@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 133 — Admin Navigation Context Summary & Current Location Cue**.
+**Release 467 Build 134 — Admin Navigation Context Summary Readability & Full-Text Accessibility**.
 
-The last fully verified Development and Production checkpoint is Build 132:
+The last fully verified Development and Production checkpoint is Build 133:
 
-- SHA `3e69d3f11e7207b12160a38a42590dcb2a3a6d39`
-- tree `5dba79cc9448043e72a740bf71fbfe4d2590ce1b`
-- System Gate `34731990800`
-- Current Application Quality `34731990814`
-- I.T. Admin Runtime `34731990794`
-- Repository Branch Hygiene `34731990817`
-- Production Pages Deploy `34732064446`
-- Production Live Resource Integrity `34732131430`
+- SHA `00025cf2fe7ec66af3fd44fba7188657a199cb87`
+- tree `639a6d20fa8bd67c93faa70971de1ef5e2f64ea8`
+- System Gate `34732882178`
+- Current Application Quality `34732882139`
+- I.T. Admin Runtime `34732882215`
+- Repository Branch Hygiene `34732882188`
+- Production Pages Deploy `34732966355`
+- Production Live Resource Integrity `34733006830`
 
 ## Canonical Development target
 
@@ -31,10 +31,10 @@ The last fully verified Development and Production checkpoint is Build 132:
 6. Only after exact Development GREEN, non-force promote the identical SHA/tree to `main`.
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 
-## Build 133 technical boundary
+## Build 134 technical boundary
 
-Build 133 preserves the Build 132 responsive context dock over the existing Admin Related tools, Section position and Section map cards. It enriches the compact summary from already-rendered context only: Section Position supplies the preferred module/section cue, Section Map is a fallback, and the summary reports the number of composed context panels.
+Build 134 preserves the existing Admin Related tools, Section position, Section map, responsive context dock, current-location cue and context count. It changes only the summary presentation: the location text can ellipsize on narrow screens, the count remains visible, and the full untruncated summary is retained in `title` and `aria-label`.
 
-The feature is Admin-only and client-only. It introduces no new navigation target, manifest request, browser preference storage, server persistence or network write. If the dock/context is unavailable, the summary enhancement fails closed and existing navigation behavior remains untouched.
+The feature is Admin-only and client-only. It introduces no new navigation target, manifest request, browser preference storage, server persistence or network read/write. If the dock/context is unavailable, the enhancement fails closed and existing navigation behavior remains untouched.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.
