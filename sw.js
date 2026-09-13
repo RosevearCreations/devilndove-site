@@ -1,5 +1,5 @@
-// Release 467 Build 142 — shared Web / Phone / Desktop service worker with public Storefront shell continuity.
-const CACHE_NAME = 'devilndove-shell-r467b142';
+// Release 450 installable platform — Release 467 Storefront continuity layer.
+const CACHE_NAME = 'devilndove-shell-r450';
 const CORE_ASSETS = [
   '/',
   '/offline.html',
