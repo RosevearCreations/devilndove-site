@@ -1,31 +1,31 @@
 {
   "release": 467,
-  "build": 147,
-  "title": "Buyer Account, Saved Items & Order Hub",
+  "build": 148,
+  "title": "Seller Daily Command Centre",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "3fadc908df56ba194e2cd2f9e5480f6bfbedb796",
-  "accepted_dev_tree_sha": "aeee53fdd3e01aee6b01a75e83f92f57b859960f",
+  "accepted_dev_sha": "5a51981e7831bbef4f44c19f43a36b811e0a2e79",
+  "accepted_dev_tree_sha": "f4e0a88f1f7c6837176a939a19e5d4ae36596434",
   "acceptance": {
-    "system_gate_run": 34769839872,
-    "current_application_quality_run": 34769839865,
-    "it_admin_runtime_proof_run": 34769839876,
-    "branch_hygiene_run": 34769839871
+    "system_gate_run": 34772251480,
+    "current_application_quality_run": 34772251467,
+    "it_admin_runtime_proof_run": 34772251459,
+    "branch_hygiene_run": 34772251477
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 147,
-      "title": "Buyer Account, Saved Items & Order Hub",
-      "authority": "release467-build147-buyer-account-saved-items-order-hub.json",
-      "dev_sha": "3fadc908df56ba194e2cd2f9e5480f6bfbedb796",
-      "tree_sha": "aeee53fdd3e01aee6b01a75e83f92f57b859960f",
+      "build": 148,
+      "title": "Seller Daily Command Centre",
+      "authority": "release467-build148-seller-daily-command-centre.json",
+      "dev_sha": "5a51981e7831bbef4f44c19f43a36b811e0a2e79",
+      "tree_sha": "f4e0a88f1f7c6837176a939a19e5d4ae36596434",
       "proofs": {
-        "system_gate_run": 34769839872,
-        "current_application_quality_run": 34769839865,
-        "it_admin_runtime_proof_run": 34769839876,
-        "branch_hygiene_run": 34769839871
+        "system_gate_run": 34772251480,
+        "current_application_quality_run": 34772251467,
+        "it_admin_runtime_proof_run": 34772251459,
+        "branch_hygiene_run": 34772251477
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "exact_preview_deployment": true
@@ -37,16 +37,17 @@
     "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE"
   },
   "production_checkpoint": {
-    "build": 147,
-    "authority": "release467-build147-buyer-account-saved-items-order-hub.json",
-    "main_sha": "3fadc908df56ba194e2cd2f9e5480f6bfbedb796",
-    "tree_sha": "aeee53fdd3e01aee6b01a75e83f92f57b859960f",
-    "production_pages_deploy_run": 34769929784,
-    "production_live_resource_integrity_run": 34769969149,
+    "build": 148,
+    "authority": "release467-build148-seller-daily-command-centre.json",
+    "main_sha": "5a51981e7831bbef4f44c19f43a36b811e0a2e79",
+    "tree_sha": "f4e0a88f1f7c6837176a939a19e5d4ae36596434",
+    "production_pages_deploy_run": 34772367891,
+    "production_live_resource_integrity_run": 34772410714,
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build148-seller-daily-command-centre.json",
     "release467-build147-buyer-account-saved-items-order-hub.json",
     "release467-build143-adaptive-mobile-desktop-web-application-shell.json",
     "release467-build142-storefront-continuity-offline-foundation.json",
@@ -149,8 +150,8 @@
   "provider_execution_authorized": false,
   "provider_publication_authorized": false,
   "secret_values_emitted": false,
-  "next_build": 148,
+  "next_build": 149,
   "next_build_state": "READY",
-  "next_build_title": "Seller Daily Command Centre",
-  "promotion_state": "BUILD148_CANDIDATE_NOT_YET_VERIFIED"
+  "next_build_title": "Seller Listing Manager & Fast Product Editing",
+  "promotion_state": "BUILD149_CANDIDATE_NOT_YET_VERIFIED"
 }
