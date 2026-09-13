@@ -1,12 +1,15 @@
-// Release 450 installable platform — Release 467 Storefront continuity layer.
+// Release 450 installable platform — Release 467 adaptive shell layer.
 const CACHE_NAME = 'devilndove-shell-r450';
 const CORE_ASSETS = [
   '/',
   '/offline.html',
   '/shop/',
+  '/saved/',
   '/css/styles.css',
+  '/css/adaptive-shell.css',
   '/js/main.js',
   '/public/js/pwa-platform.js',
+  '/public/js/adaptive-shell.js',
   '/public/js/shop.js',
   '/assets/logo-clear.png',
   '/assets/mark.png',
