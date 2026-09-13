@@ -1,9 +1,9 @@
 # Devil n Dove — Sanity Health Check
 
-Current candidate: **Release 467 Build 140 — Closure Evidence Integrity Self-Verification & Tamper Detection**.
+Current candidate: **Release 467 Build 141 — Closure Evidence Cross-Artifact Consistency Verification**.
 
-Last fully verified checkpoint is Build 139 at SHA `3cb401b8cbf9c5c37e9b734497984cd9f4a385e5`, tree `5c6adcd9702348532e0c0807b3ea634c2604d7f7`.
+Last fully verified checkpoint is Build 140 at SHA `901d349760f9631cdbf989b549fcdac140d6569e`, tree `365e6c630e6e7b82eaadfaf85a82d9806cdc948f`.
 
-Development proofs: System `34761418389`, Quality `34761418405`, I.T. `34761418383`, Hygiene `34761418425`. Production proofs: Pages `34761544388`, Live Resources `34761591278`.
+Development proofs: System `34762269626`, Quality `34762269665`, I.T. `34762269664`, Hygiene `34762269682`. Production proofs: Pages `34762361931`, Live Resources `34762417112`.
 
-Build 140 retains the Markdown/JSON exports, stable evidence ID, deterministic SHA-256 fingerprint and verification-manifest export, then adds independent browser-side recomputation and explicit tamper mismatch visibility. It does not mutate D1/R2/provider/business data. Canonical migrations remain `0001`–`0004` and live-resource retry correctness remains fail-closed.
+Build 141 retains the Markdown/JSON exports, stable evidence ID, deterministic SHA-256 fingerprint, verification-manifest export and browser digest verification, then adds independent closure JSON versus verification-manifest consistency checks for evidence ID, canonical payload and canonical byte length. It does not mutate D1/R2/provider/business data. Canonical migrations remain `0001`–`0004` and live-resource retry correctness remains fail-closed.
