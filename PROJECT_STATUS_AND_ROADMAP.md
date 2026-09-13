@@ -2,40 +2,40 @@
 
 ## Current checkpoint
 
-**Release 467 Build 128 — Admin Navigation Help & Keyboard Shortcut Reference** is the active closure candidate.
+**Release 467 Build 129 — Admin Related Tools & Context Shortcuts** is the active closure candidate.
 
-Build 127 is the last fully verified Development + Production checkpoint:
+Build 128 is the last fully verified Development + Production checkpoint:
 
-- SHA `dead9393e6d8db5fbcbe776c3885da80cbe42163`
-- tree `efff42114b680218c756031fb2f92bc12e541b1c`
-- System Gate `34725275176`
-- Current Application Quality `34725275139`
-- I.T. Admin Runtime `34725275114`
-- Repository Branch Hygiene `34725275193`
-- Production Pages Deploy `34725363163`
-- Production Live Resource Integrity `34725405258`
+- SHA `84523fe94b9007c82cae6d3f8b42b9a31a0e9f63`
+- tree `08210d5fa81558ad0b773cf2c319f74f57d88af3`
+- System Gate `34726947819`
+- Current Application Quality `34726947864`
+- I.T. Admin Runtime `34726947811`
+- Repository Branch Hygiene `34726947787`
+- Production Pages Deploy `34727026918`
+- Production Live Resource Integrity `34727072165`
 
-The Build 127 closure is recorded by Build 128 startup ingestion, not a Build 127 self-claim.
+The Build 128 closure is recorded by Build 129 startup ingestion, not a Build 128 self-claim.
 
-## Build 128 — Admin Navigation Help & Keyboard Shortcut Reference
+## Build 129 — Admin Related Tools & Context Shortcuts
 
-Goal: make the growing Admin navigation system discoverable without adding another state store, navigation manifest or business authority.
+Goal: make nearby tools easier to reach without adding another navigation authority, history store, or business-data write.
 
 Candidate scope:
-1. Preserve Build 122 command palette and workspace navigation as the route authority.
-2. Preserve Build 125 workspace memory/resume behavior.
-3. Preserve Build 126 favorites and `Alt+Shift+F` current-page toggle.
-4. Preserve Build 127 breadcrumbs and workspace-return context.
-5. Add one accessible Admin navigation-help dialog summarizing those controls.
-6. Add a visible Help button to the shared Admin workspace navigation.
-7. Add `Alt+Shift+H` as the keyboard shortcut for the help dialog.
-8. Close with Escape and restore focus to the opener.
-9. Add no saved state, server persistence or network write.
+1. Preserve the existing `data/admin-navigation-modules.json` as the only navigation manifest.
+2. Resolve the current Admin route against that manifest.
+3. Offer related tools only from the current manifest section.
+4. Exclude the current route.
+5. Cap related shortcuts at four.
+6. Insert the panel below current breadcrumbs/workspace navigation when that context exists.
+7. Fail closed when manifest/context/anchor resolution is unavailable.
+8. Add no localStorage/sessionStorage or server persistence.
+9. Add no network write or automatic business action.
 10. Add no D1/R2/binding mutation, provider execution or Production business-data overwrite; canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## Next direction
 
-After Build 128 closes, continue the bounded Admin quality-of-life sequence. Build 129 must first ingest Build 128's later external closure before beginning its own changes.
+After Build 129 closes, continue the bounded Admin quality-of-life sequence. Build 130 must first ingest Build 129's later external closure before beginning its own changes.
 
 ## Release mechanics
 
