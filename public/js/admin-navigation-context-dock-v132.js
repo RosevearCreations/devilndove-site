@@ -38,18 +38,12 @@
   function setResponsiveDefault(details) {
     if (typeof window.matchMedia !== 'function') {
       details.open = true;
+      details.dataset.ddAdminNavigationContextMode = 'expanded';
       return;
     }
-    const media = window.matchMedia('(max-width: 760px)');
-    let userChanged = false;
-    const apply = () => {
-      if (!userChanged) details.open = !media.matches;
-      details.dataset.ddAdminNavigationContextMode = media.matches ? 'compact' : 'expanded';
-    };
-    details.addEventListener('toggle', () => { userChanged = true; }, { once: true });
-    if (typeof media.addEventListener === 'function') media.addEventListener('change', apply);
-    else if (typeof media.addListener === 'function') media.addListener(apply);
-    apply();
+    const compact = window.matchMedia('(max-width: 760px)').matches;
+    details.open = !compact;
+    details.dataset.ddAdminNavigationContextMode = compact ? 'compact' : 'expanded';
   }
 
   function ensureDock() {
