@@ -16,7 +16,7 @@ def command(args,label):
     if r.stdout.strip(): print(r.stdout.strip())
     if r.returncode!=0: FAIL.append(f"{label} failed: {(r.stderr or r.stdout).strip()[-3000:]}")
 pointer=load('current-development-authority.json');prior=load('release467-build130-admin-section-position-previous-next-navigation.json');current=load('release467-build131-admin-section-switcher-module-map.json');manifest=load('migrations/canonical/manifest.json')
-runtime=read('public/js/admin-section-map-v131.js');admin=read('public/js/admin.js');provenance=read('scripts/current_system_gate_provenance_gate.py')
+runtime=read('public/js/admin-section-map-v131.js');loader=read('public/js/admin-section-position-v130.js');provenance=read('scripts/current_system_gate_provenance_gate.py')
 it=read('functions/api/admin/it-operations-control-tower.js');reliability=read('functions/api/_lib/currentReliability.js');preflight=read('functions/api/admin/current-deployment-preflight.js')
 req(pointer.get('release')==467 and pointer.get('build')==131,'current pointer must identify Release 467 Build 131')
 req(pointer.get('title')=='Admin Section Switcher & Module Map','Build 131 title drifted')
@@ -46,7 +46,7 @@ for token in ('const BUILD = 131',"const MANIFEST_URL = '/data/admin-navigation-
     req(token in runtime,f'Build 131 section-map runtime missing token: {token}')
 for forbidden in ('localStorage','sessionStorage',"method: 'POST'"):
     req(forbidden not in runtime,f'Build 131 section-map runtime contains forbidden behavior: {forbidden}')
-req("import('/public/js/admin-section-map-v131.js?v=467b131')" in admin,'Admin loader missing Build 131 section-map import')
+req("import('/public/js/admin-section-map-v131.js?v=467b131')" in loader,'Build 130 section-position runtime must chain the Build 131 section map')
 files=[str(row.get('file')or'') for row in(manifest.get('migrations')or[]) if isinstance(row,dict)]
 req(files==EXPECTED,'canonical D1 migration stream must remain exactly 0001-0004')
 req('0005_' not in json.dumps(manifest),'Build 131 must not introduce migration 0005')
