@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 131 — Admin Section Switcher & Module Map**.
+**Release 467 Build 132 — Admin Navigation Context Dock & Responsive Collapse**.
 
-The last fully verified Development and Production checkpoint is Build 130:
+The last fully verified Development and Production checkpoint is Build 131:
 
-- SHA `047427e8233793494e099c257aac56b8bd8bf6fb`
-- tree `afdce4033115489a7abf78088b7ab82dc1bb4a70`
-- System Gate `34729838054`
-- Current Application Quality `34729838051`
-- I.T. Admin Runtime `34729838028`
-- Repository Branch Hygiene `34729838029`
-- Production Pages Deploy `34729939106`
-- Production Live Resource Integrity `34729976417`
+- SHA `ba0d027f299678479d1d28abd74ca85ea63c5efd`
+- tree `057aa04505e4501516f87350556c3e13f89f986d`
+- System Gate `34730852000`
+- Current Application Quality `34730852014`
+- I.T. Admin Runtime `34730851994`
+- Repository Branch Hygiene `34730852019`
+- Production Pages Deploy `34730958494`
+- Production Live Resource Integrity `34731002747`
 
 ## Canonical Development target
 
@@ -31,10 +31,10 @@ The last fully verified Development and Production checkpoint is Build 130:
 6. Only after exact Development GREEN, non-force promote the identical SHA/tree to `main`.
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 
-## Build 131 technical boundary
+## Build 132 technical boundary
 
-Build 131 adds one optional section switcher/module map on Admin routes. It reads only the existing `data/admin-navigation-modules.json` manifest, identifies the current module/section, marks the current section, and exposes one jump target to the first available tool in each other section of the same module.
+Build 132 adds one optional responsive context dock over the existing Admin Related tools, Section position and Section map cards. Those existing components remain the source of navigation content; the dock only groups them when at least two are present.
 
-The section-map module is Admin-only and client-only. It adds no browser preference storage, server persistence, or write request. If manifest/context/anchor resolution is unavailable, it renders nothing.
+The dock is Admin-only and client-only. It is expanded by default on desktop, compact by default at 760px and below, and any manual open/close choice is ephemeral. It adds no browser preference storage, server persistence, network write or new navigation authority. If fewer than two context components are available, existing behavior is left untouched.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.
