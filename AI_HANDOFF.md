@@ -2,26 +2,26 @@
 
 ## Current authority
 
-**Release 467 Build 131 — Admin Section Switcher & Module Map** is the current Development closure candidate.
+**Release 467 Build 132 — Admin Navigation Context Dock & Responsive Collapse** is the current Development closure candidate.
 
-Build 131 starts by ingesting the externally verified Build 130 closure. Build 130 remains correctly non-self-recording; its six later proof IDs are recorded by Build 131 startup ingestion.
+Build 132 starts by ingesting the externally verified Build 131 closure. Build 131 remains correctly non-self-recording; its six later proof IDs are recorded by Build 132 startup ingestion.
 
-- SHA `047427e8233793494e099c257aac56b8bd8bf6fb`
-- tree `afdce4033115489a7abf78088b7ab82dc1bb4a70`
-- System Gate `34729838054`
-- Current Application Quality `34729838051`
-- I.T. Admin Runtime `34729838028`
-- Repository Branch Hygiene `34729838029`
-- Production Pages Deploy `34729939106`
-- Production Live Resource Integrity `34729976417`
+- SHA `ba0d027f299678479d1d28abd74ca85ea63c5efd`
+- tree `057aa04505e4501516f87350556c3e13f89f986d`
+- System Gate `34730852000`
+- Current Application Quality `34730852014`
+- I.T. Admin Runtime `34730851994`
+- Repository Branch Hygiene `34730852019`
+- Production Pages Deploy `34730958494`
+- Production Live Resource Integrity `34731002747`
 
-## Build 131 scope
+## Build 132 scope
 
-Build 131 adds an Admin-only section switcher/module map derived exclusively from `data/admin-navigation-modules.json`. When an Admin route resolves to the manifest, it identifies the current module and section, marks the current section without linking it, and offers bounded jump links to the first available tool in each other section of that same module.
+Build 132 composes the existing Admin **Related tools**, **Section position**, and **Section map** context cards into one accessible responsive navigation-context dock. The existing navigation components remain the source of all links and context; Build 132 creates no new navigation authority or destination.
 
-The feature is client-only and read-only. It adds no new navigation authority, localStorage/sessionStorage, server preference authority, or network write. If the manifest, current route, or insertion anchor cannot be resolved, the enhancement fails closed and renders nothing.
+The dock is expanded by default on desktop and compact by default on screens up to 760px. A user may open or close it for the current page session, but the choice is deliberately not persisted. Late-arriving context cards are adopted through the existing client-side event/observer flow.
 
-Build 131 does not create or modify D1 schema, D1 business rows, R2 objects, bindings, Accounting records, Inventory/Creative/Product data, prices, payment/provider state, or Production business data. Canonical D1 migrations remain exactly `0001`–`0004`.
+The feature is Admin-only, client-only and read-only. It adds no localStorage/sessionStorage, server persistence, network write, D1 schema/business-data mutation, R2/binding mutation, provider execution or Production business-data overwrite. Canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## External lanes
 
@@ -29,4 +29,4 @@ Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access service-t
 
 ## Restart rule
 
-Build 131 must not self-record its later external exact-head proof. After Build 131 is externally proven and promoted, **Build 132 must ingest that later closure**.
+Build 132 must not self-record its later external exact-head proof. After Build 132 is externally proven and promoted, **Build 133 must ingest that later closure**.
