@@ -2,21 +2,21 @@
 
 ## Current authority
 
-**Release 467 Build 139 — Closure Evidence Integrity Fingerprint & Verification Manifest** is the current Development closure candidate.
+**Release 467 Build 140 — Closure Evidence Integrity Self-Verification & Tamper Detection** is the current Development closure candidate.
 
-Build 138 is the last fully verified Development + Production checkpoint:
+Build 139 is the last fully verified Development + Production checkpoint:
 
-- SHA `5f3f0d39cdcf1ce743c9a17c40691f58fb342e8b`
-- tree `76e77253294ea84ea4a77f28ab684ffe3f07dd34`
-- System Gate `34760742040`
-- Current Application Quality `34760741973`
-- I.T. Admin Runtime `34760741960`
-- Repository Branch Hygiene `34760741974`
-- Production Pages Deploy `34760868140`
-- Production Live Resource Integrity `34760912351`
+- SHA `3cb401b8cbf9c5c37e9b734497984cd9f4a385e5`
+- tree `5c6adcd9702348532e0c0807b3ea634c2604d7f7`
+- System Gate `34761418389`
+- Current Application Quality `34761418405`
+- I.T. Admin Runtime `34761418383`
+- Repository Branch Hygiene `34761418425`
+- Production Pages Deploy `34761544388`
+- Production Live Resource Integrity `34761591278`
 
-Build 139 ingests that exact six-proof Build 138 closure. I.T. retains the Markdown and JSON closure exports plus stable evidence ID `r467-b138-5f3f0d39cdcf-34760742040-34760868140-34760912351`, then adds a deterministic SHA-256 fingerprint over a recursively key-sorted canonical closure payload and a machine-readable verification-manifest export containing the digest metadata and canonical payload.
+Build 140 ingests that exact six-proof Build 139 closure. I.T. retains Markdown, JSON, stable evidence ID, SHA-256 fingerprint and verification-manifest export. Build 140 adds an independent browser verifier that fetches the manifest, recursively key-sorts the canonical payload, recomputes SHA-256 with Web Crypto and reports VERIFIED or MISMATCH without persistence or automatic repair.
 
 Canonical D1 migrations remain exactly `0001`–`0004`. Production live-resource retry behavior remains bounded to three transient attempts; permanent 4xx and genuine Product API/R2/photo/merchandising/D1 correctness failures remain blocking. No schema, D1 business-data, R2, binding, payment/provider, accounting, inventory, creative, price or Production business-data mutation is authorized.
 
-Build 139 must not self-record its later exact-head closure. Build 140 must ingest it.
+Build 140 must not self-record its later exact-head closure. Build 141 must ingest it.
