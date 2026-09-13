@@ -2,17 +2,17 @@
 
 ## Current release
 
-**Release 467 Build 141 — Closure Evidence Cross-Artifact Consistency Verification**.
+**Release 467 Build 142 — Storefront Continuity & Offline Foundation**.
 
-Last fully verified Build 140:
-- SHA `901d349760f9631cdbf989b549fcdac140d6569e`
-- tree `365e6c630e6e7b82eaadfaf85a82d9806cdc948f`
-- System `34762269626`
-- Quality `34762269665`
-- I.T. `34762269664`
-- Hygiene `34762269682`
-- Production Pages `34762361931`
-- Production Live Resources `34762417112`
+Last fully verified Build 141:
+- SHA `72e270e4c27bd666afcb4d5befc3462dd757a1d1`
+- tree `d4a6bfe0327d8de641d3ea1910dcd8c6bc67e14b`
+- System `34763039974`
+- Quality `34763039975`
+- I.T. `34763040049`
+- Hygiene `34763039996`
+- Production Pages `34763165246`
+- Production Live Resources `34763209880`
 
 ## Canonical Development target
 
@@ -28,4 +28,8 @@ Last fully verified Build 140:
 4. Non-force promote the identical SHA/tree to `main` only after Development is GREEN.
 5. Require Production Pages Deploy and Production Live Resource Integrity.
 
-Build 141 retains the read-only I.T. Markdown and JSON closure evidence exports, stable evidence ID, SHA-256 fingerprint, verification-manifest export and independent browser digest verification. It adds a cross-artifact verifier that fetches closure JSON and the verification manifest independently, requires evidence ID, recursively key-sorted canonical payload and canonical byte length to agree, then recomputes SHA-256 using Web Crypto. Any mismatch fails evidence interpretation closed without persistence, repair or mutation. Production live-resource retries remain capped at three transient attempts; permanent 4xx responses and real Product API, R2, photography, merchandising and D1 failures still fail closed. Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`; canonical migrations remain exactly `0001`–`0004`.
+Build 142 begins the buyer/seller UX roadmap with public Storefront continuity. A shopper's previously saved public Shop snapshot can remain browseable when live Product data is unavailable, but cached price/stock are labelled last verified and cached Add to Cart is disabled until live revalidation. The shared PWA client reports offline/reconnect state and exposes retry; the service worker precaches the public Shop shell while `/api/` remains outside cache authority and returns a no-store offline response when unreachable.
+
+Build 137–141 read-only closure evidence remains available: Markdown/JSON exports, stable evidence ID, SHA-256 fingerprint, verification-manifest export, independent browser digest verification and closure-JSON-versus-manifest consistency checks.
+
+Production live-resource retries remain capped at three transient attempts; permanent 4xx responses and real Product API, R2, photography, merchandising and D1 failures still fail closed. Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`; canonical migrations remain exactly `0001`–`0004`.
