@@ -1,9 +1,10 @@
 # Devil n Dove — Markdown Index
 
-Current candidate: **Release 467 Build 142 — Storefront Continuity & Offline Foundation**.
+Current candidate: **Release 467 Build 143 — Adaptive Mobile/Desktop/Web Application Shell**.
 
 Primary authorities:
 - `current-development-authority.json`
+- `release467-build143-adaptive-mobile-desktop-web-application-shell.json`
 - `release467-build142-storefront-continuity-offline-foundation.json`
 - `release467-build141-closure-evidence-cross-artifact-consistency-verification.json`
 - `release467-build140-closure-evidence-integrity-self-verification-tamper-detection.json`
@@ -15,6 +16,6 @@ Primary authorities:
 - `SANITY_HEALTH_CHECK.md`
 - `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
 
-Build 141 proof bundle: SHA `72e270e4c27bd666afcb4d5befc3462dd757a1d1`, tree `d4a6bfe0327d8de641d3ea1910dcd8c6bc67e14b`, System `34763039974`, Quality `34763039975`, I.T. `34763040049`, Hygiene `34763039996`, Production Pages `34763165246`, Live Resources `34763209880`.
+Build 142 proof bundle: SHA `0b022c355217c00a7313aa2cb3e4b37a2b9a2b45`, tree `acf47b86db2cd170dc1fadd2a9e827e485e7c908`, System `34765428970`, Quality `34765428976`, I.T. `34765428961`, Hygiene `34765428957`, Production Pages `34765518900`, Live Resources `34765564112`.
 
-Build 142 starts the buyer/seller UX programme with Storefront continuity and an offline foundation. Cached Shop content may remain available for browsing, but cached price/stock are explicitly last verified and purchase actions fail closed until live Product authority is revalidated. The public Shop shell is cached while `/api/` remains uncached and server-authoritative. Build 137–141 closure exports and independent integrity verification remain retained.
+Build 143 continues the buyer/seller UX programme with an Adaptive Mobile/Desktop/Web Application Shell. The shared shell provides buyer Shop/Search/device-local Saved/Cart/Account navigation and seller Home/Orders/Products/Create/More navigation with distinct phone, tablet and desktop layouts, accessible connectivity status and safe offline Account behavior. Saved state remains device-local and non-authoritative; live commerce/account authority stays server-side. The Release 450 installable-client identity and `/api/` no-cache boundary remain intact. Build 137–142 closure exports and independent integrity verification remain retained.
