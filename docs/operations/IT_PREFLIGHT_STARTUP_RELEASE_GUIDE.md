@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 130 — Admin Section Position & Previous/Next Tool Navigation**.
+**Release 467 Build 131 — Admin Section Switcher & Module Map**.
 
-The last fully verified Development and Production checkpoint is Build 129:
+The last fully verified Development and Production checkpoint is Build 130:
 
-- SHA `3cd8aea7927d80f412bfe3acb62fe13f52b4c278`
-- tree `0cbb9f0f33206d8b6c3dce404afd58382c71c24c`
-- System Gate `34728937075`
-- Current Application Quality `34728937088`
-- I.T. Admin Runtime `34728937083`
-- Repository Branch Hygiene `34728937091`
-- Production Pages Deploy `34729016936`
-- Production Live Resource Integrity `34729059768`
+- SHA `047427e8233793494e099c257aac56b8bd8bf6fb`
+- tree `afdce4033115489a7abf78088b7ab82dc1bb4a70`
+- System Gate `34729838054`
+- Current Application Quality `34729838051`
+- I.T. Admin Runtime `34729838028`
+- Repository Branch Hygiene `34729838029`
+- Production Pages Deploy `34729939106`
+- Production Live Resource Integrity `34729976417`
 
 ## Canonical Development target
 
@@ -31,10 +31,10 @@ The last fully verified Development and Production checkpoint is Build 129:
 6. Only after exact Development GREEN, non-force promote the identical SHA/tree to `main`.
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 
-## Build 130 technical boundary
+## Build 131 technical boundary
 
-Build 130 adds one optional Section position panel on Admin routes. It reads only the existing `data/admin-navigation-modules.json` manifest, finds the current route in its existing ordered section, shows `Tool X of Y`, and exposes only the immediate previous and next sibling tools when available. The first and last items do not wrap around.
+Build 131 adds one optional section switcher/module map on Admin routes. It reads only the existing `data/admin-navigation-modules.json` manifest, identifies the current module/section, marks the current section, and exposes one jump target to the first available tool in each other section of the same module.
 
-The section-position module is Admin-only and client-only. It adds no browser preference storage, server persistence, or write request. If manifest/context/anchor resolution is unavailable, it renders nothing.
+The section-map module is Admin-only and client-only. It adds no browser preference storage, server persistence, or write request. If manifest/context/anchor resolution is unavailable, it renders nothing.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.
