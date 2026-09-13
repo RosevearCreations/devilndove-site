@@ -13,6 +13,7 @@
 // Release 467 Build 66: Products uses focused presentation workspaces while retaining one Product authority.
 // Release 467 Build 67: Product Editor adds product-scoped recovery, stale-copy preflight and unsaved-change protection.
 // Release 467 Build 95: Products loads the current workspace context bundle instead of the stale Build 66 asset revision.
+// Release 467 Build 129: Admin routes also bootstrap manifest-backed related-tool context shortcuts.
 
 const DD_ADMIN_LAZY_VERSION = 'R467B65_V1';
 const ddAdminLazyState = new Map();
@@ -207,3 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Build 65 authority remains eager because permissions must be known before optional admin modules are activated.
 void import('/public/js/core/dd-application-module-bootstrap.mjs?v=440')
   .catch((error) => console.warn('[DD modules] authoritative module bootstrap unavailable', error));
+
+// Release 467 Build 129: client-only contextual related-tool shortcuts over the existing Admin navigation manifest.
+void import('/public/js/admin-related-tools-v129.js?v=467b129')
+  .catch((error) => console.warn('[DD Build 129] admin related tools unavailable', error));
