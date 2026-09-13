@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 128 — Admin Navigation Help & Keyboard Shortcut Reference**.
+**Release 467 Build 129 — Admin Related Tools & Context Shortcuts**.
 
-The last fully verified Development and Production checkpoint is Build 127:
+The last fully verified Development and Production checkpoint is Build 128:
 
-- SHA `dead9393e6d8db5fbcbe776c3885da80cbe42163`
-- tree `efff42114b680218c756031fb2f92bc12e541b1c`
-- System Gate `34725275176`
-- Current Application Quality `34725275139`
-- I.T. Admin Runtime `34725275114`
-- Repository Branch Hygiene `34725275193`
-- Production Pages Deploy `34725363163`
-- Production Live Resource Integrity `34725405258`
+- SHA `84523fe94b9007c82cae6d3f8b42b9a31a0e9f63`
+- tree `08210d5fa81558ad0b773cf2c319f74f57d88af3`
+- System Gate `34726947819`
+- Current Application Quality `34726947864`
+- I.T. Admin Runtime `34726947811`
+- Repository Branch Hygiene `34726947787`
+- Production Pages Deploy `34727026918`
+- Production Live Resource Integrity `34727072165`
 
 ## Canonical Development target
 
@@ -31,12 +31,10 @@ The last fully verified Development and Production checkpoint is Build 127:
 6. Only after exact Development GREEN, non-force promote the identical SHA/tree to `main`.
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 
-## Build 128 technical boundary
+## Build 129 technical boundary
 
-Build 128 adds one accessible Admin navigation-help dialog. It documents the existing navigation features rather than creating another navigation authority: `Ctrl/Cmd+K` for the Build 122 command palette, `Alt+Shift+F` for the Build 126 current-page favorite toggle, workspace memory/resume from Build 125, and Build 127 breadcrumbs/workspace return. `Alt+Shift+H` opens the help dialog and a visible Admin workspace-nav button offers the same action.
+Build 129 adds one optional Related tools panel on Admin routes. It reads only the existing `data/admin-navigation-modules.json` manifest, finds the current route's existing section, excludes the current route, and shows at most four sibling shortcuts. It creates no new navigation authority.
 
-The help module is Admin-only and client-only. It stores no state, creates no server preference authority and introduces no network write. The dialog closes with Escape and returns focus to its opener.
-
-Build 128 adds no Accounting posting, period close, Inventory/Creative/Product/price mutation, provider execution/publication, request-time schema mutation, D1 business-data mutation, R2/binding mutation, restore action or Production business-data overwrite.
+The related-tools module is Admin-only and client-only. It adds no browser preference storage, server persistence, or write request. If manifest/context/anchor resolution is unavailable, it renders nothing.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.
