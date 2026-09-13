@@ -1,8 +1,8 @@
-// Release 450 installable platform — Release 467 Build 142 connectivity continuity layer.
+// Release 450 installable platform — Release 467 Build 143 connectivity continuity layer.
 (function(){
 'use strict';
 const RELEASE = 450;
-const BUILD = 142;
+const BUILD = 143;
 const ENABLE_KEY='dnd:new-item-notifications';
 const LAST_ITEM_KEY='dnd:new-item-last-seen-id';
 const LAST_RELEASE_KEY = 'dnd:last-seen-release';
