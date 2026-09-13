@@ -1,0 +1,44 @@
+{
+  "release": 467,
+  "build": 148,
+  "title": "Seller Daily Command Centre",
+  "state": "DEVELOPMENT_GREEN",
+  "source_authority": "dev",
+  "accepted_dev_sha": "5a51981e7831bbef4f44c19f43a36b811e0a2e79",
+  "accepted_dev_tree_sha": "f4e0a88f1f7c6837176a939a19e5d4ae36596434",
+  "acceptance": {
+    "system_gate_run": 34772251480,
+    "current_application_quality_run": 34772251467,
+    "it_admin_runtime_proof_run": 34772251459,
+    "branch_hygiene_run": 34772251477
+  },
+  "final_closure": {
+    "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "dev_sha": "5a51981e7831bbef4f44c19f43a36b811e0a2e79",
+    "tree_sha": "f4e0a88f1f7c6837176a939a19e5d4ae36596434",
+    "proofs": {
+      "system_gate_run": 34772251480,
+      "current_application_quality_run": 34772251467,
+      "it_admin_runtime_proof_run": 34772251459,
+      "branch_hygiene_run": 34772251477
+    },
+    "ingested_by_build": 149
+  },
+  "production_checkpoint": {
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "5a51981e7831bbef4f44c19f43a36b811e0a2e79",
+    "tree_sha": "f4e0a88f1f7c6837176a939a19e5d4ae36596434",
+    "production_pages_deploy_run": 34772367891,
+    "production_live_resource_integrity_run": 34772410714
+  },
+  "scope": {
+    "seller_daily_command_centre": true,
+    "read_only_existing_authorities": true,
+    "cached_stale_fallback": true,
+    "legacy_command_center_request_time_ddl_used": false,
+    "schema_change": false,
+    "d1_business_data_mutation_by_build": false,
+    "r2_mutation": false,
+    "provider_execution": false
+  }
+}
