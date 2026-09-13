@@ -2,22 +2,20 @@
 
 ## Current checkpoint
 
-**Release 467 Build 147 — Buyer Account, Saved Items & Order Hub** is fully Development + Production GREEN.
+**Release 467 Build 148 — Seller Daily Command Centre** is fully Development + Production GREEN.
 
-- SHA `3fadc908df56ba194e2cd2f9e5480f6bfbedb796`
-- tree `aeee53fdd3e01aee6b01a75e83f92f57b859960f`
-- System `34769839872`
-- Quality `34769839865`
-- I.T. `34769839876`
-- Hygiene `34769839871`
-- Production Pages `34769929784`
-- Production Live Resources `34769969149`
+- SHA `5a51981e7831bbef4f44c19f43a36b811e0a2e79`
+- tree `f4e0a88f1f7c6837176a939a19e5d4ae36596434`
+- System `34772251480`
+- Quality `34772251467`
+- I.T. `34772251459`
+- Hygiene `34772251477`
+- Production Pages `34772367891`
+- Production Live Resources `34772410714`
 
-Build 148 formally ingests that external closure. `dev` and `main` were verified identical at the Build 147 checkpoint before Build 148 work began.
+Build 149 formally ingests that external closure. `dev` and `main` were verified at the Build 148 Production checkpoint before Build 149 work began.
 
-Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
-
-Canonical D1 migrations remain exactly `0001`–`0004`. Build 135 transient-transport retry policy remains mandatory and fail-closed for permanent 4xx and genuine resource correctness failures.
+Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`. Canonical D1 migrations remain exactly `0001`–`0004`. Build 135 transient-transport retry policy remains mandatory and fail-closed for permanent 4xx and genuine resource correctness failures.
 
 ---
 
@@ -25,66 +23,29 @@ Canonical D1 migrations remain exactly `0001`–`0004`. Build 135 transient-tran
 
 - Mobile app/PWA: single-primary-task layouts, large touch targets, no hover dependency, no forced desktop tables, safe-area support.
 - Tablet: first-class portrait/landscape layouts.
-- Desktop/PWA: persistent navigation, wider tables where appropriate, keyboard-friendly workflows, bulk operations only where safe.
+- Desktop/PWA: persistent navigation, wider tables where appropriate, keyboard-friendly workflows, safe bulk operations.
 - Responsive Web remains the canonical compatibility baseline; installation is never required for core buyer/seller workflows.
-- Every network surface must distinguish loading, cached/stale, disconnected and genuine error states.
+- Every network surface distinguishes loading, cached/stale, disconnected and genuine error states.
 - Cached/stale price, stock, order, payment, gift balance and fulfillment state must never be presented as live authority.
 - Safe local drafts may survive restart; high-authority financial/destructive actions require fresh live validation and are never silently replayed offline.
 - Conflicts stop silent overwrite and surface explicit review.
-- Public SEO: exactly one H1, canonical metadata, crawl-safe core content, semantic heading order and useful alt text.
-- Accessibility: keyboard reachability, visible focus, screen-reader status, contrast and reduced-motion support.
+- Public SEO remains exactly one H1 per page with canonical metadata, semantic heading order, crawl-safe core content and useful alt text.
 
 ---
 
-# Build 148 — Seller Daily Command Centre — ACTIVE
+# Build 148 — Seller Daily Command Centre — CLOSED GREEN
 
-## Goal
-
-Answer **What needs my attention right now?** within roughly five seconds without introducing a second operational database or queue.
-
-## Read authorities
-
-Use existing non-mutating authorities only:
-- Today Tasks read contract;
-- scoped Admin dashboard summary;
-- current I.T./Reliability truth;
-- existing Admin workspace routes.
-
-Do **not** reuse the legacy Command Center endpoint's request-time DDL.
-
-## Seller experience
-
-Prioritize queues/cards for:
-- New/open Orders;
-- Needs Reply / custom requests;
-- Ready to Make/Prepare;
-- Ready to Pack/Pickup/Ship;
-- Low Stock;
-- Listings Needing Work;
-- Failed Sync / runtime incidents;
-- Content Awaiting Approval;
-- System/provider warnings.
-
-Simple first-view metrics may include live visitors, orders, product/catalog counts, recent searches, low-stock count, failed webhooks/disputes and task-group totals. Revenue remains authoritative in Finance/Business Health rather than duplicated from incomplete dashboard data.
-
-## Offline behavior
-
-A last-known read-only cockpit snapshot may be kept locally with a visible timestamp and `cached/stale` label. Current business actions remain disabled or route to live workspaces only after connectivity returns.
-
-## Safety
-
-- GET/read aggregation only.
-- No schema/D1/R2/provider/accounting/inventory/price mutation.
-- No task completion/snooze/ignore from the cockpit.
-- No silent background business action.
+Build 148 delivers the seller attention cockpit from existing safe Today Tasks, dashboard-summary and I.T./Reliability read authorities. It remains read-only, schema-free and avoids the legacy Command Center request-time DDL path. Last-known dashboard context may be shown with a timestamp while disconnected; current business actions still require live authority.
 
 ---
 
-# Build 149 — Seller Listing Manager & Fast Product Editing
+# Build 149 — Seller Listing Manager & Fast Product Editing — ACTIVE
 
-Target gallery/list views, searchable lifecycle states, quick edit, persistent Preview/Publish, clone listing, safe bulk category/status/tag actions, autosave, mobile photo capture, reorder/crop/rotate where supported, captions/alt text, reusable templates and at-a-glance stats.
+Target gallery/list views, search across lifecycle states, quick edit, persistent Preview/Publish, clone listing, safe bulk category/status/tag actions, mobile-friendly editing and media handoff.
 
-Safe edits must show visible state: `Saved locally` → `Waiting to sync` → `Synced`; conflicts must stop silent overwrite. Publication requires live connectivity and fresh validation.
+Safe edits show visible state: `Saved locally` → `Waiting to sync` → `Syncing` → `Synced`, with `Conflict` stopping silent overwrite. Build 149 keeps inventory, active/publish, delete/archive and other high-authority changes out of automatic offline replay. Publication requires live connectivity and fresh validation.
+
+The current implementation uses device-local snapshot and quick-edit records, foreground reconnect retry, `base_updated_at` conflict protection, server product/detail/update/create authorities, catalog-media handoff, storefront preview and draft-only clone semantics.
 
 ---
 
@@ -106,7 +67,7 @@ Expand gift intent/message/wrap, recipient/occasion notes, pickup availability, 
 
 # Build 152 — Notifications, Activity Inbox & Cross-Device Continuity
 
-Seller Activity Inbox should surface new orders, buyer messages, sync failures, listing issues, inventory warnings, custom requests, content approvals and system/provider warnings. Push is optional enhancement; durable in-app/server state is authoritative.
+Seller Activity Inbox should surface new orders, buyer messages, sync failures, listing issues, inventory warnings, custom requests, content approvals and system/provider warnings. Push is optional; durable in-app/server state is authoritative.
 
 ---
 
@@ -134,5 +95,5 @@ Block Production for critical overflow/navigation/accessibility failures, missin
 6. Require Production Pages Deploy SUCCESS.
 7. Require Production Live Resource Integrity SUCCESS.
 8. Only then call `main` / Production GREEN.
-9. Preserve Build 135 live-resource transport resilience and canonical D1 0001–0004 unless an explicitly approved schema build changes authority.
+9. Preserve Build 135 transport resilience and canonical D1 0001–0004 unless an explicitly approved schema build changes authority.
 10. External provider/evidence lanes remain separate from ordinary feature readiness.
