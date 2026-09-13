@@ -70,12 +70,27 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json, urllib.error, urllib.parse, urllib.request
+          import json, sys, time, urllib.error, urllib.parse, urllib.request
           BASE='https://devilndove.com'
           TRUSTED={'assets.devilndove.com','pub-f8137eb938da486a9f24410ccf49087c.r2.dev'}
+          RETRYABLE_HTTP={408,425,429,500,502,503,504}
+          def urlopen_retry(req,timeout=25,attempts=3):
+              last=None
+              for attempt in range(1,attempts+1):
+                  try:
+                      return urllib.request.urlopen(req,timeout=timeout)
+                  except urllib.error.HTTPError as exc:
+                      if exc.code not in RETRYABLE_HTTP or attempt==attempts: raise
+                      last=exc
+                  except (urllib.error.URLError,ConnectionResetError,TimeoutError) as exc:
+                      if attempt==attempts: raise
+                      last=exc
+                  print(f'TRANSPORT RETRY {attempt}/{attempts} after {type(last).__name__}',file=sys.stderr)
+                  time.sleep(attempt)
+              raise last
           def fetch_json(path):
-              req=urllib.request.Request(BASE+path,headers={'User-Agent':'devilndove-production-resource-proof/3.0','Accept':'application/json'})
-              with urllib.request.urlopen(req,timeout=25) as response:
+              req=urllib.request.Request(BASE+path,headers={'User-Agent':'devilndove-production-resource-proof/3.1','Accept':'application/json'})
+              with urlopen_retry(req) as response:
                   body=response.read(4*1024*1024)
                   assert int(response.status)==200,(response.status,path)
                   assert 'json' in str(response.headers.get('content-type') or '').lower(),response.headers
@@ -107,8 +122,8 @@ jobs:
                   route=BASE+'/api/product-media?key='+urllib.parse.quote(raw,safe='')
               if not route: continue
               try:
-                  req=urllib.request.Request(route,headers={'User-Agent':'devilndove-production-resource-proof/3.0','Accept':'image/*','Cache-Control':'no-store'})
-                  with urllib.request.urlopen(req,timeout=25) as response:
+                  req=urllib.request.Request(route,headers={'User-Agent':'devilndove-production-resource-proof/3.1','Accept':'image/*','Cache-Control':'no-store'})
+                  with urlopen_retry(req) as response:
                       status=int(response.status); ctype=str(response.headers.get('content-type') or '').lower(); resolved=str(response.headers.get('x-dd-media-key') or ''); body=response.read(8*1024*1024)
                   if status==200 and ctype.startswith('image/') and len(body)>100 and resolved:
                       proven=(route,ctype,len(body),resolved); break
@@ -126,12 +141,27 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json, urllib.error, urllib.parse, urllib.request
+          import json, sys, time, urllib.error, urllib.parse, urllib.request
           BASE='https://devilndove.com'
+          RETRYABLE_HTTP={408,425,429,500,502,503,504}
+          def urlopen_retry(req,timeout=25,attempts=3):
+              last=None
+              for attempt in range(1,attempts+1):
+                  try:
+                      return urllib.request.urlopen(req,timeout=timeout)
+                  except urllib.error.HTTPError as exc:
+                      if exc.code not in RETRYABLE_HTTP or attempt==attempts: raise
+                      last=exc
+                  except (urllib.error.URLError,ConnectionResetError,TimeoutError) as exc:
+                      if attempt==attempts: raise
+                      last=exc
+                  print(f'TRANSPORT RETRY {attempt}/{attempts} after {type(last).__name__}',file=sys.stderr)
+                  time.sleep(attempt)
+              raise last
           def fetch_json(path):
               url=BASE+path
-              req=urllib.request.Request(url,headers={'User-Agent':'devilndove-production-resource-proof/3.0','Accept':'application/json'})
-              with urllib.request.urlopen(req,timeout=25) as response:
+              req=urllib.request.Request(url,headers={'User-Agent':'devilndove-production-resource-proof/3.1','Accept':'application/json'})
+              with urlopen_retry(req) as response:
                   status=int(response.status); ctype=str(response.headers.get('content-type') or '').lower(); body=response.read(4*1024*1024)
               assert status==200,(status,url,body[:300])
               assert 'json' in ctype,(ctype,url)
@@ -151,8 +181,8 @@ jobs:
                   if text and text not in candidates: candidates.append(text)
           assert candidates,('live products exist but expose zero public image URLs',len(products),products_payload.get('diagnostics'))
           def fetch_image(url):
-              req=urllib.request.Request(url,headers={'User-Agent':'devilndove-production-resource-proof/3.0','Accept':'image/*','Cache-Control':'no-store'})
-              with urllib.request.urlopen(req,timeout=25) as response:
+              req=urllib.request.Request(url,headers={'User-Agent':'devilndove-production-resource-proof/3.1','Accept':'image/*','Cache-Control':'no-store'})
+              with urlopen_retry(req) as response:
                   status=int(response.status); ctype=str(response.headers.get('content-type') or '').lower(); body=response.read(8*1024*1024)
               return status,ctype,body
           proven=None; failures=[]
@@ -186,10 +216,25 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json,urllib.request
+          import json, sys, time, urllib.error, urllib.request
+          RETRYABLE_HTTP={408,425,429,500,502,503,504}
+          def urlopen_retry(req,timeout=25,attempts=3):
+              last=None
+              for attempt in range(1,attempts+1):
+                  try:
+                      return urllib.request.urlopen(req,timeout=timeout)
+                  except urllib.error.HTTPError as exc:
+                      if exc.code not in RETRYABLE_HTTP or attempt==attempts: raise
+                      last=exc
+                  except (urllib.error.URLError,ConnectionResetError,TimeoutError) as exc:
+                      if attempt==attempts: raise
+                      last=exc
+                  print(f'TRANSPORT RETRY {attempt}/{attempts} after {type(last).__name__}',file=sys.stderr)
+                  time.sleep(attempt)
+              raise last
           url='https://devilndove.com/api/auth/login?diagnostic=full'
-          req=urllib.request.Request(url,headers={'User-Agent':'devilndove-production-resource-proof/3.0','Accept':'application/json'})
-          with urllib.request.urlopen(req,timeout=25) as response:
+          req=urllib.request.Request(url,headers={'User-Agent':'devilndove-production-resource-proof/3.1','Accept':'application/json'})
+          with urlopen_retry(req) as response:
               status=int(response.status); body=response.read(1000000)
           data=json.loads(body.decode('utf-8','replace'))
           assert status==200,(status,data)
@@ -204,6 +249,7 @@ jobs:
         run: |
           echo "Production main source SHA: ${EXPECTED_MAIN_SHA}"
           echo "Production D1: ${PROD_D1_NAME} / ${PROD_D1_ID}"
+          echo 'Transport retries: BOUNDED TO 3 / TRANSIENT ERRORS ONLY'
           echo 'Account table shape: READ-ONLY PROVEN'
           echo 'Current catalog Product R2 object: LIVE SAME-ORIGIN READ PROVEN'
           echo 'Live Product API: NONEMPTY + PUBLIC IMAGE URL PROVEN'

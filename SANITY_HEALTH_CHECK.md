@@ -1,36 +1,9 @@
 # Devil n Dove — Sanity Health Check
 
-## Current release truth
+Current candidate: **Release 467 Build 135 — Production Live-Resource Proof Transport Resilience**.
 
-Current candidate: **Release 467 Build 134 — Admin Navigation Context Summary Readability & Full-Text Accessibility**.
+Last fully verified checkpoint is Build 134 at SHA `fa53527989dfb9583969d752c1e237dfc35e25ec`, tree `a8fcb858178dc95b8648927c6f979996ef229857`.
 
-Last fully verified Development + Production checkpoint is Build 133:
+Development proofs: System `34733563985`, Quality `34733563987`, I.T. `34733564024`, Hygiene `34733563990`. Production proofs: Pages `34733635050`, Live Resources `34733673164` (successful attempt 2).
 
-- SHA `00025cf2fe7ec66af3fd44fba7188657a199cb87`
-- tree `639a6d20fa8bd67c93faa70971de1ef5e2f64ea8`
-- System Gate `34732882178`
-- Current Application Quality `34732882139`
-- I.T. Admin Runtime `34732882215`
-- Repository Branch Hygiene `34732882188`
-- Production Pages Deploy `34732966355`
-- Production Live Resource Integrity `34733006830`
-
-Result: **Build 133 six-proof closure is ingested by Build 134.**
-
-## Build 134 checks
-
-- Scope: Admin routes only.
-- Existing Related tools, Section position, Section map and responsive context dock remain the navigation-content authorities.
-- Existing Build 133 current-location cue and context count remain the only summary data sources.
-- Narrow-screen visual location text may ellipsize; the count remains visible and non-shrinking.
-- Full summary text remains available in `title` and `aria-label`.
-- No new manifest request, navigation target or navigation authority.
-- No localStorage/sessionStorage or server preference is added.
-- No network read/write is added.
-- No D1/R2/binding/provider or Production business-data mutation.
-- Canonical migrations remain exactly `0001`–`0004`.
-- Existing commerce and external-acceptance boundaries are unchanged.
-
-## Restart integrity
-
-Build 134 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 135, not self-written into Build 134.
+Build 135 only adds bounded transport retry behavior to the live-resource proof. It does not relax resource correctness checks and does not mutate D1/R2/provider/business data. Canonical migrations remain `0001`–`0004`.
