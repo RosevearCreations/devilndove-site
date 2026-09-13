@@ -37,4 +37,5 @@
   }
   window.DDRecentlyViewed = { add, list: read, render, clear: () => { try { localStorage.removeItem(KEY); } catch {} } };
   import('/public/js/storefront-discovery-build144.js?v=467b144').catch(() => null);
+  import('/public/js/product-detail-build145.js?v=467b145').catch(() => null);
 })();
