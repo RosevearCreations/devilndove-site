@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Release 467 Build 150 — Orders, Fulfillment & Buyer Communication Workspace gate."""
 from pathlib import Path
-import json, re, sys
+import json, re, subprocess, sys
 
 ROOT = Path(__file__).resolve().parents[1]
 FAIL = []
@@ -40,6 +40,7 @@ css=read('css/admin-orders-workspace-build150.css')
 fulfilment=read('functions/api/admin/contracts/operations-order-fulfillment-workflow-write.js')
 tracking=read('functions/api/admin/contracts/operations-order-tracking-audit-write.js')
 bridge=read('public/js/admin-order-fulfillment-idempotency-bridge-build150.js')
+legacy_orders=read('public/js/admin-orders.js')
 roadmap=read('PROJECT_STATUS_AND_ROADMAP.md')
 
 req(closure.get('release')==467 and closure.get('build')==149, 'Build 149 closure identity is wrong')
@@ -115,8 +116,27 @@ for token in ('dd_admin_ofw_b150_action_ids_v1','operations-order-fulfillment-wo
     req(token in bridge, f'Legacy fulfilment idempotency bridge missing token: {token}')
 req('setInterval(' not in bridge, 'Legacy fulfilment bridge must not add polling')
 
+for token in ('product_search_text','dd:order-updated'):
+    req(token in legacy_orders, f'Legacy Orders fallback missing Build 150 compatibility token: {token}')
+
 for token in ('# Build 150 — Orders, Fulfillment & Buyer Communication Workspace — ACTIVE','client_action_id','order_status_history','no new D1 migration'):
     req(token in roadmap, f'Build 150 roadmap truth missing token: {token}')
+
+# Syntax-check every Build 150 JavaScript endpoint/client touched by this candidate.
+for rel in (
+    'functions/api/admin/orders.js',
+    'functions/api/admin/contracts/operations-order-fulfillment-workflow-write.js',
+    'functions/api/admin/contracts/operations-order-tracking-audit-write.js',
+    'public/js/admin-orders-workspace-build150.js',
+    'public/js/admin-order-fulfillment-idempotency-bridge-build150.js',
+    'public/js/admin-orders.js',
+):
+    target=ROOT/rel
+    if not target.is_file():
+        FAIL.append(f'Build 150 syntax target missing: {rel}')
+        continue
+    result=subprocess.run(['node','--check',str(target)],cwd=ROOT,text=True,capture_output=True)
+    req(result.returncode==0, f'JavaScript syntax failed for {rel}: {(result.stderr or result.stdout).strip()}')
 
 if FAIL:
     print('RELEASE 467 BUILD 150 GATE: FAIL')
@@ -127,5 +147,6 @@ print('Build 149 six-proof Production closure: INGESTED BY BUILD 150')
 print('Orders workspace: PRODUCT-AWARE SEARCH + SELLER DETAIL + LOCAL DRAFTS + PRINTABLE PACKING SLIP + TIMELINE')
 print('Fulfilment/tracking: EXPLICIT LIVE CONFIRMATION + CLIENT_ACTION_ID RESPONSE-LOSS RECOVERY')
 print('Buyer messaging: COPY-ONLY / NO AUTOMATIC SEND')
+print('Build 150 JavaScript syntax: CHECKED')
 print('Canonical D1: 0001-0004 / UNCHANGED')
 print('Provider / R2 / accounting / payment / refund execution added: NONE')
