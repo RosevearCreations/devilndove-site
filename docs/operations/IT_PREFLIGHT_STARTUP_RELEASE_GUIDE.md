@@ -14,6 +14,12 @@ Last fully verified Build 134:
 - Production Pages `34733635050`
 - Production Live Resources `34733673164` (attempt 2)
 
+## Canonical Development target
+
+- Cloudflare Pages project: `devilndove-site`
+- Development Preview: `https://dev.devilndove-site.pages.dev`
+- Development D1: `devilndove-dev`
+
 ## Release sequence
 
 1. Verify the previous exact SHA/tree and all six external proofs.
