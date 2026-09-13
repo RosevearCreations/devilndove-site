@@ -1,11 +1,15 @@
 # Devil n Dove — Sanity Health Check
 
-Current candidate: **Release 467 Build 142 — Storefront Continuity & Offline Foundation**.
+Current candidate: **Release 467 Build 143 — Adaptive Mobile/Desktop/Web Application Shell**.
 
-Last fully verified checkpoint is Build 141 at SHA `72e270e4c27bd666afcb4d5befc3462dd757a1d1`, tree `d4a6bfe0327d8de641d3ea1910dcd8c6bc67e14b`.
+Last fully verified checkpoint is Build 142 at SHA `0b022c355217c00a7313aa2cb3e4b37a2b9a2b45`, tree `acf47b86db2cd170dc1fadd2a9e827e485e7c908`.
 
-Development proofs: System `34763039974`, Quality `34763039975`, I.T. `34763040049`, Hygiene `34763039996`. Production proofs: Pages `34763165246`, Live Resources `34763209880`.
+Development proofs: System `34765428970`, Quality `34765428976`, I.T. `34765428961`, Hygiene `34765428957`. Production proofs: Pages `34765518900`, Live Resources `34765564112`.
 
-Build 142 ingests that exact closure and adds fail-closed Storefront continuity: cached public Shop data may remain browseable when the Product API is unavailable, but price/stock are marked last verified and cached Add to Cart is disabled until live revalidation. The service worker precaches the Shop shell while preserving `/api/` outside cache authority. Offline/reconnect states expose recovery rather than empty-store ambiguity.
+Build 143 ingests that exact closure and adds a shared adaptive application shell across Mobile app/PWA, Tablet, Desktop app/PWA and responsive Web. Buyer navigation exposes Shop, Search, device-local Saved, Cart and Account; seller navigation exposes Home, Orders, Products, Create and More through existing routes. Connectivity state is global and accessible, scroll position can recover through Back/Forward navigation, and offline Account navigation is stopped safely rather than forcing a failed login path.
 
-Build 137–141 closure evidence remains available, including Markdown/JSON exports, stable evidence ID, SHA-256 fingerprint, verification manifest, browser digest verification and JSON-versus-manifest consistency checks. Build 142 does not mutate D1/R2/provider/business data. Canonical migrations remain `0001`–`0004` and live-resource retry correctness remains fail-closed.
+Device-local Saved state is explicitly non-authoritative: it does not reserve inventory, sync to an account, or make a stored price current. Live price, stock, account, checkout, payment and seller mutations remain server-authoritative.
+
+The Release 450 installable-client identity remains unchanged and `/api/`, admin/auth-sensitive paths remain outside cache authority. Build 137–142 closure evidence remains available, including Markdown/JSON exports, stable evidence ID, SHA-256 fingerprint, verification manifest, browser digest verification and JSON-versus-manifest consistency checks.
+
+Build 143 does not mutate D1/R2/provider/business data. Canonical migrations remain `0001`–`0004` and live-resource retry correctness remains fail-closed.
