@@ -1,0 +1,43 @@
+{
+  "release": 467,
+  "build": 147,
+  "title": "Buyer Account, Saved Items & Order Hub",
+  "state": "DEVELOPMENT_GREEN",
+  "source_authority": "dev",
+  "accepted_dev_sha": "3fadc908df56ba194e2cd2f9e5480f6bfbedb796",
+  "accepted_dev_tree_sha": "aeee53fdd3e01aee6b01a75e83f92f57b859960f",
+  "acceptance": {
+    "system_gate_run": 34769839872,
+    "current_application_quality_run": 34769839865,
+    "it_admin_runtime_proof_run": 34769839876,
+    "branch_hygiene_run": 34769839871
+  },
+  "final_closure": {
+    "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "dev_sha": "3fadc908df56ba194e2cd2f9e5480f6bfbedb796",
+    "tree_sha": "aeee53fdd3e01aee6b01a75e83f92f57b859960f",
+    "proofs": {
+      "system_gate_run": 34769839872,
+      "current_application_quality_run": 34769839865,
+      "it_admin_runtime_proof_run": 34769839876,
+      "branch_hygiene_run": 34769839871
+    },
+    "ingested_by_build": 148
+  },
+  "production_checkpoint": {
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "3fadc908df56ba194e2cd2f9e5480f6bfbedb796",
+    "tree_sha": "aeee53fdd3e01aee6b01a75e83f92f57b859960f",
+    "production_pages_deploy_run": 34769929784,
+    "production_live_resource_integrity_run": 34769969149
+  },
+  "scope": {
+    "buyer_account_hub": true,
+    "saved_reconciliation": "user_triggered_additive_idempotent",
+    "order_freshness": "successful_live_refresh_only",
+    "schema_change": false,
+    "d1_business_data_mutation_by_build": false,
+    "r2_mutation": false,
+    "provider_execution": false
+  }
+}
