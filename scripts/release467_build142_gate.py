@@ -46,10 +46,11 @@ req('Release 467 • Build 142' in reliability_page,'Reliability page must ident
 for token in (SHA,TREE,str(PAGES),str(LIVE),'const BUILD=142','Storefront continuity'):
     req(token in preflight,f'Deployment Preflight Build 142 projection missing closure/feature token: {token}')
 req('Release 467 Build 142' in preflight_page,'Deployment Preflight page must identify Build 142')
-for token in ('const BUILD = 142','dd:shop:data','fromCache','Last verified price','Last verified stock','Reconnect to confirm availability','button.disabled=true','window.addEventListener(\'offline\'','window.addEventListener(\'online\'','DDShopRuntime','Retry live shop'):
+for token in ('const RELEASE = 450;','const BUILD = 142','dd:shop:data','fromCache','Last verified price','Last verified stock','Reconnect to confirm availability','button.disabled=true','window.addEventListener(\'offline\'','window.addEventListener(\'online\'','DDShopRuntime','Retry live shop'):
     req(token in pwa,f'PWA Storefront continuity missing fail-safe token: {token}')
-for token in ("CACHE_NAME = 'devilndove-shell-r467b142'","'/shop/'","'/public/js/shop.js'","'/api/'","'Cache-Control':'no-store'","authority:'server-required'"):
+for token in ("CACHE_NAME = 'devilndove-shell-r450'","'/shop/'","'/public/js/shop.js'","'/api/'","'Cache-Control':'no-store'","authority:'server-required'"):
     req(token in sw,f'Service worker Build 142 authority missing token: {token}')
+req('BUILD' not in sw.upper(),'service worker must retain release-only installable-platform identity')
 req("const NO_CACHE_PATH_PREFIXES = ['/admin/', '/members/', '/login/', '/register/', '/account-help/', '/api/'];" in sw,'service worker must preserve API/admin no-cache boundary')
 for token in ('Buyer + Seller User-Experience Programme','Build 142','Storefront Continuity','Mobile app / installed PWA','Desktop app / installed PWA','Permanent Connectivity / Failsafe Contract'):
     req(token in roadmap,f'roadmap missing approved UX programme token: {token}')
@@ -64,5 +65,5 @@ if FAIL:
 print('RELEASE 467 BUILD 142 GATE: PASS')
 print('Build 141 six-proof closure: INGESTED BY BUILD 142 / NOT SELF-RECORDED')
 print('Storefront continuity: CACHED BROWSING / PURCHASE AUTHORITY FAILS CLOSED UNTIL LIVE REVALIDATION')
-print('Service worker: PUBLIC SHOP SHELL CACHED / API AUTHORITY UNCACHED')
+print('Service worker: PUBLIC SHOP SHELL CACHED / API AUTHORITY UNCACHED / RELEASE 450 IDENTITY RETAINED')
 print('Canonical D1 migrations: 0001-0004 / UNCHANGED')
