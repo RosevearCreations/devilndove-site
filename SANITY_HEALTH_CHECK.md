@@ -2,28 +2,28 @@
 
 ## Current release truth
 
-Current candidate: **Release 467 Build 130 — Admin Section Position & Previous/Next Tool Navigation**.
+Current candidate: **Release 467 Build 131 — Admin Section Switcher & Module Map**.
 
-Last fully verified Development + Production checkpoint is Build 129:
+Last fully verified Development + Production checkpoint is Build 130:
 
-- SHA `3cd8aea7927d80f412bfe3acb62fe13f52b4c278`
-- tree `0cbb9f0f33206d8b6c3dce404afd58382c71c24c`
-- System Gate `34728937075`
-- Current Application Quality `34728937088`
-- I.T. Admin Runtime `34728937083`
-- Repository Branch Hygiene `34728937091`
-- Production Pages Deploy `34729016936`
-- Production Live Resource Integrity `34729059768`
+- SHA `047427e8233793494e099c257aac56b8bd8bf6fb`
+- tree `afdce4033115489a7abf78088b7ab82dc1bb4a70`
+- System Gate `34729838054`
+- Current Application Quality `34729838051`
+- I.T. Admin Runtime `34729838028`
+- Repository Branch Hygiene `34729838029`
+- Production Pages Deploy `34729939106`
+- Production Live Resource Integrity `34729976417`
 
-Result: **Build 129 six-proof closure is ingested by Build 130.**
+Result: **Build 130 six-proof closure is ingested by Build 131.**
 
-## Build 130 checks
+## Build 131 checks
 
 - Scope: Admin routes only.
 - Navigation authority: existing `data/admin-navigation-modules.json` only.
-- Position context: current route's ordered manifest section only.
-- Position text: module / section / `Tool X of Y`.
-- Previous/Next: immediate adjacent sibling tools only; no wraparound.
+- Section context: current route's existing manifest module and section only.
+- Current section: marked current, not linked.
+- Other sections: one first-tool jump target each, inside the same module only.
 - Missing manifest/context/anchor: fail closed and render nothing.
 - No browser preference storage or server persistence.
 - No write request is added.
@@ -32,4 +32,4 @@ Result: **Build 129 six-proof closure is ingested by Build 130.**
 
 ## Restart integrity
 
-Build 130 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 131, not self-written into Build 130.
+Build 131 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 132, not self-written into Build 131.
