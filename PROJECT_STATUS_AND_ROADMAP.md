@@ -2,20 +2,20 @@
 
 ## Current checkpoint
 
-**Release 467 Build 141 — Closure Evidence Cross-Artifact Consistency Verification** has completed its external six-proof closure and is fully GREEN on the exact promoted source checkpoint:
+**Release 467 Build 142 — Storefront Continuity & Offline Foundation** has completed its external six-proof closure and is fully GREEN on the exact promoted source checkpoint:
 
-- SHA `72e270e4c27bd666afcb4d5befc3462dd757a1d1`
-- tree `d4a6bfe0327d8de641d3ea1910dcd8c6bc67e14b`
-- System `34763039974`
-- Quality `34763039975`
-- I.T. `34763040049`
-- Hygiene `34763039996`
-- Production Pages `34763165246`
-- Live Resources `34763209880`
+- SHA `0b022c355217c00a7313aa2cb3e4b37a2b9a2b45`
+- tree `acf47b86db2cd170dc1fadd2a9e827e485e7c908`
+- System `34765428970`
+- Quality `34765428976`
+- I.T. `34765428961`
+- Hygiene `34765428957`
+- Production Pages `34765518900`
+- Live Resources `34765564112`
 
 `dev` and `main` were externally verified identical at that checkpoint with zero ahead/behind divergence.
 
-Build 142 must ingest Build 141's later external closure before starting its feature slice. Build 141 intentionally did not self-record future proof. This planning document may describe the externally completed closure, but the canonical Build 142 authority must perform the formal ingestion step.
+Build 143 formally ingests Build 142's later external closure before starting its feature slice. Build 142 intentionally did not self-record future proof. The current candidate is **Build 143 — Adaptive Mobile/Desktop/Web Application Shell**.
 
 Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
 
@@ -27,56 +27,61 @@ Canonical D1 migrations remain exactly `0001`–`0004`. The Build 135 transient-
 
 ## Programme objective
 
-The next major Devil n Dove development cycle should move from release-evidence infrastructure into visible, measurable user-experience improvement for both sides of the business:
+The active Devil n Dove development cycle prioritizes visible user-experience improvement for both sides of the business while retaining the release-evidence, fail-closed and Canada-first boundaries already established.
 
-1. **Buyer experience:** discovery, trust, product understanding, saving/favoriting, cart continuity, guest checkout, order visibility, gifting, pickup, custom work and recovery when connectivity is poor.
+1. **Buyer experience:** discovery, trust, product understanding, saving/favoriting, cart continuity, guest checkout, order visibility, gifting, pickup, custom work and graceful recovery when connectivity is poor.
 2. **Seller experience:** fast daily triage, product creation/editing, mobile photography, order handling, custom-work management, fulfillment, buyer communication, merchandising, analytics and clear sync/recovery status.
-3. **Cross-device design:** every important capability must work deliberately on mobile app/PWA, desktop app/PWA and ordinary responsive web. The UI may adapt by surface, but the business capability must not disappear simply because a user is on a different device class.
-4. **Reliability:** network loss, API failure, D1/R2 interruption, stale service worker, response loss after a successful server action, interrupted upload and expired login must produce recoverable states rather than lost work or misleading success/failure messages.
-5. **SEO and accessibility:** the current public constraints continue. One public H1 per page, semantic heading order, crawl-safe core content, useful metadata, alt text, keyboard access, visible focus, screen-reader status, contrast and reduced-motion support remain release requirements.
+3. **Cross-device design:** every important capability must work deliberately on Mobile app/PWA, Tablet, Desktop app/PWA and ordinary responsive Web. Presentation may adapt; the business capability must not silently disappear.
+4. **Reliability:** network loss, API failure, D1/R2 interruption, stale clients, response loss after server success, interrupted upload and expired login must produce recoverable states rather than lost work or misleading success/failure messages.
+5. **SEO and accessibility:** one public H1 per page, semantic headings, crawl-safe core content, useful metadata, alt text, keyboard access, visible focus, screen-reader status, contrast and reduced-motion support remain release requirements.
 
-This programme is based on current patterns used by comparable commerce systems such as Etsy, Shopify and Big Cartel, while retaining Devil n Dove's own strengths: handmade/vintage separation, maker provenance, local pickup, events, custom work, gift cards, creative-process storytelling and Canada-first commerce.
+The programme continues to draw useful patterns from Etsy, Shopify and Big Cartel without mechanically copying them. Devil n Dove's differentiators remain handmade/vintage separation, maker provenance, local pickup, events, custom work, gift cards, creative-process storytelling and Canada-first commerce.
 
 ---
 
 # Permanent UX / Design Contract
 
-The following constraints should become permanent development and release-gate rules beginning with Build 142.
-
 ## Mobile app / installed PWA
 
 - Mobile-first single-task layouts.
-- Large touch targets and controls that do not depend on hover.
-- Bottom or sticky primary actions where this materially reduces scrolling.
-- Minimal typing where selections, saved profiles or camera input can be used instead.
-- Camera/photo capture and upload flows designed for one-handed use.
-- Safe-area support for notches, browser chrome and installed-PWA windows.
-- No horizontal page scrolling for ordinary business workflows.
-- Desktop-sized tables must transform into cards, drill-down rows or compact summaries rather than simply shrinking.
-- Critical actions must remain reachable without pinching/zooming.
+- Large touch targets with no hover-only controls.
+- Bottom/sticky primary navigation where it reduces navigation churn.
+- Minimal typing when selection, saved context or camera input can be used.
+- Camera/photo workflows designed for one-handed operation.
+- Safe-area support for notches/browser chrome/installed windows.
+- No ordinary horizontal page scrolling.
+- Desktop tables transform into cards, drill-down rows or compact summaries rather than merely shrinking.
+- Critical actions remain reachable without pinch/zoom.
+
+## Tablet
+
+- Tablet is a first-class surface, not a stretched phone.
+- Portrait and landscape may use different navigation density.
+- Controls remain touch-sized while using additional screen width productively.
+- Multi-column layouts may appear only when they remain readable and keyboard/touch accessible.
 
 ## Desktop app / installed PWA
 
 - Persistent navigation where space allows.
-- Richer tables, filters and sortable work queues.
-- Master/detail and split-pane layouts where they reduce navigation churn.
-- Keyboard navigation and shortcuts for frequent seller actions.
-- Bulk operations where safe and useful.
-- Multi-window-safe state; opening another product/order must not corrupt the first workspace.
-- Large-screen layouts should use space productively rather than merely stretching mobile cards.
+- Richer filters/tables/work queues.
+- Master/detail or split-pane layouts when useful.
+- Keyboard navigation/shortcuts for frequent seller actions.
+- Safe bulk operations where appropriate.
+- Multi-window-safe state.
+- Large screens use space productively instead of simply stretching mobile cards.
 
 ## Responsive website
 
-- The ordinary website remains the canonical compatibility baseline.
-- Installation must never be required for shopping, account access, order lookup, seller administration or recovery.
-- Mobile/desktop installed experiences progressively enhance the same capabilities rather than creating separate incompatible products.
-- Browser Back/Forward, deep links and refresh must preserve meaningful state where practical.
+- Ordinary responsive Web remains the canonical compatibility baseline.
+- Installation is never required for shopping, account access, order lookup, seller administration or recovery.
+- Mobile/desktop installed experiences progressively enhance the same capabilities instead of becoming incompatible products.
+- Browser Back/Forward, deep links and refresh preserve meaningful state where practical.
 
 ## Capability parity
 
-- A business capability may be presented differently by surface, but must not silently disappear at another supported viewport.
-- Device-specific capabilities are allowed only when genuinely device-dependent, such as direct camera capture.
-- Every new feature must have explicit mobile, tablet, desktop and responsive-web acceptance criteria.
+- A capability may be presented differently by surface but must not silently disappear at another supported viewport.
+- Device-specific features are allowed only when genuinely device-dependent, such as direct camera capture.
+- Every new feature must have explicit phone/tablet/desktop/web acceptance criteria.
 
 ## Public SEO contract
 
@@ -86,216 +91,172 @@ The following constraints should become permanent development and release-gate r
 - Structured data where applicable.
 - Semantic heading order.
 - Useful alt text for meaningful imagery.
-- No critical product information hidden exclusively behind client-side interactions that fail without JavaScript or API enhancement.
+- No critical product information hidden exclusively behind optional client enhancement.
 
 ## Accessibility contract
 
-- Keyboard-reachable controls.
-- Visible focus state.
-- Screen-reader names and state announcements.
-- Semantic dialogs and menus.
+- Keyboard-reachable controls and visible focus.
+- Screen-reader names/state announcements.
+- Semantic menus/dialogs.
 - Adequate contrast.
 - Reduced-motion support.
-- Offline/sync/error messages announced accessibly rather than only by colour.
+- Offline/sync/error states announced in text, not colour alone.
 
 ---
 
 # Permanent Connectivity / Failsafe Contract
 
-Every network-dependent surface must explicitly support four conditions:
+Every network-dependent surface must support:
 
-1. **Loading** — a meaningful loading state rather than a blank container.
-2. **Usable cached/stale state** — previously verified content may remain visible when safe, with a timestamp or stale indicator where freshness matters.
-3. **Disconnected state** — the application clearly explains that live verification is unavailable and what the user can still do.
-4. **Genuine error state** — failures provide a recovery action and do not masquerade as an empty store, empty gallery, completed order or successful save.
+1. **Loading** — meaningful loading state, never a blank container.
+2. **Usable cached/stale state** — previously verified content may remain visible when safe, with stale/timestamp cues where freshness matters.
+3. **Disconnected state** — explain that live verification is unavailable and what remains safe to do.
+4. **Genuine error state** — give a recovery action; never masquerade as an empty store, completed order or successful save.
 
 ## Read operations
 
-Use a risk-based policy:
+- Product description, care information, maker story, approved imagery and collection metadata may use cached fallback.
+- Current price, inventory, gift-card balance, order/payment/refund/fulfillment status remain server-authoritative.
+- If authoritative information cannot refresh, show last-known context rather than implying it is live.
 
-- Product description, care instructions, maker story, approved imagery and collection metadata may use cached fallback.
-- Current price, inventory, gift-card balance, order status, payment state, refunds and fulfillment state remain server-authoritative.
-- When authoritative information cannot be refreshed, show the last verified value and timestamp rather than implying it is current.
+## Safe local state
 
-## Safe local drafts
+Safe drafts/preferences should survive connection loss and restart where implemented: product copy, listing metadata, photo ordering/captions, message drafts, custom-work notes, filters, non-financial forms, cart state and buyer browsing preferences.
 
-The following should survive connection loss and browser/app restart:
-
-- product title/description drafts;
-- listing metadata drafts;
-- photo ordering/caption work;
-- customer-message drafts;
-- custom-work notes;
-- filters and unfinished non-financial forms;
-- cart contents and safe buyer preferences.
-
-Structured offline state should use IndexedDB or equivalent durable browser storage rather than fragile page memory.
+Structured durable state should use IndexedDB or equivalent where data complexity warrants it. Small bounded preferences such as the Build 143 device-local Saved list may use localStorage with an explicit local-only boundary.
 
 ## Mutation outbox
 
-Safe ordinary mutations should use an outbox pattern:
+Safe ordinary mutations introduced by later builds should use:
 
-- client-generated operation ID / idempotency key;
+- client-generated operation/idempotency ID;
 - timestamp;
-- target entity and expected version where applicable;
-- visible state: `saved locally`, `waiting to sync`, `syncing`, `conflict`, `completed` or `failed`;
-- bounded automatic retry for transient transport failures;
-- manual retry path;
-- next-app-launch/foreground recovery path.
+- target entity + expected version where appropriate;
+- visible state (`saved locally`, `waiting to sync`, `syncing`, `conflict`, `completed`, `failed`);
+- bounded retry for transient transport failures;
+- manual retry;
+- foreground/app-relaunch recovery.
 
-Background Sync may enhance recovery on supported browsers, but it must **not** be the only recovery path because support is incomplete across browsers.
+Background Sync may enhance this but is never the sole recovery path.
 
-## Idempotency
+## Idempotency and conflict handling
 
-Reconnect processing must never duplicate authoritative actions. A response lost after a successful server commit must resolve the server's actual state before resubmission.
-
-Examples:
-
-- one order, not two;
-- one message, not duplicates;
-- one fulfillment transition, not repeated status changes;
-- one listing publish event;
-- one inventory adjustment where that action is permitted.
-
-## Conflict handling
-
-Silent last-write-wins should not be the default for meaningful seller data.
-
-If a local/offline edit conflicts with a newer server version:
-
-- stop automatic overwrite;
-- show the conflicting fields;
-- let the seller choose/merge where practical;
-- record which version was ultimately accepted.
+- Response loss after a successful server commit must resolve server state before resubmission.
+- Do not duplicate orders, messages, fulfillment changes, listing publication or inventory adjustments.
+- Meaningful seller conflicts stop automatic overwrite and expose the conflicting state rather than silently using last-write-wins.
 
 ## High-authority actions
 
-The following must not silently execute later merely because they were clicked while offline:
-
-- payments;
-- refunds;
-- destructive deletion;
-- inventory adjustments that can affect sellable quantity;
-- final listing publication;
-- gift-card activation/value mutation;
-- fulfillment completion;
-- accounting posting;
-- irreversible provider actions.
-
-The application may preserve the prepared form locally, but the authoritative action must be revalidated online before execution.
+Payments, refunds, destructive deletion, sellable inventory adjustments, final publication, gift-card value changes, fulfillment completion, accounting posting and irreversible provider actions must never silently execute later merely because they were clicked while offline. Prepared forms may persist; authoritative execution requires fresh online validation.
 
 ## Service-worker/update safety
 
-- Do not unexpectedly replace an active seller workflow during an app update.
-- Coordinate cached assets and durable app data across versions.
-- Detect stale clients and provide a safe refresh/update path.
-- Preserve unsaved drafts before applying an update.
-- App-shell version changes must never strand the user on incompatible cached API assumptions.
+- Do not unexpectedly replace an active seller workflow.
+- Coordinate cached assets and durable state across versions.
+- Preserve drafts before update where applicable.
+- App-shell changes must not strand users on incompatible cached API assumptions.
+- The Release 450 installable-client identity remains an established compatibility contract unless deliberately migrated in a dedicated release-authority build.
 
 ---
 
-# Build 142 — Storefront Continuity & Offline Foundation
+# Build 142 — Storefront Continuity & Offline Foundation — CLOSED GREEN
 
-## Purpose
+Build 142 established the first bounded continuity layer:
 
-Build the common connectivity/recovery layer before adding more UX features. Current public experiences must not interpret an unavailable API as “the business has no products” or expose raw failure states where a buyer expects a functioning shop/gallery.
+- public Shop shell precached;
+- previously loaded Shop snapshot remains useful for browsing when live Product data is unavailable;
+- cached price and stock are explicitly last verified;
+- cached Add to Cart fails closed until live Product revalidation;
+- global online/offline and retry behavior available through the shared PWA continuity layer;
+- `/api/`, checkout authority and business mutations remain uncached/server-authoritative;
+- Release 450 installable-client identity retained;
+- no schema, D1 business-data, R2, binding or provider mutation.
 
-## Buyer experience
-
-- Shop, collections, gallery, homepage and recently viewed product information remain meaningfully usable through temporary API/D1/R2 interruption.
-- Replace ambiguous empty states with explicit status such as:
-  - `Live inventory is temporarily unavailable.`
-  - `Showing recently verified products.`
-  - `Reconnect to confirm availability before checkout.`
-- Cache a safe subset of approved product cards, collection information and imagery.
-- Preserve navigation, care information, About content, policies and other safe static content offline.
-- Never represent cached inventory as current inventory.
-
-## Seller experience
-
-- Admin application shell remains usable during a connection outage.
-- Recently opened products/drafts and safe read-only context remain accessible where available.
-- Add a visible global connectivity/sync indicator.
-- Provide a `Sync & Connectivity` diagnostic surface showing queued/failed operations without exposing secrets.
-
-## Reliability mechanics
-
-- Common connectivity service.
-- IndexedDB structured state.
-- Service-worker app-shell/cache strategy.
-- Safe stale-data timestamps.
-- Mutation outbox framework.
-- Retry orchestration using foreground reconnect/manual retry/app relaunch, with Background Sync only as an optional enhancement.
-- Idempotency key support for later mutation workflows.
-
-## Acceptance
-
-Simulate:
-
-- API unavailable;
-- Development/Production D1 temporarily unavailable;
-- R2 image failure;
-- total network loss;
-- network loss during a safe save;
-- browser close/reopen before synchronization;
-- reconnect after a response was lost.
-
-No blank shop/gallery, no false empty-store conclusion, no duplicate mutation and no lost safe draft.
-
-Build 142 must first ingest Build 141's exact external six-proof closure before this feature scope begins.
+External closure: SHA `0b022c355217c00a7313aa2cb3e4b37a2b9a2b45`, tree `acf47b86db2cd170dc1fadd2a9e827e485e7c908`, System `34765428970`, Quality `34765428976`, I.T. `34765428961`, Hygiene `34765428957`, Production Pages `34765518900`, Live Resources `34765564112`.
 
 ---
 
-# Build 143 — Adaptive Mobile/Desktop/Web Application Shell
+# Build 143 — Adaptive Mobile/Desktop/Web Application Shell — CURRENT CANDIDATE
 
 ## Purpose
 
-Create deliberate application shells for buyer and seller workflows instead of merely shrinking desktop pages onto a phone.
+Create deliberate application shells for buyer and seller workflows instead of merely shrinking desktop page navigation onto a phone.
 
 ## Buyer shell
 
-Mobile/installed PWA:
+Core destinations across supported surfaces:
 
-- Shop
-- Search
-- Saved
-- Cart
-- Account
+- **Shop** → current Shop route.
+- **Search** → current Shop search focused directly.
+- **Saved** → device-local browsing list in Build 143; account synchronization is reserved for Build 147.
+- **Cart** → current cart route.
+- **Account** → current member/account route when live verification is available.
 
-Desktop/web may use richer header/sidebar navigation while retaining the same core destinations.
+### Buyer behavior
+
+- Narrow phones use a five-destination bottom navigation with touch-sized controls and safe-area padding.
+- Tablets use a compact persistent navigation treatment distinct from narrow phone and large desktop.
+- Desktop/web/PWA uses persistent navigation without removing existing site navigation.
+- The active destination receives an accessible current-page state.
+- Connectivity status is visible and announced with `role=status`/`aria-live`.
+- Offline Account navigation fails safely on the current page rather than forcing a broken login/session path.
+- Search focuses the existing Shop search field rather than creating a second search authority.
+- Saved items remain a device-local convenience, not stock reservations or price authority.
 
 ## Seller shell
 
-Suggested mobile destinations:
+Core destinations:
 
-- Home
-- Orders
-- Products
-- Create
-- More
+- **Home** → `/admin/`
+- **Orders** → `/admin/orders/`
+- **Products** → `/admin/products/`
+- **Create** → the existing Product creation form on `/admin/products/#createProductForm`
+- **More** → existing Storefront, Creator, Finance, I.T., Reliability, Deployment Preflight, Today Tasks and Mobile Product workspaces.
 
-Desktop should use persistent module navigation, search/command access and denser workspace patterns.
+### Seller behavior
 
-## Requirements
+- Phone uses large touch-sized bottom navigation.
+- Tablet uses a compact persistent shell.
+- Desktop/PWA uses a persistent rail and leaves existing module navigation intact.
+- The shell does not create new mutation authority; it only routes to existing protected workspaces.
+- More is an accessible dialog-like drawer with Escape/Close behavior.
 
-- Preserve active route, scroll position and draft state through resize/orientation change where practical.
-- Tablet gets its own responsive behaviour rather than being treated as a stretched phone.
-- Global connectivity state is available on every shell.
-- Offline must not redirect the user into a broken login loop simply because session verification temporarily cannot reach the server.
+## Cross-surface state
 
-## Acceptance viewports
+- Preserve current route naturally through resize/orientation changes; the shell changes presentation instead of rerouting.
+- Record safe scroll position for Back/Forward restoration.
+- Installed mode and viewport class are exposed as presentation state only.
+- Existing draft/autosave authorities remain owned by their existing pages; the shell must never overwrite them.
+
+## Device-local Saved boundary
+
+- Local key is bounded to public product summary information.
+- No D1/server write.
+- No account-sync claim.
+- No inventory reservation.
+- Stored price is labelled as last saved context.
+- Buyer must reopen the Product to revalidate current price/stock before purchase.
+- Build 147 remains responsible for account-level Saved/Favorites reconciliation.
+
+## PWA/cache boundary
+
+- Preserve `devilndove-shell-r450` and `const RELEASE = 450;` installable-client compatibility.
+- Safe adaptive CSS/JS and `/saved/` may be precached.
+- `/api/`, admin, members/account, login/register and other auth-sensitive authorities stay outside public cache authority.
+
+## Build 143 acceptance viewports
 
 - narrow phone;
 - large phone;
 - tablet portrait;
 - tablet landscape;
 - laptop;
-- 1080p and larger desktop;
+- 1080p+ desktop;
 - high-DPI display;
-- installed-PWA/mobile app window;
-- installed-PWA/desktop app window.
+- installed mobile PWA window;
+- installed desktop PWA window.
 
-No core business capability may be unreachable solely because of viewport.
+Acceptance fails if a core buyer/seller destination becomes unreachable solely because of viewport, if fixed navigation hides critical content, if connectivity state is colour-only, if an offline Account tap causes a broken login loop, or if device-local Saved state is presented as authoritative inventory/account data.
 
 ---
 
@@ -303,512 +264,113 @@ No core business capability may be unreachable solely because of viewport.
 
 ## Buyer improvements
 
-Make search approachable first and powerful second.
-
-Primary search should be simple, with useful merchandising chips such as:
-
-- Handmade
-- Vintage
-- Under $25
-- Gift Ideas
-- Local Pickup
-- Ready to Ship
-- New
-
-Advanced filtering can remain behind `More filters`.
+Make search approachable first and powerful second. Primary search should remain simple, with merchandising chips such as Handmade, Vintage, Under $25, Gift Ideas, Local Pickup, Ready to Ship and New. Advanced filtering can remain behind `More filters`.
 
 Add/improve:
 
-- recently viewed items;
+- recently viewed;
 - related products;
-- collection counts where helpful;
-- sort by relevance/newest/price;
+- collection counts;
+- relevance/newest/price sorts;
 - useful zero-result alternatives;
-- state restoration when the user opens a product and returns to results;
-- mobile filter drawer/sheet that preserves context.
+- Back restoration of filter/search/scroll state;
+- mobile filter sheet/drawer that preserves result context.
 
 ## Seller improvements
 
-Provide seller merchandising controls for:
+Provide merchandising controls for featured collections, seasonal groups, visibility/status, ordering and buyer-view preview. Any search-ranking boost must remain explainable and must not hide unavailable/out-of-scope inventory rules.
 
-- featured collections;
-- seasonal groups;
-- visibility/status;
-- search merchandising boosts where appropriate;
-- collection ordering;
-- buyer-view preview before publishing.
+## Offline behavior
 
-## Offline behaviour
-
-- Maintain a bounded locally cached search subset from previously received products.
-- Cached search is explicitly labelled as cached/offline.
-- Current stock is never implied while disconnected.
-
-## Acceptance
-
-- typo/basic normalization behaviour;
-- useful zero-results state;
-- Back restores filter/search/scroll position;
-- no oversized mobile filter UI that destroys context.
+Previously received product search data may provide a bounded cached result subset, explicitly labelled cached/offline. Current stock is never implied while disconnected.
 
 ---
 
 # Build 145 — Product Detail Trust, Story & Conversion
 
-## Buyer improvements
+Prioritize strong hero photography, touch-friendly gallery/zoom, dimensions/scale, materials, origin/provenance, Handmade/Vintage/Pre-built classification, vintage condition, uniqueness, maker/process story, care, fulfillment expectations, pickup, gift/custom options, related items and a clear CTA.
 
-Product detail pages should answer the buyer's likely questions without requiring them to hunt through tabs or contact the seller first.
+Seller readiness should identify missing hero imagery, dimensions, materials, provenance, vintage condition, care information, shipping/pickup rules, description completeness, SEO metadata, alt text and product-type requirements. Handmade and vintage readiness rules should differ where appropriate.
 
-Prioritize:
-
-- strong hero photography;
-- swipe/thumbnails/zoom;
-- dimensions and scale;
-- materials;
-- origin/provenance;
-- Handmade / Vintage / Pre-built classification;
-- vintage condition details;
-- uniqueness / one-of-a-kind status;
-- current quantity when safe to show;
-- maker/process story;
-- care instructions;
-- dispatch/fulfillment expectations;
-- pickup eligibility;
-- gift/custom options;
-- related items;
-- clear primary CTA.
-
-For unique inventory, make `Only one available` or equivalent prominent when current inventory has been freshly verified.
-
-## Seller improvements
-
-Add a listing-readiness checklist/score showing missing or weak evidence such as:
-
-- hero image;
-- dimensions;
-- materials;
-- origin/provenance;
-- condition note for vintage;
-- care information;
-- shipping/pickup settings;
-- description completeness;
-- SEO title/meta;
-- image alt text;
-- required product-type fields.
-
-Handmade and vintage readiness rules should differ where appropriate.
-
-Provide buyer-view preview for phone and desktop before publish.
-
-## Offline behaviour
-
-Cached product detail remains viewable when safe. Purchase/availability CTA changes to `Reconnect to confirm availability` rather than allowing stale inventory to be sold.
-
-## Acceptance
-
-- one H1;
-- product-type-specific completeness gate;
-- essential product content remains available without optional client enhancement;
-- mobile image interaction remains touch-friendly;
-- no stale-stock checkout path.
+Cached product detail may remain viewable when safe; purchase authority becomes `Reconnect to confirm availability` when live stock cannot be verified.
 
 ---
 
 # Build 146 — Resilient Cart, Guest Checkout & Payment Recovery
 
-## Buyer improvements
+Buyer priorities: persistent cart, first-class guest checkout, minimum necessary fields, clear Delivery vs Pickup choice, order review, field-level validation and clear recovery when a response disappears after payment submission.
 
-- Persistent cart between sessions/devices where account state allows.
-- Guest checkout prominent and first-class.
-- Minimum necessary checkout fields.
-- Clear Delivery vs Local Pickup decision.
-- Order review before payment.
-- Useful validation errors located beside the problem field.
-- Recovery from a provider timeout without losing the prepared order.
-- Clear answer to `Did my order go through?` when the connection disappears after payment submission.
+Seller diagnostics should aggregate inventory revalidation failures, shipping calculation errors, provider availability, abandonment stage and duplicate-prevention/idempotency events without exposing unnecessary payment detail.
 
-## Seller improvements
+Cart may persist offline, but reconnect must revalidate price, inventory, Canada-first/US-disabled rules, pickup/shipping, tax, discounts and totals. Payment is never queued for offline execution.
 
-Aggregate checkout diagnostics without exposing unnecessary payment detail:
-
-- inventory revalidation failures;
-- shipping calculation errors;
-- provider unavailable;
-- checkout abandonment stage;
-- duplicate-prevention/idempotency resolution events.
-
-## Offline behaviour
-
-The cart can persist and may permit safe local add/remove changes using cached products, but reconnect must revalidate:
-
-- price;
-- current inventory;
-- Canada-first/US-disabled rules;
-- pickup/shipping availability;
-- tax;
-- discount validity;
-- order totals.
-
-Payment itself is never queued for offline execution.
-
-## Acceptance / chaos cases
-
-- network killed at each checkout stage;
-- browser refresh immediately after Place Order;
-- double-click/tap payment;
-- provider timeout;
-- response lost after server success;
-- cart contains item that sold elsewhere while offline;
-- shipping/pickup rule changed while cart was stale.
-
-All paths must converge to one authoritative order/payment result.
+Chaos acceptance includes network loss at every checkout stage, refresh after Place Order, double-click/tap, provider timeout, lost success response, stale inventory and changed shipping/pickup rules.
 
 ---
 
 # Build 147 — Buyer Account, Saved Items & Order Hub
 
-## Buyer improvements
+Create a clear account dashboard for orders, status/timeline, tracking, account-synced Saved/Favorites, recently viewed, profile, addresses and support. Guest buyers should receive a secure order-view path and may later claim/link a purchase without forced pre-checkout registration.
 
-Create a clear account dashboard for:
-
-- orders;
-- order status/timeline;
-- tracking;
-- saved/favorite items;
-- wishlist/collections;
-- recently viewed;
-- profile;
-- addresses;
-- support/order contact.
-
-Guest buyers should receive a secure order-view path and may later claim/link the purchase to an account rather than being forced to register before checkout.
-
-## Seller improvements
-
-Within the seller order/message workspace, show useful buyer context such as repeat-buyer status and relevant order history without exposing unnecessary personal data.
-
-## Offline behaviour
-
-- Saved items can operate locally and reconcile later.
-- Cached order status is labelled with its last successful refresh time.
-- Cached order information must not be described as live/current when disconnected.
-
-## Mobile requirement
-
-Use a clear single-column account experience with direct order actions and minimal nested navigation.
+This build is where Build 143's device-local Saved state can be deliberately reconciled with authenticated account state. Cached order status must show last refresh time and never claim to be live while disconnected.
 
 ---
 
 # Build 148 — Seller Daily Command Centre
 
-## Purpose
+Turn Admin into an operational cockpit answering **What needs attention right now?** Suggested queues include New Orders, Needs Reply, Ready to Make/Prepare, Ready to Pack/Pickup/Ship, Low Stock, Listings Needing Work, Failed Sync, Content Awaiting Approval, Custom Requests and System/Provider Warnings.
 
-Turn Admin from a collection of destinations into an operational cockpit that answers: **What needs attention right now?**
-
-## Suggested queues
-
-- New Orders
-- Needs Reply
-- Ready to Make / Prepare
-- Ready to Pack
-- Ready for Pickup
-- Ready to Ship
-- Low Stock
-- Listings Needing Work
-- Failed Sync
-- Content Awaiting Approval
-- Custom Requests
-- System/Provider Warnings
-
-## Dashboard metrics
-
-Keep the first view simple and actionable:
-
-- visitors;
-- orders;
-- conversion;
-- net revenue where authoritative;
-- top products;
-- top categories;
-- current work queue counts;
-- sync/system warnings.
-
-## Offline behaviour
-
-Last known dashboard may load with a timestamp. Seller can open safe cached work, but workflows requiring current inventory/order authority are visibly restricted until reconnection/revalidation.
-
-## Acceptance
-
-On both phone and desktop, the seller should be able to identify the highest-priority work in approximately five seconds without opening several modules.
+Keep first-view metrics simple and actionable: visitors, orders, conversion, authoritative revenue, top products/categories, work-queue counts and sync/system warnings. Last known dashboard may load offline with a timestamp, but current inventory/order actions require live revalidation.
 
 ---
 
 # Build 149 — Seller Listing Manager & Fast Product Editing
 
-## Seller improvements
+Target gallery/list views, searchable lifecycle states, quick edit, persistent Preview/Publish, clone listing, safe bulk category/status/tag actions, autosave, mobile photo capture, reorder/crop/rotate where supported, captions/alt text, reusable templates and at-a-glance stats.
 
-Adopt the strongest modern seller patterns:
-
-- gallery and list views;
-- searchable draft/active/sold-out/archive states;
-- quick edit for common fields;
-- persistent Preview and Publish controls;
-- clone listing;
-- bulk safe changes for category/status/tags;
-- draft autosave;
-- mobile photo capture/upload;
-- photo reorder;
-- crop/rotate where supported;
-- captions/alt text;
-- origin templates;
-- condition templates;
-- reusable care blocks;
-- listing stats at a glance.
-
-## Offline behaviour
-
-Every safe edit should save locally first:
-
-`Saved locally` → `Waiting to sync` → `Synced`
-
-Where safe, multiple local changes to one unpublished draft can compact into the final desired state rather than replaying unnecessary intermediate edits.
-
-If the server version changed, show conflict resolution rather than silently overwriting.
-
-Publication always requires live connectivity and fresh validation.
-
-## Acceptance
-
-Pull network during:
-
-- text editing;
-- image upload;
-- image reordering;
-- preview;
-- publish initiation.
-
-Close and reopen the browser/app. Reopen the product on another device. No safe draft text should disappear, and no incomplete listing should silently publish.
+Safe edits should progress visibly from `Saved locally` → `Waiting to sync` → `Synced`; conflict handling must stop silent overwrite. Publication always requires live connectivity and fresh validation.
 
 ---
 
 # Build 150 — Orders, Fulfillment & Buyer Communication Workspace
 
-## Buyer improvements
+Buyer order lifecycle should clearly expose Received → Confirmed → Making/Preparing → Ready for Pickup/Shipped → Complete with tracking/support when applicable.
 
-Expose a clear order lifecycle, for example:
-
-`Received → Confirmed → Making / Preparing → Ready for Pickup / Shipped → Complete`
-
-Show tracking and order-specific support/contact where applicable.
-
-## Seller workspace
-
-One order screen should combine:
-
-- buyer/order identity;
-- line items;
-- payment state;
-- fulfillment state;
-- pickup/shipping information;
-- packaging notes;
-- internal notes;
-- buyer messages;
-- tracking;
-- printable packing slip;
-- event timeline.
-
-Search should work by useful identifiers such as:
-
-- order ID;
-- buyer name;
-- email;
-- product;
-- status.
-
-## Offline behaviour
-
-- internal notes and message drafts may save offline;
-- tracking changes, refunds, fulfillment completion and outbound customer notification require server confirmation;
-- if the response is lost, the client resolves the current authoritative state before presenting Retry.
-
-## Mobile requirement
-
-The common fulfillment workflow must be usable one-handed without forcing the seller through a desktop table.
+Seller order workspace should combine buyer/order identity, line items, payment state, fulfillment, pickup/shipping, packaging notes, internal notes, buyer messages, tracking, packing slip and timeline. Search by order ID, buyer, email, product and status. Notes/message drafts may save offline; refunds, fulfillment completion, tracking changes and outbound notifications require live confirmation.
 
 ---
 
 # Build 151 — Gifting, Custom Work, Local Pickup & Event Selling
 
-## Buyer improvements
+Expand gift intent/message/wrap, recipient/occasion notes, pickup availability, custom-request intake, event availability and digital gift-card redemption.
 
-Expand Devil n Dove's natural differentiators:
-
-- gift intent;
-- gift message;
-- optional gift wrap where applicable;
-- recipient/occasion notes;
-- budget/occasion discovery;
-- pickup availability;
-- custom-request intake;
-- event availability;
-- digital gift-card redemption.
-
-## Seller improvements
-
-Create a Custom Work queue with:
-
-- request status;
-- quoted amount;
-- requested-by date;
-- approvals;
-- deposit state;
-- reference images;
-- materials/requirements;
-- gift instructions;
-- pickup/event handoff tasks.
-
-Provide an Event Mode optimized for fast catalog lookup and reservation/sale preparation.
-
-## Offline/event behaviour
-
-- custom-request text/photos may draft offline;
-- quotes, inventory reservations, gift-card activation and payment require live confirmation;
-- one-of-a-kind stock must not be silently oversold because an event device was offline;
-- if an offline reservation mode is ever introduced, it must be an explicit seller workflow with clear conflict/reconciliation rules rather than pretending the sale is final.
-
-## Acceptance
-
-Test weak market/event connectivity plus a one-of-a-kind item simultaneously visible online and on the seller event device.
+Seller Custom Work queue should track request status, quote, requested-by date, approval, deposit state, reference images, materials/requirements, gift instructions and pickup/event handoff. Event Mode may support fast catalog lookup/reservation preparation but must never silently oversell one-of-a-kind stock while offline.
 
 ---
 
 # Build 152 — Notifications, Activity Inbox & Cross-Device Continuity
 
-## Buyer notifications
+Buyer notifications are optional/preferences-controlled for order status, pickup readiness, shipment/tracking and saved-item/restock where supportable.
 
-Optional, preference-controlled notifications for:
-
-- order confirmation/status;
-- ready for pickup;
-- shipment/tracking;
-- saved-item/restock where supportable.
-
-Avoid making marketing notifications a requirement for useful account operation.
-
-## Seller Activity Inbox
-
-Unified durable activity records for:
-
-- new order;
-- buyer message;
-- sync failure;
-- listing issue;
-- low inventory;
-- custom request;
-- content approval;
-- system/provider warning.
-
-## Reliability rule
-
-Push notification delivery is an enhancement, not the source of truth. A missed push must never cause a missed order or task because the in-app activity record is server-authoritative and is fetched on next foreground refresh.
-
-Background/periodic browser APIs must not be assumed to exist everywhere.
+Seller Activity Inbox should create durable in-app records for new order, buyer message, sync failure, listing issue, low inventory, custom request, content approval and system/provider warnings. Push delivery is an enhancement, never the source of truth.
 
 ---
 
 # Build 153 — UX Analytics, Recovery Telemetry & Conversion Improvement
 
-## Buyer journey measurements
+Measure aggregate search→product, product→saved, product→cart, cart→checkout, checkout→order, zero-result searches, recovery from Product/API errors and disconnected-state recovery. Seller metrics should include visitors, product views, saves, add-to-cart, checkout starts, orders, conversion, average order, top products/categories, custom inquiries and reliability incidents that affected users.
 
-Measure useful aggregate behaviour such as:
-
-- search → product;
-- product → saved;
-- product → cart;
-- cart → checkout;
-- checkout → order;
-- zero-result searches;
-- product/API error recovery;
-- disconnected-state recovery;
-- page-performance failures that materially affect the shopping experience.
-
-Do not make core commerce depend on analytics delivery.
-
-## Seller business metrics
-
-Provide understandable metrics such as:
-
-- visitors;
-- product views;
-- saves;
-- add-to-cart;
-- checkout starts;
-- orders;
-- conversion;
-- average order value;
-- top products/categories;
-- custom inquiries;
-- funnel drop-off;
-- sync/reliability incidents that affected users.
-
-## Offline behaviour
-
-Telemetry may queue locally in bounded batches and may be dropped when necessary. Business operations must never wait for analytics ingestion.
-
-A disabled or failing analytics endpoint must not create 503 loops or degrade buyer/seller workflows.
+Telemetry may queue in bounded batches and may be dropped. Business operations must never wait for analytics ingestion.
 
 ---
 
 # Build 154 — Cross-Surface UX Certification & Production Hardening
 
-## Purpose
+Certify complete buyer/seller workflows across phone browser, installed mobile PWA, tablet, desktop browser and installed desktop PWA.
 
-Turn the programme's design and reliability requirements into permanent automated/manual release gates.
+Chaos certification includes intermittent latency, offline transitions, D1/R2/API failure, stale service worker, incompatible cache, expired login, upload interruption, replayed request, connection loss after commit, multi-device stale edit conflict, unavailable analytics and external-provider HOLD state.
 
-## Cross-surface certification
-
-Certify complete workflows across:
-
-- phone browser;
-- installed mobile PWA/app surface;
-- tablet;
-- desktop browser;
-- installed desktop PWA/app surface.
-
-## Failure/chaos certification
-
-Test:
-
-- intermittent latency;
-- offline/online transitions;
-- D1 unavailable;
-- R2 image unavailable;
-- API 500/503;
-- stale service worker;
-- incompatible cached app shell;
-- expired login;
-- image upload interruption;
-- duplicate/replayed request;
-- connection loss after a successful server commit;
-- multi-device stale edit conflict;
-- unavailable analytics/telemetry;
-- provider HOLD/unavailable state.
-
-## Permanent UX/System Gate
-
-Production promotion should fail closed for critical regressions such as:
-
-- horizontal overflow in supported primary layouts;
-- broken or unreachable navigation;
-- missing offline/error state on a critical network surface;
-- inaccessible primary controls;
-- uncaught API errors that replace usable fallback content;
-- duplicate-mutation hazard;
-- false payment/order state;
-- stale stock presented as verified/current;
-- critical mobile/desktop capability divergence;
-- more than one public H1;
-- destructive/high-authority action queued for silent offline replay.
+Permanent UX/System Gate should fail Production for critical horizontal overflow, unreachable navigation, missing offline/error state, inaccessible primary controls, uncaught API errors replacing usable fallbacks, duplicate-mutation hazards, false order/payment state, stale stock presented as live, critical mobile/desktop capability divergence, multiple public H1s or destructive/high-authority offline replay.
 
 ---
 
@@ -816,145 +378,96 @@ Production promotion should fail closed for critical regressions such as:
 
 ## Phase 1 — Reliability + buyer conversion foundation
 
-**Builds 142–146**
-
-1. Storefront/offline continuity.
-2. Adaptive app shell.
-3. Search/discovery.
-4. Product-detail trust/conversion.
-5. Cart/checkout/payment recovery.
-
-This phase should make the public store materially more dependable before adding more decorative homepage/SEO surface area.
+**Builds 142–146:** continuity → adaptive shell → discovery → product trust → cart/checkout recovery.
 
 ## Phase 2 — Buyer relationship + seller operations
 
-**Builds 147–151**
-
-1. Buyer account/saved items/order hub.
-2. Seller command centre.
-3. Listing manager.
-4. Orders/fulfillment/communications.
-5. Gifting/custom work/pickup/events.
-
-This phase improves the daily operating model and makes Devil n Dove's distinctive business model easier to use.
+**Builds 147–151:** account/Saved/orders → seller command centre → listing manager → fulfillment/communication → gifting/custom/pickup/events.
 
 ## Phase 3 — Continuity, measurement and hardening
 
-**Builds 152–154**
-
-1. Notifications/activity inbox.
-2. UX analytics + recovery telemetry.
-3. Cross-surface certification and permanent gates.
-
----
-
-# What should not be prioritized ahead of this programme
-
-Until Builds 142–146 are substantially complete, avoid using major build slots primarily for:
-
-- additional decorative homepage sections;
-- large new SEO landing-page families that do not solve a known conversion/discovery gap;
-- separate native mobile and desktop codebases;
-- push-notification-only workflows;
-- optimistic offline execution of financial/destructive actions;
-- analytics that can block business workflows.
-
-The preferred architecture remains one responsive application/PWA codebase with deliberate mobile, desktop and web layouts and progressive enhancement.
+**Builds 152–154:** notifications/activity → UX/recovery telemetry → cross-surface certification.
 
 ---
 
 # Competitor / pattern review notes
 
-The roadmap should continue to periodically compare Devil n Dove against comparable seller/buyer experiences, especially:
-
 ## Etsy patterns worth adapting
 
 - mobile-first listing creation/editing;
-- gallery/list seller inventory views;
-- quick editing;
-- listing statistics near the listing workflow;
-- persistent preview/publish actions;
-- favorites and collections;
+- gallery/list inventory views and quick edits;
+- listing stats near workflow;
+- persistent preview/publish;
+- favorites/collections;
 - guest checkout;
 - order tracking;
-- gifting-oriented discovery;
-- order context integrated into seller communication.
-
-Do not copy Etsy mechanically. Use the patterns where they reduce friction for a small artisan operation.
+- gifting discovery;
+- order context in seller communication.
 
 ## Big Cartel patterns worth adapting
 
-- simple seller dashboard prioritizing orders/visitors/conversion/top products;
-- mobile order management;
-- order search;
+- simple seller dashboard focused on orders/visitors/conversion/top products;
+- mobile order management/search;
 - fulfillment/status controls;
 - packing slips;
-- straightforward product administration;
-- compact small-business operational model.
+- straightforward small-business product administration.
 
-Do not copy any behaviour that would permit accidental overselling of one-of-a-kind stock without explicit seller acknowledgement and reconciliation.
+Do not copy behavior that could oversell unique stock without explicit acknowledgement/reconciliation.
 
 ## Shopify patterns worth adapting
 
-- mobile ecommerce treated as a distinct interaction design rather than a shrunken desktop page;
-- responsive editor/workspace patterns;
-- clearer mobile customer-account order actions;
-- strong recovery around cart/checkout;
-- progressive-web-app/update guidance.
+- mobile ecommerce as deliberate interaction design rather than shrunken desktop;
+- responsive workspace/editor patterns;
+- direct mobile account/order actions;
+- strong cart/checkout recovery;
+- progressive PWA/update safety.
 
-## Web platform reliability guidance to retain
+## Web-platform reliability guidance
 
-- service workers for app-shell/cached resources;
-- IndexedDB for structured durable local state;
-- Background Sync only as an enhancement, not the sole recovery mechanism;
-- explicit app-version/data-version handling;
-- responsive/PWA experience remains a functional website first;
-- accessibility and installability are progressive enhancements rather than substitutes for web compatibility.
+- service workers for safe shell/assets;
+- IndexedDB/equivalent for structured durable state;
+- Background Sync only as enhancement;
+- explicit app/data version handling;
+- PWA remains a functional website first;
+- accessibility/installability are progressive enhancements, never substitutes for web compatibility.
 
 ---
 
 # Release-governance rules for Builds 142–154
 
-The established Release 467 governance remains unchanged unless a later deliberately approved release-authority build changes it:
-
-1. Verify the previous build's exact SHA/tree and six proofs at startup.
-2. Ingest the previous build's later external closure. The candidate does not self-record its own future closure.
+1. Verify previous exact SHA/tree and six proofs at startup.
+2. Next build ingests previous build's later external closure; a candidate never self-records its future proof.
 3. Push `dev` non-force.
-4. Require exact-head Development GREEN:
-   - System Gate;
-   - Current Application Quality Proof;
-   - I.T. Admin Runtime Proof;
-   - Repository Branch Hygiene;
-   - canonical Development D1 migrations;
-   - exact Preview deployment/bindings/smoke where required by System Gate.
+4. Require exact-head Development GREEN: System Gate, Current Application Quality Proof, I.T. Admin Runtime Proof, Repository Branch Hygiene, canonical Development D1 migrations, exact Preview deployment/bindings/smoke.
 5. Only after exact Development GREEN, fast-forward the identical SHA/tree to `main` non-force.
 6. Require Production Pages Deploy SUCCESS.
 7. Require Production Live Resource Integrity SUCCESS.
 8. Only then call `main` / Production GREEN.
-9. The following build ingests that later closure.
+9. Following build ingests the closure.
 10. No force push unless genuinely unavoidable and explicitly justified.
-11. Preserve the Build 135 live-resource transport-resilience policy.
-12. Preserve the historical/current release provenance gates.
-13. Preserve canonical migrations exactly `0001`–`0004` until an intentionally approved schema build changes the migration authority.
-14. Keep Stripe, PayPal, Social/OAuth, Cloudflare Access and CAIP evidence lanes clearly separated from ordinary application feature completion.
+11. Preserve Build 135 live-resource transport resilience.
+12. Preserve historical/current release provenance gates.
+13. Preserve canonical migrations exactly `0001`–`0004` until an intentionally approved schema build changes authority.
+14. Keep Stripe, PayPal, Social/OAuth, Cloudflare Access and CAIP evidence lanes separate from ordinary feature completion.
 
 ---
 
-# Build 142 restart note
+# Build 143 restart note
 
-At Build 142 startup:
+At Build 143 startup:
 
-1. Re-verify Build 141 exact SHA/tree:
-   - SHA `72e270e4c27bd666afcb4d5befc3462dd757a1d1`
-   - tree `d4a6bfe0327d8de641d3ea1910dcd8c6bc67e14b`
-2. Re-verify exact Build 141 proofs:
-   - System `34763039974`
-   - Quality `34763039975`
-   - I.T. `34763040049`
-   - Hygiene `34763039996`
-   - Production Pages `34763165246`
-   - Live Resources `34763209880`
-3. Ingest Build 141 external closure into the Build 141 authority.
-4. Advance current Development authority to Build 142 with Build 141 as the last fully verified Development and Production baseline.
-5. Merge/retain this buyer + seller UX roadmap into the canonical active roadmap.
-6. Begin **Build 142 — Storefront Continuity & Offline Foundation** only after the closure ingestion and authority synchronization are coherent.
+1. Re-verify Build 142 exact SHA/tree:
+   - SHA `0b022c355217c00a7313aa2cb3e4b37a2b9a2b45`
+   - tree `acf47b86db2cd170dc1fadd2a9e827e485e7c908`
+2. Re-verify exact Build 142 proofs:
+   - System `34765428970`
+   - Quality `34765428976`
+   - I.T. `34765428961`
+   - Hygiene `34765428957`
+   - Production Pages `34765518900`
+   - Live Resources `34765564112`
+3. Ingest Build 142 external closure into the Build 142 authority with `ingested_by_build: 143`.
+4. Advance current Development authority to Build 143 with Build 142 as last fully verified Development and Production baseline.
+5. Preserve the permanent Mobile/Tablet/Desktop/Web, accessibility, SEO and connectivity/failsafe contracts above.
+6. Implement **Build 143 — Adaptive Mobile/Desktop/Web Application Shell** without creating new business-data authority.
+7. Require the standard exact-head four-proof Development cycle before any Production promotion.
