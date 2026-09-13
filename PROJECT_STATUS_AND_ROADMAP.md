@@ -2,40 +2,39 @@
 
 ## Current checkpoint
 
-**Release 467 Build 132 — Admin Navigation Context Dock & Responsive Collapse** is the active closure candidate.
+**Release 467 Build 133 — Admin Navigation Context Summary & Current Location Cue** is the active closure candidate.
 
-Build 131 is the last fully verified Development + Production checkpoint:
+Build 132 is the last fully verified Development + Production checkpoint:
 
-- SHA `ba0d027f299678479d1d28abd74ca85ea63c5efd`
-- tree `057aa04505e4501516f87350556c3e13f89f986d`
-- System Gate `34730852000`
-- Current Application Quality `34730852014`
-- I.T. Admin Runtime `34730851994`
-- Repository Branch Hygiene `34730852019`
-- Production Pages Deploy `34730958494`
-- Production Live Resource Integrity `34731002747`
+- SHA `3e69d3f11e7207b12160a38a42590dcb2a3a6d39`
+- tree `5dba79cc9448043e72a740bf71fbfe4d2590ce1b`
+- System Gate `34731990800`
+- Current Application Quality `34731990814`
+- I.T. Admin Runtime `34731990794`
+- Repository Branch Hygiene `34731990817`
+- Production Pages Deploy `34732064446`
+- Production Live Resource Integrity `34732131430`
 
-The Build 131 closure is recorded by Build 132 startup ingestion, not a Build 131 self-claim.
+The Build 132 closure is recorded by Build 133 startup ingestion, not a Build 132 self-claim.
 
-## Build 132 — Admin Navigation Context Dock & Responsive Collapse
+## Build 133 — Admin Navigation Context Summary & Current Location Cue
 
-Goal: keep the navigation context added by Builds 129–131 useful without stacking three large cards on every qualifying Admin page, particularly on phones.
+Goal: make the compact Build 132 navigation-context dock useful without opening it just to identify the current Admin location.
 
 Candidate scope:
-1. Preserve the existing Related tools, Section position, and Section map components as the source of all navigation content.
-2. Compose two or more available context components into one accessible `details` region.
-3. Default the context region open on desktop.
-4. Default it compact on screens up to 760px.
-5. Allow an ephemeral user toggle without localStorage/sessionStorage or server persistence.
-6. Adopt context cards that arrive later through existing client-side events/DOM observation.
-7. Create no new navigation target or navigation manifest.
-8. Fail closed when fewer than two context components are available.
-9. Add no network write, D1/R2/binding mutation, provider execution or Production business-data overwrite.
-10. Keep canonical D1 migrations exactly `0001`–`0004`.
+1. Preserve the existing Related tools, Section position, Section map and responsive context dock.
+2. Reuse already-rendered Section Position text as the preferred module/section cue.
+3. Fall back to already-rendered Section Map text when needed.
+4. Show the composed context-card count in the dock summary.
+5. Refresh the summary as existing context components arrive.
+6. Create no new navigation target, manifest request or navigation authority.
+7. Add no browser storage, server persistence or network write.
+8. Add no D1/R2/binding/provider or Production business-data mutation.
+9. Keep canonical D1 migrations exactly `0001`–`0004`.
 
 ## Next direction
 
-After Build 132 closes, continue the bounded Admin quality-of-life sequence. Build 133 must first ingest Build 132's later external closure before beginning its own changes.
+After Build 133 closes, continue the bounded Admin quality-of-life sequence. Build 134 must first ingest Build 133's later external closure before beginning its own changes.
 
 ## Release mechanics
 
