@@ -2,17 +2,17 @@
 
 ## Current release
 
-**Release 467 Build 140 — Closure Evidence Integrity Self-Verification & Tamper Detection**.
+**Release 467 Build 141 — Closure Evidence Cross-Artifact Consistency Verification**.
 
-Last fully verified Build 139:
-- SHA `3cb401b8cbf9c5c37e9b734497984cd9f4a385e5`
-- tree `5c6adcd9702348532e0c0807b3ea634c2604d7f7`
-- System `34761418389`
-- Quality `34761418405`
-- I.T. `34761418383`
-- Hygiene `34761418425`
-- Production Pages `34761544388`
-- Production Live Resources `34761591278`
+Last fully verified Build 140:
+- SHA `901d349760f9631cdbf989b549fcdac140d6569e`
+- tree `365e6c630e6e7b82eaadfaf85a82d9806cdc948f`
+- System `34762269626`
+- Quality `34762269665`
+- I.T. `34762269664`
+- Hygiene `34762269682`
+- Production Pages `34762361931`
+- Production Live Resources `34762417112`
 
 ## Canonical Development target
 
@@ -28,4 +28,4 @@ Last fully verified Build 139:
 4. Non-force promote the identical SHA/tree to `main` only after Development is GREEN.
 5. Require Production Pages Deploy and Production Live Resource Integrity.
 
-Build 140 retains the read-only I.T. Markdown and JSON closure evidence exports, stable evidence ID, SHA-256 fingerprint and verification-manifest export. It adds an independent browser verifier that canonicalizes the exported payload, recomputes SHA-256 using Web Crypto and compares the result to the manifest digest; mismatches fail evidence interpretation closed without persistence or mutation. Production live-resource retries remain capped at three transient attempts; permanent 4xx responses and real Product API, R2, photography, merchandising and D1 failures still fail closed. Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`; canonical migrations remain exactly `0001`–`0004`.
+Build 141 retains the read-only I.T. Markdown and JSON closure evidence exports, stable evidence ID, SHA-256 fingerprint, verification-manifest export and independent browser digest verification. It adds a cross-artifact verifier that fetches closure JSON and the verification manifest independently, requires evidence ID, recursively key-sorted canonical payload and canonical byte length to agree, then recomputes SHA-256 using Web Crypto. Any mismatch fails evidence interpretation closed without persistence, repair or mutation. Production live-resource retries remain capped at three transient attempts; permanent 4xx responses and real Product API, R2, photography, merchandising and D1 failures still fail closed. Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`; canonical migrations remain exactly `0001`–`0004`.
