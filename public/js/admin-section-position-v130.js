@@ -97,3 +97,7 @@
   window.DDAdminSectionPosition = Object.freeze({ build: BUILD, manifest: MANIFEST_URL });
   void init().finally(() => document.dispatchEvent(new CustomEvent('dd:admin-section-position-ready', { detail: { build: BUILD } })));
 })();
+
+// Release 467 Build 131: once section position is available, layer the same-manifest module section map.
+void import('/public/js/admin-section-map-v131.js?v=467b131')
+  .catch((error) => console.warn('[DD Build 131] admin section map unavailable', error));
