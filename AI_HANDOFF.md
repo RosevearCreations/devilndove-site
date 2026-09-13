@@ -2,26 +2,26 @@
 
 ## Current authority
 
-**Release 467 Build 128 — Admin Navigation Help & Keyboard Shortcut Reference** is the current Development closure candidate.
+**Release 467 Build 129 — Admin Related Tools & Context Shortcuts** is the current Development closure candidate.
 
-Build 128 starts by ingesting the externally verified Build 127 closure. Build 127 remains correctly non-self-recording; its six later proof IDs are recorded by Build 128 startup ingestion.
+Build 129 starts by ingesting the externally verified Build 128 closure. Build 128 remains correctly non-self-recording; its six later proof IDs are recorded by Build 129 startup ingestion.
 
-- SHA `dead9393e6d8db5fbcbe776c3885da80cbe42163`
-- tree `efff42114b680218c756031fb2f92bc12e541b1c`
-- System Gate `34725275176`
-- Current Application Quality `34725275139`
-- I.T. Admin Runtime `34725275114`
-- Repository Branch Hygiene `34725275193`
-- Production Pages Deploy `34725363163`
-- Production Live Resource Integrity `34725405258`
+- SHA `84523fe94b9007c82cae6d3f8b42b9a31a0e9f63`
+- tree `08210d5fa81558ad0b773cf2c319f74f57d88af3`
+- System Gate `34726947819`
+- Current Application Quality `34726947864`
+- I.T. Admin Runtime `34726947811`
+- Repository Branch Hygiene `34726947787`
+- Production Pages Deploy `34727026918`
+- Production Live Resource Integrity `34727072165`
 
-## Build 128 scope
+## Build 129 scope
 
-Build 128 adds an accessible Admin navigation-help dialog over the existing navigation layers. It documents the existing `Ctrl/Cmd+K` command palette, `Alt+Shift+F` favorite toggle, workspace memory/resume behavior, favorites quick launch, breadcrumbs and workspace-return behavior. `Alt+Shift+H` opens the help dialog, and an Admin workspace-nav button provides a pointer-friendly entry point.
+Build 129 adds a small Admin-only Related tools panel. Suggestions come only from the current tool's existing section in `data/admin-navigation-modules.json`, exclude the current route, and are capped at four shortcuts. If the manifest, route context, or insertion anchor is unavailable, the enhancement fails closed and does not render.
 
-The feature is Admin-only and client-only. It stores no state, creates no server preference authority, and performs no network write. It does not replace `data/admin-navigation-modules.json` or create another navigation authority.
+The feature is client-only and read-only. It adds no new navigation authority, saved state, server preference authority, or network write. Builds 122, 125, 126, 127 and 128 remain independent navigation contracts.
 
-Build 128 does not create or modify D1 schema, D1 business rows, R2 objects, bindings, Accounting records, Inventory/Creative/Product data, prices, payment/provider state, or Production business data. Canonical D1 migrations remain exactly `0001`–`0004`.
+Build 129 does not create or modify D1 schema, D1 business rows, R2 objects, bindings, Accounting records, Inventory/Creative/Product data, prices, payment/provider state, or Production business data. Canonical D1 migrations remain exactly `0001`–`0004`.
 
 ## External lanes
 
@@ -29,4 +29,4 @@ Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access service-t
 
 ## Restart rule
 
-Build 128 must not self-record its later external exact-head proof. After Build 128 is externally proven and promoted, **Build 129 must ingest that later closure**.
+Build 129 must not self-record its later external exact-head proof. After Build 129 is externally proven and promoted, **Build 130 must ingest that later closure**.
