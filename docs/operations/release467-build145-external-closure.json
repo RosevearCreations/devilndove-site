@@ -1,0 +1,20 @@
+{
+  "release": 467,
+  "build": 145,
+  "title": "Product Detail Trust, Story & Conversion",
+  "state": "PRODUCTION_GREEN",
+  "dev_sha": "5186b6258103ea438a73f0dbe1d2f94b010e8142",
+  "tree_sha": "b9e519f7ec9a10937261e0883360207554aebea7",
+  "development_proofs": {
+    "system_gate": 34768792584,
+    "current_application_quality": 34768792638,
+    "it_admin_runtime": 34768792563,
+    "repository_branch_hygiene": 34768792590
+  },
+  "production_proofs": {
+    "production_pages": 34769058927,
+    "production_live_resources": 34769104453
+  },
+  "ingested_by_build": 146,
+  "note": "Build 146 startup ingested the later external Build 145 six-proof closure; Build 145 did not self-record future proof."
+}
