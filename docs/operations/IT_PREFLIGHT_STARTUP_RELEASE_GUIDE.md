@@ -2,18 +2,18 @@
 
 ## Current release
 
-**Release 467 Build 129 — Admin Related Tools & Context Shortcuts**.
+**Release 467 Build 130 — Admin Section Position & Previous/Next Tool Navigation**.
 
-The last fully verified Development and Production checkpoint is Build 128:
+The last fully verified Development and Production checkpoint is Build 129:
 
-- SHA `84523fe94b9007c82cae6d3f8b42b9a31a0e9f63`
-- tree `08210d5fa81558ad0b773cf2c319f74f57d88af3`
-- System Gate `34726947819`
-- Current Application Quality `34726947864`
-- I.T. Admin Runtime `34726947811`
-- Repository Branch Hygiene `34726947787`
-- Production Pages Deploy `34727026918`
-- Production Live Resource Integrity `34727072165`
+- SHA `3cd8aea7927d80f412bfe3acb62fe13f52b4c278`
+- tree `0cbb9f0f33206d8b6c3dce404afd58382c71c24c`
+- System Gate `34728937075`
+- Current Application Quality `34728937088`
+- I.T. Admin Runtime `34728937083`
+- Repository Branch Hygiene `34728937091`
+- Production Pages Deploy `34729016936`
+- Production Live Resource Integrity `34729059768`
 
 ## Canonical Development target
 
@@ -31,10 +31,10 @@ The last fully verified Development and Production checkpoint is Build 128:
 6. Only after exact Development GREEN, non-force promote the identical SHA/tree to `main`.
 7. Require Production Pages Deploy and Production Live Resource Integrity.
 
-## Build 129 technical boundary
+## Build 130 technical boundary
 
-Build 129 adds one optional Related tools panel on Admin routes. It reads only the existing `data/admin-navigation-modules.json` manifest, finds the current route's existing section, excludes the current route, and shows at most four sibling shortcuts. It creates no new navigation authority.
+Build 130 adds one optional Section position panel on Admin routes. It reads only the existing `data/admin-navigation-modules.json` manifest, finds the current route in its existing ordered section, shows `Tool X of Y`, and exposes only the immediate previous and next sibling tools when available. The first and last items do not wrap around.
 
-The related-tools module is Admin-only and client-only. It adds no browser preference storage, server persistence, or write request. If manifest/context/anchor resolution is unavailable, it renders nothing.
+The section-position module is Admin-only and client-only. It adds no browser preference storage, server persistence, or write request. If manifest/context/anchor resolution is unavailable, it renders nothing.
 
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`, with canonical migrations exactly `0001`–`0004`. External provider acceptance remains independent of deployment health.
