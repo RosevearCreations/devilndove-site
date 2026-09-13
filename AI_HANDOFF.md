@@ -2,21 +2,21 @@
 
 ## Current authority
 
-**Release 467 Build 137 — Release Closure Evidence Pack & Operator Export** is the current Development closure candidate.
+**Release 467 Build 138 — Closure Evidence JSON & Operator Reference ID** is the current Development closure candidate.
 
-Build 136 is the last fully verified Development + Production checkpoint:
+Build 137 is the last fully verified Development + Production checkpoint:
 
-- SHA `577db0056cc169656d7d582c9f03d8a3d3058de9`
-- tree `c3ec59aec9767a4ff7590d8ab3b3e7516397a2d4`
-- System Gate `34758452361`
-- Current Application Quality `34758452368`
-- I.T. Admin Runtime `34758452390`
-- Repository Branch Hygiene `34758452385`
-- Production Pages Deploy `34758525107`
-- Production Live Resource Integrity `34758561922`
+- SHA `51799af100e036667d7ed2e01a1b84edea141eb7`
+- tree `744c235c6d1e3bbffa5824dba1e710d65c522147`
+- System Gate `34759975105`
+- Current Application Quality `34759975110`
+- I.T. Admin Runtime `34759975114`
+- Repository Branch Hygiene `34759975131`
+- Production Pages Deploy `34760063777`
+- Production Live Resource Integrity `34760104667`
 
-Build 137 ingests that exact six-proof Build 136 closure and adds a read-only I.T. Markdown closure-evidence export for operator restart/handoff use. The pack includes the exact SHA/tree, all six proofs, Production retry boundary, canonical migration authority and external HOLD/EVIDENCE lanes.
+Build 138 ingests that exact six-proof Build 137 closure. I.T. retains the Markdown closure pack, adds a dedicated machine-readable JSON closure artifact, and exposes stable operator evidence ID `r467-b137-51799af100e0-34759975105-34760063777-34760104667` for handoff/reference use.
 
 Canonical D1 migrations remain exactly `0001`–`0004`. No schema, D1 business-data, R2, binding, payment/provider, accounting, inventory, creative, price or Production business-data mutation is authorized.
 
-Build 137 must not self-record its later exact-head closure. Build 138 must ingest it.
+Build 138 must not self-record its later exact-head closure. Build 139 must ingest it.
