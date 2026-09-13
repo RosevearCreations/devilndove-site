@@ -2,17 +2,17 @@
 
 ## Current release
 
-**Release 467 Build 139 — Closure Evidence Integrity Fingerprint & Verification Manifest**.
+**Release 467 Build 140 — Closure Evidence Integrity Self-Verification & Tamper Detection**.
 
-Last fully verified Build 138:
-- SHA `5f3f0d39cdcf1ce743c9a17c40691f58fb342e8b`
-- tree `76e77253294ea84ea4a77f28ab684ffe3f07dd34`
-- System `34760742040`
-- Quality `34760741973`
-- I.T. `34760741960`
-- Hygiene `34760741974`
-- Production Pages `34760868140`
-- Production Live Resources `34760912351`
+Last fully verified Build 139:
+- SHA `3cb401b8cbf9c5c37e9b734497984cd9f4a385e5`
+- tree `5c6adcd9702348532e0c0807b3ea634c2604d7f7`
+- System `34761418389`
+- Quality `34761418405`
+- I.T. `34761418383`
+- Hygiene `34761418425`
+- Production Pages `34761544388`
+- Production Live Resources `34761591278`
 
 ## Canonical Development target
 
@@ -28,4 +28,4 @@ Last fully verified Build 138:
 4. Non-force promote the identical SHA/tree to `main` only after Development is GREEN.
 5. Require Production Pages Deploy and Production Live Resource Integrity.
 
-Build 139 retains the read-only I.T. Markdown and JSON closure evidence exports plus stable evidence ID. It adds a SHA-256 integrity fingerprint over a recursively key-sorted canonical closure payload and a verification-manifest export carrying the digest metadata and canonical payload for independent handoff checking. Production live-resource retries remain capped at three transient attempts; permanent 4xx responses and real Product API, R2, photography, merchandising and D1 failures still fail closed. Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`; canonical migrations remain exactly `0001`–`0004`.
+Build 140 retains the read-only I.T. Markdown and JSON closure evidence exports, stable evidence ID, SHA-256 fingerprint and verification-manifest export. It adds an independent browser verifier that canonicalizes the exported payload, recomputes SHA-256 using Web Crypto and compares the result to the manifest digest; mismatches fail evidence interpretation closed without persistence or mutation. Production live-resource retries remain capped at three transient attempts; permanent 4xx responses and real Product API, R2, photography, merchandising and D1 failures still fail closed. Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`; canonical migrations remain exactly `0001`–`0004`.
