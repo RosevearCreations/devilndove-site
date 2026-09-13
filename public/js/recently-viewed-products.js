@@ -36,4 +36,5 @@
     el.querySelector('[data-dd-recent-clear]')?.addEventListener('click', () => { try { localStorage.removeItem(KEY); } catch {} render(el, options); });
   }
   window.DDRecentlyViewed = { add, list: read, render, clear: () => { try { localStorage.removeItem(KEY); } catch {} } };
+  import('/public/js/storefront-discovery-build144.js?v=467b144').catch(() => null);
 })();
