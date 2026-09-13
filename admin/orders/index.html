@@ -5,9 +5,10 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1" name="viewport"/>
   <link href="/css/styles.css" rel="stylesheet"/>
+  <link href="/css/admin-orders-workspace-build150.css?v=467b150" rel="stylesheet"/>
   <link href="/assets/mark.png" rel="icon" type="image/png"/>
   <title>Orders Department — Devil n Dove</title>
-  <meta content="Manage orders, payment status, outstanding balances, and export-ready accounting summaries." name="description"/>
+  <meta content="Manage orders, fulfilment, buyer communication drafts, payment status, tracking audit, packing slips and accounting handoffs." name="description"/>
 </head>
 <body>
   <div class="container admin-shell">
@@ -25,7 +26,7 @@
       </div>
     </div>
     <div class="hero">
-      <div><h1>Orders & Payments</h1><p>Manage orders, payment status, refunds, outstanding balances, client documents, and export-ready accounting summaries.</p></div>
+      <div><p class="eyebrow">Release 467 Build 150</p><h1>Orders &amp; Fulfillment</h1><p>One seller workspace for orders, buyer context, fulfilment progress, packing, copy-only communication drafts, tracking audit and downstream payment/accounting handoffs.</p></div>
     </div>
     <div class="admin-department-links card">
       <a class="btn" href="/admin/">Dashboard</a>
@@ -40,15 +41,18 @@
       <a class="btn" href="/admin/movies/">Movies</a>
     </div>
 
-    <div class="card" style="margin-top:18px"><strong>Build 82 fulfilment workflow:</strong> use <a href="/admin/order-fulfillment-care/">Fulfilment &amp; Customer Care</a> for reviewed paid → preparing → making/packing → evidence → ready → fulfilled → returned transitions, copy-only customer update drafts, and the existing cross-order attention queue. Payment, refund, shipping-provider and accounting actions stay in their existing owner workflows.</div>
+    <div class="card" style="margin-top:18px"><strong>Build 150 workspace:</strong> the unified seller view consumes the existing Orders, order-detail and Build 82 Operations fulfilment authorities. Packaging/internal notes and buyer-message drafts save locally only. Live fulfilment and tracking-audit changes require confirmation and use stable <code>client_action_id</code> replay protection. Buyer sending, payment/refund execution, carrier calls, accounting posting, R2 and schema mutation remain outside this workspace.</div>
+
+    <div id="orderWorkspaceMount" data-release="467" data-build="150"></div>
 
     <div class="card" id="ordersSection" style="margin-top:18px">
-      <h2 style="margin-top:0">Orders & Payments</h2>
+      <h2 style="margin-top:0">Detailed Orders &amp; Payments Table</h2>
+      <p class="small">Retained as the detailed payment/refund/accounting fallback while Build 150 consolidates the seller workflow above.</p>
       <div class="grid cols-4" style="gap:12px;margin-top:16px">
         <div><label class="small" for="orderStatusFilter">Order Status</label><select id="orderStatusFilter"><option value="">All</option><option value="draft">Draft</option><option value="pending">Pending</option><option value="paid">Paid</option><option value="preparing">Preparing</option><option value="making">Making</option><option value="packing">Packing</option><option value="evidence">Evidence</option><option value="ready">Ready</option><option value="fulfilled">Fulfilled</option><option value="returned">Returned</option><option value="cancelled">Cancelled</option><option value="refunded">Refunded</option></select></div>
         <div><label class="small" for="orderPaymentStatusFilter">Payment Status</label><select id="orderPaymentStatusFilter"><option value="">All</option><option value="pending">Pending</option><option value="authorized">Authorized</option><option value="paid">Paid</option><option value="failed">Failed</option><option value="cancelled">Cancelled</option><option value="refunded">Refunded</option><option value="partially_refunded">Partially Refunded</option></select></div>
         <div><label class="small" for="orderFulfillmentFilter">Fulfillment</label><select id="orderFulfillmentFilter"><option value="">All</option><option value="shipping">Shipping</option><option value="digital">Digital</option><option value="mixed">Mixed</option><option value="pickup">Pickup</option></select></div>
-        <div><label class="small" for="orderSearchInput">Search</label><input autocomplete="off" id="orderSearchInput" placeholder="Order #, name, email, method..." type="text"/></div><div><button class="btn" id="refreshOrdersButton" type="button">Refresh Orders</button></div>
+        <div><label class="small" for="orderSearchInput">Search</label><input autocomplete="off" id="orderSearchInput" placeholder="Order #, name, email, product, SKU, method…" type="text"/></div><div><button class="btn" id="refreshOrdersButton" type="button">Refresh Orders</button></div>
       </div>
       <div class="small" id="ordersMessage" style="display:none;margin-top:14px"></div>
       <div class="small" id="ordersSummary" style="margin-top:10px"></div>
@@ -65,7 +69,8 @@
   <script src="/public/js/admin-self-protect.js?v=440"></script>
   <script src="/public/js/admin.js?v=440"></script>
 
-  <script src="/public/js/admin-orders.js"></script>
+  <script src="/public/js/admin-orders-workspace-build150.js?v=467b150"></script>
+  <script src="/public/js/admin-orders.js?v=467b150"></script>
   <script src="/public/js/admin-order-contract-bridge.js?v=440"></script>
   <script src="/public/js/admin-order-detail.js"></script>
   <script src="/public/js/admin-gift-card-order-redemption.js"></script>
