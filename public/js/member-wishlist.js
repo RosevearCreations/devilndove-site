@@ -49,5 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) { setMessage(error.message || 'Failed to remove wishlist item.', true); }
   }
   document.addEventListener('dd:members-ready', async (event) => { if (!event?.detail?.ok) return; render(); await loadWishlist(); });
+  document.addEventListener('dd:build147:saved-synced', async () => { render(); await loadWishlist(); });
   render();
 });
