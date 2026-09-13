@@ -58,6 +58,7 @@ function withPlatformClient(response, request) {
       .on('head', {
         element(element) {
           element.append('<link rel="stylesheet" href="/css/current-responsive.css?v=current">', { html: true });
+          element.append(`<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`, { html: true });
           // Products must establish its essential fallbacks before the large body of
           // admin scripts registers DOMContentLoaded work. Use a dedicated asset
           // revision so a repaired bootstrap can never be hidden behind an older
@@ -72,6 +73,7 @@ function withPlatformClient(response, request) {
           element.append('<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>', { html: true });
           element.append('<script defer src="/public/js/product-media-fallback.js?v=62"></script>', { html: true });
           element.append(`<script defer src="/public/js/pwa-platform.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
+          element.append(`<script defer src="/public/js/adaptive-shell.js?v=${CURRENT_RELEASE}b143"></script>`, { html: true });
           if (isPublicRuntimeIntelligencePath(pathname)) {
             element.append('<script defer src="/public/js/public-heading-guard.js?v=current"></script>', { html: true });
             element.append(`<script defer src="/public/js/runtime-intelligence.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
