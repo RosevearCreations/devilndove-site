@@ -2,36 +2,35 @@
 
 ## Current release truth
 
-Current candidate: **Release 467 Build 132 — Admin Navigation Context Dock & Responsive Collapse**.
+Current candidate: **Release 467 Build 133 — Admin Navigation Context Summary & Current Location Cue**.
 
-Last fully verified Development + Production checkpoint is Build 131:
+Last fully verified Development + Production checkpoint is Build 132:
 
-- SHA `ba0d027f299678479d1d28abd74ca85ea63c5efd`
-- tree `057aa04505e4501516f87350556c3e13f89f986d`
-- System Gate `34730852000`
-- Current Application Quality `34730852014`
-- I.T. Admin Runtime `34730851994`
-- Repository Branch Hygiene `34730852019`
-- Production Pages Deploy `34730958494`
-- Production Live Resource Integrity `34731002747`
+- SHA `3e69d3f11e7207b12160a38a42590dcb2a3a6d39`
+- tree `5dba79cc9448043e72a740bf71fbfe4d2590ce1b`
+- System Gate `34731990800`
+- Current Application Quality `34731990814`
+- I.T. Admin Runtime `34731990794`
+- Repository Branch Hygiene `34731990817`
+- Production Pages Deploy `34732064446`
+- Production Live Resource Integrity `34732131430`
 
-Result: **Build 131 six-proof closure is ingested by Build 132.**
+Result: **Build 132 six-proof closure is ingested by Build 133.**
 
-## Build 132 checks
+## Build 133 checks
 
 - Scope: Admin routes only.
-- Existing Related tools, Section position and Section map remain the navigation-content authorities.
-- Dock: one accessible responsive `details` region when two or more context components exist.
-- Desktop: expanded by default.
-- Small screens: compact by default at 760px and below.
-- User toggle: ephemeral only; no localStorage/sessionStorage or server preference is added.
-- Late context-card arrival: adopted client-side through events/DOM observation.
-- Fewer than two components: fail closed and leave the existing cards untouched.
-- No new navigation target or manifest.
-- No write request is added.
+- Existing Related tools, Section position, Section map and Build 132 responsive dock remain the navigation-content authorities.
+- Summary cue: derives current module/section from already-rendered Section Position text, with Section Map as fallback.
+- Context count: exposes the number of composed context panels in the dock summary.
+- Late context-card arrival: existing client-side events/DOM observation refresh the summary.
+- No new manifest request, navigation target or navigation authority.
+- No localStorage/sessionStorage or server preference is added.
+- No network write is added; the Build 133 summary layer adds no network read.
+- No D1/R2/binding/provider or Production business-data mutation.
 - Canonical migrations remain exactly `0001`–`0004`.
 - Existing commerce and external-acceptance boundaries are unchanged.
 
 ## Restart integrity
 
-Build 132 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 133, not self-written into Build 132.
+Build 133 remains a closure candidate until its exact `dev` head receives the required external proof. Its later proof must be ingested by Build 134, not self-written into Build 133.
