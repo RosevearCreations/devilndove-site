@@ -1,9 +1,9 @@
 # Devil n Dove — Sanity Health Check
 
-Current candidate: **Release 467 Build 137 — Release Closure Evidence Pack & Operator Export**.
+Current candidate: **Release 467 Build 138 — Closure Evidence JSON & Operator Reference ID**.
 
-Last fully verified checkpoint is Build 136 at SHA `577db0056cc169656d7d582c9f03d8a3d3058de9`, tree `c3ec59aec9767a4ff7590d8ab3b3e7516397a2d4`.
+Last fully verified checkpoint is Build 137 at SHA `51799af100e036667d7ed2e01a1b84edea141eb7`, tree `744c235c6d1e3bbffa5824dba1e710d65c522147`.
 
-Development proofs: System `34758452361`, Quality `34758452368`, I.T. `34758452390`, Hygiene `34758452385`. Production proofs: Pages `34758525107`, Live Resources `34758561922`.
+Development proofs: System `34759975105`, Quality `34759975110`, I.T. `34759975114`, Hygiene `34759975131`. Production proofs: Pages `34760063777`, Live Resources `34760104667`.
 
-Build 137 adds read-only closure-pack export only. It does not mutate D1/R2/provider/business data. Canonical migrations remain `0001`–`0004` and live-resource retry correctness remains fail-closed.
+Build 138 adds read-only JSON closure export and stable operator evidence ID while retaining the Markdown pack. It does not mutate D1/R2/provider/business data. Canonical migrations remain `0001`–`0004` and live-resource retry correctness remains fail-closed.
