@@ -1,9 +1,9 @@
 # Devil n Dove — Sanity Health Check
 
-Current candidate: **Release 467 Build 135 — Production Live-Resource Proof Transport Resilience**.
+Current candidate: **Release 467 Build 136 — Production Proof Retry Telemetry & Closure Visibility**.
 
-Last fully verified checkpoint is Build 134 at SHA `fa53527989dfb9583969d752c1e237dfc35e25ec`, tree `a8fcb858178dc95b8648927c6f979996ef229857`.
+Last fully verified checkpoint is Build 135 at SHA `e48f2bab89cfcb67cc24eec7fab3296aa1ed3750`, tree `a1eff3544b4ecddb07d539de52eab71f3b81c9a3`.
 
-Development proofs: System `34733563985`, Quality `34733563987`, I.T. `34733564024`, Hygiene `34733563990`. Production proofs: Pages `34733635050`, Live Resources `34733673164` (successful attempt 2).
+Development proofs: System `34735075779`, Quality `34735075777`, I.T. `34735075772`, Hygiene `34735075770`. Production proofs: Pages `34735145318`, Live Resources `34735184613`.
 
-Build 135 only adds bounded transport retry behavior to the live-resource proof. It does not relax resource correctness checks and does not mutate D1/R2/provider/business data. Canonical migrations remain `0001`–`0004`.
+Build 136 adds read-only closure and retry-policy visibility only. The Build 135 transport policy remains bounded to three transient attempts; permanent 4xx and real resource failures remain blocking. It does not mutate D1/R2/provider/business data. Canonical migrations remain `0001`–`0004`.
