@@ -48,6 +48,10 @@ function parseCookie(value) {
   return { name: String(name || '').trim() || 'dd_auth_token', value: rest.join('=').trim() };
 }
 
+function sanitizeUrl(value) {
+  return String(value || '').replace(/([?&](?:meta|kid|token|build155_browser_probe)=)[^&#]+/gi, '$1<redacted>');
+}
+
 const chromeBin = findChrome();
 if (!chromeBin) {
   fail('No Chromium/Chrome binary is available on this runner.');
@@ -75,6 +79,8 @@ let ws = null;
 let nextId = 1;
 const pending = new Map();
 const waiters = new Set();
+const scriptUrls = new Map();
+let pageSessionId = null;
 
 function cleanup() {
   try { ws?.close(); } catch {}
@@ -135,6 +141,46 @@ function evaluate(expression, sessionId, timeoutMs = 20000) {
   });
 }
 
+async function diagnoseRuntimeStall(sessionId, originalError) {
+  if (!sessionId || !/CDP command timed out: Runtime\.evaluate/.test(String(originalError?.message || originalError || ''))) return;
+  try {
+    const pausedEvent = waitForEvent('Debugger.paused', sessionId, 8000);
+    await command('Debugger.pause', {}, sessionId, 8000);
+    const paused = await pausedEvent;
+    const rawFrames = Array.isArray(paused?.callFrames) ? paused.callFrames.slice(0, 12) : [];
+    const frames = rawFrames.map((frame) => ({
+      function_name: String(frame?.functionName || '(anonymous)'),
+      url: sanitizeUrl(frame?.url || scriptUrls.get(frame?.location?.scriptId) || ''),
+      line: Number(frame?.location?.lineNumber || 0) + 1,
+      column: Number(frame?.location?.columnNumber || 0) + 1,
+      script_id: String(frame?.location?.scriptId || ''),
+    }));
+    console.error('PRODUCTS BROWSER STALL DIAGNOSTIC');
+    console.error(JSON.stringify({ reason: paused?.reason || 'unknown', frames }, null, 2));
+    const top = rawFrames[0];
+    const scriptId = top?.location?.scriptId;
+    if (scriptId) {
+      try {
+        const sourcePayload = await command('Debugger.getScriptSource', { scriptId }, sessionId, 5000);
+        const lines = String(sourcePayload?.scriptSource || '').split(/\r?\n/);
+        const line = Number(top?.location?.lineNumber || 0);
+        const start = Math.max(0, line - 6);
+        const end = Math.min(lines.length, line + 9);
+        console.error('PRODUCTS BROWSER STALL SOURCE');
+        console.error(JSON.stringify({
+          url: sanitizeUrl(scriptUrls.get(scriptId) || top?.url || ''),
+          line: line + 1,
+          context: lines.slice(start, end).map((text, index) => `${start + index + 1}: ${text.slice(0, 500)}`),
+        }, null, 2));
+      } catch (sourceError) {
+        console.error(`PRODUCTS BROWSER STALL SOURCE UNAVAILABLE — ${sourceError?.message || sourceError}`);
+      }
+    }
+  } catch (diagnosticError) {
+    console.error(`PRODUCTS BROWSER STALL DIAGNOSTIC UNAVAILABLE — ${diagnosticError?.message || diagnosticError}`);
+  }
+}
+
 try {
   const version = await browserVersion();
   if (!version?.webSocketDebuggerUrl) throw new Error('Chromium did not expose a browser websocket URL.');
@@ -156,6 +202,9 @@ try {
       else row.resolve(message.result || {});
       return;
     }
+    if (message.method === 'Debugger.scriptParsed' && message.params?.scriptId) {
+      scriptUrls.set(String(message.params.scriptId), String(message.params.url || ''));
+    }
     if (!message.method) return;
     for (const waiter of [...waiters]) {
       if (waiter.method !== message.method) continue;
@@ -169,11 +218,13 @@ try {
   const target = await command('Target.createTarget', { url: 'about:blank' });
   const attached = await command('Target.attachToTarget', { targetId: target.targetId, flatten: true });
   const sessionId = attached.sessionId;
+  pageSessionId = sessionId;
   if (!sessionId) throw new Error('Could not attach to Chromium page target.');
 
   await command('Network.enable', {}, sessionId);
   await command('Page.enable', {}, sessionId);
   await command('Runtime.enable', {}, sessionId);
+  await command('Debugger.enable', {}, sessionId);
   await command('Network.setCacheDisabled', { cacheDisabled: true }, sessionId);
   await command('Network.clearBrowserCache', {}, sessionId);
 
@@ -268,6 +319,7 @@ try {
     console.log('Product data population: PROVEN');
   }
 } catch (error) {
+  await diagnoseRuntimeStall(pageSessionId, error);
   fail(error?.message || String(error));
 } finally {
   cleanup();
