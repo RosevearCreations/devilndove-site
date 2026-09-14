@@ -2,28 +2,30 @@
 
 ## Current authority
 
-**Release 467 Build 152 — Site-wide Image Quality Scoring & Media QA** is the current fully verified Development + Production baseline.
+**Release 467 Build 153 — Layout Observer Performance Hotfix** is the current exact Development + Production baseline.
 
-- Development SHA `1d01cbed98b78543b75dab808a30fb76c20d6060`
-- Production main SHA `2f22e280426968a9ff229a0cee9ee62a69dc9d75`
-- identical tree `9cf8b0ac918ce567c51536f05d4c89b6f6294765`
-- System Gate `34860514075`
-- Current Application Quality `34860514137`
-- I.T. Admin Runtime `34860514304`
-- Repository Branch Hygiene `34860514150`
-- Production Pages Deploy `34860809983`
-- Production Live Resource Integrity `34860922626`
+- Development SHA `b8323b4e13ae08a8126da761106367de75f7cd40`
+- Production main SHA `ba8b3c2406335391334b2a74a89e5819236c770b`
+- identical tree `a3d0225c579953d5572dc99313661c2981c42510`
+- System Gate `34863777573`
+- Current Application Quality `34863777529`
+- I.T. Admin Runtime `34863777559`
+- Repository Branch Hygiene `34863777543`
+- Production Pages Deploy `34864015766`
+- Production Live Resource Integrity `34864113781`
 
-Build 152 is sealed in `release467-build152-sitewide-image-quality-media-qa.json` and is the restart authority for the next build.
+Build 153 is sealed in `release467-build153-layout-observer-performance-hotfix.json` and remains historically exact. A later route-specific incident at `2026-09-14T15:48:10Z` showed that the generic Build 153 Production checks did not exercise `/admin/products/`: the live route returned HTTP 503 / Cloudflare Error 1102 (`Worker exceeded resource limits`).
 
 ## Active candidate
 
-Build 153 — **Layout Observer Performance Hotfix** — is the active schema-free candidate. It was opened after Firefox reported `Script terminated by timeout` at `layout-overflow-guard.js:58:26` on Production.
+Build 154 — **Products Worker Resource Hotfix** — is the active schema-free candidate.
 
-Root cause: the shared `MutationObserver` synchronously rescanned every added subtree. Large admin renders could therefore repeat overlapping `querySelectorAll` scans in one callback and exceed Firefox's long-script threshold. The observer also watched the same `childList` mutations created when the guard wrapped tables.
+The Products request currently completes the existing session/module-access guard and then passes the large admin HTML document through the shared request-time `HTMLRewriter`. Build 154 preserves the guard but removes `/admin/products/` from the generic rewriter path. It uses a bounded Products-only text fast path that injects the same shared responsive/PWA/layout assets and applies one cache-revision pass to Product scripts.
 
-Build 153 batches relevant added roots to the next animation frame, ignores mutations with no table/container/admin-shell target, deduplicates descendant roots when an ancestor is already queued, and disconnects the observer while applying its own table wrappers. The Products route receives cache revision `467-b153-layout-observer` so the repaired guard cannot remain hidden behind the older `467-products-b98-readiness-triage` URL.
+The repaired response emits `X-DND-Products-Render-Path: static-fast-path`, retains `X-DND-Module-Guard` / `X-DND-Module-Key`, uses Product cache revision `467-b154-products-worker-fast-path`, and keeps the Build 153 layout guard revision `467-b153-layout-observer`.
 
-The hotfix changes no business data, headings, D1/R2 state, provider execution, payment/refund/accounting state or schema. Canonical D1 migrations remain exactly `0001`–`0004`. Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
+Build 154 adds a post-Production-deploy live route proof. The proof permits at most three Build-135 transient attempts and requires the real `/admin/products/` response to return HTTP 200, the fast-path/module-guard headers, the Build 154 cache token, and no Error 1102 / Worker resource-limit body. Generic Production Pages and Live Resource proofs alone are no longer sufficient to close this incident.
 
-Build 153 must pass exact-head candidate System/Quality/I.T./hotfix proof, then exact `dev` System/Quality/I.T./Hygiene plus D1/Preview/bindings/smoke, followed by non-force identical-tree promotion to `main`, Production Pages Deploy and Production Live Resource Integrity before it may be called Production GREEN.
+The hotfix changes no business data, D1/R2 state, provider execution, payment/refund/accounting state or schema. Canonical D1 migrations remain exactly `0001`–`0004`. Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
+
+Build 154 must pass exact-head candidate System/Quality/I.T./hotfix proof, then exact `dev` System/Quality/I.T./Hygiene plus D1/Preview/bindings/smoke, followed by non-force identical-tree promotion to `main`, Production Pages Deploy, Production Live Resource Integrity, and the independent Build 154 Products Production Route Proof before the Products incident may be called fixed/Production healthy.

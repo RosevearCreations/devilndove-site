@@ -1,31 +1,31 @@
 {
   "release": 467,
-  "build": 152,
-  "title": "Site-wide Image Quality Scoring & Media QA",
+  "build": 153,
+  "title": "Layout Observer Performance Hotfix",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "1d01cbed98b78543b75dab808a30fb76c20d6060",
-  "accepted_dev_tree_sha": "9cf8b0ac918ce567c51536f05d4c89b6f6294765",
+  "accepted_dev_sha": "b8323b4e13ae08a8126da761106367de75f7cd40",
+  "accepted_dev_tree_sha": "a3d0225c579953d5572dc99313661c2981c42510",
   "acceptance": {
-    "system_gate_run": 34860514075,
-    "current_application_quality_run": 34860514137,
-    "it_admin_runtime_proof_run": 34860514304,
-    "branch_hygiene_run": 34860514150
+    "system_gate_run": 34863777573,
+    "current_application_quality_run": 34863777529,
+    "it_admin_runtime_proof_run": 34863777559,
+    "branch_hygiene_run": 34863777543
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 152,
-      "title": "Site-wide Image Quality Scoring & Media QA",
-      "authority": "release467-build152-sitewide-image-quality-media-qa.json",
-      "dev_sha": "1d01cbed98b78543b75dab808a30fb76c20d6060",
-      "tree_sha": "9cf8b0ac918ce567c51536f05d4c89b6f6294765",
+      "build": 153,
+      "title": "Layout Observer Performance Hotfix",
+      "authority": "release467-build153-layout-observer-performance-hotfix.json",
+      "dev_sha": "b8323b4e13ae08a8126da761106367de75f7cd40",
+      "tree_sha": "a3d0225c579953d5572dc99313661c2981c42510",
       "proofs": {
-        "system_gate_run": 34860514075,
-        "current_application_quality_run": 34860514137,
-        "it_admin_runtime_proof_run": 34860514304,
-        "branch_hygiene_run": 34860514150
+        "system_gate_run": 34863777573,
+        "current_application_quality_run": 34863777529,
+        "it_admin_runtime_proof_run": 34863777559,
+        "branch_hygiene_run": 34863777543
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "exact_preview_deployment": true
@@ -37,16 +37,18 @@
     "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE"
   },
   "production_checkpoint": {
-    "build": 152,
-    "authority": "release467-build152-sitewide-image-quality-media-qa.json",
-    "main_sha": "2f22e280426968a9ff229a0cee9ee62a69dc9d75",
-    "tree_sha": "9cf8b0ac918ce567c51536f05d4c89b6f6294765",
-    "production_pages_deploy_run": 34860809983,
-    "production_live_resource_integrity_run": 34860922626,
+    "build": 153,
+    "authority": "release467-build153-layout-observer-performance-hotfix.json",
+    "main_sha": "ba8b3c2406335391334b2a74a89e5819236c770b",
+    "tree_sha": "a3d0225c579953d5572dc99313661c2981c42510",
+    "production_pages_deploy_run": 34864015766,
+    "production_live_resource_integrity_run": 34864113781,
     "state": "PRODUCTION_GREEN",
-    "role": "CURRENT_PRODUCTION_BASELINE"
+    "role": "CURRENT_PRODUCTION_BASELINE",
+    "post_closure_incident": "Build 154 addresses the later /admin/products/ Cloudflare 1102 Worker resource-limit incident and adds route-specific Production proof."
   },
   "current_release_authorities": [
+    "release467-build153-layout-observer-performance-hotfix.json",
     "release467-build152-sitewide-image-quality-media-qa.json",
     "release467-build151-gifting-custom-work-local-pickup-event-selling.json",
     "release467-build150-orders-fulfillment-buyer-communication-workspace.json",
@@ -154,8 +156,8 @@
   "provider_execution_authorized": false,
   "provider_publication_authorized": false,
   "secret_values_emitted": false,
-  "next_build": 153,
+  "next_build": 154,
   "next_build_state": "AUTHORIZED_IN_PROGRESS",
-  "next_build_title": "Layout Observer Performance Hotfix",
-  "promotion_state": "BUILD153_CANDIDATE_NOT_YET_VERIFIED"
+  "next_build_title": "Products Worker Resource Hotfix",
+  "promotion_state": "BUILD154_CANDIDATE_NOT_YET_VERIFIED"
 }
