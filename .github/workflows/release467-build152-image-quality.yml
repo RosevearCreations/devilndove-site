@@ -1,0 +1,43 @@
+name: Release 467 Build 152 Image Quality Proof
+on:
+  pull_request:
+    branches: [dev, build151-gifting-custom-pickup-events]
+    paths:
+      - 'public/js/image-quality-scorer-v152.js'
+      - 'public/js/site-image-quality-overlay-v152.js'
+      - 'public/js/media-content-runtime.js'
+      - 'admin/media-content-studio/index.html'
+      - 'scripts/release467_build152_gate.py'
+      - 'PROJECT_STATUS_AND_ROADMAP.md'
+      - '.github/workflows/release467-build152-image-quality.yml'
+permissions:
+  contents: read
+jobs:
+  build152-image-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Validate Build 152 image-quality authority
+        run: python scripts/release467_build152_gate.py
+      - name: JavaScript syntax
+        run: |
+          node --check public/js/image-quality-scorer-v152.js
+          node --check public/js/site-image-quality-overlay-v152.js
+          node --check public/js/media-content-runtime.js
+      - name: Python syntax
+        run: python -m py_compile scripts/release467_build152_gate.py
+      - name: Diff safety
+        run: git diff --check "${{ github.event.pull_request.base.sha }}"...HEAD
+      - name: Safety boundary
+        run: |
+          echo 'Build 152 image scoring is advisory/read-only.'
+          echo 'No D1 migration, D1 business-data mutation, R2 mutation, provider execution, publication, payment, refund or accounting post is authorized.'
