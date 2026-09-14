@@ -2,18 +2,18 @@
 
 ## Current checkpoint
 
-**Release 467 Build 148 — Seller Daily Command Centre** is fully Development + Production GREEN.
+**Release 467 Build 149 — Seller Listing Manager & Fast Product Editing** is fully Development + Production GREEN.
 
-- SHA `5a51981e7831bbef4f44c19f43a36b811e0a2e79`
-- tree `f4e0a88f1f7c6837176a939a19e5d4ae36596434`
-- System `34772251480`
-- Quality `34772251467`
-- I.T. `34772251459`
-- Hygiene `34772251477`
-- Production Pages `34772367891`
-- Production Live Resources `34772410714`
+- SHA `6ff380f581bce93a42aacb982ba4c686baa5c5c4`
+- tree `c1829f6371b3d5b7cd771f9f170260f53d5a7e08`
+- System `34776427862`
+- Quality `34776427860`
+- I.T. `34776427885`
+- Hygiene `34776427874`
+- Production Pages `34776524835`
+- Production Live Resources `34776571549`
 
-Build 149 formally ingests that external closure. `dev` and `main` were verified at the Build 148 Production checkpoint before Build 149 work began.
+Build 150 formally ingests that external closure. `dev` and `main` were verified at the Build 149 Production checkpoint before Build 150 work began.
 
 Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`. Canonical D1 migrations remain exactly `0001`–`0004`. Build 135 transient-transport retry policy remains mandatory and fail-closed for permanent 4xx and genuine resource correctness failures.
 
@@ -33,29 +33,29 @@ Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `H
 
 ---
 
-# Build 148 — Seller Daily Command Centre — CLOSED GREEN
+# Build 149 — Seller Listing Manager & Fast Product Editing — CLOSED GREEN
 
-Build 148 delivers the seller attention cockpit from existing safe Today Tasks, dashboard-summary and I.T./Reliability read authorities. It remains read-only, schema-free and avoids the legacy Command Center request-time DDL path. Last-known dashboard context may be shown with a timestamp while disconnected; current business actions still require live authority.
-
----
-
-# Build 149 — Seller Listing Manager & Fast Product Editing — ACTIVE
-
-Target gallery/list views, search across lifecycle states, quick edit, persistent Preview/Publish, clone listing, safe bulk category/status/tag actions, mobile-friendly editing and media handoff.
-
-Safe edits show visible state: `Saved locally` → `Waiting to sync` → `Syncing` → `Synced`, with `Conflict` stopping silent overwrite. Build 149 keeps inventory, active/publish, delete/archive and other high-authority changes out of automatic offline replay. Publication requires live connectivity and fresh validation.
-
-The current implementation uses device-local snapshot and quick-edit records, foreground reconnect retry, `base_updated_at` conflict protection, server product/detail/update/create authorities, catalog-media handoff, storefront preview and draft-only clone semantics.
+Build 149 delivers seller-facing list/card/search, safe local quick edits, visible waiting/syncing/conflict state, `base_updated_at` conflict protection, draft-only clone semantics, catalog-media handoff and storefront preview. Active/publish, inventory, delete/archive and other high-authority changes remain live-only.
 
 ---
 
-# Build 150 — Orders, Fulfillment & Buyer Communication Workspace
+# Build 150 — Orders, Fulfillment & Buyer Communication Workspace — ACTIVE
 
 Buyer lifecycle: Received → Confirmed → Making/Preparing → Ready for Pickup/Shipped → Complete.
 
-Seller workspace should combine buyer/order identity, line items, payment state, fulfillment, pickup/shipping, packaging/internal notes, buyer messages, tracking, packing slip and timeline. Search by order ID, buyer, email, product and status.
+Implemented candidate scope:
 
-Notes/message drafts may save locally; refunds, fulfillment completion, tracking changes and outbound notifications require live confirmation and idempotent response-loss recovery.
+- one `/admin/orders/` seller workspace combining buyer/order identity, products/SKUs, payment state, fulfilment, pickup/shipping context, packaging/internal notes, copy-only buyer communication drafts, tracking audit, printable packing slip and timeline;
+- search by order ID/number, buyer, email, Product/SKU and status;
+- local packaging/internal/message drafts with explicit local-only state;
+- existing canonical Orders + order-detail reads and Build 82 Operations fulfilment transitions retained as the authorities;
+- stable `client_action_id` replay protection for live fulfilment writes, including the retained Build 82 fulfilment page via compatibility bridge;
+- explicit pending-confirmation queue for uncertain response-loss outcomes; retry reuses the same action ID and never silently replays in the background;
+- tracking changes recorded as append-only audit handoffs in existing `order_status_history`, with stale-order-status conflict protection;
+- no buyer-message sending, carrier/provider execution, payment/refund execution, accounting posting, R2 mutation or request-time schema mutation;
+- no new D1 migration; canonical migrations remain `0001`–`0004`.
+
+Build 150 is not Production GREEN until its exact candidate SHA passes the Development System/Quality/I.T./Hygiene + Preview/binding/smoke chain, is promoted non-force with the identical SHA/tree to `main`, and passes Production Pages + Production Live Resource Integrity.
 
 ---
 

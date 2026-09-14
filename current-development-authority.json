@@ -1,31 +1,31 @@
 {
   "release": 467,
-  "build": 148,
-  "title": "Seller Daily Command Centre",
+  "build": 149,
+  "title": "Seller Listing Manager & Fast Product Editing",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "5a51981e7831bbef4f44c19f43a36b811e0a2e79",
-  "accepted_dev_tree_sha": "f4e0a88f1f7c6837176a939a19e5d4ae36596434",
+  "accepted_dev_sha": "6ff380f581bce93a42aacb982ba4c686baa5c5c4",
+  "accepted_dev_tree_sha": "c1829f6371b3d5b7cd771f9f170260f53d5a7e08",
   "acceptance": {
-    "system_gate_run": 34772251480,
-    "current_application_quality_run": 34772251467,
-    "it_admin_runtime_proof_run": 34772251459,
-    "branch_hygiene_run": 34772251477
+    "system_gate_run": 34776427862,
+    "current_application_quality_run": 34776427860,
+    "it_admin_runtime_proof_run": 34776427885,
+    "branch_hygiene_run": 34776427874
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 148,
-      "title": "Seller Daily Command Centre",
-      "authority": "release467-build148-seller-daily-command-centre.json",
-      "dev_sha": "5a51981e7831bbef4f44c19f43a36b811e0a2e79",
-      "tree_sha": "f4e0a88f1f7c6837176a939a19e5d4ae36596434",
+      "build": 149,
+      "title": "Seller Listing Manager & Fast Product Editing",
+      "authority": "release467-build149-seller-listing-manager-fast-product-editing.json",
+      "dev_sha": "6ff380f581bce93a42aacb982ba4c686baa5c5c4",
+      "tree_sha": "c1829f6371b3d5b7cd771f9f170260f53d5a7e08",
       "proofs": {
-        "system_gate_run": 34772251480,
-        "current_application_quality_run": 34772251467,
-        "it_admin_runtime_proof_run": 34772251459,
-        "branch_hygiene_run": 34772251477
+        "system_gate_run": 34776427862,
+        "current_application_quality_run": 34776427860,
+        "it_admin_runtime_proof_run": 34776427885,
+        "branch_hygiene_run": 34776427874
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "exact_preview_deployment": true
@@ -37,16 +37,17 @@
     "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE"
   },
   "production_checkpoint": {
-    "build": 148,
-    "authority": "release467-build148-seller-daily-command-centre.json",
-    "main_sha": "5a51981e7831bbef4f44c19f43a36b811e0a2e79",
-    "tree_sha": "f4e0a88f1f7c6837176a939a19e5d4ae36596434",
-    "production_pages_deploy_run": 34772367891,
-    "production_live_resource_integrity_run": 34772410714,
+    "build": 149,
+    "authority": "release467-build149-seller-listing-manager-fast-product-editing.json",
+    "main_sha": "6ff380f581bce93a42aacb982ba4c686baa5c5c4",
+    "tree_sha": "c1829f6371b3d5b7cd771f9f170260f53d5a7e08",
+    "production_pages_deploy_run": 34776524835,
+    "production_live_resource_integrity_run": 34776571549,
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build149-seller-listing-manager-fast-product-editing.json",
     "release467-build148-seller-daily-command-centre.json",
     "release467-build147-buyer-account-saved-items-order-hub.json",
     "release467-build143-adaptive-mobile-desktop-web-application-shell.json",
@@ -150,8 +151,8 @@
   "provider_execution_authorized": false,
   "provider_publication_authorized": false,
   "secret_values_emitted": false,
-  "next_build": 149,
-  "next_build_state": "READY",
-  "next_build_title": "Seller Listing Manager & Fast Product Editing",
-  "promotion_state": "BUILD149_CANDIDATE_NOT_YET_VERIFIED"
+  "next_build": 150,
+  "next_build_state": "AUTHORIZED_IN_PROGRESS",
+  "next_build_title": "Orders, Fulfillment & Buyer Communication Workspace",
+  "promotion_state": "BUILD150_CANDIDATE_NOT_YET_VERIFIED"
 }
