@@ -1,0 +1,95 @@
+name: Build 155 Access Readonly Diagnostic
+
+on:
+  push:
+    branches:
+      - build155-access-readonly-diagnostic
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  access-readonly-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Query Access applications and service-token metadata read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'ACCESS_DIAGNOSTIC: API token missing'; exit 2; }
+          auth=(-H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" -H 'Content-Type: application/json')
+          apps_status="$(curl -sS -o /tmp/access-apps.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/apps?per_page=100")"
+          tokens_status="$(curl -sS -o /tmp/access-tokens.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/service_tokens?per_page=100")"
+          APPS_STATUS="${apps_status}" TOKENS_STATUS="${tokens_status}" python - <<'PY'
+          import json, os, pathlib
+          def load(path):
+              try: return json.loads(pathlib.Path(path).read_text())
+              except Exception: return {}
+          apps=load('/tmp/access-apps.json')
+          tokens=load('/tmp/access-tokens.json')
+          print('ACCESS_APPS_HTTP_STATUS', os.environ['APPS_STATUS'])
+          print('ACCESS_APPS_API_SUCCESS', bool(apps.get('success')))
+          if not apps.get('success'):
+              print('ACCESS_APPS_ERROR_CODES', [x.get('code') for x in apps.get('errors',[]) if isinstance(x,dict)])
+          rows=apps.get('result') if isinstance(apps.get('result'),list) else []
+          relevant=[]
+          for row in rows:
+              if not isinstance(row,dict): continue
+              domain=str(row.get('domain') or '')
+              name=str(row.get('name') or '')
+              if 'devilndove-site.pages.dev' in domain or 'devilndove' in name.lower():
+                  relevant.append(row)
+          print('ACCESS_RELEVANT_APP_COUNT', len(relevant))
+          for i,row in enumerate(relevant,1):
+              print(f'ACCESS_APP_{i}_NAME', str(row.get('name') or ''))
+              print(f'ACCESS_APP_{i}_DOMAIN', str(row.get('domain') or ''))
+              print(f'ACCESS_APP_{i}_TYPE', str(row.get('type') or ''))
+          pathlib.Path('/tmp/access-app-ids').write_text('\n'.join(str(r.get('id') or '') for r in relevant if r.get('id'))+'\n')
+          print('ACCESS_SERVICE_TOKENS_HTTP_STATUS', os.environ['TOKENS_STATUS'])
+          print('ACCESS_SERVICE_TOKENS_API_SUCCESS', bool(tokens.get('success')))
+          if not tokens.get('success'):
+              print('ACCESS_SERVICE_TOKENS_ERROR_CODES', [x.get('code') for x in tokens.get('errors',[]) if isinstance(x,dict)])
+          token_rows=tokens.get('result') if isinstance(tokens.get('result'),list) else []
+          print('ACCESS_SERVICE_TOKEN_COUNT', len(token_rows))
+          for i,row in enumerate(token_rows,1):
+              if not isinstance(row,dict): continue
+              print(f'ACCESS_SERVICE_TOKEN_{i}_NAME', str(row.get('name') or ''))
+              print(f'ACCESS_SERVICE_TOKEN_{i}_ENABLED', row.get('enabled'))
+              print(f'ACCESS_SERVICE_TOKEN_{i}_EXPIRES_AT', str(row.get('expires_at') or ''))
+          PY
+          i=0
+          while IFS= read -r app_id; do
+            [ -n "${app_id}" ] || continue
+            i=$((i+1))
+            status="$(curl -sS -o "/tmp/access-policies-${i}.json" -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/apps/${app_id}/policies?per_page=100")"
+            POLICY_INDEX="${i}" POLICY_STATUS="${status}" python - <<'PY'
+          import json, os, pathlib
+          i=os.environ['POLICY_INDEX']; path=pathlib.Path(f'/tmp/access-policies-{i}.json')
+          try: data=json.loads(path.read_text())
+          except Exception: data={}
+          print(f'ACCESS_APP_{i}_POLICIES_HTTP_STATUS', os.environ['POLICY_STATUS'])
+          print(f'ACCESS_APP_{i}_POLICIES_API_SUCCESS', bool(data.get('success')))
+          if not data.get('success'):
+              print(f'ACCESS_APP_{i}_POLICY_ERROR_CODES', [x.get('code') for x in data.get('errors',[]) if isinstance(x,dict)])
+          rows=data.get('result') if isinstance(data.get('result'),list) else []
+          print(f'ACCESS_APP_{i}_POLICY_COUNT', len(rows))
+          for n,row in enumerate(rows,1):
+              if not isinstance(row,dict): continue
+              print(f'ACCESS_APP_{i}_POLICY_{n}_NAME', str(row.get('name') or ''))
+              print(f'ACCESS_APP_{i}_POLICY_{n}_DECISION', str(row.get('decision') or ''))
+              for field in ('include','require','exclude'):
+                  rules=row.get(field) if isinstance(row.get(field),list) else []
+                  types=[]
+                  for rule in rules:
+                      if isinstance(rule,dict): types.extend(str(k) for k in rule.keys())
+                  print(f'ACCESS_APP_{i}_POLICY_{n}_{field.upper()}_RULE_TYPES', sorted(set(types)))
+          PY
+          done < /tmp/access-app-ids
+          echo 'ACCESS_DIAGNOSTIC_MUTATION NONE'
+          echo 'ACCESS_DIAGNOSTIC_SECRETS_EMITTED NONE'
