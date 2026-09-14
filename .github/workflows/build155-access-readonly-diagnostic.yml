@@ -18,7 +18,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - uses: actions/checkout@v7
-      - name: Query Access applications and service-token metadata read-only
+      - name: Query Access applications, policies and service-token metadata read-only
         shell: bash
         run: |
           set -euo pipefail
@@ -31,26 +31,21 @@ jobs:
           def load(path):
               try: return json.loads(pathlib.Path(path).read_text())
               except Exception: return {}
-          apps=load('/tmp/access-apps.json')
-          tokens=load('/tmp/access-tokens.json')
+          apps=load('/tmp/access-apps.json'); tokens=load('/tmp/access-tokens.json')
           print('ACCESS_APPS_HTTP_STATUS', os.environ['APPS_STATUS'])
           print('ACCESS_APPS_API_SUCCESS', bool(apps.get('success')))
           if not apps.get('success'):
               print('ACCESS_APPS_ERROR_CODES', [x.get('code') for x in apps.get('errors',[]) if isinstance(x,dict)])
           rows=apps.get('result') if isinstance(apps.get('result'),list) else []
-          relevant=[]
-          for row in rows:
+          print('ACCESS_APP_COUNT', len(rows))
+          ids=[]
+          for i,row in enumerate(rows,1):
               if not isinstance(row,dict): continue
-              domain=str(row.get('domain') or '')
-              name=str(row.get('name') or '')
-              if 'devilndove-site.pages.dev' in domain or 'devilndove' in name.lower():
-                  relevant.append(row)
-          print('ACCESS_RELEVANT_APP_COUNT', len(relevant))
-          for i,row in enumerate(relevant,1):
               print(f'ACCESS_APP_{i}_NAME', str(row.get('name') or ''))
               print(f'ACCESS_APP_{i}_DOMAIN', str(row.get('domain') or ''))
               print(f'ACCESS_APP_{i}_TYPE', str(row.get('type') or ''))
-          pathlib.Path('/tmp/access-app-ids').write_text('\n'.join(str(r.get('id') or '') for r in relevant if r.get('id'))+'\n')
+              if row.get('id'): ids.append(str(row['id']))
+          pathlib.Path('/tmp/access-app-ids').write_text('\n'.join(ids)+'\n')
           print('ACCESS_SERVICE_TOKENS_HTTP_STATUS', os.environ['TOKENS_STATUS'])
           print('ACCESS_SERVICE_TOKENS_API_SUCCESS', bool(tokens.get('success')))
           if not tokens.get('success'):
