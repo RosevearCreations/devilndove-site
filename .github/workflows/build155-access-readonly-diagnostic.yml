@@ -18,12 +18,12 @@ jobs:
       CLOUDFLARE_API_TOKEN_EDIT: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
       DEV_D1_DATABASE_NAME: devilndove-dev
       DND_BASE_URL: https://dev.devilndove-site.pages.dev
-      EXPECTED_SOURCE_SHA: 21b700673bd50ce396e72ed742e4e32f066e24e7
+      EXPECTED_SOURCE_SHA: e50b90df806b5a6de26c14e1d05acc5874b740b5
     steps:
       - name: Checkout exact fully-green Development SHA
         uses: actions/checkout@v7
         with:
-          ref: 21b700673bd50ce396e72ed742e4e32f066e24e7
+          ref: e50b90df806b5a6de26c14e1d05acc5874b740b5
           fetch-depth: 1
       - uses: actions/setup-node@v7
         with:
