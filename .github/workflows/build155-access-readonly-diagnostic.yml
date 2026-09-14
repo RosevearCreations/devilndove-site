@@ -1,78 +1,59 @@
-name: Build 155 Pages Access Readonly Diagnostic
+name: Build 155 Pages Access Policy Readonly Diagnostic
 
 on:
   push:
-    branches:
-      - build155-access-readonly-diagnostic
+    branches: [build155-access-readonly-diagnostic]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  pages-access-readonly:
+  access-policy-readonly:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
       CLOUDFLARE_API_TOKEN_EDIT: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
     steps:
-      - name: Inspect Pages and Access metadata without mutation
+      - name: Inspect exact Pages Access application policy without mutation
         shell: bash
         run: |
           set -euo pipefail
-          test -n "${CLOUDFLARE_API_TOKEN_EDIT}" || { echo 'STOP: edit token missing'; exit 2; }
           auth=(-H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN_EDIT}" -H 'Content-Type: application/json')
-          pages_status="$(curl -sS -o /tmp/pages.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site")"
-          apps_status="$(curl -sS -o /tmp/apps.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/apps?per_page=100")"
-          tokens_status="$(curl -sS -o /tmp/tokens.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/service_tokens?per_page=100")"
-          PAGES_STATUS="${pages_status}" APPS_STATUS="${apps_status}" TOKENS_STATUS="${tokens_status}" python - <<'PY'
-          import json, os, pathlib
-          def load(path):
-              try: return json.loads(pathlib.Path(path).read_text())
-              except Exception: return {}
-          pages=load('/tmp/pages.json'); apps=load('/tmp/apps.json'); tokens=load('/tmp/tokens.json')
-          print('PAGES_HTTP_STATUS', os.environ['PAGES_STATUS'])
-          print('PAGES_API_SUCCESS', bool(pages.get('success')))
-          project=pages.get('result') if isinstance(pages.get('result'),dict) else {}
-          print('PAGES_PROJECT_NAME', project.get('name'))
-          print('PAGES_PRODUCTION_BRANCH', project.get('production_branch'))
-          source=(project.get('source') or {}).get('config') or {}
-          print('PAGES_PRODUCTION_DEPLOYMENTS_ENABLED', source.get('production_deployments_enabled'))
-          print('PAGES_PREVIEW_DEPLOYMENT_SETTING', source.get('preview_deployment_setting'))
-          preview=(project.get('deployment_configs') or {}).get('preview') or {}
-          production=(project.get('deployment_configs') or {}).get('production') or {}
-          print('PAGES_PREVIEW_CONFIG_KEYS', sorted(preview.keys()))
-          print('PAGES_PRODUCTION_CONFIG_KEYS', sorted(production.keys()))
-          def walk(v,path='result'):
-              if isinstance(v,dict):
-                  for k,x in v.items():
-                      p=f'{path}.{k}'
-                      if any(word in str(k).lower() for word in ('access','auth','policy','preview')):
-                          if isinstance(x,(dict,list)):
-                              print('PAGES_SECURITY_FIELD', p, type(x).__name__)
-                          elif isinstance(x,(str,int,float,bool)) or x is None:
-                              text=str(x)
-                              if len(text)>120: text=text[:117]+'...'
-                              print('PAGES_SECURITY_FIELD', p, repr(text))
-                      walk(x,p)
-              elif isinstance(v,list):
-                  for i,x in enumerate(v): walk(x,f'{path}[{i}]')
-          walk(project)
-          print('ACCESS_APPS_HTTP_STATUS', os.environ['APPS_STATUS'])
-          print('ACCESS_APPS_API_SUCCESS', bool(apps.get('success')))
-          rows=apps.get('result') if isinstance(apps.get('result'),list) else []
-          print('ACCESS_APP_COUNT', len(rows))
-          for i,row in enumerate(rows,1):
-              if not isinstance(row,dict): continue
-              print(f'ACCESS_APP_{i}_NAME', str(row.get('name') or ''))
-              print(f'ACCESS_APP_{i}_DOMAIN', str(row.get('domain') or ''))
-              print(f'ACCESS_APP_{i}_TYPE', str(row.get('type') or ''))
-              print(f'ACCESS_APP_{i}_POLICIES_COUNT', len(row.get('policies') or []))
-          token_rows=tokens.get('result') if isinstance(tokens.get('result'),list) else []
-          print('ACCESS_SERVICE_TOKENS_HTTP_STATUS', os.environ['TOKENS_STATUS'])
-          print('ACCESS_SERVICE_TOKENS_API_SUCCESS', bool(tokens.get('success')))
-          print('ACCESS_SERVICE_TOKEN_COUNT', len(token_rows))
+          curl -fsS "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/apps?per_page=100" > /tmp/apps.json
+          python - <<'PY'
+          import json, pathlib
+          d=json.load(open('/tmp/apps.json')); assert d.get('success') is True,d
+          rows=[r for r in d.get('result',[]) if isinstance(r,dict) and r.get('domain')=='*.devilndove-site.pages.dev']
+          assert len(rows)==1, rows
+          app=rows[0]
+          pathlib.Path('/tmp/app-id').write_text(str(app['id']))
+          print('ACCESS_APP_ID',app['id'])
+          print('ACCESS_APP_NAME',app.get('name'))
+          print('ACCESS_APP_DOMAIN',app.get('domain'))
+          print('ACCESS_APP_POLICY_REFS',len(app.get('policies') or []))
+          PY
+          app_id="$(cat /tmp/app-id)"
+          curl -fsS "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/apps/${app_id}/policies?per_page=100" > /tmp/policies.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/policies.json')); assert d.get('success') is True,d
+          rows=d.get('result') if isinstance(d.get('result'),list) else []
+          print('ACCESS_POLICY_COUNT',len(rows))
+          for i,p in enumerate(rows,1):
+              print(f'ACCESS_POLICY_{i}_ID',p.get('id'))
+              print(f'ACCESS_POLICY_{i}_NAME',p.get('name'))
+              print(f'ACCESS_POLICY_{i}_DECISION',p.get('decision'))
+              print(f'ACCESS_POLICY_{i}_PRECEDENCE',p.get('precedence'))
+              print(f'ACCESS_POLICY_{i}_SESSION_DURATION',p.get('session_duration'))
+              for field in ('include','require','exclude'):
+                  rules=p.get(field) if isinstance(p.get(field),list) else []
+                  kinds=[]
+                  for rule in rules:
+                      if isinstance(rule,dict): kinds += list(rule.keys())
+                  print(f'ACCESS_POLICY_{i}_{field.upper()}_COUNT',len(rules))
+                  print(f'ACCESS_POLICY_{i}_{field.upper()}_RULE_TYPES',sorted(set(kinds)))
           print('DIAGNOSTIC_MUTATION NONE')
           print('SECRET_VALUES_EMITTED NONE')
           PY
