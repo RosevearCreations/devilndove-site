@@ -18,7 +18,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - uses: actions/checkout@v7
-      - name: Query Access applications, policies and service-token metadata read-only
+      - name: Query Access and Pages authority read-only
         shell: bash
         run: |
           set -euo pipefail
@@ -26,38 +26,65 @@ jobs:
           auth=(-H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" -H 'Content-Type: application/json')
           apps_status="$(curl -sS -o /tmp/access-apps.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/apps?per_page=100")"
           tokens_status="$(curl -sS -o /tmp/access-tokens.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/service_tokens?per_page=100")"
-          APPS_STATUS="${apps_status}" TOKENS_STATUS="${tokens_status}" python - <<'PY'
+          pages_status="$(curl -sS -o /tmp/pages-project.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site")"
+          verify_status="$(curl -sS -o /tmp/account-token-verify.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/tokens/verify")"
+          APPS_STATUS="${apps_status}" TOKENS_STATUS="${tokens_status}" PAGES_STATUS="${pages_status}" VERIFY_STATUS="${verify_status}" python - <<'PY'
           import json, os, pathlib
           def load(path):
               try: return json.loads(pathlib.Path(path).read_text())
               except Exception: return {}
-          apps=load('/tmp/access-apps.json'); tokens=load('/tmp/access-tokens.json')
-          print('ACCESS_APPS_HTTP_STATUS', os.environ['APPS_STATUS'])
-          print('ACCESS_APPS_API_SUCCESS', bool(apps.get('success')))
-          if not apps.get('success'):
-              print('ACCESS_APPS_ERROR_CODES', [x.get('code') for x in apps.get('errors',[]) if isinstance(x,dict)])
+          apps=load('/tmp/access-apps.json'); tokens=load('/tmp/access-tokens.json'); pages=load('/tmp/pages-project.json'); verify=load('/tmp/account-token-verify.json')
+          print('ACCESS_APPS_HTTP_STATUS', os.environ['APPS_STATUS']); print('ACCESS_APPS_API_SUCCESS', bool(apps.get('success')))
           rows=apps.get('result') if isinstance(apps.get('result'),list) else []
-          print('ACCESS_APP_COUNT', len(rows))
-          ids=[]
+          print('ACCESS_APP_COUNT', len(rows)); pathlib.Path('/tmp/access-app-ids').write_text('\n'.join(str(r.get('id') or '') for r in rows if isinstance(r,dict) and r.get('id'))+'\n')
           for i,row in enumerate(rows,1):
               if not isinstance(row,dict): continue
-              print(f'ACCESS_APP_{i}_NAME', str(row.get('name') or ''))
-              print(f'ACCESS_APP_{i}_DOMAIN', str(row.get('domain') or ''))
-              print(f'ACCESS_APP_{i}_TYPE', str(row.get('type') or ''))
-              if row.get('id'): ids.append(str(row['id']))
-          pathlib.Path('/tmp/access-app-ids').write_text('\n'.join(ids)+'\n')
-          print('ACCESS_SERVICE_TOKENS_HTTP_STATUS', os.environ['TOKENS_STATUS'])
-          print('ACCESS_SERVICE_TOKENS_API_SUCCESS', bool(tokens.get('success')))
-          if not tokens.get('success'):
-              print('ACCESS_SERVICE_TOKENS_ERROR_CODES', [x.get('code') for x in tokens.get('errors',[]) if isinstance(x,dict)])
+              print(f'ACCESS_APP_{i}_NAME', str(row.get('name') or '')); print(f'ACCESS_APP_{i}_DOMAIN', str(row.get('domain') or '')); print(f'ACCESS_APP_{i}_TYPE', str(row.get('type') or ''))
+          print('ACCESS_SERVICE_TOKENS_HTTP_STATUS', os.environ['TOKENS_STATUS']); print('ACCESS_SERVICE_TOKENS_API_SUCCESS', bool(tokens.get('success')))
           token_rows=tokens.get('result') if isinstance(tokens.get('result'),list) else []
           print('ACCESS_SERVICE_TOKEN_COUNT', len(token_rows))
           for i,row in enumerate(token_rows,1):
               if not isinstance(row,dict): continue
-              print(f'ACCESS_SERVICE_TOKEN_{i}_NAME', str(row.get('name') or ''))
-              print(f'ACCESS_SERVICE_TOKEN_{i}_ENABLED', row.get('enabled'))
-              print(f'ACCESS_SERVICE_TOKEN_{i}_EXPIRES_AT', str(row.get('expires_at') or ''))
+              print(f'ACCESS_SERVICE_TOKEN_{i}_NAME', str(row.get('name') or '')); print(f'ACCESS_SERVICE_TOKEN_{i}_ENABLED', row.get('enabled')); print(f'ACCESS_SERVICE_TOKEN_{i}_EXPIRES_AT', str(row.get('expires_at') or ''))
+          print('PAGES_PROJECT_HTTP_STATUS', os.environ['PAGES_STATUS']); print('PAGES_PROJECT_API_SUCCESS', bool(pages.get('success')))
+          project=pages.get('result') if isinstance(pages.get('result'),dict) else {}
+          print('PAGES_PROJECT_NAME', str(project.get('name') or '')); print('PAGES_PRODUCTION_BRANCH', str(project.get('production_branch') or ''))
+          def walk(v,path='result'):
+              if isinstance(v,dict):
+                  for k,x in v.items():
+                      p=f'{path}.{k}'
+                      if 'access' in str(k).lower() or 'auth' in str(k).lower():
+                          print('PAGES_ACCESS_FIELD', p, type(x).__name__)
+                      walk(x,p)
+              elif isinstance(v,list):
+                  for n,x in enumerate(v): walk(x,f'{path}[{n}]')
+          walk(project)
+          print('ACCOUNT_TOKEN_VERIFY_HTTP_STATUS', os.environ['VERIFY_STATUS']); print('ACCOUNT_TOKEN_VERIFY_API_SUCCESS', bool(verify.get('success')))
+          token_id=''
+          if isinstance(verify.get('result'),dict): token_id=str(verify['result'].get('id') or '')
+          pathlib.Path('/tmp/current-api-token-id').write_text(token_id)
+          print('ACCOUNT_TOKEN_STATUS', str((verify.get('result') or {}).get('status') or ''))
           PY
+          token_id="$(cat /tmp/current-api-token-id)"
+          if [ -n "${token_id}" ]; then
+            account_detail_status="$(curl -sS -o /tmp/account-token-detail.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/tokens/${token_id}")"
+            user_detail_status="$(curl -sS -o /tmp/user-token-detail.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/user/tokens/${token_id}")"
+            ACCOUNT_DETAIL_STATUS="${account_detail_status}" USER_DETAIL_STATUS="${user_detail_status}" python - <<'PY'
+          import json, os, pathlib
+          def load(path):
+              try: return json.loads(pathlib.Path(path).read_text())
+              except Exception: return {}
+          for label,path,status in [('ACCOUNT','/tmp/account-token-detail.json',os.environ['ACCOUNT_DETAIL_STATUS']),('USER','/tmp/user-token-detail.json',os.environ['USER_DETAIL_STATUS'])]:
+              data=load(path); print(f'{label}_TOKEN_DETAIL_HTTP_STATUS', status); print(f'{label}_TOKEN_DETAIL_API_SUCCESS', bool(data.get('success')))
+              result=data.get('result') if isinstance(data.get('result'),dict) else {}
+              names=[]
+              for policy in result.get('policies') or []:
+                  if not isinstance(policy,dict): continue
+                  for group in policy.get('permission_groups') or []:
+                      if isinstance(group,dict) and group.get('name'): names.append(str(group['name']))
+              if names: print(f'{label}_TOKEN_PERMISSION_NAMES', sorted(set(names)))
+          PY
+          fi
           i=0
           while IFS= read -r app_id; do
             [ -n "${app_id}" ] || continue
@@ -68,19 +95,13 @@ jobs:
           i=os.environ['POLICY_INDEX']; path=pathlib.Path(f'/tmp/access-policies-{i}.json')
           try: data=json.loads(path.read_text())
           except Exception: data={}
-          print(f'ACCESS_APP_{i}_POLICIES_HTTP_STATUS', os.environ['POLICY_STATUS'])
-          print(f'ACCESS_APP_{i}_POLICIES_API_SUCCESS', bool(data.get('success')))
-          if not data.get('success'):
-              print(f'ACCESS_APP_{i}_POLICY_ERROR_CODES', [x.get('code') for x in data.get('errors',[]) if isinstance(x,dict)])
-          rows=data.get('result') if isinstance(data.get('result'),list) else []
-          print(f'ACCESS_APP_{i}_POLICY_COUNT', len(rows))
+          print(f'ACCESS_APP_{i}_POLICIES_HTTP_STATUS', os.environ['POLICY_STATUS']); print(f'ACCESS_APP_{i}_POLICIES_API_SUCCESS', bool(data.get('success')))
+          rows=data.get('result') if isinstance(data.get('result'),list) else []; print(f'ACCESS_APP_{i}_POLICY_COUNT', len(rows))
           for n,row in enumerate(rows,1):
               if not isinstance(row,dict): continue
-              print(f'ACCESS_APP_{i}_POLICY_{n}_NAME', str(row.get('name') or ''))
-              print(f'ACCESS_APP_{i}_POLICY_{n}_DECISION', str(row.get('decision') or ''))
+              print(f'ACCESS_APP_{i}_POLICY_{n}_NAME', str(row.get('name') or '')); print(f'ACCESS_APP_{i}_POLICY_{n}_DECISION', str(row.get('decision') or ''))
               for field in ('include','require','exclude'):
-                  rules=row.get(field) if isinstance(row.get(field),list) else []
-                  types=[]
+                  rules=row.get(field) if isinstance(row.get(field),list) else []; types=[]
                   for rule in rules:
                       if isinstance(rule,dict): types.extend(str(k) for k in rule.keys())
                   print(f'ACCESS_APP_{i}_POLICY_{n}_{field.upper()}_RULE_TYPES', sorted(set(types)))
