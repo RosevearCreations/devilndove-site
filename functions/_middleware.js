@@ -13,7 +13,7 @@ import {
 } from './api/_lib/appModuleSessionGuard.js';
 import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appModuleRoutes.js';
 
-const PRODUCTS_ASSET_REVISION = '467-products-b98-readiness-triage';
+const PRODUCTS_ASSET_REVISION = '467-b154-products-worker-fast-path';
 const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
@@ -46,6 +46,40 @@ function withGuardHeaders(response, { moduleKey = '', contractPath = '' } = {}) 
   if (contractPath) headers.set('X-DND-Shared-Contract', contractPath);
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
+function productsPlatformMarkup() {
+  return [
+    '<link data-dd-products-static-platform="1" rel="stylesheet" href="/css/current-responsive.css?v=current">',
+    `<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`,
+    `<link rel="stylesheet" href="/css/admin-products-table-layout.css?v=${PRODUCTS_ASSET_REVISION}">`,
+    `<script data-dd-products-cold-start="1" src="/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_ASSET_REVISION}"></script>`,
+    `<script defer src="/public/js/layout-overflow-guard.js?v=${LAYOUT_ASSET_REVISION}"></script>`,
+    '<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>',
+    '<script defer src="/public/js/product-media-fallback.js?v=62"></script>',
+    `<script defer src="/public/js/pwa-platform.js?v=${CURRENT_RELEASE}"></script>`,
+    `<script defer src="/public/js/adaptive-shell.js?v=${CURRENT_RELEASE}b143"></script>`,
+  ].join('');
+}
+async function withProductsFastPlatformClient(response) {
+  const fallback = response.clone();
+  try {
+    let html = await response.text();
+    html = html.replace(
+      /\bsrc="(\/(?:public\/js|js)\/[^"?]+)(?:\?[^\"]*)?"/g,
+      (_match, clean) => `src="${clean}?v=${PRODUCTS_ASSET_REVISION}"`,
+    );
+    if (!html.includes('data-dd-products-static-platform="1"') && html.includes('</head>')) {
+      html = html.replace('</head>', `${productsPlatformMarkup()}</head>`);
+    }
+    const headers = new Headers(response.headers);
+    headers.set('X-DND-Products-Render-Path', 'static-fast-path');
+    headers.set('Cache-Control', 'no-store');
+    return new Response(html, { status: response.status, statusText: response.statusText, headers });
+  } catch {
+    const headers = new Headers(fallback.headers);
+    headers.set('X-DND-Products-Render-Path', 'static-fast-path-fallback');
+    return new Response(fallback.body, { status: fallback.status, statusText: fallback.statusText, headers });
+  }
+}
 function withPlatformClient(response, request) {
   if (String(request?.method || 'GET').toUpperCase() !== 'GET') return response;
   const contentType = String(response?.headers?.get('Content-Type') || '').toLowerCase();
@@ -53,6 +87,10 @@ function withPlatformClient(response, request) {
   const pathname = new URL(request.url).pathname;
   const normalizedPath = normalizedPagePath(pathname);
   const isProductsPage = normalizedPath === '/admin/products/';
+  if (isProductsPage) {
+    if (response.status >= 200 && response.status < 400) return withProductsFastPlatformClient(response);
+    return response;
+  }
   const productRequest = publicProductRequestInfo(request, pathname);
   try {
     let rewriter = new HTMLRewriter()
@@ -60,17 +98,7 @@ function withPlatformClient(response, request) {
         element(element) {
           element.append('<link rel="stylesheet" href="/css/current-responsive.css?v=current">', { html: true });
           element.append(`<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`, { html: true });
-          // Products must establish its essential fallbacks before the large body of
-          // admin scripts registers DOMContentLoaded work. Use a dedicated asset
-          // revision so a repaired bootstrap can never be hidden behind an older
-          // release-number cache entry.
-          if (isProductsPage) {
-            element.append(`<link rel="stylesheet" href="/css/admin-products-table-layout.css?v=${PRODUCTS_ASSET_REVISION}">`, { html: true });
-            element.append(`<script data-dd-products-cold-start="1" src="/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_ASSET_REVISION}"></script>`, { html: true });
-            element.append(`<script defer src="/public/js/layout-overflow-guard.js?v=${LAYOUT_ASSET_REVISION}"></script>`, { html: true });
-          } else {
-            element.append('<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>', { html: true });
-          }
+          element.append('<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>', { html: true });
           element.append('<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>', { html: true });
           element.append('<script defer src="/public/js/product-media-fallback.js?v=62"></script>', { html: true });
           element.append(`<script defer src="/public/js/pwa-platform.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
@@ -82,15 +110,6 @@ function withPlatformClient(response, request) {
           if (isStorefrontDiscoveryPath(pathname)) {
             element.append(`<link rel="stylesheet" href="/css/storefront-discovery.css?v=${CURRENT_RELEASE}"><script defer src="/public/js/storefront-discovery-runtime.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
           }
-        },
-      })
-      .on('script[src]', {
-        element(element) {
-          if (!isProductsPage) return;
-          const src = String(element.getAttribute('src') || '');
-          if (!src.startsWith('/public/js/') && !src.startsWith('/js/')) return;
-          const clean = src.split('?')[0];
-          element.setAttribute('src', `${clean}?v=${PRODUCTS_ASSET_REVISION}`);
         },
       });
     if (productRequest) {
