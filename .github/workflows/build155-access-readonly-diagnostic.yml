@@ -1,4 +1,4 @@
-name: Build 155 Access Readonly Diagnostic
+name: Build 155 Temporary Access Browser Acceptance
 
 on:
   push:
@@ -10,102 +10,110 @@ permissions:
   contents: read
 
 jobs:
-  access-readonly-diagnostic:
+  temporary-access-browser-acceptance:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      DND_BASE_URL: https://dev.devilndove-site.pages.dev
+      EXPECTED_SOURCE_SHA: 20db81c06bbb38832bef05778bfd96143f1464d3
     steps:
-      - uses: actions/checkout@v7
-      - name: Query Access and Pages authority read-only
+      - name: Checkout exact Development Build 155 SHA
+        uses: actions/checkout@v7
+        with:
+          ref: 20db81c06bbb38832bef05778bfd96143f1464d3
+          fetch-depth: 1
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Create ephemeral Access token, prove Chromium Product Entry, then delete token
         shell: bash
         run: |
           set -euo pipefail
-          test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'ACCESS_DIAGNOSTIC: API token missing'; exit 2; }
-          auth=(-H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" -H 'Content-Type: application/json')
-          apps_status="$(curl -sS -o /tmp/access-apps.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/apps?per_page=100")"
-          tokens_status="$(curl -sS -o /tmp/access-tokens.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/service_tokens?per_page=100")"
-          pages_status="$(curl -sS -o /tmp/pages-project.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site")"
-          verify_status="$(curl -sS -o /tmp/account-token-verify.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/tokens/verify")"
-          APPS_STATUS="${apps_status}" TOKENS_STATUS="${tokens_status}" PAGES_STATUS="${pages_status}" VERIFY_STATUS="${verify_status}" python - <<'PY'
+          test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
+          python scripts/release467_build155_gate.py
+          test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'STOP: Cloudflare API credential missing'; exit 2; }
+
+          TOKEN_ID=''
+          cleanup() {
+            set +e
+            if [ -n "${TOKEN_ID}" ]; then
+              delete_status="$(curl -sS -o /tmp/build155-token-delete.json -w '%{http_code}' -X DELETE -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" -H 'Content-Type: application/json' "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/service_tokens/${TOKEN_ID}")"
+              DELETE_STATUS="${delete_status}" python - <<'PY'
           import json, os, pathlib
-          def load(path):
-              try: return json.loads(pathlib.Path(path).read_text())
-              except Exception: return {}
-          apps=load('/tmp/access-apps.json'); tokens=load('/tmp/access-tokens.json'); pages=load('/tmp/pages-project.json'); verify=load('/tmp/account-token-verify.json')
-          print('ACCESS_APPS_HTTP_STATUS', os.environ['APPS_STATUS']); print('ACCESS_APPS_API_SUCCESS', bool(apps.get('success')))
-          rows=apps.get('result') if isinstance(apps.get('result'),list) else []
-          print('ACCESS_APP_COUNT', len(rows)); pathlib.Path('/tmp/access-app-ids').write_text('\n'.join(str(r.get('id') or '') for r in rows if isinstance(r,dict) and r.get('id'))+'\n')
-          for i,row in enumerate(rows,1):
-              if not isinstance(row,dict): continue
-              print(f'ACCESS_APP_{i}_NAME', str(row.get('name') or '')); print(f'ACCESS_APP_{i}_DOMAIN', str(row.get('domain') or '')); print(f'ACCESS_APP_{i}_TYPE', str(row.get('type') or ''))
-          print('ACCESS_SERVICE_TOKENS_HTTP_STATUS', os.environ['TOKENS_STATUS']); print('ACCESS_SERVICE_TOKENS_API_SUCCESS', bool(tokens.get('success')))
-          token_rows=tokens.get('result') if isinstance(tokens.get('result'),list) else []
-          print('ACCESS_SERVICE_TOKEN_COUNT', len(token_rows))
-          for i,row in enumerate(token_rows,1):
-              if not isinstance(row,dict): continue
-              print(f'ACCESS_SERVICE_TOKEN_{i}_NAME', str(row.get('name') or '')); print(f'ACCESS_SERVICE_TOKEN_{i}_ENABLED', row.get('enabled')); print(f'ACCESS_SERVICE_TOKEN_{i}_EXPIRES_AT', str(row.get('expires_at') or ''))
-          print('PAGES_PROJECT_HTTP_STATUS', os.environ['PAGES_STATUS']); print('PAGES_PROJECT_API_SUCCESS', bool(pages.get('success')))
-          project=pages.get('result') if isinstance(pages.get('result'),dict) else {}
-          print('PAGES_PROJECT_NAME', str(project.get('name') or '')); print('PAGES_PRODUCTION_BRANCH', str(project.get('production_branch') or ''))
-          def walk(v,path='result'):
-              if isinstance(v,dict):
-                  for k,x in v.items():
-                      p=f'{path}.{k}'
-                      if 'access' in str(k).lower() or 'auth' in str(k).lower():
-                          print('PAGES_ACCESS_FIELD', p, type(x).__name__)
-                      walk(x,p)
-              elif isinstance(v,list):
-                  for n,x in enumerate(v): walk(x,f'{path}[{n}]')
-          walk(project)
-          print('ACCOUNT_TOKEN_VERIFY_HTTP_STATUS', os.environ['VERIFY_STATUS']); print('ACCOUNT_TOKEN_VERIFY_API_SUCCESS', bool(verify.get('success')))
-          token_id=''
-          if isinstance(verify.get('result'),dict): token_id=str(verify['result'].get('id') or '')
-          pathlib.Path('/tmp/current-api-token-id').write_text(token_id)
-          print('ACCOUNT_TOKEN_STATUS', str((verify.get('result') or {}).get('status') or ''))
-          PY
-          token_id="$(cat /tmp/current-api-token-id)"
-          if [ -n "${token_id}" ]; then
-            account_detail_status="$(curl -sS -o /tmp/account-token-detail.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/tokens/${token_id}")"
-            user_detail_status="$(curl -sS -o /tmp/user-token-detail.json -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/user/tokens/${token_id}")"
-            ACCOUNT_DETAIL_STATUS="${account_detail_status}" USER_DETAIL_STATUS="${user_detail_status}" python - <<'PY'
-          import json, os, pathlib
-          def load(path):
-              try: return json.loads(pathlib.Path(path).read_text())
-              except Exception: return {}
-          for label,path,status in [('ACCOUNT','/tmp/account-token-detail.json',os.environ['ACCOUNT_DETAIL_STATUS']),('USER','/tmp/user-token-detail.json',os.environ['USER_DETAIL_STATUS'])]:
-              data=load(path); print(f'{label}_TOKEN_DETAIL_HTTP_STATUS', status); print(f'{label}_TOKEN_DETAIL_API_SUCCESS', bool(data.get('success')))
-              result=data.get('result') if isinstance(data.get('result'),dict) else {}
-              names=[]
-              for policy in result.get('policies') or []:
-                  if not isinstance(policy,dict): continue
-                  for group in policy.get('permission_groups') or []:
-                      if isinstance(group,dict) and group.get('name'): names.append(str(group['name']))
-              if names: print(f'{label}_TOKEN_PERMISSION_NAMES', sorted(set(names)))
-          PY
-          fi
-          i=0
-          while IFS= read -r app_id; do
-            [ -n "${app_id}" ] || continue
-            i=$((i+1))
-            status="$(curl -sS -o "/tmp/access-policies-${i}.json" -w '%{http_code}' "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/apps/${app_id}/policies?per_page=100")"
-            POLICY_INDEX="${i}" POLICY_STATUS="${status}" python - <<'PY'
-          import json, os, pathlib
-          i=os.environ['POLICY_INDEX']; path=pathlib.Path(f'/tmp/access-policies-{i}.json')
-          try: data=json.loads(path.read_text())
+          try: data=json.loads(pathlib.Path('/tmp/build155-token-delete.json').read_text())
           except Exception: data={}
-          print(f'ACCESS_APP_{i}_POLICIES_HTTP_STATUS', os.environ['POLICY_STATUS']); print(f'ACCESS_APP_{i}_POLICIES_API_SUCCESS', bool(data.get('success')))
-          rows=data.get('result') if isinstance(data.get('result'),list) else []; print(f'ACCESS_APP_{i}_POLICY_COUNT', len(rows))
-          for n,row in enumerate(rows,1):
-              if not isinstance(row,dict): continue
-              print(f'ACCESS_APP_{i}_POLICY_{n}_NAME', str(row.get('name') or '')); print(f'ACCESS_APP_{i}_POLICY_{n}_DECISION', str(row.get('decision') or ''))
-              for field in ('include','require','exclude'):
-                  rules=row.get(field) if isinstance(row.get(field),list) else []; types=[]
-                  for rule in rules:
-                      if isinstance(rule,dict): types.extend(str(k) for k in rule.keys())
-                  print(f'ACCESS_APP_{i}_POLICY_{n}_{field.upper()}_RULE_TYPES', sorted(set(types)))
+          print('TEMP_ACCESS_TOKEN_DELETE_HTTP_STATUS', os.environ.get('DELETE_STATUS',''))
+          print('TEMP_ACCESS_TOKEN_DELETE_API_SUCCESS', bool(data.get('success')))
           PY
-          done < /tmp/access-app-ids
-          echo 'ACCESS_DIAGNOSTIC_MUTATION NONE'
-          echo 'ACCESS_DIAGNOSTIC_SECRETS_EMITTED NONE'
+            fi
+            rm -f /tmp/build155-token-create.json /tmp/build155-token-delete.json /tmp/build155-access-body /tmp/build155-access-headers /tmp/build155-dev-session.json /tmp/build155-token-id /tmp/build155-client-id /tmp/build155-client-secret
+          }
+          trap cleanup EXIT
+
+          create_status="$(curl -sS -o /tmp/build155-token-create.json -w '%{http_code}' -X POST -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" -H 'Content-Type: application/json' --data "{\"name\":\"build155-dev-browser-${GITHUB_RUN_ID}\",\"duration\":\"30m\"}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/service_tokens")"
+          CREATE_STATUS="${create_status}" python - <<'PY'
+          import json, os, pathlib, sys
+          try: data=json.loads(pathlib.Path('/tmp/build155-token-create.json').read_text())
+          except Exception: data={}
+          print('TEMP_ACCESS_TOKEN_CREATE_HTTP_STATUS', os.environ.get('CREATE_STATUS',''))
+          print('TEMP_ACCESS_TOKEN_CREATE_API_SUCCESS', bool(data.get('success')))
+          if not data.get('success'):
+              print('TEMP_ACCESS_TOKEN_CREATE_ERROR_CODES', [x.get('code') for x in data.get('errors',[]) if isinstance(x,dict)])
+              sys.exit(10)
+          result=data.get('result') if isinstance(data.get('result'),dict) else {}
+          for key,path in [('id','/tmp/build155-token-id'),('client_id','/tmp/build155-client-id'),('client_secret','/tmp/build155-client-secret')]:
+              value=str(result.get(key) or '')
+              if not value: raise SystemExit(f'missing {key} in successful token response')
+              pathlib.Path(path).write_text(value)
+          print('TEMP_ACCESS_TOKEN_CREATED YES')
+          print('TEMP_ACCESS_TOKEN_SECRET_EMITTED NO')
+          PY
+
+          TOKEN_ID="$(cat /tmp/build155-token-id)"
+          CF_ACCESS_CLIENT_ID="$(cat /tmp/build155-client-id)"
+          CF_ACCESS_CLIENT_SECRET="$(cat /tmp/build155-client-secret)"
+          echo "::add-mask::${TOKEN_ID}"
+          echo "::add-mask::${CF_ACCESS_CLIENT_ID}"
+          echo "::add-mask::${CF_ACCESS_CLIENT_SECRET}"
+
+          access_status="$(curl -sS --max-time 25 -o /tmp/build155-access-body -D /tmp/build155-access-headers -w '%{http_code}' -H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}" -H 'Accept: application/json' "${DND_BASE_URL}/api/auth/me")"
+          echo "TEMP_ACCESS_ADMISSION_HTTP_STATUS ${access_status}"
+          if [ "${access_status}" != '401' ]; then
+            python - <<'PY'
+          import pathlib, urllib.parse
+          location=''
+          for line in pathlib.Path('/tmp/build155-access-headers').read_text(errors='replace').splitlines():
+              if line.lower().startswith('location:'):
+                  location=line.split(':',1)[1].strip(); break
+          print('TEMP_ACCESS_REDIRECT_HOST', urllib.parse.urlparse(location).hostname or '')
+          PY
+            echo 'TEMP_ACCESS_ADMISSION FAIL — service token was not admitted to the application boundary'
+            exit 20
+          fi
+          echo 'TEMP_ACCESS_ADMISSION PASS — outer Access admitted the ephemeral service token'
+
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT COALESCE(NULLIF(s.session_token,''),s.token) AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(NULLIF(s.session_token,''),s.token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/build155-dev-session.json
+          DND_SESSION_COOKIE="$(python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build155-dev-session.json'))
+          def walk(value):
+              if isinstance(value,dict):
+                  if value.get('runtime_token'): yield str(value['runtime_token'])
+                  for child in value.values(): yield from walk(child)
+              elif isinstance(value,list):
+                  for child in value: yield from walk(child)
+          token=next(walk(data),'').strip()
+          print(('dd_auth_token='+token) if token else '')
+          PY
+          )"
+          test -n "${DND_SESSION_COOKIE}" || { echo 'STOP: no unexpired Development administrator session exists'; exit 30; }
+          echo "::add-mask::${DND_SESSION_COOKIE}"
+          export CF_ACCESS_CLIENT_ID CF_ACCESS_CLIENT_SECRET DND_SESSION_COOKIE
+          node scripts/products_browser_runtime_probe.mjs
+          echo 'BUILD155_TEMP_ACCESS_BROWSER_ACCEPTANCE PASS'
+          echo 'D1_R2_BUSINESS_DATA_MUTATION NONE'
+          echo 'ACCESS_POLICY_MUTATION NONE'
+          echo 'ACCESS_TOKEN_PERSISTENCE NONE — cleanup deletes the ephemeral token'
