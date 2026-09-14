@@ -1,0 +1,46 @@
+{
+  "release": 467,
+  "build": 151,
+  "title": "Gifting, Custom Work, Local Pickup & Event Selling",
+  "state": "DEVELOPMENT_GREEN",
+  "source_authority": "dev",
+  "accepted_dev_sha": "86cc4c2500ccb7ed8027466be7226392098a989f",
+  "accepted_dev_tree_sha": "7031e0bf710a9f2b4c4202e6858fda8c01008e01",
+  "acceptance": {
+    "system_gate_run": 34858535578,
+    "current_application_quality_run": 34858535413,
+    "it_admin_runtime_proof_run": 34858535651,
+    "branch_hygiene_run": 34858535663
+  },
+  "final_closure": {
+    "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "dev_sha": "86cc4c2500ccb7ed8027466be7226392098a989f",
+    "tree_sha": "7031e0bf710a9f2b4c4202e6858fda8c01008e01",
+    "proofs": {
+      "system_gate_run": 34858535578,
+      "current_application_quality_run": 34858535413,
+      "it_admin_runtime_proof_run": 34858535651,
+      "branch_hygiene_run": 34858535663
+    },
+    "ingested_by_build": 152
+  },
+  "production_checkpoint": {
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "bb0046c701a8050f9b92948fc60ad622dd1f462e",
+    "tree_sha": "7031e0bf710a9f2b4c4202e6858fda8c01008e01",
+    "production_pages_deploy_run": 34858858586,
+    "production_live_resource_integrity_run": 34858997196
+  },
+  "scope": {
+    "gifting_context": true,
+    "custom_work_read_only_workspace": true,
+    "local_pickup_server_authority": true,
+    "event_offline_stock_authority": false,
+    "unique_stock_live_revalidation_required": true,
+    "schema_change": false,
+    "d1_business_data_mutation_by_build": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false
+  }
+}
