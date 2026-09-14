@@ -14,6 +14,7 @@ import {
 import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appModuleRoutes.js';
 
 const PRODUCTS_ASSET_REVISION = '467-products-b98-readiness-triage';
+const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
 function isReadMethod(method) { return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase()); }
@@ -66,7 +67,7 @@ function withPlatformClient(response, request) {
           if (isProductsPage) {
             element.append(`<link rel="stylesheet" href="/css/admin-products-table-layout.css?v=${PRODUCTS_ASSET_REVISION}">`, { html: true });
             element.append(`<script data-dd-products-cold-start="1" src="/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_ASSET_REVISION}"></script>`, { html: true });
-            element.append(`<script defer src="/public/js/layout-overflow-guard.js?v=${PRODUCTS_ASSET_REVISION}"></script>`, { html: true });
+            element.append(`<script defer src="/public/js/layout-overflow-guard.js?v=${LAYOUT_ASSET_REVISION}"></script>`, { html: true });
           } else {
             element.append('<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>', { html: true });
           }
@@ -138,30 +139,32 @@ async function resolveGuardUser(request, env, pathname) {
     return appModuleSessionUnavailableResponse({ api: isApiPath(pathname) });
   }
 }
+async function handleApiGuard(request, env, pathname, moduleKey, sharedContract) {
+  if (!moduleKey && !sharedContract) return null;
+  const userOrResponse = await resolveGuardUser(request, env, pathname);
+  if (userOrResponse instanceof Response) return userOrResponse;
+  if (moduleKey) {
+    const access = await moduleAccessForRequest(env, moduleKey, userOrResponse);
+    if (!access.available) return moduleUnavailableResponse(moduleKey, access);
+    if (!isReadMethod(request.method) && access.access_level === 'read') return readOnlyDeniedResponse(access);
+    return { user: userOrResponse, moduleKey, access };
+  }
+  const shared = await sharedServiceAccessForRequest(env, sharedContract, userOrResponse);
+  if (!shared.available) return sharedServiceUnavailableResponse(sharedContract, shared);
+  return { user: userOrResponse, sharedContract, shared };
+}
 export async function onRequest(context) {
-  const { request, env } = context;
+  const { request, env, next } = context;
   const pathname = new URL(request.url).pathname;
-  if (shouldBypass(pathname)) return finish(await context.next(), request);
-  const sharedContract = sharedServiceContractForPath(pathname);
-  if (sharedContract) {
-    const resolvedUser = await resolveGuardUser(request, env, pathname);
-    if (resolvedUser instanceof Response) return finish(resolvedUser, request, { contractPath: sharedContract.path });
-    const sharedAccess = await sharedServiceAccessForRequest(request, env, sharedContract, { user: resolvedUser });
-    context.data.ddSharedServiceAccess = sharedAccess;
-    context.data.ddModuleRelease = CURRENT_RELEASE;
-    if (!sharedAccess.allowed) return finish(sharedServiceUnavailableResponse(sharedAccess), request, { contractPath: sharedContract.path });
-    return finish(await context.next(), request, { contractPath: sharedContract.path });
-  }
+  if (shouldBypass(pathname)) return next();
   const moduleKey = moduleKeyForPath(pathname);
-  if (!moduleKey) return finish(await context.next(), request);
-  const resolvedUser = await resolveGuardUser(request, env, pathname);
-  if (resolvedUser instanceof Response) return finish(resolvedUser, request, { moduleKey });
-  const access = await moduleAccessForRequest(request, env, moduleKey, { user: resolvedUser });
-  context.data.ddModuleAccess = access;
-  context.data.ddModuleRelease = CURRENT_RELEASE;
-  if (!access.allowed) return finish(moduleUnavailableResponse(access, { api: isApiPath(pathname) }), request, { moduleKey });
-  if (isApiPath(pathname) && access.access_level === 'read' && !isReadMethod(request.method)) {
-    return finish(readOnlyDeniedResponse(access), request, { moduleKey });
+  const sharedContract = sharedServiceContractForPath(pathname);
+  if (isApiPath(pathname)) {
+    const apiGuard = await handleApiGuard(request, env, pathname, moduleKey, sharedContract);
+    if (apiGuard instanceof Response) return withGuardHeaders(apiGuard, { moduleKey: moduleKey || '', contractPath: sharedContract || '' });
+    const response = await next();
+    return withGuardHeaders(response, { moduleKey: moduleKey || '', contractPath: sharedContract || '' });
   }
-  return finish(await context.next(), request, { moduleKey });
+  const response = await next();
+  return finish(response, request, { moduleKey: moduleKey || '', contractPath: sharedContract || '' });
 }
