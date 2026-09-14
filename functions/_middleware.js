@@ -139,32 +139,30 @@ async function resolveGuardUser(request, env, pathname) {
     return appModuleSessionUnavailableResponse({ api: isApiPath(pathname) });
   }
 }
-async function handleApiGuard(request, env, pathname, moduleKey, sharedContract) {
-  if (!moduleKey && !sharedContract) return null;
-  const userOrResponse = await resolveGuardUser(request, env, pathname);
-  if (userOrResponse instanceof Response) return userOrResponse;
-  if (moduleKey) {
-    const access = await moduleAccessForRequest(env, moduleKey, userOrResponse);
-    if (!access.available) return moduleUnavailableResponse(moduleKey, access);
-    if (!isReadMethod(request.method) && access.access_level === 'read') return readOnlyDeniedResponse(access);
-    return { user: userOrResponse, moduleKey, access };
-  }
-  const shared = await sharedServiceAccessForRequest(env, sharedContract, userOrResponse);
-  if (!shared.available) return sharedServiceUnavailableResponse(sharedContract, shared);
-  return { user: userOrResponse, sharedContract, shared };
-}
 export async function onRequest(context) {
-  const { request, env, next } = context;
+  const { request, env } = context;
   const pathname = new URL(request.url).pathname;
-  if (shouldBypass(pathname)) return next();
-  const moduleKey = moduleKeyForPath(pathname);
+  if (shouldBypass(pathname)) return finish(await context.next(), request);
   const sharedContract = sharedServiceContractForPath(pathname);
-  if (isApiPath(pathname)) {
-    const apiGuard = await handleApiGuard(request, env, pathname, moduleKey, sharedContract);
-    if (apiGuard instanceof Response) return withGuardHeaders(apiGuard, { moduleKey: moduleKey || '', contractPath: sharedContract || '' });
-    const response = await next();
-    return withGuardHeaders(response, { moduleKey: moduleKey || '', contractPath: sharedContract || '' });
+  if (sharedContract) {
+    const resolvedUser = await resolveGuardUser(request, env, pathname);
+    if (resolvedUser instanceof Response) return finish(resolvedUser, request, { contractPath: sharedContract.path });
+    const sharedAccess = await sharedServiceAccessForRequest(request, env, sharedContract, { user: resolvedUser });
+    context.data.ddSharedServiceAccess = sharedAccess;
+    context.data.ddModuleRelease = CURRENT_RELEASE;
+    if (!sharedAccess.allowed) return finish(sharedServiceUnavailableResponse(sharedAccess), request, { contractPath: sharedContract.path });
+    return finish(await context.next(), request, { contractPath: sharedContract.path });
   }
-  const response = await next();
-  return finish(response, request, { moduleKey: moduleKey || '', contractPath: sharedContract || '' });
+  const moduleKey = moduleKeyForPath(pathname);
+  if (!moduleKey) return finish(await context.next(), request);
+  const resolvedUser = await resolveGuardUser(request, env, pathname);
+  if (resolvedUser instanceof Response) return finish(resolvedUser, request, { moduleKey });
+  const access = await moduleAccessForRequest(request, env, moduleKey, { user: resolvedUser });
+  context.data.ddModuleAccess = access;
+  context.data.ddModuleRelease = CURRENT_RELEASE;
+  if (!access.allowed) return finish(moduleUnavailableResponse(access, { api: isApiPath(pathname) }), request, { moduleKey });
+  if (isApiPath(pathname) && access.access_level === 'read' && !isReadMethod(request.method)) {
+    return finish(readOnlyDeniedResponse(access), request, { moduleKey });
+  }
+  return finish(await context.next(), request, { moduleKey });
 }
