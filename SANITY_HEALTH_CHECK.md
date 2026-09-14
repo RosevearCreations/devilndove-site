@@ -1,19 +1,19 @@
 # Devil n Dove — Sanity Health Check
 
-Current fully verified checkpoint: **Release 467 Build 150 — Orders, Fulfillment & Buyer Communication Workspace**.
+Current fully verified checkpoint: **Release 467 Build 151 — Gifting, Custom Work, Local Pickup & Event Selling**.
 
-- Development SHA `33d46f701adb839525561114a31abcd29943d28f`
-- Production main SHA `531e303d32d426d2db6986ec5c3d466455612ee3`
-- identical tree `2f7add90d513a2e9548865f04d97e69b0ae3630e`
-- System `34802545653`
-- Quality `34802545673`
-- I.T. `34802545668`
-- Hygiene `34802545660`
-- Production Pages `34802707901`
-- Production Live Resources `34802759988`
+- Development SHA `86cc4c2500ccb7ed8027466be7226392098a989f`
+- Production main SHA `bb0046c701a8050f9b92948fc60ad622dd1f462e`
+- identical tree `7031e0bf710a9f2b4c4202e6858fda8c01008e01`
+- System `34858535578`
+- Quality `34858535413`
+- I.T. `34858535651`
+- Hygiene `34858535663`
+- Production Pages `34858858586`
+- Production Live Resources `34858997196`
 
-Build 151 — **Gifting, Custom Work, Local Pickup & Event Selling** — is the active schema-free candidate.
+Build 152 — **Site-wide Image Quality Scoring & Media QA** — is the active schema-free candidate.
 
-Safety boundaries: gift/custom/event notes are descriptive context, not payment or inventory authority; the seller Custom Work command view is read-only; existing reviewed Custom Requests mutations remain on their current owner; local pickup uses the existing server-authoritative checkout path; cached/offline event state never reserves or decrements stock and never claims live sellability. Gift-card activation/redemption, payment/refund execution, accounting posting, provider calls, R2 mutation and request-time DDL remain outside Build 151.
+The image score reuses the Release 448 deterministic 100-point browser Canvas rubric. It is advisory/read-only, loads lazily on visible editable website images, skips SVG placeholders, surfaces CORS/load failures explicitly, and never publishes, replaces, deletes or mutates image/business data.
 
-Canonical D1 migrations remain `0001`–`0004`. Build 135 transient transport policy remains mandatory. External provider/evidence lanes remain separate.
+Canonical D1 migrations remain `0001`–`0004`. Build 135 transient transport policy remains mandatory. External provider/evidence lanes remain separate. Build 152 adds no D1/R2/provider/payment/refund/accounting/request-time-schema mutation authority.
