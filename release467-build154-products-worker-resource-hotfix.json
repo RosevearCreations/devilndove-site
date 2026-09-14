@@ -1,0 +1,54 @@
+{
+  "release": 467,
+  "build": 154,
+  "title": "Products Worker Resource Hotfix",
+  "ingested_by_build": 155,
+  "development": {
+    "sha": "fc74ea680c0eee221722ce1ede6cb7990b92551f",
+    "tree_sha": "36e466d2d971ac7c80f183c3b9b42a0ff56597d9",
+    "system_gate_run": 34867834161,
+    "current_application_quality_run": 34867834181,
+    "it_admin_runtime_proof_run": 34867834020,
+    "branch_hygiene_run": 34867834038,
+    "state": "GREEN"
+  },
+  "production": {
+    "sha": "cc50c65c7d4ecbb75e9744a57a14be7da4aba873",
+    "tree_sha": "36e466d2d971ac7c80f183c3b9b42a0ff56597d9",
+    "production_pages_deploy_run": 34868084233,
+    "production_live_resource_integrity_run": 34868183267,
+    "products_route_production_proof_run": 34868183338,
+    "server_route_state": "GREEN_HTTP_200_NO_1102"
+  },
+  "scope": {
+    "worker_resource_incident": "CLOSED",
+    "products_route_http_200": true,
+    "products_static_fast_path": true,
+    "module_session_guard_preserved": true,
+    "error_1102_absent": true,
+    "client_ui_usability_proven": false
+  },
+  "post_closure_incident": {
+    "reported_at": "2026-09-14T12:46:00-04:00",
+    "route": "/admin/products/",
+    "symptoms": [
+      "Firefox reports This page isn't responding",
+      "existing Product picker remains unpopulated",
+      "draft/archive cleanup remains loading",
+      "Product Release Quality Command Center remains loading"
+    ],
+    "production_product_api_evidence": {
+      "products": 40,
+      "image_candidates": 216,
+      "source_run": 34868183267
+    },
+    "root_cause_followup": "Build 155 addresses a browser-side self-triggering MutationObserver/render loop in Marketplace Listing Readiness. Build 154 remains valid for the Worker 1102/server-route repair only and must not be cited as proof of full Product UI responsiveness."
+  },
+  "safety": {
+    "schema_change": false,
+    "d1_business_data_mutation": false,
+    "r2_business_data_mutation": false,
+    "provider_execution": false,
+    "payment_refund_accounting_mutation": false
+  }
+}
