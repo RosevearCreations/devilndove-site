@@ -14,6 +14,7 @@ import {
 import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appModuleRoutes.js';
 
 const PRODUCTS_ASSET_REVISION = '467-products-b98-readiness-triage';
+const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
 function isReadMethod(method) { return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase()); }
@@ -66,7 +67,7 @@ function withPlatformClient(response, request) {
           if (isProductsPage) {
             element.append(`<link rel="stylesheet" href="/css/admin-products-table-layout.css?v=${PRODUCTS_ASSET_REVISION}">`, { html: true });
             element.append(`<script data-dd-products-cold-start="1" src="/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_ASSET_REVISION}"></script>`, { html: true });
-            element.append(`<script defer src="/public/js/layout-overflow-guard.js?v=${PRODUCTS_ASSET_REVISION}"></script>`, { html: true });
+            element.append(`<script defer src="/public/js/layout-overflow-guard.js?v=${LAYOUT_ASSET_REVISION}"></script>`, { html: true });
           } else {
             element.append('<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>', { html: true });
           }

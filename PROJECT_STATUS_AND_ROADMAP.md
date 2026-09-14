@@ -2,19 +2,19 @@
 
 ## Current checkpoint
 
-**Release 467 Build 151 — Gifting, Custom Work, Local Pickup & Event Selling** is fully Development + Production GREEN.
+**Release 467 Build 152 — Site-wide Image Quality Scoring & Media QA** is fully Development + Production GREEN.
 
-- Development SHA `86cc4c2500ccb7ed8027466be7226392098a989f`
-- Production SHA `bb0046c701a8050f9b92948fc60ad622dd1f462e`
-- identical tree `7031e0bf710a9f2b4c4202e6858fda8c01008e01`
-- System `34858535578`
-- Quality `34858535413`
-- I.T. `34858535651`
-- Hygiene `34858535663`
-- Production Pages `34858858586`
-- Production Live Resources `34858997196`
+- Development SHA `1d01cbed98b78543b75dab808a30fb76c20d6060`
+- Production SHA `2f22e280426968a9ff229a0cee9ee62a69dc9d75`
+- identical tree `9cf8b0ac918ce567c51536f05d4c89b6f6294765`
+- System `34860514075`
+- Quality `34860514137`
+- I.T. `34860514304`
+- Hygiene `34860514150`
+- Production Pages `34860809983`
+- Production Live Resources `34860922626`
 
-Build 152 formally ingests that external closure. Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`. Canonical D1 migrations remain exactly `0001`–`0004`. Build 135 transient-transport retry policy remains mandatory and fail-closed for permanent 4xx and genuine resource correctness failures.
+Build 153 formally ingests that external closure. Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`. Canonical D1 migrations remain exactly `0001`–`0004`. Build 135 transient-transport retry policy remains mandatory and fail-closed for permanent 4xx and genuine resource correctness failures.
 
 ---
 
@@ -34,82 +34,95 @@ Build 152 formally ingests that external closure. Stripe Development, PayPal san
 
 # Build 151 — Gifting, Custom Work, Local Pickup & Event Selling — CLOSED GREEN
 
-Build 151 converges existing Gift Card, Custom Requests, Orders, pickup and Events authorities without adding a second write backend or a new D1 migration. Gift/product checkout captures optional recipient, occasion, gift message, presentation/wrap preference, requested-by date and event/market context as reviewed order notes. Local pickup remains server-authoritative. Seller Custom Work remains read-only over existing authorities. Unique/event stock must be revalidated live before sale/reservation; no offline stock authority or background mutation replay exists.
+Build 151 converged existing Gift Card, Custom Requests, Orders, pickup and Events authorities without adding a second write backend or a new D1 migration. Local pickup remains server-authoritative and unique/event stock must be revalidated live.
 
 ---
 
-# Build 152 — Site-wide Image Quality Scoring & Media QA — ACTIVE
+# Build 152 — Site-wide Image Quality Scoring & Media QA — CLOSED GREEN
 
-Extend the existing Release 448 product-photo scoring approach to editable public/static website images without creating a second scoring standard.
+Build 152 extended the existing Release 448 product-photo scoring approach to editable public/static website images without creating a second scoring standard.
 
 - Same advisory 100-point browser Canvas rubric: Lighting 20, Detail/Clarity 20, Background 15, Framing 15, Resolution 10, Colour 10, Artifacts 5, Consistency 5.
-- Show score, dimensions, component breakdown and concrete improvement guidance in Media & Content Studio for current-page images, picker/library images and the selected-image preview.
-- Show the same score beside editable homepage/public-page images only when authenticated page-wide Edit mode is ON; visitors never receive the admin scoring UI.
+- Media & Content Studio and authenticated public-page Edit mode expose the same scoring guidance.
 - Lazy/visible-first scoring prevents large image libraries from becoming a heavy startup task.
 - SVG placeholders are identified but not graded.
-- Canvas/CORS/load failures surface `Image score unavailable`; they never become a false low-quality score.
-- Scoring is read-only guidance only: no publish, replace, hide, delete, D1 write, R2 mutation or provider action.
+- Canvas/CORS/load failures surface `Image score unavailable` rather than a false low-quality score.
+- Scoring remains read-only guidance: no publish, replace, hide, delete, D1 write, R2 mutation or provider action.
 - Canonical D1 remains exactly `0001`–`0004`.
 
 ---
 
-# Build 153 — Notifications, Activity Inbox & Cross-Device Continuity — QoL
+# Build 153 — Layout Observer Performance Hotfix — ACTIVE
+
+Repair the Production Firefox long-script termination reported at `layout-overflow-guard.js:58:26`.
+
+- Replace synchronous per-added-node subtree rescans with a single animation-frame batch.
+- Ignore added DOM that contains no `table`, `.container` or `.admin-shell` target.
+- Deduplicate nested roots so one render subtree is scanned once.
+- Disconnect the MutationObserver while the guard creates its own table wrappers, preventing self-generated child-list work from scheduling another pass.
+- Preserve existing centered-shell and keyboard-reachable horizontal-table behavior.
+- Advance the Products layout-guard cache token to `467-b153-layout-observer` so Production cannot retain the stale `467-products-b98-readiness-triage` guard URL.
+- Add no D1/R2/provider/payment/refund/accounting/request-time-schema mutation authority.
+
+---
+
+# Build 154 — Notifications, Activity Inbox & Cross-Device Continuity — QoL
 
 Seller Activity Inbox should surface new orders, buyer messages, sync failures, listing issues, inventory warnings, custom requests, content approvals and system/provider warnings. Push is optional; durable in-app/server state is authoritative. Add read/unread, useful deep links, severity, snooze/dismiss for advisory items, and cross-device continuity without allowing notifications themselves to mutate high-authority business state.
 
 ---
 
-# Build 154 — UX Analytics, Recovery Telemetry & Conversion Improvement — Efficiency + Error Handling
+# Build 155 — UX Analytics, Recovery Telemetry & Conversion Improvement — Efficiency + Error Handling
 
-Measure aggregate discovery→product→saved/cart→checkout→order, zero-result searches and recovery from API/offline failures. Telemetry may queue in bounded batches or be dropped; business workflows must never block on analytics. Add explicit failure/recovery categories so we can distinguish user correction, retry success, stale/offline fallback, server error, authorization failure and abandoned workflow.
-
----
-
-# Build 155 — Cross-Surface UX Certification & Production Hardening — Resilience
-
-Certify phone browser, installed mobile PWA, tablet, desktop browser and installed desktop PWA. Chaos tests include latency, offline transition, D1/R2/API failure, stale service worker, expired auth, interrupted upload, duplicate request, response loss after commit and multi-device conflicts. Block Production for critical overflow/navigation/accessibility failures, missing offline/error states, duplicate-mutation hazards, false payment/order state, stale stock presented as live, destructive offline replay, or more than one public H1.
+Measure aggregate discovery→product→saved/cart→checkout→order, zero-result searches and recovery from API/offline failures. Telemetry may queue in bounded batches or be dropped; business workflows must never block on analytics.
 
 ---
 
-# Build 156 — Error Recovery & Self-Diagnostics Centre — Error Handling
+# Build 156 — Cross-Surface UX Certification & Production Hardening — Resilience
 
-Create one operator-facing place to understand failures without hunting through unrelated pages. Normalize human-readable errors, correlation/request IDs, retryability, affected module, last successful action and safe recovery instructions. Separate credential/configuration failures, Access/auth denial, D1/R2/binding problems, provider holds, route/API failures and genuine business-data conflicts. Diagnostics remain read-only unless an existing bounded corrective action is explicitly selected.
-
----
-
-# Build 157 — Workflow Efficiency & Smart Defaults — Efficiency
-
-Reduce repetitive admin work: remember safe filters/view preferences, restore recent work context, preserve non-authoritative drafts, add clearer duplicate/clone flows, sensible defaults, keyboard-first actions, recent items, safer bulk selection and fewer unnecessary reloads. Do not silently reuse stale price/stock/payment state and do not auto-submit destructive or financial actions.
+Certify phone browser, installed mobile PWA, tablet, desktop browser and installed desktop PWA. Block Production for critical overflow/navigation/accessibility failures, missing offline/error states, duplicate-mutation hazards, false payment/order state, stale stock presented as live, destructive offline replay, or more than one public H1.
 
 ---
 
-# Build 158 — Universal Search, Recent Work & Command Centre — QoL
+# Build 157 — Error Recovery & Self-Diagnostics Centre — Error Handling
 
-Unify navigation to Products, Inventory, Tools, Projects, Orders, Custom Work, Content, Media, Finance and I.T. Add recent work, favourites, search-by-name/SKU/reference, keyboard command access, and context-preserving return links. Keep module permission boundaries intact.
+Create one operator-facing place to understand failures without hunting through unrelated pages. Normalize human-readable errors, correlation/request IDs, retryability, affected module, last successful action and safe recovery instructions.
 
 ---
 
-# Build 159 — Media & Content Efficiency Pass — QoL + Media
+# Build 158 — Workflow Efficiency & Smart Defaults — Efficiency
+
+Reduce repetitive admin work: remember safe filters/view preferences, restore recent work context, preserve non-authoritative drafts, add clearer duplicate/clone flows, sensible defaults, keyboard-first actions, recent items, safer bulk selection and fewer unnecessary reloads.
+
+---
+
+# Build 159 — Universal Search, Recent Work & Command Centre — QoL
+
+Unify navigation to Products, Inventory, Tools, Projects, Orders, Custom Work, Content, Media, Finance and I.T. Add recent work, favourites, search-by-name/SKU/reference, keyboard command access, and context-preserving return links.
+
+---
+
+# Build 160 — Media & Content Efficiency Pass — QoL + Media
 
 Build on Build 152 scoring with media-library housekeeping: assignment visibility, unused-image detection, duplicate/near-duplicate review, missing alt/title warnings, wrong-size/aspect warnings, low-score filters, replace-file-while-keeping-placements, and page-level media readiness. No automatic deletion and no automatic replacement of authored media.
 
 ---
 
-# Build 160 — Inventory / Creator Workflow Automation — Efficiency
+# Build 161 — Inventory / Creator Workflow Automation — Efficiency
 
-Reduce manual bookkeeping across kits, batches, material use, project cost and profitability. Make linked-item names clear, preserve remaining kit components, default safe use/batch values where breakdown authority exists, surface unsaved usage, and provide explicit reconciliation rather than hidden correction. Inventory mutation remains deliberate and auditable.
-
----
-
-# Build 161 — API Error Contract & Safe Retry Normalization — Error Handling
-
-Standardize admin/public API failures so UI code receives JSON rather than unexpected HTML, with stable error code, human message, retryability and correlation ID. Apply bounded transient retry only where safe and idempotent; permanent 4xx, validation conflicts, auth failures and business-rule failures remain fail-closed.
+Reduce manual bookkeeping across kits, batches, material use, project cost and profitability. Make linked-item names clear, preserve remaining kit components, default safe use/batch values where breakdown authority exists, surface unsaved usage, and provide explicit reconciliation rather than hidden correction.
 
 ---
 
-# Build 162 — I.T. Readiness, Self-Healing Guidance & Release Efficiency — Operations
+# Build 162 — API Error Contract & Safe Retry Normalization — Error Handling
 
-Converge preflight, bindings, migration proof, runtime incidents, provider readiness, quota/subrequest health, cache/service-worker state and deployment identity into one I.T. readiness view. Offer bounded corrective mechanics only where they are already authorized and reversible; never silently mutate Production, credentials, D1 business data or R2 assets.
+Standardize admin/public API failures so UI code receives JSON rather than unexpected HTML, with stable error code, human message, retryability and correlation ID. Apply bounded transient retry only where safe and idempotent.
+
+---
+
+# Build 163 — I.T. Readiness, Self-Healing Guidance & Release Efficiency — Operations
+
+Converge preflight, bindings, migration proof, runtime incidents, provider readiness, quota/subrequest health, cache/service-worker state and deployment identity into one I.T. readiness view. Offer bounded corrective mechanics only where already authorized and reversible.
 
 ---
 

@@ -1,0 +1,48 @@
+{
+  "release": 467,
+  "build": 152,
+  "title": "Site-wide Image Quality Scoring & Media QA",
+  "state": "DEVELOPMENT_GREEN",
+  "source_authority": "dev",
+  "accepted_dev_sha": "1d01cbed98b78543b75dab808a30fb76c20d6060",
+  "accepted_dev_tree_sha": "9cf8b0ac918ce567c51536f05d4c89b6f6294765",
+  "acceptance": {
+    "system_gate_run": 34860514075,
+    "current_application_quality_run": 34860514137,
+    "it_admin_runtime_proof_run": 34860514304,
+    "branch_hygiene_run": 34860514150
+  },
+  "final_closure": {
+    "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "dev_sha": "1d01cbed98b78543b75dab808a30fb76c20d6060",
+    "tree_sha": "9cf8b0ac918ce567c51536f05d4c89b6f6294765",
+    "proofs": {
+      "system_gate_run": 34860514075,
+      "current_application_quality_run": 34860514137,
+      "it_admin_runtime_proof_run": 34860514304,
+      "branch_hygiene_run": 34860514150
+    },
+    "ingested_by_build": 153
+  },
+  "production_checkpoint": {
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "2f22e280426968a9ff229a0cee9ee62a69dc9d75",
+    "tree_sha": "9cf8b0ac918ce567c51536f05d4c89b6f6294765",
+    "production_pages_deploy_run": 34860809983,
+    "production_live_resource_integrity_run": 34860922626
+  },
+  "scope": {
+    "sitewide_image_quality_scoring": true,
+    "media_content_studio_scoring": true,
+    "authenticated_public_page_edit_scoring": true,
+    "release448_scoring_rubric_reused": true,
+    "lazy_visible_first_scoring": true,
+    "svg_placeholder_handling": true,
+    "explicit_unavailable_state": true,
+    "schema_change": false,
+    "d1_business_data_mutation_by_build": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false
+  }
+}
