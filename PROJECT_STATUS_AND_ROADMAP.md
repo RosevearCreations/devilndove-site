@@ -2,18 +2,19 @@
 
 ## Current checkpoint
 
-**Release 467 Build 149 — Seller Listing Manager & Fast Product Editing** is fully Development + Production GREEN.
+**Release 467 Build 150 — Orders, Fulfillment & Buyer Communication Workspace** is fully Development + Production GREEN.
 
-- SHA `6ff380f581bce93a42aacb982ba4c686baa5c5c4`
-- tree `c1829f6371b3d5b7cd771f9f170260f53d5a7e08`
-- System `34776427862`
-- Quality `34776427860`
-- I.T. `34776427885`
-- Hygiene `34776427874`
-- Production Pages `34776524835`
-- Production Live Resources `34776571549`
+- Development SHA `33d46f701adb839525561114a31abcd29943d28f`
+- Production SHA `531e303d32d426d2db6986ec5c3d466455612ee3`
+- identical tree `2f7add90d513a2e9548865f04d97e69b0ae3630e`
+- System `34802545653`
+- Quality `34802545673`
+- I.T. `34802545668`
+- Hygiene `34802545660`
+- Production Pages `34802707901`
+- Production Live Resources `34802759988`
 
-Build 150 formally ingests that external closure. `dev` and `main` were verified at the Build 149 Production checkpoint before Build 150 work began.
+Build 151 formally ingests that external closure. `dev` and `main` were verified at the Build 150 Production checkpoint before Build 151 work began.
 
 Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`. Canonical D1 migrations remain exactly `0001`–`0004`. Build 135 transient-transport retry policy remains mandatory and fail-closed for permanent 4xx and genuine resource correctness failures.
 
@@ -33,35 +34,30 @@ Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `H
 
 ---
 
-# Build 149 — Seller Listing Manager & Fast Product Editing — CLOSED GREEN
+# Build 150 — Orders, Fulfillment & Buyer Communication Workspace — CLOSED GREEN
 
-Build 149 delivers seller-facing list/card/search, safe local quick edits, visible waiting/syncing/conflict state, `base_updated_at` conflict protection, draft-only clone semantics, catalog-media handoff and storefront preview. Active/publish, inventory, delete/archive and other high-authority changes remain live-only.
+Build 150 delivers one seller Orders workspace combining buyer/order identity, Product/SKU search, payment and fulfilment state, local packaging/internal/buyer-message drafts, printable packing slip, order timeline, stable `client_action_id` response-loss protection, and append-only tracking audit. Build 82 fulfilment authority remains retained. Buyer messages remain copy-only; carrier/provider, payment/refund/accounting and request-time schema mutation were not added.
 
 ---
 
-# Build 150 — Orders, Fulfillment & Buyer Communication Workspace — ACTIVE
+# Build 151 — Gifting, Custom Work, Local Pickup & Event Selling — ACTIVE
 
-Buyer lifecycle: Received → Confirmed → Making/Preparing → Ready for Pickup/Shipped → Complete.
+Build 151 converges existing Gift Card, Custom Requests, Orders, pickup and Events authorities without adding a second write backend or a new D1 migration.
 
 Implemented candidate scope:
 
-- one `/admin/orders/` seller workspace combining buyer/order identity, products/SKUs, payment state, fulfilment, pickup/shipping context, packaging/internal notes, copy-only buyer communication drafts, tracking audit, printable packing slip and timeline;
-- search by order ID/number, buyer, email, Product/SKU and status;
-- local packaging/internal/message drafts with explicit local-only state;
-- existing canonical Orders + order-detail reads and Build 82 Operations fulfilment transitions retained as the authorities;
-- stable `client_action_id` replay protection for live fulfilment writes, including the retained Build 82 fulfilment page via compatibility bridge;
-- explicit pending-confirmation queue for uncertain response-loss outcomes; retry reuses the same action ID and never silently replays in the background;
-- tracking changes recorded as append-only audit handoffs in existing `order_status_history`, with stale-order-status conflict protection;
-- no buyer-message sending, carrier/provider execution, payment/refund execution, accounting posting, R2 mutation or request-time schema mutation;
-- no new D1 migration; canonical migrations remain `0001`–`0004`.
+- gift/product checkout captures optional recipient, occasion, gift message, presentation/wrap preference, requested-by date and event/market context as reviewed order notes;
+- local pickup continues to use the server-authoritative checkout `fulfillment_type='pickup'` path; pickup removes shipping server-side and never bypasses live stock/pricing revalidation;
+- public custom-request intake now accepts gift intent, recipient, occasion, presentation preference, handoff preference, event context and gift message while preserving them inside the existing request-message authority;
+- a read-only seller **Custom Work** command surface summarizes request, quote, requested-by date, deposit/payment-request state, private reference-image count, order-draft state, active pickup orders and gift-card operational summary;
+- the Custom Work convergence endpoint performs SELECT/PRAGMA reads only and moves no mutation authority;
+- gift-card storefront adds occasion and requested-delivery intent while retaining `pending_activation` until payment confirmation and adding no automatic provider send;
+- Events routes buyers into reviewed custom/event intake and states explicitly that an event conversation, offline note or submitted request is not a stock reservation;
+- unique/event stock must be revalidated live before sale/reservation; Build 151 creates no offline stock authority and no background mutation replay;
+- no new D1 migration; canonical migrations remain `0001`–`0004`;
+- no provider publication, automatic buyer-message send, carrier execution, R2 mutation or request-time schema mutation is authorized by this build.
 
-Build 150 is not Production GREEN until its exact candidate SHA passes the Development System/Quality/I.T./Hygiene + Preview/binding/smoke chain, is promoted non-force with the identical SHA/tree to `main`, and passes Production Pages + Production Live Resource Integrity.
-
----
-
-# Build 151 — Gifting, Custom Work, Local Pickup & Event Selling
-
-Expand gift intent/message/wrap, recipient/occasion notes, pickup availability, custom-request intake, event availability and gift-card redemption. Seller Custom Work queue tracks request, quote, requested-by date, approval, deposit, reference images, gift instructions and handoff. Event mode must never silently oversell unique stock offline.
+Build 151 is not Production GREEN until its exact candidate SHA passes Development System/Quality/I.T./Hygiene + canonical Development D1 + exact Preview/bindings/smoke, is promoted non-force with an identical tree to `main`, and passes Production Pages + Production Live Resource Integrity.
 
 ---
 
@@ -91,7 +87,7 @@ Block Production for critical overflow/navigation/accessibility failures, missin
 2. Next build ingests previous final closure; candidates never self-record future proof.
 3. Push `dev` non-force.
 4. Require exact-head System Gate, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene GREEN, plus canonical Development D1 and exact Preview/bindings/smoke.
-5. Promote the identical SHA/tree to `main` non-force only after Development is GREEN.
+5. Promote the identical tree to `main` non-force only after Development is GREEN.
 6. Require Production Pages Deploy SUCCESS.
 7. Require Production Live Resource Integrity SUCCESS.
 8. Only then call `main` / Production GREEN.

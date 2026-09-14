@@ -1,5 +1,5 @@
 <!-- File: /checkout/index.html -->
-<!-- Release 467 Build 78: resilient checkout, pickup/shipping choice, and idempotent order recovery. -->
+<!-- Release 467 Build 151: resilient checkout plus gift, local-pickup, requested-by and event handoff context. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,7 +16,7 @@
 <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Checkout</div></div></div>
 <div class="links"><a href="/">Home</a><a href="/gallery/">Gallery</a><a href="/creations/">Creations</a><a href="/tools/">Tools</a><a href="/supplies/">Supplies</a><a href="/shop/">Shop</a><a href="/cart/">Cart</a><a data-show-when-logged-in="" href="/members/" style="display:none">Members</a><a data-show-when-admin="" href="/admin/" style="display:none">Admin</a><span class="small" data-show-when-logged-in="" style="display:none">Hi, <span data-nav-user-name="">Member</span></span><button class="btn" data-nav-logout="" data-show-when-logged-in="" style="display:none" type="button">Logout</button></div>
 </div>
-<div class="hero"><div><h1>Checkout</h1><p>Complete your order details below. Devil n Dove currently accepts storefront orders only for Canadian billing addresses and ships physical orders only within Canada.</p></div></div>
+<div class="hero"><div><h1>Checkout</h1><p>Complete your order details below. Add optional gift, requested-by, local-pickup, or event handoff context when useful. Devil n Dove currently accepts storefront orders only for Canadian billing addresses and ships physical orders only within Canada.</p></div></div>
 <div class="card" id="checkoutMessage" style="display:none;margin-bottom:18px"></div>
 <div class="card" id="checkoutRecoveryStatus" style="display:none;margin-bottom:18px"></div>
 <div class="grid cols-2" style="gap:18px">
@@ -29,10 +29,11 @@
 </div>
 <div class="card" id="checkoutFulfillmentCard">
 <h3 style="margin-top:0">Delivery / Pickup</h3>
-<p class="small" style="margin-top:0">Physical items can ship within Canada or be marked for local pickup. Digital-only orders need neither.</p>
+<p class="small" style="margin-top:0">Physical items can ship within Canada or be marked for local pickup. Local pickup removes shipping from the server-authoritative total, but the exact handoff time is arranged separately.</p>
 <label class="small" for="fulfillment_method">How would you like to receive physical items?</label>
 <select id="fulfillment_method" name="fulfillment_method"><option selected="" value="shipping">Ship within Canada</option><option value="pickup">Local pickup</option></select>
 <div class="small" id="fulfillmentMessage" style="margin-top:8px"></div>
+<div class="small" style="margin-top:8px"><strong>Event/market safety:</strong> selecting pickup or adding event notes does not reserve unique inventory. The server revalidates live stock when the order is created.</div>
 </div>
 <div class="card" id="checkoutShippingFields">
 <h3 style="margin-top:0">Shipping Information</h3>
@@ -70,7 +71,7 @@
 <div class="footer card" style="margin-top:18px"></div>
 </div>
 <script src="/js/main.js?v=279"></script><script src="/public/js/seo-page-overrides.js"></script>
-<script src="/public/js/auth.js?v=279"></script><script src="/public/js/site-auth-ui.js"></script><script src="/public/js/site-analytics.js?v=279"></script><script src="/public/js/gift-card-storefront.js"></script>
-<script src="/public/js/checkout-reliability-core.js?v=78"></script><script src="/public/js/checkout.js?v=467b78"></script><script src="/public/js/checkout-resilience-build146.js?v=467b146"></script>
+<script src="/public/js/auth.js?v=279"></script><script src="/public/js/site-auth-ui.js"></script><script src="/public/js/site-analytics.js?v=279"></script><script src="/public/js/gift-card-storefront.js?v=467b151"></script>
+<script src="/public/js/checkout-gifting-build151.js?v=467b151"></script><script src="/public/js/checkout-reliability-core.js?v=78"></script><script src="/public/js/checkout.js?v=467b78"></script><script src="/public/js/checkout-resilience-build146.js?v=467b146"></script>
 </body>
 </html>
