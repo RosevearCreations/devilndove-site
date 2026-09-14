@@ -1,0 +1,53 @@
+{
+  "release": 467,
+  "build": 153,
+  "title": "Layout Observer Performance Hotfix",
+  "state": "DEVELOPMENT_GREEN",
+  "source_authority": "dev",
+  "accepted_dev_sha": "b8323b4e13ae08a8126da761106367de75f7cd40",
+  "accepted_dev_tree_sha": "a3d0225c579953d5572dc99313661c2981c42510",
+  "acceptance": {
+    "system_gate_run": 34863777573,
+    "current_application_quality_run": 34863777529,
+    "it_admin_runtime_proof_run": 34863777559,
+    "branch_hygiene_run": 34863777543
+  },
+  "final_closure": {
+    "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "dev_sha": "b8323b4e13ae08a8126da761106367de75f7cd40",
+    "tree_sha": "a3d0225c579953d5572dc99313661c2981c42510",
+    "proofs": {
+      "system_gate_run": 34863777573,
+      "current_application_quality_run": 34863777529,
+      "it_admin_runtime_proof_run": 34863777559,
+      "branch_hygiene_run": 34863777543
+    },
+    "ingested_by_build": 154
+  },
+  "production_checkpoint": {
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "ba8b3c2406335391334b2a74a89e5819236c770b",
+    "tree_sha": "a3d0225c579953d5572dc99313661c2981c42510",
+    "production_pages_deploy_run": 34864015766,
+    "production_live_resource_integrity_run": 34864113781
+  },
+  "post_closure_incident": {
+    "observed_at_utc": "2026-09-14T15:48:10Z",
+    "route": "/admin/products/",
+    "http_status": 503,
+    "cloudflare_error": 1102,
+    "summary": "Worker exceeded resource limits while serving the Products admin document after the standard Build 153 Production proof bundle had passed.",
+    "interpretation": "Build 153 closure evidence remains historically exact, but its acceptance suite did not include a route-specific Products Worker resource-limit proof. Build 154 closes that coverage gap."
+  },
+  "scope": {
+    "layout_observer_animation_frame_batching": true,
+    "nested_root_deduplication": true,
+    "observer_self_mutation_isolation": true,
+    "products_layout_cache_revision": "467-b153-layout-observer",
+    "schema_change": false,
+    "d1_business_data_mutation_by_build": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false
+  }
+}
