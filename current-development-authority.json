@@ -1,31 +1,31 @@
 {
   "release": 467,
-  "build": 153,
-  "title": "Layout Observer Performance Hotfix",
+  "build": 154,
+  "title": "Products Worker Resource Hotfix",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "b8323b4e13ae08a8126da761106367de75f7cd40",
-  "accepted_dev_tree_sha": "a3d0225c579953d5572dc99313661c2981c42510",
+  "accepted_dev_sha": "fc74ea680c0eee221722ce1ede6cb7990b92551f",
+  "accepted_dev_tree_sha": "36e466d2d971ac7c80f183c3b9b42a0ff56597d9",
   "acceptance": {
-    "system_gate_run": 34863777573,
-    "current_application_quality_run": 34863777529,
-    "it_admin_runtime_proof_run": 34863777559,
-    "branch_hygiene_run": 34863777543
+    "system_gate_run": 34867834161,
+    "current_application_quality_run": 34867834181,
+    "it_admin_runtime_proof_run": 34867834020,
+    "branch_hygiene_run": 34867834038
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 153,
-      "title": "Layout Observer Performance Hotfix",
-      "authority": "release467-build153-layout-observer-performance-hotfix.json",
-      "dev_sha": "b8323b4e13ae08a8126da761106367de75f7cd40",
-      "tree_sha": "a3d0225c579953d5572dc99313661c2981c42510",
+      "build": 154,
+      "title": "Products Worker Resource Hotfix",
+      "authority": "release467-build154-products-worker-resource-hotfix.json",
+      "dev_sha": "fc74ea680c0eee221722ce1ede6cb7990b92551f",
+      "tree_sha": "36e466d2d971ac7c80f183c3b9b42a0ff56597d9",
       "proofs": {
-        "system_gate_run": 34863777573,
-        "current_application_quality_run": 34863777529,
-        "it_admin_runtime_proof_run": 34863777559,
-        "branch_hygiene_run": 34863777543
+        "system_gate_run": 34867834161,
+        "current_application_quality_run": 34867834181,
+        "it_admin_runtime_proof_run": 34867834020,
+        "branch_hygiene_run": 34867834038
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "exact_preview_deployment": true
@@ -37,17 +37,21 @@
     "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE"
   },
   "production_checkpoint": {
-    "build": 153,
-    "authority": "release467-build153-layout-observer-performance-hotfix.json",
-    "main_sha": "ba8b3c2406335391334b2a74a89e5819236c770b",
-    "tree_sha": "a3d0225c579953d5572dc99313661c2981c42510",
-    "production_pages_deploy_run": 34864015766,
-    "production_live_resource_integrity_run": 34864113781,
+    "build": 154,
+    "authority": "release467-build154-products-worker-resource-hotfix.json",
+    "main_sha": "cc50c65c7d4ecbb75e9744a57a14be7da4aba873",
+    "tree_sha": "36e466d2d971ac7c80f183c3b9b42a0ff56597d9",
+    "production_pages_deploy_run": 34868084233,
+    "production_live_resource_integrity_run": 34868183267,
+    "products_route_production_proof_run": 34868183338,
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE",
-    "post_closure_incident": "Build 154 addresses the later /admin/products/ Cloudflare 1102 Worker resource-limit incident and adds route-specific Production proof."
+    "client_ui_incident_state": "OPEN_BUILD155_PRODUCTS_RESPONSIVENESS",
+    "client_ui_usability_proven": false,
+    "note": "Build 154 is the exact server-route baseline: HTTP 200/static fast path/no 1102 are proven. A later real-browser report showed the Product UI can still lock from a client-side MutationObserver/render loop; Build 155 is the active corrective build."
   },
   "current_release_authorities": [
+    "release467-build154-products-worker-resource-hotfix.json",
     "release467-build153-layout-observer-performance-hotfix.json",
     "release467-build152-sitewide-image-quality-media-qa.json",
     "release467-build151-gifting-custom-work-local-pickup-event-selling.json",
@@ -156,8 +160,8 @@
   "provider_execution_authorized": false,
   "provider_publication_authorized": false,
   "secret_values_emitted": false,
-  "next_build": 154,
+  "next_build": 155,
   "next_build_state": "AUTHORIZED_IN_PROGRESS",
-  "next_build_title": "Products Worker Resource Hotfix",
-  "promotion_state": "BUILD154_CANDIDATE_NOT_YET_VERIFIED"
+  "next_build_title": "Products Client Responsiveness Hotfix",
+  "promotion_state": "BUILD155_CANDIDATE_NOT_YET_VERIFIED"
 }
