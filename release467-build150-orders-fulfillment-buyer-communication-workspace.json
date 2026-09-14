@@ -1,0 +1,49 @@
+{
+  "release": 467,
+  "build": 150,
+  "title": "Orders, Fulfillment & Buyer Communication Workspace",
+  "state": "DEVELOPMENT_GREEN",
+  "source_authority": "dev",
+  "accepted_dev_sha": "33d46f701adb839525561114a31abcd29943d28f",
+  "accepted_dev_tree_sha": "2f7add90d513a2e9548865f04d97e69b0ae3630e",
+  "acceptance": {
+    "system_gate_run": 34802545653,
+    "current_application_quality_run": 34802545673,
+    "it_admin_runtime_proof_run": 34802545668,
+    "branch_hygiene_run": 34802545660
+  },
+  "final_closure": {
+    "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "dev_sha": "33d46f701adb839525561114a31abcd29943d28f",
+    "tree_sha": "2f7add90d513a2e9548865f04d97e69b0ae3630e",
+    "proofs": {
+      "system_gate_run": 34802545653,
+      "current_application_quality_run": 34802545673,
+      "it_admin_runtime_proof_run": 34802545668,
+      "branch_hygiene_run": 34802545660
+    },
+    "ingested_by_build": 151
+  },
+  "production_checkpoint": {
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "531e303d32d426d2db6986ec5c3d466455612ee3",
+    "tree_sha": "2f7add90d513a2e9548865f04d97e69b0ae3630e",
+    "production_pages_deploy_run": 34802707901,
+    "production_live_resource_integrity_run": 34802759988
+  },
+  "scope": {
+    "seller_orders_workspace": true,
+    "product_sku_search": true,
+    "local_packaging_internal_message_drafts": true,
+    "printable_packing_slip": true,
+    "order_timeline": true,
+    "fulfillment_client_action_id_replay_protection": true,
+    "append_only_tracking_audit": true,
+    "schema_change": false,
+    "d1_business_data_mutation_by_build": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "automatic_buyer_message_send": false
+  }
+}
