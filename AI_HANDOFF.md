@@ -2,30 +2,28 @@
 
 ## Current authority
 
-**Release 467 Build 150 — Orders, Fulfillment & Buyer Communication Workspace** is the current fully verified Development + Production baseline.
+**Release 467 Build 151 — Gifting, Custom Work, Local Pickup & Event Selling** is the current fully verified Development + Production baseline.
 
-- Development SHA `33d46f701adb839525561114a31abcd29943d28f`
-- Production main SHA `531e303d32d426d2db6986ec5c3d466455612ee3`
-- identical tree `2f7add90d513a2e9548865f04d97e69b0ae3630e`
-- System Gate `34802545653`
-- Current Application Quality `34802545673`
-- I.T. Admin Runtime `34802545668`
-- Repository Branch Hygiene `34802545660`
-- Production Pages Deploy `34802707901`
-- Production Live Resource Integrity `34802759988`
+- Development SHA `86cc4c2500ccb7ed8027466be7226392098a989f`
+- Production main SHA `bb0046c701a8050f9b92948fc60ad622dd1f462e`
+- identical tree `7031e0bf710a9f2b4c4202e6858fda8c01008e01`
+- System Gate `34858535578`
+- Current Application Quality `34858535413`
+- I.T. Admin Runtime `34858535651`
+- Repository Branch Hygiene `34858535663`
+- Production Pages Deploy `34858858586`
+- Production Live Resource Integrity `34858997196`
 
-Build 150 is sealed in `release467-build150-orders-fulfillment-buyer-communication-workspace.json` and is the restart authority for the next build.
+Build 151 is sealed in `release467-build151-gifting-custom-work-local-pickup-event-selling.json` and is the restart authority for the next build.
 
 ## Active candidate
 
-Build 151 — **Gifting, Custom Work, Local Pickup & Event Selling** — is the active schema-free candidate. It ingests the exact Build 150 six-proof closure above.
+Build 152 — **Site-wide Image Quality Scoring & Media QA** — is the active schema-free candidate. It ingests the exact Build 151 six-proof closure above.
 
-Build 151 extends the existing gift-card, checkout, custom-request, pickup and event surfaces rather than creating replacement backends. Gift intent can carry recipient, occasion, gift-wrap, requested-delivery and event/pickup context. The seller Custom Work view is read-only over the existing Operations Custom Requests authority; existing reviewed quote/payment/order mutations stay with their current owners.
+Build 152 reuses the existing Release 448 deterministic browser Canvas image-quality rubric across editable public/static website images. The 100-point score remains Lighting 20, Detail/Clarity 20, Background 15, Framing 15, Resolution 10, Colour 10, Artifacts 5 and Consistency 5.
 
-Checkout continues to use the existing server-authoritative `fulfillment_type: pickup` path. Price, stock, shipping and tax are revalidated server-side. Event/offline context is descriptive only: it never reserves or decrements stock locally, never presents cached stock as live authority and requires a live checkout/reconciliation before a sale is considered authoritative.
+Scores are advisory and read-only. Media & Content Studio and authenticated public page Edit mode may display score, dimensions, component breakdown and improvement guidance. Large libraries score lazily as images become visible; SVG placeholders are identified but not graded; CORS/load failures report score unavailable rather than a false low score.
 
-Gift-card activation/redemption remains under existing gift-card/payment authorities. Build 151 adds no automatic provider send, payment capture, refund, accounting post, R2 mutation or request-time schema mutation.
+Canonical D1 migrations remain exactly `0001`–`0004`. Build 152 adds no D1 business-data mutation, R2 mutation, provider execution/publication, payment/refund/accounting action or request-time schema mutation. Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
 
-Canonical D1 migrations remain exactly `0001`–`0004`. Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
-
-No candidate may self-record future proof. Build 151 must pass exact-head Development System/Quality/I.T./Hygiene, exact Preview/bindings/smoke, then non-force identical-tree promotion to `main`, Production Pages Deploy and Production Live Resource Integrity before it may be called Production GREEN.
+No candidate may self-record future proof. Build 152 must pass exact-head candidate System/Quality/I.T./Build152 proof, then exact `dev` System/Quality/I.T./Hygiene plus D1/Preview/bindings/smoke, followed by non-force identical-tree promotion to `main`, Production Pages Deploy and Production Live Resource Integrity before it may be called Production GREEN.

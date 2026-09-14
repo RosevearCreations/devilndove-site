@@ -18,14 +18,15 @@
 
     <section class="hero media-studio-hero">
       <div>
-        <p class="eyebrow">Build 278 • Visual slot editor + page-wide preview editing</p>
+        <p class="eyebrow">Build 278 • Visual slot editor + Build 152 image-quality scoring</p>
         <h1>Media & Content Management Studio</h1>
-        <p>Choose a website area, then manage the images, backgrounds and text assigned to that page. Public pages now use one page-wide Edit switch, so individual edit badges stay hidden until you intentionally turn editing on.</p>
+        <p>Choose a website area, then manage the images, backgrounds and text assigned to that page. Editable raster images now receive the same advisory 100-point image-quality score used for product photography, including lighting, detail/clarity, background, framing, resolution, colour, artifacts and consistency.</p>
       </div>
       <div class="card media-studio-safety"><strong>Website presentation only</strong><p class="small">Products, finished-product photos, inventory, supplies and tools are not part of this Studio. Their specialist admin screens remain the authority for those records.</p></div>
     </section>
 
     <div id="mediaStudioMessage" class="card small media-studio-message" hidden></div>
+    <section class="card" style="margin-top:14px"><strong>Build 152 • Site-wide image quality</strong><p class="small" style="margin-bottom:0">Scores are read-only guidance and never publish, replace, hide or delete an image. Images are scored only as they become visible, so large libraries do not create a heavy page-load job. SVG placeholders are identified but not graded. If browser Canvas access is blocked by CORS, the Studio shows a clear score-unavailable message instead of treating the image as poor quality.</p></section>
 
     <div class="media-slot-studio-layout">
       <aside class="card media-site-map-panel">
@@ -49,7 +50,6 @@
       </main>
     </div>
 
-
     <section class="card media-image-plan-panel" id="mediaImagePlanPanel">
       <div class="section-heading-row media-image-plan-heading">
         <div><p class="eyebrow">Build 278 image plan</p><h2>Editable image spaces & outstanding artwork</h2><p class="small">A live D1-aware checklist of every public/static image and background location. Recommended dimensions come from the explicit page-slot catalog. Product, Inventory, supply and tool images remain in their specialist editors.</p></div>
@@ -66,7 +66,7 @@
 
     <section class="card media-picker-panel" id="mediaPickerPanel" hidden>
       <div class="section-heading-row">
-        <div><p class="eyebrow">Image picker</p><h2 id="mediaPickerTitle">Choose a replacement image</h2><p class="small" id="mediaPickerHelp">Choose an existing site image or upload a new one. Nothing changes until an image is explicitly assigned.</p></div>
+        <div><p class="eyebrow">Image picker</p><h2 id="mediaPickerTitle">Choose a replacement image</h2><p class="small" id="mediaPickerHelp">Choose an existing site image or upload a new one. Nothing changes until an image is explicitly assigned. Visible raster choices are scored automatically so lighting/detail issues can be spotted before assignment.</p></div>
         <button class="btn" id="mediaClosePicker" type="button">Close picker</button>
       </div>
       <div class="media-library-boundary"><strong>Not included:</strong> product/catalog images, finished-product photos, inventory, supplies and tools.</div>
@@ -85,7 +85,7 @@
     </section>
 
     <section class="card media-metadata-panel" id="mediaMetadataPanel" hidden>
-      <div class="section-heading-row"><div><h2>Selected image details</h2><p class="small">Optional SEO/accessibility and provenance details for the selected public site image.</p></div><span id="mediaSelectedId" class="small"></span></div>
+      <div class="section-heading-row"><div><h2>Selected image details</h2><p class="small">Optional SEO/accessibility and provenance details for the selected public site image. The preview also shows the same advisory image-quality breakdown used elsewhere.</p></div><span id="mediaSelectedId" class="small"></span></div>
       <div class="media-metadata-layout">
         <div><img id="mediaSelectedPreview" class="media-selected-preview-image" alt="Selected site media preview"/><div class="small" id="mediaSelectedTechnical"></div></div>
         <div class="media-form-grid">
@@ -123,5 +123,7 @@
   <script src="/public/js/site-auth-ui.js?v=440"></script><script src="/public/js/site-analytics.js?v=440"></script>
   <script src="/public/js/admin-self-protect.js?v=440"></script><script src="/public/js/admin.js?v=440"></script>
   <script src="/public/js/admin-media-content-studio.js?v=440"></script>
+  <script src="/public/js/image-quality-scorer-v152.js?v=467b152"></script>
+  <script src="/public/js/site-image-quality-overlay-v152.js?v=467b152"></script>
 </body>
 </html>
