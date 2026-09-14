@@ -2,17 +2,17 @@
 
 ## Current release baseline
 
-**Release 467 Build 151 — Gifting, Custom Work, Local Pickup & Event Selling** is fully Development + Production GREEN.
+**Release 467 Build 152 — Site-wide Image Quality Scoring & Media QA** is fully Development + Production GREEN.
 
-- Development SHA `86cc4c2500ccb7ed8027466be7226392098a989f`
-- Production main SHA `bb0046c701a8050f9b92948fc60ad622dd1f462e`
-- identical tree `7031e0bf710a9f2b4c4202e6858fda8c01008e01`
-- System `34858535578`
-- Quality `34858535413`
-- I.T. `34858535651`
-- Hygiene `34858535663`
-- Production Pages `34858858586`
-- Production Live Resources `34858997196`
+- Development SHA `1d01cbed98b78543b75dab808a30fb76c20d6060`
+- Production main SHA `2f22e280426968a9ff229a0cee9ee62a69dc9d75`
+- identical tree `9cf8b0ac918ce567c51536f05d4c89b6f6294765`
+- System `34860514075`
+- Quality `34860514137`
+- I.T. `34860514304`
+- Hygiene `34860514150`
+- Production Pages `34860809983`
+- Production Live Resources `34860922626`
 
 ## Canonical Development target
 
@@ -29,14 +29,16 @@
 5. Require Production Pages Deploy and Production Live Resource Integrity.
 6. Only then call `main` / Production GREEN.
 
-## Build 152 restart
+## Build 153 restart
 
-Build 152 — **Site-wide Image Quality Scoring & Media QA** — is authorized from the exact Build 151 checkpoint above.
+Build 153 — **Layout Observer Performance Hotfix** — is authorized from the exact Build 152 checkpoint above.
 
-It reuses the existing Release 448 deterministic browser Canvas product-image rubric for editable public/static website images. The score remains advisory and read-only: Lighting 20, Detail/Clarity 20, Background 15, Framing 15, Resolution 10, Colour 10, Artifacts 5 and Consistency 5.
+The Production symptom was Firefox reporting `Script terminated by timeout` at the `MutationObserver` callback in `public/js/layout-overflow-guard.js`. The prior observer synchronously rescanned each added subtree. A large admin render could therefore perform repeated overlapping selector scans in one callback, and table wrapping itself generated more observed `childList` changes.
 
-Media & Content Studio and authenticated public page Edit mode may display scores and improvement guidance. Scoring is lazy/visible-first, SVG placeholders are identified but not graded, and CORS/load problems are surfaced as score unavailable rather than a false quality judgement.
+The hotfix filters additions that contain no `table`, `.container` or `.admin-shell`, batches relevant roots to one animation-frame flush, deduplicates descendant roots when an ancestor is already queued, and disconnects the observer while applying its own table-wrapper changes. Existing centering, keyboard-reachable horizontal table scrolling and one-H1 behavior remain intact.
 
-Build 152 remains schema-free. Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`; canonical migrations remain exactly `0001`–`0004`.
+The Products route injects the guard with cache token `467-b153-layout-observer`, replacing the stale `467-products-b98-readiness-triage` guard URL reported in Production. Other Product assets keep their existing cache revision.
+
+Build 153 remains schema-free. Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`; canonical migrations remain exactly `0001`–`0004`.
 
 Production live-resource retries remain capped at three transient attempts; permanent 4xx responses and real Product API, R2, photography, merchandising and D1 failures fail closed. Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
