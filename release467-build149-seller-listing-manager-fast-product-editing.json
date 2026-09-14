@@ -1,0 +1,47 @@
+{
+  "release": 467,
+  "build": 149,
+  "title": "Seller Listing Manager & Fast Product Editing",
+  "state": "DEVELOPMENT_GREEN",
+  "source_authority": "dev",
+  "accepted_dev_sha": "6ff380f581bce93a42aacb982ba4c686baa5c5c4",
+  "accepted_dev_tree_sha": "c1829f6371b3d5b7cd771f9f170260f53d5a7e08",
+  "acceptance": {
+    "system_gate_run": 34776427862,
+    "current_application_quality_run": 34776427860,
+    "it_admin_runtime_proof_run": 34776427885,
+    "branch_hygiene_run": 34776427874
+  },
+  "final_closure": {
+    "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "dev_sha": "6ff380f581bce93a42aacb982ba4c686baa5c5c4",
+    "tree_sha": "c1829f6371b3d5b7cd771f9f170260f53d5a7e08",
+    "proofs": {
+      "system_gate_run": 34776427862,
+      "current_application_quality_run": 34776427860,
+      "it_admin_runtime_proof_run": 34776427885,
+      "branch_hygiene_run": 34776427874
+    },
+    "ingested_by_build": 150
+  },
+  "production_checkpoint": {
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "6ff380f581bce93a42aacb982ba4c686baa5c5c4",
+    "tree_sha": "c1829f6371b3d5b7cd771f9f170260f53d5a7e08",
+    "production_pages_deploy_run": 34776524835,
+    "production_live_resource_integrity_run": 34776571549
+  },
+  "scope": {
+    "seller_listing_manager": true,
+    "fast_product_editing": true,
+    "safe_local_quick_edits": true,
+    "base_updated_at_conflict_stop": true,
+    "draft_clone": true,
+    "storefront_preview": true,
+    "schema_change": false,
+    "d1_business_data_mutation_by_build": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false
+  }
+}

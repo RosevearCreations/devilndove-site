@@ -1,6 +1,6 @@
-// File: /functions/api/admin/orders.js
-// Brief description: Returns admin order-list data with a fallback query so the orders screen
-// can stay usable even when the richer payment rollup query drifts.
+// Release 467 Build 150 — admin Orders workspace read projection.
+// Returns canonical order-list data with product search text and a fallback query so the
+// workspace remains usable if richer payment rollups drift. GET-only; no schema mutation.
 
 import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
 
@@ -38,6 +38,8 @@ function shapeOrders(rows) {
       pending_total_cents: Number(row.pending_total_cents || 0),
       refunded_total_cents: Number(row.refunded_total_cents || 0),
       outstanding_cents: Math.max(total - paid, 0),
+      item_count: Number(row.item_count || 0),
+      product_search_text: row.product_search_text || "",
       created_at: row.created_at || null,
       updated_at: row.updated_at || null
     };
@@ -52,6 +54,14 @@ export async function onRequestGet(context) {
   if (!db) return json({ ok: false, error: "Database binding is not configured." }, 500);
 
   const warnings = [];
+  const itemProjection = `
+      (SELECT COUNT(*) FROM order_items oi WHERE oi.order_id=o.order_id) AS item_count,
+      COALESCE((
+        SELECT GROUP_CONCAT(TRIM(COALESCE(oi.product_name,'') || ' ' || COALESCE(oi.sku,'')), ' | ')
+        FROM order_items oi
+        WHERE oi.order_id=o.order_id
+      ), '') AS product_search_text`;
+
   const primarySql = `
     WITH payment_summary AS (
       SELECT
@@ -86,10 +96,11 @@ export async function onRequestGet(context) {
         WHEN COALESCE(ps.has_pending, 0) = 1 THEN 'pending'
         WHEN COALESCE(ps.all_failed_or_cancelled, 0) = 1 THEN 'failed'
         ELSE COALESCE(o.payment_status, 'pending')
-      END AS derived_payment_status
+      END AS derived_payment_status,
+      ${itemProjection}
     FROM orders o
     LEFT JOIN payment_summary ps ON ps.order_id = o.order_id
-    ORDER BY o.created_at DESC, o.order_id DESC
+    ORDER BY datetime(COALESCE(o.updated_at,o.created_at)) DESC, o.order_id DESC
   `;
 
   const fallbackSql = `
@@ -102,18 +113,21 @@ export async function onRequestGet(context) {
       0 AS paid_total_cents,
       0 AS pending_total_cents,
       0 AS refunded_total_cents,
-      COALESCE(o.payment_status, 'pending') AS derived_payment_status
+      COALESCE(o.payment_status, 'pending') AS derived_payment_status,
+      ${itemProjection}
     FROM orders o
-    ORDER BY o.created_at DESC, o.order_id DESC
+    ORDER BY datetime(COALESCE(o.updated_at,o.created_at)) DESC, o.order_id DESC
   `;
 
   try {
     const result = await db.prepare(primarySql).all();
     return json({
       ok: true,
+      release: 467,
+      build: 150,
       requested_by: { user_id: adminUser.user_id, email: adminUser.email, display_name: adminUser.display_name },
       orders: shapeOrders(result),
-      diagnostics: { warnings, authority: "primary_orders_query" }
+      diagnostics: { warnings, authority: "primary_orders_query", product_search_projection: true }
     });
   } catch (primaryError) {
     warnings.push("primary_orders_query_failed");
@@ -130,10 +144,12 @@ export async function onRequestGet(context) {
       warnings.push("fallback_orders_query_used");
       return json({
         ok: true,
+        release: 467,
+        build: 150,
         warning: "Fallback orders query used. Payment rollups may be incomplete until the richer query recovers.",
         requested_by: { user_id: adminUser.user_id, email: adminUser.email, display_name: adminUser.display_name },
         orders: shapeOrders(fallbackResult),
-        diagnostics: { warnings, authority: "fallback_orders_query" }
+        diagnostics: { warnings, authority: "fallback_orders_query", product_search_projection: true }
       });
     } catch (fallbackError) {
       warnings.push("fallback_orders_query_failed");
@@ -149,10 +165,12 @@ export async function onRequestGet(context) {
       });
       return json({
         ok: true,
+        release: 467,
+        build: 150,
         warning: "Live admin orders are unavailable right now. A safe empty result was returned.",
         requested_by: { user_id: adminUser.user_id, email: adminUser.email, display_name: adminUser.display_name },
         orders: [],
-        diagnostics: { warnings, authority: "empty_fallback" }
+        diagnostics: { warnings, authority: "empty_fallback", product_search_projection: false }
       });
     }
   }
