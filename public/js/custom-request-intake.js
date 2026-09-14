@@ -1,19 +1,15 @@
 // File: /public/js/custom-request-intake.js
-// Brief description: Handles the public custom request intake form for engraving, personalized gifts, and workshop-made commissions.
+// Release 467 Build 151: public custom-work intake with gift, pickup and event context.
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('customRequestForm');
   const msg = document.getElementById('customRequestMessage');
   if (!form) return;
 
-
   try {
     const params = new URLSearchParams(window.location.search || '');
-    const requestType = params.get('request_type');
-    const productInterest = params.get('product_interest');
-    if (requestType && form.elements.request_type) form.elements.request_type.value = requestType;
-    if (productInterest && form.elements.product_interest) form.elements.product_interest.value = productInterest;
-    ['scent_profile', 'wax_or_base', 'colour_notes', 'ingredient_notes'].forEach((key) => { if (params.get(key) && form.elements[key]) form.elements[key].value = params.get(key); });
+    const keys = ['request_type','product_interest','gift_intent','recipient_name','occasion','wrap_preference','fulfillment_preference','event_context','gift_message','deadline_date','scent_profile','wax_or_base','colour_notes','ingredient_notes'];
+    keys.forEach((key) => { if (params.get(key) && form.elements[key]) form.elements[key].value = params.get(key); });
   } catch {}
 
   function setMsg(text, isError = false) {
@@ -37,12 +33,13 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch {}
     payload.consent_to_contact = form.querySelector('[name="consent_to_contact"]')?.checked ? 1 : 0;
     payload.attachment_urls = String(payload.attachment_urls || '').split(/\r?\n|,/).map((item) => item.trim()).filter(Boolean);
+    payload.build151_context = true;
     setMsg('Sending custom request...');
     try {
       const response = await fetch('/api/custom-request', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Custom request could not be sent.');
-      try { window.DDAnalytics?.trackVisit('custom_request_submitted', { request_type: payload.request_type || '', custom_request_id: data.custom_request_id || null }); } catch {}
+      try { window.DDAnalytics?.trackVisit('custom_request_submitted', { request_type: payload.request_type || '', fulfillment_preference: payload.fulfillment_preference || '', gift_intent: payload.gift_intent || '', custom_request_id: data.custom_request_id || null }); } catch {}
       let uploadMessage = '';
       if (files.length && data.request_key && data.upload_token) {
         const uploaded = [];

@@ -1,31 +1,31 @@
 {
   "release": 467,
-  "build": 149,
-  "title": "Seller Listing Manager & Fast Product Editing",
+  "build": 150,
+  "title": "Orders, Fulfillment & Buyer Communication Workspace",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "6ff380f581bce93a42aacb982ba4c686baa5c5c4",
-  "accepted_dev_tree_sha": "c1829f6371b3d5b7cd771f9f170260f53d5a7e08",
+  "accepted_dev_sha": "33d46f701adb839525561114a31abcd29943d28f",
+  "accepted_dev_tree_sha": "2f7add90d513a2e9548865f04d97e69b0ae3630e",
   "acceptance": {
-    "system_gate_run": 34776427862,
-    "current_application_quality_run": 34776427860,
-    "it_admin_runtime_proof_run": 34776427885,
-    "branch_hygiene_run": 34776427874
+    "system_gate_run": 34802545653,
+    "current_application_quality_run": 34802545673,
+    "it_admin_runtime_proof_run": 34802545668,
+    "branch_hygiene_run": 34802545660
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 149,
-      "title": "Seller Listing Manager & Fast Product Editing",
-      "authority": "release467-build149-seller-listing-manager-fast-product-editing.json",
-      "dev_sha": "6ff380f581bce93a42aacb982ba4c686baa5c5c4",
-      "tree_sha": "c1829f6371b3d5b7cd771f9f170260f53d5a7e08",
+      "build": 150,
+      "title": "Orders, Fulfillment & Buyer Communication Workspace",
+      "authority": "release467-build150-orders-fulfillment-buyer-communication-workspace.json",
+      "dev_sha": "33d46f701adb839525561114a31abcd29943d28f",
+      "tree_sha": "2f7add90d513a2e9548865f04d97e69b0ae3630e",
       "proofs": {
-        "system_gate_run": 34776427862,
-        "current_application_quality_run": 34776427860,
-        "it_admin_runtime_proof_run": 34776427885,
-        "branch_hygiene_run": 34776427874
+        "system_gate_run": 34802545653,
+        "current_application_quality_run": 34802545673,
+        "it_admin_runtime_proof_run": 34802545668,
+        "branch_hygiene_run": 34802545660
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "exact_preview_deployment": true
@@ -37,16 +37,17 @@
     "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE"
   },
   "production_checkpoint": {
-    "build": 149,
-    "authority": "release467-build149-seller-listing-manager-fast-product-editing.json",
-    "main_sha": "6ff380f581bce93a42aacb982ba4c686baa5c5c4",
-    "tree_sha": "c1829f6371b3d5b7cd771f9f170260f53d5a7e08",
-    "production_pages_deploy_run": 34776524835,
-    "production_live_resource_integrity_run": 34776571549,
+    "build": 150,
+    "authority": "release467-build150-orders-fulfillment-buyer-communication-workspace.json",
+    "main_sha": "531e303d32d426d2db6986ec5c3d466455612ee3",
+    "tree_sha": "2f7add90d513a2e9548865f04d97e69b0ae3630e",
+    "production_pages_deploy_run": 34802707901,
+    "production_live_resource_integrity_run": 34802759988,
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build150-orders-fulfillment-buyer-communication-workspace.json",
     "release467-build149-seller-listing-manager-fast-product-editing.json",
     "release467-build148-seller-daily-command-centre.json",
     "release467-build147-buyer-account-saved-items-order-hub.json",
@@ -151,8 +152,8 @@
   "provider_execution_authorized": false,
   "provider_publication_authorized": false,
   "secret_values_emitted": false,
-  "next_build": 150,
+  "next_build": 151,
   "next_build_state": "AUTHORIZED_IN_PROGRESS",
-  "next_build_title": "Orders, Fulfillment & Buyer Communication Workspace",
-  "promotion_state": "BUILD150_CANDIDATE_NOT_YET_VERIFIED"
+  "next_build_title": "Gifting, Custom Work, Local Pickup & Event Selling",
+  "promotion_state": "BUILD151_CANDIDATE_NOT_YET_VERIFIED"
 }

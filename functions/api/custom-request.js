@@ -1,5 +1,5 @@
 // File: /functions/api/custom-request.js
-// Brief description: Public custom request intake for engraving, personalized gifts, and workshop-made commissions.
+// Release 467 Build 151: public custom-work intake; gift/pickup/event context is folded into the existing message authority.
 
 import { hasCustomRequestIntakeSchema } from "./_lib/publicRuntimeSchemaReadiness.js";
 
@@ -19,6 +19,25 @@ function parseUtm(body, request) {
     } catch {}
   }
   return out;
+}
+
+function build151Context(body) {
+  const giftIntent = clean(body.gift_intent, 80);
+  const recipient = clean(body.recipient_name, 160);
+  const occasion = clean(body.occasion, 160);
+  const wrap = clean(body.wrap_preference, 80);
+  const fulfillment = clean(body.fulfillment_preference, 80);
+  const eventContext = clean(body.event_context, 220);
+  const giftMessage = clean(body.gift_message, 600);
+  const parts = [];
+  if (giftIntent) parts.push(`Gift intent=${giftIntent}`);
+  if (recipient) parts.push(`Recipient=${recipient}`);
+  if (occasion) parts.push(`Occasion=${occasion}`);
+  if (wrap) parts.push(`Wrap=${wrap}`);
+  if (fulfillment) parts.push(`Fulfillment=${fulfillment}`);
+  if (eventContext) parts.push(`Event/context=${eventContext}`);
+  if (giftMessage) parts.push(`Gift message=${giftMessage}`);
+  return parts.length ? `[Build 151 gift/pickup/event context] ${parts.join('; ')}` : '';
 }
 
 export async function onRequestOptions() {
@@ -42,18 +61,20 @@ export async function onRequestPost(context) {
   const ingredientNotes = clean(body.ingredient_notes || '', 600);
   const allergenSafetyNotes = clean(body.allergen_safety_notes || '', 600);
   const deadlineDate = clean(body.deadline_date || '', 20);
-  const message = clean(body.message || body.notes || '', 3000);
+  const baseMessage = clean(body.message || body.notes || '', 2600);
+  const contextLine = build151Context(body);
+  const message = clean([baseMessage, contextLine].filter(Boolean).join('\n'), 3000);
   const consentToContact = body.consent_to_contact === true || String(body.consent_to_contact || '').toLowerCase() === 'on' || String(body.consent_to_contact || '') === '1' ? 1 : 0;
   const attachmentUrls = Array.isArray(body.attachment_urls) ? body.attachment_urls.map((item) => clean(item, 500)).filter(Boolean).slice(0, 8) : [];
   const utm = parseUtm(body, context.request);
 
   if (!name) return json({ ok: false, error: 'Please add your name.' }, 400);
   if (!email) return json({ ok: false, error: 'Please add a valid email address.' }, 400);
-  if (!message || message.length < 12) return json({ ok: false, error: 'Please add a few details about the custom request.' }, 400);
+  if (!baseMessage || baseMessage.length < 12) return json({ ok: false, error: 'Please add a few details about the custom request.' }, 400);
   if (!consentToContact) return json({ ok: false, error: 'Please confirm we may contact you about this request.' }, 400);
 
   if (!(await hasCustomRequestIntakeSchema(db))) {
-    return json({ ok: false, error: 'custom_request_schema_unavailable', message: 'Custom requests are temporarily unavailable.' }, 503);
+    return json({ ok: false, error: 'custom_request_schema_unavailable', message: 'Custom requests are temporarily unavailable.', request_time_schema_mutation: false }, 503);
   }
 
   const requestKey = `cr_${Date.now().toString(36)}_${crypto.randomUUID().slice(0, 8)}`;
@@ -79,5 +100,5 @@ export async function onRequestPost(context) {
     ).run().catch(() => null);
   }
 
-  return json({ ok: true, message: 'Custom request received. We will review it before replying.', request_key: requestKey, upload_token: uploadToken, reference_upload_limit: 5, custom_request_id: customRequestId });
+  return json({ ok: true, message: 'Custom request received. We will review it before replying.', request_key: requestKey, upload_token: uploadToken, reference_upload_limit: 5, custom_request_id: customRequestId, build: 151, context_preserved_in_existing_message_authority: Boolean(contextLine), request_time_schema_mutation: false, automatic_order_created: false, stock_reserved: false, provider_action_executed: false });
 }
