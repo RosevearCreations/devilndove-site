@@ -62,7 +62,7 @@ if pointer_build==152:
     req((pointer.get('current_release_authorities') or [None])[0]=='release467-build152-sitewide-image-quality-media-qa.json','Build 152 closure must lead current authority chain during candidate phase')
     req('# Build 153 — Layout Observer Performance Hotfix — ACTIVE' in roadmap,'Build 153 candidate roadmap state missing')
 elif pointer_build>=153:
-    # Successor lifecycle: prove the exact Build 153 closure rather than demanding the old candidate pointer forever.
+    # Successor lifecycle: prove the exact Build 153 closure while allowing later builds to lead current authority.
     req(closure153.get('release')==467 and closure153.get('build')==153,'Build 153 closure identity is wrong')
     req(closure153.get('title')==TITLE,'Build 153 closure title drifted')
     req(closure153.get('accepted_dev_sha')==B153_DEV and closure153.get('accepted_dev_tree_sha')==B153_TREE,'Build 153 accepted Development SHA/tree drifted')
@@ -73,13 +73,14 @@ elif pointer_build>=153:
     req(int(final153.get('ingested_by_build') or 0)>=154,'Build 153 closure must be ingested by Build 154 or later')
     req(prod153.get('state')=='PRODUCTION_GREEN' and prod153.get('main_sha')==B153_MAIN and prod153.get('tree_sha')==B153_TREE,'Build 153 Production closure drifted')
     req(prod153.get('production_pages_deploy_run')==B153_PAGES and prod153.get('production_live_resource_integrity_run')==B153_LIVE,'Build 153 Production proof IDs drifted')
-    req(pointer.get('release')==467 and pointer.get('accepted_dev_sha')==B153_DEV and pointer.get('accepted_dev_tree_sha')==B153_TREE,'current authority must preserve exact Build 153 Development closure')
-    req((pointer.get('acceptance') or {})==B153_PROOFS,'current authority Build 153 proofs drifted')
+    req(pointer.get('release')==467 and pointer_build>=153,'current authority may not regress behind Build 153')
+    last=(pointer.get('restart_integrity') or {}).get('last_fully_verified') or {}
+    req(int(last.get('build') or 0)>=153,'current restart authority may not regress behind Build 153')
     current_prod=pointer.get('production_checkpoint') or {}
-    req(current_prod.get('build')==153 and current_prod.get('main_sha')==B153_MAIN and current_prod.get('tree_sha')==B153_TREE,'current Production authority must preserve exact Build 153 checkpoint')
-    req(current_prod.get('production_pages_deploy_run')==B153_PAGES and current_prod.get('production_live_resource_integrity_run')==B153_LIVE,'current Build 153 Production proof IDs drifted')
+    req(int(current_prod.get('build') or 0)>=153,'current Production authority may not regress behind Build 153')
+    req(current_prod.get('state')=='PRODUCTION_GREEN','current Production authority must remain GREEN after Build 153')
     req(int(pointer.get('next_build') or 0)>=154,'successor lifecycle must advance beyond Build 153')
-    req((pointer.get('current_release_authorities') or [None])[0]=='release467-build153-layout-observer-performance-hotfix.json','Build 153 closure must lead current authority chain after promotion')
+    req('release467-build153-layout-observer-performance-hotfix.json' in (pointer.get('current_release_authorities') or []),'current authority must retain Build 153 historical authority')
     req('# Build 153 — Layout Observer Performance Hotfix — CLOSED GREEN' in roadmap,'Build 153 closed roadmap state missing')
 else:
     req(False,f'unsupported current authority build for Build 153 lifecycle: {pointer_build}')
