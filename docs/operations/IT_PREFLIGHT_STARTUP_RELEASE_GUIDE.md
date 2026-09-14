@@ -2,17 +2,17 @@
 
 ## Current release baseline
 
-**Release 467 Build 150 — Orders, Fulfillment & Buyer Communication Workspace** is fully Development + Production GREEN.
+**Release 467 Build 151 — Gifting, Custom Work, Local Pickup & Event Selling** is fully Development + Production GREEN.
 
-- Development SHA `33d46f701adb839525561114a31abcd29943d28f`
-- Production main SHA `531e303d32d426d2db6986ec5c3d466455612ee3`
-- identical tree `2f7add90d513a2e9548865f04d97e69b0ae3630e`
-- System `34802545653`
-- Quality `34802545673`
-- I.T. `34802545668`
-- Hygiene `34802545660`
-- Production Pages `34802707901`
-- Production Live Resources `34802759988`
+- Development SHA `86cc4c2500ccb7ed8027466be7226392098a989f`
+- Production main SHA `bb0046c701a8050f9b92948fc60ad622dd1f462e`
+- identical tree `7031e0bf710a9f2b4c4202e6858fda8c01008e01`
+- System `34858535578`
+- Quality `34858535413`
+- I.T. `34858535651`
+- Hygiene `34858535663`
+- Production Pages `34858858586`
+- Production Live Resources `34858997196`
 
 ## Canonical Development target
 
@@ -29,16 +29,14 @@
 5. Require Production Pages Deploy and Production Live Resource Integrity.
 6. Only then call `main` / Production GREEN.
 
-## Build 151 restart
+## Build 152 restart
 
-Build 151 — **Gifting, Custom Work, Local Pickup & Event Selling** — is authorized from the exact Build 150 checkpoint above.
+Build 152 — **Site-wide Image Quality Scoring & Media QA** — is authorized from the exact Build 151 checkpoint above.
 
-It reuses canonical gift-card/checkout authorities, the Operations Custom Requests read/mutation boundaries, existing local-pickup checkout support and public event/pickup pages. Gift intent may carry recipient, occasion, wrapping, requested-delivery and event/pickup context without creating a new payment or fulfillment backend.
+It reuses the existing Release 448 deterministic browser Canvas product-image rubric for editable public/static website images. The score remains advisory and read-only: Lighting 20, Detail/Clarity 20, Background 15, Framing 15, Resolution 10, Colour 10, Artifacts 5 and Consistency 5.
 
-The seller Custom Work command view is read-only. Existing reviewed quote/payment/order mutations remain in their established Custom Requests owner. Local pickup remains server-authoritative; browser totals are estimates until checkout revalidates price, stock, shipping and tax.
+Media & Content Studio and authenticated public page Edit mode may display scores and improvement guidance. Scoring is lazy/visible-first, SVG placeholders are identified but not graded, and CORS/load problems are surfaced as score unavailable rather than a false quality judgement.
 
-Event/offline mode must fail closed for inventory authority: cached state may help a seller remember context but cannot reserve/decrement stock, confirm a unique-item sale or present stale sellability as live. Reconciliation must happen through the live server-authoritative path.
-
-Build 151 remains schema-free. Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`; canonical migrations remain exactly `0001`–`0004`.
+Build 152 remains schema-free. Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`; canonical migrations remain exactly `0001`–`0004`.
 
 Production live-resource retries remain capped at three transient attempts; permanent 4xx responses and real Product API, R2, photography, merchandising and D1 failures fail closed. Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
