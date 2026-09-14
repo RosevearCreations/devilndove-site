@@ -13,7 +13,7 @@ import {
 } from './api/_lib/appModuleSessionGuard.js';
 import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appModuleRoutes.js';
 
-const PRODUCTS_ASSET_REVISION = '467-b154-products-worker-fast-path';
+const PRODUCTS_ASSET_REVISION = '467-b155-products-client-responsiveness';
 const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
