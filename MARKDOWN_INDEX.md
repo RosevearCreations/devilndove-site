@@ -1,26 +1,28 @@
 # Devil n Dove — Markdown Index
 
-Current fully verified baseline: **Release 467 Build 152 — Site-wide Image Quality Scoring & Media QA**.
+Current exact verified baseline: **Release 467 Build 153 — Layout Observer Performance Hotfix**.
 
 Primary current authorities:
 - `current-development-authority.json`
-- `release467-build152-sitewide-image-quality-media-qa.json`
+- `release467-build153-layout-observer-performance-hotfix.json`
 - `AI_HANDOFF.md`
 - `PROJECT_STATUS_AND_ROADMAP.md`
 - `SANITY_HEALTH_CHECK.md`
 - `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
 
-Build 152 proof bundle:
-- Development SHA `1d01cbed98b78543b75dab808a30fb76c20d6060`
-- Production main SHA `2f22e280426968a9ff229a0cee9ee62a69dc9d75`
-- identical tree `9cf8b0ac918ce567c51536f05d4c89b6f6294765`
-- System `34860514075`
-- Quality `34860514137`
-- I.T. `34860514304`
-- Hygiene `34860514150`
-- Production Pages `34860809983`
-- Live Resources `34860922626`
+Build 153 proof bundle:
+- Development SHA `b8323b4e13ae08a8126da761106367de75f7cd40`
+- Production main SHA `ba8b3c2406335391334b2a74a89e5819236c770b`
+- identical tree `a3d0225c579953d5572dc99313661c2981c42510`
+- System `34863777573`
+- Quality `34863777529`
+- I.T. `34863777559`
+- Hygiene `34863777543`
+- Production Pages `34864015766`
+- Live Resources `34864113781`
 
-Build 153 — **Layout Observer Performance Hotfix** — is active. It repairs the shared layout guard after a Production Firefox long-script timeout by batching and deduplicating MutationObserver work, filtering irrelevant additions, suppressing self-generated wrapper mutations and advancing the Products layout-guard cache token. It adds no D1/R2/provider/payment/refund/accounting mutation authority.
+Build 154 — **Products Worker Resource Hotfix** — is active because `/admin/products/` later returned HTTP 503 / Cloudflare Error 1102 (`Worker exceeded resource limits`) at `2026-09-14T15:48:10Z`. The repair preserves module/session authorization but removes the Products HTML document from generic request-time `HTMLRewriter`, replacing it with a bounded Products fast path and a route-specific post-Production proof.
+
+Build 154 is not complete until the live route itself proves HTTP 200, `X-DND-Products-Render-Path: static-fast-path`, module-guard headers, the `467-b154-products-worker-fast-path` cache token, and no 1102/resource-limit response.
 
 Builds 137–141 closure-evidence authorities remain retained provenance for Markdown/JSON export, evidence ID, SHA-256 fingerprint, verification manifest and independent cross-artifact verification. Build 135 Production live-resource transport resilience remains mandatory. Canonical migrations remain `0001`–`0004`.
