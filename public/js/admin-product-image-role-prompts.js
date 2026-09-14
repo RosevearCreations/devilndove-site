@@ -5,11 +5,11 @@
 // Release 467 Build 104 loads Product Work Session Focus Views.
 // Release 467 Build 105 loads Product Work Session Completion & Handoff.
 // Release 467 Build 106 loads Marketplace Listing Readiness.
-// Release 467 Build 155 cache-revises Marketplace Listing Readiness after the Products client responsiveness repair.
+// Release 467 Build 155 cache-revises Marketplace Listing Readiness and bounded Product Work Views after the Products client responsiveness repair.
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (document.body?.dataset?.adminPage === 'products') {
-    import('/public/js/admin-products-work-views.js?v=467b99').catch(() => {});
+    import('/public/js/admin-products-work-views.js?v=467b155-bounded').catch(() => {});
     import('/public/js/admin-products-work-session.js?v=467b104').catch(() => {});
     import('/public/js/admin-products-work-session-handoff.js?v=467b105').catch(() => {});
     import('/public/js/admin-products-marketplace-readiness.js?v=467b155').catch(() => {});
