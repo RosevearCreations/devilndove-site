@@ -12,8 +12,14 @@ for stale in ('Release 465 Build 3 safety statement','Release 465 Build 3 canoni
 for historical in ('scripts/release464_update2_gate.py','scripts/release464_update3_gate.py','scripts/release465_build1_gate.py','scripts/release465_build2_gate.py','scripts/release465_build3_gate.py','scripts/release465_performance_budget_gate.py'):req(historical in text,f'historical regression prerequisite missing: {historical}')
 def run_current_contract(path,label):
     result=subprocess.run([sys.executable,str(ROOT/path)],cwd=ROOT,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=False)
-    if result.stdout.strip(): print(result.stdout.strip())
-    if result.returncode!=0: FAIL.append(f"{label} current reliability contract failed: {(result.stderr or result.stdout or f'{label} gate failed').strip()[-2000:]}")
+    out=(result.stdout or '').strip();err=(result.stderr or '').strip()
+    if out: print(out)
+    if err: print(err,file=sys.stderr)
+    if result.returncode!=0:
+        detail=(err or out or f'{label} gate failed').strip()[-2000:]
+        annotation=detail.replace('\r',' ').replace('\n',' | ')
+        print(f'::error title=System provenance child failed::{label} failed with exit code {result.returncode}: {annotation}')
+        FAIL.append(f"{label} current reliability contract failed: {detail}")
 # Explicit calls and their historical formatting are intentional because retained gates inspect this source literally.
 run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
 run_current_contract('scripts/release467_build63_gate.py', 'Release 467 Build 63')
