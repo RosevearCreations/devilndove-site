@@ -6,6 +6,7 @@
   const EDIT_SESSION_KEY='dd-media-page-edit-mode';
   let adminReady=false;
   let editLinksBuilt=false;
+  let imageQualityToolsPromise=null;
 
   function pagePath(){let p=location.pathname||'/';if(p.length>1&&p.endsWith('/'))p=p.slice(0,-1);return p||'/';}
   function safeSelector(selector){try{return document.querySelector(selector);}catch{return null;}}
@@ -21,6 +22,18 @@
   }
   function persistEditMode(enabled){try{sessionStorage.setItem(EDIT_SESSION_KEY,enabled?'1':'0');}catch{}}
   function targetForSlot(key){try{return document.querySelector(`[data-media-slot="${CSS.escape(key)}"],[data-content-slot="${CSS.escape(key)}"],[data-link-slot="${CSS.escape(key)}"],[data-color-slot="${CSS.escape(key)}"]`);}catch{return null;}}
+
+  function loadScriptOnce(src,marker){
+    return new Promise((resolve,reject)=>{
+      if(document.querySelector(`script[${marker}]`)){resolve();return;}
+      const script=document.createElement('script');script.src=src;script.defer=true;script.setAttribute(marker,'1');script.onload=()=>resolve();script.onerror=()=>reject(new Error(`Could not load ${src}`));document.head.appendChild(script);
+    });
+  }
+  function loadImageQualityTools(){
+    if(imageQualityToolsPromise)return imageQualityToolsPromise;
+    imageQualityToolsPromise=loadScriptOnce('/public/js/image-quality-scorer-v152.js?v=467b152','data-dd-image-quality-scorer').then(()=>loadScriptOnce('/public/js/site-image-quality-overlay-v152.js?v=467b152','data-dd-image-quality-overlay')).catch(()=>null);
+    return imageQualityToolsPromise;
+  }
 
   function buildEditLinks(){
     if(editLinksBuilt)return;
@@ -43,12 +56,12 @@
     const toolbar=document.getElementById('mediaPageEditToolbar');if(!toolbar)return;
     const button=toolbar.querySelector('[data-media-page-edit-toggle]');const status=toolbar.querySelector('[data-media-page-edit-status]');
     if(button){button.setAttribute('aria-pressed',enabled?'true':'false');button.textContent=enabled?'Editing ON':'Edit page';button.classList.toggle('active',enabled);}
-    if(status)status.textContent=enabled?'Editable locations are visible. Turn editing off for a clean page preview.':'Clean preview. Turn editing on to reveal editable locations.';
+    if(status)status.textContent=enabled?'Editable locations and image-quality scores are visible. Turn editing off for a clean page preview.':'Clean preview. Turn editing on to reveal editable locations and image-quality scores.';
   }
 
   function setEditMode(enabled,{persist=true,focusHash=false}={}){
     if(!adminReady)return;
-    if(enabled)buildEditLinks();
+    if(enabled){buildEditLinks();loadImageQualityTools();}
     document.documentElement.classList.toggle('media-page-edit-mode',!!enabled);
     document.documentElement.dataset.mediaPageEditMode=enabled?'on':'off';
     if(persist)persistEditMode(!!enabled);
@@ -62,7 +75,7 @@
   function ensureEditToolbar(){
     if(document.getElementById('mediaPageEditToolbar'))return;
     const toolbar=document.createElement('aside');toolbar.id='mediaPageEditToolbar';toolbar.className='media-page-edit-toolbar';toolbar.setAttribute('aria-label','Page editing controls');
-    toolbar.innerHTML='<div><strong>Admin page preview</strong><span data-media-page-edit-status>Clean preview. Turn editing on to reveal editable locations.</span></div><button class="media-page-edit-toggle" data-media-page-edit-toggle type="button" aria-pressed="false">Edit page</button><a class="media-page-edit-studio-link" href="/admin/media-content-studio/">Media Studio</a>';
+    toolbar.innerHTML='<div><strong>Admin page preview</strong><span data-media-page-edit-status>Clean preview. Turn editing on to reveal editable locations and image-quality scores.</span></div><button class="media-page-edit-toggle" data-media-page-edit-toggle type="button" aria-pressed="false">Edit page</button><a class="media-page-edit-studio-link" href="/admin/media-content-studio/">Media Studio</a>';
     document.body.appendChild(toolbar);
     toolbar.querySelector('[data-media-page-edit-toggle]')?.addEventListener('click',()=>setEditMode(!document.documentElement.classList.contains('media-page-edit-mode'),{persist:true,focusHash:true}));
   }
