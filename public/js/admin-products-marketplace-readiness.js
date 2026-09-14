@@ -1,7 +1,9 @@
 // Release 467 Build 106 — browser-local Marketplace Listing Readiness.
+// Release 467 Build 155 — Products client responsiveness hotfix: marketplace rendering is idempotent and ignores its own DOM mutations.
 // Review/export preparation only. Reuses the Product snapshot and readiness already loaded on the Products page.
 (() => {
   const SNAPSHOT_KEY = 'dd_admin_products_snapshot_v2';
+  const CLIENT_RESPONSIVENESS_REVISION = '467-b155-products-client-responsiveness';
   const CHANNELS = Object.freeze({
     etsy: { label: 'Etsy', requirements: ['hero_image','image_quality','title_description','dimensions_materials','price','inventory_state','fulfilment','tags_category','evidence'] },
     facebook_marketplace: { label: 'Facebook Marketplace', requirements: ['hero_image','image_quality','title_description','price','inventory_state','fulfilment','tags_category','evidence'] },
@@ -27,6 +29,11 @@
     if (!tableBody) return;
     const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
     let renderTimer = 0;
+    let observer = null;
+    let renderCount = 0;
+    let observedMutationBatches = 0;
+    let ignoredSelfMutationBatches = 0;
+    let lastRenderAt = 0;
 
     function readSnapshot() {
       try {
@@ -178,18 +185,45 @@
       if (!panel) { panel = document.createElement('details'); panel.className = 'marketplace-readiness-inline'; nameCell.appendChild(panel); }
       const channelMarkup = Object.entries(evaluation.channels).map(([key, channel]) => `<span class="marketplace-readiness-pill ${channel.ready ? 'is-ready' : 'is-blocked'}" title="${esc(channel.missing.map((item) => CHECK_LABELS[item] || item).join(', '))}">${esc(channel.label)} ${channel.score}%</span>`).join('');
       const checksMarkup = Object.entries(evaluation.checks).map(([key, check]) => `<li class="${check.ok ? 'is-ready' : 'is-blocked'}"><strong>${check.ok ? '✓' : '!'} ${esc(CHECK_LABELS[key] || key)}</strong> — ${esc(check.detail)}</li>`).join('');
-      panel.innerHTML = `<summary>Marketplace readiness <span class="small">review/export only</span></summary><div class="marketplace-readiness-pills">${channelMarkup}</div><ul class="small marketplace-readiness-checks">${checksMarkup}</ul><div class="marketplace-readiness-actions"><button class="btn small" type="button" data-marketplace-readiness-command="copy" data-product-id="${productId}">Copy export pack</button><button class="btn small" type="button" data-marketplace-readiness-command="download" data-product-id="${productId}">Download JSON</button><a class="btn small secondary" href="/admin/catalog/?product_id=${productId}">Edit listing facts</a></div><div class="small marketplace-readiness-status" role="status" aria-live="polite">Publication stays closed; review the pack before using any marketplace.</div>`;
+      const markup = `<summary>Marketplace readiness <span class="small">review/export only</span></summary><div class="marketplace-readiness-pills">${channelMarkup}</div><ul class="small marketplace-readiness-checks">${checksMarkup}</ul><div class="marketplace-readiness-actions"><button class="btn small" type="button" data-marketplace-readiness-command="copy" data-product-id="${productId}">Copy export pack</button><button class="btn small" type="button" data-marketplace-readiness-command="download" data-product-id="${productId}">Download JSON</button><a class="btn small secondary" href="/admin/catalog/?product_id=${productId}">Edit listing facts</a></div><div class="small marketplace-readiness-status" role="status" aria-live="polite">Publication stays closed; review the pack before using any marketplace.</div>`;
+      const renderKey = JSON.stringify({ product_id: productId, channels: evaluation.channels, checks: evaluation.checks });
+      if (panel.dataset.ddMarketplaceRenderKey === renderKey) return;
+      panel.dataset.ddMarketplaceRenderKey = renderKey;
+      panel.innerHTML = markup;
+    }
+
+    function observeTable() {
+      observer?.observe(tableBody, { childList: true, subtree: true });
     }
 
     function render() {
-      const products = readSnapshot();
-      const byId = new Map(products.map((product) => [Number(product?.product_id || 0), product]));
-      for (const row of tableBody.querySelectorAll('tr')) {
-        const productId = productIdForRow(row), product = byId.get(productId); if (product) renderRow(row, product);
+      renderCount += 1;
+      lastRenderAt = Date.now();
+      observer?.disconnect();
+      try {
+        const products = readSnapshot();
+        const byId = new Map(products.map((product) => [Number(product?.product_id || 0), product]));
+        for (const row of tableBody.querySelectorAll('tr')) {
+          const productId = productIdForRow(row), product = byId.get(productId); if (product) renderRow(row, product);
+        }
+        if (!document.getElementById('marketplaceListingReadinessStyle')) {
+          const style = document.createElement('style'); style.id = 'marketplaceListingReadinessStyle'; style.textContent = '.marketplace-readiness-inline{margin-top:8px;padding:8px 10px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.045)}.marketplace-readiness-inline>summary{cursor:pointer;font-weight:800}.marketplace-readiness-pills,.marketplace-readiness-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.marketplace-readiness-pill{display:inline-flex;padding:4px 7px;border:1px solid var(--border);border-radius:999px;font-size:.78rem}.marketplace-readiness-pill.is-ready,.marketplace-readiness-checks .is-ready{opacity:.95}.marketplace-readiness-pill.is-blocked,.marketplace-readiness-checks .is-blocked{font-weight:700}.marketplace-readiness-checks{margin:8px 0;padding-left:20px;display:grid;gap:3px}.marketplace-readiness-status{margin-top:7px}@media(max-width:720px){.marketplace-readiness-actions .btn{flex:1 1 145px}}'; document.head.appendChild(style);
+        }
+      } finally {
+        observeTable();
       }
-      if (!document.getElementById('marketplaceListingReadinessStyle')) {
-        const style = document.createElement('style'); style.id = 'marketplaceListingReadinessStyle'; style.textContent = '.marketplace-readiness-inline{margin-top:8px;padding:8px 10px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.045)}.marketplace-readiness-inline>summary{cursor:pointer;font-weight:800}.marketplace-readiness-pills,.marketplace-readiness-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.marketplace-readiness-pill{display:inline-flex;padding:4px 7px;border:1px solid var(--border);border-radius:999px;font-size:.78rem}.marketplace-readiness-pill.is-ready,.marketplace-readiness-checks .is-ready{opacity:.95}.marketplace-readiness-pill.is-blocked,.marketplace-readiness-checks .is-blocked{font-weight:700}.marketplace-readiness-checks{margin:8px 0;padding-left:20px;display:grid;gap:3px}.marketplace-readiness-status{margin-top:7px}@media(max-width:720px){.marketplace-readiness-actions .btn{flex:1 1 145px}}'; document.head.appendChild(style);
+    }
+
+    function mutationNeedsRender(records) {
+      let relevant = false;
+      for (const record of records || []) {
+        const target = record?.target?.nodeType === 1 ? record.target : record?.target?.parentElement;
+        if (target?.closest?.('.marketplace-readiness-inline')) continue;
+        relevant = true;
+        break;
       }
+      if (!relevant) ignoredSelfMutationBatches += 1;
+      return relevant;
     }
 
     document.addEventListener('click', (event) => {
@@ -199,9 +233,24 @@
       if (command === 'copy') void copyPack(product, evaluation, row);
       if (command === 'download') downloadPack(product, evaluation, row);
     });
-    const observer = new MutationObserver(() => { clearTimeout(renderTimer); renderTimer = setTimeout(render, 80); });
-    observer.observe(tableBody, { childList: true, subtree: true });
+    observer = new MutationObserver((records) => {
+      observedMutationBatches += 1;
+      if (!mutationNeedsRender(records)) return;
+      clearTimeout(renderTimer);
+      renderTimer = setTimeout(render, 80);
+    });
+    observeTable();
     window.addEventListener('storage', (event) => { if (event.key === SNAPSHOT_KEY) render(); });
+    window.DDProductsMarketplaceReadinessHealth = Object.freeze({
+      version: CLIENT_RESPONSIVENESS_REVISION,
+      snapshot: () => Object.freeze({
+        version: CLIENT_RESPONSIVENESS_REVISION,
+        render_count: renderCount,
+        observed_mutation_batches: observedMutationBatches,
+        ignored_self_mutation_batches: ignoredSelfMutationBatches,
+        last_render_at: lastRenderAt || null,
+      }),
+    });
     render();
   });
 })();

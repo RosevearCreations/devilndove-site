@@ -1,0 +1,89 @@
+name: Release 467 Build 155 Products Development Browser Proof
+
+on:
+  workflow_run:
+    workflows: ['System Gate']
+    types: [completed]
+    branches: [dev]
+
+permissions: {contents: read}
+
+jobs:
+  products-development-browser:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      DND_BASE_URL: https://dev.devilndove-site.pages.dev
+      EXPECTED_SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+      DND_CONFIGURED_SESSION_COOKIE: ${{ secrets.DND_DEV_SESSION_COOKIE }}
+      CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 1
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove exact Build 155 source
+        run: |
+          test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
+          python scripts/release467_build155_gate.py
+      - name: Resolve existing Development admin session read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${DND_CONFIGURED_SESSION_COOKIE}" ]; then
+            echo '::add-mask::configured-development-session'
+            echo "DND_SESSION_COOKIE=${DND_CONFIGURED_SESSION_COOKIE}" >> "$GITHUB_ENV"
+            echo 'Using configured masked Development administrator session.'
+            exit 0
+          fi
+          test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'STOP: Development D1 read credential is not configured.'; exit 1; }
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT COALESCE(NULLIF(s.session_token,''),s.token) AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(NULLIF(s.session_token,''),s.token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/build155-dev-session.json
+          TOKEN="$(python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build155-dev-session.json'))
+          def walk(value):
+              if isinstance(value,dict):
+                  if value.get('runtime_token'): yield str(value['runtime_token'])
+                  for child in value.values(): yield from walk(child)
+              elif isinstance(value,list):
+                  for child in value: yield from walk(child)
+          print(next(walk(data),'').strip())
+          PY
+          )"
+          rm -f /tmp/build155-dev-session.json
+          test -n "${TOKEN}" || { echo 'STOP: no unexpired Development administrator session exists for real-browser acceptance.'; exit 1; }
+          echo "::add-mask::${TOKEN}"
+          echo "DND_SESSION_COOKIE=dd_auth_token=${TOKEN}" >> "$GITHUB_ENV"
+          unset TOKEN
+          echo 'Existing Development admin session resolved read-only.'
+      - name: Validate Cloudflare Access credential pairing
+        shell: bash
+        run: |
+          set -euo pipefail
+          if { [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -z "${CF_ACCESS_CLIENT_SECRET}" ]; } || { [ -z "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; }; then
+            echo 'STOP: Cloudflare Access service-token credentials are only partially configured.'
+            exit 1
+          fi
+      - name: Run real Chromium Product UI responsiveness acceptance
+        run: node scripts/products_browser_runtime_probe.mjs
+      - name: Boundary
+        if: always()
+        run: |
+          echo "Exact Development SHA: ${EXPECTED_SOURCE_SHA}"
+          echo 'Target: canonical Development Preview only'
+          echo 'Browser: real headless Chromium/CDP'
+          echo 'HTTP/browser actions: GET + DOM observation only'
+          echo 'Session lookup: READ ONLY; no session created'
+          echo 'D1/R2 mutation: NONE'
+          echo 'Provider/payment/refund/accounting mutation: NONE'

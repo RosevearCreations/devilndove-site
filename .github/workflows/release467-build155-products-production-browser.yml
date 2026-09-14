@@ -1,0 +1,72 @@
+name: Release 467 Build 155 Products Production Browser Proof
+
+on:
+  workflow_run:
+    workflows: ['Production Pages Deploy']
+    types: [completed]
+    branches: [main]
+
+permissions: {contents: read}
+
+jobs:
+  products-production-browser:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      DND_BASE_URL: https://devilndove.com
+      EXPECTED_SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      PROD_D1_DATABASE_NAME: devilndove-prod-r462
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 1
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove exact Build 155 source
+        run: |
+          test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
+          python scripts/release467_build155_gate.py
+      - name: Resolve existing Production admin session read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'STOP: Production D1 read credential is not configured.'; exit 1; }
+          npx --yes wrangler@4.128.0 d1 execute "${PROD_D1_DATABASE_NAME}" --remote --json --command "SELECT COALESCE(NULLIF(s.session_token,''),s.token) AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(NULLIF(s.session_token,''),s.token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/build155-prod-session.json
+          TOKEN="$(python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build155-prod-session.json'))
+          def walk(value):
+              if isinstance(value,dict):
+                  if value.get('runtime_token'): yield str(value['runtime_token'])
+                  for child in value.values(): yield from walk(child)
+              elif isinstance(value,list):
+                  for child in value: yield from walk(child)
+          print(next(walk(data),'').strip())
+          PY
+          )"
+          rm -f /tmp/build155-prod-session.json
+          test -n "${TOKEN}" || { echo 'STOP: no unexpired Production administrator session exists for real-browser acceptance.'; exit 1; }
+          echo "::add-mask::${TOKEN}"
+          echo "DND_SESSION_COOKIE=dd_auth_token=${TOKEN}" >> "$GITHUB_ENV"
+          unset TOKEN
+          echo 'Existing Production admin session resolved read-only.'
+      - name: Run real Chromium Product UI responsiveness acceptance
+        run: node scripts/products_browser_runtime_probe.mjs
+      - name: Boundary
+        if: always()
+        run: |
+          echo "Exact Production main SHA: ${EXPECTED_SOURCE_SHA}"
+          echo 'Target: https://devilndove.com/admin/products/'
+          echo 'Browser: real headless Chromium/CDP'
+          echo 'Acceptance requires populated Product picker/table and responsive event loop'
+          echo 'Session lookup: READ ONLY; no session created'
+          echo 'D1/R2 mutation: NONE'
+          echo 'Provider/payment/refund/accounting mutation: NONE'
