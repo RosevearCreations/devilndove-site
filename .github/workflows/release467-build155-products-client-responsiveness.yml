@@ -1,0 +1,64 @@
+name: Release 467 Build 155 Products Client Responsiveness Proof
+
+on:
+  pull_request:
+    paths:
+      - 'public/js/admin-products-marketplace-readiness.js'
+      - 'public/js/admin-product-image-role-prompts.js'
+      - 'functions/_middleware.js'
+      - 'scripts/products_browser_runtime_probe.mjs'
+      - 'scripts/release467_build154_gate.py'
+      - 'scripts/release467_build155_gate.py'
+      - 'release467-build154-products-worker-resource-hotfix.json'
+      - 'scripts/current_application_quality_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - '.github/workflows/release467-build155-products-client-responsiveness.yml'
+      - '.github/workflows/release467-build155-products-development-browser.yml'
+      - '.github/workflows/release467-build155-products-production-browser.yml'
+  push:
+    branches: [dev]
+    paths:
+      - 'public/js/admin-products-marketplace-readiness.js'
+      - 'public/js/admin-product-image-role-prompts.js'
+      - 'functions/_middleware.js'
+      - 'scripts/products_browser_runtime_probe.mjs'
+      - 'scripts/release467_build154_gate.py'
+      - 'scripts/release467_build155_gate.py'
+      - 'release467-build154-products-worker-resource-hotfix.json'
+      - 'scripts/current_application_quality_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - '.github/workflows/release467-build155-products-client-responsiveness.yml'
+      - '.github/workflows/release467-build155-products-development-browser.yml'
+      - '.github/workflows/release467-build155-products-production-browser.yml'
+
+permissions: {contents: read}
+
+jobs:
+  products-client-source-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Validate Build 155 Products client responsiveness authority
+        run: python scripts/release467_build155_gate.py
+      - name: Preserve Build 154 Worker/server repair
+        run: python scripts/release467_build154_gate.py
+      - name: JavaScript syntax
+        run: |
+          node --check public/js/admin-products-marketplace-readiness.js
+          node --check public/js/admin-product-image-role-prompts.js
+          node --check functions/_middleware.js
+          node --check scripts/products_browser_runtime_probe.mjs
+      - name: Boundary
+        run: |
+          echo 'Products client self-mutation loop: SOURCE PROTECTED'
+          echo 'Real-browser proof: required after exact Development and Production deployment'
+          echo 'Schema change: NONE'
+          echo 'D1/R2 business-data mutation: NONE'
+          echo 'Provider/payment/refund/accounting mutation: NONE'
