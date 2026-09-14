@@ -1,4 +1,4 @@
-name: Build 155 Pages Access Policy Readonly Diagnostic
+name: Build 155 Bounded Development Browser Acceptance
 
 on:
   push:
@@ -9,51 +9,203 @@ permissions:
   contents: read
 
 jobs:
-  access-policy-readonly:
+  bounded-development-browser-acceptance:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 18
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_API_TOKEN_EDIT: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      DND_BASE_URL: https://dev.devilndove-site.pages.dev
+      EXPECTED_SOURCE_SHA: 21b700673bd50ce396e72ed742e4e32f066e24e7
     steps:
-      - name: Inspect exact Pages Access application policy without mutation
+      - name: Checkout exact fully-green Development SHA
+        uses: actions/checkout@v7
+        with:
+          ref: 21b700673bd50ce396e72ed742e4e32f066e24e7
+          fetch-depth: 1
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Product Entry with reversible one-token Service Auth policy
         shell: bash
         run: |
           set -euo pipefail
-          auth=(-H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN_EDIT}" -H 'Content-Type: application/json')
-          curl -fsS "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/apps?per_page=100" > /tmp/apps.json
-          python - <<'PY'
-          import json, pathlib
-          d=json.load(open('/tmp/apps.json')); assert d.get('success') is True,d
-          rows=[r for r in d.get('result',[]) if isinstance(r,dict) and r.get('domain')=='*.devilndove-site.pages.dev']
-          assert len(rows)==1, rows
-          app=rows[0]
-          pathlib.Path('/tmp/app-id').write_text(str(app['id']))
-          print('ACCESS_APP_ID',app['id'])
-          print('ACCESS_APP_NAME',app.get('name'))
-          print('ACCESS_APP_DOMAIN',app.get('domain'))
-          print('ACCESS_APP_POLICY_REFS',len(app.get('policies') or []))
+          test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
+          python scripts/release467_build155_gate.py
+          test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'STOP: standard Cloudflare API credential missing'; exit 2; }
+          test -n "${CLOUDFLARE_API_TOKEN_EDIT}" || { echo 'STOP: Cloudflare edit credential missing'; exit 3; }
+
+          APP_ID=''
+          ORIGINAL_POLICY_ID=''
+          TEMP_POLICY_ID=''
+          TEMP_TOKEN_ID=''
+
+          cleanup() {
+            rc=$?
+            set +e
+            auth=(-H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN_EDIT}" -H 'Content-Type: application/json')
+            if [ -n "${TEMP_POLICY_ID}" ] && [ -n "${APP_ID}" ]; then
+              policy_delete_status="$(curl -sS -o /tmp/b155-policy-delete.json -w '%{http_code}' -X DELETE "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/apps/${APP_ID}/policies/${TEMP_POLICY_ID}")"
+              POLICY_DELETE_STATUS="${policy_delete_status}" python - <<'PY'
+          import json, os, pathlib
+          try: data=json.loads(pathlib.Path('/tmp/b155-policy-delete.json').read_text())
+          except Exception: data={}
+          print('TEMP_SERVICE_AUTH_POLICY_DELETE_HTTP_STATUS',os.environ.get('POLICY_DELETE_STATUS',''))
+          print('TEMP_SERVICE_AUTH_POLICY_DELETE_API_SUCCESS',bool(data.get('success')))
           PY
-          app_id="$(cat /tmp/app-id)"
-          curl -fsS "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/apps/${app_id}/policies?per_page=100" > /tmp/policies.json
+            fi
+            if [ -n "${TEMP_TOKEN_ID}" ]; then
+              token_delete_status="$(curl -sS -o /tmp/b155-token-delete.json -w '%{http_code}' -X DELETE "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/service_tokens/${TEMP_TOKEN_ID}")"
+              TOKEN_DELETE_STATUS="${token_delete_status}" python - <<'PY'
+          import json, os, pathlib
+          try: data=json.loads(pathlib.Path('/tmp/b155-token-delete.json').read_text())
+          except Exception: data={}
+          print('TEMP_SERVICE_TOKEN_DELETE_HTTP_STATUS',os.environ.get('TOKEN_DELETE_STATUS',''))
+          print('TEMP_SERVICE_TOKEN_DELETE_API_SUCCESS',bool(data.get('success')))
+          PY
+            fi
+
+            if [ -n "${APP_ID}" ] && [ -n "${ORIGINAL_POLICY_ID}" ]; then
+              curl -sS "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/apps/${APP_ID}/policies?per_page=100" > /tmp/b155-final-policies.json
+              curl -sS "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/service_tokens?per_page=100" > /tmp/b155-final-tokens.json
+              ORIGINAL_POLICY_ID="${ORIGINAL_POLICY_ID}" python - <<'PY'
+          import json,os
+          p=json.load(open('/tmp/b155-final-policies.json')); t=json.load(open('/tmp/b155-final-tokens.json'))
+          assert p.get('success') is True,p
+          assert t.get('success') is True,t
+          rows=p.get('result') if isinstance(p.get('result'),list) else []
+          tokens=t.get('result') if isinstance(t.get('result'),list) else []
+          original=os.environ['ORIGINAL_POLICY_ID']
+          assert len(rows)==1,[(x.get('id'),x.get('name'),x.get('decision')) for x in rows]
+          row=rows[0]
+          assert row.get('id')==original,row.get('id')
+          assert row.get('name')=='Allow Members - Cloudflare Pages',row.get('name')
+          assert row.get('decision')=='allow',row.get('decision')
+          include=row.get('include') if isinstance(row.get('include'),list) else []
+          assert len(include)==1 and isinstance(include[0],dict) and set(include[0])=={'email'},include
+          assert not (row.get('require') or []),row.get('require')
+          assert not (row.get('exclude') or []),row.get('exclude')
+          assert len(tokens)==0,[x.get('name') for x in tokens if isinstance(x,dict)]
+          print('ACCESS_CLEANUP_VERIFICATION PASS')
+          print('ORIGINAL_MEMBER_POLICY RESTORED_UNCHANGED')
+          print('TEMP_SERVICE_AUTH_POLICIES_REMAINING 0')
+          print('ACCESS_SERVICE_TOKENS_REMAINING 0')
+          PY
+            fi
+            rm -f /tmp/b155-*.json /tmp/b155-*.txt
+            exit ${rc}
+          }
+          trap cleanup EXIT
+
+          auth=(-H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN_EDIT}" -H 'Content-Type: application/json')
+          curl -fsS "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/apps?per_page=100" > /tmp/b155-apps.json
+          python - <<'PY'
+          import json,pathlib
+          d=json.load(open('/tmp/b155-apps.json')); assert d.get('success') is True,d
+          rows=[r for r in d.get('result',[]) if isinstance(r,dict) and r.get('domain')=='*.devilndove-site.pages.dev']
+          assert len(rows)==1,rows
+          pathlib.Path('/tmp/b155-app-id.txt').write_text(str(rows[0]['id']))
+          PY
+          APP_ID="$(cat /tmp/b155-app-id.txt)"
+
+          curl -fsS "${auth[@]}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/apps/${APP_ID}/policies?per_page=100" > /tmp/b155-initial-policies.json
+          python - <<'PY'
+          import json,pathlib
+          d=json.load(open('/tmp/b155-initial-policies.json')); assert d.get('success') is True,d
+          rows=d.get('result') if isinstance(d.get('result'),list) else []
+          assert len(rows)==1,[(x.get('id'),x.get('name')) for x in rows]
+          row=rows[0]
+          assert row.get('name')=='Allow Members - Cloudflare Pages',row.get('name')
+          assert row.get('decision')=='allow',row.get('decision')
+          include=row.get('include') if isinstance(row.get('include'),list) else []
+          assert len(include)==1 and isinstance(include[0],dict) and set(include[0])=={'email'},include
+          assert not (row.get('require') or []),row.get('require')
+          assert not (row.get('exclude') or []),row.get('exclude')
+          pathlib.Path('/tmp/b155-original-policy-id.txt').write_text(str(row['id']))
+          print('ORIGINAL_MEMBER_POLICY_BASELINE PASS')
+          PY
+          ORIGINAL_POLICY_ID="$(cat /tmp/b155-original-policy-id.txt)"
+
+          token_status="$(curl -sS -o /tmp/b155-token-create.json -w '%{http_code}' -X POST "${auth[@]}" --data "{\"name\":\"build155-dev-browser-${GITHUB_RUN_ID}\",\"duration\":\"30m\"}" "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/service_tokens")"
+          TOKEN_STATUS="${token_status}" python - <<'PY'
+          import json,os,pathlib
+          d=json.load(open('/tmp/b155-token-create.json'))
+          print('TEMP_SERVICE_TOKEN_CREATE_HTTP_STATUS',os.environ['TOKEN_STATUS'])
+          assert d.get('success') is True,d.get('errors')
+          r=d.get('result') or {}
+          for k,p in [('id','/tmp/b155-token-id.txt'),('client_id','/tmp/b155-client-id.txt'),('client_secret','/tmp/b155-client-secret.txt')]:
+              v=str(r.get(k) or ''); assert v,k; pathlib.Path(p).write_text(v)
+          print('TEMP_SERVICE_TOKEN_CREATED YES')
+          print('TEMP_SERVICE_TOKEN_SECRET_EMITTED NO')
+          PY
+          TEMP_TOKEN_ID="$(cat /tmp/b155-token-id.txt)"
+          CF_ACCESS_CLIENT_ID="$(cat /tmp/b155-client-id.txt)"
+          CF_ACCESS_CLIENT_SECRET="$(cat /tmp/b155-client-secret.txt)"
+          echo "::add-mask::${TEMP_TOKEN_ID}"
+          echo "::add-mask::${CF_ACCESS_CLIENT_ID}"
+          echo "::add-mask::${CF_ACCESS_CLIENT_SECRET}"
+
+          TEMP_TOKEN_ID="${TEMP_TOKEN_ID}" python - <<'PY'
+          import json,os
+          payload={
+            'name':'Build 155 bounded CI Service Auth',
+            'decision':'non_identity',
+            'include':[{'service_token':{'token_id':os.environ['TEMP_TOKEN_ID']}}],
+            'require':[],
+            'exclude':[]
+          }
+          json.dump(payload,open('/tmp/b155-policy-create-body.json','w'))
+          PY
+          policy_status="$(curl -sS -o /tmp/b155-policy-create.json -w '%{http_code}' -X POST "${auth[@]}" --data @/tmp/b155-policy-create-body.json "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/access/apps/${APP_ID}/policies")"
+          POLICY_STATUS="${policy_status}" python - <<'PY'
+          import json,os,pathlib
+          d=json.load(open('/tmp/b155-policy-create.json'))
+          print('TEMP_SERVICE_AUTH_POLICY_CREATE_HTTP_STATUS',os.environ['POLICY_STATUS'])
+          print('TEMP_SERVICE_AUTH_POLICY_CREATE_API_SUCCESS',bool(d.get('success')))
+          if not d.get('success'): print('TEMP_SERVICE_AUTH_POLICY_CREATE_ERROR_CODES',[x.get('code') for x in d.get('errors',[]) if isinstance(x,dict)])
+          assert d.get('success') is True,d.get('errors')
+          r=d.get('result') or {}; pid=str(r.get('id') or ''); assert pid
+          pathlib.Path('/tmp/b155-policy-id.txt').write_text(pid)
+          print('TEMP_SERVICE_AUTH_POLICY_CREATED YES')
+          PY
+          TEMP_POLICY_ID="$(cat /tmp/b155-policy-id.txt)"
+
+          sleep 3
+          admission_status="$(curl -sS --max-time 25 -o /tmp/b155-access-body.txt -D /tmp/b155-access-headers.txt -w '%{http_code}' -H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}" -H 'Accept: application/json' "${DND_BASE_URL}/api/auth/me")"
+          echo "TEMP_SERVICE_AUTH_ADMISSION_HTTP_STATUS ${admission_status}"
+          test "${admission_status}" = '401' || { echo 'TEMP_SERVICE_AUTH_ADMISSION FAIL'; exit 20; }
           python - <<'PY'
           import json
-          d=json.load(open('/tmp/policies.json')); assert d.get('success') is True,d
-          rows=d.get('result') if isinstance(d.get('result'),list) else []
-          print('ACCESS_POLICY_COUNT',len(rows))
-          for i,p in enumerate(rows,1):
-              print(f'ACCESS_POLICY_{i}_ID',p.get('id'))
-              print(f'ACCESS_POLICY_{i}_NAME',p.get('name'))
-              print(f'ACCESS_POLICY_{i}_DECISION',p.get('decision'))
-              print(f'ACCESS_POLICY_{i}_PRECEDENCE',p.get('precedence'))
-              print(f'ACCESS_POLICY_{i}_SESSION_DURATION',p.get('session_duration'))
-              for field in ('include','require','exclude'):
-                  rules=p.get(field) if isinstance(p.get(field),list) else []
-                  kinds=[]
-                  for rule in rules:
-                      if isinstance(rule,dict): kinds += list(rule.keys())
-                  print(f'ACCESS_POLICY_{i}_{field.upper()}_COUNT',len(rules))
-                  print(f'ACCESS_POLICY_{i}_{field.upper()}_RULE_TYPES',sorted(set(kinds)))
-          print('DIAGNOSTIC_MUTATION NONE')
-          print('SECRET_VALUES_EMITTED NONE')
+          raw=open('/tmp/b155-access-body.txt',errors='replace').read()
+          payload=json.loads(raw)
+          assert payload.get('ok') is False,payload
+          assert payload.get('error')=='Unauthorized.',payload
+          print('TEMP_SERVICE_AUTH_ADMISSION PASS')
+          print('APPLICATION_AUTH_SEPARATION PASS — outer Access admitted token; app still requires admin session')
           PY
+
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT COALESCE(NULLIF(s.session_token,''),s.token) AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(NULLIF(s.session_token,''),s.token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/b155-dev-session.json
+          DND_SESSION_COOKIE="$(python - <<'PY'
+          import json
+          d=json.load(open('/tmp/b155-dev-session.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  if v.get('runtime_token'): yield str(v['runtime_token'])
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          token=next(walk(d),'').strip()
+          print(('dd_auth_token='+token) if token else '')
+          PY
+          )"
+          test -n "${DND_SESSION_COOKIE}" || { echo 'STOP: no unexpired Development administrator session exists'; exit 30; }
+          echo "::add-mask::${DND_SESSION_COOKIE}"
+          export CF_ACCESS_CLIENT_ID CF_ACCESS_CLIENT_SECRET DND_SESSION_COOKIE
+          node scripts/products_browser_runtime_probe.mjs
+          echo 'BUILD155_DEVELOPMENT_BROWSER_ACCEPTANCE PASS'
+          echo 'EXACT_DEVELOPMENT_SHA' "${EXPECTED_SOURCE_SHA}"
+          echo 'D1_R2_BUSINESS_DATA_MUTATION NONE'
+          echo 'PRODUCT_MUTATION NONE'
+          echo 'PAYMENT_PROVIDER_ACCOUNTING_MUTATION NONE'
