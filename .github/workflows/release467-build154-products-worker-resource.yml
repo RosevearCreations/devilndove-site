@@ -1,0 +1,50 @@
+name: Release 467 Build 154 Products Worker Resource Proof
+
+on:
+  pull_request:
+    branches: [dev]
+    paths:
+      - 'functions/_middleware.js'
+      - 'admin/products/index.html'
+      - 'release467-build153-layout-observer-performance-hotfix.json'
+      - 'scripts/release467_build154_gate.py'
+      - 'scripts/current_application_quality_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - '.github/workflows/release467-build154-products-worker-resource.yml'
+      - '.github/workflows/release467-build154-products-route-production-proof.yml'
+      - 'current-development-authority.json'
+      - 'PROJECT_STATUS_AND_ROADMAP.md'
+      - 'AI_HANDOFF.md'
+      - 'SANITY_HEALTH_CHECK.md'
+      - 'MARKDOWN_INDEX.md'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+
+permissions:
+  contents: read
+
+jobs:
+  build154-products-worker-resource:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Validate Build 154 Products Worker resource authority
+        run: python scripts/release467_build154_gate.py
+      - name: JavaScript syntax
+        run: node --check functions/_middleware.js
+      - name: Python syntax
+        run: python -m py_compile scripts/release467_build154_gate.py
+      - name: Diff safety
+        run: git diff --check "${{ github.event.pull_request.base.sha }}"...HEAD
+      - name: Safety boundary
+        run: |
+          echo 'Build 154 changes Products page rendering only after the existing session/module guard.'
+          echo 'No schema, D1/R2 business-data, provider, payment, refund or accounting mutation is authorized.'
