@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Release 467 Build 154 — Products Worker Resource Hotfix source gate."""
+"""Release 467 Build 154 — Products Worker Resource Hotfix source gate.
+
+The immutable Build 154 renderer assertions remain active after later Products cache
+revisions. Build 155 is allowed to advance the Product asset revision while retaining
+the Build 154 static-fast-path/server-resource repair.
+"""
 from pathlib import Path
 import sys
 
@@ -21,8 +26,11 @@ middleware = read('functions/_middleware.js')
 products = read('admin/products/index.html')
 closure = read('release467-build153-layout-observer-performance-hotfix.json')
 
-req("const PRODUCTS_ASSET_REVISION = '467-b154-products-worker-fast-path';" in middleware,
-    'Build 154 Products cache revision missing')
+req(
+    "const PRODUCTS_ASSET_REVISION = '467-b154-products-worker-fast-path';" in middleware
+    or "const PRODUCTS_ASSET_REVISION = '467-b155-products-client-responsiveness';" in middleware,
+    'Build 154 Products cache revision or approved Build 155 successor revision missing'
+)
 req("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware,
     'Build 153 layout observer revision must remain preserved')
 req('async function withProductsFastPlatformClient(response)' in middleware,
