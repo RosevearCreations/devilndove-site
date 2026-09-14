@@ -15,6 +15,7 @@ import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appMo
 
 const PRODUCTS_ASSET_REVISION = '467-b155-products-client-responsiveness';
 const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';
+const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b155-products-media-admin-bound-v1';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
 function isReadMethod(method) { return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase()); }
@@ -54,7 +55,7 @@ function productsPlatformMarkup() {
     `<script data-dd-products-cold-start="1" src="/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_ASSET_REVISION}"></script>`,
     `<script defer src="/public/js/layout-overflow-guard.js?v=${LAYOUT_ASSET_REVISION}"></script>`,
     '<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>',
-    '<script defer src="/public/js/product-media-fallback.js?v=62"></script>',
+    `<script defer src="/public/js/product-media-fallback.js?v=${PRODUCTS_MEDIA_FALLBACK_REVISION}"></script>`,
     `<script defer src="/public/js/pwa-platform.js?v=${CURRENT_RELEASE}"></script>`,
     `<script defer src="/public/js/adaptive-shell.js?v=${CURRENT_RELEASE}b143"></script>`,
   ].join('');

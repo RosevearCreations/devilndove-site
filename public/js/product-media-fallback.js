@@ -13,6 +13,7 @@
   const FINAL_FLAG='ddMediaRecoveryPlaceholder';
   const PRODUCT_PLACEHOLDER='/assets/product-image-recovery-placeholder.svg';
   const PUBLIC_PREFIXES=['/products/','/movies/','/Itemsforsale/','/itemsforsale/','/Toolshed/','/Tools/','/Supplies/','/toolshed/','/tools/','/supplies/'];
+  const IS_ADMIN_RUNTIME=/^\/admin(?:\/|$)/i.test(String(window.location?.pathname||''));
 
   function fallbackInfo(raw){
     try{
@@ -130,14 +131,22 @@
   document.addEventListener('error',(event)=>{
     if(event.target instanceof HTMLImageElement)recoverImage(event.target);
   },true);
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>scan(document),{once:true});
-  else scan(document);
-  const observer=new MutationObserver((records)=>{
-    for(const record of records){
-      for(const node of record.addedNodes||[])if(node?.nodeType===1)scan(node);
-    }
-  });
-  observer.observe(document.documentElement,{childList:true,subtree:true});
+  // This recovery client exists for public Product/Movie media. Admin workspaces
+  // build large, highly dynamic tables and already surface image failures through
+  // the capturing error listener above. A document-wide subtree observer there
+  // needlessly scans every Admin mutation and can starve Product Entry startup.
+  // Keep the observer and initial cached-image sweep on public pages only.
+  let observer=null;
+  if(!IS_ADMIN_RUNTIME){
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>scan(document),{once:true});
+    else scan(document);
+    observer=new MutationObserver((records)=>{
+      for(const record of records){
+        for(const node of record.addedNodes||[])if(node?.nodeType===1)scan(node);
+      }
+    });
+    observer.observe(document.documentElement,{childList:true,subtree:true});
+  }
 
-  window.DDProductMediaFallback={installed:true,version:VERSION,fallbackUrl,recoverImage,promoteSameProductImage,showProductPlaceholder,scan};
+  window.DDProductMediaFallback={installed:true,version:VERSION,observer_mode:IS_ADMIN_RUNTIME?'error-only-admin':'public-mutation-and-error',fallbackUrl,recoverImage,promoteSameProductImage,showProductPlaceholder,scan};
 })();

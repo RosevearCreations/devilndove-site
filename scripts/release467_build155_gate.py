@@ -24,6 +24,7 @@ def req(ok, msg):
 
 marketplace = read('public/js/admin-products-marketplace-readiness.js')
 loader = read('public/js/admin-product-image-role-prompts.js')
+media_fallback = read('public/js/product-media-fallback.js')
 middleware = read('functions/_middleware.js')
 probe = read('scripts/products_browser_runtime_probe.mjs')
 closure = read('release467-build154-products-worker-resource-hotfix.json')
@@ -51,6 +52,22 @@ req("import('/public/js/admin-products-marketplace-readiness.js?v=467b155')" in 
     'Build 155 Marketplace Listing Readiness dynamic import cache revision missing')
 req('467-b155-products-client-responsiveness' in marketplace,
     'Build 155 marketplace client revision marker missing')
+req("const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b155-products-media-admin-bound-v1';" in middleware,
+    'Build 155 Products media-fallback cache revision missing')
+req('v=${PRODUCTS_MEDIA_FALLBACK_REVISION}' in middleware,
+    'Products fast path must use the Build 155 media-fallback cache revision')
+
+# The public-media fallback must retain error recovery in Admin while excluding
+# its document-wide mutation observer from the highly dynamic Admin runtime.
+for token in (
+    'const IS_ADMIN_RUNTIME=',
+    "observer_mode:IS_ADMIN_RUNTIME?'error-only-admin':'public-mutation-and-error'",
+    'if(!IS_ADMIN_RUNTIME){',
+    "document.addEventListener('error'",
+):
+    req(token in media_fallback, f'Build 155 Admin media-observer boundary missing: {token}')
+req(media_fallback.find('if(!IS_ADMIN_RUNTIME){') < media_fallback.find('new MutationObserver'),
+    'Build 155 must create the public-media MutationObserver only inside the non-Admin boundary')
 
 # Root-cause repair: renderer must be idempotent and observer must not react to its own DOM writes.
 for token in (
@@ -118,6 +135,7 @@ except Exception as exc:
 for path in (
     'public/js/admin-products-marketplace-readiness.js',
     'public/js/admin-product-image-role-prompts.js',
+    'public/js/product-media-fallback.js',
     'functions/_middleware.js',
     'scripts/products_browser_runtime_probe.mjs',
 ):
