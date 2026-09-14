@@ -2,28 +2,28 @@
 
 ## Current authority
 
-**Release 467 Build 151 — Gifting, Custom Work, Local Pickup & Event Selling** is the current fully verified Development + Production baseline.
+**Release 467 Build 152 — Site-wide Image Quality Scoring & Media QA** is the current fully verified Development + Production baseline.
 
-- Development SHA `86cc4c2500ccb7ed8027466be7226392098a989f`
-- Production main SHA `bb0046c701a8050f9b92948fc60ad622dd1f462e`
-- identical tree `7031e0bf710a9f2b4c4202e6858fda8c01008e01`
-- System Gate `34858535578`
-- Current Application Quality `34858535413`
-- I.T. Admin Runtime `34858535651`
-- Repository Branch Hygiene `34858535663`
-- Production Pages Deploy `34858858586`
-- Production Live Resource Integrity `34858997196`
+- Development SHA `1d01cbed98b78543b75dab808a30fb76c20d6060`
+- Production main SHA `2f22e280426968a9ff229a0cee9ee62a69dc9d75`
+- identical tree `9cf8b0ac918ce567c51536f05d4c89b6f6294765`
+- System Gate `34860514075`
+- Current Application Quality `34860514137`
+- I.T. Admin Runtime `34860514304`
+- Repository Branch Hygiene `34860514150`
+- Production Pages Deploy `34860809983`
+- Production Live Resource Integrity `34860922626`
 
-Build 151 is sealed in `release467-build151-gifting-custom-work-local-pickup-event-selling.json` and is the restart authority for the next build.
+Build 152 is sealed in `release467-build152-sitewide-image-quality-media-qa.json` and is the restart authority for the next build.
 
 ## Active candidate
 
-Build 152 — **Site-wide Image Quality Scoring & Media QA** — is the active schema-free candidate. It ingests the exact Build 151 six-proof closure above.
+Build 153 — **Layout Observer Performance Hotfix** — is the active schema-free candidate. It was opened after Firefox reported `Script terminated by timeout` at `layout-overflow-guard.js:58:26` on Production.
 
-Build 152 reuses the existing Release 448 deterministic browser Canvas image-quality rubric across editable public/static website images. The 100-point score remains Lighting 20, Detail/Clarity 20, Background 15, Framing 15, Resolution 10, Colour 10, Artifacts 5 and Consistency 5.
+Root cause: the shared `MutationObserver` synchronously rescanned every added subtree. Large admin renders could therefore repeat overlapping `querySelectorAll` scans in one callback and exceed Firefox's long-script threshold. The observer also watched the same `childList` mutations created when the guard wrapped tables.
 
-Scores are advisory and read-only. Media & Content Studio and authenticated public page Edit mode may display score, dimensions, component breakdown and improvement guidance. Large libraries score lazily as images become visible; SVG placeholders are identified but not graded; CORS/load failures report score unavailable rather than a false low score.
+Build 153 batches relevant added roots to the next animation frame, ignores mutations with no table/container/admin-shell target, deduplicates descendant roots when an ancestor is already queued, and disconnects the observer while applying its own table wrappers. The Products route receives cache revision `467-b153-layout-observer` so the repaired guard cannot remain hidden behind the older `467-products-b98-readiness-triage` URL.
 
-Canonical D1 migrations remain exactly `0001`–`0004`. Build 152 adds no D1 business-data mutation, R2 mutation, provider execution/publication, payment/refund/accounting action or request-time schema mutation. Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
+The hotfix changes no business data, headings, D1/R2 state, provider execution, payment/refund/accounting state or schema. Canonical D1 migrations remain exactly `0001`–`0004`. Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
 
-No candidate may self-record future proof. Build 152 must pass exact-head candidate System/Quality/I.T./Build152 proof, then exact `dev` System/Quality/I.T./Hygiene plus D1/Preview/bindings/smoke, followed by non-force identical-tree promotion to `main`, Production Pages Deploy and Production Live Resource Integrity before it may be called Production GREEN.
+Build 153 must pass exact-head candidate System/Quality/I.T./hotfix proof, then exact `dev` System/Quality/I.T./Hygiene plus D1/Preview/bindings/smoke, followed by non-force identical-tree promotion to `main`, Production Pages Deploy and Production Live Resource Integrity before it may be called Production GREEN.
