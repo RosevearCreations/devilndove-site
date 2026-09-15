@@ -25,6 +25,7 @@ def req(ok, msg):
 marketplace = read('public/js/admin-products-marketplace-readiness.js')
 loader = read('public/js/admin-product-image-role-prompts.js')
 media_fallback = read('public/js/product-media-fallback.js')
+admin = read('public/js/admin.js')
 middleware = read('functions/_middleware.js')
 probe = read('scripts/products_browser_runtime_probe.mjs')
 closure = read('release467-build154-products-worker-resource-hotfix.json')
@@ -44,8 +45,8 @@ for token in (
     req(token in closure, f'Build 154 closure token missing: {token}')
 
 # Build 155 must advance cache identity through both the Products HTML fast path and dynamic import.
-req("const PRODUCTS_ASSET_REVISION = '467-b155-products-client-responsiveness';" in middleware,
-    'Build 155 Products asset revision missing')
+req("const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';" in middleware,
+    'Build 155 emergency Products asset revision missing')
 req("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware,
     'Build 153 layout-observer revision must remain preserved')
 req("import('/public/js/admin-products-marketplace-readiness.js?v=467b155')" in loader,
@@ -56,6 +57,16 @@ req("const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b155-products-media-admin-bou
     'Build 155 Products media-fallback cache revision missing')
 req('v=${PRODUCTS_MEDIA_FALLBACK_REVISION}' in middleware,
     'Products fast path must use the Build 155 media-fallback cache revision')
+
+# Emergency recovery boundary: Product Admin does not need the cross-admin section-position/context-dock helper.
+# Keeping that helper out of Products prevents any stale cached copy of the historical dock observer from
+# blocking the Product editor before its dropdown/table data can render.
+req("document.body?.dataset?.adminPage !== 'products'" in admin,
+    'Build 155 Product Admin navigation-context exclusion missing')
+req("import('/public/js/admin-section-position-v130.js?v=467b130')" in admin,
+    'Build 130 section-position import must remain available for non-Product admin routes')
+req(admin.find("document.body?.dataset?.adminPage !== 'products'") < admin.find("import('/public/js/admin-section-position-v130.js?v=467b130')"),
+    'Product Admin exclusion must guard the section-position/context-dock import')
 
 # The public-media fallback must retain error recovery in Admin while excluding
 # its document-wide mutation observer from the highly dynamic Admin runtime.
@@ -136,6 +147,7 @@ for path in (
     'public/js/admin-products-marketplace-readiness.js',
     'public/js/admin-product-image-role-prompts.js',
     'public/js/product-media-fallback.js',
+    'public/js/admin.js',
     'functions/_middleware.js',
     'scripts/products_browser_runtime_probe.mjs',
 ):
@@ -150,6 +162,7 @@ if FAIL:
 
 print('RELEASE 467 BUILD 155 GATE: PASS')
 print('Products client: Marketplace Listing Readiness self-mutation loop isolated')
-print('Cache: Products + dynamic Marketplace import advanced to Build 155')
+print('Products recovery: nonessential navigation context chain excluded from Product Admin')
+print('Cache: Product assets advanced to the Build 155 lockup-recovery revision')
 print('Acceptance: real Chromium/CDP probe requires responsive event loop + populated Product picker/table')
 print('Boundary: no schema, D1/R2 business-data, provider, payment/refund/accounting mutation')
