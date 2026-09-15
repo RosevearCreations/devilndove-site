@@ -48,8 +48,11 @@ require('schemaChange: false' in browser and 'productionContacted: false' in bro
 require('Grey Hair Media Intelligence' in page and '/public/js/admin-grey-hair-media-intelligence-v45.js?v=46745' in page, 'admin workspace wiring missing')
 require('Build 46:' in page and 'Build 47:' in page, 'future build ownership must be explicit')
 
+# Build 45 itself remains zero-schema. Later canonical migrations are valid and
+# must not make this historical feature gate stale.
 canonical = ROOT / 'migrations' / 'canonical'
 if canonical.exists():
-    require(not list(canonical.glob('0005*')), 'Build 45 must not introduce canonical migration 0005')
+    build45_owned_later = [p for p in canonical.glob('0005*') if 'grey' in p.name.lower() or 'media' in p.name.lower()]
+    require(not build45_owned_later, 'Build 45 must not own canonical migration 0005')
 
 print('CURRENT GREY HAIR MEDIA INTELLIGENCE GATE: PASS')
