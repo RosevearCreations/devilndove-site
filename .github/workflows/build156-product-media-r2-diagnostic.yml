@@ -27,9 +27,10 @@ jobs:
       - name: Trace two unassigned 404 keys in Production D1 read-only
         shell: bash
         run: |
-          set -euo pipefail
+          set -u
           mkdir -p /tmp/dd-media-source
-          npx --yes wrangler@4.128.0 d1 execute "$PROD_D1" --remote --json --command "SELECT media_asset_id, product_id, object_key, public_url, original_filename, variant_role, created_at, updated_at FROM media_assets WHERE object_key IN ('products/unassigned/1783790631974-8950293d-59a8-4b7a-a71e-3dc52fe68d03.jpg','products/unassigned/1785866453486-38cd17a6-7a31-4104-9dbf-3ea4584cfaca.jpg') OR public_url LIKE '%1783790631974-8950293d-59a8-4b7a-a71e-3dc52fe68d03.jpg%' OR public_url LIKE '%1785866453486-38cd17a6-7a31-4104-9dbf-3ea4584cfaca.jpg%';" > /tmp/dd-media-source/unassigned.json
+          npx --yes wrangler@4.128.0 d1 execute "$PROD_D1" --remote --json --command "PRAGMA table_info(media_assets);" > /tmp/dd-media-source/media-assets-columns.json || true
+          npx --yes wrangler@4.128.0 d1 execute "$PROD_D1" --remote --json --command "SELECT media_asset_id, product_id, object_key, public_url, original_filename FROM media_assets WHERE object_key IN ('products/unassigned/1783790631974-8950293d-59a8-4b7a-a71e-3dc52fe68d03.jpg','products/unassigned/1785866453486-38cd17a6-7a31-4104-9dbf-3ea4584cfaca.jpg') OR public_url LIKE '%1783790631974-8950293d-59a8-4b7a-a71e-3dc52fe68d03.jpg%' OR public_url LIKE '%1785866453486-38cd17a6-7a31-4104-9dbf-3ea4584cfaca.jpg%';" > /tmp/dd-media-source/unassigned.json
           python - <<'PY'
           import json
           d=json.load(open('/tmp/dd-media-source/unassigned.json')); rows=[]
