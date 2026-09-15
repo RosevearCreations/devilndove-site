@@ -1,14 +1,15 @@
-// Release 467 Build 156 — one-shot Product Admin verified-auth startup recovery.
+// Release 467 Build 156 — one-shot Product Admin authenticated startup recovery.
 // Repairs the race where Product controllers bind at DOMContentLoaded before the
-// administrator session has finished verification. This file never performs a
-// mutation itself; it reuses existing Product/cleanup refresh controls after verified
-// admin readiness, with one bounded post-DOM fallback when the auth event was missed.
+// administrator session has finished verification. This file performs no API call
+// and no mutation itself; it waits only on local auth state, then reuses the already
+// bound Product/cleanup refresh controls exactly once.
 (() => {
   const path = String(window.location.pathname || '').replace(/\/+$/, '') || '/';
   if (path !== '/admin/products') return;
 
-  const VERSION = 'R467B156_AUTH_READY_RECOVERY_V2';
-  const FALLBACK_DELAY_MS = 1500;
+  const VERSION = 'R467B156_AUTH_READY_RECOVERY_V3';
+  const AUTH_WAIT_TIMEOUT_MS = 8000;
+  const AUTH_WAIT_STEP_MS = 250;
   const health = {
     version: VERSION,
     verified_event_seen: false,
@@ -17,15 +18,17 @@
     product_refresh_clicked: false,
     cleanup_refresh_clicked: false,
     skipped_already_ready: false,
-    fallback_timer_fired: false,
-    fallback_logged_in: false,
+    auth_wait_started: false,
+    auth_wait_checks: 0,
+    auth_wait_logged_in: false,
+    auth_wait_exhausted: false,
     last_reason: '',
   };
   window.DDProductsAuthReadyRecoveryHealth = health;
 
   let finished = false;
   let timer = 0;
-  let fallbackTimer = 0;
+  let authWaitTimer = 0;
 
   function productReady() {
     const picker = document.getElementById('existingProductSelect');
@@ -42,17 +45,19 @@
     return String(state?.user?.role || '').toLowerCase() === 'admin';
   }
 
-  function loggedInAdmin() {
-    if (!window.DDAuth?.isLoggedIn?.()) return false;
-    const user = window.DDAuthUiState?.user || window.DDAuth?.getStoredUser?.() || null;
-    return String(user?.role || '').toLowerCase() === 'admin';
+  function locallyLoggedIn() {
+    try {
+      return Boolean(window.DDAuth?.isLoggedIn?.());
+    } catch {
+      return false;
+    }
   }
 
   function clearTimers() {
     if (timer) window.clearTimeout(timer);
-    if (fallbackTimer) window.clearTimeout(fallbackTimer);
+    if (authWaitTimer) window.clearTimeout(authWaitTimer);
     timer = 0;
-    fallbackTimer = 0;
+    authWaitTimer = 0;
   }
 
   function runRecovery(reason) {
@@ -61,7 +66,7 @@
     clearTimers();
     health.recovery_scheduled = false;
     health.recovery_attempted = true;
-    health.last_reason = String(reason || 'verified-admin');
+    health.last_reason = String(reason || 'authenticated');
 
     if (productReady()) {
       health.skipped_already_ready = true;
@@ -92,15 +97,37 @@
     }, 100);
   }
 
-  function scheduleBoundedFallback() {
-    if (finished || fallbackTimer) return;
-    fallbackTimer = window.setTimeout(() => {
-      fallbackTimer = 0;
+  function startBoundedAuthWait() {
+    if (finished || health.auth_wait_started) return;
+    health.auth_wait_started = true;
+    const startedAt = Date.now();
+
+    const check = () => {
+      authWaitTimer = 0;
       if (finished) return;
-      health.fallback_timer_fired = true;
-      health.fallback_logged_in = loggedInAdmin();
-      if (health.fallback_logged_in) runRecovery('bounded-post-dom-fallback');
-    }, FALLBACK_DELAY_MS);
+      health.auth_wait_checks += 1;
+
+      if (productReady()) {
+        runRecovery('products-already-ready');
+        return;
+      }
+
+      if (locallyLoggedIn()) {
+        health.auth_wait_logged_in = true;
+        schedule('bounded-local-auth-wait');
+        return;
+      }
+
+      if ((Date.now() - startedAt) >= AUTH_WAIT_TIMEOUT_MS) {
+        health.auth_wait_exhausted = true;
+        health.last_reason = 'bounded-local-auth-wait-exhausted';
+        return;
+      }
+
+      authWaitTimer = window.setTimeout(check, AUTH_WAIT_STEP_MS);
+    };
+
+    authWaitTimer = window.setTimeout(check, AUTH_WAIT_STEP_MS);
   }
 
   document.addEventListener('dd:admin-ready', (event) => {
@@ -111,14 +138,15 @@
 
   document.addEventListener('dd:auth-verified', (event) => {
     const detail = event?.detail || {};
-    if (!detail?.logged_in || String(detail?.user?.role || '').toLowerCase() !== 'admin') return;
+    if (!detail?.logged_in) return;
     health.verified_event_seen = true;
     schedule('dd:auth-verified');
   });
 
   const reconcile = () => {
     if (verifiedAdmin()) schedule('retained-verified-state');
-    scheduleBoundedFallback();
+    else if (locallyLoggedIn()) schedule('retained-local-auth-state');
+    startBoundedAuthWait();
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', reconcile, { once: true });
   else reconcile();
