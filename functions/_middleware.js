@@ -16,6 +16,7 @@ import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appMo
 const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';
 const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';
 const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b155-products-media-admin-bound-v1';
+const PRODUCTS_REQUEST_BUDGET_REVISION = '467b156-request-budget-v1';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
 function isReadMethod(method) { return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase()); }
@@ -52,6 +53,7 @@ function productsPlatformMarkup() {
     '<link data-dd-products-static-platform="1" rel="stylesheet" href="/css/current-responsive.css?v=current">',
     `<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`,
     `<link rel="stylesheet" href="/css/admin-products-table-layout.css?v=${PRODUCTS_ASSET_REVISION}">`,
+    `<script data-dd-products-request-budget="1" src="/public/js/admin-products-request-budget-v156.js?v=${PRODUCTS_REQUEST_BUDGET_REVISION}"></script>`,
     `<script data-dd-products-cold-start="1" src="/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_ASSET_REVISION}"></script>`,
     `<script defer src="/public/js/layout-overflow-guard.js?v=${LAYOUT_ASSET_REVISION}"></script>`,
     '<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>',
