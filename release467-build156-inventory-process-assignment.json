@@ -11,8 +11,17 @@
     "shared workshop-process catalog",
     "one reviewed primary process per active Tool or Supply",
     "custom process creation",
-    "assign/change/clear process without stock, cost, lifecycle or Product-link mutation"
+    "assign/change/clear process without stock, cost, lifecycle or Product-link mutation",
+    "Product Admin startup GET concurrency limited to two to prevent request-amplification lockups",
+    "duplicate Product and list-readiness startup reads are shared without changing write authority"
   ],
+  "product_admin_request_budget": {
+    "client": "public/js/admin-products-request-budget-v156.js",
+    "max_concurrent_admin_gets": 2,
+    "canonical_product_readiness_limit": 500,
+    "read_only": true,
+    "write_mutation_authority": false
+  },
   "default_processes": ["Laser Engraving","3D Printing","CNC Machining","Resin","Polymer Clay","Candles","Metal & Ring Work","Wire Wrapping","Lapidary","Soldering","Packaging & Labeling","Photography & Content","General Workshop"],
   "request_time_schema_mutation": false,
   "production_business_data_overwrite": false,
