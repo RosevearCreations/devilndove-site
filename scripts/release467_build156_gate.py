@@ -54,6 +54,10 @@ req('setInterval(' not in budget,'Product request budget must not add recurring 
 req("url.pathname.startsWith('/api/admin/')" in budget,'Product request budget must stay inside authenticated admin GET scope')
 req("path === '/api/admin/products' || path === '/api/admin/product-picker' || path === '/api/admin/product-mobile-bootstrap'" in budget,'Core Product bootstrap family must retain priority zero')
 
+scheduler=read('scripts/build156_product_request_budget_test.mjs')
+for token in ('slow-background-a','slow-background-b','/api/admin/products','Core Product bootstrap lane: RESERVED AND PROVEN'):
+ req(token in scheduler,f'Product scheduler proof missing {token}')
+
 middleware=read('functions/_middleware.js')
 request_loader='/public/js/admin-products-request-budget-v156.js?v=${PRODUCTS_REQUEST_BUDGET_REVISION}'
 cold_loader='/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_ASSET_REVISION}'
@@ -63,9 +67,11 @@ req(cold_loader in middleware,'Existing Product cold-start guard must remain loa
 req(middleware.find(request_loader) < middleware.find(cold_loader),'Product request budget must load before the older cold-start controller')
 req("const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';" in middleware,'Build 155 historical Product asset identity must remain preserved')
 
-for path in ('public/js/admin-products-request-budget-v156.js','public/js/admin-inventory-process-assignments-v156.js','functions/_middleware.js'):
+for path in ('public/js/admin-products-request-budget-v156.js','public/js/admin-inventory-process-assignments-v156.js','functions/_middleware.js','scripts/build156_product_request_budget_test.mjs'):
  result=subprocess.run(['node','--check',str(ROOT/path)],cwd=ROOT,capture_output=True,text=True)
  req(result.returncode==0,f'JavaScript syntax failed for {path}: {(result.stderr or result.stdout).strip()}')
+scheduler_result=subprocess.run(['node','scripts/build156_product_request_budget_test.mjs'],cwd=ROOT,capture_output=True,text=True)
+req(scheduler_result.returncode==0,f'Product request scheduler behavior proof failed: {(scheduler_result.stderr or scheduler_result.stdout).strip()}')
 
 print('RELEASE 467 BUILD 156 — TOOL & SUPPLY PROCESS ASSIGNMENT + PRODUCT REQUEST BUDGET')
 if FAIL:
@@ -73,5 +79,6 @@ if FAIL:
 print('PASS')
 print('Product Admin: max two concurrent authenticated admin GETs; duplicate startup reads are shared')
 print('Product bootstrap: one request lane remains available for Product list/picker/bootstrap while non-core reads serialize')
+print('Product scheduler proof: deterministic reserved-lane starvation test GREEN')
 print('Product readiness: list startup variants converge on one 500-row superset request')
 print('Boundary: non-GET mutation behavior is unchanged')
