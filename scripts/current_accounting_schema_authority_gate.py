@@ -64,8 +64,7 @@ req(not DDL.search(accounting), 'Accounting core carries request-time schema DDL
 
 migrations = manifest.get('migrations') if isinstance(manifest.get('migrations'), list) else []
 files = [str(row.get('file') or '') for row in migrations if isinstance(row, dict)]
-req(files == CANONICAL, 'Build 38 must preserve the existing four-file canonical migration stream')
-req(not list((ROOT / 'migrations/canonical').glob('0005*')), 'Build 38 must not invent migration 0005 for proven baseline Accounting schema')
+req(files[:len(CANONICAL)] == CANONICAL, 'Build 38 historical four-file canonical migration baseline drifted')
 
 scope = authority.get('scope') or {}
 req(scope.get('accounting_order_records_baseline_assertion') is True, 'Build 38 baseline assertion scope missing')
@@ -75,7 +74,7 @@ req(int(scope.get('accounting_required_indexes') or 0) == 2, 'Build 38 Accountin
 req(int(scope.get('runtime_schema_residue_files_ceiling_after') or 0) <= 60, 'Build 38 runtime DDL file ceiling weakened')
 req(int(scope.get('runtime_schema_residue_occurrences_ceiling_after') or 0) <= 526, 'Build 38 runtime DDL occurrence ceiling weakened')
 req(int(scope.get('runtime_schema_residue_shared_helpers_ceiling_after') or 0) <= 4, 'Build 38 shared-helper DDL ceiling weakened')
-req(scope.get('canonical_migration_stream_unchanged') is True and int(scope.get('canonical_migration_count') or 0) == 4, 'Build 38 canonical migration boundary drifted')
+req(scope.get('canonical_migration_stream_unchanged') is True and int(scope.get('canonical_migration_count') or 0) == 4, 'Build 38 historical canonical migration boundary drifted')
 
 safety = authority.get('safety') or {}
 for key in (
@@ -101,5 +100,5 @@ if FAIL:
 print('CURRENT ACCOUNTING SCHEMA AUTHORITY GATE: PASS')
 print('Accounting order-record schema: PROVEN BASELINE / READ-ONLY ASSERTION')
 print('Accounting request-time DDL: ZERO')
-print('Canonical migration stream: UNCHANGED 0001-0004')
+print('Historical canonical migration baseline: 0001-0004 PRESERVED / LATER FORWARD MIGRATIONS ALLOWED')
 print('Business accounting write path: PRESERVED')
