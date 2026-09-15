@@ -36,7 +36,7 @@ export async function onRequestGet(context){
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:`${truth.foreign_key_violations} violation(s).`},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
     {status:'pass',code:'products_client_responsiveness',label:'Products client responsiveness',detail:'Build 155 authenticated browser responsiveness and Product population are GREEN.'},
-    {status:'review',code:'restart_integrity_checkpoint',label:'Restart integrity checkpoint',detail:`Build 155 is fully verified at ${VERIFIED_DEVELOPMENT.dev_sha}; Build 156 is the active Tool & Supply Process Assignment candidate.`}; Build 155 is the active Products client responsiveness candidate.`}
+    {status:'review',code:'restart_integrity_checkpoint',label:'Restart integrity checkpoint',detail:`Build 155 is fully verified at ${VERIFIED_DEVELOPMENT.dev_sha}; Build 156 is the active Tool & Supply Process Assignment candidate.`}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length;
   const warning_count=checks.filter((x)=>x.status==='review').length;
