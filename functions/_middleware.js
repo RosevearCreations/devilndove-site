@@ -17,7 +17,7 @@ const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';
 const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';
 const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b155-products-media-admin-bound-v1';
 const PRODUCTS_REQUEST_BUDGET_REVISION = '467b156-request-budget-v2';
-const PRODUCTS_AUTH_READY_REVISION = '467b156-auth-ready-v1';
+const PRODUCTS_AUTH_READY_REVISION = '467b156-auth-ready-v2';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
 function isReadMethod(method) { return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase()); }
