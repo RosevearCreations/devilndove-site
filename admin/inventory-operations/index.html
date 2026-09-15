@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="/css/admin-inventory-material-usage-reconciliation.css?v=467b112"/>
 <link rel="icon" href="/assets/mark.png" type="image/png"/>
 <meta name="robots" content="noindex,nofollow"/>
-<meta name="description" content="Focused inventory operations workspace for Devil n Dove tools, supplies, base-unit stock, product resource reservations, material-usage reconciliation, receiving, and catalog sync."/>
+<meta name="description" content="Focused inventory operations workspace for Devil n Dove tools, supplies, workshop-process assignment, base-unit stock, product resource reservations, material-usage reconciliation, receiving, and catalog sync."/>
 </head>
 <body data-admin-page="products" class="inventory-operations-page">
 <div class="container admin-shell">
@@ -25,23 +25,23 @@
   </div>
   <div class="hero compact-hero inventory-operations-hero">
     <div>
-      <p class="inventory-operations-eyebrow">Release 467 Build 112 • reconciliation pass</p>
+      <p class="inventory-operations-eyebrow">Release 467 Build 156 • workshop process classification</p>
       <h1>Tools & Supplies Inventory Operations</h1>
-      <p>Manage tools, supplies, purchase packaging, canonical base-unit stock, receiving, product resource reservations, material-usage reconciliation, and catalog sync without the long product editor page.</p>
-      <p class="small inventory-operations-hero-note">Build 112 adds a read-only evidence layer over existing Product, Creative, Inventory, reservation, kit and cost authorities. It never invents or repairs stock movement.</p>
+      <p>Manage tools, supplies, workshop-process assignments, purchase packaging, canonical base-unit stock, receiving, product resource reservations, material-usage reconciliation, and catalog sync without the long product editor page.</p>
+      <p class="small inventory-operations-hero-note">Build 156 adds a shared primary-process classification for both Tools and Supplies without changing inventory quantity, cost, lifecycle or Product-resource authority.</p>
     </div>
     <div class="inventory-operations-hero-art" aria-hidden="true"><img src="/assets/inventory-operations-placeholder.svg" alt=""/></div>
   </div>
   <div class="release462-status-strip" aria-label="Inventory operating status">
     <div><strong>Quantity authority</strong><span class="small">Base units drive usable stock.</span></div>
-    <div><strong>Purchase packaging</strong><span class="small">Package size and cost stay distinct from usable quantity.</span></div>
-    <div><strong>Build 112 reconciliation</strong><span class="small">Read-only exceptions; owner workflows keep all writes.</span></div>
+    <div><strong>Process classification</strong><span class="small">Tools and supplies share one workshop-process catalog.</span></div>
+    <div><strong>Safe assignments</strong><span class="small">Classification never changes stock, cost or Product links.</span></div>
   </div>
   <div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
   <div class="admin-department-links card inventory-operations-links dd-admin-responsive-actions" style="margin-bottom:18px"><a class="btn" href="/admin/catalog/">Products & publishing</a><a class="btn" href="/admin/catalog-media/">Media & product images</a><a class="btn active" href="/admin/inventory-operations/" aria-current="page">Tools & supplies inventory operations</a><a class="btn" href="/admin/release-preflight/">Release preflight</a></div>
   <div class="card catalog-workspace-panel inventory-operations-workspace">
     <div class="inventory-operations-workspace-heading">
-      <div><p class="inventory-operations-eyebrow">Stock, tools & supplies</p><h2>Inventory Operations Desk</h2><p class="small">Focused workspace for receiving, reconciliation, product resources, reserve/release, supply/tool inventory, stock reporting, catalog sync, and option sets.</p></div>
+      <div><p class="inventory-operations-eyebrow">Stock, tools & supplies</p><h2>Inventory Operations Desk</h2><p class="small">Focused workspace for receiving, process classification, reconciliation, product resources, reserve/release, supply/tool inventory, stock reporting, catalog sync, and option sets.</p></div>
       <a class="btn" href="#siteInventoryForm">Add or edit inventory item</a>
     </div>
     <div id="inventoryReceivingMount"></div>
@@ -57,6 +57,7 @@
     <div id="inventoryAssetParityMount"></div>
     <div id="inventoryIntegrityReviewMount"></div>
     <div id="inventoryMaterialUsageReconciliationMount"></div>
+    <div id="inventoryProcessAssignmentsMount"></div>
     <div id="toolLifecycleReviewMount"></div>
     <div id="productIntegrityReviewMount"></div>
     <div id="productResourcesAdminMount"></div>
@@ -85,6 +86,7 @@
 <script src="/public/js/admin-inventory-asset-parity.js?v=440.8"></script>
 <script src="/public/js/admin-inventory-integrity-review.js?v=440"></script>
 <script src="/public/js/admin-inventory-material-usage-reconciliation-v112.js?v=467b112"></script>
+<script src="/public/js/admin-inventory-process-assignments-v156.js?v=467b156"></script>
 <script src="/public/js/admin-tool-lifecycle-review.js?v=440"></script>
 <script src="/public/js/admin-product-integrity-review.js?v=440"></script>
 <script src="/public/js/admin-product-resources.js?v=440"></script>
