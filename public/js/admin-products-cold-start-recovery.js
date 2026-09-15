@@ -1,11 +1,11 @@
 // Current Products admin cold-start recovery.
-// Build 63 extends the Build 62 one-shot/coalesced startup contract with a short-lived
-// successful-GET response cache and a lightweight Product picker read model. The goal
-// is one useful Product read, not repeated D1-heavy startup work from adjacent panels.
+// Build 156 keeps the essential Product list usable even when secondary readiness panels
+// start late. Core reads remain bounded/coalesced and never perform a mutation.
 (() => {
   const pathname = String(window.location.pathname || '').replace(/\/+$/, '') || '/';
   if (pathname !== '/admin/products') return;
 
+  const VERSION = 'R467B156_CORE_PRODUCT_RECOVERY_V1';
   const PRODUCT_SNAPSHOT_KEY = 'dd_admin_products_snapshot_v2';
   const DEFAULT_CATEGORIES = ['Rings','Necklaces','Bracelets','Earrings','Pendants','CNC Components','3D Printed Items','Laser Engraved Items','Polymer Clay Items','Home Decor','Soap','Candles','Accessories','Other'];
   const DEFAULT_COLOURS = ['Silver','Gold','Black','White','Red','Blue','Green','Purple','Pink','Orange','Yellow','Brown','Clear','Multicolor'];
@@ -18,6 +18,20 @@
   let pickerFallbackAttempted = false;
   let pickerFallbackTimer = 0;
   let optionsRetryTimer = 0;
+  let coreProductsRunning = false;
+  let coreProductsReady = false;
+
+  const health = {
+    version: VERSION,
+    core_requests: 0,
+    core_recovered: false,
+    core_product_count: 0,
+    core_table_rendered: false,
+    picker_recovered: false,
+    cleanup_refresh_requested: false,
+    last_error: '',
+  };
+  window.DDProductsColdStartRecoveryHealth = health;
 
   function clean(value) { return String(value ?? '').trim(); }
   function escapeHtml(value) {
@@ -29,12 +43,16 @@
       .replaceAll("'", '&#039;');
   }
   function safeJson(value, fallback = null) { try { return JSON.parse(value); } catch { return fallback; } }
+  function locallyAuthenticated() {
+    try { return Boolean(window.DDAuth?.isLoggedIn?.()); }
+    catch { return false; }
+  }
   function verifiedAdminAvailable() {
+    // GET recovery can start as soon as a session token exists. Server-side admin
+    // authorization remains authoritative; a client-side role object is not required.
+    if (locallyAuthenticated()) return true;
     const state = window.DDAuthUiState || {};
-    const verifiedUser = state.verified === true ? state.user : null;
-    if (verifiedUser && String(verifiedUser.role || '').toLowerCase() === 'admin') return true;
-    const stored = window.DDAuth?.getStoredUser?.() || null;
-    return Boolean(window.DDAuth?.isLoggedIn?.() && stored && String(stored.role || '').toLowerCase() === 'admin');
+    return Boolean(state.verified === true && String(state?.user?.role || '').toLowerCase() === 'admin');
   }
 
   function jsonFallbackResponse(payload, status = 200, extraHeaders = {}) {
@@ -172,9 +190,7 @@
       return response.clone();
     };
 
-    function clearReadCache() {
-      responseCache.clear();
-    }
+    function clearReadCache() { responseCache.clear(); }
 
     boundedApiFetch.__ddProductsBounded = true;
     boundedApiFetch.__ddProductsOriginal = original;
@@ -239,6 +255,10 @@
     return picker.options.length > 1 && !/loading independently|loading products/i.test(text);
   }
 
+  function tableHasRows() {
+    return document.querySelectorAll('#productsTableBody [data-edit-product-id]').length > 0;
+  }
+
   function renderProductPicker(products, sourceLabel = '') {
     const select = document.getElementById('existingProductSelect');
     if (!select) return;
@@ -253,7 +273,81 @@
     if (current && rows.some((product) => String(Number(product?.product_id || 0)) === current)) select.value = current;
     const count = document.getElementById('existingProductCount');
     if (count) count.textContent = `${rows.length} product${rows.length === 1 ? '' : 's'} available${sourceLabel ? ` · ${sourceLabel}` : ''}.`;
-    if (rows.length) pickerReady = true;
+    if (rows.length) {
+      pickerReady = true;
+      health.picker_recovered = true;
+    }
+  }
+
+  function money(cents, currency = 'CAD') {
+    const amount = Number(cents || 0) / 100;
+    try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: currency || 'CAD' }).format(amount); }
+    catch { return `${amount.toFixed(2)} ${currency || 'CAD'}`; }
+  }
+
+  function renderCoreProductTable(products) {
+    const body = document.getElementById('productsTableBody');
+    const rows = Array.isArray(products) ? products : [];
+    if (!body || !rows.length || tableHasRows()) return false;
+    body.innerHTML = rows.map((product) => {
+      const id = Number(product?.product_id || 0);
+      const number = escapeHtml(String(product?.product_number || id));
+      const name = escapeHtml(product?.name || `Product #${id}`);
+      const slug = escapeHtml(product?.slug || '');
+      const sku = escapeHtml(product?.sku || '');
+      const type = escapeHtml(product?.product_type || '');
+      const status = escapeHtml(product?.status || '');
+      const review = escapeHtml(product?.review_status || 'pending_review');
+      const inventory = escapeHtml(String(Number(product?.inventory_quantity || 0)));
+      const shipping = Number(product?.requires_shipping) === 1 ? 'Yes' : 'No';
+      const tax = Number(product?.taxable) === 0 ? 'Non-taxable' : escapeHtml(product?.tax_class_name || product?.tax_class_code || 'Tax class');
+      const archived = String(product?.status || '').toLowerCase() === 'archived';
+      return `<tr data-dd-core-recovery="1">
+        <td style="padding:8px;border-bottom:1px solid #ddd"><strong>DD${number}</strong><div class="small">Row ID ${id}</div></td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${name}<div class="small">Core Product data loaded; readiness details continue independently.</div></td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${slug}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${sku}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${type}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${status}<div class="small">Review: ${review}</div></td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${escapeHtml(money(product?.price_cents, product?.currency))}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${inventory}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${shipping}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd">${tax}</td>
+        <td style="padding:8px;border-bottom:1px solid #ddd"><div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" type="button" data-edit-product-id="${id}">Edit</button>
+          <button class="btn danger" type="button" data-open-product-correction="${id}">Correct / remove</button>
+          <button class="btn" type="button" data-archive-product-id="${id}" ${archived ? 'disabled' : ''}>Archive</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+    document.getElementById('productsLoading')?.style.setProperty('display', 'none');
+    document.getElementById('productsEmpty')?.style.setProperty('display', 'none');
+    health.core_table_rendered = true;
+    return true;
+  }
+
+  function publishCoreProducts(products, sourceLabel = 'core recovery') {
+    const rows = Array.isArray(products) ? products : [];
+    if (!rows.length) return false;
+    renderProductPicker(rows, sourceLabel);
+    renderCoreProductTable(rows);
+    try {
+      localStorage.setItem(PRODUCT_SNAPSHOT_KEY, JSON.stringify({ cached_at: new Date().toISOString(), products: rows }));
+    } catch {}
+    coreProductsReady = true;
+    health.core_recovered = true;
+    health.core_product_count = rows.length;
+    document.dispatchEvent(new CustomEvent('dd:products-core-recovered', { detail: { products: rows, source: sourceLabel } }));
+    // Cleanup binds during DOMContentLoaded. By the time this network read resolves, its
+    // listener is present; one click reuses the same coalesced/cached Product response.
+    window.setTimeout(() => {
+      const cleanup = document.getElementById('refreshProductCleanup');
+      if (cleanup && !cleanup.disabled) {
+        health.cleanup_refresh_requested = true;
+        cleanup.click();
+      }
+    }, 0);
+    return true;
   }
 
   function installImmediateFallbacks() {
@@ -269,8 +363,7 @@
     const snapshot = safeJson(localStorage.getItem(PRODUCT_SNAPSHOT_KEY) || 'null', null);
     const products = Array.isArray(snapshot?.products) ? snapshot.products : [];
     if (products.length) {
-      renderProductPicker(products, `Cached product list from ${snapshot.cached_at || 'an earlier visit'}`);
-      pickerReady = true;
+      publishCoreProducts(products, `cached ${snapshot.cached_at || 'earlier visit'}`);
     } else {
       const picker = document.getElementById('existingProductSelect');
       if (picker && /loading/i.test(picker.textContent || '')) picker.innerHTML = '<option value="">Product list loading independently…</option>';
@@ -294,66 +387,104 @@
     }
   }
 
-  async function recoverProductPickerOnce() {
-    if (pickerReady || pickerFallbackAttempted || pickerHasRows() || !verifiedAdminAvailable()) {
-      pickerReady = pickerReady || pickerHasRows();
-      return pickerReady;
+  async function recoverCoreProductList() {
+    if (coreProductsRunning || tableHasRows() && pickerHasRows()) {
+      coreProductsReady = coreProductsReady || (tableHasRows() && pickerHasRows());
+      return coreProductsReady;
     }
+    if (!verifiedAdminAvailable()) return false;
+    coreProductsRunning = true;
+    health.core_requests += 1;
+    try {
+      const data = await readJson('/api/admin/products', 8000);
+      const products = Array.isArray(data.products) ? data.products : [];
+      if (!products.length) return false;
+      publishCoreProducts(products, 'live core recovery');
+      return true;
+    } catch (error) {
+      health.last_error = String(error?.message || error || 'Core Product recovery failed.');
+      return false;
+    } finally {
+      coreProductsRunning = false;
+    }
+  }
+
+  async function recoverProductPickerOnce() {
+    if (pickerReady || pickerHasRows()) {
+      pickerReady = true;
+      return true;
+    }
+    if (!verifiedAdminAvailable() || pickerFallbackAttempted) return false;
     pickerFallbackAttempted = true;
-    const data = await readJson('/api/admin/product-picker?limit=120', 5000);
-    const products = Array.isArray(data.products) ? data.products : [];
-    renderProductPicker(products, data?.pagination?.has_more ? 'live lightweight fallback · first 120' : 'live lightweight fallback');
-    return true;
+    try {
+      const data = await readJson('/api/admin/product-picker?limit=120', 5000);
+      const products = Array.isArray(data.products) ? data.products : [];
+      if (!products.length) {
+        pickerFallbackAttempted = false;
+        return false;
+      }
+      renderProductPicker(products, data?.pagination?.has_more ? 'live lightweight fallback · first 120' : 'live lightweight fallback');
+      return true;
+    } catch (error) {
+      pickerFallbackAttempted = false;
+      throw error;
+    }
   }
 
   function showRecoveryFailure(error) {
     if (!error) return;
+    health.last_error = String(error?.message || error || 'Startup request failed.');
     const target = document.getElementById('createProductMessage') || document.getElementById('productsError');
     if (!target) return;
-    target.textContent = `Product startup is in degraded mode. ${error.message || 'Startup request failed.'} Essential controls remain available where cached/default data is safe; saving still requires live database access.`;
+    target.textContent = `Product startup is in degraded mode. ${health.last_error} Essential controls remain available where cached/default data is safe; saving still requires live database access.`;
     target.style.display = '';
     target.classList?.add('is-error');
     const tax = document.getElementById('create_product_tax_class_id');
     if (tax && /loading/i.test(tax.textContent || '')) fillTaxSelect([], 'Tax classes unavailable — retry after database access returns');
   }
 
+  function recoverAfterAuth() {
+    if (!verifiedAdminAvailable()) return;
+    if (!coreProductsReady || !tableHasRows()) void recoverCoreProductList().catch(showRecoveryFailure);
+    if (!pickerHasRows()) void recoverProductPickerOnce().catch(showRecoveryFailure);
+    if (!optionsReady) void recoverEditorOptions().catch(showRecoveryFailure);
+  }
+
   function scheduleRecovery() {
     if (pickerFallbackTimer) window.clearTimeout(pickerFallbackTimer);
     pickerFallbackTimer = window.setTimeout(() => {
       pickerFallbackTimer = 0;
-      if (pickerHasRows()) {
-        pickerReady = true;
-        return;
-      }
-      void recoverProductPickerOnce().catch(showRecoveryFailure);
+      recoverAfterAuth();
     }, 2200);
 
     if (optionsRetryTimer) window.clearTimeout(optionsRetryTimer);
     optionsRetryTimer = window.setTimeout(() => {
       optionsRetryTimer = 0;
-      if (!optionsReady) void recoverEditorOptions().catch(showRecoveryFailure);
+      recoverAfterAuth();
     }, 5000);
   }
 
   function startEssentialRecovery() {
     installBoundedProductApiGuard();
     installImmediateFallbacks();
-    void recoverEditorOptions().catch(showRecoveryFailure);
+    recoverAfterAuth();
     scheduleRecovery();
   }
 
   document.addEventListener('dd:admin-ready', (event) => {
-    if (event?.detail?.ok && !optionsReady) void recoverEditorOptions().catch(showRecoveryFailure);
+    if (event?.detail?.ok) recoverAfterAuth();
   });
-  document.addEventListener('dd:auth-verified', () => {
-    if (!optionsReady) void recoverEditorOptions().catch(showRecoveryFailure);
+  document.addEventListener('dd:auth-verified', (event) => {
+    if (event?.detail?.logged_in) recoverAfterAuth();
   });
   document.addEventListener('dd:auth-changed', (event) => {
-    if (event?.detail?.ok && !optionsReady) void recoverEditorOptions().catch(showRecoveryFailure);
+    if (event?.detail?.logged_in || event?.detail?.ok) recoverAfterAuth();
   });
   ['dd:product-created', 'dd:product-updated', 'dd:product-deleted', 'dd:product-archived'].forEach((eventName) => {
     document.addEventListener(eventName, () => {
       pickerReady = pickerHasRows();
+      coreProductsReady = tableHasRows() && pickerHasRows();
+      pickerFallbackAttempted = false;
       window.DDProductsReadBudget?.clear?.();
     });
   });
