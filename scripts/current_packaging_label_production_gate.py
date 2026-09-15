@@ -56,8 +56,11 @@ require('/public/js/admin-packaging-label-production-v44.js?v=46744' in compat, 
 require('labelProductionBuild' in compat and 'labelProductionReady' in compat, 'compatibility snapshot must project Build 44 state')
 require("'dd:packaging-label-production-active'" in compat, 'compatibility checkpoint must observe Build 44 activation')
 
+# Build 44 itself did not own a canonical migration 0005. Future forward-only
+# canonical migrations are valid and must not make this historical feature gate stale.
 canonical = ROOT / 'migrations' / 'canonical'
 if canonical.exists():
-    require(not list(canonical.glob('0005*')), 'Build 44 must not introduce canonical migration 0005')
+    build44_owned_0005 = [p for p in canonical.glob('0005*') if 'packaging' in p.name.lower() or 'label' in p.name.lower()]
+    require(not build44_owned_0005, 'Build 44 must not own canonical migration 0005')
 
 print('CURRENT PACKAGING LABEL PRODUCTION GATE: PASS')
