@@ -11,6 +11,12 @@
     script.dataset.ddProductsColdStart = '1';
     document.head.appendChild(script);
   }
+  if (path === '/admin/products' && !document.querySelector('script[data-dd-products-auth-ready-recovery]')) {
+    const script = document.createElement('script');
+    script.src = '/public/js/admin-products-auth-ready-recovery-v156.js?v=467b156-auth-ready-v1';
+    script.dataset.ddProductsAuthReadyRecovery = '1';
+    document.head.appendChild(script);
+  }
 
   const TARGET_SELECTOR = 'table,.container,.admin-shell';
   const SCROLL_SELECTOR = '.dd-table-scroll,.admin-table-wrap,[data-table-scroll],.table-scroll,.table-responsive,.dd-horizontal-scroll-region';
