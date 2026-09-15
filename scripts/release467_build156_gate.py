@@ -32,7 +32,14 @@ req(page.lower().count('<h1')==1,'Inventory Operations must retain exactly one H
 
 budget=read('public/js/admin-products-request-budget-v156.js')
 for token in (
+ "VERSION = 'R467B156_REQUEST_BUDGET_V2'",
  "MAX_CONCURRENT_GETS = 2",
+ "MAX_NONCORE_GETS = 1",
+ 'reserved_core_slots: 1',
+ 'active_core_gets',
+ 'active_noncore_gets',
+ 'nextRunnableJobIndex()',
+ "job.priority === 0",
  'DDProductsRequestBudgetHealth',
  'sharedRequests = new Map()',
  'canonical_readiness_requests',
@@ -45,11 +52,12 @@ for token in (
  req(token in budget,f'Product request budget missing {token}')
 req('setInterval(' not in budget,'Product request budget must not add recurring polling')
 req("url.pathname.startsWith('/api/admin/')" in budget,'Product request budget must stay inside authenticated admin GET scope')
+req("path === '/api/admin/products' || path === '/api/admin/product-picker' || path === '/api/admin/product-mobile-bootstrap'" in budget,'Core Product bootstrap family must retain priority zero')
 
 middleware=read('functions/_middleware.js')
 request_loader='/public/js/admin-products-request-budget-v156.js?v=${PRODUCTS_REQUEST_BUDGET_REVISION}'
 cold_loader='/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_ASSET_REVISION}'
-req("const PRODUCTS_REQUEST_BUDGET_REVISION = '467b156-request-budget-v1';" in middleware,'Product request budget cache revision missing')
+req("const PRODUCTS_REQUEST_BUDGET_REVISION = '467b156-request-budget-v2';" in middleware,'Product request budget cache revision missing')
 req(request_loader in middleware,'Product request budget fast-path loader missing')
 req(cold_loader in middleware,'Existing Product cold-start guard must remain loaded')
 req(middleware.find(request_loader) < middleware.find(cold_loader),'Product request budget must load before the older cold-start controller')
@@ -64,5 +72,6 @@ if FAIL:
  print('FAIL');[print(f'{i:03d}. {x}') for i,x in enumerate(FAIL,1)];raise SystemExit(1)
 print('PASS')
 print('Product Admin: max two concurrent authenticated admin GETs; duplicate startup reads are shared')
+print('Product bootstrap: one request lane remains available for Product list/picker/bootstrap while non-core reads serialize')
 print('Product readiness: list startup variants converge on one 500-row superset request')
 print('Boundary: non-GET mutation behavior is unchanged')
