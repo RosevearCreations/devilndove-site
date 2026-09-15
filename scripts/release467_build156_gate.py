@@ -92,6 +92,27 @@ fallback_test=read('scripts/build156_products_auth_ready_fallback_test.mjs')
 for token in ('R467B156_AUTH_READY_RECOVERY_V3','let loggedIn = false','setTimeout(resolve, 600)','loggedIn = true','auth_wait_started','auth_wait_checks','auth_wait_logged_in','auth_wait_exhausted','bounded-local-auth-wait','Product refresh: exactly one','Cleanup refresh: exactly one'):
  req(token in fallback_test,f'Product bounded local-auth behavior proof missing {token}')
 
+cold=read('public/js/admin-products-cold-start-recovery.js')
+for token in (
+ "VERSION = 'R467B156_CORE_PRODUCT_RECOVERY_V1'",
+ 'DDProductsColdStartRecoveryHealth',
+ 'locallyAuthenticated()',
+ 'recoverCoreProductList()',
+ 'renderCoreProductTable(products)',
+ "readJson('/api/admin/products', 8000)",
+ 'data-dd-core-recovery="1"',
+ 'data-edit-product-id=',
+ 'data-open-product-correction=',
+ "document.dispatchEvent(new CustomEvent('dd:products-core-recovered'",
+ "document.getElementById('refreshProductCleanup')",
+ "document.addEventListener('dd:auth-verified'",
+ 'pickerFallbackAttempted = false',
+):
+ req(token in cold,f'Core Product recovery missing {token}')
+req('setInterval(' not in cold,'Core Product recovery must not add recurring polling')
+req("method: 'POST'" not in cold and 'method: "POST"' not in cold,'Core Product recovery must remain read-only')
+req('Server-side admin' in cold,'Core Product GET recovery must retain server-side authorization boundary note')
+
 layout=read('public/js/layout-overflow-guard.js')
 req('/public/js/admin-products-auth-ready-recovery-v156.js?v=467b156-auth-ready-v3' in layout,'Layout fallback must cache-bust the Product auth recovery asset at v3')
 req('data-dd-products-auth-ready-recovery' in layout,'Layout fallback missing Product auth recovery identity')
@@ -99,20 +120,23 @@ req('data-dd-products-auth-ready-recovery' in layout,'Layout fallback missing Pr
 middleware=read('functions/_middleware.js')
 request_loader='/public/js/admin-products-request-budget-v156.js?v=${PRODUCTS_REQUEST_BUDGET_REVISION}'
 auth_loader='/public/js/admin-products-auth-ready-recovery-v156.js?v=${PRODUCTS_AUTH_READY_REVISION}'
-cold_loader='/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_ASSET_REVISION}'
+cold_loader='/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_COLD_START_REVISION}'
 req("const PRODUCTS_REQUEST_BUDGET_REVISION = '467b156-request-budget-v2';" in middleware,'Product request budget cache revision missing')
 req("const PRODUCTS_AUTH_READY_REVISION = '467b156-auth-ready-v3';" in middleware,'Product auth recovery cache revision v3 missing')
+req("const PRODUCTS_COLD_START_REVISION = '467b156-core-product-recovery-v1';" in middleware,'Core Product recovery cache revision missing')
 req(request_loader in middleware,'Product request budget fast-path loader missing')
 req(auth_loader in middleware,'Product auth recovery fast-path loader missing')
-req(cold_loader in middleware,'Existing Product cold-start guard must remain loaded')
-req(middleware.find(request_loader) < middleware.find(auth_loader) < middleware.find(cold_loader),'Product fast path must load budget, auth recovery, then cold-start controller')
+req(cold_loader in middleware,'Core Product cold-start recovery loader missing')
+req(middleware.find(request_loader) < middleware.find(auth_loader) < middleware.find(cold_loader),'Product fast path must load budget, auth recovery, then core Product recovery')
 req('data-dd-products-auth-ready-recovery="1"' in middleware,'Product auth recovery fast-path identity missing')
+req('data-dd-products-cold-start="1"' in middleware,'Core Product recovery fast-path identity missing')
 req("const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';" in middleware,'Build 155 historical Product asset identity must remain preserved')
 req("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware,'Build 153 historical layout identity must remain preserved')
 
 for path in (
  'public/js/admin-products-request-budget-v156.js',
  'public/js/admin-products-auth-ready-recovery-v156.js',
+ 'public/js/admin-products-cold-start-recovery.js',
  'public/js/admin-inventory-process-assignments-v156.js',
  'public/js/layout-overflow-guard.js',
  'functions/_middleware.js',
@@ -137,6 +161,7 @@ print('Product Admin: max two concurrent authenticated admin GETs; duplicate sta
 print('Product bootstrap: one request lane remains available for Product list/picker/bootstrap while non-core reads serialize')
 print('Product scheduler proof: deterministic reserved-lane starvation test GREEN')
 print('Product auth recovery: verified auth performs one bounded Product/cleanup refresh after late authentication')
-print('Product missed-auth fallback: finite local isLoggedIn wait recovers without API polling or role-object dependency')
+print('Product core recovery: /api/admin/products can render picker + editable table independently of secondary readiness')
+print('Product cleanup recovery: recovered core Product data triggers one reuse of the cleanup read lane')
 print('Product readiness: list startup variants converge on one 500-row superset request')
 print('Boundary: non-GET mutation behavior is unchanged')
