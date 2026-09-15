@@ -18,7 +18,7 @@ for token in ('inventory_processes','inventory_process_assignments','laser-engra
  req(token in m,f'migration missing {token}')
 req('DROP TABLE' not in m.upper(),'Build 156 migration must be additive')
 api=read('functions/api/admin/inventory-process-assignments.js')
-for token in ('getAdminUserFromRequest','site_item_inventory','inventory_process_assignments',"IN ('tool','supply')","action==='assign'","action==='clear'","action==='create_process'",'auditAdminAction'):
+for token in ('getAdminUserFromRequest','site_item_inventory','inventory_process_assignments',"IN ('tool','supply')","action!=='assign'","action==='clear'","action==='create_process'",'auditAdminAction'):
  req(token in api,f'process API missing {token}')
 for forbidden in ('CREATE TABLE','ALTER TABLE','DROP TABLE'):
  req(forbidden not in api.upper(),f'process API contains request-time DDL: {forbidden}')
