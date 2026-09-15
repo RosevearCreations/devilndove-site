@@ -1,0 +1,22 @@
+{
+  "release": 467,
+  "build": 156,
+  "title": "Tool & Supply Process Assignment",
+  "state": "implementation_candidate",
+  "source_base_sha": "4e9efa2daf8f541e941c350ccde77798b5c99080",
+  "workspace": "/admin/inventory-operations/",
+  "endpoint": "/api/admin/inventory-process-assignments",
+  "migration": "0005_release467_inventory_process_assignment.sql",
+  "scope": [
+    "shared workshop-process catalog",
+    "one reviewed primary process per active Tool or Supply",
+    "custom process creation",
+    "assign/change/clear process without stock, cost, lifecycle or Product-link mutation"
+  ],
+  "default_processes": ["Laser Engraving","3D Printing","CNC Machining","Resin","Polymer Clay","Candles","Metal & Ring Work","Wire Wrapping","Lapidary","Soldering","Packaging & Labeling","Photography & Content","General Workshop"],
+  "request_time_schema_mutation": false,
+  "production_business_data_overwrite": false,
+  "r2_mutation": false,
+  "provider_execution": false,
+  "payment_mutation": false
+}
