@@ -60,27 +60,36 @@ for token in ('slow-background-a','slow-background-b','/api/admin/products','Cor
 
 auth_recovery=read('public/js/admin-products-auth-ready-recovery-v156.js')
 for token in (
- "VERSION = 'R467B156_AUTH_READY_RECOVERY_V1'",
+ "VERSION = 'R467B156_AUTH_READY_RECOVERY_V2'",
+ 'FALLBACK_DELAY_MS = 1500',
  'DDProductsAuthReadyRecoveryHealth',
  "document.addEventListener('dd:admin-ready'",
  "document.addEventListener('dd:auth-verified'",
  'detail?.verified === true',
+ 'loggedInAdmin()',
+ 'scheduleBoundedFallback()',
+ "runRecovery('bounded-post-dom-fallback')",
  "document.querySelector('[data-refresh-products]')",
  "document.getElementById('refreshProductCleanup')",
  'recovery_attempted',
  'skipped_already_ready',
+ 'fallback_timer_fired',
+ 'fallback_logged_in',
 ):
  req(token in auth_recovery,f'Product verified-auth recovery missing {token}')
 req('apiFetch(' not in auth_recovery,'Product auth-ready recovery must not create its own API lane')
-req('setInterval(' not in auth_recovery,'Product auth-ready recovery must remain one-shot and must not poll')
+req('setInterval(' not in auth_recovery,'Product auth-ready recovery must remain bounded and must not poll')
 req("method: 'POST'" not in auth_recovery and 'method: "POST"' not in auth_recovery,'Product auth-ready recovery must not contain mutation requests')
 
 auth_test=read('scripts/build156_products_auth_ready_recovery_test.mjs')
 for token in ('verified: false','verified: true','one Product refresh + one cleanup refresh','Duplicate verified event: no second recovery'):
  req(token in auth_test,f'Product auth-ready behavior proof missing {token}')
+fallback_test=read('scripts/build156_products_auth_ready_fallback_test.mjs')
+for token in ('1650','fallback_timer_fired','bounded-post-dom-fallback','Product refresh: exactly one','Cleanup refresh: exactly one'):
+ req(token in fallback_test,f'Product auth fallback behavior proof missing {token}')
 
 layout=read('public/js/layout-overflow-guard.js')
-req('/public/js/admin-products-auth-ready-recovery-v156.js?v=467b156-auth-ready-v1' in layout,'Layout fallback must cache-bust the Product auth-ready recovery asset')
+req('/public/js/admin-products-auth-ready-recovery-v156.js?v=467b156-auth-ready-v2' in layout,'Layout fallback must cache-bust the Product auth-ready recovery asset')
 req('data-dd-products-auth-ready-recovery' in layout,'Layout fallback missing Product auth-ready recovery identity')
 
 middleware=read('functions/_middleware.js')
@@ -88,7 +97,7 @@ request_loader='/public/js/admin-products-request-budget-v156.js?v=${PRODUCTS_RE
 auth_loader='/public/js/admin-products-auth-ready-recovery-v156.js?v=${PRODUCTS_AUTH_READY_REVISION}'
 cold_loader='/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_ASSET_REVISION}'
 req("const PRODUCTS_REQUEST_BUDGET_REVISION = '467b156-request-budget-v2';" in middleware,'Product request budget cache revision missing')
-req("const PRODUCTS_AUTH_READY_REVISION = '467b156-auth-ready-v1';" in middleware,'Product auth-ready recovery cache revision missing')
+req("const PRODUCTS_AUTH_READY_REVISION = '467b156-auth-ready-v2';" in middleware,'Product auth-ready recovery cache revision missing')
 req(request_loader in middleware,'Product request budget fast-path loader missing')
 req(auth_loader in middleware,'Product auth-ready recovery fast-path loader missing')
 req(cold_loader in middleware,'Existing Product cold-start guard must remain loaded')
@@ -105,6 +114,7 @@ for path in (
  'functions/_middleware.js',
  'scripts/build156_product_request_budget_test.mjs',
  'scripts/build156_products_auth_ready_recovery_test.mjs',
+ 'scripts/build156_products_auth_ready_fallback_test.mjs',
 ):
  result=subprocess.run(['node','--check',str(ROOT/path)],cwd=ROOT,capture_output=True,text=True)
  req(result.returncode==0,f'JavaScript syntax failed for {path}: {(result.stderr or result.stdout).strip()}')
@@ -112,6 +122,8 @@ scheduler_result=subprocess.run(['node','scripts/build156_product_request_budget
 req(scheduler_result.returncode==0,f'Product request scheduler behavior proof failed: {(scheduler_result.stderr or scheduler_result.stdout).strip()}')
 auth_result=subprocess.run(['node','scripts/build156_products_auth_ready_recovery_test.mjs'],cwd=ROOT,capture_output=True,text=True)
 req(auth_result.returncode==0,f'Product verified-auth recovery behavior proof failed: {(auth_result.stderr or auth_result.stdout).strip()}')
+fallback_result=subprocess.run(['node','scripts/build156_products_auth_ready_fallback_test.mjs'],cwd=ROOT,capture_output=True,text=True)
+req(fallback_result.returncode==0,f'Product bounded missed-auth fallback proof failed: {(fallback_result.stderr or fallback_result.stdout).strip()}')
 
 print('RELEASE 467 BUILD 156 — TOOL & SUPPLY PROCESS ASSIGNMENT + PRODUCT REQUEST BUDGET')
 if FAIL:
@@ -121,5 +133,6 @@ print('Product Admin: max two concurrent authenticated admin GETs; duplicate sta
 print('Product bootstrap: one request lane remains available for Product list/picker/bootstrap while non-core reads serialize')
 print('Product scheduler proof: deterministic reserved-lane starvation test GREEN')
 print('Product auth recovery: verified admin readiness performs one bounded Product/cleanup refresh after late authentication')
+print('Product missed-auth fallback: one post-DOM 1500ms check recovers a logged-in Admin without polling')
 print('Product readiness: list startup variants converge on one 500-row superset request')
 print('Boundary: non-GET mutation behavior is unchanged')
