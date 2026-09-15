@@ -13,7 +13,7 @@
   }
   if (path === '/admin/products' && !document.querySelector('script[data-dd-products-auth-ready-recovery]')) {
     const script = document.createElement('script');
-    script.src = '/public/js/admin-products-auth-ready-recovery-v156.js?v=467b156-auth-ready-v1';
+    script.src = '/public/js/admin-products-auth-ready-recovery-v156.js?v=467b156-auth-ready-v2';
     script.dataset.ddProductsAuthReadyRecovery = '1';
     document.head.appendChild(script);
   }
