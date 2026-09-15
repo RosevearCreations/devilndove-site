@@ -40,7 +40,8 @@
     health.fallback_rendered = true;
     health.product_count = rows.length;
     health.last_reason = String(reason || 'core-products-ready');
-    mount.dataset.ddQualityFallback = VERSION;
+    const data = mount.dataset;
+    data.ddQualityFallback = VERSION;
     mount.innerHTML = `<section class="card" style="margin-bottom:18px">
       <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div>
