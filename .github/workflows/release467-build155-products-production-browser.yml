@@ -30,6 +30,17 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
+      - name: Install deterministic Chrome for browser acceptance
+        id: chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: stable
+      - name: Prove Chrome binary
+        env:
+          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          test -x "${CHROME_BIN}"
+          "${CHROME_BIN}" --version
       - name: Prove exact Build 155 source
         run: |
           test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
@@ -59,13 +70,15 @@ jobs:
           unset TOKEN
           echo 'Existing Production admin session resolved read-only.'
       - name: Run real Chromium Product UI responsiveness acceptance
+        env:
+          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
         run: node scripts/products_browser_runtime_probe.mjs
       - name: Boundary
         if: always()
         run: |
           echo "Exact Production main SHA: ${EXPECTED_SOURCE_SHA}"
           echo 'Target: https://devilndove.com/admin/products/'
-          echo 'Browser: real headless Chromium/CDP'
+          echo 'Browser: deterministic headless Chrome/CDP'
           echo 'Acceptance requires populated Product picker/table and responsive event loop'
           echo 'Session lookup: READ ONLY; no session created'
           echo 'D1/R2 mutation: NONE'
