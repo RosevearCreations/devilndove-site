@@ -5,8 +5,12 @@
   const pathname = String(window.location.pathname || '').replace(/\/+$/, '') || '/';
   if (pathname !== '/admin/products') return;
 
-  const VERSION = 'R467B156_REQUEST_BUDGET_V1';
+  const VERSION = 'R467B156_REQUEST_BUDGET_V2';
   const MAX_CONCURRENT_GETS = 2;
+  // Keep one of the two lanes available for the Product list/picker/bootstrap family.
+  // Readiness and secondary work are deliberately serialized so they cannot occupy both
+  // lanes before the core Product startup request arrives.
+  const MAX_NONCORE_GETS = 1;
   const queue = [];
   const sharedRequests = new Map();
   let sequence = 0;
@@ -14,9 +18,14 @@
   const health = {
     version: VERSION,
     max_concurrent_gets: MAX_CONCURRENT_GETS,
+    max_noncore_gets: MAX_NONCORE_GETS,
+    reserved_core_slots: 1,
     active_gets: 0,
+    active_core_gets: 0,
+    active_noncore_gets: 0,
     queued_gets: 0,
     peak_active_gets: 0,
+    peak_noncore_gets: 0,
     peak_queued_gets: 0,
     started_gets: 0,
     completed_gets: 0,
@@ -90,19 +99,35 @@
     health.peak_queued_gets = Math.max(health.peak_queued_gets, queue.length);
   }
 
+  function nextRunnableJobIndex() {
+    // Queue is sorted by priority before this is called. Core Product work may always
+    // consume any free lane. Non-core work can consume only one lane at a time so a
+    // late-arriving Product bootstrap request is never trapped behind two secondary reads.
+    const coreIndex = queue.findIndex((job) => job.priority === 0);
+    if (coreIndex >= 0) return coreIndex;
+    if (health.active_noncore_gets < MAX_NONCORE_GETS) return queue.length ? 0 : -1;
+    return -1;
+  }
+
   function pump() {
     queue.sort((a, b) => a.priority - b.priority || a.sequence - b.sequence);
     while (health.active_gets < MAX_CONCURRENT_GETS && queue.length) {
-      const job = queue.shift();
+      const runnableIndex = nextRunnableJobIndex();
+      if (runnableIndex < 0) break;
+      const [job] = queue.splice(runnableIndex, 1);
       updateQueueHealth();
       if (job.signal?.aborted) {
         job.reject(abortError());
         continue;
       }
 
+      const isCore = job.priority === 0;
       health.active_gets += 1;
+      if (isCore) health.active_core_gets += 1;
+      else health.active_noncore_gets += 1;
       health.started_gets += 1;
       health.peak_active_gets = Math.max(health.peak_active_gets, health.active_gets);
+      health.peak_noncore_gets = Math.max(health.peak_noncore_gets, health.active_noncore_gets);
 
       Promise.resolve()
         .then(() => job.run())
@@ -115,6 +140,8 @@
         })
         .finally(() => {
           health.active_gets = Math.max(0, health.active_gets - 1);
+          if (isCore) health.active_core_gets = Math.max(0, health.active_core_gets - 1);
+          else health.active_noncore_gets = Math.max(0, health.active_noncore_gets - 1);
           pump();
         });
     }
