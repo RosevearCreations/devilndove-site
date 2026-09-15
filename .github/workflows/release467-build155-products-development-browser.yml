@@ -25,6 +25,7 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       DEV_D1_DATABASE_NAME: devilndove-dev
+      BUILD155_EPHEMERAL_SESSION_TOKEN: ''
     steps:
       - uses: actions/checkout@v7
         with:
@@ -92,28 +93,11 @@ jobs:
             echo 'STOP: Cloudflare Access service-token credentials are only partially configured.'
             exit 1
           fi
-      - name: Resolve an admin session accepted by the exact Preview
+      - name: Resolve or provision bounded Development acceptance session
         shell: bash
         run: |
           set -euo pipefail
-          : > /tmp/build155-session-candidates
-          if [ -n "${CLOUDFLARE_API_TOKEN}" ]; then
-            npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT s.session_token AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(s.session_token,''))>0 ORDER BY s.expires_at DESC LIMIT 8;" > /tmp/build155-dev-sessions.json
-            python - <<'PY'
-          import json
-          data=json.load(open('/tmp/build155-dev-sessions.json'))
-          tokens=[]
-          def walk(value):
-              if isinstance(value,dict):
-                  token=str(value.get('runtime_token') or '').strip()
-                  if token and token not in tokens: tokens.append(token)
-                  for child in value.values(): walk(child)
-              elif isinstance(value,list):
-                  for child in value: walk(child)
-          walk(data)
-          open('/tmp/build155-session-candidates','w').write('\n'.join(tokens))
-          PY
-          fi
+          test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'STOP: Development D1 credential is not configured.'; exit 1; }
 
           validate_cookie() {
             local cookie="$1"
@@ -135,6 +119,21 @@ jobs:
           PY
           }
 
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT s.session_token AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(s.session_token,''))>0 ORDER BY s.expires_at DESC LIMIT 8;" > /tmp/build155-dev-sessions.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build155-dev-sessions.json'))
+          tokens=[]
+          def walk(value):
+              if isinstance(value,dict):
+                  token=str(value.get('runtime_token') or '').strip()
+                  if token and token not in tokens: tokens.append(token)
+                  for child in value.values(): walk(child)
+              elif isinstance(value,list):
+                  for child in value: walk(child)
+          walk(data)
+          open('/tmp/build155-session-candidates','w').write('\n'.join(tokens))
+          PY
           while IFS= read -r TOKEN; do
             [ -n "$TOKEN" ] || continue
             echo "::add-mask::${TOKEN}"
@@ -143,7 +142,7 @@ jobs:
               echo "DND_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
               rm -f /tmp/build155-auth-me.json /tmp/build155-dev-sessions.json /tmp/build155-session-candidates
               unset TOKEN COOKIE
-              echo 'Canonical Development D1 admin session accepted by exact Preview.'
+              echo 'Existing canonical Development admin session accepted by exact Preview.'
               exit 0
             fi
           done < /tmp/build155-session-candidates
@@ -158,13 +157,41 @@ jobs:
               echo "DND_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
               rm -f /tmp/build155-auth-me.json /tmp/build155-dev-sessions.json /tmp/build155-session-candidates
               unset TOKEN COOKIE
-              echo 'Configured Development admin session fallback accepted by exact Preview.'
+              echo 'Configured Development admin session accepted by exact Preview.'
               exit 0
             fi
           fi
-          rm -f /tmp/build155-auth-me.json /tmp/build155-dev-sessions.json /tmp/build155-session-candidates
-          echo 'STOP: no existing Development administrator session is accepted by the exact deployed Preview.'
-          exit 1
+
+          TOKEN="b155-$(python - <<'PY'
+          import secrets
+          print(secrets.token_hex(32))
+          PY
+          )"
+          echo "::add-mask::${TOKEN}"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "INSERT INTO sessions (user_id, session_token, token, expires_at, created_at) SELECT u.user_id, '${TOKEN}', '${TOKEN}', datetime('now','+20 minutes'), datetime('now') FROM users u WHERE u.is_active=1 AND lower(trim(u.role))='admin' ORDER BY u.user_id LIMIT 1; SELECT changes() AS inserted;" > /tmp/build155-ephemeral-session.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build155-ephemeral-session.json'))
+          values=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'inserted' in v: values.append(int(v['inserted']))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert any(v==1 for v in values),(values,data)
+          PY
+          COOKIE="dd_auth_token=${TOKEN}"
+          echo "BUILD155_EPHEMERAL_SESSION_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
+          if ! validate_cookie "$COOKIE"; then
+            echo 'STOP: bounded Development acceptance session was created but /api/auth/me rejected it on the exact Preview.'
+            exit 1
+          fi
+          echo "DND_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
+          rm -f /tmp/build155-auth-me.json /tmp/build155-dev-sessions.json /tmp/build155-session-candidates /tmp/build155-ephemeral-session.json
+          unset TOKEN COOKIE
+          echo 'Bounded Development-only admin acceptance session authenticated on exact Preview.'
       - name: Capture real Chromium Product UI responsiveness acceptance
         id: browser_probe
         shell: bash
@@ -260,6 +287,31 @@ jobs:
         run: |
           echo 'STOP: Build 155 real-browser Development acceptance is not GREEN.'
           exit 1
+      - name: Remove bounded Development acceptance session
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOKEN="${BUILD155_EPHEMERAL_SESSION_TOKEN:-}"
+          [ -n "$TOKEN" ] || { echo 'No ephemeral Build 155 session to remove.'; exit 0; }
+          echo "::add-mask::${TOKEN}"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "DELETE FROM sessions WHERE session_token='${TOKEN}' AND token='${TOKEN}'; SELECT changes() AS deleted;" > /tmp/build155-ephemeral-cleanup.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build155-ephemeral-cleanup.json'))
+          values=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'deleted' in v: values.append(int(v['deleted']))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert any(v==1 for v in values),(values,data)
+          PY
+          rm -f /tmp/build155-ephemeral-cleanup.json
+          unset TOKEN
+          echo 'Bounded Build 155 Development acceptance session removed.'
       - name: Boundary
         if: always()
         run: |
@@ -267,7 +319,8 @@ jobs:
           echo "Exact Development Preview: ${DND_BASE_URL}"
           echo 'Target: exact canonical Development Preview deployment'
           echo 'Browser: real headless Chromium/CDP'
-          echo 'HTTP/browser actions: GET + DOM observation only'
-          echo 'Session lookup: READ ONLY; existing session must be accepted by /api/auth/me'
-          echo 'D1/R2 mutation: NONE'
+          echo 'HTTP/browser actions: GET + DOM observation only after bounded auth setup'
+          echo 'Authentication: existing valid session preferred; otherwise one short-lived Development-only acceptance session is inserted then deleted'
+          echo 'Product/R2 business-data mutation: NONE'
+          echo 'Production mutation: NONE'
           echo 'Provider/payment/refund/accounting mutation: NONE'
