@@ -60,8 +60,7 @@ req('release467-build91-prelaunch-go-live-decision-convergence.json' in (pointer
 
 for token in ('Startup Readiness','five external','Canada-only','U.S. sales/shipping','GET-only','0001','0004'):
     req(token.lower() in doc.lower(),f'Build 91 operating document missing token: {token}')
-req([row.get('file') for row in manifest.get('migrations',[])]==EXPECTED,'Build 91 canonical migration stream drifted')
-req(not list((ROOT/'migrations/canonical').glob('0005*')),'Build 91 historical boundary expects no later canonical migration yet')
+req([row.get('file') for row in manifest.get('migrations',[])][:len(EXPECTED)] == EXPECTED,'Build 91 historical canonical migration baseline drifted')
 req("run_current_contract('scripts/release467_build91_gate.py', 'Release 467 Build 91')" in provenance,'Current System Gate does not chain Build 91')
 run(['python3','scripts/release467_build90_gate.py'],'carried Build 90 boundary')
 
@@ -72,4 +71,4 @@ if FAIL:
 print('RELEASE 467 BUILD 91 PRELAUNCH AUTHORITY & GO-LIVE DECISION CONVERGENCE: PASS')
 print('Build 91 final Development + Production closure: RETAINED')
 print('Prelaunch launch-decision authority: RETAINED')
-print('Canonical D1 migrations: 0001-0004 / UNCHANGED')
+print('Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted')

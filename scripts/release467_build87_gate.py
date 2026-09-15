@@ -56,8 +56,7 @@ req('release467-build87-production-authority-restart-convergence.json' in (point
 
 for token in ('authority','restart','HOLD_EXTERNAL','0001','0004'):
     req(token.lower() in doc.lower(),f'Build 87 operating document missing token: {token}')
-req([row.get('file') for row in manifest.get('migrations',[])]==EXPECTED,'Build 87 canonical migration stream drifted')
-req(not list((ROOT/'migrations/canonical').glob('0005*')),'Build 87 historical boundary expects no later canonical migration yet')
+req([row.get('file') for row in manifest.get('migrations',[])][:len(EXPECTED)] == EXPECTED,'Build 87 historical canonical migration baseline drifted')
 req("run_current_contract('scripts/release467_build87_gate.py', 'Release 467 Build 87')" in provenance,'Current System Gate does not chain Build 87')
 
 run(['python3','scripts/current_authority_restart_integrity_gate.py'],'current restart integrity')
@@ -70,4 +69,4 @@ if FAIL:
 print('RELEASE 467 BUILD 87 PRODUCTION AUTHORITY & RESTART CONVERGENCE: PASS')
 print('Build 87 final Development + Production closure: RETAINED')
 print('Current operator surfaces may advance without rewriting Build 87 history')
-print('Canonical D1 migrations: 0001-0004 / UNCHANGED')
+print('Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted')

@@ -60,8 +60,7 @@ req('release467-build92-prelaunch-action-queue-completeness.json' in (pointer.ge
 
 for token in ('every','unresolved','owner','due date','five external','Canada-only','U.S. sales/shipping','GET/read-only','0001','0004'):
     req(token.lower() in doc.lower(),f'Build 92 operating document missing token: {token}')
-req([row.get('file') for row in manifest.get('migrations',[])]==EXPECTED,'Build 92 canonical migration stream drifted')
-req(not list((ROOT/'migrations/canonical').glob('0005*')),'Build 92 historical boundary expects no later canonical migration yet')
+req([row.get('file') for row in manifest.get('migrations',[])][:len(EXPECTED)] == EXPECTED,'Build 92 historical canonical migration baseline drifted')
 req("run_current_contract('scripts/release467_build92_gate.py', 'Release 467 Build 92')" in provenance,'Current System Gate does not chain Build 92')
 run(['python3','scripts/release467_build91_gate.py'],'carried Build 91 boundary')
 
@@ -72,4 +71,4 @@ if FAIL:
 print('RELEASE 467 BUILD 92 PRELAUNCH ACTION QUEUE COMPLETENESS & OWNERSHIP: PASS')
 print('Build 92 final Development + Production closure: RETAINED')
 print('Complete Startup Readiness action routing: RETAINED')
-print('Canonical D1 migrations: 0001-0004 / UNCHANGED')
+print('Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted')

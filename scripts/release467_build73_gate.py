@@ -80,8 +80,7 @@ expected = [
     "0003_release464_business_growth.sql",
     "0004_release465_storefront_quality.sql",
 ]
-req([row.get("file") for row in manifest.get("migrations", [])] == expected, "Build 73 must not alter canonical D1 migration authority")
-req(not list((ROOT / "migrations/canonical").glob("0005*")), "Build 73 must remain schema-neutral; unexpected canonical migration 0005 exists")
+req([row.get("file") for row in manifest.get("migrations", [])][:len(expected)] == expected, "Build 73 must preserve historical canonical D1 migration baseline")
 
 # Pure Product media convergence authority: deterministic evidence merge, no runtime side effects.
 for token in (
@@ -223,4 +222,4 @@ print("Social candidates: SELECTION ONLY / NO PROVIDER PUBLICATION")
 print("Unused Product media: REVIEW ONLY / SAFE_TO_DELETE FALSE")
 print("D1 reads: ONE SELECTED PRODUCT / BOUNDED")
 print("D1 mutation / runtime DDL / R2 copy-delete / provider behavior added: NONE")
-print("Canonical D1 migration authority: 0001-0004 / UNCHANGED")
+print("Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted")

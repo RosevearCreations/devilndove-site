@@ -84,8 +84,7 @@ expected = [
     '0003_release464_business_growth.sql',
     '0004_release465_storefront_quality.sql',
 ]
-req([row.get('file') for row in manifest.get('migrations', [])] == expected, 'Build 80 must keep canonical migrations 0001-0004 exactly')
-req(not list((ROOT / 'migrations/canonical').glob('0005*')), 'Build 80 must remain schema-neutral')
+req([row.get('file') for row in manifest.get('migrations', [])][:len(expected)] == expected, 'Build 80 must preserve historical canonical migrations 0001-0004 as prefix')
 req('release467_build80_gate.py' in provenance and 'Release 467 Build 80' in provenance, 'Current System Gate does not chain Build 80')
 
 for path in (
@@ -109,4 +108,4 @@ print('Create-order/refund idempotency: EXPLICIT')
 print('Webhook verification/replay: CARRIED FORWARD')
 print('Provider calls / credentials / execution changes: NONE')
 print('External acceptance: HOLD / 0 OF 6 CLAIMED')
-print('Canonical D1 migrations: 0001-0004 / UNCHANGED')
+print('Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted')

@@ -61,8 +61,7 @@ req('release467-build94-product-workspace-readability.json' in (pointer.get('cur
 
 for token in ('Products','Editor','Inventory Links','vertical','three-column','two columns','single column','keyboard','Build 93','0001','0004','Canada-only','U.S. sales/shipping'):
     req(token.lower() in doc.lower(),f'Build 94 operating document missing token: {token}')
-req([row.get('file') for row in manifest.get('migrations',[])]==EXPECTED,'Build 94 canonical migration stream drifted')
-req(not list((ROOT/'migrations/canonical').glob('0005*')),'Build 94 historical boundary expects no later canonical migration yet')
+req([row.get('file') for row in manifest.get('migrations',[])][:len(EXPECTED)] == EXPECTED,'Build 94 historical canonical migration baseline drifted')
 req("run_current_contract('scripts/release467_build94_gate.py', 'Release 467 Build 94')" in provenance,'Current System Gate does not chain Build 94')
 run(['python3','scripts/release467_build93_gate.py'],'carried Build 93 boundary')
 
@@ -73,4 +72,4 @@ if FAIL:
 print('RELEASE 467 BUILD 94 PRODUCT WORKSPACE READABILITY & RESPONSIVE NAVIGATION: PASS')
 print('Build 94 final Development + Production closure: RETAINED')
 print('Product workspace readable 3/2/1 navigation: RETAINED')
-print('Canonical D1 migrations: 0001-0004 / UNCHANGED')
+print('Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted')

@@ -79,8 +79,7 @@ expected = [
     "0003_release464_business_growth.sql",
     "0004_release465_storefront_quality.sql",
 ]
-req([row.get("file") for row in manifest.get("migrations", [])] == expected, "Build 74 must not alter canonical D1 migration authority")
-req(not list((ROOT / "migrations/canonical").glob("0005*")), "Build 74 must remain schema-neutral; unexpected canonical migration 0005 exists")
+req([row.get("file") for row in manifest.get("migrations", [])][:len(expected)] == expected, "Build 74 must preserve historical canonical D1 migration baseline")
 
 # Product template: one H1, existing Product-detail authority, Build 74 enhancement loaded after it.
 req(len(re.findall(r"<h1\b", page, flags=re.I)) == 1, "Build 74 Product detail template must keep exactly one H1")
@@ -180,4 +179,4 @@ print("Related Product query added: NONE")
 print("Additional Product browser API request: NONE")
 print("Automatic cart/order/payment/publication/provider action: NONE")
 print("Runtime timer/polling behavior added: NONE")
-print("Canonical D1 migration authority: 0001-0004 / UNCHANGED")
+print("Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted")

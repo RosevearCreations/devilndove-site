@@ -36,8 +36,7 @@ for token in ("one Product authority","Products","Editor","Inventory Links","Med
     req(token in doc, f"Build 66 operating document missing token: {token}")
 
 expected=["0001_release464_migration_authority.sql","0002_release464_operational_acceptance.sql","0003_release464_business_growth.sql","0004_release465_storefront_quality.sql"]
-req([row.get("file") for row in manifest.get("migrations", [])] == expected, "Build 66 must not alter canonical D1 migration authority")
-req(not list((ROOT / "migrations/canonical").glob("0005*")), "Build 66 historical boundary expects no canonical migration 0005")
+req([row.get("file") for row in manifest.get("migrations", [])][:len(expected)] == expected, "Build 66 must preserve historical canonical D1 migration baseline")
 
 # The loader revision is allowed to advance; the original lazy-loading and workspace integration are not.
 for token in ("admin-product-workspaces.js?v=","product-workspace-split","element.closest?.('[hidden], [inert]')","style.display === 'none'","style.visibility === 'hidden'"):

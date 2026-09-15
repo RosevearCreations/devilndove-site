@@ -46,8 +46,7 @@ for token in ("all checked-in public HTML routes", "exactly one source H1", "can
     req(token in doc, f"Build 76 operating document missing token: {token}")
 
 expected = ["0001_release464_migration_authority.sql", "0002_release464_operational_acceptance.sql", "0003_release464_business_growth.sql", "0004_release465_storefront_quality.sql"]
-req([row.get("file") for row in manifest.get("migrations", [])] == expected, "Build 76 must not alter canonical D1 migration authority")
-req(not list((ROOT / "migrations/canonical").glob("0005*")), "Build 76 must remain schema-neutral; unexpected canonical migration 0005 exists")
+req([row.get("file") for row in manifest.get("migrations", [])][:len(expected)] == expected, "Build 76 must preserve historical canonical D1 migration baseline")
 
 for token in (
     'PRODUCTION_ORIGIN = "https://devilndove.com"',
@@ -103,4 +102,4 @@ print("JSON-LD schema context: ENFORCED")
 print("Internal-link coverage: ENFORCED")
 print("Dynamic Product + Workshop Journal story templates: EXPLICIT SITEMAP EXCEPTIONS")
 print("D1 / R2 / payment / provider mutation added: NONE")
-print("Canonical D1 migration authority: 0001-0004 / UNCHANGED")
+print("Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted")

@@ -116,8 +116,7 @@ expected = [
     '0003_release464_business_growth.sql',
     '0004_release465_storefront_quality.sql',
 ]
-req([row.get('file') for row in manifest.get('migrations', [])] == expected, 'Build 84 must keep canonical migrations 0001-0004 exactly')
-req(not list((ROOT / 'migrations/canonical').glob('0005*')), 'Build 84 must remain schema-neutral')
+req([row.get('file') for row in manifest.get('migrations', [])][:len(expected)] == expected, 'Build 84 must preserve historical canonical migrations 0001-0004 as prefix')
 req("run_current_contract('scripts/release467_build84_gate.py', 'Release 467 Build 84')" in provenance, 'Current System Gate does not chain Build 84')
 
 for path in (
@@ -140,4 +139,4 @@ print('Workflow stages: 8 / PROJECT-TO-PROFITABILITY')
 print('Productless projects: SUPPORTED')
 print('Private/raw CAIP media: PRESERVED / NO DELETE OR AUTO-PROMOTION')
 print('OAuth/provider/publication execution: NONE / BUILD 85 OWNER PRESERVED')
-print('Canonical D1 migrations: 0001-0004 / UNCHANGED')
+print('Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted')

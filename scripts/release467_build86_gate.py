@@ -85,8 +85,7 @@ req('release467-build86-it-operations-self-diagnostics.json' in (pointer.get('cu
 for token in ('eight diagnostic domains','automatic repair','HOLD_EXTERNAL','0001_release464_migration_authority.sql','0004_release465_storefront_quality.sql'):
     req(token.lower() in doc.lower(),f'Build 86 operating document missing token: {token}')
 expected=['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql']
-req([row.get('file') for row in manifest.get('migrations',[])]==expected,'Build 86 must keep canonical migrations 0001-0004 exactly')
-req(not list((ROOT/'migrations/canonical').glob('0005*')),'Build 86 historical boundary expects no later canonical migration yet')
+req([row.get('file') for row in manifest.get('migrations',[])][:len(expected)] == expected,'Build 86 must preserve historical canonical migrations 0001-0004 as prefix')
 req("run_current_contract('scripts/release467_build86_gate.py', 'Release 467 Build 86')" in provenance,'Current System Gate does not chain Build 86')
 
 for path in ('functions/api/_lib/itOperationsSelfDiagnostics.js','functions/api/admin/it-self-diagnostics.js','functions/api/admin/it-operations-control-tower.js'):
@@ -106,4 +105,4 @@ print('RELEASE 467 BUILD 86 I.T. OPERATIONS & SELF-DIAGNOSTICS: PASS')
 print('Historical feature authority: EIGHT-DOMAIN READ-ONLY DIAGNOSTICS')
 print('Build 86 final Development + Production closure: RETAINED')
 print('Automatic repair / D1 / R2 / provider / restore execution: NONE')
-print('Canonical D1 migrations: 0001-0004 / UNCHANGED')
+print('Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted')

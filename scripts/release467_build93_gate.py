@@ -65,8 +65,7 @@ req('release467-build93-centered-application-shell-overflow-accessibility.json' 
 
 for token in ('center','overflow','right-side','keyboard','public','admin','0001','0004','Canada-only','U.S. sales/shipping'):
     req(token.lower() in doc.lower(),f'Build 93 operating document missing token: {token}')
-req([row.get('file') for row in manifest.get('migrations',[])]==EXPECTED,'Build 93 canonical migration stream drifted')
-req(not list((ROOT/'migrations/canonical').glob('0005*')),'Build 93 historical boundary expects no later canonical migration yet')
+req([row.get('file') for row in manifest.get('migrations',[])][:len(EXPECTED)] == EXPECTED,'Build 93 historical canonical migration baseline drifted')
 req("run_current_contract('scripts/release467_build93_gate.py', 'Release 467 Build 93')" in provenance,'Current System Gate does not chain Build 93')
 run(['python3','scripts/release467_build92_gate.py'],'carried Build 92 boundary')
 
@@ -77,4 +76,4 @@ if FAIL:
 print('RELEASE 467 BUILD 93 CENTERED APPLICATION SHELL & OVERFLOW ACCESSIBILITY: PASS')
 print('Build 93 final Development + Production closure: RETAINED')
 print('Centered shell / right-side reachability: RETAINED')
-print('Canonical D1 migrations: 0001-0004 / UNCHANGED')
+print('Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted')

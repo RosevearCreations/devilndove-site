@@ -81,8 +81,7 @@ expected = [
     "0003_release464_business_growth.sql",
     "0004_release465_storefront_quality.sql",
 ]
-req([row.get("file") for row in manifest.get("migrations", [])] == expected, "Build 72 must not alter canonical D1 migration authority")
-req(not list((ROOT / "migrations/canonical").glob("0005*")), "Build 72 must remain schema-neutral; unexpected canonical migration 0005 exists")
+req([row.get("file") for row in manifest.get("migrations", [])][:len(expected)] == expected, "Build 72 must preserve historical canonical D1 migration baseline")
 
 # Pure recommendation engine: one explainable contract and no operational side effects.
 for token in (
@@ -209,4 +208,4 @@ print("Supplier alternatives: COMPARISON ONLY / NO AUTO-SELECTION")
 print("Product economics: RESOURCE-LIMITED BUILDABILITY / BUILD 70 CONVERSION")
 print("Automatic purchase / PO submission / supplier contact: NONE")
 print("D1 mutation / runtime DDL / provider / R2 behavior added: NONE")
-print("Canonical D1 migration authority: 0001-0004 / UNCHANGED")
+print("Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted")

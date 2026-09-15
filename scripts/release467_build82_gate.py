@@ -112,8 +112,7 @@ expected = [
     '0003_release464_business_growth.sql',
     '0004_release465_storefront_quality.sql',
 ]
-req([row.get('file') for row in manifest.get('migrations', [])] == expected, 'Build 82 must keep canonical migrations 0001-0004 exactly')
-req(not list((ROOT / 'migrations/canonical').glob('0005*')), 'Build 82 must remain schema-neutral')
+req([row.get('file') for row in manifest.get('migrations', [])][:len(expected)] == expected, 'Build 82 must preserve historical canonical migrations 0001-0004 as prefix')
 req("run_current_contract('scripts/release467_build82_gate.py', 'Release 467 Build 82')" in provenance, 'Current System Gate does not chain Build 82')
 
 for path in (
@@ -137,4 +136,4 @@ print('Reviewed workflow statuses: 7 WRITE / 12 READ STATES')
 print('Customer communication: DRAFT/COPY ONLY')
 print('Payment/refund/provider/accounting execution: NONE')
 print('Audit authority: order_status_history / PRESERVED')
-print('Canonical D1 migrations: 0001-0004 / UNCHANGED')
+print('Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted')

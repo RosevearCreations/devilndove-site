@@ -62,8 +62,7 @@ req('Release 466 Build 6' in runner and 'provider_acceptance_development_only' i
 req('const BUILD = 7;' in bridge,'historical commercial bridge identity drifted')
 
 for token in ('bridge-first','Production','Development','six real acceptance dimensions','provider-synchronized','guided','HOLD_EXTERNAL','0001','0004'):req(token.lower() in doc.lower(),f'Build 89 operating document missing {token}')
-req([r.get('file') for r in manifest.get('migrations',[])]==EXPECTED,'canonical migration stream drifted')
-req(not list((ROOT/'migrations/canonical').glob('0005*')),'Build 89 boundary expects canonical stream still 0001-0004')
+req([r.get('file') for r in manifest.get('migrations',[])][:len(EXPECTED)] == EXPECTED,'historical canonical migration baseline drifted')
 req("run_current_contract('scripts/release467_build89_gate.py', 'Release 467 Build 89')" in provenance,'System Gate no longer chains Build 89')
 run(['python3','scripts/release467_build88_gate.py'],'carried Build 88 boundary')
 if FAIL:
@@ -72,4 +71,4 @@ print('RELEASE 467 BUILD 89 ENVIRONMENT ISOLATION: PASS')
 print('Build 89 final Development + Production closure: RETAINED')
 print('Production acceptance projection: READ-ONLY / NO PROVIDER RUNNER')
 print('Development provider runner: GUARDED / OPTIONAL ENRICHMENT')
-print('Canonical D1 migrations: 0001-0004 / UNCHANGED')
+print('Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted')

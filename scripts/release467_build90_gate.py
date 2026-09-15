@@ -54,8 +54,7 @@ req('release467-build90-external-acceptance-evidence-depth.json' in (pointer.get
 
 for token in ('five external lanes','Social OAuth','CAIP','Cloudflare Access','timestamp','HOLD_EXTERNAL','0001','0004'):
     req(token.lower() in doc.lower(),f'Build 90 operating document missing token: {token}')
-req([row.get('file') for row in manifest.get('migrations',[])]==EXPECTED,'Build 90 canonical migration stream drifted')
-req(not list((ROOT/'migrations/canonical').glob('0005*')),'Build 90 historical boundary expects no later canonical migration yet')
+req([row.get('file') for row in manifest.get('migrations',[])][:len(EXPECTED)] == EXPECTED,'Build 90 historical canonical migration baseline drifted')
 req("run_current_contract('scripts/release467_build90_gate.py', 'Release 467 Build 90')" in provenance,'Current System Gate does not chain Build 90')
 run(['python3','scripts/release467_build89_gate.py'],'carried Build 89 boundary')
 
@@ -66,4 +65,4 @@ if FAIL:
 print('RELEASE 467 BUILD 90 EXTERNAL ACCEPTANCE EVIDENCE DEPTH: PASS')
 print('Build 90 final Development + Production closure: RETAINED')
 print('Five-lane structured evidence authority: RETAINED')
-print('Canonical D1 migrations: 0001-0004 / UNCHANGED')
+print('Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted')
