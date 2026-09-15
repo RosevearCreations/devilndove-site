@@ -6,7 +6,9 @@ on:
     types: [completed]
     branches: [dev]
 
-permissions: {contents: read}
+permissions:
+  contents: read
+  actions: read
 
 jobs:
   products-development-browser:
@@ -16,6 +18,7 @@ jobs:
     env:
       DND_BASE_URL: https://dev.devilndove-site.pages.dev
       EXPECTED_SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+      TRIGGER_RUN_ID: ${{ github.event.workflow_run.id }}
       DND_CONFIGURED_SESSION_COOKIE: ${{ secrets.DND_DEV_SESSION_COOKIE }}
       CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
       CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
@@ -37,42 +40,50 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
           python scripts/release467_build155_gate.py
-      - name: Resolve existing Development admin session read-only
+      - name: Resolve exact Development Preview from System Gate evidence
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          if [ -n "${CLOUDFLARE_API_TOKEN}" ]; then
-            npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT s.session_token AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(s.session_token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/build155-dev-session.json
-            TOKEN="$(python - <<'PY'
+          curl -fsSL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs/${TRIGGER_RUN_ID}/artifacts" \
+            > /tmp/build155-artifacts.json
+          ARTIFACT_ID="$(python - <<'PY'
           import json
-          data=json.load(open('/tmp/build155-dev-session.json'))
-          def walk(value):
-              if isinstance(value,dict):
-                  if value.get('runtime_token'): yield str(value['runtime_token'])
-                  for child in value.values(): yield from walk(child)
-              elif isinstance(value,list):
-                  for child in value: yield from walk(child)
-          print(next(walk(data),'').strip())
+          data=json.load(open('/tmp/build155-artifacts.json'))
+          rows=[a for a in data.get('artifacts',[]) if a.get('name')=='current-development-deploy-proof' and not a.get('expired')]
+          print(rows[0]['id'] if rows else '')
           PY
           )"
-            rm -f /tmp/build155-dev-session.json
-            if [ -n "${TOKEN}" ]; then
-              echo "::add-mask::${TOKEN}"
-              echo "DND_SESSION_COOKIE=dd_auth_token=${TOKEN}" >> "$GITHUB_ENV"
-              unset TOKEN
-              echo 'Using the newest unexpired Development administrator session from canonical D1.'
-              exit 0
-            fi
-            unset TOKEN
-          fi
-          if [ -n "${DND_CONFIGURED_SESSION_COOKIE}" ]; then
-            echo '::add-mask::configured-development-session'
-            echo "DND_SESSION_COOKIE=${DND_CONFIGURED_SESSION_COOKIE}" >> "$GITHUB_ENV"
-            echo 'No current D1 administrator session was available; using configured masked Development session fallback.'
-            exit 0
-          fi
-          echo 'STOP: no unexpired Development administrator session exists for real-browser acceptance.'
-          exit 1
+          test -n "${ARTIFACT_ID}" || { echo 'STOP: exact Development deploy proof artifact is missing.'; exit 1; }
+          curl -fsSL -L \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip" \
+            -o /tmp/build155-deploy-proof.zip
+          rm -rf /tmp/build155-deploy-proof
+          mkdir -p /tmp/build155-deploy-proof
+          unzip -q /tmp/build155-deploy-proof.zip -d /tmp/build155-deploy-proof
+          EXACT_URL="$(python - <<'PY'
+          import json,glob,os
+          matches=glob.glob('/tmp/build155-deploy-proof/**/current-development-deploy-proof.json',recursive=True)
+          assert matches,'current-development-deploy-proof.json missing from artifact'
+          data=json.load(open(matches[0]))
+          expected=os.environ['EXPECTED_SOURCE_SHA']
+          assert data.get('status')=='PASS',data
+          assert data.get('source_sha')==expected,(data.get('source_sha'),expected)
+          assert data.get('environment')=='preview',data
+          assert data.get('project')=='devilndove-site',data
+          url=str(data.get('url') or '').strip().rstrip('/')
+          assert url.startswith('https://') and '.devilndove-site.pages.dev' in url,url
+          print(url)
+          PY
+          )"
+          echo "DND_BASE_URL=${EXACT_URL}" >> "$GITHUB_ENV"
+          echo "Exact Development Preview resolved for ${EXPECTED_SOURCE_SHA}."
       - name: Validate Cloudflare Access credential pairing
         shell: bash
         run: |
@@ -81,6 +92,79 @@ jobs:
             echo 'STOP: Cloudflare Access service-token credentials are only partially configured.'
             exit 1
           fi
+      - name: Resolve an admin session accepted by the exact Preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > /tmp/build155-session-candidates
+          if [ -n "${CLOUDFLARE_API_TOKEN}" ]; then
+            npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT s.session_token AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(s.session_token,''))>0 ORDER BY s.expires_at DESC LIMIT 8;" > /tmp/build155-dev-sessions.json
+            python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build155-dev-sessions.json'))
+          tokens=[]
+          def walk(value):
+              if isinstance(value,dict):
+                  token=str(value.get('runtime_token') or '').strip()
+                  if token and token not in tokens: tokens.append(token)
+                  for child in value.values(): walk(child)
+              elif isinstance(value,list):
+                  for child in value: walk(child)
+          walk(data)
+          open('/tmp/build155-session-candidates','w').write('\n'.join(tokens))
+          PY
+          fi
+
+          validate_cookie() {
+            local cookie="$1"
+            local response=/tmp/build155-auth-me.json
+            local args=(-sS -o "$response" -w '%{http_code}' -H "Cookie: ${cookie}" -H 'Cache-Control: no-cache')
+            if [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; then
+              args+=(-H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}")
+            fi
+            local status
+            status="$(curl "${args[@]}" "${DND_BASE_URL}/api/auth/me" || true)"
+            [ "$status" = '200' ] || return 1
+            python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build155-auth-me.json'))
+          user=data.get('user') or {}
+          assert data.get('ok') is True,data
+          assert str(user.get('role') or '').strip().lower()=='admin',user
+          assert int(user.get('is_active') or 0)==1,user
+          PY
+          }
+
+          while IFS= read -r TOKEN; do
+            [ -n "$TOKEN" ] || continue
+            echo "::add-mask::${TOKEN}"
+            COOKIE="dd_auth_token=${TOKEN}"
+            if validate_cookie "$COOKIE"; then
+              echo "DND_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
+              rm -f /tmp/build155-auth-me.json /tmp/build155-dev-sessions.json /tmp/build155-session-candidates
+              unset TOKEN COOKIE
+              echo 'Canonical Development D1 admin session accepted by exact Preview.'
+              exit 0
+            fi
+          done < /tmp/build155-session-candidates
+
+          if [ -n "${DND_CONFIGURED_SESSION_COOKIE}" ]; then
+            COOKIE="${DND_CONFIGURED_SESSION_COOKIE#Cookie: }"
+            if [[ "$COOKIE" != *=* ]]; then COOKIE="dd_auth_token=${COOKIE}"; fi
+            COOKIE="${COOKIE%%;*}"
+            TOKEN="${COOKIE#*=}"
+            echo "::add-mask::${TOKEN}"
+            if validate_cookie "$COOKIE"; then
+              echo "DND_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
+              rm -f /tmp/build155-auth-me.json /tmp/build155-dev-sessions.json /tmp/build155-session-candidates
+              unset TOKEN COOKIE
+              echo 'Configured Development admin session fallback accepted by exact Preview.'
+              exit 0
+            fi
+          fi
+          rm -f /tmp/build155-auth-me.json /tmp/build155-dev-sessions.json /tmp/build155-session-candidates
+          echo 'STOP: no existing Development administrator session is accepted by the exact deployed Preview.'
+          exit 1
       - name: Capture real Chromium Product UI responsiveness acceptance
         id: browser_probe
         shell: bash
@@ -180,9 +264,10 @@ jobs:
         if: always()
         run: |
           echo "Exact Development SHA: ${EXPECTED_SOURCE_SHA}"
-          echo 'Target: canonical Development Preview only'
+          echo "Exact Development Preview: ${DND_BASE_URL}"
+          echo 'Target: exact canonical Development Preview deployment'
           echo 'Browser: real headless Chromium/CDP'
           echo 'HTTP/browser actions: GET + DOM observation only'
-          echo 'Session lookup: READ ONLY; no session created'
+          echo 'Session lookup: READ ONLY; existing session must be accepted by /api/auth/me'
           echo 'D1/R2 mutation: NONE'
           echo 'Provider/payment/refund/accounting mutation: NONE'
