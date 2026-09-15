@@ -56,8 +56,18 @@ req(scope.get('ready_for_render_reserved_for_guarded_transition') is True, 'read
 req(scope.get('render_job_creation_authorized') is False and scope.get('provider_execution_authorized') is False, 'Build 53 must not authorize render-job/provider execution')
 req(scope.get('schema_change_authorized') is False and scope.get('canonical_migration_added') is False, 'Build 53 must remain schema-neutral')
 
+# Build 53 itself was schema-neutral and historically proved the four-migration
+# baseline below. Preserve that historical boundary without freezing the current
+# repository forever at four migrations: later release-owned, forward-only
+# canonical migrations are valid so long as the Build 53 baseline remains intact.
 migrations = manifest.get('migrations') or []
-req(len(migrations) == 4, f'Canonical migration stream changed unexpectedly: {len(migrations)}')
-req(authority.get('canonical_d1_migration_count') == 4, 'Build 53 authority must preserve canonical migration count 4')
+expected_build53_baseline = [
+    '0001_release464_migration_authority.sql',
+    '0002_release464_operational_acceptance.sql',
+    '0003_release464_business_growth.sql',
+    '0004_release465_storefront_quality.sql',
+]
+req(migrations[:4] == expected_build53_baseline, f'Build 53 canonical migration baseline changed unexpectedly: {migrations[:4]}')
+req(authority.get('canonical_d1_migration_count') == 4, 'Build 53 authority must preserve historical canonical migration count 4')
 
 print('Build 53 generated deliverable review-state convergence: GREEN')
