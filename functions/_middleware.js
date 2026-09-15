@@ -19,6 +19,7 @@ const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b155-products-media-admin-bound-v1
 const PRODUCTS_REQUEST_BUDGET_REVISION = '467b156-request-budget-v2';
 const PRODUCTS_AUTH_READY_REVISION = '467b156-auth-ready-v3';
 const PRODUCTS_COLD_START_REVISION = '467b156-core-product-recovery-v1';
+const PRODUCTS_QUALITY_FALLBACK_REVISION = '467b156-quality-fallback-v1';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
 function isReadMethod(method) { return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase()); }
@@ -58,6 +59,7 @@ function productsPlatformMarkup() {
     `<script data-dd-products-request-budget="1" src="/public/js/admin-products-request-budget-v156.js?v=${PRODUCTS_REQUEST_BUDGET_REVISION}"></script>`,
     `<script data-dd-products-auth-ready-recovery="1" src="/public/js/admin-products-auth-ready-recovery-v156.js?v=${PRODUCTS_AUTH_READY_REVISION}"></script>`,
     `<script data-dd-products-cold-start="1" src="/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_COLD_START_REVISION}"></script>`,
+    `<script data-dd-products-quality-fallback="1" src="/public/js/admin-product-quality-fallback-v156.js?v=${PRODUCTS_QUALITY_FALLBACK_REVISION}"></script>`,
     `<script defer src="/public/js/layout-overflow-guard.js?v=${LAYOUT_ASSET_REVISION}"></script>`,
     '<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>',
     `<script defer src="/public/js/product-media-fallback.js?v=${PRODUCTS_MEDIA_FALLBACK_REVISION}"></script>`,
