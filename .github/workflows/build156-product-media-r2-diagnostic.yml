@@ -12,11 +12,11 @@ permissions:
 jobs:
   trace-product-media:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
       PROD_D1: devilndove-prod-r462
-      PROD_BUCKET: devilndove-toolshed-images
+      PROD_BASE: https://devilndove.com
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - uses: actions/checkout@v7
@@ -58,9 +58,7 @@ jobs:
                       return urllib.parse.unquote(p.path.lstrip('/'))
               except Exception: pass
               return ''
-          normalized=[]
-          for r in rows:
-              normalized.append({**r,'resolved_key':key_for(r)})
+          normalized=[{**r,'resolved_key':key_for(r)} for r in rows]
           json.dump(normalized,open('/tmp/dd-media-trace/normalized.json','w'),indent=2)
           keys=[]
           for r in normalized:
@@ -71,22 +69,34 @@ jobs:
           for r in normalized:
               print('REF',r.get('product_id'),r.get('source'),r.get('resolved_key') or '<non-r2>',r.get('image_url') or '')
           PY
-      - name: Probe exact referenced Production R2 keys read-only
+      - name: Probe referenced Production media through same-origin route in parallel
         shell: bash
         run: |
           set -euo pipefail
-          : > /tmp/dd-media-trace/probes.tsv
-          while IFS= read -r key; do
-            [ -n "$key" ] || continue
-            safe="$(printf '%s' "$key" | sha256sum | cut -d' ' -f1)"
-            out="/tmp/dd-media-trace/${safe}.bin"
-            if npx --yes wrangler@4.128.0 r2 object get "${PROD_BUCKET}/${key}" --remote --file="$out" >/tmp/dd-media-trace/${safe}.log 2>&1; then
-              size="$(wc -c < "$out" | tr -d ' ')"; sha="$(sha256sum "$out" | cut -d' ' -f1)"
-              printf '%s\tFOUND\t%s\t%s\n' "$key" "$size" "$sha" | tee -a /tmp/dd-media-trace/probes.tsv
-            else
-              printf '%s\tMISSING\t-\t-\n' "$key" | tee -a /tmp/dd-media-trace/probes.tsv
-            fi
-          done < /tmp/dd-media-trace/keys.txt
+          python - <<'PY'
+          import concurrent.futures, os, urllib.error, urllib.parse, urllib.request
+          base=os.environ['PROD_BASE'].rstrip('/')
+          keys=[x.strip() for x in open('/tmp/dd-media-trace/keys.txt') if x.strip()]
+          def probe(key):
+              url=base+'/api/product-media?'+urllib.parse.urlencode({'key':key,'diagnostic':'build156'})
+              req=urllib.request.Request(url,headers={'Cache-Control':'no-store','User-Agent':'dnd-build156-media-diagnostic/1.0'})
+              try:
+                  with urllib.request.urlopen(req,timeout=20) as response:
+                      return key,'FOUND' if response.status==200 else f'HTTP_{response.status}'
+              except urllib.error.HTTPError as exc:
+                  return key,'MISSING' if exc.code==404 else f'HTTP_{exc.code}'
+              except Exception as exc:
+                  return key,'ERROR_'+type(exc).__name__
+          with concurrent.futures.ThreadPoolExecutor(max_workers=12) as pool:
+              results=list(pool.map(probe,keys))
+          with open('/tmp/dd-media-trace/probes.tsv','w') as f:
+              for key,state in results:
+                  f.write(f'{key}\t{state}\n')
+                  print(state,key,sep='\t')
+          bad=[(k,s) for k,s in results if s not in ('FOUND','MISSING')]
+          assert not bad,bad
+          print('PARALLEL_MEDIA_PROBE=PASS keys=',len(results),'found=',sum(s=='FOUND' for _,s in results),'missing=',sum(s=='MISSING' for _,s in results))
+          PY
       - name: Summarize valid sibling candidates
         shell: bash
         run: |
@@ -96,8 +106,8 @@ jobs:
           rows=json.load(open('/tmp/dd-media-trace/normalized.json'))
           probes={}
           for line in open('/tmp/dd-media-trace/probes.tsv'):
-              key,state,size,sha=line.rstrip('\n').split('\t')
-              probes[key]=(state,size,sha)
+              key,state=line.rstrip('\n').split('\t')
+              probes[key]=state
           by={}
           for r in rows:
               pid=int(r.get('product_id') or 0); by.setdefault(pid,[]).append(r)
@@ -108,7 +118,7 @@ jobs:
               for r in by[pid]:
                   k=r.get('resolved_key') or ''
                   if not k: non.append((r.get('source'),r.get('image_url') or '')); continue
-                  state=probes.get(k,('UNPROBED','',''))[0]
+                  state=probes.get(k,'UNPROBED')
                   (found if state=='FOUND' else missing).append((r.get('source'),k))
               print(f'PRODUCT {pid}\t{name}\tFOUND={len(found)}\tMISSING={len(missing)}\tNON_R2={len(non)}')
               for source,key in found: print(f'  VALID\t{source}\t{key}')
@@ -118,7 +128,7 @@ jobs:
       - name: Boundary
         run: |
           echo 'D1: read-only affected Product references only'
-          echo 'R2: exact-key GET probes only; no listing'
+          echo 'Media: public same-origin exact-key GET probes only; no listing'
           echo 'R2 writes/deletes: NONE'
           echo 'D1 writes: NONE'
           echo 'Provider/payment/accounting mutation: NONE'
