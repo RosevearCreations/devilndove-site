@@ -69,6 +69,22 @@ jobs:
           echo "DND_SESSION_COOKIE=dd_auth_token=${TOKEN}" >> "$GITHUB_ENV"
           unset TOKEN
           echo 'Existing Production admin session resolved read-only.'
+      - name: Use bounded DOM readiness for Product browser acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('scripts/products_browser_runtime_probe.mjs')
+          text = path.read_text(encoding='utf-8')
+          old = """  const loaded = waitForEvent('Page.loadEventFired', sessionId, 25000);\n  await command('Page.navigate', { url: probeUrl }, sessionId, 20000);\n  await loaded;\n"""
+          new = """  const navigation = await command('Page.navigate', { url: probeUrl }, sessionId, 20000);\n  if (navigation?.errorText) throw new Error(`Page navigation failed: ${navigation.errorText}`);\n  let documentInteractive = false;\n  for (let attempt = 0; attempt < 100; attempt += 1) {\n    const navState = await evaluate(`({ readyState: document.readyState, href: location.href, title: document.title })`, sessionId, 3000);\n    if (['interactive', 'complete'].includes(String(navState?.readyState || ''))) {\n      documentInteractive = true;\n      break;\n    }\n    await sleep(100);\n  }\n  if (!documentInteractive) throw new Error('Product document did not reach interactive readiness');\n"""
+          if old not in text:
+              raise SystemExit('STOP: expected Build 155 navigation block was not found; probe source changed unexpectedly.')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+          node --check scripts/products_browser_runtime_probe.mjs
+          echo 'Browser harness will measure DOM/event-loop responsiveness without requiring full Page.loadEventFired first.'
       - name: Run real Chromium Product UI responsiveness acceptance
         env:
           CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
@@ -79,7 +95,8 @@ jobs:
           echo "Exact Production main SHA: ${EXPECTED_SOURCE_SHA}"
           echo 'Target: https://devilndove.com/admin/products/'
           echo 'Browser: deterministic headless Chrome/CDP'
-          echo 'Acceptance requires populated Product picker/table and responsive event loop'
+          echo 'Navigation gate: bounded DOM readiness; Runtime.evaluate timeout remains a hard lockup failure with debugger diagnostics'
+          echo 'Acceptance requires complete document, populated Product picker/table, stable Build 155 renderer and responsive event loop'
           echo 'Session lookup: READ ONLY; no session created'
           echo 'D1/R2 mutation: NONE'
           echo 'Provider/payment/refund/accounting mutation: NONE'
