@@ -35,8 +35,12 @@ req('/public/js/product-media-fallback.js?v=62' in middleware,'Global HTML middl
 shop=read('shop/index.html')
 req(shop.lower().count('<h1')==1,'Shop must retain exactly one H1')
 
+# Build 59 must preserve the canonical baseline it inherited. Later forward-only
+# migrations are valid and must not make this historical storefront gate stale.
 manifest=json.loads(read('migrations/canonical/manifest.json'))
-req(len(manifest.get('migrations') or [])==4,'Storefront media recovery must not change canonical migration count')
+files=[row.get('file') for row in (manifest.get('migrations') or []) if isinstance(row,dict)]
+baseline=['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql']
+req(files[:4]==baseline,'Storefront media recovery canonical migration baseline changed')
 
 for js in ('functions/api/storefront-merchandising.js','functions/api/product-media.js','public/js/product-media-fallback.js','functions/_middleware.js','scripts/current_storefront_media_recovery_test.mjs'):
     subprocess.run(['node','--check',str(ROOT/js)],cwd=ROOT,check=True)
@@ -47,4 +51,4 @@ print('Public media recovery: PRODUCT + MOVIE + LEGACY R2 PREFIXES / R2 READ-ONL
 print('Historical public host recovery: SAME-ORIGIN')
 print('Same-product surviving-image promotion: PROVEN')
 print('Site-wide HTML fallback injection: CURRENT V62')
-print('Canonical migrations: UNCHANGED')
+print('Canonical migrations: BUILD 59 BASELINE PRESERVED / FORWARD MIGRATIONS ALLOWED')
