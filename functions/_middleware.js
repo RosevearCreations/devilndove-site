@@ -13,7 +13,7 @@ import {
 } from './api/_lib/appModuleSessionGuard.js';
 import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appModuleRoutes.js';
 
-const PRODUCTS_ASSET_REVISION = '467-b155-products-client-responsiveness';
+const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';
 const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';
 const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b155-products-media-admin-bound-v1';
 
