@@ -75,8 +75,65 @@ jobs:
             echo 'STOP: Cloudflare Access service-token credentials are only partially configured.'
             exit 1
           fi
-      - name: Run real Chromium Product UI responsiveness acceptance
-        run: node scripts/products_browser_runtime_probe.mjs
+      - name: Capture real Chromium Product UI responsiveness acceptance
+        id: browser_probe
+        shell: bash
+        run: |
+          set +e
+          node scripts/products_browser_runtime_probe.mjs 2>&1 | tee /tmp/build155-browser-probe.log
+          status=${PIPESTATUS[0]}
+          echo "status=${status}" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Browser diagnostic — document, auth or Product rows
+        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
+        shell: bash
+        run: |
+          if grep -Eqi 'document\.readyState=|administrator session was not active|existing Product picker has only|Product table rendered zero|client-health revision is not active' /tmp/build155-browser-probe.log; then
+            touch /tmp/build155-browser-diagnostic-matched
+            echo 'Build 155 browser failure classified: document/auth/Product-row readiness.'
+            exit 1
+          fi
+      - name: Browser diagnostic — render stability or event loop
+        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
+        shell: bash
+        run: |
+          if grep -Eqi 'render stability could not be measured|marketplace renderer repeated|event-loop heartbeat|CDP command timed out: Runtime\.evaluate|PRODUCTS BROWSER STALL' /tmp/build155-browser-probe.log; then
+            touch /tmp/build155-browser-diagnostic-matched
+            echo 'Build 155 browser failure classified: render stability/event-loop responsiveness.'
+            exit 1
+          fi
+      - name: Browser diagnostic — Product command centers still loading
+        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
+        shell: bash
+        run: |
+          if grep -Eqi 'draft/archive cleanup remained|Product Release Quality Command Center remained' /tmp/build155-browser-probe.log; then
+            touch /tmp/build155-browser-diagnostic-matched
+            echo 'Build 155 browser failure classified: Product command-center loading state.'
+            exit 1
+          fi
+      - name: Browser diagnostic — Worker resource limit
+        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
+        shell: bash
+        run: |
+          if grep -Eqi 'Worker resource-limit|Error 1102|Worker exceeded resource limits' /tmp/build155-browser-probe.log; then
+            touch /tmp/build155-browser-diagnostic-matched
+            echo 'Build 155 browser failure classified: Worker resource-limit evidence.'
+            exit 1
+          fi
+      - name: Browser diagnostic — runtime exception or unclassified failure
+        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
+        shell: bash
+        run: |
+          if [ ! -e /tmp/build155-browser-diagnostic-matched ]; then
+            echo 'Build 155 browser failure classified: runtime exception or currently-unclassified acceptance failure.'
+            grep -E 'PRODUCTS BROWSER RUNTIME PROBE: FAIL|Error:|Exception' /tmp/build155-browser-probe.log || true
+            exit 1
+          fi
+      - name: Require real Chromium Product UI responsiveness acceptance
+        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
+        run: |
+          echo 'STOP: Build 155 real-browser Development acceptance is not GREEN.'
+          exit 1
       - name: Boundary
         if: always()
         run: |
