@@ -84,13 +84,49 @@ jobs:
           status=${PIPESTATUS[0]}
           echo "status=${status}" >> "$GITHUB_OUTPUT"
           exit 0
-      - name: Browser diagnostic — document, auth or Product rows
+      - name: Browser diagnostic — document not complete
         if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
         shell: bash
         run: |
-          if grep -Eqi 'document\.readyState=|administrator session was not active|existing Product picker has only|Product table rendered zero|client-health revision is not active' /tmp/build155-browser-probe.log; then
+          if grep -Eqi 'document\.readyState=' /tmp/build155-browser-probe.log; then
             touch /tmp/build155-browser-diagnostic-matched
-            echo 'Build 155 browser failure classified: document/auth/Product-row readiness.'
+            echo 'Build 155 browser failure classified: document readiness.'
+            exit 1
+          fi
+      - name: Browser diagnostic — administrator session inactive
+        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
+        shell: bash
+        run: |
+          if grep -Eqi 'administrator session was not active' /tmp/build155-browser-probe.log; then
+            touch /tmp/build155-browser-diagnostic-matched
+            echo 'Build 155 browser failure classified: application administrator session inactive.'
+            exit 1
+          fi
+      - name: Browser diagnostic — Product picker not populated
+        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
+        shell: bash
+        run: |
+          if grep -Eqi 'existing Product picker has only' /tmp/build155-browser-probe.log; then
+            touch /tmp/build155-browser-diagnostic-matched
+            echo 'Build 155 browser failure classified: existing Product picker population.'
+            exit 1
+          fi
+      - name: Browser diagnostic — Product table rows missing
+        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
+        shell: bash
+        run: |
+          if grep -Eqi 'Product table rendered zero' /tmp/build155-browser-probe.log; then
+            touch /tmp/build155-browser-diagnostic-matched
+            echo 'Build 155 browser failure classified: Product table row rendering.'
+            exit 1
+          fi
+      - name: Browser diagnostic — Build 155 client health marker absent
+        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
+        shell: bash
+        run: |
+          if grep -Eqi 'client-health revision is not active' /tmp/build155-browser-probe.log; then
+            touch /tmp/build155-browser-diagnostic-matched
+            echo 'Build 155 browser failure classified: client-health revision marker.'
             exit 1
           fi
       - name: Browser diagnostic — render stability or event loop
