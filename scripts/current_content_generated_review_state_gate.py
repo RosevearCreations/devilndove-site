@@ -67,7 +67,8 @@ expected_build53_baseline = [
     '0003_release464_business_growth.sql',
     '0004_release465_storefront_quality.sql',
 ]
-req(migrations[:4] == expected_build53_baseline, f'Build 53 canonical migration baseline changed unexpectedly: {migrations[:4]}')
+current_filenames = [entry.get('file') for entry in migrations]
+req(current_filenames[:4] == expected_build53_baseline, f'Build 53 canonical migration baseline changed unexpectedly: {current_filenames[:4]}')
 req(authority.get('canonical_d1_migration_count') == 4, 'Build 53 authority must preserve historical canonical migration count 4')
 
 print('Build 53 generated deliverable review-state convergence: GREEN')
