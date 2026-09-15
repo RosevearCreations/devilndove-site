@@ -41,6 +41,13 @@
       "release": 465,
       "description": "Make Product publication hard-readiness migration-owned and add fail-closed SEO/readiness guards for Release 465 Build 1.",
       "recovery": "Forward-only. Unpublish affected Products before any corrective migration; repair or replace Release 465 publication triggers only with a new numbered migration. Never edit this migration after Development application."
+    },
+    {
+      "version": 5,
+      "file": "0005_release467_inventory_process_assignment.sql",
+      "release": 467,
+      "description": "Add a shared workshop-process catalog and one reviewed primary process assignment for each Tool or Supply inventory item.",
+      "recovery": "Forward-only additive tables. Clear or reassign process links for logical rollback; repair schema defects only with a new numbered migration and never edit this migration after Development application."
     }
   ]
 }
