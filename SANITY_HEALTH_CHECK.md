@@ -20,3 +20,11 @@ Build 155 — **Products Client Responsiveness Hotfix** — is the active schema
 The Product Entry incident is not closed until exact candidate and Development proofs pass, the canonical Development Preview passes a **real authenticated Chromium/CDP browser proof** with populated Product picker/table and responsive event loop, the identical tree is promoted to `main`, Production Pages and Live Resource proofs pass, and the **real authenticated Production browser proof** confirms the Product picker/table populate and marketplace render count remains stable rather than looping.
 
 Safety boundaries remain unchanged: no D1/R2/provider/payment/refund/accounting/request-time-schema mutation authority is added. Canonical D1 migrations remain `0001`–`0004`. Build 135 transient transport policy remains mandatory and external provider/evidence lanes remain separate.
+
+<!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
+## Current Release 467 restart authority — Build 156 candidate
+
+Build 155 **Products Client Responsiveness Hotfix** is the last fully verified Development and current Production baseline. Development SHA/main SHA: `4e9efa2daf8f541e941c350ccde77798b5c99080`. Exact tree: `3f08dc3dfde778ddca0ca5fd328e7d45a1fcee9e`. Development proofs: System Gate `34915558746`, Current Application Quality `34915558747`, I.T. Admin Runtime `34915558751`, Repository Branch Hygiene `34915558771`, dedicated Build 155 proof `34915558804`. Production proofs: Pages `34915729378`, live-resource integrity `34915877580`, Products browser `34915877555`, Products route `34915877617`.
+
+Build 156 **Tool & Supply Process Assignment** is the active Development closure candidate. It introduces forward-only canonical migration `0005_release467_inventory_process_assignment.sql`; Production promotion remains closed until the exact Build 156 `dev` head is GREEN across the required proof set.
+<!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->

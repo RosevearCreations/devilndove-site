@@ -2,7 +2,7 @@
   "release": 467,
   "build": 156,
   "title": "Tool & Supply Process Assignment",
-  "state": "implementation_candidate",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
   "source_base_sha": "4e9efa2daf8f541e941c350ccde77798b5c99080",
   "workspace": "/admin/inventory-operations/",
   "endpoint": "/api/admin/inventory-process-assignments",
@@ -22,10 +22,51 @@
     "read_only": true,
     "write_mutation_authority": false
   },
-  "default_processes": ["Laser Engraving","3D Printing","CNC Machining","Resin","Polymer Clay","Candles","Metal & Ring Work","Wire Wrapping","Lapidary","Soldering","Packaging & Labeling","Photography & Content","General Workshop"],
+  "default_processes": [
+    "Laser Engraving",
+    "3D Printing",
+    "CNC Machining",
+    "Resin",
+    "Polymer Clay",
+    "Candles",
+    "Metal & Ring Work",
+    "Wire Wrapping",
+    "Lapidary",
+    "Soldering",
+    "Packaging & Labeling",
+    "Photography & Content",
+    "General Workshop"
+  ],
   "request_time_schema_mutation": false,
   "production_business_data_overwrite": false,
   "r2_mutation": false,
   "provider_execution": false,
-  "payment_mutation": false
+  "payment_mutation": false,
+  "source_base_tree_sha": "3f08dc3dfde778ddca0ca5fd328e7d45a1fcee9e",
+  "starting_point": {
+    "development": {
+      "sha": "4e9efa2daf8f541e941c350ccde77798b5c99080",
+      "tree": "3f08dc3dfde778ddca0ca5fd328e7d45a1fcee9e",
+      "system_gate_run": 34915558746,
+      "quality_run": 34915558747,
+      "it_admin_runtime_run": 34915558751,
+      "repository_hygiene_run": 34915558771,
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+      "exact_preview_deployment": true
+    },
+    "production": {
+      "main_sha": "4e9efa2daf8f541e941c350ccde77798b5c99080",
+      "tree": "3f08dc3dfde778ddca0ca5fd328e7d45a1fcee9e",
+      "production_pages_deploy_run": 34915729378,
+      "production_live_resource_integrity_run": 34915877580,
+      "products_production_browser_proof_run": 34915877555,
+      "products_route_production_proof_run": 34915877617,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "closure_policy": {
+    "candidate_must_not_self_claim_final_proof": true,
+    "promotion_requires_exact_dev_head_four_proof_green": true,
+    "production_promotion_automatic": false
+  }
 }

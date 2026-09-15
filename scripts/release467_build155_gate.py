@@ -134,16 +134,13 @@ req("method: 'POST'" not in probe and 'method: "POST"' not in probe,
 try:
     manifest = json.loads(manifest_text)
     files = [row.get('file') for row in manifest.get('migrations', [])]
-    historical_baseline = [
+    build155_baseline = [
         '0001_release464_migration_authority.sql',
         '0002_release464_operational_acceptance.sql',
         '0003_release464_business_growth.sql',
         '0004_release465_storefront_quality.sql',
     ]
-    req(files[:4] == historical_baseline,
-        f'Build 155 historical canonical migration baseline drifted: {files[:4]}')
-    req(len(files) >= 4,
-        f'Build 155 requires its original four canonical migrations; current stream is {files}')
+    req(files[:4] == build155_baseline, f'Build 155 canonical migration baseline drifted: {files[:4]}')
 except Exception as exc:
     FAIL.append(f'canonical migration manifest could not be parsed: {exc}')
 
