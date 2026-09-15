@@ -18,6 +18,8 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
+      - name: Normalize one-shot repair inputs
+        run: python scripts/build156_authority_repair_compat.py
       - name: Apply synchronized authority repair
         run: python scripts/build156_authority_repair.py
       - name: Verify synchronized authority
@@ -33,10 +35,9 @@ jobs:
           node --check functions/api/_lib/currentReliability.js
       - name: Commit synchronized Build 156 candidate
         run: |
-          rm .github/workflows/build156-authority-repair.yml scripts/build156_authority_repair.py
+          rm .github/workflows/build156-authority-repair.yml scripts/build156_authority_repair.py scripts/build156_authority_repair_compat.py
           git config user.name 'Devil n Dove Release Automation'
           git config user.email 'actions@users.noreply.github.com'
           git add -A
           git commit -m 'Build 156: seal Build 155 authority and synchronize restart truth'
           git push origin HEAD:dev
-# Retriggered after Product Admin request-budget safety fix.
