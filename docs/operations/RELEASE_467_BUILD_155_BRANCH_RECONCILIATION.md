@@ -17,25 +17,28 @@ PR #178 merged the workflow-only `main` release-plumbing commit back into `dev`.
 
 The Development browser workflow was subsequently given bounded failure classification on `main` and reconciled into the Development ancestry. The first classified run proved the remaining failure belongs to the document/auth/Product-row readiness family, while render/event-loop stability, command-center loading, and Worker resource-limit categories did not fire.
 
-The default-branch browser workflow is now refined further to distinguish document completion, application-admin session activation, Product picker population, Product table row rendering, and the Build 155 client-health revision marker. This is diagnostic release plumbing only; it captures the existing read-only Chromium probe result and does not relax or bypass any acceptance assertion.
+The refined browser run then identified the first failing layer precisely: the page reached `complete`, but the application administrator session was inactive. Product picker population, Product-row rendering, and the Build 155 client-health marker consequently failed downstream. This means the acceptance runner was entering the Product screen with a stale configured session rather than proving the current Development application with a current session.
 
-The repair changes no Product/runtime implementation, schema, D1/R2 business data, provider/payment/refund/accounting state, or Production application deployment.
+The browser workflow now resolves the newest unexpired administrator `session_token` directly from canonical Development D1 when the existing read-only Cloudflare credential is available, matching `/api/auth/me`'s bounded session lookup. The configured secret remains only a fallback when no current D1 session can be resolved. No session is created and no authentication, Product, schema, D1/R2 business-data, provider/payment/refund/accounting state is mutated.
+
+The live-session workflow repair is registered on default `main` at `15557069ce60a21d0c8cfb88c9e3ca821301f760` and reconciled into `dev` ancestry at `8d24ae9fc0d66d14f094be86ba52e6654b3ea6e0`.
 
 ## Why this evidence commit exists
 
-This evidence document intentionally creates a Development-only release-evidence delta under `docs/operations/**`, which is already included in the canonical System Gate path contract. It retriggers the exact-SHA Development deployment so the refined default-branch browser diagnostic can observe the freshly deployed candidate.
+This evidence document intentionally creates a Development-only release-evidence delta under `docs/operations/**`, which is included in the canonical System Gate path contract. It retriggers the exact-SHA Development deployment so the corrected default-branch browser proof can observe the freshly deployed candidate using the current canonical Development administrator session.
 
 The resulting Development SHA must be treated as a fresh candidate. System Gate, Current Application Quality Proof, I.T. Admin Runtime Proof, and the real-browser Development proof must complete successfully before `main` application promotion is permitted.
 
 ## Product Entry acceptance boundary
 
-Build 155's source/quality/System Gate checks have passed on earlier candidate SHAs, and the Development browser workflow successfully resolves the existing Development administrator session and validates Cloudflare Access credential pairing before Chromium starts. The remaining blocker is therefore inside the real-browser Product UI acceptance step, not the session lookup or Access credential-pairing steps.
+Build 155's source/quality/System Gate checks have passed on earlier candidate SHAs. The prior browser proof also established that the page itself completed and did not show render-loop, command-center-loading, or Worker-resource-limit evidence; its blocker was an inactive browser session.
 
-The refined failure classifier remains read-only and is used only to identify the exact acceptance assertion so the Product Entry defect can be repaired without weakening the gate.
+The corrected proof remains GET/DOM-observation only and must now prove authenticated Product picker population, Product rows, the Build 155 client-health revision, render stability, normal event-loop responsiveness, and absence of Worker 1102 evidence before promotion.
 
 ## Safety
 
 - Production application mutation: **NONE**
+- Session/authentication mutation: **NONE**
 - Schema mutation: **NONE**
 - D1/R2 business-data mutation: **NONE**
 - Payment/refund/provider/accounting execution: **NONE**
