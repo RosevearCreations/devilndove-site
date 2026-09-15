@@ -4,9 +4,9 @@ import re
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
-TARGETS = range(80, 95)
+TARGETS = range(63, 95)
 MANIFEST_ASSERTION = re.compile(
-    r"(\[[A-Za-z_]\w*\.get\('file'\)\s+for\s+[A-Za-z_]\w*\s+in\s+manifest\.get\('migrations',\s*\[\]\)\])\s*==\s*(expected|EXPECTED)"
+    r"(\[[A-Za-z_]\w*\.get\((?:'|\")file(?:'|\")\)\s+for\s+[A-Za-z_]\w*\s+in\s+manifest\.get\((?:'|\")migrations(?:'|\"),\s*\[\]\)\])\s*==\s*(expected|EXPECTED)"
 )
 
 for build in TARGETS:
@@ -26,25 +26,28 @@ for build in TARGETS:
                 line,
                 count=1,
             )
-            line = line.replace(
-                'must keep canonical migrations 0001-0004 exactly',
-                'must preserve historical canonical migrations 0001-0004 as prefix',
-            )
-            line = line.replace(
-                'canonical migration stream drifted',
-                'historical canonical migration baseline drifted',
-            )
+            for old, new in (
+                ('must keep canonical migrations 0001-0004 exactly', 'must preserve historical canonical migrations 0001-0004 as prefix'),
+                ('must keep canonical D1 migrations 0001-0004 exactly', 'must preserve historical canonical D1 migrations 0001-0004 as prefix'),
+                ('must not alter canonical D1 migration authority', 'must preserve historical canonical D1 migration baseline'),
+                ('canonical migration stream drifted', 'historical canonical migration baseline drifted'),
+            ):
+                line = line.replace(old, new)
             replaced_manifest += 1
 
         if ".glob('0005*')" in line or '.glob("0005*")' in line:
             removed_future_ban += 1
             continue
 
-        if 'Canonical D1 migrations: 0001-0004 / UNCHANGED' in line:
-            line = line.replace(
-                'Canonical D1 migrations: 0001-0004 / UNCHANGED',
-                'Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted',
-            )
+        for old in (
+            'Canonical D1 migrations: 0001-0004 / UNCHANGED',
+            'Canonical D1 migration authority: 0001-0004 / UNCHANGED',
+        ):
+            if old in line:
+                line = line.replace(
+                    old,
+                    'Historical canonical D1 baseline: 0001-0004 / PRESERVED; later forward migrations permitted',
+                )
 
         out.append(line)
 
