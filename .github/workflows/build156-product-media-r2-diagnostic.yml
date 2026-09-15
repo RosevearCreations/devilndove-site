@@ -10,40 +10,14 @@ permissions:
   contents: read
 
 jobs:
-  recovery-source-trace:
+  recovery-manifest-trace:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      PROD_D1: devilndove-prod-r462
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       FIRESTORAGE_API: https://api.firestorage.ai/dev/file
       FIRESTORAGE_SHARE: Du_6a_urMG5o
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '24'
-
-      - name: Trace two unassigned 404 keys in Production D1 read-only
-        shell: bash
-        run: |
-          set -u
-          mkdir -p /tmp/dd-media-source
-          npx --yes wrangler@4.128.0 d1 execute "$PROD_D1" --remote --json --command "PRAGMA table_info(media_assets);" > /tmp/dd-media-source/media-assets-columns.json || true
-          npx --yes wrangler@4.128.0 d1 execute "$PROD_D1" --remote --json --command "SELECT media_asset_id, product_id, object_key, public_url, original_filename FROM media_assets WHERE object_key IN ('products/unassigned/1783790631974-8950293d-59a8-4b7a-a71e-3dc52fe68d03.jpg','products/unassigned/1785866453486-38cd17a6-7a31-4104-9dbf-3ea4584cfaca.jpg') OR public_url LIKE '%1783790631974-8950293d-59a8-4b7a-a71e-3dc52fe68d03.jpg%' OR public_url LIKE '%1785866453486-38cd17a6-7a31-4104-9dbf-3ea4584cfaca.jpg%';" > /tmp/dd-media-source/unassigned.json
-          python - <<'PY'
-          import json
-          d=json.load(open('/tmp/dd-media-source/unassigned.json')); rows=[]
-          def walk(v):
-              if isinstance(v,dict):
-                  if 'media_asset_id' in v and ('object_key' in v or 'public_url' in v): rows.append(v)
-                  for x in v.values(): walk(x)
-              elif isinstance(v,list):
-                  for x in v: walk(x)
-          walk(d)
-          print('UNASSIGNED_REFERENCE_ROWS',len(rows))
-          for r in rows: print(json.dumps(r,sort_keys=True))
-          PY
 
       - name: Download historical Product recovery transport manifests only
         shell: bash
@@ -73,7 +47,7 @@ jobs:
             echo "MANIFEST_EXTRACTED $name"
           done < /tmp/dd-media-source/map.tsv
 
-      - name: Compare historical recovery manifest with currently missing Product families
+      - name: Compare historical recovery manifest with missing Product families
         shell: bash
         run: |
           set -euo pipefail
@@ -81,8 +55,7 @@ jobs:
           import json,glob,collections
           rows=[]
           for path in sorted(glob.glob('/tmp/dd-media-source/*.manifest.json')):
-              part=json.load(open(path))
-              rows.extend(part)
+              rows.extend(json.load(open(path)))
           assert len(rows)==150,len(rows)
           ids={3,4,31,43,50}
           by=collections.defaultdict(list)
@@ -93,7 +66,7 @@ jobs:
           for pid in sorted(ids):
               print(f'PRODUCT {pid} HISTORICAL_RECOVERY_KEYS={len(by[pid])}')
               for r in by[pid]:
-                  print('  RECOVERY',r.get('key'),r.get('file'),r.get('size'),r.get('sha256'))
+                  print('RECOVERY',pid,r.get('key'),r.get('file'),r.get('size'),r.get('sha256'))
           targets={
             'products/3/1778083697595-1-f252086f-c626-46e8-b883-5d0526c5c748.jpg',
             'products/4/1781978401235-1ba4acce-e5b5-4082-b0ee-bf776f213f5c.jpg',
@@ -109,8 +82,7 @@ jobs:
 
       - name: Boundary
         run: |
-          echo 'Production D1: read-only exact unassigned-key trace only'
-          echo 'Firestorage: read-only historical recovery manifest extraction'
-          echo 'R2 writes/deletes: NONE'
-          echo 'D1 writes: NONE'
-          echo 'No source/provider/payment/accounting mutation'
+          echo 'Firestorage: read-only historical recovery manifest extraction only'
+          echo 'Production D1 reads/writes: NONE'
+          echo 'R2 reads/writes/deletes: NONE'
+          echo 'No provider/payment/accounting mutation'
