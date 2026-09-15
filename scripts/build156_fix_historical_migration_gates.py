@@ -6,7 +6,7 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[1]
 TARGETS = range(80, 95)
 MANIFEST_ASSERTION = re.compile(
-    r"(\[row\.get\('file'\)\s+for\s+row\s+in\s+manifest\.get\('migrations',\s*\[\]\)\])\s*==\s*(expected|EXPECTED)"
+    r"(\[[A-Za-z_]\w*\.get\('file'\)\s+for\s+[A-Za-z_]\w*\s+in\s+manifest\.get\('migrations',\s*\[\]\)\])\s*==\s*(expected|EXPECTED)"
 )
 
 for build in TARGETS:
@@ -56,8 +56,6 @@ for build in TARGETS:
     path.write_text('\n'.join(out) + '\n', encoding='utf-8')
     print(f'Build {build}: historical 0001-0004 prefix preserved; later forward migrations permitted')
 
-# Prove every retained historical contract after the repair, then prove the
-# current System provenance chain and Build 156 itself.
 for build in TARGETS:
     subprocess.run(['python', f'scripts/release467_build{build}_gate.py'], cwd=ROOT, check=True)
 subprocess.run(['python', 'scripts/current_system_gate_provenance_gate.py'], cwd=ROOT, check=True)
