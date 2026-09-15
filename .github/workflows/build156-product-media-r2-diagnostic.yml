@@ -10,12 +10,12 @@ permissions:
   contents: read
 
 jobs:
-  compare-product-media:
+  trace-product-media:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
-      DEV_BUCKET: devilndove-toolshed-images-dev
+      PROD_D1: devilndove-prod-r462
       PROD_BUCKET: devilndove-toolshed-images
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
@@ -23,68 +23,102 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
-      - name: Compare exact reported keys read-only
+      - name: Read affected Production Product media references
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p /tmp/dd-media-diagnostic
-          cat > /tmp/dd-media-diagnostic/keys.txt <<'EOF'
-          products/31/1784659283241-037c47a9-dbb3-4dba-bf1f-77ed34592e94.jpg
-          products/3/1778083697595-1-f252086f-c626-46e8-b883-5d0526c5c748.jpg
-          products/1/1784658555568-a6afbd00-04b5-4f38-b4d8-fd8dd96e36f8.jpg
-          products/13/1780246850248-2-e83b9a70-b10a-4761-820e-37d4697dd928.jpg
-          products/12/1780245223654-2-bd50d22d-7c3b-479f-934c-ef958e1622c8.jpg
-          products/34/1786979177708-d6f2f821-1ff2-4688-a8fd-9c6f8f8ff18c.jpg
-          products/43/1785689952917-647d08ae-8a1e-4094-a079-846310191630.jpg
-          products/10/1780154765526-2-4544f609-91c4-49b3-a865-b0b0aa045774.jpg
-          products/unassigned/1783790631974-8950293d-59a8-4b7a-a71e-3dc52fe68d03.jpg
-          products/6/1786638516200-7f7a2e1a-5667-4d8c-9c5e-b6f2d051fd6b.jpg
-          products/4/1781978401235-1ba4acce-e5b5-4082-b0ee-bf776f213f5c.jpg
-          products/50/1785121890878-2f229e62-1429-43bd-b7d8-a0858e646a30.jpg
-          products/unassigned/1785866453486-38cd17a6-7a31-4104-9dbf-3ea4584cfaca.jpg
-          EOF
-          : > /tmp/dd-media-diagnostic/results.tsv
+          mkdir -p /tmp/dd-media-trace
+          IDS='1,3,4,6,10,12,13,31,34,43,50'
+          npx --yes wrangler@4.128.0 d1 execute "$PROD_D1" --remote --json --command "SELECT 'products.featured_image_url' AS source,p.product_id,p.name,p.featured_image_url AS image_url,NULL AS object_key FROM products p WHERE p.product_id IN (${IDS}) UNION ALL SELECT 'product_images' AS source,pi.product_id,p.name,pi.image_url AS image_url,NULL AS object_key FROM product_images pi JOIN products p ON p.product_id=pi.product_id WHERE pi.product_id IN (${IDS}) UNION ALL SELECT 'media_assets' AS source,ma.product_id,p.name,ma.public_url AS image_url,ma.object_key AS object_key FROM media_assets ma LEFT JOIN products p ON p.product_id=ma.product_id WHERE ma.product_id IN (${IDS}) ORDER BY product_id,source;" > /tmp/dd-media-trace/references.json
+          python - <<'PY'
+          import json,urllib.parse
+          raw=json.load(open('/tmp/dd-media-trace/references.json'))
+          rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'source' in v and 'product_id' in v and ('image_url' in v or 'object_key' in v): rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(raw)
+          def key_for(row):
+              direct=str(row.get('object_key') or '').strip()
+              if direct: return urllib.parse.unquote(direct.lstrip('/'))
+              u=str(row.get('image_url') or '').strip()
+              if not u: return ''
+              if u.startswith('products/'): return urllib.parse.unquote(u)
+              try:
+                  p=urllib.parse.urlparse(u)
+                  if p.path.endswith('/api/product-media'):
+                      q=urllib.parse.parse_qs(p.query)
+                      if (q.get('key') or [''])[0]: return urllib.parse.unquote((q.get('key') or [''])[0].lstrip('/'))
+                      src=(q.get('src') or [''])[0]
+                      if src: return urllib.parse.unquote(urllib.parse.urlparse(src).path.lstrip('/'))
+                  if p.hostname in ('assets.devilndove.com','pub-f8137eb938da486a9f24410ccf49087c.r2.dev'):
+                      return urllib.parse.unquote(p.path.lstrip('/'))
+              except Exception: pass
+              return ''
+          normalized=[]
+          for r in rows:
+              normalized.append({**r,'resolved_key':key_for(r)})
+          json.dump(normalized,open('/tmp/dd-media-trace/normalized.json','w'),indent=2)
+          keys=[]
+          for r in normalized:
+              k=r['resolved_key']
+              if k and k not in keys: keys.append(k)
+          open('/tmp/dd-media-trace/keys.txt','w').write('\n'.join(keys)+'\n')
+          print('D1_REFERENCE_ROWS',len(normalized),'UNIQUE_KEYS',len(keys))
+          for r in normalized:
+              print('REF',r.get('product_id'),r.get('source'),r.get('resolved_key') or '<non-r2>',r.get('image_url') or '')
+          PY
+      - name: Probe exact referenced Production R2 keys read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > /tmp/dd-media-trace/probes.tsv
           while IFS= read -r key; do
             [ -n "$key" ] || continue
-            for side in DEV PROD; do
-              if [ "$side" = DEV ]; then bucket="$DEV_BUCKET"; else bucket="$PROD_BUCKET"; fi
-              safe="$(printf '%s' "$key" | sha256sum | cut -d' ' -f1)"
-              out="/tmp/dd-media-diagnostic/${side}-${safe}.bin"
-              log="/tmp/dd-media-diagnostic/${side}-${safe}.log"
-              rm -f "$out" "$log"
-              if npx --yes wrangler@4.128.0 r2 object get "${bucket}/${key}" --remote --file="$out" >"$log" 2>&1; then
-                size="$(wc -c < "$out" | tr -d ' ')"
-                sha="$(sha256sum "$out" | cut -d' ' -f1)"
-                printf '%s\t%s\tFOUND\t%s\t%s\n' "$side" "$key" "$size" "$sha" | tee -a /tmp/dd-media-diagnostic/results.tsv
-              else
-                printf '%s\t%s\tMISSING\t-\t-\n' "$side" "$key" | tee -a /tmp/dd-media-diagnostic/results.tsv
-              fi
-            done
-          done < /tmp/dd-media-diagnostic/keys.txt
+            safe="$(printf '%s' "$key" | sha256sum | cut -d' ' -f1)"
+            out="/tmp/dd-media-trace/${safe}.bin"
+            if npx --yes wrangler@4.128.0 r2 object get "${PROD_BUCKET}/${key}" --remote --file="$out" >/tmp/dd-media-trace/${safe}.log 2>&1; then
+              size="$(wc -c < "$out" | tr -d ' ')"; sha="$(sha256sum "$out" | cut -d' ' -f1)"
+              printf '%s\tFOUND\t%s\t%s\n' "$key" "$size" "$sha" | tee -a /tmp/dd-media-trace/probes.tsv
+            else
+              printf '%s\tMISSING\t-\t-\n' "$key" | tee -a /tmp/dd-media-trace/probes.tsv
+            fi
+          done < /tmp/dd-media-trace/keys.txt
+      - name: Summarize valid sibling candidates
+        shell: bash
+        run: |
+          set -euo pipefail
           python - <<'PY'
-          from pathlib import Path
-          rows=[]
-          for line in Path('/tmp/dd-media-diagnostic/results.tsv').read_text().splitlines():
-              side,key,state,size,sha=line.split('\t')
-              rows.append((side,key,state,size,sha))
-          keys=sorted({r[1] for r in rows})
-          print('BUILD 156 PRODUCT MEDIA R2 DIAGNOSTIC')
-          counts={}
-          for key in keys:
-              pair={r[0]:r for r in rows if r[1]==key}
-              ds=pair['DEV'][2]; ps=pair['PROD'][2]
-              classification='DEV_ONLY' if ds=='FOUND' and ps=='MISSING' else 'BOTH' if ds=='FOUND' and ps=='FOUND' else 'PROD_ONLY' if ds=='MISSING' and ps=='FOUND' else 'ABSENT_BOTH'
-              counts[classification]=counts.get(classification,0)+1
-              same=''
-              if classification=='BOTH':
-                  same=' IDENTICAL' if pair['DEV'][3:5]==pair['PROD'][3:5] else ' CONFLICT'
-              print(f'{classification}{same}\t{key}')
-          print('SUMMARY',counts)
+          import json
+          rows=json.load(open('/tmp/dd-media-trace/normalized.json'))
+          probes={}
+          for line in open('/tmp/dd-media-trace/probes.tsv'):
+              key,state,size,sha=line.rstrip('\n').split('\t')
+              probes[key]=(state,size,sha)
+          by={}
+          for r in rows:
+              pid=int(r.get('product_id') or 0); by.setdefault(pid,[]).append(r)
+          print('BUILD 156 PRODUCT MEDIA REFERENCE TRACE')
+          for pid in sorted(by):
+              name=next((str(r.get('name') or '') for r in by[pid] if r.get('name')), '')
+              found=[]; missing=[]; non=[]
+              for r in by[pid]:
+                  k=r.get('resolved_key') or ''
+                  if not k: non.append((r.get('source'),r.get('image_url') or '')); continue
+                  state=probes.get(k,('UNPROBED','',''))[0]
+                  (found if state=='FOUND' else missing).append((r.get('source'),k))
+              print(f'PRODUCT {pid}\t{name}\tFOUND={len(found)}\tMISSING={len(missing)}\tNON_R2={len(non)}')
+              for source,key in found: print(f'  VALID\t{source}\t{key}')
+              for source,key in missing: print(f'  BROKEN\t{source}\t{key}')
+              for source,url in non: print(f'  NON_R2\t{source}\t{url}')
           PY
       - name: Boundary
         run: |
-          echo 'R2 reads: exact 13 reported keys in Development and Production only'
-          echo 'R2 listing: NONE'
+          echo 'D1: read-only affected Product references only'
+          echo 'R2: exact-key GET probes only; no listing'
           echo 'R2 writes/deletes: NONE'
-          echo 'D1 reads/writes: NONE'
+          echo 'D1 writes: NONE'
           echo 'Provider/payment/accounting mutation: NONE'
