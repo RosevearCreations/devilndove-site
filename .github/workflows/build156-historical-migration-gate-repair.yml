@@ -36,3 +36,4 @@ jobs:
           git add -A
           git commit -m 'Build 156: preserve historical migration baselines across Builds 87-94'
           git push origin HEAD:dev
+# One-shot retrigger after workflow registration.
