@@ -1,0 +1,31 @@
+name: Release 467 Build 156 Inventory Process Assignment Proof
+on:
+  push:
+    branches: [dev]
+permissions:
+  contents: read
+jobs:
+  inventory-process-assignment-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 156 source authority
+        run: python scripts/release467_build156_gate.py
+      - name: JavaScript syntax
+        run: |
+          node --check functions/api/admin/inventory-process-assignments.js
+          node --check public/js/admin-inventory-process-assignments-v156.js
+      - name: Python syntax
+        run: python -m py_compile scripts/release467_build156_gate.py
+      - name: Boundary
+        run: |
+          echo 'Build 156: shared Tool/Supply primary workshop-process assignment.'
+          echo 'Schema: canonical forward-only migration 0005.'
+          echo 'No Product, stock, costing, payment/provider, R2 or Production business-data mutation in source proof.'
