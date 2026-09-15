@@ -28,7 +28,8 @@ closure = read('release467-build153-layout-observer-performance-hotfix.json')
 
 req(
     "const PRODUCTS_ASSET_REVISION = '467-b154-products-worker-fast-path';" in middleware
-    or "const PRODUCTS_ASSET_REVISION = '467-b155-products-client-responsiveness';" in middleware,
+    or "const PRODUCTS_ASSET_REVISION = '467-b155-products-client-responsiveness';" in middleware
+    or "const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';" in middleware,
     'Build 154 Products cache revision or approved Build 155 successor revision missing'
 )
 req("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware,
