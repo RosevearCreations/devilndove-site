@@ -26,6 +26,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       DEV_D1_DATABASE_NAME: devilndove-dev
       BUILD155_EPHEMERAL_SESSION_TOKEN: ''
+      BUILD155_EXACT_PREVIEW_URL: ''
     steps:
       - uses: actions/checkout@v7
         with:
@@ -37,11 +38,13 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
+
       - name: Prove exact Build 155 source
         run: |
           test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
           python scripts/release467_build155_gate.py
-      - name: Resolve exact Development Preview from System Gate evidence
+
+      - name: Prove exact Development deployment from System Gate evidence
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -78,13 +81,15 @@ jobs:
           assert data.get('source_sha')==expected,(data.get('source_sha'),expected)
           assert data.get('environment')=='preview',data
           assert data.get('project')=='devilndove-site',data
+          assert data.get('branch')=='dev',data
           url=str(data.get('url') or '').strip().rstrip('/')
           assert url.startswith('https://') and '.devilndove-site.pages.dev' in url,url
           print(url)
           PY
           )"
-          echo "DND_BASE_URL=${EXACT_URL}" >> "$GITHUB_ENV"
-          echo "Exact Development Preview resolved for ${EXPECTED_SOURCE_SHA}."
+          echo "BUILD155_EXACT_PREVIEW_URL=${EXACT_URL}" >> "$GITHUB_ENV"
+          echo "Exact SHA deployment proven at ${EXACT_URL}; authenticated browser target remains ${DND_BASE_URL}."
+
       - name: Validate Cloudflare Access credential pairing
         shell: bash
         run: |
@@ -93,6 +98,7 @@ jobs:
             echo 'STOP: Cloudflare Access service-token credentials are only partially configured.'
             exit 1
           fi
+
       - name: Resolve or provision bounded Development acceptance session
         shell: bash
         run: |
@@ -142,7 +148,7 @@ jobs:
               echo "DND_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
               rm -f /tmp/build155-auth-me.json /tmp/build155-dev-sessions.json /tmp/build155-session-candidates
               unset TOKEN COOKIE
-              echo 'Existing canonical Development admin session accepted by exact Preview.'
+              echo 'Existing canonical Development admin session accepted by Development alias.'
               exit 0
             fi
           done < /tmp/build155-session-candidates
@@ -157,7 +163,7 @@ jobs:
               echo "DND_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
               rm -f /tmp/build155-auth-me.json /tmp/build155-dev-sessions.json /tmp/build155-session-candidates
               unset TOKEN COOKIE
-              echo 'Configured Development admin session accepted by exact Preview.'
+              echo 'Configured Development admin session accepted by Development alias.'
               exit 0
             fi
           fi
@@ -185,13 +191,14 @@ jobs:
           COOKIE="dd_auth_token=${TOKEN}"
           echo "BUILD155_EPHEMERAL_SESSION_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
           if ! validate_cookie "$COOKIE"; then
-            echo 'STOP: bounded Development acceptance session was created but /api/auth/me rejected it on the exact Preview.'
+            echo 'STOP: bounded Development acceptance session was created but /api/auth/me rejected it on the Development alias.'
             exit 1
           fi
           echo "DND_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
           rm -f /tmp/build155-auth-me.json /tmp/build155-dev-sessions.json /tmp/build155-session-candidates /tmp/build155-ephemeral-session.json
           unset TOKEN COOKIE
-          echo 'Bounded Development-only admin acceptance session authenticated on exact Preview.'
+          echo 'Bounded Development-only admin acceptance session authenticated on Development alias.'
+
       - name: Capture real Chromium Product UI responsiveness acceptance
         id: browser_probe
         shell: bash
@@ -201,92 +208,21 @@ jobs:
           status=${PIPESTATUS[0]}
           echo "status=${status}" >> "$GITHUB_OUTPUT"
           exit 0
-      - name: Browser diagnostic — document not complete
+
+      - name: Classify failed browser acceptance
         if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
         shell: bash
         run: |
-          if grep -Eqi 'document\.readyState=' /tmp/build155-browser-probe.log; then
-            touch /tmp/build155-browser-diagnostic-matched
-            echo 'Build 155 browser failure classified: document readiness.'
-            exit 1
-          fi
-      - name: Browser diagnostic — administrator session inactive
-        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
-        shell: bash
-        run: |
-          if grep -Eqi 'administrator session was not active' /tmp/build155-browser-probe.log; then
-            touch /tmp/build155-browser-diagnostic-matched
-            echo 'Build 155 browser failure classified: application administrator session inactive.'
-            exit 1
-          fi
-      - name: Browser diagnostic — Product picker not populated
-        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
-        shell: bash
-        run: |
-          if grep -Eqi 'existing Product picker has only' /tmp/build155-browser-probe.log; then
-            touch /tmp/build155-browser-diagnostic-matched
-            echo 'Build 155 browser failure classified: existing Product picker population.'
-            exit 1
-          fi
-      - name: Browser diagnostic — Product table rows missing
-        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
-        shell: bash
-        run: |
-          if grep -Eqi 'Product table rendered zero' /tmp/build155-browser-probe.log; then
-            touch /tmp/build155-browser-diagnostic-matched
-            echo 'Build 155 browser failure classified: Product table row rendering.'
-            exit 1
-          fi
-      - name: Browser diagnostic — Build 155 client health marker absent
-        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
-        shell: bash
-        run: |
-          if grep -Eqi 'client-health revision is not active' /tmp/build155-browser-probe.log; then
-            touch /tmp/build155-browser-diagnostic-matched
-            echo 'Build 155 browser failure classified: client-health revision marker.'
-            exit 1
-          fi
-      - name: Browser diagnostic — render stability or event loop
-        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
-        shell: bash
-        run: |
-          if grep -Eqi 'render stability could not be measured|marketplace renderer repeated|event-loop heartbeat|CDP command timed out: Runtime\.evaluate|PRODUCTS BROWSER STALL' /tmp/build155-browser-probe.log; then
-            touch /tmp/build155-browser-diagnostic-matched
-            echo 'Build 155 browser failure classified: render stability/event-loop responsiveness.'
-            exit 1
-          fi
-      - name: Browser diagnostic — Product command centers still loading
-        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
-        shell: bash
-        run: |
-          if grep -Eqi 'draft/archive cleanup remained|Product Release Quality Command Center remained' /tmp/build155-browser-probe.log; then
-            touch /tmp/build155-browser-diagnostic-matched
-            echo 'Build 155 browser failure classified: Product command-center loading state.'
-            exit 1
-          fi
-      - name: Browser diagnostic — Worker resource limit
-        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
-        shell: bash
-        run: |
-          if grep -Eqi 'Worker resource-limit|Error 1102|Worker exceeded resource limits' /tmp/build155-browser-probe.log; then
-            touch /tmp/build155-browser-diagnostic-matched
-            echo 'Build 155 browser failure classified: Worker resource-limit evidence.'
-            exit 1
-          fi
-      - name: Browser diagnostic — runtime exception or unclassified failure
-        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
-        shell: bash
-        run: |
-          if [ ! -e /tmp/build155-browser-diagnostic-matched ]; then
-            echo 'Build 155 browser failure classified: runtime exception or currently-unclassified acceptance failure.'
-            grep -E 'PRODUCTS BROWSER RUNTIME PROBE: FAIL|Error:|Exception' /tmp/build155-browser-probe.log || true
-            exit 1
-          fi
+          echo 'Build 155 browser acceptance failed; diagnostic evidence follows.'
+          grep -E 'PRODUCTS BROWSER RUNTIME PROBE: FAIL|PRODUCTS BROWSER STALL|administrator session|Product picker|Product table|client-health|loading state|Worker resource|Error 1102|Exception|timed out' /tmp/build155-browser-probe.log || true
+          exit 1
+
       - name: Require real Chromium Product UI responsiveness acceptance
         if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
         run: |
           echo 'STOP: Build 155 real-browser Development acceptance is not GREEN.'
           exit 1
+
       - name: Remove bounded Development acceptance session
         if: always()
         shell: bash
@@ -312,14 +248,15 @@ jobs:
           rm -f /tmp/build155-ephemeral-cleanup.json
           unset TOKEN
           echo 'Bounded Build 155 Development acceptance session removed.'
+
       - name: Boundary
         if: always()
         run: |
           echo "Exact Development SHA: ${EXPECTED_SOURCE_SHA}"
-          echo "Exact Development Preview: ${DND_BASE_URL}"
-          echo 'Target: exact canonical Development Preview deployment'
+          echo "Exact hashed deployment proof: ${BUILD155_EXACT_PREVIEW_URL}"
+          echo "Authenticated browser target: ${DND_BASE_URL}"
           echo 'Browser: real headless Chromium/CDP'
-          echo 'HTTP/browser actions: GET + DOM observation only after bounded auth setup'
+          echo 'HTTP/browser Product actions: GET + DOM observation only after bounded auth setup'
           echo 'Authentication: existing valid session preferred; otherwise one short-lived Development-only acceptance session is inserted then deleted'
           echo 'Product/R2 business-data mutation: NONE'
           echo 'Production mutation: NONE'
