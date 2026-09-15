@@ -2,45 +2,40 @@
 
 ## Purpose
 
-This release evidence records the bounded branch-topology repair required after the Build 155 Development browser-proof workflow was registered on the default `main` branch before the Build 155 application promotion.
+This release evidence records the bounded branch-topology and browser-proof repair required to complete Build 155 safely.
 
-The workflow-only bootstrap created a legitimate but temporary `main`-only commit. `scripts/main_promotion_gate.py` correctly failed closed because the `main` tree was not reachable from `dev`.
+The original workflow-only bootstrap on `main` was reconciled into `dev`, preserving the Build 155 application tree and restoring fast-forward promotion ancestry.
 
-## Repair
+## Browser-proof findings
 
-PR #178 merged the workflow-only `main` release-plumbing commit back into `dev`.
+The first classified real-browser runs established that the Product page itself reached `complete` and did not show render-loop, command-center-loading, or Worker resource-limit evidence. The first failing layer was authentication: the browser's administrator session was inactive, with Product picker population, Product rows, and the Build 155 client-health marker failing downstream.
 
-- Original reconciled `dev` merge: `a611f0d2a7be02e36ab81cc1370768247b39f97d`
-- Original reconciled `main` ancestor: `26cbe3887c3bd66524f67d667f3e943be9a22a07`
-- Build 155 application tree retained by the original reconciliation merge: `7bccee8e2e387dd9227864dabf6cc46819ed2a77`
-- GitHub compare merge base after the original repair: `26cbe3887c3bd66524f67d667f3e943be9a22a07`
+A subsequent live-D1 session attempt still failed when tested through the moving `dev.devilndove-site.pages.dev` alias. The canonical System Gate, however, proves and publishes the exact hashed Preview deployment URL for each source SHA in the `current-development-deploy-proof` artifact.
 
-The Development browser workflow was subsequently given bounded failure classification on `main` and reconciled into the Development ancestry. The first classified run proved the remaining failure belongs to the document/auth/Product-row readiness family, while render/event-loop stability, command-center loading, and Worker resource-limit categories did not fire.
+Build 155 browser acceptance now consumes that exact System Gate artifact, verifies its `source_sha`, project and Preview environment, and tests existing Development administrator sessions against `/api/auth/me` on that exact deployed URL before Chromium starts. Only a session already accepted by the exact Preview can be passed into the browser proof. No session is created or modified.
 
-The refined browser run then identified the first failing layer precisely: the page reached `complete`, but the application administrator session was inactive. Product picker population, Product-row rendering, and the Build 155 client-health marker consequently failed downstream. This means the acceptance runner was entering the Product screen with a stale configured session rather than proving the current Development application with a current session.
+The exact-Preview browser-proof release plumbing is registered on default `main` at `610650f6eb0cb515d9689c73e74dedd7d712ef60` and reconciled into `dev` ancestry at `828fcaa04e093be99580802bb8ae46d72bc2d2b9`.
 
-The browser workflow now resolves the newest unexpired administrator `session_token` directly from canonical Development D1 when the existing read-only Cloudflare credential is available, matching `/api/auth/me`'s bounded session lookup. The configured secret remains only a fallback when no current D1 session can be resolved. No session is created and no authentication, Product, schema, D1/R2 business-data, provider/payment/refund/accounting state is mutated.
+## Promotion boundary
 
-The live-session workflow repair is registered on default `main` at `15557069ce60a21d0c8cfb88c9e3ca821301f760` and reconciled into `dev` ancestry at `8d24ae9fc0d66d14f094be86ba52e6654b3ea6e0`.
+This evidence change intentionally retriggers the canonical Development System Gate. The resulting exact `dev` SHA must complete:
 
-## Why this evidence commit exists
+- System Gate source validation
+- canonical Development D1 migration/data-authority proof
+- exact Preview deployment and smoke acceptance
+- Current Application Quality Proof
+- I.T. Admin Runtime Proof
+- real Chromium Build 155 Product acceptance against that exact Preview
 
-This evidence document intentionally creates a Development-only release-evidence delta under `docs/operations/**`, which is included in the canonical System Gate path contract. It retriggers the exact-SHA Development deployment so the corrected default-branch browser proof can observe the freshly deployed candidate using the current canonical Development administrator session.
-
-The resulting Development SHA must be treated as a fresh candidate. System Gate, Current Application Quality Proof, I.T. Admin Runtime Proof, and the real-browser Development proof must complete successfully before `main` application promotion is permitted.
-
-## Product Entry acceptance boundary
-
-Build 155's source/quality/System Gate checks have passed on earlier candidate SHAs. The prior browser proof also established that the page itself completed and did not show render-loop, command-center-loading, or Worker-resource-limit evidence; its blocker was an inactive browser session.
-
-The corrected proof remains GET/DOM-observation only and must now prove authenticated Product picker population, Product rows, the Build 155 client-health revision, render stability, normal event-loop responsiveness, and absence of Worker 1102 evidence before promotion.
+Only after those are GREEN may the exact Development SHA be fast-forwarded to `main` and Production verified.
 
 ## Safety
 
-- Production application mutation: **NONE**
+- Production application mutation before promotion: **NONE**
 - Session/authentication mutation: **NONE**
-- Schema mutation: **NONE**
-- D1/R2 business-data mutation: **NONE**
+- Product business-data mutation: **NONE**
+- Schema mutation beyond canonical Development migration proof: **NONE**
+- R2 business-data mutation: **NONE**
 - Payment/refund/provider/accounting execution: **NONE**
 - Cloudflare Access policy weakening: **NONE**
 - Promotion-gate weakening: **NONE**
