@@ -41,15 +41,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ -n "${DND_CONFIGURED_SESSION_COOKIE}" ]; then
-            echo '::add-mask::configured-development-session'
-            echo "DND_SESSION_COOKIE=${DND_CONFIGURED_SESSION_COOKIE}" >> "$GITHUB_ENV"
-            echo 'Using configured masked Development administrator session.'
-            exit 0
-          fi
-          test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'STOP: Development D1 read credential is not configured.'; exit 1; }
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT COALESCE(NULLIF(s.session_token,''),s.token) AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(NULLIF(s.session_token,''),s.token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/build155-dev-session.json
-          TOKEN="$(python - <<'PY'
+          if [ -n "${CLOUDFLARE_API_TOKEN}" ]; then
+            npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT s.session_token AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(s.session_token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/build155-dev-session.json
+            TOKEN="$(python - <<'PY'
           import json
           data=json.load(open('/tmp/build155-dev-session.json'))
           def walk(value):
@@ -61,12 +55,24 @@ jobs:
           print(next(walk(data),'').strip())
           PY
           )"
-          rm -f /tmp/build155-dev-session.json
-          test -n "${TOKEN}" || { echo 'STOP: no unexpired Development administrator session exists for real-browser acceptance.'; exit 1; }
-          echo "::add-mask::${TOKEN}"
-          echo "DND_SESSION_COOKIE=dd_auth_token=${TOKEN}" >> "$GITHUB_ENV"
-          unset TOKEN
-          echo 'Existing Development admin session resolved read-only.'
+            rm -f /tmp/build155-dev-session.json
+            if [ -n "${TOKEN}" ]; then
+              echo "::add-mask::${TOKEN}"
+              echo "DND_SESSION_COOKIE=dd_auth_token=${TOKEN}" >> "$GITHUB_ENV"
+              unset TOKEN
+              echo 'Using the newest unexpired Development administrator session from canonical D1.'
+              exit 0
+            fi
+            unset TOKEN
+          fi
+          if [ -n "${DND_CONFIGURED_SESSION_COOKIE}" ]; then
+            echo '::add-mask::configured-development-session'
+            echo "DND_SESSION_COOKIE=${DND_CONFIGURED_SESSION_COOKIE}" >> "$GITHUB_ENV"
+            echo 'No current D1 administrator session was available; using configured masked Development session fallback.'
+            exit 0
+          fi
+          echo 'STOP: no unexpired Development administrator session exists for real-browser acceptance.'
+          exit 1
       - name: Validate Cloudflare Access credential pairing
         shell: bash
         run: |
@@ -84,13 +90,49 @@ jobs:
           status=${PIPESTATUS[0]}
           echo "status=${status}" >> "$GITHUB_OUTPUT"
           exit 0
-      - name: Browser diagnostic — document, auth or Product rows
+      - name: Browser diagnostic — document not complete
         if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
         shell: bash
         run: |
-          if grep -Eqi 'document\.readyState=|administrator session was not active|existing Product picker has only|Product table rendered zero|client-health revision is not active' /tmp/build155-browser-probe.log; then
+          if grep -Eqi 'document\.readyState=' /tmp/build155-browser-probe.log; then
             touch /tmp/build155-browser-diagnostic-matched
-            echo 'Build 155 browser failure classified: document/auth/Product-row readiness.'
+            echo 'Build 155 browser failure classified: document readiness.'
+            exit 1
+          fi
+      - name: Browser diagnostic — administrator session inactive
+        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
+        shell: bash
+        run: |
+          if grep -Eqi 'administrator session was not active' /tmp/build155-browser-probe.log; then
+            touch /tmp/build155-browser-diagnostic-matched
+            echo 'Build 155 browser failure classified: application administrator session inactive.'
+            exit 1
+          fi
+      - name: Browser diagnostic — Product picker not populated
+        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
+        shell: bash
+        run: |
+          if grep -Eqi 'existing Product picker has only' /tmp/build155-browser-probe.log; then
+            touch /tmp/build155-browser-diagnostic-matched
+            echo 'Build 155 browser failure classified: existing Product picker population.'
+            exit 1
+          fi
+      - name: Browser diagnostic — Product table rows missing
+        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
+        shell: bash
+        run: |
+          if grep -Eqi 'Product table rendered zero' /tmp/build155-browser-probe.log; then
+            touch /tmp/build155-browser-diagnostic-matched
+            echo 'Build 155 browser failure classified: Product table row rendering.'
+            exit 1
+          fi
+      - name: Browser diagnostic — Build 155 client health marker absent
+        if: ${{ always() && steps.browser_probe.outputs.status != '0' }}
+        shell: bash
+        run: |
+          if grep -Eqi 'client-health revision is not active' /tmp/build155-browser-probe.log; then
+            touch /tmp/build155-browser-diagnostic-matched
+            echo 'Build 155 browser failure classified: client-health revision marker.'
             exit 1
           fi
       - name: Browser diagnostic — render stability or event loop
