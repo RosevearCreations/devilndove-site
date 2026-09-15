@@ -68,5 +68,9 @@
     "candidate_must_not_self_claim_final_proof": true,
     "promotion_requires_exact_dev_head_four_proof_green": true,
     "production_promotion_automatic": false
+  },
+  "verification_trigger": {
+    "reason": "post-authority-seal exact-head Development verification",
+    "authority_seal_sha": "4db1126714d95047d63ecfd82f04f26cb16d76ea"
   }
 }
