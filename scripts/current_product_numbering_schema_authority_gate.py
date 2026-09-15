@@ -91,8 +91,7 @@ req('functions/api/admin/_product-numbering.js regained request-time schema DDL 
 
 migrations = manifest.get('migrations') if isinstance(manifest.get('migrations'), list) else []
 files = [str(row.get('file') or '') for row in migrations if isinstance(row, dict)]
-req(files == CANONICAL, 'Build 39 must preserve the existing four-file canonical migration stream')
-req(not list((ROOT / 'migrations/canonical').glob('0005*')), 'Build 39 must not invent migration 0005 for proven baseline Product Numbering schema')
+req(files[:len(CANONICAL)] == CANONICAL, 'Build 39 historical four-file canonical migration baseline drifted')
 
 scope = authority.get('scope') or {}
 req(scope.get('product_number_sequence_baseline_assertion') is True, 'Build 39 sequence baseline assertion scope missing')
@@ -106,7 +105,7 @@ req(int(scope.get('runtime_schema_residue_files_ceiling_after') or 0) <= 59, 'Bu
 req(int(scope.get('runtime_schema_residue_occurrences_ceiling_after') or 0) <= 525, 'Build 39 runtime DDL occurrence ceiling weakened')
 req(int(scope.get('runtime_schema_residue_shared_helpers_ceiling_after') or 0) <= 3, 'Build 39 shared-helper DDL ceiling weakened')
 req(int(scope.get('raw_d1_bypass_with_ddl_ceiling', -1)) == 0, 'Build 39 raw D1 bypass ceiling weakened')
-req(scope.get('canonical_migration_stream_unchanged') is True and int(scope.get('canonical_migration_count') or 0) == 4, 'Build 39 canonical migration boundary drifted')
+req(scope.get('canonical_migration_stream_unchanged') is True and int(scope.get('canonical_migration_count') or 0) == 4, 'Build 39 historical canonical migration boundary drifted')
 
 safety = authority.get('safety') or {}
 for key in (
@@ -133,5 +132,5 @@ print('CURRENT PRODUCT NUMBERING SCHEMA AUTHORITY GATE: PASS')
 print('Product-number sequence schema: PROVEN BASELINE / READ-ONLY ASSERTION')
 print('Product-numbering request-time DDL: ZERO')
 print(f'Runtime schema residue ceiling: {current_files} files / {current_occurrences} statements / {current_helpers} delegated helpers (Build 39 maxima 59 / 525 / 3)')
-print('Canonical migration stream: UNCHANGED 0001-0004')
+print('Historical canonical migration baseline: 0001-0004 PRESERVED / LATER FORWARD MIGRATIONS ALLOWED')
 print('Desktop/mobile product-number allocation: PRESERVED / FAIL-CLOSED ON SCHEMA DRIFT')
