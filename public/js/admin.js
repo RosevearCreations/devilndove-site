@@ -15,6 +15,7 @@
 // Release 467 Build 95: Products loads the current workspace context bundle instead of the stale Build 66 asset revision.
 // Release 467 Build 129: Admin routes bootstrap manifest-backed related-tool context shortcuts.
 // Release 467 Build 130: Admin routes also bootstrap manifest-backed section position and adjacent-tool navigation.
+// Release 467 Build 155 emergency recovery: Product Admin omits the nonessential section-position/context-dock chain.
 
 const DD_ADMIN_LAZY_VERSION = 'R467B65_V1';
 const ddAdminLazyState = new Map();
@@ -215,5 +216,9 @@ void import('/public/js/admin-related-tools-v129.js?v=467b129')
   .catch((error) => console.warn('[DD Build 129] admin related tools unavailable', error));
 
 // Release 467 Build 130: client-only position and adjacent-tool navigation over the same existing Admin navigation manifest.
-void import('/public/js/admin-section-position-v130.js?v=467b130')
-  .catch((error) => console.warn('[DD Build 130] admin section position unavailable', error));
+// Build 155 outage recovery: Product Admin deliberately omits this nonessential chain because it imports
+// the navigation context dock, which has previously created recursive MutationObserver failure modes.
+if (document.body?.dataset?.adminPage !== 'products') {
+  void import('/public/js/admin-section-position-v130.js?v=467b130')
+    .catch((error) => console.warn('[DD Build 130] admin section position unavailable', error));
+}
