@@ -1,0 +1,110 @@
+name: Release 467 Build 156 Product API Diagnostic
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/release467-build156-product-api-diagnostic.yml'
+
+permissions: {contents: read}
+
+jobs:
+  production-product-api-readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      DND_BASE_URL: https://devilndove.com
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      PROD_D1_DATABASE_NAME: devilndove-prod-r462
+    steps:
+      - uses: actions/checkout@v7
+      - name: Resolve existing Production admin session read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'STOP: Production D1 read credential is not configured.'; exit 1; }
+          npx --yes wrangler@4.128.0 d1 execute "${PROD_D1_DATABASE_NAME}" --remote --json --command "SELECT COALESCE(NULLIF(s.session_token,''),s.token) AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(NULLIF(s.session_token,''),s.token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/build156-prod-session.json
+          TOKEN="$(python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build156-prod-session.json'))
+          def walk(value):
+              if isinstance(value,dict):
+                  if value.get('runtime_token'): yield str(value['runtime_token'])
+                  for child in value.values(): yield from walk(child)
+              elif isinstance(value,list):
+                  for child in value: yield from walk(child)
+          print(next(walk(data),'').strip())
+          PY
+          )"
+          rm -f /tmp/build156-prod-session.json
+          test -n "${TOKEN}" || { echo 'STOP: no unexpired Production administrator session exists.'; exit 1; }
+          echo "::add-mask::${TOKEN}"
+          echo "DND_SESSION_COOKIE=dd_auth_token=${TOKEN}" >> "$GITHUB_ENV"
+          unset TOKEN
+      - name: Probe Production Product GET endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe() {
+            label="$1"
+            path="$2"
+            body="/tmp/${label}.json"
+            headers="/tmp/${label}.headers"
+            metrics="$(curl --silent --show-error --location --max-time 25 \
+              --cookie "${DND_SESSION_COOKIE}" \
+              --header 'Accept: application/json' \
+              --header 'Cache-Control: no-cache' \
+              --dump-header "${headers}" \
+              --output "${body}" \
+              --write-out 'status=%{http_code} total=%{time_total} starttransfer=%{time_starttransfer} size=%{size_download}' \
+              "${DND_BASE_URL}${path}")" || {
+                code=$?
+                echo "${label}: curl_exit=${code}"
+                return ${code}
+              }
+            echo "${label}: ${metrics}"
+            python - "${label}" "${body}" "${headers}" <<'PY'
+          import json,sys,re
+          label,body_path,headers_path=sys.argv[1:]
+          raw=open(body_path,'rb').read()
+          text=raw.decode('utf-8','replace')
+          try:
+              data=json.loads(text)
+          except Exception:
+              data=None
+          if isinstance(data,dict):
+              products=data.get('products')
+              actions=data.get('actions')
+              user=data.get('user')
+              summary={
+                  'ok': data.get('ok'),
+                  'code': data.get('code'),
+                  'error': str(data.get('error') or '')[:180],
+                  'top_keys': sorted(list(data.keys()))[:30],
+                  'products_count': len(products) if isinstance(products,list) else None,
+                  'actions_count': len(actions) if isinstance(actions,list) else None,
+                  'user_role': str(user.get('role') or '') if isinstance(user,dict) else None,
+              }
+              print(f"{label}: json_summary={json.dumps(summary,sort_keys=True)}")
+          else:
+              compact=re.sub(r'\s+',' ',text[:300]).strip()
+              print(f"{label}: non_json_prefix={compact!r}")
+          headers=open(headers_path,'r',encoding='utf-8',errors='replace').read().splitlines()
+          safe=[]
+          for line in headers:
+              low=line.lower()
+              if low.startswith(('content-type:','cf-ray:','x-dnd-','server:')):
+                  safe.append(line.strip())
+          print(f"{label}: headers={' | '.join(safe[:20])}")
+          PY
+          }
+          probe auth_me '/api/auth/me'
+          probe product_picker '/api/admin/product-picker?limit=5'
+          probe products '/api/admin/products'
+      - name: Boundary
+        if: always()
+        run: |
+          echo 'Diagnostic is GET-only.'
+          echo 'Existing Production session is read only; no session is created or changed.'
+          echo 'No D1/R2 business-data, Product, provider, payment, refund, or accounting mutation is performed.'
