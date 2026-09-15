@@ -113,6 +113,26 @@ req('setInterval(' not in cold,'Core Product recovery must not add recurring pol
 req("method: 'POST'" not in cold and 'method: "POST"' not in cold,'Core Product recovery must remain read-only')
 req('Server-side admin' in cold,'Core Product GET recovery must retain server-side authorization boundary note')
 
+quality_fallback=read('public/js/admin-product-quality-fallback-v156.js')
+for token in (
+ "VERSION = 'R467B156_QUALITY_FALLBACK_V1'",
+ 'DDProductQualityFallbackHealth',
+ "document.addEventListener('dd:products-core-recovered'",
+ 'Product Release Quality Command Center',
+ 'Core Product authority is ready.',
+ 'Detailed readiness, buyer-fact, SEO, image, and marketplace checks are resolving independently',
+ 'Essential Product work is available.',
+ 'No quality result is invented or marked complete here.',
+ 'data.ddQualityFallback',
+):
+ req(token in quality_fallback,f'Product quality fail-soft recovery missing {token}')
+req('apiFetch(' not in quality_fallback and 'fetch(' not in quality_fallback,'Product quality fallback must not create a network lane')
+req('setInterval(' not in quality_fallback,'Product quality fallback must not add recurring polling')
+req("method: 'POST'" not in quality_fallback and 'method: "POST"' not in quality_fallback,'Product quality fallback must remain mutation-free')
+quality_test=read('scripts/build156_product_quality_fallback_test.mjs')
+for token in ('R467B156_QUALITY_FALLBACK_V1','Loading Product Release Quality Command Center','Essential Product work is available.','Network/mutation work: NONE'):
+ req(token in quality_test,f'Product quality fallback behavior proof missing {token}')
+
 layout=read('public/js/layout-overflow-guard.js')
 req('/public/js/admin-products-auth-ready-recovery-v156.js?v=467b156-auth-ready-v3' in layout,'Layout fallback must cache-bust the Product auth recovery asset at v3')
 req('data-dd-products-auth-ready-recovery' in layout,'Layout fallback missing Product auth recovery identity')
@@ -121,15 +141,19 @@ middleware=read('functions/_middleware.js')
 request_loader='/public/js/admin-products-request-budget-v156.js?v=${PRODUCTS_REQUEST_BUDGET_REVISION}'
 auth_loader='/public/js/admin-products-auth-ready-recovery-v156.js?v=${PRODUCTS_AUTH_READY_REVISION}'
 cold_loader='/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_COLD_START_REVISION}'
+quality_loader='/public/js/admin-product-quality-fallback-v156.js?v=${PRODUCTS_QUALITY_FALLBACK_REVISION}'
 req("const PRODUCTS_REQUEST_BUDGET_REVISION = '467b156-request-budget-v2';" in middleware,'Product request budget cache revision missing')
 req("const PRODUCTS_AUTH_READY_REVISION = '467b156-auth-ready-v3';" in middleware,'Product auth recovery cache revision v3 missing')
 req("const PRODUCTS_COLD_START_REVISION = '467b156-core-product-recovery-v1';" in middleware,'Core Product recovery cache revision missing')
+req("const PRODUCTS_QUALITY_FALLBACK_REVISION = '467b156-quality-fallback-v1';" in middleware,'Product quality fallback cache revision missing')
 req(request_loader in middleware,'Product request budget fast-path loader missing')
 req(auth_loader in middleware,'Product auth recovery fast-path loader missing')
 req(cold_loader in middleware,'Core Product cold-start recovery loader missing')
-req(middleware.find(request_loader) < middleware.find(auth_loader) < middleware.find(cold_loader),'Product fast path must load budget, auth recovery, then core Product recovery')
+req(quality_loader in middleware,'Product quality fail-soft loader missing')
+req(middleware.find(request_loader) < middleware.find(auth_loader) < middleware.find(cold_loader) < middleware.find(quality_loader),'Product fast path must load budget, auth recovery, core recovery, then quality fail-soft recovery')
 req('data-dd-products-auth-ready-recovery="1"' in middleware,'Product auth recovery fast-path identity missing')
 req('data-dd-products-cold-start="1"' in middleware,'Core Product recovery fast-path identity missing')
+req('data-dd-products-quality-fallback="1"' in middleware,'Product quality fail-soft fast-path identity missing')
 req("const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';" in middleware,'Build 155 historical Product asset identity must remain preserved')
 req("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware,'Build 153 historical layout identity must remain preserved')
 
@@ -137,12 +161,14 @@ for path in (
  'public/js/admin-products-request-budget-v156.js',
  'public/js/admin-products-auth-ready-recovery-v156.js',
  'public/js/admin-products-cold-start-recovery.js',
+ 'public/js/admin-product-quality-fallback-v156.js',
  'public/js/admin-inventory-process-assignments-v156.js',
  'public/js/layout-overflow-guard.js',
  'functions/_middleware.js',
  'scripts/build156_product_request_budget_test.mjs',
  'scripts/build156_products_auth_ready_recovery_test.mjs',
  'scripts/build156_products_auth_ready_fallback_test.mjs',
+ 'scripts/build156_product_quality_fallback_test.mjs',
 ):
  result=subprocess.run(['node','--check',str(ROOT/path)],cwd=ROOT,capture_output=True,text=True)
  req(result.returncode==0,f'JavaScript syntax failed for {path}: {(result.stderr or result.stdout).strip()}')
@@ -152,6 +178,8 @@ auth_result=subprocess.run(['node','scripts/build156_products_auth_ready_recover
 req(auth_result.returncode==0,f'Product verified-auth recovery behavior proof failed: {(auth_result.stderr or auth_result.stdout).strip()}')
 fallback_result=subprocess.run(['node','scripts/build156_products_auth_ready_fallback_test.mjs'],cwd=ROOT,capture_output=True,text=True)
 req(fallback_result.returncode==0,f'Product bounded local-auth wait proof failed: {(fallback_result.stderr or fallback_result.stdout).strip()}')
+quality_result=subprocess.run(['node','scripts/build156_product_quality_fallback_test.mjs'],cwd=ROOT,capture_output=True,text=True)
+req(quality_result.returncode==0,f'Product quality fail-soft behavior proof failed: {(quality_result.stderr or quality_result.stdout).strip()}')
 
 print('RELEASE 467 BUILD 156 — TOOL & SUPPLY PROCESS ASSIGNMENT + PRODUCT REQUEST BUDGET')
 if FAIL:
@@ -163,5 +191,6 @@ print('Product scheduler proof: deterministic reserved-lane starvation test GREE
 print('Product auth recovery: verified auth performs one bounded Product/cleanup refresh after late authentication')
 print('Product core recovery: /api/admin/products can render picker + editable table independently of secondary readiness')
 print('Product cleanup recovery: recovered core Product data triggers one reuse of the cleanup read lane')
+print('Product quality recovery: core Product authority renders a truthful fail-soft quality summary while secondary evidence resolves')
 print('Product readiness: list startup variants converge on one 500-row superset request')
 print('Boundary: non-GET mutation behavior is unchanged')
