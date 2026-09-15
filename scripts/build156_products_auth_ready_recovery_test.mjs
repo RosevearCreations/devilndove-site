@@ -51,7 +51,7 @@ function emit(type, detail) {
 }
 
 await import('../public/js/admin-products-auth-ready-recovery-v156.js');
-assert.equal(window.DDProductsAuthReadyRecoveryHealth?.version, 'R467B156_AUTH_READY_RECOVERY_V2');
+assert.equal(window.DDProductsAuthReadyRecoveryHealth?.version, 'R467B156_AUTH_READY_RECOVERY_V3');
 assert.equal(productRefreshClicks, 0, 'Product refresh must not run before verified admin readiness');
 assert.equal(cleanupRefreshClicks, 0, 'Cleanup refresh must not run before verified admin readiness');
 
