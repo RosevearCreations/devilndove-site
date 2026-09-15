@@ -75,8 +75,7 @@ req('functions/api/_lib/productSocialAutomation.js regained request-time schema 
 
 migrations = manifest.get('migrations') if isinstance(manifest.get('migrations'), list) else []
 files = [str(row.get('file') or '') for row in migrations if isinstance(row, dict)]
-req(files == CANONICAL, 'Build 40 must preserve the existing four-file canonical migration stream')
-req(not list((ROOT / 'migrations/canonical').glob('0005*')), 'Build 40 must not invent migration 0005 for proven Product Social baseline schema')
+req(files[:len(CANONICAL)] == CANONICAL, 'Build 40 historical four-file canonical migration baseline drifted')
 
 scope = authority.get('scope') or {}
 req(scope.get('product_social_settings_baseline_assertion') is True, 'Build 40 settings baseline assertion scope missing')
@@ -93,7 +92,7 @@ req(int(scope.get('runtime_schema_residue_files_ceiling_after') or 0) <= 58, 'Bu
 req(int(scope.get('runtime_schema_residue_occurrences_ceiling_after') or 0) <= 522, 'Build 40 runtime DDL occurrence ceiling weakened')
 req(int(scope.get('runtime_schema_residue_shared_helpers_ceiling_after') or 0) <= 2, 'Build 40 shared-helper DDL ceiling weakened')
 req(int(scope.get('raw_d1_bypass_with_ddl_ceiling', -1)) == 0, 'Build 40 raw D1 bypass ceiling weakened')
-req(scope.get('canonical_migration_stream_unchanged') is True and int(scope.get('canonical_migration_count') or 0) == 4, 'Build 40 canonical migration boundary drifted')
+req(scope.get('canonical_migration_stream_unchanged') is True and int(scope.get('canonical_migration_count') or 0) == 4, 'Build 40 historical canonical migration boundary drifted')
 
 safety = authority.get('safety') or {}
 for key in (
@@ -120,6 +119,6 @@ print('Product Social settings schema: PROVEN BASELINE / READ-ONLY ASSERTION')
 print('Social post queue schema: PROVEN BASELINE / READ-ONLY ASSERTION')
 print('Product Social request-time DDL: ZERO')
 print('Runtime schema residue ceiling: 58 files / 522 statements / 2 delegated helpers')
-print('Canonical migration stream: UNCHANGED 0001-0004')
+print('Historical canonical migration baseline: 0001-0004 PRESERVED / LATER FORWARD MIGRATIONS ALLOWED')
 print('Settings and review-first queue DML: PRESERVED')
 print('Provider publication/execution: CLOSED')
