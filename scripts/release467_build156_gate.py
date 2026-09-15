@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import json,re
+import json,re,subprocess
 ROOT=Path(__file__).resolve().parents[1]
 FAIL=[]
 def read(p):
@@ -29,7 +29,40 @@ page=read('admin/inventory-operations/index.html')
 req('id="inventoryProcessAssignmentsMount"' in page,'Inventory Operations missing process mount')
 req('/public/js/admin-inventory-process-assignments-v156.js?v=467b156' in page,'Inventory Operations missing cache-busted Build 156 client')
 req(page.lower().count('<h1')==1,'Inventory Operations must retain exactly one H1')
-print('RELEASE 467 BUILD 156 — TOOL & SUPPLY PROCESS ASSIGNMENT')
+
+budget=read('public/js/admin-products-request-budget-v156.js')
+for token in (
+ "MAX_CONCURRENT_GETS = 2",
+ 'DDProductsRequestBudgetHealth',
+ 'sharedRequests = new Map()',
+ 'canonical_readiness_requests',
+ "url.pathname === '/api/admin/product-readiness'",
+ "url.searchParams.set('limit', '500')",
+ "url.searchParams.set('show_ready', '1')",
+ '__ddProductsRequestBudget',
+ "method !== 'GET'",
+):
+ req(token in budget,f'Product request budget missing {token}')
+req('setInterval(' not in budget,'Product request budget must not add recurring polling')
+req("url.pathname.startsWith('/api/admin/')" in budget,'Product request budget must stay inside authenticated admin GET scope')
+
+middleware=read('functions/_middleware.js')
+request_loader='/public/js/admin-products-request-budget-v156.js?v=${PRODUCTS_REQUEST_BUDGET_REVISION}'
+cold_loader='/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_ASSET_REVISION}'
+req("const PRODUCTS_REQUEST_BUDGET_REVISION = '467b156-request-budget-v1';" in middleware,'Product request budget cache revision missing')
+req(request_loader in middleware,'Product request budget fast-path loader missing')
+req(cold_loader in middleware,'Existing Product cold-start guard must remain loaded')
+req(middleware.find(request_loader) < middleware.find(cold_loader),'Product request budget must load before the older cold-start controller')
+req("const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';" in middleware,'Build 155 historical Product asset identity must remain preserved')
+
+for path in ('public/js/admin-products-request-budget-v156.js','public/js/admin-inventory-process-assignments-v156.js','functions/_middleware.js'):
+ result=subprocess.run(['node','--check',str(ROOT/path)],cwd=ROOT,capture_output=True,text=True)
+ req(result.returncode==0,f'JavaScript syntax failed for {path}: {(result.stderr or result.stdout).strip()}')
+
+print('RELEASE 467 BUILD 156 — TOOL & SUPPLY PROCESS ASSIGNMENT + PRODUCT REQUEST BUDGET')
 if FAIL:
  print('FAIL');[print(f'{i:03d}. {x}') for i,x in enumerate(FAIL,1)];raise SystemExit(1)
 print('PASS')
+print('Product Admin: max two concurrent authenticated admin GETs; duplicate startup reads are shared')
+print('Product readiness: list startup variants converge on one 500-row superset request')
+print('Boundary: non-GET mutation behavior is unchanged')
