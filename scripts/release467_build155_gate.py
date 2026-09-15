@@ -134,12 +134,16 @@ req("method: 'POST'" not in probe and 'method: "POST"' not in probe,
 try:
     manifest = json.loads(manifest_text)
     files = [row.get('file') for row in manifest.get('migrations', [])]
-    req(files == [
+    historical_baseline = [
         '0001_release464_migration_authority.sql',
         '0002_release464_operational_acceptance.sql',
         '0003_release464_business_growth.sql',
         '0004_release465_storefront_quality.sql',
-    ], f'canonical migration stream drifted: {files}')
+    ]
+    req(files[:4] == historical_baseline,
+        f'Build 155 historical canonical migration baseline drifted: {files[:4]}')
+    req(len(files) >= 4,
+        f'Build 155 requires its original four canonical migrations; current stream is {files}')
 except Exception as exc:
     FAIL.append(f'canonical migration manifest could not be parsed: {exc}')
 
@@ -164,5 +168,6 @@ print('RELEASE 467 BUILD 155 GATE: PASS')
 print('Products client: Marketplace Listing Readiness self-mutation loop isolated')
 print('Products recovery: nonessential navigation context chain excluded from Product Admin')
 print('Cache: Product assets advanced to the Build 155 lockup-recovery revision')
+print('Migration history: Build 155 preserves canonical 0001-0004 and permits later forward-only migrations')
 print('Acceptance: real Chromium/CDP probe requires responsive event loop + populated Product picker/table')
 print('Boundary: no schema, D1/R2 business-data, provider, payment/refund/accounting mutation')
