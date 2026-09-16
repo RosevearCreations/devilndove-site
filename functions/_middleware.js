@@ -13,10 +13,15 @@ import {
 } from './api/_lib/appModuleSessionGuard.js';
 import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appModuleRoutes.js';
 
-const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';
+// Build 159: Product Admin returning-browser cache coherence.
+// The Build 155 generic Product revision remained on existing script tags while Product clients
+// continued to evolve in Builds 156-158. Fresh CI browsers therefore saw current bytes while a
+// returning operator browser could reuse old client code. Build 159 rotates the Product generation
+// and makes Admin-only JS revalidate on every navigation so this class of split-brain cannot recur.
+const PRODUCTS_ASSET_REVISION = '467-b159-products-returning-browser-cache-v1';
 const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';
-const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b155-products-media-admin-bound-v1';
-const PRODUCTS_REQUEST_BUDGET_REVISION = '467b156-request-budget-v2';
+const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b159-products-media-admin-cache-v1';
+const PRODUCTS_REQUEST_BUDGET_REVISION = '467b159-request-budget-loader-v1';
 const PRODUCTS_AUTH_READY_REVISION = '467b156-auth-ready-v3';
 const PRODUCTS_COLD_START_REVISION = '467b156-core-product-recovery-v1';
 const PRODUCTS_QUALITY_FALLBACK_REVISION = '467b156-quality-fallback-v1';
@@ -34,6 +39,16 @@ function isStorefrontDiscoveryPath(pathname) {
 function isPublicRuntimeIntelligencePath(pathname) {
   const path = normalizedPagePath(pathname);
   return path !== '/admin/' && !path.startsWith('/admin/');
+}
+function isAdminClientAssetPath(pathname) {
+  return /^\/public\/js\/admin-[^/]+\.js$/i.test(String(pathname || ''));
+}
+function withAdminClientNoStore(response) {
+  const headers = new Headers(response.headers);
+  headers.set('Cache-Control', 'no-store, max-age=0');
+  headers.set('Pragma', 'no-cache');
+  headers.set('X-DND-Admin-Client-Cache', 'no-store-b159');
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 function publicProductRequestInfo(request, pathname) {
   if (normalizedPagePath(pathname) !== '/shop/product/') return null;
@@ -80,6 +95,7 @@ async function withProductsFastPlatformClient(response) {
     }
     const headers = new Headers(response.headers);
     headers.set('X-DND-Products-Render-Path', 'static-fast-path');
+    headers.set('X-DND-Products-Asset-Revision', PRODUCTS_ASSET_REVISION);
     headers.set('Cache-Control', 'no-store');
     return new Response(html, { status: response.status, statusText: response.statusText, headers });
   } catch {
@@ -169,7 +185,10 @@ async function resolveGuardUser(request, env, pathname) {
 export async function onRequest(context) {
   const { request, env } = context;
   const pathname = new URL(request.url).pathname;
-  if (shouldBypass(pathname)) return finish(await context.next(), request);
+  if (shouldBypass(pathname)) {
+    const response = await context.next();
+    return finish(isAdminClientAssetPath(pathname) ? withAdminClientNoStore(response) : response, request);
+  }
   const sharedContract = sharedServiceContractForPath(pathname);
   if (sharedContract) {
     const resolvedUser = await resolveGuardUser(request, env, pathname);
