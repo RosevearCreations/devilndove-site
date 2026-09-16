@@ -9,6 +9,7 @@
   const VERSION = 'R467B160_PRODUCT_PRODUCTION_BROWSER_RECOVERY_V1';
   const CORE_PATH = '/api/admin/products-core';
   const CORE_TTL_MS = 45000;
+  const ADMIN_MEDIA_RECOVERY = 'admin-recovery-v1';
   const PUBLIC_MEDIA_HOSTS = new Set(['assets.devilndove.com', 'pub-f8137eb938da486a9f24410ccf49087c.r2.dev']);
   const health = {
     version: VERSION,
@@ -17,6 +18,7 @@
     core_shared_hits: 0,
     core_cache_hits: 0,
     admin_media_rewrites: 0,
+    admin_media_recovery: ADMIN_MEDIA_RECOVERY,
     quality_reconciliations: 0,
     readiness_deferred_reconciliations: 0,
   };
@@ -99,7 +101,7 @@
       const key = decodeURIComponent(url.pathname.replace(/^\/+/, ''));
       if (!key.startsWith('products/') || key.includes('..') || key.includes('\\')) return value;
       health.admin_media_rewrites += 1;
-      return `/api/product-media?key=${encodeURIComponent(key)}`;
+      return `/api/product-media?key=${encodeURIComponent(key)}&admin_recovery=1`;
     } catch { return value; }
   }
 

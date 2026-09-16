@@ -1,6 +1,9 @@
 // Release 467 Build 61 — read-only same-origin public R2 media authority.
 // Product, Movie and approved brand-media UIs route public URLs through the environment-bound
-// PRODUCT_MEDIA_BUCKET. This route never lists or mutates R2.
+// PRODUCT_MEDIA_BUCKET. Build 160 adds an explicit Admin-only recovery contract for stale
+// Product keys: missing Admin images return a neutral SVG placeholder with HTTP 200 so the
+// Products workspace never emits a second-wave 404 storm. Public media semantics remain unchanged.
+// This route never lists or mutates R2.
 
 const PUBLIC_PREFIXES=['products/','movies/','brand/','Itemsforsale/','itemsforsale/','Toolshed/','Tools/','Supplies/','toolshed/','tools/','supplies/'];
 const LEGACY_PUBLIC_HOSTS=new Set(['assets.devilndove.com','pub-f8137eb938da486a9f24410ccf49087c.r2.dev']);
@@ -51,10 +54,26 @@ function inferredType(key){
   return ({jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',gif:'image/gif',avif:'image/avif',svg:'image/svg+xml',mp4:'video/mp4',webm:'video/webm'})[ext]||'application/octet-stream';
 }
 function bucketFromEnv(env){return env.PRODUCT_MEDIA_BUCKET||env.MEDIA_BUCKET||env.R2_PRODUCT_MEDIA||null;}
+function adminRecoveryRequested(request,key){
+  if(!String(key||'').startsWith('products/'))return false;
+  try{return new URL(request.url).searchParams.get('admin_recovery')==='1';}catch{return false;}
+}
+function adminRecoveryPlaceholder(key){
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Product image unavailable"><rect width="800" height="600" fill="#f3f4f6"/><g fill="#6b7280" font-family="Arial,sans-serif" text-anchor="middle"><text x="400" y="285" font-size="34">Product image unavailable</text><text x="400" y="335" font-size="22">Original media is being recovered</text></g></svg>`;
+  return new Response(svg,{status:200,headers:{
+    'Content-Type':'image/svg+xml; charset=utf-8',
+    'Cache-Control':'no-store',
+    'X-Content-Type-Options':'nosniff',
+    'Cross-Origin-Resource-Policy':'same-site',
+    'X-DD-Media-Recovery':'admin-placeholder',
+    'X-DD-Media-Key':String(key||'')
+  }});
+}
 
 export async function onRequestGet({request,env}){
   const key=keyFromRequest(request);
   if(!key)return json({ok:false,code:'INVALID_PUBLIC_MEDIA_KEY',error:'A valid public media key is required.'},400);
+  const adminRecovery=adminRecoveryRequested(request,key);
   const bucket=bucketFromEnv(env);
   if(!bucket||typeof bucket.get!=='function')return json({ok:false,code:'PRODUCT_MEDIA_BUCKET_UNAVAILABLE',error:'Public media storage is not configured.'},503);
   try{
@@ -63,7 +82,10 @@ export async function onRequestGet({request,env}){
       object=await bucket.get(candidate);
       if(object){resolvedKey=candidate;break;}
     }
-    if(!object)return json({ok:false,code:'PUBLIC_MEDIA_NOT_FOUND',error:'Public media was not found.',requested_key:key},404);
+    if(!object){
+      if(adminRecovery)return adminRecoveryPlaceholder(key);
+      return json({ok:false,code:'PUBLIC_MEDIA_NOT_FOUND',error:'Public media was not found.',requested_key:key},404);
+    }
     const headers=new Headers();
     if(typeof object.writeHttpMetadata==='function')object.writeHttpMetadata(headers);
     if(!headers.get('Content-Type'))headers.set('Content-Type',inferredType(resolvedKey||key));

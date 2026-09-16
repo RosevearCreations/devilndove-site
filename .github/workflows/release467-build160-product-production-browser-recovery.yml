@@ -5,6 +5,7 @@ on:
     paths:
       - 'functions/_middleware.js'
       - 'functions/api/admin/products-core.js'
+      - 'functions/api/product-media.js'
       - 'public/js/admin-products-runtime-v160.js'
       - 'public/js/admin-product-cleanup.js'
       - 'scripts/release467_build160_gate.py'

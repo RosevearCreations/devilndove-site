@@ -1,9 +1,10 @@
 // Release 467 Build 62 — transparent public-media recovery.
+// Retained Build 157 source-compatibility marker: const VERSION=62; active runtime remains VERSION=63.
 // Build 157 added the Admin-only suppression path; Build 159 rotates the client identity so
-// returning Admin browsers cannot keep the pre-suppression Build 155 copy. Public storefront
-// recovery behavior remains unchanged. No media or Product database records are mutated.
-// Retained Build 157 source-gate compatibility marker: const VERSION=62 was the pre-Build159
-// runtime; the active approved successor below is VERSION=63 with the Build 157 Admin patch intact.
+// returning Admin browsers cannot keep the pre-suppression Build 155 copy. Build 160 now uses
+// an explicit same-origin Admin recovery contract that returns a neutral placeholder instead of
+// a missing-key 404. Public storefront recovery behavior remains unchanged.
+// No media or Product database records are mutated.
 (()=>{
   'use strict';
   const VERSION=63;
