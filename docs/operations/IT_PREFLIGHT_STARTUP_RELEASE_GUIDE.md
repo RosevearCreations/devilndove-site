@@ -15,7 +15,7 @@
 - Production Live Resources `34868183267`
 - Products Route Production Proof `34868183338`
 
-Build 154 proved the live `/admin/products/` server response is HTTP 200 through the static fast path with module/security headers and no Error 1102. Later Builds 155–158 repaired browser responsiveness, request scheduling, admin data delivery and Product Editor startup resilience. Build 159 is the current cache-coherence candidate.
+Build 154 proved the live `/admin/products/` server response is HTTP 200 through the static fast path with module/security headers and no Error 1102. Later Builds 155–159 repaired browser responsiveness, request scheduling, admin data delivery, Product Editor startup resilience and returning-browser cache coherence. Operator Firefox evidence then reopened the Product browser acceptance lane, which is now owned by Build 160.
 
 ## Canonical Development target
 
@@ -37,29 +37,29 @@ Build 154 proved the live `/admin/products/` server response is HTTP 200 through
 Forward D1 authority remains `migrations/canonical/manifest.json` + `scripts/d1_migrate.py`; canonical migrations remain exactly `0001`–`0005`. Production live-resource retries remain capped at three transient attempts; permanent 4xx and genuine resource failures fail closed. Stripe Development, PayPal sandbox, Social/OAuth remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 159 candidate
+## Current Release 467 restart authority — Build 160 candidate
 
-Build 158 **Product Editor Startup Resilience** is the last fully verified Development and current Production baseline.
+Build 159 **Product Returning-Browser Cache Coherence** is the last fully verified Development and current source/Production baseline.
 
-- Last fully verified Development SHA: `764ff267dab58c0c1068919f9a494c94984d054e`
-- Current Production main SHA: `764ff267dab58c0c1068919f9a494c94984d054e`
-- Exact shared tree: `bdaa5302bcaf26b451e9ef6954f777e26a2ee20b`
-- Development System Gate: `35055159738`
-- Development Current Application Quality: `35055159744`
-- Development I.T. Admin Runtime: `35055159758`
-- Development Repository Branch Hygiene: `35055159722`
-- Production Pages Deploy: `35055350586`
-- Production Live Resource Integrity: `35055416344`
-- Products Production Browser Proof: `35055416341`
-- Products Route Production Proof: `35055416367`
+- Last fully verified Development SHA: `8032b373c5cdef6172064cd5d61cd59dd77222e5`
+- Current Production main SHA: `8032b373c5cdef6172064cd5d61cd59dd77222e5`
+- Exact shared tree: `371fcdeafc97f98abaa19b6bbb10b857940c9d15`
+- Development System Gate: `35136874373`
+- Development Current Application Quality: `35136874379`
+- Development I.T. Admin Runtime: `35136874530`
+- Development Repository Branch Hygiene: `35136874513`
+- Production Pages Deploy: `35137289111`
+- Production Live Resource Integrity: `35137393619`
+- Products Production Browser Proof: `35137393411`
+- Products Route Production Proof: `35137393555`
 
-Build 159 **Product Returning-Browser Cache Coherence** is the active Development candidate. It rotates the generic Product page asset generation, Product request-budget loader identity, Product media fallback identity, and Product Editor/quality helper cache URLs so a returning browser cannot keep running stale Build 155-era clients after newer Product releases. Admin-only JavaScript is served with no-store cache control; public storefront caching remains separate.
+Build 160 **Product Production Browser Recovery** is the active Development candidate. It responds to operator Firefox evidence showing that the Product page could still retain a Build 157 Quality identity, display a raw bounded `readiness_timeout`, fall back to a saved Product snapshot, and generate cross-origin Product-image blocking noise after Build 159 source promotion.
 
-The Build 158 Product Editor contract remains authoritative: safe defaults/snapshot first when needed, then authoritative live enrichment when available. Build 159 changes cache delivery, not Product business authority. Product create/update mutations remain untouched. Canonical D1 remains the data/schema authority and no request-time DDL is introduced.
+Build 160 adds a compact authenticated read-only Product-core delivery path, intercepts plain Product-list startup reads before older wrappers consume the request, rewrites approved Admin Product media to the same-origin Product media route before rendering, and observes late Quality DOM rendering so bounded readiness timeouts remain pending rather than being presented as Product workspace failures.
 
-Build 159 acceptance requires the dedicated Build 159 source proof, System Gate, Current Application Quality, I.T. Admin Runtime, Repository Branch Hygiene, retained Build 158/157/156 proofs, and authenticated Development Product browser regression proof on one exact `dev` SHA. The browser proof must reject the legacy 6000 ms editor timeout, stale Product runtime generations, missing Build 159 helper URLs, same-origin Product media 404 recovery loops, and Worker 1102 evidence.
+Product create/update/archive/delete authorities are unchanged. Build 160 performs no Product, Inventory, D1 business-data, R2 object, payment, refund, accounting or provider mutation. Canonical migrations remain 0001–0005 and request-time DDL remains closed.
 
-Promotion remains closed until that exact Development SHA is GREEN. Production then requires non-force promotion, successful Production Pages deployment, Production Live Resource Integrity, Products route proof and authenticated Products Production browser proof before Build 159 may be called GREEN.
+Build 160 acceptance requires the dedicated Build 160 source proof, System Gate, Current Application Quality, I.T. Admin Runtime, Repository Branch Hygiene, retained Product regression proofs and exact Development deployment evidence on one final `dev` SHA. Only that exact GREEN SHA/tree may be non-force promoted to `main`, followed by Production Pages Deploy and Production Live Resource Integrity.
 
-No schema change, D1 business-data mutation, destructive R2 mutation, Stripe/PayPal execution, refund, accounting posting or provider publication is authorized by Build 159.
+Because the incident was reported from a real returning Firefox session, operator Firefox Product-editor confirmation remains the final human acceptance after main is GREEN. Automated GREEN is necessary for promotion but does not replace that operator test.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
