@@ -67,17 +67,29 @@ req("method: 'POST'" not in quality and 'method: "POST"' not in quality, 'Build 
 req('Buyer facts:' in quality and 'resource limit' in quality and 'failed' in quality, 'Build 158 quality helper must preserve real warning classes')
 
 budget = read('public/js/admin-products-request-budget-v156.js')
+build158_budget = "VERSION = 'R467B156_REQUEST_BUDGET_V2'" in budget
+build159_budget = "VERSION = 'R467B159_REQUEST_BUDGET_V3'" in budget
+req(build158_budget or build159_budget, 'Build 158 request-budget integration missing an approved Build 156/159 runtime version')
 for token in (
-    "VERSION = 'R467B156_REQUEST_BUDGET_V2'",
     'MAX_CONCURRENT_GETS = 2',
     'MAX_NONCORE_GETS = 1',
     'reserved_core_slots: 1',
-    '/public/js/admin-products-editor-startup-v158.js?v=467b158-editor-startup-v1',
-    '/public/js/admin-product-quality-pending-v158.js?v=467b158-quality-pending-v1',
     'data-dd-products-editor-startup-v158',
     'data-dd-product-quality-pending-v158',
 ):
     req(token in budget, f'Build 158 request-budget integration missing {token}')
+if build158_budget:
+    for token in (
+        '/public/js/admin-products-editor-startup-v158.js?v=467b158-editor-startup-v1',
+        '/public/js/admin-product-quality-pending-v158.js?v=467b158-quality-pending-v1',
+    ):
+        req(token in budget, f'Build 158 request-budget integration missing {token}')
+elif build159_budget:
+    for token in (
+        '/public/js/admin-products-editor-startup-v158.js?v=467b159-editor-startup-cache-v2',
+        '/public/js/admin-product-quality-pending-v158.js?v=467b159-quality-pending-cache-v2',
+    ):
+        req(token in budget, f'Build 158 successor integration missing {token}')
 req('setInterval(' not in budget, 'Build 156/158 request budget integration must not add recurring polling')
 
 prior = json.loads(read('release467-build157-admin-data-delivery.json') or '{}')
@@ -104,5 +116,5 @@ print('Editor startup: one canonical Product option read with bounded browser sn
 print('Legacy 6000 ms Product editor timeout: cleared only for the scoped optional editor-option lookup')
 print('Quality readiness timeout: presented as deferred/pending; unknown evidence remains unknown')
 print('Real quality failures: warning state preserved')
-print('Build 156 Product request concurrency contract: preserved')
+print('Build 156 Product request concurrency contract: preserved, including approved Build 159 cache-rotation successor')
 print('Schema/D1/R2/Product writes: unchanged')
