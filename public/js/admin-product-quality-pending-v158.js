@@ -42,7 +42,7 @@
       note.classList.remove('warning');
       note.classList.add('info');
       note.innerHTML = '<strong>Readiness evidence is deferred</strong><br>The bounded readiness read did not finish inside the startup budget. Unknown readiness remains pending and is not marked complete. Essential Product work remains available.';
-      note.dataset.ddBuild158ReadinessDeferred = '1';
+      note.setAttribute('data-dd-build158-readiness-deferred', '1');
       health.deferred_presentations += 1;
       changed = true;
     });
