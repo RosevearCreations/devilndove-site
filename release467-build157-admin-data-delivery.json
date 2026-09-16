@@ -2,7 +2,7 @@
   "release": 467,
   "build": 157,
   "title": "Product Admin + Admin Data Delivery",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "source_base_sha": "1b375af8dadb1bfc32086708469cc2008ba9fc9f",
   "source_base_tree_sha": "96928f3c3d09dcf1999387d9a63a823f264bebf8",
   "starting_point": {
@@ -25,16 +25,6 @@
       "products_route_production_proof_run": 35020259408,
       "state": "PRODUCTION_GREEN"
     }
-  },
-  "production_baseline": {
-    "build": 156,
-    "main_sha": "1b375af8dadb1bfc32086708469cc2008ba9fc9f",
-    "tree_sha": "96928f3c3d09dcf1999387d9a63a823f264bebf8",
-    "production_pages_deploy_run": 35020167619,
-    "products_production_browser_proof_run": 35020259412,
-    "production_live_resource_integrity_run": 35020259348,
-    "products_route_production_proof_run": 35020259408,
-    "state": "PRODUCTION_GREEN"
   },
   "scope": [
     "Product Admin list-level readiness waits until core Product authority is usable",
@@ -72,6 +62,40 @@
     "mobile_product_resource_limit_700": "FOLLOW_UP_CURSOR_OR_SEARCH_DELIVERY",
     "public_toolshed_500_with_static_json_fallback": "OUTSIDE_ADMIN_HOTFIX",
     "public_gallery_500_with_static_json_fallback": "OUTSIDE_ADMIN_HOTFIX"
+  },
+  "final_closure": {
+    "dev_sha": "4b82883a79e1897792fd3840860760b555e0dd36",
+    "tree_sha": "045ff6357572177fff9417f229cadce294080b02",
+    "proofs": {
+      "system_gate_run": 35045214773,
+      "current_application_quality_run": 35045214757,
+      "it_admin_runtime_proof_run": 35045214868,
+      "branch_hygiene_run": 35045214777
+    },
+    "build157_admin_data_delivery_proof_run": 35045214712,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "ingested_by_build": 158
+  },
+  "production_checkpoint": {
+    "build": 157,
+    "main_sha": "4b82883a79e1897792fd3840860760b555e0dd36",
+    "tree_sha": "045ff6357572177fff9417f229cadce294080b02",
+    "production_pages_deploy_run": 35050288505,
+    "production_live_resource_integrity_run": 35050347701,
+    "products_production_browser_proof_run": 35050347805,
+    "products_route_production_proof_run": 35050347663,
+    "state": "PRODUCTION_GREEN"
+  },
+  "production_baseline": {
+    "build": 157,
+    "main_sha": "4b82883a79e1897792fd3840860760b555e0dd36",
+    "tree_sha": "045ff6357572177fff9417f229cadce294080b02",
+    "production_pages_deploy_run": 35050288505,
+    "products_production_browser_proof_run": 35050347805,
+    "production_live_resource_integrity_run": 35050347701,
+    "products_route_production_proof_run": 35050347663,
+    "state": "PRODUCTION_GREEN"
   },
   "request_time_schema_mutation": false,
   "schema_change_authorized": false,
