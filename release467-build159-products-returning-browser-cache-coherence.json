@@ -1,0 +1,72 @@
+{
+  "release": 467,
+  "build": 159,
+  "title": "Product Returning-Browser Cache Coherence",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "source_base_sha": "764ff267dab58c0c1068919f9a494c94984d054e",
+  "source_base_tree_sha": "bdaa5302bcaf26b451e9ef6954f777e26a2ee20b",
+  "starting_point": {
+    "development": {
+      "sha": "764ff267dab58c0c1068919f9a494c94984d054e",
+      "tree": "bdaa5302bcaf26b451e9ef6954f777e26a2ee20b",
+      "system_gate_run": 35055159738,
+      "quality_run": 35055159744,
+      "it_admin_runtime_run": 35055159758,
+      "repository_hygiene_run": 35055159722,
+      "build158_source_proof_run": 35055159737,
+      "products_development_browser_proof_run": 35055159746,
+      "state": "BUILD158_EXACT_SHA_GREEN"
+    },
+    "production": {
+      "main_sha": "764ff267dab58c0c1068919f9a494c94984d054e",
+      "tree": "bdaa5302bcaf26b451e9ef6954f777e26a2ee20b",
+      "production_pages_deploy_run": 35055350586,
+      "products_production_browser_proof_run": 35055416341,
+      "products_route_production_proof_run": 35055416367,
+      "production_live_resource_integrity_run": 35055416344,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "evidence_trigger": {
+    "operator_browser": "returning browser rendered Build 155 Product client cache keys after Build 158 Production promotion",
+    "editor_symptom": "Product startup request timed out after 6000 ms",
+    "media_symptom": "repeated same-origin /api/product-media 404 recovery requests on Admin Products",
+    "list_symptom": "live Product list degraded to saved snapshot while stale startup clients remained active"
+  },
+  "scope": [
+    "rotate the generic Product page asset generation from Build 155 to Build 159",
+    "rotate Product request-budget loader and Product media fallback cache identities",
+    "force fresh Build 158 Product Editor and quality helper URLs for returning browsers",
+    "serve Admin-only JavaScript with no-store cache control while leaving public storefront caching unchanged",
+    "raise Product media fallback runtime generation so a stale version 62 instance cannot suppress the current Admin-only behavior",
+    "extend exact-Preview browser acceptance to fail on the legacy 6000 ms Editor timeout, stale runtime generations, missing Build 159 script URLs, same-origin Product media 404s, or Worker 1102 evidence"
+  ],
+  "safety": {
+    "request_time_schema_mutation": false,
+    "schema_change_authorized": false,
+    "d1_mutation_authorized": false,
+    "r2_mutation_authorized": false,
+    "product_mutation_authorized": false,
+    "provider_execution_authorized": false,
+    "provider_publication_authorized": false,
+    "payment_mutation_authorized": false,
+    "refund_mutation_authorized": false,
+    "accounting_posting_authorized": false,
+    "production_business_data_overwrite": false
+  },
+  "acceptance_required": [
+    "Build 159 exact-SHA source proof GREEN",
+    "System Gate GREEN on exact dev SHA",
+    "Current Application Quality Proof GREEN on exact dev SHA",
+    "I.T. Admin Runtime Proof GREEN on exact dev SHA",
+    "Repository Branch Hygiene GREEN on exact dev SHA",
+    "Build 157 authenticated Development browser regression proof GREEN with Build 159 cache/runtime assertions",
+    "Build 158 Product Editor source proof GREEN on exact dev SHA",
+    "non-force Production promotion only after Development acceptance",
+    "Production Pages Deploy GREEN on exact promoted SHA",
+    "Products Production Browser Proof GREEN with Build 159 assertions",
+    "Products route Production proof GREEN",
+    "Production Live Resource Integrity Proof GREEN"
+  ],
+  "promotion_state": "DEVELOPMENT_NOT_YET_ACCEPTED"
+}
