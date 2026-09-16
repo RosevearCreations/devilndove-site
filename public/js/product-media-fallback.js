@@ -1,12 +1,12 @@
 // Release 467 Build 62 — transparent public-media recovery.
-// Build 157 adds an Admin-only safety patch: when an Admin Product image already failed on
-// its approved public host, show the neutral Product placeholder instead of issuing another
-// same-origin /api/product-media probe for a key that may be stale or absent. Public storefront
+// Build 157 added the Admin-only suppression path; Build 159 rotates the client identity so
+// returning Admin browsers cannot keep the pre-suppression Build 155 copy. Public storefront
 // recovery behavior remains unchanged. No media or Product database records are mutated.
 (()=>{
   'use strict';
-  const VERSION=62;
+  const VERSION=63;
   const BUILD157_ADMIN_PATCH=157;
+  const BUILD159_ADMIN_CACHE_PATCH=159;
   if(Number(window.DDProductMediaFallback?.version||0)>=VERSION)return;
   const PUBLIC_HOSTS=new Set(['assets.devilndove.com','pub-f8137eb938da486a9f24410ccf49087c.r2.dev']);
   const FLAG='ddMediaFallbackAttempted';
@@ -146,9 +146,9 @@
     if(event.target instanceof HTMLImageElement)recoverImage(event.target);
   },true);
   // This recovery client exists primarily for public Product/Movie media. Admin workspaces
-  // use the capturing error listener above and Build 157 avoids same-origin retries for
-  // missing Product keys. A document-wide subtree observer there would needlessly scan every
-  // Admin mutation and can starve Product Entry startup.
+  // use the capturing error listener above and avoid same-origin retries for missing Product
+  // keys. A document-wide subtree observer there would needlessly scan every Admin mutation
+  // and can starve Product Entry startup.
   let observer=null;
   if(!IS_ADMIN_RUNTIME){
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>scan(document),{once:true});
@@ -161,5 +161,5 @@
     observer.observe(document.documentElement,{childList:true,subtree:true});
   }
 
-  window.DDProductMediaFallback={installed:true,version:VERSION,build157_admin_patch:BUILD157_ADMIN_PATCH,observer_mode:IS_ADMIN_RUNTIME?'error-only-admin':'public-mutation-and-error',admin_same_origin_retry_suppressed:adminRetrySuppressed,fallbackUrl,recoverImage,promoteSameProductImage,showProductPlaceholder,scan};
+  window.DDProductMediaFallback={installed:true,version:VERSION,build157_admin_patch:BUILD157_ADMIN_PATCH,build159_admin_cache_patch:BUILD159_ADMIN_CACHE_PATCH,observer_mode:IS_ADMIN_RUNTIME?'error-only-admin':'public-mutation-and-error',admin_same_origin_retry_suppressed:adminRetrySuppressed,fallbackUrl,recoverImage,promoteSameProductImage,showProductPlaceholder,scan};
 })();
