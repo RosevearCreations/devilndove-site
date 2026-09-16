@@ -30,9 +30,13 @@ Build 155 — **Products Client Responsiveness Hotfix** — is active. It repair
 Builds 137–141 closure-evidence authorities remain retained provenance for Markdown/JSON export, evidence ID, SHA-256 fingerprint, verification manifest and independent cross-artifact verification. Build 135 Production live-resource transport resilience remains mandatory. Canonical migrations remain `0001`–`0004`.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 156 candidate
+## Current Release 467 restart authority — Build 157 candidate
 
-Build 155 **Products Client Responsiveness Hotfix** is the last fully verified Development and current Production baseline. Development SHA/main SHA: `4e9efa2daf8f541e941c350ccde77798b5c99080`. Exact tree: `3f08dc3dfde778ddca0ca5fd328e7d45a1fcee9e`. Development proofs: System Gate `34915558746`, Current Application Quality `34915558747`, I.T. Admin Runtime `34915558751`, Repository Branch Hygiene `34915558771`, dedicated Build 155 proof `34915558804`. Production proofs: Pages `34915729378`, live-resource integrity `34915877580`, Products browser `34915877555`, Products route `34915877617`.
+The canonical current machine authorities are `current-development-authority.json`, `release467-build156-inventory-process-assignment.json`, and `release467-build157-admin-data-delivery.json`.
 
-Build 156 **Tool & Supply Process Assignment** is the active Development closure candidate. It introduces forward-only canonical migration `0005_release467_inventory_process_assignment.sql`; Production promotion remains closed until the exact Build 156 `dev` head is GREEN across the required proof set.
+Build 156 **Tool & Supply Process Assignment** is the last fully verified Development and current Production baseline. Development SHA/main SHA: `1b375af8dadb1bfc32086708469cc2008ba9fc9f`. Exact tree: `96928f3c3d09dcf1999387d9a63a823f264bebf8`. Development proofs: System Gate `35019952492`, Current Application Quality `35019952480`, I.T. Admin Runtime `35019952545`, Repository Branch Hygiene `35019952489`. Production proofs: Pages `35020167619`, live-resource integrity `35020259348`, Products browser `35020259412`, Products route `35020259408`.
+
+Build 157 **Product Admin + Admin Data Delivery** is the active Development candidate. It now includes the live Product Quality/media follow-up: secondary startup Product consumers can reuse the fresh core Product snapshot; Product list readiness is capped at 80; Product Quality has a fail-soft recovery path with no duplicate Product API read; and Admin Product image failures no longer trigger a second `/api/product-media` probe for already-missing keys. Public storefront media recovery remains unchanged and missing media is not represented as restored.
+
+Promotion remains closed until one exact Build 157 `dev` SHA is GREEN across the dedicated Build 157 proof, retained Build 156 proof, System Gate/Preview, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene; Production then requires exact deployment, live-resource and affected Product browser acceptance.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
