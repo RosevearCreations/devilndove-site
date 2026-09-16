@@ -1,0 +1,74 @@
+{
+  "release": 467,
+  "build": 158,
+  "title": "Product Editor Startup Resilience",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "source_base_sha": "4b82883a79e1897792fd3840860760b555e0dd36",
+  "source_base_tree_sha": "045ff6357572177fff9417f229cadce294080b02",
+  "starting_point": {
+    "development": {
+      "sha": "4b82883a79e1897792fd3840860760b555e0dd36",
+      "tree": "045ff6357572177fff9417f229cadce294080b02",
+      "state": "BUILD157_EXACT_SHA_GREEN"
+    },
+    "production": {
+      "main_sha": "4b82883a79e1897792fd3840860760b555e0dd36",
+      "tree": "045ff6357572177fff9417f229cadce294080b02",
+      "production_pages_deploy_run": 35050288505,
+      "products_production_browser_proof_run": 35050347805,
+      "products_route_production_proof_run": 35050347663,
+      "production_live_resource_integrity_run": 35050347701,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Product editor option bootstrap canonicalized to one shared read-only request",
+    "catalog and tax option enrichment may return a bounded browser snapshot or safe editor defaults before the legacy 6000 ms startup guard can fail",
+    "successful live option authority refreshes the editor and replaces fallback values without changing Product save/update mutation paths",
+    "bounded readiness timeout is presented as deferred/pending rather than a Product workspace failure",
+    "unknown readiness remains unknown and is never marked complete",
+    "real buyer-fact, HTTP, Worker-resource, authentication, or database failures retain warning presentation",
+    "Build 156 Product request concurrency scheduler remains authoritative and unchanged in its maximum-two / reserved-core-lane contract"
+  ],
+  "runtime": {
+    "editor_startup_client": "public/js/admin-products-editor-startup-v158.js",
+    "editor_startup_version": "R467B158_EDITOR_STARTUP_V1",
+    "editor_fallback_after_ms": 4200,
+    "editor_snapshot_max_age_ms": 86400000,
+    "quality_pending_client": "public/js/admin-product-quality-pending-v158.js",
+    "quality_pending_version": "R467B158_QUALITY_PENDING_V1",
+    "quality_pending_network_requests": 0,
+    "request_budget_client": "public/js/admin-products-request-budget-v156.js",
+    "request_budget_version_preserved": "R467B156_REQUEST_BUDGET_V2",
+    "max_concurrent_admin_gets": 2,
+    "reserved_core_lane": 1,
+    "product_write_routes_intercepted": false
+  },
+  "safety": {
+    "request_time_schema_mutation": false,
+    "schema_change_authorized": false,
+    "d1_mutation_authorized": false,
+    "r2_mutation_authorized": false,
+    "product_mutation_authorized": false,
+    "provider_execution_authorized": false,
+    "provider_publication_authorized": false,
+    "payment_mutation_authorized": false,
+    "refund_mutation_authorized": false,
+    "accounting_posting_authorized": false,
+    "production_business_data_overwrite": false
+  },
+  "acceptance_required": [
+    "Build 158 exact-SHA source proof GREEN",
+    "System Gate GREEN on exact dev SHA",
+    "Current Application Quality Proof GREEN on exact dev SHA",
+    "I.T. Admin Runtime Proof GREEN on exact dev SHA",
+    "Repository Branch Hygiene GREEN on exact dev SHA",
+    "Build 157 Development browser regression proof GREEN on exact dev SHA",
+    "non-force Production promotion only after Development acceptance",
+    "Production Pages Deploy GREEN on exact promoted SHA",
+    "Products Production Browser Proof GREEN",
+    "Products route Production proof GREEN",
+    "Production Live Resource Integrity Proof GREEN"
+  ],
+  "promotion_state": "DEVELOPMENT_NOT_YET_ACCEPTED"
+}
