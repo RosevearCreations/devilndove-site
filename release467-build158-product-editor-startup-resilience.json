@@ -48,6 +48,11 @@
     "reserved_core_lane": 1,
     "product_write_routes_intercepted": false
   },
+  "projection_convergence": {
+    "reliability_page": "Release 467 Build 158 over verified Build 157 baseline",
+    "deployment_preflight_page": "Release 467 Build 158 over verified Build 157 baseline",
+    "purpose": "Keep current read-only operator surfaces aligned with the Build 158 projection without changing executable release gates or mutation authority."
+  },
   "safety": {
     "request_time_schema_mutation": false,
     "schema_change_authorized": false,
