@@ -1,4 +1,5 @@
 // Release 467 Build 156 — Product Admin request burst limiter.
+// Build 158 closure marker: proof-trigger only; no request-budget or runtime behaviour change.
 // Product Admin intentionally mounts many independent workspaces. This guard keeps those
 // read-only startup lanes from issuing an unbounded burst of D1-heavy GETs at once.
 (() => {
