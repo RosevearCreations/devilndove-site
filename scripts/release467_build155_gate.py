@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Release 467 Build 155 — Products Client Responsiveness Hotfix source gate."""
+"""Release 467 Build 155 — Products Client Responsiveness Hotfix source gate.
+
+Build 159 is an approved cache-generation successor. This retained regression proof
+continues to enforce the Build 155 responsiveness, observer, authorization and safety
+contracts while accepting the newer Product and media-fallback cache identities.
+"""
 from pathlib import Path
 import json
 import subprocess
@@ -31,7 +36,6 @@ probe = read('scripts/products_browser_runtime_probe.mjs')
 closure = read('release467-build154-products-worker-resource-hotfix.json')
 manifest_text = read('migrations/canonical/manifest.json')
 
-# Exact prior closure: Build 154 repaired Worker/server routing, but did not prove UI usability.
 for token in (
     'fc74ea680c0eee221722ce1ede6cb7990b92551f',
     'cc50c65c7d4ecbb75e9744a57a14be7da4aba873',
@@ -44,23 +48,25 @@ for token in (
 ):
     req(token in closure, f'Build 154 closure token missing: {token}')
 
-# Build 155 must advance cache identity through both the Products HTML fast path and dynamic import.
-req("const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';" in middleware,
-    'Build 155 emergency Products asset revision missing')
+req(
+    "const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';" in middleware
+    or "const PRODUCTS_ASSET_REVISION = '467-b159-products-returning-browser-cache-v1';" in middleware,
+    'Build 155 emergency Products asset revision or approved Build 159 successor missing'
+)
 req("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware,
     'Build 153 layout-observer revision must remain preserved')
 req("import('/public/js/admin-products-marketplace-readiness.js?v=467b155')" in loader,
     'Build 155 Marketplace Listing Readiness dynamic import cache revision missing')
 req('467-b155-products-client-responsiveness' in marketplace,
     'Build 155 marketplace client revision marker missing')
-req("const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b155-products-media-admin-bound-v1';" in middleware,
-    'Build 155 Products media-fallback cache revision missing')
+req(
+    "const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b155-products-media-admin-bound-v1';" in middleware
+    or "const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b159-products-media-admin-cache-v1';" in middleware,
+    'Build 155 Products media-fallback cache revision or approved Build 159 successor missing'
+)
 req('v=${PRODUCTS_MEDIA_FALLBACK_REVISION}' in middleware,
-    'Products fast path must use the Build 155 media-fallback cache revision')
+    'Products fast path must use the Product media-fallback cache revision')
 
-# Emergency recovery boundary: Product Admin does not need the cross-admin section-position/context-dock helper.
-# Keeping that helper out of Products prevents any stale cached copy of the historical dock observer from
-# blocking the Product editor before its dropdown/table data can render.
 req("document.body?.dataset?.adminPage !== 'products'" in admin,
     'Build 155 Product Admin navigation-context exclusion missing')
 req("import('/public/js/admin-section-position-v130.js?v=467b130')" in admin,
@@ -68,8 +74,6 @@ req("import('/public/js/admin-section-position-v130.js?v=467b130')" in admin,
 req(admin.find("document.body?.dataset?.adminPage !== 'products'") < admin.find("import('/public/js/admin-section-position-v130.js?v=467b130')"),
     'Product Admin exclusion must guard the section-position/context-dock import')
 
-# The public-media fallback must retain error recovery in Admin while excluding
-# its document-wide mutation observer from the highly dynamic Admin runtime.
 for token in (
     'const IS_ADMIN_RUNTIME=',
     "observer_mode:IS_ADMIN_RUNTIME?'error-only-admin':'public-mutation-and-error'",
@@ -80,7 +84,6 @@ for token in (
 req(media_fallback.find('if(!IS_ADMIN_RUNTIME){') < media_fallback.find('new MutationObserver'),
     'Build 155 must create the public-media MutationObserver only inside the non-Admin boundary')
 
-# Root-cause repair: renderer must be idempotent and observer must not react to its own DOM writes.
 for token in (
     'let observer = null',
     'observer?.disconnect()',
@@ -105,11 +108,9 @@ req('panel.innerHTML = markup;' in marketplace,
 req(marketplace.find('panel.dataset.ddMarketplaceRenderKey === renderKey') < marketplace.find('panel.innerHTML = markup;'),
     'Marketplace row markup must be guarded by the render fingerprint before DOM replacement')
 
-# Marketplace readiness remains browser-local and advisory; this hotfix adds no backend calls or write authority.
-for forbidden in ('apiFetch(', "fetch('/api", 'fetch("/api', 'XMLHttpRequest', 'method: \'POST\'', 'method: "POST"', 'method: \'PUT\'', 'method: \'DELETE\''):
+for forbidden in ('apiFetch(', "fetch('/api", 'fetch("/api', 'XMLHttpRequest', "method: 'POST'", 'method: "POST"', "method: 'PUT'", "method: 'DELETE'"):
     req(forbidden not in marketplace, f'Build 155 marketplace client gained forbidden backend/write behavior: {forbidden}')
 
-# Real browser probe must verify event-loop responsiveness and populated Product data, not merely HTTP 200.
 for token in (
     "const expectedRevision = '467-b155-products-client-responsiveness'",
     "document.getElementById('existingProductSelect')",
@@ -164,7 +165,7 @@ if FAIL:
 print('RELEASE 467 BUILD 155 GATE: PASS')
 print('Products client: Marketplace Listing Readiness self-mutation loop isolated')
 print('Products recovery: nonessential navigation context chain excluded from Product Admin')
-print('Cache: Product assets advanced to the Build 155 lockup-recovery revision')
+print('Cache: Product assets retain the Build 155 contract through the approved Build 159 cache successor')
 print('Migration history: Build 155 preserves canonical 0001-0004 and permits later forward-only migrations')
 print('Acceptance: real Chromium/CDP probe requires responsive event loop + populated Product picker/table')
 print('Boundary: no schema, D1/R2 business-data, provider, payment/refund/accounting mutation')
