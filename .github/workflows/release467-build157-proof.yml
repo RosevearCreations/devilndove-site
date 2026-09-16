@@ -34,6 +34,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   build157-source-proof:
@@ -41,10 +42,13 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
       - name: Verify exact checked-out SHA
         shell: bash
         run: |
           set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
           echo "BUILD157_SHA=$(git rev-parse HEAD)"
           echo "BUILD157_TREE=$(git rev-parse HEAD^{tree})"
       - name: Run Build 157 fail-closed source gate
@@ -56,3 +60,227 @@ jobs:
           echo 'Production business-data mutation: NONE'
           echo 'R2/provider/payment/refund/accounting mutation: NONE'
           echo 'Mutable business static-JSON authority: NONE'
+
+  build157-development-browser:
+    needs: build157-source-proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      EXPECTED_SOURCE_SHA: ${{ github.sha }}
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      BUILD157_EPHEMERAL_SESSION_TOKEN: ''
+      BUILD157_EXACT_PREVIEW_URL: ''
+      DND_BASE_URL: ''
+      DND_SESSION_COOKIE: ''
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install deterministic Chrome
+        id: chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: stable
+      - name: Prove exact checked-out Build 157 source
+        env:
+          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
+          test -x "${CHROME_BIN}"
+          python scripts/release467_build157_gate.py
+          node --check scripts/products_browser_runtime_probe.mjs
+          node --check scripts/products_build157_browser_probe.mjs
+
+      - name: Wait for exact SHA System Gate and Preview proof
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          SYSTEM_RUN=''
+          for attempt in $(seq 1 90); do
+            curl -fsSL \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${EXPECTED_SOURCE_SHA}&branch=dev&per_page=100" \
+              > /tmp/build157-runs.json
+            read -r STATE CONCLUSION RUN_ID <<EOF
+          $(python - <<'PY'
+          import json, os
+          data=json.load(open('/tmp/build157-runs.json'))
+          sha=os.environ['EXPECTED_SOURCE_SHA']
+          rows=[r for r in data.get('workflow_runs',[]) if r.get('name')=='System Gate' and r.get('head_sha')==sha and r.get('head_branch')=='dev' and r.get('event')=='push']
+          row=rows[0] if rows else {}
+          print(str(row.get('status') or 'missing'), str(row.get('conclusion') or 'none'), str(row.get('id') or '0'))
+          PY
+          )
+          EOF
+            if [ "$STATE" = 'completed' ]; then
+              if [ "$CONCLUSION" != 'success' ]; then
+                echo "STOP: exact SHA System Gate ${RUN_ID} completed ${CONCLUSION}."
+                exit 1
+              fi
+              SYSTEM_RUN="$RUN_ID"
+              break
+            fi
+            echo "Waiting for exact SHA System Gate (${attempt}/90): state=${STATE} run=${RUN_ID}"
+            sleep 10
+          done
+          test -n "${SYSTEM_RUN}" || { echo 'STOP: exact SHA System Gate did not complete within the bounded wait.'; exit 1; }
+          echo "BUILD157_SYSTEM_GATE_RUN=${SYSTEM_RUN}" >> "$GITHUB_ENV"
+
+          curl -fsSL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs/${SYSTEM_RUN}/artifacts" \
+            > /tmp/build157-artifacts.json
+          ARTIFACT_ID="$(python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build157-artifacts.json'))
+          rows=[a for a in data.get('artifacts',[]) if a.get('name')=='current-development-deploy-proof' and not a.get('expired')]
+          print(rows[0]['id'] if rows else '')
+          PY
+          )"
+          test -n "${ARTIFACT_ID}" || { echo 'STOP: exact Development deploy proof artifact is missing.'; exit 1; }
+          curl -fsSL -L \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip" \
+            -o /tmp/build157-deploy-proof.zip
+          rm -rf /tmp/build157-deploy-proof
+          mkdir -p /tmp/build157-deploy-proof
+          unzip -q /tmp/build157-deploy-proof.zip -d /tmp/build157-deploy-proof
+          EXACT_URL="$(python - <<'PY'
+          import glob,json,os
+          matches=glob.glob('/tmp/build157-deploy-proof/**/current-development-deploy-proof.json',recursive=True)
+          assert matches,'current-development-deploy-proof.json missing from artifact'
+          data=json.load(open(matches[0]))
+          expected=os.environ['EXPECTED_SOURCE_SHA']
+          assert data.get('status')=='PASS',data
+          assert data.get('source_sha')==expected,(data.get('source_sha'),expected)
+          assert data.get('environment')=='preview',data
+          assert data.get('project')=='devilndove-site',data
+          assert data.get('branch')=='dev',data
+          assert data.get('d1')=='devilndove-dev',data
+          url=str(data.get('url') or '').strip().rstrip('/')
+          assert url.startswith('https://') and '.devilndove-site.pages.dev' in url,url
+          print(url)
+          PY
+          )"
+          echo "BUILD157_EXACT_PREVIEW_URL=${EXACT_URL}" >> "$GITHUB_ENV"
+          echo "DND_BASE_URL=${EXACT_URL}" >> "$GITHUB_ENV"
+          echo "Exact Build 157 Preview accepted for browser target: ${EXACT_URL}"
+
+      - name: Create and validate bounded Development admin acceptance session
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'STOP: Development D1 credential is not configured.'; exit 1; }
+          test -n "${DND_BASE_URL}" || { echo 'STOP: exact Preview URL was not resolved.'; exit 1; }
+          TOKEN="b157-$(python - <<'PY'
+          import secrets
+          print(secrets.token_hex(32))
+          PY
+          )"
+          echo "::add-mask::${TOKEN}"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "INSERT INTO sessions (user_id, session_token, token, expires_at, created_at) SELECT u.user_id, '${TOKEN}', '${TOKEN}', datetime('now','+20 minutes'), datetime('now') FROM users u WHERE u.is_active=1 AND lower(trim(u.role))='admin' ORDER BY u.user_id LIMIT 1; SELECT changes() AS inserted;" > /tmp/build157-ephemeral-session.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build157-ephemeral-session.json'))
+          values=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'inserted' in v: values.append(int(v['inserted']))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert any(v==1 for v in values),(values,data)
+          PY
+          COOKIE="dd_auth_token=${TOKEN}"
+          STATUS="$(curl -sS -o /tmp/build157-auth-me.json -w '%{http_code}' -H "Cookie: ${COOKIE}" -H 'Cache-Control: no-cache' "${DND_BASE_URL}/api/auth/me" || true)"
+          if [ "$STATUS" != '200' ]; then
+            echo "STOP: exact Preview /api/auth/me rejected the bounded Development session (HTTP ${STATUS})."
+            python - <<'PY'
+          import json
+          try:
+              data=json.load(open('/tmp/build157-auth-me.json'))
+              print('Auth error:',str(data.get('error') or data.get('message') or 'unclassified'))
+          except Exception:
+              print('Auth error: non-JSON response')
+          PY
+            exit 1
+          fi
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build157-auth-me.json'))
+          user=data.get('user') or {}
+          assert data.get('ok') is True,data
+          assert str(user.get('role') or '').strip().lower()=='admin',user
+          assert int(user.get('is_active') or 0)==1,user
+          assert data.get('response_profile')=='auth_session_bounded_v1',data
+          PY
+          echo "BUILD157_EPHEMERAL_SESSION_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
+          echo "DND_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
+          rm -f /tmp/build157-auth-me.json /tmp/build157-ephemeral-session.json
+          unset TOKEN COOKIE
+          echo 'Exact Preview accepted bounded Development admin session.'
+
+      - name: Run established Products responsiveness acceptance
+        env:
+          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: node scripts/products_browser_runtime_probe.mjs
+
+      - name: Run Build 157 Product Quality and media acceptance
+        env:
+          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: node scripts/products_build157_browser_probe.mjs
+
+      - name: Remove bounded Development admin acceptance session
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOKEN="${BUILD157_EPHEMERAL_SESSION_TOKEN:-}"
+          [ -n "$TOKEN" ] || { echo 'No Build 157 ephemeral Development session to remove.'; exit 0; }
+          echo "::add-mask::${TOKEN}"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "DELETE FROM sessions WHERE session_token='${TOKEN}' AND token='${TOKEN}'; SELECT changes() AS deleted;" > /tmp/build157-ephemeral-cleanup.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build157-ephemeral-cleanup.json'))
+          values=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'deleted' in v: values.append(int(v['deleted']))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert any(v==1 for v in values),(values,data)
+          PY
+          rm -f /tmp/build157-ephemeral-cleanup.json
+          unset TOKEN
+          echo 'Bounded Build 157 Development acceptance session removed.'
+
+      - name: Development browser boundary
+        if: always()
+        run: |
+          echo "Exact Development SHA: ${EXPECTED_SOURCE_SHA}"
+          echo "System Gate: ${BUILD157_SYSTEM_GATE_RUN:-unresolved}"
+          echo "Exact hashed Preview: ${BUILD157_EXACT_PREVIEW_URL:-unresolved}"
+          echo 'Browser target: exact hashed Preview, never an unproven branch alias'
+          echo 'Browser: deterministic headless Chrome/CDP'
+          echo 'Product Quality unavailable/startup timeout: FAIL-CLOSED'
+          echo 'Admin same-origin /api/product-media 404: FAIL-CLOSED'
+          echo 'Acceptance session: bounded Development-only insert + guaranteed cleanup'
+          echo 'Product/R2/provider/payment/refund/accounting/Production mutation: NONE'
