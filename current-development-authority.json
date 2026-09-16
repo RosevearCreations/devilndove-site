@@ -1,41 +1,41 @@
 {
   "release": 467,
-  "build": 156,
-  "title": "Tool & Supply Process Assignment",
+  "build": 157,
+  "title": "Product Admin + Admin Data Delivery",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "4e9efa2daf8f541e941c350ccde77798b5c99080",
-  "accepted_dev_tree_sha": "3f08dc3dfde778ddca0ca5fd328e7d45a1fcee9e",
+  "accepted_dev_sha": "1b375af8dadb1bfc32086708469cc2008ba9fc9f",
+  "accepted_dev_tree_sha": "96928f3c3d09dcf1999387d9a63a823f264bebf8",
   "acceptance": {
-    "system_gate_run": 34915558746,
-    "current_application_quality_run": 34915558747,
-    "it_admin_runtime_proof_run": 34915558751,
-    "branch_hygiene_run": 34915558771
+    "system_gate_run": 35019952492,
+    "current_application_quality_run": 35019952480,
+    "it_admin_runtime_proof_run": 35019952545,
+    "branch_hygiene_run": 35019952489
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 155,
-      "title": "Products Client Responsiveness Hotfix",
-      "authority": "release467-build155-products-client-responsiveness-hotfix.json",
-      "dev_sha": "4e9efa2daf8f541e941c350ccde77798b5c99080",
-      "tree_sha": "3f08dc3dfde778ddca0ca5fd328e7d45a1fcee9e",
+      "build": 156,
+      "title": "Tool & Supply Process Assignment",
+      "authority": "release467-build156-inventory-process-assignment.json",
+      "dev_sha": "1b375af8dadb1bfc32086708469cc2008ba9fc9f",
+      "tree_sha": "96928f3c3d09dcf1999387d9a63a823f264bebf8",
       "proofs": {
-        "system_gate_run": 34915558746,
-        "current_application_quality_run": 34915558747,
-        "it_admin_runtime_proof_run": 34915558751,
-        "branch_hygiene_run": 34915558771
+        "system_gate_run": 35019952492,
+        "current_application_quality_run": 35019952480,
+        "it_admin_runtime_proof_run": 35019952545,
+        "branch_hygiene_run": 35019952489
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "exact_preview_deployment": true
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 156,
-      "title": "Tool & Supply Process Assignment",
-      "authority": "release467-build156-inventory-process-assignment.json",
-      "state": "DEVELOPMENT_CLOSURE_CANDIDATE"
+      "build": 157,
+      "title": "Product Admin + Admin Data Delivery",
+      "authority": "release467-build157-admin-data-delivery.json",
+      "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
     "closure_candidate_must_not_self_claim_final_proof": true,
@@ -43,19 +43,20 @@
     "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE"
   },
   "production_checkpoint": {
-    "build": 155,
-    "authority": "release467-build155-products-client-responsiveness-hotfix.json",
-    "main_sha": "4e9efa2daf8f541e941c350ccde77798b5c99080",
-    "tree_sha": "3f08dc3dfde778ddca0ca5fd328e7d45a1fcee9e",
-    "production_pages_deploy_run": 34915729378,
-    "production_live_resource_integrity_run": 34915877580,
-    "products_production_browser_proof_run": 34915877555,
-    "products_route_production_proof_run": 34915877617,
+    "build": 156,
+    "authority": "release467-build156-inventory-process-assignment.json",
+    "main_sha": "1b375af8dadb1bfc32086708469cc2008ba9fc9f",
+    "tree_sha": "96928f3c3d09dcf1999387d9a63a823f264bebf8",
+    "production_pages_deploy_run": 35020167619,
+    "production_live_resource_integrity_run": 35020259348,
+    "products_production_browser_proof_run": 35020259412,
+    "products_route_production_proof_run": 35020259408,
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE",
     "client_ui_usability_proven": true
   },
   "current_release_authorities": [
+    "release467-build157-admin-data-delivery.json",
     "release467-build156-inventory-process-assignment.json",
     "release467-build155-products-client-responsiveness-hotfix.json",
     "release467-build154-products-worker-resource-hotfix.json",
@@ -166,9 +167,12 @@
   "r2_mutation_authorized": false,
   "provider_execution_authorized": false,
   "provider_publication_authorized": false,
+  "cloudflare_access_mutation_authorized": false,
+  "main_mutation_authorized": false,
+  "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "next_build": 156,
+  "next_build": 157,
   "next_build_state": "AUTHORIZED_IN_PROGRESS",
-  "next_build_title": "Tool & Supply Process Assignment",
-  "promotion_state": "BUILD156_CANDIDATE_NOT_YET_VERIFIED"
+  "next_build_title": "Product Admin + Admin Data Delivery",
+  "promotion_state": "BUILD157_CANDIDATE_NOT_YET_VERIFIED"
 }
