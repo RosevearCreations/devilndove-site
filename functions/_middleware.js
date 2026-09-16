@@ -16,6 +16,8 @@ import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appMo
 // Build 159: Product Admin returning-browser cache coherence.
 // Build 160 layers a read-only Product Production browser recovery client on top of the
 // proven Build 159 cache generation without changing the retained Build 159 identities.
+// Build 161 adds a shared Admin-only navigation/search QoL layer. It is browser-local for
+// recents/favourites and read-only for live universal record search.
 const PRODUCTS_ASSET_REVISION = '467-b159-products-returning-browser-cache-v1';
 const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';
 const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b159-products-media-admin-cache-v1';
@@ -23,6 +25,7 @@ const PRODUCTS_REQUEST_BUDGET_REVISION = '467b159-request-budget-loader-v1';
 const PRODUCTS_AUTH_READY_REVISION = '467b156-auth-ready-v3';
 const PRODUCTS_COLD_START_REVISION = '467b156-core-product-recovery-v1';
 const PRODUCTS_QUALITY_FALLBACK_REVISION = '467b156-quality-fallback-v1';
+const ADMIN_QOL_REVISION = '467b161-universal-search-v1';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
 function isReadMethod(method) { return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase()); }
@@ -30,6 +33,10 @@ function normalizedPagePath(pathname) {
   let path = String(pathname || '/');
   if (!path.endsWith('/')) path += '/';
   return path;
+}
+function isAdminRuntimePath(pathname) {
+  const path = normalizedPagePath(pathname);
+  return path === '/admin/' || path.startsWith('/admin/');
 }
 function isStorefrontDiscoveryPath(pathname) {
   return ['/shop/', '/shop/product/', '/collections/', '/collages/'].includes(normalizedPagePath(pathname));
@@ -50,10 +57,10 @@ function withAdminClientNoStore(response) {
 }
 function publicProductRequestInfo(request, pathname) {
   if (normalizedPagePath(pathname) !== '/shop/product/') return null;
-  const url = new URL(request.url);
-  const slug = String(url.searchParams.get('slug') || '').trim();
-  if (!slug) return { slug: '', canonical: 'https://devilndove.com/shop/product/' };
-  const canonical = `https://devilndove.com/shop/product/?slug=${encodeURIComponent(slug)}`;
+  const url=new URL(request.url);
+  const slug=String(url.searchParams.get('slug')||'').trim();
+  if(!slug)return { slug:'', canonical:'https://devilndove.com/shop/product/' };
+  const canonical=`https://devilndove.com/shop/product/?slug=${encodeURIComponent(slug)}`;
   return { slug, canonical };
 }
 function withGuardHeaders(response, { moduleKey = '', contractPath = '' } = {}) {
@@ -64,11 +71,18 @@ function withGuardHeaders(response, { moduleKey = '', contractPath = '' } = {}) 
   if (contractPath) headers.set('X-DND-Shared-Contract', contractPath);
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
+function adminQolMarkup() {
+  return [
+    `<link data-dd-admin-qol-v161="1" rel="stylesheet" href="/css/admin-universal-search-v161.css?v=${ADMIN_QOL_REVISION}">`,
+    `<script data-dd-admin-qol-v161="1" defer src="/public/js/admin-universal-search-v161.js?v=${ADMIN_QOL_REVISION}"></script>`,
+  ].join('');
+}
 function productsPlatformMarkup() {
   return [
     '<link data-dd-products-static-platform="1" rel="stylesheet" href="/css/current-responsive.css?v=current">',
     `<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`,
     `<link rel="stylesheet" href="/css/admin-products-table-layout.css?v=${PRODUCTS_ASSET_REVISION}">`,
+    adminQolMarkup(),
     '<script data-dd-products-runtime-v160="1" src="/public/js/admin-products-runtime-v160.js?v=467b160-production-browser-recovery-v1"></script>',
     `<script data-dd-products-request-budget="1" src="/public/js/admin-products-request-budget-v156.js?v=${PRODUCTS_REQUEST_BUDGET_REVISION}"></script>`,
     `<script data-dd-products-auth-ready-recovery="1" src="/public/js/admin-products-auth-ready-recovery-v156.js?v=${PRODUCTS_AUTH_READY_REVISION}"></script>`,
@@ -126,6 +140,9 @@ function withPlatformClient(response, request) {
           element.append('<script defer src="/public/js/product-media-fallback.js?v=62"></script>', { html: true });
           element.append(`<script defer src="/public/js/pwa-platform.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
           element.append(`<script defer src="/public/js/adaptive-shell.js?v=${CURRENT_RELEASE}b143"></script>`, { html: true });
+          if (isAdminRuntimePath(pathname)) {
+            element.append(adminQolMarkup(), { html: true });
+          }
           if (isPublicRuntimeIntelligencePath(pathname)) {
             element.append('<script defer src="/public/js/public-heading-guard.js?v=current"></script>', { html: true });
             element.append(`<script defer src="/public/js/runtime-intelligence.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
