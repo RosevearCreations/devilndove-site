@@ -206,6 +206,35 @@ for token in (
 ):
     req(token in catalog, f"Catalog option cached authority drifted: {token}")
 
+browser_probe = read("scripts/products_build157_browser_probe.mjs")
+for token in (
+    "BUILD 157 PRODUCTS BROWSER PROBE: PASS",
+    "Product quality view unavailable",
+    "Product startup request timed out",
+    "url.pathname === '/api/product-media'",
+    "row.status === 404",
+    "same_origin_product_media_404_count",
+    "quality_unavailable",
+    "quality_still_loading",
+    "Admin Product media recovery 404s: ZERO",
+):
+    req(token in browser_probe, f"Build 157 focused browser probe missing marker: {token}")
+for forbidden in ("method: 'POST'", 'method:"POST"', "method:'PUT'", "method:'DELETE'"):
+    req(forbidden not in browser_probe, f"Build 157 focused browser probe gained mutation behavior: {forbidden}")
+
+dev_browser_workflow = read(".github/workflows/release467-build155-products-development-browser.yml")
+prod_browser_workflow = read(".github/workflows/release467-build155-products-production-browser.yml")
+for workflow, label in (
+    (dev_browser_workflow, "Development"),
+    (prod_browser_workflow, "Production"),
+):
+    req("scripts/products_build157_browser_probe.mjs" in workflow,
+        f"Build 157 {label} browser workflow must invoke the focused Product Quality/media probe")
+    req("Build 157 Product Quality" in workflow,
+        f"Build 157 {label} browser workflow must expose Product Quality acceptance boundary")
+    req("/api/product-media 404 responses must be ZERO" in workflow,
+        f"Build 157 {label} browser workflow must expose Admin media 404 acceptance boundary")
+
 doc = read("docs/operations/RELEASE_467_BUILD_157_ADMIN_DATA_DELIVERY.md")
 for token in (
     "small core read → interactive workspace → bounded secondary evidence",
@@ -223,6 +252,7 @@ for path in (
     "public/js/admin-product-quality-command-center-v157.js",
     "public/js/product-media-fallback.js",
     "functions/api/admin/product-resource-bootstrap.js",
+    "scripts/products_build157_browser_probe.mjs",
 ):
     result = subprocess.run(["node", "--check", str(ROOT / path)], cwd=ROOT, capture_output=True, text=True)
     req(result.returncode == 0, f"JavaScript syntax failed for {path}: {(result.stderr or result.stdout).strip()}")
@@ -242,6 +272,8 @@ print("product_readiness_actual_limit=80")
 print("product_resource_bootstrap=80_DEFAULT_120_MAX")
 print("inventory_reconciliation_actual_limit=80")
 print("admin_missing_product_media_retry=SUPPRESSED")
+print("build157_browser_quality_timeout=FAIL_CLOSED")
+print("build157_browser_admin_product_media_404=FAIL_CLOSED")
 print("public_media_recovery=UNCHANGED")
 print("catalog_option_authority=CACHED_D1_NOT_STATIC_JSON")
 print("schema_d1_write_r2_provider_payment_refund_accounting_mutation=NONE")
