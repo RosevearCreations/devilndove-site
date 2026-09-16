@@ -47,6 +47,12 @@ req(manifest.get("release") == 467 and manifest.get("build") == 157,
 req(manifest.get("title") == "Product Admin + Admin Data Delivery",
     "Build 157 authority title drifted")
 runtime = manifest.get("runtime") or {}
+req(runtime.get("guard_version") == "R467B157_ADMIN_DATA_DELIVERY_V2",
+    "Build 157 authority must bind Admin delivery V2")
+req(runtime.get("product_core_snapshot_startup_budget") == 2,
+    "Build 157 authority must allow exactly two startup Product snapshot consumers")
+req(runtime.get("product_quality_duplicate_product_read") is False,
+    "Build 157 Product Quality must not start a duplicate Product read")
 req(runtime.get("product_readiness_actual_limit") == 80,
     "Build 157 authority must cap Product readiness at 80")
 req(runtime.get("product_resource_bootstrap_default_limit") == 80,
@@ -55,6 +61,10 @@ req(runtime.get("product_resource_bootstrap_max_limit") == 120,
     "Build 157 Product resource bootstrap hard max must be 120")
 req(runtime.get("inventory_reconciliation_actual_limit") == 80,
     "Build 157 Inventory reconciliation actual limit must be 80")
+req(runtime.get("admin_product_media_same_origin_retry") is False,
+    "Build 157 Admin Product media must not retry missing keys through same-origin media API")
+req(runtime.get("public_media_recovery_behavior_changed") is False,
+    "Build 157 must preserve public media recovery")
 req(runtime.get("mutations_rewritten") is False and runtime.get("static_json_business_authority_added") is False,
     "Build 157 authority must preserve mutation and business-authority boundaries")
 for key in (
@@ -73,9 +83,16 @@ for key in (
 
 route = read("public/js/admin-route-usage.js")
 for token in (
-    "R467B157_ADMIN_DATA_DELIVERY_V1",
+    "R467B157_ADMIN_DATA_DELIVERY_V2",
     "'/admin/products/'",
     "'/admin/inventory-operations/'",
+    "DD_PRODUCT_SNAPSHOT_KEY",
+    "readFreshProductSnapshot",
+    "productSnapshotBudget = pagePath === '/admin/products/' ? 2 : 0",
+    "Date.now() - installedAt <= 15_000",
+    "url.pathname === '/api/admin/products'",
+    "delivery: 'build157-core-product-snapshot'",
+    "read_only_snapshot: true",
     "url.pathname === '/api/admin/product-readiness'",
     "url.searchParams.set('limit', '80')",
     "url.searchParams.set('force_deep', '1')",
@@ -86,6 +103,10 @@ for token in (
     "url.pathname === '/api/admin/inventory-material-usage-reconciliation'",
     "Math.min(80, requested)",
     "method !== 'GET'",
+    "productSnapshotBudget = 0",
+    "DD_PRODUCT_QUALITY_RECOVERY_SRC",
+    "Product quality view unavailable",
+    "MutationObserver",
     "DDAdminDataDeliveryHealth",
 ):
     req(token in route, f"Build 157 Admin delivery guard missing marker: {token}")
@@ -139,6 +160,37 @@ req("/api/admin/product-readiness?limit=300&show_ready=1" in quality,
 req("nothing is published automatically" in quality.lower(),
     "Product Quality automatic-publication boundary drifted")
 
+quality_recovery = read("public/js/admin-product-quality-command-center-v157.js")
+for token in (
+    "R467B157_PRODUCT_QUALITY_RECOVERY_V1",
+    "dd_admin_products_snapshot_v2",
+    "dd:products-core-recovered",
+    "/api/admin/product-readiness?limit=80&show_ready=1",
+    "Promise.allSettled",
+    "Secondary quality evidence",
+    "nothing is published automatically",
+    "duplicate_product_read: false",
+):
+    req(token in quality_recovery, f"Build 157 Product Quality recovery missing marker: {token}")
+req("/api/admin/products" not in quality_recovery,
+    "Build 157 Product Quality recovery must never start a duplicate Product API read")
+for forbidden in ("method: 'POST'", 'method:"POST"', "setInterval("):
+    req(forbidden not in quality_recovery, f"Build 157 Product Quality recovery gained forbidden behavior: {forbidden}")
+
+media_fallback = read("public/js/product-media-fallback.js")
+for token in (
+    "const VERSION=62",
+    "const BUILD157_ADMIN_PATCH=157",
+    "IS_ADMIN_RUNTIME&&info.isProduct",
+    "admin_same_origin_retry_suppressed",
+    "showProductPlaceholder(img)",
+    "/api/product-media?key=",
+    "public storefront",
+):
+    req(token.lower() in media_fallback.lower(), f"Build 157 media recovery missing marker: {token}")
+req("bucket.put(" not in media_fallback and "bucket.delete(" not in media_fallback,
+    "Build 157 media fallback must remain mutation-free")
+
 catalog = read("functions/api/admin/_catalog-option-authority.js")
 for token in (
     "CATALOG_AUTHORITY_TTL_MS = 5 * 60 * 1000",
@@ -161,6 +213,8 @@ for token in (
 
 for path in (
     "public/js/admin-route-usage.js",
+    "public/js/admin-product-quality-command-center-v157.js",
+    "public/js/product-media-fallback.js",
     "functions/api/admin/product-resource-bootstrap.js",
 ):
     result = subprocess.run(["node", "--check", str(ROOT / path)], cwd=ROOT, capture_output=True, text=True)
@@ -174,8 +228,13 @@ if FAIL:
 
 print("PASS Release 467 Build 157 — Product Admin + Admin Data Delivery")
 print("product_core_delivery=FIRST")
+print("product_startup_snapshot_consumers=2_MAX")
+print("product_quality_duplicate_product_read=NONE")
+print("product_quality_failure_mode=FAIL_SOFT")
 print("product_readiness_actual_limit=80")
 print("product_resource_bootstrap=80_DEFAULT_120_MAX")
 print("inventory_reconciliation_actual_limit=80")
+print("admin_missing_product_media_retry=SUPPRESSED")
+print("public_media_recovery=UNCHANGED")
 print("catalog_option_authority=CACHED_D1_NOT_STATIC_JSON")
 print("schema_d1_write_r2_provider_payment_refund_accounting_mutation=NONE")
