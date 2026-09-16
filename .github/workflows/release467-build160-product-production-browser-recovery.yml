@@ -6,6 +6,7 @@ on:
       - 'functions/_middleware.js'
       - 'functions/api/admin/products-core.js'
       - 'public/js/admin-products-runtime-v160.js'
+      - 'public/js/admin-product-cleanup.js'
       - 'scripts/release467_build160_gate.py'
       - 'release467-build160-product-production-browser-recovery.json'
       - '.github/workflows/release467-build160-product-production-browser-recovery.yml'

@@ -1,7 +1,24 @@
 // Release 467 Build 69 — bounded cleanup with explicit unused-record classification.
+// Release 467 Build 160 — settle cleanup from the already-proven core Product handoff while
+// the live cleanup refresh runs independently. Permanent removal still requires live preflight.
 (() => {
+  const BUILD160_CLEANUP_CORE_HANDOFF_VERSION = 'R467B160_CLEANUP_CORE_HANDOFF_V1';
+  const PRODUCT_SNAPSHOT_KEY = 'dd_admin_products_snapshot_v2';
+  const LIVE_REFRESH_TIMEOUT_MS = 7000;
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[char]));
   let products = [];
+  let liveLoadPromise = null;
+
+  const health = window.DDProductCleanupBuild160Health = {
+    version: BUILD160_CLEANUP_CORE_HANDOFF_VERSION,
+    core_handoffs: 0,
+    snapshot_handoffs: 0,
+    live_refreshes: 0,
+    live_refresh_timeouts: 0,
+    product_count: 0,
+    last_source: '',
+    last_error: '',
+  };
 
   function node(id) { return document.getElementById(id); }
   function enforceCanonicalCleanupLane() {
@@ -91,26 +108,76 @@
       </article>`;
     }).join('');
   }
-  async function load() {
+  function adoptProducts(rows, source, { snapshot = false } = {}) {
+    const next = Array.isArray(rows) ? rows : [];
+    if (!next.length) return false;
+    products = next;
+    health.product_count = next.length;
+    health.last_source = String(source || 'core Product handoff');
+    if (snapshot) health.snapshot_handoffs += 1;
+    else health.core_handoffs += 1;
+    render();
+    const count = candidateRows().length;
+    message(`${count} cleanup candidate${count === 1 ? '' : 's'} shown from ${health.last_source}. Live safety preflight is still required before permanent removal.`, 'success');
+    return true;
+  }
+  function readCoreSnapshot() {
     try {
-      message('Loading draft and archive cleanup candidates…');
-      const response = await window.DDAuth.apiFetch('/api/admin/products');
-      const data = await readApiJson(response, 'Products could not load.');
-      products = Array.isArray(data.products) ? data.products : [];
-      render();
-      message(`${candidateRows().length} cleanup candidate${candidateRows().length === 1 ? '' : 's'} shown.`, 'success');
-    } catch (error) {
-      message(error.message || 'Cleanup candidates could not load.', 'error');
-      const cached = localStorage.getItem('dd_admin_products_cache_v3');
-      try {
-        const parsed = JSON.parse(cached || '{}');
-        products = Array.isArray(parsed.products) ? parsed.products : [];
-        if (products.length) {
-          render();
-          message('Live data is unavailable. Showing the last saved product snapshot; permanent removal remains disabled until live preflight succeeds.', 'error');
-        }
-      } catch {}
+      const parsed = JSON.parse(localStorage.getItem(PRODUCT_SNAPSHOT_KEY) || 'null');
+      const rows = Array.isArray(parsed?.products) ? parsed.products : [];
+      return { rows, cachedAt: String(parsed?.cached_at || '') };
+    } catch {
+      return { rows: [], cachedAt: '' };
     }
+  }
+  async function load(options = {}) {
+    if (liveLoadPromise) return liveLoadPromise;
+    const announceLoading = options.announceLoading !== false && products.length === 0;
+    if (announceLoading) message('Loading draft and archive cleanup candidates…');
+    health.live_refreshes += 1;
+    liveLoadPromise = (async () => {
+      const controller = typeof AbortController === 'function' ? new AbortController() : null;
+      let timeout = 0;
+      if (controller) timeout = window.setTimeout(() => controller.abort('build160-cleanup-live-refresh-timeout'), LIVE_REFRESH_TIMEOUT_MS);
+      try {
+        if (!window.DDAuth?.apiFetch) throw new Error('Authenticated Product API is not ready yet.');
+        const response = await window.DDAuth.apiFetch('/api/admin/products', controller ? { signal: controller.signal } : {});
+        const data = await readApiJson(response, 'Products could not load.');
+        products = Array.isArray(data.products) ? data.products : [];
+        health.product_count = products.length;
+        health.last_source = String(data.delivery || 'live Product authority');
+        health.last_error = '';
+        render();
+        const count = candidateRows().length;
+        message(`${count} cleanup candidate${count === 1 ? '' : 's'} shown.`, 'success');
+        return true;
+      } catch (error) {
+        const reason = String(error?.message || error || 'Cleanup candidates could not load.');
+        health.last_error = reason;
+        if (error?.name === 'AbortError' || /timeout|aborted/i.test(reason)) health.live_refresh_timeouts += 1;
+        if (products.length) {
+          const count = candidateRows().length;
+          message(`${count} cleanup candidate${count === 1 ? '' : 's'} shown from core Product data. Live cleanup refresh is deferred; permanent removal remains protected by live preflight.`, 'success');
+          return false;
+        }
+        const snapshot = readCoreSnapshot();
+        if (adoptProducts(snapshot.rows, snapshot.cachedAt ? `saved Product snapshot ${snapshot.cachedAt}` : 'saved Product snapshot', { snapshot: true })) return false;
+        message(reason, 'error');
+        const cached = localStorage.getItem('dd_admin_products_cache_v3');
+        try {
+          const parsed = JSON.parse(cached || '{}');
+          products = Array.isArray(parsed.products) ? parsed.products : [];
+          if (products.length) {
+            render();
+            message('Live data is unavailable. Showing the last saved product snapshot; permanent removal remains disabled until live preflight succeeds.', 'error');
+          }
+        } catch {}
+        return false;
+      } finally {
+        if (timeout) window.clearTimeout(timeout);
+      }
+    })().finally(() => { liveLoadPromise = null; });
+    return liveLoadPromise;
   }
   async function preflight(productId) {
     const result = document.querySelector(`[data-cleanup-result="${productId}"]`);
@@ -167,7 +234,7 @@
     const data = await readApiJson(response, 'Product could not be removed.');
     message(data.message || 'Product removed.', 'success');
     document.dispatchEvent(new CustomEvent('dd:product-deleted', { detail: { product_id: Number(productId), product: data.product || null } }));
-    await load();
+    await load({ announceLoading: false });
   }
   async function archive(productId) {
     const product = products.find((row) => Number(row.product_id) === Number(productId));
@@ -183,10 +250,10 @@
     const data = await readApiJson(response, 'Product could not be archived.');
     message(data.message || 'Product archived.', 'success');
     document.dispatchEvent(new CustomEvent('dd:product-archived', { detail: { product_id: Number(productId), product: data.product || null } }));
-    await load();
+    await load({ announceLoading: false });
   }
   function bind() {
-    node('refreshProductCleanup')?.addEventListener('click', load);
+    node('refreshProductCleanup')?.addEventListener('click', () => { void load({ announceLoading: products.length === 0 }); });
     node('productCleanupSearch')?.addEventListener('input', render);
     node('productCleanupStatus')?.addEventListener('change', render);
     node('productCleanupList')?.addEventListener('click', async (event) => {
@@ -201,10 +268,20 @@
         if (archiveButton) await archive(Number(archiveButton.dataset.cleanupArchive || 0));
       } catch (error) { message(error.message || 'Cleanup action failed.', 'error'); }
     });
-    document.addEventListener('dd:product-created', load);
-    document.addEventListener('dd:product-updated', load);
-    document.addEventListener('dd:product-archived', load);
-    document.addEventListener('dd:product-deleted', load);
+    document.addEventListener('dd:products-core-recovered', (event) => {
+      const rows = Array.isArray(event?.detail?.products) ? event.detail.products : [];
+      if (rows.length) adoptProducts(rows, String(event?.detail?.source || 'live core Product handoff'));
+    });
+    document.addEventListener('dd:product-created', () => { void load({ announceLoading: false }); });
+    document.addEventListener('dd:product-updated', () => { void load({ announceLoading: false }); });
+    document.addEventListener('dd:product-archived', () => { void load({ announceLoading: false }); });
+    document.addEventListener('dd:product-deleted', () => { void load({ announceLoading: false }); });
   }
-  document.addEventListener('DOMContentLoaded', () => { enforceCanonicalCleanupLane(); bind(); load(); });
+  document.addEventListener('DOMContentLoaded', () => {
+    enforceCanonicalCleanupLane();
+    bind();
+    const snapshot = readCoreSnapshot();
+    const hydrated = adoptProducts(snapshot.rows, snapshot.cachedAt ? `saved Product snapshot ${snapshot.cachedAt}` : 'saved Product snapshot', { snapshot: true });
+    void load({ announceLoading: !hydrated });
+  });
 })();
