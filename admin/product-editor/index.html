@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Product Editor — Devil n Dove Admin</title>
+  <meta name="description" content="Dedicated single-Product editor for Devil n Dove."/>
+  <link rel="icon" href="/assets/mark.png" type="image/png"/>
+  <link rel="stylesheet" href="/css/styles.css?v=440"/>
+  <link rel="stylesheet" href="/css/admin-product-v162.css?v=162"/>
+</head>
+<body data-admin-page="product-editor-v162">
+  <div class="container admin-shell dd-product-shell">
+    <nav class="nav" aria-label="Admin navigation">
+      <div class="brand">
+        <img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
+        <div><div style="font-weight:800">Devil n Dove</div><div class="small">Admin / Product Editor</div></div>
+      </div>
+      <div class="links"><a href="/admin/products/">Back to Products</a><a href="/admin/">Dashboard</a></div>
+    </nav>
+
+    <header class="hero compact-hero dd-editor-head">
+      <div>
+        <p class="eyebrow">Release 467 • Build 162</p>
+        <h1 id="productEditorTitle">Product Editor</h1>
+        <p>Edit one Product without loading the full catalog or unrelated Product systems.</p>
+      </div>
+      <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
+    </header>
+
+    <div id="productEditorStatus" class="dd-product-status small" aria-live="polite"></div>
+    <div class="dd-low-read-note small"><strong>Low-read editor:</strong> startup loads one Product and its SEO row. Media loads only when we open Media. Inventory, readiness, quality and pricing-evidence systems are not started automatically.</div>
+
+    <form id="productEditorForm" class="card">
+      <div id="productEditorTabs" class="dd-editor-tabs" role="tablist" aria-label="Product Editor sections">
+        <button class="btn dd-editor-tab" type="button" data-editor-tab="basics" aria-selected="true">Basics</button>
+        <button class="btn dd-editor-tab" type="button" data-editor-tab="pricing" aria-selected="false">Pricing &amp; Stock</button>
+        <button class="btn dd-editor-tab" type="button" data-editor-tab="description" aria-selected="false">Description</button>
+        <button class="btn dd-editor-tab" type="button" data-editor-tab="media" aria-selected="false">Media</button>
+        <button class="btn dd-editor-tab" type="button" data-editor-tab="seo" aria-selected="false">SEO / Publishing</button>
+        <button class="btn dd-editor-tab" type="button" data-editor-tab="advanced" aria-selected="false">Advanced</button>
+      </div>
+
+      <section class="dd-editor-panel" data-editor-panel="basics">
+        <h2>Basics</h2>
+        <div class="dd-editor-grid">
+          <label><span class="small">Product name</span><input class="input" name="name" maxlength="160" required/></label>
+          <label><span class="small">Slug</span><input class="input" name="slug" maxlength="180"/></label>
+          <label><span class="small">SKU</span><input class="input" name="sku" maxlength="80"/></label>
+          <label><span class="small">Category</span><input class="input" name="product_category" maxlength="120"/></label>
+          <label><span class="small">Product type</span><select class="input" name="product_type"><option value="physical">Physical</option><option value="digital">Digital</option></select></label>
+          <label><span class="small">Status</span><select class="input" name="status"><option value="draft">Draft</option><option value="active">Active</option><option value="archived">Archived</option></select></label>
+          <label><span class="small">Review status</span><select class="input" name="review_status"><option value="pending_review">Pending review</option><option value="approved">Approved</option><option value="needs_changes">Needs changes</option><option value="published">Published</option></select></label>
+          <label><span class="small">Primary colour</span><input class="input" name="color_name" maxlength="80"/></label>
+          <label><span class="small">Additional colours</span><input class="input" name="color_names_text" maxlength="255"/></label>
+        </div>
+      </section>
+
+      <section class="dd-editor-panel" data-editor-panel="pricing" hidden>
+        <h2>Pricing &amp; Stock</h2>
+        <div class="dd-editor-grid cols-4">
+          <label><span class="small">Price (CAD)</span><input class="input" type="number" name="price" min="0" step="0.01"/></label>
+          <label><span class="small">Compare-at price</span><input class="input" type="number" name="compare_at_price" min="0" step="0.01"/></label>
+          <label><span class="small">Currency</span><input class="input" name="currency" maxlength="8" value="CAD"/></label>
+          <label><span class="small">Sort order</span><input class="input" type="number" name="sort_order" min="0" step="1" value="0"/></label>
+          <label><span class="small">Track inventory</span><select class="input" name="inventory_tracking"><option value="0">No</option><option value="1">Yes</option></select></label>
+          <label><span class="small">Inventory quantity</span><input class="input" type="number" name="inventory_quantity" min="0" step="1" value="0"/></label>
+          <label><span class="small">Taxable</span><select class="input" name="taxable"><option value="1">Yes</option><option value="0">No</option></select></label>
+          <label><span class="small">Tax class ID</span><input class="input" type="number" name="tax_class_id" min="1" step="1"/></label>
+          <label><span class="small">Requires shipping</span><select class="input" name="requires_shipping"><option value="1">Yes</option><option value="0">No</option></select></label>
+          <label><span class="small">Shipping code</span><input class="input" name="shipping_code" maxlength="80"/></label>
+          <label><span class="small">Weight (grams)</span><input class="input" type="number" name="weight_grams" min="0" step="1"/></label>
+          <label><span class="small">Digital file URL</span><input class="input" name="digital_file_url" type="url"/></label>
+        </div>
+      </section>
+
+      <section class="dd-editor-panel" data-editor-panel="description" hidden>
+        <h2>Description &amp; Item Facts</h2>
+        <div class="dd-editor-grid cols-2">
+          <label class="wide"><span class="small">Short description</span><textarea class="input" name="short_description" rows="3"></textarea></label>
+          <label class="wide"><span class="small">Long description</span><textarea class="input" name="description" rows="7"></textarea></label>
+          <label><span class="small">Merchandise origin</span><select class="input" name="merchandise_origin"><option value="handmade">Handmade</option><option value="vintage">Vintage</option><option value="collectible">Collectible</option><option value="antique">Antique</option><option value="oddity">Oddity / curiosity</option><option value="prebuilt">Pre-built / found</option></select></label>
+          <label><span class="small">Sale channel</span><select class="input" name="sale_channel"><option value="onsite">Devil n Dove</option><option value="hybrid">Devil n Dove + external</option><option value="external_only">External only</option></select></label>
+          <label><span class="small">External listing label</span><input class="input" name="external_listing_label" maxlength="120"/></label>
+          <label><span class="small">External listing URL</span><input class="input" name="external_listing_url" type="url"/></label>
+          <label><span class="small">Era / period</span><input class="input" name="era_label" maxlength="120"/></label>
+          <label><span class="small">Condition summary</span><input class="input" name="condition_summary" maxlength="255"/></label>
+          <label class="wide"><span class="small">Sourcing notes</span><textarea class="input" name="sourcing_notes" rows="4"></textarea></label>
+        </div>
+      </section>
+
+      <section class="dd-editor-panel" data-editor-panel="media" hidden>
+        <h2>Media</h2>
+        <p class="small">Opening this section performs one bounded gallery-row read for this Product only. R2 itself is not listed.</p>
+        <div class="dd-editor-grid cols-2">
+          <label><span class="small">Featured image URL</span><input class="input" name="featured_image_url" type="url"/></label>
+          <div><span class="small">Featured preview</span><div><img id="productEditorFeaturedPreview" class="dd-product-thumb" alt=""/></div></div>
+        </div>
+        <div id="productEditorMediaMount" style="margin-top:14px"><p class="small">Media has not been loaded.</p></div>
+        <p><a class="btn" id="productEditorMediaManagerLink" href="/admin/catalog-media/">Open full Media Manager</a></p>
+      </section>
+
+      <section class="dd-editor-panel" data-editor-panel="seo" hidden>
+        <h2>SEO / Publishing</h2>
+        <div class="dd-editor-grid cols-2">
+          <label><span class="small">SEO title</span><input class="input" name="meta_title" maxlength="70"/></label>
+          <label><span class="small">H1 override</span><input class="input" name="h1_override" maxlength="160"/></label>
+          <label class="wide"><span class="small">Meta description</span><textarea class="input" name="meta_description" maxlength="160" rows="3"></textarea></label>
+          <label><span class="small">Keywords</span><input class="input" name="keywords" maxlength="255"/></label>
+          <label><span class="small">Canonical URL</span><input class="input" name="canonical_url"/></label>
+          <label><span class="small">OpenGraph title</span><input class="input" name="og_title" maxlength="120"/></label>
+          <label><span class="small">OpenGraph image URL</span><input class="input" name="og_image_url"/></label>
+          <label class="wide"><span class="small">OpenGraph description</span><textarea class="input" name="og_description" rows="3"></textarea></label>
+        </div>
+      </section>
+
+      <section class="dd-editor-panel" data-editor-panel="advanced" hidden>
+        <h2>Advanced</h2>
+        <p class="small">Heavy readiness, resource-cost, image-quality, cleanup and correction workflows are intentionally not embedded in this editor.</p>
+        <div class="dd-product-actions">
+          <a class="btn" href="/admin/inventory-operations/">Inventory Operations</a>
+          <a class="btn" href="/admin/catalog-media/">Media Manager</a>
+          <a class="btn" href="/admin/packaging-studio/">Packaging</a>
+        </div>
+      </section>
+
+      <div class="dd-editor-footer">
+        <div class="small">No autosave. We save only when we press Save Product.</div>
+        <div class="dd-product-actions">
+          <button class="btn" id="productEditorRetry" type="button">Retry load</button>
+          <a class="btn" href="/admin/products/">Cancel / Back</a>
+          <button class="btn" id="productEditorSave" type="submit">Save Product</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script src="/public/js/auth.js?v=440"></script>
+  <script src="/public/js/admin-product-editor-v162.js?v=162"></script>
+</body>
+</html>
