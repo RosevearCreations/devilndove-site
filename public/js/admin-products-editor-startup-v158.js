@@ -108,7 +108,8 @@
       return { ...snapshot, degraded: true, reason, source: 'browser-snapshot' };
     }
     health.default_fallbacks += 1;
-    return normalizedPayload({ degraded: true, reason }, 'safe-defaults');
+    const defaults = normalizedPayload({ degraded: true, reason }, 'safe-defaults');
+    return { ...defaults, source: 'safe-defaults' };
   }
   function setSimpleSelect(id, values, placeholder) {
     const select = document.getElementById(id);
