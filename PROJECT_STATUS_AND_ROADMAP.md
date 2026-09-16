@@ -156,9 +156,13 @@ Converge preflight, bindings, migration proof, runtime incidents, provider readi
 11. External provider/evidence lanes remain separate from ordinary feature readiness.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 156 candidate
+## Current Release 467 restart authority — Build 157 candidate
 
-Build 155 **Products Client Responsiveness Hotfix** is the last fully verified Development and current Production baseline. Development SHA/main SHA: `4e9efa2daf8f541e941c350ccde77798b5c99080`. Exact tree: `3f08dc3dfde778ddca0ca5fd328e7d45a1fcee9e`. Development proofs: System Gate `34915558746`, Current Application Quality `34915558747`, I.T. Admin Runtime `34915558751`, Repository Branch Hygiene `34915558771`, dedicated Build 155 proof `34915558804`. Production proofs: Pages `34915729378`, live-resource integrity `34915877580`, Products browser `34915877555`, Products route `34915877617`.
+Build 156 **Tool & Supply Process Assignment** is the last fully verified Development and current Production baseline. Development SHA/main SHA: `1b375af8dadb1bfc32086708469cc2008ba9fc9f`. Exact tree: `96928f3c3d09dcf1999387d9a63a823f264bebf8`. Development proofs: System Gate `35019952492`, Current Application Quality `35019952480`, I.T. Admin Runtime `35019952545`, Repository Branch Hygiene `35019952489`. Production proofs: Pages `35020167619`, live-resource integrity `35020259348`, Products browser `35020259412`, Products route `35020259408`.
 
-Build 156 **Tool & Supply Process Assignment** is the active Development closure candidate. It introduces forward-only canonical migration `0005_release467_inventory_process_assignment.sql`; Production promotion remains closed until the exact Build 156 `dev` head is GREEN across the required proof set.
+Build 157 **Product Admin + Admin Data Delivery** supersedes the old roadmap placeholder for Build 157 and is the active Development candidate. It addresses current Product Admin delivery/responsiveness: fresh core Product snapshot reuse for at most two startup consumers, list-readiness cap 80, Product resource bootstrap 80 default/120 max, Inventory reconciliation delivery cap 80, fail-soft Product Quality recovery without a duplicate Product D1 read, and Admin suppression of redundant `/api/product-media` retries for already-missing Product keys. Public storefront media recovery remains unchanged.
+
+The latest live Firefox evidence showed `Product startup request timed out after 8000 ms` in Product Release Quality plus repeated missing Product-media 404 retries. Build 157 does not claim those missing R2 objects exist; it keeps the operator workspace responsive, shows truthful placeholder/degraded evidence, and leaves later media reconciliation separate.
+
+Promotion remains closed until one exact Build 157 `dev` SHA is GREEN across Build 157 source proof, retained Build 156 regression proof, System Gate/Preview, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene. Exact Production Pages, live-resource and affected Product browser acceptance are then required before Production may be called GREEN for Build 157.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
