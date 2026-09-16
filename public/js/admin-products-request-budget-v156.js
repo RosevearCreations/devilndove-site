@@ -1,12 +1,13 @@
 // Release 467 Build 156 — Product Admin request burst limiter.
-// Build 158 closure marker: proof-trigger only; no request-budget or runtime behaviour change.
+// Build 159 rotates the loader/runtime cache identity so returning browsers cannot keep the
+// pre-Build-158 helper graph. Request concurrency semantics remain unchanged.
 // Product Admin intentionally mounts many independent workspaces. This guard keeps those
 // read-only startup lanes from issuing an unbounded burst of D1-heavy GETs at once.
 (() => {
   const pathname = String(window.location.pathname || '').replace(/\/+$/, '') || '/';
   if (pathname !== '/admin/products') return;
 
-  const VERSION = 'R467B156_REQUEST_BUDGET_V2';
+  const VERSION = 'R467B159_REQUEST_BUDGET_V3';
   const MAX_CONCURRENT_GETS = 2;
   // Keep one of the two lanes available for the Product list/picker/bootstrap family.
   // Readiness and secondary work are deliberately serialized so they cannot occupy both
@@ -64,7 +65,8 @@
     if (url.origin !== window.location.origin || !url.pathname.startsWith('/api/admin/')) return null;
 
     // Product Admin historically had separate 300-row and 500-row readiness startup calls.
-    // The 500-row read is a safe superset, so all list-level readiness startup consumers share it.
+    // The Build 157 delivery guard rewrites the actual deep read to 80 rows after this
+    // compatibility canonicalization, so older workspace consumers can continue to coalesce.
     if (url.pathname === '/api/admin/product-readiness' && !url.searchParams.get('product_id')) {
       url.searchParams.set('limit', '500');
       url.searchParams.set('show_ready', '1');
@@ -200,7 +202,7 @@
   }
 
   function loadBuild158Helper(src, marker) {
-    // The Build 156 scheduler has a deliberately minimal Node test DOM. Helper injection is
+    // The scheduler has a deliberately minimal Node test DOM. Helper injection is
     // browser-only; absence of DOM script APIs must remain a safe no-op for that proof harness.
     if (typeof document?.createElement !== 'function' || !document?.head || typeof document.head.appendChild !== 'function') return;
     if (typeof document.querySelector === 'function' && document.querySelector(`script[${marker}="1"]`)) return;
@@ -211,10 +213,10 @@
     document.head.appendChild(script);
   }
 
-  // Build 158 is deliberately layered over the proven Build 156 request scheduler so the
-  // earlier concurrency contract stays intact. These helpers are read-only and mutation-free.
-  loadBuild158Helper('/public/js/admin-products-editor-startup-v158.js?v=467b158-editor-startup-v1', 'data-dd-products-editor-startup-v158');
-  loadBuild158Helper('/public/js/admin-product-quality-pending-v158.js?v=467b158-quality-pending-v1', 'data-dd-product-quality-pending-v158');
+  // Build 159 forces fresh helper URLs for returning browsers; helper semantics remain the
+  // already-proven Build 158 editor fallback and pending/unknown quality behavior.
+  loadBuild158Helper('/public/js/admin-products-editor-startup-v158.js?v=467b159-editor-startup-cache-v2', 'data-dd-products-editor-startup-v158');
+  loadBuild158Helper('/public/js/admin-product-quality-pending-v158.js?v=467b159-quality-pending-cache-v2', 'data-dd-product-quality-pending-v158');
 
   const installWhenReady = () => { install(); };
   if (!install()) {
