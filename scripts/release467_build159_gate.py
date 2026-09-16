@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""Release 467 Build 159 — forward-only Product returning-browser cache proof.
+
+Retained Build 154-158 safety/runtime contracts are successor-aware; this gate owns the
+current Build 159 cache identities and does not self-claim later exact-head proof runs.
+"""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
