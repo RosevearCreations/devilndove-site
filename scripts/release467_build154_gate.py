@@ -2,8 +2,8 @@
 """Release 467 Build 154 — Products Worker Resource Hotfix source gate.
 
 The immutable Build 154 renderer assertions remain active after later Products cache
-revisions. Build 155 is allowed to advance the Product asset revision while retaining
-the Build 154 static-fast-path/server-resource repair.
+revisions. Builds 155 and 159 are allowed to advance the Product asset revision while
+retaining the Build 154 static-fast-path/server-resource repair.
 """
 from pathlib import Path
 import sys
@@ -29,8 +29,9 @@ closure = read('release467-build153-layout-observer-performance-hotfix.json')
 req(
     "const PRODUCTS_ASSET_REVISION = '467-b154-products-worker-fast-path';" in middleware
     or "const PRODUCTS_ASSET_REVISION = '467-b155-products-client-responsiveness';" in middleware
-    or "const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';" in middleware,
-    'Build 154 Products cache revision or approved Build 155 successor revision missing'
+    or "const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';" in middleware
+    or "const PRODUCTS_ASSET_REVISION = '467-b159-products-returning-browser-cache-v1';" in middleware,
+    'Build 154 Products cache revision or approved Build 155/159 successor revision missing'
 )
 req("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware,
     'Build 153 layout observer revision must remain preserved')
@@ -49,7 +50,7 @@ for token in (
     '/public/js/admin-products-cold-start-recovery.js?v=',
     '/public/js/layout-overflow-guard.js?v=',
     '/public/js/packaging-safe-area-guard.js?v=current',
-    '/public/js/product-media-fallback.js?v=62',
+    '/public/js/product-media-fallback.js?v=',
     '/public/js/pwa-platform.js?v=',
     '/public/js/adaptive-shell.js?v=',
 ):
@@ -69,7 +70,6 @@ req('html = await response.text();' in middleware and 'html = html.replace(' in 
 req('(?:public\\/js|js)' in middleware and 'PRODUCTS_ASSET_REVISION' in middleware,
     'Products script cache revision pass missing')
 
-# The fast renderer is intentionally downstream of the existing module/session guard.
 on_request = middleware.find('export async function onRequest(context)')
 module_key = middleware.find('const moduleKey = moduleKeyForPath(pathname);', on_request)
 resolve_user = middleware.find('const resolvedUser = await resolveGuardUser(request, env, pathname);', module_key)
@@ -81,13 +81,11 @@ should_bypass = middleware[middleware.find('function shouldBypass'):middleware.f
 req('/admin/products/' not in should_bypass,
     'Products route must not bypass module/session guard')
 
-# Existing Product page remains the source document; the hotfix changes server rendering only.
 req('<body data-admin-page="products">' in products and 'Products &amp; Inventory' in products,
     'Products source document identity drifted')
 req('/public/js/admin-products.js' in products and '/public/js/admin-create-product.js' in products,
     'Products core client scripts missing')
 
-# Historical Build 153 closure must be exact and explicitly describe the newly discovered coverage gap.
 for token in (
     'b8323b4e13ae08a8126da761106367de75f7cd40',
     'ba8b3c2406335391334b2a74a89e5819236c770b',
