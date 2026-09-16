@@ -2,7 +2,7 @@
   "release": 467,
   "build": 159,
   "title": "Product Returning-Browser Cache Coherence",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN_PRODUCTION_GREEN",
   "source_base_sha": "764ff267dab58c0c1068919f9a494c94984d054e",
   "source_base_tree_sha": "bdaa5302bcaf26b451e9ef6954f777e26a2ee20b",
   "starting_point": {
@@ -68,5 +68,27 @@
     "Products route Production proof GREEN",
     "Production Live Resource Integrity Proof GREEN"
   ],
-  "promotion_state": "DEVELOPMENT_NOT_YET_ACCEPTED"
+  "final_closure": {
+    "dev_sha": "8032b373c5cdef6172064cd5d61cd59dd77222e5",
+    "tree_sha": "371fcdeafc97f98abaa19b6bbb10b857940c9d15",
+    "proofs": {
+      "system_gate_run": 35136874373,
+      "current_application_quality_run": 35136874379,
+      "it_admin_runtime_proof_run": 35136874530,
+      "branch_hygiene_run": 35136874513
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 160
+  },
+  "production_checkpoint": {
+    "build": 159,
+    "main_sha": "8032b373c5cdef6172064cd5d61cd59dd77222e5",
+    "tree_sha": "371fcdeafc97f98abaa19b6bbb10b857940c9d15",
+    "production_pages_deploy_run": 35137289111,
+    "production_live_resource_integrity_run": 35137393619,
+    "products_production_browser_proof_run": 35137393411,
+    "products_route_production_proof_run": 35137393555,
+    "state": "PRODUCTION_GREEN"
+  },
+  "promotion_state": "PRODUCTION_GREEN"
 }
