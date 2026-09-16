@@ -1,4 +1,115 @@
-// Current admin dashboard supplements and non-critical route telemetry.
+// Current admin dashboard supplements, Build 157 bounded Admin read delivery, and non-critical route telemetry.
+const DD_ADMIN_DATA_DELIVERY_VERSION = 'R467B157_ADMIN_DATA_DELIVERY_V1';
+
+function normalizeAdminPath(value) {
+  const raw = String(value || '/');
+  return raw.endsWith('/') ? raw : `${raw}/`;
+}
+
+function adminJsonResponse(payload, status = 200) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      'X-DND-Admin-Data-Delivery': DD_ADMIN_DATA_DELIVERY_VERSION,
+    },
+  });
+}
+
+function waitForProductCore(timeoutMs = 1200) {
+  const startedAt = performance.now();
+  const alreadyReady = () => Boolean(
+    window.DDProductsColdStartRecoveryHealth?.core_recovered
+    || document.querySelector('#productsTableBody [data-edit-product-id]')
+  );
+  if (alreadyReady()) return Promise.resolve({ source: 'already-ready', elapsed_ms: 0 });
+  return new Promise((resolve) => {
+    let timer = 0;
+    const finish = (source) => {
+      document.removeEventListener('dd:products-core-recovered', onRecovered);
+      if (timer) window.clearTimeout(timer);
+      resolve({ source, elapsed_ms: Math.round((performance.now() - startedAt) * 10) / 10 });
+    };
+    const onRecovered = () => finish('core-recovered-event');
+    document.addEventListener('dd:products-core-recovered', onRecovered, { once: true });
+    timer = window.setTimeout(() => finish('bounded-timeout'), timeoutMs);
+  });
+}
+
+function installAdminDataDeliveryGuard(pathname) {
+  const pagePath = normalizeAdminPath(pathname);
+  if (!['/admin/products/', '/admin/inventory-operations/'].includes(pagePath)) return false;
+  if (!window.DDAuth?.apiFetch) return false;
+  if (window.DDAuth.apiFetch.__ddAdminDataDeliveryV157 === true) return true;
+
+  const original = window.DDAuth.apiFetch.bind(window.DDAuth);
+  const health = window.DDAdminDataDeliveryHealth = window.DDAdminDataDeliveryHealth || {
+    version: DD_ADMIN_DATA_DELIVERY_VERSION,
+    page_path: pagePath,
+    product_readiness_rewrites: 0,
+    product_readiness_actual_limit: 0,
+    product_core_wait_ms: 0,
+    product_core_wait_source: '',
+    product_resource_bootstrap_rewrites: 0,
+    inventory_reconciliation_rewrites: 0,
+    inventory_reconciliation_actual_limit: 0,
+    mutation_requests_rewritten: 0,
+  };
+
+  const boundedApiFetch = async (input, options = {}) => {
+    const method = String(options?.method || 'GET').toUpperCase();
+    if (method !== 'GET') return original(input, options);
+
+    let url;
+    try { url = new URL(String(input || ''), window.location.origin); }
+    catch { return original(input, options); }
+    if (url.origin !== window.location.origin) return original(input, options);
+
+    if (pagePath === '/admin/products/' && url.pathname === '/api/admin/product-readiness' && !url.searchParams.get('product_id')) {
+      const wait = await waitForProductCore(1200);
+      health.product_core_wait_ms = wait.elapsed_ms;
+      health.product_core_wait_source = wait.source;
+      // Build 156 compatibility requests historically canonicalize list readiness to 500 rows.
+      // Build 157 preserves that client contract while the actual deep D1 read is delayed until
+      // core Product authority is usable and is bounded to 80 Products.
+      url.searchParams.set('limit', '80');
+      url.searchParams.set('show_ready', '1');
+      url.searchParams.set('force_deep', '1');
+      url.searchParams.set('delivery', 'build157');
+      health.product_readiness_rewrites += 1;
+      health.product_readiness_actual_limit = 80;
+      return original(`${url.pathname}${url.search}`, { ...options, method: 'GET' });
+    }
+
+    if (pagePath === '/admin/products/' && url.pathname === '/api/admin/product-resource-bootstrap') {
+      const requested = Math.trunc(Number(url.searchParams.get('limit') || 80)) || 80;
+      const bounded = Math.max(1, Math.min(120, requested, 80));
+      url.searchParams.set('limit', String(bounded));
+      url.searchParams.set('delivery', 'build157');
+      health.product_resource_bootstrap_rewrites += 1;
+      return original(`${url.pathname}${url.search}`, { ...options, method: 'GET' });
+    }
+
+    if (pagePath === '/admin/inventory-operations/' && url.pathname === '/api/admin/inventory-material-usage-reconciliation') {
+      const requested = Math.trunc(Number(url.searchParams.get('limit') || 80)) || 80;
+      const bounded = Math.max(25, Math.min(80, requested));
+      url.searchParams.set('limit', String(bounded));
+      url.searchParams.set('delivery', 'build157');
+      health.inventory_reconciliation_rewrites += 1;
+      health.inventory_reconciliation_actual_limit = bounded;
+      return original(`${url.pathname}${url.search}`, { ...options, method: 'GET' });
+    }
+
+    return original(input, options);
+  };
+
+  boundedApiFetch.__ddAdminDataDeliveryV157 = true;
+  boundedApiFetch.__ddProductsOriginal = original;
+  window.DDAuth.apiFetch = boundedApiFetch;
+  return true;
+}
+
 function ensureCurrentDashboardCards(path) {
   if (path !== '/admin/' && path !== '/admin/index.html') return;
   const grid = document.querySelector('.department-grid');
@@ -25,6 +136,17 @@ function ensureCurrentDashboardCards(path) {
     grid.appendChild(link);
   }
 }
+
+const currentAdminPath = window.location.pathname || '';
+if (currentAdminPath.startsWith('/admin/')) {
+  const installDelivery = () => installAdminDataDeliveryGuard(currentAdminPath);
+  if (!installDelivery()) {
+    document.addEventListener('dd:auth-verified', installDelivery, { once: true });
+    document.addEventListener('dd:admin-ready', installDelivery, { once: true });
+    window.setTimeout(installDelivery, 0);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const path = window.location.pathname || '';
   if (!path.startsWith('/admin/')) return;
