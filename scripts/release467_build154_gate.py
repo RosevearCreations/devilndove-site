@@ -2,8 +2,8 @@
 """Release 467 Build 154 — Products Worker Resource Hotfix source gate.
 
 The immutable Build 154 renderer assertions remain active after later Products cache
-revisions. Build 155 and Build 159 are allowed to advance Product asset generations
-while retaining the Build 154 static-fast-path/server-resource repair.
+revisions. Build 155 is allowed to advance the Product asset revision while retaining
+the Build 154 static-fast-path/server-resource repair.
 """
 from pathlib import Path
 import sys
@@ -29,9 +29,8 @@ closure = read('release467-build153-layout-observer-performance-hotfix.json')
 req(
     "const PRODUCTS_ASSET_REVISION = '467-b154-products-worker-fast-path';" in middleware
     or "const PRODUCTS_ASSET_REVISION = '467-b155-products-client-responsiveness';" in middleware
-    or "const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';" in middleware
-    or "const PRODUCTS_ASSET_REVISION = '467-b159-products-returning-browser-cache-v1';" in middleware,
-    'Build 154 Products cache revision or approved successor revision missing'
+    or "const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';" in middleware,
+    'Build 154 Products cache revision or approved Build 155 successor revision missing'
 )
 req("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware,
     'Build 153 layout observer revision must remain preserved')
@@ -50,15 +49,11 @@ for token in (
     '/public/js/admin-products-cold-start-recovery.js?v=',
     '/public/js/layout-overflow-guard.js?v=',
     '/public/js/packaging-safe-area-guard.js?v=current',
-    '/public/js/product-media-fallback.js?v=${PRODUCTS_MEDIA_FALLBACK_REVISION}',
+    '/public/js/product-media-fallback.js?v=62',
     '/public/js/pwa-platform.js?v=',
     '/public/js/adaptive-shell.js?v=',
 ):
     req(token in middleware, f'Products fast path missing shared asset: {token}')
-req(
-    "const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b159-products-media-admin-cache-v1';" in middleware,
-    'Current approved Product media-fallback cache revision missing'
-)
 
 products_branch = middleware.find("const isProductsPage = normalizedPath === '/admin/products/';")
 fast_return = middleware.find('return withProductsFastPlatformClient(response);')
@@ -120,5 +115,4 @@ print('RELEASE 467 BUILD 154 GATE: PASS')
 print('Products: module/session guard preserved before renderer')
 print('Renderer: bounded text fast path; no Products HTMLRewriter')
 print('Proof marker: X-DND-Products-Render-Path=static-fast-path')
-print('Cache: historical Build 154 behavior preserved under approved Build 159 generation')
 print('Boundary: no schema, D1/R2 business-data, provider, payment/refund/accounting mutation')
