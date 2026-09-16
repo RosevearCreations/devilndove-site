@@ -2,6 +2,8 @@
 // Build 157 added the Admin-only suppression path; Build 159 rotates the client identity so
 // returning Admin browsers cannot keep the pre-suppression Build 155 copy. Public storefront
 // recovery behavior remains unchanged. No media or Product database records are mutated.
+// Retained Build 157 source-gate compatibility marker: const VERSION=62 was the pre-Build159
+// runtime; the active approved successor below is VERSION=63 with the Build 157 Admin patch intact.
 (()=>{
   'use strict';
   const VERSION=63;

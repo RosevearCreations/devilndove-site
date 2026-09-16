@@ -45,6 +45,10 @@
     "required_builds": [157, 159],
     "business_data_mutation": false
   },
+  "retained_gate_compatibility": {
+    "build157_media_runtime": "Build 159 VERSION 63 is the approved cache-identity successor of the retained Build 157 VERSION 62 media semantics; the Build 157 Admin suppression patch remains active.",
+    "runtime_semantics_changed": false
+  },
   "safety": {
     "schema_change_authorized": false,
     "request_time_schema_mutation": false,
