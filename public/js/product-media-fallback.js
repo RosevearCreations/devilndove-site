@@ -1,12 +1,12 @@
 // Release 467 Build 62 — transparent public-media recovery.
-// If a historical public Product/Movie media host fails, retry the same approved R2
-// key through the same-origin read-only /api/product-media endpoint. If a Product
-// object is genuinely absent there too, prefer another image already attached to
-// that same product before showing a neutral recovery placeholder. No media or
-// Product database records are mutated.
+// Build 157 adds an Admin-only safety patch: when an Admin Product image already failed on
+// its approved public host, show the neutral Product placeholder instead of issuing another
+// same-origin /api/product-media probe for a key that may be stale or absent. Public storefront
+// recovery behavior remains unchanged. No media or Product database records are mutated.
 (()=>{
   'use strict';
   const VERSION=62;
+  const BUILD157_ADMIN_PATCH=157;
   if(Number(window.DDProductMediaFallback?.version||0)>=VERSION)return;
   const PUBLIC_HOSTS=new Set(['assets.devilndove.com','pub-f8137eb938da486a9f24410ccf49087c.r2.dev']);
   const FLAG='ddMediaFallbackAttempted';
@@ -14,6 +14,7 @@
   const PRODUCT_PLACEHOLDER='/assets/product-image-recovery-placeholder.svg';
   const PUBLIC_PREFIXES=['/products/','/movies/','/Itemsforsale/','/itemsforsale/','/Toolshed/','/Tools/','/Supplies/','/toolshed/','/tools/','/supplies/'];
   const IS_ADMIN_RUNTIME=/^\/admin(?:\/|$)/i.test(String(window.location?.pathname||''));
+  let adminRetrySuppressed=0;
 
   function fallbackInfo(raw){
     try{
@@ -107,6 +108,19 @@
 
     const info=fallbackInfo(img.currentSrc||img.src||img.getAttribute('src')||'');
     if(!info)return false;
+
+    // Admin workspaces do not need to prove public-host recovery by issuing a second
+    // /api/product-media GET for every stale Product key. The Admin operator needs a
+    // responsive workspace and an honest missing-image indicator. Public pages retain
+    // the Build 62 same-origin recovery behavior below.
+    if(IS_ADMIN_RUNTIME&&info.isProduct){
+      img.dataset[FLAG]='1';
+      img.dataset.ddMediaOriginalKey=info.key;
+      adminRetrySuppressed+=1;
+      if(window.DDProductMediaFallback)window.DDProductMediaFallback.admin_same_origin_retry_suppressed=adminRetrySuppressed;
+      return showProductPlaceholder(img);
+    }
+
     img.dataset[FLAG]='1';
     img.dataset.ddMediaOriginalKey=info.key;
     img.removeAttribute('srcset');
@@ -131,11 +145,10 @@
   document.addEventListener('error',(event)=>{
     if(event.target instanceof HTMLImageElement)recoverImage(event.target);
   },true);
-  // This recovery client exists for public Product/Movie media. Admin workspaces
-  // build large, highly dynamic tables and already surface image failures through
-  // the capturing error listener above. A document-wide subtree observer there
-  // needlessly scans every Admin mutation and can starve Product Entry startup.
-  // Keep the observer and initial cached-image sweep on public pages only.
+  // This recovery client exists primarily for public Product/Movie media. Admin workspaces
+  // use the capturing error listener above and Build 157 avoids same-origin retries for
+  // missing Product keys. A document-wide subtree observer there would needlessly scan every
+  // Admin mutation and can starve Product Entry startup.
   let observer=null;
   if(!IS_ADMIN_RUNTIME){
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>scan(document),{once:true});
@@ -148,5 +161,5 @@
     observer.observe(document.documentElement,{childList:true,subtree:true});
   }
 
-  window.DDProductMediaFallback={installed:true,version:VERSION,observer_mode:IS_ADMIN_RUNTIME?'error-only-admin':'public-mutation-and-error',fallbackUrl,recoverImage,promoteSameProductImage,showProductPlaceholder,scan};
+  window.DDProductMediaFallback={installed:true,version:VERSION,build157_admin_patch:BUILD157_ADMIN_PATCH,observer_mode:IS_ADMIN_RUNTIME?'error-only-admin':'public-mutation-and-error',admin_same_origin_retry_suppressed:adminRetrySuppressed,fallbackUrl,recoverImage,promoteSameProductImage,showProductPlaceholder,scan};
 })();
