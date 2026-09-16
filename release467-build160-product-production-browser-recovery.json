@@ -38,6 +38,7 @@
     "rewrite approved Product R2 public-host URLs to the same-origin Product media route before Admin image rendering",
     "observe late Product Quality rendering and reconcile stale Build identity plus bounded readiness_timeout presentation"
   ],
+  "authority_convergence_completed": true,
   "safety": {
     "schema_change_authorized": false,
     "request_time_schema_mutation": false,
