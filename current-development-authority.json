@@ -1,40 +1,40 @@
 {
   "release": 467,
-  "build": 159,
-  "title": "Product Returning-Browser Cache Coherence",
+  "build": 160,
+  "title": "Product Production Browser Recovery",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "764ff267dab58c0c1068919f9a494c94984d054e",
-  "accepted_dev_tree_sha": "bdaa5302bcaf26b451e9ef6954f777e26a2ee20b",
+  "accepted_dev_sha": "8032b373c5cdef6172064cd5d61cd59dd77222e5",
+  "accepted_dev_tree_sha": "371fcdeafc97f98abaa19b6bbb10b857940c9d15",
   "acceptance": {
-    "system_gate_run": 35055159738,
-    "current_application_quality_run": 35055159744,
-    "it_admin_runtime_proof_run": 35055159758,
-    "branch_hygiene_run": 35055159722
+    "system_gate_run": 35136874373,
+    "current_application_quality_run": 35136874379,
+    "it_admin_runtime_proof_run": 35136874530,
+    "branch_hygiene_run": 35136874513
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 158,
-      "title": "Product Editor Startup Resilience",
-      "authority": "release467-build158-product-editor-startup-resilience.json",
-      "dev_sha": "764ff267dab58c0c1068919f9a494c94984d054e",
-      "tree_sha": "bdaa5302bcaf26b451e9ef6954f777e26a2ee20b",
+      "build": 159,
+      "title": "Product Returning-Browser Cache Coherence",
+      "authority": "release467-build159-products-returning-browser-cache-coherence.json",
+      "dev_sha": "8032b373c5cdef6172064cd5d61cd59dd77222e5",
+      "tree_sha": "371fcdeafc97f98abaa19b6bbb10b857940c9d15",
       "proofs": {
-        "system_gate_run": 35055159738,
-        "current_application_quality_run": 35055159744,
-        "it_admin_runtime_proof_run": 35055159758,
-        "branch_hygiene_run": 35055159722
+        "system_gate_run": 35136874373,
+        "current_application_quality_run": 35136874379,
+        "it_admin_runtime_proof_run": 35136874530,
+        "branch_hygiene_run": 35136874513
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "exact_preview_deployment": true
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 159,
-      "title": "Product Returning-Browser Cache Coherence",
-      "authority": "release467-build159-products-returning-browser-cache-coherence.json",
+      "build": 160,
+      "title": "Product Production Browser Recovery",
+      "authority": "release467-build160-product-production-browser-recovery.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -43,19 +43,21 @@
     "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE"
   },
   "production_checkpoint": {
-    "build": 158,
-    "authority": "release467-build158-product-editor-startup-resilience.json",
-    "main_sha": "764ff267dab58c0c1068919f9a494c94984d054e",
-    "tree_sha": "bdaa5302bcaf26b451e9ef6954f777e26a2ee20b",
-    "production_pages_deploy_run": 35055350586,
-    "production_live_resource_integrity_run": 35055416344,
-    "products_production_browser_proof_run": 35055416341,
-    "products_route_production_proof_run": 35055416367,
+    "build": 159,
+    "authority": "release467-build159-products-returning-browser-cache-coherence.json",
+    "main_sha": "8032b373c5cdef6172064cd5d61cd59dd77222e5",
+    "tree_sha": "371fcdeafc97f98abaa19b6bbb10b857940c9d15",
+    "production_pages_deploy_run": 35137289111,
+    "production_live_resource_integrity_run": 35137393619,
+    "products_production_browser_proof_run": 35137393411,
+    "products_route_production_proof_run": 35137393555,
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE",
-    "client_ui_usability_proven": true
+    "client_ui_usability_proven": false,
+    "operator_regression_reported": true
   },
   "current_release_authorities": [
+    "release467-build160-product-production-browser-recovery.json",
     "release467-build159-products-returning-browser-cache-coherence.json",
     "release467-build158-product-editor-startup-resilience.json",
     "release467-build157-admin-data-delivery.json",
@@ -173,8 +175,8 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "next_build": 159,
+  "next_build": 160,
   "next_build_state": "AUTHORIZED_IN_PROGRESS",
-  "next_build_title": "Product Returning-Browser Cache Coherence",
-  "promotion_state": "BUILD159_CANDIDATE_NOT_YET_VERIFIED"
+  "next_build_title": "Product Production Browser Recovery",
+  "promotion_state": "BUILD160_CANDIDATE_NOT_YET_VERIFIED"
 }
