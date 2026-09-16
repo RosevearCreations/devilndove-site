@@ -223,6 +223,13 @@ jobs:
           echo 'STOP: Build 155 real-browser Development acceptance is not GREEN.'
           exit 1
 
+      - name: Require Build 157 Product Quality and media acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/products_build157_browser_probe.mjs
+          node scripts/products_build157_browser_probe.mjs
+
       - name: Remove bounded Development acceptance session
         if: always()
         shell: bash
@@ -258,6 +265,8 @@ jobs:
           echo 'Browser: real headless Chromium/CDP'
           echo 'HTTP/browser Product actions: GET + DOM observation only after bounded auth setup'
           echo 'Authentication: existing valid session preferred; otherwise one short-lived Development-only acceptance session is inserted then deleted'
+          echo 'Build 157 Product Quality: must settle without unavailable/startup-timeout state'
+          echo 'Build 157 Admin Product media: same-origin /api/product-media 404 responses must be ZERO'
           echo 'Product/R2 business-data mutation: NONE'
           echo 'Production mutation: NONE'
           echo 'Provider/payment/refund/accounting mutation: NONE'
