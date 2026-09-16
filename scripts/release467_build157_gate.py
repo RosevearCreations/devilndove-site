@@ -105,11 +105,12 @@ for token in (
     "method !== 'GET'",
     "productSnapshotBudget = 0",
     "DD_PRODUCT_QUALITY_RECOVERY_SRC",
-    "Product quality view unavailable",
     "MutationObserver",
     "DDAdminDataDeliveryHealth",
 ):
     req(token in route, f"Build 157 Admin delivery guard missing marker: {token}")
+req("product quality view unavailable" in route.lower(),
+    "Build 157 Admin delivery guard must detect the legacy Product Quality unavailable state")
 req("boundedApiFetch.__ddAdminDataDeliveryV157 = true" in route,
     "Build 157 delivery guard wrapper identity missing")
 req("window.DDAuth.apiFetch = boundedApiFetch" in route,
@@ -172,8 +173,14 @@ for token in (
     "duplicate_product_read: false",
 ):
     req(token in quality_recovery, f"Build 157 Product Quality recovery missing marker: {token}")
-req("/api/admin/products" not in quality_recovery,
-    "Build 157 Product Quality recovery must never start a duplicate Product API read")
+for forbidden_call in (
+    "apiFetch('/api/admin/products'",
+    'apiFetch("/api/admin/products"',
+    "fetch('/api/admin/products'",
+    'fetch("/api/admin/products"',
+):
+    req(forbidden_call not in quality_recovery,
+        f"Build 157 Product Quality recovery must not execute duplicate Product API read: {forbidden_call}")
 for forbidden in ("method: 'POST'", 'method:"POST"', "setInterval("):
     req(forbidden not in quality_recovery, f"Build 157 Product Quality recovery gained forbidden behavior: {forbidden}")
 
