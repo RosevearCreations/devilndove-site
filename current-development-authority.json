@@ -159,7 +159,7 @@
     "paypal_sandbox": "HOLD_EXTERNAL",
     "social_oauth": "HOLD_EXTERNAL",
     "caip_private_media": "EVIDENCE_DEPENDENT",
-    "cloudflare_access_service_token": "CONFIGURED_AND_PROVEN_DEVELOPMENT"
+    "cloudflare_access_service_token": "HOLD_EXTERNAL_CONFIGURED_AND_PROVEN_DEVELOPMENT"
   },
   "automatic_production_promotion_authorized": false,
   "request_time_schema_mutation": false,
