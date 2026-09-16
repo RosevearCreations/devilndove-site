@@ -1,0 +1,52 @@
+name: Release 467 Build 158 Product Editor Startup Proof
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'public/js/admin-products-editor-startup-v158.js'
+      - 'public/js/admin-product-quality-pending-v158.js'
+      - 'public/js/admin-products-request-budget-v156.js'
+      - 'scripts/release467_build158_gate.py'
+      - 'release467-build158-product-editor-startup-resilience.json'
+      - 'current-development-authority.json'
+      - '.github/workflows/release467-build158-product-editor-startup.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release467-build158-development
+  cancel-in-progress: true
+
+jobs:
+  build158-source-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Verify exact checked-out SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          echo "BUILD158_SHA=$(git rev-parse HEAD)"
+          echo "BUILD158_TREE=$(git rev-parse HEAD^{tree})"
+      - name: Run Build 158 source gate
+        run: python scripts/release467_build158_gate.py
+      - name: Preserve safety boundaries
+        run: |
+          echo 'Schema migration: NONE'
+          echo 'Request-time DDL: NONE'
+          echo 'Product/D1/R2 mutation: NONE'
+          echo 'Provider/payment/refund/accounting mutation: NONE'
+          echo 'Quality timeout fallback: pending/unknown, never invented complete'
