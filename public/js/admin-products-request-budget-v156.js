@@ -198,6 +198,20 @@
     return true;
   }
 
+  function loadBuild158Helper(src, marker) {
+    if (document.querySelector(`script[${marker}="1"]`)) return;
+    const script = document.createElement('script');
+    script.src = src;
+    script.setAttribute(marker, '1');
+    script.async = false;
+    document.head.appendChild(script);
+  }
+
+  // Build 158 is deliberately layered over the proven Build 156 request scheduler so the
+  // earlier concurrency contract stays intact. These helpers are read-only and mutation-free.
+  loadBuild158Helper('/public/js/admin-products-editor-startup-v158.js?v=467b158-editor-startup-v1', 'data-dd-products-editor-startup-v158');
+  loadBuild158Helper('/public/js/admin-product-quality-pending-v158.js?v=467b158-quality-pending-v1', 'data-dd-product-quality-pending-v158');
+
   const installWhenReady = () => { install(); };
   if (!install()) {
     document.addEventListener('DOMContentLoaded', installWhenReady, { once: true });
