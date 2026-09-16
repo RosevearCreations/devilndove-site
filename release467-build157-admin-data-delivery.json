@@ -1,0 +1,53 @@
+{
+  "release": 467,
+  "build": 157,
+  "title": "Product Admin + Admin Data Delivery",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "source_base_sha": "2cfb3e49211fc9a02592c896ae3546ab497c8f1e",
+  "source_base_tree_sha": "96928f3c3d09dcf1999387d9a63a823f264bebf8",
+  "production_baseline": {
+    "build": 156,
+    "sha": "1b375af8dadb1bfc32086708469cc2008ba9fc9f",
+    "tree_sha": "96928f3c3d09dcf1999387d9a63a823f264bebf8",
+    "production_pages_deploy_run": 35020167619,
+    "products_production_browser_proof_run": 35020259412,
+    "production_live_resource_integrity_run": 35020259348,
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": [
+    "Product Admin list-level readiness waits until core Product authority is usable",
+    "actual Product readiness D1 delivery capped at 80 rows",
+    "Product resource bootstrap reduced from 600 rows to 80 default / 120 hard max",
+    "Inventory material-usage reconciliation browser delivery capped at 80 rows",
+    "repository audit of other explicit high-row delivery paths",
+    "preserve cached D1 authority for mutable catalog options and tax classes instead of creating a static JSON second authority"
+  ],
+  "delivery_policy": "small core read -> interactive workspace -> bounded secondary evidence",
+  "runtime": {
+    "admin_delivery_guard": "public/js/admin-route-usage.js",
+    "guard_version": "R467B157_ADMIN_DATA_DELIVERY_V1",
+    "product_readiness_actual_limit": 80,
+    "product_core_wait_timeout_ms": 1200,
+    "product_resource_bootstrap_default_limit": 80,
+    "product_resource_bootstrap_max_limit": 120,
+    "inventory_reconciliation_actual_limit": 80,
+    "mutations_rewritten": false,
+    "static_json_business_authority_added": false
+  },
+  "audit_follow_up": {
+    "mobile_product_resource_limit_700": "FOLLOW_UP_CURSOR_OR_SEARCH_DELIVERY",
+    "public_toolshed_500_with_static_json_fallback": "OUTSIDE_ADMIN_HOTFIX",
+    "public_gallery_500_with_static_json_fallback": "OUTSIDE_ADMIN_HOTFIX"
+  },
+  "request_time_schema_mutation": false,
+  "schema_change_authorized": false,
+  "d1_mutation_authorized": false,
+  "r2_mutation_authorized": false,
+  "provider_execution_authorized": false,
+  "provider_publication_authorized": false,
+  "payment_mutation_authorized": false,
+  "refund_mutation_authorized": false,
+  "accounting_posting_authorized": false,
+  "production_business_data_overwrite": false,
+  "production_promotion_automatic": false
+}
