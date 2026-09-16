@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 // Build 156 deterministic Product request-budget scheduler proof.
+// Build 159 permits the forward cache/runtime generation while preserving the exact
+// concurrency, reserved-core-lane, cloning, and read-only scheduling behavior.
 // No network, D1, R2, provider, or mutation work is performed.
 import assert from 'node:assert/strict';
 
@@ -33,7 +35,14 @@ globalThis.window = {
 globalThis.document = { addEventListener() {} };
 
 await import('../public/js/admin-products-request-budget-v156.js');
-assert.equal(window.DDProductsRequestBudgetHealth?.version, 'R467B156_REQUEST_BUDGET_V2');
+const runtimeVersion = String(window.DDProductsRequestBudgetHealth?.version || '');
+assert.ok(
+  ['R467B156_REQUEST_BUDGET_V2', 'R467B159_REQUEST_BUDGET_V3'].includes(runtimeVersion),
+  `unexpected Product request budget version: ${runtimeVersion || 'none'}`,
+);
+assert.equal(window.DDProductsRequestBudgetHealth.max_concurrent_gets, 2);
+assert.equal(window.DDProductsRequestBudgetHealth.max_noncore_gets, 1);
+assert.equal(window.DDProductsRequestBudgetHealth.reserved_core_slots, 1);
 
 const lowOne = window.DDAuth.apiFetch('/api/admin/slow-background-a');
 await nextTurn();
@@ -73,6 +82,7 @@ assert.equal(window.DDProductsRequestBudgetHealth.completed_gets, 3);
 assert.equal(window.DDProductsRequestBudgetHealth.failed_gets, 0);
 
 console.log('BUILD 156 PRODUCT REQUEST BUDGET SCHEDULER: PASS');
+console.log(`Runtime generation: ${runtimeVersion}`);
 console.log('Concurrent GET ceiling: 2');
 console.log('Non-core GET ceiling: 1');
 console.log('Core Product bootstrap lane: RESERVED AND PROVEN');
