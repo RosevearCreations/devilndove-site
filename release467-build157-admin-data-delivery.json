@@ -3,15 +3,37 @@
   "build": 157,
   "title": "Product Admin + Admin Data Delivery",
   "state": "DEVELOPMENT_CANDIDATE",
-  "source_base_sha": "2cfb3e49211fc9a02592c896ae3546ab497c8f1e",
+  "source_base_sha": "1b375af8dadb1bfc32086708469cc2008ba9fc9f",
   "source_base_tree_sha": "96928f3c3d09dcf1999387d9a63a823f264bebf8",
+  "starting_point": {
+    "development": {
+      "sha": "1b375af8dadb1bfc32086708469cc2008ba9fc9f",
+      "tree": "96928f3c3d09dcf1999387d9a63a823f264bebf8",
+      "system_gate_run": 35019952492,
+      "quality_run": 35019952480,
+      "it_admin_runtime_run": 35019952545,
+      "repository_hygiene_run": 35019952489,
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+      "exact_preview_deployment": true
+    },
+    "production": {
+      "main_sha": "1b375af8dadb1bfc32086708469cc2008ba9fc9f",
+      "tree": "96928f3c3d09dcf1999387d9a63a823f264bebf8",
+      "production_pages_deploy_run": 35020167619,
+      "production_live_resource_integrity_run": 35020259348,
+      "products_production_browser_proof_run": 35020259412,
+      "products_route_production_proof_run": 35020259408,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
   "production_baseline": {
     "build": 156,
-    "sha": "1b375af8dadb1bfc32086708469cc2008ba9fc9f",
+    "main_sha": "1b375af8dadb1bfc32086708469cc2008ba9fc9f",
     "tree_sha": "96928f3c3d09dcf1999387d9a63a823f264bebf8",
     "production_pages_deploy_run": 35020167619,
     "products_production_browser_proof_run": 35020259412,
     "production_live_resource_integrity_run": 35020259348,
+    "products_route_production_proof_run": 35020259408,
     "state": "PRODUCTION_GREEN"
   },
   "scope": [
