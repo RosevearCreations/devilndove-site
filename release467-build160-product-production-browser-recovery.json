@@ -2,7 +2,7 @@
   "release": 467,
   "build": 160,
   "title": "Product Production Browser Recovery",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "source_base_sha": "8032b373c5cdef6172064cd5d61cd59dd77222e5",
   "source_base_tree_sha": "371fcdeafc97f98abaa19b6bbb10b857940c9d15",
   "starting_point": {
@@ -74,5 +74,29 @@
     "Production Pages Deploy GREEN on exact promoted SHA",
     "Production Live Resource Integrity GREEN on exact promoted SHA"
   ],
-  "promotion_state": "DEVELOPMENT_NOT_YET_ACCEPTED"
+  "final_closure": {
+    "dev_sha": "4963a718166a7010c2075c803a26b13dadaf88db",
+    "tree_sha": "55e10b5507ac14ac1bc8937365789861c4119bea",
+    "proofs": {
+      "system_gate_run": 35149251365,
+      "current_application_quality_run": 35149251447,
+      "it_admin_runtime_proof_run": 35149251412,
+      "branch_hygiene_run": 35149251413
+    },
+    "build160_source_proof_run": 35149251640,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "ingested_by_build": 161
+  },
+  "production_checkpoint": {
+    "build": 160,
+    "main_sha": "4963a718166a7010c2075c803a26b13dadaf88db",
+    "tree_sha": "55e10b5507ac14ac1bc8937365789861c4119bea",
+    "production_pages_deploy_run": 35160325113,
+    "production_live_resource_integrity_run": 35160415476,
+    "products_production_browser_proof_run": 35160415542,
+    "products_route_production_proof_run": 35160415443,
+    "state": "PRODUCTION_GREEN"
+  },
+  "promotion_state": "PRODUCTION_GREEN"
 }
