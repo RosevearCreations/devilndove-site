@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // Release 467 Build 157 — focused Products Quality/media real-browser acceptance.
+// Build 159 extends the proof to returning-browser cache/runtime coherence and the Product Editor timeout.
 // Browser actions are GET/DOM observation only; no Product, R2, provider, payment, refund, or accounting mutation.
 import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -206,6 +207,9 @@ try {
     await new Promise((resolve)=>setTimeout(resolve,1200));
     const select=document.getElementById('existingProductSelect');
     const quality=String(document.getElementById('productQualityCommandCenterMount')?.textContent||'').replace(/\\s+/g,' ').trim();
+    const editorMessage=String(document.getElementById('createProductMessage')?.textContent||'').replace(/\\s+/g,' ').trim();
+    const bodyText=String(document.body?.innerText||'');
+    const scriptSrcs=[...document.scripts].map((script)=>String(script.src||''));
     return {
       ready_state:document.readyState,
       logged_in:Boolean(window.DDAuth?.isLoggedIn?.()),
@@ -214,7 +218,18 @@ try {
       quality_text:quality.slice(0,500),
       quality_unavailable:/Product quality view unavailable|Product startup request timed out/i.test(quality),
       quality_still_loading:/Loading Product Release Quality Command Center/i.test(quality),
-      body_has_1102:/Error 1102|Worker exceeded resource limits/i.test(document.body?.innerText||''),
+      editor_message:editorMessage.slice(0,300),
+      editor_startup_timeout_6000:/Product startup request timed out after 6000 ms/i.test(editorMessage)||/Product startup request timed out after 6000 ms/i.test(bodyText),
+      request_budget_version:String(window.DDProductsRequestBudgetHealth?.version||''),
+      editor_startup_version:String(window.DDProductsEditorStartupHealth?.version||''),
+      media_fallback_version:Number(window.DDProductMediaFallback?.version||0),
+      media_build159_patch:Number(window.DDProductMediaFallback?.build159_admin_cache_patch||0),
+      admin_data_delivery_version:String(window.DDAdminDataDeliveryHealth?.version||''),
+      has_build159_product_asset:scriptSrcs.some((src)=>src.includes('467-b159-products-returning-browser-cache-v1')),
+      has_build159_request_budget_loader:scriptSrcs.some((src)=>src.includes('467b159-request-budget-loader-v1')),
+      has_build159_media_loader:scriptSrcs.some((src)=>src.includes('467-b159-products-media-admin-cache-v1')),
+      has_build159_editor_helper:scriptSrcs.some((src)=>src.includes('467b159-editor-startup-cache-v2')),
+      body_has_1102:/Error 1102|Worker exceeded resource limits/i.test(bodyText),
       heartbeat_elapsed_ms:performance.now()-heartbeatStart
     };
   })()`, sessionId, 30000);
@@ -236,6 +251,17 @@ try {
     quality_unavailable: Boolean(result?.quality_unavailable),
     quality_still_loading: Boolean(result?.quality_still_loading),
     quality_text: String(result?.quality_text || ''),
+    editor_message: String(result?.editor_message || ''),
+    editor_startup_timeout_6000: Boolean(result?.editor_startup_timeout_6000),
+    request_budget_version: String(result?.request_budget_version || ''),
+    editor_startup_version: String(result?.editor_startup_version || ''),
+    media_fallback_version: Number(result?.media_fallback_version || 0),
+    media_build159_patch: Number(result?.media_build159_patch || 0),
+    admin_data_delivery_version: String(result?.admin_data_delivery_version || ''),
+    has_build159_product_asset: Boolean(result?.has_build159_product_asset),
+    has_build159_request_budget_loader: Boolean(result?.has_build159_request_budget_loader),
+    has_build159_media_loader: Boolean(result?.has_build159_media_loader),
+    has_build159_editor_helper: Boolean(result?.has_build159_editor_helper),
     same_origin_product_media_404_count: media404.length,
     same_origin_product_media_404_unique: media404Unique,
     body_has_1102: Boolean(result?.body_has_1102),
@@ -251,6 +277,15 @@ try {
   if (!String(result?.quality_text || '').trim()) failures.push('Product Quality view rendered no settled content');
   if (result?.quality_unavailable) failures.push('Product Quality reported unavailable/startup timeout');
   if (result?.quality_still_loading) failures.push('Product Quality remained in its loading state');
+  if (result?.editor_startup_timeout_6000) failures.push('Product Editor reported the legacy 6000 ms startup timeout');
+  if (String(result?.request_budget_version || '') !== 'R467B159_REQUEST_BUDGET_V3') failures.push(`Build 159 request budget runtime missing (${result?.request_budget_version || 'none'})`);
+  if (!String(result?.editor_startup_version || '').startsWith('R467B158_EDITOR_STARTUP')) failures.push(`Product Editor startup helper missing (${result?.editor_startup_version || 'none'})`);
+  if (Number(result?.media_fallback_version || 0) < 63) failures.push(`Product media fallback runtime is stale (${result?.media_fallback_version || 0})`);
+  if (Number(result?.media_build159_patch || 0) < 159) failures.push('Build 159 Admin media cache patch is not installed');
+  if (!result?.has_build159_product_asset) failures.push('Build 159 Product asset generation is absent from rendered script URLs');
+  if (!result?.has_build159_request_budget_loader) failures.push('Build 159 request-budget loader URL is absent');
+  if (!result?.has_build159_media_loader) failures.push('Build 159 Product media loader URL is absent');
+  if (!result?.has_build159_editor_helper) failures.push('Build 159 Product Editor helper cache generation is absent');
   if (media404.length > 0) failures.push(`/api/product-media returned ${media404.length} Admin recovery 404 response(s)`);
   if (result?.body_has_1102) failures.push('page contains Worker resource-limit evidence');
   if (Number(result?.heartbeat_elapsed_ms || 0) < 1000) failures.push('browser event-loop heartbeat did not complete normally');
@@ -259,7 +294,9 @@ try {
   else {
     console.log('BUILD 157 PRODUCTS BROWSER PROBE: PASS');
     console.log('Product Quality: SETTLED / NO STARTUP TIMEOUT');
+    console.log('Product Editor legacy 6000 ms timeout: ZERO');
     console.log('Admin Product media recovery 404s: ZERO');
+    console.log('Build 159 cache/runtime contract: INSTALLED');
   }
 } catch (error) {
   stop(error?.message || String(error));
