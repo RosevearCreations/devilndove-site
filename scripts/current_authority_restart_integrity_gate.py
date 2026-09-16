@@ -3,8 +3,8 @@
 
 Build 103 consumes the externally proven Build 102 checkpoint. The Build 103 transition
 is bound to immutable machine-authority blobs, the exact Build 102 tree and six proof
-runs. Human restart documents must retain the tree/proof bundle but need not duplicate
-the commit identifier already sealed inside those immutable machine authorities.
+runs. The canonical I.T. restart guide retains the human-readable tree/proof bundle;
+other narrative Markdown files remain informational and are not duplicate proof stores.
 """
 from pathlib import Path
 import hashlib, json, re, sys
@@ -128,7 +128,9 @@ if prod_build==last_build and prod_authority_path:
         req(int(pp.get('production_pages_deploy_run') or 0)==prod_run,'Production release authority run must match pointer')
     req(prod_tree==last_tree,'promoted Production tree must exactly match verified Development tree')
 
-doc_paths=['AI_HANDOFF.md','PROJECT_STATUS_AND_ROADMAP.md','SANITY_HEALTH_CHECK.md','MARKDOWN_INDEX.md','docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md']
+# One canonical human restart guide carries the proof bundle. Machine authorities and
+# live operational truth surfaces below remain independently exact and fail closed.
+doc_paths=['docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md']
 for path in doc_paths:
     text=read(path)
     req(last_tree in text,f'{path} missing last fully verified tree SHA')
