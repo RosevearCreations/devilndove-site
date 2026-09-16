@@ -68,6 +68,11 @@
     "Products route Production proof GREEN",
     "Production Live Resource Integrity Proof GREEN"
   ],
+  "retained_regression_context": {
+    "requested_by_build": 160,
+    "reason": "Build 160 Product cleanup startup settlement must retain returning-browser cache/runtime coherence before Production promotion.",
+    "business_data_mutation": false
+  },
   "final_closure": {
     "dev_sha": "8032b373c5cdef6172064cd5d61cd59dd77222e5",
     "tree_sha": "371fcdeafc97f98abaa19b6bbb10b857940c9d15",

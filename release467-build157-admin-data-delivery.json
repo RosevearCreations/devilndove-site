@@ -63,6 +63,11 @@
     "public_toolshed_500_with_static_json_fallback": "OUTSIDE_ADMIN_HOTFIX",
     "public_gallery_500_with_static_json_fallback": "OUTSIDE_ADMIN_HOTFIX"
   },
+  "retained_regression_context": {
+    "requested_by_build": 160,
+    "reason": "Build 160 changes Product Admin startup settlement for Draft & Archive Cleanup; rerun the authenticated exact-SHA Development Product browser proof before Production promotion.",
+    "business_data_mutation": false
+  },
   "final_closure": {
     "dev_sha": "4b82883a79e1897792fd3840860760b555e0dd36",
     "tree_sha": "045ff6357572177fff9417f229cadce294080b02",

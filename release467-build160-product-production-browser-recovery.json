@@ -36,9 +36,15 @@
     "add a compact authenticated read-only Product core endpoint for first interactive delivery",
     "coalesce exact Product-list startup reads into the Build 160 core endpoint before legacy wrappers can consume the request",
     "rewrite approved Product R2 public-host URLs to the same-origin Product media route before Admin image rendering",
-    "observe late Product Quality rendering and reconcile stale Build identity plus bounded readiness_timeout presentation"
+    "observe late Product Quality rendering and reconcile stale Build identity plus bounded readiness_timeout presentation",
+    "settle Draft & Archive Cleanup from the proven core Product handoff while retaining live preflight authority for permanent removal"
   ],
   "authority_convergence_completed": true,
+  "retained_regression_refresh": {
+    "reason": "The cleanup core-handoff correction changes Product Admin startup settlement and requires fresh exact-SHA Build 157 browser plus Build 159 cache/runtime regression proofs before main promotion.",
+    "required_builds": [157, 159],
+    "business_data_mutation": false
+  },
   "safety": {
     "schema_change_authorized": false,
     "request_time_schema_mutation": false,
