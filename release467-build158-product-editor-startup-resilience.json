@@ -9,6 +9,10 @@
     "development": {
       "sha": "4b82883a79e1897792fd3840860760b555e0dd36",
       "tree": "045ff6357572177fff9417f229cadce294080b02",
+      "system_gate_run": 35045214773,
+      "quality_run": 35045214757,
+      "it_admin_runtime_run": 35045214868,
+      "repository_hygiene_run": 35045214777,
       "state": "BUILD157_EXACT_SHA_GREEN"
     },
     "production": {
