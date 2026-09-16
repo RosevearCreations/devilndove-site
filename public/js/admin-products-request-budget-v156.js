@@ -199,7 +199,10 @@
   }
 
   function loadBuild158Helper(src, marker) {
-    if (document.querySelector(`script[${marker}="1"]`)) return;
+    // The Build 156 scheduler has a deliberately minimal Node test DOM. Helper injection is
+    // browser-only; absence of DOM script APIs must remain a safe no-op for that proof harness.
+    if (typeof document?.createElement !== 'function' || !document?.head || typeof document.head.appendChild !== 'function') return;
+    if (typeof document.querySelector === 'function' && document.querySelector(`script[${marker}="1"]`)) return;
     const script = document.createElement('script');
     script.src = src;
     script.setAttribute(marker, '1');
