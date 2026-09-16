@@ -1,0 +1,57 @@
+name: Release 467 Build 159 Products Returning Browser Cache Proof
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/_middleware.js'
+      - 'public/js/admin-products-request-budget-v156.js'
+      - 'public/js/product-media-fallback.js'
+      - 'scripts/products_build157_browser_probe.mjs'
+      - 'scripts/release467_build159_gate.py'
+      - 'release467-build159-products-returning-browser-cache-coherence.json'
+      - 'current-development-authority.json'
+      - '.github/workflows/release467-build159-products-returning-browser-cache.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release467-build159-development
+  cancel-in-progress: true
+
+jobs:
+  build159-source-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Verify exact checked-out SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          echo "BUILD159_SHA=$(git rev-parse HEAD)"
+          echo "BUILD159_TREE=$(git rev-parse HEAD^{tree})"
+      - name: Run Build 159 source gate
+        run: |
+          python scripts/release467_build159_gate.py
+          node --check scripts/products_build157_browser_probe.mjs
+      - name: Preserve safety boundaries
+        run: |
+          echo 'Schema migration: NONE'
+          echo 'Request-time DDL: NONE'
+          echo 'Product/D1/R2 mutation: NONE'
+          echo 'Provider/payment/refund/accounting mutation: NONE'
+          echo 'Public storefront media recovery semantics: UNCHANGED'
+          echo 'Admin client cache policy: NO-STORE'
+          echo 'Returning-browser Product asset generation: BUILD159'
