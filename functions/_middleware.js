@@ -14,10 +14,8 @@ import {
 import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appModuleRoutes.js';
 
 // Build 159: Product Admin returning-browser cache coherence.
-// The Build 155 generic Product revision remained on existing script tags while Product clients
-// continued to evolve in Builds 156-158. Fresh CI browsers therefore saw current bytes while a
-// returning operator browser could reuse old client code. Build 159 rotates the Product generation
-// and makes Admin-only JS revalidate on every navigation so this class of split-brain cannot recur.
+// Build 160 layers a read-only Product Production browser recovery client on top of the
+// proven Build 159 cache generation without changing the retained Build 159 identities.
 const PRODUCTS_ASSET_REVISION = '467-b159-products-returning-browser-cache-v1';
 const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';
 const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b159-products-media-admin-cache-v1';
@@ -71,6 +69,7 @@ function productsPlatformMarkup() {
     '<link data-dd-products-static-platform="1" rel="stylesheet" href="/css/current-responsive.css?v=current">',
     `<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`,
     `<link rel="stylesheet" href="/css/admin-products-table-layout.css?v=${PRODUCTS_ASSET_REVISION}">`,
+    '<script data-dd-products-runtime-v160="1" src="/public/js/admin-products-runtime-v160.js?v=467b160-production-browser-recovery-v1"></script>',
     `<script data-dd-products-request-budget="1" src="/public/js/admin-products-request-budget-v156.js?v=${PRODUCTS_REQUEST_BUDGET_REVISION}"></script>`,
     `<script data-dd-products-auth-ready-recovery="1" src="/public/js/admin-products-auth-ready-recovery-v156.js?v=${PRODUCTS_AUTH_READY_REVISION}"></script>`,
     `<script data-dd-products-cold-start="1" src="/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_COLD_START_REVISION}"></script>`,

@@ -1,0 +1,54 @@
+{
+  "release": 467,
+  "build": 160,
+  "title": "Product Production Browser Recovery",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "source_base_sha": "8032b373c5cdef6172064cd5d61cd59dd77222e5",
+  "source_base_tree_sha": "371fcdeafc97f98abaa19b6bbb10b857940c9d15",
+  "build159_external_closure": {
+    "system_gate_run": 35136874373,
+    "current_application_quality_run": 35136874379,
+    "it_admin_runtime_proof_run": 35136874530,
+    "repository_branch_hygiene_run": 35136874513,
+    "build159_source_proof_run": 35136874372,
+    "production_pages_deploy_run": 35137289111,
+    "production_live_resource_integrity_run": 35137393619,
+    "state": "EXTERNAL_EXACT_SHA_GREEN"
+  },
+  "operator_evidence": [
+    "Firefox Production Products page retained Release 467 Build 157 label after Build 159",
+    "Product readiness degraded with readiness_timeout after the fixed Build 158 correction window",
+    "live Product list fell back to the last saved snapshot",
+    "cross-origin Product JPG requests were blocked by OpaqueResponseBlocking"
+  ],
+  "scope": [
+    "add a compact authenticated read-only Product core endpoint for first interactive delivery",
+    "coalesce exact Product-list startup reads into the Build 160 core endpoint before legacy wrappers can consume the request",
+    "rewrite approved Product R2 public-host URLs to the same-origin Product media route before Admin image rendering",
+    "observe late Product Quality rendering and reconcile stale Build identity plus bounded readiness_timeout presentation"
+  ],
+  "safety": {
+    "schema_change_authorized": false,
+    "request_time_schema_mutation": false,
+    "d1_mutation_authorized": false,
+    "r2_mutation_authorized": false,
+    "product_mutation_authorized": false,
+    "provider_execution_authorized": false,
+    "provider_publication_authorized": false,
+    "payment_mutation_authorized": false,
+    "refund_mutation_authorized": false,
+    "accounting_posting_authorized": false,
+    "production_business_data_overwrite": false
+  },
+  "acceptance_required": [
+    "Build 160 source proof GREEN",
+    "System Gate GREEN on exact dev SHA",
+    "Current Application Quality GREEN on exact dev SHA",
+    "I.T. Admin Runtime Proof GREEN on exact dev SHA",
+    "Repository Branch Hygiene GREEN on exact dev SHA",
+    "non-force promotion to main only after exact Development acceptance",
+    "Production Pages Deploy GREEN on exact promoted SHA",
+    "Production Live Resource Integrity GREEN on exact promoted SHA"
+  ],
+  "promotion_state": "DEVELOPMENT_NOT_YET_ACCEPTED"
+}

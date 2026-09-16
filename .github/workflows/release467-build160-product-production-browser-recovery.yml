@@ -1,0 +1,21 @@
+name: Release 467 Build 160 Product Production Browser Recovery Proof
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/_middleware.js'
+      - 'functions/api/admin/products-core.js'
+      - 'public/js/admin-products-runtime-v160.js'
+      - 'scripts/release467_build160_gate.py'
+      - 'release467-build160-product-production-browser-recovery.json'
+      - '.github/workflows/release467-build160-product-production-browser-recovery.yml'
+  workflow_dispatch:
+jobs:
+  source-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: python scripts/release467_build160_gate.py
