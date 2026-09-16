@@ -36,6 +36,10 @@ permissions:
   contents: read
   actions: read
 
+concurrency:
+  group: release467-build157-development
+  cancel-in-progress: true
+
 jobs:
   build157-source-proof:
     runs-on: ubuntu-latest
@@ -69,6 +73,8 @@ jobs:
       EXPECTED_SOURCE_SHA: ${{ github.sha }}
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
       DEV_D1_DATABASE_NAME: devilndove-dev
       BUILD157_EPHEMERAL_SESSION_TOKEN: ''
       BUILD157_EXACT_PREVIEW_URL: ''
@@ -181,12 +187,24 @@ jobs:
           echo "DND_BASE_URL=${EXACT_URL}" >> "$GITHUB_ENV"
           echo "Exact Build 157 Preview accepted for browser target: ${EXACT_URL}"
 
+      - name: Validate Cloudflare Access service-token contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CF_ACCESS_CLIENT_ID}" || { echo 'STOP: CF_ACCESS_CLIENT_ID is not configured.'; exit 1; }
+          test -n "${CF_ACCESS_CLIENT_SECRET}" || { echo 'STOP: CF_ACCESS_CLIENT_SECRET is not configured.'; exit 1; }
+          echo 'Cloudflare Access service-token pair is configured for Development browser acceptance.'
+
       - name: Create and validate bounded Development admin acceptance session
         shell: bash
         run: |
           set -euo pipefail
           test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'STOP: Development D1 credential is not configured.'; exit 1; }
           test -n "${DND_BASE_URL}" || { echo 'STOP: exact Preview URL was not resolved.'; exit 1; }
+
+          # The b157-* namespace is reserved for this serialized Development acceptance job.
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "DELETE FROM sessions WHERE session_token LIKE 'b157-%' AND token=session_token; SELECT changes() AS stale_deleted;" > /tmp/build157-stale-cleanup.json
+
           TOKEN="b157-$(python - <<'PY'
           import secrets
           print(secrets.token_hex(32))
@@ -207,10 +225,18 @@ jobs:
           walk(data)
           assert any(v==1 for v in values),(values,data)
           PY
+
+          # Register cleanup authority before any network validation can fail.
+          echo "BUILD157_EPHEMERAL_SESSION_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
           COOKIE="dd_auth_token=${TOKEN}"
-          STATUS="$(curl -sS -o /tmp/build157-auth-me.json -w '%{http_code}' -H "Cookie: ${COOKIE}" -H 'Cache-Control: no-cache' "${DND_BASE_URL}/api/auth/me" || true)"
+          STATUS="$(curl -sS -o /tmp/build157-auth-me.json -w '%{http_code}' \
+            -H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" \
+            -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}" \
+            -H "Cookie: ${COOKIE}" \
+            -H 'Cache-Control: no-cache' \
+            "${DND_BASE_URL}/api/auth/me" || true)"
           if [ "$STATUS" != '200' ]; then
-            echo "STOP: exact Preview /api/auth/me rejected the bounded Development session (HTTP ${STATUS})."
+            echo "STOP: exact Preview /api/auth/me did not reach an authenticated application session after Access admission (HTTP ${STATUS})."
             python - <<'PY'
           import json
           try:
@@ -230,11 +256,10 @@ jobs:
           assert int(user.get('is_active') or 0)==1,user
           assert data.get('response_profile')=='auth_session_bounded_v1',data
           PY
-          echo "BUILD157_EPHEMERAL_SESSION_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
           echo "DND_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
-          rm -f /tmp/build157-auth-me.json /tmp/build157-ephemeral-session.json
+          rm -f /tmp/build157-auth-me.json /tmp/build157-ephemeral-session.json /tmp/build157-stale-cleanup.json
           unset TOKEN COOKIE
-          echo 'Exact Preview accepted bounded Development admin session.'
+          echo 'Exact Preview accepted Cloudflare Access service token plus bounded Development admin session.'
 
       - name: Run established Products responsiveness acceptance
         env:
@@ -279,6 +304,7 @@ jobs:
           echo "System Gate: ${BUILD157_SYSTEM_GATE_RUN:-unresolved}"
           echo "Exact hashed Preview: ${BUILD157_EXACT_PREVIEW_URL:-unresolved}"
           echo 'Browser target: exact hashed Preview, never an unproven branch alias'
+          echo 'Outer Cloudflare Access: service-token headers required; Access remains enabled'
           echo 'Browser: deterministic headless Chrome/CDP'
           echo 'Product Quality unavailable/startup timeout: FAIL-CLOSED'
           echo 'Admin same-origin /api/product-media 404: FAIL-CLOSED'
