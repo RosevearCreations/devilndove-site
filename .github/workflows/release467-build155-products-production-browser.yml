@@ -89,6 +89,13 @@ jobs:
         env:
           CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
         run: node scripts/products_browser_runtime_probe.mjs
+      - name: Require Build 157 Product Quality and media acceptance
+        env:
+          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          set -euo pipefail
+          node --check scripts/products_build157_browser_probe.mjs
+          node scripts/products_build157_browser_probe.mjs
       - name: Boundary
         if: always()
         run: |
@@ -97,6 +104,8 @@ jobs:
           echo 'Browser: deterministic headless Chrome/CDP'
           echo 'Navigation gate: bounded DOM readiness; Runtime.evaluate timeout remains a hard lockup failure with debugger diagnostics'
           echo 'Acceptance requires complete document, populated Product picker/table, stable Build 155 renderer and responsive event loop'
+          echo 'Build 157 Product Quality: must settle without unavailable/startup-timeout state'
+          echo 'Build 157 Admin Product media: same-origin /api/product-media 404 responses must be ZERO'
           echo 'Session lookup: READ ONLY; no session created'
           echo 'D1/R2 mutation: NONE'
           echo 'Provider/payment/refund/accounting mutation: NONE'
