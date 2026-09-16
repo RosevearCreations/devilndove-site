@@ -2,7 +2,7 @@
   "release": 467,
   "build": 158,
   "title": "Product Editor Startup Resilience",
-  "state": "PRODUCTION_GREEN",
+  "state": "DEVELOPMENT_CANDIDATE",
   "source_base_sha": "4b82883a79e1897792fd3840860760b555e0dd36",
   "source_base_tree_sha": "045ff6357572177fff9417f229cadce294080b02",
   "starting_point": {
@@ -53,41 +53,6 @@
     "deployment_preflight_page": "Release 467 Build 158 over verified Build 157 baseline",
     "purpose": "Keep current read-only operator surfaces aligned with the Build 158 projection without changing executable release gates or mutation authority."
   },
-  "final_closure": {
-    "dev_sha": "764ff267dab58c0c1068919f9a494c94984d054e",
-    "tree_sha": "bdaa5302bcaf26b451e9ef6954f777e26a2ee20b",
-    "proofs": {
-      "system_gate_run": 35055159738,
-      "current_application_quality_run": 35055159744,
-      "it_admin_runtime_proof_run": 35055159758,
-      "branch_hygiene_run": 35055159722
-    },
-    "build158_source_proof_run": 35055159737,
-    "products_development_browser_proof_run": 35055159746,
-    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
-    "exact_preview_deployment": true,
-    "ingested_by_build": 159
-  },
-  "production_checkpoint": {
-    "build": 158,
-    "main_sha": "764ff267dab58c0c1068919f9a494c94984d054e",
-    "tree_sha": "bdaa5302bcaf26b451e9ef6954f777e26a2ee20b",
-    "production_pages_deploy_run": 35055350586,
-    "production_live_resource_integrity_run": 35055416344,
-    "products_production_browser_proof_run": 35055416341,
-    "products_route_production_proof_run": 35055416367,
-    "state": "PRODUCTION_GREEN"
-  },
-  "production_baseline": {
-    "build": 158,
-    "main_sha": "764ff267dab58c0c1068919f9a494c94984d054e",
-    "tree_sha": "bdaa5302bcaf26b451e9ef6954f777e26a2ee20b",
-    "production_pages_deploy_run": 35055350586,
-    "production_live_resource_integrity_run": 35055416344,
-    "products_production_browser_proof_run": 35055416341,
-    "products_route_production_proof_run": 35055416367,
-    "state": "PRODUCTION_GREEN"
-  },
   "safety": {
     "request_time_schema_mutation": false,
     "schema_change_authorized": false,
@@ -114,5 +79,5 @@
     "Products route Production proof GREEN",
     "Production Live Resource Integrity Proof GREEN"
   ],
-  "promotion_state": "PRODUCTION_GREEN"
+  "promotion_state": "DEVELOPMENT_NOT_YET_ACCEPTED"
 }

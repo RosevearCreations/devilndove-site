@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 155 — Products Client Responsiveness Hotfix source gate.
-
-Build 155's behavioral protections remain historical regression requirements. Later
-approved cache generations may replace the exact asset revision while preserving the
-same responsiveness, observer, authorization, and non-mutation contracts.
-"""
+"""Release 467 Build 155 — Products Client Responsiveness Hotfix source gate."""
 from pathlib import Path
 import json
 import subprocess
@@ -49,26 +44,19 @@ for token in (
 ):
     req(token in closure, f'Build 154 closure token missing: {token}')
 
-# Build 155 introduced cache separation. Build 159 is the approved successor generation
-# for returning-browser coherence and must continue to preserve the Build 155 behavior.
-req(
-    "const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';" in middleware
-    or "const PRODUCTS_ASSET_REVISION = '467-b159-products-returning-browser-cache-v1';" in middleware,
-    'Build 155 Product asset revision or approved successor revision missing'
-)
+# Build 155 must advance cache identity through both the Products HTML fast path and dynamic import.
+req("const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';" in middleware,
+    'Build 155 emergency Products asset revision missing')
 req("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware,
     'Build 153 layout-observer revision must remain preserved')
 req("import('/public/js/admin-products-marketplace-readiness.js?v=467b155')" in loader,
     'Build 155 Marketplace Listing Readiness dynamic import cache revision missing')
 req('467-b155-products-client-responsiveness' in marketplace,
     'Build 155 marketplace client revision marker missing')
-req(
-    "const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b155-products-media-admin-bound-v1';" in middleware
-    or "const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b159-products-media-admin-cache-v1';" in middleware,
-    'Build 155 Products media-fallback revision or approved successor revision missing'
-)
+req("const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b155-products-media-admin-bound-v1';" in middleware,
+    'Build 155 Products media-fallback cache revision missing')
 req('v=${PRODUCTS_MEDIA_FALLBACK_REVISION}' in middleware,
-    'Products fast path must use the current Product media-fallback cache revision')
+    'Products fast path must use the Build 155 media-fallback cache revision')
 
 # Emergency recovery boundary: Product Admin does not need the cross-admin section-position/context-dock helper.
 # Keeping that helper out of Products prevents any stale cached copy of the historical dock observer from
@@ -176,7 +164,7 @@ if FAIL:
 print('RELEASE 467 BUILD 155 GATE: PASS')
 print('Products client: Marketplace Listing Readiness self-mutation loop isolated')
 print('Products recovery: nonessential navigation context chain excluded from Product Admin')
-print('Cache: Build 155 responsiveness behavior preserved under the approved current Product generation')
+print('Cache: Product assets advanced to the Build 155 lockup-recovery revision')
 print('Migration history: Build 155 preserves canonical 0001-0004 and permits later forward-only migrations')
 print('Acceptance: real Chromium/CDP probe requires responsive event loop + populated Product picker/table')
 print('Boundary: no schema, D1/R2 business-data, provider, payment/refund/accounting mutation')

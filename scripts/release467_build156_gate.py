@@ -32,7 +32,7 @@ req(page.lower().count('<h1')==1,'Inventory Operations must retain exactly one H
 
 budget=read('public/js/admin-products-request-budget-v156.js')
 for token in (
- "VERSION = 'R467B159_REQUEST_BUDGET_V3'",
+ "VERSION = 'R467B156_REQUEST_BUDGET_V2'",
  "MAX_CONCURRENT_GETS = 2",
  "MAX_NONCORE_GETS = 1",
  'reserved_core_slots: 1',
@@ -55,7 +55,7 @@ req("url.pathname.startsWith('/api/admin/')" in budget,'Product request budget m
 req("path === '/api/admin/products' || path === '/api/admin/product-picker' || path === '/api/admin/product-mobile-bootstrap'" in budget,'Core Product bootstrap family must retain priority zero')
 
 scheduler=read('scripts/build156_product_request_budget_test.mjs')
-for token in ('slow-background-a','slow-background-b','/api/admin/products','Core Product bootstrap lane: RESERVED AND PROVEN','R467B159_REQUEST_BUDGET_V3'):
+for token in ('slow-background-a','slow-background-b','/api/admin/products','Core Product bootstrap lane: RESERVED AND PROVEN'):
  req(token in scheduler,f'Product scheduler proof missing {token}')
 
 auth_recovery=read('public/js/admin-products-auth-ready-recovery-v156.js')
@@ -142,7 +142,7 @@ request_loader='/public/js/admin-products-request-budget-v156.js?v=${PRODUCTS_RE
 auth_loader='/public/js/admin-products-auth-ready-recovery-v156.js?v=${PRODUCTS_AUTH_READY_REVISION}'
 cold_loader='/public/js/admin-products-cold-start-recovery.js?v=${PRODUCTS_COLD_START_REVISION}'
 quality_loader='/public/js/admin-product-quality-fallback-v156.js?v=${PRODUCTS_QUALITY_FALLBACK_REVISION}'
-req("const PRODUCTS_REQUEST_BUDGET_REVISION = '467b159-request-budget-loader-v1';" in middleware,'Current Product request budget cache revision missing')
+req("const PRODUCTS_REQUEST_BUDGET_REVISION = '467b156-request-budget-v2';" in middleware,'Product request budget cache revision missing')
 req("const PRODUCTS_AUTH_READY_REVISION = '467b156-auth-ready-v3';" in middleware,'Product auth recovery cache revision v3 missing')
 req("const PRODUCTS_COLD_START_REVISION = '467b156-core-product-recovery-v1';" in middleware,'Core Product recovery cache revision missing')
 req("const PRODUCTS_QUALITY_FALLBACK_REVISION = '467b156-quality-fallback-v1';" in middleware,'Product quality fallback cache revision missing')
@@ -154,9 +154,8 @@ req(middleware.find(request_loader) < middleware.find(auth_loader) < middleware.
 req('data-dd-products-auth-ready-recovery="1"' in middleware,'Product auth recovery fast-path identity missing')
 req('data-dd-products-cold-start="1"' in middleware,'Core Product recovery fast-path identity missing')
 req('data-dd-products-quality-fallback="1"' in middleware,'Product quality fail-soft fast-path identity missing')
-req("const PRODUCTS_ASSET_REVISION = '467-b159-products-returning-browser-cache-v1';" in middleware,'Current Product asset generation must be Build 159')
+req("const PRODUCTS_ASSET_REVISION = '467-b155-products-lockup-recovery-v2';" in middleware,'Build 155 historical Product asset identity must remain preserved')
 req("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware,'Build 153 historical layout identity must remain preserved')
-req("X-DND-Admin-Client-Cache', 'no-store-b159'" in middleware,'Build 159 Admin client no-store contract missing')
 
 for path in (
  'public/js/admin-products-request-budget-v156.js',
@@ -188,10 +187,10 @@ if FAIL:
 print('PASS')
 print('Product Admin: max two concurrent authenticated admin GETs; duplicate startup reads are shared')
 print('Product bootstrap: one request lane remains available for Product list/picker/bootstrap while non-core reads serialize')
-print('Product scheduler proof: deterministic reserved-lane starvation test GREEN under current cache generation')
+print('Product scheduler proof: deterministic reserved-lane starvation test GREEN')
 print('Product auth recovery: verified auth performs one bounded Product/cleanup refresh after late authentication')
 print('Product core recovery: /api/admin/products can render picker + editable table independently of secondary readiness')
 print('Product cleanup recovery: recovered core Product data triggers one reuse of the cleanup read lane')
 print('Product quality recovery: core Product authority renders a truthful fail-soft quality summary while secondary evidence resolves')
-print('Product readiness: list startup variants converge on one 500-row superset request before Build 157 delivery capping')
+print('Product readiness: list startup variants converge on one 500-row superset request')
 print('Boundary: non-GET mutation behavior is unchanged')
