@@ -185,8 +185,14 @@ for forbidden in ("method: 'POST'", 'method:"POST"', "setInterval("):
     req(forbidden not in quality_recovery, f"Build 157 Product Quality recovery gained forbidden behavior: {forbidden}")
 
 media_fallback = read("public/js/product-media-fallback.js")
+req(
+    "const VERSION=62" in media_fallback or "const VERSION=63" in media_fallback,
+    "Build 157 media recovery version or approved successor version missing"
+)
+if "const VERSION=63" in media_fallback:
+    req("const BUILD159_ADMIN_CACHE_PATCH=159" in media_fallback and "build159_admin_cache_patch" in media_fallback,
+        "Build 159 media successor must carry explicit Admin cache-patch identity")
 for token in (
-    "const VERSION=62",
     "const BUILD157_ADMIN_PATCH=157",
     "IS_ADMIN_RUNTIME&&info.isProduct",
     "admin_same_origin_retry_suppressed",
@@ -276,4 +282,5 @@ print("build157_browser_quality_timeout=FAIL_CLOSED")
 print("build157_browser_admin_product_media_404=FAIL_CLOSED")
 print("public_media_recovery=UNCHANGED")
 print("catalog_option_authority=CACHED_D1_NOT_STATIC_JSON")
+print("media_cache_generation=BUILD157_OR_APPROVED_BUILD159_SUCCESSOR")
 print("schema_d1_write_r2_provider_payment_refund_accounting_mutation=NONE")
