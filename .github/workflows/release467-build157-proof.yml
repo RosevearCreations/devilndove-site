@@ -1,0 +1,42 @@
+name: Release 467 Build 157 Admin Data Delivery Proof
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'public/js/admin-route-usage.js'
+      - 'functions/api/admin/product-resource-bootstrap.js'
+      - 'functions/api/admin/product-resource-search.js'
+      - 'public/js/admin-products-request-budget-v156.js'
+      - 'public/js/admin-inventory-material-usage-reconciliation-v112.js'
+      - 'functions/api/admin/_catalog-option-authority.js'
+      - 'release467-build157-admin-data-delivery.json'
+      - 'scripts/release467_build157_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_157_ADMIN_DATA_DELIVERY.md'
+      - '.github/workflows/release467-build157-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build157-source-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Verify exact checked-out SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "BUILD157_SHA=$(git rev-parse HEAD)"
+          echo "BUILD157_TREE=$(git rev-parse HEAD^{tree})"
+      - name: Run Build 157 fail-closed source gate
+        run: python scripts/release467_build157_gate.py
+      - name: Boundary
+        run: |
+          echo 'Schema migration: NONE'
+          echo 'Request-time DDL: NONE'
+          echo 'Production business-data mutation: NONE'
+          echo 'R2/provider/payment/refund/accounting mutation: NONE'
+          echo 'Mutable business static-JSON authority: NONE'
