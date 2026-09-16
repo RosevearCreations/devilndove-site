@@ -1,40 +1,40 @@
 {
   "release": 467,
-  "build": 157,
-  "title": "Product Admin + Admin Data Delivery",
+  "build": 158,
+  "title": "Product Editor Startup Resilience",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "1b375af8dadb1bfc32086708469cc2008ba9fc9f",
-  "accepted_dev_tree_sha": "96928f3c3d09dcf1999387d9a63a823f264bebf8",
+  "accepted_dev_sha": "4b82883a79e1897792fd3840860760b555e0dd36",
+  "accepted_dev_tree_sha": "045ff6357572177fff9417f229cadce294080b02",
   "acceptance": {
-    "system_gate_run": 35019952492,
-    "current_application_quality_run": 35019952480,
-    "it_admin_runtime_proof_run": 35019952545,
-    "branch_hygiene_run": 35019952489
+    "system_gate_run": 35045214773,
+    "current_application_quality_run": 35045214757,
+    "it_admin_runtime_proof_run": 35045214868,
+    "branch_hygiene_run": 35045214777
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 156,
-      "title": "Tool & Supply Process Assignment",
-      "authority": "release467-build156-inventory-process-assignment.json",
-      "dev_sha": "1b375af8dadb1bfc32086708469cc2008ba9fc9f",
-      "tree_sha": "96928f3c3d09dcf1999387d9a63a823f264bebf8",
+      "build": 157,
+      "title": "Product Admin + Admin Data Delivery",
+      "authority": "release467-build157-admin-data-delivery.json",
+      "dev_sha": "4b82883a79e1897792fd3840860760b555e0dd36",
+      "tree_sha": "045ff6357572177fff9417f229cadce294080b02",
       "proofs": {
-        "system_gate_run": 35019952492,
-        "current_application_quality_run": 35019952480,
-        "it_admin_runtime_proof_run": 35019952545,
-        "branch_hygiene_run": 35019952489
+        "system_gate_run": 35045214773,
+        "current_application_quality_run": 35045214757,
+        "it_admin_runtime_proof_run": 35045214868,
+        "branch_hygiene_run": 35045214777
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "exact_preview_deployment": true
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 157,
-      "title": "Product Admin + Admin Data Delivery",
-      "authority": "release467-build157-admin-data-delivery.json",
+      "build": 158,
+      "title": "Product Editor Startup Resilience",
+      "authority": "release467-build158-product-editor-startup-resilience.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -43,19 +43,20 @@
     "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE"
   },
   "production_checkpoint": {
-    "build": 156,
-    "authority": "release467-build156-inventory-process-assignment.json",
-    "main_sha": "1b375af8dadb1bfc32086708469cc2008ba9fc9f",
-    "tree_sha": "96928f3c3d09dcf1999387d9a63a823f264bebf8",
-    "production_pages_deploy_run": 35020167619,
-    "production_live_resource_integrity_run": 35020259348,
-    "products_production_browser_proof_run": 35020259412,
-    "products_route_production_proof_run": 35020259408,
+    "build": 157,
+    "authority": "release467-build157-admin-data-delivery.json",
+    "main_sha": "4b82883a79e1897792fd3840860760b555e0dd36",
+    "tree_sha": "045ff6357572177fff9417f229cadce294080b02",
+    "production_pages_deploy_run": 35050288505,
+    "production_live_resource_integrity_run": 35050347701,
+    "products_production_browser_proof_run": 35050347805,
+    "products_route_production_proof_run": 35050347663,
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE",
     "client_ui_usability_proven": true
   },
   "current_release_authorities": [
+    "release467-build158-product-editor-startup-resilience.json",
     "release467-build157-admin-data-delivery.json",
     "release467-build156-inventory-process-assignment.json",
     "release467-build155-products-client-responsiveness-hotfix.json",
@@ -158,7 +159,7 @@
     "paypal_sandbox": "HOLD_EXTERNAL",
     "social_oauth": "HOLD_EXTERNAL",
     "caip_private_media": "EVIDENCE_DEPENDENT",
-    "cloudflare_access_service_token": "HOLD_EXTERNAL"
+    "cloudflare_access_service_token": "CONFIGURED_AND_PROVEN_DEVELOPMENT"
   },
   "automatic_production_promotion_authorized": false,
   "request_time_schema_mutation": false,
@@ -171,8 +172,8 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "next_build": 157,
+  "next_build": 158,
   "next_build_state": "AUTHORIZED_IN_PROGRESS",
-  "next_build_title": "Product Admin + Admin Data Delivery",
-  "promotion_state": "BUILD157_CANDIDATE_NOT_YET_VERIFIED"
+  "next_build_title": "Product Editor Startup Resilience",
+  "promotion_state": "BUILD158_CANDIDATE_NOT_YET_VERIFIED"
 }
