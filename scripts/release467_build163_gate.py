@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 163 Product Editor/Media low-read continuity gate, successor-aware through Build 172."""
+"""Release 467 Build 163 Product Editor/Media low-read continuity gate, successor-aware through Build 175."""
 from pathlib import Path
 import re, subprocess, sys
 ROOT=Path(__file__).resolve().parents[1];FAIL=[]
@@ -50,8 +50,12 @@ for source,label in ((save_api,'Product save API'),(media_api,'Product media API
         req(forbidden not in source.upper(),f'{label} contains request-time DDL: {forbidden}')
     req('getAdminUserFromRequest' not in source,f'{label} re-reads D1 authentication instead of using route-guard context')
 
-for token in ('single-product-save-v163','UPDATE products SET','product_seo','background_work_started:false','media_sync_started:false','readiness_scan_started:false','X-DD-D1-Rows-Read'):
+req(any(token in save_api for token in ('single-product-save-v163','single-product-save-v175')),'Product save API lost recognized low-read save identity')
+for token in ('UPDATE products SET','product_seo','background_work_started:false','media_sync_started:false','readiness_scan_started:false','X-DD-D1-Rows-Read'):
     req(token in save_api,f'Product save API missing token: {token}')
+if 'single-product-save-v175' in save_api:
+    req('PRAGMA' not in save_api.upper(),'Build 175 Product save must not perform request-time PRAGMA/schema introspection')
+    req('schema_introspection_reads:0' in save_api,'Build 175 Product save must report zero schema introspection reads')
 for forbidden in ('product_images','product_resource_links','content_projects','creative_projects','maybeQueueApprovedProductSocialPost','createOrRefreshContentProjectForProduct'):
     req(forbidden not in save_api,f'Low-read Product save touches unrelated authority: {forbidden}')
 
