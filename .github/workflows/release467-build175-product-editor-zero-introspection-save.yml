@@ -1,0 +1,49 @@
+name: Release 467 Build 175 Product Editor Zero-Introspection Save
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/product-editor-save.js'
+      - 'admin/product-editor/index.html'
+      - 'public/js/admin-product-editor-v163.js'
+      - 'scripts/release467_build175_gate.py'
+      - 'scripts/release467_build174_gate.py'
+      - 'scripts/release467_build173_gate.py'
+      - 'scripts/release467_build169_gate.py'
+      - 'scripts/release467_build168_gate.py'
+      - 'scripts/release467_build165_gate.py'
+      - 'scripts/release467_build163_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_175_PRODUCT_EDITOR_ZERO_INTROSPECTION_SAVE.md'
+      - '.github/workflows/release467-build175-product-editor-zero-introspection-save.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  product-editor-zero-introspection-save-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Prove Build 175 Product Editor save collapse
+        run: python scripts/release467_build175_gate.py
+      - name: Retain Build 174 Product Editor Media read collapse
+        run: python scripts/release467_build174_gate.py
+      - name: Retain Build 173 Product media repair
+        run: python scripts/release467_build173_gate.py
+      - name: Retain Build 169 explicit QA/editor convergence
+        run: python scripts/release467_build169_gate.py
+      - name: Retain Build 168 low-read handoff
+        run: python scripts/release467_build168_gate.py
+      - name: Retain Build 165 Product/media continuity
+        run: python scripts/release467_build165_gate.py
+      - name: Retain Build 163 Product save continuity
+        run: python scripts/release467_build163_gate.py
+      - name: JavaScript syntax
+        run: |
+          node --check functions/api/admin/product-editor-save.js
+          node --check public/js/admin-product-editor-v163.js
