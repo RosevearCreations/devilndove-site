@@ -1,0 +1,37 @@
+{
+  "release": 467,
+  "build": 170,
+  "title": "Product Browser Explicit Image Recovery",
+  "state": "PRODUCTION_GREEN",
+  "development": {
+    "dev_sha": "879c8730040afaf6caec6374b5057b7261fdcfe2",
+    "tree_sha": "da5e3b249d6e14266da5e191cb22c06205947948",
+    "system_gate_run": 35275441340,
+    "current_application_quality_run": 35275441446,
+    "it_admin_runtime_proof_run": 35275441412,
+    "branch_hygiene_run": 35275441448,
+    "build170_proof_run": 35275441460,
+    "state": "DEVELOPMENT_GREEN"
+  },
+  "production": {
+    "main_sha": "879c8730040afaf6caec6374b5057b7261fdcfe2",
+    "tree_sha": "da5e3b249d6e14266da5e191cb22c06205947948",
+    "production_pages_deploy_run": 35275636873,
+    "production_live_resource_integrity_run": 35275711398,
+    "products_browser_proof_run": 35275711387,
+    "products_route_proof_run": 35275711471,
+    "build170_proof_run": 35275636939,
+    "state": "PRODUCTION_GREEN"
+  },
+  "closure": {
+    "dev_equals_main": true,
+    "exact_tree_match": true,
+    "automatic_secondary_image_recovery_reads": 0,
+    "fallback_photo_recovery": "OPERATOR_TRIGGERED_SINGLE_PRODUCT_ONLY",
+    "schema_change": false,
+    "d1_business_data_mutation": false,
+    "r2_listing_or_mutation": false,
+    "provider_execution": false,
+    "payment_refund_accounting_mutation": false
+  }
+}
