@@ -3,6 +3,12 @@ name: Release 467 Build 155 Products Client Responsiveness Proof
 on:
   pull_request:
     paths:
+      - 'admin/products/index.html'
+      - 'admin/product-editor/index.html'
+      - 'public/js/admin-products-browser-v162.js'
+      - 'public/js/admin-product-editor-v163.js'
+      - 'functions/api/admin/product-browser-images.js'
+      - 'functions/api/admin/product-media-editor.js'
       - 'public/js/admin-products-marketplace-readiness.js'
       - 'public/js/admin-product-image-role-prompts.js'
       - 'functions/_middleware.js'
@@ -10,6 +16,7 @@ on:
       - 'scripts/release467_build154_gate.py'
       - 'scripts/release467_build155_gate.py'
       - 'scripts/release467_build162_gate.py'
+      - 'scripts/release467_build165_gate.py'
       - 'release467-build154-products-worker-resource-hotfix.json'
       - 'scripts/current_application_quality_gate.py'
       - 'scripts/current_system_gate_provenance_gate.py'
@@ -19,6 +26,12 @@ on:
   push:
     branches: [dev]
     paths:
+      - 'admin/products/index.html'
+      - 'admin/product-editor/index.html'
+      - 'public/js/admin-products-browser-v162.js'
+      - 'public/js/admin-product-editor-v163.js'
+      - 'functions/api/admin/product-browser-images.js'
+      - 'functions/api/admin/product-media-editor.js'
       - 'public/js/admin-products-marketplace-readiness.js'
       - 'public/js/admin-product-image-role-prompts.js'
       - 'functions/_middleware.js'
@@ -26,6 +39,7 @@ on:
       - 'scripts/release467_build154_gate.py'
       - 'scripts/release467_build155_gate.py'
       - 'scripts/release467_build162_gate.py'
+      - 'scripts/release467_build165_gate.py'
       - 'release467-build154-products-worker-resource-hotfix.json'
       - 'scripts/current_application_quality_gate.py'
       - 'scripts/current_system_gate_provenance_gate.py'
@@ -51,10 +65,16 @@ jobs:
         id: product-authority
         shell: bash
         run: |
-          if grep -q 'dd-product-admin-architecture' admin/products/index.html && grep -q 'product-browser-v162' admin/products/index.html; then
+          if grep -q 'data-admin-page="product-browser-v165"' admin/products/index.html && grep -q 'data-admin-page="product-editor-v165"' admin/product-editor/index.html; then
+            echo 'build165=true' >> "$GITHUB_OUTPUT"
+            echo 'build162=true' >> "$GITHUB_OUTPUT"
+            echo 'Current Product authority: Build 165 compact browser + image recovery'
+          elif grep -q 'dd-product-admin-architecture' admin/products/index.html && grep -q 'product-browser-v162' admin/products/index.html; then
+            echo 'build165=false' >> "$GITHUB_OUTPUT"
             echo 'build162=true' >> "$GITHUB_OUTPUT"
             echo 'Current Product authority: Build 162 architecture reset'
           else
+            echo 'build165=false' >> "$GITHUB_OUTPUT"
             echo 'build162=false' >> "$GITHUB_OUTPUT"
             echo 'Current Product authority: retained Build 154/155 document'
           fi
@@ -64,10 +84,17 @@ jobs:
         if: steps.product-authority.outputs.build162 != 'true'
         run: python scripts/release467_build154_gate.py
       - name: Validate Build 162 successor Product architecture
-        if: steps.product-authority.outputs.build162 == 'true'
+        if: steps.product-authority.outputs.build162 == 'true' && steps.product-authority.outputs.build165 != 'true'
         run: python scripts/release467_build162_gate.py
+      - name: Validate Build 165 successor Product architecture
+        if: steps.product-authority.outputs.build165 == 'true'
+        run: python scripts/release467_build165_gate.py
       - name: JavaScript syntax
         run: |
+          node --check public/js/admin-products-browser-v162.js
+          node --check public/js/admin-product-editor-v163.js
+          node --check functions/api/admin/product-browser-images.js
+          node --check functions/api/admin/product-media-editor.js
           node --check public/js/admin-products-marketplace-readiness.js
           node --check public/js/admin-product-image-role-prompts.js
           node --check functions/_middleware.js
@@ -75,7 +102,8 @@ jobs:
       - name: Boundary
         run: |
           echo 'Build 154/155 historical client authority: PRESERVED'
-          echo 'Build 162 successor Product Browser/Editor architecture: ACCEPTED WHEN PRESENT'
+          echo 'Build 162 historical Product Browser/Editor architecture: PRESERVED AS PREDECESSOR'
+          echo 'Build 165 compact Product Browser + bounded image recovery: ACCEPTED WHEN PRESENT'
           echo 'Schema change: NONE'
           echo 'D1/R2 business-data mutation: NONE'
           echo 'Provider/payment/refund/accounting mutation: NONE'
