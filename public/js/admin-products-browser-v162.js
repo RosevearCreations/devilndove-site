@@ -1,4 +1,4 @@
-// Release 467 Build 165 — compact Product Browser with bounded multi-source image recovery.
+// Release 467 Build 166 — compact Product Browser with bounded multi-source image recovery.
 // Explicit operator reads only: initial page, Search, Next, Previous, Refresh. No timers.
 (() => {
   'use strict';
@@ -30,13 +30,13 @@
       try{
         const url=new URL(value,location.origin);
         if(url.pathname==='/api/product-media'){
-          const key=String(url.searchParams.get('key')||'').trim();if(key)out.push(`/media/product?key=${encodeURIComponent(key)}&admin_recovery=1`);out.push(value);continue;
+          const key=String(url.searchParams.get('key')||'').trim();if(key)out.push(`/api/product-media?key=${encodeURIComponent(key)}&admin_recovery=1`);out.push(value);continue;
         }
         if(url.pathname==='/media/product'){
-          url.searchParams.set('admin_recovery','1');out.push(`${url.pathname}${url.search}`);continue;
+          const key=String(url.searchParams.get('key')||'').trim();if(key)out.push(`/api/product-media?key=${encodeURIComponent(key)}&admin_recovery=1`);continue;
         }
         if(url.hostname==='assets.devilndove.com'||url.hostname.endsWith('.r2.dev')){
-          const key=url.pathname.replace(/^\/+/, '');if(key)out.push(`/media/product?key=${encodeURIComponent(key)}&admin_recovery=1`);out.push(value);continue;
+          const key=url.pathname.replace(/^\/+/, '');if(key)out.push(`/api/product-media?key=${encodeURIComponent(key)}&admin_recovery=1`);out.push(value);continue;
         }
         out.push(value);
       }catch{}
