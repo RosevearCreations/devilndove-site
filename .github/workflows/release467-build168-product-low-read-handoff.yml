@@ -1,0 +1,41 @@
+name: Release 467 Build 168 Product Low-Read Handoff Proof
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'admin/products/index.html'
+      - 'admin/product-editor/index.html'
+      - 'public/js/admin-products-browser-v162.js'
+      - 'public/js/admin-product-editor-v163.js'
+      - 'functions/api/admin/product-browser-images.js'
+      - 'scripts/release467_build166_gate.py'
+      - 'scripts/release467_build168_gate.py'
+      - '.github/workflows/release467-build168-product-low-read-handoff.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  product-low-read-handoff-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build 168 Product low-read handoff gate
+        run: python scripts/release467_build168_gate.py
+      - name: Retained Build 166 Product editing/image stabilization gate
+        run: python scripts/release467_build166_gate.py
+      - name: JavaScript syntax checks
+        run: |
+          node --check public/js/admin-products-browser-v162.js
+          node --check public/js/admin-product-editor-v163.js
+          node --check functions/api/admin/product-browser-images.js
+      - name: Boundary
+        run: echo 'Build 168 is browser-session reuse + missing-featured-only image recovery + display-only editor handoff. No schema, D1 business-data, R2 listing/mutation, provider, payment, refund or accounting mutation.'
