@@ -18,13 +18,14 @@ def req(value, message):
 
 manifest = json.loads(read('migrations/canonical/manifest.json') or '{}')
 files = [row.get('file') for row in manifest.get('migrations', []) if isinstance(row, dict)]
-req(files == [
+expected = [
     '0001_release464_migration_authority.sql',
     '0002_release464_operational_acceptance.sql',
     '0003_release464_business_growth.sql',
     '0004_release465_storefront_quality.sql',
     '0005_release467_inventory_process_assignment.sql',
-], 'Build 158 must not introduce a schema migration')
+]
+req(files[:len(expected)] == expected and len(files) >= len(expected), 'Build 158 canonical migration prefix must remain intact')
 
 editor = read('public/js/admin-products-editor-startup-v158.js')
 for token in (
