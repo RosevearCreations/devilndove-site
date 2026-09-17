@@ -22,9 +22,9 @@
   const esc=(value)=>String(value??'').replace(/[&<>"']/g,(ch)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
   const money=(cents,currency='CAD')=>{try{return new Intl.NumberFormat('en-CA',{style:'currency',currency:String(currency||'CAD')}).format(Number(cents||0)/100);}catch{return `$${(Number(cents||0)/100).toFixed(2)}`;}};
   function setStatus(message,tone=''){status.textContent=message;status.dataset.tone=tone;status.hidden=!message;}
-  function imageUrl(raw){const value=String(raw||'').trim();if(!value)return '/assets/product-image-recovery-placeholder.svg';try{const url=new URL(value,location.origin);if(url.hostname==='assets.devilndove.com'||url.hostname.endsWith('.r2.dev')){const key=url.pathname.replace(/^\/+/, '');return `/api/product-media?key=${encodeURIComponent(key)}`;}return value;}catch{return '/assets/product-image-recovery-placeholder.svg';}}
+  function imageUrl(raw){const value=String(raw||'').trim();if(!value)return '/assets/product-image-recovery-placeholder.svg';try{const url=new URL(value,location.origin);if(url.hostname==='assets.devilndove.com'||url.hostname.endsWith('.r2.dev')){const key=url.pathname.replace(/^\/+/, '');return `/media/product?key=${encodeURIComponent(key)}`;}return value;}catch{return '/assets/product-image-recovery-placeholder.svg';}}
   function render(products){
-    if(!products.length){body.innerHTML='<tr><td colspan="9" class="dd-empty">No Products matched this page.</td></tr>';return;}
+    if(!products.length){body.innerHTML='<tr><td colspan="8" class="dd-empty">No Products matched this page.</td></tr>';return;}
     body.innerHTML=products.map((p)=>{
       const id=Number(p.product_id||0);
       const edit=`/admin/product-editor/?product_id=${encodeURIComponent(id)}`;
@@ -59,7 +59,7 @@
       const quota=error?.code==='d1_read_capacity_unavailable'||error?.status===503&&/D1|read capacity|quota|rows/i.test(String(error?.message||''));
       if(quota){stoppedForQuota=true;setStatus(`${error.message} Automatic retries are stopped until we deliberately refresh after capacity returns.`,'error');}
       else setStatus(error?.message||'Could not load Products.','error');
-      body.innerHTML='<tr><td colspan="9" class="dd-empty">Product Browser is unavailable. No automatic retry will run.</td></tr>';
+      body.innerHTML='<tr><td colspan="8" class="dd-empty">Product Browser is unavailable. No automatic retry will run.</td></tr>';
     }finally{
       inFlight=false;next.disabled=stoppedForQuota||!nextCursor;prev.disabled=stoppedForQuota||history.length===0;refresh.disabled=stoppedForQuota;
     }
