@@ -25,7 +25,8 @@ catalog_media_source=(ROOT/'admin/catalog-media/index.html').read_text(encoding=
 product_editor_source=(ROOT/'admin/product-editor/index.html').read_text(encoding='utf-8',errors='replace')
 products_source=(ROOT/'admin/products/index.html').read_text(encoding='utf-8',errors='replace')
 build163_current=(('product-media-v163' in catalog_media_source) or ('product-media-v164' in catalog_media_source)) and 'product-editor-v163' in product_editor_source
-build164_current='product-media-v164' in catalog_media_source and 'product-editor-v163' in product_editor_source
+build164_current='product-media-v164' in catalog_media_source and ('product-editor-v163' in product_editor_source or 'product-editor-v165' in product_editor_source)
+build165_current='product-browser-v165' in products_source and 'product-editor-v165' in product_editor_source and 'product-media-v164' in catalog_media_source
 
 # Explicit calls and their historical formatting are intentional because retained gates inspect this source literally.
 run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
@@ -39,7 +40,7 @@ run_current_contract('scripts/release467_build69_gate.py', 'Release 467 Build 69
 run_current_contract('scripts/release467_build70_gate.py', 'Release 467 Build 70')
 run_current_contract('scripts/release467_build71_gate.py', 'Release 467 Build 71')
 run_current_contract('scripts/release467_build72_gate.py', 'Release 467 Build 72')
-if build163_current:
+if build163_current or build164_current or build165_current:
     print('CURRENT PRODUCT MEDIA PROVENANCE: Build 73 multi-panel Catalog Media DOM contract superseded by Build 163+ selected-Product/image architecture')
 else:
     run_current_contract('scripts/release467_build73_gate.py', 'Release 467 Build 73')
@@ -65,12 +66,15 @@ run_current_contract('scripts/release467_build92_gate.py', 'Release 467 Build 92
 run_current_contract('scripts/release467_build93_gate.py', 'Release 467 Build 93')
 run_current_contract('scripts/release467_build94_gate.py', 'Release 467 Build 94')
 
-# Builds 162/163/164 replace the historical giant Product page. Build 164 succeeds the
-# Build 163 selected-Product media workspace with explicit CRUD and image preparation.
-# Historical 154/155/162 assertions remain provenance while current runtime is proven by
-# the newest applicable architecture gate plus its immediate compatibility contract.
+# Builds 162-165 replace the historical giant Product page. Build 165 keeps the Build 164
+# selected-image CRUD authority while compacting Product discovery and recovering existing image
+# references from bounded Product-owned media sources. Historical Product gates are provenance only.
 build162_current='dd-product-admin-architecture' in products_source and 'product-browser-v162' in products_source
-if build164_current:
+if build165_current:
+    print('CURRENT PRODUCT PROVENANCE: Build 165 compact Product browser + image recovery succeeds Build 164 media CRUD')
+    run_current_contract('scripts/release467_build164_gate.py','Release 467 Build 164 compatibility')
+    run_current_contract('scripts/release467_build165_gate.py','Release 467 Build 165')
+elif build164_current:
     print('CURRENT PRODUCT PROVENANCE: Build 154/155 and Build 162 superseded; Build 164 extends Build 163 low-read Product architecture')
     run_current_contract('scripts/release467_build163_gate.py','Release 467 Build 163 compatibility')
     run_current_contract('scripts/release467_build164_gate.py','Release 467 Build 164')
