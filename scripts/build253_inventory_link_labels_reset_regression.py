@@ -35,11 +35,11 @@ mobile_html = (ROOT/'admin/mobile-inventory/index.html').read_text()
 editor_path = ROOT/'admin/product-editor/index.html'
 editor_html = editor_path.read_text() if editor_path.exists() else ''
 css = (ROOT/'css/styles.css').read_text()
-# Build 165 succeeds the Build 162 lightweight Product Browser architecture. Both intentionally
-# keep Product-resource runtime out of the Product list/editor startup path and leave it in the
-# focused Inventory Operations workspace.
+# Build 166 succeeds the Build 162 lightweight Product Browser architecture. Successor Product
+# browsers intentionally keep Product-resource runtime out of the list/editor startup path and
+# leave it in the focused Inventory Operations workspace.
 build162_products = (
-    ('data-admin-page="product-browser-v162"' in products_html or 'data-admin-page="product-browser-v165"' in products_html)
+    any(f'data-admin-page="product-browser-v{version}"' in products_html for version in (162, 165, 166))
     and 'data-dd-products-static-platform="1"' in products_html
     and editor_path.exists()
     and '/admin/product-editor/' in products_html
