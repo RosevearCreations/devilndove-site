@@ -123,7 +123,13 @@ jobs:
           from pathlib import Path
           text=Path('.github/workflows/production-live-resource-integrity-proof.yml').read_text(encoding='utf-8')
           executable='\n'.join(line for line in text.splitlines() if not line.lstrip().startswith('#'))
-          forbidden=('wrangler@4 d1 execute','wrangler d1 execute','/api/products','/api/auth/login?diagnostic=full','/api/storefront-merchandising')
+          forbidden=(
+              'wrangler@4 d1 ' + 'execute',
+              'wrangler d1 ' + 'execute',
+              '/api/' + 'products',
+              '/api/auth/login?' + 'diagnostic=full',
+              '/api/storefront-' + 'merchandising',
+          )
           found=[token for token in forbidden if token in executable]
           assert not found, found
           print('ZERO-D1 POST-DEPLOY BOUNDARY: PASS')
