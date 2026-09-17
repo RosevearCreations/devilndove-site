@@ -9,6 +9,7 @@ on:
       - 'scripts/products_browser_runtime_probe.mjs'
       - 'scripts/release467_build154_gate.py'
       - 'scripts/release467_build155_gate.py'
+      - 'scripts/release467_build162_gate.py'
       - 'release467-build154-products-worker-resource-hotfix.json'
       - 'scripts/current_application_quality_gate.py'
       - 'scripts/current_system_gate_provenance_gate.py'
@@ -24,6 +25,7 @@ on:
       - 'scripts/products_browser_runtime_probe.mjs'
       - 'scripts/release467_build154_gate.py'
       - 'scripts/release467_build155_gate.py'
+      - 'scripts/release467_build162_gate.py'
       - 'release467-build154-products-worker-resource-hotfix.json'
       - 'scripts/current_application_quality_gate.py'
       - 'scripts/current_system_gate_provenance_gate.py'
@@ -45,10 +47,25 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
+      - name: Detect current Product authority
+        id: product-authority
+        shell: bash
+        run: |
+          if grep -q 'dd-product-admin-architecture' admin/products/index.html && grep -q 'product-browser-v162' admin/products/index.html; then
+            echo 'build162=true' >> "$GITHUB_OUTPUT"
+            echo 'Current Product authority: Build 162 architecture reset'
+          else
+            echo 'build162=false' >> "$GITHUB_OUTPUT"
+            echo 'Current Product authority: retained Build 154/155 document'
+          fi
       - name: Validate Build 155 Products client responsiveness authority
         run: python scripts/release467_build155_gate.py
       - name: Preserve Build 154 Worker/server repair
+        if: steps.product-authority.outputs.build162 != 'true'
         run: python scripts/release467_build154_gate.py
+      - name: Validate Build 162 successor Product architecture
+        if: steps.product-authority.outputs.build162 == 'true'
+        run: python scripts/release467_build162_gate.py
       - name: JavaScript syntax
         run: |
           node --check public/js/admin-products-marketplace-readiness.js
@@ -57,8 +74,8 @@ jobs:
           node --check scripts/products_browser_runtime_probe.mjs
       - name: Boundary
         run: |
-          echo 'Products client self-mutation loop: SOURCE PROTECTED'
-          echo 'Real-browser proof: required after exact Development and Production deployment'
+          echo 'Build 154/155 historical client authority: PRESERVED'
+          echo 'Build 162 successor Product Browser/Editor architecture: ACCEPTED WHEN PRESENT'
           echo 'Schema change: NONE'
           echo 'D1/R2 business-data mutation: NONE'
           echo 'Provider/payment/refund/accounting mutation: NONE'
