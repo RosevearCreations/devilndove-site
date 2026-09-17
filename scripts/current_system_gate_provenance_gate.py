@@ -54,8 +54,19 @@ run_current_contract('scripts/release467_build91_gate.py', 'Release 467 Build 91
 run_current_contract('scripts/release467_build92_gate.py', 'Release 467 Build 92')
 run_current_contract('scripts/release467_build93_gate.py', 'Release 467 Build 93')
 run_current_contract('scripts/release467_build94_gate.py', 'Release 467 Build 94')
-run_current_contract('scripts/release467_build154_gate.py','Release 467 Build 154')
-run_current_contract('scripts/release467_build155_gate.py','Release 467 Build 155')
+
+# Build 162 deliberately replaces the Build 154/155 giant Product document with a bounded
+# Product Browser plus a dedicated single-Product editor. Keep the historical Build 154/155
+# gates immutable, but stop applying their DOM/script assertions to the new current Product
+# authority. On a pre-162 tree we still execute them exactly as before.
+products_source=(ROOT/'admin/products/index.html').read_text(encoding='utf-8',errors='replace')
+build162_current='dd-product-admin-architecture' in products_source and 'product-browser-v162' in products_source
+if build162_current:
+    print('CURRENT PRODUCT PROVENANCE: Build 154/155 historical DOM contract superseded by Build 162 architecture reset')
+    run_current_contract('scripts/release467_build162_gate.py','Release 467 Build 162')
+else:
+    run_current_contract('scripts/release467_build154_gate.py','Release 467 Build 154')
+    run_current_contract('scripts/release467_build155_gate.py','Release 467 Build 155')
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL');[print('-',x) for x in FAIL];sys.exit(1)
 print('CURRENT SYSTEM GATE PROVENANCE: PASS')
