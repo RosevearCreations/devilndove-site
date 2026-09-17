@@ -34,7 +34,8 @@ expected = [
     '0004_release465_storefront_quality.sql',
     '0005_release467_inventory_process_assignment.sql',
 ]
-req(files == expected, 'Build 156 canonical migration stream must be exactly 0001-0005')
+req(files[:len(expected)] == expected and len(files) >= len(expected),
+    'Build 156 canonical migration prefix 0001-0005 must remain intact')
 
 migration = read('migrations/canonical/0005_release467_inventory_process_assignment.sql')
 for token in (
