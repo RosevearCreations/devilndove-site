@@ -32,12 +32,12 @@ export async function onRequestGet(context){
   if(!schema.ready)return json({ok:true,schema_ready:false,missing_tables:schema.missing,collections:[],memberships:[],collages:[],rules:[]});
   try{
     const [c,m,g,r]=await Promise.all([
-      a.db.prepare('SELECT * FROM storefront_collections ORDER BY sort_order,LOWER(name),storefront_collection_id').all(),
-      a.db.prepare('SELECT scp.*,p.name AS product_name,p.slug AS product_slug FROM storefront_collection_products scp LEFT JOIN products p ON p.product_id=scp.product_id ORDER BY scp.storefront_collection_id,scp.sort_order,scp.product_id').all(),
-      a.db.prepare('SELECT cp.*,sc.name AS collection_name FROM storefront_collage_presets cp LEFT JOIN storefront_collections sc ON sc.storefront_collection_id=cp.storefront_collection_id ORDER BY cp.sort_order,LOWER(cp.name),cp.storefront_collage_preset_id').all(),
-      a.db.prepare('SELECT r.*,sc.name AS collection_name FROM storefront_merchandising_rules r JOIN storefront_collections sc ON sc.storefront_collection_id=r.storefront_collection_id ORDER BY r.storefront_collection_id,r.priority DESC,r.storefront_merchandising_rule_id').all()
+      a.db.prepare('SELECT * FROM storefront_collections ORDER BY sort_order,LOWER(name),storefront_collection_id LIMIT 200').all(),
+      a.db.prepare('SELECT scp.*,p.name AS product_name,p.slug AS product_slug FROM storefront_collection_products scp LEFT JOIN products p ON p.product_id=scp.product_id ORDER BY scp.storefront_collection_id,scp.sort_order,scp.product_id LIMIT 200').all(),
+      a.db.prepare('SELECT cp.*,sc.name AS collection_name FROM storefront_collage_presets cp LEFT JOIN storefront_collections sc ON sc.storefront_collection_id=cp.storefront_collection_id ORDER BY cp.sort_order,LOWER(cp.name),cp.storefront_collage_preset_id LIMIT 200').all(),
+      a.db.prepare('SELECT r.*,sc.name AS collection_name FROM storefront_merchandising_rules r JOIN storefront_collections sc ON sc.storefront_collection_id=r.storefront_collection_id ORDER BY r.storefront_collection_id,r.priority DESC,r.storefront_merchandising_rule_id LIMIT 200').all()
     ]);
-    return json({ok:true,schema_ready:true,collections:rows(c),memberships:rows(m),collages:rows(g),rules:rows(r)});
+    return json({ok:true,schema_ready:true,collections:rows(c),memberships:rows(m),collages:rows(g),rules:rows(r),projection_limit:200,projection_window_may_be_truncated:[c,m,g,r].some((result)=>rows(result).length>=200)});
   }catch(e){return json({ok:false,error:e?.message||'Could not load Storefront merchandising.'},500);}
 }
 
