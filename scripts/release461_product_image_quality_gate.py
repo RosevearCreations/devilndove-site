@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 461 product-image quality contract, with Build 163+ current-runtime convergence."""
+"""Release 461 product-image quality contract, successor-aware through Release 467 Build 172."""
 from pathlib import Path
 import re
 ROOT=Path(__file__).resolve().parents[1]
@@ -8,15 +8,20 @@ LEGACY_API=ROOT/'functions/api/admin/product-media-score.js'
 LEGACY_UI=ROOT/'public/js/admin-product-media-score.js'
 PAGE=ROOT/'admin/catalog-media/index.html'
 NEW_API=ROOT/'functions/api/admin/product-image-editor.js'
-NEW_UI_163=ROOT/'public/js/admin-product-media-editor-v163.js'
-NEW_UI_164=ROOT/'public/js/admin-product-media-editor-v164.js'
+UI_163=ROOT/'public/js/admin-product-media-editor-v163.js'
+UI_164=ROOT/'public/js/admin-product-media-editor-v164.js'
+UI_172=ROOT/'public/js/admin-product-media-editor-v172.js'
 for path in (MIG,LEGACY_API,LEGACY_UI,PAGE):
     if not path.is_file(): raise SystemExit(f'Missing product image quality authority: {path.relative_to(ROOT)}')
 migration=MIG.read_text(encoding='utf-8');legacy_api=LEGACY_API.read_text(encoding='utf-8');legacy_ui=LEGACY_UI.read_text(encoding='utf-8');page=PAGE.read_text(encoding='utf-8')
-build164='product-media-v164' in page and NEW_API.is_file() and NEW_UI_164.is_file()
-build163=('product-media-v163' in page and NEW_API.is_file() and NEW_UI_163.is_file()) or build164
+build172='admin-product-media-editor-v172.js' in page and NEW_API.is_file() and UI_172.is_file()
+build164=('product-media-v164' in page and NEW_API.is_file() and UI_164.is_file()) and not build172
+build163=(('product-media-v163' in page and NEW_API.is_file() and UI_163.is_file()) or build164 or build172)
 api=NEW_API.read_text(encoding='utf-8') if build163 else legacy_api
-ui=(NEW_UI_164.read_text(encoding='utf-8') if build164 else NEW_UI_163.read_text(encoding='utf-8')) if build163 else legacy_ui
+if build172: ui=UI_172.read_text(encoding='utf-8')
+elif build164: ui=UI_164.read_text(encoding='utf-8')
+elif build163: ui=UI_163.read_text(encoding='utf-8')
+else: ui=legacy_ui
 checks={
  'migration owns role table':'CREATE TABLE IF NOT EXISTS product_media_role_assignments' in migration,
  'migration owns quality review table':'CREATE TABLE IF NOT EXISTS product_image_quality_reviews' in migration,
@@ -31,10 +36,17 @@ if build163:
       'primary score threshold':'PRIMARY_MIN_SCORE=70' in api,
       'server recomputes selected-image score':'function score({' in api and "action==='score'" in api,
       'browser measures natural dimensions':'naturalWidth' in ui and 'naturalHeight' in ui,
-      'catalog media loads Build 163+ editor':('/public/js/admin-product-media-editor-v163.js' in page or '/public/js/admin-product-media-editor-v164.js' in page),
-      'scoring is explicit':'Measure &amp; Score Selected Image' in page and 'scoring was not run automatically' in api.lower(),
+      'catalog media loads Build 163+ editor':any(token in page for token in ('/public/js/admin-product-media-editor-v163.js','/public/js/admin-product-media-editor-v164.js','/public/js/admin-product-media-editor-v172.js')),
+      'scoring is explicit':'Measure &amp; Score Selected Image' in page and (('scoring was not run automatically' in api.lower()) or ('scoring_started:false' in api)),
       'scoring stays selected-image':'WHERE pi.product_image_id=? LIMIT 1' in api,
+      'no background scoring':'setInterval(' not in ui and 'MutationObserver' not in ui,
     })
+    if build172:
+        checks.update({
+          'Build 172 save does not start scoring':'scoring_started:false' in api,
+          'Build 172 score button remains explicit':"productMediaV164ScoreButton')?.addEventListener('click'" in ui,
+          'Build 172 recovered references not score targets':'row.editable===false' in ui,
+        })
 else:
     checks.update({
       'api fails closed on missing migration':'product_media_quality_migration_required' in legacy_api,
@@ -49,7 +61,7 @@ else:
 failed=[name for name,ok in checks.items() if not ok]
 if failed: raise SystemExit('Release 461 product image quality gate failed: '+'; '.join(failed))
 print('RELEASE 461 PRODUCT IMAGE QUALITY ACCEPTANCE: PASS')
-print('Current runtime:', 'Build 164 selected-image scorer' if build164 else ('Build 163 selected-image scorer' if build163 else 'legacy Product media scorer'))
+print('Current runtime:', 'Build 172 selected-image scorer' if build172 else ('Build 164 selected-image scorer' if build164 else ('Build 163 selected-image scorer' if build163 else 'legacy Product media scorer')))
 print('Primary dimensions: >=1200x1200')
 print('Primary alt text: >=12 characters')
 print('Primary quality score: >=70')
