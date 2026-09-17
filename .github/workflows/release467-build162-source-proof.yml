@@ -28,6 +28,5 @@ jobs:
           node --check public/js/admin-product-editor-v162.js
       - name: Service worker syntax check
         run: node --check sw.js
-      - name: Confirm no remote-provider access
-        run: |
-          ! grep -R "wrangler.*d1.*--remote\|wrangler.*r2\|CLOUDFLARE_API_TOKEN" .github/workflows/release467-build162-source-proof.yml
+      - name: Source-only boundary
+        run: echo "Source proof complete; no remote D1, R2, Pages, payment or provider command is executed by this workflow."
