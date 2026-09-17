@@ -35,8 +35,11 @@ mobile_html = (ROOT/'admin/mobile-inventory/index.html').read_text()
 editor_path = ROOT/'admin/product-editor/index.html'
 editor_html = editor_path.read_text() if editor_path.exists() else ''
 css = (ROOT/'css/styles.css').read_text()
+# Build 165 succeeds the Build 162 lightweight Product Browser architecture. Both intentionally
+# keep Product-resource runtime out of the Product list/editor startup path and leave it in the
+# focused Inventory Operations workspace.
 build162_products = (
-    'data-admin-page="product-browser-v162"' in products_html
+    ('data-admin-page="product-browser-v162"' in products_html or 'data-admin-page="product-browser-v165"' in products_html)
     and 'data-dd-products-static-platform="1"' in products_html
     and editor_path.exists()
     and '/admin/product-editor/' in products_html
@@ -55,9 +58,9 @@ check('browser preserves server-provided linked name before external key fallbac
 check('linked-item dropdown displays name before source key fallback', 'link.name || link.source_key' in resources_js)
 check('Inventory Operations loads an accepted Product-resource bundle', has_accepted_asset(inv_html, 'admin-product-resources.js'))
 if build162_products:
-    check('Build 162 Product Browser does not eagerly load Product-resource bundle', not has_accepted_asset(products_html, 'admin-product-resources.js'))
-    check('Build 162 keeps Product-resource authority available from focused Inventory Operations', has_accepted_asset(inv_html, 'admin-product-resources.js'))
-    check('Build 162 dedicated Product Editor exists without eager Product-resource startup', bool(editor_html) and 'admin-product-resources.js' not in editor_html)
+    check('Build 162+ Product Browser does not eagerly load Product-resource bundle', not has_accepted_asset(products_html, 'admin-product-resources.js'))
+    check('Build 162+ keeps Product-resource authority available from focused Inventory Operations', has_accepted_asset(inv_html, 'admin-product-resources.js'))
+    check('Build 162+ dedicated Product Editor exists without eager Product-resource startup', bool(editor_html) and 'admin-product-resources.js' not in editor_html)
 else:
     check('Products loads an accepted Product-resource bundle', has_accepted_asset(products_html, 'admin-product-resources.js'))
 check('Inventory Operations loads an accepted Inventory bundle', has_accepted_asset(inv_html, 'admin-site-item-inventory.js'))
@@ -102,5 +105,5 @@ print(f"\nBuild {release} retained linked-item/reset compatibility regression: {
 print(f"Feature provenance floor: Build {FEATURE_BUILD}; active release ceiling: Build {release}")
 print(f"Runtime release authority: development-release.json / Build {release}")
 if build162_products:
-    print('Build 162 successor mode: Product Browser intentionally excludes eager Product-resource runtime; Inventory Operations remains the focused resource authority.')
+    print('Build 162+ successor mode: Product Browser intentionally excludes eager Product-resource runtime; Inventory Operations remains the focused resource authority.')
 raise SystemExit(0 if passed == len(checks) else 1)
