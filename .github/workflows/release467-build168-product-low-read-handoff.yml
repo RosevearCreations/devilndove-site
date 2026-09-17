@@ -11,6 +11,7 @@ on:
       - 'functions/api/admin/product-browser-images.js'
       - 'scripts/release467_build166_gate.py'
       - 'scripts/release467_build168_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_168_PRODUCT_LOW_READ_HANDOFF.md'
       - '.github/workflows/release467-build168-product-low-read-handoff.yml'
   workflow_dispatch:
 
