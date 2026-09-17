@@ -63,7 +63,8 @@
       if(remember)history.push(cursor);
       cursor=requestedCursor||null;nextCursor=data.next_cursor||null;
       render(Array.isArray(data.products)?data.products:[]);
-      setStatus(`${data.products?.length||0} Product${data.products?.length===1?'':'s'} loaded. No readiness, media-library, inventory-resource or quality scans were run.`,'ok');
+      const readEvidence=Number.isFinite(Number(data.d1_rows_read))?` D1 rows read for this Product query: ${Number(data.d1_rows_read)}.`:'';
+      setStatus(`${data.products?.length||0} Product${data.products?.length===1?'':'s'} loaded. No readiness, media-library, inventory-resource or quality scans were run.${readEvidence}`,'ok');
       pageLabel.textContent=`Page ${page}`;
     }catch(error){
       const quota=error?.code==='d1_read_capacity_unavailable'||error?.status===503&&/D1|read capacity|quota|rows/i.test(String(error?.message||''));
