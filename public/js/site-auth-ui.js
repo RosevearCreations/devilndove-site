@@ -174,18 +174,43 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 if (window.location.pathname.startsWith('/admin')) {
-  void import('/public/js/admin-context-help.js?v=448-context-help')
-    .catch((error) => console.warn('[DD admin help] contextual help unavailable', error));
+  const leanRoutes = new Set([
+    '/admin/catalog/',
+    '/admin/catalog/index.html',
+    '/admin/orders/',
+    '/admin/orders/index.html',
+    '/admin/storefront-merchandising/',
+    '/admin/storefront-merchandising/index.html',
+    '/admin/supply-sourcing/',
+    '/admin/supply-sourcing/index.html'
+  ]);
+  const leanStartup = leanRoutes.has(window.location.pathname);
+  window.DDAdminLeanStartup = Object.freeze({
+    build: 176,
+    enabled: leanStartup,
+    path: window.location.pathname,
+    preserved: ['auth','account-widget','command-palette'],
+    deferred_optional_navigation: leanStartup
+  });
+
+  // Ctrl+K navigation remains available even in lean mode. The remaining modules are
+  // convenience layers that can create multiple document observers while a large business
+  // workspace is still rendering, so heavyweight routes deliberately omit them at startup.
   void import('/public/js/admin-workspace-command-palette-v122.js?v=467b122')
     .catch((error) => console.warn('[DD Build 122] admin workspace navigation unavailable', error));
-  void import('/public/js/admin-workspace-preferences-v125.js?v=467b125')
-    .catch((error) => console.warn('[DD Build 125] admin workspace memory unavailable', error));
-  void import('/public/js/admin-favorites-quick-launch-v126.js?v=467b126')
-    .catch((error) => console.warn('[DD Build 126] admin favorites unavailable', error));
-  void import('/public/js/admin-context-breadcrumbs-v127.js?v=467b127')
-    .catch((error) => console.warn('[DD Build 127] admin context breadcrumbs unavailable', error));
-  void import('/public/js/admin-navigation-help-v128.js?v=467b128')
-    .catch((error) => console.warn('[DD Build 128] admin navigation help unavailable', error));
+
+  if (!leanStartup) {
+    void import('/public/js/admin-context-help.js?v=467b176-context-help')
+      .catch((error) => console.warn('[DD admin help] contextual help unavailable', error));
+    void import('/public/js/admin-workspace-preferences-v125.js?v=467b125')
+      .catch((error) => console.warn('[DD Build 125] admin workspace memory unavailable', error));
+    void import('/public/js/admin-favorites-quick-launch-v126.js?v=467b126')
+      .catch((error) => console.warn('[DD Build 126] admin favorites unavailable', error));
+    void import('/public/js/admin-context-breadcrumbs-v127.js?v=467b127')
+      .catch((error) => console.warn('[DD Build 127] admin context breadcrumbs unavailable', error));
+    void import('/public/js/admin-navigation-help-v128.js?v=467b128')
+      .catch((error) => console.warn('[DD Build 128] admin navigation help unavailable', error));
+  }
 } else {
   void import('/public/js/core/dd-public-module-visibility.mjs?v=440')
     .catch((error) => console.warn('[DD modules] public navigation module visibility unavailable', error));
