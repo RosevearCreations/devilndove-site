@@ -10,7 +10,9 @@ on:
       - 'public/js/admin-products-browser-v162.js'
       - 'public/js/admin-product-editor-v163.js'
       - 'public/js/admin-product-media-editor-v163.js'
+      - 'public/js/admin-product-media-editor-v164.js'
       - 'functions/api/admin/product-browser.js'
+      - 'functions/api/admin/product-browser-images.js'
       - 'functions/api/admin/product-editor-detail.js'
       - 'functions/api/admin/product-editor-save.js'
       - 'functions/api/admin/product-media-editor.js'
@@ -18,6 +20,8 @@ on:
       - 'functions/api/_lib/appModuleRoutes.js'
       - 'sw.js'
       - 'scripts/release467_build163_gate.py'
+      - 'scripts/release467_build164_gate.py'
+      - 'scripts/release467_build165_gate.py'
       - 'scripts/current_system_gate_provenance_gate.py'
       - 'scripts/release461_product_image_quality_gate.py'
       - '.github/workflows/release467-build155-products-production-browser.yml'
@@ -38,16 +42,35 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Detect current Product authority
+        id: product-authority
+        shell: bash
+        run: |
+          if grep -q 'data-admin-page="product-browser-v165"' admin/products/index.html && grep -q 'data-admin-page="product-editor-v165"' admin/product-editor/index.html; then
+            echo 'build165=true' >> "$GITHUB_OUTPUT"
+            echo 'Current Product authority: Build 165 compact browser + bounded image recovery'
+          else
+            echo 'build165=false' >> "$GITHUB_OUTPUT"
+            echo 'Current Product authority: Build 163/164 predecessor contract'
+          fi
       - name: Build 163 Product architecture gate
+        if: steps.product-authority.outputs.build165 != 'true'
         run: python scripts/release467_build163_gate.py
+      - name: Build 165 successor Product architecture gate
+        if: steps.product-authority.outputs.build165 == 'true'
+        run: |
+          python scripts/release467_build164_gate.py
+          python scripts/release467_build165_gate.py
       - name: Release 461 image quality compatibility gate
         run: python scripts/release461_product_image_quality_gate.py
       - name: JavaScript syntax checks
         run: |
+          node --check public/js/admin-products-browser-v162.js
           node --check public/js/admin-product-editor-v163.js
-          node --check public/js/admin-product-media-editor-v163.js
+          node --check public/js/admin-product-media-editor-v164.js
+          node --check functions/api/admin/product-browser-images.js
           node --check functions/api/admin/product-editor-save.js
           node --check functions/api/admin/product-media-editor.js
           node --check functions/api/admin/product-image-editor.js
       - name: Zero-D1 proof boundary
-        run: echo 'Build 163 source proof performs no D1, R2, provider, or Production mutation.'
+        run: echo 'Build 163 historical low-read contract is successor-aware; Build 165 source proof performs no D1, R2 listing, provider, or Production mutation.'
