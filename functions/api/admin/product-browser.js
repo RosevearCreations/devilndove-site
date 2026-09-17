@@ -8,6 +8,7 @@ function json(data,status=200,headers={}){return jsonResponse(data,status,{'Cach
 function cleanText(value,max=160){return String(value||'').trim().slice(0,max);}
 function clampLimit(value){const n=Number(value);return Number.isInteger(n)?Math.max(1,Math.min(MAX_LIMIT,n)):40;}
 function adminFromContext(context){const user=context?.data?.ddModuleAccess?.user||null;return user&&String(user.role||'').toLowerCase()==='admin'?user:null;}
+function measuredRows(result){const n=Number(result?.meta?.rows_read??result?.meta?.rowsRead);return Number.isFinite(n)&&n>=0?n:null;}
 
 export async function onRequestGet(context){
   const {request,env}=context;
@@ -38,7 +39,8 @@ export async function onRequestGet(context){
     const hasMore=rows.length>limit;
     const products=rows.slice(0,limit).map((row)=>({...row,product_id:Number(row.product_id||0),product_number:row.product_number==null?null:Number(row.product_number),price_cents:Number(row.price_cents||0),inventory_quantity:Number(row.inventory_quantity||0),inventory_tracking:Number(row.inventory_tracking||0)}));
     const nextCursor=hasMore&&products.length?Number(products[products.length-1].product_id||0):null;
-    return json({ok:true,products,next_cursor:nextCursor,has_more:hasMore,limit,query:q||null,delivery:'product-browser-v162',read_policy:'single_products_page_query'});
+    const rowsRead=measuredRows(result);
+    return json({ok:true,products,next_cursor:nextCursor,has_more:hasMore,limit,query:q||null,delivery:'product-browser-v162',read_policy:'single_products_page_query',d1_rows_read:rowsRead},200,rowsRead==null?{}:{'X-DD-D1-Rows-Read':String(rowsRead)});
   }catch(error){
     const message=String(error?.message||'Product browser read failed.');
     const quota=/rows read|daily|limit|quota|7500/i.test(message);
