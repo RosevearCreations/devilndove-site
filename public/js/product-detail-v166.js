@@ -37,8 +37,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
   function render(product,rows){
     const images=[];const seen=new Set();
-    const add=(row)=>{const raw=String(row?.image_url||row||'').trim();if(!raw)return;const key=raw.toLowerCase();if(seen.has(key))return;seen.add(key);images.push(typeof row==='string'?{image_url:row,alt_text:product.name||'Product image'}:row);};
-    add({image_url:product.featured_image_url,alt_text:product.name||'Product image'});(Array.isArray(rows)?rows:[]).forEach(add);
+    const addImage=(row)=>{const raw=String(row?.image_url||row||'').trim();if(!raw)return;const key=raw.toLowerCase();if(seen.has(key))return;seen.add(key);images.push(typeof row==='string'?{image_url:row,alt_text:product.name||'Product image'}:row);};
+    addImage({image_url:product.featured_image_url,alt_text:product.name||'Product image'});(Array.isArray(rows)?rows:[]).forEach(addImage);
     setText('pageH1',product.h1_override||product.name||'Product Details');
     setText('pageIntro',product.short_description||'View the full details for this Devil n Dove item.');
     setText('productBreadcrumbLabel',product.name||'Product');setText('productType',product.product_category||product.product_type||'');setText('productName',product.name||'Product');
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const trust=document.getElementById('productTrustSummary');if(trust)trust.textContent='This Product page now loads from a bounded Product record and existing gallery references so shopping remains responsive.';
     show(detail);
     try{document.dispatchEvent(new CustomEvent('dd:product-detail-rendered',{detail:{product,images}}));}catch{}
-    const add=document.getElementById('addToCartButton');add?.addEventListener('click',()=>{const message=document.getElementById('addToCartMessage');try{if(!window.DDCart)throw new Error('Cart is not available right now.');const qty=Math.max(1,Number(document.getElementById('productQuantity')?.value||1));window.DDCart.addToCart(product,qty);if(message){message.textContent='Added to cart successfully.';message.style.display='block';}}catch(e){if(message){message.textContent=e.message||'Could not add to cart.';message.style.display='block';}}});
+    const addButton=document.getElementById('addToCartButton');addButton?.addEventListener('click',()=>{const message=document.getElementById('addToCartMessage');try{if(!window.DDCart)throw new Error('Cart is not available right now.');const qty=Math.max(1,Number(document.getElementById('productQuantity')?.value||1));window.DDCart.addToCart(product,qty);if(message){message.textContent='Added to cart successfully.';message.style.display='block';}}catch(e){if(message){message.textContent=e.message||'Could not add to cart.';message.style.display='block';}}});
   }
   (async()=>{
     hide(error);hide(detail);show(loading);
