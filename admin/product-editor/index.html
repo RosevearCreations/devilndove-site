@@ -7,9 +7,9 @@
   <meta name="description" content="Dedicated low-read single-Product editor for Devil n Dove."/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
-  <link rel="stylesheet" href="/css/admin-product-v162.css?v=168"/>
+  <link rel="stylesheet" href="/css/admin-product-v162.css?v=169"/>
 </head>
-<body data-admin-page="product-editor-v165">
+<body data-admin-page="product-editor-v169">
   <div class="container admin-shell dd-product-shell">
     <nav class="nav" aria-label="Admin navigation">
       <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><strong>Devil n Dove</strong><div class="small">Admin / Product Editor</div></div></div>
@@ -17,12 +17,12 @@
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
-      <div><p class="eyebrow">Release 467 • Build 168</p><h1 id="productEditorTitle">Product Editor</h1><p>Edit one Product at a time. A Product Browser handoff may show identity/photo immediately, but Save remains disabled until the authoritative one-Product detail read succeeds.</p></div>
+      <div><p class="eyebrow">Release 467 • Build 169</p><h1 id="productEditorTitle">Product Editor</h1><p>Edit one Product at a time. Product QA is now explicit and lazy: opening the QA tab performs no read until you press Run QA.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
 
     <div id="productEditorStatus" class="dd-product-status small" aria-live="polite"></div>
-    <details class="dd-low-read-details"><summary>Low-read editor contract</summary><div class="dd-low-read-note small"><strong>Build 165 foundation, Build 168 refinement:</strong> startup authority is still one selected-Product detail read. The Product Browser may hand over display-only identity/photo context through session storage, but that snapshot never becomes write authority and cannot enable Save. No Product-list bootstrap, autosave, gallery scan, scoring or background refresh. Opening Media performs bounded selected-Product image-reference reads only. Save updates only this Product and its SEO row.</div></details>
+    <details class="dd-low-read-details"><summary>Low-read editor contract</summary><div class="dd-low-read-note small"><strong>Build 169:</strong> startup authority remains one selected-Product detail read. The browser handoff remains display-only. Media loads only when Media is opened. QA loads only when Run QA is pressed, reads the selected Product/SEO record plus at most two Product image rows, performs no request-time schema mutation, and does not automatically write QA history. Save updates only this Product and its SEO row.</div></details>
 
     <form id="productEditorForm" class="card">
       <div class="dd-editor-tabs" role="tablist" aria-label="Product Editor sections">
@@ -31,6 +31,7 @@
         <button class="btn dd-editor-tab" type="button" data-editor-tab="description" aria-selected="false">Description</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="media" aria-selected="false">Media</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="seo" aria-selected="false">SEO / Publishing</button>
+        <button class="btn dd-editor-tab" type="button" data-editor-tab="qa" aria-selected="false">QA</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="advanced" aria-selected="false">Advanced</button>
       </div>
 
@@ -99,12 +100,18 @@
         </div>
       </section>
 
+      <section class="dd-editor-panel" data-editor-panel="qa" hidden>
+        <div class="dd-products-browser-heading"><div><h2>Product QA</h2><p class="small">This panel is intentionally idle until you press Run QA. A run checks only this Product, its SEO row and at most two Product image rows. It does not create tables, write QA history, scan the catalog, list R2 or retry in the background.</p></div><button class="btn" id="productEditorQaRun" type="button" disabled>Run QA</button></div>
+        <div id="productEditorQaStatus" class="small" aria-live="polite">QA has not run.</div>
+        <div id="productEditorQaResults" style="display:grid;gap:10px;margin-top:12px"></div>
+      </section>
+
       <section class="dd-editor-panel" data-editor-panel="advanced" hidden><h2>Advanced workspaces</h2><p class="small">These systems remain separate so they cannot wake up merely because we edit a Product.</p><div class="dd-product-actions"><a class="btn" href="/admin/inventory-operations/">Inventory Operations</a><a class="btn" id="productEditorMediaAdvancedLink" href="/admin/catalog-media/">Image Editor</a><a class="btn" href="/admin/release-preflight/">Release Preflight</a><a class="btn" href="/admin/packaging-studio/">Packaging</a></div></section>
 
-      <div class="dd-editor-footer"><div class="small">No autosave. Save is an explicit one-Product action after live authority loads.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
+      <div class="dd-editor-footer"><div class="small">No autosave. Save and QA are explicit one-Product actions after live Product authority loads.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-editor-v163.js?v=168"></script>
+  <script src="/public/js/admin-product-editor-v163.js?v=169"></script>
 </body>
 </html>
