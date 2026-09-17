@@ -18,6 +18,7 @@ on:
       - 'scripts/release467_build172_gate.py'
       - 'scripts/release467_build169_gate.py'
       - 'scripts/release467_build168_gate.py'
+      - 'scripts/release467_build165_gate.py'
       - 'scripts/release467_build161_gate.py'
       - 'scripts/release467_build158_gate.py'
       - 'scripts/release467_build157_gate.py'
