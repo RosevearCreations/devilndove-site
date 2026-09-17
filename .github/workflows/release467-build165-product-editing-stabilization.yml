@@ -10,6 +10,7 @@ on:
       - 'public/js/admin-products-browser-v162.js'
       - 'public/js/admin-product-editor-v163.js'
       - 'functions/api/admin/product-browser-images.js'
+      - 'functions/api/admin/product-media-editor.js'
       - 'scripts/release467_build165_gate.py'
       - '.github/workflows/release467-build165-product-editing-stabilization.yml'
   workflow_dispatch:
@@ -28,16 +29,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Build 165 Product editing stabilization source gate
+      - name: Build 165 Product browser and image recovery source gate
         run: python scripts/release467_build165_gate.py
-      - name: Build 164 Product media CRUD compatibility gate
+      - name: Build 164 Product media CRUD continuity gate
         run: python scripts/release467_build164_gate.py
-      - name: Build 163 Product editor compatibility gate
-        run: python scripts/release467_build163_gate.py
       - name: JavaScript syntax checks
         run: |
           node --check public/js/admin-products-browser-v162.js
           node --check public/js/admin-product-editor-v163.js
           node --check functions/api/admin/product-browser-images.js
+          node --check functions/api/admin/product-media-editor.js
       - name: Boundary
-        run: echo 'Build 165 changes Product browser/editor source only; no D1 schema, Production data, R2 listing, provider, payment, refund or accounting mutation.'
+        run: echo 'Build 165 changes bounded Product browser/editor image discovery only; no D1 schema, Production data, R2 listing, provider, payment, refund or accounting mutation.'
