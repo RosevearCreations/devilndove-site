@@ -49,6 +49,9 @@ function shapeOrders(rows) {
 export async function onRequestGet(context) {
   const { request, env } = context;
   const db = getDb(env);
+  const url = new URL(request.url);
+  const requestedLimit = Math.trunc(Number(url.searchParams.get('limit') || 80));
+  const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(200, requestedLimit)) : 80;
   const adminUser = await getAdminUserFromRequest(request, env);
   if (!adminUser) return json({ ok: false, error: "Unauthorized." }, 401);
   if (!db) return json({ ok: false, error: "Database binding is not configured." }, 500);
@@ -101,6 +104,7 @@ export async function onRequestGet(context) {
     FROM orders o
     LEFT JOIN payment_summary ps ON ps.order_id = o.order_id
     ORDER BY datetime(COALESCE(o.updated_at,o.created_at)) DESC, o.order_id DESC
+    LIMIT ${limit}
   `;
 
   const fallbackSql = `
@@ -117,6 +121,7 @@ export async function onRequestGet(context) {
       ${itemProjection}
     FROM orders o
     ORDER BY datetime(COALESCE(o.updated_at,o.created_at)) DESC, o.order_id DESC
+    LIMIT ${limit}
   `;
 
   try {
@@ -127,7 +132,9 @@ export async function onRequestGet(context) {
       build: 150,
       requested_by: { user_id: adminUser.user_id, email: adminUser.email, display_name: adminUser.display_name },
       orders: shapeOrders(result),
-      diagnostics: { warnings, authority: "primary_orders_query", product_search_projection: true }
+      list_limit: limit,
+      window_may_be_truncated: normalizeResults(result).length >= limit,
+      diagnostics: { warnings, authority: "primary_orders_query", product_search_projection: true, bounded_list: true }
     });
   } catch (primaryError) {
     warnings.push("primary_orders_query_failed");
@@ -149,7 +156,9 @@ export async function onRequestGet(context) {
         warning: "Fallback orders query used. Payment rollups may be incomplete until the richer query recovers.",
         requested_by: { user_id: adminUser.user_id, email: adminUser.email, display_name: adminUser.display_name },
         orders: shapeOrders(fallbackResult),
-        diagnostics: { warnings, authority: "fallback_orders_query", product_search_projection: true }
+        list_limit: limit,
+        window_may_be_truncated: normalizeResults(fallbackResult).length >= limit,
+        diagnostics: { warnings, authority: "fallback_orders_query", product_search_projection: true, bounded_list: true }
       });
     } catch (fallbackError) {
       warnings.push("fallback_orders_query_failed");
