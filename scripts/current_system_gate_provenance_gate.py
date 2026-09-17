@@ -7,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[1];WORKFLOW=ROOT/'.github/workflows/system
 def req(ok,msg):
     if not ok: FAIL.append(msg)
 text=WORKFLOW.read_text(encoding='utf-8')
-for token in ("'current-development-authority.json'","'release467-*.json'",'python scripts/current_system_gate_provenance_gate.py','python scripts/current_regression_evidence.py','/tmp/current-development-url','/tmp/current-development-d1-authority.json','/tmp/current-development-deploy-proof.json','/tmp/current-regression-evidence.json','name: current-development-deploy-proof','name: current-regression-evidence','Current Development Preview ${GITHUB_SHA}'):req(token in text,f'missing current System Gate provenance token: {token}')
+for token in ("'current-development-authority.json'","'release467-*.json'",'python scripts/current_system_gate_provenance_gate.py','python scripts/current_regression_evidence.py','/tmp/current-development-url','/tmp/current-development-d1-authority.json','/tmp/current-development-deploy-proof','/tmp/current-regression-evidence.json','name: current-development-deploy-proof','name: current-regression-evidence','Current Development Preview ${GITHUB_SHA}'):req(token in text,f'missing current System Gate provenance token: {token}')
 for stale in ('Release 465 Build 3 safety statement','Release 465 Build 3 canonical Development Preview','release465-build3-development-deploy-proof','release465-build3-regression-evidence','/tmp/release465-dev-url','/tmp/release465-build3-d1-authority.json','/tmp/release465-build3-development-deploy-proof.json'):req(stale not in text,f'stale active System Gate provenance remains: {stale}')
 for historical in ('scripts/release464_update2_gate.py','scripts/release464_update3_gate.py','scripts/release465_build1_gate.py','scripts/release465_build2_gate.py','scripts/release465_build3_gate.py','scripts/release465_performance_budget_gate.py'):req(historical in text,f'historical regression prerequisite missing: {historical}')
 def run_current_contract(path,label):
@@ -20,6 +20,12 @@ def run_current_contract(path,label):
         annotation=detail.replace('\r',' ').replace('\n',' | ')
         print(f'::error title=System provenance child failed::{label} failed with exit code {result.returncode}: {annotation}')
         FAIL.append(f"{label} current reliability contract failed: {detail}")
+
+catalog_media_source=(ROOT/'admin/catalog-media/index.html').read_text(encoding='utf-8',errors='replace')
+product_editor_source=(ROOT/'admin/product-editor/index.html').read_text(encoding='utf-8',errors='replace')
+products_source=(ROOT/'admin/products/index.html').read_text(encoding='utf-8',errors='replace')
+build163_current='product-media-v163' in catalog_media_source and 'product-editor-v163' in product_editor_source
+
 # Explicit calls and their historical formatting are intentional because retained gates inspect this source literally.
 run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
 run_current_contract('scripts/release467_build63_gate.py', 'Release 467 Build 63')
@@ -32,7 +38,10 @@ run_current_contract('scripts/release467_build69_gate.py', 'Release 467 Build 69
 run_current_contract('scripts/release467_build70_gate.py', 'Release 467 Build 70')
 run_current_contract('scripts/release467_build71_gate.py', 'Release 467 Build 71')
 run_current_contract('scripts/release467_build72_gate.py', 'Release 467 Build 72')
-run_current_contract('scripts/release467_build73_gate.py', 'Release 467 Build 73')
+if build163_current:
+    print('CURRENT PRODUCT MEDIA PROVENANCE: Build 73 multi-panel Catalog Media DOM contract superseded by Build 163 selected-Product/image architecture')
+else:
+    run_current_contract('scripts/release467_build73_gate.py', 'Release 467 Build 73')
 run_current_contract('scripts/release467_build74_gate.py', 'Release 467 Build 74')
 run_current_contract('scripts/release467_build75_gate.py', 'Release 467 Build 75')
 run_current_contract('scripts/release467_build76_gate.py', 'Release 467 Build 76')
@@ -55,13 +64,14 @@ run_current_contract('scripts/release467_build92_gate.py', 'Release 467 Build 92
 run_current_contract('scripts/release467_build93_gate.py', 'Release 467 Build 93')
 run_current_contract('scripts/release467_build94_gate.py', 'Release 467 Build 94')
 
-# Build 162 deliberately replaces the Build 154/155 giant Product document with a bounded
-# Product Browser plus a dedicated single-Product editor. Keep the historical Build 154/155
-# gates immutable, but stop applying their DOM/script assertions to the new current Product
-# authority. On a pre-162 tree we still execute them exactly as before.
-products_source=(ROOT/'admin/products/index.html').read_text(encoding='utf-8',errors='replace')
+# Builds 162/163 replace the historical giant Product page. Build 163 extends that reset
+# through Product save plus Catalog Media/Image scoring. Historical 154/155 assertions remain
+# source history, while the current runtime is proven by the newest architecture gate.
 build162_current='dd-product-admin-architecture' in products_source and 'product-browser-v162' in products_source
-if build162_current:
+if build163_current:
+    print('CURRENT PRODUCT PROVENANCE: Build 154/155 and Build 162 editor/media contracts superseded by Build 163 low-read Product architecture')
+    run_current_contract('scripts/release467_build163_gate.py','Release 467 Build 163')
+elif build162_current:
     print('CURRENT PRODUCT PROVENANCE: Build 154/155 historical DOM contract superseded by Build 162 architecture reset')
     run_current_contract('scripts/release467_build162_gate.py','Release 467 Build 162')
 else:
