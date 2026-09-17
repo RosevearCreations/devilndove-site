@@ -4,9 +4,10 @@
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { normalizeTaxRateFraction, taxRatePercent } from './_tax-rate.js';
 
-function json(data,status=200){return jsonResponse(data,status,{'Cache-Control':'no-store','X-DD-D1-Read-Contract':'single-product-editor-v162'});}
+function json(data,status=200,headers={}){return jsonResponse(data,status,{'Cache-Control':'no-store','X-DD-D1-Read-Contract':'single-product-editor-v162',...headers});}
 function adminFromContext(context){const user=context?.data?.ddModuleAccess?.user||null;return user&&String(user.role||'').toLowerCase()==='admin'?user:null;}
 function text(value){return String(value||'').trim();}
+function measuredRows(result){const n=Number(result?.meta?.rows_read??result?.meta?.rowsRead);return Number.isFinite(n)&&n>=0?n:null;}
 function parseColors(value,fallback=''){
   let rows=[];try{const parsed=JSON.parse(String(value||'[]'));if(Array.isArray(parsed))rows=parsed;}catch{}
   const out=[];[fallback,...rows].forEach((entry)=>{const clean=text(entry);if(clean&&!out.some((row)=>row.toLowerCase()===clean.toLowerCase()))out.push(clean);});
@@ -20,7 +21,7 @@ export async function onRequestGet(context){
   const productId=Number(new URL(request.url).searchParams.get('product_id'));
   if(!Number.isInteger(productId)||productId<=0)return json({ok:false,error:'A valid product_id is required.'},400);
   try{
-    const product=await db.prepare(`
+    const result=await db.prepare(`
       SELECT p.*,
              ps.meta_title, ps.meta_description, ps.keywords, ps.h1_override,
              ps.canonical_url, ps.schema_type, ps.og_title, ps.og_description, ps.og_image_url
@@ -28,13 +29,15 @@ export async function onRequestGet(context){
       LEFT JOIN product_seo ps ON ps.product_id=p.product_id
       WHERE p.product_id=?
       LIMIT 1
-    `).bind(productId).first();
+    `).bind(productId).all();
+    const product=(Array.isArray(result?.results)?result.results:[])[0]||null;
     if(!product)return json({ok:false,error:'Product not found.'},404);
     const rate=normalizeTaxRateFraction(product.tax_rate,product.rate_percent);
     product.tax_rate=rate;product.rate_percent=taxRatePercent(rate);
     product.color_names=parseColors(product.color_names_json,product.color_name);
     product.color_names_text=product.color_names.join(', ');
-    return json({ok:true,product,delivery:'single-product-editor-v162',lazy_sections:{media:true,inventory:true,readiness:true,pricing_evidence:true}});
+    const rowsRead=measuredRows(result);
+    return json({ok:true,product,delivery:'single-product-editor-v162',d1_rows_read:rowsRead,lazy_sections:{media:true,inventory:true,readiness:true,pricing_evidence:true}},200,rowsRead==null?{}:{'X-DD-D1-Rows-Read':String(rowsRead)});
   }catch(error){
     const message=String(error?.message||'Product Editor read failed.');
     const quota=/rows read|daily|limit|quota|7500/i.test(message);
