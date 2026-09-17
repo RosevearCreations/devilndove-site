@@ -7,21 +7,26 @@ on:
       - 'admin/products/index.html'
       - 'admin/product-editor/index.html'
       - 'admin/catalog-media/index.html'
+      - 'shop/product/index.html'
       - 'public/js/admin-products-browser-v162.js'
       - 'public/js/admin-product-editor-v163.js'
       - 'public/js/admin-product-media-editor-v163.js'
       - 'public/js/admin-product-media-editor-v164.js'
+      - 'public/js/product-detail-v166.js'
       - 'functions/api/admin/product-browser.js'
       - 'functions/api/admin/product-browser-images.js'
       - 'functions/api/admin/product-editor-detail.js'
       - 'functions/api/admin/product-editor-save.js'
       - 'functions/api/admin/product-media-editor.js'
       - 'functions/api/admin/product-image-editor.js'
+      - 'functions/api/product-detail-core.js'
+      - 'functions/media/product.js'
       - 'functions/api/_lib/appModuleRoutes.js'
       - 'sw.js'
       - 'scripts/release467_build163_gate.py'
       - 'scripts/release467_build164_gate.py'
       - 'scripts/release467_build165_gate.py'
+      - 'scripts/release467_build166_gate.py'
       - 'scripts/current_system_gate_provenance_gate.py'
       - 'scripts/release461_product_image_quality_gate.py'
       - '.github/workflows/release467-build155-products-production-browser.yml'
@@ -46,21 +51,29 @@ jobs:
         id: product-authority
         shell: bash
         run: |
-          if grep -q 'data-admin-page="product-browser-v165"' admin/products/index.html && grep -q 'data-admin-page="product-editor-v165"' admin/product-editor/index.html; then
-            echo 'build165=true' >> "$GITHUB_OUTPUT"
+          if grep -q 'data-admin-page="product-browser-v166"' admin/products/index.html && grep -q 'data-admin-page="product-editor-v165"' admin/product-editor/index.html; then
+            echo 'authority=build166' >> "$GITHUB_OUTPUT"
+            echo 'Current Product authority: Build 166 stabilized browser + bounded Product detail'
+          elif grep -q 'data-admin-page="product-browser-v165"' admin/products/index.html && grep -q 'data-admin-page="product-editor-v165"' admin/product-editor/index.html; then
+            echo 'authority=build165' >> "$GITHUB_OUTPUT"
             echo 'Current Product authority: Build 165 compact browser + bounded image recovery'
           else
-            echo 'build165=false' >> "$GITHUB_OUTPUT"
+            echo 'authority=predecessor' >> "$GITHUB_OUTPUT"
             echo 'Current Product authority: Build 163/164 predecessor contract'
           fi
       - name: Build 163 Product architecture gate
-        if: steps.product-authority.outputs.build165 != 'true'
+        if: steps.product-authority.outputs.authority == 'predecessor'
         run: python scripts/release467_build163_gate.py
       - name: Build 165 successor Product architecture gate
-        if: steps.product-authority.outputs.build165 == 'true'
+        if: steps.product-authority.outputs.authority == 'build165'
         run: |
           python scripts/release467_build164_gate.py
           python scripts/release467_build165_gate.py
+      - name: Build 166 successor Product architecture gate
+        if: steps.product-authority.outputs.authority == 'build166'
+        run: |
+          python scripts/release467_build164_gate.py
+          python scripts/release467_build166_gate.py
       - name: Release 461 image quality compatibility gate
         run: python scripts/release461_product_image_quality_gate.py
       - name: JavaScript syntax checks
@@ -68,9 +81,12 @@ jobs:
           node --check public/js/admin-products-browser-v162.js
           node --check public/js/admin-product-editor-v163.js
           node --check public/js/admin-product-media-editor-v164.js
+          node --check public/js/product-detail-v166.js
           node --check functions/api/admin/product-browser-images.js
           node --check functions/api/admin/product-editor-save.js
           node --check functions/api/admin/product-media-editor.js
           node --check functions/api/admin/product-image-editor.js
+          node --check functions/api/product-detail-core.js
+          node --check functions/media/product.js
       - name: Zero-D1 proof boundary
-        run: echo 'Build 163 historical low-read contract is successor-aware; Build 165 source proof performs no D1, R2 listing, provider, or Production mutation.'
+        run: echo 'Historical Product low-read proof is successor-aware; Build 166 source proof performs no D1 schema, R2 listing, provider, payment, refund or Production business-data mutation.'
