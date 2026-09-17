@@ -65,7 +65,8 @@ for token in ('Classify whether this promotion needs Production D1 migration wor
     req(token in production_deploy,f'Production deploy missing D1 read-amplification guard: {token}')
 for token in ('control_plane_zero_d1',"'remote_d1_queries':0","'runtime_business_table_reads':0",'ZERO-D1 POST-DEPLOY BOUNDARY: PASS'):
     req(token in production_live,f'Production live proof missing zero-D1 boundary: {token}')
-executable='\n'.join(line for line in production_live.splitlines() if not line.lstrip().startswith('#'))
+# Ignore comments and the workflow's own forbidden-token audit literal; inspect only executable commands.
+executable='\n'.join(line for line in production_live.splitlines() if not line.lstrip().startswith('#') and 'forbidden=(' not in line.replace(' ',''))
 for forbidden in ('wrangler@4 d1 execute','wrangler d1 execute','/api/products','/api/auth/login?diagnostic=full','/api/storefront-merchandising'):
     req(forbidden not in executable,f'Post-deploy resource proof still executes D1/runtime-heavy path: {forbidden}')
 
