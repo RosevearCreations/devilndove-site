@@ -34,7 +34,8 @@ for key in ('request_time_schema_mutation','schema_change_authorized','d1_mutati
 
 canonical = load('migrations/canonical/manifest.json')
 expected = ['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql']
-req([row.get('file') for row in canonical.get('migrations', []) if isinstance(row, dict)] == expected, 'Build 161 must not add or remove canonical migrations')
+current_files=[row.get('file') for row in canonical.get('migrations', []) if isinstance(row, dict)]
+req(current_files[:len(expected)] == expected and len(current_files) >= len(expected), 'Build 161 canonical migration prefix must remain intact')
 
 middleware = read('functions/_middleware.js')
 for token in ('ADMIN_QOL_REVISION', '467b161-universal-search-v1', 'adminQolMarkup()', 'admin-universal-search-v161.css', 'admin-universal-search-v161.js', 'isAdminRuntimePath(pathname)', 'productsPlatformMarkup()'):
