@@ -1,4 +1,4 @@
-// Release 467 Build 172 — Product Media save/refresh reliability.
+// Release 467 Build 173 — Product Media save/refresh reliability with corrected publication guard.
 // Explicit operator actions only: no catalog scan, R2 listing, autosave, observer, or background refresh.
 (() => {
   'use strict';
