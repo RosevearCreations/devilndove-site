@@ -28,7 +28,10 @@ for token in ('dd-product-admin-architecture','product-browser-v162','admin-prod
 for forbidden in ('admin-products.js','admin-edit-product.js','admin-product-seo.js','admin-product-resources.js','admin-product-stock-report.js','admin-site-item-inventory.js','productQualityCommandCenterMount','createProductForm','admin-product-workspaces.js'):
     req(forbidden not in products,f'Product Browser still eagerly loads legacy Product system: {forbidden}')
 
-for token in ('admin-product-editor-v162.js','productEditorForm','data-editor-tab="media"','No autosave','Back to Products'):
+# Build 163+ succeeds the Build 162 editor client while preserving the dedicated editor
+# architecture. Accept the current successor asset as proof that the Build 162 boundary remains.
+req('admin-product-editor-v162.js' in editor or 'admin-product-editor-v163.js' in editor,'dedicated Product Editor missing Build 162-or-later editor asset')
+for token in ('productEditorForm','data-editor-tab="media"','No autosave','Back to Products'):
     req(token in editor,f'dedicated Product Editor missing {token}')
 for forbidden in ('admin-edit-product.js','admin-products.js','admin-product-workspaces.js','admin-product-seo.js','admin-product-resources.js','admin-site-item-inventory.js'):
     req(forbidden not in editor,f'dedicated Product Editor embeds legacy subsystem: {forbidden}')
