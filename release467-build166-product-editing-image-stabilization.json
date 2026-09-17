@@ -4,13 +4,31 @@
   "title": "Product Editing & Image Stabilization",
   "state": "DEVELOPMENT_CANDIDATE",
   "priority": "stabilize_product_editing_and_product_images",
+  "starting_point": {
+    "development": {
+      "sha": "20961a195ccab0594ca47ee051de45aa9168bda4",
+      "tree": "1adc33d1280b55f62f4dc21c7c87ac334fee303e",
+      "system_gate_run": 35229694257,
+      "quality_run": 35229694220,
+      "it_admin_runtime_run": 35229694225,
+      "repository_hygiene_run": 35229694190,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "20961a195ccab0594ca47ee051de45aa9168bda4",
+      "tree": "1adc33d1280b55f62f4dc21c7c87ac334fee303e",
+      "production_pages_deploy_run": 35230536365,
+      "production_live_resource_integrity_run": 35230633169,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
   "changes": [
     "Keep /admin/products/ compact at eight rows by default with explicit paging.",
     "Route Product thumbnails through the canonical same-origin /api/product-media R2 reader.",
     "Retain /media/product as a zero-D1 compatibility alias for older image tools.",
     "Add /api/product-detail-core as a bounded public Product record/gallery endpoint without schema introspection or catalog scans.",
     "Replace the public Product detail renderer with an 8-second fail-fast bounded renderer to prevent indefinite Loading product states.",
-    "Make historical Build 157 browser proof successor-aware so it no longer tests the retired all-in-one Product workspace against Build 166."
+    "Make historical Product browser and route proofs successor-aware so they no longer execute retired high-read paths against Build 166."
   ],
   "safety": {
     "schema_change": false,
