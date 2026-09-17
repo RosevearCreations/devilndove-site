@@ -48,6 +48,13 @@
       "release": 467,
       "description": "Add a shared workshop-process catalog and one reviewed primary process assignment for each Tool or Supply inventory item.",
       "recovery": "Forward-only additive tables. Clear or reassign process links for logical rollback; repair schema defects only with a new numbered migration and never edit this migration after Development application."
+    },
+    {
+      "version": 6,
+      "file": "0006_release467_product_media_publication_guard.sql",
+      "release": 467,
+      "description": "Correct the Release 465 activation trigger so legacy active Products can repair media safely while preserving publication-boundary and no-degradation guards.",
+      "recovery": "Forward-only trigger correction. If the guard semantics require further repair, add a new numbered migration; never edit this migration after Development application."
     }
   ]
 }
