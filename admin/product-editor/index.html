@@ -7,7 +7,7 @@
   <meta name="description" content="Dedicated low-read single-Product editor for Devil n Dove."/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
-  <link rel="stylesheet" href="/css/admin-product-v162.css?v=163"/>
+  <link rel="stylesheet" href="/css/admin-product-v162.css?v=165"/>
 </head>
 <body data-admin-page="product-editor-v163">
   <div class="container admin-shell dd-product-shell">
@@ -17,12 +17,12 @@
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
-      <div><p class="eyebrow">Release 467 • Build 163</p><h1 id="productEditorTitle">Product Editor</h1><p>Edit one Product. Media, scoring, inventory evidence, readiness, cost analysis and other heavy systems are separate on-demand workspaces.</p></div>
+      <div><p class="eyebrow">Release 467 • Build 165</p><h1 id="productEditorTitle">Product Editor</h1><p>Edit one Product at a time. Images are now available inside the Media tab on demand, while full crop/replace/score tools remain in the dedicated image editor.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
 
     <div id="productEditorStatus" class="dd-product-status small" aria-live="polite"></div>
-    <div class="dd-low-read-note small"><strong>Low-read contract:</strong> startup performs one selected-Product detail read. There is no Product list bootstrap, no autosave, no gallery read, no scoring and no background refresh. Save updates only this Product and its SEO row.</div>
+    <div class="dd-low-read-note small"><strong>Low-read contract:</strong> startup performs one selected-Product detail read. There is no Product list bootstrap, no autosave, no gallery read, no scoring and no background refresh. Opening Media performs one bounded selected-Product gallery read. Save updates only this Product and its SEO row.</div>
 
     <form id="productEditorForm" class="card">
       <div class="dd-editor-tabs" role="tablist" aria-label="Product Editor sections">
@@ -83,10 +83,10 @@
       </section>
 
       <section class="dd-editor-panel" data-editor-panel="media" hidden>
-        <h2>Media</h2>
-        <p class="small">This Product Editor does not load the gallery. Use the dedicated Media &amp; Image Editor so only the selected Product and selected image are read.</p>
-        <div class="dd-editor-grid cols-2"><label><span class="small">Featured image URL</span><input class="input" name="featured_image_url" type="url"/></label><div><span class="small">Featured preview</span><div><img id="productEditorFeaturedPreview" class="dd-product-thumb" alt=""/></div></div></div>
-        <p><a class="btn" id="productEditorMediaLink" href="/admin/catalog-media/">Open Media &amp; Image Editor</a></p>
+        <div class="dd-products-browser-heading"><div><h2>Media</h2><p class="small">Gallery loads only when this tab is opened. Set the featured image here, or open the full Media &amp; Image Editor to add, replace, crop, reorder, score or remove images.</p></div><a class="btn" id="productEditorMediaLink" href="/admin/catalog-media/">Open Media &amp; Image Editor</a></div>
+        <div id="productEditorMediaStatus" class="small" aria-live="polite">Gallery not loaded yet.</div>
+        <div id="productEditorMediaStrip" class="dd-editor-media-strip"></div>
+        <div class="dd-editor-grid cols-2" style="margin-top:14px"><label><span class="small">Featured image URL</span><input class="input" name="featured_image_url" type="url"/></label><div><span class="small">Featured preview</span><div><img id="productEditorFeaturedPreview" class="dd-product-thumb" alt=""/></div></div></div>
       </section>
 
       <section class="dd-editor-panel" data-editor-panel="seo" hidden>
@@ -105,6 +105,6 @@
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-editor-v163.js?v=163"></script>
+  <script src="/public/js/admin-product-editor-v163.js?v=165"></script>
 </body>
 </html>
