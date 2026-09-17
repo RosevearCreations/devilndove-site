@@ -13,6 +13,19 @@
     "build170_proof_run": 35275441460,
     "state": "DEVELOPMENT_GREEN"
   },
+  "final_closure": {
+    "dev_sha": "879c8730040afaf6caec6374b5057b7261fdcfe2",
+    "tree_sha": "da5e3b249d6e14266da5e191cb22c06205947948",
+    "proofs": {
+      "system_gate_run": 35275441340,
+      "current_application_quality_run": 35275441446,
+      "it_admin_runtime_proof_run": 35275441412,
+      "branch_hygiene_run": 35275441448
+    },
+    "build_specific_proof_run": 35275441460,
+    "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 171
+  },
   "production": {
     "main_sha": "879c8730040afaf6caec6374b5057b7261fdcfe2",
     "tree_sha": "da5e3b249d6e14266da5e191cb22c06205947948",
@@ -21,6 +34,16 @@
     "products_browser_proof_run": 35275711387,
     "products_route_proof_run": 35275711471,
     "build170_proof_run": 35275636939,
+    "state": "PRODUCTION_GREEN"
+  },
+  "production_checkpoint": {
+    "main_sha": "879c8730040afaf6caec6374b5057b7261fdcfe2",
+    "tree_sha": "da5e3b249d6e14266da5e191cb22c06205947948",
+    "production_pages_deploy_run": 35275636873,
+    "production_live_resource_integrity_run": 35275711398,
+    "products_browser_proof_run": 35275711387,
+    "products_route_proof_run": 35275711471,
+    "build_specific_proof_run": 35275636939,
     "state": "PRODUCTION_GREEN"
   },
   "closure": {
