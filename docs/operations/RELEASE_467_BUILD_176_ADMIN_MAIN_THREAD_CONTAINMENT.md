@@ -45,6 +45,18 @@ The compact Product Browser did not exhibit the same failure pattern because it 
 
 The legacy all-in-one Catalog Product application no longer starts a dozen Product subsystems together. The route is now a focused navigation hub to Product Browser, Product Editor, Media, Inventory and Creative Automation.
 
+### Release automation
+
+The same read-amplification rule now applies to deployment verification:
+
+- Development compares the candidate against the current `main` baseline;
+- when no canonical schema input changed, migration/authority verification records a **zero-D1 code-only proof** and performs no remote D1 query;
+- root-admin D1 verification runs only when root-admin/module-authority inputs changed;
+- code-only Preview smoke omits the database-backed public API probe;
+- canonical schema changes still require the full Development D1 migration + authority path and fail closed if that proof is unavailable.
+
+This prevents ordinary HTML/CSS/JavaScript/admin work from consuming D1 daily row-read quota merely to prove an unchanged database.
+
 ## Boundaries
 
 Build 176 is code-only. It adds no D1 migration and no D1 business-data, R2, provider, payment, refund or accounting mutation. It removes startup work; it does not create a second authority.
