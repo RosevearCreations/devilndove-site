@@ -18,6 +18,9 @@ on:
       - 'admin/orders/index.html'
       - 'admin/catalog/index.html'
       - 'admin/index.html'
+      - '.github/workflows/system-gate.yml'
+      - '.github/workflows/it-admin-runtime-proof.yml'
+      - 'scripts/preview_smoke.py'
       - 'scripts/release467_build176_gate.py'
       - 'docs/operations/RELEASE_467_BUILD_176_ADMIN_MAIN_THREAD_CONTAINMENT.md'
       - '.github/workflows/release467-build176-admin-main-thread-containment.yml'
@@ -51,3 +54,5 @@ jobs:
           node --check functions/api/admin/orders.js
           node --check public/js/admin-orders-workspace-build150.js
           node --check public/js/admin-orders.js
+      - name: Python syntax for zero-D1 release path
+        run: python -m py_compile scripts/preview_smoke.py scripts/release467_build176_gate.py
