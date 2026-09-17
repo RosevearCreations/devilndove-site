@@ -11,6 +11,7 @@ on:
       - 'scripts/release467_build168_gate.py'
       - 'scripts/release467_build169_gate.py'
       - 'docs/operations/RELEASE_467_BUILD_169_PRODUCT_QA_EDITOR_CONVERGENCE.md'
+      - '.github/workflows/release467-build155-products-client-responsiveness.yml'
       - '.github/workflows/release467-build169-product-qa-editor-convergence.yml'
   workflow_dispatch:
 
