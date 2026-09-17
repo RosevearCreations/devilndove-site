@@ -8,9 +8,9 @@
   <meta name="description" content="Compact Devil n Dove Product browser with bounded multi-source thumbnail recovery."/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
-  <link rel="stylesheet" href="/css/admin-product-v162.css?v=166"/>
+  <link rel="stylesheet" href="/css/admin-product-v162.css?v=167"/>
 </head>
-<body data-admin-page="product-browser-v165">
+<body data-admin-page="product-browser-v166">
   <div class="container admin-shell dd-product-shell">
     <nav class="nav" aria-label="Admin navigation">
       <div class="brand">
@@ -22,16 +22,16 @@
 
     <header class="hero compact-hero dd-products-compact-head">
       <div>
-        <p class="eyebrow">Release 467 • Build 165</p>
+        <p class="eyebrow">Release 467 • Build 166</p>
         <h1>Products</h1>
-        <p>Find a Product, see its existing photo, and move straight into editing without loading the old all-in-one workspace.</p>
+        <p>Find a Product, confirm its existing photo, and move straight into Product or image editing without loading the old all-in-one workspace.</p>
       </div>
       <div class="dd-product-actions"><a class="btn" href="/admin/product-editor/">Create Product</a><a class="btn" href="/admin/catalog-media/">Image Editor</a></div>
     </header>
 
     <section class="card dd-products-browser-card">
       <div class="dd-products-browser-heading"><div><h2>Product Browser</h2><p class="small">Eight compact rows by default. Image recovery checks only the Products visible on this page.</p></div></div>
-      <details class="dd-low-read-details"><summary>Low-read / image-recovery details</summary><div class="dd-low-read-note small"><strong>Build 165:</strong> one bounded Product query plus bounded visible-image lookups. Existing references are checked in Product featured image, Product gallery, Product media roles and media assets. R2 is never listed, there are no timers, and failed reads do not loop.</div></details>
+      <details class="dd-low-read-details"><summary>Low-read / image-recovery details</summary><div class="dd-low-read-note small"><strong>Build 166:</strong> one bounded Product query plus bounded visible-image lookups. Existing references are checked in Product featured image, Product gallery, Product media roles and media assets. Image delivery now uses the canonical same-origin R2 reader, with a compatibility path for older references. R2 is never listed, there are no timers, and failed reads do not loop.</div></details>
       <form id="productBrowserSearchForm" class="dd-product-toolbar">
         <label><span class="small">Find a Product</span><input class="input" id="productBrowserQuery" type="search" placeholder="ID, product no., name, SKU or slug" autocomplete="off"/></label>
         <label class="dd-product-rows-label"><span class="small">Rows</span><select class="input" id="productBrowserPageSize"><option value="8" selected>8</option><option value="16">16</option><option value="24">24</option></select></label>
@@ -55,6 +55,6 @@
   </div>
 
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-products-browser-v162.js?v=166"></script>
+  <script src="/public/js/admin-products-browser-v162.js?v=167"></script>
 </body>
 </html>
