@@ -1,4 +1,4 @@
-// Release 467 Build 162 — Product Browser client.
+// Release 467 Build 165 successor — compact Product Browser with bounded image recovery.
 // Explicit operator reads only: initial page, Search, Next, Previous, Refresh. No timers.
 (() => {
   'use strict';
@@ -12,6 +12,7 @@
   const pageLabel=document.getElementById('productBrowserPageLabel');
   if(!form||!body||!status||!window.DDAuth)return;
 
+  const PAGE_SIZE=12;
   const history=[];
   let cursor=null;
   let nextCursor=null;
@@ -22,55 +23,71 @@
   const esc=(value)=>String(value??'').replace(/[&<>"']/g,(ch)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
   const money=(cents,currency='CAD')=>{try{return new Intl.NumberFormat('en-CA',{style:'currency',currency:String(currency||'CAD')}).format(Number(cents||0)/100);}catch{return `$${(Number(cents||0)/100).toFixed(2)}`;}};
   function setStatus(message,tone=''){status.textContent=message;status.dataset.tone=tone;status.hidden=!message;}
-  function imageUrl(raw){
-    const value=String(raw||'').trim();if(!value)return '/assets/product-image-recovery-placeholder.svg';
-    try{
-      const url=new URL(value,location.origin);
-      if(url.origin===location.origin&&url.pathname==='/api/product-media'){
-        const key=String(url.searchParams.get('key')||'').trim();if(key)return `/media/product?key=${encodeURIComponent(key)}`;
-      }
-      if(url.hostname==='assets.devilndove.com'||url.hostname.endsWith('.r2.dev')){const key=url.pathname.replace(/^\/+/, '');return `/media/product?key=${encodeURIComponent(key)}`;}
-      return value;
-    }catch{return '/assets/product-image-recovery-placeholder.svg';}
+  function imageCandidates(primary,fallback){
+    const values=[primary,fallback].map((value)=>String(value||'').trim()).filter(Boolean);const out=[];
+    for(const value of values){
+      try{
+        const url=new URL(value,location.origin);
+        if(url.origin===location.origin&&url.pathname==='/api/product-media'){
+          const key=String(url.searchParams.get('key')||'').trim();if(key)out.push(`/media/product?key=${encodeURIComponent(key)}`);out.push(value);continue;
+        }
+        if(url.pathname==='/media/product'){out.push(`${url.pathname}${url.search}`);continue;}
+        if(url.hostname==='assets.devilndove.com'||url.hostname.endsWith('.r2.dev')){out.push(value);const key=url.pathname.replace(/^\/+/, '');if(key)out.push(`/media/product?key=${encodeURIComponent(key)}`);continue;}
+        out.push(value);
+      }catch{}
+    }
+    out.push('/assets/product-image-recovery-placeholder.svg');return [...new Set(out)];
   }
-  function render(products){
-    if(!products.length){body.innerHTML='<tr><td colspan="8" class="dd-empty">No Products matched this page.</td></tr>';return;}
+  function armImages(){
+    body.querySelectorAll('img[data-product-image-candidates]').forEach((img)=>{
+      let candidates=[];try{candidates=JSON.parse(img.dataset.productImageCandidates||'[]');}catch{}
+      let index=0;const use=()=>{img.src=candidates[index]||'/assets/product-image-recovery-placeholder.svg';};
+      img.onerror=()=>{if(index<candidates.length-1){index+=1;use();}};use();
+    });
+  }
+  function render(products,imageMap={}){
+    if(!products.length){body.innerHTML='<tr><td colspan="7" class="dd-empty">No Products matched this page.</td></tr>';return;}
     body.innerHTML=products.map((p)=>{
-      const id=Number(p.product_id||0);
-      const edit=`/admin/product-editor/?product_id=${encodeURIComponent(id)}`;
-      const publicLink=p.slug?`/shop/product/?slug=${encodeURIComponent(p.slug)}`:'';
-      const stock=Number(p.inventory_tracking||0)===1?String(Number(p.inventory_quantity||0)):'Not tracked';
-      return `<tr>
-        <td><img class="dd-product-thumb" loading="lazy" src="${esc(imageUrl(p.featured_image_url))}" alt=""></td>
-        <td><strong>${esc(p.name||`Product #${id}`)}</strong><div class="small">#${id}${p.product_number?` • No. ${esc(p.product_number)}`:''}</div></td>
-        <td>${esc(p.sku||'—')}</td>
+      const id=Number(p.product_id||0);const fallback=imageMap[id]?.image_url||'';const candidates=imageCandidates(p.featured_image_url,fallback);
+      const edit=`/admin/product-editor/?product_id=${encodeURIComponent(id)}`;const media=`/admin/catalog-media/?product_id=${encodeURIComponent(id)}`;const publicLink=p.slug?`/shop/product/?slug=${encodeURIComponent(p.slug)}`:'';
+      const stock=Number(p.inventory_tracking||0)===1?String(Number(p.inventory_quantity||0)):'—';
+      return `<tr data-product-id="${id}">
+        <td class="dd-product-image-cell"><img class="dd-product-thumb" loading="lazy" data-product-image-candidates='${esc(JSON.stringify(candidates))}' alt="${esc(p.name||'Product image')}"></td>
+        <td><strong>${esc(p.name||`Product #${id}`)}</strong><div class="small">#${id}${p.product_number?` • No. ${esc(p.product_number)}`:''}${p.sku?` • ${esc(p.sku)}`:''}</div></td>
         <td><div class="dd-product-meta"><span>${esc(p.status||'draft')}</span><span>${esc(p.review_status||'pending')}</span></div></td>
         <td>${money(p.price_cents,p.currency)}</td>
         <td>${esc(stock)}</td>
         <td>${esc(p.updated_at||'—')}</td>
-        <td class="dd-product-actions"><a class="btn" href="${edit}">Edit</a>${publicLink?`<a class="btn" href="${publicLink}" target="_blank" rel="noopener">View</a>`:''}</td>
+        <td class="dd-product-actions"><a class="btn" href="${edit}">Edit</a><a class="btn" href="${media}">Images</a>${publicLink?`<a class="btn" href="${publicLink}" target="_blank" rel="noopener">View</a>`:''}</td>
       </tr>`;
     }).join('');
+    armImages();
   }
   async function readJson(response){const data=await response.json().catch(()=>null);if(!response.ok||!data?.ok){const error=new Error(data?.error||`Product Browser request failed (${response.status}).`);error.code=data?.code||'';error.status=response.status;throw error;}return data;}
+  async function loadImageMap(products){
+    const ids=products.map((p)=>Number(p.product_id||0)).filter((id)=>id>0).slice(0,16);if(!ids.length)return {images_by_product:{},d1_rows_read:0};
+    const response=await window.DDAuth.apiFetch('/api/admin/product-browser-images',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({product_ids:ids}),cache:'no-store'});
+    return readJson(response,'Could not load Product thumbnails.');
+  }
   async function load({requestedCursor=cursor,remember=false}={}){
     if(inFlight||stoppedForQuota)return;
-    inFlight=true;next.disabled=true;prev.disabled=true;refresh.disabled=true;setStatus('Loading one bounded Product page…');
+    inFlight=true;next.disabled=true;prev.disabled=true;refresh.disabled=true;setStatus('Loading one compact Product page…');
     try{
-      const params=new URLSearchParams({limit:'40'});const q=String(query.value||'').trim();if(q)params.set('q',q);if(requestedCursor)params.set('cursor',String(requestedCursor));
+      const params=new URLSearchParams({limit:String(PAGE_SIZE)});const q=String(query.value||'').trim();if(q)params.set('q',q);if(requestedCursor)params.set('cursor',String(requestedCursor));
       const response=await window.DDAuth.apiFetch(`/api/admin/product-browser?${params.toString()}`,{method:'GET',cache:'no-store'});
-      const data=await readJson(response);
-      if(remember)history.push(cursor);
-      cursor=requestedCursor||null;nextCursor=data.next_cursor||null;
-      render(Array.isArray(data.products)?data.products:[]);
-      const readEvidence=Number.isFinite(Number(data.d1_rows_read))?` D1 rows read for this Product query: ${Number(data.d1_rows_read)}.`:'';
-      setStatus(`${data.products?.length||0} Product${data.products?.length===1?'':'s'} loaded. No readiness, media-library, inventory-resource or quality scans were run.${readEvidence}`,'ok');
-      pageLabel.textContent=`Page ${page}`;
+      const data=await readJson(response);const products=Array.isArray(data.products)?data.products:[];
+      let imageData={images_by_product:{},d1_rows_read:0};
+      try{imageData=await loadImageMap(products);}catch(imageError){if(imageError?.code==='d1_read_capacity_unavailable')throw imageError;}
+      if(remember)history.push(cursor);cursor=requestedCursor||null;nextCursor=data.next_cursor||null;
+      render(products,imageData.images_by_product||{});
+      const rows=[data.d1_rows_read,imageData.d1_rows_read].filter((value)=>Number.isFinite(Number(value))).reduce((sum,value)=>sum+Number(value),0);
+      setStatus(`${products.length} Product${products.length===1?'':'s'} loaded in compact view. Thumbnail recovery checked only these visible Product IDs; no R2 listing, readiness, inventory-resource or quality scan ran.${rows?` D1 rows read: ${rows}.`:''}`,'ok');
+      pageLabel.textContent=`Page ${page} • ${PAGE_SIZE} per page`;
     }catch(error){
       const quota=error?.code==='d1_read_capacity_unavailable'||error?.status===503&&/D1|read capacity|quota|rows/i.test(String(error?.message||''));
       if(quota){stoppedForQuota=true;setStatus(`${error.message} Automatic retries are stopped until we deliberately refresh after capacity returns.`,'error');}
       else setStatus(error?.message||'Could not load Products.','error');
-      body.innerHTML='<tr><td colspan="8" class="dd-empty">Product Browser is unavailable. No automatic retry will run.</td></tr>';
+      body.innerHTML='<tr><td colspan="7" class="dd-empty">Product Browser is unavailable. No automatic retry will run.</td></tr>';
     }finally{
       inFlight=false;next.disabled=stoppedForQuota||!nextCursor;prev.disabled=stoppedForQuota||history.length===0;refresh.disabled=stoppedForQuota;
     }
