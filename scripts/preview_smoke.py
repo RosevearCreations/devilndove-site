@@ -92,6 +92,7 @@ def local_source_checks() -> list[tuple[str, bool, str]]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", required=True)
+    parser.add_argument("--zero-d1", action="store_true", help="Skip database-backed public API smoke for code-only candidates.")
     args = parser.parse_args()
     base = args.base_url.rstrip("/") + "/"
     expected_host = urlparse(base).hostname or ""
@@ -101,8 +102,9 @@ def main() -> int:
         ("home", ""),
         ("manifest", "manifest.webmanifest"),
         ("service_worker", "sw.js"),
-        ("public_api", "api/creations?limit=1"),
     ]
+    if not args.zero_d1:
+        routes.append(("public_api", "api/creations?limit=1"))
     observations: dict[str, tuple[int, bytes, str, str, bool]] = {}
     for name, relative in routes:
         status, body, ctype, final_url = fetch(urljoin(base, relative))
@@ -147,13 +149,16 @@ def main() -> int:
         checks.append(("service_worker_200", status == 200, f"status={status} final={final_url}"))
         checks.append(("service_worker_runtime", "addEventListener" in sw, "event listener present"))
 
-        status, body, ctype, final_url, _ = observations["public_api"]
-        public_api_ok = status == 200
-        try:
-            json.loads(body.decode("utf-8"))
-        except Exception:
-            public_api_ok = False
-        checks.append(("public_api_non_secret", public_api_ok, f"status={status} final={final_url} content-type={ctype}"))
+        if not args.zero_d1:
+            status, body, ctype, final_url, _ = observations["public_api"]
+            public_api_ok = status == 200
+            try:
+                json.loads(body.decode("utf-8"))
+            except Exception:
+                public_api_ok = False
+            checks.append(("public_api_non_secret", public_api_ok, f"status={status} final={final_url} content-type={ctype}"))
+        else:
+            checks.append(("public_api_zero_d1_skip", True, "code-only candidate; remote D1 query intentionally skipped"))
         print("PREVIEW_MODE: DIRECT_APPLICATION")
 
     failed = [name for name, ok, _ in checks if not ok]
@@ -166,6 +171,7 @@ def main() -> int:
     print("Authentication headers used: ZERO")
     print("Cloudflare Access weakened: NO")
     print("Provider execution invoked: ZERO")
+    print(f"Remote D1 smoke queries: {'ZERO' if args.zero_d1 else 'PUBLIC_API_ONLY'}")
     return 0
 
 
