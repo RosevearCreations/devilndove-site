@@ -1,0 +1,33 @@
+name: Release 467 Build 173 Product Media Repair
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'migrations/canonical/0006_release467_product_media_publication_guard.sql'
+      - 'migrations/canonical/manifest.json'
+      - 'functions/api/admin/product-image-editor.js'
+      - 'public/js/admin-product-editor-v163.js'
+      - 'admin/catalog-media/index.html'
+      - 'admin/product-editor/index.html'
+      - 'scripts/release467_build173_gate.py'
+      - '.github/workflows/release467-build173-product-media-repair.yml'
+  workflow_dispatch:
+jobs:
+  product-media-repair-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Prove Build 173 Product media repair
+        run: python scripts/release467_build173_gate.py
+      - name: Prove canonical migration policy
+        run: python scripts/migration_policy_gate.py
+      - name: JavaScript syntax
+        run: |
+          node --check functions/api/admin/product-image-editor.js
+          node --check public/js/admin-product-editor-v163.js
