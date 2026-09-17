@@ -99,6 +99,7 @@ const STOREFRONT_ADMIN_PAGES = Object.freeze([
   '/admin/catalog',
   '/admin/catalog-media',
   '/admin/create-product',
+  '/admin/product-editor',
   '/admin/products',
   '/admin/movies',
   '/admin/mobile-product',
