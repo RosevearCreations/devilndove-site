@@ -3,8 +3,9 @@
 // gallery rows and never lists R2 or performs media-quality/readiness scans.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 
-function json(data,status=200){return jsonResponse(data,status,{'Cache-Control':'no-store','X-DD-D1-Read-Contract':'product-editor-media-v162'});}
+function json(data,status=200,headers={}){return jsonResponse(data,status,{'Cache-Control':'no-store','X-DD-D1-Read-Contract':'product-editor-media-v162',...headers});}
 function adminFromContext(context){const user=context?.data?.ddModuleAccess?.user||null;return user&&String(user.role||'').toLowerCase()==='admin'?user:null;}
+function measuredRows(result){const n=Number(result?.meta?.rows_read??result?.meta?.rowsRead);return Number.isFinite(n)&&n>=0?n:null;}
 
 export async function onRequestGet(context){
   const {request,env}=context;
@@ -15,7 +16,8 @@ export async function onRequestGet(context){
   try{
     const result=await db.prepare(`SELECT product_image_id, product_id, image_url, alt_text, sort_order, created_at, updated_at FROM product_images WHERE product_id=? ORDER BY sort_order ASC, product_image_id ASC LIMIT 12`).bind(productId).all();
     const images=Array.isArray(result?.results)?result.results:[];
-    return json({ok:true,product_id:productId,images,delivery:'product-editor-media-v162',r2_listing:false});
+    const rowsRead=measuredRows(result);
+    return json({ok:true,product_id:productId,images,delivery:'product-editor-media-v162',r2_listing:false,d1_rows_read:rowsRead},200,rowsRead==null?{}:{'X-DD-D1-Rows-Read':String(rowsRead)});
   }catch(error){
     const message=String(error?.message||'Product media read failed.');
     const quota=/rows read|daily|limit|quota|7500/i.test(message);
