@@ -17,6 +17,7 @@ on:
       - 'scripts/release467_build155_gate.py'
       - 'scripts/release467_build162_gate.py'
       - 'scripts/release467_build165_gate.py'
+      - 'scripts/release467_build166_gate.py'
       - 'release467-build154-products-worker-resource-hotfix.json'
       - 'scripts/current_application_quality_gate.py'
       - 'scripts/current_system_gate_provenance_gate.py'
@@ -40,6 +41,7 @@ on:
       - 'scripts/release467_build155_gate.py'
       - 'scripts/release467_build162_gate.py'
       - 'scripts/release467_build165_gate.py'
+      - 'scripts/release467_build166_gate.py'
       - 'release467-build154-products-worker-resource-hotfix.json'
       - 'scripts/current_application_quality_gate.py'
       - 'scripts/current_system_gate_provenance_gate.py'
@@ -65,15 +67,23 @@ jobs:
         id: product-authority
         shell: bash
         run: |
-          if grep -q 'data-admin-page="product-browser-v165"' admin/products/index.html && grep -q 'data-admin-page="product-editor-v165"' admin/product-editor/index.html; then
+          if grep -q 'data-admin-page="product-browser-v166"' admin/products/index.html && grep -q 'data-admin-page="product-editor-v165"' admin/product-editor/index.html; then
+            echo 'build166=true' >> "$GITHUB_OUTPUT"
+            echo 'build165=false' >> "$GITHUB_OUTPUT"
+            echo 'build162=true' >> "$GITHUB_OUTPUT"
+            echo 'Current Product authority: Build 166+ stabilized browser + bounded Product detail'
+          elif grep -q 'data-admin-page="product-browser-v165"' admin/products/index.html && grep -q 'data-admin-page="product-editor-v165"' admin/product-editor/index.html; then
+            echo 'build166=false' >> "$GITHUB_OUTPUT"
             echo 'build165=true' >> "$GITHUB_OUTPUT"
             echo 'build162=true' >> "$GITHUB_OUTPUT"
             echo 'Current Product authority: Build 165 compact browser + image recovery'
           elif grep -q 'dd-product-admin-architecture' admin/products/index.html && grep -q 'product-browser-v162' admin/products/index.html; then
+            echo 'build166=false' >> "$GITHUB_OUTPUT"
             echo 'build165=false' >> "$GITHUB_OUTPUT"
             echo 'build162=true' >> "$GITHUB_OUTPUT"
             echo 'Current Product authority: Build 162 architecture reset'
           else
+            echo 'build166=false' >> "$GITHUB_OUTPUT"
             echo 'build165=false' >> "$GITHUB_OUTPUT"
             echo 'build162=false' >> "$GITHUB_OUTPUT"
             echo 'Current Product authority: retained Build 154/155 document'
@@ -84,11 +94,14 @@ jobs:
         if: steps.product-authority.outputs.build162 != 'true'
         run: python scripts/release467_build154_gate.py
       - name: Validate Build 162 successor Product architecture
-        if: steps.product-authority.outputs.build162 == 'true' && steps.product-authority.outputs.build165 != 'true'
+        if: steps.product-authority.outputs.build162 == 'true' && steps.product-authority.outputs.build165 != 'true' && steps.product-authority.outputs.build166 != 'true'
         run: python scripts/release467_build162_gate.py
       - name: Validate Build 165 successor Product architecture
         if: steps.product-authority.outputs.build165 == 'true'
         run: python scripts/release467_build165_gate.py
+      - name: Validate Build 166+ successor Product architecture
+        if: steps.product-authority.outputs.build166 == 'true'
+        run: python scripts/release467_build166_gate.py
       - name: JavaScript syntax
         run: |
           node --check public/js/admin-products-browser-v162.js
@@ -104,6 +117,7 @@ jobs:
           echo 'Build 154/155 historical client authority: PRESERVED'
           echo 'Build 162 historical Product Browser/Editor architecture: PRESERVED AS PREDECESSOR'
           echo 'Build 165 compact Product Browser + bounded image recovery: ACCEPTED WHEN PRESENT'
+          echo 'Build 166+ stabilized Product browser/detail authority: ACCEPTED WHEN PRESENT'
           echo 'Schema change: NONE'
           echo 'D1/R2 business-data mutation: NONE'
           echo 'Provider/payment/refund/accounting mutation: NONE'
