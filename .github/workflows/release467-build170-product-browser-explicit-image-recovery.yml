@@ -12,6 +12,7 @@ on:
       - 'scripts/release467_build169_gate.py'
       - 'scripts/release467_build170_gate.py'
       - 'docs/operations/RELEASE_467_BUILD_170_PRODUCT_BROWSER_EXPLICIT_IMAGE_RECOVERY.md'
+      - '.github/workflows/release467-build157-proof.yml'
       - '.github/workflows/release467-build170-product-browser-explicit-image-recovery.yml'
   workflow_dispatch:
 
