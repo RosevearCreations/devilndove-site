@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 173 — Product media publication/save/rendering repair proof, successor-aware through Build 174."""
+"""Release 467 Build 173 — Product media publication/save/rendering repair proof, successor-aware through Build 175."""
 from pathlib import Path
 import json
 import re
@@ -41,7 +41,7 @@ checks={
   'public asset URL precedes same-origin fallback': "list.push(value);if(key)list.push(" in ui,
   'Product Editor arms loaded media images': "img[data-media-raw]" in ui and "armMediaImage(img,img.dataset.mediaRaw" in ui,
   'Media page cache bumped': 'Release 467 • Build 173' in media_page and 'admin-product-media-editor-v172.js?v=173' in media_page,
-  'Product Editor cache bumped': any(token in editor_page for token in ('Release 467 • Build 173','Release 467 • Build 174')) and any(token in editor_page for token in ('admin-product-editor-v163.js?v=173','admin-product-editor-v163.js?v=174')),
+  'Product Editor cache bumped': any(token in editor_page for token in ('Release 467 • Build 173','Release 467 • Build 174','Release 467 • Build 175')) and any(token in editor_page for token in ('admin-product-editor-v163.js?v=173','admin-product-editor-v163.js?v=174','admin-product-editor-v163.js?v=175')),
   'no automatic background media polling': all(token not in ui for token in ('setInterval(','MutationObserver(')),
 }
 
