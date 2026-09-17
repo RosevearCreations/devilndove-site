@@ -17,7 +17,7 @@
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
-      <div><p class="eyebrow">Release 467 • Build 169</p><h1 id="productEditorTitle">Product Editor</h1><p>Edit one Product at a time. Product QA is now explicit and lazy: opening the QA tab performs no read until you press Run QA.</p></div>
+      <div><p class="eyebrow">Release 467 • Build 169</p><h1 id="productEditorTitle">Product Editor</h1><p>Edit one Product at a time. Product QA is now explicit and lazy: opening the QA tab performs zero D1 reads until you press Run QA.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
 
@@ -101,7 +101,7 @@
       </section>
 
       <section class="dd-editor-panel" data-editor-panel="qa" hidden>
-        <div class="dd-products-browser-heading"><div><h2>Product QA</h2><p class="small">This panel is intentionally idle until you press Run QA. A run checks only this Product, its SEO row and at most two Product image rows. It does not create tables, write QA history, scan the catalog, list R2 or retry in the background.</p></div><button class="btn" id="productEditorQaRun" type="button" disabled>Run QA</button></div>
+        <div class="dd-products-browser-heading"><div><h2>Product QA</h2><p class="small">This panel is intentionally idle until you press Run QA. Opening it performs zero D1 reads. A run checks only this Product, its SEO row and at most two Product image rows. It does not create tables, write QA history, scan the catalog, list R2 or retry in the background.</p></div><button class="btn" id="productEditorQaRun" type="button" disabled>Run QA</button></div>
         <div id="productEditorQaStatus" class="small" aria-live="polite">QA has not run.</div>
         <div id="productEditorQaResults" style="display:grid;gap:10px;margin-top:12px"></div>
       </section>
