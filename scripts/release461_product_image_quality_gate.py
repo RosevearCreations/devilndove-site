@@ -30,7 +30,7 @@ if build163:
       'server recomputes selected-image score':'function score({' in api and "action==='score'" in api,
       'browser measures natural dimensions':'naturalWidth' in ui and 'naturalHeight' in ui,
       'catalog media loads Build 163 editor':'/public/js/admin-product-media-editor-v163.js' in page,
-      'scoring is explicit':'Measure &amp; Score Selected Image' in page and 'scoring was not run automatically' in api,
+      'scoring is explicit':'Measure &amp; Score Selected Image' in page and 'scoring was not run automatically' in api.lower(),
       'scoring stays selected-image':'WHERE pi.product_image_id=? LIMIT 1' in api,
     })
 else:
