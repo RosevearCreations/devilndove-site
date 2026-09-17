@@ -9,7 +9,7 @@ on:
 permissions: {contents: read}
 
 # Historical Build 157 source-authority markers retained for compatibility only.
-# The Build 162 successor path below does not execute the legacy browser probe or Production D1 reads.
+# Build 162+ successor paths below do not execute the legacy browser probe or Production D1 reads.
 # scripts/products_build157_browser_probe.mjs
 # Build 157 Product Quality
 # /api/product-media 404 responses must be ZERO
@@ -43,18 +43,39 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
-          if [ -f scripts/release467_build162_gate.py ] \
+          if [ -f scripts/release467_build163_gate.py ] \
+             && [ -f admin/product-editor/index.html ] \
+             && [ -f admin/catalog-media/index.html ] \
+             && [ -f public/js/admin-product-editor-v163.js ] \
+             && [ -f public/js/admin-product-media-editor-v163.js ]; then
+            echo 'successor=build163' >> "${GITHUB_OUTPUT}"
+            echo 'Build 163 Product Admin low-read architecture detected. Legacy Product browser/session proof is retired for this SHA.'
+          elif [ -f scripts/release467_build162_gate.py ] \
              && [ -f admin/product-editor/index.html ] \
              && grep -q 'product-browser-v162' admin/products/index.html; then
-            echo 'successor=true' >> "${GITHUB_OUTPUT}"
+            echo 'successor=build162' >> "${GITHUB_OUTPUT}"
             echo 'Build 162 Product Admin architecture detected. Legacy Build 155 browser/session proof is retired for this SHA.'
           else
-            echo 'successor=false' >> "${GITHUB_OUTPUT}"
+            echo 'successor=legacy' >> "${GITHUB_OUTPUT}"
             echo 'Historical Build 155/160 Product Admin architecture detected.'
           fi
 
+      - name: Prove Build 163 Product Admin source without Production D1 reads
+        if: steps.architecture.outputs.successor == 'build163'
+        run: |
+          set -euo pipefail
+          python scripts/release467_build163_gate.py
+          node --check public/js/admin-products-browser-v162.js
+          node --check public/js/admin-product-editor-v163.js
+          node --check public/js/admin-product-media-editor-v163.js
+          node --check sw.js
+          echo 'Build 163 Production Product proof: SOURCE/DELIVERY CONTRACT ONLY'
+          echo 'Remote D1 queries: ZERO'
+          echo 'Authenticated Production browser reads: ZERO while D1 capacity is constrained'
+          echo 'Runtime row-read acceptance is operator-controlled after D1 capacity is available.'
+
       - name: Prove Build 162 Product Admin source without Production D1 reads
-        if: steps.architecture.outputs.successor == 'true'
+        if: steps.architecture.outputs.successor == 'build162'
         run: |
           set -euo pipefail
           python scripts/release467_build162_gate.py
@@ -67,25 +88,25 @@ jobs:
           echo 'Runtime row-read acceptance is deliberately deferred until D1 capacity is available.'
 
       - name: Install deterministic Chrome for historical browser acceptance
-        if: steps.architecture.outputs.successor != 'true'
+        if: steps.architecture.outputs.successor == 'legacy'
         id: chrome
         uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: stable
       - name: Prove Chrome binary
-        if: steps.architecture.outputs.successor != 'true'
+        if: steps.architecture.outputs.successor == 'legacy'
         env:
           CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
         run: |
           test -x "${CHROME_BIN}"
           "${CHROME_BIN}" --version
       - name: Prove exact historical Build 155 source
-        if: steps.architecture.outputs.successor != 'true'
+        if: steps.architecture.outputs.successor == 'legacy'
         run: |
           test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
           python scripts/release467_build155_gate.py
       - name: Resolve existing Production admin session read-only
-        if: steps.architecture.outputs.successor != 'true'
+        if: steps.architecture.outputs.successor == 'legacy'
         shell: bash
         run: |
           set -euo pipefail
@@ -110,7 +131,7 @@ jobs:
           unset TOKEN
           echo 'Existing Production admin session resolved read-only.'
       - name: Use bounded DOM readiness for historical Product browser acceptance
-        if: steps.architecture.outputs.successor != 'true'
+        if: steps.architecture.outputs.successor == 'legacy'
         shell: bash
         run: |
           set -euo pipefail
@@ -126,12 +147,12 @@ jobs:
           PY
           node --check scripts/products_browser_runtime_probe.mjs
       - name: Run historical real Chromium Product UI responsiveness acceptance
-        if: steps.architecture.outputs.successor != 'true'
+        if: steps.architecture.outputs.successor == 'legacy'
         env:
           CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
         run: node scripts/products_browser_runtime_probe.mjs
       - name: Require historical Build 157 Product Quality and media acceptance
-        if: steps.architecture.outputs.successor != 'true'
+        if: steps.architecture.outputs.successor == 'legacy'
         env:
           CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
         run: |
@@ -144,7 +165,10 @@ jobs:
         run: |
           echo "Exact Production main SHA: ${EXPECTED_SOURCE_SHA}"
           echo 'Target: https://devilndove.com/admin/products/'
-          if [ "${{ steps.architecture.outputs.successor }}" = "true" ]; then
+          if [ "${{ steps.architecture.outputs.successor }}" = "build163" ]; then
+            echo 'Build 163 successor mode: zero Production D1/session/browser reads in this automatic proof.'
+            echo 'Product Editor + Media/Image low-read source contract is the current authority.'
+          elif [ "${{ steps.architecture.outputs.successor }}" = "build162" ]; then
             echo 'Build 162 successor mode: zero Production D1/session/browser reads in this automatic proof.'
             echo 'Runtime row-read acceptance waits for available D1 capacity and is operator-controlled.'
           else
