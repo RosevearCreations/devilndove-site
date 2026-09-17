@@ -24,23 +24,31 @@ Release 467 uses `main` as the current Production source and `dev` as the Develo
 Production live-resource retries remain capped at three transient attempts; permanent 4xx and genuine resource failures fail closed. Stripe Development, PayPal sandbox and Social/OAuth remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 166 candidate
+## Current Release 467 restart authority — Build 171 candidate
 
-Build 165 **Product Editing Stabilization** is the last fully verified Development and current Production baseline.
+Build 170 **Product Browser Explicit Image Recovery** is the last fully verified Development and current Production baseline.
 
-- Last fully verified Development SHA: `20961a195ccab0594ca47ee051de45aa9168bda4`
-- Current Production main SHA: `20961a195ccab0594ca47ee051de45aa9168bda4`
-- Exact shared tree: `1adc33d1280b55f62f4dc21c7c87ac334fee303e`
-- Development System Gate: `35229694257`
-- Development Current Application Quality: `35229694220`
-- Development I.T. Admin Runtime: `35229694225`
-- Development Repository Branch Hygiene: `35229694190`
-- Production Pages Deploy: `35230536365`
-- Production Live Resource Integrity: `35230633169`
+- Last fully verified Development SHA: `879c8730040afaf6caec6374b5057b7261fdcfe2`
+- Current Production main SHA: `879c8730040afaf6caec6374b5057b7261fdcfe2`
+- Exact shared tree: `da5e3b249d6e14266da5e191cb22c06205947948`
+- Development System Gate: `35275441340`
+- Development Current Application Quality: `35275441446`
+- Development I.T. Admin Runtime: `35275441412`
+- Development Repository Branch Hygiene: `35275441448`
+- Build 170 Development proof: `35275441460`
+- Production Pages Deploy: `35275636873`
+- Production Live Resource Integrity: `35275711398`
+- Products Production Browser Proof: `35275711387`
+- Products Route Production Proof: `35275711471`
+- Build 170 Production proof: `35275636939`
 
-Build 166 **Product Editing & Image Stabilization** is the active Development candidate. It keeps `/admin/products/` compact at eight rows by default, routes existing Product images through the canonical same-origin `/api/product-media` R2 reader, retains `/media/product` only as a zero-D1 compatibility alias, and replaces the public Product detail loader with one bounded Product/gallery endpoint plus an eight-second fail-fast browser timeout.
+Build 171 **Release & Restart Authority Convergence** is the active Development candidate. It converges `current-development-authority.json`, the I.T. control tower, this canonical restart guide, `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `MARKDOWN_INDEX.md`, and the Build 170 closure authority on the exact proof bundle above.
 
-The Product rewrite does not list R2, does not perform request-time DDL, does not scan the Product catalog automatically, and does not introduce payment/provider/accounting mutation. Historical Build 157/Build 163 browser probes are successor-aware and must not be used as authority for the Build 166 Product architecture.
+Build 171 changes release/restart truth only. It does not alter Product runtime behavior, canonical migrations, schema, D1/R2 business data, provider execution/publication, payments, refunds or accounting.
 
-Build 166 acceptance requires its dedicated source proof plus System Gate, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene on one exact final `dev` SHA. Only that exact GREEN commit may be non-force promoted to `main`, followed by Production Pages Deploy, Production Live Resource Integrity, and current Product architecture proof.
+Build 171 acceptance requires its dedicated source proof plus System Gate, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene on one exact final `dev` SHA. Only that exact GREEN commit may be non-force promoted to `main`, followed by Production Pages Deploy, Production Live Resource Integrity and retained Product Production proofs.
+
+### Restart resolution rule
+
+The candidate never self-claims its not-yet-created final SHA. At every restart, resolve the live `dev` and `main` refs first. Once Build 171 is promoted, the synchronized exact branch head plus exact-SHA Development and Production proofs becomes the current source authority.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
