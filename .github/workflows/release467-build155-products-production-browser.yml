@@ -8,6 +8,12 @@ on:
 
 permissions: {contents: read}
 
+# Historical Build 157 source-authority markers retained for compatibility only.
+# The Build 162 successor path below does not execute the legacy browser probe or Production D1 reads.
+# scripts/products_build157_browser_probe.mjs
+# Build 157 Product Quality
+# /api/product-media 404 responses must be ZERO
+
 jobs:
   products-production-browser:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
