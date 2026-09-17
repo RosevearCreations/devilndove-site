@@ -32,6 +32,9 @@ orders_legacy=read('public/js/admin-orders.js')
 orders_page=read('admin/orders/index.html')
 catalog_page=read('admin/catalog/index.html')
 admin_home=read('admin/index.html')
+system_gate=read('.github/workflows/system-gate.yml')
+it_admin_workflow=read('.github/workflows/it-admin-runtime-proof.yml')
+preview_smoke=read('scripts/preview_smoke.py')
 
 for token in ('AUTO_OBSERVER_MAX_MS = 8000','REFRESH_DEBOUNCE_MS = 180','mutationNeedsRefresh','refreshSafely','dd:admin-context-help-refresh','observerStopTimer'):
     req(token in help_js,f'Context-help containment missing: {token}')
@@ -81,6 +84,15 @@ for eager in ('admin-products.js','admin-products-enhancements.js','admin-create
 req('createProductForm' not in catalog_page,'Catalog still embeds the legacy all-in-one Product editor form')
 req('site-auth-ui.js?v=176' in catalog_page and 'admin.js?v=176' in catalog_page,'Catalog lean shared startup cache identity missing')
 req('site-auth-ui.js?v=176' in admin_home and 'admin.js?v=176' in admin_home,'Admin home did not receive bounded shared startup cache identity')
+
+# Code-only Development pushes must not consume D1 merely to prove unchanged schema/admin authority.
+for token in ('Classify whether Development candidate needs D1 proof','origin/main...','code_only_no_canonical_schema_change','Record zero-D1 code-only Development path','remote_d1_queries','--zero-d1'):
+    req(token in system_gate,f'Zero-D1 Development release path missing: {token}')
+req("if: steps.d1-classification.outputs.requires_d1 == 'true'" in system_gate,'Development D1 migration/read proof is not classification-gated')
+for token in ('Classify whether root-admin D1 proof is required','code_only_no_admin_authority_change','Record zero-D1 root-admin continuity','Remote D1 queries: 0'):
+    req(token in it_admin_workflow,f'Zero-D1 root-admin continuity path missing: {token}')
+for token in ('--zero-d1','if not args.zero_d1','public_api_zero_d1_skip','Remote D1 smoke queries'):
+    req(token in preview_smoke,f'Zero-D1 Preview smoke contract missing: {token}')
 
 for source,label in ((supply_api,'Supply API'),(merch_api,'Storefront API'),(orders_api,'Orders API')):
     for ddl in ('CREATE TABLE','ALTER TABLE','DROP TABLE','CREATE INDEX'):
