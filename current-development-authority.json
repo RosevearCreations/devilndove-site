@@ -1,40 +1,40 @@
 {
   "release": 467,
-  "build": 161,
-  "title": "Universal Search, Recent Work & Command Centre QoL",
+  "build": 166,
+  "title": "Product Editing & Image Stabilization",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "4963a718166a7010c2075c803a26b13dadaf88db",
-  "accepted_dev_tree_sha": "55e10b5507ac14ac1bc8937365789861c4119bea",
+  "accepted_dev_sha": "20961a195ccab0594ca47ee051de45aa9168bda4",
+  "accepted_dev_tree_sha": "1adc33d1280b55f62f4dc21c7c87ac334fee303e",
   "acceptance": {
-    "system_gate_run": 35149251365,
-    "current_application_quality_run": 35149251447,
-    "it_admin_runtime_proof_run": 35149251412,
-    "branch_hygiene_run": 35149251413
+    "system_gate_run": 35229694257,
+    "current_application_quality_run": 35229694220,
+    "it_admin_runtime_proof_run": 35229694225,
+    "branch_hygiene_run": 35229694190
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 160,
-      "title": "Product Production Browser Recovery",
-      "authority": "release467-build160-product-production-browser-recovery.json",
-      "dev_sha": "4963a718166a7010c2075c803a26b13dadaf88db",
-      "tree_sha": "55e10b5507ac14ac1bc8937365789861c4119bea",
+      "build": 165,
+      "title": "Product Editing Stabilization",
+      "authority": "release467-build165-product-editing-stabilization-closure.json",
+      "dev_sha": "20961a195ccab0594ca47ee051de45aa9168bda4",
+      "tree_sha": "1adc33d1280b55f62f4dc21c7c87ac334fee303e",
       "proofs": {
-        "system_gate_run": 35149251365,
-        "current_application_quality_run": 35149251447,
-        "it_admin_runtime_proof_run": 35149251412,
-        "branch_hygiene_run": 35149251413
+        "system_gate_run": 35229694257,
+        "current_application_quality_run": 35229694220,
+        "it_admin_runtime_proof_run": 35229694225,
+        "branch_hygiene_run": 35229694190
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "exact_preview_deployment": true
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 161,
-      "title": "Universal Search, Recent Work & Command Centre QoL",
-      "authority": "release467-build161-universal-search-recent-work-command-centre.json",
+      "build": 166,
+      "title": "Product Editing & Image Stabilization",
+      "authority": "release467-build166-product-editing-image-stabilization.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -43,20 +43,21 @@
     "closure_proof_mode": "VERIFY_EXACT_DEV_BRANCH_HEAD_AFTER_CLOSURE_MERGE"
   },
   "production_checkpoint": {
-    "build": 160,
-    "authority": "release467-build160-product-production-browser-recovery.json",
-    "main_sha": "4963a718166a7010c2075c803a26b13dadaf88db",
-    "tree_sha": "55e10b5507ac14ac1bc8937365789861c4119bea",
-    "production_pages_deploy_run": 35160325113,
-    "production_live_resource_integrity_run": 35160415476,
-    "products_production_browser_proof_run": 35160415542,
-    "products_route_production_proof_run": 35160415443,
+    "release": 467,
+    "build": 165,
+    "authority": "release467-build165-product-editing-stabilization-closure.json",
+    "main_sha": "20961a195ccab0594ca47ee051de45aa9168bda4",
+    "tree_sha": "1adc33d1280b55f62f4dc21c7c87ac334fee303e",
+    "production_pages_deploy_run": 35230536365,
+    "production_live_resource_integrity_run": 35230633169,
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE",
     "client_ui_usability_proven": true,
     "operator_regression_reported": false
   },
   "current_release_authorities": [
+    "release467-build166-product-editing-image-stabilization.json",
+    "release467-build165-product-editing-stabilization-closure.json",
     "release467-build161-universal-search-recent-work-command-centre.json",
     "release467-build160-product-production-browser-recovery.json",
     "release467-build159-products-returning-browser-cache-coherence.json",
@@ -64,17 +65,7 @@
     "release467-build157-admin-data-delivery.json",
     "release467-build156-inventory-process-assignment.json",
     "release467-build155-products-client-responsiveness-hotfix.json",
-    "release467-build154-products-worker-resource-hotfix.json",
-    "release467-build153-layout-observer-performance-hotfix.json",
-    "release467-build94-product-workspace-readability.json",
-    "release467-build93-centered-application-shell-overflow-accessibility.json",
-    "release467-build92-prelaunch-action-queue-completeness.json",
-    "release467-build91-prelaunch-go-live-decision-convergence.json",
-    "release467-build90-external-acceptance-evidence-depth.json",
-    "release467-build89-external-acceptance-environment-isolation.json",
-    "release467-build88-external-acceptance-control-center.json",
-    "release467-build87-production-authority-restart-convergence.json",
-    "release467-build86-it-operations-self-diagnostics.json"
+    "release467-build154-products-worker-resource-hotfix.json"
   ],
   "external_lanes": {
     "stripe_development": "HOLD_EXTERNAL",
@@ -94,8 +85,8 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "next_build": 161,
+  "next_build": 166,
   "next_build_state": "AUTHORIZED_IN_PROGRESS",
-  "next_build_title": "Universal Search, Recent Work & Command Centre QoL",
-  "promotion_state": "BUILD161_CANDIDATE_NOT_YET_VERIFIED"
+  "next_build_title": "Product Editing & Image Stabilization",
+  "promotion_state": "BUILD166_CANDIDATE_NOT_YET_VERIFIED"
 }

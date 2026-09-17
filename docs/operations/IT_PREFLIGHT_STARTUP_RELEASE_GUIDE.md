@@ -15,37 +15,32 @@ Release 467 uses `main` as the current Production source and `dev` as the Develo
 1. Verify the previous exact SHA/tree and external proofs.
 2. The next build ingests that closure; the previous build never self-records later proof.
 3. Prove the exact `dev` head through System, Quality, I.T., Hygiene and build-specific acceptance.
-4. For browser/runtime incidents, execute the affected authenticated workflow in a real browser after the exact Preview deployment; HTTP-only smoke is insufficient.
+4. For browser/runtime incidents, execute only the current bounded workflow for the affected architecture; retired browser probes must not be run against successor Product architectures.
 5. Non-force promote the identical Development commit to `main` only after Development is GREEN.
 6. Require Production Pages Deploy and Production Live Resource Integrity.
-7. Execute incident-specific Production browser/route proof when required.
+7. Execute current architecture-specific Production proof without unnecessary Production D1 reads.
 8. Only then call `main` / Production GREEN.
 
 Production live-resource retries remain capped at three transient attempts; permanent 4xx and genuine resource failures fail closed. Stripe Development, PayPal sandbox and Social/OAuth remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 161 candidate
+## Current Release 467 restart authority — Build 166 candidate
 
-Build 160 **Product Production Browser Recovery** is the last fully verified Development and current Production baseline.
+Build 165 **Product Editing Stabilization** is the last fully verified Development and current Production baseline.
 
-- Last fully verified Development SHA: `4963a718166a7010c2075c803a26b13dadaf88db`
-- Current Production main SHA: `4963a718166a7010c2075c803a26b13dadaf88db`
-- Exact shared tree: `55e10b5507ac14ac1bc8937365789861c4119bea`
-- Development System Gate: `35149251365`
-- Development Current Application Quality: `35149251447`
-- Development I.T. Admin Runtime: `35149251412`
-- Development Repository Branch Hygiene: `35149251413`
-- Build 160 source proof: `35149251640`
-- Production Pages Deploy: `35160325113`
-- Production Live Resource Integrity: `35160415476`
-- Products Production Browser Proof: `35160415542`
-- Products Route Production Proof: `35160415443`
+- Last fully verified Development SHA: `20961a195ccab0594ca47ee051de45aa9168bda4`
+- Current Production main SHA: `20961a195ccab0594ca47ee051de45aa9168bda4`
+- Exact shared tree: `1adc33d1280b55f62f4dc21c7c87ac334fee303e`
+- Development System Gate: `35229694257`
+- Development Current Application Quality: `35229694220`
+- Development I.T. Admin Runtime: `35229694225`
+- Development Repository Branch Hygiene: `35229694190`
+- Production Pages Deploy: `35230536365`
+- Production Live Resource Integrity: `35230633169`
 
-Build 161 **Universal Search, Recent Work & Command Centre QoL** is the active Development candidate. It adds a shared Admin-only search and navigation layer while keeping `data/admin-navigation-modules.json` as the canonical route authority.
+Build 166 **Product Editing & Image Stabilization** is the active Development candidate. It keeps `/admin/products/` compact at eight rows by default, routes existing Product images through the canonical same-origin `/api/product-media` R2 reader, retains `/media/product` only as a zero-D1 compatibility alias, and replaces the public Product detail loader with one bounded Product/gallery endpoint plus an eight-second fail-fast browser timeout.
 
-The Build 161 search endpoint is authenticated, GET-only and bounded. It searches existing Product, Inventory/Tools, Project, Order, Custom Work, Content and Media authorities only where their tables and searchable columns exist. It does not create a second business-data authority. Recent work and favourites remain browser-local and do not write D1.
+The Product rewrite does not list R2, does not perform request-time DDL, does not scan the Product catalog automatically, and does not introduce payment/provider/accounting mutation. Historical Build 157/Build 163 browser probes are successor-aware and must not be used as authority for the Build 166 Product architecture.
 
-Keyboard access uses Ctrl/Cmd+K and `/`; same-origin Admin destinations can receive a bounded `dd_return` context so operators can return to the prior workspace. The existing Command Centre displays recent work and favourites without changing Product, Inventory, Finance, payment, provider, R2 or accounting mutation authority.
-
-Build 161 acceptance requires the dedicated Build 161 source proof plus System Gate, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene on one exact final `dev` SHA. Only that exact GREEN commit may be non-force promoted to `main`, followed by Production Pages Deploy, Production Live Resource Integrity and the retained Production Product proofs required by the repository release process.
+Build 166 acceptance requires its dedicated source proof plus System Gate, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene on one exact final `dev` SHA. Only that exact GREEN commit may be non-force promoted to `main`, followed by Production Pages Deploy, Production Live Resource Integrity, and current Product architecture proof.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
