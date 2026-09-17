@@ -2,169 +2,99 @@
 
 ## Current checkpoint
 
-**Release 467 Build 154 — Products Worker Resource Hotfix** is the current exact Development + Production source baseline.
+Release 467 **Build 170 — Product Browser Explicit Image Recovery** is the last fully verified Development and Production baseline.
 
-- Development SHA `fc74ea680c0eee221722ce1ede6cb7990b92551f`
-- Production SHA `cc50c65c7d4ecbb75e9744a57a14be7da4aba873`
-- identical tree `36e466d2d971ac7c80f183c3b9b42a0ff56597d9`
-- System `34867834161`
-- Quality `34867834181`
-- I.T. `34867834020`
-- Hygiene `34867834038`
-- Production Pages `34868084233`
-- Production Live Resources `34868183267`
-- Products Route Production Proof `34868183338`
+- Development SHA: `879c8730040afaf6caec6374b5057b7261fdcfe2`
+- Production SHA: `879c8730040afaf6caec6374b5057b7261fdcfe2`
+- exact tree: `da5e3b249d6e14266da5e191cb22c06205947948`
+- System Gate: `35275441340`
+- Current Application Quality: `35275441446`
+- I.T. Admin Runtime: `35275441412`
+- Repository Branch Hygiene: `35275441448`
+- Build 170 Development proof: `35275441460`
+- Production Pages Deploy: `35275636873`
+- Production Live Resource Integrity: `35275711398`
+- Products Production Browser Proof: `35275711387`
+- Products Route Production Proof: `35275711471`
+- Build 170 Production proof: `35275636939`
 
-Build 154 closed the server-side `/admin/products/` Cloudflare 1102 incident: Production returned HTTP 200 through the static Products fast path with module/session guards intact and no Worker resource-limit body. That exact closure remains valid for the server route, but it did not execute authenticated Product-page JavaScript.
-
-A later real Firefox session at **2026-09-14 12:46 EDT** exposed a separate client-side blocker: the page HTML renders, then the browser reports **This page isn't responding** while the existing-Product picker and several loading panels remain unfinished. Production live-resource evidence already showed **40 Products / 216 image candidates**, so the catalog itself is present. Build 155 is therefore an urgent client-responsiveness hotfix and adds real-browser acceptance rather than another HTTP-only proof.
-
-Stripe Development, PayPal sandbox, Social/OAuth and Cloudflare Access remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`. Canonical D1 migrations remain exactly `0001`–`0004`. Build 135 transient-transport retry policy remains mandatory and fail-closed for permanent 4xx and genuine resource correctness failures.
-
----
-
-# Permanent UX / Connectivity Contract
-
-- Mobile app/PWA: single-primary-task layouts, large touch targets, no hover dependency, no forced desktop tables, safe-area support.
-- Tablet: first-class portrait/landscape layouts.
-- Desktop/PWA: persistent navigation, wider tables where appropriate, keyboard-friendly workflows, safe bulk operations.
-- Responsive Web remains the canonical compatibility baseline; installation is never required for core buyer/seller workflows.
-- Every network surface distinguishes loading, cached/stale, disconnected and genuine error states.
-- Cached/stale price, stock, order, payment, gift balance and fulfillment state must never be presented as live authority.
-- Safe local drafts may survive restart; high-authority financial/destructive actions require fresh live validation and are never silently replayed offline.
-- Conflicts stop silent overwrite and surface explicit review.
-- Public SEO remains exactly one H1 per page with canonical metadata, semantic heading order, crawl-safe core content and useful alt text.
+Build 170 is GREEN. The compact Product Browser uses one bounded Product query on a fresh page. Missing fallback image recovery is explicit, one-Product-only and non-retrying; there is no automatic secondary image read, Product-table re-read, R2 listing, schema mutation or Product/image mutation.
 
 ---
 
-# Build 151 — Gifting, Custom Work, Local Pickup & Event Selling — CLOSED GREEN
+# Build 171 — Release & Restart Authority Convergence — ACTIVE
 
-Build 151 converged existing Gift Card, Custom Requests, Orders, pickup and Events authorities without adding a second write backend or a new D1 migration. Local pickup remains server-authoritative and unique/event stock must be revalidated live.
+## Purpose
 
----
+Remove stale restart/release truth left behind after the Product administration sequence advanced through Builds 166–170. Future chats and release passes must begin from the actual Production baseline rather than old Build 154/158/166 authority text.
 
-# Build 152 — Site-wide Image Quality Scoring & Media QA — CLOSED GREEN
+## Scope
 
-Build 152 extended the existing Release 448 product-photo scoring approach to editable public/static website images without creating a second scoring standard. Scoring remains advisory, lazy/visible-first and read-only; SVG/load failures remain explicit and canonical D1 remains `0001`–`0004`.
+Build 171 converges the machine pointer, I.T. control-tower identity and primary human handoff documents on the exact Build 170 GREEN baseline. It adds an immutable Build 170 Production closure authority plus a Build 171 candidate authority and dedicated gate.
 
----
+The build is intentionally operational rather than a Product feature pass. It changes no Product runtime logic, schema, canonical migration, D1/R2 business data, payment/refund/accounting state or external-provider execution/publication.
 
-# Build 153 — Layout Observer Performance Hotfix — CLOSED GREEN
+## Acceptance
 
-Build 153 repaired the Production Firefox long-script termination reported at `layout-overflow-guard.js:58:26` by batching MutationObserver work, filtering irrelevant additions, deduplicating nested roots, isolating self-mutations and advancing the Products layout cache token to `467-b153-layout-observer`.
+Development must be GREEN on one exact Build 171 head across:
 
-Its exact six-proof Production closure remains historically valid. The later Build 154 Worker incident and Build 155 client-loop incident are separate coverage gaps rather than invalidations of the Build 153 layout-observer repair.
+- Build 171 dedicated authority-convergence proof
+- retained Build 170 Product Browser proof
+- current I.T. release-truth gate
+- repository forward sanity
+- System Gate / exact Development Preview
+- Current Application Quality
+- I.T. Admin Runtime
+- Repository Branch Hygiene
 
----
+Production promotion is non-force and identical-tree only. After `main` advances, Production must pass:
 
-# Build 154 — Products Worker Resource Hotfix — CLOSED / SERVER ROUTE GREEN
+- Production Pages Deploy
+- Production Live Resource Integrity
+- retained Products Production Browser Proof
+- retained Products Route Production Proof
+- Build 171 authority-convergence proof on `main`
 
-Build 154 preserves admin session/module authorization while removing `/admin/products/` from the generic request-time `HTMLRewriter` path. It uses a bounded Products-only text fast path, `X-DND-Products-Render-Path: static-fast-path`, `Cache-Control: no-store`, and route-specific Production proof.
-
-Exact Build 154 Production proof established HTTP 200, module guard headers, the expected Product assets, and no Error 1102 / Worker resource-limit response. The closure explicitly records `client_ui_usability_proven: false` because later browser evidence showed the Product UI could still lock after the server response completed.
-
----
-
-# Build 155 — Products Client Responsiveness Hotfix — ACTIVE
-
-Repair the confirmed browser-main-thread lock on `/admin/products/` without weakening Product data, module security or Marketplace Listing Readiness authority.
-
-- Break the self-triggering `MutationObserver`/`render()` loop in `admin-products-marketplace-readiness.js`.
-- Make marketplace row rendering idempotent with a deterministic render fingerprint.
-- Disconnect the observer while authored marketplace markup is changed and ignore mutation batches originating inside `.marketplace-readiness-inline`.
-- Keep Marketplace Listing Readiness browser-local/advisory; add no Product API writes or marketplace publication.
-- Advance Product asset revision to `467-b155-products-client-responsiveness` and dynamic Marketplace import to `467b155`; preserve `467-b153-layout-observer`.
-- Expose a non-sensitive runtime health marker so acceptance can prove render stability rather than infer it.
-- Add a real Chromium/CDP Development proof after exact Preview deployment and a real Chromium/CDP Production proof after exact Production deployment.
-- Require an existing authenticated administrator session, Product picker options > 1, rendered Product rows > 0, a functioning event-loop heartbeat, stable marketplace render count, and cleanup/quality panels no longer stuck in Loading.
-- Browser proof remains GET/observation-only and never creates a session or mutates Product, D1, R2, provider, payment, refund or accounting authority.
+Only then may Build 171 be called Production GREEN.
 
 ---
 
-# Build 156 — Notifications, Activity Inbox & Cross-Device Continuity — QoL
+## Permanent release/restart rules
 
-Seller Activity Inbox should surface new orders, buyer messages, sync failures, listing issues, inventory warnings, custom requests, content approvals and system/provider warnings. Push is optional; durable in-app/server state is authoritative. Add read/unread, useful deep links, severity, snooze/dismiss for advisory items, and cross-device continuity without allowing notifications themselves to mutate high-authority business state.
-
----
-
-# Build 157 — UX Analytics, Recovery Telemetry & Conversion Improvement — Efficiency + Error Handling
-
-Measure aggregate discovery→product→saved/cart→checkout→order, zero-result searches and recovery from API/offline failures. Telemetry may queue in bounded batches or be dropped; business workflows must never block on analytics.
-
----
-
-# Build 158 — Cross-Surface UX Certification & Production Hardening — Resilience
-
-Certify phone browser, installed mobile PWA, tablet, desktop browser and installed desktop PWA. Block Production for critical overflow/navigation/accessibility failures, missing offline/error states, duplicate-mutation hazards, false payment/order state, stale stock presented as live, destructive offline replay, or more than one public H1.
+1. Verify live `dev` and `main` refs at restart; do not trust stale embedded self-SHAs.
+2. A candidate records the exact previously verified checkpoint, never its own not-yet-created final commit SHA.
+3. `current-development-authority.json`, I.T. release truth, `AI_HANDOFF.md`, this roadmap and `MARKDOWN_INDEX.md` must agree on build identity and predecessor proof.
+4. Promotion remains **EXACT GREEN DEVELOPMENT TREE ONLY** and non-force unless a separately documented emergency procedure explicitly says otherwise.
+5. Canonical D1 migrations remain `0001`–`0005` unless a future schema build explicitly changes that authority.
+6. Never reapply historical migrations or copy Development business data over Production merely because a new chat started.
+7. Request-time schema mutation remains closed.
+8. Product/admin/public workflows must remain fail-soft for bounded read-capacity issues and must not silently invent successful authority.
+9. Public SEO continues to require one H1 per exposed page.
+10. Secrets and provider credentials remain outside source/D1/public files.
 
 ---
 
-# Build 159 — Error Recovery & Self-Diagnostics Centre — Error Handling
+## Product administration state after Build 170
 
-Create one operator-facing place to understand failures without hunting through unrelated pages. Normalize human-readable errors, correlation/request IDs, retryability, affected module, last successful action and safe recovery instructions.
+The current Product path now includes:
 
----
+- compact Product Browser with explicit paging/search/refresh
+- browser-session reuse for revisited Product pages
+- one bounded Product query on a fresh browser page
+- operator-triggered single-Product fallback photo recovery
+- no automatic secondary image recovery reads
+- dedicated one-Product Product Editor
+- Media tab loading only when opened
+- QA loading only when **Run QA** is pressed
+- bounded public Product detail/image path
+- retained Product route/browser Production proofs
 
-# Build 160 — Workflow Efficiency & Smart Defaults — Efficiency
-
-Reduce repetitive admin work: remember safe filters/view preferences, restore recent work context, preserve non-authoritative drafts, add clearer duplicate/clone flows, sensible defaults, keyboard-first actions, recent items, safer bulk selection and fewer unnecessary reloads.
-
----
-
-# Build 161 — Universal Search, Recent Work & Command Centre — QoL
-
-Unify navigation to Products, Inventory, Tools, Projects, Orders, Custom Work, Content, Media, Finance and I.T. Add recent work, favourites, search-by-name/SKU/reference, keyboard command access, and context-preserving return links.
-
----
-
-# Build 162 — Media & Content Efficiency Pass — QoL + Media
-
-Build on Build 152 scoring with media-library housekeeping: assignment visibility, unused-image detection, duplicate/near-duplicate review, missing alt/title warnings, wrong-size/aspect warnings, low-score filters, replace-file-while-keeping-placements, and page-level media readiness. No automatic deletion and no automatic replacement of authored media.
+Historical Product repair builds remain provenance only. Do not restart from their older runtime assumptions when Build 170/171 authority is available.
 
 ---
 
-# Build 163 — Inventory / Creator Workflow Automation — Efficiency
+## Next direction after Build 171
 
-Reduce manual bookkeeping across kits, batches, material use, project cost and profitability. Make linked-item names clear, preserve remaining kit components, default safe use/batch values where breakdown authority exists, surface unsaved usage, and provide explicit reconciliation rather than hidden correction.
+Once Build 171 itself is Production GREEN, continue feature work from the synchronized Build 171 `dev == main` head. Choose the next bounded scope from current operational evidence rather than stale build numbers. Product runtime changes should preserve the Build 170 low-read contracts unless a measured regression requires a deliberate change.
 
----
-
-# Build 164 — API Error Contract & Safe Retry Normalization — Error Handling
-
-Standardize admin/public API failures so UI code receives JSON rather than unexpected HTML, with stable error code, human message, retryability and correlation ID. Apply bounded transient retry only where safe and idempotent.
-
----
-
-# Build 165 — I.T. Readiness, Self-Healing Guidance & Release Efficiency — Operations
-
-Converge preflight, bindings, migration proof, runtime incidents, provider readiness, quota/subrequest health, cache/service-worker state and deployment identity into one I.T. readiness view. Offer bounded corrective mechanics only where already authorized and reversible.
-
----
-
-# Release Governance
-
-1. Verify previous exact SHA/tree and all required proofs at startup.
-2. The next build ingests that closure; candidates never self-record future proof.
-3. Push `dev` non-force.
-4. Require exact-head System Gate, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene GREEN, plus canonical Development D1 and exact Preview/bindings/smoke.
-5. Resource/client-sensitive hotfixes require direct acceptance of the affected live route/workflow; generic smoke is not enough.
-6. Build 155 additionally requires a real authenticated Development browser proof before Production promotion.
-7. Promote the identical tree to `main` non-force only after Development is GREEN.
-8. Require Production Pages Deploy SUCCESS and Production Live Resource Integrity SUCCESS.
-9. Build 155 additionally requires the real authenticated Production browser proof to show a populated Product picker/table, responsive event loop and stable marketplace renderer before the Product Entry incident may be called GREEN.
-10. Preserve Build 135 transport resilience and canonical D1 `0001`–`0004` unless an explicitly approved schema build changes authority.
-11. External provider/evidence lanes remain separate from ordinary feature readiness.
-
-<!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 158 candidate
-
-Build 157 **Product Admin + Admin Data Delivery** is the last fully verified Development and current Production baseline. Development SHA/main SHA: `4b82883a79e1897792fd3840860760b555e0dd36`. Exact tree: `045ff6357572177fff9417f229cadce294080b02`. Development proofs: System Gate `35045214773`, Current Application Quality `35045214757`, I.T. Admin Runtime `35045214868`, Repository Branch Hygiene `35045214777`. Production proofs: Pages `35050288505`, live-resource integrity `35050347701`, Products browser `35050347805`, Products route `35050347663`.
-
-Build 158 **Product Editor Startup Resilience** supersedes the old roadmap placeholder for Build 158 and is the active Development candidate. Product editor option bootstrap is canonicalized to one bounded read; browser snapshot/safe defaults keep editor controls available if optional catalog/tax enrichment is slow; live D1-backed option authority can replace fallback options when it succeeds. Product create/update behaviour is not rewritten.
-
-The Product Quality follow-up treats a bounded `readiness_timeout` as deferred/pending evidence rather than a broken Product workspace. Unknown readiness remains unknown and is never marked complete. Real buyer-fact, HTTP, Worker-resource, authentication, and database failures remain warnings. The Build 156 two-lane/reserved-core request scheduler contract remains preserved.
-
-Cloudflare Access service-token transport is configured and proven for Development browser acceptance without recording secret values. Canonical D1 migrations are `0001`–`0005`; request-time schema/Product/D1/R2/provider/payment/refund/accounting mutation remains closed.
-
-Promotion remains closed until one exact Build 158 `dev` SHA is GREEN across the dedicated Build 158 proof, retained Build 157 and Build 156 proofs, System Gate/Preview, Current Application Quality, I.T. Admin Runtime, Repository Branch Hygiene, and authenticated Product browser regression acceptance. Exact Production Pages, live-resource, Product-route, and Product-browser acceptance are then required before Production may be called GREEN for Build 158.
-<!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
+External provider/evidence lanes remain separate from ordinary application readiness: Stripe Development, PayPal sandbox and Social/OAuth require their own acceptance evidence, while CAIP private media remains evidence-dependent.
