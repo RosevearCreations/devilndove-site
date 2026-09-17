@@ -14,6 +14,12 @@ on:
       - 'scripts/release467_build164_gate.py'
       - 'scripts/repository_forward_sanity.py'
       - 'scripts/release467_build156_gate.py'
+      - 'scripts/release467_build171_gate.py'
+      - 'scripts/release467_build161_gate.py'
+      - 'scripts/release467_build158_gate.py'
+      - 'scripts/release467_build157_gate.py'
+      - 'scripts/current_deployment_preflight_truth_gate.py'
+      - 'functions/api/admin/current-deployment-preflight.js'
       - '.github/workflows/release467-build173-product-media-repair.yml'
   workflow_dispatch:
 jobs:
