@@ -1,0 +1,43 @@
+name: Release 467 Build 174 Product Editor Media Read Collapse
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/product-editor-media.js'
+      - 'public/js/admin-product-editor-v163.js'
+      - 'admin/product-editor/index.html'
+      - 'scripts/release467_build174_gate.py'
+      - 'scripts/release467_build173_gate.py'
+      - 'scripts/release467_build169_gate.py'
+      - 'scripts/release467_build168_gate.py'
+      - 'scripts/release467_build165_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_174_PRODUCT_EDITOR_MEDIA_READ_COLLAPSE.md'
+      - '.github/workflows/release467-build174-product-editor-media-read-collapse.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  product-editor-media-read-collapse-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Prove Build 174 Product Editor Media read collapse
+        run: python scripts/release467_build174_gate.py
+      - name: Retain Build 173 Product media repair
+        run: python scripts/release467_build173_gate.py
+      - name: Retain Build 169 explicit QA/editor convergence
+        run: python scripts/release467_build169_gate.py
+      - name: Retain Build 168 low-read handoff
+        run: python scripts/release467_build168_gate.py
+      - name: Retain Build 165 Product/media continuity
+        run: python scripts/release467_build165_gate.py
+      - name: JavaScript syntax
+        run: |
+          node --check functions/api/admin/product-editor-media.js
+          node --check public/js/admin-product-editor-v163.js
