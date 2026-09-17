@@ -1,44 +1,45 @@
 # Devil n Dove — Markdown Index
 
-Current exact verified source baseline: **Release 467 Build 154 — Products Worker Resource Hotfix**.
+## Current authority
 
-Primary current authorities:
-- `current-development-authority.json`
-- `release467-build154-products-worker-resource-hotfix.json`
-- `release467-build153-layout-observer-performance-hotfix.json`
-- `AI_HANDOFF.md`
-- `PROJECT_STATUS_AND_ROADMAP.md`
-- `SANITY_HEALTH_CHECK.md`
-- `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
+Current verified predecessor: **Release 467 Build 170 — Product Browser Explicit Image Recovery**, fully GREEN in Development and Production.
 
-Build 154 proof bundle:
-- Development SHA `fc74ea680c0eee221722ce1ede6cb7990b92551f`
-- Production main SHA `cc50c65c7d4ecbb75e9744a57a14be7da4aba873`
-- identical tree `36e466d2d971ac7c80f183c3b9b42a0ff56597d9`
-- System `34867834161`
-- Quality `34867834181`
-- I.T. `34867834020`
-- Hygiene `34867834038`
-- Production Pages `34868084233`
-- Live Resources `34868183267`
-- Products Route Production Proof `34868183338`
+Active Build 171 candidate: **Release 467 Build 171 — Release & Restart Authority Convergence**.
 
-Build 154 proved the `/admin/products/` **server route** HTTP 200/static-fast-path/no-1102 boundary. Its closure intentionally records `client_ui_usability_proven: false` because a later real Firefox session showed the page can still lock after HTML rendering while Product dropdown/loading work remains unfinished.
+Primary current authorities, in restart order:
 
-Build 155 — **Products Client Responsiveness Hotfix** — is active. It repairs the Marketplace Listing Readiness self-triggering `MutationObserver`/DOM-render loop, advances Product cache identity to `467-b155-products-client-responsiveness`, advances the dynamic Marketplace import to `467b155`, and adds real authenticated Chromium/CDP Development and Production browser proofs. Those proofs must show a populated Product picker/table, responsive event-loop heartbeat, stable marketplace render count, and loading panels that settle.
+1. `current-development-authority.json`
+2. `AI_HANDOFF.md`
+3. `PROJECT_STATUS_AND_ROADMAP.md`
+4. `release467-build171-release-restart-authority-convergence.json`
+5. `release467-build170-product-browser-explicit-image-recovery-closure.json`
+6. `docs/operations/RELEASE_467_BUILD_171_RELEASE_RESTART_AUTHORITY_CONVERGENCE.md`
+7. `docs/operations/RELEASE_467_BUILD_170_PRODUCT_BROWSER_EXPLICIT_IMAGE_RECOVERY.md`
+8. `SANITY_HEALTH_CHECK.md`
+9. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
 
-Builds 137–141 closure-evidence authorities remain retained provenance for Markdown/JSON export, evidence ID, SHA-256 fingerprint, verification manifest and independent cross-artifact verification. Build 135 Production live-resource transport resilience remains mandatory. Canonical migrations remain `0001`–`0004`.
+## Exact Build 170 proof bundle
 
-<!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 158 candidate
+- `dev`: `879c8730040afaf6caec6374b5057b7261fdcfe2`
+- `main`: `879c8730040afaf6caec6374b5057b7261fdcfe2`
+- tree: `da5e3b249d6e14266da5e191cb22c06205947948`
+- System Gate: `35275441340`
+- Current Application Quality: `35275441446`
+- I.T. Admin Runtime: `35275441412`
+- Repository Branch Hygiene: `35275441448`
+- Build 170 Development proof: `35275441460`
+- Production Pages Deploy: `35275636873`
+- Production Live Resource Integrity: `35275711398`
+- Products Production Browser Proof: `35275711387`
+- Products Route Production Proof: `35275711471`
+- Build 170 Production proof: `35275636939`
 
-The canonical current machine authorities are `current-development-authority.json`, `release467-build157-admin-data-delivery.json`, and `release467-build158-product-editor-startup-resilience.json`; Build 156 remains retained historical regression authority.
+## Restart rule
 
-Build 157 **Product Admin + Admin Data Delivery** is the last fully verified Development and current Production baseline. Development SHA/main SHA: `4b82883a79e1897792fd3840860760b555e0dd36`. Exact tree: `045ff6357572177fff9417f229cadce294080b02`. Development proofs: System Gate `35045214773`, Current Application Quality `35045214757`, I.T. Admin Runtime `35045214868`, Repository Branch Hygiene `35045214777`. Production proofs: Pages `35050288505`, live-resource integrity `35050347701`, Products browser `35050347805`, Products route `35050347663`.
+Do not infer the current exact Build 171 SHA from an embedded candidate file. Resolve live `dev` and `main` refs at restart. Once Build 171 is promoted, the synchronized exact branch head plus exact-SHA CI/Production proof is the current source authority.
 
-Build 158 **Product Editor Startup Resilience** is the active Development candidate. It canonicalizes Product editor option bootstrap to one bounded read, provides browser snapshot/safe-default continuity for optional catalog/tax enrichment, allows live D1-backed authority to replace fallback values, and presents bounded readiness timeout as deferred/pending without inventing completeness. Product create/update and other high-authority mutations are unchanged.
+Historical Build 154/155/158/166 authority documents remain Git provenance only. They must not override Build 170/171 current truth.
 
-Cloudflare Access service-token transport is configured and proven for Development browser acceptance without recording secret values. Canonical migrations remain `0001`–`0005` and request-time schema/Product/D1/R2/provider/payment/refund/accounting mutation remains closed.
+## Safety boundary
 
-Promotion remains closed until one exact Build 158 `dev` SHA is GREEN across Build 158 source proof, retained Build 157/156 proofs, System Gate/Preview, Current Application Quality, I.T. Admin Runtime, Repository Branch Hygiene, and authenticated Product browser regression acceptance; Production then requires exact deployment, live-resource, Product-route, and Product-browser acceptance.
-<!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
+Build 171 changes release/restart truth only. Canonical migrations remain `0001`–`0005`; request-time DDL, D1/R2 business-data mutation, provider execution/publication, payment/refund/accounting mutation and Product runtime changes remain closed.
