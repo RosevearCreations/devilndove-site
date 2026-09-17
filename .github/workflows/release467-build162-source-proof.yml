@@ -1,0 +1,33 @@
+name: Release 467 Build 162 Product Admin D1 Reset Proof
+
+on:
+  push:
+    branches: [build162-product-admin-d1-reset]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Product Admin architecture source gate
+        run: python scripts/release467_build162_gate.py
+      - name: JavaScript syntax checks
+        run: |
+          node --check public/js/admin-products-browser-v162.js
+          node --check public/js/admin-product-editor-v162.js
+      - name: Service worker syntax check
+        run: node --check sw.js
+      - name: Confirm no remote-provider access
+        run: |
+          ! grep -R "wrangler.*d1.*--remote\|wrangler.*r2\|CLOUDFLARE_API_TOKEN" .github/workflows/release467-build162-source-proof.yml
