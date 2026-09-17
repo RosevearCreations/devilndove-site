@@ -48,7 +48,7 @@
     inFlight=true;next.disabled=true;prev.disabled=true;refresh.disabled=true;setStatus('Loading one bounded Product page…');
     try{
       const params=new URLSearchParams({limit:'40'});const q=String(query.value||'').trim();if(q)params.set('q',q);if(requestedCursor)params.set('cursor',String(requestedCursor));
-      const response=await window.DDAuth.apiFetch(`/api/admin/products-browser?${params.toString()}`,{method:'GET',cache:'no-store'});
+      const response=await window.DDAuth.apiFetch(`/api/admin/product-browser?${params.toString()}`,{method:'GET',cache:'no-store'});
       const data=await readJson(response);
       if(remember)history.push(cursor);
       cursor=requestedCursor||null;nextCursor=data.next_cursor||null;
