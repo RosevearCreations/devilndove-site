@@ -1,0 +1,42 @@
+name: Release 467 Build 169 Product QA Editor Convergence Proof
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'admin/product-editor/index.html'
+      - 'public/js/admin-product-editor-v163.js'
+      - 'functions/api/admin/product-publish-qa.js'
+      - 'scripts/release467_build166_gate.py'
+      - 'scripts/release467_build168_gate.py'
+      - 'scripts/release467_build169_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_169_PRODUCT_QA_EDITOR_CONVERGENCE.md'
+      - '.github/workflows/release467-build169-product-qa-editor-convergence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  product-qa-editor-convergence-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build 169 Product QA/editor convergence gate
+        run: python scripts/release467_build169_gate.py
+      - name: Retained Build 168 Product low-read handoff gate
+        run: python scripts/release467_build168_gate.py
+      - name: Retained Build 166 Product editing/image stabilization gate
+        run: python scripts/release467_build166_gate.py
+      - name: JavaScript syntax checks
+        run: |
+          node --check public/js/admin-product-editor-v163.js
+          node --check functions/api/admin/product-publish-qa.js
+      - name: Boundary
+        run: echo 'Build 169 is explicit selected-Product QA/editor convergence. QA performs no startup read, request-time DDL, automatic history write, catalog-wide scan, R2 listing/mutation, provider, payment, refund or accounting mutation.'
