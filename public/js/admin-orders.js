@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }).join("");
   }
 
-  async function fetchOrders() { const response = await window.DDAuth.apiFetch("/api/admin/orders", { method: "GET" }); const data = await response.json().catch(() => null); if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to load orders."); return data; }
+  async function fetchOrders() { const response = await window.DDAuth.apiFetch("/api/admin/orders?limit=80", { method: "GET" }); const data = await response.json().catch(() => null); if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to load orders."); return data; }
   async function loadOrders() {
     if (isLoading) return;
     const originalText = refreshButton?.textContent || "Refresh Orders";
