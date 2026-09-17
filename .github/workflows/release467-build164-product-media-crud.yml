@@ -6,8 +6,12 @@ on:
     paths:
       - 'admin/catalog-media/index.html'
       - 'public/js/admin-product-media-editor-v164.js'
+      - 'public/js/admin-product-media-editor-v172.js'
+      - 'functions/api/admin/product-media-editor.js'
       - 'functions/api/admin/product-image-editor.js'
       - 'functions/api/admin/product-image-file.js'
+      - 'functions/api/admin/_productImageAnnotationsV172.js'
+      - 'scripts/release467_build163_gate.py'
       - 'scripts/release467_build164_gate.py'
       - '.github/workflows/release467-build164-product-media-crud.yml'
   workflow_dispatch:
@@ -26,14 +30,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Build 164 Product Media CRUD source gate
+      - name: Build 164 Product Media CRUD successor source gate
         run: python scripts/release467_build164_gate.py
-      - name: Build 163 low-read compatibility gate
+      - name: Build 163 low-read successor compatibility gate
         run: python scripts/release467_build163_gate.py
       - name: JavaScript syntax checks
         run: |
-          node --check public/js/admin-product-media-editor-v164.js
+          if grep -q 'admin-product-media-editor-v172.js' admin/catalog-media/index.html; then
+            node --check public/js/admin-product-media-editor-v172.js
+          else
+            node --check public/js/admin-product-media-editor-v164.js
+          fi
+          node --check functions/api/admin/product-media-editor.js
           node --check functions/api/admin/product-image-editor.js
           node --check functions/api/admin/product-image-file.js
+          if [ -f functions/api/admin/_productImageAnnotationsV172.js ]; then node --check functions/api/admin/_productImageAnnotationsV172.js; fi
       - name: Zero-D1 proof boundary
-        run: echo 'Build 164 source proof performs no D1, R2, provider, or Production mutation.'
+        run: echo 'Retained Product Media source proof performs no D1, R2, provider, or Production mutation. Build 172 preserves explicit low-read runtime actions.'
