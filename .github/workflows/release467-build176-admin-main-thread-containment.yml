@@ -1,0 +1,53 @@
+name: Release 467 Build 176 Admin Main-Thread Containment
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'public/js/admin-context-help.js'
+      - 'public/js/site-auth-ui.js'
+      - 'public/js/admin.js'
+      - 'functions/api/admin/supply-sourcing.js'
+      - 'public/js/admin-supply-sourcing.js'
+      - 'admin/supply-sourcing/index.html'
+      - 'functions/api/admin/storefront-merchandising.js'
+      - 'public/js/admin-storefront-merchandising.js'
+      - 'admin/storefront-merchandising/index.html'
+      - 'functions/api/admin/orders.js'
+      - 'public/js/admin-orders-workspace-build150.js'
+      - 'public/js/admin-orders.js'
+      - 'admin/orders/index.html'
+      - 'admin/catalog/index.html'
+      - 'admin/index.html'
+      - 'scripts/release467_build176_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_176_ADMIN_MAIN_THREAD_CONTAINMENT.md'
+      - '.github/workflows/release467-build176-admin-main-thread-containment.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  admin-main-thread-containment-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Prove Build 176 admin main-thread containment
+        run: python scripts/release467_build176_gate.py
+      - name: Retain Build 175 Product Editor low-read contract
+        run: python scripts/release467_build175_gate.py
+      - name: JavaScript syntax
+        run: |
+          node --check public/js/admin-context-help.js
+          node --check public/js/site-auth-ui.js
+          node --check public/js/admin.js
+          node --check functions/api/admin/supply-sourcing.js
+          node --check public/js/admin-supply-sourcing.js
+          node --check functions/api/admin/storefront-merchandising.js
+          node --check public/js/admin-storefront-merchandising.js
+          node --check functions/api/admin/orders.js
+          node --check public/js/admin-orders-workspace-build150.js
+          node --check public/js/admin-orders.js
