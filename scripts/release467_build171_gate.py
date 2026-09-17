@@ -6,12 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 FAIL=[]
 BASE_SHA='879c8730040afaf6caec6374b5057b7261fdcfe2'
 BASE_TREE='da5e3b249d6e14266da5e191cb22c06205947948'
-DEV_PROOFS={
-    'system_gate_run':35275441340,
-    'current_application_quality_run':35275441446,
-    'it_admin_runtime_proof_run':35275441412,
-    'branch_hygiene_run':35275441448,
-}
+DEV_PROOFS={'system_gate_run':35275441340,'current_application_quality_run':35275441446,'it_admin_runtime_proof_run':35275441412,'branch_hygiene_run':35275441448}
 PROD_PAGES=35275636873
 PROD_LIVE=35275711398
 PROD_BROWSER=35275711387
@@ -37,6 +32,10 @@ def node(path):
     p=subprocess.run(['node','--check',str(ROOT/path)],cwd=ROOT,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     req(p.returncode==0,f'JavaScript syntax failed for {path}: {(p.stderr or p.stdout)[-1200:]}')
 
+def require_baseline(text,label):
+    for token in (BASE_SHA,BASE_TREE,str(DEV_PROOFS['system_gate_run']),str(DEV_PROOFS['current_application_quality_run']),str(DEV_PROOFS['it_admin_runtime_proof_run']),str(DEV_PROOFS['branch_hygiene_run']),str(PROD_PAGES),str(PROD_LIVE)):
+        req(token in text,f'{label} missing Build 170 truth token: {token}')
+
 pointer=load('current-development-authority.json')
 candidate=load(CANDIDATE)
 closure=load(CLOSURE)
@@ -45,9 +44,12 @@ ai=read('AI_HANDOFF.md')
 roadmap=read('PROJECT_STATUS_AND_ROADMAP.md')
 index=read('MARKDOWN_INDEX.md')
 note=read('docs/operations/RELEASE_467_BUILD_171_RELEASE_RESTART_AUTHORITY_CONVERGENCE.md')
+guide=read('docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md')
 api=read('functions/api/admin/it-operations-control-tower.js')
 client=read('public/js/admin-it-control-tower.js')
 page=read('admin/it/index.html')
+preflight=read('functions/api/admin/current-deployment-preflight.js')
+reliability=read('functions/api/_lib/currentReliability.js')
 
 req(pointer.get('release')==467,'pointer release must be 467')
 req(pointer.get('build')==171,'pointer build must be 171')
@@ -57,12 +59,9 @@ req(pointer.get('source_authority')=='dev','pointer source authority must remain
 req(pointer.get('accepted_dev_sha')==BASE_SHA,'pointer accepted Development SHA must be exact Build 170')
 req(pointer.get('accepted_dev_tree_sha')==BASE_TREE,'pointer accepted Development tree must be exact Build 170')
 req((pointer.get('acceptance') or {})==DEV_PROOFS,'pointer accepted Development proof bundle must be exact Build 170')
-
-restart=pointer.get('restart_integrity') or {}
-last=restart.get('last_fully_verified') or {}
-current=restart.get('current_closure_candidate') or {}
+restart=pointer.get('restart_integrity') or {};last=restart.get('last_fully_verified') or {};current=restart.get('current_closure_candidate') or {}
 req(last.get('build')==170 and last.get('dev_sha')==BASE_SHA and last.get('tree_sha')==BASE_TREE,'restart last verified authority must be exact Build 170')
-req(last.get('authority')==CLOSURE,'restart last verified authority file must be the Build 170 closure')
+req(last.get('authority')==CLOSURE,'restart last verified authority file must be Build 170 closure')
 req((last.get('proofs') or {})==DEV_PROOFS,'restart Build 170 proof bundle drifted')
 req(current.get('build')==171 and current.get('authority')==CANDIDATE,'restart current candidate must be Build 171 authority')
 req(restart.get('restart_requires_exact_dev_head_proof_verification') is True,'restart must require exact dev-head proof verification')
@@ -76,41 +75,47 @@ req(prod.get('production_live_resource_integrity_run')==PROD_LIVE,'Production li
 req(prod.get('state')=='PRODUCTION_GREEN','Production checkpoint must remain GREEN')
 authorities=pointer.get('current_release_authorities') or []
 req(bool(authorities) and authorities[0]==CANDIDATE,'Build 171 candidate must be first current release authority')
-req(CLOSURE in authorities,'Build 170 Production closure must remain a current release authority')
+req(CLOSURE in authorities,'Build 170 Production closure must remain current authority')
 
 req(candidate.get('release')==467 and candidate.get('build')==171 and candidate.get('title')==TITLE,'Build 171 candidate identity mismatch')
-req(candidate.get('state')=='DEVELOPMENT_CANDIDATE','Build 171 authority must remain an explicit candidate before external exact-head proof')
+req(candidate.get('state')=='DEVELOPMENT_CANDIDATE','Build 171 authority must remain explicit candidate before external exact-head proof')
 start=(candidate.get('starting_point') or {}).get('development') or {}
-req(start.get('sha')==BASE_SHA and start.get('tree')==BASE_TREE,'Build 171 candidate must start from exact Build 170 Development SHA/tree')
+req(start.get('sha')==BASE_SHA and start.get('tree')==BASE_TREE,'Build 171 candidate must start from exact Build 170 SHA/tree')
 req(start.get('system_gate_run')==DEV_PROOFS['system_gate_run'],'Build 171 candidate System proof mismatch')
 req(start.get('quality_run')==DEV_PROOFS['current_application_quality_run'],'Build 171 candidate Quality proof mismatch')
 req(start.get('it_admin_runtime_run')==DEV_PROOFS['it_admin_runtime_proof_run'],'Build 171 candidate I.T. proof mismatch')
 req(start.get('repository_hygiene_run')==DEV_PROOFS['branch_hygiene_run'],'Build 171 candidate Hygiene proof mismatch')
 
-req(closure.get('release')==467 and closure.get('build')==170,'Build 170 closure identity mismatch')
-req(closure.get('state')=='PRODUCTION_GREEN','Build 170 closure must remain Production GREEN')
-closure_dev=closure.get('development') or {};closure_prod=closure.get('production') or {}
+req(closure.get('release')==467 and closure.get('build')==170 and closure.get('state')=='PRODUCTION_GREEN','Build 170 closure identity/state mismatch')
+closure_dev=closure.get('development') or {};closure_prod=closure.get('production') or {};final=closure.get('final_closure') or {};prod_closure=closure.get('production_checkpoint') or {}
 req(closure_dev.get('dev_sha')==BASE_SHA and closure_dev.get('tree_sha')==BASE_TREE,'Build 170 closure Development identity mismatch')
+req(final.get('dev_sha')==BASE_SHA and final.get('tree_sha')==BASE_TREE and (final.get('proofs') or {})==DEV_PROOFS,'Build 170 final_closure restart contract mismatch')
+req(final.get('ingested_by_build')==171,'Build 170 final_closure must be ingested by Build 171')
 req(closure_prod.get('main_sha')==BASE_SHA and closure_prod.get('tree_sha')==BASE_TREE,'Build 170 closure Production identity mismatch')
 req(closure_prod.get('production_pages_deploy_run')==PROD_PAGES and closure_prod.get('production_live_resource_integrity_run')==PROD_LIVE,'Build 170 closure Production proof mismatch')
 req(closure_prod.get('products_browser_proof_run')==PROD_BROWSER and closure_prod.get('products_route_proof_run')==PROD_ROUTE,'Build 170 Product Production proof mismatch')
+req(prod_closure.get('main_sha')==BASE_SHA and prod_closure.get('tree_sha')==BASE_TREE and prod_closure.get('production_pages_deploy_run')==PROD_PAGES,'Build 170 production_checkpoint restart contract mismatch')
 
-for body,label in ((ai,'AI_HANDOFF.md'),(roadmap,'PROJECT_STATUS_AND_ROADMAP.md'),(index,'MARKDOWN_INDEX.md'),(note,'Build 171 release note')):
+for body,label in ((ai,'AI_HANDOFF.md'),(roadmap,'PROJECT_STATUS_AND_ROADMAP.md'),(index,'MARKDOWN_INDEX.md'),(note,'Build 171 release note'),(guide,'I.T. preflight guide')):
     req('Build 171' in body,f'{label} missing Build 171 current authority')
     req(BASE_SHA in body,f'{label} missing exact Build 170 predecessor SHA')
-for stale in ('Build 155 — Products Client Responsiveness Hotfix — ACTIVE','Current Release 467 restart authority — Build 158 candidate','Current exact verified source baseline: **Release 467 Build 154'):
-    req(stale not in ai and stale not in roadmap and stale not in index,f'stale restart authority remains active: {stale}')
+for stale in ('Build 155 — Products Client Responsiveness Hotfix — ACTIVE','Current Release 467 restart authority — Build 158 candidate','Current Release 467 restart authority — Build 166 candidate','Current exact verified source baseline: **Release 467 Build 154'):
+    req(stale not in ai and stale not in roadmap and stale not in index and stale not in guide,f'stale restart authority remains active: {stale}')
 
+for text,label in ((api,'I.T. API'),(preflight,'Deployment Preflight'),(reliability,'Reliability')):
+    require_baseline(text,label)
 req('const BUILD=171;' in api,'I.T. API must expose Build 171')
 req("const TITLE='Release & Restart Authority Convergence';" in api,'I.T. API must expose Build 171 title')
-for token in (BASE_SHA,BASE_TREE,str(DEV_PROOFS['system_gate_run']),str(PROD_PAGES),str(PROD_LIVE),"state:'DEVELOPMENT_GREEN'"):
-    req(token in api,f'I.T. API missing Build 170 accepted truth token: {token}')
+req('const BUILD=171;' in preflight,'Deployment Preflight must expose Build 171')
+req("CURRENT_RELIABILITY_BUILD=171" in reliability,'Reliability must expose Build 171')
+req('verified_development_checkpoint' in preflight,'Deployment Preflight must expose verified Development')
+req('last_fully_verified_development' in reliability,'Reliability must expose verified Development provenance')
 req('Release 467 Build 171' in client,'I.T. client must identify Build 171')
 req('Release 467 Build 171' in page,'I.T. page must identify Build 171')
 req(len(re.findall(r'<h1(?:\s|>)',page,re.I))==1,'I.T. page must retain exactly one H1')
-req('onRequestPost' not in api,'Build 171 I.T. authority endpoint must remain read-only')
-node('functions/api/admin/it-operations-control-tower.js')
-node('public/js/admin-it-control-tower.js')
+req('onRequestPost' not in api and 'onRequestPost' not in preflight,'Build 171 authority endpoints must remain read-only')
+for path in ('functions/api/admin/it-operations-control-tower.js','public/js/admin-it-control-tower.js','functions/api/admin/current-deployment-preflight.js','functions/api/_lib/currentReliability.js'):
+    node(path)
 
 canonical=[x.get('file') for x in manifest.get('migrations',[])]
 req(canonical==['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql'],'Build 171 must not alter canonical migration authority')
@@ -123,5 +128,5 @@ if FAIL:
     sys.exit(1)
 print('RELEASE 467 BUILD 171 RELEASE/RESTART AUTHORITY CONVERGENCE: PASS')
 print('Verified predecessor: Build 170 exact SHA/tree + Development/Production proof bundle')
-print('Machine pointer / I.T. truth / human handoff: CONVERGED')
+print('Machine pointer / I.T. / Preflight / Reliability / human handoff: CONVERGED')
 print('Schema / D1-R2 business data / provider / payment-runtime mutation: NONE')
