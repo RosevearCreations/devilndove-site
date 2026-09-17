@@ -22,7 +22,17 @@
   const esc=(value)=>String(value??'').replace(/[&<>"']/g,(ch)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
   const money=(cents,currency='CAD')=>{try{return new Intl.NumberFormat('en-CA',{style:'currency',currency:String(currency||'CAD')}).format(Number(cents||0)/100);}catch{return `$${(Number(cents||0)/100).toFixed(2)}`;}};
   function setStatus(message,tone=''){status.textContent=message;status.dataset.tone=tone;status.hidden=!message;}
-  function imageUrl(raw){const value=String(raw||'').trim();if(!value)return '/assets/product-image-recovery-placeholder.svg';try{const url=new URL(value,location.origin);if(url.hostname==='assets.devilndove.com'||url.hostname.endsWith('.r2.dev')){const key=url.pathname.replace(/^\/+/, '');return `/media/product?key=${encodeURIComponent(key)}`;}return value;}catch{return '/assets/product-image-recovery-placeholder.svg';}}
+  function imageUrl(raw){
+    const value=String(raw||'').trim();if(!value)return '/assets/product-image-recovery-placeholder.svg';
+    try{
+      const url=new URL(value,location.origin);
+      if(url.origin===location.origin&&url.pathname==='/api/product-media'){
+        const key=String(url.searchParams.get('key')||'').trim();if(key)return `/media/product?key=${encodeURIComponent(key)}`;
+      }
+      if(url.hostname==='assets.devilndove.com'||url.hostname.endsWith('.r2.dev')){const key=url.pathname.replace(/^\/+/, '');return `/media/product?key=${encodeURIComponent(key)}`;}
+      return value;
+    }catch{return '/assets/product-image-recovery-placeholder.svg';}
+  }
   function render(products){
     if(!products.length){body.innerHTML='<tr><td colspan="8" class="dd-empty">No Products matched this page.</td></tr>';return;}
     body.innerHTML=products.map((p)=>{
