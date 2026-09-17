@@ -7,7 +7,7 @@
   <meta name="description" content="Dedicated low-read single-Product editor for Devil n Dove."/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
-  <link rel="stylesheet" href="/css/admin-product-v162.css?v=169"/>
+  <link rel="stylesheet" href="/css/admin-product-v162.css?v=173"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -17,12 +17,12 @@
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
-      <div><p class="eyebrow">Release 467 • Build 169</p><h1 id="productEditorTitle">Product Editor</h1><p>Edit one Product at a time. Product QA is now explicit and lazy: opening the QA tab performs zero D1 reads until you press Run QA.</p></div>
+      <div><p class="eyebrow">Release 467 • Build 173</p><h1 id="productEditorTitle">Product Editor</h1><p>Edit one Product at a time. Product QA is now explicit and lazy: opening the QA tab performs zero D1 reads until you press Run QA.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
 
     <div id="productEditorStatus" class="dd-product-status small" aria-live="polite"></div>
-    <details class="dd-low-read-details"><summary>Low-read editor contract</summary><div class="dd-low-read-note small"><strong>Build 169:</strong> startup authority remains one selected-Product detail read. The browser handoff remains display-only. Media loads only when Media is opened. QA loads only when Run QA is pressed, reads the selected Product/SEO record plus at most two Product image rows, performs no request-time schema mutation, and does not automatically write QA history. Save updates only this Product and its SEO row.</div></details>
+    <details class="dd-low-read-details"><summary>Low-read editor contract</summary><div class="dd-low-read-note small"><strong>Build 173:</strong> startup authority remains one selected-Product detail read. The browser handoff remains display-only. Media loads only when Media is opened. QA loads only when Run QA is pressed, reads the selected Product/SEO record plus at most two Product image rows, performs no request-time schema mutation, and does not automatically write QA history. Save updates only this Product and its SEO row.</div></details>
 
     <form id="productEditorForm" class="card">
       <div class="dd-editor-tabs" role="tablist" aria-label="Product Editor sections">
@@ -112,6 +112,6 @@
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-editor-v163.js?v=169"></script>
+  <script src="/public/js/admin-product-editor-v163.js?v=173"></script>
 </body>
 </html>
