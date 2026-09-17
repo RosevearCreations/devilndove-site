@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta data-dd-products-static-platform="1" name="dd-product-admin-architecture" content="product-browser-v162"/>
   <title>Products — Devil n Dove Admin</title>
-  <meta name="description" content="Focused Devil n Dove Product browser."/>
+  <meta name="description" content="Compact Devil n Dove Product browser with bounded thumbnail recovery."/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
-  <link rel="stylesheet" href="/css/admin-product-v162.css?v=162"/>
+  <link rel="stylesheet" href="/css/admin-product-v162.css?v=165"/>
 </head>
 <body data-admin-page="product-browser-v162">
   <div class="container admin-shell dd-product-shell">
@@ -17,58 +17,43 @@
         <img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
         <div><div style="font-weight:800">Devil n Dove</div><div class="small">Admin / Products</div></div>
       </div>
-      <div class="links">
-        <a href="/admin/">Dashboard</a>
-        <a href="/admin/product-editor/">New Product</a>
-        <a href="/admin/catalog-media/">Media</a>
-        <a href="/admin/inventory-operations/">Inventory</a>
-      </div>
+      <div class="links"><a href="/admin/">Dashboard</a><a href="/admin/product-editor/">New Product</a><a href="/admin/catalog-media/">Media</a><a href="/admin/inventory-operations/">Inventory</a></div>
     </nav>
 
-    <header class="hero compact-hero">
+    <header class="hero compact-hero dd-products-compact-head">
       <div>
-        <p class="eyebrow">Release 467 • Build 162</p>
+        <p class="eyebrow">Release 467 • Build 165</p>
         <h1>Products</h1>
-        <p>Browse Products, then open exactly one Product in the dedicated editor. This page does not load Product editing, SEO, media-library, inventory-resource, readiness or quality systems.</p>
+        <p>Compact Product browser for finding, editing and fixing images without waking the old all-in-one Product workspace.</p>
       </div>
-      <div><a class="btn" href="/admin/product-editor/">Create Product</a></div>
+      <div class="dd-product-actions"><a class="btn" href="/admin/product-editor/">Create Product</a><a class="btn" href="/admin/catalog-media/">Product Images</a></div>
     </header>
 
-    <section class="card">
-      <h2 style="margin-top:0">Product Browser</h2>
-      <div class="dd-low-read-note small"><strong>Low-read mode:</strong> one bounded Product-table query per explicit page load. Search runs only when we press Search. There are no timers, background refreshes or automatic retries.</div>
+    <section class="card dd-products-browser-card">
+      <div class="dd-products-browser-heading"><div><h2>Product Browser</h2><p class="small">12 Products per page. Existing gallery images are recovered only for the visible Product IDs.</p></div></div>
+      <div class="dd-low-read-note small"><strong>Low-read mode:</strong> one bounded Product query plus one bounded visible-thumbnail query. Search runs only when we press Search. There are no timers, background refreshes, R2 listings or automatic retries.</div>
       <form id="productBrowserSearchForm" class="dd-product-toolbar">
-        <label><span class="small">Find a Product</span><input class="input" id="productBrowserQuery" type="search" placeholder="Product ID, product number, name, SKU or slug" autocomplete="off"/></label>
+        <label><span class="small">Find a Product</span><input class="input" id="productBrowserQuery" type="search" placeholder="Product ID, number, name, SKU or slug" autocomplete="off"/></label>
         <button class="btn" type="submit">Search</button>
-        <button class="btn" id="productBrowserRefresh" type="button">Refresh this page</button>
+        <button class="btn" id="productBrowserRefresh" type="button">Refresh page</button>
       </form>
       <div id="productBrowserStatus" class="dd-product-status small" aria-live="polite"></div>
 
-      <div class="dd-product-table-wrap">
+      <div class="dd-product-table-wrap dd-product-table-compact">
         <table class="dd-product-table">
-          <thead><tr><th>Image</th><th>Product</th><th>SKU</th><th>Status</th><th>Price</th><th>Stock</th><th>Updated</th><th>Actions</th></tr></thead>
-          <tbody id="productBrowserBody"><tr><td colspan="8" class="dd-empty">Loading one bounded Product page…</td></tr></tbody>
+          <thead><tr><th>Image</th><th>Product</th><th>Status</th><th>Price</th><th>Stock</th><th>Updated</th><th>Actions</th></tr></thead>
+          <tbody id="productBrowserBody"><tr><td colspan="7" class="dd-empty">Loading one compact Product page…</td></tr></tbody>
         </table>
       </div>
       <div class="dd-product-pager">
         <button class="btn" id="productBrowserPrev" type="button" disabled>Previous</button>
-        <span id="productBrowserPageLabel" class="small">Page 1</span>
+        <span id="productBrowserPageLabel" class="small">Page 1 • 12 per page</span>
         <button class="btn" id="productBrowserNext" type="button" disabled>Next</button>
-      </div>
-    </section>
-
-    <section class="card" style="margin-top:16px">
-      <h2 style="margin-top:0">Specialized Product work</h2>
-      <p class="small">These tools are separate so opening Products does not automatically run them.</p>
-      <div class="dd-product-actions">
-        <a class="btn" href="/admin/catalog-media/">Product Media</a>
-        <a class="btn" href="/admin/inventory-operations/">Inventory Operations</a>
-        <a class="btn" href="/admin/packaging-studio/">Packaging</a>
       </div>
     </section>
   </div>
 
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-products-browser-v162.js?v=162"></script>
+  <script src="/public/js/admin-products-browser-v162.js?v=165"></script>
 </body>
 </html>
