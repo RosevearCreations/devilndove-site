@@ -1,0 +1,48 @@
+name: Release 467 Build 172 Product Media Save Reliability Proof
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'admin/catalog-media/index.html'
+      - 'public/js/admin-product-media-editor-v172.js'
+      - 'functions/api/admin/product-media-editor.js'
+      - 'functions/api/admin/product-image-editor.js'
+      - 'functions/api/admin/product-image-file.js'
+      - 'functions/api/admin/_productImageAnnotationsV172.js'
+      - 'scripts/release467_build164_gate.py'
+      - 'scripts/release467_build165_gate.py'
+      - 'scripts/release467_build172_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_172_PRODUCT_MEDIA_SAVE_RELIABILITY.md'
+      - '.github/workflows/release467-build172-product-media-save-reliability.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  product-media-save-reliability:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build 172 Product Media save reliability gate
+        run: python scripts/release467_build172_gate.py
+      - name: Retained Build 164 Product Media continuity
+        run: python scripts/release467_build164_gate.py
+      - name: Retained Build 165 Product recovery continuity
+        run: python scripts/release467_build165_gate.py
+      - name: JavaScript syntax checks
+        run: |
+          node --check public/js/admin-product-media-editor-v172.js
+          node --check functions/api/admin/product-media-editor.js
+          node --check functions/api/admin/product-image-editor.js
+          node --check functions/api/admin/product-image-file.js
+          node --check functions/api/admin/_productImageAnnotationsV172.js
+      - name: Boundary
+        run: echo 'Build 172 changes Product Media explicit-action runtime only. No canonical migration, request-time DDL, catalog/R2 scan, provider, payment, refund or accounting mutation is introduced.'
