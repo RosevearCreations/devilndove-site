@@ -22,8 +22,10 @@ save_api=read('functions/api/admin/product-editor-save.js');media_api=read('func
 
 req(('product-browser-v162' in products) or ('product-browser-v166' in products),'Product Browser lost bounded browser authority')
 req('/admin/product-editor/?product_id=' in browser_js,'Product Browser lost direct Product Editor navigation')
-for token in ('admin-product-editor-v163.js','Low-read contract:','No autosave','Open Media &amp; Image Editor'):
+for token in ('admin-product-editor-v163.js','No autosave'):
     req(token in editor,f'Product Editor missing Build 163+ token: {token}')
+req(('Low-read contract:' in editor) or ('Low-read editor contract' in editor),'Product Editor lost its visible low-read contract')
+req(('Open Media &amp; Image Editor' in editor) or ('Open Image Editor' in editor),'Product Editor lost explicit Image Editor navigation')
 for forbidden in ('admin-product-editor-v162.js','admin-products.js','admin-edit-product.js','admin-product-seo.js','admin-product-resources.js','admin-site-item-inventory.js','productEditorMediaMount'):
     req(forbidden not in editor,f'Product Editor eagerly embeds legacy subsystem: {forbidden}')
 for token in ('/api/admin/product-editor-detail?product_id=','/api/admin/product-editor-save','Automatic retries are stopped'):
