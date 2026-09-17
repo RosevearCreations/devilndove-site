@@ -7,6 +7,7 @@ on:
       - 'migrations/canonical/manifest.json'
       - 'functions/api/admin/product-image-editor.js'
       - 'public/js/admin-product-editor-v163.js'
+      - 'public/js/admin-product-media-editor-v172.js'
       - 'admin/catalog-media/index.html'
       - 'admin/product-editor/index.html'
       - 'scripts/release467_build173_gate.py'
