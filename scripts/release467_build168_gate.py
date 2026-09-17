@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Release 467 Build 168 — Product admin low-read session reuse + editor handoff gate."""
+"""Release 467 Build 168 — Product admin low-read session reuse + editor handoff gate.
+
+Successor-aware for Build 169: the retained Build 168 invariants are the browser-session
+reuse, missing-featured-only image recovery, display-only editor handoff, and authority-before-save
+behavior. Successor copy may identify a later build without weakening those invariants.
+"""
 from pathlib import Path
 import subprocess,sys
 ROOT=Path(__file__).resolve().parents[1];FAIL=[]
@@ -22,8 +27,9 @@ req("filter((p)=>!String(p?.featured_image_url||'').trim())" in browser,'Image r
 req('FROM products' not in images,'Secondary Product image recovery re-reads the Products table')
 for token in ('product-browser-images-v168','visible_products_missing_featured_secondary_only','product_table_read:false','requested_missing_featured'):
     req(token in images,f'Build 168 image recovery contract missing: {token}')
-for token in ('Build 168','Save remains disabled','display-only'):
-    req(token in editor_page,f'Product Editor missing Build 168 authority copy: {token}')
+req(('Build 168' in editor_page) or ('Build 169' in editor_page),'Product Editor is not a recognized Build 168+ successor')
+req('display-only' in editor_page,'Product Editor lost display-only browser handoff contract')
+req(('Save remains disabled' in editor_page) or ('Save updates only this Product' in editor_page),'Product Editor lost authority-before-save contract copy')
 for token in ('browserSeed()','primeFromBrowser()','setSaveReady(false)','authorityLoaded','Save is blocked to prevent a stale browser handoff'):
     req(token in editor,f'Product Editor authority handoff guard missing: {token}')
 req("sessionStorage.removeItem(`dnd:product-editor-seed:${state.productId}`)" in editor,'Editor does not clear browser handoff after authority loads')
@@ -39,6 +45,7 @@ if FAIL:
 print('RELEASE 467 BUILD 168 PRODUCT ADMIN LOW-READ HANDOFF: PASS')
 print('Product Browser: session-only page reuse; deliberate Refresh returns to live authority')
 print('Image recovery: secondary tables only for visible Products missing featured_image_url')
-print('Product Editor: browser handoff is display-only; Save waits for authoritative one-Product read')
+print('Product Editor: display-only browser handoff; Save waits for authoritative one-Product read')
+print('Build 169 successor copy: ACCEPTED only with retained Build 168 authority invariants')
 print('Background timers/scans: NONE')
 print('Schema/D1-data/R2/provider/payment/accounting mutation: NONE')
