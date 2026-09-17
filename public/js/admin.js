@@ -211,14 +211,17 @@ document.addEventListener('DOMContentLoaded', () => {
 void import('/public/js/core/dd-application-module-bootstrap.mjs?v=440')
   .catch((error) => console.warn('[DD modules] authoritative module bootstrap unavailable', error));
 
-// Release 467 Build 129: client-only contextual related-tool shortcuts over the existing Admin navigation manifest.
-void import('/public/js/admin-related-tools-v129.js?v=467b129')
-  .catch((error) => console.warn('[DD Build 129] admin related tools unavailable', error));
+// Release 467 Build 129: related-tool shortcuts are optional convenience UI. Heavy Build 176
+// workspaces use lean startup so business rendering is not competing with navigation observers.
+if (!window.DDAdminLeanStartup?.enabled) {
+  void import('/public/js/admin-related-tools-v129.js?v=467b129')
+    .catch((error) => console.warn('[DD Build 129] admin related tools unavailable', error));
+}
 
-// Release 467 Build 130: client-only position and adjacent-tool navigation over the same existing Admin navigation manifest.
-// Build 155 outage recovery: Product Admin deliberately omits this nonessential chain because it imports
-// the navigation context dock, which has previously created recursive MutationObserver failure modes.
-if (document.body?.dataset?.adminPage !== 'products') {
+// Release 467 Build 130: section-position/context-dock navigation is now explicit opt-in only.
+// Build 155 already documented recursive MutationObserver failure modes from this chain;
+// Build 176 removes it from every normal Admin startup rather than protecting Products alone.
+if (document.body?.dataset?.adminEnhancedNavigation === '1' && !window.DDAdminLeanStartup?.enabled) {
   void import('/public/js/admin-section-position-v130.js?v=467b130')
     .catch((error) => console.warn('[DD Build 130] admin section position unavailable', error));
 }
