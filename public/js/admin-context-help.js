@@ -65,7 +65,13 @@ const DD_CONTEXT_HELP_RULES = Object.freeze([
 ]);
 
 let openRecord = null;
-let refreshQueued = false;
+let refreshTimer = 0;
+let observer = null;
+let observing = false;
+let observerStopTimer = 0;
+const AUTO_OBSERVER_MAX_MS = 8000;
+const REFRESH_DEBOUNCE_MS = 180;
+const OBSERVER_CONFIG = Object.freeze({ childList: true, subtree: true });
 function normalizedPath() {
   let raw = String(window.location.pathname || '/');
   if (!raw.startsWith('/admin')) return raw;
@@ -196,11 +202,49 @@ function refresh() {
     if (definition) attach(target, key, definition, ++ordinal);
   });
 }
-function queueRefresh() {
-  if (refreshQueued) return;
-  refreshQueued = true;
-  queueMicrotask(() => { refreshQueued = false; refresh(); });
+function helpOwnedNode(node) {
+  const el = node?.nodeType === 1 ? node : node?.parentElement;
+  return Boolean(el?.closest?.('.dd-context-help-trigger,.dd-context-help-panel,.dd-context-help-field'));
 }
+function mutationNeedsRefresh(records) {
+  return records.some((record) => {
+    const changed = [...(record.addedNodes || []), ...(record.removedNodes || [])];
+    if (!changed.length) return !helpOwnedNode(record.target);
+    return changed.some((node) => !helpOwnedNode(node));
+  });
+}
+function refreshSafely() {
+  if (observer && observing) observer.disconnect();
+  observing = false;
+  try { refresh(); }
+  finally {
+    if (observer && document.body && observerStopTimer) {
+      observer.observe(document.body, OBSERVER_CONFIG);
+      observing = true;
+    }
+  }
+}
+function queueRefresh() {
+  if (refreshTimer) window.clearTimeout(refreshTimer);
+  refreshTimer = window.setTimeout(() => {
+    refreshTimer = 0;
+    refreshSafely();
+  }, REFRESH_DEBOUNCE_MS);
+}
+function startBoundedObserver() {
+  if (!document.body || typeof MutationObserver !== 'function' || observer) return;
+  observer = new MutationObserver((records) => {
+    if (mutationNeedsRefresh(records)) queueRefresh();
+  });
+  observer.observe(document.body, OBSERVER_CONFIG);
+  observing = true;
+  observerStopTimer = window.setTimeout(() => {
+    observerStopTimer = 0;
+    observer?.disconnect();
+    observing = false;
+  }, AUTO_OBSERVER_MAX_MS);
+}
+document.addEventListener('dd:admin-context-help-refresh', queueRefresh);
 document.addEventListener('click', (event) => {
   if (!openRecord) return;
   if (openRecord.panel.contains(event.target) || openRecord.trigger.contains(event.target)) return;
@@ -209,9 +253,12 @@ document.addEventListener('click', (event) => {
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && openRecord) closeOpen({ restoreFocus: true });
 });
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', refresh, { once: true });
-else refresh();
-const observer = new MutationObserver(queueRefresh);
-const observe = () => document.body && observer.observe(document.body, { childList: true, subtree: true });
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', observe, { once: true });
-else observe();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    refreshSafely();
+    startBoundedObserver();
+  }, { once: true });
+} else {
+  refreshSafely();
+  startBoundedObserver();
+}
