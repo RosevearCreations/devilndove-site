@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Release 467 Build 163 — Product Editor + Media/Image low-read rewrite source gate."""
+# Exact-SHA revalidation marker: Build 163 low-read Product admin contract.
 from pathlib import Path
 import re, subprocess, sys
 ROOT=Path(__file__).resolve().parents[1];FAIL=[]
