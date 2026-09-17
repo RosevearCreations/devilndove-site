@@ -1,0 +1,51 @@
+name: Release 467 Build 171 Release Restart Authority Convergence Proof
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'current-development-authority.json'
+      - 'release467-build170-product-browser-explicit-image-recovery-closure.json'
+      - 'release467-build171-release-restart-authority-convergence.json'
+      - 'AI_HANDOFF.md'
+      - 'PROJECT_STATUS_AND_ROADMAP.md'
+      - 'MARKDOWN_INDEX.md'
+      - 'admin/it/index.html'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'scripts/release467_build170_gate.py'
+      - 'scripts/release467_build171_gate.py'
+      - 'scripts/current_it_release_truth_gate.py'
+      - 'scripts/repository_forward_sanity.py'
+      - 'docs/operations/RELEASE_467_BUILD_171_RELEASE_RESTART_AUTHORITY_CONVERGENCE.md'
+      - '.github/workflows/release467-build171-release-restart-authority-convergence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-restart-authority-convergence-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build 171 authority convergence gate
+        run: python scripts/release467_build171_gate.py
+      - name: Current I.T. release truth gate
+        run: python scripts/current_it_release_truth_gate.py
+      - name: Repository forward sanity
+        run: python scripts/repository_forward_sanity.py
+      - name: Retained Build 170 Product Browser gate
+        run: python scripts/release467_build170_gate.py
+      - name: JavaScript syntax checks
+        run: |
+          node --check functions/api/admin/it-operations-control-tower.js
+          node --check public/js/admin-it-control-tower.js
+      - name: Boundary
+        run: echo 'Build 171 converges release/restart machine, I.T. and human authority only. Product runtime, schema, canonical migrations, D1/R2 business data, providers, payments, refunds and accounting remain unchanged.'
