@@ -7,22 +7,22 @@
   <meta name="description" content="Dedicated low-read single-Product editor for Devil n Dove."/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
-  <link rel="stylesheet" href="/css/admin-product-v162.css?v=165"/>
+  <link rel="stylesheet" href="/css/admin-product-v162.css?v=166"/>
 </head>
-<body data-admin-page="product-editor-v163">
+<body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
     <nav class="nav" aria-label="Admin navigation">
       <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><strong>Devil n Dove</strong><div class="small">Admin / Product Editor</div></div></div>
-      <div class="links"><a href="/admin/products/">Back to Products</a><a href="/admin/catalog-media/">Media</a><a href="/admin/">Dashboard</a></div>
+      <div class="links"><a href="/admin/products/">Back to Products</a><a href="/admin/catalog-media/">Images</a><a href="/admin/">Dashboard</a></div>
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
-      <div><p class="eyebrow">Release 467 • Build 165</p><h1 id="productEditorTitle">Product Editor</h1><p>Edit one Product at a time. Images are now available inside the Media tab on demand, while full crop/replace/score tools remain in the dedicated image editor.</p></div>
+      <div><p class="eyebrow">Release 467 • Build 165</p><h1 id="productEditorTitle">Product Editor</h1><p>Edit one Product at a time. Existing image references are recovered lazily from the Product's own media authority when the Media tab is opened.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
 
     <div id="productEditorStatus" class="dd-product-status small" aria-live="polite"></div>
-    <div class="dd-low-read-note small"><strong>Low-read contract:</strong> startup performs one selected-Product detail read. There is no Product list bootstrap, no autosave, no gallery read, no scoring and no background refresh. Opening Media performs one bounded selected-Product gallery read. Save updates only this Product and its SEO row.</div>
+    <details class="dd-low-read-details"><summary>Low-read editor contract</summary><div class="dd-low-read-note small"><strong>Startup:</strong> one selected-Product detail read. No Product-list bootstrap, autosave, gallery scan, scoring or background refresh. Opening Media performs bounded selected-Product image-reference reads only. Save updates only this Product and its SEO row.</div></details>
 
     <form id="productEditorForm" class="card">
       <div class="dd-editor-tabs" role="tablist" aria-label="Product Editor sections">
@@ -83,8 +83,8 @@
       </section>
 
       <section class="dd-editor-panel" data-editor-panel="media" hidden>
-        <div class="dd-products-browser-heading"><div><h2>Media</h2><p class="small">Gallery loads only when this tab is opened. Set the featured image here, or open the full Media &amp; Image Editor to add, replace, crop, reorder, score or remove images.</p></div><a class="btn" id="productEditorMediaLink" href="/admin/catalog-media/">Open Media &amp; Image Editor</a></div>
-        <div id="productEditorMediaStatus" class="small" aria-live="polite">Gallery not loaded yet.</div>
+        <div class="dd-products-browser-heading"><div><h2>Media</h2><p class="small">Existing Product image references load only when this tab is opened. Set any recovered image as featured here; use the full Image Editor for gallery add/replace/crop/reorder/remove/score work.</p></div><a class="btn" id="productEditorMediaLink" href="/admin/catalog-media/">Open Image Editor</a></div>
+        <div id="productEditorMediaStatus" class="small" aria-live="polite">Images not loaded yet.</div>
         <div id="productEditorMediaStrip" class="dd-editor-media-strip"></div>
         <div class="dd-editor-grid cols-2" style="margin-top:14px"><label><span class="small">Featured image URL</span><input class="input" name="featured_image_url" type="url"/></label><div><span class="small">Featured preview</span><div><img id="productEditorFeaturedPreview" class="dd-product-thumb" alt=""/></div></div></div>
       </section>
@@ -99,12 +99,12 @@
         </div>
       </section>
 
-      <section class="dd-editor-panel" data-editor-panel="advanced" hidden><h2>Advanced workspaces</h2><p class="small">These systems are intentionally separate so they cannot wake up merely because we edit a Product.</p><div class="dd-product-actions"><a class="btn" href="/admin/inventory-operations/">Inventory Operations</a><a class="btn" id="productEditorMediaAdvancedLink" href="/admin/catalog-media/">Media &amp; Image Editor</a><a class="btn" href="/admin/release-preflight/">Release Preflight</a><a class="btn" href="/admin/packaging-studio/">Packaging</a></div></section>
+      <section class="dd-editor-panel" data-editor-panel="advanced" hidden><h2>Advanced workspaces</h2><p class="small">These systems remain separate so they cannot wake up merely because we edit a Product.</p><div class="dd-product-actions"><a class="btn" href="/admin/inventory-operations/">Inventory Operations</a><a class="btn" id="productEditorMediaAdvancedLink" href="/admin/catalog-media/">Image Editor</a><a class="btn" href="/admin/release-preflight/">Release Preflight</a><a class="btn" href="/admin/packaging-studio/">Packaging</a></div></section>
 
       <div class="dd-editor-footer"><div class="small">No autosave. Save is an explicit one-Product action.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-editor-v163.js?v=165"></script>
+  <script src="/public/js/admin-product-editor-v163.js?v=166"></script>
 </body>
 </html>
