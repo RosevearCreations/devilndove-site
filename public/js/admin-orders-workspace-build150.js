@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderList() {
-    const rows=filtered();
+    const rows=filtered().slice(0,80);
     const counts={Received:0,Confirmed:0,'In progress':0,Ready:0,Complete:0,Review:0};
     rows.forEach((r)=>{ counts[lifecycle(r)]=(counts[lifecycle(r)]||0)+1; });
     $('b150Summary').innerHTML=Object.entries(counts).map(([k,v])=>`<div class="b150-kpi"><span class="small">${esc(k)}</span><strong>${v}</strong></div>`).join('');
@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!online()) return loadSnapshot('Offline — showing the last saved Orders snapshot. Live fulfilment and tracking controls are disabled.');
     message('Loading live Orders workspace…');
     try {
-      const [ordersResponse,workflowResponse]=await Promise.all([apiFetch('/api/admin/orders',{cache:'no-store'}),apiFetch('/api/admin/order-fulfillment-workflow?limit=120',{cache:'no-store'})]);
+      const [ordersResponse,workflowResponse]=await Promise.all([apiFetch('/api/admin/orders?limit=80',{cache:'no-store'}),apiFetch('/api/admin/order-fulfillment-workflow?limit=120',{cache:'no-store'})]);
       const ordersData=await ordersResponse.json(); if (!ordersResponse.ok||!ordersData?.ok) throw new Error(ordersData?.error||`Orders failed (${ordersResponse.status}).`);
       const workflowData=await workflowResponse.json().catch(()=>({}));
       state.orders=Array.isArray(ordersData.orders)?ordersData.orders:[]; state.workflow=new Map((workflowResponse.ok&&Array.isArray(workflowData?.workflow?.orders)?workflowData.workflow.orders:[]).map((x)=>[Number(x.order_id),x])); state.stale=false; saveSnapshot(); renderList(); renderPending(); message(ordersData.warning||`Live Orders workspace loaded • ${state.orders.length} orders.`);
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function loadSnapshot(reason) {
     const snap=readJson(SNAPSHOT_KEY,null); state.stale=true;
     if (!snap?.orders) { state.orders=[]; state.workflow=new Map(); renderList(); renderPending(); message(`${reason} No saved snapshot is available.`,true); return; }
-    state.orders=snap.orders||[]; state.workflow=new Map((snap.workflows||[]).map((x)=>[Number(x.order_id),x])); state.details=snap.details||{}; renderList(); renderPending(); message(`${reason} Snapshot saved ${when(snap.saved_at)}.`,true); const target=Number(state.selected||state.orders[0]?.order_id||0); if (target) selectOrder(target);
+    state.orders=Array.isArray(snap.orders)?snap.orders.slice(0,80):[]; state.workflow=new Map((snap.workflows||[]).map((x)=>[Number(x.order_id),x])); state.details=snap.details||{}; renderList(); renderPending(); message(`${reason} Snapshot saved ${when(snap.saved_at)}.`,true); const target=Number(state.selected||state.orders[0]?.order_id||0); if (target) selectOrder(target);
   }
 
   $('b150Search').addEventListener('input',(e)=>{state.query=e.target.value;renderList();});
