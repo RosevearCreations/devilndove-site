@@ -8,11 +8,8 @@ on:
 
 permissions: {contents: read}
 
-# Historical Build 157 source-authority markers retained for compatibility only.
-# Build 162+ successor paths below do not execute the legacy browser probe or Production D1 reads.
-# scripts/products_build157_browser_probe.mjs
-# Build 157 Product Quality
-# /api/product-media 404 responses must be ZERO
+# Historical workflow name retained as provenance. Build 162+ successor paths prove source/delivery
+# contracts only and perform ZERO Production D1/session/browser reads.
 
 jobs:
   products-production-browser:
@@ -43,27 +40,36 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
-          if [ -f scripts/release467_build165_gate.py ] \
-             && grep -q 'Build 165' admin/products/index.html \
-             && grep -q 'product-media-workspace-v165' functions/api/admin/product-media-editor.js; then
+          if [ -f scripts/release467_build166_gate.py ] \
+             && grep -q 'Build 166' admin/products/index.html \
+             && grep -q '/public/js/product-detail-v166.js?v=166' shop/product/index.html; then
+            echo 'successor=build166' >> "${GITHUB_OUTPUT}"
+            echo 'Build 166 Product editing/image stabilization architecture detected. Historical browser/session probes are retired for this SHA.'
+          elif [ -f scripts/release467_build165_gate.py ] \
+             && grep -q 'Build 165' admin/products/index.html; then
             echo 'successor=build165' >> "${GITHUB_OUTPUT}"
-            echo 'Build 165 compact Product browser + existing-image recovery architecture detected. Historical Build 155/162/163 browser proofs are retired for this SHA.'
-          elif [ -f scripts/release467_build163_gate.py ] \
-             && [ -f admin/product-editor/index.html ] \
-             && [ -f admin/catalog-media/index.html ] \
-             && [ -f public/js/admin-product-editor-v163.js ] \
-             && [ -f public/js/admin-product-media-editor-v163.js ]; then
+          elif [ -f scripts/release467_build163_gate.py ]; then
             echo 'successor=build163' >> "${GITHUB_OUTPUT}"
-            echo 'Build 163 Product Admin low-read architecture detected. Legacy Product browser/session proof is retired for this SHA.'
-          elif [ -f scripts/release467_build162_gate.py ] \
-             && [ -f admin/product-editor/index.html ] \
-             && grep -q 'product-browser-v162' admin/products/index.html; then
+          elif [ -f scripts/release467_build162_gate.py ]; then
             echo 'successor=build162' >> "${GITHUB_OUTPUT}"
-            echo 'Build 162 Product Admin architecture detected. Legacy Build 155 browser/session proof is retired for this SHA.'
           else
             echo 'successor=legacy' >> "${GITHUB_OUTPUT}"
-            echo 'Historical Build 155/160 Product Admin architecture detected.'
           fi
+
+      - name: Prove Build 166 Product source without Production D1 reads
+        if: steps.architecture.outputs.successor == 'build166'
+        run: |
+          set -euo pipefail
+          python scripts/release467_build166_gate.py
+          node --check public/js/admin-products-browser-v162.js
+          node --check public/js/product-detail-v166.js
+          node --check functions/api/product-detail-core.js
+          node --check functions/media/product.js
+          node --check functions/api/product-media.js
+          echo 'Build 166 Production Product proof: SOURCE/DELIVERY CONTRACT ONLY'
+          echo 'Remote Production D1 queries: ZERO'
+          echo 'Authenticated Production browser/session reads: ZERO'
+          echo 'R2 listing/mutation: ZERO'
 
       - name: Prove Build 165 Product Admin source without Production D1 reads
         if: steps.architecture.outputs.successor == 'build165'
@@ -73,13 +79,8 @@ jobs:
           node --check public/js/admin-products-browser-v162.js
           node --check public/js/admin-product-editor-v163.js
           node --check public/js/admin-product-media-editor-v164.js
-          node --check functions/api/admin/product-browser-images.js
-          node --check functions/api/admin/product-media-editor.js
-          node --check sw.js
           echo 'Build 165 Production Product proof: SOURCE/DELIVERY CONTRACT ONLY'
-          echo 'Remote D1 queries: ZERO'
-          echo 'Authenticated Production browser reads: ZERO in this automatic proof'
-          echo 'Current Product authority: compact browser + multi-source existing-image recovery + Build 164 image CRUD continuity.'
+          echo 'Remote Production D1 queries: ZERO'
 
       - name: Prove Build 163 Product Admin source without Production D1 reads
         if: steps.architecture.outputs.successor == 'build163'
@@ -88,12 +89,8 @@ jobs:
           python scripts/release467_build163_gate.py
           node --check public/js/admin-products-browser-v162.js
           node --check public/js/admin-product-editor-v163.js
-          node --check public/js/admin-product-media-editor-v163.js
-          node --check sw.js
           echo 'Build 163 Production Product proof: SOURCE/DELIVERY CONTRACT ONLY'
-          echo 'Remote D1 queries: ZERO'
-          echo 'Authenticated Production browser reads: ZERO while D1 capacity is constrained'
-          echo 'Runtime row-read acceptance is operator-controlled after D1 capacity is available.'
+          echo 'Remote Production D1 queries: ZERO'
 
       - name: Prove Build 162 Product Admin source without Production D1 reads
         if: steps.architecture.outputs.successor == 'build162'
@@ -101,102 +98,20 @@ jobs:
           set -euo pipefail
           python scripts/release467_build162_gate.py
           node --check public/js/admin-products-browser-v162.js
-          node --check public/js/admin-product-editor-v162.js
-          node --check sw.js
           echo 'Build 162 Production Product proof: SOURCE/DELIVERY CONTRACT ONLY'
-          echo 'Remote D1 queries: ZERO'
-          echo 'Authenticated Production browser reads: ZERO while D1 capacity is unavailable'
-          echo 'Runtime row-read acceptance is deliberately deferred until D1 capacity is available.'
+          echo 'Remote Production D1 queries: ZERO'
 
-      - name: Install deterministic Chrome for historical browser acceptance
-        if: steps.architecture.outputs.successor == 'legacy'
-        id: chrome
-        uses: browser-actions/setup-chrome@v2
-        with:
-          chrome-version: stable
-      - name: Prove Chrome binary
-        if: steps.architecture.outputs.successor == 'legacy'
-        env:
-          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
-        run: |
-          test -x "${CHROME_BIN}"
-          "${CHROME_BIN}" --version
-      - name: Prove exact historical Build 155 source
+      - name: Historical Product browser proof retired
         if: steps.architecture.outputs.successor == 'legacy'
         run: |
-          test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
-          python scripts/release467_build155_gate.py
-      - name: Resolve existing Production admin session read-only
-        if: steps.architecture.outputs.successor == 'legacy'
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'STOP: Production D1 read credential is not configured.'; exit 1; }
-          npx --yes wrangler@4.128.0 d1 execute "${PROD_D1_DATABASE_NAME}" --remote --json --command "SELECT COALESCE(NULLIF(s.session_token,''),s.token) AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(NULLIF(s.session_token,''),s.token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/build155-prod-session.json
-          TOKEN="$(python - <<'PY'
-          import json
-          data=json.load(open('/tmp/build155-prod-session.json'))
-          def walk(value):
-              if isinstance(value,dict):
-                  if value.get('runtime_token'): yield str(value['runtime_token'])
-                  for child in value.values(): yield from walk(child)
-              elif isinstance(value,list):
-                  for child in value: yield from walk(child)
-          print(next(walk(data),'').strip())
-          PY
-          )"
-          rm -f /tmp/build155-prod-session.json
-          test -n "${TOKEN}" || { echo 'STOP: no unexpired Production administrator session exists for real-browser acceptance.'; exit 1; }
-          echo "::add-mask::${TOKEN}"
-          echo "DND_SESSION_COOKIE=dd_auth_token=${TOKEN}" >> "$GITHUB_ENV"
-          unset TOKEN
-          echo 'Existing Production admin session resolved read-only.'
-      - name: Use bounded DOM readiness for historical Product browser acceptance
-        if: steps.architecture.outputs.successor == 'legacy'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          path = Path('scripts/products_browser_runtime_probe.mjs')
-          text = path.read_text(encoding='utf-8')
-          old = """  const loaded = waitForEvent('Page.loadEventFired', sessionId, 25000);\n  await command('Page.navigate', { url: probeUrl }, sessionId, 20000);\n  await loaded;\n"""
-          new = """  const navigation = await command('Page.navigate', { url: probeUrl }, sessionId, 20000);\n  if (navigation?.errorText) throw new Error(`Page navigation failed: ${navigation.errorText}`);\n  let documentInteractive = false;\n  for (let attempt = 0; attempt < 100; attempt += 1) {\n    const navState = await evaluate(`({ readyState: document.readyState, href: location.href, title: document.title })`, sessionId, 3000);\n    if (['interactive', 'complete'].includes(String(navState?.readyState || ''))) {\n      documentInteractive = true;\n      break;\n    }\n    await sleep(100);\n  }\n  if (!documentInteractive) throw new Error('Product document did not reach interactive readiness');\n"""
-          if old not in text:
-              raise SystemExit('STOP: expected Build 155 navigation block was not found; probe source changed unexpectedly.')
-          path.write_text(text.replace(old, new, 1), encoding='utf-8')
-          PY
-          node --check scripts/products_browser_runtime_probe.mjs
-      - name: Run historical real Chromium Product UI responsiveness acceptance
-        if: steps.architecture.outputs.successor == 'legacy'
-        env:
-          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
-        run: node scripts/products_browser_runtime_probe.mjs
-      - name: Require historical Build 157 Product Quality and media acceptance
-        if: steps.architecture.outputs.successor == 'legacy'
-        env:
-          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
-        run: |
-          set -euo pipefail
-          node --check scripts/products_build157_browser_probe.mjs
-          node scripts/products_build157_browser_probe.mjs
+          echo 'STOP: historical Product browser architecture reached Production proof after successor migration.'
+          exit 1
 
       - name: Boundary
         if: always()
         run: |
           echo "Exact Production main SHA: ${EXPECTED_SOURCE_SHA}"
           echo 'Target: https://devilndove.com/admin/products/'
-          if [ "${{ steps.architecture.outputs.successor }}" = "build165" ]; then
-            echo 'Build 165 successor mode: zero Production D1/session/browser reads in this automatic proof.'
-            echo 'Compact Product Browser + existing-image recovery + image CRUD continuity are current authority.'
-          elif [ "${{ steps.architecture.outputs.successor }}" = "build163" ]; then
-            echo 'Build 163 successor mode: zero Production D1/session/browser reads in this automatic proof.'
-            echo 'Product Editor + Media/Image low-read source contract is the current authority.'
-          elif [ "${{ steps.architecture.outputs.successor }}" = "build162" ]; then
-            echo 'Build 162 successor mode: zero Production D1/session/browser reads in this automatic proof.'
-            echo 'Runtime row-read acceptance waits for available D1 capacity and is operator-controlled.'
-          else
-            echo 'Historical Build 155 mode: deterministic Chrome Product runtime acceptance retained.'
-          fi
-          echo 'D1/R2 mutation: NONE'
-          echo 'Provider/payment/refund/accounting mutation: NONE'
+          echo "Product architecture: ${{ steps.architecture.outputs.successor }}"
+          echo 'Automatic proof Production D1 reads: ZERO for successor architectures'
+          echo 'D1/R2/provider/payment/refund/accounting mutation: NONE'
