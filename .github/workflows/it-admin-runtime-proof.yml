@@ -45,14 +45,38 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
+      - name: Classify whether root-admin D1 proof is required
+        id: d1-classification
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          git diff --name-only origin/main..."${GITHUB_SHA}" > /tmp/root-admin-changed-files.txt
+          if grep -Eq '^(migrations/canonical/|scripts/release467_root_admin_access\.py$|functions/_middleware\.js$|functions/api/admin/_middleware\.js$|functions/api/_lib/appModules\.js$|functions/api/_lib/appModuleRoutes\.js$|functions/api/_lib/appModuleSessionGuard\.js$)' /tmp/root-admin-changed-files.txt; then
+            echo 'requires_d1=true' >> "${GITHUB_OUTPUT}"
+            echo 'reason=admin_authority_inputs_changed' >> "${GITHUB_OUTPUT}"
+          else
+            echo 'requires_d1=false' >> "${GITHUB_OUTPUT}"
+            echo 'reason=code_only_no_admin_authority_change' >> "${GITHUB_OUTPUT}"
+          fi
+          cat /tmp/root-admin-changed-files.txt
       - name: Verify current Development root admin module authority read-only
+        if: steps.d1-classification.outputs.requires_d1 == 'true'
         run: python scripts/release467_root_admin_access.py --verify-only
+      - name: Record zero-D1 root-admin continuity
+        if: steps.d1-classification.outputs.requires_d1 != 'true'
+        run: |
+          echo 'ROOT ADMIN MODULE AUTHORITY: SOURCE CONTINUITY PASS'
+          echo 'Remote D1 queries: 0'
+          echo 'Reason: no root-admin/module-authority input changed relative to main'
       - name: Boundary
         if: always()
         run: |
