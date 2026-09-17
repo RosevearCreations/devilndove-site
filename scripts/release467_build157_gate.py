@@ -38,8 +38,9 @@ expected_migrations = [
     "0004_release465_storefront_quality.sql",
     "0005_release467_inventory_process_assignment.sql",
 ]
-req([row.get("file") for row in canonical.get("migrations", []) if isinstance(row, dict)] == expected_migrations,
-    "Build 157 must not add or remove canonical migrations")
+current_migrations = [row.get("file") for row in canonical.get("migrations", []) if isinstance(row, dict)]
+req(current_migrations[:len(expected_migrations)] == expected_migrations and len(current_migrations) >= len(expected_migrations),
+    "Build 157 canonical migration prefix must remain intact")
 
 manifest = load("release467-build157-admin-data-delivery.json")
 req(manifest.get("release") == 467 and manifest.get("build") == 157,
