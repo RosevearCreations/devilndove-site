@@ -123,12 +123,14 @@ jobs:
           from pathlib import Path
           text=Path('.github/workflows/production-live-resource-integrity-proof.yml').read_text(encoding='utf-8')
           executable='\n'.join(line for line in text.splitlines() if not line.lstrip().startswith('#'))
+          # Build the sentinels from fragments so this self-check does not match its own
+          # forbidden strings while still rejecting executable Production D1/runtime reads.
           forbidden=(
               'wrangler@4 d1 ' + 'execute',
               'wrangler d1 ' + 'execute',
               '/api/' + 'products',
               '/api/auth/login?' + 'diagnostic=full',
-              '/api/storefront-' + 'merchandising',
+              '/api/' + 'storefront-merchandising',
           )
           found=[token for token in forbidden if token in executable]
           assert not found, found
