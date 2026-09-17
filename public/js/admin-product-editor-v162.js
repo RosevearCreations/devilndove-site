@@ -23,7 +23,17 @@
   const cents=(value)=>{const n=numOrNull(value);return n==null?0:Math.max(0,Math.round(n*100));};
   function setStatus(message,tone=''){status.textContent=message;status.dataset.tone=tone;status.hidden=!message;}
   async function readJson(response,fallback){const data=await response.json().catch(()=>null);if(!response.ok||!data?.ok){const error=new Error(data?.error||fallback||`Request failed (${response.status}).`);error.code=data?.code||'';error.status=response.status;throw error;}return data;}
-  function sameOriginMedia(raw){const value=String(raw||'').trim();if(!value)return '/assets/product-image-recovery-placeholder.svg';try{const url=new URL(value,location.origin);if(url.hostname==='assets.devilndove.com'||url.hostname.endsWith('.r2.dev')){const key=url.pathname.replace(/^\/+/, '');return `/media/product?key=${encodeURIComponent(key)}`;}return value;}catch{return '/assets/product-image-recovery-placeholder.svg';}}
+  function sameOriginMedia(raw){
+    const value=String(raw||'').trim();if(!value)return '/assets/product-image-recovery-placeholder.svg';
+    try{
+      const url=new URL(value,location.origin);
+      if(url.origin===location.origin&&url.pathname==='/api/product-media'){
+        const key=String(url.searchParams.get('key')||'').trim();if(key)return `/media/product?key=${encodeURIComponent(key)}`;
+      }
+      if(url.hostname==='assets.devilndove.com'||url.hostname.endsWith('.r2.dev')){const key=url.pathname.replace(/^\/+/, '');return `/media/product?key=${encodeURIComponent(key)}`;}
+      return value;
+    }catch{return '/assets/product-image-recovery-placeholder.svg';}
+  }
   function fill(product){
     state.product=product||{};
     const map=['name','slug','sku','product_category','color_name','color_names_text','shipping_code','review_status','short_description','description','product_type','status','currency','tax_class_id','weight_grams','inventory_quantity','digital_file_url','featured_image_url','sort_order','meta_title','meta_description','keywords','h1_override','canonical_url','og_title','og_description','og_image_url','merchandise_origin','sale_channel','external_listing_url','external_listing_label','condition_summary','era_label','sourcing_notes'];
