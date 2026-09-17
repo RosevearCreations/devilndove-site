@@ -35,8 +35,19 @@ for token in ('/api/admin/product-editor-detail?product_id=','/api/admin/product
 for forbidden in ('setInterval(','MutationObserver','/api/admin/products','/api/admin/product-readiness','/api/admin/product-lineage','/api/admin/product-editor-media'):
     req(forbidden not in editor_exec,f'Product Editor client gained eager/heavy path: {forbidden}')
 
-for token in ('product-media-v163','admin-product-media-editor-v163.js','Measure &amp; Score Selected Image','Low-read contract:','Nothing scans the R2 library'):
-    req(token in media_page,f'Product Media page missing Build 163 token: {token}')
+# Build 164 intentionally succeeds the Build 163 Product Media page while retaining
+# the Build 163 low-read contract. Build 164 has its own current feature gate.
+media_page_is_build163='product-media-v163' in media_page
+media_page_is_build164='product-media-v164' in media_page
+req(media_page_is_build163 or media_page_is_build164,'Product Media page missing Build 163-or-later low-read identity')
+for token in ('admin-product-media-editor-v163.js','Measure &amp; Score Selected Image','Low-read contract:'):
+    req(token in media_page,f'Product Media page missing Build 163 compatibility token: {token}')
+req(
+    'Nothing scans the R2 library' in media_page
+    or 'R2 is never listed automatically' in media_page
+    or 'without scanning the Product catalog or R2 library' in media_page,
+    'Product Media page lost the no-R2-library-scan contract'
+)
 for forbidden in ('admin-product-media-context.js','admin-product-media-convergence.js','admin-product-content-bridge.js','admin-product-images.js','admin-product-image-annotations.js','admin-r2-derivative-settings.js','admin-product-story-notes.js','admin-product-media-score.js','admin-product-listing-profiles.js','admin-product-seo.js','admin-candle-soap-specs.js','admin-route-usage.js','site-analytics.js'):
     req(forbidden not in media_page,f'Product Media still loads legacy/eager subsystem: {forbidden}')
 for token in ('/api/admin/product-media-editor?product_id=','/api/admin/product-image-editor','/api/admin/product-browser?','No other Product images were read or rescored'):
