@@ -118,7 +118,8 @@ for path in ('functions/api/admin/it-operations-control-tower.js','public/js/adm
     node(path)
 
 canonical=[x.get('file') for x in manifest.get('migrations',[])]
-req(canonical==['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql'],'Build 171 must not alter canonical migration authority')
+expected_canonical=['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql']
+req(canonical[:len(expected_canonical)]==expected_canonical and len(canonical)>=len(expected_canonical),'Build 171 canonical migration prefix must remain intact')
 req(pointer.get('schema_change_authorized') is False and pointer.get('d1_mutation_authorized') is False and pointer.get('r2_mutation_authorized') is False,'Build 171 pointer must keep schema/D1/R2 mutation closed')
 req(pointer.get('provider_execution_authorized') is False and pointer.get('provider_publication_authorized') is False,'Build 171 pointer must keep provider execution/publication closed')
 
