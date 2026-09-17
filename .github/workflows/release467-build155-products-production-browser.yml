@@ -43,7 +43,12 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
-          if [ -f scripts/release467_build163_gate.py ] \
+          if [ -f scripts/release467_build165_gate.py ] \
+             && grep -q 'Build 165' admin/products/index.html \
+             && grep -q 'product-media-workspace-v165' functions/api/admin/product-media-editor.js; then
+            echo 'successor=build165' >> "${GITHUB_OUTPUT}"
+            echo 'Build 165 compact Product browser + existing-image recovery architecture detected. Historical Build 155/162/163 browser proofs are retired for this SHA.'
+          elif [ -f scripts/release467_build163_gate.py ] \
              && [ -f admin/product-editor/index.html ] \
              && [ -f admin/catalog-media/index.html ] \
              && [ -f public/js/admin-product-editor-v163.js ] \
@@ -59,6 +64,22 @@ jobs:
             echo 'successor=legacy' >> "${GITHUB_OUTPUT}"
             echo 'Historical Build 155/160 Product Admin architecture detected.'
           fi
+
+      - name: Prove Build 165 Product Admin source without Production D1 reads
+        if: steps.architecture.outputs.successor == 'build165'
+        run: |
+          set -euo pipefail
+          python scripts/release467_build165_gate.py
+          node --check public/js/admin-products-browser-v162.js
+          node --check public/js/admin-product-editor-v163.js
+          node --check public/js/admin-product-media-editor-v164.js
+          node --check functions/api/admin/product-browser-images.js
+          node --check functions/api/admin/product-media-editor.js
+          node --check sw.js
+          echo 'Build 165 Production Product proof: SOURCE/DELIVERY CONTRACT ONLY'
+          echo 'Remote D1 queries: ZERO'
+          echo 'Authenticated Production browser reads: ZERO in this automatic proof'
+          echo 'Current Product authority: compact browser + multi-source existing-image recovery + Build 164 image CRUD continuity.'
 
       - name: Prove Build 163 Product Admin source without Production D1 reads
         if: steps.architecture.outputs.successor == 'build163'
@@ -165,7 +186,10 @@ jobs:
         run: |
           echo "Exact Production main SHA: ${EXPECTED_SOURCE_SHA}"
           echo 'Target: https://devilndove.com/admin/products/'
-          if [ "${{ steps.architecture.outputs.successor }}" = "build163" ]; then
+          if [ "${{ steps.architecture.outputs.successor }}" = "build165" ]; then
+            echo 'Build 165 successor mode: zero Production D1/session/browser reads in this automatic proof.'
+            echo 'Compact Product Browser + existing-image recovery + image CRUD continuity are current authority.'
+          elif [ "${{ steps.architecture.outputs.successor }}" = "build163" ]; then
             echo 'Build 163 successor mode: zero Production D1/session/browser reads in this automatic proof.'
             echo 'Product Editor + Media/Image low-read source contract is the current authority.'
           elif [ "${{ steps.architecture.outputs.successor }}" = "build162" ]; then
