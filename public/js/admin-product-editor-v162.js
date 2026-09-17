@@ -21,6 +21,7 @@
   const get=(name)=>String(field(name)?.value??'').trim();
   const numOrNull=(value)=>{const text=String(value??'').trim();if(!text)return null;const n=Number(text);return Number.isFinite(n)?n:null;};
   const cents=(value)=>{const n=numOrNull(value);return n==null?0:Math.max(0,Math.round(n*100));};
+  const rowReadText=(data)=>Number.isFinite(Number(data?.d1_rows_read))?` D1 rows read: ${Number(data.d1_rows_read)}.`:'';
   function setStatus(message,tone=''){status.textContent=message;status.dataset.tone=tone;status.hidden=!message;}
   async function readJson(response,fallback){const data=await response.json().catch(()=>null);if(!response.ok||!data?.ok){const error=new Error(data?.error||fallback||`Request failed (${response.status}).`);error.code=data?.code||'';error.status=response.status;throw error;}return data;}
   function sameOriginMedia(raw){
@@ -55,7 +56,7 @@
     try{
       const response=await window.DDAuth.apiFetch(`/api/admin/product-editor-detail?product_id=${encodeURIComponent(state.productId)}`,{method:'GET',cache:'no-store'});
       const data=await readJson(response,'Failed to load Product.');
-      fill(data.product||{});setStatus('Product loaded. Supporting media, inventory, readiness and pricing evidence remain unloaded until requested.','ok');
+      fill(data.product||{});setStatus(`Product loaded. Supporting media, inventory, readiness and pricing evidence remain unloaded until requested.${rowReadText(data)}`,'ok');
     }catch(error){
       const quota=error?.code==='d1_read_capacity_unavailable'||error?.status===503&&/D1|read capacity|quota|rows/i.test(String(error?.message||''));
       if(quota)state.stoppedForQuota=true;
@@ -74,8 +75,9 @@
     try{
       const response=await window.DDAuth.apiFetch(`/api/admin/product-editor-media?product_id=${encodeURIComponent(state.productId)}`,{method:'GET',cache:'no-store'});
       const data=await readJson(response,'Failed to load Product media.');state.images=Array.isArray(data.images)?data.images:[];state.mediaLoaded=true;
-      if(!state.images.length){mediaMount.innerHTML='<p class="small">No gallery images are attached to this Product.</p>';return;}
-      mediaMount.innerHTML=`<div class="dd-media-grid">${state.images.map((row,index)=>`<div class="dd-media-card"><img loading="lazy" src="${esc(sameOriginMedia(row.image_url))}" alt="${esc(row.alt_text||`Product image ${index+1}`)}"><div class="small">${esc(row.alt_text||'No alt text')}</div></div>`).join('')}</div>`;
+      const evidence=rowReadText(data);
+      if(!state.images.length){mediaMount.innerHTML=`<p class="small">No gallery images are attached to this Product.${esc(evidence)}</p>`;return;}
+      mediaMount.innerHTML=`<p class="small">Gallery loaded on demand.${esc(evidence)}</p><div class="dd-media-grid">${state.images.map((row,index)=>`<div class="dd-media-card"><img loading="lazy" src="${esc(sameOriginMedia(row.image_url))}" alt="${esc(row.alt_text||`Product image ${index+1}`)}"><div class="small">${esc(row.alt_text||'No alt text')}</div></div>`).join('')}</div>`;
     }catch(error){mediaMount.innerHTML=`<p class="small">${esc(error?.message||'Media could not be loaded.')}</p>`;}
   }
   function payload(){
