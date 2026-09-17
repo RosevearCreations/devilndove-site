@@ -1,0 +1,45 @@
+name: Release 467 Build 170 Product Browser Explicit Image Recovery Proof
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'admin/products/index.html'
+      - 'public/js/admin-products-browser-v162.js'
+      - 'functions/api/admin/product-browser-images.js'
+      - 'scripts/release467_build166_gate.py'
+      - 'scripts/release467_build168_gate.py'
+      - 'scripts/release467_build169_gate.py'
+      - 'scripts/release467_build170_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_170_PRODUCT_BROWSER_EXPLICIT_IMAGE_RECOVERY.md'
+      - '.github/workflows/release467-build170-product-browser-explicit-image-recovery.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  product-browser-explicit-image-recovery-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build 170 Product Browser explicit photo recovery gate
+        run: python scripts/release467_build170_gate.py
+      - name: Retained Build 169 Product QA/editor convergence gate
+        run: python scripts/release467_build169_gate.py
+      - name: Retained Build 168 Product low-read handoff gate
+        run: python scripts/release467_build168_gate.py
+      - name: Retained Build 166 Product editing/image stabilization gate
+        run: python scripts/release467_build166_gate.py
+      - name: JavaScript syntax checks
+        run: |
+          node --check public/js/admin-products-browser-v162.js
+          node --check functions/api/admin/product-browser-images.js
+      - name: Boundary
+        run: echo 'Build 170 changes Product Browser read behavior only. Fresh pages perform one bounded Product query; fallback photo recovery is explicit, one-Product-only, non-retrying, and performs no Product-table re-read, R2 listing/mutation, schema, provider, payment, refund or accounting mutation.'

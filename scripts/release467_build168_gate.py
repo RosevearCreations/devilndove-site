@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Release 467 Build 168 — Product admin low-read session reuse + editor handoff gate.
 
-Successor-aware for Build 169: the retained Build 168 invariants are the browser-session
-reuse, missing-featured-only image recovery, display-only editor handoff, and authority-before-save
-behavior. Successor copy may identify a later build without weakening those invariants.
+Successor-aware through Build 170: retained invariants are browser-session reuse, no Products-table
+re-read for fallback images, display-only editor handoff, and authority-before-save. Build 170 strengthens
+image recovery from visible-page automatic batching to an explicit single-Product operator action.
 """
 from pathlib import Path
 import subprocess,sys
@@ -19,14 +19,16 @@ editor_page=read('admin/product-editor/index.html')
 browser=read('public/js/admin-products-browser-v162.js')
 images=read('functions/api/admin/product-browser-images.js')
 editor=read('public/js/admin-product-editor-v163.js')
-for token in ('Build 168','session','featured image','Refresh'):
-    req(token in products,f'Product Browser missing Build 168 low-read copy: {token}')
-for token in ('pageCache=new Map()','session reuse','featured_missing_only:true','dnd:product-editor-seed:','force:true'):
+for token in ('Build 170','session','featured image','Refresh','Recover photo'):
+    req(token in products,f'Product Browser missing Build 168+ low-read copy: {token}')
+for token in ('pageCache=new Map()','session reuse','async function recoverPhoto(productId)','operator_triggered:true','dnd:product-editor-seed:','force:true'):
     req(token in browser,f'Product Browser low-read/session handoff missing: {token}')
-req("filter((p)=>!String(p?.featured_image_url||'').trim())" in browser,'Image recovery is not restricted to Products missing featured_image_url')
+req('loadImageMap(products)' not in browser,'Build 170 must not perform automatic page-level image recovery')
+req('product_ids:[productId]' in browser,'Explicit photo recovery is not limited to one selected Product')
+req('featured_missing_only:true' in browser,'Explicit photo recovery lost missing-featured-only request contract')
 req('FROM products' not in images,'Secondary Product image recovery re-reads the Products table')
-for token in ('product-browser-images-v168','visible_products_missing_featured_secondary_only','product_table_read:false','requested_missing_featured'):
-    req(token in images,f'Build 168 image recovery contract missing: {token}')
+for token in ('product-browser-images-v170-explicit','operator_triggered_single_product_missing_featured_secondary_only','product_table_read:false','requested_missing_featured:1','MAX_IDS=1','automatic:false'):
+    req(token in images,f'Build 170 successor image recovery contract missing: {token}')
 req(('Build 168' in editor_page) or ('Build 169' in editor_page),'Product Editor is not a recognized Build 168+ successor')
 req('display-only' in editor_page,'Product Editor lost display-only browser handoff contract')
 req(('Save remains disabled' in editor_page) or ('Save updates only this Product' in editor_page),'Product Editor lost authority-before-save contract copy')
@@ -44,8 +46,8 @@ if FAIL:
     sys.exit(1)
 print('RELEASE 467 BUILD 168 PRODUCT ADMIN LOW-READ HANDOFF: PASS')
 print('Product Browser: session-only page reuse; deliberate Refresh returns to live authority')
-print('Image recovery: secondary tables only for visible Products missing featured_image_url')
+print('Build 170 successor: normal Product page performs no automatic secondary image recovery read')
+print('Image recovery: explicit one-Product action; no Products-table re-read or R2 listing')
 print('Product Editor: display-only browser handoff; Save waits for authoritative one-Product read')
-print('Build 169 successor copy: ACCEPTED only with retained Build 168 authority invariants')
 print('Background timers/scans: NONE')
 print('Schema/D1-data/R2/provider/payment/accounting mutation: NONE')

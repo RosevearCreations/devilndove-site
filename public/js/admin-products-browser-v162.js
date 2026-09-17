@@ -1,6 +1,6 @@
-// Release 467 Build 168 — Product Browser session reuse + missing-featured-only image recovery.
-// Explicit operator reads only: initial page, Search, Next and deliberate Refresh.
-// Previous/revisit may reuse this browser-session snapshot. No timers, autoscan or second authority.
+// Release 467 Build 170 — Product Browser one-query pages + explicit single-Product photo recovery.
+// Fresh page authority is one bounded Product request. Secondary image recovery never runs automatically.
+// Previous/revisit may reuse this browser-session snapshot. No timers, autoscan or second Product authority.
 (() => {
   'use strict';
   const form=document.getElementById('productBrowserSearchForm');
@@ -16,11 +16,13 @@
 
   const history=[];
   const pageCache=new Map();
+  const imageRecoveryState=new Map();
   let cursor=null;
   let nextCursor=null;
   let page=1;
   let inFlight=false;
   let stoppedForQuota=false;
+  let currentEntry=null;
 
   const esc=(value)=>String(value??'').replace(/[&<>"']/g,(ch)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
   const money=(cents,currency='CAD')=>{try{return new Intl.NumberFormat('en-CA',{style:'currency',currency:String(currency||'CAD')}).format(Number(cents||0)/100);}catch{return `$${(Number(cents||0)/100).toFixed(2)}`;}};
@@ -48,7 +50,7 @@
   }
   function rememberEditorSeed(product){
     const id=Number(product?.product_id||0);if(!id)return;
-    const seed={product_id:id,product_number:product.product_number??null,name:product.name||'',slug:product.slug||'',sku:product.sku||'',status:product.status||'',review_status:product.review_status||'',price_cents:Number(product.price_cents||0),currency:product.currency||'CAD',inventory_tracking:Number(product.inventory_tracking||0),inventory_quantity:Number(product.inventory_quantity||0),featured_image_url:product.featured_image_url||'',updated_at:product.updated_at||'',captured_at:Date.now(),source:'product-browser-v168'};
+    const seed={product_id:id,product_number:product.product_number??null,name:product.name||'',slug:product.slug||'',sku:product.sku||'',status:product.status||'',review_status:product.review_status||'',price_cents:Number(product.price_cents||0),currency:product.currency||'CAD',inventory_tracking:Number(product.inventory_tracking||0),inventory_quantity:Number(product.inventory_quantity||0),featured_image_url:product.featured_image_url||'',updated_at:product.updated_at||'',captured_at:Date.now(),source:'product-browser-v170'};
     try{sessionStorage.setItem(`dnd:product-editor-seed:${id}`,JSON.stringify(seed));}catch{}
   }
   function armImages(){
@@ -58,35 +60,46 @@
       img.onerror=()=>{if(index<candidates.length-1){index+=1;use();}};use();
     });
   }
-  function render(products,imageMap={}){
+  function render(products){
     if(!products.length){body.innerHTML='<tr><td colspan="4" class="dd-empty">No Products matched this page.</td></tr>';return;}
     const byId=new Map(products.map((p)=>[Number(p.product_id||0),p]));
     body.innerHTML=products.map((p)=>{
-      const id=Number(p.product_id||0);const recovered=imageMap[id]||{};const fallback=recovered.image_url||'';const candidates=mediaCandidates(p.featured_image_url,fallback);
+      const id=Number(p.product_id||0);const recovery=imageRecoveryState.get(id)||{status:'idle',image:null};const recovered=recovery.image||{};const featured=String(p.featured_image_url||'').trim();const fallback=featured?'':String(recovered.image_url||'').trim();const candidates=mediaCandidates(featured,fallback);
       const edit=`/admin/product-editor/?product_id=${encodeURIComponent(id)}`;const media=`/admin/catalog-media/?product_id=${encodeURIComponent(id)}`;const publicLink=p.slug?`/shop/product/?slug=${encodeURIComponent(p.slug)}`:'';
       const stock=Number(p.inventory_tracking||0)===1?String(Number(p.inventory_quantity||0)):'not tracked';
-      const source=recovered.source?` • photo: ${esc(recovered.source)}`:'';
+      let source='';let photoAction='';
+      if(!featured){
+        if(recovery.status==='loading'){source='Checking this Product only…';photoAction='<button class="btn" type="button" disabled>Loading photo…</button>';}
+        else if(recovery.status==='done'&&fallback){source=`photo: ${esc(recovered.source||'recovered reference')}`;}
+        else if(recovery.status==='done'){source='No fallback photo found. Use Images to add one.';}
+        else {source=recovery.status==='error'?'Photo recovery failed; explicit retry is available.':'No featured image loaded. Secondary photo lookup is idle.';photoAction=`<button class="btn" type="button" data-recover-photo-id="${id}">${recovery.status==='error'?'Retry photo':'Recover photo'}</button>`;}
+      }
       return `<tr data-product-id="${id}">
         <td class="dd-product-image-cell"><img class="dd-product-thumb" loading="lazy" data-product-image-candidates='${esc(JSON.stringify(candidates))}' alt="${esc(p.name||'Product image')}"></td>
-        <td><strong>${esc(p.name||`Product #${id}`)}</strong><div class="small">#${id}${p.product_number?` • No. ${esc(p.product_number)}`:''}${p.sku?` • ${esc(p.sku)}`:''}</div><div class="dd-product-meta"><span>${esc(p.status||'draft')}</span><span>${esc(p.review_status||'pending')}</span></div><div class="small dd-product-photo-source">${source.replace(/^ • /,'')}</div></td>
+        <td><strong>${esc(p.name||`Product #${id}`)}</strong><div class="small">#${id}${p.product_number?` • No. ${esc(p.product_number)}`:''}${p.sku?` • ${esc(p.sku)}`:''}</div><div class="dd-product-meta"><span>${esc(p.status||'draft')}</span><span>${esc(p.review_status||'pending')}</span></div><div class="small dd-product-photo-source">${source}</div></td>
         <td><strong>${money(p.price_cents,p.currency)}</strong><div class="small">Stock: ${esc(stock)}</div></td>
-        <td class="dd-product-actions"><a class="btn" data-product-edit-id="${id}" href="${edit}">Edit</a><a class="btn" href="${media}">Images</a>${publicLink?`<a class="btn" href="${publicLink}" target="_blank" rel="noopener">View</a>`:''}</td>
+        <td class="dd-product-actions"><a class="btn" data-product-edit-id="${id}" href="${edit}">Edit</a><a class="btn" href="${media}">Images</a>${photoAction}${publicLink?`<a class="btn" href="${publicLink}" target="_blank" rel="noopener">View</a>`:''}</td>
       </tr>`;
     }).join('');
     body.querySelectorAll('[data-product-edit-id]').forEach((link)=>link.addEventListener('click',()=>rememberEditorSeed(byId.get(Number(link.dataset.productEditId||0)))));
+    body.querySelectorAll('[data-recover-photo-id]').forEach((button)=>button.addEventListener('click',()=>recoverPhoto(Number(button.dataset.recoverPhotoId||0))));
     armImages();
   }
   async function readJson(response){const data=await response.json().catch(()=>null);if(!response.ok||!data?.ok){const error=new Error(data?.error||`Product Browser request failed (${response.status}).`);error.code=data?.code||'';error.status=response.status;throw error;}return data;}
-  async function loadImageMap(products){
-    const ids=products.filter((p)=>!String(p?.featured_image_url||'').trim()).map((p)=>Number(p.product_id||0)).filter((id)=>id>0).slice(0,24);
-    if(!ids.length)return {images_by_product:{},d1_rows_read:0,recovered_count:0,requested_missing_featured:0};
-    const response=await window.DDAuth.apiFetch('/api/admin/product-browser-images',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({product_ids:ids,featured_missing_only:true}),cache:'no-store'});
-    return readJson(response);
+  async function recoverPhoto(productId){
+    if(!Number.isInteger(productId)||productId<=0)return;const prior=imageRecoveryState.get(productId)||{};if(prior.status==='loading')return;
+    imageRecoveryState.set(productId,{status:'loading',image:null});if(currentEntry)render(currentEntry.products||[]);setStatus(`Recovering one fallback photo for Product #${productId}…`);
+    try{
+      const response=await window.DDAuth.apiFetch('/api/admin/product-browser-images',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({product_ids:[productId],featured_missing_only:true,operator_triggered:true}),cache:'no-store'});
+      const data=await readJson(response);const image=data.images_by_product?.[productId]||data.images_by_product?.[String(productId)]||null;imageRecoveryState.set(productId,{status:'done',image});
+      setStatus(image?`Fallback photo recovered for Product #${productId} from ${image.source||'existing Product media'}. D1 rows read: ${Number(data.d1_rows_read||0)}.`:`No fallback photo was found for Product #${productId}. No automatic retry will run. D1 rows read: ${Number(data.d1_rows_read||0)}.`,'ok');
+    }catch(error){imageRecoveryState.set(productId,{status:'error',image:null});setStatus(`${error?.message||'Could not recover Product photo.'} No automatic retry will run.`,'error');}
+    finally{if(currentEntry)render(currentEntry.products||[]);}
   }
   function applyPage(entry,{fromCache=false}={}){
-    cursor=entry.cursor||null;nextCursor=entry.nextCursor||null;render(entry.products||[],entry.imageMap||{});
-    const recovered=Number(entry.recovered||0);const rows=Number(entry.rows||0);const missing=Number(entry.requestedMissingFeatured||0);
-    setStatus(fromCache?`${entry.products.length} Product${entry.products.length===1?'':'s'} reused from this browser session. D1 rows read: 0 for this navigation. Press Refresh for live authority.`:`${entry.products.length} Product${entry.products.length===1?'':'s'} loaded. Secondary image lookup ran for ${missing} visible Product${missing===1?'':'s'} without a featured image; ${recovered} fallback photo reference${recovered===1?'':'s'} recovered.${Number.isFinite(rows)?` D1 rows read: ${rows}.`:''}`,'ok');
+    currentEntry=entry;cursor=entry.cursor||null;nextCursor=entry.nextCursor||null;render(entry.products||[]);
+    const rows=Number(entry.rows||0);const missing=(entry.products||[]).filter((p)=>!String(p?.featured_image_url||'').trim()).length;
+    setStatus(fromCache?`${entry.products.length} Product${entry.products.length===1?'':'s'} reused from this browser session. D1 rows read: 0 for this navigation. Press Refresh for live authority.`:`${entry.products.length} Product${entry.products.length===1?'':'s'} loaded from one bounded Product query. Automatic secondary image recovery reads: 0. ${missing} visible Product${missing===1?'':'s'} lack a featured image; use Recover photo only when needed.${Number.isFinite(rows)?` D1 rows read: ${rows}.`:''}`,'ok');
     pageLabel.textContent=`Page ${page} • ${entry.pageLimit} per page${fromCache?' • session reuse':''}`;
   }
   async function load({requestedCursor=cursor,remember=false,force=false}={}){
@@ -100,11 +113,9 @@
       const params=new URLSearchParams({limit:String(pageLimit)});if(q)params.set('q',q);if(requestedCursor)params.set('cursor',String(requestedCursor));
       const response=await window.DDAuth.apiFetch(`/api/admin/product-browser?${params.toString()}`,{method:'GET',cache:'no-store'});
       const data=await readJson(response);const products=Array.isArray(data.products)?data.products:[];
-      let imageData={images_by_product:{},d1_rows_read:0,recovered_count:0,requested_missing_featured:0};
-      try{imageData=await loadImageMap(products);}catch(imageError){if(imageError?.code==='d1_read_capacity_unavailable')throw imageError;}
       if(remember)history.push(cursor);
-      const rows=[data.d1_rows_read,imageData.d1_rows_read].filter((value)=>Number.isFinite(Number(value))).reduce((sum,value)=>sum+Number(value),0);
-      const entry={cursor:requestedCursor||null,nextCursor:data.next_cursor||null,products,imageMap:imageData.images_by_product||{},recovered:Number(imageData.recovered_count||0),requestedMissingFeatured:Number(imageData.requested_missing_featured??products.filter((p)=>!String(p?.featured_image_url||'').trim()).length),rows,pageLimit};
+      const rows=Number.isFinite(Number(data.d1_rows_read))?Number(data.d1_rows_read):0;
+      const entry={cursor:requestedCursor||null,nextCursor:data.next_cursor||null,products,rows,pageLimit};
       pageCache.set(key,entry);applyPage(entry);
     }catch(error){
       const quota=error?.code==='d1_read_capacity_unavailable'||error?.status===503&&/D1|read capacity|quota|rows/i.test(String(error?.message||''));

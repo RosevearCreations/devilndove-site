@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta data-dd-products-static-platform="1" name="dd-product-admin-architecture" content="product-browser-v162"/>
   <title>Products — Devil n Dove Admin</title>
-  <meta name="description" content="Compact Devil n Dove Product browser with bounded low-read image recovery and browser-session page reuse."/>
+  <meta name="description" content="Compact Devil n Dove Product browser with one bounded Product read and operator-triggered fallback photo recovery."/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
   <link rel="stylesheet" href="/css/admin-product-v162.css?v=168"/>
@@ -22,16 +22,16 @@
 
     <header class="hero compact-hero dd-products-compact-head">
       <div>
-        <p class="eyebrow">Release 467 • Build 168</p>
+        <p class="eyebrow">Release 467 • Build 170</p>
         <h1>Products</h1>
-        <p>Find a Product, confirm its existing photo, and move straight into Product or image editing without loading the old all-in-one workspace.</p>
+        <p>Find a Product and move straight into Product or image editing. A normal page load now performs one bounded Product query only; missing fallback photos are recovered only when you explicitly request one.</p>
       </div>
       <div class="dd-product-actions"><a class="btn" href="/admin/product-editor/">Create Product</a><a class="btn" href="/admin/catalog-media/">Image Editor</a></div>
     </header>
 
     <section class="card dd-products-browser-card">
-      <div class="dd-products-browser-heading"><div><h2>Product Browser</h2><p class="small">Eight compact rows by default. Previous/revisited pages reuse this browser session; secondary image recovery runs only for visible Products that lack a featured image.</p></div></div>
-      <details class="dd-low-read-details"><summary>Low-read / image-recovery details</summary><div class="dd-low-read-note small"><strong>Build 166 foundation, Build 168 refinement:</strong> one bounded Product query for a fresh page. Featured image authority comes from that same Product row and is never re-read by image recovery. Only visible Products with no featured image check Product gallery, media roles, then media assets. Previous/revisited pages may reuse this session at zero D1 cost; Refresh deliberately returns to live authority. R2 is never listed, there are no timers, and failed reads do not loop.</div></details>
+      <div class="dd-products-browser-heading"><div><h2>Product Browser</h2><p class="small">Eight compact rows by default. Previous/revisited pages reuse this browser session. Featured image authority comes from the Product row; when a Product has no featured image, use Recover photo to check that Product's existing gallery/media references explicitly.</p></div></div>
+      <details class="dd-low-read-details"><summary>Low-read / image-recovery details</summary><div class="dd-low-read-note small"><strong>Build 166 foundation, Build 168 session reuse, Build 170 explicit photo recovery:</strong> one bounded Product query for a fresh page. Automatic secondary image recovery reads are zero. Featured image authority comes from that same Product row. Only pressing <strong>Recover photo</strong> may read secondary image authorities, and that request is limited to one Product. Previous/revisited pages may reuse this session at zero D1 cost; Refresh deliberately returns to live authority. R2 is never listed, there are no timers, and failed reads do not loop.</div></details>
       <form id="productBrowserSearchForm" class="dd-product-toolbar">
         <label><span class="small">Find a Product</span><input class="input" id="productBrowserQuery" type="search" placeholder="ID, product no., name, SKU or slug" autocomplete="off"/></label>
         <label class="dd-product-rows-label"><span class="small">Rows</span><select class="input" id="productBrowserPageSize"><option value="8" selected>8</option><option value="16">16</option><option value="24">24</option></select></label>
@@ -55,6 +55,6 @@
   </div>
 
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-products-browser-v162.js?v=168"></script>
+  <script src="/public/js/admin-products-browser-v162.js?v=170"></script>
 </body>
 </html>
