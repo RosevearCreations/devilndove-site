@@ -29,10 +29,14 @@ on:
       - 'admin/deployment-preflight/index.html'
       - 'scripts/release467_build157_gate.py'
       - 'scripts/release467_build166_gate.py'
+      - 'scripts/release467_build168_gate.py'
+      - 'scripts/release467_build169_gate.py'
+      - 'scripts/release467_build170_gate.py'
       - 'public/js/admin-products-browser-v162.js'
       - 'functions/api/product-detail-core.js'
       - 'functions/media/product.js'
       - 'docs/operations/RELEASE_467_BUILD_157_ADMIN_DATA_DELIVERY.md'
+      - '.github/workflows/release467-build170-product-browser-explicit-image-recovery.yml'
       - '.github/workflows/release467-build157-proof.yml'
   workflow_dispatch:
 
@@ -66,7 +70,10 @@ jobs:
         id: architecture
         run: |
           set -euo pipefail
-          if [ -f scripts/release467_build166_gate.py ]; then
+          if [ -f scripts/release467_build170_gate.py ]; then
+            echo 'successor=build170' >> "${GITHUB_OUTPUT}"
+            echo 'Build 170 explicit single-Product photo recovery detected. Historical Build 157 Product browser contract is retired for this SHA.'
+          elif [ -f scripts/release467_build166_gate.py ]; then
             echo 'successor=build166' >> "${GITHUB_OUTPUT}"
             echo 'Build 166 Product editing/image stabilization detected. Historical Build 157 browser runtime probe is retired for this SHA.'
           elif [ -f scripts/release467_build165_gate.py ]; then
@@ -76,8 +83,24 @@ jobs:
             echo 'successor=legacy' >> "${GITHUB_OUTPUT}"
           fi
       - name: Prove carried-forward Build 157 source contract
+        if: steps.architecture.outputs.successor == 'legacy'
         run: python scripts/release467_build157_gate.py
-      - name: Prove current Product successor without legacy catalog scan
+      - name: Prove Build 170 Product successor without legacy catalog scan
+        if: steps.architecture.outputs.successor == 'build170'
+        run: |
+          set -euo pipefail
+          python scripts/release467_build170_gate.py
+          python scripts/release467_build169_gate.py
+          python scripts/release467_build168_gate.py
+          python scripts/release467_build166_gate.py
+          node --check public/js/admin-products-browser-v162.js
+          node --check functions/api/admin/product-browser-images.js
+          echo 'Build 170 successor proof: SOURCE CONTRACT ONLY'
+          echo 'Legacy all-in-one Product browser probe: RETIRED'
+          echo 'Automatic secondary Product image reads: ZERO'
+          echo 'Development D1 session insertion: ZERO'
+          echo 'Catalog-wide Product browser reads: ZERO'
+      - name: Prove Build 166 Product successor without legacy catalog scan
         if: steps.architecture.outputs.successor == 'build166'
         run: |
           set -euo pipefail
