@@ -32,7 +32,15 @@ wrapper_js = wrapper_path.read_text()
 inv_html = (ROOT/'admin/inventory-operations/index.html').read_text()
 products_html = (ROOT/'admin/products/index.html').read_text()
 mobile_html = (ROOT/'admin/mobile-inventory/index.html').read_text()
+editor_path = ROOT/'admin/product-editor/index.html'
+editor_html = editor_path.read_text() if editor_path.exists() else ''
 css = (ROOT/'css/styles.css').read_text()
+build162_products = (
+    'data-admin-page="product-browser-v162"' in products_html
+    and 'data-dd-products-static-platform="1"' in products_html
+    and editor_path.exists()
+    and '/admin/product-editor/' in products_html
+)
 
 check('canonical Development release is available', release >= FEATURE_BUILD)
 if data_path == legacy_path:
@@ -46,7 +54,12 @@ check('browser preserves server-linked resource outside current search', '|| x.r
 check('browser preserves server-provided linked name before external key fallback', 'resource.name || x.name || x.source_key' in resources_js)
 check('linked-item dropdown displays name before source key fallback', 'link.name || link.source_key' in resources_js)
 check('Inventory Operations loads an accepted Product-resource bundle', has_accepted_asset(inv_html, 'admin-product-resources.js'))
-check('Products loads an accepted Product-resource bundle', has_accepted_asset(products_html, 'admin-product-resources.js'))
+if build162_products:
+    check('Build 162 Product Browser does not eagerly load Product-resource bundle', not has_accepted_asset(products_html, 'admin-product-resources.js'))
+    check('Build 162 keeps Product-resource authority available from focused Inventory Operations', has_accepted_asset(inv_html, 'admin-product-resources.js'))
+    check('Build 162 dedicated Product Editor exists without eager Product-resource startup', bool(editor_html) and 'admin-product-resources.js' not in editor_html)
+else:
+    check('Products loads an accepted Product-resource bundle', has_accepted_asset(products_html, 'admin-product-resources.js'))
 check('Inventory Operations loads an accepted Inventory bundle', has_accepted_asset(inv_html, 'admin-site-item-inventory.js'))
 check('Mobile Inventory loads an accepted Inventory bundle', has_accepted_asset(mobile_html, 'admin-site-item-inventory.js'))
 check('inventory form exposes Start New Item', 'id="siteInventoryResetButton">Start New Item</button>' in inventory_js)
@@ -88,4 +101,6 @@ passed = sum(checks)
 print(f"\nBuild {release} retained linked-item/reset compatibility regression: {passed}/{len(checks)} passed")
 print(f"Feature provenance floor: Build {FEATURE_BUILD}; active release ceiling: Build {release}")
 print(f"Runtime release authority: development-release.json / Build {release}")
+if build162_products:
+    print('Build 162 successor mode: Product Browser intentionally excludes eager Product-resource runtime; Inventory Operations remains the focused resource authority.')
 raise SystemExit(0 if passed == len(checks) else 1)
