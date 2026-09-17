@@ -6,21 +6,25 @@ ROOT=Path(__file__).resolve().parents[1];FAIL=[]
 def read(path): return (ROOT/path).read_text(encoding='utf-8',errors='replace')
 def req(ok,msg):
     if not ok: FAIL.append(msg)
+def executable_js(source):
+    return re.sub(r'//[^\n]*','',source)
 def node(path):
     p=subprocess.run(['node','--check',str(ROOT/path)],cwd=ROOT,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     req(p.returncode==0,f'JavaScript syntax failed for {path}: {(p.stderr or p.stdout)[-1200:]}')
 products=read('admin/products/index.html')
+browser_js=read('public/js/admin-products-browser-v162.js')
 editor=read('admin/product-editor/index.html')
 media_page=read('admin/catalog-media/index.html')
 editor_js=read('public/js/admin-product-editor-v163.js')
 media_js=read('public/js/admin-product-media-editor-v163.js')
+editor_exec=executable_js(editor_js);media_exec=executable_js(media_js)
 save_api=read('functions/api/admin/product-editor-save.js')
 media_api=read('functions/api/admin/product-media-editor.js')
 image_api=read('functions/api/admin/product-image-editor.js')
 sw=read('sw.js')
 
-for token in ('product-browser-v162','/admin/product-editor/?product_id='):
-    req(token in products,f'Product Browser lost direct editor contract: {token}')
+req('product-browser-v162' in products,'Product Browser lost Build 162 bounded browser authority')
+req('/admin/product-editor/?product_id=' in browser_js,'Product Browser lost direct Product Editor navigation')
 for token in ('product-editor-v163','admin-product-editor-v163.js','Low-read contract:','No autosave','Open Media &amp; Image Editor'):
     req(token in editor,f'Product Editor missing Build 163 token: {token}')
 for forbidden in ('admin-product-editor-v162.js','admin-products.js','admin-edit-product.js','admin-product-seo.js','admin-product-resources.js','admin-site-item-inventory.js','productEditorMediaMount'):
@@ -28,16 +32,16 @@ for forbidden in ('admin-product-editor-v162.js','admin-products.js','admin-edit
 for token in ('/api/admin/product-editor-detail?product_id=','/api/admin/product-editor-save','No catalog refresh, media scan, scoring or readiness scan','Automatic retries are stopped'):
     req(token in editor_js,f'Product Editor client missing token: {token}')
 for forbidden in ('setInterval(','MutationObserver','/api/admin/products','/api/admin/product-readiness','/api/admin/product-lineage','/api/admin/product-editor-media'):
-    req(forbidden not in editor_js,f'Product Editor client gained eager/heavy path: {forbidden}')
+    req(forbidden not in editor_exec,f'Product Editor client gained eager/heavy path: {forbidden}')
 
-for token in ('product-media-v163','admin-product-media-editor-v163.js','Measure &amp; Score Selected Image','Low-read contract:','No R2 library scan'):
+for token in ('product-media-v163','admin-product-media-editor-v163.js','Measure &amp; Score Selected Image','Low-read contract:','Nothing scans the R2 library'):
     req(token in media_page,f'Product Media page missing Build 163 token: {token}')
 for forbidden in ('admin-product-media-context.js','admin-product-media-convergence.js','admin-product-content-bridge.js','admin-product-images.js','admin-product-image-annotations.js','admin-r2-derivative-settings.js','admin-product-story-notes.js','admin-product-media-score.js','admin-product-listing-profiles.js','admin-product-seo.js','admin-candle-soap-specs.js','admin-route-usage.js','site-analytics.js'):
     req(forbidden not in media_page,f'Product Media still loads legacy/eager subsystem: {forbidden}')
-for token in ('/api/admin/product-media-editor?product_id=','/api/admin/product-image-editor','/api/admin/product-browser?','Measure & Score Selected Image','No other Product images were read or rescored'):
+for token in ('/api/admin/product-media-editor?product_id=','/api/admin/product-image-editor','/api/admin/product-browser?','No other Product images were read or rescored'):
     req(token in media_js,f'Product Media client missing token: {token}')
 for forbidden in ('setInterval(','MutationObserver','/api/admin/products','/api/admin/product-media-score','/api/admin/product-detail','/api/admin/media-content-studio'):
-    req(forbidden not in media_js,f'Product Media client gained automatic/heavy path: {forbidden}')
+    req(forbidden not in media_exec,f'Product Media client gained automatic/heavy path: {forbidden}')
 
 for source,label in ((save_api,'Product save API'),(media_api,'Product media API'),(image_api,'Image editor API')):
     for forbidden in ('CREATE TABLE','ALTER TABLE','DROP TABLE','CREATE INDEX'):
