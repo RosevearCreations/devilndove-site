@@ -1,0 +1,30 @@
+{
+  "release": 467,
+  "build": 166,
+  "title": "Product Editing & Image Stabilization",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "priority": "stabilize_product_editing_and_product_images",
+  "changes": [
+    "Keep /admin/products/ compact at eight rows by default with explicit paging.",
+    "Route Product thumbnails through the canonical same-origin /api/product-media R2 reader.",
+    "Retain /media/product as a zero-D1 compatibility alias for older image tools.",
+    "Add /api/product-detail-core as a bounded public Product record/gallery endpoint without schema introspection or catalog scans.",
+    "Replace the public Product detail renderer with an 8-second fail-fast bounded renderer to prevent indefinite Loading product states.",
+    "Make historical Build 157 browser proof successor-aware so it no longer tests the retired all-in-one Product workspace against Build 166."
+  ],
+  "safety": {
+    "schema_change": false,
+    "request_time_ddl": false,
+    "production_business_data_mutation": false,
+    "r2_listing": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "payment_refund_accounting_mutation": false
+  },
+  "next_direction": [
+    "Finish Product image recovery visibility and guided first-image repair.",
+    "Consolidate Product Editor and Product Media Editor around one bounded Product context.",
+    "Add operator-controlled image reference audit that reports stale versus resolvable R2 keys without catalog-wide automatic scans.",
+    "Continue the existing roadmap after Product editing and image stability are proven GREEN."
+  ]
+}

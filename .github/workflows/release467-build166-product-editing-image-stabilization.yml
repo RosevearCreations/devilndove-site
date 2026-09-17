@@ -1,0 +1,51 @@
+name: Release 467 Build 166 Product Editing and Image Stabilization Proof
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'admin/products/index.html'
+      - 'shop/product/index.html'
+      - 'public/js/admin-products-browser-v162.js'
+      - 'public/js/product-detail-v166.js'
+      - 'functions/api/product-detail-core.js'
+      - 'functions/media/product.js'
+      - '.github/workflows/release467-build157-proof.yml'
+      - 'scripts/release467_build166_gate.py'
+      - 'release467-build166-product-editing-image-stabilization.json'
+      - '.github/workflows/release467-build166-product-editing-image-stabilization.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release467-build166-product-editing-image-stabilization
+  cancel-in-progress: true
+
+jobs:
+  build166-source-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove exact checked-out Build 166 source
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          python scripts/release467_build166_gate.py
+      - name: Boundary
+        run: |
+          echo "Exact Development SHA: ${GITHUB_SHA}"
+          echo 'Product Browser: bounded 8-row default with explicit paging'
+          echo 'Product images: canonical same-origin R2 reader plus legacy URL compatibility'
+          echo 'Product detail: bounded core endpoint with fail-fast browser timeout'
+          echo 'Production D1/R2/provider/payment/refund/accounting mutation: NONE'
