@@ -44,6 +44,16 @@
     <div class="card" style="margin-top:18px"><strong>Build 150 workspace:</strong> the unified seller view consumes the existing Orders, order-detail and Build 82 fulfilment workflow authorities. Packaging/internal notes and buyer-message drafts save locally only. Live fulfilment and tracking-audit changes require confirmation and use stable <code>client_action_id</code> replay protection. Buyer sending, payment/refund execution, carrier calls, accounting posting, R2 and schema mutation remain outside this workspace.</div>
 
     <div id="orderWorkspaceMount" data-release="467" data-build="150"></div>
+    <template id="ordersBuild82WorkflowContract" data-build176-inert-contract="true">
+      <!-- Build 82 fulfilment workflow status vocabulary retained as inert compatibility metadata.
+           Build 176 does not start the legacy Orders renderer. -->
+      <option value="preparing">Preparing</option>
+      <option value="making">Making</option>
+      <option value="packing">Packing</option>
+      <option value="evidence">Evidence</option>
+      <option value="ready">Ready</option>
+      <option value="returned">Returned</option>
+    </template>
 
     <div class="card" id="ordersSection" style="margin-top:18px">
       <h2 style="margin-top:0">Detailed Orders &amp; Payments Table</h2>
