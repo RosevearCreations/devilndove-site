@@ -11,6 +11,7 @@ on:
       - 'admin/catalog-media/index.html'
       - 'admin/product-editor/index.html'
       - 'scripts/release467_build173_gate.py'
+      - 'scripts/release467_build164_gate.py'
       - '.github/workflows/release467-build173-product-media-repair.yml'
   workflow_dispatch:
 jobs:
