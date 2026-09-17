@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 461 product-image quality contract, with Build 163 current-runtime convergence."""
+"""Release 461 product-image quality contract, with Build 163+ current-runtime convergence."""
 from pathlib import Path
 import re
 ROOT=Path(__file__).resolve().parents[1]
@@ -8,13 +8,15 @@ LEGACY_API=ROOT/'functions/api/admin/product-media-score.js'
 LEGACY_UI=ROOT/'public/js/admin-product-media-score.js'
 PAGE=ROOT/'admin/catalog-media/index.html'
 NEW_API=ROOT/'functions/api/admin/product-image-editor.js'
-NEW_UI=ROOT/'public/js/admin-product-media-editor-v163.js'
+NEW_UI_163=ROOT/'public/js/admin-product-media-editor-v163.js'
+NEW_UI_164=ROOT/'public/js/admin-product-media-editor-v164.js'
 for path in (MIG,LEGACY_API,LEGACY_UI,PAGE):
     if not path.is_file(): raise SystemExit(f'Missing product image quality authority: {path.relative_to(ROOT)}')
 migration=MIG.read_text(encoding='utf-8');legacy_api=LEGACY_API.read_text(encoding='utf-8');legacy_ui=LEGACY_UI.read_text(encoding='utf-8');page=PAGE.read_text(encoding='utf-8')
-build163='product-media-v163' in page and NEW_API.is_file() and NEW_UI.is_file()
+build164='product-media-v164' in page and NEW_API.is_file() and NEW_UI_164.is_file()
+build163=('product-media-v163' in page and NEW_API.is_file() and NEW_UI_163.is_file()) or build164
 api=NEW_API.read_text(encoding='utf-8') if build163 else legacy_api
-ui=NEW_UI.read_text(encoding='utf-8') if build163 else legacy_ui
+ui=(NEW_UI_164.read_text(encoding='utf-8') if build164 else NEW_UI_163.read_text(encoding='utf-8')) if build163 else legacy_ui
 checks={
  'migration owns role table':'CREATE TABLE IF NOT EXISTS product_media_role_assignments' in migration,
  'migration owns quality review table':'CREATE TABLE IF NOT EXISTS product_image_quality_reviews' in migration,
@@ -29,7 +31,7 @@ if build163:
       'primary score threshold':'PRIMARY_MIN_SCORE=70' in api,
       'server recomputes selected-image score':'function score({' in api and "action==='score'" in api,
       'browser measures natural dimensions':'naturalWidth' in ui and 'naturalHeight' in ui,
-      'catalog media loads Build 163 editor':'/public/js/admin-product-media-editor-v163.js' in page,
+      'catalog media loads Build 163+ editor':('/public/js/admin-product-media-editor-v163.js' in page or '/public/js/admin-product-media-editor-v164.js' in page),
       'scoring is explicit':'Measure &amp; Score Selected Image' in page and 'scoring was not run automatically' in api.lower(),
       'scoring stays selected-image':'WHERE pi.product_image_id=? LIMIT 1' in api,
     })
@@ -47,9 +49,9 @@ else:
 failed=[name for name,ok in checks.items() if not ok]
 if failed: raise SystemExit('Release 461 product image quality gate failed: '+'; '.join(failed))
 print('RELEASE 461 PRODUCT IMAGE QUALITY ACCEPTANCE: PASS')
-print('Current runtime:', 'Build 163 selected-image scorer' if build163 else 'legacy Product media scorer')
+print('Current runtime:', 'Build 164 selected-image scorer' if build164 else ('Build 163 selected-image scorer' if build163 else 'legacy Product media scorer'))
 print('Primary dimensions: >=1200x1200')
 print('Primary alt text: >=12 characters')
 print('Primary quality score: >=70')
 print('Runtime DDL: NONE')
-print('Build 163 automatic gallery scoring: NONE' if build163 else 'Legacy behavior retained')
+print('Build 163+ automatic gallery scoring: NONE' if build163 else 'Legacy behavior retained')
