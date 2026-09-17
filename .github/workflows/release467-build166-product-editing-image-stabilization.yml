@@ -11,6 +11,8 @@ on:
       - 'functions/api/product-detail-core.js'
       - 'functions/media/product.js'
       - '.github/workflows/release467-build157-proof.yml'
+      - 'scripts/release467_build74_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
       - 'scripts/release467_build166_gate.py'
       - 'release467-build166-product-editing-image-stabilization.json'
       - '.github/workflows/release467-build166-product-editing-image-stabilization.yml'
@@ -42,10 +44,13 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
           python scripts/release467_build166_gate.py
+      - name: Prove successor-aware Storefront Product contract
+        run: python scripts/release467_build74_gate.py
       - name: Boundary
         run: |
           echo "Exact Development SHA: ${GITHUB_SHA}"
           echo 'Product Browser: bounded 8-row default with explicit paging'
           echo 'Product images: canonical same-origin R2 reader plus legacy URL compatibility'
           echo 'Product detail: bounded core endpoint with fail-fast browser timeout'
+          echo 'Historical Product browser/runtime proofs: successor-aware'
           echo 'Production D1/R2/provider/payment/refund/accounting mutation: NONE'
