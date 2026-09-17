@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 165 Product Browser/Image Recovery continuity gate, successor-aware through Build 172."""
+"""Release 467 Build 165 Product Browser/Image Recovery continuity gate, successor-aware through Build 173."""
 from pathlib import Path
 import subprocess,sys
 ROOT=Path(__file__).resolve().parents[1];FAIL=[]
@@ -22,7 +22,7 @@ for forbidden in ('setInterval(','MutationObserver','/api/admin/products','/api/
 req(('product-browser-images-v165' in thumb_api) or ('product-browser-images-v170-explicit' in thumb_api),'thumbnail recovery API is not a recognized Build 165+ successor')
 for token in ('FROM product_images','FROM product_media_role_assignments','FROM media_assets','r2_listing:false'):
     req(token in thumb_api,f'thumbnail recovery API missing: {token}')
-req(('Build 165' in editor) or ('Build 168' in editor) or ('Build 169' in editor),'Product Editor lost recognized Build 165+ identity')
+req(any(token in editor for token in ('Build 165','Build 168','Build 169','Build 173')),'Product Editor lost recognized Build 165+ identity')
 for token in ('data-use-featured-url','admin_recovery=1','recovered_reference_count'):
     req(token in editor_js,f'Product Editor media recovery continuity missing: {token}')
 req(('product-media-workspace-v165' in media_api) or ('product-media-workspace-v172' in media_api),'Product media recovery is not a recognized Build 165+ successor')
