@@ -1,0 +1,39 @@
+name: Release 467 Build 164 Product Media CRUD Proof
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'admin/catalog-media/index.html'
+      - 'public/js/admin-product-media-editor-v164.js'
+      - 'functions/api/admin/product-image-editor.js'
+      - 'functions/api/admin/product-image-file.js'
+      - 'scripts/release467_build164_gate.py'
+      - '.github/workflows/release467-build164-product-media-crud.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  product-media-crud-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build 164 Product Media CRUD source gate
+        run: python scripts/release467_build164_gate.py
+      - name: Build 163 low-read compatibility gate
+        run: python scripts/release467_build163_gate.py
+      - name: JavaScript syntax checks
+        run: |
+          node --check public/js/admin-product-media-editor-v164.js
+          node --check functions/api/admin/product-image-editor.js
+          node --check functions/api/admin/product-image-file.js
+      - name: Zero-D1 proof boundary
+        run: echo 'Build 164 source proof performs no D1, R2, provider, or Production mutation.'

@@ -8,12 +8,25 @@
   <meta name="description" content="Low-read selected-Product media and image editor for Devil n Dove."/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
-  <link rel="stylesheet" href="/css/admin-product-v162.css?v=163"/>
+  <link rel="stylesheet" href="/css/admin-product-v162.css?v=164"/>
   <style>
-    .dd-media-editor-shell{max-width:1480px;margin:0 auto;padding:0 18px 48px}.dd-media-search-results{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.dd-media-edit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}.dd-media-edit-card{display:flex;flex-direction:column;gap:8px;text-align:left;padding:8px;border:1px solid var(--border);border-radius:12px;background:var(--card,#fff);color:inherit}.dd-media-edit-card.is-selected{outline:2px solid currentColor;outline-offset:2px}.dd-media-edit-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;background:#f3f4f6}.dd-media-edit-card span{display:flex;flex-direction:column;gap:2px}.dd-media-edit-card small{opacity:.8}.dd-image-editor-layout{display:grid;grid-template-columns:minmax(260px,420px) minmax(0,1fr);gap:18px}.dd-image-editor-preview img{width:100%;max-height:520px;object-fit:contain;border:1px solid var(--border);border-radius:12px;background:#f3f4f6}.dd-media-section{margin-top:18px}.dd-score-box{padding:10px;border:1px solid var(--border);border-radius:10px}.dd-media-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}@media(max-width:900px){.dd-image-editor-layout{grid-template-columns:1fr}.dd-media-editor-shell{padding-inline:10px}}
+    .dd-media-editor-shell{max-width:1480px;margin:0 auto;padding:0 18px 48px}
+    .dd-media-search-results,.dd-media-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .dd-media-edit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+    .dd-media-edit-card{display:flex;flex-direction:column;gap:8px;text-align:left;padding:8px;border:1px solid var(--border);border-radius:12px;background:var(--card,#fff);color:inherit}
+    .dd-media-edit-card.is-selected{outline:2px solid currentColor;outline-offset:2px}
+    .dd-media-edit-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;background:#f3f4f6}
+    .dd-media-edit-card span{display:flex;flex-direction:column;gap:2px}.dd-media-edit-card small{opacity:.8}
+    .dd-image-editor-layout{display:grid;grid-template-columns:minmax(280px,440px) minmax(0,1fr);gap:18px}
+    .dd-image-editor-preview img{width:100%;max-height:520px;object-fit:contain;border:1px solid var(--border);border-radius:12px;background:#f3f4f6}
+    .dd-media-section{margin-top:18px}.dd-score-box,.dd-file-tools{padding:10px;border:1px solid var(--border);border-radius:10px}
+    .dd-media-danger{border-color:#8d3144!important}.dd-media-toolbar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin:14px 0}
+    .dd-file-preview{width:100%;max-width:420px;border:1px solid var(--border);border-radius:10px;background:#f3f4f6;margin-top:10px}
+    .dd-media-muted{opacity:.78}.dd-media-broken{display:block;font-size:12px;margin-top:4px}
+    @media(max-width:900px){.dd-image-editor-layout{grid-template-columns:1fr}.dd-media-editor-shell{padding-inline:10px}}
   </style>
 </head>
-<body data-admin-page="product-media-v163">
+<body data-admin-page="product-media-v164">
   <div class="container admin-shell dd-media-editor-shell">
     <nav class="nav" aria-label="Admin navigation">
       <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><strong>Devil n Dove</strong><div class="small">Admin / Product Media</div></div></div>
@@ -21,44 +34,71 @@
     </nav>
 
     <header class="hero compact-hero">
-      <div><p class="eyebrow">Release 467 • Build 163</p><h1>Product Media & Image Editor</h1><p>Edit one Product gallery and one image at a time. Nothing scans the R2 library, scores the gallery, loads SEO, or reads unrelated Products automatically.</p></div>
+      <div><p class="eyebrow">Release 467 • Build 164</p><h1>Product Media & Image Editor</h1><p>Add, replace, remove, reorder, crop/resize and score one Product image at a time without scanning the Product catalog or R2 library.</p></div>
     </header>
 
-    <div id="productMediaV163Status" class="dd-product-status small" aria-live="polite"></div>
-    <div class="dd-low-read-note small"><strong>Low-read contract:</strong> opening this page with no Product selected performs no Product catalog query. Search is manual. A selected Product loads one bounded gallery. Image details and scoring load only after we click an image.</div>
+    <div id="productMediaV164Status" class="dd-product-status small" aria-live="polite"></div>
+    <div class="dd-low-read-note small"><strong>Low-read contract:</strong> Product search is manual. A selected Product loads one bounded gallery. Image details load only after selection. Add/replace/remove/reorder are explicit actions. R2 is never listed automatically.</div>
 
     <section class="card">
       <h2 style="margin-top:0">Choose a Product</h2>
-      <form id="productMediaV163SearchForm" class="dd-product-toolbar">
-        <label><span class="small">Product ID, name, SKU or slug</span><input class="input" id="productMediaV163Search" type="search" autocomplete="off" placeholder="Example: 27, lavender soap, DND-027"/></label>
+      <form id="productMediaV164SearchForm" class="dd-product-toolbar">
+        <label><span class="small">Product ID, name, SKU or slug</span><input class="input" id="productMediaV164Search" type="search" autocomplete="off" placeholder="Example: 50, Dreamsicle, DND-050"/></label>
         <button class="btn" type="submit">Search Products</button>
       </form>
-      <div id="productMediaV163SearchResults" class="dd-media-search-results"></div>
+      <div id="productMediaV164SearchResults" class="dd-media-search-results"></div>
     </section>
 
     <section class="card dd-media-section">
       <h2 style="margin-top:0">Selected Product Gallery</h2>
-      <div id="productMediaV163Identity"><strong>No Product selected.</strong></div>
-      <div id="productMediaV163Gallery" class="dd-media-edit-grid" style="margin-top:14px"></div>
+      <div id="productMediaV164Identity"><strong>No Product selected.</strong></div>
+      <div class="dd-media-toolbar">
+        <div class="dd-media-actions">
+          <button class="btn" id="productMediaV164AddButton" type="button" disabled>Add image</button>
+          <button class="btn" id="productMediaV164ReplaceButton" type="button" disabled>Replace selected</button>
+          <button class="btn" id="productMediaV164MoveLeft" type="button" disabled>← Move earlier</button>
+          <button class="btn" id="productMediaV164MoveRight" type="button" disabled>Move later →</button>
+          <button class="btn dd-media-danger" id="productMediaV164RemoveButton" type="button" disabled>Remove selected</button>
+        </div>
+        <span class="small dd-media-muted">Nothing changes until you click an explicit action.</span>
+      </div>
+      <input id="productMediaV164AddInput" type="file" accept="image/*" hidden/>
+      <input id="productMediaV164ReplaceInput" type="file" accept="image/*" hidden/>
+      <div id="productMediaV164FileTools" class="dd-file-tools" hidden>
+        <strong id="productMediaV164FileHeading">Prepare image</strong>
+        <div class="grid cols-3" style="gap:12px;margin-top:10px">
+          <label><span class="small">Crop / sizing</span><select class="input" id="productMediaV164Preset"><option value="original">Keep original</option><option value="square_1200">Square 1200×1200</option><option value="landscape_1600">Landscape 4:3 up to 1600</option><option value="max_side">Resize max side</option></select></label>
+          <label><span class="small">Max side px</span><input class="input" id="productMediaV164MaxSide" type="number" min="800" max="2600" step="100" value="1600"/></label>
+          <label><span class="small">JPEG quality %</span><input class="input" id="productMediaV164Quality" type="number" min="55" max="95" step="1" value="88"/></label>
+        </div>
+        <canvas id="productMediaV164FilePreview" class="dd-file-preview" width="420" height="315"></canvas>
+        <div id="productMediaV164FileNote" class="small" style="margin-top:8px"></div>
+        <div class="dd-media-actions" style="margin-top:10px"><button class="btn" id="productMediaV164ApplyFile" type="button">Apply image</button><button class="btn" id="productMediaV164CancelFile" type="button">Cancel</button></div>
+      </div>
+      <div id="productMediaV164Gallery" class="dd-media-edit-grid" style="margin-top:14px"></div>
     </section>
 
-    <section id="productMediaV163Editor" class="card dd-media-section" hidden>
-      <div class="dd-media-actions"><h2 style="margin:0">Selected Image</h2><span id="productMediaV163ImageId" class="small"></span></div>
+    <section id="productMediaV164Editor" class="card dd-media-section" hidden>
+      <div class="dd-media-actions"><h2 style="margin:0">Selected Image</h2><span id="productMediaV164ImageId" class="small"></span></div>
       <div class="dd-image-editor-layout" style="margin-top:14px">
-        <div class="dd-image-editor-preview"><img id="productMediaV163Preview" alt="Selected Product image"/><div class="dd-score-box" style="margin-top:10px"><strong>Image score</strong><div id="productMediaV163Score">Not measured</div><button class="btn" id="productMediaV163ScoreButton" type="button" style="margin-top:8px">Measure &amp; Score Selected Image</button><p class="small">This reads and scores only this image. Nothing else in the gallery is rescored.</p></div></div>
-        <form id="productMediaV163EditorForm">
+        <div class="dd-image-editor-preview">
+          <img id="productMediaV164Preview" alt="Selected Product image"/>
+          <span id="productMediaV164PreviewNotice" class="dd-media-broken small"></span>
+          <div class="dd-score-box" style="margin-top:10px"><strong>Image score</strong><div id="productMediaV164Score">Not measured</div><button class="btn" id="productMediaV164ScoreButton" type="button" style="margin-top:8px">Measure &amp; Score Selected Image</button><p class="small">This reads and scores only this image. Nothing else in the gallery is rescored.</p></div>
+        </div>
+        <form id="productMediaV164EditorForm">
           <div class="dd-editor-grid cols-2">
             <label class="wide"><span class="small">Alt text</span><input class="input" name="alt_text" maxlength="1000"/></label>
             <label><span class="small">Gallery order</span><input class="input" name="sort_order" type="number" min="0" step="1"/></label>
             <label><span class="small">Image role</span><select class="input" name="image_role"><option value="">Unassigned</option><option value="hero_front">Hero / front</option><option value="detail_texture">Detail / texture</option><option value="scale_context">Scale / context</option><option value="back_side">Back / side</option><option value="process_story">Process / story</option><option value="packaging_pickup">Packaging / pickup</option><option value="material_tool_proof">Material / tool proof</option><option value="gallery_support">Gallery support</option></select></label>
             <label><span class="small">Public use</span><select class="input" name="public_use_status"><option value="internal_review">Internal review</option><option value="product_page_ok">Product page OK</option><option value="social_ok">Social OK</option><option value="all_public_ok">All public OK</option><option value="consent_needed">Consent needed</option><option value="blocked">Blocked</option></select></label>
-            <label><span class="small">Focal point X (0–100)</span><input class="input" name="focal_point_x" type="number" min="0" max="100" step="0.1"/></label>
-            <label><span class="small">Focal point Y (0–100)</span><input class="input" name="focal_point_y" type="number" min="0" max="100" step="0.1"/></label>
+            <label><span class="small">Focal point X %</span><input class="input" name="focal_point_x" type="number" min="0" max="100" step="0.1"/></label>
+            <label><span class="small">Focal point Y %</span><input class="input" name="focal_point_y" type="number" min="0" max="100" step="0.1"/></label>
             <label class="wide"><span class="small">Image title</span><input class="input" name="image_title" maxlength="250"/></label>
             <label class="wide"><span class="small">Caption</span><textarea class="input" name="caption" rows="3"></textarea></label>
             <label class="wide"><span class="small">Annotation notes</span><textarea class="input" name="annotation_notes" rows="3"></textarea></label>
             <label class="wide"><span class="small">Role / public-use review notes</span><textarea class="input" name="role_review_notes" rows="3"></textarea></label>
-            <label class="wide"><input id="productMediaV163SetFeatured" type="checkbox"/> Make this the Product featured image when saving</label>
+            <label class="wide"><input id="productMediaV164SetFeatured" type="checkbox"/> Make this the Product featured image when saving</label>
           </div>
           <div class="dd-media-actions" style="margin-top:14px"><button class="btn" type="submit">Save Selected Image Details</button><span class="small">Saving does not automatically score, publish, list R2, or run Product readiness.</span></div>
         </form>
@@ -66,6 +106,7 @@
     </section>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-media-editor-v163.js?v=163"></script>
+  <!-- Build 163 compatibility marker: admin-product-media-editor-v163.js -->
+  <script src="/public/js/admin-product-media-editor-v164.js?v=164"></script>
 </body>
 </html>
