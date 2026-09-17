@@ -1,4 +1,4 @@
-// Release 467 Build 172 — selected Product image metadata, scoring, remove and reorder authority.
+// Release 467 Build 173 — selected Product image metadata, scoring, safe featured replacement, remove and reorder authority.
 // Every request is bounded to one selected Product image or at most 20 explicitly supplied gallery ids.
 // Annotation compatibility uses read-only schema discovery; request-time DDL is forbidden.
 import { auditAdminAction, getDb, jsonResponse } from '../_lib/adminAudit.js';
@@ -17,7 +17,7 @@ function score({primary=false,width=0,height=0,altLength=0,loaded=false}){let to
 async function selectedImage(db,imageId){
   const result=await db.prepare(`
     SELECT pi.product_image_id,pi.product_id,pi.image_url,pi.alt_text,pi.sort_order,
-           p.name AS product_name,p.featured_image_url,
+           p.name AS product_name,p.status AS product_status,p.featured_image_url,
            qr.width_px,qr.height_px,qr.load_status,qr.quality_score,qr.acceptance_status,qr.reviewed_at
     FROM product_images pi
     INNER JOIN products p ON p.product_id=pi.product_id
@@ -54,14 +54,18 @@ export async function onRequestPost(context){
 
     if(action==='remove'){
       let replacementUrl=null;const wasPrimary=String(image.featured_image_url||'').trim()===String(image.image_url||'').trim();
-      if(wasPrimary){const replacement=await db.prepare('SELECT image_url FROM product_images WHERE product_id=? AND product_image_id<>? ORDER BY COALESCE(sort_order,0) ASC,product_image_id ASC LIMIT 1').bind(image.product_id,imageId).all();measured+=rowsRead(replacement);replacementUrl=(replacement?.results||[])[0]?.image_url||null;}
+      if(wasPrimary){
+        const replacement=await db.prepare('SELECT image_url FROM product_images WHERE product_id=? AND product_image_id<>? ORDER BY COALESCE(sort_order,0) ASC,product_image_id ASC LIMIT 1').bind(image.product_id,imageId).all();measured+=rowsRead(replacement);replacementUrl=(replacement?.results||[])[0]?.image_url||null;
+        if(String(image.product_status||'').toLowerCase()==='active'&&!String(replacementUrl||'').trim())return json({ok:false,error:'This is the featured image for an active Product and there is no replacement gallery image. Add or choose another featured image before removing it.',code:'featured_image_requires_replacement'},409);
+        // Fail closed: the Product featured pointer must move successfully before the gallery row is removed.
+        await db.prepare('UPDATE products SET featured_image_url=?,updated_at=CURRENT_TIMESTAMP WHERE product_id=?').bind(replacementUrl,image.product_id).run();
+      }
       await db.prepare('DELETE FROM product_media_role_assignments WHERE product_id=? AND product_image_id=?').bind(image.product_id,imageId).run().catch(()=>null);
       await db.prepare('DELETE FROM product_image_quality_reviews WHERE product_id=? AND product_image_id=?').bind(image.product_id,imageId).run().catch(()=>null);
       await db.prepare('DELETE FROM product_image_annotations WHERE product_image_id=?').bind(imageId).run().catch(()=>null);
       await db.prepare('DELETE FROM product_images WHERE product_image_id=? AND product_id=?').bind(imageId,image.product_id).run();
-      if(wasPrimary)await db.prepare('UPDATE products SET featured_image_url=?,updated_at=CURRENT_TIMESTAMP WHERE product_id=?').bind(replacementUrl,image.product_id).run();
-      if(typeof context.waitUntil==='function')context.waitUntil(auditAdminAction(context.env,context.request,admin,{action_type:'remove_product_image_v172',target_type:'product_image',target_id:imageId,target_key:String(image.image_url||imageId),details:{product_id:image.product_id,r2_source_preserved:true,replacement_featured_url:replacementUrl}}).catch(()=>null));
-      return json({ok:true,action:'remove',product_image_id:imageId,product_id:image.product_id,r2_source_preserved:true,replacement_featured_url:replacementUrl,message:'Image removed from the Product gallery.',d1_rows_read:measured},200,{'X-DD-D1-Rows-Read':String(measured)});
+      if(typeof context.waitUntil==='function')context.waitUntil(auditAdminAction(context.env,context.request,admin,{action_type:'remove_product_image_v173',target_type:'product_image',target_id:imageId,target_key:String(image.image_url||imageId),details:{product_id:image.product_id,r2_source_preserved:true,replacement_featured_url:replacementUrl,featured_pointer_updated_first:wasPrimary}}).catch(()=>null));
+      return json({ok:true,action:'remove',product_image_id:imageId,product_id:image.product_id,r2_source_preserved:true,replacement_featured_url:replacementUrl,message:'Image removed from the Product gallery.',save_confirmed:true,d1_rows_read:measured},200,{'X-DD-D1-Rows-Read':String(measured)});
     }
 
     if(action==='score'){
@@ -74,9 +78,12 @@ export async function onRequestPost(context){
     if(action!=='save_metadata')return json({ok:false,error:'Unsupported image action.'},400);
     const fields={alt_text:text(body.alt_text,1000),image_title:text(body.image_title,250)||null,caption:text(body.caption,2000)||null,focal_point_x:optionalNumber(body.focal_point_x,0,1),focal_point_y:optionalNumber(body.focal_point_y,0,1),annotation_notes:text(body.annotation_notes,3000)||null,image_role:text(body.image_role,80)||null,public_use_status:text(body.public_use_status||'internal_review',80)||'internal_review',role_review_notes:text(body.role_review_notes,1500)||null};
     const sortOrder=integer(body.sort_order);
-    let result=await db.prepare('UPDATE product_images SET alt_text=?,sort_order=? WHERE product_image_id=? AND product_id=?').bind(fields.alt_text||null,sortOrder,imageId,image.product_id).run();measured+=rowsRead(result);
-    const annotation=await upsertAnnotation(db,{product_id:image.product_id,product_image_id:imageId,image_url:image.image_url,fields});measured+=annotation.rows_read;
+    let result;
+    // When changing the featured image, prove the Product pointer update first so a publication guard
+    // cannot leave metadata half-saved while the main-image change failed.
     if(body.set_featured===true){result=await db.prepare('UPDATE products SET featured_image_url=?,updated_at=CURRENT_TIMESTAMP WHERE product_id=?').bind(text(image.image_url,2048),image.product_id).run();measured+=rowsRead(result);}
+    result=await db.prepare('UPDATE product_images SET alt_text=?,sort_order=? WHERE product_image_id=? AND product_id=?').bind(fields.alt_text||null,sortOrder,imageId,image.product_id).run();measured+=rowsRead(result);
+    const annotation=await upsertAnnotation(db,{product_id:image.product_id,product_image_id:imageId,image_url:image.image_url,fields});measured+=annotation.rows_read;
     if(typeof context.waitUntil==='function')context.waitUntil(auditAdminAction(context.env,context.request,admin,{action_type:'update_product_image_v172',target_type:'product_image',target_id:imageId,target_key:String(image.image_url||imageId),details:{product_id:image.product_id,set_featured:body.set_featured===true,saved_annotation_fields:annotation.saved_fields,unsupported_annotation_fields:annotation.unsupported_fields}}).catch(()=>null));
     return json({ok:true,action:'save_metadata',product_image_id:imageId,product_id:image.product_id,message:'Image details saved.',save_confirmed:true,scoring_started:false,annotation_saved_fields:annotation.saved_fields,annotation_unsupported_fields:annotation.unsupported_fields,warning:annotation.warning||'',d1_rows_read:measured},200,{'X-DD-D1-Rows-Read':String(measured)});
   }catch(error){const message=String(error?.message||'Product image update failed.');const quota=/rows read|daily|limit|quota|7500/i.test(message);return json({ok:false,error:quota?'D1 read capacity is temporarily unavailable. Image Editor will not retry automatically.':message,code:quota?'d1_read_capacity_unavailable':'product_image_update_failed',retry_automatically:false},quota?503:500);}
