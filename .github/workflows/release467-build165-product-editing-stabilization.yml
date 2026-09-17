@@ -6,12 +6,18 @@ on:
     paths:
       - 'admin/products/index.html'
       - 'admin/product-editor/index.html'
+      - 'shop/product/index.html'
       - 'css/admin-product-v162.css'
       - 'public/js/admin-products-browser-v162.js'
       - 'public/js/admin-product-editor-v163.js'
+      - 'public/js/product-detail-v166.js'
       - 'functions/api/admin/product-browser-images.js'
       - 'functions/api/admin/product-media-editor.js'
+      - 'functions/api/product-detail-core.js'
+      - 'functions/media/product.js'
+      - 'scripts/release467_build164_gate.py'
       - 'scripts/release467_build165_gate.py'
+      - 'scripts/release467_build166_gate.py'
       - '.github/workflows/release467-build165-product-editing-stabilization.yml'
   workflow_dispatch:
 
@@ -29,15 +35,36 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Detect current Product authority
+        id: product-authority
+        shell: bash
+        run: |
+          if grep -q 'data-admin-page="product-browser-v166"' admin/products/index.html && grep -q 'data-admin-page="product-editor-v165"' admin/product-editor/index.html; then
+            echo 'authority=build166' >> "$GITHUB_OUTPUT"
+            echo 'Current Product authority: Build 166 stabilized browser + bounded Product detail'
+          elif grep -q 'data-admin-page="product-browser-v165"' admin/products/index.html && grep -q 'data-admin-page="product-editor-v165"' admin/product-editor/index.html; then
+            echo 'authority=build165' >> "$GITHUB_OUTPUT"
+            echo 'Current Product authority: Build 165 compact browser + bounded image recovery'
+          else
+            echo 'authority=predecessor' >> "$GITHUB_OUTPUT"
+            echo 'Current Product authority: predecessor contract'
+          fi
       - name: Build 165 Product browser and image recovery source gate
+        if: steps.product-authority.outputs.authority == 'build165'
         run: python scripts/release467_build165_gate.py
+      - name: Build 166 Product editing and image stabilization gate
+        if: steps.product-authority.outputs.authority == 'build166'
+        run: python scripts/release467_build166_gate.py
       - name: Build 164 Product media CRUD continuity gate
         run: python scripts/release467_build164_gate.py
       - name: JavaScript syntax checks
         run: |
           node --check public/js/admin-products-browser-v162.js
           node --check public/js/admin-product-editor-v163.js
+          node --check public/js/product-detail-v166.js
           node --check functions/api/admin/product-browser-images.js
           node --check functions/api/admin/product-media-editor.js
+          node --check functions/api/product-detail-core.js
+          node --check functions/media/product.js
       - name: Boundary
-        run: echo 'Build 165 changes bounded Product browser/editor image discovery only; no D1 schema, Production data, R2 listing, provider, payment, refund or accounting mutation.'
+        run: echo 'Retained Build 165 proof is successor-aware; Build 166 remains bounded Product browser/editor/image/detail stabilization with no D1 schema, Production data, R2 listing, provider, payment, refund or accounting mutation.'
