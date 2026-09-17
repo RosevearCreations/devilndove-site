@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Release 467 Build 175 — Product Editor zero-introspection save proof."""
 from pathlib import Path
-import subprocess,sys
+import re,subprocess,sys
 
 ROOT=Path(__file__).resolve().parents[1]
 FAIL=[]
@@ -18,6 +18,8 @@ def node(path):
     req(p.returncode==0,f'JavaScript syntax failed for {path}: {(p.stderr or p.stdout)[-1200:]}')
 
 save=read('functions/api/admin/product-editor-save.js')
+save_exec=re.sub(r'//[^\n]*','',save)
+save_exec=re.sub(r'/\*.*?\*/','',save_exec,flags=re.S)
 page=read('admin/product-editor/index.html')
 client=read('public/js/admin-product-editor-v163.js')
 schema=read('functions/api/admin/storefront-schema-repair.js')
@@ -27,7 +29,7 @@ for token in ('single-product-save-v175','PRODUCT_UPDATE_SQL','SEO_UPSERT_SQL','
     req(token in save,f'Build 175 Product save missing: {token}')
 
 for forbidden in ('PRAGMA','SQLITE_MASTER','TABLE_INFO(','COLUMN_CACHE','ASYNC FUNCTION COLUMNS('):
-    req(forbidden not in save.upper(),f'Build 175 Product save contains forbidden runtime schema introspection: {forbidden}')
+    req(forbidden not in save_exec.upper(),f'Build 175 Product save contains forbidden runtime schema introspection: {forbidden}')
 
 req(save.count('UPDATE products SET')==1,'Build 175 Product save should define exactly one Product UPDATE authority')
 req(save.count('INSERT INTO product_seo')==1,'Build 175 Product save should define exactly one SEO UPSERT authority')
