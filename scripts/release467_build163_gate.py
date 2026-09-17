@@ -18,7 +18,7 @@ if 'admin-product-media-editor-v172.js' in media_page: media_client_path='public
 elif 'admin-product-media-editor-v164.js' in media_page: media_client_path='public/js/admin-product-media-editor-v164.js'
 else: media_client_path='public/js/admin-product-media-editor-v163.js'
 media_js=read(media_client_path);editor_exec=executable_js(editor_js);media_exec=executable_js(media_js)
-save_api=read('functions/api/admin/product-editor-save.js');media_api=read('functions/api/admin/product-media-editor.js');image_api=read('functions/api/admin/product-image-editor.js');sw=read('sw.js')
+save_api=read('functions/api/admin/product-editor-save.js');editor_media_api=read('functions/api/admin/product-editor-media.js');media_api=read('functions/api/admin/product-media-editor.js');image_api=read('functions/api/admin/product-image-editor.js');sw=read('sw.js')
 
 req(('product-browser-v162' in products) or ('product-browser-v166' in products),'Product Browser lost bounded browser authority')
 req('/admin/product-editor/?product_id=' in browser_js,'Product Browser lost direct Product Editor navigation')
@@ -30,8 +30,12 @@ for forbidden in ('admin-product-editor-v162.js','admin-products.js','admin-edit
     req(forbidden not in editor,f'Product Editor eagerly embeds legacy subsystem: {forbidden}')
 for token in ('/api/admin/product-editor-detail?product_id=','/api/admin/product-editor-save','Automatic retries are stopped'):
     req(token in editor_js,f'Product Editor client missing token: {token}')
-for forbidden in ('setInterval(','MutationObserver','/api/admin/products','/api/admin/product-readiness','/api/admin/product-lineage','/api/admin/product-editor-media'):
+for forbidden in ('setInterval(','MutationObserver','/api/admin/products','/api/admin/product-readiness','/api/admin/product-lineage','/api/admin/product-media-editor'):
     req(forbidden not in editor_exec,f'Product Editor client gained eager/heavy path: {forbidden}')
+if '/api/admin/product-editor-media' in editor_exec:
+    req('product-editor-media-v174' in editor_media_api,'Dedicated Product Editor Media route is not the recognized Build 174+ canonical-only authority')
+    for forbidden in ('FROM products','product_media_role_assignments','media_assets','product_image_quality_reviews','product_image_annotations','PRAGMA','sqlite_master'):
+        req(forbidden not in editor_media_api,f'Build 174+ dedicated Product Editor Media route gained heavy/introspection path: {forbidden}')
 
 req(('product-media-v163' in media_page) or ('product-media-v164' in media_page),'Product Media page missing Build 163-or-later low-read identity')
 for token in ('Measure &amp; Score Selected Image','Low-read contract:'):
@@ -54,7 +58,7 @@ req(any(token in save_api for token in ('single-product-save-v163','single-produ
 for token in ('UPDATE products SET','product_seo','background_work_started:false','media_sync_started:false','readiness_scan_started:false','X-DD-D1-Rows-Read'):
     req(token in save_api,f'Product save API missing token: {token}')
 if 'single-product-save-v175' in save_api:
-    req('PRAGMA' not in save_api.upper(),'Build 175 Product save must not perform request-time PRAGMA/schema introspection')
+    req('PRAGMA' not in executable_js(save_api).upper(),'Build 175 Product save must not perform request-time PRAGMA/schema introspection')
     req('schema_introspection_reads:0' in save_api,'Build 175 Product save must report zero schema introspection reads')
 for forbidden in ('product_images','product_resource_links','content_projects','creative_projects','maybeQueueApprovedProductSocialPost','createOrRefreshContentProjectForProduct'):
     req(forbidden not in save_api,f'Low-read Product save touches unrelated authority: {forbidden}')
