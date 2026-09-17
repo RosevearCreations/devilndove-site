@@ -23,6 +23,9 @@ export function canonicalModuleKey(value) {
 const CORE_EXEMPT = Object.freeze([
   '/admin/application-modules',
   '/api/admin/app-modules',
+  // Build 162: Product media is R2-only transport. It must not resolve a D1-backed
+  // application-module session before serving an image.
+  '/api/product-media',
 ]);
 
 export const SHARED_SERVICE_CONTRACTS = Object.freeze([
