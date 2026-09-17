@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 169 — explicit low-read Product QA/editor convergence gate, successor-aware through Build 173."""
+"""Release 467 Build 169 — explicit low-read Product QA/editor convergence gate, successor-aware through Build 174."""
 from pathlib import Path
 import subprocess,sys
 ROOT=Path(__file__).resolve().parents[1];FAIL=[]
@@ -12,7 +12,7 @@ def node(path):
 page=read('admin/product-editor/index.html')
 editor=read('public/js/admin-product-editor-v163.js')
 qa=read('functions/api/admin/product-publish-qa.js')
-req(('Build 169' in page) or ('Build 173' in page),'Build 169+ Product Editor identity missing')
+req(any(token in page for token in ('Build 169','Build 173','Build 174')),'Build 169+ Product Editor identity missing')
 for token in ('data-admin-page="product-editor-v165"','data-editor-tab="qa"','productEditorQaRun','performs zero D1 reads','does not create tables'):
     req(token in page,f'Build 169 Product Editor QA contract missing: {token}')
 for token in ('qaRun?.addEventListener(\'click\',runQa)','function runQa()','state.qaData=null','data-qa-fix-tab','openTab(button.dataset.qaFixTab','QA has not run'):
