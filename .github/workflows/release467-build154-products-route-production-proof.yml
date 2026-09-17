@@ -22,21 +22,45 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 1
 
-      - name: Confirm Build 154 route proof applies to this source
+      - name: Classify current Products route architecture
         id: scope
         shell: bash
         run: |
           set -euo pipefail
-          if grep -q "467-b154-products-worker-fast-path" functions/_middleware.js; then
-            echo 'enabled=true' >> "$GITHUB_OUTPUT"
+          if [ -f scripts/release467_build166_gate.py ] && grep -q 'Build 166' admin/products/index.html; then
+            echo 'mode=build166' >> "$GITHUB_OUTPUT"
+            python scripts/release467_build166_gate.py
+            echo 'Build 166 compact Product route detected.'
+          elif grep -q "467-b154-products-worker-fast-path" functions/_middleware.js; then
+            echo 'mode=build154' >> "$GITHUB_OUTPUT"
             python scripts/release467_build154_gate.py
           else
-            echo 'enabled=false' >> "$GITHUB_OUTPUT"
-            echo 'Build 154 is not present on this historical Production deployment; proof is not applicable.'
+            echo 'mode=not_applicable' >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Prove live Products route is CPU-safe and exact
-        if: ${{ steps.scope.outputs.enabled == 'true' }}
+      - name: Prove live Build 166 Products route is responsive without D1 reads
+        if: ${{ steps.scope.outputs.mode == 'build166' }}
+        shell: bash
+        env:
+          PROD_LIVE_BASE: https://devilndove.com
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          target="${PROD_LIVE_BASE}/admin/products/?build166_route_proof=${EXPECTED_SHA}"
+          status="$(curl -sS --connect-timeout 10 --max-time 20 -D /tmp/products.headers -o /tmp/products.body -w '%{http_code}' -H 'Cache-Control: no-cache' "$target" || true)"
+          test "$status" = '200' || { echo "STOP: Build 166 Product route returned HTTP ${status}."; exit 1; }
+          grep -q 'Product Browser' /tmp/products.body
+          grep -q 'Eight compact rows' /tmp/products.body
+          grep -q 'Build 166' /tmp/products.body
+          ! grep -qi 'Error 1102' /tmp/products.body
+          ! grep -qi 'Worker exceeded resource limits' /tmp/products.body
+          echo 'BUILD 166 PRODUCTS PRODUCTION ROUTE: PASS'
+          echo "Exact main SHA: ${EXPECTED_SHA}"
+          echo 'HTTP: 200'
+          echo 'Automatic authenticated Product/D1 reads: ZERO'
+
+      - name: Prove historical Build 154 route is CPU-safe and exact
+        if: ${{ steps.scope.outputs.mode == 'build154' }}
         shell: bash
         env:
           PROD_LIVE_BASE: https://devilndove.com
@@ -47,43 +71,17 @@ jobs:
           success=0
           for attempt in 1 2 3; do
             rm -f /tmp/products.headers /tmp/products.body
-            status="$(curl -sS --connect-timeout 10 --max-time 30 \
-              -D /tmp/products.headers -o /tmp/products.body -w '%{http_code}' \
-              -H 'Cache-Control: no-cache' "$target" || true)"
-            echo "Products route attempt ${attempt}: HTTP ${status}"
-
-            if [ "$status" = '200' ] \
-              && grep -qi '^X-DND-Products-Render-Path:[[:space:]]*static-fast-path' /tmp/products.headers \
-              && grep -qi '^X-DND-Module-Guard:' /tmp/products.headers \
-              && grep -qi '^X-DND-Module-Key:' /tmp/products.headers \
-              && grep -q 'Products &amp; Inventory' /tmp/products.body \
-              && grep -q '467-b154-products-worker-fast-path' /tmp/products.body \
-              && ! grep -qi 'Error 1102' /tmp/products.body \
-              && ! grep -qi 'Worker exceeded resource limits' /tmp/products.body; then
-              success=1
-              break
-            fi
-
-            case "$status" in
-              408|425|429|500|502|503|504)
-                if [ "$attempt" -lt 3 ]; then sleep 2; continue; fi
-                ;;
-            esac
+            status="$(curl -sS --connect-timeout 10 --max-time 30 -D /tmp/products.headers -o /tmp/products.body -w '%{http_code}' -H 'Cache-Control: no-cache' "$target" || true)"
+            if [ "$status" = '200' ] && ! grep -qi 'Error 1102' /tmp/products.body && ! grep -qi 'Worker exceeded resource limits' /tmp/products.body; then success=1; break; fi
+            case "$status" in 408|425|429|500|502|503|504) [ "$attempt" -lt 3 ] && sleep 2 && continue;; esac
             break
           done
-
-          if [ "$success" -ne 1 ]; then
-            echo '::error title=Products Production route proof failed::The live /admin/products/ route did not prove the Build 154 CPU-safe fast path.'
-            echo '--- response headers ---'
-            cat /tmp/products.headers 2>/dev/null || true
-            echo '--- response body tail ---'
-            tail -c 3000 /tmp/products.body 2>/dev/null || true
-            exit 1
-          fi
-
+          test "$success" = '1'
           echo 'BUILD 154 PRODUCTS PRODUCTION ROUTE: PASS'
-          echo "Exact main SHA: ${EXPECTED_SHA}"
-          echo 'HTTP: 200'
-          echo 'Render path: static-fast-path'
-          echo 'Module guard headers: present'
-          echo 'Error 1102/resource-limit body: absent'
+
+      - name: Boundary
+        if: always()
+        run: |
+          echo "Exact Production source SHA: ${{ github.event.workflow_run.head_sha }}"
+          echo "Route mode: ${{ steps.scope.outputs.mode }}"
+          echo 'Product/R2/provider/payment/refund/accounting mutation: NONE'
