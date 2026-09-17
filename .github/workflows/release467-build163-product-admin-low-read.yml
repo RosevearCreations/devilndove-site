@@ -1,0 +1,52 @@
+name: Release 467 Build 163 Product Admin Low-Read Proof
+
+on:
+  push:
+    branches: [build163-product-editor-media-low-read-work4, dev, main]
+    paths:
+      - 'admin/products/index.html'
+      - 'admin/product-editor/index.html'
+      - 'admin/catalog-media/index.html'
+      - 'public/js/admin-products-browser-v162.js'
+      - 'public/js/admin-product-editor-v163.js'
+      - 'public/js/admin-product-media-editor-v163.js'
+      - 'functions/api/admin/product-browser.js'
+      - 'functions/api/admin/product-editor-detail.js'
+      - 'functions/api/admin/product-editor-save.js'
+      - 'functions/api/admin/product-media-editor.js'
+      - 'functions/api/admin/product-image-editor.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'sw.js'
+      - 'scripts/release467_build163_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'scripts/release461_product_image_quality_gate.py'
+      - '.github/workflows/release467-build163-product-admin-low-read.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  product-admin-low-read-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build 163 Product architecture gate
+        run: python scripts/release467_build163_gate.py
+      - name: Release 461 image quality compatibility gate
+        run: python scripts/release461_product_image_quality_gate.py
+      - name: JavaScript syntax checks
+        run: |
+          node --check public/js/admin-product-editor-v163.js
+          node --check public/js/admin-product-media-editor-v163.js
+          node --check functions/api/admin/product-editor-save.js
+          node --check functions/api/admin/product-media-editor.js
+          node --check functions/api/admin/product-image-editor.js
+      - name: Zero-D1 proof boundary
+        run: echo 'Build 163 source proof performs no D1, R2, provider, or Production mutation.'
