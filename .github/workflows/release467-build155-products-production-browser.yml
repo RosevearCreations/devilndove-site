@@ -16,7 +16,7 @@ jobs:
     env:
       DND_BASE_URL: https://devilndove.com
       EXPECTED_SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
-      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7b787
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       PROD_D1_DATABASE_NAME: devilndove-prod-r462
     steps:
@@ -30,22 +30,56 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
-      - name: Install deterministic Chrome for browser acceptance
+
+      - name: Classify Product Admin architecture
+        id: architecture
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
+          if [ -f scripts/release467_build162_gate.py ] \
+             && [ -f admin/product-editor/index.html ] \
+             && grep -q 'product-browser-v162' admin/products/index.html; then
+            echo 'successor=true' >> "${GITHUB_OUTPUT}"
+            echo 'Build 162 Product Admin architecture detected. Legacy Build 155 browser/session proof is retired for this SHA.'
+          else
+            echo 'successor=false' >> "${GITHUB_OUTPUT}"
+            echo 'Historical Build 155/160 Product Admin architecture detected.'
+          fi
+
+      - name: Prove Build 162 Product Admin source without Production D1 reads
+        if: steps.architecture.outputs.successor == 'true'
+        run: |
+          set -euo pipefail
+          python scripts/release467_build162_gate.py
+          node --check public/js/admin-products-browser-v162.js
+          node --check public/js/admin-product-editor-v162.js
+          node --check sw.js
+          echo 'Build 162 Production Product proof: SOURCE/DELIVERY CONTRACT ONLY'
+          echo 'Remote D1 queries: ZERO'
+          echo 'Authenticated Production browser reads: ZERO while D1 capacity is unavailable'
+          echo 'Runtime row-read acceptance is deliberately deferred until D1 capacity is available.'
+
+      - name: Install deterministic Chrome for historical browser acceptance
+        if: steps.architecture.outputs.successor != 'true'
         id: chrome
         uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: stable
       - name: Prove Chrome binary
+        if: steps.architecture.outputs.successor != 'true'
         env:
           CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
         run: |
           test -x "${CHROME_BIN}"
           "${CHROME_BIN}" --version
-      - name: Prove exact Build 155 source
+      - name: Prove exact historical Build 155 source
+        if: steps.architecture.outputs.successor != 'true'
         run: |
           test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
           python scripts/release467_build155_gate.py
       - name: Resolve existing Production admin session read-only
+        if: steps.architecture.outputs.successor != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -69,7 +103,8 @@ jobs:
           echo "DND_SESSION_COOKIE=dd_auth_token=${TOKEN}" >> "$GITHUB_ENV"
           unset TOKEN
           echo 'Existing Production admin session resolved read-only.'
-      - name: Use bounded DOM readiness for Product browser acceptance
+      - name: Use bounded DOM readiness for historical Product browser acceptance
+        if: steps.architecture.outputs.successor != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -84,28 +119,30 @@ jobs:
           path.write_text(text.replace(old, new, 1), encoding='utf-8')
           PY
           node --check scripts/products_browser_runtime_probe.mjs
-          echo 'Browser harness will measure DOM/event-loop responsiveness without requiring full Page.loadEventFired first.'
-      - name: Run real Chromium Product UI responsiveness acceptance
+      - name: Run historical real Chromium Product UI responsiveness acceptance
+        if: steps.architecture.outputs.successor != 'true'
         env:
           CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
         run: node scripts/products_browser_runtime_probe.mjs
-      - name: Require Build 157 Product Quality and media acceptance
+      - name: Require historical Build 157 Product Quality and media acceptance
+        if: steps.architecture.outputs.successor != 'true'
         env:
           CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
         run: |
           set -euo pipefail
           node --check scripts/products_build157_browser_probe.mjs
           node scripts/products_build157_browser_probe.mjs
+
       - name: Boundary
         if: always()
         run: |
           echo "Exact Production main SHA: ${EXPECTED_SOURCE_SHA}"
           echo 'Target: https://devilndove.com/admin/products/'
-          echo 'Browser: deterministic headless Chrome/CDP'
-          echo 'Navigation gate: bounded DOM readiness; Runtime.evaluate timeout remains a hard lockup failure with debugger diagnostics'
-          echo 'Acceptance requires complete document, populated Product picker/table, stable Build 155 renderer and responsive event loop'
-          echo 'Build 157 Product Quality: must settle without unavailable/startup-timeout state'
-          echo 'Build 157 Admin Product media: same-origin /api/product-media 404 responses must be ZERO'
-          echo 'Session lookup: READ ONLY; no session created'
+          if [ "${{ steps.architecture.outputs.successor }}" = "true" ]; then
+            echo 'Build 162 successor mode: zero Production D1/session/browser reads in this automatic proof.'
+            echo 'Runtime row-read acceptance waits for available D1 capacity and is operator-controlled.'
+          else
+            echo 'Historical Build 155 mode: deterministic Chrome Product runtime acceptance retained.'
+          fi
           echo 'D1/R2 mutation: NONE'
           echo 'Provider/payment/refund/accounting mutation: NONE'
