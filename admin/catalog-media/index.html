@@ -1,58 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="p:domain_verify" content="416962017515ec25302304e522b8bd8a"/>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Product Media & Photo Studio — Devil n Dove</title>
-  <link rel="stylesheet" href="/css/styles.css"/>
-  <link rel="icon" href="/assets/mark.png" type="image/png"/>
+  <title>Product Media & Image Editor — Devil n Dove Admin</title>
   <meta name="robots" content="noindex,nofollow"/>
-  <meta name="description" content="Focused Product Media and Photo Studio workspace for Devil n Dove catalog products."/>
+  <meta name="description" content="Low-read selected-Product media and image editor for Devil n Dove."/>
+  <link rel="icon" href="/assets/mark.png" type="image/png"/>
+  <link rel="stylesheet" href="/css/styles.css?v=440"/>
+  <link rel="stylesheet" href="/css/admin-product-v162.css?v=163"/>
+  <style>
+    .dd-media-editor-shell{max-width:1480px;margin:0 auto;padding:0 18px 48px}.dd-media-search-results{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.dd-media-edit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}.dd-media-edit-card{display:flex;flex-direction:column;gap:8px;text-align:left;padding:8px;border:1px solid var(--border);border-radius:12px;background:var(--card,#fff);color:inherit}.dd-media-edit-card.is-selected{outline:2px solid currentColor;outline-offset:2px}.dd-media-edit-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;background:#f3f4f6}.dd-media-edit-card span{display:flex;flex-direction:column;gap:2px}.dd-media-edit-card small{opacity:.8}.dd-image-editor-layout{display:grid;grid-template-columns:minmax(260px,420px) minmax(0,1fr);gap:18px}.dd-image-editor-preview img{width:100%;max-height:520px;object-fit:contain;border:1px solid var(--border);border-radius:12px;background:#f3f4f6}.dd-media-section{margin-top:18px}.dd-score-box{padding:10px;border:1px solid var(--border);border-radius:10px}.dd-media-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}@media(max-width:900px){.dd-image-editor-layout{grid-template-columns:1fr}.dd-media-editor-shell{padding-inline:10px}}
+  </style>
 </head>
-<body data-admin-page="products">
-  <div class="container admin-shell">
-    <div class="nav">
-      <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div><div class="small">Admin Department</div></div></div>
-      <div class="links"><a href="/admin/">Dashboard</a><a href="/admin/catalog/">Products</a><a href="/admin/catalog-media/">Media</a><a href="/admin/inventory-operations/">Inventory Ops</a><a href="/admin/mobile-product/">Phone Capture</a><a href="/admin/release-preflight/">Release Preflight</a></div>
-    </div>
-    <div class="hero compact-hero"><div><p class="eyebrow">Release 467 Build 73</p><h1>Product Media & Photo Studio</h1><p>One focused Product-owned workspace for upload, gallery order, focal/crop notes, alt text, featured/SEO selection, buyer-facing roles, image quality, R2-linked recovery and review-only unused media.</p></div></div>
-    <div class="card" id="adminAccessMessage" style="display:none;margin-bottom:18px"></div>
-    <div class="admin-department-links card" style="margin-bottom:18px"><a class="btn" href="/admin/catalog/">Products & publishing</a><a class="btn" href="/admin/catalog-media/">Media & product images</a><a class="btn" href="/admin/release-preflight/">Product release preflight</a><a class="btn" href="/admin/inventory-operations/">Tools & supplies inventory operations</a></div>
-    <div class="card catalog-workspace-panel">
-      <h2 style="margin-top:0">Product media workspace</h2>
-      <p class="small">Choose one Product. Build 73 reconciles its canonical <code>product_images</code> gallery with linked R2 media, image roles, annotations, focal points, public-use status and quality evidence. Existing specialist controls below remain the mutation authorities; the convergence panel is read-only and never publishes or deletes R2 media.</p>
-      <div id="productMediaContextMount"></div>
-      <div id="productMediaConvergenceMount"></div>
-      <div id="productContentBridgeMount"></div>
-      <div id="productMediaAdminMount"></div>
-      <div id="productMediaRoleScoreMount"></div>
-      <div id="productListingProfileAdminMount"></div>
-      <div id="adminProductImageAnnotationsMount"></div>
-      <div id="productStoryNotesAdminMount"></div>
-      <div id="productSeoAdminMount"></div>
-      <div id="mediaLibraryAdminMount"></div>
-      <div id="r2DerivativeSettingsMount" style="margin-top:18px"></div>
-    </div>
+<body data-admin-page="product-media-v163">
+  <div class="container admin-shell dd-media-editor-shell">
+    <nav class="nav" aria-label="Admin navigation">
+      <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><strong>Devil n Dove</strong><div class="small">Admin / Product Media</div></div></div>
+      <div class="links"><a href="/admin/products/">Products</a><a href="/admin/product-editor/">Product Editor</a><a href="/admin/">Dashboard</a></div>
+    </nav>
 
-    <div class="footer card" style="margin-top:18px"></div>
+    <header class="hero compact-hero">
+      <div><p class="eyebrow">Release 467 • Build 163</p><h1>Product Media & Image Editor</h1><p>Edit one Product gallery and one image at a time. Nothing scans the R2 library, scores the gallery, loads SEO, or reads unrelated Products automatically.</p></div>
+    </header>
+
+    <div id="productMediaV163Status" class="dd-product-status small" aria-live="polite"></div>
+    <div class="dd-low-read-note small"><strong>Low-read contract:</strong> opening this page with no Product selected performs no Product catalog query. Search is manual. A selected Product loads one bounded gallery. Image details and scoring load only after we click an image.</div>
+
+    <section class="card">
+      <h2 style="margin-top:0">Choose a Product</h2>
+      <form id="productMediaV163SearchForm" class="dd-product-toolbar">
+        <label><span class="small">Product ID, name, SKU or slug</span><input class="input" id="productMediaV163Search" type="search" autocomplete="off" placeholder="Example: 27, lavender soap, DND-027"/></label>
+        <button class="btn" type="submit">Search Products</button>
+      </form>
+      <div id="productMediaV163SearchResults" class="dd-media-search-results"></div>
+    </section>
+
+    <section class="card dd-media-section">
+      <h2 style="margin-top:0">Selected Product Gallery</h2>
+      <div id="productMediaV163Identity"><strong>No Product selected.</strong></div>
+      <div id="productMediaV163Gallery" class="dd-media-edit-grid" style="margin-top:14px"></div>
+    </section>
+
+    <section id="productMediaV163Editor" class="card dd-media-section" hidden>
+      <div class="dd-media-actions"><h2 style="margin:0">Selected Image</h2><span id="productMediaV163ImageId" class="small"></span></div>
+      <div class="dd-image-editor-layout" style="margin-top:14px">
+        <div class="dd-image-editor-preview"><img id="productMediaV163Preview" alt="Selected Product image"/><div class="dd-score-box" style="margin-top:10px"><strong>Image score</strong><div id="productMediaV163Score">Not measured</div><button class="btn" id="productMediaV163ScoreButton" type="button" style="margin-top:8px">Measure &amp; Score Selected Image</button><p class="small">This reads and scores only this image. Nothing else in the gallery is rescored.</p></div></div>
+        <form id="productMediaV163EditorForm">
+          <div class="dd-editor-grid cols-2">
+            <label class="wide"><span class="small">Alt text</span><input class="input" name="alt_text" maxlength="1000"/></label>
+            <label><span class="small">Gallery order</span><input class="input" name="sort_order" type="number" min="0" step="1"/></label>
+            <label><span class="small">Image role</span><select class="input" name="image_role"><option value="">Unassigned</option><option value="hero_front">Hero / front</option><option value="detail_texture">Detail / texture</option><option value="scale_context">Scale / context</option><option value="back_side">Back / side</option><option value="process_story">Process / story</option><option value="packaging_pickup">Packaging / pickup</option><option value="material_tool_proof">Material / tool proof</option><option value="gallery_support">Gallery support</option></select></label>
+            <label><span class="small">Public use</span><select class="input" name="public_use_status"><option value="internal_review">Internal review</option><option value="product_page_ok">Product page OK</option><option value="social_ok">Social OK</option><option value="all_public_ok">All public OK</option><option value="consent_needed">Consent needed</option><option value="blocked">Blocked</option></select></label>
+            <label><span class="small">Focal point X (0–100)</span><input class="input" name="focal_point_x" type="number" min="0" max="100" step="0.1"/></label>
+            <label><span class="small">Focal point Y (0–100)</span><input class="input" name="focal_point_y" type="number" min="0" max="100" step="0.1"/></label>
+            <label class="wide"><span class="small">Image title</span><input class="input" name="image_title" maxlength="250"/></label>
+            <label class="wide"><span class="small">Caption</span><textarea class="input" name="caption" rows="3"></textarea></label>
+            <label class="wide"><span class="small">Annotation notes</span><textarea class="input" name="annotation_notes" rows="3"></textarea></label>
+            <label class="wide"><span class="small">Role / public-use review notes</span><textarea class="input" name="role_review_notes" rows="3"></textarea></label>
+            <label class="wide"><input id="productMediaV163SetFeatured" type="checkbox"/> Make this the Product featured image when saving</label>
+          </div>
+          <div class="dd-media-actions" style="margin-top:14px"><button class="btn" type="submit">Save Selected Image Details</button><span class="small">Saving does not automatically score, publish, list R2, or run Product readiness.</span></div>
+        </form>
+      </div>
+    </section>
   </div>
-  <script src="/js/main.js?v=440"></script>
-  <script src="/public/js/auth.js?v=440"></script><script src="/public/js/admin-route-usage.js"></script>
-  <script src="/public/js/site-auth-ui.js?v=440"></script>
-  <script src="/public/js/site-analytics.js?v=440"></script>
-  <script src="/public/js/admin-self-protect.js?v=440"></script>
-  <script src="/public/js/admin.js?v=440"></script>
-  <script src="/public/js/admin-product-media-context.js"></script>
-  <script src="/public/js/admin-product-media-convergence.js?v=467b73"></script>
-  <script src="/public/js/admin-product-content-bridge.js"></script>
-  <script src="/public/js/admin-product-images.js"></script>
-  <script src="/public/js/admin-product-image-annotations.js"></script>
-  <script src="/public/js/admin-r2-derivative-settings.js"></script>
-  <script src="/public/js/admin-product-story-notes.js"></script>
-  <script src="/public/js/admin-product-media-score.js"></script>
-  <script src="/public/js/admin-product-listing-profiles.js"></script>
-  <script src="/public/js/admin-product-seo.js"></script>
-
-<script src="/public/js/admin-candle-soap-specs.js"></script></body>
+  <script src="/public/js/auth.js?v=440"></script>
+  <script src="/public/js/admin-product-media-editor-v163.js?v=163"></script>
+</body>
 </html>
