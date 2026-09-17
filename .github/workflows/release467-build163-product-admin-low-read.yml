@@ -20,6 +20,7 @@ on:
       - 'scripts/release467_build163_gate.py'
       - 'scripts/current_system_gate_provenance_gate.py'
       - 'scripts/release461_product_image_quality_gate.py'
+      - '.github/workflows/release467-build155-products-production-browser.yml'
       - '.github/workflows/release467-build163-product-admin-low-read.yml'
   workflow_dispatch:
 
