@@ -22,7 +22,7 @@ for token in ('AbortController','8000','/api/product-detail-core','publicMediaUr
     req(token in detail,f'Lean Product renderer missing: {token}')
 for forbidden in ('setInterval(','MutationObserver','/api/product-detail?'):
     req(forbidden not in detail,f'Lean Product renderer gained eager/heavy behavior: {forbidden}')
-req('/public/js/product-detail-v166.js?v=166' in page,'Product page does not load Build 166 lean renderer')
+req(any(token in page for token in ('/public/js/product-detail-v166.js?v=166','/public/js/product-detail-v166.js?v=179')),'Product page does not load Build 166 lean renderer or Build 179 cache-key successor')
 req('/public/js/product-detail.js?v=224' not in page,'Product page still loads legacy heavy Product renderer')
 req('/public/js/storefront-product-experience.js?v=74' not in page,'Product page still loads duplicate legacy Product experience renderer')
 req("export { onRequestGet } from '../api/product-media.js';" in media_alias,'Legacy /media/product compatibility route is not R2-only alias')
