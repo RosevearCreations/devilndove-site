@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   quality:
@@ -95,3 +96,78 @@ jobs:
           echo 'Runtime schema residue remains governed by current-development-authority.json with zero raw D1 bypasses carrying DDL.'
           echo 'Canonical migration stream remains unchanged at 0001-0004; Builds 42-53 add no schema migration.'
           echo 'No D1/R2/provider/Production mutation is performed by this quality proof.'
+
+  build178-production-final-observer:
+    if: ${{ github.event_name == 'pull_request' && github.head_ref == 'build178-production-final-verification' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Prove exact Build 178 Production GREEN
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: 3dc026ee35cd6776e63908cdb1450bbde6cd8bb8
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, time, urllib.parse, urllib.request
+          token=os.environ['GITHUB_TOKEN']
+          repo=os.environ['REPOSITORY']
+          expected=os.environ['EXPECTED_SHA']
+          checks=[
+            ('Production Pages Deploy','production-pages-deploy-current.yml','push','main'),
+            ('Production Live Resource Integrity','production-live-resource-integrity-proof.yml','workflow_run','main'),
+            ('Products Production Browser','release467-build155-products-production-browser.yml','workflow_run','main'),
+            ('Products Route Production','release467-build154-products-route-production-proof.yml','workflow_run','main'),
+            ('Build 178 Product Editor Navigation','release467-build178-product-editor-navigation-convergence.yml','push','main'),
+          ]
+
+          def workflow_runs(path):
+              encoded=urllib.parse.quote(path,safe='')
+              url=f'https://api.github.com/repos/{repo}/actions/workflows/{encoded}/runs?per_page=100'
+              req=urllib.request.Request(url,headers={
+                'Authorization':f'Bearer {token}',
+                'Accept':'application/vnd.github+json',
+                'X-GitHub-Api-Version':'2022-11-28',
+                'User-Agent':'devilndove-build178-production-final-observer',
+              })
+              with urllib.request.urlopen(req,timeout=30) as response:
+                  return json.load(response).get('workflow_runs') or []
+
+          deadline=time.time()+480
+          latest={}
+          while True:
+              failures=[]
+              latest={}
+              for label,path,event,branch in checks:
+                  exact=[
+                    r for r in workflow_runs(path)
+                    if str(r.get('head_sha') or '')==expected
+                    and str(r.get('head_branch') or '')==branch
+                    and str(r.get('event') or '')==event
+                  ]
+                  exact.sort(key=lambda r:str(r.get('created_at') or ''),reverse=True)
+                  chosen=next((r for r in exact if r.get('conclusion')=='success'), exact[0] if exact else None)
+                  row={
+                    'workflow':path,
+                    'event':event,
+                    'branch':branch,
+                    'run_id':chosen.get('id') if chosen else None,
+                    'status':chosen.get('status') if chosen else 'missing',
+                    'conclusion':chosen.get('conclusion') if chosen else None,
+                    'html_url':chosen.get('html_url') if chosen else None,
+                  }
+                  latest[label]=row
+                  if not chosen or chosen.get('status')!='completed' or chosen.get('conclusion')!='success':
+                      failures.append((label,row))
+              if not failures:
+                  break
+              if time.time() >= deadline:
+                  print(json.dumps({'expected_sha':expected,'checks':latest,'failures':failures},indent=2,sort_keys=True))
+                  raise SystemExit('Production acceptance did not reach GREEN before deadline')
+              time.sleep(12)
+
+          print('BUILD 178 PRODUCTION FINAL EVIDENCE')
+          print(json.dumps({'expected_sha':expected,'checks':latest},indent=2,sort_keys=True))
+          print('BUILD 178 PRODUCTION: GREEN')
+          PY
