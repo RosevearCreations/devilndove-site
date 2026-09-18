@@ -1,0 +1,54 @@
+name: Release 467 Build 178 Product Editor Navigation Convergence
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'admin/product-editor/index.html'
+      - 'admin/catalog-media/index.html'
+      - 'public/js/admin-product-editor-v163.js'
+      - 'public/js/admin-product-media-editor-v172.js'
+      - 'public/js/admin-product-readiness.js'
+      - 'public/js/admin-products.js'
+      - 'public/js/admin-product-media-context.js'
+      - 'public/js/admin-product-release-preflight.js'
+      - 'functions/api/admin/product-release-preflight.js'
+      - 'public/js/admin-products-marketplace-readiness.js'
+      - 'scripts/release467_build178_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_178_PRODUCT_EDITOR_NAVIGATION_CONVERGENCE.md'
+      - '.github/workflows/release467-build178-product-editor-navigation-convergence.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  product-editor-navigation-convergence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Prove Build 178 Product navigation convergence
+        run: python scripts/release467_build178_gate.py
+      - name: Retain Product QA convergence
+        run: python scripts/release467_build169_gate.py
+      - name: Retain Product Media save reliability
+        run: python scripts/release467_build172_gate.py
+      - name: Retain Product Media repair
+        run: python scripts/release467_build173_gate.py
+      - name: Retain Product Editor Media read collapse
+        run: python scripts/release467_build174_gate.py
+      - name: Retain Product Editor zero-introspection save
+        run: python scripts/release467_build175_gate.py
+      - name: JavaScript syntax
+        run: |
+          node --check public/js/admin-product-editor-v163.js
+          node --check public/js/admin-product-media-editor-v172.js
+          node --check public/js/admin-product-readiness.js
+          node --check public/js/admin-products.js
+          node --check public/js/admin-product-media-context.js
+          node --check public/js/admin-product-release-preflight.js
+          node --check functions/api/admin/product-release-preflight.js
+          node --check public/js/admin-products-marketplace-readiness.js
