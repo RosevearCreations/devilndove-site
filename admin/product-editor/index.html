@@ -8,12 +8,13 @@
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
   <link rel="stylesheet" href="/css/admin-product-v162.css?v=178"/>
+  <link rel="stylesheet" href="/css/release467-build182-product-buyer-readiness.css?v=182"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
     <nav class="nav" aria-label="Admin navigation">
       <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><strong>Devil n Dove</strong><div class="small">Admin / Product Editor</div></div></div>
-      <div class="links"><a href="/admin/products/">Back to Products</a><a href="/admin/catalog-media/">Images</a><a href="/admin/">Dashboard</a></div>
+      <div class="links"><a href="/admin/products/">Back to Products</a><a href="/admin/catalog-media/">Images</a><a href="/admin/catalog-health/">Health</a><a href="/admin/">Dashboard</a></div>
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
@@ -29,6 +30,7 @@
         <button class="btn dd-editor-tab" type="button" data-editor-tab="basics" aria-selected="true">Basics</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="pricing" aria-selected="false">Pricing &amp; Stock</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="description" aria-selected="false">Description</button>
+        <button class="btn dd-editor-tab" type="button" data-editor-tab="buyer" aria-selected="false">Buyer Readiness</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="media" aria-selected="false">Media</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="seo" aria-selected="false">SEO / Publishing</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="qa" aria-selected="false">QA</button>
@@ -83,6 +85,14 @@
         </div>
       </section>
 
+      <section class="dd-editor-panel" data-editor-panel="buyer" hidden>
+        <div class="dd-products-browser-heading">
+          <div><p class="eyebrow">Release 467 • Build 182</p><h2>Product Facts & Buyer Readiness</h2><p class="small">This panel evaluates the Product facts already loaded into this editor. It performs zero additional D1 or R2 reads and never saves automatically. Fix buttons move you to the owning field; image, Inventory/Tool/Supply, SEO, packaging and publication checks remain separate specialist reviews.</p></div>
+          <button class="btn" id="productBuyerReadinessRefresh" type="button">Refresh buyer readiness</button>
+        </div>
+        <div id="productBuyerReadinessLocal" aria-live="polite"><div class="small">Open this tab after Product authority loads to review buyer-facing facts.</div></div>
+      </section>
+
       <section class="dd-editor-panel" data-editor-panel="media" hidden>
         <div class="dd-products-browser-heading"><div><h2>Media</h2><p class="small">Opening this tab reads only this Product's canonical gallery rows. The featured URL is reused from the Product authority already loaded by the editor, so the Media tab does not re-read the Product table or check media-role/media-asset recovery sources. Open the full Image Editor only when you need recovery, add/replace/crop/reorder/remove/score work.</p></div><a class="btn" id="productEditorMediaLink" href="/admin/catalog-media/">Open Image Editor</a></div>
         <div id="productEditorMediaStatus" class="small" aria-live="polite">Images not loaded yet.</div>
@@ -113,5 +123,6 @@
   </div>
   <script src="/public/js/auth.js?v=440"></script>
   <script src="/public/js/admin-product-editor-v163.js?v=178"></script>
+  <script src="/public/js/admin-product-buyer-readiness-v182.js?v=182"></script>
 </body>
 </html>
