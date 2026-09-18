@@ -2,7 +2,7 @@
 import { getAdminUserFromRequest, getDb, jsonResponse } from "../_lib/adminAudit.js";
 
 function json(data, status = 200) { return jsonResponse(data, status, { 'Cache-Control': 'no-store' }); }
-function normalizeView(value) { const v=String(value||'').trim().toLowerCase(); return v==='mobile_health' ? 'mobile_health' : 'compact'; }
+function normalizeView(value) { const v=String(value||'').trim().toLowerCase(); return v==='mobile_health' ? 'mobile_health' : (v==='seller_daily' ? 'seller_daily' : 'compact'); }
 
 async function compactSummary(db) {
   return await db.prepare(`
@@ -51,6 +51,20 @@ async function compactSummary(db) {
   `).first();
 }
 
+async function sellerDailySummary(db) {
+  // Build 176: exactly the six metrics rendered by Seller Daily. Avoid the compact
+  // Product/image/SEO joins when that UI never displays them.
+  return await db.prepare(`
+    SELECT
+      (SELECT COUNT(*) FROM orders) AS orders_count,
+      (SELECT COUNT(*) FROM site_item_inventory WHERE COALESCE(is_active,1)=1 AND (COALESCE(on_hand_quantity,0)+COALESCE(incoming_quantity,0))<=COALESCE(reorder_level,0)) AS low_stock_count,
+      (SELECT COUNT(*) FROM webhook_events WHERE process_status='failed') AS failed_webhooks_count,
+      (SELECT COUNT(*) FROM payment_disputes WHERE dispute_status IN ('open','under_review')) AS open_disputes_count,
+      (SELECT COUNT(*) FROM site_search_events WHERE created_at>=datetime('now','-1 day')) AS recent_searches_count,
+      (SELECT COUNT(*) FROM site_visitor_sessions WHERE last_seen_at>=datetime('now','-30 minutes')) AS active_visitor_sessions_count
+  `).first();
+}
+
 async function mobileHealthSummary(db) {
   return await db.prepare(`
     SELECT
@@ -78,7 +92,9 @@ export async function onRequestGet(context) {
 
   const view = normalizeView(new URL(request.url).searchParams.get('view'));
   try {
-    const summary = view === 'mobile_health' ? await mobileHealthSummary(db) : await compactSummary(db);
+    const summary = view === 'mobile_health'
+      ? await mobileHealthSummary(db)
+      : (view === 'seller_daily' ? await sellerDailySummary(db) : await compactSummary(db));
     return json({
       ok: true,
       view,
