@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 183 — Inventory & Tool/Supply identity cleanup gate."""
+"""Release 467 Build 183 — Inventory & Tool/Supply identity cleanup gate, successor-aware through Build 184."""
 from pathlib import Path
 import re, subprocess, sys
 
@@ -48,8 +48,9 @@ for token in ("save_usage_setup","physical_count","ON CONFLICT(site_item_invento
 
 for token in ("no automatic duplicate merge","Build 244 remains the mutation authority","no canonical migration","no R2 mutation","Build 184"):
     req(token.lower() in doc.lower(),f"Build 183 documentation missing: {token}")
-for token in ("Build 182 — complete","Build 183 — current","Build 184 — next"):
-    req(token in plan,f"Catalog rework checkpoint missing: {token}")
+req("Build 182 — complete" in plan,"Catalog rework checkpoint missing: Build 182 — complete")
+req(any(token in plan for token in ("Build 183 — current","Build 183 — complete")),"Catalog rework checkpoint missing Build 183 current/complete state")
+req(any(token in plan for token in ("Build 184 — next","Build 184 — current")),"Catalog rework checkpoint missing Build 184 next/current state")
 for token in ("inventory-identity-table-wrap","overflow-x:auto","@media(max-width:760px)"):
     req(token in css,f"Build 183 responsive CSS missing: {token}")
 
