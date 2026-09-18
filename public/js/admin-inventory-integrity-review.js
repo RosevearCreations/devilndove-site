@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <section class="card inventory-integrity-review" aria-labelledby="inventoryIntegrityHeading">
         <div class="section-heading-row">
           <div>
-            <p class="inventory-operations-eyebrow">Build 440 · Inventory truth &amp; usage</p>
+            <p class="inventory-operations-eyebrow">Release 467 Build 179 · Inventory truth &amp; usage</p>
             <h3 id="inventoryIntegrityHeading">Physical Count &amp; Usage Setup Review</h3>
             <p class="small">Use a physical count to make on-hand stock truthful. Legacy supplies that remain in the safe <code>log_only</code> default stay in Usage Setup Required until their real stock-to-usage conversion is reviewed.</p>
           </div>
