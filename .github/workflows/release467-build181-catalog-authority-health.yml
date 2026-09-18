@@ -1,0 +1,83 @@
+name: Release 467 Build 181 Catalog Authority Health
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/catalog-health.js'
+      - 'public/js/admin-catalog-health-v181.js'
+      - 'css/release467-build181-catalog-health.css'
+      - 'admin/catalog-health/index.html'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'admin/products/index.html'
+      - 'admin/inventory-operations/index.html'
+      - 'admin/catalog-media/index.html'
+      - 'scripts/release467_build181_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_181_CATALOG_AUTHORITY_HEALTH.md'
+      - 'docs/operations/RELEASE_467_CATALOG_REWORK_BUILDS_181_186.md'
+      - '.github/workflows/release467-build181-catalog-authority-health.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 181 source contract
+        run: python scripts/release467_build181_gate.py
+      - name: Retain Build 180 staged runtime startup
+        run: python scripts/release467_build180_gate.py
+      - name: Retain Build 179 runtime responsiveness
+        run: python scripts/release467_build179_gate.py
+      - name: Retain Build 166 Product delivery
+        run: python scripts/release467_build166_gate.py
+      - name: Retain Inventory integrity regression
+        run: python scripts/build440_inventory_integrity_review_regression_test.py
+      - name: Retain Inventory asset transport regression
+        run: node scripts/build440_resource_asset_url_regression_test.mjs
+
+  development-d1-read-proof:
+    if: ${{ github.event_name != 'push' || github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 target
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+      - name: Prove live catalog D1 authorities read-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM products) AS products, (SELECT COUNT(*) FROM product_images) AS product_images, (SELECT COUNT(*) FROM product_resource_links) AS product_resource_links, (SELECT COUNT(*) FROM site_item_inventory) AS site_item_inventory, (SELECT COUNT(*) FROM catalog_items) AS catalog_items;" > /tmp/build181-d1.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build181-d1.json')); rows=[]
+          keys=('products','product_images','product_resource_links','site_item_inventory','catalog_items')
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in keys): rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert rows, data
+          row={k:int(rows[0][k]) for k in keys}
+          assert all(v>=0 for v in row.values()), row
+          print('BUILD 181 DEVELOPMENT D1 CATALOG AUTHORITY: PASS',row)
+          PY
