@@ -122,6 +122,6 @@
     id('catalogHealthSearchForm').addEventListener('submit',(event)=>{event.preventDefault();state.q=String(id('catalogHealthSearch').value||'').trim();state.kind=String(id('catalogHealthKind').value||'');loadIssues();});
     id('catalogHealthKind').addEventListener('change',()=>{state.kind=String(id('catalogHealthKind').value||'');if(state.mode==='inventory')loadIssues();});
   }
-  async function start(){bind();await loadSummary();}
+  function start(){bind();message('Live D1 summary is paused to protect the daily row-read budget. Use Refresh summary when you need current evidence.');}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
