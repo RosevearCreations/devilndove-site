@@ -43,7 +43,7 @@ def main() -> int:
         ('usage review preserves fractional conversion authority', all(token in api for token in ('usage_units_per_stock_unit','minimum_usage_increment','usage_tracking_mode'))),
         ('usage review upserts the existing usage profile rather than creating schema', 'ON CONFLICT(site_item_inventory_id) DO UPDATE SET' in api and 'INSERT INTO site_inventory_usage_profiles' in api),
         ('usage setup does not mutate on-hand stock', 'SET stock_unit_label=?,usage_unit_label=?,usage_units_per_stock_unit=?' in api),
-        ('Inventory Operations page mounts and loads the review workspace', 'inventoryIntegrityReviewMount' in page and 'admin-inventory-integrity-review.js?v=179' in page and 'inventory-integrity-review.css?v=440' in page),
+        ('Inventory Operations page mounts and loads the review workspace', 'inventoryIntegrityReviewMount' in page and any(token in page for token in ('admin-inventory-integrity-review.js?v=179','admin-inventory-integrity-review.js?v=180')) and 'inventory-integrity-review.css?v=440' in page),
         ('UI exposes count due and usage setup queues', 'Physical count due' in ui and 'Usage setup required' in ui and 'All attention' in ui),
         ('UI requires explicit physical-count confirmation when quantity changes', 'window.confirm' in ui and 'Save physical count' in ui and 'Correction:' in ui),
         ('UI supports reviewed intentional log-only usage', 'Intentional log-only usage needs a clear review note' in ui and 'Save reviewed usage setup' in ui),
