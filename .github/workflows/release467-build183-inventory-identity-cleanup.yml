@@ -12,6 +12,8 @@ on:
       - 'docs/operations/RELEASE_467_BUILD_183_INVENTORY_IDENTITY_CLEANUP.md'
       - 'docs/operations/RELEASE_467_CATALOG_REWORK_BUILDS_181_186.md'
       - 'scripts/release467_build183_gate.py'
+      - 'scripts/release467_build182_gate.py'
+      - 'scripts/release467_build180_gate.py'
       - '.github/workflows/release467-build183-inventory-identity-cleanup.yml'
   workflow_dispatch:
 permissions:
