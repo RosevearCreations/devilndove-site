@@ -63,9 +63,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (imageLabels.some((token) => label.includes(token) || label.includes(token.replace(/_/g, '')))) {
       return `/admin/catalog-media/?product_id=${encodeURIComponent(productId)}#product-media-workflow`;
     }
-    if (label.includes('seo')) return `/admin/catalog/?product_id=${encodeURIComponent(productId)}#product-seo-fields`;
-    if (label.includes('price')) return `/admin/catalog/?product_id=${encodeURIComponent(productId)}#product-pricing-fields`;
-    if (label.includes('description')) return `/admin/catalog/?product_id=${encodeURIComponent(productId)}#product-description-fields`;
+    if (label.includes('seo')) return `/admin/product-editor/?product_id=${encodeURIComponent(productId)}&tab=seo&focus=meta_title`;
+    if (label.includes('price')) return `/admin/product-editor/?product_id=${encodeURIComponent(productId)}&tab=pricing&focus=price`;
+    if (label.includes('description')) return `/admin/product-editor/?product_id=${encodeURIComponent(productId)}&tab=description&focus=description`;
     return `/admin/readiness/?product_id=${encodeURIComponent(productId)}`;
   }
 
