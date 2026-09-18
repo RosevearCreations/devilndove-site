@@ -195,7 +195,8 @@
 
         <details class="inventory-receiving-recent">
           <summary>Recent receiving evidence</summary>
-          <div id="inventoryReceivingRecent"><div class="small">Loading…</div></div>
+          <div style="margin:8px 0"><button class="btn" type="button" id="inventoryReceivingLoadRecent">Load recent receiving</button></div>
+          <div id="inventoryReceivingRecent"><div class="small">Recent receiving evidence is paused until requested.</div></div>
         </details>
       </section>`;
     const today = new Date().toISOString().slice(0, 10);
@@ -424,8 +425,8 @@
 
   renderShell();
   renderSearchResults();
-  loadRecent();
 
+  document.getElementById('inventoryReceivingLoadRecent')?.addEventListener('click', loadRecent);
   document.getElementById('inventoryReceiveLookup')?.addEventListener('click', lookupCode);
   document.getElementById('inventoryReceiveCode')?.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); lookupCode(); } });
   document.getElementById('inventoryReceiveSearchButton')?.addEventListener('click', searchInventory);
