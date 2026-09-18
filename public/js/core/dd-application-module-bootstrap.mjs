@@ -195,7 +195,7 @@ await load();
 // availability has been established. Server middleware remains the direct-route gate.
 const currentModuleId = applicationModuleIdForPath(window.location.pathname);
 if (!currentModuleId || isAvailable(currentModuleId)) {
-  await import('./dd-admin-module-runtime.mjs?v=438');
+  await import('./dd-admin-module-runtime.mjs?v=177');
 } else {
   document.documentElement.dataset.ddApplicationModule = currentModuleId;
   document.documentElement.dataset.ddApplicationModuleMode = 'disabled';
