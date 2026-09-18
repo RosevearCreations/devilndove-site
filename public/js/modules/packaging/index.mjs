@@ -211,9 +211,9 @@ async function contractizeBootstrapResponse(serverResponse, serverPayload, {
   if (!serverResponse?.ok || !serverPayload?.ok) return serverResponse;
 
   const [catalogResult, inventoryResult, mediaResult] = await Promise.allSettled([
-    readCatalog({ limit: 500 }),
-    readInventory({ limit: 1000 }),
-    readContentMedia({ mediaType: 'artwork', limit: 72 }),
+    readCatalog({ limit: 120 }),
+    readInventory({ limit: 120 }),
+    readContentMedia({ mediaType: 'artwork', limit: 36 }),
   ]);
 
   const needsLegacyData = [catalogResult, inventoryResult, mediaResult].some((settled, index) => {
