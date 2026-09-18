@@ -880,6 +880,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const toggle = event.target?.closest?.('[data-toggle-product-qa-panel]');
     if(toggle){ const id=toggle.getAttribute('data-toggle-product-qa-panel'); const panel=document.querySelector(`[data-product-qa-panel="${CSS.escape(String(id))}"]`); if(panel){ const open=panel.toggleAttribute('hidden'); saveQaState(id, open?'collapsed':'expanded'); } }
     const fix = event.target?.closest?.('[data-product-qa-fix]');
-    if(fix){ const productId=fix.getAttribute('data-product-id')||''; const field=fix.getAttribute('data-focus-field')||'name'; window.location.href=`/admin/catalog/?product_id=${encodeURIComponent(productId)}&focus_field=${encodeURIComponent(field)}`; }
+    if(fix){ const productId=fix.getAttribute('data-product-id')||''; const field=fix.getAttribute('data-focus-field')||'name'; const key=String(field).toLowerCase(); const tab=(key.includes('seo')||key.includes('meta')||key.includes('canonical')||key.includes('h1_'))?'seo':(key.includes('price')||key.includes('currency')||key.includes('tax')||key.includes('weight')||key.includes('inventory'))?'pricing':key.includes('description')?'description':'basics'; window.location.href=`/admin/product-editor/?product_id=${encodeURIComponent(productId)}&tab=${encodeURIComponent(tab)}&focus=${encodeURIComponent(field)}`; }
   });
 })();
