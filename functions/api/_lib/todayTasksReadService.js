@@ -9,6 +9,8 @@ export const IMPLEMENTATION_BUILD = 369;
 export const CONTRACT_ID = 'operations-today-tasks-read';
 export const OWNER = 'operations';
 
+const TASK_KEYS = Object.freeze(['readiness','custom_requests','orders','inventory','accounting','failed_api']);
+
 function text(value) {
   return String(value ?? '').trim();
 }
@@ -71,16 +73,22 @@ async function runtimeIncidentDetails(db) {
 
 async function latestTaskActions(db) {
   try {
-    const result = await db.prepare(`
-      SELECT task_key, action_status, snooze_until, created_at
-      FROM today_task_actions
-      ORDER BY datetime(created_at) DESC
-    `).all();
-
+    // Build 176: the table has idx_today_task_actions_task_key_created(task_key, created_at DESC).
+    // Use six indexed point-lookups instead of reading the entire historical action log.
+    const results = await Promise.all(TASK_KEYS.map(async (taskKey) => {
+      const row = await db.prepare(`
+        SELECT task_key, action_status, snooze_until, created_at
+        FROM today_task_actions
+        WHERE task_key=?
+        ORDER BY created_at DESC, today_task_action_id DESC
+        LIMIT 1
+      `).bind(taskKey).first();
+      return row || null;
+    }));
     const latest = new Map();
-    for (const row of rows(result)) {
+    for (const row of results) {
       const key = text(row?.task_key);
-      if (key && !latest.has(key)) latest.set(key, row);
+      if (key) latest.set(key, row);
     }
     return Object.freeze({ latest, issue: null });
   } catch (error) {
