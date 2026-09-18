@@ -5,7 +5,7 @@
 // artwork picker, Build 288 legacy-GET retirement and Build 289 write bridge while
 // physically removing the retired broad Catalog/Inventory reads from server source.
 
-import * as base from './index.mjs';
+import * as base from './index.mjs?v=177';
 import { createPackagingArtworkPicker, normalizeContentArtworkRows } from './artwork-picker.mjs';
 import { createPackagingLegacyGetRetirementGuard } from './read-retirement.mjs';
 import { createPackagingWriteResponseBridge } from './write-response.mjs';
