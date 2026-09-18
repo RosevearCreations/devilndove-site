@@ -45,6 +45,24 @@ The compact Product Browser did not exhibit the same failure pattern because it 
 
 The legacy all-in-one Catalog Product application no longer starts a dozen Product subsystems together. The route is now a focused navigation hub to Product Browser, Product Editor, Media, Inventory and Creative Automation.
 
+### Runtime D1 usage
+
+Build 176 also removes D1 work that was happening merely because an administrator opened or revisited a page:
+
+- automatic Admin route-view telemetry is browser-local; normal navigation performs **zero remote telemetry D1 queries**;
+- the route-usage endpoint rejects cached automatic clients unless the operator explicitly requests a usage sample;
+- Admin Home is lean and cache-first:
+  - the Seller Daily snapshot is reused for 10 minutes unless **Refresh live** is clicked;
+  - the live snapshot reads Today Tasks plus a dedicated six-metric `seller_daily` summary only;
+  - the old compact Product/image/SEO summary is not used by Seller Daily;
+  - the lower Home dashboard reuses the same Seller Daily payload instead of reading Today Tasks and I.T. a second time;
+  - live I.T. health is opened deliberately from the I.T. workspace instead of scanned on every Home visit;
+- Today Task suppression state uses six indexed `task_key + LIMIT 1` reads rather than scanning the full historical action table;
+- lean routes do not start the presentation-only `/api/modules` client bootstrap or optional lazy observers; server middleware remains the authorization boundary;
+- Ctrl+K remains available because it reads only the static navigation manifest and uses no MutationObserver or polling.
+
+These changes preserve real D1 authority for actual Product, Inventory, Order, Finance, I.T. and customer work while removing background and duplicate reads caused by normal navigation.
+
 ### Release automation
 
 The same read-amplification rule now applies to deployment verification:
