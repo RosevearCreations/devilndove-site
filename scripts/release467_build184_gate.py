@@ -51,7 +51,7 @@ for token in ("save_metadata","UPDATE product_images SET alt_text","upsertAnnota
     req(token in product_editor_api,f"Existing Product image mutation owner missing: {token}")
 
 req("new URLSearchParams(window.location.search).get('q')" in inventory_ui,"Inventory repair deep-link search prefill missing")
-req("/public/js/admin-site-item-inventory.js?v=184" in inventory_page,"Inventory repair asset cache key missing")
+req("/public/js/admin-site-item-inventory.js?v=440.4" in inventory_page,"Inventory repair asset cache key missing")
 req("siteInventoryImageUrl" in inventory_ui and "Full edit" in inventory_ui,"Inventory operational image editor owner missing")
 
 for token in ("Catalog Health","Product Media & Image Editor","Inventory Operations","Media & Content Studio","single-object","no bucket listing","no canonical schema migration","no payment/refund action","Build 185"):
