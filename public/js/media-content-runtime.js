@@ -31,7 +31,7 @@
   }
   function loadImageQualityTools(){
     if(imageQualityToolsPromise)return imageQualityToolsPromise;
-    imageQualityToolsPromise=loadScriptOnce('/public/js/image-quality-scorer-v152.js?v=467b152','data-dd-image-quality-scorer').then(()=>loadScriptOnce('/public/js/site-image-quality-overlay-v152.js?v=467b152','data-dd-image-quality-overlay')).catch(()=>null);
+    imageQualityToolsPromise=loadScriptOnce('/public/js/image-quality-scorer-v152.js?v=467b152','data-dd-image-quality-scorer').then(()=>loadScriptOnce('/public/js/site-image-quality-overlay-v152.js?v=179','data-dd-image-quality-overlay')).catch(()=>null);
     return imageQualityToolsPromise;
   }
 
