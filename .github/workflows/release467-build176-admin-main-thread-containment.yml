@@ -18,6 +18,13 @@ on:
       - 'admin/orders/index.html'
       - 'admin/catalog/index.html'
       - 'admin/index.html'
+      - 'public/js/admin-route-usage.js'
+      - 'functions/api/admin/live-readiness-playbook.js'
+      - 'functions/api/admin/dashboard-summary.js'
+      - 'public/js/admin-seller-command-centre-build148.js'
+      - 'public/js/admin-home-dashboard-v123.js'
+      - 'functions/api/_lib/todayTasksReadService.js'
+      - 'public/js/admin-workspace-command-palette-v122.js'
       - '.github/workflows/system-gate.yml'
       - '.github/workflows/it-admin-runtime-proof.yml'
       - 'scripts/preview_smoke.py'
@@ -54,5 +61,12 @@ jobs:
           node --check functions/api/admin/orders.js
           node --check public/js/admin-orders-workspace-build150.js
           node --check public/js/admin-orders.js
+          node --check public/js/admin-route-usage.js
+          node --check functions/api/admin/live-readiness-playbook.js
+          node --check functions/api/admin/dashboard-summary.js
+          node --check public/js/admin-seller-command-centre-build148.js
+          node --check public/js/admin-home-dashboard-v123.js
+          node --check functions/api/_lib/todayTasksReadService.js
+          node --check public/js/admin-workspace-command-palette-v122.js
       - name: Python syntax for zero-D1 release path
         run: python -m py_compile scripts/preview_smoke.py scripts/release467_build176_gate.py
