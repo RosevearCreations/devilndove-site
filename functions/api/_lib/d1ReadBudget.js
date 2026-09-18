@@ -84,6 +84,33 @@ export const D1_READ_BUDGETS = Object.freeze({
     max_concurrent_identical_gets: 1,
     notes: 'Build 72 adds recommendation-only stock coverage, received-lot landed-cost comparison and linked-Product resource economics. Every contributing query has an explicit hard cap and this route remains an operator-opened workspace, not admin startup work.'
   }),
+  admin_catalog_health_v181: Object.freeze({
+    route: '/api/admin/catalog-health',
+    risk: 'high',
+    contract: 'explicit_only_grouped_authority_scan',
+    returned_rows_max: 40,
+    browser_cache_ms: 30000,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 184 quota hardening: Catalog Health no longer reads on page startup. Inventory/catalog evidence must use grouped CTEs/joins rather than correlated per-row rescans.'
+  }),
+  admin_inventory_identity_health_v183: Object.freeze({
+    route: '/api/admin/inventory-identity-health',
+    risk: 'critical',
+    contract: 'explicit_only_linear_inventory_catalog_scan',
+    returned_rows_max: 40,
+    browser_cache_ms: 30000,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 184 quota hardening: duplicate and catalog-reference evidence is pre-aggregated once. Correlated Inventory/catalog subqueries are prohibited.'
+  }),
+  admin_catalog_image_repair_v184: Object.freeze({
+    route: '/api/admin/catalog-image-repair',
+    risk: 'high',
+    contract: 'explicit_only_grouped_image_inventory_scan',
+    returned_rows_max: 40,
+    browser_cache_ms: 30000,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 184 quota hardening: Product/Inventory image health is explicit-only; Tool/Supply catalog matching is one grouped/ranked pass and R2 evidence is one object HEAD.'
+  }),
   admin_pending_actions: Object.freeze({
     route: '/api/admin/pending-actions',
     risk: 'medium',
