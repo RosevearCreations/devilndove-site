@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function render() {
     mountEl.innerHTML = `
       <div class="card" style="margin-top:18px">
-        <h3 style="margin-top:0">Dropdowns, Tax Codes &amp; Lookup Values</h3>
+        <div class="section-heading-row"><h3 style="margin-top:0">Dropdowns, Tax Codes &amp; Lookup Values</h3><button class="btn" type="button" id="catalogOptionAuthorityLoad">Load option authority</button></div>
         <p class="small" style="margin-top:0">Release 467 shared Product catalog option authority, with the operator UI refreshed in Build 179. Categories, colours, and shipping codes are editable app settings. Product types and workflow-state values are validated system semantics. Tax classes remain audited tax records. Product editors, phone capture, and recovery paths consume the same authority.</p>
         <div class="small" style="margin:0 0 12px 0"><strong>Authority:</strong> ${escapeHtml(authoritySummary())}</div>
         <div id="catalogOptionManagerMessage" class="small" style="display:none;margin-bottom:12px"></div>
@@ -213,6 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>`;
 
+    document.getElementById('catalogOptionAuthorityLoad')?.addEventListener('click',load);
     mountEl.querySelectorAll('[data-save-option-set]').forEach((button) => {
       button.addEventListener('click', () => saveOptionSet(button.getAttribute('data-save-option-set') || ''));
     });
@@ -346,8 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('dd:product-editor-target', (event) => applyAuthorityToProductEditor(event?.detail?.product || null));
   document.addEventListener('dd:product-editor-cleared', () => applyAuthorityToProductEditor());
-  document.addEventListener('dd:admin-ready', async (event) => { if (!event?.detail?.ok) return; await load(); });
   render();
   applyAuthorityToProductEditor();
-  if (window.DDAuth?.isLoggedIn()) load();
+  setMessage('Catalog option authority is paused on Inventory Operations. Load it only when editing dropdown or tax-code settings.');
 });
