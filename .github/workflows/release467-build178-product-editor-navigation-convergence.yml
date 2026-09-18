@@ -1,5 +1,7 @@
 name: Release 467 Build 178 Product Editor Navigation Convergence
 on:
+  pull_request:
+    branches: [dev]
   push:
     branches: [dev, main]
     paths:
@@ -13,6 +15,11 @@ on:
       - 'public/js/admin-product-release-preflight.js'
       - 'functions/api/admin/product-release-preflight.js'
       - 'public/js/admin-products-marketplace-readiness.js'
+      - 'scripts/release467_build164_gate.py'
+      - 'scripts/release467_build172_gate.py'
+      - 'scripts/release467_build173_gate.py'
+      - 'scripts/release467_build174_gate.py'
+      - 'scripts/release467_build175_gate.py'
       - 'scripts/release467_build178_gate.py'
       - 'docs/operations/RELEASE_467_BUILD_178_PRODUCT_EDITOR_NAVIGATION_CONVERGENCE.md'
       - '.github/workflows/release467-build178-product-editor-navigation-convergence.yml'
