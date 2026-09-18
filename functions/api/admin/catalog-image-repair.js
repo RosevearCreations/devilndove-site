@@ -60,52 +60,74 @@ function inventoryIssues(row){
 }
 
 async function summary(db){
+  // Build 184 quota hardening: pre-aggregate Product image facts and Tool/Supply
+  // catalog references. A summary must never rescan Inventory/catalog once per row.
   const [p,i]=await Promise.all([
     db.prepare(`
+      WITH active_products AS (
+        SELECT product_id,featured_image_url
+        FROM products
+        WHERE LOWER(TRIM(COALESCE(status,'draft'))) NOT IN ('archived','deleted')
+      ),
+      role_by_image AS (
+        SELECT product_image_id,MAX(CASE WHEN TRIM(COALESCE(image_role,''))<>'' THEN 1 ELSE 0 END) AS has_role
+        FROM product_image_annotations GROUP BY product_image_id
+      ),
+      image_stats AS (
+        SELECT pi.product_id,COUNT(*) AS image_count,
+          SUM(CASE WHEN LENGTH(TRIM(COALESCE(pi.alt_text,'')))<12 THEN 1 ELSE 0 END) AS alt_attention,
+          SUM(CASE WHEN COALESCE(rbi.has_role,0)=0 THEN 1 ELSE 0 END) AS role_attention,
+          SUM(CASE WHEN TRIM(COALESCE(pi.image_url,''))<>'' AND LOWER(TRIM(pi.image_url)) NOT LIKE 'https://assets.devilndove.com/%' THEN 1 ELSE 0 END) AS image_source_attention
+        FROM product_images pi
+        LEFT JOIN role_by_image rbi ON rbi.product_image_id=pi.product_image_id
+        GROUP BY pi.product_id
+      ),
+      featured_match AS (
+        SELECT ap.product_id,MAX(CASE WHEN TRIM(COALESCE(pi.image_url,''))=TRIM(COALESCE(ap.featured_image_url,'')) THEN 1 ELSE 0 END) AS has_featured
+        FROM active_products ap
+        LEFT JOIN product_images pi ON pi.product_id=ap.product_id
+        GROUP BY ap.product_id
+      )
       SELECT COUNT(*) active_products,
-        SUM(CASE WHEN TRIM(COALESCE(p.featured_image_url,''))='' THEN 1 ELSE 0 END) missing_featured,
-        SUM(CASE WHEN image_count=0 THEN 1 ELSE 0 END) no_gallery,
-        SUM(CASE WHEN image_count>0 AND image_count<3 THEN 1 ELSE 0 END) shallow_gallery,
-        SUM(CASE WHEN alt_attention>0 THEN 1 ELSE 0 END) products_with_alt_attention,
-        SUM(CASE WHEN role_attention>0 THEN 1 ELSE 0 END) products_with_role_attention,
-        SUM(CASE WHEN featured_not_in_gallery>0 THEN 1 ELSE 0 END) featured_not_in_gallery,
-        SUM(CASE WHEN image_source_attention>0 THEN 1 ELSE 0 END) products_with_external_image_source
-      FROM (
-        SELECT p.product_id,p.featured_image_url,
-          (SELECT COUNT(*) FROM product_images pi WHERE pi.product_id=p.product_id) image_count,
-          (SELECT COUNT(*) FROM product_images pi WHERE pi.product_id=p.product_id AND LENGTH(TRIM(COALESCE(pi.alt_text,'')))<12) alt_attention,
-          (SELECT COUNT(*) FROM product_images pi WHERE pi.product_id=p.product_id AND NOT EXISTS(
-             SELECT 1 FROM product_image_annotations pia
-             WHERE pia.product_image_id=pi.product_image_id AND TRIM(COALESCE(pia.image_role,''))<>''
-          )) role_attention,
-          CASE WHEN TRIM(COALESCE(p.featured_image_url,''))<>'' AND NOT EXISTS(
-             SELECT 1 FROM product_images pi WHERE pi.product_id=p.product_id AND TRIM(COALESCE(pi.image_url,''))=TRIM(COALESCE(p.featured_image_url,''))
-          ) THEN 1 ELSE 0 END featured_not_in_gallery,
-          (SELECT COUNT(*) FROM product_images pi
-             WHERE pi.product_id=p.product_id
-               AND TRIM(COALESCE(pi.image_url,''))<>''
-               AND LOWER(TRIM(pi.image_url)) NOT LIKE 'https://assets.devilndove.com/%'
-          ) image_source_attention
-        FROM products p
-        WHERE LOWER(TRIM(COALESCE(p.status,'draft'))) NOT IN ('archived','deleted')
-      ) p
+        SUM(CASE WHEN TRIM(COALESCE(ap.featured_image_url,''))='' THEN 1 ELSE 0 END) missing_featured,
+        SUM(CASE WHEN COALESCE(ins.image_count,0)=0 THEN 1 ELSE 0 END) no_gallery,
+        SUM(CASE WHEN COALESCE(ins.image_count,0)>0 AND COALESCE(ins.image_count,0)<3 THEN 1 ELSE 0 END) shallow_gallery,
+        SUM(CASE WHEN COALESCE(ins.alt_attention,0)>0 THEN 1 ELSE 0 END) products_with_alt_attention,
+        SUM(CASE WHEN COALESCE(ins.role_attention,0)>0 THEN 1 ELSE 0 END) products_with_role_attention,
+        SUM(CASE WHEN TRIM(COALESCE(ap.featured_image_url,''))<>'' AND COALESCE(fm.has_featured,0)=0 THEN 1 ELSE 0 END) featured_not_in_gallery,
+        SUM(CASE WHEN COALESCE(ins.image_source_attention,0)>0 THEN 1 ELSE 0 END) products_with_external_image_source
+      FROM active_products ap
+      LEFT JOIN image_stats ins ON ins.product_id=ap.product_id
+      LEFT JOIN featured_match fm ON fm.product_id=ap.product_id
     `).first(),
     db.prepare(`
-      SELECT COUNT(*) active_inventory,
-        SUM(CASE WHEN TRIM(COALESCE(sii.image_url,''))='' THEN 1 ELSE 0 END) blank_images,
-        SUM(CASE WHEN TRIM(COALESCE(sii.image_url,''))='' AND TRIM(COALESCE(ci.image_url,''))<>'' THEN 1 ELSE 0 END) catalog_image_candidates,
-        SUM(CASE WHEN TRIM(COALESCE(sii.image_url,''))<>'' AND TRIM(COALESCE(ci.image_url,''))<>'' AND TRIM(sii.image_url)<>TRIM(ci.image_url) THEN 1 ELSE 0 END) authority_drift,
-        SUM(CASE WHEN TRIM(COALESCE(sii.image_url,''))<>'' AND LOWER(TRIM(sii.image_url)) NOT LIKE 'https://assets.devilndove.com/%' THEN 1 ELSE 0 END) external_image_sources
-      FROM site_item_inventory sii
-      LEFT JOIN catalog_items ci ON ci.catalog_item_id=(
-        SELECT ci2.catalog_item_id FROM catalog_items ci2
-        WHERE LOWER(TRIM(COALESCE(ci2.item_kind,'')))=LOWER(TRIM(COALESCE(sii.source_type,'')))
-          AND LOWER(TRIM(COALESCE(ci2.source_key,'')))=LOWER(TRIM(COALESCE(sii.external_key,'')))
-          AND COALESCE(ci2.status,'active')<>'archived'
-        ORDER BY ci2.catalog_item_id DESC LIMIT 1
+      WITH active_inventory AS (
+        SELECT sii.site_item_inventory_id,
+               LOWER(TRIM(COALESCE(sii.source_type,''))) AS item_kind,
+               LOWER(TRIM(COALESCE(sii.external_key,''))) AS external_key_norm,
+               sii.image_url
+        FROM site_item_inventory sii
+        WHERE COALESCE(sii.is_active,1)=1
+          AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')
+      ),
+      catalog_ranked AS (
+        SELECT catalog_item_id,LOWER(TRIM(COALESCE(item_kind,''))) AS item_kind,
+               LOWER(TRIM(COALESCE(source_key,''))) AS source_key_norm,image_url,
+               ROW_NUMBER() OVER (
+                 PARTITION BY LOWER(TRIM(COALESCE(item_kind,''))),LOWER(TRIM(COALESCE(source_key,'')))
+                 ORDER BY catalog_item_id DESC
+               ) AS rn
+        FROM catalog_items
+        WHERE LOWER(TRIM(COALESCE(item_kind,''))) IN ('tool','supply')
+          AND COALESCE(status,'active')<>'archived'
       )
-      WHERE COALESCE(sii.is_active,1)=1
-        AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')
+      SELECT COUNT(*) active_inventory,
+        SUM(CASE WHEN TRIM(COALESCE(ai.image_url,''))='' THEN 1 ELSE 0 END) blank_images,
+        SUM(CASE WHEN TRIM(COALESCE(ai.image_url,''))='' AND TRIM(COALESCE(cr.image_url,''))<>'' THEN 1 ELSE 0 END) catalog_image_candidates,
+        SUM(CASE WHEN TRIM(COALESCE(ai.image_url,''))<>'' AND TRIM(COALESCE(cr.image_url,''))<>'' AND TRIM(ai.image_url)<>TRIM(cr.image_url) THEN 1 ELSE 0 END) authority_drift,
+        SUM(CASE WHEN TRIM(COALESCE(ai.image_url,''))<>'' AND LOWER(TRIM(ai.image_url)) NOT LIKE 'https://assets.devilndove.com/%' THEN 1 ELSE 0 END) external_image_sources
+      FROM active_inventory ai
+      LEFT JOIN catalog_ranked cr ON cr.rn=1 AND cr.item_kind=ai.item_kind AND cr.source_key_norm=ai.external_key_norm
     `).first(),
   ]);
   return {
@@ -125,26 +147,33 @@ async function summary(db){
 async function productRows(db,q,limit){
   const like=`%${String(q||'').toLowerCase()}%`;
   const result=await db.prepare(`
-    SELECT * FROM (
+    WITH role_by_image AS (
+      SELECT product_image_id,MAX(CASE WHEN TRIM(COALESCE(image_role,''))<>'' THEN 1 ELSE 0 END) AS has_role
+      FROM product_image_annotations GROUP BY product_image_id
+    ),
+    image_stats AS (
+      SELECT pi.product_id,COUNT(*) image_count,
+        SUM(CASE WHEN LENGTH(TRIM(COALESCE(pi.alt_text,'')))<12 THEN 1 ELSE 0 END) alt_attention,
+        SUM(CASE WHEN COALESCE(rbi.has_role,0)=0 THEN 1 ELSE 0 END) role_attention,
+        SUM(CASE WHEN TRIM(COALESCE(pi.image_url,''))<>'' AND LOWER(TRIM(pi.image_url)) NOT LIKE 'https://assets.devilndove.com/%' THEN 1 ELSE 0 END) image_source_attention
+      FROM product_images pi
+      LEFT JOIN role_by_image rbi ON rbi.product_image_id=pi.product_image_id
+      GROUP BY pi.product_id
+    ),
+    base AS (
       SELECT p.product_id,p.name,p.slug,p.sku,p.status,p.review_status,p.featured_image_url,p.updated_at,
-        (SELECT COUNT(*) FROM product_images pi WHERE pi.product_id=p.product_id) image_count,
-        (SELECT COUNT(*) FROM product_images pi WHERE pi.product_id=p.product_id AND LENGTH(TRIM(COALESCE(pi.alt_text,'')))<12) alt_attention,
-        (SELECT COUNT(*) FROM product_images pi WHERE pi.product_id=p.product_id AND NOT EXISTS(
-          SELECT 1 FROM product_image_annotations pia WHERE pia.product_image_id=pi.product_image_id AND TRIM(COALESCE(pia.image_role,''))<>''
-        )) role_attention,
+        COALESCE(ins.image_count,0) image_count,COALESCE(ins.alt_attention,0) alt_attention,
+        COALESCE(ins.role_attention,0) role_attention,COALESCE(ins.image_source_attention,0) image_source_attention,
         CASE WHEN TRIM(COALESCE(p.featured_image_url,''))<>'' AND NOT EXISTS(
           SELECT 1 FROM product_images pi WHERE pi.product_id=p.product_id AND TRIM(COALESCE(pi.image_url,''))=TRIM(COALESCE(p.featured_image_url,''))
-        ) THEN 1 ELSE 0 END featured_not_in_gallery,
-        (SELECT COUNT(*) FROM product_images pi WHERE pi.product_id=p.product_id
-          AND TRIM(COALESCE(pi.image_url,''))<>'' AND LOWER(TRIM(pi.image_url)) NOT LIKE 'https://assets.devilndove.com/%') image_source_attention
+        ) THEN 1 ELSE 0 END featured_not_in_gallery
       FROM products p
+      LEFT JOIN image_stats ins ON ins.product_id=p.product_id
       WHERE LOWER(TRIM(COALESCE(p.status,'draft'))) NOT IN ('archived','deleted')
     )
+    SELECT * FROM base
     WHERE (?='' OR LOWER(COALESCE(name,'')) LIKE ? OR LOWER(COALESCE(sku,'')) LIKE ? OR LOWER(COALESCE(slug,'')) LIKE ? OR CAST(product_id AS TEXT)=?)
-      AND (
-        TRIM(COALESCE(featured_image_url,''))='' OR image_count<3 OR alt_attention>0 OR role_attention>0
-        OR featured_not_in_gallery>0 OR image_source_attention>0
-      )
+      AND (TRIM(COALESCE(featured_image_url,''))='' OR image_count<3 OR alt_attention>0 OR role_attention>0 OR featured_not_in_gallery>0 OR image_source_attention>0)
     ORDER BY
       (CASE WHEN image_count=0 THEN 8 ELSE 0 END
        +CASE WHEN TRIM(COALESCE(featured_image_url,''))='' THEN 6 ELSE 0 END
@@ -157,14 +186,20 @@ async function productRows(db,q,limit){
   if(!ids.length)return products;
   const marks=ids.map(()=>'?').join(',');
   const images=rows(await db.prepare(`
+    WITH annotation_ranked AS (
+      SELECT product_image_id,image_role,public_use_status,
+             ROW_NUMBER() OVER (PARTITION BY product_image_id ORDER BY updated_at DESC,product_image_annotation_id DESC) rn
+      FROM product_image_annotations
+      WHERE product_image_id IS NOT NULL
+    )
     SELECT pi.product_image_id,pi.product_id,pi.image_url,pi.alt_text,pi.sort_order,
-      (SELECT pia.image_role FROM product_image_annotations pia WHERE pia.product_image_id=pi.product_image_id ORDER BY pia.updated_at DESC,pia.product_image_annotation_id DESC LIMIT 1) image_role,
-      (SELECT pia.public_use_status FROM product_image_annotations pia WHERE pia.product_image_id=pi.product_image_id ORDER BY pia.updated_at DESC,pia.product_image_annotation_id DESC LIMIT 1) public_use_status,
+      ar.image_role,ar.public_use_status,
       (SELECT ma.object_key FROM media_assets ma
         WHERE ma.product_id=pi.product_id AND ma.deleted_at IS NULL
           AND (TRIM(COALESCE(ma.public_url,''))=TRIM(COALESCE(pi.image_url,'')) OR TRIM(COALESCE(ma.object_key,''))=TRIM(REPLACE(COALESCE(pi.image_url,''),'https://assets.devilndove.com/','')))
         ORDER BY ma.media_asset_id DESC LIMIT 1) object_key
     FROM product_images pi
+    LEFT JOIN annotation_ranked ar ON ar.product_image_id=pi.product_image_id AND ar.rn=1
     WHERE pi.product_id IN (${marks})
     ORDER BY pi.product_id,COALESCE(pi.sort_order,0),pi.product_image_id
     LIMIT ?
@@ -181,35 +216,44 @@ async function productRows(db,q,limit){
 async function inventoryRows(db,q,kind,limit){
   const like=`%${String(q||'').toLowerCase()}%`;
   const result=await db.prepare(`
-    SELECT sii.site_item_inventory_id,LOWER(TRIM(COALESCE(sii.source_type,''))) item_kind,
-      sii.external_key,sii.item_name,sii.category,sii.image_url,sii.supplier_name,sii.source_url,sii.amazon_url,sii.updated_at,
-      ci.catalog_item_id,ci.image_url catalog_image_url
-    FROM site_item_inventory sii
-    LEFT JOIN catalog_items ci ON ci.catalog_item_id=(
-      SELECT ci2.catalog_item_id FROM catalog_items ci2
-      WHERE LOWER(TRIM(COALESCE(ci2.item_kind,'')))=LOWER(TRIM(COALESCE(sii.source_type,'')))
-        AND LOWER(TRIM(COALESCE(ci2.source_key,'')))=LOWER(TRIM(COALESCE(sii.external_key,'')))
-        AND COALESCE(ci2.status,'active')<>'archived'
-      ORDER BY ci2.catalog_item_id DESC LIMIT 1
+    WITH active_inventory AS (
+      SELECT sii.site_item_inventory_id,LOWER(TRIM(COALESCE(sii.source_type,''))) item_kind,
+        LOWER(TRIM(COALESCE(sii.external_key,''))) external_key_norm,
+        sii.external_key,sii.item_name,sii.category,sii.image_url,sii.supplier_name,sii.source_url,sii.amazon_url,sii.updated_at
+      FROM site_item_inventory sii
+      WHERE COALESCE(sii.is_active,1)=1
+        AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')
+    ),
+    catalog_ranked AS (
+      SELECT catalog_item_id,LOWER(TRIM(COALESCE(item_kind,''))) item_kind,
+        LOWER(TRIM(COALESCE(source_key,''))) source_key_norm,image_url,
+        ROW_NUMBER() OVER (
+          PARTITION BY LOWER(TRIM(COALESCE(item_kind,''))),LOWER(TRIM(COALESCE(source_key,'')))
+          ORDER BY catalog_item_id DESC
+        ) rn
+      FROM catalog_items
+      WHERE LOWER(TRIM(COALESCE(item_kind,''))) IN ('tool','supply')
+        AND COALESCE(status,'active')<>'archived'
     )
-    WHERE COALESCE(sii.is_active,1)=1
-      AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')
-      AND (?='' OR LOWER(COALESCE(sii.item_name,'')) LIKE ? OR LOWER(COALESCE(sii.external_key,'')) LIKE ? OR LOWER(COALESCE(sii.category,'')) LIKE ? OR LOWER(COALESCE(sii.supplier_name,'')) LIKE ?)
-      AND (?='' OR LOWER(TRIM(COALESCE(sii.source_type,'')))=?)
+    SELECT ai.site_item_inventory_id,ai.item_kind,ai.external_key,ai.item_name,ai.category,ai.image_url,
+      ai.supplier_name,ai.source_url,ai.amazon_url,ai.updated_at,cr.catalog_item_id,cr.image_url catalog_image_url
+    FROM active_inventory ai
+    LEFT JOIN catalog_ranked cr ON cr.rn=1 AND cr.item_kind=ai.item_kind AND cr.source_key_norm=ai.external_key_norm
+    WHERE (?='' OR LOWER(COALESCE(ai.item_name,'')) LIKE ? OR LOWER(COALESCE(ai.external_key,'')) LIKE ? OR LOWER(COALESCE(ai.category,'')) LIKE ? OR LOWER(COALESCE(ai.supplier_name,'')) LIKE ?)
+      AND (?='' OR ai.item_kind=?)
       AND (
-        TRIM(COALESCE(sii.image_url,''))=''
-        OR (TRIM(COALESCE(sii.image_url,''))<>'' AND LOWER(TRIM(sii.image_url)) NOT LIKE 'https://assets.devilndove.com/%')
-        OR (TRIM(COALESCE(sii.image_url,''))<>'' AND TRIM(COALESCE(ci.image_url,''))<>'' AND TRIM(sii.image_url)<>TRIM(ci.image_url))
+        TRIM(COALESCE(ai.image_url,''))=''
+        OR (TRIM(COALESCE(ai.image_url,''))<>'' AND LOWER(TRIM(ai.image_url)) NOT LIKE 'https://assets.devilndove.com/%')
+        OR (TRIM(COALESCE(ai.image_url,''))<>'' AND TRIM(COALESCE(cr.image_url,''))<>'' AND TRIM(ai.image_url)<>TRIM(cr.image_url))
       )
     ORDER BY
-      CASE WHEN TRIM(COALESCE(sii.image_url,''))='' THEN 0 ELSE 1 END,
-      CASE WHEN TRIM(COALESCE(ci.image_url,''))<>'' THEN 0 ELSE 1 END,
-      LOWER(COALESCE(sii.item_name,'')),sii.site_item_inventory_id
+      CASE WHEN TRIM(COALESCE(ai.image_url,''))='' THEN 0 ELSE 1 END,
+      CASE WHEN TRIM(COALESCE(cr.image_url,''))<>'' THEN 0 ELSE 1 END,
+      LOWER(COALESCE(ai.item_name,'')),ai.site_item_inventory_id
     LIMIT ?
   `).bind(q,like,like,like,like,kind,kind,limit).all();
   return rows(result).map(r=>({...r,issues:inventoryIssues(r),image_source_status:imageSourceStatus(r.image_url),r2_key:canonicalR2Key(r.image_url)||null,catalog_r2_key:canonicalR2Key(r.catalog_image_url)||null}));
 }
-
 async function r2Evidence(db,env,scope,id){
   const bucket=env.PRODUCT_MEDIA_BUCKET||env.MEDIA_BUCKET||env.R2_PRODUCT_MEDIA;
   if(!bucket||typeof bucket.head!=='function')return {supported:false,state:'bucket_binding_unavailable',exists:null};
