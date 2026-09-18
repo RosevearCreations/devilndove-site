@@ -966,10 +966,27 @@
   }
 
 
+  function notifyEditorRendered(reason='render-main') {
+    if (typeof document==='undefined' || typeof CustomEvent==='undefined') return;
+    document.dispatchEvent(new CustomEvent('dd:packaging-editor-rendered',{detail:Object.freeze({
+      build:177,
+      reason,
+      project_id:Number(state.detail?.project?.packaging_project_id||0),
+      has_project:Boolean(state.detail?.project)
+    })}));
+  }
+
   function renderMain() {
     const main = id('packagingStudioMain'); if (!main) return;
-    if (!state.detail?.project) { main.innerHTML = `<section class="card packaging-studio-welcome"><h2>Choose or create a labeling and packaging project</h2><p>Use one project for the editable label, packaging component bill of materials, cost estimate, versions, print tests and approval evidence.</p><p><strong>You do not need a project to build the Material Library.</strong> Enter purchased soap bases, candle waxes, oils, colours and their supplier ingredients below first; they can then be reused by any label.</p></section>${sourceMaterialManagerMarkup({allowAttach:false,standalone:true})}`; bindSourceLibraryControls(); return; }
-    main.innerHTML = detailMarkup(); bindDetail();
+    if (!state.detail?.project) {
+      main.innerHTML = `<section class="card packaging-studio-welcome"><h2>Choose or create a labeling and packaging project</h2><p>Use one project for the editable label, packaging component bill of materials, cost estimate, versions, print tests and approval evidence.</p><p><strong>You do not need a project to build the Material Library.</strong> Enter purchased soap bases, candle waxes, oils, colours and their supplier ingredients below first; they can then be reused by any label.</p></section>${sourceMaterialManagerMarkup({allowAttach:false,standalone:true})}`;
+      bindSourceLibraryControls();
+      notifyEditorRendered('welcome-render');
+      return;
+    }
+    main.innerHTML = detailMarkup();
+    bindDetail();
+    notifyEditorRendered('project-render');
   }
 
   async function load(projectId = 0) {
