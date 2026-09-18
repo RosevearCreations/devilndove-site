@@ -30,14 +30,14 @@
   <section class="card catalog-health-boundary">
     <strong>Read-only diagnostic boundary</strong>
     <p class="small">This page reads established Product, Product Image, Product Resource, Inventory and catalog-reference tables. It never edits Product facts, stock, Tool/Supply rows, images, R2 objects, provider state, payments or accounting. Every repair opens the existing owning editor.</p>
-    <div id="catalogHealthAuthority" class="small">Waiting for live D1 authority…</div>
+    <div id="catalogHealthAuthority" class="small">Live D1 summary is explicit-only to protect the daily read budget.</div>
   </section>
 
   <div id="catalogHealthMessage" class="card small catalog-health-message" hidden aria-live="polite"></div>
 
   <section class="card">
     <div class="section-heading-row"><div><h2>Product health</h2><p class="small">Featured image, gallery depth, alt text, linked maker inputs and tracked finished stock.</p></div><button class="btn" id="catalogHealthProductIssues" type="button">Load 40 Product issues</button></div>
-    <div class="catalog-health-stat-grid" id="catalogHealthProductStats"><div class="small">Loading Product summary…</div></div>
+    <div class="catalog-health-stat-grid" id="catalogHealthProductStats"><div class="small">Summary paused. Use Refresh summary when needed.</div></div>
   </section>
 
   <section class="card">
@@ -55,7 +55,7 @@
 
   <section class="card">
     <div class="section-heading-row"><div><h2>Inventory, Tools & Supplies</h2><p class="small">Operational Tool/Supply rows, image authority drift, duplicate identities and zero-on-hand supplies.</p></div><button class="btn" id="catalogHealthInventoryIssues" type="button">Load 40 Tool/Supply issues</button></div>
-    <div class="catalog-health-stat-grid" id="catalogHealthInventoryStats"><div class="small">Loading Inventory summary…</div></div>
+    <div class="catalog-health-stat-grid" id="catalogHealthInventoryStats"><div class="small">Summary paused. Use Refresh summary when needed.</div></div>
   </section>
 
   <section class="card">
