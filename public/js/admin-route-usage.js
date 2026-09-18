@@ -229,19 +229,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const path = window.location.pathname || '';
   if (!path.startsWith('/admin/')) return;
   ensureCurrentDashboardCards(path);
-  const key = `dd_admin_route_usage_current:${path}`;
-  try { if (sessionStorage.getItem(key)) return; } catch {}
-  const record = async () => {
-    if (!window.DDAuth?.apiFetch || !window.DDAuth?.isLoggedIn?.()) return;
-    try {
-      await window.DDAuth.apiFetch('/api/admin/live-readiness-playbook', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'record_usage', route_path: path, event_kind: 'view', source_route: document.referrer ? new URL(document.referrer, window.location.origin).pathname : '' })
-      });
-      try { sessionStorage.setItem(key, '1'); } catch {}
-    } catch {}
-  };
-  if ('requestIdleCallback' in window) window.requestIdleCallback(record, { timeout: 5000 });
-  else window.setTimeout(record, 4000);
+
+  // Build 176: route-view telemetry is intentionally browser-local. Merely navigating
+  // around Admin must not authenticate against D1 or write a telemetry row.
+  const key = `dd_admin_route_usage_local:${path}`;
+  try {
+    if (!sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, JSON.stringify({
+        first_seen_at: new Date().toISOString(),
+        source_route: document.referrer ? new URL(document.referrer, window.location.origin).pathname : ''
+      }));
+    }
+  } catch {}
+  window.DDAdminRouteUsage = Object.freeze({
+    build: 176,
+    automatic_remote_recording: false,
+    remote_d1_queries: 0,
+    path
+  });
 });
