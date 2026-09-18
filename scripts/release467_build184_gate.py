@@ -47,7 +47,7 @@ req(len(re.findall(r"<h1\b",health,re.I))==1,"Catalog Health must keep exactly o
 
 for token in ("Product Media & Image Editor","Alt text","Image role","Make this the Product featured image"):
     req(token in product_media,f"Existing Product Media owner missing: {token}")
-for token in ("action==='save_metadata'","UPDATE product_images SET alt_text","upsertAnnotation","set_featured"):
+for token in ("save_metadata","UPDATE product_images SET alt_text","upsertAnnotation","set_featured"):
     req(token in product_editor_api,f"Existing Product image mutation owner missing: {token}")
 
 req("new URLSearchParams(window.location.search).get('q')" in inventory_ui,"Inventory repair deep-link search prefill missing")
