@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 181 — Product / Inventory / Tool / Image authority health gate."""
+"""Release 467 Build 181 — Product / Inventory / Tool / Image authority health gate, successor-aware through Build 184."""
 from pathlib import Path
 import re, subprocess, sys
 
@@ -36,8 +36,9 @@ for forbidden in ("onRequestPost","onRequestPut","onRequestPatch","onRequestDele
     req(forbidden not in api,f"Build 181 API gained forbidden mutation/heavy behavior: {forbidden}")
 for forbidden in ("setInterval(","MutationObserver","location.reload("):
     req(forbidden not in ui,f"Build 181 UI gained polling/observer behavior: {forbidden}")
-for token in ("Load 40 Product issues","Load 40 Tool/Supply issues","D1 is the live authority again","admin-catalog-health-v181.js?v=181"):
+for token in ("Load 40 Product issues","Load 40 Tool/Supply issues","admin-catalog-health-v181.js?v=181"):
     req(token in page,f"Build 181 page missing: {token}")
+req(any(token in page for token in ("D1 is the live authority again","D1 remains the live catalog authority")),"Catalog Health lost the live-D1 authority statement")
 req(len(re.findall(r"<h1\b",page,re.I))==1,"Build 181 admin page must contain one H1")
 for token in ("/admin/catalog-health","/api/admin/catalog-health"):
     req(token in routes,f"Storefront route ownership missing: {token}")
