@@ -23,3 +23,10 @@ This plan continues the existing Product / Inventory / Tool / Image direction af
 8. R2 repair is explicit, bounded and environment-safe.
 9. Provider publication/payment lanes remain separate from catalog cleanup.
 10. Every build gets exact-SHA Development and Production proof before it is called GREEN.
+
+
+## Current execution checkpoint
+
+- Build 181 — complete: live Product / Inventory / Tool / Image authority health.
+- Build 182 — current: Product Facts & Buyer Readiness.
+- Build 183 — next after Build 182 is fully GREEN: Inventory & Tool/Supply Identity Cleanup.
