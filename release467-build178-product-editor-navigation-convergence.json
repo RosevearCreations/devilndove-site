@@ -1,0 +1,25 @@
+{
+  "release": 467,
+  "build": 178,
+  "title": "Product Editor Navigation Convergence",
+  "state": "DEVELOPMENT_CANDIDATE_AWAITING_EXTERNAL_EXACT_HEAD_PROOF",
+  "source_branch": "dev",
+  "verification_branch": "build178-product-editor-navigation-verification",
+  "scope": {
+    "dedicated_product_editor_routes": true,
+    "retired_catalog_editor_links_removed_from_covered_current_surfaces": true,
+    "product_editor_tab_focus_deep_links": true,
+    "product_image_editor_cache_generation": 178,
+    "schema_change": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "payment_refund_mutation": false,
+    "accounting_posting": false
+  },
+  "closure_policy": {
+    "candidate_must_not_self_claim_final_proof": true,
+    "requires_exact_dev_head_proof": true,
+    "production_promotion_only_after_development_green": true
+  }
+}
