@@ -340,9 +340,9 @@ async function readPackaging(projectId = 0) {
 
   const facade = contracts();
   const [catalogResult, inventoryResult, mediaResult] = await Promise.allSettled([
-    facade.readCatalog({ limit: 500 }),
-    facade.readInventory({ limit: 1000 }),
-    facade.readContentMedia({ mediaType: 'artwork', limit: 72 }),
+    facade.readCatalog({ limit: 120 }),
+    facade.readInventory({ limit: 120 }),
+    facade.readContentMedia({ mediaType: 'artwork', limit: 36 }),
   ]);
 
   const catalog = resolveContract(catalogResult, 'catalog', 'Catalog', fallbackReasons);
