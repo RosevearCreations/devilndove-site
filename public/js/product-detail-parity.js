@@ -1,4 +1,4 @@
-// Release 467 Build 15 — visible Product facts, schema, relationships, and shipping policy parity.
+// Release 467 Build 15 — visible Product facts, schema, relationships, and shipping policy parity.\n// Release 467 Build 179 successor: consumes DDProductDetailSnapshot and performs zero duplicate Product-detail reads.
 (async function initProductParity(){
   const run = async () => {
     const parity = window.DDStorefrontParity;
@@ -7,9 +7,8 @@
     if (!slug) return;
     const escapeHtml = (value) => String(value == null ? '' : value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
     try {
-      const response = await fetch(`/api/product-detail?slug=${encodeURIComponent(slug)}`, { headers: { Accept: 'application/json' } });
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.ok || !data.product) return;
+      const data = window.DDProductDetailSnapshot || null;
+      if (!data?.product) return;
       const product = data.product;
       const facts = parity.buyerFacts(product, data.listing_profile || {}, data.story_notes || {});
       const factRows = [['Best for',facts.best_for],['Materials',facts.materials],['Process',facts.process],['Finish / condition',facts.finish_condition],['Size / dimensions',facts.dimensions],['Care',facts.care],['Personalization limits',facts.personalization_limits],['Availability',facts.availability],['Shipping / pickup',facts.shipping_pickup],['Handmade note',facts.handmade_limitations]].filter(([,value])=>String(value||'').trim());
@@ -22,5 +21,6 @@
       const policyList=document.getElementById('productPolicyList');if(policyList&&Number(product.requires_shipping||0)===1&&!policyList.querySelector('[data-ca-shipping-policy]')){const li=document.createElement('li');li.dataset.caShippingPolicy='1';li.textContent=parity.SHIPPING_POLICY.public_message;policyList.prepend(li);}
     } catch {}
   };
+  document.addEventListener('dd:product-detail-rendered',()=>{ void run(); });
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});else await run();
 })();
