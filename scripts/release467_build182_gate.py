@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 182 — Product Facts & Buyer Readiness gate."""
+"""Release 467 Build 182 — Product Facts & Buyer Readiness gate, successor-aware through Build 183."""
 from pathlib import Path
 import re, subprocess, sys
 
@@ -47,8 +47,9 @@ req(len(re.findall(r"<h1\b",health,re.I))==1,"Catalog Health must keep one H1")
 req("'/api/admin/product'" in routes or '"/api/admin/product"' in routes,"Storefront Product API prefix ownership missing")
 for token in ("Product Browser remains compact","Build 183","no canonical schema migration","no R2 mutation","no payment/refund action"):
     req(token.lower() in (doc+"\n"+plan).lower(),f"Build 182 documentation missing: {token}")
-for token in ("Build 181 — complete","Build 182 — current","Build 183 — next"):
-    req(token in plan,f"Catalog rework checkpoint missing: {token}")
+req("Build 181 — complete" in plan,"Catalog rework checkpoint missing: Build 181 — complete")
+req(any(token in plan for token in ("Build 182 — current","Build 182 — complete")),"Catalog rework checkpoint missing Build 182 current/complete state")
+req(any(token in plan for token in ("Build 183 — next","Build 183 — current")),"Catalog rework checkpoint missing Build 183 next/current state")
 
 node("functions/api/admin/product-buyer-readiness.js")
 node("public/js/admin-product-buyer-readiness-v182.js")
