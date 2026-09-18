@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="card product-stock-report-panel" style="margin-top:18px">
         <div class="inventory-panel-heading">
           <div><h3 style="margin-top:0">Product Stock & Build Readiness</h3><p class="small" style="margin-top:0">See what is on hand, which finished products are running low, and which linked tools/supplies are triggering reorder pressure.</p></div>
-          <div class="inventory-panel-actions"><button class="btn" type="button" id="productStockReportRefresh">Refresh</button></div>
+          <div class="inventory-panel-actions"><button class="btn" type="button" id="productStockReportRefresh">Load stock report</button></div>
         </div>
         <div id="productStockReportMessage" class="small" style="display:none;margin-bottom:10px"></div>
         <div class="grid cols-4 inventory-stock-summary-grid" style="gap:12px;margin-bottom:12px">
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div><label class="small" for="productStockSearch">Search products</label><input id="productStockSearch" class="input" type="search" placeholder="ring, pendant, polymer..."/></div>
           <div><label class="small" for="productStockLowOnly">Filter</label><select id="productStockLowOnly"><option value="0">All products</option><option value="1">Low stock only</option></select></div>
         </div>
-        <div class="admin-table-wrap product-stock-table-wrap"><table class="product-stock-table"><thead><tr><th>Product</th><th>Stock</th><th>Price</th><th>Build links</th><th>Linked low stock</th><th>Reserve tools/supplies</th></tr></thead><tbody id="productStockRows"><tr><td colspan="6" class="site-inventory-empty-row">Loading stock report...</td></tr></tbody></table></div>
+        <div class="admin-table-wrap product-stock-table-wrap"><table class="product-stock-table"><thead><tr><th>Product</th><th>Stock</th><th>Price</th><th>Build links</th><th>Linked low stock</th><th>Reserve tools/supplies</th></tr></thead><tbody id="productStockRows"><tr><td colspan="6" class="site-inventory-empty-row">Stock report is paused until requested.</td></tr></tbody></table></div>
       </div>`;
     document.getElementById('productStockReportRefresh')?.addEventListener('click', load);
     document.getElementById('productStockSearch')?.addEventListener('input', debounce(load, 250));
@@ -53,6 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
       setMsg('');
     } catch(err){ setMsg(err.message || 'Failed to load product stock report.', true); }
   }
-  document.addEventListener('dd:admin-ready', (event) => { if(!event?.detail?.ok) return; render(); load(); });
+  document.addEventListener('dd:admin-ready', (event) => { if(!event?.detail?.ok) return; render(); });
   render();
 });
