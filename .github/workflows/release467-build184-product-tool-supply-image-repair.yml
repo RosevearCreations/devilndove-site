@@ -14,6 +14,23 @@ on:
       - 'docs/operations/RELEASE_467_BUILD_184_PRODUCT_TOOL_SUPPLY_IMAGE_REPAIR.md'
       - 'docs/operations/RELEASE_467_CATALOG_REWORK_BUILDS_181_186.md'
       - 'scripts/release467_build184_gate.py'
+      - 'scripts/release467_build184_d1_quota_guard.py'
+      - 'functions/api/admin/inventory-identity-health.js'
+      - 'functions/api/admin/catalog-health.js'
+      - 'functions/api/_lib/d1ReadBudget.js'
+      - 'public/js/admin-catalog-health-v181.js'
+      - 'public/js/admin-tool-lifecycle-review.js'
+      - 'public/js/admin-inventory-material-usage-reconciliation-v112.js'
+      - 'public/js/admin-inventory-process-assignments-v156.js'
+      - 'public/js/admin-product-integrity-review.js'
+      - 'public/js/admin-inventory-receiving.js'
+      - 'public/js/admin-inventory-receiving-reversal.js'
+      - 'public/js/admin-product-resources.js'
+      - 'public/js/admin-inventory-kits.js'
+      - 'public/js/admin-inventory-kit-component-usage.js'
+      - 'public/js/admin-product-stock-report.js'
+      - 'public/js/admin-catalog-option-manager.js'
+      - 'docs/operations/RELEASE_467_BUILD_184_D1_QUOTA_REMEDIATION.md'
       - 'scripts/release467_build183_gate.py'
       - 'scripts/release467_build182_gate.py'
       - 'scripts/release467_build181_gate.py'
@@ -36,6 +53,8 @@ jobs:
           node-version: '24'
       - name: Prove Build 184 image repair contract
         run: python scripts/release467_build184_gate.py
+      - name: Prove Build 184 D1 quota remediation contract
+        run: python scripts/release467_build184_d1_quota_guard.py
       - name: Retain Build 183 Inventory identity cleanup
         run: python scripts/release467_build183_gate.py
       - name: Retain Build 182 Product buyer readiness
