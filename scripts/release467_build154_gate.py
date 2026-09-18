@@ -81,7 +81,8 @@ should_bypass = middleware[middleware.find('function shouldBypass'):middleware.f
 req('/admin/products/' not in should_bypass,
     'Products route must not bypass module/session guard')
 
-req('<body data-admin-page="products">' in products and 'Products &amp; Inventory' in products,
+req(('<body data-admin-page="products">' in products and 'Products &amp; Inventory' in products)
+    or ('<body data-admin-page="product-browser-v166">' in products and '<h1>Products</h1>' in products),
     'Products source document identity drifted')
 req(('/public/js/admin-products.js' in products and '/public/js/admin-create-product.js' in products)
     or '/public/js/admin-products-browser-v162.js' in products,
