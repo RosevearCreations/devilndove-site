@@ -1,5 +1,5 @@
 // Release 465 Build 1 — reviewed SEO overrides, dynamic Product merchant markup, and Shop search-quality loader.
-// Release 467 Build 15 preserves that authority and adds shared visible-fact/schema/fulfillment parity.
+// Release 467 Build 15 preserves that authority and adds shared visible-fact/schema/fulfillment parity.\n// Release 467 Build 179 successor: Product SEO reuses the bounded renderer snapshot instead of refetching legacy Product detail.
 (function(){
   'use strict';
   const text=(v)=>String(v==null?'':v).trim();
@@ -20,13 +20,13 @@
     await loadScript('/public/js/storefront-parity.js?v=467b15','release467Build15StorefrontParity');
     const path=location.pathname;
     if(path==='/shop/'||path.endsWith('/shop/index.html')) await loadScript('/public/js/shop-parity.js?v=467b15','release467Build15ShopParity');
-    if(path==='/shop/product/'||path.endsWith('/shop/product/index.html')) await loadScript('/public/js/product-detail-parity.js?v=467b15','release467Build15ProductParity');
+    if(path==='/shop/product/'||path.endsWith('/shop/product/index.html')) await loadScript('/public/js/product-detail-parity.js?v=179','release467Build15ProductParity');
     if(path.startsWith('/shop/')||path.startsWith('/cart/')||path.startsWith('/checkout/')||path==='/custom-request/'||path.endsWith('/custom-request/index.html')) await loadScript('/public/js/storefront-shipping-policy.js?v=467b15','release467Build15ShippingPolicy');
   }
   async function productSeo(){
     if(location.pathname!=='/shop/product/'&&!location.pathname.endsWith('/shop/product/index.html'))return;
     const slug=text(new URL(location.href).searchParams.get('slug'));if(!slug)return;
-    const response=await fetch(`/api/product-detail?slug=${encodeURIComponent(slug)}`,{headers:{Accept:'application/json'},cache:'no-store'});const data=await response.json().catch(()=>null);if(!response.ok||!data?.ok||!data.product)return;
+    const data=window.DDProductDetailSnapshot||null;if(!data?.product)return;
     const p=data.product,parity=window.DDStorefrontParity,canonicalUrl=parity?.canonicalFor?.(p,location.href)||`https://devilndove.com/shop/product/?slug=${encodeURIComponent(p.slug||slug)}`,desc=productDescription(p);const image=text(p.featured_image_url||(data.storefront_images||data.images||[])[0]?.image_url||(data.images||[])[0]?.url);
     document.title=text(p.meta_title||p.seo_title)||`${text(p.name)} — Devil n Dove`;description(desc);canonical(canonicalUrl);property('og:type','product');property('og:title',document.title);property('og:description',desc);property('og:url',canonicalUrl);if(image)property('og:image',image);twitter('twitter:card','summary_large_image');twitter('twitter:title',document.title);twitter('twitter:description',desc);if(image)twitter('twitter:image',image);
     if(parity){
@@ -40,5 +40,6 @@
     }
     try{const merch=await fetch('/api/storefront-merchandising',{headers:{Accept:'application/json'}}).then((r)=>r.ok?r.json():null);const collections=(merch?.collections||[]).filter((c)=>(c.products||[]).some((x)=>Number(x.product_id)===Number(p.product_id)));if(collections.length&&!document.getElementById('update3ProductCollections')){const target=document.getElementById('productRelatedProofCard')||document.getElementById('productRelated')||document.querySelector('.footer');if(target){const box=document.createElement('section');box.id='update3ProductCollections';box.className='card';box.style.marginTop='18px';box.innerHTML=`<h2 style="margin-top:0">Shop related collections</h2><p class="small">Continue browsing curated Devil n Dove collections connected to this item.</p><div class="dd-admin-responsive-actions">${collections.slice(0,6).map((c)=>`<a class="btn" href="/collections/?collection=${encodeURIComponent(c.slug)}">${esc(c.name)}</a>`).join('')}</div>`;target.parentNode?.insertBefore(box,target);}}}catch(_e){}
   }
+  document.addEventListener('dd:product-detail-rendered',()=>{productSeo().catch(()=>{});});
   document.addEventListener('DOMContentLoaded',async()=>{loadShopSearchQuality();await loadBuild15Parity();try{const r=await fetch(`/api/seo-page-overrides?path=${encodeURIComponent(location.pathname)}`,{headers:{Accept:'application/json'}}),d=await r.json().catch(()=>null);if(r.ok&&d?.ok)applyOverride(d.override||null);}catch(_e){try{const f=await fetch('/data/site/seo-page-overrides.json',{cache:'no-store'}).then((r)=>r.ok?r.json():null);applyOverride(findStaticOverride(f));}catch(_ignore){}}productSeo().catch(()=>{});});
 })();
