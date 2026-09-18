@@ -177,7 +177,7 @@
             </div>
             ${blockerMarkup}
             <div class="product-readiness-actions">
-              <a class="btn" href="/admin/catalog/?product_id=${encodeURIComponent(product.product_id)}">Open editor</a>
+              <a class="btn" href="/admin/product-editor/?product_id=${encodeURIComponent(product.product_id)}&tab=basics">Open editor</a>
               <a class="btn" href="/admin/catalog-media/?product_id=${encodeURIComponent(product.product_id)}">Open media</a>
               ${quickFixButtons(product)}
             </div>
