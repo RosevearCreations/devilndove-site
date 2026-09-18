@@ -1,4 +1,4 @@
-// Release 467 Build 166 — lean, fail-fast public Product renderer.
+// Release 467 Build 166 — lean, fail-fast public Product renderer.\n// Release 467 Build 179 successor: one fetched snapshot is shared with SEO/parity enhancers; no duplicate Product request.
 // Uses the bounded Product core endpoint, converts legacy media references to same-origin R2 reads,
 // and never retries automatically or leaves the browser waiting indefinitely.
 document.addEventListener('DOMContentLoaded',()=>{
@@ -56,7 +56,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     const optional=['productQuickFactsCard','productVideoCard','productPublicStoryCard','productStoryCard','productReviewsCard','productCandleSoapSafetyCard','productRelatedProofCard'];optional.forEach((id)=>hide(document.getElementById(id)));
     const trust=document.getElementById('productTrustSummary');if(trust)trust.textContent='This Product page now loads from a bounded Product record and existing gallery references so shopping remains responsive.';
     show(detail);
-    try{document.dispatchEvent(new CustomEvent('dd:product-detail-rendered',{detail:{product,images}}));}catch{}
+    window.DDProductDetailSnapshot=Object.freeze({product,images});
+    try{document.dispatchEvent(new CustomEvent('dd:product-detail-rendered',{detail:window.DDProductDetailSnapshot}));}catch{}
     const addButton=document.getElementById('addToCartButton');addButton?.addEventListener('click',()=>{const message=document.getElementById('addToCartMessage');try{if(!window.DDCart)throw new Error('Cart is not available right now.');const qty=Math.max(1,Number(document.getElementById('productQuantity')?.value||1));window.DDCart.addToCart(product,qty);if(message){message.textContent='Added to cart successfully.';message.style.display='block';}}catch(e){if(message){message.textContent=e.message||'Could not add to cart.';message.style.display='block';}}});
   }
   (async()=>{
