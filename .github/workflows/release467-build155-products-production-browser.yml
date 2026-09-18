@@ -42,7 +42,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_SHA}"
           if [ -f scripts/release467_build166_gate.py ] \
              && grep -q 'Build 166' admin/products/index.html \
-             && grep -q '/public/js/product-detail-v166.js?v=166' shop/product/index.html; then
+             && grep -Eq '/public/js/product-detail-v166\.js\?v=(166|179)' shop/product/index.html; then
             echo 'successor=build166' >> "${GITHUB_OUTPUT}"
             echo 'Build 166 Product editing/image stabilization architecture detected. Historical browser/session probes are retired for this SHA.'
           elif [ -f scripts/release467_build165_gate.py ] \
