@@ -1,4 +1,4 @@
-// Build 298 - Mature Packaging editor requests now use the native DDPackagingClient facade.
+// Build 177 - Packaging starts bounded and Inventory search expands explicitly through the owner contract.
 // Build 277 renderer/content behavior remains otherwise unchanged.
 (() => {
   const STORAGE_KEY = 'dd_packaging_studio_local_draft_v5';
@@ -660,8 +660,53 @@
     const idMatch=clean.match(/#(\d+)\s*$/);if(idMatch){const match=state.inventory.find((item)=>Number(item.site_item_inventory_id)===Number(idMatch[1]));if(match)return match;}
     return state.inventory.find((item)=>inventoryChoiceLabel(item)===clean)||state.inventory.find((item)=>String(item.item_name||'').toLowerCase()===clean.toLowerCase())||null;
   }
+  const inventorySearchTimers = new WeakMap();
   function inventoryDatalist(idValue) {
     return `<datalist id="${esc(idValue)}">${state.inventory.map((item)=>`<option value="${esc(inventoryChoiceLabel(item))}"></option>`).join('')}</datalist>`;
+  }
+  function mergeInventoryRows(rows = []) {
+    const merged = []; const seen = new Set();
+    for (const item of [...(Array.isArray(rows)?rows:[]), ...state.inventory]) {
+      const key = Number(item?.site_item_inventory_id || 0);
+      if (!key || seen.has(key)) continue;
+      seen.add(key); merged.push(item);
+      if (merged.length >= 240) break;
+    }
+    state.inventory = merged;
+  }
+  function refreshInventoryDatalists() {
+    document.querySelectorAll('datalist[id*="Inventory"]').forEach((list) => {
+      list.innerHTML = state.inventory.map((item)=>`<option value="${esc(inventoryChoiceLabel(item))}"></option>`).join('');
+    });
+  }
+  async function searchInventoryForInput(input) {
+    const q = String(input?.value || '').trim();
+    if (q.length < 2) return;
+    const facade = globalThis.DDPackagingContracts;
+    if (!facade || typeof facade.readInventory !== 'function') return;
+    try {
+      const result = await facade.readInventory({ q, limit: 40 });
+      mergeInventoryRows(result?.rows || []);
+      refreshInventoryDatalists();
+      const row = input.closest('[data-packaging-component-row],[data-soap-ingredient-row]');
+      const stock = row?.querySelector('[data-inventory-stock]');
+      if (stock && Array.isArray(result?.rows)) stock.textContent = `${result.rows.length} matching Inventory item${result.rows.length===1?'':'s'} loaded. Choose a suggestion to link it.`;
+    } catch (error) {
+      console.warn('[DD Packaging Build 177] bounded Inventory search unavailable', error);
+    }
+  }
+  function bindInventorySearchInput(input) {
+    if (!input || input.dataset.ddPackagingInventorySearchBound === '1') return;
+    input.dataset.ddPackagingInventorySearchBound = '1';
+    input.addEventListener('input', () => {
+      const existing = inventorySearchTimers.get(input);
+      if (existing) clearTimeout(existing);
+      const timer = setTimeout(() => {
+        inventorySearchTimers.delete(input);
+        void searchInventoryForInput(input);
+      }, 320);
+      inventorySearchTimers.set(input, timer);
+    });
   }
   function claimIconUi(icon='leaf') {
     return `<span class="packaging-claim-icon" title="${esc(icon)}"><svg viewBox="0 0 36 36" aria-hidden="true">${iconSvg(icon,18,18,'currentColor')}</svg></span>`;
@@ -910,9 +955,11 @@
     document.querySelectorAll('[data-remove-claim]').forEach((button) => { button.onclick = () => { button.closest('[data-soap-claim-row]')?.remove(); updateRowNumbers('[data-soap-claim-row]'); renderPreview(); }; });
     document.querySelectorAll('[data-remove-component]').forEach((button) => { button.onclick = () => { button.closest('[data-packaging-component-row]')?.remove(); updateRowNumbers('[data-packaging-component-row]'); }; });
     document.querySelectorAll('[data-packaging-component-row] [data-field="inventory_search"]').forEach((input) => {
+      bindInventorySearchInput(input);
       const resolve=()=>applyInventoryToComponentRow(input.closest('[data-packaging-component-row]'),inventoryByChoice(input.value));input.onchange=resolve;input.onblur=resolve;
     });
     document.querySelectorAll('[data-soap-ingredient-row] [data-field="inventory_search"]').forEach((input) => {
+      bindInventorySearchInput(input);
       const resolve=()=>{applyInventoryToIngredientRow(input.closest('[data-soap-ingredient-row]'),inventoryByChoice(input.value));renderPreview();};input.onchange=resolve;input.onblur=resolve;
     });
     document.querySelectorAll('[data-soap-ingredient-row] input:not([data-field="inventory_search"]),[data-soap-claim-row] input,[data-soap-claim-row] select').forEach((node) => { node.oninput = renderPreview; node.onchange = () => { if(node.matches('[data-field="icon_name"]')){const row=node.closest('[data-soap-claim-row]');const mount=row?.querySelector('.packaging-claim-editor-icon');if(mount)mount.innerHTML=claimIconUi(node.value);} renderPreview(); }; });
