@@ -180,18 +180,18 @@ function packagingRequiredFields(project = {}, ingredients = [], claims = [], te
 }
 
 async function listPackagingData(db) {
-  const templates = rows(await db.prepare(`SELECT * FROM packaging_templates WHERE is_active=1 ORDER BY CASE WHEN template_key='soap-ribbon-glacial-approved-v1' THEN 0 WHEN template_key='soap-ribbon-spec-50mm-seal-v1' THEN 1 ELSE 2 END,is_system DESC,LOWER(template_name)`).all()).map(mapTemplate);
+  const templates = rows(await db.prepare(`SELECT * FROM packaging_templates WHERE is_active=1 ORDER BY CASE WHEN template_key='soap-ribbon-glacial-approved-v1' THEN 0 WHEN template_key='soap-ribbon-spec-50mm-seal-v1' THEN 1 ELSE 2 END,is_system DESC,LOWER(template_name) LIMIT 48`).all()).map(mapTemplate);
 
   // Linked Catalog context only: this does not enumerate the Catalog.
-  const projects = rows(await db.prepare(`SELECT pp.*,p.sku,p.slug,p.status AS product_status,p.featured_image_url,sp.print_status AS soap_print_status FROM packaging_projects pp LEFT JOIN products p ON p.product_id=pp.product_id LEFT JOIN soap_products sp ON sp.packaging_project_id=pp.packaging_project_id ORDER BY pp.updated_at DESC,pp.packaging_project_id DESC`).all()).map(mapProject);
+  const projects = rows(await db.prepare(`SELECT pp.*,p.sku,p.slug,p.status AS product_status,p.featured_image_url,sp.print_status AS soap_print_status FROM packaging_projects pp LEFT JOIN products p ON p.product_id=pp.product_id LEFT JOIN soap_products sp ON sp.packaging_project_id=pp.packaging_project_id ORDER BY pp.updated_at DESC,pp.packaging_project_id DESC LIMIT 80`).all()).map(mapProject);
 
   let printers = [];
   let printers_schema_ready = true;
   try {
-    printers = rows(await db.prepare(`SELECT * FROM packaging_printer_profiles WHERE is_active=1 ORDER BY is_default_label DESC,LOWER(profile_name),packaging_printer_profile_id`).all()).map(mapPrinterProfile);
+    printers = rows(await db.prepare(`SELECT * FROM packaging_printer_profiles WHERE is_active=1 ORDER BY is_default_label DESC,LOWER(profile_name),packaging_printer_profile_id LIMIT 24`).all()).map(mapPrinterProfile);
   } catch { printers_schema_ready = false; }
 
-  const reference_sources = rows(await db.prepare(`SELECT * FROM packaging_reference_sources WHERE is_active=1 ORDER BY CASE source_type WHEN 'design_specification' THEN 1 WHEN 'dimension_guide' THEN 2 WHEN 'svg_template' THEN 3 ELSE 4 END,source_key`).all()).map(mapReference);
+  const reference_sources = rows(await db.prepare(`SELECT * FROM packaging_reference_sources WHERE is_active=1 ORDER BY CASE source_type WHEN 'design_specification' THEN 1 WHEN 'dimension_guide' THEN 2 WHEN 'svg_template' THEN 3 ELSE 4 END,source_key LIMIT 32`).all()).map(mapReference);
 
   let formula_library = [];
   let content_library = [];
@@ -201,18 +201,18 @@ async function listPackagingData(db) {
   let source_material_metadata_ready = true;
 
   try {
-    formula_library = rows(await db.prepare(`SELECT * FROM packaging_formula_library WHERE is_active=1 ORDER BY is_system DESC,LOWER(formula_name),packaging_formula_library_id`).all()).map(mapFormula);
-    content_library = rows(await db.prepare(`SELECT * FROM packaging_content_library WHERE is_active=1 ORDER BY CASE content_type WHEN 'claim' THEN 1 WHEN 'ingredient' THEN 2 WHEN 'fragrance_oil' THEN 3 WHEN 'colourant' THEN 4 ELSE 5 END,is_system DESC,LOWER(item_name),packaging_content_library_id`).all()).map(mapLibraryContent);
+    formula_library = rows(await db.prepare(`SELECT * FROM packaging_formula_library WHERE is_active=1 ORDER BY is_system DESC,LOWER(formula_name),packaging_formula_library_id LIMIT 80`).all()).map(mapFormula);
+    content_library = rows(await db.prepare(`SELECT * FROM packaging_content_library WHERE is_active=1 ORDER BY CASE content_type WHEN 'claim' THEN 1 WHEN 'ingredient' THEN 2 WHEN 'fragrance_oil' THEN 3 WHEN 'colourant' THEN 4 ELSE 5 END,is_system DESC,LOWER(item_name),packaging_content_library_id LIMIT 120`).all()).map(mapLibraryContent);
   } catch { library_schema_ready = false; }
 
   try {
     try {
-      source_material_library = rows(await db.prepare(`SELECT smt.*,smm.product_family,smm.material_subtype,smm.default_role,smm.colour_hex FROM packaging_source_material_templates smt LEFT JOIN packaging_source_material_metadata smm ON smm.packaging_source_material_template_id=smt.packaging_source_material_template_id WHERE smt.is_active=1 ORDER BY CASE COALESCE(smm.default_role,'') WHEN 'base' THEN 1 WHEN 'fragrance' THEN 2 WHEN 'colourant' THEN 3 ELSE 4 END,smt.is_system DESC,LOWER(smt.material_name),smt.packaging_source_material_template_id`).all()).map(mapSourceMaterial);
+      source_material_library = rows(await db.prepare(`SELECT smt.*,smm.product_family,smm.material_subtype,smm.default_role,smm.colour_hex FROM packaging_source_material_templates smt LEFT JOIN packaging_source_material_metadata smm ON smm.packaging_source_material_template_id=smt.packaging_source_material_template_id WHERE smt.is_active=1 ORDER BY CASE COALESCE(smm.default_role,'') WHEN 'base' THEN 1 WHEN 'fragrance' THEN 2 WHEN 'colourant' THEN 3 ELSE 4 END,smt.is_system DESC,LOWER(smt.material_name),smt.packaging_source_material_template_id LIMIT 120`).all()).map(mapSourceMaterial);
     } catch {
       source_material_metadata_ready = false;
-      source_material_library = rows(await db.prepare(`SELECT * FROM packaging_source_material_templates WHERE is_active=1 ORDER BY CASE material_type WHEN 'soap_base' THEN 1 WHEN 'fragrance_oil' THEN 2 WHEN 'colourant' THEN 3 ELSE 4 END,is_system DESC,LOWER(material_name),packaging_source_material_template_id`).all()).map(mapSourceMaterial);
+      source_material_library = rows(await db.prepare(`SELECT * FROM packaging_source_material_templates WHERE is_active=1 ORDER BY CASE material_type WHEN 'soap_base' THEN 1 WHEN 'fragrance_oil' THEN 2 WHEN 'colourant' THEN 3 ELSE 4 END,is_system DESC,LOWER(material_name),packaging_source_material_template_id LIMIT 120`).all()).map(mapSourceMaterial);
     }
-    const links = rows(await db.prepare(`SELECT packaging_formula_library_id,packaging_source_material_template_id,material_role FROM packaging_formula_source_material_links ORDER BY packaging_formula_source_material_link_id`).all());
+    const links = rows(await db.prepare(`SELECT packaging_formula_library_id,packaging_source_material_template_id,material_role FROM packaging_formula_source_material_links ORDER BY packaging_formula_source_material_link_id LIMIT 240`).all());
     for (const formula of formula_library) {
       const link = links.find((row) => Number(row.packaging_formula_library_id) === Number(formula.packaging_formula_library_id) && String(row.material_role) === 'base');
       if (link) formula.source_material_template_id = Number(link.packaging_source_material_template_id);
@@ -231,6 +231,16 @@ async function listPackagingData(db) {
     library_schema_ready,
     source_material_schema_ready,
     source_material_metadata_ready,
+    bootstrap_limits: {
+      projects: 80,
+      templates: 48,
+      printers: 24,
+      reference_sources: 32,
+      formula_library: 80,
+      content_library: 120,
+      source_material_library: 120,
+      formula_source_links: 240,
+    },
   };
 }
 
@@ -243,26 +253,26 @@ async function loadDetail(db, projectId) {
   let ingredients = [];
   let claims = [];
   try {
-    ingredients = rows(await db.prepare(`SELECT * FROM packaging_project_ingredients WHERE packaging_project_id=? ORDER BY sort_order,packaging_project_ingredient_id`).bind(projectId).all());
-    claims = rows(await db.prepare(`SELECT * FROM packaging_project_claims WHERE packaging_project_id=? ORDER BY sort_order,packaging_project_claim_id`).bind(projectId).all());
+    ingredients = rows(await db.prepare(`SELECT * FROM packaging_project_ingredients WHERE packaging_project_id=? ORDER BY sort_order,packaging_project_ingredient_id LIMIT 80`).bind(projectId).all());
+    claims = rows(await db.prepare(`SELECT * FROM packaging_project_claims WHERE packaging_project_id=? ORDER BY sort_order,packaging_project_claim_id LIMIT 40`).bind(projectId).all());
   } catch {}
-  if (!ingredients.length && soapProduct) ingredients = rows(await db.prepare(`SELECT * FROM soap_ingredients WHERE soap_product_id=? ORDER BY sort_order,ingredient_id`).bind(soapProduct.soap_product_id).all());
-  if (!claims.length && soapProduct) claims = rows(await db.prepare(`SELECT * FROM soap_label_claims WHERE soap_product_id=? ORDER BY sort_order,claim_id`).bind(soapProduct.soap_product_id).all());
+  if (!ingredients.length && soapProduct) ingredients = rows(await db.prepare(`SELECT * FROM soap_ingredients WHERE soap_product_id=? ORDER BY sort_order,ingredient_id LIMIT 80`).bind(soapProduct.soap_product_id).all());
+  if (!claims.length && soapProduct) claims = rows(await db.prepare(`SELECT * FROM soap_label_claims WHERE soap_product_id=? ORDER BY sort_order,claim_id LIMIT 40`).bind(soapProduct.soap_product_id).all());
 
-  const versions = rows(await db.prepare(`SELECT packaging_project_version_id,packaging_project_id,version_number,version_label,review_status,reviewed_by_user_id,reviewed_at,created_by_user_id,created_at,snapshot_json FROM packaging_project_versions WHERE packaging_project_id=? ORDER BY version_number DESC`).bind(projectId).all()).map(mapVersion);
+  const versions = rows(await db.prepare(`SELECT packaging_project_version_id,packaging_project_id,version_number,version_label,review_status,reviewed_by_user_id,reviewed_at,created_by_user_id,created_at,snapshot_json FROM packaging_project_versions WHERE packaging_project_id=? ORDER BY version_number DESC LIMIT 50`).bind(projectId).all()).map(mapVersion);
   const exports = rows(await db.prepare(`SELECT * FROM packaging_export_history WHERE packaging_project_id=? ORDER BY created_at DESC,packaging_export_history_id DESC LIMIT 100`).bind(projectId).all());
   const printTests = rows(await db.prepare(`SELECT * FROM soap_label_print_tests WHERE packaging_project_id=? ORDER BY created_at DESC,print_test_id DESC LIMIT 50`).bind(projectId).all());
   const soapExports = soapProduct ? rows(await db.prepare(`SELECT * FROM soap_label_exports WHERE soap_product_id=? ORDER BY generated_at DESC,export_id DESC LIMIT 100`).bind(soapProduct.soap_product_id).all()) : [];
 
   // Linked Inventory context only for components already attached to this Packaging project.
-  const components = rows(await db.prepare(`SELECT pc.*,sii.item_name AS inventory_item_name,sii.on_hand_quantity,sii.reserved_quantity,sii.stock_unit_label,sii.usage_unit_label,sii.usage_units_per_stock_unit FROM packaging_components pc LEFT JOIN site_item_inventory sii ON sii.site_item_inventory_id=pc.site_item_inventory_id WHERE pc.packaging_project_id=? AND pc.is_active=1 ORDER BY pc.packaging_component_id`).bind(projectId).all());
+  const components = rows(await db.prepare(`SELECT pc.*,sii.item_name AS inventory_item_name,sii.on_hand_quantity,sii.reserved_quantity,sii.stock_unit_label,sii.usage_unit_label,sii.usage_units_per_stock_unit FROM packaging_components pc LEFT JOIN site_item_inventory sii ON sii.site_item_inventory_id=pc.site_item_inventory_id WHERE pc.packaging_project_id=? AND pc.is_active=1 ORDER BY pc.packaging_component_id LIMIT 80`).bind(projectId).all());
 
   let sourceMaterials = [];
   try {
-    sourceMaterials = rows(await db.prepare(`SELECT psm.packaging_project_source_material_id,psm.material_role,psm.sort_order,psm.source_snapshot_json,psm.review_status AS project_source_review_status,psm.notes AS project_source_notes,smt.*,smm.product_family,smm.material_subtype,smm.default_role,smm.colour_hex FROM packaging_project_source_materials psm JOIN packaging_source_material_templates smt ON smt.packaging_source_material_template_id=psm.packaging_source_material_template_id LEFT JOIN packaging_source_material_metadata smm ON smm.packaging_source_material_template_id=smt.packaging_source_material_template_id WHERE psm.packaging_project_id=? ORDER BY psm.sort_order,psm.packaging_project_source_material_id`).bind(projectId).all()).map(mapSourceMaterial);
+    sourceMaterials = rows(await db.prepare(`SELECT psm.packaging_project_source_material_id,psm.material_role,psm.sort_order,psm.source_snapshot_json,psm.review_status AS project_source_review_status,psm.notes AS project_source_notes,smt.*,smm.product_family,smm.material_subtype,smm.default_role,smm.colour_hex FROM packaging_project_source_materials psm JOIN packaging_source_material_templates smt ON smt.packaging_source_material_template_id=psm.packaging_source_material_template_id LEFT JOIN packaging_source_material_metadata smm ON smm.packaging_source_material_template_id=smt.packaging_source_material_template_id WHERE psm.packaging_project_id=? ORDER BY psm.sort_order,psm.packaging_project_source_material_id LIMIT 80`).bind(projectId).all()).map(mapSourceMaterial);
   } catch {
     try {
-      sourceMaterials = rows(await db.prepare(`SELECT psm.packaging_project_source_material_id,psm.material_role,psm.sort_order,psm.source_snapshot_json,psm.review_status AS project_source_review_status,psm.notes AS project_source_notes,smt.* FROM packaging_project_source_materials psm JOIN packaging_source_material_templates smt ON smt.packaging_source_material_template_id=psm.packaging_source_material_template_id WHERE psm.packaging_project_id=? ORDER BY psm.sort_order,psm.packaging_project_source_material_id`).bind(projectId).all()).map(mapSourceMaterial);
+      sourceMaterials = rows(await db.prepare(`SELECT psm.packaging_project_source_material_id,psm.material_role,psm.sort_order,psm.source_snapshot_json,psm.review_status AS project_source_review_status,psm.notes AS project_source_notes,smt.* FROM packaging_project_source_materials psm JOIN packaging_source_material_templates smt ON smt.packaging_source_material_template_id=psm.packaging_source_material_template_id WHERE psm.packaging_project_id=? ORDER BY psm.sort_order,psm.packaging_project_source_material_id LIMIT 80`).bind(projectId).all()).map(mapSourceMaterial);
     } catch {}
   }
 
