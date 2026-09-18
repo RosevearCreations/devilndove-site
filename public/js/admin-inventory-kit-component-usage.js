@@ -2,7 +2,7 @@
 (() => {
   const esc=(value)=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const number=(value)=>Number.isFinite(Number(value))?Number(value):0;
-  let state={components:[],summary:{}};
+  let state={components:[],summary:{},loaded:false};
 
   function mount(){
     let node=document.getElementById('inventoryKitComponentUsageMount');
@@ -59,16 +59,16 @@
   function render(){
     const node=mount();if(!node)return;
     const components=Array.isArray(state.components)?state.components:[];
-    node.innerHTML=`<div class="section-heading-row"><div><p class="inventory-operations-eyebrow">Purchased-kit component usage</p><h2 style="margin:0">Use released kit components</h2><p class="small">Exact/estimated Supply use reduces both Inventory and its purchase lot. Reusable and log-only items record usage without pretending the stock disappeared.</p></div><button class="btn" id="refreshInventoryKitComponentUsage" type="button">Refresh</button></div>
+    node.innerHTML=`<div class="section-heading-row"><div><p class="inventory-operations-eyebrow">Purchased-kit component usage</p><h2 style="margin:0">Use released kit components</h2><p class="small">Exact/estimated Supply use reduces both Inventory and its purchase lot. Reusable and log-only items record usage without pretending the stock disappeared.</p></div><button class="btn" id="refreshInventoryKitComponentUsage" type="button">${state.loaded?'Refresh':'Load components'}</button></div>
       <div id="inventoryKitComponentUsageMessage" hidden></div>
       <div class="inventory-kit-component-summary small">${components.length} component${components.length===1?'':'s'} · ${Number(state.summary?.ready_count||0)} linked · ${Number(state.summary?.unlinked_count||0)} waiting for first kit opening</div>
-      ${components.length?`<div class="admin-table-wrap"><table class="inventory-kit-component-table"><thead><tr><th>Component</th><th>Stock / tracking</th><th>Usage quantity</th><th>Evidence note</th><th>Action</th></tr></thead><tbody>${components.map(rowHtml).join('')}</tbody></table></div>`:'<p class="small">No active purchased-kit components are configured yet.</p>'}`;
+      ${components.length?`<div class="admin-table-wrap"><table class="inventory-kit-component-table"><thead><tr><th>Component</th><th>Stock / tracking</th><th>Usage quantity</th><th>Evidence note</th><th>Action</th></tr></thead><tbody>${components.map(rowHtml).join('')}</tbody></table></div>`:(state.loaded?'<p class="small">No active purchased-kit components are configured yet.</p>':'<p class="small">Kit component usage is paused until requested.</p>')}`;
     wire();
   }
   async function load({quiet=false}={}){
     try{
       const data=await request('/api/admin/inventory-kit-component-usage');
-      state=data;
+      state={...data,loaded:true};
       render();
       if(!quiet)message('Kit component balances refreshed.');
     }catch(error){
@@ -95,6 +95,6 @@
     document.getElementById('refreshInventoryKitComponentUsage')?.addEventListener('click',()=>load());
     document.querySelectorAll('[data-kit-use-submit]').forEach(button=>button.addEventListener('click',()=>consume(Number(button.dataset.kitUseSubmit||0),button)));
   }
-  window.addEventListener('inventory:kit-changed',()=>load({quiet:true}));
-  document.addEventListener('DOMContentLoaded',()=>{if(document.getElementById('siteInventoryAdminMount'))load({quiet:true});});
+  window.addEventListener('inventory:kit-changed',()=>{if(state.loaded)load({quiet:true});});
+  document.addEventListener('DOMContentLoaded',()=>{if(document.getElementById('siteInventoryAdminMount'))render();});
 })();
