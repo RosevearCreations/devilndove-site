@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function render() {
     mountEl.innerHTML = `
       <div class="card resource-editor-dark" style="margin-top:18px">
-        <h3 style="margin-top:0">Product Tools &amp; Supplies Used</h3>
+        <div class="section-heading-row"><h3 style="margin-top:0">Product Tools &amp; Supplies Used</h3><button class="btn" type="button" id="productResourcesLoadButton">Load Product resources</button></div>
         <p class="small" style="margin-top:0">Link the exact supplies and tools used to make a product. Add items from the dropdown, then select one linked item at a time to adjust how much was used.</p>
         <div class="small" id="productResourcesEditorHint" style="margin-bottom:12px">This section follows the current product editor record when you load, create, or update a product.</div>
         <div id="productResourcesMessage" class="small" style="display:none;margin-bottom:12px"></div>
@@ -210,6 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
 
+    document.getElementById('productResourcesLoadButton')?.addEventListener('click', startInitialLoad);
     document.getElementById('productResourcesProduct')?.addEventListener('change', onProductChange);
     document.getElementById('productResourcesSearch')?.addEventListener('input', scheduleResourceSearch);
     document.getElementById('productResourcesSaveButton')?.addEventListener('click', saveLinks);
@@ -729,7 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadData({ bootstrap: true, resources: true });
   }
 
-  document.addEventListener('dd:catalog-options-updated', () => { if (window.DDAuth?.isLoggedIn()) loadData({ bootstrap: false, resources: true }); });
+  document.addEventListener('dd:catalog-options-updated', () => { if (initialLoadStarted && window.DDAuth?.isLoggedIn()) loadData({ bootstrap: false, resources: true }); });
   document.addEventListener('dd:product-editor-target', (event) => {
     const productId = Number(event?.detail?.product_id || event?.detail?.product?.product_id || 0);
     if (productId) syncSelectedProduct(productId, { autoLoad: true });
@@ -742,7 +743,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const productId = Number(event?.detail?.product?.product_id || event?.detail?.product_id || 0);
     if (productId) syncSelectedProduct(productId, { autoLoad: true });
   });
-  document.addEventListener('dd:admin-ready', (event) => { if (event?.detail?.ok) startInitialLoad(); });
   ensureRendered();
-  if (window.DDAuth?.isLoggedIn()) startInitialLoad();
+  setMessage('Product resource reads are paused to protect the D1 daily budget. Choose Load Product resources when actively editing Product links.');
 });
