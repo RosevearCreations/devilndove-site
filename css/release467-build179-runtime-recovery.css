@@ -1,4 +1,5 @@
-/* Release 467 Build 179 — Inventory Operations viewport containment and responsive recovery. */
+/* Release 467 Build 179 — Inventory Operations viewport containment and responsive recovery.
+   Release 467 Build 180 successor — skip below-fold layout/paint until each operational mount approaches the viewport. */
 .inventory-operations-page .inventory-operations-workspace{overflow-x:clip!important;max-width:100%;}
 .inventory-operations-page .inventory-operations-workspace *,.inventory-operations-page .inventory-operations-workspace::before,.inventory-operations-page .inventory-operations-workspace::after{min-width:0;box-sizing:border-box;}
 .inventory-operations-page .inventory-operations-workspace>*,.inventory-operations-page [id$="Mount"],.inventory-operations-page section,.inventory-operations-page .card,.inventory-operations-page .grid{max-width:100%;}
@@ -18,3 +19,7 @@
  .inventory-operations-page .inventory-integrity-controls>*:last-child,.inventory-operations-page .inventory-integrity-count-controls>*:last-child{grid-column:auto;}
  .inventory-operations-page .inventory-integrity-item-head{align-items:flex-start;}
 }
+
+/* Build 180 staged-paint successor: preserve DOM/accessibility while avoiding eager below-fold rendering cost. */
+.inventory-operations-page .inventory-operations-workspace>[id$="Mount"]{content-visibility:auto;contain-intrinsic-size:auto 520px;}
+.inventory-operations-page .inventory-operations-workspace>#inventoryIntegrityReviewMount{contain-intrinsic-size:auto 720px;}
