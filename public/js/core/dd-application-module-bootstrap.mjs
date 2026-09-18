@@ -1,9 +1,10 @@
 // Devil n Dove Release 467 Build 61 authoritative application-module bootstrap.
 // One bounded read, no polling/timers. Server middleware remains the security boundary.
 // Build 61 converges legacy domain-group classification onto the canonical five-module API.
+// Build 177 lets lean Packaging activate its runtime from the static presentation fallback with zero /api/modules D1 reads; server middleware remains authoritative.
 
 import { createModuleRegistry } from './dd-module-registry.mjs';
-import { DD_MODULE_DEFINITIONS } from './dd-module-definitions.mjs';
+import { DD_MODULE_DEFINITIONS } from './dd-module-definitions.mjs?v=177';
 import { getApplicationModule } from './dd-application-module-groups.mjs';
 
 export const BUILD = 61;
@@ -81,6 +82,14 @@ function moduleForPath(pathname) {
   return moduleId ? moduleByKey(moduleId) : null;
 }
 
+function useLeanStaticPresentation() {
+  const path = normalizePath(window.location.pathname);
+  return Boolean(
+    window.DDAdminLeanStartup?.enabled === true
+    && (path === '/admin/packaging-studio' || path === '/admin/packaging-studio/index.html')
+  );
+}
+
 function annotateAndFilterLinks(root = document) {
   if (!root?.querySelectorAll) return;
   for (const link of root.querySelectorAll('a[href]')) {
@@ -146,6 +155,17 @@ function publish() {
 }
 
 async function load({ force = false } = {}) {
+  if (!force && useLeanStaticPresentation()) {
+    snapshot = Object.freeze({
+      build: BUILD,
+      schema_ready: true,
+      source: 'lean_static_server_middleware_authority',
+      reason: 'build177_packaging_zero_d1_module_presentation',
+      user: window.DDAuth?.getStoredUser?.() || null,
+      modules: FALLBACK_MODULES,
+    });
+    return publish();
+  }
   try {
     const response = await fetch(force ? '/api/modules?fresh=1' : '/api/modules', { method: 'GET', credentials: 'same-origin', cache: 'no-store' });
     const data = await response.json().catch(() => null);
