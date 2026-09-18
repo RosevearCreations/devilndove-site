@@ -212,7 +212,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // Build 176: server middleware remains the authorization boundary. Heavy lean workspaces
 // avoid the client presentation bootstrap because /api/modules adds session/module D1 reads
 // to every page load. Non-lean pages retain the authoritative presentation bootstrap.
-if (!window.DDAdminLeanStartup?.enabled) {
+const ddLeanModuleRuntimeRequired = document.body?.dataset?.adminPage === 'packaging-studio';
+if (!window.DDAdminLeanStartup?.enabled || ddLeanModuleRuntimeRequired) {
   void import('/public/js/core/dd-application-module-bootstrap.mjs?v=440')
     .catch((error) => console.warn('[DD modules] authoritative module bootstrap unavailable', error));
 } else {
