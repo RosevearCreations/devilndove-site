@@ -208,6 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// Historical Build 65 rule: permissions must be known before optional presentation modules.
 // Build 176: server middleware remains the authorization boundary. Heavy lean workspaces
 // avoid the client presentation bootstrap because /api/modules adds session/module D1 reads
 // to every page load. Non-lean pages retain the authoritative presentation bootstrap.
