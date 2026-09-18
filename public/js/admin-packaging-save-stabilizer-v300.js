@@ -372,26 +372,24 @@
     });
   }
 
-  function watchEditor() {
-    const main = byId('packagingStudioMain');
-    if (!main || typeof MutationObserver === 'undefined') return;
-
+  function refreshEditorBindings(reason='explicit-refresh') {
     bindPreviewAuditEvents();
-    const observer = new MutationObserver((mutations) => {
-      const meaningful = mutations.some((mutation) => {
-        const target = mutation?.target;
-        return !target?.closest?.('[data-build300-preview-controls]');
-      });
-      if (!meaningful) return;
-      bindPreviewIdentity();
-      ensurePreviewControls();
-      schedulePreviewAudit('editor-render');
-    });
-    observer.observe(main, { childList: true, subtree: true });
-
     bindPreviewIdentity();
     ensurePreviewControls();
-    schedulePreviewAudit('initial');
+    schedulePreviewAudit(reason);
+  }
+
+  function watchEditor() {
+    const main = byId('packagingStudioMain');
+    if (!main) return;
+
+    // Build 177: do not keep a permanent subtree MutationObserver over the mature editor.
+    // Packaging Studio explicitly dispatches this event after it renders/opens a project.
+    document.addEventListener('dd:packaging-editor-rendered', (event) => {
+      const reason=String(event?.detail?.reason||'editor-rendered');
+      refreshEditorBindings(reason);
+    });
+    refreshEditorBindings('initial');
   }
 
   function getStatus() {
