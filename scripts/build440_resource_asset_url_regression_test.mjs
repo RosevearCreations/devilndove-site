@@ -110,7 +110,7 @@ const transportIndex = inventoryPage.indexOf('/public/js/admin-inventory-asset-t
 check(safetyIndex > 0, 'Inventory Operations page does not load the Admin asset URL safety layer with the new cache-busting version.');
 check(transportIndex > safetyIndex, 'Inventory Operations page must load the transport guard after the shared safety layer.');
 for (const script of [
-  '/public/js/admin-inventory-integrity-review.js?v=179',
+  ...['/public/js/admin-inventory-integrity-review.js?v=179','/public/js/admin-inventory-integrity-review.js?v=180'].filter((script) => inventoryPage.includes(script)),
   '/public/js/admin-tool-lifecycle-review.js?v=440',
   '/public/js/admin-product-resources.js?v=440',
   '/public/js/admin-site-item-inventory.js?v=440.3',
