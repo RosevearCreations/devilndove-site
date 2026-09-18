@@ -1,0 +1,84 @@
+name: Release 467 Build 182 Product Facts Buyer Readiness
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/product-buyer-readiness.js'
+      - 'public/js/admin-product-buyer-readiness-v182.js'
+      - 'public/js/admin-catalog-buyer-readiness-v182.js'
+      - 'css/release467-build182-product-buyer-readiness.css'
+      - 'admin/product-editor/index.html'
+      - 'admin/catalog-health/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_182_PRODUCT_FACTS_BUYER_READINESS.md'
+      - 'docs/operations/RELEASE_467_CATALOG_REWORK_BUILDS_181_186.md'
+      - 'scripts/release467_build182_gate.py'
+      - '.github/workflows/release467-build182-product-facts-buyer-readiness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 182 Product facts contract
+        run: python scripts/release467_build182_gate.py
+      - name: Retain Build 181 catalog authority health
+        run: python scripts/release467_build181_gate.py
+      - name: Retain Build 180 staged runtime startup
+        run: python scripts/release467_build180_gate.py
+      - name: Retain Build 179 runtime responsiveness
+        run: python scripts/release467_build179_gate.py
+      - name: Retain Build 166 Product delivery
+        run: python scripts/release467_build166_gate.py
+      - name: Retain Build 175 zero-introspection Product save
+        run: python scripts/release467_build175_gate.py
+      - name: Retain Build 169 explicit Product QA
+        run: python scripts/release467_build169_gate.py
+
+  development-d1-buyer-facts:
+    if: ${{ github.event_name != 'push' || github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 target
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+      - name: Prove live Development Product buyer facts are readable
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT COUNT(*) AS products, SUM(CASE WHEN TRIM(COALESCE(product_category,''))='' THEN 1 ELSE 0 END) AS missing_category, SUM(CASE WHEN LENGTH(TRIM(COALESCE(short_description,'')))<40 THEN 1 ELSE 0 END) AS short_description_attention, SUM(CASE WHEN LENGTH(TRIM(COALESCE(description,'')))<120 THEN 1 ELSE 0 END) AS description_attention, SUM(CASE WHEN COALESCE(price_cents,0)<=0 THEN 1 ELSE 0 END) AS missing_price, SUM(CASE WHEN COALESCE(requires_shipping,0)=1 AND (COALESCE(weight_grams,0)<=0 OR TRIM(COALESCE(shipping_code,''))='') THEN 1 ELSE 0 END) AS shipping_attention, SUM(CASE WHEN COALESCE(inventory_tracking,0)=1 AND COALESCE(inventory_quantity,0)<=0 THEN 1 ELSE 0 END) AS tracked_zero_stock FROM products WHERE LOWER(TRIM(COALESCE(status,'draft'))) NOT IN ('archived','deleted');" > /tmp/build182-buyer-facts.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build182-buyer-facts.json')); rows=[]
+          keys=('products','missing_category','short_description_attention','description_attention','missing_price','shipping_attention','tracked_zero_stock')
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in keys): rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert rows,data
+          row={k:int(rows[0][k] or 0) for k in keys}
+          assert row['products']>=0,row
+          print('BUILD 182 DEVELOPMENT D1 BUYER FACTS: PASS',row)
+          PY
