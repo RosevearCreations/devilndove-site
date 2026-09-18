@@ -1240,6 +1240,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (initialLoadStarted || !window.DDAuth?.isLoggedIn()) return;
     initialLoadStarted = true;
     restoreInventoryDraft();
+    // Build 184: Catalog Health may route a reviewed Tool/Supply image issue here.
+    // Prefill only the normal bounded Inventory search; no mutation or extra authority is introduced.
+    const deepSearch = String(new URLSearchParams(window.location.search).get('q') || '').trim().slice(0, 160);
+    if (deepSearch) {
+      const search = document.getElementById('siteInventorySearch');
+      if (search) search.value = deepSearch;
+    }
     Promise.allSettled([loadSeedOptions(), loadList()]);
   }
 
