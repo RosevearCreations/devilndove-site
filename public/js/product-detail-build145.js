@@ -1,4 +1,4 @@
-// Release 467 Build 145 — Product Detail Trust, Story & Conversion.
+// Release 467 Build 145 — Product Detail Trust, Story & Conversion.\n// Release 467 Build 179 successor: event-driven only; no DOM MutationObserver feedback loop.
 // Read-only presentation enhancement. It consumes the existing rendered Product detail and adds no API authority.
 (() => {
   'use strict';
@@ -40,8 +40,8 @@
     else if(btn.dataset.build145Disabled==='1'){btn.disabled=false;btn.removeAttribute('aria-disabled');btn.removeAttribute('title');delete btn.dataset.build145Disabled;}
   }
   function scan(){mount();syncConnectivity();}
-  const observer=new MutationObserver(()=>scan());
-  document.addEventListener('DOMContentLoaded',()=>{observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','hidden']});scan();},{once:true});
+  document.addEventListener('dd:product-detail-rendered',scan);
+  document.addEventListener('DOMContentLoaded',scan,{once:true});
   addEventListener('online',syncConnectivity);addEventListener('offline',syncConnectivity);
   globalThis.DDProductDetailBuild145=Object.freeze({BUILD,scan});
 })();
