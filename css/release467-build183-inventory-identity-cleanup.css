@@ -1,0 +1,16 @@
+/* Release 467 Build 183 — Inventory / Tool / Supply identity cleanup. */
+.inventory-identity-cleanup{display:grid;gap:14px}
+.inventory-identity-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px}
+.inventory-identity-stat{display:grid;gap:4px;min-width:0}
+.inventory-identity-stat strong{font-size:1.45rem;line-height:1.05}
+.inventory-identity-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.inventory-identity-controls label{display:grid;gap:4px;min-width:210px;flex:1}
+.inventory-identity-table-wrap{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+.inventory-identity-table{width:100%;min-width:980px;border-collapse:collapse}
+.inventory-identity-table th,.inventory-identity-table td{text-align:left;vertical-align:top;padding:10px;border-bottom:1px solid var(--border);overflow-wrap:anywhere}
+.inventory-identity-tags,.inventory-identity-actions{display:flex;flex-wrap:wrap;gap:6px}
+.inventory-identity-tags span{display:inline-flex;border:1px solid var(--border);border-radius:999px;padding:2px 7px;font-size:.76rem}
+.inventory-identity-tags .is-blocker{border-color:rgba(220,90,90,.65)}
+.inventory-identity-tags .is-attention{border-color:rgba(220,170,70,.55)}
+.inventory-identity-policy{border-top:1px solid var(--border);padding-top:10px}
+@media(max-width:760px){.inventory-identity-controls,.inventory-identity-actions{display:grid;grid-template-columns:1fr}.inventory-identity-controls label{min-width:0}.inventory-identity-actions .btn{width:100%}}
