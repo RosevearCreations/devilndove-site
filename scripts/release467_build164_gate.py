@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 164 Product Media continuity gate, successor-aware through Build 173."""
+"""Release 467 Build 164 Product Media continuity gate, successor-aware through Build 178."""
 from pathlib import Path
 import subprocess,sys
 ROOT=Path(__file__).resolve().parents[1];FAIL=[]
@@ -13,7 +13,7 @@ page=read('admin/catalog-media/index.html');client_path='public/js/admin-product
 image_api=read('functions/api/admin/product-image-editor.js');file_api=read('functions/api/admin/product-image-file.js');media_api=read('functions/api/admin/product-media-editor.js');helper=read('functions/api/admin/_productImageAnnotationsV172.js') if (ROOT/'functions/api/admin/_productImageAnnotationsV172.js').is_file() else ''
 for token in ('Add image','Replace selected','Remove selected','Move earlier','Crop / sizing'):
     req(token in page,f'Product Media page missing continuity token: {token}')
-req(any(token in page for token in ('Build 164','Build 172','Build 173')),'Product Media page lost Build 164+ identity')
+req(any(token in page for token in ('Build 164','Build 172','Build 173','Build 178')),'Product Media page lost Build 164+ identity')
 for token in ('/api/admin/product-image-file',"action:'remove'","action:'reorder'",'square_1200','landscape_1600','window.confirm'):
     req(token in client,f'Product Media client missing continuity token: {token}')
 for forbidden in ('setInterval(','MutationObserver','/api/admin/products','/api/admin/media-assets','/api/admin/product-images'):
