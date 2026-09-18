@@ -9,6 +9,7 @@
   const LABEL_PRODUCTION_BUILD = 44;
   const RELEASE_WORKFLOW_BUILD = 83;
   const EXPECTED = Object.freeze({ startupGateBuild:297, clientTransportBuild:297, nativeClientBuild:298, stabilizationBuild:300, editorImplementationBuild:298, nativeReadGatewayBuild:293, nativeReadImplementationBuild:286, nativeWriteGatewayBuild:292, nativeWriteServiceBuild:291 });
+  let advancedLayersRequested = false;
   const safeStatus = (target) => { try { return target?.getStatus?.() || null; } catch { return null; } };
 
   function snapshot() {
@@ -30,10 +31,33 @@
   function loadLabelProduction(){if(typeof document==='undefined'||!String(globalThis.location?.pathname||'').includes('/admin/packaging-studio'))return;addScript('script[data-dd-packaging-label-production]','/public/js/admin-packaging-label-production-v44.js?v=46744','ddPackagingLabelProduction',LABEL_PRODUCTION_BUILD,loadReleaseWorkflow);}
   function loadLabelComposition(){if(typeof document==='undefined'||!String(globalThis.location?.pathname||'').includes('/admin/packaging-studio'))return;addScript('script[data-dd-packaging-label-composition]','/public/js/admin-packaging-label-composition-v43.js?v=46743','ddPackagingLabelComposition',LABEL_COMPOSITION_BUILD,loadLabelProduction);}
   function loadMaterialIntelligence(){if(typeof document==='undefined'||!String(globalThis.location?.pathname||'').includes('/admin/packaging-studio'))return;addScript('script[data-dd-packaging-material-intelligence]','/public/js/admin-packaging-material-intelligence-v42.js?v=46742','ddPackagingMaterialIntelligence',MATERIAL_INTELLIGENCE_BUILD,loadLabelComposition);}
-  globalThis.DDPackagingCompatibility=Object.freeze({build:BUILD,getStatus:snapshot,refreshStatus:publishState});
+  function requestAdvancedLayers(reason='explicit'){
+    if(advancedLayersRequested)return;
+    advancedLayersRequested=true;
+    if(typeof document!=='undefined'&&document.documentElement){
+      document.documentElement.dataset.ddPackagingAdvancedLayers='loading';
+      document.documentElement.dataset.ddPackagingAdvancedLayersReason=String(reason||'explicit');
+    }
+    loadMaterialIntelligence();
+  }
+
+  globalThis.DDPackagingCompatibility=Object.freeze({
+    build:BUILD,
+    getStatus:snapshot,
+    refreshStatus:publishState,
+    loadAdvancedLayers:()=>requestAdvancedLayers('manual-api')
+  });
+
   if(typeof document!=='undefined'){
     ['dd:packaging-client-transport-active','dd:packaging-contract-bootstrap','dd:packaging-native-client-write','dd:packaging-material-intelligence-active','dd:packaging-label-composition-active','dd:packaging-label-production-active','dd:packaging-release-workflow-active'].forEach((name)=>document.addEventListener(name,publishState));
     document.addEventListener('input',(event)=>{if(event?.target?.closest?.('#packagingStudioMain'))queueMicrotask(publishState);},{passive:true});
+    document.addEventListener('dd:packaging-editor-rendered',(event)=>{
+      if(event?.detail?.has_project===true)requestAdvancedLayers('project-opened');
+    });
+    document.addEventListener('dd:packaging-load-advanced-tools',()=>requestAdvancedLayers('explicit-event'));
   }
-  loadMaterialIntelligence();queueMicrotask(publishState);
+
+  // Build 177: core Packaging loads first. Advanced material/composition/production/release
+  // layers no longer compete with the initial page render.
+  queueMicrotask(publishState);
 })();
