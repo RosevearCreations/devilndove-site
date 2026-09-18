@@ -80,5 +80,18 @@ jobs:
           assert rows,data
           row={k:int(rows[0][k] or 0) for k in keys}
           assert row['products']>=0,row
+          reads=[]
+          def collect_reads(v):
+              if isinstance(v,dict):
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None:
+                      reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): collect_reads(x)
+              elif isinstance(v,list):
+                  for x in v: collect_reads(x)
+          collect_reads(data)
+          provider_rows_read=sum(reads)
+          assert provider_rows_read <= 5000, ('D1 rows_read budget exceeded',provider_rows_read,5000)
+          print('D1_PROVIDER_ROWS_READ=',provider_rows_read,'BUDGET=',5000)
           print('BUILD 182 DEVELOPMENT D1 BUYER FACTS: PASS',row)
           PY
