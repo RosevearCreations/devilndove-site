@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 174 — Product Editor Media read-collapse proof, successor-aware through Build 175."""
+"""Release 467 Build 174 — Product Editor Media read-collapse proof, successor-aware through Build 178."""
 from pathlib import Path
 import subprocess,sys
 
@@ -34,8 +34,8 @@ req('/api/admin/product-media-editor?product_id=' not in client,'Product Editor 
 for forbidden in ('setInterval(','setTimeout(','MutationObserver('):
     req(forbidden not in client,f'Build 174 Product Editor gained background behavior: {forbidden}')
 
-req(any(token in page for token in ('Release 467 • Build 174','Release 467 • Build 175')),'Build 174+ Product Editor identity missing')
-req(any(token in page for token in ('admin-product-editor-v163.js?v=174','admin-product-editor-v163.js?v=175')),'Build 174+ Product Editor client cache identity missing')
+req(any(token in page for token in ('Release 467 • Build 174','Release 467 • Build 175','Release 467 • Build 178')),'Build 174+ Product Editor identity missing')
+req(any(token in page for token in ('admin-product-editor-v163.js?v=174','admin-product-editor-v163.js?v=175','admin-product-editor-v163.js?v=178')),'Build 174+ Product Editor client cache identity missing')
 for token in ("reads only this Product's canonical gallery rows",'does not re-read the Product table','Open the full Image Editor only when you need recovery'):
     req(token in page,f'Build 174 Product Editor page missing: {token}')
 
