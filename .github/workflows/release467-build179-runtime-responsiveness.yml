@@ -1,0 +1,66 @@
+name: Release 467 Build 179 Runtime Responsiveness
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'shop/product/index.html'
+      - 'public/js/product-detail-v166.js'
+      - 'public/js/product-detail-build145.js'
+      - 'public/js/product-detail-parity.js'
+      - 'public/js/seo-page-overrides.js'
+      - 'public/js/recently-viewed-products.js'
+      - 'public/js/site-image-quality-overlay-v152.js'
+      - 'public/js/media-content-runtime.js'
+      - 'public/js/site-auth-ui.js'
+      - 'admin/media-content-studio/index.html'
+      - 'admin/inventory-operations/index.html'
+      - 'public/js/admin-inventory-integrity-review.js'
+      - 'public/js/admin-catalog-option-manager.js'
+      - 'css/release467-build179-runtime-recovery.css'
+      - 'scripts/release467_build166_gate.py'
+      - 'scripts/release467_build74_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'scripts/build440_resource_asset_url_regression_test.mjs'
+      - 'scripts/build440_inventory_integrity_review_regression_test.py'
+      - '.github/workflows/release467-build155-products-production-browser.yml'
+      - 'scripts/release467_build179_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_179_RUNTIME_RESPONSIVENESS_INVENTORY_LAYOUT_RECOVERY.md'
+      - '.github/workflows/release467-build179-runtime-responsiveness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  runtime-responsiveness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 179 runtime responsiveness
+        run: python scripts/release467_build179_gate.py
+      - name: Retain Build 152 image-quality contract
+        run: python scripts/release467_build152_gate.py
+      - name: Retain Build 166 bounded Product delivery
+        run: python scripts/release467_build166_gate.py
+      - name: Retain Build 440 inventory integrity regression
+        run: python scripts/build440_inventory_integrity_review_regression_test.py
+      - name: Retain Build 440 asset URL regression
+        run: node scripts/build440_resource_asset_url_regression_test.mjs
+      - name: JavaScript syntax
+        run: |
+          node --check public/js/product-detail-v166.js
+          node --check public/js/product-detail-build145.js
+          node --check public/js/product-detail-parity.js
+          node --check public/js/seo-page-overrides.js
+          node --check public/js/recently-viewed-products.js
+          node --check public/js/site-image-quality-overlay-v152.js
+          node --check public/js/media-content-runtime.js
+          node --check public/js/site-auth-ui.js
+          node --check public/js/admin-inventory-integrity-review.js
+          node --check public/js/admin-catalog-option-manager.js
