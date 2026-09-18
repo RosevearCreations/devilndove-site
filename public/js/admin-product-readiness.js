@@ -50,10 +50,10 @@
     function blockerFixHref(productId, blocker = {}) {
       const key = blockerKey(blocker);
       if (key.includes('image') || key.includes('alt') || key.includes('role') || key.includes('public_use')) return `/admin/catalog-media/?product_id=${encodeURIComponent(productId)}#product-media-workflow`;
-      if (key.includes('seo') || key.includes('meta')) return `/admin/catalog/?product_id=${encodeURIComponent(productId)}#product-seo-fields`;
-      if (key.includes('price')) return `/admin/catalog/?product_id=${encodeURIComponent(productId)}#product-pricing-fields`;
-      if (key.includes('description')) return `/admin/catalog/?product_id=${encodeURIComponent(productId)}#product-description-fields`;
-      return `/admin/catalog/?product_id=${encodeURIComponent(productId)}`;
+      if (key.includes('seo') || key.includes('meta')) return `/admin/product-editor/?product_id=${encodeURIComponent(productId)}&tab=seo&focus=meta_title`;
+      if (key.includes('price')) return `/admin/product-editor/?product_id=${encodeURIComponent(productId)}&tab=pricing&focus=price`;
+      if (key.includes('description')) return `/admin/product-editor/?product_id=${encodeURIComponent(productId)}&tab=description&focus=description`;
+      return `/admin/product-editor/?product_id=${encodeURIComponent(productId)}&tab=basics`;
     }
 
     function productMatchesActiveFilter(product = {}) {
