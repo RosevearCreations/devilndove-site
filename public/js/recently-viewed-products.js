@@ -1,5 +1,5 @@
 // File: /public/js/recently-viewed-products.js
-// Brief description: Privacy-friendly, local-browser recently viewed product list. No account or personal data is sent to the server.
+// Brief description: Privacy-friendly, local-browser recently viewed product list. No account or personal data is sent to the server.\n// Release 467 Build 179: optional Shop/Product enhancers are loaded only on their owning route.
 (function () {
   const KEY = 'dd_recently_viewed_products_v1';
   const MAX = 8;
@@ -36,6 +36,7 @@
     el.querySelector('[data-dd-recent-clear]')?.addEventListener('click', () => { try { localStorage.removeItem(KEY); } catch {} render(el, options); });
   }
   window.DDRecentlyViewed = { add, list: read, render, clear: () => { try { localStorage.removeItem(KEY); } catch {} } };
-  import('/public/js/storefront-discovery-build144.js?v=467b144').catch(() => null);
-  import('/public/js/product-detail-build145.js?v=467b145').catch(() => null);
+  const pagePath = window.location.pathname.replace(/\\/+$/, '/') || '/';
+  if (pagePath === '/shop/') import('/public/js/storefront-discovery-build144.js?v=467b144').catch(() => null);
+  if (pagePath === '/shop/product/') import('/public/js/product-detail-build145.js?v=179').catch(() => null);
 })();
