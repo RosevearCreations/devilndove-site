@@ -153,9 +153,9 @@ export function createPackagingNativeReadTransport({
     }
 
     const [catalogResult, inventoryResult, mediaResult] = await Promise.allSettled([
-      typeof readCatalog === 'function' ? readCatalog({ limit: 500 }) : Promise.reject(new Error('Catalog contract unavailable')),
-      typeof readInventory === 'function' ? readInventory({ limit: 1000 }) : Promise.reject(new Error('Inventory contract unavailable')),
-      typeof readContentMedia === 'function' ? readContentMedia({ mediaType: 'artwork', limit: 72 }) : Promise.reject(new Error('Content media contract unavailable')),
+      typeof readCatalog === 'function' ? readCatalog({ limit: 120 }) : Promise.reject(new Error('Catalog contract unavailable')),
+      typeof readInventory === 'function' ? readInventory({ limit: 120 }) : Promise.reject(new Error('Inventory contract unavailable')),
+      typeof readContentMedia === 'function' ? readContentMedia({ mediaType: 'artwork', limit: 36 }) : Promise.reject(new Error('Content media contract unavailable')),
     ]);
 
     const fallbackReasons = [];
