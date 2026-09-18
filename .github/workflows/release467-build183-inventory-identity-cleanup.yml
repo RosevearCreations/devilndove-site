@@ -1,0 +1,111 @@
+name: Release 467 Build 183 Inventory Identity Cleanup
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/inventory-identity-health.js'
+      - 'public/js/admin-inventory-identity-cleanup-v183.js'
+      - 'css/release467-build183-inventory-identity-cleanup.css'
+      - 'admin/inventory-operations/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_183_INVENTORY_IDENTITY_CLEANUP.md'
+      - 'docs/operations/RELEASE_467_CATALOG_REWORK_BUILDS_181_186.md'
+      - 'scripts/release467_build183_gate.py'
+      - '.github/workflows/release467-build183-inventory-identity-cleanup.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 183 Inventory identity contract
+        run: python scripts/release467_build183_gate.py
+      - name: Retain Build 182 Product buyer readiness
+        run: python scripts/release467_build182_gate.py
+      - name: Retain Build 181 catalog authority health
+        run: python scripts/release467_build181_gate.py
+      - name: Retain Build 180 staged runtime startup
+        run: python scripts/release467_build180_gate.py
+      - name: Retain Inventory integrity review
+        run: python scripts/build440_inventory_integrity_review_regression_test.py
+      - name: Retain Tool lifecycle review
+        run: python scripts/build440_tool_lifecycle_regression_test.py
+      - name: Retain Inventory asset transport
+        run: node scripts/build440_resource_asset_url_regression_test.mjs
+
+  development-d1-identity-proof:
+    if: ${{ github.event_name != 'push' || github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 target
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+      - name: Prove live Development Inventory identity evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT
+            COUNT(*) AS active_items,
+            SUM(CASE WHEN (
+              SELECT COUNT(*) FROM site_item_inventory d
+              WHERE COALESCE(d.is_active,1)=1
+                AND LOWER(TRIM(COALESCE(d.source_type,''))) IN ('tool','supply')
+                AND LOWER(TRIM(COALESCE(d.external_key,'')))=LOWER(TRIM(COALESCE(sii.external_key,'')))
+                AND TRIM(COALESCE(d.external_key,''))<>''
+            ) > 1 THEN 1 ELSE 0 END) AS duplicate_identity_rows,
+            SUM(CASE WHEN TRIM(COALESCE(sii.supplier_name,''))='' THEN 1 ELSE 0 END) AS missing_supplier_name,
+            SUM(CASE WHEN TRIM(COALESCE(sii.source_url,''))='' AND TRIM(COALESCE(sii.amazon_url,''))='' THEN 1 ELSE 0 END) AS missing_source_reference,
+            SUM(CASE WHEN (
+              (LOWER(TRIM(COALESCE(sii.source_type,'')))='supply' AND siup.site_item_inventory_id IS NULL)
+              OR (LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' AND siup.site_item_inventory_id IS NOT NULL AND LOWER(TRIM(COALESCE(siup.usage_tracking_mode,'reusable')))<>'reusable')
+            ) THEN 1 ELSE 0 END) AS usage_review_minimum,
+            SUM(CASE WHEN sii.last_counted_at IS NULL OR datetime(sii.last_counted_at)<datetime('now','-90 days') THEN 1 ELSE 0 END) AS count_due,
+            SUM(CASE WHEN (
+              (COALESCE(sii.do_not_reorder,0)=0 AND COALESCE(sii.reorder_level,0)>0 AND COALESCE(sii.on_hand_quantity,0)<=COALESCE(sii.reorder_level,0) AND COALESCE(sii.is_on_reorder_list,0)=0)
+              OR (COALESCE(sii.do_not_reorder,0)=1 AND COALESCE(sii.is_on_reorder_list,0)=1)
+            ) THEN 1 ELSE 0 END) AS reorder_review,
+            SUM(CASE WHEN TRIM(COALESCE(sii.external_key,''))<>'' AND NOT EXISTS(
+              SELECT 1 FROM catalog_items ci
+              WHERE LOWER(TRIM(COALESCE(ci.item_kind,'')))=LOWER(TRIM(COALESCE(sii.source_type,'')))
+                AND LOWER(TRIM(COALESCE(ci.source_key,'')))=LOWER(TRIM(COALESCE(sii.external_key,'')))
+                AND COALESCE(ci.status,'active')<>'archived'
+            ) THEN 1 ELSE 0 END) AS catalog_reference_not_matched
+          FROM site_item_inventory sii
+          LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
+          WHERE COALESCE(sii.is_active,1)=1
+            AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply');" > /tmp/build183-inventory-identity.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build183-inventory-identity.json')); rows=[]
+          keys=('active_items','duplicate_identity_rows','missing_supplier_name','missing_source_reference','usage_review_minimum','count_due','reorder_review','catalog_reference_not_matched')
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in keys): rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert rows,data
+          row={k:int(rows[0][k] or 0) for k in keys}
+          assert row['active_items']>=0,row
+          print('BUILD 183 DEVELOPMENT D1 INVENTORY IDENTITY: PASS',row)
+          PY
