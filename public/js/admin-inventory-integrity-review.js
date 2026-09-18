@@ -1,5 +1,6 @@
 // Devil n Dove Build 440 — Inventory physical-count and usage-setup review workspace.
 // User-triggered only. No polling, providers, R2, or request-time schema work.
+// Release 467 Build 180 — the 40-row attention queue is now explicitly activated instead of auto-loading during the already-large Inventory Operations startup.
 
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('inventoryIntegrityReviewMount');
@@ -13,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     items: [],
     summary: {},
     loading: false,
+    loaded: false,
   };
   let startRequested = false;
 
@@ -140,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <section class="card inventory-integrity-review" aria-labelledby="inventoryIntegrityHeading">
         <div class="section-heading-row">
           <div>
-            <p class="inventory-operations-eyebrow">Release 467 Build 179 · Inventory truth &amp; usage</p>
+            <p class="inventory-operations-eyebrow">Release 467 Build 180 · staged Inventory truth &amp; usage</p>
             <h3 id="inventoryIntegrityHeading">Physical Count &amp; Usage Setup Review</h3>
             <p class="small">Use a physical count to make on-hand stock truthful. Legacy supplies that remain in the safe <code>log_only</code> default stay in Usage Setup Required until their real stock-to-usage conversion is reviewed.</p>
           </div>
@@ -163,16 +165,18 @@ document.addEventListener('DOMContentLoaded', () => {
           <label class="small">Search
             <input class="input" id="inventoryIntegritySearch" type="search" placeholder="name, key, category" />
           </label>
+          <button class="btn primary" type="button" id="inventoryIntegrityLoad">Load 40-item queue</button>
           <button class="btn" type="button" id="inventoryIntegrityRefresh">Refresh queue</button>
         </div>
         <div id="inventoryIntegrityMessage" class="small" hidden aria-live="polite"></div>
-        <div id="inventoryIntegrityList" class="inventory-integrity-list"><div class="small">Load the review queue to begin.</div></div>
+        <div id="inventoryIntegrityList" class="inventory-integrity-list"><div class="small">This large review queue is paused during page startup. Choose Load 40-item queue when you are ready to work it.</div></div>
         <div class="inventory-integrity-pager">
           <button class="btn secondary" type="button" id="inventoryIntegrityPrevious" disabled>Previous</button>
           <button class="btn secondary" type="button" id="inventoryIntegrityNext" disabled>Next</button>
         </div>
       </section>`;
 
+    document.getElementById('inventoryIntegrityLoad')?.addEventListener('click', start);
     document.getElementById('inventoryIntegrityQueue')?.addEventListener('change', (event) => {
       state.queue = String(event.target.value || 'all');
       state.offset = 0;
@@ -205,6 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function load() {
     if (state.loading || !window.DDAuth?.isLoggedIn()) return;
     state.loading = true;
+    state.loaded = true;
     setMessage('Loading Inventory attention queue…');
     try {
       const url = `/api/admin/inventory-integrity-review?queue=${encodeURIComponent(state.queue)}&q=${encodeURIComponent(state.q)}&offset=${encodeURIComponent(state.offset)}&limit=40`;
@@ -300,12 +305,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function start() {
-    if (startRequested) return;
+    if (startRequested && state.loaded) return;
     startRequested = true;
+    state.loaded = true;
     load();
   }
 
   render();
-  document.addEventListener('dd:admin-ready', (event) => { if (event?.detail?.ok) start(); }, { once: true });
-  if (window.DDAuth?.isLoggedIn()) start();
 });
