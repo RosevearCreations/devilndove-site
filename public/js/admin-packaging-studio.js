@@ -2,7 +2,7 @@
 // Build 277 renderer/content behavior remains otherwise unchanged.
 (() => {
   const STORAGE_KEY = 'dd_packaging_studio_local_draft_v5';
-  const state = { projects: [], templates: [], products: [], inventory: [], printers: [], printersSchemaReady: true, referenceSources: [], formulaLibrary: [], contentLibrary: [], sourceMaterialLibrary: [], librarySchemaReady: true, sourceMaterialSchemaReady: true, sourceMaterialMetadataReady: true, detail: null, loading: false, activeTab: 'product', activeSourceMaterialId: 0, activeContentLibraryId: 0 };
+  const state = { projects: [], templates: [], products: [], inventory: [], printers: [], printersSchemaReady: true, referenceSources: [], formulaLibrary: [], contentLibrary: [], sourceMaterialLibrary: [], materialLibraryOpen: false, librarySchemaReady: true, sourceMaterialSchemaReady: true, sourceMaterialMetadataReady: true, detail: null, loading: false, activeTab: 'product', activeSourceMaterialId: 0, activeContentLibraryId: 0 };
   const id = (name) => document.getElementById(name);
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   const xml = (value) => String(value ?? '').replace(/[<>&"']/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[char]));
@@ -979,9 +979,19 @@
   function renderMain() {
     const main = id('packagingStudioMain'); if (!main) return;
     if (!state.detail?.project) {
-      main.innerHTML = `<section class="card packaging-studio-welcome"><h2>Choose or create a labeling and packaging project</h2><p>Use one project for the editable label, packaging component bill of materials, cost estimate, versions, print tests and approval evidence.</p><p><strong>You do not need a project to build the Material Library.</strong> Enter purchased soap bases, candle waxes, oils, colours and their supplier ingredients below first; they can then be reused by any label.</p></section>${sourceMaterialManagerMarkup({allowAttach:false,standalone:true})}`;
-      bindSourceLibraryControls();
-      notifyEditorRendered('welcome-render');
+      const library = state.materialLibraryOpen
+        ? sourceMaterialManagerMarkup({allowAttach:false,standalone:true})
+        : `<section class="card" data-packaging-material-library-closed><h2>Material Library</h2><p class="small">Soap bases, candle waxes, fragrance oils, colours, supplier ingredients and INCI records are available on demand. Keeping this editor closed makes normal Packaging startup much lighter.</p><button class="btn" id="openPackagingMaterialLibrary" type="button">Open Material Library</button></section>`;
+      main.innerHTML = `<section class="card packaging-studio-welcome"><h2>Choose or create a labeling and packaging project</h2><p>Use one project for the editable label, packaging component bill of materials, cost estimate, versions, print tests and approval evidence.</p><p><strong>You do not need a project to build the Material Library.</strong> Open it only when you need to enter or review purchased materials and supplier ingredients.</p></section>${library}`;
+      if (state.materialLibraryOpen) {
+        bindSourceLibraryControls();
+      } else {
+        id('openPackagingMaterialLibrary')?.addEventListener('click',()=>{
+          state.materialLibraryOpen=true;
+          renderMain();
+        },{once:true});
+      }
+      notifyEditorRendered(state.materialLibraryOpen?'material-library-render':'welcome-render');
       return;
     }
     main.innerHTML = detailMarkup();
