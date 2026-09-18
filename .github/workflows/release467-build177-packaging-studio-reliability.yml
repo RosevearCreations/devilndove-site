@@ -1,0 +1,62 @@
+name: Release 467 Build 177 Packaging Studio Reliability
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'admin/packaging-studio/index.html'
+      - 'public/js/admin-packaging-studio.js'
+      - 'public/js/admin-packaging-save-stabilizer-v300.js'
+      - 'public/js/admin-packaging-compatibility-v301.js'
+      - 'public/js/admin-packaging-native-client-v298.js'
+      - 'public/js/admin-packaging-client-transport-v297.js'
+      - 'public/js/modules/packaging/**'
+      - 'functions/api/_lib/packagingReadService.js'
+      - 'public/js/site-auth-ui.js'
+      - 'public/js/admin.js'
+      - 'public/js/core/dd-application-module-bootstrap.mjs'
+      - 'public/js/core/dd-admin-module-runtime.mjs'
+      - 'public/js/core/dd-module-definitions.mjs'
+      - 'scripts/packaging_bootstrap_resilience_gate.py'
+      - 'scripts/release467_build177_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_177_PACKAGING_STUDIO_RELIABILITY.md'
+      - '.github/workflows/release467-build177-packaging-studio-reliability.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  packaging-studio-reliability-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Prove Build 177 Packaging bounded startup
+        run: python scripts/release467_build177_gate.py
+      - name: Retain Packaging bootstrap resilience
+        run: python scripts/packaging_bootstrap_resilience_gate.py
+      - name: Retain Packaging safe-area contract
+        run: python scripts/current_packaging_safe_area_gate.py
+      - name: Retain Packaging material intelligence
+        run: python scripts/current_packaging_material_intelligence_gate.py
+      - name: Retain Packaging label composition
+        run: python scripts/current_packaging_label_composition_gate.py
+      - name: Retain Packaging label production
+        run: python scripts/current_packaging_label_production_gate.py
+      - name: Retain Packaging release workflow
+        run: python scripts/release467_build83_gate.py
+      - name: JavaScript syntax
+        run: |
+          node --check public/js/admin-packaging-studio.js
+          node --check public/js/admin-packaging-save-stabilizer-v300.js
+          node --check public/js/admin-packaging-compatibility-v301.js
+          node --check public/js/modules/packaging/artwork-picker.mjs
+          node --check public/js/modules/packaging/native-client-v298.mjs
+          node --check public/js/modules/packaging/native-read-transport.mjs
+          node --check public/js/modules/packaging/index.mjs
+          node --check public/js/modules/packaging/runtime.mjs
+          node --check public/js/modules/packaging/client-transport-v297.mjs
+          node --check functions/api/_lib/packagingReadService.js
