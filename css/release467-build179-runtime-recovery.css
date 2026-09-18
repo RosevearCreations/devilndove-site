@@ -1,0 +1,20 @@
+/* Release 467 Build 179 — Inventory Operations viewport containment and responsive recovery. */
+.inventory-operations-page .inventory-operations-workspace{overflow-x:clip!important;max-width:100%;}
+.inventory-operations-page .inventory-operations-workspace *,.inventory-operations-page .inventory-operations-workspace::before,.inventory-operations-page .inventory-operations-workspace::after{min-width:0;box-sizing:border-box;}
+.inventory-operations-page .inventory-operations-workspace>*,.inventory-operations-page [id$="Mount"],.inventory-operations-page section,.inventory-operations-page .card,.inventory-operations-page .grid{max-width:100%;}
+.inventory-operations-page input,.inventory-operations-page select,.inventory-operations-page textarea{min-width:0;max-width:100%;width:100%;box-sizing:border-box;}
+.inventory-operations-page h1,.inventory-operations-page h2,.inventory-operations-page h3,.inventory-operations-page h4,.inventory-operations-page strong,.inventory-operations-page code,.inventory-operations-page .small,.inventory-operations-page p,.inventory-operations-page td,.inventory-operations-page th{overflow-wrap:anywhere;word-break:break-word;}
+.inventory-operations-page .inventory-integrity-item-head>*,.inventory-operations-page .inventory-integrity-row-head>*,.inventory-operations-page .inventory-receiving-heading>*,.inventory-operations-page .section-heading-row>*{min-width:0;max-width:100%;}
+.inventory-operations-page .inventory-integrity-item h4{max-width:100%;overflow-wrap:anywhere;}
+.inventory-operations-page .inventory-integrity-summary,.inventory-operations-page .inventory-integrity-controls,.inventory-operations-page .inventory-integrity-count-controls,.inventory-operations-page .inventory-receiving-form,.inventory-operations-page #catalogOptionManagerMount .grid{max-width:100%;}
+.inventory-operations-page .site-inventory-table-wrap,.inventory-operations-page .site-inventory-movements-wrap,.inventory-operations-page .product-stock-table-wrap{max-width:100%;overflow-x:auto!important;overscroll-behavior-x:contain;}
+@media(max-width:1180px){
+ .inventory-operations-page .inventory-integrity-controls,.inventory-operations-page .inventory-integrity-count-controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
+ .inventory-operations-page .inventory-integrity-controls>*:last-child,.inventory-operations-page .inventory-integrity-count-controls>*:last-child{grid-column:1/-1;}
+ .inventory-operations-page .inventory-receiving-form.grid,.inventory-operations-page #catalogOptionManagerMount .grid.cols-3{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+}
+@media(max-width:760px){
+ .inventory-operations-page .inventory-integrity-controls,.inventory-operations-page .inventory-integrity-count-controls,.inventory-operations-page .inventory-receiving-form.grid,.inventory-operations-page #catalogOptionManagerMount .grid.cols-3,.inventory-operations-page #catalogOptionManagerMount .grid.cols-2{grid-template-columns:minmax(0,1fr)!important;}
+ .inventory-operations-page .inventory-integrity-controls>*:last-child,.inventory-operations-page .inventory-integrity-count-controls>*:last-child{grid-column:auto;}
+ .inventory-operations-page .inventory-integrity-item-head{align-items:flex-start;}
+}
