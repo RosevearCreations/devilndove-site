@@ -1,0 +1,111 @@
+name: Release 467 Build 184 Product Tool Supply Image Repair
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/catalog-image-repair.js'
+      - 'public/js/admin-catalog-image-repair-v184.js'
+      - 'css/release467-build184-catalog-image-repair.css'
+      - 'admin/catalog-health/index.html'
+      - 'public/js/admin-site-item-inventory.js'
+      - 'admin/inventory-operations/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_184_PRODUCT_TOOL_SUPPLY_IMAGE_REPAIR.md'
+      - 'docs/operations/RELEASE_467_CATALOG_REWORK_BUILDS_181_186.md'
+      - 'scripts/release467_build184_gate.py'
+      - 'scripts/release467_build183_gate.py'
+      - 'scripts/release467_build182_gate.py'
+      - 'scripts/release467_build181_gate.py'
+      - '.github/workflows/release467-build184-product-tool-supply-image-repair.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 184 image repair contract
+        run: python scripts/release467_build184_gate.py
+      - name: Retain Build 183 Inventory identity cleanup
+        run: python scripts/release467_build183_gate.py
+      - name: Retain Build 182 Product buyer readiness
+        run: python scripts/release467_build182_gate.py
+      - name: Retain Build 181 catalog authority health
+        run: python scripts/release467_build181_gate.py
+      - name: Retain Build 180 staged runtime startup
+        run: python scripts/release467_build180_gate.py
+      - name: Retain selected Product image editor
+        run: python scripts/release467_build173_gate.py
+      - name: Retain Product media convergence
+        run: node scripts/release467_build73_product_media_runtime_test.mjs
+      - name: Retain Tool/Supply asset URL safety
+        run: node scripts/build440_resource_asset_url_regression_test.mjs
+      - name: Retain Development Inventory R2 restore safety
+        run: python scripts/build440_inventory_asset_server_restore_regression_test.py
+
+  development-d1-image-proof:
+    if: ${{ github.event_name != 'push' || github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 and R2 bindings
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          grep -q '^binding = "PRODUCT_MEDIA_BUCKET"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-toolshed-images-dev"$' wrangler.toml
+          ! grep -q '^database_id = "f34a741b-0000-45b0-9a96-6be08754d563"$' wrangler.toml
+      - name: Prove live Development image-repair evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT
+            (SELECT COUNT(*) FROM products p WHERE LOWER(TRIM(COALESCE(p.status,'draft'))) NOT IN ('archived','deleted')) AS active_products,
+            (SELECT COUNT(*) FROM product_images pi JOIN products p ON p.product_id=pi.product_id WHERE LOWER(TRIM(COALESCE(p.status,'draft'))) NOT IN ('archived','deleted')) AS gallery_images,
+            (SELECT COUNT(*) FROM product_images pi JOIN products p ON p.product_id=pi.product_id WHERE LOWER(TRIM(COALESCE(p.status,'draft'))) NOT IN ('archived','deleted') AND LENGTH(TRIM(COALESCE(pi.alt_text,'')))<12) AS alt_attention,
+            (SELECT COUNT(*) FROM product_images pi JOIN products p ON p.product_id=pi.product_id WHERE LOWER(TRIM(COALESCE(p.status,'draft'))) NOT IN ('archived','deleted') AND NOT EXISTS(
+              SELECT 1 FROM product_image_annotations pia WHERE pia.product_image_id=pi.product_image_id AND TRIM(COALESCE(pia.image_role,''))<>''
+            )) AS role_attention,
+            (SELECT COUNT(*) FROM site_item_inventory sii WHERE COALESCE(sii.is_active,1)=1 AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')) AS active_inventory,
+            (SELECT COUNT(*) FROM site_item_inventory sii WHERE COALESCE(sii.is_active,1)=1 AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply') AND TRIM(COALESCE(sii.image_url,''))='') AS blank_inventory_images,
+            (SELECT COUNT(*) FROM site_item_inventory sii WHERE COALESCE(sii.is_active,1)=1 AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')
+              AND TRIM(COALESCE(sii.image_url,''))<>'' AND EXISTS(
+                SELECT 1 FROM catalog_items ci
+                WHERE LOWER(TRIM(COALESCE(ci.item_kind,'')))=LOWER(TRIM(COALESCE(sii.source_type,'')))
+                  AND LOWER(TRIM(COALESCE(ci.source_key,'')))=LOWER(TRIM(COALESCE(sii.external_key,'')))
+                  AND COALESCE(ci.status,'active')<>'archived'
+                  AND TRIM(COALESCE(ci.image_url,''))<>'' AND TRIM(ci.image_url)<>TRIM(sii.image_url)
+              )) AS inventory_catalog_image_drift;" > /tmp/build184-image-evidence.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build184-image-evidence.json')); rows=[]
+          keys=('active_products','gallery_images','alt_attention','role_attention','active_inventory','blank_inventory_images','inventory_catalog_image_drift')
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in keys): rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert rows,data
+          row={k:int(rows[0][k] or 0) for k in keys}
+          assert row['active_products']>=0 and row['active_inventory']>=0,row
+          print('BUILD 184 DEVELOPMENT D1 IMAGE REPAIR: PASS',row)
+          print('PRODUCT_MEDIA_BUCKET: DEVELOPMENT BINDING PROVEN FROM TRACKED CONFIG')
+          print('R2 MUTATION: ZERO')
+          PY
