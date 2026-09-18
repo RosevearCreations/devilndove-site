@@ -10,7 +10,7 @@
 
   function render() {
     const r=state.data?.reconciliation;
-    if(!r) return;
+    if(!r) { mount.innerHTML='<section class="card imr-card"><div class="section-heading-row"><div><p class="inventory-operations-eyebrow">Release 467 Build 112 • read-only</p><h3>Inventory &amp; Material-Usage Reconciliation</h3><p class="small">Paused to protect the D1 daily read budget. Load this evidence only when you are actively reconciling material usage.</p></div><button class="btn" id="imrLoad" type="button">Load reconciliation</button></div></section>'; document.getElementById('imrLoad')?.addEventListener('click',load); return; }
     const summary=r.summary||{};
     const all=Array.isArray(r.records)?r.records:[];
     const records=state.filter==='all'?all:all.filter(row=>row.state===state.filter);
@@ -75,6 +75,5 @@
     }
   }
 
-  document.addEventListener('dd:admin-ready',event=>{if(event?.detail?.ok) load();});
-  if(window.DDAuth.isLoggedIn()) load();
+  render();
 })();
