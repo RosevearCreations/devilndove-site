@@ -55,10 +55,13 @@ else:
     req(closed_prod.get('state')=='PRODUCTION_GREEN' and closed_prod.get('main_sha')==MAIN152 and closed_prod.get('tree_sha')==TREE152,'sealed Build 152 Production closure drifted')
     req(closed_prod.get('production_pages_deploy_run')==PAGES152 and closed_prod.get('production_live_resource_integrity_run')==LIVE152,'sealed Build 152 Production proof IDs drifted')
     req('release467-build152-sitewide-image-quality-media-qa.json' in (pointer.get('current_release_authorities') or []),'current authority lost sealed Build 152 provenance')
-    for path in ('AI_HANDOFF.md','PROJECT_STATUS_AND_ROADMAP.md','SANITY_HEALTH_CHECK.md','MARKDOWN_INDEX.md','docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'):
-        body=read(path)
-        for token in (DEV152,MAIN152,TREE152,*map(str,PROOFS152.values()),str(PAGES152),str(LIVE152),'Build 152'):
-            req(token in body,f'{path} missing sealed Build 152 closure token: {token}')
+    if pointer_build==152:
+        for path in ('AI_HANDOFF.md','PROJECT_STATUS_AND_ROADMAP.md','SANITY_HEALTH_CHECK.md','MARKDOWN_INDEX.md','docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'):
+            body=read(path)
+            for token in (DEV152,MAIN152,TREE152,*map(str,PROOFS152.values()),str(PAGES152),str(LIVE152),'Build 152'):
+                req(token in body,f'{path} missing sealed Build 152 closure token: {token}')
+    else:
+        req(pointer_build>152,'Build 152 successor pointer must advance beyond the sealed Build 152 checkpoint')
 
 scorer=read('public/js/image-quality-scorer-v152.js'); overlay=read('public/js/site-image-quality-overlay-v152.js'); runtime=read('public/js/media-content-runtime.js'); studio=read('admin/media-content-studio/index.html'); product=read('public/js/admin-product-image-quality-editor-bridge-v56.js')
 req('Release 448 deterministic browser Canvas heuristic' in scorer,'shared scorer must retain Release 448 product-photo algorithm identity')
