@@ -2,7 +2,7 @@
 // Layers over the proven Build 296 runtime. Compatibility GETs use the Build 297
 // native read transport; compatibility POSTs keep the proven Build 296/289 path.
 
-import { createPackagingNativeReadTransport } from './native-read-transport.mjs?v=297';
+import { createPackagingNativeReadTransport } from './native-read-transport.mjs?v=177';
 
 const BUILD = 297;
 const LEGACY_PACKAGING_PATH = '/api/admin/packaging-studio';
