@@ -1,4 +1,4 @@
-// Release 467 Build 152 — advisory quality badges for editable website images.
+// Release 467 Build 152 — advisory quality badges for editable website images.\n// Release 467 Build 179 successor: scoped mutation roots, debounced scans, and single-concurrency scoring.
 (function(){
   'use strict';
   const scorer=window.DDImageQualityScorer;if(!scorer)return;
@@ -44,13 +44,33 @@
     finally{pending.delete(img);}
   }
 
-  const viewportObserver='IntersectionObserver' in window?new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){viewportObserver.unobserve(entry.target);score(entry.target);}}),{rootMargin:'240px'}):null;
+  const MAX_CONCURRENT_SCORES=1;
+  const scoreQueue=[];const queued=new WeakSet();let scoring=false;let scanTimer=0;
+  const yieldBrowser=()=>new Promise(resolve=>(window.requestIdleCallback?window.requestIdleCallback(()=>resolve(),{timeout:120}):window.setTimeout(resolve,0)));
+  async function pumpScores(){
+    if(scoring)return;scoring=true;
+    try{while(scoreQueue.length){const img=scoreQueue.shift();queued.delete(img);await score(img);await yieldBrowser();}}
+    finally{scoring=false;}
+  }
+  function queueScore(img){if(!img||queued.has(img)||pending.has(img))return;queued.add(img);scoreQueue.push(img);void pumpScores();}
+  const viewportObserver='IntersectionObserver' in window?new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){viewportObserver.unobserve(entry.target);queueScore(entry.target);}}),{rootMargin:'240px'}):null;
   function eligibleImages(){if(isStudio())return [...document.querySelectorAll('#mediaSlotBoard img,#mediaLibraryGrid img,#mediaSelectedPreview')];if(!editMode())return [];return [...document.querySelectorAll('img[data-media-slot]')];}
   function scan(){
     style();
     if(!isStudio()&&!editMode()){document.querySelectorAll('.dd-image-quality-v152').forEach(el=>el.remove());return;}
-    eligibleImages().forEach(img=>{const src=text(img.currentSrc||img.src);const panel=existingPanel(img);if(panel&&panel.dataset.ddiqSrc===key(src))return;viewportObserver?viewportObserver.observe(img):score(img);});
+    eligibleImages().forEach(img=>{const src=text(img.currentSrc||img.src);const panel=existingPanel(img);if(panel&&panel.dataset.ddiqSrc===key(src))return;viewportObserver?viewportObserver.observe(img):queueScore(img);});
   }
-  const mutation=new MutationObserver(scan);mutation.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['src','class']});
-  document.addEventListener('dd:admin-ready',scan);window.addEventListener('load',scan,{once:true});if(document.readyState!=='loading')scan();else document.addEventListener('DOMContentLoaded',scan,{once:true});
+  function scheduleScan(){if(scanTimer)return;scanTimer=window.setTimeout(()=>{scanTimer=0;scan();},80);}
+  const mutation=new MutationObserver(scheduleScan);
+  function observeRelevantRoots(){
+    mutation.disconnect();
+    const roots=isStudio()
+      ?['mediaSlotBoard','mediaLibraryGrid','mediaMetadataPanel'].map(id=>document.getElementById(id)).filter(Boolean)
+      :(editMode()?[document.body]:[]);
+    roots.forEach(root=>mutation.observe(root,{subtree:true,childList:true,attributes:true,attributeFilter:['src']}));
+    scheduleScan();
+  }
+  document.addEventListener('dd:admin-ready',observeRelevantRoots);
+  window.addEventListener('load',observeRelevantRoots,{once:true});
+  if(document.readyState!=='loading')observeRelevantRoots();else document.addEventListener('DOMContentLoaded',observeRelevantRoots,{once:true});
 })();
