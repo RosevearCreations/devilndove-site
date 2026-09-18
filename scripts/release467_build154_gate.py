@@ -83,8 +83,9 @@ req('/admin/products/' not in should_bypass,
 
 req('<body data-admin-page="products">' in products and 'Products &amp; Inventory' in products,
     'Products source document identity drifted')
-req('/public/js/admin-products.js' in products and '/public/js/admin-create-product.js' in products,
-    'Products core client scripts missing')
+req(('/public/js/admin-products.js' in products and '/public/js/admin-create-product.js' in products)
+    or '/public/js/admin-products-browser-v162.js' in products,
+    'Products core client scripts or approved compact Product Browser successor missing')
 
 for token in (
     'b8323b4e13ae08a8126da761106367de75f7cd40',
