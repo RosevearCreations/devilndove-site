@@ -93,7 +93,7 @@ export const DD_MODULE_DEFINITIONS = Object.freeze([
     routePrefixes: ['/admin/packaging-studio'],
     capabilities: ['packaging-projects', 'packaging-templates', 'packaging-print'],
     consumes: ['inventory-read', 'catalog-read', 'content-media'],
-    entry: '../modules/packaging/runtime.mjs?v=290',
+    entry: '../modules/packaging/runtime.mjs?v=177',
     lazy: true,
   }),
   Object.freeze({
