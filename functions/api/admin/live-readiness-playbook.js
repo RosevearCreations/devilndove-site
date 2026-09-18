@@ -134,19 +134,16 @@ export async function onRequestPost(context) {
   try { body = await context.request.json(); } catch { return json({ ok:false, error:'Expected JSON request body.' }, 400); }
   const action = normalizeText(body.action).toLowerCase();
 
-  // Every admin page records this lightweight telemetry. Do not run the full table seed on every page view.
-  // If D1 is briefly unavailable, treat usage recording as optional instead of causing a 503 in unrelated admin screens.
+  // Build 176: automatic route-view telemetry is disabled. This guard also protects
+  // against cached pre-176 browser scripts continuing to POST on every Admin navigation.
+  // An explicit operator-triggered usage sample may still be recorded with explicit=true.
   if (action === 'record_usage') {
+    if (body.explicit !== true) return json({ ok:true, recorded:false, skipped:true, reason:'automatic_admin_route_telemetry_disabled_build176' });
     const routePath = normalizeText(body.route_path);
     if (!routePath.startsWith('/admin/')) return json({ ok:false, error:'A valid admin route is required.' }, 400);
-    try {
-      await safeRun(db, `CREATE TABLE IF NOT EXISTS command_center_usage_events (command_center_usage_event_id INTEGER PRIMARY KEY AUTOINCREMENT,route_path TEXT NOT NULL,event_kind TEXT NOT NULL DEFAULT 'view',source_route TEXT,user_id INTEGER,session_key TEXT,created_at TEXT DEFAULT CURRENT_TIMESTAMP,notes TEXT)`);
-      await safeRun(db, `INSERT INTO command_center_usage_events (route_path,event_kind,source_route,user_id,session_key,notes) VALUES (?,?,?,?,?,?)`,
-        [routePath, normalizeText(body.event_kind) || 'view', normalizeText(body.source_route) || '/admin/command-center/', Number(admin.user_id || 0) || null, normalizeText(body.session_key) || null, normalizeText(body.notes) || null]);
-      return json({ ok:true, recorded:true });
-    } catch (error) {
-      return json({ ok:true, recorded:false, degraded:true, backend_warning:error?.message || 'Usage telemetry will retry on a later page visit.' });
-    }
+    const result = await safeRun(db, `INSERT INTO command_center_usage_events (route_path,event_kind,source_route,user_id,session_key,notes) VALUES (?,?,?,?,?,?)`,
+      [routePath, normalizeText(body.event_kind) || 'view', normalizeText(body.source_route) || '/admin/command-center/', Number(admin.user_id || 0) || null, normalizeText(body.session_key) || null, normalizeText(body.notes) || null]);
+    return json({ ok:true, recorded:Boolean(result), explicit:true });
   }
 
   try {
