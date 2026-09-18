@@ -66,36 +66,43 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT
-            COUNT(*) AS active_items,
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "WITH active AS (
+            SELECT sii.site_item_inventory_id,LOWER(TRIM(COALESCE(sii.source_type,''))) AS source_type_norm,
+                   LOWER(TRIM(COALESCE(sii.external_key,''))) AS external_key_norm,
+                   sii.supplier_name,sii.source_url,sii.amazon_url,sii.last_counted_at,sii.do_not_reorder,
+                   sii.reorder_level,sii.on_hand_quantity,sii.is_on_reorder_list
+            FROM site_item_inventory sii
+            WHERE COALESCE(sii.is_active,1)=1
+              AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')
+          ), key_counts AS (
+            SELECT external_key_norm,COUNT(*) AS duplicate_count
+            FROM active WHERE external_key_norm<>'' GROUP BY external_key_norm
+          ), catalog_refs AS (
+            SELECT LOWER(TRIM(COALESCE(item_kind,''))) AS item_kind_norm,
+                   LOWER(TRIM(COALESCE(source_key,''))) AS source_key_norm
+            FROM catalog_items
+            WHERE LOWER(TRIM(COALESCE(item_kind,''))) IN ('tool','supply')
+              AND COALESCE(status,'active')<>'archived'
+            GROUP BY 1,2
+          )
+          SELECT COUNT(*) AS active_items,
+            SUM(CASE WHEN COALESCE(kc.duplicate_count,0)>1 THEN 1 ELSE 0 END) AS duplicate_identity_rows,
+            SUM(CASE WHEN TRIM(COALESCE(a.supplier_name,''))='' THEN 1 ELSE 0 END) AS missing_supplier_name,
+            SUM(CASE WHEN TRIM(COALESCE(a.source_url,''))='' AND TRIM(COALESCE(a.amazon_url,''))='' THEN 1 ELSE 0 END) AS missing_source_reference,
             SUM(CASE WHEN (
-              SELECT COUNT(*) FROM site_item_inventory d
-              WHERE COALESCE(d.is_active,1)=1
-                AND LOWER(TRIM(COALESCE(d.source_type,''))) IN ('tool','supply')
-                AND LOWER(TRIM(COALESCE(d.external_key,'')))=LOWER(TRIM(COALESCE(sii.external_key,'')))
-                AND TRIM(COALESCE(d.external_key,''))<>''
-            ) > 1 THEN 1 ELSE 0 END) AS duplicate_identity_rows,
-            SUM(CASE WHEN TRIM(COALESCE(sii.supplier_name,''))='' THEN 1 ELSE 0 END) AS missing_supplier_name,
-            SUM(CASE WHEN TRIM(COALESCE(sii.source_url,''))='' AND TRIM(COALESCE(sii.amazon_url,''))='' THEN 1 ELSE 0 END) AS missing_source_reference,
-            SUM(CASE WHEN (
-              (LOWER(TRIM(COALESCE(sii.source_type,'')))='supply' AND siup.site_item_inventory_id IS NULL)
-              OR (LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' AND siup.site_item_inventory_id IS NOT NULL AND LOWER(TRIM(COALESCE(siup.usage_tracking_mode,'reusable')))<>'reusable')
+              (a.source_type_norm='supply' AND siup.site_item_inventory_id IS NULL)
+              OR (a.source_type_norm='tool' AND siup.site_item_inventory_id IS NOT NULL AND LOWER(TRIM(COALESCE(siup.usage_tracking_mode,'reusable')))<> 'reusable')
             ) THEN 1 ELSE 0 END) AS usage_review_minimum,
-            SUM(CASE WHEN sii.last_counted_at IS NULL OR datetime(sii.last_counted_at)<datetime('now','-90 days') THEN 1 ELSE 0 END) AS count_due,
+            SUM(CASE WHEN a.last_counted_at IS NULL OR datetime(a.last_counted_at)<datetime('now','-90 days') THEN 1 ELSE 0 END) AS count_due,
             SUM(CASE WHEN (
-              (COALESCE(sii.do_not_reorder,0)=0 AND COALESCE(sii.reorder_level,0)>0 AND COALESCE(sii.on_hand_quantity,0)<=COALESCE(sii.reorder_level,0) AND COALESCE(sii.is_on_reorder_list,0)=0)
-              OR (COALESCE(sii.do_not_reorder,0)=1 AND COALESCE(sii.is_on_reorder_list,0)=1)
+              (COALESCE(a.do_not_reorder,0)=0 AND COALESCE(a.reorder_level,0)>0 AND COALESCE(a.on_hand_quantity,0)<=COALESCE(a.reorder_level,0) AND COALESCE(a.is_on_reorder_list,0)=0)
+              OR (COALESCE(a.do_not_reorder,0)=1 AND COALESCE(a.is_on_reorder_list,0)=1)
             ) THEN 1 ELSE 0 END) AS reorder_review,
-            SUM(CASE WHEN TRIM(COALESCE(sii.external_key,''))<>'' AND NOT EXISTS(
-              SELECT 1 FROM catalog_items ci
-              WHERE LOWER(TRIM(COALESCE(ci.item_kind,'')))=LOWER(TRIM(COALESCE(sii.source_type,'')))
-                AND LOWER(TRIM(COALESCE(ci.source_key,'')))=LOWER(TRIM(COALESCE(sii.external_key,'')))
-                AND COALESCE(ci.status,'active')<>'archived'
-            ) THEN 1 ELSE 0 END) AS catalog_reference_not_matched
-          FROM site_item_inventory sii
-          LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
-          WHERE COALESCE(sii.is_active,1)=1
-            AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply');" > /tmp/build183-inventory-identity.json
+            SUM(CASE WHEN a.external_key_norm<>'' AND cr.source_key_norm IS NULL THEN 1 ELSE 0 END) AS catalog_reference_not_matched
+          FROM active a
+          LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=a.site_item_inventory_id
+          LEFT JOIN key_counts kc ON kc.external_key_norm=a.external_key_norm
+          LEFT JOIN catalog_refs cr ON cr.item_kind_norm=a.source_type_norm AND cr.source_key_norm=a.external_key_norm;" > /tmp/build183-inventory-identity.json
           python - <<'PY'
           import json
           data=json.load(open('/tmp/build183-inventory-identity.json')); rows=[]
