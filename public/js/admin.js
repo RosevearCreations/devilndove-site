@@ -157,7 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dd:auth-rejected', renderDenied);
 
   const adminPage = document.body?.dataset?.adminPage || '';
-  if (document.body?.dataset?.adminPage === 'products') {
+  const leanStartup = window.DDAdminLeanStartup?.enabled === true;
+  if (!leanStartup && document.body?.dataset?.adminPage === 'products') {
     void ddImportOnce(
       'product-workspace-split',
       () => import('/public/js/admin-product-workspaces.js?v=95'),
@@ -181,14 +182,14 @@ document.addEventListener('DOMContentLoaded', () => {
       importer: () => import('/public/js/admin-product-image-quality-editor-bridge-v56.js?v=56'),
     });
   }
-  if (adminPage === 'product-image-quality') {
+  if (!leanStartup && adminPage === 'product-image-quality') {
     void ddImportOnce('product-image-quality-guidance', () => import('/public/js/admin-product-image-quality-guidance-v56.js?v=56'), 'photography coaching');
   }
-  if (adminPage === 'packaging-studio') {
+  if (!leanStartup && adminPage === 'packaging-studio') {
     void ddImportOnce('packaging-onboarding', () => import('/public/js/admin-packaging-onboarding-v56.js?v=56'), 'Packaging walkthrough');
   }
 
-  if (document.body?.dataset?.adminPage !== 'products') {
+  if (!leanStartup && document.body?.dataset?.adminPage !== 'products') {
     ddLazyImportWhenVisible({
       key: 'inventory-base-unit-usability',
       selector: '#siteInventoryAdminMount',
@@ -197,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  ddLazyImportWhenVisible({
+  if (!leanStartup) ddLazyImportWhenVisible({
     key: 'external-field-help',
     selector: '[data-external-help-key], .it-setup-field code, input[id*="external" i], input[name*="external" i], input[id*="callback" i], input[name*="callback" i], input[id*="redirect" i], input[name*="redirect" i], input[id*="webhook" i], input[name*="webhook" i], input[id*="scope" i], input[name*="scope" i], input[id*="credential" i], input[name*="credential" i], input[id*="etsy" i], input[name*="etsy" i], input[id*="stripe" i], input[name*="stripe" i], input[id*="paypal" i], input[name*="paypal" i], input[id*="pinterest" i], input[name*="pinterest" i], input[id*="tiktok" i], input[name*="tiktok" i], input[id*="youtube" i], input[name*="youtube" i], input[id*="meta" i], input[name*="meta" i]',
     label: 'external field help',
@@ -207,9 +208,16 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Build 65 authority remains eager because permissions must be known before optional admin modules are activated.
-void import('/public/js/core/dd-application-module-bootstrap.mjs?v=440')
-  .catch((error) => console.warn('[DD modules] authoritative module bootstrap unavailable', error));
+// Build 176: server middleware remains the authorization boundary. Heavy lean workspaces
+// avoid the client presentation bootstrap because /api/modules adds session/module D1 reads
+// to every page load. Non-lean pages retain the authoritative presentation bootstrap.
+if (!window.DDAdminLeanStartup?.enabled) {
+  void import('/public/js/core/dd-application-module-bootstrap.mjs?v=440')
+    .catch((error) => console.warn('[DD modules] authoritative module bootstrap unavailable', error));
+} else {
+  document.documentElement.dataset.ddApplicationModulesSource = 'lean-static';
+  document.documentElement.dataset.ddApplicationModulesSchemaReady = 'server-authority';
+}
 
 // Release 467 Build 129: related-tool shortcuts are optional convenience UI. Heavy Build 176
 // workspaces use lean startup so business rendering is not competing with navigation observers.
