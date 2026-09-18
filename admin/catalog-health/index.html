@@ -9,6 +9,7 @@
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
   <link rel="stylesheet" href="/css/release467-build181-catalog-health.css?v=181"/>
+  <link rel="stylesheet" href="/css/release467-build182-product-buyer-readiness.css?v=182"/>
 </head>
 <body data-admin-page="products">
 <div class="container admin-shell catalog-health-page">
@@ -39,6 +40,19 @@
   </section>
 
   <section class="card">
+    <div class="section-heading-row">
+      <div><p class="eyebrow">Build 182 • Product facts</p><h2>Buyer readiness</h2><p class="small">Explicit live-D1 review of descriptions, category/type, pricing, shipping/delivery, condition/origin, external listing facts and tracked finished stock. Nothing loads here until requested.</p></div>
+      <button class="btn" id="catalogBuyerReadinessLoad" type="button">Load 40 buyer-readiness issues</button>
+    </div>
+    <form id="catalogBuyerReadinessSearchForm" class="catalog-health-toolbar">
+      <label><span class="small">Search Product buyer facts</span><input class="input" id="catalogBuyerReadinessSearch" type="search" placeholder="Product, SKU, slug, category or ID"/></label>
+      <button class="btn" type="submit">Search buyer readiness</button>
+    </form>
+    <div class="buyer-readiness-summary" id="catalogBuyerReadinessSummary"></div>
+    <div id="catalogBuyerReadinessResults" style="margin-top:14px"><div class="small">Use Load 40 buyer-readiness issues when you are ready. This queue does not run during Catalog Health startup.</div></div>
+  </section>
+
+  <section class="card">
     <div class="section-heading-row"><div><h2>Inventory, Tools & Supplies</h2><p class="small">Operational Tool/Supply rows, image authority drift, duplicate identities and zero-on-hand supplies.</p></div><button class="btn" id="catalogHealthInventoryIssues" type="button">Load 40 Tool/Supply issues</button></div>
     <div class="catalog-health-stat-grid" id="catalogHealthInventoryStats"><div class="small">Loading Inventory summary…</div></div>
   </section>
@@ -60,5 +74,6 @@
 <script src="/public/js/site-auth-ui.js?v=180"></script>
 <script src="/public/js/admin-self-protect.js?v=440"></script>
 <script src="/public/js/admin-catalog-health-v181.js?v=181"></script>
+<script src="/public/js/admin-catalog-buyer-readiness-v182.js?v=182"></script>
 </body>
 </html>
