@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Catalog Authority Health — Devil n Dove Admin</title>
+  <meta name="description" content="Read-only live D1 health workspace for Devil n Dove Products, Inventory, Tools, Supplies and image authority."/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <link rel="icon" href="/assets/mark.png" type="image/png"/>
+  <link rel="stylesheet" href="/css/styles.css?v=440"/>
+  <link rel="stylesheet" href="/css/release467-build181-catalog-health.css?v=181"/>
+</head>
+<body data-admin-page="products">
+<div class="container admin-shell catalog-health-page">
+  <nav class="nav" aria-label="Admin navigation">
+    <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><strong>Devil n Dove</strong><div class="small">Admin / Catalog Authority Health</div></div></div>
+    <div class="links"><a href="/admin/products/">Products</a><a href="/admin/catalog-media/">Images</a><a href="/admin/inventory-operations/">Inventory</a><a href="/admin/catalog/">Catalog Hub</a><a href="/admin/">Dashboard</a></div>
+  </nav>
+
+  <header class="hero compact-hero">
+    <div>
+      <p class="eyebrow">Release 467 • Build 181</p>
+      <h1>Product, Inventory, Tool & Image Health</h1>
+      <p>D1 is the live authority again. This focused workspace finds the next catalog problems to repair without loading every editor, every image, or every Inventory card at startup.</p>
+    </div>
+  </header>
+
+  <section class="card catalog-health-boundary">
+    <strong>Read-only diagnostic boundary</strong>
+    <p class="small">This page reads established Product, Product Image, Product Resource, Inventory and catalog-reference tables. It never edits Product facts, stock, Tool/Supply rows, images, R2 objects, provider state, payments or accounting. Every repair opens the existing owning editor.</p>
+    <div id="catalogHealthAuthority" class="small">Waiting for live D1 authority…</div>
+  </section>
+
+  <div id="catalogHealthMessage" class="card small catalog-health-message" hidden aria-live="polite"></div>
+
+  <section class="card">
+    <div class="section-heading-row"><div><h2>Product health</h2><p class="small">Featured image, gallery depth, alt text, linked maker inputs and tracked finished stock.</p></div><button class="btn" id="catalogHealthProductIssues" type="button">Load 40 Product issues</button></div>
+    <div class="catalog-health-stat-grid" id="catalogHealthProductStats"><div class="small">Loading Product summary…</div></div>
+  </section>
+
+  <section class="card">
+    <div class="section-heading-row"><div><h2>Inventory, Tools & Supplies</h2><p class="small">Operational Tool/Supply rows, image authority drift, duplicate identities and zero-on-hand supplies.</p></div><button class="btn" id="catalogHealthInventoryIssues" type="button">Load 40 Tool/Supply issues</button></div>
+    <div class="catalog-health-stat-grid" id="catalogHealthInventoryStats"><div class="small">Loading Inventory summary…</div></div>
+  </section>
+
+  <section class="card">
+    <div class="section-heading-row"><div><h2>Bounded repair queue</h2><p class="small">Issue rows load only when requested. Search never loads more than 40 rows.</p></div><button class="btn" id="catalogHealthRefresh" type="button">Refresh summary</button></div>
+    <form id="catalogHealthSearchForm" class="catalog-health-toolbar">
+      <label><span class="small">Search current queue</span><input class="input" id="catalogHealthSearch" type="search" placeholder="Product, SKU, slug, Tool/Supply name, key or category"/></label>
+      <select class="input" id="catalogHealthKind" hidden aria-label="Tool or Supply filter"><option value="">Tools & Supplies</option><option value="tool">Tools only</option><option value="supply">Supplies only</option></select>
+      <button class="btn" type="submit">Search</button>
+    </form>
+    <div id="catalogHealthResults" style="margin-top:14px"><div class="small">Choose a Product or Tool/Supply issue queue above.</div></div>
+  </section>
+
+  <div class="footer card" style="margin-top:18px"></div>
+</div>
+<script src="/public/js/auth.js?v=440"></script>
+<script src="/public/js/admin-route-usage.js"></script>
+<script src="/public/js/site-auth-ui.js?v=180"></script>
+<script src="/public/js/admin-self-protect.js?v=440"></script>
+<script src="/public/js/admin-catalog-health-v181.js?v=181"></script>
+</body>
+</html>
