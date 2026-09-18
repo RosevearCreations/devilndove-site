@@ -54,7 +54,7 @@ jobs:
         run: python scripts/build440_inventory_asset_server_restore_regression_test.py
 
   development-d1-image-proof:
-    if: ${{ github.event_name != 'push' || github.ref == 'refs/heads/dev' }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
