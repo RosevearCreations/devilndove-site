@@ -16,6 +16,7 @@ on:
       - 'functions/api/admin/product-release-preflight.js'
       - 'public/js/admin-products-marketplace-readiness.js'
       - 'scripts/release467_build164_gate.py'
+      - 'scripts/release467_build169_gate.py'
       - 'scripts/release467_build172_gate.py'
       - 'scripts/release467_build173_gate.py'
       - 'scripts/release467_build174_gate.py'
