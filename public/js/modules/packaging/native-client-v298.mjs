@@ -217,16 +217,14 @@ function scheduleDeferredContractRefresh() {
       document.dispatchEvent(new CustomEvent('dd:packaging-owner-contracts-ready', {
         detail: Object.freeze({
           moduleId: 'packaging',
-          build: BUILD,
-          reason: 'refresh-core-packaging-with-owner-contract-enrichment',
+          build: 177,
+          reason: 'owner-contracts-ready-no-core-reload',
+          automatic_core_reload: false,
         }),
       }));
     }
-
-    const refresh = typeof document !== 'undefined'
-      ? document.getElementById('refreshPackagingStudio')
-      : null;
-    if (refresh && typeof refresh.click === 'function') refresh.click();
+    // Build 177 deliberately does not click Refresh here. A ready owner-contract runtime
+    // must not cause a second full Packaging bootstrap immediately after the first one.
   }).catch((error) => {
     deferredContractRefreshScheduled = false;
     console.warn('[DD Packaging] delayed owner-contract enrichment unavailable', error);
@@ -452,7 +450,7 @@ export const metadata = Object.freeze({
   nativeBootstrapPath: NATIVE_BOOTSTRAP_PATH,
   nativeWritePath: NATIVE_WRITE_PATH,
   legacyRouteNamedByClient: false,
-  behaviorMode: 'core-packaging-first-delayed-owner-contract-enrichment',
+  behaviorMode: 'core-packaging-first-no-automatic-second-bootstrap',
 });
 
 if (typeof globalThis !== 'undefined') {
