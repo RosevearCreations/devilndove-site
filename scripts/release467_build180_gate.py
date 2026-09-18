@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 180 — staged runtime startup gate."""
+"""Release 467 Build 180 — staged runtime startup gate, successor-aware through Build 183."""
 from pathlib import Path
 import sys
 ROOT=Path(__file__).resolve().parents[1]; FAIL=[]
@@ -38,7 +38,7 @@ req("Release 467 Build 180" in studio and "/public/js/admin-media-content-studio
 for token in ("inventoryIntegrityLoad","Load 40-item queue","paused during page startup","state.loaded = true","Release 467 Build 180 · staged Inventory truth &amp; usage"):
     req(token in inventory_ui,f"Inventory staged queue token missing: {token}")
 req("dd:admin-ready" not in inventory_ui and "if (window.DDAuth?.isLoggedIn()) start();" not in inventory_ui,"Inventory attention queue still auto-starts")
-req("/public/js/admin-inventory-integrity-review.js?v=180" in inventory and "release467-build179-runtime-recovery.css?v=180" in inventory and "Release 467 Build 180" in inventory,"Inventory Operations Build 180 page/cache identity missing")
+req("/public/js/admin-inventory-integrity-review.js?v=180" in inventory and "release467-build179-runtime-recovery.css?v=180" in inventory and any(token in inventory for token in ("Release 467 Build 180","Release 467 Build 183")),"Inventory Operations Build 180/183 page/cache identity missing")
 for token in ("content-visibility:auto","contain-intrinsic-size:auto 520px","contain-intrinsic-size:auto 720px"):
     req(token in css,f"Inventory staged-paint CSS missing: {token}")
 
