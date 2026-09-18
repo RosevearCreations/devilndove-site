@@ -85,7 +85,7 @@ export function createPackagingArtworkPicker({
   onSelect = null,
   onClear = null,
 } = {}) {
-  let observer = null;
+  let renderListenerInstalled = false;
   let started = false;
   let mountedField = null;
   let mountCount = 0;
@@ -272,22 +272,28 @@ export function createPackagingArtworkPicker({
     return render(panel, field);
   }
 
+  function handleEditorRendered() {
+    if (!started) return;
+    mount();
+  }
+
   function start() {
     if (started) return true;
     started = true;
     mount();
-    const root = documentRef?.getElementById?.('packagingStudioMain') || documentRef?.body || null;
-    if (root && typeof MutationObserver === 'function') {
-      observer = new MutationObserver(() => { mount(); });
-      observer.observe(root, { childList: true, subtree: true });
+    if (!renderListenerInstalled && documentRef?.addEventListener) {
+      documentRef.addEventListener('dd:packaging-editor-rendered', handleEditorRendered);
+      renderListenerInstalled = true;
     }
     return true;
   }
 
   function stop() {
     started = false;
-    observer?.disconnect?.();
-    observer = null;
+    if (renderListenerInstalled && documentRef?.removeEventListener) {
+      documentRef.removeEventListener('dd:packaging-editor-rendered', handleEditorRendered);
+    }
+    renderListenerInstalled = false;
     documentRef?.getElementById?.(PICKER_ID)?.remove?.();
     mountedField = null;
   }
@@ -297,7 +303,8 @@ export function createPackagingArtworkPicker({
       build: 287,
       started,
       mounted: Boolean(documentRef?.getElementById?.(PICKER_ID)),
-      observerInstalled: Boolean(observer),
+      observerInstalled: false,
+      renderEventListenerInstalled: renderListenerInstalled,
       availableCount: currentRows().length,
       mountCount,
       lastError,
