@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <h3 id="productIntegrityReviewHeading">Ingredient &amp; Product Media Integrity</h3>
             <p class="small">Read-only triage. This desk identifies Product facts/media that need review, then opens the owning Product or Media workspace. It never auto-approves ingredients or rewrites Product media.</p>
           </div>
-          <button class="btn" type="button" id="productIntegrityRefresh" ${state.loading ? 'disabled' : ''}>${state.loading ? 'Loading…' : 'Refresh queues'}</button>
+          <button class="btn" type="button" id="productIntegrityRefresh" ${state.loading ? 'disabled' : ''}>${state.loading ? 'Loading…' : (state.data ? 'Refresh queues' : 'Load queues')}</button>
         </div>
 
         <div class="grid cols-4 product-integrity-summary">
@@ -141,7 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (booted || !window.DDAuth?.isLoggedIn()) return;
     booted = true;
     render();
-    load();
   }
 
   document.addEventListener('dd:admin-ready', (event) => { if (event?.detail?.ok) boot(); });
