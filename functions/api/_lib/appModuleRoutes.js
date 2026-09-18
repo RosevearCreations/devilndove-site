@@ -101,6 +101,7 @@ export const SHARED_SERVICE_CONTRACTS = Object.freeze([
 const STOREFRONT_ADMIN_PAGES = Object.freeze([
   '/admin/catalog',
   '/admin/catalog-media',
+  '/admin/catalog-health',
   '/admin/create-product',
   '/admin/product-editor',
   '/admin/products',
@@ -171,6 +172,7 @@ const IT_ADMIN_PAGES = Object.freeze([
 
 const STOREFRONT_ADMIN_APIS = Object.freeze([
   '/api/admin/catalog',
+  '/api/admin/catalog-health',
   '/api/admin/product',
   '/api/admin/create-product',
   '/api/admin/update-product',
