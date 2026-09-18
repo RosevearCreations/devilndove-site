@@ -184,7 +184,9 @@ if (window.location.pathname.startsWith('/admin')) {
     '/admin/storefront-merchandising/',
     '/admin/storefront-merchandising/index.html',
     '/admin/supply-sourcing/',
-    '/admin/supply-sourcing/index.html'
+    '/admin/supply-sourcing/index.html',
+    '/admin/packaging-studio/',
+    '/admin/packaging-studio/index.html'
   ]);
   const leanStartup = leanRoutes.has(window.location.pathname);
   window.DDAdminLeanStartup = Object.freeze({
