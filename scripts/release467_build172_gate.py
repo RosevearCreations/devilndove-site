@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 172 — Product Media save reliability and canonical-reference gate, successor-aware through Build 173."""
+"""Release 467 Build 172 — Product Media save reliability and canonical-reference gate, successor-aware through Build 178."""
 from pathlib import Path
 import subprocess,sys
 ROOT=Path(__file__).resolve().parents[1];FAIL=[]
@@ -10,10 +10,10 @@ def node(path):
     p=subprocess.run(['node','--check',str(ROOT/path)],cwd=ROOT,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     req(p.returncode==0,f'JavaScript syntax failed for {path}: {(p.stderr or p.stdout)[-1200:]}')
 page=read('admin/catalog-media/index.html');client=read('public/js/admin-product-media-editor-v172.js');media=read('functions/api/admin/product-media-editor.js');image=read('functions/api/admin/product-image-editor.js');file_api=read('functions/api/admin/product-image-file.js');helper=read('functions/api/admin/_productImageAnnotationsV172.js')
-req(('Release 467 • Build 172' in page) or ('Release 467 • Build 173' in page),'Build 172+ Product Media page identity missing')
+req(any(token in page for token in ('Release 467 • Build 172','Release 467 • Build 173','Release 467 • Build 178')),'Build 172+ Product Media page identity missing')
 for token in ('productMediaV172SaveReceipt','Saved ✓','Recovered media references are display-only'):
     req(token in page,f'Build 172 page missing: {token}')
-req(('admin-product-media-editor-v172.js?v=172' in page) or ('admin-product-media-editor-v172.js?v=173' in page),'Build 172+ Product Media client cache identity missing')
+req(any(token in page for token in ('admin-product-media-editor-v172.js?v=172','admin-product-media-editor-v172.js?v=173','admin-product-media-editor-v172.js?v=178')),'Build 172+ Product Media client cache identity missing')
 for token in ('fetchProduct(state.productId)','fetchImage(targetId)','Save failed — image was not confirmed','Saved ✓','row.editable===false','data-reference="1"'):
     req(token in client,f'Build 172 client repair missing: {token}')
 req('await loadProduct(state.productId)' not in client,'Build 172 reintroduced in-flight loadProduct refresh deadlock')
