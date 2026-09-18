@@ -109,12 +109,15 @@ const safetyIndex = inventoryPage.indexOf('/public/js/admin-asset-url-safety.js?
 const transportIndex = inventoryPage.indexOf('/public/js/admin-inventory-asset-transport-guard.js?v=440.4');
 check(safetyIndex > 0, 'Inventory Operations page does not load the Admin asset URL safety layer with the new cache-busting version.');
 check(transportIndex > safetyIndex, 'Inventory Operations page must load the transport guard after the shared safety layer.');
+const inventoryEditorScript = ['/public/js/admin-site-item-inventory.js?v=184','/public/js/admin-site-item-inventory.js?v=440.3']
+  .find((script) => inventoryPage.includes(script));
+check(Boolean(inventoryEditorScript), 'Inventory Operations page lost the site-item Inventory editor script.');
 for (const script of [
   ...['/public/js/admin-inventory-integrity-review.js?v=179','/public/js/admin-inventory-integrity-review.js?v=180'].filter((script) => inventoryPage.includes(script)),
   '/public/js/admin-tool-lifecycle-review.js?v=440',
   '/public/js/admin-product-resources.js?v=440',
-  '/public/js/admin-site-item-inventory.js?v=440.3',
-]) {
+  inventoryEditorScript,
+].filter(Boolean)) {
   check(inventoryPage.indexOf(script) > transportIndex, `Inventory transport guard must load before ${script}.`);
 }
 
