@@ -75,23 +75,48 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "WITH
+          role_by_image AS (
+            SELECT product_image_id,MAX(CASE WHEN TRIM(COALESCE(image_role,''))<>'' THEN 1 ELSE 0 END) AS has_role
+            FROM product_image_annotations GROUP BY product_image_id
+          ),
+          image_facts AS (
+            SELECT pi.product_image_id,pi.product_id,pi.alt_text,COALESCE(rbi.has_role,0) AS has_role
+            FROM product_images pi LEFT JOIN role_by_image rbi ON rbi.product_image_id=pi.product_image_id
+          ),
+          active_inventory AS (
+            SELECT LOWER(TRIM(COALESCE(source_type,''))) AS item_kind,
+                   LOWER(TRIM(COALESCE(external_key,''))) AS external_key_norm,image_url
+            FROM site_item_inventory
+            WHERE COALESCE(is_active,1)=1 AND LOWER(TRIM(COALESCE(source_type,''))) IN ('tool','supply')
+          ),
+          catalog_ranked AS (
+            SELECT LOWER(TRIM(COALESCE(item_kind,''))) AS item_kind,
+                   LOWER(TRIM(COALESCE(source_key,''))) AS source_key_norm,image_url,
+                   ROW_NUMBER() OVER (
+                     PARTITION BY LOWER(TRIM(COALESCE(item_kind,''))),LOWER(TRIM(COALESCE(source_key,'')))
+                     ORDER BY catalog_item_id DESC
+                   ) AS rn
+            FROM catalog_items
+            WHERE LOWER(TRIM(COALESCE(item_kind,''))) IN ('tool','supply')
+              AND COALESCE(status,'active')<>'archived'
+          ),
+          inventory_image_facts AS (
+            SELECT ai.image_url AS inventory_image_url,cr.image_url AS catalog_image_url
+            FROM active_inventory ai
+            LEFT JOIN catalog_ranked cr ON cr.rn=1 AND cr.item_kind=ai.item_kind AND cr.source_key_norm=ai.external_key_norm
+          )
+          SELECT
             (SELECT COUNT(*) FROM products p WHERE LOWER(TRIM(COALESCE(p.status,'draft'))) NOT IN ('archived','deleted')) AS active_products,
-            (SELECT COUNT(*) FROM product_images pi JOIN products p ON p.product_id=pi.product_id WHERE LOWER(TRIM(COALESCE(p.status,'draft'))) NOT IN ('archived','deleted')) AS gallery_images,
-            (SELECT COUNT(*) FROM product_images pi JOIN products p ON p.product_id=pi.product_id WHERE LOWER(TRIM(COALESCE(p.status,'draft'))) NOT IN ('archived','deleted') AND LENGTH(TRIM(COALESCE(pi.alt_text,'')))<12) AS alt_attention,
-            (SELECT COUNT(*) FROM product_images pi JOIN products p ON p.product_id=pi.product_id WHERE LOWER(TRIM(COALESCE(p.status,'draft'))) NOT IN ('archived','deleted') AND NOT EXISTS(
-              SELECT 1 FROM product_image_annotations pia WHERE pia.product_image_id=pi.product_image_id AND TRIM(COALESCE(pia.image_role,''))<>''
-            )) AS role_attention,
-            (SELECT COUNT(*) FROM site_item_inventory sii WHERE COALESCE(sii.is_active,1)=1 AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')) AS active_inventory,
-            (SELECT COUNT(*) FROM site_item_inventory sii WHERE COALESCE(sii.is_active,1)=1 AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply') AND TRIM(COALESCE(sii.image_url,''))='') AS blank_inventory_images,
-            (SELECT COUNT(*) FROM site_item_inventory sii WHERE COALESCE(sii.is_active,1)=1 AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')
-              AND TRIM(COALESCE(sii.image_url,''))<>'' AND EXISTS(
-                SELECT 1 FROM catalog_items ci
-                WHERE LOWER(TRIM(COALESCE(ci.item_kind,'')))=LOWER(TRIM(COALESCE(sii.source_type,'')))
-                  AND LOWER(TRIM(COALESCE(ci.source_key,'')))=LOWER(TRIM(COALESCE(sii.external_key,'')))
-                  AND COALESCE(ci.status,'active')<>'archived'
-                  AND TRIM(COALESCE(ci.image_url,''))<>'' AND TRIM(ci.image_url)<>TRIM(sii.image_url)
-              )) AS inventory_catalog_image_drift;" > /tmp/build184-image-evidence.json
+            (SELECT COUNT(*) FROM image_facts) AS gallery_images,
+            (SELECT COUNT(*) FROM image_facts WHERE LENGTH(TRIM(COALESCE(alt_text,'')))<12) AS alt_attention,
+            (SELECT COUNT(*) FROM image_facts WHERE has_role=0) AS role_attention,
+            (SELECT COUNT(*) FROM active_inventory) AS active_inventory,
+            (SELECT COUNT(*) FROM active_inventory WHERE TRIM(COALESCE(image_url,''))='') AS blank_inventory_images,
+            (SELECT COUNT(*) FROM inventory_image_facts
+              WHERE TRIM(COALESCE(inventory_image_url,''))<>''
+                AND TRIM(COALESCE(catalog_image_url,''))<>''
+                AND TRIM(inventory_image_url)<>TRIM(catalog_image_url)) AS inventory_catalog_image_drift;" > /tmp/build184-image-evidence.json
           python - <<'PY'
           import json
           data=json.load(open('/tmp/build184-image-evidence.json')); rows=[]
