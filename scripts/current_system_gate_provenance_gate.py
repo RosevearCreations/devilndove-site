@@ -28,7 +28,7 @@ product_page_source=(ROOT/'shop/product/index.html').read_text(encoding='utf-8',
 build163_current=(('product-media-v163' in catalog_media_source) or ('product-media-v164' in catalog_media_source)) and 'product-editor-v163' in product_editor_source
 build164_current='product-media-v164' in catalog_media_source and ('product-editor-v163' in product_editor_source or 'product-editor-v165' in product_editor_source)
 build165_current='product-browser-v165' in products_source and 'product-editor-v165' in product_editor_source and 'product-media-v164' in catalog_media_source
-build166_current='product-browser-v166' in products_source and any(token in product_page_source for token in ('/public/js/product-detail-v166.js?v=166','/public/js/product-detail-v166.js?v=179')) and (ROOT/'scripts/release467_build166_gate.py').is_file()
+build166_current='product-browser-v166' in products_source and any(token in product_page_source for token in ('/public/js/product-detail-v166.js?v=166','/public/js/product-detail-v166.js?v=179','/public/js/product-detail-v166.js?v=180')) and (ROOT/'scripts/release467_build166_gate.py').is_file()
 
 # Explicit calls and their historical formatting are intentional because retained gates inspect this source literally.
 run_current_contract('scripts/release467_build62_gate.py', 'Release 467 Build 62')
