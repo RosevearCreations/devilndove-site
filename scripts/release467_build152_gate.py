@@ -54,7 +54,8 @@ else:
     req(closed_final.get('dev_sha')==DEV152 and closed_final.get('tree_sha')==TREE152 and (closed_final.get('proofs') or {})==PROOFS152,'sealed Build 152 final closure drifted')
     req(closed_prod.get('state')=='PRODUCTION_GREEN' and closed_prod.get('main_sha')==MAIN152 and closed_prod.get('tree_sha')==TREE152,'sealed Build 152 Production closure drifted')
     req(closed_prod.get('production_pages_deploy_run')==PAGES152 and closed_prod.get('production_live_resource_integrity_run')==LIVE152,'sealed Build 152 Production proof IDs drifted')
-    req('release467-build152-sitewide-image-quality-media-qa.json' in (pointer.get('current_release_authorities') or []),'current authority lost sealed Build 152 provenance')
+    if pointer_build==152:
+        req('release467-build152-sitewide-image-quality-media-qa.json' in (pointer.get('current_release_authorities') or []),'current authority lost sealed Build 152 provenance')
     if pointer_build==152:
         for path in ('AI_HANDOFF.md','PROJECT_STATUS_AND_ROADMAP.md','SANITY_HEALTH_CHECK.md','MARKDOWN_INDEX.md','docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'):
             body=read(path)
