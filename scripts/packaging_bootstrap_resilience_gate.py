@@ -25,7 +25,16 @@ blocking_wait = body.find('await waitForContracts()')
 check('readPackaging_exists', start >= 0 and end > start, f'start={start} end={end}')
 check('core_bootstrap_precedes_owner_contract_wait', bootstrap_call >= 0 and (blocking_wait < 0 or bootstrap_call < blocking_wait), f'bootstrap_call={bootstrap_call} blocking_wait={blocking_wait}')
 check('read_does_not_block_on_owner_contract_wait', 'const ready = await waitForContracts()' not in body, 'core Packaging reads must not await owner-contract activation')
-check('deferred_owner_contract_refresh_exists', 'function scheduleDeferredContractRefresh()' in native and 'dd:packaging-owner-contracts-ready' in native and "document.getElementById('refreshPackagingStudio')" in native, 'owner contracts should enrich the already-rendered workspace later')
+check(
+    'deferred_owner_contract_enrichment_exists',
+    'function scheduleDeferredContractRefresh()' in native
+    and 'dd:packaging-owner-contracts-ready' in native
+    and (
+        "document.getElementById('refreshPackagingStudio')" in native
+        or ('automatic_core_reload: false' in native and 'refresh.click()' not in native)
+    ),
+    'owner-contract readiness must remain observable; Build 177 may deliberately avoid a second full core refresh'
+)
 check('pending_contract_state_explicit', "source: 'contract-pending'" in native and 'owner_contracts_pending' in native, 'pending product/inventory/content dropdown state must be observable')
 check('writes_remain_modularly_gated', 'async function writePackaging' in native and 'const ready = await waitForContracts();' in native, 'writes remain behind the verified modular runtime')
 check('retired_legacy_route_not_named', '/api/admin/packaging-studio' not in native, 'native client must not reintroduce the retired broad endpoint')
