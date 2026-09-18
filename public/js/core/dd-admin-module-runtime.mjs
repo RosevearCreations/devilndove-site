@@ -4,7 +4,7 @@
 // domain registry, Packaging activation, and Build 303 verified-auth reconciliation.
 
 import { MODULE_STATES, createModuleRegistry } from './dd-module-registry.mjs';
-import { DD_MODULE_DEFINITIONS } from './dd-module-definitions.mjs';
+import { DD_MODULE_DEFINITIONS } from './dd-module-definitions.mjs?v=177';
 import { validateModuleContracts } from './dd-module-contracts.mjs';
 import { registerDefaultModuleServices } from './dd-module-service-adapters.mjs';
 import {
