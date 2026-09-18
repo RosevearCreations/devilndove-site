@@ -17,6 +17,7 @@ on:
       - 'scripts/release467_build183_gate.py'
       - 'scripts/release467_build182_gate.py'
       - 'scripts/release467_build181_gate.py'
+      - 'scripts/build440_resource_asset_url_regression_test.mjs'
       - '.github/workflows/release467-build184-product-tool-supply-image-repair.yml'
   workflow_dispatch:
 permissions:
