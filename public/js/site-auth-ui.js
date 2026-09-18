@@ -8,7 +8,7 @@
 // Release 467 Build 125: admin routes bootstrap user-scoped browser workspace preferences and memory.
 // Release 467 Build 126: admin routes bootstrap user-scoped browser favorites and quick launch.
 // Release 467 Build 127: admin routes bootstrap manifest-backed context breadcrumbs and workspace return.
-// Release 467 Build 128: admin routes bootstrap read-only navigation help and keyboard shortcut reference.
+// Release 467 Build 128: admin routes bootstrap read-only navigation help and keyboard shortcut reference.\n// Release 467 Build 179: Media Studio and Inventory Operations use lean startup while their large workspaces render.
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!window.DDAuth) return;
@@ -186,7 +186,11 @@ if (window.location.pathname.startsWith('/admin')) {
     '/admin/supply-sourcing/',
     '/admin/supply-sourcing/index.html',
     '/admin/packaging-studio/',
-    '/admin/packaging-studio/index.html'
+    '/admin/packaging-studio/index.html',
+    '/admin/media-content-studio/',
+    '/admin/media-content-studio/index.html',
+    '/admin/inventory-operations/',
+    '/admin/inventory-operations/index.html'
   ]);
   const leanStartup = leanRoutes.has(window.location.pathname);
   window.DDAdminLeanStartup = Object.freeze({
