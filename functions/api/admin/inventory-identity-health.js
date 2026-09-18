@@ -65,42 +65,55 @@ function shapeIssue(row = {}) {
 }
 
 async function summary(db) {
+  // Build 184 quota hardening: aggregate each authority once. Do not run a correlated
+  // Inventory/catalog subquery for every Tool/Supply row.
   const row = await db.prepare(`
+    WITH active AS (
+      SELECT sii.*,
+             LOWER(TRIM(COALESCE(sii.source_type,''))) AS source_type_norm,
+             LOWER(TRIM(COALESCE(sii.external_key,''))) AS external_key_norm
+      FROM site_item_inventory sii
+      WHERE COALESCE(sii.is_active,1)=1
+        AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')
+    ),
+    key_counts AS (
+      SELECT external_key_norm,COUNT(*) AS key_duplicate_count
+      FROM active
+      WHERE external_key_norm<>''
+      GROUP BY external_key_norm
+    ),
+    catalog_refs AS (
+      SELECT LOWER(TRIM(COALESCE(item_kind,''))) AS item_kind_norm,
+             LOWER(TRIM(COALESCE(source_key,''))) AS source_key_norm
+      FROM catalog_items
+      WHERE LOWER(TRIM(COALESCE(item_kind,''))) IN ('tool','supply')
+        AND COALESCE(status,'active')<>'archived'
+      GROUP BY 1,2
+    )
     SELECT
       COUNT(*) AS active_items,
-      SUM(CASE WHEN TRIM(COALESCE(sii.external_key,''))='' THEN 1 ELSE 0 END) AS missing_external_key,
+      SUM(CASE WHEN a.external_key_norm='' THEN 1 ELSE 0 END) AS missing_external_key,
+      SUM(CASE WHEN COALESCE(kc.key_duplicate_count,0)>1 THEN 1 ELSE 0 END) AS duplicate_identity_rows,
+      SUM(CASE WHEN TRIM(COALESCE(a.supplier_name,''))='' THEN 1 ELSE 0 END) AS missing_supplier_name,
+      SUM(CASE WHEN TRIM(COALESCE(a.source_url,''))='' AND TRIM(COALESCE(a.amazon_url,''))='' THEN 1 ELSE 0 END) AS missing_source_reference,
+      SUM(CASE WHEN (TRIM(COALESCE(a.source_url,''))<>'' OR TRIM(COALESCE(a.amazon_url,''))<>'') AND TRIM(COALESCE(a.supplier_sku,''))='' THEN 1 ELSE 0 END) AS missing_supplier_sku_when_sourced,
       SUM(CASE WHEN (
-        SELECT COUNT(*) FROM site_item_inventory d
-        WHERE COALESCE(d.is_active,1)=1
-          AND LOWER(TRIM(COALESCE(d.source_type,''))) IN ('tool','supply')
-          AND LOWER(TRIM(COALESCE(d.external_key,'')))=LOWER(TRIM(COALESCE(sii.external_key,'')))
-          AND TRIM(COALESCE(d.external_key,''))<>''
-      ) > 1 THEN 1 ELSE 0 END) AS duplicate_identity_rows,
-      SUM(CASE WHEN TRIM(COALESCE(sii.supplier_name,''))='' THEN 1 ELSE 0 END) AS missing_supplier_name,
-      SUM(CASE WHEN TRIM(COALESCE(sii.source_url,''))='' AND TRIM(COALESCE(sii.amazon_url,''))='' THEN 1 ELSE 0 END) AS missing_source_reference,
-      SUM(CASE WHEN (TRIM(COALESCE(sii.source_url,''))<>'' OR TRIM(COALESCE(sii.amazon_url,''))<>'') AND TRIM(COALESCE(sii.supplier_sku,''))='' THEN 1 ELSE 0 END) AS missing_supplier_sku_when_sourced,
-      SUM(CASE WHEN (
-        (LOWER(TRIM(COALESCE(sii.source_type,'')))='supply' AND (
+        (a.source_type_norm='supply' AND (
           siup.site_item_inventory_id IS NULL
           OR (LOWER(TRIM(COALESCE(siup.usage_tracking_mode,'log_only')))='log_only' AND ${LEGACY_USAGE_NOTE_SQL})
         ))
-        OR (LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' AND siup.site_item_inventory_id IS NOT NULL AND LOWER(TRIM(COALESCE(siup.usage_tracking_mode,'reusable')))<>'reusable')
+        OR (a.source_type_norm='tool' AND siup.site_item_inventory_id IS NOT NULL AND LOWER(TRIM(COALESCE(siup.usage_tracking_mode,'reusable')))<> 'reusable')
       ) THEN 1 ELSE 0 END) AS usage_review_required,
-      SUM(CASE WHEN sii.last_counted_at IS NULL OR datetime(sii.last_counted_at)<datetime('now','-90 days') THEN 1 ELSE 0 END) AS count_due,
+      SUM(CASE WHEN a.last_counted_at IS NULL OR datetime(a.last_counted_at)<datetime('now','-90 days') THEN 1 ELSE 0 END) AS count_due,
       SUM(CASE WHEN (
-        (COALESCE(sii.do_not_reorder,0)=0 AND COALESCE(sii.reorder_level,0)>0 AND COALESCE(sii.on_hand_quantity,0)<=COALESCE(sii.reorder_level,0) AND COALESCE(sii.is_on_reorder_list,0)=0)
-        OR (COALESCE(sii.do_not_reorder,0)=1 AND COALESCE(sii.is_on_reorder_list,0)=1)
+        (COALESCE(a.do_not_reorder,0)=0 AND COALESCE(a.reorder_level,0)>0 AND COALESCE(a.on_hand_quantity,0)<=COALESCE(a.reorder_level,0) AND COALESCE(a.is_on_reorder_list,0)=0)
+        OR (COALESCE(a.do_not_reorder,0)=1 AND COALESCE(a.is_on_reorder_list,0)=1)
       ) THEN 1 ELSE 0 END) AS reorder_review_required,
-      SUM(CASE WHEN TRIM(COALESCE(sii.external_key,''))<>'' AND NOT EXISTS(
-        SELECT 1 FROM catalog_items ci
-        WHERE LOWER(TRIM(COALESCE(ci.item_kind,'')))=LOWER(TRIM(COALESCE(sii.source_type,'')))
-          AND LOWER(TRIM(COALESCE(ci.source_key,'')))=LOWER(TRIM(COALESCE(sii.external_key,'')))
-          AND COALESCE(ci.status,'active')<>'archived'
-      ) THEN 1 ELSE 0 END) AS catalog_reference_not_matched
-    FROM site_item_inventory sii
-    LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
-    WHERE COALESCE(sii.is_active,1)=1
-      AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')
+      SUM(CASE WHEN a.external_key_norm<>'' AND cr.source_key_norm IS NULL THEN 1 ELSE 0 END) AS catalog_reference_not_matched
+    FROM active a
+    LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=a.site_item_inventory_id
+    LEFT JOIN key_counts kc ON kc.external_key_norm=a.external_key_norm
+    LEFT JOIN catalog_refs cr ON cr.item_kind_norm=a.source_type_norm AND cr.source_key_norm=a.external_key_norm
   `).first();
 
   return {
@@ -124,64 +137,74 @@ async function issueRows(db, { queue = 'all', q = '', limit = MAX_ROWS } = {}) {
   const filter = queueWhere(safeQueue);
 
   const result = await db.prepare(`
-    WITH base AS (
+    WITH active AS (
+      SELECT sii.*,
+             LOWER(TRIM(COALESCE(sii.source_type,''))) AS source_type_norm,
+             LOWER(TRIM(COALESCE(sii.external_key,''))) AS external_key_norm
+      FROM site_item_inventory sii
+      WHERE COALESCE(sii.is_active,1)=1
+        AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')
+    ),
+    key_counts AS (
+      SELECT external_key_norm,COUNT(*) AS key_duplicate_count
+      FROM active WHERE external_key_norm<>'' GROUP BY external_key_norm
+    ),
+    same_kind_counts AS (
+      SELECT source_type_norm,external_key_norm,COUNT(*) AS same_kind_duplicate_count
+      FROM active WHERE external_key_norm<>'' GROUP BY source_type_norm,external_key_norm
+    ),
+    catalog_refs AS (
+      SELECT LOWER(TRIM(COALESCE(item_kind,''))) AS item_kind_norm,
+             LOWER(TRIM(COALESCE(source_key,''))) AS source_key_norm
+      FROM catalog_items
+      WHERE LOWER(TRIM(COALESCE(item_kind,''))) IN ('tool','supply')
+        AND COALESCE(status,'active')<>'archived'
+      GROUP BY 1,2
+    ),
+    catalog_any AS (
+      SELECT source_key_norm,COUNT(*) AS ref_count
+      FROM catalog_refs GROUP BY source_key_norm
+    ),
+    base AS (
       SELECT
-        sii.site_item_inventory_id,
-        LOWER(TRIM(COALESCE(sii.source_type,''))) AS source_type,
-        sii.external_key,sii.item_name,sii.category,sii.source_url,sii.amazon_url,sii.image_url,
-        sii.supplier_name,sii.supplier_sku,sii.supplier_contact,
-        sii.on_hand_quantity,sii.reserved_quantity,sii.incoming_quantity,sii.reorder_level,
-        sii.preferred_reorder_quantity,sii.is_on_reorder_list,sii.do_not_reorder,sii.do_not_reuse,
-        sii.stock_unit_label,sii.usage_unit_label,sii.usage_units_per_stock_unit,sii.last_counted_at,sii.updated_at,
+        a.site_item_inventory_id,a.source_type_norm AS source_type,
+        a.external_key,a.item_name,a.category,a.source_url,a.amazon_url,a.image_url,
+        a.supplier_name,a.supplier_sku,a.supplier_contact,
+        a.on_hand_quantity,a.reserved_quantity,a.incoming_quantity,a.reorder_level,
+        a.preferred_reorder_quantity,a.is_on_reorder_list,a.do_not_reorder,a.do_not_reuse,
+        a.stock_unit_label,a.usage_unit_label,a.usage_units_per_stock_unit,a.last_counted_at,a.updated_at,
         siup.site_item_inventory_id AS usage_profile_id,
-        COALESCE(siup.usage_tracking_mode,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
+        COALESCE(siup.usage_tracking_mode,CASE WHEN a.source_type_norm='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
         COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment,
         COALESCE(siup.notes,'') AS usage_profile_notes,
-        (SELECT COUNT(*) FROM site_item_inventory d
-          WHERE COALESCE(d.is_active,1)=1
-            AND LOWER(TRIM(COALESCE(d.source_type,''))) IN ('tool','supply')
-            AND LOWER(TRIM(COALESCE(d.external_key,'')))=LOWER(TRIM(COALESCE(sii.external_key,'')))
-            AND TRIM(COALESCE(d.external_key,''))<>'') AS key_duplicate_count,
-        (SELECT COUNT(*) FROM site_item_inventory d
-          WHERE COALESCE(d.is_active,1)=1
-            AND LOWER(TRIM(COALESCE(d.source_type,'')))=LOWER(TRIM(COALESCE(sii.source_type,'')))
-            AND LOWER(TRIM(COALESCE(d.external_key,'')))=LOWER(TRIM(COALESCE(sii.external_key,'')))
-            AND TRIM(COALESCE(d.external_key,''))<>'') AS same_kind_duplicate_count,
+        COALESCE(kc.key_duplicate_count,0) AS key_duplicate_count,
+        COALESCE(skc.same_kind_duplicate_count,0) AS same_kind_duplicate_count,
         CASE WHEN (
-          (LOWER(TRIM(COALESCE(sii.source_type,'')))='supply' AND (
+          (a.source_type_norm='supply' AND (
             siup.site_item_inventory_id IS NULL
             OR (LOWER(TRIM(COALESCE(siup.usage_tracking_mode,'log_only')))='log_only' AND ${LEGACY_USAGE_NOTE_SQL})
           ))
-          OR (LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' AND siup.site_item_inventory_id IS NOT NULL AND LOWER(TRIM(COALESCE(siup.usage_tracking_mode,'reusable')))<>'reusable')
+          OR (a.source_type_norm='tool' AND siup.site_item_inventory_id IS NOT NULL AND LOWER(TRIM(COALESCE(siup.usage_tracking_mode,'reusable')))<> 'reusable')
         ) THEN 1 ELSE 0 END AS usage_review_required,
-        CASE WHEN sii.last_counted_at IS NULL OR datetime(sii.last_counted_at)<datetime('now','-90 days') THEN 1 ELSE 0 END AS count_due,
+        CASE WHEN a.last_counted_at IS NULL OR datetime(a.last_counted_at)<datetime('now','-90 days') THEN 1 ELSE 0 END AS count_due,
         CASE WHEN (
-          (COALESCE(sii.do_not_reorder,0)=0 AND COALESCE(sii.reorder_level,0)>0 AND COALESCE(sii.on_hand_quantity,0)<=COALESCE(sii.reorder_level,0) AND COALESCE(sii.is_on_reorder_list,0)=0)
-          OR (COALESCE(sii.do_not_reorder,0)=1 AND COALESCE(sii.is_on_reorder_list,0)=1)
+          (COALESCE(a.do_not_reorder,0)=0 AND COALESCE(a.reorder_level,0)>0 AND COALESCE(a.on_hand_quantity,0)<=COALESCE(a.reorder_level,0) AND COALESCE(a.is_on_reorder_list,0)=0)
+          OR (COALESCE(a.do_not_reorder,0)=1 AND COALESCE(a.is_on_reorder_list,0)=1)
         ) THEN 1 ELSE 0 END AS reorder_review_required,
         CASE
-          WHEN TRIM(COALESCE(sii.external_key,''))='' THEN 'missing'
-          WHEN EXISTS(
-            SELECT 1 FROM catalog_items ci
-            WHERE LOWER(TRIM(COALESCE(ci.item_kind,'')))=LOWER(TRIM(COALESCE(sii.source_type,'')))
-              AND LOWER(TRIM(COALESCE(ci.source_key,'')))=LOWER(TRIM(COALESCE(sii.external_key,'')))
-              AND COALESCE(ci.status,'active')<>'archived'
-          ) THEN 'matched'
-          WHEN EXISTS(
-            SELECT 1 FROM catalog_items ci
-            WHERE LOWER(TRIM(COALESCE(ci.source_key,'')))=LOWER(TRIM(COALESCE(sii.external_key,'')))
-              AND LOWER(TRIM(COALESCE(ci.item_kind,''))) IN ('tool','supply')
-              AND COALESCE(ci.status,'active')<>'archived'
-          ) THEN 'kind_drift'
+          WHEN a.external_key_norm='' THEN 'missing'
+          WHEN cr.source_key_norm IS NOT NULL THEN 'matched'
+          WHEN ca.source_key_norm IS NOT NULL THEN 'kind_drift'
           ELSE 'missing'
         END AS catalog_reference_status
-      FROM site_item_inventory sii
-      LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
-      WHERE COALESCE(sii.is_active,1)=1
-        AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')
+      FROM active a
+      LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=a.site_item_inventory_id
+      LEFT JOIN key_counts kc ON kc.external_key_norm=a.external_key_norm
+      LEFT JOIN same_kind_counts skc ON skc.source_type_norm=a.source_type_norm AND skc.external_key_norm=a.external_key_norm
+      LEFT JOIN catalog_refs cr ON cr.item_kind_norm=a.source_type_norm AND cr.source_key_norm=a.external_key_norm
+      LEFT JOIN catalog_any ca ON ca.source_key_norm=a.external_key_norm
     )
-    SELECT *
-    FROM base
+    SELECT * FROM base
     WHERE (?='' OR LOWER(COALESCE(item_name,'')) LIKE ? OR LOWER(COALESCE(external_key,'')) LIKE ? OR LOWER(COALESCE(category,'')) LIKE ? OR LOWER(COALESCE(supplier_name,'')) LIKE ?)
       AND ${filter}
     ORDER BY
@@ -196,7 +219,6 @@ async function issueRows(db, { queue = 'all', q = '', limit = MAX_ROWS } = {}) {
 
   return rows(result).map(shapeIssue);
 }
-
 export async function onRequestGet({ request, env }) {
   const admin = await getAdminUserFromRequest(request, env);
   if (!admin) return json({ ok: false, error: 'Admin access required.' }, 401);
