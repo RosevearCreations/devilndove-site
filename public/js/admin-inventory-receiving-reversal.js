@@ -86,14 +86,15 @@
           <h3 style="margin:0">Audited Receipt Reversal</h3>
           <p class="small">A receipt can be reversed once only while its exact received quantity is still provably present in the linked purchase lot. Consumed stock fails closed.</p>
         </div>
+        <button class="btn" type="button" id="inventoryReceivingReversalLoad">Load reversal evidence</button>
       </div>
       <div id="inventoryReceivingReversalMessage" class="small inventory-receiving-message" hidden></div>
-      <div id="inventoryReceivingReversalList"><div class="small">Loading…</div></div>
+      <div id="inventoryReceivingReversalList"><div class="small">Reversal evidence is paused until requested.</div></div>
     </section>`;
   mount.addEventListener('click', (event) => {
     const button = event.target.closest('[data-reverse-receipt]');
     if (button) reviewAndReverse(Number(button.dataset.reverseReceipt || 0));
   });
+  document.getElementById('inventoryReceivingReversalLoad')?.addEventListener('click', load);
   document.addEventListener('dd:inventory-received', load);
-  load();
 })();
