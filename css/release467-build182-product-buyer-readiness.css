@@ -1,0 +1,11 @@
+/* Release 467 Build 182 — Product Facts & Buyer Readiness. */
+.buyer-readiness-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:12px}
+.buyer-readiness-summary .card{display:grid;gap:4px}
+.buyer-readiness-summary strong{font-size:1.55rem;line-height:1.05}
+.buyer-readiness-list{display:grid;gap:10px;margin-top:12px}
+.buyer-readiness-list .status-note{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.buyer-readiness-compact{display:flex;gap:6px;flex-wrap:wrap}
+.buyer-readiness-compact span{display:inline-flex;border:1px solid var(--border);border-radius:999px;padding:2px 8px;font-size:.78rem}
+.buyer-readiness-compact .is-blocker{border-color:rgba(220,90,90,.65)}
+.buyer-readiness-compact .is-attention{border-color:rgba(220,170,70,.55)}
+@media(max-width:760px){.buyer-readiness-list .status-note{display:grid}.buyer-readiness-list .btn{width:100%}}
