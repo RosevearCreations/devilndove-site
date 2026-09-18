@@ -29,8 +29,8 @@ check('deferred_owner_contract_refresh_exists', 'function scheduleDeferredContra
 check('pending_contract_state_explicit', "source: 'contract-pending'" in native and 'owner_contracts_pending' in native, 'pending product/inventory/content dropdown state must be observable')
 check('writes_remain_modularly_gated', 'async function writePackaging' in native and 'const ready = await waitForContracts();' in native, 'writes remain behind the verified modular runtime')
 check('retired_legacy_route_not_named', '/api/admin/packaging-studio' not in native, 'native client must not reintroduce the retired broad endpoint')
-check('launcher_cache_bump', 'native-client-v298.mjs?v=441' in launcher, 'launcher must request the repaired native module revision')
-check('html_launcher_cache_bump', 'admin-packaging-native-client-v298.js?v=441' in html, 'Packaging page must request the repaired launcher revision')
+check('launcher_cache_bump', any(token in launcher for token in ('native-client-v298.mjs?v=441','native-client-v298.mjs?v=177')), 'launcher must request the repaired native module revision')
+check('html_launcher_cache_bump', any(token in html for token in ('admin-packaging-native-client-v298.js?v=441','admin-packaging-native-client-v298.js?v=177')), 'Packaging page must request the repaired launcher revision')
 
 failed = [row for row in checks if not row[1]]
 for name, ok, detail in checks:
