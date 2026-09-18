@@ -29,5 +29,6 @@ This plan continues the existing Product / Inventory / Tool / Image direction af
 
 - Build 181 — complete: live Product / Inventory / Tool / Image authority health.
 - Build 182 — complete: Product Facts & Buyer Readiness.
-- Build 183 — current: Inventory & Tool/Supply Identity Cleanup.
-- Build 184 — next after Build 183 is fully GREEN: Product & Tool/Supply Image Repair Workflow.
+- Build 183 — complete: Inventory & Tool/Supply Identity Cleanup.
+- Build 184 — current: Product & Tool/Supply Image Repair Workflow.
+- Build 185 — next after Build 184 is fully GREEN: Product Resource / Cost / Usage Linkage.
