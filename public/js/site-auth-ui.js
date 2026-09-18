@@ -175,6 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 if (window.location.pathname.startsWith('/admin')) {
   const leanRoutes = new Set([
+    '/admin/',
+    '/admin/index.html',
     '/admin/catalog/',
     '/admin/catalog/index.html',
     '/admin/orders/',
