@@ -1,7 +1,8 @@
 // Release 467 Build 166 — lean, fail-fast public Product renderer.\n// Release 467 Build 179 successor: one fetched snapshot is shared with SEO/parity enhancers; no duplicate Product request.
+// Release 467 Build 180 successor: start immediately from the body-end script so the Product read begins before optional storefront helpers.
 // Uses the bounded Product core endpoint, converts legacy media references to same-origin R2 reads,
 // and never retries automatically or leaves the browser waiting indefinitely.
-document.addEventListener('DOMContentLoaded',()=>{
+(()=>{
   'use strict';
   const loading=document.getElementById('productLoading'),error=document.getElementById('productError'),detail=document.getElementById('productDetail');
   const esc=(v)=>String(v??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -66,4 +67,4 @@ document.addEventListener('DOMContentLoaded',()=>{
     catch(e){if(error){error.textContent=e.message||'Failed to load product.';show(error);}}
     finally{hide(loading);}
   })();
-});
+})();
