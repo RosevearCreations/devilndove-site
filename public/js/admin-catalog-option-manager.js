@@ -1,5 +1,5 @@
 // File: /public/js/admin-catalog-option-manager.js
-// Release 467 Build 68: canonical Product catalog option authority client/manager.
+// Release 467 Build 68: canonical Product catalog option authority client/manager.\n// Release 467 Build 179 successor: responsive operator presentation only; option authority remains Build 68.
 
 document.addEventListener('DOMContentLoaded', () => {
   const mountEl = document.getElementById('catalogOptionManagerMount');
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mountEl.innerHTML = `
       <div class="card" style="margin-top:18px">
         <h3 style="margin-top:0">Dropdowns, Tax Codes &amp; Lookup Values</h3>
-        <p class="small" style="margin-top:0">Build 68 makes this the shared Product catalog option authority. Categories, colours, and shipping codes are editable app settings. Product types and workflow-state values are validated system semantics. Tax classes remain audited tax records. Product editors, phone capture, and recovery paths consume the same authority.</p>
+        <p class="small" style="margin-top:0">Release 467 shared Product catalog option authority, with the operator UI refreshed in Build 179. Categories, colours, and shipping codes are editable app settings. Product types and workflow-state values are validated system semantics. Tax classes remain audited tax records. Product editors, phone capture, and recovery paths consume the same authority.</p>
         <div class="small" style="margin:0 0 12px 0"><strong>Authority:</strong> ${escapeHtml(authoritySummary())}</div>
         <div id="catalogOptionManagerMessage" class="small" style="display:none;margin-bottom:12px"></div>
         <div class="grid cols-3" style="gap:12px">
