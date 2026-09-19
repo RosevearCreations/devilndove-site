@@ -12,6 +12,61 @@ function severity(value) {
   return ['critical','error','warning','info'].includes(clean) ? clean : 'warning';
 }
 
+const BREACH_CONTEXT = Object.freeze({
+  open_critical: {
+    label: 'Open critical runtime incidents',
+    description: 'One or more incidents are explicitly recorded at critical severity and are still open or under review.',
+    where: 'I.T. → Runtime incidents',
+    owner_href: '/admin/it/',
+    owner_label: 'Open I.T. operations'
+  },
+  notification_failures_24h: {
+    label: 'Notification failures in the past 24 hours',
+    description: 'Recent notification or messaging failures need review before another provider or customer-facing retry.',
+    where: 'I.T. → Runtime incidents / notification provider',
+    owner_href: '/admin/it/',
+    owner_label: 'Review notification incidents'
+  },
+  upload_failures_24h: {
+    label: 'Upload or media failures in the past 24 hours',
+    description: 'Recent media/upload failures need review in the owning media workflow before another upload is attempted.',
+    where: 'Media workflows + I.T. runtime incidents',
+    owner_href: '/admin/media-content-studio/',
+    owner_label: 'Open Media Studio'
+  },
+  payment_provider_failures_24h: {
+    label: 'Payment/provider failures in the past 24 hours',
+    description: 'Payment or provider failures require evidence review; this screen never retries charges or refunds automatically.',
+    where: 'Finance / provider integration + I.T. runtime incidents',
+    owner_href: '/admin/accounting/',
+    owner_label: 'Open Finance'
+  },
+  stale_open_24h: {
+    label: 'Open incidents older than 24 hours',
+    description: 'Incidents have remained open or reviewing for more than 24 hours and need disposition or corrective evidence.',
+    where: 'I.T. → Runtime incidents',
+    owner_href: '/admin/it/',
+    owner_label: 'Review stale incidents'
+  },
+  stale_open_72h: {
+    label: 'Open incidents older than 72 hours',
+    description: 'Incidents have remained open or reviewing for more than 72 hours. The count is the full runtime-incident backlog, not only the current Days filter.',
+    where: 'I.T. → Runtime incidents',
+    owner_href: '/admin/it/',
+    owner_label: 'Review stale incidents'
+  }
+});
+
+function breachWithContext(key, level, count) {
+  return { key, level, count, ...(BREACH_CONTEXT[key] || {
+    label: key,
+    description: 'Operational attention is required.',
+    where: 'I.T. → Runtime incidents',
+    owner_href: '/admin/it/',
+    owner_label: 'Open I.T. operations'
+  }) };
+}
+
 export function classifyIncidentAttention(row) {
   const status = text(row?.review_status || 'open').toLowerCase();
   if (!['open','reviewing'].includes(status)) return { level: 'none', reasons: [], age_hours: 0 };
@@ -49,15 +104,15 @@ export async function operationalThresholdSnapshot(db) {
     stale_open_72h: Number(row?.stale_open_72h || 0)
   };
   const breaches = [];
-  if (counts.open_critical >= 1) breaches.push({ key:'open_critical', level:'critical', count:counts.open_critical });
-  if (counts.payment_provider_failures_24h >= 3) breaches.push({ key:'payment_provider_failures_24h', level:'critical', count:counts.payment_provider_failures_24h });
-  else if (counts.payment_provider_failures_24h >= 1) breaches.push({ key:'payment_provider_failures_24h', level:'error', count:counts.payment_provider_failures_24h });
+  if (counts.open_critical >= 1) breaches.push(breachWithContext('open_critical','critical',counts.open_critical));
+  if (counts.payment_provider_failures_24h >= 3) breaches.push(breachWithContext('payment_provider_failures_24h','critical',counts.payment_provider_failures_24h));
+  else if (counts.payment_provider_failures_24h >= 1) breaches.push(breachWithContext('payment_provider_failures_24h','error',counts.payment_provider_failures_24h));
   for (const key of ['notification_failures_24h','upload_failures_24h']) {
-    if (counts[key] >= 3) breaches.push({ key, level:'error', count:counts[key] });
-    else if (counts[key] >= 1) breaches.push({ key, level:'warning', count:counts[key] });
+    if (counts[key] >= 3) breaches.push(breachWithContext(key,'error',counts[key]));
+    else if (counts[key] >= 1) breaches.push(breachWithContext(key,'warning',counts[key]));
   }
-  if (counts.stale_open_72h > 0) breaches.push({ key:'stale_open_72h', level:'critical', count:counts.stale_open_72h });
-  else if (counts.stale_open_24h > 0) breaches.push({ key:'stale_open_24h', level:'warning', count:counts.stale_open_24h });
+  if (counts.stale_open_72h > 0) breaches.push(breachWithContext('stale_open_72h','critical',counts.stale_open_72h));
+  else if (counts.stale_open_24h > 0) breaches.push(breachWithContext('stale_open_24h','warning',counts.stale_open_24h));
   const status = breaches.some((b)=>b.level==='critical') ? 'critical' : breaches.some((b)=>b.level==='error') ? 'error' : breaches.length ? 'warning' : 'ok';
   return { thresholds: OPERATIONAL_THRESHOLDS, counts, breaches, status };
 }
