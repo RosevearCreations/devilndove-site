@@ -24,7 +24,7 @@
     const el=safeSelector(item.target_selector);if(!el||!item.public_url)return false;
     const url=String(item.public_url);
     if(item.slot_type==='background'||item.target_attribute==='background-image'){
-      el.style.backgroundImage=`url("${url.replace(/["\\]/g,'\\  function applyImage(item){const el=safeSelector(item.target_selector);if(!el||!item.public_url)return false;if(item.slot_type==='background'||item.target_attribute==='background-image'){el.style.backgroundImage=`url("${String(item.public_url).replace(/["\\]/g,'\\$&')}")`;el.style.backgroundPosition=`${Math.round(clamp(item.focal_x)*100)}% ${Math.round(clamp(item.focal_y)*100)}%`;el.dataset.mediaContentOverride='1';return true;}if(el.tagName==='IMG'||item.target_attribute==='src'){el.setAttribute('src',String(item.public_url));if(el.tagName==='IMG'){el.alt=item.decorative?'':String(item.alt_text||el.alt||'');if(item.image_title)el.title=String(item.image_title);else el.removeAttribute('title');el.style.objectPosition=`${Math.round(clamp(item.focal_x)*100)}% ${Math.round(clamp(item.focal_y)*100)}%`;}el.dataset.mediaContentOverride='1';return true;}return false;}')}")`;
+      el.style.backgroundImage='url("' + url.replace(/["\\]/g,'\\$&') + '")';
       el.style.backgroundPosition=`${Math.round(clamp(item.focal_x)*100)}% ${Math.round(clamp(item.focal_y)*100)}%`;
       el.dataset.mediaContentOverride='1';
       return true;

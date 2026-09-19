@@ -30,7 +30,10 @@ wf194=read(".github/workflows/release467-build194-d1-headroom-home-media.yml")
 for token in ("waitForMediaStudioFallback","fallbackMarkup = mount.innerHTML","published-carousel","/api/home-carousel"):
     req(token in carousel,f"Home carousel corrective contract missing: {token}")
 req("media-studio-override" not in carousel and "waitForMediaStudioHero" not in carousel,"Build 194 carousel-suppression regression still present")
-req(carousel.index("await waitForMediaStudioFallback") < carousel.index("fallbackMarkup = mount.innerHTML") < carousel.index("fetch('/api/home-carousel'"),"Home fallback must be captured after Media Studio readiness and before carousel fetch")
+wait_i=carousel.index("await waitForMediaStudioFallback")
+fallback_i=carousel.index("fallbackMarkup = mount.innerHTML",wait_i)
+fetch_i=carousel.index("fetch('/api/home-carousel'",fallback_i)
+req(wait_i>=0 and fallback_i>wait_i and fetch_i>fallback_i,"Home fallback must be captured after Media Studio readiness and before carousel fetch")
 
 for token in ("querySelectorAll('source')","setAttribute('srcset',url)","delete el.dataset.mediaPlaceholder","media-managed-placeholder","mediaPlaceholderCaption","[data-media-slot],[data-media-background-slot]","media-inline-background-edit"):
     req(token in runtime,f"sitewide media runtime recovery missing: {token}")
