@@ -38,7 +38,7 @@ for forbidden in ("method:'POST'","method: 'POST'","method:'PATCH'","method: 'PA
 req("admin-inventory-identity-cleanup-v183.js?v=189" in page,"Build 189 Inventory identity asset cache key missing")
 req(page.lower().count("<h1") == 1,"Inventory Operations must keep exactly one H1")
 
-req("Build 188 — complete" in roadmap and "Build 189 — current" in roadmap and "Build 190 — next after Build 189 is fully GREEN" in roadmap,"Build 189/190 roadmap checkpoint missing")
+req("Build 188 — complete" in roadmap and ((("Build 189 — current" in roadmap) and ("Build 190 — next after Build 189 is fully GREEN" in roadmap)) or (("Build 189 — complete" in roadmap) and ("Build 190 — current" in roadmap))),"Build 189/190 roadmap checkpoint missing")
 for token in ("20,000 rows read","zero D1 mutation","no canonical migration","zero-D1 code-only path","stale_archived","Inventory Operations"):
     req(token.lower() in doc.lower(),f"Build 189 operations doc missing: {token}")
 

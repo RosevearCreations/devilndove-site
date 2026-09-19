@@ -1,4 +1,4 @@
-// Release 467 Build 184 — explicit Product & Tool/Supply image repair review.
+// Release 467 Build 184 image-repair authority, extended by Build 190 media evidence closure.
 // No startup read, no polling, no mutation. R2 evidence is one selected object HEAD at a time.
 (()=>{
   'use strict';
@@ -27,7 +27,7 @@
   function issueLabel(code){
     return ({
       missing_featured:'missing featured image',no_gallery:'no gallery',shallow_gallery:'gallery under 3',
-      alt_text:'alt text',image_role:'image role',featured_not_in_gallery:'featured not in gallery',
+      alt_text:'alt text',image_role:'image role',image_role_ambiguous:'ambiguous approved image role',featured_not_in_gallery:'featured not in gallery',
       image_source:'image source',missing_url:'missing image URL',external_source:'external image source',
       missing_image:'missing image',catalog_image_candidate:'catalog image candidate',authority_drift:'Inventory/catalog drift'
     })[code]||String(code||'issue').replaceAll('_',' ');
@@ -53,10 +53,10 @@
       stat('External Tool/Supply image source',i.external_image_sources,'review source ownership')
     ].join('');
   }
-  function evidenceButton(scope,id,key){
+  function evidenceButton(scope,id,key,token=''){
     if(!id)return '';
-    const label=key?'Check R2 object':'Check image source';
-    return '<button class="btn" type="button" data-image-evidence-scope="'+esc(scope)+'" data-image-evidence-id="'+n(id)+'">'+label+'</button><span class="small catalog-image-evidence-result" data-image-evidence-result="'+esc(scope)+':'+n(id)+'"></span>';
+    const label=key?'Check R2 object / media evidence':'Check image source / metadata';
+    return '<button class="btn" type="button" data-image-evidence-scope="'+esc(scope)+'" data-image-evidence-id="'+n(id)+'" data-image-evidence-token="'+esc(token)+'">'+label+'</button><span class="small catalog-image-evidence-result" data-image-evidence-result="'+esc(scope)+':'+n(id)+'"></span>';
   }
   function renderProductImages(product){
     const images=Array.isArray(product.images)?product.images:[];
@@ -66,8 +66,8 @@
       const src=img.image_source_status==='r2_reference'?'R2 reference':img.image_source_status==='external_reference'?'external source':'missing source';
       return '<div class="catalog-image-subrow">'+
         '<div class="catalog-image-thumb">'+(img.image_url?'<img src="'+esc(img.image_url)+'" alt="" loading="lazy">':'<span>IMG</span>')+'</div>'+
-        '<div class="catalog-image-subrow-main"><strong>Image #'+n(img.product_image_id)+'</strong><div class="small">'+esc(src)+(img.r2_key?' · '+esc(img.r2_key):'')+'</div><div class="catalog-image-chips">'+issues.map(code=>chip(issueLabel(code),code==='external_source'?'warning':'attention')).join('')+'</div></div>'+
-        '<div class="catalog-image-evidence">'+evidenceButton('product_image',img.product_image_id,img.r2_key)+'</div>'+
+        '<div class="catalog-image-subrow-main"><strong>Image #'+n(img.product_image_id)+'</strong><div class="small">'+esc(src)+(img.r2_key?' · '+esc(img.r2_key):'')+'</div><div class="small">Role evidence: '+esc(img.role_evidence_status||'not checked')+'</div><div class="catalog-image-chips">'+issues.map(code=>chip(issueLabel(code),code==='external_source'?'warning':'attention')).join('')+'</div></div>'+
+        '<div class="catalog-image-evidence">'+evidenceButton('product_image',img.product_image_id,img.r2_key,img.evidence_token||'')+'</div>'+
       '</div>';
     }).join('')+'</div>';
   }
@@ -96,7 +96,7 @@
           '<td><div class="catalog-image-inventory-preview">'+(img?'<img src="'+esc(img)+'" alt="" loading="lazy">':'<span class="catalog-image-empty">No image</span>')+
           '<div class="small"><strong>Inventory:</strong> '+esc(img||'blank')+'</div><div class="small"><strong>Catalog:</strong> '+esc(cat||'blank')+'</div></div></td>'+
           '<td><div class="catalog-image-chips">'+issues.map(code=>chip(issueLabel(code),code==='missing_image'?'blocker':'attention')).join('')+'</div></td>'+
-          '<td>'+evidenceButton('inventory',id,item.r2_key)+'</td>'+
+          '<td>'+evidenceButton('inventory',id,item.r2_key,item.evidence_token||'')+'</td>'+
           '<td><a class="btn primary" href="/admin/inventory-operations/?q='+encodeURIComponent(key)+'#siteInventoryAdminMount">Open Inventory repair</a></td></tr>';
       }).join('')+'</tbody></table></div>';
   }
@@ -122,18 +122,20 @@
     const out=mount.querySelector('[data-image-evidence-result="'+CSS.escape(scope+':'+eid)+'"]');
     const old=button.textContent;button.disabled=true;button.textContent='Checking…';if(out)out.textContent='';
     try{
-      const data=await api('r2_evidence',{scope,id:String(eid)}),e=data.evidence||{};
+      const data=await api('r2_evidence',{scope,id:String(eid),expected_token:String(button.dataset.imageEvidenceToken||'')}),e=data.evidence||{};
       if(out){
-        if(e.supported&&e.exists)out.textContent='R2 present'+(e.object?.size?' · '+Number(e.object.size).toLocaleString()+' bytes':'');
-        else if(e.supported)out.textContent='R2 object missing';
-        else out.textContent='No canonical R2 key · '+String(e.state||'review source');
+        const stale=e.stale_target?' · stale queue evidence':'';
+        const role=e.role_evidence_status?' · role '+String(e.role_evidence_status):'';
+        const size=e.object?.size?' · '+Number(e.object.size).toLocaleString()+' bytes':'';
+        out.textContent='Media '+String(e.evidence_classification||'review')+' · metadata '+String(e.metadata_state||'unknown')+' · object '+String(e.object_state||e.state||'unknown')+size+role+stale;
       }
+      button.dataset.imageEvidenceToken=String(e.current_token||'');
     }catch(error){if(out)out.textContent=error.message||'R2 evidence failed';}
     finally{button.disabled=false;button.textContent=old;}
   }
   function render(){
     mount.innerHTML='<section class="card catalog-image-repair" aria-labelledby="catalogImageRepairHeading">'+
-      '<div class="section-heading-row"><div><p class="eyebrow">Release 467 • Build 184</p><h2 id="catalogImageRepairHeading">Product & Tool/Supply Image Repair</h2><p class="small">Review missing images, Product alt text and image roles, image-source authority, Inventory/catalog image drift, and one-object R2 evidence without merging Product Media, Inventory media, or static-site Media Studio.</p></div><button class="btn primary" id="catalogImageRepairSummaryButton" type="button">Load image health</button></div>'+
+      '<div class="section-heading-row"><div><p class="eyebrow">Release 467 • Build 190</p><h2 id="catalogImageRepairHeading">Product & Tool/Supply Image Repair</h2><p class="small">Build 190 separates metadata problems from missing R2-object evidence, flags approved-image role gaps/ambiguity, and rechecks one selected media record at a time without merging Product Media, Inventory media, or static-site Media Studio.</p></div><button class="btn primary" id="catalogImageRepairSummaryButton" type="button">Load image health</button></div>'+
       '<div id="catalogImageRepairSummary" class="catalog-image-summary"><div class="small">Build 184 image health is paused during page startup.</div></div>'+
       '<div class="catalog-image-controls"><label class="small">Repair queue<select class="input" id="catalogImageRepairMode"><option value="products">Products</option><option value="inventory">Tools & Supplies</option></select></label>'+
       '<label class="small">Tool/Supply kind<select class="input" id="catalogImageRepairKind" disabled><option value="">Tools & Supplies</option><option value="tool">Tools only</option><option value="supply">Supplies only</option></select></label>'+
@@ -141,7 +143,7 @@
       '<button class="btn" id="catalogImageRepairLoad" type="button">Load 40 repair records</button></div>'+
       '<div id="catalogImageRepairMessage" class="small" hidden aria-live="polite"></div>'+
       '<div id="catalogImageRepairResults"><div class="small">Choose Load 40 repair records when you are ready. R2 checks run only when you press a specific image’s evidence button.</div></div>'+
-      '<details class="catalog-image-boundary"><summary>Image authority boundaries</summary><div class="small"><strong>Finished Products:</strong> Product Media & Image Editor owns gallery, alt text, role, crop, featured selection and Product image mutation. <strong>Tools/Supplies:</strong> Inventory Operations owns operational image_url and catalog reconciliation. <strong>Static pages:</strong> Media & Content Studio remains separate. Build 184 never copies or deletes R2 objects automatically.</div></details>'+
+      '<details class="catalog-image-boundary"><summary>Image authority boundaries</summary><div class="small"><strong>Finished Products:</strong> Product Media & Image Editor owns gallery, alt text, role, crop, featured selection and Product image mutation. <strong>Tools/Supplies:</strong> Inventory Operations owns operational image_url and catalog reconciliation. <strong>Static pages:</strong> Media & Content Studio remains separate. Build 190 uses only one selected R2 object HEAD and never copies, uploads, reassigns or deletes R2 objects automatically.</div></details>'+
     '</section>';
     $('catalogImageRepairSummaryButton')?.addEventListener('click',loadSummary);
     $('catalogImageRepairLoad')?.addEventListener('click',()=>{state.q=String($('catalogImageRepairSearch')?.value||'').trim();loadRows();});
