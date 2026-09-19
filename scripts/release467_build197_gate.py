@@ -101,11 +101,11 @@ def norm_path(value):
 html_keys = {(norm_path(r["page_path"]), r["slot_key"]) for r in html_placeholders}
 catalog_keys = {(norm_path(r["page_path"]), r.get("slot_key", "")) for r in catalog_placeholders}
 
-req(len(html_placeholders) == 22, f"expected 22 HTML placeholders, found {len(html_placeholders)}")
-req(len(placeholder_pages) == 20, f"expected 20 placeholder pages, found {len(placeholder_pages)}")
-req(len(html_keys) == 22, "HTML placeholder page+slot keys must be unique")
-req(len(catalog_placeholders) == 22, f"expected 22 catalog placeholders, found {len(catalog_placeholders)}")
-req(len(catalog_keys) == 22, "catalog placeholder page+slot keys must be unique")
+req(len(html_placeholders) == 29, f"expected 29 HTML placeholders, found {len(html_placeholders)}")
+req(len(placeholder_pages) == 22, f"expected 22 placeholder pages, found {len(placeholder_pages)}")
+req(len(html_keys) == 29, "HTML placeholder page+slot keys must be unique")
+req(len(catalog_placeholders) == 29, f"expected 29 catalog placeholders, found {len(catalog_placeholders)}")
+req(len(catalog_keys) == 29, "catalog placeholder page+slot keys must be unique")
 req(html_keys == catalog_keys, f"HTML/catalog placeholder inventory mismatch: html_only={sorted(html_keys-catalog_keys)} catalog_only={sorted(catalog_keys-html_keys)}")
 
 html_by_key = {(norm_path(r["page_path"]), r["slot_key"]): r for r in html_placeholders}
@@ -164,7 +164,7 @@ for token in (
     req(token in roadmap, f"Build 197 roadmap checkpoint missing: {token}")
 
 for token in (
-    "22 SVG image placeholders across 20 public pages",
+    "29 SVG image placeholders across 22 public pages",
     "home.what.visual.2",
     "home.what.visual.3",
     "home.section.visual.1",
@@ -189,7 +189,7 @@ if FAIL:
     sys.exit(1)
 
 print("RELEASE 467 BUILD 197 SITEWIDE PLACEHOLDER INTEGRITY: PASS")
-print("Placeholder inventory: 22 placeholders / 20 public pages")
+print("Placeholder inventory: 29 placeholders / 22 public pages")
 print("Home placeholder inventory: 3 / 3 unique")
 print("HTML/catalog inventory: BIDIRECTIONAL MATCH")
 print("Placeholder preparation: BOUNDED + ASSIGNMENTS PRESERVED")
