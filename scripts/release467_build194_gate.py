@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Release 467 Build 194 — D1 evidence headroom + Home media reliability gate."""
 from pathlib import Path
-import subprocess,sys
+import re,subprocess,sys
 
 ROOT=Path(__file__).resolve().parents[1]
 FAIL=[]
@@ -52,7 +52,10 @@ successor_roadmap=all(token in roadmap for token in ("Build 193 — complete","B
 later_successor_roadmap=all(token in roadmap for token in ("Build 194 — complete","Build 195 — complete","Build 196 — current"))
 latest_successor_roadmap=all(token in roadmap for token in ("Build 195 — complete","Build 196 — complete","Build 197 — current"))
 current_successor_roadmap=all(token in roadmap for token in ("Build 197 — complete","Build 198 — current"))
-req(legacy_roadmap or successor_roadmap or later_successor_roadmap or latest_successor_roadmap or current_successor_roadmap,"Build 194 roadmap checkpoint must be current or explicitly closed by later successors")
+active_successor_match=re.search(r"\*\*Build (\d+) — current\*\*",roadmap)
+active_successor_build=int(active_successor_match.group(1)) if active_successor_match else 0
+future_successor_roadmap=("Build 194 — complete" in roadmap and active_successor_build >= 199)
+req(legacy_roadmap or successor_roadmap or later_successor_roadmap or latest_successor_roadmap or current_successor_roadmap or future_successor_roadmap,"Build 194 roadmap checkpoint must be current or explicitly closed by later successors")
 
 condition="github.event_name == 'push' && github.ref == 'refs/heads/dev'"
 req(condition in workflow,"Build 194 provider proof must be exact-dev push only")
