@@ -37,3 +37,29 @@ No schema migration, request-time DDL, automatic cost write, automatic Inventory
 ## Successor
 
 Build 192 — Release Regression & Runtime Budget Convergence.
+
+
+## Implemented evidence model
+
+Build 191 extends the Build 185 Product-resource linkage authority rather than adding another costing or accounting authority.
+
+- The operator explicitly loads or rechecks one selected Product.
+- The selected Product price is read as one exact Product row.
+- Saved Product-resource links continue to use the grouped/ranked Inventory/catalog projection and one batched base-balance read.
+- Each link reports `cost_evidence_state` as `known`, `unknown_missing_cost`, `unknown_inventory_match` or `not_applicable`.
+- Reusable/log-only Tools and story-only links are `not_applicable`; they are never treated as zero-cost consumables.
+- A cost-required link with no Inventory cost remains explicitly unknown. Build 191 never substitutes zero.
+- The Product resource-cost total is `null` whenever any cost-required link is unknown.
+- Resource margin is derived only when Product price evidence and every cost-required linked-resource cost are known.
+- Link evidence exposes quantity used, usage unit, stock unit, units-per-stock-unit, consumption mode, Inventory identity and lot state.
+- End-of-lot and lot-reconciliation review remains inherited from Build 185.
+- The margin snapshot is deliberately scoped to linked resources only and excludes labour, overhead, marketplace/payment fees, shipping, tax and accounting adjustments.
+- Publication readiness remains owned separately by Product buyer-readiness evidence.
+
+## Development D1 budget
+
+The exact Development Build 191 proof is provider-metered and capped at **15,000 rows read**. It measures Product-resource/Inventory identity, usage, lot and cost evidence with grouped CTEs and performs **zero D1 mutation**.
+
+## Production path
+
+Build 191 is code-only and requires **no canonical migration**. Production promotion therefore uses the **zero-D1 code-only path** with Production business data remaining Production-owned.
