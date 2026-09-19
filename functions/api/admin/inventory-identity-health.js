@@ -5,14 +5,49 @@ import { buildReadBudgetHeaders } from '../_lib/d1ReadBudget.js';
 
 const BUILD = 183;
 const CLOSURE_BUILD = 189;
+const WORKBENCH_BUILD = 200;
 const MAX_ROWS = 40;
-const json = (data, status = 200, routeKey = 'admin_inventory_identity_health_v183', limit = MAX_ROWS) => jsonResponse({ release: 467, build: BUILD, closure_build: CLOSURE_BUILD, read_only: true, ...data }, status, {
+const SUPPLIER_NA_MARKER = '[supplier-not-applicable]';
+const SOURCE_NA_MARKER = '[source-not-applicable]';
+const json = (data, status = 200, routeKey = 'admin_inventory_identity_health_v183', limit = MAX_ROWS) => jsonResponse({ release: 467, build: BUILD, closure_build: CLOSURE_BUILD, workbench_build: WORKBENCH_BUILD, read_only: true, ...data }, status, {
   'Cache-Control': 'no-store',
   ...buildReadBudgetHeaders(routeKey, { limit }),
 });
 const rows = (result) => Array.isArray(result?.results) ? result.results : [];
 const text = (value) => normalizeText(value);
 const n = (value) => Number(value || 0);
+
+function evidenceNotApplicable(row = {}, marker = '') {
+  return Boolean(marker && text(row.reorder_notes).toLowerCase().includes(marker));
+}
+function supplierSourceState(row = {}) {
+  const supplierPresent = Boolean(text(row.supplier_name));
+  const sourcePresent = Boolean(text(row.source_url) || text(row.amazon_url));
+  const supplierNotApplicable = !supplierPresent && evidenceNotApplicable(row, SUPPLIER_NA_MARKER);
+  const sourceNotApplicable = !sourcePresent && evidenceNotApplicable(row, SOURCE_NA_MARKER);
+  return {
+    supplier_status: supplierPresent ? 'present' : supplierNotApplicable ? 'not_applicable' : 'missing',
+    source_status: sourcePresent ? 'present' : sourceNotApplicable ? 'not_applicable' : 'missing',
+    supplier_sku_status: sourcePresent ? (text(row.supplier_sku) ? 'present' : 'missing') : 'not_required',
+    supplier_not_applicable: supplierNotApplicable,
+    source_not_applicable: sourceNotApplicable,
+    explicit_note_markers_only: true,
+  };
+}
+const SUPPLIER_NA_SQL = `LOWER(COALESCE(reorder_notes,'')) LIKE '%[supplier-not-applicable]%'`;
+const SOURCE_NA_SQL = `LOWER(COALESCE(reorder_notes,'')) LIKE '%[source-not-applicable]%'`;
+function supplierSourceWhere(filter = 'all') {
+  const missingSupplier = `(TRIM(COALESCE(supplier_name,''))='' AND NOT (${SUPPLIER_NA_SQL}))`;
+  const missingSource = `(TRIM(COALESCE(source_url,''))='' AND TRIM(COALESCE(amazon_url,''))='' AND NOT (${SOURCE_NA_SQL}))`;
+  const missingSku = `((TRIM(COALESCE(source_url,''))<>'' OR TRIM(COALESCE(amazon_url,''))<>'') AND TRIM(COALESCE(supplier_sku,''))='')`;
+  const knownNa = `(${SUPPLIER_NA_SQL} OR ${SOURCE_NA_SQL})`;
+  if (filter === 'missing_supplier') return missingSupplier;
+  if (filter === 'missing_source') return missingSource;
+  if (filter === 'both') return `(${missingSupplier} AND ${missingSource})`;
+  if (filter === 'missing_sku') return missingSku;
+  if (filter === 'known_na') return knownNa;
+  return `(${missingSupplier} OR ${missingSource} OR ${missingSku})`;
+}
 
 const LEGACY_USAGE_NOTE_SQL = `(
   TRIM(COALESCE(siup.notes,''))=''
@@ -25,11 +60,7 @@ const LEGACY_USAGE_NOTE_SQL = `(
 
 function queueWhere(queue) {
   const duplicate = `(key_duplicate_count>1 OR TRIM(COALESCE(external_key,''))='')`;
-  const supplier = `(
-    TRIM(COALESCE(supplier_name,''))=''
-    OR (TRIM(COALESCE(source_url,''))='' AND TRIM(COALESCE(amazon_url,''))='')
-    OR ((TRIM(COALESCE(source_url,''))<>'' OR TRIM(COALESCE(amazon_url,''))<>'') AND TRIM(COALESCE(supplier_sku,''))='')
-  )`;
+  const supplier = supplierSourceWhere('all');
   const usage = `usage_review_required=1`;
   const countReorder = `(count_due=1 OR reorder_review_required=1)`;
   const catalog = `catalog_reference_status<>'matched'`;
@@ -54,16 +85,17 @@ function shapeIssue(row = {}) {
       owner: 'inventory',
     });
   }
-  if (!text(row.supplier_name)) issues.push({ code: 'supplier_name', severity: 'attention', label: 'Supplier name missing', owner: 'inventory' });
-  if (!text(row.source_url) && !text(row.amazon_url)) issues.push({ code: 'source_reference', severity: 'attention', label: 'Source URL/reference missing', owner: 'inventory' });
-  if ((text(row.source_url) || text(row.amazon_url)) && !text(row.supplier_sku)) issues.push({ code: 'supplier_sku', severity: 'attention', label: 'Supplier SKU missing', owner: 'inventory' });
+  const supplierSource = supplierSourceState(row);
+  if (supplierSource.supplier_status === 'missing') issues.push({ code: 'supplier_name', severity: 'attention', label: 'Supplier name missing', owner: 'inventory', focus: 'siteInventorySupplierName' });
+  if (supplierSource.source_status === 'missing') issues.push({ code: 'source_reference', severity: 'attention', label: 'Source URL/reference missing', owner: 'inventory', focus: 'siteInventorySourceUrl' });
+  if (supplierSource.supplier_sku_status === 'missing') issues.push({ code: 'supplier_sku', severity: 'attention', label: 'Supplier SKU missing', owner: 'inventory', focus: 'siteInventorySupplierSku' });
   if (n(row.usage_review_required)) issues.push({ code: 'usage_review', severity: 'attention', label: 'Usage mode/conversion needs review', owner: 'integrity' });
   if (n(row.count_due)) issues.push({ code: 'count_due', severity: 'attention', label: row.last_counted_at ? 'Physical count is 90+ days old' : 'Never physically counted', owner: 'integrity' });
   if (n(row.reorder_review_required)) issues.push({ code: 'reorder_review', severity: 'attention', label: 'Reorder state needs review', owner: 'inventory' });
   if (row.catalog_reference_status === 'stale_archived') issues.push({ code: 'catalog_reference_stale', severity: 'blocker', label: 'Matching catalog reference is archived/stale', owner: 'inventory' });
   if (row.catalog_reference_status === 'kind_drift') issues.push({ code: 'catalog_kind_drift', severity: 'blocker', label: 'Catalog source key exists under the other Tool/Supply kind', owner: 'inventory' });
   if (row.catalog_reference_status === 'missing') issues.push({ code: 'catalog_reference_missing', severity: 'attention', label: 'No active catalog reference for this source key', owner: 'inventory' });
-  return { ...row, issues };
+  return { ...row, supplier_source_state: supplierSourceState(row), issues };
 }
 
 async function summary(db) {
@@ -98,6 +130,11 @@ async function summary(db) {
       SUM(CASE WHEN COALESCE(kc.key_duplicate_count,0)>1 THEN 1 ELSE 0 END) AS duplicate_identity_rows,
       SUM(CASE WHEN TRIM(COALESCE(a.supplier_name,''))='' THEN 1 ELSE 0 END) AS missing_supplier_name,
       SUM(CASE WHEN TRIM(COALESCE(a.source_url,''))='' AND TRIM(COALESCE(a.amazon_url,''))='' THEN 1 ELSE 0 END) AS missing_source_reference,
+      SUM(CASE WHEN TRIM(COALESCE(a.supplier_name,''))='' AND LOWER(COALESCE(a.reorder_notes,'')) NOT LIKE '%[supplier-not-applicable]%' THEN 1 ELSE 0 END) AS supplier_evidence_unresolved,
+      SUM(CASE WHEN TRIM(COALESCE(a.source_url,''))='' AND TRIM(COALESCE(a.amazon_url,''))='' AND LOWER(COALESCE(a.reorder_notes,'')) NOT LIKE '%[source-not-applicable]%' THEN 1 ELSE 0 END) AS source_evidence_unresolved,
+      SUM(CASE WHEN TRIM(COALESCE(a.supplier_name,''))='' AND LOWER(COALESCE(a.reorder_notes,'')) NOT LIKE '%[supplier-not-applicable]%' AND TRIM(COALESCE(a.source_url,''))='' AND TRIM(COALESCE(a.amazon_url,''))='' AND LOWER(COALESCE(a.reorder_notes,'')) NOT LIKE '%[source-not-applicable]%' THEN 1 ELSE 0 END) AS supplier_source_both_unresolved,
+      SUM(CASE WHEN LOWER(COALESCE(a.reorder_notes,'')) LIKE '%[supplier-not-applicable]%' THEN 1 ELSE 0 END) AS supplier_not_applicable_reviewed,
+      SUM(CASE WHEN LOWER(COALESCE(a.reorder_notes,'')) LIKE '%[source-not-applicable]%' THEN 1 ELSE 0 END) AS source_not_applicable_reviewed,
       SUM(CASE WHEN (TRIM(COALESCE(a.source_url,''))<>'' OR TRIM(COALESCE(a.amazon_url,''))<>'') AND TRIM(COALESCE(a.supplier_sku,''))='' THEN 1 ELSE 0 END) AS missing_supplier_sku_when_sourced,
       SUM(CASE WHEN (
         (a.source_type_norm='supply' AND (
@@ -124,6 +161,11 @@ async function summary(db) {
     duplicate_identity_rows: n(row?.duplicate_identity_rows),
     missing_supplier_name: n(row?.missing_supplier_name),
     missing_source_reference: n(row?.missing_source_reference),
+    supplier_evidence_unresolved: n(row?.supplier_evidence_unresolved),
+    source_evidence_unresolved: n(row?.source_evidence_unresolved),
+    supplier_source_both_unresolved: n(row?.supplier_source_both_unresolved),
+    supplier_not_applicable_reviewed: n(row?.supplier_not_applicable_reviewed),
+    source_not_applicable_reviewed: n(row?.source_not_applicable_reviewed),
     missing_supplier_sku_when_sourced: n(row?.missing_supplier_sku_when_sourced),
     usage_review_required: n(row?.usage_review_required),
     count_due: n(row?.count_due),
@@ -132,11 +174,12 @@ async function summary(db) {
   };
 }
 
-async function issueRows(db, { queue = 'all', q = '', limit = MAX_ROWS } = {}) {
+async function issueRows(db, { queue = 'all', q = '', limit = MAX_ROWS, supplierFilter = 'all' } = {}) {
   const safeQueue = ['all','duplicates','supplier_source','usage','count_reorder','catalog'].includes(queue) ? queue : 'all';
+  const safeSupplierFilter = ['all','missing_supplier','missing_source','both','missing_sku','known_na'].includes(supplierFilter) ? supplierFilter : 'all';
   const safeLimit = Math.max(1, Math.min(MAX_ROWS, Number(limit || MAX_ROWS)));
   const like = `%${String(q || '').toLowerCase()}%`;
-  const filter = queueWhere(safeQueue);
+  const filter = safeQueue === 'supplier_source' ? supplierSourceWhere(safeSupplierFilter) : queueWhere(safeQueue);
 
   const result = await db.prepare(`
     WITH active AS (
@@ -179,7 +222,7 @@ async function issueRows(db, { queue = 'all', q = '', limit = MAX_ROWS } = {}) {
       SELECT
         a.site_item_inventory_id,a.source_type_norm AS source_type,
         a.external_key,a.item_name,a.category,a.source_url,a.amazon_url,a.image_url,
-        a.supplier_name,a.supplier_sku,a.supplier_contact,
+        a.supplier_name,a.supplier_sku,a.supplier_contact,a.reorder_notes,
         a.on_hand_quantity,a.reserved_quantity,a.incoming_quantity,a.reorder_level,
         a.preferred_reorder_quantity,a.is_on_reorder_list,a.do_not_reorder,a.do_not_reuse,
         a.stock_unit_label,a.usage_unit_label,a.usage_units_per_stock_unit,a.last_counted_at,a.updated_at,
@@ -236,7 +279,7 @@ async function recordEvidence(db, inventoryId, expectedUpdatedAt) {
   const target = await db.prepare(`
     SELECT sii.site_item_inventory_id,
            LOWER(TRIM(COALESCE(sii.source_type,''))) AS source_type,
-           sii.external_key,sii.item_name,sii.category,sii.supplier_name,sii.supplier_sku,sii.supplier_contact,
+           sii.external_key,sii.item_name,sii.category,sii.supplier_name,sii.supplier_sku,sii.supplier_contact,sii.reorder_notes,
            sii.source_url,sii.amazon_url,sii.on_hand_quantity,sii.reserved_quantity,sii.incoming_quantity,
            sii.unit_cost_cents,sii.reorder_level,sii.preferred_reorder_quantity,sii.is_on_reorder_list,
            sii.do_not_reorder,sii.do_not_reuse,sii.last_counted_at,sii.updated_at,
@@ -251,8 +294,8 @@ async function recordEvidence(db, inventoryId, expectedUpdatedAt) {
   const key = text(target.external_key).toLowerCase();
   const duplicateGroup = key ? rows(await db.prepare(`
     SELECT site_item_inventory_id,LOWER(TRIM(COALESCE(source_type,''))) AS source_type,
-           external_key,item_name,category,supplier_name,on_hand_quantity,reserved_quantity,incoming_quantity,
-           unit_cost_cents,last_counted_at,updated_at
+           external_key,item_name,category,supplier_name,supplier_sku,supplier_contact,source_url,amazon_url,reorder_notes,
+           on_hand_quantity,reserved_quantity,incoming_quantity,unit_cost_cents,last_counted_at,updated_at
     FROM site_item_inventory
     WHERE COALESCE(is_active,1)=1 AND LOWER(TRIM(COALESCE(external_key,'')))=?
     ORDER BY LOWER(TRIM(COALESCE(source_type,''))),site_item_inventory_id
@@ -285,6 +328,33 @@ async function recordEvidence(db, inventoryId, expectedUpdatedAt) {
     supplier_sku_present: Boolean(text(target.supplier_sku)),
     source_reference_present: sourceReferencePresent,
   };
+  const sourceState = supplierSourceState(target);
+  const candidateEvidence = [];
+  const seenCandidates = new Set();
+  const addCandidate = (origin, row, sourceReference = '') => {
+    const supplierName = text(row?.supplier_name);
+    const supplierSku = text(row?.supplier_sku);
+    const source = text(sourceReference || row?.source_url || row?.amazon_url);
+    if (!supplierName && !supplierSku && !source) return;
+    const key = [supplierName.toLowerCase(), supplierSku.toLowerCase(), source.toLowerCase()].join('|');
+    if (seenCandidates.has(key)) return;
+    seenCandidates.add(key);
+    candidateEvidence.push({
+      origin,
+      inventory_id: n(row?.site_item_inventory_id) || null,
+      catalog_item_id: n(row?.catalog_item_id) || null,
+      item_name: text(row?.item_name || row?.name),
+      supplier_name: supplierName || null,
+      supplier_sku: supplierSku || null,
+      source_reference: source || null,
+      source_reference_kind: text(row?.source_url) ? 'source_url' : text(row?.amazon_url) ? 'amazon_url' : null,
+      auto_select: false,
+    });
+  };
+  duplicateGroup.filter((row) => n(row.site_item_inventory_id) !== n(target.site_item_inventory_id))
+    .forEach((row) => addCandidate('same_identity_inventory', row));
+  catalogMatches.forEach((row) => addCandidate('same_identity_catalog', row, row.amazon_url));
+  const boundedCandidates = candidateEvidence.slice(0, 20);
 
   return {
     target: { ...target, count_due: n(target.count_due) },
@@ -297,9 +367,19 @@ async function recordEvidence(db, inventoryId, expectedUpdatedAt) {
     catalog_reference_status: catalogStatus,
     catalog_reference_safe: !staleTarget && catalogStatus === 'matched',
     supplier_evidence: supplierEvidence,
+    supplier_source_state: sourceState,
+    candidate_evidence: boundedCandidates,
+    candidate_evidence_count: boundedCandidates.length,
+    candidate_evidence_is_authorization: false,
+    candidate_evidence_auto_fill: false,
+    not_applicable_markers: {
+      supplier: SUPPLIER_NA_MARKER,
+      source: SOURCE_NA_MARKER,
+      mutation_owner: 'Inventory Operations notes field',
+    },
     count_action: n(target.count_due) ? 'review_required_no_count_performed' : 'not_due',
     mutation_authority: 'Inventory Operations',
-    repair_href: `/admin/inventory-operations/?q=${encodeURIComponent(text(target.external_key) || text(target.item_name) || String(inventoryId))}&repair_from=build189#siteInventoryForm`,
+    repair_href: `/admin/inventory-operations/?q=${encodeURIComponent(text(target.external_key) || text(target.item_name) || String(inventoryId))}&repair_from=build200#siteInventoryForm`,
     automatic_merge: false,
     automatic_count: false,
     automatic_stock_change: false,
@@ -317,6 +397,7 @@ export async function onRequestGet({ request, env }) {
   const mode = text(url.searchParams.get('mode') || 'summary').toLowerCase();
   const queue = text(url.searchParams.get('queue') || 'all').toLowerCase();
   const q = text(url.searchParams.get('q')).slice(0, 120);
+  const supplierFilter = text(url.searchParams.get('supplier_filter') || 'all').toLowerCase();
   const limit = Math.max(1, Math.min(MAX_ROWS, Number(url.searchParams.get('limit') || MAX_ROWS)));
 
   try {
@@ -330,11 +411,19 @@ export async function onRequestGet({ request, env }) {
         queue,
         q,
         limit,
+        supplier_filter: supplierFilter,
         authority: 'live_d1_inventory',
         mutation_capability: 'none',
         review_actions: 'existing_inventory_authorities_only',
-        items: await issueRows(db, { queue, q, limit }),
-      });
+        supplier_source_workbench: {
+          build: WORKBENCH_BUILD,
+          candidate_evidence: 'same_identity_inventory_and_catalog_only',
+          candidate_auto_fill: false,
+          not_applicable_is_explicit_note_marker_only: true,
+          manual_next_navigation: true,
+        },
+        items: await issueRows(db, { queue, q, limit, supplierFilter }),
+      }, 200, queue === 'supplier_source' ? 'admin_inventory_supplier_source_workbench_v200' : 'admin_inventory_identity_health_v183', limit);
     }
     if (mode === 'record') {
       const inventoryId = Number(url.searchParams.get('inventory_id') || 0);
