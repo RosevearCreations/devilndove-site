@@ -64,7 +64,7 @@ req("Release 467 Build 185" in page and "admin-product-resources.js?v=185" in pa
 # Central budget and documentation.
 for token in ("admin_product_resource_linkage_v185","explicit_selected_product_grouped_linkage","base_balance_ids: 120"):
     req(token in budget,f"Build 185 D1 budget missing: {token}")
-req((("Build 185 — current" in plan) and ("Build 186 — next after Build 185 is fully GREEN" in plan)) or (("Build 185 — complete" in plan) and ("Build 186 — current" in plan)),"catalog rework checkpoint missing Build 185 current/complete and Build 186 next/current state")
+req((("Build 185 — current" in plan) and ("Build 186 — next after Build 185 is fully GREEN" in plan)) or (("Build 185 — complete" in plan) and (("Build 186 — current" in plan) or ("Build 186 — complete" in plan))),"catalog rework checkpoint missing valid Build 185/186 successor state")
 for token in ("25,000 rows read","No Build 185 schema migration is required","N+1 base-balance reads","no automatic Inventory quantity/cost mutation"):
     req(token in doc,f"Build 185 operations doc missing: {token}")
 

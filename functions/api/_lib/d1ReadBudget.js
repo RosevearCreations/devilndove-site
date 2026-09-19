@@ -125,6 +125,15 @@ export const D1_READ_BUDGETS = Object.freeze({
     max_concurrent_identical_gets: 1,
     notes: 'Build 185: Product resource work remains explicit-only. Inventory/catalog identity is grouped/ranked once, base-unit balances are loaded in one batched IN query, and blank resource search returns zero rows.'
   }),
+  admin_catalog_repair_recheck_v187: Object.freeze({
+    route: '/api/admin/catalog-health',
+    risk: 'low',
+    contract: 'explicit_one_record_recheck_no_mutation',
+    returned_rows_max: 1,
+    browser_cache_ms: 0,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 187: explicit Product or Inventory target recheck only. Returns routing/stale evidence and never mutates Product, Inventory, R2, provider, payment or accounting state.'
+  }),
   admin_pending_actions: Object.freeze({
     route: '/api/admin/pending-actions',
     risk: 'medium',
