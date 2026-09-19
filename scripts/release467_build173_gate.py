@@ -40,7 +40,7 @@ checks={
   'Product Editor uses candidate fallback': 'function mediaCandidates(raw)' in ui and 'function armMediaImage(img,raw)' in ui,
   'public asset URL precedes same-origin fallback': "list.push(value);if(key)list.push(" in ui,
   'Product Editor arms loaded media images': "img[data-media-raw]" in ui and "armMediaImage(img,img.dataset.mediaRaw" in ui,
-  'Media page cache bumped': any(token in media_page for token in ('Release 467 • Build 173','Release 467 • Build 178')) and any(token in media_page for token in ('admin-product-media-editor-v172.js?v=173','admin-product-media-editor-v172.js?v=178')),
+  'Media page cache bumped': any(token in media_page for token in ('Release 467 • Build 173','Release 467 • Build 178','Product media workspace')) and any(token in media_page for token in ('admin-product-media-editor-v172.js?v=173','admin-product-media-editor-v172.js?v=178','admin-product-media-editor-v172.js?v=467b198')),
   'Product Editor cache bumped': any(token in editor_page for token in ('Release 467 • Build 173','Release 467 • Build 174','Release 467 • Build 175','Release 467 • Build 178')) and any(token in editor_page for token in ('admin-product-editor-v163.js?v=173','admin-product-editor-v163.js?v=174','admin-product-editor-v163.js?v=175','admin-product-editor-v163.js?v=178')),
   'no automatic background media polling': all(token not in ui for token in ('setInterval(','MutationObserver(')),
 }
