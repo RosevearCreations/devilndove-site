@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Release 467 Build 192 — Release Regression & Runtime Budget Convergence gate."""
 from pathlib import Path
-import json,re,subprocess,sys
+import json
+import re,re,subprocess,sys
 
 ROOT=Path(__file__).resolve().parents[1]
 FAIL=[]
@@ -138,7 +139,10 @@ for token in (
 ):
     req(token in workflow,f"Build 192 workflow missing retained proof/evidence token: {token}")
 
-req("Build 191 — complete" in roadmap and (("Build 192 — current and final planned build in this sequence" in roadmap) or (("Build 192 — complete" in roadmap) and ("CLOSED / Production GREEN" in roadmap) and (("Build 193 — next/current planned work" in successor_roadmap) or ("Build 193 — complete" in successor_roadmap and "Build 194 — current" in successor_roadmap) or ("Build 194 — complete" in successor_roadmap and "Build 195 — current" in successor_roadmap) or ("Build 195 — complete" in successor_roadmap and "Build 196 — current" in successor_roadmap) or ("Build 196 — complete" in successor_roadmap and "Build 197 — current" in successor_roadmap) or ("Build 197 — complete" in successor_roadmap and "Build 198 — current" in successor_roadmap)))),"Build 192 roadmap checkpoint missing")
+active_successor_match=re.search(r"\*\*Build (\d+) — current\*\*",successor_roadmap)
+active_successor_build=int(active_successor_match.group(1)) if active_successor_match else 0
+known_successor=(("Build 193 — next/current planned work" in successor_roadmap) or ("Build 193 — complete" in successor_roadmap and "Build 194 — current" in successor_roadmap) or ("Build 194 — complete" in successor_roadmap and "Build 195 — current" in successor_roadmap) or ("Build 195 — complete" in successor_roadmap and "Build 196 — current" in successor_roadmap) or ("Build 196 — complete" in successor_roadmap and "Build 197 — current" in successor_roadmap) or ("Build 197 — complete" in successor_roadmap and "Build 198 — current" in successor_roadmap) or ("Build 193 — complete" in successor_roadmap and active_successor_build >= 199))
+req("Build 191 — complete" in roadmap and (("Build 192 — current and final planned build in this sequence" in roadmap) or (("Build 192 — complete" in roadmap) and ("CLOSED / Production GREEN" in roadmap) and known_successor)),"Build 192 roadmap checkpoint missing")
 for token in (
  "centralized runtime budget manifest",
  "19,282",

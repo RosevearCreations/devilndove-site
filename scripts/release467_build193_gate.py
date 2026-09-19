@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Release 467 Build 193 — Current Authority & Handoff Convergence gate."""
 from pathlib import Path
-import json,re,subprocess,sys
+import json
+import re,re,subprocess,sys
 
 ROOT=Path(__file__).resolve().parents[1]
 FAIL=[]
@@ -150,7 +151,10 @@ for token in ('retained historical release/restart authority proof','Current suc
     req(token.lower() in gate171.lower(),f'Build 171 retained gate missing successor-aware token: {token}')
 
 # Roadmap and Build 193 doc.
-req(('**Build 193 — next/current planned work**' in roadmap) or ('**Build 193 — complete**' in roadmap and '**Build 194 — current**' in roadmap) or ('**Build 194 — complete**' in roadmap and '**Build 195 — current**' in roadmap) or ('**Build 195 — complete**' in roadmap and '**Build 196 — current**' in roadmap) or ('**Build 196 — complete**' in roadmap and '**Build 197 — current**' in roadmap) or ('**Build 197 — complete**' in roadmap and '**Build 198 — current**' in roadmap),'193-204 roadmap must preserve Build 193 closure while allowing later successors')
+active_successor_match=re.search(r"\*\*Build (\d+) — current\*\*",roadmap)
+active_successor_build=int(active_successor_match.group(1)) if active_successor_match else 0
+successor_roadmap=('**Build 193 — complete**' in roadmap and active_successor_build >= 199)
+req(('**Build 193 — next/current planned work**' in roadmap) or ('**Build 193 — complete**' in roadmap and '**Build 194 — current**' in roadmap) or ('**Build 194 — complete**' in roadmap and '**Build 195 — current**' in roadmap) or ('**Build 195 — complete**' in roadmap and '**Build 196 — current**' in roadmap) or ('**Build 196 — complete**' in roadmap and '**Build 197 — current**' in roadmap) or ('**Build 197 — complete**' in roadmap and '**Build 198 — current**' in roadmap) or successor_roadmap,'193-204 roadmap must preserve Build 193 closure while allowing later successors')
 req('**194** | D1 Evidence Headroom Optimization' in roadmap,'Build 194 successor scope missing')
 for token in ('Current Authority & Handoff Convergence','76321bfc975862ce2463e87450852c19fc98c852','451ca8173b9ad3127f84f352ed0a8d7774e53b14','Build 171','0006','no live D1 work'):
     req(token.lower() in doc.lower(),f'Build 193 operations doc missing: {token}')

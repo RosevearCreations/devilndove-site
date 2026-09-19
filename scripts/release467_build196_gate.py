@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Release 467 Build 196 — Media Studio save-to-placement convergence gate."""
 from pathlib import Path
+import re
 import subprocess, sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -88,7 +89,10 @@ req(
 legacy_roadmap=all(token in roadmap for token in ("Build 195 — complete","Build 196 — current","Build 197 — next after Build 196 is fully GREEN","**202** | Storefront Launch Set & Autonomous Closure"))
 successor_roadmap=all(token in roadmap for token in ("Build 196 — complete","Build 197 — current","Build 198 — next after Build 197 is fully GREEN","**203** | Storefront Launch Set & Autonomous Closure"))
 later_successor_roadmap=all(token in roadmap for token in ("Build 197 — complete","Build 198 — current","Build 199 — next after Build 198 is fully GREEN","**204** | Storefront Launch Set & Autonomous Closure"))
-req(legacy_roadmap or successor_roadmap or later_successor_roadmap,"Build 196 roadmap checkpoint must be current or explicitly closed by later successors")
+active_successor_match=re.search(r"\*\*Build (\d+) — current\*\*",roadmap)
+active_successor_build=int(active_successor_match.group(1)) if active_successor_match else 0
+future_successor_roadmap=("Build 196 — complete" in roadmap and active_successor_build >= 199 and "**204** | Storefront Launch Set & Autonomous Closure" in roadmap)
+req(legacy_roadmap or successor_roadmap or later_successor_roadmap or future_successor_roadmap,"Build 196 roadmap checkpoint must be current or explicitly closed by later successors")
 
 for token in (
     "metadata",
