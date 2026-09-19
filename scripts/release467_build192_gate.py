@@ -26,6 +26,7 @@ except Exception as exc:
 
 doc=read("docs/operations/RELEASE_467_BUILD_192_RELEASE_RUNTIME_BUDGET_CONVERGENCE.md")
 roadmap=read("docs/operations/RELEASE_467_AUTONOMOUS_CLOSURE_BUILDS_187_192.md")
+successor_roadmap=read("docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md")
 workflow=read(".github/workflows/release467-build192-release-runtime-budget-convergence.yml")
 prod_workflow=read(".github/workflows/production-pages-deploy-current.yml")
 renderer=read("public/js/product-detail-v166.js")
@@ -137,7 +138,7 @@ for token in (
 ):
     req(token in workflow,f"Build 192 workflow missing retained proof/evidence token: {token}")
 
-req("Build 191 — complete" in roadmap and "Build 192 — current and final planned build in this sequence" in roadmap,"Build 192 roadmap checkpoint missing")
+req("Build 191 — complete" in roadmap and (("Build 192 — current and final planned build in this sequence" in roadmap) or (("Build 192 — complete" in roadmap) and ("CLOSED / Production GREEN" in roadmap) and ("Build 193 — next/current planned work" in successor_roadmap))),"Build 192 roadmap checkpoint missing")
 for token in (
  "centralized runtime budget manifest",
  "19,282",
