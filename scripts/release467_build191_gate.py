@@ -44,7 +44,7 @@ for forbidden in ("setInterval(","MutationObserver("):
 for token in ("admin_product_profitability_evidence_v191","explicit_selected_product_profitability_evidence","Missing cost remains unknown"):
     req(token in budget,f"Build 191 D1 budget contract missing: {token}")
 
-req("Build 190 — complete" in roadmap and "Build 191 — current" in roadmap and "Build 192 — next after Build 191 is fully GREEN" in roadmap,"Build 191/192 roadmap checkpoint missing")
+req("Build 190 — complete" in roadmap and ((("Build 191 — current" in roadmap) and ("Build 192 — next after Build 191 is fully GREEN" in roadmap)) or (("Build 191 — complete" in roadmap) and ("Build 192 — current and final planned build in this sequence" in roadmap))),"Build 191/192 roadmap checkpoint missing")
 for token in ("15,000 rows read","zero D1 mutation","no canonical migration","zero-D1 code-only path","unknown_missing_cost","not_applicable","linked resources only","Publication readiness"):
     req(token.lower() in doc.lower(),f"Build 191 operations doc missing: {token}")
 
