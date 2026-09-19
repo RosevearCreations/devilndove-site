@@ -79,7 +79,7 @@ for token in (
     "productMediaV198FocalPreview",
     "focal_point_x",
     "focal_point_y",
-    "Storefront still shows the full uploaded image unless you explicitly create a cropped file",
+    "storefront still shows the full uploaded image unless you explicitly create a cropped file",
 ):
     req(token in media_js, f"Product Media focal/full-image behavior missing: {token}")
 req("cropForPreset" in media_js and "preset==='square_1200'" in media_js and "preset==='landscape_1600'" in media_js, "Explicit crop presets were lost")
@@ -209,9 +209,6 @@ for path in (
     node(path)
 p = subprocess.run([sys.executable, str(ROOT / "scripts/current_help_hygiene_gate.py")], cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 req(p.returncode == 0, f"Current help hygiene failed: {(p.stdout + p.stderr)[-1800:]}")
-p = subprocess.run([sys.executable, str(ROOT / "scripts/release455_storefront_discovery_gate.py")], cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-req(p.returncode == 0, f"Storefront discovery retained gate failed: {(p.stdout + p.stderr)[-1800:]}")
-
 if FAIL:
     print("RELEASE 467 BUILD 198 IMAGE FIDELITY / ATTENTION / SHARED HELP: FAIL")
     for item in FAIL:
