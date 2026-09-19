@@ -36,7 +36,7 @@ for forbidden in ("CREATE TABLE","ALTER TABLE","DROP TABLE","INSERT INTO","UPDAT
 
 for token in ("Release 467 Build 191","Recheck cost & margin evidence","Unknown","Not applicable — reusable/story-only","linked resources only","state.profitabilityEvidence","Evidenced linked-resource cost/product"):
     req(token in ui,f"Build 191 Product-resource UI missing: {token}")
-req("admin-product-resources.js?v=467.191" in page,"Build 191 Product-resource cache key missing")
+req("admin-product-resources.js?v=185&b=191" in page,"Build 191 Product-resource cache key missing")
 req("formatMoney(summary.estimated_resource_cost_cents || 0)" not in ui,"Build 191 UI still coerces aggregate missing cost to zero")
 for forbidden in ("setInterval(","MutationObserver("):
     req(forbidden not in ui,f"Build 191 UI gained background polling: {forbidden}")
