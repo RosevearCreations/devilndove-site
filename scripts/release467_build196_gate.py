@@ -63,8 +63,8 @@ req(
     "client must fail closed unless exactly one active placement is verified",
 )
 req(
-    "admin-media-content-studio.js?v=467b196" in page,
-    "Media Studio cache key must advance to Build 196",
+    any(token in page for token in ("admin-media-content-studio.js?v=467b196","admin-media-content-studio.js?v=467b197")),
+    "Media Studio cache key must retain Build 196 or advance to Build 197",
 )
 
 for token in (
@@ -85,13 +85,9 @@ req(
     "public manifest must expose assignment media identity for diagnostics",
 )
 
-for token in (
-    "Build 195 — complete",
-    "Build 196 — current",
-    "Build 197 — next after Build 196 is fully GREEN",
-    "**202** | Storefront Launch Set & Autonomous Closure",
-):
-    req(token in roadmap, f"Build 196 roadmap checkpoint missing: {token}")
+legacy_roadmap=all(token in roadmap for token in ("Build 195 — complete","Build 196 — current","Build 197 — next after Build 196 is fully GREEN","**202** | Storefront Launch Set & Autonomous Closure"))
+successor_roadmap=all(token in roadmap for token in ("Build 196 — complete","Build 197 — current","Build 198 — next after Build 197 is fully GREEN","**203** | Storefront Launch Set & Autonomous Closure"))
+req(legacy_roadmap or successor_roadmap,"Build 196 roadmap checkpoint must be current or explicitly closed by Build 197")
 
 for token in (
     "metadata",

@@ -41,7 +41,7 @@ req(legacy_carousel or successor_carousel,"Home carousel must retain Build 194 p
 legacy_cache="media-content-runtime.js?v=194" in home and "home-carousel.js?v=194" in home
 successor_cache="media-content-runtime.js?v=467b195" in home and "home-carousel.js?v=467b195" in home
 req(legacy_cache or successor_cache,"Home runtime cache keys must retain Build 194 or advance to Build 195")
-req(any(token in studio_page for token in ("admin-media-content-studio.js?v=194","admin-media-content-studio.js?v=467b195","admin-media-content-studio.js?v=467b196")),"Media Studio cache key must retain Build 194 or advance to Build 195/196")
+req(any(token in studio_page for token in ("admin-media-content-studio.js?v=194","admin-media-content-studio.js?v=467b195","admin-media-content-studio.js?v=467b196","admin-media-content-studio.js?v=467b197")),"Media Studio cache key must retain Build 194 or advance to Build 195/196")
 req(home.lower().count("<h1")==1,"Home must retain exactly one H1")
 req(studio_page.lower().count("<h1")==1,"Media Studio must retain exactly one H1")
 
@@ -50,7 +50,8 @@ for token in ("20,000 rows-read","<= 10,000","<= 12,500","R2 mutation/listing: z
 legacy_roadmap=all(token in roadmap for token in ("Build 193 — complete","Build 194 — current","Build 195 — next after Build 194 is fully GREEN"))
 successor_roadmap=all(token in roadmap for token in ("Build 193 — complete","Build 194 — complete","Build 195 — current"))
 later_successor_roadmap=all(token in roadmap for token in ("Build 194 — complete","Build 195 — complete","Build 196 — current"))
-req(legacy_roadmap or successor_roadmap or later_successor_roadmap,"Build 194 roadmap checkpoint must be current or explicitly closed by Build 195/196")
+latest_successor_roadmap=all(token in roadmap for token in ("Build 195 — complete","Build 196 — complete","Build 197 — current"))
+req(legacy_roadmap or successor_roadmap or later_successor_roadmap or latest_successor_roadmap,"Build 194 roadmap checkpoint must be current or explicitly closed by later successors")
 
 condition="github.event_name == 'push' && github.ref == 'refs/heads/dev'"
 req(condition in workflow,"Build 194 provider proof must be exact-dev push only")
