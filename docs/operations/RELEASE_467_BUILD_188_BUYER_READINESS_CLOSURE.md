@@ -37,3 +37,25 @@ No schema migration, request-time DDL, automatic Product rewriting, payment/prov
 ## Successor
 
 Build 189 — Inventory Evidence Closure.
+
+
+## Implemented closure design
+
+Build 188 extends the established Build 182 Product buyer-readiness authority rather than creating another Product editor or public catalog authority.
+
+- Queue findings are separated into `blocking_issues` and `advisory_issues`.
+- Every finding retains **Product Editor** as the mutation owner and a direct field/tab repair link.
+- `mode=product&product_id=...` performs an explicit one-Product D1 recheck after a reviewed repair.
+- `expected_updated_at` is compared with the current Product row so stale queue evidence is identified before the operator relies on it.
+- The Product Editor buyer panel remains zero-network and evaluates only already-loaded Product authority.
+- Shop/search and Product detail use the same public release-state contract already used by featured Products: Product status must be active and review status must be approved, published, or the historical blank compatibility state.
+- Internal Search inherits the Product visibility gate through the existing `/api/products?q=` authority; no second search Product request is introduced.
+- Build 186 one-H1, production canonical, Product JSON-LD and one-Product-request contracts remain the public regression proof.
+
+## D1 budget
+
+The exact Development Build 188 proof is provider-metered and must remain at or below **5,000 rows read**. The proof reads aggregate buyer-readiness/publication-state evidence and one selected Product only. It performs no Product mutation.
+
+## Production path
+
+Build 188 is code-only. It requires no canonical migration. Production promotion therefore uses the zero-D1 code-only path and must retain the exact Production Pages deployment, Build 186 public proof and Production Live Resource Integrity proof.

@@ -1,4 +1,4 @@
-// Release 467 Build 182 — explicit live-D1 Product buyer-readiness queue on Catalog Health.
+// Release 467 Build 182 queue, extended by Build 188 blocker/advisory visibility and one-Product recheck.
 // No automatic startup read, timer, polling, mutation, or retry loop.
 (()=>{
   'use strict';
@@ -7,6 +7,7 @@
   const input=document.getElementById('catalogBuyerReadinessSearch');
   const mount=document.getElementById('catalogBuyerReadinessResults');
   const summary=document.getElementById('catalogBuyerReadinessSummary');
+  const evidence=document.getElementById('catalogBuyerReadinessEvidence');
   if(!load||!mount||!summary||!window.DDAuth)return;
   const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const n=(v)=>Number(v||0);
@@ -36,16 +37,21 @@
         stat('Pricing blockers',s.pricing_blockers,'positive selling price'),
         stat('Shipping blockers',s.shipping_blockers,'weight/code/digital delivery'),
         stat('Condition attention',s.condition_attention,'found/vintage buyer facts'),
-        stat('Tracked zero stock',s.tracked_zero_stock,'finished Product stock review')
+        stat('Tracked zero stock',s.tracked_zero_stock,'finished Product stock review'),
+        stat('Publicly visible',s.publicly_visible,'active + publication review state'),
+        stat('Held from public',s.held_from_public,'draft/review/slug rule')
       ].join('');
       const products=Array.isArray(data.products)?data.products:[];
       mount.innerHTML=products.length?`<div class="catalog-health-table-wrap"><table class="catalog-health-table"><thead><tr><th>Product</th><th>Readiness</th><th>Issues</th><th>Repair</th></tr></thead><tbody>${products.map(product=>{
         const r=product.buyer_readiness||{},issues=Array.isArray(r.issues)?r.issues:[],pid=n(product.product_id);
-        return `<tr>
+        const blockers=Array.isArray(r.blocking_issues)?r.blocking_issues:issues.filter(item=>item.severity==='blocker');
+        const advisory=Array.isArray(r.advisory_issues)?r.advisory_issues:issues.filter(item=>item.severity!=='blocker');
+        const visibility=r.public_visibility||{};
+        return `<tr data-buyer-product-row="${pid}">
           <td><strong>${esc(product.name||`Product #${pid}`)}</strong><div class="small">#${pid} · ${esc(product.sku||'no SKU')} · ${esc(product.product_category||'no category')}</div></td>
-          <td><strong>${n(r.score)}%</strong><div class="small">${n(r.blocker_count)} blocker(s) · ${n(r.attention_count)} attention</div></td>
-          <td><div class="buyer-readiness-compact">${issues.slice(0,4).map(item=>`<span class="${item.severity==='blocker'?'is-blocker':'is-attention'}">${esc(item.label)}</span>`).join('')}${issues.length>4?`<span>+${issues.length-4} more</span>`:''}</div></td>
-          <td><div class="catalog-health-actions">${issues.slice(0,3).map(item=>`<a class="btn" href="${fixHref(pid,item)}">${esc(item.fix?.label||'Fix')}</a>`).join('')}<a class="btn" href="/admin/product-editor/?product_id=${pid}&tab=buyer">Open buyer review</a></div></td>
+          <td><strong>${n(r.score)}%</strong><div class="small">${n(r.blocker_count)} blocker(s) · ${n(r.attention_count)} advisory</div><div class="small">${visibility.catalog_search_visible?'Public Shop/search eligible':'Held from public Shop/search'} · ${esc(visibility.review_status||'unknown review')}</div></td>
+          <td><div class="buyer-readiness-compact">${blockers.slice(0,3).map(item=>`<span class="is-blocker">Blocker: ${esc(item.label)}</span>`).join('')}${advisory.slice(0,3).map(item=>`<span class="is-attention">Advisory: ${esc(item.label)}</span>`).join('')}${issues.length>6?`<span>+${issues.length-6} more</span>`:''}</div></td>
+          <td><div class="catalog-health-actions">${issues.slice(0,3).map(item=>`<a class="btn" href="${fixHref(pid,item)}">${esc(item.fix?.label||'Fix')}</a>`).join('')}<a class="btn" href="/admin/product-editor/?product_id=${pid}&tab=buyer">Open buyer review</a><button class="btn" type="button" data-buyer-recheck="${pid}" data-expected-updated-at="${esc(product.updated_at||'')}">Recheck Product</button></div></td>
         </tr>`;
       }).join('')}</tbody></table></div>`:'<div class="card"><strong>No buyer-readiness issues match this view.</strong></div>';
     }catch(error){
@@ -53,6 +59,24 @@
       mount.innerHTML=`<div class="card catalog-health-error"><strong>Buyer readiness could not load.</strong><div class="small">${esc(message)}</div></div>`;
     }finally{busy=false;load.disabled=false;}
   }
+  async function recheck(button){
+    const productId=n(button?.dataset?.buyerRecheck);
+    if(!productId||busy)return;
+    button.disabled=true;
+    if(evidence)evidence.textContent='Rechecking one Product from live D1…';
+    try{
+      const expected=String(button.dataset.expectedUpdatedAt||'');
+      const params=new URLSearchParams({mode:'product',product_id:String(productId),expected_updated_at:expected});
+      const response=await window.DDAuth.apiFetch('/api/admin/product-buyer-readiness?'+params.toString(),{cache:'no-store'});
+      const raw=await response.text().catch(()=>''),data=raw?JSON.parse(raw):null;
+      if(!response.ok||!data?.ok)throw new Error(data?.error||data?.detail||`Buyer readiness recheck failed (${response.status}).`);
+      const product=data.product||{},r=product.buyer_readiness||{},v=r.public_visibility||{};
+      if(evidence)evidence.innerHTML=`<strong>${esc(product.name||('Product #'+productId))}</strong><div class="small">${data.stale_target?'Stale queue evidence detected; use this current snapshot before deciding the next repair.':'Queue timestamp still matches this Product.'}</div><div class="small">${n(r.blocker_count)} blocker(s) · ${n(r.attention_count)} advisory · ${v.catalog_search_visible?'public Shop/search eligible':'held from public Shop/search'}</div>`;
+      button.dataset.expectedUpdatedAt=String(data.current_updated_at||'');
+    }catch(error){if(evidence)evidence.textContent=error?.message||'Buyer readiness recheck failed.';}
+    finally{button.disabled=false;}
+  }
   load.addEventListener('click',run);
   form?.addEventListener('submit',(event)=>{event.preventDefault();run();});
+  mount.addEventListener('click',(event)=>{const button=event.target.closest('[data-buyer-recheck]');if(button){event.preventDefault();recheck(button);}});
 })();

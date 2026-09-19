@@ -31,9 +31,10 @@ These builds are intentionally chosen so they can be completed without Stripe, P
 ## Current checkpoint
 
 - Builds 181–186: complete and Production GREEN.
-- Build 187 — current: Catalog Repair Action Framework.
-- Build 188 — next after Build 187 is fully GREEN: Buyer Readiness Closure.
-- Builds 189–192 — planned, not started.
+- Build 187 — complete: Catalog Repair Action Framework.
+- Build 188 — current: Buyer Readiness Closure.
+- Build 189 — next after Build 188 is fully GREEN: Inventory Evidence Closure.
+- Builds 190–192 — planned, not started.
 
 ## Why this sequence
 

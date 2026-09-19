@@ -1,4 +1,4 @@
-// Release 467 Build 182 — zero-read local Product facts & buyer-readiness panel.
+// Release 467 Build 182 zero-read local Product facts panel, extended by Build 188 visibility closure.
 // Reads only the already-loaded Product Editor form. It performs no network/D1/R2 request.
 (()=>{
   'use strict';
@@ -41,6 +41,14 @@
     if(status==='active'&&!['approved','published'].includes(review))issues.push(problem('blocker','Review status','Active buyer-facing Products should be approved or published.','basics','review_status'));
     return issues;
   }
+  function publicVisibility(){
+    const status=(get('status')||'draft').toLowerCase();
+    const review=get('review_status').toLowerCase();
+    const slug=get('slug');
+    const reviewAllowed=['approved','published',''].includes(review);
+    const visible=status==='active'&&reviewAllowed&&Boolean(slug);
+    return {visible,status,review:review||'legacy blank',slug_present:Boolean(slug)};
+  }
   function openFix(tab,focus){
     document.querySelector(`[data-editor-tab="${CSS.escape(tab)}"]`)?.click();
     const target=field(focus);
@@ -57,12 +65,14 @@
     const issues=evaluate();
     const blockers=issues.filter(x=>x.severity==='blocker').length;
     const attention=issues.filter(x=>x.severity==='attention').length;
+    const visibility=publicVisibility();
     const total=18,penalty=Math.min(total,blockers*2+attention),score=Math.max(0,Math.round(((total-penalty)/total)*100));
     mount.innerHTML=`
       <div class="buyer-readiness-summary">
         <div class="card"><span class="small">Buyer readiness</span><strong>${score}%</strong><span class="small">${blockers?'blocking facts remain':'no blocking facts'}</span></div>
         <div class="card"><span class="small">Blockers</span><strong>${blockers}</strong><span class="small">must review before buyer-facing release</span></div>
-        <div class="card"><span class="small">Attention</span><strong>${attention}</strong><span class="small">quality/completeness follow-up</span></div>
+        <div class="card"><span class="small">Advisory</span><strong>${attention}</strong><span class="small">quality/completeness follow-up</span></div>
+        <div class="card"><span class="small">Public storefront</span><strong>${visibility.visible?'Eligible':'Held'}</strong><span class="small">${esc(visibility.status)} · ${esc(visibility.review)}</span></div>
       </div>
       <div class="buyer-readiness-list">${issues.length?issues.map((item,index)=>`
         <article class="status-note ${item.severity==='blocker'?'warning':''}">

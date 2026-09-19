@@ -12,7 +12,7 @@ export async function onRequestGet({request,env}){
   if(!slug)return json({ok:false,error:'A valid product slug is required.'},400);
   let read=0;
   try{
-    const result=await db.prepare("SELECT * FROM products WHERE lower(slug)=? AND lower(COALESCE(status,'active'))='active' LIMIT 1").bind(slug).all();
+    const result=await db.prepare("SELECT * FROM products WHERE lower(slug)=? AND lower(COALESCE(status,'active'))='active' AND lower(COALESCE(review_status,'published')) IN ('approved','published','') LIMIT 1").bind(slug).all();
     read+=rowsRead(result);
     const product=Array.isArray(result?.results)?result.results[0]||null:null;
     if(!product)return json({ok:false,error:'Product not found.'},404,{'X-DD-D1-Rows-Read':String(read)});
