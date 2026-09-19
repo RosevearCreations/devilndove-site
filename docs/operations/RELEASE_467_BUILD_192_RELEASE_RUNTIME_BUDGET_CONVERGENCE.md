@@ -96,4 +96,12 @@ Build 192 performs proof/quality convergence only:
 
 ## Closure rule
 
-Build 192 is the **final planned build in the 187–192 closure roadmap**. After Build 192 is fully Production GREEN, this sequence is exhausted. The next feature block must be defined from current measured business needs rather than automatically inventing Build 193.
+Build 192 is the **final build in the 187–192 closure roadmap** and is Production GREEN.
+
+- Development SHA: `76321bfc975862ce2463e87450852c19fc98c852`
+- Production `main` SHA: `451ca8173b9ad3127f84f352ed0a8d7774e53b14`
+- Exact tree: `5752f7e0be8c432d2cc45b5de08c349208ee497a`
+- Production deployment: `https://8ed2f630.devilndove-site.pages.dev`
+- Production remote D1 queries: `0`
+
+The next autonomous block is now defined from measured business/runtime evidence in `docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md`. Release 467 Build 193 is the next planned build.

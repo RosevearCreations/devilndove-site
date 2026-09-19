@@ -1,0 +1,69 @@
+{
+  "release": 467,
+  "build": 192,
+  "title": "Release Regression & Runtime Budget Convergence",
+  "state": "PRODUCTION_GREEN",
+  "authority": "release467-build192-release-runtime-budget-convergence-closure",
+  "development": {
+    "dev_sha": "76321bfc975862ce2463e87450852c19fc98c852",
+    "tree_sha": "5752f7e0be8c432d2cc45b5de08c349208ee497a",
+    "system_gate_run": 35418600834,
+    "current_application_quality_run": 35418600870,
+    "it_admin_runtime_proof_run": 35418600868,
+    "branch_hygiene_run": 35418600827,
+    "build_specific_proof_run": 35418600841,
+    "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true
+  },
+  "final_closure": {
+    "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "dev_sha": "76321bfc975862ce2463e87450852c19fc98c852",
+    "tree_sha": "5752f7e0be8c432d2cc45b5de08c349208ee497a",
+    "proofs": {
+      "system_gate_run": 35418600834,
+      "current_application_quality_run": 35418600870,
+      "it_admin_runtime_proof_run": 35418600868,
+      "branch_hygiene_run": 35418600827
+    },
+    "build_specific_proof_run": 35418600841,
+    "exact_preview_deployment": true,
+    "ingested_by_build": 193,
+    "recorded_by": "Build 193 current-authority convergence; Build 192 did not self-record later closure ingestion."
+  },
+  "production": {
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "451ca8173b9ad3127f84f352ed0a8d7774e53b14",
+    "tree_sha": "5752f7e0be8c432d2cc45b5de08c349208ee497a",
+    "production_pages_deploy_run": 35418692246,
+    "production_live_resource_integrity_run": 35418731807,
+    "products_route_proof_run": 35418731793,
+    "products_browser_proof_run": 35418731822,
+    "build_specific_proof_run": 35418692245,
+    "exact_production_url": "https://8ed2f630.devilndove-site.pages.dev",
+    "remote_d1_queries": 0
+  },
+  "production_checkpoint": {
+    "build": 192,
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "451ca8173b9ad3127f84f352ed0a8d7774e53b14",
+    "tree_sha": "5752f7e0be8c432d2cc45b5de08c349208ee497a",
+    "production_pages_deploy_run": 35418692246,
+    "production_live_resource_integrity_run": 35418731807,
+    "products_route_proof_run": 35418731793,
+    "products_browser_proof_run": 35418731822,
+    "build_specific_proof_run": 35418692245,
+    "exact_production_url": "https://8ed2f630.devilndove-site.pages.dev",
+    "remote_d1_queries": 0
+  },
+  "safety": {
+    "code_only_zero_d1": true,
+    "schema_change": false,
+    "request_time_ddl": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "payment_refund_accounting_mutation": false,
+    "production_business_data_overwrite": false
+  }
+}
