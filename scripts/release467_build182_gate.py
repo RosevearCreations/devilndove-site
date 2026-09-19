@@ -36,13 +36,13 @@ for forbidden in ("onRequestPost","onRequestPut","onRequestPatch","onRequestDele
 
 for token in ("zero-read local Product facts","data-editor-tab=\"buyer\"","productBuyerReadinessLocal"):
     req(token in (local+editor),f"Build 182 local Product Editor contract missing: {token}")
-req(any(token in editor for token in ("admin-product-buyer-readiness-v182.js?v=182","admin-product-buyer-readiness-v182.js?v=188")),"Build 182/188 local buyer-readiness cache-key successor missing")
+req(any(token in editor for token in ("admin-product-buyer-readiness-v182.js?v=182","admin-product-buyer-readiness-v182.js?v=188","admin-product-buyer-readiness-v182.js?v=199")),"Build 182/188 local buyer-readiness cache-key successor missing")
 for forbidden in ("apiFetch(","fetch(","setInterval(","setTimeout(","MutationObserver("):
     req(forbidden not in local,f"Build 182 local buyer-readiness panel must remain zero-network/background: {forbidden}")
 
 for token in ("catalogBuyerReadinessLoad","Load 40 buyer-readiness issues","/api/admin/product-buyer-readiness?limit=40"):
     req(token in (health+catalog),f"Build 182 Catalog Health contract missing: {token}")
-req(any(token in health for token in ("admin-catalog-buyer-readiness-v182.js?v=182","admin-catalog-buyer-readiness-v182.js?v=188")),"Build 182/188 Catalog buyer-readiness cache-key successor missing")
+req(any(token in health for token in ("admin-catalog-buyer-readiness-v182.js?v=182","admin-catalog-buyer-readiness-v182.js?v=188","admin-catalog-buyer-readiness-v182.js?v=199")),"Build 182/188 Catalog buyer-readiness cache-key successor missing")
 req("setInterval(" not in catalog and "MutationObserver(" not in catalog,"Build 182 Catalog buyer queue gained polling/observer behavior")
 req(len(re.findall(r"<h1\b",editor,re.I))==1,"Product Editor must keep one H1")
 req(len(re.findall(r"<h1\b",health,re.I))==1,"Catalog Health must keep one H1")

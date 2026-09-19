@@ -189,13 +189,16 @@ for token in (
     "Build 199",
 ):
     req(token.lower() in doc.lower(), f"Build 198 operations contract missing: {token}")
-for token in (
+legacy_roadmap=all(token in roadmap for token in (
     "Build 197 — complete",
     "Build 198 — current",
     "Build 199 — next after Build 198 is fully GREEN",
     "**204** | Storefront Launch Set & Autonomous Closure",
-):
-    req(token in roadmap, f"Build 198 roadmap checkpoint missing: {token}")
+))
+active_successor_match=re.search(r"\*\*Build (\d+) — current\*\*",roadmap)
+active_successor_build=int(active_successor_match.group(1)) if active_successor_match else 0
+successor_roadmap=("Build 198 — complete" in roadmap and active_successor_build >= 199 and "**204** | Storefront Launch Set & Autonomous Closure" in roadmap)
+req(legacy_roadmap or successor_roadmap,"Build 198 roadmap checkpoint must be current or explicitly closed by Build 199 or later successors")
 req("successor_roadmap" in b197, "Build 197 retained gate must recognize Build 198")
 
 # Syntax and retained help hygiene.
