@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 179 — Runtime responsiveness and Inventory layout recovery gate, successor-aware through Build 183."""
+"""Release 467 Build 179 — Runtime responsiveness and Inventory layout recovery gate, successor-aware through Build 185."""
 from pathlib import Path
 import sys
 ROOT=Path(__file__).resolve().parents[1]; FAIL=[]
@@ -40,7 +40,7 @@ for token in ('IntersectionObserver','MAX_CONCURRENT_SCORES=1','#mediaSlotBoard 
 req("site-image-quality-overlay-v152.js?v=179" in media_runtime and "site-image-quality-overlay-v152.js?v=179" in studio,'Repaired image overlay cache key missing')
 for route in ('/admin/media-content-studio/','/admin/inventory-operations/'): req(route in authui,f'Lean Admin startup missing route: {route}')
 req(('Release 467 Build 179' in studio) or ('Release 467 Build 180' in studio),'Media Studio Build 179/180 identity missing')
-req(any(token in inventory for token in ('release467-build179-runtime-recovery.css?v=179','release467-build179-runtime-recovery.css?v=180')) and any(token in inventory for token in ('Release 467 Build 179','Release 467 Build 180','Release 467 Build 183')),'Inventory Build 179/180/183 page recovery not loaded')
+req(any(token in inventory for token in ('release467-build179-runtime-recovery.css?v=179','release467-build179-runtime-recovery.css?v=180')) and any(token in inventory for token in ('Release 467 Build 179','Release 467 Build 180','Release 467 Build 183','Release 467 Build 185')),'Inventory Build 179/180/183/185 page recovery not loaded')
 for token in ('overflow-x:clip','overflow-wrap:anywhere','min-width:0','@media(max-width:1180px)','@media(max-width:760px)'): req(token in css,f'Inventory responsive CSS missing token: {token}')
 req(any(token in inventory_ui for token in ('Release 467 Build 179 · Inventory truth &amp; usage','Release 467 Build 180 · staged Inventory truth &amp; usage')),'Inventory integrity current operator label missing')
 req('operator UI refreshed in Build 179' in options,'Catalog option current operator label missing')
