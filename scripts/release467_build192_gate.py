@@ -138,7 +138,7 @@ for token in (
 ):
     req(token in workflow,f"Build 192 workflow missing retained proof/evidence token: {token}")
 
-req("Build 191 — complete" in roadmap and (("Build 192 — current and final planned build in this sequence" in roadmap) or (("Build 192 — complete" in roadmap) and ("CLOSED / Production GREEN" in roadmap) and (("Build 193 — next/current planned work" in successor_roadmap) or ("Build 193 — complete" in successor_roadmap and "Build 194 — current" in successor_roadmap) or ("Build 194 — complete" in successor_roadmap and "Build 195 — current" in successor_roadmap) or ("Build 195 — complete" in successor_roadmap and "Build 196 — current" in successor_roadmap) or ("Build 196 — complete" in successor_roadmap and "Build 197 — current" in successor_roadmap)))),"Build 192 roadmap checkpoint missing")
+req("Build 191 — complete" in roadmap and (("Build 192 — current and final planned build in this sequence" in roadmap) or (("Build 192 — complete" in roadmap) and ("CLOSED / Production GREEN" in roadmap) and (("Build 193 — next/current planned work" in successor_roadmap) or ("Build 193 — complete" in successor_roadmap and "Build 194 — current" in successor_roadmap) or ("Build 194 — complete" in successor_roadmap and "Build 195 — current" in successor_roadmap) or ("Build 195 — complete" in successor_roadmap and "Build 196 — current" in successor_roadmap) or ("Build 196 — complete" in successor_roadmap and "Build 197 — current" in successor_roadmap) or ("Build 197 — complete" in successor_roadmap and "Build 198 — current" in successor_roadmap)))),"Build 192 roadmap checkpoint missing")
 for token in (
  "centralized runtime budget manifest",
  "19,282",
