@@ -42,7 +42,7 @@ for forbidden in ("method:'POST'","method: 'POST'","method:'PATCH'","method: 'PA
 req("admin-catalog-image-repair-v184.js?v=190" in health,"Build 190 Catalog Health asset cache key missing")
 req(len(re.findall(r"<h1\b",health,re.I))==1,"Catalog Health must keep one H1")
 
-req("Build 189 — complete" in roadmap and ((("Build 190 — current" in roadmap) and ("Build 191 — next after Build 190 is fully GREEN" in roadmap)) or (("Build 190 — complete" in roadmap) and ("Build 191 — current" in roadmap))),"Build 190/191 roadmap checkpoint missing")
+req("Build 189 — complete" in roadmap and ((("Build 190 — current" in roadmap) and ("Build 191 — next after Build 190 is fully GREEN" in roadmap)) or (("Build 190 — complete" in roadmap) and (("Build 191 — current" in roadmap) or ("Build 191 — complete" in roadmap)))),"Build 190/191 roadmap checkpoint missing")
 for token in ("20,000 rows read","zero D1 mutation","zero R2 mutation","no canonical migration","zero-D1 code-only path","bucket.head(key)","metadata_state","object_state","Build 186"):
     req(token.lower() in doc.lower(),f"Build 190 operations doc missing: {token}")
 
