@@ -38,7 +38,7 @@ for token in (
     "Open next duplicate",
     "state.queue='duplicates'",
     "Open physical count due queue",
-    "nothing was merged, counted, or changed automatically",
+    "Nothing was merged, counted, or changed automatically.",
     "siteInventorySourceType",
 ):
     req(token in identity_ui,f"Build 201 duplicate/count routing UI missing: {token}")
