@@ -115,7 +115,7 @@ check(Boolean(inventoryEditorScript), 'Inventory Operations page lost the site-i
 for (const script of [
   ...['/public/js/admin-inventory-integrity-review.js?v=179','/public/js/admin-inventory-integrity-review.js?v=180'].filter((script) => inventoryPage.includes(script)),
   '/public/js/admin-tool-lifecycle-review.js?v=440',
-  ...['/public/js/admin-product-resources.js?v=440','/public/js/admin-product-resources.js?v=185','/public/js/admin-product-resources.js?v=467.191'].filter((script) => inventoryPage.includes(script)),
+  ...['/public/js/admin-product-resources.js?v=440','/public/js/admin-product-resources.js?v=185'].filter((script) => inventoryPage.includes(script)),
   inventoryEditorScript,
 ].filter(Boolean)) {
   check(inventoryPage.indexOf(script) > transportIndex, `Inventory transport guard must load before ${script}.`);
