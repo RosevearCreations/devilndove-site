@@ -40,7 +40,7 @@ for token in ("repair_product","repair_inventory","expected_updated_at","cache:'
     req(token in repair,f"Build 187 explicit recheck UI missing: {token}")
 for forbidden in ("setInterval(","MutationObserver(","method:'POST'","method: 'POST'","method:'PATCH'","method: 'PATCH'"):
     req(forbidden not in repair,f"Build 187 recheck UI gained background/write behavior: {forbidden}")
-req((("Build 187 — current" in roadmap) and ("Build 188 — next after Build 187 is fully GREEN" in roadmap)) or (("Build 187 — complete" in roadmap) and ("Build 188 — current" in roadmap)),"Build 187/188 roadmap checkpoint missing")
+req((("Build 187 — current" in roadmap) and ("Build 188 — next after Build 187 is fully GREEN" in roadmap)) or (("Build 187 — complete" in roadmap) and (("Build 188 — current" in roadmap) or ("Build 188 — complete" in roadmap))),"Build 187/188 roadmap checkpoint missing")
 for token in ("5,000 rows read","stale_target=true","zero-D1 code-only path","No canonical migration"):
     req(token.lower() in doc.lower(),f"Build 187 operations doc missing: {token}")
 condition="github.event_name == 'push' && github.ref == 'refs/heads/dev'"

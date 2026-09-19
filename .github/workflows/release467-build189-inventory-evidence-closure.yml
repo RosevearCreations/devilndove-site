@@ -1,0 +1,135 @@
+name: Release 467 Build 189 Inventory Evidence Closure
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/inventory-identity-health.js'
+      - 'functions/api/_lib/d1ReadBudget.js'
+      - 'public/js/admin-inventory-identity-cleanup-v183.js'
+      - 'admin/inventory-operations/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_189_INVENTORY_EVIDENCE_CLOSURE.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_CLOSURE_BUILDS_187_192.md'
+      - 'scripts/release467_build189_gate.py'
+      - 'scripts/release467_build183_gate.py'
+      - '.github/workflows/release467-build189-inventory-evidence-closure.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 189 Inventory evidence closure
+        run: python scripts/release467_build189_gate.py
+      - name: Retain Build 188 buyer readiness closure
+        run: python scripts/release467_build188_gate.py
+      - name: Retain Build 187 Catalog repair framework
+        run: python scripts/release467_build187_gate.py
+      - name: Retain Build 184 D1 quota remediation
+        run: python scripts/release467_build184_d1_quota_guard.py
+      - name: Retain Build 183 Inventory identity authority
+        run: python scripts/release467_build183_gate.py
+
+  development-d1-inventory-evidence-proof:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 target
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+      - name: Prove live Development Inventory evidence closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "WITH active AS (
+            SELECT sii.site_item_inventory_id,
+                   LOWER(TRIM(COALESCE(sii.source_type,''))) AS item_kind,
+                   LOWER(TRIM(COALESCE(sii.external_key,''))) AS source_key,
+                   sii.supplier_name,sii.supplier_sku,sii.source_url,sii.amazon_url,sii.last_counted_at
+            FROM site_item_inventory sii
+            WHERE COALESCE(sii.is_active,1)=1
+              AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')
+          ), key_counts AS (
+            SELECT source_key,COUNT(*) AS duplicate_count
+            FROM active WHERE source_key<>'' GROUP BY source_key
+          ), catalog_state AS (
+            SELECT LOWER(TRIM(COALESCE(item_kind,''))) AS item_kind,
+                   LOWER(TRIM(COALESCE(source_key,''))) AS source_key,
+                   MAX(CASE WHEN LOWER(TRIM(COALESCE(status,'active')))<>'archived' THEN 1 ELSE 0 END) AS active_match,
+                   MAX(CASE WHEN LOWER(TRIM(COALESCE(status,'active')))='archived' THEN 1 ELSE 0 END) AS archived_match
+            FROM catalog_items
+            WHERE LOWER(TRIM(COALESCE(item_kind,''))) IN ('tool','supply')
+            GROUP BY 1,2
+          ), catalog_any_active AS (
+            SELECT LOWER(TRIM(COALESCE(source_key,''))) AS source_key,COUNT(*) AS active_count
+            FROM catalog_items
+            WHERE LOWER(TRIM(COALESCE(item_kind,''))) IN ('tool','supply')
+              AND LOWER(TRIM(COALESCE(status,'active')))<>'archived'
+            GROUP BY 1
+          )
+          SELECT COUNT(*) AS active_items,
+            SUM(CASE WHEN COALESCE(kc.duplicate_count,0)>1 THEN 1 ELSE 0 END) AS duplicate_identity_rows,
+            SUM(CASE WHEN TRIM(COALESCE(a.supplier_name,''))='' THEN 1 ELSE 0 END) AS missing_supplier_name,
+            SUM(CASE WHEN TRIM(COALESCE(a.source_url,''))='' AND TRIM(COALESCE(a.amazon_url,''))='' THEN 1 ELSE 0 END) AS missing_source_reference,
+            SUM(CASE WHEN a.last_counted_at IS NULL OR datetime(a.last_counted_at)<datetime('now','-90 days') THEN 1 ELSE 0 END) AS count_due,
+            SUM(CASE WHEN a.source_key<>'' AND COALESCE(cs.active_match,0)=1 THEN 1 ELSE 0 END) AS catalog_matched,
+            SUM(CASE WHEN a.source_key<>'' AND COALESCE(cs.active_match,0)=0 AND COALESCE(cs.archived_match,0)=1 THEN 1 ELSE 0 END) AS catalog_stale_archived,
+            SUM(CASE WHEN a.source_key<>'' AND COALESCE(cs.active_match,0)=0 AND COALESCE(cs.archived_match,0)=0 AND COALESCE(caa.active_count,0)>0 THEN 1 ELSE 0 END) AS catalog_kind_drift,
+            SUM(CASE WHEN a.source_key<>'' AND COALESCE(cs.active_match,0)=0 AND COALESCE(cs.archived_match,0)=0 AND COALESCE(caa.active_count,0)=0 THEN 1 ELSE 0 END) AS catalog_missing,
+            MIN(a.site_item_inventory_id) AS sample_inventory_id
+          FROM active a
+          LEFT JOIN key_counts kc ON kc.source_key=a.source_key
+          LEFT JOIN catalog_state cs ON cs.item_kind=a.item_kind AND cs.source_key=a.source_key
+          LEFT JOIN catalog_any_active caa ON caa.source_key=a.source_key;" > /tmp/build189-inventory-evidence.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build189-inventory-evidence.json')); rows=[]
+          keys=('active_items','duplicate_identity_rows','missing_supplier_name','missing_source_reference','count_due','catalog_matched','catalog_stale_archived','catalog_kind_drift','catalog_missing','sample_inventory_id')
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in keys): rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert rows,data
+          row={k:int(rows[0][k] or 0) for k in keys}
+          assert row['active_items']>=0,row
+          reads=[]
+          def collect_reads(v):
+              if isinstance(v,dict):
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None:
+                      reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): collect_reads(x)
+              elif isinstance(v,list):
+                  for x in v: collect_reads(x)
+          collect_reads(data)
+          provider_rows_read=sum(reads)
+          assert provider_rows_read <= 20000, ('D1 rows_read budget exceeded',provider_rows_read,20000)
+          print('D1_PROVIDER_ROWS_READ=',provider_rows_read,'BUDGET=',20000)
+          print('BUILD 189 DEVELOPMENT D1 INVENTORY EVIDENCE: PASS',row)
+          print('D1 MUTATION: ZERO')
+          print('SCHEMA MIGRATION: NONE')
+          PY

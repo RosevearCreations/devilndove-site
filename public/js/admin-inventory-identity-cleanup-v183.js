@@ -1,4 +1,4 @@
-// Release 467 Build 183 — explicit Inventory / Tool / Supply identity cleanup review.
+// Release 467 Build 183 identity authority, extended by Build 189 Inventory evidence closure.
 // This UI never mutates Inventory. It routes reviewed fixes into existing Inventory Operations authorities.
 document.addEventListener('DOMContentLoaded',()=>{
   const mount=document.getElementById('inventoryIdentityCleanupMount');
@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         <td><strong>${esc(item.catalog_reference_status||'unknown')}</strong><div class="small">Duplicate key rows: ${n(item.key_duplicate_count)} · same-kind: ${n(item.same_kind_duplicate_count)}</div></td>
         <td><div class="inventory-identity-actions">
           <button class="btn" type="button" data-inventory-review-key="${esc(item.external_key||item.item_name||'')}">Open Inventory editor</button>
+          <button class="btn" type="button" data-inventory-evidence-recheck="${id}" data-expected-updated-at="${esc(item.updated_at||'')}">Recheck evidence</button>
           ${integrityOwner?`<button class="btn" type="button" data-integrity-review-key="${esc(item.external_key||item.item_name||'')}" data-integrity-queue="${n(item.usage_review_required)?'usage_setup':(n(item.count_due)?'count_due':'all')}">Open count / usage review</button>`:''}
         </div></td>
       </tr>`;
@@ -69,6 +70,33 @@ document.addEventListener('DOMContentLoaded',()=>{
     try{const data=await api('issues',{queue:state.queue,q:state.q,limit:'40'});renderItems(data.items||[]);msg(`${(data.items||[]).length} issue row(s) loaded. Nothing was changed automatically.`);}
     catch(error){if(el)el.innerHTML='';msg(error.message||'Inventory identity issues failed.',true);}
     finally{state.loading=false;}
+  }
+  async function recheckEvidence(button){
+    if(state.loading)return;
+    const inventoryId=n(button&&button.dataset?button.dataset.inventoryEvidenceRecheck:0);
+    if(!inventoryId)return;
+    state.loading=true;button.disabled=true;msg('Rechecking one Inventory record and its bounded identity/catalog evidence…');
+    const evidenceEl=document.getElementById('inventoryEvidenceRecheckResult');
+    if(evidenceEl)evidenceEl.innerHTML='<div class="small">Reading one target plus bounded duplicate/catalog evidence…</div>';
+    try{
+      const data=await api('record',{inventory_id:String(inventoryId),expected_updated_at:String(button.dataset.expectedUpdatedAt||'')});
+      const e=data.evidence||{},target=e.target||{},dups=Array.isArray(e.duplicate_group)?e.duplicate_group:[],catalog=Array.isArray(e.catalog_matches)?e.catalog_matches:[];
+      const duplicateText=dups.map(row=>'#'+n(row.site_item_inventory_id)+' '+esc(row.source_type||'')+' · '+esc(row.item_name||'')+' · on hand '+n(row.on_hand_quantity)+' · reserved '+n(row.reserved_quantity)+' · cost '+n(row.unit_cost_cents)+'¢ · '+esc(row.updated_at||'')).join('<br>');
+      const catalogText=catalog.map(row=>'#'+n(row.catalog_item_id)+' '+esc(row.item_kind||'')+' · '+esc(row.status||'active')+' · '+esc(row.name||row.source_key||'')).join('<br>');
+      if(evidenceEl)evidenceEl.innerHTML='<div class="card"><strong>'+esc(target.item_name||target.external_key||('Inventory #'+inventoryId))+'</strong>'
+        +'<div class="small">'+(e.stale_target?'Stale queue snapshot detected — rely on this current evidence before editing.':'Queue timestamp matches the current Inventory record.')+'</div>'
+        +'<div class="small">Catalog: '+esc(e.catalog_reference_status||'unknown')+' · safe reference: '+(e.catalog_reference_safe?'yes':'no / fail closed')+' · count: '+esc(e.count_action||'')+'</div>'
+        +'<div class="small">Supplier: '+(e.supplier_evidence&&e.supplier_evidence.supplier_name_present?'present':'missing')+' · source reference: '+(e.supplier_evidence&&e.supplier_evidence.source_reference_present?'present':'missing')+' · supplier SKU: '+(e.supplier_evidence&&e.supplier_evidence.supplier_sku_present?'present':'missing')+'</div>'
+        +'<div class="small">Duplicate-group members: '+dups.length+' · catalog candidates: '+catalog.length+'</div>'
+        +(dups.length?'<details><summary>Compare duplicate-group evidence</summary><div class="small">'+duplicateText+'</div></details>':'')
+        +(catalog.length?'<details><summary>Catalog-reference evidence</summary><div class="small">'+catalogText+'</div></details>':'')
+        +'<div class="inventory-identity-actions"><button class="btn" type="button" data-inventory-review-key="'+esc(target.external_key||target.item_name||'')+'">Open Inventory editor</button></div></div>';
+      button.dataset.expectedUpdatedAt=String(e.current_updated_at||'');
+      msg('One-record evidence recheck complete. No merge, count, stock, cost or catalog change was performed.');
+    }catch(error){
+      if(evidenceEl)evidenceEl.innerHTML='';
+      msg(error.message||'Inventory evidence recheck failed.',true);
+    }finally{state.loading=false;button.disabled=false;}
   }
   function openInventoryEditor(key){
     const search=document.getElementById('siteInventorySearch');
@@ -95,7 +123,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     mount.innerHTML=`
       <section class="card inventory-identity-cleanup" aria-labelledby="inventoryIdentityCleanupHeading">
         <div class="section-heading-row">
-          <div><p class="inventory-operations-eyebrow">Release 467 Build 183 · Inventory identity cleanup</p><h3 id="inventoryIdentityCleanupHeading">Tool & Supply Identity Review</h3><p class="small">Find duplicate source identities, incomplete supplier/source facts, usage-mode review, physical-count/reorder context and catalog kind/reference drift. This workspace is read-only; every correction is reviewed in the existing Inventory editor or Count/Usage authority.</p></div>
+          <div><p class="inventory-operations-eyebrow">Release 467 Build 189 · Inventory evidence closure</p><h3 id="inventoryIdentityCleanupHeading">Tool & Supply Identity Review</h3><p class="small">Build 183 identity authority extended by Build 189: compare duplicate members, distinguish supplier from source evidence, detect archived/wrong-kind/missing catalog references, and recheck one Inventory record after a reviewed correction. This workspace stays read-only.</p></div>
           <button class="btn primary" type="button" id="inventoryIdentityCleanupSummaryButton">Load identity health</button>
         </div>
         <div id="inventoryIdentityCleanupSummary" class="inventory-identity-summary"><div class="small">Identity summary is paused during page startup.</div></div>
@@ -112,6 +140,7 @@ document.addEventListener('DOMContentLoaded',()=>{
           <button class="btn" type="button" id="inventoryIdentityCleanupLoad">Load 40 issue rows</button>
         </div>
         <div id="inventoryIdentityCleanupMessage" class="small" hidden aria-live="polite"></div>
+        <div id="inventoryEvidenceRecheckResult" style="margin:12px 0"></div>
         <div id="inventoryIdentityCleanupResults"><div class="small">Choose Load 40 issue rows when you are ready to review corrections.</div></div>
         <details class="inventory-identity-policy"><summary>How duplicate classification cleanup works</summary><p class="small">Nothing merges automatically. If review shows the same source key represented as both Tool and Supply, use Full edit and deliberately correct the Tool/Supply classification. The established Build 244 Inventory authority can consolidate into an existing canonical target without double-counting legacy default stock, and updates linked Product-resource/catalog kind references as part of that explicit save.</p></details>
       </section>`;
@@ -120,6 +149,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.getElementById('inventoryIdentityCleanupQueue')?.addEventListener('change',(event)=>{state.queue=String(event.target.value||'all');});
     document.getElementById('inventoryIdentityCleanupSearch')?.addEventListener('keydown',(event)=>{if(event.key!=='Enter')return;event.preventDefault();state.q=String(event.currentTarget.value||'').trim();loadIssues();});
     mount.addEventListener('click',(event)=>{
+      const recheck=event.target.closest('[data-inventory-evidence-recheck]');
+      if(recheck){recheckEvidence(recheck);return;}
       const inventory=event.target.closest('[data-inventory-review-key]');
       if(inventory){openInventoryEditor(inventory.getAttribute('data-inventory-review-key')||'');return;}
       const integrity=event.target.closest('[data-integrity-review-key]');

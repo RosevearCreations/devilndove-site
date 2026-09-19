@@ -44,7 +44,7 @@ for token in ("LOWER(COALESCE(p.review_status,'published')) IN ('approved','publ
     req(token in products,f"Build 188 public catalog publication gate missing: {token}")
 req("lower(COALESCE(review_status,'published')) IN ('approved','published','')" in detail,"Build 188 Product detail publication gate missing")
 req("/api/products?q=" in search,"Internal Search must continue to inherit Product publication filtering from /api/products")
-req("Build 187 — complete" in roadmap and "Build 188 — current" in roadmap and "Build 189 — next after Build 188 is fully GREEN" in roadmap,"Build 188/189 roadmap checkpoint missing")
+req((("Build 187 — complete" in roadmap and "Build 188 — current" in roadmap and "Build 189 — next after Build 188 is fully GREEN" in roadmap) or ("Build 188 — complete" in roadmap and "Build 189 — current" in roadmap)),"Build 188/189 roadmap checkpoint missing")
 for token in ("5,000 rows read","zero-D1 code-only path","Build 186","no canonical migration"):
     req(token.lower() in doc.lower(),f"Build 188 operations doc missing: {token}")
 condition="github.event_name == 'push' && github.ref == 'refs/heads/dev'"
