@@ -39,8 +39,9 @@ req("bucket.head(key)" in api,"Build 184 single-object R2 HEAD evidence missing"
 for forbidden in ("bucket.list(","bucket.put(","bucket.delete(","onRequestPost","onRequestPatch","onRequestPut","onRequestDelete","CREATE TABLE","ALTER TABLE","DROP TABLE","INSERT INTO","UPDATE products","UPDATE product_images","UPDATE site_item_inventory","DELETE FROM"):
     req(forbidden not in api,f"Build 184 diagnostic API gained mutation/heavy behavior: {forbidden}")
 
-for token in ("Product & Tool/Supply Image Repair","Load image health","Load 40 repair records","Check R2 object","catalogImageRepairMount","admin-catalog-image-repair-v184.js?v=184"):
+for token in ("Product & Tool/Supply Image Repair","Load image health","Load 40 repair records","Check R2 object","catalogImageRepairMount"):
     req(token in (health+ui),f"Build 184 Catalog Health workspace missing: {token}")
+req(any(token in health for token in ("admin-catalog-image-repair-v184.js?v=184","admin-catalog-image-repair-v184.js?v=190")),"Build 184/190 image-repair cache-key successor missing")
 for forbidden in ("method:'POST'","method: 'POST'","method:'PATCH'","method: 'PATCH'","setInterval(","MutationObserver("):
     req(forbidden not in ui,f"Build 184 review UI must remain explicit/read-only: {forbidden}")
 req(len(re.findall(r"<h1\b",health,re.I))==1,"Catalog Health must keep exactly one H1")
