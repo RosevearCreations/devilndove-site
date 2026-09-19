@@ -1,0 +1,15 @@
+/* Release 467 Build 202 — Catalog Reference & Media Reconciliation */
+.catalog-recon-workbench{margin-top:18px}
+.catalog-recon-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0}
+.catalog-recon-stat{display:flex;flex-direction:column;gap:4px;min-width:0}
+.catalog-recon-stat strong{font-size:1.45rem}
+.catalog-recon-toolbar{display:grid;grid-template-columns:minmax(220px,1fr) minmax(220px,1fr) auto;gap:10px;align-items:end;margin:14px 0}
+.catalog-recon-results{display:grid;gap:12px}
+.catalog-recon-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:14px;align-items:start}
+.catalog-recon-row-main,.catalog-recon-row-evidence{min-width:0}
+.catalog-recon-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.catalog-recon-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.catalog-recon-chip{display:inline-flex;align-items:center;padding:3px 8px;border:1px solid currentColor;border-radius:999px;font-size:.78rem}
+.catalog-recon-result{display:block;margin-top:6px;overflow-wrap:anywhere}
+@media(max-width:980px){.catalog-recon-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-recon-row{grid-template-columns:1fr}.catalog-recon-actions{justify-content:flex-start}}
+@media(max-width:680px){.catalog-recon-summary{grid-template-columns:1fr}.catalog-recon-toolbar{grid-template-columns:1fr}}
