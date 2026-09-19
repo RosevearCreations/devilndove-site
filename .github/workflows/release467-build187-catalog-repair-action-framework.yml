@@ -1,0 +1,113 @@
+name: Release 467 Build 187 Catalog Repair Action Framework
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/catalog-health.js'
+      - 'functions/api/_lib/d1ReadBudget.js'
+      - 'public/js/admin-catalog-health-v181.js'
+      - 'public/js/admin-catalog-repair-actions-v187.js'
+      - 'admin/catalog-health/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_187_CATALOG_REPAIR_ACTION_FRAMEWORK.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_CLOSURE_BUILDS_187_192.md'
+      - 'scripts/release467_build187_gate.py'
+      - '.github/workflows/release467-build187-catalog-repair-action-framework.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 187 Catalog repair action framework
+        run: python scripts/release467_build187_gate.py
+      - name: Retain Build 186 public Product/Search proof
+        run: python scripts/release467_build186_gate.py
+      - name: Retain Build 184 D1 quota remediation
+        run: python scripts/release467_build184_d1_quota_guard.py
+
+  development-d1-recheck-proof:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 target
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+      - name: Prove one-target repair recheck evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "WITH product_target AS (
+            SELECT product_id,updated_at FROM products
+            WHERE LOWER(TRIM(COALESCE(status,'draft'))) NOT IN ('archived','deleted')
+            ORDER BY product_id LIMIT 1
+          ), inventory_target AS (
+            SELECT site_item_inventory_id,source_type,external_key,updated_at
+            FROM site_item_inventory
+            WHERE COALESCE(is_active,1)=1 AND LOWER(TRIM(COALESCE(source_type,''))) IN ('tool','supply')
+            ORDER BY site_item_inventory_id LIMIT 1
+          )
+          SELECT pt.product_id,it.site_item_inventory_id,
+            (SELECT COUNT(*) FROM product_images pi WHERE pi.product_id=pt.product_id) AS product_images,
+            (SELECT COUNT(*) FROM product_resource_links prl WHERE prl.product_id=pt.product_id) AS resource_links,
+            (SELECT COUNT(*) FROM site_item_inventory sii
+              WHERE COALESCE(sii.is_active,1)=1
+                AND LOWER(TRIM(COALESCE(sii.source_type,'')))=LOWER(TRIM(COALESCE(it.source_type,'')))
+                AND LOWER(TRIM(COALESCE(sii.external_key,'')))=LOWER(TRIM(COALESCE(it.external_key,'')))) AS duplicate_identity_rows,
+            (SELECT COUNT(*) FROM catalog_items ci
+              WHERE LOWER(TRIM(COALESCE(ci.item_kind,'')))=LOWER(TRIM(COALESCE(it.source_type,'')))
+                AND LOWER(TRIM(COALESCE(ci.source_key,'')))=LOWER(TRIM(COALESCE(it.external_key,'')))
+                AND COALESCE(ci.status,'active')<>'archived') AS catalog_matches
+          FROM product_target pt CROSS JOIN inventory_target it;" > /tmp/build187-recheck.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build187-recheck.json')); rows=[]
+          keys=('product_id','site_item_inventory_id','product_images','resource_links','duplicate_identity_rows','catalog_matches')
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in keys): rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert rows,data
+          row={k:int(rows[0][k] or 0) for k in keys}
+          assert row['product_id']>0 and row['site_item_inventory_id']>0,row
+          reads=[]
+          def collect_reads(v):
+              if isinstance(v,dict):
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None:
+                      reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): collect_reads(x)
+              elif isinstance(v,list):
+                  for x in v: collect_reads(x)
+          collect_reads(data)
+          provider_rows_read=sum(reads)
+          assert provider_rows_read <= 5000, ('D1 rows_read budget exceeded',provider_rows_read,5000)
+          print('D1_PROVIDER_ROWS_READ=',provider_rows_read,'BUDGET=',5000)
+          print('BUILD 187 DEVELOPMENT D1 ONE-TARGET RECHECK: PASS',row)
+          print('D1 MUTATION: ZERO')
+          print('SCHEMA MIGRATION: NONE')
+          PY

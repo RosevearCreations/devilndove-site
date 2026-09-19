@@ -59,6 +59,11 @@
     if(n(row.inventory_tracking)===1&&n(row.inventory_quantity)<=0)issues.push('tracked stock is zero');
     return issues;
   }
+  function repairLinks(row,scope,targetId){
+    const actions=Array.isArray(row.repair_actions)?row.repair_actions:[];
+    const links=actions.map(action=>`<a class="btn" href="${esc(action.href||'#')}" title="${esc(action.note||'')}">${esc(action.owner||'Open owner')}</a>`).join('');
+    return `${links}<button class="btn" type="button" data-catalog-recheck="${esc(scope)}" data-target-id="${n(targetId)}" data-expected-updated-at="${esc(row.updated_at||'')}">Recheck</button>`;
+  }
   function renderProducts(rows){
     const body=id('catalogHealthResults');
     if(!rows.length){body.innerHTML='<div class="card"><strong>No Product health issues match this search.</strong></div>';return;}
@@ -70,7 +75,7 @@
         <td><span class="catalog-health-weight">Priority ${n(row.issue_weight)}</span><div class="small">${issues.map(esc).join(' · ')}</div></td>
         <td><strong>${n(row.image_count)}</strong> gallery<div class="small">${n(row.alt_attention)} alt-text attention</div></td>
         <td><strong>${n(row.linked_resources)}</strong> linked<div class="small">${n(row.missing_inventory_links)} missing Inventory · stock ${n(row.inventory_quantity)}</div></td>
-        <td><div class="catalog-health-actions"><a class="btn" href="/admin/product-editor/?product_id=${pid}&tab=basics">Product</a><a class="btn" href="/admin/catalog-media/?product_id=${pid}">Images</a><a class="btn" href="/admin/inventory-operations/?product_id=${pid}">Inventory</a>${row.slug?`<a class="btn" href="/shop/product/?slug=${encodeURIComponent(row.slug)}" target="_blank" rel="noopener">Public</a>`:''}</div></td>
+        <td><div class="catalog-health-actions">${repairLinks(row,'product',pid)}${row.slug?`<a class="btn" href="/shop/product/?slug=${encodeURIComponent(row.slug)}" target="_blank" rel="noopener">Public</a>`:''}</div></td>
       </tr>`;
     }).join('')}</tbody></table></div>`;
   }
@@ -93,7 +98,7 @@
         <td><span class="catalog-health-weight">Priority ${n(row.issue_weight)}</span><div class="small">${issues.map(esc).join(' · ')}</div></td>
         <td><div class="small"><strong>Inventory:</strong> ${image?'set':'blank'}</div><div class="small"><strong>Catalog ref:</strong> ${String(row.catalog_image_url||'').trim()?'set':'blank'}</div></td>
         <td><strong>${Number(row.on_hand_quantity||0).toLocaleString()}</strong> on hand<div class="small">${Number(row.reserved_quantity||0).toLocaleString()} reserved</div></td>
-        <td><div class="catalog-health-actions"><a class="btn" href="/admin/inventory-operations/#siteInventoryForm">Inventory Ops</a><a class="btn" href="/admin/catalog-media/">Product images</a></div></td>
+        <td><div class="catalog-health-actions">${repairLinks(row,'inventory',iid)}</div></td>
       </tr>`;
     }).join('')}</tbody></table></div>`;
   }

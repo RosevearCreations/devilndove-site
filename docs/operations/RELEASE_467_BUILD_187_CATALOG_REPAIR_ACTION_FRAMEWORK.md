@@ -60,3 +60,23 @@ Build 187 performs no:
 ## Successor
 
 Build 188 — Buyer Readiness Closure.
+
+
+## Implemented bounded design
+
+Build 187 extends the existing read-only Catalog Health API instead of creating a generic write endpoint.
+
+- Product and Inventory issue rows carry explicit `repair_actions` with the established owner, deep link, direct-mutation=false and a deterministic request key.
+- `mode=repair_product&product_id=...` rechecks exactly one Product target.
+- `mode=repair_inventory&inventory_id=...` rechecks exactly one Inventory target.
+- `expected_updated_at` is compared with the current authority row. A mismatch returns `stale_target=true` and `safe_to_apply=false`.
+- The browser Recheck control is explicit-only. There is no startup read, polling loop, MutationObserver-driven write, POST, PATCH, PUT or DELETE path.
+- The recheck response supplies current snapshot and owner routing; the mutation itself remains in Product Editor, Product Image Editor or Inventory Operations.
+
+## D1 budget
+
+The exact Development live proof is provider-metered and must stay at or below **5,000 rows read**. It performs only SELECT evidence representative of one Product and one Tool/Supply target. A higher measurement fails closed; the ceiling is not raised merely to make a regression pass.
+
+## Production proof
+
+Build 187 is code-only. No canonical migration is required. Production promotion therefore keeps the zero-D1 code-only path and requires the exact Production Pages deployment plus Production Live Resource Integrity proof to be GREEN.
