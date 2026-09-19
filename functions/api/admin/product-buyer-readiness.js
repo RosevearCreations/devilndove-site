@@ -6,10 +6,11 @@ import { buildReadBudgetHeaders } from '../_lib/d1ReadBudget.js';
 
 const BUILD = 182;
 const CLOSURE_BUILD = 188;
+const WORKBENCH_BUILD = 199;
 const MAX_SOURCE_ROWS = 240;
 const MAX_ISSUE_ROWS = 40;
 const PUBLIC_REVIEW_STATES = new Set(['approved','published','']);
-const json = (data, status = 200, routeKey = 'admin_product_buyer_readiness_v182', limit = MAX_SOURCE_ROWS) => jsonResponse({ release: 467, build: BUILD, closure_build: CLOSURE_BUILD, read_only: true, ...data }, status, {
+const json = (data, status = 200, routeKey = 'admin_product_buyer_readiness_v182', limit = MAX_SOURCE_ROWS) => jsonResponse({ release: 467, build: BUILD, closure_build: CLOSURE_BUILD, workbench_build: WORKBENCH_BUILD, read_only: true, ...data }, status, {
   'Cache-Control': 'no-store',
   ...buildReadBudgetHeaders(routeKey, { limit }),
 });
@@ -23,6 +24,23 @@ function fix(tab, field, label) {
 function issue(code, severity, label, help, target) {
   return { code, severity, label, help, fix: target, mutation_owner: 'Product Editor' };
 }
+const WORKBENCH_GROUPS = Object.freeze({
+  category: new Set(['category','product_type']),
+  description: new Set(['short_description','description','condition','era']),
+  shipping: new Set(['weight','shipping_code','digital_file','digital_shipping']),
+  stock: new Set(['stock']),
+});
+function workbenchIssues(readiness = {}, severity = 'all', issueGroup = 'all') {
+  const issues = Array.isArray(readiness.issues) ? readiness.issues : [];
+  return issues.filter((item) => {
+    const severityMatch = severity === 'all'
+      || (severity === 'blocker' && item.severity === 'blocker')
+      || (severity === 'advisory' && item.severity !== 'blocker');
+    const groupMatch = issueGroup === 'all' || Boolean(WORKBENCH_GROUPS[issueGroup]?.has(item.code));
+    return severityMatch && groupMatch;
+  });
+}
+
 function publicVisibility(product = {}) {
   const status = text(product.status).toLowerCase() || 'draft';
   const rawReview = text(product.review_status).toLowerCase();
@@ -122,6 +140,10 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const mode = text(url.searchParams.get('mode') || 'queue').toLowerCase();
   const q = text(url.searchParams.get('q')).toLowerCase().slice(0, 100);
+  const severityFilter = text(url.searchParams.get('severity') || 'all').toLowerCase();
+  const issueFilter = text(url.searchParams.get('issue') || 'all').toLowerCase();
+  if (!['all','blocker','advisory'].includes(severityFilter)) return json({ ok: false, error: 'Unsupported buyer-readiness severity filter.' }, 400);
+  if (!['all','category','description','shipping','stock'].includes(issueFilter)) return json({ ok: false, error: 'Unsupported buyer-readiness issue filter.' }, 400);
   const requestedLimit = Number(url.searchParams.get('limit') || MAX_ISSUE_ROWS);
   const issueLimit = Math.max(1, Math.min(MAX_ISSUE_ROWS, Number.isFinite(requestedLimit) ? requestedLimit : MAX_ISSUE_ROWS));
   try {
@@ -171,9 +193,21 @@ export async function onRequestGet({ request, env }) {
     const searched = q ? analyzed.filter((product) => [
       product.name, product.slug, product.sku, product.product_category, product.product_number, product.product_id
     ].some((value) => String(value ?? '').toLowerCase().includes(q))) : analyzed;
-    const issues = searched.filter((product) => product.buyer_readiness.issues.length > 0)
-      .sort((a,b) => b.buyer_readiness.blocker_count - a.buyer_readiness.blocker_count
-        || b.buyer_readiness.attention_count - a.buyer_readiness.attention_count
+    const filtered = searched.map((product) => {
+      const selected = workbenchIssues(product.buyer_readiness, severityFilter, issueFilter);
+      return {
+        ...product,
+        buyer_readiness: {
+          ...product.buyer_readiness,
+          workbench_issues: selected,
+          workbench_blocking_issues: selected.filter((row) => row.severity === 'blocker'),
+          workbench_advisory_issues: selected.filter((row) => row.severity !== 'blocker'),
+        },
+      };
+    });
+    const issues = filtered.filter((product) => product.buyer_readiness.workbench_issues.length > 0)
+      .sort((a,b) => b.buyer_readiness.workbench_blocking_issues.length - a.buyer_readiness.workbench_blocking_issues.length
+        || b.buyer_readiness.workbench_advisory_issues.length - a.buyer_readiness.workbench_advisory_issues.length
         || a.buyer_readiness.score - b.buyer_readiness.score
         || String(a.name || '').localeCompare(String(b.name || '')))
       .slice(0, issueLimit);
@@ -197,6 +231,10 @@ export async function onRequestGet({ request, env }) {
       source_limit: MAX_SOURCE_ROWS,
       issue_limit: issueLimit,
       source_truncated: source.length >= MAX_SOURCE_ROWS,
+      workbench_matching_products: filtered.filter((product) => product.buyer_readiness.workbench_issues.length > 0).length,
+      workbench_matching_blockers: filtered.reduce((sum, product) => sum + product.buyer_readiness.workbench_blocking_issues.length, 0),
+      workbench_matching_advisories: filtered.reduce((sum, product) => sum + product.buyer_readiness.workbench_advisory_issues.length, 0),
+      workbench_filters: { severity: severityFilter, issue: issueFilter },
     };
 
     return json({
@@ -208,6 +246,14 @@ export async function onRequestGet({ request, env }) {
       automatic_save: false,
       requested_by: { user_id: admin.user_id, email: admin.email },
       query: q,
+      workbench: {
+        filters: { severity: severityFilter, issue: issueFilter },
+        mutation_owner: 'Product Editor',
+        next_navigation: 'manual_explicit_only',
+        publication_readiness: 'separate_public_visibility_evidence',
+        profitability_readiness: 'not_evaluated_here',
+        automatic_fact_generation: false,
+      },
       summary,
       products: issues,
     });

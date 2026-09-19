@@ -1,4 +1,4 @@
-// Release 467 Build 182 zero-read local Product facts panel, extended by Build 188 visibility closure.
+// Release 467 Build 182 zero-read local Product facts panel, extended by Build 188 visibility closure and Build 199 workbench separation.
 // Reads only the already-loaded Product Editor form. It performs no network/D1/R2 request.
 (()=>{
   'use strict';
@@ -74,6 +74,7 @@
         <div class="card"><span class="small">Advisory</span><strong>${attention}</strong><span class="small">quality/completeness follow-up</span></div>
         <div class="card"><span class="small">Public storefront</span><strong>${visibility.visible?'Eligible':'Held'}</strong><span class="small">${esc(visibility.status)} · ${esc(visibility.review)}</span></div>
       </div>
+      <div class="status-note"><strong>Separate readiness domains</strong><div class="small">Buyer facts are repaired here. Publication eligibility is shown separately and does not publish anything. Profitability is not evaluated here and remains owned by Product resource/cost evidence and Finance.</div></div>
       <div class="buyer-readiness-list">${issues.length?issues.map((item,index)=>`
         <article class="status-note ${item.severity==='blocker'?'warning':''}">
           <div><strong>${item.severity==='blocker'?'Blocker':'Attention'}: ${esc(item.label)}</strong><div class="small">${esc(item.help)}</div></div>

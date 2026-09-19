@@ -3,6 +3,7 @@
 from html.parser import HTMLParser
 from pathlib import Path
 import json
+import re
 import subprocess
 import sys
 
@@ -157,7 +158,10 @@ req("admin-media-content-studio.js?v=467b197" in page, "Media Studio cache key m
 
 legacy_roadmap=all(token in roadmap for token in ("Build 196 — complete","Build 197 — current","Build 198 — next after Build 197 is fully GREEN","**203** | Storefront Launch Set & Autonomous Closure"))
 successor_roadmap=all(token in roadmap for token in ("Build 197 — complete","Build 198 — current","Build 199 — next after Build 198 is fully GREEN","**204** | Storefront Launch Set & Autonomous Closure"))
-req(legacy_roadmap or successor_roadmap,"Build 197 roadmap checkpoint must be current or explicitly closed by Build 198")
+active_successor_match=re.search(r"\*\*Build (\d+) — current\*\*",roadmap)
+active_successor_build=int(active_successor_match.group(1)) if active_successor_match else 0
+later_successor_roadmap=("Build 197 — complete" in roadmap and active_successor_build >= 199 and "**204** | Storefront Launch Set & Autonomous Closure" in roadmap)
+req(legacy_roadmap or successor_roadmap or later_successor_roadmap,"Build 197 roadmap checkpoint must be current or explicitly closed by Build 198 or later successors")
 
 for token in (
     "29 SVG image placeholders across 22 public pages",
