@@ -1,0 +1,124 @@
+name: Release 467 Build 200 Supplier Source Evidence Workbench
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/inventory-identity-health.js'
+      - 'functions/api/_lib/d1ReadBudget.js'
+      - 'public/js/admin-inventory-identity-cleanup-v183.js'
+      - 'admin/inventory-operations/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_200_SUPPLIER_SOURCE_EVIDENCE_WORKBENCH.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md'
+      - 'scripts/release467_build200_gate.py'
+      - 'scripts/release467_build199_gate.py'
+      - 'scripts/release467_build189_gate.py'
+      - 'scripts/release467_build183_gate.py'
+      - '.github/workflows/release467-build200-supplier-source-evidence-workbench.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 200 Supplier Source Evidence Workbench
+        run: python scripts/release467_build200_gate.py
+      - name: Retain Build 199 Buyer Readiness Repair Workbench
+        run: python scripts/release467_build199_gate.py
+      - name: Retain Build 189 Inventory evidence closure
+        run: python scripts/release467_build189_gate.py
+      - name: Retain Build 183 Inventory identity authority
+        run: python scripts/release467_build183_gate.py
+      - name: Retain Build 194 D1 headroom contract
+        run: python scripts/release467_build194_gate.py
+
+  development-d1-supplier-source-proof:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 target
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+      - name: Prove bounded live Development supplier source evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "WITH active AS (
+            SELECT site_item_inventory_id,LOWER(TRIM(COALESCE(source_type,''))) item_kind,
+                   LOWER(TRIM(COALESCE(external_key,''))) source_key,item_name,
+                   supplier_name,supplier_sku,source_url,amazon_url,reorder_notes
+            FROM site_item_inventory
+            WHERE COALESCE(is_active,1)=1
+              AND LOWER(TRIM(COALESCE(source_type,''))) IN ('tool','supply')
+          )
+          SELECT COUNT(*) active_items,
+            SUM(CASE WHEN TRIM(COALESCE(supplier_name,''))='' THEN 1 ELSE 0 END) raw_missing_supplier,
+            SUM(CASE WHEN TRIM(COALESCE(source_url,''))='' AND TRIM(COALESCE(amazon_url,''))='' THEN 1 ELSE 0 END) raw_missing_source,
+            SUM(CASE WHEN TRIM(COALESCE(supplier_name,''))='' AND LOWER(COALESCE(reorder_notes,'')) NOT LIKE '%[supplier-not-applicable]%' THEN 1 ELSE 0 END) unresolved_supplier,
+            SUM(CASE WHEN TRIM(COALESCE(source_url,''))='' AND TRIM(COALESCE(amazon_url,''))='' AND LOWER(COALESCE(reorder_notes,'')) NOT LIKE '%[source-not-applicable]%' THEN 1 ELSE 0 END) unresolved_source,
+            SUM(CASE WHEN TRIM(COALESCE(supplier_name,''))='' AND LOWER(COALESCE(reorder_notes,'')) NOT LIKE '%[supplier-not-applicable]%' AND TRIM(COALESCE(source_url,''))='' AND TRIM(COALESCE(amazon_url,''))='' AND LOWER(COALESCE(reorder_notes,'')) NOT LIKE '%[source-not-applicable]%' THEN 1 ELSE 0 END) unresolved_both,
+            SUM(CASE WHEN (TRIM(COALESCE(source_url,''))<>'' OR TRIM(COALESCE(amazon_url,''))<>'') AND TRIM(COALESCE(supplier_sku,''))='' THEN 1 ELSE 0 END) missing_supplier_sku,
+            SUM(CASE WHEN LOWER(COALESCE(reorder_notes,'')) LIKE '%[supplier-not-applicable]%' THEN 1 ELSE 0 END) supplier_na,
+            SUM(CASE WHEN LOWER(COALESCE(reorder_notes,'')) LIKE '%[source-not-applicable]%' THEN 1 ELSE 0 END) source_na,
+            MIN(CASE WHEN TRIM(COALESCE(supplier_name,''))='' OR (TRIM(COALESCE(source_url,''))='' AND TRIM(COALESCE(amazon_url,''))='') THEN site_item_inventory_id END) sample_inventory_id
+          FROM active;" > /tmp/build200-summary.json
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "WITH target AS (
+            SELECT LOWER(TRIM(COALESCE(external_key,''))) source_key
+            FROM site_item_inventory
+            WHERE COALESCE(is_active,1)=1
+              AND LOWER(TRIM(COALESCE(source_type,''))) IN ('tool','supply')
+              AND (TRIM(COALESCE(supplier_name,''))='' OR (TRIM(COALESCE(source_url,''))='' AND TRIM(COALESCE(amazon_url,''))=''))
+            ORDER BY site_item_inventory_id LIMIT 1
+          )
+          SELECT
+            (SELECT COUNT(*) FROM site_item_inventory sii,target t WHERE COALESCE(sii.is_active,1)=1 AND LOWER(TRIM(COALESCE(sii.external_key,'')))=t.source_key LIMIT 12) same_identity_inventory_candidates,
+            (SELECT COUNT(*) FROM catalog_items ci,target t WHERE LOWER(TRIM(COALESCE(ci.item_kind,''))) IN ('tool','supply') AND LOWER(TRIM(COALESCE(ci.source_key,'')))=t.source_key LIMIT 12) same_identity_catalog_candidates;" > /tmp/build200-candidates.json
+          python - <<'PY'
+          import json
+          files=['/tmp/build200-summary.json','/tmp/build200-candidates.json']
+          payloads=[json.load(open(path)) for path in files]
+          reads=[]
+          rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None:
+                      reads.append(int(meta.get('rows_read') or 0))
+                  results=v.get('results')
+                  if isinstance(results,list): rows.extend(x for x in results if isinstance(x,dict))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          for payload in payloads: walk(payload)
+          assert rows,payloads
+          summary=next((r for r in rows if 'active_items' in r),None)
+          assert summary is not None,rows
+          provider_rows_read=sum(reads)
+          assert provider_rows_read <= 12500, ('D1 rows_read budget exceeded',provider_rows_read,12500)
+          print('D1_PROVIDER_ROWS_READ=',provider_rows_read,'BUDGET=',12500)
+          print('BUILD 200 DEVELOPMENT SUPPLIER SOURCE EVIDENCE: PASS',summary)
+          print('D1 MUTATION: ZERO')
+          print('SCHEMA MIGRATION: NONE')
+          print('R2 MUTATION: ZERO')
+          PY
