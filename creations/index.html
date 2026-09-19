@@ -449,6 +449,7 @@
       items.forEach(item => {
         const card = document.createElement('article');
         card.className = 'creation-card';
+        card.dataset.creationCard = String(item.source_key || item.id || '');
         const tags = (item.tags || []).slice(0, 4).map(t => `<span class="pill">${nice(t)}</span>`).join('');
         const materials = (item.materials || []).slice(0, 3).map(m => `<span class="pill">${nice(m)}</span>`).join('');
         const actionHref = item.shop_url || '/contact/index.html';
@@ -461,6 +462,9 @@
             loading="lazy"
             data-fallbacks='${JSON.stringify(fallbacks).replace(/'/g, '&#39;')}'
             data-fallback-alt="${item.fallback_alt || 'Representative Devil n Dove preview; original product photo unavailable.'}"
+            data-creation-image-key="${String(item.source_key || item.id || '').replace(/"/g, '&quot;')}"
+            data-creation-catalog-id="${Number(item.catalog_item_id || 0) || ''}"
+            data-creation-image-label="${String(item.title || item.name || 'Creation').replace(/"/g, '&quot;')}"
           />
           <div class="creation-body">
             <div class="meta-line">
@@ -484,6 +488,7 @@
       });
 
       wireImageFallbacks(data);
+      try { document.dispatchEvent(new CustomEvent('dd:creations-rendered',{detail:{count:items.length}})); } catch {}
     }
 
     function applyFilters(data){
@@ -566,5 +571,6 @@
   </script>
 <script src="/public/js/auth.js?v=279"></script><script src="/public/js/site-auth-ui.js"></script><script src="/public/js/trust-block-context.js"></script>
 <script defer="" src="/public/js/media-content-runtime.js?v=467b195"></script>
+<script defer src="/public/js/creations-admin-image-edit-v201.js?v=201"></script>
 </body>
 </html>
