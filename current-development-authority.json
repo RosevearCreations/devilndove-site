@@ -1,41 +1,41 @@
 {
   "release": 467,
-  "build": 171,
-  "title": "Release & Restart Authority Convergence",
+  "build": 193,
+  "title": "Current Authority & Handoff Convergence",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "879c8730040afaf6caec6374b5057b7261fdcfe2",
-  "accepted_dev_tree_sha": "da5e3b249d6e14266da5e191cb22c06205947948",
+  "accepted_dev_sha": "76321bfc975862ce2463e87450852c19fc98c852",
+  "accepted_dev_tree_sha": "5752f7e0be8c432d2cc45b5de08c349208ee497a",
   "acceptance": {
-    "system_gate_run": 35275441340,
-    "current_application_quality_run": 35275441446,
-    "it_admin_runtime_proof_run": 35275441412,
-    "branch_hygiene_run": 35275441448
+    "system_gate_run": 35418600834,
+    "current_application_quality_run": 35418600870,
+    "it_admin_runtime_proof_run": 35418600868,
+    "branch_hygiene_run": 35418600827
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 170,
-      "title": "Product Browser Explicit Image Recovery",
-      "authority": "release467-build170-product-browser-explicit-image-recovery-closure.json",
-      "dev_sha": "879c8730040afaf6caec6374b5057b7261fdcfe2",
-      "tree_sha": "da5e3b249d6e14266da5e191cb22c06205947948",
+      "build": 192,
+      "title": "Release Regression & Runtime Budget Convergence",
+      "authority": "release467-build192-release-runtime-budget-convergence-closure.json",
+      "dev_sha": "76321bfc975862ce2463e87450852c19fc98c852",
+      "tree_sha": "5752f7e0be8c432d2cc45b5de08c349208ee497a",
       "proofs": {
-        "system_gate_run": 35275441340,
-        "current_application_quality_run": 35275441446,
-        "it_admin_runtime_proof_run": 35275441412,
-        "branch_hygiene_run": 35275441448
+        "system_gate_run": 35418600834,
+        "current_application_quality_run": 35418600870,
+        "it_admin_runtime_proof_run": 35418600868,
+        "branch_hygiene_run": 35418600827
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "exact_preview_deployment": true
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 171,
-      "title": "Release & Restart Authority Convergence",
-      "authority": "release467-build171-release-restart-authority-convergence.json",
-      "state": "DEVELOPMENT_CANDIDATE"
+      "build": 193,
+      "title": "Current Authority & Handoff Convergence",
+      "authority": "release467-build193-current-authority-handoff-convergence.json",
+      "state": "DEVELOPMENT_CLOSURE_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
     "closure_candidate_must_not_self_claim_final_proof": true,
@@ -45,20 +45,22 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 170,
-    "authority": "release467-build170-product-browser-explicit-image-recovery-closure.json",
-    "main_sha": "879c8730040afaf6caec6374b5057b7261fdcfe2",
-    "tree_sha": "da5e3b249d6e14266da5e191cb22c06205947948",
-    "production_pages_deploy_run": 35275636873,
-    "production_live_resource_integrity_run": 35275711398,
-    "products_browser_proof_run": 35275711387,
-    "products_route_proof_run": 35275711471,
+    "build": 192,
+    "authority": "release467-build192-release-runtime-budget-convergence-closure.json",
+    "main_sha": "451ca8173b9ad3127f84f352ed0a8d7774e53b14",
+    "tree_sha": "5752f7e0be8c432d2cc45b5de08c349208ee497a",
+    "production_pages_deploy_run": 35418692246,
+    "production_live_resource_integrity_run": 35418731807,
+    "products_route_proof_run": 35418731793,
+    "products_browser_proof_run": 35418731822,
+    "build_specific_proof_run": 35418692245,
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE",
-    "client_ui_usability_proven": true,
-    "operator_regression_reported": false
+    "remote_d1_queries": 0
   },
   "current_release_authorities": [
+    "release467-build193-current-authority-handoff-convergence.json",
+    "release467-build192-release-runtime-budget-convergence-closure.json",
     "release467-build171-release-restart-authority-convergence.json",
     "release467-build170-product-browser-explicit-image-recovery-closure.json",
     "release467-build166-product-editing-image-stabilization.json",
@@ -100,8 +102,8 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "next_build": 171,
+  "next_build": 193,
   "next_build_state": "AUTHORIZED_IN_PROGRESS",
-  "next_build_title": "Release & Restart Authority Convergence",
-  "promotion_state": "BUILD171_CANDIDATE_NOT_YET_VERIFIED"
+  "next_build_title": "Current Authority & Handoff Convergence",
+  "promotion_state": "BUILD193_CANDIDATE_NOT_YET_VERIFIED"
 }
