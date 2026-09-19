@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 183 — Inventory & Tool/Supply identity cleanup gate, successor-aware through Build 184."""
+"""Release 467 Build 183 — Inventory & Tool/Supply identity cleanup gate, successor-aware through Build 185."""
 from pathlib import Path
 import re, subprocess, sys
 
@@ -50,7 +50,8 @@ for token in ("no automatic duplicate merge","Build 244 remains the mutation aut
     req(token.lower() in doc.lower(),f"Build 183 documentation missing: {token}")
 req("Build 182 — complete" in plan,"Catalog rework checkpoint missing: Build 182 — complete")
 req(any(token in plan for token in ("Build 183 — current","Build 183 — complete")),"Catalog rework checkpoint missing Build 183 current/complete state")
-req(any(token in plan for token in ("Build 184 — next","Build 184 — current")),"Catalog rework checkpoint missing Build 184 next/current state")
+req(any(token in plan for token in ("Build 184 — next","Build 184 — current","Build 184 — complete")),"Catalog rework checkpoint missing Build 184 successor state")
+req(("Build 185 — current" in plan) or ("Build 185 — complete" in plan) or ("Build 184 — next" in plan),"Catalog rework checkpoint missing Build 185 successor/current state")
 for token in ("inventory-identity-table-wrap","overflow-x:auto","@media(max-width:760px)"):
     req(token in css,f"Build 183 responsive CSS missing: {token}")
 
@@ -66,4 +67,4 @@ print("Review API: LIVE D1 / READ-ONLY / <=40 ISSUE ROWS")
 print("Duplicate correction: EXPLICIT EXISTING INVENTORY AUTHORITY")
 print("Usage/count correction: EXPLICIT EXISTING INTEGRITY AUTHORITY")
 print("R2/Product/payment/provider/accounting mutation: NONE")
-print("Next: BUILD 184 PRODUCT & TOOL/SUPPLY IMAGE REPAIR")
+print("Successor continuity: BUILD 184 IMAGE REPAIR / BUILD 185 RESOURCE LINKAGE")
