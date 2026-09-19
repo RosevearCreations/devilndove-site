@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try{sessionStorage.setItem('ddBuild201CountCursor',String(state.countCursor));}catch{}
     const article=mount.querySelector('[data-integrity-item="'+inventoryId+'"]');
     article?.scrollIntoView({behavior:'smooth',block:'center'});
-    setTimeout(()=>mount.querySelector('[data-count-qty="'+inventoryId+'"]')?.focus(),60);
+    mount.querySelector('[data-count-qty="'+inventoryId+'"]')?.focus();
     renderSummary();
     setMessage('Count form opened for '+String(item.item_name||item.external_key||('Inventory #'+inventoryId))+'. Review the shelf/bin quantity and save explicitly when ready.');
   }
