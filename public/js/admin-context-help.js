@@ -120,7 +120,7 @@ function ensureStylesheet() {
   if (document.querySelector('link[data-dd-context-help-style]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = '/css/admin-context-help.css?v=current';
+  link.href = '/css/admin-context-help.css?v=467b198-shared-help';
   link.dataset.ddContextHelpStyle = 'true';
   document.head.appendChild(link);
 }
