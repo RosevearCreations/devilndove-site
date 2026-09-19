@@ -47,7 +47,8 @@ const EXTERNAL_POLICY=Object.freeze([
   {key:'caip_private_media',state:'EVIDENCE_DEPENDENT'},
   {key:'cloudflare_access_service_token',state:'HOLD_EXTERNAL_CONFIGURED_AND_PROVEN_DEVELOPMENT'}
 ]);
-const BUILD86_DIAGNOSTIC_CONTRACT=Object.freeze({self_diagnostics:'self',automatic_repair:false,provider_execution:false,provider_publication:false});
+const self='self';
+const BUILD86_DIAGNOSTIC_CONTRACT=Object.freeze({self_diagnostics:self,automatic_repair:false,provider_execution:false,provider_publication:false});
 
 function stableJson(value){
   if(Array.isArray(value))return `[${value.map(stableJson).join(',')}]`;
