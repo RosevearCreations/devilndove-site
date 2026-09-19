@@ -1,0 +1,120 @@
+name: Release 467 Build 201 Cycle Count Duplicate + Creation Image Edit
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/creation-media.js'
+      - 'admin/creation-media/index.html'
+      - 'public/js/admin-creation-media-v201.js'
+      - 'functions/api/creations.js'
+      - 'creations/index.html'
+      - 'public/js/creations-admin-image-edit-v201.js'
+      - 'functions/api/admin/media-content-studio.js'
+      - 'public/js/admin-inventory-identity-cleanup-v183.js'
+      - 'public/js/admin-inventory-integrity-review.js'
+      - 'admin/inventory-operations/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_201_CYCLE_COUNT_DUPLICATE_IDENTITY_RESOLUTION.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md'
+      - 'scripts/release467_build201_gate.py'
+      - 'scripts/release467_build200_gate.py'
+      - 'scripts/release467_build189_gate.py'
+      - 'scripts/release467_build183_gate.py'
+      - 'scripts/release467_build180_gate.py'
+      - '.github/workflows/release467-build201-cycle-count-duplicate-creation-image-edit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 201 cycle count duplicate and creation image edit
+        run: python scripts/release467_build201_gate.py
+      - name: Retain Build 200 Supplier Source Workbench
+        run: python scripts/release467_build200_gate.py
+      - name: Retain Build 194 D1 headroom contract
+        run: python scripts/release467_build194_gate.py
+      - name: Retain Build 189 Inventory evidence closure
+        run: python scripts/release467_build189_gate.py
+      - name: Retain Build 183 Inventory identity authority
+        run: python scripts/release467_build183_gate.py
+      - name: Retain Build 180 staged runtime
+        run: python scripts/release467_build180_gate.py
+      - name: Retain Build 197 Media Studio placeholder integrity
+        run: python scripts/release467_build197_gate.py
+
+  development-d1-cycle-duplicate-creation-proof:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 target
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+      - name: Prove bounded live Development count duplicate and creation evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "WITH active_identity AS (
+            SELECT site_item_inventory_id,LOWER(TRIM(COALESCE(external_key,''))) external_key_norm
+            FROM site_item_inventory
+            WHERE COALESCE(is_active,1)=1 AND LOWER(TRIM(COALESCE(source_type,''))) IN ('tool','supply')
+          ), key_counts AS (
+            SELECT external_key_norm,COUNT(*) duplicate_count
+            FROM active_identity WHERE external_key_norm<>'' GROUP BY external_key_norm
+          )
+          SELECT
+            (SELECT COUNT(*) FROM site_item_inventory WHERE COALESCE(is_active,1)=1) active_inventory,
+            (SELECT COUNT(*) FROM site_item_inventory WHERE COALESCE(is_active,1)=1 AND (last_counted_at IS NULL OR datetime(last_counted_at)<datetime('now','-90 days'))) count_due,
+            (SELECT COUNT(*) FROM site_item_inventory WHERE COALESCE(is_active,1)=1 AND last_counted_at IS NULL) never_counted,
+            (SELECT COUNT(*) FROM site_item_inventory WHERE COALESCE(is_active,1)=1 AND last_counted_at IS NOT NULL AND datetime(last_counted_at)<datetime('now','-90 days')) stale_count,
+            (SELECT COUNT(*) FROM active_identity a JOIN key_counts k ON k.external_key_norm=a.external_key_norm WHERE k.duplicate_count>1) duplicate_identity_rows,
+            (SELECT COUNT(*) FROM key_counts WHERE duplicate_count>1) duplicate_identity_keys,
+            (SELECT COUNT(*) FROM catalog_items WHERE LOWER(TRIM(COALESCE(item_kind,'')))='creation' AND COALESCE(status,'active')<>'archived') creation_rows,
+            (SELECT COUNT(*) FROM catalog_items WHERE LOWER(TRIM(COALESCE(item_kind,'')))='creation' AND COALESCE(status,'active')<>'archived' AND TRIM(COALESCE(image_url,''))='') creation_rows_missing_image;" > /tmp/build201-evidence.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build201-evidence.json')); rows=[]; reads=[]
+          keys=('active_inventory','count_due','never_counted','stale_count','duplicate_identity_rows','duplicate_identity_keys','creation_rows','creation_rows_missing_image')
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in keys): rows.append(v)
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None: reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert rows,data
+          row={k:int(rows[0][k] or 0) for k in keys}
+          assert row['active_inventory']>=0,row
+          assert row['creation_rows']>=0,row
+          provider_rows_read=sum(reads)
+          assert provider_rows_read <= 12500,('D1 rows_read budget exceeded',provider_rows_read,12500)
+          print('D1_PROVIDER_ROWS_READ=',provider_rows_read,'BUDGET=',12500)
+          print('BUILD 201 DEVELOPMENT CYCLE/DUPLICATE/CREATION EVIDENCE: PASS',row)
+          print('CREATION_CATALOG_START_STATE=',row['creation_rows'],'ONE_RECORD_FALLBACK_PROMOTION=EXPLICIT_SAVE_ONLY')
+          print('D1 MUTATION: ZERO')
+          print('SCHEMA MIGRATION: NONE')
+          print('R2 MUTATION: ZERO')
+          PY

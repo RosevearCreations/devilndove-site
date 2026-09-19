@@ -37,7 +37,7 @@ for forbidden in ("onRequestPost","onRequestPatch","onRequestPut","onRequestDele
 
 for token in ("Tool & Supply Identity Review","Load identity health","Load 40 issue rows","inventoryIdentityCleanupMount","Release 467 Build 183"):
     req(token in page or token in ui,f"Build 183 Inventory workspace missing: {token}")
-req(any(token in page for token in ("admin-inventory-identity-cleanup-v183.js?v=183","admin-inventory-identity-cleanup-v183.js?v=189","admin-inventory-identity-cleanup-v183.js?v=200")),"Build 183/189 Inventory identity cache-key successor missing")
+req(any(token in page for token in ("admin-inventory-identity-cleanup-v183.js?v=183","admin-inventory-identity-cleanup-v183.js?v=189","admin-inventory-identity-cleanup-v183.js?v=200","admin-inventory-identity-cleanup-v183.js?v=201")),"Build 183/189 Inventory identity cache-key successor missing")
 for forbidden in ("method:'POST'","method: 'POST'","method:'PATCH'","method: 'PATCH'","setInterval(","MutationObserver("):
     req(forbidden not in ui,f"Build 183 review UI must remain non-mutating/non-polling: {forbidden}")
 req(len(re.findall(r"<h1\b",page,re.I))==1,"Inventory Operations must keep one H1")

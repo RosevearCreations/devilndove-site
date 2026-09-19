@@ -35,7 +35,7 @@ for token in ("Release 467 Build 189","data-inventory-evidence-recheck","invento
     req(token in ui+page,f"Build 189 Inventory UI missing: {token}")
 for forbidden in ("method:'POST'","method: 'POST'","method:'PATCH'","method: 'PATCH'","setInterval(","MutationObserver("):
     req(forbidden not in ui,f"Build 189 Inventory evidence UI gained background/write behavior: {forbidden}")
-req(any(token in page for token in ("admin-inventory-identity-cleanup-v183.js?v=189","admin-inventory-identity-cleanup-v183.js?v=200")),"Build 189/200 Inventory identity asset cache-key successor missing")
+req(any(token in page for token in ("admin-inventory-identity-cleanup-v183.js?v=189","admin-inventory-identity-cleanup-v183.js?v=200","admin-inventory-identity-cleanup-v183.js?v=201")),"Build 189/200 Inventory identity asset cache-key successor missing")
 req(page.lower().count("<h1") == 1,"Inventory Operations must keep exactly one H1")
 
 req("Build 188 — complete" in roadmap and ((("Build 189 — current" in roadmap) and ("Build 190 — next after Build 189 is fully GREEN" in roadmap)) or (("Build 189 — complete" in roadmap) and (("Build 190 — current" in roadmap) or ("Build 190 — complete" in roadmap)))),"Build 189/190 roadmap checkpoint missing")

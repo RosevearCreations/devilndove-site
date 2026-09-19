@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Release 467 Build 200 — Supplier & Source Evidence Workbench fail-closed gate."""
 from pathlib import Path
-import subprocess,sys
+import re,subprocess,sys
 
 ROOT=Path(__file__).resolve().parents[1]
 FAIL=[]
@@ -75,7 +75,7 @@ for token in (
 for forbidden in ("setInterval(","MutationObserver(","method:'POST'","method: 'POST'","method:'PATCH'","method: 'PATCH'"):
     req(forbidden not in ui,f"Build 200 workbench gained background/direct-write behavior: {forbidden}")
 
-req("admin-inventory-identity-cleanup-v183.js?v=200" in page,"Build 200 Inventory asset cache key missing")
+req(any(token in page for token in ("admin-inventory-identity-cleanup-v183.js?v=200","admin-inventory-identity-cleanup-v183.js?v=201")),"Build 200/201 Inventory asset cache-key successor missing")
 req(page.lower().count("<h1") == 1,"Inventory Operations must keep exactly one H1")
 for token in (
     "admin_inventory_supplier_source_workbench_v200",
@@ -85,13 +85,16 @@ for token in (
 ):
     req(token in budget,f"Build 200 D1 budget contract missing: {token}")
 
-for token in (
+legacy_roadmap=all(token in roadmap for token in (
     "Build 199 — complete",
     "Build 200 — current",
     "Build 201 — next after Build 200 is fully GREEN",
     "Builds 202–204: planned, not started",
-):
-    req(token in roadmap,f"Build 200 roadmap checkpoint missing: {token}")
+))
+active_successor_match=re.search(r"\*\*Build (\d+) — current\*\*",roadmap)
+active_successor_build=int(active_successor_match.group(1)) if active_successor_match else 0
+successor_roadmap=("Build 200 — complete" in roadmap and active_successor_build >= 201)
+req(legacy_roadmap or successor_roadmap,"Build 200 roadmap checkpoint must be current or explicitly closed by Build 201 or later successors")
 
 for token in (
     "exact starting boundary",

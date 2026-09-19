@@ -35,10 +35,11 @@ for token in ("imagePlanVisible:40","scheduleVisualPlan","requestIdleCallback","
 req("await choosePage(target,{slotKey:slot,replaceHistory:false});scheduleVisualPlan();" in media,"Media Studio does not paint selected page before scheduling image plan")
 req("Release 467 Build 180" in studio and any(token in studio for token in ("/public/js/admin-media-content-studio.js?v=180","/public/js/admin-media-content-studio.js?v=194","/public/js/admin-media-content-studio.js?v=467b195","/public/js/admin-media-content-studio.js?v=467b196","/public/js/admin-media-content-studio.js?v=467b197")),"Media Studio Build 180/successor page-cache identity missing")
 
-for token in ("inventoryIntegrityLoad","Load 40-item queue","paused during page startup","state.loaded = true","Release 467 Build 180 · staged Inventory truth &amp; usage"):
+for token in ("inventoryIntegrityLoad","Load 40-item queue","paused during page startup","state.loaded = true"):
     req(token in inventory_ui,f"Inventory staged queue token missing: {token}")
+req(any(token in inventory_ui for token in ("Release 467 Build 180 · staged Inventory truth & usage","Release 467 Build 201 · explicit cycle-count workflow")),"Inventory staged queue successor identity missing")
 req("dd:admin-ready" not in inventory_ui and "if (window.DDAuth?.isLoggedIn()) start();" not in inventory_ui,"Inventory attention queue still auto-starts")
-req("/public/js/admin-inventory-integrity-review.js?v=180" in inventory and "release467-build179-runtime-recovery.css?v=180" in inventory and any(token in inventory for token in ("Release 467 Build 180","Release 467 Build 183","Release 467 Build 185","Release 467 Build 189")),"Inventory Operations Build 180/183/185 page/cache identity missing")
+req(any(token in inventory for token in ("/public/js/admin-inventory-integrity-review.js?v=180","/public/js/admin-inventory-integrity-review.js?v=201")) and "release467-build179-runtime-recovery.css?v=180" in inventory and any(token in inventory for token in ("Release 467 Build 180","Release 467 Build 183","Release 467 Build 185","Release 467 Build 189","Build 200","Build 201")),"Inventory Operations Build 180/201 page/cache identity missing")
 for token in ("content-visibility:auto","contain-intrinsic-size:auto 520px","contain-intrinsic-size:auto 720px"):
     req(token in css,f"Inventory staged-paint CSS missing: {token}")
 

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Creation Image Editor — Devil n Dove Admin</title>
+<meta name="description" content="Edit the image for one Devil n Dove creation without changing Product or Inventory media."/>
+<meta name="robots" content="noindex,nofollow"/>
+<link rel="stylesheet" href="/css/styles.css?v=440"/>
+<link rel="icon" href="/assets/mark.png" type="image/png"/>
+<style>
+.creation-media-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.creation-media-card{display:flex;flex-direction:column;gap:9px}.creation-media-card img,.creation-media-current img{width:100%;aspect-ratio:4/3;object-fit:contain;background:rgba(0,0,0,.2);border-radius:12px}.creation-media-current{display:grid;grid-template-columns:minmax(180px,320px) 1fr;gap:18px;align-items:start}.creation-media-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.creation-media-controls label{flex:1 1 260px}.creation-media-card .btn{margin-top:auto}@media(max-width:900px){.creation-media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.creation-media-grid,.creation-media-current{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-admin-page="creation-media-v201">
+<div class="container admin-shell">
+  <div class="nav"><div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><strong>Devil n Dove</strong><div class="small">Admin / Creation Image Editor</div></div></div><div class="links"><a href="/admin/">Dashboard</a><a href="/admin/media-content-studio/">Media Studio</a><a href="/creations/?media-edit=1">Creations preview</a></div></div>
+  <section class="hero compact-hero"><div><p class="eyebrow">Release 467 Build 201</p><h1>Creation Image Editor</h1><p>Change the image for one Creations card. This is a specialist creation-catalog editor; Product, Inventory, Tool and Supply media remain in their own workflows.</p></div></section>
+  <div id="creationMediaMessage" class="card small" hidden aria-live="polite"></div>
+  <section class="card creation-media-current" id="creationMediaCurrent"><div class="small">Loading the selected creation…</div></section>
+  <section class="card" style="margin-top:16px">
+    <div class="section-heading-row"><div><h2>Choose an existing managed image</h2><p class="small">Only general/public creation media is shown. Choosing an image changes only this creation after explicit confirmation.</p></div></div>
+    <div class="creation-media-controls"><label class="small">Search<input class="input" id="creationMediaSearch" type="search" placeholder="filename, title, alt text or object key"/></label><button class="btn" id="creationMediaSearchButton" type="button">Search</button><button class="btn" id="creationMediaRefresh" type="button">Refresh</button></div>
+    <div id="creationMediaLibrary" class="creation-media-grid" style="margin-top:14px"><div class="small">Loading managed images…</div></div>
+    <div style="margin-top:12px"><button class="btn" id="creationMediaMore" type="button" hidden>Load more images</button></div>
+  </section>
+  <section class="card" style="margin-top:16px">
+    <h2>Upload a new creation image</h2>
+    <p class="small">The upload enters the managed public-media library with creation scope, then is explicitly assigned to this one creation. It does not attach to a Product or change Inventory.</p>
+    <div class="creation-media-controls"><label class="small">Image file<input class="input" id="creationMediaUploadFile" type="file" accept="image/*"/></label><button class="btn primary" id="creationMediaUpload" type="button">Upload & use for this creation</button></div>
+  </section>
+  <div class="footer card" style="margin-top:18px"></div>
+</div>
+<script src="/js/main.js?v=440"></script>
+<script src="/public/js/auth.js?v=440"></script><script src="/public/js/admin-route-usage.js"></script>
+<script src="/public/js/site-auth-ui.js?v=179"></script><script src="/public/js/site-analytics.js?v=440"></script>
+<script src="/public/js/admin-self-protect.js?v=440"></script><script src="/public/js/admin.js?v=440"></script>
+<script src="/public/js/admin-creation-media-v201.js?v=201"></script>
+</body>
+</html>
