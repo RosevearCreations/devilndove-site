@@ -150,7 +150,16 @@ export const D1_READ_BUDGETS = Object.freeze({
     returned_rows_max: 1,
     browser_cache_ms: 0,
     max_concurrent_identical_gets: 1,
-    notes: 'Build 189: one Inventory target plus at most 12 duplicate-group and 12 catalog-reference evidence rows. No merge, count, stock, cost, reorder, purchasing or catalog mutation.'
+    notes: 'Build 189: one Inventory target plus at most 12 duplicate-group and 12 catalog-reference evidence rows. Build 200 may expose those supplier/source values as candidates only; no auto-fill, merge, count, stock, cost, reorder, purchasing or catalog mutation.'
+  }),
+  admin_inventory_supplier_source_workbench_v200: Object.freeze({
+    route: '/api/admin/inventory-identity-health',
+    risk: 'medium',
+    contract: 'explicit_supplier_source_evidence_queue',
+    returned_rows_max: 40,
+    browser_cache_ms: 0,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 200: explicit-only supplier/source queue. Blank provenance stays unknown; reviewed N/A uses explicit Inventory notes markers, and candidate values are never selected automatically.'
   }),
   admin_media_evidence_recheck_v190: Object.freeze({
     route: '/api/admin/catalog-image-repair',
