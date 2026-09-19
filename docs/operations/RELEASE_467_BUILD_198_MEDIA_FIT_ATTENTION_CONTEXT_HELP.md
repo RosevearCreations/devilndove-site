@@ -21,7 +21,7 @@ Build 198 starts from:
 
 ## Product image presentation contract
 
-The authoritative uploaded Product image is shown in full by default.
+The authoritative **full uploaded Product image** is shown in full by default.
 
 - Shop Product cards use a consistent square presentation **frame**, but the image itself uses `object-fit: contain`.
 - Shop thumbnails and Product Detail thumbnails also use `contain`.
@@ -61,7 +61,7 @@ Owner routing is evidence-derived from the incident scope/code/endpoint and is l
 
 A new shared help system provides:
 
-- a fixed **ⓘ Help** entry point on HTML application pages;
+- a fixed **ⓘ Help** entry point and reusable **circled i** controls on HTML application pages;
 - reusable circular `i` controls beside recognized methods, fields, headings and processes;
 - explicit `data-dd-help-key` hooks for important workflows;
 - a searchable accessible dialog with `role="dialog"`, `aria-modal="true"`, Escape-to-close and focus restoration;
