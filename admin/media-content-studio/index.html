@@ -86,7 +86,7 @@
     </section>
 
     <section class="card media-metadata-panel" id="mediaMetadataPanel" hidden>
-      <div class="section-heading-row"><div><h2>Selected image details</h2><p class="small">Optional SEO/accessibility and provenance details for the selected public site image. The preview also shows the same advisory image-quality breakdown used elsewhere.</p></div><span id="mediaSelectedId" class="small"></span></div>
+      <div class="section-heading-row"><div><h2>Selected image details</h2><p class="small">Optional SEO/accessibility and provenance details for the selected public site image. When you opened this image from a page location, use <strong>Save details & use in this location</strong> to actually replace the page image.</p></div><span id="mediaSelectedId" class="small"></span></div><div id="mediaPlacementTarget" class="status-note" hidden></div><div id="mediaMetadataFeedback" class="small media-action-feedback" role="status" aria-live="polite" hidden></div>
       <div class="media-metadata-layout">
         <div><img id="mediaSelectedPreview" class="media-selected-preview-image" alt="Selected site media preview"/><div class="small" id="mediaSelectedTechnical"></div></div>
         <div class="media-form-grid">
@@ -104,7 +104,7 @@
           <label class="media-span-2"><span class="small">Consent / release notes</span><textarea class="input" id="mediaConsentNotes" rows="2"></textarea></label>
         </div>
       </div>
-      <div class="media-editor-actions"><button class="btn primary" id="mediaSaveMetadata" type="button">Save image details</button><button class="btn" id="mediaReplaceButton" type="button">Replace file, keep placements</button><input id="mediaReplaceFile" type="file" accept="image/*" hidden/><button class="btn" id="mediaArchive" type="button">Archive if unused</button><button class="btn danger" id="mediaDelete" type="button">Delete if safe</button></div>
+      <div class="media-editor-actions"><button class="btn primary" id="mediaSaveAndUse" type="button" hidden>Save details &amp; use in this location</button><button class="btn" id="mediaSaveMetadata" type="button">Save details only (do not change page)</button><button class="btn" id="mediaReplaceButton" type="button">Replace file, keep placements</button><input id="mediaReplaceFile" type="file" accept="image/*" hidden/><button class="btn" id="mediaArchive" type="button">Archive if unused</button><button class="btn danger" id="mediaDelete" type="button">Delete if safe</button></div>
       <div class="media-existing-uses" id="mediaExistingUses"></div>
     </section>
 
@@ -123,7 +123,7 @@
   <script src="/public/js/auth.js?v=440"></script><script src="/public/js/admin-route-usage.js"></script>
   <script src="/public/js/site-auth-ui.js?v=179"></script><script src="/public/js/site-analytics.js?v=440"></script>
   <script src="/public/js/admin-self-protect.js?v=440"></script><script src="/public/js/admin.js?v=440"></script>
-  <script src="/public/js/admin-media-content-studio.js?v=467b195"></script>
+  <script src="/public/js/admin-media-content-studio.js?v=467b196"></script>
   <script src="/public/js/image-quality-scorer-v152.js?v=467b152"></script>
   <script src="/public/js/site-image-quality-overlay-v152.js?v=179"></script>
 </body>
