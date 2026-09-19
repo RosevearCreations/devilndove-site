@@ -41,8 +41,9 @@ req("detail:{ok:true,...detail}" not in runtime,"Media readiness event must not 
 for token in ("ok:false,applied:false,reason:'manifest_http_error'","ok:false,applied:false,reason:'manifest_exception'","ok:true,applied:true"):
     req(token in runtime,f"truthful runtime readiness state missing: {token}")
 
-for token in ("slotSyncAttempted:new Set()","slotDefinitionDrift","reconcilePageSlots","action:'register_slots'","drift=expected.filter","Existing image assignments were preserved","v=467b195"):
+for token in ("slotSyncAttempted:new Set()","slotDefinitionDrift","reconcilePageSlots","action:'register_slots'","drift=expected.filter","Existing image assignments were preserved"):
     req(token in studio,f"Media Studio catalog reconciliation missing: {token}")
+req(any(token in studio for token in ("v=467b195","v=467b197")),"Media Studio catalog cache key must retain Build 195 or advance to Build 197")
 req("apply Build 259 migration" not in studio,"obsolete Build 259 manual-repair instruction remains")
 for token in ("register_slots","ON CONFLICT(page_path,slot_key) DO UPDATE","slots:await pageSlots","Product, inventory, tools, supplies"):
     req(token in studio_api,f"bounded slot-registration/specialist boundary missing: {token}")
