@@ -1,4 +1,5 @@
 // File: /public/js/admin-product-resources.js
+// Release 467 Build 185 linkage authority retained; Build 191 adds unknown-safe profitability evidence.
 // Brief description: Admin editor for linking tools and supplies to a product as
 // a reusable making-story with quantity, cost, and inventory handling notes.
 
