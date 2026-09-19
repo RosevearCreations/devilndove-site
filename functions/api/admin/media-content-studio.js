@@ -108,7 +108,7 @@ async function mediaList(db, query = {}) {
 async function pageSlots(db, pagePath) {
   const result = await db.prepare(`
     SELECT s.media_content_slot_id,s.page_path,s.slot_key,s.slot_label,s.slot_type,s.target_selector,s.target_attribute,s.source_snapshot,s.source_alt_snapshot,s.is_required,s.is_active,
-           a.media_content_assignment_id,a.media_asset_id,ma.public_url,ma.original_filename,mm.display_name,mm.alt_text,mm.image_title,mm.focal_x,mm.focal_y,mm.decorative,
+           a.media_content_assignment_id,a.media_asset_id,ma.public_url,ma.updated_at AS media_updated_at,ma.original_filename,mm.display_name,mm.alt_text,mm.image_title,mm.focal_x,mm.focal_y,mm.decorative,
            cb.managed_content_block_id,cb.draft_text,cb.published_text,cb.published,cb.protected_static
     FROM media_content_slots s
     LEFT JOIN media_content_assignments a ON a.media_content_slot_id=s.media_content_slot_id AND a.active=1
@@ -119,7 +119,7 @@ async function pageSlots(db, pagePath) {
     ORDER BY CASE s.slot_type WHEN 'image' THEN 1 WHEN 'background' THEN 2 ELSE 3 END,s.media_content_slot_id,s.media_content_slot_id
     LIMIT 350
   `).bind(pagePath).all();
-  return rows(result).map((r)=>({...r,media_content_slot_id:n(r.media_content_slot_id),media_asset_id:r.media_asset_id==null?null:n(r.media_asset_id),media_content_assignment_id:r.media_content_assignment_id==null?null:n(r.media_content_assignment_id),published:bool(r.published),protected_static:bool(r.protected_static),decorative:bool(r.decorative),is_required:bool(r.is_required)}));
+  return rows(result).map((r)=>({...r,media_content_slot_id:n(r.media_content_slot_id),media_asset_id:r.media_asset_id==null?null:n(r.media_asset_id),media_content_assignment_id:r.media_content_assignment_id==null?null:n(r.media_content_assignment_id),public_url:versionUrl(r.public_url,r.media_updated_at),published:bool(r.published),protected_static:bool(r.protected_static),decorative:bool(r.decorative),is_required:bool(r.is_required)}));
 }
 
 async function visualPlanSlots(db) {
@@ -226,8 +226,13 @@ export async function onRequestPost(context) {
       const batch=[]; if(previous)batch.push(db.prepare(`UPDATE media_content_assignments SET active=0,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE media_content_assignment_id=?`).bind(adminUser.user_id,previous.media_content_assignment_id));
       batch.push(db.prepare(`INSERT INTO media_content_assignments(media_content_slot_id,media_asset_id,active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES(?,?,1,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(slotId,mediaId,adminUser.user_id,adminUser.user_id));
       await db.batch(batch);
-      await changeAudit(db,adminUser,{action_type:"assign_media",media_asset_id:mediaId,media_content_slot_id:slotId,page_path:slot.page_path,old_value:previous||null,new_value:{media_asset_id:mediaId}});
-      return json({ok:true,message:previous&&n(previous.media_asset_id)!==mediaId?"Occupied placement replaced. Only this placement was changed; no other use of either image was altered.":"Image assigned to this placement.",slots:await pageSlots(db,slot.page_path)});
+      const refreshed=await pageSlots(db,slot.page_path);
+      const authoritative=refreshed.find((row)=>n(row.media_content_slot_id)===slotId);
+      if(!authoritative||n(authoritative.media_asset_id)!==mediaId){
+        return json({ok:false,error:"The requested image was not verified as the active assignment. Reload the location before trying again.",error_code:"media_assignment_verification_failed"},409);
+      }
+      await changeAudit(db,adminUser,{action_type:"assign_media",media_asset_id:mediaId,media_content_slot_id:slotId,page_path:slot.page_path,old_value:previous||null,new_value:{media_asset_id:mediaId,verified:true}});
+      return json({ok:true,message:previous&&n(previous.media_asset_id)!==mediaId?"Image replaced and verified for this exact placement. No other image use was changed.":"Image assigned and verified for this exact placement.",assignment:{media_content_slot_id:slotId,media_asset_id:mediaId,slot_key:slot.slot_key,page_path:slot.page_path,verified:true},slots:refreshed});
     }
 
     if (action === "remove_assignment") {
