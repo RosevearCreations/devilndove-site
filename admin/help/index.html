@@ -21,6 +21,41 @@
     <p>Use this page as the current operating guide. Historical release and build evidence stays auditable in source history but is not a current instruction set.</p></div>
   </section>
 
+  <section class="card" id="help-contextual"><h2 data-dd-help-key="admin.release">Contextual help throughout the application</h2>
+    <p>The shared circled <strong>i</strong> and floating <strong>ⓘ Help</strong> control are available across public, Admin and Creator screens. Context help is explanatory and role-aware: it answers <strong>What is this?</strong>, <strong>How do I use it?</strong>, and <strong>What happens if I change it?</strong> without performing the action for you.</p>
+    <ul class="clean">
+      <li>Public help covers Shop/search, Product images, cart/checkout, pickup and custom work.</li>
+      <li>Administrator help covers Today Needs Attention, Product Editor, Product Media, Inventory, Finance, releases and I.T. infrastructure.</li>
+      <li>Creator help covers creative workflow, content, public-use/consent decisions and Packaging Studio.</li>
+      <li>The existing provider/credential help remains available for external IDs, callbacks, webhooks, OAuth scopes and secrets.</li>
+    </ul>
+  </section>
+
+  <section class="card" id="help-product-media"><h2 data-dd-help-key="admin.product-media">Product images, framing, crop and focal point</h2>
+    <ul class="clean">
+      <li>The public Storefront shows the <strong>full approved uploaded Product image</strong> inside a consistent frame by default. It does not silently crop a portrait or landscape source just because the card is square.</li>
+      <li>Crop, recenter, focal point and derivative tools are deliberate Product Media / Photo Studio edits. Use them only when you actually want a different composition.</li>
+      <li>Keep the original source image preserved. A deliberately edited derivative may be selected later as the buyer-facing image.</li>
+      <li>Static website/workshop/engagement photos remain owned by Media &amp; Content Studio; Product images remain owned by Product Media.</li>
+    </ul>
+    <p><a class="btn" href="/admin/catalog-media/">Product Media / Photo Studio</a> <a class="btn" href="/admin/media-content-studio/">Media &amp; Content Studio</a></p>
+  </section>
+
+  <section class="card" id="help-attention"><h2 data-dd-help-key="admin.today-attention">Today Needs Attention</h2>
+    <ul class="clean">
+      <li>Start with the human-readable <strong>What</strong> and <strong>Where</strong> cards. Raw incident codes remain available as technical evidence, not as the primary explanation.</li>
+      <li>Use the owning-workspace link to open the Product, Inventory, Orders, Finance, Content or I.T. area responsible for the incident.</li>
+      <li>A stale threshold count can cover the complete unresolved runtime backlog even when the current incident list is filtered to fewer days.</li>
+      <li>Mark an incident reviewing/resolved only when you have reviewed the evidence or completed the corrective work.</li>
+    </ul>
+    <p><a class="btn" href="/admin/it/">I.T. Operations</a></p>
+  </section>
+
+  <section class="card" id="help-creator"><h2 data-dd-help-key="creator.workflow">Creator and content workflow</h2>
+    <p>Creative evidence, approved public media, Content Studio drafts and public release are separate stages. The contextual help system explains the current stage and links back to the owning workspace without auto-publishing anything.</p>
+    <p><a class="btn" href="/admin/creator/">Creator</a> <a class="btn" href="/admin/content-studio/">Content Studio</a> <a class="btn" href="/admin/packaging-studio/">Packaging Studio</a></p>
+  </section>
+
   <section class="card" id="help-security"><h2>Accounts, passwords and security</h2>
     <ul class="clean">
       <li>Stored passwords are one-way hashes and cannot be displayed. Eye controls reveal only a password currently typed or generated in an input.</li>
@@ -80,7 +115,7 @@
 
   <footer class="footer card">Help is explanatory and read-only. Business data remains owned by the application workflow that created it.</footer>
 </main>
-<script src="/js/main.js"></script>
+<script src="/js/main.js?v=467b198"></script>
 <script src="/public/js/auth.js"></script>
 <script src="/public/js/admin-route-usage.js"></script>
 <script src="/public/js/site-auth-ui.js"></script>
