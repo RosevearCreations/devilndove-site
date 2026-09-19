@@ -28,8 +28,9 @@ workflow=read(".github/workflows/release467-build194-d1-headroom-home-media.yml"
 b189=read(".github/workflows/release467-build189-inventory-evidence-closure.yml")
 b190=read(".github/workflows/release467-build190-media-evidence-closure.yml")
 
-for token in ("Content-Type':'application/json","mediaActionFeedback","Applying…","data.assignment","media_assignment_verification_failed"):
+for token in ("Content-Type':'application/json","mediaActionFeedback","data.assignment","media_assignment_verification_failed"):
     req(token in studio+api+studio_page,f"Home Media Studio verified-save contract missing: {token}")
+req(("Applying…" in studio) or ("Applying & verifying…" in studio),"Home Media Studio verified-save progress feedback missing")
 for token in ("const refreshed=await pageSlots","authoritative","verified:true","versionUrl(r.public_url,r.media_updated_at)"):
     req(token in api,f"server-side assignment verification/cache coherence missing: {token}")
 for token in ("dd:media-content-ready","media-refresh","signalReady"):
