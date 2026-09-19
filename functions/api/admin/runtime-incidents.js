@@ -5,6 +5,23 @@ import { recoveryDescriptor, safeRecheckIncident } from './_operationalRecovery.
 function text(value){return String(value||'').trim();}
 function rows(result){return Array.isArray(result?.results)?result.results:[];}
 function parseIds(value){if(Array.isArray(value))return value.map(Number).filter((id)=>Number.isInteger(id)&&id>0);return String(value||'').split(',').map((id)=>Number(String(id).trim())).filter((id)=>Number.isInteger(id)&&id>0);}
+function incidentContext(row={}){
+  const scope=text(row.incident_scope).toLowerCase();
+  const code=text(row.incident_code).toLowerCase();
+  const endpoint=text(row.endpoint_path);
+  const haystack=`${scope} ${code} ${endpoint.toLowerCase()}`;
+  let owner_href='/admin/it/', owner_label='Open I.T. operations', area='I.T. / Runtime incidents';
+  if(/product|catalog|media|image/.test(haystack)){owner_href='/admin/catalog-media/';owner_label='Open Product Media';area='Products / Product Media';}
+  if(/inventory|supply|tool|stock|reorder/.test(haystack)){owner_href='/admin/inventory-operations/';owner_label='Open Inventory Operations';area='Inventory / Supplies / Tools';}
+  if(/order|fulfill|shipment|shipping|refund/.test(haystack)){owner_href='/admin/orders/';owner_label='Open Orders';area='Orders / Fulfillment';}
+  if(/payment|stripe|paypal|accounting|finance|invoice|settlement/.test(haystack)){owner_href='/admin/accounting/';owner_label='Open Accounting';area='Finance / Payment provider';}
+  if(/content|social|creative|publication|caip/.test(haystack)){owner_href='/admin/content-studio/';owner_label='Open Content Studio';area='Creator / Content';}
+  if(/auth|login|session|access|user/.test(haystack)){owner_href='/admin/it/';owner_label='Open I.T. access diagnostics';area='Access / Authentication';}
+  const requestMethod=text(row.request_method).toUpperCase();
+  const where=endpoint ? `${area} — ${requestMethod ? requestMethod+' ' : ''}${endpoint}` : `${area} — ${scope || 'runtime'}`;
+  const what=text(row.message) || text(row.incident_code).replace(/[_-]+/g,' ') || 'Runtime incident needs review';
+  return { what, where, area, owner_href, owner_label, scope:scope||'runtime', code:code||'unknown' };
+}
 function filters(url){
   const scope=text(url.searchParams.get('scope')).toLowerCase(),code=text(url.searchParams.get('code')).toLowerCase(),path=text(url.searchParams.get('path')).toLowerCase(),severity=text(url.searchParams.get('severity')).toLowerCase(),review=text(url.searchParams.get('review_status')||'open').toLowerCase();
   const days=Math.max(1,Math.min(Number(url.searchParams.get('days')||7),90)),limit=Math.max(1,Math.min(Number(url.searchParams.get('limit')||40),100));
@@ -19,7 +36,7 @@ export async function onRequestGet(context){
     const summary=await db.prepare(`SELECT COUNT(*) AS total_count,SUM(CASE WHEN LOWER(COALESCE(severity,''))='critical' THEN 1 ELSE 0 END) AS critical_count,SUM(CASE WHEN LOWER(COALESCE(severity,''))='error' THEN 1 ELSE 0 END) AS error_count,SUM(CASE WHEN LOWER(COALESCE(severity,''))='warning' THEN 1 ELSE 0 END) AS warning_count,SUM(CASE WHEN LOWER(COALESCE(review_status,'open'))='open' THEN 1 ELSE 0 END) AS open_count,SUM(CASE WHEN LOWER(COALESCE(review_status,'open')) IN ('resolved','ignored') THEN 1 ELSE 0 END) AS closed_count FROM runtime_incidents WHERE ${where}`).bind(...f.binds).first();
     const grouped=group?rows(await db.prepare(`SELECT LOWER(COALESCE(severity,'warning')) AS severity,COALESCE(incident_scope,'') AS incident_scope,COALESCE(incident_code,'') AS incident_code,COALESCE(endpoint_path,'') AS endpoint_path,COUNT(*) AS incident_count,MAX(created_at) AS last_seen_at,MIN(created_at) AS first_seen_at FROM runtime_incidents WHERE ${where} GROUP BY LOWER(COALESCE(severity,'warning')),COALESCE(incident_scope,''),COALESCE(incident_code,''),COALESCE(endpoint_path,'') ORDER BY incident_count DESC,datetime(MAX(created_at)) DESC LIMIT ?`).bind(...f.binds,f.limit).all()):[];
     const incidents=rows(await db.prepare(`SELECT runtime_incident_id,incident_scope,incident_code,severity,endpoint_path,request_method,message,details_json,related_user_id,ip_address,user_agent,COALESCE(review_status,'open') AS review_status,admin_note,reviewed_by_user_id,reviewed_at,created_at FROM runtime_incidents WHERE ${where} ORDER BY datetime(created_at) DESC,runtime_incident_id DESC LIMIT ?`).bind(...f.binds,f.limit).all());
-    return jsonResponse({ok:true,requested_by:{user_id:adminUser.user_id,email:adminUser.email,display_name:adminUser.display_name},operational_attention:await operationalThresholdSnapshot(db),retention_reviews:await retentionReviews(db),filters:{scope:f.scope,code:f.code,path:f.path,severity:f.severity,review_status:f.review_status,days:f.days,limit:f.limit,group},summary:{total_count:Number(summary?.total_count||0),critical_count:Number(summary?.critical_count||0),error_count:Number(summary?.error_count||0),warning_count:Number(summary?.warning_count||0),open_count:Number(summary?.open_count||0),closed_count:Number(summary?.closed_count||0)},groups:grouped.map((r)=>({...r,incident_count:Number(r.incident_count||0)})),incidents:incidents.map((r)=>({...r,runtime_incident_id:Number(r.runtime_incident_id||0),attention:classifyIncidentAttention(r),recovery:recoveryDescriptor(r)}))},200,{'Cache-Control':'no-store'});
+    return jsonResponse({ok:true,requested_by:{user_id:adminUser.user_id,email:adminUser.email,display_name:adminUser.display_name},operational_attention:await operationalThresholdSnapshot(db),retention_reviews:await retentionReviews(db),filters:{scope:f.scope,code:f.code,path:f.path,severity:f.severity,review_status:f.review_status,days:f.days,limit:f.limit,group},summary:{total_count:Number(summary?.total_count||0),critical_count:Number(summary?.critical_count||0),error_count:Number(summary?.error_count||0),warning_count:Number(summary?.warning_count||0),open_count:Number(summary?.open_count||0),closed_count:Number(summary?.closed_count||0)},groups:grouped.map((r)=>({...r,incident_count:Number(r.incident_count||0),attention_context:incidentContext(r)})),incidents:incidents.map((r)=>({...r,runtime_incident_id:Number(r.runtime_incident_id||0),attention:classifyIncidentAttention(r),attention_context:incidentContext(r),recovery:recoveryDescriptor(r)}))},200,{'Cache-Control':'no-store'});
   }catch(error){return jsonResponse({ok:false,error:error?.message||'Failed to load runtime incidents.',schema_ready:false},500);}
 }
 export async function onRequestPost(context){
