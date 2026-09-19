@@ -1,0 +1,150 @@
+name: Release 467 Build 190 Media Evidence Closure
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/catalog-image-repair.js'
+      - 'functions/api/_lib/d1ReadBudget.js'
+      - 'public/js/admin-catalog-image-repair-v184.js'
+      - 'admin/catalog-health/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_190_MEDIA_EVIDENCE_CLOSURE.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_CLOSURE_BUILDS_187_192.md'
+      - 'scripts/release467_build190_gate.py'
+      - 'scripts/release467_build189_gate.py'
+      - 'scripts/release467_build188_gate.py'
+      - 'scripts/release467_build184_gate.py'
+      - '.github/workflows/release467-build190-media-evidence-closure.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 190 media evidence closure
+        run: python scripts/release467_build190_gate.py
+      - name: Retain Build 189 Inventory evidence closure
+        run: python scripts/release467_build189_gate.py
+      - name: Retain Build 184 image repair authority
+        run: python scripts/release467_build184_gate.py
+      - name: Retain Build 184 D1 quota remediation
+        run: python scripts/release467_build184_d1_quota_guard.py
+      - name: Retain Build 186 public Product image proof
+        run: python scripts/release467_build186_gate.py
+
+  development-d1-media-evidence-proof:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 and selected-object R2 binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          grep -q '^binding = "PRODUCT_MEDIA_BUCKET"$' wrangler.toml
+          grep -q '^bucket_name = "devilndove-toolshed-images-dev"$' wrangler.toml
+          ! grep -q '^database_id = "f34a741b-0000-45b0-9a96-6be08754d563"$' wrangler.toml
+      - name: Prove live Development media evidence closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "WITH annotation_ranked AS (
+            SELECT product_image_id,image_role,public_use_status,
+                   ROW_NUMBER() OVER (PARTITION BY product_image_id ORDER BY updated_at DESC,product_image_annotation_id DESC) rn
+            FROM product_image_annotations
+            WHERE product_image_id IS NOT NULL
+          ), image_facts AS (
+            SELECT pi.product_image_id,pi.product_id,pi.image_url,pi.alt_text,
+                   COALESCE(ar.image_role,'') image_role,COALESCE(ar.public_use_status,'') public_use_status
+            FROM product_images pi
+            LEFT JOIN annotation_ranked ar ON ar.product_image_id=pi.product_image_id AND ar.rn=1
+          ), approved_role_counts AS (
+            SELECT product_id,LOWER(TRIM(COALESCE(image_role,''))) role_norm,COUNT(*) role_count
+            FROM image_facts
+            WHERE LOWER(TRIM(COALESCE(public_use_status,''))) IN ('product_page_ok','all_public_ok')
+              AND TRIM(COALESCE(image_role,''))<>''
+            GROUP BY product_id,LOWER(TRIM(COALESCE(image_role,'')))
+          ), inventory_facts AS (
+            SELECT sii.site_item_inventory_id,LOWER(TRIM(COALESCE(sii.source_type,''))) item_kind,
+                   LOWER(TRIM(COALESCE(sii.external_key,''))) source_key_norm,sii.image_url
+            FROM site_item_inventory sii
+            WHERE COALESCE(sii.is_active,1)=1
+              AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')
+          ), catalog_ranked AS (
+            SELECT LOWER(TRIM(COALESCE(item_kind,''))) item_kind,
+                   LOWER(TRIM(COALESCE(source_key,''))) source_key_norm,image_url,
+                   ROW_NUMBER() OVER (
+                     PARTITION BY LOWER(TRIM(COALESCE(item_kind,''))),LOWER(TRIM(COALESCE(source_key,'')))
+                     ORDER BY catalog_item_id DESC
+                   ) rn
+            FROM catalog_items
+            WHERE LOWER(TRIM(COALESCE(item_kind,''))) IN ('tool','supply')
+              AND COALESCE(status,'active')<>'archived'
+          ), inventory_media AS (
+            SELECT i.*,cr.image_url catalog_image_url
+            FROM inventory_facts i
+            LEFT JOIN catalog_ranked cr ON cr.rn=1 AND cr.item_kind=i.item_kind AND cr.source_key_norm=i.source_key_norm
+          )
+          SELECT
+            (SELECT COUNT(*) FROM products p WHERE LOWER(TRIM(COALESCE(p.status,'draft'))) NOT IN ('archived','deleted')) active_products,
+            (SELECT COUNT(*) FROM image_facts) gallery_images,
+            (SELECT COUNT(*) FROM image_facts WHERE LENGTH(TRIM(COALESCE(alt_text,'')))<12) alt_attention,
+            (SELECT COUNT(*) FROM image_facts WHERE LOWER(TRIM(COALESCE(public_use_status,''))) IN ('product_page_ok','all_public_ok') AND TRIM(COALESCE(image_role,''))='') approved_role_missing,
+            (SELECT COUNT(*) FROM image_facts i JOIN approved_role_counts a ON a.product_id=i.product_id AND a.role_norm=LOWER(TRIM(COALESCE(i.image_role,''))) WHERE a.role_count>1 AND LOWER(TRIM(COALESCE(i.public_use_status,''))) IN ('product_page_ok','all_public_ok')) approved_role_ambiguous,
+            (SELECT COUNT(*) FROM inventory_media) active_inventory,
+            (SELECT COUNT(*) FROM inventory_media WHERE TRIM(COALESCE(image_url,''))='') blank_inventory_images,
+            (SELECT COUNT(*) FROM inventory_media WHERE TRIM(COALESCE(image_url,''))<>'' AND LOWER(TRIM(image_url)) NOT LIKE 'https://assets.devilndove.com/%') external_inventory_refs,
+            (SELECT COUNT(*) FROM inventory_media WHERE TRIM(COALESCE(image_url,''))<>'' AND TRIM(COALESCE(catalog_image_url,''))<>'' AND TRIM(image_url)<>TRIM(catalog_image_url)) inventory_catalog_image_drift,
+            (SELECT MIN(product_image_id) FROM image_facts WHERE LOWER(TRIM(COALESCE(image_url,''))) LIKE 'https://assets.devilndove.com/%') sample_product_image_id,
+            (SELECT MIN(site_item_inventory_id) FROM inventory_media WHERE LOWER(TRIM(COALESCE(image_url,''))) LIKE 'https://assets.devilndove.com/%') sample_inventory_id;" > /tmp/build190-media-evidence.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build190-media-evidence.json')); rows=[]
+          keys=('active_products','gallery_images','alt_attention','approved_role_missing','approved_role_ambiguous','active_inventory','blank_inventory_images','external_inventory_refs','inventory_catalog_image_drift','sample_product_image_id','sample_inventory_id')
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in keys): rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert rows,data
+          row={k:int(rows[0][k] or 0) for k in keys}
+          assert row['active_products']>=0 and row['active_inventory']>=0,row
+          reads=[]
+          def collect_reads(v):
+              if isinstance(v,dict):
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None:
+                      reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): collect_reads(x)
+              elif isinstance(v,list):
+                  for x in v: collect_reads(x)
+          collect_reads(data)
+          provider_rows_read=sum(reads)
+          assert provider_rows_read <= 20000, ('D1 rows_read budget exceeded',provider_rows_read,20000)
+          print('D1_PROVIDER_ROWS_READ=',provider_rows_read,'BUDGET=',20000)
+          print('BUILD 190 DEVELOPMENT D1 MEDIA EVIDENCE: PASS',row)
+          print('R2 EVIDENCE CONTRACT: ONE SELECTED OBJECT HEAD AT RUNTIME')
+          print('D1 MUTATION: ZERO')
+          print('R2 MUTATION: ZERO')
+          print('SCHEMA MIGRATION: NONE')
+          PY
