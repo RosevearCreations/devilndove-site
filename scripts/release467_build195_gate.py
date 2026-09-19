@@ -50,7 +50,7 @@ req("ma.product_id IS NULL" in studio_api and "BLOCKED_MEDIA_PREFIXES" in studio
 
 req("const refresh=normalizeText(url.searchParams.get('refresh'))" in manifest and '"Cache-Control":"no-store"' in manifest,"public manifest admin-refresh cache bypass missing")
 req("media-content-runtime.js?v=467b195" in home and "home-carousel.js?v=467b195" in home,"Home Build 195 cache keys missing")
-req("admin-media-content-studio.js?v=467b195" in studio_page,"Media Studio Build 195 cache key missing")
+req(any(token in studio_page for token in ("admin-media-content-studio.js?v=467b195","admin-media-content-studio.js?v=467b196")),"Media Studio Build 195/successor cache key missing")
 req(home.lower().count("<h1")==1,"Home must retain exactly one H1")
 req(studio_page.lower().count("<h1")==1,"Media Studio must retain exactly one H1")
 
@@ -71,8 +71,9 @@ for p in ROOT.rglob("*.html"):
         req("media-content-runtime.js?v=467b195" in body,f"managed page missing corrected media runtime: {p.relative_to(ROOT)}")
 req(len(managed_pages)>=24,f"expected sitewide managed-page coverage, found {len(managed_pages)}")
 
-for token in ("Build 194 — complete","Build 195 — current","Build 196 — next after Build 195 is fully GREEN","**201** | Storefront Launch Set & Autonomous Closure"):
-    req(token in roadmap,f"Build 195 roadmap checkpoint missing: {token}")
+legacy_roadmap=all(token in roadmap for token in ("Build 194 — complete","Build 195 — current","Build 196 — next after Build 195 is fully GREEN","**201** | Storefront Launch Set & Autonomous Closure"))
+successor_roadmap=all(token in roadmap for token in ("Build 194 — complete","Build 195 — complete","Build 196 — current","**202** | Storefront Launch Set & Autonomous Closure"))
+req(legacy_roadmap or successor_roadmap,"Build 195 roadmap checkpoint must be current or explicitly closed by Build 196")
 for token in ("responsive","placeholder","fallback image","slot definitions","zero-D1 migration path","No automatic R2"):
     req(token.lower() in doc.lower(),f"Build 195 operations contract missing: {token}")
 
