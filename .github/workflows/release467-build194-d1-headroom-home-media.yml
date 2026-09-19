@@ -42,7 +42,7 @@ jobs:
         run: python scripts/release467_build189_gate.py
 
   development-d1-headroom-proof:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' && contains(github.event.head_commit.message, 'Build 194') }}
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
