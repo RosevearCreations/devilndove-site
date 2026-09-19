@@ -1,0 +1,179 @@
+name: Release 467 Build 191 Cost Usage Profitability Evidence Closure
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/_productResourcesData.js'
+      - 'functions/api/admin/product-resource-bootstrap.js'
+      - 'functions/api/_lib/d1ReadBudget.js'
+      - 'public/js/admin-product-resources.js'
+      - 'admin/inventory-operations/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_191_COST_USAGE_PROFITABILITY_CLOSURE.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_CLOSURE_BUILDS_187_192.md'
+      - 'scripts/release467_build191_gate.py'
+      - 'scripts/release467_build190_gate.py'
+      - 'scripts/release467_build185_gate.py'
+      - 'scripts/build440_resource_asset_url_regression_test.mjs'
+      - '.github/workflows/release467-build191-cost-usage-profitability-closure.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 191 cost usage profitability closure
+        run: python scripts/release467_build191_gate.py
+      - name: Retain Build 190 media evidence closure
+        run: python scripts/release467_build190_gate.py
+      - name: Retain Build 185 Product resource linkage
+        run: python scripts/release467_build185_gate.py
+      - name: Retain Build 184 D1 quota remediation
+        run: python scripts/release467_build184_d1_quota_guard.py
+      - name: Retain Build 188 buyer readiness separation
+        run: python scripts/release467_build188_gate.py
+      - name: Retain Tool/Supply asset transport
+        run: node scripts/build440_resource_asset_url_regression_test.mjs
+
+  development-d1-profitability-evidence-proof:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q '^database_id = "f34a741b-0000-45b0-9a96-6be08754d563"$' wrangler.toml
+      - name: Prove live Development cost usage profitability evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "WITH
+          inventory_ranked AS (
+            SELECT site_item_inventory_id,
+              LOWER(TRIM(COALESCE(source_type,''))) item_kind_norm,
+              LOWER(TRIM(COALESCE(external_key,''))) source_key_norm,
+              COALESCE(is_active,1) is_active,
+              COALESCE(unit_cost_cents,0) unit_cost_cents,
+              COALESCE(NULLIF(usage_units_per_stock_unit,0),1) usage_units_per_stock_unit,
+              ROW_NUMBER() OVER (
+                PARTITION BY LOWER(TRIM(COALESCE(source_type,''))),LOWER(TRIM(COALESCE(external_key,'')))
+                ORDER BY COALESCE(is_active,1) DESC,site_item_inventory_id DESC
+              ) rn
+            FROM site_item_inventory
+            WHERE LOWER(TRIM(COALESCE(source_type,''))) IN ('tool','supply')
+          ),
+          lot_stats AS (
+            SELECT site_item_inventory_id,COUNT(*) lot_count
+            FROM inventory_purchase_lots GROUP BY site_item_inventory_id
+          ),
+          link_facts AS (
+            SELECT prl.product_resource_link_id,prl.product_id,
+              LOWER(TRIM(COALESCE(prl.resource_kind,''))) resource_kind,
+              COALESCE(prl.quantity_used,0) quantity_used,
+              COALESCE(prl.consumption_mode,'per_unit') consumption_mode,
+              COALESCE(NULLIF(prl.lot_size_units,0),1) lot_size_units,
+              ir.site_item_inventory_id,COALESCE(ir.is_active,0) inventory_active,
+              COALESCE(ir.unit_cost_cents,0) unit_cost_cents,
+              COALESCE(ir.usage_units_per_stock_unit,1) usage_units_per_stock_unit,
+              COALESCE(siup.usage_tracking_mode,CASE WHEN LOWER(TRIM(COALESCE(prl.resource_kind,'')))='tool' THEN 'reusable' ELSE 'exact' END) usage_tracking_mode,
+              COALESCE(ls.lot_count,0) lot_count,
+              COALESCE(ilp.reconcile_status,'needs_review') lot_reconcile_status,
+              CASE WHEN COALESCE(prl.consumption_mode,'per_unit')='story_only'
+                    OR (LOWER(TRIM(COALESCE(prl.resource_kind,'')))='tool' AND LOWER(TRIM(COALESCE(siup.usage_tracking_mode,'reusable'))) IN ('reusable','log_only'))
+                   THEN 0 ELSE 1 END cost_required
+            FROM product_resource_links prl
+            LEFT JOIN inventory_ranked ir
+              ON ir.rn=1
+             AND ir.item_kind_norm=LOWER(TRIM(COALESCE(prl.resource_kind,'')))
+             AND ir.source_key_norm=LOWER(TRIM(COALESCE(prl.source_key,'')))
+            LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=ir.site_item_inventory_id
+            LEFT JOIN lot_stats ls ON ls.site_item_inventory_id=ir.site_item_inventory_id
+            LEFT JOIN inventory_lot_policies ilp ON ilp.site_item_inventory_id=ir.site_item_inventory_id
+          ),
+          costed AS (
+            SELECT lf.*,
+              CASE WHEN cost_required=0 THEN NULL
+                   WHEN site_item_inventory_id IS NULL OR unit_cost_cents<=0 THEN NULL
+                   WHEN consumption_mode='end_of_lot' THEN CAST(ROUND(1.0*unit_cost_cents/lot_size_units) AS INTEGER)
+                   ELSE CAST(ROUND(1.0*quantity_used*unit_cost_cents/usage_units_per_stock_unit) AS INTEGER)
+              END evidenced_cost_cents,
+              CASE WHEN cost_required=1 AND (site_item_inventory_id IS NULL OR unit_cost_cents<=0) THEN 1 ELSE 0 END unknown_cost
+            FROM link_facts lf
+          ),
+          product_rollup AS (
+            SELECT c.product_id,
+              COUNT(*) linked_resources,
+              SUM(c.unknown_cost) unknown_cost_links,
+              SUM(CASE WHEN c.cost_required=0 THEN 1 ELSE 0 END) nondepleting_links,
+              SUM(CASE WHEN c.cost_required=1 AND c.unknown_cost=0 THEN 1 ELSE 0 END) known_cost_links,
+              CASE WHEN SUM(c.unknown_cost)>0 THEN NULL ELSE COALESCE(SUM(COALESCE(c.evidenced_cost_cents,0)),0) END evidenced_resource_cost_cents
+            FROM costed c GROUP BY c.product_id
+          )
+          SELECT
+            COUNT(*) linked_resources,
+            COUNT(DISTINCT product_id) products_with_links,
+            SUM(CASE WHEN site_item_inventory_id IS NULL THEN 1 ELSE 0 END) missing_inventory_matches,
+            SUM(CASE WHEN cost_required=1 AND site_item_inventory_id IS NOT NULL AND unit_cost_cents<=0 THEN 1 ELSE 0 END) missing_cost_evidence,
+            SUM(CASE WHEN cost_required=1 AND unknown_cost=0 THEN 1 ELSE 0 END) known_cost_links,
+            SUM(CASE WHEN cost_required=0 THEN 1 ELSE 0 END) nondepleting_links,
+            SUM(CASE WHEN quantity_used<=0 THEN 1 ELSE 0 END) quantity_default_attention,
+            SUM(CASE WHEN resource_kind='supply' AND site_item_inventory_id IS NOT NULL AND TRIM(COALESCE(usage_tracking_mode,''))='' THEN 1 ELSE 0 END) usage_profile_attention,
+            SUM(CASE WHEN consumption_mode='end_of_lot' THEN 1 ELSE 0 END) end_of_lot_links,
+            SUM(CASE WHEN consumption_mode='end_of_lot' AND site_item_inventory_id IS NOT NULL AND lot_count=0 THEN 1 ELSE 0 END) end_of_lot_without_lots,
+            SUM(CASE WHEN consumption_mode='end_of_lot' AND site_item_inventory_id IS NOT NULL AND lot_count>0 AND lot_reconcile_status<>'reconciled' THEN 1 ELSE 0 END) lot_reconciliation_attention,
+            (SELECT COUNT(*) FROM product_rollup pr JOIN products p ON p.product_id=pr.product_id WHERE pr.unknown_cost_links=0) margin_ready_products,
+            (SELECT COUNT(*) FROM product_rollup WHERE unknown_cost_links>0) margin_review_products
+          FROM costed;" > /tmp/build191-profitability-evidence.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build191-profitability-evidence.json')); rows=[]
+          keys=('linked_resources','products_with_links','missing_inventory_matches','missing_cost_evidence','known_cost_links','nondepleting_links','quantity_default_attention','usage_profile_attention','end_of_lot_links','end_of_lot_without_lots','lot_reconciliation_attention','margin_ready_products','margin_review_products')
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in keys): rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert rows,data
+          row={k:int(rows[0][k] or 0) for k in keys}
+          assert row['linked_resources']>=0 and row['products_with_links']>=0,row
+          assert row['margin_ready_products']+row['margin_review_products']==row['products_with_links'],row
+          reads=[]
+          def collect_reads(v):
+              if isinstance(v,dict):
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None:
+                      reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): collect_reads(x)
+              elif isinstance(v,list):
+                  for x in v: collect_reads(x)
+          collect_reads(data)
+          provider_rows_read=sum(reads)
+          assert provider_rows_read <= 15000, ('D1 rows_read budget exceeded',provider_rows_read,15000)
+          print('D1_PROVIDER_ROWS_READ=',provider_rows_read,'BUDGET=',15000)
+          print('BUILD 191 DEVELOPMENT D1 PROFITABILITY EVIDENCE: PASS',row)
+          print('UNKNOWN COST POLICY: NEVER ZERO')
+          print('D1 MUTATION: ZERO')
+          print('SCHEMA MIGRATION: NONE')
+          PY
