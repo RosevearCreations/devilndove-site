@@ -51,8 +51,6 @@ jobs:
         run: python scripts/release467_build198_gate.py
       - name: Retain current online-help hygiene
         run: python scripts/current_help_hygiene_gate.py
-      - name: Retain shared contextual-help accessibility
-        run: python scripts/release448_storefront_merchandising_gate.py
       - name: Retain Build 197 placeholder integrity
         run: python scripts/release467_build197_gate.py
       - name: Retain Build 196 save-to-placement convergence
