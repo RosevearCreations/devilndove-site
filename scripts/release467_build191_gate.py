@@ -34,7 +34,7 @@ for token in ("buildProfitabilityEvidence","SELECT product_id,name,price_cents,c
 for forbidden in ("CREATE TABLE","ALTER TABLE","DROP TABLE","INSERT INTO","UPDATE products","UPDATE site_item_inventory","DELETE FROM","bucket.put(","bucket.delete("):
     req(forbidden not in overlay+bootstrap,f"Build 191 read evidence gained forbidden mutation/schema/R2 behavior: {forbidden}")
 
-for token in ("Release 467 Build 191","Recheck cost & margin evidence","Unknown","Not applicable — reusable/story-only","linked resources only","state.profitabilityEvidence","evidenced linked-resource cost/product"):
+for token in ("Release 467 Build 191","Recheck cost & margin evidence","Unknown","Not applicable — reusable/story-only","linked resources only","state.profitabilityEvidence","Evidenced linked-resource cost/product"):
     req(token in ui,f"Build 191 Product-resource UI missing: {token}")
 req("admin-product-resources.js?v=467.191" in page,"Build 191 Product-resource cache key missing")
 req("formatMoney(summary.estimated_resource_cost_cents || 0)" not in ui,"Build 191 UI still coerces aggregate missing cost to zero")
