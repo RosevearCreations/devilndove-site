@@ -57,7 +57,12 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           body = Path('.github/workflows/release467-build196-media-studio-save-placement.yml').read_text()
-          forbidden = ('wrangler d1 execute', 'bucket.put(', 'bucket.delete(', 'bucket.list(')
+          forbidden = (
+              'wrangler' + ' d1 execute',
+              'bucket.' + 'put(',
+              'bucket.' + 'delete(',
+              'bucket.' + 'list(',
+          )
           found = [item for item in forbidden if item in body]
           if found:
               raise SystemExit(f'Provider-spend token found: {found}')
