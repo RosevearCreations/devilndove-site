@@ -143,6 +143,15 @@ export const D1_READ_BUDGETS = Object.freeze({
     max_concurrent_identical_gets: 1,
     notes: 'Build 188: explicit one-Product buyer-readiness recheck. It returns blocker/advisory/public-visibility evidence and performs no Product save or publication action.'
   }),
+  admin_inventory_evidence_recheck_v189: Object.freeze({
+    route: '/api/admin/inventory-identity-health',
+    risk: 'low',
+    contract: 'explicit_one_inventory_record_evidence_recheck',
+    returned_rows_max: 1,
+    browser_cache_ms: 0,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 189: one Inventory target plus at most 12 duplicate-group and 12 catalog-reference evidence rows. No merge, count, stock, cost, reorder, purchasing or catalog mutation.'
+  }),
   admin_pending_actions: Object.freeze({
     route: '/api/admin/pending-actions',
     risk: 'medium',
