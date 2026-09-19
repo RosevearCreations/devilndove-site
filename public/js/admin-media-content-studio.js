@@ -3,7 +3,7 @@
 (()=>{
   'use strict';
   if(!window.DDAuth)return;
-  const state={catalog:null,pagePath:'/',page:null,slots:[],media:[],mediaHasMore:false,mediaBefore:null,mediaLoading:false,selectedMedia:null,activeSlot:null,slotFilter:'all',uses:[],visualPlan:[],imagePlanFilter:'outstanding',imagePlanVisible:40,visualPlanLoaded:false,visualPlanScheduled:false};
+  const state={catalog:null,pagePath:'/',page:null,slots:[],media:[],mediaHasMore:false,mediaBefore:null,mediaLoading:false,selectedMedia:null,activeSlot:null,slotFilter:'all',uses:[],visualPlan:[],imagePlanFilter:'outstanding',imagePlanVisible:40,visualPlanLoaded:false,visualPlanScheduled:false,slotSyncAttempted:new Set()};
   const id=(v)=>document.getElementById(v);
   const text=(v)=>String(v??'').trim();
   const esc=(v)=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -61,7 +61,7 @@
     const blob=new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='devilndove-editable-image-space-checklist.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
 
-  async function loadCatalog(){const res=await fetch('/public/data/media-content-slot-catalog.json?v=440',{cache:'no-store'});if(!res.ok)throw new Error('The built-in website slot catalog could not be loaded.');state.catalog=await res.json();renderSiteMap();id('mediaImagePlanSummary').innerHTML='<span>Live checklist will load after the page editor is ready.</span>';id('mediaImagePlanBoard').innerHTML='<p class="small">Staging image-plan status after the primary editor paint…</p>';}
+  async function loadCatalog(){const res=await fetch('/public/data/media-content-slot-catalog.json?v=467b195',{cache:'no-store'});if(!res.ok)throw new Error('The built-in website slot catalog could not be loaded.');state.catalog=await res.json();renderSiteMap();id('mediaImagePlanSummary').innerHTML='<span>Live checklist will load after the page editor is ready.</span>';id('mediaImagePlanBoard').innerHTML='<p class="small">Staging image-plan status after the primary editor paint…</p>';}
   function renderSiteMap(){
     id('mediaSitewideLinks').innerHTML=`<button class="media-map-button" data-page="@site"><strong>Shared site</strong><span>Logo • header • page background • footer</span></button>`;
     id('mediaPageMap').innerHTML=(state.catalog?.groups||[]).map(g=>`<section class="media-map-group"><h3>${esc(g.label)}</h3>${(g.pages||[]).map(p=>`<button class="media-map-button" data-page="${esc(p.path)}"><strong>${esc(p.label)}</strong><span>${esc(p.description||'')}</span><em>${(p.slots||[]).filter(s=>!isContentSlot(s)).length} visual • ${(p.slots||[]).filter(isContentSlot).length} text/link/colour</em></button>`).join('')}</section>`).join('');
@@ -78,9 +78,36 @@
     await loadPage();
     if(slotKey){const slot=state.slots.find(s=>s.slot_key===slotKey);if(slot){setTimeout(()=>document.querySelector(`[data-slot-card="${CSS.escape(slotKey)}"]`)?.scrollIntoView({behavior:'smooth',block:'center'}),60);}}
   }
+  function slotDefinitionDrift(live,expected){
+    if(!live)return true;
+    const same=(a,b)=>String(a??'')===String(b??'');
+    return !same(live.slot_type,expected.slot_type)
+      || !same(live.target_selector,expected.target_selector)
+      || !same(live.target_attribute,expected.target_attribute)
+      || !same(live.source_snapshot,expected.source_snapshot)
+      || !same(live.source_alt_snapshot,expected.source_alt_snapshot)
+      || Number(live.is_required||0)!==Number(expected.is_required||0);
+  }
+  async function reconcilePageSlots(){
+    const page=apiPath(state.pagePath),expected=catalogSlots(state.pagePath);
+    if(!expected.length||state.slotSyncAttempted.has(page))return {changed:0};
+    const live=new Map(state.slots.map(s=>[String(s.slot_key||''),s]));
+    const drift=expected.filter(s=>slotDefinitionDrift(live.get(String(s.slot_key||'')),s));
+    if(!drift.length)return {changed:0};
+    state.slotSyncAttempted.add(page);
+    const synced=await post({action:'register_slots',page_path:page,slots:drift});
+    if(Array.isArray(synced.slots))state.slots=synced.slots;
+    return {changed:drift.length};
+  }
   async function loadPage(){
     const params=new URLSearchParams({mode:'page',path:apiPath(state.pagePath)});
-    try{const data=await read(await window.DDAuth.apiFetch(`/api/admin/media-content-studio?${params}`),'Media Studio page locations could not load.');state.slots=data.slots||[];renderSlots();}
+    try{
+      const data=await read(await window.DDAuth.apiFetch(`/api/admin/media-content-studio?${params}`),'Media Studio page locations could not load.');
+      state.slots=data.slots||[];
+      try{const sync=await reconcilePageSlots();if(sync.changed)msg(`Synced ${sync.changed} missing or updated editable location${sync.changed===1?'':'s'} from the deployed site catalog. Existing image assignments were preserved.`,'success');}
+      catch(syncError){msg(`The page loaded, but its editable-location catalog could not be reconciled: ${syncError.message}`,'error');}
+      renderSlots();
+    }
     catch(e){msg(e.message,'error');state.slots=[];renderSlots();}
   }
   async function loadLibrary({append=false}={}){
@@ -96,8 +123,8 @@
   function renderSlots(){
     const expected=catalogSlots(state.pagePath),dbKeys=new Set(state.slots.map(s=>s.slot_key));const missing=expected.filter(s=>!dbKeys.has(s.slot_key));
     const visual=state.slots.filter(s=>!isContentSlot(s)).length,txt=state.slots.filter(isContentSlot).length,assigned=state.slots.filter(s=>s.media_asset_id).length,published=state.slots.filter(s=>isContentSlot(s)&&Number(s.published||0)===1).length;
-    id('mediaSlotSummary').innerHTML=`<span><strong>${visual}</strong> image/background slots</span><span><strong>${txt}</strong> text/link/colour fields</span><span><strong>${assigned}</strong> custom images</span><span><strong>${published}</strong> published text overrides</span>${missing.length?`<span class="warning"><strong>${missing.length}</strong> deployment slots missing from D1 — apply Build 259 migration</span>`:''}`;
-    const rows=visibleSlots();if(!rows.length){id('mediaSlotBoard').innerHTML=`<div class="media-empty-state"><strong>No editable locations loaded.</strong><p class="small">${missing.length?'Apply the Build 259 D1 migration, then refresh this page.':'This page has no locations in the selected filter.'}</p></div>`;return;}
+    id('mediaSlotSummary').innerHTML=`<span><strong>${visual}</strong> image/background slots</span><span><strong>${txt}</strong> text/link/colour fields</span><span><strong>${assigned}</strong> custom images</span><span><strong>${published}</strong> published text overrides</span>${missing.length?`<span class="warning"><strong>${missing.length}</strong> catalog locations still missing from D1 — refresh Studio or check I.T. diagnostics</span>`:''}`;
+    const rows=visibleSlots();if(!rows.length){id('mediaSlotBoard').innerHTML=`<div class="media-empty-state"><strong>No editable locations loaded.</strong><p class="small">${missing.length?'The deployed catalog did not reconcile into D1. Refresh Studio; if it persists, check I.T. diagnostics.':'This page has no locations in the selected filter.'}</p></div>`;return;}
     id('mediaSlotBoard').innerHTML=rows.map(renderSlotCard).join('');
     id('mediaSlotBoard').querySelectorAll('[data-change-image]').forEach(b=>b.addEventListener('click',()=>openPicker(Number(b.dataset.changeImage))));
     id('mediaSlotBoard').querySelectorAll('[data-use-default]').forEach(b=>b.addEventListener('click',()=>removeAssignment(Number(b.dataset.useDefault))));
@@ -118,7 +145,7 @@
       return `<article class="media-slot-card media-text-slot-card ${esc(s.slot_type)}" data-slot-card="${esc(s.slot_key)}"><div class="media-slot-card-head"><div><span class="media-slot-kind">${esc(contentKind(s).toUpperCase())}</span><h3>${esc(s.slot_label)}</h3><code>${esc(s.slot_key)}</code></div><span class="media-slot-status ${Number(s.published||0)===1?'assigned':''}">${esc(status)}</span></div>${editor}<div class="media-slot-actions"><button class="btn" data-save-text="${s.media_content_slot_id}" type="button">Save draft</button><button class="btn primary" data-publish-text="${s.media_content_slot_id}" type="button">Publish ${esc(contentKind(s))}</button>${Number(s.published||0)===1?`<button class="btn" data-unpublish-text="${s.media_content_slot_id}" type="button">Use original/default</button>`:''}</div><details><summary>Original authored value</summary><p class="small">${esc(s.source_snapshot||'')}</p></details></article>`;
     }
     const preview=slotCurrentPreview(s),isPlaceholder=String(s.source_snapshot||'').includes('/assets/placeholders/');
-    return `<article class="media-slot-card media-visual-slot-card" data-slot-card="${esc(s.slot_key)}"><div class="media-slot-thumb ${s.slot_type==='background'?'background':''}"><img src="${esc(preview)}" alt="${esc(s.source_alt_snapshot||s.slot_label)}" loading="lazy"/></div><div class="media-slot-card-body"><div class="media-slot-card-head"><div><span class="media-slot-kind">${s.slot_type==='background'?'BACKGROUND':'IMAGE'}</span><h3>${esc(s.slot_label)}</h3><code>${esc(s.slot_key)}</code></div><span class="media-slot-status ${s.media_asset_id?'assigned':''}">${esc(status)}</span></div><p class="small">${s.media_asset_id?`Assigned: ${esc(s.display_name||s.original_filename||'Site image')}`:(isPlaceholder?'Default is an SVG placeholder waiting for our image.':'Default is the image already authored on the website.')}</p>${recText(s)?`<p class="media-image-recommendation"><strong>Recommended image:</strong> ${esc(recText(s))}</p>`:''}<div class="media-slot-actions"><button class="btn primary" data-change-image="${s.media_content_slot_id}" type="button">${s.media_asset_id?'Change image':'Choose image'}</button>${s.media_asset_id?`<button class="btn" data-use-default="${s.media_content_slot_id}" type="button">Use original/default</button>`:''}<a class="btn" href="${esc(browserPath(state.pagePath))}?media-edit=1#${encodeURIComponent(s.slot_key)}" target="_blank" rel="noopener">View page</a></div></div></article>`;
+    return `<article class="media-slot-card media-visual-slot-card" data-slot-card="${esc(s.slot_key)}"><div class="media-slot-thumb ${s.slot_type==='background'?'background':''}"><img src="${esc(preview)}" alt="${esc(s.source_alt_snapshot||s.slot_label)}" loading="lazy"/></div><div class="media-slot-card-body"><div class="media-slot-card-head"><div><span class="media-slot-kind">${s.slot_type==='background'?'BACKGROUND':'IMAGE'}</span><h3>${esc(s.slot_label)}</h3><code>${esc(s.slot_key)}</code></div><span class="media-slot-status ${s.media_asset_id?'assigned':''}">${esc(status)}</span></div><p class="small">${s.media_asset_id?`Assigned: ${esc(s.display_name||s.original_filename||'Site image')}`:(isPlaceholder?'Default is an SVG placeholder waiting for our image.':'Default is the image already authored on the website.')}</p>${recText(s)?`<p class="media-image-recommendation"><strong>Recommended image:</strong> ${esc(recText(s))}</p>`:''}<div class="media-slot-actions"><button class="btn primary" data-change-image="${s.media_content_slot_id}" type="button">${s.media_asset_id?'Change image':'Choose image'}</button>${s.media_asset_id?`<button class="btn" data-use-default="${s.media_content_slot_id}" type="button">Use original/default</button>`:''}<a class="btn" href="${esc(browserPath(state.pagePath))}?media-edit=1&media-refresh=studio#${encodeURIComponent(s.slot_key)}" target="_blank" rel="noopener">View page</a></div></div></article>`;
   }
   async function openPicker(slotId){state.activeSlot=state.slots.find(s=>Number(s.media_content_slot_id)===Number(slotId))||null;if(!state.activeSlot)return;id('mediaPickerTitle').textContent=`Choose image — ${state.activeSlot.slot_label}`;id('mediaPickerHelp').textContent=`Current behavior: ${state.activeSlot.media_asset_id?'a custom image is assigned':'the website is using its authored/default image'}. Choosing another image changes only this slot.`;id('mediaPickerPanel').hidden=false;id('mediaPickerPanel').scrollIntoView({behavior:'smooth',block:'start'});await loadLibrary({append:false});}
   function renderLibrary(){const grid=id('mediaLibraryGrid');if(!state.media.length){grid.innerHTML='<div class="media-empty-state"><strong>No matching static-site media.</strong><p class="small">Upload a new image above or change the search/filter.</p></div>';return;}grid.innerHTML=state.media.map(m=>`<article class="media-library-card"><button class="media-library-thumb" data-select-media="${m.media_asset_id}" type="button"><img src="${esc(m.public_url||'')}" alt="${esc(m.alt_text||m.display_name||'Site media')}" loading="lazy"/></button><div><strong>${esc(m.display_name||m.original_filename||m.object_key)}</strong><p class="small">${esc(m.media_type||'photo')} • Media #${m.media_asset_id}</p><div class="media-library-card-actions"><button class="btn primary" data-use-media="${m.media_asset_id}" type="button">Use in this slot</button><button class="btn" data-select-media="${m.media_asset_id}" type="button">Details / uses</button></div></div></article>`).join('')+(state.mediaHasMore?'<div class="media-library-load-more"><button class="btn" id="mediaLoadMore" type="button">Load more site images</button></div>':'');grid.querySelectorAll('[data-use-media]').forEach(b=>b.addEventListener('click',()=>assignMedia(Number(b.dataset.useMedia))));grid.querySelectorAll('[data-select-media]').forEach(b=>b.addEventListener('click',()=>selectMedia(Number(b.dataset.selectMedia))));id('mediaLoadMore')?.addEventListener('click',()=>loadLibrary({append:true}));}

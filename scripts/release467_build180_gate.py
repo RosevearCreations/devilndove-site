@@ -33,7 +33,7 @@ req(min(pos for pos in (page.find('/public/js/product-detail-v166.js?v=180'),pag
 for token in ("imagePlanVisible:40","scheduleVisualPlan","requestIdleCallback","state.imagePlanVisible+=40","Staging image-plan status after the primary editor paint"):
     req(token in media,f"Media Studio staged-start token missing: {token}")
 req("await choosePage(target,{slotKey:slot,replaceHistory:false});scheduleVisualPlan();" in media,"Media Studio does not paint selected page before scheduling image plan")
-req("Release 467 Build 180" in studio and any(token in studio for token in ("/public/js/admin-media-content-studio.js?v=180","/public/js/admin-media-content-studio.js?v=194")),"Media Studio Build 180/successor page-cache identity missing")
+req("Release 467 Build 180" in studio and any(token in studio for token in ("/public/js/admin-media-content-studio.js?v=180","/public/js/admin-media-content-studio.js?v=194","/public/js/admin-media-content-studio.js?v=467b195")),"Media Studio Build 180/successor page-cache identity missing")
 
 for token in ("inventoryIntegrityLoad","Load 40-item queue","paused during page startup","state.loaded = true","Release 467 Build 180 · staged Inventory truth &amp; usage"):
     req(token in inventory_ui,f"Inventory staged queue token missing: {token}")
