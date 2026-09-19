@@ -92,10 +92,19 @@ export function resourceLinkHealth(link = {}) {
   const lotStatus = String(resource?.lot_reconcile_status || 'needs_review').trim().toLowerCase();
   const quantityDefaulted = Number(link?.quantity_defaulted || 0) === 1;
   const lotSizeDefaulted = Number(link?.lot_size_defaulted || 0) === 1;
+  const nonDepleting = mode === 'story_only' || (kind === 'tool' && ['reusable','log_only'].includes(trackingMode));
+  const costRequired = !nonDepleting;
+  const costEvidenceState = !costRequired
+    ? 'not_applicable'
+    : !inventoryId
+      ? 'unknown_inventory_match'
+      : unitCostCents <= 0
+        ? 'unknown_missing_cost'
+        : 'known';
 
   if (!inventoryId) issues.push('missing_inventory_match');
   if (inventoryId && Number(resource?.is_active || 0) !== 1) issues.push('inactive_inventory_match');
-  if (mode !== 'story_only' && inventoryId && unitCostCents <= 0) issues.push('missing_cost_evidence');
+  if (costRequired && inventoryId && unitCostCents <= 0) issues.push('missing_cost_evidence');
   if (quantityDefaulted) issues.push('quantity_per_use_defaulted');
   if (mode === 'end_of_lot' && lotSizeDefaulted) issues.push('lot_size_defaulted');
   if (kind === 'supply' && inventoryId && resource?.usage_profile_present === false) issues.push('usage_profile_defaulted');
@@ -104,6 +113,9 @@ export function resourceLinkHealth(link = {}) {
   if (mode === 'end_of_lot' && inventoryId && lotCount > 0 && lotStatus !== 'reconciled') issues.push('lot_reconciliation_attention');
 
   const preview = resourcePreview(resource, link);
+  const evidencedCost = costEvidenceState === 'known'
+    ? Math.max(0, Number(preview?.estimated_cost_per_product_cents || 0))
+    : null;
   return {
     status: issues.length ? 'review' : 'ready',
     issue_count: issues.length,
@@ -112,11 +124,83 @@ export function resourceLinkHealth(link = {}) {
     site_item_inventory_id: inventoryId,
     usage_tracking_mode: trackingMode,
     quantity_authority: resource?.quantity_authority || (inventoryId ? 'base_migration_required' : 'catalog_only'),
+    cost_required: costRequired,
+    cost_evidence_state: costEvidenceState,
+    evidenced_cost_per_product_cents: evidencedCost,
     estimated_cost_per_product_cents: Math.max(0, Number(preview?.estimated_cost_per_product_cents || 0)),
+    quantity_used: positive(link?.quantity_used, 1),
+    usage_unit_label: resource?.base_unit_label || resource?.usage_unit_label || 'unit',
+    stock_unit_label: resource?.purchase_unit_label || resource?.stock_unit_label || 'unit',
+    usage_units_per_stock_unit: positive(resource?.base_units_per_purchase_unit ?? resource?.usage_units_per_stock_unit, 1),
+    consumption_mode: mode,
     buildable_products: Math.max(0, Number(preview?.buildable_products || 0)),
     lot_count: lotCount,
     available_lot_count: Math.max(0, Number(resource?.available_lot_count || 0)),
     lot_reconcile_status: lotStatus,
+  };
+}
+
+export function buildProfitabilityEvidence(product = null, links = []) {
+  const rows = Array.isArray(links) ? links : [];
+  const linkEvidence = rows.map((link) => {
+    const health = link?.health || resourceLinkHealth(link);
+    return {
+      product_resource_link_id: Number(link?.product_resource_link_id || 0),
+      resource_kind: String(link?.resource_kind || '').trim().toLowerCase(),
+      source_key: String(link?.source_key || '').trim(),
+      name: String(link?.name || link?.source_key || '').trim(),
+      inventory_match: Boolean(health.inventory_match),
+      site_item_inventory_id: Number(health.site_item_inventory_id || 0),
+      consumption_mode: health.consumption_mode || legacy.normalizeConsumptionMode(link?.consumption_mode),
+      usage_tracking_mode: health.usage_tracking_mode || '',
+      quantity_used: positive(link?.quantity_used, 1),
+      usage_unit_label: health.usage_unit_label || 'unit',
+      stock_unit_label: health.stock_unit_label || 'unit',
+      usage_units_per_stock_unit: positive(health.usage_units_per_stock_unit, 1),
+      cost_required: Boolean(health.cost_required),
+      cost_evidence_state: health.cost_evidence_state || 'unknown',
+      evidenced_cost_per_product_cents: health.evidenced_cost_per_product_cents == null ? null : Math.max(0, Number(health.evidenced_cost_per_product_cents || 0)),
+      issues: Array.isArray(health.issues) ? [...health.issues] : [],
+      lot_count: Math.max(0, Number(health.lot_count || 0)),
+      lot_reconcile_status: health.lot_reconcile_status || 'needs_review',
+    };
+  });
+  const unknownCostLinks = linkEvidence.filter((row) => row.cost_required && row.cost_evidence_state !== 'known');
+  const knownCostLinks = linkEvidence.filter((row) => row.cost_required && row.cost_evidence_state === 'known');
+  const notApplicableLinks = linkEvidence.filter((row) => !row.cost_required);
+  const resourceCostKnown = unknownCostLinks.length === 0;
+  const resourceCostCents = resourceCostKnown
+    ? knownCostLinks.reduce((sum, row) => sum + Math.max(0, Number(row.evidenced_cost_per_product_cents || 0)), 0)
+    : null;
+  const pricePresent = Boolean(product && product.product_id);
+  const priceCents = pricePresent ? Math.max(0, Number(product?.price_cents || 0)) : null;
+  const marginReady = pricePresent && resourceCostKnown;
+  const resourceMarginCents = marginReady ? priceCents - resourceCostCents : null;
+  const resourceMarginPercent = marginReady && priceCents > 0 ? Math.round((resourceMarginCents / priceCents) * 10000) / 100 : null;
+  const reasons = [];
+  if (!pricePresent) reasons.push('product_price_evidence_missing');
+  if (unknownCostLinks.length) reasons.push('linked_resource_cost_evidence_incomplete');
+  if (linkEvidence.some((row) => !row.inventory_match)) reasons.push('inventory_match_review_required');
+  if (linkEvidence.some((row) => row.issues.includes('lot_reconciliation_attention') || row.issues.includes('end_of_lot_without_purchase_lot'))) reasons.push('lot_evidence_review_required');
+  return {
+    status: marginReady ? 'ready' : 'review',
+    margin_ready: marginReady,
+    reasons,
+    currency: String(product?.currency || 'CAD').trim() || 'CAD',
+    price_cents: priceCents,
+    resource_cost_state: resourceCostKnown ? 'known' : 'unknown',
+    evidenced_resource_cost_cents: resourceCostCents,
+    resource_margin_cents: resourceMarginCents,
+    resource_margin_percent: resourceMarginPercent,
+    linked_resource_count: linkEvidence.length,
+    known_cost_links: knownCostLinks.length,
+    unknown_cost_links: unknownCostLinks.length,
+    nondepleting_or_story_links: notApplicableLinks.length,
+    links: linkEvidence,
+    scope: 'linked_resources_only_not_full_accounting_profit',
+    excludes: ['labour','overhead','marketplace_fees','payment_fees','shipping','tax','accounting_adjustments'],
+    publication_readiness_authority: 'separate_product_buyer_readiness',
+    mutation_capability: 'none',
   };
 }
 
@@ -132,6 +216,10 @@ export function summarizeProductResourceLinks(links = []) {
     usage_setup_attention: healthRows.filter((row) => row.issues.some((code) => ['quantity_per_use_defaulted','usage_profile_defaulted','tool_usage_mode_attention'].includes(code))).length,
     lot_attention: healthRows.filter((row) => row.issues.some((code) => ['lot_size_defaulted','end_of_lot_without_purchase_lot','lot_reconciliation_attention'].includes(code))).length,
     estimated_resource_cost_cents: healthRows.reduce((sum, row) => sum + Math.max(0, Number(row.estimated_cost_per_product_cents || 0)), 0),
+    evidenced_resource_cost_state: healthRows.some((row) => row.cost_required && row.cost_evidence_state !== 'known') ? 'unknown' : 'known',
+    evidenced_resource_cost_cents: healthRows.some((row) => row.cost_required && row.cost_evidence_state !== 'known')
+      ? null
+      : healthRows.reduce((sum, row) => sum + Math.max(0, Number(row.evidenced_cost_per_product_cents || 0)), 0),
     authority: 'product_resource_links + site_item_inventory + base_balances + purchase_lots',
   };
 }
