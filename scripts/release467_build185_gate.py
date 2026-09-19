@@ -59,7 +59,7 @@ for token in ("Release 467 Build 185","productResourcesLinkHealth","Build 185 li
     req(token in ui,f"Build 185 Product resource UI missing: {token}")
 req("dd:admin-ready', (event) => { if (event?.detail?.ok) startInitialLoad();" not in ui,"Product Resources must not auto-load on admin-ready")
 req("if (window.DDAuth?.isLoggedIn()) startInitialLoad();" not in ui,"Product Resources must not auto-load solely because auth exists")
-req(any(token in page for token in ("Release 467 Build 185","Release 467 Build 189")) and any(token in page for token in ("admin-product-resources.js?v=185","admin-product-resources.js?v=191")),"Inventory Operations lost Build 185 Product-resource successor contract")
+req(any(token in page for token in ("Release 467 Build 185","Release 467 Build 189")) and any(token in page for token in ("admin-product-resources.js?v=185","admin-product-resources.js?v=467.191")),"Inventory Operations lost Build 185 Product-resource successor contract")
 
 # Central budget and documentation.
 for token in ("admin_product_resource_linkage_v185","explicit_selected_product_grouped_linkage","base_balance_ids: 120"):
