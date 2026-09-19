@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Release 467 Build 168 — Product admin low-read session reuse + editor handoff gate.
 
-Successor-aware through Build 175: retained invariants are browser-session reuse, no Products-table
+Successor-aware through Build 178: retained invariants are browser-session reuse, no Products-table
 re-read for fallback images, display-only editor handoff, and authority-before-save. Build 170 strengthens
 image recovery from visible-page automatic batching to an explicit single-Product operator action.
 """
@@ -29,7 +29,7 @@ req('featured_missing_only:true' in browser,'Explicit photo recovery lost missin
 req('FROM products' not in images,'Secondary Product image recovery re-reads the Products table')
 for token in ('product-browser-images-v170-explicit','operator_triggered_single_product_missing_featured_secondary_only','product_table_read:false','requested_missing_featured:1','MAX_IDS=1','automatic:false'):
     req(token in images,f'Build 170 successor image recovery contract missing: {token}')
-req(any(token in editor_page for token in ('Build 168','Build 169','Build 173','Build 174','Build 175')),'Product Editor is not a recognized Build 168+ successor')
+req(any(token in editor_page for token in ('Build 168','Build 169','Build 173','Build 174','Build 175','Build 178')),'Product Editor is not a recognized Build 168+ successor')
 req('display-only' in editor_page,'Product Editor lost display-only browser handoff contract')
 req(('Save remains disabled' in editor_page) or ('Save updates only this Product' in editor_page),'Product Editor lost authority-before-save contract copy')
 for token in ('browserSeed()','primeFromBrowser()','setSaveReady(false)','authorityLoaded','Save is blocked to prevent a stale browser handoff'):
