@@ -1,8 +1,8 @@
-# Release 467 — Autonomous Execution Roadmap, Builds 193–200
+# Release 467 — Autonomous Execution Roadmap, Builds 193–201
 
 ## Purpose
 
-Builds 193–200 are the next autonomous Devil n Dove sequence after the fully Production-GREEN Builds 187–192 closure block.
+Builds 193–201 are the current autonomous Devil n Dove sequence after the fully Production-GREEN Builds 187–192 closure block.
 
 The roadmap is evidence-driven. The Build 192 closure proved the runtime/catalog evidence gaps below, and the post-closure handoff review also found a release-authority consistency gap that must be repaired before more feature work.
 
@@ -23,7 +23,7 @@ The roadmap is evidence-driven. The Build 192 closure proved the runtime/catalog
 
 Older historical files use unscoped labels such as “Build 193” through “Build 200.” They are provenance from an older numbering era.
 
-Current authority uses the explicit labels **Release 467 Build 193** through **Release 467 Build 200** and the `RELEASE_467_BUILD_...` operations-document convention.
+Current authority uses the explicit labels **Release 467 Build 193** through **Release 467 Build 201** and the `RELEASE_467_BUILD_...` operations-document convention.
 
 ## Sequence
 
@@ -31,12 +31,13 @@ Current authority uses the explicit labels **Release 467 Build 193** through **R
 |---|---|---|
 | **193** | Current Authority & Handoff Convergence | Ingest the exact Build 192 Development/Production closure into the machine pointer, current I.T./Preflight/Reliability truth and primary human handoff without changing business runtime. |
 | **194** | D1 Evidence Headroom Optimization | Reduce both media and Inventory evidence read amplification without relaxing their existing 20,000-row ceilings. |
-| **195** | Buyer Readiness Repair Workbench | Turn category/description/shipping/stock findings into explicit Product Editor repair work without inventing buyer facts. |
-| **196** | Supplier & Source Evidence Workbench | Turn missing supplier/source evidence into bounded Inventory repair queues without fabricated provenance. |
-| **197** | Cycle Count & Duplicate Identity Resolution | Provide safe count-due and duplicate-identity workflows; no automatic merge or stock rewrite. |
-| **198** | Catalog Reference & Media Reconciliation | Resolve catalog/image-reference work through existing Catalog, Inventory and Product Media authorities. |
-| **199** | Cost Evidence & Margin Readiness | Route missing cost evidence to existing Inventory/Product-resource authorities; margin stays evidence-derived and separate from accounting. |
-| **200** | Storefront Launch Set & Autonomous Closure | Converge buyer/Inventory/media/cost evidence into a reviewed launch-set/readiness closure; no automatic publication or provider/payment execution. |
+| **195** | Sitewide Media Studio Runtime & Carousel Recovery | Repair the owner-reported non-product media failure: reconcile deployed presentation slots into D1, restore responsive/placeholder replacement behavior, and let published Home carousel slides run while Media Studio owns the fallback image. |
+| **196** | Buyer Readiness Repair Workbench | Turn category/description/shipping/stock findings into explicit Product Editor repair work without inventing buyer facts. |
+| **197** | Supplier & Source Evidence Workbench | Turn missing supplier/source evidence into bounded Inventory repair queues without fabricated provenance. |
+| **198** | Cycle Count & Duplicate Identity Resolution | Provide safe count-due and duplicate-identity workflows; no automatic merge or stock rewrite. |
+| **199** | Catalog Reference & Media Reconciliation | Resolve catalog/image-reference work through existing Catalog, Inventory and Product Media authorities. |
+| **200** | Cost Evidence & Margin Readiness | Route missing cost evidence to existing Inventory/Product-resource authorities; margin stays evidence-derived and separate from accounting. |
+| **201** | Storefront Launch Set & Autonomous Closure | Converge buyer/Inventory/media/cost evidence into a reviewed launch-set/readiness closure; no automatic publication or provider/payment execution. |
 
 ## Execution rules
 
@@ -52,19 +53,26 @@ Current authority uses the explicit labels **Release 467 Build 193** through **R
 10. Stripe, PayPal, Social/OAuth and other external lanes remain HOLD_EXTERNAL unless separately authorized.
 11. Each build owns an operations Markdown, fail-closed source gate, exact Development proof, protected-main promotion and exact Production proof.
 12. Code-only Production promotions use the zero-D1 path.
-13. Build 200 closes the sequence and defines the next block only from then-current measured evidence.
+13. Build 201 closes the sequence and defines the next block only from then-current measured evidence.
 
 ## Current checkpoint
 
-- Builds 187–193: **complete and Production GREEN**.
+- Builds 187–194: **complete and Production GREEN**.
 - Build 193 protected-`main` merge: `649650b317bc2ad8ad6fbc0b42b0965d9653f9a7`.
+- Build 194 protected-`main` merge: `8bfd3902fb95146edadde59f653ecbebd13fb9ed`.
 - **Build 193 — complete**.
-- **Build 194 — current**: D1 evidence headroom optimization plus owner-reported Home Media Studio assignment reliability.
-- **Build 195 — next after Build 194 is fully GREEN**.
-- Builds 196–200: planned, not started.
+- **Build 194 — complete**: D1 evidence headroom optimization reached 9,821 Inventory rows-read and 9,967 Media rows-read, but the subsequent owner acceptance exposed a broader presentation-runtime regression.
+- **Build 195 — current**: Sitewide Media Studio Runtime & Carousel Recovery. Owner acceptance reported the Home carousel/placeholder stopped working and non-product studio/engagement images still could not be reliably changed across the application.
+- **Build 196 — next after Build 195 is fully GREEN**: Buyer Readiness Repair Workbench.
+- Builds 197–201: planned, not started.
 
 ## Why this sequence
 
 The post-Build-192 review showed that the application runtime is ahead of the repository’s machine restart pointer. That consistency issue comes first because every later autonomous build depends on reliable restart truth.
 
-After authority convergence, the largest operational risk is D1 headroom, followed by the already-measured buyer/Inventory/media/cost repair queues. This roadmap therefore fixes authority truth, recovers read headroom, then turns evidence into bounded operator work.
+After authority convergence, the largest operational risk is D1 headroom, followed by the owner-reported sitewide presentation regression, then the already-measured buyer/Inventory/media/cost repair queues. This roadmap therefore fixes authority truth, recovers read headroom, then turns evidence into bounded operator work.
+
+
+## Build 195 insertion note
+
+Build 195 was re-scoped before buyer-readiness work began because owner acceptance after Build 194 exposed a release-blocking presentation failure. The planned buyer-through-launch sequence is preserved by shifting it one build later, through Build 201. The filename is retained for historical links even though the roadmap now extends through Build 201.

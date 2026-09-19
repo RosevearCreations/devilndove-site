@@ -34,17 +34,21 @@ for token in ("const refreshed=await pageSlots","authoritative","verified:true",
     req(token in api,f"server-side assignment verification/cache coherence missing: {token}")
 for token in ("dd:media-content-ready","media-refresh","signalReady"):
     req(token in runtime,f"public Media Studio readiness contract missing: {token}")
-for token in ("waitForMediaStudioHero","media-studio-override","dataset.mediaContentOverride"):
-    req(token in carousel,f"Home carousel precedence contract missing: {token}")
-req("media-content-runtime.js?v=194" in home and "home-carousel.js?v=194" in home,"Home runtime cache keys must advance to Build 194")
-req("admin-media-content-studio.js?v=194" in studio_page,"Media Studio cache key must advance to Build 194")
+legacy_carousel=all(token in carousel for token in ("waitForMediaStudioHero","media-studio-override","dataset.mediaContentOverride"))
+successor_carousel=all(token in carousel for token in ("waitForMediaStudioFallback","fallbackMarkup = mount.innerHTML","published-carousel"))
+req(legacy_carousel or successor_carousel,"Home carousel must retain Build 194 precedence or its Build 195 corrective successor")
+legacy_cache="media-content-runtime.js?v=194" in home and "home-carousel.js?v=194" in home
+successor_cache="media-content-runtime.js?v=467b195" in home and "home-carousel.js?v=467b195" in home
+req(legacy_cache or successor_cache,"Home runtime cache keys must retain Build 194 or advance to Build 195")
+req(("admin-media-content-studio.js?v=194" in studio_page) or ("admin-media-content-studio.js?v=467b195" in studio_page),"Media Studio cache key must retain Build 194 or advance to Build 195")
 req(home.lower().count("<h1")==1,"Home must retain exactly one H1")
 req(studio_page.lower().count("<h1")==1,"Media Studio must retain exactly one H1")
 
 for token in ("20,000 rows-read","<= 10,000","<= 12,500","R2 mutation/listing: zero","Home Media Studio"):
     req(token.lower() in doc.lower(),f"Build 194 operations doc missing: {token}")
-for token in ("Build 193 — complete","Build 194 — current","Build 195 — next after Build 194 is fully GREEN"):
-    req(token in roadmap,f"Build 194 roadmap checkpoint missing: {token}")
+legacy_roadmap=all(token in roadmap for token in ("Build 193 — complete","Build 194 — current","Build 195 — next after Build 194 is fully GREEN"))
+successor_roadmap=all(token in roadmap for token in ("Build 193 — complete","Build 194 — complete","Build 195 — current"))
+req(legacy_roadmap or successor_roadmap,"Build 194 roadmap checkpoint must be current or explicitly closed by Build 195")
 
 condition="github.event_name == 'push' && github.ref == 'refs/heads/dev'"
 req(condition in workflow,"Build 194 provider proof must be exact-dev push only")

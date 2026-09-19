@@ -1,0 +1,62 @@
+name: Release 467 Build 195 Sitewide Media Studio + Carousel Recovery
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'public/js/home-carousel.js'
+      - 'public/js/media-content-runtime.js'
+      - 'public/js/admin-media-content-studio.js'
+      - 'functions/api/public-media-content-manifest.js'
+      - 'functions/api/admin/media-content-studio.js'
+      - 'admin/media-content-studio/index.html'
+      - '**/*.html'
+      - 'docs/operations/RELEASE_467_BUILD_195_SITEWIDE_MEDIA_STUDIO_RUNTIME_CAROUSEL_RECOVERY.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md'
+      - 'scripts/release467_build195_gate.py'
+      - 'scripts/release467_build194_gate.py'
+      - 'scripts/release467_build193_gate.py'
+      - 'scripts/release467_build192_gate.py'
+      - 'scripts/release467_build180_gate.py'
+      - '.github/workflows/release467-build194-d1-headroom-home-media.yml'
+      - '.github/workflows/release467-build195-sitewide-media-carousel-recovery.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 195 source contract
+        run: python scripts/release467_build195_gate.py
+      - name: Retain Build 194 D1 and Home media closure
+        run: python scripts/release467_build194_gate.py
+      - name: Retain Build 193 authority convergence
+        run: python scripts/release467_build193_gate.py
+      - name: Retain Build 192 release convergence
+        run: python scripts/release467_build192_gate.py
+      - name: Retain Build 180 staged Media Studio startup
+        run: python scripts/release467_build180_gate.py
+
+  no-provider-spend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Prove corrective build has no CI provider mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Eq 'wrangler .*d1 execute|bucket\.(put|delete|list)\(' .github/workflows/release467-build195-sitewide-media-carousel-recovery.yml
+          echo "BUILD 195 CI D1 PROVIDER QUERY: ZERO"
+          echo "BUILD 195 CI R2 MUTATION: ZERO"

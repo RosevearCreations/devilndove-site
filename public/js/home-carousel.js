@@ -3,7 +3,7 @@
   'use strict';
   const mount = document.getElementById('homeHeroCarouselMount');
   if (!mount) return;
-  const fallbackMarkup = mount.innerHTML;
+  let fallbackMarkup = mount.innerHTML;
 
   function restoreFallback() {
     mount.innerHTML = fallbackMarkup;
@@ -31,28 +31,40 @@
     return window.DDMediaCarousel;
   }
 
-  async function waitForMediaStudioHero() {
-    const hero=()=>mount.querySelector('[data-media-slot="home.hero.image"]');
-    if(hero()?.dataset.mediaContentOverride==='1') return true;
-    if(['applied','partial','authored-default'].includes(document.documentElement.dataset.mediaContentStudio||'')) return hero()?.dataset.mediaContentOverride==='1';
-    await new Promise((resolve)=>{let done=false;const finish=()=>{if(done)return;done=true;document.removeEventListener('dd:media-content-ready',finish);resolve();};document.addEventListener('dd:media-content-ready',finish,{once:true});setTimeout(finish,1800);});
-    return hero()?.dataset.mediaContentOverride==='1';
+  async function waitForMediaStudioFallback() {
+    if (['applied','partial','authored-default'].includes(document.documentElement.dataset.mediaContentStudio || '')) return;
+    await new Promise((resolve) => {
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        document.removeEventListener('dd:media-content-ready', finish);
+        resolve();
+      };
+      document.addEventListener('dd:media-content-ready', finish, { once:true });
+      setTimeout(finish, 1800);
+    });
   }
 
   async function start() {
     try {
-      if(await waitForMediaStudioHero()){mount.dataset.carouselState='media-studio-override';return;}
+      mount.dataset.carouselState = 'loading';
+      await waitForMediaStudioFallback();
+      fallbackMarkup = mount.innerHTML;
       const response = await fetch('/api/home-carousel', { headers: { Accept:'application/json' }, cache:'no-store' });
       const data = await response.json();
       if (!response.ok || !data?.ok || !Array.isArray(data.slides) || !data.slides.length) return restoreFallback();
       const authority = await loadCarouselAuthority();
       const first = new Image();
-      first.onload = () => authority.mount(mount, {
+      first.onload = () => {
+        mount.dataset.carouselState = 'published-carousel';
+        authority.mount(mount, {
         slides: data.slides,
         label: 'Featured Devil n Dove stories',
         autoplay: true,
         fallbackMarkup,
-      });
+        });
+      };
       first.onerror = restoreFallback;
       first.src = data.slides[0].image_url;
     } catch {

@@ -150,7 +150,7 @@ for token in ('retained historical release/restart authority proof','Current suc
     req(token.lower() in gate171.lower(),f'Build 171 retained gate missing successor-aware token: {token}')
 
 # Roadmap and Build 193 doc.
-req(('**Build 193 — next/current planned work**' in roadmap) or ('**Build 193 — complete**' in roadmap and '**Build 194 — current**' in roadmap),'193-200 roadmap must keep Build 193 current or explicitly complete with Build 194 current')
+req(('**Build 193 — next/current planned work**' in roadmap) or ('**Build 193 — complete**' in roadmap and '**Build 194 — current**' in roadmap) or ('**Build 194 — complete**' in roadmap and '**Build 195 — current**' in roadmap),'193-201 roadmap must preserve Build 193 closure while allowing Build 194/195 successors')
 req('**194** | D1 Evidence Headroom Optimization' in roadmap,'Build 194 successor scope missing')
 for token in ('Current Authority & Handoff Convergence','76321bfc975862ce2463e87450852c19fc98c852','451ca8173b9ad3127f84f352ed0a8d7774e53b14','Build 171','0006','no live D1 work'):
     req(token.lower() in doc.lower(),f'Build 193 operations doc missing: {token}')
