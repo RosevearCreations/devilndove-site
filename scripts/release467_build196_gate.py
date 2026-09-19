@@ -87,7 +87,8 @@ req(
 
 legacy_roadmap=all(token in roadmap for token in ("Build 195 — complete","Build 196 — current","Build 197 — next after Build 196 is fully GREEN","**202** | Storefront Launch Set & Autonomous Closure"))
 successor_roadmap=all(token in roadmap for token in ("Build 196 — complete","Build 197 — current","Build 198 — next after Build 197 is fully GREEN","**203** | Storefront Launch Set & Autonomous Closure"))
-req(legacy_roadmap or successor_roadmap,"Build 196 roadmap checkpoint must be current or explicitly closed by Build 197")
+later_successor_roadmap=all(token in roadmap for token in ("Build 197 — complete","Build 198 — current","Build 199 — next after Build 198 is fully GREEN","**204** | Storefront Launch Set & Autonomous Closure"))
+req(legacy_roadmap or successor_roadmap or later_successor_roadmap,"Build 196 roadmap checkpoint must be current or explicitly closed by later successors")
 
 for token in (
     "metadata",
