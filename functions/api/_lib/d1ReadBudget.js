@@ -161,6 +161,15 @@ export const D1_READ_BUDGETS = Object.freeze({
     max_concurrent_identical_gets: 1,
     notes: 'Build 190: one selected Product image or Inventory image metadata read plus at most one canonical R2 object HEAD. No bucket listing, reassignment, upload, copy or delete.'
   }),
+  admin_product_profitability_evidence_v191: Object.freeze({
+    route: '/api/admin/product-resource-bootstrap',
+    risk: 'low',
+    contract: 'explicit_selected_product_profitability_evidence',
+    returned_rows_max: 1,
+    browser_cache_ms: 0,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 191: selected Product price plus its already-bounded saved resource links only. Missing cost remains unknown; no accounting, Inventory, Product, purchasing or payment mutation.'
+  }),
   admin_pending_actions: Object.freeze({
     route: '/api/admin/pending-actions',
     risk: 'medium',
