@@ -1,0 +1,121 @@
+name: Release 467 Build 202 Catalog Reference Media Reconciliation
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/catalog-image-repair.js'
+      - 'public/js/admin-catalog-media-reconciliation-v202.js'
+      - 'css/release467-build202-catalog-media-reconciliation.css'
+      - 'admin/catalog-health/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_202_CATALOG_REFERENCE_MEDIA_RECONCILIATION.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md'
+      - 'scripts/release467_build202_gate.py'
+      - 'scripts/release467_build201_gate.py'
+      - '.github/workflows/release467-build202-catalog-reference-media-reconciliation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 202 reconciliation contract
+        run: python scripts/release467_build202_gate.py
+      - name: Retain Build 201 cycle count duplicate creation image contract
+        run: python scripts/release467_build201_gate.py
+      - name: Retain Build 194 D1 headroom contract
+        run: python scripts/release467_build194_gate.py
+      - name: Retain Build 190 media evidence closure
+        run: python scripts/release467_build190_gate.py
+      - name: Retain Build 189 Inventory evidence closure
+        run: python scripts/release467_build189_gate.py
+
+  development-d1-reconciliation-proof:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 target
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+      - name: Prove bounded Development reconciliation evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "WITH active_inventory AS (
+            SELECT site_item_inventory_id,
+                   LOWER(TRIM(COALESCE(source_type,''))) item_kind,
+                   LOWER(TRIM(COALESCE(external_key,''))) external_key_norm,
+                   image_url
+            FROM site_item_inventory
+            WHERE COALESCE(is_active,1)=1
+              AND LOWER(TRIM(COALESCE(source_type,''))) IN ('tool','supply')
+          ), catalog_refs AS (
+            SELECT LOWER(TRIM(COALESCE(item_kind,''))) item_kind,
+                   LOWER(TRIM(COALESCE(source_key,''))) source_key_norm
+            FROM catalog_items
+            WHERE LOWER(TRIM(COALESCE(item_kind,''))) IN ('tool','supply')
+              AND COALESCE(status,'active')<>'archived'
+            GROUP BY 1,2
+          ), inventory_evidence AS (
+            SELECT
+              SUM(CASE WHEN ai.external_key_norm<>'' AND cr.source_key_norm IS NULL THEN 1 ELSE 0 END) catalog_reference_not_matched,
+              SUM(CASE WHEN TRIM(COALESCE(ai.image_url,''))='' THEN 1 ELSE 0 END) blank_inventory_images,
+              SUM(CASE WHEN TRIM(COALESCE(ai.image_url,''))<>'' AND LOWER(TRIM(ai.image_url)) NOT LIKE 'https://assets.devilndove.com/%' THEN 1 ELSE 0 END) external_inventory_image_references
+            FROM active_inventory ai
+            LEFT JOIN catalog_refs cr ON cr.item_kind=ai.item_kind AND cr.source_key_norm=ai.external_key_norm
+          ), product_alt AS (
+            SELECT COUNT(DISTINCT product_id) products_with_alt_attention
+            FROM product_images
+            WHERE LENGTH(TRIM(COALESCE(alt_text,'')))<12
+          )
+          SELECT
+            COALESCE(ie.catalog_reference_not_matched,0) catalog_reference_not_matched,
+            COALESCE(ie.blank_inventory_images,0) blank_inventory_images,
+            COALESCE(ie.external_inventory_image_references,0) external_inventory_image_references,
+            COALESCE(pa.products_with_alt_attention,0) products_with_alt_attention
+          FROM inventory_evidence ie CROSS JOIN product_alt pa;" > /tmp/build202-evidence.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build202-evidence.json'))
+          rows=[]; reads=[]
+          keys=('catalog_reference_not_matched','blank_inventory_images','external_inventory_image_references','products_with_alt_attention')
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in keys): rows.append(v)
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None: reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert rows,data
+          row={k:int(rows[0][k] or 0) for k in keys}
+          provider_rows_read=sum(reads)
+          assert provider_rows_read <= 12500,('D1 rows_read budget exceeded',provider_rows_read,12500)
+          print('D1_PROVIDER_ROWS_READ=',provider_rows_read,'BUDGET=',12500)
+          print('BUILD 202 DEVELOPMENT RECONCILIATION EVIDENCE: PASS',row)
+          print('D1 MUTATION: ZERO')
+          print('R2 MUTATION: ZERO')
+          print('SCHEMA MIGRATION: NONE')
+          PY
