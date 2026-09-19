@@ -658,6 +658,11 @@ function buildWhere({ productColumns, seoColumns, hasSeoJoin, filters, includeSe
     clauses.push(`1 = 1`);
     warnings.push("products_status_column_missing");
   }
+  if (productColumns.has("review_status")) {
+    clauses.push(`LOWER(COALESCE(p.review_status,'published')) IN ('approved','published','')`);
+  } else {
+    warnings.push("products_review_status_column_missing_legacy_publication_compatibility");
+  }
 
   if (filters.q) {
     const like = `%${filters.q}%`;
@@ -965,6 +970,7 @@ async function runUltraProductFallback(db, filters) {
   const enrichedProducts = await enrichProductsWithStoryNotes(db, shapeProducts(rows));
   const products = enrichedProducts
     .filter((product) => String(product.status || "active").toLowerCase() === "active")
+    .filter((product) => ['approved','published',''].includes(String(product.review_status ?? '').trim().toLowerCase()))
     .filter((product) => productMatchesFilters(product, filters));
   return sortProducts(products);
 }

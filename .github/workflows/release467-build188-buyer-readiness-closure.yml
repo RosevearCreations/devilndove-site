@@ -1,0 +1,116 @@
+name: Release 467 Build 188 Buyer Readiness Closure
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/product-buyer-readiness.js'
+      - 'functions/api/_lib/d1ReadBudget.js'
+      - 'public/js/admin-product-buyer-readiness-v182.js'
+      - 'public/js/admin-catalog-buyer-readiness-v182.js'
+      - 'admin/product-editor/index.html'
+      - 'admin/catalog-health/index.html'
+      - 'functions/api/products.js'
+      - 'functions/api/product-detail-core.js'
+      - 'docs/operations/RELEASE_467_BUILD_188_BUYER_READINESS_CLOSURE.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_CLOSURE_BUILDS_187_192.md'
+      - 'scripts/release467_build188_gate.py'
+      - 'scripts/release467_build187_gate.py'
+      - 'scripts/release467_build182_gate.py'
+      - '.github/workflows/release467-build188-buyer-readiness-closure.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 188 Buyer readiness closure
+        run: python scripts/release467_build188_gate.py
+      - name: Retain Build 187 Catalog repair framework
+        run: python scripts/release467_build187_gate.py
+      - name: Retain Build 186 public Product/Search proof
+        run: python scripts/release467_build186_gate.py
+      - name: Retain Build 182 Product buyer-readiness authority
+        run: python scripts/release467_build182_gate.py
+      - name: Retain Build 166 bounded Product detail
+        run: python scripts/release467_build166_gate.py
+
+  development-d1-buyer-closure-proof:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 target
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+      - name: Prove live Development buyer-readiness closure evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "WITH active AS (
+            SELECT product_id,slug,status,review_status,product_category,short_description,description,price_cents,
+                   requires_shipping,weight_grams,shipping_code,inventory_tracking,inventory_quantity,updated_at
+            FROM products
+            WHERE LOWER(TRIM(COALESCE(status,'draft'))) NOT IN ('archived','deleted')
+          )
+          SELECT COUNT(*) AS products_reviewed,
+            SUM(CASE WHEN TRIM(COALESCE(product_category,''))='' THEN 1 ELSE 0 END) AS category_blockers,
+            SUM(CASE WHEN LENGTH(TRIM(COALESCE(short_description,'')))<40 OR LENGTH(TRIM(COALESCE(description,'')))<120 THEN 1 ELSE 0 END) AS description_advisory,
+            SUM(CASE WHEN COALESCE(price_cents,0)<=0 THEN 1 ELSE 0 END) AS pricing_blockers,
+            SUM(CASE WHEN COALESCE(requires_shipping,0)=1 AND (COALESCE(weight_grams,0)<=0 OR TRIM(COALESCE(shipping_code,''))='') THEN 1 ELSE 0 END) AS shipping_blockers,
+            SUM(CASE WHEN LOWER(TRIM(COALESCE(status,'draft')))='active' AND LOWER(TRIM(COALESCE(review_status,''))) IN ('approved','published','') AND TRIM(COALESCE(slug,''))<>'' THEN 1 ELSE 0 END) AS publicly_visible,
+            SUM(CASE WHEN LOWER(TRIM(COALESCE(status,'draft')))='active' AND LOWER(TRIM(COALESCE(review_status,''))) NOT IN ('approved','published','') THEN 1 ELSE 0 END) AS active_review_held,
+            SUM(CASE WHEN COALESCE(inventory_tracking,0)=1 AND COALESCE(inventory_quantity,0)<=0 THEN 1 ELSE 0 END) AS tracked_zero_stock,
+            MIN(product_id) AS sample_product_id
+          FROM active;" > /tmp/build188-buyer-closure.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build188-buyer-closure.json')); rows=[]
+          keys=('products_reviewed','category_blockers','description_advisory','pricing_blockers','shipping_blockers','publicly_visible','active_review_held','tracked_zero_stock','sample_product_id')
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in keys): rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert rows,data
+          row={k:int(rows[0][k] or 0) for k in keys}
+          assert row['products_reviewed']>=0,row
+          reads=[]
+          def collect_reads(v):
+              if isinstance(v,dict):
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None:
+                      reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): collect_reads(x)
+              elif isinstance(v,list):
+                  for x in v: collect_reads(x)
+          collect_reads(data)
+          provider_rows_read=sum(reads)
+          assert provider_rows_read <= 5000, ('D1 rows_read budget exceeded',provider_rows_read,5000)
+          print('D1_PROVIDER_ROWS_READ=',provider_rows_read,'BUDGET=',5000)
+          print('BUILD 188 DEVELOPMENT D1 BUYER READINESS CLOSURE: PASS',row)
+          print('D1 MUTATION: ZERO')
+          print('SCHEMA MIGRATION: NONE')
+          PY

@@ -1,15 +1,17 @@
-// Release 467 Build 182 — bounded, read-only Product facts & buyer-readiness projection.
+// Release 467 Build 182 buyer-readiness projection, extended by Build 188 closure and one-Product recheck.
 // One Product-table read only. No Product mutation, image/R2 read, Inventory scan, provider execution,
 // publication, payment/refund action, accounting posting, request-time DDL, timer, or retry loop.
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { buildReadBudgetHeaders } from '../_lib/d1ReadBudget.js';
 
 const BUILD = 182;
+const CLOSURE_BUILD = 188;
 const MAX_SOURCE_ROWS = 240;
 const MAX_ISSUE_ROWS = 40;
-const json = (data, status = 200) => jsonResponse({ release: 467, build: BUILD, read_only: true, ...data }, status, {
+const PUBLIC_REVIEW_STATES = new Set(['approved','published','']);
+const json = (data, status = 200, routeKey = 'admin_product_buyer_readiness_v182', limit = MAX_SOURCE_ROWS) => jsonResponse({ release: 467, build: BUILD, closure_build: CLOSURE_BUILD, read_only: true, ...data }, status, {
   'Cache-Control': 'no-store',
-  ...buildReadBudgetHeaders('admin_product_buyer_readiness_v182', { limit: MAX_SOURCE_ROWS }),
+  ...buildReadBudgetHeaders(routeKey, { limit }),
 });
 const rows = (result) => Array.isArray(result?.results) ? result.results : [];
 const text = (value) => normalizeText(value);
@@ -19,7 +21,26 @@ function fix(tab, field, label) {
   return { tab, field, label, href_template: `/admin/product-editor/?product_id={product_id}&tab=${tab}&focus=${field}` };
 }
 function issue(code, severity, label, help, target) {
-  return { code, severity, label, help, fix: target };
+  return { code, severity, label, help, fix: target, mutation_owner: 'Product Editor' };
+}
+function publicVisibility(product = {}) {
+  const status = text(product.status).toLowerCase() || 'draft';
+  const rawReview = text(product.review_status).toLowerCase();
+  const slug = text(product.slug);
+  const statusAllowed = status === 'active';
+  const reviewAllowed = PUBLIC_REVIEW_STATES.has(rawReview);
+  const visible = statusAllowed && reviewAllowed && Boolean(slug);
+  return {
+    status,
+    review_status: rawReview || 'legacy_blank',
+    slug_present: Boolean(slug),
+    status_allowed: statusAllowed,
+    review_allowed: reviewAllowed,
+    catalog_search_visible: visible,
+    detail_visible: visible,
+    public_url: visible ? `/shop/product/?slug=${encodeURIComponent(slug)}` : '',
+    policy: 'active_plus_approved_published_or_legacy_blank',
+  };
 }
 function analyze(product = {}) {
   const issues = [];
@@ -74,12 +95,21 @@ function analyze(product = {}) {
   const totalChecks = 18;
   const penalty = Math.min(totalChecks, blockerCount * 2 + attentionCount);
   const score = Math.max(0, Math.round(((totalChecks - penalty) / totalChecks) * 100));
+  const blockingIssues = issues.filter((row) => row.severity === 'blocker');
+  const advisoryIssues = issues.filter((row) => row.severity === 'attention');
+  const groups = ['basics','description','pricing'].map((tab) => ({
+    owner: 'Product Editor', tab, issues: issues.filter((row) => row.fix?.tab === tab),
+  })).filter((group) => group.issues.length);
   return {
     issues,
+    blocking_issues: blockingIssues,
+    advisory_issues: advisoryIssues,
+    repair_groups: groups,
     blocker_count: blockerCount,
     attention_count: attentionCount,
     score,
     ready_for_buyer_review: blockerCount === 0,
+    public_visibility: publicVisibility(product),
   };
 }
 
@@ -90,10 +120,41 @@ export async function onRequestGet({ request, env }) {
   if (!db) return json({ ok: false, error: 'Database binding is not configured.' }, 500);
 
   const url = new URL(request.url);
+  const mode = text(url.searchParams.get('mode') || 'queue').toLowerCase();
   const q = text(url.searchParams.get('q')).toLowerCase().slice(0, 100);
   const requestedLimit = Number(url.searchParams.get('limit') || MAX_ISSUE_ROWS);
   const issueLimit = Math.max(1, Math.min(MAX_ISSUE_ROWS, Number.isFinite(requestedLimit) ? requestedLimit : MAX_ISSUE_ROWS));
   try {
+    if (mode === 'product') {
+      const productId = Number(url.searchParams.get('product_id') || 0);
+      if (!Number.isInteger(productId) || productId <= 0) return json({ ok: false, error: 'A positive product_id is required.' }, 400, 'admin_product_buyer_recheck_v188', 1);
+      const product = await db.prepare(`
+        SELECT product_id,product_number,name,slug,sku,product_category,product_type,status,review_status,
+               short_description,description,price_cents,compare_at_price_cents,currency,
+               requires_shipping,shipping_code,weight_grams,inventory_tracking,inventory_quantity,
+               digital_file_url,merchandise_origin,sale_channel,external_listing_url,external_listing_label,
+               condition_summary,era_label,updated_at
+        FROM products WHERE product_id=? LIMIT 1
+      `).bind(productId).first();
+      if (!product) return json({ ok: false, error: 'Product buyer-readiness target was not found.' }, 404, 'admin_product_buyer_recheck_v188', 1);
+      const expected = text(url.searchParams.get('expected_updated_at'));
+      const current = text(product.updated_at);
+      const stale = Boolean(expected && expected !== current);
+      return json({
+        ok: true,
+        delivery: 'product-buyer-readiness-v188-targeted-recheck',
+        authority: 'live_d1_one_product',
+        mutation_capability: 'none',
+        automatic_publish: false,
+        automatic_save: false,
+        stale_target: stale,
+        safe_to_apply: !stale,
+        expected_updated_at: expected || null,
+        current_updated_at: current || null,
+        product: { ...product, buyer_readiness: analyze(product) },
+      }, 200, 'admin_product_buyer_recheck_v188', 1);
+    }
+    if (mode !== 'queue') return json({ ok: false, error: 'Unsupported buyer-readiness mode.' }, 400);
     const result = await db.prepare(`
       SELECT product_id,product_number,name,slug,sku,product_category,product_type,status,review_status,
              short_description,description,price_cents,compare_at_price_cents,currency,
@@ -130,6 +191,9 @@ export async function onRequestGet({ request, env }) {
       condition_attention: countIssue('condition'),
       external_listing_blockers: countIssue('external_listing'),
       tracked_zero_stock: countIssue('stock'),
+      publicly_visible: analyzed.filter((product) => product.buyer_readiness.public_visibility.catalog_search_visible).length,
+      held_from_public: analyzed.filter((product) => !product.buyer_readiness.public_visibility.catalog_search_visible).length,
+      legacy_blank_review_visible: analyzed.filter((product) => product.buyer_readiness.public_visibility.review_status === 'legacy_blank' && product.buyer_readiness.public_visibility.catalog_search_visible).length,
       source_limit: MAX_SOURCE_ROWS,
       issue_limit: issueLimit,
       source_truncated: source.length >= MAX_SOURCE_ROWS,
@@ -137,7 +201,7 @@ export async function onRequestGet({ request, env }) {
 
     return json({
       ok: true,
-      delivery: 'product-buyer-readiness-v182',
+      delivery: 'product-buyer-readiness-v188-closure',
       authority: 'live_d1_products',
       mutation_capability: 'none',
       automatic_publish: false,
