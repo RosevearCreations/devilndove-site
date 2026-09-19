@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     products: [],
     resources: [],
     links: [],
+    linkHealthSummary: null,
     selectedProductId: Number.isInteger(requestedProductId) && requestedProductId > 0 ? requestedProductId : 0,
     selectedLinkIndex: -1,
     selectedAvailableKey: '',
@@ -140,10 +141,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function render() {
     mountEl.innerHTML = `
       <div class="card resource-editor-dark" style="margin-top:18px">
-        <div class="section-heading-row"><h3 style="margin-top:0">Product Tools &amp; Supplies Used</h3><button class="btn" type="button" id="productResourcesLoadButton">Load Product resources</button></div>
-        <p class="small" style="margin-top:0">Link the exact supplies and tools used to make a product. Add items from the dropdown, then select one linked item at a time to adjust how much was used.</p>
+        <div class="section-heading-row"><div><p class="inventory-operations-eyebrow">Release 467 Build 185 • Product resource / cost / usage linkage</p><h3 style="margin-top:0">Product Tools &amp; Supplies Used</h3></div><button class="btn" type="button" id="productResourcesLoadButton">Load Product resources</button></div>
+        <p class="small" style="margin-top:0">Link the exact supplies and tools used to make a product. Build 185 verifies Inventory identity, base-unit quantity authority, usage setup, purchase-lot semantics and cost evidence without loading the whole catalog.</p>
         <div class="small" id="productResourcesEditorHint" style="margin-bottom:12px">This section follows the current product editor record when you load, create, or update a product.</div>
         <div id="productResourcesMessage" class="small" style="display:none;margin-bottom:12px"></div>
+        <div id="productResourcesLinkHealth" class="card" style="margin:0 0 12px;padding:12px"><div class="small">Linkage health is paused until Product resources are loaded.</div></div>
 
         <div class="grid cols-2" style="gap:12px;margin-bottom:12px">
           <div>
@@ -322,6 +324,49 @@ document.addEventListener('DOMContentLoaded', () => {
     if (summary) summary.textContent = `${state.links.length} linked item(s). Select one to adjust quantity, usage mode, notes, and lot behavior.`;
   }
 
+  function issueLabel(code) {
+    const labels = {
+      missing_inventory_match: 'No active Inventory match',
+      inactive_inventory_match: 'Inventory match is inactive',
+      missing_cost_evidence: 'No unit-cost evidence',
+      quantity_per_use_defaulted: 'Use-per-product defaulted to 1',
+      lot_size_defaulted: 'Products-per-lot defaulted to 1',
+      usage_profile_defaulted: 'Supply usage profile is defaulted',
+      tool_usage_mode_attention: 'Tool is not reusable/log-only',
+      end_of_lot_without_purchase_lot: 'End-of-lot has no purchase lot',
+      lot_reconciliation_attention: 'Purchase lots need reconciliation'
+    };
+    return labels[code] || String(code || '').replaceAll('_',' ');
+  }
+
+  function renderLinkHealth() {
+    const el = document.getElementById('productResourcesLinkHealth');
+    if (!el) return;
+    if (!state.selectedProductId) {
+      el.innerHTML = '<div class="small"><strong>Build 185 linkage health</strong> • Choose a Product to review its Tool/Supply linkage.</div>';
+      return;
+    }
+    const summary = state.linkHealthSummary;
+    if (!summary) {
+      el.innerHTML = '<div class="small"><strong>Build 185 linkage health</strong> • Load or save this Product to calculate current linkage evidence.</div>';
+      return;
+    }
+    const review = Number(summary.review_links || 0);
+    el.innerHTML = `
+      <div class="section-heading-row">
+        <div><strong>Build 185 linkage health — ${review ? 'Review needed' : 'Ready'}</strong><div class="small">Last-saved Product linkage only; no background scan.</div></div>
+        <div class="small">${Number(summary.ready_links || 0)} ready · ${review} review</div>
+      </div>
+      <div class="grid cols-4" style="gap:8px;margin-top:8px">
+        <div><strong>${Number(summary.linked_resource_count || 0)}</strong><div class="small">Linked Tools/Supplies</div></div>
+        <div><strong>${Number(summary.missing_inventory_matches || 0)}</strong><div class="small">Missing Inventory matches</div></div>
+        <div><strong>${Number(summary.missing_cost_evidence || 0)}</strong><div class="small">Missing cost evidence</div></div>
+        <div><strong>${formatMoney(summary.estimated_resource_cost_cents || 0)}</strong><div class="small">Estimated resource cost/product</div></div>
+      </div>
+      <div class="small" style="margin-top:8px">Usage setup attention: ${Number(summary.usage_setup_attention || 0)} · Lot attention: ${Number(summary.lot_attention || 0)} · Authority: ${escapeHtml(summary.authority || '')}</div>
+    `;
+  }
+
   function renderLinks() {
     const el = document.getElementById('productResourcesLinkedEditor');
     if (!el) return;
@@ -334,6 +379,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const usagePreview = buildUsagePreview(link);
     const usageMeta = usagePreview.usage;
     const mode = String(link.consumption_mode || 'per_unit');
+    const health = link.health || {};
+    const healthIssues = Array.isArray(health.issues) ? health.issues : [];
+    const resource = link.resource || {};
     el.innerHTML = `
       <div class="resource-linked-card resource-linked-card-dark">
         <div class="resource-linked-summary">
@@ -355,7 +403,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <input class="input" data-link-lot="${state.selectedLinkIndex}" type="number" min="1" step="1" value="${Math.max(1, Number(link.lot_size_units || 1) || 1)}" />
           </label>
           <div class="small" style="margin-top:4px">${mode === 'end_of_lot' ? `End-of-lot spreads ${escapeHtml(usageMeta.label)} usage across multiple finished products without per-item reservation.` : (mode === 'story_only' ? 'Story only keeps this item in the making record without touching cost or stock math.' : `Per product treats the quantity as ${escapeHtml(usageMeta.label)} used on every finished item.`)}</div>
-          <div class="small">Estimated cost ${escapeHtml(formatMoney(usagePreview.costPerFinishedCents))} per finished product${mode === 'end_of_lot' ? ` • lot covers about ${escapeHtml(String(usagePreview.lotSize))} finished products` : ''} • buildable now ≈ ${escapeHtml(String(Math.max(0, usagePreview.buildable)))}.</div>
+          <div class="small">Estimated cost ${escapeHtml(formatMoney(health.estimated_cost_per_product_cents ?? usagePreview.costPerFinishedCents))} per finished product${mode === 'end_of_lot' ? ` • lot covers about ${escapeHtml(String(usagePreview.lotSize))} finished products` : ''} • buildable now ≈ ${escapeHtml(String(Math.max(0, health.buildable_products ?? usagePreview.buildable)))}.</div>
+          <div class="small" style="margin-top:6px"><strong>Linkage evidence:</strong> ${healthIssues.length ? healthIssues.map(issueLabel).map(escapeHtml).join(' • ') : 'Ready — Inventory, usage, lot and cost evidence are coherent for this saved link.'}</div>
+          <div class="small">Inventory ${Number(resource.site_item_inventory_id || 0) ? `#${Number(resource.site_item_inventory_id)}` : 'unresolved'} · tracking ${escapeHtml(resource.usage_tracking_mode || 'default')} · purchase lots ${Number(resource.lot_count || 0)} (${Number(resource.available_lot_count || 0)} available) · lot reconciliation ${escapeHtml(resource.lot_reconcile_status || 'needs_review')}</div>
           <textarea class="input" data-link-note="${state.selectedLinkIndex}" rows="2" placeholder="How was this item used for the story of this product?">${escapeHtml(link.usage_notes || '')}</textarea>
           ${String(link.resource_kind || '').toLowerCase() === 'supply' ? `
           <div class="resource-ingredient-profile">
@@ -494,6 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
     );
     state.products = Array.isArray(data.products) ? data.products : [];
     state.links = Array.isArray(data.links) ? data.links : [];
+    state.linkHealthSummary = data.link_health_summary || null;
     renderProducts();
     return data;
   }
@@ -525,6 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
       hydrateLinks();
       renderResources();
       renderLinks();
+      renderLinkHealth();
       renderProductionPreview();
       const stale = results.some((data) => data?._response_meta?.stale);
       setMessage(stale ? 'The server was temporarily busy. Showing the last saved resource list; retry when convenient.' : '', stale);
@@ -542,6 +594,8 @@ document.addEventListener('DOMContentLoaded', () => {
     state.selectedProductId = Number(event.target.value || 0);
     state.productionPreview = null;
     state.productionHistory = [];
+    state.linkHealthSummary = null;
+    renderLinkHealth();
     const url = new URL(window.location.href);
     if (state.selectedProductId > 0) url.searchParams.set('product_id', String(state.selectedProductId));
     else url.searchParams.delete('product_id');
@@ -705,8 +759,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await readJsonResponse(response, 'Failed to save product links.');
       if (Array.isArray(data.links)) {
         state.links = data.links;
+        state.linkHealthSummary = data.link_health_summary || null;
         hydrateLinks();
         renderLinks();
+        renderLinkHealth();
       }
       state.productionPreview = null;
       renderProductionPreview();
