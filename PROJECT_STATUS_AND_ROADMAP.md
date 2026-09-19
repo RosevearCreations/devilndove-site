@@ -50,3 +50,16 @@ The sequence is autonomous because it avoids provider acceptance, payment execut
 - no automatic publication/provider/payment/accounting action unless separately authorized;
 - Canada-first commerce and U.S. sales/shipping pause remain in force;
 - public pages retain one-H1 and current Product low-read contracts.
+
+
+---
+
+## Retained historical provenance — Release 467 Build 153
+
+This section is retained solely for the immutable Build 153 performance gate; it does not supersede the current Build 192 / Builds 193–200 authority.
+
+# Build 153 — Layout Observer Performance Hotfix — CLOSED GREEN
+
+- Products layout cache revision: `467-b153-layout-observer`.
+- Incident addressed: Firefox long-script / page responsiveness caused by excessive layout-observer churn.
+- Historical Build 153 canonical migration baseline was `0001–0004`; later forward-only canonical migrations are valid successors and must preserve that immutable prefix.
