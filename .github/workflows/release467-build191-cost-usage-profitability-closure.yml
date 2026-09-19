@@ -125,7 +125,7 @@ jobs:
               COUNT(*) linked_resources,
               SUM(c.unknown_cost) unknown_cost_links,
               SUM(CASE WHEN c.cost_required=0 THEN 1 ELSE 0 END nondepleting_links,
-              SUM(CASE WHEN c.cost_required=1 AND c.unknown_cost=0 THEN 1 ELSE 0 END known_cost_links,
+              SUM(CASE WHEN c.cost_required=1 AND c.unknown_cost=0 THEN 1 ELSE 0 END) known_cost_links,
               CASE WHEN SUM(c.unknown_cost)>0 THEN NULL ELSE COALESCE(SUM(COALESCE(c.evidenced_cost_cents,0)),0) END evidenced_resource_cost_cents
             FROM costed c GROUP BY c.product_id
           )
