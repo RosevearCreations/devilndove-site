@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 184 — Product & Tool/Supply image repair workflow gate."""
+"""Release 467 Build 184 — Product & Tool/Supply image repair workflow gate, successor-aware through Build 185."""
 from pathlib import Path
 import re, subprocess, sys
 
@@ -56,8 +56,9 @@ req("siteInventoryImageUrl" in inventory_ui and "Full edit" in inventory_ui,"Inv
 
 for token in ("Catalog Health","Product Media & Image Editor","Inventory Operations","Media & Content Studio","single-object","no bucket listing","no canonical schema migration","no payment/refund action","Build 185"):
     req(token.lower() in doc.lower(),f"Build 184 documentation missing: {token}")
-for token in ("Build 183 — complete","Build 184 — current","Build 185 — next"):
-    req(token in plan,f"Catalog rework checkpoint missing: {token}")
+req("Build 183 — complete" in plan,"Catalog rework checkpoint missing: Build 183 — complete")
+req(any(token in plan for token in ("Build 184 — current","Build 184 — complete")),"Catalog rework checkpoint missing Build 184 current/complete state")
+req(any(token in plan for token in ("Build 185 — next","Build 185 — current","Build 185 — complete")),"Catalog rework checkpoint missing Build 185 successor state")
 
 for token in ("catalog-image-table-wrap","overflow-x:auto","@media(max-width:760px)"):
     req(token in css,f"Build 184 responsive CSS missing: {token}")
