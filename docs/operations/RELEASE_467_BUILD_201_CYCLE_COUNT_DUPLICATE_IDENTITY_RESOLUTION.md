@@ -44,7 +44,8 @@ Build 201 therefore adds a specialist Creation Image Editor instead of creating 
 - The selected managed asset is re-read and verified before the creation update is accepted.
 - Product, Inventory, Tool and Supply media are rejected by the creation authority.
 - Media Studio archive/delete checks include creation-card use, so an actively used creation image cannot be removed from the managed library.
-- When a card exists only in JSON fallback and no live creation catalog row can be resolved, editing fails closed with a catalog-recovery message rather than mutating the fallback JSON.
+- When a card exists only in the trusted repository JSON fallback, the editor resolves that fallback server-side by source key. The first explicit image save creates exactly that one `creation` catalog row from the trusted fallback record and assigns the selected managed image. It does not bulk-seed the other fallback records and never trusts browser-supplied product facts.
+- Development evidence before this corrective step showed `creation_rows = 0`, confirming that one-record fallback promotion is required for the seven currently visible fallback cards to be genuinely editable.
 
 ## D1 budget
 
@@ -53,7 +54,7 @@ The exact Development Build 201 proof is read-only and covers:
 - active Inventory rows;
 - physical count due / never-counted / stale-count totals;
 - duplicate Tool/Supply identity rows and duplicate keys;
-- live creation catalog rows and missing creation-image rows.
+- current live creation catalog rows and missing creation-image rows; zero live rows is a supported starting state because the specialist editor promotes one trusted fallback record only on explicit save.
 
 Provider-metered rows read must be **<= 12,500**. The retained 20,000 hard ceiling is not raised. If the Build 201 proof exceeds 12,500, optimize the query rather than increasing the limit.
 
