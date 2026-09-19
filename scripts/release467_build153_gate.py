@@ -86,7 +86,11 @@ else:
     req(False,f'unsupported current authority build for Build 153 lifecycle: {pointer_build}')
 
 expected_migrations=['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql']
-req([x.get('file') for x in manifest.get('migrations',[])]==expected_migrations,'canonical D1 migration authority changed')
+current_migrations=manifest.get('migrations',[])
+current_files=[x.get('file') for x in current_migrations]
+req(current_files[:4]==expected_migrations,'Build 153 canonical D1 migration prefix changed')
+req(len(current_migrations)>=4 and [int(x.get('version') or 0) for x in current_migrations]==list(range(1,len(current_migrations)+1)),'canonical D1 successor migration sequence is not contiguous')
+req(all(str(x.get('file') or '').startswith(f"{int(x.get('version') or 0):04d}_") for x in current_migrations),'canonical D1 successor migration filename/version mismatch')
 
 # Immutable Build 153 implementation/performance assertions stay strict for all successor builds.
 for token in (
