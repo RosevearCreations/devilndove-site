@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 180 — staged runtime startup gate, successor-aware through Build 185."""
+"""Release 467 Build 180 — staged runtime startup gate, successor-aware through Build 186."""
 from pathlib import Path
 import sys
 ROOT=Path(__file__).resolve().parents[1]; FAIL=[]
@@ -27,8 +27,8 @@ req("(()=>{" in product and "document.addEventListener('DOMContentLoaded'" not i
 for token in ("AbortController","8000","/api/product-detail-core","DDProductDetailSnapshot","dd:product-detail-rendered"):
     req(token in product,f"Product detail lost bounded token: {token}")
 req("MutationObserver" not in product and "setInterval(" not in product,"Product detail gained polling/observer behavior")
-req('/public/js/product-detail-v166.js?v=180' in page,"Product page Build 180 cache key missing")
-req(page.find('/public/js/product-detail-v166.js?v=180') < page.find('/public/js/site-auth-ui.js'),"Product detail does not start before optional storefront helpers")
+req(any(token in page for token in ('/public/js/product-detail-v166.js?v=180','/public/js/product-detail-v166.js?v=186')),"Product page Build 180/186 cache key missing")
+req(min(pos for pos in (page.find('/public/js/product-detail-v166.js?v=180'),page.find('/public/js/product-detail-v166.js?v=186')) if pos >= 0) < page.find('/public/js/site-auth-ui.js'),"Product detail does not start before optional storefront helpers")
 
 for token in ("imagePlanVisible:40","scheduleVisualPlan","requestIdleCallback","state.imagePlanVisible+=40","Staging image-plan status after the primary editor paint"):
     req(token in media,f"Media Studio staged-start token missing: {token}")

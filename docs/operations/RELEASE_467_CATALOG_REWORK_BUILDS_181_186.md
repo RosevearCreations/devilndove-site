@@ -31,5 +31,5 @@ This plan continues the existing Product / Inventory / Tool / Image direction af
 - Build 182 — complete: Product Facts & Buyer Readiness.
 - Build 183 — complete: Inventory & Tool/Supply Identity Cleanup.
 - Build 184 — complete: Product & Tool/Supply Image Repair Workflow plus D1 quota hardening.
-- Build 185 — current: Product Resource / Cost / Usage Linkage.
-- Build 186 — next after Build 185 is fully GREEN: Public Product & Search Proof.
+- Build 185 — complete: Product Resource / Cost / Usage Linkage.
+- Build 186 — current: Public Product & Search Proof.

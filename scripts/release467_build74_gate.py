@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fail-closed source/runtime contract for Release 467 Build 74 — Storefront Product Experience.
 
-Build 166 is an accepted successor for the Product detail delivery layer. The historical buyer-first
+Build 166+ through Build 186 are accepted successors for the Product detail delivery layer. The historical buyer-first
 helper remains tested as provenance, while the live Product page may use the bounded Build 166 renderer.
 """
 from __future__ import annotations
@@ -57,7 +57,7 @@ expected = ["0001_release464_migration_authority.sql","0002_release464_operation
 req([row.get("file") for row in manifest.get("migrations", [])][:len(expected)] == expected, "Build 74 must preserve historical canonical D1 migration baseline")
 
 req(len(re.findall(r"<h1\b", page, flags=re.I)) == 1, "Build 74 Product detail template must keep exactly one H1")
-successor_v166 = any(token in page for token in ('/public/js/product-detail-v166.js?v=166','/public/js/product-detail-v166.js?v=179','/public/js/product-detail-v166.js?v=180'))
+successor_v166 = any(token in page for token in ('/public/js/product-detail-v166.js?v=166','/public/js/product-detail-v166.js?v=179','/public/js/product-detail-v166.js?v=180','/public/js/product-detail-v166.js?v=186'))
 if successor_v166:
     req('/public/js/product-detail.js?v=224' not in page, "Build 166 successor must not double-load the legacy Product renderer")
     req('/public/js/storefront-product-experience.js?v=74' not in page, "Build 166 successor must not double-enhance the bounded Product renderer")
