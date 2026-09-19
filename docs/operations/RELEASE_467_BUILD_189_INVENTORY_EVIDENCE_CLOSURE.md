@@ -49,3 +49,26 @@ Build 189 performs no:
 ## Successor
 
 Build 190 — Product & Inventory Media Evidence Closure.
+
+
+## Implemented closure design
+
+Build 189 extends the Build 183 Inventory identity authority rather than creating a second Inventory editor.
+
+- The existing explicit queue remains capped at 40 issue rows.
+- A new `mode=record&inventory_id=...` path rechecks exactly one Inventory target after a reviewed correction.
+- The one-record recheck returns at most 12 active duplicate-group members and at most 12 same-key catalog candidates.
+- Supplier-name, supplier-SKU and source-reference evidence are reported separately.
+- Catalog evidence is classified as `matched`, `stale_archived`, `kind_drift` or `missing`.
+- `catalog_reference_safe` is fail-closed unless the current target timestamp still matches and an active same-kind catalog record exists.
+- Count-due state is evidence only. Build 189 never writes a physical count.
+- Duplicate evidence is comparison-only. Build 189 never merges records or combines stock/cost values.
+- Inventory Operations and Inventory Integrity remain the only mutation authorities.
+
+## Development D1 budget
+
+The exact Development Build 189 proof is provider-metered and capped at **20,000 rows read**. That ceiling is intentionally below the previous 50,000 Build 183 ceiling while leaving room for one grouped Inventory/catalog evidence scan. It performs **zero D1 mutation**.
+
+## Production path
+
+Build 189 is code-only and requires **no canonical migration**. Production promotion must therefore remain on the **zero-D1 code-only path**, with exact Production Pages deployment, Production Live Resource Integrity and retained Product public proofs GREEN.

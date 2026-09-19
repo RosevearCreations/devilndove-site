@@ -4,10 +4,11 @@ import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../
 import { buildReadBudgetHeaders } from '../_lib/d1ReadBudget.js';
 
 const BUILD = 183;
+const CLOSURE_BUILD = 189;
 const MAX_ROWS = 40;
-const json = (data, status = 200) => jsonResponse({ release: 467, build: BUILD, read_only: true, ...data }, status, {
+const json = (data, status = 200, routeKey = 'admin_inventory_identity_health_v183', limit = MAX_ROWS) => jsonResponse({ release: 467, build: BUILD, closure_build: CLOSURE_BUILD, read_only: true, ...data }, status, {
   'Cache-Control': 'no-store',
-  ...buildReadBudgetHeaders('admin_inventory_identity_health_v183', { limit: MAX_ROWS }),
+  ...buildReadBudgetHeaders(routeKey, { limit }),
 });
 const rows = (result) => Array.isArray(result?.results) ? result.results : [];
 const text = (value) => normalizeText(value);
@@ -59,6 +60,7 @@ function shapeIssue(row = {}) {
   if (n(row.usage_review_required)) issues.push({ code: 'usage_review', severity: 'attention', label: 'Usage mode/conversion needs review', owner: 'integrity' });
   if (n(row.count_due)) issues.push({ code: 'count_due', severity: 'attention', label: row.last_counted_at ? 'Physical count is 90+ days old' : 'Never physically counted', owner: 'integrity' });
   if (n(row.reorder_review_required)) issues.push({ code: 'reorder_review', severity: 'attention', label: 'Reorder state needs review', owner: 'inventory' });
+  if (row.catalog_reference_status === 'stale_archived') issues.push({ code: 'catalog_reference_stale', severity: 'blocker', label: 'Matching catalog reference is archived/stale', owner: 'inventory' });
   if (row.catalog_reference_status === 'kind_drift') issues.push({ code: 'catalog_kind_drift', severity: 'blocker', label: 'Catalog source key exists under the other Tool/Supply kind', owner: 'inventory' });
   if (row.catalog_reference_status === 'missing') issues.push({ code: 'catalog_reference_missing', severity: 'attention', label: 'No active catalog reference for this source key', owner: 'inventory' });
   return { ...row, issues };
@@ -161,6 +163,14 @@ async function issueRows(db, { queue = 'all', q = '', limit = MAX_ROWS } = {}) {
         AND COALESCE(status,'active')<>'archived'
       GROUP BY 1,2
     ),
+    catalog_archived AS (
+      SELECT LOWER(TRIM(COALESCE(item_kind,''))) AS item_kind_norm,
+             LOWER(TRIM(COALESCE(source_key,''))) AS source_key_norm
+      FROM catalog_items
+      WHERE LOWER(TRIM(COALESCE(item_kind,''))) IN ('tool','supply')
+        AND LOWER(TRIM(COALESCE(status,'active')))='archived'
+      GROUP BY 1,2
+    ),
     catalog_any AS (
       SELECT source_key_norm,COUNT(*) AS ref_count
       FROM catalog_refs GROUP BY source_key_norm
@@ -194,6 +204,7 @@ async function issueRows(db, { queue = 'all', q = '', limit = MAX_ROWS } = {}) {
         CASE
           WHEN a.external_key_norm='' THEN 'missing'
           WHEN cr.source_key_norm IS NOT NULL THEN 'matched'
+          WHEN car.source_key_norm IS NOT NULL THEN 'stale_archived'
           WHEN ca.source_key_norm IS NOT NULL THEN 'kind_drift'
           ELSE 'missing'
         END AS catalog_reference_status
@@ -202,13 +213,14 @@ async function issueRows(db, { queue = 'all', q = '', limit = MAX_ROWS } = {}) {
       LEFT JOIN key_counts kc ON kc.external_key_norm=a.external_key_norm
       LEFT JOIN same_kind_counts skc ON skc.source_type_norm=a.source_type_norm AND skc.external_key_norm=a.external_key_norm
       LEFT JOIN catalog_refs cr ON cr.item_kind_norm=a.source_type_norm AND cr.source_key_norm=a.external_key_norm
+      LEFT JOIN catalog_archived car ON car.item_kind_norm=a.source_type_norm AND car.source_key_norm=a.external_key_norm
       LEFT JOIN catalog_any ca ON ca.source_key_norm=a.external_key_norm
     )
     SELECT * FROM base
     WHERE (?='' OR LOWER(COALESCE(item_name,'')) LIKE ? OR LOWER(COALESCE(external_key,'')) LIKE ? OR LOWER(COALESCE(category,'')) LIKE ? OR LOWER(COALESCE(supplier_name,'')) LIKE ?)
       AND ${filter}
     ORDER BY
-      CASE catalog_reference_status WHEN 'kind_drift' THEN 0 WHEN 'missing' THEN 1 ELSE 2 END,
+      CASE catalog_reference_status WHEN 'stale_archived' THEN 0 WHEN 'kind_drift' THEN 1 WHEN 'missing' THEN 2 ELSE 3 END,
       CASE WHEN key_duplicate_count>1 THEN 0 ELSE 1 END,
       CASE WHEN usage_review_required=1 THEN 0 ELSE 1 END,
       CASE WHEN count_due=1 THEN 0 ELSE 1 END,
@@ -219,6 +231,82 @@ async function issueRows(db, { queue = 'all', q = '', limit = MAX_ROWS } = {}) {
 
   return rows(result).map(shapeIssue);
 }
+
+async function recordEvidence(db, inventoryId, expectedUpdatedAt) {
+  const target = await db.prepare(`
+    SELECT sii.site_item_inventory_id,
+           LOWER(TRIM(COALESCE(sii.source_type,''))) AS source_type,
+           sii.external_key,sii.item_name,sii.category,sii.supplier_name,sii.supplier_sku,sii.supplier_contact,
+           sii.source_url,sii.amazon_url,sii.on_hand_quantity,sii.reserved_quantity,sii.incoming_quantity,
+           sii.unit_cost_cents,sii.reorder_level,sii.preferred_reorder_quantity,sii.is_on_reorder_list,
+           sii.do_not_reorder,sii.do_not_reuse,sii.last_counted_at,sii.updated_at,
+           COALESCE(siup.usage_tracking_mode,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
+           CASE WHEN sii.last_counted_at IS NULL OR datetime(sii.last_counted_at)<datetime('now','-90 days') THEN 1 ELSE 0 END AS count_due
+    FROM site_item_inventory sii
+    LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
+    WHERE sii.site_item_inventory_id=? LIMIT 1
+  `).bind(inventoryId).first();
+  if (!target) return null;
+
+  const key = text(target.external_key).toLowerCase();
+  const duplicateGroup = key ? rows(await db.prepare(`
+    SELECT site_item_inventory_id,LOWER(TRIM(COALESCE(source_type,''))) AS source_type,
+           external_key,item_name,category,supplier_name,on_hand_quantity,reserved_quantity,incoming_quantity,
+           unit_cost_cents,last_counted_at,updated_at
+    FROM site_item_inventory
+    WHERE COALESCE(is_active,1)=1 AND LOWER(TRIM(COALESCE(external_key,'')))=?
+    ORDER BY LOWER(TRIM(COALESCE(source_type,''))),site_item_inventory_id
+    LIMIT 12
+  `).bind(key).all()) : [];
+
+  const catalogMatches = key ? rows(await db.prepare(`
+    SELECT catalog_item_id,LOWER(TRIM(COALESCE(item_kind,''))) AS item_kind,
+           source_key,name,category,status,supplier_name,supplier_sku,amazon_url,image_url,updated_at
+    FROM catalog_items
+    WHERE LOWER(TRIM(COALESCE(item_kind,''))) IN ('tool','supply')
+      AND LOWER(TRIM(COALESCE(source_key,'')))=?
+    ORDER BY CASE WHEN LOWER(TRIM(COALESCE(status,'active')))='archived' THEN 1 ELSE 0 END,
+             CASE WHEN LOWER(TRIM(COALESCE(item_kind,'')))=? THEN 0 ELSE 1 END,
+             catalog_item_id DESC
+    LIMIT 12
+  `).bind(key,text(target.source_type).toLowerCase()).all()) : [];
+
+  const kind = text(target.source_type).toLowerCase();
+  const exactActive = catalogMatches.find((row) => text(row.item_kind).toLowerCase() === kind && text(row.status || 'active').toLowerCase() !== 'archived');
+  const exactArchived = catalogMatches.find((row) => text(row.item_kind).toLowerCase() === kind && text(row.status || 'active').toLowerCase() === 'archived');
+  const otherKindActive = catalogMatches.find((row) => text(row.item_kind).toLowerCase() !== kind && text(row.status || 'active').toLowerCase() !== 'archived');
+  const catalogStatus = !key ? 'missing' : exactActive ? 'matched' : exactArchived ? 'stale_archived' : otherKindActive ? 'kind_drift' : 'missing';
+  const expected = text(expectedUpdatedAt);
+  const current = text(target.updated_at);
+  const staleTarget = Boolean(expected && expected !== current);
+  const sourceReferencePresent = Boolean(text(target.source_url) || text(target.amazon_url));
+  const supplierEvidence = {
+    supplier_name_present: Boolean(text(target.supplier_name)),
+    supplier_sku_present: Boolean(text(target.supplier_sku)),
+    source_reference_present: sourceReferencePresent,
+  };
+
+  return {
+    target: { ...target, count_due: n(target.count_due) },
+    expected_updated_at: expected || null,
+    current_updated_at: current || null,
+    stale_target: staleTarget,
+    duplicate_group: duplicateGroup,
+    duplicate_group_size: duplicateGroup.length,
+    catalog_matches: catalogMatches,
+    catalog_reference_status: catalogStatus,
+    catalog_reference_safe: !staleTarget && catalogStatus === 'matched',
+    supplier_evidence: supplierEvidence,
+    count_action: n(target.count_due) ? 'review_required_no_count_performed' : 'not_due',
+    mutation_authority: 'Inventory Operations',
+    repair_href: `/admin/inventory-operations/?q=${encodeURIComponent(text(target.external_key) || text(target.item_name) || String(inventoryId))}&repair_from=build189#siteInventoryForm`,
+    automatic_merge: false,
+    automatic_count: false,
+    automatic_stock_change: false,
+    automatic_cost_change: false,
+  };
+}
+
 export async function onRequestGet({ request, env }) {
   const admin = await getAdminUserFromRequest(request, env);
   if (!admin) return json({ ok: false, error: 'Admin access required.' }, 401);
@@ -247,6 +335,20 @@ export async function onRequestGet({ request, env }) {
         review_actions: 'existing_inventory_authorities_only',
         items: await issueRows(db, { queue, q, limit }),
       });
+    }
+    if (mode === 'record') {
+      const inventoryId = Number(url.searchParams.get('inventory_id') || 0);
+      if (!Number.isInteger(inventoryId) || inventoryId <= 0) return json({ ok: false, error: 'A positive inventory_id is required.' }, 400, 'admin_inventory_evidence_recheck_v189', 1);
+      const evidence = await recordEvidence(db, inventoryId, url.searchParams.get('expected_updated_at'));
+      if (!evidence) return json({ ok: false, error: 'Inventory evidence target was not found.' }, 404, 'admin_inventory_evidence_recheck_v189', 1);
+      return json({
+        ok: true,
+        mode,
+        authority: 'live_d1_inventory_one_record',
+        mutation_capability: 'none',
+        review_actions: 'existing_inventory_authorities_only',
+        evidence,
+      }, 200, 'admin_inventory_evidence_recheck_v189', 1);
     }
     return json({ ok: false, error: 'Unsupported Inventory identity-health mode.' }, 400);
   } catch (error) {
