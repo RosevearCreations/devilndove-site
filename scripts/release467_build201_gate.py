@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Release 467 Build 201 — Cycle Count & Duplicate Identity Resolution + Creation Image Edit gate."""
 from pathlib import Path
-import subprocess,sys
+import json,subprocess,sys
 
 ROOT=Path(__file__).resolve().parents[1]
 FAIL=[]
@@ -24,6 +24,7 @@ inventory_page=read("admin/inventory-operations/index.html")
 creation_api=read("functions/api/admin/creation-media.js")
 creation_ui=read("public/js/admin-creation-media-v201.js")
 creation_page=read("admin/creation-media/index.html")
+fallback_raw=read("data/itemsforsale/itemsforsale_items_master.json")
 public_api=read("functions/api/creations.js")
 public_page=read("creations/index.html")
 inline=read("public/js/creations-admin-image-edit-v201.js")
@@ -71,6 +72,12 @@ for token in (
     "LOWER(TRIM(COALESCE(item_kind,'')))='creation'",
     "BLOCKED_SOURCE_TYPES",
     "expected_updated_at",
+    "loadTrustedFallback(",
+    "promoteTrustedFallback(",
+    "creation_catalog_promoted_from_fallback",
+    "INSERT INTO catalog_items",
+    "ON CONFLICT(item_kind,source_key) DO NOTHING",
+    "FALLBACK_PATH",
 ):
     req(token in creation_api,f"Build 201 Creation Image authority missing: {token}")
 for forbidden in (
@@ -91,6 +98,15 @@ for token in (
 for token in ("Creation Image Editor","specialist creation-catalog editor","admin-creation-media-v201.js?v=201"):
     req(token in creation_page,f"Creation Image page missing: {token}")
 req(creation_page.lower().count("<h1")==1,"Creation Image Editor must keep exactly one H1")
+try:
+    fallback_data=json.loads(fallback_raw)
+except Exception as error:
+    fallback_data=[]
+    FAIL.append(f"trusted creation fallback JSON could not be parsed: {error}")
+fallback_items=fallback_data if isinstance(fallback_data,list) else fallback_data.get("items",[]) if isinstance(fallback_data,dict) else []
+req(len(fallback_items)>=7,"Build 201 requires the trusted creation fallback set used by /creations/")
+fallback_ids={str(row.get("id") or row.get("source_key") or "") for row in fallback_items if isinstance(row,dict)}
+req("DD215-216B" in fallback_ids,"Build 201 trusted fallback proof is missing the owner-visible DD215-216B creation")
 
 for token in ("catalog_item_id: row?.catalog_item_id","source_key: row?.source_key"):
     req(token in public_api,f"Public creations identity projection missing: {token}")
@@ -120,6 +136,8 @@ for token in (
     "12,500",
     "Edit image",
     "Build 202",
+    "one trusted fallback record",
+    "creation_rows = 0",
 ):
     req(token.lower() in doc.lower(),f"Build 201 operations contract missing: {token}")
 

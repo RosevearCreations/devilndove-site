@@ -14,7 +14,9 @@
   function renderTarget(){
     const t=state.target,el=id('creationMediaCurrent');if(!el)return;
     if(!t){el.innerHTML='<div class="small">No creation is selected.</div>';return;}
-    el.innerHTML='<div><img src="'+esc(t.image_url||'/assets/mark.png')+'" alt="'+esc(t.name||'Creation')+'"/></div><div><p class="eyebrow">Exact creation target</p><h2>'+esc(t.name||'Creation')+'</h2><p class="small">Catalog #'+Number(t.catalog_item_id||0)+' · '+esc(t.source_key||'no source key')+'</p><p class="small"><strong>Current image:</strong> '+esc(t.image_url||'none recorded')+'</p><p class="small">A selection below updates only <code>catalog_items.image_url</code> for this creation after a stale-safe check.</p><a class="btn" href="/creations/?media-edit=1">Back to Creations preview</a></div>';
+    const identityLine=t.catalog_item_id?('Catalog #'+Number(t.catalog_item_id||0)+' · '+esc(t.source_key||'no source key')):('Trusted fallback · '+esc(t.source_key||'no source key'));
+    const authorityNote=t.catalog_item_id?'A selection below updates only <code>catalog_items.image_url</code> for this creation after a stale-safe check.':'This card is currently fallback-only. The first explicit image save will create exactly this trusted creation row in the live catalog and assign the selected image; no other fallback records are seeded.';
+    el.innerHTML='<div><img src="'+esc(t.image_url||'/assets/mark.png')+'" alt="'+esc(t.name||'Creation')+'"/></div><div><p class="eyebrow">Exact creation target</p><h2>'+esc(t.name||'Creation')+'</h2><p class="small">'+identityLine+'</p><p class="small"><strong>Current image:</strong> '+esc(t.image_url||'none recorded')+'</p><p class="small">'+authorityNote+'</p><a class="btn" href="/creations/?media-edit=1">Back to Creations preview</a></div>';
   }
   function renderMedia(){
     const el=id('creationMediaLibrary');if(!el)return;
