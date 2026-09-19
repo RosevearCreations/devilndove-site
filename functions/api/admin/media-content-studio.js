@@ -222,17 +222,25 @@ export async function onRequestPost(context) {
       const slot=await db.prepare(`SELECT * FROM media_content_slots WHERE media_content_slot_id=? AND is_active=1`).bind(slotId).first(); if(!slot||slot.slot_type==='text')return json({ok:false,error:"That slot cannot receive an image."},400);
       const media=await db.prepare(`SELECT ma.media_asset_id,ma.product_id,ma.object_key,mm.archived_at,mm.source_type,mm.media_type FROM media_assets ma LEFT JOIN managed_media_metadata mm ON mm.media_asset_id=ma.media_asset_id WHERE ma.media_asset_id=? AND ma.deleted_at IS NULL`).bind(mediaId).first();
       if(!media || media.product_id!=null || isBlockedMediaKey(media.object_key) || BLOCKED_SOURCE_TYPES.has(normalizeText(media.source_type).toLowerCase()) || normalizeText(media.media_type).toLowerCase()==='product') return json({ok:false,error:"That media is managed by the Product/Inventory workflow, not Media Studio."},404); if(media.archived_at)return json({ok:false,error:"Archived media cannot be newly assigned. Restore it first."},409);
-      const previous=await db.prepare(`SELECT media_content_assignment_id,media_asset_id FROM media_content_assignments WHERE media_content_slot_id=? AND active=1 LIMIT 1`).bind(slotId).first();
-      const batch=[]; if(previous)batch.push(db.prepare(`UPDATE media_content_assignments SET active=0,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE media_content_assignment_id=?`).bind(adminUser.user_id,previous.media_content_assignment_id));
+      const previousResult=await db.prepare(`SELECT media_content_assignment_id,media_asset_id FROM media_content_assignments WHERE media_content_slot_id=? AND active=1 ORDER BY media_content_assignment_id`).bind(slotId).all();
+      const previousRows=rows(previousResult);
+      const batch=[];
+      if(previousRows.length)batch.push(db.prepare(`UPDATE media_content_assignments SET active=0,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE media_content_slot_id=? AND active=1`).bind(adminUser.user_id,slotId));
       batch.push(db.prepare(`INSERT INTO media_content_assignments(media_content_slot_id,media_asset_id,active,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES(?,?,1,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(slotId,mediaId,adminUser.user_id,adminUser.user_id));
       await db.batch(batch);
+      const activeResult=await db.prepare(`SELECT media_content_assignment_id,media_asset_id FROM media_content_assignments WHERE media_content_slot_id=? AND active=1 ORDER BY media_content_assignment_id`).bind(slotId).all();
+      const activeRows=rows(activeResult);
       const refreshed=await pageSlots(db,slot.page_path);
-      const authoritative=refreshed.find((row)=>n(row.media_content_slot_id)===slotId);
-      if(!authoritative||n(authoritative.media_asset_id)!==mediaId){
-        return json({ok:false,error:"The requested image was not verified as the active assignment. Reload the location before trying again.",error_code:"media_assignment_verification_failed"},409);
+      const authoritative=refreshed.find((row)=>n(row.media_content_slot_id)===slotId&&n(row.media_asset_id)===mediaId);
+      if(activeRows.length!==1||n(activeRows[0]?.media_asset_id)!==mediaId||!authoritative){
+        return json({ok:false,error:"The requested image was not verified as the only active assignment. Reload the location before trying again.",error_code:"media_assignment_verification_failed",active_assignment_count:activeRows.length},409);
       }
-      await changeAudit(db,adminUser,{action_type:"assign_media",media_asset_id:mediaId,media_content_slot_id:slotId,page_path:slot.page_path,old_value:previous||null,new_value:{media_asset_id:mediaId,verified:true}});
-      return json({ok:true,message:previous&&n(previous.media_asset_id)!==mediaId?"Image replaced and verified for this exact placement. No other image use was changed.":"Image assigned and verified for this exact placement.",assignment:{media_content_slot_id:slotId,media_asset_id:mediaId,slot_key:slot.slot_key,page_path:slot.page_path,verified:true},slots:refreshed});
+      const previous=previousRows[0]||null;
+      await changeAudit(db,adminUser,{action_type:"assign_media",media_asset_id:mediaId,media_content_slot_id:slotId,page_path:slot.page_path,old_value:previousRows.length?{assignments:previousRows}:null,new_value:{media_asset_id:mediaId,verified:true,active_assignment_count:1}});
+      const replaced=previousRows.some((row)=>n(row.media_asset_id)!==mediaId);
+      const normalized=previousRows.length>1;
+      const message=normalized?"Image saved and verified. Duplicate active placements for this location were normalized to one authoritative image.":replaced?"Image replaced and verified for this exact placement. No other image use was changed.":"Image assigned and verified for this exact placement.";
+      return json({ok:true,message,assignment:{media_content_slot_id:slotId,media_asset_id:mediaId,slot_key:slot.slot_key,page_path:slot.page_path,public_url:authoritative.public_url||null,verified:true,active_assignment_count:1,previous_active_count:previousRows.length},slots:refreshed});
     }
 
     if (action === "remove_assignment") {
