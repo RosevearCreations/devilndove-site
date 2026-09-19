@@ -151,6 +151,8 @@ function normalizeCreationItem(source, row = null, options = {}) {
 
   return {
     ...source,
+    catalog_item_id: row?.catalog_item_id ? Number(row.catalog_item_id) : null,
+    source_key: row?.source_key || source.source_key || source.id || '',
     id: source.id || row?.source_key || row?.catalog_item_id || slugify(title),
     name: row?.name || source.name || source.title || "Creation",
     title,

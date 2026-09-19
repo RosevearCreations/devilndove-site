@@ -164,7 +164,10 @@ export async function onRequestGet(context) {
       const selectedMediaId = n(url.searchParams.get("media_id"));
       if (selectedMediaId <= 0) return json({ok:false,error:"Select a media item first."},400);
       const usesResult = await db.prepare(`SELECT a.media_content_assignment_id,s.media_content_slot_id,s.page_path,s.slot_key,s.slot_label,s.slot_type FROM media_content_assignments a INNER JOIN media_content_slots s ON s.media_content_slot_id=a.media_content_slot_id WHERE a.media_asset_id=? AND a.active=1 AND s.is_active=1 AND s.page_path NOT LIKE '/shop%' AND s.page_path NOT LIKE '/tools%' AND s.page_path NOT LIKE '/toolshed%' AND s.page_path NOT LIKE '/supplies%' AND s.page_path NOT LIKE '/admin%' AND s.page_path NOT LIKE '/cart%' AND s.page_path NOT LIKE '/checkout%' AND s.page_path NOT LIKE '/members%' AND s.page_path NOT LIKE '/search%' ORDER BY s.page_path,s.slot_label LIMIT 120`).bind(selectedMediaId).all();
-      return json({ok:true,requested_by:adminUser,media_uses:rows(usesResult)});
+      const asset=await db.prepare(`SELECT public_url FROM media_assets WHERE media_asset_id=? AND deleted_at IS NULL LIMIT 1`).bind(selectedMediaId).first();
+      const creationUses=asset?.public_url?rows(await db.prepare(`SELECT catalog_item_id,name,source_key FROM catalog_items WHERE LOWER(TRIM(COALESCE(item_kind,'')))='creation' AND image_url=? ORDER BY catalog_item_id LIMIT 120`).bind(asset.public_url).all()):[];
+      const creationUseRows=creationUses.map(row=>({media_content_assignment_id:null,media_content_slot_id:null,page_path:'/creations/',slot_key:'creation:'+String(row.source_key||row.catalog_item_id),slot_label:'Creation: '+String(row.name||row.source_key||row.catalog_item_id),slot_type:'creation_catalog_image',catalog_item_id:n(row.catalog_item_id)}));
+      return json({ok:true,requested_by:adminUser,media_uses:rows(usesResult).concat(creationUseRows),creation_catalog_uses:creationUseRows});
     }
     if (isBlockedPagePath(path)) return json({ok:false,error:"That route is managed by its specialist editor, not Media Studio."},400);
     const slots = await pageSlots(db, path);
@@ -347,8 +350,11 @@ export async function onRequestPost(context) {
     if (action === "archive_media" || action === "restore_media") {
       const mediaId=n(body.media_asset_id); if(mediaId<=0)return json({ok:false,error:"Select a media item first."},400);
       if(action==='archive_media'){
+        const asset=await db.prepare(`SELECT public_url FROM media_assets WHERE media_asset_id=? AND deleted_at IS NULL LIMIT 1`).bind(mediaId).first();
         const use=await db.prepare(`SELECT COUNT(*) AS c FROM media_content_assignments WHERE media_asset_id=? AND active=1`).bind(mediaId).first();
-        if(n(use?.c)>0)return json({ok:false,error:`This image is currently assigned to ${n(use.c)} placement(s). Remove or replace those placements before archiving.`},409);
+        const creationUse=asset?.public_url?await db.prepare(`SELECT COUNT(*) AS c FROM catalog_items WHERE LOWER(TRIM(COALESCE(item_kind,'')))='creation' AND image_url=?`).bind(asset.public_url).first():null;
+        const totalUses=n(use?.c)+n(creationUse?.c);
+        if(totalUses>0)return json({ok:false,error:`This image is currently used in ${totalUses} public placement(s), including creation-card use. Replace those uses before archiving.`},409);
       }
       await db.prepare(`INSERT INTO managed_media_metadata(media_asset_id,media_type,archived_at,created_by_user_id,updated_by_user_id,created_at,updated_at) VALUES(?,'photo',?, ?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(media_asset_id) DO UPDATE SET archived_at=excluded.archived_at,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(mediaId,action==='archive_media'?new Date().toISOString():null,adminUser.user_id,adminUser.user_id).run();
       return json({ok:true,message:action==='archive_media'?"Media archived. It was not deleted from R2.":"Media restored to the active library."});
@@ -358,7 +364,9 @@ export async function onRequestPost(context) {
       const mediaId=n(body.media_asset_id); if(mediaId<=0)return json({ok:false,error:"Select a media item first."},400);
       const asset=await db.prepare(`SELECT media_asset_id,object_key,public_url FROM media_assets WHERE media_asset_id=? AND deleted_at IS NULL`).bind(mediaId).first(); if(!asset)return json({ok:false,error:"Media item not found."},404);
       const use=await db.prepare(`SELECT COUNT(*) AS c FROM media_content_assignments WHERE media_asset_id=? AND active=1`).bind(mediaId).first();
-      if(n(use?.c)>0)return json({ok:false,error:`Cannot delete this image. It is currently used in ${n(use.c)} location(s). Remove or replace those assignments first.`},409);
+      const creationUse=asset.public_url?await db.prepare(`SELECT COUNT(*) AS c FROM catalog_items WHERE LOWER(TRIM(COALESCE(item_kind,'')))='creation' AND image_url=?`).bind(asset.public_url).first():null;
+      const totalUses=n(use?.c)+n(creationUse?.c);
+      if(totalUses>0)return json({ok:false,error:`Cannot delete this image. It is currently used in ${totalUses} public location(s), including creation-card use. Remove or replace those assignments first.`},409);
       if(normalizeText(body.confirm)!==`DELETE ${mediaId}`)return json({ok:false,error:`Type DELETE ${mediaId} to permanently remove this unassigned public asset.`},400);
       const bucket=context.env.PRODUCT_MEDIA_BUCKET||context.env.MEDIA_BUCKET||context.env.R2_PRODUCT_MEDIA;
       if(bucket?.delete&&asset.object_key)await bucket.delete(asset.object_key);

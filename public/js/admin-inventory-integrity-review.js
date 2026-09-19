@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     summary: {},
     loading: false,
     loaded: false,
+    countCursor: 0,
   };
   let startRequested = false;
 
@@ -135,6 +136,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const previous = document.getElementById('inventoryIntegrityPrevious');
     if (next) next.disabled = state.nextOffset == null;
     if (previous) previous.disabled = state.offset <= 0;
+    const openNext = document.getElementById('inventoryIntegrityOpenNextCount');
+    const due = state.items.filter(item => Number(item.physical_count_due || 0) === 1);
+    if (openNext) {
+      openNext.hidden = state.queue !== 'count_due';
+      openNext.disabled = !due.length;
+      openNext.textContent = due.length ? 'Open next count due ('+((state.countCursor % due.length)+1)+'/'+due.length+')' : 'Open next count due';
+    }
   }
 
   function render() {
@@ -142,9 +150,9 @@ document.addEventListener('DOMContentLoaded', () => {
       <section class="card inventory-integrity-review" aria-labelledby="inventoryIntegrityHeading">
         <div class="section-heading-row">
           <div>
-            <p class="inventory-operations-eyebrow">Release 467 Build 180 · staged Inventory truth &amp; usage</p>
+            <p class="inventory-operations-eyebrow">Release 467 Build 201 · explicit cycle-count workflow</p>
             <h3 id="inventoryIntegrityHeading">Physical Count &amp; Usage Setup Review</h3>
-            <p class="small">Use a physical count to make on-hand stock truthful. Legacy supplies that remain in the safe <code>log_only</code> default stay in Usage Setup Required until their real stock-to-usage conversion is reviewed.</p>
+            <p class="small">Use a physical count to make on-hand stock truthful. Build 201 keeps cycle counts operator-triggered, audited and concurrency-protected: loading or navigating this queue never changes stock. Legacy supplies that remain in the safe <code>log_only</code> default stay in Usage Setup Required until their real stock-to-usage conversion is reviewed.</p>
           </div>
         </div>
         <div class="grid cols-5 inventory-integrity-summary">
@@ -167,6 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </label>
           <button class="btn primary" type="button" id="inventoryIntegrityLoad">Load 40-item queue</button>
           <button class="btn" type="button" id="inventoryIntegrityRefresh">Refresh queue</button>
+          <button class="btn" type="button" id="inventoryIntegrityOpenNextCount" hidden disabled>Open next count due</button>
         </div>
         <div id="inventoryIntegrityMessage" class="small" hidden aria-live="polite"></div>
         <div id="inventoryIntegrityList" class="inventory-integrity-list"><div class="small">This large review queue is paused during page startup. Choose Load 40-item queue when you are ready to work it.</div></div>
@@ -203,7 +212,21 @@ document.addEventListener('DOMContentLoaded', () => {
       state.offset = Number(state.nextOffset || 0);
       load();
     });
+    document.getElementById('inventoryIntegrityOpenNextCount')?.addEventListener('click', openNextCountDue);
     mount.addEventListener('click', onAction);
+  }
+
+  function openNextCountDue() {
+    const due=state.items.filter(item=>Number(item.physical_count_due||0)===1);
+    if(!due.length)return;
+    const item=due[state.countCursor%due.length],inventoryId=Number(item.site_item_inventory_id||0);
+    state.countCursor=(state.countCursor+1)%due.length;
+    try{sessionStorage.setItem('ddBuild201CountCursor',String(state.countCursor));}catch{}
+    const article=mount.querySelector('[data-integrity-item="'+inventoryId+'"]');
+    article?.scrollIntoView({behavior:'smooth',block:'center'});
+    mount.querySelector('[data-count-qty="'+inventoryId+'"]')?.focus();
+    renderSummary();
+    setMessage('Count form opened for '+String(item.item_name||item.external_key||('Inventory #'+inventoryId))+'. Review the shelf/bin quantity and save explicitly when ready.');
   }
 
   async function load() {
@@ -216,6 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await window.DDAuth.apiFetch(url, { cache: 'no-store' });
       const data = await read(response, 'Inventory integrity review could not be loaded.');
       state.items = Array.isArray(data.items) ? data.items : [];
+      try{state.countCursor=Number(sessionStorage.getItem('ddBuild201CountCursor')||0)||0;}catch{state.countCursor=0;}
       state.summary = data.summary || {};
       state.nextOffset = data.next_offset == null ? null : Number(data.next_offset);
       renderSummary();
