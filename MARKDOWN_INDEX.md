@@ -4,6 +4,8 @@
 
 Current verified baseline: **Release 467 Build 192 — Release Regression & Runtime Budget Convergence**, fully GREEN in Development and Production.
 
+Active candidate: **Release 467 Build 193 — Current Authority & Handoff Convergence**. The machine pointer and current I.T./Preflight/Reliability surfaces are being converged over the immutable Build 192 proof bundle.
+
 Read in this order:
 
 1. `AI_HANDOFF.md`

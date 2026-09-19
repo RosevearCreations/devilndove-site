@@ -25,7 +25,7 @@ Build 192 closed the 187–192 roadmap with code-only / zero-D1 Production promo
 
 Use `docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md`.
 
-Next planned build: **Release 467 Build 193 — Current Authority & Handoff Convergence**.
+Active candidate: **Release 467 Build 193 — Current Authority & Handoff Convergence**.
 
 The 193–200 sequence is measured-work driven:
 
@@ -39,6 +39,15 @@ The 193–200 sequence is measured-work driven:
 8. Build 200 — Storefront Launch Set & Autonomous Closure
 
 Historical unscoped “Build 193–200” artifacts are not current Release 467 authority.
+
+## Active Build 193 authority transition
+
+- Machine pointer: Release 467 Build 193 candidate.
+- Immutable predecessor: Build 192 Development `76321bfc975862ce2463e87450852c19fc98c852`.
+- Production predecessor: Build 192 `main` `451ca8173b9ad3127f84f352ed0a8d7774e53b14`.
+- Shared Build 192 tree: `5752f7e0be8c432d2cc45b5de08c349208ee497a`.
+- Build 193 is release/provenance convergence only; business data and external lanes remain unchanged.
+- Build 194 remains next only after Build 193 is exact-SHA Production GREEN.
 
 ## Restart rule
 

@@ -23,13 +23,17 @@ Build 192 centralized provider-metered D1 budgets, retained one Product-detail c
 - Media: 10 Product alt-text attention items, 2 blank Inventory images, 141 external Inventory image references.
 - Cost: 4 missing-cost links; 2 Products remain margin-review.
 
+## Active Build 193
+
+Build 193 is now the active Development closure candidate. It repairs stale machine/I.T. restart truth only and inherits exact Build 192 GREEN as its immutable predecessor. No Product/Inventory/customer business-data mutation is part of this build.
+
 ## Active roadmap — Release 467 Builds 193–200
 
 Primary roadmap: `docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md`.
 
 | Build | Focus | State |
 |---|---|---|
-| 193 | Current Authority & Handoff Convergence | Next |
+| 193 | Current Authority & Handoff Convergence | Active candidate |
 | 194 | D1 Evidence Headroom Optimization | Planned |
 | 195 | Buyer Readiness Repair Workbench | Planned |
 | 196 | Supplier & Source Evidence Workbench | Planned |

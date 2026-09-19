@@ -1,0 +1,100 @@
+name: Release 467 Build 193 Current Authority Handoff Convergence
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'current-development-authority.json'
+      - 'release467-build192-release-runtime-budget-convergence-closure.json'
+      - 'release467-build193-current-authority-handoff-convergence.json'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'admin/it/index.html'
+      - 'admin/deployment-preflight/index.html'
+      - 'admin/reliability/index.html'
+      - 'AI_HANDOFF.md'
+      - 'PROJECT_STATUS_AND_ROADMAP.md'
+      - 'MARKDOWN_INDEX.md'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+      - 'docs/operations/RELEASE_467_BUILD_193_CURRENT_AUTHORITY_HANDOFF_CONVERGENCE.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md'
+      - 'scripts/release467_build171_gate.py'
+      - 'scripts/release467_build193_gate.py'
+      - '.github/workflows/release467-build193-current-authority-handoff-convergence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-convergence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Prove Build 193 current authority convergence
+        run: python scripts/release467_build193_gate.py
+
+      - name: Record exact Build 193 source evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os
+          proof={
+            'release':467,
+            'build':193,
+            'status':'PASS',
+            'kind':'release467-build193-exact-evidence',
+            'source_sha':os.environ.get('GITHUB_SHA'),
+            'ref':os.environ.get('GITHUB_REF'),
+            'ref_name':os.environ.get('GITHUB_REF_NAME'),
+            'event':os.environ.get('GITHUB_EVENT_NAME'),
+            'run_id':os.environ.get('GITHUB_RUN_ID'),
+            'run_attempt':os.environ.get('GITHUB_RUN_ATTEMPT'),
+            'predecessor_build':192,
+            'predecessor_development_sha':'76321bfc975862ce2463e87450852c19fc98c852',
+            'predecessor_production_sha':'451ca8173b9ad3127f84f352ed0a8d7774e53b14',
+            'predecessor_tree':'5752f7e0be8c432d2cc45b5de08c349208ee497a',
+            'live_d1_execution_by_build193':False,
+            'remote_d1_queries_by_build193':0,
+            'schema_migration':False,
+            'd1_business_data_mutation':False,
+            'r2_mutation':False,
+            'provider_execution':False,
+            'payment_refund_action':False,
+            'accounting_posting':False,
+            'production_code_only_zero_d1_required':True,
+            'next_planned_build':194,
+          }
+          json.dump(proof,open('/tmp/release467-build193-exact-evidence.json','w'),indent=2,sort_keys=True)
+          print(json.dumps(proof,indent=2,sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release467-build193-exact-evidence-${{ github.sha }}
+          path: /tmp/release467-build193-exact-evidence.json
+          retention-days: 180
+          if-no-files-found: error
+
+      - name: Boundary
+        run: |
+          echo 'Release 467 Build 193: release/restart provenance convergence only.'
+          echo 'Build 192 exact Development and Production closure is the immutable predecessor.'
+          echo 'Build 170/171 remain historical provenance.'
+          echo 'Build 193 live D1 execution: ZERO.'
+          echo 'Code-only Production promotion: ZERO-D1 required.'
+          echo 'No schema/D1 business-data/R2/provider/payment/refund/accounting mutation is authorized.'
