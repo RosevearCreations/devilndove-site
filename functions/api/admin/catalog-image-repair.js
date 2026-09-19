@@ -4,13 +4,13 @@
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { buildReadBudgetHeaders } from '../_lib/d1ReadBudget.js';
 
-const BUILD=184, CLOSURE_BUILD=190, MAX_ROWS=40, MAX_IMAGE_ROWS=240;
+const BUILD=184, CLOSURE_BUILD=190, RECONCILIATION_BUILD=202, MAX_ROWS=40, MAX_IMAGE_ROWS=240;
 const APPROVED_PRODUCT_USE=new Set(['product_page_ok','all_public_ok']);
 const PUBLIC_ORIGIN='https://assets.devilndove.com';
 const rows=(r)=>Array.isArray(r?.results)?r.results:[];
 const n=(v)=>Number(v||0);
 const text=(v)=>normalizeText(v);
-const json=(data,status=200,routeKey='admin_catalog_image_repair_v184',limit=MAX_ROWS)=>jsonResponse({release:467,build:BUILD,closure_build:CLOSURE_BUILD,read_only:true,...data},status,{
+const json=(data,status=200,routeKey='admin_catalog_image_repair_v184',limit=MAX_ROWS)=>jsonResponse({release:467,build:BUILD,closure_build:CLOSURE_BUILD,reconciliation_build:RECONCILIATION_BUILD,read_only:true,...data},status,{
   'Cache-Control':'no-store',
   ...buildReadBudgetHeaders(routeKey,{limit}),
 });
@@ -169,8 +169,9 @@ async function summary(db){
   };
 }
 
-async function productRows(db,q,limit){
+async function productRows(db,q,limit,issue='all'){
   const like=`%${String(q||'').toLowerCase()}%`;
+  const safeIssue=['all','alt_text'].includes(issue)?issue:'all';
   const result=await db.prepare(`
     WITH role_by_image AS (
       SELECT product_image_id,MAX(CASE WHEN TRIM(COALESCE(image_role,''))<>'' THEN 1 ELSE 0 END) AS has_role
@@ -199,13 +200,14 @@ async function productRows(db,q,limit){
     SELECT * FROM base
     WHERE (?='' OR LOWER(COALESCE(name,'')) LIKE ? OR LOWER(COALESCE(sku,'')) LIKE ? OR LOWER(COALESCE(slug,'')) LIKE ? OR CAST(product_id AS TEXT)=?)
       AND (TRIM(COALESCE(featured_image_url,''))='' OR image_count<3 OR alt_attention>0 OR role_attention>0 OR featured_not_in_gallery>0 OR image_source_attention>0)
+      AND (?='all' OR (?='alt_text' AND alt_attention>0))
     ORDER BY
       (CASE WHEN image_count=0 THEN 8 ELSE 0 END
        +CASE WHEN TRIM(COALESCE(featured_image_url,''))='' THEN 6 ELSE 0 END
        +alt_attention*2+role_attention*2+featured_not_in_gallery*4+image_source_attention*3) DESC,
       LOWER(COALESCE(name,'')),product_id
     LIMIT ?
-  `).bind(q,like,like,like,q,limit).all();
+  `).bind(q,like,like,like,q,safeIssue,safeIssue,limit).all();
   const products=rows(result).map(r=>({...r,image_count:n(r.image_count),alt_attention:n(r.alt_attention),role_attention:n(r.role_attention),featured_not_in_gallery:n(r.featured_not_in_gallery),image_source_attention:n(r.image_source_attention),issues:productIssueCodes(r),images:[]}));
   const ids=products.map(r=>n(r.product_id)).filter(Boolean);
   if(!ids.length)return products;
@@ -254,8 +256,9 @@ async function productRows(db,q,limit){
   return products;
 }
 
-async function inventoryRows(db,q,kind,limit){
+async function inventoryRows(db,q,kind,limit,issue='all'){
   const like=`%${String(q||'').toLowerCase()}%`;
+  const safeIssue=['all','missing_image','external_source','authority_drift'].includes(issue)?issue:'all';
   const result=await db.prepare(`
     WITH active_inventory AS (
       SELECT sii.site_item_inventory_id,LOWER(TRIM(COALESCE(sii.source_type,''))) item_kind,
@@ -287,12 +290,18 @@ async function inventoryRows(db,q,kind,limit){
         OR (TRIM(COALESCE(ai.image_url,''))<>'' AND LOWER(TRIM(ai.image_url)) NOT LIKE 'https://assets.devilndove.com/%')
         OR (TRIM(COALESCE(ai.image_url,''))<>'' AND TRIM(COALESCE(cr.image_url,''))<>'' AND TRIM(ai.image_url)<>TRIM(cr.image_url))
       )
+      AND (
+        ?='all'
+        OR (?='missing_image' AND TRIM(COALESCE(ai.image_url,''))='')
+        OR (?='external_source' AND TRIM(COALESCE(ai.image_url,''))<>'' AND LOWER(TRIM(ai.image_url)) NOT LIKE 'https://assets.devilndove.com/%')
+        OR (?='authority_drift' AND TRIM(COALESCE(ai.image_url,''))<>'' AND TRIM(COALESCE(cr.image_url,''))<>'' AND TRIM(ai.image_url)<>TRIM(cr.image_url))
+      )
     ORDER BY
       CASE WHEN TRIM(COALESCE(ai.image_url,''))='' THEN 0 ELSE 1 END,
       CASE WHEN TRIM(COALESCE(cr.image_url,''))<>'' THEN 0 ELSE 1 END,
       LOWER(COALESCE(ai.item_name,'')),ai.site_item_inventory_id
     LIMIT ?
-  `).bind(q,like,like,like,like,kind,kind,limit).all();
+  `).bind(q,like,like,like,like,kind,kind,safeIssue,safeIssue,safeIssue,safeIssue,limit).all();
   return rows(result).map(r=>{
     const normalized={...r,issues:inventoryIssues(r),image_source_status:imageSourceStatus(r.image_url),r2_key:canonicalR2Key(r.image_url)||null,catalog_r2_key:canonicalR2Key(r.catalog_image_url)||null};
     normalized.evidence_token=mediaEvidenceToken('inventory',normalized);
@@ -399,11 +408,15 @@ export async function onRequestGet({request,env}){
   const url=new URL(request.url),mode=text(url.searchParams.get('mode')||'summary').toLowerCase();
   const q=text(url.searchParams.get('q')).slice(0,120),kindRaw=text(url.searchParams.get('kind')).toLowerCase();
   const kind=['tool','supply'].includes(kindRaw)?kindRaw:'';
+  const productIssueRaw=text(url.searchParams.get('product_issue')||'all').toLowerCase();
+  const inventoryIssueRaw=text(url.searchParams.get('inventory_issue')||'all').toLowerCase();
+  const productIssue=['all','alt_text'].includes(productIssueRaw)?productIssueRaw:'all';
+  const inventoryIssue=['all','missing_image','external_source','authority_drift'].includes(inventoryIssueRaw)?inventoryIssueRaw:'all';
   const limit=Math.max(1,Math.min(MAX_ROWS,Number(url.searchParams.get('limit')||MAX_ROWS)));
   try{
     if(mode==='summary')return json({ok:true,mode,authority:'live_d1_image_evidence',r2_execution:'none',mutation_capability:'none',summary:await summary(db)});
-    if(mode==='products')return json({ok:true,mode,q,limit,authority:'live_d1_image_evidence',r2_execution:'none',mutation_capability:'none',products:await productRows(db,q,limit)});
-    if(mode==='inventory')return json({ok:true,mode,q,kind,limit,authority:'live_d1_image_evidence',r2_execution:'none',mutation_capability:'none',inventory:await inventoryRows(db,q,kind,limit)});
+    if(mode==='products')return json({ok:true,mode,q,limit,product_issue:productIssue,authority:'live_d1_image_evidence',r2_execution:'none',mutation_capability:'none',products:await productRows(db,q,limit,productIssue)});
+    if(mode==='inventory')return json({ok:true,mode,q,kind,limit,inventory_issue:inventoryIssue,authority:'live_d1_image_evidence',r2_execution:'none',mutation_capability:'none',inventory:await inventoryRows(db,q,kind,limit,inventoryIssue)});
     if(mode==='r2_evidence'){
       const scope=text(url.searchParams.get('scope')).toLowerCase(),id=Number(url.searchParams.get('id')||0);
       if(!Number.isInteger(id)||id<=0)return json({ok:false,error:'A positive image/inventory id is required.'},400);
