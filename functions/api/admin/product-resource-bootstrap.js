@@ -1,7 +1,7 @@
 // Build 243/current: lightweight product/resource editor bootstrap. No Amazon registry and no schema PRAGMAs.
 // Build 157 bounds Product identity delivery so this secondary workspace cannot preload a 600-row Product universe.
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
-import { loadProducts, loadProductLinks } from './_productResourcesData.js';
+import { loadProducts, loadProductLinks, summarizeProductResourceLinks } from './_productResourcesData.js';
 
 const DEFAULT_PRODUCT_LIMIT = 80;
 const MAX_PRODUCT_LIMIT = 120;
@@ -28,14 +28,17 @@ export async function onRequestGet({ request, env }) {
       ok: true,
       products,
       links,
+      link_health_summary: summarizeProductResourceLinks(links),
       product_id: productId,
       read_budget: {
-        delivery: 'build157-bounded-bootstrap',
+        delivery: 'build185-bounded-resource-linkage',
         product_row_limit: productLimit,
         product_row_limit_default: DEFAULT_PRODUCT_LIMIT,
         product_row_limit_max: MAX_PRODUCT_LIMIT,
         resource_catalog_preloaded: false,
         selected_product_links_only: productId > 0,
+        base_balance_reads: productId > 0 ? 'single_batched_IN_query' : 'none',
+        catalog_inventory_linkage: 'grouped_ranked_once_per_selected_product',
       },
     });
   } catch (error) {
