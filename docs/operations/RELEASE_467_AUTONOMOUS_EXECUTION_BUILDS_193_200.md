@@ -56,9 +56,12 @@ Current authority uses the explicit labels **Release 467 Build 193** through **R
 
 ## Current checkpoint
 
-- Builds 187–192: **complete and Production GREEN**.
-- **Build 193 — next/current planned work**.
-- Builds 194–200: planned, not started.
+- Builds 187–193: **complete and Production GREEN**.
+- Build 193 protected-`main` merge: `649650b317bc2ad8ad6fbc0b42b0965d9653f9a7`.
+- **Build 193 — complete**.
+- **Build 194 — current**: D1 evidence headroom optimization plus owner-reported Home Media Studio assignment reliability.
+- **Build 195 — next after Build 194 is fully GREEN**.
+- Builds 196–200: planned, not started.
 
 ## Why this sequence
 
