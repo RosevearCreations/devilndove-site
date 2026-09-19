@@ -1,8 +1,8 @@
-# Release 467 — Autonomous Execution Roadmap, Builds 193–201
+# Release 467 — Autonomous Execution Roadmap, Builds 193–202
 
 ## Purpose
 
-Builds 193–201 are the current autonomous Devil n Dove sequence after the fully Production-GREEN Builds 187–192 closure block.
+Builds 193–202 are the current autonomous Devil n Dove sequence after the fully Production-GREEN Builds 187–192 closure block.
 
 The roadmap is evidence-driven. The Build 192 closure proved the runtime/catalog evidence gaps below, and the post-closure handoff review also found a release-authority consistency gap that must be repaired before more feature work.
 
@@ -23,7 +23,7 @@ The roadmap is evidence-driven. The Build 192 closure proved the runtime/catalog
 
 Older historical files use unscoped labels such as “Build 193” through “Build 200.” They are provenance from an older numbering era.
 
-Current authority uses the explicit labels **Release 467 Build 193** through **Release 467 Build 201** and the `RELEASE_467_BUILD_...` operations-document convention.
+Current authority uses the explicit labels **Release 467 Build 193** through **Release 467 Build 202** and the `RELEASE_467_BUILD_...` operations-document convention.
 
 ## Sequence
 
@@ -32,12 +32,13 @@ Current authority uses the explicit labels **Release 467 Build 193** through **R
 | **193** | Current Authority & Handoff Convergence | Ingest the exact Build 192 Development/Production closure into the machine pointer, current I.T./Preflight/Reliability truth and primary human handoff without changing business runtime. |
 | **194** | D1 Evidence Headroom Optimization | Reduce both media and Inventory evidence read amplification without relaxing their existing 20,000-row ceilings. |
 | **195** | Sitewide Media Studio Runtime & Carousel Recovery | Repair the owner-reported non-product media failure: reconcile deployed presentation slots into D1, restore responsive/placeholder replacement behavior, and let published Home carousel slides run while Media Studio owns the fallback image. |
-| **196** | Buyer Readiness Repair Workbench | Turn category/description/shipping/stock findings into explicit Product Editor repair work without inventing buyer facts. |
-| **197** | Supplier & Source Evidence Workbench | Turn missing supplier/source evidence into bounded Inventory repair queues without fabricated provenance. |
-| **198** | Cycle Count & Duplicate Identity Resolution | Provide safe count-due and duplicate-identity workflows; no automatic merge or stock rewrite. |
-| **199** | Catalog Reference & Media Reconciliation | Resolve catalog/image-reference work through existing Catalog, Inventory and Product Media authorities. |
-| **200** | Cost Evidence & Margin Readiness | Route missing cost evidence to existing Inventory/Product-resource authorities; margin stays evidence-derived and separate from accounting. |
-| **201** | Storefront Launch Set & Autonomous Closure | Converge buyer/Inventory/media/cost evidence into a reviewed launch-set/readiness closure; no automatic publication or provider/payment execution. |
+| **196** | Media Studio Save-to-Placement Convergence | Make “choose image → save” unambiguous: save metadata and placement separately, provide a primary Save & Use action for an open slot, and enforce one authoritative active assignment per presentation slot. |
+| **197** | Buyer Readiness Repair Workbench | Turn category/description/shipping/stock findings into explicit Product Editor repair work without inventing buyer facts. |
+| **198** | Supplier & Source Evidence Workbench | Turn missing supplier/source evidence into bounded Inventory repair queues without fabricated provenance. |
+| **199** | Cycle Count & Duplicate Identity Resolution | Provide safe count-due and duplicate-identity workflows; no automatic merge or stock rewrite. |
+| **200** | Catalog Reference & Media Reconciliation | Resolve catalog/image-reference work through existing Catalog, Inventory and Product Media authorities. |
+| **201** | Cost Evidence & Margin Readiness | Route missing cost evidence to existing Inventory/Product-resource authorities; margin stays evidence-derived and separate from accounting. |
+| **202** | Storefront Launch Set & Autonomous Closure | Converge buyer/Inventory/media/cost evidence into a reviewed launch-set/readiness closure; no automatic publication or provider/payment execution. |
 
 ## Execution rules
 
@@ -53,18 +54,20 @@ Current authority uses the explicit labels **Release 467 Build 193** through **R
 10. Stripe, PayPal, Social/OAuth and other external lanes remain HOLD_EXTERNAL unless separately authorized.
 11. Each build owns an operations Markdown, fail-closed source gate, exact Development proof, protected-main promotion and exact Production proof.
 12. Code-only Production promotions use the zero-D1 path.
-13. Build 201 closes the sequence and defines the next block only from then-current measured evidence.
+13. Build 202 closes the sequence and defines the next block only from then-current measured evidence.
 
 ## Current checkpoint
 
-- Builds 187–194: **complete and Production GREEN**.
+- Builds 187–195: **complete and Production GREEN**.
 - Build 193 protected-`main` merge: `649650b317bc2ad8ad6fbc0b42b0965d9653f9a7`.
 - Build 194 protected-`main` merge: `8bfd3902fb95146edadde59f653ecbebd13fb9ed`.
+- Build 195 protected-`main` merge: `2855881cfb81f20355ada9b15afd4fe1a14905e9`.
 - **Build 193 — complete**.
-- **Build 194 — complete**: D1 evidence headroom optimization reached 9,821 Inventory rows-read and 9,967 Media rows-read, but the subsequent owner acceptance exposed a broader presentation-runtime regression.
-- **Build 195 — current**: Sitewide Media Studio Runtime & Carousel Recovery. Owner acceptance reported the Home carousel/placeholder stopped working and non-product studio/engagement images still could not be reliably changed across the application.
-- **Build 196 — next after Build 195 is fully GREEN**: Buyer Readiness Repair Workbench.
-- Builds 197–201: planned, not started.
+- **Build 194 — complete**: D1 evidence headroom optimization reached 9,821 Inventory rows-read and 9,967 Media rows-read.
+- **Build 195 — complete**: Sitewide Media Studio Runtime & Carousel Recovery restored carousel/fallback authority, slot reconciliation, responsive image replacement, placeholder cleanup and corrected runtime cache coverage.
+- **Build 196 — current**: Media Studio Save-to-Placement Convergence. Owner acceptance after Build 195 showed that selecting an image and pressing the prominent metadata Save button did not assign it to the page, and assignment authority must also fail closed to exactly one active row.
+- **Build 197 — next after Build 196 is fully GREEN**: Buyer Readiness Repair Workbench.
+- Builds 198–202: planned, not started.
 
 ## Why this sequence
 
@@ -75,4 +78,9 @@ After authority convergence, the largest operational risk is D1 headroom, follow
 
 ## Build 195 insertion note
 
-Build 195 was re-scoped before buyer-readiness work began because owner acceptance after Build 194 exposed a release-blocking presentation failure. The planned buyer-through-launch sequence is preserved by shifting it one build later, through Build 201. The filename is retained for historical links even though the roadmap now extends through Build 201.
+Build 195 was re-scoped before buyer-readiness work began because owner acceptance after Build 194 exposed a release-blocking presentation failure. The planned buyer-through-launch sequence is preserved by shifting it one build later, through Build 201 at that time. The filename is retained for historical links even though the roadmap now extends through Build 201.
+
+
+## Build 196 insertion note
+
+Build 196 was inserted after owner acceptance on Production-GREEN Build 195 showed a distinct save/placement usability failure: the image-details Save action was metadata-only, so a user could reasonably choose an image, press Save, and see no page change. The repair makes placement explicit and verifies exactly one active assignment. The previously planned buyer-through-launch sequence is shifted one build later, through Build 202.
