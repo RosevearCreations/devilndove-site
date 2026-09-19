@@ -120,14 +120,19 @@ req(public_page.lower().count("<h1")==1,"Creations page must keep exactly one H1
 for token in ("creation_catalog_uses","creation-card use","LOWER(TRIM(COALESCE(item_kind,'')))='creation' AND image_url=?"):
     req(token in media_api,f"Managed-media creation-use protection missing: {token}")
 
-for token in (
+legacy_roadmap=all(token in roadmap for token in (
     "Build 200 — complete",
     "Build 201 — current",
     "Build 202 — next after Build 201 is fully GREEN",
     "Builds 203–204: planned, not started",
     "Build 201 owner-acceptance addition",
-):
-    req(token in roadmap,f"Build 201 roadmap checkpoint missing: {token}")
+))
+successor_roadmap=(
+    "Build 201 — complete" in roadmap
+    and "Build 201 owner-acceptance addition" in roadmap
+    and any(token in roadmap for token in ("Build 202 — current","Build 202 — complete","Build 203 — current","Build 203 — complete","Build 204 — current","Build 204 — complete"))
+)
+req(legacy_roadmap or successor_roadmap,"Build 201 roadmap checkpoint must be current or explicitly closed by Build 202 or later successors")
 for token in (
     "exact starting boundary",
     "Creation Image Editor",
