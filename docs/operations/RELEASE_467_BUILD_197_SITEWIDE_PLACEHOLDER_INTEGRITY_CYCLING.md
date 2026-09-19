@@ -14,7 +14,7 @@ Build 197 starts from:
 
 ## Source audit
 
-The current public/static presentation source contains **22 SVG image placeholders across 20 public pages**.
+The current public/static presentation source contains **29 SVG image placeholders across 22 public pages**.
 
 The Home page contains the three owner-reported placeholder locations:
 
@@ -25,6 +25,7 @@ The Home page contains the three owner-reported placeholder locations:
 The audit found:
 
 - no duplicate placeholder slot keys in HTML;
+- seven catalog placeholder visuals were found missing the HTML placeholder marker; six hero slots were normalized and the missing Collections section placeholder was rendered;
 - one matching slot-catalog definition for every placeholder;
 - no catalog placeholder definition without a corresponding HTML placeholder;
 - every placeholder catalog row uses an image slot and an exact `[data-media-slot="..."]` selector;
@@ -55,7 +56,7 @@ The audit found:
 
 ## Acceptance
 
-- Source audit remains exactly 22 placeholders across 20 pages until a deliberate source/catalog change updates this contract.
+- Source audit remains exactly 29 placeholders across 22 pages until a deliberate source/catalog change updates this contract.
 - All three Home placeholder keys are present and unique.
 - HTML and catalog placeholder inventories match bidirectionally.
 - Media Studio reconciles all placeholders before page-by-page editing begins.
