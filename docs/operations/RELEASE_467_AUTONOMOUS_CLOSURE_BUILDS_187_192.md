@@ -35,8 +35,8 @@ These builds are intentionally chosen so they can be completed without Stripe, P
 - Build 188 — complete: Buyer Readiness Closure.
 - Build 189 — complete: Inventory Evidence Closure.
 - Build 190 — complete: Product & Inventory Media Evidence Closure.
-- Build 191 — current: Cost, Usage & Profitability Evidence Closure.
-- Build 192 — next after Build 191 is fully GREEN: Release Regression & Runtime Budget Convergence.
+- Build 191 — complete: Cost, Usage & Profitability Evidence Closure.
+- Build 192 — current and final planned build in this sequence: Release Regression & Runtime Budget Convergence.
 
 ## Why this sequence
 
