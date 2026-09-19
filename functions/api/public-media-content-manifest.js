@@ -7,7 +7,7 @@ function cleanPath(value){let path=normalizeText(value||'/');try{if(/^https?:\/\
 
 export async function onRequestGet(context){
   const db=getDb(context.env); if(!db)return json({ok:true,page_path:'/',images:[],content:[]},200,{"Cache-Control":"public, max-age=30"});
-  const url=new URL(context.request.url); const path=cleanPath(url.searchParams.get('path')||'/');
+  const url=new URL(context.request.url); const path=cleanPath(url.searchParams.get('path')||'/'); const refresh=normalizeText(url.searchParams.get('refresh')); const cacheHeaders=refresh?{"Cache-Control":"no-store"}:{"Cache-Control":"public, max-age=30, s-maxage=60","Vary":"Accept-Encoding"};
   try{
     const result=await db.prepare(`
       SELECT s.media_content_slot_id,s.slot_key,s.slot_label,s.slot_type,s.target_selector,s.target_attribute,
@@ -29,9 +29,9 @@ export async function onRequestGet(context){
       }
       if(row.slot_type==='text'&&Number(row.published||0)===1&&row.published_text!=null){const kind=row.target_attribute==='href'?'link':row.target_attribute==='background-color'?'color':'text';content.push({slot_key:row.slot_key,slot_type:kind,target_selector:row.target_selector,target_attribute:row.target_attribute,value:String(row.published_text),text:String(row.published_text)});}
     }
-    return json({ok:true,page_path:path,images,content},200,{"Cache-Control":"public, max-age=30, s-maxage=60","Vary":"Accept-Encoding"});
+    return json({ok:true,page_path:path,images,content},200,cacheHeaders);
   }catch{
     // Pre-migration deployments must not break public pages.
-    return json({ok:true,page_path:path,images:[],content:[],studio_ready:false},200,{"Cache-Control":"public, max-age=15"});
+    return json({ok:true,page_path:path,images:[],content:[],studio_ready:false},200,refresh?{"Cache-Control":"no-store"}:{"Cache-Control":"public, max-age=15"});
   }
 }
