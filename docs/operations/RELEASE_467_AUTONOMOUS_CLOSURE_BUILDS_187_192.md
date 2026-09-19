@@ -34,9 +34,9 @@ These builds are intentionally chosen so they can be completed without Stripe, P
 - Build 187 — complete: Catalog Repair Action Framework.
 - Build 188 — complete: Buyer Readiness Closure.
 - Build 189 — complete: Inventory Evidence Closure.
-- Build 190 — current: Product & Inventory Media Evidence Closure.
-- Build 191 — next after Build 190 is fully GREEN: Cost, Usage & Profitability Evidence Closure.
-- Build 192 — planned, not started.
+- Build 190 — complete: Product & Inventory Media Evidence Closure.
+- Build 191 — current: Cost, Usage & Profitability Evidence Closure.
+- Build 192 — next after Build 191 is fully GREEN: Release Regression & Runtime Budget Convergence.
 
 ## Why this sequence
 
