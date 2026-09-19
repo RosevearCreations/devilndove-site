@@ -1,5 +1,6 @@
 // Release 467 Build 166 — lean, fail-fast public Product renderer.\n// Release 467 Build 179 successor: one fetched snapshot is shared with SEO/parity enhancers; no duplicate Product request.
 // Release 467 Build 180 successor: start immediately from the body-end script so the Product read begins before optional storefront helpers.
+// Release 467 Build 186 successor: production-canonical metadata, Product social metadata, and priority-aware primary imagery without an additional Product request.
 // Uses the bounded Product core endpoint, converts legacy media references to same-origin R2 reads,
 // and never retries automatically or leaves the browser waiting indefinitely.
 (()=>{
@@ -10,6 +11,28 @@
   const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value??'';};
   const show=(el)=>{if(el)el.style.display='';},hide=(el)=>{if(el)el.style.display='none';};
   const placeholder='/assets/product-image-recovery-placeholder.svg';
+  const productionOrigin='https://devilndove.com';
+  function canonicalForProduct(product){
+    const slug=String(product?.slug||'').trim();
+    const fallback=slug?`${productionOrigin}/shop/product/?slug=${encodeURIComponent(slug)}`:`${productionOrigin}/shop/product/`;
+    const raw=String(product?.canonical_url||'').trim();
+    if(!raw)return fallback;
+    try{
+      const url=new URL(raw,productionOrigin);
+      if(url.hostname==='devilndove.com'||url.hostname==='www.devilndove.com'){
+        url.protocol='https:';url.hostname='devilndove.com';url.hash='';
+        return url.toString();
+      }
+      if(raw.startsWith('/'))return new URL(raw,productionOrigin).toString();
+    }catch{}
+    return fallback;
+  }
+  function setMeta(attr,key,value){
+    const content=String(value||'').trim();if(!content)return;
+    let node=document.querySelector(`meta[${attr}="${key}"]`);
+    if(!node){node=document.createElement('meta');node.setAttribute(attr,key);document.head.appendChild(node);}
+    node.setAttribute('content',content);
+  }
 
   function publicMediaUrl(raw){
     const value=String(raw||'').trim();if(!value)return placeholder;
@@ -25,9 +48,10 @@
       return value;
     }catch{return placeholder;}
   }
-  function imageTag(row,cls=''){
+  function imageTag(row,cls='',priority=false){
     const src=publicMediaUrl(row?.image_url||'');
-    return `<img class="${cls}" src="${esc(src)}" alt="${esc(row?.alt_text||'Product image')}" loading="lazy" data-product-v166-image>`;
+    const loading=priority?'eager':'lazy',fetchPriority=priority?'high':'auto';
+    return `<img class="${cls}" src="${esc(src)}" alt="${esc(row?.alt_text||'Product image')}" loading="${loading}" decoding="async" fetchpriority="${fetchPriority}" data-product-v166-image>`;
   }
   function armImages(){document.querySelectorAll('[data-product-v166-image]').forEach((img)=>{img.onerror=()=>{img.onerror=null;img.src=placeholder;};});}
   async function fetchJson(url,timeoutMs=8000){
@@ -47,13 +71,18 @@
     setText('productShipping',Number(product.requires_shipping||0)===1?'Yes':'No');setText('productTaxClass',product.tax_class_name||product.tax_class_code||'Standard');
     setText('productInventory',Number(product.inventory_tracking||0)===1?String(Number(product.inventory_quantity||product.on_hand_quantity||0)):'Not tracked');
     const desc=document.getElementById('productDescription');if(desc)desc.innerHTML=esc(product.description||product.short_description||'').replace(/\n/g,'<br>');
-    const main=document.getElementById('productMainImageWrap');if(main)main.innerHTML=images.length?`<div class="product-detail-main-image">${imageTag(images[0])}</div>`:'<div class="product-detail-main-image product-detail-no-image"><span class="small">No image available</span></div>';
+    const main=document.getElementById('productMainImageWrap');if(main)main.innerHTML=images.length?`<div class="product-detail-main-image">${imageTag(images[0],'',true)}</div>`:'<div class="product-detail-main-image product-detail-no-image"><span class="small">No image available</span></div>';
     const gallery=document.getElementById('productGallery');if(gallery)gallery.innerHTML=images.length>1?`<div class="product-detail-thumbs">${images.map((row,i)=>`<button type="button" class="product-detail-thumb${i===0?' is-active':''}" data-v166-src="${esc(publicMediaUrl(row.image_url))}" data-v166-alt="${esc(row.alt_text||product.name||'Product image')}">${imageTag(row)}</button>`).join('')}</div>`:'';
     gallery?.querySelectorAll('[data-v166-src]').forEach((button)=>button.addEventListener('click',()=>{const img=main?.querySelector('img');if(img){img.src=button.dataset.v166Src||placeholder;img.alt=button.dataset.v166Alt||'Product image';}gallery.querySelectorAll('.product-detail-thumb').forEach((b)=>b.classList.remove('is-active'));button.classList.add('is-active');}));
     armImages();
-    document.title=`${product.meta_title||product.name||'Product'} — Devil n Dove`;
+    const title=`${product.meta_title||product.name||'Product'} — Devil n Dove`;document.title=title;
     const description=product.meta_description||product.short_description||'View product details from Devil n Dove.';document.querySelector('meta[name="description"]')?.setAttribute('content',description);
-    const canonical=product.canonical_url||location.href;document.querySelector('link[rel="canonical"]')?.setAttribute('href',canonical);
+    const canonical=canonicalForProduct(product);document.querySelector('link[rel="canonical"]')?.setAttribute('href',canonical);
+    const primaryImage=images.length?publicMediaUrl(images[0].image_url):'';
+    setMeta('property','og:type','product');setMeta('property','og:title',product.og_title||title);setMeta('property','og:description',product.og_description||description);setMeta('property','og:url',canonical);
+    if(primaryImage){setMeta('property','og:image',new URL(primaryImage,productionOrigin).toString());setMeta('property','og:image:alt',images[0]?.alt_text||product.name||'Product image');}
+    setMeta('name','twitter:card','summary_large_image');setMeta('name','twitter:title',product.og_title||title);setMeta('name','twitter:description',product.og_description||description);
+    if(primaryImage)setMeta('name','twitter:image',new URL(primaryImage,productionOrigin).toString());
     const optional=['productQuickFactsCard','productVideoCard','productPublicStoryCard','productStoryCard','productReviewsCard','productCandleSoapSafetyCard','productRelatedProofCard'];optional.forEach((id)=>hide(document.getElementById(id)));
     const trust=document.getElementById('productTrustSummary');if(trust)trust.textContent='This Product page now loads from a bounded Product record and existing gallery references so shopping remains responsive.';
     show(detail);

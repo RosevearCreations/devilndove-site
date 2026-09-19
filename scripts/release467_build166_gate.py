@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 166 — Product editing and image stabilization gate."""
+"""Release 467 Build 166 — Product editing and image stabilization gate, successor-aware through Build 186."""
 from pathlib import Path
 import subprocess,sys
 ROOT=Path(__file__).resolve().parents[1];FAIL=[]
@@ -22,7 +22,7 @@ for token in ('AbortController','8000','/api/product-detail-core','publicMediaUr
     req(token in detail,f'Lean Product renderer missing: {token}')
 for forbidden in ('setInterval(','MutationObserver','/api/product-detail?'):
     req(forbidden not in detail,f'Lean Product renderer gained eager/heavy behavior: {forbidden}')
-req(any(token in page for token in ('/public/js/product-detail-v166.js?v=166','/public/js/product-detail-v166.js?v=179','/public/js/product-detail-v166.js?v=180')),'Product page does not load Build 166 lean renderer or Build 179/180 cache-key successor')
+req(any(token in page for token in ('/public/js/product-detail-v166.js?v=166','/public/js/product-detail-v166.js?v=179','/public/js/product-detail-v166.js?v=180','/public/js/product-detail-v166.js?v=186')),'Product page does not load Build 166 lean renderer or Build 179/180/186 cache-key successor')
 req('/public/js/product-detail.js?v=224' not in page,'Product page still loads legacy heavy Product renderer')
 req('/public/js/storefront-product-experience.js?v=74' not in page,'Product page still loads duplicate legacy Product experience renderer')
 req("export { onRequestGet } from '../api/product-media.js';" in media_alias,'Legacy /media/product compatibility route is not R2-only alias')

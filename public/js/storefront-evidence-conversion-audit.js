@@ -1,4 +1,5 @@
 // Release 467 Build 110 — Storefront Evidence & SEO Conversion Audit.
+// Release 467 Build 186 successor — snapshot-safe Product JSON-LD bootstrap and production-canonical Product URLs.
 // Uses only Product data already loaded or rendered by the owning Storefront page. No API request, Product mutation, provider call, or publication action is added.
 (() => {
   'use strict';
@@ -41,6 +42,18 @@
     || /\blocal pickup\b|\bcurbside pickup\b|\bpickup eligible\b/.test(lower([product.fulfilment_notes, product.shipping_notes, product.locality_label].map(text).join(' | ')));
   const inventoryKnown = (product = {}) => Number(product.inventory_tracking || 0) === 1 || Number.isFinite(Number(product.inventory_quantity));
   const productUrl = (product = {}) => product.slug ? absolute(`/shop/product/?slug=${encodeURIComponent(product.slug)}`) : absolute('/shop/');
+  const productCanonical = (product = {}) => {
+    const fallback = productUrl(product);
+    const raw = text(product.canonical_url);
+    if (!raw) return fallback;
+    try {
+      const parsed = new URL(raw, 'https://devilndove.com');
+      if (raw.startsWith('/') || ['devilndove.com','www.devilndove.com'].includes(parsed.hostname)) {
+        return new URL(`${parsed.pathname}${parsed.search}`, 'https://devilndove.com').href;
+      }
+    } catch {}
+    return fallback;
+  };
   const setJsonLd = (id, payload) => {
     let script = document.getElementById(id);
     if (!script) {
@@ -88,7 +101,7 @@
   function productSchema(detail = {}) {
     const product = detail.product || {};
     const images = productImages(product, detail.images || []);
-    const canonical = text(product.canonical_url) || productUrl(product);
+    const canonical = productCanonical(product);
     const schema = { '@context':'https://schema.org', '@type':text(product.schema_type) || 'Product', name:text(product.name) || 'Devil n Dove Product', url:canonical, seller:{ '@type':'Organization', name:'Devil n Dove', url:absolute('/') } };
     const description = text(product.meta_description || product.short_description || product.description);
     if (description) schema.description = description;
@@ -164,14 +177,29 @@
     return true;
   }
 
+  function bootProductAudit() {
+    const snapshot = globalThis.DDProductDetailSnapshot;
+    if (snapshot?.product) {
+      renderProductAudit(snapshot);
+      return true;
+    }
+    if (renderProductAuditFromDom()) return true;
+    const detail = document.getElementById('productDetail');
+    if (!detail || typeof MutationObserver === 'undefined') return false;
+    const observer = new MutationObserver(() => {
+      const current = globalThis.DDProductDetailSnapshot;
+      if (current?.product) {
+        renderProductAudit(current);
+        observer.disconnect();
+      } else if (renderProductAuditFromDom()) observer.disconnect();
+    });
+    observer.observe(detail,{ childList:true, subtree:true, attributes:true, attributeFilter:['style'] });
+    return false;
+  }
+
   document.addEventListener('dd:shop:data',(event) => renderShopAudit(event.detail?.data || {}));
   document.addEventListener('dd:product-detail-rendered',(event) => renderProductAudit(event.detail || {}));
-  document.addEventListener('DOMContentLoaded',() => {
-    if (renderProductAuditFromDom()) return;
-    const detail = document.getElementById('productDetail');
-    if (!detail || typeof MutationObserver === 'undefined') return;
-    const observer = new MutationObserver(() => { if (renderProductAuditFromDom()) observer.disconnect(); });
-    observer.observe(detail,{ childList:true, subtree:true, attributes:true, attributeFilter:['style'] });
-  },{once:true});
-  globalThis.DDStorefrontEvidenceConversionAudit = Object.freeze({ BUILD, CONTRACT, realImage, productImages, proofFields, pickupEvidence, productSchema, renderShopAudit, renderProductAuditFromDom });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',bootProductAudit,{once:true});
+  else bootProductAudit();
+  globalThis.DDStorefrontEvidenceConversionAudit = Object.freeze({ BUILD, CONTRACT, realImage, productImages, proofFields, pickupEvidence, productCanonical, productSchema, renderShopAudit, renderProductAudit, renderProductAuditFromDom, bootProductAudit });
 })();
