@@ -111,6 +111,20 @@ export const D1_READ_BUDGETS = Object.freeze({
     max_concurrent_identical_gets: 1,
     notes: 'Build 184 quota hardening: Product/Inventory image health is explicit-only; Tool/Supply catalog matching is one grouped/ranked pass and R2 evidence is one object HEAD.'
   }),
+  admin_product_resource_linkage_v185: Object.freeze({
+    route: '/api/admin/product-resource-bootstrap',
+    risk: 'medium',
+    contract: 'explicit_selected_product_grouped_linkage',
+    server_caps: Object.freeze({
+      products: 120,
+      selected_product_links: 120,
+      resource_search: 120,
+      base_balance_ids: 120
+    }),
+    browser_cache_ms: 30000,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 185: Product resource work remains explicit-only. Inventory/catalog identity is grouped/ranked once, base-unit balances are loaded in one batched IN query, and blank resource search returns zero rows.'
+  }),
   admin_pending_actions: Object.freeze({
     route: '/api/admin/pending-actions',
     risk: 'medium',
