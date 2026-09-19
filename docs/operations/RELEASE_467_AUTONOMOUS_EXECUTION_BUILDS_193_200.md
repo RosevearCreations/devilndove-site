@@ -60,7 +60,7 @@ Current authority uses the explicit labels **Release 467 Build 193** through **R
 
 ## Current checkpoint
 
-- Builds 187–200: **complete and Production GREEN**.
+- Builds 187–201: **complete and Production GREEN**.
 - Build 193 protected-`main` merge: `649650b317bc2ad8ad6fbc0b42b0965d9653f9a7`.
 - Build 194 protected-`main` merge: `8bfd3902fb95146edadde59f653ecbebd13fb9ed`.
 - Build 195 protected-`main` merge: `2855881cfb81f20355ada9b15afd4fe1a14905e9`.
@@ -69,6 +69,7 @@ Current authority uses the explicit labels **Release 467 Build 193** through **R
 - Build 198 protected-`main` merge: `7777a7b929670faa30738b3ccd41356622fb0ffc`.
 - Build 199 protected-`main` merge: `fd92e3eec6a8db4283e83fb19db5cd81ab01929b`.
 - Build 200 protected-`main` merge: `b07e020fa23668b9689565fd7c16f36ef12f0a21`.
+- Build 201 protected-`main` merge: `54706ae1b62338098b3ca27a14b9bcda1dbd7aa6`.
 - **Build 193 — complete**.
 - **Build 194 — complete**: D1 evidence headroom optimization reached 9,821 Inventory rows-read and 9,967 Media rows-read.
 - **Build 195 — complete**: Sitewide Media Studio Runtime & Carousel Recovery restored carousel/fallback authority, slot reconciliation, responsive image replacement, placeholder cleanup and corrected runtime cache coverage.
@@ -77,9 +78,10 @@ Current authority uses the explicit labels **Release 467 Build 193** through **R
 - **Build 198 — complete**: Product Image Fidelity, Actionable Attention & Shared Help is Production GREEN at exact main SHA 7777a7b929670faa30738b3ccd41356622fb0ffc.
 - **Build 199 — complete**: Buyer Readiness Repair Workbench is Production GREEN at exact main SHA fd92e3eec6a8db4283e83fb19db5cd81ab01929b.
 - **Build 200 — complete**: Supplier & Source Evidence Workbench is Production GREEN at exact main SHA b07e020fa23668b9689565fd7c16f36ef12f0a21.
-- **Build 201 — current**: Cycle Count & Duplicate Identity Resolution provides explicit count-due/duplicate workflows with no automatic merge/count, and includes the owner-requested Creations-card image edit path so authenticated Editing ON previews can open the exact creation image authority.
-- **Build 202 — next after Build 201 is fully GREEN**: Catalog Reference & Media Reconciliation.
-- Builds 203–204: planned, not started.
+- **Build 201 — complete**: Cycle Count & Duplicate Identity Resolution + Creation Image Edit is Production GREEN at exact main SHA 54706ae1b62338098b3ca27a14b9bcda1dbd7aa6; the exact Development live-D1 proof used 12,198 / 12,500 provider-metered rows read.
+- **Build 202 — current**: Catalog Reference & Media Reconciliation separates unmatched catalog references, blank/external Inventory image references and Product alt-text evidence, then routes deliberate repair to the existing Catalog, Inventory Operations or Product Media authority.
+- **Build 203 — next after Build 202 is fully GREEN**: Cost Evidence & Margin Readiness.
+- Build 204: planned, not started.
 
 ## Why this sequence
 
