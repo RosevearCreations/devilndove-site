@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release 467 Build 179 — Runtime responsiveness and Inventory layout recovery gate, successor-aware through Build 185."""
+"""Release 467 Build 179 — Runtime responsiveness and Inventory layout recovery gate, successor-aware through Build 186."""
 from pathlib import Path
 import sys
 ROOT=Path(__file__).resolve().parents[1]; FAIL=[]
@@ -33,7 +33,7 @@ req('DDProductDetailSnapshot' in parity and 'dd:product-detail-rendered' in pari
 req('/api/product-detail?slug=' not in seo,'Product SEO still performs the retired duplicate Product detail read')
 req('DDProductDetailSnapshot' in seo and 'dd:product-detail-rendered' in seo,'Product SEO must consume the shared Product snapshot/event')
 req("pagePath === '/shop/'" in recent and "pagePath === '/shop/product/'" in recent,'Recently viewed optional helpers are not route-gated')
-req(any(token in page for token in ('/public/js/product-detail-v166.js?v=179','/public/js/product-detail-v166.js?v=180')) and '/public/js/seo-page-overrides.js?v=179' in page,'Product page Build 179/180 cache keys missing')
+req(any(token in page for token in ('/public/js/product-detail-v166.js?v=179','/public/js/product-detail-v166.js?v=180','/public/js/product-detail-v166.js?v=186')) and '/public/js/seo-page-overrides.js?v=179' in page,'Product page Build 179/180/186 cache keys missing')
 req('observe(document.documentElement' not in overlay,'Image-quality overlay still observes the full documentElement')
 req("attributeFilter:['src','class']" not in overlay,'Image-quality overlay still watches global class churn')
 for token in ('IntersectionObserver','MAX_CONCURRENT_SCORES=1','#mediaSlotBoard img,#mediaLibraryGrid img,#mediaSelectedPreview','img[data-media-slot]','Placeholder / SVG','Image score unavailable','same Release 448 product-photo rubric'): req(token in overlay,f'Image-quality recovery missing retained token: {token}')
