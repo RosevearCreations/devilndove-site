@@ -1,34 +1,14 @@
-# Release 467 Build 194 — Inventory Evidence Headroom Optimization
+# Superseded planning stub — Release 467 Build 194
 
-## Goal
+The original planning draft assigned Inventory Evidence Headroom Optimization alone to Build 194.
 
-Reduce the Build 189 Inventory-evidence proof cost while preserving duplicate, supplier/source, count-due and catalog-reference truth.
+After the Build 193 authority-convergence correction, Build 194 now combines both tight D1 evidence paths:
 
-## Measured starting point
+- Build 190 media evidence: 19,282 / 20,000 rows read.
+- Build 189 Inventory evidence: 15,487 / 20,000 rows read.
 
-- Build 189 provider rows read: **15,487 / 20,000**.
-- Active Inventory items: 1,040.
-- Duplicate-identity rows: 8.
-- Missing supplier names: 898.
-- Missing source references: 326.
-- Count due: 1,040.
-- Catalog matched: 897.
-- Catalog missing: 143.
+Current Build 194 authority:
 
-## Required scope
+`RELEASE_467_BUILD_194_D1_EVIDENCE_HEADROOM_OPTIMIZATION.md`
 
-- optimize grouped Inventory/catalog evidence without correlated per-row rescans;
-- preserve exact active/duplicate/supplier/source/count/catalog classifications;
-- keep one-record repair rechecks bounded;
-- ensure exact rechecks do not trigger the full summary scan;
-- target **<= 10,000 rows read** for the grouped Development proof if achievable without semantic loss;
-- keep the existing 20,000 ceiling until a lower provider-measured ceiling is proven;
-- expose which evidence dimensions drive remaining read cost.
-
-## Safety boundary
-
-No automatic duplicate merge, stock change, count entry, supplier invention, source-reference invention, purchasing, reorder placement, cost write, schema change or Production business-data read.
-
-## Acceptance
-
-Provider-metered exact Development proof must improve materially, retain semantic parity, and keep all Build 189 repair-routing contracts GREEN before protected-main Production promotion.
+Do not use this file as the active Build 194 authority.
