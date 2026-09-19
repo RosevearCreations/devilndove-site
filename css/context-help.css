@@ -1,0 +1,44 @@
+/* Release 467 Build 198 — contextual Online Help + readable operational attention. */
+.dd-context-help-trigger{
+  appearance:none;width:1.35rem;height:1.35rem;min-width:1.35rem;min-height:1.35rem;
+  display:inline-grid;place-items:center;margin-left:.4rem;padding:0;border-radius:50%;
+  border:1px solid color-mix(in srgb,var(--ice,#bfe8ff) 55%,transparent);
+  background:rgba(46,168,255,.10);color:var(--ice,#bfe8ff);font:700 .78rem/1 system-ui;
+  cursor:pointer;vertical-align:middle;
+}
+.dd-context-help-trigger:hover,.dd-context-help-trigger:focus-visible{background:rgba(46,168,255,.24);outline:2px solid rgba(191,232,255,.45);outline-offset:2px}
+.dd-heading-with-help{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap}
+.dd-heading-with-help .dd-context-help-trigger{margin-left:0}
+.dd-context-help-global{
+  position:fixed;left:14px;bottom:14px;z-index:4200;display:inline-flex;align-items:center;gap:.45rem;
+  padding:.6rem .8rem;border-radius:999px;border:1px solid rgba(191,232,255,.48);
+  background:rgba(15,19,26,.96);color:var(--text,#fff);box-shadow:0 10px 28px rgba(0,0,0,.35);cursor:pointer
+}
+.dd-context-help-global>span:first-child{width:1.35rem;height:1.35rem;border:1px solid currentColor;border-radius:50%;display:grid;place-items:center;font-weight:800}
+.dd-context-help-dialog{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.64);display:grid;place-items:center;padding:18px}
+.dd-context-help-dialog[hidden]{display:none}
+.dd-context-help-panel{width:min(840px,96vw);max-height:min(88vh,900px);overflow:auto;background:var(--card,#121722);color:var(--text,#f6f7fb);border:1px solid var(--border,#232a36);border-radius:18px;box-shadow:0 28px 90px rgba(0,0,0,.55);padding:18px}
+.dd-context-help-head{position:sticky;top:-18px;z-index:2;display:flex;justify-content:space-between;gap:16px;align-items:flex-start;background:var(--card,#121722);padding:18px 0 10px}
+.dd-context-help-head h2{margin:.15rem 0 0}
+.dd-context-help-close{appearance:none;border:1px solid var(--border,#232a36);border-radius:50%;background:rgba(255,255,255,.05);color:inherit;width:42px;height:42px;font-size:1.6rem;cursor:pointer}
+.dd-context-help-search-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin-bottom:14px}
+.dd-context-help-body{display:grid;gap:12px}
+.dd-context-help-article,.dd-context-help-topic{border:1px solid var(--border,#232a36);border-radius:14px;background:rgba(255,255,255,.025);padding:14px}
+.dd-context-help-article h3,.dd-context-help-article h4{margin:.2rem 0 .5rem}
+.dd-context-help-article ol{padding-left:1.3rem}
+.dd-context-help-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.dd-context-help-index{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.dd-context-help-topic{text-align:left;color:inherit;cursor:pointer;display:grid;gap:6px}
+.dd-context-help-topic span{font-size:.84rem;color:var(--muted,#aab3c2);line-height:1.45}
+.dd-context-help-topic:hover,.dd-context-help-topic:focus-visible{border-color:rgba(191,232,255,.55);background:rgba(46,168,255,.08)}
+html.dd-help-open{overflow:hidden}
+.runtime-attention-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:10px;margin-top:10px}
+.runtime-attention-card,.runtime-incident-group-card{display:grid;gap:8px;border:1px solid var(--border,#232a36);border-radius:14px;padding:12px;background:rgba(255,255,255,.025);min-width:0}
+.runtime-attention-card .btn,.runtime-incident-group-card .btn{width:max-content;max-width:100%}
+@media(max-width:640px){
+  .dd-context-help-dialog{padding:8px;place-items:end center}
+  .dd-context-help-panel{width:100%;max-height:92vh;border-radius:18px 18px 0 0}
+  .dd-context-help-search-row{grid-template-columns:1fr}
+  .dd-context-help-global{left:10px;bottom:10px}
+}
+@media(prefers-reduced-motion:reduce){.dd-context-help-dialog,.dd-context-help-panel{scroll-behavior:auto}}
