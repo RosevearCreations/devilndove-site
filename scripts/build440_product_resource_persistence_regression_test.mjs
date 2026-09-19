@@ -55,8 +55,18 @@ if(dataPath===legacyPath){
   check(wrapperSource.includes("from './_productResourcesDataLegacy.js'"),'Release 461 wrapper retains the proven Product resource data implementation');
   check(wrapperSource.includes('loadInventoryBaseBalances') && wrapperSource.includes("quantity_authority: 'base'"),'Release 461 wrapper layers canonical base-unit availability over retained resource resolution');
 }
-check(dataSource.includes("LOWER(TRIM(COALESCE(sii2.external_key, ''))) = LOWER(TRIM(COALESCE(prl.source_key, '')))"),'linked Inventory lookup normalizes case and whitespace');
-check(dataSource.includes("LOWER(TRIM(COALESCE(ci2.source_key, ''))) = LOWER(TRIM(COALESCE(prl.source_key, '')))"),'linked catalog fallback lookup normalizes case and whitespace');
+check(
+  dataSource.includes("LOWER(TRIM(COALESCE(sii2.external_key, ''))) = LOWER(TRIM(COALESCE(prl.source_key, '')))")
+    || (dataSource.includes("LOWER(TRIM(COALESCE(sii.external_key, ''))) AS source_key_norm")
+      && dataSource.includes("sii.source_key_norm=LOWER(TRIM(COALESCE(prl.source_key,'')))")),
+  'linked Inventory lookup normalizes case and whitespace'
+);
+check(
+  dataSource.includes("LOWER(TRIM(COALESCE(ci2.source_key, ''))) = LOWER(TRIM(COALESCE(prl.source_key, '')))")
+    || (dataSource.includes("LOWER(TRIM(COALESCE(ci.source_key, ''))) AS source_key_norm")
+      && dataSource.includes("ci.source_key_norm=LOWER(TRIM(COALESCE(prl.source_key,'')))")),
+  'linked catalog fallback lookup normalizes case and whitespace'
+);
 check(dataSource.includes("LOWER(TRIM(COALESCE(sii.external_key, ''))) = LOWER(TRIM(COALESCE(ci.source_key, '')))"),'catalog fallback suppresses Inventory duplicates using normalized identity');
 check(dataSource.includes('quantity_used: positive(row.quantity_used, 1)') && dataSource.includes('lot_size_units: positive(row.lot_size_units, 1)'),'historical zero/missing persisted values are presented with safe default one');
 
