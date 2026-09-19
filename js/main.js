@@ -532,6 +532,7 @@
     ensureGlobalScript('/public/js/auth.js');
     ensureGlobalScript('/public/js/site-auth-ui.js');
     ensureGlobalScript('/public/js/site-analytics.js?v=440');
+    ensureGlobalScript('/public/js/context-help.js?v=467b198');
   });
 })();
 

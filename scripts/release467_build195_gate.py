@@ -75,7 +75,8 @@ req(len(managed_pages)>=24,f"expected sitewide managed-page coverage, found {len
 legacy_roadmap=all(token in roadmap for token in ("Build 194 — complete","Build 195 — current","Build 196 — next after Build 195 is fully GREEN","**201** | Storefront Launch Set & Autonomous Closure"))
 successor_roadmap=all(token in roadmap for token in ("Build 194 — complete","Build 195 — complete","Build 196 — current","**202** | Storefront Launch Set & Autonomous Closure"))
 later_successor_roadmap=all(token in roadmap for token in ("Build 195 — complete","Build 196 — complete","Build 197 — current","**203** | Storefront Launch Set & Autonomous Closure"))
-req(legacy_roadmap or successor_roadmap or later_successor_roadmap,"Build 195 roadmap checkpoint must be current or explicitly closed by later successors")
+latest_successor_roadmap=all(token in roadmap for token in ("Build 197 — complete","Build 198 — current","**204** | Storefront Launch Set & Autonomous Closure"))
+req(legacy_roadmap or successor_roadmap or later_successor_roadmap or latest_successor_roadmap,"Build 195 roadmap checkpoint must be current or explicitly closed by later successors")
 for token in ("responsive","placeholder","fallback image","slot definitions","zero-D1 migration path","No automatic R2"):
     req(token.lower() in doc.lower(),f"Build 195 operations contract missing: {token}")
 

@@ -71,6 +71,9 @@ function withGuardHeaders(response, { moduleKey = '', contractPath = '' } = {}) 
   if (contractPath) headers.set('X-DND-Shared-Contract', contractPath);
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
+function contextHelpMarkup() {
+  return '<link data-dd-context-help="1" rel="stylesheet" href="/css/context-help.css?v=467b198"><script data-dd-context-help="1" defer src="/public/js/context-help.js?v=467b198"></script>';
+}
 function adminQolMarkup() {
   return [
     `<link data-dd-admin-qol-v161="1" rel="stylesheet" href="/css/admin-universal-search-v161.css?v=${ADMIN_QOL_REVISION}">`,
@@ -80,6 +83,7 @@ function adminQolMarkup() {
 function productsPlatformMarkup() {
   return [
     '<link data-dd-products-static-platform="1" rel="stylesheet" href="/css/current-responsive.css?v=current">',
+    contextHelpMarkup(),
     `<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`,
     `<link rel="stylesheet" href="/css/admin-products-table-layout.css?v=${PRODUCTS_ASSET_REVISION}">`,
     adminQolMarkup(),
@@ -134,6 +138,7 @@ function withPlatformClient(response, request) {
       .on('head', {
         element(element) {
           element.append('<link rel="stylesheet" href="/css/current-responsive.css?v=current">', { html: true });
+          element.append(contextHelpMarkup(), { html: true });
           element.append(`<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`, { html: true });
           element.append('<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>', { html: true });
           element.append('<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>', { html: true });

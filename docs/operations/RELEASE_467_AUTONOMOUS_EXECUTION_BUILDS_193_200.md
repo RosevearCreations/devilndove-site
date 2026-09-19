@@ -1,8 +1,8 @@
-# Release 467 — Autonomous Execution Roadmap, Builds 193–203
+# Release 467 — Autonomous Execution Roadmap, Builds 193–204
 
 ## Purpose
 
-Builds 193–203 are the current autonomous Devil n Dove sequence after the fully Production-GREEN Builds 187–192 closure block.
+Builds 193–204 are the current autonomous Devil n Dove sequence after the fully Production-GREEN Builds 187–192 closure block.
 
 The roadmap is evidence-driven. The Build 192 closure proved the runtime/catalog evidence gaps below, and the post-closure handoff review also found a release-authority consistency gap that must be repaired before more feature work.
 
@@ -23,7 +23,7 @@ The roadmap is evidence-driven. The Build 192 closure proved the runtime/catalog
 
 Older historical files use unscoped labels such as “Build 193” through “Build 200.” They are provenance from an older numbering era.
 
-Current authority uses the explicit labels **Release 467 Build 193** through **Release 467 Build 203** and the `RELEASE_467_BUILD_...` operations-document convention.
+Current authority uses the explicit labels **Release 467 Build 193** through **Release 467 Build 204** and the `RELEASE_467_BUILD_...` operations-document convention.
 
 ## Sequence
 
@@ -34,12 +34,13 @@ Current authority uses the explicit labels **Release 467 Build 193** through **R
 | **195** | Sitewide Media Studio Runtime & Carousel Recovery | Repair the owner-reported non-product media failure: reconcile deployed presentation slots into D1, restore responsive/placeholder replacement behavior, and let published Home carousel slides run while Media Studio owns the fallback image. |
 | **196** | Media Studio Save-to-Placement Convergence | Make “choose image → save” unambiguous: save metadata and placement separately, provide a primary Save & Use action for an open slot, and enforce one authoritative active assignment per presentation slot. |
 | **197** | Sitewide Placeholder Integrity & Cycling | Reconcile every public static image placeholder before editing, prove HTML/catalog identity, verify stable page+slot identity on save, and surface duplicate active-assignment warnings without choosing an image for the owner. |
-| **198** | Buyer Readiness Repair Workbench | Turn category/description/shipping/stock findings into explicit Product Editor repair work without inventing buyer facts. |
-| **199** | Supplier & Source Evidence Workbench | Turn missing supplier/source evidence into bounded Inventory repair queues without fabricated provenance. |
-| **200** | Cycle Count & Duplicate Identity Resolution | Provide safe count-due and duplicate-identity workflows; no automatic merge or stock rewrite. |
-| **201** | Catalog Reference & Media Reconciliation | Resolve catalog/image-reference work through existing Catalog, Inventory and Product Media authorities. |
-| **202** | Cost Evidence & Margin Readiness | Route missing cost evidence to existing Inventory/Product-resource authorities; margin stays evidence-derived and separate from accounting. |
-| **203** | Storefront Launch Set & Autonomous Closure | Converge buyer/Inventory/media/cost evidence into a reviewed launch-set/readiness closure; no automatic publication or provider/payment execution. |
+| **198** | Storefront Media Fit, Actionable Attention & Contextual Help | Preserve the full uploaded Product image by default, make operational attention say what/where/owner, and provide reusable circled-i Online Help across public, Admin and Creator surfaces. |
+| **199** | Buyer Readiness Repair Workbench | Turn category/description/shipping/stock findings into explicit Product Editor repair work without inventing buyer facts. |
+| **200** | Supplier & Source Evidence Workbench | Turn missing supplier/source evidence into bounded Inventory repair queues without fabricated provenance. |
+| **201** | Cycle Count & Duplicate Identity Resolution | Provide safe count-due and duplicate-identity workflows; no automatic merge or stock rewrite. |
+| **202** | Catalog Reference & Media Reconciliation | Resolve catalog/image-reference work through existing Catalog, Inventory and Product Media authorities. |
+| **203** | Cost Evidence & Margin Readiness | Route missing cost evidence to existing Inventory/Product-resource authorities; margin stays evidence-derived and separate from accounting. |
+| **204** | Storefront Launch Set & Autonomous Closure | Converge buyer/Inventory/media/cost evidence into a reviewed launch-set/readiness closure; no automatic publication or provider/payment execution. |
 
 ## Execution rules
 
@@ -55,22 +56,24 @@ Current authority uses the explicit labels **Release 467 Build 193** through **R
 10. Stripe, PayPal, Social/OAuth and other external lanes remain HOLD_EXTERNAL unless separately authorized.
 11. Each build owns an operations Markdown, fail-closed source gate, exact Development proof, protected-main promotion and exact Production proof.
 12. Code-only Production promotions use the zero-D1 path.
-13. Build 203 closes the sequence and defines the next block only from then-current measured evidence.
+13. Build 204 closes the sequence and defines the next block only from then-current measured evidence.
 
 ## Current checkpoint
 
-- Builds 187–196: **complete and Production GREEN**.
+- Builds 187–197: **complete and Production GREEN**.
 - Build 193 protected-`main` merge: `649650b317bc2ad8ad6fbc0b42b0965d9653f9a7`.
 - Build 194 protected-`main` merge: `8bfd3902fb95146edadde59f653ecbebd13fb9ed`.
 - Build 195 protected-`main` merge: `2855881cfb81f20355ada9b15afd4fe1a14905e9`.
 - Build 196 protected-`main` merge: `8c41e361ad5bdbbabf9fc2f6d8b16f8a01f5b872`.
+- Build 197 protected-`main` merge: `4ee71f0d20849f486618e8d39648acf637f111f3`.
 - **Build 193 — complete**.
 - **Build 194 — complete**: D1 evidence headroom optimization reached 9,821 Inventory rows-read and 9,967 Media rows-read.
 - **Build 195 — complete**: Sitewide Media Studio Runtime & Carousel Recovery restored carousel/fallback authority, slot reconciliation, responsive image replacement, placeholder cleanup and corrected runtime cache coverage.
 - **Build 196 — complete**: Save-to-Placement Convergence made page placement explicit and required one authoritative active assignment.
-- **Build 197 — current**: Sitewide Placeholder Integrity & Cycling. Owner acceptance after Build 196 showed that only the first two of three Home placeholders could be saved reliably, so all public placeholders are now audited and prepared as one contract before editing begins.
-- **Build 198 — next after Build 197 is fully GREEN**: Buyer Readiness Repair Workbench.
-- Builds 199–203: planned, not started.
+- **Build 197 — complete**: Sitewide Placeholder Integrity & Cycling proved 29 placeholders across 22 public pages, corrected seven hidden source/catalog inconsistencies, and added stable sitewide placeholder preparation.
+- **Build 198 — current**: Storefront Media Fit, Actionable Attention & Contextual Help. Owner acceptance after Build 197 showed automatic Storefront image cropping, opaque operational-attention summaries, and a need for reusable contextual Online Help across user, Admin and Creator workflows.
+- **Build 199 — next after Build 198 is fully GREEN**: Buyer Readiness Repair Workbench.
+- Builds 200–204: planned, not started.
 
 ## Why this sequence
 
@@ -92,3 +95,8 @@ Build 196 was inserted after owner acceptance on Production-GREEN Build 195 show
 ## Build 197 insertion note
 
 Build 197 was inserted after owner acceptance on Production-GREEN Build 196 showed that placeholder reliability still differed by location. The source audit found **29 SVG image placeholders across 22 public pages**, including the three Home placeholders, with unique HTML keys and one matching catalog definition each. Build 197 turns that inventory into a single readiness contract before editing begins and shifts the previously planned buyer-through-launch sequence one build later, through Build 203.
+
+
+## Build 198 insertion note
+
+Build 198 was inserted after owner acceptance on Production-GREEN Build 197 exposed three cross-application usability problems. Storefront Product cards were forcing approved uploads through square `object-fit: cover` framing and silently clipping image content; Today Needs Attention surfaced counts and raw threshold codes without making the affected area and owning workflow obvious; and existing Help was either static or limited to external-provider fields. Build 198 keeps the full uploaded Product image visible by default, reserves crop/recenter work for explicit Product Media editing, makes operational attention actionable, and introduces shared role-aware contextual help. The previously planned buyer-through-launch sequence is shifted one build later, through Build 204.

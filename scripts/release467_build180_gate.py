@@ -27,8 +27,9 @@ req("(()=>{" in product and "document.addEventListener('DOMContentLoaded'" not i
 for token in ("AbortController","8000","/api/product-detail-core","DDProductDetailSnapshot","dd:product-detail-rendered"):
     req(token in product,f"Product detail lost bounded token: {token}")
 req("MutationObserver" not in product and "setInterval(" not in product,"Product detail gained polling/observer behavior")
-req(any(token in page for token in ('/public/js/product-detail-v166.js?v=180','/public/js/product-detail-v166.js?v=186')),"Product page Build 180/186 cache key missing")
-req(min(pos for pos in (page.find('/public/js/product-detail-v166.js?v=180'),page.find('/public/js/product-detail-v166.js?v=186')) if pos >= 0) < page.find('/public/js/site-auth-ui.js'),"Product detail does not start before optional storefront helpers")
+product_cache_tokens=('/public/js/product-detail-v166.js?v=180','/public/js/product-detail-v166.js?v=186','/public/js/product-detail-v166.js?v=467b198')
+req(any(token in page for token in product_cache_tokens),"Product page Build 180/186/198 cache key missing")
+req(min(pos for pos in (page.find(token) for token in product_cache_tokens) if pos >= 0) < page.find('/public/js/site-auth-ui.js'),"Product detail does not start before optional storefront helpers")
 
 for token in ("imagePlanVisible:40","scheduleVisualPlan","requestIdleCallback","state.imagePlanVisible+=40","Staging image-plan status after the primary editor paint"):
     req(token in media,f"Media Studio staged-start token missing: {token}")

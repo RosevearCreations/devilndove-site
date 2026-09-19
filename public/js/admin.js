@@ -17,6 +17,9 @@
 // Release 467 Build 130: Admin routes also bootstrap manifest-backed section position and adjacent-tool navigation.
 // Release 467 Build 155 emergency recovery: Product Admin omits the nonessential section-position/context-dock chain.
 
+void import('/public/js/context-help.js?v=467b198')
+  .catch((error) => console.warn('[DD Build 198] contextual help unavailable', error));
+
 const DD_ADMIN_LAZY_VERSION = 'R467B65_V1';
 const ddAdminLazyState = new Map();
 
