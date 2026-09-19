@@ -33,8 +33,9 @@ for forbidden in ("onRequestPost","onRequestPatch","onRequestPut","onRequestDele
     req(forbidden not in api,f"Build 187 Catalog Health gained forbidden mutation/schema/R2 behavior: {forbidden}")
 for token in ("data-catalog-recheck","repairLinks(row,'product'","repairLinks(row,'inventory'"):
     req(token in ui,f"Build 187 Catalog Health row routing missing: {token}")
-for token in ("Build 187","catalogRepairActionEvidence","admin-catalog-repair-actions-v187.js?v=187","one-record stale-safe rechecks"):
+for token in ("Build 187","catalogRepairActionEvidence","admin-catalog-repair-actions-v187.js?v=187"):
     req(token in page,f"Build 187 page missing: {token}")
+req(("one-record stale-safe rechecks" in page) or ("one-Product rechecks" in page),"Build 187 page lost explicit bounded recheck messaging")
 for token in ("repair_product","repair_inventory","expected_updated_at","cache:'no-store'","data-catalog-recheck"):
     req(token in repair,f"Build 187 explicit recheck UI missing: {token}")
 for forbidden in ("setInterval(","MutationObserver(","method:'POST'","method: 'POST'","method:'PATCH'","method: 'PATCH'"):
