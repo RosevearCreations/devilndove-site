@@ -77,53 +77,98 @@ export async function loadProducts(db, env, limit = 600) {
 export async function loadProductLinks(db, productId) {
   if (!Number(productId || 0)) return [];
   const result = await db.prepare(`
-    SELECT prl.product_resource_link_id, prl.product_id, prl.resource_kind, prl.source_key,
-           COALESCE(NULLIF(TRIM(sii.item_name), ''), NULLIF(TRIM(ci.name), ''), prl.source_key) AS resource_name,
-           COALESCE(sii.category, ci.category, '') AS resource_category,
-           COALESCE(sii.on_hand_quantity, 0) AS resource_on_hand_quantity,
-           COALESCE(sii.unit_cost_cents, 0) AS resource_unit_cost_cents,
-           COALESCE(sii.stock_unit_label, 'unit') AS resource_stock_unit_label,
-           COALESCE(sii.usage_unit_label, 'unit') AS resource_usage_unit_label,
-           COALESCE(sii.usage_units_per_stock_unit, 1) AS resource_usage_units_per_stock_unit,
-           COALESCE(siup.usage_tracking_mode,
-             CASE WHEN LOWER(TRIM(COALESCE(prl.resource_kind,'')))='tool' THEN 'reusable' ELSE 'exact' END
-           ) AS resource_usage_tracking_mode,
-           COALESCE(siup.minimum_usage_increment, 0.001) AS resource_minimum_usage_increment,
-           prl.quantity_used, prl.usage_notes, prl.sort_order,
-           COALESCE(prl.consumption_mode, 'per_unit') AS consumption_mode,
-           COALESCE(prl.lot_size_units, 1) AS lot_size_units,
-           COALESCE(prip.is_label_ingredient,0) AS is_label_ingredient,
-           COALESCE(prip.ingredient_name_en,'') AS ingredient_name_en,
-           COALESCE(prip.ingredient_name_fr,'') AS ingredient_name_fr,
-           COALESCE(prip.inci_name,'') AS inci_name,
-           COALESCE(prip.translation_review_status,'needs_review') AS translation_review_status
+    WITH inventory_ranked AS (
+      SELECT
+        sii.*,
+        LOWER(TRIM(COALESCE(sii.source_type, ''))) AS item_kind_norm,
+        LOWER(TRIM(COALESCE(sii.external_key, ''))) AS source_key_norm,
+        ROW_NUMBER() OVER (
+          PARTITION BY LOWER(TRIM(COALESCE(sii.source_type, ''))), LOWER(TRIM(COALESCE(sii.external_key, '')))
+          ORDER BY COALESCE(sii.is_active, 1) DESC, sii.site_item_inventory_id DESC
+        ) AS rn
+      FROM site_item_inventory sii
+      WHERE LOWER(TRIM(COALESCE(sii.source_type, ''))) IN ('tool','supply')
+    ),
+    catalog_ranked AS (
+      SELECT
+        ci.*,
+        LOWER(TRIM(COALESCE(ci.item_kind, ''))) AS item_kind_norm,
+        LOWER(TRIM(COALESCE(ci.source_key, ''))) AS source_key_norm,
+        ROW_NUMBER() OVER (
+          PARTITION BY LOWER(TRIM(COALESCE(ci.item_kind, ''))), LOWER(TRIM(COALESCE(ci.source_key, '')))
+          ORDER BY ci.catalog_item_id DESC
+        ) AS rn
+      FROM catalog_items ci
+      WHERE LOWER(TRIM(COALESCE(ci.item_kind, ''))) IN ('tool','supply')
+        AND COALESCE(ci.status, 'active') <> 'archived'
+    ),
+    lot_stats AS (
+      SELECT
+        site_item_inventory_id,
+        COUNT(*) AS lot_count,
+        SUM(CASE WHEN COALESCE(lot_status,'available')='available' AND COALESCE(quantity_remaining,0)>0 THEN 1 ELSE 0 END) AS available_lot_count,
+        COALESCE(SUM(COALESCE(quantity_remaining,0)),0) AS lot_remaining_quantity,
+        COALESCE(SUM(COALESCE(quantity_received,0) * COALESCE(unit_cost_cents,0)),0) AS lot_received_value_cents
+      FROM inventory_purchase_lots
+      GROUP BY site_item_inventory_id
+    )
+    SELECT
+      prl.product_resource_link_id, prl.product_id, prl.resource_kind, prl.source_key,
+      COALESCE(NULLIF(TRIM(sii.item_name), ''), NULLIF(TRIM(ci.name), ''), prl.source_key) AS resource_name,
+      COALESCE(sii.category, ci.category, '') AS resource_category,
+      sii.site_item_inventory_id,
+      COALESCE(sii.is_active,0) AS resource_is_active,
+      ci.catalog_item_id,
+      COALESCE(sii.on_hand_quantity, 0) AS resource_on_hand_quantity,
+      COALESCE(sii.reserved_quantity, 0) AS resource_reserved_quantity,
+      COALESCE(sii.incoming_quantity, 0) AS resource_incoming_quantity,
+      COALESCE(sii.unit_cost_cents, 0) AS resource_unit_cost_cents,
+      COALESCE(sii.stock_unit_label, 'unit') AS resource_stock_unit_label,
+      COALESCE(sii.usage_unit_label, 'unit') AS resource_usage_unit_label,
+      COALESCE(sii.usage_units_per_stock_unit, 1) AS resource_usage_units_per_stock_unit,
+      CASE WHEN siup.site_item_inventory_id IS NULL THEN 0 ELSE 1 END AS usage_profile_present,
+      COALESCE(siup.usage_tracking_mode,
+        CASE WHEN LOWER(TRIM(COALESCE(prl.resource_kind,'')))='tool' THEN 'reusable' ELSE 'exact' END
+      ) AS resource_usage_tracking_mode,
+      COALESCE(siup.minimum_usage_increment, 0.001) AS resource_minimum_usage_increment,
+      COALESCE(ls.lot_count,0) AS lot_count,
+      COALESCE(ls.available_lot_count,0) AS available_lot_count,
+      COALESCE(ls.lot_remaining_quantity,0) AS lot_remaining_quantity,
+      COALESCE(ls.lot_received_value_cents,0) AS lot_received_value_cents,
+      COALESCE(ilp.depletion_method,'manual') AS lot_depletion_method,
+      COALESCE(ilp.reconcile_status,'needs_review') AS lot_reconcile_status,
+      ilp.last_reconciled_at AS lot_last_reconciled_at,
+      prl.quantity_used, prl.usage_notes, prl.sort_order,
+      COALESCE(prl.consumption_mode, 'per_unit') AS consumption_mode,
+      COALESCE(prl.lot_size_units, 1) AS lot_size_units,
+      COALESCE(prip.is_label_ingredient,0) AS is_label_ingredient,
+      COALESCE(prip.ingredient_name_en,'') AS ingredient_name_en,
+      COALESCE(prip.ingredient_name_fr,'') AS ingredient_name_fr,
+      COALESCE(prip.inci_name,'') AS inci_name,
+      COALESCE(prip.translation_review_status,'needs_review') AS translation_review_status
     FROM product_resource_links prl
     LEFT JOIN product_resource_ingredient_profiles prip
       ON prip.product_resource_link_id=prl.product_resource_link_id
-    LEFT JOIN site_item_inventory sii
-      ON sii.site_item_inventory_id = (
-        SELECT sii2.site_item_inventory_id
-        FROM site_item_inventory sii2
-        WHERE LOWER(TRIM(COALESCE(sii2.source_type, ''))) = LOWER(TRIM(COALESCE(prl.resource_kind, '')))
-          AND LOWER(TRIM(COALESCE(sii2.external_key, ''))) = LOWER(TRIM(COALESCE(prl.source_key, '')))
-        ORDER BY COALESCE(sii2.is_active, 1) DESC, sii2.site_item_inventory_id DESC
-        LIMIT 1
-      )
+    LEFT JOIN inventory_ranked sii
+      ON sii.rn=1
+     AND sii.item_kind_norm=LOWER(TRIM(COALESCE(prl.resource_kind,'')))
+     AND sii.source_key_norm=LOWER(TRIM(COALESCE(prl.source_key,'')))
     LEFT JOIN site_inventory_usage_profiles siup
-      ON siup.site_item_inventory_id = sii.site_item_inventory_id
-    LEFT JOIN catalog_items ci
-      ON ci.catalog_item_id = (
-        SELECT ci2.catalog_item_id
-        FROM catalog_items ci2
-        WHERE LOWER(TRIM(COALESCE(ci2.item_kind, ''))) = LOWER(TRIM(COALESCE(prl.resource_kind, '')))
-          AND LOWER(TRIM(COALESCE(ci2.source_key, ''))) = LOWER(TRIM(COALESCE(prl.source_key, '')))
-        ORDER BY ci2.catalog_item_id DESC
-        LIMIT 1
-      )
-    WHERE prl.product_id = ?
+      ON siup.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN catalog_ranked ci
+      ON ci.rn=1
+     AND ci.item_kind_norm=LOWER(TRIM(COALESCE(prl.resource_kind,'')))
+     AND ci.source_key_norm=LOWER(TRIM(COALESCE(prl.source_key,'')))
+    LEFT JOIN lot_stats ls
+      ON ls.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN inventory_lot_policies ilp
+      ON ilp.site_item_inventory_id=sii.site_item_inventory_id
+    WHERE prl.product_id=?
     ORDER BY prl.sort_order ASC, prl.product_resource_link_id ASC
   `).bind(Number(productId)).all();
   return rows(result).map((row) => {
+    const rawQuantityUsed = number(row.quantity_used, 0);
+    const rawLotSizeUnits = number(row.lot_size_units, 0);
     const shaped = {
       product_resource_link_id: Number(row.product_resource_link_id || 0),
       product_id: Number(row.product_id || 0),
@@ -131,10 +176,12 @@ export async function loadProductLinks(db, productId) {
       source_key: row.source_key || '',
       name: row.resource_name || row.source_key || '',
       quantity_used: positive(row.quantity_used, 1),
+      quantity_defaulted: rawQuantityUsed > 0 ? 0 : 1,
       usage_notes: row.usage_notes || '',
       sort_order: Number(row.sort_order || 0),
       consumption_mode: normalizeConsumptionMode(row.consumption_mode),
       lot_size_units: positive(row.lot_size_units, 1),
+      lot_size_defaulted: rawLotSizeUnits > 0 ? 0 : 1,
       is_label_ingredient: Number(row.is_label_ingredient || 0) === 1 ? 1 : 0,
       ingredient_name_en: row.ingredient_name_en || '',
       ingredient_name_fr: row.ingredient_name_fr || '',
@@ -146,13 +193,26 @@ export async function loadProductLinks(db, productId) {
       source_key: shaped.source_key,
       name: shaped.name,
       category: normalizeText(row.resource_category).toLowerCase(),
+      site_item_inventory_id: Number(row.site_item_inventory_id || 0),
+      catalog_item_id: Number(row.catalog_item_id || 0),
+      is_active: Number(row.resource_is_active || 0),
       on_hand_quantity: Math.max(0, number(row.resource_on_hand_quantity, 0)),
+      reserved_quantity: Math.max(0, number(row.resource_reserved_quantity, 0)),
+      incoming_quantity: Math.max(0, number(row.resource_incoming_quantity, 0)),
       unit_cost_cents: money(row.resource_unit_cost_cents),
       stock_unit_label: normalizeText(row.resource_stock_unit_label).toLowerCase() || 'unit',
       usage_unit_label: normalizeText(row.resource_usage_unit_label).toLowerCase() || 'unit',
       usage_units_per_stock_unit: Math.max(0.001, number(row.resource_usage_units_per_stock_unit, 1)),
+      usage_profile_present: Number(row.usage_profile_present || 0) === 1,
       usage_tracking_mode: normalizeText(row.resource_usage_tracking_mode).toLowerCase() || (shaped.resource_kind === 'tool' ? 'reusable' : 'exact'),
-      minimum_usage_increment: Math.max(0.0001, number(row.resource_minimum_usage_increment, 0.001))
+      minimum_usage_increment: Math.max(0.0001, number(row.resource_minimum_usage_increment, 0.001)),
+      lot_count: Math.max(0, Number(row.lot_count || 0)),
+      available_lot_count: Math.max(0, Number(row.available_lot_count || 0)),
+      lot_remaining_quantity: Math.max(0, number(row.lot_remaining_quantity, 0)),
+      lot_received_value_cents: Math.max(0, money(row.lot_received_value_cents)),
+      lot_depletion_method: normalizeText(row.lot_depletion_method).toLowerCase() || 'manual',
+      lot_reconcile_status: normalizeText(row.lot_reconcile_status).toLowerCase() || 'needs_review',
+      lot_last_reconciled_at: row.lot_last_reconciled_at || null
     };
     return { ...shaped, resource: linkedResource, preview: resourcePreview(linkedResource, shaped) };
   });
