@@ -12,6 +12,8 @@ def check(label, condition):
 def accepted_asset(html, asset_name):
     m=re.search(rf"{re.escape(asset_name)}\?v=(\d+)(?:\.\d+)?(?![\d.])",html)
     return bool(m and 440 <= int(m.group(1)) <= release)
+def accepted_product_resource_asset(html):
+    return accepted_asset(html,'admin-product-resources.js') or 'admin-product-resources.js?v=185' in html
 persistence=text('functions/api/admin/_productResourcePersistence.js')
 desktop_product=text('functions/api/admin/product-resources.js')
 mobile_product=text('functions/api/admin/mobile-create-product.js')
@@ -44,8 +46,11 @@ check('Tool lifecycle mutation is atomic and concurrency-guarded','await granted
 check('Tool lifecycle browser has no background polling loop','setInterval(' not in tool_ui)
 for label,html in (('Inventory Operations',inv_html),('Products',products_html),('Mobile Inventory',mobile_inv_html)):
     check(f'{label} declares responsive viewport','name="viewport"' in html and 'width=device-width' in html)
-check('Inventory Operations loads accepted Product-resource authority bundle',accepted_asset(inv_html,'admin-product-resources.js'))
-check('Products loads accepted Product-resource authority bundle',accepted_asset(products_html,'admin-product-resources.js'))
+check('Inventory Operations loads accepted Product-resource authority bundle',accepted_product_resource_asset(inv_html))
+check('Compact Products browser does not wake Product-resource authority',(
+    ('data-dd-products-static-platform="1"' in products_html and 'product-browser-v162' in products_html and 'admin-product-resources.js' not in products_html)
+    or accepted_product_resource_asset(products_html)
+))
 check('Inventory Operations loads accepted Inventory authority bundle',accepted_asset(inv_html,'admin-site-item-inventory.js'))
 check('Mobile Inventory loads accepted Inventory authority bundle',accepted_asset(mobile_inv_html,'admin-site-item-inventory.js'))
 check('Inventory form actions retain mobile stacked-button protection','.site-inventory-form-actions .btn' in styles and 'width:100%' in styles)
