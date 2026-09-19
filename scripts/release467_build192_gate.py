@@ -26,6 +26,7 @@ except Exception as exc:
 
 doc=read("docs/operations/RELEASE_467_BUILD_192_RELEASE_RUNTIME_BUDGET_CONVERGENCE.md")
 roadmap=read("docs/operations/RELEASE_467_AUTONOMOUS_CLOSURE_BUILDS_187_192.md")
+successor_roadmap=read("docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md")
 workflow=read(".github/workflows/release467-build192-release-runtime-budget-convergence.yml")
 prod_workflow=read(".github/workflows/production-pages-deploy-current.yml")
 renderer=read("public/js/product-detail-v166.js")
