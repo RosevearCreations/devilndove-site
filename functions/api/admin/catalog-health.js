@@ -1,4 +1,4 @@
-// Release 467 Build 181 — bounded, read-only Product / Inventory / Tool / Image authority health.
+// Release 467 Build 181 authority health, extended by Build 187 with explicit one-record repair routing/recheck evidence.
 // D1 is the live catalog authority again. This endpoint intentionally performs no mutation, schema work, R2 listing,
 // provider execution, publication, payment/refund action, or accounting posting.
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
@@ -6,12 +6,77 @@ import { buildReadBudgetHeaders } from '../_lib/d1ReadBudget.js';
 
 const BUILD = 181;
 const MAX_ROWS = 40;
-const json = (data, status = 200) => jsonResponse({ release: 467, build: BUILD, read_only: true, ...data }, status, {
+const json = (data, status = 200, routeKey = 'admin_catalog_health_v181', limit = MAX_ROWS) => jsonResponse({ release: 467, build: BUILD, read_only: true, ...data }, status, {
   'Cache-Control': 'no-store',
-  ...buildReadBudgetHeaders('admin_catalog_health_v181', { limit: MAX_ROWS }),
+  ...buildReadBudgetHeaders(routeKey, { limit }),
 });
 const rows = (result) => Array.isArray(result?.results) ? result.results : [];
 const n = (value) => Number(value || 0);
+const text = (value) => normalizeText(value || '');
+const repairRequestKey = (scope, id, finding, updatedAt) =>
+  ['r467b187', scope, Number(id || 0), finding, text(updatedAt) || 'unknown'].join(':');
+
+function repairAction({ scope, id, finding_key, owner, href, updated_at, note }) {
+  return {
+    finding_key,
+    owner,
+    href,
+    mutation_authority: owner,
+    direct_mutation: false,
+    reviewed_target_only: true,
+    request_key: repairRequestKey(scope, id, finding_key, updated_at),
+    note,
+  };
+}
+
+function productRepairActions(row) {
+  const id = n(row?.product_id);
+  const updatedAt = text(row?.updated_at);
+  const actions = [];
+  const mediaIssue = !text(row?.featured_image_url) || n(row?.image_count) < 3 || n(row?.alt_attention) > 0;
+  if (mediaIssue) actions.push(repairAction({
+    scope: 'product', id, finding_key: 'product_media', owner: 'Product Image Editor',
+    href: `/admin/catalog-media/?product_id=${id}&repair_from=catalog-health`, updated_at: updatedAt,
+    note: 'Product media mutations remain in Catalog Media / Product Image Editor.'
+  }));
+  if (n(row?.missing_inventory_links) > 0 || (n(row?.inventory_tracking) === 1 && n(row?.inventory_quantity) <= 0)) actions.push(repairAction({
+    scope: 'product', id, finding_key: 'product_inventory_resource', owner: 'Inventory Operations',
+    href: `/admin/inventory-operations/?product_id=${id}&repair_from=catalog-health`, updated_at: updatedAt,
+    note: 'Inventory/resource mutations remain in Inventory Operations.'
+  }));
+  actions.push(repairAction({
+    scope: 'product', id, finding_key: 'product_facts_review', owner: 'Product Editor',
+    href: `/admin/product-editor/?product_id=${id}&tab=basics&repair_from=catalog-health`, updated_at: updatedAt,
+    note: 'Product fact changes remain one-Product-at-a-time in Product Editor.'
+  }));
+  return actions;
+}
+
+function inventoryRepairActions(row) {
+  const id = n(row?.site_item_inventory_id);
+  const updatedAt = text(row?.updated_at);
+  const q = encodeURIComponent(text(row?.external_key) || text(row?.item_name) || String(id));
+  return [repairAction({
+    scope: 'inventory', id, finding_key: 'inventory_record_review', owner: 'Inventory Operations',
+    href: `/admin/inventory-operations/?q=${q}&repair_from=catalog-health#siteInventoryForm`, updated_at: updatedAt,
+    note: 'Tool/Supply identity, source, image, count and stock mutations remain in Inventory Operations.'
+  })];
+}
+
+function issueSnapshot(row, scope) {
+  if (scope === 'product') return {
+    product_id: n(row.product_id), updated_at: text(row.updated_at), featured_image_url: text(row.featured_image_url),
+    image_count: n(row.image_count), alt_attention: n(row.alt_attention), linked_resources: n(row.linked_resources),
+    missing_inventory_links: n(row.missing_inventory_links), inventory_tracking: n(row.inventory_tracking),
+    inventory_quantity: n(row.inventory_quantity),
+  };
+  return {
+    site_item_inventory_id: n(row.site_item_inventory_id), updated_at: text(row.updated_at), item_kind: text(row.item_kind),
+    external_key: text(row.external_key), image_url: text(row.image_url), catalog_image_url: text(row.catalog_image_url),
+    duplicate_count: n(row.duplicate_count), on_hand_quantity: Number(row.on_hand_quantity || 0),
+    reserved_quantity: Number(row.reserved_quantity || 0),
+  };
+}
 
 async function summary(db) {
   // Build 184 quota hardening: aggregate image/resource/Inventory facts once instead of
@@ -163,7 +228,7 @@ async function productIssues(db, q, limit) {
     ORDER BY issue_weight DESC,LOWER(COALESCE(name,'')),product_id
     LIMIT ?
   `).bind(q, like, like, like, limit).all();
-  return rows(result).map((row) => ({ ...row, issue_weight: n(row.issue_weight), image_count: n(row.image_count), alt_attention: n(row.alt_attention), linked_resources: n(row.linked_resources), missing_inventory_links: n(row.missing_inventory_links) }));
+  return rows(result).map((row) => { const normalized={ ...row, issue_weight: n(row.issue_weight), image_count: n(row.image_count), alt_attention: n(row.alt_attention), linked_resources: n(row.linked_resources), missing_inventory_links: n(row.missing_inventory_links) }; return { ...normalized, repair_actions: productRepairActions(normalized) }; });
 }
 
 async function inventoryIssues(db, q, kind, limit) {
@@ -214,8 +279,92 @@ async function inventoryIssues(db, q, kind, limit) {
     ORDER BY issue_weight DESC,item_kind,LOWER(COALESCE(item_name,'')),site_item_inventory_id
     LIMIT ?
   `).bind(q, like, like, like, kind, kind, limit).all();
-  return rows(result).map((row) => ({ ...row, issue_weight: n(row.issue_weight), duplicate_count: n(row.duplicate_count), on_hand_quantity: Number(row.on_hand_quantity || 0), reserved_quantity: Number(row.reserved_quantity || 0) }));
+  return rows(result).map((row) => { const normalized={ ...row, issue_weight: n(row.issue_weight), duplicate_count: n(row.duplicate_count), on_hand_quantity: Number(row.on_hand_quantity || 0), reserved_quantity: Number(row.reserved_quantity || 0) }; return { ...normalized, repair_actions: inventoryRepairActions(normalized) }; });
 }
+
+async function productRepairEvidence(db, productId, expectedUpdatedAt) {
+  const row = await db.prepare(`
+    WITH image_stats AS (
+      SELECT product_id,COUNT(*) AS image_count,
+             SUM(CASE WHEN LENGTH(TRIM(COALESCE(alt_text,'')))<12 THEN 1 ELSE 0 END) AS alt_attention
+      FROM product_images WHERE product_id=? GROUP BY product_id
+    ),
+    inventory_keys AS (
+      SELECT LOWER(TRIM(COALESCE(source_type,''))) AS source_type_norm,
+             LOWER(TRIM(COALESCE(external_key,''))) AS external_key_norm
+      FROM site_item_inventory WHERE COALESCE(is_active,1)=1 GROUP BY 1,2
+    ),
+    resource_stats AS (
+      SELECT prl.product_id,COUNT(*) AS linked_resources,
+             SUM(CASE WHEN ik.external_key_norm IS NULL THEN 1 ELSE 0 END) AS missing_inventory_links
+      FROM product_resource_links prl
+      LEFT JOIN inventory_keys ik
+        ON ik.source_type_norm=LOWER(TRIM(COALESCE(prl.resource_kind,'')))
+       AND ik.external_key_norm=LOWER(TRIM(COALESCE(prl.source_key,'')))
+      WHERE prl.product_id=? GROUP BY prl.product_id
+    )
+    SELECT p.product_id,p.name,p.slug,p.sku,p.status,p.review_status,p.featured_image_url,
+           p.inventory_tracking,p.inventory_quantity,p.updated_at,
+           COALESCE(im.image_count,0) AS image_count,COALESCE(im.alt_attention,0) AS alt_attention,
+           COALESCE(rs.linked_resources,0) AS linked_resources,COALESCE(rs.missing_inventory_links,0) AS missing_inventory_links
+    FROM products p
+    LEFT JOIN image_stats im ON im.product_id=p.product_id
+    LEFT JOIN resource_stats rs ON rs.product_id=p.product_id
+    WHERE p.product_id=? LIMIT 1
+  `).bind(productId,productId,productId).first();
+  if (!row) return null;
+  const snapshot = issueSnapshot(row,'product');
+  const expected = text(expectedUpdatedAt);
+  const stale = Boolean(expected && expected !== snapshot.updated_at);
+  return {
+    scope: 'product', target_id: productId, target_name: text(row.name) || `Product #${productId}`,
+    expected_updated_at: expected || null, current_updated_at: snapshot.updated_at || null,
+    stale_target: stale, safe_to_apply: !stale, snapshot,
+    repair_actions: productRepairActions(row),
+  };
+}
+
+async function inventoryRepairEvidence(db, inventoryId, expectedUpdatedAt) {
+  const row = await db.prepare(`
+    WITH target AS (
+      SELECT sii.site_item_inventory_id,LOWER(TRIM(COALESCE(sii.source_type,''))) AS item_kind,
+             LOWER(TRIM(COALESCE(sii.external_key,''))) AS external_key_norm,sii.external_key,sii.item_name,
+             sii.category,sii.image_url,sii.on_hand_quantity,sii.reserved_quantity,sii.updated_at
+      FROM site_item_inventory sii WHERE sii.site_item_inventory_id=? LIMIT 1
+    ),
+    duplicate_counts AS (
+      SELECT LOWER(TRIM(COALESCE(source_type,''))) AS item_kind,
+             LOWER(TRIM(COALESCE(external_key,''))) AS external_key_norm,COUNT(*) AS duplicate_count
+      FROM site_item_inventory WHERE COALESCE(is_active,1)=1 GROUP BY 1,2
+    ),
+    catalog_ranked AS (
+      SELECT LOWER(TRIM(COALESCE(item_kind,''))) AS item_kind,
+             LOWER(TRIM(COALESCE(source_key,''))) AS source_key_norm,image_url,
+             ROW_NUMBER() OVER (
+               PARTITION BY LOWER(TRIM(COALESCE(item_kind,''))),LOWER(TRIM(COALESCE(source_key,'')))
+               ORDER BY catalog_item_id DESC
+             ) AS rn
+      FROM catalog_items
+      WHERE LOWER(TRIM(COALESCE(item_kind,''))) IN ('tool','supply') AND COALESCE(status,'active')<>'archived'
+    )
+    SELECT t.*,cr.image_url AS catalog_image_url,COALESCE(dc.duplicate_count,0) AS duplicate_count
+    FROM target t
+    LEFT JOIN duplicate_counts dc ON dc.item_kind=t.item_kind AND dc.external_key_norm=t.external_key_norm
+    LEFT JOIN catalog_ranked cr ON cr.rn=1 AND cr.item_kind=t.item_kind AND cr.source_key_norm=t.external_key_norm
+    LIMIT 1
+  `).bind(inventoryId).first();
+  if (!row) return null;
+  const snapshot = issueSnapshot(row,'inventory');
+  const expected = text(expectedUpdatedAt);
+  const stale = Boolean(expected && expected !== snapshot.updated_at);
+  return {
+    scope: 'inventory', target_id: inventoryId, target_name: text(row.item_name) || text(row.external_key) || `Inventory #${inventoryId}`,
+    expected_updated_at: expected || null, current_updated_at: snapshot.updated_at || null,
+    stale_target: stale, safe_to_apply: !stale, snapshot,
+    repair_actions: inventoryRepairActions(row),
+  };
+}
+
 export async function onRequestGet({ request, env }) {
   const admin = await getAdminUserFromRequest(request, env);
   if (!admin) return json({ ok: false, error: 'Admin access required.' }, 401);
@@ -238,6 +387,20 @@ export async function onRequestGet({ request, env }) {
     }
     if (mode === 'inventory') {
       return json({ ok: true, mode, authority: 'live_d1', mutation_capability: 'none', q, kind, limit, inventory: await inventoryIssues(db, q, kind, limit) });
+    }
+    if (mode === 'repair_product') {
+      const productId = Number(url.searchParams.get('product_id') || 0);
+      if (!Number.isInteger(productId) || productId <= 0) return json({ build: 187, ok: false, error: 'A positive product_id is required.' }, 400, 'admin_catalog_repair_recheck_v187', 1);
+      const evidence = await productRepairEvidence(db, productId, url.searchParams.get('expected_updated_at'));
+      if (!evidence) return json({ build: 187, ok: false, error: 'Product repair target was not found.' }, 404, 'admin_catalog_repair_recheck_v187', 1);
+      return json({ build: 187, ok: true, mode, authority: 'live_d1_exact_recheck', mutation_capability: 'none', repair_framework: 'route_existing_authorities', evidence }, 200, 'admin_catalog_repair_recheck_v187', 1);
+    }
+    if (mode === 'repair_inventory') {
+      const inventoryId = Number(url.searchParams.get('inventory_id') || 0);
+      if (!Number.isInteger(inventoryId) || inventoryId <= 0) return json({ build: 187, ok: false, error: 'A positive inventory_id is required.' }, 400, 'admin_catalog_repair_recheck_v187', 1);
+      const evidence = await inventoryRepairEvidence(db, inventoryId, url.searchParams.get('expected_updated_at'));
+      if (!evidence) return json({ build: 187, ok: false, error: 'Inventory repair target was not found.' }, 404, 'admin_catalog_repair_recheck_v187', 1);
+      return json({ build: 187, ok: true, mode, authority: 'live_d1_exact_recheck', mutation_capability: 'none', repair_framework: 'route_existing_authorities', evidence }, 200, 'admin_catalog_repair_recheck_v187', 1);
     }
     return json({ ok: false, error: 'Unsupported catalog-health mode.' }, 400);
   } catch (error) {
