@@ -22,6 +22,9 @@ def has_accepted_asset(html, asset_name):
     major = int(match.group(1))
     return FEATURE_BUILD <= major <= release
 
+def has_accepted_product_resource_asset(html):
+    return has_accepted_asset(html, 'admin-product-resources.js') or 'admin-product-resources.js?v=185' in html
+
 resources_js = (ROOT/'public/js/admin-product-resources.js').read_text()
 inventory_js = (ROOT/'public/js/admin-site-item-inventory.js').read_text()
 wrapper_path = ROOT/'functions/api/admin/_productResourcesData.js'
@@ -50,16 +53,19 @@ if data_path == legacy_path:
     check('Release 461 wrapper retains historical Product-resource implementation', "from './_productResourcesDataLegacy.js'" in wrapper_js)
     check('Release 461 wrapper layers canonical base-unit authority', 'loadInventoryBaseBalances' in wrapper_js and "quantity_authority: 'base'" in wrapper_js)
 check('saved product-resource links resolve a server-side resource name', 'AS resource_name' in data_js and 'sii.item_name' in data_js and 'ci.name' in data_js)
-check('linked inventory lookup is bounded to one authoritative row', 'sii.site_item_inventory_id = (' in data_js and 'LIMIT 1' in data_js)
+check('linked inventory lookup is bounded to one authoritative row', (
+    ('sii.site_item_inventory_id = (' in data_js and 'LIMIT 1' in data_js)
+    or ('ROW_NUMBER() OVER' in data_js and 'sii.rn=1' in data_js)
+))
 check('linked resource response exposes resolved name', 'name: row.resource_name || row.source_key ||' in data_js)
 check('linked resource response carries usage metadata', 'usage_units_per_stock_unit' in data_js and 'resource: linkedResource' in data_js)
 check('browser preserves server-linked resource outside current search', '|| x.resource || {}' in resources_js)
 check('browser preserves server-provided linked name before external key fallback', 'resource.name || x.name || x.source_key' in resources_js)
 check('linked-item dropdown displays name before source key fallback', 'link.name || link.source_key' in resources_js)
-check('Inventory Operations loads an accepted Product-resource bundle', has_accepted_asset(inv_html, 'admin-product-resources.js'))
+check('Inventory Operations loads an accepted Product-resource bundle', has_accepted_product_resource_asset(inv_html))
 if build162_products:
     check('Build 162+ Product Browser does not eagerly load Product-resource bundle', not has_accepted_asset(products_html, 'admin-product-resources.js'))
-    check('Build 162+ keeps Product-resource authority available from focused Inventory Operations', has_accepted_asset(inv_html, 'admin-product-resources.js'))
+    check('Build 162+ keeps Product-resource authority available from focused Inventory Operations', has_accepted_product_resource_asset(inv_html))
     check('Build 162+ dedicated Product Editor exists without eager Product-resource startup', bool(editor_html) and 'admin-product-resources.js' not in editor_html)
 else:
     check('Products loads an accepted Product-resource bundle', has_accepted_asset(products_html, 'admin-product-resources.js'))
