@@ -27,10 +27,10 @@
   </div>
   <div class="hero compact-hero inventory-operations-hero">
     <div>
-      <p class="inventory-operations-eyebrow">Release 467 Build 183 • Inventory &amp; Tool/Supply identity cleanup</p>
+      <p class="inventory-operations-eyebrow">Release 467 Build 185 • Product resource / cost / usage linkage</p>
       <h1>Tools & Supplies Inventory Operations</h1>
       <p>Manage tools, supplies, workshop-process assignments, purchase packaging, canonical base-unit stock, receiving, product resource reservations, material-usage reconciliation, and catalog sync without the long product editor page.</p>
-      <p class="small inventory-operations-hero-note">Build 183 keeps the staged Build 180 runtime and adds an explicit live-D1 identity review for duplicate Tool/Supply keys, supplier/source facts, usage mode, count/reorder context and catalog-reference drift. All corrections remain deliberate actions in existing Inventory authorities.</p>
+      <p class="small inventory-operations-hero-note">Build 185 keeps the staged low-read Inventory runtime and makes Product-to-Tool/Supply linkage review explicit: Inventory match, base-unit quantity authority, quantity-per-use/batch, usage mode, purchase-lot semantics and cost evidence. Saves remain deliberate Product-resource actions; opening this page does not scan Product links.</p>
     </div>
     <div class="inventory-operations-hero-art" aria-hidden="true"><img src="/assets/inventory-operations-placeholder.svg" alt=""/></div>
   </div>
@@ -93,7 +93,7 @@
 <script src="/public/js/admin-inventory-process-assignments-v156.js?v=467b156"></script>
 <script src="/public/js/admin-tool-lifecycle-review.js?v=440"></script>
 <script src="/public/js/admin-product-integrity-review.js?v=440"></script>
-<script src="/public/js/admin-product-resources.js?v=440"></script>
+<script src="/public/js/admin-product-resources.js?v=185"></script>
 <script src="/public/js/admin-site-item-inventory.js?v=440.4"></script>
 <script src="/public/js/admin-inventory-lots.js"></script>
 <script src="/public/js/admin-inventory-kits.js?v=440"></script>
