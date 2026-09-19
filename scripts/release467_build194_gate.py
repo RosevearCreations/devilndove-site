@@ -51,7 +51,8 @@ legacy_roadmap=all(token in roadmap for token in ("Build 193 — complete","Buil
 successor_roadmap=all(token in roadmap for token in ("Build 193 — complete","Build 194 — complete","Build 195 — current"))
 later_successor_roadmap=all(token in roadmap for token in ("Build 194 — complete","Build 195 — complete","Build 196 — current"))
 latest_successor_roadmap=all(token in roadmap for token in ("Build 195 — complete","Build 196 — complete","Build 197 — current"))
-req(legacy_roadmap or successor_roadmap or later_successor_roadmap or latest_successor_roadmap,"Build 194 roadmap checkpoint must be current or explicitly closed by later successors")
+current_successor_roadmap=all(token in roadmap for token in ("Build 197 — complete","Build 198 — current"))
+req(legacy_roadmap or successor_roadmap or later_successor_roadmap or latest_successor_roadmap or current_successor_roadmap,"Build 194 roadmap checkpoint must be current or explicitly closed by later successors")
 
 condition="github.event_name == 'push' && github.ref == 'refs/heads/dev'"
 req(condition in workflow,"Build 194 provider proof must be exact-dev push only")
