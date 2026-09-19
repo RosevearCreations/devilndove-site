@@ -112,7 +112,7 @@ req("https://devilndove.com/shop/" in sitemap, "Sitemap lost Shop")
 req("https://devilndove.com/collections/" in sitemap, "Sitemap lost Collections")
 req("https://devilndove.com/search/" not in sitemap, "Internal noindex Search must not enter sitemap")
 
-req("Build 185 — complete" in plan and "Build 186 — current" in plan, "Catalog rework checkpoint did not advance to Build 186")
+req("Build 185 — complete" in plan and (("Build 186 — current" in plan) or ("Build 186 — complete" in plan)), "Catalog rework checkpoint lost Build 186 current/complete state")
 req("successor-aware through Build 186" in build185, "Build 185 retained gate is not successor-aware for Build 186")
 
 for token in (
