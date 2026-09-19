@@ -77,7 +77,7 @@
   function fillEditor(data){
     const image=data.image||{};state.selected=image;editor.hidden=false;armImage(byId('productMediaV164Preview'),image.image_url,byId('productMediaV164PreviewNotice'));byId('productMediaV164Preview').alt=image.alt_text||'';byId('productMediaV164ImageId').textContent=`Image #${Number(image.product_image_id||0)}${data.primary?' • FEATURED':''}`;
     for(const name of ['alt_text','image_title','caption','annotation_notes','image_role','public_use_status','role_review_notes','sort_order']){const field=editorForm.elements.namedItem(name);if(field)field.value=image[name]??'';}
-    const fx=editorForm.elements.namedItem('focal_point_x'),fy=editorForm.elements.namedItem('focal_point_y');if(fx)fx.value=displayPercent(image.focal_point_x);if(fy)fy.value=displayPercent(image.focal_point_y);
+    const fx=editorForm.elements.namedItem('focal_point_x'),fy=editorForm.elements.namedItem('focal_point_y');if(fx)fx.value=displayPercent(image.focal_point_x);if(fy)fy.value=displayPercent(image.focal_point_y);updateFocalPreview();
     byId('productMediaV164Score').textContent=image.quality_score==null?'Not measured':`${Number(image.quality_score)}/100 • ${image.acceptance_status||'review'}`;byId('productMediaV164SetFeatured').checked=Boolean(data.primary);renderGallery();syncButtons();
     if(data.annotation_warning)setStatus(`Image loaded. ${data.annotation_warning}${rowsText(data)}`,'ok');
   }
@@ -90,6 +90,22 @@
     catch(error){if(isQuota(error))state.stoppedForQuota=true;setStatus(`${error.message}${isQuota(error)?' Automatic retries are stopped.':''}`,'error');}
     finally{state.inFlight=false;syncButtons();}
   }
+  function updateFocalPreview(){
+    const dot=byId('productMediaV198FocalDot'),wrap=byId('productMediaV198FocalPreview');if(!dot||!wrap)return;
+    const fx=Number(editorForm.elements.namedItem('focal_point_x')?.value),fy=Number(editorForm.elements.namedItem('focal_point_y')?.value);
+    const x=Number.isFinite(fx)?Math.max(0,Math.min(100,fx)):50,y=Number.isFinite(fy)?Math.max(0,Math.min(100,fy)):50;
+    dot.style.left=`${x}%`;dot.style.top=`${y}%`;
+  }
+  byId('productMediaV198FocalPreview')?.addEventListener('click',(event)=>{
+    if(!state.selected)return;const rect=event.currentTarget.getBoundingClientRect();if(!rect.width||!rect.height)return;
+    const x=Math.max(0,Math.min(100,((event.clientX-rect.left)/rect.width)*100));
+    const y=Math.max(0,Math.min(100,((event.clientY-rect.top)/rect.height)*100));
+    const fx=editorForm.elements.namedItem('focal_point_x'),fy=editorForm.elements.namedItem('focal_point_y');
+    if(fx)fx.value=(Math.round(x*10)/10).toFixed(1);if(fy)fy.value=(Math.round(y*10)/10).toFixed(1);
+    updateFocalPreview();setStatus('Focal point moved in the editor. Save Selected Image Details to keep it. The storefront still shows the full uploaded image unless you explicitly create a cropped file.','ok');
+  });
+  for(const name of ['focal_point_x','focal_point_y'])editorForm.elements.namedItem(name)?.addEventListener('input',updateFocalPreview);
+
   function metadataPayload(){
     const image=state.selected||{};const get=(name)=>String(editorForm.elements.namedItem(name)?.value??'').trim();const percent=(name)=>{const n=Number(get(name));return Number.isFinite(n)?Math.max(0,Math.min(100,n))/100:null;};
     return {action:'save_metadata',product_image_id:Number(image.product_image_id||0),alt_text:get('alt_text'),image_title:get('image_title'),caption:get('caption'),focal_point_x:percent('focal_point_x'),focal_point_y:percent('focal_point_y'),annotation_notes:get('annotation_notes'),image_role:get('image_role'),public_use_status:get('public_use_status')||'internal_review',role_review_notes:get('role_review_notes'),sort_order:Number(get('sort_order')||0),set_featured:Boolean(byId('productMediaV164SetFeatured').checked)};

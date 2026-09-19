@@ -14,7 +14,9 @@ for p in (RUNTIME,CSS,PLACEHOLDER):req((ROOT/p).exists(),f'Release 455 asset mis
 runtime,css,middleware,authority=map(read,(RUNTIME,CSS,'functions/_middleware.js','functions/api/_lib/releaseAuthority.js'))
 for marker in ('MutationObserver','storefront-media-fallback.svg','aria-live','aria-pressed','duplicate-demoted','og:image:alt','twitter:image:alt','https://devilndove.com'):req(marker in runtime,f'Release 455 runtime missing {marker}')
 for marker in ('@media(max-width:900px)','@media(max-width:640px)','@media(prefers-reduced-motion:reduce)','min-height:44px','overflow-x:auto'):req(marker in css,f'Release 455 CSS missing {marker}')
-req('storefront-discovery.css?v=${CURRENT_RELEASE}' in middleware and 'storefront-discovery-runtime.js?v=${CURRENT_RELEASE}' in middleware,'Pages middleware must inject Storefront assets using current release authority')
+legacy_assets='storefront-discovery.css?v=${CURRENT_RELEASE}' in middleware and 'storefront-discovery-runtime.js?v=${CURRENT_RELEASE}' in middleware
+successor_assets='STOREFRONT_DISCOVERY_REVISION' in middleware and 'storefront-discovery.css?v=${STOREFRONT_DISCOVERY_REVISION}' in middleware and 'storefront-discovery-runtime.js?v=${STOREFRONT_DISCOVERY_REVISION}' in middleware
+req(legacy_assets or successor_assets,'Pages middleware must inject Storefront assets using current/successor release authority')
 m=re.search(r'CURRENT_RELEASE\s*=\s*(\d+)',authority);req(bool(m) and int(m.group(1))>=455,'shared runtime release authority cannot regress below 455')
 pages={'shop/index.html':'https://devilndove.com/shop/','shop/product/index.html':'https://devilndove.com/shop/product/','collections/index.html':'https://devilndove.com/collections/','collages/index.html':'https://devilndove.com/collages/'}
 for path,canonical in pages.items():

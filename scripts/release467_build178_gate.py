@@ -33,8 +33,8 @@ marketplace=read('public/js/admin-products-marketplace-readiness.js')
 
 req('Release 467 • Build 178' in editor_page,'Product Editor Build 178 identity missing')
 req('admin-product-editor-v163.js?v=178' in editor_page,'Product Editor Build 178 cache identity missing')
-req('Release 467 • Build 178' in media_page,'Product Image Editor Build 178 identity missing')
-req('admin-product-media-editor-v172.js?v=178' in media_page,'Product Image Editor Build 178 cache identity missing')
+req(('Release 467 • Build 178' in media_page) or ('Product media workspace' in media_page),'Product Image Editor Build 178/successor identity missing')
+req(any(token in media_page for token in ('admin-product-media-editor-v172.js?v=178','admin-product-media-editor-v172.js?v=467b198')),'Product Image Editor Build 178/successor cache identity missing')
 
 for token in ("params.get('tab')","params.get('focus')","openTab(initialTab,initialFocus)","/api/admin/product-editor-save"):
     req(token in editor,f'Product Editor deep-link/save continuity missing: {token}')

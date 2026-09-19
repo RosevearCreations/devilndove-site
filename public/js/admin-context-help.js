@@ -29,7 +29,27 @@ const DD_CONTEXT_HELP_LIBRARY = Object.freeze({
   seo_search: { title: 'Search-engine quality', body: ['Every indexable public page must expose one primary H1, a useful title and description, and a clean canonical URL.', 'Internal search, admin/account surfaces and empty templates should not compete with real public content in search results.'] },
   responsive_layout: { title: 'Responsive layout', body: ['Important content must remain equivalent on phone and desktop.', 'Navigation, grids, media, forms and tables should fit their container at phone, tablet, PC/app and wide-web widths without page-level horizontal overflow.'] },
   release_promotion: { title: 'Release promotion', body: ['Application changes are proven in Development first. Only the exact green Development tree is eligible for main.', 'Production then independently proves database convergence, bindings, exact deployment and public smoke acceptance. Main-only application patches are not allowed.'] },
-  online_help: { title: 'Online Help Centre', body: ['The Help Centre is the current operator guide for security, search quality, responsive layout, releases and integrations.', 'Historical release/build evidence remains auditable in source history but is not presented as current instruction.'] }
+  online_help: { title: 'Online Help Centre', body: ['The Help Centre is the current guide for shoppers, members, creators and administrators.', 'Contextual ⓘ buttons explain the term or process beside them without changing data. Historical release evidence remains auditable separately from current instructions.'] },
+  product_media: { title:'Product Media & Image Editor', body:['This workspace owns Product gallery image add, replace, order, metadata, explicit crop/resize and scoring work.', 'The Storefront shows the complete uploaded image by default. A crop happens only when you deliberately prepare a cropped replacement or derivative.'] },
+  product_image_fit: { title:'Full Product image display', body:['Product cards and Product detail views use the full uploaded image by default, even when its shape is portrait or landscape.', 'Empty space around a non-square photo is intentional. It prevents the Storefront from cutting off part of the Product.'] },
+  crop_resize: { title:'Crop / resize', body:['Keep original preserves the complete uploaded file. Square or landscape presets deliberately create a modified image file.', 'Use a crop only when the Product is still completely and accurately represented after the crop.'] },
+  focal_point: { title:'Focal point / re-centering', body:['The focal point records the important subject position for intentional presentation or derivative work.', 'Click the selected-image preview or enter X/Y percentages, then save. Focal metadata does not silently crop the Storefront image.'] },
+  image_score: { title:'Image score', body:['Image score measures technical/readiness evidence such as dimensions and required metadata.', 'A good score does not authorize automatic cropping, publication or replacement.'] },
+  public_use_status: { title:'Public use status', body:['Public use controls where reviewed Product media is allowed to appear.', 'Internal review or consent-needed media should not be treated as buyer-facing approval.'] },
+  today_attention: { title:'Today Needs Attention', body:['This view summarizes operational incidents that need review and now shows what failed, the affected endpoint/area, age and the owning workspace.', 'A threshold count is a signal to investigate; resolving or ignoring records should follow corrective evidence rather than bulk-clearing warnings.'] },
+  recurring_incidents: { title:'Grouped recurring incidents', body:['Recurring incidents combine repeated scope/code/endpoint failures so one underlying problem is easier to identify.', 'Fix the recurring cause first, then resolve only incident records supported by that correction.'] },
+  runtime_incident: { title:'Runtime incident', body:['A runtime incident records an application or provider-facing failure with scope, code, endpoint, message and review state.', 'Use the owning workspace and preserved details to diagnose the cause. Safe recheck is read-only and is offered only when an allowlisted probe exists.'] },
+  incident_severity: { title:'Incident severity', body:['Critical and error indicate higher operational impact; warning and info are lower-severity signals.', 'Age can elevate attention even when the original incident severity was lower.'] },
+  incident_review_status: { title:'Incident review status', body:['Open means not yet reviewed; Reviewing means active investigation; Resolved requires corrective evidence; Ignored is for a known harmless condition.', 'Do not use status changes to hide an unresolved recurring cause.'] },
+  shop_by_intent: { title:'Shop by intent', body:['Intent links are discovery shortcuts over the same Product data, such as local pickup, vintage or custom gifts.', 'They do not create duplicate Products and only show labels supported by current public Product facts.'] },
+  advanced_product_search: { title:'Advanced Product Search', body:['Use filters together to narrow public Products by origin, type, availability, material, process, locality and price.', 'Reset clears the current search filters without changing any Product data.'] },
+  product_details: { title:'Product details', body:['This page shows the current public Product record, full Product images, price, availability and supporting facts.', 'If an image is intentionally cropped, that crop must first be created in the Product Media & Image Editor; the public page itself does not auto-crop uploads.'] },
+  purchase_cart: { title:'Purchase and cart', body:['Adding an item to the cart records the intended Product and quantity for checkout.', 'Availability, pricing and fulfilment rules are confirmed again before an order is completed.'] },
+  save_follow: { title:'Wishlist and back-in-stock', body:['Wishlist saves an item for later. Back-in-stock follows availability when a Product cannot currently be purchased.', 'These actions do not reserve stock.'] },
+  media_studio: { title:'Media & Content Studio', body:['Media Studio manages non-Product presentation photography such as workshop, process, gallery, proof, banner and engagement images.', 'Product images remain in the Product Media editor so Product gallery authority is not mixed with site presentation media.'] },
+  content_studio: { title:'Content Studio', body:['Content Studio prepares reviewed stories, captions and publication packages from approved evidence.', 'Preparing content does not publish automatically unless the owning publication workflow explicitly does so.'] },
+  creative_project: { title:'Creative Project', body:['A Creative Project tracks the making process, materials, evidence and content opportunities around one piece or experiment.', 'It can feed Content Studio without changing Inventory or publishing by itself.'] },
+  packaging_studio: { title:'Packaging Studio', body:['Packaging Studio prepares labels, packaging layouts and repeatable templates from approved Product/ingredient facts.', 'Preview and approval should happen before a printed or public-facing package is treated as final.'] }
 });
 
 const DD_CONTEXT_HELP_RULES = Object.freeze([
@@ -61,7 +81,25 @@ const DD_CONTEXT_HELP_RULES = Object.freeze([
   { path: '/admin/visual-polish/', textIncludes: 'Mobile', help: 'responsive_layout' },
   { path: '/admin/deploy-readiness/', textIncludes: 'Promote', help: 'release_promotion' },
   { path: '/admin/promotion-control/', textIncludes: 'Promotion', help: 'release_promotion' },
-  { path: '/admin/help/', textIncludes: 'Help Centre', help: 'online_help' }
+  { path: '/admin/help/', textIncludes: 'Help Centre', help: 'online_help' },
+  { path: '/shop/', selector: '#shopIntentHeading', help: 'shop_by_intent' },
+  { path: '/shop/', text: 'Advanced Product Search', help: 'advanced_product_search' },
+  { path: '/shop/', text: 'Available Products', help: 'product_image_fit' },
+  { path: '/shop/product/', selector: '#pageH1', help: 'product_details' },
+  { path: '/shop/product/', text: 'Purchase', help: 'purchase_cart' },
+  { path: '/shop/product/', text: 'Save or follow this item', help: 'save_follow' },
+  { path: '/admin/catalog-media/', text: 'Product Media & Image Editor', help: 'product_media' },
+  { path: '/admin/catalog-media/', labelControl: '#productMediaV164Preset', help: 'crop_resize' },
+  { path: '/admin/catalog-media/', labelControl: 'input[name="focal_point_x"]', help: 'focal_point' },
+  { path: '/admin/catalog-media/', text: 'Image score', help: 'image_score' },
+  { path: '/admin/catalog-media/', labelControl: 'select[name="public_use_status"]', help: 'public_use_status' },
+  { path: '/admin/operations/', text: 'Today Needs Attention', help: 'today_attention' },
+  { path: '/admin/operations/', text: 'Grouped recurring incidents', help: 'recurring_incidents' },
+  { path: '/admin/operations/', text: 'Recent incident records and safe recovery', help: 'runtime_incident' },
+  { path: '/admin/media-content-studio/', textIncludes: 'Media', help: 'media_studio' },
+  { path: '/admin/content-studio/', textIncludes: 'Content Studio', help: 'content_studio' },
+  { path: '/admin/creative-automation/', textIncludes: 'Creative', help: 'creative_project' },
+  { path: '/admin/packaging-studio/', textIncludes: 'Packaging', help: 'packaging_studio' }
 ]);
 
 let openRecord = null;
@@ -74,7 +112,6 @@ const REFRESH_DEBOUNCE_MS = 180;
 const OBSERVER_CONFIG = Object.freeze({ childList: true, subtree: true });
 function normalizedPath() {
   let raw = String(window.location.pathname || '/');
-  if (!raw.startsWith('/admin')) return raw;
   raw = raw.replace(/\/index\.html$/i, '/');
   return raw.endsWith('/') ? raw : `${raw}/`;
 }
@@ -83,7 +120,7 @@ function ensureStylesheet() {
   if (document.querySelector('link[data-dd-context-help-style]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = '/css/admin-context-help.css?v=current';
+  link.href = '/css/admin-context-help.css?v=467b198-shared-help';
   link.dataset.ddContextHelpStyle = 'true';
   document.head.appendChild(link);
 }
@@ -186,9 +223,20 @@ function attach(target, helpKey, definition, ordinal) {
   }
   target.dataset.ddContextHelpAttached = helpKey;
 }
+function ensureHelpCentreLauncher(path){
+  if(document.querySelector('[data-dd-help-centre-launcher]'))return;
+  const link=document.createElement('a');
+  link.className='dd-context-help-centre';
+  link.dataset.ddHelpCentreLauncher='true';
+  link.href=path.startsWith('/admin/')?'/admin/help/':'/help/';
+  link.textContent='ⓘ Help';
+  link.setAttribute('aria-label','Open Devil n Dove Help Centre');
+  document.body.appendChild(link);
+}
 function refresh() {
   ensureStylesheet();
   const path = normalizedPath();
+  ensureHelpCentreLauncher(path);
   let ordinal = 0;
   for (const rule of DD_CONTEXT_HELP_RULES) {
     if (rule.path !== path) continue;
@@ -233,6 +281,7 @@ function queueRefresh() {
 }
 function startBoundedObserver() {
   if (!document.body || typeof MutationObserver !== 'function' || observer) return;
+  if (!normalizedPath().startsWith('/admin/') || window.DDAdminLeanStartup?.enabled) return;
   observer = new MutationObserver((records) => {
     if (mutationNeedsRefresh(records)) queueRefresh();
   });

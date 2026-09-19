@@ -15,11 +15,11 @@
     .dd-media-edit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
     .dd-media-edit-card{display:flex;flex-direction:column;gap:8px;text-align:left;padding:8px;border:1px solid var(--border);border-radius:12px;background:var(--card,#fff);color:inherit}
     .dd-media-edit-card.is-selected{outline:2px solid currentColor;outline-offset:2px}
-    .dd-media-edit-card img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;background:#f3f4f6}
+    .dd-media-edit-card img{width:100%;aspect-ratio:4/3;object-fit:contain;border-radius:8px;background:#f3f4f6}
     .dd-media-edit-card span{display:flex;flex-direction:column;gap:2px}.dd-media-edit-card small{opacity:.8}
     .dd-media-reference{opacity:.82;border-style:dashed}
     .dd-image-editor-layout{display:grid;grid-template-columns:minmax(280px,440px) minmax(0,1fr);gap:18px}
-    .dd-image-editor-preview img{width:100%;max-height:520px;object-fit:contain;border:1px solid var(--border);border-radius:12px;background:#f3f4f6}
+    .dd-image-editor-preview img{width:100%;max-height:520px;object-fit:contain;border:1px solid var(--border);border-radius:12px;background:#f3f4f6}.dd-focal-preview-wrap{position:relative;display:block;cursor:crosshair}.dd-focal-dot{position:absolute;width:16px;height:16px;border:2px solid #fff;border-radius:50%;background:#7a2cff;box-shadow:0 0 0 2px rgba(0,0,0,.55);transform:translate(-50%,-50%);pointer-events:none}
     .dd-media-section{margin-top:18px}.dd-score-box,.dd-file-tools{padding:10px;border:1px solid var(--border);border-radius:10px}
     .dd-media-danger{border-color:#8d3144!important}.dd-media-toolbar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;margin:14px 0}
     .dd-file-preview{width:100%;max-width:420px;border:1px solid var(--border);border-radius:10px;background:#f3f4f6;margin-top:10px}
@@ -37,7 +37,7 @@
     </nav>
 
     <header class="hero compact-hero">
-      <div><p class="eyebrow">Release 467 • Build 178</p><h1>Product Media & Image Editor</h1><p>Add, replace, remove, reorder, crop/resize and score one Product image at a time without scanning the Product catalog or R2 library.</p></div>
+      <div><p class="eyebrow">Product media workspace</p><h1 data-context-help="product_media">Product Media & Image Editor</h1><p>Storefront images show the complete uploaded file by default. Use crop/resize here only when you deliberately want to create a modified file; use focal point to record where the subject should remain centred for intentional presentation work.</p></div>
     </header>
 
     <div id="productMediaV164Status" class="dd-product-status small" aria-live="polite"></div>
@@ -70,7 +70,7 @@
       <div id="productMediaV164FileTools" class="dd-file-tools" hidden>
         <strong id="productMediaV164FileHeading">Prepare image</strong>
         <div class="grid cols-3" style="gap:12px;margin-top:10px">
-          <label><span class="small">Crop / sizing</span><select class="input" id="productMediaV164Preset"><option value="original">Keep original</option><option value="square_1200">Square 1200×1200</option><option value="landscape_1600">Landscape 4:3 up to 1600</option><option value="max_side">Resize max side</option></select></label>
+          <label data-context-help="crop_resize"><span class="small">Crop / sizing</span><select class="input" id="productMediaV164Preset"><option value="original">Keep original</option><option value="square_1200">Square 1200×1200</option><option value="landscape_1600">Landscape 4:3 up to 1600</option><option value="max_side">Resize max side</option></select></label>
           <label><span class="small">Max side px</span><input class="input" id="productMediaV164MaxSide" type="number" min="800" max="2600" step="100" value="1600"/></label>
           <label><span class="small">JPEG quality %</span><input class="input" id="productMediaV164Quality" type="number" min="55" max="95" step="1" value="88"/></label>
         </div>
@@ -85,18 +85,21 @@
       <div class="dd-media-actions"><h2 style="margin:0">Selected Image</h2><span id="productMediaV164ImageId" class="small"></span></div>
       <div class="dd-image-editor-layout" style="margin-top:14px">
         <div class="dd-image-editor-preview">
-          <img id="productMediaV164Preview" alt="Selected Product image"/>
+          <div class="dd-focal-preview-wrap" id="productMediaV198FocalPreview" data-context-help="focal_point" title="Click the image to set its focal point">
+            <img id="productMediaV164Preview" alt="Selected Product image"/>
+            <span class="dd-focal-dot" id="productMediaV198FocalDot" aria-hidden="true"></span>
+          </div>
           <span id="productMediaV164PreviewNotice" class="dd-media-broken small"></span>
-          <div class="dd-score-box" style="margin-top:10px"><strong>Image score</strong><div id="productMediaV164Score">Not measured</div><button class="btn" id="productMediaV164ScoreButton" type="button" style="margin-top:8px">Measure &amp; Score Selected Image</button><p class="small">This reads and scores only this image. Nothing else in the gallery is rescored.</p></div>
+          <div class="dd-score-box" style="margin-top:10px" data-context-help="image_score"><strong>Image score</strong><div id="productMediaV164Score">Not measured</div><button class="btn" id="productMediaV164ScoreButton" type="button" style="margin-top:8px">Measure &amp; Score Selected Image</button><p class="small">This reads and scores only this image. Nothing else in the gallery is rescored.</p></div>
         </div>
         <form id="productMediaV164EditorForm">
           <div class="dd-editor-grid cols-2">
             <label class="wide"><span class="small">Alt text</span><input class="input" name="alt_text" maxlength="1000"/></label>
             <label><span class="small">Gallery order</span><input class="input" name="sort_order" type="number" min="0" step="1"/></label>
             <label><span class="small">Image role</span><select class="input" name="image_role"><option value="">Unassigned</option><option value="hero_front">Hero / front</option><option value="detail_texture">Detail / texture</option><option value="scale_context">Scale / context</option><option value="back_side">Back / side</option><option value="process_story">Process / story</option><option value="packaging_pickup">Packaging / pickup</option><option value="material_tool_proof">Material / tool proof</option><option value="gallery_support">Gallery support</option></select></label>
-            <label><span class="small">Public use</span><select class="input" name="public_use_status"><option value="internal_review">Internal review</option><option value="product_page_ok">Product page OK</option><option value="social_ok">Social OK</option><option value="all_public_ok">All public OK</option><option value="consent_needed">Consent needed</option><option value="blocked">Blocked</option></select></label>
-            <label><span class="small">Focal point X %</span><input class="input" name="focal_point_x" type="number" min="0" max="100" step="0.1"/></label>
-            <label><span class="small">Focal point Y %</span><input class="input" name="focal_point_y" type="number" min="0" max="100" step="0.1"/></label>
+            <label data-context-help="public_use_status"><span class="small">Public use</span><select class="input" name="public_use_status"><option value="internal_review">Internal review</option><option value="product_page_ok">Product page OK</option><option value="social_ok">Social OK</option><option value="all_public_ok">All public OK</option><option value="consent_needed">Consent needed</option><option value="blocked">Blocked</option></select></label>
+            <label data-context-help="focal_point"><span class="small">Focal point X %</span><input class="input" name="focal_point_x" type="number" min="0" max="100" step="0.1"/></label>
+            <label data-context-help="focal_point"><span class="small">Focal point Y %</span><input class="input" name="focal_point_y" type="number" min="0" max="100" step="0.1"/></label>
             <label class="wide"><span class="small">Image title</span><input class="input" name="image_title" maxlength="250"/></label>
             <label class="wide"><span class="small">Caption</span><textarea class="input" name="caption" rows="3"></textarea></label>
             <label class="wide"><span class="small">Annotation notes</span><textarea class="input" name="annotation_notes" rows="3"></textarea></label>
@@ -111,6 +114,6 @@
   </div>
   <script src="/public/js/auth.js?v=440"></script>
   <!-- Product Media compatibility DOM marker retained; Build 178 keeps selected-Product image work bounded and explicit. -->
-  <script src="/public/js/admin-product-media-editor-v172.js?v=178"></script>
+  <script src="/public/js/admin-product-media-editor-v172.js?v=467b198"></script>
 </body>
 </html>
