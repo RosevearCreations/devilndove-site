@@ -33,8 +33,8 @@ Read in this order:
 
 ## Active autonomous build documents
 
-- `docs/operations/RELEASE_467_BUILD_193_D1_MEDIA_HEADROOM_OPTIMIZATION.md`
-- `docs/operations/RELEASE_467_BUILD_194_INVENTORY_EVIDENCE_HEADROOM_OPTIMIZATION.md`
+- `docs/operations/RELEASE_467_BUILD_193_CURRENT_AUTHORITY_HANDOFF_CONVERGENCE.md`
+- `docs/operations/RELEASE_467_BUILD_194_D1_EVIDENCE_HEADROOM_OPTIMIZATION.md`
 - `docs/operations/RELEASE_467_BUILD_195_BUYER_READINESS_REPAIR_WORKBENCH.md`
 - `docs/operations/RELEASE_467_BUILD_196_SUPPLIER_SOURCE_EVIDENCE_WORKBENCH.md`
 - `docs/operations/RELEASE_467_BUILD_197_CYCLE_COUNT_DUPLICATE_IDENTITY_RESOLUTION.md`
@@ -49,3 +49,7 @@ Historical unscoped “Build 193–200” files are provenance only. Current fut
 ## Safety boundary
 
 Production data ownership, zero-D1 code-only promotion, provider HOLD states, no request-time DDL, no bucket-wide R2 listing, no background polling and one-core-Product-request rules remain in force.
+
+## Retained historical provenance — Release 467 Build 171
+
+Build 171 — Release & Restart Authority Convergence — remains immutable historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It is not the current application baseline. Build 193 will converge the machine pointer and current I.T. release surfaces from that historical authority to the fully proven Build 192 baseline.
