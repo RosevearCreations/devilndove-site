@@ -162,4 +162,3 @@ export async function loadProductLinks(db, productId) {
     return { ...shaped, health: resourceLinkHealth(shaped) };
   });
 }
-
