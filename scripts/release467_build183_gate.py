@@ -35,8 +35,9 @@ for token in ("key_duplicate_count","same_kind_duplicate_count","usage_review_re
 for forbidden in ("onRequestPost","onRequestPatch","onRequestPut","onRequestDelete","CREATE TABLE","ALTER TABLE","DROP TABLE","INSERT INTO","UPDATE site_item_inventory","DELETE FROM","bucket.put(","bucket.delete(","setInterval(","MutationObserver("):
     req(forbidden not in api,f"Build 183 review API gained mutation/background behavior: {forbidden}")
 
-for token in ("Tool & Supply Identity Review","Load identity health","Load 40 issue rows","inventoryIdentityCleanupMount","admin-inventory-identity-cleanup-v183.js?v=183","Release 467 Build 183"):
+for token in ("Tool & Supply Identity Review","Load identity health","Load 40 issue rows","inventoryIdentityCleanupMount","Release 467 Build 183"):
     req(token in page or token in ui,f"Build 183 Inventory workspace missing: {token}")
+req(any(token in page for token in ("admin-inventory-identity-cleanup-v183.js?v=183","admin-inventory-identity-cleanup-v183.js?v=189")),"Build 183/189 Inventory identity cache-key successor missing")
 for forbidden in ("method:'POST'","method: 'POST'","method:'PATCH'","method: 'PATCH'","setInterval(","MutationObserver("):
     req(forbidden not in ui,f"Build 183 review UI must remain non-mutating/non-polling: {forbidden}")
 req(len(re.findall(r"<h1\b",page,re.I))==1,"Inventory Operations must keep one H1")
