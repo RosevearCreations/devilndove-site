@@ -180,6 +180,83 @@ export async function onRequestPost(context) {
   let body={}; try { body=await context.request.json(); } catch { return json({ok:false,error:"Invalid JSON body."},400); }
   const action=normalizeText(body.action).toLowerCase();
   try {
+    if (action === "reconcile_placeholder_slots") {
+      const incoming=Array.isArray(body.slots)?body.slots.slice(0,100):[];
+      if(!incoming.length)return json({ok:false,error:"No placeholder slots were supplied."},400);
+      const expected=[];
+      for(const item of incoming){
+        const pagePath=cleanPath(item?.page_path);
+        const key=cleanSlotKey(item?.slot_key);
+        const selector=cleanSelector(item?.target_selector);
+        const source=normalizeText(item?.source_snapshot).slice(0,5000);
+        if(isBlockedPagePath(pagePath)||!key||!selector||!source.startsWith("/assets/placeholders/media-content/"))continue;
+        expected.push({
+          page_path:pagePath,
+          slot_key:key,
+          slot_label:normalizeText(item?.slot_label).slice(0,300)||key,
+          slot_type:"image",
+          target_selector:selector,
+          target_attribute:"src",
+          source_snapshot:source,
+          source_alt_snapshot:normalizeText(item?.source_alt_snapshot).slice(0,1000)||null,
+          is_required:bool(item?.is_required)
+        });
+      }
+      if(!expected.length)return json({ok:false,error:"No valid public image placeholders were supplied."},400);
+
+      const existingResult=await db.prepare(`SELECT media_content_slot_id,page_path,slot_key,slot_label,slot_type,target_selector,target_attribute,source_snapshot,source_alt_snapshot,is_required,is_active
+        FROM media_content_slots
+        WHERE is_active=1 AND slot_type='image'
+          AND page_path NOT LIKE '/admin%' AND page_path NOT LIKE '/shop/product%'
+          AND page_path NOT LIKE '/tools%' AND page_path NOT LIKE '/toolshed%' AND page_path NOT LIKE '/supplies%'
+        ORDER BY media_content_slot_id
+        LIMIT 500`).all();
+      const existingMap=new Map(rows(existingResult).map(row=>[`${cleanPath(row.page_path)}|${cleanSlotKey(row.slot_key)}`,row]));
+      const drift=[];
+      const missing=[];
+      for(const item of expected){
+        const current=existingMap.get(`${item.page_path}|${item.slot_key}`);
+        if(!current){missing.push(item);drift.push(item);continue;}
+        const same=String(current.slot_type||'')===item.slot_type
+          && String(current.target_selector||'')===item.target_selector
+          && String(current.target_attribute||'')===item.target_attribute
+          && String(current.source_snapshot||'')===item.source_snapshot
+          && String(current.source_alt_snapshot||'')===String(item.source_alt_snapshot||'')
+          && bool(current.is_required)===item.is_required;
+        if(!same)drift.push(item);
+      }
+      if(drift.length){
+        const statements=drift.map(item=>db.prepare(`INSERT INTO media_content_slots(page_path,slot_key,slot_label,slot_type,target_selector,target_attribute,source_snapshot,source_alt_snapshot,is_required,is_active,created_by_user_id,updated_by_user_id,created_at,updated_at)
+          VALUES(?,?,?,?,?,?,?,?,?,1,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+          ON CONFLICT(page_path,slot_key) DO UPDATE SET
+            slot_label=excluded.slot_label,slot_type=excluded.slot_type,target_selector=excluded.target_selector,target_attribute=excluded.target_attribute,
+            source_snapshot=excluded.source_snapshot,source_alt_snapshot=excluded.source_alt_snapshot,is_required=excluded.is_required,is_active=1,
+            updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`)
+          .bind(item.page_path,item.slot_key,item.slot_label,item.slot_type,item.target_selector,item.target_attribute,item.source_snapshot,item.source_alt_snapshot,item.is_required,adminUser.user_id,adminUser.user_id));
+        await db.batch(statements);
+        await changeAudit(db,adminUser,{action_type:"reconcile_placeholder_slots",new_value:{checked:expected.length,changed:drift.length,missing_before:missing.length}});
+        await auditAdminAction(context.env,context.request,adminUser,{action_type:"media_placeholder_slots_reconcile",target_type:"site_presentation",target_key:"all-placeholders",details:{checked:expected.length,changed:drift.length,missing_before:missing.length}});
+      }
+
+      const integrityResult=await db.prepare(`SELECT s.media_content_slot_id,s.page_path,s.slot_key,
+          SUM(CASE WHEN a.active=1 THEN 1 ELSE 0 END) AS active_assignment_count
+        FROM media_content_slots s
+        LEFT JOIN media_content_assignments a ON a.media_content_slot_id=s.media_content_slot_id
+        WHERE s.is_active=1 AND s.slot_type='image'
+          AND s.page_path NOT LIKE '/admin%' AND s.page_path NOT LIKE '/shop/product%'
+          AND s.page_path NOT LIKE '/tools%' AND s.page_path NOT LIKE '/toolshed%' AND s.page_path NOT LIKE '/supplies%'
+        GROUP BY s.media_content_slot_id,s.page_path,s.slot_key
+        ORDER BY s.media_content_slot_id
+        LIMIT 500`).all();
+      const expectedKeys=new Set(expected.map(item=>`${item.page_path}|${item.slot_key}`));
+      const integrityRows=rows(integrityResult).filter(row=>expectedKeys.has(`${cleanPath(row.page_path)}|${cleanSlotKey(row.slot_key)}`));
+      const duplicateActive=integrityRows.filter(row=>n(row.active_assignment_count)>1).map(row=>({page_path:row.page_path,slot_key:row.slot_key,media_content_slot_id:n(row.media_content_slot_id),active_assignment_count:n(row.active_assignment_count)}));
+      const foundKeys=new Set(integrityRows.map(row=>`${cleanPath(row.page_path)}|${cleanSlotKey(row.slot_key)}`));
+      const stillMissing=expected.filter(item=>!foundKeys.has(`${item.page_path}|${item.slot_key}`)).map(item=>({page_path:item.page_path,slot_key:item.slot_key}));
+      if(stillMissing.length)return json({ok:false,error:"Some public image placeholders could not be registered for editing.",error_code:"placeholder_slot_reconciliation_failed",missing:stillMissing},409);
+      return json({ok:true,message:drift.length?`Prepared ${drift.length} placeholder location(s) for editing.`:"All placeholder locations are registered for editing.",changed:drift.length,integrity:{checked:expected.length,changed:drift.length,missing_before:missing.length,duplicate_active_assignments:duplicateActive},duplicate_active_assignments:duplicateActive});
+    }
+
     if (action === "register_slots") {
       const pagePath=cleanPath(body.page_path); const incoming=Array.isArray(body.slots)?body.slots.slice(0,300):[];
       if (isBlockedPagePath(pagePath)) return json({ok:false,error:"Media Studio manages public/static site presentation only. Product, inventory, tools, supplies, account and transactional routes use their own editors."},400);
@@ -220,6 +297,8 @@ export async function onRequestPost(context) {
     if (action === "assign_media") {
       const slotId=n(body.media_content_slot_id), mediaId=n(body.media_asset_id); if(slotId<=0||mediaId<=0)return json({ok:false,error:"Choose both a page slot and a media item."},400);
       const slot=await db.prepare(`SELECT * FROM media_content_slots WHERE media_content_slot_id=? AND is_active=1`).bind(slotId).first(); if(!slot||slot.slot_type==='text')return json({ok:false,error:"That slot cannot receive an image."},400);
+      const expectedPage=cleanPath(body.expected_page_path||slot.page_path), expectedKey=cleanSlotKey(body.expected_slot_key||slot.slot_key);
+      if(cleanPath(slot.page_path)!==expectedPage||cleanSlotKey(slot.slot_key)!==expectedKey)return json({ok:false,error:"The selected page location changed before save. Re-open that placeholder and try again.",error_code:"media_slot_identity_mismatch",expected_page_path:expectedPage,expected_slot_key:expectedKey},409);
       const media=await db.prepare(`SELECT ma.media_asset_id,ma.product_id,ma.object_key,mm.archived_at,mm.source_type,mm.media_type FROM media_assets ma LEFT JOIN managed_media_metadata mm ON mm.media_asset_id=ma.media_asset_id WHERE ma.media_asset_id=? AND ma.deleted_at IS NULL`).bind(mediaId).first();
       if(!media || media.product_id!=null || isBlockedMediaKey(media.object_key) || BLOCKED_SOURCE_TYPES.has(normalizeText(media.source_type).toLowerCase()) || normalizeText(media.media_type).toLowerCase()==='product') return json({ok:false,error:"That media is managed by the Product/Inventory workflow, not Media Studio."},404); if(media.archived_at)return json({ok:false,error:"Archived media cannot be newly assigned. Restore it first."},409);
       const previousResult=await db.prepare(`SELECT media_content_assignment_id,media_asset_id FROM media_content_assignments WHERE media_content_slot_id=? AND active=1 ORDER BY media_content_assignment_id`).bind(slotId).all();

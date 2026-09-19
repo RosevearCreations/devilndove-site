@@ -41,8 +41,9 @@ req("detail:{ok:true,...detail}" not in runtime,"Media readiness event must not 
 for token in ("ok:false,applied:false,reason:'manifest_http_error'","ok:false,applied:false,reason:'manifest_exception'","ok:true,applied:true"):
     req(token in runtime,f"truthful runtime readiness state missing: {token}")
 
-for token in ("slotSyncAttempted:new Set()","slotDefinitionDrift","reconcilePageSlots","action:'register_slots'","drift=expected.filter","Existing image assignments were preserved","v=467b195"):
+for token in ("slotSyncAttempted:new Set()","slotDefinitionDrift","reconcilePageSlots","action:'register_slots'","drift=expected.filter","Existing image assignments were preserved"):
     req(token in studio,f"Media Studio catalog reconciliation missing: {token}")
+req(any(token in studio for token in ("v=467b195","v=467b197")),"Media Studio catalog cache key must retain Build 195 or advance to Build 197")
 req("apply Build 259 migration" not in studio,"obsolete Build 259 manual-repair instruction remains")
 for token in ("register_slots","ON CONFLICT(page_path,slot_key) DO UPDATE","slots:await pageSlots","Product, inventory, tools, supplies"):
     req(token in studio_api,f"bounded slot-registration/specialist boundary missing: {token}")
@@ -50,7 +51,7 @@ req("ma.product_id IS NULL" in studio_api and "BLOCKED_MEDIA_PREFIXES" in studio
 
 req("const refresh=normalizeText(url.searchParams.get('refresh'))" in manifest and '"Cache-Control":"no-store"' in manifest,"public manifest admin-refresh cache bypass missing")
 req("media-content-runtime.js?v=467b195" in home and "home-carousel.js?v=467b195" in home,"Home Build 195 cache keys missing")
-req(any(token in studio_page for token in ("admin-media-content-studio.js?v=467b195","admin-media-content-studio.js?v=467b196")),"Media Studio Build 195/successor cache key missing")
+req(any(token in studio_page for token in ("admin-media-content-studio.js?v=467b195","admin-media-content-studio.js?v=467b196","admin-media-content-studio.js?v=467b197")),"Media Studio Build 195/successor cache key missing")
 req(home.lower().count("<h1")==1,"Home must retain exactly one H1")
 req(studio_page.lower().count("<h1")==1,"Media Studio must retain exactly one H1")
 
@@ -73,7 +74,8 @@ req(len(managed_pages)>=24,f"expected sitewide managed-page coverage, found {len
 
 legacy_roadmap=all(token in roadmap for token in ("Build 194 — complete","Build 195 — current","Build 196 — next after Build 195 is fully GREEN","**201** | Storefront Launch Set & Autonomous Closure"))
 successor_roadmap=all(token in roadmap for token in ("Build 194 — complete","Build 195 — complete","Build 196 — current","**202** | Storefront Launch Set & Autonomous Closure"))
-req(legacy_roadmap or successor_roadmap,"Build 195 roadmap checkpoint must be current or explicitly closed by Build 196")
+later_successor_roadmap=all(token in roadmap for token in ("Build 195 — complete","Build 196 — complete","Build 197 — current","**203** | Storefront Launch Set & Autonomous Closure"))
+req(legacy_roadmap or successor_roadmap or later_successor_roadmap,"Build 195 roadmap checkpoint must be current or explicitly closed by later successors")
 for token in ("responsive","placeholder","fallback image","slot definitions","zero-D1 migration path","No automatic R2"):
     req(token.lower() in doc.lower(),f"Build 195 operations contract missing: {token}")
 
