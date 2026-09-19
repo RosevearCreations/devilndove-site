@@ -5,7 +5,8 @@ import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../
 import {
   loadProducts,
   loadProductLinks,
-  searchResources
+  searchResources,
+  summarizeProductResourceLinks
 } from './_productResourcesData.js';
 import {
   normalizeSubmittedLinks,
@@ -25,11 +26,24 @@ export async function onRequestGet({ request, env }) {
     const productId = Number(url.searchParams.get('product_id') || 0);
     const q = normalizeText(url.searchParams.get('q')).toLowerCase();
     const [products, resources, links] = await Promise.all([
-      loadProducts(db, env, 600),
-      searchResources(db, env, q, 240),
+      loadProducts(db, env, 120),
+      q ? searchResources(db, env, q, 120) : Promise.resolve([]),
       loadProductLinks(db, productId)
     ]);
-    return json({ ok: true, products, resources, links });
+    return json({
+      ok: true,
+      products,
+      resources,
+      links,
+      link_health_summary: summarizeProductResourceLinks(links),
+      read_budget: {
+        delivery: 'build185-bounded-compatibility',
+        product_row_limit: 120,
+        resource_row_limit: q ? 120 : 0,
+        resource_search_required: !q,
+        selected_product_links_only: productId > 0,
+      }
+    });
   } catch (error) {
     return json({ ok: false, error: error?.message || 'Failed to load product tools and supplies.' }, 500);
   }
@@ -59,7 +73,7 @@ export async function onRequestPost({ request, env }) {
     });
 
     const persistedLinks = await loadProductLinks(db, productId);
-    return json({ ok: true, saved_links: links.length, links: persistedLinks });
+    return json({ ok: true, saved_links: links.length, links: persistedLinks, link_health_summary: summarizeProductResourceLinks(persistedLinks) });
   } catch (error) {
     return json({ ok: false, error: error?.message || 'Failed to save product links.' }, 500);
   }
