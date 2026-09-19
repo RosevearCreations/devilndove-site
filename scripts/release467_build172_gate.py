@@ -10,10 +10,10 @@ def node(path):
     p=subprocess.run(['node','--check',str(ROOT/path)],cwd=ROOT,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     req(p.returncode==0,f'JavaScript syntax failed for {path}: {(p.stderr or p.stdout)[-1200:]}')
 page=read('admin/catalog-media/index.html');client=read('public/js/admin-product-media-editor-v172.js');media=read('functions/api/admin/product-media-editor.js');image=read('functions/api/admin/product-image-editor.js');file_api=read('functions/api/admin/product-image-file.js');helper=read('functions/api/admin/_productImageAnnotationsV172.js')
-req(any(token in page for token in ('Release 467 • Build 172','Release 467 • Build 173','Release 467 • Build 178')),'Build 172+ Product Media page identity missing')
+req(any(token in page for token in ('Release 467 • Build 172','Release 467 • Build 173','Release 467 • Build 178','Product media workspace')),'Build 172+ Product Media page identity missing')
 for token in ('productMediaV172SaveReceipt','Saved ✓','Recovered media references are display-only'):
     req(token in page,f'Build 172 page missing: {token}')
-req(any(token in page for token in ('admin-product-media-editor-v172.js?v=172','admin-product-media-editor-v172.js?v=173','admin-product-media-editor-v172.js?v=178')),'Build 172+ Product Media client cache identity missing')
+req(any(token in page for token in ('admin-product-media-editor-v172.js?v=172','admin-product-media-editor-v172.js?v=173','admin-product-media-editor-v172.js?v=178','admin-product-media-editor-v172.js?v=467b198')),'Build 172+ Product Media client cache identity missing')
 for token in ('fetchProduct(state.productId)','fetchImage(targetId)','Save failed — image was not confirmed','Saved ✓','row.editable===false','data-reference="1"'):
     req(token in client,f'Build 172 client repair missing: {token}')
 req('await loadProduct(state.productId)' not in client,'Build 172 reintroduced in-flight loadProduct refresh deadlock')

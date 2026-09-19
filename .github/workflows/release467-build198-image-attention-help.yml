@@ -1,0 +1,87 @@
+name: Release 467 Build 198 Image Fidelity Attention Shared Help
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'css/storefront-discovery.css'
+      - 'css/styles.css'
+      - 'css/admin-context-help.css'
+      - 'admin/catalog-media/index.html'
+      - 'admin/help/index.html'
+      - 'help/index.html'
+      - 'public/js/admin-product-media-editor-v172.js'
+      - 'public/js/admin-runtime-incidents.js'
+      - 'public/js/admin-context-help.js'
+      - 'public/js/site-auth-ui.js'
+      - 'functions/_middleware.js'
+      - 'docs/architecture/admin-context-help.md'
+      - 'docs/operations/RELEASE_467_BUILD_198_PRODUCT_IMAGE_FIDELITY_ATTENTION_SHARED_HELP.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md'
+      - 'scripts/release467_build198_gate.py'
+      - 'scripts/current_help_hygiene_gate.py'
+      - 'scripts/release455_storefront_discovery_gate.py'
+      - 'scripts/release448_storefront_merchandising_gate.py'
+      - 'scripts/release467_build197_gate.py'
+      - 'scripts/release467_build196_gate.py'
+      - 'scripts/release467_build195_gate.py'
+      - 'scripts/release467_build194_gate.py'
+      - 'scripts/release467_build193_gate.py'
+      - 'scripts/release467_build192_gate.py'
+      - '.github/workflows/release467-build198-image-attention-help.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 198 image, attention and shared-help contract
+        run: python scripts/release467_build198_gate.py
+      - name: Retain current online-help hygiene
+        run: python scripts/current_help_hygiene_gate.py
+      - name: Retain Build 197 placeholder integrity
+        run: python scripts/release467_build197_gate.py
+      - name: Retain Build 196 save-to-placement convergence
+        run: python scripts/release467_build196_gate.py
+      - name: Retain Build 195 Media Studio recovery
+        run: python scripts/release467_build195_gate.py
+      - name: Retain Build 194 headroom and Home media closure
+        run: python scripts/release467_build194_gate.py
+      - name: Retain Build 193 authority convergence
+        run: python scripts/release467_build193_gate.py
+      - name: Retain Build 192 release convergence
+        run: python scripts/release467_build192_gate.py
+
+  no-provider-spend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Confirm Build 198 CI is source-only
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          body = Path('.github/workflows/release467-build198-image-attention-help.yml').read_text()
+          forbidden = (
+              'wrangler' + ' d1 execute',
+              'bucket.' + 'put(',
+              'bucket.' + 'delete(',
+              'bucket.' + 'list(',
+          )
+          found = [item for item in forbidden if item in body]
+          if found:
+              raise SystemExit(f'Provider-spend token found: {found}')
+          print('BUILD 198 CI D1 PROVIDER QUERY: ZERO')
+          print('BUILD 198 CI R2 MUTATION: ZERO')
+          PY

@@ -155,13 +155,9 @@ req("LIMIT 500" in api, "placeholder reconciliation queries must remain bounded"
 req("existing image assignments were not changed" in read("functions/api/admin/media-content-studio.js").lower() or "Existing image assignments were preserved" in studio, "placeholder reconciliation must preserve existing assignments")
 req("admin-media-content-studio.js?v=467b197" in page, "Media Studio cache key must advance to Build 197")
 
-for token in (
-    "Build 196 — complete",
-    "Build 197 — current",
-    "Build 198 — next after Build 197 is fully GREEN",
-    "**203** | Storefront Launch Set & Autonomous Closure",
-):
-    req(token in roadmap, f"Build 197 roadmap checkpoint missing: {token}")
+legacy_roadmap=all(token in roadmap for token in ("Build 196 — complete","Build 197 — current","Build 198 — next after Build 197 is fully GREEN","**203** | Storefront Launch Set & Autonomous Closure"))
+successor_roadmap=all(token in roadmap for token in ("Build 197 — complete","Build 198 — current","Build 199 — next after Build 198 is fully GREEN","**204** | Storefront Launch Set & Autonomous Closure"))
+req(legacy_roadmap or successor_roadmap,"Build 197 roadmap checkpoint must be current or explicitly closed by Build 198")
 
 for token in (
     "29 SVG image placeholders across 22 public pages",

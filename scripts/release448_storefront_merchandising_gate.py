@@ -41,7 +41,8 @@ with tempfile.NamedTemporaryFile(suffix='.sqlite') as tmp:
 # Forward admin usability regression: one shared contextual-help implementation serves
 # Storefront, CAIP, Tools, Supplies, Accounting and I.T. without acquiring write authority.
 context=need('public/js/admin-context-help.js',"trigger.textContent = 'ⓘ'")
-bootstrap=need('public/js/site-auth-ui.js','/public/js/admin-context-help.js?v=448-context-help')
+bootstrap=need('public/js/site-auth-ui.js','/public/js/admin-context-help.js?v=')
+if not any(token in bootstrap for token in ('/public/js/admin-context-help.js?v=448-context-help','/public/js/admin-context-help.js?v=467b176-context-help','/public/js/admin-context-help.js?v=467b198-shared-help')):raise SystemExit('FAIL — shared contextual help bootstrap cache identity missing')
 context_css=need('css/admin-context-help.css','.dd-context-help-trigger:focus-visible')
 for needle in ["trigger.type = 'button'",'aria-controls','aria-expanded',"event.key === 'Escape'","document.addEventListener('click'",'MutationObserver','[data-context-help]','dataset.contextHelpText','dataset.contextHelpTitle','dd-context-help-field',"replace(/\\/index\\.html$/i, '/')"]:
  if needle not in context:raise SystemExit(f'FAIL — shared admin contextual help missing {needle!r}')
@@ -63,4 +64,4 @@ print('Public images: inherited from consent-gated /api/products projection')
 print('Collection metadata/membership: D1 ADDITIVE')
 print('Collage image binaries: NOT DUPLICATED')
 print('Public H1 count: 1 per Storefront page')
-print('Shared admin contextual help: ACCESSIBLE / CLIENT-ONLY / GRID-SAFE / NO MUTATION')
+print('Shared contextual help: ACCESSIBLE / CLIENT-ONLY / GRID-SAFE / NO MUTATION')

@@ -26,6 +26,7 @@ const PRODUCTS_AUTH_READY_REVISION = '467b156-auth-ready-v3';
 const PRODUCTS_COLD_START_REVISION = '467b156-core-product-recovery-v1';
 const PRODUCTS_QUALITY_FALLBACK_REVISION = '467b156-quality-fallback-v1';
 const ADMIN_QOL_REVISION = '467b161-universal-search-v1';
+const STOREFRONT_DISCOVERY_REVISION = '467b198-product-image-fidelity';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
 function isReadMethod(method) { return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase()); }
@@ -144,11 +145,12 @@ function withPlatformClient(response, request) {
             element.append(adminQolMarkup(), { html: true });
           }
           if (isPublicRuntimeIntelligencePath(pathname)) {
+            element.append('<link data-dd-context-help-style="true" rel="stylesheet" href="/css/admin-context-help.css?v=467b198-shared-help"><script defer src="/public/js/admin-context-help.js?v=467b198-shared-help"></script>', { html: true });
             element.append('<script defer src="/public/js/public-heading-guard.js?v=current"></script>', { html: true });
             element.append(`<script defer src="/public/js/runtime-intelligence.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
           }
           if (isStorefrontDiscoveryPath(pathname)) {
-            element.append(`<link rel="stylesheet" href="/css/storefront-discovery.css?v=${CURRENT_RELEASE}"><script defer src="/public/js/storefront-discovery-runtime.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
+            element.append(`<link rel="stylesheet" href="/css/storefront-discovery.css?v=${STOREFRONT_DISCOVERY_REVISION}"><script defer src="/public/js/storefront-discovery-runtime.js?v=${STOREFRONT_DISCOVERY_REVISION}"></script>`, { html: true });
           }
         },
       });

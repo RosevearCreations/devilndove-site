@@ -47,3 +47,12 @@
   .dd-context-help-panel{max-width:100%;padding:.8rem .85rem}
 }
 @media(prefers-reduced-motion:reduce){.dd-context-help-trigger,.dd-context-help-panel{scroll-behavior:auto;transition:none}}
+
+.dd-context-help-centre{
+  position:fixed;left:max(12px,env(safe-area-inset-left));bottom:max(12px,env(safe-area-inset-bottom));
+  z-index:2147482000;display:inline-flex;align-items:center;gap:.35rem;min-height:40px;padding:.5rem .75rem;
+  border:1px solid rgba(191,232,255,.55);border-radius:999px;background:rgba(15,20,30,.94);
+  color:var(--text,#f6f7fb);text-decoration:none;font-weight:800;box-shadow:0 10px 28px rgba(0,0,0,.28)
+}
+.dd-context-help-centre:hover{background:rgba(46,168,255,.22)}
+.dd-context-help-centre:focus-visible{outline:3px solid var(--ice,#bfe8ff);outline-offset:3px}

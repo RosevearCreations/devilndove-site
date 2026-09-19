@@ -207,9 +207,10 @@ if (window.location.pathname.startsWith('/admin')) {
   void import('/public/js/admin-workspace-command-palette-v122.js?v=467b122')
     .catch((error) => console.warn('[DD Build 122] admin workspace navigation unavailable', error));
 
+  void import('/public/js/admin-context-help.js?v=467b198-shared-help')
+    .catch((error) => console.warn('[DD help] contextual help unavailable', error));
+
   if (!leanStartup) {
-    void import('/public/js/admin-context-help.js?v=467b176-context-help')
-      .catch((error) => console.warn('[DD admin help] contextual help unavailable', error));
     void import('/public/js/admin-workspace-preferences-v125.js?v=467b125')
       .catch((error) => console.warn('[DD Build 125] admin workspace memory unavailable', error));
     void import('/public/js/admin-favorites-quick-launch-v126.js?v=467b126')

@@ -3363,3 +3363,22 @@ body[data-admin-page="creative-assets"] .caip-sync-panel{background:#1c2540;colo
 .media-image-plan-row>div{min-width:0;display:grid;gap:2px}.media-image-plan-row strong,.media-image-plan-row code,.media-image-plan-row span{overflow-wrap:anywhere}.media-image-plan-row code{font-size:.68rem;color:var(--muted)}.media-image-plan-row .media-plan-status{display:inline-flex;width:max-content;max-width:100%;border-radius:999px;padding:4px 7px;font-size:.68rem;border:1px solid rgba(255,255,255,.1)}.media-image-plan-row .media-plan-status.p1{border-color:rgba(244,117,117,.55);color:#ffc5c5;background:rgba(244,117,117,.07)}.media-image-plan-row .media-plan-status.p2{border-color:rgba(231,201,120,.48);color:#f5dfa1;background:rgba(184,138,47,.07)}.media-image-plan-row .media-plan-status.p3{border-color:rgba(94,164,255,.38);color:#cfe2ff;background:rgba(94,164,255,.05)}.media-image-plan-row .media-plan-status.complete{border-color:rgba(85,190,126,.4);color:#b9ebca;background:rgba(85,190,126,.06)}
 @media(max-width:900px){.media-page-edit-toolbar{grid-template-columns:1fr auto}.media-page-edit-studio-link{grid-column:2}.media-image-plan-row{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.media-page-edit-toolbar{left:10px;right:10px;bottom:10px;max-width:none;grid-template-columns:1fr 1fr}.media-page-edit-toolbar>div{grid-column:1/-1}.media-page-edit-toggle,.media-page-edit-studio-link{text-align:center;min-height:40px}.media-image-plan-actions{display:grid;grid-template-columns:1fr 1fr}.media-image-plan-actions .btn{width:100%}.media-image-plan-row{grid-template-columns:1fr}.media-image-plan-board{max-height:560px}}
+
+
+/* Release 467 Build 198 — Product image fidelity.
+   Buyer-facing Product media shows the full uploaded file. Cropping belongs to an explicit Image Editor operation. */
+.shop-card-main-image img,
+.shop-card-thumb img,
+.product-detail-main-image img,
+.product-detail-thumb img{
+  object-fit:contain!important;
+  object-position:center!important;
+  background:rgba(255,255,255,.055);
+}
+
+.runtime-attention-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
+.runtime-attention-card{display:grid;gap:7px;min-width:0}
+.runtime-attention-head{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.runtime-attention-head strong{min-width:0;overflow-wrap:anywhere}
+.runtime-attention-card code{white-space:normal;overflow-wrap:anywhere}
+.runtime-attention-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
