@@ -1,0 +1,211 @@
+name: Release 467 Build 194 D1 Headroom + Home Media Reliability
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'public/js/admin-media-content-studio.js'
+      - 'admin/media-content-studio/index.html'
+      - 'functions/api/admin/media-content-studio.js'
+      - 'public/js/media-content-runtime.js'
+      - 'public/js/home-carousel.js'
+      - 'index.html'
+      - 'docs/operations/RELEASE_467_BUILD_194_D1_EVIDENCE_HEADROOM_OPTIMIZATION.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md'
+      - 'scripts/release467_build194_gate.py'
+      - '.github/workflows/release467-build194-d1-headroom-home-media.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 194 source contract
+        run: python scripts/release467_build194_gate.py
+      - name: Retain Build 193 current authority convergence
+        run: python scripts/release467_build193_gate.py
+      - name: Retain Build 190 media evidence closure
+        run: python scripts/release467_build190_gate.py
+      - name: Retain Build 189 Inventory evidence closure
+        run: python scripts/release467_build189_gate.py
+
+  development-d1-headroom-proof:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 target
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+
+      - name: Prove optimized Inventory evidence headroom
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "WITH active AS (
+            SELECT sii.site_item_inventory_id,
+                   LOWER(TRIM(COALESCE(sii.source_type,''))) AS item_kind,
+                   LOWER(TRIM(COALESCE(sii.external_key,''))) AS source_key,
+                   sii.supplier_name,sii.source_url,sii.amazon_url,sii.last_counted_at,
+                   COUNT(*) OVER (PARTITION BY LOWER(TRIM(COALESCE(sii.external_key,'')))) AS duplicate_count
+            FROM site_item_inventory sii
+            WHERE COALESCE(sii.is_active,1)=1
+              AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')
+          ), catalog_normalized AS (
+            SELECT LOWER(TRIM(COALESCE(item_kind,''))) AS item_kind,
+                   LOWER(TRIM(COALESCE(source_key,''))) AS source_key,
+                   LOWER(TRIM(COALESCE(status,'active'))) AS status_norm
+            FROM catalog_items
+            WHERE LOWER(TRIM(COALESCE(item_kind,''))) IN ('tool','supply')
+          ), catalog_rollup AS (
+            SELECT source_key,
+                   MAX(CASE WHEN item_kind='tool' AND status_norm<>'archived' THEN 1 ELSE 0 END) AS tool_active,
+                   MAX(CASE WHEN item_kind='supply' AND status_norm<>'archived' THEN 1 ELSE 0 END) AS supply_active,
+                   MAX(CASE WHEN item_kind='tool' AND status_norm='archived' THEN 1 ELSE 0 END) AS tool_archived,
+                   MAX(CASE WHEN item_kind='supply' AND status_norm='archived' THEN 1 ELSE 0 END) AS supply_archived,
+                   MAX(CASE WHEN status_norm<>'archived' THEN 1 ELSE 0 END) AS any_active
+            FROM catalog_normalized
+            GROUP BY source_key
+          ), evidence AS (
+            SELECT a.*,
+                   CASE WHEN a.item_kind='tool' THEN COALESCE(c.tool_active,0) ELSE COALESCE(c.supply_active,0) END AS active_match,
+                   CASE WHEN a.item_kind='tool' THEN COALESCE(c.tool_archived,0) ELSE COALESCE(c.supply_archived,0) END AS archived_match,
+                   COALESCE(c.any_active,0) AS any_active
+            FROM active a LEFT JOIN catalog_rollup c ON c.source_key=a.source_key
+          )
+          SELECT COUNT(*) AS active_items,
+            SUM(CASE WHEN source_key<>'' AND duplicate_count>1 THEN 1 ELSE 0 END) AS duplicate_identity_rows,
+            SUM(CASE WHEN TRIM(COALESCE(supplier_name,''))='' THEN 1 ELSE 0 END) AS missing_supplier_name,
+            SUM(CASE WHEN TRIM(COALESCE(source_url,''))='' AND TRIM(COALESCE(amazon_url,''))='' THEN 1 ELSE 0 END) AS missing_source_reference,
+            SUM(CASE WHEN last_counted_at IS NULL OR datetime(last_counted_at)<datetime('now','-90 days') THEN 1 ELSE 0 END) AS count_due,
+            SUM(CASE WHEN source_key<>'' AND active_match=1 THEN 1 ELSE 0 END) AS catalog_matched,
+            SUM(CASE WHEN source_key<>'' AND active_match=0 AND archived_match=1 THEN 1 ELSE 0 END) AS catalog_stale_archived,
+            SUM(CASE WHEN source_key<>'' AND active_match=0 AND archived_match=0 AND any_active=1 THEN 1 ELSE 0 END) AS catalog_kind_drift,
+            SUM(CASE WHEN source_key<>'' AND active_match=0 AND archived_match=0 AND any_active=0 THEN 1 ELSE 0 END) AS catalog_missing,
+            MIN(site_item_inventory_id) AS sample_inventory_id
+          FROM evidence;" > /tmp/build194-inventory.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build194-inventory.json')); rows=[]; reads=[]
+          keys=('active_items','duplicate_identity_rows','missing_supplier_name','missing_source_reference','count_due','catalog_matched','catalog_stale_archived','catalog_kind_drift','catalog_missing','sample_inventory_id')
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in keys): rows.append(v)
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None: reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data); assert rows,data
+          row={k:int(rows[0][k] or 0) for k in keys}
+          inventory_rows_read=sum(reads)
+          assert inventory_rows_read <= 20000, ('retained HARD_CEILING=20000 exceeded',inventory_rows_read)
+          assert inventory_rows_read <= 10000, ('Build 194 Inventory target exceeded',inventory_rows_read,10000)
+          print('INVENTORY_PROVIDER_ROWS_READ=',inventory_rows_read,'TARGET=',10000,'HARD_CEILING=20000')
+          print('BUILD 194 DEVELOPMENT INVENTORY HEADROOM: PASS',row)
+          print('D1 MUTATION: ZERO')
+          PY
+
+      - name: Prove optimized media evidence headroom
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "WITH annotation_ranked AS (
+            SELECT product_image_id,image_role,public_use_status,
+                   ROW_NUMBER() OVER (PARTITION BY product_image_id ORDER BY updated_at DESC,product_image_annotation_id DESC) rn
+            FROM product_image_annotations
+            WHERE product_image_id IS NOT NULL
+          ), image_facts AS (
+            SELECT pi.product_image_id,pi.product_id,pi.image_url,pi.alt_text,
+                   LOWER(TRIM(COALESCE(ar.image_role,''))) AS role_norm,
+                   CASE WHEN LOWER(TRIM(COALESCE(ar.public_use_status,''))) IN ('product_page_ok','all_public_ok') THEN 1 ELSE 0 END AS approved
+            FROM product_images pi
+            LEFT JOIN annotation_ranked ar ON ar.product_image_id=pi.product_image_id AND ar.rn=1
+          ), image_scored AS (
+            SELECT i.*,
+                   SUM(CASE WHEN approved=1 AND role_norm<>'' THEN 1 ELSE 0 END)
+                     OVER (PARTITION BY product_id,role_norm) AS approved_role_count
+            FROM image_facts i
+          ), image_summary AS (
+            SELECT COUNT(*) AS gallery_images,
+                   SUM(CASE WHEN LENGTH(TRIM(COALESCE(alt_text,'')))<12 THEN 1 ELSE 0 END) AS alt_attention,
+                   SUM(CASE WHEN approved=1 AND role_norm='' THEN 1 ELSE 0 END) AS approved_role_missing,
+                   SUM(CASE WHEN approved=1 AND role_norm<>'' AND approved_role_count>1 THEN 1 ELSE 0 END) AS approved_role_ambiguous,
+                   MIN(CASE WHEN LOWER(TRIM(COALESCE(image_url,''))) LIKE 'https://assets.devilndove.com/%' THEN product_image_id END) AS sample_product_image_id
+            FROM image_scored
+          ), catalog_ranked AS (
+            SELECT LOWER(TRIM(COALESCE(item_kind,''))) AS item_kind,
+                   LOWER(TRIM(COALESCE(source_key,''))) AS source_key_norm,image_url,
+                   ROW_NUMBER() OVER (
+                     PARTITION BY LOWER(TRIM(COALESCE(item_kind,''))),LOWER(TRIM(COALESCE(source_key,'')))
+                     ORDER BY catalog_item_id DESC
+                   ) rn
+            FROM catalog_items
+            WHERE LOWER(TRIM(COALESCE(item_kind,''))) IN ('tool','supply')
+              AND LOWER(TRIM(COALESCE(status,'active')))<>'archived'
+          ), inventory_media AS (
+            SELECT sii.site_item_inventory_id,sii.image_url,cr.image_url AS catalog_image_url
+            FROM site_item_inventory sii
+            LEFT JOIN catalog_ranked cr
+              ON cr.rn=1
+             AND cr.item_kind=LOWER(TRIM(COALESCE(sii.source_type,'')))
+             AND cr.source_key_norm=LOWER(TRIM(COALESCE(sii.external_key,'')))
+            WHERE COALESCE(sii.is_active,1)=1
+              AND LOWER(TRIM(COALESCE(sii.source_type,''))) IN ('tool','supply')
+          ), inventory_summary AS (
+            SELECT COUNT(*) AS active_inventory,
+                   SUM(CASE WHEN TRIM(COALESCE(image_url,''))='' THEN 1 ELSE 0 END) AS blank_inventory_images,
+                   SUM(CASE WHEN TRIM(COALESCE(image_url,''))<>'' AND LOWER(TRIM(image_url)) NOT LIKE 'https://assets.devilndove.com/%' THEN 1 ELSE 0 END) AS external_inventory_refs,
+                   SUM(CASE WHEN TRIM(COALESCE(image_url,''))<>'' AND TRIM(COALESCE(catalog_image_url,''))<>'' AND TRIM(image_url)<>TRIM(catalog_image_url) THEN 1 ELSE 0 END) AS inventory_catalog_image_drift,
+                   MIN(CASE WHEN LOWER(TRIM(COALESCE(image_url,''))) LIKE 'https://assets.devilndove.com/%' THEN site_item_inventory_id END) AS sample_inventory_id
+            FROM inventory_media
+          ), product_summary AS (
+            SELECT COUNT(*) AS active_products FROM products
+            WHERE LOWER(TRIM(COALESCE(status,'draft'))) NOT IN ('archived','deleted')
+          )
+          SELECT p.active_products,i.gallery_images,i.alt_attention,i.approved_role_missing,i.approved_role_ambiguous,
+                 v.active_inventory,v.blank_inventory_images,v.external_inventory_refs,v.inventory_catalog_image_drift,
+                 i.sample_product_image_id,v.sample_inventory_id
+          FROM product_summary p CROSS JOIN image_summary i CROSS JOIN inventory_summary v;" > /tmp/build194-media.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build194-media.json')); rows=[]; reads=[]
+          keys=('active_products','gallery_images','alt_attention','approved_role_missing','approved_role_ambiguous','active_inventory','blank_inventory_images','external_inventory_refs','inventory_catalog_image_drift','sample_product_image_id','sample_inventory_id')
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in keys): rows.append(v)
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None: reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data); assert rows,data
+          row={k:int(rows[0][k] or 0) for k in keys}
+          media_rows_read=sum(reads)
+          assert media_rows_read <= 20000, ('retained HARD_CEILING=20000 exceeded',media_rows_read)
+          assert media_rows_read <= 12500, ('Build 194 media target exceeded',media_rows_read,12500)
+          print('MEDIA_PROVIDER_ROWS_READ=',media_rows_read,'TARGET=',12500,'HARD_CEILING=20000')
+          print('BUILD 194 DEVELOPMENT MEDIA HEADROOM: PASS',row)
+          print('D1 MUTATION: ZERO')
+          print('R2 MUTATION: ZERO')
+          PY
