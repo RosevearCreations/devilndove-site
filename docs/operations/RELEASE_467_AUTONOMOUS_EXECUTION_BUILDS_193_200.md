@@ -91,4 +91,4 @@ Build 196 was inserted after owner acceptance on Production-GREEN Build 195 show
 
 ## Build 197 insertion note
 
-Build 197 was inserted after owner acceptance on Production-GREEN Build 196 showed that placeholder reliability still differed by location. The source audit found **22 SVG image placeholders across 20 public pages**, including the three Home placeholders, with unique HTML keys and one matching catalog definition each. Build 197 turns that inventory into a single readiness contract before editing begins and shifts the previously planned buyer-through-launch sequence one build later, through Build 203.
+Build 197 was inserted after owner acceptance on Production-GREEN Build 196 showed that placeholder reliability still differed by location. The source audit found **29 SVG image placeholders across 22 public pages**, including the three Home placeholders, with unique HTML keys and one matching catalog definition each. Build 197 turns that inventory into a single readiness contract before editing begins and shifts the previously planned buyer-through-launch sequence one build later, through Build 203.
