@@ -152,6 +152,15 @@ export const D1_READ_BUDGETS = Object.freeze({
     max_concurrent_identical_gets: 1,
     notes: 'Build 189: one Inventory target plus at most 12 duplicate-group and 12 catalog-reference evidence rows. No merge, count, stock, cost, reorder, purchasing or catalog mutation.'
   }),
+  admin_media_evidence_recheck_v190: Object.freeze({
+    route: '/api/admin/catalog-image-repair',
+    risk: 'low',
+    contract: 'explicit_one_media_record_plus_single_r2_head',
+    returned_rows_max: 1,
+    browser_cache_ms: 0,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 190: one selected Product image or Inventory image metadata read plus at most one canonical R2 object HEAD. No bucket listing, reassignment, upload, copy or delete.'
+  }),
   admin_pending_actions: Object.freeze({
     route: '/api/admin/pending-actions',
     risk: 'medium',
