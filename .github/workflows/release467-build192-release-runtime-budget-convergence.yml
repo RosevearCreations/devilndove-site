@@ -1,0 +1,121 @@
+name: Release 467 Build 192 Release Runtime Budget Convergence
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'docs/operations/RELEASE_467_RUNTIME_BUDGETS.json'
+      - 'docs/operations/RELEASE_467_BUILD_192_RELEASE_RUNTIME_BUDGET_CONVERGENCE.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_CLOSURE_BUILDS_187_192.md'
+      - 'scripts/release467_build190_gate.py'
+      - 'scripts/release467_build191_gate.py'
+      - 'scripts/release467_build192_gate.py'
+      - '.github/workflows/release467-build192-release-runtime-budget-convergence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-convergence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Prove Build 192 release/runtime budget convergence
+        run: python scripts/release467_build192_gate.py
+
+      - name: Retain Build 179 runtime responsiveness
+        run: python scripts/release467_build179_gate.py
+      - name: Retain Build 180 staged runtime startup
+        run: python scripts/release467_build180_gate.py
+      - name: Retain Build 181 catalog authority health
+        run: python scripts/release467_build181_gate.py
+      - name: Retain Build 182 buyer facts
+        run: python scripts/release467_build182_gate.py
+      - name: Retain Build 183 inventory identity
+        run: python scripts/release467_build183_gate.py
+      - name: Retain Build 184 image repair
+        run: python scripts/release467_build184_gate.py
+      - name: Retain Build 184 D1 quota remediation
+        run: python scripts/release467_build184_d1_quota_guard.py
+      - name: Retain Build 185 Product-resource linkage
+        run: python scripts/release467_build185_gate.py
+      - name: Retain Build 186 public Product/Search proof
+        run: python scripts/release467_build186_gate.py
+      - name: Retain Build 187 repair framework
+        run: python scripts/release467_build187_gate.py
+      - name: Retain Build 188 buyer-readiness closure
+        run: python scripts/release467_build188_gate.py
+      - name: Retain Build 189 Inventory evidence closure
+        run: python scripts/release467_build189_gate.py
+      - name: Retain Build 190 media evidence closure
+        run: python scripts/release467_build190_gate.py
+      - name: Retain Build 191 cost/usage/profitability closure
+        run: python scripts/release467_build191_gate.py
+
+      - name: Record exact Build 192 source evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os
+          budget_path='docs/operations/RELEASE_467_RUNTIME_BUDGETS.json'
+          budget=json.load(open(budget_path))
+          proof={
+            'release':467,
+            'build':192,
+            'status':'PASS',
+            'kind':'release467-build192-exact-evidence',
+            'source_sha':os.environ.get('GITHUB_SHA'),
+            'ref':os.environ.get('GITHUB_REF'),
+            'ref_name':os.environ.get('GITHUB_REF_NAME'),
+            'event':os.environ.get('GITHUB_EVENT_NAME'),
+            'run_id':os.environ.get('GITHUB_RUN_ID'),
+            'run_attempt':os.environ.get('GITHUB_RUN_ATTEMPT'),
+            'runtime_budget_manifest_sha256':hashlib.sha256(open(budget_path,'rb').read()).hexdigest(),
+            'retained_live_d1_builds':[int(x['build']) for x in budget['d1_live_development_proofs']],
+            'live_d1_execution_by_build192':False,
+            'remote_d1_queries_by_build192':0,
+            'schema_migration':False,
+            'd1_business_data_mutation':False,
+            'r2_mutation':False,
+            'provider_execution':False,
+            'payment_refund_action':False,
+            'accounting_posting':False,
+            'production_code_only_zero_d1_required':True,
+            'required_development_proofs':budget['exact_sha_required_development_proofs'],
+            'required_production_proofs':budget['exact_production_required'],
+          }
+          json.dump(proof,open('/tmp/release467-build192-exact-evidence.json','w'),indent=2,sort_keys=True)
+          print(json.dumps(proof,indent=2,sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release467-build192-exact-evidence-${{ github.sha }}
+          path: /tmp/release467-build192-exact-evidence.json
+          retention-days: 180
+          if-no-files-found: error
+
+      - name: Boundary
+        run: |
+          echo 'Release 467 Build 192: proof/quality convergence only.'
+          echo 'Build 192 live D1 execution: ZERO.'
+          echo 'Retained provider-metered D1 ceilings may not be silently increased.'
+          echo 'Product detail remains one core Product request with shared snapshot/event.'
+          echo 'Optional Admin systems remain explicit/lazy/bounded.'
+          echo 'Request-time DDL, bucket-wide R2 listing and background polling regressions are forbidden.'
+          echo 'Code-only Production promotion remains ZERO-D1.'
+          echo 'Production business data remains Production-owned.'
+          echo 'No schema/D1 business-data/R2/provider/payment/accounting mutation is authorized.'
