@@ -1,0 +1,122 @@
+{
+  "release": 467,
+  "build": 192,
+  "contract": "release467_runtime_budget_convergence",
+  "policy": {
+    "provider_metered_rows_read_authoritative": true,
+    "silent_ceiling_increase_forbidden": true,
+    "production_code_only_zero_d1": true,
+    "production_business_data_owned_by_production": true,
+    "historical_proof_reuse_allowed_when_source_boundary_unchanged": true
+  },
+  "starting_boundary": {
+    "development_sha": "a51a556865d6bcc602cb0aa9ec5125593b7f762b",
+    "production_main_sha": "691eb1830455f16cb2f0be53ee747a8956dcdb5a"
+  },
+  "d1_live_development_proofs": [
+    {
+      "build": 181,
+      "workflow": ".github/workflows/release467-build181-catalog-authority-health.yml",
+      "ceiling_rows_read": 20000,
+      "last_observed_rows_read": 2229,
+      "last_success_run": 35417324499,
+      "last_measured_sha": "1b8cc4669828f1809215e80c5181d94b59e1c33a"
+    },
+    {
+      "build": 182,
+      "workflow": ".github/workflows/release467-build182-product-facts-buyer-readiness.yml",
+      "ceiling_rows_read": 5000,
+      "last_observed_rows_read": 45,
+      "last_success_run": 35416742680,
+      "last_measured_sha": "fe7f40b51c4a7d616b1311dccf64c411dd28bc98"
+    },
+    {
+      "build": 183,
+      "workflow": ".github/workflows/release467-build183-inventory-identity-cleanup.yml",
+      "ceiling_rows_read": 50000,
+      "last_observed_rows_read": 11904,
+      "last_success_run": 35417324494,
+      "last_measured_sha": "1b8cc4669828f1809215e80c5181d94b59e1c33a"
+    },
+    {
+      "build": 184,
+      "workflow": ".github/workflows/release467-build184-product-tool-supply-image-repair.yml",
+      "ceiling_rows_read": 50000,
+      "last_observed_rows_read": 11841,
+      "last_success_run": 35417324559,
+      "last_measured_sha": "1b8cc4669828f1809215e80c5181d94b59e1c33a"
+    },
+    {
+      "build": 185,
+      "workflow": ".github/workflows/release467-build185-product-resource-cost-usage-linkage.yml",
+      "ceiling_rows_read": 25000,
+      "last_observed_rows_read": 6550,
+      "last_success_run": 35417324635,
+      "last_measured_sha": "1b8cc4669828f1809215e80c5181d94b59e1c33a"
+    },
+    {
+      "build": 187,
+      "workflow": ".github/workflows/release467-build187-catalog-repair-action-framework.yml",
+      "ceiling_rows_read": 5000,
+      "last_observed_rows_read": 1948,
+      "last_success_run": 35417324512,
+      "last_measured_sha": "1b8cc4669828f1809215e80c5181d94b59e1c33a"
+    },
+    {
+      "build": 188,
+      "workflow": ".github/workflows/release467-build188-buyer-readiness-closure.yml",
+      "ceiling_rows_read": 5000,
+      "last_observed_rows_read": 85,
+      "last_success_run": 35417324519,
+      "last_measured_sha": "1b8cc4669828f1809215e80c5181d94b59e1c33a"
+    },
+    {
+      "build": 189,
+      "workflow": ".github/workflows/release467-build189-inventory-evidence-closure.yml",
+      "ceiling_rows_read": 20000,
+      "last_observed_rows_read": 15487,
+      "last_success_run": 35417324510,
+      "last_measured_sha": "1b8cc4669828f1809215e80c5181d94b59e1c33a"
+    },
+    {
+      "build": 190,
+      "workflow": ".github/workflows/release467-build190-media-evidence-closure.yml",
+      "ceiling_rows_read": 20000,
+      "last_observed_rows_read": 19282,
+      "last_success_run": 35417324509,
+      "last_measured_sha": "1b8cc4669828f1809215e80c5181d94b59e1c33a"
+    },
+    {
+      "build": 191,
+      "workflow": ".github/workflows/release467-build191-cost-usage-profitability-closure.yml",
+      "ceiling_rows_read": 15000,
+      "last_observed_rows_read": 7771,
+      "last_success_run": 35417581547,
+      "last_measured_sha": "a51a556865d6bcc602cb0aa9ec5125593b7f762b"
+    }
+  ],
+  "d1_free_proofs": [
+    {
+      "build": 186,
+      "workflow": ".github/workflows/release467-build186-public-product-search-proof.yml",
+      "contract": "public_product_search_no_additional_product_d1_read"
+    },
+    {
+      "build": 192,
+      "workflow": ".github/workflows/release467-build192-release-runtime-budget-convergence.yml",
+      "contract": "source_convergence_only_no_live_d1"
+    }
+  ],
+  "exact_sha_required_development_proofs": [
+    "System Gate",
+    "Current Application Quality Proof",
+    "I.T. Admin Runtime Proof",
+    "Repository Branch Hygiene"
+  ],
+  "exact_production_required": [
+    "Production Pages Deploy",
+    "Release 467 Build 154 Products Route Production Proof",
+    "Release 467 Build 155 Products Production Browser Proof",
+    "Production Live Resource Integrity Proof"
+  ]
+}
