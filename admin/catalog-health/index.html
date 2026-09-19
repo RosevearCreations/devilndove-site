@@ -21,9 +21,9 @@
 
   <header class="hero compact-hero">
     <div>
-      <p class="eyebrow">Release 467 • Build 188</p>
+      <p class="eyebrow">Release 467 • Build 199</p>
       <h1>Product, Inventory, Tool & Image Health</h1>
-      <p>D1 remains the live catalog authority. Build 188 closes buyer readiness with blocker/advisory separation, public-visibility evidence and explicit one-Product rechecks; mutations remain in Product Editor.</p>
+      <p>D1 remains the live catalog authority. Build 199 turns buyer-readiness evidence into an explicit repair workbench with manual filters, direct Product Editor routing, stale-safe rechecks and next-unresolved navigation; mutations remain in Product Editor.</p>
     </div>
   </header>
 
@@ -47,12 +47,15 @@
 
   <section class="card">
     <div class="section-heading-row">
-      <div><p class="eyebrow">Build 188 • Buyer readiness closure</p><h2>Buyer readiness</h2><p class="small">Explicit live-D1 review of blocking facts versus advisory quality work, plus whether each Product is eligible for public Shop/search/detail under the current publication-state rule. Nothing loads here until requested.</p></div>
+      <div><p class="eyebrow">Build 199 • Buyer Readiness Repair Workbench</p><h2>Buyer readiness</h2><p class="small">Filter category, description, shipping and tracked-stock evidence by blocker or advisory severity. Each repair opens the exact Product Editor field; no Product facts are generated or saved here. Publication eligibility is evidence-only and profitability remains a separate Product-resource/Finance review.</p></div>
       <button class="btn" id="catalogBuyerReadinessLoad" type="button">Load 40 buyer-readiness issues</button>
     </div>
     <form id="catalogBuyerReadinessSearchForm" class="catalog-health-toolbar">
       <label><span class="small">Search Product buyer facts</span><input class="input" id="catalogBuyerReadinessSearch" type="search" placeholder="Product, SKU, slug, category or ID"/></label>
-      <button class="btn" type="submit">Search buyer readiness</button>
+      <label><span class="small">Severity</span><select class="input" id="catalogBuyerReadinessSeverity"><option value="all">Blockers + advisory</option><option value="blocker">Blockers only</option><option value="advisory">Advisory only</option></select></label>
+      <label><span class="small">Issue type</span><select class="input" id="catalogBuyerReadinessIssue"><option value="all">All buyer facts</option><option value="category">Category / type</option><option value="description">Descriptions / condition</option><option value="shipping">Shipping / delivery</option><option value="stock">Tracked zero stock</option></select></label>
+      <button class="btn" type="submit">Apply workbench filters</button>
+      <button class="btn" id="catalogBuyerReadinessNext" type="button" disabled>Open next unresolved</button>
     </form>
     <div class="buyer-readiness-summary" id="catalogBuyerReadinessSummary"></div>
     <div id="catalogBuyerReadinessEvidence" class="small" style="margin-top:12px">No Product has been rechecked yet.</div><div id="catalogBuyerReadinessResults" style="margin-top:14px"><div class="small">Use Load 40 buyer-readiness issues when you are ready. This queue does not run during Catalog Health startup.</div></div>
@@ -81,6 +84,7 @@
 <script src="/public/js/admin-self-protect.js?v=440"></script>
 <script src="/public/js/admin-catalog-health-v181.js?v=181"></script>
 <script src="/public/js/admin-catalog-repair-actions-v187.js?v=187"></script>
-<script src="/public/js/admin-catalog-buyer-readiness-v182.js?v=188"></script>\n<script src="/public/js/admin-catalog-image-repair-v184.js?v=190"></script>
+<script src="/public/js/admin-catalog-buyer-readiness-v182.js?v=199"></script>
+<script src="/public/js/admin-catalog-image-repair-v184.js?v=190"></script>
 </body>
 </html>

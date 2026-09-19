@@ -1,0 +1,68 @@
+name: Release 467 Build 199 Buyer Readiness Repair Workbench
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/product-buyer-readiness.js'
+      - 'public/js/admin-catalog-buyer-readiness-v182.js'
+      - 'public/js/admin-product-buyer-readiness-v182.js'
+      - 'admin/catalog-health/index.html'
+      - 'admin/product-editor/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_199_BUYER_READINESS_REPAIR_WORKBENCH.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md'
+      - 'scripts/release467_build199_gate.py'
+      - 'scripts/release467_build198_gate.py'
+      - 'scripts/release467_build188_gate.py'
+      - 'scripts/release467_build182_gate.py'
+      - '.github/workflows/release467-build199-buyer-readiness-repair-workbench.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 199 buyer-readiness repair workbench
+        run: python scripts/release467_build199_gate.py
+      - name: Retain Build 198 shared Product-image, attention and help contract
+        run: python scripts/release467_build198_gate.py
+      - name: Retain Build 188 buyer-readiness closure
+        run: python scripts/release467_build188_gate.py
+      - name: Retain Build 182 buyer-facts projection
+        run: python scripts/release467_build182_gate.py
+      - name: Retain Build 192 runtime budget convergence
+        run: python scripts/release467_build192_gate.py
+
+  no-provider-spend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Confirm Build 199 CI is source-only
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          body = Path('.github/workflows/release467-build199-buyer-readiness-repair-workbench.yml').read_text()
+          forbidden = (
+              'wrangler' + ' d1 execute',
+              'bucket.' + 'put(',
+              'bucket.' + 'delete(',
+              'bucket.' + 'list(',
+          )
+          found = [item for item in forbidden if item in body]
+          if found:
+              raise SystemExit(f'Provider-spend token found: {found}')
+          print('BUILD 199 CI D1 PROVIDER QUERY: ZERO')
+          print('BUILD 199 CI R2 MUTATION: ZERO')
+          PY
