@@ -29,8 +29,8 @@ Primary roadmap: `docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_20
 
 | Build | Focus | State |
 |---|---|---|
-| 193 | D1 Media Evidence Headroom Optimization | Next |
-| 194 | Inventory Evidence Headroom Optimization | Planned |
+| 193 | Current Authority & Handoff Convergence | Next |
+| 194 | D1 Evidence Headroom Optimization | Planned |
 | 195 | Buyer Readiness Repair Workbench | Planned |
 | 196 | Supplier & Source Evidence Workbench | Planned |
 | 197 | Cycle Count & Duplicate Identity Resolution | Planned |
@@ -63,3 +63,7 @@ This section is retained solely for the immutable Build 153 performance gate; it
 - Products layout cache revision: `467-b153-layout-observer`.
 - Incident addressed: Firefox long-script / page responsiveness caused by excessive layout-observer churn.
 - Historical Build 153 canonical migration baseline was `0001–0004`; later forward-only canonical migrations are valid successors and must preserve that immutable prefix.
+
+## Retained historical provenance — Release 467 Build 171
+
+Build 171 — Release & Restart Authority Convergence — remains immutable historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It is not the current application baseline. Build 193 will converge the machine pointer and current I.T. release surfaces from that historical authority to the fully proven Build 192 baseline.
