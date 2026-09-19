@@ -134,6 +134,15 @@ export const D1_READ_BUDGETS = Object.freeze({
     max_concurrent_identical_gets: 1,
     notes: 'Build 187: explicit Product or Inventory target recheck only. Returns routing/stale evidence and never mutates Product, Inventory, R2, provider, payment or accounting state.'
   }),
+  admin_product_buyer_recheck_v188: Object.freeze({
+    route: '/api/admin/product-buyer-readiness',
+    risk: 'low',
+    contract: 'explicit_one_product_buyer_readiness_recheck',
+    returned_rows_max: 1,
+    browser_cache_ms: 0,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 188: explicit one-Product buyer-readiness recheck. It returns blocker/advisory/public-visibility evidence and performs no Product save or publication action.'
+  }),
   admin_pending_actions: Object.freeze({
     route: '/api/admin/pending-actions',
     risk: 'medium',
