@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
     resources: [],
     links: [],
     linkHealthSummary: null,
+    profitabilityEvidence: null,
+    selectedProductEvidence: null,
     selectedProductId: Number.isInteger(requestedProductId) && requestedProductId > 0 ? requestedProductId : 0,
     selectedLinkIndex: -1,
     selectedAvailableKey: '',
@@ -141,8 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function render() {
     mountEl.innerHTML = `
       <div class="card resource-editor-dark" style="margin-top:18px">
-        <div class="section-heading-row"><div><p class="inventory-operations-eyebrow">Release 467 Build 185 • Product resource / cost / usage linkage</p><h3 style="margin-top:0">Product Tools &amp; Supplies Used</h3></div><button class="btn" type="button" id="productResourcesLoadButton">Load Product resources</button></div>
-        <p class="small" style="margin-top:0">Link the exact supplies and tools used to make a product. Build 185 verifies Inventory identity, base-unit quantity authority, usage setup, purchase-lot semantics and cost evidence without loading the whole catalog.</p>
+        <div class="section-heading-row"><div><p class="inventory-operations-eyebrow">Release 467 Build 191 • Cost, usage & profitability evidence</p><h3 style="margin-top:0">Product Tools &amp; Supplies Used</h3></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="productResourcesLoadButton">Load Product resources</button><button class="btn" type="button" id="productResourcesProfitabilityRecheckButton">Recheck cost & margin evidence</button></div></div>
+        <p class="small" style="margin-top:0">Build 191 keeps the Build 185 linkage authority and adds an explainable linked-resource cost/margin snapshot. Missing cost is Unknown, reusable/story-only evidence is Not applicable, and this view never posts accounting or changes Inventory.</p>
         <div class="small" id="productResourcesEditorHint" style="margin-bottom:12px">This section follows the current product editor record when you load, create, or update a product.</div>
         <div id="productResourcesMessage" class="small" style="display:none;margin-bottom:12px"></div>
         <div id="productResourcesLinkHealth" class="card" style="margin:0 0 12px;padding:12px"><div class="small">Linkage health is paused until Product resources are loaded.</div></div>
@@ -213,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     document.getElementById('productResourcesLoadButton')?.addEventListener('click', startInitialLoad);
+    document.getElementById('productResourcesProfitabilityRecheckButton')?.addEventListener('click', () => loadData({ bootstrap: true, resources: false }));
     document.getElementById('productResourcesProduct')?.addEventListener('change', onProductChange);
     document.getElementById('productResourcesSearch')?.addEventListener('input', scheduleResourceSearch);
     document.getElementById('productResourcesSaveButton')?.addEventListener('click', saveLinks);
@@ -352,18 +355,31 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     const review = Number(summary.review_links || 0);
+    const profitability = state.profitabilityEvidence || {};
+    const resourceCost = profitability.resource_cost_state === 'known'
+      ? formatMoney(profitability.evidenced_resource_cost_cents || 0)
+      : 'Unknown';
+    const margin = profitability.margin_ready
+      ? formatMoney(profitability.resource_margin_cents || 0) + (profitability.resource_margin_percent == null ? '' : ' · ' + Number(profitability.resource_margin_percent).toFixed(2) + '%')
+      : 'Not ready';
     el.innerHTML = `
       <div class="section-heading-row">
-        <div><strong>Build 185 linkage health — ${review ? 'Review needed' : 'Ready'}</strong><div class="small">Last-saved Product linkage only; no background scan.</div></div>
+        <div><strong>Build 191 cost/usage evidence — ${profitability.margin_ready ? 'Margin evidence ready' : 'Review needed'}</strong><div class="small">Last-saved selected Product links only; publication readiness remains separate and no background scan runs.</div></div>
         <div class="small">${Number(summary.ready_links || 0)} ready · ${review} review</div>
       </div>
       <div class="grid cols-4" style="gap:8px;margin-top:8px">
         <div><strong>${Number(summary.linked_resource_count || 0)}</strong><div class="small">Linked Tools/Supplies</div></div>
         <div><strong>${Number(summary.missing_inventory_matches || 0)}</strong><div class="small">Missing Inventory matches</div></div>
         <div><strong>${Number(summary.missing_cost_evidence || 0)}</strong><div class="small">Missing cost evidence</div></div>
-        <div><strong>${formatMoney(summary.estimated_resource_cost_cents || 0)}</strong><div class="small">Estimated resource cost/product</div></div>
+        <div><strong>${escapeHtml(resourceCost)}</strong><div class="small">Evidenced linked-resource cost/product</div></div>
       </div>
-      <div class="small" style="margin-top:8px">Usage setup attention: ${Number(summary.usage_setup_attention || 0)} · Lot attention: ${Number(summary.lot_attention || 0)} · Authority: ${escapeHtml(summary.authority || '')}</div>
+      <div class="grid cols-3" style="gap:8px;margin-top:8px">
+        <div><strong>${profitability.price_cents == null ? 'Unknown' : escapeHtml(formatMoney(profitability.price_cents))}</strong><div class="small">Selected Product price evidence</div></div>
+        <div><strong>${escapeHtml(margin)}</strong><div class="small">Price less evidenced linked-resource cost</div></div>
+        <div><strong>${Number(profitability.nondepleting_or_story_links || 0)}</strong><div class="small">Reusable/story-only links — cost not applicable</div></div>
+      </div>
+      <div class="small" style="margin-top:8px">Known-cost links: ${Number(profitability.known_cost_links || 0)} · Unknown-cost links: ${Number(profitability.unknown_cost_links || 0)} · Usage setup attention: ${Number(summary.usage_setup_attention || 0)} · Lot attention: ${Number(summary.lot_attention || 0)}</div>
+      <div class="small" style="margin-top:6px"><strong>Scope:</strong> linked resources only — excludes labour, overhead, marketplace/payment fees, shipping, tax and accounting adjustments. Authority: ${escapeHtml(summary.authority || '')}</div>
     `;
   }
 
@@ -403,7 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <input class="input" data-link-lot="${state.selectedLinkIndex}" type="number" min="1" step="1" value="${Math.max(1, Number(link.lot_size_units || 1) || 1)}" />
           </label>
           <div class="small" style="margin-top:4px">${mode === 'end_of_lot' ? `End-of-lot spreads ${escapeHtml(usageMeta.label)} usage across multiple finished products without per-item reservation.` : (mode === 'story_only' ? 'Story only keeps this item in the making record without touching cost or stock math.' : `Per product treats the quantity as ${escapeHtml(usageMeta.label)} used on every finished item.`)}</div>
-          <div class="small">Estimated cost ${escapeHtml(formatMoney(health.estimated_cost_per_product_cents ?? usagePreview.costPerFinishedCents))} per finished product${mode === 'end_of_lot' ? ` • lot covers about ${escapeHtml(String(usagePreview.lotSize))} finished products` : ''} • buildable now ≈ ${escapeHtml(String(Math.max(0, health.buildable_products ?? usagePreview.buildable)))}.</div>
+          <div class="small">Evidenced cost ${health.cost_evidence_state === 'known' ? escapeHtml(formatMoney(health.evidenced_cost_per_product_cents || 0)) : (health.cost_evidence_state === 'not_applicable' ? 'Not applicable — reusable/story-only' : 'Unknown — repair Inventory cost evidence')} per finished product${mode === 'end_of_lot' ? ` • lot covers about ${escapeHtml(String(usagePreview.lotSize))} finished products` : ''} • usage ${escapeHtml(String(health.quantity_used || usagePreview.qtyUsed))} ${escapeHtml(health.usage_unit_label || usageMeta.label)} • buildable now ≈ ${escapeHtml(String(Math.max(0, health.buildable_products ?? usagePreview.buildable)))}.</div>
           <div class="small" style="margin-top:6px"><strong>Linkage evidence:</strong> ${healthIssues.length ? healthIssues.map(issueLabel).map(escapeHtml).join(' • ') : 'Ready — Inventory, usage, lot and cost evidence are coherent for this saved link.'}</div>
           <div class="small">Inventory ${Number(resource.site_item_inventory_id || 0) ? `#${Number(resource.site_item_inventory_id)}` : 'unresolved'} · tracking ${escapeHtml(resource.usage_tracking_mode || 'default')} · purchase lots ${Number(resource.lot_count || 0)} (${Number(resource.available_lot_count || 0)} available) · lot reconciliation ${escapeHtml(resource.lot_reconcile_status || 'needs_review')}</div>
           <textarea class="input" data-link-note="${state.selectedLinkIndex}" rows="2" placeholder="How was this item used for the story of this product?">${escapeHtml(link.usage_notes || '')}</textarea>
@@ -545,6 +561,8 @@ document.addEventListener('DOMContentLoaded', () => {
     state.products = Array.isArray(data.products) ? data.products : [];
     state.links = Array.isArray(data.links) ? data.links : [];
     state.linkHealthSummary = data.link_health_summary || null;
+    state.profitabilityEvidence = data.profitability_evidence || null;
+    state.selectedProductEvidence = data.selected_product_evidence || null;
     renderProducts();
     return data;
   }
@@ -595,6 +613,8 @@ document.addEventListener('DOMContentLoaded', () => {
     state.productionPreview = null;
     state.productionHistory = [];
     state.linkHealthSummary = null;
+    state.profitabilityEvidence = null;
+    state.selectedProductEvidence = null;
     renderLinkHealth();
     const url = new URL(window.location.href);
     if (state.selectedProductId > 0) url.searchParams.set('product_id', String(state.selectedProductId));
