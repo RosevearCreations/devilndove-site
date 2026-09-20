@@ -197,6 +197,24 @@ export const D1_READ_BUDGETS = Object.freeze({
     max_concurrent_identical_gets: 1,
     notes: 'Build 203: one selected Product-resource link recheck after operator repair. It reports stale evidence and never writes Inventory cost, Product price or accounting state.'
   }),
+  admin_storefront_launch_set_v204: Object.freeze({
+    route: '/api/admin/storefront-launch-set',
+    risk: 'high',
+    contract: 'explicit_only_grouped_launch_readiness_projection',
+    returned_rows_max: 40,
+    browser_cache_ms: 0,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 204: bounded Product launch-set convergence over buyer, media, linked Inventory/cost and current publication evidence. Ready never authorizes automatic publication or provider/payment execution.'
+  }),
+  admin_storefront_launch_recheck_v204: Object.freeze({
+    route: '/api/admin/storefront-launch-set',
+    risk: 'low',
+    contract: 'explicit_one_product_launch_evidence_recheck',
+    returned_rows_max: 1,
+    browser_cache_ms: 0,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 204: one Product launch-evidence recheck with stale token detection and zero Product/Inventory/R2/provider/payment/accounting mutation.'
+  }),
   admin_pending_actions: Object.freeze({
     route: '/api/admin/pending-actions',
     risk: 'medium',
