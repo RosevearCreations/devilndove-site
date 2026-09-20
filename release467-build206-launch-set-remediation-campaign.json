@@ -1,0 +1,76 @@
+{
+  "release": 467,
+  "build": 206,
+  "title": "Launch-Set Remediation Campaign",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build206-launch-set-remediation-campaign",
+  "priority": "turn_build204_launch_evidence_into_owned_reviewed_remediation_without_duplicate_readiness_logic",
+  "starting_point": {
+    "development": {
+      "sha": "61163ceaeb07a28cac1df0f9ff6b3ab46b498c02",
+      "tree": "0710a7dfe8a81342704c92b810d6e18249b960e7",
+      "system_gate_run": 35485817330,
+      "quality_run": 35485817347,
+      "it_admin_runtime_run": 35485817370,
+      "repository_hygiene_run": 35485817325,
+      "build_specific_proof_run": 35485817337,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "0a6144bc4b9767c06ccf82a78853b8375a55637a",
+      "tree": "0710a7dfe8a81342704c92b810d6e18249b960e7",
+      "production_pages_deploy_run": 35485914734,
+      "production_live_resource_integrity_run": 35485940566,
+      "build_specific_proof_run": 35485914603,
+      "exact_production_url": "https://eed80e04.devilndove-site.pages.dev",
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "baseline": {
+    "source_build": 204,
+    "products_reviewed": 43,
+    "ready": 1,
+    "review_required": 42
+  },
+  "scope": [
+    "Reuse the Build 204 storefront launch-set projection directly; do not fork buyer-readiness or launch classification rules.",
+    "Persist only explicit remediation campaign metadata: reviewed owner, status, due note, notes, official recheck evidence and completion evidence.",
+    "Expose current movement from the 43 Products / 1 ready / 42 review-required Build 204 baseline.",
+    "Separate buyer, media, tracked-stock, linked-cost, publication, inventory-link and commerce blocker evidence.",
+    "Keep Product Editor, Product Media and Inventory Operations as the owners of Product/Inventory/media facts."
+  ],
+  "safety": {
+    "canonical_schema_addition": true,
+    "request_time_ddl": false,
+    "duplicate_readiness_engine": false,
+    "second_product_editor": false,
+    "automatic_product_copy": false,
+    "automatic_publication": false,
+    "automatic_unpublication": false,
+    "product_fact_write": false,
+    "inventory_fact_write": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "payment_refund_execution": false,
+    "accounting_posting": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build206_gate.py",
+    "canonical_migration": "migrations/canonical/0007_release467_storefront_launch_remediation.sql",
+    "campaign_api": "functions/api/admin/storefront-launch-remediation.js",
+    "official_recheck_api": "/api/admin/storefront-launch-set?mode=product",
+    "owner_surfaces": [
+      "Product Editor",
+      "Product Media",
+      "Inventory Operations"
+    ],
+    "development_proof": "exact-green Development + canonical migration applied + bounded D1 campaign schema proof",
+    "production_promotion": "EXACT_GREEN_DEVELOPMENT_TREE_ONLY"
+  },
+  "next_build": {
+    "build": 207,
+    "title": "Workshop Capability & Process Taxonomy Expansion",
+    "state": "BLOCKED_UNTIL_BUILD206_PRODUCTION_GREEN"
+  }
+}
