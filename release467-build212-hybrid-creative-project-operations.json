@@ -1,0 +1,72 @@
+{
+  "release": 467,
+  "build": 212,
+  "title": "Hybrid Creative Project Operations",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build212-hybrid-creative-project-operations",
+  "priority": "add_ordered_multi_process_operation_plans_to_existing_creative_process_without_parallel_project_inventory_media_or_finance_authority",
+  "starting_point": {
+    "development": {
+      "sha": "a7f07b18a4a3b24db1a148ec287cbf446041f573",
+      "tree": "b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7",
+      "system_gate_run": 35524455791,
+      "quality_run": 35524455693,
+      "it_admin_runtime_run": 35524455845,
+      "repository_hygiene_run": 35524455852,
+      "build_specific_proof_run": 35524455858,
+      "build_specific_proof_attempt": 2,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "41bf65727771c7c302c022d0944945a0802a909d",
+      "tree": "b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7",
+      "production_pages_deploy_run": 35524655164,
+      "production_live_resource_integrity_run": 35524741052,
+      "products_browser_proof_run": 35524741050,
+      "products_route_proof_run": 35524741073,
+      "build_specific_proof_run": 35524655209,
+      "exact_production_url": "https://1d28f0f1.devilndove-site.pages.dev",
+      "deployment_id": "1d28f0f1-ce55-489d-97b0-645d48e65c7a",
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Extend existing creative_work_projects with ordered planning-only manufacturing operations.",
+    "Reference canonical inventory_processes for each operation.",
+    "Add explicit predecessor dependencies between operations within the same Creative Project.",
+    "Reference active site_item_inventory rows for planned materials, tools, consumables and fixtures without mutating Inventory.",
+    "Expose the planner inside the existing /admin/creative-process/ workspace."
+  ],
+  "safety": {
+    "canonical_schema_addition": true,
+    "request_time_ddl": false,
+    "parallel_project_manager": false,
+    "parallel_process_dictionary": false,
+    "inventory_mutation": false,
+    "inventory_reservation": false,
+    "actual_creative_event_creation": false,
+    "caip_media_mutation": false,
+    "finance_posting": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "payment_execution": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build212_gate.py",
+    "canonical_migration": "migrations/canonical/0012_release467_hybrid_creative_project_operations.sql",
+    "project_authority": "creative_work_projects",
+    "process_authority": "inventory_processes",
+    "inventory_authority": "site_item_inventory",
+    "operation_authority": "creative_project_operations",
+    "dependency_authority": "creative_project_operation_dependencies",
+    "resource_plan_authority": "creative_project_operation_resources",
+    "admin_api": "functions/api/admin/creative-project-operations.js",
+    "admin_surface": "/admin/creative-process/"
+  },
+  "next_build": {
+    "build": 213,
+    "title": "Digital Proof & Customer Approval",
+    "state": "BLOCKED_UNTIL_BUILD212_PRODUCTION_GREEN"
+  }
+}

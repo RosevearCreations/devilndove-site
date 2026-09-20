@@ -2,22 +2,22 @@
 
 ## Current authority
 
-Last fully verified: **Build 210 — Custom Work Intake 2.0**. Active candidate: **Build 211 — Manufacturing Triage & Route Proposal**.
+Last fully verified: **Build 211 — Manufacturing Triage & Route Proposal**. Active candidate: **Build 212 — Hybrid Creative Project Operations**.
 
-- Development `228d50a0a71d8b99e24f888b8bcd25b9c839a396`
-- Production `6e81942e7fd54157698b640252eed256b0411752`
-- tree `f8e85d5e91a9eee5a9c64901865efe24be1ad34e`
-- System / Quality / I.T. / Hygiene `35519319569` / `35519319561` / `35519319637` / `35519319612`
-- Production Pages / Live Resources `35519559453` / `35519611667`
-- canonical migrations `0001–0011`
+- Development `a7f07b18a4a3b24db1a148ec287cbf446041f573`
+- Production `41bf65727771c7c302c022d0944945a0802a909d`
+- tree `b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7`
+- System / Quality / I.T. / Hygiene `35524455791` / `35524455693` / `35524455845` / `35524455852`
+- Production Pages / Live Resources `35524655164` / `35524741052`
+- canonical migrations `0001–0012`
 
 ## Read in this order
 
 1. `AI_HANDOFF.md`
 2. `PROJECT_STATUS_AND_ROADMAP.md`
 3. `docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md`
-4. `docs/operations/RELEASE_467_BUILD_211_MANUFACTURING_TRIAGE_ROUTE_PROPOSAL.md`
-5. `release467-build211-manufacturing-triage-route.json`
+4. `docs/operations/RELEASE_467_BUILD_212_HYBRID_CREATIVE_PROJECT_OPERATIONS.md`
+5. `release467-build212-hybrid-creative-project-operations.json`
 6. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
 
 ## Active autonomous build documents
@@ -58,4 +58,4 @@ Build 171 remains historical provenance over exact Build 170 predecessor `879c87
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 211 over exact Production-GREEN Build 210.
+Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 212 over exact Production-GREEN Build 211.

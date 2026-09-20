@@ -1,0 +1,92 @@
+name: Release 467 Build 212 Hybrid Creative Project Operations
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'migrations/canonical/0012_release467_hybrid_creative_project_operations.sql'
+      - 'migrations/canonical/manifest.json'
+      - 'functions/api/admin/creative-project-operations.js'
+      - 'public/js/admin-creative-project-operations-build212.js'
+      - 'admin/creative-process/index.html'
+      - 'current-development-authority.json'
+      - 'release467-build211-manufacturing-triage-route.json'
+      - 'release467-build212-hybrid-creative-project-operations.json'
+      - 'docs/operations/RELEASE_467_BUILD_212_HYBRID_CREATIVE_PROJECT_OPERATIONS.md'
+      - 'scripts/release467_build211_gate.py'
+      - 'scripts/release467_build212_gate.py'
+      - 'scripts/repository_forward_sanity.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'scripts/current_deployment_preflight_truth_gate.py'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - '.github/workflows/release467-build212-hybrid-creative-project-operations.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.x'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - run: python scripts/release467_build212_gate.py
+      - run: python scripts/release467_build211_gate.py
+  development-d1-operation-proof:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - run: |
+          set -euo pipefail
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT
+            (SELECT COUNT(*) FROM d1_migrations WHERE name='0012_release467_hybrid_creative_project_operations.sql') migration_rows,
+            (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('creative_project_operations','creative_project_operation_dependencies','creative_project_operation_resources')) operation_tables,
+            (SELECT COUNT(*) FROM creative_project_operations) operation_rows,
+            (SELECT COUNT(*) FROM creative_project_operation_dependencies) dependency_rows,
+            (SELECT COUNT(*) FROM creative_project_operation_resources) resource_rows,
+            (SELECT COUNT(*) FROM creative_project_operations o LEFT JOIN creative_work_projects p ON p.creative_work_project_id=o.creative_work_project_id LEFT JOIN inventory_processes ip ON ip.inventory_process_id=o.inventory_process_id WHERE p.creative_work_project_id IS NULL OR ip.inventory_process_id IS NULL) invalid_operation_refs,
+            (SELECT COUNT(*) FROM creative_project_operation_dependencies d LEFT JOIN creative_project_operations child ON child.creative_project_operation_id=d.creative_project_operation_id LEFT JOIN creative_project_operations pred ON pred.creative_project_operation_id=d.predecessor_operation_id WHERE child.creative_project_operation_id IS NULL OR pred.creative_project_operation_id IS NULL OR child.creative_work_project_id<>pred.creative_work_project_id) invalid_dependencies,
+            (SELECT COUNT(*) FROM creative_project_operation_resources r LEFT JOIN creative_project_operations o ON o.creative_project_operation_id=r.creative_project_operation_id LEFT JOIN site_item_inventory i ON i.site_item_inventory_id=r.site_item_inventory_id WHERE o.creative_project_operation_id IS NULL OR i.site_item_inventory_id IS NULL) invalid_resource_refs,
+            (SELECT COUNT(*) FROM (SELECT creative_work_project_id,operation_order,COUNT(*) n FROM creative_project_operations GROUP BY creative_work_project_id,operation_order HAVING COUNT(*)>1)) duplicate_operation_orders,
+            (SELECT COUNT(*) FROM pragma_foreign_key_check) foreign_key_violations;" > /tmp/b212.json
+          python - <<'PY'
+          import json,os
+          d=json.load(open('/tmp/b212.json'));found=[];reads=[]
+          def walk(v):
+            if isinstance(v,dict):
+              if all(k in v for k in ('migration_rows','operation_tables','operation_rows','dependency_rows','resource_rows','invalid_operation_refs','invalid_dependencies','invalid_resource_refs','duplicate_operation_orders','foreign_key_violations')):found.append(v)
+              m=v.get('meta')
+              if isinstance(m,dict) and m.get('rows_read') is not None:reads.append(int(m.get('rows_read') or 0))
+              for x in v.values():walk(x)
+            elif isinstance(v,list):
+              for x in v:walk(x)
+          walk(d);assert found,d;r=found[0]
+          assert int(r['migration_rows'])==1,r
+          assert int(r['operation_tables'])==3,r
+          assert int(r['invalid_operation_refs'])==0,r
+          assert int(r['invalid_dependencies'])==0,r
+          assert int(r['invalid_resource_refs'])==0,r
+          assert int(r['duplicate_operation_orders'])==0,r
+          assert int(r['foreign_key_violations'])==0,r
+          rr=sum(reads);assert rr<=5000,(rr,5000)
+          proof={'release':467,'build':212,'development_sha':os.environ.get('GITHUB_SHA',''),'migration_0012':'APPLIED',
+            'operation_tables':3,'operation_rows':int(r['operation_rows']),'dependency_rows':int(r['dependency_rows']),'resource_rows':int(r['resource_rows']),
+            'invalid_operation_refs':0,'invalid_dependencies':0,'invalid_resource_refs':0,'duplicate_operation_orders':0,'foreign_key_violations':0,
+            'provider_rows_read':rr,'rows_read_ceiling':5000,'inventory_mutation':'ZERO_BY_CONTRACT',
+            'caip_media_mutation':'ZERO_BY_CONTRACT','actual_event_creation':'ZERO_BY_CONTRACT','finance_posting':'ZERO_BY_CONTRACT'}
+          json.dump(proof,open('/tmp/release467-build212-exact-evidence.json','w'),indent=2,sort_keys=True);print(proof)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release467-build212-exact-evidence-${{ github.sha }}
+          path: /tmp/release467-build212-exact-evidence.json
