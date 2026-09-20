@@ -1,0 +1,69 @@
+{
+  "release": 467,
+  "build": 205,
+  "title": "Current Authority & Manufacturing-Era Roadmap Convergence",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build205-current-authority-manufacturing-era-roadmap-convergence",
+  "priority": "converge_build204_and_205_224_restart_truth",
+  "starting_point": {
+    "development": {
+      "sha": "48307e67978dee5ef4481ccfe2739a5d3df79b18",
+      "tree": "4a63209efc54bc641ba0484c4954ac1cb35acc2e",
+      "system_gate_run": 35483005170,
+      "quality_run": 35483005094,
+      "it_admin_runtime_run": 35483005097,
+      "repository_hygiene_run": 35483005113,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "09253dbe5b43c4308d1ff671bb71df80bf0592d9",
+      "tree": "4a63209efc54bc641ba0484c4954ac1cb35acc2e",
+      "production_pages_deploy_run": 35483092965,
+      "exact_production_url": "https://cd226d56.devilndove-site.pages.dev",
+      "state": "PRODUCTION_GREEN",
+      "remote_d1_queries": 0
+    },
+    "build204_runtime": {
+      "development_sha": "50098122e88548ad5e94835d5ef69a5e738aed88",
+      "production_main_sha": "d88789ee563e700e8847f7b47f156964024a3b45",
+      "tree_sha": "90018f79ee469420e9f3c16504bdf4a73c0dfd0f",
+      "build204_development_proof_run": 35478691738,
+      "build204_production_proof_run": 35478779057,
+      "production_pages_deploy_run": 35478779248
+    }
+  },
+  "roadmap": "docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md",
+  "scope": [
+    "Ingest Build 204 runtime closure and the later docs-only roadmap canonicalization as the exact restart boundary.",
+    "Advance current-development-authority.json to Build 205 without claiming its future exact final SHA.",
+    "Converge I.T., Deployment Preflight, Reliability and the canonical human restart guide on Build 204/current-source truth.",
+    "Make the 205-224 roadmap the single active autonomous roadmap.",
+    "Retain Build 170/171/192/193-204 provenance without letting historical labels override current truth.",
+    "Keep Build 206 blocked until Build 205 is exact-SHA Production GREEN."
+  ],
+  "safety": {
+    "schema_change": false,
+    "request_time_ddl": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "binding_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "payment_refund_accounting_mutation": false,
+    "product_inventory_custom_request_creative_project_mutation": false,
+    "production_business_data_overwrite": false,
+    "automatic_production_promotion": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build205_gate.py",
+    "retained_build204_gate": "scripts/release467_build204_gate.py",
+    "retained_build193_gate": "scripts/release467_build193_gate.py",
+    "restart_integrity_gate": "scripts/current_authority_restart_integrity_gate.py",
+    "current_it_truth_gate": "scripts/current_it_release_truth_gate.py",
+    "deployment_preflight_truth_gate": "scripts/current_deployment_preflight_truth_gate.py",
+    "reliability_truth_gate": "scripts/current_reliability_truth_gate.py",
+    "repository_forward_sanity": "scripts/repository_forward_sanity.py",
+    "production_mode": "CODE_DOCS_ONLY_ZERO_D1",
+    "promotion": "EXACT_GREEN_DEVELOPMENT_TREE_ONLY"
+  }
+}
