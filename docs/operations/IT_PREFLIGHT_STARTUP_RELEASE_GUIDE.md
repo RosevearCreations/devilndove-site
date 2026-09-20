@@ -2,7 +2,7 @@
 
 ## Current release baseline
 
-Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0011`. Request-time DDL and automatic Production promotion remain closed.
+Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0012`. Request-time DDL and automatic Production promotion remain closed.
 
 ## Canonical Development target
 
@@ -24,31 +24,31 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 Stripe Development, PayPal sandbox and Social/OAuth remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 211 candidate
+## Current Release 467 restart authority — Build 212 candidate
 
-Build 210 **Custom Work Intake 2.0** is the exact fully verified predecessor.
+Build 211 **Manufacturing Triage & Route Proposal** is the exact fully verified predecessor.
 
-- Development SHA: `228d50a0a71d8b99e24f888b8bcd25b9c839a396`
-- Shared tree: `f8e85d5e91a9eee5a9c64901865efe24be1ad34e`
-- System / Quality / I.T. / Hygiene: `35519319569` / `35519319561` / `35519319637` / `35519319612`
-- Build 210 Development proof: `35519319562`
-- Production main: `6e81942e7fd54157698b640252eed256b0411752`
-- Production Pages / Live Resources: `35519559453` / `35519611667`
-- Product Browser / Route: `35519611679` / `35519611767`
-- Build 210 Production proof: `35519559362`
-- Exact Production URL: `https://cae32d7d.devilndove-site.pages.dev`
+- Development SHA: `a7f07b18a4a3b24db1a148ec287cbf446041f573`
+- Shared tree: `b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7`
+- System / Quality / I.T. / Hygiene: `35524455791` / `35524455693` / `35524455845` / `35524455852`
+- Build 211 Development proof: `35524455858` (attempt 2)
+- Production main: `41bf65727771c7c302c022d0944945a0802a909d`
+- Production Pages / Live Resources: `35524655164` / `35524741052`
+- Product Browser / Route: `35524741050` / `35524741073`
+- Build 211 Production proof: `35524655209`
+- Exact Production URL: `https://1d28f0f1.devilndove-site.pages.dev`
 
-Build 211 **Manufacturing Triage & Route Proposal** is the active candidate. Migration `0011_release467_manufacturing_triage_route.sql` adds reviewed triage and candidate-process route evidence linked to the existing `custom_requests` and canonical `inventory_processes` authorities.
+Build 212 **Hybrid Creative Project Operations** is the active candidate. Migration `0012_release467_hybrid_creative_project_operations.sql` adds ordered operation plans, predecessor dependencies and planning-only Inventory references to the existing Creative Process project authority.
 
-Customer requirements remain requirements. Candidate processes, feasibility state, specialist review, proof/sample requirements, material unknowns, supplied-item review and clarification questions require explicit staff review; no quote/order/stock/provider action is automatic.
+Creative Process remains the project/event authority. `inventory_processes` remains canonical process identity. Inventory remains stock/usage authority, CAIP remains media/evidence authority and Finance remains financial authority.
 
 ### Restart resolution rule
-Resolve live `dev` and `main` first. Build 212 starts only after Build 211 is exact-SHA Production GREEN.
+Resolve live `dev` and `main` first. Build 213 starts only after Build 212 is exact-SHA Production GREEN.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
 
 ## Retained historical provenance — Build 171
 
-Build 171 **Release & Restart Authority Convergence** remains historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It does not override current Build 210/211 truth.
+Build 171 **Release & Restart Authority Convergence** remains historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It does not override current Build 211/212 truth.
 
 ## Retained historical provenance — Builds 192–193
 
