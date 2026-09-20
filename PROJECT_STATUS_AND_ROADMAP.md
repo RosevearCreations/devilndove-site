@@ -2,11 +2,11 @@
 
 ## Current checkpoint
 
-Build 205 **Current Authority & Manufacturing-Era Roadmap Convergence** is Production GREEN at `0a6144bc4b9767c06ccf82a78853b8375a55637a`, exact tree `0710a7dfe8a81342704c92b810d6e18249b960e7`, with Development `61163ceaeb07a28cac1df0f9ff6b3ab46b498c02` and Production Pages/Live proofs `35485914734` / `35485940566`.
+Build 206 **Launch-Set Remediation Campaign** is Production GREEN at `16689f6eb5982bb72253aba677cfadf636c89ec9`, exact tree `4c71f152a75c401d3dfd2a5b83852a821dc82cb3`, with Development `ee62ddd837d2ecbb8f0695fa7efb19e9dffb8b98` and Production Pages/Live proofs `35486756097` / `35486808590`.
 
-## Active Build 206
+## Active Build 207
 
-**Launch-Set Remediation Campaign** reuses Build 204 launch readiness and adds only reviewed remediation metadata. Baseline: **43 Products / 1 ready / 42 review-required**. Product Editor, Product Media and Inventory Operations remain fact owners. Build 207 is blocked until exact-SHA Production GREEN.
+**Workshop Capability & Process Taxonomy Expansion** extends the existing Build 156 `inventory_processes` authority through canonical migration 0008. The canonical catalog covers 22 required workshop process families while preserving existing process keys and reviewed Tool/Supply assignments. Build 208 remains blocked until exact-SHA Production GREEN.
 
 ## Permanent boundaries
 
@@ -28,4 +28,4 @@ Build 171 — Release & Restart Authority Convergence — remains immutable hist
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain immutable historical release/restart provenance; they do not supersede the Build 204/205 current authority.
+Build 192 and Build 193 remain immutable historical release/restart provenance; they do not supersede the Build 206/207 current authority.
