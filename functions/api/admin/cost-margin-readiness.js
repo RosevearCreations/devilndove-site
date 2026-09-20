@@ -20,6 +20,7 @@ WITH inventory_ranked AS (
     LOWER(TRIM(COALESCE(source_type,''))) item_kind_norm,
     LOWER(TRIM(COALESCE(external_key,''))) source_key_norm,
     COALESCE(is_active,1) is_active,
+    COALESCE(item_name,'') item_name,
     COALESCE(unit_cost_cents,0) unit_cost_cents,
     COALESCE(stock_unit_label,'unit') stock_unit_label,
     COALESCE(usage_unit_label,'unit') usage_unit_label,
@@ -36,7 +37,7 @@ link_facts AS (
   SELECT prl.product_resource_link_id,prl.product_id,p.name product_name,p.sku,p.price_cents,p.currency,
     LOWER(TRIM(COALESCE(prl.resource_kind,''))) resource_kind,
     TRIM(COALESCE(prl.source_key,'')) source_key,
-    COALESCE(NULLIF(TRIM(ir_name.item_name),''),TRIM(COALESCE(prl.source_key,''))) resource_name,
+    COALESCE(NULLIF(TRIM(ir.item_name),''),TRIM(COALESCE(prl.source_key,''))) resource_name,
     COALESCE(prl.quantity_used,0) quantity_used,
     COALESCE(prl.consumption_mode,'per_unit') consumption_mode,
     COALESCE(NULLIF(prl.lot_size_units,0),1) lot_size_units,
@@ -56,7 +57,6 @@ link_facts AS (
     ON ir.rn=1
    AND ir.item_kind_norm=LOWER(TRIM(COALESCE(prl.resource_kind,'')))
    AND ir.source_key_norm=LOWER(TRIM(COALESCE(prl.source_key,'')))
-  LEFT JOIN site_item_inventory ir_name ON ir_name.site_item_inventory_id=ir.site_item_inventory_id
   LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=ir.site_item_inventory_id
 ),
 costed AS (
