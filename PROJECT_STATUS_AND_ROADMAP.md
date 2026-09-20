@@ -76,7 +76,11 @@ Build 206 remains blocked until Build 205 is exact-SHA Production GREEN.
 
 ## Retained historical provenance — Release 467 Build 153
 
-Build 153 — Layout Observer Performance Hotfix — remains retained performance provenance. Historical migration prefix 0001–0004 remains immutable inside the current forward migration stream.
+# Build 153 — Layout Observer Performance Hotfix — CLOSED GREEN
+
+- Products layout cache revision: `467-b153-layout-observer`.
+- Incident addressed: Firefox long-script / page responsiveness caused by excessive layout-observer churn.
+- Historical Build 153 canonical migration prefix was `0001–0004`; later forward-only canonical migrations remain valid successors and must preserve that immutable prefix.
 
 ## Retained historical provenance — Release 467 Build 171
 
