@@ -76,15 +76,15 @@ req(start_prod.get('main_sha')==B192_MAIN and start_prod.get('tree')==B192_TREE 
 for key,value in (candidate.get('safety') or {}).items():
     if isinstance(value,bool): req(value is False,f'Build 193 safety must remain false: {key}')
 
-# Canonical migration stream remains exactly the retained six-file stream.
+# Canonical migration stream preserves the retained six-file Build 193 prefix; forward-only successors are allowed.
 expected=[
  '0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql',
  '0003_release464_business_growth.sql','0004_release465_storefront_quality.sql',
  '0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql'
 ]
 rows=manifest.get('migrations') or []
-req([x.get('file') for x in rows]==expected,'Build 193 retained migration authority drifted')
-req([int(x.get('version') or 0) for x in rows]==list(range(1,7)),'Build 193 retained migration versions drifted')
+req([x.get('file') for x in rows[:len(expected)]]==expected,'Build 193 retained migration prefix drifted')
+req([int(x.get('version') or 0) for x in rows[:len(expected)]]==list(range(1,7)),'Build 193 retained migration prefix versions drifted')
 
 # Current successor pointer may advance, but Build 193/192 provenance must remain discoverable.
 pointer_build=int(pointer.get('build') or 0)
@@ -144,4 +144,4 @@ print('RELEASE 467 BUILD 193 RETAINED CURRENT AUTHORITY & HANDOFF CONVERGENCE: P
 print('Build 192 exact closure / Build 193 candidate: IMMUTABLE PROVENANCE')
 print(f'Current successor pointer: RELEASE 467 BUILD {pointer_build}')
 print('Build 170/171 provenance: RETAINED HISTORICALLY')
-print('Canonical migrations: 0001-0006 / BUILD 193 LIVE D1 WORK ZERO')
+print('Canonical migrations: BUILD 193 PREFIX 0001-0006 RETAINED / FORWARD SUCCESSORS ALLOWED')

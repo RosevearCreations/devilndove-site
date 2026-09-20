@@ -1,29 +1,29 @@
-// Release 467 Build 205 — current release/restart authority over canonical Build 204 GREEN restart boundary.
+// Release 467 Build 206 — current release/restart authority over exact Build 205 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=205;
-const TITLE='Current Authority & Manufacturing-Era Roadmap Convergence';
-const AUTHORITY='release467-build205-current-authority-manufacturing-era-roadmap-convergence';
-const EVIDENCE_ID='r467-b204-48307e67-35483005170-35483092965';
+const BUILD=206;
+const TITLE='Launch-Set Remediation Campaign';
+const AUTHORITY='release467-build206-launch-set-remediation-campaign';
+const EVIDENCE_ID='r467-b205-61163cea-35485817330-35485914734';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:204,title:'Storefront Launch Set & Autonomous Closure',state:'DEVELOPMENT_GREEN',
-  dev_sha:'48307e67978dee5ef4481ccfe2739a5d3df79b18',tree_sha:'4a63209efc54bc641ba0484c4954ac1cb35acc2e',
-  system_gate_run:35483005170,current_application_quality_run:35483005094,it_admin_runtime_proof_run:35483005097,
-  branch_hygiene_run:35483005113,build_specific_proof_run:35478691738,exact_preview_deployment:true,
+  release:467,build:205,title:'Current Authority & Manufacturing-Era Roadmap Convergence',state:'DEVELOPMENT_GREEN',
+  dev_sha:'61163ceaeb07a28cac1df0f9ff6b3ab46b498c02',tree_sha:'0710a7dfe8a81342704c92b810d6e18249b960e7',
+  system_gate_run:35485817330,current_application_quality_run:35485817347,it_admin_runtime_proof_run:35485817370,
+  branch_hygiene_run:35485817325,build_specific_proof_run:35485817337,exact_preview_deployment:true,
   role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:204,title:'Storefront Launch Set & Autonomous Closure',state:'PRODUCTION_GREEN',
-  main_sha:'09253dbe5b43c4308d1ff671bb71df80bf0592d9',tree_sha:'4a63209efc54bc641ba0484c4954ac1cb35acc2e',
-  pages_deploy_run:35483092965,production_pages_deploy_run:35483092965,
-  production_live_resource_integrity_run:0,products_browser_proof_run:0,
-  products_route_proof_run:0,build_specific_proof_run:35478779057,
-  exact_production_url:'https://cd226d56.devilndove-site.pages.dev',remote_d1_queries:0
+  release:467,build:205,title:'Current Authority & Manufacturing-Era Roadmap Convergence',state:'PRODUCTION_GREEN',
+  main_sha:'0a6144bc4b9767c06ccf82a78853b8375a55637a',tree_sha:'0710a7dfe8a81342704c92b810d6e18249b960e7',
+  pages_deploy_run:35485914734,production_pages_deploy_run:35485914734,
+  production_live_resource_integrity_run:35485940566,products_browser_proof_run:0,
+  products_route_proof_run:0,build_specific_proof_run:35485914603,
+  exact_production_url:'https://eed80e04.devilndove-site.pages.dev',remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -38,7 +38,7 @@ const CURRENT_GUARDS=Object.freeze([
 const CANONICAL_MIGRATIONS=Object.freeze([
   '0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql',
   '0003_release464_business_growth.sql','0004_release465_storefront_quality.sql',
-  '0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql'
+  '0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql'
 ]);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
@@ -61,15 +61,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:204,title:'Storefront Launch Set & Autonomous Closure',
+    release:467,build:205,title:'Current Authority & Manufacturing-Era Roadmap Convergence',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35483005170,current_application_quality_run:35483005094,
-      it_admin_runtime_proof_run:35483005097,branch_hygiene_run:35483005113,build204_proof_run:35478691738
+      system_gate_run:35485817330,current_application_quality_run:35485817347,
+      it_admin_runtime_proof_run:35485817370,branch_hygiene_run:35485817325,build205_proof_run:35485817337
     },
     production_proofs:{
-      production_pages_deploy_run:35483092965,production_live_resource_integrity_run:0,
-      products_browser_proof_run:0,products_route_proof_run:0,build204_proof_run:35478779057
+      production_pages_deploy_run:35485914734,production_live_resource_integrity_run:35485940566,
+      products_browser_proof_run:0,products_route_proof_run:0,build205_proof_run:35485914603
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -80,7 +80,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,code_only_production_zero_d1:true
     },
-    next_build:'Build 205 converges machine, I.T. and human restart authority over exact Build 204/current roadmap proof.'
+    next_build:'Build 206 owns launch-set remediation over exact Build 205 proof; Build 207 remains blocked until Production GREEN.'
   };
 }
 async function closurePack(){
@@ -93,23 +93,23 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 204 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 205 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
 - Canonical Development SHA: ${pack.sha}
 - Canonical Production main SHA: ${PRODUCTION.main_sha}
 - Shared tree: ${pack.tree_sha}
-- System Gate: 35483005170
-- Current Application Quality Proof: 35483005094
-- I.T. Admin Runtime Proof: 35483005097
-- Repository Branch Hygiene: 35483005113
-- Original Build 204 Development Proof: 35478691738
-- Canonical Production Pages Deploy: 35483092965
-- Original Build 204 Production Proof: 35478779057
-- Original Build 204 Production Pages: 35478779248
+- System Gate: 35485817330
+- Current Application Quality Proof: 35485817347
+- I.T. Admin Runtime Proof: 35485817370
+- Repository Branch Hygiene: 35485817325
+- Original Build 205 Development Proof: 35485817337
+- Canonical Production Pages Deploy: 35485914734
+- Original Build 205 Production Proof: 35485914603
+- Original Build 205 Production Pages: 35478779248
 - Production remote D1 queries for roadmap promotion: 0
-- Current candidate: Build 205 Current Authority & Manufacturing-Era Roadmap Convergence
+- Current candidate: Build 206 Current Authority & Manufacturing-Era Roadmap Convergence
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -128,7 +128,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:205,title:TITLE,authority:'release467-build205-current-authority-manufacturing-era-roadmap-convergence.json'},
+        current_closure_candidate:{release:467,build:206,title:TITLE,authority:'release467-build206-launch-set-remediation-campaign.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -147,12 +147,12 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 204/current roadmap source is the exact last fully verified Development checkpoint.',
-      'Build 204/current roadmap Production is GREEN on the identical source tree with code/docs-only / zero-D1 promotion.',
-      'Development proofs: System 35483005170, Quality 35483005094, I.T. 35483005097, Hygiene 35483005113.',
-      'Current Production proof: Pages 35483092965. Original Build 204 runtime Production proof remains retained separately.',
-      'Build 205 Current Authority & Manufacturing-Era Roadmap Convergence is the active Development closure candidate.',
-      'Canonical D1 migrations are 0001-0006; request-time schema mutation remains closed.'
+      'Build 205 source is the exact last fully verified Development checkpoint.',
+      'Build 205 Production is GREEN on the identical source tree with code/docs-only / zero-D1 promotion.',
+      'Development proofs: System 35485817330, Quality 35485817347, I.T. 35485817370, Hygiene 35485817325.',
+      'Current Production proof: Pages 35485914734. Original Build 205 runtime Production proof remains retained separately.',
+      'Build 206 Launch-Set Remediation Campaign is the active Development closure candidate.',
+      'Canonical D1 migrations are 0001-0007; request-time schema mutation remains closed.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
