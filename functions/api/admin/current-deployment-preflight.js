@@ -1,29 +1,29 @@
-// Release 467 Build 209 — current read-only Deployment Preflight over exact Build 208 GREEN predecessor.
+// Release 467 Build 210 — current read-only Deployment Preflight over exact Build 209 GREEN predecessor.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=209;
-const TITLE='Workshop Capability Profiles & Constraints';
-const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql']);
+const BUILD=210;
+const TITLE='Custom Work Intake 2.0';
+const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql']);
 const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 208 Multi-Discipline Public Positioning & Capability Navigation Proof'
+  'Release 467 Build 209 Workshop Capability Profiles & Constraints Proof'
 ]);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:208,title:'Multi-Discipline Public Positioning & Capability Navigation',state:'DEVELOPMENT_GREEN',
-  dev_sha:'cc76ca21585e0b9a38e2b7f481799963943be056',tree_sha:'7a3583f0f12275d5316b1fc63a3067bc3dd7d74a',
-  system_gate_run:35515481692,current_application_quality_run:35515481732,it_admin_runtime_proof_run:35515481657,
-  branch_hygiene_run:35515481717,build_specific_proof_run:35515481737,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:209,title:'Workshop Capability Profiles & Constraints',state:'DEVELOPMENT_GREEN',
+  dev_sha:'9b6b22291bd98bdd2d57c8793a0c892f937b4287',tree_sha:'36bed0abebbb47b375277562355c3517d171b629',
+  system_gate_run:35517349532,current_application_quality_run:35517349713,it_admin_runtime_proof_run:35517349672,
+  branch_hygiene_run:35517349600,build_specific_proof_run:35517349698,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:208,title:'Multi-Discipline Public Positioning & Capability Navigation',state:'PRODUCTION_GREEN',
-  main_sha:'2d53ff1f65b0252e4c1812766e61577f530dccaa',
-  tree_sha:'7a3583f0f12275d5316b1fc63a3067bc3dd7d74a',production_pages_deploy_run:35515609351,
-  production_live_resource_integrity_run:35515652270,products_browser_proof_run:35515652261,
-  products_route_proof_run:35515652315,build_specific_proof_run:35515609321,remote_d1_queries:0,
-  exact_production_url:'https://f784f34e.devilndove-site.pages.dev'
+  release:467,build:209,title:'Workshop Capability Profiles & Constraints',state:'PRODUCTION_GREEN',
+  main_sha:'9a1bd2b3d99edf69651a17e790866d3b8fa744d4',
+  tree_sha:'36bed0abebbb47b375277562355c3517d171b629',production_pages_deploy_run:35517517613,
+  production_live_resource_integrity_run:35517574976,products_browser_proof_run:35517574870,
+  products_route_proof_run:35517574790,build_specific_proof_run:35517517656,remote_d1_queries:0,
+  exact_production_url:'https://d8ed45c4.devilndove-site.pages.dev'
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -79,8 +79,8 @@ export async function onRequestGet(context){
     {status:truth.proof_recorded_count===CANONICAL_MIGRATIONS.length?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:`${truth.proof_recorded_count}/${CANONICAL_MIGRATIONS.length} proof rows recorded.`},
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:`${truth.foreign_key_violations} violation(s).`},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
-    {status:'pass',code:'build208_verified_baseline',label:'Build 208 verified restart baseline',detail:'Build 208 public positioning/navigation is exact-SHA Production GREEN on the current shared source tree.'},
-    {status:'review',code:'build209_capability_profiles',label:'Build 209 capability profiles & constraints',detail:'Canonical migration 0009 and the 12 reviewed capability profiles must pass one exact-head Development proof before promotion.'}
+    {status:'pass',code:'build209_verified_baseline',label:'Build 209 verified restart baseline',detail:'Build 209 workshop capability profiles are exact-SHA Production GREEN on the current shared source tree.'},
+    {status:'review',code:'build210_custom_work_intake',label:'Build 210 Custom Work Intake 2.0',detail:'Canonical migration 0010 and structured Custom Work intake must pass one exact-head Development proof before promotion.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
   const data={
@@ -92,15 +92,15 @@ export async function onRequestGet(context){
     release_authority:{
       current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,
       verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
-      current_candidate:{release:467,build:209,title:TITLE,authority:'release467-build209-workshop-capability-profiles-constraints.json'},
+      current_candidate:{release:467,build:210,title:TITLE,authority:'release467-build210-custom-work-intake-2.json'},
       rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'
     },
     truth_notes:[
-      `Build 208 source is the exact fully verified restart baseline at ${VERIFIED_DEVELOPMENT.dev_sha}; Production source is ${PRODUCTION.main_sha}; both share ${VERIFIED_DEVELOPMENT.tree_sha}.`,
+      `Build 209 source is the exact fully verified restart baseline at ${VERIFIED_DEVELOPMENT.dev_sha}; Production source is ${PRODUCTION.main_sha}; both share ${VERIFIED_DEVELOPMENT.tree_sha}.`,
       `Development proofs: System ${VERIFIED_DEVELOPMENT.system_gate_run}, Quality ${VERIFIED_DEVELOPMENT.current_application_quality_run}, I.T. ${VERIFIED_DEVELOPMENT.it_admin_runtime_proof_run}, Hygiene ${VERIFIED_DEVELOPMENT.branch_hygiene_run}.`,
       `Production proofs: Pages ${PRODUCTION.production_pages_deploy_run}, Live Resources ${PRODUCTION.production_live_resource_integrity_run}, Product Browser ${PRODUCTION.products_browser_proof_run}, Product Route ${PRODUCTION.products_route_proof_run}.`,
-      'Build 209 Workshop Capability Profiles & Constraints is the active Development closure candidate.',
-      'Canonical migrations are 0001-0009; migration 0009 adds reviewed capability profile authority only.'
+      'Build 210 Custom Work Intake 2.0 is the active Development closure candidate.',
+      'Canonical migrations are 0001-0010; migration 0010 enriches the existing custom_requests authority only.'
     ],
     safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}
   };

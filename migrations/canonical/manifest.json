@@ -76,6 +76,13 @@
       "release": 467,
       "description": "Add reviewed workshop capability profiles linked to canonical process keys, with source notes, explicit unknown/measured constraint state, customer-supplied assessment policy, proof/sample policy and public/admin routing.",
       "recovery": "Forward-only additive table. Hide or hold profiles for logical rollback; correct facts only through reviewed admin updates or a new numbered migration. Never edit this migration after Development application."
+    },
+    {
+      "version": 10,
+      "file": "0010_release467_custom_work_intake_2.sql",
+      "release": 467,
+      "description": "Enrich the existing custom_requests authority with structured quantity, project intent, intended use, organisation/event context, supplied-item, material/finish, personalization, capability preference, size/tolerance and help-me-choose fields.",
+      "recovery": "Forward-only additive columns and indexes. Existing requests and status/quote/order journeys remain intact. Correct schema defects only with a new numbered migration; never edit this migration after Development application."
     }
   ]
 }
