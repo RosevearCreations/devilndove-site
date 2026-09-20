@@ -93,28 +93,27 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 192 Closure Evidence Pack
+  return `# Devil n Dove Release 467 Build 204 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
-- Development SHA: ${pack.sha}
-- Production main SHA: ${PRODUCTION.main_sha}
-- Tree: ${pack.tree_sha}
-- System Gate: 35418600834
-- Current Application Quality Proof: 35418600870
-- I.T. Admin Runtime Proof: 35418600868
-- Repository Branch Hygiene: 35418600827
-- Build 192 Development Proof: 35418600841
-- Production Pages Deploy: 35418692246
-- Production Live Resource Integrity: 35418731807
-- Products Browser Proof: 35418731822
-- Products Route Proof: 35418731793
-- Build 192 Production Proof: 35418692245
-- Production remote D1 queries: 0
-- Current follow-up: Build 193 Current Authority & Handoff Convergence
+- Canonical Development SHA: ${pack.sha}
+- Canonical Production main SHA: ${PRODUCTION.main_sha}
+- Shared tree: ${pack.tree_sha}
+- System Gate: 35483005170
+- Current Application Quality Proof: 35483005094
+- I.T. Admin Runtime Proof: 35483005097
+- Repository Branch Hygiene: 35483005113
+- Original Build 204 Development Proof: 35478691738
+- Canonical Production Pages Deploy: 35483092965
+- Original Build 204 Production Proof: 35478779057
+- Original Build 204 Production Pages: 35478779248
+- Production remote D1 queries for roadmap promotion: 0
+- Current candidate: Build 205 Current Authority & Manufacturing-Era Roadmap Convergence
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
+
 export async function onRequestGet(context){
   const [baseResponse,diagnosticResponse,closure]=await Promise.all([
     getReadinessControlTower(context),getSelfDiagnostics(context),closurePack()
