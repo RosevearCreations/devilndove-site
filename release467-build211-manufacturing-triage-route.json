@@ -1,0 +1,69 @@
+{
+  "release": 467,
+  "build": 211,
+  "title": "Manufacturing Triage & Route Proposal",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build211-manufacturing-triage-route",
+  "priority": "add_staff_reviewed_manufacturing_triage_and_candidate_process_routes_without_automatic_feasibility_promises_or_parallel_request_process_authorities",
+  "starting_point": {
+    "development": {
+      "sha": "228d50a0a71d8b99e24f888b8bcd25b9c839a396",
+      "tree": "f8e85d5e91a9eee5a9c64901865efe24be1ad34e",
+      "system_gate_run": 35519319569,
+      "quality_run": 35519319561,
+      "it_admin_runtime_run": 35519319637,
+      "repository_hygiene_run": 35519319612,
+      "build_specific_proof_run": 35519319562,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "6e81942e7fd54157698b640252eed256b0411752",
+      "tree": "f8e85d5e91a9eee5a9c64901865efe24be1ad34e",
+      "production_pages_deploy_run": 35519559453,
+      "production_live_resource_integrity_run": 35519611667,
+      "products_browser_proof_run": 35519611679,
+      "products_route_proof_run": 35519611767,
+      "build_specific_proof_run": 35519559362,
+      "exact_production_url": "https://cae32d7d.devilndove-site.pages.dev",
+      "deployment_id": "cae32d7d-8ac6-4ba2-96de-7ecbbdd4a6ad",
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Attach one reviewed manufacturing-triage record to an existing Custom Request.",
+    "Map each request to zero or more ordered candidate processes from canonical inventory_processes.",
+    "Record feasibility state, specialist review, proof/sample need, material unknowns, supplied-item suitability review and the next clarification question.",
+    "Expose triage through the existing authenticated Custom Work admin route with explicit-save behavior only."
+  ],
+  "safety": {
+    "canonical_schema_addition": true,
+    "request_time_ddl": false,
+    "parallel_custom_request_system": false,
+    "parallel_process_dictionary": false,
+    "automatic_feasibility_promise": false,
+    "automatic_customer_fact_invention": false,
+    "automatic_quote": false,
+    "automatic_order": false,
+    "automatic_stock_reservation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "payment_execution": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build211_gate.py",
+    "canonical_migration": "migrations/canonical/0011_release467_manufacturing_triage_route.sql",
+    "request_authority": "custom_requests",
+    "process_authority": "inventory_processes",
+    "triage_authority": "custom_request_manufacturing_triage",
+    "route_authority": "custom_request_route_processes",
+    "admin_api": "functions/api/admin/custom-work-triage.js",
+    "admin_surface": "/admin/custom-request/",
+    "max_candidate_processes_per_request": 8
+  },
+  "next_build": {
+    "build": 212,
+    "title": "Hybrid Creative Project Operations",
+    "state": "BLOCKED_UNTIL_BUILD211_PRODUCTION_GREEN"
+  }
+}

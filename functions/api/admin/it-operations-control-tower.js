@@ -1,29 +1,29 @@
-// Release 467 Build 210 — current release/restart authority over exact Build 209 GREEN predecessor.
+// Release 467 Build 211 — current release/restart authority over exact Build 210 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=210;
-const TITLE='Custom Work Intake 2.0';
-const AUTHORITY='release467-build210-custom-work-intake-2';
-const EVIDENCE_ID='r467-b209-9b6b2229-35517349532-35517517613';
+const BUILD=211;
+const TITLE='Manufacturing Triage & Route Proposal';
+const AUTHORITY='release467-build211-manufacturing-triage-route';
+const EVIDENCE_ID='r467-b210-228d50a0-35519319569-35519559453';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:209,title:'Workshop Capability Profiles & Constraints',state:'DEVELOPMENT_GREEN',
-  dev_sha:'9b6b22291bd98bdd2d57c8793a0c892f937b4287',tree_sha:'36bed0abebbb47b375277562355c3517d171b629',
-  system_gate_run:35517349532,current_application_quality_run:35517349713,it_admin_runtime_proof_run:35517349672,
-  branch_hygiene_run:35517349600,build_specific_proof_run:35517349698,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:210,title:'Custom Work Intake 2.0',state:'DEVELOPMENT_GREEN',
+  dev_sha:'228d50a0a71d8b99e24f888b8bcd25b9c839a396',tree_sha:'f8e85d5e91a9eee5a9c64901865efe24be1ad34e',
+  system_gate_run:35519319569,current_application_quality_run:35519319561,it_admin_runtime_proof_run:35519319637,
+  branch_hygiene_run:35519319612,build_specific_proof_run:35519319562,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true,
   role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:209,title:'Workshop Capability Profiles & Constraints',state:'PRODUCTION_GREEN',
-  main_sha:'9a1bd2b3d99edf69651a17e790866d3b8fa744d4',
-  tree_sha:'36bed0abebbb47b375277562355c3517d171b629',pages_deploy_run:35517517613,production_pages_deploy_run:35517517613,
-  production_live_resource_integrity_run:35517574976,products_browser_proof_run:35517574870,
-  products_route_proof_run:35517574790,build_specific_proof_run:35517517656,remote_d1_queries:0,
+  release:467,build:210,title:'Custom Work Intake 2.0',state:'PRODUCTION_GREEN',
+  main_sha:'6e81942e7fd54157698b640252eed256b0411752',
+  tree_sha:'f8e85d5e91a9eee5a9c64901865efe24be1ad34e',pages_deploy_run:35519559453,production_pages_deploy_run:35519559453,
+  production_live_resource_integrity_run:35519611667,products_browser_proof_run:35519611679,
+  products_route_proof_run:35519611767,build_specific_proof_run:35519559362,remote_d1_queries:0,
   exact_production_url:'https://d8ed45c4.devilndove-site.pages.dev'
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
@@ -34,9 +34,9 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 209 Workshop Capability Profiles & Constraints Proof'
+  'Release 467 Build 210 Custom Work Intake 2.0 Proof'
 ]);
-const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql']);
+const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
   {key:'paypal_sandbox',state:'HOLD_EXTERNAL'},
@@ -58,26 +58,26 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:209,title:'Workshop Capability Profiles & Constraints',
+    release:467,build:210,title:'Custom Work Intake 2.0',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35517349532,current_application_quality_run:35517349713,
-      it_admin_runtime_proof_run:35517349672,branch_hygiene_run:35517349600,build209_proof_run:35517349698
+      system_gate_run:35519319569,current_application_quality_run:35519319561,
+      it_admin_runtime_proof_run:35519319637,branch_hygiene_run:35519319612,build210_proof_run:35519319562
     },
     production_proofs:{
-      production_pages_deploy_run:35517517613,production_live_resource_integrity_run:35517574976,
-      products_browser_proof_run:35517574870,products_route_proof_run:35517574790,build209_proof_run:35517517656
+      production_pages_deploy_run:35519559453,production_live_resource_integrity_run:35519611667,
+      products_browser_proof_run:35519611679,products_route_proof_run:35519611767,build210_proof_run:35519559362
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
     canonical_migration_authority:'migrations/canonical/manifest.json + scripts/d1_migrate.py',
-    canonical_migrations:CANONICAL_MIGRATIONS.slice(0,9),
+    canonical_migrations:CANONICAL_MIGRATIONS.slice(0,10),
     external_lanes:Object.fromEntries(EXTERNAL_POLICY.map((x)=>[x.key,x.state])),
     runtime_closure:{
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
-      background_polling:false,automatic_inventory_assignment:false,build209_capability_profiles:true
+      background_polling:false,automatic_inventory_assignment:false,build210_custom_work_intake:true
     },
-    next_build:'Build 210 enriches the existing Custom Work intake through canonical migration 0010 over exact Build 209 proof.'
+    next_build:'Build 211 adds reviewed manufacturing triage and candidate process routing through canonical migration 0011 over exact Build 210 proof.'
   };
 }
 async function closurePack(){
@@ -90,22 +90,22 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 209 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 210 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
 - Canonical Development SHA: ${pack.sha}
 - Canonical Production main SHA: ${PRODUCTION.main_sha}
 - Shared tree: ${pack.tree_sha}
-- System Gate: 35517349532
-- Current Application Quality Proof: 35517349713
-- I.T. Admin Runtime Proof: 35517349672
-- Repository Branch Hygiene: 35517349600
-- Build 209 Development Proof: 35517349698
-- Production Pages Deploy: 35517517613
-- Production Live Resource Integrity: 35517574976
-- Build 209 Production Proof: 35517517656
-- Current candidate: Build 210 Custom Work Intake 2.0
+- System Gate: 35519319569
+- Current Application Quality Proof: 35519319561
+- I.T. Admin Runtime Proof: 35519319637
+- Repository Branch Hygiene: 35519319612
+- Build 210 Development Proof: 35519319562
+- Production Pages Deploy: 35519559453
+- Production Live Resource Integrity: 35519611667
+- Build 210 Production Proof: 35519559362
+- Current candidate: Build 211 Manufacturing Triage & Route Proposal
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -124,7 +124,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:210,title:TITLE,authority:'release467-build210-custom-work-intake-2.json'},
+        current_closure_candidate:{release:467,build:211,title:TITLE,authority:'release467-build211-manufacturing-triage-route.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -143,12 +143,12 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 209 source is the exact last fully verified Development checkpoint.',
-      'Build 209 Production is GREEN on the identical source tree with canonical migration 0009 applied.',
-      'Development proofs: System 35517349532, Quality 35517349713, I.T. 35517349672, Hygiene 35517349600.',
-      'Production proofs: Pages 35517517613, Live Resources 35517574976, Product Browser 35517574870, Product Route 35517574790.',
-      'Build 210 Custom Work Intake 2.0 is the active Development closure candidate.',
-      'Canonical D1 migrations are now 0001-0010 in source; migration 0010 must be applied/proven in Development before promotion.'
+      'Build 210 source is the exact last fully verified Development checkpoint.',
+      'Build 210 Production is GREEN on the identical source tree with canonical migration 0010 applied.',
+      'Development proofs: System 35519319569, Quality 35519319561, I.T. 35519319637, Hygiene 35519319612.',
+      'Production proofs: Pages 35519559453, Live Resources 35519611667, Product Browser 35519611679, Product Route 35519611767.',
+      'Build 211 Manufacturing Triage & Route Proposal is the active Development closure candidate.',
+      'Canonical D1 migrations are now 0001-0011 in source; migration 0011 must be applied/proven in Development before promotion.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,

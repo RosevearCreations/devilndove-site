@@ -2,21 +2,21 @@
 
 ## Current verified restart baseline
 
-Release 467 **Build 209 — Workshop Capability Profiles & Constraints** is fully promoted and Production GREEN.
+Release 467 **Build 210 — Custom Work Intake 2.0** is fully promoted and Production GREEN.
 
-- Development `9b6b22291bd98bdd2d57c8793a0c892f937b4287`
-- Production `9a1bd2b3d99edf69651a17e790866d3b8fa744d4`
-- shared tree `36bed0abebbb47b375277562355c3517d171b629`
-- four Development proofs `35517349532` / `35517349713` / `35517349672` / `35517349600`
-- Build 209 Development proof `35517349698`
-- Production Pages / Live Resources `35517517613` / `35517574976`
-- Product Browser / Route proofs `35517574870` / `35517574790`
-- Build 209 Production proof `35517517656`
-- exact Production URL `https://d8ed45c4.devilndove-site.pages.dev`
+- Development `228d50a0a71d8b99e24f888b8bcd25b9c839a396`
+- Production `6e81942e7fd54157698b640252eed256b0411752`
+- shared tree `f8e85d5e91a9eee5a9c64901865efe24be1ad34e`
+- four Development proofs `35519319569` / `35519319561` / `35519319637` / `35519319612`
+- Build 210 Development proof `35519319562`
+- Production Pages / Live Resources `35519559453` / `35519611667`
+- Product Browser / Route proofs `35519611679` / `35519611767`
+- Build 210 Production proof `35519559362`
+- exact Production URL `https://cae32d7d.devilndove-site.pages.dev`
 
 ## Active candidate
 
-**Release 467 Build 210 — Custom Work Intake 2.0**. Enrich the existing `custom_requests` authority with 12 structured manufacturing-intent fields, optional Build 209 capability preference and an explicit help-me-decide path. Preserve the existing private status, reference, quote, payment-request and order journey; Build 211 owns manufacturing triage.
+**Release 467 Build 211 — Manufacturing Triage & Route Proposal**. Add explicit staff-reviewed triage over existing `custom_requests` and canonical `inventory_processes`: candidate processes, feasibility state, specialist/proof needs, material unknowns, supplied-item review and next clarification question. No automatic feasibility promise, quote, order, stock reservation or provider action.
 
 ## Restart rule
 
@@ -28,4 +28,4 @@ Build 171 **Release & Restart Authority Convergence** remains immutable historic
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 **Release Regression & Runtime Budget Convergence** and Build 193 **Current Authority & Handoff Convergence** remain retained historical release/restart provenance. Their exact artifacts and gates must remain valid, but current restart truth is Build 210 over exact Production-GREEN Build 209.
+Build 192 **Release Regression & Runtime Budget Convergence** and Build 193 **Current Authority & Handoff Convergence** remain retained historical release/restart provenance. Their exact artifacts and gates must remain valid, but current restart truth is Build 211 over exact Production-GREEN Build 210.
