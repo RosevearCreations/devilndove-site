@@ -1,0 +1,40 @@
+name: Release 467 Build 214 Prototype Sample Production Run
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'migrations/canonical/0014_release467_prototype_sample_production_run.sql'
+      - 'migrations/canonical/manifest.json'
+      - 'functions/api/_lib/manufacturingMaturity.js'
+      - 'functions/api/admin/manufacturing-lifecycle.js'
+      - 'public/js/admin-manufacturing-lifecycle-build214.js'
+      - 'admin/creative-process/index.html'
+      - 'admin/custom-request/index.html'
+      - 'current-development-authority.json'
+      - 'release467-build213-digital-proof-customer-approval.json'
+      - 'release467-build214-prototype-sample-production-run.json'
+      - 'docs/operations/RELEASE_467_BUILD_214_PROTOTYPE_SAMPLE_PRODUCTION_RUN.md'
+      - 'scripts/release467_build213_gate.py'
+      - 'scripts/release467_build214_gate.py'
+      - 'scripts/repository_forward_sanity.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'scripts/current_deployment_preflight_truth_gate.py'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - '.github/workflows/release467-build214-prototype-sample-production-run.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.x'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - run: python scripts/release467_build214_gate.py
+      - run: python scripts/release467_build213_gate.py

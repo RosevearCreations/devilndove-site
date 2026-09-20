@@ -104,6 +104,13 @@
       "release": 467,
       "description": "Add versioned private Custom Work proof records and append-only approval/change-request event history with optional Packaging-version and customer-safe stage-photo references.",
       "recovery": "Forward-only additive tables. Logical rollback supersedes/expires proof versions while retaining audit history; Packaging, CAIP/media, Custom Work and publication authorities remain independently owned. Repair schema defects only with a new numbered migration."
+    },
+    {
+      "version": 14,
+      "file": "0014_release467_prototype_sample_production_run.sql",
+      "release": 467,
+      "description": "Add explicit prototype/sample/production maturity lifecycle and append-only transition evidence over existing Creative Process, Custom Work and Build 213 proof authorities.",
+      "recovery": "Forward-only additive tables. Logical rollback records a superseding lifecycle transition; never delete failed prototype or approval history. Repair schema defects only with a new numbered migration."
     }
   ]
 }

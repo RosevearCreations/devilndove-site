@@ -2,21 +2,21 @@
 
 ## Current verified restart baseline
 
-Release 467 **Build 212 — Hybrid Creative Project Operations** is fully promoted and Production GREEN.
+Release 467 **Build 213 — Digital Proof & Customer Approval** is fully promoted and Production GREEN.
 
-- Development `7891a869d748072846a1ac9452782e119f01cd53`
-- Production `9ea6c728a4df978d653be910388ea7081b800de9`
-- shared tree `f972119d10f98ea566173868915463ce31cdf22c`
-- four Development proofs `35526209718` / `35526209719` / `35526209723` / `35526209630`
-- Build 212 Development proof `35526209730`
-- Production Pages / Live Resources `35526432043` / `35526530121`
-- Product Browser / Route proofs `35526530105` / `35526530131`
-- Build 212 Production proof `35526432021`
-- exact Production URL `https://f3bd9a21.devilndove-site.pages.dev`
+- Development `3292ac5c20780e23bd9d5ae593368e82b6e4826b`
+- Production `92df5745fc2d4311dfacfbd214c1032a34c46bb8`
+- shared tree `1108fecdeac23c69b8ea4d810c0375a0899ff469`
+- four Development proofs `35533703475` / `35533703446` / `35533703481` / `35533703474`
+- Build 213 Development proof `35533703458`
+- Production Pages / Live Resources `35534081643` / `35534292686`
+- Product Browser / Route proofs `35534292705` / `35534292692`
+- Build 213 Production proof `35534081642`
+- exact Production URL `https://e8fa1e4b.devilndove-site.pages.dev`
 
 ## Active candidate
 
-**Release 467 Build 213 — Digital Proof & Customer Approval**. Add private versioned Custom Work proofs, exact approve/changes-requested evidence, optional immutable Packaging-version/customer-safe media references, and a fail-closed proof readiness projection. Customer approval is not publication approval.
+**Release 467 Build 214 — Prototype → Sample → Production Run**. Add explicit human-controlled manufacturing maturity over existing Creative Process and Custom Work. Approved sample requires exact evidence; production authorization is separate and does not start production or mutate Inventory/Product-run/payment/publication authorities.
 
 ## Restart rule
 
@@ -28,4 +28,4 @@ Build 171 **Release & Restart Authority Convergence** remains immutable historic
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 **Release Regression & Runtime Budget Convergence** and Build 193 **Current Authority & Handoff Convergence** remain retained historical release/restart provenance. Their exact artifacts and gates must remain valid, but current restart truth is Build 213 over exact Production-GREEN Build 212.
+Build 192 **Release Regression & Runtime Budget Convergence** and Build 193 **Current Authority & Handoff Convergence** remain retained historical release/restart provenance. Their exact artifacts and gates must remain valid, but current restart truth is Build 214 over exact Production-GREEN Build 213.

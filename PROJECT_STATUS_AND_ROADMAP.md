@@ -2,11 +2,11 @@
 
 ## Current checkpoint
 
-Build 212 **Hybrid Creative Project Operations** is Production GREEN at `9ea6c728a4df978d653be910388ea7081b800de9`, exact tree `f972119d10f98ea566173868915463ce31cdf22c`, with Development `7891a869d748072846a1ac9452782e119f01cd53` and Production Pages/Live proofs `35526432043` / `35526530121`.
+Build 213 **Digital Proof & Customer Approval** is Production GREEN at `92df5745fc2d4311dfacfbd214c1032a34c46bb8`, exact tree `1108fecdeac23c69b8ea4d810c0375a0899ff469`, with Development `3292ac5c20780e23bd9d5ae593368e82b6e4826b` and Production Pages/Live proofs `35534081643` / `35534292686`.
 
-## Active Build 213
+## Active Build 214
 
-**Digital Proof & Customer Approval** extends the existing Custom Work journey through canonical migration 0013. Proof versions have private tokens, exact customer approval/changes-requested evidence, append-only event history and optional immutable Packaging-version/customer-safe stage-photo references. Customer approval never grants publication authority. Build 214 remains blocked until exact-SHA Production GREEN.
+**Prototype → Sample → Production Run** extends existing Creative Process and Custom Work through canonical migration 0014. One linked lifecycle records concept, prototype, failed/rework, sample candidate, approved sample, production authorization, production run, QA/rework and completed maturity. Approved sample requires exact Build 213 proof or Creative Process event evidence. Production authorization is explicit evidence only. Build 215 remains blocked until exact-SHA Production GREEN.
 
 ## Permanent boundaries
 
