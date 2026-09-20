@@ -2,22 +2,22 @@
 
 ## Current authority
 
-Last fully verified: **Build 211 — Manufacturing Triage & Route Proposal**. Active candidate: **Build 212 — Hybrid Creative Project Operations**.
+Last fully verified: **Build 212 — Hybrid Creative Project Operations**. Active candidate: **Build 213 — Digital Proof & Customer Approval**.
 
-- Development `a7f07b18a4a3b24db1a148ec287cbf446041f573`
-- Production `41bf65727771c7c302c022d0944945a0802a909d`
-- tree `b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7`
-- System / Quality / I.T. / Hygiene `35524455791` / `35524455693` / `35524455845` / `35524455852`
-- Production Pages / Live Resources `35524655164` / `35524741052`
-- canonical migrations `0001–0012`
+- Development `7891a869d748072846a1ac9452782e119f01cd53`
+- Production `9ea6c728a4df978d653be910388ea7081b800de9`
+- tree `f972119d10f98ea566173868915463ce31cdf22c`
+- System / Quality / I.T. / Hygiene `35526209718` / `35526209719` / `35526209723` / `35526209630`
+- Production Pages / Live Resources `35526432043` / `35526530121`
+- canonical migrations `0001–0013`
 
 ## Read in this order
 
 1. `AI_HANDOFF.md`
 2. `PROJECT_STATUS_AND_ROADMAP.md`
 3. `docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md`
-4. `docs/operations/RELEASE_467_BUILD_212_HYBRID_CREATIVE_PROJECT_OPERATIONS.md`
-5. `release467-build212-hybrid-creative-project-operations.json`
+4. `docs/operations/RELEASE_467_BUILD_213_DIGITAL_PROOF_CUSTOMER_APPROVAL.md`
+5. `release467-build213-digital-proof-customer-approval.json`
 6. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
 
 ## Active autonomous build documents
@@ -58,4 +58,4 @@ Build 171 remains historical provenance over exact Build 170 predecessor `879c87
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 212 over exact Production-GREEN Build 211.
+Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 213 over exact Production-GREEN Build 212.

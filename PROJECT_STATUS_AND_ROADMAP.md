@@ -2,11 +2,11 @@
 
 ## Current checkpoint
 
-Build 211 **Manufacturing Triage & Route Proposal** is Production GREEN at `41bf65727771c7c302c022d0944945a0802a909d`, exact tree `b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7`, with Development `a7f07b18a4a3b24db1a148ec287cbf446041f573` and Production Pages/Live proofs `35524655164` / `35524741052`.
+Build 212 **Hybrid Creative Project Operations** is Production GREEN at `9ea6c728a4df978d653be910388ea7081b800de9`, exact tree `f972119d10f98ea566173868915463ce31cdf22c`, with Development `7891a869d748072846a1ac9452782e119f01cd53` and Production Pages/Live proofs `35526432043` / `35526530121`.
 
-## Active Build 212
+## Active Build 213
 
-**Hybrid Creative Project Operations** extends the existing Creative Process project authority through canonical migration 0012. Each project can carry ordered canonical-process operations, explicit predecessor dependencies, workspace/setup/duration/output planning and read-only Inventory resource references. Actual Creative events, Inventory movements, CAIP media and Finance remain owned by their existing systems. Build 213 remains blocked until exact-SHA Production GREEN.
+**Digital Proof & Customer Approval** extends the existing Custom Work journey through canonical migration 0013. Proof versions have private tokens, exact customer approval/changes-requested evidence, append-only event history and optional immutable Packaging-version/customer-safe stage-photo references. Customer approval never grants publication authority. Build 214 remains blocked until exact-SHA Production GREEN.
 
 ## Permanent boundaries
 
@@ -28,4 +28,4 @@ Build 171 — Release & Restart Authority Convergence — remains immutable hist
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain immutable historical release/restart provenance; they do not supersede the Build 211/212 current authority.
+Build 192 and Build 193 remain immutable historical release/restart provenance; they do not supersede the Build 212/213 current authority.

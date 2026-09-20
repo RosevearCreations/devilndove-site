@@ -97,6 +97,13 @@
       "release": 467,
       "description": "Add ordered multi-process Creative Project operation plans, explicit operation dependencies and planned Inventory resource references while preserving Creative Process, Inventory and CAIP ownership.",
       "recovery": "Forward-only additive tables. Logical rollback retires operation plans or removes planning-only dependency/resource links; actual Creative Process events, Inventory movements, CAIP media and Finance records remain untouched. Repair schema defects only with a new numbered migration."
+    },
+    {
+      "version": 13,
+      "file": "0013_release467_digital_proof_customer_approval.sql",
+      "release": 467,
+      "description": "Add versioned private Custom Work proof records and append-only approval/change-request event history with optional Packaging-version and customer-safe stage-photo references.",
+      "recovery": "Forward-only additive tables. Logical rollback supersedes/expires proof versions while retaining audit history; Packaging, CAIP/media, Custom Work and publication authorities remain independently owned. Repair schema defects only with a new numbered migration."
     }
   ]
 }
