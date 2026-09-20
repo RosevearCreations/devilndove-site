@@ -215,6 +215,25 @@ export const D1_READ_BUDGETS = Object.freeze({
     max_concurrent_identical_gets: 1,
     notes: 'Build 204: one Product launch-evidence recheck with stale token detection and zero Product/Inventory/R2/provider/payment/accounting mutation.'
   }),
+  admin_storefront_launch_remediation_v206: Object.freeze({
+    route: '/api/admin/storefront-launch-remediation',
+    risk: 'high',
+    contract: 'explicit_only_reuse_build204_projection_plus_bounded_campaign_metadata',
+    returned_products_max: 240,
+    remediation_rows_max: 400,
+    browser_cache_ms: 0,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 206: reuses the Build 204 launch-set projection directly; adds one bounded remediation-metadata read and explicit admin writes only. No duplicate readiness rules, Product publication, Inventory mutation, R2 work or provider execution.'
+  }),
+  admin_storefront_launch_remediation_recheck_v206: Object.freeze({
+    route: '/api/admin/storefront-launch-set',
+    risk: 'low',
+    contract: 'official_build204_one_product_recheck_before_remediation_update',
+    returned_rows_max: 1,
+    browser_cache_ms: 0,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 206: the browser rechecks one Product through the official Build 204 authority before recording campaign evidence.'
+  }),
   admin_pending_actions: Object.freeze({
     route: '/api/admin/pending-actions',
     risk: 'medium',

@@ -1,31 +1,31 @@
-// Release 467 Build 205 — current read-only Deployment Preflight over canonical Build 204 GREEN restart boundary.
+// Release 467 Build 206 — current read-only Deployment Preflight over exact Build 205 GREEN predecessor.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=205;
-const TITLE='Current Authority & Manufacturing-Era Roadmap Convergence';
+const BUILD=206;
+const TITLE='Launch-Set Remediation Campaign';
 const CANONICAL_MIGRATIONS=Object.freeze([
   '0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql',
   '0003_release464_business_growth.sql','0004_release465_storefront_quality.sql',
-  '0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql'
+  '0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql'
 ]);
 const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
   'Release 467 Build 205 Current Authority Manufacturing-Era Roadmap Convergence Proof'
 ]);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:204,title:'Storefront Launch Set & Autonomous Closure',state:'DEVELOPMENT_GREEN',
-  dev_sha:'48307e67978dee5ef4481ccfe2739a5d3df79b18',tree_sha:'4a63209efc54bc641ba0484c4954ac1cb35acc2e',
-  system_gate_run:35483005170,current_application_quality_run:35483005094,it_admin_runtime_proof_run:35483005097,
-  branch_hygiene_run:35483005113,build_specific_proof_run:35478691738,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:205,title:'Current Authority & Manufacturing-Era Roadmap Convergence',state:'DEVELOPMENT_GREEN',
+  dev_sha:'61163ceaeb07a28cac1df0f9ff6b3ab46b498c02',tree_sha:'0710a7dfe8a81342704c92b810d6e18249b960e7',
+  system_gate_run:35485817330,current_application_quality_run:35485817347,it_admin_runtime_proof_run:35485817370,
+  branch_hygiene_run:35485817325,build_specific_proof_run:35485817337,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:204,state:'PRODUCTION_GREEN',main_sha:'09253dbe5b43c4308d1ff671bb71df80bf0592d9',
-  tree_sha:'4a63209efc54bc641ba0484c4954ac1cb35acc2e',production_pages_deploy_run:35483092965,
-  production_live_resource_integrity_run:0,products_browser_proof_run:0,
-  products_route_proof_run:0,build_specific_proof_run:35478779057,remote_d1_queries:0
+  release:467,build:205,state:'PRODUCTION_GREEN',main_sha:'0a6144bc4b9767c06ccf82a78853b8375a55637a',
+  tree_sha:'0710a7dfe8a81342704c92b810d6e18249b960e7',production_pages_deploy_run:35485914734,
+  production_live_resource_integrity_run:35485940566,products_browser_proof_run:0,
+  products_route_proof_run:0,build_specific_proof_run:35485914603,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -81,8 +81,8 @@ export async function onRequestGet(context){
     {status:truth.proof_recorded_count===CANONICAL_MIGRATIONS.length?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:`${truth.proof_recorded_count}/${CANONICAL_MIGRATIONS.length} proof rows recorded.`},
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:`${truth.foreign_key_violations} violation(s).`},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
-    {status:'pass',code:'build204_verified_baseline',label:'Build 204 verified restart baseline',detail:'Build 204 runtime closure and the later docs-only roadmap canonicalization are GREEN and share the current dev/main source tree.'},
-    {status:'review',code:'build205_authority_convergence',label:'Build 205 current authority convergence',detail:'Machine pointer, I.T. truth and canonical human handoff must pass one exact-head Development proof before promotion.'}
+    {status:'pass',code:'build205_verified_baseline',label:'Build 205 verified restart baseline',detail:'Build 205 runtime closure and the later docs-only roadmap canonicalization are GREEN and share the current dev/main source tree.'},
+    {status:'review',code:'build206_launch_remediation',label:'Build 206 launch-set remediation',detail:'Migration 0007 and launch remediation must pass one exact-head Development proof before promotion.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
   const data={
@@ -94,15 +94,15 @@ export async function onRequestGet(context){
     release_authority:{
       current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,
       verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
-      current_candidate:{release:467,build:205,title:TITLE,authority:'release467-build205-current-authority-manufacturing-era-roadmap-convergence.json'},
+      current_candidate:{release:467,build:206,title:TITLE,authority:'release467-build206-launch-set-remediation-campaign.json'},
       rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'
     },
     truth_notes:[
-      `Build 204/current roadmap source is the exact fully verified restart baseline at ${VERIFIED_DEVELOPMENT.dev_sha}; Production source is ${PRODUCTION.main_sha}; both share ${VERIFIED_DEVELOPMENT.tree_sha}.`,
+      `Build 205 source is the exact fully verified restart baseline at ${VERIFIED_DEVELOPMENT.dev_sha}; Production source is ${PRODUCTION.main_sha}; both share ${VERIFIED_DEVELOPMENT.tree_sha}.`,
       `Development proofs: System ${VERIFIED_DEVELOPMENT.system_gate_run}, Quality ${VERIFIED_DEVELOPMENT.current_application_quality_run}, I.T. ${VERIFIED_DEVELOPMENT.it_admin_runtime_proof_run}, Hygiene ${VERIFIED_DEVELOPMENT.branch_hygiene_run}.`,
       `Production proofs: Pages ${PRODUCTION.production_pages_deploy_run}, Live Resources ${PRODUCTION.production_live_resource_integrity_run}, Product Browser ${PRODUCTION.products_browser_proof_run}, Product Route ${PRODUCTION.products_route_proof_run}.`,
-      'Build 205 Current Authority & Manufacturing-Era Roadmap Convergence is the active Development closure candidate.',
-      'Canonical migrations are 0001-0006; request-time schema mutation remains closed.'
+      'Build 206 Launch-Set Remediation Campaign is the active Development closure candidate.',
+      'Canonical migrations are 0001-0007; request-time schema mutation remains closed.'
     ],
     safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}
   };

@@ -1,0 +1,66 @@
+name: Release 467 Build 206 Launch-Set Remediation Campaign
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/storefront-launch-set.js'
+      - 'functions/api/admin/storefront-launch-remediation.js'
+      - 'functions/api/_lib/d1ReadBudget.js'
+      - 'public/js/admin-storefront-launch-remediation-v206.js'
+      - 'css/release467-build206-launch-remediation.css'
+      - 'admin/catalog-health/index.html'
+      - 'migrations/canonical/0007_release467_storefront_launch_remediation.sql'
+      - 'migrations/canonical/manifest.json'
+      - 'current-development-authority.json'
+      - 'release467-build205-current-authority-manufacturing-era-roadmap-convergence.json'
+      - 'release467-build206-launch-set-remediation-campaign.json'
+      - 'scripts/release467_build206_gate.py'
+      - '.github/workflows/release467-build206-launch-set-remediation.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.x'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - run: python scripts/release467_build206_gate.py
+      - run: python scripts/release467_build205_gate.py
+      - run: python scripts/release467_build204_gate.py
+  development-d1-remediation-proof:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - run: |
+          set -euo pipefail
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM d1_migrations WHERE name='0007_release467_storefront_launch_remediation.sql') migration_rows,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='storefront_launch_remediation_items') table_rows,(SELECT COUNT(*) FROM storefront_launch_remediation_items) campaign_rows,(SELECT COUNT(*) FROM pragma_foreign_key_check) foreign_key_violations;" > /tmp/b206.json
+          python - <<'PY'
+          import json,os
+          d=json.load(open('/tmp/b206.json'));found=[];reads=[]
+          def w(v):
+            if isinstance(v,dict):
+              if all(k in v for k in ('migration_rows','table_rows','campaign_rows','foreign_key_violations')):found.append(v)
+              m=v.get('meta')
+              if isinstance(m,dict) and m.get('rows_read') is not None:reads.append(int(m.get('rows_read') or 0))
+              for x in v.values():w(x)
+            elif isinstance(v,list):
+              for x in v:w(x)
+          w(d);assert found,d;r=found[0];assert int(r['migration_rows'])==1 and int(r['table_rows'])==1 and int(r['foreign_key_violations'])==0,r;rr=sum(reads);assert rr<=2000,(rr,2000)
+          proof={'release':467,'build':206,'development_sha':os.environ.get('GITHUB_SHA',''),'migration_0007':'APPLIED','campaign_rows':int(r['campaign_rows'] or 0),'provider_rows_read':rr,'rows_read_ceiling':2000}
+          json.dump(proof,open('/tmp/release467-build206-exact-evidence.json','w'),indent=2);print(proof)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release467-build206-exact-evidence-${{ github.sha }}
+          path: /tmp/release467-build206-exact-evidence.json

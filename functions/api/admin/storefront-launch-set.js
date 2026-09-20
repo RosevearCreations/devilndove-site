@@ -229,11 +229,11 @@ function classify(row={}){
   };
 }
 
-async function loadProjection(db,productId=0,limit=MAX_SOURCE_ROWS){
+export async function loadProjection(db,productId=0,limit=MAX_SOURCE_ROWS){
   const result=await db.prepare(PROJECTION).bind(productId,productId,Math.max(1,Math.min(MAX_SOURCE_ROWS,limit))).all();
   return rows(result).map(classify);
 }
-function summary(items=[]){
+export function summary(items=[]){
   const count=(status)=>items.filter(x=>x.status===status).length;
   return {
     products_reviewed:items.length,
