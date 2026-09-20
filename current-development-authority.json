@@ -1,41 +1,42 @@
 {
   "release": 467,
-  "build": 211,
-  "title": "Manufacturing Triage & Route Proposal",
+  "build": 212,
+  "title": "Hybrid Creative Project Operations",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "228d50a0a71d8b99e24f888b8bcd25b9c839a396",
-  "accepted_dev_tree_sha": "f8e85d5e91a9eee5a9c64901865efe24be1ad34e",
+  "accepted_dev_sha": "a7f07b18a4a3b24db1a148ec287cbf446041f573",
+  "accepted_dev_tree_sha": "b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7",
   "acceptance": {
-    "system_gate_run": 35519319569,
-    "current_application_quality_run": 35519319561,
-    "it_admin_runtime_proof_run": 35519319637,
-    "branch_hygiene_run": 35519319612
+    "system_gate_run": 35524455791,
+    "current_application_quality_run": 35524455693,
+    "it_admin_runtime_proof_run": 35524455845,
+    "branch_hygiene_run": 35524455852
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 210,
-      "title": "Custom Work Intake 2.0",
-      "authority": "release467-build210-custom-work-intake-2.json",
-      "dev_sha": "228d50a0a71d8b99e24f888b8bcd25b9c839a396",
-      "tree_sha": "f8e85d5e91a9eee5a9c64901865efe24be1ad34e",
-      "proofs": {
-        "system_gate_run": 35519319569,
-        "current_application_quality_run": 35519319561,
-        "it_admin_runtime_proof_run": 35519319637,
-        "branch_hygiene_run": 35519319612
-      },
-      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
-      "exact_preview_deployment": true,
-      "build_specific_proof_run": 35519319562
-    },
-    "current_closure_candidate": {
-      "release": 467,
       "build": 211,
       "title": "Manufacturing Triage & Route Proposal",
       "authority": "release467-build211-manufacturing-triage-route.json",
+      "dev_sha": "a7f07b18a4a3b24db1a148ec287cbf446041f573",
+      "tree_sha": "b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7",
+      "proofs": {
+        "system_gate_run": 35524455791,
+        "current_application_quality_run": 35524455693,
+        "it_admin_runtime_proof_run": 35524455845,
+        "branch_hygiene_run": 35524455852
+      },
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+      "exact_preview_deployment": true,
+      "build_specific_proof_run": 35524455858,
+      "build_specific_proof_attempt": 2
+    },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 212,
+      "title": "Hybrid Creative Project Operations",
+      "authority": "release467-build212-hybrid-creative-project-operations.json",
       "state": "DEVELOPMENT_CLOSURE_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -46,21 +47,22 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 210,
-    "title": "Custom Work Intake 2.0",
-    "authority": "release467-build210-custom-work-intake-2.json",
-    "main_sha": "6e81942e7fd54157698b640252eed256b0411752",
-    "tree_sha": "f8e85d5e91a9eee5a9c64901865efe24be1ad34e",
-    "production_pages_deploy_run": 35519559453,
-    "production_live_resource_integrity_run": 35519611667,
-    "products_browser_proof_run": 35519611679,
-    "products_route_proof_run": 35519611767,
-    "build_specific_proof_run": 35519559362,
-    "exact_production_url": "https://cae32d7d.devilndove-site.pages.dev",
+    "build": 211,
+    "title": "Manufacturing Triage & Route Proposal",
+    "authority": "release467-build211-manufacturing-triage-route.json",
+    "main_sha": "41bf65727771c7c302c022d0944945a0802a909d",
+    "tree_sha": "b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7",
+    "production_pages_deploy_run": 35524655164,
+    "production_live_resource_integrity_run": 35524741052,
+    "products_browser_proof_run": 35524741050,
+    "products_route_proof_run": 35524741073,
+    "build_specific_proof_run": 35524655209,
+    "exact_production_url": "https://1d28f0f1.devilndove-site.pages.dev",
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build212-hybrid-creative-project-operations.json",
     "release467-build211-manufacturing-triage-route.json",
     "release467-build210-custom-work-intake-2.json",
     "release467-build209-workshop-capability-profiles-constraints.json",
@@ -113,8 +115,8 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md",
-  "next_build": 212,
-  "next_build_state": "BLOCKED_UNTIL_BUILD211_PRODUCTION_GREEN",
-  "next_build_title": "Hybrid Creative Project Operations",
-  "promotion_state": "BUILD211_CANDIDATE_NOT_YET_VERIFIED"
+  "next_build": 213,
+  "next_build_state": "BLOCKED_UNTIL_BUILD212_PRODUCTION_GREEN",
+  "next_build_title": "Digital Proof & Customer Approval",
+  "promotion_state": "BUILD212_CANDIDATE_NOT_YET_VERIFIED"
 }

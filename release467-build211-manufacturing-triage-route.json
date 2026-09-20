@@ -2,7 +2,7 @@
   "release": 467,
   "build": 211,
   "title": "Manufacturing Triage & Route Proposal",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build211-manufacturing-triage-route",
   "priority": "add_staff_reviewed_manufacturing_triage_and_candidate_process_routes_without_automatic_feasibility_promises_or_parallel_request_process_authorities",
   "starting_point": {
@@ -64,6 +64,33 @@
   "next_build": {
     "build": 212,
     "title": "Hybrid Creative Project Operations",
-    "state": "BLOCKED_UNTIL_BUILD211_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_AFTER_BUILD211_PRODUCTION_GREEN"
+  },
+  "final_closure": {
+    "dev_sha": "a7f07b18a4a3b24db1a148ec287cbf446041f573",
+    "tree_sha": "b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7",
+    "proofs": {
+      "system_gate_run": 35524455791,
+      "current_application_quality_run": 35524455693,
+      "it_admin_runtime_proof_run": 35524455845,
+      "branch_hygiene_run": 35524455852
+    },
+    "build_specific_proof_run": 35524455858,
+    "build_specific_proof_attempt": 2,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+  },
+  "production_checkpoint": {
+    "main_sha": "41bf65727771c7c302c022d0944945a0802a909d",
+    "tree_sha": "b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7",
+    "production_pages_deploy_run": 35524655164,
+    "production_live_resource_integrity_run": 35524741052,
+    "products_browser_proof_run": 35524741050,
+    "products_route_proof_run": 35524741073,
+    "build_specific_proof_run": 35524655209,
+    "exact_production_url": "https://1d28f0f1.devilndove-site.pages.dev",
+    "deployment_id": "1d28f0f1-ce55-489d-97b0-645d48e65c7a",
+    "canonical_migrations": 11,
+    "business_counts_preserved": true,
+    "state": "PRODUCTION_GREEN"
   }
 }
