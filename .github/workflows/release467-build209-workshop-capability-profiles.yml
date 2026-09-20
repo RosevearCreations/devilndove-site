@@ -1,0 +1,82 @@
+name: Release 467 Build 209 Workshop Capability Profiles Constraints
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'migrations/canonical/0009_release467_workshop_capability_profiles.sql'
+      - 'migrations/canonical/manifest.json'
+      - 'functions/api/capabilities.js'
+      - 'functions/api/admin/workshop-capabilities.js'
+      - 'capabilities/**'
+      - 'admin/workshop-capabilities/**'
+      - 'public/js/capabilities.js'
+      - 'public/js/admin-workshop-capabilities.js'
+      - 'gallery/index.html'
+      - 'js/main.js'
+      - 'css/styles.css'
+      - 'current-development-authority.json'
+      - 'release467-build208-multi-discipline-public-positioning-capability-navigation.json'
+      - 'release467-build209-workshop-capability-profiles-constraints.json'
+      - 'docs/operations/RELEASE_467_BUILD_209_WORKSHOP_CAPABILITY_PROFILES_CONSTRAINTS.md'
+      - 'scripts/release467_build208_gate.py'
+      - 'scripts/release467_build209_gate.py'
+      - 'scripts/repository_forward_sanity.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'scripts/current_deployment_preflight_truth_gate.py'
+      - '.github/workflows/release467-build209-workshop-capability-profiles.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.x'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - run: python scripts/release467_build209_gate.py
+      - run: python scripts/release467_build208_gate.py
+      - run: python scripts/release467_build207_gate.py
+  development-d1-capability-proof:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - run: |
+          set -euo pipefail
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM d1_migrations WHERE name='0009_release467_workshop_capability_profiles.sql') migration_rows,(SELECT COUNT(*) FROM workshop_capability_profiles) profile_count,(SELECT COUNT(*) FROM workshop_capability_profiles WHERE is_public=1 AND review_status IN ('reviewed','published')) public_profiles,(SELECT COUNT(*) FROM workshop_capability_profiles WHERE constraints_state='measured') measured_profiles,(SELECT COUNT(*) FROM workshop_capability_profiles WHERE capability_key='mechanical-automotive-fabrication' AND known_constraints LIKE '%not a general automotive repair%') mechanical_boundary,(SELECT COUNT(*) FROM (SELECT capability_key FROM workshop_capability_profiles GROUP BY capability_key HAVING COUNT(*)>1)) duplicate_keys,(SELECT COUNT(*) FROM pragma_foreign_key_check) foreign_key_violations;" > /tmp/b209.json
+          python - <<'PY'
+          import json,os
+          d=json.load(open('/tmp/b209.json'));found=[];reads=[]
+          def walk(v):
+            if isinstance(v,dict):
+              if all(k in v for k in ('migration_rows','profile_count','public_profiles','measured_profiles','mechanical_boundary','duplicate_keys','foreign_key_violations')):found.append(v)
+              m=v.get('meta')
+              if isinstance(m,dict) and m.get('rows_read') is not None:reads.append(int(m.get('rows_read') or 0))
+              for x in v.values():walk(x)
+            elif isinstance(v,list):
+              for x in v:walk(x)
+          walk(d);assert found,d;r=found[0]
+          assert int(r['migration_rows'])==1,r
+          assert int(r['profile_count'])==12,r
+          assert int(r['public_profiles'])==12,r
+          assert int(r['measured_profiles'])==0,r
+          assert int(r['mechanical_boundary'])==1,r
+          assert int(r['duplicate_keys'])==0,r
+          assert int(r['foreign_key_violations'])==0,r
+          rr=sum(reads);assert rr<=2500,(rr,2500)
+          proof={'release':467,'build':209,'development_sha':os.environ.get('GITHUB_SHA',''),'migration_0009':'APPLIED','profile_count':12,'public_profiles':12,'measured_profiles':0,'mechanical_boundary':'PASS','duplicate_keys':0,'foreign_key_violations':0,'provider_rows_read':rr,'rows_read_ceiling':2500,'technical_limit_policy':'UNKNOWN_UNTIL_MEASURED_OR_OWNER_SUPPLIED'}
+          json.dump(proof,open('/tmp/release467-build209-exact-evidence.json','w'),indent=2,sort_keys=True);print(proof)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release467-build209-exact-evidence-${{ github.sha }}
+          path: /tmp/release467-build209-exact-evidence.json
