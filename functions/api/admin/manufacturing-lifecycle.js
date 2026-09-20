@@ -97,6 +97,9 @@ async function audit(env,request,admin,lifecycle,action,details={}){
 }
 async function validateApprovedSampleEvidence(db,lifecycle,body){
   const kind=clean(body.approved_sample_evidence_kind,40);
+  if(id(lifecycle.custom_request_id)&&kind!=='proof_version'){
+    throw new Error('A linked Custom Request requires its exact approved Build 213 proof version as approved-sample evidence.');
+  }
   if(kind==='proof_version'){
     const proofId=id(body.approved_sample_proof_version_id);
     if(!proofId||!id(lifecycle.custom_request_id))throw new Error('Link a Custom Request and choose its exact approved proof version.');
@@ -108,6 +111,7 @@ async function validateApprovedSampleEvidence(db,lifecycle,body){
     return {kind,proofVersionId:proofId,creativeEventId:null,note:`Approved sample references proof version ${Number(proof.version_number||0)}.`};
   }
   if(kind==='creative_work_event'){
+    if(id(lifecycle.custom_request_id))throw new Error('Creative Process event evidence is only available when no Custom Request is linked.');
     const eventId=id(body.approved_sample_creative_work_event_id);
     if(!eventId||!id(lifecycle.creative_work_project_id))throw new Error('Link a Creative Project and choose an exact active Creative Process event.');
     const row=await db.prepare(`SELECT creative_work_event_id,event_title FROM creative_work_events
