@@ -136,11 +136,11 @@ export async function onRequestPost({request,env}){
 
     if(action==='activate_link'){
       if(!['draft','changes_requested'].includes(String(version.proof_status||'')))return json({ok:false,error:'Only a draft or changes-requested version can be activated.'},409);
+      const previousActive=rows(await a.db.prepare(`SELECT custom_request_proof_version_id FROM custom_request_proof_versions
+        WHERE custom_request_id=? AND custom_request_proof_version_id<>? AND proof_status IN ('sent','viewed','approved') ORDER BY version_number DESC LIMIT 20`).bind(requestId,versionId).all());
       await a.db.prepare(`UPDATE custom_request_proof_versions SET proof_status='superseded',superseded_at=COALESCE(superseded_at,CURRENT_TIMESTAMP),updated_at=CURRENT_TIMESTAMP,updated_by_user_id=?
         WHERE custom_request_id=? AND custom_request_proof_version_id<>? AND proof_status IN ('sent','viewed','approved')`).bind(userId,requestId,versionId).run();
-      const old=rows(await a.db.prepare(`SELECT custom_request_proof_version_id FROM custom_request_proof_versions
-        WHERE custom_request_id=? AND custom_request_proof_version_id<>? AND proof_status='superseded' AND superseded_at IS NOT NULL ORDER BY version_number DESC LIMIT 20`).bind(requestId,versionId).all());
-      for(const row of old)await event(a.db,{versionId:id(row.custom_request_proof_version_id),requestId,type:'superseded',actor:'system',note:`Superseded when proof version ${version.version_number} was activated.`,userId});
+      for(const row of previousActive)await event(a.db,{versionId:id(row.custom_request_proof_version_id),requestId,type:'superseded',actor:'system',note:`Superseded when proof version ${version.version_number} was activated.`,userId});
       await a.db.prepare(`UPDATE custom_request_proof_versions SET proof_status='sent',sent_at=COALESCE(sent_at,CURRENT_TIMESTAMP),updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE custom_request_proof_version_id=?`).bind(userId,versionId).run();
       await event(a.db,{versionId,requestId,type:'sent',note:'Private proof link activated. No provider message was sent automatically.',userId});
       await audit(env,request,a.admin,requestId,'activate',{proof_version_id:versionId,provider_message_sent:false});
