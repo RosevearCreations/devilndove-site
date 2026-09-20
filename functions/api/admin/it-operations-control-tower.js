@@ -1,29 +1,29 @@
-// Release 467 Build 206 — current release/restart authority over exact Build 205 GREEN predecessor.
+// Release 467 Build 207 — current release/restart authority over exact Build 206 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=206;
-const TITLE='Launch-Set Remediation Campaign';
-const AUTHORITY='release467-build206-launch-set-remediation-campaign';
-const EVIDENCE_ID='r467-b205-61163cea-35485817330-35485914734';
+const BUILD=207;
+const TITLE='Workshop Capability & Process Taxonomy Expansion';
+const AUTHORITY='release467-build207-workshop-capability-process-taxonomy-expansion';
+const EVIDENCE_ID='r467-b206-ee62ddd8-35486635313-35486756097';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:205,title:'Current Authority & Manufacturing-Era Roadmap Convergence',state:'DEVELOPMENT_GREEN',
-  dev_sha:'61163ceaeb07a28cac1df0f9ff6b3ab46b498c02',tree_sha:'0710a7dfe8a81342704c92b810d6e18249b960e7',
-  system_gate_run:35485817330,current_application_quality_run:35485817347,it_admin_runtime_proof_run:35485817370,
-  branch_hygiene_run:35485817325,build_specific_proof_run:35485817337,exact_preview_deployment:true,
+  release:467,build:206,title:'Launch-Set Remediation Campaign',state:'DEVELOPMENT_GREEN',
+  dev_sha:'ee62ddd837d2ecbb8f0695fa7efb19e9dffb8b98',tree_sha:'4c71f152a75c401d3dfd2a5b83852a821dc82cb3',
+  system_gate_run:35486635313,current_application_quality_run:35486635381,it_admin_runtime_proof_run:35486635362,
+  branch_hygiene_run:35486635293,build_specific_proof_run:35486635345,exact_preview_deployment:true,
   role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:205,title:'Current Authority & Manufacturing-Era Roadmap Convergence',state:'PRODUCTION_GREEN',
-  main_sha:'0a6144bc4b9767c06ccf82a78853b8375a55637a',tree_sha:'0710a7dfe8a81342704c92b810d6e18249b960e7',
-  pages_deploy_run:35485914734,production_pages_deploy_run:35485914734,
-  production_live_resource_integrity_run:35485940566,products_browser_proof_run:0,
-  products_route_proof_run:0,build_specific_proof_run:35485914603,
-  exact_production_url:'https://eed80e04.devilndove-site.pages.dev',remote_d1_queries:0
+  release:467,build:206,title:'Launch-Set Remediation Campaign',state:'PRODUCTION_GREEN',
+  main_sha:'16689f6eb5982bb72253aba677cfadf636c89ec9',tree_sha:'4c71f152a75c401d3dfd2a5b83852a821dc82cb3',
+  pages_deploy_run:35486756097,production_pages_deploy_run:35486756097,
+  production_live_resource_integrity_run:35486808590,products_browser_proof_run:35486808652,
+  products_route_proof_run:35486808582,build_specific_proof_run:35486756132,
+  exact_production_url:'https://065082cf.devilndove-site.pages.dev',remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -33,12 +33,12 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 205 Current Authority Manufacturing-Era Roadmap Convergence Proof'
+  'Release 467 Build 206 Launch-Set Remediation Campaign Proof'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze([
   '0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql',
   '0003_release464_business_growth.sql','0004_release465_storefront_quality.sql',
-  '0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql'
+  '0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql'
 ]);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
@@ -61,15 +61,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:205,title:'Current Authority & Manufacturing-Era Roadmap Convergence',
+    release:467,build:206,title:'Launch-Set Remediation Campaign',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35485817330,current_application_quality_run:35485817347,
-      it_admin_runtime_proof_run:35485817370,branch_hygiene_run:35485817325,build205_proof_run:35485817337
+      system_gate_run:35486635313,current_application_quality_run:35486635381,
+      it_admin_runtime_proof_run:35486635362,branch_hygiene_run:35486635293,build206_proof_run:35486635345
     },
     production_proofs:{
-      production_pages_deploy_run:35485914734,production_live_resource_integrity_run:35485940566,
-      products_browser_proof_run:0,products_route_proof_run:0,build205_proof_run:35485914603
+      production_pages_deploy_run:35486756097,production_live_resource_integrity_run:35486808590,
+      products_browser_proof_run:35486808652,products_route_proof_run:35486808582,build206_proof_run:35486756132
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -78,9 +78,9 @@ function closurePayload(){
     external_lanes:Object.fromEntries(EXTERNAL_POLICY.map((x)=>[x.key,x.state])),
     runtime_closure:{
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
-      background_polling:false,code_only_production_zero_d1:true
+      background_polling:false,automatic_inventory_assignment:false
     },
-    next_build:'Build 206 owns launch-set remediation over exact Build 205 proof; Build 207 remains blocked until Production GREEN.'
+    next_build:'Build 207 expands the existing workshop process taxonomy over exact Build 206 proof; Build 208 remains blocked until Production GREEN.'
   };
 }
 async function closurePack(){
@@ -93,23 +93,22 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 205 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 206 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
 - Canonical Development SHA: ${pack.sha}
 - Canonical Production main SHA: ${PRODUCTION.main_sha}
 - Shared tree: ${pack.tree_sha}
-- System Gate: 35485817330
-- Current Application Quality Proof: 35485817347
-- I.T. Admin Runtime Proof: 35485817370
-- Repository Branch Hygiene: 35485817325
-- Original Build 205 Development Proof: 35485817337
-- Canonical Production Pages Deploy: 35485914734
-- Original Build 205 Production Proof: 35485914603
-- Original Build 205 Production Pages: 35478779248
-- Production remote D1 queries for roadmap promotion: 0
-- Current candidate: Build 206 Current Authority & Manufacturing-Era Roadmap Convergence
+- System Gate: 35486635313
+- Current Application Quality Proof: 35486635381
+- I.T. Admin Runtime Proof: 35486635362
+- Repository Branch Hygiene: 35486635293
+- Build 206 Development Proof: 35486635345
+- Production Pages Deploy: 35486756097
+- Production Live Resource Integrity: 35486808590
+- Build 206 Production Proof: 35486756132
+- Current candidate: Build 207 Workshop Capability & Process Taxonomy Expansion
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -128,7 +127,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:206,title:TITLE,authority:'release467-build206-launch-set-remediation-campaign.json'},
+        current_closure_candidate:{release:467,build:207,title:TITLE,authority:'release467-build207-workshop-capability-process-taxonomy-expansion.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -147,12 +146,12 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 205 source is the exact last fully verified Development checkpoint.',
-      'Build 205 Production is GREEN on the identical source tree with code/docs-only / zero-D1 promotion.',
-      'Development proofs: System 35485817330, Quality 35485817347, I.T. 35485817370, Hygiene 35485817325.',
-      'Current Production proof: Pages 35485914734. Original Build 205 runtime Production proof remains retained separately.',
-      'Build 206 Launch-Set Remediation Campaign is the active Development closure candidate.',
-      'Canonical D1 migrations are 0001-0007; request-time schema mutation remains closed.'
+      'Build 206 source is the exact last fully verified Development checkpoint.',
+      'Build 206 Production is GREEN on the identical source tree with canonical migration 0007 applied.',
+      'Development proofs: System 35486635313, Quality 35486635381, I.T. 35486635362, Hygiene 35486635293.',
+      'Production proofs: Pages 35486756097, Live Resources 35486808590, Product Browser 35486808652, Product Route 35486808582.',
+      'Build 207 Workshop Capability & Process Taxonomy Expansion is the active Development closure candidate.',
+      'Canonical D1 migrations are 0001-0008; request-time schema mutation remains closed.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
