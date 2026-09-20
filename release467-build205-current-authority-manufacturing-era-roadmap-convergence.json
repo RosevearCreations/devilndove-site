@@ -2,7 +2,7 @@
   "release": 467,
   "build": 205,
   "title": "Current Authority & Manufacturing-Era Roadmap Convergence",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build205-current-authority-manufacturing-era-roadmap-convergence",
   "priority": "converge_build204_and_205_224_restart_truth",
   "starting_point": {
@@ -65,5 +65,35 @@
     "repository_forward_sanity": "scripts/repository_forward_sanity.py",
     "production_mode": "CODE_DOCS_ONLY_ZERO_D1",
     "promotion": "EXACT_GREEN_DEVELOPMENT_TREE_ONLY"
+  },
+  "final_closure": {
+    "ingested_by_build": 206,
+    "dev_sha": "61163ceaeb07a28cac1df0f9ff6b3ab46b498c02",
+    "tree_sha": "0710a7dfe8a81342704c92b810d6e18249b960e7",
+    "proofs": {
+      "system_gate_run": 35485817330,
+      "current_application_quality_run": 35485817347,
+      "it_admin_runtime_proof_run": 35485817370,
+      "branch_hygiene_run": 35485817325
+    },
+    "build_specific_proof_run": 35485817337,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "exact_preview_url": "https://4d33a898.devilndove-site.pages.dev"
+  },
+  "production_checkpoint": {
+    "main_sha": "0a6144bc4b9767c06ccf82a78853b8375a55637a",
+    "tree_sha": "0710a7dfe8a81342704c92b810d6e18249b960e7",
+    "production_pages_deploy_run": 35485914734,
+    "production_live_resource_integrity_run": 35485940566,
+    "build_specific_proof_run": 35485914603,
+    "exact_production_url": "https://eed80e04.devilndove-site.pages.dev",
+    "state": "PRODUCTION_GREEN",
+    "role": "CURRENT_PRODUCTION_BASELINE"
+  },
+  "next_build": {
+    "build": 206,
+    "title": "Launch-Set Remediation Campaign",
+    "state": "AUTHORIZED_BY_PRODUCTION_GREEN_CLOSURE"
   }
 }

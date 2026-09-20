@@ -2,86 +2,24 @@
 
 ## Current verified restart baseline
 
-Release 467 **Build 204 — Storefront Launch Set & Autonomous Closure** remains the last fully verified application build. The later Builds 205–224 roadmap promotion was documentation-only and is part of the canonical Build 204 restart source boundary.
+Release 467 **Build 205 — Current Authority & Manufacturing-Era Roadmap Convergence** is fully promoted and Production GREEN.
 
-### Canonical current source boundary
-
-- `dev`: `48307e67978dee5ef4481ccfe2739a5d3df79b18`
-- `main`: `09253dbe5b43c4308d1ff671bb71df80bf0592d9`
-- exact shared tree: `4a63209efc54bc641ba0484c4954ac1cb35acc2e`
-- System Gate: `35483005170`
-- Current Application Quality: `35483005094`
-- I.T. Admin Runtime: `35483005097`
-- Repository Branch Hygiene: `35483005113`
-- Production Pages Deploy: `35483092965`
-- exact Production URL: `https://cd226d56.devilndove-site.pages.dev`
-- D1/schema/R2 business-data mutation in roadmap promotion: **ZERO**
-
-### Original Build 204 runtime closure
-
-- Development SHA: `50098122e88548ad5e94835d5ef69a5e738aed88`
-- Production SHA: `d88789ee563e700e8847f7b47f156964024a3b45`
-- runtime tree: `90018f79ee469420e9f3c16504bdf4a73c0dfd0f`
-- Build 204 Development proof: `35478691738`
-- Build 204 Production proof: `35478779057`
-- Build 204 Production Pages: `35478779248`
-- exact runtime deployment: `https://72602315.devilndove-site.pages.dev`
-- Development D1 proof: **8,593 / 15,000 rows read**
-- launch-set evidence: **43 Products / 1 ready / 42 review-required / 0 externally blocked**
+- Development `61163ceaeb07a28cac1df0f9ff6b3ab46b498c02`
+- Production `0a6144bc4b9767c06ccf82a78853b8375a55637a`
+- shared tree `0710a7dfe8a81342704c92b810d6e18249b960e7`
+- four Development proofs `35485817330` / `35485817347` / `35485817370` / `35485817325`
+- Build 205 Development proof `35485817337`
+- Production Pages / Live Resources `35485914734` / `35485940566`
+- Build 205 Production proof `35485914603`
+- exact Production URL `https://eed80e04.devilndove-site.pages.dev`
 
 ## Active candidate
 
-**Release 467 Build 205 — Current Authority & Manufacturing-Era Roadmap Convergence**.
-
-Build 205 changes release/restart truth only. It does not mutate Product, Inventory, Custom Request, Creative Project, Finance, D1 business data or R2, and it does not execute providers, payments or publication.
-
-Build 205 must become exact-SHA Production GREEN before Build 206 starts.
-
-## Active autonomous roadmap
-
-Use:
-
-`docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md`
-
-Sequence:
-
-1. Build 205 — Current Authority & Manufacturing-Era Roadmap Convergence
-2. Build 206 — Launch-Set Remediation Campaign
-3. Build 207 — Workshop Capability & Process Taxonomy Expansion
-4. Build 208 — Multi-Discipline Public Positioning & Capability Navigation
-5. Build 209 — Workshop Capability Profiles & Constraints
-6. Build 210 — Custom Work Intake 2.0
-7. Build 211 — Manufacturing Triage & Route Proposal
-8. Build 212 — Hybrid Creative Project Operations
-9. Build 213 — Digital Proof & Customer Approval
-10. Build 214 — Prototype → Sample → Production Run
-11. Build 215 — Small-Batch, Corporate & Event Quoting
-12. Build 216 — Customer-Supplied Item Intake & Suitability Review
-13. Build 217 — Production Cost Evidence v2
-14. Build 218 — Quote ↔ Production Cost ↔ Margin Guardrails
-15. Build 219 — Manufacturing Work Order & Job Traveler
-16. Build 220 — Production Run, QA, Rework & Scrap Evidence
-17. Build 221 — Workshop Knowledge Library Foundation
-18. Build 222 — Project-to-Knowledge Promotion & Recipe History
-19. Build 223 — Capability Case Studies, Workshop Journal & Search Richness
-20. Build 224 — Manufacturing-Era Closure & Next Roadmap
+**Release 467 Build 206 — Launch-Set Remediation Campaign**. Reuse Build 204 launch readiness; persist only reviewed campaign owner/status/due-note/recheck/completion evidence through canonical migration 0007. Ready remains evidence-only.
 
 ## Restart rule
 
-1. Verify live GitHub `dev` and `main` refs before making changes.
-2. Treat the canonical Build 204 restart source boundary above as the immutable predecessor for Build 205.
-3. Preserve the original Build 204 runtime closure separately from the later docs-only roadmap promotion.
-4. Read the 205–224 roadmap and the active build document.
-5. Preserve exact-green Development → protected-main → exact Production proof.
-6. Extend existing Custom Work, Creative Project, Inventory process, Media/CAIP, Packaging and Finance authorities rather than duplicating them.
-7. Never wholesale-copy Development business data into Production.
-8. Never raise D1 ceilings merely to make a regression pass.
-9. Never invent customer, material, process, cost, setting, safety or approval facts.
-10. Request-time DDL, bucket-wide R2 listing, background polling and duplicate Product requests remain closed.
-
-## External lanes
-
-Stripe Development, PayPal sandbox and Social/OAuth remain `HOLD_EXTERNAL`. CAIP private media remains `EVIDENCE_DEPENDENT`. Cloudflare Access remains externally governed.
+Verify live refs; require exact-green Development; promote only the exact Development tree through protected main; keep Production business data Production-owned; keep external provider/payment lanes held.
 
 ## Retained historical provenance — Release 467 Build 171
 

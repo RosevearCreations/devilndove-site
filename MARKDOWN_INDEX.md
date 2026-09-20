@@ -2,31 +2,23 @@
 
 ## Current authority
 
-Last fully verified application build: **Release 467 Build 204 — Storefront Launch Set & Autonomous Closure**.
+Last fully verified: **Build 205 — Current Authority & Manufacturing-Era Roadmap Convergence**. Active candidate: **Build 206 — Launch-Set Remediation Campaign**.
 
-Active candidate: **Release 467 Build 205 — Current Authority & Manufacturing-Era Roadmap Convergence**.
-
-Canonical Build 204 restart source boundary:
-
-- `dev`: `48307e67978dee5ef4481ccfe2739a5d3df79b18`
-- `main`: `09253dbe5b43c4308d1ff671bb71df80bf0592d9`
-- tree: `4a63209efc54bc641ba0484c4954ac1cb35acc2e`
-- System: `35483005170`
-- Quality: `35483005094`
-- I.T.: `35483005097`
-- Hygiene: `35483005113`
-- Production Pages: `35483092965`
+- Development `61163ceaeb07a28cac1df0f9ff6b3ab46b498c02`
+- Production `0a6144bc4b9767c06ccf82a78853b8375a55637a`
+- tree `0710a7dfe8a81342704c92b810d6e18249b960e7`
+- System / Quality / I.T. / Hygiene `35485817330` / `35485817347` / `35485817370` / `35485817325`
+- Production Pages / Live Resources `35485914734` / `35485940566`
+- canonical migrations `0001–0007`
 
 ## Read in this order
 
 1. `AI_HANDOFF.md`
 2. `PROJECT_STATUS_AND_ROADMAP.md`
 3. `docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md`
-4. `docs/operations/RELEASE_467_BUILD_205_CURRENT_AUTHORITY_MANUFACTURING_ERA_ROADMAP_CONVERGENCE.md`
-5. `release467-build205-current-authority-manufacturing-era-roadmap-convergence.json`
-6. `release467-build204-storefront-launch-set-autonomous-closure.json`
-7. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
-8. retained historical build documents only when a gate/provenance contract requires them
+4. `docs/operations/RELEASE_467_BUILD_206_LAUNCH_SET_REMEDIATION_CAMPAIGN.md`
+5. `release467-build206-launch-set-remediation-campaign.json`
+6. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
 
 ## Active autonomous build documents
 
@@ -66,4 +58,4 @@ Build 171 remains historical provenance over exact Build 170 predecessor `879c87
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 205 over the canonical Build 204 boundary.
+Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 206 over exact Production-GREEN Build 205.

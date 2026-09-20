@@ -608,6 +608,7 @@ Build 224 must not invent Build 225+ scope before those measurements exist.
 
 ## Current checkpoint
 
-- Build 204: **complete and Production GREEN**.
-- Build 205: **next planned build — Current Authority & Manufacturing-Era Roadmap Convergence**.
-- Builds 206–224: **planned**.
+- Build 205: **complete and Production GREEN** at `0a6144bc4b9767c06ccf82a78853b8375a55637a`.
+- Build 206: **current — Launch-Set Remediation Campaign**.
+- Build 207: **next only after Build 206 is exact-SHA Production GREEN**.
+- Builds 208–224: **planned**.
