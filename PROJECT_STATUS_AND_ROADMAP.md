@@ -1,108 +1,73 @@
 # Devil n Dove — Project Status & Roadmap
 
-## Current verified checkpoint
+## Current checkpoint
 
-Release 467 **Build 204 — Storefront Launch Set & Autonomous Closure** is fully GREEN in Development and Production.
+Release 467 **Build 192 — Release Regression & Runtime Budget Convergence** is fully Production GREEN.
 
-- Development SHA: `50098122e88548ad5e94835d5ef69a5e738aed88`
-- Production `main`: `d88789ee563e700e8847f7b47f156964024a3b45`
-- shared source tree: `90018f79ee469420e9f3c16504bdf4a73c0dfd0f`
-- Development Build 204 proof: `35478691738`
-- Development System Gate: `35478691748`
-- Development Current Application Quality: `35478691733`
-- Development I.T. Runtime: `35478691718`
-- Development Branch Hygiene: `35478691753`
-- Production Build 204 source contract: `35478779057`
-- Production Pages Deploy: `35478779248`
-- exact Production deployment: `https://72602315.devilndove-site.pages.dev`
+- Development SHA: `76321bfc975862ce2463e87450852c19fc98c852`
+- Production SHA: `451ca8173b9ad3127f84f352ed0a8d7774e53b14`
+- exact tree: `5752f7e0be8c432d2cc45b5de08c349208ee497a`
+- Production deployment: `https://8ed2f630.devilndove-site.pages.dev`
+- Production mode: code-only / zero-D1
+- D1 mutation: none
+- R2 mutation: none
 
-Build 204 Production promotion was code-only / zero-D1. No D1/R2 business-data mutation and no schema migration occurred.
+Build 192 centralized provider-metered D1 budgets, retained one Product-detail core request, kept Admin optional systems explicit/lazy/bounded and blocked request-time DDL, bucket-wide R2 listing and background polling regressions.
 
-## Build 204 measured closure evidence
+## Measured evidence driving the next block
 
-- 43 Products reviewed
-- 1 ready
-- 42 review-required
-- 0 externally blocked
-- 40 publicly visible
-- 3 media-ready
-- 2 tracked-zero-stock
-- 2 Products with linked resources
-- 0 missing linked Inventory
-- 2 with unknown linked cost
-- 16 with buyer blockers
-- Development proof: 8,593 / 15,000 provider-metered D1 rows read
+- Media evidence: 19,282 / 20,000 rows read — only 718 headroom.
+- Inventory evidence: 15,487 / 20,000 rows read.
+- Buyer readiness: 1 category blocker, 38 description advisory items, 16 shipping blockers, 2 tracked-zero-stock Products.
+- Inventory: 8 duplicate rows, 898 missing supplier names, 326 missing source references, 1,040 count-due rows, 143 unmatched catalog references.
+- Media: 10 Product alt-text attention items, 2 blank Inventory images, 141 external Inventory image references.
+- Cost: 4 missing-cost links; 2 Products remain margin-review.
 
-This is the immutable starting evidence for the next autonomous sequence.
+## Active Build 193
 
-## Strategic direction
+Build 193 is now the active Development closure candidate. It repairs stale machine/I.T. restart truth only and inherits exact Build 192 GREEN as its immutable predecessor. No Product/Inventory/customer business-data mutation is part of this build.
 
-Devil n Dove should now be treated as a **multi-discipline artisan and maker workshop**, not only a conventional Product catalogue.
+## Active roadmap — Release 467 Builds 193–200
 
-The application should increasingly answer:
-
-1. What can we make?
-2. How should a customer idea be made?
-3. What exact proof/sample/run is approved?
-4. What did the work actually cost?
-5. What did the workshop learn?
-
-Existing Custom Work, Creative Project, Inventory process, Packaging, CAIP/Media, Content Studio and Finance authorities must be extended rather than duplicated.
-
-## Active roadmap — Release 467 Builds 205–224
-
-Primary roadmap:
-
-`docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md`
+Primary roadmap: `docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md`.
 
 | Build | Focus | State |
 |---|---|---|
-| 205 | Current Authority & Manufacturing-Era Roadmap Convergence | Next |
-| 206 | Launch-Set Remediation Campaign | Planned |
-| 207 | Workshop Capability & Process Taxonomy Expansion | Planned |
-| 208 | Multi-Discipline Public Positioning & Capability Navigation | Planned |
-| 209 | Workshop Capability Profiles & Constraints | Planned |
-| 210 | Custom Work Intake 2.0 | Planned |
-| 211 | Manufacturing Triage & Route Proposal | Planned |
-| 212 | Hybrid Creative Project Operations | Planned |
-| 213 | Digital Proof & Customer Approval | Planned |
-| 214 | Prototype → Sample → Production Run | Planned |
-| 215 | Small-Batch, Corporate & Event Quoting | Planned |
-| 216 | Customer-Supplied Item Intake & Suitability Review | Planned |
-| 217 | Production Cost Evidence v2 | Planned |
-| 218 | Quote ↔ Production Cost ↔ Margin Guardrails | Planned |
-| 219 | Manufacturing Work Order & Job Traveler | Planned |
-| 220 | Production Run, QA, Rework & Scrap Evidence | Planned |
-| 221 | Workshop Knowledge Library Foundation | Planned |
-| 222 | Project-to-Knowledge Promotion & Recipe History | Planned |
-| 223 | Capability Case Studies, Workshop Journal & Search Richness | Planned |
-| 224 | Manufacturing-Era Closure & Next Roadmap | Planned |
+| 193 | Current Authority & Handoff Convergence | Active candidate |
+| 194 | D1 Evidence Headroom Optimization | Planned |
+| 195 | Buyer Readiness Repair Workbench | Planned |
+| 196 | Supplier & Source Evidence Workbench | Planned |
+| 197 | Cycle Count & Duplicate Identity Resolution | Planned |
+| 198 | Catalog Reference & Media Reconciliation | Planned |
+| 199 | Cost Evidence & Margin Readiness | Planned |
+| 200 | Storefront Launch Set & Autonomous Closure | Planned |
 
-## Non-overlap rules
-
-- `/custom-request/` remains the Custom Work authority; Build 210 enriches it.
-- Creative Process / Creative Automation remain project authorities; Build 212 adds normalized operations there.
-- `inventory_processes` remains the canonical workshop-process catalog; Build 207 extends it.
-- Build 204 launch-set/readiness rules remain canonical; Build 206 adds progress/orchestration only.
-- Product Media, Media Studio and CAIP keep their existing media ownership.
-- Packaging Studio keeps packaging layout/proof/BOM ownership.
-- Finance/Accounting keep profitability and posting ownership.
-- Content Studio/publication systems keep public-content release ownership.
+The sequence is autonomous because it avoids provider acceptance, payment execution, social publication, supplier purchasing and invented business facts.
 
 ## Permanent boundaries
 
-- exact-green Development before protected-main promotion;
+- exact-green Development only before protected-main promotion;
 - Production business data remains Production-owned;
 - no request-time DDL;
 - no unbounded D1/R2 work;
 - no silent D1 ceiling increase;
-- no automatic Product publication/provider/payment/accounting action unless separately authorized;
-- unknown cost/settings/material/safety facts remain unknown;
-- Canada/CAD commerce and U.S. sales/shipping pause remain in force;
-- public pages retain one H1 and approved evidence-only claims.
+- no automatic publication/provider/payment/accounting action unless separately authorized;
+- Canada-first commerce and U.S. sales/shipping pause remain in force;
+- public pages retain one-H1 and current Product low-read contracts.
+
 
 ---
 
-## Retained historical provenance
+## Retained historical provenance — Release 467 Build 153
 
-Builds 153, 171, 192 and 193–204 remain immutable historical release provenance. Their specific operations documents and gates continue to define retained regression contracts, but they do not supersede the current Build 204 Production baseline or the Builds 205–224 roadmap.
+This section is retained solely for the immutable Build 153 performance gate; it does not supersede the current Build 192 / Builds 193–200 authority.
+
+# Build 153 — Layout Observer Performance Hotfix — CLOSED GREEN
+
+- Products layout cache revision: `467-b153-layout-observer`.
+- Incident addressed: Firefox long-script / page responsiveness caused by excessive layout-observer churn.
+- Historical Build 153 canonical migration baseline was `0001–0004`; later forward-only canonical migrations are valid successors and must preserve that immutable prefix.
+
+## Retained historical provenance — Release 467 Build 171
+
+Build 171 — Release & Restart Authority Convergence — remains immutable historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It is not the current application baseline. Build 193 will converge the machine pointer and current I.T. release surfaces from that historical authority to the fully proven Build 192 baseline.
