@@ -2,22 +2,22 @@
 
 ## Current authority
 
-Last fully verified: **Build 212 — Hybrid Creative Project Operations**. Active candidate: **Build 213 — Digital Proof & Customer Approval**.
+Last fully verified: **Build 213 — Digital Proof & Customer Approval**. Active candidate: **Build 214 — Prototype → Sample → Production Run**.
 
-- Development `7891a869d748072846a1ac9452782e119f01cd53`
-- Production `9ea6c728a4df978d653be910388ea7081b800de9`
-- tree `f972119d10f98ea566173868915463ce31cdf22c`
-- System / Quality / I.T. / Hygiene `35526209718` / `35526209719` / `35526209723` / `35526209630`
-- Production Pages / Live Resources `35526432043` / `35526530121`
-- canonical migrations `0001–0013`
+- Development `3292ac5c20780e23bd9d5ae593368e82b6e4826b`
+- Production `92df5745fc2d4311dfacfbd214c1032a34c46bb8`
+- tree `1108fecdeac23c69b8ea4d810c0375a0899ff469`
+- System / Quality / I.T. / Hygiene `35533703475` / `35533703446` / `35533703481` / `35533703474`
+- Production Pages / Live Resources `35534081643` / `35534292686`
+- canonical migrations `0001–0014`
 
 ## Read in this order
 
 1. `AI_HANDOFF.md`
 2. `PROJECT_STATUS_AND_ROADMAP.md`
 3. `docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md`
-4. `docs/operations/RELEASE_467_BUILD_213_DIGITAL_PROOF_CUSTOMER_APPROVAL.md`
-5. `release467-build213-digital-proof-customer-approval.json`
+4. `docs/operations/RELEASE_467_BUILD_214_PROTOTYPE_SAMPLE_PRODUCTION_RUN.md`
+5. `release467-build214-prototype-sample-production-run.json`
 6. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
 
 ## Active autonomous build documents
@@ -58,4 +58,4 @@ Build 171 remains historical provenance over exact Build 170 predecessor `879c87
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 213 over exact Production-GREEN Build 212.
+Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 214 over exact Production-GREEN Build 213.
