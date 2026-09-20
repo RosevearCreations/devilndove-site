@@ -1,31 +1,30 @@
-// Release 467 Build 208 — current read-only reliability projection over exact Build 207 GREEN predecessor.
+// Release 467 Build 209 — current read-only reliability projection over exact Build 208 GREEN predecessor.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=208;
-export const CURRENT_RELIABILITY_TITLE='Multi-Discipline Public Positioning & Capability Navigation';
+export const CURRENT_RELIABILITY_BUILD=209;
+export const CURRENT_RELIABILITY_TITLE='Workshop Capability Profiles & Constraints';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
 export const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:207,title:'Workshop Capability & Process Taxonomy Expansion',
-  accepted_dev_sha:'ead5fcb06f9b0e849736a66d5032274ca99de830',
-  accepted_dev_tree_sha:'22a246a035f421856a705643c59ccb4171854d71',
-  system_gate_run:35514290109,current_application_quality_run:35514290237,it_admin_runtime_proof_run:35514290207,
-  branch_hygiene_run:35514290217,build_specific_proof_run:35514290132,exact_preview_deployment:true,
+  release:467,build:208,title:'Multi-Discipline Public Positioning & Capability Navigation',
+  accepted_dev_sha:'cc76ca21585e0b9a38e2b7f481799963943be056',accepted_dev_tree_sha:'7a3583f0f12275d5316b1fc63a3067bc3dd7d74a',
+  system_gate_run:35515481692,current_application_quality_run:35515481732,it_admin_runtime_proof_run:35515481657,
+  branch_hygiene_run:35515481717,build_specific_proof_run:35515481737,exact_preview_deployment:true,
   role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:207,title:'Workshop Capability & Process Taxonomy Expansion',state:'DEVELOPMENT_GREEN',
-  dev_sha:'ead5fcb06f9b0e849736a66d5032274ca99de830',tree_sha:'22a246a035f421856a705643c59ccb4171854d71',
-  system_gate_run:35514290109,current_application_quality_run:35514290237,it_admin_runtime_proof_run:35514290207,
-  branch_hygiene_run:35514290217,build_specific_proof_run:35514290132,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN'
+  release:467,build:208,title:'Multi-Discipline Public Positioning & Capability Navigation',state:'DEVELOPMENT_GREEN',
+  dev_sha:'cc76ca21585e0b9a38e2b7f481799963943be056',tree_sha:'7a3583f0f12275d5316b1fc63a3067bc3dd7d74a',
+  system_gate_run:35515481692,current_application_quality_run:35515481732,it_admin_runtime_proof_run:35515481657,
+  branch_hygiene_run:35515481717,build_specific_proof_run:35515481737,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN'
 });
 export const CURRENT_PRODUCTION=Object.freeze({
-  release:467,build:207,title:'Workshop Capability & Process Taxonomy Expansion',state:'PRODUCTION_GREEN',
-  main_sha:'0937de81d2610788db5315b675d92c055c9db549',tree_sha:'22a246a035f421856a705643c59ccb4171854d71',
-  production_pages_deploy_run:35514481645,production_live_resource_integrity_run:35514524661,
-  products_browser_proof_run:35514524666,products_route_proof_run:35514524708,
-  build_specific_proof_run:35514481601,remote_d1_queries:0
+  release:467,build:208,title:'Multi-Discipline Public Positioning & Capability Navigation',state:'PRODUCTION_GREEN',
+  main_sha:'2d53ff1f65b0252e4c1812766e61577f530dccaa',tree_sha:'7a3583f0f12275d5316b1fc63a3067bc3dd7d74a',
+  production_pages_deploy_run:35515609351,production_live_resource_integrity_run:35515652270,
+  products_browser_proof_run:35515652261,products_route_proof_run:35515652315,
+  build_specific_proof_run:35515609321,remote_d1_queries:0
 });
 export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -37,7 +36,7 @@ export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
 export async function loadCurrentReliability(db,env={}){
   const inherited=await loadRelease466Reliability(db,env);
   return {
-    release:467,build:208,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
+    release:467,build:209,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
     environment:inherited.environment,score:inherited.score,status:inherited.status,scope:inherited.scope,slo_targets:inherited.slo_targets,
     checks:inherited.checks,migrations:inherited.migrations,runtime_incidents:inherited.runtime_incidents,
     foreign_key_violations:inherited.foreign_key_violations,resources:inherited.resources,
@@ -48,14 +47,14 @@ export async function loadCurrentReliability(db,env={}){
     },
     recovery:inherited.recovery,drift:inherited.drift,
     provenance:{
-      current_surface_release:467,current_surface_build:208,
+      current_surface_release:467,current_surface_build:209,
       inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
       historical_feature_authority:'release467-build36-current-reliability-operational-health.json',
       current_operator_authority:'current-development-authority.json',
       accepted_development:ACCEPTED_DEVELOPMENT,last_fully_verified_development:LAST_FULLY_VERIFIED_DEVELOPMENT,
       current_production:CURRENT_PRODUCTION,production_proof_transport_policy:PRODUCTION_PROOF_TRANSPORT_POLICY,
       implementation_acceptance_is_distinct_from_final_closure:true,closure_candidate_requires_external_exact_head_proof:true,
-      build207_workshop_process_taxonomy_production_green:true,build208_public_positioning_candidate:true,build208_exact_head_proof_required:true,production_baseline_build:207
+      build208_public_positioning_production_green:true,build209_capability_profiles_candidate:true,build209_exact_head_proof_required:true,production_baseline_build:208
     },
     safety:{
       ...inherited.safety,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,

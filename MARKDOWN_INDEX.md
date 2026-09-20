@@ -2,22 +2,22 @@
 
 ## Current authority
 
-Last fully verified: **Build 207 — Workshop Capability & Process Taxonomy Expansion**. Active candidate: **Build 208 — Multi-Discipline Public Positioning & Capability Navigation**.
+Last fully verified: **Build 208 — Multi-Discipline Public Positioning & Capability Navigation**. Active candidate: **Build 209 — Workshop Capability Profiles & Constraints**.
 
-- Development `ead5fcb06f9b0e849736a66d5032274ca99de830`
-- Production `0937de81d2610788db5315b675d92c055c9db549`
-- tree `22a246a035f421856a705643c59ccb4171854d71`
-- System / Quality / I.T. / Hygiene `35514290109` / `35514290237` / `35514290207` / `35514290217`
-- Production Pages / Live Resources `35514481645` / `35514524661`
-- canonical migrations `0001–0008`
+- Development `cc76ca21585e0b9a38e2b7f481799963943be056`
+- Production `2d53ff1f65b0252e4c1812766e61577f530dccaa`
+- tree `7a3583f0f12275d5316b1fc63a3067bc3dd7d74a`
+- System / Quality / I.T. / Hygiene `35515481692` / `35515481732` / `35515481657` / `35515481717`
+- Production Pages / Live Resources `35515609351` / `35515652270`
+- canonical migrations `0001–0009`
 
 ## Read in this order
 
 1. `AI_HANDOFF.md`
 2. `PROJECT_STATUS_AND_ROADMAP.md`
 3. `docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md`
-4. `docs/operations/RELEASE_467_BUILD_208_MULTI_DISCIPLINE_PUBLIC_POSITIONING_CAPABILITY_NAVIGATION.md`
-5. `release467-build208-multi-discipline-public-positioning-capability-navigation.json`
+4. `docs/operations/RELEASE_467_BUILD_209_WORKSHOP_CAPABILITY_PROFILES_CONSTRAINTS.md`
+5. `release467-build209-workshop-capability-profiles-constraints.json`
 6. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
 
 ## Active autonomous build documents
@@ -58,4 +58,4 @@ Build 171 remains historical provenance over exact Build 170 predecessor `879c87
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 208 over exact Production-GREEN Build 207.
+Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 209 over exact Production-GREEN Build 208.
