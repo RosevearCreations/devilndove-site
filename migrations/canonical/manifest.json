@@ -55,6 +55,13 @@
       "release": 467,
       "description": "Correct the Release 465 activation trigger so legacy active Products can repair media safely while preserving publication-boundary and no-degradation guards.",
       "recovery": "Forward-only trigger correction. If the guard semantics require further repair, add a new numbered migration; never edit this migration after Development application."
+    },
+    {
+      "version": 7,
+      "file": "0007_release467_storefront_launch_remediation.sql",
+      "release": 467,
+      "description": "Add explicit admin-owned launch-set remediation review metadata: owner, status, due note, official recheck evidence and completion evidence.",
+      "recovery": "Forward-only additive table. Logical rollback leaves Product/Inventory facts untouched; archive or supersede remediation metadata as needed. Repair schema defects only with a new numbered migration and never edit this migration after Development application."
     }
   ]
 }
