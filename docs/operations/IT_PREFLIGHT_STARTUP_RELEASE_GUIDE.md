@@ -2,7 +2,7 @@
 
 ## Current release baseline
 
-Release 467 uses `main` as the current Production source and `dev` as the Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`; canonical migrations currently run from `0001` through `0006`. Request-time DDL and automatic Production promotion remain closed.
+Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0006`. Request-time DDL and automatic Production promotion remain closed.
 
 ## Canonical Development target
 
@@ -15,46 +15,58 @@ Release 467 uses `main` as the current Production source and `dev` as the Develo
 1. Verify the previous exact SHA/tree and external proofs.
 2. The next build ingests that closure; the previous build never self-records later proof.
 3. Prove the exact `dev` head through System, Quality, I.T., Hygiene and build-specific acceptance.
-4. For browser/runtime incidents, execute only the current bounded workflow for the affected architecture; retired browser probes must not be run against successor Product architectures.
-5. Non-force promote the identical Development tree to `main` only after Development is GREEN.
-6. Require Production Pages Deploy and Production Live Resource Integrity.
-7. Execute current architecture-specific Production proof without unnecessary Production D1 reads.
+4. Execute only bounded current-architecture runtime proof.
+5. Promote the identical Development tree to protected `main` only after Development is GREEN.
+6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
+7. Avoid unnecessary Production D1 reads for code/docs-only promotions.
 8. Only then call `main` / Production GREEN.
 
-Production live-resource retries remain capped at three transient attempts; permanent 4xx and genuine resource failures fail closed. Stripe Development, PayPal sandbox and Social/OAuth remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
+Stripe Development, PayPal sandbox and Social/OAuth remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 193 candidate
+## Current Release 467 restart authority — Build 205 candidate
 
-Build 192 **Release Regression & Runtime Budget Convergence** is the last fully verified Development and current Production baseline.
+Build 204 **Storefront Launch Set & Autonomous Closure** is the last fully verified application build.
 
-- Last fully verified Development SHA: `76321bfc975862ce2463e87450852c19fc98c852`
-- Current Production main SHA: `451ca8173b9ad3127f84f352ed0a8d7774e53b14`
-- Exact shared tree: `5752f7e0be8c432d2cc45b5de08c349208ee497a`
-- Development System Gate: `35418600834`
-- Development Current Application Quality: `35418600870`
-- Development I.T. Admin Runtime: `35418600868`
-- Development Repository Branch Hygiene: `35418600827`
-- Build 192 Development proof: `35418600841`
-- Production Pages Deploy: `35418692246`
-- Production Live Resource Integrity: `35418731807`
-- Products Production Browser Proof: `35418731822`
-- Products Route Production Proof: `35418731793`
-- Build 192 Production proof: `35418692245`
+The later Builds 205–224 roadmap promotion was documentation-only and became the canonical Build 204 restart source boundary:
+
+- Last fully verified Development SHA: `48307e67978dee5ef4481ccfe2739a5d3df79b18`
+- Current Production main SHA: `09253dbe5b43c4308d1ff671bb71df80bf0592d9`
+- Exact shared tree: `4a63209efc54bc641ba0484c4954ac1cb35acc2e`
+- Development System Gate: `35483005170`
+- Development Current Application Quality: `35483005094`
+- Development I.T. Admin Runtime: `35483005097`
+- Development Repository Branch Hygiene: `35483005113`
+- Original Build 204 Development proof: `35478691738`
+- Production Pages Deploy: `35483092965`
 - Production remote D1 queries: `0`
-- Exact Production URL: `https://8ed2f630.devilndove-site.pages.dev`
+- Exact Production URL: `https://cd226d56.devilndove-site.pages.dev`
 
-Build 193 **Current Authority & Handoff Convergence** is the active Development closure candidate. It converges `current-development-authority.json`, the I.T. control tower, Deployment Preflight, Reliability, this canonical restart guide, `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md`, `MARKDOWN_INDEX.md`, and the immutable Build 192 closure authority on the exact proof bundle above.
+Original Build 204 runtime closure remains preserved separately:
 
-Build 193 changes release/restart truth only. It does not alter Product/Inventory/customer business data, canonical migrations, schema, D1/R2 business data, provider execution/publication, payments, refunds or accounting.
+- runtime Development: `50098122e88548ad5e94835d5ef69a5e738aed88`
+- runtime Production: `d88789ee563e700e8847f7b47f156964024a3b45`
+- runtime tree: `90018f79ee469420e9f3c16504bdf4a73c0dfd0f`
+- Development proof: `35478691738`
+- Production proof: `35478779057`
+- Production Pages: `35478779248`
+- runtime Production URL: `https://72602315.devilndove-site.pages.dev`
 
-Build 193 acceptance requires its dedicated source proof plus System Gate, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene on one exact final `dev` SHA. Only that exact GREEN tree may be promoted through protected `main`, followed by Production Pages Deploy, Production Live Resource Integrity and retained Product Production proofs.
+Build 205 **Current Authority & Manufacturing-Era Roadmap Convergence** is the active Development closure candidate. It converges `current-development-authority.json`, I.T. control tower, Deployment Preflight, Reliability, this guide, `AI_HANDOFF.md`, `PROJECT_STATUS_AND_ROADMAP.md` and `MARKDOWN_INDEX.md` on the exact boundary above.
+
+Build 205 changes release/restart truth only. It performs no Product/Inventory/Custom Request/Creative Project mutation, no schema change, no D1/R2 business-data work and no provider/payment/publication execution.
+
+Build 205 acceptance requires its dedicated source proof plus System Gate, Current Application Quality, I.T. Admin Runtime and Repository Branch Hygiene on one exact final `dev` SHA. Only that exact GREEN tree may be promoted through protected `main`, followed by exact Production deployment/runtime proof.
 
 ### Restart resolution rule
 
-The candidate never self-claims its not-yet-created final SHA. At every restart, resolve live `dev` and `main` refs first. Once Build 193 is promoted, the exact branch/tree plus exact-SHA Development and Production proofs becomes the current source authority; Build 194 must ingest that later closure.
+The Build 205 candidate never self-claims its not-yet-created final SHA. At every restart resolve live `dev` and `main` first. Once Build 205 is Production GREEN, Build 206 must ingest the exact Build 205 closure.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
 
 ## Retained historical provenance — Build 171
 
-Build 171 **Release & Restart Authority Convergence** remains historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It is not the current application baseline and must not override Build 192/193 restart truth.
+Build 171 **Release & Restart Authority Convergence** remains historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It does not override current Build 204/205 truth.
+
+## Retained historical provenance — Builds 192–193
+
+Build 192 **Release Regression & Runtime Budget Convergence** and Build 193 **Current Authority & Handoff Convergence** remain historical restart authorities. Their artifacts stay immutable and successor-aware.

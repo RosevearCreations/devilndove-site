@@ -1,0 +1,99 @@
+name: Release 467 Build 205 Current Authority Manufacturing-Era Convergence
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'current-development-authority.json'
+      - 'release467-build204-storefront-launch-set-autonomous-closure.json'
+      - 'release467-build205-current-authority-manufacturing-era-roadmap-convergence.json'
+      - 'AI_HANDOFF.md'
+      - 'PROJECT_STATUS_AND_ROADMAP.md'
+      - 'MARKDOWN_INDEX.md'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md'
+      - 'docs/operations/RELEASE_467_BUILD_205_CURRENT_AUTHORITY_MANUFACTURING_ERA_ROADMAP_CONVERGENCE.md'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'admin/it/index.html'
+      - 'admin/deployment-preflight/index.html'
+      - 'admin/reliability/index.html'
+      - 'scripts/release467_build193_gate.py'
+      - 'scripts/release467_build205_gate.py'
+      - '.github/workflows/release467-build205-current-authority-manufacturing-era-convergence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 205 authority convergence
+        run: python scripts/release467_build205_gate.py
+      - name: Retain Build 204 storefront closure
+        run: python scripts/release467_build204_gate.py
+      - name: Retain Build 193 authority convergence
+        run: python scripts/release467_build193_gate.py
+      - name: Retain Build 171 restart provenance
+        run: python scripts/release467_build171_gate.py
+
+  exact-development-evidence:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Record exact Development authority evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os
+          payload={
+            'release':467,
+            'build':205,
+            'title':'Current Authority & Manufacturing-Era Roadmap Convergence',
+            'development_sha':os.environ.get('GITHUB_SHA',''),
+            'predecessor':{
+              'build':204,
+              'canonical_dev_sha':'48307e67978dee5ef4481ccfe2739a5d3df79b18',
+              'canonical_main_sha':'09253dbe5b43c4308d1ff671bb71df80bf0592d9',
+              'canonical_tree':'4a63209efc54bc641ba0484c4954ac1cb35acc2e'
+            },
+            'scope':'release_restart_authority_only',
+            'd1_mutation':'ZERO',
+            'r2_mutation':'ZERO',
+            'schema_migration':'NONE',
+            'business_data_mutation':'ZERO',
+            'provider_execution':'ZERO',
+            'payment_execution':'ZERO',
+            'publication_execution':'ZERO',
+            'next_build':206,
+            'next_build_blocked_until_production_green':True
+          }
+          json.dump(payload,open('/tmp/release467-build205-exact-evidence.json','w'),indent=2,sort_keys=True)
+          print('BUILD 205 EXACT DEVELOPMENT EVIDENCE:',payload['development_sha'])
+          print('D1 MUTATION: ZERO')
+          print('R2 MUTATION: ZERO')
+          print('SCHEMA MIGRATION: NONE')
+          print('BUSINESS DATA MUTATION: ZERO')
+          print('BUILD 206: BLOCKED UNTIL BUILD 205 PRODUCTION GREEN')
+          PY
+      - name: Upload exact-SHA Build 205 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: release467-build205-exact-evidence-${{ github.sha }}
+          path: /tmp/release467-build205-exact-evidence.json
+          if-no-files-found: error

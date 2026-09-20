@@ -1,40 +1,42 @@
 {
   "release": 467,
-  "build": 193,
-  "title": "Current Authority & Handoff Convergence",
+  "build": 205,
+  "title": "Current Authority & Manufacturing-Era Roadmap Convergence",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "76321bfc975862ce2463e87450852c19fc98c852",
-  "accepted_dev_tree_sha": "5752f7e0be8c432d2cc45b5de08c349208ee497a",
+  "accepted_dev_sha": "48307e67978dee5ef4481ccfe2739a5d3df79b18",
+  "accepted_dev_tree_sha": "4a63209efc54bc641ba0484c4954ac1cb35acc2e",
   "acceptance": {
-    "system_gate_run": 35418600834,
-    "current_application_quality_run": 35418600870,
-    "it_admin_runtime_proof_run": 35418600868,
-    "branch_hygiene_run": 35418600827
+    "system_gate_run": 35483005170,
+    "current_application_quality_run": 35483005094,
+    "it_admin_runtime_proof_run": 35483005097,
+    "branch_hygiene_run": 35483005113
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 192,
-      "title": "Release Regression & Runtime Budget Convergence",
-      "authority": "release467-build192-release-runtime-budget-convergence-closure.json",
-      "dev_sha": "76321bfc975862ce2463e87450852c19fc98c852",
-      "tree_sha": "5752f7e0be8c432d2cc45b5de08c349208ee497a",
+      "build": 204,
+      "title": "Storefront Launch Set & Autonomous Closure",
+      "authority": "release467-build204-storefront-launch-set-autonomous-closure.json",
+      "dev_sha": "48307e67978dee5ef4481ccfe2739a5d3df79b18",
+      "tree_sha": "4a63209efc54bc641ba0484c4954ac1cb35acc2e",
       "proofs": {
-        "system_gate_run": 35418600834,
-        "current_application_quality_run": 35418600870,
-        "it_admin_runtime_proof_run": 35418600868,
-        "branch_hygiene_run": 35418600827
+        "system_gate_run": 35483005170,
+        "current_application_quality_run": 35483005094,
+        "it_admin_runtime_proof_run": 35483005097,
+        "branch_hygiene_run": 35483005113
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
-      "exact_preview_deployment": true
+      "exact_preview_deployment": true,
+      "runtime_build204_dev_sha": "50098122e88548ad5e94835d5ef69a5e738aed88",
+      "runtime_build204_tree_sha": "90018f79ee469420e9f3c16504bdf4a73c0dfd0f"
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 193,
-      "title": "Current Authority & Handoff Convergence",
-      "authority": "release467-build193-current-authority-handoff-convergence.json",
+      "build": 205,
+      "title": "Current Authority & Manufacturing-Era Roadmap Convergence",
+      "authority": "release467-build205-current-authority-manufacturing-era-roadmap-convergence.json",
       "state": "DEVELOPMENT_CLOSURE_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -45,20 +47,22 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 192,
-    "authority": "release467-build192-release-runtime-budget-convergence-closure.json",
-    "main_sha": "451ca8173b9ad3127f84f352ed0a8d7774e53b14",
-    "tree_sha": "5752f7e0be8c432d2cc45b5de08c349208ee497a",
-    "production_pages_deploy_run": 35418692246,
-    "production_live_resource_integrity_run": 35418731807,
-    "products_route_proof_run": 35418731793,
-    "products_browser_proof_run": 35418731822,
-    "build_specific_proof_run": 35418692245,
+    "build": 204,
+    "authority": "release467-build204-storefront-launch-set-autonomous-closure.json",
+    "main_sha": "09253dbe5b43c4308d1ff671bb71df80bf0592d9",
+    "tree_sha": "4a63209efc54bc641ba0484c4954ac1cb35acc2e",
+    "production_pages_deploy_run": 35483092965,
+    "production_live_resource_integrity_run": 0,
+    "build_specific_proof_run": 35478779057,
+    "exact_production_url": "https://cd226d56.devilndove-site.pages.dev",
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE",
-    "remote_d1_queries": 0
+    "remote_d1_queries": 0,
+    "docs_only_roadmap_promotion": true
   },
   "current_release_authorities": [
+    "release467-build205-current-authority-manufacturing-era-roadmap-convergence.json",
+    "release467-build204-storefront-launch-set-autonomous-closure.json",
     "release467-build193-current-authority-handoff-convergence.json",
     "release467-build192-release-runtime-budget-convergence-closure.json",
     "release467-build171-release-restart-authority-convergence.json",
@@ -102,8 +106,9 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "next_build": 193,
+  "roadmap": "docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md",
+  "next_build": 205,
   "next_build_state": "AUTHORIZED_IN_PROGRESS",
-  "next_build_title": "Current Authority & Handoff Convergence",
-  "promotion_state": "BUILD193_CANDIDATE_NOT_YET_VERIFIED"
+  "next_build_title": "Current Authority & Manufacturing-Era Roadmap Convergence",
+  "promotion_state": "BUILD205_CANDIDATE_NOT_YET_VERIFIED"
 }
