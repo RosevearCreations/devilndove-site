@@ -47,6 +47,17 @@ These counts are the baseline for the next block. They must not be silently rese
 
 ---
 
+## Current execution checkpoint
+
+- Build 204: **complete and Production GREEN**.
+- Build 205: **current — Current Authority & Manufacturing-Era Roadmap Convergence**.
+- Build 206: **next only after Build 205 is exact-SHA Production GREEN**.
+- Builds 207–224: **planned**.
+- The canonical Build 204 restart source boundary is Development `48307e67978dee5ef4481ccfe2739a5d3df79b18`, Production `09253dbe5b43c4308d1ff671bb71df80bf0592d9`, shared tree `4a63209efc54bc641ba0484c4954ac1cb35acc2e`.
+- Original Build 204 runtime closure remains separately preserved at Development `50098122e88548ad5e94835d5ef69a5e738aed88` and Production `d88789ee563e700e8847f7b47f156964024a3b45`.
+
+---
+
 # Existing authorities that MUST be extended, not duplicated
 
 ## Custom Work
