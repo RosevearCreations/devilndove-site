@@ -1,30 +1,30 @@
-// Release 467 Build 212 — current read-only reliability projection over exact Build 211 GREEN predecessor.
+// Release 467 Build 213 — current read-only reliability projection over exact Build 212 GREEN predecessor.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=212;
-export const CURRENT_RELIABILITY_TITLE='Hybrid Creative Project Operations';
+export const CURRENT_RELIABILITY_BUILD=213;
+export const CURRENT_RELIABILITY_TITLE='Digital Proof & Customer Approval';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
 export const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:211,title:'Manufacturing Triage & Route Proposal',
-  accepted_dev_sha:'a7f07b18a4a3b24db1a148ec287cbf446041f573',accepted_dev_tree_sha:'b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7',
-  system_gate_run:35524455791,current_application_quality_run:35524455693,it_admin_runtime_proof_run:35524455845,
-  branch_hygiene_run:35524455852,build_specific_proof_run:35524455858,exact_preview_deployment:true,
+  release:467,build:212,title:'Hybrid Creative Project Operations',
+  accepted_dev_sha:'7891a869d748072846a1ac9452782e119f01cd53',accepted_dev_tree_sha:'f972119d10f98ea566173868915463ce31cdf22c',
+  system_gate_run:35526209718,current_application_quality_run:35526209719,it_admin_runtime_proof_run:35526209723,
+  branch_hygiene_run:35526209630,build_specific_proof_run:35526209730,exact_preview_deployment:true,
   role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:211,title:'Manufacturing Triage & Route Proposal',state:'DEVELOPMENT_GREEN',
-  dev_sha:'a7f07b18a4a3b24db1a148ec287cbf446041f573',tree_sha:'b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7',
-  system_gate_run:35524455791,current_application_quality_run:35524455693,it_admin_runtime_proof_run:35524455845,
-  branch_hygiene_run:35524455852,build_specific_proof_run:35524455858,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN'
+  release:467,build:212,title:'Hybrid Creative Project Operations',state:'DEVELOPMENT_GREEN',
+  dev_sha:'7891a869d748072846a1ac9452782e119f01cd53',tree_sha:'f972119d10f98ea566173868915463ce31cdf22c',
+  system_gate_run:35526209718,current_application_quality_run:35526209719,it_admin_runtime_proof_run:35526209723,
+  branch_hygiene_run:35526209630,build_specific_proof_run:35526209730,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN'
 });
 export const CURRENT_PRODUCTION=Object.freeze({
-  release:467,build:211,title:'Manufacturing Triage & Route Proposal',state:'PRODUCTION_GREEN',
-  main_sha:'41bf65727771c7c302c022d0944945a0802a909d',tree_sha:'b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7',
-  production_pages_deploy_run:35524655164,production_live_resource_integrity_run:35524741052,
-  products_browser_proof_run:35524741050,products_route_proof_run:35524741073,
-  build_specific_proof_run:35524655209,remote_d1_queries:0
+  release:467,build:212,title:'Hybrid Creative Project Operations',state:'PRODUCTION_GREEN',
+  main_sha:'9ea6c728a4df978d653be910388ea7081b800de9',tree_sha:'f972119d10f98ea566173868915463ce31cdf22c',
+  production_pages_deploy_run:35526432043,production_live_resource_integrity_run:35526530121,
+  products_browser_proof_run:35526530105,products_route_proof_run:35526530131,
+  build_specific_proof_run:35526432021,remote_d1_queries:0
 });
 export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -36,7 +36,7 @@ export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
 export async function loadCurrentReliability(db,env={}){
   const inherited=await loadRelease466Reliability(db,env);
   return {
-    release:467,build:212,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
+    release:467,build:213,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
     environment:inherited.environment,score:inherited.score,status:inherited.status,scope:inherited.scope,slo_targets:inherited.slo_targets,
     checks:inherited.checks,migrations:inherited.migrations,runtime_incidents:inherited.runtime_incidents,
     foreign_key_violations:inherited.foreign_key_violations,resources:inherited.resources,
@@ -47,14 +47,14 @@ export async function loadCurrentReliability(db,env={}){
     },
     recovery:inherited.recovery,drift:inherited.drift,
     provenance:{
-      current_surface_release:467,current_surface_build:212,
+      current_surface_release:467,current_surface_build:213,
       inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
       historical_feature_authority:'release467-build36-current-reliability-operational-health.json',
       current_operator_authority:'current-development-authority.json',
       accepted_development:ACCEPTED_DEVELOPMENT,last_fully_verified_development:LAST_FULLY_VERIFIED_DEVELOPMENT,
       current_production:CURRENT_PRODUCTION,production_proof_transport_policy:PRODUCTION_PROOF_TRANSPORT_POLICY,
       implementation_acceptance_is_distinct_from_final_closure:true,closure_candidate_requires_external_exact_head_proof:true,
-      build211_manufacturing_triage_production_green:true,build212_hybrid_creative_operations_candidate:true,build212_exact_head_proof_required:true,production_baseline_build:211
+      build212_hybrid_creative_operations_production_green:true,build213_digital_proof_customer_approval_candidate:true,build213_exact_head_proof_required:true,production_baseline_build:212
     },
     safety:{
       ...inherited.safety,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,

@@ -1,0 +1,73 @@
+{
+  "release": 467,
+  "build": 213,
+  "title": "Digital Proof & Customer Approval",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build213-digital-proof-customer-approval",
+  "priority": "add_versioned_private_customer_proof_approval_to_existing_custom_work_without_publication_or_parallel_packaging_media_authority",
+  "starting_point": {
+    "development": {
+      "sha": "7891a869d748072846a1ac9452782e119f01cd53",
+      "tree": "f972119d10f98ea566173868915463ce31cdf22c",
+      "system_gate_run": 35526209718,
+      "quality_run": 35526209719,
+      "it_admin_runtime_run": 35526209723,
+      "repository_hygiene_run": 35526209630,
+      "build_specific_proof_run": 35526209730,
+      "build_specific_proof_attempt": 1,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "9ea6c728a4df978d653be910388ea7081b800de9",
+      "tree": "f972119d10f98ea566173868915463ce31cdf22c",
+      "production_pages_deploy_run": 35526432043,
+      "production_live_resource_integrity_run": 35526530121,
+      "products_browser_proof_run": 35526530105,
+      "products_route_proof_run": 35526530131,
+      "build_specific_proof_run": 35526432021,
+      "exact_production_url": "https://f3bd9a21.devilndove-site.pages.dev",
+      "deployment_id": "f3bd9a21-ebec-46c7-823b-d2bace92de32",
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Attach ordered proof versions to existing custom_requests.",
+    "Issue one private customer-safe proof token/link per version with no provider messaging.",
+    "Allow exact-version approval or changes-requested responses with append-only event evidence.",
+    "Reference immutable Packaging versions or customer-safe stage photos without duplicating Packaging/Media ownership.",
+    "Expose a proof-readiness gate that fails closed when Manufacturing Triage requires proof and the exact approved version is missing or still needs internal production approval."
+  ],
+  "safety": {
+    "canonical_schema_addition": true,
+    "request_time_ddl": false,
+    "parallel_custom_request_system": false,
+    "parallel_packaging_version_system": false,
+    "raw_private_caip_exposure": false,
+    "customer_approval_is_publication_approval": false,
+    "automatic_publication": false,
+    "automatic_production_start": false,
+    "inventory_mutation": false,
+    "payment_execution": false,
+    "provider_message_execution": false,
+    "r2_mutation": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build213_gate.py",
+    "canonical_migration": "migrations/canonical/0013_release467_digital_proof_customer_approval.sql",
+    "request_authority": "custom_requests",
+    "proof_authority": "custom_request_proof_versions",
+    "proof_event_authority": "custom_request_proof_events",
+    "packaging_reference_authority": "packaging_project_versions",
+    "admin_api": "functions/api/admin/custom-work-proof.js",
+    "public_api": "functions/api/custom-request-proof.js",
+    "packaging_artifact_bridge": "functions/api/custom-request-proof-artifact.js",
+    "admin_surface": "/admin/custom-request/",
+    "customer_surface": "/custom-request/proof/"
+  },
+  "next_build": {
+    "build": 214,
+    "title": "Prototype → Sample → Production Run",
+    "state": "BLOCKED_UNTIL_BUILD213_PRODUCTION_GREEN"
+  }
+}

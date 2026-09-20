@@ -57,9 +57,10 @@ These counts are the baseline for the next block. They must not be silently rese
 - Build 209: **complete and Production GREEN** at Production `9a1bd2b3d99edf69651a17e790866d3b8fa744d4`, shared tree `36bed0abebbb47b375277562355c3517d171b629`.
 - Build 210: **complete and Production GREEN** at Production `6e81942e7fd54157698b640252eed256b0411752`, shared tree `f8e85d5e91a9eee5a9c64901865efe24be1ad34e`.
 - Build 211: **complete and Production GREEN** at Production `41bf65727771c7c302c022d0944945a0802a909d`, shared tree `b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7`.
-- Build 212: **current — Hybrid Creative Project Operations**.
-- Build 213: **next only after Build 212 is exact-SHA Production GREEN**.
-- Builds 214–224: **planned**.
+- Build 212: **complete and Production GREEN** at Production `9ea6c728a4df978d653be910388ea7081b800de9`, shared tree `f972119d10f98ea566173868915463ce31cdf22c`.
+- Build 213: **current — Digital Proof & Customer Approval**.
+- Build 214: **next only after Build 213 is exact-SHA Production GREEN**.
+- Builds 215–224: **planned**.
 - Build 207 extends the existing Build 156 process catalog through canonical migration 0008 and preserves reviewed Tool/Supply assignments.
 
 ---
