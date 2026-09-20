@@ -1,0 +1,67 @@
+{
+  "release": 467,
+  "build": 210,
+  "title": "Custom Work Intake 2.0",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build210-custom-work-intake-2",
+  "priority": "enrich_existing_custom_requests_with_structured_manufacturing_intent_without_parallel_intake_or_automatic_feasibility_routing",
+  "starting_point": {
+    "development": {
+      "sha": "9b6b22291bd98bdd2d57c8793a0c892f937b4287",
+      "tree": "36bed0abebbb47b375277562355c3517d171b629",
+      "system_gate_run": 35517349532,
+      "quality_run": 35517349713,
+      "it_admin_runtime_run": 35517349672,
+      "repository_hygiene_run": 35517349600,
+      "build_specific_proof_run": 35517349698,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "9a1bd2b3d99edf69651a17e790866d3b8fa744d4",
+      "tree": "36bed0abebbb47b375277562355c3517d171b629",
+      "production_pages_deploy_run": 35517517613,
+      "production_live_resource_integrity_run": 35517574976,
+      "products_browser_proof_run": 35517574870,
+      "products_route_proof_run": 35517574790,
+      "build_specific_proof_run": 35517517656,
+      "exact_production_url": "https://d8ed45c4.devilndove-site.pages.dev",
+      "deployment_id": "d8ed45c4-cc5c-4dfa-b430-d9f5591760c0",
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Extend existing custom_requests with structured quantity, project intent, intended use, organisation/event context, supplied-item, material/finish, personalization, size/tolerance, capability preference and help-me-choose fields.",
+    "Reuse Build 209 reviewed workshop capability profiles for optional customer capability preference.",
+    "Preserve existing budget, deadline, gift/occasion/recipient/handoff, reference uploads, private status, quote, payment-request and order-draft authorities.",
+    "Expose structured intake context in the existing authenticated Custom Work command surface."
+  ],
+  "safety": {
+    "canonical_schema_addition": true,
+    "request_time_ddl": false,
+    "parallel_custom_request_system": false,
+    "automatic_feasibility_promise": false,
+    "manufacturing_route_proposal": false,
+    "automatic_quote": false,
+    "automatic_order": false,
+    "automatic_stock_reservation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "payment_execution": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build210_gate.py",
+    "canonical_migration": "migrations/canonical/0010_release467_custom_work_intake_2.sql",
+    "request_authority": "custom_requests",
+    "public_route": "/custom-request/",
+    "public_api": "functions/api/custom-request.js",
+    "admin_route": "/admin/custom-request/",
+    "required_structured_columns": 12,
+    "capability_authority": "workshop_capability_profiles"
+  },
+  "next_build": {
+    "build": 211,
+    "title": "Manufacturing Triage & Route Proposal",
+    "state": "BLOCKED_UNTIL_BUILD210_PRODUCTION_GREEN"
+  }
+}

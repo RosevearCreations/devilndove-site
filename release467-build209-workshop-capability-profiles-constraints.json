@@ -2,7 +2,7 @@
   "release": 467,
   "build": 209,
   "title": "Workshop Capability Profiles & Constraints",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build209-workshop-capability-profiles-constraints",
   "priority": "add_reviewed_source_backed_capability_profiles_linked_to_inventory_processes_without_inventing_technical_limits_or_duplicate_process_identity",
   "starting_point": {
@@ -62,6 +62,32 @@
   "next_build": {
     "build": 210,
     "title": "Custom Work Intake 2.0",
-    "state": "BLOCKED_UNTIL_BUILD209_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_AFTER_BUILD209_PRODUCTION_GREEN"
+  },
+  "final_closure": {
+    "dev_sha": "9b6b22291bd98bdd2d57c8793a0c892f937b4287",
+    "tree_sha": "36bed0abebbb47b375277562355c3517d171b629",
+    "proofs": {
+      "system_gate_run": 35517349532,
+      "current_application_quality_run": 35517349713,
+      "it_admin_runtime_proof_run": 35517349672,
+      "branch_hygiene_run": 35517349600
+    },
+    "build_specific_proof_run": 35517349698,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+  },
+  "production_checkpoint": {
+    "main_sha": "9a1bd2b3d99edf69651a17e790866d3b8fa744d4",
+    "tree_sha": "36bed0abebbb47b375277562355c3517d171b629",
+    "production_pages_deploy_run": 35517517613,
+    "production_live_resource_integrity_run": 35517574976,
+    "products_browser_proof_run": 35517574870,
+    "products_route_proof_run": 35517574790,
+    "build_specific_proof_run": 35517517656,
+    "exact_production_url": "https://d8ed45c4.devilndove-site.pages.dev",
+    "deployment_id": "d8ed45c4-cc5c-4dfa-b430-d9f5591760c0",
+    "canonical_migrations": 9,
+    "business_counts_preserved": true,
+    "state": "PRODUCTION_GREEN"
   }
 }
