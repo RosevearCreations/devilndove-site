@@ -1,0 +1,43 @@
+name: Release 467 Build 213 Digital Proof Customer Approval
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'migrations/canonical/0013_release467_digital_proof_customer_approval.sql'
+      - 'migrations/canonical/manifest.json'
+      - 'functions/api/_lib/customRequestProofReadiness.js'
+      - 'functions/api/admin/custom-work-proof.js'
+      - 'functions/api/custom-request-proof.js'
+      - 'functions/api/custom-request-proof-artifact.js'
+      - 'public/js/admin-custom-work-proof-build213.js'
+      - 'public/js/custom-request-proof-build213.js'
+      - 'custom-request/proof/index.html'
+      - 'admin/custom-request/index.html'
+      - 'current-development-authority.json'
+      - 'release467-build212-hybrid-creative-project-operations.json'
+      - 'release467-build213-digital-proof-customer-approval.json'
+      - 'docs/operations/RELEASE_467_BUILD_213_DIGITAL_PROOF_CUSTOMER_APPROVAL.md'
+      - 'scripts/release467_build212_gate.py'
+      - 'scripts/release467_build213_gate.py'
+      - 'scripts/repository_forward_sanity.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'scripts/current_deployment_preflight_truth_gate.py'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - '.github/workflows/release467-build213-digital-proof-customer-approval.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.x'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - run: python scripts/release467_build213_gate.py
+      - run: python scripts/release467_build212_gate.py
