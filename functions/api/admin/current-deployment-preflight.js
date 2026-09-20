@@ -1,29 +1,29 @@
-// Release 467 Build 212 — current read-only Deployment Preflight over exact Build 211 GREEN predecessor.
+// Release 467 Build 213 — current read-only Deployment Preflight over exact Build 212 GREEN predecessor.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=212;
-const TITLE='Hybrid Creative Project Operations';
-const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql']);
+const BUILD=213;
+const TITLE='Digital Proof & Customer Approval';
+const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql']);
 const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 211 Manufacturing Triage & Route Proposal Proof'
+  'Release 467 Build 212 Hybrid Creative Project Operations Proof'
 ]);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:211,title:'Manufacturing Triage & Route Proposal',state:'DEVELOPMENT_GREEN',
-  dev_sha:'a7f07b18a4a3b24db1a148ec287cbf446041f573',tree_sha:'b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7',
-  system_gate_run:35524455791,current_application_quality_run:35524455693,it_admin_runtime_proof_run:35524455845,
-  branch_hygiene_run:35524455852,build_specific_proof_run:35524455858,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:212,title:'Hybrid Creative Project Operations',state:'DEVELOPMENT_GREEN',
+  dev_sha:'7891a869d748072846a1ac9452782e119f01cd53',tree_sha:'f972119d10f98ea566173868915463ce31cdf22c',
+  system_gate_run:35526209718,current_application_quality_run:35526209719,it_admin_runtime_proof_run:35526209723,
+  branch_hygiene_run:35526209630,build_specific_proof_run:35526209730,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:211,title:'Manufacturing Triage & Route Proposal',state:'PRODUCTION_GREEN',
-  main_sha:'41bf65727771c7c302c022d0944945a0802a909d',
-  tree_sha:'b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7',production_pages_deploy_run:35524655164,
-  production_live_resource_integrity_run:35524741052,products_browser_proof_run:35524741050,
-  products_route_proof_run:35524741073,build_specific_proof_run:35524655209,remote_d1_queries:0,
-  exact_production_url:'https://1d28f0f1.devilndove-site.pages.dev'
+  release:467,build:212,title:'Hybrid Creative Project Operations',state:'PRODUCTION_GREEN',
+  main_sha:'9ea6c728a4df978d653be910388ea7081b800de9',
+  tree_sha:'f972119d10f98ea566173868915463ce31cdf22c',production_pages_deploy_run:35526432043,
+  production_live_resource_integrity_run:35526530121,products_browser_proof_run:35526530105,
+  products_route_proof_run:35526530131,build_specific_proof_run:35526432021,remote_d1_queries:0,
+  exact_production_url:'https://f3bd9a21.devilndove-site.pages.dev'
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -79,8 +79,8 @@ export async function onRequestGet(context){
     {status:truth.proof_recorded_count===CANONICAL_MIGRATIONS.length?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:`${truth.proof_recorded_count}/${CANONICAL_MIGRATIONS.length} proof rows recorded.`},
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:`${truth.foreign_key_violations} violation(s).`},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
-    {status:'pass',code:'build211_verified_baseline',label:'Build 211 verified restart baseline',detail:'Build 211 Manufacturing Triage & Route Proposal is exact-SHA Production GREEN on the current shared source tree.'},
-    {status:'review',code:'build212_hybrid_operations',label:'Build 212 Hybrid Creative Project Operations',detail:'Canonical migration 0012 and the planning-only Creative Project operation layer must pass one exact-head Development proof before promotion.'}
+    {status:'pass',code:'build212_verified_baseline',label:'Build 212 verified restart baseline',detail:'Build 212 Hybrid Creative Project Operations is exact-SHA Production GREEN on the current shared source tree.'},
+    {status:'review',code:'build213_digital_proof',label:'Build 213 Digital Proof & Customer Approval',detail:'Canonical migration 0013 and the private versioned proof/approval layer must pass one exact-head Development proof before promotion.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
   const data={
@@ -92,15 +92,15 @@ export async function onRequestGet(context){
     release_authority:{
       current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,
       verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
-      current_candidate:{release:467,build:212,title:TITLE,authority:'release467-build212-hybrid-creative-project-operations.json'},
+      current_candidate:{release:467,build:213,title:TITLE,authority:'release467-build213-digital-proof-customer-approval.json'},
       rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'
     },
     truth_notes:[
-      `Build 211 source is the exact fully verified restart baseline at ${VERIFIED_DEVELOPMENT.dev_sha}; Production source is ${PRODUCTION.main_sha}; both share ${VERIFIED_DEVELOPMENT.tree_sha}.`,
+      `Build 212 source is the exact fully verified restart baseline at ${VERIFIED_DEVELOPMENT.dev_sha}; Production source is ${PRODUCTION.main_sha}; both share ${VERIFIED_DEVELOPMENT.tree_sha}.`,
       `Development proofs: System ${VERIFIED_DEVELOPMENT.system_gate_run}, Quality ${VERIFIED_DEVELOPMENT.current_application_quality_run}, I.T. ${VERIFIED_DEVELOPMENT.it_admin_runtime_proof_run}, Hygiene ${VERIFIED_DEVELOPMENT.branch_hygiene_run}.`,
       `Production proofs: Pages ${PRODUCTION.production_pages_deploy_run}, Live Resources ${PRODUCTION.production_live_resource_integrity_run}, Product Browser ${PRODUCTION.products_browser_proof_run}, Product Route ${PRODUCTION.products_route_proof_run}.`,
-      'Build 212 Hybrid Creative Project Operations is the active Development closure candidate.',
-      'Canonical migrations are 0001-0012; migration 0012 adds planning-only Creative Project operations, dependencies and Inventory references over existing authorities.'
+      'Build 213 Digital Proof & Customer Approval is the active Development closure candidate.',
+      'Canonical migrations are 0001-0013; migration 0013 adds versioned private Custom Work proof/approval records and append-only response events over existing authorities.'
     ],
     safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}
   };
