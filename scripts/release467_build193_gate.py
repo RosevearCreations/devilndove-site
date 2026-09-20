@@ -105,9 +105,13 @@ for token in ('retained historical release/restart authority proof','Current suc
     req(token.lower() in gate171.lower(),f'Build 171 retained gate missing successor-aware token: {token}')
 
 # Historical roadmap and workflow remain immutable provenance.
-active_successor_match=re.search(r"**Build (d+) — current(?: and final planned build)?**",roadmap)
-active_successor_build=int(active_successor_match.group(1)) if active_successor_match else 0
-req('**Build 193 — complete**' in roadmap and active_successor_build>=199,'193-204 roadmap must retain Build 193 closure provenance')
+req('**Build 193 — complete**' in roadmap,'193-204 roadmap must retain Build 193 closure provenance')
+req(
+    ('**Build 204 — current and final planned build**' in roadmap)
+    or ('Build 204 — complete' in roadmap)
+    or ('Future queue after Build 204' in roadmap),
+    '193-204 roadmap must retain the Build 204 end-of-sequence checkpoint'
+)
 for token in ('python scripts/release467_build193_gate.py','release467-build193-exact-evidence','branches: [dev, main]','pull_request:'):
     req(token in workflow,f'Build 193 workflow missing: {token}')
 for forbidden in ('wrangler@4 d1 execute','CLOUDFLARE_API_TOKEN','PRODUCT_MEDIA_BUCKET','CAIP_PRIVATE_MEDIA_BUCKET'):
