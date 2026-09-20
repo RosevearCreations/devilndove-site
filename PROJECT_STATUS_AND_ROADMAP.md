@@ -2,11 +2,11 @@
 
 ## Current checkpoint
 
-Build 208 **Multi-Discipline Public Positioning & Capability Navigation** is Production GREEN at `2d53ff1f65b0252e4c1812766e61577f530dccaa`, exact tree `7a3583f0f12275d5316b1fc63a3067bc3dd7d74a`, with Development `cc76ca21585e0b9a38e2b7f481799963943be056` and Production Pages/Live proofs `35515609351` / `35515652270`.
+Build 209 **Workshop Capability Profiles & Constraints** is Production GREEN at `9a1bd2b3d99edf69651a17e790866d3b8fa744d4`, exact tree `36bed0abebbb47b375277562355c3517d171b629`, with Development `9b6b22291bd98bdd2d57c8793a0c892f937b4287` and Production Pages/Live proofs `35517517613` / `35517574976`.
 
-## Active Build 209
+## Active Build 210
 
-**Workshop Capability Profiles & Constraints** adds 12 reviewed source-backed capability profiles linked to canonical `inventory_processes` through migration 0009. Public/admin profile surfaces expose suitable uses, documented materials, known/unknown constraints, supplied-item assessment policy, proof/sample expectations, Gallery routing and Custom Work routing. Build 210 remains blocked until exact-SHA Production GREEN.
+**Custom Work Intake 2.0** extends the existing `custom_requests` authority through canonical migration 0010 with quantity, project intent, intended use, company/event context, supplied-item, material/finish, personalization, size/tolerance, capability preference and explicit help-me-choose fields. Existing status/quote/order/reference authorities remain canonical. Build 211 remains blocked until exact-SHA Production GREEN.
 
 ## Permanent boundaries
 
@@ -28,4 +28,4 @@ Build 171 — Release & Restart Authority Convergence — remains immutable hist
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain immutable historical release/restart provenance; they do not supersede the Build 208/209 current authority.
+Build 192 and Build 193 remain immutable historical release/restart provenance; they do not supersede the Build 209/210 current authority.
