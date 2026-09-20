@@ -1,0 +1,77 @@
+{
+  "release": 467,
+  "build": 214,
+  "title": "Prototype → Sample → Production Run",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build214-prototype-sample-production-run",
+  "priority": "add_explicit_manufacturing_maturity_over_existing_creative_process_custom_work_and_build213_proof_without_parallel_project_run_or_inventory_authority",
+  "starting_point": {
+    "development": {
+      "sha": "3292ac5c20780e23bd9d5ae593368e82b6e4826b",
+      "tree": "1108fecdeac23c69b8ea4d810c0375a0899ff469",
+      "system_gate_run": 35533703475,
+      "quality_run": 35533703446,
+      "it_admin_runtime_run": 35533703481,
+      "repository_hygiene_run": 35533703474,
+      "build_specific_proof_run": 35533703458,
+      "build_specific_proof_attempt": 1,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "92df5745fc2d4311dfacfbd214c1032a34c46bb8",
+      "tree": "1108fecdeac23c69b8ea4d810c0375a0899ff469",
+      "production_pages_deploy_run": 35534081643,
+      "production_live_resource_integrity_run": 35534292686,
+      "products_browser_proof_run": 35534292705,
+      "products_route_proof_run": 35534292692,
+      "build_specific_proof_run": 35534081642,
+      "exact_production_url": "https://e8fa1e4b.devilndove-site.pages.dev",
+      "deployment_id": "e8fa1e4b-910d-4fae-bddf-cc00218c9c40",
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Add one manufacturing-maturity lifecycle record over existing Creative Project and/or Custom Request identities.",
+    "Record explicit concept, prototype, failed/rework, sample candidate, approved sample, production authorized, production run, QA/rework and completed states.",
+    "Preserve append-only lifecycle transitions so failed prototypes, rework and superseded sample approvals remain evidence.",
+    "Require approved sample to reference an exact approved Build 213 proof version or exact active Creative Process event.",
+    "Require a separate explicit production-authorization transition and fail closed on the Build 213 proof gate when Custom Work triage requires proof/sample."
+  ],
+  "safety": {
+    "canonical_schema_addition": true,
+    "request_time_ddl": false,
+    "parallel_creative_project_system": false,
+    "parallel_custom_request_system": false,
+    "parallel_product_production_run_system": false,
+    "creative_work_event_mutation": false,
+    "inventory_mutation": false,
+    "product_production_run_mutation": false,
+    "payment_execution": false,
+    "provider_execution": false,
+    "automatic_production_start": false,
+    "automatic_publication": false,
+    "raw_private_caip_exposure": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build214_gate.py",
+    "canonical_migration": "migrations/canonical/0014_release467_prototype_sample_production_run.sql",
+    "lifecycle_authority": "creative_project_manufacturing_lifecycles",
+    "event_authority": "creative_project_manufacturing_lifecycle_events",
+    "creative_project_authority": "creative_work_projects",
+    "custom_request_authority": "custom_requests",
+    "proof_authority": "custom_request_proof_versions",
+    "creative_event_authority": "creative_work_events",
+    "admin_api": "functions/api/admin/manufacturing-lifecycle.js",
+    "shared_helper": "functions/api/_lib/manufacturingMaturity.js",
+    "admin_surfaces": [
+      "/admin/creative-process/",
+      "/admin/custom-request/"
+    ]
+  },
+  "next_build": {
+    "build": 215,
+    "title": "Small-Batch, Corporate & Event Quoting",
+    "state": "BLOCKED_UNTIL_BUILD214_PRODUCTION_GREEN"
+  }
+}
