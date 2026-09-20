@@ -1,4 +1,4 @@
-// Release 467 Build 151 — read-only Custom Work, gifting, pickup and event-selling convergence.
+// Release 467 Build 210 — read-only Custom Work projection including structured Intake 2.0 fields.
 // This endpoint adds no mutation authority. Existing Custom Requests, Orders and Gift Card
 // write routes remain authoritative and are reached only by explicit existing workflows.
 
@@ -28,8 +28,10 @@ export async function onRequestGet(context) {
 
   try {
     const requestRows = rows(await db.prepare(`
-      SELECT custom_request_id,request_key,name,email,phone,request_type,product_interest,deadline_date,budget_cents,message,
-             attachment_urls_json,consent_to_contact,status,admin_notes,reference_upload_count,created_at,updated_at
+      SELECT custom_request_id,request_key,name,email,phone,request_type,product_interest,deadline_date,budget_cents,
+             quantity,project_intent,intended_use,organization_name,event_context_structured,supplied_item,
+             desired_material,desired_finish,personalization_text,requested_capability_key,tolerance_size_notes,help_choose_method,
+             message,attachment_urls_json,consent_to_contact,status,admin_notes,reference_upload_count,created_at,updated_at
       FROM custom_requests
       ORDER BY CASE status WHEN 'new' THEN 0 WHEN 'reviewing' THEN 1 WHEN 'quote_needed' THEN 2 WHEN 'quoted' THEN 3 WHEN 'accepted' THEN 4 ELSE 5 END,
                datetime(updated_at) DESC
@@ -81,7 +83,7 @@ export async function onRequestGet(context) {
 
     return json({
       ok: true,
-      build: BUILD,
+      build: 210,
       contract: CONTRACT_ID,
       owner: OWNER,
       requested_by: { user_id: Number(adminUser.user_id || 0), email: adminUser.email || '', display_name: adminUser.display_name || '' },
@@ -97,6 +99,8 @@ export async function onRequestGet(context) {
       provider_publication: false,
       event_offline_stock_authority: false,
       event_unique_stock_requires_live_revalidation: true,
+      structured_intake_2: true,
+      manufacturing_route_authority: 'BUILD_211_NOT_YET_STARTED',
       connectivity_contract: 'READ_ONLY_LIVE_AUTHORITY_WITH_VISIBLE_OFFLINE_STATE'
     });
   } catch (error) {

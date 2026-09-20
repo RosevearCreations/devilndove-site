@@ -48,7 +48,11 @@
         <label>Name<input class="input" name="name" autocomplete="name" required/></label>
         <label>Email<input class="input" name="email" type="email" autocomplete="email" required/></label>
         <label>Phone, optional<input class="input" name="phone" autocomplete="tel"/></label>
-        <label>Request type<select class="input" name="request_type"><option value="custom_gift">Custom handmade gift</option><option value="engraving">Laser engraving</option><option value="jewelry">Jewelry or polymer clay piece</option><option value="sublimation">Sublimation item</option><option value="custom_candle">Custom candle making</option><option value="custom_soap">Custom soap making</option><option value="vintage_find">Vintage or collectible idea</option><option value="repair_or_remake">Repair, remake, or matching piece</option><option value="event_or_market">Event / market request</option><option value="other">Other workshop request</option></select></label>
+        <label>Request type<select class="input" name="request_type"><option value="custom_piece">Custom piece / gift</option><option value="personalization">Personalization / wording / graphics</option><option value="prototype">Prototype or test piece</option><option value="batch_event">Batch, corporate or event work</option><option value="repair_or_remake">Repair, remake, or matching piece</option><option value="customer_supplied_item">Work on an item I supply</option><option value="other">Other workshop request</option></select></label>
+        <label>Project intent<select class="input" name="project_intent"><option value="one_off">One-off</option><option value="prototype">Prototype / experiment</option><option value="repeat">Repeat of an existing idea</option><option value="batch">Small batch</option><option value="corporate_event">Corporate / organisation / event</option><option value="repair_remake">Repair / remake / matching</option><option value="unknown">Not sure yet</option></select></label>
+        <label>Quantity<input class="input" name="quantity" type="number" min="1" step="1" value="1" inputmode="numeric"/></label>
+        <label>Preferred workshop capability<select class="input" name="requested_capability_key" id="customRequestedCapability"><option value="">No preference / not sure</option></select><span class="small">Choose only if you already have a process in mind. This is a preference, not a feasibility promise.</span></label>
+        <label class="small" style="grid-column:1/-1;display:flex;gap:8px;align-items:flex-start"><input name="help_choose_method" type="checkbox"/> <span><strong>Help me decide how to make it.</strong> I know the result I want, but I want Devil n Dove to review possible workshop methods.</span></label>
         <label>Product or idea name<input class="input" name="product_interest" placeholder="Example: personalized keychain, memorial ornament, matching earrings"/></label>
         <label>Requested-by date, optional<input class="input" name="deadline_date" type="date"/></label>
         <label>Budget range, optional<input class="input" name="budget" inputmode="decimal" placeholder="Example: 40"/></label>
@@ -58,6 +62,14 @@
         <label>Gift presentation<select class="input" name="wrap_preference"><option value="">No preference</option><option value="standard">Standard presentation</option><option value="gift">Gift presentation requested</option><option value="minimal">Minimal / low-waste</option><option value="discuss">Please discuss with me</option></select></label>
         <label>Handoff preference<select class="input" name="fulfillment_preference"><option value="discuss">Please discuss with me</option><option value="pickup">Local pickup</option><option value="shipping">Canada shipping</option><option value="event">Event / market handoff</option></select></label>
         <label>Event / market context, optional<input class="input" name="event_context" placeholder="Event name, date, market or meetup"/></label>
+        <label>Company / organisation, optional<input class="input" name="organization_name" placeholder="Business, team, club or organisation"/></label>
+        <label>Structured event / project context, optional<input class="input" name="event_context_structured" placeholder="Event, campaign, deadline or group context"/></label>
+        <label>Intended use, optional<input class="input" name="intended_use" placeholder="Display, daily use, gift, prototype, event handout…"/></label>
+        <label>Desired material, optional<input class="input" name="desired_material" placeholder="Wood, metal, vinyl, resin, stone, fabric…"/></label>
+        <label>Colour / finish, optional<input class="input" name="desired_finish" placeholder="Colour, sheen, texture, coating or finish"/></label>
+        <label style="display:flex;gap:8px;align-items:center"><input name="supplied_item" type="checkbox"/> I plan to supply the item or blank</label>
+        <label style="grid-column:1/-1">Wording / personalization, optional<textarea class="input" name="personalization_text" rows="3" placeholder="Names, wording, dates, variable personalization, logo/graphic notes…"></textarea></label>
+        <label style="grid-column:1/-1">Size / tolerance notes, optional<textarea class="input" name="tolerance_size_notes" rows="3" placeholder="Approximate dimensions, fit, clearance or tolerance needs. Unknown is okay."></textarea></label>
         <label style="grid-column:1/-1">Gift message, optional<textarea class="input" name="gift_message" rows="3" placeholder="Optional wording or message for the recipient"></textarea></label>
         <label style="grid-column:1/-1">Reference image uploads, optional<input class="input" name="reference_images" type="file" accept="image/*" multiple/><span class="small">Up to 5 images, 8 MB each. Uploads are treated as private review references until we approve public use.</span></label>
         <label style="grid-column:1/-1">Links or image URLs, optional<textarea class="input" name="attachment_urls" rows="3" placeholder="Paste public image links or reference URLs, one per line."></textarea></label>
@@ -75,6 +87,6 @@
 
     <div class="footer card" style="margin-top:18px"></div>
   </div>
-  <script src="/js/main.js?v=279"></script><script src="/public/js/seo-page-overrides.js"></script><script src="/public/js/site-analytics.js?v=279"></script><script src="/public/js/custom-request-intake.js?v=467b151"></script><script src="/public/js/custom-request-examples.js?v=467b16"></script><script defer src="/public/js/media-content-runtime.js?v=467b195"></script>
+  <script src="/js/main.js?v=279"></script><script src="/public/js/seo-page-overrides.js"></script><script src="/public/js/site-analytics.js?v=279"></script><script src="/public/js/custom-request-intake.js?v=467b210"></script><script src="/public/js/custom-request-examples.js?v=467b16"></script><script defer src="/public/js/media-content-runtime.js?v=467b195"></script>
 </body>
 </html>

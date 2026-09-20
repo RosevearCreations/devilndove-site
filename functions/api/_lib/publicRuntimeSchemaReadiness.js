@@ -18,7 +18,11 @@ const CUSTOM_REQUEST_COLUMNS = [
   "consent_to_contact", "status", "admin_notes", "utm_source", "utm_medium", "utm_campaign",
   "utm_content", "utm_term", "visitor_token", "browser_session_token", "upload_token",
   "reference_upload_count", "scent_profile", "wax_or_base", "colour_notes", "batch_number",
-  "ingredient_notes", "allergen_safety_notes", "created_at", "updated_at",
+  "ingredient_notes", "allergen_safety_notes",
+  "quantity", "project_intent", "intended_use", "organization_name", "event_context_structured",
+  "supplied_item", "desired_material", "desired_finish", "personalization_text",
+  "requested_capability_key", "tolerance_size_notes", "help_choose_method",
+  "created_at", "updated_at",
 ];
 
 const CUSTOM_SPEC_COLUMNS = [

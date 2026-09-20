@@ -1,5 +1,5 @@
 // File: /public/js/custom-request-intake.js
-// Release 467 Build 151: public custom-work intake with gift, pickup and event context.
+// Release 467 Build 210: Custom Work Intake 2.0 with structured manufacturing intent.
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('customRequestForm');
@@ -8,9 +8,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   try {
     const params = new URLSearchParams(window.location.search || '');
-    const keys = ['request_type','product_interest','gift_intent','recipient_name','occasion','wrap_preference','fulfillment_preference','event_context','gift_message','deadline_date','scent_profile','wax_or_base','colour_notes','ingredient_notes'];
+    const keys = ['request_type','project_intent','quantity','requested_capability_key','product_interest','intended_use','organization_name','event_context_structured','desired_material','desired_finish','personalization_text','tolerance_size_notes','gift_intent','recipient_name','occasion','wrap_preference','fulfillment_preference','event_context','gift_message','deadline_date','scent_profile','wax_or_base','colour_notes','ingredient_notes'];
     keys.forEach((key) => { if (params.get(key) && form.elements[key]) form.elements[key].value = params.get(key); });
   } catch {}
+
+  async function loadCapabilities() {
+    const select = form.elements.requested_capability_key;
+    if (!select) return;
+    try {
+      const response = await fetch('/api/capabilities', { headers: { Accept: 'application/json' } });
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) return;
+      const existing = select.value;
+      for (const profile of (Array.isArray(data.profiles) ? data.profiles : [])) {
+        const option = document.createElement('option');
+        option.value = String(profile.capability_key || '');
+        option.textContent = String(profile.display_name || profile.capability_key || '');
+        if (option.value) select.appendChild(option);
+      }
+      if (existing && Array.from(select.options).some((o) => o.value === existing)) select.value = existing;
+    } catch {}
+  }
 
   function setMsg(text, isError = false) {
     if (!msg) return;
@@ -18,6 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     msg.style.display = text ? 'block' : 'none';
     msg.style.color = isError ? '#b00020' : '#0a7a2f';
   }
+
+  void loadCapabilities();
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -32,8 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
       payload.browser_session_token = window.DDAnalytics?.browser_session_token || '';
     } catch {}
     payload.consent_to_contact = form.querySelector('[name="consent_to_contact"]')?.checked ? 1 : 0;
+    payload.supplied_item = form.querySelector('[name="supplied_item"]')?.checked ? 1 : 0;
+    payload.help_choose_method = form.querySelector('[name="help_choose_method"]')?.checked ? 1 : 0;
     payload.attachment_urls = String(payload.attachment_urls || '').split(/\r?\n|,/).map((item) => item.trim()).filter(Boolean);
     payload.build151_context = true;
+    payload.build210_structured_intake = true;
     setMsg('Sending custom request...');
     try {
       const response = await fetch('/api/custom-request', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
