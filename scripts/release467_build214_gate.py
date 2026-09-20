@@ -39,12 +39,14 @@ for forbidden in ('INSERT INTO creative_work_events','UPDATE creative_work_event
  req(forbidden not in api,f'Build 214 API touches forbidden owner authority: {forbidden}')
 for token in (
  'allowedManufacturingTransitions','loadManufacturingMaturityReadiness','proof_required','production_authorization_ready',
- 'automatic_production_start:false','product_production_run_mutation:false','publication_authorized:false'
+ 'automatic_production_start:false','product_production_run_mutation:false','publication_authorized:false',
+ 'exact_approved_sample_evidence',"proof_status='approved'","COALESCE(entry_status,'active')='active'"
 ):req(token in helper,f'Build 214 helper missing {token}')
 for token in (
  "action==='save_link'","action!=='transition'","to==='approved_sample'","to==='production_authorized'",
  'validateApprovedSampleEvidence','custom_request_proof_versions','creative_work_events',
- "proof_status||'')!=='approved'","Build 213 proof-readiness gate",'sample_superseded',
+ "proof_status||'')!=='approved'","linked Custom Request requires its exact approved Build 213 proof version",
+ "Build 213 proof-readiness gate",'sample_superseded',
  'No production, Inventory, Product-run, payment or publication action was executed.'
 ):req(token in api,f'Build 214 API missing {token}')
 for token in ('Prototype → sample → production run','Approved-sample evidence type','Append-only maturity history','Record transition','does not start production'):req(token in client,f'Build 214 client missing {token}')
