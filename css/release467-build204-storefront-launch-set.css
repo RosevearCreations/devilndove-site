@@ -1,0 +1,14 @@
+/* Release 467 Build 204 — Storefront Launch Set & Autonomous Closure */
+.launch-set-workbench{margin:18px 0}
+.launch-set-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0}
+.launch-set-stat{display:flex;flex-direction:column;gap:4px;min-width:0}
+.launch-set-stat strong{font-size:1.35rem}
+.launch-set-toolbar{display:grid;grid-template-columns:minmax(220px,1fr) minmax(180px,.45fr) auto;gap:10px;align-items:end;margin:14px 0}
+.launch-set-results{display:grid;gap:12px}
+.launch-set-row{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) auto;gap:14px;align-items:start}
+.launch-set-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.launch-set-reasons{margin:8px 0 0;padding-left:20px}
+.launch-set-chip{display:inline-flex;padding:3px 8px;border:1px solid currentColor;border-radius:999px;font-size:.78rem;margin:4px 6px 0 0}
+.launch-set-result{display:block;margin-top:8px;overflow-wrap:anywhere}
+@media(max-width:980px){.launch-set-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.launch-set-row{grid-template-columns:1fr}.launch-set-actions{justify-content:flex-start}}
+@media(max-width:680px){.launch-set-summary,.launch-set-toolbar{grid-template-columns:1fr}}
