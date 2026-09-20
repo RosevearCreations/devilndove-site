@@ -179,6 +179,24 @@ export const D1_READ_BUDGETS = Object.freeze({
     max_concurrent_identical_gets: 1,
     notes: 'Build 191: selected Product price plus its already-bounded saved resource links only. Missing cost remains unknown; no accounting, Inventory, Product, purchasing or payment mutation.'
   }),
+  admin_cost_margin_readiness_v203: Object.freeze({
+    route: '/api/admin/cost-margin-readiness',
+    risk: 'medium',
+    contract: 'explicit_only_grouped_product_resource_cost_evidence',
+    returned_rows_max: 40,
+    browser_cache_ms: 0,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 203: explicit missing-cost and linked-resource margin-readiness evidence. Inventory/Product Resources remain mutation owners; missing cost is unknown and never coerced to zero.'
+  }),
+  admin_cost_margin_recheck_v203: Object.freeze({
+    route: '/api/admin/cost-margin-readiness',
+    risk: 'low',
+    contract: 'explicit_one_product_resource_cost_recheck',
+    returned_rows_max: 1,
+    browser_cache_ms: 0,
+    max_concurrent_identical_gets: 1,
+    notes: 'Build 203: one selected Product-resource link recheck after operator repair. It reports stale evidence and never writes Inventory cost, Product price or accounting state.'
+  }),
   admin_pending_actions: Object.freeze({
     route: '/api/admin/pending-actions',
     risk: 'medium',

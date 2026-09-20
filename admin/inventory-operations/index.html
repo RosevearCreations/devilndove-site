@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="/css/release467-build179-runtime-recovery.css?v=180"/>
 <link rel="stylesheet" href="/css/release467-build183-inventory-identity-cleanup.css?v=183"/>
 <link rel="stylesheet" href="/css/admin-inventory-material-usage-reconciliation.css?v=467b112"/>
+<link rel="stylesheet" href="/css/release467-build203-cost-margin-readiness.css?v=203"/>
 <link rel="icon" href="/assets/mark.png" type="image/png"/>
 <meta name="robots" content="noindex,nofollow"/>
 <meta name="description" content="Focused inventory operations workspace for Devil n Dove tools, supplies, workshop-process assignment, base-unit stock, product resource reservations, material-usage reconciliation, receiving, and catalog sync."/>
@@ -27,10 +28,10 @@
   </div>
   <div class="hero compact-hero inventory-operations-hero">
     <div>
-      <p class="inventory-operations-eyebrow">Release 467 Build 189 • Inventory evidence closure</p>
+      <p class="inventory-operations-eyebrow">Release 467 Build 203 • Cost evidence &amp; margin readiness</p>
       <h1>Tools & Supplies Inventory Operations</h1>
       <p>Manage tools, supplies, workshop-process assignments, purchase packaging, canonical base-unit stock, receiving, product resource reservations, material-usage reconciliation, and catalog sync without the long product editor page.</p>
-      <p class="small inventory-operations-hero-note">Build 200 adds the Supplier & Source Evidence Workbench on top of the staged low-read Build 189 Inventory runtime: explicit supplier/source filters, same-identity candidate evidence, reviewed N/A markers, exact-field routing and one-record stale-safe rechecks. Saves remain deliberate existing Inventory actions; opening this page still performs no identity scan.</p>
+      <p class="small inventory-operations-hero-note">Build 203 adds an explicit-only Cost Evidence &amp; Margin Readiness workbench: required linked-resource costs remain unknown until reviewed, reusable/story-only links remain not applicable, and repairs route to the existing Inventory or Product Resources authority. Opening this page still performs no cost scan.</p>
     </div>
     <div class="inventory-operations-hero-art" aria-hidden="true"><img src="/assets/inventory-operations-placeholder.svg" alt=""/></div>
   </div>
@@ -63,6 +64,7 @@
     <div id="inventoryProcessAssignmentsMount"></div>
     <div id="toolLifecycleReviewMount"></div>
     <div id="productIntegrityReviewMount"></div>
+    <div id="costMarginReadinessMount"></div>
     <div id="productResourcesAdminMount"></div>
     <div id="siteInventoryAdminMount"></div>
     <div id="inventoryKitComponentUsageMount"></div>
@@ -93,6 +95,7 @@
 <script src="/public/js/admin-inventory-process-assignments-v156.js?v=467b156"></script>
 <script src="/public/js/admin-tool-lifecycle-review.js?v=440"></script>
 <script src="/public/js/admin-product-integrity-review.js?v=440"></script>
+<script src="/public/js/admin-cost-margin-readiness-v203.js?v=203"></script>
 <script src="/public/js/admin-product-resources.js?v=185&b=191"></script>
 <script src="/public/js/admin-site-item-inventory.js?v=440.4"></script>
 <script src="/public/js/admin-inventory-lots.js"></script>
