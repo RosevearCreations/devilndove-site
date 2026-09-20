@@ -2,7 +2,7 @@
   "release": 467,
   "build": 213,
   "title": "Digital Proof & Customer Approval",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build213-digital-proof-customer-approval",
   "priority": "add_versioned_private_customer_proof_approval_to_existing_custom_work_without_publication_or_parallel_packaging_media_authority",
   "starting_point": {
@@ -68,6 +68,33 @@
   "next_build": {
     "build": 214,
     "title": "Prototype → Sample → Production Run",
-    "state": "BLOCKED_UNTIL_BUILD213_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_AFTER_BUILD213_PRODUCTION_GREEN"
+  },
+  "final_closure": {
+    "dev_sha": "3292ac5c20780e23bd9d5ae593368e82b6e4826b",
+    "tree_sha": "1108fecdeac23c69b8ea4d810c0375a0899ff469",
+    "proofs": {
+      "system_gate_run": 35533703475,
+      "current_application_quality_run": 35533703446,
+      "it_admin_runtime_proof_run": 35533703481,
+      "branch_hygiene_run": 35533703474
+    },
+    "build_specific_proof_run": 35533703458,
+    "build_specific_proof_attempt": 1,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+  },
+  "production_checkpoint": {
+    "main_sha": "92df5745fc2d4311dfacfbd214c1032a34c46bb8",
+    "tree_sha": "1108fecdeac23c69b8ea4d810c0375a0899ff469",
+    "production_pages_deploy_run": 35534081643,
+    "production_live_resource_integrity_run": 35534292686,
+    "products_browser_proof_run": 35534292705,
+    "products_route_proof_run": 35534292692,
+    "build_specific_proof_run": 35534081642,
+    "exact_production_url": "https://e8fa1e4b.devilndove-site.pages.dev",
+    "deployment_id": "e8fa1e4b-910d-4fae-bddf-cc00218c9c40",
+    "canonical_migrations": 13,
+    "business_counts_preserved": true,
+    "state": "PRODUCTION_GREEN"
   }
 }
