@@ -17,10 +17,20 @@ const json=(data,status=200,routeKey='admin_storefront_launch_set_v204',limit=MA
 );
 
 const PROJECTION=`
-WITH role_by_image AS (
-  SELECT product_image_id,MAX(CASE WHEN TRIM(COALESCE(image_role,''))<>'' THEN 1 ELSE 0 END) has_role
-  FROM product_image_annotations
-  GROUP BY product_image_id
+WITH product_base AS (
+  SELECT *
+  FROM products
+  WHERE LOWER(TRIM(COALESCE(status,'draft'))) NOT IN ('archived','deleted')
+    AND (?=0 OR product_id=?)
+  ORDER BY updated_at DESC,product_id DESC
+  LIMIT ?
+),
+role_by_image AS (
+  SELECT pia.product_image_id,MAX(CASE WHEN TRIM(COALESCE(pia.image_role,''))<>'' THEN 1 ELSE 0 END) has_role
+  FROM product_image_annotations pia
+  JOIN product_images pi0 ON pi0.product_image_id=pia.product_image_id
+  JOIN product_base pb0 ON pb0.product_id=pi0.product_id
+  GROUP BY pia.product_image_id
 ),
 image_stats AS (
   SELECT pi.product_id,
@@ -29,8 +39,18 @@ image_stats AS (
     SUM(CASE WHEN COALESCE(rbi.has_role,0)=0 THEN 1 ELSE 0 END) role_attention,
     SUM(CASE WHEN TRIM(COALESCE(pi.image_url,''))<>'' AND LOWER(TRIM(pi.image_url)) NOT LIKE 'https://assets.devilndove.com/%' THEN 1 ELSE 0 END) image_source_attention
   FROM product_images pi
+  JOIN product_base pb ON pb.product_id=pi.product_id
   LEFT JOIN role_by_image rbi ON rbi.product_image_id=pi.product_image_id
   GROUP BY pi.product_id
+),
+featured_match AS (
+  SELECT pb.product_id,
+    CASE WHEN TRIM(COALESCE(pb.featured_image_url,''))<>'' AND
+      SUM(CASE WHEN TRIM(COALESCE(pi.image_url,''))=TRIM(COALESCE(pb.featured_image_url,'')) THEN 1 ELSE 0 END)=0
+    THEN 1 ELSE 0 END featured_not_in_gallery
+  FROM product_base pb
+  LEFT JOIN product_images pi ON pi.product_id=pb.product_id
+  GROUP BY pb.product_id,pb.featured_image_url
 ),
 inventory_ranked AS (
   SELECT site_item_inventory_id,
@@ -55,6 +75,7 @@ resource_facts AS (
           AND LOWER(TRIM(COALESCE(siup.usage_tracking_mode,'reusable'))) IN ('reusable','log_only'))
       THEN 0 ELSE 1 END cost_required
   FROM product_resource_links prl
+  JOIN product_base pb ON pb.product_id=prl.product_id
   LEFT JOIN inventory_ranked ir
     ON ir.rn=1
    AND ir.item_kind_norm=LOWER(TRIM(COALESCE(prl.resource_kind,'')))
@@ -78,24 +99,19 @@ SELECT p.product_id,p.product_number,p.name,p.slug,p.sku,p.product_category,p.pr
   p.condition_summary,p.era_label,p.featured_image_url,p.updated_at,
   COALESCE(img.image_count,0) image_count,COALESCE(img.alt_attention,0) alt_attention,
   COALESCE(img.role_attention,0) role_attention,COALESCE(img.image_source_attention,0) image_source_attention,
-  CASE WHEN TRIM(COALESCE(p.featured_image_url,''))<>'' AND NOT EXISTS(
-    SELECT 1 FROM product_images pi WHERE pi.product_id=p.product_id
-      AND TRIM(COALESCE(pi.image_url,''))=TRIM(COALESCE(p.featured_image_url,''))
-  ) THEN 1 ELSE 0 END featured_not_in_gallery,
+  COALESCE(fm.featured_not_in_gallery,0) featured_not_in_gallery,
   COALESCE(rs.linked_resource_count,0) linked_resource_count,
   COALESCE(rs.missing_inventory_matches,0) missing_inventory_matches,
   COALESCE(rs.inactive_inventory_links,0) inactive_inventory_links,
   COALESCE(rs.unknown_cost_links,0) unknown_cost_links,
   COALESCE(rs.known_cost_links,0) known_cost_links,
   COALESCE(rs.nondepleting_links,0) nondepleting_links
-FROM products p
+FROM product_base p
 LEFT JOIN image_stats img ON img.product_id=p.product_id
+LEFT JOIN featured_match fm ON fm.product_id=p.product_id
 LEFT JOIN resource_stats rs ON rs.product_id=p.product_id
-WHERE LOWER(TRIM(COALESCE(p.status,'draft'))) NOT IN ('archived','deleted')
-  AND (?=0 OR p.product_id=?)
 ORDER BY p.updated_at DESC,p.product_id DESC
-LIMIT ?
-`;
+`
 
 function reason(code,area,label,href){
   return {code,area,label,repair_href:href||null,automatic_fix:false};
