@@ -3,6 +3,7 @@
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 
 const BUILD = 156;
+const TAXONOMY_BUILD = 207;
 const json = (data,status=200) => jsonResponse({ build:BUILD, ...data },status,{ 'Cache-Control':'no-store' });
 const rows = result => Array.isArray(result?.results) ? result.results : [];
 const keyFor = value => normalizeText(value).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,80);
@@ -36,7 +37,7 @@ async function snapshot(db){
 export async function onRequestGet({request,env}){
   const ready=await context(request,env);if(ready.error)return ready.error;
   if(!(await schemaReady(ready.db))) return json({ok:false,error:'Build 156 inventory process migration is required.',code:'inventory_process_schema_required'},503);
-  return json({ok:true,...await snapshot(ready.db),authority:'inventory_process_assignments',assignment_cardinality:'one_primary_process_per_item'});
+  return json({ok:true,...await snapshot(ready.db),authority:'inventory_process_assignments',taxonomy_authority:'inventory_processes',taxonomy_build:TAXONOMY_BUILD,assignment_cardinality:'one_primary_process_per_item'});
 }
 
 export async function onRequestPost({request,env}){
@@ -52,7 +53,7 @@ export async function onRequestPost({request,env}){
     const result=await ready.db.prepare(`INSERT INTO inventory_processes(process_key,process_name,description,sort_order,is_active,created_at,updated_at) VALUES(?,?,?,500,1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(key,name,description||null).run();
     const id=Number(result?.meta?.last_row_id||0);
     await auditAdminAction(env,request,ready.admin,{action_type:'inventory_process_create',target_type:'inventory_process',target_id:id||null,target_key:key,details:{process_name:name}});
-    return json({ok:true,message:`Process “${name}” created.`,...await snapshot(ready.db)});
+    return json({ok:true,message:`Process “${name}” created.`,taxonomy_build:TAXONOMY_BUILD,...await snapshot(ready.db)});
   }
   const itemId=Number(body.site_item_inventory_id||0);
   if(!itemId)return json({ok:false,error:'Inventory item is required.'},400);
@@ -61,7 +62,7 @@ export async function onRequestPost({request,env}){
   if(action==='clear'){
     await ready.db.prepare('DELETE FROM inventory_process_assignments WHERE site_item_inventory_id=?').bind(itemId).run();
     await auditAdminAction(env,request,ready.admin,{action_type:'inventory_process_assignment_clear',target_type:'inventory_item',target_id:itemId,target_key:`${item.source_type}:${item.external_key}`,details:{item_name:item.item_name}});
-    return json({ok:true,message:`Process cleared for ${item.item_name}.`,...await snapshot(ready.db)});
+    return json({ok:true,message:`Process cleared for ${item.item_name}.`,taxonomy_build:TAXONOMY_BUILD,...await snapshot(ready.db)});
   }
   if(action!=='assign')return json({ok:false,error:'Unsupported action.'},400);
   const processId=Number(body.inventory_process_id||0);
@@ -71,5 +72,5 @@ export async function onRequestPost({request,env}){
     VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
     ON CONFLICT(site_item_inventory_id) DO UPDATE SET inventory_process_id=excluded.inventory_process_id,assigned_by_user_id=excluded.assigned_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(itemId,processId,Number(ready.admin.user_id||0)||null).run();
   await auditAdminAction(env,request,ready.admin,{action_type:'inventory_process_assignment_set',target_type:'inventory_item',target_id:itemId,target_key:`${item.source_type}:${item.external_key}`,details:{item_name:item.item_name,process_key:process.process_key,process_name:process.process_name}});
-  return json({ok:true,message:`${item.item_name} assigned to ${process.process_name}.`,...await snapshot(ready.db)});
+  return json({ok:true,message:`${item.item_name} assigned to ${process.process_name}.`,taxonomy_build:TAXONOMY_BUILD,...await snapshot(ready.db)});
 }

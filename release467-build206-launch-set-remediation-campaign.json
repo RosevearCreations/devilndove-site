@@ -2,7 +2,7 @@
   "release": 467,
   "build": 206,
   "title": "Launch-Set Remediation Campaign",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build206-launch-set-remediation-campaign",
   "priority": "turn_build204_launch_evidence_into_owned_reviewed_remediation_without_duplicate_readiness_logic",
   "starting_point": {
@@ -71,6 +71,29 @@
   "next_build": {
     "build": 207,
     "title": "Workshop Capability & Process Taxonomy Expansion",
-    "state": "BLOCKED_UNTIL_BUILD206_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_AFTER_BUILD206_PRODUCTION_GREEN"
+  },
+  "final_closure": {
+    "dev_sha": "ee62ddd837d2ecbb8f0695fa7efb19e9dffb8b98",
+    "tree_sha": "4c71f152a75c401d3dfd2a5b83852a821dc82cb3",
+    "proofs": {
+      "system_gate_run": 35486635313,
+      "current_application_quality_run": 35486635381,
+      "it_admin_runtime_proof_run": 35486635362,
+      "branch_hygiene_run": 35486635293
+    },
+    "build_specific_proof_run": 35486635345,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+  },
+  "production_checkpoint": {
+    "main_sha": "16689f6eb5982bb72253aba677cfadf636c89ec9",
+    "tree_sha": "4c71f152a75c401d3dfd2a5b83852a821dc82cb3",
+    "production_pages_deploy_run": 35486756097,
+    "production_live_resource_integrity_run": 35486808590,
+    "products_browser_proof_run": 35486808652,
+    "products_route_proof_run": 35486808582,
+    "build_specific_proof_run": 35486756132,
+    "exact_production_url": "https://065082cf.devilndove-site.pages.dev",
+    "state": "PRODUCTION_GREEN"
   }
 }
