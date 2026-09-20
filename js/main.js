@@ -65,17 +65,17 @@
     { href: "/collections/index.html", nav: "/collections/", label: "Collections", desktop: true, group: "Shop & Browse" },
     { href: "/marketplaces/index.html", nav: "/marketplaces/", label: "Marketplaces", desktop: true, group: "Shop & Browse" },
     { href: "/cart/index.html", nav: "/cart/", label: "Cart", desktop: true, group: "Shop & Browse" },
-    { href: "/gallery/index.html", nav: "/gallery/", label: "Art", desktop: true, group: "Workshop" },
-    { href: "/creations/index.html", nav: "/creations/", label: "Creations", desktop: true, group: "Workshop" },
-    { href: "/workshop-journal/index.html", nav: "/workshop-journal/", label: "Workshop Journal", desktop: false, group: "Workshop" },
-    { href: "/tools/index.html", nav: "/tools/", label: "Tools", desktop: true, group: "Workshop" },
-    { href: "/supplies/index.html", nav: "/supplies/", label: "Supplies", desktop: true, group: "Workshop" },
-    { href: "/movies/index.html", nav: "/movies/", label: "Movies", desktop: true, group: "Workshop" },
-    { href: "/events/index.html", nav: "/events/", label: "Events", desktop: true, group: "Community" },
-    { href: "/pickup/index.html", nav: "/pickup/", label: "Pickup", desktop: true, group: "Community" },
-    { href: "/socials/index.html", nav: "/socials/", label: "Socials", desktop: true, group: "Community" },
+    { href: "/gallery/index.html", nav: "/gallery/", label: "Gallery", desktop: false, group: "Workshop" },
+    { href: "/creations/index.html", nav: "/creations/", label: "What we make", desktop: true, group: "Workshop" },
+    { href: "/workshop-journal/index.html", nav: "/workshop-journal/", label: "How we make it", desktop: true, group: "Workshop" },
+    { href: "/tools/index.html", nav: "/tools/", label: "Tools", desktop: false, group: "Workshop" },
+    { href: "/supplies/index.html", nav: "/supplies/", label: "Materials", desktop: true, group: "Workshop" },
+    { href: "/movies/index.html", nav: "/movies/", label: "Movies", desktop: false, group: "Workshop" },
+    { href: "/events/index.html", nav: "/events/", label: "Occasions & events", desktop: true, group: "Community" },
+    { href: "/pickup/index.html", nav: "/pickup/", label: "Pickup", desktop: false, group: "Community" },
+    { href: "/socials/index.html", nav: "/socials/", label: "Socials", desktop: false, group: "Community" },
     { href: "/contact/index.html", nav: "/contact/", label: "Contact", desktop: true, group: "Community" },
-    { href: "/custom-request/index.html", nav: "/custom-request/", label: "Request custom work", desktop: false, group: "Community" },
+    { href: "/custom-request/index.html", nav: "/custom-request/", label: "Custom Work", desktop: true, group: "Community" },
     { href: "/about/index.html", nav: "/about/", label: "About", desktop: true, group: "Essentials" },
     { href: "/search/index.html", nav: "/search/", label: "Search", desktop: true, group: "Essentials" },
     { href: "/handmade-jewelry-ontario/index.html", nav: "/handmade-jewelry-ontario/", label: "Handmade jewelry Ontario", desktop: false, group: "Local pages" },
@@ -119,7 +119,7 @@
         <img src="/assets/logo-clear.png" alt="Devil n Dove logo" />
         <div>
           <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-          <div class="small">Workshop • Art • Tools • Movies</div>
+          <div class="small">Multi-discipline artisan &amp; maker workshop</div>
         </div>
       </div>
       <button class="nav-mobile-toggle" type="button" aria-expanded="false" aria-controls="siteNavPanel">
@@ -133,13 +133,13 @@
         <div class="nav-mobile-panel-head">
           <div>
             <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Browse Devil n Dove</div>
-            <div class="small">Shop, creations, tools, supplies, movies, and more</div>
+            <div class="small">What we make • how we make it • materials • occasions • Custom Work</div>
           </div>
           <button class="btn nav-mobile-close" type="button">Close</button>
         </div>
         <div class="nav-mobile-quick-row" aria-label="Quick mobile navigation">
           <a class="btn primary" href="/shop/index.html" data-nav="/shop/">Shop</a>
-          <a class="btn" href="/search/index.html" data-nav="/search/">Search</a>
+          <a class="btn" href="/custom-request/index.html" data-nav="/custom-request/">Custom Work</a>
           <a class="btn" href="/cart/index.html" data-nav="/cart/">Cart</a>
         </div>
         <div class="nav-mobile-groups" aria-label="Mobile navigation">
@@ -154,7 +154,7 @@
       <div class="site-footer-grid">
         <div>
           <h2 class="site-footer-title">Devil n Dove</h2>
-          <p class="small">Handmade jewelry, workshop creations, tools, supplies, movies, and maker-life updates from Southern Ontario.</p>
+          <p class="small">A multi-discipline artisan and maker workshop in Southern Ontario: explore what we make, how we make it, materials, occasions and reviewed Custom Work.</p>
         </div>
         <div>
           <div class="site-footer-heading">Explore</div>
@@ -164,11 +164,13 @@
             <a href="/marketplaces/index.html">Marketplaces</a>
             <a href="/events/index.html">Events</a>
             <a href="/pickup/index.html">Pickup</a>
+            <a href="/creations/index.html">What we make</a>
+            <a href="/workshop-journal/index.html">How we make it</a>
+            <a href="/supplies/index.html">Materials</a>
+            <a href="/events/index.html">Occasions &amp; events</a>
+            <a href="/custom-request/index.html">Custom Work</a>
             <a href="/gallery/index.html">Gallery</a>
-            <a href="/creations/index.html">Creations</a>
-            <a href="/workshop-journal/index.html">Workshop Journal</a>
             <a href="/tools/index.html">Tools</a>
-            <a href="/supplies/index.html">Supplies</a>
             <a href="/movies/index.html">Movies</a>
             <a href="/socials/index.html">Socials</a>
           </div>

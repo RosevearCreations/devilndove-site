@@ -52,9 +52,10 @@ These counts are the baseline for the next block. They must not be silently rese
 - Build 204: **complete and Production GREEN**.
 - Build 205: **complete and Production GREEN**.
 - Build 206: **complete and Production GREEN** at Production `16689f6eb5982bb72253aba677cfadf636c89ec9`, shared tree `4c71f152a75c401d3dfd2a5b83852a821dc82cb3`.
-- Build 207: **current — Workshop Capability & Process Taxonomy Expansion**.
-- Build 208: **next only after Build 207 is exact-SHA Production GREEN**.
-- Builds 209–224: **planned**.
+- Build 207: **complete and Production GREEN** at Production `0937de81d2610788db5315b675d92c055c9db549`, shared tree `22a246a035f421856a705643c59ccb4171854d71`.
+- Build 208: **current — Multi-Discipline Public Positioning & Capability Navigation**.
+- Build 209: **next only after Build 208 is exact-SHA Production GREEN**.
+- Builds 210–224: **planned**.
 - Build 207 extends the existing Build 156 process catalog through canonical migration 0008 and preserves reviewed Tool/Supply assignments.
 
 ---
