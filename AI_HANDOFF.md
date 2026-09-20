@@ -2,21 +2,21 @@
 
 ## Current verified restart baseline
 
-Release 467 **Build 206 — Launch-Set Remediation Campaign** is fully promoted and Production GREEN.
+Release 467 **Build 207 — Workshop Capability & Process Taxonomy Expansion** is fully promoted and Production GREEN.
 
-- Development `ee62ddd837d2ecbb8f0695fa7efb19e9dffb8b98`
-- Production `16689f6eb5982bb72253aba677cfadf636c89ec9`
-- shared tree `4c71f152a75c401d3dfd2a5b83852a821dc82cb3`
-- four Development proofs `35486635313` / `35486635381` / `35486635362` / `35486635293`
-- Build 206 Development proof `35486635345`
-- Production Pages / Live Resources `35486756097` / `35486808590`
-- Product Browser / Route proofs `35486808652` / `35486808582`
-- Build 206 Production proof `35486756132`
-- exact Production URL `https://065082cf.devilndove-site.pages.dev`
+- Development `ead5fcb06f9b0e849736a66d5032274ca99de830`
+- Production `0937de81d2610788db5315b675d92c055c9db549`
+- shared tree `22a246a035f421856a705643c59ccb4171854d71`
+- four Development proofs `35514290109` / `35514290237` / `35514290207` / `35514290217`
+- Build 207 Development proof `35514290132`
+- Production Pages / Live Resources `35514481645` / `35514524661`
+- Product Browser / Route proofs `35514524666` / `35514524708`
+- Build 207 Production proof `35514481601`
+- exact Production URL `https://37b30f80.devilndove-site.pages.dev`
 
 ## Active candidate
 
-**Release 467 Build 207 — Workshop Capability & Process Taxonomy Expansion**. Extend the existing Build 156 `inventory_processes` authority through canonical migration 0008. Preserve existing process keys and reviewed Tool/Supply assignments; add no parallel taxonomy and make no automatic assignments.
+**Release 467 Build 208 — Multi-Discipline Public Positioning & Capability Navigation**. Reorganize existing public discovery around What we make, How we make it, Materials, Occasions & use, and Custom Work. Reuse existing Storefront, Workshop Journal, Supplies, Events/Pickup and Custom Request routes; add no second catalog, process taxonomy or Custom Work system.
 
 ## Restart rule
 
@@ -28,4 +28,4 @@ Build 171 **Release & Restart Authority Convergence** remains immutable historic
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 **Release Regression & Runtime Budget Convergence** and Build 193 **Current Authority & Handoff Convergence** remain retained historical release/restart provenance. Their exact artifacts and gates must remain valid, but current restart truth is Build 207 over exact Production-GREEN Build 206.
+Build 192 **Release Regression & Runtime Budget Convergence** and Build 193 **Current Authority & Handoff Convergence** remain retained historical release/restart provenance. Their exact artifacts and gates must remain valid, but current restart truth is Build 208 over exact Production-GREEN Build 207.

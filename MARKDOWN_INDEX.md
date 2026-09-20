@@ -2,13 +2,13 @@
 
 ## Current authority
 
-Last fully verified: **Build 206 — Launch-Set Remediation Campaign**. Active candidate: **Build 207 — Workshop Capability & Process Taxonomy Expansion**.
+Last fully verified: **Build 207 — Workshop Capability & Process Taxonomy Expansion**. Active candidate: **Build 208 — Multi-Discipline Public Positioning & Capability Navigation**.
 
-- Development `ee62ddd837d2ecbb8f0695fa7efb19e9dffb8b98`
-- Production `16689f6eb5982bb72253aba677cfadf636c89ec9`
-- tree `4c71f152a75c401d3dfd2a5b83852a821dc82cb3`
-- System / Quality / I.T. / Hygiene `35486635313` / `35486635381` / `35486635362` / `35486635293`
-- Production Pages / Live Resources `35486756097` / `35486808590`
+- Development `ead5fcb06f9b0e849736a66d5032274ca99de830`
+- Production `0937de81d2610788db5315b675d92c055c9db549`
+- tree `22a246a035f421856a705643c59ccb4171854d71`
+- System / Quality / I.T. / Hygiene `35514290109` / `35514290237` / `35514290207` / `35514290217`
+- Production Pages / Live Resources `35514481645` / `35514524661`
 - canonical migrations `0001–0008`
 
 ## Read in this order
@@ -16,8 +16,8 @@ Last fully verified: **Build 206 — Launch-Set Remediation Campaign**. Active c
 1. `AI_HANDOFF.md`
 2. `PROJECT_STATUS_AND_ROADMAP.md`
 3. `docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md`
-4. `docs/operations/RELEASE_467_BUILD_207_WORKSHOP_CAPABILITY_PROCESS_TAXONOMY_EXPANSION.md`
-5. `release467-build207-workshop-capability-process-taxonomy-expansion.json`
+4. `docs/operations/RELEASE_467_BUILD_208_MULTI_DISCIPLINE_PUBLIC_POSITIONING_CAPABILITY_NAVIGATION.md`
+5. `release467-build208-multi-discipline-public-positioning-capability-navigation.json`
 6. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
 
 ## Active autonomous build documents
@@ -58,4 +58,4 @@ Build 171 remains historical provenance over exact Build 170 predecessor `879c87
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 207 over exact Production-GREEN Build 206.
+Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 208 over exact Production-GREEN Build 207.
