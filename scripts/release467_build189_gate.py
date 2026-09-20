@@ -31,7 +31,8 @@ for token in ("admin_inventory_evidence_recheck_v189","explicit_one_inventory_re
 for forbidden in ("onRequestPost","onRequestPatch","onRequestPut","onRequestDelete","CREATE TABLE","ALTER TABLE","DROP TABLE","INSERT INTO","UPDATE site_item_inventory","DELETE FROM","bucket.put(","bucket.delete("):
     req(forbidden not in api,f"Build 189 evidence API gained forbidden mutation/schema/R2 behavior: {forbidden}")
 
-for token in ("Release 467 Build 189","data-inventory-evidence-recheck","inventoryEvidenceRecheckResult","api('record'","safe reference:","Compare duplicate-group evidence","Catalog-reference evidence"):
+req(("Release 467 Build 189" in ui+page) or ("Release 467 Build 203" in page),"Build 189 Inventory UI missing a valid successor page identity")
+for token in ("data-inventory-evidence-recheck","inventoryEvidenceRecheckResult","api('record'","safe reference:","Compare duplicate-group evidence","Catalog-reference evidence"):
     req(token in ui+page,f"Build 189 Inventory UI missing: {token}")
 for forbidden in ("method:'POST'","method: 'POST'","method:'PATCH'","method: 'PATCH'","setInterval(","MutationObserver("):
     req(forbidden not in ui,f"Build 189 Inventory evidence UI gained background/write behavior: {forbidden}")
