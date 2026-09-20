@@ -151,7 +151,7 @@ for token in ('retained historical release/restart authority proof','Current suc
     req(token.lower() in gate171.lower(),f'Build 171 retained gate missing successor-aware token: {token}')
 
 # Roadmap and Build 193 doc.
-active_successor_match=re.search(r"\*\*Build (\d+) — current\*\*",roadmap)
+active_successor_match=re.search(r"\*\*Build (\d+) — current(?: and final planned build)?\*\*",roadmap)
 active_successor_build=int(active_successor_match.group(1)) if active_successor_match else 0
 successor_roadmap=('**Build 193 — complete**' in roadmap and active_successor_build >= 199)
 req(('**Build 193 — next/current planned work**' in roadmap) or ('**Build 193 — complete**' in roadmap and '**Build 194 — current**' in roadmap) or ('**Build 194 — complete**' in roadmap and '**Build 195 — current**' in roadmap) or ('**Build 195 — complete**' in roadmap and '**Build 196 — current**' in roadmap) or ('**Build 196 — complete**' in roadmap and '**Build 197 — current**' in roadmap) or ('**Build 197 — complete**' in roadmap and '**Build 198 — current**' in roadmap) or successor_roadmap,'193-204 roadmap must preserve Build 193 closure while allowing later successors')
