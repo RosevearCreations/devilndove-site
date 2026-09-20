@@ -1,0 +1,72 @@
+{
+  "release": 467,
+  "build": 208,
+  "title": "Multi-Discipline Public Positioning & Capability Navigation",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build208-multi-discipline-public-positioning-capability-navigation",
+  "priority": "organize_existing_public_authorities_around_five_workshop_discovery_dimensions_without_duplicate_catalog_or_capability_truth",
+  "starting_point": {
+    "development": {
+      "sha": "ead5fcb06f9b0e849736a66d5032274ca99de830",
+      "tree": "22a246a035f421856a705643c59ccb4171854d71",
+      "system_gate_run": 35514290109,
+      "quality_run": 35514290237,
+      "it_admin_runtime_run": 35514290207,
+      "repository_hygiene_run": 35514290217,
+      "build_specific_proof_run": 35514290132,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "0937de81d2610788db5315b675d92c055c9db549",
+      "tree": "22a246a035f421856a705643c59ccb4171854d71",
+      "production_pages_deploy_run": 35514481645,
+      "production_live_resource_integrity_run": 35514524661,
+      "products_browser_proof_run": 35514524666,
+      "products_route_proof_run": 35514524708,
+      "build_specific_proof_run": 35514481601,
+      "exact_production_url": "https://37b30f80.devilndove-site.pages.dev",
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "dimensions": [
+    "what_we_make",
+    "how_we_make_it",
+    "materials",
+    "occasions_and_use",
+    "custom_work"
+  ],
+  "scope": [
+    "Relabel shared public navigation around the five Build 208 discovery dimensions while retaining existing routes.",
+    "Add crawlable Home and Shop discovery hubs using existing Storefront, workshop, local and Custom Work routes.",
+    "Add context to the existing Custom Request page without changing its intake schema or workflow.",
+    "Preserve Product/Collections/Collages shopping, one-H1, approved evidence only and Canada-first commerce."
+  ],
+  "safety": {
+    "schema_change": false,
+    "d1_business_data_mutation": false,
+    "new_storefront_route_system": false,
+    "new_product_catalog": false,
+    "new_process_taxonomy": false,
+    "new_custom_request_system": false,
+    "automatic_product_publication": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "payment_execution": false,
+    "publication_execution": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build208_gate.py",
+    "shared_navigation": "js/main.js",
+    "home": "index.html",
+    "shop": "shop/index.html",
+    "custom_work": "custom-request/index.html",
+    "style": "css/styles.css",
+    "required_dimensions": 5
+  },
+  "next_build": {
+    "build": 209,
+    "title": "Workshop Capability Profiles & Constraints",
+    "state": "BLOCKED_UNTIL_BUILD208_PRODUCTION_GREEN"
+  }
+}
