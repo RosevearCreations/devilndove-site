@@ -54,10 +54,12 @@ Allowed transitions are explicit and fail closed. Failed prototypes and rework r
 
 ## Approved-sample evidence
 
-An approved sample must reference exactly one of:
+An approved sample must reference exact evidence:
 
-- an approved Build 213 proof version belonging to the linked Custom Request; or
-- an active Creative Process event belonging to the linked Creative Project.
+- when a Custom Request is linked, it must be the exact **currently approved Build 213 proof version** belonging to that request;
+- for Creative-Project-only work with no Custom Request, it may be an exact active Creative Process event belonging to that project.
+
+If the referenced proof is later superseded or the referenced Creative Process event is voided, Build 214 fails closed and will not treat the sample evidence as production-authorization-ready.
 
 If an approved sample is superseded by a new sample candidate, the current pointer is cleared but the prior transition/evidence remains in append-only history.
 
