@@ -14,8 +14,8 @@ export async function loadCustomRequestProofReadiness(db, customRequestId) {
 
   const triage=await db.prepare(`SELECT proof_sample_required,proof_sample_notes,triage_status,feasibility_state
     FROM custom_request_manufacturing_triage WHERE custom_request_id=? LIMIT 1`).bind(requestId).first().catch(()=>null);
-  const versions=rows(await db.prepare(`SELECT custom_request_proof_version_id,version_number,proof_status,proof_title,
-      source_kind,expires_at,sent_at,first_viewed_at,customer_responded_at,approved_at,changes_requested_at,superseded_at,expired_at,
+  const versions=rows(await db.prepare(`SELECT custom_request_proof_version_id,version_number,proof_token,proof_status,proof_title,customer_message,
+      source_kind,proof_preview_url,custom_order_stage_photo_id,packaging_project_id,packaging_project_version_id,source_note,expires_at,sent_at,first_viewed_at,customer_response_note,customer_responded_at,approved_at,changes_requested_at,superseded_at,expired_at,
       internal_production_approval_required,internal_production_approval_status,internal_approved_at,created_at,updated_at
     FROM custom_request_proof_versions WHERE custom_request_id=?
     ORDER BY version_number DESC,custom_request_proof_version_id DESC LIMIT 40`).bind(requestId).all().catch(()=>({results:[]})));
