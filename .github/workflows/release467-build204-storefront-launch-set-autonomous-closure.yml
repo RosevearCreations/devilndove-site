@@ -1,0 +1,239 @@
+name: Release 467 Build 204 Storefront Launch Set Autonomous Closure
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/admin/storefront-launch-set.js'
+      - 'functions/api/_lib/d1ReadBudget.js'
+      - 'public/js/admin-storefront-launch-set-v204.js'
+      - 'css/release467-build204-storefront-launch-set.css'
+      - 'admin/catalog-health/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_204_STOREFRONT_LAUNCH_SET_AUTONOMOUS_CLOSURE.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md'
+      - 'scripts/release467_build204_gate.py'
+      - 'scripts/release467_build203_gate.py'
+      - 'scripts/release467_build202_gate.py'
+      - '.github/workflows/release467-build204-storefront-launch-set-autonomous-closure.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prove Build 204 storefront launch-set closure
+        run: python scripts/release467_build204_gate.py
+      - name: Retain Build 203 cost evidence and margin readiness
+        run: python scripts/release467_build203_gate.py
+      - name: Retain Build 202 catalog/media reconciliation
+        run: python scripts/release467_build202_gate.py
+      - name: Retain Build 199 buyer readiness workbench
+        run: python scripts/release467_build199_gate.py
+      - name: Retain Build 189 Inventory evidence closure
+        run: python scripts/release467_build189_gate.py
+      - name: Retain Build 194 D1 headroom contract
+        run: python scripts/release467_build194_gate.py
+      - name: Retain Build 186 public Product request proof
+        run: python scripts/release467_build186_gate.py
+      - name: Retain Build 77 Canada-only commerce
+        run: python scripts/release467_build77_gate.py
+
+  development-d1-launch-closure-proof:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q '^database_id = "f34a741b-0000-45b0-9a96-6be08754d563"$' wrangler.toml
+      - name: Prove exact Development storefront launch-set closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "WITH product_base AS (
+            SELECT *
+            FROM products
+            WHERE LOWER(TRIM(COALESCE(status,'draft'))) NOT IN ('archived','deleted')
+            ORDER BY updated_at DESC,product_id DESC
+            LIMIT 240
+          ),
+          role_by_image AS (
+            SELECT pia.product_image_id,MAX(CASE WHEN TRIM(COALESCE(pia.image_role,''))<>'' THEN 1 ELSE 0 END) has_role
+            FROM product_image_annotations pia
+            JOIN product_images pi0 ON pi0.product_image_id=pia.product_image_id
+            JOIN product_base pb0 ON pb0.product_id=pi0.product_id
+            GROUP BY pia.product_image_id
+          ),
+          image_stats AS (
+            SELECT pi.product_id,COUNT(*) image_count,
+              SUM(CASE WHEN LENGTH(TRIM(COALESCE(pi.alt_text,'')))<12 THEN 1 ELSE 0 END) alt_attention,
+              SUM(CASE WHEN COALESCE(rbi.has_role,0)=0 THEN 1 ELSE 0 END) role_attention,
+              SUM(CASE WHEN TRIM(COALESCE(pi.image_url,''))<>'' AND LOWER(TRIM(pi.image_url)) NOT LIKE 'https://assets.devilndove.com/%' THEN 1 ELSE 0 END) image_source_attention
+            FROM product_images pi
+            JOIN product_base pb ON pb.product_id=pi.product_id
+            LEFT JOIN role_by_image rbi ON rbi.product_image_id=pi.product_image_id
+            GROUP BY pi.product_id
+          ),
+          featured_match AS (
+            SELECT pb.product_id,
+              CASE WHEN TRIM(COALESCE(pb.featured_image_url,''))<>'' AND
+                SUM(CASE WHEN TRIM(COALESCE(pi.image_url,''))=TRIM(COALESCE(pb.featured_image_url,'')) THEN 1 ELSE 0 END)=0
+              THEN 1 ELSE 0 END featured_not_in_gallery
+            FROM product_base pb
+            LEFT JOIN product_images pi ON pi.product_id=pb.product_id
+            GROUP BY pb.product_id,pb.featured_image_url
+          ),
+          inventory_ranked AS (
+            SELECT site_item_inventory_id,
+              LOWER(TRIM(COALESCE(source_type,''))) item_kind_norm,
+              LOWER(TRIM(COALESCE(external_key,''))) source_key_norm,
+              COALESCE(is_active,1) is_active,COALESCE(unit_cost_cents,0) unit_cost_cents,
+              ROW_NUMBER() OVER (
+                PARTITION BY LOWER(TRIM(COALESCE(source_type,''))),LOWER(TRIM(COALESCE(external_key,'')))
+                ORDER BY COALESCE(is_active,1) DESC,site_item_inventory_id DESC
+              ) rn
+            FROM site_item_inventory
+            WHERE LOWER(TRIM(COALESCE(source_type,''))) IN ('tool','supply')
+          ),
+          resource_facts AS (
+            SELECT prl.product_id,ir.site_item_inventory_id,COALESCE(ir.is_active,0) inventory_active,
+              COALESCE(ir.unit_cost_cents,0) unit_cost_cents,
+              CASE WHEN COALESCE(prl.consumption_mode,'per_unit')='story_only'
+                OR (LOWER(TRIM(COALESCE(prl.resource_kind,'')))='tool'
+                    AND LOWER(TRIM(COALESCE(siup.usage_tracking_mode,'reusable'))) IN ('reusable','log_only'))
+                THEN 0 ELSE 1 END cost_required
+            FROM product_resource_links prl
+            JOIN product_base pb ON pb.product_id=prl.product_id
+            LEFT JOIN inventory_ranked ir
+              ON ir.rn=1
+             AND ir.item_kind_norm=LOWER(TRIM(COALESCE(prl.resource_kind,'')))
+             AND ir.source_key_norm=LOWER(TRIM(COALESCE(prl.source_key,'')))
+            LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=ir.site_item_inventory_id
+          ),
+          resource_stats AS (
+            SELECT product_id,COUNT(*) linked_resource_count,
+              SUM(CASE WHEN site_item_inventory_id IS NULL THEN 1 ELSE 0 END) missing_inventory_matches,
+              SUM(CASE WHEN site_item_inventory_id IS NOT NULL AND inventory_active<>1 THEN 1 ELSE 0 END) inactive_inventory_links,
+              SUM(CASE WHEN cost_required=1 AND (site_item_inventory_id IS NULL OR unit_cost_cents<=0) THEN 1 ELSE 0 END) unknown_cost_links
+            FROM resource_facts GROUP BY product_id
+          ),
+          evidence AS (
+            SELECT pb.*,
+              COALESCE(img.image_count,0) image_count,COALESCE(img.alt_attention,0) alt_attention,
+              COALESCE(img.role_attention,0) role_attention,COALESCE(img.image_source_attention,0) image_source_attention,
+              COALESCE(fm.featured_not_in_gallery,0) featured_not_in_gallery,
+              COALESCE(rs.linked_resource_count,0) linked_resource_count,
+              COALESCE(rs.missing_inventory_matches,0) missing_inventory_matches,
+              COALESCE(rs.inactive_inventory_links,0) inactive_inventory_links,
+              COALESCE(rs.unknown_cost_links,0) unknown_cost_links,
+              CASE WHEN
+                TRIM(COALESCE(pb.name,''))='' OR TRIM(COALESCE(pb.slug,''))='' OR TRIM(COALESCE(pb.product_category,''))=''
+                OR LOWER(TRIM(COALESCE(pb.product_type,'physical'))) NOT IN ('physical','digital')
+                OR COALESCE(pb.price_cents,0)<=0 OR TRIM(COALESCE(pb.currency,''))=''
+                OR (LOWER(TRIM(COALESCE(pb.product_type,'physical')))='physical' AND COALESCE(pb.requires_shipping,0)=1 AND COALESCE(pb.weight_grams,0)<=0)
+                OR (LOWER(TRIM(COALESCE(pb.product_type,'physical')))='physical' AND COALESCE(pb.requires_shipping,0)=1 AND TRIM(COALESCE(pb.shipping_code,''))='')
+                OR (LOWER(TRIM(COALESCE(pb.product_type,'physical')))='digital' AND TRIM(COALESCE(pb.digital_file_url,''))='')
+                OR (LOWER(TRIM(COALESCE(pb.sale_channel,'onsite'))) IN ('hybrid','external_only') AND TRIM(COALESCE(pb.external_listing_url,''))='')
+                OR (LOWER(TRIM(COALESCE(pb.status,'draft')))='active' AND LOWER(TRIM(COALESCE(pb.review_status,'pending_review'))) NOT IN ('approved','published'))
+              THEN 1 ELSE 0 END buyer_blocked,
+              CASE WHEN LOWER(TRIM(COALESCE(pb.status,'draft')))='active'
+                AND LOWER(TRIM(COALESCE(pb.review_status,''))) IN ('','approved','published')
+                AND TRIM(COALESCE(pb.slug,''))<>'' THEN 1 ELSE 0 END publicly_visible,
+              CASE WHEN UPPER(TRIM(COALESCE(pb.currency,''))) NOT IN ('','CAD')
+                OR LOWER(TRIM(COALESCE(pb.sale_channel,'onsite')))='external_only'
+              THEN 1 ELSE 0 END externally_blocked
+            FROM product_base pb
+            LEFT JOIN image_stats img ON img.product_id=pb.product_id
+            LEFT JOIN featured_match fm ON fm.product_id=pb.product_id
+            LEFT JOIN resource_stats rs ON rs.product_id=pb.product_id
+          ),
+          classified AS (
+            SELECT *,
+              CASE WHEN TRIM(COALESCE(featured_image_url,''))<>'' AND image_count>=3
+                AND alt_attention=0 AND role_attention=0 AND image_source_attention=0 AND featured_not_in_gallery=0
+              THEN 1 ELSE 0 END media_ready,
+              CASE WHEN COALESCE(inventory_tracking,0)=1 AND COALESCE(inventory_quantity,0)<=0 THEN 1 ELSE 0 END tracked_zero_stock,
+              CASE WHEN buyer_blocked=1
+                OR (COALESCE(inventory_tracking,0)=1 AND COALESCE(inventory_quantity,0)<=0)
+                OR publicly_visible=0
+                OR NOT (TRIM(COALESCE(featured_image_url,''))<>'' AND image_count>=3 AND alt_attention=0 AND role_attention=0 AND image_source_attention=0 AND featured_not_in_gallery=0)
+                OR missing_inventory_matches>0 OR inactive_inventory_links>0 OR unknown_cost_links>0
+              THEN 1 ELSE 0 END review_required
+            FROM evidence
+          )
+          SELECT
+            COUNT(*) products_reviewed,
+            SUM(CASE WHEN externally_blocked=0 AND review_required=0 THEN 1 ELSE 0 END) ready_products,
+            SUM(CASE WHEN externally_blocked=0 AND review_required=1 THEN 1 ELSE 0 END) review_required_products,
+            SUM(externally_blocked) externally_blocked_products,
+            SUM(publicly_visible) publicly_visible_products,
+            SUM(media_ready) media_ready_products,
+            SUM(tracked_zero_stock) tracked_zero_stock_products,
+            SUM(CASE WHEN linked_resource_count>0 THEN 1 ELSE 0 END) products_with_linked_resources,
+            SUM(CASE WHEN missing_inventory_matches>0 THEN 1 ELSE 0 END) products_with_missing_linked_inventory,
+            SUM(CASE WHEN unknown_cost_links>0 THEN 1 ELSE 0 END) products_with_unknown_linked_cost,
+            SUM(buyer_blocked) buyer_blocked_products
+          FROM classified;" > /tmp/build204-launch-closure.json
+          python - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/build204-launch-closure.json')); rows=[]; reads=[]
+          keys=('products_reviewed','ready_products','review_required_products','externally_blocked_products','publicly_visible_products','media_ready_products','tracked_zero_stock_products','products_with_linked_resources','products_with_missing_linked_inventory','products_with_unknown_linked_cost','buyer_blocked_products')
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in keys): rows.append(v)
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None: reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          assert rows,data
+          row={k:int(rows[0][k] or 0) for k in keys}
+          assert row['products_reviewed']<=240,row
+          assert row['ready_products']+row['review_required_products']+row['externally_blocked_products']==row['products_reviewed'],row
+          provider_rows_read=sum(reads)
+          assert provider_rows_read <= 15000,('D1 rows_read budget exceeded',provider_rows_read,15000)
+          closure={
+            'release':467,'build':204,'development_sha':os.environ.get('GITHUB_SHA',''),
+            'final_planned_build':True,'future_queue_preplanned':False,
+            'd1_provider_rows_read':provider_rows_read,'d1_rows_read_ceiling':15000,
+            'launch_set':row,
+            'commerce_policy':{'country':'CA','currency':'CAD','us_sales_enabled':False,'us_shipping_enabled':False},
+            'external_lanes':{'stripe_development':'HOLD_EXTERNAL','paypal_sandbox':'HOLD_EXTERNAL','social_oauth':'HOLD_EXTERNAL','cloudflare_access':'HOLD_EXTERNAL'},
+            'mutations':{'d1':'ZERO','r2':'ZERO','schema':'NONE','product_publication':'NONE','inventory':'NONE','payment_refund':'NONE','accounting':'NONE','production_data_copy':'NONE'}
+          }
+          json.dump(closure,open('/tmp/release467-build204-closure.json','w'),indent=2,sort_keys=True)
+          print('D1_PROVIDER_ROWS_READ=',provider_rows_read,'BUDGET=',15000)
+          print('BUILD 204 DEVELOPMENT STOREFRONT LAUNCH CLOSURE: PASS',row)
+          print('COMMERCE POLICY: CANADA + CAD / U.S. SALES & SHIPPING DISABLED')
+          print('D1 MUTATION: ZERO')
+          print('R2 MUTATION: ZERO')
+          print('SCHEMA MIGRATION: NONE')
+          print('FUTURE PREPLANNED QUEUE AFTER BUILD 204: NONE')
+          PY
+      - name: Upload exact-SHA Build 204 autonomous closure artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release467-build204-closure-${{ github.sha }}
+          path: /tmp/release467-build204-closure.json
+          if-no-files-found: error

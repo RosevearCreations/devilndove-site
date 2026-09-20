@@ -87,13 +87,18 @@ for token in (
 ):
     req(token in budget,f"Build 203 D1 budget contract missing: {token}")
 
-for token in (
+legacy_roadmap=all(token in roadmap for token in (
     "Build 202 — complete",
     "Build 203 — current",
     "Build 204 — next after Build 203 is fully GREEN",
     "09745a82b5f8d23e0fe1c681b90ec32b4605a38a",
-):
-    req(token in roadmap,f"Build 203 roadmap checkpoint missing: {token}")
+))
+successor_roadmap=(
+    "Build 203 — complete" in roadmap
+    and "6e08228a925fa1283a0e25b46ef1231b724c48e4" in roadmap
+    and any(token in roadmap for token in ("Build 204 — current and final planned build","Build 204 — complete"))
+)
+req(legacy_roadmap or successor_roadmap,"Build 203 roadmap checkpoint must be current or explicitly closed by Build 204")
 
 for token in (
     "exact starting boundary",

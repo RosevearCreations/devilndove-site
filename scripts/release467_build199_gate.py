@@ -77,7 +77,7 @@ legacy_roadmap=all(token in roadmap for token in (
     "Build 200 — next after Build 199 is fully GREEN",
     "Builds 201–204: planned, not started",
 ))
-active_successor_match=re.search(r"\*\*Build (\d+) — current\*\*",roadmap)
+active_successor_match=re.search(r"\*\*Build (\d+) — current(?: and final planned build)?\*\*",roadmap)
 active_successor_build=int(active_successor_match.group(1)) if active_successor_match else 0
 successor_roadmap=("Build 199 — complete" in roadmap and active_successor_build >= 200)
 req(legacy_roadmap or successor_roadmap,"Build 199 roadmap checkpoint must be current or explicitly closed by Build 200 or later successors")
