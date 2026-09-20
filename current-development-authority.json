@@ -1,41 +1,41 @@
 {
   "release": 467,
-  "build": 207,
-  "title": "Workshop Capability & Process Taxonomy Expansion",
+  "build": 208,
+  "title": "Multi-Discipline Public Positioning & Capability Navigation",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "ee62ddd837d2ecbb8f0695fa7efb19e9dffb8b98",
-  "accepted_dev_tree_sha": "4c71f152a75c401d3dfd2a5b83852a821dc82cb3",
+  "accepted_dev_sha": "ead5fcb06f9b0e849736a66d5032274ca99de830",
+  "accepted_dev_tree_sha": "22a246a035f421856a705643c59ccb4171854d71",
   "acceptance": {
-    "system_gate_run": 35486635313,
-    "current_application_quality_run": 35486635381,
-    "it_admin_runtime_proof_run": 35486635362,
-    "branch_hygiene_run": 35486635293
+    "system_gate_run": 35514290109,
+    "current_application_quality_run": 35514290237,
+    "it_admin_runtime_proof_run": 35514290207,
+    "branch_hygiene_run": 35514290217
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 206,
-      "title": "Launch-Set Remediation Campaign",
-      "authority": "release467-build206-launch-set-remediation-campaign.json",
-      "dev_sha": "ee62ddd837d2ecbb8f0695fa7efb19e9dffb8b98",
-      "tree_sha": "4c71f152a75c401d3dfd2a5b83852a821dc82cb3",
-      "proofs": {
-        "system_gate_run": 35486635313,
-        "current_application_quality_run": 35486635381,
-        "it_admin_runtime_proof_run": 35486635362,
-        "branch_hygiene_run": 35486635293
-      },
-      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
-      "exact_preview_deployment": true,
-      "build_specific_proof_run": 35486635345
-    },
-    "current_closure_candidate": {
-      "release": 467,
       "build": 207,
       "title": "Workshop Capability & Process Taxonomy Expansion",
       "authority": "release467-build207-workshop-capability-process-taxonomy-expansion.json",
+      "dev_sha": "ead5fcb06f9b0e849736a66d5032274ca99de830",
+      "tree_sha": "22a246a035f421856a705643c59ccb4171854d71",
+      "proofs": {
+        "system_gate_run": 35514290109,
+        "current_application_quality_run": 35514290237,
+        "it_admin_runtime_proof_run": 35514290207,
+        "branch_hygiene_run": 35514290217
+      },
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+      "exact_preview_deployment": true,
+      "build_specific_proof_run": 35514290132
+    },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 208,
+      "title": "Multi-Discipline Public Positioning & Capability Navigation",
+      "authority": "release467-build208-multi-discipline-public-positioning-capability-navigation.json",
       "state": "DEVELOPMENT_CLOSURE_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -46,21 +46,22 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 206,
-    "title": "Launch-Set Remediation Campaign",
-    "authority": "release467-build206-launch-set-remediation-campaign.json",
-    "main_sha": "16689f6eb5982bb72253aba677cfadf636c89ec9",
-    "tree_sha": "4c71f152a75c401d3dfd2a5b83852a821dc82cb3",
-    "production_pages_deploy_run": 35486756097,
-    "production_live_resource_integrity_run": 35486808590,
-    "products_browser_proof_run": 35486808652,
-    "products_route_proof_run": 35486808582,
-    "build_specific_proof_run": 35486756132,
-    "exact_production_url": "https://065082cf.devilndove-site.pages.dev",
+    "build": 207,
+    "title": "Workshop Capability & Process Taxonomy Expansion",
+    "authority": "release467-build207-workshop-capability-process-taxonomy-expansion.json",
+    "main_sha": "0937de81d2610788db5315b675d92c055c9db549",
+    "tree_sha": "22a246a035f421856a705643c59ccb4171854d71",
+    "production_pages_deploy_run": 35514481645,
+    "production_live_resource_integrity_run": 35514524661,
+    "products_browser_proof_run": 35514524666,
+    "products_route_proof_run": 35514524708,
+    "build_specific_proof_run": 35514481601,
+    "exact_production_url": "https://37b30f80.devilndove-site.pages.dev",
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build208-multi-discipline-public-positioning-capability-navigation.json",
     "release467-build207-workshop-capability-process-taxonomy-expansion.json",
     "release467-build206-launch-set-remediation-campaign.json",
     "release467-build205-current-authority-manufacturing-era-roadmap-convergence.json",
@@ -109,8 +110,8 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md",
-  "next_build": 208,
-  "next_build_state": "BLOCKED_UNTIL_BUILD207_PRODUCTION_GREEN",
-  "next_build_title": "Multi-Discipline Public Positioning & Capability Navigation",
-  "promotion_state": "BUILD207_CANDIDATE_NOT_YET_VERIFIED"
+  "next_build": 209,
+  "next_build_state": "BLOCKED_UNTIL_BUILD208_PRODUCTION_GREEN",
+  "next_build_title": "Workshop Capability Profiles & Constraints",
+  "promotion_state": "BUILD208_CANDIDATE_NOT_YET_VERIFIED"
 }

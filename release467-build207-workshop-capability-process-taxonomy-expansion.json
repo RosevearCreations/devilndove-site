@@ -2,7 +2,7 @@
   "release": 467,
   "build": 207,
   "title": "Workshop Capability & Process Taxonomy Expansion",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build207-workshop-capability-process-taxonomy-expansion",
   "priority": "extend_existing_build156_inventory_processes_authority_for_full_multi_discipline_workshop_without_parallel_taxonomy",
   "starting_point": {
@@ -64,6 +64,30 @@
   "next_build": {
     "build": 208,
     "title": "Multi-Discipline Public Positioning & Capability Navigation",
-    "state": "BLOCKED_UNTIL_BUILD207_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_AFTER_BUILD207_PRODUCTION_GREEN"
+  },
+  "final_closure": {
+    "dev_sha": "ead5fcb06f9b0e849736a66d5032274ca99de830",
+    "tree_sha": "22a246a035f421856a705643c59ccb4171854d71",
+    "proofs": {
+      "system_gate_run": 35514290109,
+      "current_application_quality_run": 35514290237,
+      "it_admin_runtime_proof_run": 35514290207,
+      "branch_hygiene_run": 35514290217
+    },
+    "build_specific_proof_run": 35514290132,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+  },
+  "production_checkpoint": {
+    "main_sha": "0937de81d2610788db5315b675d92c055c9db549",
+    "tree_sha": "22a246a035f421856a705643c59ccb4171854d71",
+    "production_pages_deploy_run": 35514481645,
+    "production_live_resource_integrity_run": 35514524661,
+    "products_browser_proof_run": 35514524666,
+    "products_route_proof_run": 35514524708,
+    "build_specific_proof_run": 35514481601,
+    "exact_production_url": "https://37b30f80.devilndove-site.pages.dev",
+    "deployment_id": "37b30f80-d1fa-4901-a5aa-2c427683cf5b",
+    "state": "PRODUCTION_GREEN"
   }
 }

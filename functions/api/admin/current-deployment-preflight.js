@@ -1,10 +1,10 @@
-// Release 467 Build 207 — current read-only Deployment Preflight over exact Build 206 GREEN predecessor.
+// Release 467 Build 208 — current read-only Deployment Preflight over exact Build 207 GREEN predecessor.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=207;
-const TITLE='Workshop Capability & Process Taxonomy Expansion';
+const BUILD=208;
+const TITLE='Multi-Discipline Public Positioning & Capability Navigation';
 const CANONICAL_MIGRATIONS=Object.freeze([
   '0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql',
   '0003_release464_business_growth.sql','0004_release465_storefront_quality.sql',
@@ -12,22 +12,22 @@ const CANONICAL_MIGRATIONS=Object.freeze([
 ]);
 const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 206 Launch-Set Remediation Campaign Proof'
+  'Release 467 Build 207 Workshop Capability & Process Taxonomy Expansion Proof'
 ]);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:206,title:'Launch-Set Remediation Campaign',state:'DEVELOPMENT_GREEN',
-  dev_sha:'ee62ddd837d2ecbb8f0695fa7efb19e9dffb8b98',tree_sha:'4c71f152a75c401d3dfd2a5b83852a821dc82cb3',
-  system_gate_run:35486635313,current_application_quality_run:35486635381,it_admin_runtime_proof_run:35486635362,
-  branch_hygiene_run:35486635293,build_specific_proof_run:35486635345,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:207,title:'Workshop Capability & Process Taxonomy Expansion',state:'DEVELOPMENT_GREEN',
+  dev_sha:'ead5fcb06f9b0e849736a66d5032274ca99de830',tree_sha:'22a246a035f421856a705643c59ccb4171854d71',
+  system_gate_run:35514290109,current_application_quality_run:35514290237,it_admin_runtime_proof_run:35514290207,
+  branch_hygiene_run:35514290217,build_specific_proof_run:35514290132,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:206,title:'Launch-Set Remediation Campaign',state:'PRODUCTION_GREEN',
-  main_sha:'16689f6eb5982bb72253aba677cfadf636c89ec9',
-  tree_sha:'4c71f152a75c401d3dfd2a5b83852a821dc82cb3',production_pages_deploy_run:35486756097,
-  production_live_resource_integrity_run:35486808590,products_browser_proof_run:35486808652,
-  products_route_proof_run:35486808582,build_specific_proof_run:35486756132,remote_d1_queries:0,
-  exact_production_url:'https://065082cf.devilndove-site.pages.dev'
+  release:467,build:207,title:'Workshop Capability & Process Taxonomy Expansion',state:'PRODUCTION_GREEN',
+  main_sha:'0937de81d2610788db5315b675d92c055c9db549',
+  tree_sha:'22a246a035f421856a705643c59ccb4171854d71',production_pages_deploy_run:35514481645,
+  production_live_resource_integrity_run:35514524661,products_browser_proof_run:35514524666,
+  products_route_proof_run:35514524708,build_specific_proof_run:35514481601,remote_d1_queries:0,
+  exact_production_url:'https://37b30f80.devilndove-site.pages.dev'
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -83,8 +83,8 @@ export async function onRequestGet(context){
     {status:truth.proof_recorded_count===CANONICAL_MIGRATIONS.length?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:`${truth.proof_recorded_count}/${CANONICAL_MIGRATIONS.length} proof rows recorded.`},
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:`${truth.foreign_key_violations} violation(s).`},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
-    {status:'pass',code:'build206_verified_baseline',label:'Build 206 verified restart baseline',detail:'Build 206 launch-set remediation is exact-SHA Production GREEN on the current shared source tree.'},
-    {status:'review',code:'build207_workshop_process_taxonomy',label:'Build 207 workshop process taxonomy',detail:'Migration 0008 and the 22-process canonical taxonomy must pass one exact-head Development proof before promotion.'}
+    {status:'pass',code:'build207_verified_baseline',label:'Build 207 verified restart baseline',detail:'Build 207 workshop process taxonomy is exact-SHA Production GREEN on the current shared source tree.'},
+    {status:'review',code:'build208_public_positioning',label:'Build 208 public positioning and navigation',detail:'The five-dimension public discovery layer must pass one exact-head Development proof before promotion; no schema migration is introduced.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
   const data={
@@ -96,15 +96,15 @@ export async function onRequestGet(context){
     release_authority:{
       current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,
       verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
-      current_candidate:{release:467,build:207,title:TITLE,authority:'release467-build207-workshop-capability-process-taxonomy-expansion.json'},
+      current_candidate:{release:467,build:208,title:TITLE,authority:'release467-build208-multi-discipline-public-positioning-capability-navigation.json'},
       rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'
     },
     truth_notes:[
-      `Build 206 source is the exact fully verified restart baseline at ${VERIFIED_DEVELOPMENT.dev_sha}; Production source is ${PRODUCTION.main_sha}; both share ${VERIFIED_DEVELOPMENT.tree_sha}.`,
+      `Build 207 source is the exact fully verified restart baseline at ${VERIFIED_DEVELOPMENT.dev_sha}; Production source is ${PRODUCTION.main_sha}; both share ${VERIFIED_DEVELOPMENT.tree_sha}.`,
       `Development proofs: System ${VERIFIED_DEVELOPMENT.system_gate_run}, Quality ${VERIFIED_DEVELOPMENT.current_application_quality_run}, I.T. ${VERIFIED_DEVELOPMENT.it_admin_runtime_proof_run}, Hygiene ${VERIFIED_DEVELOPMENT.branch_hygiene_run}.`,
       `Production proofs: Pages ${PRODUCTION.production_pages_deploy_run}, Live Resources ${PRODUCTION.production_live_resource_integrity_run}, Product Browser ${PRODUCTION.products_browser_proof_run}, Product Route ${PRODUCTION.products_route_proof_run}.`,
-      'Build 207 Workshop Capability & Process Taxonomy Expansion is the active Development closure candidate.',
-      'Canonical migrations are 0001-0008; request-time schema mutation remains closed.'
+      'Build 208 Multi-Discipline Public Positioning & Capability Navigation is the active Development closure candidate.',
+      'Canonical migrations remain 0001-0008; Build 208 introduces no schema or D1 business-data mutation.'
     ],
     safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}
   };
