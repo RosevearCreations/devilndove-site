@@ -2,11 +2,11 @@
 
 ## Current checkpoint
 
-Build 210 **Custom Work Intake 2.0** is Production GREEN at `6e81942e7fd54157698b640252eed256b0411752`, exact tree `f8e85d5e91a9eee5a9c64901865efe24be1ad34e`, with Development `228d50a0a71d8b99e24f888b8bcd25b9c839a396` and Production Pages/Live proofs `35519559453` / `35519611667`.
+Build 211 **Manufacturing Triage & Route Proposal** is Production GREEN at `41bf65727771c7c302c022d0944945a0802a909d`, exact tree `b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7`, with Development `a7f07b18a4a3b24db1a148ec287cbf446041f573` and Production Pages/Live proofs `35524655164` / `35524741052`.
 
-## Active Build 211
+## Active Build 212
 
-**Manufacturing Triage & Route Proposal** extends the existing Custom Work journey through canonical migration 0011. Staff can explicitly review one request, select candidate `inventory_processes`, record feasibility state, specialist/proof requirements, material unknowns, supplied-item suitability review, route notes and the next clarification question. Customer requirements are not automatic manufacturing promises. Build 212 remains blocked until exact-SHA Production GREEN.
+**Hybrid Creative Project Operations** extends the existing Creative Process project authority through canonical migration 0012. Each project can carry ordered canonical-process operations, explicit predecessor dependencies, workspace/setup/duration/output planning and read-only Inventory resource references. Actual Creative events, Inventory movements, CAIP media and Finance remain owned by their existing systems. Build 213 remains blocked until exact-SHA Production GREEN.
 
 ## Permanent boundaries
 
@@ -28,4 +28,4 @@ Build 171 — Release & Restart Authority Convergence — remains immutable hist
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain immutable historical release/restart provenance; they do not supersede the Build 210/211 current authority.
+Build 192 and Build 193 remain immutable historical release/restart provenance; they do not supersede the Build 211/212 current authority.
