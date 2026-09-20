@@ -2,7 +2,7 @@
 
 ## Current release baseline
 
-Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0007`. Request-time DDL and automatic Production promotion remain closed.
+Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0008`. Request-time DDL and automatic Production promotion remain closed.
 
 ## Canonical Development target
 
@@ -24,30 +24,31 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 Stripe Development, PayPal sandbox and Social/OAuth remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 206 candidate
+## Current Release 467 restart authority — Build 207 candidate
 
-Build 205 **Current Authority & Manufacturing-Era Roadmap Convergence** is the exact fully verified predecessor.
+Build 206 **Launch-Set Remediation Campaign** is the exact fully verified predecessor.
 
-- Development SHA: `61163ceaeb07a28cac1df0f9ff6b3ab46b498c02`
-- Shared tree: `0710a7dfe8a81342704c92b810d6e18249b960e7`
-- System / Quality / I.T. / Hygiene: `35485817330` / `35485817347` / `35485817370` / `35485817325`
-- Build 205 Development proof: `35485817337`
-- Production main: `0a6144bc4b9767c06ccf82a78853b8375a55637a`
-- Production Pages / Live Resources: `35485914734` / `35485940566`
-- Build 205 Production proof: `35485914603`
-- Exact Production URL: `https://eed80e04.devilndove-site.pages.dev`
+- Development SHA: `ee62ddd837d2ecbb8f0695fa7efb19e9dffb8b98`
+- Shared tree: `4c71f152a75c401d3dfd2a5b83852a821dc82cb3`
+- System / Quality / I.T. / Hygiene: `35486635313` / `35486635381` / `35486635362` / `35486635293`
+- Build 206 Development proof: `35486635345`
+- Production main: `16689f6eb5982bb72253aba677cfadf636c89ec9`
+- Production Pages / Live Resources: `35486756097` / `35486808590`
+- Product Browser / Route: `35486808652` / `35486808582`
+- Build 206 Production proof: `35486756132`
+- Exact Production URL: `https://065082cf.devilndove-site.pages.dev`
 
-Build 206 **Launch-Set Remediation Campaign** is the active candidate. It reuses Build 204 launch readiness and adds canonical migration `0007_release467_storefront_launch_remediation.sql` for explicit campaign metadata only.
+Build 207 **Workshop Capability & Process Taxonomy Expansion** is the active candidate. It extends the existing Build 156 `inventory_processes` authority through `0008_release467_workshop_process_taxonomy.sql`, preserving existing process keys and reviewed Tool/Supply assignments.
 
-Product Editor, Product Media and Inventory Operations remain fact owners. Build 206 adds no duplicate readiness engine, automatic copy, automatic publication/unpublication, R2 mutation, provider/payment/refund execution or accounting posting.
+No parallel process dictionary is introduced. No existing Tool/Supply item is assigned automatically. Product, Inventory quantity/cost, Creative Project, Custom Work, Packaging, Media/CAIP, Finance and external provider/payment/publication authorities remain unchanged.
 
 ### Restart resolution rule
-Resolve live `dev` and `main` first. Build 207 starts only after Build 206 is exact-SHA Production GREEN.
+Resolve live `dev` and `main` first. Build 208 starts only after Build 207 is exact-SHA Production GREEN.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
 
 ## Retained historical provenance — Build 171
 
-Build 171 **Release & Restart Authority Convergence** remains historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It does not override current Build 204/205 truth.
+Build 171 **Release & Restart Authority Convergence** remains historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It does not override current Build 206/207 truth.
 
 ## Retained historical provenance — Builds 192–193
 

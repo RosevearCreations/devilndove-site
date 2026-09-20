@@ -1,31 +1,31 @@
-// Release 467 Build 206 — current read-only reliability projection over exact Build 205 GREEN predecessor.
+// Release 467 Build 207 — current read-only reliability projection over exact Build 206 GREEN predecessor.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=206;
-export const CURRENT_RELIABILITY_TITLE='Launch-Set Remediation Campaign';
+export const CURRENT_RELIABILITY_BUILD=207;
+export const CURRENT_RELIABILITY_TITLE='Workshop Capability & Process Taxonomy Expansion';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
 export const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:205,title:'Current Authority & Manufacturing-Era Roadmap Convergence',
-  accepted_dev_sha:'61163ceaeb07a28cac1df0f9ff6b3ab46b498c02',
-  accepted_dev_tree_sha:'0710a7dfe8a81342704c92b810d6e18249b960e7',
-  system_gate_run:35485817330,current_application_quality_run:35485817347,it_admin_runtime_proof_run:35485817370,
-  branch_hygiene_run:35485817325,build_specific_proof_run:35485817337,exact_preview_deployment:true,
+  release:467,build:206,title:'Launch-Set Remediation Campaign',
+  accepted_dev_sha:'ee62ddd837d2ecbb8f0695fa7efb19e9dffb8b98',
+  accepted_dev_tree_sha:'4c71f152a75c401d3dfd2a5b83852a821dc82cb3',
+  system_gate_run:35486635313,current_application_quality_run:35486635381,it_admin_runtime_proof_run:35486635362,
+  branch_hygiene_run:35486635293,build_specific_proof_run:35486635345,exact_preview_deployment:true,
   role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:205,title:'Current Authority & Manufacturing-Era Roadmap Convergence',state:'DEVELOPMENT_GREEN',
-  dev_sha:'61163ceaeb07a28cac1df0f9ff6b3ab46b498c02',tree_sha:'0710a7dfe8a81342704c92b810d6e18249b960e7',
-  system_gate_run:35485817330,current_application_quality_run:35485817347,it_admin_runtime_proof_run:35485817370,
-  branch_hygiene_run:35485817325,build_specific_proof_run:35485817337,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN'
+  release:467,build:206,title:'Launch-Set Remediation Campaign',state:'DEVELOPMENT_GREEN',
+  dev_sha:'ee62ddd837d2ecbb8f0695fa7efb19e9dffb8b98',tree_sha:'4c71f152a75c401d3dfd2a5b83852a821dc82cb3',
+  system_gate_run:35486635313,current_application_quality_run:35486635381,it_admin_runtime_proof_run:35486635362,
+  branch_hygiene_run:35486635293,build_specific_proof_run:35486635345,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN'
 });
 export const CURRENT_PRODUCTION=Object.freeze({
-  release:467,build:205,title:'Current Authority & Manufacturing-Era Roadmap Convergence',state:'PRODUCTION_GREEN',
-  main_sha:'0a6144bc4b9767c06ccf82a78853b8375a55637a',tree_sha:'0710a7dfe8a81342704c92b810d6e18249b960e7',
-  production_pages_deploy_run:35485914734,production_live_resource_integrity_run:35485940566,
-  products_browser_proof_run:0,products_route_proof_run:0,
-  build_specific_proof_run:35485914603,remote_d1_queries:0
+  release:467,build:206,title:'Launch-Set Remediation Campaign',state:'PRODUCTION_GREEN',
+  main_sha:'16689f6eb5982bb72253aba677cfadf636c89ec9',tree_sha:'4c71f152a75c401d3dfd2a5b83852a821dc82cb3',
+  production_pages_deploy_run:35486756097,production_live_resource_integrity_run:35486808590,
+  products_browser_proof_run:35486808652,products_route_proof_run:35486808582,
+  build_specific_proof_run:35486756132,remote_d1_queries:0
 });
 export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -37,7 +37,7 @@ export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
 export async function loadCurrentReliability(db,env={}){
   const inherited=await loadRelease466Reliability(db,env);
   return {
-    release:467,build:206,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
+    release:467,build:207,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
     environment:inherited.environment,score:inherited.score,status:inherited.status,scope:inherited.scope,slo_targets:inherited.slo_targets,
     checks:inherited.checks,migrations:inherited.migrations,runtime_incidents:inherited.runtime_incidents,
     foreign_key_violations:inherited.foreign_key_violations,resources:inherited.resources,
@@ -48,14 +48,14 @@ export async function loadCurrentReliability(db,env={}){
     },
     recovery:inherited.recovery,drift:inherited.drift,
     provenance:{
-      current_surface_release:467,current_surface_build:206,
+      current_surface_release:467,current_surface_build:207,
       inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
       historical_feature_authority:'release467-build36-current-reliability-operational-health.json',
       current_operator_authority:'current-development-authority.json',
       accepted_development:ACCEPTED_DEVELOPMENT,last_fully_verified_development:LAST_FULLY_VERIFIED_DEVELOPMENT,
       current_production:CURRENT_PRODUCTION,production_proof_transport_policy:PRODUCTION_PROOF_TRANSPORT_POLICY,
       implementation_acceptance_is_distinct_from_final_closure:true,closure_candidate_requires_external_exact_head_proof:true,
-      build205_current_authority_production_green:true,build206_launch_remediation_candidate:true,build206_exact_head_proof_required:true,production_baseline_build:205
+      build206_launch_remediation_production_green:true,build207_workshop_process_taxonomy_candidate:true,build207_exact_head_proof_required:true,production_baseline_build:206
     },
     safety:{
       ...inherited.safety,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,

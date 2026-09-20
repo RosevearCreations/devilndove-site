@@ -1,0 +1,69 @@
+{
+  "release": 467,
+  "build": 207,
+  "title": "Workshop Capability & Process Taxonomy Expansion",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build207-workshop-capability-process-taxonomy-expansion",
+  "priority": "extend_existing_build156_inventory_processes_authority_for_full_multi_discipline_workshop_without_parallel_taxonomy",
+  "starting_point": {
+    "development": {
+      "sha": "ee62ddd837d2ecbb8f0695fa7efb19e9dffb8b98",
+      "tree": "4c71f152a75c401d3dfd2a5b83852a821dc82cb3",
+      "system_gate_run": 35486635313,
+      "quality_run": 35486635381,
+      "it_admin_runtime_run": 35486635362,
+      "repository_hygiene_run": 35486635293,
+      "build_specific_proof_run": 35486635345,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "16689f6eb5982bb72253aba677cfadf636c89ec9",
+      "tree": "4c71f152a75c401d3dfd2a5b83852a821dc82cb3",
+      "production_pages_deploy_run": 35486756097,
+      "production_live_resource_integrity_run": 35486808590,
+      "products_browser_proof_run": 35486808652,
+      "products_route_proof_run": 35486808582,
+      "build_specific_proof_run": 35486756132,
+      "exact_production_url": "https://065082cf.devilndove-site.pages.dev",
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Extend the Build 156 inventory_processes authority only; do not create a second process dictionary.",
+    "Add or normalize the 22 minimum workshop process families required by the manufacturing-era roadmap.",
+    "Preserve every existing Build 156 process_key so existing assignments and downstream references remain compatible.",
+    "Keep inventory_process_assignments as the one reviewed primary-process authority for Tool/Supply records.",
+    "Expose the expanded taxonomy through existing Inventory Operations without automatic assignment."
+  ],
+  "safety": {
+    "canonical_schema_addition": true,
+    "reference_taxonomy_seed": true,
+    "request_time_ddl": false,
+    "parallel_process_table": false,
+    "automatic_inventory_assignment": false,
+    "inventory_quantity_mutation": false,
+    "inventory_cost_mutation": false,
+    "product_mutation": false,
+    "creative_project_mutation": false,
+    "custom_request_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "payment_execution": false,
+    "publication_execution": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build207_gate.py",
+    "canonical_migration": "migrations/canonical/0008_release467_workshop_process_taxonomy.sql",
+    "process_authority": "inventory_processes",
+    "assignment_authority": "inventory_process_assignments",
+    "admin_api": "functions/api/admin/inventory-process-assignments.js",
+    "owner_surface": "admin/inventory-operations/index.html",
+    "required_process_count": 22
+  },
+  "next_build": {
+    "build": 208,
+    "title": "Multi-Discipline Public Positioning & Capability Navigation",
+    "state": "BLOCKED_UNTIL_BUILD207_PRODUCTION_GREEN"
+  }
+}

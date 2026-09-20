@@ -2,22 +2,22 @@
 
 ## Current authority
 
-Last fully verified: **Build 205 — Current Authority & Manufacturing-Era Roadmap Convergence**. Active candidate: **Build 206 — Launch-Set Remediation Campaign**.
+Last fully verified: **Build 206 — Launch-Set Remediation Campaign**. Active candidate: **Build 207 — Workshop Capability & Process Taxonomy Expansion**.
 
-- Development `61163ceaeb07a28cac1df0f9ff6b3ab46b498c02`
-- Production `0a6144bc4b9767c06ccf82a78853b8375a55637a`
-- tree `0710a7dfe8a81342704c92b810d6e18249b960e7`
-- System / Quality / I.T. / Hygiene `35485817330` / `35485817347` / `35485817370` / `35485817325`
-- Production Pages / Live Resources `35485914734` / `35485940566`
-- canonical migrations `0001–0007`
+- Development `ee62ddd837d2ecbb8f0695fa7efb19e9dffb8b98`
+- Production `16689f6eb5982bb72253aba677cfadf636c89ec9`
+- tree `4c71f152a75c401d3dfd2a5b83852a821dc82cb3`
+- System / Quality / I.T. / Hygiene `35486635313` / `35486635381` / `35486635362` / `35486635293`
+- Production Pages / Live Resources `35486756097` / `35486808590`
+- canonical migrations `0001–0008`
 
 ## Read in this order
 
 1. `AI_HANDOFF.md`
 2. `PROJECT_STATUS_AND_ROADMAP.md`
 3. `docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md`
-4. `docs/operations/RELEASE_467_BUILD_206_LAUNCH_SET_REMEDIATION_CAMPAIGN.md`
-5. `release467-build206-launch-set-remediation-campaign.json`
+4. `docs/operations/RELEASE_467_BUILD_207_WORKSHOP_CAPABILITY_PROCESS_TAXONOMY_EXPANSION.md`
+5. `release467-build207-workshop-capability-process-taxonomy-expansion.json`
 6. `docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md`
 
 ## Active autonomous build documents
@@ -58,4 +58,4 @@ Build 171 remains historical provenance over exact Build 170 predecessor `879c87
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 206 over exact Production-GREEN Build 205.
+Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 207 over exact Production-GREEN Build 206.
