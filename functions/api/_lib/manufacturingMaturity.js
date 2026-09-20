@@ -33,10 +33,24 @@ export async function loadManufacturingMaturityReadiness(db,lifecycleId){
   const proof=lifecycle.custom_request_id
     ? await loadCustomRequestProofReadiness(db,lifecycle.custom_request_id)
     : null;
-  const approvedEvidence=Boolean(lifecycle.approved_sample_proof_version_id||lifecycle.approved_sample_creative_work_event_id);
+  let exactSampleEvidence=null;
+  if(id(lifecycle.custom_request_id)&&id(lifecycle.approved_sample_proof_version_id)){
+    exactSampleEvidence=await db.prepare(`SELECT custom_request_proof_version_id,custom_request_id,version_number,proof_status,approved_at
+      FROM custom_request_proof_versions
+      WHERE custom_request_proof_version_id=? AND custom_request_id=? AND proof_status='approved' LIMIT 1`)
+      .bind(id(lifecycle.approved_sample_proof_version_id),id(lifecycle.custom_request_id)).first().catch(()=>null);
+  }else if(!id(lifecycle.custom_request_id)&&id(lifecycle.creative_work_project_id)&&id(lifecycle.approved_sample_creative_work_event_id)){
+    exactSampleEvidence=await db.prepare(`SELECT creative_work_event_id,creative_work_project_id,event_title,occurred_at
+      FROM creative_work_events
+      WHERE creative_work_event_id=? AND creative_work_project_id=? AND COALESCE(entry_status,'active')='active' LIMIT 1`)
+      .bind(id(lifecycle.approved_sample_creative_work_event_id),id(lifecycle.creative_work_project_id)).first().catch(()=>null);
+  }
+  const approvedEvidence=Boolean(exactSampleEvidence);
   const blockers=[];
   if(['approved_sample','production_authorized','production_run','qa_rework','completed'].includes(String(lifecycle.current_stage||''))&&!approvedEvidence){
-    blockers.push('Approved-sample stage or later is missing exact sample evidence.');
+    blockers.push(id(lifecycle.custom_request_id)
+      ? 'Approved-sample stage or later requires the exact linked Build 213 proof version to remain approved.'
+      : 'Approved-sample stage or later requires the exact linked Creative Process event to remain active.');
   }
   if(String(lifecycle.current_stage||'')==='approved_sample'&&proof?.proof_required&&!proof.production_ready){
     blockers.push(...(proof.blockers||[]));
@@ -45,6 +59,7 @@ export async function loadManufacturingMaturityReadiness(db,lifecycleId){
     lifecycle,
     allowed_next_stages:allowedManufacturingTransitions(lifecycle.current_stage),
     approved_sample_evidence_present:approvedEvidence,
+    exact_approved_sample_evidence:exactSampleEvidence,
     custom_request_proof_readiness:proof,
     production_authorization_ready:approvedEvidence&&(!proof?.proof_required||Boolean(proof.production_ready)),
     blockers,
