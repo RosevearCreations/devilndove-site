@@ -20,7 +20,7 @@ req(b.get('build')==208 and b.get('state')=='DEVELOPMENT_CLOSURE_CANDIDATE','Bui
 req(b207.get('state')=='PRODUCTION_GREEN','Build 207 must remain Production GREEN')
 req(len(manifest.get('migrations') or [])==8,'Build 208 must not add a schema migration')
 for label in ('What we make','How we make it','Materials','Occasions & events','Custom Work'):req(label in nav,f'shared navigation missing {label}')
-for token in ('Multi-discipline artisan &amp; maker workshop','build208CapabilityNavigation','What we make','How we make it','Materials','Occasions &amp; use','Custom Work','U.S. sales and shipping remain paused'):req(token in home,f'Home missing Build 208 token: {token}')
+for token in ('multi-discipline artisan &amp; maker workshop','build208CapabilityNavigation','What we make','How we make it','Materials','Occasions &amp; use','Custom Work','U.S. sales and shipping remain paused'):req(token in home,f'Home missing Build 208 token: {token}')
 for token in ('build208ShopCapabilityNavigation','Browse beyond Product type','What we make','How we make it','Materials','Occasions &amp; use','Custom Work','U.S. sales and shipping remain paused'):req(token in shop,f'Shop missing Build 208 token: {token}')
 for token in ('build208CustomDiscovery','You do not need to choose a manufacturing method','What you want made','How it might be made','Material ideas','Occasion or use'):req(token in custom,f'Custom Work missing Build 208 token: {token}')
 for path,body in (('index.html',home),('shop/index.html',shop),('custom-request/index.html',custom)):req(len(re.findall(r'<h1(?:\s|>)',body,re.I))==1,f'{path} must retain exactly one H1')
