@@ -2,11 +2,11 @@
 
 ## Current checkpoint
 
-Build 209 **Workshop Capability Profiles & Constraints** is Production GREEN at `9a1bd2b3d99edf69651a17e790866d3b8fa744d4`, exact tree `36bed0abebbb47b375277562355c3517d171b629`, with Development `9b6b22291bd98bdd2d57c8793a0c892f937b4287` and Production Pages/Live proofs `35517517613` / `35517574976`.
+Build 210 **Custom Work Intake 2.0** is Production GREEN at `6e81942e7fd54157698b640252eed256b0411752`, exact tree `f8e85d5e91a9eee5a9c64901865efe24be1ad34e`, with Development `228d50a0a71d8b99e24f888b8bcd25b9c839a396` and Production Pages/Live proofs `35519559453` / `35519611667`.
 
-## Active Build 210
+## Active Build 211
 
-**Custom Work Intake 2.0** extends the existing `custom_requests` authority through canonical migration 0010 with quantity, project intent, intended use, company/event context, supplied-item, material/finish, personalization, size/tolerance, capability preference and explicit help-me-choose fields. Existing status/quote/order/reference authorities remain canonical. Build 211 remains blocked until exact-SHA Production GREEN.
+**Manufacturing Triage & Route Proposal** extends the existing Custom Work journey through canonical migration 0011. Staff can explicitly review one request, select candidate `inventory_processes`, record feasibility state, specialist/proof requirements, material unknowns, supplied-item suitability review, route notes and the next clarification question. Customer requirements are not automatic manufacturing promises. Build 212 remains blocked until exact-SHA Production GREEN.
 
 ## Permanent boundaries
 
@@ -28,4 +28,4 @@ Build 171 — Release & Restart Authority Convergence — remains immutable hist
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain immutable historical release/restart provenance; they do not supersede the Build 209/210 current authority.
+Build 192 and Build 193 remain immutable historical release/restart provenance; they do not supersede the Build 210/211 current authority.
