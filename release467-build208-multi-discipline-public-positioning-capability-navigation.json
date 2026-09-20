@@ -2,7 +2,7 @@
   "release": 467,
   "build": 208,
   "title": "Multi-Discipline Public Positioning & Capability Navigation",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build208-multi-discipline-public-positioning-capability-navigation",
   "priority": "organize_existing_public_authorities_around_five_workshop_discovery_dimensions_without_duplicate_catalog_or_capability_truth",
   "starting_point": {
@@ -67,6 +67,31 @@
   "next_build": {
     "build": 209,
     "title": "Workshop Capability Profiles & Constraints",
-    "state": "BLOCKED_UNTIL_BUILD208_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_AFTER_BUILD208_PRODUCTION_GREEN"
+  },
+  "final_closure": {
+    "dev_sha": "cc76ca21585e0b9a38e2b7f481799963943be056",
+    "tree_sha": "7a3583f0f12275d5316b1fc63a3067bc3dd7d74a",
+    "proofs": {
+      "system_gate_run": 35515481692,
+      "current_application_quality_run": 35515481732,
+      "it_admin_runtime_proof_run": 35515481657,
+      "branch_hygiene_run": 35515481717
+    },
+    "build_specific_proof_run": 35515481737,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+  },
+  "production_checkpoint": {
+    "main_sha": "2d53ff1f65b0252e4c1812766e61577f530dccaa",
+    "tree_sha": "7a3583f0f12275d5316b1fc63a3067bc3dd7d74a",
+    "production_pages_deploy_run": 35515609351,
+    "production_live_resource_integrity_run": 35515652270,
+    "products_browser_proof_run": 35515652261,
+    "products_route_proof_run": 35515652315,
+    "build_specific_proof_run": 35515609321,
+    "exact_production_url": "https://f784f34e.devilndove-site.pages.dev",
+    "deployment_id": "f784f34e-36b1-477e-9f58-047d831bf487",
+    "zero_d1_post_deploy_boundary": "PASS",
+    "state": "PRODUCTION_GREEN"
   }
 }

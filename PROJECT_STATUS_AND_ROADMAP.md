@@ -2,11 +2,11 @@
 
 ## Current checkpoint
 
-Build 207 **Workshop Capability & Process Taxonomy Expansion** is Production GREEN at `0937de81d2610788db5315b675d92c055c9db549`, exact tree `22a246a035f421856a705643c59ccb4171854d71`, with Development `ead5fcb06f9b0e849736a66d5032274ca99de830` and Production Pages/Live proofs `35514481645` / `35514524661`.
+Build 208 **Multi-Discipline Public Positioning & Capability Navigation** is Production GREEN at `2d53ff1f65b0252e4c1812766e61577f530dccaa`, exact tree `7a3583f0f12275d5316b1fc63a3067bc3dd7d74a`, with Development `cc76ca21585e0b9a38e2b7f481799963943be056` and Production Pages/Live proofs `35515609351` / `35515652270`.
 
-## Active Build 208
+## Active Build 209
 
-**Multi-Discipline Public Positioning & Capability Navigation** reorganizes existing Home, shared navigation, Shop and Custom Work discovery around five public dimensions: What we make, How we make it, Materials, Occasions & use, and Custom Work. No schema or D1 business-data mutation is introduced. Build 209 remains blocked until exact-SHA Production GREEN.
+**Workshop Capability Profiles & Constraints** adds 12 reviewed source-backed capability profiles linked to canonical `inventory_processes` through migration 0009. Public/admin profile surfaces expose suitable uses, documented materials, known/unknown constraints, supplied-item assessment policy, proof/sample expectations, Gallery routing and Custom Work routing. Build 210 remains blocked until exact-SHA Production GREEN.
 
 ## Permanent boundaries
 
@@ -28,4 +28,4 @@ Build 171 — Release & Restart Authority Convergence — remains immutable hist
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain immutable historical release/restart provenance; they do not supersede the Build 207/208 current authority.
+Build 192 and Build 193 remain immutable historical release/restart provenance; they do not supersede the Build 208/209 current authority.

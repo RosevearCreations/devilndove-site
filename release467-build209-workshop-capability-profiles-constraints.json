@@ -1,0 +1,67 @@
+{
+  "release": 467,
+  "build": 209,
+  "title": "Workshop Capability Profiles & Constraints",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build209-workshop-capability-profiles-constraints",
+  "priority": "add_reviewed_source_backed_capability_profiles_linked_to_inventory_processes_without_inventing_technical_limits_or_duplicate_process_identity",
+  "starting_point": {
+    "development": {
+      "sha": "cc76ca21585e0b9a38e2b7f481799963943be056",
+      "tree": "7a3583f0f12275d5316b1fc63a3067bc3dd7d74a",
+      "system_gate_run": 35515481692,
+      "quality_run": 35515481732,
+      "it_admin_runtime_run": 35515481657,
+      "repository_hygiene_run": 35515481717,
+      "build_specific_proof_run": 35515481737,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "2d53ff1f65b0252e4c1812766e61577f530dccaa",
+      "tree": "7a3583f0f12275d5316b1fc63a3067bc3dd7d74a",
+      "production_pages_deploy_run": 35515609351,
+      "production_live_resource_integrity_run": 35515652270,
+      "products_browser_proof_run": 35515652261,
+      "products_route_proof_run": 35515652315,
+      "build_specific_proof_run": 35515609321,
+      "exact_production_url": "https://f784f34e.devilndove-site.pages.dev",
+      "deployment_id": "f784f34e-36b1-477e-9f58-047d831bf487",
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Add 12 reviewed workshop capability profiles while retaining inventory_processes as canonical process identity.",
+    "Expose public capability hub and individual profile pages with source notes, suitable uses, materials, explicit constraints state, customer-supplied assessment policy and proof/sample policy.",
+    "Add authenticated admin review/editing without request-time DDL, arbitrary process creation or automatic publication.",
+    "Connect capability profiles to approved public Gallery search and the existing Custom Work route."
+  ],
+  "safety": {
+    "canonical_schema_addition": true,
+    "request_time_ddl": false,
+    "parallel_process_dictionary": false,
+    "automatic_capability_fact_invention": false,
+    "automatic_product_publication": false,
+    "custom_request_schema_change": false,
+    "inventory_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "payment_execution": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build209_gate.py",
+    "canonical_migration": "migrations/canonical/0009_release467_workshop_capability_profiles.sql",
+    "profile_authority": "workshop_capability_profiles",
+    "process_authority": "inventory_processes",
+    "public_api": "functions/api/capabilities.js",
+    "admin_api": "functions/api/admin/workshop-capabilities.js",
+    "public_hub": "capabilities/index.html",
+    "admin_surface": "admin/workshop-capabilities/index.html",
+    "required_profile_count": 12
+  },
+  "next_build": {
+    "build": 210,
+    "title": "Custom Work Intake 2.0",
+    "state": "BLOCKED_UNTIL_BUILD209_PRODUCTION_GREEN"
+  }
+}
