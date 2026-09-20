@@ -1,0 +1,97 @@
+{
+  "release": 467,
+  "build": 204,
+  "title": "Storefront Launch Set & Autonomous Closure",
+  "state": "PRODUCTION_GREEN",
+  "authority": "release467-build204-storefront-launch-set-autonomous-closure",
+  "runtime_build204": {
+    "development": {
+      "sha": "50098122e88548ad5e94835d5ef69a5e738aed88",
+      "tree": "90018f79ee469420e9f3c16504bdf4a73c0dfd0f",
+      "system_gate_run": 35478691748,
+      "quality_run": 35478691733,
+      "it_admin_runtime_run": 35478691718,
+      "repository_hygiene_run": 35478691753,
+      "build_specific_proof_run": 35478691738,
+      "state": "EXACT_BRANCH_HEAD_GREEN"
+    },
+    "production": {
+      "main_sha": "d88789ee563e700e8847f7b47f156964024a3b45",
+      "tree": "90018f79ee469420e9f3c16504bdf4a73c0dfd0f",
+      "production_pages_deploy_run": 35478779248,
+      "build_specific_proof_run": 35478779057,
+      "exact_production_url": "https://72602315.devilndove-site.pages.dev",
+      "state": "PRODUCTION_GREEN",
+      "remote_d1_queries": 0
+    },
+    "storefront_evidence": {
+      "products_reviewed": 43,
+      "ready": 1,
+      "review_required": 42,
+      "externally_blocked": 0,
+      "publicly_visible": 40,
+      "media_ready": 3,
+      "tracked_zero_stock": 2,
+      "products_with_linked_resources": 2,
+      "products_with_missing_linked_inventory": 0,
+      "products_with_unknown_linked_cost": 2,
+      "buyer_blocked": 16
+    },
+    "d1_provider_rows_read": 8593,
+    "d1_rows_read_ceiling": 15000
+  },
+  "roadmap_canonicalization": {
+    "role": "POST_BUILD204_DOCS_ONLY_CANONICAL_SOURCE_BOUNDARY",
+    "development_sha": "48307e67978dee5ef4481ccfe2739a5d3df79b18",
+    "production_main_sha": "09253dbe5b43c4308d1ff671bb71df80bf0592d9",
+    "tree_sha": "4a63209efc54bc641ba0484c4954ac1cb35acc2e",
+    "system_gate_run": 35483005170,
+    "current_application_quality_run": 35483005094,
+    "it_admin_runtime_proof_run": 35483005097,
+    "branch_hygiene_run": 35483005113,
+    "production_pages_deploy_run": 35483092965,
+    "exact_production_url": "https://cd226d56.devilndove-site.pages.dev",
+    "runtime_feature_change": false,
+    "schema_change": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false
+  },
+  "final_closure": {
+    "dev_sha": "48307e67978dee5ef4481ccfe2739a5d3df79b18",
+    "tree_sha": "4a63209efc54bc641ba0484c4954ac1cb35acc2e",
+    "proofs": {
+      "system_gate_run": 35483005170,
+      "current_application_quality_run": 35483005094,
+      "it_admin_runtime_proof_run": 35483005097,
+      "branch_hygiene_run": 35483005113
+    },
+    "build_specific_proof_run": 35478691738,
+    "exact_preview_deployment": true,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 205,
+    "note": "Build 204 runtime was already Production GREEN; the later 205-224 roadmap promotion was documentation-only and became the canonical restart source boundary without changing runtime business behavior."
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 204,
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "09253dbe5b43c4308d1ff671bb71df80bf0592d9",
+    "tree_sha": "4a63209efc54bc641ba0484c4954ac1cb35acc2e",
+    "production_pages_deploy_run": 35483092965,
+    "production_live_resource_integrity_run": 0,
+    "build_specific_proof_run": 35478779057,
+    "exact_production_url": "https://cd226d56.devilndove-site.pages.dev",
+    "remote_d1_queries": 0,
+    "code_only": true,
+    "docs_only_roadmap_promotion": true
+  },
+  "safety": {
+    "request_time_ddl": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "payment_refund_accounting_mutation": false,
+    "production_business_data_overwrite": false
+  }
+}
