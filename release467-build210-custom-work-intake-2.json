@@ -2,7 +2,7 @@
   "release": 467,
   "build": 210,
   "title": "Custom Work Intake 2.0",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build210-custom-work-intake-2",
   "priority": "enrich_existing_custom_requests_with_structured_manufacturing_intent_without_parallel_intake_or_automatic_feasibility_routing",
   "starting_point": {
@@ -62,6 +62,32 @@
   "next_build": {
     "build": 211,
     "title": "Manufacturing Triage & Route Proposal",
-    "state": "BLOCKED_UNTIL_BUILD210_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_AFTER_BUILD210_PRODUCTION_GREEN"
+  },
+  "final_closure": {
+    "dev_sha": "228d50a0a71d8b99e24f888b8bcd25b9c839a396",
+    "tree_sha": "f8e85d5e91a9eee5a9c64901865efe24be1ad34e",
+    "proofs": {
+      "system_gate_run": 35519319569,
+      "current_application_quality_run": 35519319561,
+      "it_admin_runtime_proof_run": 35519319637,
+      "branch_hygiene_run": 35519319612
+    },
+    "build_specific_proof_run": 35519319562,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+  },
+  "production_checkpoint": {
+    "main_sha": "6e81942e7fd54157698b640252eed256b0411752",
+    "tree_sha": "f8e85d5e91a9eee5a9c64901865efe24be1ad34e",
+    "production_pages_deploy_run": 35519559453,
+    "production_live_resource_integrity_run": 35519611667,
+    "products_browser_proof_run": 35519611679,
+    "products_route_proof_run": 35519611767,
+    "build_specific_proof_run": 35519559362,
+    "exact_production_url": "https://cae32d7d.devilndove-site.pages.dev",
+    "deployment_id": "cae32d7d-8ac6-4ba2-96de-7ecbbdd4a6ad",
+    "canonical_migrations": 10,
+    "business_counts_preserved": true,
+    "state": "PRODUCTION_GREEN"
   }
 }

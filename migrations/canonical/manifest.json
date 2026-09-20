@@ -83,6 +83,13 @@
       "release": 467,
       "description": "Enrich the existing custom_requests authority with structured quantity, project intent, intended use, organisation/event context, supplied-item, material/finish, personalization, capability preference, size/tolerance and help-me-choose fields.",
       "recovery": "Forward-only additive columns and indexes. Existing requests and status/quote/order journeys remain intact. Correct schema defects only with a new numbered migration; never edit this migration after Development application."
+    },
+    {
+      "version": 11,
+      "file": "0011_release467_manufacturing_triage_route.sql",
+      "release": 467,
+      "description": "Add staff-reviewed manufacturing triage and ordered candidate-process route proposals linked to existing custom_requests and canonical inventory_processes.",
+      "recovery": "Forward-only additive tables. Logical rollback archives/clears triage and candidate-route evidence only; customer requests and canonical process identity remain intact. Repair schema defects only with a new numbered migration."
     }
   ]
 }

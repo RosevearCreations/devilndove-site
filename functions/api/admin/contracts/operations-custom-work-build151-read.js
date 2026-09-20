@@ -1,4 +1,4 @@
-// Release 467 Build 210 — read-only Custom Work projection including structured Intake 2.0 fields.
+// Release 467 Build 211 — read-only Custom Work projection retaining structured Intake 2.0 alongside reviewed manufacturing triage.
 // This endpoint adds no mutation authority. Existing Custom Requests, Orders and Gift Card
 // write routes remain authoritative and are reached only by explicit existing workflows.
 
@@ -100,7 +100,7 @@ export async function onRequestGet(context) {
       event_offline_stock_authority: false,
       event_unique_stock_requires_live_revalidation: true,
       structured_intake_2: true,
-      manufacturing_route_authority: 'BUILD_211_NOT_YET_STARTED',
+      manufacturing_route_authority: 'BUILD_211_REVIEWED_TRIAGE_ENDPOINT',
       connectivity_contract: 'READ_ONLY_LIVE_AUTHORITY_WITH_VISIBLE_OFFLINE_STATE'
     });
   } catch (error) {
