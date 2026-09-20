@@ -499,6 +499,8 @@
       }
 
       const qEl = document.getElementById("artQ");
+      const initialGalleryQuery = new URLSearchParams(window.location.search).get("q");
+      if (initialGalleryQuery && qEl) qEl.value = initialGalleryQuery;
       const typeEl = document.getElementById("artType");
       const materialEl = document.getElementById("artMaterial");
       const processEl = document.getElementById("artProcess");

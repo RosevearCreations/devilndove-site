@@ -69,6 +69,13 @@
       "release": 467,
       "description": "Extend the existing inventory_processes workshop taxonomy for the full multi-discipline maker/manufacturing capability set while preserving all Build 156 process keys and reviewed Tool/Supply assignments.",
       "recovery": "Forward-only reference-taxonomy expansion. Existing process keys and inventory assignments remain intact. Correct taxonomy defects only with a new numbered migration; never edit this migration after Development application."
+    },
+    {
+      "version": 9,
+      "file": "0009_release467_workshop_capability_profiles.sql",
+      "release": 467,
+      "description": "Add reviewed workshop capability profiles linked to canonical process keys, with source notes, explicit unknown/measured constraint state, customer-supplied assessment policy, proof/sample policy and public/admin routing.",
+      "recovery": "Forward-only additive table. Hide or hold profiles for logical rollback; correct facts only through reviewed admin updates or a new numbered migration. Never edit this migration after Development application."
     }
   ]
 }
