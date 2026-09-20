@@ -2,47 +2,64 @@
 
 ## Current checkpoint
 
-Release 467 **Build 192 — Release Regression & Runtime Budget Convergence** is fully Production GREEN.
+Release 467 **Build 204 — Storefront Launch Set & Autonomous Closure** is the last fully verified application build.
 
-- Development SHA: `76321bfc975862ce2463e87450852c19fc98c852`
-- Production SHA: `451ca8173b9ad3127f84f352ed0a8d7774e53b14`
-- exact tree: `5752f7e0be8c432d2cc45b5de08c349208ee497a`
-- Production deployment: `https://8ed2f630.devilndove-site.pages.dev`
-- Production mode: code-only / zero-D1
-- D1 mutation: none
-- R2 mutation: none
+The post-closure 205–224 roadmap promotion was docs-only and is now the canonical Build 204 restart source boundary:
 
-Build 192 centralized provider-metered D1 budgets, retained one Product-detail core request, kept Admin optional systems explicit/lazy/bounded and blocked request-time DDL, bucket-wide R2 listing and background polling regressions.
+- Development SHA: `48307e67978dee5ef4481ccfe2739a5d3df79b18`
+- Production `main`: `09253dbe5b43c4308d1ff671bb71df80bf0592d9`
+- shared tree: `4a63209efc54bc641ba0484c4954ac1cb35acc2e`
+- System Gate: `35483005170`
+- Current Application Quality: `35483005094`
+- I.T. Admin Runtime: `35483005097`
+- Repository Branch Hygiene: `35483005113`
+- Production Pages Deploy: `35483092965`
+- exact Production URL: `https://cd226d56.devilndove-site.pages.dev`
+- roadmap promotion D1/schema/R2 business-data mutation: **ZERO**
 
-## Measured evidence driving the next block
+Original Build 204 runtime proof remains separately preserved at Development `50098122e88548ad5e94835d5ef69a5e738aed88`, Production `d88789ee563e700e8847f7b47f156964024a3b45`, tree `90018f79ee469420e9f3c16504bdf4a73c0dfd0f`, Development proof `35478691738`, Production proof `35478779057`, and Production Pages `35478779248`.
 
-- Media evidence: 19,282 / 20,000 rows read — only 718 headroom.
-- Inventory evidence: 15,487 / 20,000 rows read.
-- Buyer readiness: 1 category blocker, 38 description advisory items, 16 shipping blockers, 2 tracked-zero-stock Products.
-- Inventory: 8 duplicate rows, 898 missing supplier names, 326 missing source references, 1,040 count-due rows, 143 unmatched catalog references.
-- Media: 10 Product alt-text attention items, 2 blank Inventory images, 141 external Inventory image references.
-- Cost: 4 missing-cost links; 2 Products remain margin-review.
+## Active Build 205
 
-## Active Build 193
+**Build 205 — Current Authority & Manufacturing-Era Roadmap Convergence** is the active Development closure candidate.
 
-Build 193 is now the active Development closure candidate. It repairs stale machine/I.T. restart truth only and inherits exact Build 192 GREEN as its immutable predecessor. No Product/Inventory/customer business-data mutation is part of this build.
+Scope is release/restart authority only:
 
-## Active roadmap — Release 467 Builds 193–200
+- advance machine pointer to Build 205 over exact Build 204/current roadmap truth;
+- converge I.T., Deployment Preflight and Reliability;
+- converge AI handoff, project roadmap, Markdown index and restart guide;
+- preserve Build 170/171/192/193–204 provenance;
+- activate the 205–224 autonomous roadmap;
+- no Product/Inventory/Custom Request/Creative Project/schema/D1/R2/provider/payment/publication mutation.
 
-Primary roadmap: `docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md`.
+## Active roadmap — Release 467 Builds 205–224
+
+Primary roadmap: `docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md`.
 
 | Build | Focus | State |
 |---|---|---|
-| 193 | Current Authority & Handoff Convergence | Active candidate |
-| 194 | D1 Evidence Headroom Optimization | Planned |
-| 195 | Buyer Readiness Repair Workbench | Planned |
-| 196 | Supplier & Source Evidence Workbench | Planned |
-| 197 | Cycle Count & Duplicate Identity Resolution | Planned |
-| 198 | Catalog Reference & Media Reconciliation | Planned |
-| 199 | Cost Evidence & Margin Readiness | Planned |
-| 200 | Storefront Launch Set & Autonomous Closure | Planned |
+| 205 | Current Authority & Manufacturing-Era Roadmap Convergence | Active candidate |
+| 206 | Launch-Set Remediation Campaign | Planned |
+| 207 | Workshop Capability & Process Taxonomy Expansion | Planned |
+| 208 | Multi-Discipline Public Positioning & Capability Navigation | Planned |
+| 209 | Workshop Capability Profiles & Constraints | Planned |
+| 210 | Custom Work Intake 2.0 | Planned |
+| 211 | Manufacturing Triage & Route Proposal | Planned |
+| 212 | Hybrid Creative Project Operations | Planned |
+| 213 | Digital Proof & Customer Approval | Planned |
+| 214 | Prototype → Sample → Production Run | Planned |
+| 215 | Small-Batch, Corporate & Event Quoting | Planned |
+| 216 | Customer-Supplied Item Intake & Suitability Review | Planned |
+| 217 | Production Cost Evidence v2 | Planned |
+| 218 | Quote ↔ Production Cost ↔ Margin Guardrails | Planned |
+| 219 | Manufacturing Work Order & Job Traveler | Planned |
+| 220 | Production Run, QA, Rework & Scrap Evidence | Planned |
+| 221 | Workshop Knowledge Library Foundation | Planned |
+| 222 | Project-to-Knowledge Promotion & Recipe History | Planned |
+| 223 | Capability Case Studies, Workshop Journal & Search Richness | Planned |
+| 224 | Manufacturing-Era Closure & Next Roadmap | Planned |
 
-The sequence is autonomous because it avoids provider acceptance, payment execution, social publication, supplier purchasing and invented business facts.
+Build 206 remains blocked until Build 205 is exact-SHA Production GREEN.
 
 ## Permanent boundaries
 
@@ -51,23 +68,20 @@ The sequence is autonomous because it avoids provider acceptance, payment execut
 - no request-time DDL;
 - no unbounded D1/R2 work;
 - no silent D1 ceiling increase;
-- no automatic publication/provider/payment/accounting action unless separately authorized;
-- Canada-first commerce and U.S. sales/shipping pause remain in force;
-- public pages retain one-H1 and current Product low-read contracts.
-
+- no automatic Product publication/provider/payment/accounting action unless separately authorized;
+- Canada/CAD commerce and U.S. sales/shipping pause remain in force;
+- public pages retain one H1 and source-backed claims.
 
 ---
 
 ## Retained historical provenance — Release 467 Build 153
 
-This section is retained solely for the immutable Build 153 performance gate; it does not supersede the current Build 192 / Builds 193–200 authority.
-
-# Build 153 — Layout Observer Performance Hotfix — CLOSED GREEN
-
-- Products layout cache revision: `467-b153-layout-observer`.
-- Incident addressed: Firefox long-script / page responsiveness caused by excessive layout-observer churn.
-- Historical Build 153 canonical migration baseline was `0001–0004`; later forward-only canonical migrations are valid successors and must preserve that immutable prefix.
+Build 153 — Layout Observer Performance Hotfix — remains retained performance provenance. Historical migration prefix 0001–0004 remains immutable inside the current forward migration stream.
 
 ## Retained historical provenance — Release 467 Build 171
 
-Build 171 — Release & Restart Authority Convergence — remains immutable historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It is not the current application baseline. Build 193 will converge the machine pointer and current I.T. release surfaces from that historical authority to the fully proven Build 192 baseline.
+Build 171 — Release & Restart Authority Convergence — remains immutable historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`.
+
+## Retained historical provenance — Release 467 Builds 192–193
+
+Build 192 and Build 193 remain immutable historical release/restart provenance; they do not supersede the Build 204/205 current authority.
