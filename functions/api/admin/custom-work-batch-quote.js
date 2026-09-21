@@ -24,7 +24,7 @@ async function access(context){
   return {admin,db};
 }
 async function requestById(db,requestId){
-  return db.prepare(`SELECT custom_request_id,request_key,name,email,request_type,product_interest,status,quantity,project_intent,organisation_name,event_context,deadline_date,budget_cents
+  return db.prepare(`SELECT custom_request_id,request_key,name,email,request_type,product_interest,status,quantity,project_intent,organization_name,event_context_structured,deadline_date,budget_cents
     FROM custom_requests WHERE custom_request_id=? LIMIT 1`).bind(id(requestId)).first().catch(()=>null);
 }
 async function quoteByRequest(db,requestId){
