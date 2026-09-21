@@ -56,10 +56,13 @@ async function sha256Hex(text){
 function closurePayload(){
   return {
     release:467,build:220,title:'Production Run, QA, Rework & Scrap Evidence',
-      system_gate_run:35606184887,current_application_quality_run:35606184822,it_admin_runtime_proof_run:35606184538,branch_hygiene_run:35606184707,build220_proof_run:35606184585
+    sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
+    development_proofs:{
+      system_gate_run:35606184887,current_application_quality_run:35606184822,
+      it_admin_runtime_proof_run:35606184538,branch_hygiene_run:35606184707,build220_proof_run:35606184585
     },
     production_proofs:{
-      production_pages_deploy_run:35560514490,production_live_resource_integrity_run:35560585150,
+      production_pages_deploy_run:35607469436,production_live_resource_integrity_run:35607606049,
       products_browser_proof_run:35607606000,products_route_proof_run:35607605559,build220_proof_run:35607469438
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
@@ -91,14 +94,16 @@ function markdownReport(pack){
 - Canonical Development SHA: ${pack.sha}
 - Canonical Production main SHA: ${PRODUCTION.main_sha}
 - Shared tree: ${pack.tree_sha}
-- System Gate: 35559932353
-- Current Application Quality Proof: 35559932262
-- I.T. Admin Runtime Proof: 35559932380
-- Repository Branch Hygiene: 35559932232
-- Build 220 Development Proof: 35606184585
-- Production Pages Deploy: 35560514490
-- Production Live Resource Integrity: 35560585150
-- Build 220 Production Proof: 35607469438
+- System Gate: ${pack.development_proofs.system_gate_run}
+- Current Application Quality Proof: ${pack.development_proofs.current_application_quality_run}
+- I.T. Admin Runtime Proof: ${pack.development_proofs.it_admin_runtime_proof_run}
+- Repository Branch Hygiene: ${pack.development_proofs.branch_hygiene_run}
+- Build 220 Development Proof: ${pack.development_proofs.build220_proof_run}
+- Production Pages Deploy: ${pack.production_proofs.production_pages_deploy_run}
+- Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
+- Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
+- Product Route Proof: ${pack.production_proofs.products_route_proof_run}
+- Build 220 Production Proof: ${pack.production_proofs.build220_proof_run}
 - Current candidate: Build 221 Workshop Knowledge Library Foundation
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
@@ -139,8 +144,8 @@ export async function onRequestGet(context){
     truth_notes:[
       'Build 220 source is the exact last fully verified Development checkpoint.',
       'Build 220 Production is GREEN on the identical source tree through canonical migration 0019.',
-      'Development proofs: System 35559932353, Quality 35559932262, I.T. 35559932380, Hygiene 35559932232.',
-      'Production proofs: Pages 35560514490, Live Resources 35560585150, Product Browser 35560585205, Product Route 35560585179.',
+      'Development proofs: System 35606184887, Quality 35606184822, I.T. 35606184538, Hygiene 35606184707.',
+      'Production proofs: Pages 35607469436, Live Resources 35607606049, Product Browser 35607606000, Product Route 35607605559.',
       'Build 221 Workshop Knowledge Library Foundation is the active Development closure candidate.',
       'Canonical D1 migrations advance through 0001-0020 for Build 221 reviewed source-backed knowledge evidence.'
     ],
