@@ -1,24 +1,24 @@
-// Release 467 Build 219 — current read-only Deployment Preflight over exact Build 218 GREEN predecessor.
+// Release 467 Build 220 — current read-only Deployment Preflight over exact Build 219 GREEN predecessor.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=219;
-const TITLE='Manufacturing Work Order & Job Traveler';
-const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql']);
-const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 218 Quote Production Cost Margin Guardrails Proof']);
+const BUILD=220;
+const TITLE='Production Run, QA, Rework & Scrap Evidence';
+const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql']);
+const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 219 Manufacturing Work Order Job Traveler Proof']);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:218,title:'Quote ↔ Production Cost ↔ Margin Guardrails',state:'DEVELOPMENT_GREEN',
-  dev_sha:'068b99a9f4f5e32e4d3547a69a23549d9dcd1c1a',tree_sha:'0bb22258a030eb529be3a7b5faf9ba12baa66f46',
-  system_gate_run:35556952902,current_application_quality_run:35556952735,it_admin_runtime_proof_run:35556952815,
-  branch_hygiene_run:35556952797,build_specific_proof_run:35556952722,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',exact_preview_deployment:true
+  release:467,build:219,title:'Manufacturing Work Order & Job Traveler',state:'DEVELOPMENT_GREEN',
+  dev_sha:'d05924a6c395b9ff2d6cd667d335d690de995805',tree_sha:'c41a2fd13e69a517d258a2b7e8a5c6af47706e1b',
+  system_gate_run:35559932353,current_application_quality_run:35559932262,it_admin_runtime_proof_run:35559932380,
+  branch_hygiene_run:35559932232,build_specific_proof_run:35559932358,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:218,title:'Quote ↔ Production Cost ↔ Margin Guardrails',state:'PRODUCTION_GREEN',
-  main_sha:'24b59add984ea0be5acc3ebe3bf8ae558db747ee',tree_sha:'0bb22258a030eb529be3a7b5faf9ba12baa66f46',
-  production_pages_deploy_run:35557094198,production_live_resource_integrity_run:35557137931,
-  products_browser_proof_run:35557137831,products_route_proof_run:35557137932,build_specific_proof_run:35557094182,
-  remote_d1_queries:0,exact_production_url:'https://b8567968.devilndove-site.pages.dev'
+  release:467,build:219,title:'Manufacturing Work Order & Job Traveler',state:'PRODUCTION_GREEN',
+  main_sha:'6442fc479a61ff1083567a40a46a2987aba12844',tree_sha:'c41a2fd13e69a517d258a2b7e8a5c6af47706e1b',
+  production_pages_deploy_run:35560514490,production_live_resource_integrity_run:35560585150,
+  products_browser_proof_run:35560585205,products_route_proof_run:35560585179,build_specific_proof_run:35560514532,
+  remote_d1_queries:0,exact_production_url:'https://6e81f92e.devilndove-site.pages.dev'
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true});
 const rows=(r)=>Array.isArray(r?.results)?r.results:[];
@@ -41,15 +41,15 @@ export async function onRequestGet(context){
   const db=getDb(context.env);if(!db)return jsonResponse({ok:false,release:RELEASE,build:BUILD,error:'Database binding is not configured.'},503,{'Cache-Control':'no-store'});
   const truth=await canonicalMigrationTruth(db);
   const checks=[
-    {status:truth.native_applied_count===18?'pass':'fail',code:'canonical_native_ledger',label:'Canonical D1 migration ledger',detail:truth.native_applied_count+'/18 canonical migrations recorded.'},
-    {status:truth.proof_recorded_count===18?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:truth.proof_recorded_count+'/18 proof rows recorded.'},
+    {status:truth.native_applied_count===19?'pass':'fail',code:'canonical_native_ledger',label:'Canonical D1 migration ledger',detail:truth.native_applied_count+'/19 canonical migrations recorded.'},
+    {status:truth.proof_recorded_count===19?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:truth.proof_recorded_count+'/19 proof rows recorded.'},
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:truth.foreign_key_violations+' violation(s).'},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
-    {status:'pass',code:'build218_verified_baseline',label:'Build 218 verified restart baseline',detail:'Build 218 Quote ↔ Production Cost ↔ Margin Guardrails is exact-SHA Production GREEN.'},
-    {status:'review',code:'build219_job_traveler',label:'Build 219 Manufacturing Work Order & Job Traveler',detail:'Additive migration 0018 and traveler orchestration must pass exact-head Development proof before Production promotion.'}
+    {status:'pass',code:'build219_verified_baseline',label:'Build 219 verified restart baseline',detail:'Build 219 Manufacturing Work Order & Job Traveler is exact-SHA Production GREEN.'},
+    {status:'review',code:'build220_production_run_evidence',label:'Build 220 Production Run, QA, Rework & Scrap Evidence',detail:'Additive migration 0019 and reviewed run evidence must pass exact-head Development proof before Production promotion.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
-  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:219,title:TITLE,authority:'release467-build219-manufacturing-work-order-job-traveler.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 218 is the exact fully verified Development and Production restart boundary.','Build 219 Manufacturing Work Order & Job Traveler is the active Development closure candidate.','Canonical migrations advance through 0018; source-authority mutation remains closed.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
+  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:220,title:TITLE,authority:'release467-build220-production-run-qa-rework-scrap-evidence.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 219 is the exact fully verified Development and Production restart boundary.','Build 220 Production Run, QA, Rework & Scrap Evidence is the active Development closure candidate.','Canonical migrations advance through 0019; Inventory movement, order and Finance/Accounting mutation remain closed.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
   if(new URL(context.request.url).searchParams.get('format')==='markdown')return new Response(markdownReport(data),{status:200,headers:{'Content-Type':'text/markdown; charset=utf-8','Cache-Control':'no-store'}});
   return jsonResponse(data,200,{'Cache-Control':'no-store'});
 }

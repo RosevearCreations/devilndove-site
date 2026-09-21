@@ -2,7 +2,7 @@
 
 ## Current release baseline
 
-Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0018`. Request-time DDL and automatic Production promotion remain closed.
+Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0019`. Request-time DDL and automatic Production promotion remain closed.
 
 ## Canonical Development target
 
@@ -24,26 +24,29 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 Stripe Development, PayPal sandbox and Social/OAuth remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 219 candidate
+## Current Release 467 restart authority — Build 220 candidate
 
-Build 218 **Quote ↔ Production Cost ↔ Margin Guardrails** is the exact fully verified predecessor.
+Build 219 **Manufacturing Work Order & Job Traveler** is the exact fully verified predecessor.
 
-- Development SHA: 068b99a9f4f5e32e4d3547a69a23549d9dcd1c1a
-- Shared tree: 0bb22258a030eb529be3a7b5faf9ba12baa66f46
-- System / Quality / I.T. / Hygiene: 35556952902 / 35556952735 / 35556952815 / 35556952797
-- Build 218 Development proof: 35556952722
-- Exact Development URL: https://8d25c91e.devilndove-site.pages.dev
-- Production main: 24b59add984ea0be5acc3ebe3bf8ae558db747ee
-- Production Pages / Live Resources: 35557094198 / 35557137931
-- Product Browser / Route: 35557137831 / 35557137932
-- Build 218 Production proof: 35557094182
-- Exact Production URL: https://b8567968.devilndove-site.pages.dev
-- Deployment ID: b8567968-da64-41b9-b378-965fd942ea6d
+- Development SHA: d05924a6c395b9ff2d6cd667d335d690de995805
+- Shared tree: c41a2fd13e69a517d258a2b7e8a5c6af47706e1b
+- System / Quality / I.T. / Hygiene: 35559932353 / 35559932262 / 35559932380 / 35559932232
+- Build 219 Development proof: 35559932358
+- Exact Development URL: https://51612e13.devilndove-site.pages.dev
+- Development deploy proof artifact: 10621358188
+- Development regression artifact: 10622191261
+- Production main: 6442fc479a61ff1083567a40a46a2987aba12844
+- Production Pages / Live Resources: 35560514490 / 35560585150
+- Product Browser / Route: 35560585205 / 35560585179
+- Build 219 Production proof: 35560514532
+- Exact Production URL: https://6e81f92e.devilndove-site.pages.dev
+- Deployment ID: 6e81f92e-ce58-426e-b0e5-568504efe009
+- Production promotion artifact: 10621673570
 
-Build 219 **Manufacturing Work Order & Job Traveler** is the active candidate. It introduces additive canonical migration 0018 for versioned reviewed traveler evidence. The generated traveler freezes source-authority evidence and detects later source drift by SHA-256; it never becomes a duplicate Product, Inventory, Packaging, CAIP, quote, proof or Finance editor.
+Build 220 **Production Run, QA, Rework & Scrap Evidence** is the active candidate. It introduces additive canonical migration 0019 for immutable reviewed run packets linked to the exact reviewed Build 219 traveler. Inventory-owned material postings and existing order/handoff records are referenced, not rewritten; Finance/Accounting posting remains closed.
 
 ### Restart resolution rule
-Resolve live dev and main first. Build 220 starts only after Build 219 is exact-SHA Production GREEN.
+Resolve live dev and main first. Build 221 starts only after Build 220 is exact-SHA Production GREEN.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
 
 ## Retained historical provenance — Build 171
