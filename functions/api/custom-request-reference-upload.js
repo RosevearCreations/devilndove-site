@@ -36,6 +36,14 @@ export async function onRequestPost(context) {
   const row = await db.prepare(`SELECT custom_request_id, request_key, upload_token, reference_upload_count, attachment_urls_json FROM custom_requests WHERE request_key=? LIMIT 1`).bind(requestKey).first().catch(() => null);
   if (!row || String(row.upload_token || '') !== uploadToken) return json({ ok: false, error: 'Upload token was not accepted for this request.' }, 403);
   if (Number(row.reference_upload_count || 0) >= 5) return json({ ok: false, error: 'Reference upload limit reached for this request.' }, 400);
+  let suppliedItem = null;
+  if (evidenceRole === 'intake_condition') {
+    if (!(await hasCustomRequestSuppliedItemSchema(db))) {
+      return json({ ok: false, error: 'custom_request_supplied_item_schema_unavailable', message: 'Supplied-item condition evidence is temporarily unavailable.' }, 503);
+    }
+    suppliedItem = await db.prepare(`SELECT custom_request_supplied_item_id FROM custom_request_supplied_items WHERE custom_request_id=? ORDER BY custom_request_supplied_item_id LIMIT 1`).bind(Number(row.custom_request_id || 0)).first().catch(() => null);
+    if (!suppliedItem?.custom_request_supplied_item_id) return json({ ok: false, error: 'supplied_item_not_found', message: 'No supplied-item intake record was found for this request.' }, 409);
+  }
 
   const mimeType = clean(file.type || 'application/octet-stream', 80).toLowerCase();
   if (!mimeType.startsWith('image/')) return json({ ok: false, error: 'Only image reference uploads are allowed.' }, 400);
@@ -53,11 +61,6 @@ export async function onRequestPost(context) {
   const uploadId = Number(uploadResult?.meta?.last_row_id || 0) || null;
   let suppliedItemEvidenceId = null;
   if (evidenceRole === 'intake_condition') {
-    if (!(await hasCustomRequestSuppliedItemSchema(db))) {
-      return json({ ok: false, error: 'custom_request_supplied_item_schema_unavailable', message: 'The image was uploaded, but supplied-item condition evidence could not be linked yet.' }, 503);
-    }
-    const suppliedItem = await db.prepare(`SELECT custom_request_supplied_item_id FROM custom_request_supplied_items WHERE custom_request_id=? ORDER BY custom_request_supplied_item_id LIMIT 1`).bind(Number(row.custom_request_id || 0)).first().catch(() => null);
-    if (!suppliedItem?.custom_request_supplied_item_id) return json({ ok: false, error: 'supplied_item_not_found', message: 'The image was uploaded, but no supplied-item intake record was found for this request.' }, 409);
     const evidenceInsert = await db.prepare(`INSERT INTO custom_request_supplied_item_evidence(
       custom_request_supplied_item_id,custom_request_id,evidence_role,custom_request_reference_upload_id,evidence_note,created_at
     ) VALUES(?,?, 'intake_condition',?, 'Customer-uploaded condition-at-intake photo.',CURRENT_TIMESTAMP)`).bind(
