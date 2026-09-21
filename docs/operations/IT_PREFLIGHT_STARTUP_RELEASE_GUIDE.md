@@ -2,7 +2,7 @@
 
 ## Current release baseline
 
-Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0015`. Request-time DDL and automatic Production promotion remain closed.
+Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0016`. Request-time DDL and automatic Production promotion remain closed.
 
 ## Canonical Development target
 
@@ -24,26 +24,26 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 Stripe Development, PayPal sandbox and Social/OAuth remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 215 candidate
+## Current Release 467 restart authority — Build 216 candidate
 
-Build 214 **Prototype → Sample → Production Run** is the exact fully verified predecessor.
+Build 215 **Small-Batch, Corporate & Event Quoting** is the exact fully verified predecessor.
 
-- Development SHA: `45a6bbb5ea01fa8b79ea9df331d87086ca5c7657`
-- Shared tree: `6792f4ed926e3c52b197dfe8f3cc68e074b92d62`
-- System / Quality / I.T. / Hygiene: `35544979662` / `35544979675` / `35544979731` / `35544979736`
-- Build 214 Development proof: `35544979792`
-- Production main: `6e3e8f04578998e16e1e8b8d27daad28b2332603`
-- Production Pages / Live Resources: `35545124565` / `35545169766`
-- Product Browser / Route: `35545169753` / `35545169742`
-- Build 214 Production proof: `35545124482`
-- Exact Production URL: `https://e817e044.devilndove-site.pages.dev`
+- Development SHA: 825814b09a7c3f05c6fddc223ec8876ade0bbc35
+- Shared tree: f1facb7a27e22f3a129654713cc6dd109e3b6b16
+- System / Quality / I.T. / Hygiene: 35548513112 / 35548513093 / 35548513139 / 35548513160
+- Build 215 Development proof: 35548513080
+- Production main: c8366bde7fb2e7c673be656ff85265058a407c4a
+- Production Pages / Live Resources: 35548670491 / 35548742503
+- Product Browser / Route: 35548742488 / 35548742478
+- Build 215 Production proof: 35548670519
+- Exact Production URL: https://cec5e207.devilndove-site.pages.dev
 
-Build 215 **Small-Batch, Corporate & Event Quoting** is the active candidate. Migration `0015_release467_small_batch_corporate_event_quoting.sql` adds structured quote terms and quantity tiers over the existing Custom Work quote draft/revision/line-item authority.
+Build 216 **Customer-Supplied Item Intake & Suitability Review** is the active candidate. Migration 0016_release467_customer_supplied_item_suitability_review.sql adds item-specific intake, append-only review, evidence-link and acknowledgement records over existing Custom Work, Build 211 triage and media authorities.
 
-Build 215 does not create a second quote/payment/order engine. Unknown production cost remains unknown or partial until reviewed; payment/provider execution and real-order creation remain closed.
+Unknown compatibility/material/safety facts remain explicit; evidence is link-only; automatic production, Inventory, payment/provider and publication action remain closed.
 
 ### Restart resolution rule
-Resolve live `dev` and `main` first. Build 216 starts only after Build 215 is exact-SHA Production GREEN.
+Resolve live dev and main first. Build 217 starts only after Build 216 is exact-SHA Production GREEN.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
 
 ## Retained historical provenance — Build 171
