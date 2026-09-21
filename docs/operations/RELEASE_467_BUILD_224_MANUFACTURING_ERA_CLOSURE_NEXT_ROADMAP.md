@@ -88,13 +88,86 @@ The closure artifact must record, at minimum:
 10. **Published evidence-backed capability/case-study coverage** — published Workshop Journal entries; exact Creative Project-sourced stories; capability-backed project stories; and published hybrid-project stories.
 11. **Provider budget** — provider-metered D1 rows read, capped at **25,000**; D1 mutation ZERO; R2 mutation ZERO; schema migration NONE.
 
-## Roadmap derivation rule
+## Exact Development measurement result
 
-Build 224 deliberately does **not** pre-authorize Build 225+ scope in this initial candidate.
+The required bounded measurement is now complete and GREEN.
 
-The exact Development measurement artifact must exist first. Only then may the closure source be amended to preserve the measured counts, identify the remaining gaps, group those gaps by the existing mutation owner, and create a successor autonomous roadmap without duplicating authorities already created in Builds 205–223.
+- Exact measured Development SHA: `95fd199e4345a6e191996f5de7ef56057a0ffde8`
+- Tree: `11ea923c36a0e2cd56c8319a545c63743ed4df41`
+- Build 224 measurement workflow: `35641735469`
+- Measurement artifact: `10658891143`
+- Provider-metered D1 rows read: **8,781 / 25,000**
+- D1 mutation: **ZERO**
+- R2 mutation: **ZERO**
+- Schema migration: **NONE**
 
-If the evidence shows that a lane has no current operational records, the successor roadmap should focus on adoption, workflow integration, evidence capture, repair queues or acceptance—not create another parallel schema merely to make the count non-zero.
+### Launch-set movement
+
+The measured storefront launch set is unchanged from Build 204:
+
+- Products reviewed: **43** (Δ 0)
+- Ready: **1** (Δ 0)
+- Review-required: **42** (Δ 0)
+- Externally blocked: **0** (Δ 0)
+- Publicly visible: **40** (Δ 0)
+- Media-ready: **3** (Δ 0)
+- Media-blocked: **40**
+- Buyer-blocked: **16** (Δ 0)
+- Tracked zero-stock: **2** (Δ 0)
+- Products with linked resources: **2** (Δ 0)
+- Missing linked Inventory: **0** (Δ 0)
+- Unknown linked-resource cost: **2** (Δ 0)
+
+### Capability coverage
+
+- Active canonical processes: **22**
+- Public reviewed capability profiles: **12**
+- Public profile process keys: **21**
+- Active canonical processes with public profile coverage: **21 / 22 = 95.5%**
+- Remaining public profile coverage gap: **1 process**
+
+### Operational manufacturing evidence
+
+Current Development contains no active operational manufacturing records in the measured lanes:
+
+- Active Custom Requests: **0**
+- Manufacturing triage records in active use: **0**
+- Hybrid projects: **0**
+- Proof versions: **0**
+- Manufacturing lifecycles: **0**
+- Approved samples: **0**
+- Reviewed production runs: **0**
+- Completed manufacturing lifecycles: **0**
+- Quote drafts: **0**
+- Actual production-cost evidence projects: **0**
+- QA checks: **0**
+- Workshop Knowledge entries: **0**
+- Approved recipe versions: **0**
+- Published Workshop Journal entries: **0**
+- Published Creative Project case studies: **0**
+
+This does **not** justify another manufacturing schema. It shows an adoption/integration gap: the authorities built in Builds 210–223 exist, but there is not yet real operational evidence exercising them.
+
+## Evidence-derived successor roadmap
+
+The exact measurement now authorizes a successor roadmap at:
+
+`docs/operations/RELEASE_467_POST_MANUFACTURING_AUTONOMOUS_BUILDS_225_232.md`
+
+Planned builds:
+
+- **225 — Storefront Launch-Set Remediation Execution II**
+- **226 — Capability Profile Coverage Closure**
+- **227 — Manufacturing Adoption Command Centre**
+- **228 — First Real Custom Work Route-to-Proof Pilot**
+- **229 — First Creative Project Prototype-to-Run Pilot**
+- **230 — Cost, Margin, QA & Knowledge Evidence Adoption**
+- **231 — Workshop Journal & Capability Case-Study Activation**
+- **232 — Manufacturing Outcomes Review & Roadmap Renewal**
+
+These builds reuse existing mutation authorities. Zero-record lanes are treated as adoption evidence, not as permission to invent fake business records or parallel tables.
+
+**Build 225 remains blocked until Build 224 is exact-SHA Production GREEN.**
 
 ## Safety boundary
 
@@ -119,6 +192,6 @@ Build 224 is eligible for Production promotion only when:
 
 ## Queue state
 
-At this initial candidate stage, Build 224 is the final pre-planned build in the 205–224 roadmap.
+The future queue **has not run out**.
 
-The future queue is **not declared exhausted yet** because Build 224 itself is still active. The queue state after Build 224 will be determined by the exact Build 224 measurement and the successor roadmap derived from it.
+Builds **225–232** are now planned from the exact Build 224 measurement evidence. None may begin until Build 224 is fully promoted and exact-SHA Production GREEN.

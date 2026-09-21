@@ -609,6 +609,11 @@ Build 224 must not invent Build 225+ scope before those measurements exist.
 ## Current checkpoint
 
 - Build 223: **complete and Production GREEN** at `704c407485c0fd0c3de785b696113d3cc7be5a27`, shared tree `23394309d09e765c5327fbf8715532faabc78d6a`.
-- Build 224: **current and final planned build — Manufacturing-Era Closure & Next Roadmap**.
-- Successor roadmap: **blocked until exact Build 224 measurement evidence exists**.
-- The future queue is not declared exhausted while Build 224 is active.
+- Build 224: **measured Development closure candidate**.
+- Exact Build 224 measurement: `95fd199e4345a6e191996f5de7ef56057a0ffde8` / tree `11ea923c36a0e2cd56c8319a545c63743ed4df41`.
+- Measurement run: `35641735469`; artifact: `10658891143`; D1 provider rows: **8,781 / 25,000**; mutations: **ZERO**.
+- Measured launch set remains **43 reviewed / 1 ready / 42 review-required**, unchanged from Build 204.
+- Manufacturing operational lanes currently contain no active request/lifecycle/run/knowledge/publication evidence; this is treated as an adoption gap, not a missing-schema mandate.
+- Successor roadmap: `docs/operations/RELEASE_467_POST_MANUFACTURING_AUTONOMOUS_BUILDS_225_232.md`.
+- Builds **225–232 are planned** but Build 225 remains blocked until Build 224 is exact-SHA Production GREEN.
+- The future queue **has not run out**.

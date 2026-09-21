@@ -47,7 +47,7 @@ export async function loadCurrentReliability(db,env={}){
       accepted_development:ACCEPTED_DEVELOPMENT,last_fully_verified_development:LAST_FULLY_VERIFIED_DEVELOPMENT,current_production:CURRENT_PRODUCTION,
       production_proof_transport_policy:PRODUCTION_PROOF_TRANSPORT_POLICY,implementation_acceptance_is_distinct_from_final_closure:true,
       closure_candidate_requires_external_exact_head_proof:true,build223_capability_case_studies_production_green:true,
-      build224_manufacturing_era_closure_candidate:true,build224_exact_measurement_required:true,production_baseline_build:223
+      build224_manufacturing_era_closure_candidate:true,build224_exact_measurement_green:true,build224_measured_dev_sha:'95fd199e4345a6e191996f5de7ef56057a0ffde8',build224_measurement_run:35641735469,build224_measurement_artifact_id:10658891143,build224_provider_rows_read:8781,build224_provider_rows_ceiling:25000,successor_builds_planned:'225-232',production_baseline_build:223
     },
     safety:{...inherited.safety,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,accounting_posting:false,period_close:false,inventory_mutation:false,creative_mutation:false,price_mutation:false,provider_execution:false,provider_publication:false,marketplace_publication:false,social_publication:false,backup_restore_execution:false,production_mutation:false,secrets_exposed:false}
   };

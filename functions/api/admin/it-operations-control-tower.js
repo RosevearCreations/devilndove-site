@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build223_capability_case_studies:true
     },
-    next_build:'Build 224 measures the manufacturing era from exact Build 223 proof; successor scope remains blocked until exact Development measurement evidence exists.'
+    next_build:'Build 224 measurement is GREEN; Builds 225-232 are planned from evidence and blocked until Build 224 is exact-SHA Production GREEN.'
   };
 }
 async function closurePack(){
@@ -116,9 +116,9 @@ export async function onRequestGet(context){
   const base=baseResponse.ok?await baseResponse.json().catch(()=>({})):{};
   const diagnostic=diagnosticResponse.ok?await diagnosticResponse.json().catch(()=>({})):{};
   const data={
-    release:RELEASE,build:BUILD,title:TITLE,ok:true,authority:AUTHORITY,state:'DEVELOPMENT_CLOSURE_CANDIDATE',
+    release:RELEASE,build:BUILD,title:TITLE,ok:true,authority:AUTHORITY,state:'DEVELOPMENT_MEASURED_CLOSURE_CANDIDATE',
     release_authority:{
-      current_operator:{release:RELEASE,build:BUILD,title:TITLE,state:'DEVELOPMENT_CLOSURE_CANDIDATE'},
+      current_operator:{release:RELEASE,build:BUILD,title:TITLE,state:'DEVELOPMENT_MEASURED_CLOSURE_CANDIDATE'},
       accepted_development:ACCEPTED_DEVELOPMENT,verified_development:VERIFIED_DEVELOPMENT,production:PRODUCTION,
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
@@ -146,8 +146,8 @@ export async function onRequestGet(context){
       'Build 223 Production is GREEN on the identical source tree through canonical migration 0021.',
       'Development proofs: System 35636209245, Quality 35636209377, I.T. 35636209182, Hygiene 35636209309.',
       'Production proofs: Pages 35636523017, Live Resources 35636619207, Product Browser 35636619026, Product Route 35636619136.',
-      'Build 224 Manufacturing-Era Closure & Next Roadmap is the active Development closure candidate.',
-      'Canonical D1 migrations remain 0001-0021; Build 224 is bounded read-only measurement with no new schema or business-data mutation.'
+      'Build 224 Manufacturing-Era Closure & Next Roadmap is the active measured Development closure candidate.',
+      'Build 224 measurement is GREEN at SHA 95fd199e4345a6e191996f5de7ef56057a0ffde8: 8,781/25,000 provider rows, zero D1/R2/schema mutation; Builds 225-232 are planned but blocked until Production GREEN.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,

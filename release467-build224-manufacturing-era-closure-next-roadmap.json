@@ -2,7 +2,7 @@
   "release": 467,
   "build": 224,
   "title": "Manufacturing-Era Closure & Next Roadmap",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "DEVELOPMENT_MEASURED_CLOSURE_CANDIDATE",
   "authority": "release467-build224-manufacturing-era-closure-next-roadmap",
   "priority": "measure_the_manufacturing_era_from_exact_build223_production_green_evidence_then_derive_successor_scope_without_new_business_authority",
   "starting_point": {
@@ -53,23 +53,119 @@
     "buyer_blocked_products": 16
   },
   "measurement": {
-    "state": "PENDING_EXACT_DEV_PUSH_PROOF",
+    "state": "EXACT_DEVELOPMENT_MEASURED_GREEN",
     "query": "scripts/release467_build224_measurement.sql",
+    "development_sha": "95fd199e4345a6e191996f5de7ef56057a0ffde8",
+    "tree_sha": "11ea923c36a0e2cd56c8319a545c63743ed4df41",
+    "workflow_run": 35641735469,
+    "artifact_id": 10658891143,
+    "artifact_name": "release467-build224-manufacturing-era-closure-95fd199e4345a6e191996f5de7ef56057a0ffde8",
+    "d1_provider_rows_read": 8781,
     "d1_rows_read_ceiling": 25000,
     "mutation": "ZERO",
-    "required_dimensions": [
-      "Build 204 launch-set movement and remaining buyer/media/stock/cost blockers",
-      "capability taxonomy and public-profile coverage",
-      "Custom Request manufacturing-triage sufficiency",
-      "hybrid Creative Projects",
-      "proofs sent/approved/changed",
-      "prototype/sample/production-run evidence",
-      "quote expected-cost coverage and reviewed actual production-cost coverage",
-      "QA/rework/scrap evidence",
-      "reviewed Workshop Knowledge entries and approved recipe versions",
-      "published evidence-backed Workshop Journal/case-study capability coverage",
-      "provider-metered D1 rows read"
-    ]
+    "build204_baseline": {
+      "products_reviewed": 43,
+      "ready_products": 1,
+      "review_required_products": 42,
+      "externally_blocked_products": 0,
+      "publicly_visible_products": 40,
+      "media_ready_products": 3,
+      "tracked_zero_stock_products": 2,
+      "products_with_linked_resources": 2,
+      "products_with_missing_linked_inventory": 0,
+      "products_with_unknown_linked_cost": 2,
+      "buyer_blocked_products": 16
+    },
+    "launch_set_current": {
+      "products_reviewed": 43,
+      "ready_products": 1,
+      "review_required_products": 42,
+      "externally_blocked_products": 0,
+      "publicly_visible_products": 40,
+      "media_ready_products": 3,
+      "tracked_zero_stock_products": 2,
+      "products_with_linked_resources": 2,
+      "products_with_missing_linked_inventory": 0,
+      "products_with_unknown_linked_cost": 2,
+      "buyer_blocked_products": 16
+    },
+    "launch_set_deltas": {
+      "products_reviewed": 0,
+      "ready_products": 0,
+      "review_required_products": 0,
+      "externally_blocked_products": 0,
+      "publicly_visible_products": 0,
+      "media_ready_products": 0,
+      "tracked_zero_stock_products": 0,
+      "products_with_linked_resources": 0,
+      "products_with_missing_linked_inventory": 0,
+      "products_with_unknown_linked_cost": 0,
+      "buyer_blocked_products": 0
+    },
+    "measurements": {
+      "active_custom_requests": 0,
+      "active_processes_with_public_profile": 21,
+      "approved_recipe_versions": 0,
+      "buyer_blocked_products": 16,
+      "canonical_active_processes": 22,
+      "completed_manufacturing_lifecycles": 0,
+      "custom_requests_with_sufficient_triage": 0,
+      "custom_requests_with_triage": 0,
+      "externally_blocked_products": 0,
+      "hybrid_projects": 0,
+      "knowledge_entries_reviewed": 0,
+      "knowledge_entries_total": 0,
+      "lifecycles_with_approved_sample": 0,
+      "lifecycles_with_prototype_evidence": 0,
+      "manufacturing_lifecycles": 0,
+      "media_blocked_products": 40,
+      "media_ready_products": 3,
+      "production_run_qa_checks": 0,
+      "products_reviewed": 43,
+      "products_with_linked_resources": 2,
+      "products_with_missing_linked_inventory": 0,
+      "products_with_unknown_linked_cost": 2,
+      "projects_with_actual_cost_evidence": 0,
+      "projects_with_fully_reviewed_cost_evidence": 0,
+      "projects_with_reviewed_known_direct_cost": 0,
+      "proof_versions_total": 0,
+      "proofs_approved": 0,
+      "proofs_changed": 0,
+      "proofs_sent": 0,
+      "public_profile_process_keys": 21,
+      "public_reviewed_capability_profiles": 12,
+      "publicly_visible_products": 40,
+      "published_capability_backed_case_studies": 0,
+      "published_hybrid_case_studies": 0,
+      "published_project_case_studies": 0,
+      "published_workshop_journal_entries": 0,
+      "qa_fail_checks": 0,
+      "qa_pass_checks": 0,
+      "qa_rework_checks": 0,
+      "quote_drafts_total": 0,
+      "quote_drafts_with_expected_cost_review": 0,
+      "ready_products": 1,
+      "review_required_products": 42,
+      "reviewed_production_runs": 0,
+      "reviewed_rework_quantity": 0,
+      "reviewed_runs_with_rework": 0,
+      "reviewed_runs_with_scrap": 0,
+      "reviewed_scrap_quantity": 0,
+      "tracked_zero_stock_products": 2
+    },
+    "coverage_percentages": {
+      "public_process_profile_coverage_pct": 95.5,
+      "custom_request_sufficient_triage_pct": null,
+      "quote_expected_cost_review_coverage_pct": null,
+      "actual_cost_fully_reviewed_pct": null,
+      "published_project_capability_backed_pct": null
+    },
+    "interpretation": {
+      "storefront_readiness_moved_since_build204": false,
+      "operational_manufacturing_records_present": false,
+      "zero_record_lanes_mean": "ADOPTION_EVIDENCE_NOT_SCHEMA_GAP",
+      "capability_profile_gap_count": 1
+    }
   },
   "safety": {
     "canonical_schema_addition": false,
@@ -87,7 +183,43 @@
     "production_business_data_copy": false
   },
   "successor_roadmap": {
-    "state": "BLOCKED_UNTIL_EXACT_BUILD224_MEASUREMENT_EXISTS",
-    "rule": "Do not assign Build 225+ scope until the exact Development Build 224 measurement artifact has been reviewed and incorporated."
+    "state": "PLANNED_BLOCKED_UNTIL_BUILD224_PRODUCTION_GREEN",
+    "path": "docs/operations/RELEASE_467_POST_MANUFACTURING_AUTONOMOUS_BUILDS_225_232.md",
+    "future_queue_exhausted": false,
+    "builds": [
+      {
+        "build": 225,
+        "title": "Storefront Launch-Set Remediation Execution II"
+      },
+      {
+        "build": 226,
+        "title": "Capability Profile Coverage Closure"
+      },
+      {
+        "build": 227,
+        "title": "Manufacturing Adoption Command Centre"
+      },
+      {
+        "build": 228,
+        "title": "First Real Custom Work Route-to-Proof Pilot"
+      },
+      {
+        "build": 229,
+        "title": "First Creative Project Prototype-to-Run Pilot"
+      },
+      {
+        "build": 230,
+        "title": "Cost, Margin, QA & Knowledge Evidence Adoption"
+      },
+      {
+        "build": 231,
+        "title": "Workshop Journal & Capability Case-Study Activation"
+      },
+      {
+        "build": 232,
+        "title": "Manufacturing Outcomes Review & Roadmap Renewal"
+      }
+    ],
+    "rule": "Build 225 may begin only after Build 224 is exact-SHA Production GREEN."
   }
 }
