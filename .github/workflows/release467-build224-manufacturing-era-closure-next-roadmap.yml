@@ -62,7 +62,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --file scripts/release467_build224_measurement.sql > /tmp/build224-measurement.json
+          BUILD224_SQL="$(sed '/^[[:space:]]*--/d' scripts/release467_build224_measurement.sql | tr '\n' ' ')"
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "$BUILD224_SQL" > /tmp/build224-measurement.json
           python - <<'PY'
           import json,os
           raw=json.load(open('/tmp/build224-measurement.json'))
