@@ -2,7 +2,7 @@
 
 ## Current release baseline
 
-Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0016`. Request-time DDL and automatic Production promotion remain closed.
+Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0017`. Request-time DDL and automatic Production promotion remain closed.
 
 ## Canonical Development target
 
@@ -24,26 +24,26 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 Stripe Development, PayPal sandbox and Social/OAuth remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 216 candidate
+## Current Release 467 restart authority — Build 217 candidate
 
-Build 215 **Small-Batch, Corporate & Event Quoting** is the exact fully verified predecessor.
+Build 216 **Customer-Supplied Item Intake & Suitability Review** is the exact fully verified predecessor.
 
-- Development SHA: 825814b09a7c3f05c6fddc223ec8876ade0bbc35
-- Shared tree: f1facb7a27e22f3a129654713cc6dd109e3b6b16
-- System / Quality / I.T. / Hygiene: 35548513112 / 35548513093 / 35548513139 / 35548513160
-- Build 215 Development proof: 35548513080
-- Production main: c8366bde7fb2e7c673be656ff85265058a407c4a
-- Production Pages / Live Resources: 35548670491 / 35548742503
-- Product Browser / Route: 35548742488 / 35548742478
-- Build 215 Production proof: 35548670519
-- Exact Production URL: https://cec5e207.devilndove-site.pages.dev
+- Development SHA: 2f9b0187110ffa0bd754eba1087f6ce56c23a0e4
+- Shared tree: 5bc30361efc9166f90aa8a7a4761646389325625
+- System / Quality / I.T. / Hygiene: 35552576564 / 35552576510 / 35552576480 / 35552576583
+- Build 216 Development proof: 35552576627
+- Production main: 0e6312ed188c3423fdf32b18c892ff4d17c387bc
+- Production Pages / Live Resources: 35552841763 / 35552906462
+- Product Browser / Route: 35552906457 / 35552906453
+- Build 216 Production proof: 35552841726
+- Exact Production URL: https://401aaffc.devilndove-site.pages.dev
 
-Build 216 **Customer-Supplied Item Intake & Suitability Review** is the active candidate. Migration 0016_release467_customer_supplied_item_suitability_review.sql adds item-specific intake, append-only review, evidence-link and acknowledgement records over existing Custom Work, Build 211 triage and media authorities.
+Build 217 **Production Cost Evidence v2** is the active candidate. Migration `0017_release467_production_cost_evidence_v2.sql` adds nullable Creative Project manufacturing source evidence for setup, machine and hands-on labour time; consumables, finishing, prototype waste/rework and outside-service cost; failed prototype count; and produced/accepted quantity.
 
-Unknown compatibility/material/safety facts remain explicit; evidence is link-only; automatic production, Inventory, payment/provider and publication action remain closed.
+Inventory remains the material-use/cost authority. Finance/Accounting remains the profitability/posting authority. Blank cost fields remain unknown rather than silently becoming zero.
 
 ### Restart resolution rule
-Resolve live dev and main first. Build 217 starts only after Build 216 is exact-SHA Production GREEN.
+Resolve live dev and main first. Build 218 starts only after Build 217 is exact-SHA Production GREEN.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
 
 ## Retained historical provenance — Build 171

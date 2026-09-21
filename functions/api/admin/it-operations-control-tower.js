@@ -1,30 +1,29 @@
-// Release 467 Build 216 — current release/restart authority over exact Build 215 GREEN predecessor.
+// Release 467 Build 217 — current release/restart authority over exact Build 216 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=216;
-const TITLE='Customer-Supplied Item Intake & Suitability Review';
-const AUTHORITY='release467-build216-customer-supplied-item-suitability-review';
-const EVIDENCE_ID='r467-b215-825814b0-35548513112-35548670491';
+const BUILD=217;
+const TITLE='Production Cost Evidence v2';
+const AUTHORITY='release467-build217-production-cost-evidence-v2';
+const EVIDENCE_ID='r467-b216-2f9b0187-35552576564-35552841763';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:215,title:'Small-Batch, Corporate & Event Quoting',state:'DEVELOPMENT_GREEN',
-  dev_sha:'825814b09a7c3f05c6fddc223ec8876ade0bbc35',tree_sha:'f1facb7a27e22f3a129654713cc6dd109e3b6b16',
-  system_gate_run:35548513112,current_application_quality_run:35548513093,it_admin_runtime_proof_run:35548513139,
-  branch_hygiene_run:35548513160,build_specific_proof_run:35548513080,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
-  exact_preview_deployment:true,
-  role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
+  release:467,build:216,title:'Customer-Supplied Item Intake & Suitability Review',state:'DEVELOPMENT_GREEN',
+  dev_sha:'2f9b0187110ffa0bd754eba1087f6ce56c23a0e4',tree_sha:'5bc30361efc9166f90aa8a7a4761646389325625',
+  system_gate_run:35552576564,current_application_quality_run:35552576510,it_admin_runtime_proof_run:35552576480,
+  branch_hygiene_run:35552576583,build_specific_proof_run:35552576627,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:215,title:'Small-Batch, Corporate & Event Quoting',state:'PRODUCTION_GREEN',
-  main_sha:'c8366bde7fb2e7c673be656ff85265058a407c4a',
-  tree_sha:'f1facb7a27e22f3a129654713cc6dd109e3b6b16',pages_deploy_run:35548670491,production_pages_deploy_run:35548670491,
-  production_live_resource_integrity_run:35548742503,products_browser_proof_run:35548742488,
-  products_route_proof_run:35548742478,build_specific_proof_run:35548670519,remote_d1_queries:0,
-  exact_production_url:'https://cec5e207.devilndove-site.pages.dev'
+  release:467,build:216,title:'Customer-Supplied Item Intake & Suitability Review',state:'PRODUCTION_GREEN',
+  main_sha:'0e6312ed188c3423fdf32b18c892ff4d17c387bc',
+  tree_sha:'5bc30361efc9166f90aa8a7a4761646389325625',pages_deploy_run:35552841763,production_pages_deploy_run:35552841763,
+  production_live_resource_integrity_run:35552906462,products_browser_proof_run:35552906457,
+  products_route_proof_run:35552906453,build_specific_proof_run:35552841726,remote_d1_queries:0,
+  exact_production_url:'https://401aaffc.devilndove-site.pages.dev'
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -34,9 +33,9 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 215 Small-Batch, Corporate & Event Quoting Proof'
+  'Release 467 Build 216 Customer-Supplied Item Suitability Review Proof'
 ]);
-const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql']);
+const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
   {key:'paypal_sandbox',state:'HOLD_EXTERNAL'},
@@ -58,26 +57,26 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:215,title:'Small-Batch, Corporate & Event Quoting',
+    release:467,build:216,title:'Customer-Supplied Item Intake & Suitability Review',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35548513112,current_application_quality_run:35548513093,
-      it_admin_runtime_proof_run:35548513139,branch_hygiene_run:35548513160,build215_proof_run:35548513080
+      system_gate_run:35552576564,current_application_quality_run:35552576510,
+      it_admin_runtime_proof_run:35552576480,branch_hygiene_run:35552576583,build216_proof_run:35552576627
     },
     production_proofs:{
-      production_pages_deploy_run:35548670491,production_live_resource_integrity_run:35548742503,
-      products_browser_proof_run:35548742488,products_route_proof_run:35548742478,build215_proof_run:35548670519
+      production_pages_deploy_run:35552841763,production_live_resource_integrity_run:35552906462,
+      products_browser_proof_run:35552906457,products_route_proof_run:35552906453,build216_proof_run:35552841726
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
     canonical_migration_authority:'migrations/canonical/manifest.json + scripts/d1_migrate.py',
-    canonical_migrations:CANONICAL_MIGRATIONS.slice(0,15),
+    canonical_migrations:CANONICAL_MIGRATIONS.slice(0,16),
     external_lanes:Object.fromEntries(EXTERNAL_POLICY.map((x)=>[x.key,x.state])),
     runtime_closure:{
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
-      background_polling:false,automatic_inventory_assignment:false,build215_small_batch_corporate_event_quoting:true
+      background_polling:false,automatic_inventory_assignment:false,build216_customer_supplied_item_suitability_review:true
     },
-    next_build:'Build 216 adds item-specific supplied-item intake/suitability evidence through canonical migration 0016 over exact Build 215 proof.'
+    next_build:'Build 217 adds Production Cost Evidence v2 through canonical migration 0017 over exact Build 216 proof.'
   };
 }
 async function closurePack(){
@@ -90,22 +89,22 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 215 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 216 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
 - Canonical Development SHA: ${pack.sha}
 - Canonical Production main SHA: ${PRODUCTION.main_sha}
 - Shared tree: ${pack.tree_sha}
-- System Gate: 35548513112
-- Current Application Quality Proof: 35548513093
-- I.T. Admin Runtime Proof: 35548513139
-- Repository Branch Hygiene: 35548513160
-- Build 215 Development Proof: 35548513080
-- Production Pages Deploy: 35548670491
-- Production Live Resource Integrity: 35548742503
-- Build 215 Production Proof: 35548670519
-- Current candidate: Build 216 Customer-Supplied Item Intake & Suitability Review
+- System Gate: 35552576564
+- Current Application Quality Proof: 35552576510
+- I.T. Admin Runtime Proof: 35552576480
+- Repository Branch Hygiene: 35552576583
+- Build 216 Development Proof: 35552576627
+- Production Pages Deploy: 35552841763
+- Production Live Resource Integrity: 35552906462
+- Build 216 Production Proof: 35552841726
+- Current candidate: Build 217 Production Cost Evidence v2
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -124,7 +123,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:216,title:TITLE,authority:'release467-build216-customer-supplied-item-suitability-review.json'},
+        current_closure_candidate:{release:467,build:217,title:TITLE,authority:'release467-build217-production-cost-evidence-v2.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -143,12 +142,12 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 215 source is the exact last fully verified Development checkpoint.',
-      'Build 215 Production is GREEN on the identical source tree with canonical migration 0015 applied.',
-      'Development proofs: System 35548513112, Quality 35548513093, I.T. 35548513139, Hygiene 35548513160.',
-      'Production proofs: Pages 35548670491, Live Resources 35548742503, Product Browser 35548742488, Product Route 35548742478.',
-      'Build 216 Customer-Supplied Item Intake & Suitability Review is the active Development closure candidate.',
-      'Canonical D1 migrations are now 0001-0016 in source; migration 0016 must be applied/proven in Development before promotion.'
+      'Build 216 source is the exact last fully verified Development checkpoint.',
+      'Build 216 Production is GREEN on the identical source tree with canonical migration 0016 applied.',
+      'Development proofs: System 35552576564, Quality 35552576510, I.T. 35552576480, Hygiene 35552576583.',
+      'Production proofs: Pages 35552841763, Live Resources 35552906462, Product Browser 35552906457, Product Route 35552906453.',
+      'Build 217 Production Cost Evidence v2 is the active Development closure candidate.',
+      'Canonical D1 migrations are now 0001-0017 in source; migration 0017 must be applied/proven in Development before promotion.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,

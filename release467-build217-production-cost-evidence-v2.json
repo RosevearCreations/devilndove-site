@@ -1,0 +1,84 @@
+{
+  "release": 467,
+  "build": 217,
+  "title": "Production Cost Evidence v2",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build217-production-cost-evidence-v2",
+  "priority": "enrich_existing_creative_project_source_evidence_with_manufacturing_cost_drivers_without_parallel_inventory_finance_or_accounting_authority",
+  "starting_point": {
+    "development": {
+      "sha": "2f9b0187110ffa0bd754eba1087f6ce56c23a0e4",
+      "tree": "5bc30361efc9166f90aa8a7a4761646389325625",
+      "system_gate_run": 35552576564,
+      "quality_run": 35552576510,
+      "it_admin_runtime_run": 35552576480,
+      "repository_hygiene_run": 35552576583,
+      "build_specific_proof_run": 35552576627,
+      "build_specific_proof_attempt": 1,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "0e6312ed188c3423fdf32b18c892ff4d17c387bc",
+      "tree": "5bc30361efc9166f90aa8a7a4761646389325625",
+      "production_pages_deploy_run": 35552841763,
+      "production_live_resource_integrity_run": 35552906462,
+      "products_browser_proof_run": 35552906457,
+      "products_route_proof_run": 35552906453,
+      "build_specific_proof_run": 35552841726,
+      "exact_production_url": "https://401aaffc.devilndove-site.pages.dev",
+      "deployment_id": "401aaffc-a186-4eb9-9c54-f7f045c45284",
+      "canonical_migrations": 16,
+      "business_counts": {
+        "users": 2,
+        "products": 45,
+        "site_item_inventory": 1041,
+        "orders": 0
+      },
+      "foreign_key_violations": 0,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Add nullable manufacturing source-evidence fields for setup, machine, hands-on labour and rework time plus consumables, packaging, prototype waste, rework, finishing and outside-service cost.",
+    "Link source evidence optionally to existing Build 212 Creative Project operations.",
+    "Capture failed prototype count and actual quantity produced/accepted.",
+    "Read existing Inventory material usage/cost evidence in place without copying or mutating its authority.",
+    "Expose the richer source evidence to the existing read-only Creator ↔ Finance profitability reconciliation without changing Finance/Accounting ownership.",
+    "Preserve unknown cost as null/unknown; only explicitly supplied zero is zero."
+  ],
+  "safety": {
+    "canonical_schema_addition": true,
+    "request_time_ddl": false,
+    "parallel_inventory_cost_system": false,
+    "parallel_profitability_ledger": false,
+    "parallel_accounting_ledger": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "accounting_posting": false,
+    "automatic_cost_rollup": false,
+    "unknown_cost_is_zero": false,
+    "payment_execution": false,
+    "provider_execution": false,
+    "real_order_creation": false,
+    "automatic_publication": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build217_gate.py",
+    "canonical_migration": "migrations/canonical/0017_release467_production_cost_evidence_v2.sql",
+    "source_table": "creative_project_production_cost_evidence",
+    "operation_authority": "creative_project_operations",
+    "material_usage_authority": "creative_project_inventory_posts + creative_project_inventory_usage_details",
+    "creative_event_authority": "creative_work_events",
+    "admin_api": "functions/api/admin/production-cost-evidence.js",
+    "admin_ui": "public/js/admin-production-cost-evidence-build217.js",
+    "admin_surface": "/admin/creative-process/",
+    "finance_bridge_api": "functions/api/admin/project-profitability-reconciliation.js",
+    "finance_surface": "/admin/project-profitability-reconciliation/"
+  },
+  "next_build": {
+    "build": 218,
+    "title": "Quote ↔ Production Cost ↔ Margin Guardrails",
+    "state": "BLOCKED_UNTIL_BUILD217_PRODUCTION_GREEN"
+  }
+}
