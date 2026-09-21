@@ -1,5 +1,5 @@
 // File: /public/js/custom-request-intake.js
-// Release 467 Build 210: Custom Work Intake 2.0 with structured manufacturing intent.
+// Release 467 Build 216: Custom Work intake with customer-supplied item identity and condition evidence.
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('customRequestForm');
@@ -37,14 +37,26 @@ document.addEventListener('DOMContentLoaded', () => {
     msg.style.color = isError ? '#b00020' : '#0a7a2f';
   }
 
+  const suppliedToggle=form.querySelector('[name="supplied_item"]');
+  const suppliedDetails=document.getElementById('customSuppliedItemDetails');
+  function syncSuppliedDetails(){
+    const active=Boolean(suppliedToggle?.checked);
+    if(suppliedDetails)suppliedDetails.style.display=active?'block':'none';
+    suppliedDetails?.querySelectorAll('input,select,textarea').forEach((el)=>{ el.disabled=!active; });
+  }
+  suppliedToggle?.addEventListener('change',syncSuppliedDetails);
+  syncSuppliedDetails();
   void loadCapabilities();
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const formData = new FormData(form);
-    const files = Array.from(form.querySelector('[name="reference_images"]')?.files || []).slice(0, 5);
+    const referenceFiles = Array.from(form.querySelector('[name="reference_images"]')?.files || []);
+    const conditionFiles = Array.from(form.querySelector('[name="supplied_item_condition_images"]')?.files || []);
+    if(referenceFiles.length+conditionFiles.length>5){setMsg('Please choose no more than 5 images total for this request.',true);return;}
     const payload = Object.fromEntries(formData.entries());
     delete payload.reference_images;
+    delete payload.supplied_item_condition_images;
     try {
       const params = new URLSearchParams(window.location.search || '');
       ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach((key) => { payload[key] = params.get(key) || ''; });
@@ -64,27 +76,34 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok || !data?.ok) throw new Error(data?.error || 'Custom request could not be sent.');
       try { window.DDAnalytics?.trackVisit('custom_request_submitted', { request_type: payload.request_type || '', fulfillment_preference: payload.fulfillment_preference || '', gift_intent: payload.gift_intent || '', custom_request_id: data.custom_request_id || null }); } catch {}
       let uploadMessage = '';
-      if (files.length && data.request_key && data.upload_token) {
-        const uploaded = [];
-        const failed = [];
-        for (const file of files) {
+      const uploadPlans=[
+        ...conditionFiles.map(file=>({file,evidence_role:'intake_condition'})),
+        ...referenceFiles.map(file=>({file,evidence_role:''}))
+      ];
+      if (uploadPlans.length && data.request_key && data.upload_token) {
+        const uploaded = [], failed = [];
+        for (const plan of uploadPlans) {
           const upload = new FormData();
           upload.append('request_key', data.request_key);
           upload.append('upload_token', data.upload_token);
-          upload.append('file', file);
+          upload.append('file', plan.file);
+          if(plan.evidence_role)upload.append('evidence_role',plan.evidence_role);
           try {
             const uploadResponse = await fetch('/api/custom-request-reference-upload', { method: 'POST', body: upload });
             const uploadData = await uploadResponse.json().catch(() => null);
             if (!uploadResponse.ok || !uploadData?.ok) throw new Error(uploadData?.error || 'upload failed');
-            uploaded.push(file.name || 'image');
+            uploaded.push({name:plan.file.name||'image',role:plan.evidence_role||'reference'});
           } catch (uploadError) {
-            failed.push(`${file.name || 'image'} (${uploadError.message || 'upload failed'})`);
+            failed.push(`${plan.file.name || 'image'} (${uploadError.message || 'upload failed'})`);
           }
         }
-        uploadMessage = uploaded.length ? ` ${uploaded.length} reference image(s) uploaded for private review.` : '';
+        const conditionCount=uploaded.filter(x=>x.role==='intake_condition').length;
+        const referenceCount=uploaded.filter(x=>x.role!=='intake_condition').length;
+        if(conditionCount)uploadMessage += ` ${conditionCount} condition photo(s) linked as private intake evidence.`;
+        if(referenceCount)uploadMessage += ` ${referenceCount} reference image(s) uploaded for private review.`;
         if (failed.length) uploadMessage += ` ${failed.length} image upload(s) did not finish; the written request was still saved.`;
       }
-      form.reset();
+      form.reset();syncSuppliedDetails();
       setMsg(`${data.message || 'Custom request received.'}${uploadMessage}`.trim());
     } catch (error) {
       setMsg(error.message || 'Custom request could not be sent.', true);
