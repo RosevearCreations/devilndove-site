@@ -37,6 +37,19 @@ const CUSTOM_REFERENCE_UPLOAD_COLUMNS = [
   "created_at",
 ];
 
+const CUSTOM_SUPPLIED_ITEM_COLUMNS = [
+  "custom_request_supplied_item_id", "custom_request_id", "item_key", "item_label", "item_description",
+  "ownership_status", "ownership_notes", "material_status", "material_description", "finish_status",
+  "finish_description", "requested_modification", "intake_condition_notes", "workflow_status",
+  "created_by_user_id", "updated_by_user_id", "created_at", "updated_at",
+];
+
+const CUSTOM_SUPPLIED_ITEM_EVIDENCE_COLUMNS = [
+  "custom_request_supplied_item_evidence_id", "custom_request_supplied_item_id", "custom_request_id",
+  "evidence_role", "custom_request_reference_upload_id", "custom_order_stage_photo_id",
+  "evidence_note", "created_by_user_id", "created_at",
+];
+
 const PRODUCT_INTEREST_COLUMNS = [
   "product_interest_request_id", "product_id", "request_type", "user_id", "email",
   "notes", "status", "created_at", "updated_at",
@@ -100,6 +113,12 @@ export async function hasCustomRequestReferenceUploadSchema(db) {
   return (await hasTableShape(db, "custom_requests", CUSTOM_REQUEST_COLUMNS)) &&
     (await hasTableShape(db, "custom_request_reference_uploads", CUSTOM_REFERENCE_UPLOAD_COLUMNS)) &&
     (await hasTableShape(db, "media_consent_records", MEDIA_CONSENT_COLUMNS));
+}
+
+
+export async function hasCustomRequestSuppliedItemSchema(db) {
+  return (await hasTableShape(db, "custom_request_supplied_items", CUSTOM_SUPPLIED_ITEM_COLUMNS)) &&
+    (await hasTableShape(db, "custom_request_supplied_item_evidence", CUSTOM_SUPPLIED_ITEM_EVIDENCE_COLUMNS));
 }
 
 export async function hasProductInterestSchema(db) {
