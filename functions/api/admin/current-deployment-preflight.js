@@ -8,16 +8,16 @@ const TITLE='Storefront Launch-Set Remediation Execution II';
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql']);
 const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 223 Capability Case Studies Workshop Journal Search Richness Proof']);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:223,title:'Capability Case Studies, Workshop Journal & Search Richness',state:'DEVELOPMENT_GREEN',
-  dev_sha:'f69deaa659520af182edc60dfc7cfefc7914d8f8',tree_sha:'23394309d09e765c5327fbf8715532faabc78d6a',
-  system_gate_run:35636209245,current_application_quality_run:35636209377,it_admin_runtime_proof_run:35636209182,
-  branch_hygiene_run:35636209309,build_specific_proof_run:35636209003,proof_state:'EXACT_BRANCH_HEAD_GREEN',exact_preview_deployment:true
+  release:467,build:224,title:'Manufacturing-Era Closure & Next Roadmap',state:'DEVELOPMENT_GREEN',
+  dev_sha:'20afcad9a74589cd015c94a1172dc10e3e8b55a5',tree_sha:'188dc8f60480c902ac91a6f957b30c37a7166c7d',
+  system_gate_run:35643013344,current_application_quality_run:35643013215,it_admin_runtime_proof_run:35643013107,
+  branch_hygiene_run:35643013180,build_specific_proof_run:35643013307,proof_state:'EXACT_BRANCH_HEAD_GREEN',exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:223,title:'Capability Case Studies, Workshop Journal & Search Richness',state:'PRODUCTION_GREEN',
-  main_sha:'704c407485c0fd0c3de785b696113d3cc7be5a27',tree_sha:'23394309d09e765c5327fbf8715532faabc78d6a',
-  production_pages_deploy_run:35636523017,production_live_resource_integrity_run:35636619207,
-  products_browser_proof_run:35636619026,products_route_proof_run:35636619136,build_specific_proof_run:35636522959
+  release:467,build:224,title:'Manufacturing-Era Closure & Next Roadmap',state:'PRODUCTION_GREEN',
+  main_sha:'d67fe22bb0cceaf8d6ea133f688a9304c7d1f439',tree_sha:'188dc8f60480c902ac91a6f957b30c37a7166c7d',
+  production_pages_deploy_run:35643398483,production_live_resource_integrity_run:35643492350,
+  products_browser_proof_run:35643492529,products_route_proof_run:35643492514,build_specific_proof_run:35643398886
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true});
 const rows=(r)=>Array.isArray(r?.results)?r.results:[];
