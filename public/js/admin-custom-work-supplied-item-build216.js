@@ -113,7 +113,7 @@
     const d=await r.json().catch(()=>null);if(!r.ok||!d?.ok)throw new Error(d?.error||`Build 216 save failed (${r.status}).`);return d;
   }
   async function save(payload){
-    try{msg('Saving…');const d=await post(payload);if(d.share_url)state.lastShareUrl=d.share_url;state.data=d;if(state.requestId&&!state.itemId){const first=d.items.find(x=>num(x.custom_request_id)===state.requestId);if(first)state.itemId=num(first.custom_request_supplied_item_id);}render();msg(d.message||'Saved.');}
+    try{msg('Saving…');const d=await post(payload);if(d.share_url)state.lastShareUrl=d.share_url;if(d.saved_item_id)state.itemId=num(d.saved_item_id);state.data=d;if(state.requestId&&!state.itemId){const first=d.items.find(x=>num(x.custom_request_id)===state.requestId);if(first)state.itemId=num(first.custom_request_supplied_item_id);}render();msg(d.message||'Saved.');}
     catch(e){msg(e.message||'Save failed.',true);}
   }
   function bind(){
