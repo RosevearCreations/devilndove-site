@@ -68,6 +68,7 @@
     { href: "/gallery/index.html", nav: "/gallery/", label: "Gallery", desktop: false, group: "Workshop" },
     { href: "/creations/index.html", nav: "/creations/", label: "What we make", desktop: true, group: "Workshop" },
     { href: "/capabilities/index.html", nav: "/capabilities/", label: "How we make it", desktop: true, group: "Workshop" },
+    { href: "/case-studies/index.html", nav: "/case-studies/", label: "Case studies", desktop: false, group: "Workshop" },
     { href: "/workshop-journal/index.html", nav: "/workshop-journal/", label: "Workshop Journal", desktop: false, group: "Workshop" },
     { href: "/tools/index.html", nav: "/tools/", label: "Tools", desktop: false, group: "Workshop" },
     { href: "/supplies/index.html", nav: "/supplies/", label: "Materials", desktop: true, group: "Workshop" },
