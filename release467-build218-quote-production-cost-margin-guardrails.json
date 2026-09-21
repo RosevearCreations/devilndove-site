@@ -2,7 +2,7 @@
   "release": 467,
   "build": 218,
   "title": "Quote ↔ Production Cost ↔ Margin Guardrails",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build218-quote-production-cost-margin-guardrails",
   "priority": "connect_existing_custom_work_quote_production_cost_product_resource_margin_and_finance_profitability_evidence_without_price_or_accounting_automation",
   "starting_point": {
@@ -78,6 +78,34 @@
   "next_build": {
     "build": 219,
     "title": "Manufacturing Work Order & Job Traveler",
-    "state": "BLOCKED_UNTIL_BUILD218_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_AFTER_BUILD218_PRODUCTION_GREEN"
+  },
+  "final_closure": {
+    "dev_sha": "068b99a9f4f5e32e4d3547a69a23549d9dcd1c1a",
+    "tree_sha": "0bb22258a030eb529be3a7b5faf9ba12baa66f46",
+    "proofs": {
+      "system_gate_run": 35556952902,
+      "current_application_quality_run": 35556952735,
+      "it_admin_runtime_proof_run": 35556952815,
+      "branch_hygiene_run": 35556952797
+    },
+    "build_specific_proof_run": 35556952722,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_development_url": "https://8d25c91e.devilndove-site.pages.dev"
+  },
+  "production_checkpoint": {
+    "main_sha": "24b59add984ea0be5acc3ebe3bf8ae558db747ee",
+    "tree_sha": "0bb22258a030eb529be3a7b5faf9ba12baa66f46",
+    "production_pages_deploy_run": 35557094198,
+    "production_live_resource_integrity_run": 35557137931,
+    "products_browser_proof_run": 35557137831,
+    "products_route_proof_run": 35557137932,
+    "build_specific_proof_run": 35557094182,
+    "exact_production_url": "https://b8567968.devilndove-site.pages.dev",
+    "deployment_id": "b8567968-da64-41b9-b378-965fd942ea6d",
+    "canonical_migrations": 17,
+    "business_counts_preserved": true,
+    "foreign_key_violations": 0,
+    "state": "PRODUCTION_GREEN"
   }
 }
