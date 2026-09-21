@@ -1,0 +1,47 @@
+name: Release 467 Build 220 Production Run QA Rework Scrap Evidence
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'migrations/canonical/manifest.json'
+      - 'migrations/canonical/0019_release467_production_run_qa_rework_scrap_evidence.sql'
+      - 'functions/api/admin/production-run-evidence.js'
+      - 'public/js/admin-production-run-evidence-build220.js'
+      - 'admin/custom-request/index.html'
+      - 'current-development-authority.json'
+      - 'release467-build219-manufacturing-work-order-job-traveler.json'
+      - 'release467-build220-production-run-qa-rework-scrap-evidence.json'
+      - 'docs/operations/RELEASE_467_BUILD_220_PRODUCTION_RUN_QA_REWORK_SCRAP_EVIDENCE.md'
+      - 'scripts/release467_build219_gate.py'
+      - 'scripts/release467_build220_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'scripts/current_deployment_preflight_truth_gate.py'
+      - 'scripts/repository_forward_sanity.py'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'admin/it/index.html'
+      - 'public/js/admin-it-control-tower.js'
+      - 'admin/deployment-preflight/index.html'
+      - 'admin/reliability/index.html'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Validate Build 220 production run QA rework scrap evidence
+        run: python scripts/release467_build220_gate.py
+      - name: Retain Build 219 manufacturing job traveler closure
+        run: python scripts/release467_build219_gate.py
