@@ -132,6 +132,13 @@
       "release": 467,
       "description": "Add nullable Creative Project manufacturing source evidence for operation-level time, direct-cost components, failed prototypes and actual produced/accepted quantities while preserving Inventory and Finance/Accounting ownership.",
       "recovery": "Forward-only additive table. Void incorrect evidence rows while retaining history; do not rewrite Inventory or Finance/Accounting facts. Repair schema defects only with a new numbered migration."
+    },
+    {
+      "version": 18,
+      "file": "0018_release467_manufacturing_work_order_job_traveler.sql",
+      "release": 467,
+      "description": "Add versioned reviewed manufacturing job-traveler snapshots and append-only traveler events over existing Custom Request, Creative Project, proof/sample, operation/resource, supplied-item and Packaging/handoff authorities.",
+      "recovery": "Forward-only additive traveler evidence. Void or supersede traveler versions for logical rollback; source authorities remain untouched. Repair schema defects only with a new numbered migration and never edit this migration after Development application."
     }
   ]
 }
