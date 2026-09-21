@@ -27,7 +27,7 @@ for ddl in ('CREATE TABLE','ALTER TABLE','DROP TABLE','CREATE INDEX','DROP INDEX
 for token in ('creative_project_production_runs','creative_project_production_run_qa_checks','creative_project_production_run_material_evidence','inventory_mutation:false','finance_mutation:false'):req(token in api,'Build 220 retained API missing '+token)
 for token in ('Production Run, QA, Rework &amp; Scrap Evidence','Record reviewed production run','Corrections are void-and-replace'):req(token in ui,'Build 220 retained UI missing '+token)
 req('customWorkProductionRun220Mount' in page and '/public/js/admin-production-run-evidence-build220.js?v=467b220' in page,'Custom Work page lost Build 220 production-run workspace')
-req(len(re.findall(r'<h1(?:\\s|>)',page,re.I))==1,'Custom Work page must retain exactly one H1')
+req(len(re.findall(r'<h1(?:\s|>)',page,re.I))==1,'Custom Work page must retain exactly one H1')
 for path in ('functions/api/admin/production-run-evidence.js','public/js/admin-production-run-evidence-build220.js'):
  q=subprocess.run(['node','--check',str(ROOT/path)],text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
  req(q.returncode==0,path+' syntax failed: '+(q.stderr or q.stdout)[-1200:])
