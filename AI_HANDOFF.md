@@ -2,21 +2,21 @@
 
 ## Current verified restart baseline
 
-Release 467 **Build 214 — Prototype → Sample → Production Run** is fully promoted and Production GREEN.
+Release 467 **Build 215 — Small-Batch, Corporate & Event Quoting** is fully promoted and Production GREEN.
 
-- Development `45a6bbb5ea01fa8b79ea9df331d87086ca5c7657`
-- Production `6e3e8f04578998e16e1e8b8d27daad28b2332603`
-- shared tree `6792f4ed926e3c52b197dfe8f3cc68e074b92d62`
-- four Development proofs `35544979662` / `35544979675` / `35544979731` / `35544979736`
-- Build 214 Development proof `35544979792`
-- Production Pages / Live Resources `35545124565` / `35545169766`
-- Product Browser / Route proofs `35545169753` / `35545169742`
-- Build 214 Production proof `35545124482`
-- exact Production URL `https://e817e044.devilndove-site.pages.dev`
+- Development 825814b09a7c3f05c6fddc223ec8876ade0bbc35
+- Production c8366bde7fb2e7c673be656ff85265058a407c4a
+- shared tree f1facb7a27e22f3a129654713cc6dd109e3b6b16
+- four Development proofs 35548513112 / 35548513093 / 35548513139 / 35548513160
+- Build 215 Development proof 35548513080
+- Production Pages / Live Resources 35548670491 / 35548742503
+- Product Browser / Route proofs 35548742488 / 35548742478
+- Build 215 Production proof 35548670519
+- exact Production URL https://cec5e207.devilndove-site.pages.dev
 
 ## Active candidate
 
-**Release 467 Build 215 — Small-Batch, Corporate & Event Quoting**. Extend the existing Custom Work quote draft/revision/line-item authority with structured quantity tiers, setup/sample charges, personalization, packaging, lead-time, handoff and expiry assumptions. Unknown production cost remains explicit; payment/provider/order execution stays closed.
+**Release 467 Build 216 — Customer-Supplied Item Intake & Suitability Review**. Extend existing Custom Work, Build 211 triage and existing private media authorities with item identity, ownership, condition evidence, append-only suitability decisions, explicit limitations acknowledgement and post-work condition evidence. Unknown material/process/safety facts stay unknown; no production/payment/provider/Inventory action is automatic.
 
 ## Restart rule
 
@@ -28,4 +28,4 @@ Build 171 **Release & Restart Authority Convergence** remains immutable historic
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 **Release Regression & Runtime Budget Convergence** and Build 193 **Current Authority & Handoff Convergence** remain retained historical release/restart provenance. Their exact artifacts and gates must remain valid, but current restart truth is Build 215 over exact Production-GREEN Build 214.
+Build 192 **Release Regression & Runtime Budget Convergence** and Build 193 **Current Authority & Handoff Convergence** remain retained historical release/restart provenance. Their exact artifacts and gates must remain valid, but current restart truth is Build 216 over exact Production-GREEN Build 215.
