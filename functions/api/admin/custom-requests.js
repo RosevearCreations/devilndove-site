@@ -669,6 +669,13 @@ async function ensureDefaultQuoteLineItems(db, adminUser, requestRow, quote) {
   await syncQuoteTotals(db, quote, budget);
   return lines;
 }
+async function build215BatchQuoteContext(db, quoteId) {
+  if (!Number(quoteId || 0)) return { terms: null, tiers: [] };
+  const terms = await db.prepare(`SELECT * FROM custom_request_quote_batch_terms WHERE quote_draft_id=? LIMIT 1`).bind(Number(quoteId)).first().catch(() => null);
+  if (!terms) return { terms: null, tiers: [] };
+  const result = await db.prepare(`SELECT * FROM custom_request_quote_quantity_tiers WHERE custom_request_quote_batch_terms_id=? ORDER BY sort_order,min_quantity,custom_request_quote_quantity_tier_id`).bind(Number(terms.custom_request_quote_batch_terms_id || 0)).all().catch(() => ({ results: [] }));
+  return { terms, tiers: rows(result) };
+}
 async function recordQuoteRevision(db, adminUser, requestId, quoteId, revisionType, notes, snapshot = {}) {
   await db.prepare(`INSERT INTO custom_request_quote_revisions (custom_request_id, quote_draft_id, revision_type, revision_status, revision_notes, snapshot_json, created_by_user_id, created_at) VALUES (?, ?, ?, 'open', ?, ?, ?, CURRENT_TIMESTAMP)`).bind(
     Number(requestId || 0), Number(quoteId || 0) || null, clean(revisionType || 'changed', 60), clean(notes || '', 1200) || null, JSON.stringify(snapshot || {}), Number(adminUser?.user_id || 0) || null
@@ -832,7 +839,8 @@ async function createQuotePreviewLink(db, adminUser, requestId, origin) {
     invoice_balance_cents: Number(invoiceCandidate?.amount_cents || 0),
     note: 'Payment amounts are planning values only until Devil n Dove sends a final payment request or invoice.'
   });
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString();
+  const build215 = await build215BatchQuoteContext(db, quote?.custom_request_quote_draft_id);
+  const expiresAt = build215.terms?.expires_at || new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString();
   const insert = await db.prepare(`INSERT INTO custom_request_quote_share_links (
     custom_request_id, quote_draft_id, share_token, share_status, customer_name, customer_email, title, quote_total_cents,
     scope_summary, payment_summary_json, expires_at, created_by_user_id, created_at, updated_at
@@ -882,7 +890,8 @@ async function createAcceptedPaymentAndOrderDrafts(db, adminUser, requestId, sha
   let paymentKey = existingPayment?.payment_request_key || null;
   let orderKey = existingOrder?.order_draft_key || null;
   const lineItems = await quoteLineItems(db, quote.custom_request_quote_draft_id);
-  const sourcePayload = JSON.stringify({ request_key: row.request_key, quote_key: quote.quote_key, share_link_id: shareLinkId || null, line_items: lineItems, totals });
+  const build215 = await build215BatchQuoteContext(db, quote.custom_request_quote_draft_id);
+  const sourcePayload = JSON.stringify({ request_key: row.request_key, quote_key: quote.quote_key, share_link_id: shareLinkId || null, line_items: lineItems, totals, build215_batch_terms: build215.terms, build215_quantity_tiers: build215.tiers });
   if (!existingPayment) {
     paymentKey = key('payreq');
     const depositCandidate = await db.prepare(`SELECT * FROM custom_request_payment_candidates WHERE custom_request_id=? AND candidate_type='deposit' LIMIT 1`).bind(Number(requestId)).first().catch(() => null);
@@ -1090,7 +1099,8 @@ async function createQuoteRevisionLink(db, adminUser, requestId, origin) {
   const version = Math.max(1, Number(previous?.version_number || 1) + 1);
   const shareToken = `quote_${crypto.randomUUID().replace(/-/g, '')}`;
   const paymentSummary = JSON.stringify({ subtotal_cents: totals.subtotal_cents, pickup_shipping_cents: totals.pickup_shipping_cents, tax_estimate_cents: totals.tax_estimate_cents, quote_total_cents: totals.quote_total_cents, note: `Quote revision/version ${version}.` });
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString();
+  const build215 = await build215BatchQuoteContext(db, quote.custom_request_quote_draft_id);
+  const expiresAt = build215.terms?.expires_at || new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString();
   const insert = await db.prepare(`INSERT INTO custom_request_quote_share_links (
     custom_request_id, quote_draft_id, share_token, share_status, customer_name, customer_email, title, quote_total_cents,
     scope_summary, payment_summary_json, expires_at, created_by_user_id, version_number, supersedes_share_link_id, resent_at, resend_note, created_at, updated_at
