@@ -1,27 +1,27 @@
-// Release 467 Build 223 — current release/restart authority over exact Build 222 GREEN predecessor.
+// Release 467 Build 224 — current release/restart authority over exact Build 223 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=223;
-const TITLE='Capability Case Studies, Workshop Journal & Search Richness';
-const AUTHORITY='release467-build223-capability-case-studies-workshop-journal-search-richness';
-const EVIDENCE_ID='r467-b222-a9fd2f4e-35624331277-35624807963';
+const BUILD=224;
+const TITLE='Manufacturing-Era Closure & Next Roadmap';
+const AUTHORITY='release467-build224-manufacturing-era-closure-next-roadmap';
+const EVIDENCE_ID='r467-b223-f69deaa6-35636209245-35636523017';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:222,title:'Project-to-Knowledge Promotion & Recipe History',state:'DEVELOPMENT_GREEN',
-  dev_sha:'a9fd2f4e10f8bf68d3fe9b40c82ced112cf91bb1',tree_sha:'255d08bc787f7eb785119ceaffa61d6aa5eeefed',
-  system_gate_run:35624331277,current_application_quality_run:35624331446,it_admin_runtime_proof_run:35624331471,
-  branch_hygiene_run:35624331702,build_specific_proof_run:35624331629,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:223,title:'Capability Case Studies, Workshop Journal & Search Richness',state:'DEVELOPMENT_GREEN',
+  dev_sha:'f69deaa659520af182edc60dfc7cfefc7914d8f8',tree_sha:'23394309d09e765c5327fbf8715532faabc78d6a',
+  system_gate_run:35636209245,current_application_quality_run:35636209377,it_admin_runtime_proof_run:35636209182,
+  branch_hygiene_run:35636209309,build_specific_proof_run:35636209003,proof_state:'EXACT_BRANCH_HEAD_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:222,title:'Project-to-Knowledge Promotion & Recipe History',state:'PRODUCTION_GREEN',
-  main_sha:'e55cff067fda9a1c949e93db8ea2ea3e5f8d366f',tree_sha:'255d08bc787f7eb785119ceaffa61d6aa5eeefed',
-  production_pages_deploy_run:35624807963,production_live_resource_integrity_run:35624977882,
-  products_browser_proof_run:35624977818,products_route_proof_run:35624977830,build_specific_proof_run:35624807852,remote_d1_queries:0
+  release:467,build:223,title:'Capability Case Studies, Workshop Journal & Search Richness',state:'PRODUCTION_GREEN',
+  main_sha:'704c407485c0fd0c3de785b696113d3cc7be5a27',tree_sha:'23394309d09e765c5327fbf8715532faabc78d6a',
+  production_pages_deploy_run:35636523017,production_live_resource_integrity_run:35636619207,
+  products_browser_proof_run:35636619026,products_route_proof_run:35636619136,build_specific_proof_run:35636522959,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 222 Project-to-Knowledge Promotion Recipe History Proof'
+  'Release 467 Build 223 Capability Case Studies Workshop Journal Search Richness Proof'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:222,title:'Project-to-Knowledge Promotion & Recipe History',
+    release:467,build:223,title:'Capability Case Studies, Workshop Journal & Search Richness',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35624331277,current_application_quality_run:35624331446,
-      it_admin_runtime_proof_run:35624331471,branch_hygiene_run:35624331702,build222_proof_run:35624331629
+      system_gate_run:35636209245,current_application_quality_run:35636209377,
+      it_admin_runtime_proof_run:35636209182,branch_hygiene_run:35636209309,build223_proof_run:35636209003
     },
     production_proofs:{
-      production_pages_deploy_run:35624807963,production_live_resource_integrity_run:35624977882,
-      products_browser_proof_run:35624977818,products_route_proof_run:35624977830,build222_proof_run:35624807852
+      production_pages_deploy_run:35636523017,production_live_resource_integrity_run:35636619207,
+      products_browser_proof_run:35636619026,products_route_proof_run:35636619136,build223_proof_run:35636522959
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -72,9 +72,9 @@ function closurePayload(){
     external_lanes:Object.fromEntries(EXTERNAL_POLICY.map((x)=>[x.key,x.state])),
     runtime_closure:{
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
-      background_polling:false,automatic_inventory_assignment:false,build222_project_knowledge_recipe_history:true
+      background_polling:false,automatic_inventory_assignment:false,build223_capability_case_studies:true
     },
-    next_build:'Build 223 projects already-published Content Release evidence into capability case studies, Workshop Journal discovery and richer internal links over exact Build 222 proof.'
+    next_build:'Build 224 measures the manufacturing era from exact Build 223 proof; successor scope remains blocked until exact Development measurement evidence exists.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 222 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 223 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -98,13 +98,13 @@ function markdownReport(pack){
 - Current Application Quality Proof: ${pack.development_proofs.current_application_quality_run}
 - I.T. Admin Runtime Proof: ${pack.development_proofs.it_admin_runtime_proof_run}
 - Repository Branch Hygiene: ${pack.development_proofs.branch_hygiene_run}
-- Build 222 Development Proof: ${pack.development_proofs.build222_proof_run}
+- Build 223 Development Proof: ${pack.development_proofs.build223_proof_run}
 - Production Pages Deploy: ${pack.production_proofs.production_pages_deploy_run}
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Build 222 Production Proof: ${pack.production_proofs.build222_proof_run}
-- Current candidate: Build 223 Capability Case Studies, Workshop Journal & Search Richness
+- Build 223 Production Proof: ${pack.production_proofs.build223_proof_run}
+- Current candidate: Build 224 Manufacturing-Era Closure & Next Roadmap
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -123,7 +123,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:223,title:TITLE,authority:'release467-build223-capability-case-studies-workshop-journal-search-richness.json'},
+        current_closure_candidate:{release:467,build:224,title:TITLE,authority:'release467-build224-manufacturing-era-closure-next-roadmap.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -142,12 +142,12 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 222 source is the exact last fully verified Development checkpoint.',
-      'Build 222 Production is GREEN on the identical source tree through canonical migration 0021.',
-      'Development proofs: System 35624331277, Quality 35624331446, I.T. 35624331471, Hygiene 35624331702.',
-      'Production proofs: Pages 35624807963, Live Resources 35624977882, Product Browser 35624977818, Product Route 35624977830.',
-      'Build 223 Capability Case Studies, Workshop Journal & Search Richness is the active Development closure candidate.',
-      'Canonical D1 migrations remain 0001-0021; Build 223 is a read-only public projection with no new publication engine or private CAIP exposure.'
+      'Build 223 source is the exact last fully verified Development checkpoint.',
+      'Build 223 Production is GREEN on the identical source tree through canonical migration 0021.',
+      'Development proofs: System 35636209245, Quality 35636209377, I.T. 35636209182, Hygiene 35636209309.',
+      'Production proofs: Pages 35636523017, Live Resources 35636619207, Product Browser 35636619026, Product Route 35636619136.',
+      'Build 224 Manufacturing-Era Closure & Next Roadmap is the active Development closure candidate.',
+      'Canonical D1 migrations remain 0001-0021; Build 224 is bounded read-only measurement with no new schema or business-data mutation.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
