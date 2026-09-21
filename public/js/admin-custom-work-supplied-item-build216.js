@@ -1,21 +1,21 @@
 // Release 467 Build 216 — Customer-Supplied Item Intake & Suitability Review UI.
 (() => {
   const ENDPOINT='/api/admin/custom-work-supplied-item';
-  const state={data:null,requestId:0,itemId:0,lastShareUrl:''};
+  const state={snapshot:null,requestId:0,itemId:0,lastShareUrl:''};
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const num=v=>Number(v||0)||0;
   const apiFetch=(...args)=>window.DDAuth?.apiFetch?window.DDAuth.apiFetch(...args):fetch(...args);
   const mount=()=>document.getElementById('customWorkSuppliedItem216Mount');
   const msg=(text,error=false)=>{const e=document.getElementById('suppliedItem216Message');if(e){e.textContent=text||'';e.style.color=error?'#b00020':'';}};
-  const request=()=> (state.data?.requests||[]).find(x=>num(x.custom_request_id)===state.requestId)||null;
-  const items=()=> (state.data?.items||[]).filter(x=>num(x.custom_request_id)===state.requestId);
-  const item=()=> (state.data?.items||[]).find(x=>num(x.custom_request_supplied_item_id)===state.itemId)||null;
-  const triage=()=> (state.data?.triage||[]).find(x=>num(x.custom_request_id)===state.requestId)||null;
-  const reviews=()=> (state.data?.reviews||[]).filter(x=>num(x.custom_request_supplied_item_id)===state.itemId);
-  const evidence=()=> (state.data?.evidence||[]).filter(x=>num(x.custom_request_supplied_item_id)===state.itemId);
-  const acks=()=> (state.data?.acknowledgements||[]).filter(x=>num(x.custom_request_supplied_item_id)===state.itemId);
-  const readiness=()=> (state.data?.readiness||[]).find(x=>num(x.custom_request_supplied_item_id)===state.itemId)||null;
-  const requestOptions=()=>'<option value="">Choose a customer-supplied request…</option>'+(state.data?.requests||[]).map(r=>`<option value="${num(r.custom_request_id)}" ${num(r.custom_request_id)===state.requestId?'selected':''}>#${num(r.custom_request_id)} ${esc(r.product_interest||r.request_type||r.request_key)} • ${esc(r.name||'')}</option>`).join('');
+  const request=()=> (state.snapshot?.requests||[]).find(x=>num(x.custom_request_id)===state.requestId)||null;
+  const items=()=> (state.snapshot?.items||[]).filter(x=>num(x.custom_request_id)===state.requestId);
+  const item=()=> (state.snapshot?.items||[]).find(x=>num(x.custom_request_supplied_item_id)===state.itemId)||null;
+  const triage=()=> (state.snapshot?.triage||[]).find(x=>num(x.custom_request_id)===state.requestId)||null;
+  const reviews=()=> (state.snapshot?.reviews||[]).filter(x=>num(x.custom_request_supplied_item_id)===state.itemId);
+  const evidence=()=> (state.snapshot?.evidence||[]).filter(x=>num(x.custom_request_supplied_item_id)===state.itemId);
+  const acks=()=> (state.snapshot?.acknowledgements||[]).filter(x=>num(x.custom_request_supplied_item_id)===state.itemId);
+  const readiness=()=> (state.snapshot?.readiness||[]).find(x=>num(x.custom_request_supplied_item_id)===state.itemId)||null;
+  const requestOptions=()=>'<option value="">Choose a customer-supplied request…</option>'+(state.snapshot?.requests||[]).map(r=>`<option value="${num(r.custom_request_id)}" ${num(r.custom_request_id)===state.requestId?'selected':''}>#${num(r.custom_request_id)} ${esc(r.product_interest||r.request_type||r.request_key)} • ${esc(r.name||'')}</option>`).join('');
   const badge=x=>`<span class="status-note">${esc(x||'')}</span>`;
   function itemTabs(){
     const list=items();
@@ -48,8 +48,8 @@
   }
   function evidenceCard(){
     if(!state.itemId)return '';
-    const refs=(state.data?.reference_uploads||[]).filter(x=>num(x.custom_request_id)===state.requestId);
-    const photos=(state.data?.stage_photos||[]).filter(x=>num(x.custom_request_id)===state.requestId);
+    const refs=(state.snapshot?.reference_uploads||[]).filter(x=>num(x.custom_request_id)===state.requestId);
+    const photos=(state.snapshot?.stage_photos||[]).filter(x=>num(x.custom_request_id)===state.requestId);
     const list=evidence();
     return `<section class="card"><h3 style="margin-top:0">Condition evidence</h3>
       <p class="small">Link existing private Custom Work uploads for intake condition and existing stage photos for post-work condition. Build 216 stores references only; it does not copy or delete media.</p>
@@ -101,7 +101,7 @@
     try{
       const r=await apiFetch(ENDPOINT,{cache:'no-store'}),d=await r.json().catch(()=>null);
       if(!r.ok||!d?.ok)throw new Error(d?.error||`Build 216 load failed (${r.status}).`);
-      state.data=d;
+      state.snapshot=d;
       if(state.requestId&&!d.requests.some(x=>num(x.custom_request_id)===state.requestId)){state.requestId=0;state.itemId=0;}
       if(state.requestId&&state.itemId&&!d.items.some(x=>num(x.custom_request_supplied_item_id)===state.itemId)){state.itemId=0;}
       if(state.requestId&&!state.itemId){const first=d.items.find(x=>num(x.custom_request_id)===state.requestId);if(first)state.itemId=num(first.custom_request_supplied_item_id);}
@@ -113,11 +113,11 @@
     const d=await r.json().catch(()=>null);if(!r.ok||!d?.ok)throw new Error(d?.error||`Build 216 save failed (${r.status}).`);return d;
   }
   async function save(payload){
-    try{msg('Saving…');const d=await post(payload);if(d.share_url)state.lastShareUrl=d.share_url;if(d.saved_item_id)state.itemId=num(d.saved_item_id);state.data=d;if(state.requestId&&!state.itemId){const first=d.items.find(x=>num(x.custom_request_id)===state.requestId);if(first)state.itemId=num(first.custom_request_supplied_item_id);}render();msg(d.message||'Saved.');}
+    try{msg('Saving…');const d=await post(payload);if(d.share_url)state.lastShareUrl=d.share_url;if(d.saved_item_id)state.itemId=num(d.saved_item_id);state.snapshot=d;if(state.requestId&&!state.itemId){const first=d.items.find(x=>num(x.custom_request_id)===state.requestId);if(first)state.itemId=num(first.custom_request_supplied_item_id);}render();msg(d.message||'Saved.');}
     catch(e){msg(e.message||'Save failed.',true);}
   }
   function bind(){
-    document.getElementById('suppliedItem216Request')?.addEventListener('change',e=>{state.requestId=num(e.target.value);state.itemId=0;state.lastShareUrl='';const first=(state.data?.items||[]).find(x=>num(x.custom_request_id)===state.requestId);if(first)state.itemId=num(first.custom_request_supplied_item_id);render();});
+    document.getElementById('suppliedItem216Request')?.addEventListener('change',e=>{state.requestId=num(e.target.value);state.itemId=0;state.lastShareUrl='';const first=(state.snapshot?.items||[]).find(x=>num(x.custom_request_id)===state.requestId);if(first)state.itemId=num(first.custom_request_supplied_item_id);render();});
     document.querySelectorAll('[data-supplied-item-select]').forEach(b=>b.addEventListener('click',()=>{state.itemId=num(b.dataset.suppliedItemSelect);state.lastShareUrl='';render();}));
     document.getElementById('suppliedItem216Add')?.addEventListener('click',()=>{state.itemId=0;state.lastShareUrl='';render();});
     document.getElementById('suppliedItem216ItemForm')?.addEventListener('submit',e=>{e.preventDefault();save({action:'save_item',custom_request_id:state.requestId,custom_request_supplied_item_id:state.itemId||null,...Object.fromEntries(new FormData(e.currentTarget).entries())});});
