@@ -1,0 +1,49 @@
+name: Release 467 Build 223 Capability Case Studies Workshop Journal Search Richness
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/capability-case-studies.js'
+      - 'public/js/capability-case-studies.js'
+      - 'case-studies/index.html'
+      - 'public/js/workshop-journal-publications.js'
+      - 'workshop-journal/index.html'
+      - 'public/js/capabilities.js'
+      - 'capabilities/index.html'
+      - 'js/main.js'
+      - 'sitemap.xml'
+      - 'current-development-authority.json'
+      - 'release467-build222-project-knowledge-recipe-history.json'
+      - 'release467-build223-capability-case-studies-workshop-journal-search-richness.json'
+      - 'docs/operations/RELEASE_467_BUILD_223_CAPABILITY_CASE_STUDIES_WORKSHOP_JOURNAL_SEARCH_RICHNESS.md'
+      - 'scripts/release467_build222_gate.py'
+      - 'scripts/release467_build223_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'admin/it/index.html'
+      - 'admin/deployment-preflight/index.html'
+      - 'admin/reliability/index.html'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Validate Build 223 Capability Case Studies Workshop Journal Search Richness
+        run: python scripts/release467_build223_gate.py
+      - name: Retain Build 222 Production closure
+        run: python scripts/release467_build222_gate.py

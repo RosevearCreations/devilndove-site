@@ -2,7 +2,7 @@
   "release": 467,
   "build": 222,
   "title": "Project-to-Knowledge Promotion & Recipe History",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build222-project-knowledge-recipe-history",
   "priority": "promote_only_reviewed_creative_project_lessons_into_versioned_reusable_workshop_knowledge_with_exact_provenance_supersession_and_failure_history",
   "starting_point": {
@@ -77,6 +77,44 @@
   "next_build": {
     "build": 223,
     "title": "Capability Case Studies, Workshop Journal & Search Richness",
-    "state": "BLOCKED_UNTIL_BUILD222_PRODUCTION_GREEN"
+    "state": "UNBLOCKED_BY_BUILD222_PRODUCTION_GREEN"
+  },
+  "final_closure": {
+    "dev_sha": "a9fd2f4e10f8bf68d3fe9b40c82ced112cf91bb1",
+    "tree_sha": "255d08bc787f7eb785119ceaffa61d6aa5eeefed",
+    "proofs": {
+      "system_gate_run": 35624331277,
+      "current_application_quality_run": 35624331446,
+      "it_admin_runtime_proof_run": 35624331471,
+      "branch_hygiene_run": 35624331702
+    },
+    "build_specific_proof_run": 35624331629,
+    "exact_development_url": "https://866b341f.devilndove-site.pages.dev",
+    "development_deploy_proof_artifact_id": 10651376256,
+    "development_regression_artifact_id": 10651681047,
+    "canonical_migrations": 21,
+    "foreign_key_violations": 0,
+    "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+  },
+  "production_checkpoint": {
+    "main_sha": "e55cff067fda9a1c949e93db8ea2ea3e5f8d366f",
+    "tree_sha": "255d08bc787f7eb785119ceaffa61d6aa5eeefed",
+    "production_pages_deploy_run": 35624807963,
+    "production_live_resource_integrity_run": 35624977882,
+    "products_browser_proof_run": 35624977818,
+    "products_route_proof_run": 35624977830,
+    "build_specific_proof_run": 35624807852,
+    "exact_production_url": "https://5f0593a4.devilndove-site.pages.dev",
+    "deployment_id": "5f0593a4-dc45-4d27-b915-c27954d65c63",
+    "production_promotion_artifact_id": 10651161987,
+    "canonical_migrations": 21,
+    "business_counts": {
+      "users": 2,
+      "products": 45,
+      "site_item_inventory": 1041,
+      "orders": 0
+    },
+    "foreign_key_violations": 0,
+    "state": "PRODUCTION_GREEN"
   }
 }

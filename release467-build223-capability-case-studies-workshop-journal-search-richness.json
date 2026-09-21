@@ -1,0 +1,87 @@
+{
+  "release": 467,
+  "build": 223,
+  "title": "Capability Case Studies, Workshop Journal & Search Richness",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build223-capability-case-studies-workshop-journal-search-richness",
+  "priority": "project_only_already_published_content_release_evidence_into_public_case_study_capability_and_workshop_journal_discovery_without_new_publication_authority",
+  "starting_point": {
+    "development": {
+      "sha": "a9fd2f4e10f8bf68d3fe9b40c82ced112cf91bb1",
+      "tree": "255d08bc787f7eb785119ceaffa61d6aa5eeefed",
+      "system_gate_run": 35624331277,
+      "quality_run": 35624331446,
+      "it_admin_runtime_run": 35624331471,
+      "repository_hygiene_run": 35624331702,
+      "build_specific_proof_run": 35624331629,
+      "exact_development_url": "https://866b341f.devilndove-site.pages.dev",
+      "canonical_migrations": 21,
+      "foreign_key_violations": 0,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "e55cff067fda9a1c949e93db8ea2ea3e5f8d366f",
+      "tree": "255d08bc787f7eb785119ceaffa61d6aa5eeefed",
+      "production_pages_deploy_run": 35624807963,
+      "production_live_resource_integrity_run": 35624977882,
+      "products_browser_proof_run": 35624977818,
+      "products_route_proof_run": 35624977830,
+      "build_specific_proof_run": 35624807852,
+      "exact_production_url": "https://5f0593a4.devilndove-site.pages.dev",
+      "deployment_id": "5f0593a4-dc45-4d27-b915-c27954d65c63",
+      "production_promotion_artifact_id": 10651161987,
+      "canonical_migrations": 21,
+      "business_counts": {
+        "users": 2,
+        "products": 45,
+        "site_item_inventory": 1041,
+        "orders": 0
+      },
+      "foreign_key_violations": 0,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Add an indexable public Case Studies hub over already-published Workshop Journal Content Release records.",
+    "Enrich published stories with source-backed capability and canonical process relationships where exact Creative Project linkage exists.",
+    "Identify hybrid-project, prototype-to-finished, process/technique, before/after and reviewed-run signals only from existing evidence.",
+    "Link case studies to existing capability profiles, Workshop Journal stories, related Product routes and Custom Work.",
+    "Enrich Workshop Journal and Capability discovery without creating another publication engine or media store."
+  ],
+  "safety": {
+    "canonical_schema_addition": false,
+    "canonical_migrations_remain": 21,
+    "request_time_ddl": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "new_publication_engine": false,
+    "automatic_publication": false,
+    "publication_authority_mutation": false,
+    "content_creation": false,
+    "raw_private_caip_exposure": false,
+    "private_media_queries": false,
+    "source_authority_mutation": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build223_gate.py",
+    "public_api": "functions/api/capability-case-studies.js",
+    "public_hub": "case-studies/index.html",
+    "public_client": "public/js/capability-case-studies.js",
+    "publication_authority": "content_publications via publicContentPublications",
+    "capability_authority": "workshop_capability_profiles",
+    "process_authority": "inventory_processes",
+    "source_project_operation_authority": "creative_project_operations",
+    "lifecycle_authority": "creative_project_manufacturing_lifecycles",
+    "production_run_authority": "creative_project_production_runs",
+    "workshop_journal_projection": "public/js/workshop-journal-publications.js"
+  },
+  "next_build": {
+    "build": 224,
+    "title": "Manufacturing-Era Closure & Next Roadmap",
+    "state": "BLOCKED_UNTIL_BUILD223_PRODUCTION_GREEN"
+  }
+}
