@@ -1,4 +1,4 @@
-// Release 467 Build 23 — read-only Creator ↔ Finance profitability reconciliation.
+// Release 467 Build 23 + Build 217 — read-only Creator ↔ Finance profitability reconciliation with Production Cost Evidence v2 source facts.
 // Existing Creator facts and Finance profitability intelligence remain the owning authorities.
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
 import { loadProfitabilityIntelligence } from '../_lib/release465BusinessHealth.js';
@@ -22,6 +22,54 @@ async function groupedOutputs(db){
   if(!(await tableExists(db,'creative_work_outputs')))return new Map();
   const result=rows(await db.prepare(`SELECT creative_work_project_id,COUNT(*) output_count,SUM(CASE WHEN output_status='complete' THEN 1 ELSE 0 END) completed_output_count FROM creative_work_outputs GROUP BY creative_work_project_id`).all().catch(()=>({results:[]})));
   return new Map(result.map((row)=>[integer(row.creative_work_project_id),row]));
+}
+
+async function groupedProductionCostEvidence(db){
+  if(!(await tableExists(db,'creative_project_production_cost_evidence')))return new Map();
+  const result=rows(await db.prepare(`SELECT creative_work_project_id,
+    COUNT(*) evidence_rows,
+    SUM(CASE WHEN cost_evidence_state='reviewed' THEN 1 ELSE 0 END) reviewed_rows,
+    SUM(COALESCE(design_setup_minutes,0)) design_setup_minutes,
+    SUM(COALESCE(machine_minutes,0)) machine_minutes,
+    SUM(COALESCE(hands_on_labour_minutes,0)) hands_on_labour_minutes,
+    SUM(COALESCE(rework_minutes,0)) rework_minutes,
+    SUM(COALESCE(failed_prototype_count,0)) failed_prototype_count,
+    SUM(CASE WHEN quantity_produced IS NOT NULL THEN quantity_produced ELSE 0 END) quantity_produced,
+    SUM(CASE WHEN quantity_accepted IS NOT NULL THEN quantity_accepted ELSE 0 END) quantity_accepted,
+    SUM(CASE WHEN quantity_produced IS NOT NULL THEN 1 ELSE 0 END) produced_rows,
+    SUM(CASE WHEN quantity_accepted IS NOT NULL THEN 1 ELSE 0 END) accepted_rows,
+    SUM(
+      CASE WHEN consumables_cost_cents IS NOT NULL THEN 1 ELSE 0 END +
+      CASE WHEN packaging_cost_cents IS NOT NULL THEN 1 ELSE 0 END +
+      CASE WHEN prototype_waste_cost_cents IS NOT NULL THEN 1 ELSE 0 END +
+      CASE WHEN rework_cost_cents IS NOT NULL THEN 1 ELSE 0 END +
+      CASE WHEN finishing_cost_cents IS NOT NULL THEN 1 ELSE 0 END +
+      CASE WHEN outside_service_cost_cents IS NOT NULL THEN 1 ELSE 0 END
+    ) known_cost_component_count,
+    SUM(COALESCE(consumables_cost_cents,0)+COALESCE(packaging_cost_cents,0)+COALESCE(prototype_waste_cost_cents,0)+COALESCE(rework_cost_cents,0)+COALESCE(finishing_cost_cents,0)+COALESCE(outside_service_cost_cents,0)) known_direct_cost_cents,
+    MAX(recorded_at) latest_evidence_at
+    FROM creative_project_production_cost_evidence
+    WHERE evidence_status='active'
+    GROUP BY creative_work_project_id`).all().catch(()=>({results:[]})));
+  return new Map(result.map((row)=>[integer(row.creative_work_project_id),row]));
+}
+function productionCostProjection(row={}){
+  const evidenceRows=integer(row.evidence_rows),known=integer(row.known_cost_component_count),reviewed=integer(row.reviewed_rows);
+  return {
+    evidence_rows:evidenceRows,
+    cost_evidence_state:!evidenceRows?'unknown':reviewed===evidenceRows&&evidenceRows>0?'reviewed':known>0?'partial':'unknown',
+    design_setup_minutes:num(row.design_setup_minutes),machine_minutes:num(row.machine_minutes),
+    hands_on_labour_minutes:num(row.hands_on_labour_minutes),rework_minutes:num(row.rework_minutes),
+    failed_prototype_count:integer(row.failed_prototype_count),
+    quantity_produced:integer(row.produced_rows)>0?num(row.quantity_produced):null,
+    quantity_accepted:integer(row.accepted_rows)>0?num(row.quantity_accepted):null,
+    known_cost_component_count:known,
+    known_direct_cost_cents:known>0?integer(row.known_direct_cost_cents):null,
+    latest_evidence_at:row.latest_evidence_at||null,
+    unknown_cost_is_zero:false,
+    source:'creative_project_production_cost_evidence',
+    interpretation:'Production cost source evidence only; Finance/Accounting remains profitability and posting authority.'
+  };
 }
 function buildReconciliation(project,eventFacts,outputFacts,financeRow){
   const creatorRevenue=Math.max(0,integer(project.sales_revenue_cents));
@@ -55,14 +103,15 @@ export async function onRequestGet(context){
     const eventsReady=await tableExists(db,'creative_work_events');
     const outputsReady=await tableExists(db,'creative_work_outputs');
     const profitabilityReady=await tableExists(db,'creative_project_profitability');
-    if(!projectReady)return json({ok:true,release:467,build:23,authority:'read_only_cross_module_reconciliation',schema_ready:false,table_readiness:{creative_work_projects:false,creative_work_events:eventsReady,creative_work_outputs:outputsReady,creative_project_profitability:profitabilityReady},summary:{projects:0,finance_record_missing:0,creator_cost_missing:0,finance_cost_missing:0,revenue_missing:0,variance_review:0,reconciled:0},projects:[],policy:{accounting_posting:false,automatic_project_mutation:false,automatic_finance_mutation:false,provider_execution:false,request_time_schema_mutation:false}});
+    const productionCostReady=await tableExists(db,'creative_project_production_cost_evidence');
+    if(!projectReady)return json({ok:true,release:467,build:23,authority:'read_only_cross_module_reconciliation',schema_ready:false,table_readiness:{creative_work_projects:false,creative_work_events:eventsReady,creative_work_outputs:outputsReady,creative_project_profitability:profitabilityReady,creative_project_production_cost_evidence:productionCostReady},summary:{projects:0,finance_record_missing:0,creator_cost_missing:0,finance_cost_missing:0,revenue_missing:0,variance_review:0,reconciled:0},projects:[],policy:{accounting_posting:false,automatic_project_mutation:false,automatic_finance_mutation:false,provider_execution:false,request_time_schema_mutation:false}});
     const projectRows=rows(await db.prepare('SELECT * FROM creative_work_projects ORDER BY datetime(updated_at) DESC,creative_work_project_id DESC LIMIT 160').all());
-    const eventMap=await groupedEvents(db);const outputMap=await groupedOutputs(db);
+    const eventMap=await groupedEvents(db);const outputMap=await groupedOutputs(db);const productionCostMap=await groupedProductionCostEvidence(db);
     const profitability=profitabilityReady?await loadProfitabilityIntelligence(db,{limit:150}):{schema_ready:false,missing_tables:['creative_project_profitability'],rows:[]};
     const financeMap=new Map((profitability.rows||[]).map((row)=>[integer(row.creative_work_project_id),row]));
-    const projects=projectRows.map((project)=>{const id=integer(project.creative_work_project_id);return buildReconciliation(project,eventMap.get(id)||{},outputMap.get(id)||{},financeMap.get(id)||null);}).sort((a,b)=>b.priority_score-a.priority_score||String(b.updated_at||'').localeCompare(String(a.updated_at||'')));
+    const projects=projectRows.map((project)=>{const id=integer(project.creative_work_project_id);const result=buildReconciliation(project,eventMap.get(id)||{},outputMap.get(id)||{},financeMap.get(id)||null);result.production_cost_evidence_v2=productionCostProjection(productionCostMap.get(id)||{});return result;}).sort((a,b)=>b.priority_score-a.priority_score||String(b.updated_at||'').localeCompare(String(a.updated_at||'')));
     const hasLane=(project,lane)=>project.attention.some((item)=>item.lane===lane);
     const summary={projects:projects.length,finance_record_missing:projects.filter((p)=>hasLane(p,'finance_record')).length,creator_cost_missing:projects.filter((p)=>hasLane(p,'creator_cost')).length,finance_cost_missing:projects.filter((p)=>hasLane(p,'finance_cost')).length,revenue_missing:projects.filter((p)=>hasLane(p,'revenue')).length,variance_review:projects.filter((p)=>hasLane(p,'variance')).length,reconciled:projects.filter((p)=>hasLane(p,'reconciled')).length};
-    return json({ok:true,release:467,build:23,authority:'read_only_cross_module_reconciliation',schema_ready:projectReady&&eventsReady&&profitabilityReady,table_readiness:{creative_work_projects:projectReady,creative_work_events:eventsReady,creative_work_outputs:outputsReady,creative_project_profitability:profitabilityReady},summary,projects,finance_intelligence:{schema_ready:Boolean(profitability.schema_ready),missing_tables:profitability.missing_tables||[],policy:profitability.policy||null},policy:{creator_result_is_accounting_truth:false,reconciliation_is_posting:false,accounting_posting:false,automatic_project_mutation:false,automatic_finance_mutation:false,provider_execution:false,provider_publication:false,request_time_schema_mutation:false,production_mutation:false}});
+    return json({ok:true,release:467,build:23,authority:'read_only_cross_module_reconciliation',schema_ready:projectReady&&eventsReady&&profitabilityReady&&productionCostReady,table_readiness:{creative_work_projects:projectReady,creative_work_events:eventsReady,creative_work_outputs:outputsReady,creative_project_profitability:profitabilityReady,creative_project_production_cost_evidence:productionCostReady},summary,projects,finance_intelligence:{schema_ready:Boolean(profitability.schema_ready),missing_tables:profitability.missing_tables||[],policy:profitability.policy||null},policy:{creator_result_is_accounting_truth:false,reconciliation_is_posting:false,accounting_posting:false,automatic_project_mutation:false,automatic_finance_mutation:false,provider_execution:false,provider_publication:false,request_time_schema_mutation:false,production_mutation:false,unknown_cost_is_zero:false,production_cost_evidence_v2:'read_only_source_evidence'}});
   }catch(error){return json({ok:false,error:'Creator and Finance profitability reconciliation could not be loaded.',detail:String(error?.message||error),accounting_posting:false,automatic_project_mutation:false,automatic_finance_mutation:false,request_time_schema_mutation:false},500);}
 }

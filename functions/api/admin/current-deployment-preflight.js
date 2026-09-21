@@ -1,29 +1,29 @@
-// Release 467 Build 216 — current read-only Deployment Preflight over exact Build 215 GREEN predecessor.
+// Release 467 Build 217 — current read-only Deployment Preflight over exact Build 216 GREEN predecessor.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=216;
-const TITLE='Customer-Supplied Item Intake & Suitability Review';
-const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql']);
+const BUILD=217;
+const TITLE='Production Cost Evidence v2';
+const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql']);
 const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 215 Small-Batch, Corporate & Event Quoting Proof'
+  'Release 467 Build 216 Customer-Supplied Item Suitability Review Proof'
 ]);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:215,title:'Small-Batch, Corporate & Event Quoting',state:'DEVELOPMENT_GREEN',
-  dev_sha:'825814b09a7c3f05c6fddc223ec8876ade0bbc35',tree_sha:'f1facb7a27e22f3a129654713cc6dd109e3b6b16',
-  system_gate_run:35548513112,current_application_quality_run:35548513093,it_admin_runtime_proof_run:35548513139,
-  branch_hygiene_run:35548513160,build_specific_proof_run:35548513080,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:216,title:'Customer-Supplied Item Intake & Suitability Review',state:'DEVELOPMENT_GREEN',
+  dev_sha:'2f9b0187110ffa0bd754eba1087f6ce56c23a0e4',tree_sha:'5bc30361efc9166f90aa8a7a4761646389325625',
+  system_gate_run:35552576564,current_application_quality_run:35552576510,it_admin_runtime_proof_run:35552576480,
+  branch_hygiene_run:35552576583,build_specific_proof_run:35552576627,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:215,title:'Small-Batch, Corporate & Event Quoting',state:'PRODUCTION_GREEN',
-  main_sha:'c8366bde7fb2e7c673be656ff85265058a407c4a',
-  tree_sha:'f1facb7a27e22f3a129654713cc6dd109e3b6b16',production_pages_deploy_run:35548670491,
-  production_live_resource_integrity_run:35548742503,products_browser_proof_run:35548742488,
-  products_route_proof_run:35548742478,build_specific_proof_run:35548670519,remote_d1_queries:0,
-  exact_production_url:'https://cec5e207.devilndove-site.pages.dev'
+  release:467,build:216,title:'Customer-Supplied Item Intake & Suitability Review',state:'PRODUCTION_GREEN',
+  main_sha:'0e6312ed188c3423fdf32b18c892ff4d17c387bc',
+  tree_sha:'5bc30361efc9166f90aa8a7a4761646389325625',production_pages_deploy_run:35552841763,
+  production_live_resource_integrity_run:35552906462,products_browser_proof_run:35552906457,
+  products_route_proof_run:35552906453,build_specific_proof_run:35552841726,remote_d1_queries:0,
+  exact_production_url:'https://401aaffc.devilndove-site.pages.dev'
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -79,8 +79,8 @@ export async function onRequestGet(context){
     {status:truth.proof_recorded_count===CANONICAL_MIGRATIONS.length?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:`${truth.proof_recorded_count}/${CANONICAL_MIGRATIONS.length} proof rows recorded.`},
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:`${truth.foreign_key_violations} violation(s).`},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
-    {status:'pass',code:'build215_verified_baseline',label:'Build 215 verified restart baseline',detail:'Build 215 Small-Batch, Corporate & Event Quoting is exact-SHA Production GREEN on the current shared source tree.'},
-    {status:'review',code:'build216_supplied_item',label:'Build 216 Customer-Supplied Item Intake & Suitability Review',detail:'Canonical migration 0016 and the supplied-item identity/review/evidence/acknowledgement extension must pass one exact-head Development proof before promotion.'}
+    {status:'pass',code:'build216_verified_baseline',label:'Build 216 verified restart baseline',detail:'Build 216 Customer-Supplied Item Intake & Suitability Review is exact-SHA Production GREEN on the current shared source tree.'},
+    {status:'review',code:'build217_production_cost_evidence',label:'Build 217 Production Cost Evidence v2',detail:'Canonical migration 0017 and the Creative Project production-cost source-evidence extension must pass one exact-head Development proof before promotion.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
   const data={
@@ -92,15 +92,15 @@ export async function onRequestGet(context){
     release_authority:{
       current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,
       verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
-      current_candidate:{release:467,build:216,title:TITLE,authority:'release467-build216-customer-supplied-item-suitability-review.json'},
+      current_candidate:{release:467,build:217,title:TITLE,authority:'release467-build217-production-cost-evidence-v2.json'},
       rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'
     },
     truth_notes:[
-      `Build 215 source is the exact fully verified restart baseline at ${VERIFIED_DEVELOPMENT.dev_sha}; Production source is ${PRODUCTION.main_sha}; both share ${VERIFIED_DEVELOPMENT.tree_sha}.`,
+      `Build 216 source is the exact fully verified restart baseline at ${VERIFIED_DEVELOPMENT.dev_sha}; Production source is ${PRODUCTION.main_sha}; both share ${VERIFIED_DEVELOPMENT.tree_sha}.`,
       `Development proofs: System ${VERIFIED_DEVELOPMENT.system_gate_run}, Quality ${VERIFIED_DEVELOPMENT.current_application_quality_run}, I.T. ${VERIFIED_DEVELOPMENT.it_admin_runtime_proof_run}, Hygiene ${VERIFIED_DEVELOPMENT.branch_hygiene_run}.`,
       `Production proofs: Pages ${PRODUCTION.production_pages_deploy_run}, Live Resources ${PRODUCTION.production_live_resource_integrity_run}, Product Browser ${PRODUCTION.products_browser_proof_run}, Product Route ${PRODUCTION.products_route_proof_run}.`,
-      'Build 216 Customer-Supplied Item Intake & Suitability Review is the active Development closure candidate.',
-      'Canonical migrations are 0001-0016; migration 0016 adds customer-supplied item identity, append-only reviews, link-only condition evidence and limitation acknowledgement over existing Custom Work, Build 211 triage and media authorities.'
+      'Build 217 Production Cost Evidence v2 is the active Development closure candidate.',
+      'Canonical migrations are 0001-0017; migration 0017 adds nullable Creative Project manufacturing source evidence while preserving Inventory and Finance/Accounting ownership.'
     ],
     safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}
   };
