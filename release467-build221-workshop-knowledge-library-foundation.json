@@ -1,0 +1,88 @@
+{
+  "release": 467,
+  "build": 221,
+  "title": "Workshop Knowledge Library Foundation",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build221-workshop-knowledge-library-foundation",
+  "priority": "create_reviewed_source_backed_internal_workshop_knowledge_relationships_without_invented_settings_or_duplicate_source_authorities",
+  "starting_point": {
+    "development": {
+      "sha": "79abf5b94a7080a25b2feb38bb10cfdde9dcf4c2",
+      "tree": "b68b2c8efbf187da8c9414eb4a7e5b24405f5029",
+      "system_gate_run": 35606184887,
+      "quality_run": 35606184822,
+      "it_admin_runtime_run": 35606184538,
+      "repository_hygiene_run": 35606184707,
+      "build_specific_proof_run": 35606184585,
+      "exact_development_url": "https://760b9a2e.devilndove-site.pages.dev",
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "4579e9b91c0676d775f32859a0169ec749bf2194",
+      "tree": "b68b2c8efbf187da8c9414eb4a7e5b24405f5029",
+      "production_pages_deploy_run": 35607469436,
+      "production_live_resource_integrity_run": 35607606049,
+      "products_browser_proof_run": 35607606000,
+      "products_route_proof_run": 35607605559,
+      "build_specific_proof_run": 35607469438,
+      "exact_production_url": "https://95102f07.devilndove-site.pages.dev",
+      "deployment_id": "95102f07-9211-4870-8130-e465c723e280",
+      "canonical_migrations": 19,
+      "business_counts": {
+        "users": 2,
+        "products": 45,
+        "site_item_inventory": 1041,
+        "orders": 0
+      },
+      "foreign_key_violations": 0,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Create reviewed Workshop Knowledge entries with explicit scope, observed result, provenance, confidence and review state.",
+    "Link knowledge to canonical inventory_processes rather than creating a second process taxonomy.",
+    "Link material, machine/tool, fixture/workholding, consumable and finishing relationships to existing site_item_inventory identities.",
+    "Record only observed/measured/owner-confirmed settings with an evidence note; missing or untested settings remain unknown.",
+    "Reference Creative Project/project-operation provenance and approved evidence/media without copying source media.",
+    "Require safety/constraint notes to carry an evidence note and keep reviewed knowledge immutable in this foundation workspace."
+  ],
+  "safety": {
+    "canonical_schema_addition": true,
+    "request_time_ddl": false,
+    "ai_generated_best_settings": false,
+    "unknown_settings_remain_unknown": true,
+    "parallel_process_taxonomy": false,
+    "parallel_inventory_authority": false,
+    "parallel_creative_project_authority": false,
+    "media_copy": false,
+    "r2_mutation": false,
+    "inventory_mutation": false,
+    "source_authority_mutation": false,
+    "payment_execution": false,
+    "provider_execution": false,
+    "automatic_publication": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build221_gate.py",
+    "canonical_migration": "migrations/canonical/0020_release467_workshop_knowledge_library_foundation.sql",
+    "entry_table": "workshop_knowledge_entries",
+    "process_table": "workshop_knowledge_entry_processes",
+    "inventory_reference_table": "workshop_knowledge_entry_inventory_refs",
+    "settings_table": "workshop_knowledge_entry_settings",
+    "evidence_reference_table": "workshop_knowledge_entry_evidence_refs",
+    "event_table": "workshop_knowledge_entry_events",
+    "process_authority": "inventory_processes",
+    "inventory_authority": "site_item_inventory",
+    "creative_project_authority": "creative_work_projects + creative_project_operations",
+    "media_authority": "reference-only existing approved creative/media evidence",
+    "admin_api": "functions/api/admin/workshop-knowledge-library.js",
+    "admin_ui": "public/js/admin-workshop-knowledge-build221.js",
+    "admin_surface": "/admin/workshop-knowledge/"
+  },
+  "next_build": {
+    "build": 222,
+    "title": "Project-to-Knowledge Promotion & Recipe History",
+    "state": "BLOCKED_UNTIL_BUILD221_PRODUCTION_GREEN"
+  }
+}
