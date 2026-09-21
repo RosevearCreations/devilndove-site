@@ -118,6 +118,13 @@
       "release": 467,
       "description": "Extend existing Custom Work quote drafts with structured small-batch/corporate/event assumptions and quantity tiers while retaining existing quote revisions, line items, payment gates and order drafts.",
       "recovery": "Forward-only additive tables. Logical rollback stops using/supersedes batch quote terms and tiers; existing quote drafts, revisions, line items, payment and order authorities remain intact. Repair schema defects only with a new numbered migration."
+    },
+    {
+      "version": 16,
+      "file": "0016_release467_customer_supplied_item_suitability_review.sql",
+      "release": 467,
+      "description": "Extend existing Custom Work with customer-supplied item identity, append-only suitability reviews, links to existing intake/post-work media evidence, and explicit limitation acknowledgement without duplicating triage or media authorities.",
+      "recovery": "Forward-only additive tables. Logical rollback stops creating new supplied-item records/reviews/acknowledgements while retaining existing evidence history. Repair schema defects only with a new numbered migration."
     }
   ]
 }

@@ -68,6 +68,20 @@
         <label>Desired material, optional<input class="input" name="desired_material" placeholder="Wood, metal, vinyl, resin, stone, fabric…"/></label>
         <label>Colour / finish, optional<input class="input" name="desired_finish" placeholder="Colour, sheen, texture, coating or finish"/></label>
         <label style="display:flex;gap:8px;align-items:center"><input name="supplied_item" type="checkbox"/> I plan to supply the item or blank</label>
+        <div id="customSuppliedItemDetails" class="card" style="grid-column:1/-1;display:none;margin:0">
+          <h3 style="margin-top:0">Customer-supplied item details</h3>
+          <p class="small">These details help us identify and assess your actual item. They do not promise that a material, coating or process is safe or compatible; we review that separately before accepting the work.</p>
+          <div class="admin-form-grid">
+            <label>Item label<input class="input" name="supplied_item_label" placeholder="Example: 20 oz stainless tumbler, silver ring, hand tool"/></label>
+            <label>Ownership / authority<select class="input" name="supplied_item_ownership_status"><option value="unconfirmed">Not confirmed yet</option><option value="customer_owned">I own this item</option><option value="authorized_agent">I am authorized by the owner</option><option value="unknown">Not sure / discuss with me</option></select></label>
+            <label style="grid-column:1/-1">Item description<textarea class="input" name="supplied_item_description" rows="3" placeholder="Brand/model if known, approximate age, size, identifying details, or anything unusual."></textarea></label>
+            <label>Material, if known<input class="input" name="supplied_item_material_description" placeholder="Only what you know; unknown is okay."/></label>
+            <label>Finish/coating, if known<input class="input" name="supplied_item_finish_description" placeholder="Paint, powder coat, plating, clear coat, bare metal…"/></label>
+            <label style="grid-column:1/-1">Requested modification<textarea class="input" name="supplied_item_requested_modification" rows="3" placeholder="What would you like us to engrave, personalize, repair, alter, fit, or finish?"></textarea></label>
+            <label style="grid-column:1/-1">Current condition notes<textarea class="input" name="supplied_item_condition_notes" rows="3" placeholder="Existing scratches, dents, cracks, wear, loose parts, discoloration, coating damage, or other condition details."></textarea></label>
+            <label style="grid-column:1/-1">Current-condition photos<input class="input" name="supplied_item_condition_images" type="file" accept="image/*" multiple/><span class="small">These use the same private Custom Work upload system but are tagged as condition-at-intake evidence. General inspiration images can still be added below. Maximum 5 images total per request.</span></label>
+          </div>
+        </div>
         <label style="grid-column:1/-1">Wording / personalization, optional<textarea class="input" name="personalization_text" rows="3" placeholder="Names, wording, dates, variable personalization, logo/graphic notes…"></textarea></label>
         <label style="grid-column:1/-1">Size / tolerance notes, optional<textarea class="input" name="tolerance_size_notes" rows="3" placeholder="Approximate dimensions, fit, clearance or tolerance needs. Unknown is okay."></textarea></label>
         <label style="grid-column:1/-1">Gift message, optional<textarea class="input" name="gift_message" rows="3" placeholder="Optional wording or message for the recipient"></textarea></label>
@@ -87,6 +101,6 @@
 
     <div class="footer card" style="margin-top:18px"></div>
   </div>
-  <script src="/js/main.js?v=279"></script><script src="/public/js/seo-page-overrides.js"></script><script src="/public/js/site-analytics.js?v=279"></script><script src="/public/js/custom-request-intake.js?v=467b210"></script><script src="/public/js/custom-request-examples.js?v=467b16"></script><script defer src="/public/js/media-content-runtime.js?v=467b195"></script>
+  <script src="/js/main.js?v=279"></script><script src="/public/js/seo-page-overrides.js"></script><script src="/public/js/site-analytics.js?v=279"></script><script src="/public/js/custom-request-intake.js?v=467b216"></script><script src="/public/js/custom-request-examples.js?v=467b16"></script><script defer src="/public/js/media-content-runtime.js?v=467b195"></script>
 </body>
 </html>

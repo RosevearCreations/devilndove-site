@@ -1,0 +1,46 @@
+name: Release 467 Build 216 Customer-Supplied Item Suitability Review
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'migrations/canonical/0016_release467_customer_supplied_item_suitability_review.sql'
+      - 'migrations/canonical/manifest.json'
+      - 'functions/api/admin/custom-work-supplied-item.js'
+      - 'public/js/admin-custom-work-supplied-item-build216.js'
+      - 'functions/api/custom-request.js'
+      - 'functions/api/custom-request-reference-upload.js'
+      - 'functions/api/custom-request-supplied-item-acknowledgement.js'
+      - 'functions/api/_lib/publicRuntimeSchemaReadiness.js'
+      - 'public/js/custom-request-intake.js'
+      - 'public/js/custom-request-supplied-item-acknowledgement.js'
+      - 'custom-request/index.html'
+      - 'custom-request/supplied-item/index.html'
+      - 'admin/custom-request/index.html'
+      - 'current-development-authority.json'
+      - 'release467-build215-small-batch-corporate-event-quoting.json'
+      - 'release467-build216-customer-supplied-item-suitability-review.json'
+      - 'docs/operations/RELEASE_467_BUILD_216_CUSTOMER_SUPPLIED_ITEM_SUITABILITY_REVIEW.md'
+      - 'scripts/release467_build215_gate.py'
+      - 'scripts/release467_build216_gate.py'
+      - 'scripts/repository_forward_sanity.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'scripts/current_deployment_preflight_truth_gate.py'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - '.github/workflows/release467-build216-customer-supplied-item-suitability-review.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.x'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - run: python scripts/release467_build216_gate.py
+      - run: python scripts/release467_build215_gate.py
