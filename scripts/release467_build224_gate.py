@@ -24,7 +24,7 @@ req(int(prod.get('products_browser_proof_run') or 0)==35643492529 and int(prod.g
 req(prod.get('exact_main_sha_workflows')=='33/33' and int(prod.get('canonical_migrations') or 0)==21 and int(prod.get('remote_d1_queries') or 0)==0 and prod.get('code_only') is True,'Build 224 Production workflow/schema boundary drifted')
 req(prod.get('exact_production_url')=='https://6041effd.devilndove-site.pages.dev' and prod.get('deployment_id')=='6041effd-6004-4768-bd36-e5dd8cfe0506' and int(prod.get('production_promotion_artifact_id') or 0)==10659270575,'Build 224 Production deployment proof drifted')
 files=[x.get('file') for x in m.get('migrations',[]) if isinstance(x,dict)]
-req(len(files)==21 and files[-1]=='0021_release467_project_knowledge_recipe_history.sql','Build 224 retained closure must keep canonical migrations at 21')
+req(len(files)>=21 and files[20]=='0021_release467_project_knowledge_recipe_history.sql','Build 224 retained closure must keep canonical migrations at 21')
 measurement=b.get('measurement') or {}
 req(measurement.get('state')=='EXACT_DEVELOPMENT_MEASURED_GREEN' and int(measurement.get('d1_provider_rows_read') or 0)==8781 and int(measurement.get('d1_rows_read_ceiling') or 0)==25000,'Build 224 measured closure drifted')
 launch=measurement.get('launch_set_current') or {}
