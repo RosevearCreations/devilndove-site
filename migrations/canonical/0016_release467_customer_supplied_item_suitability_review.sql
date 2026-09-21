@@ -68,6 +68,10 @@ CREATE TABLE IF NOT EXISTS custom_request_supplied_item_evidence (
   custom_request_reference_upload_id INTEGER,
   custom_order_stage_photo_id INTEGER,
   evidence_note TEXT,
+  evidence_status TEXT NOT NULL DEFAULT 'active' CHECK(evidence_status IN ('active','void')),
+  void_reason TEXT,
+  voided_by_user_id INTEGER,
+  voided_at TEXT,
   created_by_user_id INTEGER,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY(custom_request_supplied_item_id) REFERENCES custom_request_supplied_items(custom_request_supplied_item_id) ON DELETE CASCADE,
@@ -81,7 +85,7 @@ CREATE TABLE IF NOT EXISTS custom_request_supplied_item_evidence (
 );
 
 CREATE INDEX IF NOT EXISTS idx_custom_request_supplied_item_evidence_item
-  ON custom_request_supplied_item_evidence(custom_request_supplied_item_id, evidence_role, created_at DESC);
+  ON custom_request_supplied_item_evidence(custom_request_supplied_item_id, evidence_role, evidence_status, created_at DESC);
 
 CREATE TABLE IF NOT EXISTS custom_request_supplied_item_acknowledgements (
   custom_request_supplied_item_acknowledgement_id INTEGER PRIMARY KEY AUTOINCREMENT,
