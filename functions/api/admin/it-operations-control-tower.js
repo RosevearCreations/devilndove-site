@@ -4,24 +4,24 @@ import { onRequestGet as getReadinessControlTower } from './it-control-tower.js'
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=225;
-const TITLE='Storefront Launch-Set Remediation Execution II';
-const AUTHORITY='release467-build225-storefront-launch-set-remediation-execution-ii';
-const EVIDENCE_ID='r467-b224-20afcad9-35643013344-35643398483';
+const BUILD=226;
+const TITLE='Capability Profile Coverage Closure';
+const AUTHORITY='release467-build226-capability-profile-coverage-closure';
+const EVIDENCE_ID='r467-b225-e759f09d-35647494752-35647907774';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:224,title:'Manufacturing-Era Closure & Next Roadmap',state:'DEVELOPMENT_GREEN',
-  dev_sha:'20afcad9a74589cd015c94a1172dc10e3e8b55a5',tree_sha:'188dc8f60480c902ac91a6f957b30c37a7166c7d',
-  system_gate_run:35643013344,current_application_quality_run:35643013215,it_admin_runtime_proof_run:35643013107,
-  branch_hygiene_run:35643013180,build_specific_proof_run:35643013307,proof_state:'EXACT_BRANCH_HEAD_GREEN',
+  release:467,build:225,title:'Storefront Launch-Set Remediation Execution II',state:'DEVELOPMENT_GREEN',
+  dev_sha:'e759f09d069170fe04092651f87fe727d8ecdc80',tree_sha:'ba60ec9147def32da518f1c993f0099244e858f1',
+  system_gate_run:35647494752,current_application_quality_run:35647494738,it_admin_runtime_proof_run:35647495428,
+  branch_hygiene_run:35647494747,build_specific_proof_run:35647494740,proof_state:'EXACT_BRANCH_HEAD_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:224,title:'Manufacturing-Era Closure & Next Roadmap',state:'PRODUCTION_GREEN',
-  main_sha:'d67fe22bb0cceaf8d6ea133f688a9304c7d1f439',tree_sha:'188dc8f60480c902ac91a6f957b30c37a7166c7d',
-  production_pages_deploy_run:35643398483,production_live_resource_integrity_run:35643492350,
-  products_browser_proof_run:35643492529,products_route_proof_run:35643492514,build_specific_proof_run:35643398886,remote_d1_queries:0
+  release:467,build:225,title:'Storefront Launch-Set Remediation Execution II',state:'PRODUCTION_GREEN',
+  main_sha:'82e819c33ef9d90ee440b73cb47ded1450cf9c2e',tree_sha:'ba60ec9147def32da518f1c993f0099244e858f1',
+  production_pages_deploy_run:35647907774,production_live_resource_integrity_run:35648076498,
+  products_browser_proof_run:35648079711,products_route_proof_run:35648076097,build_specific_proof_run:35647907634,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:224,title:'Manufacturing-Era Closure & Next Roadmap',
+    release:467,build:225,title:'Storefront Launch-Set Remediation Execution II',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35643013344,current_application_quality_run:35643013215,
-      it_admin_runtime_proof_run:35643013107,branch_hygiene_run:35643013180,build223_proof_run:35643013307
+      system_gate_run:35647494752,current_application_quality_run:35647494738,
+      it_admin_runtime_proof_run:35647495428,branch_hygiene_run:35647494747,build223_proof_run:35647494740
     },
     production_proofs:{
-      production_pages_deploy_run:35643398483,production_live_resource_integrity_run:35643492350,
-      products_browser_proof_run:35643492529,products_route_proof_run:35643492514,build223_proof_run:35643398886
+      production_pages_deploy_run:35647907774,production_live_resource_integrity_run:35648076498,
+      products_browser_proof_run:35648079711,products_route_proof_run:35648076097,build223_proof_run:35647907634
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -123,7 +123,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:224,title:TITLE,authority:'release467-build224-manufacturing-era-closure-next-roadmap.json'},
+        current_closure_candidate:{release:467,build:226,title:TITLE,authority:'release467-build224-manufacturing-era-closure-next-roadmap.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -144,8 +144,8 @@ export async function onRequestGet(context){
     truth_notes:[
       'Build 223 source is the exact last fully verified Development checkpoint.',
       'Build 223 Production is GREEN on the identical source tree through canonical migration 0021.',
-      'Development proofs: System 35643013344, Quality 35643013215, I.T. 35643013107, Hygiene 35643013180.',
-      'Production proofs: Pages 35643398483, Live Resources 35643492350, Product Browser 35643492529, Product Route 35643492514.',
+      'Development proofs: System 35647494752, Quality 35647494738, I.T. 35647495428, Hygiene 35647494747.',
+      'Production proofs: Pages 35647907774, Live Resources 35648076498, Product Browser 35648079711, Product Route 35648076097.',
       'Build 224 Manufacturing-Era Closure & Next Roadmap is the active measured Development closure candidate.',
       'Build 224 measurement is GREEN at SHA 95fd199e4345a6e191996f5de7ef56057a0ffde8: 8,781/25,000 provider rows, zero D1/R2/schema mutation; Builds 225-232 are planned but blocked until Production GREEN.'
     ],
