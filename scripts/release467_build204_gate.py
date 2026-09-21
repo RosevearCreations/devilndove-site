@@ -82,9 +82,9 @@ for token in (
     "storefrontLaunchSetMount",
     "release467-build204-storefront-launch-set.css?v=204",
     "admin-storefront-launch-set-v204.js?v=204",
-    "Release 467 • Build 204",
 ):
     req(token in page,f"Catalog Health Build 204 mount/cache identity missing: {token}")
+req(any(token in page for token in ("Release 467 • Build 204","Release 467 • Build 225")),"Catalog Health Build 204 page identity lost a valid successor")
 req(page.lower().count("<h1")==1,"Catalog Health must keep exactly one H1")
 for token in ("launch-set-summary","launch-set-toolbar","launch-set-row","@media(max-width:680px)"):
     req(token in css,f"Build 204 responsive CSS missing: {token}")
