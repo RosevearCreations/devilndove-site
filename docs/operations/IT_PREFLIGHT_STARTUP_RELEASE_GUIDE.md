@@ -2,7 +2,7 @@
 
 ## Current release baseline
 
-Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0014`. Request-time DDL and automatic Production promotion remain closed.
+Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0015`. Request-time DDL and automatic Production promotion remain closed.
 
 ## Canonical Development target
 
@@ -24,26 +24,26 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 Stripe Development, PayPal sandbox and Social/OAuth remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 214 candidate
+## Current Release 467 restart authority — Build 215 candidate
 
-Build 213 **Digital Proof & Customer Approval** is the exact fully verified predecessor.
+Build 214 **Prototype → Sample → Production Run** is the exact fully verified predecessor.
 
-- Development SHA: `3292ac5c20780e23bd9d5ae593368e82b6e4826b`
-- Shared tree: `1108fecdeac23c69b8ea4d810c0375a0899ff469`
-- System / Quality / I.T. / Hygiene: `35533703475` / `35533703446` / `35533703481` / `35533703474`
-- Build 213 Development proof: `35533703458`
-- Production main: `92df5745fc2d4311dfacfbd214c1032a34c46bb8`
-- Production Pages / Live Resources: `35534081643` / `35534292686`
-- Product Browser / Route: `35534292705` / `35534292692`
-- Build 213 Production proof: `35534081642`
-- Exact Production URL: `https://e8fa1e4b.devilndove-site.pages.dev`
+- Development SHA: `45a6bbb5ea01fa8b79ea9df331d87086ca5c7657`
+- Shared tree: `6792f4ed926e3c52b197dfe8f3cc68e074b92d62`
+- System / Quality / I.T. / Hygiene: `35544979662` / `35544979675` / `35544979731` / `35544979736`
+- Build 214 Development proof: `35544979792`
+- Production main: `6e3e8f04578998e16e1e8b8d27daad28b2332603`
+- Production Pages / Live Resources: `35545124565` / `35545169766`
+- Product Browser / Route: `35545169753` / `35545169742`
+- Build 214 Production proof: `35545124482`
+- Exact Production URL: `https://e817e044.devilndove-site.pages.dev`
 
-Build 214 **Prototype → Sample → Production Run** is the active candidate. Migration `0014_release467_prototype_sample_production_run.sql` adds explicit manufacturing maturity and append-only transition evidence over existing Creative Process, Custom Work and Build 213 proof authorities.
+Build 215 **Small-Batch, Corporate & Event Quoting** is the active candidate. Migration `0015_release467_small_batch_corporate_event_quoting.sql` adds structured quote terms and quantity tiers over the existing Custom Work quote draft/revision/line-item authority.
 
-Approved sample must reference exact evidence. Production authorization is a separate explicit human transition and does not start production, consume Inventory, create Product production-run rows, execute payment/provider work or publish media.
+Build 215 does not create a second quote/payment/order engine. Unknown production cost remains unknown or partial until reviewed; payment/provider execution and real-order creation remain closed.
 
 ### Restart resolution rule
-Resolve live `dev` and `main` first. Build 215 starts only after Build 214 is exact-SHA Production GREEN.
+Resolve live `dev` and `main` first. Build 216 starts only after Build 215 is exact-SHA Production GREEN.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
 
 ## Retained historical provenance — Build 171

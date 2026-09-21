@@ -2,14 +2,14 @@
 
 ## Current authority
 
-Last fully verified: **Build 213 — Digital Proof & Customer Approval**. Active candidate: **Build 214 — Prototype → Sample → Production Run**.
+Last fully verified: **Build 214 — Prototype → Sample → Production Run**. Active candidate: **Build 215 — Small-Batch, Corporate & Event Quoting**.
 
-- Development `3292ac5c20780e23bd9d5ae593368e82b6e4826b`
-- Production `92df5745fc2d4311dfacfbd214c1032a34c46bb8`
-- tree `1108fecdeac23c69b8ea4d810c0375a0899ff469`
-- System / Quality / I.T. / Hygiene `35533703475` / `35533703446` / `35533703481` / `35533703474`
-- Production Pages / Live Resources `35534081643` / `35534292686`
-- canonical migrations `0001–0014`
+- Development `45a6bbb5ea01fa8b79ea9df331d87086ca5c7657`
+- Production `6e3e8f04578998e16e1e8b8d27daad28b2332603`
+- tree `6792f4ed926e3c52b197dfe8f3cc68e074b92d62`
+- System / Quality / I.T. / Hygiene `35544979662` / `35544979675` / `35544979731` / `35544979736`
+- Production Pages / Live Resources `35545124565` / `35545169766`
+- canonical migrations `0001–0015`
 
 ## Read in this order
 
@@ -58,4 +58,4 @@ Build 171 remains historical provenance over exact Build 170 predecessor `879c87
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 214 over exact Production-GREEN Build 213.
+Build 192 and Build 193 remain retained restart/provenance authorities. Current truth is Build 215 over exact Production-GREEN Build 214.
