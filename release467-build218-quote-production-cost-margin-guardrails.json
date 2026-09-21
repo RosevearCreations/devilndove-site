@@ -1,0 +1,83 @@
+{
+  "release": 467,
+  "build": 218,
+  "title": "Quote ↔ Production Cost ↔ Margin Guardrails",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build218-quote-production-cost-margin-guardrails",
+  "priority": "connect_existing_custom_work_quote_production_cost_product_resource_margin_and_finance_profitability_evidence_without_price_or_accounting_automation",
+  "starting_point": {
+    "development": {
+      "sha": "17d606f63d91ec178668c215caf263b95e3bd580",
+      "tree": "cffc68c278b69f389372e4d43c022a9f0140a9d1",
+      "system_gate_run": 35553944193,
+      "quality_run": 35553944303,
+      "it_admin_runtime_run": 35553944241,
+      "repository_hygiene_run": 35553944239,
+      "build_specific_proof_run": 35553944296,
+      "exact_development_url": "https://14044e78.devilndove-site.pages.dev",
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "94a977f0732cc649037423a415dfba60417d4a47",
+      "tree": "cffc68c278b69f389372e4d43c022a9f0140a9d1",
+      "production_pages_deploy_run": 35554258043,
+      "production_live_resource_integrity_run": 35554327033,
+      "products_browser_proof_run": 35554326994,
+      "products_route_proof_run": 35554327019,
+      "build_specific_proof_run": 35554258012,
+      "exact_production_url": "https://5cebd07d.devilndove-site.pages.dev",
+      "deployment_id": "5cebd07d-ae31-4dd1-94a0-30b20c7d403c",
+      "canonical_migrations": 17,
+      "business_counts": {
+        "users": 2,
+        "products": 45,
+        "site_item_inventory": 1041,
+        "orders": 0
+      },
+      "foreign_key_violations": 0,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Reuse existing Custom Work quote draft, quote line and quote revision authority; create no parallel quote engine.",
+    "Resolve the existing Custom Request ↔ Creative Project relationship through the manufacturing lifecycle authority.",
+    "Show quote revenue and unit-price evidence separately from cost evidence.",
+    "Show Build 217 reviewed production-cost source evidence with unknown cost preserved as unknown.",
+    "Show existing Product linked-resource margin evidence separately from full Finance profitability.",
+    "Allow a human to append an expected-cost/margin review snapshot to existing quote revision history without rewriting quote prices.",
+    "Keep automatic price rewrite, Inventory mutation, Finance/Accounting posting, payment, provider, order and publication execution closed."
+  ],
+  "safety": {
+    "schema_change": false,
+    "request_time_ddl": false,
+    "parallel_quote_engine": false,
+    "parallel_profitability_ledger": false,
+    "unknown_cost_is_zero": false,
+    "automatic_price_rewrite": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "accounting_posting": false,
+    "payment_execution": false,
+    "provider_execution": false,
+    "real_order_creation": false,
+    "automatic_publication": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build218_gate.py",
+    "schema_change_required": false,
+    "quote_authority": "custom_request_quote_drafts + custom_request_quote_line_items + custom_request_quote_revisions",
+    "project_link_authority": "creative_project_manufacturing_lifecycles",
+    "production_cost_authority": "creative_project_production_cost_evidence",
+    "linked_resource_margin_authority": "product_resource_links + Inventory cost evidence",
+    "finance_profitability_authority": "creative_project_profitability",
+    "admin_api": "functions/api/admin/custom-work-margin-guardrails.js",
+    "admin_ui": "public/js/admin-custom-work-margin-guardrails-build218.js",
+    "admin_surface": "/admin/custom-request/"
+  },
+  "next_build": {
+    "build": 219,
+    "title": "Manufacturing Work Order & Job Traveler",
+    "state": "BLOCKED_UNTIL_BUILD218_PRODUCTION_GREEN"
+  }
+}
