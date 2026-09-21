@@ -2,7 +2,7 @@
   "release": 467,
   "build": 217,
   "title": "Production Cost Evidence v2",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build217-production-cost-evidence-v2",
   "priority": "enrich_existing_creative_project_source_evidence_with_manufacturing_cost_drivers_without_parallel_inventory_finance_or_accounting_authority",
   "starting_point": {
@@ -79,6 +79,40 @@
   "next_build": {
     "build": 218,
     "title": "Quote ↔ Production Cost ↔ Margin Guardrails",
-    "state": "BLOCKED_UNTIL_BUILD217_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_AFTER_BUILD217_PRODUCTION_GREEN"
+  },
+  "final_closure": {
+    "dev_sha": "17d606f63d91ec178668c215caf263b95e3bd580",
+    "tree_sha": "cffc68c278b69f389372e4d43c022a9f0140a9d1",
+    "proofs": {
+      "system_gate_run": 35553944193,
+      "current_application_quality_run": 35553944303,
+      "it_admin_runtime_proof_run": 35553944241,
+      "branch_hygiene_run": 35553944239
+    },
+    "build_specific_proof_run": 35553944296,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_development_url": "https://14044e78.devilndove-site.pages.dev"
+  },
+  "production_checkpoint": {
+    "main_sha": "94a977f0732cc649037423a415dfba60417d4a47",
+    "tree_sha": "cffc68c278b69f389372e4d43c022a9f0140a9d1",
+    "production_pages_deploy_run": 35554258043,
+    "production_live_resource_integrity_run": 35554327033,
+    "products_browser_proof_run": 35554326994,
+    "products_route_proof_run": 35554327019,
+    "build_specific_proof_run": 35554258012,
+    "exact_production_url": "https://5cebd07d.devilndove-site.pages.dev",
+    "deployment_id": "5cebd07d-ae31-4dd1-94a0-30b20c7d403c",
+    "canonical_migrations": 17,
+    "business_counts": {
+      "users": 2,
+      "products": 45,
+      "site_item_inventory": 1041,
+      "orders": 0
+    },
+    "business_counts_preserved": true,
+    "foreign_key_violations": 0,
+    "state": "PRODUCTION_GREEN"
   }
 }
