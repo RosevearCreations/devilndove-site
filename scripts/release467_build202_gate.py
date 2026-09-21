@@ -69,7 +69,7 @@ for token in (
     "admin-catalog-media-reconciliation-v202.js?v=202",
 ):
     req(token in page,f"Catalog Health Build 202 mount/cache identity missing: {token}")
-req(any(token in page for token in ("Release 467 • Build 202","Release 467 • Build 204")),"Catalog Health Build 202 page identity lost a valid successor")
+req(any(token in page for token in ("Release 467 • Build 202","Release 467 • Build 204","Release 467 • Build 225")),"Catalog Health Build 202 page identity lost a valid successor")
 req(page.lower().count("<h1")==1,"Catalog Health must keep exactly one H1")
 for token in ("catalog-recon-summary","catalog-recon-toolbar","catalog-recon-row","@media(max-width:680px)"):
     req(token in css,f"Build 202 responsive CSS missing: {token}")
