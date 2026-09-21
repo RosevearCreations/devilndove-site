@@ -2,7 +2,7 @@
 
 ## Current release baseline
 
-Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0020`. Request-time DDL and automatic Production promotion remain closed.
+Release 467 uses `main` as Production source and `dev` as Development candidate lane. The canonical Cloudflare Pages project is `devilndove-site`. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0020`. Request-time DDL and automatic Production promotion remain closed.
 
 1. Verify the previous exact SHA/tree and external proofs.
 2. The next build ingests that closure; the previous build never self-records later proof.
