@@ -24,26 +24,26 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 Stripe Development, PayPal sandbox and Social/OAuth remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 217 candidate
+## Current Release 467 restart authority — Build 218 candidate
 
-Build 216 **Customer-Supplied Item Intake & Suitability Review** is the exact fully verified predecessor.
+Build 217 **Production Cost Evidence v2** is the exact fully verified predecessor.
 
-- Development SHA: 2f9b0187110ffa0bd754eba1087f6ce56c23a0e4
-- Shared tree: 5bc30361efc9166f90aa8a7a4761646389325625
-- System / Quality / I.T. / Hygiene: 35552576564 / 35552576510 / 35552576480 / 35552576583
-- Build 216 Development proof: 35552576627
-- Production main: 0e6312ed188c3423fdf32b18c892ff4d17c387bc
-- Production Pages / Live Resources: 35552841763 / 35552906462
-- Product Browser / Route: 35552906457 / 35552906453
-- Build 216 Production proof: 35552841726
-- Exact Production URL: https://401aaffc.devilndove-site.pages.dev
+- Development SHA: 17d606f63d91ec178668c215caf263b95e3bd580
+- Shared tree: cffc68c278b69f389372e4d43c022a9f0140a9d1
+- System / Quality / I.T. / Hygiene: 35553944193 / 35553944303 / 35553944241 / 35553944239
+- Build 217 Development proof: 35553944296
+- Production main: 94a977f0732cc649037423a415dfba60417d4a47
+- Production Pages / Live Resources: 35554258043 / 35554327033
+- Product Browser / Route: 35554326994 / 35554327019
+- Build 217 Production proof: 35554258012
+- Exact Production URL: https://5cebd07d.devilndove-site.pages.dev
 
-Build 217 **Production Cost Evidence v2** is the active candidate. Migration `0017_release467_production_cost_evidence_v2.sql` adds nullable Creative Project manufacturing source evidence for setup, machine and hands-on labour time; consumables, finishing, prototype waste/rework and outside-service cost; failed prototype count; and produced/accepted quantity.
+Build 218 **Quote ↔ Production Cost ↔ Margin Guardrails** is the active schema-neutral candidate. It reuses existing Custom Work quote/revision authority, the Build 217 production-cost evidence, Product linked-resource margin evidence and Finance profitability. Human review may append a quote-revision snapshot, but quote prices are never rewritten automatically.
 
-Inventory remains the material-use/cost authority. Finance/Accounting remains the profitability/posting authority. Blank cost fields remain unknown rather than silently becoming zero.
+Inventory remains the material-use/cost authority. Finance/Accounting remains the profitability/posting authority. Blank cost fields remain unknown rather than silently becoming zero. Canonical migrations remain `0001`–`0017`.
 
 ### Restart resolution rule
-Resolve live dev and main first. Build 218 starts only after Build 217 is exact-SHA Production GREEN.
+Resolve live dev and main first. Build 219 starts only after Build 218 is exact-SHA Production GREEN.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
 
 ## Retained historical provenance — Build 171
