@@ -1,0 +1,93 @@
+{
+  "release": 467,
+  "build": 224,
+  "title": "Manufacturing-Era Closure & Next Roadmap",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build224-manufacturing-era-closure-next-roadmap",
+  "priority": "measure_the_manufacturing_era_from_exact_build223_production_green_evidence_then_derive_successor_scope_without_new_business_authority",
+  "starting_point": {
+    "development": {
+      "sha": "f69deaa659520af182edc60dfc7cfefc7914d8f8",
+      "tree": "23394309d09e765c5327fbf8715532faabc78d6a",
+      "system_gate_run": 35636209245,
+      "quality_run": 35636209377,
+      "it_admin_runtime_run": 35636209182,
+      "repository_hygiene_run": 35636209309,
+      "build_specific_proof_run": 35636209003,
+      "workflow_success": "39/39",
+      "exact_development_url": "https://f4dccb93.devilndove-site.pages.dev",
+      "development_deploy_artifact_id": 10656392380,
+      "development_regression_artifact_id": 10656452358,
+      "canonical_migrations": 21,
+      "state": "EXACT_BRANCH_HEAD_GREEN"
+    },
+    "production": {
+      "main_sha": "704c407485c0fd0c3de785b696113d3cc7be5a27",
+      "tree": "23394309d09e765c5327fbf8715532faabc78d6a",
+      "production_pages_deploy_run": 35636523017,
+      "production_live_resource_integrity_run": 35636619207,
+      "products_browser_proof_run": 35636619026,
+      "products_route_proof_run": 35636619136,
+      "build_specific_proof_run": 35636522959,
+      "workflow_success": "33/33",
+      "exact_production_url": "https://445258ee.devilndove-site.pages.dev",
+      "deployment_id": "445258ee-503a-4860-9e3e-ebc3dd01696c",
+      "production_promotion_artifact_id": 10656248196,
+      "canonical_migrations": 21,
+      "code_only": true,
+      "remote_d1_queries": 0,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "build204_baseline": {
+    "products_reviewed": 43,
+    "ready_products": 1,
+    "review_required_products": 42,
+    "externally_blocked_products": 0,
+    "publicly_visible_products": 40,
+    "media_ready_products": 3,
+    "tracked_zero_stock_products": 2,
+    "products_with_linked_resources": 2,
+    "products_with_missing_linked_inventory": 0,
+    "products_with_unknown_linked_cost": 2,
+    "buyer_blocked_products": 16
+  },
+  "measurement": {
+    "state": "PENDING_EXACT_DEV_PUSH_PROOF",
+    "query": "scripts/release467_build224_measurement.sql",
+    "d1_rows_read_ceiling": 25000,
+    "mutation": "ZERO",
+    "required_dimensions": [
+      "Build 204 launch-set movement and remaining buyer/media/stock/cost blockers",
+      "capability taxonomy and public-profile coverage",
+      "Custom Request manufacturing-triage sufficiency",
+      "hybrid Creative Projects",
+      "proofs sent/approved/changed",
+      "prototype/sample/production-run evidence",
+      "quote expected-cost coverage and reviewed actual production-cost coverage",
+      "QA/rework/scrap evidence",
+      "reviewed Workshop Knowledge entries and approved recipe versions",
+      "published evidence-backed Workshop Journal/case-study capability coverage",
+      "provider-metered D1 rows read"
+    ]
+  },
+  "safety": {
+    "canonical_schema_addition": false,
+    "canonical_migrations_remain": 21,
+    "request_time_ddl": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "publication_mutation": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "automatic_product_publication": false,
+    "automatic_price_rewrite": false,
+    "production_business_data_copy": false
+  },
+  "successor_roadmap": {
+    "state": "BLOCKED_UNTIL_EXACT_BUILD224_MEASUREMENT_EXISTS",
+    "rule": "Do not assign Build 225+ scope until the exact Development Build 224 measurement artifact has been reviewed and incorporated."
+  }
+}
