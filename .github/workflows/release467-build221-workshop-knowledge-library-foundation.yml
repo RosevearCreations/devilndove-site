@@ -8,6 +8,7 @@ on:
       - 'migrations/canonical/manifest.json'
       - 'migrations/canonical/0020_release467_workshop_knowledge_library_foundation.sql'
       - 'functions/api/admin/workshop-knowledge-library.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
       - 'public/js/admin-workshop-knowledge-build221.js'
       - 'admin/workshop-knowledge/index.html'
       - 'admin/creative-process/index.html'
