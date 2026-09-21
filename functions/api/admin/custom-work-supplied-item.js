@@ -79,7 +79,7 @@ function itemReadiness(item,triage,review,evidence,acks){
     if(clean(review.material_unknowns,20))warnings.push('Material unknowns remain recorded in the latest review.');
     if(clean(review.safety_unknowns,20))warnings.push('Safety/process unknowns remain recorded in the latest review.');
     if(decision==='accepted_with_limitations'&&String(matchingAck?.acknowledgement_status||'')!=='acknowledged')blockers.push('Customer limitation acknowledgement for the exact current review is still required.');
-    if(decision==='declined')return {state:'declined',blockers:[],warnings,intake_evidence_count:intake.length,post_work_evidence_count:post.length,latest_acknowledgement_status:latestAck?.acknowledgement_status||null};
+    if(decision==='declined')return {state:'declined',blockers:[],warnings,intake_evidence_count:intake.length,post_work_evidence_count:post.length,latest_acknowledgement_status:matchingAck?.acknowledgement_status||null};
   }
   if(['work_complete','returned','closed'].includes(String(item.workflow_status||''))&&!post.length)blockers.push('Post-work condition evidence is required before completion/return closure.');
   const state=blockers.length?'blocked':warnings.length?'review':'ready';
