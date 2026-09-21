@@ -1,0 +1,36 @@
+name: Release 467 Build 225 Storefront Launch-Set Remediation Execution II
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'admin/catalog-health/index.html'
+      - 'public/js/admin-storefront-launch-remediation-v225.js'
+      - 'css/release467-build225-launch-remediation-execution.css'
+      - 'current-development-authority.json'
+      - 'release467-build224-manufacturing-era-closure-next-roadmap.json'
+      - 'release467-build225-storefront-launch-set-remediation-execution-ii.json'
+      - 'docs/operations/RELEASE_467_BUILD_225_STOREFRONT_LAUNCH_SET_REMEDIATION_EXECUTION_II.md'
+      - 'scripts/release467_build224_gate.py'
+      - 'scripts/release467_build225_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - '.github/workflows/release467-build225-storefront-launch-set-remediation-execution-ii.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Validate Build 225 Storefront Launch-Set Remediation Execution II
+        run: python scripts/release467_build225_gate.py
+      - name: Retain Build 224 exact Production closure
+        run: python scripts/release467_build224_gate.py

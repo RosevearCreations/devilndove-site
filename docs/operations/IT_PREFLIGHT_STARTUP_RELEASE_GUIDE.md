@@ -12,34 +12,34 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 224 candidate
+## Current Release 467 restart authority — Build 225 candidate
 
-Build 223 **Capability Case Studies, Workshop Journal & Search Richness** is the exact fully verified Development and Production predecessor.
+Build 224 **Manufacturing-Era Closure & Next Roadmap** is the exact fully verified Development and Production predecessor.
 
-- Development SHA: `f69deaa659520af182edc60dfc7cfefc7914d8f8`
-- Shared tree: `23394309d09e765c5327fbf8715532faabc78d6a`
-- System Gate: `35636209245`
-- Current Application Quality Proof: `35636209377`
-- I.T. Admin Runtime Proof: `35636209182`
-- Repository Branch Hygiene: `35636209309`
-- Build 223 Development proof: `35636209003`
-- Development deploy proof artifact: `10656392380`
-- Development regression artifact: `10656452358`
-- Exact Development preview: `https://f4dccb93.devilndove-site.pages.dev`
-- Production main SHA: `704c407485c0fd0c3de785b696113d3cc7be5a27`
-- Production Pages Deploy: `35636523017`
-- Production Live Resource Integrity: `35636619207`
-- Product Browser Proof: `35636619026`
-- Product Route Proof: `35636619136`
-- Build 223 Production proof: `35636522959`
-- Production promotion artifact: `10656248196`
-- Exact Production deployment: `https://445258ee.devilndove-site.pages.dev`
-- Production deployment ID: `445258ee-503a-4860-9e3e-ebc3dd01696c`
+- Development SHA: `20afcad9a74589cd015c94a1172dc10e3e8b55a5`
+- Shared tree: `188dc8f60480c902ac91a6f957b30c37a7166c7d`
+- System Gate: `35643013344`
+- Current Application Quality Proof: `35643013215`
+- I.T. Admin Runtime Proof: `35643013107`
+- Repository Branch Hygiene: `35643013180`
+- Build 224 Development proof: `35643013307`
+- Development deploy proof artifact: `10658858404`
+- Development regression artifact: `10659013158`
+- Exact Development preview: `https://784a7e53.devilndove-site.pages.dev`
+- Production main SHA: `d67fe22bb0cceaf8d6ea133f688a9304c7d1f439`
+- Production Pages Deploy: `35643398483`
+- Production Live Resource Integrity: `35643492350`
+- Product Browser Proof: `35643492529`
+- Product Route Proof: `35643492514`
+- Build 224 Production proof: `35643398886`
+- Production promotion artifact: `10659270575`
+- Exact Production deployment: `https://6041effd.devilndove-site.pages.dev`
+- Production deployment ID: `6041effd-6004-4768-bd36-e5dd8cfe0506`
 - Canonical migrations: `21`
 
-Build 224 **Manufacturing-Era Closure & Next Roadmap** is the active measured candidate. Exact Development measurement is GREEN at `95fd199e4345a6e191996f5de7ef56057a0ffde8` / tree `11ea923c36a0e2cd56c8319a545c63743ed4df41`, workflow `35641735469`, artifact `10658891143`, with **8,781 / 25,000** provider-metered D1 rows and zero D1/R2/schema mutation. The evidence-derived successor roadmap plans Builds **225–232**, all blocked until Build 224 is exact-SHA Production GREEN.
+Build 225 **Storefront Launch-Set Remediation Execution II** is the active bounded candidate. It reuses the existing Build 204 launch-set projection and Build 206 campaign metadata, with Product Editor, Product Media and Inventory Operations retaining fact-mutation authority. No schema migration, automatic publication, price rewrite, stock mutation, media mutation, invented cost, R2 mutation, provider execution, payment/refund or accounting posting is authorized.
 
-Resolve live `dev` and `main` first. The successor roadmap is `docs/operations/RELEASE_467_POST_MANUFACTURING_AUTONOMOUS_BUILDS_225_232.md`; Build 225 may begin only after Build 224 exact-SHA Production GREEN.
+Resolve live `dev` and `main` first. Build 226 remains blocked until Build 225 is exact-SHA Production GREEN. The future queue has not run out; Builds 226–232 remain planned.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
 
 ## Retained historical provenance — Build 171

@@ -1,0 +1,139 @@
+{
+  "release": 467,
+  "build": 225,
+  "title": "Storefront Launch-Set Remediation Execution II",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build225-storefront-launch-set-remediation-execution-ii",
+  "priority": "execute_the_measured_storefront_blocker_set_through_existing_product_media_inventory_cost_and_launch_recheck_authorities_without_parallel_fact_mutation",
+  "predecessor": {
+    "build": 224,
+    "state": "PRODUCTION_GREEN",
+    "dev_sha": "20afcad9a74589cd015c94a1172dc10e3e8b55a5",
+    "tree_sha": "188dc8f60480c902ac91a6f957b30c37a7166c7d",
+    "main_sha": "d67fe22bb0cceaf8d6ea133f688a9304c7d1f439",
+    "production_pages_deploy_run": 35643398483,
+    "production_live_resource_integrity_run": 35643492350,
+    "products_browser_proof_run": 35643492529,
+    "products_route_proof_run": 35643492514,
+    "build_specific_proof_run": 35643398886,
+    "exact_production_url": "https://6041effd.devilndove-site.pages.dev",
+    "deployment_id": "6041effd-6004-4768-bd36-e5dd8cfe0506",
+    "production_promotion_artifact_id": 10659270575,
+    "exact_main_sha_workflows": "33/33"
+  },
+  "measured_baseline": {
+    "source_build": 224,
+    "products_reviewed": 43,
+    "ready_products": 1,
+    "review_required_products": 42,
+    "externally_blocked_products": 0,
+    "buyer_blocked_products": 16,
+    "media_blocked_products": 40,
+    "tracked_zero_stock_products": 2,
+    "products_with_unknown_linked_cost": 2
+  },
+  "execution_order": [
+    {
+      "priority": 1,
+      "lane": "buyer_required_facts",
+      "owner": "Product Editor"
+    },
+    {
+      "priority": 2,
+      "lane": "approved_media_gallery_alt_role_readiness",
+      "owner": "Product Media"
+    },
+    {
+      "priority": 3,
+      "lane": "tracked_stock_review",
+      "owner": "Product Editor / Inventory Operations"
+    },
+    {
+      "priority": 4,
+      "lane": "linked_resource_and_cost_evidence",
+      "owner": "Inventory Operations"
+    },
+    {
+      "priority": 5,
+      "lane": "final_buyer_readiness_review",
+      "owner": "Build 204 one-Product launch-set recheck"
+    }
+  ],
+  "reuse": {
+    "readiness_projection": "functions/api/admin/storefront-launch-set.js",
+    "campaign_api": "functions/api/admin/storefront-launch-remediation.js",
+    "campaign_schema": "migrations/canonical/0007_release467_storefront_launch_remediation.sql",
+    "product_authority": "Product Editor",
+    "media_authority": "Product Media",
+    "inventory_cost_authority": "Inventory Operations"
+  },
+  "implementation": {
+    "page": "admin/catalog-health/index.html",
+    "client": "public/js/admin-storefront-launch-remediation-v225.js",
+    "css": "css/release467-build225-launch-remediation-execution.css",
+    "operator_queue": "bounded_explicit_load",
+    "official_recheck": "/api/admin/storefront-launch-set?mode=product",
+    "campaign_metadata_write": "/api/admin/storefront-launch-remediation",
+    "final_review_requires_no_live_blockers": true
+  },
+  "safety": {
+    "canonical_schema_addition": false,
+    "canonical_migrations_remain": 21,
+    "request_time_ddl": false,
+    "new_business_authority": false,
+    "automatic_publication": false,
+    "automatic_unpublication": false,
+    "automatic_price_rewrite": false,
+    "automatic_stock_mutation": false,
+    "automatic_media_mutation": false,
+    "invented_cost": false,
+    "r2_mutation": false,
+    "payment_refund": false,
+    "accounting_posting": false,
+    "provider_execution": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build225_gate.py",
+    "retained_predecessor_gate": "scripts/release467_build224_gate.py",
+    "one_h1": true,
+    "node_syntax_client": true,
+    "baseline_movement_required": true,
+    "future_queue_exhausted": false
+  },
+  "next_build": {
+    "build": 226,
+    "title": "Capability Profile Coverage Closure",
+    "state": "BLOCKED_UNTIL_BUILD225_PRODUCTION_GREEN"
+  },
+  "future_queue": {
+    "first_build": 226,
+    "last_build": 232,
+    "exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "20afcad9a74589cd015c94a1172dc10e3e8b55a5",
+      "tree": "188dc8f60480c902ac91a6f957b30c37a7166c7d",
+      "system_gate_run": 35643013344,
+      "quality_run": 35643013215,
+      "it_admin_runtime_run": 35643013107,
+      "repository_hygiene_run": 35643013180,
+      "build_specific_proof_run": 35643013307,
+      "exact_development_url": "https://784a7e53.devilndove-site.pages.dev"
+    },
+    "production": {
+      "main_sha": "d67fe22bb0cceaf8d6ea133f688a9304c7d1f439",
+      "tree": "188dc8f60480c902ac91a6f957b30c37a7166c7d",
+      "production_pages_deploy_run": 35643398483,
+      "production_live_resource_integrity_run": 35643492350,
+      "products_browser_proof_run": 35643492529,
+      "products_route_proof_run": 35643492514,
+      "build_specific_proof_run": 35643398886,
+      "exact_production_url": "https://6041effd.devilndove-site.pages.dev",
+      "deployment_id": "6041effd-6004-4768-bd36-e5dd8cfe0506",
+      "production_promotion_artifact_id": 10659270575,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}

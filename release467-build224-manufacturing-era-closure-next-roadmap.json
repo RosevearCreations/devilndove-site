@@ -2,7 +2,7 @@
   "release": 467,
   "build": 224,
   "title": "Manufacturing-Era Closure & Next Roadmap",
-  "state": "DEVELOPMENT_MEASURED_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build224-manufacturing-era-closure-next-roadmap",
   "priority": "measure_the_manufacturing_era_from_exact_build223_production_green_evidence_then_derive_successor_scope_without_new_business_authority",
   "starting_point": {
@@ -183,7 +183,7 @@
     "production_business_data_copy": false
   },
   "successor_roadmap": {
-    "state": "PLANNED_BLOCKED_UNTIL_BUILD224_PRODUCTION_GREEN",
+    "state": "AUTHORIZED_FROM_BUILD224_PRODUCTION_GREEN",
     "path": "docs/operations/RELEASE_467_POST_MANUFACTURING_AUTONOMOUS_BUILDS_225_232.md",
     "future_queue_exhausted": false,
     "builds": [
@@ -221,5 +221,47 @@
       }
     ],
     "rule": "Build 225 may begin only after Build 224 is exact-SHA Production GREEN."
+  },
+  "final_closure": {
+    "dev_sha": "20afcad9a74589cd015c94a1172dc10e3e8b55a5",
+    "tree_sha": "188dc8f60480c902ac91a6f957b30c37a7166c7d",
+    "proofs": {
+      "system_gate_run": 35643013344,
+      "current_application_quality_run": 35643013215,
+      "it_admin_runtime_proof_run": 35643013107,
+      "branch_hygiene_run": 35643013180
+    },
+    "build_specific_proof_run": 35643013307,
+    "exact_development_url": "https://784a7e53.devilndove-site.pages.dev",
+    "development_deploy_artifact_id": 10658858404,
+    "development_regression_artifact_id": 10659013158,
+    "exact_dev_push_workflows": "34/34",
+    "canonical_migrations": 21,
+    "proof_state": "EXACT_BRANCH_HEAD_GREEN",
+    "ingested_by_build": 225
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 224,
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "d67fe22bb0cceaf8d6ea133f688a9304c7d1f439",
+    "tree_sha": "188dc8f60480c902ac91a6f957b30c37a7166c7d",
+    "production_pages_deploy_run": 35643398483,
+    "production_live_resource_integrity_run": 35643492350,
+    "products_browser_proof_run": 35643492529,
+    "products_route_proof_run": 35643492514,
+    "build_specific_proof_run": 35643398886,
+    "exact_production_url": "https://6041effd.devilndove-site.pages.dev",
+    "deployment_id": "6041effd-6004-4768-bd36-e5dd8cfe0506",
+    "production_promotion_artifact_id": 10659270575,
+    "exact_main_sha_workflows": "33/33",
+    "canonical_migrations": 21,
+    "remote_d1_queries": 0,
+    "code_only": true
+  },
+  "next_build": {
+    "build": 225,
+    "title": "Storefront Launch-Set Remediation Execution II",
+    "state": "AUTHORIZED_FROM_BUILD224_PRODUCTION_GREEN"
   }
 }
