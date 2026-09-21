@@ -29,7 +29,7 @@ for token in ('Workshop Knowledge Library','Reviewed observations only','Missing
 req('workshopKnowledge221Mount' in page and '/public/js/admin-workshop-knowledge-build221.js?v=467b221' in page,'Workshop Knowledge page missing Build 221 workspace')
 req('/admin/workshop-knowledge/' in creative,'Creative Process page lost Workshop Knowledge navigation')
 req(len(re.findall(r'<h1(?:\s|>)',page,re.I))==1,'Workshop Knowledge page must contain exactly one H1')
-for path in ('functions/api/admin/workshop-knowledge-library.js','public/js/admin-workshop-knowledge-build221.js'):
+for path in ('functions/api/admin/workshop-knowledge-library.js','public/js/admin-workshop-knowledge-build221.js','functions/api/admin/it-operations-control-tower.js'):
  q=subprocess.run(['node','--check',str(ROOT/path)],text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
  req(q.returncode==0,path+' syntax failed: '+(q.stderr or q.stdout)[-1500:])
 if FAIL:
