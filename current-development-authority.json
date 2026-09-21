@@ -2,8 +2,8 @@
   "release": 467,
   "build": 225,
   "title": "Storefront Launch-Set Remediation Execution II",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "source_authority": "release467-build225-storefront-launch-set-remediation-execution-ii.json",
+  "state": "DEVELOPMENT_GREEN",
+  "source_authority": "dev",
   "accepted_dev_sha": "20afcad9a74589cd015c94a1172dc10e3e8b55a5",
   "accepted_dev_tree_sha": "188dc8f60480c902ac91a6f957b30c37a7166c7d",
   "acceptance": {
