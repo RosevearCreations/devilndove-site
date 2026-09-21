@@ -4,10 +4,10 @@ import { onRequestGet as getReadinessControlTower } from './it-control-tower.js'
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=224;
-const TITLE='Manufacturing-Era Closure & Next Roadmap';
-const AUTHORITY='release467-build224-manufacturing-era-closure-next-roadmap';
-const EVIDENCE_ID='r467-b223-f69deaa6-35636209245-35636523017';
+const BUILD=225;
+const TITLE='Storefront Launch-Set Remediation Execution II';
+const AUTHORITY='release467-build225-storefront-launch-set-remediation-execution-ii';
+const EVIDENCE_ID='r467-b224-20afcad9-35643013344-35643398483';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
   release:467,build:223,title:'Capability Case Studies, Workshop Journal & Search Richness',state:'DEVELOPMENT_GREEN',
