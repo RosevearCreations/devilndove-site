@@ -1,0 +1,114 @@
+{
+  "release": 467,
+  "build": 226,
+  "title": "Capability Profile Coverage Closure",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build226-capability-profile-coverage-closure",
+  "priority": "close_the_single_measured_public_capability_profile_coverage_gap_using_the_existing_build209_profile_authority_without_duplicate_process_identity",
+  "predecessor": {
+    "build": 225,
+    "state": "PRODUCTION_GREEN",
+    "dev_sha": "e759f09d069170fe04092651f87fe727d8ecdc80",
+    "tree_sha": "ba60ec9147def32da518f1c993f0099244e858f1",
+    "main_sha": "82e819c33ef9d90ee440b73cb47ded1450cf9c2e",
+    "system_gate_run": 35647494752,
+    "current_application_quality_run": 35647494738,
+    "it_admin_runtime_proof_run": 35647495428,
+    "branch_hygiene_run": 35647494747,
+    "build_specific_dev_run": 35647494740,
+    "production_pages_deploy_run": 35647907774,
+    "production_live_resource_integrity_run": 35648076498,
+    "products_browser_proof_run": 35648079711,
+    "products_route_proof_run": 35648076097,
+    "build_specific_production_run": 35647907634,
+    "exact_production_url": "https://2c35ccc8.devilndove-site.pages.dev"
+  },
+  "measured_baseline": {
+    "source_build": 224,
+    "canonical_active_processes": 22,
+    "public_reviewed_capability_profiles": 12,
+    "active_processes_with_public_profile": 21,
+    "coverage_percent": 95.5,
+    "uncovered_active_processes": 1,
+    "uncovered_process_key": "photography-content"
+  },
+  "closure": {
+    "canonical_process_authority": "inventory_processes",
+    "capability_profile_authority": "workshop_capability_profiles",
+    "existing_authority_build": 209,
+    "action": "add_smallest_reviewed_public_profile_extension",
+    "capability_key": "photography-content",
+    "display_name": "Photography & Content",
+    "related_process_keys": [
+      "photography-content"
+    ],
+    "review_status": "reviewed",
+    "is_public": true,
+    "constraints_state": "unmeasured",
+    "target_active_process_coverage": "22/22"
+  },
+  "implementation": {
+    "migration": "migrations/canonical/0022_release467_capability_profile_coverage_closure.sql",
+    "admin_api": "functions/api/admin/workshop-capabilities.js",
+    "admin_surface": "admin/workshop-capabilities/index.html",
+    "admin_client": "public/js/admin-workshop-capabilities.js"
+  },
+  "safety": {
+    "canonical_schema_addition": false,
+    "data_only_forward_migration": true,
+    "parallel_process_taxonomy": false,
+    "automatic_publication": false,
+    "invented_technical_limits": false,
+    "product_mutation": false,
+    "inventory_quantity_mutation": false,
+    "inventory_cost_mutation": false,
+    "customer_data_mutation": false,
+    "r2_mutation": false,
+    "payment_execution": false,
+    "provider_execution": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build226_gate.py",
+    "predecessor_gate": "scripts/release467_build225_gate.py",
+    "canonical_migrations_after_apply": 22,
+    "expected_public_reviewed_profiles": 13,
+    "expected_active_processes": 22,
+    "expected_covered_active_processes": 22,
+    "expected_uncovered_active_processes": 0,
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "e759f09d069170fe04092651f87fe727d8ecdc80",
+      "tree": "ba60ec9147def32da518f1c993f0099244e858f1",
+      "system_gate_run": 35647494752,
+      "quality_run": 35647494738,
+      "it_admin_runtime_run": 35647495428,
+      "repository_hygiene_run": 35647494747,
+      "build_specific_proof_run": 35647494740,
+      "exact_development_url": "https://89ec1531.devilndove-site.pages.dev"
+    },
+    "production": {
+      "main_sha": "82e819c33ef9d90ee440b73cb47ded1450cf9c2e",
+      "tree": "ba60ec9147def32da518f1c993f0099244e858f1",
+      "production_pages_deploy_run": 35647907774,
+      "production_live_resource_integrity_run": 35648076498,
+      "products_browser_proof_run": 35648079711,
+      "products_route_proof_run": 35648076097,
+      "build_specific_proof_run": 35647907634,
+      "exact_production_url": "https://2c35ccc8.devilndove-site.pages.dev",
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "next_build": {
+    "build": 227,
+    "title": "Manufacturing Adoption Command Centre",
+    "state": "BLOCKED_UNTIL_BUILD226_PRODUCTION_GREEN"
+  },
+  "future_queue": {
+    "first_build": 227,
+    "last_build": 232,
+    "exhausted": false
+  }
+}
