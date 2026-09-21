@@ -1,0 +1,41 @@
+name: Release 467 Build 222 Project to Knowledge Promotion Recipe History
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'migrations/canonical/manifest.json'
+      - 'migrations/canonical/0021_release467_project_knowledge_recipe_history.sql'
+      - 'functions/api/admin/workshop-knowledge-promotion.js'
+      - 'public/js/admin-workshop-knowledge-build222.js'
+      - 'admin/workshop-knowledge/index.html'
+      - 'current-development-authority.json'
+      - 'release467-build221-workshop-knowledge-library-foundation.json'
+      - 'release467-build222-project-knowledge-recipe-history.json'
+      - 'docs/operations/RELEASE_467_BUILD_222_PROJECT_TO_KNOWLEDGE_PROMOTION_RECIPE_HISTORY.md'
+      - 'scripts/release467_build221_gate.py'
+      - 'scripts/release467_build222_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'scripts/repository_forward_sanity.py'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Validate Build 222 Project-to-Knowledge Promotion & Recipe History
+        run: python scripts/release467_build222_gate.py
+      - name: Retain Build 221 Production closure
+        run: python scripts/release467_build221_gate.py

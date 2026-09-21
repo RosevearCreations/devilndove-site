@@ -153,6 +153,13 @@
       "release": 467,
       "description": "Add a reviewed internal Workshop Knowledge Library linking source-backed material/tool Inventory identities, canonical workshop processes, observed settings, constraints/outcomes, Creative Project provenance and reference-only evidence.",
       "recovery": "Forward-only additive knowledge tables. Void incorrect reviewed knowledge entries while retaining provenance; never rewrite source Creative Project, Inventory, process or media authorities. Repair schema defects only with a new numbered migration."
+    },
+    {
+      "version": 21,
+      "file": "0021_release467_project_knowledge_recipe_history.sql",
+      "release": 467,
+      "description": "Add reviewed Project-to-Knowledge promotion with immutable recipe version snapshots, exact Creative Project/operation provenance, canonical process/Inventory identities, observed settings, failure history and explicit supersession.",
+      "recovery": "Forward-only additive recipe history. Supersede or void incorrect recipe versions while retaining provenance; never rewrite source Creative Project, Inventory, process or media authorities. Repair schema defects only with a new numbered migration."
     }
   ]
 }
