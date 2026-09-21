@@ -110,5 +110,30 @@
     "first_build": 226,
     "last_build": 232,
     "exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "20afcad9a74589cd015c94a1172dc10e3e8b55a5",
+      "tree": "188dc8f60480c902ac91a6f957b30c37a7166c7d",
+      "system_gate_run": 35643013344,
+      "quality_run": 35643013215,
+      "it_admin_runtime_run": 35643013107,
+      "repository_hygiene_run": 35643013180,
+      "build_specific_proof_run": 35643013307,
+      "exact_development_url": "https://784a7e53.devilndove-site.pages.dev"
+    },
+    "production": {
+      "main_sha": "d67fe22bb0cceaf8d6ea133f688a9304c7d1f439",
+      "tree": "188dc8f60480c902ac91a6f957b30c37a7166c7d",
+      "production_pages_deploy_run": 35643398483,
+      "production_live_resource_integrity_run": 35643492350,
+      "products_browser_proof_run": 35643492529,
+      "products_route_proof_run": 35643492514,
+      "build_specific_proof_run": 35643398886,
+      "exact_production_url": "https://6041effd.devilndove-site.pages.dev",
+      "deployment_id": "6041effd-6004-4768-bd36-e5dd8cfe0506",
+      "production_promotion_artifact_id": 10659270575,
+      "state": "PRODUCTION_GREEN"
+    }
   }
 }
