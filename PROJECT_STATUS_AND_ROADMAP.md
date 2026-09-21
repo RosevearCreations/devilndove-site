@@ -2,11 +2,11 @@
 
 ## Current checkpoint
 
-Build 214 **Prototype → Sample → Production Run** is Production GREEN at `6e3e8f04578998e16e1e8b8d27daad28b2332603`, exact tree `6792f4ed926e3c52b197dfe8f3cc68e074b92d62`, with Development `45a6bbb5ea01fa8b79ea9df331d87086ca5c7657` and Production Pages/Live proofs `35545124565` / `35545169766`.
+Build 215 **Small-Batch, Corporate & Event Quoting** is Production GREEN at c8366bde7fb2e7c673be656ff85265058a407c4a, exact tree f1facb7a27e22f3a129654713cc6dd109e3b6b16, with Development 825814b09a7c3f05c6fddc223ec8876ade0bbc35 and Production Pages/Live proofs 35548670491 / 35548742503.
 
-## Active Build 215
+## Active Build 216
 
-**Small-Batch, Corporate & Event Quoting** extends the existing Custom Work quote draft/revision/line-item authority through canonical migration 0015. Structured terms cover requested/quoted quantity, tiers, setup/sample charges, personalization, packaging, lead-time, handoff, expiry and production-cost evidence state. Existing private quote sharing, revisions, payment gates and order drafts remain authoritative. Build 216 remains blocked until exact-SHA Production GREEN.
+**Customer-Supplied Item Intake & Suitability Review** extends the existing Custom Work journey through canonical migration 0016. It reuses Build 211 triage plus existing reference uploads/stage photos for item identity, ownership, condition-at-intake evidence, append-only suitability decisions, limitations acknowledgement and post-work condition evidence. Build 217 remains blocked until exact-SHA Production GREEN.
 
 ## Permanent boundaries
 
@@ -28,4 +28,4 @@ Build 171 — Release & Restart Authority Convergence — remains immutable hist
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain immutable historical release/restart provenance; they do not supersede the Build 212/213 current authority.
+Build 192 and Build 193 remain immutable historical release/restart provenance; they remain historical and do not supersede the current Build 216 authority.
