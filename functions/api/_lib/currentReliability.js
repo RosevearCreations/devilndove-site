@@ -2,8 +2,8 @@
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=224;
-export const CURRENT_RELIABILITY_TITLE='Manufacturing-Era Closure & Next Roadmap';
+export const CURRENT_RELIABILITY_BUILD=225;
+export const CURRENT_RELIABILITY_TITLE='Storefront Launch-Set Remediation Execution II';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
 export const ACCEPTED_DEVELOPMENT=Object.freeze({
