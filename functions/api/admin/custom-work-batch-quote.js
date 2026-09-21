@@ -23,6 +23,14 @@ async function access(context){
   if(Number(schema?.c||0)!==7)return {error:json({ok:false,error:'Build 215 canonical migration is required.',code:'build215_schema_required'},503)};
   return {admin,db};
 }
+async function requestChoices(db){
+  return rows(await db.prepare(`SELECT r.custom_request_id,r.request_key,r.name,r.request_type,r.product_interest,r.status,r.quantity,r.project_intent,r.organization_name,r.event_context_structured,r.updated_at,
+    q.custom_request_quote_draft_id,q.quote_status
+    FROM custom_requests r
+    LEFT JOIN custom_request_quote_drafts q ON q.custom_request_id=r.custom_request_id
+    WHERE COALESCE(r.status,'new')<>'archived'
+    ORDER BY datetime(r.updated_at) DESC,r.custom_request_id DESC LIMIT 80`).all().catch(()=>({results:[]})));
+}
 async function requestById(db,requestId){
   return db.prepare(`SELECT custom_request_id,request_key,name,email,request_type,product_interest,status,quantity,project_intent,organization_name,event_context_structured,deadline_date,budget_cents
     FROM custom_requests WHERE custom_request_id=? LIMIT 1`).bind(id(requestId)).first().catch(()=>null);
@@ -140,10 +148,10 @@ async function payload(db,requestId){
   const request=await requestById(db,requestId);
   if(!request)return {ok:false,error:'Custom request was not found.'};
   const quote=await quoteByRequest(db,requestId);
-  if(!quote)return {ok:true,request,quote:null,quote_required:true,terms:null,tiers:[],readiness:{state:'quote_required',blockers:['Create the existing Custom Work quote draft first.'],warnings:[]},payment_execution:false,order_creation:false};
+  if(!quote)return {ok:true,request,quote:null,quote_required:true,terms:null,tiers:[],readiness:{state:'quote_required',blockers:['Create the existing Custom Work quote draft first.'],warnings:[]},request_choices:await requestChoices(db),payment_execution:false,provider_execution:false,order_creation:false,unknown_cost_is_zero:false};
   const terms=await termsByQuote(db,quote.custom_request_quote_draft_id);
   const tiers=terms?await tiersByTerms(db,terms.custom_request_quote_batch_terms_id):[];
-  return {ok:true,request,quote,quote_required:false,terms,tiers,readiness:readiness(terms,tiers),quote_lines:await quoteLines(db,quote.custom_request_quote_draft_id),revisions:await revisions(db,quote.custom_request_quote_draft_id),scope_summary:termsSummary(request,terms,tiers),payment_execution:false,provider_execution:false,order_creation:false,unknown_cost_is_zero:false};
+  return {ok:true,request,quote,quote_required:false,terms,tiers,readiness:readiness(terms,tiers),quote_lines:await quoteLines(db,quote.custom_request_quote_draft_id),revisions:await revisions(db,quote.custom_request_quote_draft_id),scope_summary:termsSummary(request,terms,tiers),request_choices:await requestChoices(db),payment_execution:false,provider_execution:false,order_creation:false,unknown_cost_is_zero:false};
 }
 async function ensureTerms(db,request,quote,admin,body={}){
   let terms=await termsByQuote(db,quote.custom_request_quote_draft_id);
@@ -163,7 +171,7 @@ async function audit(context,admin,quote,action,details={}){
 export async function onRequestGet(context){
   const a=await access(context);if(a.error)return a.error;
   const u=new URL(context.request.url),requestId=id(u.searchParams.get('request_id')||u.searchParams.get('custom_request_id'));
-  if(!requestId)return json({ok:false,error:'Choose a Custom Request.'},400);
+  if(!requestId)return json({ok:true,request_choices:await requestChoices(a.db),quote:null,terms:null,tiers:[],readiness:{state:'choose_request',blockers:[],warnings:[]},payment_execution:false,provider_execution:false,order_creation:false,unknown_cost_is_zero:false});
   const data=await payload(a.db,requestId);return json(data,data.ok?200:404);
 }
 
