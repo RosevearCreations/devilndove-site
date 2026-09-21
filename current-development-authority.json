@@ -39,7 +39,7 @@
       "build": 224,
       "title": "Manufacturing-Era Closure & Next Roadmap",
       "authority": "release467-build224-manufacturing-era-closure-next-roadmap.json",
-      "state": "DEVELOPMENT_CLOSURE_CANDIDATE"
+      "state": "DEVELOPMENT_MEASURED_CLOSURE_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
     "closure_candidate_must_not_self_claim_final_proof": true,
@@ -135,5 +135,23 @@
   "next_build_state": "AUTHORIZED_IN_PROGRESS",
   "next_build_title": "Manufacturing-Era Closure & Next Roadmap",
   "promotion_state": "BUILD224_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BLOCKED_UNTIL_BUILD224_EXACT_MEASUREMENT"
+  "successor_scope_state": "PLANNED_FROM_EXACT_BUILD224_MEASUREMENT_BLOCKED_UNTIL_PRODUCTION_GREEN",
+  "measured_closure": {
+    "release": 467,
+    "build": 224,
+    "sha": "95fd199e4345a6e191996f5de7ef56057a0ffde8",
+    "tree_sha": "11ea923c36a0e2cd56c8319a545c63743ed4df41",
+    "workflow_run": 35641735469,
+    "artifact_id": 10658891143,
+    "d1_provider_rows_read": 8781,
+    "d1_rows_read_ceiling": 25000,
+    "mutation": "ZERO",
+    "successor_roadmap": "docs/operations/RELEASE_467_POST_MANUFACTURING_AUTONOMOUS_BUILDS_225_232.md"
+  },
+  "planned_successor": {
+    "first_build": 225,
+    "last_build": 232,
+    "state": "BLOCKED_UNTIL_BUILD224_PRODUCTION_GREEN",
+    "future_queue_exhausted": false
+  }
 }
