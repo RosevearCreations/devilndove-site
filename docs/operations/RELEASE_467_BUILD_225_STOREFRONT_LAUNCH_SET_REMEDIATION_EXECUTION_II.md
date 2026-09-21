@@ -35,7 +35,7 @@ Build 224 confirmed no movement from the Build 204 launch-set baseline:
 - 2 tracked zero-stock
 - 2 with unknown linked-resource cost
 
-## Implementation
+The execution campaign measures movement from the retained **43 / 1 / 42** baseline.\n\n## Implementation
 
 Build 225 reuses the existing Build 204 launch-set projection and Build 206 remediation campaign. No migration is added and no parallel mutation API is created.
 
