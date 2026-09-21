@@ -2,7 +2,7 @@
   "release": 467,
   "build": 216,
   "title": "Customer-Supplied Item Intake & Suitability Review",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build216-customer-supplied-item-suitability-review",
   "priority": "extend_existing_custom_work_triage_and_media_authorities_with_item_specific_ownership_condition_suitability_limitations_acknowledgement_and_post_work_evidence",
   "starting_point": {
@@ -87,6 +87,40 @@
   "next_build": {
     "build": 217,
     "title": "Production Cost Evidence v2",
-    "state": "BLOCKED_UNTIL_BUILD216_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_AFTER_BUILD216_PRODUCTION_GREEN"
+  },
+  "final_closure": {
+    "dev_sha": "2f9b0187110ffa0bd754eba1087f6ce56c23a0e4",
+    "tree_sha": "5bc30361efc9166f90aa8a7a4761646389325625",
+    "proofs": {
+      "system_gate_run": 35552576564,
+      "current_application_quality_run": 35552576510,
+      "it_admin_runtime_proof_run": 35552576480,
+      "branch_hygiene_run": 35552576583
+    },
+    "build_specific_proof_run": 35552576627,
+    "build_specific_proof_attempt": 1,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+  },
+  "production_checkpoint": {
+    "main_sha": "0e6312ed188c3423fdf32b18c892ff4d17c387bc",
+    "tree_sha": "5bc30361efc9166f90aa8a7a4761646389325625",
+    "production_pages_deploy_run": 35552841763,
+    "production_live_resource_integrity_run": 35552906462,
+    "products_browser_proof_run": 35552906457,
+    "products_route_proof_run": 35552906453,
+    "build_specific_proof_run": 35552841726,
+    "exact_production_url": "https://401aaffc.devilndove-site.pages.dev",
+    "deployment_id": "401aaffc-a186-4eb9-9c54-f7f045c45284",
+    "canonical_migrations": 16,
+    "business_counts": {
+      "users": 2,
+      "products": 45,
+      "site_item_inventory": 1041,
+      "orders": 0
+    },
+    "business_counts_preserved": true,
+    "foreign_key_violations": 0,
+    "state": "PRODUCTION_GREEN"
   }
 }
