@@ -65,7 +65,17 @@ jobs:
           npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --file scripts/release467_build224_measurement.sql > /tmp/build224-measurement.json
           python - <<'PY'
           import json,os
-          raw=json.load(open('/tmp/build224-measurement.json'))
+          payload_text=open('/tmp/build224-measurement.json',encoding='utf-8',errors='replace').read()
+decoder=json.JSONDecoder();raw=None
+for i,ch in enumerate(payload_text):
+  if ch not in '[{': continue
+  try:
+    candidate,_=decoder.raw_decode(payload_text[i:])
+    if isinstance(candidate,(list,dict)):
+      raw=candidate;break
+  except json.JSONDecodeError:
+    pass
+assert raw is not None,('Wrangler JSON payload not found',payload_text[-2000:])
           required=(
             'products_reviewed','ready_products','review_required_products','externally_blocked_products',
             'publicly_visible_products','media_ready_products','media_blocked_products','tracked_zero_stock_products',
