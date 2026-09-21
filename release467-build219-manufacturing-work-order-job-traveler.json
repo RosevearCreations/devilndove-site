@@ -2,7 +2,7 @@
   "release": 467,
   "build": 219,
   "title": "Manufacturing Work Order & Job Traveler",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build219-manufacturing-work-order-job-traveler",
   "priority": "generate_reviewed_versioned_internal_manufacturing_traveler_from_existing_authorities_without_parallel_source_editors",
   "starting_point": {
@@ -75,6 +75,42 @@
   "next_build": {
     "build": 220,
     "title": "Production Run, QA, Rework & Scrap Evidence",
-    "state": "BLOCKED_UNTIL_BUILD219_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_AFTER_BUILD219_PRODUCTION_GREEN"
+  },
+  "final_closure": {
+    "dev_sha": "d05924a6c395b9ff2d6cd667d335d690de995805",
+    "tree_sha": "c41a2fd13e69a517d258a2b7e8a5c6af47706e1b",
+    "proofs": {
+      "system_gate_run": 35559932353,
+      "current_application_quality_run": 35559932262,
+      "it_admin_runtime_proof_run": 35559932380,
+      "branch_hygiene_run": 35559932232
+    },
+    "build_specific_proof_run": 35559932358,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_development_url": "https://51612e13.devilndove-site.pages.dev",
+    "development_deploy_proof_artifact_id": 10621358188,
+    "development_regression_artifact_id": 10622191261
+  },
+  "production_checkpoint": {
+    "main_sha": "6442fc479a61ff1083567a40a46a2987aba12844",
+    "tree_sha": "c41a2fd13e69a517d258a2b7e8a5c6af47706e1b",
+    "production_pages_deploy_run": 35560514490,
+    "production_live_resource_integrity_run": 35560585150,
+    "products_browser_proof_run": 35560585205,
+    "products_route_proof_run": 35560585179,
+    "build_specific_proof_run": 35560514532,
+    "exact_production_url": "https://6e81f92e.devilndove-site.pages.dev",
+    "deployment_id": "6e81f92e-ce58-426e-b0e5-568504efe009",
+    "production_promotion_artifact_id": 10621673570,
+    "canonical_migrations": 18,
+    "business_counts": {
+      "users": 2,
+      "products": 45,
+      "site_item_inventory": 1041,
+      "orders": 0
+    },
+    "foreign_key_violations": 0,
+    "state": "PRODUCTION_GREEN"
   }
 }
