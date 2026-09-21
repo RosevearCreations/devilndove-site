@@ -1,0 +1,91 @@
+{
+  "release": 467,
+  "build": 220,
+  "title": "Production Run, QA, Rework & Scrap Evidence",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build220-production-run-qa-rework-scrap-evidence",
+  "priority": "record_reviewed_run_level_outcomes_quality_deviations_material_reconciliation_and_handoff_evidence_without_duplicate_inventory_or_finance_ledgers",
+  "starting_point": {
+    "development": {
+      "sha": "d05924a6c395b9ff2d6cd667d335d690de995805",
+      "tree": "c41a2fd13e69a517d258a2b7e8a5c6af47706e1b",
+      "system_gate_run": 35559932353,
+      "quality_run": 35559932262,
+      "it_admin_runtime_run": 35559932380,
+      "repository_hygiene_run": 35559932232,
+      "build_specific_proof_run": 35559932358,
+      "exact_development_url": "https://51612e13.devilndove-site.pages.dev",
+      "development_deploy_proof_artifact_id": 10621358188,
+      "development_regression_artifact_id": 10622191261,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "6442fc479a61ff1083567a40a46a2987aba12844",
+      "tree": "c41a2fd13e69a517d258a2b7e8a5c6af47706e1b",
+      "production_pages_deploy_run": 35560514490,
+      "production_live_resource_integrity_run": 35560585150,
+      "products_browser_proof_run": 35560585205,
+      "products_route_proof_run": 35560585179,
+      "build_specific_proof_run": 35560514532,
+      "exact_production_url": "https://6e81f92e.devilndove-site.pages.dev",
+      "deployment_id": "6e81f92e-ce58-426e-b0e5-568504efe009",
+      "production_promotion_artifact_id": 10621673570,
+      "canonical_migrations": 18,
+      "business_counts": {
+        "users": 2,
+        "products": 45,
+        "site_item_inventory": 1041,
+        "orders": 0
+      },
+      "foreign_key_violations": 0,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Record immutable reviewed production-run packets linked to the exact Build 219 traveler used.",
+    "Capture planned, actual, accepted, rework and scrap/failure quantities with reasoned deviations.",
+    "Capture per-operation start/completion timestamps, outcomes and checkpoint/deviation notes.",
+    "Capture reviewed QA checkpoints derived from the traveler and operation evidence requirements.",
+    "Reconcile a run to existing Inventory-owned Creative material postings by reference only.",
+    "Record resulting finished-inventory, Custom Work order-draft or order handoff evidence by reference only.",
+    "Correct run evidence through void-and-replace history rather than rewriting Inventory, order or Finance authorities."
+  ],
+  "safety": {
+    "canonical_schema_addition": true,
+    "request_time_ddl": false,
+    "parallel_inventory_ledger": false,
+    "parallel_finance_ledger": false,
+    "inventory_mutation": false,
+    "inventory_movement_creation": false,
+    "finance_mutation": false,
+    "accounting_posting": false,
+    "quote_mutation": false,
+    "order_mutation": false,
+    "source_authority_mutation": false,
+    "payment_execution": false,
+    "provider_execution": false,
+    "automatic_publication": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build220_gate.py",
+    "canonical_migration": "migrations/canonical/0019_release467_production_run_qa_rework_scrap_evidence.sql",
+    "run_table": "creative_project_production_runs",
+    "operation_table": "creative_project_production_run_operations",
+    "qa_table": "creative_project_production_run_qa_checks",
+    "material_evidence_table": "creative_project_production_run_material_evidence",
+    "handoff_table": "creative_project_production_run_handoffs",
+    "event_table": "creative_project_production_run_events",
+    "traveler_authority": "creative_project_job_travelers",
+    "inventory_authority": "creative_project_inventory_posts + site_item_inventory",
+    "order_handoff_authority": "custom_request_order_drafts + orders",
+    "admin_api": "functions/api/admin/production-run-evidence.js",
+    "admin_ui": "public/js/admin-production-run-evidence-build220.js",
+    "admin_surface": "/admin/custom-request/"
+  },
+  "next_build": {
+    "build": 221,
+    "title": "Workshop Knowledge Library Foundation",
+    "state": "BLOCKED_UNTIL_BUILD220_PRODUCTION_GREEN"
+  }
+}

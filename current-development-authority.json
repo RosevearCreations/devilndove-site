@@ -1,41 +1,41 @@
 {
   "release": 467,
-  "build": 219,
-  "title": "Manufacturing Work Order & Job Traveler",
+  "build": 220,
+  "title": "Production Run, QA, Rework & Scrap Evidence",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "068b99a9f4f5e32e4d3547a69a23549d9dcd1c1a",
-  "accepted_dev_tree_sha": "0bb22258a030eb529be3a7b5faf9ba12baa66f46",
+  "accepted_dev_sha": "d05924a6c395b9ff2d6cd667d335d690de995805",
+  "accepted_dev_tree_sha": "c41a2fd13e69a517d258a2b7e8a5c6af47706e1b",
   "acceptance": {
-    "system_gate_run": 35556952902,
-    "current_application_quality_run": 35556952735,
-    "it_admin_runtime_proof_run": 35556952815,
-    "branch_hygiene_run": 35556952797
+    "system_gate_run": 35559932353,
+    "current_application_quality_run": 35559932262,
+    "it_admin_runtime_proof_run": 35559932380,
+    "branch_hygiene_run": 35559932232
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 218,
-      "title": "Quote ↔ Production Cost ↔ Margin Guardrails",
-      "authority": "release467-build218-quote-production-cost-margin-guardrails.json",
-      "dev_sha": "068b99a9f4f5e32e4d3547a69a23549d9dcd1c1a",
-      "tree_sha": "0bb22258a030eb529be3a7b5faf9ba12baa66f46",
-      "proofs": {
-        "system_gate_run": 35556952902,
-        "current_application_quality_run": 35556952735,
-        "it_admin_runtime_proof_run": 35556952815,
-        "branch_hygiene_run": 35556952797
-      },
-      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
-      "exact_preview_deployment": true,
-      "build_specific_proof_run": 35556952722
-    },
-    "current_closure_candidate": {
-      "release": 467,
       "build": 219,
       "title": "Manufacturing Work Order & Job Traveler",
       "authority": "release467-build219-manufacturing-work-order-job-traveler.json",
+      "dev_sha": "d05924a6c395b9ff2d6cd667d335d690de995805",
+      "tree_sha": "c41a2fd13e69a517d258a2b7e8a5c6af47706e1b",
+      "proofs": {
+        "system_gate_run": 35559932353,
+        "current_application_quality_run": 35559932262,
+        "it_admin_runtime_proof_run": 35559932380,
+        "branch_hygiene_run": 35559932232
+      },
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+      "exact_preview_deployment": true,
+      "build_specific_proof_run": 35559932358
+    },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 220,
+      "title": "Production Run, QA, Rework & Scrap Evidence",
+      "authority": "release467-build220-production-run-qa-rework-scrap-evidence.json",
       "state": "DEVELOPMENT_CLOSURE_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -46,21 +46,22 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 218,
-    "title": "Quote ↔ Production Cost ↔ Margin Guardrails",
-    "authority": "release467-build218-quote-production-cost-margin-guardrails.json",
-    "main_sha": "24b59add984ea0be5acc3ebe3bf8ae558db747ee",
-    "tree_sha": "0bb22258a030eb529be3a7b5faf9ba12baa66f46",
-    "production_pages_deploy_run": 35557094198,
-    "production_live_resource_integrity_run": 35557137931,
-    "products_browser_proof_run": 35557137831,
-    "products_route_proof_run": 35557137932,
-    "build_specific_proof_run": 35557094182,
-    "exact_production_url": "https://b8567968.devilndove-site.pages.dev",
+    "build": 219,
+    "title": "Manufacturing Work Order & Job Traveler",
+    "authority": "release467-build219-manufacturing-work-order-job-traveler.json",
+    "main_sha": "6442fc479a61ff1083567a40a46a2987aba12844",
+    "tree_sha": "c41a2fd13e69a517d258a2b7e8a5c6af47706e1b",
+    "production_pages_deploy_run": 35560514490,
+    "production_live_resource_integrity_run": 35560585150,
+    "products_browser_proof_run": 35560585205,
+    "products_route_proof_run": 35560585179,
+    "build_specific_proof_run": 35560514532,
+    "exact_production_url": "https://6e81f92e.devilndove-site.pages.dev",
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build220-production-run-qa-rework-scrap-evidence.json",
     "release467-build219-manufacturing-work-order-job-traveler.json",
     "release467-build218-quote-production-cost-margin-guardrails.json",
     "release467-build217-production-cost-evidence-v2.json",
@@ -121,8 +122,8 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md",
-  "next_build": 220,
-  "next_build_state": "BLOCKED_UNTIL_BUILD219_PRODUCTION_GREEN",
-  "next_build_title": "Production Run, QA, Rework & Scrap Evidence",
-  "promotion_state": "BUILD219_CANDIDATE_NOT_YET_VERIFIED"
+  "next_build": 221,
+  "next_build_state": "BLOCKED_UNTIL_BUILD220_PRODUCTION_GREEN",
+  "next_build_title": "Workshop Knowledge Library Foundation",
+  "promotion_state": "BUILD220_CANDIDATE_NOT_YET_VERIFIED"
 }

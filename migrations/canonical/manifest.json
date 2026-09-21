@@ -139,6 +139,13 @@
       "release": 467,
       "description": "Add versioned reviewed manufacturing job-traveler snapshots and append-only traveler events over existing Custom Request, Creative Project, proof/sample, operation/resource, supplied-item and Packaging/handoff authorities.",
       "recovery": "Forward-only additive traveler evidence. Void or supersede traveler versions for logical rollback; source authorities remain untouched. Repair schema defects only with a new numbered migration and never edit this migration after Development application."
+    },
+    {
+      "version": 19,
+      "file": "0019_release467_production_run_qa_rework_scrap_evidence.sql",
+      "release": 467,
+      "description": "Add reviewed production-run outcome evidence with per-operation timestamps/outcomes, QA checks, links to existing Inventory postings, and finished-inventory/order handoff references while preserving Inventory and Finance/Accounting ownership.",
+      "recovery": "Forward-only additive evidence tables. Void incorrect reviewed runs and record a corrected run; do not rewrite Inventory movements, order authority or Finance/Accounting facts. Repair schema defects only with a new numbered migration."
     }
   ]
 }
