@@ -2,7 +2,7 @@
   "release": 467,
   "build": 223,
   "title": "Capability Case Studies, Workshop Journal & Search Richness",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build223-capability-case-studies-workshop-journal-search-richness",
   "priority": "project_only_already_published_content_release_evidence_into_public_case_study_capability_and_workshop_journal_discovery_without_new_publication_authority",
   "starting_point": {
@@ -79,9 +79,46 @@
     "production_run_authority": "creative_project_production_runs",
     "workshop_journal_projection": "public/js/workshop-journal-publications.js"
   },
+  "final_closure": {
+    "dev_sha": "f69deaa659520af182edc60dfc7cfefc7914d8f8",
+    "tree_sha": "23394309d09e765c5327fbf8715532faabc78d6a",
+    "proofs": {
+      "system_gate_run": 35636209245,
+      "current_application_quality_run": 35636209377,
+      "it_admin_runtime_proof_run": 35636209182,
+      "branch_hygiene_run": 35636209309
+    },
+    "build_specific_proof_run": 35636209003,
+    "exact_development_url": "https://f4dccb93.devilndove-site.pages.dev",
+    "development_deploy_artifact_id": 10656392380,
+    "development_regression_artifact_id": 10656452358,
+    "exact_dev_push_workflows": "39/39",
+    "canonical_migrations": 21,
+    "proof_state": "EXACT_BRANCH_HEAD_GREEN",
+    "ingested_by_build": 224
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 223,
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "704c407485c0fd0c3de785b696113d3cc7be5a27",
+    "tree_sha": "23394309d09e765c5327fbf8715532faabc78d6a",
+    "production_pages_deploy_run": 35636523017,
+    "production_live_resource_integrity_run": 35636619207,
+    "products_browser_proof_run": 35636619026,
+    "products_route_proof_run": 35636619136,
+    "build_specific_proof_run": 35636522959,
+    "exact_production_url": "https://445258ee.devilndove-site.pages.dev",
+    "deployment_id": "445258ee-503a-4860-9e3e-ebc3dd01696c",
+    "production_promotion_artifact_id": 10656248196,
+    "exact_main_sha_workflows": "33/33",
+    "canonical_migrations": 21,
+    "remote_d1_queries": 0,
+    "code_only": true
+  },
   "next_build": {
     "build": 224,
     "title": "Manufacturing-Era Closure & Next Roadmap",
-    "state": "BLOCKED_UNTIL_BUILD223_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_FROM_BUILD223_PRODUCTION_GREEN"
   }
 }

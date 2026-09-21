@@ -1,0 +1,166 @@
+name: Release 467 Build 224 Manufacturing Era Closure Next Roadmap
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'release467-build223-capability-case-studies-workshop-journal-search-richness.json'
+      - 'release467-build224-manufacturing-era-closure-next-roadmap.json'
+      - 'current-development-authority.json'
+      - 'scripts/release467_build223_gate.py'
+      - 'scripts/release467_build224_gate.py'
+      - 'scripts/release467_build224_measurement.sql'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_224_MANUFACTURING_ERA_CLOSURE_NEXT_ROADMAP.md'
+      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'admin/it/index.html'
+      - 'admin/deployment-preflight/index.html'
+      - 'admin/reliability/index.html'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+      - '.github/workflows/release467-build224-manufacturing-era-closure-next-roadmap.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - name: Validate Build 224 Manufacturing-Era Closure & Next Roadmap
+        run: python scripts/release467_build224_gate.py
+      - name: Retain Build 223 exact Production closure
+        run: python scripts/release467_build223_gate.py
+
+  development-manufacturing-era-measurement:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q '^database_id = "f34a741b-0000-45b0-9a96-6be08754d563"$' wrangler.toml
+      - name: Measure exact Development manufacturing-era closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "$(cat scripts/release467_build224_measurement.sql)" > /tmp/build224-measurement.json
+          python - <<'PY'
+          import json,os
+          raw=json.load(open('/tmp/build224-measurement.json'))
+          required=(
+            'products_reviewed','ready_products','review_required_products','externally_blocked_products',
+            'publicly_visible_products','media_ready_products','media_blocked_products','tracked_zero_stock_products',
+            'products_with_linked_resources','products_with_missing_linked_inventory','products_with_unknown_linked_cost','buyer_blocked_products',
+            'canonical_active_processes','public_reviewed_capability_profiles','public_profile_process_keys','active_processes_with_public_profile',
+            'active_custom_requests','custom_requests_with_triage','custom_requests_with_sufficient_triage','hybrid_projects',
+            'proof_versions_total','proofs_sent','proofs_approved','proofs_changed','manufacturing_lifecycles',
+            'lifecycles_with_prototype_evidence','lifecycles_with_approved_sample','reviewed_production_runs','completed_manufacturing_lifecycles',
+            'quote_drafts_total','quote_drafts_with_expected_cost_review','projects_with_actual_cost_evidence',
+            'projects_with_fully_reviewed_cost_evidence','projects_with_reviewed_known_direct_cost',
+            'production_run_qa_checks','qa_pass_checks','qa_rework_checks','qa_fail_checks',
+            'reviewed_runs_with_rework','reviewed_runs_with_scrap','reviewed_rework_quantity','reviewed_scrap_quantity',
+            'knowledge_entries_total','knowledge_entries_reviewed','approved_recipe_versions',
+            'published_workshop_journal_entries','published_project_case_studies',
+            'published_capability_backed_case_studies','published_hybrid_case_studies'
+          )
+          rows=[];reads=[]
+          def walk(v):
+            if isinstance(v,dict):
+              if all(k in v for k in required): rows.append(v)
+              meta=v.get('meta')
+              if isinstance(meta,dict) and meta.get('rows_read') is not None:
+                reads.append(int(meta.get('rows_read') or 0))
+              for x in v.values(): walk(x)
+            elif isinstance(v,list):
+              for x in v: walk(x)
+          walk(raw)
+          assert rows,raw
+          row=rows[0]
+          normalized={}
+          for k in required:
+            v=row.get(k)
+            if k in ('reviewed_rework_quantity','reviewed_scrap_quantity'):
+              normalized[k]=float(v or 0)
+            else:
+              normalized[k]=int(v or 0)
+          assert normalized['products_reviewed']<=240,normalized
+          assert normalized['ready_products']+normalized['review_required_products']+normalized['externally_blocked_products']==normalized['products_reviewed'],normalized
+          provider_rows_read=sum(reads)
+          d1_rows_read_ceiling=25000
+          assert provider_rows_read<=d1_rows_read_ceiling,('D1 rows_read budget exceeded',provider_rows_read,d1_rows_read_ceiling)
+          baseline={
+            'products_reviewed':43,'ready_products':1,'review_required_products':42,'externally_blocked_products':0,
+            'publicly_visible_products':40,'media_ready_products':3,'tracked_zero_stock_products':2,
+            'products_with_linked_resources':2,'products_with_missing_linked_inventory':0,
+            'products_with_unknown_linked_cost':2,'buyer_blocked_products':16
+          }
+          current={k:normalized[k] for k in baseline}
+          deltas={k:current[k]-baseline[k] for k in baseline}
+          def pct(n,d): return None if not d else round((100.0*n)/d,1)
+          coverage={
+            'public_process_profile_coverage_pct':pct(normalized['active_processes_with_public_profile'],normalized['canonical_active_processes']),
+            'custom_request_sufficient_triage_pct':pct(normalized['custom_requests_with_sufficient_triage'],normalized['active_custom_requests']),
+            'quote_expected_cost_review_coverage_pct':pct(normalized['quote_drafts_with_expected_cost_review'],normalized['quote_drafts_total']),
+            'actual_cost_fully_reviewed_pct':pct(normalized['projects_with_fully_reviewed_cost_evidence'],normalized['projects_with_actual_cost_evidence']),
+            'published_project_capability_backed_pct':pct(normalized['published_capability_backed_case_studies'],normalized['published_project_case_studies'])
+          }
+          signals={
+            'launch_review_work_remains':normalized['review_required_products']>0 or normalized['externally_blocked_products']>0,
+            'buyer_blockers_remain':normalized['buyer_blocked_products']>0,
+            'media_blockers_remain':normalized['media_blocked_products']>0,
+            'stock_blockers_remain':normalized['tracked_zero_stock_products']>0,
+            'linked_cost_unknowns_remain':normalized['products_with_unknown_linked_cost']>0,
+            'capability_profile_gaps_remain':normalized['active_processes_with_public_profile']<normalized['canonical_active_processes'],
+            'triage_adoption_gap_remains':normalized['custom_requests_with_sufficient_triage']<normalized['active_custom_requests'],
+            'quote_cost_coverage_gap_remains':normalized['quote_drafts_with_expected_cost_review']<normalized['quote_drafts_total'],
+            'production_cost_review_gap_remains':normalized['projects_with_fully_reviewed_cost_evidence']<normalized['projects_with_actual_cost_evidence'],
+            'knowledge_adoption_gap_remains':normalized['knowledge_entries_reviewed']<normalized['knowledge_entries_total'] or normalized['knowledge_entries_reviewed']==0,
+            'published_case_study_gap_remains':normalized['published_project_case_studies']==0 or normalized['published_capability_backed_case_studies']<normalized['published_project_case_studies']
+          }
+          closure={
+            'release':467,'build':224,'development_sha':os.environ.get('GITHUB_SHA',''),
+            'measurement_state':'EXACT_DEVELOPMENT_EVIDENCE_AVAILABLE',
+            'd1_provider_rows_read':provider_rows_read,'d1_rows_read_ceiling':d1_rows_read_ceiling,
+            'build204_baseline':baseline,'launch_set_current':current,'launch_set_deltas':deltas,
+            'measurements':normalized,'coverage_percentages':coverage,'roadmap_signals':signals,
+            'successor_scope_status':'EVIDENCE_AVAILABLE_FOR_REVIEW',
+            'mutations':{
+              'd1':'ZERO','r2':'ZERO','schema':'NONE','product_publication':'NONE','inventory':'NONE',
+              'custom_work':'NONE','creative_project':'NONE','knowledge':'NONE','content_publication':'NONE',
+              'payment_refund':'NONE','accounting':'NONE','provider_execution':'NONE','production_data_copy':'NONE'
+            }
+          }
+          json.dump(closure,open('/tmp/release467-build224-manufacturing-era-closure.json','w'),indent=2,sort_keys=True)
+          print('D1_PROVIDER_ROWS_READ=',provider_rows_read,'BUDGET=',d1_rows_read_ceiling)
+          print('BUILD 224 DEVELOPMENT MANUFACTURING ERA MEASUREMENT: PASS')
+          print(json.dumps({'launch_set_current':current,'launch_set_deltas':deltas,'measurements':normalized,'coverage_percentages':coverage,'roadmap_signals':signals},sort_keys=True))
+          print('D1 MUTATION: ZERO')
+          print('R2 MUTATION: ZERO')
+          print('SCHEMA MIGRATION: NONE')
+          print('SUCCESSOR SCOPE STATUS: EVIDENCE_AVAILABLE_FOR_REVIEW')
+          PY
+      - name: Upload exact-SHA Build 224 manufacturing-era closure artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release467-build224-manufacturing-era-closure-${{ github.sha }}
+          path: /tmp/release467-build224-manufacturing-era-closure.json
+          if-no-files-found: error

@@ -49,22 +49,12 @@ These counts are the baseline for the next block. They must not be silently rese
 
 ## Current execution checkpoint
 
-- Build 204: **complete and Production GREEN**.
-- Build 205: **complete and Production GREEN**.
-- Build 206: **complete and Production GREEN** at Production `16689f6eb5982bb72253aba677cfadf636c89ec9`, shared tree `4c71f152a75c401d3dfd2a5b83852a821dc82cb3`.
-- Build 207: **complete and Production GREEN** at Production `0937de81d2610788db5315b675d92c055c9db549`, shared tree `22a246a035f421856a705643c59ccb4171854d71`.
-- Build 208: **complete and Production GREEN** at Production `2d53ff1f65b0252e4c1812766e61577f530dccaa`, shared tree `7a3583f0f12275d5316b1fc63a3067bc3dd7d74a`.
-- Build 209: **complete and Production GREEN** at Production `9a1bd2b3d99edf69651a17e790866d3b8fa744d4`, shared tree `36bed0abebbb47b375277562355c3517d171b629`.
-- Build 210: **complete and Production GREEN** at Production `6e81942e7fd54157698b640252eed256b0411752`, shared tree `f8e85d5e91a9eee5a9c64901865efe24be1ad34e`.
-- Build 211: **complete and Production GREEN** at Production `41bf65727771c7c302c022d0944945a0802a909d`, shared tree `b80ccbfb772ccc4384e6fc0a2c53a62341e4caf7`.
-- Build 212: **complete and Production GREEN** at Production `9ea6c728a4df978d653be910388ea7081b800de9`, shared tree `f972119d10f98ea566173868915463ce31cdf22c`.
-- Build 213: **complete and Production GREEN** at Production `92df5745fc2d4311dfacfbd214c1032a34c46bb8`, shared tree `1108fecdeac23c69b8ea4d810c0375a0899ff469`.
-- Build 214: **complete and Production GREEN** at Production `6e3e8f04578998e16e1e8b8d27daad28b2332603`, shared tree `6792f4ed926e3c52b197dfe8f3cc68e074b92d62`.
-- Build 215: **complete and Production GREEN** at Production `c8366bde7fb2e7c673be656ff85265058a407c4a`, shared tree `f1facb7a27e22f3a129654713cc6dd109e3b6b16`.
-- Build 216: **current — Customer-Supplied Item Intake & Suitability Review**.
-- Build 217: **next only after Build 216 is exact-SHA Production GREEN**.
-- Builds 218–224: **planned**.
-- Build 207 extends the existing Build 156 process catalog through canonical migration 0008 and preserves reviewed Tool/Supply assignments.
+- Builds 204–223: **complete and Production GREEN**.
+- Build 223 final Production boundary: `704c407485c0fd0c3de785b696113d3cc7be5a27`, shared tree `23394309d09e765c5327fbf8715532faabc78d6a`.
+- Build 224: **current and final planned build — Manufacturing-Era Closure & Next Roadmap**.
+- Build 224 starts from the exact Build 223 Production-GREEN boundary and performs bounded read-only measurement only.
+- Future Build 225+ scope: **not pre-authorized**. It will be derived only after exact Build 224 Development measurement evidence exists.
+- Canonical migrations remain 21 through `0021_release467_project_knowledge_recipe_history.sql`.
 
 ---
 
@@ -618,8 +608,7 @@ Build 224 must not invent Build 225+ scope before those measurements exist.
 
 ## Current checkpoint
 
-- Build 214: **complete and Production GREEN** at `6e3e8f04578998e16e1e8b8d27daad28b2332603`.
-- Build 215: **complete and Production GREEN** at `c8366bde7fb2e7c673be656ff85265058a407c4a`.
-- Build 216: **current — Customer-Supplied Item Intake & Suitability Review**.
-- Build 217: **next only after Build 216 is exact-SHA Production GREEN**.
-- Builds 218–224: **planned**.
+- Build 223: **complete and Production GREEN** at `704c407485c0fd0c3de785b696113d3cc7be5a27`, shared tree `23394309d09e765c5327fbf8715532faabc78d6a`.
+- Build 224: **current and final planned build — Manufacturing-Era Closure & Next Roadmap**.
+- Successor roadmap: **blocked until exact Build 224 measurement evidence exists**.
+- The future queue is not declared exhausted while Build 224 is active.
