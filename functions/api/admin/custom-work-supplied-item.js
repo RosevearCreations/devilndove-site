@@ -158,7 +158,7 @@ export async function onRequestPost(context){
       item=await itemById(ctx.db,id(result?.meta?.last_row_id));
     }
     await audit(context,ctx.admin,item,'save_item',{request_id:requestId,workflow_status:item.workflow_status,ownership_status:item.ownership_status});
-    return json({ok:true,message:'Supplied-item intake record saved.',...await snapshot(ctx.db)});
+    return json({ok:true,message:'Supplied-item intake record saved.',saved_item_id:Number(item.custom_request_supplied_item_id),...await snapshot(ctx.db)});
   }
 
   if(action==='link_evidence'){
