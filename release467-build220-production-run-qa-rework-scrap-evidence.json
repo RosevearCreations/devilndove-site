@@ -2,7 +2,7 @@
   "release": 467,
   "build": 220,
   "title": "Production Run, QA, Rework & Scrap Evidence",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build220-production-run-qa-rework-scrap-evidence",
   "priority": "record_reviewed_run_level_outcomes_quality_deviations_material_reconciliation_and_handoff_evidence_without_duplicate_inventory_or_finance_ledgers",
   "starting_point": {
@@ -86,6 +86,43 @@
   "next_build": {
     "build": 221,
     "title": "Workshop Knowledge Library Foundation",
-    "state": "BLOCKED_UNTIL_BUILD220_PRODUCTION_GREEN"
+    "state": "UNBLOCKED_BY_BUILD220_PRODUCTION_GREEN"
+  },
+  "final_closure": {
+    "dev_sha": "79abf5b94a7080a25b2feb38bb10cfdde9dcf4c2",
+    "tree_sha": "b68b2c8efbf187da8c9414eb4a7e5b24405f5029",
+    "proofs": {
+      "system_gate_run": 35606184887,
+      "current_application_quality_run": 35606184822,
+      "it_admin_runtime_proof_run": 35606184538,
+      "branch_hygiene_run": 35606184707
+    },
+    "build_specific_proof_run": 35606184585,
+    "exact_development_url": "https://760b9a2e.devilndove-site.pages.dev",
+    "development_deploy_proof_artifact_id": 10640824804,
+    "development_regression_artifact_id": 10640814771,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 221
+  },
+  "production_checkpoint": {
+    "main_sha": "4579e9b91c0676d775f32859a0169ec749bf2194",
+    "tree_sha": "b68b2c8efbf187da8c9414eb4a7e5b24405f5029",
+    "production_pages_deploy_run": 35607469436,
+    "production_live_resource_integrity_run": 35607606049,
+    "products_browser_proof_run": 35607606000,
+    "products_route_proof_run": 35607605559,
+    "build_specific_proof_run": 35607469438,
+    "exact_production_url": "https://95102f07.devilndove-site.pages.dev",
+    "deployment_id": "95102f07-9211-4870-8130-e465c723e280",
+    "canonical_migrations": 19,
+    "business_counts": {
+      "users": 2,
+      "products": 45,
+      "site_item_inventory": 1041,
+      "orders": 0
+    },
+    "foreign_key_violations": 0,
+    "state": "PRODUCTION_GREEN",
+    "ingested_by_build": 221
   }
 }
