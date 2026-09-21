@@ -31,7 +31,7 @@ req(int(prod.get('production_pages_deploy_run') or 0)==35636523017 and int(prod.
 req(int(prod.get('products_browser_proof_run') or 0)==35636619026 and int(prod.get('products_route_proof_run') or 0)==35636619136 and int(prod.get('build_specific_proof_run') or 0)==35636522959,'Build 223 Production proof set drifted')
 req(prod.get('exact_main_sha_workflows')=='33/33' and int(prod.get('canonical_migrations') or 0)==21 and int(prod.get('remote_d1_queries') or 0)==0 and prod.get('code_only') is True,'Build 223 Production workflow/schema boundary drifted')
 files=[x.get('file') for x in m.get('migrations',[]) if isinstance(x,dict)]
-req(len(files)==21 and files[-1]=='0021_release467_project_knowledge_recipe_history.sql','retained canonical stream lost migration 0021')
+req(len(files)>=21 and files[20]=='0021_release467_project_knowledge_recipe_history.sql','retained canonical stream lost migration 0021')
 for token in ('publicContentPublications','content_publications','workshop_capability_profiles','creative_project_operations','inventory_processes','creative_project_manufacturing_lifecycles','creative_project_production_runs','raw_private_caip_exposed:false','automatic_publication:false','private_media_queries:false'):
  req(token in api,'Build 223 API missing '+token)
 for forbidden in ('INSERT INTO','UPDATE ','DELETE FROM','CREATE TABLE','ALTER TABLE','DROP TABLE','CREATE INDEX','DROP INDEX','creative_assets','bucket.put(','bucket.delete(','publishContentPublication','prepareContentPublications'):

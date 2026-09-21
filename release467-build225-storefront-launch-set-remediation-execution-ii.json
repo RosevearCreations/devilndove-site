@@ -2,7 +2,7 @@
   "release": 467,
   "build": 225,
   "title": "Storefront Launch-Set Remediation Execution II",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build225-storefront-launch-set-remediation-execution-ii",
   "priority": "execute_the_measured_storefront_blocker_set_through_existing_product_media_inventory_cost_and_launch_recheck_authorities_without_parallel_fact_mutation",
   "predecessor": {
@@ -104,7 +104,7 @@
   "next_build": {
     "build": 226,
     "title": "Capability Profile Coverage Closure",
-    "state": "BLOCKED_UNTIL_BUILD225_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_AFTER_BUILD225_PRODUCTION_GREEN"
   },
   "future_queue": {
     "first_build": 226,
@@ -135,5 +135,37 @@
       "production_promotion_artifact_id": 10659270575,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "e759f09d069170fe04092651f87fe727d8ecdc80",
+    "tree_sha": "ba60ec9147def32da518f1c993f0099244e858f1",
+    "proofs": {
+      "system_gate_run": 35647494752,
+      "current_application_quality_run": 35647494738,
+      "it_admin_runtime_proof_run": 35647495428,
+      "branch_hygiene_run": 35647494747
+    },
+    "build_specific_proof_run": 35647494740,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "exact_preview_url": "https://89ec1531.devilndove-site.pages.dev",
+    "development_deploy_artifact_id": 10660543056,
+    "development_regression_artifact_id": 10660727178
+  },
+  "production_checkpoint": {
+    "main_sha": "82e819c33ef9d90ee440b73cb47ded1450cf9c2e",
+    "tree_sha": "ba60ec9147def32da518f1c993f0099244e858f1",
+    "production_pages_deploy_run": 35647907774,
+    "production_live_resource_integrity_run": 35648076498,
+    "products_browser_proof_run": 35648079711,
+    "products_route_proof_run": 35648076097,
+    "build_specific_proof_run": 35647907634,
+    "exact_production_url": "https://2c35ccc8.devilndove-site.pages.dev",
+    "deployment_id": "2c35ccc8-4d61-4ec4-83a0-5732163115a5",
+    "production_promotion_artifact_id": 10660618060,
+    "exact_main_sha_workflows": "41/41",
+    "canonical_migrations": 21,
+    "code_only": true,
+    "remote_d1_queries": 0,
+    "state": "PRODUCTION_GREEN"
   }
 }
