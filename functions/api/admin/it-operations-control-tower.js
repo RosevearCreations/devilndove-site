@@ -1,29 +1,27 @@
-// Release 467 Build 220 — current release/restart authority over exact Build 219 GREEN predecessor.
+// Release 467 Build 221 — current release/restart authority over exact Build 220 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=220;
-const TITLE='Production Run, QA, Rework & Scrap Evidence';
-const AUTHORITY='release467-build220-production-run-qa-rework-scrap-evidence';
-const EVIDENCE_ID='r467-b219-d05924a6-35559932353-35560514490';
+const BUILD=221;
+const TITLE='Workshop Knowledge Library Foundation';
+const AUTHORITY='release467-build221-workshop-knowledge-library-foundation';
+const EVIDENCE_ID='r467-b220-79abf5b9-35606184887-35607469436';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:219,title:'Manufacturing Work Order & Job Traveler',state:'DEVELOPMENT_GREEN',
-  dev_sha:'d05924a6c395b9ff2d6cd667d335d690de995805',tree_sha:'c41a2fd13e69a517d258a2b7e8a5c6af47706e1b',
-  system_gate_run:35559932353,current_application_quality_run:35559932262,it_admin_runtime_proof_run:35559932380,
-  branch_hygiene_run:35559932232,build_specific_proof_run:35559932358,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:220,title:'Production Run, QA, Rework & Scrap Evidence',state:'DEVELOPMENT_GREEN',
+  dev_sha:'79abf5b94a7080a25b2feb38bb10cfdde9dcf4c2',tree_sha:'b68b2c8efbf187da8c9414eb4a7e5b24405f5029',
+  system_gate_run:35606184887,current_application_quality_run:35606184822,it_admin_runtime_proof_run:35606184538,
+  branch_hygiene_run:35606184707,build_specific_proof_run:35606184585,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:219,title:'Manufacturing Work Order & Job Traveler',state:'PRODUCTION_GREEN',
-  main_sha:'6442fc479a61ff1083567a40a46a2987aba12844',
-  tree_sha:'c41a2fd13e69a517d258a2b7e8a5c6af47706e1b',pages_deploy_run:35560514490,production_pages_deploy_run:35560514490,
-  production_live_resource_integrity_run:35560585150,products_browser_proof_run:35560585205,
-  products_route_proof_run:35560585179,build_specific_proof_run:35560514532,remote_d1_queries:0,
-  exact_production_url:'https://6e81f92e.devilndove-site.pages.dev'
+  release:467,build:220,title:'Production Run, QA, Rework & Scrap Evidence',state:'PRODUCTION_GREEN',
+  main_sha:'4579e9b91c0676d775f32859a0169ec749bf2194',tree_sha:'b68b2c8efbf187da8c9414eb4a7e5b24405f5029',
+  production_pages_deploy_run:35607469436,production_live_resource_integrity_run:35607606049,
+  products_browser_proof_run:35607606000,products_route_proof_run:35607605559,build_specific_proof_run:35607469438,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -33,9 +31,9 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 219 Manufacturing Work Order Job Traveler Proof'
+  'Release 467 Build 220 Production Run QA Rework Scrap Evidence Proof'
 ]);
-const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql']);
+const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
   {key:'paypal_sandbox',state:'HOLD_EXTERNAL'},
@@ -57,26 +55,26 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:219,title:'Manufacturing Work Order & Job Traveler',
+    release:467,build:220,title:'Production Run, QA, Rework & Scrap Evidence',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35559932353,current_application_quality_run:35559932262,
-      it_admin_runtime_proof_run:35559932380,branch_hygiene_run:35559932232,build219_proof_run:35559932358
+      system_gate_run:35606184887,current_application_quality_run:35606184822,
+      it_admin_runtime_proof_run:35606184538,branch_hygiene_run:35606184707,build220_proof_run:35606184585
     },
     production_proofs:{
-      production_pages_deploy_run:35560514490,production_live_resource_integrity_run:35560585150,
-      products_browser_proof_run:35560585205,products_route_proof_run:35560585179,build219_proof_run:35560514532
+      production_pages_deploy_run:35607469436,production_live_resource_integrity_run:35607606049,
+      products_browser_proof_run:35607606000,products_route_proof_run:35607605559,build220_proof_run:35607469438
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
     canonical_migration_authority:'migrations/canonical/manifest.json + scripts/d1_migrate.py',
-    canonical_migrations:CANONICAL_MIGRATIONS.slice(0,18),
+    canonical_migrations:CANONICAL_MIGRATIONS.slice(0,19),
     external_lanes:Object.fromEntries(EXTERNAL_POLICY.map((x)=>[x.key,x.state])),
     runtime_closure:{
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
-      background_polling:false,automatic_inventory_assignment:false,build219_manufacturing_job_traveler:true
+      background_polling:false,automatic_inventory_assignment:false,build220_production_run_qa_rework_scrap_evidence:true
     },
-    next_build:'Build 220 adds reviewed Production Run, QA, Rework & Scrap evidence over exact Build 219 proof.'
+    next_build:'Build 221 adds reviewed source-backed Workshop Knowledge Library evidence over exact Build 220 proof.'
   };
 }
 async function closurePack(){
@@ -89,22 +87,24 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 219 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 220 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
 - Canonical Development SHA: ${pack.sha}
 - Canonical Production main SHA: ${PRODUCTION.main_sha}
 - Shared tree: ${pack.tree_sha}
-- System Gate: 35559932353
-- Current Application Quality Proof: 35559932262
-- I.T. Admin Runtime Proof: 35559932380
-- Repository Branch Hygiene: 35559932232
-- Build 219 Development Proof: 35559932358
-- Production Pages Deploy: 35560514490
-- Production Live Resource Integrity: 35560585150
-- Build 219 Production Proof: 35560514532
-- Current candidate: Build 220 Production Run, QA, Rework & Scrap Evidence
+- System Gate: ${pack.development_proofs.system_gate_run}
+- Current Application Quality Proof: ${pack.development_proofs.current_application_quality_run}
+- I.T. Admin Runtime Proof: ${pack.development_proofs.it_admin_runtime_proof_run}
+- Repository Branch Hygiene: ${pack.development_proofs.branch_hygiene_run}
+- Build 220 Development Proof: ${pack.development_proofs.build220_proof_run}
+- Production Pages Deploy: ${pack.production_proofs.production_pages_deploy_run}
+- Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
+- Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
+- Product Route Proof: ${pack.production_proofs.products_route_proof_run}
+- Build 220 Production Proof: ${pack.production_proofs.build220_proof_run}
+- Current candidate: Build 221 Workshop Knowledge Library Foundation
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -123,7 +123,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:220,title:TITLE,authority:'release467-build220-production-run-qa-rework-scrap-evidence.json'},
+        current_closure_candidate:{release:467,build:221,title:TITLE,authority:'release467-build221-workshop-knowledge-library-foundation.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -142,12 +142,12 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 219 source is the exact last fully verified Development checkpoint.',
-      'Build 219 Production is GREEN on the identical source tree through canonical migration 0018.',
-      'Development proofs: System 35559932353, Quality 35559932262, I.T. 35559932380, Hygiene 35559932232.',
-      'Production proofs: Pages 35560514490, Live Resources 35560585150, Product Browser 35560585205, Product Route 35560585179.',
-      'Build 220 Production Run, QA, Rework & Scrap Evidence is the active Development closure candidate.',
-      'Canonical D1 migrations advance through 0001-0019 for Build 220 reviewed run evidence.'
+      'Build 220 source is the exact last fully verified Development checkpoint.',
+      'Build 220 Production is GREEN on the identical source tree through canonical migration 0019.',
+      'Development proofs: System 35606184887, Quality 35606184822, I.T. 35606184538, Hygiene 35606184707.',
+      'Production proofs: Pages 35607469436, Live Resources 35607606049, Product Browser 35607606000, Product Route 35607605559.',
+      'Build 221 Workshop Knowledge Library Foundation is the active Development closure candidate.',
+      'Canonical D1 migrations advance through 0001-0020 for Build 221 reviewed source-backed knowledge evidence.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,

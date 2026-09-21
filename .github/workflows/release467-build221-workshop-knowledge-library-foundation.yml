@@ -1,0 +1,40 @@
+name: Release 467 Build 221 Workshop Knowledge Library Foundation
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'migrations/canonical/manifest.json'
+      - 'migrations/canonical/0020_release467_workshop_knowledge_library_foundation.sql'
+      - 'functions/api/admin/workshop-knowledge-library.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'public/js/admin-workshop-knowledge-build221.js'
+      - 'admin/workshop-knowledge/index.html'
+      - 'admin/creative-process/index.html'
+      - 'current-development-authority.json'
+      - 'release467-build220-production-run-qa-rework-scrap-evidence.json'
+      - 'release467-build221-workshop-knowledge-library-foundation.json'
+      - 'docs/operations/RELEASE_467_BUILD_221_WORKSHOP_KNOWLEDGE_LIBRARY_FOUNDATION.md'
+      - 'scripts/release467_build220_gate.py'
+      - 'scripts/release467_build221_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'scripts/repository_forward_sanity.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Validate Build 221 Workshop Knowledge Library Foundation
+        run: python scripts/release467_build221_gate.py
+      - name: Retain Build 220 Production closure
+        run: python scripts/release467_build220_gate.py
