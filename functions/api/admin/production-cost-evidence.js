@@ -134,7 +134,7 @@ export async function onRequestPost(context){
         values.consumables_cost_cents,values.packaging_cost_cents,values.prototype_waste_cost_cents,values.rework_cost_cents,values.finishing_cost_cents,
         values.outside_service_cost_cents,values.failed_prototype_count,values.quantity_produced,values.quantity_accepted,notes||null,adminUser.user_id
       ).first();
-      await auditAdminAction(db,adminUser,'creative_project.production_cost_evidence.record',{creative_work_project_id:projectId,evidence_id:id(created?.creative_project_production_cost_evidence_id),cost_evidence_state:state});
+      await auditAdminAction(context.env,context.request,adminUser,{action_type:'creative_project.production_cost_evidence.record',target_type:'creative_work_project',target_id:projectId,details:{evidence_id:id(created?.creative_project_production_cost_evidence_id),cost_evidence_state:state}});
       return json({ok:true,message:'Production cost source evidence recorded. Finance/Accounting remains the profitability owner.',...(await loadSnapshot(db,projectId))});
     }
 
@@ -144,7 +144,7 @@ export async function onRequestPost(context){
       const changed=await db.prepare(`UPDATE creative_project_production_cost_evidence SET evidence_status='void',void_reason=?,voided_by_user_id=?,voided_at=CURRENT_TIMESTAMP
         WHERE creative_project_production_cost_evidence_id=? AND creative_work_project_id=? AND evidence_status='active'`).bind(reason,adminUser.user_id,evidenceId,projectId).run();
       if(Number(changed?.meta?.changes||0)!==1)throw Object.assign(new Error('Active evidence row was not found.'),{status:404});
-      await auditAdminAction(db,adminUser,'creative_project.production_cost_evidence.void',{creative_work_project_id:projectId,evidence_id:evidenceId,reason});
+      await auditAdminAction(context.env,context.request,adminUser,{action_type:'creative_project.production_cost_evidence.void',target_type:'creative_work_project',target_id:projectId,details:{evidence_id:evidenceId,reason}});
       return json({ok:true,message:'Evidence row voided; history was retained.',...(await loadSnapshot(db,projectId))});
     }
     throw new Error('Unsupported Build 217 action.');
