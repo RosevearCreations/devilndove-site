@@ -1,0 +1,80 @@
+{
+  "release": 467,
+  "build": 219,
+  "title": "Manufacturing Work Order & Job Traveler",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build219-manufacturing-work-order-job-traveler",
+  "priority": "generate_reviewed_versioned_internal_manufacturing_traveler_from_existing_authorities_without_parallel_source_editors",
+  "starting_point": {
+    "development": {
+      "sha": "068b99a9f4f5e32e4d3547a69a23549d9dcd1c1a",
+      "tree": "0bb22258a030eb529be3a7b5faf9ba12baa66f46",
+      "system_gate_run": 35556952902,
+      "quality_run": 35556952735,
+      "it_admin_runtime_run": 35556952815,
+      "repository_hygiene_run": 35556952797,
+      "build_specific_proof_run": 35556952722,
+      "exact_development_url": "https://8d25c91e.devilndove-site.pages.dev",
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "24b59add984ea0be5acc3ebe3bf8ae558db747ee",
+      "tree": "0bb22258a030eb529be3a7b5faf9ba12baa66f46",
+      "production_pages_deploy_run": 35557094198,
+      "production_live_resource_integrity_run": 35557137931,
+      "products_browser_proof_run": 35557137831,
+      "products_route_proof_run": 35557137932,
+      "build_specific_proof_run": 35557094182,
+      "exact_production_url": "https://b8567968.devilndove-site.pages.dev",
+      "deployment_id": "b8567968-da64-41b9-b378-965fd942ea6d",
+      "canonical_migrations": 17,
+      "business_counts_preserved": true,
+      "foreign_key_violations": 0,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Generate a reviewed internal traveler from the existing Custom Request and Creative Project manufacturing lifecycle.",
+    "Freeze exact approved proof/sample evidence, production quantity, ordered Build 212 operations, linked material/tool references and setup notes into versioned traveler evidence.",
+    "Carry customer wording/personalization, checkpoints, customer-supplied-item limitations, Packaging/handoff assumptions and an evidence-capture checklist.",
+    "Detect traveler staleness by comparing current generated source snapshot SHA-256 with the latest reviewed traveler version.",
+    "Keep Product, Inventory, Packaging, CAIP, quote, proof, Finance/Accounting, payment, provider and publication mutation in their existing authorities."
+  ],
+  "safety": {
+    "canonical_schema_addition": true,
+    "request_time_ddl": false,
+    "parallel_product_editor": false,
+    "parallel_inventory_editor": false,
+    "parallel_packaging_editor": false,
+    "parallel_caip_editor": false,
+    "parallel_quote_editor": false,
+    "parallel_finance_ledger": false,
+    "source_authority_mutation": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "accounting_posting": false,
+    "payment_execution": false,
+    "provider_execution": false,
+    "automatic_publication": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build219_gate.py",
+    "canonical_migration": "migrations/canonical/0018_release467_manufacturing_work_order_job_traveler.sql",
+    "traveler_table": "creative_project_job_travelers",
+    "traveler_event_table": "creative_project_job_traveler_events",
+    "lifecycle_authority": "creative_project_manufacturing_lifecycles",
+    "operation_authority": "creative_project_operations + creative_project_operation_resources",
+    "proof_sample_authority": "custom_request_proof_versions / creative_work_events",
+    "supplied_item_authority": "custom_request_supplied_items + reviews + acknowledgements",
+    "packaging_handoff_authority": "custom_request_quote_batch_terms + Packaging Studio",
+    "admin_api": "functions/api/admin/manufacturing-job-traveler.js",
+    "admin_ui": "public/js/admin-manufacturing-job-traveler-build219.js",
+    "admin_surface": "/admin/custom-request/"
+  },
+  "next_build": {
+    "build": 220,
+    "title": "Production Run, QA, Rework & Scrap Evidence",
+    "state": "BLOCKED_UNTIL_BUILD219_PRODUCTION_GREEN"
+  }
+}
