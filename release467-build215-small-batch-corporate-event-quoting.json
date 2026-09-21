@@ -2,7 +2,7 @@
   "release": 467,
   "build": 215,
   "title": "Small-Batch, Corporate & Event Quoting",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build215-small-batch-corporate-event-quoting",
   "priority": "extend_existing_custom_work_quote_drafts_revisions_and_line_items_for_small_batch_corporate_event_assumptions_without_parallel_quote_payment_or_order_authority",
   "starting_point": {
@@ -72,6 +72,40 @@
   "next_build": {
     "build": 216,
     "title": "Customer-Supplied Item Intake & Suitability Review",
-    "state": "BLOCKED_UNTIL_BUILD215_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_AFTER_BUILD215_PRODUCTION_GREEN"
+  },
+  "final_closure": {
+    "dev_sha": "825814b09a7c3f05c6fddc223ec8876ade0bbc35",
+    "tree_sha": "f1facb7a27e22f3a129654713cc6dd109e3b6b16",
+    "proofs": {
+      "system_gate_run": 35548513112,
+      "current_application_quality_run": 35548513093,
+      "it_admin_runtime_proof_run": 35548513139,
+      "branch_hygiene_run": 35548513160
+    },
+    "build_specific_proof_run": 35548513080,
+    "build_specific_proof_attempt": 1,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+  },
+  "production_checkpoint": {
+    "main_sha": "c8366bde7fb2e7c673be656ff85265058a407c4a",
+    "tree_sha": "f1facb7a27e22f3a129654713cc6dd109e3b6b16",
+    "production_pages_deploy_run": 35548670491,
+    "production_live_resource_integrity_run": 35548742503,
+    "products_browser_proof_run": 35548742488,
+    "products_route_proof_run": 35548742478,
+    "build_specific_proof_run": 35548670519,
+    "exact_production_url": "https://cec5e207.devilndove-site.pages.dev",
+    "deployment_id": "cec5e207-de9d-40f3-a9fe-3e6f25e67da6",
+    "canonical_migrations": 15,
+    "business_counts": {
+      "users": 2,
+      "products": 45,
+      "site_item_inventory": 1041,
+      "orders": 0
+    },
+    "business_counts_preserved": true,
+    "foreign_key_violations": 0,
+    "state": "PRODUCTION_GREEN"
   }
 }

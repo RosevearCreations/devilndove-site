@@ -1,0 +1,92 @@
+{
+  "release": 467,
+  "build": 216,
+  "title": "Customer-Supplied Item Intake & Suitability Review",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build216-customer-supplied-item-suitability-review",
+  "priority": "extend_existing_custom_work_triage_and_media_authorities_with_item_specific_ownership_condition_suitability_limitations_acknowledgement_and_post_work_evidence",
+  "starting_point": {
+    "development": {
+      "sha": "825814b09a7c3f05c6fddc223ec8876ade0bbc35",
+      "tree": "f1facb7a27e22f3a129654713cc6dd109e3b6b16",
+      "system_gate_run": 35548513112,
+      "quality_run": 35548513093,
+      "it_admin_runtime_run": 35548513139,
+      "repository_hygiene_run": 35548513160,
+      "build_specific_proof_run": 35548513080,
+      "build_specific_proof_attempt": 1,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "c8366bde7fb2e7c673be656ff85265058a407c4a",
+      "tree": "f1facb7a27e22f3a129654713cc6dd109e3b6b16",
+      "production_pages_deploy_run": 35548670491,
+      "production_live_resource_integrity_run": 35548742503,
+      "products_browser_proof_run": 35548742488,
+      "products_route_proof_run": 35548742478,
+      "build_specific_proof_run": 35548670519,
+      "exact_production_url": "https://cec5e207.devilndove-site.pages.dev",
+      "deployment_id": "cec5e207-de9d-40f3-a9fe-3e6f25e67da6",
+      "canonical_migrations": 15,
+      "business_counts": {
+        "users": 2,
+        "products": 45,
+        "site_item_inventory": 1041,
+        "orders": 0
+      },
+      "foreign_key_violations": 0,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Keep custom_requests.supplied_item as the request-level indicator and add one-or-more item-specific supplied-item records only for supplied-item work.",
+    "Keep custom_request_manufacturing_triage as the request-level feasibility/supplied-item triage authority; Build 216 final decisions must agree with its supplied_item_review_state.",
+    "Keep custom_request_reference_uploads and custom_order_stage_photos as media authorities; Build 216 stores evidence links only and never copies/deletes media.",
+    "Capture item identity, ownership/authority confirmation, material/finish known-or-unknown state, requested modification and condition-at-intake notes.",
+    "Record append-only item-specific suitability decisions: needs_review, accepted, accepted_with_limitations or declined, with explicit material/safety unknowns and limitations.",
+    "Require customer acknowledgement for accepted-with-limitations through a private token-protected acknowledgement surface.",
+    "Retain post-work condition evidence before a completed/returned/closed supplied item can be considered ready."
+  ],
+  "safety": {
+    "canonical_schema_addition": true,
+    "request_time_ddl": false,
+    "parallel_custom_request_system": false,
+    "parallel_triage_system": false,
+    "parallel_media_store": false,
+    "media_object_mutation": false,
+    "evidence_delete": false,
+    "automatic_material_compatibility_claim": false,
+    "automatic_safety_claim": false,
+    "automatic_feasibility_promise": false,
+    "automatic_production_start": false,
+    "inventory_mutation": false,
+    "payment_execution": false,
+    "provider_execution": false,
+    "real_order_creation": false,
+    "automatic_publication": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build216_gate.py",
+    "canonical_migration": "migrations/canonical/0016_release467_customer_supplied_item_suitability_review.sql",
+    "request_authority": "custom_requests",
+    "triage_authority": "custom_request_manufacturing_triage",
+    "intake_media_authority": "custom_request_reference_uploads",
+    "post_work_media_authority": "custom_order_stage_photos",
+    "item_extension": "custom_request_supplied_items",
+    "review_history": "custom_request_supplied_item_reviews",
+    "evidence_links": "custom_request_supplied_item_evidence",
+    "acknowledgement_authority": "custom_request_supplied_item_acknowledgements",
+    "admin_api": "functions/api/admin/custom-work-supplied-item.js",
+    "admin_ui": "public/js/admin-custom-work-supplied-item-build216.js",
+    "customer_ack_api": "functions/api/custom-request-supplied-item-acknowledgement.js",
+    "customer_ack_ui": "public/js/custom-request-supplied-item-acknowledgement.js",
+    "admin_surface": "/admin/custom-request/",
+    "customer_ack_surface": "/custom-request/supplied-item/"
+  },
+  "next_build": {
+    "build": 217,
+    "title": "Production Cost Evidence v2",
+    "state": "BLOCKED_UNTIL_BUILD216_PRODUCTION_GREEN"
+  }
+}

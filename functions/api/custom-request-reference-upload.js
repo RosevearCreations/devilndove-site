@@ -1,7 +1,7 @@
 // File: /functions/api/custom-request-reference-upload.js
 // Brief description: Public post-submit image/reference upload for custom requests. Uploads are token-bound to a submitted request and private until reviewed.
 
-import { hasCustomRequestReferenceUploadSchema } from "./_lib/publicRuntimeSchemaReadiness.js";
+import { hasCustomRequestReferenceUploadSchema, hasCustomRequestSuppliedItemSchema } from "./_lib/publicRuntimeSchemaReadiness.js";
 
 function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } }); }
 function clean(value, limit = 1000) { const text = String(value ?? '').replace(/\s+/g, ' ').trim(); return text.length > limit ? text.slice(0, limit).trim() : text; }
@@ -25,6 +25,7 @@ export async function onRequestPost(context) {
   const requestKey = clean(form.get('request_key'), 120);
   const uploadToken = clean(form.get('upload_token'), 160);
   const file = form.get('file');
+  const evidenceRole = clean(form.get('evidence_role'), 80).toLowerCase();
   if (!requestKey || !uploadToken) return json({ ok: false, error: 'Missing request upload token.' }, 400);
   if (!file || typeof file.arrayBuffer !== 'function') return json({ ok: false, error: 'Choose an image file first.' }, 400);
 
@@ -35,6 +36,14 @@ export async function onRequestPost(context) {
   const row = await db.prepare(`SELECT custom_request_id, request_key, upload_token, reference_upload_count, attachment_urls_json FROM custom_requests WHERE request_key=? LIMIT 1`).bind(requestKey).first().catch(() => null);
   if (!row || String(row.upload_token || '') !== uploadToken) return json({ ok: false, error: 'Upload token was not accepted for this request.' }, 403);
   if (Number(row.reference_upload_count || 0) >= 5) return json({ ok: false, error: 'Reference upload limit reached for this request.' }, 400);
+  let suppliedItem = null;
+  if (evidenceRole === 'intake_condition') {
+    if (!(await hasCustomRequestSuppliedItemSchema(db))) {
+      return json({ ok: false, error: 'custom_request_supplied_item_schema_unavailable', message: 'Supplied-item condition evidence is temporarily unavailable.' }, 503);
+    }
+    suppliedItem = await db.prepare(`SELECT custom_request_supplied_item_id FROM custom_request_supplied_items WHERE custom_request_id=? ORDER BY custom_request_supplied_item_id LIMIT 1`).bind(Number(row.custom_request_id || 0)).first().catch(() => null);
+    if (!suppliedItem?.custom_request_supplied_item_id) return json({ ok: false, error: 'supplied_item_not_found', message: 'No supplied-item intake record was found for this request.' }, 409);
+  }
 
   const mimeType = clean(file.type || 'application/octet-stream', 80).toLowerCase();
   if (!mimeType.startsWith('image/')) return json({ ok: false, error: 'Only image reference uploads are allowed.' }, 400);
@@ -50,11 +59,20 @@ export async function onRequestPost(context) {
 
   const uploadResult = await db.prepare(`INSERT INTO custom_request_reference_uploads (custom_request_id, request_key, public_url, object_key, original_filename, mime_type, file_size_bytes, reference_use_status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'private_review_only', CURRENT_TIMESTAMP)`).bind(Number(row.custom_request_id || 0), requestKey, publicUrl, objectKey, originalName, mimeType, fileSize).run().catch(() => null);
   const uploadId = Number(uploadResult?.meta?.last_row_id || 0) || null;
+  let suppliedItemEvidenceId = null;
+  if (evidenceRole === 'intake_condition') {
+    const evidenceInsert = await db.prepare(`INSERT INTO custom_request_supplied_item_evidence(
+      custom_request_supplied_item_id,custom_request_id,evidence_role,custom_request_reference_upload_id,evidence_note,created_at
+    ) VALUES(?,?, 'intake_condition',?, 'Customer-uploaded condition-at-intake photo.',CURRENT_TIMESTAMP)`).bind(
+      Number(suppliedItem.custom_request_supplied_item_id),Number(row.custom_request_id || 0),uploadId
+    ).run();
+    suppliedItemEvidenceId = Number(evidenceInsert?.meta?.last_row_id || 0) || null;
+  }
   await db.prepare(`INSERT INTO media_consent_records (consent_key, subject_label, source_type, source_id, media_url, consent_status, consent_scope, public_use_allowed, social_use_allowed, privacy_notes, created_at, updated_at) VALUES (?, ?, 'custom_request_reference_upload', ?, ?, 'requested', 'internal_only', 0, 0, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) ON CONFLICT(consent_key) DO UPDATE SET media_url=excluded.media_url, consent_status=CASE WHEN media_consent_records.consent_status='unknown' THEN 'requested' ELSE media_consent_records.consent_status END, privacy_notes=excluded.privacy_notes, updated_at=CURRENT_TIMESTAMP`).bind(consentKey(requestKey, objectKey), `Reference image for ${requestKey}`, uploadId ? String(uploadId) : objectKey, publicUrl, 'Customer-uploaded reference image. Keep private until consent scope is reviewed and explicitly approved.').run().catch(() => null);
 
   let links = []; try { links = JSON.parse(row.attachment_urls_json || '[]'); if (!Array.isArray(links)) links = []; } catch { links = []; }
   links.push(publicUrl);
   await db.prepare(`UPDATE custom_requests SET attachment_urls_json=?, reference_upload_count=COALESCE(reference_upload_count,0)+1, updated_at=CURRENT_TIMESTAMP WHERE custom_request_id=?`).bind(JSON.stringify(links.slice(0, 12)), Number(row.custom_request_id || 0)).run();
 
-  return json({ ok: true, message: 'Reference image uploaded for private review and consent review.', public_url: publicUrl, object_key: objectKey, consent_status: 'requested', consent_scope: 'internal_only' });
+  return json({ ok: true, message: evidenceRole === 'intake_condition' ? 'Condition photo uploaded and linked as private supplied-item intake evidence.' : 'Reference image uploaded for private review and consent review.', public_url: publicUrl, object_key: objectKey, consent_status: 'requested', consent_scope: 'internal_only', evidence_role: evidenceRole || 'reference', supplied_item_evidence_id: suppliedItemEvidenceId });
 }

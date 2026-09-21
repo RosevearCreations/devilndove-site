@@ -1,7 +1,7 @@
 // File: /functions/api/custom-request.js
 // Release 467 Build 210: structured Custom Work Intake 2.0 over the existing custom_requests authority.
 
-import { hasCustomRequestIntakeSchema } from "./_lib/publicRuntimeSchemaReadiness.js";
+import { hasCustomRequestIntakeSchema, hasCustomRequestSuppliedItemSchema } from "./_lib/publicRuntimeSchemaReadiness.js";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
@@ -71,6 +71,17 @@ export async function onRequestPost(context) {
   const organizationName = clean(body.organization_name || '', 240);
   const eventContextStructured = clean(body.event_context_structured || '', 500);
   const suppliedItem = flag(body.supplied_item);
+  const suppliedItemLabel = clean(body.supplied_item_label || body.product_interest || 'Customer-supplied item', 240);
+  const suppliedItemDescription = clean(body.supplied_item_description || '', 1200);
+  const suppliedOwnershipRaw = clean(body.supplied_item_ownership_status || 'unconfirmed', 40).toLowerCase();
+  const suppliedOwnershipStatus = ['unconfirmed','customer_owned','authorized_agent','unknown'].includes(suppliedOwnershipRaw) ? suppliedOwnershipRaw : 'unconfirmed';
+  const suppliedOwnershipNotes = clean(body.supplied_item_ownership_notes || '', 800);
+  const suppliedMaterialDescription = clean(body.supplied_item_material_description || body.desired_material || '', 600);
+  const suppliedMaterialStatus = suppliedMaterialDescription ? 'customer_stated' : 'unknown';
+  const suppliedFinishDescription = clean(body.supplied_item_finish_description || body.desired_finish || '', 600);
+  const suppliedFinishStatus = suppliedFinishDescription ? 'customer_stated' : 'unknown';
+  const suppliedRequestedModification = clean(body.supplied_item_requested_modification || '', 1200);
+  const suppliedConditionNotes = clean(body.supplied_item_condition_notes || '', 1200);
   const desiredMaterial = clean(body.desired_material || '', 500);
   const desiredFinish = clean(body.desired_finish || '', 500);
   const personalizationText = clean(body.personalization_text || '', 1000);
@@ -91,6 +102,9 @@ export async function onRequestPost(context) {
 
   if (!(await hasCustomRequestIntakeSchema(db))) {
     return json({ ok: false, error: 'custom_request_schema_unavailable', message: 'Custom requests are temporarily unavailable.', request_time_schema_mutation: false }, 503);
+  }
+  if (suppliedItem && !(await hasCustomRequestSuppliedItemSchema(db))) {
+    return json({ ok: false, error: 'custom_request_supplied_item_schema_unavailable', message: 'Customer-supplied item intake is temporarily unavailable.', request_time_schema_mutation: false }, 503);
   }
 
   if (requestedCapabilityKey) {
@@ -120,6 +134,20 @@ export async function onRequestPost(context) {
   ).run();
 
   const customRequestId = Number(insert?.meta?.last_row_id || 0) || null;
+  let suppliedItemId = null;
+  if (customRequestId && suppliedItem) {
+    const itemKey = `supitem_${requestKey}_1`;
+    const supplied = await db.prepare(`INSERT INTO custom_request_supplied_items(
+      custom_request_id,item_key,item_label,item_description,ownership_status,ownership_notes,
+      material_status,material_description,finish_status,finish_description,requested_modification,
+      intake_condition_notes,workflow_status,created_at,updated_at
+    ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?, 'intake',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(
+      customRequestId,itemKey,suppliedItemLabel || 'Customer-supplied item',suppliedItemDescription || null,
+      suppliedOwnershipStatus,suppliedOwnershipNotes || null,suppliedMaterialStatus,suppliedMaterialDescription || null,
+      suppliedFinishStatus,suppliedFinishDescription || null,suppliedRequestedModification || null,suppliedConditionNotes || null
+    ).run();
+    suppliedItemId = Number(supplied?.meta?.last_row_id || 0) || null;
+  }
   if (customRequestId && (requestType.includes('candle') || requestType.includes('soap') || scentProfile || waxOrBase || ingredientNotes)) {
     await db.prepare(`INSERT INTO custom_candle_soap_product_specs (custom_request_id, product_family, scent_profile, wax_or_base, colour_notes, batch_number, ingredient_notes, allergen_safety_notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`).bind(
       customRequestId, requestType.includes('soap') ? 'soap' : 'candle', scentProfile || null, waxOrBase || null, colourNotes || null,
@@ -127,5 +155,5 @@ export async function onRequestPost(context) {
     ).run().catch(() => null);
   }
 
-  return json({ ok: true, message: 'Custom request received. We will review it before replying.', request_key: requestKey, upload_token: uploadToken, reference_upload_limit: 5, custom_request_id: customRequestId, build: 210, structured_intake: true, capability_preference_recorded: Boolean(requestedCapabilityKey), help_choose_method: Boolean(helpChooseMethod), context_preserved_in_existing_message_authority: Boolean(contextLine), request_time_schema_mutation: false, automatic_order_created: false, automatic_quote_created: false, manufacturing_route_proposed: false, stock_reserved: false, provider_action_executed: false });
+  return json({ ok: true, message: 'Custom request received. We will review it before replying.', request_key: requestKey, upload_token: uploadToken, reference_upload_limit: 5, custom_request_id: customRequestId, supplied_item_id: suppliedItemId, build: suppliedItem ? 216 : 210, structured_intake: true, supplied_item_intake_recorded: Boolean(suppliedItemId), capability_preference_recorded: Boolean(requestedCapabilityKey), help_choose_method: Boolean(helpChooseMethod), context_preserved_in_existing_message_authority: Boolean(contextLine), request_time_schema_mutation: false, automatic_order_created: false, automatic_quote_created: false, manufacturing_route_proposed: false, stock_reserved: false, provider_action_executed: false });
 }
