@@ -1,0 +1,77 @@
+{
+  "release": 467,
+  "build": 215,
+  "title": "Small-Batch, Corporate & Event Quoting",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build215-small-batch-corporate-event-quoting",
+  "priority": "extend_existing_custom_work_quote_drafts_revisions_and_line_items_for_small_batch_corporate_event_assumptions_without_parallel_quote_payment_or_order_authority",
+  "starting_point": {
+    "development": {
+      "sha": "45a6bbb5ea01fa8b79ea9df331d87086ca5c7657",
+      "tree": "6792f4ed926e3c52b197dfe8f3cc68e074b92d62",
+      "system_gate_run": 35544979662,
+      "quality_run": 35544979675,
+      "it_admin_runtime_run": 35544979731,
+      "repository_hygiene_run": 35544979736,
+      "build_specific_proof_run": 35544979792,
+      "build_specific_proof_attempt": 1,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "6e3e8f04578998e16e1e8b8d27daad28b2332603",
+      "tree": "6792f4ed926e3c52b197dfe8f3cc68e074b92d62",
+      "production_pages_deploy_run": 35545124565,
+      "production_live_resource_integrity_run": 35545169766,
+      "products_browser_proof_run": 35545169753,
+      "products_route_proof_run": 35545169742,
+      "build_specific_proof_run": 35545124482,
+      "exact_production_url": "https://e817e044.devilndove-site.pages.dev",
+      "deployment_id": "e817e044-0606-4954-af6f-abca2411dd3e",
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Extend existing custom_request_quote_drafts with one structured batch/corporate terms record and ordered quantity tiers.",
+    "Keep custom_request_quote_line_items as customer-facing price-line authority; Build 215 owns only reserved setup/sample/packaging/selected-unit line types.",
+    "Append every Build 215 terms/tier change to existing custom_request_quote_revisions.",
+    "Expose requested/quoted quantity, setup charge, prototype/sample charge, tier assumptions, personalization scope, packaging, lead time, handoff and expiry on the existing private customer quote preview.",
+    "Carry Build 215 structured assumptions into existing accepted payment-request/order-draft source snapshots without executing payment or creating a real order.",
+    "Keep production-cost evidence explicitly unknown/partial/reviewed; unknown is never interpreted as zero."
+  ],
+  "safety": {
+    "canonical_schema_addition": true,
+    "request_time_ddl": false,
+    "parallel_quote_engine": false,
+    "parallel_revision_system": false,
+    "parallel_payment_system": false,
+    "parallel_order_system": false,
+    "payment_execution": false,
+    "provider_execution": false,
+    "real_order_creation": false,
+    "inventory_mutation": false,
+    "automatic_price_rewrite": false,
+    "unknown_cost_is_zero": false,
+    "automatic_publication": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build215_gate.py",
+    "canonical_migration": "migrations/canonical/0015_release467_small_batch_corporate_event_quoting.sql",
+    "quote_authority": "custom_request_quote_drafts",
+    "line_item_authority": "custom_request_quote_line_items",
+    "revision_authority": "custom_request_quote_revisions",
+    "terms_extension": "custom_request_quote_batch_terms",
+    "quantity_tiers": "custom_request_quote_quantity_tiers",
+    "admin_api": "functions/api/admin/custom-work-batch-quote.js",
+    "admin_ui": "public/js/admin-custom-work-batch-quote-build215.js",
+    "customer_quote_api": "functions/api/custom-request-quote.js",
+    "customer_quote_ui": "public/js/custom-request-quote-preview.js",
+    "admin_surface": "/admin/custom-request/",
+    "customer_surface": "/custom-request/quote/"
+  },
+  "next_build": {
+    "build": 216,
+    "title": "Customer-Supplied Item Intake & Suitability Review",
+    "state": "BLOCKED_UNTIL_BUILD215_PRODUCTION_GREEN"
+  }
+}

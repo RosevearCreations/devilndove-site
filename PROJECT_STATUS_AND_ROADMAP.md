@@ -2,11 +2,11 @@
 
 ## Current checkpoint
 
-Build 213 **Digital Proof & Customer Approval** is Production GREEN at `92df5745fc2d4311dfacfbd214c1032a34c46bb8`, exact tree `1108fecdeac23c69b8ea4d810c0375a0899ff469`, with Development `3292ac5c20780e23bd9d5ae593368e82b6e4826b` and Production Pages/Live proofs `35534081643` / `35534292686`.
+Build 214 **Prototype → Sample → Production Run** is Production GREEN at `6e3e8f04578998e16e1e8b8d27daad28b2332603`, exact tree `6792f4ed926e3c52b197dfe8f3cc68e074b92d62`, with Development `45a6bbb5ea01fa8b79ea9df331d87086ca5c7657` and Production Pages/Live proofs `35545124565` / `35545169766`.
 
-## Active Build 214
+## Active Build 215
 
-**Prototype → Sample → Production Run** extends existing Creative Process and Custom Work through canonical migration 0014. One linked lifecycle records concept, prototype, failed/rework, sample candidate, approved sample, production authorization, production run, QA/rework and completed maturity. Approved sample requires exact Build 213 proof or Creative Process event evidence. Production authorization is explicit evidence only. Build 215 remains blocked until exact-SHA Production GREEN.
+**Small-Batch, Corporate & Event Quoting** extends the existing Custom Work quote draft/revision/line-item authority through canonical migration 0015. Structured terms cover requested/quoted quantity, tiers, setup/sample charges, personalization, packaging, lead-time, handoff, expiry and production-cost evidence state. Existing private quote sharing, revisions, payment gates and order drafts remain authoritative. Build 216 remains blocked until exact-SHA Production GREEN.
 
 ## Permanent boundaries
 

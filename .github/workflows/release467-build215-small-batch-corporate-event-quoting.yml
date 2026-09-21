@@ -1,0 +1,41 @@
+name: Release 467 Build 215 Small-Batch Corporate Event Quoting
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'migrations/canonical/0015_release467_small_batch_corporate_event_quoting.sql'
+      - 'migrations/canonical/manifest.json'
+      - 'functions/api/admin/custom-work-batch-quote.js'
+      - 'public/js/admin-custom-work-batch-quote-build215.js'
+      - 'functions/api/admin/custom-requests.js'
+      - 'functions/api/custom-request-quote.js'
+      - 'public/js/custom-request-quote-preview.js'
+      - 'admin/custom-request/index.html'
+      - 'current-development-authority.json'
+      - 'release467-build214-prototype-sample-production-run.json'
+      - 'release467-build215-small-batch-corporate-event-quoting.json'
+      - 'docs/operations/RELEASE_467_BUILD_215_SMALL_BATCH_CORPORATE_EVENT_QUOTING.md'
+      - 'scripts/release467_build214_gate.py'
+      - 'scripts/release467_build215_gate.py'
+      - 'scripts/repository_forward_sanity.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'scripts/current_deployment_preflight_truth_gate.py'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - '.github/workflows/release467-build215-small-batch-corporate-event-quoting.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.x'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - run: python scripts/release467_build215_gate.py
+      - run: python scripts/release467_build214_gate.py
