@@ -1,6 +1,6 @@
 // Release 467 Build 217 — Production Cost Evidence v2 UI.
 (()=>{
-  const ENDPOINT='/api/admin/production-cost-evidence',state={data:null,projectId:0};
+  const ENDPOINT='/api/admin/production-cost-evidence',state={snapshot:null,projectId:0};
   const $=id=>document.getElementById(id);
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const num=v=>Number(v||0)||0;
@@ -10,13 +10,13 @@
   const cents=v=>{if(v===null||v===undefined||String(v).trim()==='')return null;const n=Number(v);return Number.isFinite(n)&&n>=0?Math.round(n*100):null;};
 
   function projectOptions(){
-    return '<option value="">Choose a Creative Project…</option>'+((state.data?.projects||[]).map(p=>`<option value="${num(p.creative_work_project_id)}" ${num(p.creative_work_project_id)===state.projectId?'selected':''}>${esc(p.project_title||p.project_key)} — ${esc(p.project_status||'')}</option>`).join(''));
+    return '<option value="">Choose a Creative Project…</option>'+((state.snapshot?.projects||[]).map(p=>`<option value="${num(p.creative_work_project_id)}" ${num(p.creative_work_project_id)===state.projectId?'selected':''}>${esc(p.project_title||p.project_key)} — ${esc(p.project_status||'')}</option>`).join(''));
   }
   function operationOptions(){
-    return '<option value="">Project-wide / not operation-specific</option>'+((state.data?.operations||[]).map(o=>`<option value="${num(o.creative_project_operation_id)}">#${num(o.operation_order)} ${esc(o.operation_title||o.process_name||'operation')}</option>`).join(''));
+    return '<option value="">Project-wide / not operation-specific</option>'+((state.snapshot?.operations||[]).map(o=>`<option value="${num(o.creative_project_operation_id)}">#${num(o.operation_order)} ${esc(o.operation_title||o.process_name||'operation')}</option>`).join(''));
   }
   function summary(){
-    const s=state.data?.summary||{};
+    const s=state.snapshot?.summary||{};
     return `<div class="grid cols-3" style="gap:10px">
       <div class="card"><strong>${esc(s.active_evidence_rows||0)}</strong><div class="small">active evidence rows</div></div>
       <div class="card"><strong>${esc(s.cost_evidence_state||'unknown')}</strong><div class="small">cost evidence state</div></div>
@@ -53,8 +53,8 @@
     </form>`;
   }
   function evidence(){
-    const ops=new Map((state.data?.operations||[]).map(o=>[num(o.creative_project_operation_id),o]));
-    const rows=state.data?.evidence||[];
+    const ops=new Map((state.snapshot?.operations||[]).map(o=>[num(o.creative_project_operation_id),o]));
+    const rows=state.snapshot?.evidence||[];
     if(!rows.length)return '<div class="card"><p class="small">No Production Cost Evidence v2 rows yet.</p></div>';
     return rows.map(r=>{
       const op=ops.get(num(r.creative_project_operation_id));
@@ -71,12 +71,12 @@
     }).join('');
   }
   function materials(){
-    const rows=state.data?.inventory_material_usage||[];
+    const rows=state.snapshot?.inventory_material_usage||[];
     if(!rows.length)return '<p class="small">No posted Inventory material usage is linked to this project yet.</p>';
     return '<div style="display:grid;gap:8px">'+rows.map(r=>`<div class="card" style="margin:0"><strong>${esc(r.item_name||'Inventory item')}</strong><div class="small">${esc(r.usage_quantity_consumed??r.stock_quantity_consumed??'—')} ${esc(r.posted_usage_unit_label||'')} • cost evidence ${esc(money(r.allocated_cost_cents))}</div></div>`).join('')+'</div>';
   }
   function render(){
-    const host=mount();if(!host)return;const p=state.data?.project;
+    const host=mount();if(!host)return;const p=state.snapshot?.project;
     host.innerHTML=`<section class="card" id="production-cost-evidence-v2" style="margin-top:18px">
       <p class="eyebrow">Release 467 • Build 217</p><h2 style="margin-top:0">Production Cost Evidence v2</h2>
       <p class="small">Manufacturing source evidence for setup, machine time, hands-on labour, consumables, finishing, failed prototypes, waste, rework and actual quantities. Finance/Accounting remains the profitability owner.</p>
@@ -90,7 +90,7 @@
     try{
       const r=await apiFetch(ENDPOINT+'?'+qs.toString(),{cache:'no-store'}),d=await r.json();
       if(!r.ok||!d.ok)throw new Error(d.error||'Build 217 load failed.');
-      state.data=d;state.projectId=num(d.project?.creative_work_project_id||projectId);render();
+      state.snapshot=d;state.projectId=num(d.project?.creative_work_project_id||projectId);render();
     }catch(e){
       if(mount())mount().innerHTML='<section class="card" style="margin-top:18px"><h2>Production Cost Evidence v2 unavailable</h2><p class="small">'+esc(e.message||e)+'</p></section>';
     }
@@ -99,7 +99,7 @@
     try{
       const r=await apiFetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({project_id:state.projectId,...payload})}),d=await r.json();
       if(!r.ok||!d.ok)throw new Error(d.error||'Save failed.');
-      state.data={...state.data,...d};render();
+      state.snapshot={...state.snapshot,...d};render();
     }catch(e){
       const m=$('productionCostEvidence217Message');if(m)m.textContent=e.message||'Save failed.';
     }
