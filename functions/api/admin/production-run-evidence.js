@@ -207,6 +207,7 @@ async function recordRun(context,ctx,lifecycle,current,body){
     return {operationId,outcome,opStart,opEnd,checkpoint,opDeviation};
   });
   const templates=new Map(current.qa_templates.map((x)=>[String(x.checkpoint_key),x]));
+  if(q.actual>0&&!ops.some((o)=>o.outcome!=='not_run'))throw new Error('A run with actual output requires at least one performed operation with start/completion timestamps.');
   const qaInput=Array.isArray(body.qa_checks)?body.qa_checks.slice(0,80):[];
   const qaKeys=new Set(qaInput.map((x)=>String(x.checkpoint_key||'')));
   if(templates.size&&([...templates.keys()].some((x)=>!qaKeys.has(x))||qaKeys.size!==templates.size))throw new Error('Record a QA status for every current traveler/operation checkpoint.');
