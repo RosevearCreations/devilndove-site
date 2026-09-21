@@ -47,7 +47,8 @@ const CUSTOM_SUPPLIED_ITEM_COLUMNS = [
 const CUSTOM_SUPPLIED_ITEM_EVIDENCE_COLUMNS = [
   "custom_request_supplied_item_evidence_id", "custom_request_supplied_item_id", "custom_request_id",
   "evidence_role", "custom_request_reference_upload_id", "custom_order_stage_photo_id",
-  "evidence_note", "created_by_user_id", "created_at",
+  "evidence_note", "evidence_status", "void_reason", "voided_by_user_id", "voided_at",
+  "created_by_user_id", "created_at",
 ];
 
 const PRODUCT_INTEREST_COLUMNS = [
