@@ -60,9 +60,10 @@ These counts are the baseline for the next block. They must not be silently rese
 - Build 212: **complete and Production GREEN** at Production `9ea6c728a4df978d653be910388ea7081b800de9`, shared tree `f972119d10f98ea566173868915463ce31cdf22c`.
 - Build 213: **complete and Production GREEN** at Production `92df5745fc2d4311dfacfbd214c1032a34c46bb8`, shared tree `1108fecdeac23c69b8ea4d810c0375a0899ff469`.
 - Build 214: **complete and Production GREEN** at Production `6e3e8f04578998e16e1e8b8d27daad28b2332603`, shared tree `6792f4ed926e3c52b197dfe8f3cc68e074b92d62`.
-- Build 215: **current — Small-Batch, Corporate & Event Quoting**.
-- Build 216: **next only after Build 215 is exact-SHA Production GREEN**.
-- Builds 217–224: **planned**.
+- Build 215: **complete and Production GREEN** at Production `c8366bde7fb2e7c673be656ff85265058a407c4a`, shared tree `f1facb7a27e22f3a129654713cc6dd109e3b6b16`.
+- Build 216: **current — Customer-Supplied Item Intake & Suitability Review**.
+- Build 217: **next only after Build 216 is exact-SHA Production GREEN**.
+- Builds 218–224: **planned**.
 - Build 207 extends the existing Build 156 process catalog through canonical migration 0008 and preserves reviewed Tool/Supply assignments.
 
 ---
@@ -618,6 +619,7 @@ Build 224 must not invent Build 225+ scope before those measurements exist.
 ## Current checkpoint
 
 - Build 214: **complete and Production GREEN** at `6e3e8f04578998e16e1e8b8d27daad28b2332603`.
-- Build 215: **current — Small-Batch, Corporate & Event Quoting**.
-- Build 216: **next only after Build 215 is exact-SHA Production GREEN**.
-- Builds 217–224: **planned**.
+- Build 215: **complete and Production GREEN** at `c8366bde7fb2e7c673be656ff85265058a407c4a`.
+- Build 216: **current — Customer-Supplied Item Intake & Suitability Review**.
+- Build 217: **next only after Build 216 is exact-SHA Production GREEN**.
+- Builds 218–224: **planned**.
