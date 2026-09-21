@@ -37,9 +37,9 @@ Build 223 **Capability Case Studies, Workshop Journal & Search Richness** is the
 - Production deployment ID: `445258ee-503a-4860-9e3e-ebc3dd01696c`
 - Canonical migrations: `21`
 
-Build 224 **Manufacturing-Era Closure & Next Roadmap** is the active candidate. It adds no schema migration and performs bounded read-only measurement of the existing Build 205–223 authorities. The Development proof is capped at 25,000 provider-metered D1 rows, with zero D1/R2/business-data mutation. Build 225+ scope is not authorized until exact Build 224 measurement evidence exists.
+Build 224 **Manufacturing-Era Closure & Next Roadmap** is the active measured candidate. Exact Development measurement is GREEN at `95fd199e4345a6e191996f5de7ef56057a0ffde8` / tree `11ea923c36a0e2cd56c8319a545c63743ed4df41`, workflow `35641735469`, artifact `10658891143`, with **8,781 / 25,000** provider-metered D1 rows and zero D1/R2/schema mutation. The evidence-derived successor roadmap plans Builds **225–232**, all blocked until Build 224 is exact-SHA Production GREEN.
 
-Resolve live `dev` and `main` first. Successor roadmap scope is derived only after Build 224 exact Development measurement.
+Resolve live `dev` and `main` first. The successor roadmap is `docs/operations/RELEASE_467_POST_MANUFACTURING_AUTONOMOUS_BUILDS_225_232.md`; Build 225 may begin only after Build 224 exact-SHA Production GREEN.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
 
 ## Retained historical provenance — Build 171
