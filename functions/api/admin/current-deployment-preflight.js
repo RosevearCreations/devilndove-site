@@ -1,23 +1,23 @@
-// Release 467 Build 221 — current read-only Deployment Preflight over exact Build 220 GREEN predecessor.
+// Release 467 Build 222 — current read-only Deployment Preflight over exact Build 221 GREEN predecessor.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=221;
-const TITLE='Workshop Knowledge Library Foundation';
-const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql']);
-const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 220 Production Run QA Rework Scrap Evidence Proof']);
+const BUILD=222;
+const TITLE='Project-to-Knowledge Promotion & Recipe History';
+const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql']);
+const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 221 Workshop Knowledge Library Foundation Proof']);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:220,title:'Production Run, QA, Rework & Scrap Evidence',state:'DEVELOPMENT_GREEN',
-  dev_sha:'79abf5b94a7080a25b2feb38bb10cfdde9dcf4c2',tree_sha:'b68b2c8efbf187da8c9414eb4a7e5b24405f5029',
-  system_gate_run:35606184887,current_application_quality_run:35606184822,it_admin_runtime_proof_run:35606184538,
-  branch_hygiene_run:35606184707,build_specific_proof_run:35606184585,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',exact_preview_deployment:true
+  release:467,build:221,title:'Workshop Knowledge Library Foundation',state:'DEVELOPMENT_GREEN',
+  dev_sha:'eceee6897410295b029f08ac728b159cf7559823',tree_sha:'321514649fa70ba2ccdc4961ca69eba08eef6962',
+  system_gate_run:35619862172,current_application_quality_run:35619862224,it_admin_runtime_proof_run:35619862189,
+  branch_hygiene_run:35619862154,build_specific_proof_run:35619862180,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:220,title:'Production Run, QA, Rework & Scrap Evidence',state:'PRODUCTION_GREEN',
-  main_sha:'4579e9b91c0676d775f32859a0169ec749bf2194',tree_sha:'b68b2c8efbf187da8c9414eb4a7e5b24405f5029',
-  production_pages_deploy_run:35607469436,production_live_resource_integrity_run:35607606049,
-  products_browser_proof_run:35607606000,products_route_proof_run:35607605559,build_specific_proof_run:35607469438
+  release:467,build:221,title:'Workshop Knowledge Library Foundation',state:'PRODUCTION_GREEN',
+  main_sha:'44cdd9aef639fc58343e0810a9a351986dd39052',tree_sha:'321514649fa70ba2ccdc4961ca69eba08eef6962',
+  production_pages_deploy_run:35620308181,production_live_resource_integrity_run:35620434376,
+  products_browser_proof_run:35620434354,products_route_proof_run:35620434404,build_specific_proof_run:35620308104
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true});
 const rows=(r)=>Array.isArray(r?.results)?r.results:[];
@@ -40,15 +40,15 @@ export async function onRequestGet(context){
   const db=getDb(context.env);if(!db)return jsonResponse({ok:false,release:RELEASE,build:BUILD,error:'Database binding is not configured.'},503,{'Cache-Control':'no-store'});
   const truth=await canonicalMigrationTruth(db);
   const checks=[
-    {status:truth.native_applied_count===20?'pass':'fail',code:'canonical_native_ledger',label:'Canonical D1 migration ledger',detail:truth.native_applied_count+'/20 canonical migrations recorded.'},
-    {status:truth.proof_recorded_count===20?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:truth.proof_recorded_count+'/20 proof rows recorded.'},
+    {status:truth.native_applied_count===21?'pass':'fail',code:'canonical_native_ledger',label:'Canonical D1 migration ledger',detail:truth.native_applied_count+'/21 canonical migrations recorded.'},
+    {status:truth.proof_recorded_count===21?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:truth.proof_recorded_count+'/21 proof rows recorded.'},
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:truth.foreign_key_violations+' violation(s).'},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
-    {status:'pass',code:'build220_verified_baseline',label:'Build 220 verified restart baseline',detail:'Build 220 Production Run, QA, Rework & Scrap Evidence is exact-SHA Production GREEN.'},
-    {status:'review',code:'build221_workshop_knowledge_library',label:'Build 221 Workshop Knowledge Library Foundation',detail:'Additive migration 0020 and reviewed source-backed knowledge must pass exact-head Development proof before Production promotion.'}
+    {status:'pass',code:'build221_verified_baseline',label:'Build 221 verified restart baseline',detail:'Build 221 Workshop Knowledge Library Foundation is exact-SHA Production GREEN.'},
+    {status:'review',code:'build222_project_knowledge_recipe_history',label:'Build 222 Project-to-Knowledge Promotion & Recipe History',detail:'Additive migration 0021 and versioned project-to-knowledge promotion must pass exact-head Development proof before Production promotion.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
-  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:221,title:TITLE,authority:'release467-build221-workshop-knowledge-library-foundation.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 220 is the exact fully verified Development and Production restart boundary.','Build 221 Workshop Knowledge Library Foundation is the active Development closure candidate.','Canonical migrations advance through 0020; source authorities, Inventory movement, media copy and Finance/Accounting mutation remain closed.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
+  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:222,title:TITLE,authority:'release467-build222-project-knowledge-recipe-history.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 221 is the exact fully verified Development and Production restart boundary.','Build 222 Project-to-Knowledge Promotion & Recipe History is the active Development closure candidate.','Canonical migrations advance through 0021; source authorities, Inventory movement, media copy and Finance/Accounting mutation remain closed.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
   if(new URL(context.request.url).searchParams.get('format')==='markdown')return new Response(markdownReport(data),{status:200,headers:{'Content-Type':'text/markdown; charset=utf-8','Cache-Control':'no-store'}});
   return jsonResponse(data,200,{'Cache-Control':'no-store'});
 }

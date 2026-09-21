@@ -1,0 +1,82 @@
+{
+  "release": 467,
+  "build": 222,
+  "title": "Project-to-Knowledge Promotion & Recipe History",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "authority": "release467-build222-project-knowledge-recipe-history",
+  "priority": "promote_only_reviewed_creative_project_lessons_into_versioned_reusable_workshop_knowledge_with_exact_provenance_supersession_and_failure_history",
+  "starting_point": {
+    "development": {
+      "sha": "eceee6897410295b029f08ac728b159cf7559823",
+      "tree": "321514649fa70ba2ccdc4961ca69eba08eef6962",
+      "system_gate_run": 35619862172,
+      "quality_run": 35619862224,
+      "it_admin_runtime_run": 35619862189,
+      "repository_hygiene_run": 35619862154,
+      "build_specific_proof_run": 35619862180,
+      "exact_development_url": "https://4a02e2dc.devilndove-site.pages.dev",
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "44cdd9aef639fc58343e0810a9a351986dd39052",
+      "tree": "321514649fa70ba2ccdc4961ca69eba08eef6962",
+      "production_pages_deploy_run": 35620308181,
+      "production_live_resource_integrity_run": 35620434376,
+      "products_browser_proof_run": 35620434354,
+      "products_route_proof_run": 35620434404,
+      "build_specific_proof_run": 35620308104,
+      "exact_production_url": "https://ddcbfc0a.devilndove-site.pages.dev",
+      "deployment_id": "ddcbfc0a-0e13-4ee2-a8c8-4ef0fba9b00b",
+      "canonical_migrations": 20,
+      "business_counts": {
+        "users": 2,
+        "products": 45,
+        "site_item_inventory": 1041,
+        "orders": 0
+      },
+      "foreign_key_violations": 0,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": [
+    "Promote only approved Creative Project lessons-learned summaries into Workshop Knowledge.",
+    "Preserve exact source Creative Project and exact operation when known.",
+    "Snapshot canonical process and Inventory identities plus only observed settings with evidence notes.",
+    "Preserve failure/rework notes instead of deleting unsuccessful history.",
+    "Create immutable recipe version history with explicit approved and superseded states.",
+    "Keep worked-once evidence explicitly non-generalized; never create automatic best/safe setting claims."
+  ],
+  "safety": {
+    "canonical_schema_addition": true,
+    "request_time_ddl": false,
+    "ai_generated_best_settings": false,
+    "automatic_generalization": false,
+    "unknown_settings_remain_unknown": true,
+    "source_authority_mutation": false,
+    "inventory_mutation": false,
+    "media_copy": false,
+    "r2_mutation": false,
+    "finance_mutation": false,
+    "provider_execution": false,
+    "automatic_publication": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build222_gate.py",
+    "canonical_migration": "migrations/canonical/0021_release467_project_knowledge_recipe_history.sql",
+    "version_table": "workshop_knowledge_recipe_versions",
+    "process_snapshot_table": "workshop_knowledge_recipe_processes",
+    "inventory_snapshot_table": "workshop_knowledge_recipe_inventory_refs",
+    "settings_snapshot_table": "workshop_knowledge_recipe_settings",
+    "event_table": "workshop_knowledge_recipe_events",
+    "source_authority": "creative_project_knowledge_summaries approved lessons_learned",
+    "admin_api": "functions/api/admin/workshop-knowledge-promotion.js",
+    "admin_ui": "public/js/admin-workshop-knowledge-build222.js",
+    "admin_surface": "/admin/workshop-knowledge/"
+  },
+  "next_build": {
+    "build": 223,
+    "title": "Capability Case Studies, Workshop Journal & Search Richness",
+    "state": "BLOCKED_UNTIL_BUILD222_PRODUCTION_GREEN"
+  }
+}
