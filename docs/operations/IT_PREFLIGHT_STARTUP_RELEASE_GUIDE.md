@@ -2,7 +2,7 @@
 
 ## Current release baseline
 
-Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0017`. Request-time DDL and automatic Production promotion remain closed.
+Release 467 uses `main` as Production source and `dev` as Development candidate lane. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through `0018`. Request-time DDL and automatic Production promotion remain closed.
 
 ## Canonical Development target
 
@@ -24,26 +24,26 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 Stripe Development, PayPal sandbox and Social/OAuth remain `HOLD_EXTERNAL`; CAIP private media remains `EVIDENCE_DEPENDENT`.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 218 candidate
+## Current Release 467 restart authority — Build 219 candidate
 
-Build 217 **Production Cost Evidence v2** is the exact fully verified predecessor.
+Build 218 **Quote ↔ Production Cost ↔ Margin Guardrails** is the exact fully verified predecessor.
 
-- Development SHA: 17d606f63d91ec178668c215caf263b95e3bd580
-- Shared tree: cffc68c278b69f389372e4d43c022a9f0140a9d1
-- System / Quality / I.T. / Hygiene: 35553944193 / 35553944303 / 35553944241 / 35553944239
-- Build 217 Development proof: 35553944296
-- Production main: 94a977f0732cc649037423a415dfba60417d4a47
-- Production Pages / Live Resources: 35554258043 / 35554327033
-- Product Browser / Route: 35554326994 / 35554327019
-- Build 217 Production proof: 35554258012
-- Exact Production URL: https://5cebd07d.devilndove-site.pages.dev
+- Development SHA: 068b99a9f4f5e32e4d3547a69a23549d9dcd1c1a
+- Shared tree: 0bb22258a030eb529be3a7b5faf9ba12baa66f46
+- System / Quality / I.T. / Hygiene: 35556952902 / 35556952735 / 35556952815 / 35556952797
+- Build 218 Development proof: 35556952722
+- Exact Development URL: https://8d25c91e.devilndove-site.pages.dev
+- Production main: 24b59add984ea0be5acc3ebe3bf8ae558db747ee
+- Production Pages / Live Resources: 35557094198 / 35557137931
+- Product Browser / Route: 35557137831 / 35557137932
+- Build 218 Production proof: 35557094182
+- Exact Production URL: https://b8567968.devilndove-site.pages.dev
+- Deployment ID: b8567968-da64-41b9-b378-965fd942ea6d
 
-Build 218 **Quote ↔ Production Cost ↔ Margin Guardrails** is the active schema-neutral candidate. It reuses existing Custom Work quote/revision authority, the Build 217 production-cost evidence, Product linked-resource margin evidence and Finance profitability. Human review may append a quote-revision snapshot, but quote prices are never rewritten automatically.
-
-Inventory remains the material-use/cost authority. Finance/Accounting remains the profitability/posting authority. Blank cost fields remain unknown rather than silently becoming zero. Canonical migrations remain `0001`–`0017`.
+Build 219 **Manufacturing Work Order & Job Traveler** is the active candidate. It introduces additive canonical migration 0018 for versioned reviewed traveler evidence. The generated traveler freezes source-authority evidence and detects later source drift by SHA-256; it never becomes a duplicate Product, Inventory, Packaging, CAIP, quote, proof or Finance editor.
 
 ### Restart resolution rule
-Resolve live dev and main first. Build 219 starts only after Build 218 is exact-SHA Production GREEN.
+Resolve live dev and main first. Build 220 starts only after Build 219 is exact-SHA Production GREEN.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
 
 ## Retained historical provenance — Build 171
