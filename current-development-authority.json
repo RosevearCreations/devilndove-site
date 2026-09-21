@@ -1,42 +1,45 @@
 {
   "release": 467,
-  "build": 223,
-  "title": "Capability Case Studies, Workshop Journal & Search Richness",
+  "build": 224,
+  "title": "Manufacturing-Era Closure & Next Roadmap",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "a9fd2f4e10f8bf68d3fe9b40c82ced112cf91bb1",
-  "accepted_dev_tree_sha": "255d08bc787f7eb785119ceaffa61d6aa5eeefed",
+  "accepted_dev_sha": "f69deaa659520af182edc60dfc7cfefc7914d8f8",
+  "accepted_dev_tree_sha": "23394309d09e765c5327fbf8715532faabc78d6a",
   "acceptance": {
-    "system_gate_run": 35624331277,
-    "current_application_quality_run": 35624331446,
-    "it_admin_runtime_proof_run": 35624331471,
-    "branch_hygiene_run": 35624331702
+    "system_gate_run": 35636209245,
+    "current_application_quality_run": 35636209377,
+    "it_admin_runtime_proof_run": 35636209182,
+    "branch_hygiene_run": 35636209309
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 222,
-      "title": "Project-to-Knowledge Promotion & Recipe History",
-      "authority": "release467-build222-project-knowledge-recipe-history.json",
-      "dev_sha": "a9fd2f4e10f8bf68d3fe9b40c82ced112cf91bb1",
-      "tree_sha": "255d08bc787f7eb785119ceaffa61d6aa5eeefed",
-      "proofs": {
-        "system_gate_run": 35624331277,
-        "current_application_quality_run": 35624331446,
-        "it_admin_runtime_proof_run": 35624331471,
-        "branch_hygiene_run": 35624331702
-      },
-      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
-      "exact_preview_deployment": true,
-      "build_specific_proof_run": 35624331629
-    },
-    "current_closure_candidate": {
-      "release": 467,
       "build": 223,
       "title": "Capability Case Studies, Workshop Journal & Search Richness",
       "authority": "release467-build223-capability-case-studies-workshop-journal-search-richness.json",
-      "state": "DEVELOPMENT_CLOSURE_CANDIDATE"
+      "dev_sha": "f69deaa659520af182edc60dfc7cfefc7914d8f8",
+      "tree_sha": "23394309d09e765c5327fbf8715532faabc78d6a",
+      "proofs": {
+        "system_gate_run": 35636209245,
+        "current_application_quality_run": 35636209377,
+        "it_admin_runtime_proof_run": 35636209182,
+        "branch_hygiene_run": 35636209309
+      },
+      "proof_state": "EXACT_BRANCH_HEAD_GREEN",
+      "exact_preview_deployment": true,
+      "build_specific_proof_run": 35636209003,
+      "exact_preview_url": "https://f4dccb93.devilndove-site.pages.dev",
+      "development_deploy_artifact_id": 10656392380,
+      "development_regression_artifact_id": 10656452358
+    },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 224,
+      "title": "Manufacturing-Era Closure & Next Roadmap",
+      "authority": "release467-build224-manufacturing-era-closure-next-roadmap.json",
+      "state": "DEVELOPMENT_MEASURED_CLOSURE_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
     "closure_candidate_must_not_self_claim_final_proof": true,
@@ -46,21 +49,24 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 222,
-    "title": "Project-to-Knowledge Promotion & Recipe History",
-    "authority": "release467-build222-project-knowledge-recipe-history.json",
-    "main_sha": "e55cff067fda9a1c949e93db8ea2ea3e5f8d366f",
-    "tree_sha": "255d08bc787f7eb785119ceaffa61d6aa5eeefed",
-    "production_pages_deploy_run": 35624807963,
-    "production_live_resource_integrity_run": 35624977882,
-    "products_browser_proof_run": 35624977818,
-    "products_route_proof_run": 35624977830,
-    "build_specific_proof_run": 35624807852,
-    "exact_production_url": "https://5f0593a4.devilndove-site.pages.dev",
+    "build": 223,
+    "title": "Capability Case Studies, Workshop Journal & Search Richness",
+    "authority": "release467-build223-capability-case-studies-workshop-journal-search-richness.json",
+    "main_sha": "704c407485c0fd0c3de785b696113d3cc7be5a27",
+    "tree_sha": "23394309d09e765c5327fbf8715532faabc78d6a",
+    "production_pages_deploy_run": 35636523017,
+    "production_live_resource_integrity_run": 35636619207,
+    "products_browser_proof_run": 35636619026,
+    "products_route_proof_run": 35636619136,
+    "build_specific_proof_run": 35636522959,
+    "exact_production_url": "https://445258ee.devilndove-site.pages.dev",
+    "deployment_id": "445258ee-503a-4860-9e3e-ebc3dd01696c",
+    "production_promotion_artifact_id": 10656248196,
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build224-manufacturing-era-closure-next-roadmap.json",
     "release467-build223-capability-case-studies-workshop-journal-search-richness.json",
     "release467-build222-project-knowledge-recipe-history.json",
     "release467-build221-workshop-knowledge-library-foundation.json",
@@ -126,7 +132,26 @@
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_205_224.md",
   "next_build": 224,
-  "next_build_state": "BLOCKED_UNTIL_BUILD223_PRODUCTION_GREEN",
+  "next_build_state": "AUTHORIZED_IN_PROGRESS",
   "next_build_title": "Manufacturing-Era Closure & Next Roadmap",
-  "promotion_state": "BUILD223_CANDIDATE_NOT_YET_VERIFIED"
+  "promotion_state": "BUILD224_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "PLANNED_FROM_EXACT_BUILD224_MEASUREMENT_BLOCKED_UNTIL_PRODUCTION_GREEN",
+  "measured_closure": {
+    "release": 467,
+    "build": 224,
+    "sha": "95fd199e4345a6e191996f5de7ef56057a0ffde8",
+    "tree_sha": "11ea923c36a0e2cd56c8319a545c63743ed4df41",
+    "workflow_run": 35641735469,
+    "artifact_id": 10658891143,
+    "d1_provider_rows_read": 8781,
+    "d1_rows_read_ceiling": 25000,
+    "mutation": "ZERO",
+    "successor_roadmap": "docs/operations/RELEASE_467_POST_MANUFACTURING_AUTONOMOUS_BUILDS_225_232.md"
+  },
+  "planned_successor": {
+    "first_build": 225,
+    "last_build": 232,
+    "state": "BLOCKED_UNTIL_BUILD224_PRODUCTION_GREEN",
+    "future_queue_exhausted": false
+  }
 }
