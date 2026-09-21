@@ -1,5 +1,3 @@
--- Release 467 Build 224 — Manufacturing-Era Closure & Next Roadmap
--- Read-only exact-Development measurement query. No DDL and no mutation.
 WITH
 product_base AS (
   SELECT *
