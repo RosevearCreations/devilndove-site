@@ -1,23 +1,23 @@
-// Release 467 Build 229 — current read-only Deployment Preflight over exact Build 228 GREEN predecessor.
+// Release 467 Build 230 — current read-only Deployment Preflight over exact Build 229 GREEN predecessor.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=229;
-const TITLE='First Creative Project Prototype-to-Run Pilot';
+const BUILD=230;
+const TITLE='Cost, Margin, QA & Knowledge Evidence Adoption';
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql']);
-const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 228 First Real Custom Work Route-to-Proof Pilot']);
+const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 229 First Creative Project Prototype-to-Run Pilot']);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:228,title:'First Real Custom Work Route-to-Proof Pilot',state:'DEVELOPMENT_GREEN',
-  dev_sha:'db896df37a89e3477d77a26707277d0ca65eed5d',tree_sha:'414d747065b3d95002224fa4975c6da86a5d7c79',
-  system_gate_run:35675467679,current_application_quality_run:35675467644,it_admin_runtime_proof_run:35675467795,
-  branch_hygiene_run:35675467898,build_specific_proof_run:35675467986,proof_state:'EXACT_BRANCH_HEAD_GREEN',exact_preview_deployment:true
+  release:467,build:229,title:'First Creative Project Prototype-to-Run Pilot',state:'DEVELOPMENT_GREEN',
+  dev_sha:'4a195f435c4491408db6c39dadc1d874d166cf36',tree_sha:'2ec97031a2c774fc2920a03d6fc72d63998421b8',
+  system_gate_run:35677766703,current_application_quality_run:35677766653,it_admin_runtime_proof_run:35677766460,
+  branch_hygiene_run:35677766514,build_specific_proof_run:35677766604,proof_state:'EXACT_BRANCH_HEAD_GREEN',exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:228,title:'First Real Custom Work Route-to-Proof Pilot',state:'PRODUCTION_GREEN',
-  main_sha:'9b4a12fe90b207006c9593d7440f56bf681c43aa',tree_sha:'414d747065b3d95002224fa4975c6da86a5d7c79',
-  production_pages_deploy_run:35675671813,production_live_resource_integrity_run:35675740985,
-  products_browser_proof_run:35675740992,products_route_proof_run:35675740994,build_specific_proof_run:35675671688
+  release:467,build:229,title:'First Creative Project Prototype-to-Run Pilot',state:'PRODUCTION_GREEN',
+  main_sha:'4ba7631cfd0da23925c82b1ec3cf8ed247b75f0c',tree_sha:'2ec97031a2c774fc2920a03d6fc72d63998421b8',
+  production_pages_deploy_run:35678474432,production_live_resource_integrity_run:35678533786,
+  products_browser_proof_run:35678533596,products_route_proof_run:35678533740,build_specific_proof_run:35678474416
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true});
 const rows=(r)=>Array.isArray(r?.results)?r.results:[];
@@ -44,11 +44,11 @@ export async function onRequestGet(context){
     {status:truth.proof_recorded_count===22?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:truth.proof_recorded_count+'/22 proof rows recorded.'},
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:truth.foreign_key_violations+' violation(s).'},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
-    {status:'pass',code:'build228_verified_baseline',label:'Build 228 verified restart baseline',detail:'Build 228 First Real Custom Work Route-to-Proof Pilot is exact-SHA Production GREEN and closed HOLD_NO_REAL_REQUEST without synthetic records.'},
-    {status:'review',code:'build229_prototype_to_run_pilot',label:'Build 229 First Creative Project Prototype-to-Run Pilot',detail:'Read-only pilot evidence is the active candidate; legitimate Creative Project manufacturing work is required and HOLD_NO_REAL_PROJECT is valid when none exists.'}
+    {status:'pass',code:'build228_verified_baseline',label:'Build 229 verified restart baseline',detail:'Build 229 First Creative Project Prototype-to-Run Pilot is exact-SHA Production GREEN and closed HOLD_NO_REAL_PROJECT without synthetic records.'},
+    {status:'review',code:'build229_prototype_to_run_pilot',label:'Build 230 Cost, Margin, QA & Knowledge Evidence Adoption',detail:'Read-only evidence-adoption measurement is the active candidate; HOLD_NO_QUALIFYING_REAL_RUN is valid when no reviewed real production run exists.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
-  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:229,title:TITLE,authority:'release467-build229-first-creative-project-prototype-to-run-pilot.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 228 is the exact fully verified Development and Production restart boundary.','Build 228 closed HOLD_NO_REAL_REQUEST with software acceptance GREEN and no synthetic records.','Build 229 is a GET-only prototype-to-run pilot over the existing Creative Project manufacturing authorities.','Canonical migrations remain 0001-0022; Build 229 adds no migration.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
+  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:230,title:TITLE,authority:'release467-build230-cost-margin-qa-knowledge-evidence-adoption.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 229 is the exact fully verified Development and Production restart boundary.','Build 229 closed HOLD_NO_REAL_PROJECT with software acceptance GREEN and no synthetic records.','Build 230 is a GET-only cost, margin, QA and Workshop Knowledge evidence-adoption measurement over existing authorities.','Canonical migrations remain 0001-0022; Build 230 adds no migration.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
   if(new URL(context.request.url).searchParams.get('format')==='markdown')return new Response(markdownReport(data),{status:200,headers:{'Content-Type':'text/markdown; charset=utf-8','Cache-Control':'no-store'}});
   return jsonResponse(data,200,{'Cache-Control':'no-store'});
 }

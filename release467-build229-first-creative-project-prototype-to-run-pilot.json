@@ -2,7 +2,7 @@
   "release": 467,
   "build": 229,
   "title": "First Creative Project Prototype-to-Run Pilot",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build229-first-creative-project-prototype-to-run-pilot",
   "priority": "prove_existing_creative_project_prototype_to_run_path_with_real_operator_work_or_hold_without_fabrication",
   "predecessor": {
@@ -69,7 +69,7 @@
   "next_build": {
     "build": 230,
     "title": "Cost, Margin, QA & Knowledge Evidence Adoption",
-    "state": "BLOCKED_UNTIL_BUILD229_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_AFTER_BUILD229_PRODUCTION_GREEN"
   },
   "future_queue": {
     "first_build": 230,
@@ -104,5 +104,39 @@
       "state": "PRODUCTION_GREEN",
       "role": "CURRENT_PRODUCTION_BASELINE"
     }
+  },
+  "business_exit": {
+    "state": "HOLD_NO_REAL_PROJECT",
+    "real_projects": 0,
+    "manufacturing_lifecycles": 0,
+    "reviewed_runs": 0,
+    "qa_checks": 0,
+    "synthetic_project_or_production_records_created": false,
+    "evidence": "Development D1 prototype-to-run pilot found no legitimate Creative Project manufacturing records; software acceptance remained GREEN."
+  },
+  "final_closure": {
+    "dev_sha": "4a195f435c4491408db6c39dadc1d874d166cf36",
+    "tree_sha": "2ec97031a2c774fc2920a03d6fc72d63998421b8",
+    "proofs": {
+      "system_gate_run": 35677766703,
+      "current_application_quality_run": 35677766653,
+      "it_admin_runtime_proof_run": 35677766460,
+      "branch_hygiene_run": 35677766514
+    },
+    "build_specific_proof_run": 35677766604,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "business_exit": "HOLD_NO_REAL_PROJECT"
+  },
+  "production_checkpoint": {
+    "main_sha": "4ba7631cfd0da23925c82b1ec3cf8ed247b75f0c",
+    "tree_sha": "2ec97031a2c774fc2920a03d6fc72d63998421b8",
+    "production_pages_deploy_run": 35678474432,
+    "production_live_resource_integrity_run": 35678533786,
+    "products_browser_proof_run": 35678533596,
+    "products_route_proof_run": 35678533740,
+    "build_specific_proof_run": 35678474416,
+    "canonical_migrations": 22,
+    "business_exit": "HOLD_NO_REAL_PROJECT",
+    "state": "PRODUCTION_GREEN"
   }
 }

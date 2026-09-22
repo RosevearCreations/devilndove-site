@@ -1,0 +1,52 @@
+name: Release 467 Build 230 Cost Margin QA Knowledge Evidence Adoption
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.x'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - run: python scripts/release467_build230_gate.py
+      - run: python scripts/release467_build229_gate.py
+      - run: python scripts/release467_build218_gate.py
+      - run: python scripts/release467_build217_gate.py
+      - run: python scripts/release467_build220_gate.py
+      - run: python scripts/release467_build221_gate.py
+      - run: python scripts/release467_build222_gate.py
+  development-d1-evidence-adoption:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - run: |
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM d1_migrations) canonical_migrations,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('custom_request_quote_drafts','custom_request_quote_revisions','creative_project_production_runs','creative_project_production_cost_evidence','creative_project_production_run_qa_checks','workshop_knowledge_entries','workshop_knowledge_recipe_versions')) required_tables,(SELECT COUNT(*) FROM pragma_foreign_key_check) fk,(SELECT COUNT(*) FROM custom_request_quote_drafts) quote_drafts,(SELECT COUNT(*) FROM custom_request_quote_revisions WHERE revision_type='build218_margin_review') margin_reviews,(SELECT COUNT(*) FROM creative_project_production_runs WHERE run_status='reviewed') reviewed_runs,(SELECT COUNT(DISTINCT creative_work_project_id) FROM creative_project_production_cost_evidence WHERE evidence_status='active' AND cost_evidence_state='reviewed') reviewed_cost_projects,(SELECT COUNT(*) FROM creative_project_production_run_qa_checks) qa_checks,(SELECT COUNT(*) FROM workshop_knowledge_entries WHERE review_status='reviewed') reviewed_knowledge_entries,(SELECT COUNT(*) FROM workshop_knowledge_recipe_versions WHERE recipe_state='approved') approved_recipe_versions,(SELECT COUNT(*) FROM creative_project_production_runs pr WHERE pr.run_status='reviewed' AND EXISTS (SELECT 1 FROM creative_project_production_run_qa_checks q WHERE q.creative_project_production_run_id=pr.creative_project_production_run_id) AND EXISTS (SELECT 1 FROM creative_project_production_cost_evidence ce WHERE ce.creative_work_project_id=pr.creative_work_project_id AND ce.evidence_status='active' AND ce.cost_evidence_state='reviewed')) qualifying_runs;" > /tmp/b230.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/b230.json'));found=[]
+          keys=('canonical_migrations','required_tables','fk','quote_drafts','margin_reviews','reviewed_runs','reviewed_cost_projects','qa_checks','reviewed_knowledge_entries','approved_recipe_versions','qualifying_runs')
+          def w(v):
+            if isinstance(v,dict):
+              if all(k in v for k in keys):found.append(v)
+              for x in v.values():w(x)
+            elif isinstance(v,list):
+              for x in v:w(x)
+          w(d);assert found,d;r=found[0]
+          assert int(r['canonical_migrations'])==22,r
+          assert int(r['required_tables'])==7,r
+          assert int(r['fk'])==0,r
+          proven=int(r['qualifying_runs'])>0 and all(int(r[k])>0 for k in ('margin_reviews','reviewed_cost_projects','qa_checks','reviewed_knowledge_entries','approved_recipe_versions'))
+          state='HOLD_NO_QUALIFYING_REAL_RUN' if int(r['reviewed_runs'])==0 else ('PROVEN_REVIEWED_ADOPTION' if proven else 'EVIDENCE_ADOPTION_IN_PROGRESS')
+          print('BUILD 230 DEVELOPMENT EVIDENCE ADOPTION: GREEN',state,r)
+          PY

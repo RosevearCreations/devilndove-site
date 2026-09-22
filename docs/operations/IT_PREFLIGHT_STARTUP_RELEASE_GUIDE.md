@@ -12,21 +12,21 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 229 candidate
+## Current Release 467 restart authority — Build 230 candidate
 
-Build 228 **First Real Custom Work Route-to-Proof Pilot** is the exact verified predecessor:
+Build 229 **First Creative Project Prototype-to-Run Pilot** is the exact verified predecessor:
 
-- Development SHA: `db896df37a89e3477d77a26707277d0ca65eed5d`
-- Shared tree: `414d747065b3d95002224fa4975c6da86a5d7c79`
-- Development proofs: System `35675467679`, Quality `35675467644`, I.T. `35675467795`, Hygiene `35675467898`, Build proof `35675467986`
-- Production main: `9b4a12fe90b207006c9593d7440f56bf681c43aa`
-- Production proofs: Pages `35675671813`, Live Resources `35675740985`, Product Browser `35675740992`, Product Route `35675740994`, Build proof `35675671688`
-- Business exit: `HOLD_NO_REAL_REQUEST`
+- Development SHA: `4a195f435c4491408db6c39dadc1d874d166cf36`
+- Shared tree: `2ec97031a2c774fc2920a03d6fc72d63998421b8`
+- Development proofs: System `35677766703`, Quality `35677766653`, I.T. `35677766460`, Hygiene `35677766514`, Build proof `35677766604`
+- Production main: `4ba7631cfd0da23925c82b1ec3cf8ed247b75f0c`
+- Production proofs: Pages `35678474432`, Live Resources `35678533786`, Product Browser `35678533596`, Product Route `35678533740`, Build proof `35678474416`
+- Business exit: `HOLD_NO_REAL_PROJECT`
 - Canonical migrations remain **0001–0022**.
 
-Build 229 **First Creative Project Prototype-to-Run Pilot** is GET-only and reuses the existing Build 212/214/219/220 Creative Project manufacturing authorities. It may report `HOLD_NO_REAL_PROJECT` when no legitimate operator-entered project exists. It must not fabricate projects, lifecycle transitions, travelers, production runs, QA checks or handoffs.
+Build 230 **Cost, Margin, QA & Knowledge Evidence Adoption** is GET-only and measures reviewed use of existing Build 217/218/220/221/222 authorities. It may report `HOLD_NO_QUALIFYING_REAL_RUN` when no reviewed real production run exists. It must not fabricate cost, margin, QA, knowledge or recipe evidence.
 
-Build 230 remains blocked until Build 229 is exact-SHA Production GREEN. The future queue has not run out; Builds 230–232 remain planned.
+Build 231 remains blocked until Build 230 is exact-SHA Production GREEN. The future queue has not run out; Builds 231–232 remain planned.
 
 ## Retained historical provenance — Build 171
 
