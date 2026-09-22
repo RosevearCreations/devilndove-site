@@ -1,0 +1,80 @@
+{
+  "release": 467,
+  "build": 234,
+  "title": "Workflow Help, Empty States & Recovery Guidance",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build234-workflow-help-empty-states-recovery-guidance",
+  "predecessor": {
+    "build": 233,
+    "title": "Universal Help & Quality-of-Life Coverage",
+    "development_sha": "c9882fef84e23f7416a7042f52ec8b5ea151287f",
+    "development_tree": "6eef4a4edf79d5ce367b052823bede7d9a665465",
+    "system_gate_run": 35772128810,
+    "current_application_quality_run": 35772128894,
+    "it_admin_runtime_proof_run": 35772128961,
+    "branch_hygiene_run": 35772128724,
+    "build_specific_proof_run": 35772128756,
+    "production_main_sha": "8de67c8e5a0e9fe745264a387f749c0cd8a4c6ad",
+    "production_tree": "6eef4a4edf79d5ce367b052823bede7d9a665465",
+    "production_pages_deploy_run": 35772353686,
+    "production_live_resource_integrity_run": 35772488495,
+    "products_browser_proof_run": 35772488386,
+    "products_route_proof_run": 35772488446,
+    "production_build_specific_proof_run": 35772353401,
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "workflow_help": true,
+    "empty_vs_broken_state": true,
+    "recovery_guidance": true,
+    "disabled_action_help": true,
+    "customer_help_centre": "/help/",
+    "creator_help_centre": "/admin/help/",
+    "cupcake_soap_labels": {
+      "authority": "existing Packaging Studio",
+      "physical_size_mm": [
+        50.8,
+        50.8
+      ],
+      "design_profile": "cupcake_soap_square_v1",
+      "supplied_reference_count": 5,
+      "system_theme_count": 10,
+      "editable_fields": true,
+      "structured_ingredients_reused": true,
+      "companion_label_boundary": true,
+      "specification": "docs/packaging/CUPCAKE_SOAP_LABEL_SYSTEM.md"
+    }
+  },
+  "migration": {
+    "canonical_version": 23,
+    "file": "0023_release467_build234_cupcake_soap_label_templates.sql",
+    "kind": "REFERENCE_DATA_ONLY",
+    "schema_change": false,
+    "business_data_mutation": false,
+    "template_rows_added": 10
+  },
+  "safety": {
+    "request_time_schema_mutation": false,
+    "schema_change": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "product_mutation": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "customer_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "automatic_publication": false,
+    "synthetic_business_evidence": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build234_gate.py",
+    "workflow": ".github/workflows/release467-build234-workflow-help-recovery.yml",
+    "canonical_migrations": 23
+  },
+  "successor": {
+    "next_build": 235,
+    "next_title": "Resume Work & Cross-Workspace Handoff",
+    "future_queue_exhausted": false
+  }
+}
