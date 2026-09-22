@@ -67,7 +67,10 @@
         "Lavender Dream"
       ],
       "additional_colour_directions": 10,
-      "existing_authority": "Packaging Studio"
+      "existing_authority": "Packaging Studio",
+      "owner_reference_templates_received": 5,
+      "reference_integration_mode": "EDITABLE_SVG_RECREATION_NOT_FLATTENED_ARTWORK",
+      "reference_note": "Owner-supplied Sweet Orange, Charcoal, Oatmeal & Goat Milk, Sea Breeze and Lavender Dream concepts define the five built-in visual directions; editable Packaging fields remain authoritative."
     }
   },
   "implementation": {
