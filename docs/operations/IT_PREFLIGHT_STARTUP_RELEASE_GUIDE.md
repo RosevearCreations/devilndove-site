@@ -12,21 +12,21 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 230 candidate
+## Current Release 467 restart authority — Build 231 candidate
 
-Build 229 **First Creative Project Prototype-to-Run Pilot** is the exact verified predecessor:
+Build 230 **Cost, Margin, QA & Knowledge Evidence Adoption** is the exact verified predecessor:
 
-- Development SHA: `4a195f435c4491408db6c39dadc1d874d166cf36`
-- Shared tree: `2ec97031a2c774fc2920a03d6fc72d63998421b8`
-- Development proofs: System `35677766703`, Quality `35677766653`, I.T. `35677766460`, Hygiene `35677766514`, Build proof `35677766604`
-- Production main: `4ba7631cfd0da23925c82b1ec3cf8ed247b75f0c`
-- Production proofs: Pages `35678474432`, Live Resources `35678533786`, Product Browser `35678533596`, Product Route `35678533740`, Build proof `35678474416`
-- Business exit: `HOLD_NO_REAL_PROJECT`
+- Development SHA: `b67c23231d06f9faaf2952784878c11784936c48`
+- Shared tree: `42d45f7d521b4f93a891cea9351dc65f656f89c6`
+- Development proofs: System `35681244435`, Quality `35681244619`, I.T. `35681244610`, Hygiene `35681244451`, Build proof `35681244469`
+- Production main: `eab246604f1fd3a7d4762d17ee4868451f87584b`
+- Production proofs: Pages `35681417751`, Live Resources `35681463987`, Product Browser `35681464032`, Product Route `35681464036`, Build proof `35681417827`
+- Business exit: `HOLD_NO_QUALIFYING_REAL_RUN`
 - Canonical migrations remain **0001–0022**.
 
-Build 230 **Cost, Margin, QA & Knowledge Evidence Adoption** is GET-only and measures reviewed use of existing Build 217/218/220/221/222 authorities. It may report `HOLD_NO_QUALIFYING_REAL_RUN` when no reviewed real production run exists. It must not fabricate cost, margin, QA, knowledge or recipe evidence.
+Build 231 **Workshop Journal & Capability Case-Study Activation** is GET-only and measures existing reviewed Content Release / public case-study evidence. It may report `HOLD_NO_PUBLISHABLE_EVIDENCE` when no qualifying reviewed public story or approved Creative Project publication exists. It never publishes automatically or queries private/raw CAIP media.
 
-Build 231 remains blocked until Build 230 is exact-SHA Production GREEN. The future queue has not run out; Builds 231–232 remain planned.
+Build 231 remains blocked until Build 231 is exact-SHA Production GREEN. The future queue has not run out; Build 232 remain planned.
 
 ## Retained historical provenance — Build 171
 
