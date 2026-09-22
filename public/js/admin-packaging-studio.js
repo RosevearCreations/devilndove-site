@@ -1398,6 +1398,37 @@
     image.onerror = () => { URL.revokeObjectURL(source); message('Raster preview could not be rendered. Use SVG.', 'error'); }; image.src = source;
   }
 
+  function applyCupcakePreset(key, selectTemplate=true, announce=true) {
+    const preset=cupcakePresetByKey(key);
+    const matched=state.templates.find((row)=>String(row.layout?.design_profile||'')==='cupcake_soap_square_v1'&&String(row.layout?.cupcake_preset_key||'')===preset.key);
+    if(selectTemplate&&matched&&id('packagingTemplateId')) id('packagingTemplateId').value=String(matched.packaging_template_id);
+    const values={
+      packagingCupcakePresetKey:preset.key, packagingCollection:preset.label, packagingIdentityEn:'Cupcake Soap',
+      packagingCupcakeNameMirror:preset.label, packagingCupcakePurpose:preset.purpose,
+      packagingTemplateWidth:50.8, packagingTemplateHeight:50.8, packagingTemplateFrontWidth:50.8, packagingTemplateFrontHeight:50.8,
+      packagingTemplateRearWidth:0, packagingTemplateRearHeight:0, packagingTemplateShape:'rectangle', packagingDesignProfile:'cupcake_soap_square_v1',
+      packagingSafeMarginMm:2
+    };
+    Object.entries(values).forEach(([field,value])=>{const node=id(field);if(node)node.value=value;});
+    Object.entries({rose_colour:'packagingRoseColour',theme_colour:'packagingThemeColour',border_colour:'packagingBorderColour',accent_gold:'packagingAccentGold',secondary_colour:'packagingSecondaryColour'}).forEach(([themeKey,field])=>{const node=id(field);if(node&&preset.theme[themeKey])node.value=preset.theme[themeKey];});
+    document.querySelectorAll('[data-cupcake-preset]').forEach((button)=>button.classList.toggle('is-active',button.dataset.cupcakePreset===preset.key));
+    renderPreview();
+    if(announce) message(preset.label+' Cupcake Soap theme applied at 2 × 2 inches. Ingredient/INCI rows and other verified product facts were not replaced.','success');
+  }
+
+  async function createCupcakeSoapProject() {
+    const preferred=state.templates.find((row)=>String(row.layout?.design_profile||'')==='cupcake_soap_square_v1'&&String(row.layout?.cupcake_preset_key||'')==='sweet-orange')||state.templates.find((row)=>String(row.layout?.design_profile||'')==='cupcake_soap_square_v1');
+    if(!preferred){message('Cupcake Soap system templates are not available yet. Apply canonical migration 0023 and refresh Packaging Studio.','error');return;}
+    const projectName=String(prompt('Cupcake Soap label project name:','Cupcake Soap label')||'').trim();
+    if(!projectName)return;
+    try{
+      message('Creating editable 2 × 2 inch Cupcake Soap label…');
+      const data=await api({action:'create_project',packaging_template_id:Number(preferred.packaging_template_id),project_name:projectName,product_name:'Cupcake Soap',collection_name:preferred.layout?.default_collection||'Sweet Orange',product_identity_en:'Cupcake Soap',made_in_canada_text:'Made in Canada'});
+      state.projects=data.projects||[]; state.templates=data.templates||state.templates; state.detail=data.detail; state.activeTab='cupcake'; renderProjects(); renderMain(); message(data.message,'success');
+    }catch(error){message(error.message||'Cupcake Soap label could not be created.','error');}
+  }
+
+
   function applyGlacialPurpleReference() {
     if (!confirm('Apply the approved Glacial Purple visual reference to this draft? Product identity, formula/INCI rows, claims, warnings and verified net quantity will be preserved.')) return;
     // Build 246: the approved reference controls visual treatment only. It must never invent
@@ -1427,6 +1458,11 @@
     document.querySelectorAll('[data-packaging-tab]').forEach((button) => button.addEventListener('click', () => activateTab(button.dataset.packagingTab)));
     document.querySelectorAll('.packaging-editor-card input,.packaging-editor-card textarea,.packaging-editor-card select').forEach((node) => { const eventName = node.type === 'color' || node.type === 'checkbox' ? 'input' : 'change'; node.addEventListener(eventName, renderPreview); if (node.tagName === 'TEXTAREA' || ['text','number','url','search'].includes(node.type)) node.addEventListener('input', renderPreview); });
     id('reloadAttachedBaseIngredients')?.addEventListener('click', reloadAttachedBaseIngredients); id('generatePackagingFrenchDraftIngredients')?.addEventListener('click', generateFrenchDraft); id('addSoapIngredient')?.addEventListener('click', () => addIngredient({required_on_label:1})); id('addPackagingInventoryIngredient')?.addEventListener('click', addIngredientFromInventory); id('addSoapClaim')?.addEventListener('click', () => addClaim({icon_name:'leaf'})); id('addPackagingComponent')?.addEventListener('click', () => addComponent({component_type:'label',quantity_per_finished_unit:1})); bindDynamicRows();
+    document.querySelectorAll('[data-cupcake-preset]').forEach((button)=>button.addEventListener('click',()=>applyCupcakePreset(button.dataset.cupcakePreset||'sweet-orange')));
+    id('packagingCupcakeNameMirror')?.addEventListener('input',(event)=>{if(id('packagingCollection'))id('packagingCollection').value=event.target.value;renderPreview();});
+    id('applyCupcakeTwoInSize')?.addEventListener('click',()=>applyCupcakePreset(id('packagingCupcakePresetKey')?.value||'sweet-orange',false));
+    id('openCupcakeIngredients')?.addEventListener('click',()=>activateTab('ingredients'));
+    id('openCupcakePreview')?.addEventListener('click',()=>activateTab('preview'));
     id('packagingRoseAsset')?.addEventListener('change', (event) => applyRoseAssetPreset(event.target.value)); id('packagingProductRosePreset')?.addEventListener('change', (event) => applyProductRosePreset(event.target.value)); document.querySelectorAll('[data-product-rose-direction]').forEach((button)=>button.addEventListener('click',()=>{const key=button.dataset.productRoseDirection||'';if(id('packagingProductRosePreset'))id('packagingProductRosePreset').value=key;applyProductRosePreset(key);document.querySelectorAll('[data-product-rose-direction]').forEach((item)=>item.classList.toggle('is-active',item===button));})); id('packagingRoseColour')?.addEventListener('input', (event) => { const selected=rosePresetById(id('packagingRoseAsset')?.value); if(!selected.colour || String(selected.colour).toLowerCase()!==String(event.target.value).toLowerCase()){if(id('packagingRoseAsset'))id('packagingRoseAsset').value='rose-custom-v1';updateRoseAssetPath();} if(id('packagingSecondaryColour'))id('packagingSecondaryColour').value=mixHex(event.target.value,'#000000',.28); renderPreview(); });
     id('packagingTemplateId')?.addEventListener('change', applySelectedTemplate); document.querySelectorAll('[data-use-packaging-template]').forEach((button)=>button.addEventListener('click',()=>{if(id('packagingTemplateId'))id('packagingTemplateId').value=button.dataset.usePackagingTemplate||'';applySelectedTemplate();})); id('savePackagingTemplate')?.addEventListener('click', saveAsTemplate);
     id('generatePackagingFrenchDraft')?.addEventListener('click', generateFrenchDraft);
@@ -1449,7 +1485,7 @@
   }
 
   function bind() {
-    id('newPackagingProject')?.addEventListener('click', createProject); id('refreshPackagingStudio')?.addEventListener('click', () => load(Number(state.detail?.project?.packaging_project_id || 0))); id('restorePackagingDraft')?.addEventListener('click', () => restoreLocal(true)); id('packagingProjectSearch')?.addEventListener('input', renderProjects);
+    id('newPackagingProject')?.addEventListener('click', createProject); id('newCupcakeSoapLabel')?.addEventListener('click', createCupcakeSoapProject); id('refreshPackagingStudio')?.addEventListener('click', () => load(Number(state.detail?.project?.packaging_project_id || 0))); id('restorePackagingDraft')?.addEventListener('click', () => restoreLocal(true)); id('packagingProjectSearch')?.addEventListener('input', renderProjects);
     id('packagingProjectList')?.addEventListener('click', (event) => { const button = event.target.closest('[data-open-packaging]'); if (button) load(Number(button.dataset.openPackaging || 0)); });
   }
 
