@@ -75,6 +75,31 @@ No schema migration; D1/R2 mutation; automatic publication/unpublication; automa
 
 Canada/CAD storefront policy and the U.S. sales/shipping pause remain unchanged.
 
+## Exact Development measurement result
+
+The required Build 232 Development measurement completed GREEN on exact Development SHA `17aa15b39bd96ca27be0069a8c50a1ccf807b85d` and tree `a868c8e230e528cd2dd4e99ed6002e3a525b94d2`.
+
+- Build 232 workflow: `35738527416`
+- Measurement artifact: `10698460999`
+- Provider-metered D1 rows read: **8,808 / 25,000**
+- D1 mutation: **ZERO**
+- R2 mutation: **ZERO**
+- Schema migration: **NONE**
+- Foreign-key violations: **0**
+- Exact Development workflow result: **47/47 GREEN**
+
+Measured movement from Build 224:
+
+- Public capability coverage improved from **21/22 (95.5%)** to **22/22 (100%)**.
+- Public reviewed capability profiles increased from **12** to **13**.
+- Product launch-set facts did not move: **43 reviewed / 1 ready / 42 review-required**, with **16 buyer-blocked**, **40 media-blocked**, **2 tracked zero-stock**, and **2 products with unknown linked-resource cost**.
+- Real operational manufacturing evidence remains absent: **0 active Custom Requests**, **0 manufacturing lifecycles**, **0 reviewed production runs**, **0 quote/cost evidence**, **0 QA checks**, **0 Workshop Knowledge entries**, and **0 published project case studies**.
+
+The remaining storefront facts are operator remediation work already owned by existing Product, Media and Inventory authorities. The empty manufacturing lanes are absence of real business evidence, not missing software authority.
+
 ## Current queue state
 
-Build 232 is the active final planned build from the Build 224 roadmap. The **future queue decision is pending the exact Build 232 Development measurement**. It must not be declared exhausted or renewed before that evidence is captured and reviewed.
+The evidence-driven decision is now **AUTONOMOUS_QUEUE_EXHAUSTED**.
+
+Build 232 is the final planned build from the Build 224 roadmap. No Build 233 is authorized. A future roadmap should be created only when new measured business evidence appears, a verified defect is found, or we explicitly request a new capability.
+
