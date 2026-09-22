@@ -12,30 +12,27 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 227 candidate
+## Current Release 467 restart authority — Build 228 candidate
 
-Build 226 **Capability Profile Coverage Closure** is the exact fully verified Development and Production predecessor.
+Build 227 **Manufacturing Adoption Command Centre** is the exact fully verified Development and Production predecessor.
 
-- Development SHA: `a3f220deb8c4cef7a2143ab1960c2ea33454ad6d`
-- Shared tree: `c21821ae1ac1ba931b1f38e8fb3b9641bd3b4b3f`
-- System Gate: `35667972994`
-- Current Application Quality Proof: `35667973054`
-- I.T. Admin Runtime Proof: `35667973089`
-- Repository Branch Hygiene: `35667973130`
-- Build 226 Development proof: `35667972987`
-- Exact Development preview: `https://d041c726.devilndove-site.pages.dev`
-- Production main SHA: `8a4adf0a9108f482edd7aaa0c2f7e27d843a9d2e`
-- Production Pages Deploy: `35668227904`
-- Production Live Resource Integrity: `35668338010`
-- Product Browser Proof: `35668337892`
-- Product Route Proof: `35668337966`
-- Build 226 Production proof: `35668227824`
-- Exact Production deployment: `https://eb805f65.devilndove-site.pages.dev`
+- Development SHA: `86a599178cfe473afc4dba15890d47db66f015ea`
+- Shared tree: `5694ea94c097505cc8db6795e839073fb210f746`
+- System Gate: `35671994146`
+- Current Application Quality Proof: `35671994173`
+- I.T. Admin Runtime Proof: `35671994145`
+- Repository Branch Hygiene: `35671994205`
+- Build 227 Development proof: `35671994164`
+- Production main SHA: `2fbbb950b2598a518d14078b0252a8159472fbb7`
+- Production Pages Deploy: `35672279658`
+- Production Live Resource Integrity: `35672342976`
+- Product Browser Production Proof: `35672342991`
+- Product Route Production Proof: `35672343003`
+- Build 227 Production proof: `35672279694`
 
-Build 227 **Manufacturing Adoption Command Centre** is a GET-only operator adoption/readiness layer over the existing Build 210–220 authorities. It distinguishes `NO_REAL_WORK_YET` from `BROKEN_EXISTING_AUTHORITY`, exposes missing prerequisites and next valid existing workflow actions, and creates no synthetic Production business records. Build 227 adds no schema migration; the canonical stream remains 0001–0022.
+Build 228 **First Real Custom Work Route-to-Proof Pilot** is a GET-only pilot over the existing Build 210/211/213/215 Custom Work authorities. It uses legitimate operator-entered work only. When no legitimate request exists, `HOLD_NO_REAL_REQUEST` is a valid bounded exit; no synthetic customer, route, quote, proof or approval record may be created.
 
-Build 228 remains blocked until Build 227 is exact-SHA Production GREEN. The future queue has not run out; Builds 228–232 remain planned.
-<!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
+Build 229 remains blocked until Build 228 is exact-SHA Production GREEN. The future queue has not run out; Builds 229–232 remain planned.
 
 ## Retained historical provenance — Build 171
 
