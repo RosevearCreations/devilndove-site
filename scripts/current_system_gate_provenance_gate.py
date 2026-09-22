@@ -17,8 +17,7 @@ def run_current_contract(path,label):
     if err: print(err,file=sys.stderr)
     if result.returncode!=0:
         detail=(err or out or f'{label} gate failed').strip()[-2000:]
-        annotation=detail.replace('\r',' ').replace('
-',' | ')
+        annotation=detail.replace('\r',' ').replace('\n',' | ')
         print(f'::error title=System provenance child failed::{label} failed with exit code {result.returncode}: {annotation}')
         FAIL.append(f"{label} current reliability contract failed: {detail}")
 
