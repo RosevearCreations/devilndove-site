@@ -1,0 +1,106 @@
+{
+  "release": 467,
+  "build": 231,
+  "title": "Workshop Journal & Capability Case-Study Activation",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build231-workshop-journal-capability-case-study-activation",
+  "priority": "activate_public_discovery_only_from_existing_reviewed_authorized_content_release_evidence_or_hold_without_publication_mutation",
+  "predecessor": {
+    "build": 230,
+    "title": "Cost, Margin, QA & Knowledge Evidence Adoption",
+    "development_head_sha": "b67c23231d06f9faaf2952784878c11784936c48",
+    "development_tree_sha": "42d45f7d521b4f93a891cea9351dc65f656f89c6",
+    "business_exit": "HOLD_NO_QUALIFYING_REAL_RUN",
+    "promotion_pr": 307,
+    "production_main_sha": "eab246604f1fd3a7d4762d17ee4868451f87584b",
+    "production_tree_sha": "42d45f7d521b4f93a891cea9351dc65f656f89c6",
+    "zero_file_diff_promotion": true,
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "mode": "read_only_public_story_activation_measurement",
+    "publication_authority": "content_publications",
+    "existing_public_projection": "functions/api/capability-case-studies.js",
+    "publication_owner_surface": "/admin/content-publications/",
+    "public_discovery_surfaces": [
+      "/workshop-journal/",
+      "/case-studies/",
+      "/capabilities/"
+    ],
+    "real_reviewed_evidence_only": true,
+    "automatic_publication": false,
+    "new_publication_engine": false,
+    "raw_private_caip_exposure": false
+  },
+  "implementation": {
+    "admin_api": "functions/api/admin/workshop-journal-case-study-activation.js",
+    "admin_surface": "admin/public-story-activation/index.html",
+    "admin_client": "public/js/admin-public-story-activation-build231.js"
+  },
+  "exit": {
+    "proven": "PROVEN_REVIEWED_PUBLIC_STORY",
+    "ready": "READY_FOR_OPERATOR_PUBLICATION",
+    "no_evidence": "HOLD_NO_PUBLISHABLE_EVIDENCE",
+    "software_acceptance_required": "GREEN_READ_ONLY_PUBLIC_STORY_ACTIVATION"
+  },
+  "safety": {
+    "canonical_migration_added": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "content_publication_mutation": false,
+    "automatic_publication": false,
+    "private_caip_query": false,
+    "raw_private_caip_exposure": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "provider_execution": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build231_gate.py",
+    "predecessor_gate": "scripts/release467_build230_gate.py",
+    "retained_public_projection_gate": "scripts/release467_build223_gate.py",
+    "canonical_migrations": 22,
+    "api_get_only": true,
+    "future_queue_exhausted": false
+  },
+  "next_build": {
+    "build": 232,
+    "title": "Manufacturing Outcomes Review & Roadmap Renewal",
+    "state": "BLOCKED_UNTIL_BUILD231_PRODUCTION_GREEN"
+  },
+  "future_queue": {
+    "first_build": 232,
+    "last_build": 232,
+    "exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "b67c23231d06f9faaf2952784878c11784936c48",
+      "tree": "42d45f7d521b4f93a891cea9351dc65f656f89c6",
+      "system_gate_run": 35681244435,
+      "quality_run": 35681244619,
+      "it_admin_runtime_run": 35681244610,
+      "repository_hygiene_run": 35681244451,
+      "build_specific_proof_run": 35681244469,
+      "business_exit": "HOLD_NO_QUALIFYING_REAL_RUN",
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "release": 467,
+      "build": 230,
+      "title": "Cost, Margin, QA & Knowledge Evidence Adoption",
+      "authority": "release467-build230-cost-margin-qa-knowledge-evidence-adoption.json",
+      "main_sha": "eab246604f1fd3a7d4762d17ee4868451f87584b",
+      "tree_sha": "42d45f7d521b4f93a891cea9351dc65f656f89c6",
+      "production_pages_deploy_run": 35681417751,
+      "production_live_resource_integrity_run": 35681463987,
+      "products_browser_proof_run": 35681464032,
+      "products_route_proof_run": 35681464036,
+      "build_specific_proof_run": 35681417827,
+      "business_exit": "HOLD_NO_QUALIFYING_REAL_RUN",
+      "state": "PRODUCTION_GREEN",
+      "role": "CURRENT_PRODUCTION_BASELINE"
+    }
+  }
+}

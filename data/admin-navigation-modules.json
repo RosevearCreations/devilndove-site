@@ -255,6 +255,10 @@
               "label": "Cost, Margin, QA & Knowledge Evidence Adoption"
             },
             {
+              "href": "/admin/public-story-activation/",
+              "label": "Workshop Journal & Capability Case-Study Activation"
+            },
+            {
               "href": "/admin/custom-request/",
               "label": "Custom Requests"
             },
