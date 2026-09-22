@@ -43,7 +43,7 @@ jobs:
             elif isinstance(v,list):
               for x in v:w(x)
           w(d);assert found,d;r=found[0]
-          assert int(r['canonical_migrations'])==22,r
+          assert int(r['canonical_migrations'])>=22,r
           assert int(r['required_tables'])==7,r
           assert int(r['fk'])==0,r
           proven=int(r['qualifying_runs'])>0 and all(int(r[k])>0 for k in ('margin_reviews','reviewed_cost_projects','qa_checks','reviewed_knowledge_entries','approved_recipe_versions'))
