@@ -207,7 +207,7 @@ if (window.location.pathname.startsWith('/admin')) {
   void import('/public/js/admin-workspace-command-palette-v122.js?v=467b122')
     .catch((error) => console.warn('[DD Build 122] admin workspace navigation unavailable', error));
 
-  void import('/public/js/admin-context-help.js?v=467b233-universal-help')
+  void import('/public/js/admin-context-help.js?v=467b234-workflow-recovery')
     .catch((error) => console.warn('[DD help] contextual help unavailable', error));
 
   if (!leanStartup) {
