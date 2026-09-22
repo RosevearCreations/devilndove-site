@@ -1,1 +1,47 @@
-name: Release 467 Build 228 First Real Custom Work Route-to-Proof Pilot\non:\n  pull_request:\n    branches: [dev, main]\n  push:\n    branches: [dev, main]\n  workflow_dispatch:\npermissions: {contents: read}\njobs:\n  source-contract:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v7\n      - uses: actions/setup-python@v7\n        with: {python-version: '3.x'}\n      - uses: actions/setup-node@v7\n        with: {node-version: '24'}\n      - run: python scripts/release467_build228_gate.py\n      - run: python scripts/release467_build227_gate.py\n      - run: python scripts/release467_build213_gate.py\n      - run: python scripts/release467_build211_gate.py\n  development-d1-route-to-proof-pilot:\n    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}\n    runs-on: ubuntu-latest\n    env:\n      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787\n      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}\n    steps:\n      - uses: actions/checkout@v7\n      - run: |\n          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM d1_migrations) canonical_migrations,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('custom_requests','custom_request_manufacturing_triage','custom_request_route_processes','custom_request_quote_drafts','custom_request_proof_versions')) required_tables,(SELECT COUNT(*) FROM pragma_foreign_key_check) fk,(SELECT COUNT(*) FROM custom_requests WHERE lower(COALESCE(status,'new')) NOT IN ('declined','archived')) active_custom_requests,(SELECT COUNT(DISTINCT custom_request_id) FROM custom_request_manufacturing_triage WHERE triage_status='reviewed') reviewed_triage_requests,(SELECT COUNT(DISTINCT custom_request_id) FROM custom_request_route_processes) routed_requests,(SELECT COUNT(DISTINCT custom_request_id) FROM custom_request_quote_drafts) quoted_requests,(SELECT COUNT(DISTINCT custom_request_id) FROM custom_request_proof_versions) proofed_requests,(SELECT COUNT(DISTINCT custom_request_id) FROM custom_request_proof_versions WHERE proof_status='approved') customer_approved_requests;" > /tmp/b228.json\n          python - <<'PY'\n          import json\n          d=json.load(open('/tmp/b228.json')); found=[]\n          def w(v):\n            if isinstance(v,dict):\n              if all(k in v for k in ('canonical_migrations','required_tables','fk','active_custom_requests','reviewed_triage_requests','routed_requests','quoted_requests','proofed_requests','customer_approved_requests')): found.append(v)\n              for x in v.values(): w(x)\n            elif isinstance(v,list):\n              for x in v:w(x)\n          w(d); assert found,d; r=found[0]\n          assert int(r['canonical_migrations'])==22,r\n          assert int(r['required_tables'])==5,r\n          assert int(r['fk'])==0,r\n          state='HOLD_NO_REAL_REQUEST' if int(r['active_custom_requests'])==0 else 'REAL_REQUEST_PRESENT_FOR_PILOT'\n          print('BUILD 228 DEVELOPMENT ROUTE-TO-PROOF PILOT: GREEN',state,r)\n          PY\n
+name: Release 467 Build 228 First Real Custom Work Route-to-Proof Pilot
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.x'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - run: python scripts/release467_build228_gate.py
+      - run: python scripts/release467_build227_gate.py
+      - run: python scripts/release467_build213_gate.py
+      - run: python scripts/release467_build211_gate.py
+  development-d1-route-to-proof-pilot:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - run: |
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM d1_migrations) canonical_migrations,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('custom_requests','custom_request_manufacturing_triage','custom_request_route_processes','custom_request_quote_drafts','custom_request_proof_versions')) required_tables,(SELECT COUNT(*) FROM pragma_foreign_key_check) fk,(SELECT COUNT(*) FROM custom_requests WHERE lower(COALESCE(status,'new')) NOT IN ('declined','archived')) active_custom_requests,(SELECT COUNT(DISTINCT custom_request_id) FROM custom_request_manufacturing_triage WHERE triage_status='reviewed') reviewed_triage_requests,(SELECT COUNT(DISTINCT custom_request_id) FROM custom_request_route_processes) routed_requests,(SELECT COUNT(DISTINCT custom_request_id) FROM custom_request_quote_drafts) quoted_requests,(SELECT COUNT(DISTINCT custom_request_id) FROM custom_request_proof_versions) proofed_requests,(SELECT COUNT(DISTINCT custom_request_id) FROM custom_request_proof_versions WHERE proof_status='approved') customer_approved_requests;" > /tmp/b228.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/b228.json')); found=[]
+          def w(v):
+            if isinstance(v,dict):
+              if all(k in v for k in ('canonical_migrations','required_tables','fk','active_custom_requests','reviewed_triage_requests','routed_requests','quoted_requests','proofed_requests','customer_approved_requests')): found.append(v)
+              for x in v.values(): w(x)
+            elif isinstance(v,list):
+              for x in v:w(x)
+          w(d); assert found,d; r=found[0]
+          assert int(r['canonical_migrations'])==22,r
+          assert int(r['required_tables'])==5,r
+          assert int(r['fk'])==0,r
+          state='HOLD_NO_REAL_REQUEST' if int(r['active_custom_requests'])==0 else 'REAL_REQUEST_PRESENT_FOR_PILOT'
+          print('BUILD 228 DEVELOPMENT ROUTE-TO-PROOF PILOT: GREEN',state,r)
+          PY
