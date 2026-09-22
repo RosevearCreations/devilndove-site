@@ -53,7 +53,12 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           body=Path('.github/workflows/release467-build233-universal-help-qol.yml').read_text()
-          forbidden=('wrangler d1 execute','bucket.put(','bucket.delete(','bucket.list(')
+          forbidden=(
+              'wrangler' + ' d1 execute',
+              'bucket.' + 'put(',
+              'bucket.' + 'delete(',
+              'bucket.' + 'list(',
+          )
           found=[x for x in forbidden if x in body]
           if found: raise SystemExit(f'Provider-spend token found: {found}')
           print('BUILD 233 CI D1 PROVIDER QUERY: ZERO')
