@@ -141,7 +141,7 @@
   "next_build": 232,
   "next_build_state": "COMPLETED_QUEUE_EXHAUSTED",
   "next_build_title": "Manufacturing Outcomes Review & Roadmap Renewal",
-  "promotion_state": "BUILD232_DEVELOPMENT_MEASURED_GREEN_PENDING_PRODUCTION",
+  "promotion_state": "BUILD232_MEASURED_GREEN_NOT_YET_PRODUCTION",
   "successor_scope_state": "AUTONOMOUS_QUEUE_EXHAUSTED",
   "measured_closure": {
     "source_build": 232,
