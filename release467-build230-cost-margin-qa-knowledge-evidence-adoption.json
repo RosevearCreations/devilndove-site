@@ -80,12 +80,12 @@
       "sha": "4a195f435c4491408db6c39dadc1d874d166cf36",
       "tree": "2ec97031a2c774fc2920a03d6fc72d63998421b8",
       "system_gate_run": 35677766703,
-      "current_application_quality_run": 35677766653,
-      "it_admin_runtime_proof_run": 35677766460,
-      "branch_hygiene_run": 35677766514,
       "build_specific_proof_run": 35677766604,
       "business_exit": "HOLD_NO_REAL_PROJECT",
-      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+      "quality_run": 35677766653,
+      "it_admin_runtime_run": 35677766460,
+      "repository_hygiene_run": 35677766514
     },
     "production": {
       "release": 467,
