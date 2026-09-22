@@ -51,3 +51,16 @@ Public HTML receives the client-only help layer from the shared Pages middleware
 A floating **ⓘ Help** link points shoppers/members to `/help/` and admin/creator users to `/admin/help/`. Contextual triggers remain local to the term or method being explained.
 
 Product and presentation media help deliberately preserves authority boundaries: Product gallery/crop work belongs to Product Media; non-Product workshop/site photography belongs to Media & Content Studio.
+
+## Build 233 application-wide page-level coverage
+
+The shared implementation now supplies a page-level circular ⓘ explanation for every meaningful page with an H1 when the shared runtime is active. This is a fallback/overview layer; specific field and term help remains local and more precise.
+
+Audience separation is explicit:
+
+- public/customer routes use **ⓘ Customer Help** and `/help/` for shopping, accounts, orders, custom requests, gift cards, pickup and contact guidance;
+- Creator/Admin routes use **ⓘ Creator Help** and `/admin/help/` for Creator, Storefront, Operations, Finance, I.T. and administration guidance.
+
+Page profiles explain purpose, authority boundaries, what the screen can change, what help itself never changes, and where the operator/customer should go next. The runtime remains client-only and performs no fetch/API call or business-data/provider mutation.
+
+Build 233 does not create another help engine. The existing declarative `data-context-help` extension and shared term library remain authoritative for detailed local help.

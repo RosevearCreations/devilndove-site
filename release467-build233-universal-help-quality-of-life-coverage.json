@@ -1,0 +1,71 @@
+{
+  "release": 467,
+  "build": 233,
+  "title": "Universal Help & Quality-of-Life Coverage",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build233-universal-help-quality-of-life-coverage",
+  "predecessor": {
+    "build": 232,
+    "title": "Manufacturing Outcomes Review & Roadmap Renewal",
+    "production_main_sha": "d5e9922b629f99c5653f5b884861a2c18358b44f",
+    "production_tree_sha": "3fcfd435a8618dc64244f53d0ceca1379878dcdd",
+    "state": "PRODUCTION_GREEN"
+  },
+  "authorization": {
+    "type": "EXPLICIT_OWNER_NEW_CAPABILITY",
+    "reason": "Owner requested a new refinement roadmap beginning with quality-of-life enhancements and a robust application-wide contextual help system.",
+    "roadmap": "docs/operations/RELEASE_467_REFINEMENT_AUTONOMOUS_BUILDS_233_248.md",
+    "next_build_after_233": 234,
+    "future_queue_exhausted": false
+  },
+  "scope": {
+    "customer_help_centre": "/help/",
+    "creator_and_up_help_centre": "/admin/help/",
+    "shared_context_help_runtime": "/public/js/admin-context-help.js",
+    "public_injection": "/functions/_middleware.js",
+    "admin_injection": "/public/js/site-auth-ui.js",
+    "page_level_help": true,
+    "field_term_help_retained": true,
+    "help_is_read_only": true,
+    "non_product_image_register": "SITE_WIDE_NON_PRODUCT_IMAGE_REQUIREMENTS.md"
+  },
+  "safety": {
+    "schema_change": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "publication": false,
+    "product_mutation": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build233_gate.py",
+    "workflow": ".github/workflows/release467-build233-universal-help-qol.yml",
+    "canonical_migrations": 22
+  },
+  "starting_point": {
+    "development": {
+      "release": 467,
+      "build": 232,
+      "title": "Manufacturing Outcomes Review & Roadmap Renewal",
+      "sha": "f0067f89f94a9bb7ef7ad14510ec1cfb023d8cb8",
+      "tree": "3fcfd435a8618dc64244f53d0ceca1379878dcdd",
+      "system_gate_run": 35739960877,
+      "quality_run": 35739960401,
+      "it_admin_runtime_run": 35739960703,
+      "repository_hygiene_run": 35739960845,
+      "build_specific_proof_run": 35739960789,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "build": 232,
+      "main_sha": "d5e9922b629f99c5653f5b884861a2c18358b44f",
+      "tree_sha": "3fcfd435a8618dc64244f53d0ceca1379878dcdd",
+      "production_pages_deploy_run": 35740221037,
+      "production_live_resource_integrity_run": 35740304575,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}
