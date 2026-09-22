@@ -1,46 +1,30 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import json,re,subprocess,sys
+import json,subprocess,sys
 R=Path(__file__).resolve().parents[1];F=[]
+DEV='db896df37a89e3477d77a26707277d0ca65eed5d';TREE='414d747065b3d95002224fa4975c6da86a5d7c79';MAIN='9b4a12fe90b207006c9593d7440f56bf681c43aa'
+PROOFS={'system_gate_run':35675467679,'current_application_quality_run':35675467644,'it_admin_runtime_proof_run':35675467795,'branch_hygiene_run':35675467898}
 def q(x,m):
  if not x:F.append(m)
-def t(p):return (R/p).read_text(encoding='utf-8')
-def l(p):return json.loads(t(p))
-p=l('current-development-authority.json')
-b=l('release467-build228-first-real-custom-work-route-to-proof-pilot.json')
-m=l('migrations/canonical/manifest.json')
-a=t('functions/api/admin/custom-work-route-proof-pilot.js')
-u=t('public/js/admin-custom-work-route-proof-pilot-build228.js')
-h=t('admin/custom-work-pilot/index.html')
-n=t('data/admin-navigation-modules.json')
-s=t('scripts/current_system_gate_provenance_gate.py')
-d=t('docs/operations/RELEASE_467_BUILD_228_FIRST_REAL_CUSTOM_WORK_ROUTE_TO_PROOF_PILOT.md')
-q(p.get('build')==228 and p.get('title')=='First Real Custom Work Route-to-Proof Pilot','pointer identity')
-q(p.get('promotion_state')=='BUILD228_CANDIDATE_NOT_YET_VERIFIED','pointer fail-closed state')
-q(b.get('state')=='DEVELOPMENT_CANDIDATE','Build 228 authority candidate state')
-pre=b.get('predecessor') or {}
-q(pre.get('production_main_sha')=='2fbbb950b2598a518d14078b0252a8159472fbb7' and pre.get('promotion_pr')==301,'Build 227 promotion boundary drifted')
-files=[x.get('file') for x in m.get('migrations',[]) if isinstance(x,dict)]
-q(len(files)==22 and files[-1]=='0022_release467_capability_profile_coverage_closure.sql','Build 228 must add no migration')
-q('export async function onRequestGet' in a and 'onRequestPost' not in a,'Build 228 API must remain GET-only')
-for token in ('HOLD_NO_REAL_REQUEST','PROVEN_REAL_REVIEWED_EVIDENCE','custom_request_manufacturing_triage','custom_request_route_processes','custom_request_quote_drafts','custom_request_proof_versions','synthetic_business_records:false'):
- q(token in a,'Build 228 API missing '+token)
-for forbidden in ('INSERT INTO','UPDATE ','DELETE FROM','CREATE TABLE','ALTER TABLE','DROP TABLE','bucket.put(','bucket.delete('):
- q(forbidden not in a,'Build 228 API mutation/DDL boundary crossed: '+forbidden)
-q('Release 467 Build 228' in h and len(re.findall(r'<h1(?:\\s|>)',h,re.I))==1,'Build 228 page identity/one-H1')
-q('/public/js/admin-custom-work-route-proof-pilot-build228.js?v=467b228' in h,'Build 228 page client activation')
-q('/admin/custom-work-pilot/' in n and 'Route-to-Proof Pilot' in n,'Build 228 navigation')
-q("run_current_contract('scripts/release467_build228_gate.py','Release 467 Build 228')" in s,'Current System Gate must invoke Build 228')
-q('HOLD_NO_REAL_REQUEST' in d and 'Builds **229–232** remain planned' in d,'Build 228 operations doc')
+def t(p):
+ f=R/p
+ if not f.is_file():F.append('missing '+p);return''
+ return f.read_text(encoding='utf-8',errors='replace')
+def l(p):return json.loads(t(p) or '{}')
+p=l('current-development-authority.json');b=l('release467-build228-first-real-custom-work-route-to-proof-pilot.json');m=l('migrations/canonical/manifest.json')
+q(int(p.get('build') or 0)>=228,'current pointer regressed before Build 228')
+q('release467-build228-first-real-custom-work-route-to-proof-pilot.json' in (p.get('current_release_authorities') or []),'successor pointer lost Build 228 authority')
+q(b.get('build')==228 and b.get('state')=='PRODUCTION_GREEN','Build 228 retained authority must be Production GREEN')
+final=b.get('final_closure') or {};q(final.get('dev_sha')==DEV and final.get('tree_sha')==TREE and (final.get('proofs') or {})==PROOFS and int(final.get('build_specific_proof_run') or 0)==35675467986,'Build 228 exact Development closure drifted')
+q(final.get('business_exit')=='HOLD_NO_REAL_REQUEST','Build 228 bounded business exit drifted')
+prod=b.get('production_checkpoint') or {};q(prod.get('main_sha')==MAIN and prod.get('tree_sha')==TREE and int(prod.get('production_pages_deploy_run') or 0)==35675671813 and int(prod.get('production_live_resource_integrity_run') or 0)==35675740985 and int(prod.get('build_specific_proof_run') or 0)==35675671688,'Build 228 Production closure drifted')
+q(prod.get('business_exit')=='HOLD_NO_REAL_REQUEST','Build 228 Production business exit drifted')
+mf=[x.get('file') for x in m.get('migrations',[]) if isinstance(x,dict)];q(len(mf)==22 and mf[-1]=='0022_release467_capability_profile_coverage_closure.sql','Build 228 retained canonical stream drifted')
+a=t('functions/api/admin/custom-work-route-proof-pilot.js');q('export async function onRequestGet' in a and 'onRequestPost' not in a,'Build 228 retained API must remain GET-only')
+for forbidden in ('INSERT INTO','UPDATE ','DELETE FROM','CREATE TABLE','ALTER TABLE','DROP TABLE','bucket.put(','bucket.delete('):q(forbidden not in a,'Build 228 retained API crossed mutation boundary: '+forbidden)
 for zpath in ('functions/api/admin/custom-work-route-proof-pilot.js','public/js/admin-custom-work-route-proof-pilot-build228.js'):
- r=subprocess.run(['node','--check',str(R/zpath)],capture_output=True,text=True)
- q(r.returncode==0,zpath+' syntax: '+(r.stderr or r.stdout)[-600:])
+ r=subprocess.run(['node','--check',str(R/zpath)],capture_output=True,text=True);q(r.returncode==0,zpath+' syntax: '+(r.stderr or r.stdout)[-600:])
 if F:
- print('RELEASE 467 BUILD 228 FIRST REAL CUSTOM WORK ROUTE-TO-PROOF PILOT: FAIL')
- [print('-',x) for x in F]
- sys.exit(1)
-print('RELEASE 467 BUILD 228 FIRST REAL CUSTOM WORK ROUTE-TO-PROOF PILOT: PASS')
-print('Exit policy: REAL reviewed evidence OR HOLD_NO_REAL_REQUEST with software acceptance GREEN')
-print('Canonical migration: NONE / remains 0001-0022')
-print('Mutation authority: NONE / GET-ONLY PILOT EVIDENCE')
-print('Future queue exhausted: NO / Builds 229-232 remain planned')
+ print('RELEASE 467 BUILD 228 RETAINED ROUTE-TO-PROOF CLOSURE: FAIL');[print('-',x) for x in F];sys.exit(1)
+print('RELEASE 467 BUILD 228 RETAINED ROUTE-TO-PROOF CLOSURE: PASS')
+print('Business exit: HOLD_NO_REAL_REQUEST / no synthetic records')

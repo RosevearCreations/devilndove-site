@@ -12,27 +12,21 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 228 candidate
+## Current Release 467 restart authority — Build 229 candidate
 
-Build 227 **Manufacturing Adoption Command Centre** is the exact fully verified Development and Production predecessor.
+Build 228 **First Real Custom Work Route-to-Proof Pilot** is the exact verified predecessor:
 
-- Development SHA: `86a599178cfe473afc4dba15890d47db66f015ea`
-- Shared tree: `5694ea94c097505cc8db6795e839073fb210f746`
-- System Gate: `35671994146`
-- Current Application Quality Proof: `35671994173`
-- I.T. Admin Runtime Proof: `35671994145`
-- Repository Branch Hygiene: `35671994205`
-- Build 227 Development proof: `35671994164`
-- Production main SHA: `2fbbb950b2598a518d14078b0252a8159472fbb7`
-- Production Pages Deploy: `35672279658`
-- Production Live Resource Integrity: `35672342976`
-- Product Browser Production Proof: `35672342991`
-- Product Route Production Proof: `35672343003`
-- Build 227 Production proof: `35672279694`
+- Development SHA: `db896df37a89e3477d77a26707277d0ca65eed5d`
+- Shared tree: `414d747065b3d95002224fa4975c6da86a5d7c79`
+- Development proofs: System `35675467679`, Quality `35675467644`, I.T. `35675467795`, Hygiene `35675467898`, Build proof `35675467986`
+- Production main: `9b4a12fe90b207006c9593d7440f56bf681c43aa`
+- Production proofs: Pages `35675671813`, Live Resources `35675740985`, Product Browser `35675740992`, Product Route `35675740994`, Build proof `35675671688`
+- Business exit: `HOLD_NO_REAL_REQUEST`
+- Canonical migrations remain **0001–0022**.
 
-Build 228 **First Real Custom Work Route-to-Proof Pilot** is a GET-only pilot over the existing Build 210/211/213/215 Custom Work authorities. It uses legitimate operator-entered work only. When no legitimate request exists, `HOLD_NO_REAL_REQUEST` is a valid bounded exit; no synthetic customer, route, quote, proof or approval record may be created.
+Build 229 **First Creative Project Prototype-to-Run Pilot** is GET-only and reuses the existing Build 212/214/219/220 Creative Project manufacturing authorities. It may report `HOLD_NO_REAL_PROJECT` when no legitimate operator-entered project exists. It must not fabricate projects, lifecycle transitions, travelers, production runs, QA checks or handoffs.
 
-Build 229 remains blocked until Build 228 is exact-SHA Production GREEN. The future queue has not run out; Builds 229–232 remain planned.
+Build 230 remains blocked until Build 229 is exact-SHA Production GREEN. The future queue has not run out; Builds 230–232 remain planned.
 
 ## Retained historical provenance — Build 171
 
