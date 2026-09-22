@@ -1,27 +1,27 @@
-// Release 467 Build 224 — current release/restart authority over exact Build 223 GREEN predecessor.
+// Release 467 Build 227 — current release/restart authority over exact Build 226 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=226;
-const TITLE='Capability Profile Coverage Closure';
-const AUTHORITY='release467-build226-capability-profile-coverage-closure';
-const EVIDENCE_ID='r467-b225-e759f09d-35647494752-35647907774';
+const BUILD=227;
+const TITLE='Manufacturing Adoption Command Centre';
+const AUTHORITY='release467-build227-manufacturing-adoption-command-centre';
+const EVIDENCE_ID='r467-b226-a3f220d-35667972994-35668227904';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:225,title:'Storefront Launch-Set Remediation Execution II',state:'DEVELOPMENT_GREEN',
-  dev_sha:'e759f09d069170fe04092651f87fe727d8ecdc80',tree_sha:'ba60ec9147def32da518f1c993f0099244e858f1',
-  system_gate_run:35647494752,current_application_quality_run:35647494738,it_admin_runtime_proof_run:35647495428,
-  branch_hygiene_run:35647494747,build_specific_proof_run:35647494740,proof_state:'EXACT_BRANCH_HEAD_GREEN',
+  release:467,build:226,title:'Capability Profile Coverage Closure',state:'DEVELOPMENT_GREEN',
+  dev_sha:'a3f220deb8c4cef7a2143ab1960c2ea33454ad6d',tree_sha:'c21821ae1ac1ba931b1f38e8fb3b9641bd3b4b3f',
+  system_gate_run:35667972994,current_application_quality_run:35667973054,it_admin_runtime_proof_run:35667973089,
+  branch_hygiene_run:35667973130,build_specific_proof_run:35667972987,proof_state:'EXACT_BRANCH_HEAD_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:225,title:'Storefront Launch-Set Remediation Execution II',state:'PRODUCTION_GREEN',
-  main_sha:'82e819c33ef9d90ee440b73cb47ded1450cf9c2e',tree_sha:'ba60ec9147def32da518f1c993f0099244e858f1',
-  production_pages_deploy_run:35647907774,production_live_resource_integrity_run:35648076498,
-  products_browser_proof_run:35648079711,products_route_proof_run:35648076097,build_specific_proof_run:35647907634,remote_d1_queries:0
+  release:467,build:226,title:'Capability Profile Coverage Closure',state:'PRODUCTION_GREEN',
+  main_sha:'8a4adf0a9108f482edd7aaa0c2f7e27d843a9d2e',tree_sha:'c21821ae1ac1ba931b1f38e8fb3b9641bd3b4b3f',
+  production_pages_deploy_run:35668227904,production_live_resource_integrity_run:35668338010,
+  products_browser_proof_run:35668337892,products_route_proof_run:35668337966,build_specific_proof_run:35668227824,remote_d1_queries:1
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,9 +31,9 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 223 Capability Case Studies Workshop Journal Search Richness Proof'
+  'Release 467 Build 226 Capability Profile Coverage Closure'
 ]);
-const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql']);
+const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
   {key:'paypal_sandbox',state:'HOLD_EXTERNAL'},
@@ -55,26 +55,26 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:225,title:'Storefront Launch-Set Remediation Execution II',
+    release:467,build:226,title:'Capability Profile Coverage Closure',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35647494752,current_application_quality_run:35647494738,
-      it_admin_runtime_proof_run:35647495428,branch_hygiene_run:35647494747,build223_proof_run:35647494740
+      system_gate_run:35667972994,current_application_quality_run:35667973054,
+      it_admin_runtime_proof_run:35667973089,branch_hygiene_run:35667973130,build226_proof_run:35667972987
     },
     production_proofs:{
-      production_pages_deploy_run:35647907774,production_live_resource_integrity_run:35648076498,
-      products_browser_proof_run:35648079711,products_route_proof_run:35648076097,build223_proof_run:35647907634
+      production_pages_deploy_run:35668227904,production_live_resource_integrity_run:35668338010,
+      products_browser_proof_run:35668337892,products_route_proof_run:35668337966,build226_proof_run:35668227824
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
     canonical_migration_authority:'migrations/canonical/manifest.json + scripts/d1_migrate.py',
-    canonical_migrations:CANONICAL_MIGRATIONS.slice(0,21),
+    canonical_migrations:CANONICAL_MIGRATIONS.slice(0,22),
     external_lanes:Object.fromEntries(EXTERNAL_POLICY.map((x)=>[x.key,x.state])),
     runtime_closure:{
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
-      background_polling:false,automatic_inventory_assignment:false,build223_capability_case_studies:true
+      background_polling:false,automatic_inventory_assignment:false,build226_capability_profile_coverage:true
     },
-    next_build:'Build 224 measurement is GREEN; Builds 225-232 are planned from evidence and blocked until Build 224 is exact-SHA Production GREEN.'
+    next_build:'Build 228 is blocked until Build 227 is exact-SHA Production GREEN; Builds 228-232 remain planned.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 223 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 226 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -98,13 +98,13 @@ function markdownReport(pack){
 - Current Application Quality Proof: ${pack.development_proofs.current_application_quality_run}
 - I.T. Admin Runtime Proof: ${pack.development_proofs.it_admin_runtime_proof_run}
 - Repository Branch Hygiene: ${pack.development_proofs.branch_hygiene_run}
-- Build 223 Development Proof: ${pack.development_proofs.build223_proof_run}
+- Build 226 Development Proof: ${pack.development_proofs.build226_proof_run}
 - Production Pages Deploy: ${pack.production_proofs.production_pages_deploy_run}
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Build 223 Production Proof: ${pack.production_proofs.build223_proof_run}
-- Current candidate: Build 224 Manufacturing-Era Closure & Next Roadmap
+- Build 226 Production Proof: ${pack.production_proofs.build226_proof_run}
+- Current candidate: Build 227 Manufacturing Adoption Command Centre
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -116,14 +116,14 @@ export async function onRequestGet(context){
   const base=baseResponse.ok?await baseResponse.json().catch(()=>({})):{};
   const diagnostic=diagnosticResponse.ok?await diagnosticResponse.json().catch(()=>({})):{};
   const data={
-    release:RELEASE,build:BUILD,title:TITLE,ok:true,authority:AUTHORITY,state:'DEVELOPMENT_MEASURED_CLOSURE_CANDIDATE',
+    release:RELEASE,build:BUILD,title:TITLE,ok:true,authority:AUTHORITY,state:'DEVELOPMENT_ADOPTION_CANDIDATE',
     release_authority:{
-      current_operator:{release:RELEASE,build:BUILD,title:TITLE,state:'DEVELOPMENT_MEASURED_CLOSURE_CANDIDATE'},
+      current_operator:{release:RELEASE,build:BUILD,title:TITLE,state:'DEVELOPMENT_ADOPTION_CANDIDATE'},
       accepted_development:ACCEPTED_DEVELOPMENT,verified_development:VERIFIED_DEVELOPMENT,production:PRODUCTION,
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:226,title:TITLE,authority:'release467-build224-manufacturing-era-closure-next-roadmap.json'},
+        current_closure_candidate:{release:467,build:227,title:TITLE,authority:'release467-build227-manufacturing-adoption-command-centre.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -142,12 +142,12 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 223 source is the exact last fully verified Development checkpoint.',
-      'Build 223 Production is GREEN on the identical source tree through canonical migration 0021.',
-      'Development proofs: System 35647494752, Quality 35647494738, I.T. 35647495428, Hygiene 35647494747.',
-      'Production proofs: Pages 35647907774, Live Resources 35648076498, Product Browser 35648079711, Product Route 35648076097.',
-      'Build 224 Manufacturing-Era Closure & Next Roadmap is the active measured Development closure candidate.',
-      'Build 224 measurement is GREEN at SHA 95fd199e4345a6e191996f5de7ef56057a0ffde8: 8,781/25,000 provider rows, zero D1/R2/schema mutation; Builds 225-232 are planned but blocked until Production GREEN.'
+      'Build 226 source is the exact last fully verified Development checkpoint.',
+      'Build 226 Production is GREEN on the identical source tree through canonical migration 0022.',
+      'Development proofs: System 35667972994, Quality 35667973054, I.T. 35667973089, Hygiene 35667973130.',
+      'Production proofs: Pages 35668227904, Live Resources 35668338010, Product Browser 35668337892, Product Route 35668337966.',
+      'Build 227 Manufacturing Adoption Command Centre is the active read-only Development candidate.',
+      'Build 227 adds no schema migration or synthetic business records; Builds 228-232 remain planned and blocked until Build 227 is Production GREEN.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,

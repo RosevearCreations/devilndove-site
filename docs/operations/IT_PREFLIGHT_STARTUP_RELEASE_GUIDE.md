@@ -12,34 +12,34 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 226 candidate
+## Current Release 467 restart authority — Build 227 candidate
 
-Build 225 **Storefront Launch-Set Remediation Execution II** is the exact fully verified Development and Production predecessor.
+Build 226 **Capability Profile Coverage Closure** is the exact fully verified Development and Production predecessor.
 
-- Development SHA: `e759f09d069170fe04092651f87fe727d8ecdc80`
-- Shared tree: `ba60ec9147def32da518f1c993f0099244e858f1`
-- System Gate: `35647494752`
-- Current Application Quality Proof: `35647494738`
-- I.T. Admin Runtime Proof: `35647495428`
-- Repository Branch Hygiene: `35647494747`
-- Build 225 Development proof: `35647494740`
-- Exact Development preview: `https://89ec1531.devilndove-site.pages.dev`
-- Production main SHA: `82e819c33ef9d90ee440b73cb47ded1450cf9c2e`
-- Production Pages Deploy: `35647907774`
-- Production Live Resource Integrity: `35648076498`
-- Product Browser Proof: `35648079711`
-- Product Route Proof: `35648076097`
-- Build 225 Production proof: `35647907634`
-- Exact Production deployment: `https://2c35ccc8.devilndove-site.pages.dev`
+- Development SHA: `a3f220deb8c4cef7a2143ab1960c2ea33454ad6d`
+- Shared tree: `c21821ae1ac1ba931b1f38e8fb3b9641bd3b4b3f`
+- System Gate: `35667972994`
+- Current Application Quality Proof: `35667973054`
+- I.T. Admin Runtime Proof: `35667973089`
+- Repository Branch Hygiene: `35667973130`
+- Build 226 Development proof: `35667972987`
+- Exact Development preview: `https://d041c726.devilndove-site.pages.dev`
+- Production main SHA: `8a4adf0a9108f482edd7aaa0c2f7e27d843a9d2e`
+- Production Pages Deploy: `35668227904`
+- Production Live Resource Integrity: `35668338010`
+- Product Browser Proof: `35668337892`
+- Product Route Proof: `35668337966`
+- Build 226 Production proof: `35668227824`
+- Exact Production deployment: `https://eb805f65.devilndove-site.pages.dev`
 
-Build 226 **Capability Profile Coverage Closure** closes the measured 21/22 public capability-profile gap through the existing Build 209 authority. The uncovered canonical process is `photography-content`. Migration 0022 is data-only and creates no parallel taxonomy.
+Build 227 **Manufacturing Adoption Command Centre** is a GET-only operator adoption/readiness layer over the existing Build 210–220 authorities. It distinguishes `NO_REAL_WORK_YET` from `BROKEN_EXISTING_AUTHORITY`, exposes missing prerequisites and next valid existing workflow actions, and creates no synthetic Production business records. Build 227 adds no schema migration; the canonical stream remains 0001–0022.
 
-Build 227 remains blocked until Build 226 is exact-SHA Production GREEN. The future queue has not run out; Builds 227–232 remain planned.
+Build 228 remains blocked until Build 227 is exact-SHA Production GREEN. The future queue has not run out; Builds 228–232 remain planned.
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_END -->
 
 ## Retained historical provenance — Build 171
 
-Build 171 **Release & Restart Authority Convergence** remains historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It does not override current Build 224 truth.
+Build 171 **Release & Restart Authority Convergence** remains historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It does not override current Build 227 truth.
 
 ## Retained historical provenance — Builds 192–193
 
