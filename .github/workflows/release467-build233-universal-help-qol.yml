@@ -1,0 +1,61 @@
+name: Release 467 Build 233 Universal Help QoL
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'public/js/admin-context-help.js'
+      - 'public/js/site-auth-ui.js'
+      - 'functions/_middleware.js'
+      - 'help/index.html'
+      - 'admin/help/index.html'
+      - 'css/admin-context-help.css'
+      - 'docs/architecture/admin-context-help.md'
+      - 'docs/operations/RELEASE_467_BUILD_233_UNIVERSAL_HELP_QUALITY_OF_LIFE_COVERAGE.md'
+      - 'docs/operations/RELEASE_467_REFINEMENT_AUTONOMOUS_BUILDS_233_248.md'
+      - 'SITE_WIDE_NON_PRODUCT_IMAGE_REQUIREMENTS.md'
+      - 'release467-build233-universal-help-quality-of-life-coverage.json'
+      - 'scripts/release467_build233_gate.py'
+      - 'scripts/release467_build198_gate.py'
+      - 'scripts/current_help_hygiene_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - '.github/workflows/release467-build233-universal-help-qol.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - name: Prove Build 233 universal help and QoL coverage
+        run: python scripts/release467_build233_gate.py
+      - name: Retain current help hygiene
+        run: python scripts/current_help_hygiene_gate.py
+      - name: Retain Build 198 shared-help compatibility
+        run: python scripts/release467_build198_gate.py
+      - name: Retain Build 232 measured closure
+        run: python scripts/release467_build232_gate.py
+
+  no-provider-spend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Confirm Build 233 CI is source-only
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          body=Path('.github/workflows/release467-build233-universal-help-qol.yml').read_text()
+          forbidden=('wrangler d1 execute','bucket.put(','bucket.delete(','bucket.list(')
+          found=[x for x in forbidden if x in body]
+          if found: raise SystemExit(f'Provider-spend token found: {found}')
+          print('BUILD 233 CI D1 PROVIDER QUERY: ZERO')
+          print('BUILD 233 CI R2 MUTATION: ZERO')
+          PY
