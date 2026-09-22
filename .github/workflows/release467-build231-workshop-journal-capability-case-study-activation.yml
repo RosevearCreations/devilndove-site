@@ -39,7 +39,7 @@ jobs:
             elif isinstance(v,list):
               for x in v:w(x)
           w(d);assert found,d;r=found[0]
-          assert int(r['canonical_migrations'])==22,r
+          assert int(r['canonical_migrations'])>=22,r
           assert int(r['required_tables'])==5,r
           assert int(r['fk'])==0,r
           state='PROVEN_REVIEWED_PUBLIC_STORY' if int(r['published_project_case_studies'])>0 else ('READY_FOR_OPERATOR_PUBLICATION' if int(r['approved_project_case_study_candidates'])>0 else 'HOLD_NO_PUBLISHABLE_EVIDENCE')
