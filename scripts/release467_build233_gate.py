@@ -8,6 +8,7 @@ def text(path): return (ROOT/path).read_text(encoding='utf-8',errors='replace')
 def load(path): return json.loads(text(path))
 
 a=load('release467-build233-universal-help-quality-of-life-coverage.json')
+pointer=load('current-development-authority.json')
 h=text('public/js/admin-context-help.js')
 pub=text('help/index.html')
 adm=text('admin/help/index.html')
@@ -23,6 +24,10 @@ req(a.get('build')==233 and a.get('state') in ('DEVELOPMENT_CANDIDATE','DEVELOPM
 req(a.get('predecessor',{}).get('production_main_sha')=='d5e9922b629f99c5653f5b884861a2c18358b44f','Build 233 must start from exact Build 232 Production main')
 req(a.get('authorization',{}).get('type')=='EXPLICIT_OWNER_NEW_CAPABILITY','Build 233 owner authorization missing')
 req(a.get('authorization',{}).get('future_queue_exhausted') is False,'new refinement queue must remain open')
+start=(a.get('starting_point') or {}).get('development') or {}
+req(pointer.get('build')==233 and pointer.get('title')=='Universal Help & Quality-of-Life Coverage','current authority must identify Build 233')
+req(start.get('sha')==pointer.get('accepted_dev_sha') and start.get('tree')==pointer.get('accepted_dev_tree_sha'),'Build 233 starting Development checkpoint must match current pointer')
+req(int(start.get('system_gate_run') or 0)==int((pointer.get('acceptance') or {}).get('system_gate_run') or 0),'Build 233 starting System proof must match current pointer')
 for token in ('DD_PAGE_HELP_PROFILES','pageHelpProfile(path)','ensurePageLevelHelp(path, ordinal)','ⓘ Customer Help','ⓘ Creator Help','customer_shop','customer_custom','customer_account','creator_storefront','creator_workshop','creator_finance','creator_it'):
     req(token in h,f'shared help runtime missing {token}')
 req('fetch(' not in h and 'apiFetch' not in h,'contextual help must remain client-only/read-only')
