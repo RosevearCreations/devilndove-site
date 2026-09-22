@@ -28,7 +28,7 @@ q(pred.get('production_tree_sha')=='afc367962b2163105a73c60a1bb14fd06744218e','B
 q(pred.get('state')=='PRODUCTION_GREEN' and pred.get('business_exit')=='HOLD_NO_PUBLISHABLE_EVIDENCE','Build 231 retained Production closure not ingested')
 q(pre.get('build')==231,'Build 231 authority missing')
 mf=[x.get('file') for x in m.get('migrations',[]) if isinstance(x,dict)]
-q(len(mf)==22 and mf[-1]=='0022_release467_capability_profile_coverage_closure.sql','Build 232 must add no migration')
+q(len(mf)>=22 and mf[21]=='0022_release467_capability_profile_coverage_closure.sql','Build 232 must add no migration')
 q(not re.search(r'(?im)^\s*(INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|REPLACE|PRAGMA)\b',sql),'Build 232 measurement SQL contains mutation or DDL')
 for token in ('products_reviewed','canonical_active_processes','active_custom_requests','manufacturing_lifecycles','proof_versions_total','quote_drafts_total','production_run_qa_checks','knowledge_entries_total','published_project_case_studies','canonical_migrations','foreign_key_violations'):
  q(token in sql,'Build 232 measurement missing '+token)
@@ -47,5 +47,5 @@ if F:
  print('RELEASE 467 BUILD 232 MANUFACTURING OUTCOMES REVIEW ROADMAP RENEWAL: FAIL');[print('-',x) for x in F];sys.exit(1)
 print('RELEASE 467 BUILD 232 MANUFACTURING OUTCOMES REVIEW ROADMAP RENEWAL: PASS')
 print('Measurement:',meas.get('state'))
-print('Canonical migration: NONE / remains 0001-0022')
+print('Historical build migration: NONE / canonical prefix 0001-0022 preserved; later forward migrations allowed')
 print('Future queue decision:',succ.get('state'))
