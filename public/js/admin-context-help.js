@@ -114,6 +114,74 @@ function pageHelpProfile(path) {
   return DD_PAGE_HELP_PROFILES.customer_discovery;
 }
 
+const DD_WORKFLOW_HELP = Object.freeze([
+  { match:/\/admin\/(?:packaging-studio|packaging)\//, title:'Packaging workflow', owner:'/admin/packaging-studio/', body:[
+    'Start: open an existing Packaging project or create one from the correct reusable physical template.',
+    'Work: edit product wording, verified ingredient/INCI facts, artwork, dimensions, components and costs in their owning tabs.',
+    'Review: save a review version, check compliance warnings and preview at the real physical size.',
+    'Finish: record a 100% physical print test, approve the exact reviewed version, then export/reprint from that version.',
+    'Empty state: no project means start a Packaging project; it is not an error. Broken state: a failed load/save or unavailable D1/template message means recover the connection/migration first instead of creating duplicate projects.'
+  ]},
+  { match:/\/admin\/(?:product-editor|products|catalog-media|catalog)\//, title:'Product & media workflow', owner:'/admin/products/', body:[
+    'Start: choose the existing Product before editing facts or media.',
+    'Work: change Product facts in Product authority and gallery/crop/focal-point work in Product Media; do not create a duplicate Product to work around a failed screen.',
+    'Review: use readiness, image score and publication checks to see what is still missing.',
+    'Finish: save the intended Product/media state and use the existing explicit publication/release control only when its prerequisites pass.',
+    'Empty state: no selected Product means choose one. Broken state: failed reads, 503/resource-limit messages or stale data require refresh/recovery, not a replacement Product.'
+  ]},
+  { match:/\/admin\/(?:media-content-studio|content-studio|creation-media)\//, title:'Media & Content workflow', owner:'/admin/media-content-studio/', body:[
+    'Start: identify whether the media belongs to Product Media or non-Product Media & Content Studio.',
+    'Work: upload/assign only approved media and preserve source, consent and placement context.',
+    'Review: confirm alt text, placement, public-use/consent state and whether the asset is evidence or editorial illustration.',
+    'Finish: save the placement or handoff; publication remains an explicit downstream action.',
+    'Empty state: no approved media means capture/import evidence. Broken state: failed storage or placement requests should be retried only after the owning error is understood.'
+  ]},
+  { match:/\/admin\/(?:creative-process|creative-project|creative-assets|caip|creative-automation)\//, title:'Creator project workflow', owner:'/admin/creative-process/', body:[
+    'Start: open the existing Creative Project or create one only for a real piece/experiment.',
+    'Work: record real process, material, tool and evidence facts in the owning workflow.',
+    'Review: distinguish reviewed evidence from draft ideas, generated planning and private source media.',
+    'Finish: hand reviewed references to Content/Packaging/Manufacturing without copying the source authority.',
+    'Empty state: no real project evidence means wait for real work rather than synthesizing records. Broken state: failed reads/uploads require recovery before new evidence is entered.'
+  ]},
+  { match:/\/admin\/(?:custom-request|custom-work)\//, title:'Custom Work workflow', owner:'/admin/custom-request/', body:[
+    'Start: open the customer request and confirm intake/reference evidence.',
+    'Work: triage capability, supplied-item constraints, quote assumptions, proof and approval using the existing request.',
+    'Review: verify customer decisions and staff evidence before routing work forward.',
+    'Finish: progress only through explicit proof/quote/order/production gates.',
+    'Empty state: no active request is a normal no-work state. Broken state: missing request data or failed save should be recovered, not recreated under a new request.'
+  ]},
+  { match:/\/admin\/(?:inventory|supply|tool)\//, title:'Inventory, Supplies & Tools workflow', owner:'/admin/inventory-operations/', body:[
+    'Start: find the canonical Inventory/Tool/Supply record before receiving, consuming, assigning or servicing it.',
+    'Work: record the real stock, lot, source, usage or durable-tool lifecycle event in its existing authority.',
+    'Review: confirm quantity, unit, lot/source, process assignment and cost evidence before committing high-impact changes.',
+    'Finish: save the explicit movement/review and return to the owning job/project when applicable.',
+    'Empty state: no matching item means refine search or create a legitimate new inventory identity. Broken state: failed mutation means confirm whether it committed before retrying.'
+  ]},
+  { match:/\/admin\/(?:accounting|finance|month-end|order|customer-documents|business-health)\//, title:'Finance workflow', owner:'/admin/finance/', body:[
+    'Start: open the existing order, payment, statement or accounting period that owns the financial fact.',
+    'Work: prepare classifications, matches, documents and corrections without silently posting unfinished work.',
+    'Review: reconcile evidence and investigate differences before posting, locking or issuing an immutable document.',
+    'Finish: perform the explicit posting/issue/close action and retain its evidence.',
+    'Empty state: no transactions to review is normal. Broken state: failed financial mutations require confirmation of the authoritative state before any retry.'
+  ]},
+  { match:/\/admin\/(?:operations|today-tasks|runtime-incidents)\//, title:'Operations attention workflow', owner:'/admin/operations/', body:[
+    'Start: read What, Where, Age and Owner before changing an incident/review state.',
+    'Work: investigate the owning workspace and correct the cause.',
+    'Review: use safe read-only recheck where available and preserve evidence.',
+    'Finish: resolve/ignore only when the recorded evidence supports that status.',
+    'Empty state: no attention items is healthy. Broken state: an attention feed that failed to load must not be interpreted as zero incidents.'
+  ]},
+  { match:/\/admin\/(?:it|deploy|deployment|release|reliability|prelaunch|promotion|startup-readiness|safe-deploy|go-live)\//, title:'I.T. & release workflow', owner:'/admin/it/', body:[
+    'Start: identify the exact environment, SHA/tree, provider lane and current evidence state.',
+    'Work: diagnose/configure in the owning I.T. surface without exposing secrets or mutating Production to prove a theory.',
+    'Review: configured is not tested; Development GREEN is not Production GREEN; external HOLD stays open until its real evidence exists.',
+    'Finish: promote only the exact proven Development tree and independently verify Production deployment/resources.',
+    'Empty state: no incident/hold may be healthy. Broken state: missing evidence, failed checks or unavailable providers stay explicitly unresolved rather than being marked passed.'
+  ]}
+]);
+function workflowHelpForPath(path){ return DD_WORKFLOW_HELP.find((row)=>row.match.test(path)) || null; }
+
+
 const DD_CONTEXT_HELP_RULES = Object.freeze([
   { path: '/admin/home-carousel/', selector: '#carouselEditorHeading', help: 'carousel' },
   { path: '/admin/home-carousel/', selector: '#carouselContractHeading', help: 'carousel' },
@@ -301,7 +369,8 @@ function ensurePageLevelHelp(path, ordinal){
   if(!heading || heading.dataset.ddContextHelpAttached || document.querySelector('[data-dd-page-help]')) return ordinal;
   const profile=pageHelpProfile(path);
   const title=String(heading.textContent||'').trim();
-  const definition={title:title?`${profile.title}: ${title}`:profile.title,body:profile.body};
+  const workflow=workflowHelpForPath(path);
+  const definition={title:workflow?(workflow.title+(title?`: ${title}`:'')):(title?`${profile.title}: ${title}`:profile.title),body:[...(profile.body||[]),...((workflow&&workflow.body)||[])]};
   const built=createPanel('page-help',definition,ordinal+1);
   built.trigger.dataset.ddPageHelp='true';
   built.panel.dataset.ddPageHelp='true';
@@ -310,6 +379,25 @@ function ensurePageLevelHelp(path, ordinal){
   heading.dataset.ddContextHelpAttached='page-help';
   return ordinal+1;
 }
+function ensureDisabledActionHelp(path, ordinal){
+  const workflow=workflowHelpForPath(path);
+  const candidates=[...document.querySelectorAll('main button:disabled,main input[type="submit"]:disabled,.admin-shell button:disabled,.admin-shell input[type="submit"]:disabled')].filter((node)=>!node.dataset.ddDisabledHelpAttached).slice(0,10);
+  for(const target of candidates){
+    const label=String(target.textContent||target.value||target.getAttribute('aria-label')||'this action').trim();
+    const definition={title:'Why is '+label+' unavailable?',body:[
+      'A disabled action normally means required data, review, permission, upstream evidence or a safe operating condition is still missing.',
+      workflow?'Use the page workflow above to identify the prerequisite and owning workspace. Do not create duplicate records, bypass a HOLD, or repeatedly submit a failed mutation.':'Read the nearby status and page-level help to identify the prerequisite before retrying.',
+      'If the page failed to load or save, confirm the authoritative state first. An empty state and a broken state are not the same thing.'
+    ]};
+    const built=createPanel('disabled-action',definition,++ordinal);
+    built.trigger.classList.add('dd-context-help-disabled-action');
+    target.insertAdjacentElement('afterend',built.trigger); built.trigger.insertAdjacentElement('afterend',built.panel);
+    target.dataset.ddDisabledHelpAttached='true';
+  }
+  return ordinal;
+}
+
+
 function refresh() {
   ensureStylesheet();
   const path = normalizedPath();
@@ -326,8 +414,9 @@ function refresh() {
     const definition = DD_CONTEXT_HELP_LIBRARY[key] || localDefinition(target, key);
     if (definition) attach(target, key, definition, ++ordinal);
   });
-}
   ordinal = ensurePageLevelHelp(path, ordinal);
+  if (path.startsWith('/admin/')) ordinal = ensureDisabledActionHelp(path, ordinal);
+}
 function helpOwnedNode(node) {
   const el = node?.nodeType === 1 ? node : node?.parentElement;
   return Boolean(el?.closest?.('.dd-context-help-trigger,.dd-context-help-panel,.dd-context-help-field'));
