@@ -247,6 +247,10 @@
               "label": "Custom Work Route-to-Proof Pilot"
             },
             {
+              "href": "/admin/creative-project-pilot/",
+              "label": "Creative Project Prototype-to-Run Pilot"
+            },
+            {
               "href": "/admin/custom-request/",
               "label": "Custom Requests"
             },

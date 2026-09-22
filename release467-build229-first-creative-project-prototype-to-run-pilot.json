@@ -1,0 +1,108 @@
+{
+  "release": 467,
+  "build": 229,
+  "title": "First Creative Project Prototype-to-Run Pilot",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build229-first-creative-project-prototype-to-run-pilot",
+  "priority": "prove_existing_creative_project_prototype_to_run_path_with_real_operator_work_or_hold_without_fabrication",
+  "predecessor": {
+    "build": 228,
+    "title": "First Real Custom Work Route-to-Proof Pilot",
+    "development_head_sha": "db896df37a89e3477d77a26707277d0ca65eed5d",
+    "development_tree_sha": "414d747065b3d95002224fa4975c6da86a5d7c79",
+    "business_exit": "HOLD_NO_REAL_REQUEST",
+    "promotion_pr": 303,
+    "production_main_sha": "9b4a12fe90b207006c9593d7440f56bf681c43aa",
+    "production_tree_sha": "414d747065b3d95002224fa4975c6da86a5d7c79",
+    "zero_file_diff_promotion": true,
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "mode": "read_only_real_creative_project_prototype_to_run_pilot",
+    "path": [
+      "Creative Project Operation Plan",
+      "Prototype / Rework Evidence",
+      "Approved Sample",
+      "Production Authorization",
+      "Reviewed Job Traveler",
+      "Reviewed Production Run",
+      "QA / Rework / Scrap Evidence",
+      "Handoff Evidence"
+    ],
+    "legitimate_operator_entered_records_only": true,
+    "synthetic_project_or_production_records": false,
+    "existing_owner_authorities_only": true,
+    "duplicate_lifecycle_traveler_run_qa_schema": false
+  },
+  "implementation": {
+    "admin_api": "functions/api/admin/creative-project-prototype-run-pilot.js",
+    "admin_surface": "admin/creative-project-pilot/index.html",
+    "admin_client": "public/js/admin-creative-project-prototype-run-pilot-build229.js"
+  },
+  "exit": {
+    "real_evidence": "PROVEN_REAL_REVIEWED_EVIDENCE",
+    "no_real_project": "HOLD_NO_REAL_PROJECT",
+    "software_acceptance_required": "GREEN_READ_ONLY_PROTOTYPE_TO_RUN_ORCHESTRATION"
+  },
+  "safety": {
+    "canonical_migration_added": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "project_fabrication": false,
+    "lifecycle_fabrication": false,
+    "traveler_fabrication": false,
+    "production_run_fabrication": false,
+    "qa_or_handoff_fabrication": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build229_gate.py",
+    "predecessor_gate": "scripts/release467_build228_gate.py",
+    "canonical_migrations": 22,
+    "api_get_only": true,
+    "future_queue_exhausted": false
+  },
+  "next_build": {
+    "build": 230,
+    "title": "Cost, Margin, QA & Knowledge Evidence Adoption",
+    "state": "BLOCKED_UNTIL_BUILD229_PRODUCTION_GREEN"
+  },
+  "future_queue": {
+    "first_build": 230,
+    "last_build": 232,
+    "exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "db896df37a89e3477d77a26707277d0ca65eed5d",
+      "tree": "414d747065b3d95002224fa4975c6da86a5d7c79",
+      "system_gate_run": 35675467679,
+      "quality_run": 35675467644,
+      "it_admin_runtime_run": 35675467795,
+      "repository_hygiene_run": 35675467898,
+      "build_specific_proof_run": 35675467986,
+      "business_exit": "HOLD_NO_REAL_REQUEST",
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "release": 467,
+      "build": 228,
+      "title": "First Real Custom Work Route-to-Proof Pilot",
+      "authority": "release467-build228-first-real-custom-work-route-to-proof-pilot.json",
+      "main_sha": "9b4a12fe90b207006c9593d7440f56bf681c43aa",
+      "tree_sha": "414d747065b3d95002224fa4975c6da86a5d7c79",
+      "production_pages_deploy_run": 35675671813,
+      "production_live_resource_integrity_run": 35675740985,
+      "products_browser_proof_run": 35675740992,
+      "products_route_proof_run": 35675740994,
+      "build_specific_proof_run": 35675671688,
+      "business_exit": "HOLD_NO_REAL_REQUEST",
+      "state": "PRODUCTION_GREEN",
+      "role": "CURRENT_PRODUCTION_BASELINE"
+    }
+  }
+}
