@@ -44,7 +44,7 @@ for phase in ('Quality of life','Streamlining','Security hardening','Visual comp
 req('not individual Product gallery images' in imgs,'non-Product image scope boundary missing')
 for route in ('/socials/','/marketplaces/','/contact/','/about/','/workshop-journal/','/toolshed/','/tools/','/supplies/','/admin/customer-documents/','/admin/creative-assets/'):
     req(route in imgs,f'non-Product image register missing {route}')
-req(len(manifest)==22,'Build 233 must add no canonical migration')
+req(len(manifest.get('migrations') or [])==22,'Build 233 must add no canonical migration')
 req("run_current_contract('scripts/release467_build232_gate.py','Release 467 Build 232')" in sysgate,'System Gate must retain Build 232')
 req("run_current_contract('scripts/release467_build233_gate.py','Release 467 Build 233')" in sysgate,'System Gate must invoke Build 233')
 
