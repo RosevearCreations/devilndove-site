@@ -17,7 +17,8 @@ def run_current_contract(path,label):
     if err: print(err,file=sys.stderr)
     if result.returncode!=0:
         detail=(err or out or f'{label} gate failed').strip()[-2000:]
-        annotation=detail.replace('\r',' ').replace('\n',' | ')
+        annotation=detail.replace('\r',' ').replace('
+',' | ')
         print(f'::error title=System provenance child failed::{label} failed with exit code {result.returncode}: {annotation}')
         FAIL.append(f"{label} current reliability contract failed: {detail}")
 
@@ -111,7 +112,8 @@ run_current_contract('scripts/release467_build223_gate.py','Release 467 Build 22
 run_current_contract('scripts/release467_build224_gate.py','Release 467 Build 224')
 run_current_contract('scripts/release467_build225_gate.py','Release 467 Build 225')
 run_current_contract('scripts/release467_build226_gate.py','Release 467 Build 226')
-run_current_contract('scripts/release467_build227_gate.py','Release 467 Build 227')\nrun_current_contract('scripts/release467_build228_gate.py','Release 467 Build 228')
+run_current_contract('scripts/release467_build227_gate.py','Release 467 Build 227')
+run_current_contract('scripts/release467_build228_gate.py','Release 467 Build 228')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL');[print('-',x) for x in FAIL];sys.exit(1)
