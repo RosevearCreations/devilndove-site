@@ -52,6 +52,68 @@ const DD_CONTEXT_HELP_LIBRARY = Object.freeze({
   packaging_studio: { title:'Packaging Studio', body:['Packaging Studio prepares labels, packaging layouts and repeatable templates from approved Product/ingredient facts.', 'Preview and approval should happen before a printed or public-facing package is treated as final.'] }
 });
 
+const DD_PAGE_HELP_PROFILES = Object.freeze({
+  customer_shop: { title:'Shopping help', body:[
+    'Use this page to discover, compare, save or purchase currently available Devil n Dove items and services.',
+    'Customer help explains what the page shows, what an action means, and what happens next. Opening help never changes an order, payment, Product, wishlist or stock.',
+    'For account, order, pickup or custom-request questions, the Customer Help Centre links to the correct next step.'
+  ]},
+  customer_custom: { title:'Custom work help', body:[
+    'Use this area to describe a custom idea, provide approved references, review a quote or proof, and follow the request through the existing Custom Work workflow.',
+    'Submitting a reference is not automatic approval, production or payment. The page shows when human review, quote, proof or acknowledgement is still required.',
+    'Use the Customer Help Centre for plain-language guidance and Contact when a request needs personal follow-up.'
+  ]},
+  customer_account: { title:'Account, order & fulfilment help', body:[
+    'Use this area for your Devil n Dove account, saved items, order details, gift-card information, checkout or fulfilment steps.',
+    'Help never changes payment, order status, account details or fulfilment choices. Those changes happen only through the page’s explicit controls.',
+    'If a control is unavailable, check the nearby status/help text before retrying or contacting Devil n Dove.'
+  ]},
+  customer_discovery: { title:'Page help', body:[
+    'This page explains part of Devil n Dove’s workshop, services, events, creative work or ways to connect.',
+    'Photos and examples are descriptive unless the page explicitly identifies a currently available item or active offer.',
+    'Use the Customer Help Centre for shopping, account, custom-request and contact guidance.'
+  ]},
+  creator_storefront: { title:'Storefront workspace help', body:[
+    'This Creator/Admin surface supports buyer-facing presentation, discovery, media, merchandising or search quality while preserving the existing Product and Media authorities.',
+    'Use explicit review/save/publish controls only after prerequisites are satisfied. Opening help performs no save, publication, Product mutation, Inventory movement or provider action.',
+    'The Creator & Operations Help Centre explains ownership boundaries, common tasks, recovery paths and where work belongs.'
+  ]},
+  creator_workshop: { title:'Creator workspace help', body:[
+    'This workspace supports workshop operations such as Creative Projects, Custom Work, tools, supplies, inventory, CAIP, Content or Packaging using the existing canonical records.',
+    'Follow the page’s current prerequisites and review states; do not create duplicate records simply to move a workflow forward.',
+    'Opening help is read-only. Use the Creator & Operations Help Centre for start-to-finish workflow guidance and recovery help.'
+  ]},
+  creator_finance: { title:'Finance workspace help', body:[
+    'This workspace supports orders, payments, documents, accounting, reconciliation, close or business-health review using the existing Finance authorities.',
+    'Posting, locking, payment and correction actions must remain explicit and auditable. Help never performs a financial mutation.',
+    'Use the Creator & Operations Help Centre when you need the meaning of a status, prerequisite, evidence requirement or next safe action.'
+  ]},
+  creator_it: { title:'I.T. & administration help', body:[
+    'This workspace supports access, security, diagnostics, integrations, reliability, release evidence or application administration.',
+    'Configured is not the same as tested or accepted. Production and provider actions remain separately controlled and evidence-based.',
+    'Opening help never changes configuration, secrets, D1/R2 data, deployment state or provider state.'
+  ]},
+  creator_general: { title:'Creator & operations help', body:[
+    'This is an authenticated Devil n Dove operating workspace. Use the page’s explicit controls for the task named in the main heading.',
+    'Help explains purpose, prerequisites, authority boundaries and next steps without changing business data.',
+    'For broader workflow guidance, open the Creator & Operations Help Centre from the floating ⓘ control.'
+  ]}
+});
+
+function pageHelpProfile(path) {
+  if (path.startsWith('/admin/')) {
+    if (/\/(?:catalog|storefront|home-carousel|public-display|local-seo|image-manifest|media-content|visual|creator-content-completeness|marketplace)/.test(path)) return DD_PAGE_HELP_PROFILES.creator_storefront;
+    if (/\/(?:creative|caip|packaging|tool|inventory|supply|workshop|content|social|custom|creation|mobile-workshop)/.test(path)) return DD_PAGE_HELP_PROFILES.creator_workshop;
+    if (/\/(?:finance|accounting|month-end|order|gift-card|business-health|project-profitability)/.test(path)) return DD_PAGE_HELP_PROFILES.creator_finance;
+    if (/\/(?:it|release|deploy|runtime|security|user|application|operational|reliability|prelaunch|promotion|safe-deploy|startup-readiness|go-live)/.test(path)) return DD_PAGE_HELP_PROFILES.creator_it;
+    return DD_PAGE_HELP_PROFILES.creator_general;
+  }
+  if (/^\/(?:shop|collections|gift-cards|gallery|creations|handmade-|polymer-|vintage-|laser-|custom-(?:candle|soap|gifts)|workshop-made-gifts)/.test(path)) return DD_PAGE_HELP_PROFILES.customer_shop;
+  if (path.startsWith('/custom-request/')) return DD_PAGE_HELP_PROFILES.customer_custom;
+  if (/^\/(?:members|member|account|cart|checkout|orders|pickup|gift-card)/.test(path)) return DD_PAGE_HELP_PROFILES.customer_account;
+  return DD_PAGE_HELP_PROFILES.customer_discovery;
+}
+
 const DD_CONTEXT_HELP_RULES = Object.freeze([
   { path: '/admin/home-carousel/', selector: '#carouselEditorHeading', help: 'carousel' },
   { path: '/admin/home-carousel/', selector: '#carouselContractHeading', help: 'carousel' },
@@ -225,13 +287,28 @@ function attach(target, helpKey, definition, ordinal) {
 }
 function ensureHelpCentreLauncher(path){
   if(document.querySelector('[data-dd-help-centre-launcher]'))return;
+  const creator=path.startsWith('/admin/');
   const link=document.createElement('a');
   link.className='dd-context-help-centre';
   link.dataset.ddHelpCentreLauncher='true';
-  link.href=path.startsWith('/admin/')?'/admin/help/':'/help/';
-  link.textContent='ⓘ Help';
-  link.setAttribute('aria-label','Open Devil n Dove Help Centre');
+  link.href=creator?'/admin/help/':'/help/';
+  link.textContent=creator?'ⓘ Creator Help':'ⓘ Customer Help';
+  link.setAttribute('aria-label',creator?'Open Creator and Operations Help Centre':'Open Customer Help Centre');
   document.body.appendChild(link);
+}
+function ensurePageLevelHelp(path, ordinal){
+  const heading=document.querySelector('main h1,.hero h1,h1');
+  if(!heading || heading.dataset.ddContextHelpAttached || document.querySelector('[data-dd-page-help]')) return ordinal;
+  const profile=pageHelpProfile(path);
+  const title=String(heading.textContent||'').trim();
+  const definition={title:title?`${profile.title}: ${title}`:profile.title,body:profile.body};
+  const built=createPanel('page-help',definition,ordinal+1);
+  built.trigger.dataset.ddPageHelp='true';
+  built.panel.dataset.ddPageHelp='true';
+  heading.insertAdjacentElement('afterend',built.trigger);
+  built.trigger.insertAdjacentElement('afterend',built.panel);
+  heading.dataset.ddContextHelpAttached='page-help';
+  return ordinal+1;
 }
 function refresh() {
   ensureStylesheet();
@@ -250,6 +327,7 @@ function refresh() {
     if (definition) attach(target, key, definition, ++ordinal);
   });
 }
+  ordinal = ensurePageLevelHelp(path, ordinal);
 function helpOwnedNode(node) {
   const el = node?.nodeType === 1 ? node : node?.parentElement;
   return Boolean(el?.closest?.('.dd-context-help-trigger,.dd-context-help-panel,.dd-context-help-field'));
