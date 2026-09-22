@@ -1,41 +1,41 @@
 {
   "release": 467,
-  "build": 229,
-  "title": "First Creative Project Prototype-to-Run Pilot",
+  "build": 230,
+  "title": "Cost, Margin, QA & Knowledge Evidence Adoption",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "db896df37a89e3477d77a26707277d0ca65eed5d",
-  "accepted_dev_tree_sha": "414d747065b3d95002224fa4975c6da86a5d7c79",
+  "accepted_dev_sha": "4a195f435c4491408db6c39dadc1d874d166cf36",
+  "accepted_dev_tree_sha": "2ec97031a2c774fc2920a03d6fc72d63998421b8",
   "acceptance": {
-    "system_gate_run": 35675467679,
-    "current_application_quality_run": 35675467644,
-    "it_admin_runtime_proof_run": 35675467795,
-    "branch_hygiene_run": 35675467898
+    "system_gate_run": 35677766703,
+    "current_application_quality_run": 35677766653,
+    "it_admin_runtime_proof_run": 35677766460,
+    "branch_hygiene_run": 35677766514
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 228,
-      "title": "First Real Custom Work Route-to-Proof Pilot",
-      "authority": "release467-build228-first-real-custom-work-route-to-proof-pilot.json",
-      "dev_sha": "db896df37a89e3477d77a26707277d0ca65eed5d",
-      "tree_sha": "414d747065b3d95002224fa4975c6da86a5d7c79",
-      "proofs": {
-        "system_gate_run": 35675467679,
-        "current_application_quality_run": 35675467644,
-        "it_admin_runtime_proof_run": 35675467795,
-        "branch_hygiene_run": 35675467898
-      },
-      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
-      "build_specific_proof_run": 35675467986,
-      "business_exit": "HOLD_NO_REAL_REQUEST"
-    },
-    "current_closure_candidate": {
-      "release": 467,
       "build": 229,
       "title": "First Creative Project Prototype-to-Run Pilot",
       "authority": "release467-build229-first-creative-project-prototype-to-run-pilot.json",
+      "dev_sha": "4a195f435c4491408db6c39dadc1d874d166cf36",
+      "tree_sha": "2ec97031a2c774fc2920a03d6fc72d63998421b8",
+      "proofs": {
+        "system_gate_run": 35677766703,
+        "current_application_quality_run": 35677766653,
+        "it_admin_runtime_proof_run": 35677766460,
+        "branch_hygiene_run": 35677766514
+      },
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+      "build_specific_proof_run": 35677766604,
+      "business_exit": "HOLD_NO_REAL_PROJECT"
+    },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 230,
+      "title": "Cost, Margin, QA & Knowledge Evidence Adoption",
+      "authority": "release467-build230-cost-margin-qa-knowledge-evidence-adoption.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -46,21 +46,22 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 228,
-    "title": "First Real Custom Work Route-to-Proof Pilot",
-    "authority": "release467-build228-first-real-custom-work-route-to-proof-pilot.json",
-    "main_sha": "9b4a12fe90b207006c9593d7440f56bf681c43aa",
-    "tree_sha": "414d747065b3d95002224fa4975c6da86a5d7c79",
-    "production_pages_deploy_run": 35675671813,
-    "production_live_resource_integrity_run": 35675740985,
-    "products_browser_proof_run": 35675740992,
-    "products_route_proof_run": 35675740994,
-    "build_specific_proof_run": 35675671688,
-    "business_exit": "HOLD_NO_REAL_REQUEST",
+    "build": 229,
+    "title": "First Creative Project Prototype-to-Run Pilot",
+    "authority": "release467-build229-first-creative-project-prototype-to-run-pilot.json",
+    "main_sha": "4ba7631cfd0da23925c82b1ec3cf8ed247b75f0c",
+    "tree_sha": "2ec97031a2c774fc2920a03d6fc72d63998421b8",
+    "production_pages_deploy_run": 35678474432,
+    "production_live_resource_integrity_run": 35678533786,
+    "products_browser_proof_run": 35678533596,
+    "products_route_proof_run": 35678533740,
+    "build_specific_proof_run": 35678474416,
+    "business_exit": "HOLD_NO_REAL_PROJECT",
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build230-cost-margin-qa-knowledge-evidence-adoption.json",
     "release467-build229-first-creative-project-prototype-to-run-pilot.json",
     "release467-build228-first-real-custom-work-route-to-proof-pilot.json",
     "release467-build227-manufacturing-adoption-command-centre.json",
@@ -131,25 +132,24 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_POST_MANUFACTURING_AUTONOMOUS_BUILDS_225_232.md",
-  "next_build": 230,
-  "next_build_state": "BLOCKED_UNTIL_BUILD229_PRODUCTION_GREEN",
-  "next_build_title": "Cost, Margin, QA & Knowledge Evidence Adoption",
-  "promotion_state": "BUILD229_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD229_PROTOTYPE_TO_RUN_PILOT_ACTIVE_FROM_BUILD228_PRODUCTION_GREEN",
+  "next_build": 231,
+  "next_build_state": "BLOCKED_UNTIL_BUILD230_PRODUCTION_GREEN",
+  "next_build_title": "Workshop Journal & Capability Case-Study Activation",
+  "promotion_state": "BUILD230_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD230_EVIDENCE_ADOPTION_ACTIVE_FROM_BUILD229_PRODUCTION_GREEN",
   "measured_closure": {
-    "source_build": 228,
-    "build228_business_exit": "HOLD_NO_REAL_REQUEST",
-    "active_custom_requests": 0,
-    "creative_project_measurement_source_build": 224,
-    "measured_hybrid_projects": 0,
-    "measured_manufacturing_lifecycles": 0,
-    "measured_reviewed_runs": 0,
-    "interpretation": "BUILD229_MUST_USE_REAL_OPERATOR_PROJECT_WORK_OR_CLOSE_HOLD_NO_REAL_PROJECT"
+    "source_build": 229,
+    "build229_business_exit": "HOLD_NO_REAL_PROJECT",
+    "real_projects": 0,
+    "manufacturing_lifecycles": 0,
+    "reviewed_runs": 0,
+    "qa_checks": 0,
+    "interpretation": "BUILD230_MUST_MEASURE_REAL_REVIEWED_EVIDENCE_OR_CLOSE_HOLD_NO_QUALIFYING_REAL_RUN"
   },
   "planned_successor": {
-    "first_build": 230,
+    "first_build": 231,
     "last_build": 232,
-    "state": "BLOCKED_UNTIL_BUILD229_PRODUCTION_GREEN",
+    "state": "BLOCKED_UNTIL_BUILD230_PRODUCTION_GREEN",
     "future_queue_exhausted": false
   }
 }

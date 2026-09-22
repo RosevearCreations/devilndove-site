@@ -1,0 +1,107 @@
+{
+  "release": 467,
+  "build": 230,
+  "title": "Cost, Margin, QA & Knowledge Evidence Adoption",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build230-cost-margin-qa-knowledge-evidence-adoption",
+  "priority": "measure_real_cost_margin_qa_and_knowledge_adoption_from_existing_reviewed_authorities_or_hold_without_fabrication",
+  "predecessor": {
+    "build": 229,
+    "title": "First Creative Project Prototype-to-Run Pilot",
+    "development_head_sha": "4a195f435c4491408db6c39dadc1d874d166cf36",
+    "development_tree_sha": "2ec97031a2c774fc2920a03d6fc72d63998421b8",
+    "business_exit": "HOLD_NO_REAL_PROJECT",
+    "promotion_pr": 305,
+    "production_main_sha": "4ba7631cfd0da23925c82b1ec3cf8ed247b75f0c",
+    "production_tree_sha": "2ec97031a2c774fc2920a03d6fc72d63998421b8",
+    "zero_file_diff_promotion": true,
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "mode": "read_only_real_evidence_adoption_measurement",
+    "evidence_lanes": [
+      "Build 218 expected-cost / margin review snapshots",
+      "Build 217 reviewed production-cost evidence",
+      "Build 220 reviewed production runs and QA / rework / scrap evidence",
+      "Build 221 reviewed Workshop Knowledge entries",
+      "Build 222 approved recipe versions"
+    ],
+    "qualifying_real_runs_only": true,
+    "unknown_cost_remains_unknown": true,
+    "worked_once_remains_scoped": true,
+    "synthetic_cost_margin_qa_or_knowledge_records": false,
+    "existing_owner_authorities_only": true
+  },
+  "implementation": {
+    "admin_api": "functions/api/admin/cost-margin-qa-knowledge-adoption.js",
+    "admin_surface": "admin/evidence-adoption/index.html",
+    "admin_client": "public/js/admin-cost-margin-qa-knowledge-adoption-build230.js"
+  },
+  "exit": {
+    "proven": "PROVEN_REVIEWED_ADOPTION",
+    "in_progress": "EVIDENCE_ADOPTION_IN_PROGRESS",
+    "no_qualifying_run": "HOLD_NO_QUALIFYING_REAL_RUN",
+    "software_acceptance_required": "GREEN_READ_ONLY_EVIDENCE_ADOPTION_MEASUREMENT"
+  },
+  "safety": {
+    "canonical_migration_added": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "cost_fabrication": false,
+    "margin_fabrication": false,
+    "qa_fabrication": false,
+    "knowledge_fabrication": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "automatic_price_rewrite": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build230_gate.py",
+    "predecessor_gate": "scripts/release467_build229_gate.py",
+    "canonical_migrations": 22,
+    "api_get_only": true,
+    "future_queue_exhausted": false
+  },
+  "next_build": {
+    "build": 231,
+    "title": "Workshop Journal & Capability Case-Study Activation",
+    "state": "BLOCKED_UNTIL_BUILD230_PRODUCTION_GREEN"
+  },
+  "future_queue": {
+    "first_build": 231,
+    "last_build": 232,
+    "exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "4a195f435c4491408db6c39dadc1d874d166cf36",
+      "tree": "2ec97031a2c774fc2920a03d6fc72d63998421b8",
+      "system_gate_run": 35677766703,
+      "build_specific_proof_run": 35677766604,
+      "business_exit": "HOLD_NO_REAL_PROJECT",
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+      "quality_run": 35677766653,
+      "it_admin_runtime_run": 35677766460,
+      "repository_hygiene_run": 35677766514
+    },
+    "production": {
+      "release": 467,
+      "build": 229,
+      "title": "First Creative Project Prototype-to-Run Pilot",
+      "authority": "release467-build229-first-creative-project-prototype-to-run-pilot.json",
+      "main_sha": "4ba7631cfd0da23925c82b1ec3cf8ed247b75f0c",
+      "tree_sha": "2ec97031a2c774fc2920a03d6fc72d63998421b8",
+      "production_pages_deploy_run": 35678474432,
+      "production_live_resource_integrity_run": 35678533786,
+      "products_browser_proof_run": 35678533596,
+      "products_route_proof_run": 35678533740,
+      "build_specific_proof_run": 35678474416,
+      "business_exit": "HOLD_NO_REAL_PROJECT",
+      "state": "PRODUCTION_GREEN",
+      "role": "CURRENT_PRODUCTION_BASELINE"
+    }
+  }
+}
