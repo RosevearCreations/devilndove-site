@@ -66,14 +66,14 @@ jobs:
               for x in v:walk(x)
           walk(d);assert found,d;r=found[0]
           assert int(r['migration_rows'])==1,r
-          assert int(r['profile_count'])==12,r
-          assert int(r['public_profiles'])==12,r
+          assert int(r['profile_count'])>=12,r
+          assert int(r['public_profiles'])>=12,r
           assert int(r['measured_profiles'])==0,r
           assert int(r['mechanical_boundary'])==1,r
           assert int(r['duplicate_keys'])==0,r
           assert int(r['foreign_key_violations'])==0,r
           rr=sum(reads);assert rr<=2500,(rr,2500)
-          proof={'release':467,'build':209,'development_sha':os.environ.get('GITHUB_SHA',''),'migration_0009':'APPLIED','profile_count':12,'public_profiles':12,'measured_profiles':0,'mechanical_boundary':'PASS','duplicate_keys':0,'foreign_key_violations':0,'provider_rows_read':rr,'rows_read_ceiling':2500,'technical_limit_policy':'UNKNOWN_UNTIL_MEASURED_OR_OWNER_SUPPLIED'}
+          proof={'release':467,'build':209,'development_sha':os.environ.get('GITHUB_SHA',''),'migration_0009':'APPLIED','baseline_profile_floor':12,'profile_count':int(r['profile_count']),'public_profiles':int(r['public_profiles']),'successor_profiles_allowed':True,'measured_profiles':0,'mechanical_boundary':'PASS','duplicate_keys':0,'foreign_key_violations':0,'provider_rows_read':rr,'rows_read_ceiling':2500,'technical_limit_policy':'UNKNOWN_UNTIL_MEASURED_OR_OWNER_SUPPLIED'}
           json.dump(proof,open('/tmp/release467-build209-exact-evidence.json','w'),indent=2,sort_keys=True);print(proof)
           PY
       - uses: actions/upload-artifact@v4

@@ -1,0 +1,45 @@
+name: Release 467 Build 227 Manufacturing Adoption Command Centre
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.x'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - run: python scripts/release467_build227_gate.py
+      - run: python scripts/release467_build226_gate.py
+      - run: python scripts/release467_build220_gate.py
+  development-d1-existing-authority-proof:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - run: |
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM d1_migrations) canonical_migrations,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('custom_requests','custom_request_manufacturing_triage','custom_request_route_processes','creative_work_projects','creative_project_operations','custom_request_proof_versions','custom_request_quote_drafts','creative_project_manufacturing_lifecycles','creative_project_job_travelers','creative_project_production_runs','creative_project_production_run_qa_checks','creative_project_production_cost_evidence')) required_tables,(SELECT COUNT(*) FROM pragma_foreign_key_check) fk,(SELECT COUNT(*) FROM custom_requests WHERE lower(COALESCE(status,'new')) NOT IN ('declined','archived')) active_custom_requests,(SELECT COUNT(*) FROM creative_project_manufacturing_lifecycles) lifecycles,(SELECT COUNT(*) FROM creative_project_production_runs WHERE run_status='reviewed') reviewed_runs;" > /tmp/b227.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/b227.json')); found=[]
+          def w(v):
+            if isinstance(v,dict):
+              if all(k in v for k in ('canonical_migrations','required_tables','fk','active_custom_requests','lifecycles','reviewed_runs')): found.append(v)
+              for x in v.values(): w(x)
+            elif isinstance(v,list):
+              for x in v:w(x)
+          w(d); assert found,d; r=found[0]
+          assert int(r['canonical_migrations'])==22,r
+          assert int(r['required_tables'])==12,r
+          assert int(r['fk'])==0,r
+          print('BUILD 227 DEVELOPMENT EXISTING AUTHORITY: GREEN',r)
+          PY

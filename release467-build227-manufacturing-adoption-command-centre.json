@@ -1,0 +1,160 @@
+{
+  "release": 467,
+  "build": 227,
+  "title": "Manufacturing Adoption Command Centre",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build227-manufacturing-adoption-command-centre",
+  "priority": "make_the_existing_build210_220_manufacturing_engine_human_testable_without_creating_parallel_business_data_authority",
+  "predecessor": {
+    "build": 226,
+    "state": "PRODUCTION_GREEN",
+    "dev_sha": "a3f220deb8c4cef7a2143ab1960c2ea33454ad6d",
+    "tree_sha": "c21821ae1ac1ba931b1f38e8fb3b9641bd3b4b3f",
+    "main_sha": "8a4adf0a9108f482edd7aaa0c2f7e27d843a9d2e",
+    "system_gate_run": 35667972994,
+    "current_application_quality_run": 35667973054,
+    "it_admin_runtime_proof_run": 35667973089,
+    "branch_hygiene_run": 35667973130,
+    "build_specific_dev_run": 35667972987,
+    "production_pages_deploy_run": 35668227904,
+    "production_live_resource_integrity_run": 35668338010,
+    "products_browser_proof_run": 35668337892,
+    "products_route_proof_run": 35668337966,
+    "build_specific_production_run": 35668227824,
+    "exact_production_url": "https://eb805f65.devilndove-site.pages.dev"
+  },
+  "measured_baseline": {
+    "source_build": 224,
+    "active_custom_requests": 0,
+    "manufacturing_triage_records_in_active_use": 0,
+    "manufacturing_lifecycles": 0,
+    "hybrid_projects": 0,
+    "proof_versions": 0,
+    "quote_drafts": 0,
+    "production_runs": 0,
+    "conclusion": "implemented_engine_has_not_yet_received_real_operational_adoption_evidence"
+  },
+  "scope": {
+    "mode": "read_only_operator_adoption_orchestration",
+    "owner_builds": "210-220",
+    "shows_next_valid_existing_workflow_action": true,
+    "exposes_missing_prerequisites": true,
+    "deep_links_existing_owner_surfaces": true,
+    "distinguishes_no_real_work_from_broken_workflow": true,
+    "synthetic_business_record_generation": false,
+    "parallel_business_data_authority": false
+  },
+  "implementation": {
+    "admin_api": "functions/api/admin/manufacturing-adoption-command-centre.js",
+    "admin_surface": "admin/manufacturing-adoption/index.html",
+    "admin_client": "public/js/admin-manufacturing-adoption-command-centre-build227.js",
+    "navigation": "data/admin-navigation-modules.json"
+  },
+  "existing_owner_surfaces": [
+    {
+      "build": 210,
+      "label": "Custom Work Intake",
+      "href": "/admin/custom-request/#customWorkBuild151Mount"
+    },
+    {
+      "build": 211,
+      "label": "Manufacturing Triage & Route",
+      "href": "/admin/custom-request/#customWorkTriage211Mount"
+    },
+    {
+      "build": 212,
+      "label": "Creative Project Operations",
+      "href": "/admin/creative-process/#creativeOperations212Mount"
+    },
+    {
+      "build": 213,
+      "label": "Digital Proof",
+      "href": "/admin/custom-request/#customWorkProof213Mount"
+    },
+    {
+      "build": 214,
+      "label": "Manufacturing Lifecycle",
+      "href": "/admin/custom-request/#customWorkLifecycle214Mount"
+    },
+    {
+      "build": 215,
+      "label": "Batch / Event Quote",
+      "href": "/admin/custom-request/#customWorkBatchQuote215Mount"
+    },
+    {
+      "build": 217,
+      "label": "Production Cost Evidence",
+      "href": "/admin/creative-process/#productionCostEvidence217Mount"
+    },
+    {
+      "build": 218,
+      "label": "Margin Guardrails",
+      "href": "/admin/custom-request/#customWorkMarginGuardrails218Mount"
+    },
+    {
+      "build": 219,
+      "label": "Job Traveler",
+      "href": "/admin/custom-request/#customWorkJobTraveler219Mount"
+    },
+    {
+      "build": 220,
+      "label": "Production Run & QA",
+      "href": "/admin/custom-request/#customWorkProductionRun220Mount"
+    }
+  ],
+  "safety": {
+    "canonical_schema_addition": false,
+    "canonical_migration_added": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "product_mutation": false,
+    "inventory_mutation": false,
+    "customer_or_project_fabrication": false,
+    "automatic_publication": false,
+    "payment_execution": false,
+    "provider_execution": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build227_gate.py",
+    "predecessor_gate": "scripts/release467_build226_gate.py",
+    "canonical_migrations": 22,
+    "api_get_only": true,
+    "no_real_work_classification": "NO_REAL_WORK_YET",
+    "broken_authority_classification": "BROKEN_EXISTING_AUTHORITY",
+    "future_queue_exhausted": false
+  },
+  "next_build": {
+    "build": 228,
+    "title": "First Real Custom Work Route-to-Proof Pilot",
+    "state": "BLOCKED_UNTIL_BUILD227_PRODUCTION_GREEN"
+  },
+  "future_queue": {
+    "first_build": 228,
+    "last_build": 232,
+    "exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "a3f220deb8c4cef7a2143ab1960c2ea33454ad6d",
+      "tree": "c21821ae1ac1ba931b1f38e8fb3b9641bd3b4b3f",
+      "system_gate_run": 35667972994,
+      "quality_run": 35667973054,
+      "it_admin_runtime_run": 35667973089,
+      "repository_hygiene_run": 35667973130,
+      "build_specific_proof_run": 35667972987,
+      "exact_development_url": "https://d041c726.devilndove-site.pages.dev"
+    },
+    "production": {
+      "main_sha": "8a4adf0a9108f482edd7aaa0c2f7e27d843a9d2e",
+      "tree": "c21821ae1ac1ba931b1f38e8fb3b9641bd3b4b3f",
+      "production_pages_deploy_run": 35668227904,
+      "production_live_resource_integrity_run": 35668338010,
+      "products_browser_proof_run": 35668337892,
+      "products_route_proof_run": 35668337966,
+      "build_specific_proof_run": 35668227824,
+      "exact_production_url": "https://eb805f65.devilndove-site.pages.dev",
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}
