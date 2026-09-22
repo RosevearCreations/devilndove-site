@@ -1,27 +1,27 @@
-// Release 467 Build 231 — current release/restart authority over exact Build 230 GREEN predecessor.
+// Release 467 Build 232 — current release/restart authority over exact Build 231 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=231;
-const TITLE='Workshop Journal & Capability Case-Study Activation';
-const AUTHORITY='release467-build231-workshop-journal-capability-case-study-activation';
-const EVIDENCE_ID='r467-b230-b67c232-35681244435-35681417751';
+const BUILD=232;
+const TITLE='Manufacturing Outcomes Review & Roadmap Renewal';
+const AUTHORITY='release467-build232-manufacturing-outcomes-review-roadmap-renewal';
+const EVIDENCE_ID='r467-b230-b67c232-35685100622-35685413652';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:230,title:'Cost, Margin, QA & Knowledge Evidence Adoption',state:'DEVELOPMENT_GREEN',
-  dev_sha:'b67c23231d06f9faaf2952784878c11784936c48',tree_sha:'42d45f7d521b4f93a891cea9351dc65f656f89c6',
-  system_gate_run:35681244435,current_application_quality_run:35681244619,it_admin_runtime_proof_run:35681244610,
-  branch_hygiene_run:35681244451,build_specific_proof_run:35681244469,proof_state:'EXACT_BRANCH_HEAD_GREEN',
+  release:467,build:231,title:'Workshop Journal & Capability Case-Study Activation',state:'DEVELOPMENT_GREEN',
+  dev_sha:'fc65e05083e7dcf52d50a392d650d937988db0b6',tree_sha:'afc367962b2163105a73c60a1bb14fd06744218e',
+  system_gate_run:35685100622,current_application_quality_run:35685100552,it_admin_runtime_proof_run:35685100662,
+  branch_hygiene_run:35685100555,build_specific_proof_run:35685100623,proof_state:'EXACT_BRANCH_HEAD_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:230,title:'Cost, Margin, QA & Knowledge Evidence Adoption',state:'PRODUCTION_GREEN',
-  main_sha:'eab246604f1fd3a7d4762d17ee4868451f87584b',tree_sha:'42d45f7d521b4f93a891cea9351dc65f656f89c6',
-  production_pages_deploy_run:35681417751,production_live_resource_integrity_run:35681463987,
-  products_browser_proof_run:35681464032,products_route_proof_run:35681464036,build_specific_proof_run:35681417827,remote_d1_queries:0
+  release:467,build:231,title:'Workshop Journal & Capability Case-Study Activation',state:'PRODUCTION_GREEN',
+  main_sha:'99af873897334e8eb3b382c898a687bcbe06819a',tree_sha:'afc367962b2163105a73c60a1bb14fd06744218e',
+  production_pages_deploy_run:35685413652,production_live_resource_integrity_run:35685469887,
+  products_browser_proof_run:35685469957,products_route_proof_run:35685469861,build_specific_proof_run:35685413673,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 230 Cost, Margin, QA & Knowledge Evidence Adoption'
+  'Release 467 Build 231 Workshop Journal & Capability Case-Study Activation'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:230,title:'Cost, Margin, QA & Knowledge Evidence Adoption',
+    release:467,build:231,title:'Workshop Journal & Capability Case-Study Activation',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35681244435,current_application_quality_run:35681244619,
-      it_admin_runtime_proof_run:35681244610,branch_hygiene_run:35681244451,build230_proof_run:35681244469
+      system_gate_run:35685100622,current_application_quality_run:35685100552,
+      it_admin_runtime_proof_run:35685100662,branch_hygiene_run:35685100555,build231_proof_run:35685100623
     },
     production_proofs:{
-      production_pages_deploy_run:35681417751,production_live_resource_integrity_run:35681463987,
-      products_browser_proof_run:35681464032,products_route_proof_run:35681464036,build230_proof_run:35681417827
+      production_pages_deploy_run:35685413652,production_live_resource_integrity_run:35685469887,
+      products_browser_proof_run:35685469957,products_route_proof_run:35685469861,build231_proof_run:35685413673
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 231 is blocked until Build 231 is exact-SHA Production GREEN; Build 232 remain planned.'
+    next_build:'Build 232 is blocked until Build 232 is exact-SHA Production GREEN; Build 232 is active; successor scope is pending measured evidence.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 230 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 231 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -98,13 +98,13 @@ function markdownReport(pack){
 - Current Application Quality Proof: ${pack.development_proofs.current_application_quality_run}
 - I.T. Admin Runtime Proof: ${pack.development_proofs.it_admin_runtime_proof_run}
 - Repository Branch Hygiene: ${pack.development_proofs.branch_hygiene_run}
-- Build 230 Development Proof: ${pack.development_proofs.build230_proof_run}
+- Build 231 Development Proof: ${pack.development_proofs.build231_proof_run}
 - Production Pages Deploy: ${pack.production_proofs.production_pages_deploy_run}
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Build 230 Production Proof: ${pack.production_proofs.build230_proof_run}
-- Current candidate: Build 231 Workshop Journal & Capability Case-Study Activation
+- Build 231 Production Proof: ${pack.production_proofs.build231_proof_run}
+- Current candidate: Build 232 Manufacturing Outcomes Review & Roadmap Renewal
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -116,14 +116,14 @@ export async function onRequestGet(context){
   const base=baseResponse.ok?await baseResponse.json().catch(()=>({})):{};
   const diagnostic=diagnosticResponse.ok?await diagnosticResponse.json().catch(()=>({})):{};
   const data={
-    release:RELEASE,build:BUILD,title:TITLE,ok:true,authority:AUTHORITY,state:'DEVELOPMENT_PILOT_CANDIDATE',
+    release:RELEASE,build:BUILD,title:TITLE,ok:true,authority:AUTHORITY,state:'DEVELOPMENT_MEASUREMENT_CANDIDATE',
     release_authority:{
-      current_operator:{release:RELEASE,build:BUILD,title:TITLE,state:'DEVELOPMENT_PUBLIC_STORY_CANDIDATE'},
+      current_operator:{release:RELEASE,build:BUILD,title:TITLE,state:'DEVELOPMENT_MEASUREMENT_CANDIDATE'},
       accepted_development:ACCEPTED_DEVELOPMENT,verified_development:VERIFIED_DEVELOPMENT,production:PRODUCTION,
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:231,title:TITLE,authority:'release467-build231-workshop-journal-capability-case-study-activation.json'},
+        current_closure_candidate:{release:467,build:232,title:TITLE,authority:'release467-build232-manufacturing-outcomes-review-roadmap-renewal.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -142,12 +142,12 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 230 source is the exact last fully verified Development checkpoint.',
-      'Build 230 Production is GREEN on the identical source tree through canonical migration 0022 and closed HOLD_NO_QUALIFYING_REAL_RUN without synthetic evidence.',
-      'Development proofs: System 35681244435, Quality 35681244619, I.T. 35681244610, Hygiene 35681244451.',
-      'Production proofs: Pages 35681417751, Live Resources 35681463987, Product Browser 35681464032, Product Route 35681464036.',
-      'Build 231 Workshop Journal & Capability Case-Study Activation is the active read-only Development candidate.',
-      'Build 231 adds no schema migration, publication engine, automatic publication, or private/raw CAIP exposure; Build 232 remains planned and blocked until Build 231 is Production GREEN.'
+      'Build 231 source is the exact last fully verified Development checkpoint.',
+      'Build 231 Production is GREEN on the identical source tree through canonical migration 0022 and closed HOLD_NO_PUBLISHABLE_EVIDENCE without synthetic evidence.',
+      'Development proofs: System 35685100622, Quality 35685100552, I.T. 35685100662, Hygiene 35685100555.',
+      'Production proofs: Pages 35685413652, Live Resources 35685469887, Product Browser 35685469957, Product Route 35685469861.',
+      'Build 232 Manufacturing Outcomes Review & Roadmap Renewal is the active read-only Development candidate.',
+      'Build 232 adds no schema migration, publication engine, automatic publication, or private/raw CAIP exposure; Build 232 remains planned and blocked until Build 232 is Production GREEN.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
