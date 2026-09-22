@@ -2,7 +2,7 @@
   "release": 467,
   "build": 226,
   "title": "Capability Profile Coverage Closure",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build226-capability-profile-coverage-closure",
   "priority": "close_the_single_measured_public_capability_profile_coverage_gap_using_the_existing_build209_profile_authority_without_duplicate_process_identity",
   "predecessor": {
@@ -104,11 +104,49 @@
   "next_build": {
     "build": 227,
     "title": "Manufacturing Adoption Command Centre",
-    "state": "BLOCKED_UNTIL_BUILD226_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_FROM_BUILD226_PRODUCTION_GREEN"
   },
   "future_queue": {
     "first_build": 227,
     "last_build": 232,
     "exhausted": false
+  },
+  "final_closure": {
+    "dev_sha": "a3f220deb8c4cef7a2143ab1960c2ea33454ad6d",
+    "tree_sha": "c21821ae1ac1ba931b1f38e8fb3b9641bd3b4b3f",
+    "proofs": {
+      "system_gate_run": 35667972994,
+      "current_application_quality_run": 35667973054,
+      "it_admin_runtime_proof_run": 35667973089,
+      "branch_hygiene_run": 35667973130
+    },
+    "build_specific_proof_run": 35667972987,
+    "exact_preview_url": "https://d041c726.devilndove-site.pages.dev",
+    "development_deploy_artifact_id": 10670535335,
+    "development_regression_artifact_id": 10670760159,
+    "exact_dev_sha_workflows": "41/41"
+  },
+  "production_checkpoint": {
+    "main_sha": "8a4adf0a9108f482edd7aaa0c2f7e27d843a9d2e",
+    "tree_sha": "c21821ae1ac1ba931b1f38e8fb3b9641bd3b4b3f",
+    "production_pages_deploy_run": 35668227904,
+    "production_live_resource_integrity_run": 35668338010,
+    "products_browser_proof_run": 35668337892,
+    "products_route_proof_run": 35668337966,
+    "build_specific_proof_run": 35668227824,
+    "exact_production_url": "https://eb805f65.devilndove-site.pages.dev",
+    "deployment_id": "eb805f65-82fd-4e02-ba8f-83b5a19ef8f0",
+    "production_promotion_artifact_id": 10670880412,
+    "exact_main_sha_workflows": "35/35",
+    "canonical_migrations": 22,
+    "remote_d1_queries": 1,
+    "production_business_counts": {
+      "users": 2,
+      "products": 45,
+      "site_item_inventory": 1041,
+      "orders": 0
+    },
+    "business_counts_preserved": true,
+    "state": "PRODUCTION_GREEN"
   }
 }
