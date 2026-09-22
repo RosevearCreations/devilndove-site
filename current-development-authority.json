@@ -1,11 +1,11 @@
 {
   "release": 467,
-  "build": 231,
-  "title": "Workshop Journal & Capability Case-Study Activation",
-  "state": "DEVELOPMENT_GREEN",
-  "source_authority": "dev",
-  "accepted_dev_sha": "b67c23231d06f9faaf2952784878c11784936c48",
-  "accepted_dev_tree_sha": "42d45f7d521b4f93a891cea9351dc65f656f89c6",
+  "build": 232,
+  "title": "Manufacturing Outcomes Review & Roadmap Renewal",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "source_authority": "build232-manufacturing-outcomes-roadmap",
+  "accepted_dev_sha": "99af873897334e8eb3b382c898a687bcbe06819a",
+  "accepted_dev_tree_sha": "afc367962b2163105a73c60a1bb14fd06744218e",
   "acceptance": {
     "system_gate_run": 35681244435,
     "current_application_quality_run": 35681244619,
@@ -16,26 +16,26 @@
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 230,
-      "title": "Cost, Margin, QA & Knowledge Evidence Adoption",
-      "authority": "release467-build230-cost-margin-qa-knowledge-evidence-adoption.json",
-      "dev_sha": "b67c23231d06f9faaf2952784878c11784936c48",
-      "tree_sha": "42d45f7d521b4f93a891cea9351dc65f656f89c6",
-      "proofs": {
-        "system_gate_run": 35681244435,
-        "current_application_quality_run": 35681244619,
-        "it_admin_runtime_proof_run": 35681244610,
-        "branch_hygiene_run": 35681244451
-      },
-      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
-      "build_specific_proof_run": 35681244469,
-      "business_exit": "HOLD_NO_QUALIFYING_REAL_RUN"
-    },
-    "current_closure_candidate": {
-      "release": 467,
       "build": 231,
       "title": "Workshop Journal & Capability Case-Study Activation",
       "authority": "release467-build231-workshop-journal-capability-case-study-activation.json",
+      "dev_sha": "fc65e05083e7dcf52d50a392d650d937988db0b6",
+      "tree_sha": "afc367962b2163105a73c60a1bb14fd06744218e",
+      "proofs": {
+        "system_gate_run": 35685100622,
+        "current_application_quality_run": 35685100552,
+        "it_admin_runtime_proof_run": 35685100662,
+        "branch_hygiene_run": 35685100555
+      },
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+      "build_specific_proof_run": 35685100623,
+      "business_exit": "HOLD_NO_PUBLISHABLE_EVIDENCE"
+    },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 232,
+      "title": "Manufacturing Outcomes Review & Roadmap Renewal",
+      "authority": "release467-build232-manufacturing-outcomes-review-roadmap-renewal.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -46,21 +46,23 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 230,
-    "title": "Cost, Margin, QA & Knowledge Evidence Adoption",
-    "authority": "release467-build230-cost-margin-qa-knowledge-evidence-adoption.json",
-    "main_sha": "eab246604f1fd3a7d4762d17ee4868451f87584b",
-    "tree_sha": "42d45f7d521b4f93a891cea9351dc65f656f89c6",
-    "production_pages_deploy_run": 35681417751,
-    "production_live_resource_integrity_run": 35681463987,
-    "products_browser_proof_run": 35681464032,
-    "products_route_proof_run": 35681464036,
-    "build_specific_proof_run": 35681417827,
-    "business_exit": "HOLD_NO_QUALIFYING_REAL_RUN",
+    "build": 231,
+    "title": "Workshop Journal & Capability Case-Study Activation",
+    "authority": "release467-build231-workshop-journal-capability-case-study-activation.json",
+    "main_sha": "99af873897334e8eb3b382c898a687bcbe06819a",
+    "tree_sha": "afc367962b2163105a73c60a1bb14fd06744218e",
+    "production_pages_deploy_run": 35685413652,
+    "production_live_resource_integrity_run": 35685469887,
+    "products_browser_proof_run": 35685469957,
+    "products_route_proof_run": 35685469861,
+    "build_specific_proof_run": 35685413673,
+    "business_exit": "HOLD_NO_PUBLISHABLE_EVIDENCE",
+    "exact_main_sha_workflows": "40/40",
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build232-manufacturing-outcomes-review-roadmap-renewal.json",
     "release467-build231-workshop-journal-capability-case-study-activation.json",
     "release467-build230-cost-margin-qa-knowledge-evidence-adoption.json",
     "release467-build229-first-creative-project-prototype-to-run-pilot.json",
@@ -133,24 +135,21 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_POST_MANUFACTURING_AUTONOMOUS_BUILDS_225_232.md",
-  "next_build": 232,
-  "next_build_state": "BLOCKED_UNTIL_BUILD231_PRODUCTION_GREEN",
-  "next_build_title": "Manufacturing Outcomes Review & Roadmap Renewal",
-  "promotion_state": "BUILD231_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD231_PUBLIC_STORY_ACTIVATION_ACTIVE_FROM_BUILD230_PRODUCTION_GREEN",
+  "next_build": null,
+  "next_build_state": "PENDING_BUILD232_MEASURED_ROADMAP_RENEWAL",
+  "next_build_title": null,
+  "promotion_state": "BUILD232_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD232_MEASUREMENT_PENDING",
   "measured_closure": {
-    "source_build": 230,
-    "build230_business_exit": "HOLD_NO_QUALIFYING_REAL_RUN",
-    "published_workshop_journal_entries": 0,
-    "published_project_case_studies": 0,
-    "published_capability_backed_case_studies": 0,
-    "published_hybrid_case_studies": 0,
-    "interpretation": "BUILD231_MUST_PROVE_EXISTING_REVIEWED_PUBLIC_STORY_OR_CLOSE_HOLD_NO_PUBLISHABLE_EVIDENCE"
+    "source_build": 231,
+    "build231_business_exit": "HOLD_NO_PUBLISHABLE_EVIDENCE",
+    "build224_baseline_retained": true,
+    "interpretation": "BUILD232_MUST_REMEASURE_BEFORE_AUTHORIZING_ANY_SUCCESSOR_OR_DECLARING_QUEUE_EXHAUSTED"
   },
   "planned_successor": {
-    "first_build": 232,
-    "last_build": 232,
-    "state": "BLOCKED_UNTIL_BUILD231_PRODUCTION_GREEN",
+    "first_build": null,
+    "last_build": null,
+    "state": "PENDING_BUILD232_MEASUREMENT",
     "future_queue_exhausted": false
   }
 }
