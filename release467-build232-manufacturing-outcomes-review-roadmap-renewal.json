@@ -2,7 +2,7 @@
   "release": 467,
   "build": 232,
   "title": "Manufacturing Outcomes Review & Roadmap Renewal",
-  "state": "DEVELOPMENT_GREEN",
+  "state": "DEVELOPMENT_CANDIDATE",
   "authority": "release467-build232-manufacturing-outcomes-review-roadmap-renewal",
   "priority": "remeasure_build224_dimensions_from_exact_build231_production_green_then_renew_or_exhaust_the_autonomous_roadmap_without_inventing_business_evidence",
   "predecessor": {
