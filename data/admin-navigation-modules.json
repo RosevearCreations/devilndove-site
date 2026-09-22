@@ -251,6 +251,10 @@
               "label": "Creative Project Prototype-to-Run Pilot"
             },
             {
+              "href": "/admin/evidence-adoption/",
+              "label": "Cost, Margin, QA & Knowledge Evidence Adoption"
+            },
+            {
               "href": "/admin/custom-request/",
               "label": "Custom Requests"
             },
