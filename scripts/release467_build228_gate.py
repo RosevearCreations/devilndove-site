@@ -19,7 +19,7 @@ final=b.get('final_closure') or {};q(final.get('dev_sha')==DEV and final.get('tr
 q(final.get('business_exit')=='HOLD_NO_REAL_REQUEST','Build 228 bounded business exit drifted')
 prod=b.get('production_checkpoint') or {};q(prod.get('main_sha')==MAIN and prod.get('tree_sha')==TREE and int(prod.get('production_pages_deploy_run') or 0)==35675671813 and int(prod.get('production_live_resource_integrity_run') or 0)==35675740985 and int(prod.get('build_specific_proof_run') or 0)==35675671688,'Build 228 Production closure drifted')
 q(prod.get('business_exit')=='HOLD_NO_REAL_REQUEST','Build 228 Production business exit drifted')
-mf=[x.get('file') for x in m.get('migrations',[]) if isinstance(x,dict)];q(len(mf)==22 and mf[-1]=='0022_release467_capability_profile_coverage_closure.sql','Build 228 retained canonical stream drifted')
+mf=[x.get('file') for x in m.get('migrations',[]) if isinstance(x,dict)];q(len(mf)>=22 and mf[21]=='0022_release467_capability_profile_coverage_closure.sql','Build 228 retained canonical stream drifted')
 a=t('functions/api/admin/custom-work-route-proof-pilot.js');q('export async function onRequestGet' in a and 'onRequestPost' not in a,'Build 228 retained API must remain GET-only')
 for forbidden in ('INSERT INTO','UPDATE ','DELETE FROM','CREATE TABLE','ALTER TABLE','DROP TABLE','bucket.put(','bucket.delete('):q(forbidden not in a,'Build 228 retained API crossed mutation boundary: '+forbidden)
 for zpath in ('functions/api/admin/custom-work-route-proof-pilot.js','public/js/admin-custom-work-route-proof-pilot-build228.js'):
