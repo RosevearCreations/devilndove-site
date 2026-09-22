@@ -12,21 +12,21 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 232 candidate
+## Current Release 467 restart authority — Build 233 candidate
 
-Build 231 **Workshop Journal & Capability Case-Study Activation** is the exact verified predecessor:
+Build 232 **Manufacturing Outcomes Review & Roadmap Renewal** is the exact verified predecessor:
 
-- Development SHA: `fc65e05083e7dcf52d50a392d650d937988db0b6`
-- Shared tree: `afc367962b2163105a73c60a1bb14fd06744218e`
-- Development proofs: System `35685100622`, Quality `35685100552`, I.T. `35685100662`, Hygiene `35685100555`, Build proof `35685100623`
-- Production main: `99af873897334e8eb3b382c898a687bcbe06819a`
-- Production proofs: Pages `35685413652`, Live Resources `35685469887`, Product Browser `35685469957`, Product Route `35685469861`, Build proof `35685413673`
+- Development SHA: `f0067f89f94a9bb7ef7ad14510ec1cfb023d8cb8`
+- Shared tree: `3fcfd435a8618dc64244f53d0ceca1379878dcdd`
+- Development proofs: System `35739960877`, Quality `35739960401`, I.T. `35739960703`, Hygiene `35739960845`, Build proof `35739960789`
+- Production main: `d5e9922b629f99c5653f5b884861a2c18358b44f`
+- Production proofs: Pages `35740221037`, Live Resources `35740304575`, Product Browser `35740304505`, Product Route `35740304478`, Build proof `35740221128`
 - Business exit: `HOLD_NO_PUBLISHABLE_EVIDENCE`
 - Canonical migrations remain **0001–0022**.
 
-Build 232 **Manufacturing Outcomes Review & Roadmap Renewal** is GET-only and measures existing reviewed Content Release / public case-study evidence. It may report `HOLD_NO_PUBLISHABLE_EVIDENCE` when no qualifying reviewed public story or approved Creative Project publication exists. It never publishes automatically or queries private/raw CAIP media.
+Build 233 **Universal Help & Quality-of-Life Coverage** is the active owner-authorized refinement candidate. It extends the existing shared ⓘ runtime, separates Customer Help from Creator & Operations Help, and performs no business-data/provider mutation.
 
-Build 232 remains blocked until Build 232 is exact-SHA Production GREEN. Build 232 is the active final planned build from the Build 224 roadmap. The future queue decision is pending exact Build 232 measured Development evidence.
+Build 232 is exact-SHA Production GREEN and closed the prior roadmap. Build 233 begins the owner-authorized Builds 233–248 refinement roadmap and remains blocked from Production until its exact Development head is fully GREEN.
 
 ## Retained historical provenance — Build 171
 

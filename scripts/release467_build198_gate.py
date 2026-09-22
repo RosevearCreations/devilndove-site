@@ -146,18 +146,19 @@ for token in (
     "aria-expanded",
     "event.key === 'Escape'",
     "ensureHelpCentreLauncher",
-    "ⓘ Help",
     "data-dd-help-centre-launcher",
 ):
     req(token in help_js, f"Accessible shared help behavior missing: {token}")
+req(("ⓘ Help" in help_js) or ("ⓘ Customer Help" in help_js and "ⓘ Creator Help" in help_js), "Accessible shared help launcher text missing")
 req("fetch(" not in help_js and "apiFetch" not in help_js, "Contextual help must remain client-only/no API")
 req("<h1" not in help_js.lower(), "Contextual help client must never create an H1")
 req("if (!normalizedPath().startsWith('/admin/') || window.DDAdminLeanStartup?.enabled) return;" in help_js, "Public/lean help must not start the broad document observer")
 req("AUTO_OBSERVER_MAX_MS = 8000" in help_js, "Retained bounded Admin observer contract missing")
 req(".dd-context-help-centre" in help_css, "Floating Help Centre styling missing")
-req("/public/js/admin-context-help.js?v=467b198-shared-help" in auth_ui, "Admin/creator shared help bootstrap revision missing")
-req(auth_ui.index("/public/js/admin-context-help.js?v=467b198-shared-help") < auth_ui.index("if (!leanStartup)"), "Shared Admin help must load even on lean workspaces")
-req('data-dd-context-help-style="true"' in middleware and "/public/js/admin-context-help.js?v=467b198-shared-help" in middleware, "Public middleware shared help injection missing")
+req(("/public/js/admin-context-help.js?v=467b198-shared-help" in auth_ui) or ("/public/js/admin-context-help.js?v=467b233-universal-help" in auth_ui), "Admin/creator shared help bootstrap revision missing")
+help_bootstrap = "/public/js/admin-context-help.js?v=467b233-universal-help" if "/public/js/admin-context-help.js?v=467b233-universal-help" in auth_ui else "/public/js/admin-context-help.js?v=467b198-shared-help"
+req(auth_ui.index(help_bootstrap) < auth_ui.index("if (!leanStartup)"), "Shared Admin help must load even on lean workspaces")
+req('data-dd-context-help-style="true"' in middleware and ("/public/js/admin-context-help.js?v=467b198-shared-help" in middleware or "/public/js/admin-context-help.js?v=467b233-universal-help" in middleware), "Public middleware shared help injection missing")
 
 # Help centres.
 for path, body, public in (
@@ -168,8 +169,9 @@ for path, body, public in (
     req("ⓘ" in body, f"{path} must explain contextual help")
     if public:
         req("index,follow" in body.lower(), "Public Help Centre should be indexable")
-        for topic in ("Shopping", "Product images", "Wishlist", "Creators", "Using contextual help"):
+        for topic in ("Shopping", "Product images", "Wishlist", "Using contextual help"):
             req(topic.lower() in body.lower(), f"Public Help Centre missing topic: {topic}")
+        req(("creators" in body.lower()) or ("custom requests" in body.lower()), "Public Help Centre must retain Build 198 creator-era coverage or the Build 233 customer custom-request successor")
     else:
         req("noindex,nofollow" in body.lower(), "Admin Help Centre must remain noindex")
         for topic in ("Product images", "Today Needs Attention", "contextual help"):
