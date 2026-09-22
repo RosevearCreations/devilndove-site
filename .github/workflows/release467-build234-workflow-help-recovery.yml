@@ -1,0 +1,82 @@
+name: Release 467 Build 234 Workflow Help Recovery
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev, main]
+    paths:
+      - 'public/js/admin-context-help.js'
+      - 'admin/help/index.html'
+      - 'functions/_middleware.js'
+      - 'public/js/site-auth-ui.js'
+      - 'admin/packaging-studio/index.html'
+      - 'public/js/admin-packaging-studio.js'
+      - 'functions/api/_lib/packagingDomainService.js'
+      - 'css/styles.css'
+      - 'docs/packaging/CUPCAKE_SOAP_LABEL_SYSTEM.md'
+      - 'migrations/canonical/0023_release467_build234_cupcake_soap_label_templates.sql'
+      - 'migrations/canonical/manifest.json'
+      - 'current-development-authority.json'
+      - 'release467-build233-universal-help-quality-of-life-coverage.json'
+      - 'release467-build234-workflow-help-empty-states-recovery-guidance.json'
+      - 'docs/operations/RELEASE_467_BUILD_234_WORKFLOW_HELP_EMPTY_STATES_RECOVERY_GUIDANCE.md'
+      - 'scripts/release467_build234_gate.py'
+      - 'scripts/release467_build233_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'scripts/current_help_hygiene_gate.py'
+      - 'scripts/migration_policy_gate.py'
+      - 'scripts/repository_forward_sanity.py'
+      - '.github/workflows/release467-build234-workflow-help-recovery.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Check Packaging client syntax
+        run: node --check public/js/admin-packaging-studio.js
+      - name: Check shared help syntax
+        run: node --check public/js/admin-context-help.js
+      - name: Prove Build 234
+        run: python scripts/release467_build234_gate.py
+      - name: Prove canonical migration policy
+        run: python scripts/migration_policy_gate.py
+      - name: Prove forward repository authority
+        run: python scripts/repository_forward_sanity.py
+      - name: Retain current help hygiene
+        run: python scripts/current_help_hygiene_gate.py
+      - name: Retain Build 233 help contract
+        run: python scripts/release467_build233_gate.py
+      - name: Retain Packaging composition
+        run: python scripts/current_packaging_label_composition_gate.py
+      - name: Retain Packaging production
+        run: python scripts/current_packaging_label_production_gate.py
+      - name: Retain Packaging safe area
+        run: python scripts/current_packaging_safe_area_gate.py
+
+  provider-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Confirm Build 234 dedicated CI does not mutate providers
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          body=Path('.github/workflows/release467-build234-workflow-help-recovery.yml').read_text()
+          forbidden=('wrangler d1 execute','wrangler d1 migrations apply','bucket.put(','bucket.delete(','bucket.list(')
+          found=[x for x in forbidden if x in body]
+          if found: raise SystemExit(f'Provider mutation token found in dedicated CI: {found}')
+          print('BUILD 234 DEDICATED CI PROVIDER MUTATION: ZERO')
+          print('Canonical migration 0023 is applied only by the established Development/Production migration pipeline.')
+          PY
