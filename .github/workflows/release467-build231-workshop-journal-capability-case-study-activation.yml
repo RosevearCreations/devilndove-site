@@ -1,0 +1,47 @@
+name: Release 467 Build 231 Workshop Journal Capability Case Study Activation
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.x'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - run: python scripts/release467_build231_gate.py
+      - run: python scripts/release467_build230_gate.py
+      - run: python scripts/release467_build223_gate.py
+  development-d1-public-story-activation:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - run: |
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "WITH public_profile_process_keys AS (SELECT DISTINCT CAST(j.value AS TEXT) process_key FROM workshop_capability_profiles p,json_each(CASE WHEN json_valid(p.related_process_keys_json) THEN p.related_process_keys_json ELSE '[]' END) j WHERE p.is_public=1 AND p.review_status IN ('reviewed','published') AND TRIM(CAST(j.value AS TEXT))<>''),project_stories AS (SELECT pub.content_publication_id,pub.content_status,CAST(cp.source_id AS INTEGER) creative_work_project_id FROM content_publications pub JOIN content_projects cp ON cp.content_project_id=pub.content_project_id WHERE pub.destination='workshop_journal' AND cp.source_type='creative_work_project' AND CAST(cp.source_id AS INTEGER)>0) SELECT (SELECT COUNT(*) FROM d1_migrations) canonical_migrations,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('content_publications','content_projects','creative_project_operations','inventory_processes','workshop_capability_profiles')) required_tables,(SELECT COUNT(*) FROM pragma_foreign_key_check) fk,(SELECT COUNT(*) FROM content_publications WHERE destination='workshop_journal' AND content_status='published') published_workshop_journal_entries,(SELECT COUNT(*) FROM project_stories WHERE content_status='published') published_project_case_studies,(SELECT COUNT(*) FROM project_stories ps WHERE content_status='published' AND EXISTS (SELECT 1 FROM creative_project_operations o JOIN inventory_processes ip ON ip.inventory_process_id=o.inventory_process_id JOIN public_profile_process_keys ppk ON ppk.process_key=ip.process_key WHERE o.creative_work_project_id=ps.creative_work_project_id AND COALESCE(o.plan_status,'planned')<>'retired')) published_capability_backed_case_studies,(SELECT COUNT(*) FROM project_stories ps WHERE content_status='published' AND (SELECT COUNT(DISTINCT o.inventory_process_id) FROM creative_project_operations o WHERE o.creative_work_project_id=ps.creative_work_project_id AND COALESCE(o.plan_status,'planned')<>'retired')>=2) published_hybrid_case_studies,(SELECT COUNT(*) FROM content_publications WHERE destination='workshop_journal' AND content_status='approved') approved_workshop_journal_candidates,(SELECT COUNT(*) FROM project_stories WHERE content_status='approved') approved_project_case_study_candidates;" > /tmp/b231.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/b231.json'));found=[]
+          keys=('canonical_migrations','required_tables','fk','published_workshop_journal_entries','published_project_case_studies','published_capability_backed_case_studies','published_hybrid_case_studies','approved_workshop_journal_candidates','approved_project_case_study_candidates')
+          def w(v):
+            if isinstance(v,dict):
+              if all(k in v for k in keys):found.append(v)
+              for x in v.values():w(x)
+            elif isinstance(v,list):
+              for x in v:w(x)
+          w(d);assert found,d;r=found[0]
+          assert int(r['canonical_migrations'])==22,r
+          assert int(r['required_tables'])==5,r
+          assert int(r['fk'])==0,r
+          state='PROVEN_REVIEWED_PUBLIC_STORY' if int(r['published_project_case_studies'])>0 else ('READY_FOR_OPERATOR_PUBLICATION' if int(r['approved_project_case_study_candidates'])>0 else 'HOLD_NO_PUBLISHABLE_EVIDENCE')
+          print('BUILD 231 DEVELOPMENT PUBLIC STORY ACTIVATION: GREEN',state,r)
+          PY

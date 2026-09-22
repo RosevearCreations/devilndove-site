@@ -2,7 +2,7 @@
   "release": 467,
   "build": 230,
   "title": "Cost, Margin, QA & Knowledge Evidence Adoption",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build230-cost-margin-qa-knowledge-evidence-adoption",
   "priority": "measure_real_cost_margin_qa_and_knowledge_adoption_from_existing_reviewed_authorities_or_hold_without_fabrication",
   "predecessor": {
@@ -68,7 +68,7 @@
   "next_build": {
     "build": 231,
     "title": "Workshop Journal & Capability Case-Study Activation",
-    "state": "BLOCKED_UNTIL_BUILD230_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_AFTER_BUILD230_PRODUCTION_GREEN"
   },
   "future_queue": {
     "first_build": 231,
@@ -103,5 +103,43 @@
       "state": "PRODUCTION_GREEN",
       "role": "CURRENT_PRODUCTION_BASELINE"
     }
+  },
+  "business_exit": {
+    "state": "HOLD_NO_QUALIFYING_REAL_RUN",
+    "quote_drafts": 0,
+    "margin_reviews": 0,
+    "reviewed_runs": 0,
+    "reviewed_cost_projects": 0,
+    "qa_checks": 0,
+    "reviewed_knowledge_entries": 0,
+    "approved_recipe_versions": 0,
+    "qualifying_runs": 0,
+    "synthetic_evidence_created": false,
+    "evidence": "Development D1 measured no qualifying reviewed real production run or downstream evidence; software acceptance remained GREEN."
+  },
+  "final_closure": {
+    "dev_sha": "b67c23231d06f9faaf2952784878c11784936c48",
+    "tree_sha": "42d45f7d521b4f93a891cea9351dc65f656f89c6",
+    "proofs": {
+      "system_gate_run": 35681244435,
+      "current_application_quality_run": 35681244619,
+      "it_admin_runtime_proof_run": 35681244610,
+      "branch_hygiene_run": 35681244451
+    },
+    "build_specific_proof_run": 35681244469,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "business_exit": "HOLD_NO_QUALIFYING_REAL_RUN"
+  },
+  "production_checkpoint": {
+    "main_sha": "eab246604f1fd3a7d4762d17ee4868451f87584b",
+    "tree_sha": "42d45f7d521b4f93a891cea9351dc65f656f89c6",
+    "production_pages_deploy_run": 35681417751,
+    "production_live_resource_integrity_run": 35681463987,
+    "products_browser_proof_run": 35681464032,
+    "products_route_proof_run": 35681464036,
+    "build_specific_proof_run": 35681417827,
+    "canonical_migrations": 22,
+    "business_exit": "HOLD_NO_QUALIFYING_REAL_RUN",
+    "state": "PRODUCTION_GREEN"
   }
 }
