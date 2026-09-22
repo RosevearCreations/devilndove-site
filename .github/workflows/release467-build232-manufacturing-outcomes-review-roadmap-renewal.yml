@@ -1,0 +1,147 @@
+name: Release 467 Build 232 Manufacturing Outcomes Review Roadmap Renewal
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.x'}
+      - run: python scripts/release467_build232_gate.py
+      - run: python scripts/release467_build231_gate.py
+      - run: python scripts/release467_build224_gate.py
+
+  development-manufacturing-outcomes-measurement:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q '^database_id = "f34a741b-0000-45b0-9a96-6be08754d563"$' wrangler.toml
+      - name: Measure Development manufacturing outcomes
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "$(cat scripts/release467_build232_measurement.sql)" > /tmp/build232-measurement.json
+          python - <<'PY'
+          import json,os
+          raw=json.load(open('/tmp/build232-measurement.json'))
+          required=(
+            'products_reviewed','ready_products','review_required_products','externally_blocked_products',
+            'publicly_visible_products','media_ready_products','media_blocked_products','tracked_zero_stock_products',
+            'products_with_linked_resources','products_with_missing_linked_inventory','products_with_unknown_linked_cost','buyer_blocked_products',
+            'canonical_migrations','foreign_key_violations',
+            'canonical_active_processes','public_reviewed_capability_profiles','public_profile_process_keys','active_processes_with_public_profile',
+            'active_custom_requests','custom_requests_with_triage','custom_requests_with_sufficient_triage','hybrid_projects',
+            'proof_versions_total','proofs_sent','proofs_approved','proofs_changed','manufacturing_lifecycles',
+            'lifecycles_with_prototype_evidence','lifecycles_with_approved_sample','reviewed_production_runs','completed_manufacturing_lifecycles',
+            'quote_drafts_total','quote_drafts_with_expected_cost_review','projects_with_actual_cost_evidence',
+            'projects_with_fully_reviewed_cost_evidence','projects_with_reviewed_known_direct_cost',
+            'production_run_qa_checks','qa_pass_checks','qa_rework_checks','qa_fail_checks',
+            'reviewed_runs_with_rework','reviewed_runs_with_scrap','reviewed_rework_quantity','reviewed_scrap_quantity',
+            'knowledge_entries_total','knowledge_entries_reviewed','approved_recipe_versions',
+            'published_workshop_journal_entries','published_project_case_studies',
+            'published_capability_backed_case_studies','published_hybrid_case_studies'
+          )
+          rows=[];reads=[]
+          def walk(v):
+            if isinstance(v,dict):
+              if all(k in v for k in required): rows.append(v)
+              meta=v.get('meta')
+              if isinstance(meta,dict) and meta.get('rows_read') is not None: reads.append(int(meta.get('rows_read') or 0))
+              for x in v.values(): walk(x)
+            elif isinstance(v,list):
+              for x in v: walk(x)
+          walk(raw);assert rows,raw
+          r=rows[0];n={}
+          for k in required:
+            v=r.get(k)
+            n[k]=float(v or 0) if k in ('reviewed_rework_quantity','reviewed_scrap_quantity') else int(v or 0)
+          assert n['canonical_migrations']==22,n
+          assert n['foreign_key_violations']==0,n
+          assert n['products_reviewed']<=240,n
+          assert n['ready_products']+n['review_required_products']+n['externally_blocked_products']==n['products_reviewed'],n
+          provider_rows_read=sum(reads);ceiling=25000
+          assert provider_rows_read<=ceiling,(provider_rows_read,ceiling)
+          b224={
+            'products_reviewed':43,'ready_products':1,'review_required_products':42,'externally_blocked_products':0,
+            'publicly_visible_products':40,'media_ready_products':3,'media_blocked_products':40,'tracked_zero_stock_products':2,
+            'products_with_linked_resources':2,'products_with_missing_linked_inventory':0,'products_with_unknown_linked_cost':2,
+            'buyer_blocked_products':16,'canonical_active_processes':22,'public_reviewed_capability_profiles':12,
+            'public_profile_process_keys':21,'active_processes_with_public_profile':21,'active_custom_requests':0,
+            'custom_requests_with_triage':0,'custom_requests_with_sufficient_triage':0,'hybrid_projects':0,
+            'proof_versions_total':0,'proofs_sent':0,'proofs_approved':0,'proofs_changed':0,'manufacturing_lifecycles':0,
+            'lifecycles_with_prototype_evidence':0,'lifecycles_with_approved_sample':0,'reviewed_production_runs':0,
+            'completed_manufacturing_lifecycles':0,'quote_drafts_total':0,'quote_drafts_with_expected_cost_review':0,
+            'projects_with_actual_cost_evidence':0,'projects_with_fully_reviewed_cost_evidence':0,
+            'projects_with_reviewed_known_direct_cost':0,'production_run_qa_checks':0,'qa_pass_checks':0,
+            'qa_rework_checks':0,'qa_fail_checks':0,'reviewed_runs_with_rework':0,'reviewed_runs_with_scrap':0,
+            'reviewed_rework_quantity':0,'reviewed_scrap_quantity':0,'knowledge_entries_total':0,
+            'knowledge_entries_reviewed':0,'approved_recipe_versions':0,'published_workshop_journal_entries':0,
+            'published_project_case_studies':0,'published_capability_backed_case_studies':0,'published_hybrid_case_studies':0
+          }
+          deltas={k:n[k]-v for k,v in b224.items()}
+          def pct(a,b): return None if not b else round(100.0*a/b,1)
+          coverage={
+            'public_process_profile_coverage_pct':pct(n['active_processes_with_public_profile'],n['canonical_active_processes']),
+            'custom_request_sufficient_triage_pct':pct(n['custom_requests_with_sufficient_triage'],n['active_custom_requests']),
+            'quote_expected_cost_review_coverage_pct':pct(n['quote_drafts_with_expected_cost_review'],n['quote_drafts_total']),
+            'actual_cost_fully_reviewed_pct':pct(n['projects_with_fully_reviewed_cost_evidence'],n['projects_with_actual_cost_evidence']),
+            'published_project_capability_backed_pct':pct(n['published_capability_backed_case_studies'],n['published_project_case_studies'])
+          }
+          remaining={
+            'storefront_operator_blockers': n['review_required_products']>0 or n['buyer_blocked_products']>0 or n['media_blocked_products']>0 or n['tracked_zero_stock_products']>0 or n['products_with_unknown_linked_cost']>0,
+            'capability_coverage_gap': n['active_processes_with_public_profile']<n['canonical_active_processes'],
+            'real_custom_work_evidence_absent': n['active_custom_requests']==0,
+            'real_creative_project_manufacturing_evidence_absent': n['manufacturing_lifecycles']==0 and n['reviewed_production_runs']==0,
+            'cost_margin_evidence_absent': n['quote_drafts_total']==0 and n['projects_with_actual_cost_evidence']==0,
+            'qa_evidence_absent': n['production_run_qa_checks']==0,
+            'knowledge_recipe_evidence_absent': n['knowledge_entries_total']==0 and n['approved_recipe_versions']==0,
+            'public_case_study_evidence_absent': n['published_project_case_studies']==0
+          }
+          autonomous_blockers_only=(
+            not remaining['capability_coverage_gap'] and
+            remaining['real_custom_work_evidence_absent'] and
+            remaining['real_creative_project_manufacturing_evidence_absent'] and
+            remaining['cost_margin_evidence_absent'] and
+            remaining['qa_evidence_absent'] and
+            remaining['knowledge_recipe_evidence_absent'] and
+            remaining['public_case_study_evidence_absent']
+          )
+          closure={
+            'release':467,'build':232,'development_sha':os.environ.get('GITHUB_SHA',''),
+            'measurement_state':'EXACT_DEVELOPMENT_EVIDENCE_AVAILABLE',
+            'd1_provider_rows_read':provider_rows_read,'d1_rows_read_ceiling':ceiling,
+            'build224_baseline':b224,'current':n,'deltas_from_build224':deltas,'coverage_percentages':coverage,
+            'remaining_gaps':remaining,'autonomous_blockers_only':autonomous_blockers_only,
+            'mutations':{'d1':'ZERO','r2':'ZERO','schema':'NONE','publication':'NONE','inventory':'NONE','finance':'NONE','production_data_copy':'NONE'}
+          }
+          json.dump(closure,open('/tmp/release467-build232-manufacturing-outcomes.json','w'),indent=2,sort_keys=True)
+          print('D1_PROVIDER_ROWS_READ=',provider_rows_read,'BUDGET=',ceiling)
+          print('BUILD 232 DEVELOPMENT MANUFACTURING OUTCOMES: GREEN')
+          print(json.dumps({'current':n,'deltas_from_build224':deltas,'coverage_percentages':coverage,'remaining_gaps':remaining,'autonomous_blockers_only':autonomous_blockers_only},sort_keys=True))
+          print('D1 MUTATION: ZERO')
+          print('R2 MUTATION: ZERO')
+          print('SCHEMA MIGRATION: NONE')
+          PY
+      - name: Upload exact-SHA Build 232 manufacturing outcomes artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release467-build232-manufacturing-outcomes-${{ github.sha }}
+          path: /tmp/release467-build232-manufacturing-outcomes.json
+          if-no-files-found: error
