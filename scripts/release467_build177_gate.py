@@ -116,9 +116,9 @@ for token in (
     'admin-packaging-native-client-v298.js?v=177',
     'admin-packaging-save-stabilizer-v300.js?v=177',
     'admin-packaging-compatibility-v301.js?v=177',
-    'admin-packaging-studio.js?v=177',
 ):
     req(token in page,f'Packaging page Build 177 delivery marker missing: {token}')
+req('admin-packaging-studio.js?v=' in page,'Packaging page must retain a cache-busted Packaging Studio runtime; later builds may advance the revision')
 req('site-analytics.js' not in page,'Packaging page still loads nonessential public analytics script')
 req(page.count('loading="lazy"') >= 4,'Packaging below-fold reference imagery is not lazy-loaded')
 req(page.count('decoding="async"') >= 5,'Packaging reference imagery is not async-decoded')
