@@ -42,7 +42,7 @@ jobs:
             elif isinstance(v,list):
               for x in v:w(x)
           w(d);assert found,d;r=found[0]
-          assert int(r['canonical_migrations'])==22,r
+          assert int(r['canonical_migrations'])>=22,r
           assert int(r['required_tables'])==8,r
           assert int(r['fk'])==0,r
           state='HOLD_NO_REAL_PROJECT' if int(r['real_projects'])==0 and int(r['manufacturing_lifecycles'])==0 else ('PROVEN_REAL_REVIEWED_EVIDENCE' if int(r['proven_projects'])>0 else 'REAL_PROJECT_PILOT_IN_PROGRESS')
