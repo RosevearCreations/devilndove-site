@@ -1,0 +1,98 @@
+{
+  "release": 467,
+  "build": 228,
+  "title": "First Real Custom Work Route-to-Proof Pilot",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build228-first-real-custom-work-route-to-proof-pilot",
+  "priority": "prove_the_existing_custom_work_route_to_proof_path_with_real_operator_work_or_close_hold_without_fabricated_business_evidence",
+  "predecessor": {
+    "build": 227,
+    "title": "Manufacturing Adoption Command Centre",
+    "development_head_sha": "86a599178cfe473afc4dba15890d47db66f015ea",
+    "promotion_pr": 301,
+    "production_main_sha": "2fbbb950b2598a518d14078b0252a8159472fbb7",
+    "zero_file_diff_promotion": true,
+    "build227_pr_contract_run": 35672227181,
+    "state": "PRODUCTION_GREEN_REPOSITORY_PROMOTION_CONFIRMED"
+  },
+  "scope": {
+    "mode": "read_only_real_request_route_to_proof_pilot",
+    "path": [
+      "Custom Work Intake",
+      "Manufacturing Triage",
+      "Canonical Route",
+      "Quote Assumptions",
+      "Proof / Version",
+      "Customer / Internal Approval"
+    ],
+    "legitimate_operator_entered_records_only": true,
+    "synthetic_business_records": false,
+    "existing_owner_authorities_only": true
+  },
+  "implementation": {
+    "admin_api": "functions/api/admin/custom-work-route-proof-pilot.js",
+    "admin_surface": "admin/custom-work-pilot/index.html",
+    "admin_client": "public/js/admin-custom-work-route-proof-pilot-build228.js"
+  },
+  "exit": {
+    "real_evidence": "PROVEN_REAL_REVIEWED_EVIDENCE",
+    "no_real_request": "HOLD_NO_REAL_REQUEST",
+    "software_acceptance_required": "GREEN_READ_ONLY_ROUTE_TO_PROOF_ORCHESTRATION"
+  },
+  "safety": {
+    "canonical_migration_added": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "customer_fabrication": false,
+    "quote_or_proof_fabrication": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build228_gate.py",
+    "predecessor_gate": "scripts/release467_build227_gate.py",
+    "canonical_migrations": 22,
+    "api_get_only": true,
+    "future_queue_exhausted": false
+  },
+  "next_build": {
+    "build": 229,
+    "title": "First Creative Project Prototype-to-Run Pilot",
+    "state": "BLOCKED_UNTIL_BUILD228_PRODUCTION_GREEN"
+  },
+  "future_queue": {
+    "first_build": 229,
+    "last_build": 232,
+    "exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "86a599178cfe473afc4dba15890d47db66f015ea",
+      "tree": "5694ea94c097505cc8db6795e839073fb210f746",
+      "system_gate_run": 35671994146,
+      "quality_run": 35671994173,
+      "it_admin_runtime_run": 35671994145,
+      "repository_hygiene_run": 35671994205,
+      "build_specific_proof_run": 35671994164,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "release": 467,
+      "build": 227,
+      "title": "Manufacturing Adoption Command Centre",
+      "authority": "release467-build227-manufacturing-adoption-command-centre.json",
+      "main_sha": "2fbbb950b2598a518d14078b0252a8159472fbb7",
+      "tree_sha": "5694ea94c097505cc8db6795e839073fb210f746",
+      "production_pages_deploy_run": 35672279658,
+      "production_live_resource_integrity_run": 35672342976,
+      "products_browser_proof_run": 35672342991,
+      "products_route_proof_run": 35672343003,
+      "build_specific_proof_run": 35672279694,
+      "state": "PRODUCTION_GREEN",
+      "role": "CURRENT_PRODUCTION_BASELINE"
+    }
+  }
+}

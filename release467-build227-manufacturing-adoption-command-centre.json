@@ -2,7 +2,7 @@
   "release": 467,
   "build": 227,
   "title": "Manufacturing Adoption Command Centre",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build227-manufacturing-adoption-command-centre",
   "priority": "make_the_existing_build210_220_manufacturing_engine_human_testable_without_creating_parallel_business_data_authority",
   "predecessor": {
@@ -127,7 +127,7 @@
   "next_build": {
     "build": 228,
     "title": "First Real Custom Work Route-to-Proof Pilot",
-    "state": "BLOCKED_UNTIL_BUILD227_PRODUCTION_GREEN"
+    "state": "INGESTED_BY_BUILD228"
   },
   "future_queue": {
     "first_build": 228,
@@ -156,5 +156,34 @@
       "exact_production_url": "https://eb805f65.devilndove-site.pages.dev",
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "86a599178cfe473afc4dba15890d47db66f015ea",
+    "tree_sha": "5694ea94c097505cc8db6795e839073fb210f746",
+    "proofs": {
+      "system_gate_run": 35671994146,
+      "current_application_quality_run": 35671994173,
+      "it_admin_runtime_proof_run": 35671994145,
+      "branch_hygiene_run": 35671994205
+    },
+    "build_specific_proof_run": 35671994164,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 228,
+    "recorded_by": "Build 228 successor ingestion; not self-recorded by Build 227"
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 227,
+    "title": "Manufacturing Adoption Command Centre",
+    "authority": "release467-build227-manufacturing-adoption-command-centre.json",
+    "main_sha": "2fbbb950b2598a518d14078b0252a8159472fbb7",
+    "tree_sha": "5694ea94c097505cc8db6795e839073fb210f746",
+    "production_pages_deploy_run": 35672279658,
+    "production_live_resource_integrity_run": 35672342976,
+    "products_browser_proof_run": 35672342991,
+    "products_route_proof_run": 35672343003,
+    "build_specific_proof_run": 35672279694,
+    "state": "PRODUCTION_GREEN",
+    "role": "CURRENT_PRODUCTION_BASELINE"
   }
 }

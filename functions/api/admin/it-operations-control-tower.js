@@ -1,27 +1,27 @@
-// Release 467 Build 227 — current release/restart authority over exact Build 226 GREEN predecessor.
+// Release 467 Build 228 — current release/restart authority over exact Build 227 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=227;
-const TITLE='Manufacturing Adoption Command Centre';
-const AUTHORITY='release467-build227-manufacturing-adoption-command-centre';
-const EVIDENCE_ID='r467-b226-a3f220d-35667972994-35668227904';
+const BUILD=228;
+const TITLE='First Real Custom Work Route-to-Proof Pilot';
+const AUTHORITY='release467-build228-first-real-custom-work-route-to-proof-pilot';
+const EVIDENCE_ID='r467-b227-86a5991-35671994146-35672279658';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:226,title:'Capability Profile Coverage Closure',state:'DEVELOPMENT_GREEN',
-  dev_sha:'a3f220deb8c4cef7a2143ab1960c2ea33454ad6d',tree_sha:'c21821ae1ac1ba931b1f38e8fb3b9641bd3b4b3f',
-  system_gate_run:35667972994,current_application_quality_run:35667973054,it_admin_runtime_proof_run:35667973089,
-  branch_hygiene_run:35667973130,build_specific_proof_run:35667972987,proof_state:'EXACT_BRANCH_HEAD_GREEN',
+  release:467,build:227,title:'Manufacturing Adoption Command Centre',state:'DEVELOPMENT_GREEN',
+  dev_sha:'86a599178cfe473afc4dba15890d47db66f015ea',tree_sha:'5694ea94c097505cc8db6795e839073fb210f746',
+  system_gate_run:35671994146,current_application_quality_run:35671994173,it_admin_runtime_proof_run:35671994145,
+  branch_hygiene_run:35671994205,build_specific_proof_run:35671994164,proof_state:'EXACT_BRANCH_HEAD_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:226,title:'Capability Profile Coverage Closure',state:'PRODUCTION_GREEN',
-  main_sha:'8a4adf0a9108f482edd7aaa0c2f7e27d843a9d2e',tree_sha:'c21821ae1ac1ba931b1f38e8fb3b9641bd3b4b3f',
-  production_pages_deploy_run:35668227904,production_live_resource_integrity_run:35668338010,
-  products_browser_proof_run:35668337892,products_route_proof_run:35668337966,build_specific_proof_run:35668227824,remote_d1_queries:1
+  release:467,build:227,title:'Manufacturing Adoption Command Centre',state:'PRODUCTION_GREEN',
+  main_sha:'2fbbb950b2598a518d14078b0252a8159472fbb7',tree_sha:'5694ea94c097505cc8db6795e839073fb210f746',
+  production_pages_deploy_run:35672279658,production_live_resource_integrity_run:35672342976,
+  products_browser_proof_run:35672342991,products_route_proof_run:35672343003,build_specific_proof_run:35672279694,remote_d1_queries:1
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 226 Capability Profile Coverage Closure'
+  'Release 467 Build 227 Manufacturing Adoption Command Centre'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:226,title:'Capability Profile Coverage Closure',
+    release:467,build:227,title:'Manufacturing Adoption Command Centre',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35667972994,current_application_quality_run:35667973054,
-      it_admin_runtime_proof_run:35667973089,branch_hygiene_run:35667973130,build226_proof_run:35667972987
+      system_gate_run:35671994146,current_application_quality_run:35671994173,
+      it_admin_runtime_proof_run:35671994145,branch_hygiene_run:35671994205,build227_proof_run:35671994164
     },
     production_proofs:{
-      production_pages_deploy_run:35668227904,production_live_resource_integrity_run:35668338010,
-      products_browser_proof_run:35668337892,products_route_proof_run:35668337966,build226_proof_run:35668227824
+      production_pages_deploy_run:35672279658,production_live_resource_integrity_run:35672342976,
+      products_browser_proof_run:35672342991,products_route_proof_run:35672343003,build227_proof_run:35672279694
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -72,9 +72,9 @@ function closurePayload(){
     external_lanes:Object.fromEntries(EXTERNAL_POLICY.map((x)=>[x.key,x.state])),
     runtime_closure:{
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
-      background_polling:false,automatic_inventory_assignment:false,build226_capability_profile_coverage:true
+      background_polling:false,automatic_inventory_assignment:false,build227_manufacturing_adoption:true
     },
-    next_build:'Build 228 is blocked until Build 227 is exact-SHA Production GREEN; Builds 228-232 remain planned.'
+    next_build:'Build 229 is blocked until Build 228 is exact-SHA Production GREEN; Builds 229-232 remain planned.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 226 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 227 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -98,13 +98,13 @@ function markdownReport(pack){
 - Current Application Quality Proof: ${pack.development_proofs.current_application_quality_run}
 - I.T. Admin Runtime Proof: ${pack.development_proofs.it_admin_runtime_proof_run}
 - Repository Branch Hygiene: ${pack.development_proofs.branch_hygiene_run}
-- Build 226 Development Proof: ${pack.development_proofs.build226_proof_run}
+- Build 227 Development Proof: ${pack.development_proofs.build227_proof_run}
 - Production Pages Deploy: ${pack.production_proofs.production_pages_deploy_run}
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Build 226 Production Proof: ${pack.production_proofs.build226_proof_run}
-- Current candidate: Build 227 Manufacturing Adoption Command Centre
+- Build 227 Production Proof: ${pack.production_proofs.build227_proof_run}
+- Current candidate: Build 228 First Real Custom Work Route-to-Proof Pilot
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -142,12 +142,12 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 226 source is the exact last fully verified Development checkpoint.',
-      'Build 226 Production is GREEN on the identical source tree through canonical migration 0022.',
-      'Development proofs: System 35667972994, Quality 35667973054, I.T. 35667973089, Hygiene 35667973130.',
-      'Production proofs: Pages 35668227904, Live Resources 35668338010, Product Browser 35668337892, Product Route 35668337966.',
-      'Build 227 Manufacturing Adoption Command Centre is the active read-only Development candidate.',
-      'Build 227 adds no schema migration or synthetic business records; Builds 228-232 remain planned and blocked until Build 227 is Production GREEN.'
+      'Build 227 source is the exact last fully verified Development checkpoint.',
+      'Build 227 Production is GREEN on the identical source tree through canonical migration 0022.',
+      'Development proofs: System 35671994146, Quality 35671994173, I.T. 35671994145, Hygiene 35671994205.',
+      'Production proofs: Pages 35672279658, Live Resources 35672342976, Product Browser 35672342991, Product Route 35672343003.',
+      'Build 228 First Real Custom Work Route-to-Proof Pilot is the active read-only Development candidate.',
+      'Build 228 adds no schema migration or synthetic business records; Builds 229-232 remain planned and blocked until Build 228 is Production GREEN.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
