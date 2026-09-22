@@ -932,6 +932,30 @@
   function tabButton(key, label) { return `<button class="packaging-tab ${state.activeTab === key ? 'is-active' : ''}" type="button" data-packaging-tab="${key}">${label}</button>`; }
   function tabPanel(key, content) { return `<section class="packaging-tab-panel ${state.activeTab === key ? 'is-active' : ''}" data-packaging-panel="${key}">${content}</section>`; }
 
+  function cupcakePanelMarkup(project={},template={},artwork={}) {
+    const key=artwork.cupcake_preset_key||template.layout?.cupcake_preset_key||'sweet-orange';
+    const purpose=artwork.cupcake_purpose_text||template.layout?.default_cupcake_purpose_text||cupcakePresetByKey(key).purpose;
+    const name=project.collection_name||template.layout?.default_collection||cupcakePresetByKey(key).label;
+    return '<section class="packaging-tab-panel '+(state.activeTab==='cupcake'?'is-active':'')+'" data-packaging-panel="cupcake">'+
+      '<div class="section-heading-row"><div><h3>2 × 2 inch Cupcake Soap front label</h3><p class="small">Choose an owner-supplied direction or an added colour family. Wording stays editable and ingredient facts stay in the existing structured ingredient authority.</p></div><span class="status-pill">50.8 × 50.8 mm</span></div>'+
+      '<div class="packaging-warning-list"><strong>Compact front-label boundary</strong><p class="small">This small front label is not automatically a complete Canadian cosmetic declaration. If required ingredient, bilingual, net-quantity, dealer/contact or warning text cannot fit legibly, keep the complete reviewed wording on a companion/back label. Do not remove required facts merely to make the front design fit.</p></div>'+
+      cupcakePresetCardsMarkup(key)+
+      '<input type="hidden" id="packagingCupcakePresetKey" value="'+esc(key)+'"/>'+
+      '<div class="grid cols-2"><label><span class="small">Cupcake / scent name</span><input class="input" id="packagingCupcakeNameMirror" value="'+esc(name)+'" placeholder="Sweet Orange"/></label><label><span class="small">Purpose / front-use wording</span><input class="input" id="packagingCupcakePurpose" value="'+esc(purpose)+'" placeholder="hand & body soap"/></label></div>'+
+      '<p class="small">The large title comes from the editable English identity field, normally “Cupcake Soap”. Ingredients come from the same structured ingredient rows used by the rest of Packaging Studio. Made in Canada, website and business wording remain editable in Product.</p>'+
+      '<div class="packaging-save-actions"><button class="btn primary" id="applyCupcakeTwoInSize" type="button">Set exact 2 in × 2 in size</button><button class="btn" id="openCupcakeIngredients" type="button">Review ingredients</button><button class="btn" id="openCupcakePreview" type="button">Open preview</button></div>'+
+      '</section>';
+  }
+
+  function injectCupcakePanel(){
+    if(document.querySelector('[data-packaging-panel="cupcake"]'))return;
+    const rosePanel=document.querySelector('[data-packaging-panel="rose"]');
+    if(!rosePanel)return;
+    const project=state.detail?.project||{}, template=state.detail?.template||{}, artwork=project.artwork||{};
+    rosePanel.insertAdjacentHTML('afterend',cupcakePanelMarkup(project,template,artwork));
+  }
+
+
   function detailMarkup() {
     const project = state.detail?.project || {}; const template = state.detail?.template || {}; const theme = project.theme || template.theme || {};
     const artwork = project.artwork || {}; const ingredients = state.detail?.ingredients || []; const claims = state.detail?.structured_claims || []; const sourceMaterials = state.detail?.source_materials || []; const components = state.detail?.components || []; const componentSummary = state.detail?.component_summary || {};
@@ -1064,6 +1088,7 @@
       return;
     }
     main.innerHTML = detailMarkup();
+    injectCupcakePanel();
     bindDetail();
     notifyEditorRendered('project-render');
   }
@@ -1085,9 +1110,11 @@
       packagingBleedMm: layout.bleed_mm ?? (num(layout.bleed_in) * 25.4), packagingSafeMarginMm: layout.safe_margin_mm ?? (num(layout.safe_margin_in) * 25.4),
       packagingTopArcText: layout.default_top_arc_text || (template.package_type === 'soap_ribbon' ? 'Rosevear Creations' : ''), packagingBottomArcText: layout.default_bottom_arc_text || (template.package_type === 'soap_ribbon' ? 'MADE IN CANADA' : ''),
       packagingCandlePrimaryText: layout.default_primary_text || '', packagingCandleDateLine1: layout.default_date_line_1 || '', packagingCandleEventLine: layout.default_event_line || '',
-      packagingCandleDateLine2: layout.default_date_line_2 || '', packagingArtworkAsset: String(template.package_type)==='soap_ribbon' ? '' : (layout.artwork_asset || '')
+      packagingCandleDateLine2: layout.default_date_line_2 || '', packagingArtworkAsset: String(template.package_type)==='soap_ribbon' ? '' : (layout.artwork_asset || ''),
+      packagingCupcakePresetKey: layout.cupcake_preset_key || '', packagingCupcakePurpose: layout.default_cupcake_purpose_text || '', packagingCupcakeNameMirror: layout.default_collection || ''
     };
     Object.entries(values).forEach(([field, value]) => { const node = id(field); if (node) node.value = value ?? ''; });
+    if (String(layout.design_profile||'') === 'cupcake_soap_square_v1') { if(id('packagingCollection')) id('packagingCollection').value=layout.default_collection||template.template_name||'Cupcake Soap'; if(id('packagingIdentityEn')) id('packagingIdentityEn').value=layout.default_primary_text||'Cupcake Soap'; }
     Object.entries({ rose_colour: 'packagingRoseColour', theme_colour: 'packagingThemeColour', border_colour: 'packagingBorderColour', accent_gold: 'packagingAccentGold', secondary_colour: 'packagingSecondaryColour' }).forEach(([key, field]) => { if (id(field) && theme[key]) id(field).value = theme[key]; });
     renderPreview(); message(`Template “${template.template_name}” applied to this draft. Save the project to make it authoritative.`, 'success');
   }
