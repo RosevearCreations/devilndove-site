@@ -94,6 +94,23 @@
     return `<div class="packaging-rose-direction-palette" aria-label="Product rose direction quick palette">${PRODUCT_ROSE_PRESETS.filter(([key])=>colourKeys.has(key)).map(([key,label,assetId])=>{const preset=rosePresetById(assetId);return `<button class="packaging-rose-direction ${String(selectedKey)===key?'is-active':''}" type="button" data-product-rose-direction="${esc(key)}" title="${esc(label)}"><img src="${esc(preset.path)}" alt="${esc(label)} actual botanical rose preset"/><span>${esc(label.replace(' rose',''))}</span></button>`;}).join('')}</div>`;
   }
 
+  const CUPCAKE_SOAP_PRESETS = Object.freeze([
+    { key:'sweet-orange', label:'Sweet Orange', purpose:'uplifting hand & body soap', motif:'orange', theme:{ theme_colour:'#FFF4DF', border_colour:'#7A2512', accent_gold:'#F3A21A', secondary_colour:'#F2662D', rose_colour:'#F28A35' } },
+    { key:'charcoal', label:'Charcoal', purpose:'deep-cleansing hand & body soap', motif:'charcoal', theme:{ theme_colour:'#F3F0E9', border_colour:'#181818', accent_gold:'#BFC3C8', secondary_colour:'#353535', rose_colour:'#555555' } },
+    { key:'oatmeal-goat-milk', label:'Oatmeal & Goat Milk', purpose:'gentle hand & body soap', motif:'oatmeal', theme:{ theme_colour:'#FFF3D8', border_colour:'#5A2D10', accent_gold:'#B8894E', secondary_colour:'#A66B35', rose_colour:'#C9B18A' } },
+    { key:'sea-breeze', label:'Sea Breeze', purpose:'refreshing hand & body soap', motif:'sea', theme:{ theme_colour:'#ECFBF7', border_colour:'#083B57', accent_gold:'#B99B5B', secondary_colour:'#1598A5', rose_colour:'#55C9C2' } },
+    { key:'lavender-dream', label:'Lavender Dream', purpose:'calming hand & body soap', motif:'lavender', theme:{ theme_colour:'#FFF5E9', border_colour:'#3E1759', accent_gold:'#C79A46', secondary_colour:'#8757B2', rose_colour:'#A57BCB' } },
+    { key:'rose-petal', label:'Rose Petal', purpose:'floral hand & body soap', motif:'rose', theme:{ theme_colour:'#FFF0F2', border_colour:'#681C36', accent_gold:'#C99760', secondary_colour:'#D86B8A', rose_colour:'#E18CA4' } },
+    { key:'lemon-honey', label:'Lemon Honey', purpose:'bright hand & body soap', motif:'lemon', theme:{ theme_colour:'#FFF9DE', border_colour:'#6E4A0C', accent_gold:'#D5A928', secondary_colour:'#E8C43B', rose_colour:'#E0B12A' } },
+    { key:'eucalyptus-mint', label:'Eucalyptus Mint', purpose:'fresh hand & body soap', motif:'mint', theme:{ theme_colour:'#F1FAF2', border_colour:'#174A32', accent_gold:'#A5A66A', secondary_colour:'#5BA87D', rose_colour:'#77B995' } },
+    { key:'vanilla-cream', label:'Vanilla Cream', purpose:'creamy hand & body soap', motif:'vanilla', theme:{ theme_colour:'#FFF8E9', border_colour:'#5D3822', accent_gold:'#C6A169', secondary_colour:'#C99865', rose_colour:'#D8B98D' } },
+    { key:'berry-bliss', label:'Berry Bliss', purpose:'fruity hand & body soap', motif:'berry', theme:{ theme_colour:'#FFF0F8', border_colour:'#4E174B', accent_gold:'#C59A58', secondary_colour:'#B83E83', rose_colour:'#D865A2' } }
+  ]);
+  function cupcakePresetByKey(value=''){ return CUPCAKE_SOAP_PRESETS.find((row)=>row.key===String(value||'')) || CUPCAKE_SOAP_PRESETS[0]; }
+  function cupcakePresetCardsMarkup(selected=''){
+    return '<div class="packaging-cupcake-preset-grid">'+CUPCAKE_SOAP_PRESETS.map((row)=>'<button class="packaging-cupcake-preset '+(String(selected)===row.key?'is-active':'')+'" type="button" data-cupcake-preset="'+esc(row.key)+'" title="Apply '+esc(row.label)+' visual theme"><span class="packaging-cupcake-swatch" style="--cup-bg:'+esc(row.theme.theme_colour)+';--cup-accent:'+esc(row.theme.secondary_colour)+';--cup-ink:'+esc(row.theme.border_colour)+'"></span><strong>'+esc(row.label)+'</strong></button>').join('')+'</div>';
+  }
+
   function message(text = '', kind = '') {
     const node = id('packagingStudioMessage');
     if (!node) return;
