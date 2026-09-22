@@ -25,14 +25,19 @@ req(a.get('predecessor',{}).get('production_main_sha')=='d5e9922b629f99c5653f5b8
 req(a.get('authorization',{}).get('type')=='EXPLICIT_OWNER_NEW_CAPABILITY','Build 233 owner authorization missing')
 req(a.get('authorization',{}).get('future_queue_exhausted') is False,'new refinement queue must remain open')
 start=(a.get('starting_point') or {}).get('development') or {}
-req(pointer.get('build')==233 and pointer.get('title')=='Universal Help & Quality-of-Life Coverage','current authority must identify Build 233')
-req(start.get('sha')==pointer.get('accepted_dev_sha') and start.get('tree')==pointer.get('accepted_dev_tree_sha'),'Build 233 starting Development checkpoint must match current pointer')
-req(int(start.get('system_gate_run') or 0)==int((pointer.get('acceptance') or {}).get('system_gate_run') or 0),'Build 233 starting System proof must match current pointer')
+req(int(pointer.get('build') or 0)>=233,'current authority must not regress before Build 233')
+if int(pointer.get('build') or 0)==233:
+    req(pointer.get('title')=='Universal Help & Quality-of-Life Coverage','Build 233 pointer title')
+    req(start.get('sha')==pointer.get('accepted_dev_sha') and start.get('tree')==pointer.get('accepted_dev_tree_sha'),'Build 233 starting Development checkpoint must match current pointer')
+    req(int(start.get('system_gate_run') or 0)==int((pointer.get('acceptance') or {}).get('system_gate_run') or 0),'Build 233 starting System proof must match current pointer')
+else:
+    last=(pointer.get('restart_integrity') or {}).get('last_fully_verified') or {}
+    req(int(last.get('build') or 0)>=233,'Build 233 must remain represented as a verified predecessor after successor activation')
 for token in ('DD_PAGE_HELP_PROFILES','pageHelpProfile(path)','ensurePageLevelHelp(path, ordinal)','ⓘ Customer Help','ⓘ Creator Help','customer_shop','customer_custom','customer_account','creator_storefront','creator_workshop','creator_finance','creator_it'):
     req(token in h,f'shared help runtime missing {token}')
 req('fetch(' not in h and 'apiFetch' not in h,'contextual help must remain client-only/read-only')
-req('/public/js/admin-context-help.js?v=467b233-universal-help' in mid,'public middleware must inject Build 233 help revision')
-req('/public/js/admin-context-help.js?v=467b233-universal-help' in auth,'Creator/Admin bootstrap must load Build 233 help revision')
+req(any(token in mid for token in ('/public/js/admin-context-help.js?v=467b233-universal-help','/public/js/admin-context-help.js?v=467b234-workflow-help')),'public middleware must retain Build 233+ help runtime')
+req(any(token in auth for token in ('/public/js/admin-context-help.js?v=467b233-universal-help','/public/js/admin-context-help.js?v=467b234-workflow-help')),'Creator/Admin bootstrap must retain Build 233+ help runtime')
 req('data-help-audience="customer"' in pub and 'Customer Help Centre' in pub,'customer-specific Help Centre missing')
 req('data-help-audience="creator-and-up"' in adm and 'Creator &amp; Operations Help Centre' in adm,'Creator-and-up Help Centre missing')
 req(len(re.findall(r'<h1(?:\s|>)',pub,re.I))==1,'Customer Help Centre must contain exactly one H1')
@@ -49,7 +54,10 @@ for phase in ('Quality of life','Streamlining','Security hardening','Visual comp
 req('not individual Product gallery images' in imgs,'non-Product image scope boundary missing')
 for route in ('/socials/','/marketplaces/','/contact/','/about/','/workshop-journal/','/toolshed/','/tools/','/supplies/','/admin/customer-documents/','/admin/creative-assets/'):
     req(route in imgs,f'non-Product image register missing {route}')
-req(len(manifest.get('migrations') or [])==22,'Build 233 must add no canonical migration')
+files=[str(row.get('file') or '') for row in (manifest.get('migrations') or []) if isinstance(row,dict)]
+req(len(files)>=22 and files[21]=='0022_release467_capability_profile_coverage_closure.sql','Build 233 canonical migration baseline 0001-0022 must remain intact')
+if int(pointer.get('build') or 0)>=234:
+    req(len(files)>=23 and files[22]=='0023_release467_cupcake_soap_label_templates.sql','Build 234 successor migration must be canonical 0023')
 req("run_current_contract('scripts/release467_build232_gate.py','Release 467 Build 232')" in sysgate,'System Gate must retain Build 232')
 req("run_current_contract('scripts/release467_build233_gate.py','Release 467 Build 233')" in sysgate,'System Gate must invoke Build 233')
 
