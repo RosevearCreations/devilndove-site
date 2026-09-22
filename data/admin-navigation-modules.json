@@ -243,6 +243,10 @@
               "label": "Manufacturing Adoption Command Centre"
             },
             {
+              "href": "/admin/custom-work-pilot/",
+              "label": "Custom Work Route-to-Proof Pilot"
+            },
+            {
               "href": "/admin/custom-request/",
               "label": "Custom Requests"
             },
