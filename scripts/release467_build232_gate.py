@@ -19,7 +19,7 @@ d=t('docs/operations/RELEASE_467_BUILD_232_MANUFACTURING_OUTCOMES_REVIEW_ROADMAP
 s=t('scripts/current_system_gate_provenance_gate.py')
 q(p.get('build')==232 and p.get('title')=='Manufacturing Outcomes Review & Roadmap Renewal','pointer identity')
 q(p.get('state')=='DEVELOPMENT_GREEN' and p.get('source_authority')=='dev','current pointer must remain verified Development GREEN while Build 232 candidate is tested')
-q(p.get('accepted_dev_sha')=='fc65e05083e7dcf52d50a392d650d937988db0b6' and p.get('accepted_dev_tree_sha')=='afc367962b2163105a73c60a1bb14fd06744218e','Build 232 pointer must retain exact Build 231 verified Development boundary')
+q((p.get('accepted_dev_sha')=='fc65e05083e7dcf52d50a392d650d937988db0b6' and p.get('accepted_dev_tree_sha')=='afc367962b2163105a73c60a1bb14fd06744218e') or (int(p.get('build') or 0)>=233 and p.get('accepted_dev_sha')=='f0067f89f94a9bb7ef7ad14510ec1cfb023d8cb8' and p.get('accepted_dev_tree_sha')=='3fcfd435a8618dc64244f53d0ceca1379878dcdd'),'Build 232 pointer must retain its predecessor boundary or the exact verified Build 232 successor boundary')
 q(b.get('build')==232 and b.get('title')=='Manufacturing Outcomes Review & Roadmap Renewal','Build 232 authority identity')
 q(b.get('state') in ('DEVELOPMENT_CANDIDATE','DEVELOPMENT_GREEN','PRODUCTION_GREEN'),'Build 232 state')
 pred=b.get('predecessor') or {}
