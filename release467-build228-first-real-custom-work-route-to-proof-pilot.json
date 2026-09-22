@@ -67,5 +67,32 @@
     "first_build": 229,
     "last_build": 232,
     "exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "86a599178cfe473afc4dba15890d47db66f015ea",
+      "tree": "5694ea94c097505cc8db6795e839073fb210f746",
+      "system_gate_run": 35671994146,
+      "quality_run": 35671994173,
+      "it_admin_runtime_run": 35671994145,
+      "repository_hygiene_run": 35671994205,
+      "build_specific_proof_run": 35671994164,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "release": 467,
+      "build": 227,
+      "title": "Manufacturing Adoption Command Centre",
+      "authority": "release467-build227-manufacturing-adoption-command-centre.json",
+      "main_sha": "2fbbb950b2598a518d14078b0252a8159472fbb7",
+      "tree_sha": "5694ea94c097505cc8db6795e839073fb210f746",
+      "production_pages_deploy_run": 35672279658,
+      "production_live_resource_integrity_run": 35672342976,
+      "products_browser_proof_run": 35672342991,
+      "products_route_proof_run": 35672343003,
+      "build_specific_proof_run": 35672279694,
+      "state": "PRODUCTION_GREEN",
+      "role": "CURRENT_PRODUCTION_BASELINE"
+    }
   }
 }
