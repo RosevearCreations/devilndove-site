@@ -146,10 +146,10 @@ for token in (
     "aria-expanded",
     "event.key === 'Escape'",
     "ensureHelpCentreLauncher",
-    "ⓘ Help",
     "data-dd-help-centre-launcher",
 ):
     req(token in help_js, f"Accessible shared help behavior missing: {token}")
+req(("ⓘ Help" in help_js) or ("ⓘ Customer Help" in help_js and "ⓘ Creator Help" in help_js), "Accessible shared help launcher text missing")
 req("fetch(" not in help_js and "apiFetch" not in help_js, "Contextual help must remain client-only/no API")
 req("<h1" not in help_js.lower(), "Contextual help client must never create an H1")
 req("if (!normalizedPath().startsWith('/admin/') || window.DDAdminLeanStartup?.enabled) return;" in help_js, "Public/lean help must not start the broad document observer")
