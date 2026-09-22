@@ -85,6 +85,34 @@
     ['copper','Copper rose','rose-copper-v1'],
     ['bronze','Bronze rose','rose-bronze-v1']
   ];
+  const CUPCAKE_LABEL_PRESETS = Object.freeze([
+    { id:'sweet-orange', template_key:'soap-cupcake-sweet-orange-2in-v1', label:'Sweet Orange', purpose:'uplifting hand & body soap', theme:{theme_colour:'#FFF5E8',border_colour:'#7A210D',accent_gold:'#E99418',secondary_colour:'#F06A2E',rose_colour:'#F28A2D'} },
+    { id:'charcoal', template_key:'soap-cupcake-charcoal-2in-v1', label:'Charcoal', purpose:'deep-cleansing hand & body soap', theme:{theme_colour:'#F4F1EC',border_colour:'#171717',accent_gold:'#8B8B8B',secondary_colour:'#2C2C2C',rose_colour:'#555555'} },
+    { id:'oatmeal-goat-milk', template_key:'soap-cupcake-oatmeal-goat-milk-2in-v1', label:'Oatmeal & Goat Milk', purpose:'gentle hand & body soap', theme:{theme_colour:'#FFF7E8',border_colour:'#5B2C0F',accent_gold:'#C99B55',secondary_colour:'#B77B3D',rose_colour:'#D3B47B'} },
+    { id:'sea-breeze', template_key:'soap-cupcake-sea-breeze-2in-v1', label:'Sea Breeze', purpose:'refreshing hand & body soap', theme:{theme_colour:'#F1FCFA',border_colour:'#063E5A',accent_gold:'#B69A55',secondary_colour:'#1499A2',rose_colour:'#59C9C4'} },
+    { id:'lavender-dream', template_key:'soap-cupcake-lavender-dream-2in-v1', label:'Lavender Dream', purpose:'calming hand & body soap', theme:{theme_colour:'#FFF7F5',border_colour:'#45205F',accent_gold:'#C99B55',secondary_colour:'#8452A6',rose_colour:'#A985CF'} }
+  ]);
+  const CUPCAKE_COLOUR_PRESETS = Object.freeze([
+    ['berry-pink','Berry Pink','#FFF2F7','#6D1747','#D89AB3','#C84D82','#E98CB5'],
+    ['mint-cream','Mint Cream','#F2FFF8','#174C3A','#B2A469','#4FAE88','#89D9B8'],
+    ['lemon-cream','Lemon Cream','#FFFCEB','#604C08','#D5B74B','#E4C436','#F2D766'],
+    ['honey-amber','Honey Amber','#FFF8E8','#613A10','#C28A2E','#D19A3D','#E6B85E'],
+    ['rose-cream','Rose Cream','#FFF4F3','#672B35','#C89A65','#C75F71','#E496A3'],
+    ['peach-cream','Peach Cream','#FFF5ED','#6A321C','#C88B55','#E17B51','#F0AD83'],
+    ['blueberry-cream','Blueberry Cream','#F4F4FF','#29245D','#A59A68','#625CB1','#8982D3'],
+    ['vanilla-gold','Vanilla Gold','#FFF9ED','#5B431F','#B58B38','#C9A354','#E5CC94'],
+    ['teal-cream','Teal Cream','#F0FFFD','#073E42','#B89A58','#148D8B','#67C8C2'],
+    ['copper-cream','Copper Cream','#FFF4EA','#5D2D1B','#A86142','#B66545','#D89372']
+  ].map(([id,label,theme_colour,border_colour,accent_gold,secondary_colour,rose_colour])=>({id,label,theme:{theme_colour,border_colour,accent_gold,secondary_colour,rose_colour}})));
+  function cupcakePresetById(value){return CUPCAKE_LABEL_PRESETS.find((row)=>row.id===String(value||''))||CUPCAKE_LABEL_PRESETS[0];}
+  function cupcakeColourById(value){return CUPCAKE_COLOUR_PRESETS.find((row)=>row.id===String(value||''))||null;}
+  function cupcakePresetCardsMarkup(selected=''){
+    return CUPCAKE_LABEL_PRESETS.map((row)=>`<button class="packaging-cupcake-preset ${String(selected)===row.id?'is-active':''}" type="button" data-cupcake-preset="${esc(row.id)}"><span class="packaging-cupcake-swatch" style="--cupcake-bg:${esc(row.theme.theme_colour)};--cupcake-accent:${esc(row.theme.secondary_colour)};--cupcake-ink:${esc(row.theme.border_colour)}"></span><strong>${esc(row.label)}</strong><small>2 × 2 in</small></button>`).join('');
+  }
+  function cupcakeColourMarkup(selected=''){
+    return CUPCAKE_COLOUR_PRESETS.map((row)=>`<button class="packaging-cupcake-colour ${String(selected)===row.id?'is-active':''}" type="button" data-cupcake-colour="${esc(row.id)}" title="${esc(row.label)}"><span style="background:${esc(row.theme.secondary_colour)}"></span><small>${esc(row.label)}</small></button>`).join('');
+  }
+
   function rosePresetById(value) { return ROSE_PRESETS.find((row) => row.id === String(value || '')) || ROSE_PRESETS[0]; }
   function roseOptions(value) { const selected=String(value||'rose-purple-v1'); return ROSE_PRESETS.map((row)=>`<option value="${esc(row.id)}" ${selected===row.id?'selected':''}>${esc(row.label)}</option>`).join(''); }
   function roseAssetPath(value) { return rosePresetById(value)?.path || ''; }
@@ -130,6 +158,7 @@
     if (id('packagingTemplateShape')) layout.shape = id('packagingTemplateShape').value || layout.shape || 'rectangle';
     if (id('packagingDesignProfile')) layout.design_profile = id('packagingDesignProfile').value || layout.design_profile || 'general_rectangle';
     if (String(selected.package_type || '') === 'soap_ribbon') layout.design_profile = 'soap_reference_v3';
+    if (String(selected.package_type || '') === 'soap_cupcake_label') { layout.design_profile = 'cupcake_soap_square'; layout.shape = 'square'; }
     if (id('packagingBleedMm')) layout.bleed_mm = Math.max(0, num(id('packagingBleedMm').value, layout.bleed_mm));
     if (id('packagingSafeMarginMm')) layout.safe_margin_mm = Math.max(0, num(id('packagingSafeMarginMm').value, layout.safe_margin_mm));
     return {
@@ -222,6 +251,10 @@
       candle_date_line_1: value('packagingCandleDateLine1'),
       candle_event_line: value('packagingCandleEventLine'),
       candle_date_line_2: value('packagingCandleDateLine2'),
+      cupcake_reference_id: value('packagingCupcakeReference') || state.detail?.project?.artwork?.cupcake_reference_id || currentTemplate().layout?.cupcake_reference_id || '',
+      cupcake_label_title: value('packagingCupcakeLabelTitle') || state.detail?.project?.artwork?.cupcake_label_title || currentTemplate().layout?.default_label_title || 'Cupcake Soap',
+      cupcake_purpose_text: value('packagingCupcakePurpose') || state.detail?.project?.artwork?.cupcake_purpose_text || currentTemplate().layout?.default_purpose || 'hand & body soap',
+      cupcake_palette_id: value('packagingCupcakePalette') || state.detail?.project?.artwork?.cupcake_palette_id || '',
       artwork_asset: value('packagingArtworkAsset'),
       show_guides: id('packagingShowGuides')?.checked ? 1 : 0,
       show_bleed: id('packagingShowBleed')?.checked ? 1 : 0,
