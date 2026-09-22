@@ -169,8 +169,9 @@ for path, body, public in (
     req("ⓘ" in body, f"{path} must explain contextual help")
     if public:
         req("index,follow" in body.lower(), "Public Help Centre should be indexable")
-        for topic in ("Shopping", "Product images", "Wishlist", "Creators", "Using contextual help"):
+        for topic in ("Shopping", "Product images", "Wishlist", "Using contextual help"):
             req(topic.lower() in body.lower(), f"Public Help Centre missing topic: {topic}")
+        req(("creators" in body.lower()) or ("custom requests" in body.lower()), "Public Help Centre must retain Build 198 creator-era coverage or the Build 233 customer custom-request successor")
     else:
         req("noindex,nofollow" in body.lower(), "Admin Help Centre must remain noindex")
         for topic in ("Product images", "Today Needs Attention", "contextual help"):
