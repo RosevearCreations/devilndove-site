@@ -580,6 +580,46 @@
     </svg>`;
   }
 
+  function cupcakeSoapLabelSvg(data, template) {
+    const widthMm = 50.8; const heightMm = 50.8; const width = 1000; const height = 1000;
+    const theme=data.theme||{}; const artwork=data.artwork||{}; const reference=cupcakePresetById(artwork.cupcake_reference_id||template.layout?.cupcake_reference_id||'sweet-orange');
+    const bg=theme.theme_colour||reference.theme.theme_colour; const ink=theme.border_colour||reference.theme.border_colour; const gold=theme.accent_gold||reference.theme.accent_gold; const accent=theme.secondary_colour||reference.theme.secondary_colour; const soft=theme.rose_colour||reference.theme.rose_colour;
+    const title=artwork.cupcake_label_title||template.layout?.default_label_title||'Cupcake Soap'; const variant=data.packagingProductName||reference.label; const purpose=artwork.cupcake_purpose_text||template.layout?.default_purpose||reference.purpose;
+    const ingredientSource=String(data.packagingIngredientsEn||data.packagingInci||'Ingredients required').replace(/\s+/g,' ').trim();
+    const ingredientLines=wrapPlainLines(ingredientSource,42,3); const variantLines=wrapPlainLines(variant,22,2); const website=data.packagingWebsite||'devilndove.com'; const made=(data.packagingMadeInCanada||'Made in Canada').split('/')[0].trim();
+    const net=String(data.packagingNetQuantity||'').trim(); const refId=String(reference.id||'sweet-orange');
+    const decor = refId==='charcoal'
+      ? `<g fill="${ink}" opacity=".9"><circle cx="400" cy="188" r="25"/><circle cx="566" cy="155" r="20"/><path d="M663 140c-38-38-99 15-42 65l42 34 42-34c57-50-4-103-42-65z"/></g><g fill="#fff" opacity=".7"><circle cx="431" cy="156" r="8"/><circle cx="590" cy="201" r="7"/></g>`
+      : refId==='oatmeal-goat-milk'
+      ? `<g fill="${gold}" opacity=".85"><ellipse cx="390" cy="178" rx="38" ry="12" transform="rotate(-22 390 178)"/><ellipse cx="470" cy="139" rx="36" ry="11" transform="rotate(18 470 139)"/><ellipse cx="570" cy="182" rx="38" ry="12" transform="rotate(-8 570 182)"/><ellipse cx="637" cy="136" rx="34" ry="10" transform="rotate(27 637 136)"/></g><path d="M682 130c-32-32-85 14-36 57l36 30 36-30c49-43-4-89-36-57z" fill="${soft}" opacity=".7"/>`
+      : refId==='sea-breeze'
+      ? `<path d="M330 212q58-48 116 0t116 0t116 0" fill="none" stroke="${accent}" stroke-width="22" stroke-linecap="round"/><path d="M436 122l18 36 40 6-29 28 7 40-36-19-36 19 7-40-29-28 40-6z" fill="${accent}"/><path d="M620 124q42-36 84 0q-42 36-84 0z" fill="${bg}" stroke="${gold}" stroke-width="8"/>`
+      : refId==='lavender-dream'
+      ? `<g stroke="${accent}" stroke-width="9" stroke-linecap="round"><path d="M390 230q0-86 16-150"/><path d="M455 225q12-88 36-150"/><path d="M530 226q20-82 48-139"/></g><g fill="${soft}"><ellipse cx="407" cy="100" rx="13" ry="27"/><ellipse cx="395" cy="133" rx="13" ry="27"/><ellipse cx="486" cy="97" rx="13" ry="27"/><ellipse cx="474" cy="132" rx="13" ry="27"/><ellipse cx="577" cy="103" rx="13" ry="27"/><ellipse cx="561" cy="139" rx="13" ry="27"/></g>`
+      : `<g><circle cx="430" cy="150" r="54" fill="#F6921E"/><path d="M430 99v102M379 150h102M394 114l72 72M466 114l-72 72" stroke="#FFF2D8" stroke-width="9"/><ellipse cx="626" cy="148" rx="26" ry="55" fill="${accent}" transform="rotate(35 626 148)"/><ellipse cx="666" cy="123" rx="24" ry="48" fill="${soft}" transform="rotate(55 666 123)"/></g>`;
+    const variantMarkup=variantLines.map((line,index)=>`<text x="500" y="${548+index*52}" text-anchor="middle" font-size="${fontSize(line,22,54,39)}" font-weight="800" class="cup-serif">${xml(line)}</text>`).join('');
+    const ingredientMarkup=ingredientLines.map((line,index)=>`<text x="120" y="${825+index*31}" font-size="${fontSize(line,42,25,18)}" class="cup-copy">${xml(line)}</text>`).join('');
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${widthMm}mm" height="${heightMm}mm" viewBox="0 0 ${width} ${height}" role="img" aria-label="${xml(title)} ${xml(variant)} 2 by 2 inch label" data-packaging-profile="cupcake_soap_square">
+      <defs><linearGradient id="cup-frosting" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="${bg}"/><stop offset="1" stop-color="${soft}"/></linearGradient></defs>
+      <style>.cup-copy{font-family:Arial,Helvetica,sans-serif;fill:${ink}}.cup-serif{font-family:Georgia,'Times New Roman',serif;fill:${ink}}.cup-script{font-family:'Brush Script MT','Segoe Script',cursive;fill:${ink}}</style>
+      <rect width="1000" height="1000" rx="70" fill="${bg}"/><rect x="18" y="18" width="964" height="964" rx="62" fill="none" stroke="#fff" stroke-width="20"/><rect x="34" y="34" width="932" height="932" rx="54" fill="none" stroke="${ink}" stroke-width="5"/><rect x="47" y="47" width="906" height="906" rx="48" fill="none" stroke="${gold}" stroke-width="4"/>
+      <path d="M300 330h400l-35 145H335z" fill="${accent}" opacity=".9"/><path d="M318 334h364M337 379h326M350 425h300" stroke="${bg}" stroke-width="10" opacity=".55"/>
+      <path d="M306 330c20-69 80-92 132-64-2-55 43-100 100-87 32-72 135-68 158 8 57-15 105 31 99 91 55 9 80 58 55 102H285c-23-42-7-85 21-102z" fill="url(#cup-frosting)" stroke="${accent}" stroke-width="8"/>
+      ${decor}
+      <g transform="translate(808 126)"><circle r="86" fill="${bg}" stroke="${accent}" stroke-width="9"/><circle r="70" fill="none" stroke="${gold}" stroke-width="4" stroke-dasharray="7 8"/><text y="-13" text-anchor="middle" font-size="25" font-weight="700" class="cup-serif">${xml(made.toUpperCase())}</text><path d="M0 10l9 18 20-3-12 16 9 18-21-6-14 15 1-21-19-10 20-6z" fill="${accent}"/></g>
+      <path d="M105 485q395-58 790 0v116q-395 58-790 0z" fill="#fff" stroke="${gold}" stroke-width="6"/>
+      <text x="500" y="535" text-anchor="middle" font-size="${fontSize(title,24,72,49)}" class="cup-script">${xml(title)}</text>${variantMarkup}
+      <text x="500" y="665" text-anchor="middle" font-size="31" class="cup-script">from Devil n Dove</text><text x="500" y="704" text-anchor="middle" font-size="26" letter-spacing="3" class="cup-copy">${xml(website)}</text>
+      <rect x="82" y="744" width="836" height="175" rx="30" fill="#fff" opacity=".88" stroke="${accent}" stroke-width="5"/><line x1="610" y1="765" x2="610" y2="895" stroke="${gold}" stroke-width="4"/>
+      <text x="120" y="793" font-size="29" font-weight="800" class="cup-serif">Ingredients:</text>${ingredientMarkup}
+      <text x="650" y="793" font-size="29" font-weight="800" class="cup-serif">Purpose:</text><text x="650" y="832" font-size="${fontSize(purpose,28,27,19)}" class="cup-copy">${xml(purpose)}</text>
+      ${net?`<text x="650" y="875" font-size="22" font-weight="700" class="cup-copy">${xml(net)}</text>`:''}
+      <text x="500" y="948" text-anchor="middle" font-size="17" class="cup-copy">Compact front label — complete cosmetic/bilingual information may require a companion label.</text>
+      ${artwork.show_bleed?'<rect x="3" y="3" width="994" height="994" rx="72" fill="none" stroke="#d12424" stroke-width="3" stroke-dasharray="9 7"/>':''}
+      ${artwork.show_safe_area?'<rect x="40" y="40" width="920" height="920" rx="48" fill="none" stroke="#14843a" stroke-width="3" stroke-dasharray="8 7"/>':''}
+    </svg>`;
+  }
+
   function genericPackageSvg(data, template) {
     const widthMm = Math.max(25, num(template.page_width_mm, 88.9)); const heightMm = Math.max(25, num(template.page_height_mm, 50.8));
     const ratio = widthMm / heightMm; const width = 1000; const height = Math.max(400, Math.round(width / ratio));
@@ -628,13 +668,14 @@
   function svgMarkup() {
     const data = snapshot(); const template = currentTemplate(); const packageType = String(template.package_type || 'product_label'); const profile = String(template.layout?.design_profile || '');
     if (packageType === 'soap_ribbon' || profile === 'soap_reference_v2' || profile === 'soap_reference_v3') return glacialRibbonSvg(data, template);
+    if (packageType === 'soap_cupcake_label' || profile === 'cupcake_soap_square') return cupcakeSoapLabelSvg(data, template);
     if (packageType === 'candle_top' || packageType === 'engraved_round' || profile.startsWith('candle_top') || profile === 'round_maker_mark') return candleTopSvg(data, template);
     return genericPackageSvg(data, template);
   }
 
   function compliance(payload) {
     const ingredients = payload.structured_ingredients || []; const claims = payload.structured_claims || []; const template = currentTemplate(); const layout = template.layout || {};
-    const packageType = String(template.package_type || payload.package_type || ''); const isSoap = packageType === 'soap_ribbon'; const isRound = packageType === 'candle_top' || packageType === 'engraved_round';
+    const packageType = String(template.package_type || payload.package_type || ''); const isRibbon = packageType === 'soap_ribbon'; const isCupcake = packageType === 'soap_cupcake_label'; const isSoap = isRibbon || isCupcake; const isRound = packageType === 'candle_top' || packageType === 'engraved_round';
     const checks = isRound ? [
       ['Reusable template', template.packaging_template_id], ['Physical width', num(template.page_width_mm) >= 20], ['Physical height', num(template.page_height_mm) >= 20],
       ['Centred primary wording', payload.artwork?.candle_primary_text || template.layout?.default_primary_text], ['Upper brand arc', payload.artwork?.top_arc_text || template.layout?.default_top_arc_text], ['Lower origin arc', payload.artwork?.bottom_arc_text || template.layout?.default_bottom_arc_text]
@@ -643,23 +684,26 @@
       ['Dealer / business', payload.dealer_name], ['Principal address', payload.dealer_address], ['Consumer contact', payload.contact_text], ['Website', payload.website_text],
       ['Bilingual claims', claims.length > 0 && claims.every((row) => row.claim_en && row.claim_fr)]
     ];
-    if (isSoap) checks.push(['INCI list', payload.ingredients_inci], ['Made in Canada', payload.made_in_canada_text], ['Rose asset', payload.rose_asset_id], ['Structured ingredients', ingredients.length], ['INCI on each required ingredient', ingredients.length && ingredients.filter((row)=>Number(row.required_on_label)!==0).every((row) => row.inci_name)]);
+    if (isSoap) checks.push(['INCI list', payload.ingredients_inci], ['Made in Canada', payload.made_in_canada_text], ['Structured ingredients', ingredients.length], ['INCI on each required ingredient', ingredients.length && ingredients.filter((row)=>Number(row.required_on_label)!==0).every((row) => row.inci_name)]);
+    if (isRibbon) checks.push(['Rose asset', payload.rose_asset_id]);
+    if (isCupcake) checks.push(['2 × 2 inch canvas', Math.abs(num(template.page_width_mm)-50.8)<.15 && Math.abs(num(template.page_height_mm)-50.8)<.15], ['Cupcake renderer', String(layout.design_profile||'')==='cupcake_soap_square'], ['Purpose text', payload.artwork?.cupcake_purpose_text], ['Cupcake label title', payload.artwork?.cupcake_label_title]);
     const missing = checks.filter(([, value]) => !value); const warnings = [];
-    if (isSoap && Math.abs(num(template.page_width_mm) - 279.4) > .2) missing.push(['11-inch artboard', false]);
-    if (isSoap && Math.abs(num(layout.band_height_mm) - 19.05) > .1) missing.push(['0.75-inch band', false]);
-    if (isSoap && (Math.abs(num(template.front_width_mm) - 50.8) > .1 || Math.abs(num(template.front_height_mm) - 38.1) > .1)) missing.push(['2 × 1.5-inch front oval', false]);
-    if (isSoap && Math.abs(num(template.page_height_mm) - 38.1) > .1) warnings.push('This 50 mm rear-seal profile expands the artboard beyond 1.50 inches.');
-    if (isSoap && Math.abs(num(template.rear_width_mm) - 50) > .1) warnings.push('Photo-fit profile uses a 38.1 mm rear seal because 50 mm cannot fit inside a 38.1 mm-high artboard.');
+    if (isRibbon && Math.abs(num(template.page_width_mm) - 279.4) > .2) missing.push(['11-inch artboard', false]);
+    if (isRibbon && Math.abs(num(layout.band_height_mm) - 19.05) > .1) missing.push(['0.75-inch band', false]);
+    if (isRibbon && (Math.abs(num(template.front_width_mm) - 50.8) > .1 || Math.abs(num(template.front_height_mm) - 38.1) > .1)) missing.push(['2 × 1.5-inch front oval', false]);
+    if (isRibbon && Math.abs(num(template.page_height_mm) - 38.1) > .1) warnings.push('This 50 mm rear-seal profile expands the artboard beyond 1.50 inches.');
+    if (isRibbon && Math.abs(num(template.rear_width_mm) - 50) > .1) warnings.push('Photo-fit profile uses a 38.1 mm rear seal because 50 mm cannot fit inside a 38.1 mm-high artboard.');
     if (isSoap && ingredients.some((row) => row.allergen_note)) warnings.push('At least one ingredient includes an allergen note; verify current Health Canada fragrance-allergen requirements.');
     if (claims.some((row) => !row.is_approved)) warnings.push('One or more claims are not marked approved.');
-    if (isSoap) {
+    if (isRibbon) {
       const requiredRows=ingredients.filter((row)=>Number(row.required_on_label)!==0);
       const enLayout=ribbonIngredientLayout(requiredRows.map((row)=>row.display_name_en||row.inci_name).filter(Boolean));
       const frLayout=ribbonIngredientLayout(requiredRows.map((row)=>row.display_name_fr||curatedFrenchDraft(row.display_name_en||row.inci_name)||row.inci_name).filter(Boolean));
       if(enLayout.overflow||frLayout.overflow) missing.push(['Extended bilingual ingredient label required for complete English and French lists', false]);
       if(requiredRows.some((row)=>!String(row.display_name_fr||'').trim())) warnings.push('One or more French ingredient names are using a generated/fallback preview. Review and save the French ingredient wording before print approval.');
     }
-    if (isSoap && claims.length > 4) warnings.push('Only the first four claim rows fit the standard claims panel; remove, combine or move additional claims after review.');
+    if (isRibbon && claims.length > 4) warnings.push('Only the first four claim rows fit the standard claims panel; remove, combine or move additional claims after review.');
+    if (isCupcake) warnings.push('The 2 × 2 inch cupcake sticker is intentionally compact. Verify required bilingual identity, full ingredients, net quantity, dealer/address, warnings and any other cosmetic information on this label or a reviewed companion/back/extended label before sale.');
     if (isRound) warnings.push('Round laser/print preview: confirm the measured lid or blank diameter, safe margin, material settings and a physical proof before production.');
     else if (!isSoap) warnings.push('General packaging preview: verify category-specific legal fields, physical dieline, barcode/QR destination and material fit before approval.');
     return { checks, missing, warnings, ready: missing.length === 0 };
