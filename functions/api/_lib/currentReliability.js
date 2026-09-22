@@ -2,7 +2,7 @@
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=230;
+export const CURRENT_RELIABILITY_BUILD=231;
 export const CURRENT_RELIABILITY_TITLE='Workshop Journal & Capability Case-Study Activation';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';

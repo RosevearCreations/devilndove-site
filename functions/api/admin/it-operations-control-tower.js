@@ -4,7 +4,7 @@ import { onRequestGet as getReadinessControlTower } from './it-control-tower.js'
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=230;
+const BUILD=231;
 const TITLE='Workshop Journal & Capability Case-Study Activation';
 const AUTHORITY='release467-build231-workshop-journal-capability-case-study-activation';
 const EVIDENCE_ID='r467-b230-b67c232-35681244435-35681417751';
@@ -118,7 +118,7 @@ export async function onRequestGet(context){
   const data={
     release:RELEASE,build:BUILD,title:TITLE,ok:true,authority:AUTHORITY,state:'DEVELOPMENT_PILOT_CANDIDATE',
     release_authority:{
-      current_operator:{release:RELEASE,build:BUILD,title:TITLE,state:'DEVELOPMENT_ADOPTION_CANDIDATE'},
+      current_operator:{release:RELEASE,build:BUILD,title:TITLE,state:'DEVELOPMENT_PUBLIC_STORY_CANDIDATE'},
       accepted_development:ACCEPTED_DEVELOPMENT,verified_development:VERIFIED_DEVELOPMENT,production:PRODUCTION,
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
