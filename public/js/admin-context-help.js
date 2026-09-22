@@ -100,6 +100,84 @@ const DD_PAGE_HELP_PROFILES = Object.freeze({
   ]}
 });
 
+const DD_WORKFLOW_HELP_PROFILES = Object.freeze({
+  packaging: { body:[
+    'Start — choose or create the Packaging project and the correct physical template. For Soap Cupcakes, use the exact 2 × 2 inch template family rather than resizing a ribbon label.',
+    'Work — confirm Product identity, source/Inventory evidence, structured ingredients, wording, artwork and colours. Packaging references Inventory; it does not consume stock.',
+    'Review — use Preview, compliance checks and a 100%-scale physical print test. A preview that looks attractive is not regulatory or physical approval.',
+    'Finish — save a review version, resolve blockers, record physical proof and approve only when the current facts support it.',
+    'Empty / first use — no project or no template is a setup state. Create/select the owning record first. Broken / recovery — a failed save, missing migration or stale template is an error state; keep the browser draft, refresh the owning data, and retry only after the named dependency is available.',
+    'Why can’t I do this? — approval can be blocked by missing bilingual/INCI facts, physical dimensions, print evidence, permissions or an unresolved review/HOLD. Do not create duplicate Products, Inventory items or Packaging projects to bypass a blocker.'
+  ]},
+  catalog_media: { body:[
+    'Start — select the existing Product and the exact image or listing that needs work.',
+    'Work — edit only the fields owned here: Product facts in Product workspaces and Product gallery/crop metadata in Product Media.',
+    'Review — resolve image-readiness, publication, inventory and required-content signals before trying a public-state action.',
+    'Finish — save the owning record, then use the existing release/publication action when all gates are satisfied.',
+    'Empty / first use means no eligible Product/media exists yet. Broken / recovery means an expected record failed to load or save; use the stated retry/recovery path and preserve the original record instead of making a duplicate.',
+    'Why can’t I do this? — a disabled publish, image or release action normally means a prerequisite, permission, review state or business fact is missing.'
+  ]},
+  custom_work: { body:[
+    'Start — open the existing customer request and confirm the customer intent, quantity, timing, supplied-item facts and proposed capability route.',
+    'Work — keep triage, quote, proof, suitability and production evidence linked to that same request.',
+    'Review — verify customer acknowledgements, proof status, cost/quantity assumptions and any supplied-item limitations before advancing.',
+    'Finish — move to the next existing workflow state only when its evidence is present; do not manufacture placeholder approvals.',
+    'Empty / first use means no real request/evidence exists. Broken / recovery means a real request should exist but failed to load/save. Preserve the request ID and investigate the owning API/workspace.',
+    'Why can’t I do this? — missing real customer evidence is a valid HOLD, not a reason to create synthetic records.'
+  ]},
+  inventory: { body:[
+    'Start — search for the existing Tool, Supply or Inventory item before creating anything new.',
+    'Work — update the canonical item, source/lot/process links and the operation-specific evidence owned by this workspace.',
+    'Review — check quantity, unit, source identity, lot/condition and downstream references before a stock-changing action.',
+    'Finish — save the reviewed change and leave an auditable movement/evidence trail when quantity actually changes.',
+    'Empty / first use means the item is genuinely not recorded. Broken / recovery means a known item is missing from the view or a save failed; refresh/search the canonical authority before creating a replacement.',
+    'Why can’t I do this? — permission, insufficient stock, missing source/lot evidence or an incompatible lifecycle state can intentionally block the action.'
+  ]},
+  creative: { body:[
+    'Start — select the existing Creative Project, CAIP source, Media item or Content package that owns the work.',
+    'Work — keep private source evidence, reviewed media, story/edit decisions and publication packages in their existing authorities.',
+    'Review — confirm rights/privacy, evidence quality, intended audience and publication status before a public handoff.',
+    'Finish — hand reviewed references to the next workspace; preparation does not automatically publish.',
+    'Empty / first use means no qualifying real source/project exists yet. Broken / recovery means expected media or a project failed to load; recover the source link rather than fabricating replacement evidence.',
+    'Why can’t I do this? — private-media acceptance, rights, missing reviewed evidence or provider/OAuth HOLD can correctly prevent the next step.'
+  ]},
+  finance: { body:[
+    'Start — select the real order, payment, bank item, document or accounting period that owns the transaction.',
+    'Work — match and classify using the existing Finance/Accounting records; do not invent balancing business events.',
+    'Review — verify amount, currency, customer/vendor, tax, source document and reconciliation evidence before posting or locking.',
+    'Finish — post, reconcile, issue or lock only through the explicit audited action for that record.',
+    'Empty / first use means there is no source transaction yet. Broken / recovery means an expected financial record failed to load/save; stop and recover that record before posting another.',
+    'Why can’t I do this? — period locks, mismatches, missing source evidence, permissions or provider status can intentionally block a financial mutation.'
+  ]},
+  it_ops: { body:[
+    'Start — identify the exact current incident, configuration, release SHA or environment; avoid acting on an old build note.',
+    'Work — use read-only diagnostics first and keep provider/configuration facts separate from tested acceptance.',
+    'Review — confirm exact Development evidence, environment, permissions and current HOLD state before any high-consequence operation.',
+    'Finish — preserve evidence and use the existing release/recovery authority. Production changes require the normal Development → exact-tree → Production proof path.',
+    'Empty / first use can mean no incidents or no configured external lane. Broken / recovery means an expected binding, route, proof or provider response failed; follow its owner and safe recheck rather than bulk-clearing evidence.',
+    'Why can’t I do this? — a HOLD, missing exact-head proof, permission boundary, provider configuration or safety gate can deliberately stop the action.'
+  ]},
+  general: { body:[
+    'Start — select the existing record or workspace named by the page.',
+    'Work — change only the facts owned by this workspace and save deliberately.',
+    'Review — read status, prerequisites and evidence before a high-consequence action.',
+    'Finish — use the explicit next action; help never performs it for you.',
+    'Empty / first use means there may be nothing to work on yet. Broken / recovery means expected data failed to load/save; preserve the existing identity and use the owning recovery path instead of creating duplicates.',
+    'Why can’t I do this? — check permissions, prerequisites, review state, HOLD state and the owning workspace.'
+  ]}
+});
+
+function workflowHelpProfile(path) {
+  if (/\/admin\/packaging/.test(path)) return DD_WORKFLOW_HELP_PROFILES.packaging;
+  if (/\/admin\/(?:catalog|product|storefront|home-carousel|local-seo|media-content)/.test(path)) return DD_WORKFLOW_HELP_PROFILES.catalog_media;
+  if (/\/admin\/(?:custom|manufacturing|proof|prototype|quote)/.test(path)) return DD_WORKFLOW_HELP_PROFILES.custom_work;
+  if (/\/admin\/(?:inventory|supply|tool|equipment)/.test(path)) return DD_WORKFLOW_HELP_PROFILES.inventory;
+  if (/\/admin\/(?:creative|caip|content|social|workshop-journal)/.test(path)) return DD_WORKFLOW_HELP_PROFILES.creative;
+  if (/\/admin\/(?:finance|accounting|month-end|order|customer-documents|business-health|project-profitability|gift-card)/.test(path)) return DD_WORKFLOW_HELP_PROFILES.finance;
+  if (/\/admin\/(?:it|release|deploy|runtime|security|user|application|operational|reliability|prelaunch|promotion|startup|go-live)/.test(path)) return DD_WORKFLOW_HELP_PROFILES.it_ops;
+  return DD_WORKFLOW_HELP_PROFILES.general;
+}
+
 function pageHelpProfile(path) {
   if (path.startsWith('/admin/')) {
     if (/\/(?:catalog|storefront|home-carousel|public-display|local-seo|image-manifest|media-content|visual|creator-content-completeness|marketplace)/.test(path)) return DD_PAGE_HELP_PROFILES.creator_storefront;
@@ -182,7 +260,7 @@ function ensureStylesheet() {
   if (document.querySelector('link[data-dd-context-help-style]')) return;
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = '/css/admin-context-help.css?v=467b198-shared-help';
+  link.href = '/css/admin-context-help.css?v=467b234-workflow-help';
   link.dataset.ddContextHelpStyle = 'true';
   document.head.appendChild(link);
 }
@@ -301,7 +379,8 @@ function ensurePageLevelHelp(path, ordinal){
   if(!heading || heading.dataset.ddContextHelpAttached || document.querySelector('[data-dd-page-help]')) return ordinal;
   const profile=pageHelpProfile(path);
   const title=String(heading.textContent||'').trim();
-  const definition={title:title?`${profile.title}: ${title}`:profile.title,body:profile.body};
+  const workflow=path.startsWith('/admin/')?workflowHelpProfile(path):null;
+  const definition={title:title?`${profile.title}: ${title}`:profile.title,body:[...(profile.body||[]),...((workflow&&workflow.body)||[])]};
   const built=createPanel('page-help',definition,ordinal+1);
   built.trigger.dataset.ddPageHelp='true';
   built.panel.dataset.ddPageHelp='true';
@@ -309,6 +388,20 @@ function ensurePageLevelHelp(path, ordinal){
   built.trigger.insertAdjacentElement('afterend',built.panel);
   heading.dataset.ddContextHelpAttached='page-help';
   return ordinal+1;
+}
+function ensureActionRecoveryHelp(path, ordinal) {
+  if (!path.startsWith('/admin/')) return ordinal;
+  const candidates=[...document.querySelectorAll('button:disabled,button.danger,[aria-disabled="true"]')].filter((button)=>!button.closest('.dd-context-help-panel')&&!button.dataset.ddActionRecoveryHelp).slice(0,16);
+  for (const button of candidates) {
+    const label=String(button.textContent||button.getAttribute('aria-label')||'this action').trim();
+    const definition={title:`Why can’t I do this? — ${label}`,body:[
+      button.disabled||button.getAttribute('aria-disabled')==='true' ? 'This action is currently unavailable. The usual causes are a missing prerequisite, selection, permission, review state, required evidence or an intentional HOLD.' : 'This is a high-consequence action. Confirm the selected record, prerequisites and evidence before using it.',
+      'Use the page-level ⓘ workflow guide to identify Start → Work → Review → Finish and the owning workspace. Do not create duplicate records, clear evidence or bypass a HOLD simply to enable a button.',
+      'If the expected record failed to load or a save failed, treat that as broken/recovery state: preserve the existing record identity, follow the named recovery path, then retry.'
+    ]};
+    const built=createPanel('action-recovery',definition,++ordinal); built.trigger.classList.add('dd-context-help-trigger--action'); button.insertAdjacentElement('afterend',built.trigger); built.trigger.insertAdjacentElement('afterend',built.panel); button.dataset.ddActionRecoveryHelp='true';
+  }
+  return ordinal;
 }
 function refresh() {
   ensureStylesheet();
@@ -326,8 +419,9 @@ function refresh() {
     const definition = DD_CONTEXT_HELP_LIBRARY[key] || localDefinition(target, key);
     if (definition) attach(target, key, definition, ++ordinal);
   });
-}
   ordinal = ensurePageLevelHelp(path, ordinal);
+  ordinal = ensureActionRecoveryHelp(path, ordinal);
+}
 function helpOwnedNode(node) {
   const el = node?.nodeType === 1 ? node : node?.parentElement;
   return Boolean(el?.closest?.('.dd-context-help-trigger,.dd-context-help-panel,.dd-context-help-field'));

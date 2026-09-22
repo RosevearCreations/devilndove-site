@@ -19,7 +19,7 @@ d=t('docs/operations/RELEASE_467_BUILD_232_MANUFACTURING_OUTCOMES_REVIEW_ROADMAP
 s=t('scripts/current_system_gate_provenance_gate.py')
 q((p.get('build')==232 and p.get('title')=='Manufacturing Outcomes Review & Roadmap Renewal') or int(p.get('build') or 0)>=233,'pointer identity')
 q(p.get('state')=='DEVELOPMENT_GREEN' and p.get('source_authority')=='dev','current pointer must remain verified Development GREEN while Build 232 candidate is tested')
-q((p.get('accepted_dev_sha')=='fc65e05083e7dcf52d50a392d650d937988db0b6' and p.get('accepted_dev_tree_sha')=='afc367962b2163105a73c60a1bb14fd06744218e') or (int(p.get('build') or 0)>=233 and p.get('accepted_dev_sha')=='f0067f89f94a9bb7ef7ad14510ec1cfb023d8cb8' and p.get('accepted_dev_tree_sha')=='3fcfd435a8618dc64244f53d0ceca1379878dcdd'),'Build 232 pointer must retain its predecessor boundary or the exact verified Build 232 successor boundary')
+pb=int(p.get('build') or 0); last=(p.get('restart_integrity') or {}).get('last_fully_verified') or {}; q((pb==232 and p.get('accepted_dev_sha')=='fc65e05083e7dcf52d50a392d650d937988db0b6' and p.get('accepted_dev_tree_sha')=='afc367962b2163105a73c60a1bb14fd06744218e') or (pb==233 and p.get('accepted_dev_sha')=='f0067f89f94a9bb7ef7ad14510ec1cfb023d8cb8' and p.get('accepted_dev_tree_sha')=='3fcfd435a8618dc64244f53d0ceca1379878dcdd') or (pb>=234 and int(last.get('build') or 0)>=233 and 'release467-build232-manufacturing-outcomes-review-roadmap-renewal.json' in (p.get('current_release_authorities') or [])),'Build 232 exact closure must remain represented in the verified successor chain')
 q(b.get('build')==232 and b.get('title')=='Manufacturing Outcomes Review & Roadmap Renewal','Build 232 authority identity')
 q(b.get('state') in ('DEVELOPMENT_CANDIDATE','DEVELOPMENT_GREEN','PRODUCTION_GREEN'),'Build 232 state')
 pred=b.get('predecessor') or {}
@@ -28,7 +28,7 @@ q(pred.get('production_tree_sha')=='afc367962b2163105a73c60a1bb14fd06744218e','B
 q(pred.get('state')=='PRODUCTION_GREEN' and pred.get('business_exit')=='HOLD_NO_PUBLISHABLE_EVIDENCE','Build 231 retained Production closure not ingested')
 q(pre.get('build')==231,'Build 231 authority missing')
 mf=[x.get('file') for x in m.get('migrations',[]) if isinstance(x,dict)]
-q(len(mf)==22 and mf[-1]=='0022_release467_capability_profile_coverage_closure.sql','Build 232 must add no migration')
+q(len(mf)>=22 and mf[21]=='0022_release467_capability_profile_coverage_closure.sql','Build 232 canonical 0001-0022 boundary drifted');q(len(mf)==22 or int(p.get('build') or 0)>=234,'post-Build-232 migrations require a verified forward successor')
 q(not re.search(r'(?im)^\s*(INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|REPLACE|PRAGMA)\b',sql),'Build 232 measurement SQL contains mutation or DDL')
 for token in ('products_reviewed','canonical_active_processes','active_custom_requests','manufacturing_lifecycles','proof_versions_total','quote_drafts_total','production_run_qa_checks','knowledge_entries_total','published_project_case_studies','canonical_migrations','foreign_key_violations'):
  q(token in sql,'Build 232 measurement missing '+token)

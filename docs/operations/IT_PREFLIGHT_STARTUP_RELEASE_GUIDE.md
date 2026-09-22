@@ -2,7 +2,7 @@
 
 ## Current release baseline
 
-Release 467 uses `main` as Production source and `dev` as Development candidate lane. The canonical Cloudflare Pages project is `devilndove-site`. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through data-only `0022`. Request-time DDL and automatic Production promotion remain closed.
+Release 467 uses `main` as Production source and `dev` as Development candidate lane. The canonical Cloudflare Pages project is `devilndove-site`. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through data-only `0023`. Request-time DDL and automatic Production promotion remain closed.
 
 1. Verify the previous exact SHA/tree and external proofs.
 2. The next build ingests that closure; the previous build never self-records later proof.
@@ -12,15 +12,15 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 233 candidate
+## Current Release 467 restart authority — Build 234 candidate
 
-Build 232 **Manufacturing Outcomes Review & Roadmap Renewal** is the exact verified predecessor:
+Build 233 **Universal Help & Quality-of-Life Coverage** is the exact verified predecessor:
 
-- Development SHA: `f0067f89f94a9bb7ef7ad14510ec1cfb023d8cb8`
-- Shared tree: `3fcfd435a8618dc64244f53d0ceca1379878dcdd`
-- Development proofs: System `35739960877`, Quality `35739960401`, I.T. `35739960703`, Hygiene `35739960845`, Build proof `35739960789`
-- Production main: `d5e9922b629f99c5653f5b884861a2c18358b44f`
-- Production proofs: Pages `35740221037`, Live Resources `35740304575`, Product Browser `35740304505`, Product Route `35740304478`, Build proof `35740221128`
+- Development SHA: `c9882fef84e23f7416a7042f52ec8b5ea151287f`
+- Shared tree: `6eef4a4edf79d5ce367b052823bede7d9a665465`
+- Development proofs: System `35772128810`, Quality `35772128894`, I.T. `35772128961`, Hygiene `35772128724`, Build proof `35772128756`
+- Production main: `8de67c8e5a0e9fe745264a387f749c0cd8a4c6ad`
+- Production proofs: Pages `35772353686`, Live Resources `35772488495`, Product Browser `35772488386`, Product Route `35772488446`, Build proof `35772353401`
 - Business exit: `HOLD_NO_PUBLISHABLE_EVIDENCE`
 - Canonical migrations remain **0001–0022**.
 

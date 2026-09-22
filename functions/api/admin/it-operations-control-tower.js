@@ -1,27 +1,27 @@
-// Release 467 Build 232 — current release/restart authority over exact Build 231 GREEN predecessor.
+// Release 467 Build 234 — current release/restart authority over exact Build 233 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=233;
-const TITLE='Universal Help & Quality-of-Life Coverage';
-const AUTHORITY='release467-build233-universal-help-quality-of-life-coverage';
-const EVIDENCE_ID='r467-b232-b233-35739960877-35740221037';
+const BUILD=234;
+const TITLE='Workflow Help, Empty States & Recovery Guidance';
+const AUTHORITY='release467-build234-workflow-help-empty-state-recovery';
+const EVIDENCE_ID='r467-b233-b234-35772128810-35772353686';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:232,title:'Manufacturing Outcomes Review & Roadmap Renewal',state:'DEVELOPMENT_GREEN',
-  dev_sha:'f0067f89f94a9bb7ef7ad14510ec1cfb023d8cb8',tree_sha:'3fcfd435a8618dc64244f53d0ceca1379878dcdd',
-  system_gate_run:35739960877,current_application_quality_run:35739960401,it_admin_runtime_proof_run:35739960703,
-  branch_hygiene_run:35739960845,build_specific_proof_run:35739960789,proof_state:'EXACT_BRANCH_HEAD_GREEN',
+  release:467,build:233,title:'Universal Help & Quality-of-Life Coverage',state:'DEVELOPMENT_GREEN',
+  dev_sha:'c9882fef84e23f7416a7042f52ec8b5ea151287f',tree_sha:'6eef4a4edf79d5ce367b052823bede7d9a665465',
+  system_gate_run:35772128810,current_application_quality_run:35772128894,it_admin_runtime_proof_run:35772128961,
+  branch_hygiene_run:35772128724,build_specific_proof_run:35772128756,proof_state:'EXACT_BRANCH_HEAD_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:232,title:'Manufacturing Outcomes Review & Roadmap Renewal',state:'PRODUCTION_GREEN',
-  main_sha:'d5e9922b629f99c5653f5b884861a2c18358b44f',tree_sha:'3fcfd435a8618dc64244f53d0ceca1379878dcdd',
-  production_pages_deploy_run:35740221037,production_live_resource_integrity_run:35740304575,
-  products_browser_proof_run:35740304505,products_route_proof_run:35740304478,build_specific_proof_run:35740221128,remote_d1_queries:0
+  release:467,build:233,title:'Universal Help & Quality-of-Life Coverage',state:'PRODUCTION_GREEN',
+  main_sha:'8de67c8e5a0e9fe745264a387f749c0cd8a4c6ad',tree_sha:'6eef4a4edf79d5ce367b052823bede7d9a665465',
+  production_pages_deploy_run:35772353686,production_live_resource_integrity_run:35772488495,
+  products_browser_proof_run:35772488386,products_route_proof_run:35772488446,build_specific_proof_run:35772353401,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,9 +31,9 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 232 Manufacturing Outcomes Review & Roadmap Renewal'
+  'Release 467 Build 233 Universal Help QoL'
 ]);
-const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql']);
+const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
   {key:'paypal_sandbox',state:'HOLD_EXTERNAL'},
@@ -55,26 +55,26 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:232,title:'Manufacturing Outcomes Review & Roadmap Renewal',
+    release:467,build:233,title:'Universal Help & Quality-of-Life Coverage',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35739960877,current_application_quality_run:35739960401,
-      it_admin_runtime_proof_run:35739960703,branch_hygiene_run:35739960845,build232_proof_run:35739960789
+      system_gate_run:35772128810,current_application_quality_run:35772128894,
+      it_admin_runtime_proof_run:35772128961,branch_hygiene_run:35772128724,build233_proof_run:35772128756
     },
     production_proofs:{
-      production_pages_deploy_run:35740221037,production_live_resource_integrity_run:35740304575,
-      products_browser_proof_run:35740304505,products_route_proof_run:35740304478,build232_proof_run:35740221128
+      production_pages_deploy_run:35772353686,production_live_resource_integrity_run:35772488495,
+      products_browser_proof_run:35772488386,products_route_proof_run:35772488446,build233_proof_run:35772353401
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
     canonical_migration_authority:'migrations/canonical/manifest.json + scripts/d1_migrate.py',
-    canonical_migrations:CANONICAL_MIGRATIONS.slice(0,22),
+    canonical_migrations:CANONICAL_MIGRATIONS.slice(0,23),
     external_lanes:Object.fromEntries(EXTERNAL_POLICY.map((x)=>[x.key,x.state])),
     runtime_closure:{
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 233 is the active owner-authorized refinement candidate; Build 234 follows only after exact Build 233 Production GREEN.'
+    next_build:'Build 234 is the active owner-authorized refinement candidate; Build 235 follows only after exact Build 234 Production GREEN.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 232 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 233 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -98,13 +98,13 @@ function markdownReport(pack){
 - Current Application Quality Proof: ${pack.development_proofs.current_application_quality_run}
 - I.T. Admin Runtime Proof: ${pack.development_proofs.it_admin_runtime_proof_run}
 - Repository Branch Hygiene: ${pack.development_proofs.branch_hygiene_run}
-- Build 232 Development Proof: ${pack.development_proofs.build232_proof_run}
+- Build 233 Development Proof: ${pack.development_proofs.build233_proof_run}
 - Production Pages Deploy: ${pack.production_proofs.production_pages_deploy_run}
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Build 232 Production Proof: ${pack.production_proofs.build232_proof_run}
-- Current candidate: Build 233 Universal Help & Quality-of-Life Coverage
+- Build 233 Production Proof: ${pack.production_proofs.build233_proof_run}
+- Current candidate: Build 234 Workflow Help, Empty States & Recovery Guidance
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -123,7 +123,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:232,title:TITLE,authority:'release467-build232-manufacturing-outcomes-review-roadmap-renewal.json'},
+        current_closure_candidate:{release:467,build:234,title:TITLE,authority:'release467-build234-workflow-help-empty-state-recovery.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -142,12 +142,12 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 232 source is the exact last fully verified Development checkpoint.',
-      'Build 232 Production is GREEN on the identical source tree through canonical migration 0022 and closed AUTONOMOUS_QUEUE_EXHAUSTED for the prior roadmap.',
-      'Development proofs: System 35739960877, Quality 35739960401, I.T. 35739960703, Hygiene 35739960845.',
-      'Production proofs: Pages 35740221037, Live Resources 35740304575, Product Browser 35740304505, Product Route 35740304478.',
-      'Build 233 Universal Help & Quality-of-Life Coverage is the active read-only Development candidate.',
-      'Build 233 adds no schema migration or business-data/provider mutation; it extends the shared help runtime and keeps Production promotion closed until exact-head proof.'
+      'Build 233 source is the exact last fully verified Development checkpoint.',
+      'Build 233 Production is GREEN on the identical source tree; Build 234 advances canonical migration authority through data-only 0023 for five editable Soap Cupcake system templates.',
+      'Development proofs: System 35772128810, Quality 35772128894, I.T. 35772128961, Hygiene 35772128724.',
+      'Production proofs: Pages 35772353686, Live Resources 35772488495, Product Browser 35772488386, Product Route 35772488446.',
+      'Build 234 Workflow Help, Empty States & Recovery Guidance is the active Development candidate.',
+      'Build 234 adds a data-only canonical 0023 template seed, no schema change, and no Product/Inventory quantity/Finance/R2/provider/publication mutation; Production remains closed until exact-head proof.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,

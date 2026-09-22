@@ -126,8 +126,11 @@ function estimatedIngredientLines(values = [], maxChars = 38) {
   return lines;
 }
 function packagingRequiredFields(project = {}, ingredients = [], claims = [], template = {}, sourceMaterials = []) {
-  const isSoap = String(project.package_type || template.package_type || '') === 'soap_ribbon';
-  const isRound = ['candle_top', 'engraved_round'].includes(String(project.package_type || template.package_type || ''));
+  const packageType = String(project.package_type || template.package_type || '');
+  const isRibbon = packageType === 'soap_ribbon';
+  const isCupcake = packageType === 'soap_cupcake_label';
+  const isSoap = isRibbon || isCupcake;
+  const isRound = ['candle_top', 'engraved_round'].includes(packageType);
   const checks = isRound ? [
     ['template', project.packaging_template_id || template.packaging_template_id],
     ['main candle-top wording', project.artwork?.candle_primary_text || template.layout?.default_primary_text],
@@ -139,7 +142,9 @@ function packagingRequiredFields(project = {}, ingredients = [], claims = [], te
     ['dealer / business identity', project.dealer_name], ['dealer principal address', project.dealer_address],
     ['consumer contact information', project.contact_text], ['website', project.website_text],
   ];
-  if (isSoap) checks.push(['INCI ingredient list', project.ingredients_inci], ['Made in Canada wording', project.made_in_canada_text], ['rose asset', project.artwork?.rose_asset_id || project.rose_asset_id]);
+  if (isSoap) checks.push(['INCI ingredient list', project.ingredients_inci], ['Made in Canada wording', project.made_in_canada_text]);
+  if (isRibbon) checks.push(['rose asset', project.artwork?.rose_asset_id || project.rose_asset_id]);
+  if (isCupcake) checks.push(['cupcake purpose', project.artwork?.cupcake_purpose_text], ['cupcake label title', project.artwork?.cupcake_label_title]);
   if (String(project.warnings_en || project.warnings_fr || '').trim()) checks.push(['English warning', project.warnings_en], ['French warning', project.warnings_fr]);
   const missing = checks.filter(([, value]) => !String(value || '').trim()).map(([label]) => label);
   if (isSoap && !ingredients.length) missing.push('structured INCI ingredient rows');
@@ -162,14 +167,25 @@ function packagingRequiredFields(project = {}, ingredients = [], claims = [], te
   if (isSoap && requiredIngredients.some((row) => !String(row.display_name_fr || '').trim())) missing.push('French display name for each required ingredient row');
   const englishLines = estimatedIngredientLines(requiredIngredients.map((row) => row.display_name_en || row.inci_name), 38);
   const frenchLines = estimatedIngredientLines(requiredIngredients.map((row) => row.display_name_fr), 38);
-  if (isSoap && (englishLines > 11 || frenchLines > 11)) missing.push(`Complete bilingual ingredient declarations exceed the tested dedicated-panel capacity (English ${englishLines} lines; French ${frenchLines} lines); use an extended/peel-back label or other reviewed extended ingredient presentation rather than clipping either language`);
-  const dimensions = isSoap ? dimensionReview(template) : {
+  if (isRibbon && (englishLines > 11 || frenchLines > 11)) missing.push(`Complete bilingual ingredient declarations exceed the tested dedicated-panel capacity (English ${englishLines} lines; French ${frenchLines} lines); use an extended/peel-back label or other reviewed extended ingredient presentation rather than clipping either language`);
+  const designProfile = String(template.layout?.design_profile || safeJson(template.layout_json, {}).design_profile || '');
+  let dimensions;
+  if (isRibbon) dimensions = dimensionReview(template);
+  else if (isCupcake) {
+    const width = number(template.page_width_mm, 0), height = number(template.page_height_mm, 0);
+    dimensions = {
+      blockers: [],
+      warnings: ['The 2 × 2 inch Soap Cupcake label is a compact presentation surface. Verify whether bilingual identity, complete ingredients, metric quantity, dealer/address, warnings or other required cosmetic information needs a companion/back/extended label before sale.'],
+      profile: designProfile || 'cupcake_soap_square',
+    };
+    if (Math.abs(width - 50.8) > .15 || Math.abs(height - 50.8) > .15) dimensions.blockers.push('Soap Cupcake label must remain exactly 50.8 × 50.8 mm (2 × 2 inches) before approval.');
+    if (designProfile !== 'cupcake_soap_square') dimensions.blockers.push('Soap Cupcake label must use the cupcake_soap_square design profile before approval.');
+  } else dimensions = {
     blockers: [],
     warnings: [isRound ? 'Confirm the measured lid/blank diameter, safe margin, material settings and a physical proof before approval.' : 'Confirm the selected template against the physical container/card dieline before approval.'],
     profile: template.layout?.design_profile || template.layout?.dimension_profile || 'general',
   };
-  const designProfile = String(template.layout?.design_profile || safeJson(template.layout_json, {}).design_profile || '');
-  if (isSoap && !['soap_reference_v2', 'soap_reference_v3'].includes(designProfile)) dimensions.blockers.push('Soap ribbon must use the approved soap_reference_v3 design profile before approval.');
+  if (isRibbon && !['soap_reference_v2', 'soap_reference_v3'].includes(designProfile)) dimensions.blockers.push('Soap ribbon must use the approved soap_reference_v3 design profile before approval.');
   return {
     missing: [...new Set(missing)],
     dimension_blockers: [...new Set(dimensions.blockers)],
