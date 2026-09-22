@@ -1,27 +1,27 @@
-// Release 467 Build 229 — current release/restart authority over exact Build 228 GREEN predecessor.
+// Release 467 Build 230 — current release/restart authority over exact Build 229 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=229;
-const TITLE='First Creative Project Prototype-to-Run Pilot';
-const AUTHORITY='release467-build229-first-creative-project-prototype-to-run-pilot';
-const EVIDENCE_ID='r467-b228-db896df-35675467679-35675671813';
+const BUILD=230;
+const TITLE='Cost, Margin, QA & Knowledge Evidence Adoption';
+const AUTHORITY='release467-build230-cost-margin-qa-knowledge-evidence-adoption';
+const EVIDENCE_ID='r467-b229-4a195f4-35677766703-35678474432';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:228,title:'First Real Custom Work Route-to-Proof Pilot',state:'DEVELOPMENT_GREEN',
-  dev_sha:'db896df37a89e3477d77a26707277d0ca65eed5d',tree_sha:'414d747065b3d95002224fa4975c6da86a5d7c79',
-  system_gate_run:35675467679,current_application_quality_run:35675467644,it_admin_runtime_proof_run:35675467795,
-  branch_hygiene_run:35675467898,build_specific_proof_run:35675467986,proof_state:'EXACT_BRANCH_HEAD_GREEN',
+  release:467,build:229,title:'First Creative Project Prototype-to-Run Pilot',state:'DEVELOPMENT_GREEN',
+  dev_sha:'4a195f435c4491408db6c39dadc1d874d166cf36',tree_sha:'2ec97031a2c774fc2920a03d6fc72d63998421b8',
+  system_gate_run:35677766703,current_application_quality_run:35677766653,it_admin_runtime_proof_run:35677766460,
+  branch_hygiene_run:35677766514,build_specific_proof_run:35677766604,proof_state:'EXACT_BRANCH_HEAD_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:228,title:'First Real Custom Work Route-to-Proof Pilot',state:'PRODUCTION_GREEN',
-  main_sha:'9b4a12fe90b207006c9593d7440f56bf681c43aa',tree_sha:'414d747065b3d95002224fa4975c6da86a5d7c79',
-  production_pages_deploy_run:35675671813,production_live_resource_integrity_run:35675740985,
-  products_browser_proof_run:35675740992,products_route_proof_run:35675740994,build_specific_proof_run:35675671688,remote_d1_queries:0
+  release:467,build:229,title:'First Creative Project Prototype-to-Run Pilot',state:'PRODUCTION_GREEN',
+  main_sha:'4ba7631cfd0da23925c82b1ec3cf8ed247b75f0c',tree_sha:'2ec97031a2c774fc2920a03d6fc72d63998421b8',
+  production_pages_deploy_run:35678474432,production_live_resource_integrity_run:35678533786,
+  products_browser_proof_run:35678533596,products_route_proof_run:35678533740,build_specific_proof_run:35678474416,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 228 First Real Custom Work Route-to-Proof Pilot'
+  'Release 467 Build 229 First Creative Project Prototype-to-Run Pilot'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:228,title:'First Real Custom Work Route-to-Proof Pilot',
+    release:467,build:229,title:'First Creative Project Prototype-to-Run Pilot',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35675467679,current_application_quality_run:35675467644,
-      it_admin_runtime_proof_run:35675467795,branch_hygiene_run:35675467898,build228_proof_run:35675467986
+      system_gate_run:35677766703,current_application_quality_run:35677766653,
+      it_admin_runtime_proof_run:35677766460,branch_hygiene_run:35677766514,build229_proof_run:35677766604
     },
     production_proofs:{
-      production_pages_deploy_run:35675671813,production_live_resource_integrity_run:35675740985,
-      products_browser_proof_run:35675740992,products_route_proof_run:35675740994,build228_proof_run:35675671688
+      production_pages_deploy_run:35678474432,production_live_resource_integrity_run:35678533786,
+      products_browser_proof_run:35678533596,products_route_proof_run:35678533740,build229_proof_run:35678474416
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -72,9 +72,9 @@ function closurePayload(){
     external_lanes:Object.fromEntries(EXTERNAL_POLICY.map((x)=>[x.key,x.state])),
     runtime_closure:{
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
-      background_polling:false,automatic_inventory_assignment:false,build228_route_to_proof:true
+      background_polling:false,automatic_inventory_assignment:false,build229_route_to_proof:true
     },
-    next_build:'Build 230 is blocked until Build 229 is exact-SHA Production GREEN; Builds 230-232 remain planned.'
+    next_build:'Build 231 is blocked until Build 230 is exact-SHA Production GREEN; Builds 231-232 remain planned.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 228 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 229 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -98,13 +98,13 @@ function markdownReport(pack){
 - Current Application Quality Proof: ${pack.development_proofs.current_application_quality_run}
 - I.T. Admin Runtime Proof: ${pack.development_proofs.it_admin_runtime_proof_run}
 - Repository Branch Hygiene: ${pack.development_proofs.branch_hygiene_run}
-- Build 228 Development Proof: ${pack.development_proofs.build228_proof_run}
+- Build 229 Development Proof: ${pack.development_proofs.build229_proof_run}
 - Production Pages Deploy: ${pack.production_proofs.production_pages_deploy_run}
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Build 228 Production Proof: ${pack.production_proofs.build228_proof_run}
-- Current candidate: Build 229 First Creative Project Prototype-to-Run Pilot
+- Build 229 Production Proof: ${pack.production_proofs.build229_proof_run}
+- Current candidate: Build 230 Cost, Margin, QA & Knowledge Evidence Adoption
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -123,7 +123,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:229,title:TITLE,authority:'release467-build229-first-creative-project-prototype-to-run-pilot.json'},
+        current_closure_candidate:{release:467,build:230,title:TITLE,authority:'release467-build230-cost-margin-qa-knowledge-evidence-adoption.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -142,12 +142,12 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 228 source is the exact last fully verified Development checkpoint.',
-      'Build 228 Production is GREEN on the identical source tree through canonical migration 0022 and closed HOLD_NO_REAL_REQUEST without synthetic records.',
-      'Development proofs: System 35675467679, Quality 35675467644, I.T. 35675467795, Hygiene 35675467898.',
-      'Production proofs: Pages 35675671813, Live Resources 35675740985, Product Browser 35675740992, Product Route 35675740994.',
-      'Build 229 First Creative Project Prototype-to-Run Pilot is the active read-only Development candidate.',
-      'Build 229 adds no schema migration or synthetic project/production records; Builds 230-232 remain planned and blocked until Build 229 is Production GREEN.'
+      'Build 229 source is the exact last fully verified Development checkpoint.',
+      'Build 229 Production is GREEN on the identical source tree through canonical migration 0022 and closed HOLD_NO_REAL_PROJECT without synthetic records.',
+      'Development proofs: System 35677766703, Quality 35677766653, I.T. 35677766460, Hygiene 35677766514.',
+      'Production proofs: Pages 35678474432, Live Resources 35678533786, Product Browser 35678533596, Product Route 35678533740.',
+      'Build 230 Cost, Margin, QA & Knowledge Evidence Adoption is the active read-only Development candidate.',
+      'Build 230 adds no schema migration or synthetic project/production records; Builds 231-232 remain planned and blocked until Build 230 is Production GREEN.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
