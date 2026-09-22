@@ -155,9 +155,10 @@ req("<h1" not in help_js.lower(), "Contextual help client must never create an H
 req("if (!normalizedPath().startsWith('/admin/') || window.DDAdminLeanStartup?.enabled) return;" in help_js, "Public/lean help must not start the broad document observer")
 req("AUTO_OBSERVER_MAX_MS = 8000" in help_js, "Retained bounded Admin observer contract missing")
 req(".dd-context-help-centre" in help_css, "Floating Help Centre styling missing")
-req("/public/js/admin-context-help.js?v=467b198-shared-help" in auth_ui, "Admin/creator shared help bootstrap revision missing")
-req(auth_ui.index("/public/js/admin-context-help.js?v=467b198-shared-help") < auth_ui.index("if (!leanStartup)"), "Shared Admin help must load even on lean workspaces")
-req('data-dd-context-help-style="true"' in middleware and "/public/js/admin-context-help.js?v=467b198-shared-help" in middleware, "Public middleware shared help injection missing")
+req(("/public/js/admin-context-help.js?v=467b198-shared-help" in auth_ui) or ("/public/js/admin-context-help.js?v=467b233-universal-help" in auth_ui), "Admin/creator shared help bootstrap revision missing")
+help_bootstrap = "/public/js/admin-context-help.js?v=467b233-universal-help" if "/public/js/admin-context-help.js?v=467b233-universal-help" in auth_ui else "/public/js/admin-context-help.js?v=467b198-shared-help"
+req(auth_ui.index(help_bootstrap) < auth_ui.index("if (!leanStartup)"), "Shared Admin help must load even on lean workspaces")
+req('data-dd-context-help-style="true"' in middleware and ("/public/js/admin-context-help.js?v=467b198-shared-help" in middleware or "/public/js/admin-context-help.js?v=467b233-universal-help" in middleware), "Public middleware shared help injection missing")
 
 # Help centres.
 for path, body, public in (
