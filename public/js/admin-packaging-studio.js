@@ -566,6 +566,55 @@
     </svg>`;
   }
 
+  function cupcakeDecorSvg(preset, theme) {
+    const accent=theme.secondary_colour||'#8757B2', gold=theme.accent_gold||'#C79A46', ink=theme.border_colour||'#3E1759';
+    const key=String(preset?.motif||preset?.key||'');
+    if(key==='orange'||key==='lemon') return '<g opacity=".92"><circle cx="170" cy="135" r="70" fill="'+accent+'" opacity=".16"/><circle cx="170" cy="135" r="53" fill="none" stroke="'+accent+'" stroke-width="12"/><path d="M170 82v106M117 135h106M133 98l74 74M207 98l-74 74" stroke="'+gold+'" stroke-width="7"/></g>';
+    if(key==='charcoal') return '<g fill="'+ink+'" opacity=".84"><circle cx="145" cy="125" r="46"/><circle cx="218" cy="92" r="22"/><circle cx="238" cy="158" r="30"/></g>';
+    if(key==='oatmeal') return '<g fill="none" stroke="'+accent+'" stroke-width="10" opacity=".78"><ellipse cx="140" cy="120" rx="17" ry="46" transform="rotate(-35 140 120)"/><ellipse cx="196" cy="96" rx="17" ry="46" transform="rotate(20 196 96)"/><ellipse cx="240" cy="146" rx="17" ry="46" transform="rotate(48 240 146)"/></g>';
+    if(key==='sea') return '<g fill="none" stroke="'+accent+'" stroke-width="13" stroke-linecap="round" opacity=".88"><path d="M80 150q45-50 90 0t90 0"/><path d="M100 188q38-38 76 0t76 0"/></g><path d="M205 58l15 35 38 3-29 25 9 38-33-20-33 20 9-38-29-25 38-3z" fill="'+gold+'" opacity=".75"/>';
+    if(key==='lavender') return '<g stroke="'+accent+'" stroke-width="8" stroke-linecap="round"><path d="M130 195q30-75 70-130M180 205q18-78 70-126"/><g fill="'+accent+'" stroke="none"><circle cx="162" cy="116" r="13"/><circle cx="180" cy="91" r="12"/><circle cx="198" cy="68" r="11"/><circle cx="213" cy="144" r="13"/><circle cx="231" cy="119" r="12"/><circle cx="249" cy="95" r="11"/></g></g>';
+    if(key==='mint') return '<g fill="'+accent+'" opacity=".78"><ellipse cx="150" cy="120" rx="32" ry="68" transform="rotate(-40 150 120)"/><ellipse cx="220" cy="108" rx="29" ry="62" transform="rotate(32 220 108)"/></g>';
+    if(key==='rose'||key==='berry') return '<g fill="'+accent+'" opacity=".76"><circle cx="155" cy="122" r="40"/><circle cx="204" cy="92" r="37"/><circle cx="232" cy="142" r="39"/><circle cx="185" cy="160" r="35"/></g><circle cx="194" cy="124" r="25" fill="'+gold+'" opacity=".62"/>';
+    return '<g fill="none" stroke="'+accent+'" stroke-width="10" opacity=".62"><path d="M95 160q70-110 150 0"/><path d="M118 187q55-78 110 0"/></g>';
+  }
+
+  function cupcakeSoapLabelSvg(data, template) {
+    const theme=data.theme||{}, artwork=data.artwork||{}, layout=template.layout||{};
+    const widthMm=num(template.page_width_mm,50.8), heightMm=num(template.page_height_mm,50.8);
+    const background=theme.theme_colour||'#FFF5E9', ink=theme.border_colour||'#3E1759', gold=theme.accent_gold||'#C79A46', accent=theme.secondary_colour||'#8757B2';
+    const preset=cupcakePresetByKey(artwork.cupcake_preset_key||layout.cupcake_preset_key||'sweet-orange');
+    const title=String(data.packagingIdentityEn||data.packagingProductName||layout.default_primary_text||'Cupcake Soap').trim()||'Cupcake Soap';
+    const flavour=String(data.packagingCollection||layout.default_collection||preset.label).trim()||preset.label;
+    const purpose=String(artwork.cupcake_purpose_text||layout.default_cupcake_purpose_text||preset.purpose||'hand & body soap').trim();
+    const made=String(data.packagingMadeInCanada||'Made in Canada').split('/')[0].trim()||'Made in Canada';
+    const website=String(data.packagingWebsite||'devilndove.com').trim()||'devilndove.com';
+    const rows=Array.isArray(data.structured_ingredients)?data.structured_ingredients.filter((row)=>Number(row.required_on_label)!==0):[];
+    const ingredients=(rows.map((row)=>String(row.display_name_en||row.inci_name||'').trim()).filter(Boolean).join(', ')||String(data.packagingIngredientsEn||data.packagingInci||'Ingredients require review').trim());
+    const ingredientLines=wrapPlainLines(ingredients,38,2), purposeLines=wrapPlainLines(purpose,29,2);
+    const ingredientMarkup=ingredientLines.map((line,index)=>'<text x="118" y="'+(775+index*31)+'" font-size="23" class="cup-copy">'+xml(line)+'</text>').join('');
+    const purposeMarkup=purposeLines.map((line,index)=>'<text x="585" y="'+(775+index*31)+'" font-size="23" class="cup-copy">'+xml(line)+'</text>').join('');
+    const ingredientOverflow=ingredients.length>75;
+    const titleSize=fontSize(title,18,56,35), flavourSize=fontSize(flavour,24,43,27);
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="'+widthMm+'mm" height="'+heightMm+'mm" viewBox="0 0 1000 1000" role="img" aria-label="'+xml(flavour)+' '+xml(title)+' 2 inch label" data-cupcake-layout="square-v1">'+
+      '<style>.cup-copy{font-family:Arial,Helvetica,sans-serif;fill:'+ink+'}.cup-serif{font-family:Georgia,serif;fill:'+ink+'}.cup-script{font-family:cursive;fill:'+ink+'}</style>'+
+      '<rect width="1000" height="1000" rx="88" fill="'+background+'"/><rect x="18" y="18" width="964" height="964" rx="76" fill="none" stroke="#fff" stroke-width="28"/><rect x="45" y="45" width="910" height="910" rx="62" fill="none" stroke="'+ink+'" stroke-width="6"/><rect x="58" y="58" width="884" height="884" rx="54" fill="none" stroke="'+gold+'" stroke-width="3" stroke-dasharray="8 10"/>'+
+      cupcakeDecorSvg(preset,theme)+
+      '<g transform="translate(365 42)"><path d="M30 210h350l-35 190H65z" fill="'+accent+'" opacity=".72" stroke="'+ink+'" stroke-width="6"/><path d="M64 210c-20-54 13-89 61-103-1-58 43-91 91-72 33-35 92-20 100 26 56-1 85 44 58 86 35 26 31 65-14 86z" fill="'+mixHex(accent,'#FFFFFF',.62)+'" stroke="'+ink+'" stroke-width="6"/></g>'+
+      '<g transform="translate(735 85)"><circle cx="90" cy="90" r="78" fill="'+background+'" stroke="'+accent+'" stroke-width="10"/><circle cx="90" cy="90" r="66" fill="none" stroke="'+gold+'" stroke-width="4" stroke-dasharray="5 7"/><text x="90" y="78" text-anchor="middle" font-size="27" font-weight="700" class="cup-serif">'+xml(made)+'</text><text x="90" y="122" text-anchor="middle" font-size="40" fill="'+accent+'">♥</text></g>'+
+      '<rect x="105" y="350" width="790" height="170" rx="72" fill="'+mixHex(background,'#FFFFFF',.45)+'" stroke="'+ink+'" stroke-width="7"/><rect x="124" y="369" width="752" height="132" rx="56" fill="none" stroke="'+gold+'" stroke-width="3"/>'+
+      '<text x="500" y="425" text-anchor="middle" font-size="'+titleSize+'" class="cup-script">'+xml(title)+'</text><text x="500" y="480" text-anchor="middle" font-size="27" class="cup-serif">from Devil n Dove</text>'+
+      '<path d="M115 548h770l-65 116H180z" fill="'+accent+'" stroke="'+ink+'" stroke-width="6"/><text x="500" y="620" text-anchor="middle" font-size="'+flavourSize+'" font-weight="700" fill="'+mixHex(background,'#FFFFFF',.68)+'" class="cup-serif">'+xml(flavour)+'</text>'+
+      '<line x1="105" y1="696" x2="895" y2="696" stroke="'+gold+'" stroke-width="4"/><text x="118" y="738" font-size="25" font-weight="700" class="cup-serif">Ingredients:</text>'+ingredientMarkup+
+      (ingredientOverflow?'<text x="118" y="844" font-size="18" font-weight="700" fill="'+accent+'" class="cup-copy">Complete declaration on companion/back label</text>':'')+
+      '<text x="585" y="738" font-size="25" font-weight="700" class="cup-serif">Purpose:</text>'+purposeMarkup+
+      '<rect x="250" y="884" width="500" height="58" rx="29" fill="'+accent+'" opacity=".94"/><text x="500" y="923" text-anchor="middle" font-size="28" font-weight="700" fill="'+mixHex(background,'#FFFFFF',.72)+'" class="cup-copy">'+xml(website)+'</text>'+
+      (artwork.show_safe_area?'<rect x="82" y="82" width="836" height="836" rx="48" fill="none" stroke="#14843a" stroke-width="3" stroke-dasharray="10 8"/>':'')+
+      (artwork.show_bleed?'<rect x="28" y="28" width="944" height="944" rx="72" fill="none" stroke="#d12424" stroke-width="3" stroke-dasharray="10 8"/>':'')+
+      '</svg>';
+  }
+
+
   function genericPackageSvg(data, template) {
     const widthMm = Math.max(25, num(template.page_width_mm, 88.9)); const heightMm = Math.max(25, num(template.page_height_mm, 50.8));
     const ratio = widthMm / heightMm; const width = 1000; const height = Math.max(400, Math.round(width / ratio));
@@ -613,6 +662,7 @@
 
   function svgMarkup() {
     const data = snapshot(); const template = currentTemplate(); const packageType = String(template.package_type || 'product_label'); const profile = String(template.layout?.design_profile || '');
+    if (profile === 'cupcake_soap_square_v1') return cupcakeSoapLabelSvg(data, template);
     if (packageType === 'soap_ribbon' || profile === 'soap_reference_v2' || profile === 'soap_reference_v3') return glacialRibbonSvg(data, template);
     if (packageType === 'candle_top' || packageType === 'engraved_round' || profile.startsWith('candle_top') || profile === 'round_maker_mark') return candleTopSvg(data, template);
     return genericPackageSvg(data, template);
