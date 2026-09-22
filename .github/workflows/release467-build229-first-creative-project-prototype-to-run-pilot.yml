@@ -1,0 +1,50 @@
+name: Release 467 Build 229 First Creative Project Prototype-to-Run Pilot
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.x'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - run: python scripts/release467_build229_gate.py
+      - run: python scripts/release467_build228_gate.py
+      - run: python scripts/release467_build220_gate.py
+      - run: python scripts/release467_build219_gate.py
+      - run: python scripts/release467_build214_gate.py
+      - run: python scripts/release467_build212_gate.py
+  development-d1-prototype-to-run-pilot:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - run: |
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM d1_migrations) canonical_migrations,(SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('creative_work_projects','creative_project_operations','creative_project_manufacturing_lifecycles','creative_project_manufacturing_lifecycle_events','creative_project_job_travelers','creative_project_production_runs','creative_project_production_run_qa_checks','creative_project_production_run_handoffs')) required_tables,(SELECT COUNT(*) FROM pragma_foreign_key_check) fk,(SELECT COUNT(*) FROM creative_work_projects w WHERE EXISTS (SELECT 1 FROM creative_project_operations o WHERE o.creative_work_project_id=w.creative_work_project_id) OR EXISTS (SELECT 1 FROM creative_project_manufacturing_lifecycles l WHERE l.creative_work_project_id=w.creative_work_project_id)) real_projects,(SELECT COUNT(DISTINCT creative_work_project_id) FROM creative_project_operations WHERE COALESCE(plan_status,'planned')<>'retired') operation_plan_projects,(SELECT COUNT(*) FROM creative_project_manufacturing_lifecycles) manufacturing_lifecycles,(SELECT COUNT(DISTINCT l.creative_work_project_id) FROM creative_project_manufacturing_lifecycles l WHERE l.creative_work_project_id IS NOT NULL AND EXISTS (SELECT 1 FROM creative_project_manufacturing_lifecycle_events e WHERE e.creative_project_manufacturing_lifecycle_id=l.creative_project_manufacturing_lifecycle_id AND e.to_stage IN ('prototype','prototype_failed_rework'))) prototype_projects,(SELECT COUNT(*) FROM creative_project_manufacturing_lifecycles WHERE creative_work_project_id IS NOT NULL AND approved_sample_at IS NOT NULL) approved_sample_projects,(SELECT COUNT(*) FROM creative_project_manufacturing_lifecycles WHERE creative_work_project_id IS NOT NULL AND production_authorized_at IS NOT NULL) production_authorized_projects,(SELECT COUNT(*) FROM creative_project_job_travelers WHERE traveler_status='reviewed') reviewed_travelers,(SELECT COUNT(*) FROM creative_project_production_runs WHERE run_status='reviewed') reviewed_runs,(SELECT COUNT(*) FROM creative_project_production_run_qa_checks) qa_checks,(SELECT COUNT(*) FROM creative_project_production_run_handoffs) handoffs,(SELECT COUNT(*) FROM creative_project_manufacturing_lifecycles WHERE creative_work_project_id IS NOT NULL AND (completed_at IS NOT NULL OR current_stage='completed')) completed_lifecycles,(SELECT COUNT(DISTINCT l.creative_work_project_id) FROM creative_project_manufacturing_lifecycles l WHERE l.creative_work_project_id IS NOT NULL AND (l.completed_at IS NOT NULL OR l.current_stage='completed') AND EXISTS (SELECT 1 FROM creative_project_operations o WHERE o.creative_work_project_id=l.creative_work_project_id AND COALESCE(o.plan_status,'planned')<>'retired') AND EXISTS (SELECT 1 FROM creative_project_manufacturing_lifecycle_events e WHERE e.creative_project_manufacturing_lifecycle_id=l.creative_project_manufacturing_lifecycle_id AND e.to_stage IN ('prototype','prototype_failed_rework')) AND l.approved_sample_at IS NOT NULL AND l.production_authorized_at IS NOT NULL AND EXISTS (SELECT 1 FROM creative_project_job_travelers jt WHERE jt.creative_project_manufacturing_lifecycle_id=l.creative_project_manufacturing_lifecycle_id AND jt.traveler_status='reviewed') AND EXISTS (SELECT 1 FROM creative_project_production_runs pr WHERE pr.creative_project_manufacturing_lifecycle_id=l.creative_project_manufacturing_lifecycle_id AND pr.run_status='reviewed' AND EXISTS (SELECT 1 FROM creative_project_production_run_qa_checks q WHERE q.creative_project_production_run_id=pr.creative_project_production_run_id) AND EXISTS (SELECT 1 FROM creative_project_production_run_handoffs h WHERE h.creative_project_production_run_id=pr.creative_project_production_run_id))) proven_projects;" > /tmp/b229.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/b229.json'));found=[]
+          keys=('canonical_migrations','required_tables','fk','real_projects','operation_plan_projects','manufacturing_lifecycles','prototype_projects','approved_sample_projects','production_authorized_projects','reviewed_travelers','reviewed_runs','qa_checks','handoffs','completed_lifecycles','proven_projects')
+          def w(v):
+            if isinstance(v,dict):
+              if all(k in v for k in keys):found.append(v)
+              for x in v.values():w(x)
+            elif isinstance(v,list):
+              for x in v:w(x)
+          w(d);assert found,d;r=found[0]
+          assert int(r['canonical_migrations'])==22,r
+          assert int(r['required_tables'])==8,r
+          assert int(r['fk'])==0,r
+          state='HOLD_NO_REAL_PROJECT' if int(r['real_projects'])==0 and int(r['manufacturing_lifecycles'])==0 else ('PROVEN_REAL_REVIEWED_EVIDENCE' if int(r['proven_projects'])>0 else 'REAL_PROJECT_PILOT_IN_PROGRESS')
+          print('BUILD 229 DEVELOPMENT PROTOTYPE-TO-RUN PILOT: GREEN',state,r)
+          PY

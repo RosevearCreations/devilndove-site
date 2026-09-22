@@ -1,40 +1,41 @@
 {
   "release": 467,
-  "build": 228,
-  "title": "First Real Custom Work Route-to-Proof Pilot",
+  "build": 229,
+  "title": "First Creative Project Prototype-to-Run Pilot",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
-  "accepted_dev_sha": "86a599178cfe473afc4dba15890d47db66f015ea",
-  "accepted_dev_tree_sha": "5694ea94c097505cc8db6795e839073fb210f746",
+  "accepted_dev_sha": "db896df37a89e3477d77a26707277d0ca65eed5d",
+  "accepted_dev_tree_sha": "414d747065b3d95002224fa4975c6da86a5d7c79",
   "acceptance": {
-    "system_gate_run": 35671994146,
-    "current_application_quality_run": 35671994173,
-    "it_admin_runtime_proof_run": 35671994145,
-    "branch_hygiene_run": 35671994205
+    "system_gate_run": 35675467679,
+    "current_application_quality_run": 35675467644,
+    "it_admin_runtime_proof_run": 35675467795,
+    "branch_hygiene_run": 35675467898
   },
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 227,
-      "title": "Manufacturing Adoption Command Centre",
-      "authority": "release467-build227-manufacturing-adoption-command-centre.json",
-      "dev_sha": "86a599178cfe473afc4dba15890d47db66f015ea",
-      "tree_sha": "5694ea94c097505cc8db6795e839073fb210f746",
-      "proofs": {
-        "system_gate_run": 35671994146,
-        "current_application_quality_run": 35671994173,
-        "it_admin_runtime_proof_run": 35671994145,
-        "branch_hygiene_run": 35671994205
-      },
-      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
-      "build_specific_proof_run": 35671994164
-    },
-    "current_closure_candidate": {
-      "release": 467,
       "build": 228,
       "title": "First Real Custom Work Route-to-Proof Pilot",
       "authority": "release467-build228-first-real-custom-work-route-to-proof-pilot.json",
+      "dev_sha": "db896df37a89e3477d77a26707277d0ca65eed5d",
+      "tree_sha": "414d747065b3d95002224fa4975c6da86a5d7c79",
+      "proofs": {
+        "system_gate_run": 35675467679,
+        "current_application_quality_run": 35675467644,
+        "it_admin_runtime_proof_run": 35675467795,
+        "branch_hygiene_run": 35675467898
+      },
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+      "build_specific_proof_run": 35675467986,
+      "business_exit": "HOLD_NO_REAL_REQUEST"
+    },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 229,
+      "title": "First Creative Project Prototype-to-Run Pilot",
+      "authority": "release467-build229-first-creative-project-prototype-to-run-pilot.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -45,20 +46,22 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 227,
-    "title": "Manufacturing Adoption Command Centre",
-    "authority": "release467-build227-manufacturing-adoption-command-centre.json",
-    "main_sha": "2fbbb950b2598a518d14078b0252a8159472fbb7",
-    "tree_sha": "5694ea94c097505cc8db6795e839073fb210f746",
-    "production_pages_deploy_run": 35672279658,
-    "production_live_resource_integrity_run": 35672342976,
-    "products_browser_proof_run": 35672342991,
-    "products_route_proof_run": 35672343003,
-    "build_specific_proof_run": 35672279694,
+    "build": 228,
+    "title": "First Real Custom Work Route-to-Proof Pilot",
+    "authority": "release467-build228-first-real-custom-work-route-to-proof-pilot.json",
+    "main_sha": "9b4a12fe90b207006c9593d7440f56bf681c43aa",
+    "tree_sha": "414d747065b3d95002224fa4975c6da86a5d7c79",
+    "production_pages_deploy_run": 35675671813,
+    "production_live_resource_integrity_run": 35675740985,
+    "products_browser_proof_run": 35675740992,
+    "products_route_proof_run": 35675740994,
+    "build_specific_proof_run": 35675671688,
+    "business_exit": "HOLD_NO_REAL_REQUEST",
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build229-first-creative-project-prototype-to-run-pilot.json",
     "release467-build228-first-real-custom-work-route-to-proof-pilot.json",
     "release467-build227-manufacturing-adoption-command-centre.json",
     "release467-build226-capability-profile-coverage-closure.json",
@@ -128,23 +131,25 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_POST_MANUFACTURING_AUTONOMOUS_BUILDS_225_232.md",
-  "next_build": 229,
-  "next_build_state": "BLOCKED_UNTIL_BUILD228_PRODUCTION_GREEN",
-  "next_build_title": "First Creative Project Prototype-to-Run Pilot",
-  "promotion_state": "BUILD228_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD228_ROUTE_TO_PROOF_PILOT_ACTIVE_FROM_BUILD227_PRODUCTION_GREEN",
+  "next_build": 230,
+  "next_build_state": "BLOCKED_UNTIL_BUILD229_PRODUCTION_GREEN",
+  "next_build_title": "Cost, Margin, QA & Knowledge Evidence Adoption",
+  "promotion_state": "BUILD229_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD229_PROTOTYPE_TO_RUN_PILOT_ACTIVE_FROM_BUILD228_PRODUCTION_GREEN",
   "measured_closure": {
-    "source_build": 227,
+    "source_build": 228,
+    "build228_business_exit": "HOLD_NO_REAL_REQUEST",
     "active_custom_requests": 0,
-    "manufacturing_triage_records_in_active_use": 0,
-    "proof_versions": 0,
-    "quote_drafts": 0,
-    "interpretation": "BUILD228_MUST_USE_REAL_OPERATOR_WORK_OR_CLOSE_HOLD_NO_REAL_REQUEST"
+    "creative_project_measurement_source_build": 224,
+    "measured_hybrid_projects": 0,
+    "measured_manufacturing_lifecycles": 0,
+    "measured_reviewed_runs": 0,
+    "interpretation": "BUILD229_MUST_USE_REAL_OPERATOR_PROJECT_WORK_OR_CLOSE_HOLD_NO_REAL_PROJECT"
   },
   "planned_successor": {
-    "first_build": 229,
+    "first_build": 230,
     "last_build": 232,
-    "state": "BLOCKED_UNTIL_BUILD228_PRODUCTION_GREEN",
+    "state": "BLOCKED_UNTIL_BUILD229_PRODUCTION_GREEN",
     "future_queue_exhausted": false
   }
 }
