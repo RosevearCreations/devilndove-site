@@ -133,5 +133,36 @@
     "state": "PENDING_BUILD232_MEASUREMENT",
     "future_queue_exhausted": false,
     "builds": []
+  },
+  "starting_point": {
+    "development": {
+      "release": 467,
+      "build": 231,
+      "title": "Workshop Journal & Capability Case-Study Activation",
+      "sha": "fc65e05083e7dcf52d50a392d650d937988db0b6",
+      "tree": "afc367962b2163105a73c60a1bb14fd06744218e",
+      "system_gate_run": 35685100622,
+      "quality_run": 35685100552,
+      "it_admin_runtime_run": 35685100662,
+      "repository_hygiene_run": 35685100555,
+      "build_specific_proof_run": 35685100623,
+      "business_exit": "HOLD_NO_PUBLISHABLE_EVIDENCE",
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "release": 467,
+      "build": 231,
+      "title": "Workshop Journal & Capability Case-Study Activation",
+      "main_sha": "99af873897334e8eb3b382c898a687bcbe06819a",
+      "tree_sha": "afc367962b2163105a73c60a1bb14fd06744218e",
+      "production_pages_deploy_run": 35685413652,
+      "production_live_resource_integrity_run": 35685469887,
+      "products_browser_proof_run": 35685469957,
+      "products_route_proof_run": 35685469861,
+      "build_specific_proof_run": 35685413673,
+      "exact_main_sha_workflows": "40/40",
+      "business_exit": "HOLD_NO_PUBLISHABLE_EVIDENCE",
+      "state": "PRODUCTION_GREEN"
+    }
   }
 }

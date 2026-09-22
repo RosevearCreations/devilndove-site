@@ -2,7 +2,7 @@
   "release": 467,
   "build": 231,
   "title": "Workshop Journal & Capability Case-Study Activation",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build231-workshop-journal-capability-case-study-activation",
   "priority": "activate_public_discovery_only_from_existing_reviewed_authorized_content_release_evidence_or_hold_without_publication_mutation",
   "predecessor": {
@@ -67,7 +67,7 @@
   "next_build": {
     "build": 232,
     "title": "Manufacturing Outcomes Review & Roadmap Renewal",
-    "state": "BLOCKED_UNTIL_BUILD231_PRODUCTION_GREEN"
+    "state": "AUTHORIZED_FROM_BUILD231_PRODUCTION_GREEN"
   },
   "future_queue": {
     "first_build": 232,
@@ -102,5 +102,40 @@
       "state": "PRODUCTION_GREEN",
       "role": "CURRENT_PRODUCTION_BASELINE"
     }
+  },
+  "final_closure": {
+    "release": 467,
+    "build": 231,
+    "title": "Workshop Journal & Capability Case-Study Activation",
+    "dev_sha": "fc65e05083e7dcf52d50a392d650d937988db0b6",
+    "tree_sha": "afc367962b2163105a73c60a1bb14fd06744218e",
+    "proofs": {
+      "system_gate_run": 35685100622,
+      "current_application_quality_run": 35685100552,
+      "it_admin_runtime_proof_run": 35685100662,
+      "branch_hygiene_run": 35685100555
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "build_specific_proof_run": 35685100623,
+    "business_exit": "HOLD_NO_PUBLISHABLE_EVIDENCE"
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 231,
+    "title": "Workshop Journal & Capability Case-Study Activation",
+    "main_sha": "99af873897334e8eb3b382c898a687bcbe06819a",
+    "tree_sha": "afc367962b2163105a73c60a1bb14fd06744218e",
+    "production_pages_deploy_run": 35685413652,
+    "production_live_resource_integrity_run": 35685469887,
+    "products_browser_proof_run": 35685469957,
+    "products_route_proof_run": 35685469861,
+    "build_specific_proof_run": 35685413673,
+    "exact_main_sha_workflows": "40/40",
+    "canonical_migrations": 22,
+    "code_only": true,
+    "remote_d1_queries": 0,
+    "business_exit": "HOLD_NO_PUBLISHABLE_EVIDENCE",
+    "state": "PRODUCTION_GREEN",
+    "role": "CURRENT_PRODUCTION_BASELINE"
   }
 }
