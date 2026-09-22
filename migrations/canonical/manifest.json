@@ -167,6 +167,13 @@
       "release": 467,
       "description": "Close the measured 21/22 public capability-profile coverage gap by adding one reviewed Photography & Content profile for the existing canonical photography-content process; no schema change or parallel taxonomy.",
       "recovery": "Forward-only reference-data extension. Correct through the existing Build 209 reviewed capability authority or a new forward migration; never edit this migration after Development application."
+    },
+    {
+      "version": 23,
+      "file": "0023_release467_build234_cupcake_soap_label_templates.sql",
+      "release": 467,
+      "description": "Add ten owner-requested editable 50.8 mm × 50.8 mm Cupcake Soap system label templates, including the five supplied visual directions plus five additional colour variants, within the existing Packaging Studio authority.",
+      "recovery": "Forward-only reference-data templates. Deactivate or supersede a template through a later migration if needed; do not edit this migration after Development application. Existing Packaging projects, Products, Inventory, Finance and customer records are untouched."
     }
   ]
 }
