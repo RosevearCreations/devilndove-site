@@ -670,10 +670,14 @@
 
   function compliance(payload) {
     const ingredients = payload.structured_ingredients || []; const claims = payload.structured_claims || []; const template = currentTemplate(); const layout = template.layout || {};
-    const packageType = String(template.package_type || payload.package_type || ''); const isSoap = packageType === 'soap_ribbon'; const isRound = packageType === 'candle_top' || packageType === 'engraved_round';
+    const packageType = String(template.package_type || payload.package_type || ''); const profile=String(layout.design_profile||''); const isSoap = packageType === 'soap_ribbon'; const isCupcake=profile==='cupcake_soap_square_v1'; const isRound = packageType === 'candle_top' || packageType === 'engraved_round';
     const checks = isRound ? [
       ['Reusable template', template.packaging_template_id], ['Physical width', num(template.page_width_mm) >= 20], ['Physical height', num(template.page_height_mm) >= 20],
       ['Centred primary wording', payload.artwork?.candle_primary_text || template.layout?.default_primary_text], ['Upper brand arc', payload.artwork?.top_arc_text || template.layout?.default_top_arc_text], ['Lower origin arc', payload.artwork?.bottom_arc_text || template.layout?.default_bottom_arc_text]
+    ] : isCupcake ? [
+      ['Cupcake Soap system/reusable template', template.packaging_template_id], ['Exact 2-inch width', Math.abs(num(template.page_width_mm)-50.8)<=.1], ['Exact 2-inch height', Math.abs(num(template.page_height_mm)-50.8)<=.1],
+      ['Editable Cupcake Soap title', payload.product_identity_en], ['Editable scent / collection name', payload.collection_name], ['Purpose wording', payload.artwork?.cupcake_purpose_text || layout.default_cupcake_purpose_text],
+      ['Ingredients / INCI source', ingredients.length || payload.ingredients_en || payload.ingredients_inci], ['Made in Canada wording', payload.made_in_canada_text], ['Website', payload.website_text]
     ] : [
       ['English identity', payload.product_identity_en], ['French identity', payload.product_identity_fr], ['Metric net quantity', payload.net_quantity_text],
       ['Dealer / business', payload.dealer_name], ['Principal address', payload.dealer_address], ['Consumer contact', payload.contact_text], ['Website', payload.website_text],
@@ -697,6 +701,7 @@
     }
     if (isSoap && claims.length > 4) warnings.push('Only the first four claim rows fit the standard claims panel; remove, combine or move additional claims after review.');
     if (isRound) warnings.push('Round laser/print preview: confirm the measured lid or blank diameter, safe margin, material settings and a physical proof before production.');
+    else if (isCupcake) warnings.push('Compact 2 × 2 inch Cupcake Soap front label: keep any complete required cosmetic declaration that does not fit legibly on a reviewed companion/back label, and complete a 100% physical print test before approval.');
     else if (!isSoap) warnings.push('General packaging preview: verify category-specific legal fields, physical dieline, barcode/QR destination and material fit before approval.');
     return { checks, missing, warnings, ready: missing.length === 0 };
   }
@@ -705,12 +710,13 @@
     const mount = id('packagingSvgPreview'); const template = currentTemplate(); if (mount) { mount.innerHTML = svgMarkup(); mount.dataset.previewShape = String(template.layout?.shape || 'rectangle'); }
     const payload = projectPayload(); const result = compliance(payload); const target = id('packagingComplianceResults');
     const isRound = ['candle_top','engraved_round'].includes(String(template.package_type));
-    const readyNote = isRound ? 'Text and primary dimensions are ready for a review version. A measured blank, safe-area check, material settings and physical laser/print proof still apply.' : 'Data and primary dimensions are ready for a review version. Final formula, bilingual, claim and physical print review still apply.';
+    const isCupcake=String(template.layout?.design_profile||'')==='cupcake_soap_square_v1';
+    const readyNote = isRound ? 'Text and primary dimensions are ready for a review version. A measured blank, safe-area check, material settings and physical laser/print proof still apply.' : isCupcake ? 'The compact front label is ready for a review version. Complete required cosmetic declarations may still need a companion/back label, and a 100% physical print test remains required.' : 'Data and primary dimensions are ready for a review version. Final formula, bilingual, claim and physical print review still apply.';
     if (target) target.innerHTML = `<div class="packaging-compliance-grid">${result.checks.map(([label, value]) => `<span class="${value ? 'ok' : 'missing'}">${value ? '✓' : '!'} ${esc(label)}</span>`).join('')}</div>
       ${result.warnings.length ? `<div class="packaging-warning-list"><strong>Physical/design decisions:</strong><ul>${result.warnings.map((warning) => `<li>${esc(warning)}</li>`).join('')}</ul></div>` : ''}
       <p class="small">${result.ready ? readyNote : `${result.missing.length} required check(s) remain incomplete.`}</p>`;
     const size = id('packagingPreviewSize');
-    if (size) size.textContent = `Canvas ${num(template.page_width_mm,279.4)} × ${num(template.page_height_mm,38.1)} mm • band ${num(template.layout?.band_height_mm,19.05)} mm • front ${num(template.front_width_mm,50.8)} × ${num(template.front_height_mm,38.1)} mm • rear ${['candle_top','engraved_round'].includes(String(template.package_type))?Math.min(num(template.page_width_mm),num(template.page_height_mm)):num(template.rear_width_mm,38.1)} mm.`;
+    if (size) size.textContent = isCupcake ? `Cupcake Soap compact front label • ${num(template.page_width_mm,50.8)} × ${num(template.page_height_mm,50.8)} mm • 2.00 × 2.00 in at 100% scale.` : `Canvas ${num(template.page_width_mm,279.4)} × ${num(template.page_height_mm,38.1)} mm • band ${num(template.layout?.band_height_mm,19.05)} mm • front ${num(template.front_width_mm,50.8)} × ${num(template.front_height_mm,38.1)} mm • rear ${['candle_top','engraved_round'].includes(String(template.package_type))?Math.min(num(template.page_width_mm),num(template.page_height_mm)):num(template.rear_width_mm,38.1)} mm.`;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot())); } catch {}
   }
 
