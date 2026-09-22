@@ -72,7 +72,7 @@ jobs:
           for k in required:
             v=r.get(k)
             n[k]=float(v or 0) if k in ('reviewed_rework_quantity','reviewed_scrap_quantity') else int(v or 0)
-          assert n['canonical_migrations']==22,n
+          assert n['canonical_migrations']>=22,n
           assert n['foreign_key_violations']==0,n
           assert n['products_reviewed']<=240,n
           assert n['ready_products']+n['review_required_products']+n['externally_blocked_products']==n['products_reviewed'],n

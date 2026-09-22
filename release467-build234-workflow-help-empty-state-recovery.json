@@ -1,0 +1,139 @@
+{
+  "release": 467,
+  "build": 234,
+  "title": "Workflow Help, Empty States & Recovery Guidance",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build234-workflow-help-empty-state-recovery",
+  "predecessor": {
+    "build": 233,
+    "title": "Universal Help & Quality-of-Life Coverage",
+    "development_sha": "c9882fef84e23f7416a7042f52ec8b5ea151287f",
+    "development_tree_sha": "6eef4a4edf79d5ce367b052823bede7d9a665465",
+    "system_gate_run": 35772128810,
+    "current_application_quality_run": 35772128894,
+    "it_admin_runtime_proof_run": 35772128961,
+    "branch_hygiene_run": 35772128724,
+    "build_specific_dev_run": 35772128756,
+    "production_main_sha": "8de67c8e5a0e9fe745264a387f749c0cd8a4c6ad",
+    "production_tree_sha": "6eef4a4edf79d5ce367b052823bede7d9a665465",
+    "production_pages_deploy_run": 35772353686,
+    "production_live_resource_integrity_run": 35772488495,
+    "products_browser_proof_run": 35772488386,
+    "products_route_proof_run": 35772488446,
+    "build_specific_production_run": 35772353401,
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "workflow_help": true,
+    "workflow_cycle": [
+      "Start",
+      "Work",
+      "Review",
+      "Finish"
+    ],
+    "empty_state_vs_broken_state": true,
+    "next_valid_action_guidance": true,
+    "disabled_action_explanations": true,
+    "recovery_guidance": true,
+    "owning_workspace_links": true,
+    "shared_help_runtime": "public/js/admin-context-help.js",
+    "creator_help_centre": "admin/help/index.html",
+    "cupcake_soap_labels": {
+      "package_type": "soap_cupcake_label",
+      "physical_size_mm": [
+        50.8,
+        50.8
+      ],
+      "physical_size_in": [
+        2,
+        2
+      ],
+      "renderer_profile": "cupcake_soap_square",
+      "editable_fields": [
+        "label title",
+        "product/variant",
+        "ingredients",
+        "purpose",
+        "website",
+        "Made in Canada wording",
+        "net quantity",
+        "theme colours"
+      ],
+      "built_in_visual_directions": [
+        "Sweet Orange",
+        "Charcoal",
+        "Oatmeal & Goat Milk",
+        "Sea Breeze",
+        "Lavender Dream"
+      ],
+      "additional_colour_directions": 10,
+      "existing_authority": "Packaging Studio",
+      "owner_reference_templates_received": 5,
+      "reference_integration_mode": "EDITABLE_SVG_RECREATION_NOT_FLATTENED_ARTWORK",
+      "reference_note": "Owner-supplied Sweet Orange, Charcoal, Oatmeal & Goat Milk, Sea Breeze and Lavender Dream concepts define the five built-in visual directions; editable Packaging fields remain authoritative."
+    }
+  },
+  "implementation": {
+    "canonical_migration": "migrations/canonical/0023_release467_cupcake_soap_label_templates.sql",
+    "packaging_studio": "admin/packaging-studio/index.html",
+    "packaging_client": "public/js/admin-packaging-studio.js",
+    "packaging_domain": "functions/api/_lib/packagingDomainService.js",
+    "packaging_preflight": "functions/api/_lib/packagingReadService.js"
+  },
+  "safety": {
+    "canonical_schema_addition": false,
+    "data_only_forward_migration": true,
+    "existing_packaging_projects_rewritten": false,
+    "product_mutation": false,
+    "inventory_quantity_mutation": false,
+    "finance_mutation": false,
+    "customer_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "automatic_product_publication": false,
+    "help_api_calls": false,
+    "production_business_data_copy": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build234_gate.py",
+    "predecessor_gate": "scripts/release467_build233_gate.py",
+    "workflow": ".github/workflows/release467-build234-workflow-help-empty-state-recovery.yml",
+    "canonical_migrations_after_apply": 23,
+    "next_build": 235,
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "c9882fef84e23f7416a7042f52ec8b5ea151287f",
+      "tree": "6eef4a4edf79d5ce367b052823bede7d9a665465",
+      "system_gate_run": 35772128810,
+      "quality_run": 35772128894,
+      "it_admin_runtime_run": 35772128961,
+      "repository_hygiene_run": 35772128724,
+      "build_specific_proof_run": 35772128756,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "8de67c8e5a0e9fe745264a387f749c0cd8a4c6ad",
+      "tree_sha": "6eef4a4edf79d5ce367b052823bede7d9a665465",
+      "production_pages_deploy_run": 35772353686,
+      "production_live_resource_integrity_run": 35772488495,
+      "products_browser_proof_run": 35772488386,
+      "products_route_proof_run": 35772488446,
+      "build_specific_proof_run": 35772353401,
+      "exact_main_sha_workflows": "47/47",
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "successor": {
+    "build": 235,
+    "title": "Resume Work & Cross-Workspace Handoff",
+    "state": "PLANNED_AFTER_BUILD234_GREEN"
+  },
+  "future_queue": {
+    "first_build": 235,
+    "last_build": 248,
+    "exhausted": false
+  }
+}

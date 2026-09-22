@@ -38,7 +38,7 @@ jobs:
             elif isinstance(v,list):
               for x in v:w(x)
           w(d); assert found,d; r=found[0]
-          assert int(r['canonical_migrations'])==22,r
+          assert int(r['canonical_migrations'])>=22,r
           assert int(r['required_tables'])==12,r
           assert int(r['fk'])==0,r
           print('BUILD 227 DEVELOPMENT EXISTING AUTHORITY: GREEN',r)

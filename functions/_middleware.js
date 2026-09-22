@@ -145,7 +145,7 @@ function withPlatformClient(response, request) {
             element.append(adminQolMarkup(), { html: true });
           }
           if (isPublicRuntimeIntelligencePath(pathname)) {
-            element.append('<link data-dd-context-help-style="true" rel="stylesheet" href="/css/admin-context-help.css?v=467b233-universal-help"><script defer src="/public/js/admin-context-help.js?v=467b233-universal-help"></script>', { html: true });
+            element.append('<link data-dd-context-help-style="true" rel="stylesheet" href="/css/admin-context-help.css?v=467b234-workflow-help"><script defer src="/public/js/admin-context-help.js?v=467b234-workflow-help"></script>', { html: true });
             element.append('<script defer src="/public/js/public-heading-guard.js?v=current"></script>', { html: true });
             element.append(`<script defer src="/public/js/runtime-intelligence.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
           }
