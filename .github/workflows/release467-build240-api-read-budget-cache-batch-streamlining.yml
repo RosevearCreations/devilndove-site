@@ -11,6 +11,7 @@ on:
       - 'public/js/admin-save-confidence-v236.js'
       - 'public/js/admin-surface-consolidation-v239.js'
       - 'release467-build240-api-read-budget-cache-batch-streamlining.json'
+      - 'scripts/release467_build176_gate.py'
       - 'scripts/release467_build239_gate.py'
       - 'scripts/release467_build240_gate.py'
       - 'scripts/current_system_gate_provenance_gate.py'
