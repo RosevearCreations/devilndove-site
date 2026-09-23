@@ -12,6 +12,7 @@ import {
   resolveAppModuleRequestUser,
 } from './api/_lib/appModuleSessionGuard.js';
 import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appModuleRoutes.js';
+import { protectMutationOrigin } from './api/_lib/csrfOriginProtection.js';
 
 // Build 159: Product Admin returning-browser cache coherence.
 // Build 160 layers a read-only Product Production browser recovery client on top of the
@@ -32,7 +33,7 @@ const ADMIN_ERGONOMICS_REVISION = '467b237-ergonomics-v1';
 const ADMIN_ATTENTION_SIGNALS_REVISION = '467b238-attention-signals-v1';
 const ADMIN_SURFACE_CONSOLIDATION_REVISION = '467b239-admin-surface-consolidation-v1';
 const ADMIN_HANDOFF_REVISION = '467b241-cross-authority-handoff-v1';
-const ADMIN_RELEASE_EVIDENCE_REVISION = '467b243-release-evidence-baseline-v2';
+const ADMIN_RELEASE_EVIDENCE_REVISION = '467b244-release-evidence-baseline-v3';
 const STOREFRONT_DISCOVERY_REVISION = '467b198-product-image-fidelity';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
@@ -139,6 +140,8 @@ function withPlatformClient(response, request) {
   const contentType = String(response?.headers?.get('Content-Type') || '').toLowerCase();
   if (!contentType.includes('text/html')) return response;
   const pathname = new URL(request.url).pathname;
+  const mutationOriginDenied = protectMutationOrigin(request);
+  if (mutationOriginDenied) return finish(mutationOriginDenied, request);
   const normalizedPath = normalizedPagePath(pathname);
   const isProductsPage = normalizedPath === '/admin/products/';
   if (isProductsPage) {

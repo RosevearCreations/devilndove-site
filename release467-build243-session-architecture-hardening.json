@@ -2,7 +2,7 @@
   "release": 467,
   "build": 243,
   "title": "Session Architecture Hardening",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build243-session-architecture-hardening",
   "predecessor": {
     "build": 242,
@@ -111,5 +111,30 @@
       "build_specific_proof_run": 35883719159,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "146b588a0ad060d8b68914440eef485d32d2bd35",
+    "tree_sha": "909ac24bfd97b4ed2a20b004db8d3e4cf73b914a",
+    "proofs": {
+      "system_gate_run": 35895595239,
+      "current_application_quality_run": 35895596041,
+      "it_admin_runtime_proof_run": 35895595669,
+      "branch_hygiene_run": 35895595676
+    },
+    "dedicated_gate_run": 35895595649,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 244,
+    "recorded_by": "Build 244 restart ingestion; not self-recorded by Build 243"
+  },
+  "production_checkpoint": {
+    "main_sha": "c725b19e6dd9c051e8efb552abab734ff0532894",
+    "tree_sha": "909ac24bfd97b4ed2a20b004db8d3e4cf73b914a",
+    "production_pages_deploy_run": 35895852561,
+    "production_live_resource_integrity_run": 35896016840,
+    "products_browser_proof_run": 35896016792,
+    "products_route_proof_run": 35896016941,
+    "build_specific_proof_run": 35895852471,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
