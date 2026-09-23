@@ -1,27 +1,27 @@
-// Release 467 Build 244 — current release/restart authority over exact Build 240 GREEN predecessor.
+// Release 467 Build 245 — current release/restart authority over exact Build 240 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=244;
-const TITLE='CSRF / Origin Protection for Mutating Routes';
-const AUTHORITY='release467-build244-csrf-origin-protection-mutating-routes';
-const EVIDENCE_ID='r467-b240-b239-35895595239-35895852561';
+const BUILD=245;
+const TITLE='CSP & Browser Injection-Surface Hardening';
+const AUTHORITY='release467-build245-csp-browser-injection-hardening';
+const EVIDENCE_ID='r467-b240-b239-35925164067-35925424234';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:243,title:'Session Architecture Hardening',state:'DEVELOPMENT_GREEN',
-  dev_sha:'146b588a0ad060d8b68914440eef485d32d2bd35',tree_sha:'909ac24bfd97b4ed2a20b004db8d3e4cf73b914a',
-  system_gate_run:35895595239,current_application_quality_run:35895596041,it_admin_runtime_proof_run:35895595669,
-  branch_hygiene_run:35895595676,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:244,title:'CSRF / Origin Protection for Mutating Routes',state:'DEVELOPMENT_GREEN',
+  dev_sha:'1d8111e948db0d3ee176f86a8a74e12dcdbec4e3',tree_sha:'bddcec6079d5f906a39fd938cd47a61b594d434a',
+  system_gate_run:35925164067,current_application_quality_run:35925164397,it_admin_runtime_proof_run:35925164225,
+  branch_hygiene_run:35925164408,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:243,title:'Session Architecture Hardening',state:'PRODUCTION_GREEN',
-  main_sha:'c725b19e6dd9c051e8efb552abab734ff0532894',tree_sha:'909ac24bfd97b4ed2a20b004db8d3e4cf73b914a',
-  production_pages_deploy_run:35895852561,production_live_resource_integrity_run:35896016840,
-  products_browser_proof_run:35896016792,products_route_proof_run:35896016941,remote_d1_queries:0
+  release:467,build:244,title:'CSRF / Origin Protection for Mutating Routes',state:'PRODUCTION_GREEN',
+  main_sha:'f65d13c3b9d686d5e88168dcee84f25f580b6323',tree_sha:'bddcec6079d5f906a39fd938cd47a61b594d434a',
+  production_pages_deploy_run:35925424234,production_live_resource_integrity_run:35925501698,
+  products_browser_proof_run:35925501669,products_route_proof_run:35925501788,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 244 API Read Budget Cache Batch Streamlining'
+  'Release 467 Build 245 API Read Budget Cache Batch Streamlining'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:243,title:'Session Architecture Hardening',
+    release:467,build:244,title:'CSRF / Origin Protection for Mutating Routes',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35895595239,current_application_quality_run:35895596041,
-      it_admin_runtime_proof_run:35895595669,branch_hygiene_run:35895595676
+      system_gate_run:35925164067,current_application_quality_run:35925164397,
+      it_admin_runtime_proof_run:35925164225,branch_hygiene_run:35925164408
     },
     production_proofs:{
-      production_pages_deploy_run:35895852561,production_live_resource_integrity_run:35896016840,
-      products_browser_proof_run:35896016792,products_route_proof_run:35896016941
+      production_pages_deploy_run:35925424234,production_live_resource_integrity_run:35925501698,
+      products_browser_proof_run:35925501669,products_route_proof_run:35925501788
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 244 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 245 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -121,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:240,title:TITLE,authority:'release467-build244-csrf-origin-protection-mutating-routes.json'},
+        current_closure_candidate:{release:467,build:240,title:TITLE,authority:'release467-build245-csp-browser-injection-hardening.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -141,10 +141,10 @@ export async function onRequestGet(context){
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
       'Build 240 source is the exact last fully verified Development checkpoint.',
-      'Build 240 Production is GREEN on the identical tree 909ac24bfd97b4ed2a20b004db8d3e4cf73b914a.',
-      'Development proofs: System 35895595239, Quality 35895596041, I.T. 35895595669, Hygiene 35895595676.',
-      'Production proofs: Pages 35895852561, Live Resources 35896016840, Product Browser 35896016792, Product Route 35896016941.',
-      'Build 241 CSRF / Origin Protection for Mutating Routes is the active Development candidate and contains the reported Admin lockup.',
+      'Build 240 Production is GREEN on the identical tree bddcec6079d5f906a39fd938cd47a61b594d434a.',
+      'Development proofs: System 35925164067, Quality 35925164397, I.T. 35925164225, Hygiene 35925164408.',
+      'Production proofs: Pages 35925424234, Live Resources 35925501698, Product Browser 35925501669, Product Route 35925501788.',
+      'Build 241 CSP & Browser Injection-Surface Hardening is the active Development candidate and contains the reported Admin lockup.',
       'Build 241 adds no schema change, new business-write authority or automatic provider mutation.'
     ],
     safety:{
