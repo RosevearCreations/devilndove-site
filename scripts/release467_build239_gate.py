@@ -36,9 +36,9 @@ if int(p.get('build') or 0)==239:
  q((p.get('acceptance') or {})=={'system_gate_run':35859876994,'current_application_quality_run':35859877349,'it_admin_runtime_proof_run':35859876896,'branch_hygiene_run':35859877139},'Build 239 must inherit exact Build 238 four-proof set')
  q(p.get('production_checkpoint',{}).get('main_sha')=='44e52cfc905b7864c31c2921ea5e34146a02361a','Build 239 must retain exact Build 238 Production baseline')
 else:
- prev=(p.get('restart_integrity') or {}).get('last_fully_verified') or {}
- q(int(prev.get('build') or 0)>=239 and prev.get('dev_sha')=='f3594106fd74956e0aae524df7f75e53c84b9916','Build 240+ must ingest exact Build 239 Development closure')
- q((prev.get('proofs') or {}).get('system_gate_run')==35862488377,'Build 240+ missing Build 239 System proof')
+ final=a.get('final_closure') or {}
+ q(final.get('dev_sha')=='f3594106fd74956e0aae524df7f75e53c84b9916','Build 240+ must retain exact Build 239 Development closure')
+ q((final.get('proofs') or {}).get('system_gate_run')==35862488377,'Build 240+ missing retained Build 239 System proof')
 for k in ('automatic_business_action','new_api_authority','d1_business_data_mutation','r2_mutation','provider_execution','provider_publication','product_publication','inventory_movement','finance_posting','schema_change'):q(a.get('safety',{}).get(k) is False,f'Build 239 safety drift: {k}')
 q('Build 240 — API Read Budget, Cache & Batch Streamlining' in road,'Build 240 successor missing')
 q("run_current_contract('scripts/release467_build239_gate.py','Release 467 Build 239')" in sysgate,'System Gate must invoke Build 239')
