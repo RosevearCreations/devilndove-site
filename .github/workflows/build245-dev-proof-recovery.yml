@@ -1,0 +1,23 @@
+name: Build 245 Dev Proof Recovery
+permissions:
+  contents: read
+  actions: read
+on:
+  pull_request:
+    branches: [dev]
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover exact Build 245 dev push proofs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TARGET=b4eeed8895a8a04247b68a626c9018caadd8c9ad
+          echo "BUILD245_DEV_SHA=$TARGET"
+          git fetch --no-tags origin "$TARGET"
+          echo "BUILD245_DEV_TREE=$(git rev-parse "$TARGET^{tree}")"
+          echo "BUILD245_DEV_RUNS_BEGIN"
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=$TARGET&event=push&per_page=100" --jq '.workflow_runs[] | [.id,.name,.status,.conclusion,.head_sha] | @tsv'
+          echo "BUILD245_DEV_RUNS_END"
