@@ -1,4 +1,5 @@
 // Release 467 Build 236 — Save Confidence, Unsaved-Work Protection & Safe Batch Review
+// Build 240 containment: added-node-only observer; never render from self-generated DOM mutations.
 (() => {
   'use strict';
   if (!location.pathname.startsWith('/admin/')) return;
@@ -71,12 +72,13 @@
     renderBatchReview(root);
   }
   function track(form) {
-    if(!eligible(form) || tracked.has(form)) return;
+    if(!eligible(form) || tracked.has(form)) return false;
     tracked.set(form,{state:STATE.SAVED,detail:'',dirty:false});
     form.addEventListener('input',()=>setState(form,STATE.DIRTY,'Review and save before leaving.'));
     form.addEventListener('change',()=>setState(form,STATE.DIRTY,'Review and save before leaving.'));
     form.addEventListener('reset',()=>queueMicrotask(()=>setState(form,STATE.SAVED,'Form reset to its loaded values.')));
     form.addEventListener('submit',()=>setState(form,STATE.SAVING,'Waiting for the existing save action to finish.'));
+    return true;
   }
   function selectedBatchItems() {
     return [...document.querySelectorAll('[data-dd-safe-batch-review="1"] input[type="checkbox"][data-item-id]:checked')]
@@ -104,9 +106,29 @@
     event.returnValue='';
   });
 
-  function scan(){ document.querySelectorAll('form').forEach(track); render(); }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',scan,{once:true}); else scan();
-  new MutationObserver(scan).observe(document.documentElement,{childList:true,subtree:true});
+  function scan(root=document){
+    let added=0;
+    if(root instanceof HTMLFormElement) added+=track(root)?1:0;
+    if(root?.querySelectorAll) root.querySelectorAll('form').forEach((form)=>{ if(track(form)) added+=1; });
+    return added;
+  }
+  function initialScan(){ scan(document); render(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initialScan,{once:true}); else initialScan();
+
+  // Build 240: observe only added nodes and never call render() merely because our own
+  // confidence panel changed. The old whole-document scan+render callback could observe
+  // its own text/child rewrites forever and lock the browser main thread.
+  const formObserver=new MutationObserver((records)=>{
+    let added=0;
+    for(const record of records){
+      for(const node of record.addedNodes||[]){
+        if(node?.id==='ddSaveConfidenceV236' || node?.closest?.('#ddSaveConfidenceV236')) continue;
+        added+=scan(node);
+      }
+    }
+    if(added) render();
+  });
+  if(document.documentElement) formObserver.observe(document.documentElement,{childList:true,subtree:true});
 
   window.DDAdminSaveConfidenceV236=Object.freeze({
     version:'467.236',

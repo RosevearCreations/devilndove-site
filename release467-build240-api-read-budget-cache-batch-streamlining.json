@@ -1,0 +1,88 @@
+{
+  "release": 467,
+  "build": 240,
+  "title": "API Read Budget, Cache & Batch Streamlining",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build240-api-read-budget-cache-batch-streamlining",
+  "predecessor": {
+    "build": 239,
+    "title": "Admin Surface & Navigation Consolidation",
+    "development_sha": "f3594106fd74956e0aae524df7f75e53c84b9916",
+    "production_main_sha": "ca2f822ac5811f55abb8385d7e548b61097f24e8",
+    "development_proofs": {
+      "system_gate_run": 35862488377,
+      "current_application_quality_run": 35862487494,
+      "it_admin_runtime_proof_run": 35862488308,
+      "branch_hygiene_run": 35862488113,
+      "dedicated_gate_run": 35862488370
+    },
+    "production_evidence_visibility": "EXACT_TREE_AND_PRODUCTION_PROOFS_RECOVERED_READ_ONLY_BY_BUILD240_CI",
+    "development_tree_sha": "3a4b02a5fcebb70475ea12698486fbea3775675a",
+    "production_tree_sha": "3a4b02a5fcebb70475ea12698486fbea3775675a",
+    "production_proofs": {
+      "production_pages_deploy_run": 35862809663,
+      "production_live_resource_integrity_run": 35862907582,
+      "products_browser_proof_run": 35862907503,
+      "products_route_proof_run": 35862907598,
+      "build_specific_proof_run": 35862809510
+    },
+    "production_state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "admin_home_read_coalescing": true,
+    "read_only_cache_ttl_seconds": 60,
+    "live_read_timeout_seconds": 8,
+    "duplicate_identical_gets_coalesced": true,
+    "save_confidence_observer_feedback_loop_removed": true,
+    "build239_dom_cleanup_idempotent": true,
+    "static_navigation_read_only": true
+  },
+  "implementation": {
+    "read_budget_client": "public/js/admin-read-budget-v240.js",
+    "admin_home": "admin/index.html",
+    "save_confidence_repair": "public/js/admin-save-confidence-v236.js",
+    "build239_idempotence_repair": "public/js/admin-surface-consolidation-v239.js"
+  },
+  "safety": {
+    "automatic_business_action": false,
+    "new_api_authority": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "schema_change": false,
+    "request_time_schema_mutation": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build240_gate.py",
+    "workflow": ".github/workflows/release467-build240-api-read-budget-cache-batch-streamlining.yml",
+    "admin_home_must_not_self_observe_render_loop": true,
+    "next_build": 241,
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "f3594106fd74956e0aae524df7f75e53c84b9916",
+      "tree": "3a4b02a5fcebb70475ea12698486fbea3775675a",
+      "system_gate_run": 35862488377,
+      "quality_run": 35862487494,
+      "it_admin_runtime_run": 35862488308,
+      "repository_hygiene_run": 35862488113,
+      "dedicated_gate_run": 35862488370,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "ca2f822ac5811f55abb8385d7e548b61097f24e8",
+      "tree_sha": "3a4b02a5fcebb70475ea12698486fbea3775675a",
+      "production_pages_deploy_run": 35862809663,
+      "production_live_resource_integrity_run": 35862907582,
+      "products_browser_proof_run": 35862907503,
+      "products_route_proof_run": 35862907598,
+      "build_specific_proof_run": 35862809510,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}

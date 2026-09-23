@@ -1,4 +1,5 @@
 // Release 467 Build 239 — Admin Surface & Navigation Consolidation.
+// Build 240 containment: exact-link cleanup is idempotent and dynamic-ready handling is one-shot.
 (() => {
   if (!window.location.pathname.startsWith('/admin')) return;
   const normalize=(href)=>{ try { const u=new URL(href,window.location.origin); let p=u.pathname||'/'; if(!p.endsWith('/')) p+='/'; return p; } catch { return String(href||''); } };
@@ -12,8 +13,11 @@
       root.querySelectorAll('a[href]').forEach((a)=>{
         const key=normalize(a.getAttribute('href'));
         if(!key || key==='/admin/') return;
-        if(seen.has(key)){ a.hidden=true; a.dataset.ddRedundantEntry='1'; a.setAttribute('aria-hidden','true'); }
-        else seen.add(key);
+        if(seen.has(key)){
+          if(a.hidden!==true) a.hidden=true;
+          if(a.dataset.ddRedundantEntry!=='1') a.dataset.ddRedundantEntry='1';
+          if(a.getAttribute('aria-hidden')!=='true') a.setAttribute('aria-hidden','true');
+        } else seen.add(key);
       });
     });
   };
@@ -33,6 +37,6 @@
   const run=()=>{dedupeExactLinks();markCanonicalOwner();};
   window.DDAdminSurfaceConsolidationV239={normalize,canonicalOwners,dedupeExactLinks,run};
   document.addEventListener('DOMContentLoaded',run,{once:true});
-  window.addEventListener('dd:admin-module-hub-ready',run);
+  window.addEventListener('dd:admin-module-hub-ready',run,{once:true});
   document.dispatchEvent(new CustomEvent('dd:admin-surface-consolidation-ready',{detail:{build:239}}));
 })();
