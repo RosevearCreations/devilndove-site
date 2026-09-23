@@ -11,6 +11,14 @@ on:
       - 'scripts/release467_build236_gate.py'
       - 'scripts/current_system_gate_provenance_gate.py'
       - 'docs/operations/RELEASE_467_BUILD_236_SAVE_CONFIDENCE_UNSAVED_WORK_SAFE_BATCH_REVIEW.md'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'admin/it/index.html'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'admin/deployment-preflight/index.html'
+      - 'admin/reliability/index.html'
       - '.github/workflows/release467-build236-save-confidence-unsaved-work-safe-batch-review.yml'
   pull_request:
     branches: [dev, main]
