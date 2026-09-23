@@ -3,15 +3,15 @@
 (() => {
   'use strict';
   const EVIDENCE=Object.freeze({
-    verified:{release:467,build:242,title:'Release, Diagnostics & Evidence Streamlining',
-      dev_sha:'5977a1aa9674eb378d5aede0b31648a73ac770c6',tree_sha:'3ea103b093c4dcbf1670346dcce0ec6acf214470',
-      system_gate_run:35883357799,current_application_quality_run:35883358653,it_admin_runtime_proof_run:35883357777,
-      branch_hygiene_run:35883357974,dedicated_gate_run:35883357988},
-    production:{main_sha:'ae9ca2b48700f4b48e6eb7e6bb465f0472d5e41f',tree_sha:'3ea103b093c4dcbf1670346dcce0ec6acf214470',
-      production_pages_deploy_run:35883719199,production_live_resource_integrity_run:35883846712,
-      products_browser_proof_run:35883846744,products_route_proof_run:35883846755,build_specific_proof_run:35883719159,
+    verified:{release:467,build:243,title:'Session Architecture Hardening',
+      dev_sha:'146b588a0ad060d8b68914440eef485d32d2bd35',tree_sha:'909ac24bfd97b4ed2a20b004db8d3e4cf73b914a',
+      system_gate_run:35895595239,current_application_quality_run:35895596041,it_admin_runtime_proof_run:35895595669,
+      branch_hygiene_run:35895595676,dedicated_gate_run:35895595649},
+    production:{main_sha:'c725b19e6dd9c051e8efb552abab734ff0532894',tree_sha:'909ac24bfd97b4ed2a20b004db8d3e4cf73b914a',
+      production_pages_deploy_run:35895852561,production_live_resource_integrity_run:35896016840,
+      products_browser_proof_run:35896016792,products_route_proof_run:35896016941,build_specific_proof_run:35895852471,
       state:'PRODUCTION_GREEN'},
-    current:{release:467,build:243,title:'Session Architecture Hardening',
+    current:{release:467,build:244,title:'CSRF / Origin Protection for Mutating Routes',
       state:'DEVELOPMENT_CANDIDATE',next_action:'Prove the exact final Development head GREEN before any Production promotion.'}
   });
   const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

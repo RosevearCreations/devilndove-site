@@ -1,0 +1,99 @@
+{
+  "release": 467,
+  "build": 244,
+  "title": "CSRF / Origin Protection for Mutating Routes",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build244-csrf-origin-protection-mutating-routes",
+  "predecessor": {
+    "build": 243,
+    "title": "Session Architecture Hardening",
+    "development_sha": "146b588a0ad060d8b68914440eef485d32d2bd35",
+    "development_tree_sha": "909ac24bfd97b4ed2a20b004db8d3e4cf73b914a",
+    "production_main_sha": "c725b19e6dd9c051e8efb552abab734ff0532894",
+    "production_tree_sha": "909ac24bfd97b4ed2a20b004db8d3e4cf73b914a",
+    "development_proofs": {
+      "system_gate_run": 35895595239,
+      "current_application_quality_run": 35895596041,
+      "it_admin_runtime_proof_run": 35895595669,
+      "branch_hygiene_run": 35895595676,
+      "dedicated_gate_run": 35895595649
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 35895852561,
+      "production_live_resource_integrity_run": 35896016840,
+      "products_browser_proof_run": 35896016792,
+      "products_route_proof_run": 35896016941,
+      "build_specific_proof_run": 35895852471
+    },
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "state_changing_methods": [
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE"
+    ],
+    "browser_mutations_require_same_origin": true,
+    "origin_header_validation": true,
+    "referer_fallback_validation": true,
+    "fetch_metadata_validation": true,
+    "bearer_api_clients_compatible": true,
+    "headerless_non_browser_api_clients_compatible": true,
+    "provider_callback_exemptions_use_separate_signature_validation": true
+  },
+  "implementation": {
+    "shared_guard": "functions/api/_lib/csrfOriginProtection.js",
+    "enforcement_layer": "functions/_middleware.js",
+    "protected_surface": "/api/* mutating requests",
+    "denial_status": 403,
+    "denial_code": "csrf_origin_rejected",
+    "provider_callback_exemptions": [
+      "/api/stripe-webhook",
+      "/api/paypal-webhook",
+      "/api/social/meta/data-deletion"
+    ]
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "webhook_signature_authority_replaced": false,
+    "non_browser_bearer_compatibility_removed": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build244_gate.py",
+    "workflow": ".github/workflows/release467-build244-csrf-origin-protection-mutating-routes.yml",
+    "next_build": 245,
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "146b588a0ad060d8b68914440eef485d32d2bd35",
+      "tree": "909ac24bfd97b4ed2a20b004db8d3e4cf73b914a",
+      "system_gate_run": 35895595239,
+      "quality_run": 35895596041,
+      "it_admin_runtime_run": 35895595669,
+      "repository_hygiene_run": 35895595676,
+      "dedicated_gate_run": 35895595649,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "c725b19e6dd9c051e8efb552abab734ff0532894",
+      "tree_sha": "909ac24bfd97b4ed2a20b004db8d3e4cf73b914a",
+      "production_pages_deploy_run": 35895852561,
+      "production_live_resource_integrity_run": 35896016840,
+      "products_browser_proof_run": 35896016792,
+      "products_route_proof_run": 35896016941,
+      "build_specific_proof_run": 35895852471,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}

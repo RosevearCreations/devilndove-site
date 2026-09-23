@@ -23,11 +23,18 @@ audit=t('functions/api/_lib/adminAudit.js')
 road=t('docs/operations/RELEASE_467_REFINEMENT_AUTONOMOUS_BUILDS_233_248.md')
 sysgate=t('scripts/current_system_gate_provenance_gate.py')
 
-q(a.get('build')==243 and a.get('state')=='DEVELOPMENT_CANDIDATE','Build 243 authority identity/state mismatch')
+q(a.get('build')==243 and a.get('state') in ('DEVELOPMENT_CANDIDATE','PRODUCTION_GREEN'),'Build 243 authority identity/state mismatch')
+if a.get('state')=='PRODUCTION_GREEN':
+    q((a.get('final_closure') or {}).get('dev_sha')=='146b588a0ad060d8b68914440eef485d32d2bd35','Build 243 successor closure must retain exact final dev SHA')
+    q((a.get('production_checkpoint') or {}).get('main_sha')=='c725b19e6dd9c051e8efb552abab734ff0532894','Build 243 successor closure must retain exact Production main')
 q(prev.get('state')=='PRODUCTION_GREEN','Build 242 predecessor must be Production GREEN')
 q((prev.get('final_closure') or {}).get('dev_sha')=='5977a1aa9674eb378d5aede0b31648a73ac770c6','Build 242 final Development closure missing')
 q((prev.get('production_checkpoint') or {}).get('main_sha')=='ae9ca2b48700f4b48e6eb7e6bb465f0472d5e41f','Build 242 production checkpoint missing')
-q(p.get('build')==243 and p.get('next_build')==244 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must expose Build 243 candidate and Build 244 successor')
+q(int(p.get('build') or 0)>=243 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 243 or a verified successor')
+if int(p.get('build') or 0)==243:
+    q(p.get('next_build')==244,'Build 243 successor pointer mismatch')
+else:
+    q((a.get('final_closure') or {}).get('dev_sha')=='146b588a0ad060d8b68914440eef485d32d2bd35','Build 244+ must retain exact Build 243 Development closure')
 
 for src,name in ((browser,'public/js/auth.js'),(root_browser,'auth.js')):
     q("return \"\";" in src and 'clearLegacyBrowserToken' in src,f'{name} must not expose a browser-readable auth token')
