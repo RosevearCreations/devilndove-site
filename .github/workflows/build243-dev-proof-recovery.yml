@@ -1,4 +1,5 @@
 name: Build 243 Dev Proof Recovery
+# refresh downstream production proofs
 permissions:
   contents: read
   actions: read
