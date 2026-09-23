@@ -1,4 +1,7 @@
 name: Release 467 Build 240 API Read Budget Cache Batch Streamlining
+permissions:
+  contents: read
+  actions: read
 on:
   push:
     branches: [dev, main]
@@ -20,6 +23,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Recover Build 239 exact provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git fetch --no-tags origin f3594106fd74956e0aae524df7f75e53c84b9916 ca2f822ac5811f55abb8385d7e548b61097f24e8
+          echo "BUILD239_DEV_SHA=f3594106fd74956e0aae524df7f75e53c84b9916"
+          echo "BUILD239_DEV_TREE=$(git rev-parse 'f3594106fd74956e0aae524df7f75e53c84b9916^{tree}')"
+          echo "BUILD239_MAIN_SHA=ca2f822ac5811f55abb8385d7e548b61097f24e8"
+          echo "BUILD239_MAIN_TREE=$(git rev-parse 'ca2f822ac5811f55abb8385d7e548b61097f24e8^{tree}')"
+          echo "BUILD239_PUSH_RUNS_BEGIN"
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=ca2f822ac5811f55abb8385d7e548b61097f24e8&event=push&per_page=100" --jq '.workflow_runs[] | [.id,.name,.status,.conclusion,.head_sha] | @tsv'
+          echo "BUILD239_PUSH_RUNS_END"
       - uses: actions/setup-node@v4
         with: { node-version: '22' }
       - name: JavaScript syntax
