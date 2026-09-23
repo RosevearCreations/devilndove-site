@@ -1,23 +1,23 @@
-// Release 467 Build 239 — current read-only Deployment Preflight over exact Build 234 GREEN predecessor.
+// Release 467 Build 240 — current read-only Deployment Preflight over exact Build 239 GREEN predecessor.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=239;
-const TITLE='Admin Surface & Navigation Consolidation';
+const BUILD=240;
+const TITLE='API Read Budget, Cache & Batch Streamlining';
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
-const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 239 Save Confidence Unsaved-Work Safe Batch Review']);
+const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 240 API Read Budget Cache Batch Streamlining']);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:238,title:'Attention, Notifications & Operator Signal Cleanup',state:'DEVELOPMENT_GREEN',
-  dev_sha:'26bd3f755bd486e41335431136f6fed36cabde9f',tree_sha:'a29c7d6fe3e7fbfae120000020303dc32ef55419',
-  system_gate_run:35859876994,current_application_quality_run:35859877349,it_admin_runtime_proof_run:35859876896,
-  branch_hygiene_run:35859877139,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',exact_preview_deployment:true
+  release:467,build:239,title:'Admin Surface & Navigation Consolidation',state:'DEVELOPMENT_GREEN',
+  dev_sha:'f3594106fd74956e0aae524df7f75e53c84b9916',tree_sha:'3a4b02a5fcebb70475ea12698486fbea3775675a',
+  system_gate_run:35862488377,current_application_quality_run:35862487494,it_admin_runtime_proof_run:35862488308,
+  branch_hygiene_run:35862488113,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:238,title:'Attention, Notifications & Operator Signal Cleanup',state:'PRODUCTION_GREEN',
-  main_sha:'44e52cfc905b7864c31c2921ea5e34146a02361a',tree_sha:'a29c7d6fe3e7fbfae120000020303dc32ef55419',
-  production_pages_deploy_run:35860073843,production_live_resource_integrity_run:35860150517,
-  products_browser_proof_run:35860150674,products_route_proof_run:35860150585
+  release:467,build:239,title:'Admin Surface & Navigation Consolidation',state:'PRODUCTION_GREEN',
+  main_sha:'ca2f822ac5811f55abb8385d7e548b61097f24e8',tree_sha:'3a4b02a5fcebb70475ea12698486fbea3775675a',
+  production_pages_deploy_run:35862809663,production_live_resource_integrity_run:35862907582,
+  products_browser_proof_run:35862907503,products_route_proof_run:35862907598
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true});
 const rows=(r)=>Array.isArray(r?.results)?r.results:[];
@@ -44,11 +44,11 @@ export async function onRequestGet(context){
     {status:truth.proof_recorded_count===23?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:truth.proof_recorded_count+'/23 proof rows recorded.'},
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:truth.foreign_key_violations+' violation(s).'},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
-    {status:'pass',code:'build237_verified_baseline',label:'Build 237 verified restart baseline',detail:'Build 236 Attention, Notifications & Operator Signal Cleanup is exact-SHA Development and Production GREEN.'},
-    {status:'review',code:'build238_attention_signal_candidate',label:'Build 236 Attention, Notifications & Operator Signal Cleanup',detail:'Build 238 is an attention/notification presentation cleanup candidate over existing authorities; Production remains closed until exact Development proof.'}
+    {status:'pass',code:'build239_verified_baseline',label:'Build 239 verified restart baseline',detail:'Build 239 Admin Surface & Navigation Consolidation is exact-tree Development and Production GREEN.'},
+    {status:'review',code:'build240_read_budget_candidate',label:'Build 240 API Read Budget, Cache & Batch Streamlining',detail:'Build 240 is a code-only Admin startup/read-budget correction over the exact Build 239 GREEN boundary.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
-  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:239,title:TITLE,authority:'release467-build239-admin-surface-navigation-consolidation.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 238 is the exact fully verified Development and Production restart boundary.','Build 236 standardizes save states and adds unsaved-work protection plus opt-in review-only batch summaries.','Canonical migration authority remains through data-only 0023.','Build 236 adds no schema change, automatic retry, batch mutation, Product publication, Inventory movement, Finance posting, R2 mutation, or provider action.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
+  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:240,title:TITLE,authority:'release467-build240-api-read-budget-cache-batch-streamlining.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 239 is the exact fully verified Development and Production restart boundary.','Build 240 contains the reported Admin-home browser lockup by removing the Save Confidence MutationObserver feedback loop and bounding/coalescing read-only startup requests.','Canonical migration authority remains through data-only 0023.','Build 240 adds no schema change, automatic business mutation, Product publication, Inventory movement, Finance posting, R2 mutation, or provider action.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
   if(new URL(context.request.url).searchParams.get('format')==='markdown')return new Response(markdownReport(data),{status:200,headers:{'Content-Type':'text/markdown; charset=utf-8','Cache-Control':'no-store'}});
   return jsonResponse(data,200,{'Cache-Control':'no-store'});
 }

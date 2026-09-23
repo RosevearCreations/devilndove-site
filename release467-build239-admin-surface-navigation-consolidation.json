@@ -2,7 +2,7 @@
   "release": 467,
   "build": 239,
   "title": "Admin Surface & Navigation Consolidation",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build239-admin-surface-navigation-consolidation",
   "predecessor": {
     "build": 238,
@@ -66,5 +66,32 @@
       "products_route_proof_run": 35860150585,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "f3594106fd74956e0aae524df7f75e53c84b9916",
+    "tree_sha": "3a4b02a5fcebb70475ea12698486fbea3775675a",
+    "proofs": {
+      "system_gate_run": 35862488377,
+      "current_application_quality_run": 35862487494,
+      "it_admin_runtime_proof_run": 35862488308,
+      "branch_hygiene_run": 35862488113
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "dedicated_gate_run": 35862488370,
+    "exact_preview_url": "https://d1934014.devilndove-site.pages.dev",
+    "ingested_by_build": 240,
+    "recorded_by": "Build 240 restart ingestion; not self-recorded by Build 239"
+  },
+  "production_checkpoint": {
+    "main_sha": "ca2f822ac5811f55abb8385d7e548b61097f24e8",
+    "tree_sha": "3a4b02a5fcebb70475ea12698486fbea3775675a",
+    "production_pages_deploy_run": 35862809663,
+    "production_live_resource_integrity_run": 35862907582,
+    "products_browser_proof_run": 35862907503,
+    "products_route_proof_run": 35862907598,
+    "build_specific_proof_run": 35862809510,
+    "exact_production_url": "https://7ac27371.devilndove-site.pages.dev",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }

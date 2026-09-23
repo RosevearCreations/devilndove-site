@@ -1,0 +1,56 @@
+name: Release 467 Build 240 API Read Budget Cache Batch Streamlining
+permissions:
+  contents: read
+  actions: read
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'admin/index.html'
+      - 'public/js/admin-read-budget-v240.js'
+      - 'public/js/admin-save-confidence-v236.js'
+      - 'public/js/admin-surface-consolidation-v239.js'
+      - 'release467-build240-api-read-budget-cache-batch-streamlining.json'
+      - 'scripts/release467_build176_gate.py'
+      - 'scripts/release467_build239_gate.py'
+      - 'scripts/release467_build240_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_240_API_READ_BUDGET_CACHE_BATCH_STREAMLINING.md'
+      - '.github/workflows/release467-build240-api-read-budget-cache-batch-streamlining.yml'
+  pull_request:
+    branches: [dev, main]
+jobs:
+  build240:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Recover Build 239 exact provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git fetch --no-tags origin f3594106fd74956e0aae524df7f75e53c84b9916 ca2f822ac5811f55abb8385d7e548b61097f24e8
+          echo "BUILD239_DEV_SHA=f3594106fd74956e0aae524df7f75e53c84b9916"
+          echo "BUILD239_DEV_TREE=$(git rev-parse 'f3594106fd74956e0aae524df7f75e53c84b9916^{tree}')"
+          echo "BUILD239_MAIN_SHA=ca2f822ac5811f55abb8385d7e548b61097f24e8"
+          echo "BUILD239_MAIN_TREE=$(git rev-parse 'ca2f822ac5811f55abb8385d7e548b61097f24e8^{tree}')"
+          echo "BUILD239_PUSH_RUNS_BEGIN"
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=ca2f822ac5811f55abb8385d7e548b61097f24e8&event=push&per_page=100" --jq '.workflow_runs[] | [.id,.name,.status,.conclusion,.head_sha] | @tsv'
+          echo "BUILD239_PUSH_RUNS_END"
+          echo "BUILD239_ALL_RUNS_BEGIN"
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=ca2f822ac5811f55abb8385d7e548b61097f24e8&per_page=100" --jq '.workflow_runs[] | [.id,.name,.event,.status,.conclusion,.head_sha] | @tsv'
+          echo "BUILD239_ALL_RUNS_END"
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: JavaScript syntax
+        run: |
+          node --check public/js/admin-read-budget-v240.js
+          node --check public/js/admin-save-confidence-v236.js
+          node --check public/js/admin-surface-consolidation-v239.js
+      - name: Build 240 contract
+        run: python scripts/release467_build240_gate.py
+      - name: Retain Build 176 main-thread containment
+        run: python scripts/release467_build176_gate.py
+      - name: Retain Build 239 contract
+        run: python scripts/release467_build239_gate.py

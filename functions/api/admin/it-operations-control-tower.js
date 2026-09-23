@@ -1,27 +1,27 @@
-// Release 467 Build 239 — current release/restart authority over exact Build 234 GREEN predecessor.
+// Release 467 Build 240 — current release/restart authority over exact Build 239 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=239;
-const TITLE='Admin Surface & Navigation Consolidation';
-const AUTHORITY='release467-build239-admin-surface-navigation-consolidation';
-const EVIDENCE_ID='r467-b235-b236-35859876994-35860073843';
+const BUILD=240;
+const TITLE='API Read Budget, Cache & Batch Streamlining';
+const AUTHORITY='release467-build240-api-read-budget-cache-batch-streamlining';
+const EVIDENCE_ID='r467-b240-b239-35862488377-35862809663';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:238,title:'Attention, Notifications & Operator Signal Cleanup',state:'DEVELOPMENT_GREEN',
-  dev_sha:'26bd3f755bd486e41335431136f6fed36cabde9f',tree_sha:'a29c7d6fe3e7fbfae120000020303dc32ef55419',
-  system_gate_run:35859876994,current_application_quality_run:35859877349,it_admin_runtime_proof_run:35859876896,
-  branch_hygiene_run:35859877139,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:239,title:'Admin Surface & Navigation Consolidation',state:'DEVELOPMENT_GREEN',
+  dev_sha:'f3594106fd74956e0aae524df7f75e53c84b9916',tree_sha:'3a4b02a5fcebb70475ea12698486fbea3775675a',
+  system_gate_run:35862488377,current_application_quality_run:35862487494,it_admin_runtime_proof_run:35862488308,
+  branch_hygiene_run:35862488113,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:238,title:'Attention, Notifications & Operator Signal Cleanup',state:'PRODUCTION_GREEN',
-  main_sha:'44e52cfc905b7864c31c2921ea5e34146a02361a',tree_sha:'a29c7d6fe3e7fbfae120000020303dc32ef55419',
-  production_pages_deploy_run:35860073843,production_live_resource_integrity_run:35860150517,
-  products_browser_proof_run:35860150674,products_route_proof_run:35860150585,remote_d1_queries:0
+  release:467,build:239,title:'Admin Surface & Navigation Consolidation',state:'PRODUCTION_GREEN',
+  main_sha:'ca2f822ac5811f55abb8385d7e548b61097f24e8',tree_sha:'3a4b02a5fcebb70475ea12698486fbea3775675a',
+  production_pages_deploy_run:35862809663,production_live_resource_integrity_run:35862907582,
+  products_browser_proof_run:35862907503,products_route_proof_run:35862907598,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 239 Save Confidence Unsaved-Work Safe Batch Review'
+  'Release 467 Build 240 API Read Budget Cache Batch Streamlining'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:238,title:'Attention, Notifications & Operator Signal Cleanup',
+    release:467,build:239,title:'Admin Surface & Navigation Consolidation',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35859876994,current_application_quality_run:35859877349,
-      it_admin_runtime_proof_run:35859876896,branch_hygiene_run:35859877139
+      system_gate_run:35862488377,current_application_quality_run:35862487494,
+      it_admin_runtime_proof_run:35862488308,branch_hygiene_run:35862488113
     },
     production_proofs:{
-      production_pages_deploy_run:35860073843,production_live_resource_integrity_run:35860150517,
-      products_browser_proof_run:35860150674,products_route_proof_run:35860150585
+      production_pages_deploy_run:35862809663,production_live_resource_integrity_run:35862907582,
+      products_browser_proof_run:35862907503,products_route_proof_run:35862907598
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 238 is the active owner-authorized refinement candidate; Build 239 follows only after exact Build 238 Production GREEN.'
+    next_build:'Build 240 is the active owner-authorized read-budget/browser-freeze correction; Build 241 follows only after exact Build 240 Production GREEN.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 237 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 240 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -102,7 +102,7 @@ function markdownReport(pack){
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Current candidate: Build 236 Attention, Notifications & Operator Signal Cleanup
+- Current candidate: Build 240 API Read Budget, Cache & Batch Streamlining
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -121,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:238,title:TITLE,authority:'release467-build238-attention-notifications-operator-signal-cleanup.json'},
+        current_closure_candidate:{release:467,build:240,title:TITLE,authority:'release467-build240-api-read-budget-cache-batch-streamlining.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -140,12 +140,12 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 237 source is the exact last fully verified Development checkpoint.',
-      'Build 237 Production is GREEN on the identical source tree; Build 238 converges presentation over existing attention authorities.',
-      'Development proofs: System 35859876994, Quality 35859877349, I.T. 35859876896, Hygiene 35859877139.',
-      'Production proofs: Pages 35860073843, Live Resources 35860150517, Product Browser 35860150674, Product Route 35860150585.',
-      'Build 236 Attention, Notifications & Operator Signal Cleanup is the active Development candidate.',
-      'Build 238 adds no schema change, new API authority or automatic business/provider mutation, and Production remains closed until exact-head proof.'
+      'Build 239 source is the exact last fully verified Development checkpoint.',
+      'Build 239 Production is GREEN on the identical tree 3a4b02a5fcebb70475ea12698486fbea3775675a.',
+      'Development proofs: System 35862488377, Quality 35862487494, I.T. 35862488308, Hygiene 35862488113.',
+      'Production proofs: Pages 35862809663, Live Resources 35862907582, Product Browser 35862907503, Product Route 35862907598.',
+      'Build 240 API Read Budget, Cache & Batch Streamlining is the active Development candidate and contains the reported Admin lockup.',
+      'Build 240 adds no schema change, new business-write authority or automatic provider mutation.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
