@@ -12,21 +12,24 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 239 candidate
+## Current Release 467 restart authority — Build 240 candidate
 
-Build 238 **Attention, Notifications & Operator Signal Cleanup** is the exact verified predecessor:
+Build 239 **Admin Surface & Navigation Consolidation** is the exact verified predecessor:
 
-- Development SHA: `26bd3f755bd486e41335431136f6fed36cabde9f`
-- Shared tree: `a29c7d6fe3e7fbfae120000020303dc32ef55419`
-- Development proofs: System `35859876994`, Quality `35859877349`, I.T. `35859876896`, Hygiene `35859877139`
-- Production main: `44e52cfc905b7864c31c2921ea5e34146a02361a`
-- Production proofs: Pages `35860073843`, Live Resources `35860150517`, Product Browser `35860150674`, Product Route `35860150585`
+- Development SHA: `f3594106fd74956e0aae524df7f75e53c84b9916`
+- Shared tree: `3a4b02a5fcebb70475ea12698486fbea3775675a`
+- Development proofs: System `35862488377`, Quality `35862487494`, I.T. `35862488308`, Hygiene `35862488113`
+- Development preview: `https://d1934014.devilndove-site.pages.dev`
+- Production main: `ca2f822ac5811f55abb8385d7e548b61097f24e8`
+- Production proofs: Pages `35862809663`, Live Resources `35862907582`, Product Browser `35862907503`, Product Route `35862907598`
+- Build 239 production gate: `35862809510`
+- Exact Production URL: `https://7ac27371.devilndove-site.pages.dev`
 - Business exit: `OWNER_AUTHORIZED_REFINEMENT_QUEUE_OPEN`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 239 **Admin Surface & Navigation Consolidation** is the active owner-authorized refinement candidate. Existing Runtime Incidents, Notification Queue and Today Needs Attention remain authoritative; Build 238 only converges ranking, ownership cues and visual priority.
+Build 240 **API Read Budget, Cache & Batch Streamlining** is the active owner-authorized refinement candidate. It also contains the reported Admin-home Firefox lockup by removing the Save Confidence MutationObserver feedback loop and bounding/coalescing the two existing read-only startup GETs.
 
-Build 238 is exact-tree Production GREEN. Build 239 remains blocked from Production until its exact Development head is fully GREEN.
+Build 239 is exact-tree Development + Production GREEN. Build 240 remains blocked from Production until its exact Development head is fully GREEN.
 
 ## Retained historical provenance — Build 171
 
