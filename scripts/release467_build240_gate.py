@@ -14,7 +14,10 @@ save=t('public/js/admin-save-confidence-v236.js')
 surface=t('public/js/admin-surface-consolidation-v239.js')
 road=t('docs/operations/RELEASE_467_REFINEMENT_AUTONOMOUS_BUILDS_233_248.md')
 sysgate=t('scripts/current_system_gate_provenance_gate.py')
-q(a.get('build')==240 and a.get('state')=='DEVELOPMENT_CANDIDATE','Build 240 authority identity/state mismatch')
+q(a.get('build')==240 and a.get('state') in ('DEVELOPMENT_CANDIDATE','PRODUCTION_GREEN'),'Build 240 authority identity/state mismatch')
+if a.get('state')=='PRODUCTION_GREEN':
+    q((a.get('final_closure') or {}).get('dev_sha')=='3fb60a9f3be8c40ca415ecd3cdcf7a44bff081d8','Build 240 successor closure must retain exact final dev SHA')
+    q((a.get('production_checkpoint') or {}).get('main_sha')=='a9efe9826c6ad7e400fa174f7cd6a8e6d980c452','Build 240 successor closure must retain exact Production main')
 pred=a.get('predecessor') or {}
 q(pred.get('development_sha')=='f3594106fd74956e0aae524df7f75e53c84b9916','Build 240 must ingest exact Build 239 Development head')
 q(pred.get('production_main_sha')=='ca2f822ac5811f55abb8385d7e548b61097f24e8','Build 240 must start from promoted Build 239 main')

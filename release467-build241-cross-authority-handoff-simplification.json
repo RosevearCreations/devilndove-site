@@ -1,0 +1,102 @@
+{
+  "release": 467,
+  "build": 241,
+  "title": "Cross-Authority Handoff Simplification",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build241-cross-authority-handoff-simplification",
+  "predecessor": {
+    "build": 240,
+    "title": "API Read Budget, Cache & Batch Streamlining",
+    "development_sha": "3fb60a9f3be8c40ca415ecd3cdcf7a44bff081d8",
+    "development_tree_sha": "6388a8259bdf4902e220fed5e1dd9f21766c2357",
+    "production_main_sha": "a9efe9826c6ad7e400fa174f7cd6a8e6d980c452",
+    "production_tree_sha": "6388a8259bdf4902e220fed5e1dd9f21766c2357",
+    "development_proofs": {
+      "system_gate_run": 35874693973,
+      "current_application_quality_run": 35874693732,
+      "it_admin_runtime_proof_run": 35874693995,
+      "branch_hygiene_run": 35874694168,
+      "dedicated_gate_run": 35874693925,
+      "retained_build176_gate_run": 35874694016
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 35877290030,
+      "production_live_resource_integrity_run": 35877494906,
+      "products_browser_proof_run": 35877494864,
+      "products_route_proof_run": 35877494771,
+      "build_specific_proof_run": 35877289310
+    },
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "pass_existing_identifiers_between_workspaces": true,
+    "preselect_supported_destination_records": true,
+    "return_to_source_links": true,
+    "authoritative_record_copying": false,
+    "new_business_authority": false
+  },
+  "implementation": {
+    "shared_client": "public/js/admin-handoff-v241.js",
+    "shared_bootstrap": "functions/_middleware.js",
+    "context_transport": "same-origin query parameters only",
+    "supported_identifier_families": [
+      "product_id",
+      "creative_project_id",
+      "creative_work_project_id",
+      "project_id",
+      "inventory_id",
+      "site_item_inventory_id",
+      "custom_request_id",
+      "content_project_id",
+      "creation_id",
+      "creation_key"
+    ],
+    "return_contract": [
+      "handoff_from",
+      "handoff_label",
+      "return_to"
+    ]
+  },
+  "safety": {
+    "automatic_business_action": false,
+    "new_api_authority": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "copied_authoritative_business_records": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build241_gate.py",
+    "workflow": ".github/workflows/release467-build241-cross-authority-handoff-simplification.yml",
+    "next_build": 242,
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "3fb60a9f3be8c40ca415ecd3cdcf7a44bff081d8",
+      "tree": "6388a8259bdf4902e220fed5e1dd9f21766c2357",
+      "system_gate_run": 35874693973,
+      "quality_run": 35874693732,
+      "it_admin_runtime_run": 35874693995,
+      "repository_hygiene_run": 35874694168,
+      "dedicated_gate_run": 35874693925,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "a9efe9826c6ad7e400fa174f7cd6a8e6d980c452",
+      "tree_sha": "6388a8259bdf4902e220fed5e1dd9f21766c2357",
+      "production_pages_deploy_run": 35877290030,
+      "production_live_resource_integrity_run": 35877494906,
+      "products_browser_proof_run": 35877494864,
+      "products_route_proof_run": 35877494771,
+      "build_specific_proof_run": 35877289310,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}

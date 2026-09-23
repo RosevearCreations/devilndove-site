@@ -12,24 +12,23 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 240 candidate
+## Current Release 467 restart authority — Build 241 candidate
 
-Build 239 **Admin Surface & Navigation Consolidation** is the exact verified predecessor:
+Build 240 **API Read Budget, Cache & Batch Streamlining** is the exact verified predecessor:
 
-- Development SHA: `f3594106fd74956e0aae524df7f75e53c84b9916`
-- Shared tree: `3a4b02a5fcebb70475ea12698486fbea3775675a`
-- Development proofs: System `35862488377`, Quality `35862487494`, I.T. `35862488308`, Hygiene `35862488113`
-- Development preview: `https://d1934014.devilndove-site.pages.dev`
-- Production main: `ca2f822ac5811f55abb8385d7e548b61097f24e8`
-- Production proofs: Pages `35862809663`, Live Resources `35862907582`, Product Browser `35862907503`, Product Route `35862907598`
-- Build 239 production gate: `35862809510`
-- Exact Production URL: `https://7ac27371.devilndove-site.pages.dev`
-- Business exit: `OWNER_AUTHORIZED_REFINEMENT_QUEUE_OPEN`
+- Development SHA: `3fb60a9f3be8c40ca415ecd3cdcf7a44bff081d8`
+- Shared tree: `6388a8259bdf4902e220fed5e1dd9f21766c2357`
+- Development proofs: System `35874693973`, Quality `35874693732`, I.T. `35874693995`, Hygiene `35874694168`
+- Build 240 dedicated proof: `35874693925`
+- Retained Build 176 main-thread proof: `35874694016`
+- Production main: `a9efe9826c6ad7e400fa174f7cd6a8e6d980c452`
+- Production proofs: Pages `35877290030`, Live Resources `35877494906`, Product Browser `35877494864`, Product Route `35877494771`
+- Build 240 production gate: `35877289310`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 240 **API Read Budget, Cache & Batch Streamlining** is the active owner-authorized refinement candidate. It also contains the reported Admin-home Firefox lockup by removing the Save Confidence MutationObserver feedback loop and bounding/coalescing the two existing read-only startup GETs.
+Build 241 **Cross-Authority Handoff Simplification** is the active owner-authorized refinement candidate. It passes existing identifiers between compatible Admin workspaces, lets destination clients preselect records they already own, and shows same-origin return-to-source links. It does not copy authoritative business records or add a business-write authority.
 
-Build 239 is exact-tree Development + Production GREEN. Build 240 remains blocked from Production until its exact Development head is fully GREEN.
+Build 240 is exact-tree Development + Production GREEN. Build 241 remains blocked from Production until its exact Development head is fully GREEN.
 
 ## Retained historical provenance — Build 171
 

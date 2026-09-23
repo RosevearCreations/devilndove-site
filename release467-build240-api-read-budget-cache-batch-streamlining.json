@@ -2,7 +2,7 @@
   "release": 467,
   "build": 240,
   "title": "API Read Budget, Cache & Batch Streamlining",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build240-api-read-budget-cache-batch-streamlining",
   "predecessor": {
     "build": 239,
@@ -84,5 +84,31 @@
       "build_specific_proof_run": 35862809510,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "3fb60a9f3be8c40ca415ecd3cdcf7a44bff081d8",
+    "tree_sha": "6388a8259bdf4902e220fed5e1dd9f21766c2357",
+    "proofs": {
+      "system_gate_run": 35874693973,
+      "current_application_quality_run": 35874693732,
+      "it_admin_runtime_proof_run": 35874693995,
+      "branch_hygiene_run": 35874694168
+    },
+    "dedicated_gate_run": 35874693925,
+    "retained_build176_gate_run": 35874694016,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 241,
+    "recorded_by": "Build 241 restart ingestion; not self-recorded by Build 240"
+  },
+  "production_checkpoint": {
+    "main_sha": "a9efe9826c6ad7e400fa174f7cd6a8e6d980c452",
+    "tree_sha": "6388a8259bdf4902e220fed5e1dd9f21766c2357",
+    "production_pages_deploy_run": 35877290030,
+    "production_live_resource_integrity_run": 35877494906,
+    "products_browser_proof_run": 35877494864,
+    "products_route_proof_run": 35877494771,
+    "build_specific_proof_run": 35877289310,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
