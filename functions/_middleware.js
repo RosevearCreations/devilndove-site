@@ -26,6 +26,7 @@ const PRODUCTS_AUTH_READY_REVISION = '467b156-auth-ready-v3';
 const PRODUCTS_COLD_START_REVISION = '467b156-core-product-recovery-v1';
 const PRODUCTS_QUALITY_FALLBACK_REVISION = '467b156-quality-fallback-v1';
 const ADMIN_QOL_REVISION = '467b161-universal-search-v1';
+const ADMIN_RESUME_WORK_REVISION = '467b235-resume-work-v1';
 const STOREFRONT_DISCOVERY_REVISION = '467b198-product-image-fidelity';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
@@ -76,6 +77,7 @@ function adminQolMarkup() {
   return [
     `<link data-dd-admin-qol-v161="1" rel="stylesheet" href="/css/admin-universal-search-v161.css?v=${ADMIN_QOL_REVISION}">`,
     `<script data-dd-admin-qol-v161="1" defer src="/public/js/admin-universal-search-v161.js?v=${ADMIN_QOL_REVISION}"></script>`,
+    `<script data-dd-admin-resume-work-v235="1" defer src="/public/js/admin-resume-work-v235.js?v=${ADMIN_RESUME_WORK_REVISION}"></script>`,
   ].join('');
 }
 function productsPlatformMarkup() {
