@@ -1,0 +1,80 @@
+{
+  "release": 467,
+  "build": 237,
+  "title": "Mobile, Touch, Keyboard & Dense-Workspace Ergonomics",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build237-mobile-touch-keyboard-dense-workspace-ergonomics",
+  "predecessor": {
+    "build": 236,
+    "title": "Save Confidence, Unsaved-Work Protection & Safe Batch Review",
+    "development_sha": "6385d67a726c82a049569d20537a55a9e727a19a",
+    "development_tree_sha": "616274b2701b2b071eb033a785371607aa13b97d",
+    "system_gate_run": 35857576835,
+    "current_application_quality_run": 35857576801,
+    "it_admin_runtime_proof_run": 35857576924,
+    "branch_hygiene_run": 35857576861,
+    "dedicated_gate_run": 35857576884,
+    "production_main_sha": "07a1b3b115dbff380e6645837a610879c4f8eda7",
+    "production_tree_sha": "616274b2701b2b071eb033a785371607aa13b97d",
+    "production_pages_deploy_run": 35857748748,
+    "production_live_resource_integrity_run": 35857829165,
+    "products_browser_proof_run": 35857829164,
+    "products_route_proof_run": 35857829198,
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "sticky_local_action_bars": true,
+    "touch_target_improvements": true,
+    "visible_focus": true,
+    "narrow_table_card_switching": true,
+    "horizontal_overflow_reduction": true,
+    "keyboard_flow": true,
+    "existing_responsive_gates_preserved": true
+  },
+  "implementation": {
+    "css": "css/admin-ergonomics-v237.css",
+    "client": "public/js/admin-ergonomics-v237.js",
+    "shared_bootstrap": "functions/_middleware.js",
+    "table_card_mode": "USER_TOGGLE_WITH_NARROW_SCREEN_DEFAULT",
+    "business_mutation_execution": "NONE"
+  },
+  "safety": {
+    "automatic_business_action": false,
+    "api_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "schema_change": false,
+    "request_time_schema_mutation": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build237_gate.py",
+    "workflow": ".github/workflows/release467-build237-mobile-touch-keyboard-dense-workspace-ergonomics.yml",
+    "next_build": 238,
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "6385d67a726c82a049569d20537a55a9e727a19a",
+      "tree": "616274b2701b2b071eb033a785371607aa13b97d",
+      "system_gate_run": 35857576835,
+      "quality_run": 35857576801,
+      "it_admin_runtime_run": 35857576924,
+      "repository_hygiene_run": 35857576861,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "07a1b3b115dbff380e6645837a610879c4f8eda7",
+      "tree_sha": "616274b2701b2b071eb033a785371607aa13b97d",
+      "production_pages_deploy_run": 35857748748,
+      "production_live_resource_integrity_run": 35857829165,
+      "products_browser_proof_run": 35857829164,
+      "products_route_proof_run": 35857829198,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}

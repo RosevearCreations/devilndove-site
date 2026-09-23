@@ -28,6 +28,7 @@ const PRODUCTS_QUALITY_FALLBACK_REVISION = '467b156-quality-fallback-v1';
 const ADMIN_QOL_REVISION = '467b161-universal-search-v1';
 const ADMIN_RESUME_WORK_REVISION = '467b235-resume-work-v1';
 const ADMIN_SAVE_CONFIDENCE_REVISION = '467b236-save-confidence-v1';
+const ADMIN_ERGONOMICS_REVISION = '467b237-ergonomics-v1';
 const STOREFRONT_DISCOVERY_REVISION = '467b198-product-image-fidelity';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
@@ -80,6 +81,8 @@ function adminQolMarkup() {
     `<script data-dd-admin-qol-v161="1" defer src="/public/js/admin-universal-search-v161.js?v=${ADMIN_QOL_REVISION}"></script>`,
     `<script data-dd-admin-resume-work-v235="1" defer src="/public/js/admin-resume-work-v235.js?v=${ADMIN_RESUME_WORK_REVISION}"></script>`,
     `<script data-dd-admin-save-confidence-v236="1" defer src="/public/js/admin-save-confidence-v236.js?v=${ADMIN_SAVE_CONFIDENCE_REVISION}"></script>`,
+    `<link data-dd-admin-ergonomics-v237="1" rel="stylesheet" href="/css/admin-ergonomics-v237.css?v=${ADMIN_ERGONOMICS_REVISION}">`,
+    `<script data-dd-admin-ergonomics-v237="1" defer src="/public/js/admin-ergonomics-v237.js?v=${ADMIN_ERGONOMICS_REVISION}"></script>`,
   ].join('');
 }
 function productsPlatformMarkup() {

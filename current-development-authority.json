@@ -1,32 +1,32 @@
 {
   "release": 467,
-  "build": 236,
-  "title": "Save Confidence, Unsaved-Work Protection & Safe Batch Review",
+  "build": 237,
+  "title": "Mobile, Touch, Keyboard & Dense-Workspace Ergonomics",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 235,
-      "title": "Resume Work & Cross-Workspace Handoff",
-      "authority": "release467-build235-resume-work-cross-workspace-handoff.json",
-      "dev_sha": "b4c9d47752a146da3bfd3b8047ae5cc941c70d55",
-      "tree_sha": "6bceeefcab82beb5587fc05b053caf61dc587ef4",
+      "build": 236,
+      "title": "Save Confidence, Unsaved-Work Protection & Safe Batch Review",
+      "authority": "release467-build236-save-confidence-unsaved-work-safe-batch-review.json",
+      "dev_sha": "6385d67a726c82a049569d20537a55a9e727a19a",
+      "tree_sha": "616274b2701b2b071eb033a785371607aa13b97d",
       "proofs": {
-        "system_gate_run": 35802372348,
-        "current_application_quality_run": 35802372207,
-        "it_admin_runtime_proof_run": 35802372335,
-        "branch_hygiene_run": 35802372354
+        "system_gate_run": 35857576835,
+        "current_application_quality_run": 35857576801,
+        "it_admin_runtime_proof_run": 35857576924,
+        "branch_hygiene_run": 35857576861
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "business_exit": "OWNER_AUTHORIZED_REFINEMENT_QUEUE_OPEN"
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 236,
-      "title": "Save Confidence, Unsaved-Work Protection & Safe Batch Review",
-      "authority": "release467-build236-save-confidence-unsaved-work-safe-batch-review.json",
+      "build": 237,
+      "title": "Mobile, Touch, Keyboard & Dense-Workspace Ergonomics",
+      "authority": "release467-build237-mobile-touch-keyboard-dense-workspace-ergonomics.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -37,19 +37,20 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 235,
-    "title": "Resume Work & Cross-Workspace Handoff",
-    "authority": "release467-build235-resume-work-cross-workspace-handoff.json",
-    "main_sha": "b2fbbcc86d1e3c4925bee7e09287ed32519d7f34",
-    "tree_sha": "6bceeefcab82beb5587fc05b053caf61dc587ef4",
-    "production_pages_deploy_run": 35802505626,
-    "production_live_resource_integrity_run": 35802559175,
-    "products_browser_proof_run": 35802559138,
-    "products_route_proof_run": 35802559194,
+    "build": 236,
+    "title": "Save Confidence, Unsaved-Work Protection & Safe Batch Review",
+    "authority": "release467-build236-save-confidence-unsaved-work-safe-batch-review.json",
+    "main_sha": "07a1b3b115dbff380e6645837a610879c4f8eda7",
+    "tree_sha": "616274b2701b2b071eb033a785371607aa13b97d",
+    "production_pages_deploy_run": 35857748748,
+    "production_live_resource_integrity_run": 35857829165,
+    "products_browser_proof_run": 35857829164,
+    "products_route_proof_run": 35857829198,
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build237-mobile-touch-keyboard-dense-workspace-ergonomics.json",
     "release467-build236-save-confidence-unsaved-work-safe-batch-review.json",
     "release467-build235-resume-work-cross-workspace-handoff.json",
     "release467-build234-workflow-help-empty-state-recovery.json",
@@ -127,10 +128,10 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_REFINEMENT_AUTONOMOUS_BUILDS_233_248.md",
-  "next_build": 237,
+  "next_build": 238,
   "next_build_state": "AUTHORIZED_PLANNED",
-  "next_build_title": "Mobile, Touch, Keyboard & Dense-Workspace Ergonomics",
-  "promotion_state": "BUILD236_DEVELOPMENT_CANDIDATE_NOT_YET_PRODUCTION",
+  "next_build_title": "Attention, Notifications & Operator Signal Cleanup",
+  "promotion_state": "BUILD237_DEVELOPMENT_CANDIDATE_NOT_YET_PRODUCTION",
   "successor_scope_state": "OWNER_AUTHORIZED_REFINEMENT_IN_PROGRESS",
   "measured_closure": {
     "source_build": 232,
@@ -152,22 +153,22 @@
     "interpretation": "NO_JUSTIFIED_AUTONOMOUS_SOFTWARE_SUCCESSOR"
   },
   "planned_successor": {
-    "first_build": 237,
+    "first_build": 238,
     "last_build": 248,
     "state": "OWNER_AUTHORIZED_REFINEMENT_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 237,
-    "next_build_title": "Mobile, Touch, Keyboard & Dense-Workspace Ergonomics",
+    "next_build": 238,
+    "next_build_title": "Attention, Notifications & Operator Signal Cleanup",
     "reactivation_source": "EXPLICIT_OWNER_NEW_CAPABILITY"
   },
   "canonical_data_migration_authorized": false,
-  "canonical_data_migration_scope": "NONE_BUILD236_CODE_ONLY",
-  "accepted_dev_sha": "b4c9d47752a146da3bfd3b8047ae5cc941c70d55",
-  "accepted_dev_tree_sha": "6bceeefcab82beb5587fc05b053caf61dc587ef4",
+  "canonical_data_migration_scope": "NONE_BUILD237_CODE_ONLY",
+  "accepted_dev_sha": "6385d67a726c82a049569d20537a55a9e727a19a",
+  "accepted_dev_tree_sha": "616274b2701b2b071eb033a785371607aa13b97d",
   "acceptance": {
-    "system_gate_run": 35802372348,
-    "current_application_quality_run": 35802372207,
-    "it_admin_runtime_proof_run": 35802372335,
-    "branch_hygiene_run": 35802372354
+    "system_gate_run": 35857576835,
+    "current_application_quality_run": 35857576801,
+    "it_admin_runtime_proof_run": 35857576924,
+    "branch_hygiene_run": 35857576861
   }
 }
