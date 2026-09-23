@@ -37,6 +37,9 @@ jobs:
           echo "BUILD239_PUSH_RUNS_BEGIN"
           gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=ca2f822ac5811f55abb8385d7e548b61097f24e8&event=push&per_page=100" --jq '.workflow_runs[] | [.id,.name,.status,.conclusion,.head_sha] | @tsv'
           echo "BUILD239_PUSH_RUNS_END"
+          echo "BUILD239_ALL_RUNS_BEGIN"
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=ca2f822ac5811f55abb8385d7e548b61097f24e8&per_page=100" --jq '.workflow_runs[] | [.id,.name,.event,.status,.conclusion,.head_sha] | @tsv'
+          echo "BUILD239_ALL_RUNS_END"
       - uses: actions/setup-node@v4
         with: { node-version: '22' }
       - name: JavaScript syntax
