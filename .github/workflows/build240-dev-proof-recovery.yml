@@ -14,7 +14,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TARGET=904bb8f2e987c254b6ed69b04d8e540a86a09909
+          TARGET=3fb60a9f3be8c40ca415ecd3cdcf7a44bff081d8
           echo "BUILD240_DEV_SHA=$TARGET"
           echo "BUILD240_DEV_RUNS_BEGIN"
           gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=$TARGET&event=push&per_page=100" --jq '.workflow_runs[] | [.id,.name,.status,.conclusion,.head_sha] | @tsv'
