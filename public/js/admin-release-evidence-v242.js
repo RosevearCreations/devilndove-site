@@ -3,15 +3,15 @@
 (() => {
   'use strict';
   const EVIDENCE=Object.freeze({
-    verified:{release:467,build:241,title:'Cross-Authority Handoff Simplification',
-      dev_sha:'82688fbe6a74e235b85b56bc21f82380131bb3bc',tree_sha:'b9d600e5eed18fe6697f42cf1588717437d4f725',
-      system_gate_run:35880685343,current_application_quality_run:35880685733,it_admin_runtime_proof_run:35880685713,
-      branch_hygiene_run:35880685361,dedicated_gate_run:35880685738},
-    production:{main_sha:'87778556ac99c1e82217c4d2d45ead5bf1ef1b88',tree_sha:'b9d600e5eed18fe6697f42cf1588717437d4f725',
-      production_pages_deploy_run:35881116063,production_live_resource_integrity_run:35881253740,
-      products_browser_proof_run:35881253749,products_route_proof_run:35881253783,build_specific_proof_run:35881115558,
+    verified:{release:467,build:242,title:'Release, Diagnostics & Evidence Streamlining',
+      dev_sha:'5977a1aa9674eb378d5aede0b31648a73ac770c6',tree_sha:'3ea103b093c4dcbf1670346dcce0ec6acf214470',
+      system_gate_run:35883357799,current_application_quality_run:35883358653,it_admin_runtime_proof_run:35883357777,
+      branch_hygiene_run:35883357974,dedicated_gate_run:35883357988},
+    production:{main_sha:'ae9ca2b48700f4b48e6eb7e6bb465f0472d5e41f',tree_sha:'3ea103b093c4dcbf1670346dcce0ec6acf214470',
+      production_pages_deploy_run:35883719199,production_live_resource_integrity_run:35883846712,
+      products_browser_proof_run:35883846744,products_route_proof_run:35883846755,build_specific_proof_run:35883719159,
       state:'PRODUCTION_GREEN'},
-    current:{release:467,build:242,title:'Release, Diagnostics & Evidence Streamlining',
+    current:{release:467,build:243,title:'Session Architecture Hardening',
       state:'DEVELOPMENT_CANDIDATE',next_action:'Prove the exact final Development head GREEN before any Production promotion.'}
   });
   const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

@@ -1,0 +1,53 @@
+name: Release 467 Build 243 Session Architecture Hardening
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'public/js/auth.js'
+      - 'auth.js'
+      - 'public/js/bootstrap-admin.js'
+      - 'bootstrap-admin.js'
+      - 'public/js/checkout.js'
+      - 'checkout.js'
+      - 'functions/api/auth/login.js'
+      - 'auth/login.js'
+      - 'functions/api/auth/register.js'
+      - 'auth/register.js'
+      - 'functions/api/auth/bootstrap-admin.js'
+      - 'auth/bootstrap-admin.js'
+      - 'functions/api/auth/me.js'
+      - 'auth/me.js'
+      - 'functions/api/auth/session-info.js'
+      - 'auth/session-info.js'
+      - 'current-development-authority.json'
+      - 'release467-build242-release-diagnostics-evidence-streamlining.json'
+      - 'release467-build243-session-architecture-hardening.json'
+      - 'scripts/release467_build242_gate.py'
+      - 'scripts/release467_build243_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_243_SESSION_ARCHITECTURE_HARDENING.md'
+      - '.github/workflows/release467-build243-session-architecture-hardening.yml'
+  pull_request:
+    branches: [dev, main]
+jobs:
+  build243:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: JavaScript syntax
+        run: |
+          node --check public/js/auth.js
+          node --check auth.js
+          node --check public/js/bootstrap-admin.js
+          node --check public/js/checkout.js
+          node --check functions/api/auth/login.js
+          node --check functions/api/auth/register.js
+          node --check functions/api/auth/bootstrap-admin.js
+          node --check functions/api/auth/me.js
+          node --check functions/api/auth/session-info.js
+      - name: Build 243 contract
+        run: python scripts/release467_build243_gate.py
+      - name: Retain Build 242 contract
+        run: python scripts/release467_build242_gate.py

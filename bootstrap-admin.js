@@ -121,17 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
         bootstrap_token
       });
 
-      const token =
-        String(result?.session_token || "").trim() ||
-        String(result?.token || "").trim() ||
-        String(result?.session?.session_token || "").trim() ||
-        String(result?.session?.token || "").trim();
-
-      if (!token) {
-        throw new Error("Admin was created but no session token was returned.");
-      }
-
-      window.DDAuth.setToken(token);
       window.DDAuth.setStoredUser(result?.user || null);
 
       setMessage("First admin created successfully.");

@@ -16,17 +16,17 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 
 Build 240 **API Read Budget, Cache & Batch Streamlining** is the exact verified predecessor:
 
-- Development SHA: `82688fbe6a74e235b85b56bc21f82380131bb3bc`
-- Shared tree: `b9d600e5eed18fe6697f42cf1588717437d4f725`
-- Development proofs: System `35880685343`, Quality `35880685733`, I.T. `35880685713`, Hygiene `35880685361`
+- Development SHA: `5977a1aa9674eb378d5aede0b31648a73ac770c6`
+- Shared tree: `3ea103b093c4dcbf1670346dcce0ec6acf214470`
+- Development proofs: System `35883357799`, Quality `35883358653`, I.T. `35883357777`, Hygiene `35883357974`
 - Build 240 dedicated proof: `35874693925`
 - Retained Build 176 main-thread proof: `35874694016`
-- Production main: `87778556ac99c1e82217c4d2d45ead5bf1ef1b88`
-- Production proofs: Pages `35881116063`, Live Resources `35881253740`, Product Browser `35881253749`, Product Route `35881253783`
+- Production main: `ae9ca2b48700f4b48e6eb7e6bb465f0472d5e41f`
+- Production proofs: Pages `35883719199`, Live Resources `35883846712`, Product Browser `35883846744`, Product Route `35883846755`
 - Build 240 production gate: `35877289310`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 241 **Cross-Authority Handoff Simplification** is the active owner-authorized refinement candidate. It passes existing identifiers between compatible Admin workspaces, lets destination clients preselect records they already own, and shows same-origin return-to-source links. It does not copy authoritative business records or add a business-write authority.
+Build 241 **Release, Diagnostics & Evidence Streamlining** is the active owner-authorized refinement candidate. It passes existing identifiers between compatible Admin workspaces, lets destination clients preselect records they already own, and shows same-origin return-to-source links. It does not copy authoritative business records or add a business-write authority.
 
 Build 240 is exact-tree Development + Production GREEN. Build 241 remains blocked from Production until its exact Development head is fully GREEN.
 
