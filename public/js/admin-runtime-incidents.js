@@ -48,10 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${labels[key]||String(key||'').replaceAll('_',' ')} — ${Number(count||0)}`;
   }
   function attentionCards(incidents){
-    const rank={critical:0,error:1,warning:2,info:3,none:4};
-    return [...incidents].sort((a,b)=>(rank[a.attention?.level||a.severity]??9)-(rank[b.attention?.level||b.severity]??9)||Number(b.attention?.age_hours||0)-Number(a.attention?.age_hours||0)).slice(0,12).map((row)=>{
+    const signals=window.DDAttentionSignalsV238;
+    const ranked=signals?signals.rank(incidents):[...incidents].sort((a,b)=>Number(b.attention?.age_hours||0)-Number(a.attention?.age_hours||0));
+    return ranked.slice(0,12).map((row)=>{
       const owner=ownerFor(row),age=Number(row.attention?.age_hours||0);
-      return `<article class="card runtime-attention-card"><div class="runtime-attention-head">${pill(row.attention?.level||row.severity)}<strong>${esc(row.message||row.incident_code||'Runtime incident')}</strong></div><div class="small"><strong>What:</strong> ${esc(row.incident_scope||'runtime')} / ${esc(row.incident_code||'unspecified')}</div><div class="small"><strong>Where:</strong> <code>${esc(row.request_method||'')} ${esc(row.endpoint_path||'unknown endpoint')}</code></div><div class="small"><strong>Age:</strong> ${esc(age)} hours • Incident #${esc(row.runtime_incident_id)}</div><div class="runtime-attention-actions"><a class="btn small" href="${esc(owner.href)}">Open ${esc(owner.area)}</a>${row.recovery?.available?`<button class="btn small" type="button" data-safe-recheck="${esc(row.runtime_incident_id)}">Safe recheck</button>`:''}</div></article>`;
+      const priority=signals?signals.statusOf(row):String(row.attention?.level||row.severity||'info').toLowerCase();const quiet=signals?.quiet(row)?'1':'0';return `<article class="card runtime-attention-card dd-signal" data-signal-priority="${esc(priority)}" data-signal-quiet="${quiet}"><div class="runtime-attention-head">${pill(row.attention?.level||row.severity)}<strong>${esc(row.message||row.incident_code||'Runtime incident')}</strong></div><div class="small"><strong>What:</strong> ${esc(row.incident_scope||'runtime')} / ${esc(row.incident_code||'unspecified')}</div><div class="small"><strong>Where:</strong> <code>${esc(row.request_method||'')} ${esc(row.endpoint_path||'unknown endpoint')}</code></div><div class="small dd-signal-meta"><strong>Age:</strong> ${esc(age)} hours • Incident #${esc(row.runtime_incident_id)} • <span class="dd-signal-owner">Owner: ${esc(owner.area)}</span></div><div class="runtime-attention-actions"><a class="btn small" href="${esc(owner.href)}">Open ${esc(owner.area)}</a>${row.recovery?.available?`<button class="btn small" type="button" data-safe-recheck="${esc(row.runtime_incident_id)}">Safe recheck</button>`:''}</div></article>`;
     }).join('');
   }
   function render(data) {

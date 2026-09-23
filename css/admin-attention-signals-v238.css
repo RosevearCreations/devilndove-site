@@ -1,0 +1,9 @@
+/* Release 467 Build 238 — attention signal presentation over existing authorities */
+.dd-signal{transition:opacity .15s ease,border-color .15s ease}
+.dd-signal[data-signal-priority="critical"],.dd-signal[data-signal-priority="error"],.dd-signal[data-signal-priority="failed"]{border-inline-start:4px solid currentColor}
+.dd-signal[data-signal-priority="warning"],.dd-signal[data-signal-priority="warn"]{border-inline-start:3px solid currentColor}
+.dd-signal[data-signal-quiet="1"]{opacity:.58}
+.dd-signal[data-signal-quiet="1"]:hover,.dd-signal[data-signal-quiet="1"]:focus-within{opacity:1}
+.dd-signal-owner{font-weight:700}
+.dd-signal-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dd-signal-section-note{padding:8px 10px;border:1px dashed var(--border);border-radius:10px;opacity:.8}
