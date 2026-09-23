@@ -23,8 +23,10 @@ if int(pointer.get('build') or 0)==238:
  req(authority.get('state')=='DEVELOPMENT_CANDIDATE','Build 238 authority must be Development candidate while current')
 else:
  req(authority.get('state')=='PRODUCTION_GREEN','Retained Build 238 authority must carry Production closure')
- req((authority.get('final_closure') or {}).get('dev_sha')=='26bd3f755bd486e41335431136f6fed36cabde9f','Retained Build 238 Development closure mismatch')
- req((authority.get('production_checkpoint') or {}).get('main_sha')=='44e52cfc905b7864c31c2921ea5e34146a02361a','Retained Build 238 Production closure mismatch')
+ final=authority.get('final_closure') or {}; prod238=authority.get('production_checkpoint') or {}
+ req(final.get('dev_sha')=='26bd3f755bd486e41335431136f6fed36cabde9f' and final.get('tree_sha')=='a29c7d6fe3e7fbfae120000020303dc32ef55419','Retained Build 238 Development closure mismatch')
+ req((final.get('proofs') or {})=={'system_gate_run':35859876994,'current_application_quality_run':35859877349,'it_admin_runtime_proof_run':35859876896,'branch_hygiene_run':35859877139},'Retained Build 238 proof set mismatch')
+ req(prod238.get('main_sha')=='44e52cfc905b7864c31c2921ea5e34146a02361a' and prod238.get('tree_sha')=='a29c7d6fe3e7fbfae120000020303dc32ef55419' and int(prod238.get('production_pages_deploy_run') or 0)==35860073843,'Retained Build 238 Production closure mismatch')
 for key in ('automatic_business_action','new_business_mutation','new_api_authority','d1_business_data_mutation','r2_mutation','provider_execution','provider_publication','product_publication','inventory_movement','finance_posting','schema_change'): req(authority.get('safety',{}).get(key) is False,f'Build 238 safety drift: {key}')
 req(int(pointer.get('build') or 0)>=238 and pointer.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 238 or a verified successor')
 if int(pointer.get('build') or 0)==238: req(pointer.get('accepted_dev_sha')=='06cb191758b204fbbc3912ae533bec6c6fd227ad' and pointer.get('accepted_dev_tree_sha')=='51fc6b9a4c0910f42bbbee9bf7d7a8aa756220b5','Build 238 must ingest exact Build 237 Development closure')
