@@ -98,6 +98,22 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       </div>
 
+      <div class="grid cols-2" style="gap:12px;margin-top:12px">
+        <div class="card">
+          <div class="small">Expiring Within 7 Days</div>
+          <div id="securityExpiringSoonSessions" style="font-size:1.35rem;font-weight:800">—</div>
+        </div>
+        <div class="card">
+          <div class="small">Stale Expired Sessions</div>
+          <div id="securityStaleExpiredSessions" style="font-size:1.35rem;font-weight:800">—</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div class="small">Security Controls</div>
+        <div id="securityControlStatus" class="small" style="margin-top:6px">—</div>
+      </div>
+
       <div class="card" style="margin-top:12px">
         <div class="small">Bootstrap Status</div>
         <div id="securityBootstrapStatus" style="font-size:1.1rem;font-weight:700;margin-top:4px">—</div>
@@ -125,10 +141,10 @@ document.addEventListener("DOMContentLoaded", () => {
       throw new Error(data?.error || "Failed to load security summary.");
     }
 
-    return data.summary || {};
+    return { summary: data.summary || {}, controls: data.security_controls || {} };
   }
 
-  function renderSummary(summary) {
+  function renderSummary(summary, controls = {}) {
     setValue("securityTotalUsers", formatCount(summary.total_users));
     setValue("securityActiveUsers", formatCount(summary.active_users));
     setValue("securityInactiveUsers", formatCount(summary.inactive_users));
@@ -137,6 +153,15 @@ document.addEventListener("DOMContentLoaded", () => {
     setValue("securityTotalSessions", formatCount(summary.total_sessions));
     setValue("securityActiveSessions", formatCount(summary.active_sessions));
     setValue("securityExpiredSessions", formatCount(summary.expired_sessions));
+    setValue("securityExpiringSoonSessions", formatCount(summary.expiring_soon_sessions));
+    setValue("securityStaleExpiredSessions", formatCount(summary.stale_expired_sessions));
+    setValue("securityControlStatus",
+      `Cookie-first sessions: ${controls.session_mode === "http_only_cookie" ? "ON" : "CHECK"} • ` +
+      `Origin guard: ${controls.mutation_origin_guard ? "ON" : "CHECK"} • ` +
+      `Nonce CSP: ${controls.runtime_script_nonce_csp ? "ON" : "CHECK"} • ` +
+      `Login throttle: ${controls.login_throttle?.enabled ? "ON" : "CHECK"} • ` +
+      `Admin cleanup step-up: ${controls.admin_session_cleanup_step_up ? "ON" : "CHECK"}`
+    );
     setValue(
       "securityBootstrapStatus",
       summary.bootstrap_required ? "Bootstrap Still Open" : "Bootstrap Locked"
@@ -159,8 +184,8 @@ document.addEventListener("DOMContentLoaded", () => {
         refreshButton.textContent = "Loading...";
       }
 
-      const summary = await fetchSummary();
-      renderSummary(summary);
+      const result = await fetchSummary();
+      renderSummary(result.summary, result.controls);
       setMessage("Security overview loaded.");
     } catch (error) {
       setMessage(error.message || "Failed to load security overview.", true);
