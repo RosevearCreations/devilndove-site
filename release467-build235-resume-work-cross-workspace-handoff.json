@@ -54,5 +54,25 @@
     "workflow": ".github/workflows/release467-build235-resume-work-cross-workspace-handoff.yml",
     "next_build": 236,
     "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "b2ea3fdc6277751483d95dfc4700a85a7898b6b6",
+      "tree": "a5cbb736ebf496bf1be3fbcce902cd50c6d8b1de",
+      "system_gate_run": 35798441644,
+      "quality_run": 35798441665,
+      "it_admin_runtime_run": 35798441497,
+      "repository_hygiene_run": 35798441629,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "5d7e86d25eb114ddfd2a0ede877a0dcf5a866507",
+      "tree_sha": "a5cbb736ebf496bf1be3fbcce902cd50c6d8b1de",
+      "production_pages_deploy_run": 35798690001,
+      "production_live_resource_integrity_run": 35798742625,
+      "products_browser_proof_run": 35798742655,
+      "products_route_proof_run": 35798742683,
+      "state": "PRODUCTION_GREEN"
+    }
   }
 }
