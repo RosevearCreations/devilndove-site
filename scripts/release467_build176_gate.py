@@ -125,7 +125,12 @@ home_load=home_dashboard.split('async function load',1)[1] if 'async function lo
 req('getJson(TODAY_URL)' not in home_load,'Admin home regained duplicate Today Tasks read')
 req('getJson(IT_URL)' not in home_load,'Admin home regained duplicate I.T. read')
 req('getJson(MANIFEST_URL,{auth:false})' in home_load,'Admin home static navigation manifest read missing')
-req('admin-route-usage.js?v=176' in admin_home and 'admin-home-dashboard-v123.js?v=467b176' in admin_home and 'admin-seller-command-centre-build148.js?v=467b176' in admin_home,'Admin home Build 176 runtime cache identities missing')
+req('admin-route-usage.js?v=176' in admin_home,'Admin home Build 176 route-usage containment identity missing')
+home_dashboard_identity_ok=('admin-home-dashboard-v123.js?v=467b176' in admin_home or 'admin-home-dashboard-v123.js?v=467b240' in admin_home)
+seller_identity_ok=('admin-seller-command-centre-build148.js?v=467b176' in admin_home or 'admin-seller-command-centre-build148.js?v=467b240' in admin_home)
+req(home_dashboard_identity_ok and seller_identity_ok,'Admin home bounded runtime cache identities missing')
+if 'admin-home-dashboard-v123.js?v=467b240' in admin_home or 'admin-seller-command-centre-build148.js?v=467b240' in admin_home:
+    req('admin-read-budget-v240.js?v=467b240-admin-read-budget-v1' in admin_home,'Build 240 cache identities require bounded Admin read-budget bootstrap')
 
 # Today Task suppression state is bounded to six indexed latest-state point reads.
 for token in ("const TASK_KEYS = Object.freeze(['readiness','custom_requests','orders','inventory','accounting','failed_api'])","WHERE task_key=?","ORDER BY created_at DESC, today_task_action_id DESC","LIMIT 1"):
