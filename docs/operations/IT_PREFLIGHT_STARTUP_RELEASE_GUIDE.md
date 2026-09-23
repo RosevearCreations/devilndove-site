@@ -24,7 +24,7 @@ Build 237 **Mobile, Touch, Keyboard & Dense-Workspace Ergonomics** is the exact 
 - Business exit: `OWNER_AUTHORIZED_REFINEMENT_QUEUE_OPEN`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 238 **Attention, Notifications & Operator Signal Cleanup** is the active owner-authorized refinement candidate. Existing Runtime Incidents, Notification Queue and Today Needs Attention remain authoritative; Build 238 only converges ranking, ownership cues and visual priority.
+Build 238 **Admin Surface & Navigation Consolidation** is the active owner-authorized refinement candidate. Existing Runtime Incidents, Notification Queue and Today Needs Attention remain authoritative; Build 238 only converges ranking, ownership cues and visual priority.
 
 Build 237 is exact-tree Production GREEN. Build 238 remains blocked from Production until its exact Development head is fully GREEN.
 
