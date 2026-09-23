@@ -20,7 +20,7 @@
     correction: 'Open the specialist workspace, correct the source record, then retest this stage.'
   }));
 
-  const state = { data: null, selected: 0, search: '', local: readLocal() };
+  const state = { payload: null, selected: 0, search: '', local: readLocal() };
   const id = (name) => document.getElementById(name);
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (ch) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -205,20 +205,20 @@
   function render() {
     const host = id('creativeAutomationMount');
     if (!host) return;
-    if (!state.data) {
+    if (!state.payload) {
       host.innerHTML = fallback('The master workflow has not loaded.');
       bind();
       return;
     }
-    if (!state.selected && state.data.projects?.length) state.selected = Number(state.data.detail?.project?.creative_work_project_id || state.data.projects[0].creative_work_project_id);
-    host.innerHTML = `${stats(state.data)}${workQueue(state.data)}<div class="creative-automation-layout">${projectList(state.data)}<div class="creative-automation-main">${detail(state.data)}</div></div>`;
+    if (!state.selected && state.payload.projects?.length) state.selected = Number(state.payload.detail?.project?.creative_work_project_id || state.payload.projects[0].creative_work_project_id);
+    host.innerHTML = `${stats(state.payload)}${workQueue(state.payload)}<div class="creative-automation-layout">${projectList(state.payload)}<div class="creative-automation-main">${detail(state.payload)}</div></div>`;
     bind();
   }
 
   async function post(payload, localOnFailure = true) {
     try {
       const data = await api({ ...payload, project_id: state.selected });
-      state.data = data;
+      state.payload = data;
       state.local = state.local.filter((item) => !(item.project_id === state.selected && item.action === payload.action && item.stage_key === payload.stage_key));
       writeLocal();
       render();
@@ -274,7 +274,7 @@
       } else {
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${state.data?.detail?.project?.project_key || 'creative-project'}-evidence-packet.json`;
+        link.download = `${state.payload?.detail?.project?.project_key || 'creative-project'}-evidence-packet.json`;
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -302,7 +302,7 @@
         return;
       }
       const data = await api({ action: 'delete_project', project_id: state.selected, confirmation: typed }, state.selected);
-      state.data = data;
+      state.payload = data;
       state.selected = Number(data.detail?.project?.creative_work_project_id || data.projects?.[0]?.creative_work_project_id || 0);
       render();
       message(data.message, 'success');
@@ -337,7 +337,7 @@
     message('Loading the master creative workflow…');
     try {
       const data = await api(null, projectId);
-      state.data = data;
+      state.payload = data;
       state.selected = Number(data.detail?.project?.creative_work_project_id || projectId || data.projects?.[0]?.creative_work_project_id || 0);
       render();
       if (state.local.length) message(`${state.local.length} browser-only change${state.local.length === 1 ? ' is' : 's are'} waiting to synchronize.`, 'warning');
@@ -355,7 +355,7 @@
         }
       }
     } catch (error) {
-      state.data = null;
+      state.payload = null;
       id('creativeAutomationMount').innerHTML = fallback(error.message);
       bind();
       message(error.message, 'warning');
