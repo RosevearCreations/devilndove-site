@@ -1,0 +1,56 @@
+name: Release 467 Build 244 CSRF Origin Protection Mutating Routes
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/_lib/csrfOriginProtection.js'
+      - 'functions/_middleware.js'
+      - 'current-development-authority.json'
+      - 'release467-build243-session-architecture-hardening.json'
+      - 'release467-build244-csrf-origin-protection-mutating-routes.json'
+      - 'scripts/release467_build243_gate.py'
+      - 'scripts/release467_build244_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'public/js/admin-release-evidence-v242.js'
+      - 'admin/it/index.html'
+      - 'admin/deployment-preflight/index.html'
+      - 'admin/reliability/index.html'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+      - 'docs/operations/RELEASE_467_BUILD_244_CSRF_ORIGIN_PROTECTION_MUTATING_ROUTES.md'
+      - '.github/workflows/release467-build244-csrf-origin-protection-mutating-routes.yml'
+  pull_request:
+    branches: [dev, main]
+jobs:
+  build244:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: JavaScript syntax
+        run: |
+          node --check functions/api/_lib/csrfOriginProtection.js
+          node --check functions/_middleware.js
+      - name: Mutation origin behavior
+        run: |
+          node --input-type=module <<'NODE'
+          import { evaluateMutationOrigin } from './functions/api/_lib/csrfOriginProtection.js';
+          const req=(method,headers={})=>new Request('https://devilndove.com/api/admin/example',{method,headers});
+          const same=evaluateMutationOrigin(req('POST',{Origin:'https://devilndove.com'}));
+          const cross=evaluateMutationOrigin(req('POST',{Origin:'https://evil.example'}));
+          const referer=evaluateMutationOrigin(req('PATCH',{Referer:'https://devilndove.com/admin/'}));
+          const fetchCross=evaluateMutationOrigin(req('DELETE',{'Sec-Fetch-Site':'cross-site'}));
+          const bearer=evaluateMutationOrigin(req('POST',{Authorization:'Bearer automation-token',Origin:'https://evil.example'}));
+          const headerless=evaluateMutationOrigin(req('PUT'));
+          const webhook=evaluateMutationOrigin(new Request('https://devilndove.com/api/stripe-webhook',{method:'POST',headers:{Origin:'https://stripe.example'}}));
+          if(!same.allowed || cross.allowed || !referer.allowed || fetchCross.allowed || !bearer.allowed || !headerless.allowed || !webhook.allowed) process.exit(1);
+          console.log('Build 244 mutation-origin behavior PASS');
+          NODE
+      - name: Build 244 contract
+        run: python scripts/release467_build244_gate.py
+      - name: Retain Build 243 contract
+        run: python scripts/release467_build243_gate.py
