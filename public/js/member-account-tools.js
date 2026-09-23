@@ -61,6 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
           <div><strong>Current Session Expires:</strong> <span id="memberToolsSessionExpires">—</span></div>
           <div><strong>Total Sessions:</strong> <span id="memberToolsTotalSessions">—</span></div>
           <div><strong>Active Sessions:</strong> <span id="memberToolsActiveSessions">—</span></div>
+          <div><strong>Other Active Sessions:</strong> <span id="memberToolsOtherActiveSessions">—</span></div>
+          <div><strong>Expiring Within 7 Days:</strong> <span id="memberToolsExpiringSoon">—</span></div>
+          <div><strong>Expired Sessions:</strong> <span id="memberToolsExpiredSessions">—</span></div>
         </div>
 
         <div class="small" style="margin-top:12px">Need help? <a href="/account-help/index.html?mode=password">Forgot password</a> • <a href="/account-help/index.html?mode=email">Forgot email</a></div>
@@ -70,6 +73,9 @@ document.addEventListener("DOMContentLoaded", () => {
             Refresh Session Info
           </button>
 
+          <button class="btn secondary" type="button" id="memberRevokeOtherSessionsButton">
+            Revoke Other Sessions
+          </button>
           <button class="btn" type="button" id="memberLogoutAllButton">
             Logout All Sessions
           </button>
@@ -79,10 +85,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const refreshButton = document.getElementById("refreshMemberSessionInfoButton");
     const logoutAllButton = document.getElementById("memberLogoutAllButton");
+    const revokeOtherButton = document.getElementById("memberRevokeOtherSessionsButton");
 
     if (refreshButton) {
       refreshButton.addEventListener("click", async () => {
         await loadSessionInfo();
+      });
+    }
+
+    if (revokeOtherButton) {
+      revokeOtherButton.addEventListener("click", async () => {
+        const originalText = revokeOtherButton.textContent || "Revoke Other Sessions";
+        try {
+          setMessage("Revoking other sessions...");
+          revokeOtherButton.disabled = true;
+          revokeOtherButton.textContent = "Revoking...";
+          const response = await window.DDAuth.apiFetch("/api/auth/revoke-other-sessions", { method: "POST" });
+          const data = await window.DDAuth.readApiJson(response, { fallbackMessage: "Failed to revoke other sessions." });
+          setMessage(`Other sessions revoked: ${Number(data?.revoked_sessions || 0)}. This session remains signed in.`);
+          await loadSessionInfo();
+        } catch (error) {
+          setMessage(error.message || "Failed to revoke other sessions.", true);
+        } finally {
+          revokeOtherButton.disabled = false;
+          revokeOtherButton.textContent = originalText;
+        }
       });
     }
 
@@ -122,10 +149,10 @@ document.addEventListener("DOMContentLoaded", () => {
       sessionSummary ? String(sessionSummary.total_sessions ?? "—") : "—"
     );
 
-    setText(
-      "memberToolsActiveSessions",
-      sessionSummary ? String(sessionSummary.active_sessions ?? "—") : "—"
-    );
+    setText("memberToolsActiveSessions", sessionSummary ? String(sessionSummary.active_sessions ?? "—") : "—");
+    setText("memberToolsOtherActiveSessions", sessionSummary ? String(sessionSummary.other_active_sessions ?? "—") : "—");
+    setText("memberToolsExpiringSoon", sessionSummary ? String(sessionSummary.expiring_soon_sessions ?? "—") : "—");
+    setText("memberToolsExpiredSessions", sessionSummary ? String(sessionSummary.expired_sessions ?? "—") : "—");
   }
 
   async function loadSessionInfo() {
