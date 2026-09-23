@@ -46,5 +46,25 @@
     "workflow": ".github/workflows/release467-build239-admin-surface-navigation-consolidation.yml",
     "next_build": 240,
     "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "26bd3f755bd486e41335431136f6fed36cabde9f",
+      "tree": "a29c7d6fe3e7fbfae120000020303dc32ef55419",
+      "system_gate_run": 35859876994,
+      "quality_run": 35859877349,
+      "it_admin_runtime_run": 35859876896,
+      "repository_hygiene_run": 35859877139,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "44e52cfc905b7864c31c2921ea5e34146a02361a",
+      "tree_sha": "a29c7d6fe3e7fbfae120000020303dc32ef55419",
+      "production_pages_deploy_run": 35860073843,
+      "production_live_resource_integrity_run": 35860150517,
+      "products_browser_proof_run": 35860150674,
+      "products_route_proof_run": 35860150585,
+      "state": "PRODUCTION_GREEN"
+    }
   }
 }
