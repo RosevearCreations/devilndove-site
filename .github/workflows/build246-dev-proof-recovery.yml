@@ -1,0 +1,23 @@
+name: Build 246 Dev Proof Recovery
+permissions:
+  contents: read
+  actions: read
+on:
+  pull_request:
+    branches: [dev]
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover exact Build 246 dev push proofs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TARGET=cfd9af8777699b8d7902eef0585693b2152e60c8
+          echo "BUILD246_DEV_SHA=$TARGET"
+          git fetch --no-tags origin "$TARGET"
+          echo "BUILD246_DEV_TREE=$(git rev-parse "$TARGET^{tree}")"
+          echo "BUILD246_DEV_RUNS_BEGIN"
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=$TARGET&event=push&per_page=100" --jq '.workflow_runs[] | [.id,.name,.status,.conclusion,.head_sha] | @tsv'
+          echo "BUILD246_DEV_RUNS_END"
