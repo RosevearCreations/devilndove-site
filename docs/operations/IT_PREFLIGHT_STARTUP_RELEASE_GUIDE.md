@@ -16,11 +16,11 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 
 Build 237 **Mobile, Touch, Keyboard & Dense-Workspace Ergonomics** is the exact verified predecessor:
 
-- Development SHA: `06cb191758b204fbbc3912ae533bec6c6fd227ad`
-- Shared tree: `51fc6b9a4c0910f42bbbee9bf7d7a8aa756220b5`
-- Development proofs: System `35858747170`, Quality `35858747245`, I.T. `35858747280`, Hygiene `35858746503`
-- Production main: `53c0d8e4ed7cb9ea1691198e25a51f556a2ce0b3`
-- Production proofs: Pages `35858981317`, Live Resources `35859107887`, Product Browser `35859108079`, Product Route `35859107986`
+- Development SHA: `26bd3f755bd486e41335431136f6fed36cabde9f`
+- Shared tree: `a29c7d6fe3e7fbfae120000020303dc32ef55419`
+- Development proofs: System `35859876994`, Quality `35859877349`, I.T. `35859876896`, Hygiene `35859877139`
+- Production main: `44e52cfc905b7864c31c2921ea5e34146a02361a`
+- Production proofs: Pages `35860073843`, Live Resources `35860150517`, Product Browser `35860150674`, Product Route `35860150585`
 - Business exit: `OWNER_AUTHORIZED_REFINEMENT_QUEUE_OPEN`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
