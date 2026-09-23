@@ -26,9 +26,13 @@ if int(p.get('build') or 0)==242:
     q(p.get('next_build')==243,'Build 242 successor pointer mismatch')
 else:
     q((a.get('final_closure') or {}).get('dev_sha')=='5977a1aa9674eb378d5aede0b31648a73ac770c6','Build 243+ must retain exact Build 242 Development closure')
-for token in ('DDReleaseEvidenceV242','Verified evidence — immutable','Current action','82688fbe6a74e235b85b56bc21f82380131bb3bc','b9d600e5eed18fe6697f42cf1588717437d4f725','87778556ac99c1e82217c4d2d45ead5bf1ef1b88','35880685343','35881116063'):
-    q(token in js,f'Build 242 shared evidence client missing {token}')
-q("ADMIN_RELEASE_EVIDENCE_REVISION = '467b242-release-evidence-streamlining-v1'" in mw and 'admin-release-evidence-v242.js' in mw,'Build 242 shared bootstrap missing')
+if int(p.get('build') or 0)==242:
+    for token in ('DDReleaseEvidenceV242','Verified evidence — immutable','Current action','82688fbe6a74e235b85b56bc21f82380131bb3bc','b9d600e5eed18fe6697f42cf1588717437d4f725','87778556ac99c1e82217c4d2d45ead5bf1ef1b88','35880685343','35881116063'):
+        q(token in js,f'Build 242 shared evidence client missing {token}')
+    q("ADMIN_RELEASE_EVIDENCE_REVISION = '467b242-release-evidence-streamlining-v1'" in mw and 'admin-release-evidence-v242.js' in mw,'Build 242 shared bootstrap missing')
+else:
+    q((a.get('final_closure') or {}).get('dev_sha')=='5977a1aa9674eb378d5aede0b31648a73ac770c6','Build 243+ must preserve exact Build 242 closure while shared evidence advances')
+    q('admin-release-evidence-v242.js' in mw,'Build 243+ must retain shared release evidence bootstrap')
 for name,src in [('I.T.',it),('Deployment Preflight',pre),('Reliability',rel)]:
     q('data-dd-release-evidence-v242' in src,f'{name} must use shared Build 242 evidence mount')
 q('Build 243 — Session Architecture Hardening' in road,'Build 243 successor missing')
