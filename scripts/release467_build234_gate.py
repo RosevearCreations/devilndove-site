@@ -30,10 +30,11 @@ pred=a.get('predecessor') or {}
 req(pred.get('development_sha')=='c9882fef84e23f7416a7042f52ec8b5ea151287f' and pred.get('development_tree_sha')=='6eef4a4edf79d5ce367b052823bede7d9a665465','Build 234 Development predecessor drifted')
 req(pred.get('production_main_sha')=='8de67c8e5a0e9fe745264a387f749c0cd8a4c6ad' and pred.get('production_tree_sha')=='6eef4a4edf79d5ce367b052823bede7d9a665465','Build 234 Production predecessor drifted')
 req(prev.get('state')=='PRODUCTION_GREEN','Build 233 must be finalized Production GREEN')
-req(int(p.get('build') or 0)==234 and p.get('title')=='Workflow Help, Empty States & Recovery Guidance','current pointer must identify Build 234')
-req(p.get('accepted_dev_sha')=='c9882fef84e23f7416a7042f52ec8b5ea151287f' and p.get('accepted_dev_tree_sha')=='6eef4a4edf79d5ce367b052823bede7d9a665465','Build 234 pointer must retain exact Build 233 Development checkpoint')
-req((p.get('restart_integrity') or {}).get('last_fully_verified',{}).get('build')==233,'Build 234 must retain Build 233 as last fully verified predecessor')
-req((p.get('planned_successor') or {}).get('next_build')==235 and (p.get('planned_successor') or {}).get('future_queue_exhausted') is False,'Build 235 must remain next and queue open')
+pb=int(p.get('build') or 0); last=(p.get('restart_integrity') or {}).get('last_fully_verified',{})
+req((pb==234 and p.get('title')=='Workflow Help, Empty States & Recovery Guidance') or (pb>=235 and 'release467-build234-workflow-help-empty-state-recovery.json' in (p.get('current_release_authorities') or [])),'Build 234 must remain represented in the current successor chain')
+req((pb==234 and p.get('accepted_dev_sha')=='c9882fef84e23f7416a7042f52ec8b5ea151287f' and p.get('accepted_dev_tree_sha')=='6eef4a4edf79d5ce367b052823bede7d9a665465') or (pb>=235 and int(last.get('build') or 0)>=234),'Build 234 predecessor/closure checkpoint must remain represented')
+req((pb==234 and int(last.get('build') or 0)==233) or (pb>=235 and int(last.get('build') or 0)>=234),'Build 234 verified successor provenance missing')
+req(((pb==234 and (p.get('planned_successor') or {}).get('next_build')==235) or pb>=235) and (p.get('planned_successor') or {}).get('future_queue_exhausted') is False,'Build 235+ successor queue must remain open')
 
 for token in ('DD_WORKFLOW_HELP_PROFILES','workflowHelpProfile(path)','Start —','Work —','Review —','Finish —','Empty / first use','Broken / recovery','Why can’t I do this?','ensureActionRecoveryHelp(path, ordinal)'):
     req(token in h,f'workflow help missing {token}')

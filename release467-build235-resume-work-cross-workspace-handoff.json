@@ -1,0 +1,78 @@
+{
+  "release": 467,
+  "build": 235,
+  "title": "Resume Work & Cross-Workspace Handoff",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build235-resume-work-cross-workspace-handoff",
+  "predecessor": {
+    "build": 234,
+    "title": "Workflow Help, Empty States & Recovery Guidance",
+    "development_sha": "b2ea3fdc6277751483d95dfc4700a85a7898b6b6",
+    "development_tree_sha": "a5cbb736ebf496bf1be3fbcce902cd50c6d8b1de",
+    "system_gate_run": 35798441644,
+    "current_application_quality_run": 35798441665,
+    "it_admin_runtime_proof_run": 35798441497,
+    "branch_hygiene_run": 35798441629,
+    "production_main_sha": "5d7e86d25eb114ddfd2a0ede877a0dcf5a866507",
+    "production_tree_sha": "a5cbb736ebf496bf1be3fbcce902cd50c6d8b1de",
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "resume_continue_work": true,
+    "converge_recent_work": true,
+    "converge_favorites": true,
+    "converge_today_needs_attention": true,
+    "existing_universal_search": true,
+    "navigation_manifest_authority": "data/admin-navigation-modules.json",
+    "context_preserving_handoff": true,
+    "direct_next_step_links": true,
+    "read_only_navigation_layer": true
+  },
+  "implementation": {
+    "client": "public/js/admin-resume-work-v235.js",
+    "shared_bootstrap": "functions/_middleware.js",
+    "today_attention_route": "/admin/today-tasks/",
+    "universal_search_owner": "public/js/admin-universal-search-v161.js",
+    "workspace_memory_owner": "public/js/admin-workspace-preferences-v125.js",
+    "favorites_owner": "public/js/admin-favorites-quick-launch-v126.js"
+  },
+  "safety": {
+    "automatic_business_action": false,
+    "product_mutation": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "automatic_product_publication": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build235_gate.py",
+    "workflow": ".github/workflows/release467-build235-resume-work-cross-workspace-handoff.yml",
+    "next_build": 236,
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "b2ea3fdc6277751483d95dfc4700a85a7898b6b6",
+      "tree": "a5cbb736ebf496bf1be3fbcce902cd50c6d8b1de",
+      "system_gate_run": 35798441644,
+      "quality_run": 35798441665,
+      "it_admin_runtime_run": 35798441497,
+      "repository_hygiene_run": 35798441629,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "5d7e86d25eb114ddfd2a0ede877a0dcf5a866507",
+      "tree_sha": "a5cbb736ebf496bf1be3fbcce902cd50c6d8b1de",
+      "production_pages_deploy_run": 35798690001,
+      "production_live_resource_integrity_run": 35798742625,
+      "products_browser_proof_run": 35798742655,
+      "products_route_proof_run": 35798742683,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}
