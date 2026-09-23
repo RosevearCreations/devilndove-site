@@ -8,11 +8,18 @@
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 238,
-      "title": "Attention, Notifications & Operator Signal Cleanup",
-      "authority": "release467-build238-attention-notifications-operator-signal-cleanup.json",
-      "dev_sha": "26bd3f755bd486e41335431136f6fed36cabde9f",
-      "proof_state": "EXACT_DEV_HEAD_PREDECESSOR",
+      "build": 237,
+      "title": "Mobile, Touch, Keyboard & Dense-Workspace Ergonomics",
+      "authority": "release467-build237-mobile-touch-keyboard-dense-workspace-ergonomics.json",
+      "dev_sha": "06cb191758b204fbbc3912ae533bec6c6fd227ad",
+      "tree_sha": "51fc6b9a4c0910f42bbbee9bf7d7a8aa756220b5",
+      "proofs": {
+        "system_gate_run": 35858747170,
+        "current_application_quality_run": 35858747245,
+        "it_admin_runtime_proof_run": 35858747280,
+        "branch_hygiene_run": 35858746503
+      },
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "business_exit": "OWNER_AUTHORIZED_REFINEMENT_QUEUE_OPEN"
     },
     "current_closure_candidate": {
@@ -30,10 +37,15 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 238,
-    "title": "Attention, Notifications & Operator Signal Cleanup",
-    "authority": "release467-build238-attention-notifications-operator-signal-cleanup.json",
-    "main_sha": "44e52cfc905b7864c31c2921ea5e34146a02361a",
+    "build": 237,
+    "title": "Mobile, Touch, Keyboard & Dense-Workspace Ergonomics",
+    "authority": "release467-build237-mobile-touch-keyboard-dense-workspace-ergonomics.json",
+    "main_sha": "53c0d8e4ed7cb9ea1691198e25a51f556a2ce0b3",
+    "tree_sha": "51fc6b9a4c0910f42bbbee9bf7d7a8aa756220b5",
+    "production_pages_deploy_run": 35858981317,
+    "production_live_resource_integrity_run": 35859107887,
+    "products_browser_proof_run": 35859108079,
+    "products_route_proof_run": 35859107986,
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
@@ -154,6 +166,11 @@
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_BUILD239_CODE_ONLY",
   "accepted_dev_sha": "26bd3f755bd486e41335431136f6fed36cabde9f",
-  "accepted_dev_tree_sha": null,
-  "acceptance": {}
+  "accepted_dev_tree_sha": "51fc6b9a4c0910f42bbbee9bf7d7a8aa756220b5",
+  "acceptance": {
+    "system_gate_run": 35858747170,
+    "current_application_quality_run": 35858747245,
+    "it_admin_runtime_proof_run": 35858747280,
+    "branch_hygiene_run": 35858746503
+  }
 }
