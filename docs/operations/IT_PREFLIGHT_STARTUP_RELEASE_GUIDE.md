@@ -12,9 +12,9 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 238 candidate
+## Current Release 467 restart authority — Build 239 candidate
 
-Build 237 **Mobile, Touch, Keyboard & Dense-Workspace Ergonomics** is the exact verified predecessor:
+Build 238 **Attention, Notifications & Operator Signal Cleanup** is the exact verified predecessor:
 
 - Development SHA: `26bd3f755bd486e41335431136f6fed36cabde9f`
 - Shared tree: `a29c7d6fe3e7fbfae120000020303dc32ef55419`
@@ -24,9 +24,9 @@ Build 237 **Mobile, Touch, Keyboard & Dense-Workspace Ergonomics** is the exact 
 - Business exit: `OWNER_AUTHORIZED_REFINEMENT_QUEUE_OPEN`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 238 **Admin Surface & Navigation Consolidation** is the active owner-authorized refinement candidate. Existing Runtime Incidents, Notification Queue and Today Needs Attention remain authoritative; Build 238 only converges ranking, ownership cues and visual priority.
+Build 239 **Admin Surface & Navigation Consolidation** is the active owner-authorized refinement candidate. Existing Runtime Incidents, Notification Queue and Today Needs Attention remain authoritative; Build 238 only converges ranking, ownership cues and visual priority.
 
-Build 237 is exact-tree Production GREEN. Build 238 remains blocked from Production until its exact Development head is fully GREEN.
+Build 238 is exact-tree Production GREEN. Build 239 remains blocked from Production until its exact Development head is fully GREEN.
 
 ## Retained historical provenance — Build 171
 
