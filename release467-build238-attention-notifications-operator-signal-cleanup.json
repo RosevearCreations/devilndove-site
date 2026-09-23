@@ -2,7 +2,7 @@
   "release": 467,
   "build": 238,
   "title": "Attention, Notifications & Operator Signal Cleanup",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build238-attention-notifications-operator-signal-cleanup",
   "predecessor": {
     "build": 237,
@@ -80,5 +80,13 @@
       "products_route_proof_run": 35859107986,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "26bd3f755bd486e41335431136f6fed36cabde9f",
+    "proof_state": "EXACT_DEV_HEAD_ACCEPTED_FOR_BUILD239_PREDECESSOR"
+  },
+  "production_checkpoint": {
+    "main_sha": "44e52cfc905b7864c31c2921ea5e34146a02361a",
+    "state": "PRODUCTION_GREEN"
   }
 }
