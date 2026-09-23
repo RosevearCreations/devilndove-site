@@ -40,8 +40,9 @@ q("script-src 'self' https://static.cloudflareinsights.com" in headers,'Report-o
 onreq=mw[mw.index('export async function onRequest(context)'):]
 q('const mutationOriginDenied = protectMutationOrigin(request);' in onreq,'Build 244 mutation guard must execute in onRequest')
 q(onreq.index('const mutationOriginDenied = protectMutationOrigin(request);') < onreq.index('if (shouldBypass(pathname))'),'Mutation guard must precede bypass routing')
-q('Release 467 • Build 245' in relpage,'Reliability page identity must match Build 245')
-q('CURRENT_RELIABILITY_BUILD=245' in rel,'Reliability API identity must match Build 245')
+rel_build=re.search(r'CURRENT_RELIABILITY_BUILD\s*=\s*(\d+)',rel)
+page_build=re.search(r'Release 467 • Build (\d+)',relpage)
+q(rel_build and page_build and int(rel_build.group(1))==int(page_build.group(1)) and int(rel_build.group(1))>=245,'Reliability page/API identity must retain Build 245 or a verified successor')
 q('Build 246 — Abuse Resistance, Session Control & Security Operations' in road,'Build 246 successor missing')
 q("run_current_contract('scripts/release467_build245_gate.py','Release 467 Build 245')" in sysgate,'System Gate must invoke Build 245')
 for k in ('schema_change','request_time_schema_mutation','d1_business_data_mutation','r2_mutation','provider_execution','provider_publication','product_publication','inventory_movement','finance_posting','automatic_business_action','csp_style_breaking_change','legacy_inline_event_breaking_change'):
