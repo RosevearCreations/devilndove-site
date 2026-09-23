@@ -33,7 +33,7 @@ const ADMIN_ERGONOMICS_REVISION = '467b237-ergonomics-v1';
 const ADMIN_ATTENTION_SIGNALS_REVISION = '467b238-attention-signals-v1';
 const ADMIN_SURFACE_CONSOLIDATION_REVISION = '467b239-admin-surface-consolidation-v1';
 const ADMIN_HANDOFF_REVISION = '467b241-cross-authority-handoff-v1';
-const ADMIN_RELEASE_EVIDENCE_REVISION = '467b244-release-evidence-baseline-v3';
+const ADMIN_RELEASE_EVIDENCE_REVISION = '467b245-release-evidence-baseline-v4';
 const STOREFRONT_DISCOVERY_REVISION = '467b198-product-image-fidelity';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
