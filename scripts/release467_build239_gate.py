@@ -19,7 +19,16 @@ q('/admin/visual-polish/' in hrefs and owners.get('/admin/visual-polish/')==['st
 for token in ('DDAdminSurfaceConsolidationV239','dedupeExactLinks','canonicalOwners','data-dd-canonical-owner-v239','dd:admin-surface-consolidation-ready'):q(token in client,f'Build 239 client missing {token}')
 q('location.replace(' not in client and 'location.href=' not in client,'Build 239 must preserve deep links without forced redirects')
 q("ADMIN_SURFACE_CONSOLIDATION_REVISION = '467b239-admin-surface-consolidation-v1'" in mw and 'admin-surface-consolidation-v239.js' in mw,'Build 239 shared bootstrap missing')
-q(a.get('build')==239 and a.get('state')=='DEVELOPMENT_CANDIDATE','Build 239 authority identity/state mismatch')
+q(a.get('build')==239,'Build 239 authority identity mismatch')
+if int(p.get('build') or 0)==239:
+ q(a.get('state')=='DEVELOPMENT_CANDIDATE','Current Build 239 authority must remain Development candidate')
+else:
+ q(a.get('state')=='PRODUCTION_GREEN','Retained Build 239 authority must carry Production closure')
+ final=a.get('final_closure') or {}; prod=a.get('production_checkpoint') or {}
+ q(final.get('dev_sha')=='f3594106fd74956e0aae524df7f75e53c84b9916' and final.get('tree_sha')=='3a4b02a5fcebb70475ea12698486fbea3775675a','Retained Build 239 Development closure mismatch')
+ q((final.get('proofs') or {})=={'system_gate_run':35862488377,'current_application_quality_run':35862487494,'it_admin_runtime_proof_run':35862488308,'branch_hygiene_run':35862488113},'Retained Build 239 proof set mismatch')
+ q(prod.get('main_sha')=='ca2f822ac5811f55abb8385d7e548b61097f24e8' and prod.get('tree_sha')=='3a4b02a5fcebb70475ea12698486fbea3775675a','Retained Build 239 Production tree mismatch')
+ q(int(prod.get('production_pages_deploy_run') or 0)==35862809663 and int(prod.get('production_live_resource_integrity_run') or 0)==35862907582,'Retained Build 239 Production proof mismatch')
 q(int(p.get('build') or 0)>=239 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 239 or a verified successor')
 if int(p.get('build') or 0)==239:
  q(p.get('next_build')==240,'Build 239 successor pointer mismatch')
