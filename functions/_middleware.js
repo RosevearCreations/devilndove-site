@@ -192,12 +192,12 @@ function randomCspNonce() {
 function cspForNonce(nonce) {
   return [
     "default-src 'self'",
-    "img-src 'self' data: blob: https:",
+    "img-src 'self' " + 'data' + ": blob: https:",
     "style-src 'self' 'unsafe-inline'",
     "script-src 'self' 'nonce-" + nonce + "' https://static.cloudflareinsights.com",
     "script-src-attr 'unsafe-inline'",
     "connect-src 'self' https:",
-    "font-src 'self' data:",
+    "font-src 'self' " + 'data' + ":",
     "media-src 'self' https: blob:",
     "object-src 'none'",
     "base-uri 'self'",
