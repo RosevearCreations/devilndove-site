@@ -1,0 +1,82 @@
+{
+  "release": 467,
+  "build": 245,
+  "title": "CSP & Browser Injection-Surface Hardening",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build245-csp-browser-injection-hardening",
+  "predecessor": {
+    "build": 244,
+    "title": "CSRF / Origin Protection for Mutating Routes",
+    "development_sha": "1d8111e948db0d3ee176f86a8a74e12dcdbec4e3",
+    "development_tree_sha": "bddcec6079d5f906a39fd938cd47a61b594d434a",
+    "production_main_sha": "f65d13c3b9d686d5e88168dcee84f25f580b6323",
+    "production_tree_sha": "bddcec6079d5f906a39fd938cd47a61b594d434a",
+    "development_proofs": {
+      "system_gate_run": 35925164067,
+      "current_application_quality_run": 35925164397,
+      "it_admin_runtime_proof_run": 35925164225,
+      "branch_hygiene_run": 35925164408,
+      "dedicated_gate_run": 35925164235
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 35925424234,
+      "production_live_resource_integrity_run": 35925501698,
+      "products_browser_proof_run": 35925501669,
+      "products_route_proof_run": 35925501788,
+      "build_specific_proof_run": 35925424216
+    },
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "runtime_script_nonce": true,
+    "script_src_unsafe_inline_removed": true,
+    "script_src_attr_legacy_compatibility": true,
+    "style_unsafe_inline_retained_for_incremental_migration": true,
+    "static_report_only_policy": true,
+    "all_script_elements_nonce_stamped": true,
+    "dynamic_html_inventory_preserved": true,
+    "build244_origin_guard_entrypoint_corrected": true
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "csp_style_breaking_change": false,
+    "legacy_inline_event_breaking_change": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build245_gate.py",
+    "workflow": ".github/workflows/release467-build245-csp-browser-injection-hardening.yml",
+    "next_build": 246,
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "1d8111e948db0d3ee176f86a8a74e12dcdbec4e3",
+      "tree": "bddcec6079d5f906a39fd938cd47a61b594d434a",
+      "system_gate_run": 35925164067,
+      "quality_run": 35925164397,
+      "it_admin_runtime_run": 35925164225,
+      "repository_hygiene_run": 35925164408,
+      "dedicated_gate_run": 35925164235,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "f65d13c3b9d686d5e88168dcee84f25f580b6323",
+      "tree_sha": "bddcec6079d5f906a39fd938cd47a61b594d434a",
+      "production_pages_deploy_run": 35925424234,
+      "production_live_resource_integrity_run": 35925501698,
+      "products_browser_proof_run": 35925501669,
+      "products_route_proof_run": 35925501788,
+      "build_specific_proof_run": 35925424216,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}
