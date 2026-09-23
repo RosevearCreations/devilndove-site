@@ -2,7 +2,7 @@
   "release": 467,
   "build": 241,
   "title": "Cross-Authority Handoff Simplification",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build241-cross-authority-handoff-simplification",
   "predecessor": {
     "build": 240,
@@ -98,5 +98,30 @@
       "build_specific_proof_run": 35877289310,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "82688fbe6a74e235b85b56bc21f82380131bb3bc",
+    "tree_sha": "b9d600e5eed18fe6697f42cf1588717437d4f725",
+    "proofs": {
+      "system_gate_run": 35880685343,
+      "current_application_quality_run": 35880685733,
+      "it_admin_runtime_proof_run": 35880685713,
+      "branch_hygiene_run": 35880685361
+    },
+    "dedicated_gate_run": 35880685738,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 242,
+    "recorded_by": "Build 242 restart ingestion; not self-recorded by Build 241"
+  },
+  "production_checkpoint": {
+    "main_sha": "87778556ac99c1e82217c4d2d45ead5bf1ef1b88",
+    "tree_sha": "b9d600e5eed18fe6697f42cf1588717437d4f725",
+    "production_pages_deploy_run": 35881116063,
+    "production_live_resource_integrity_run": 35881253740,
+    "products_browser_proof_run": 35881253749,
+    "products_route_proof_run": 35881253783,
+    "build_specific_proof_run": 35881115558,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
