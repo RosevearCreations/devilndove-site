@@ -29,3 +29,6 @@ jobs:
           echo "BUILD240_PROD_RUNS_BEGIN"
           gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=$PROD&event=push&per_page=100" --jq '.workflow_runs[] | [.id,.name,.status,.conclusion,.head_sha] | @tsv'
           echo "BUILD240_PROD_RUNS_END"
+          echo "BUILD240_PROD_ALL_RUNS_BEGIN"
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=$PROD&per_page=100" --jq '.workflow_runs[] | [.id,.name,.event,.status,.conclusion,.head_sha] | @tsv'
+          echo "BUILD240_PROD_ALL_RUNS_END"
