@@ -1,16 +1,16 @@
-// Release 467 Build 240 — current read-only API/read-budget refinement over exact Build 239 GREEN predecessor.
+// Release 467 Build 241 — current read-only API/read-budget refinement over exact Build 240 GREEN predecessor.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=240;
-export const CURRENT_RELIABILITY_TITLE='API Read Budget, Cache & Batch Streamlining';
+export const CURRENT_RELIABILITY_BUILD=241;
+export const CURRENT_RELIABILITY_TITLE='Cross-Authority Handoff Simplification';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
 export const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:239,title:'Admin Surface & Navigation Consolidation',
-  dev_sha:'f3594106fd74956e0aae524df7f75e53c84b9916',tree_sha:'3a4b02a5fcebb70475ea12698486fbea3775675a',
-  system_gate_run:35862488377,current_application_quality_run:35862487494,it_admin_runtime_proof_run:35862488308,
-  branch_hygiene_run:35862488113,exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
+  release:467,build:240,title:'API Read Budget, Cache & Batch Streamlining',
+  dev_sha:'3fb60a9f3be8c40ca415ecd3cdcf7a44bff081d8',tree_sha:'6388a8259bdf4902e220fed5e1dd9f21766c2357',
+  system_gate_run:35874693973,current_application_quality_run:35874693732,it_admin_runtime_proof_run:35874693995,
+  branch_hygiene_run:35874694168,exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({
   release:467,build:238,title:'Attention, Notifications & Operator Signal Cleanup',state:'DEVELOPMENT_GREEN',
@@ -19,10 +19,10 @@ export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({
   branch_hygiene_run:35859877139,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN'
 });
 export const CURRENT_PRODUCTION=Object.freeze({
-  release:467,build:239,title:'Admin Surface & Navigation Consolidation',state:'PRODUCTION_GREEN',
-  main_sha:'ca2f822ac5811f55abb8385d7e548b61097f24e8',tree_sha:'3a4b02a5fcebb70475ea12698486fbea3775675a',
-  production_pages_deploy_run:35862809663,production_live_resource_integrity_run:35862907582,
-  products_browser_proof_run:35862907503,products_route_proof_run:35862907598,remote_d1_queries:0
+  release:467,build:240,title:'API Read Budget, Cache & Batch Streamlining',state:'PRODUCTION_GREEN',
+  main_sha:'a9efe9826c6ad7e400fa174f7cd6a8e6d980c452',tree_sha:'6388a8259bdf4902e220fed5e1dd9f21766c2357',
+  production_pages_deploy_run:35877290030,production_live_resource_integrity_run:35877494906,
+  products_browser_proof_run:35877494864,products_route_proof_run:35877494771,remote_d1_queries:0
 });
 export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -41,7 +41,7 @@ export async function loadCurrentReliability(db,env={}){
     governance:{...inherited.governance,current_release_authority:'current-development-authority.json',production_promotion_proof_count:4,production_closure_proof_count:6,rollback_readiness:'release-neutral-read-only',restart_integrity_protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1'},
     recovery:inherited.recovery,drift:inherited.drift,
     provenance:{
-      current_surface_release:467,current_surface_build:240,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
+      current_surface_release:467,current_surface_build:241,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
       historical_feature_authority:'release467-build36-current-reliability-operational-health.json',current_operator_authority:'current-development-authority.json',
       accepted_development:ACCEPTED_DEVELOPMENT,last_fully_verified_development:LAST_FULLY_VERIFIED_DEVELOPMENT,current_production:CURRENT_PRODUCTION,
       production_proof_transport_policy:PRODUCTION_PROOF_TRANSPORT_POLICY,implementation_acceptance_is_distinct_from_final_closure:true,
