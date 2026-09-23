@@ -4,6 +4,7 @@
   'use strict';
   const BUILD=235;
   const MANIFEST_URL='/data/admin-navigation-modules.json';
+  const TODAY_TASKS_ROUTE='/admin/today-tasks/';
   if (!String(window.location.pathname||'').startsWith('/admin/')) return;
   const clean=(v,f='')=>String(v??'').trim()||f;
   const esc=(v)=>String(v??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -51,7 +52,7 @@
   function render(){
     if(!dialog)return;
     const {recent,favorites}=sources();
-    const today=manifestPaths.get('/admin/today-tasks');
+    const today=manifestPaths.get(normalize(TODAY_TASKS_ROUTE));
     dialog.innerHTML=`<section class="dd-b235-panel" role="dialog" aria-modal="true" aria-labelledby="ddB235Title">
       <div class="dd-b235-head"><div><p class="eyebrow">Release 467 Build 235</p><h2 id="ddB235Title">Resume / Continue work</h2><p class="small">Pick up where we left off, jump to a favourite, review Today Needs Attention, or open the existing universal search. Links only—nothing here executes a business action.</p></div><button class="dd-b235-close" type="button" aria-label="Close resume work">×</button></div>
       <div class="dd-b235-grid">

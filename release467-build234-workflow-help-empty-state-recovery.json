@@ -2,7 +2,7 @@
   "release": 467,
   "build": 234,
   "title": "Workflow Help, Empty States & Recovery Guidance",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build234-workflow-help-empty-state-recovery",
   "predecessor": {
     "build": 233,
@@ -135,5 +135,26 @@
     "first_build": 235,
     "last_build": 248,
     "exhausted": false
+  },
+  "final_closure": {
+    "dev_sha": "b2ea3fdc6277751483d95dfc4700a85a7898b6b6",
+    "tree_sha": "a5cbb736ebf496bf1be3fbcce902cd50c6d8b1de",
+    "proofs": {
+      "system_gate_run": 35798441644,
+      "current_application_quality_run": 35798441665,
+      "it_admin_runtime_proof_run": 35798441497,
+      "branch_hygiene_run": 35798441629
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 235
+  },
+  "production_checkpoint": {
+    "main_sha": "5d7e86d25eb114ddfd2a0ede877a0dcf5a866507",
+    "tree_sha": "a5cbb736ebf496bf1be3fbcce902cd50c6d8b1de",
+    "production_pages_deploy_run": 35798690001,
+    "production_live_resource_integrity_run": 35798742625,
+    "products_browser_proof_run": 35798742655,
+    "products_route_proof_run": 35798742683,
+    "state": "PRODUCTION_GREEN"
   }
 }
