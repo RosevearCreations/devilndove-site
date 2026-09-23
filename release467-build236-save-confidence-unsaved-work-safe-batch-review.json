@@ -2,7 +2,7 @@
   "release": 467,
   "build": 236,
   "title": "Save Confidence, Unsaved-Work Protection & Safe Batch Review",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build236-save-confidence-unsaved-work-safe-batch-review",
   "predecessor": {
     "build": 235,
@@ -83,5 +83,27 @@
       "products_route_proof_run": 35802559194,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "6385d67a726c82a049569d20537a55a9e727a19a",
+    "tree_sha": "616274b2701b2b071eb033a785371607aa13b97d",
+    "proofs": {
+      "system_gate_run": 35857576835,
+      "current_application_quality_run": 35857576801,
+      "it_admin_runtime_proof_run": 35857576924,
+      "branch_hygiene_run": 35857576861
+    },
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 237
+  },
+  "production_checkpoint": {
+    "main_sha": "07a1b3b115dbff380e6645837a610879c4f8eda7",
+    "tree_sha": "616274b2701b2b071eb033a785371607aa13b97d",
+    "production_pages_deploy_run": 35857748748,
+    "production_live_resource_integrity_run": 35857829165,
+    "products_browser_proof_run": 35857829164,
+    "products_route_proof_run": 35857829198,
+    "build_specific_proof_run": 35857748808,
+    "state": "PRODUCTION_GREEN"
   }
 }
