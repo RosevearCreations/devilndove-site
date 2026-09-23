@@ -1,0 +1,29 @@
+name: Release 467 Build 236 Save Confidence Unsaved-Work Safe Batch Review
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'public/js/admin-save-confidence-v236.js'
+      - 'functions/_middleware.js'
+      - 'release467-build236-save-confidence-unsaved-work-safe-batch-review.json'
+      - 'current-development-authority.json'
+      - 'scripts/release467_build235_gate.py'
+      - 'scripts/release467_build236_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'docs/operations/RELEASE_467_BUILD_236_SAVE_CONFIDENCE_UNSAVED_WORK_SAFE_BATCH_REVIEW.md'
+      - '.github/workflows/release467-build236-save-confidence-unsaved-work-safe-batch-review.yml'
+  pull_request:
+    branches: [dev, main]
+jobs:
+  build236:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: JavaScript syntax
+        run: node --check public/js/admin-save-confidence-v236.js
+      - name: Build 236 contract
+        run: python scripts/release467_build236_gate.py
+      - name: Retain Build 235 contract
+        run: python scripts/release467_build235_gate.py
