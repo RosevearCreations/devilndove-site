@@ -17,11 +17,18 @@ relpage=t('admin/reliability/index.html')
 road=t('docs/operations/RELEASE_467_REFINEMENT_AUTONOMOUS_BUILDS_233_248.md')
 sysgate=t('scripts/current_system_gate_provenance_gate.py')
 
-q(a.get('build')==245 and a.get('state')=='DEVELOPMENT_CANDIDATE','Build 245 authority identity/state mismatch')
+q(a.get('build')==245 and a.get('state') in ('DEVELOPMENT_CANDIDATE','PRODUCTION_GREEN'),'Build 245 authority identity/state mismatch')
+if a.get('state')=='PRODUCTION_GREEN':
+    q((a.get('final_closure') or {}).get('dev_sha')=='b4eeed8895a8a04247b68a626c9018caadd8c9ad','Build 245 successor closure must retain exact final dev SHA')
+    q((a.get('production_checkpoint') or {}).get('main_sha')=='2312b35c5d527721219c48985325eeba8f3ecd3f','Build 245 successor closure must retain exact Production main')
 q(prev.get('state')=='PRODUCTION_GREEN','Build 244 predecessor must be Production GREEN')
 q((prev.get('final_closure') or {}).get('dev_sha')=='1d8111e948db0d3ee176f86a8a74e12dcdbec4e3','Build 244 final Development closure missing')
 q((prev.get('production_checkpoint') or {}).get('main_sha')=='f65d13c3b9d686d5e88168dcee84f25f580b6323','Build 244 Production closure missing')
-q(p.get('build')==245 and p.get('next_build')==246 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must expose Build 245 candidate and Build 246 successor')
+q(int(p.get('build') or 0)>=245 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 245 or a verified successor')
+if int(p.get('build') or 0)==245:
+    q(p.get('next_build')==246,'Build 245 successor pointer mismatch')
+else:
+    q((a.get('final_closure') or {}).get('dev_sha')=='b4eeed8895a8a04247b68a626c9018caadd8c9ad','Build 246+ must retain exact Build 245 Development closure')
 
 for token in ('function randomCspNonce()','crypto.getRandomValues(bytes)','function cspForNonce(nonce)',"script-src 'self' 'nonce-", "script-src-attr 'unsafe-inline'",'X-DND-CSP-Revision',".on('script', { element(element) { element.setAttribute('nonce', nonce); } })"):
     q(token in mw,f'Build 245 middleware missing {token}')
