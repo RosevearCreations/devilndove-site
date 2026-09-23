@@ -1,0 +1,50 @@
+{
+  "release": 467,
+  "build": 239,
+  "title": "Admin Surface & Navigation Consolidation",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build239-admin-surface-navigation-consolidation",
+  "predecessor": {
+    "build": 238,
+    "title": "Attention, Notifications & Operator Signal Cleanup",
+    "development_sha": "26bd3f755bd486e41335431136f6fed36cabde9f",
+    "production_main_sha": "44e52cfc905b7864c31c2921ea5e34146a02361a",
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "canonical_business_authorities_preserved": true,
+    "duplicate_navigation_entries_removed": true,
+    "redundant_exact_controls_collapsed": true,
+    "deep_links_preserved": true,
+    "route_compatibility_preserved": true,
+    "automatic_redirects": false
+  },
+  "implementation": {
+    "navigation_manifest": "data/admin-navigation-modules.json",
+    "shared_client": "public/js/admin-surface-consolidation-v239.js",
+    "shared_bootstrap": "functions/_middleware.js",
+    "canonical_owner_routes": [
+      "/admin/local-seo-review/",
+      "/admin/visual-polish/"
+    ]
+  },
+  "safety": {
+    "automatic_business_action": false,
+    "new_api_authority": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "schema_change": false,
+    "request_time_schema_mutation": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build239_gate.py",
+    "workflow": ".github/workflows/release467-build239-admin-surface-navigation-consolidation.yml",
+    "next_build": 240,
+    "future_queue_exhausted": false
+  }
+}
