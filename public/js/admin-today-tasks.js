@@ -59,14 +59,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const details = Array.isArray(task?.details) && task.details.length
       ? `<details class="small" style="margin-top:8px"><summary>Details</summary>${task.details.map((row) => `<div class="status-note warning" style="margin-top:6px"><strong>${esc(row.incident_code || row.incident_scope || 'incident')}</strong><br>${esc(row.message || '')}<br>${esc(row.request_path || '')} · ${esc(row.created_at || '')}</div>`).join('')}</details>`
       : '';
-    return `<article class="card" style="margin-top:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h3 style="margin:0">${esc(task.label || task.key || 'Task')}</h3><div class="small">${esc(categoryLabel(task.category))} · ${esc(task.count || 0)} item(s) · ${esc(module.label)} workspace</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn secondary" href="${esc(module.href)}">${esc(module.label)}</a><a class="btn" href="${esc(task.href || '/admin/')}">Open work</a></div></div>${details}<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" type="button" data-today-action="completed" data-task-key="${esc(task.key || '')}" data-task-label="${esc(task.label || '')}">Done</button><button class="btn secondary" type="button" data-today-action="ignored" data-task-key="${esc(task.key || '')}" data-task-label="${esc(task.label || '')}">Ignore</button><button class="btn secondary" type="button" data-today-action="snoozed" data-task-key="${esc(task.key || '')}" data-task-label="${esc(task.label || '')}">Snooze 24h</button></div></article>`;
+    const signals=window.DDAttentionSignalsV238;const priority=signals?signals.statusOf({...task,status:task.category==='health'?'warning':'pending'}):'pending';return `<article class="card dd-signal" data-signal-priority="${esc(priority)}" style="margin-top:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h3 style="margin:0">${esc(task.label || task.key || 'Task')}</h3><div class="small dd-signal-meta">${esc(categoryLabel(task.category))} · ${esc(task.count || 0)} item(s) · <span class="dd-signal-owner">${esc(module.label)} workspace</span></div>${task.category==='health'?'<div class="small dd-signal-section-note">Incident evidence and resolution remain owned by Runtime Incidents; this card is only a route into that authority.</div>':''}</div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn secondary" href="${esc(module.href)}">${esc(module.label)}</a><a class="btn" href="${esc(task.href || '/admin/')}">Open work</a></div></div>${details}<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn" type="button" data-today-action="completed" data-task-key="${esc(task.key || '')}" data-task-label="${esc(task.label || '')}">Done</button><button class="btn secondary" type="button" data-today-action="ignored" data-task-key="${esc(task.key || '')}" data-task-label="${esc(task.label || '')}">Ignore</button><button class="btn secondary" type="button" data-today-action="snoozed" data-task-key="${esc(task.key || '')}" data-task-label="${esc(task.label || '')}">Snooze 24h</button></div></article>`;
   }
 
   function renderDedicated(data) {
     lastPayload = data;
     const allTasks = Array.isArray(data?.tasks) ? data.tasks : [];
     const categories = Array.isArray(data?.categories) ? data.categories : [];
-    const tasks = activeCategory ? allTasks.filter((task) => task.category === activeCategory) : allTasks;
+    const filtered = activeCategory ? allTasks.filter((task) => task.category === activeCategory) : allTasks;
+    const signals=window.DDAttentionSignalsV238; const tasks=signals?signals.rank(filtered.map((task)=>({...task,status:task.category==='health'?'warning':'pending',owner:moduleFor(task).label}))):filtered;
     const filters = [''].concat(categories).map((category) => `<button class="btn ${activeCategory === category ? 'primary' : 'secondary'}" type="button" data-task-category="${esc(category)}">${category ? esc(categoryLabel(category)) : 'All'}</button>`).join(' ');
 
     mount.setAttribute('aria-busy', 'false');
@@ -82,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderCompatibility(data, category, min) {
     lastPayload = data;
-    const tasks = Array.isArray(data?.tasks) ? data.tasks : [];
+    const rawTasks = Array.isArray(data?.tasks) ? data.tasks : []; const signals=window.DDAttentionSignalsV238; const tasks=signals?signals.rank(rawTasks.map((task)=>({...task,status:task.category==='health'?'warning':'pending',owner:moduleFor(task).label}))):rawTasks;
     const categories = Array.isArray(data?.categories) ? data.categories : [];
     const activeModules = Array.from(new Set(tasks.map((task) => moduleFor(task).label)));
     const taskRows = tasks.map((task) => {

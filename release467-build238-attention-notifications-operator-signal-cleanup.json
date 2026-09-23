@@ -1,0 +1,84 @@
+{
+  "release": 467,
+  "build": 238,
+  "title": "Attention, Notifications & Operator Signal Cleanup",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build238-attention-notifications-operator-signal-cleanup",
+  "predecessor": {
+    "build": 237,
+    "title": "Mobile, Touch, Keyboard & Dense-Workspace Ergonomics",
+    "development_sha": "06cb191758b204fbbc3912ae533bec6c6fd227ad",
+    "development_tree_sha": "51fc6b9a4c0910f42bbbee9bf7d7a8aa756220b5",
+    "system_gate_run": 35858747170,
+    "current_application_quality_run": 35858747245,
+    "it_admin_runtime_proof_run": 35858747280,
+    "branch_hygiene_run": 35858746503,
+    "dedicated_gate_run": 35858747392,
+    "production_main_sha": "53c0d8e4ed7cb9ea1691198e25a51f556a2ce0b3",
+    "production_tree_sha": "51fc6b9a4c0910f42bbbee9bf7d7a8aa756220b5",
+    "production_pages_deploy_run": 35858981317,
+    "production_live_resource_integrity_run": 35859107887,
+    "products_browser_proof_run": 35859108079,
+    "products_route_proof_run": 35859107986,
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "existing_notification_authority": true,
+    "existing_runtime_incident_authority": true,
+    "existing_today_attention_view": true,
+    "severity_age_owner_ranking": true,
+    "stale_informational_quieting": true,
+    "audit_history_preserved": true,
+    "explicit_resolution_preserved": true,
+    "no_parallel_inbox": true
+  },
+  "implementation": {
+    "shared_client": "public/js/admin-attention-signals-v238.js",
+    "shared_style": "css/admin-attention-signals-v238.css",
+    "notification_renderer": "public/js/admin-notifications.js",
+    "runtime_incident_renderer": "public/js/admin-runtime-incidents.js",
+    "today_tasks_renderer": "public/js/admin-today-tasks.js",
+    "shared_bootstrap": "functions/_middleware.js",
+    "business_mutation_execution": "NONE_NEW"
+  },
+  "safety": {
+    "automatic_business_action": false,
+    "new_business_mutation": false,
+    "new_api_authority": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "schema_change": false,
+    "request_time_schema_mutation": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build238_gate.py",
+    "workflow": ".github/workflows/release467-build238-attention-notifications-operator-signal-cleanup.yml",
+    "next_build": 239,
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "06cb191758b204fbbc3912ae533bec6c6fd227ad",
+      "tree": "51fc6b9a4c0910f42bbbee9bf7d7a8aa756220b5",
+      "system_gate_run": 35858747170,
+      "quality_run": 35858747245,
+      "it_admin_runtime_run": 35858747280,
+      "repository_hygiene_run": 35858746503,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "53c0d8e4ed7cb9ea1691198e25a51f556a2ce0b3",
+      "tree_sha": "51fc6b9a4c0910f42bbbee9bf7d7a8aa756220b5",
+      "production_pages_deploy_run": 35858981317,
+      "production_live_resource_integrity_run": 35859107887,
+      "products_browser_proof_run": 35859108079,
+      "products_route_proof_run": 35859107986,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}

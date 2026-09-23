@@ -12,21 +12,21 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 237 candidate
+## Current Release 467 restart authority — Build 238 candidate
 
-Build 236 **Save Confidence, Unsaved-Work Protection & Safe Batch Review** is the exact verified predecessor:
+Build 237 **Mobile, Touch, Keyboard & Dense-Workspace Ergonomics** is the exact verified predecessor:
 
-- Development SHA: `6385d67a726c82a049569d20537a55a9e727a19a`
-- Shared tree: `616274b2701b2b071eb033a785371607aa13b97d`
-- Development proofs: System `35857576835`, Quality `35857576801`, I.T. `35857576924`, Hygiene `35857576861`
-- Production main: `07a1b3b115dbff380e6645837a610879c4f8eda7`
-- Production proofs: Pages `35857748748`, Live Resources `35857829165`, Product Browser `35857829164`, Product Route `35857829198`
+- Development SHA: `06cb191758b204fbbc3912ae533bec6c6fd227ad`
+- Shared tree: `51fc6b9a4c0910f42bbbee9bf7d7a8aa756220b5`
+- Development proofs: System `35858747170`, Quality `35858747245`, I.T. `35858747280`, Hygiene `35858746503`
+- Production main: `53c0d8e4ed7cb9ea1691198e25a51f556a2ce0b3`
+- Production proofs: Pages `35858981317`, Live Resources `35859107887`, Product Browser `35859108079`, Product Route `35859107986`
 - Business exit: `OWNER_AUTHORIZED_REFINEMENT_QUEUE_OPEN`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 237 **Mobile, Touch, Keyboard & Dense-Workspace Ergonomics** is the active owner-authorized refinement candidate. It is presentation-only: sticky local actions, touch/focus improvements, narrow table/card presentation switching, and overflow/keyboard refinements.
+Build 238 **Attention, Notifications & Operator Signal Cleanup** is the active owner-authorized refinement candidate. Existing Runtime Incidents, Notification Queue and Today Needs Attention remain authoritative; Build 238 only converges ranking, ownership cues and visual priority.
 
-Build 236 is exact-tree Production GREEN. Build 237 remains blocked from Production until its exact Development head is fully GREEN.
+Build 237 is exact-tree Production GREEN. Build 238 remains blocked from Production until its exact Development head is fully GREEN.
 
 ## Retained historical provenance — Build 171
 
