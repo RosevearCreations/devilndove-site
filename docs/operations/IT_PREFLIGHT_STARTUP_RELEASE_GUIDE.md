@@ -12,21 +12,21 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 235 candidate
+## Current Release 467 restart authority — Build 236 candidate
 
-Build 234 **Workflow Help, Empty States & Recovery Guidance** is the exact verified predecessor:
+Build 235 **Save Confidence, Unsaved-Work Protection & Safe Batch Review** is the exact verified predecessor:
 
-- Development SHA: `b2ea3fdc6277751483d95dfc4700a85a7898b6b6`
-- Shared tree: `a5cbb736ebf496bf1be3fbcce902cd50c6d8b1de`
-- Development proofs: System `35798441644`, Quality `35798441665`, I.T. `35798441497`, Hygiene `35798441629`
-- Production main: `5d7e86d25eb114ddfd2a0ede877a0dcf5a866507`
-- Production proofs: Pages `35798690001`, Live Resources `35798742625`, Product Browser `35798742655`, Product Route `35798742683`
+- Development SHA: `b4c9d47752a146da3bfd3b8047ae5cc941c70d55`
+- Shared tree: `6bceeefcab82beb5587fc05b053caf61dc587ef4`
+- Development proofs: System `35802372348`, Quality `35802372207`, I.T. `35802372335`, Hygiene `35802372354`
+- Production main: `b2fbbcc86d1e3c4925bee7e09287ed32519d7f34`
+- Production proofs: Pages `35802505626`, Live Resources `35802559175`, Product Browser `35802559138`, Product Route `35802559194`
 - Business exit: `OWNER_AUTHORIZED_REFINEMENT_QUEUE_OPEN`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 235 **Resume Work & Cross-Workspace Handoff** is the active owner-authorized refinement candidate. It converges existing recent work, favourites, Today Needs Attention and universal search through the canonical navigation manifest. It performs no automatic business action or business-data/provider mutation.
+Build 235 **Save Confidence, Unsaved-Work Protection & Safe Batch Review** is the active owner-authorized refinement candidate. It converges existing recent work, favourites, Today Needs Attention and universal search through the canonical navigation manifest. It performs no automatic business action or business-data/provider mutation.
 
-Build 234 is exact-tree Production GREEN. Build 235 remains blocked from Production until its exact Development head is fully GREEN.
+Build 235 is exact-tree Production GREEN. Build 236 remains blocked from Production until its exact Development head is fully GREEN.
 
 ## Retained historical provenance — Build 171
 

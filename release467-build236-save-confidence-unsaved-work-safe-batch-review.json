@@ -1,0 +1,87 @@
+{
+  "release": 467,
+  "build": 236,
+  "title": "Save Confidence, Unsaved-Work Protection & Safe Batch Review",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build236-save-confidence-unsaved-work-safe-batch-review",
+  "predecessor": {
+    "build": 235,
+    "title": "Resume Work & Cross-Workspace Handoff",
+    "development_sha": "b4c9d47752a146da3bfd3b8047ae5cc941c70d55",
+    "development_tree_sha": "6bceeefcab82beb5587fc05b053caf61dc587ef4",
+    "system_gate_run": 35802372348,
+    "current_application_quality_run": 35802372207,
+    "it_admin_runtime_proof_run": 35802372335,
+    "branch_hygiene_run": 35802372354,
+    "dedicated_gate_run": 35802372285,
+    "production_main_sha": "b2fbbcc86d1e3c4925bee7e09287ed32519d7f34",
+    "production_tree_sha": "6bceeefcab82beb5587fc05b053caf61dc587ef4",
+    "production_pages_deploy_run": 35802505626,
+    "production_live_resource_integrity_run": 35802559175,
+    "products_browser_proof_run": 35802559138,
+    "products_route_proof_run": 35802559194,
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "consistent_save_status_language": true,
+    "unsaved_change_warning": true,
+    "manual_retry_recovery_affordance": true,
+    "safe_batch_review": true,
+    "batch_review_requires_explicit_opt_in": true,
+    "existing_api_authority_only": true,
+    "admin_shared_runtime": true
+  },
+  "implementation": {
+    "client": "public/js/admin-save-confidence-v236.js",
+    "shared_bootstrap": "functions/_middleware.js",
+    "save_states": [
+      "Saved",
+      "Unsaved changes",
+      "Saving…",
+      "Save failed",
+      "Stale data"
+    ],
+    "batch_contract": "data-dd-safe-batch-review=1 + checkbox[data-item-id]",
+    "business_mutation_execution": "NONE"
+  },
+  "safety": {
+    "automatic_business_action": false,
+    "automatic_retry": false,
+    "automatic_batch_mutation": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "schema_change": false,
+    "request_time_schema_mutation": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build236_gate.py",
+    "workflow": ".github/workflows/release467-build236-save-confidence-unsaved-work-safe-batch-review.yml",
+    "next_build": 237,
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "b4c9d47752a146da3bfd3b8047ae5cc941c70d55",
+      "tree": "6bceeefcab82beb5587fc05b053caf61dc587ef4",
+      "system_gate_run": 35802372348,
+      "quality_run": 35802372207,
+      "it_admin_runtime_run": 35802372335,
+      "repository_hygiene_run": 35802372354,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "b2fbbcc86d1e3c4925bee7e09287ed32519d7f34",
+      "tree_sha": "6bceeefcab82beb5587fc05b053caf61dc587ef4",
+      "production_pages_deploy_run": 35802505626,
+      "production_live_resource_integrity_run": 35802559175,
+      "products_browser_proof_run": 35802559138,
+      "products_route_proof_run": 35802559194,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}
