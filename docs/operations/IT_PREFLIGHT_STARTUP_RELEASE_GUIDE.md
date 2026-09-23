@@ -16,13 +16,13 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 
 Build 240 **API Read Budget, Cache & Batch Streamlining** is the exact verified predecessor:
 
-- Development SHA: `1d8111e948db0d3ee176f86a8a74e12dcdbec4e3`
-- Shared tree: `bddcec6079d5f906a39fd938cd47a61b594d434a`
-- Development proofs: System `35925164067`, Quality `35925164397`, I.T. `35925164225`, Hygiene `35925164408`
+- Development SHA: `b4eeed8895a8a04247b68a626c9018caadd8c9ad`
+- Shared tree: `8ac58d89c62750e7d266ad849a3ac23fdcabf7e9`
+- Development proofs: System `35928075029`, Quality `35928074148`, I.T. `35928075128`, Hygiene `35928075568`
 - Build 240 dedicated proof: `35874693925`
 - Retained Build 176 main-thread proof: `35874694016`
-- Production main: `f65d13c3b9d686d5e88168dcee84f25f580b6323`
-- Production proofs: Pages `35925424234`, Live Resources `35925501698`, Product Browser `35925501669`, Product Route `35925501788`
+- Production main: `2312b35c5d527721219c48985325eeba8f3ecd3f`
+- Production proofs: Pages `35928404982`, Live Resources `35928530977`, Product Browser `35928530972`, Product Route `35928530951`
 - Build 240 production gate: `35877289310`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 

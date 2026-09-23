@@ -2,7 +2,7 @@
   "release": 467,
   "build": 245,
   "title": "CSP & Browser Injection-Surface Hardening",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build245-csp-browser-injection-hardening",
   "predecessor": {
     "build": 244,
@@ -78,5 +78,30 @@
       "build_specific_proof_run": 35925424216,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "b4eeed8895a8a04247b68a626c9018caadd8c9ad",
+    "tree_sha": "8ac58d89c62750e7d266ad849a3ac23fdcabf7e9",
+    "proofs": {
+      "system_gate_run": 35928075029,
+      "current_application_quality_run": 35928074148,
+      "it_admin_runtime_proof_run": 35928075128,
+      "branch_hygiene_run": 35928075568
+    },
+    "dedicated_gate_run": 35928075043,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 246,
+    "recorded_by": "Build 246 restart ingestion; not self-recorded by Build 245"
+  },
+  "production_checkpoint": {
+    "main_sha": "2312b35c5d527721219c48985325eeba8f3ecd3f",
+    "tree_sha": "8ac58d89c62750e7d266ad849a3ac23fdcabf7e9",
+    "production_pages_deploy_run": 35928404982,
+    "production_live_resource_integrity_run": 35928530977,
+    "products_browser_proof_run": 35928530972,
+    "products_route_proof_run": 35928530951,
+    "build_specific_proof_run": 35928405141,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }

@@ -1,3 +1,6 @@
+import { auditAdminAction } from "../_lib/adminAudit.js";
+import { requireAdminStepUp } from "../_lib/adminStepUp.js";
+import { resolveSessionUser } from "../_lib/accountAuthCompat.js";
 // File: /functions/api/admin/cleanup-sessions.js
 
 function json(data, status = 200) {
@@ -13,54 +16,17 @@ function normalizeText(value) {
   return String(value || "").trim();
 }
 
-function getBearerToken(request) {
-  const authHeader = request.headers.get("Authorization") || "";
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? String(match[1] || "").trim() : "";
-}
-
 async function getAdminUserFromRequest(request, env) {
-  const token = getBearerToken(request);
-
-  if (!token) {
-    return null;
-  }
-
-  const session = await env.DB.prepare(`
-    SELECT
-      s.session_id,
-      s.user_id,
-      s.session_token,
-      s.token,
-      s.expires_at,
-      u.user_id AS resolved_user_id,
-      u.email,
-      u.display_name,
-      u.role,
-      u.is_active
-    FROM sessions s
-    INNER JOIN users u
-      ON u.user_id = s.user_id
-    WHERE (
-      s.session_token = ?
-      OR s.token = ?
-    )
-      AND s.expires_at > datetime('now')
-    LIMIT 1
-  `)
-    .bind(token, token)
-    .first();
-
-  if (!session) return null;
-  if (Number(session.is_active || 0) !== 1) return null;
-  if (String(session.role || "").toLowerCase() !== "admin") return null;
-
+  const db = env.DB || env.DD_DB;
+  if (!db) return null;
+  const user = await resolveSessionUser(request, db, { requireAdmin: true });
+  if (!user) return null;
   return {
-    session_id: Number(session.session_id || 0),
-    user_id: Number(session.resolved_user_id || session.user_id || 0),
-    email: session.email || "",
-    display_name: session.display_name || "",
-    role: session.role || "admin"
+    session_id: Number(user.session_id || 0),
+    user_id: Number(user.user_id || user.session_user_id || 0),
+    email: user.email || "",
+    display_name: user.display_name || "",
+    role: user.role || "admin"
   };
 }
 
@@ -87,6 +53,9 @@ export async function onRequestPost(context) {
   if (!["expired_only", "user_all_sessions", "all_expired_and_user"].includes(mode)) {
     return json({ ok: false, error: "Invalid cleanup mode." }, 400);
   }
+
+  const stepUp = await requireAdminStepUp(request, env, adminUser, body, "session cleanup");
+  if (!stepUp.ok) return stepUp.response;
 
   let expired_deleted = 0;
   let user_deleted = 0;
@@ -171,6 +140,22 @@ export async function onRequestPost(context) {
       user_deleted = userSessionIds.length;
     }
   }
+
+  await auditAdminAction(env, request, adminUser, {
+    action_type: "session_cleanup",
+    target_type: "sessions",
+    target_id: target_user_id || null,
+    target_key: mode,
+    details: {
+      mode,
+      expired_deleted,
+      user_deleted,
+      total_deleted: expired_deleted + user_deleted,
+      preserve_current_session,
+      step_up_verified: true,
+      secret_values_emitted: false
+    }
+  });
 
   return json({
     ok: true,

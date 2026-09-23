@@ -1,0 +1,111 @@
+{
+  "release": 467,
+  "build": 246,
+  "title": "Abuse Resistance, Session Control & Security Operations",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build246-abuse-session-security-operations",
+  "predecessor": {
+    "build": 245,
+    "title": "CSP & Browser Injection-Surface Hardening",
+    "development_sha": "b4eeed8895a8a04247b68a626c9018caadd8c9ad",
+    "development_tree_sha": "8ac58d89c62750e7d266ad849a3ac23fdcabf7e9",
+    "production_main_sha": "2312b35c5d527721219c48985325eeba8f3ecd3f",
+    "production_tree_sha": "8ac58d89c62750e7d266ad849a3ac23fdcabf7e9",
+    "development_proofs": {
+      "system_gate_run": 35928075029,
+      "current_application_quality_run": 35928074148,
+      "it_admin_runtime_proof_run": 35928075128,
+      "branch_hygiene_run": 35928075568,
+      "dedicated_gate_run": 35928075043
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 35928404982,
+      "production_live_resource_integrity_run": 35928530977,
+      "products_browser_proof_run": 35928530972,
+      "products_route_proof_run": 35928530951,
+      "build_specific_proof_run": 35928405141
+    },
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "login_throttle": {
+      "limit": 8,
+      "window_minutes": 15,
+      "store": "ephemeral_cloudflare_cache"
+    },
+    "password_change_throttle": {
+      "limit": 6,
+      "window_minutes": 15,
+      "store": "ephemeral_cloudflare_cache"
+    },
+    "account_recovery_throttle": {
+      "contact_email_per_hour": 3,
+      "ip_per_hour": 6,
+      "existing_d1_authority_preserved": true
+    },
+    "member_revoke_other_sessions": true,
+    "current_session_preserved": true,
+    "session_summary_active_expired_expiring_stale": true,
+    "admin_session_cleanup_step_up": true,
+    "admin_session_cleanup_audited": true,
+    "admin_security_summary_cookie_compatible": true,
+    "security_summary_actionable_controls": true,
+    "secrets_logged": false
+  },
+  "implementation": {
+    "abuse_guard": "functions/api/_lib/authAbuseGuard.js",
+    "login_route": "functions/api/auth/login.js",
+    "password_change_route": "functions/api/auth/change-password.js",
+    "revoke_other_sessions_route": "functions/api/auth/revoke-other-sessions.js",
+    "session_info_route": "functions/api/auth/session-info.js",
+    "member_controls": "public/js/member-account-tools.js",
+    "admin_cleanup_route": "functions/api/admin/cleanup-sessions.js",
+    "admin_cleanup_client": "public/js/admin-cleanup-sessions.js",
+    "security_summary_route": "functions/api/admin/security-summary.js",
+    "security_summary_client": "public/js/admin-security-summary.js"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "secret_values_logged": false,
+    "session_tokens_returned": false,
+    "password_values_logged": false,
+    "throttle_fingerprints_exposed": false,
+    "account_recovery_privacy_disclosure": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build246_gate.py",
+    "workflow": ".github/workflows/release467-build246-abuse-session-security-operations.yml",
+    "next_build": 247,
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "b4eeed8895a8a04247b68a626c9018caadd8c9ad",
+      "tree": "8ac58d89c62750e7d266ad849a3ac23fdcabf7e9",
+      "system_gate_run": 35928075029,
+      "quality_run": 35928074148,
+      "it_admin_runtime_run": 35928075128,
+      "repository_hygiene_run": 35928075568,
+      "dedicated_gate_run": 35928075043,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "2312b35c5d527721219c48985325eeba8f3ecd3f",
+      "tree_sha": "8ac58d89c62750e7d266ad849a3ac23fdcabf7e9",
+      "production_pages_deploy_run": 35928404982,
+      "production_live_resource_integrity_run": 35928530977,
+      "products_browser_proof_run": 35928530972,
+      "products_route_proof_run": 35928530951,
+      "build_specific_proof_run": 35928405141,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}
