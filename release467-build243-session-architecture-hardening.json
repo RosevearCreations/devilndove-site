@@ -1,0 +1,115 @@
+{
+  "release": 467,
+  "build": 243,
+  "title": "Session Architecture Hardening",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build243-session-architecture-hardening",
+  "predecessor": {
+    "build": 242,
+    "title": "Release, Diagnostics & Evidence Streamlining",
+    "development_sha": "5977a1aa9674eb378d5aede0b31648a73ac770c6",
+    "development_tree_sha": "3ea103b093c4dcbf1670346dcce0ec6acf214470",
+    "production_main_sha": "ae9ca2b48700f4b48e6eb7e6bb465f0472d5e41f",
+    "production_tree_sha": "3ea103b093c4dcbf1670346dcce0ec6acf214470",
+    "development_proofs": {
+      "system_gate_run": 35883357799,
+      "current_application_quality_run": 35883358653,
+      "it_admin_runtime_proof_run": 35883357777,
+      "branch_hygiene_run": 35883357974,
+      "dedicated_gate_run": 35883357988
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 35883719199,
+      "production_live_resource_integrity_run": 35883846712,
+      "products_browser_proof_run": 35883846744,
+      "products_route_proof_run": 35883846755,
+      "build_specific_proof_run": 35883719159
+    },
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "browser_session_mode": "HTTP_ONLY_COOKIE_FIRST",
+    "expose_session_secret_to_browser_javascript": false,
+    "return_session_secret_in_login_json": false,
+    "mirror_session_secret_to_local_storage": false,
+    "mirror_session_secret_to_script_readable_cookie": false,
+    "attach_browser_bearer_header": false,
+    "server_bearer_compatibility_for_non_browser_automation": true,
+    "same_site_authenticated_fetches": true,
+    "session_expiry_metadata_preserved": true,
+    "session_rotation_contract": "SERVER_MANAGED_COMPATIBILITY"
+  },
+  "implementation": {
+    "browser_auth_helpers": [
+      "public/js/auth.js",
+      "auth.js"
+    ],
+    "browser_bootstrap_helpers": [
+      "public/js/bootstrap-admin.js",
+      "bootstrap-admin.js"
+    ],
+    "browser_checkout_helpers": [
+      "public/js/checkout.js",
+      "checkout.js"
+    ],
+    "session_issuers": [
+      "functions/api/auth/login.js",
+      "functions/api/auth/register.js",
+      "functions/api/auth/bootstrap-admin.js"
+    ],
+    "session_readers": [
+      "functions/api/auth/me.js",
+      "functions/api/auth/session-info.js"
+    ],
+    "cookie_name": "dd_auth_token",
+    "cookie_flags": [
+      "HttpOnly",
+      "SameSite=Lax",
+      "Secure on HTTPS"
+    ],
+    "normal_browser_transport": "credentials: same-origin",
+    "compatibility_transport": "server continues accepting Authorization Bearer for existing automation"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "session_secret_logged": false,
+    "session_secret_returned_to_browser_json": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build243_gate.py",
+    "workflow": ".github/workflows/release467-build243-session-architecture-hardening.yml",
+    "next_build": 244,
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "5977a1aa9674eb378d5aede0b31648a73ac770c6",
+      "tree": "3ea103b093c4dcbf1670346dcce0ec6acf214470",
+      "system_gate_run": 35883357799,
+      "quality_run": 35883358653,
+      "it_admin_runtime_run": 35883357777,
+      "repository_hygiene_run": 35883357974,
+      "dedicated_gate_run": 35883357988,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "ae9ca2b48700f4b48e6eb7e6bb465f0472d5e41f",
+      "tree_sha": "3ea103b093c4dcbf1670346dcce0ec6acf214470",
+      "production_pages_deploy_run": 35883719199,
+      "production_live_resource_integrity_run": 35883846712,
+      "products_browser_proof_run": 35883846744,
+      "products_route_proof_run": 35883846755,
+      "build_specific_proof_run": 35883719159,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}
