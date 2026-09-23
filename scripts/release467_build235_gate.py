@@ -20,7 +20,16 @@ req("ADMIN_RESUME_WORK_REVISION = '467b235-resume-work-v1'" in middleware,'Build
 req('admin-resume-work-v235.js' in middleware and 'data-dd-admin-resume-work-v235' in middleware,'Build 235 shared Admin bootstrap missing')
 hrefs=[l.get('href') for m in manifest.get('modules',[]) for s in m.get('sections',[]) for l in s.get('links',[]) if isinstance(l,dict)]
 req('/admin/today-tasks/' in hrefs,'Today Tasks must remain manifest-owned')
-req(authority.get('build')==235 and authority.get('state')=='DEVELOPMENT_CANDIDATE','Build 235 authority must be a Development candidate')
+req(authority.get('build')==235,'Build 235 authority identity drift')
+if int(pointer.get('build') or 0)==235:
+    req(authority.get('state')=='DEVELOPMENT_CANDIDATE','Build 235 authority must be a Development candidate while current')
+else:
+    req(authority.get('state')=='PRODUCTION_GREEN','Retained Build 235 authority must carry the ingested Production closure')
+    final=authority.get('final_closure') or {}
+    prod235=authority.get('production_checkpoint') or {}
+    req(final.get('dev_sha')=='b4c9d47752a146da3bfd3b8047ae5cc941c70d55' and final.get('tree_sha')=='6bceeefcab82beb5587fc05b053caf61dc587ef4','Retained Build 235 final Development closure mismatch')
+    req((final.get('proofs') or {})=={'system_gate_run':35802372348,'current_application_quality_run':35802372207,'it_admin_runtime_proof_run':35802372335,'branch_hygiene_run':35802372354},'Retained Build 235 final proof set mismatch')
+    req(prod235.get('main_sha')=='b2fbbcc86d1e3c4925bee7e09287ed32519d7f34' and prod235.get('tree_sha')=='6bceeefcab82beb5587fc05b053caf61dc587ef4' and int(prod235.get('production_pages_deploy_run') or 0)==35802505626,'Retained Build 235 Production closure mismatch')
 for key in ('automatic_business_action','product_mutation','inventory_mutation','finance_mutation','provider_execution','provider_publication','d1_business_data_mutation','r2_mutation','schema_change'):
     req(authority.get('safety',{}).get(key) is False,f'Build 235 safety drift: {key}')
 req(int(pointer.get('build') or 0)>=235 and pointer.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 235 or a verified successor')
