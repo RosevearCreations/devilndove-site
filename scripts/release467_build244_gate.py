@@ -15,11 +15,18 @@ mw=t('functions/_middleware.js')
 road=t('docs/operations/RELEASE_467_REFINEMENT_AUTONOMOUS_BUILDS_233_248.md')
 sysgate=t('scripts/current_system_gate_provenance_gate.py')
 
-q(a.get('build')==244 and a.get('state')=='DEVELOPMENT_CANDIDATE','Build 244 authority identity/state mismatch')
+q(a.get('build')==244 and a.get('state') in ('DEVELOPMENT_CANDIDATE','PRODUCTION_GREEN'),'Build 244 authority identity/state mismatch')
+if a.get('state')=='PRODUCTION_GREEN':
+    q((a.get('final_closure') or {}).get('dev_sha')=='1d8111e948db0d3ee176f86a8a74e12dcdbec4e3','Build 244 successor closure must retain exact final dev SHA')
+    q((a.get('production_checkpoint') or {}).get('main_sha')=='f65d13c3b9d686d5e88168dcee84f25f580b6323','Build 244 successor closure must retain exact Production main')
 q(prev.get('state')=='PRODUCTION_GREEN','Build 243 predecessor must be Production GREEN')
 q((prev.get('final_closure') or {}).get('dev_sha')=='146b588a0ad060d8b68914440eef485d32d2bd35','Build 243 final Development closure missing')
 q((prev.get('production_checkpoint') or {}).get('main_sha')=='c725b19e6dd9c051e8efb552abab734ff0532894','Build 243 production checkpoint missing')
-q(p.get('build')==244 and p.get('next_build')==245 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must expose Build 244 candidate and Build 245 successor')
+q(int(p.get('build') or 0)>=244 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 244 or a verified successor')
+if int(p.get('build') or 0)==244:
+    q(p.get('next_build')==245,'Build 244 successor pointer mismatch')
+else:
+    q((a.get('final_closure') or {}).get('dev_sha')=='1d8111e948db0d3ee176f86a8a74e12dcdbec4e3','Build 245+ must retain exact Build 244 Development closure')
 
 for token in ("READ_METHODS = new Set(['GET','HEAD','OPTIONS'])","'/api/stripe-webhook'","'/api/paypal-webhook'","'/api/social/meta/data-deletion'","origin === url.origin","refOrigin === url.origin","fetchSite === 'same-origin'","fetchSite === 'cross-site' || fetchSite === 'same-site'","mode:'bearer_automation'","mode:'headerless_api_compatibility'","code:'csrf_origin_rejected'"):
     q(token in guard,f'Build 244 guard missing {token}')

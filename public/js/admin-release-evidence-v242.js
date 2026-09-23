@@ -3,13 +3,13 @@
 (() => {
   'use strict';
   const EVIDENCE=Object.freeze({
-    verified:{release:467,build:243,title:'Session Architecture Hardening',
-      dev_sha:'146b588a0ad060d8b68914440eef485d32d2bd35',tree_sha:'909ac24bfd97b4ed2a20b004db8d3e4cf73b914a',
-      system_gate_run:35895595239,current_application_quality_run:35895596041,it_admin_runtime_proof_run:35895595669,
-      branch_hygiene_run:35895595676,dedicated_gate_run:35895595649},
-    production:{main_sha:'c725b19e6dd9c051e8efb552abab734ff0532894',tree_sha:'909ac24bfd97b4ed2a20b004db8d3e4cf73b914a',
-      production_pages_deploy_run:35895852561,production_live_resource_integrity_run:35896016840,
-      products_browser_proof_run:35896016792,products_route_proof_run:35896016941,build_specific_proof_run:35895852471,
+    verified:{release:467,build:244,title:'CSRF / Origin Protection for Mutating Routes',
+      dev_sha:'1d8111e948db0d3ee176f86a8a74e12dcdbec4e3',tree_sha:'bddcec6079d5f906a39fd938cd47a61b594d434a',
+      system_gate_run:35925164067,current_application_quality_run:35925164397,it_admin_runtime_proof_run:35925164225,
+      branch_hygiene_run:35925164408,dedicated_gate_run:35895595649},
+    production:{main_sha:'f65d13c3b9d686d5e88168dcee84f25f580b6323',tree_sha:'bddcec6079d5f906a39fd938cd47a61b594d434a',
+      production_pages_deploy_run:35925424234,production_live_resource_integrity_run:35925501698,
+      products_browser_proof_run:35925501669,products_route_proof_run:35925501788,build_specific_proof_run:35895852471,
       state:'PRODUCTION_GREEN'},
     current:{release:467,build:244,title:'CSRF / Origin Protection for Mutating Routes',
       state:'DEVELOPMENT_CANDIDATE',next_action:'Prove the exact final Development head GREEN before any Production promotion.'}

@@ -33,7 +33,7 @@ const ADMIN_ERGONOMICS_REVISION = '467b237-ergonomics-v1';
 const ADMIN_ATTENTION_SIGNALS_REVISION = '467b238-attention-signals-v1';
 const ADMIN_SURFACE_CONSOLIDATION_REVISION = '467b239-admin-surface-consolidation-v1';
 const ADMIN_HANDOFF_REVISION = '467b241-cross-authority-handoff-v1';
-const ADMIN_RELEASE_EVIDENCE_REVISION = '467b244-release-evidence-baseline-v3';
+const ADMIN_RELEASE_EVIDENCE_REVISION = '467b245-release-evidence-baseline-v4';
 const STOREFRONT_DISCOVERY_REVISION = '467b198-product-image-fidelity';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
@@ -140,8 +140,6 @@ function withPlatformClient(response, request) {
   const contentType = String(response?.headers?.get('Content-Type') || '').toLowerCase();
   if (!contentType.includes('text/html')) return response;
   const pathname = new URL(request.url).pathname;
-  const mutationOriginDenied = protectMutationOrigin(request);
-  if (mutationOriginDenied) return finish(mutationOriginDenied, request);
   const normalizedPath = normalizedPagePath(pathname);
   const isProductsPage = normalizedPath === '/admin/products/';
   if (isProductsPage) {
@@ -184,9 +182,51 @@ function withPlatformClient(response, request) {
     return response;
   }
 }
-function finish(response, request, guard = null) {
+function randomCspNonce() {
+  const bytes = new Uint8Array(18);
+  crypto.getRandomValues(bytes);
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+function cspForNonce(nonce) {
+  return [
+    "default-src 'self'",
+    "img-src 'self' " + 'data' + ": blob: https:",
+    "style-src 'self' 'unsafe-inline'",
+    "script-src 'self' 'nonce-" + nonce + "' https://static.cloudflareinsights.com",
+    "script-src-attr 'unsafe-inline'",
+    "connect-src 'self' https:",
+    "font-src 'self' " + 'data' + ":",
+    "media-src 'self' https: blob:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "upgrade-insecure-requests"
+  ].join('; ');
+}
+function withScriptNonceCsp(response, request) {
+  if (String(request?.method || 'GET').toUpperCase() !== 'GET') return response;
+  const contentType = String(response?.headers?.get('Content-Type') || '').toLowerCase();
+  if (!contentType.includes('text/html')) return response;
+  const nonce = randomCspNonce();
+  const headers = new Headers(response.headers);
+  headers.set('Content-Security-Policy', cspForNonce(nonce));
+  headers.set('X-DND-CSP-Revision', '467b245-script-nonce-v1');
+  const secured = new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+  try {
+    return new HTMLRewriter()
+      .on('script', { element(element) { element.setAttribute('nonce', nonce); } })
+      .transform(secured);
+  } catch {
+    return secured;
+  }
+}
+async function finish(response, request, guard = null) {
   const guarded = guard ? withGuardHeaders(response, guard) : response;
-  return withPlatformClient(guarded, request);
+  const platform = await withPlatformClient(guarded, request);
+  return withScriptNonceCsp(platform, request);
 }
 function readOnlyDeniedResponse(access) {
   return new Response(JSON.stringify({
@@ -222,6 +262,8 @@ async function resolveGuardUser(request, env, pathname) {
 export async function onRequest(context) {
   const { request, env } = context;
   const pathname = new URL(request.url).pathname;
+  const mutationOriginDenied = protectMutationOrigin(request);
+  if (mutationOriginDenied) return mutationOriginDenied;
   if (shouldBypass(pathname)) {
     const response = await context.next();
     return finish(isAdminClientAssetPath(pathname) ? withAdminClientNoStore(response) : response, request);
