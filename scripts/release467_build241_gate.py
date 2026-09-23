@@ -15,16 +15,23 @@ mw=t('functions/_middleware.js')
 road=t('docs/operations/RELEASE_467_REFINEMENT_AUTONOMOUS_BUILDS_233_248.md')
 sysgate=t('scripts/current_system_gate_provenance_gate.py')
 
-q(a.get('build')==241 and a.get('state')=='DEVELOPMENT_CANDIDATE','Build 241 authority identity/state mismatch')
+q(a.get('build')==241 and a.get('state') in ('DEVELOPMENT_CANDIDATE','PRODUCTION_GREEN'),'Build 241 authority identity/state mismatch')
+if a.get('state')=='PRODUCTION_GREEN':
+    q((a.get('final_closure') or {}).get('dev_sha')=='82688fbe6a74e235b85b56bc21f82380131bb3bc','Build 241 successor closure must retain exact final dev SHA')
+    q((a.get('production_checkpoint') or {}).get('main_sha')=='87778556ac99c1e82217c4d2d45ead5bf1ef1b88','Build 241 successor closure must retain exact Production main')
 q((a.get('starting_point') or {}).get('development',{}).get('sha')=='3fb60a9f3be8c40ca415ecd3cdcf7a44bff081d8','Build 241 starting dev SHA mismatch')
 q((a.get('starting_point') or {}).get('development',{}).get('tree')=='6388a8259bdf4902e220fed5e1dd9f21766c2357','Build 241 starting dev tree mismatch')
 q((a.get('starting_point') or {}).get('production',{}).get('main_sha')=='a9efe9826c6ad7e400fa174f7cd6a8e6d980c452','Build 241 starting Production main mismatch')
 q(prev.get('state')=='PRODUCTION_GREEN','Build 240 predecessor must be Production GREEN')
 q((prev.get('final_closure') or {}).get('dev_sha')=='3fb60a9f3be8c40ca415ecd3cdcf7a44bff081d8','Build 240 final Development closure missing')
 q((prev.get('production_checkpoint') or {}).get('main_sha')=='a9efe9826c6ad7e400fa174f7cd6a8e6d980c452','Build 240 production checkpoint missing')
-q(p.get('build')==241 and p.get('next_build')==242 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must expose Build 241 candidate and Build 242 successor')
-q(p.get('accepted_dev_sha')=='3fb60a9f3be8c40ca415ecd3cdcf7a44bff081d8','Current authority must inherit exact Build 240 dev SHA')
-q(p.get('accepted_dev_tree_sha')=='6388a8259bdf4902e220fed5e1dd9f21766c2357','Current authority must inherit exact Build 240 tree')
+q(int(p.get('build') or 0)>=241 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 241 or a verified successor')
+if int(p.get('build') or 0)==241:
+    q(p.get('next_build')==242,'Build 241 successor pointer mismatch')
+    q(p.get('accepted_dev_sha')=='3fb60a9f3be8c40ca415ecd3cdcf7a44bff081d8','Current Build 241 must inherit exact Build 240 dev SHA')
+    q(p.get('accepted_dev_tree_sha')=='6388a8259bdf4902e220fed5e1dd9f21766c2357','Current Build 241 must inherit exact Build 240 tree')
+else:
+    q((a.get('final_closure') or {}).get('dev_sha')=='82688fbe6a74e235b85b56bc21f82380131bb3bc','Build 242+ must retain exact Build 241 Development closure')
 for token in (
     "DDAdminHandoffV241","product_id","creative_project_id","inventory_id","custom_request_id",
     "content_project_id","creation_id","handoff_from","handoff_label","return_to",
