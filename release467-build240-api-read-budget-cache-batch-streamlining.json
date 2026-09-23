@@ -16,7 +16,17 @@
       "branch_hygiene_run": 35862488113,
       "dedicated_gate_run": 35862488370
     },
-    "production_evidence_visibility": "MAIN_PROMOTION_CONFIRMED; push-triggered production proof ids not exposed by connected GitHub workflow API"
+    "production_evidence_visibility": "EXACT_TREE_AND_PRODUCTION_PROOFS_RECOVERED_READ_ONLY_BY_BUILD240_CI",
+    "development_tree_sha": "3a4b02a5fcebb70475ea12698486fbea3775675a",
+    "production_tree_sha": "3a4b02a5fcebb70475ea12698486fbea3775675a",
+    "production_proofs": {
+      "production_pages_deploy_run": 35862809663,
+      "production_live_resource_integrity_run": 35862907582,
+      "products_browser_proof_run": 35862907503,
+      "products_route_proof_run": 35862907598,
+      "build_specific_proof_run": 35862809510
+    },
+    "production_state": "PRODUCTION_GREEN"
   },
   "scope": {
     "admin_home_read_coalescing": true,
