@@ -2,7 +2,7 @@
   "release": 467,
   "build": 242,
   "title": "Release, Diagnostics & Evidence Streamlining",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build242-release-diagnostics-evidence-streamlining",
   "predecessor": {
     "build": 241,
@@ -83,5 +83,30 @@
       "build_specific_proof_run": 35881115558,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "5977a1aa9674eb378d5aede0b31648a73ac770c6",
+    "tree_sha": "3ea103b093c4dcbf1670346dcce0ec6acf214470",
+    "proofs": {
+      "system_gate_run": 35883357799,
+      "current_application_quality_run": 35883358653,
+      "it_admin_runtime_proof_run": 35883357777,
+      "branch_hygiene_run": 35883357974
+    },
+    "dedicated_gate_run": 35883357988,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 243,
+    "recorded_by": "Build 243 restart ingestion; not self-recorded by Build 242"
+  },
+  "production_checkpoint": {
+    "main_sha": "ae9ca2b48700f4b48e6eb7e6bb465f0472d5e41f",
+    "tree_sha": "3ea103b093c4dcbf1670346dcce0ec6acf214470",
+    "production_pages_deploy_run": 35883719199,
+    "production_live_resource_integrity_run": 35883846712,
+    "products_browser_proof_run": 35883846744,
+    "products_route_proof_run": 35883846755,
+    "build_specific_proof_run": 35883719159,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
