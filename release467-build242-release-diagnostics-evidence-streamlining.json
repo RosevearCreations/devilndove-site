@@ -1,0 +1,87 @@
+{
+  "release": 467,
+  "build": 242,
+  "title": "Release, Diagnostics & Evidence Streamlining",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build242-release-diagnostics-evidence-streamlining",
+  "predecessor": {
+    "build": 241,
+    "title": "Cross-Authority Handoff Simplification",
+    "development_sha": "82688fbe6a74e235b85b56bc21f82380131bb3bc",
+    "development_tree_sha": "b9d600e5eed18fe6697f42cf1588717437d4f725",
+    "production_main_sha": "87778556ac99c1e82217c4d2d45ead5bf1ef1b88",
+    "production_tree_sha": "b9d600e5eed18fe6697f42cf1588717437d4f725",
+    "development_proofs": {
+      "system_gate_run": 35880685343,
+      "current_application_quality_run": 35880685733,
+      "it_admin_runtime_proof_run": 35880685713,
+      "branch_hygiene_run": 35880685361,
+      "dedicated_gate_run": 35880685738
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 35881116063,
+      "production_live_resource_integrity_run": 35881253740,
+      "products_browser_proof_run": 35881253749,
+      "products_route_proof_run": 35881253783,
+      "build_specific_proof_run": 35881115558
+    },
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "consolidated_operator_readiness_summary": true,
+    "immutable_historical_proof_separated_from_current_action": true,
+    "duplicated_release_state_language_reduced": true,
+    "exact_sha_dev_main_production_requirement_preserved": true
+  },
+  "implementation": {
+    "shared_client": "public/js/admin-release-evidence-v242.js",
+    "shared_bootstrap": "functions/_middleware.js",
+    "operator_surfaces": [
+      "/admin/it/",
+      "/admin/deployment-preflight/",
+      "/admin/reliability/"
+    ]
+  },
+  "safety": {
+    "automatic_business_action": false,
+    "new_api_authority": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "historical_proof_rewrite": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build242_gate.py",
+    "workflow": ".github/workflows/release467-build242-release-diagnostics-evidence-streamlining.yml",
+    "next_build": 243,
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "82688fbe6a74e235b85b56bc21f82380131bb3bc",
+      "tree": "b9d600e5eed18fe6697f42cf1588717437d4f725",
+      "system_gate_run": 35880685343,
+      "quality_run": 35880685733,
+      "it_admin_runtime_run": 35880685713,
+      "repository_hygiene_run": 35880685361,
+      "dedicated_gate_run": 35880685738,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "87778556ac99c1e82217c4d2d45ead5bf1ef1b88",
+      "tree_sha": "b9d600e5eed18fe6697f42cf1588717437d4f725",
+      "production_pages_deploy_run": 35881116063,
+      "production_live_resource_integrity_run": 35881253740,
+      "products_browser_proof_run": 35881253749,
+      "products_route_proof_run": 35881253783,
+      "build_specific_proof_run": 35881115558,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}
