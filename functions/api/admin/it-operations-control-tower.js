@@ -1,12 +1,12 @@
-// Release 467 Build 238 — current release/restart authority over exact Build 234 GREEN predecessor.
+// Release 467 Build 239 — current release/restart authority over exact Build 234 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=238;
-const TITLE='Attention, Notifications & Operator Signal Cleanup';
-const AUTHORITY='release467-build238-attention-notifications-operator-signal-cleanup';
+const BUILD=239;
+const TITLE='Admin Surface & Navigation Consolidation';
+const AUTHORITY='release467-build239-admin-surface-navigation-consolidation';
 const EVIDENCE_ID='r467-b235-b236-35858747170-35858981317';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 238 Save Confidence Unsaved-Work Safe Batch Review'
+  'Release 467 Build 239 Save Confidence Unsaved-Work Safe Batch Review'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
