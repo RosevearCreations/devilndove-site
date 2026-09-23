@@ -1,0 +1,21 @@
+name: Build 240 Dev Proof Recovery
+permissions:
+  contents: read
+  actions: read
+on:
+  pull_request:
+    branches: [dev]
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover exact Build 240 dev push proofs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TARGET=904bb8f2e987c254b6ed69b04d8e540a86a09909
+          echo "BUILD240_DEV_SHA=$TARGET"
+          echo "BUILD240_DEV_RUNS_BEGIN"
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=$TARGET&event=push&per_page=100" --jq '.workflow_runs[] | [.id,.name,.status,.conclusion,.head_sha] | @tsv'
+          echo "BUILD240_DEV_RUNS_END"
