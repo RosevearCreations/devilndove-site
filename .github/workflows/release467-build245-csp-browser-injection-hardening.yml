@@ -1,0 +1,39 @@
+name: Release 467 Build 245 CSP Browser Injection Surface Hardening
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - '_headers'
+      - 'functions/_middleware.js'
+      - 'current-development-authority.json'
+      - 'release467-build244-csrf-origin-protection-mutating-routes.json'
+      - 'release467-build245-csp-browser-injection-hardening.json'
+      - 'scripts/release467_build244_gate.py'
+      - 'scripts/release467_build245_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'public/js/admin-release-evidence-v242.js'
+      - 'admin/it/index.html'
+      - 'admin/deployment-preflight/index.html'
+      - 'admin/reliability/index.html'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+      - 'docs/operations/RELEASE_467_BUILD_245_CSP_BROWSER_INJECTION_HARDENING.md'
+      - '.github/workflows/release467-build245-csp-browser-injection-hardening.yml'
+  pull_request:
+    branches: [dev, main]
+jobs:
+  build245:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: JavaScript syntax
+        run: node --check functions/_middleware.js
+      - name: Build 245 contract
+        run: python scripts/release467_build245_gate.py
+      - name: Retain Build 244 contract
+        run: python scripts/release467_build244_gate.py
