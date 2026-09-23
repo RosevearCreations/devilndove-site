@@ -1,0 +1,30 @@
+name: Release 467 Build 239 Admin Surface Navigation Consolidation
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'data/admin-navigation-modules.json'
+      - 'public/js/admin-surface-consolidation-v239.js'
+      - 'functions/_middleware.js'
+      - 'release467-build238-attention-notifications-operator-signal-cleanup.json'
+      - 'release467-build239-admin-surface-navigation-consolidation.json'
+      - 'current-development-authority.json'
+      - 'scripts/release467_build238_gate.py'
+      - 'scripts/release467_build239_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - '.github/workflows/release467-build239-admin-surface-navigation-consolidation.yml'
+  pull_request:
+    branches: [dev, main]
+jobs:
+  build239:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: JavaScript syntax
+        run: node --check public/js/admin-surface-consolidation-v239.js
+      - name: Build 239 contract
+        run: python scripts/release467_build239_gate.py
+      - name: Retain Build 238 contract
+        run: python scripts/release467_build238_gate.py
