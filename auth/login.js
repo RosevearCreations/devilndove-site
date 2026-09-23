@@ -144,13 +144,12 @@ async function handleLoginPost(context) {
   return json({
     ok:true,
     message:"Login successful.",
-    response_profile:"auth_login_bounded_v2",
+    response_profile:"auth_login_cookie_first_v3",
     credential_hash:{ scheme:PASSWORD_HASH_SCHEME, legacy_upgraded:upgradeLegacyPassword },
-    session_token:sessionToken,
-    token:sessionToken,
-    session:{ session_id:0,session_token:sessionToken,token:sessionToken,expires_at:databaseTimestamp(expiresAt),created_at:databaseTimestamp(createdAt) },
+    session_mode:"http_only_cookie",
+    session:{ session_id:0,expires_at:databaseTimestamp(expiresAt),created_at:databaseTimestamp(createdAt) },
     user:{ user_id:Number(user.user_id || 0),email:user.email || email,display_name:user.display_name || "",role:user.role || "member",is_active:Number(user.is_active || 0),created_at:user.created_at || null,updated_at:user.updated_at || null }
-  },200,{ "Set-Cookie":buildSessionCookie(request,sessionToken),"X-DD-Auth-Profile":"auth_login_bounded_v2" });
+  },200,{ "Set-Cookie":buildSessionCookie(request,sessionToken),"X-DD-Auth-Profile":"auth_login_cookie_first_v3" });
 }
 
 export async function onRequest(context) {
@@ -164,7 +163,7 @@ export async function onRequest(context) {
       binding_available:hasDbBinding,ping:"not_run",ready:hasDbBinding,code:hasDbBinding ? "AUTH_BINDING_PRESENT" : "AUTH_DB_BINDING_MISSING",
       hint:hasDbBinding ? "Use ?diagnostic=full for an owner-requested schema diagnostic; POST does not run schema discovery." : "Connect the Production Cloudflare D1 binding named DB to this Pages project."
     };
-    return json({ ok:true,route:"/api/auth/login",status:authDatabase.ready ? "ready" : "needs_configuration",accepts:["POST"],functions_active:true,has_db_binding:authDatabase.binding_available,auth_database:authDatabase,response_profile:"auth_login_bounded_v2",credential_hash_scheme:PASSWORD_HASH_SCHEME,legacy_hash_upgrade:"on_successful_login",diagnostic_mode:runFullDiagnostic ? "full" : "binding_only",note:"Submit login credentials with POST JSON: { email, password }. Full schema diagnostics require ?diagnostic=full." },200);
+    return json({ ok:true,route:"/api/auth/login",status:authDatabase.ready ? "ready" : "needs_configuration",accepts:["POST"],functions_active:true,has_db_binding:authDatabase.binding_available,auth_database:authDatabase,response_profile:"auth_login_cookie_first_v3",credential_hash_scheme:PASSWORD_HASH_SCHEME,legacy_hash_upgrade:"on_successful_login",diagnostic_mode:runFullDiagnostic ? "full" : "binding_only",note:"Submit login credentials with POST JSON: { email, password }. Successful browser sessions are returned only in the HttpOnly cookie; JSON never contains bearer-equivalent session material." },200);
   }
   if (method === "POST") {
     try { return await handleLoginPost(context); }

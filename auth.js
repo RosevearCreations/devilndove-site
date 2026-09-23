@@ -1,12 +1,10 @@
 // File: /public/js/auth.js
-// Brief description: Shared client-side auth helper for the site. It stores the session token,
-// mirrors it into a first-party cookie for same-site continuity, exposes login/register/logout/account
-// methods, and provides the authenticated apiFetch wrapper used across public, member, and admin flows.
-
+// Release 467 Build 243 — cookie-first session architecture.
+// Browser JavaScript never stores, reads, mirrors, or forwards the bearer-equivalent session secret.
+// The authenticated session is carried only by the server-issued HttpOnly same-site cookie.
 (function () {
   const TOKEN_KEY = "dd_auth_token";
   const USER_KEY = "dd_auth_user";
-  const TOKEN_COOKIE = "dd_auth_token";
   const USER_COOKIE = "dd_auth_user";
   const TOKEN_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 
@@ -43,22 +41,23 @@
     } catch {}
   }
 
-  function getToken() {
+  function clearLegacyBrowserToken() {
+    try { localStorage.removeItem(TOKEN_KEY); } catch {}
+    // Remove only a legacy script-readable host cookie. The server-owned HttpOnly
+    // cookie is not readable or writable from normal browser JavaScript.
     try {
-      const fromLocal = normalizeText(localStorage.getItem(TOKEN_KEY));
-      if (fromLocal) return fromLocal;
+      if (getCookie(TOKEN_KEY)) document.cookie = `${TOKEN_KEY}=; path=/; max-age=0; SameSite=Lax`;
     } catch {}
-    return normalizeText(getCookie(TOKEN_COOKIE));
   }
 
-  function setToken(token) {
-    const safeToken = normalizeText(token);
-    try {
-      if (safeToken) localStorage.setItem(TOKEN_KEY, safeToken);
-      else localStorage.removeItem(TOKEN_KEY);
-    } catch {}
-    setCookie(TOKEN_COOKIE, safeToken, safeToken ? TOKEN_COOKIE_MAX_AGE : 0);
-    return safeToken;
+  function getToken() {
+    clearLegacyBrowserToken();
+    return "";
+  }
+
+  function setToken() {
+    clearLegacyBrowserToken();
+    return "";
   }
 
   function getStoredUser() {
@@ -93,21 +92,22 @@
   }
 
   function clearAuth() {
-    setToken('');
+    clearLegacyBrowserToken();
     setStoredUser(null);
   }
 
   function isLoggedIn() {
-    return !!getToken();
+    // HttpOnly cookies are intentionally invisible to JavaScript. Cached identity is
+    // only a UI hint; /api/auth/me remains the server-side source of truth.
+    return !!getStoredUser();
   }
 
   async function apiFetch(url, options = {}) {
-    const token = getToken();
+    clearLegacyBrowserToken();
     const headers = new Headers(options.headers || {});
     if (!headers.has('Content-Type') && options.body && !(options.body instanceof FormData)) {
       headers.set('Content-Type', 'application/json');
     }
-    if (token) headers.set('Authorization', `Bearer ${token}`);
     const response = await fetch(url, { ...options, headers, credentials: 'same-origin' });
     if (response.status === 401 && !String(url).includes('/api/auth/login')) {
       clearAuth();
@@ -155,13 +155,13 @@
     return readApiJson(response, { fallbackMessage: `Request failed (${response?.status || 'unknown status'}).` });
   }
 
-  async function handleAuthResponse(response, successFallback) {
+  async function handleAuthResponse(response) {
     const data = await parseJson(response);
-    const token = normalizeText(data?.session_token) || normalizeText(data?.token) || normalizeText(data?.session?.session_token) || normalizeText(data?.session?.token);
-    if (!token && successFallback !== 'allow-no-token') throw new Error('Authentication succeeded but no session token was returned.');
-    if (token) setToken(token);
-    setStoredUser(data?.user || null);
-    document.dispatchEvent(new CustomEvent('dd:auth-changed', { detail: { ok: true, logged_in: !!token, user: data?.user || null } }));
+    clearLegacyBrowserToken();
+    const user = data?.user || null;
+    if (!user) throw new Error('Authentication succeeded but no user identity was returned.');
+    setStoredUser(user);
+    document.dispatchEvent(new CustomEvent('dd:auth-changed', { detail: { ok: true, logged_in: true, user, session_mode: 'http_only_cookie' } }));
     return data;
   }
 
@@ -260,6 +260,8 @@
     });
     return handleAuthResponse(response);
   }
+
+  clearLegacyBrowserToken();
 
   window.DDAuth = {
     getToken,

@@ -217,7 +217,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function createOrder(payload) {
     const headers = { "Content-Type": "application/json" };
-    if (window.DDAuth?.isLoggedIn?.()) { const token = window.DDAuth.getToken?.(); if (token) headers.Authorization = `Bearer ${token}`; }
     const response = await fetch("/api/checkout-create-order", { method: "POST", headers, body: JSON.stringify(payload) });
     const data = await response.json().catch(() => null);
     if (!response.ok || !data?.ok) {
@@ -231,7 +230,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function preparePayment(order_id, provider) {
     const headers = { "Content-Type": "application/json" };
-    if (window.DDAuth?.isLoggedIn?.()) { const token = window.DDAuth.getToken?.(); if (token) headers.Authorization = `Bearer ${token}`; }
     const response = await fetch("/api/checkout-prepare-payment", { method: "POST", headers, body: JSON.stringify({ order_id, provider }) });
     const data = await response.json().catch(() => null);
     if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to prepare payment.");
