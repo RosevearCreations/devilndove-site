@@ -3,15 +3,15 @@
 (() => {
   'use strict';
   const EVIDENCE=Object.freeze({
-    verified:{release:467,build:244,title:'CSRF / Origin Protection for Mutating Routes',
-      dev_sha:'1d8111e948db0d3ee176f86a8a74e12dcdbec4e3',tree_sha:'bddcec6079d5f906a39fd938cd47a61b594d434a',
-      system_gate_run:35925164067,current_application_quality_run:35925164397,it_admin_runtime_proof_run:35925164225,
-      branch_hygiene_run:35925164408,dedicated_gate_run:35895595649},
-    production:{main_sha:'f65d13c3b9d686d5e88168dcee84f25f580b6323',tree_sha:'bddcec6079d5f906a39fd938cd47a61b594d434a',
-      production_pages_deploy_run:35925424234,production_live_resource_integrity_run:35925501698,
-      products_browser_proof_run:35925501669,products_route_proof_run:35925501788,build_specific_proof_run:35895852471,
+    verified:{release:467,build:245,title:'CSP & Browser Injection-Surface Hardening',
+      dev_sha:'b4eeed8895a8a04247b68a626c9018caadd8c9ad',tree_sha:'8ac58d89c62750e7d266ad849a3ac23fdcabf7e9',
+      system_gate_run:35928075029,current_application_quality_run:35928074148,it_admin_runtime_proof_run:35928075128,
+      branch_hygiene_run:35928075568,dedicated_gate_run:35928075043},
+    production:{main_sha:'2312b35c5d527721219c48985325eeba8f3ecd3f',tree_sha:'8ac58d89c62750e7d266ad849a3ac23fdcabf7e9',
+      production_pages_deploy_run:35928404982,production_live_resource_integrity_run:35928530977,
+      products_browser_proof_run:35928530972,products_route_proof_run:35928530951,build_specific_proof_run:35928405141,
       state:'PRODUCTION_GREEN'},
-    current:{release:467,build:244,title:'CSRF / Origin Protection for Mutating Routes',
+    current:{release:467,build:246,title:'Abuse Resistance, Session Control & Security Operations',
       state:'DEVELOPMENT_CANDIDATE',next_action:'Prove the exact final Development head GREEN before any Production promotion.'}
   });
   const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
