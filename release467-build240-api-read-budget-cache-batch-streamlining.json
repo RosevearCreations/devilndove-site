@@ -62,5 +62,27 @@
     "admin_home_must_not_self_observe_render_loop": true,
     "next_build": 241,
     "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "f3594106fd74956e0aae524df7f75e53c84b9916",
+      "tree": "3a4b02a5fcebb70475ea12698486fbea3775675a",
+      "system_gate_run": 35862488377,
+      "quality_run": 35862487494,
+      "it_admin_runtime_run": 35862488308,
+      "repository_hygiene_run": 35862488113,
+      "dedicated_gate_run": 35862488370,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "ca2f822ac5811f55abb8385d7e548b61097f24e8",
+      "tree_sha": "3a4b02a5fcebb70475ea12698486fbea3775675a",
+      "production_pages_deploy_run": 35862809663,
+      "production_live_resource_integrity_run": 35862907582,
+      "products_browser_proof_run": 35862907503,
+      "products_route_proof_run": 35862907598,
+      "build_specific_proof_run": 35862809510,
+      "state": "PRODUCTION_GREEN"
+    }
   }
 }
