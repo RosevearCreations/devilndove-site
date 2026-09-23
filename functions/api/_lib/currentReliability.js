@@ -34,7 +34,7 @@ export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
 export async function loadCurrentReliability(db,env={}){
   const inherited=await loadRelease466Reliability(db,env);
   return {
-    release:467,build:240,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
+    release:467,build:244,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
     environment:inherited.environment,score:inherited.score,status:inherited.status,scope:inherited.scope,slo_targets:inherited.slo_targets,
     checks:inherited.checks,migrations:inherited.migrations,runtime_incidents:inherited.runtime_incidents,
     foreign_key_violations:inherited.foreign_key_violations,resources:inherited.resources,
@@ -47,7 +47,7 @@ export async function loadCurrentReliability(db,env={}){
       production_proof_transport_policy:PRODUCTION_PROOF_TRANSPORT_POLICY,implementation_acceptance_is_distinct_from_final_closure:true,
       closure_candidate_requires_external_exact_head_proof:true,build234_workflow_help_production_green:true,build234_exact_tree:'a29c7d6fe3e7fbfae120000020303dc32ef55419',
       build237_ergonomics_production_green:true,build238_attention_signal_production_green:true,build238_existing_authorities_only:true,build238_schema_change:false,build238_automatic_publication:false,
-      build239_navigation_production_green:true,build240_admin_read_budget_production_green:true,successor_builds_planned:'Builds 242-248 owner-authorized refinement roadmap',production_baseline_build:241
+      build239_navigation_production_green:true,build240_admin_read_budget_production_green:true,successor_builds_planned:'Builds 245-248 owner-authorized refinement roadmap',production_baseline_build:243
     },
     safety:{...inherited.safety,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,accounting_posting:false,period_close:false,inventory_mutation:false,creative_mutation:false,price_mutation:false,provider_execution:false,provider_publication:false,marketplace_publication:false,social_publication:false,backup_restore_execution:false,production_mutation:false,secrets_exposed:false}
   };
