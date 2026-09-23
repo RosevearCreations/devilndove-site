@@ -21,3 +21,13 @@ jobs:
           echo "BUILD241_DEV_RUNS_BEGIN"
           gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=$TARGET&event=push&per_page=100" --jq '.workflow_runs[] | [.id,.name,.status,.conclusion,.head_sha] | @tsv'
           echo "BUILD241_DEV_RUNS_END"
+          PROD=87778556ac99c1e82217c4d2d45ead5bf1ef1b88
+          echo "BUILD241_PROD_SHA=$PROD"
+          git fetch --no-tags origin "$PROD"
+          echo "BUILD241_PROD_TREE=$(git rev-parse "$PROD^{tree}")"
+          echo "BUILD241_PROD_RUNS_BEGIN"
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=$PROD&event=push&per_page=100" --jq '.workflow_runs[] | [.id,.name,.status,.conclusion,.head_sha] | @tsv'
+          echo "BUILD241_PROD_RUNS_END"
+          echo "BUILD241_PROD_ALL_RUNS_BEGIN"
+          gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=$PROD&per_page=100" --jq '.workflow_runs[] | [.id,.name,.event,.status,.conclusion,.head_sha] | @tsv'
+          echo "BUILD241_PROD_ALL_RUNS_END"
