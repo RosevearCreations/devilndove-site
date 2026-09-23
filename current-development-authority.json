@@ -1,32 +1,32 @@
 {
   "release": 467,
-  "build": 243,
-  "title": "Session Architecture Hardening",
+  "build": 244,
+  "title": "CSRF / Origin Protection for Mutating Routes",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 242,
-      "title": "Release, Diagnostics & Evidence Streamlining",
-      "authority": "release467-build242-release-diagnostics-evidence-streamlining.json",
-      "dev_sha": "5977a1aa9674eb378d5aede0b31648a73ac770c6",
-      "tree_sha": "3ea103b093c4dcbf1670346dcce0ec6acf214470",
+      "build": 243,
+      "title": "Session Architecture Hardening",
+      "authority": "release467-build243-session-architecture-hardening.json",
+      "dev_sha": "146b588a0ad060d8b68914440eef485d32d2bd35",
+      "tree_sha": "909ac24bfd97b4ed2a20b004db8d3e4cf73b914a",
       "proofs": {
-        "system_gate_run": 35883357799,
-        "current_application_quality_run": 35883358653,
-        "it_admin_runtime_proof_run": 35883357777,
-        "branch_hygiene_run": 35883357974
+        "system_gate_run": 35895595239,
+        "current_application_quality_run": 35895596041,
+        "it_admin_runtime_proof_run": 35895595669,
+        "branch_hygiene_run": 35895595676
       },
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
       "business_exit": "OWNER_AUTHORIZED_REFINEMENT_QUEUE_OPEN"
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 243,
-      "title": "Session Architecture Hardening",
-      "authority": "release467-build243-session-architecture-hardening.json",
+      "build": 244,
+      "title": "CSRF / Origin Protection for Mutating Routes",
+      "authority": "release467-build244-csrf-origin-protection-mutating-routes.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -37,19 +37,20 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 242,
-    "title": "Release, Diagnostics & Evidence Streamlining",
-    "authority": "release467-build242-release-diagnostics-evidence-streamlining.json",
-    "main_sha": "ae9ca2b48700f4b48e6eb7e6bb465f0472d5e41f",
-    "tree_sha": "3ea103b093c4dcbf1670346dcce0ec6acf214470",
-    "production_pages_deploy_run": 35883719199,
-    "production_live_resource_integrity_run": 35883846712,
-    "products_browser_proof_run": 35883846744,
-    "products_route_proof_run": 35883846755,
+    "build": 243,
+    "title": "Session Architecture Hardening",
+    "authority": "release467-build243-session-architecture-hardening.json",
+    "main_sha": "c725b19e6dd9c051e8efb552abab734ff0532894",
+    "tree_sha": "909ac24bfd97b4ed2a20b004db8d3e4cf73b914a",
+    "production_pages_deploy_run": 35895852561,
+    "production_live_resource_integrity_run": 35896016840,
+    "products_browser_proof_run": 35896016792,
+    "products_route_proof_run": 35896016941,
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build244-csrf-origin-protection-mutating-routes.json",
     "release467-build243-session-architecture-hardening.json",
     "release467-build242-release-diagnostics-evidence-streamlining.json",
     "release467-build241-cross-authority-handoff-simplification.json",
@@ -134,10 +135,10 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_REFINEMENT_AUTONOMOUS_BUILDS_233_248.md",
-  "next_build": 244,
+  "next_build": 245,
   "next_build_state": "AUTHORIZED_PLANNED",
-  "next_build_title": "CSRF / Origin Protection for Mutating Routes",
-  "promotion_state": "BUILD243_DEVELOPMENT_CANDIDATE_NOT_YET_PRODUCTION",
+  "next_build_title": "CSP & Browser Injection-Surface Hardening",
+  "promotion_state": "BUILD244_DEVELOPMENT_CANDIDATE_NOT_YET_PRODUCTION",
   "successor_scope_state": "OWNER_AUTHORIZED_REFINEMENT_IN_PROGRESS",
   "measured_closure": {
     "source_build": 232,
@@ -163,18 +164,18 @@
     "last_build": 248,
     "state": "OWNER_AUTHORIZED_REFINEMENT_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 244,
-    "next_build_title": "CSRF / Origin Protection for Mutating Routes",
+    "next_build": 245,
+    "next_build_title": "CSP & Browser Injection-Surface Hardening",
     "reactivation_source": "EXPLICIT_OWNER_NEW_CAPABILITY"
   },
   "canonical_data_migration_authorized": false,
-  "canonical_data_migration_scope": "NONE_BUILD243_CODE_ONLY",
-  "accepted_dev_sha": "5977a1aa9674eb378d5aede0b31648a73ac770c6",
-  "accepted_dev_tree_sha": "3ea103b093c4dcbf1670346dcce0ec6acf214470",
+  "canonical_data_migration_scope": "NONE_BUILD244_CODE_ONLY",
+  "accepted_dev_sha": "146b588a0ad060d8b68914440eef485d32d2bd35",
+  "accepted_dev_tree_sha": "909ac24bfd97b4ed2a20b004db8d3e4cf73b914a",
   "acceptance": {
-    "system_gate_run": 35883357799,
-    "current_application_quality_run": 35883358653,
-    "it_admin_runtime_proof_run": 35883357777,
-    "branch_hygiene_run": 35883357974
+    "system_gate_run": 35895595239,
+    "current_application_quality_run": 35895596041,
+    "it_admin_runtime_proof_run": 35895595669,
+    "branch_hygiene_run": 35895595676
   }
 }
