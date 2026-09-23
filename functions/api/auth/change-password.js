@@ -7,6 +7,7 @@ import {
   verifyStoredPasswordHash
 } from '../_lib/passwordHash.js';
 import { readUserById, resolveSessionUser, updateUserPasswordCompatible } from '../_lib/accountAuthCompat.js';
+import { consumeAbuseBudget, rateLimitedResponse } from '../_lib/authAbuseGuard.js';
 
 function json(data, status = 200) { return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json", "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff" } }); }
 function compactError(error) { return String(error?.message || error || '').trim().replace(/\s+/g, ' ').slice(0, 300); }
@@ -19,6 +20,8 @@ export async function onRequestPost(context) {
     const sessionUser = await resolveSessionUser(request,db,{includePassword:true});
     if (!sessionUser) return json({ ok:false,error:"Invalid or expired session." },401);
     if (Number(sessionUser.is_active || 0) !== 1) return json({ ok:false,error:"Account is inactive." },403);
+    const abuseBudget = await consumeAbuseBudget({ request, scope:'password_change', identity:String(sessionUser.user_id || sessionUser.session_user_id || ''), limit:6, windowSeconds:900 });
+    if (!abuseBudget.allowed) return rateLimitedResponse(abuseBudget);
 
     let body; try { body = await request.json(); } catch { return json({ ok:false,error:"Invalid JSON body." },400); }
     const current_password = String(body.current_password || "");
