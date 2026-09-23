@@ -8,6 +8,7 @@ import {
   storedPasswordHashNeedsUpgrade,
   verifyStoredPasswordHash
 } from '../_lib/passwordHash.js';
+import { consumeAbuseBudget, rateLimitedResponse } from '../_lib/authAbuseGuard.js';
 
 const AUTH_ROUTE_HEADERS = {
   "Content-Type": "application/json",
@@ -98,6 +99,8 @@ async function handleLoginPost(context) {
   const password = String(body.password || "");
   if (!email) return json({ ok:false,error:"Email is required.",code:"AUTH_EMAIL_REQUIRED" },400);
   if (!password) return json({ ok:false,error:"Password is required.",code:"AUTH_PASSWORD_REQUIRED" },400);
+  const abuseBudget = await consumeAbuseBudget({ request, scope:'login', identity:email, limit:8, windowSeconds:900 });
+  if (!abuseBudget.allowed) return rateLimitedResponse(abuseBudget);
   if (!env?.DB || typeof env.DB.prepare !== "function" || typeof env.DB.batch !== "function") {
     return loginUnavailable({ code:"AUTH_DB_BINDING_MISSING",hint:"Connect the Production Cloudflare D1 binding named DB to this Pages project." });
   }

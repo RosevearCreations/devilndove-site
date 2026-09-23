@@ -77,6 +77,11 @@ document.addEventListener("DOMContentLoaded", () => {
         <span>Preserve my current session when cleaning my own user sessions</span>
       </label>
 
+      <div style="margin-top:12px">
+        <label class="small" for="adminCleanupConfirmPassword">Confirm your admin password</label>
+        <input id="adminCleanupConfirmPassword" type="password" autocomplete="current-password" placeholder="Required before session cleanup" />
+      </div>
+
       <div id="adminCleanupSessionsMessage" class="small" style="display:none;margin-top:12px"></div>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
@@ -110,12 +115,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const target_user_id = Number(targetUserEl?.value || 0);
     const preserve_current_session = !!preserveEl?.checked;
+    const confirm_password = String(document.getElementById("adminCleanupConfirmPassword")?.value || "");
 
     if (
       (mode === "user_all_sessions" || mode === "all_expired_and_user") &&
       (!Number.isInteger(target_user_id) || target_user_id <= 0)
     ) {
       setMessage("A valid target user ID is required for this cleanup mode.", true);
+      return;
+    }
+
+    if (!confirm_password) {
+      setMessage("Confirm your admin password before running session cleanup.", true);
       return;
     }
 
@@ -134,7 +145,8 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify({
           mode,
           target_user_id: target_user_id || null,
-          preserve_current_session
+          preserve_current_session,
+          confirm_password
         })
       });
 
@@ -145,6 +157,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const summary = data.summary || {};
+      const passwordInput = document.getElementById("adminCleanupConfirmPassword");
+      if (passwordInput) passwordInput.value = "";
       setMessage(
         `Cleanup complete. Expired removed: ${Number(summary.expired_deleted || 0)}. ` +
         `User sessions removed: ${Number(summary.user_deleted || 0)}. ` +

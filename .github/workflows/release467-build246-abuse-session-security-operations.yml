@@ -1,0 +1,59 @@
+name: Release 467 Build 246 Abuse Resistance Session Control Security Operations
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/_lib/authAbuseGuard.js'
+      - 'functions/api/auth/login.js'
+      - 'functions/api/auth/change-password.js'
+      - 'functions/api/auth/revoke-other-sessions.js'
+      - 'auth/revoke-other-sessions.js'
+      - 'functions/api/auth/session-info.js'
+      - 'auth/session-info.js'
+      - 'public/js/member-account-tools.js'
+      - 'functions/api/admin/cleanup-sessions.js'
+      - 'public/js/admin-cleanup-sessions.js'
+      - 'functions/api/admin/security-summary.js'
+      - 'public/js/admin-security-summary.js'
+      - 'current-development-authority.json'
+      - 'release467-build245-csp-browser-injection-hardening.json'
+      - 'release467-build246-abuse-session-security-operations.json'
+      - 'scripts/release467_build245_gate.py'
+      - 'scripts/release467_build246_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'public/js/admin-release-evidence-v242.js'
+      - 'admin/it/index.html'
+      - 'admin/deployment-preflight/index.html'
+      - 'admin/reliability/index.html'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+      - 'docs/operations/RELEASE_467_BUILD_246_ABUSE_SESSION_SECURITY_OPERATIONS.md'
+      - '.github/workflows/release467-build246-abuse-session-security-operations.yml'
+  pull_request:
+    branches: [dev, main]
+jobs:
+  build246:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: JavaScript syntax
+        run: |
+          node --check functions/api/_lib/authAbuseGuard.js
+          node --check functions/api/auth/login.js
+          node --check functions/api/auth/change-password.js
+          node --check functions/api/auth/revoke-other-sessions.js
+          node --check functions/api/auth/session-info.js
+          node --check public/js/member-account-tools.js
+          node --check functions/api/admin/cleanup-sessions.js
+          node --check public/js/admin-cleanup-sessions.js
+          node --check functions/api/admin/security-summary.js
+          node --check public/js/admin-security-summary.js
+      - name: Build 246 contract
+        run: python scripts/release467_build246_gate.py
+      - name: Retain Build 245 contract
+        run: python scripts/release467_build245_gate.py
