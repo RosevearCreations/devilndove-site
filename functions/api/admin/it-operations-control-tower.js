@@ -7,21 +7,21 @@ const RELEASE=467;
 const BUILD=239;
 const TITLE='Admin Surface & Navigation Consolidation';
 const AUTHORITY='release467-build239-admin-surface-navigation-consolidation';
-const EVIDENCE_ID='r467-b235-b236-35858747170-35858981317';
+const EVIDENCE_ID='r467-b235-b236-35859876994-35860073843';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:237,title:'Mobile, Touch, Keyboard & Dense-Workspace Ergonomics',state:'DEVELOPMENT_GREEN',
-  dev_sha:'06cb191758b204fbbc3912ae533bec6c6fd227ad',tree_sha:'51fc6b9a4c0910f42bbbee9bf7d7a8aa756220b5',
-  system_gate_run:35858747170,current_application_quality_run:35858747245,it_admin_runtime_proof_run:35858747280,
-  branch_hygiene_run:35858746503,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:238,title:'Attention, Notifications & Operator Signal Cleanup',state:'DEVELOPMENT_GREEN',
+  dev_sha:'26bd3f755bd486e41335431136f6fed36cabde9f',tree_sha:'a29c7d6fe3e7fbfae120000020303dc32ef55419',
+  system_gate_run:35859876994,current_application_quality_run:35859877349,it_admin_runtime_proof_run:35859876896,
+  branch_hygiene_run:35859877139,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:237,title:'Mobile, Touch, Keyboard & Dense-Workspace Ergonomics',state:'PRODUCTION_GREEN',
-  main_sha:'53c0d8e4ed7cb9ea1691198e25a51f556a2ce0b3',tree_sha:'51fc6b9a4c0910f42bbbee9bf7d7a8aa756220b5',
-  production_pages_deploy_run:35858981317,production_live_resource_integrity_run:35859107887,
-  products_browser_proof_run:35859108079,products_route_proof_run:35859107986,remote_d1_queries:0
+  release:467,build:238,title:'Attention, Notifications & Operator Signal Cleanup',state:'PRODUCTION_GREEN',
+  main_sha:'44e52cfc905b7864c31c2921ea5e34146a02361a',tree_sha:'a29c7d6fe3e7fbfae120000020303dc32ef55419',
+  production_pages_deploy_run:35860073843,production_live_resource_integrity_run:35860150517,
+  products_browser_proof_run:35860150674,products_route_proof_run:35860150585,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:237,title:'Mobile, Touch, Keyboard & Dense-Workspace Ergonomics',
+    release:467,build:238,title:'Attention, Notifications & Operator Signal Cleanup',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35858747170,current_application_quality_run:35858747245,
-      it_admin_runtime_proof_run:35858747280,branch_hygiene_run:35858746503
+      system_gate_run:35859876994,current_application_quality_run:35859877349,
+      it_admin_runtime_proof_run:35859876896,branch_hygiene_run:35859877139
     },
     production_proofs:{
-      production_pages_deploy_run:35858981317,production_live_resource_integrity_run:35859107887,
-      products_browser_proof_run:35859108079,products_route_proof_run:35859107986
+      production_pages_deploy_run:35860073843,production_live_resource_integrity_run:35860150517,
+      products_browser_proof_run:35860150674,products_route_proof_run:35860150585
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -142,8 +142,8 @@ export async function onRequestGet(context){
     truth_notes:[
       'Build 237 source is the exact last fully verified Development checkpoint.',
       'Build 237 Production is GREEN on the identical source tree; Build 238 converges presentation over existing attention authorities.',
-      'Development proofs: System 35858747170, Quality 35858747245, I.T. 35858747280, Hygiene 35858746503.',
-      'Production proofs: Pages 35858981317, Live Resources 35859107887, Product Browser 35859108079, Product Route 35859107986.',
+      'Development proofs: System 35859876994, Quality 35859877349, I.T. 35859876896, Hygiene 35859877139.',
+      'Production proofs: Pages 35860073843, Live Resources 35860150517, Product Browser 35860150674, Product Route 35860150585.',
       'Build 236 Attention, Notifications & Operator Signal Cleanup is the active Development candidate.',
       'Build 238 adds no schema change, new API authority or automatic business/provider mutation, and Production remains closed until exact-head proof.'
     ],
