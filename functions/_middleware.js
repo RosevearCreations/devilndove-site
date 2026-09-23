@@ -12,6 +12,7 @@ import {
   resolveAppModuleRequestUser,
 } from './api/_lib/appModuleSessionGuard.js';
 import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appModuleRoutes.js';
+import { protectMutationOrigin } from './api/_lib/csrfOriginProtection.js';
 
 // Build 159: Product Admin returning-browser cache coherence.
 // Build 160 layers a read-only Product Production browser recovery client on top of the
@@ -139,6 +140,8 @@ function withPlatformClient(response, request) {
   const contentType = String(response?.headers?.get('Content-Type') || '').toLowerCase();
   if (!contentType.includes('text/html')) return response;
   const pathname = new URL(request.url).pathname;
+  const mutationOriginDenied = protectMutationOrigin(request);
+  if (mutationOriginDenied) return finish(mutationOriginDenied, request);
   const normalizedPath = normalizedPagePath(pathname);
   const isProductsPage = normalizedPath === '/admin/products/';
   if (isProductsPage) {
