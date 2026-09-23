@@ -1,3 +1,4 @@
+// Release 467 Build 239 — Admin Surface & Navigation Consolidation.
 // Release 467 Build 238 — current I.T. authority renderer over exact Build 233 GREEN restart boundary.
 document.addEventListener('DOMContentLoaded',()=>{
   const mount=document.getElementById('itControlTowerMount'); if(!mount)return;

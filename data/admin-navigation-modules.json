@@ -8,7 +8,7 @@
     "financials",
     "it"
   ],
-  "navigation_note": "Current operational navigation only. Historical release/build evidence remains in Git history and release authorities, not in the active tool menu.",
+  "navigation_note": "Current operational navigation only. Build 239 removes duplicate menu entry points while preserving every deep-link route and canonical business authority.",
   "modules": [
     {
       "key": "storefront",
@@ -378,14 +378,6 @@
             {
               "href": "/admin/reliability/",
               "label": "Reliability"
-            },
-            {
-              "href": "/admin/local-seo-review/",
-              "label": "Search & SEO Review"
-            },
-            {
-              "href": "/admin/visual-polish/",
-              "label": "Responsive Layout Review"
             }
           ]
         },
@@ -445,5 +437,14 @@
         }
       ]
     }
-  ]
+  ],
+  "consolidation": {
+    "build": 239,
+    "policy": "one_canonical_navigation_entry_per_route",
+    "preserved_deep_links": true,
+    "canonical_owners": {
+      "/admin/local-seo-review/": "storefront",
+      "/admin/visual-polish/": "storefront"
+    }
+  }
 }

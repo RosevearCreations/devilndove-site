@@ -30,6 +30,7 @@ const ADMIN_RESUME_WORK_REVISION = '467b235-resume-work-v1';
 const ADMIN_SAVE_CONFIDENCE_REVISION = '467b236-save-confidence-v1';
 const ADMIN_ERGONOMICS_REVISION = '467b237-ergonomics-v1';
 const ADMIN_ATTENTION_SIGNALS_REVISION = '467b238-attention-signals-v1';
+const ADMIN_SURFACE_CONSOLIDATION_REVISION = '467b239-admin-surface-consolidation-v1';
 const STOREFRONT_DISCOVERY_REVISION = '467b198-product-image-fidelity';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
@@ -86,6 +87,7 @@ function adminQolMarkup() {
     `<script data-dd-admin-ergonomics-v237="1" defer src="/public/js/admin-ergonomics-v237.js?v=${ADMIN_ERGONOMICS_REVISION}"></script>`,
     `<link data-dd-admin-attention-signals-v238="1" rel="stylesheet" href="/css/admin-attention-signals-v238.css?v=${ADMIN_ATTENTION_SIGNALS_REVISION}">`,
     `<script data-dd-admin-attention-signals-v238="1" defer src="/public/js/admin-attention-signals-v238.js?v=${ADMIN_ATTENTION_SIGNALS_REVISION}"></script>`,
+    `<script data-dd-admin-surface-consolidation-v239="1" defer src="/public/js/admin-surface-consolidation-v239.js?v=${ADMIN_SURFACE_CONSOLIDATION_REVISION}"></script>`,
   ].join('');
 }
 function productsPlatformMarkup() {
