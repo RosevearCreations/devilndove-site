@@ -394,6 +394,16 @@ document.addEventListener('DOMContentLoaded', () => {
       privacy:{...state.privacy}
     };
   }
+  function routeEvidence(){
+    return Object.freeze({
+      build:BUILD,
+      storage:'sessionStorage',
+      remote_recording:false,
+      pathname_only:true,
+      route_visits:{...(state.route_visits||{})},
+      transitions:{...(state.transitions||{})}
+    });
+  }
   function captureBaseline(){
     if(state.baseline) return {...state.baseline};
     if(performance.now()-pageStarted<STARTUP_WINDOW_MS) return null;
@@ -445,6 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
     version:VERSION,
     snapshot,
     captureBaseline,
+    routeEvidence,
     storage:'sessionStorage',
     remote_recording:false
   });

@@ -79,9 +79,12 @@ pc=p.get('production_checkpoint') or {}
 if int(p.get('build') or 0)==252:
     q(pc.get('build')==251 and pc.get('main_sha')=='f8e15d07e97e9a4e2953a65d09b494c73a36192a' and pc.get('tree_sha')=='2d6d06e321693779cee55ed2dd892bff3b364a36','Build 252 Production predecessor checkpoint mismatch')
 
-for source,label in ((it,'I.T. tower'),(reliability,'Reliability'),(preflight,'Preflight')):
-    q('252' in source and 'Cross-Device Accessibility Acceptance Refresh' in source,f'{label} must identify Build 252')
-q('Build 252' in guide and ('Build 252 candidate' in guide or 'Build 253 candidate' in guide),'I.T. guide must retain Build 252 provenance')
+if int(p.get('build') or 0)==252:
+    for source,label in ((it,'I.T. tower'),(reliability,'Reliability'),(preflight,'Preflight')):
+        q('252' in source and 'Cross-Device Accessibility Acceptance Refresh' in source,f'{label} must identify Build 252')
+else:
+    q((a.get('final_closure') or {}).get('ingested_by_build')==253,'Build 252 successor must retain externally ingested closure')
+q('Build 252' in guide or (a.get('final_closure') or {}).get('dev_sha')=='ec749569908b2ebbf393ca1ec2181e586a10f548','I.T./authority provenance must retain Build 252 closure')
 
 for k,v in (a.get('safety') or {}).items():
     q(v is False,f'Build 252 safety drift: {k}')
