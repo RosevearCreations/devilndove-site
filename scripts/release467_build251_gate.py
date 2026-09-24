@@ -21,7 +21,7 @@ relcss=t('css/csp-style-surface-v251.css')
 road=t('docs/operations/RELEASE_467_REFINEMENT_OUTCOMES_AUTONOMOUS_BUILDS_249_256.md')
 sysgate=t('scripts/current_system_gate_provenance_gate.py')
 
-q(a.get('build')==251 and a.get('state')=='DEVELOPMENT_CANDIDATE','Build 251 identity/state mismatch')
+q(a.get('build')==251 and a.get('state') in ('DEVELOPMENT_CANDIDATE','PRODUCTION_GREEN'),'Build 251 identity/state mismatch')
 pred=a.get('predecessor') or {}
 q(pred.get('development_sha')=='f2eb36f2cae76e44a7e225c38fb4102cf1f9a84d','Build 250 predecessor dev SHA mismatch')
 q(pred.get('production_main_sha')=='4bbd5ffdd7063bdc7bb864c416b8a6f08cf2582e','Build 250 predecessor main SHA mismatch')
@@ -71,7 +71,20 @@ for name,body in raw_style:
 
 q('Build 252 — Cross-Device Accessibility Acceptance Refresh' in road,'Build 252 successor missing')
 q("run_current_contract('scripts/release467_build251_gate.py','Release 467 Build 251')" in sysgate,'System Gate must invoke Build 251')
-q(p.get('build')==251 and p.get('next_build')==252 and p.get('state')=='DEVELOPMENT_GREEN','current authority must expose Build 251 and successor 252')
+pb=int(p.get('build') or 0)
+if pb==251:
+    q(p.get('next_build')==252 and p.get('state')=='DEVELOPMENT_GREEN','current authority must expose Build 251 and successor 252')
+elif pb>=252:
+    q(p.get('state')=='DEVELOPMENT_GREEN' and 'release467-build251-csp-style-injection-surface-hardening.json' in (p.get('current_release_authorities') or []),'verified successors must retain Build 251 authority')
+else:
+    q(False,'current authority must be Build 251 or a verified successor')
+if a.get('state')=='PRODUCTION_GREEN':
+    final=a.get('final_closure') or {}; prod=a.get('production_checkpoint') or {}
+    q(final.get('dev_sha')=='4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd' and final.get('tree_sha')=='2d6d06e321693779cee55ed2dd892bff3b364a36','Build 251 final Development closure mismatch')
+    proofs=final.get('proofs') or {}
+    q(proofs.get('system_gate_run')==36030944185 and proofs.get('current_application_quality_run')==36030944073 and proofs.get('it_admin_runtime_proof_run')==36030944009 and proofs.get('dedicated_gate_run')==36030944096,'Build 251 retained PR proof set mismatch')
+    q((final.get('branch_hygiene') or {}).get('run_id') is None,'Build 251 must not fabricate unavailable push-only hygiene run ID')
+    q(prod.get('main_sha')=='f8e15d07e97e9a4e2953a65d09b494c73a36192a' and prod.get('tree_sha')=='2d6d06e321693779cee55ed2dd892bff3b364a36' and prod.get('state')=='PRODUCTION_GREEN','Build 251 Production closure mismatch')
 
 for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 251 safety drift: {k}')
 node('functions/_middleware.js')
