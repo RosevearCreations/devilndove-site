@@ -2,7 +2,7 @@
   "release": 467,
   "build": 247,
   "title": "Non-Product Visual Coverage & Media Placement Closure",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build247-non-product-visual-coverage-media-placement-closure",
   "predecessor": {
     "build": 246,
@@ -92,5 +92,21 @@
       "build_specific_proof_run": 35934551031,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "6b201a410636d3e861e7a1e554c04afd16e81ce3",
+    "tree_sha": "a581c34f7ad45f9a7fd75411f917df8f8f1f5a46",
+    "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 248
+  },
+  "production_checkpoint": {
+    "main_sha": "7a51ae487552d3b2d7bdf4a048ef33380ccaa917",
+    "tree_sha": "a581c34f7ad45f9a7fd75411f917df8f8f1f5a46",
+    "production_pages_deploy_run": 35940742900,
+    "production_live_resource_integrity_run": 35940804209,
+    "products_browser_proof_run": 35940804268,
+    "products_route_proof_run": 35940804298,
+    "build_specific_proof_run": 35940744345,
+    "state": "PRODUCTION_GREEN"
   }
 }
