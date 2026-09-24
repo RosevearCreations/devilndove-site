@@ -2,7 +2,7 @@
 // Admin Home only. Browser-local/session-only; pathname counts only; no remote telemetry.
 (() => {
   'use strict';
-  const normalized=String(location.pathname||'/').replace(/\\+$/,'')||'/';
+  const normalized=String(location.pathname||'/').replace(/\/+$/,'')||'/';
   if(normalized!=='/admin' && normalized!=='/admin/index.html') return;
   if(!window.DDAuth?.apiFetch || window.DDStartupReadBudgetV250) return;
   const BUILD=250;
