@@ -1,0 +1,135 @@
+{
+  "release": 467,
+  "build": 253,
+  "title": "Session & Abuse-Control Runtime Evidence",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build253-session-abuse-control-runtime-evidence",
+  "predecessor": {
+    "build": 252,
+    "title": "Cross-Device Accessibility Acceptance Refresh",
+    "development_sha": "ec749569908b2ebbf393ca1ec2181e586a10f548",
+    "development_tree_sha": "bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2",
+    "production_main_sha": "3c14d72ed481035d82f3cffa2d16f733f603f1d9",
+    "production_tree_sha": "bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2",
+    "development_proofs": {
+      "system_gate_run": 36042886754,
+      "current_application_quality_run": 36042887036,
+      "it_admin_runtime_proof_run": 36042887117,
+      "branch_hygiene_run": 36042886574,
+      "build_specific_proof_run": 36042887105
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36043164640,
+      "production_live_resource_integrity_run": 36043274946,
+      "products_browser_proof_run": 36043274912,
+      "products_route_proof_run": 36043274915,
+      "build_specific_proof_run": 36043164318
+    },
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true
+  },
+  "scope": {
+    "cookie_first_session_runtime": true,
+    "cookie_over_bearer_compatibility_runtime": true,
+    "csrf_same_origin_runtime": true,
+    "csrf_cross_origin_denial_runtime": true,
+    "bearer_automation_origin_compatibility_runtime": true,
+    "login_throttle_runtime": true,
+    "throttle_429_retry_after_runtime": true,
+    "revoke_other_sessions_runtime": true,
+    "preserve_current_session_runtime": true,
+    "admin_step_up_required_runtime": true,
+    "admin_step_up_success_runtime": true,
+    "no_secret_output_runtime": true
+  },
+  "acceptance_matrix": {
+    "session_transport": [
+      "HttpOnly cookie is accepted by server session resolver",
+      "Bearer remains compatible for non-browser automation",
+      "browser-readable session secret is not required"
+    ],
+    "origin_guard": [
+      "same-origin mutation accepted",
+      "cross-origin browser mutation denied 403",
+      "Bearer automation lane remains compatible"
+    ],
+    "throttling": [
+      "first 8 login-budget attempts accepted within 15-minute window",
+      "9th attempt denied",
+      "429 includes Retry-After without exposing fingerprint or identity"
+    ],
+    "session_control": [
+      "current session resolves from cookie",
+      "other sessions are selected for deletion",
+      "current session id is excluded and preserved"
+    ],
+    "step_up": [
+      "missing password confirmation returns requires_step_up",
+      "valid password confirmation succeeds against current authenticated session",
+      "password value is never emitted"
+    ]
+  },
+  "implementation": {
+    "mode": "BOUNDED_RUNTIME_ACCEPTANCE_EVIDENCE",
+    "runtime_feature_change": false,
+    "runtime_evidence_script": "scripts/release467_build253_runtime_evidence.mjs",
+    "dedicated_gate": "scripts/release467_build253_gate.py",
+    "workflow": ".github/workflows/release467-build253-session-abuse-control-runtime-evidence.yml",
+    "retained_runtime_authorities": [
+      "functions/api/_lib/accountAuthCompat.js",
+      "functions/api/_lib/csrfOriginProtection.js",
+      "functions/api/_lib/authAbuseGuard.js",
+      "functions/api/_lib/adminStepUp.js",
+      "functions/api/auth/revoke-other-sessions.js",
+      "functions/api/auth/login.js"
+    ]
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "production_business_data_copy": false,
+    "real_credentials_used": false,
+    "secret_capture": false,
+    "session_token_logged": false,
+    "password_logged": false,
+    "throttle_fingerprint_logged": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build253_gate.py",
+    "workflow": ".github/workflows/release467-build253-session-abuse-control-runtime-evidence.yml",
+    "next_build": 254,
+    "next_build_title": "Operator Journey Friction Review",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "ec749569908b2ebbf393ca1ec2181e586a10f548",
+      "tree": "bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2",
+      "system_gate_run": 36042886754,
+      "quality_run": 36042887036,
+      "it_admin_runtime_run": 36042887117,
+      "repository_hygiene_run": 36042886574,
+      "build_specific_proof_run": 36042887105,
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "3c14d72ed481035d82f3cffa2d16f733f603f1d9",
+      "tree_sha": "bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2",
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true,
+      "production_pages_deploy_run": 36043164640,
+      "production_live_resource_integrity_run": 36043274946,
+      "products_browser_proof_run": 36043274912,
+      "products_route_proof_run": 36043274915,
+      "build_specific_proof_run": 36043164318
+    }
+  }
+}

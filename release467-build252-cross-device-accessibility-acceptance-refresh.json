@@ -2,7 +2,7 @@
   "release": 467,
   "build": 252,
   "title": "Cross-Device Accessibility Acceptance Refresh",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build252-cross-device-accessibility-acceptance-refresh",
   "predecessor": {
     "build": 251,
@@ -159,5 +159,30 @@
       "products_route_proof_run": 36031748437,
       "build_specific_proof_run": 36031593481
     }
+  },
+  "final_closure": {
+    "dev_sha": "ec749569908b2ebbf393ca1ec2181e586a10f548",
+    "tree_sha": "bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2",
+    "proofs": {
+      "system_gate_run": 36042886754,
+      "current_application_quality_run": 36042887036,
+      "it_admin_runtime_proof_run": 36042887117,
+      "branch_hygiene_run": 36042886574
+    },
+    "dedicated_gate_run": 36042887105,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 253,
+    "recorded_by": "Build 253 restart ingestion; not self-recorded by Build 252"
+  },
+  "production_checkpoint": {
+    "main_sha": "3c14d72ed481035d82f3cffa2d16f733f603f1d9",
+    "tree_sha": "bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2",
+    "production_pages_deploy_run": 36043164640,
+    "production_live_resource_integrity_run": 36043274946,
+    "products_browser_proof_run": 36043274912,
+    "products_route_proof_run": 36043274915,
+    "build_specific_proof_run": 36043164318,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
