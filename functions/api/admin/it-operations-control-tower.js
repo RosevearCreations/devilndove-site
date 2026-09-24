@@ -1,27 +1,27 @@
-// Release 467 Build 249 — runtime measurement candidate over exact Build 248 GREEN predecessor.
+// Release 467 Build 250 — startup/provider read-budget candidate over exact Build 249 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=249;
-const TITLE='Refinement Runtime Measurement & Outcome Baseline';
-const AUTHORITY='release467-build249-refinement-runtime-measurement-outcome-baseline';
-const EVIDENCE_ID='r467-b248-green-35942841810-35943937792';
+const BUILD=250;
+const TITLE='Startup & Provider Read-Budget Verification';
+const AUTHORITY='release467-build250-startup-provider-read-budget-verification';
+const EVIDENCE_ID='r467-b249-green-35945324462-35945579057';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:248,title:'Refinement Outcomes Review & Roadmap Renewal',state:'DEVELOPMENT_GREEN',
-  dev_sha:'2f46181a3c92568c2b192a83929a85f72a2b4374',tree_sha:'2db3a312cd0e7a6e24b07de4495d1d97898c7028',
-  system_gate_run:35942841810,current_application_quality_run:35942841817,it_admin_runtime_proof_run:35942841820,
-  branch_hygiene_run:35942841826,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:249,title:'Refinement Runtime Measurement & Outcome Baseline',state:'DEVELOPMENT_GREEN',
+  dev_sha:'fe7ac18156f2cbe83c67536be27b77756d29c696',tree_sha:'bec700bf173ef7cc07b74aafdde4db6d362faad1',
+  system_gate_run:35945324462,current_application_quality_run:35945324867,it_admin_runtime_proof_run:35945324872,
+  branch_hygiene_run:35945324865,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:248,title:'Refinement Outcomes Review & Roadmap Renewal',state:'PRODUCTION_GREEN',
-  main_sha:'e6ed352b5fe9f32b2cd6d049b00239fd643ebbc6',tree_sha:'2db3a312cd0e7a6e24b07de4495d1d97898c7028',
-  production_pages_deploy_run:35943937792,production_live_resource_integrity_run:35944021002,
-  products_browser_proof_run:35944020958,products_route_proof_run:35944020834,remote_d1_queries:0
+  release:467,build:249,title:'Refinement Runtime Measurement & Outcome Baseline',state:'PRODUCTION_GREEN',
+  main_sha:'94e4561f6b47337538a23ef2404f456237961ca3',tree_sha:'bec700bf173ef7cc07b74aafdde4db6d362faad1',
+  production_pages_deploy_run:35945579057,production_live_resource_integrity_run:35945652794,
+  products_browser_proof_run:35945652743,products_route_proof_run:35945652805,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 249 Refinement Runtime Measurement Outcome Baseline'
+  'Release 467 Build 250 Startup Provider Read-Budget Verification'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:248,title:'Refinement Outcomes Review & Roadmap Renewal',
+    release:467,build:249,title:'Refinement Runtime Measurement & Outcome Baseline',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35934272420,current_application_quality_run:35934272137,
-      it_admin_runtime_proof_run:35934272393,branch_hygiene_run:35942841826
+      system_gate_run:35945324462,current_application_quality_run:35945324867,
+      it_admin_runtime_proof_run:35945324872,branch_hygiene_run:35945324865
     },
     production_proofs:{
-      production_pages_deploy_run:35943937792,production_live_resource_integrity_run:35944021002,
-      products_browser_proof_run:35944020958,products_route_proof_run:35944020834
+      production_pages_deploy_run:35945579057,production_live_resource_integrity_run:35945652794,
+      products_browser_proof_run:35945652743,products_route_proof_run:35945652805
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 250 follows only after exact Build 249 Production GREEN.'
+    next_build:'Build 251 follows only after exact Build 250 Production GREEN.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 249 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 250 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -102,7 +102,7 @@ function markdownReport(pack){
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Current predecessor: Build 248 Refinement Outcomes Review & Roadmap Renewal
+- Current predecessor: Build 249 Refinement Runtime Measurement & Outcome Baseline
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -121,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:249,title:TITLE,authority:'release467-build249-refinement-runtime-measurement-outcome-baseline.json'},
+        current_closure_candidate:{release:467,build:250,title:TITLE,authority:'release467-build250-startup-provider-read-budget-verification.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -140,12 +140,12 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 248 is the exact last fully verified Development checkpoint.',
-      'Build 248 Production is GREEN on the identical tree 2db3a312cd0e7a6e24b07de4495d1d97898c7028.',
-      'Development proofs: System 35942841810, Quality 35942841817, I.T. 35942841820, Hygiene 35942841826.',
-      'Production proofs: Pages 35943937792, Live Resources 35944021002, Product Browser 35944020958, Product Route 35944020834.',
-      'Build 249 Refinement Runtime Measurement & Outcome Baseline is the active Development candidate.',
-      'Build 249 measurement is browser-local/session-only and captures no query values, payloads, headers, secrets or remote telemetry.'
+      'Build 249 is the exact last fully verified Development checkpoint.',
+      'Build 249 Production is GREEN on the identical tree bec700bf173ef7cc07b74aafdde4db6d362faad1.',
+      'Development proofs: System 35945324462, Quality 35945324867, I.T. 35945324872, Hygiene 35945324865.',
+      'Production proofs: Pages 35945579057, Live Resources 35945652794, Product Browser 35945652743, Product Route 35945652805.',
+      'Build 250 Startup & Provider Read-Budget Verification is the active Development candidate.',
+      'Build 250 verifies browser-local startup ceilings and Development-only provider rows_read with zero Production D1 contact or business-data mutation.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,

@@ -1,0 +1,176 @@
+name: Release 467 Build 250 Startup Provider Read-Budget Verification
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build 250 source contract
+        run: python scripts/release467_build250_gate.py
+      - name: Retain Build 249, Build 240 and Build 176 contracts
+        run: |
+          python scripts/release467_build249_gate.py
+          python scripts/release467_build240_gate.py
+          python scripts/release467_build176_gate.py
+
+  development-provider-read-budget:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Prove exact Development source and D1 identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test -n "${CLOUDFLARE_API_TOKEN}"
+          grep -q '^name = "devilndove-site"$' wrangler.toml
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'devilndove-prod' wrangler.toml
+          npx --yes wrangler@4.128.0 d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/build250-d1-info.json
+          python - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/build250-d1-info.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          rows=list(walk(data))
+          ids={str(r.get('uuid') or r.get('id') or '') for r in rows}
+          names={str(r.get('name') or '') for r in rows}
+          assert os.environ['EXPECTED_DEV_D1_DATABASE_ID'] in ids,(ids,names)
+          assert os.environ['DEV_D1_DATABASE_NAME'] in names,(ids,names)
+          print('EXACT DEVELOPMENT D1 IDENTITY: PASS')
+          PY
+
+      - name: Measure Today Tasks provider rows_read
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$(grep -v '^[[:space:]]*--' scripts/release467_build250_today_tasks_measurement.sql)" > /tmp/build250-today.json
+          python - <<'PY'
+          import json
+          raw=json.load(open('/tmp/build250-today.json'))
+          reads=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None: reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(raw)
+          today_rows_read=sum(reads)
+          assert len(reads)>=13,('expected at least 13 statement metadata rows',len(reads))
+          assert today_rows_read <= 15000,('Today Tasks rows_read budget exceeded',today_rows_read,15000)
+          open('/tmp/build250-today-rows.txt','w').write(str(today_rows_read))
+          print('TODAY_TASKS_PROVIDER_ROWS_READ=',today_rows_read,'CEILING=',15000)
+          PY
+
+      - name: Measure Seller Daily provider rows_read
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$(grep -v '^[[:space:]]*--' scripts/release467_build250_seller_daily_measurement.sql)" > /tmp/build250-seller.json
+          python - <<'PY'
+          import json
+          raw=json.load(open('/tmp/build250-seller.json'))
+          reads=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None: reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(raw)
+          seller_rows_read=sum(reads)
+          assert len(reads)>=1,('expected Seller Daily provider metadata',len(reads))
+          assert seller_rows_read <= 10000,('Seller Daily rows_read budget exceeded',seller_rows_read,10000)
+          open('/tmp/build250-seller-rows.txt','w').write(str(seller_rows_read))
+          print('SELLER_DAILY_PROVIDER_ROWS_READ=',seller_rows_read,'CEILING=',10000)
+          PY
+
+      - name: Enforce aggregate budget and write sanitized evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os
+          today_rows_read=int(open('/tmp/build250-today-rows.txt').read().strip())
+          seller_rows_read=int(open('/tmp/build250-seller-rows.txt').read().strip())
+          aggregate_rows_read=today_rows_read+seller_rows_read
+          assert aggregate_rows_read <= 25000,('Aggregate rows_read budget exceeded',aggregate_rows_read,25000)
+          hotspots=[
+            {'surface':'operations-today-tasks-read','sql_statement_count':13,'provider_rows_read':today_rows_read},
+            {'surface':'dashboard-summary:seller_daily','sql_statement_count':1,'provider_rows_read':seller_rows_read},
+          ]
+          hotspots.sort(key=lambda r:(r['provider_rows_read'],r['sql_statement_count']),reverse=True)
+          evidence={
+            'release':467,'build':250,'title':'Startup & Provider Read-Budget Verification',
+            'exact_development_sha':os.environ.get('GITHUB_SHA',''),
+            'database':'devilndove-dev','database_id':os.environ.get('EXPECTED_DEV_D1_DATABASE_ID',''),
+            'today_tasks_provider_rows_read':today_rows_read,'today_tasks_ceiling':15000,
+            'seller_daily_provider_rows_read':seller_rows_read,'seller_daily_ceiling':10000,
+            'aggregate_provider_rows_read':aggregate_rows_read,'aggregate_ceiling':25000,
+            'hotspots':hotspots,'highest_provider_read_hotspot':hotspots[0]['surface'],
+            'd1_mutation':False,'r2_mutation':False,'production_d1_contact':False,
+            'production_business_data_copy':False,'provider_execution':False,'provider_publication':False,
+            'credentials_emitted':False
+          }
+          open('/tmp/build250-provider-read-budget.json','w',encoding='utf-8').write(json.dumps(evidence,indent=2,sort_keys=True)+'\n')
+          print('AGGREGATE_PROVIDER_ROWS_READ=',aggregate_rows_read,'CEILING=',25000)
+          print('HIGHEST_PROVIDER_READ_HOTSPOT=',hotspots[0]['surface'])
+          PY
+
+      - name: Upload exact-SHA Build 250 provider read-budget evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: build250-provider-read-budget-${{ github.sha }}
+          path: /tmp/build250-provider-read-budget.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Boundary
+        if: always()
+        run: |
+          echo 'D1 target: canonical Development devilndove-dev only'
+          echo 'D1 mutation: ZERO'
+          echo 'R2 mutation: ZERO'
+          echo 'PRODUCTION D1 CONTACT: ZERO'
+          echo 'Production business-data copy: ZERO'
+          echo 'Provider execution/publication: ZERO'

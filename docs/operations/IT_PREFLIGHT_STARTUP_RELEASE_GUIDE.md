@@ -12,22 +12,22 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 249 candidate
+## Current Release 467 restart authority — Build 250 candidate
 
-Build 248 **Refinement Outcomes Review & Roadmap Renewal** is the exact verified predecessor:
+Build 249 **Refinement Runtime Measurement & Outcome Baseline** is the exact verified predecessor:
 
-- Development SHA: `2f46181a3c92568c2b192a83929a85f72a2b4374`
-- Shared tree: `2db3a312cd0e7a6e24b07de4495d1d97898c7028`
-- Development proofs: System `35942841810`, Quality `35942841817`, I.T. `35942841820`, Hygiene `35942841826`
-- Build 248 dedicated proof: `35942841818`
-- Production main: `e6ed352b5fe9f32b2cd6d049b00239fd643ebbc6`
-- Production proofs: Pages `35943937792`, Live Resources `35944021002`, Product Browser `35944020958`, Product Route `35944020834`
-- Build 248 Production-specific proof: `35943937473`
+- Development SHA: `fe7ac18156f2cbe83c67536be27b77756d29c696`
+- Shared tree: `bec700bf173ef7cc07b74aafdde4db6d362faad1`
+- Development proofs: System `35945324462`, Quality `35945324867`, I.T. `35945324872`, Hygiene `35945324865`
+- Build 249 dedicated proof: `35945324387`
+- Production main: `94e4561f6b47337538a23ef2404f456237961ca3`
+- Production proofs: Pages `35945579057`, Live Resources `35945652794`, Product Browser `35945652743`, Product Route `35945652805`
+- Build 249 Production-specific proof: `35945579187`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 249 **Refinement Runtime Measurement & Outcome Baseline** is the active candidate. It adds browser-local, session-only measurement for Admin route transitions, bounded startup request counts, Build 240 cache hits/misses and duplicate-read suppression without capturing query values, payloads, headers, secrets or remote telemetry.
+Build 250 **Startup & Provider Read-Budget Verification** is the active candidate. It enforces browser-local Admin startup ceilings and runs SELECT-only provider rows_read probes against canonical Development D1 only. Production D1 contact/business-data copy, D1/R2 mutation, provider execution/publication, Inventory movement and Finance posting remain closed.
 
-Build 248 is exact-tree Development + Production GREEN. Build 249 remains blocked from Production until its exact Development head is fully GREEN.
+Build 249 is exact-tree Development + Production GREEN. Build 250 remains blocked from Production until its exact Development head, provider budget proof and required release gates are GREEN.
 
 ## Retained historical provenance — Build 171
 

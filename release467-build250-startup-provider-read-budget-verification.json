@@ -1,0 +1,129 @@
+{
+  "release": 467,
+  "build": 250,
+  "title": "Startup & Provider Read-Budget Verification",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build250-startup-provider-read-budget-verification",
+  "predecessor": {
+    "build": 249,
+    "title": "Refinement Runtime Measurement & Outcome Baseline",
+    "development_sha": "fe7ac18156f2cbe83c67536be27b77756d29c696",
+    "development_tree_sha": "bec700bf173ef7cc07b74aafdde4db6d362faad1",
+    "development_proofs": {
+      "system_gate_run": 35945324462,
+      "current_application_quality_run": 35945324867,
+      "it_admin_runtime_proof_run": 35945324872,
+      "branch_hygiene_run": 35945324865,
+      "dedicated_gate_run": 35945324387
+    },
+    "production_main_sha": "94e4561f6b47337538a23ef2404f456237961ca3",
+    "production_tree_sha": "bec700bf173ef7cc07b74aafdde4db6d362faad1",
+    "production_proofs": {
+      "production_pages_deploy_run": 35945579057,
+      "production_live_resource_integrity_run": 35945652794,
+      "products_browser_proof_run": 35945652743,
+      "products_route_proof_run": 35945652805,
+      "build_specific_proof_run": 35945579187
+    },
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true
+  },
+  "scope": {
+    "admin_home_startup_measurement": "BROWSER_LOCAL_FIRST_15_SECONDS",
+    "automatic_api_path_ceiling": 4,
+    "provider_bound_live_read_ceiling": 2,
+    "provider_d1_probe_environment": "DEVELOPMENT_ONLY",
+    "today_tasks_provider_rows_read_ceiling": 15000,
+    "seller_daily_provider_rows_read_ceiling": 10000,
+    "aggregate_provider_rows_read_ceiling": 25000,
+    "repeated_read_hotspot_detection": "PATH_COUNT_AND_SQL_STATEMENT_FANOUT",
+    "query_value_capture": false,
+    "request_payload_capture": false,
+    "response_payload_capture": false,
+    "header_capture": false,
+    "secret_capture": false,
+    "remote_browser_telemetry": false
+  },
+  "measurement": {
+    "state": "EXACT_DEVELOPMENT_MEASURED_GREEN",
+    "local_runtime_source": "public/js/admin-startup-read-budget-v250.js",
+    "today_tasks_sql": "scripts/release467_build250_today_tasks_measurement.sql",
+    "seller_daily_sql": "scripts/release467_build250_seller_daily_measurement.sql",
+    "provider_workflow": ".github/workflows/release467-build250-startup-provider-read-budget-verification.yml",
+    "expected_startup_endpoints": [
+      "/api/admin/contracts/operations-today-tasks-read",
+      "/api/admin/dashboard-summary"
+    ],
+    "source_statement_fanout": {
+      "operations_today_tasks_read": 13,
+      "seller_daily_summary": 1
+    },
+    "current_hotspot": "operations-today-tasks-read",
+    "current_hotspot_reason": "Exact Development provider measurement: Operations Today Tasks read 1,132 rows across 13 SELECT statements versus Seller Daily 1,046 rows in one SELECT; both and aggregate remain well below hard ceilings.",
+    "synthetic_samples": false,
+    "source_dev_sha": "14f1d1f9d29988d39902dc6667230a611fb0018e",
+    "source_dev_tree": "42e3797d5a575af10da0aa9d1d367b41d85908ed",
+    "provider_workflow_run": 35998730536,
+    "provider_job_id": 107629846131,
+    "provider_evidence_artifact_id": 10807715341,
+    "provider_evidence_artifact_name": "build250-provider-read-budget-14f1d1f9d29988d39902dc6667230a611fb0018e",
+    "today_tasks_provider_rows_read": 1132,
+    "seller_daily_provider_rows_read": 1046,
+    "aggregate_provider_rows_read": 2178,
+    "today_tasks_headroom_rows": 13868,
+    "seller_daily_headroom_rows": 8954,
+    "aggregate_headroom_rows": 22822,
+    "highest_provider_read_hotspot": "operations-today-tasks-read",
+    "provider_measurement_mutation": false,
+    "production_d1_contact": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "production_business_data_copy": false,
+    "production_mutation": false,
+    "synthetic_business_evidence": false,
+    "personal_data_capture": false,
+    "secret_capture": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build250_gate.py",
+    "workflow": ".github/workflows/release467-build250-startup-provider-read-budget-verification.yml",
+    "admin_home_runtime": "public/js/admin-startup-read-budget-v250.js",
+    "exact_dev_provider_job": "development-provider-read-budget",
+    "provider_evidence_artifact": "build250-provider-read-budget-${GITHUB_SHA}",
+    "next_build": 251,
+    "next_build_title": "CSP Style Injection-Surface Hardening",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "fe7ac18156f2cbe83c67536be27b77756d29c696",
+      "tree": "bec700bf173ef7cc07b74aafdde4db6d362faad1",
+      "system_gate_run": 35945324462,
+      "quality_run": 35945324867,
+      "it_admin_runtime_run": 35945324872,
+      "repository_hygiene_run": 35945324865,
+      "dedicated_gate_run": 35945324387,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "94e4561f6b47337538a23ef2404f456237961ca3",
+      "tree_sha": "bec700bf173ef7cc07b74aafdde4db6d362faad1",
+      "production_pages_deploy_run": 35945579057,
+      "production_live_resource_integrity_run": 35945652794,
+      "products_browser_proof_run": 35945652743,
+      "products_route_proof_run": 35945652805,
+      "build_specific_proof_run": 35945579187,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_verified_development": true
+    }
+  }
+}
