@@ -1,0 +1,43 @@
+name: Release 467 Build 252 Cross-Device Accessibility Acceptance Refresh
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build252:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check functions/_middleware.js
+          node --check public/js/admin-ergonomics-v237.js
+          node --check public/js/media-carousel.js
+      - name: Recover exact Build 251 predecessor workflow evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "BUILD251 DEVELOPMENT PUSH RUNS"
+          gh run list --repo "${GITHUB_REPOSITORY}" --commit 4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd --limit 100 --json databaseId,workflowName,event,status,conclusion,headSha
+          echo "BUILD251 PRODUCTION MAIN RUNS"
+          gh run list --repo "${GITHUB_REPOSITORY}" --commit f8e15d07e97e9a4e2953a65d09b494c73a36192a --limit 100 --json databaseId,workflowName,event,status,conclusion,headSha
+      - name: Build 252 cross-device accessibility contract
+        run: python scripts/release467_build252_gate.py
+      - name: Retain predecessor security and ergonomics contracts
+        run: |
+          python scripts/release467_build251_gate.py
+          python scripts/release467_build245_gate.py
+          python scripts/release467_build237_gate.py
