@@ -11,22 +11,30 @@
     "development_tree_sha": "2d6d06e321693779cee55ed2dd892bff3b364a36",
     "candidate_pr": 344,
     "candidate_pr_head_sha": "0aa691e42d996f2fec28c8bd3f02bdafb82c34db",
-    "candidate_pr_proofs": {
-      "system_gate_run": 36030944185,
-      "current_application_quality_run": 36030944073,
-      "it_admin_runtime_proof_run": 36030944009,
-      "dedicated_gate_run": 36030944096
-    },
     "branch_hygiene": {
       "workflow": ".github/workflows/repository-branch-hygiene.yml",
       "trigger": "push_to_dev",
-      "run_id": null,
-      "evidence_note": "The connected GitHub PR-run wrapper does not expose push-only workflow runs; no run ID is invented."
+      "run_id": 36031272718,
+      "state": "GREEN"
     },
     "production_main_sha": "f8e15d07e97e9a4e2953a65d09b494c73a36192a",
     "production_tree_sha": "2d6d06e321693779cee55ed2dd892bff3b364a36",
     "state": "PRODUCTION_GREEN",
-    "same_tree": true
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36031272271,
+      "current_application_quality_run": 36031272780,
+      "it_admin_runtime_proof_run": 36031272416,
+      "branch_hygiene_run": 36031272718,
+      "build_specific_proof_run": 36031272407
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36031593630,
+      "production_live_resource_integrity_run": 36031748408,
+      "products_browser_proof_run": 36031748531,
+      "products_route_proof_run": 36031748437,
+      "build_specific_proof_run": 36031593481
+    }
   },
   "scope": {
     "phone_layout_reproof": true,
@@ -44,22 +52,53 @@
   },
   "acceptance_matrix": {
     "phone": {
-      "breakpoints": ["<=420px", "<=720px"],
-      "contracts": ["16px form controls at narrow phone width", "single-column grids", "reachable local overflow", "coarse-pointer targets"]
+      "breakpoints": [
+        "<=420px",
+        "<=720px"
+      ],
+      "contracts": [
+        "16px form controls at narrow phone width",
+        "single-column grids",
+        "reachable local overflow",
+        "coarse-pointer targets"
+      ]
     },
     "tablet": {
-      "breakpoints": ["721-1023px", "721-1050px"],
-      "contracts": ["two-column bounded layouts where appropriate", "Product workspace reflow", "Packaging Studio reflow"]
+      "breakpoints": [
+        "721-1023px",
+        "721-1050px"
+      ],
+      "contracts": [
+        "two-column bounded layouts where appropriate",
+        "Product workspace reflow",
+        "Packaging Studio reflow"
+      ]
     },
     "desktop": {
-      "breakpoints": [">=1024px"],
-      "contracts": ["centered shell", "wide workspace containment", "local table scrolling instead of document clipping"]
+      "breakpoints": [
+        ">=1024px"
+      ],
+      "contracts": [
+        "centered shell",
+        "wide workspace containment",
+        "local table scrolling instead of document clipping"
+      ]
     },
     "keyboard_and_focus": {
-      "contracts": ["focus-visible outline", "keyboard Escape recovery", "table/card toggle aria-pressed state", "no presentation-only network mutation"]
+      "contracts": [
+        "focus-visible outline",
+        "keyboard Escape recovery",
+        "table/card toggle aria-pressed state",
+        "no presentation-only network mutation"
+      ]
     },
     "motion": {
-      "contracts": ["global reduced-motion suppression", "adaptive shell reduced-motion behavior", "storefront reduced-motion behavior", "carousel reduced-motion awareness"]
+      "contracts": [
+        "global reduced-motion suppression",
+        "adaptive shell reduced-motion behavior",
+        "storefront reduced-motion behavior",
+        "carousel reduced-motion awareness"
+      ]
     }
   },
   "implementation": {
@@ -102,13 +141,23 @@
     "development": {
       "sha": "4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd",
       "tree": "2d6d06e321693779cee55ed2dd892bff3b364a36",
-      "proof_basis": "Build 251 PR head GREEN with identical merged Development tree; push-only hygiene run ID is intentionally not fabricated."
+      "system_gate_run": 36031272271,
+      "quality_run": 36031272780,
+      "it_admin_runtime_run": 36031272416,
+      "repository_hygiene_run": 36031272718,
+      "build_specific_proof_run": 36031272407,
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
     },
     "production": {
       "main_sha": "f8e15d07e97e9a4e2953a65d09b494c73a36192a",
       "tree_sha": "2d6d06e321693779cee55ed2dd892bff3b364a36",
       "state": "PRODUCTION_GREEN",
-      "same_tree_as_development": true
+      "same_tree_as_development": true,
+      "production_pages_deploy_run": 36031593630,
+      "production_live_resource_integrity_run": 36031748408,
+      "products_browser_proof_run": 36031748531,
+      "products_route_proof_run": 36031748437,
+      "build_specific_proof_run": 36031593481
     }
   }
 }
