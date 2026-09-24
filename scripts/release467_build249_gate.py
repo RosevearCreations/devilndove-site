@@ -17,7 +17,7 @@ budget=t('public/js/admin-read-budget-v240.js')
 road=t('docs/operations/RELEASE_467_REFINEMENT_OUTCOMES_AUTONOMOUS_BUILDS_249_256.md')
 sysgate=t('scripts/current_system_gate_provenance_gate.py')
 
-q(a.get('build')==249 and a.get('state')=='DEVELOPMENT_CANDIDATE','Build 249 identity/state mismatch')
+q(a.get('build')==249 and a.get('state') in ('DEVELOPMENT_CANDIDATE','PRODUCTION_GREEN'),'Build 249 identity/state mismatch')
 pred=a.get('predecessor') or {}
 q(pred.get('development_sha')=='2f46181a3c92568c2b192a83929a85f72a2b4374','Build 249 predecessor dev SHA mismatch')
 q(pred.get('production_main_sha')=='e6ed352b5fe9f32b2cd6d049b00239fd643ebbc6','Build 249 predecessor main SHA mismatch')
@@ -51,8 +51,21 @@ for token in ('TTL_MS=60_000','coalesced_reads','cache_hits','live_reads'):
 
 q('Build 250 — Startup & Provider Read-Budget Verification' in road,'Build 250 successor missing')
 q("run_current_contract('scripts/release467_build249_gate.py','Release 467 Build 249')" in sysgate,'System Gate must invoke Build 249')
-q(p.get('build')==249 and p.get('next_build')==250 and p.get('state')=='DEVELOPMENT_GREEN','current authority must expose Build 249 and successor 250')
+if p.get('build')==249:
+    q(p.get('next_build')==250 and p.get('state')=='DEVELOPMENT_GREEN','current authority must expose Build 249 and successor 250')
+elif p.get('build')==250:
+    q(p.get('next_build')==251 and p.get('state')=='DEVELOPMENT_GREEN','Build 250 successor must retain Build 249 compatibility')
+else:
+    q(False,'current authority must be Build 249 or direct successor Build 250')
 
+if a.get('state')=='PRODUCTION_GREEN':
+    final=a.get('final_closure') or {};prod=a.get('production_checkpoint') or {}
+    q(final.get('dev_sha')=='fe7ac18156f2cbe83c67536be27b77756d29c696','Build 249 final dev SHA mismatch')
+    q(final.get('tree_sha')=='bec700bf173ef7cc07b74aafdde4db6d362faad1','Build 249 final tree mismatch')
+    q((final.get('proofs') or {}).get('system_gate_run')==35945324462,'Build 249 final System proof mismatch')
+    q(prod.get('main_sha')=='94e4561f6b47337538a23ef2404f456237961ca3','Build 249 Production main mismatch')
+    q(prod.get('tree_sha')=='bec700bf173ef7cc07b74aafdde4db6d362faad1','Build 249 Production tree mismatch')
+    q(prod.get('production_pages_deploy_run')==35945579057 and prod.get('production_live_resource_integrity_run')==35945652794,'Build 249 Production proof mismatch')
 for k,v in (a.get('safety') or {}).items():
     q(v is False,f'Build 249 safety drift: {k}')
 
