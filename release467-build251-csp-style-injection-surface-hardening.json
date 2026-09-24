@@ -79,5 +79,28 @@
     "next_build": 252,
     "next_build_title": "Cross-Device Accessibility Acceptance Refresh",
     "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "f2eb36f2cae76e44a7e225c38fb4102cf1f9a84d",
+      "tree": "41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1",
+      "system_gate_run": 35999263313,
+      "quality_run": 35999263281,
+      "it_admin_runtime_run": 35999263373,
+      "repository_hygiene_run": 35999263534,
+      "dedicated_gate_run": 35999263213,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "4bbd5ffdd7063bdc7bb864c416b8a6f08cf2582e",
+      "tree_sha": "41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1",
+      "production_pages_deploy_run": 35999481927,
+      "production_live_resource_integrity_run": 35999606857,
+      "products_browser_proof_run": 35999606928,
+      "products_route_proof_run": 35999606852,
+      "build_specific_proof_run": 35999481765,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_verified_development": true
+    }
   }
 }
