@@ -82,9 +82,11 @@ if a.get('state')=='PRODUCTION_GREEN':
     final=a.get('final_closure') or {}; prod=a.get('production_checkpoint') or {}
     q(final.get('dev_sha')=='4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd' and final.get('tree_sha')=='2d6d06e321693779cee55ed2dd892bff3b364a36','Build 251 final Development closure mismatch')
     proofs=final.get('proofs') or {}
-    q(proofs.get('system_gate_run')==36030944185 and proofs.get('current_application_quality_run')==36030944073 and proofs.get('it_admin_runtime_proof_run')==36030944009 and proofs.get('dedicated_gate_run')==36030944096,'Build 251 retained PR proof set mismatch')
-    q((final.get('branch_hygiene') or {}).get('run_id') is None,'Build 251 must not fabricate unavailable push-only hygiene run ID')
+    q(proofs=={'system_gate_run':36031272271,'current_application_quality_run':36031272780,'it_admin_runtime_proof_run':36031272416,'branch_hygiene_run':36031272718},'Build 251 retained exact Development proof set mismatch')
+    q(final.get('build_specific_proof_run')==36031272407,'Build 251 retained dedicated Development proof mismatch')
     q(prod.get('main_sha')=='f8e15d07e97e9a4e2953a65d09b494c73a36192a' and prod.get('tree_sha')=='2d6d06e321693779cee55ed2dd892bff3b364a36' and prod.get('state')=='PRODUCTION_GREEN','Build 251 Production closure mismatch')
+    q(prod.get('production_pages_deploy_run')==36031593630 and prod.get('production_live_resource_integrity_run')==36031748408,'Build 251 Production deploy/resource proof mismatch')
+    q(prod.get('products_browser_proof_run')==36031748531 and prod.get('products_route_proof_run')==36031748437 and prod.get('build_specific_proof_run')==36031593481,'Build 251 Production browser/route/build proof mismatch')
 
 for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 251 safety drift: {k}')
 node('functions/_middleware.js')
