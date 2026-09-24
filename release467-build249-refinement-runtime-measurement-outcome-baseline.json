@@ -65,5 +65,28 @@
     "next_build": 250,
     "next_build_title": "Startup & Provider Read-Budget Verification",
     "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "2f46181a3c92568c2b192a83929a85f72a2b4374",
+      "tree": "2db3a312cd0e7a6e24b07de4495d1d97898c7028",
+      "system_gate_run": 35942841810,
+      "quality_run": 35942841817,
+      "it_admin_runtime_run": 35942841820,
+      "repository_hygiene_run": 35942841826,
+      "dedicated_gate_run": 35942841818,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "e6ed352b5fe9f32b2cd6d049b00239fd643ebbc6",
+      "tree_sha": "2db3a312cd0e7a6e24b07de4495d1d97898c7028",
+      "production_pages_deploy_run": 35943937792,
+      "production_live_resource_integrity_run": 35944021002,
+      "products_browser_proof_run": 35944020958,
+      "products_route_proof_run": 35944020834,
+      "build_specific_proof_run": 35943937473,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_verified_development": true
+    }
   }
 }
