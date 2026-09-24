@@ -26,3 +26,7 @@ Build 253 remains blocked from Production until the exact candidate passes the f
 Next authorized release: **Build 254 — Operator Journey Friction Review**.
 
 Future queue exhausted: **false**.
+
+## Current-surface identity
+
+Current Reliability, Deployment Preflight and I.T. operator surfaces identify Release 467 Build 253 while retaining Build 252 as the exact verified Production predecessor.
