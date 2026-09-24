@@ -256,9 +256,9 @@
       "tree": "7da896d6d154460950844b44bc179a8354b836f2",
       "proof_recovery": "LIVE_BY_EXACT_SHA",
       "system_gate_run": 36070577487,
-      "current_application_quality_run": 36070577680,
-      "it_admin_runtime_proof_run": 36070577821,
-      "branch_hygiene_run": 36070578110,
+      "quality_run": 36070577680,
+      "it_admin_runtime_run": 36070577821,
+      "repository_hygiene_run": 36070578110,
       "build_specific_proof_run": 36070577943,
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
     },
