@@ -7,22 +7,22 @@ export const CURRENT_RELIABILITY_TITLE='Cross-Device Accessibility Acceptance Re
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
 export const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:250,title:'Startup & Provider Read-Budget Verification',
-  dev_sha:'f2eb36f2cae76e44a7e225c38fb4102cf1f9a84d',tree_sha:'41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1',
-  system_gate_run:35999263313,current_application_quality_run:35999263281,it_admin_runtime_proof_run:35999263373,
-  branch_hygiene_run:35999263534,exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
+  release:467,build:251,title:'CSP Style Injection-Surface Hardening',
+  dev_sha:'4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd',tree_sha:'2d6d06e321693779cee55ed2dd892bff3b364a36',
+  system_gate_run:36031272271,current_application_quality_run:36031272780,it_admin_runtime_proof_run:36031272416,
+  branch_hygiene_run:36031272718,exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:250,title:'Startup & Provider Read-Budget Verification',state:'DEVELOPMENT_GREEN',
-  dev_sha:'f2eb36f2cae76e44a7e225c38fb4102cf1f9a84d',tree_sha:'41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1',
-  system_gate_run:35999263313,current_application_quality_run:35999263281,it_admin_runtime_proof_run:35999263373,
-  branch_hygiene_run:35999263534,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN'
+  release:467,build:251,title:'CSP Style Injection-Surface Hardening',state:'DEVELOPMENT_GREEN',
+  dev_sha:'4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd',tree_sha:'2d6d06e321693779cee55ed2dd892bff3b364a36',
+  system_gate_run:36031272271,current_application_quality_run:36031272780,it_admin_runtime_proof_run:36031272416,
+  branch_hygiene_run:36031272718,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN'
 });
 export const CURRENT_PRODUCTION=Object.freeze({
-  release:467,build:250,title:'Startup & Provider Read-Budget Verification',state:'PRODUCTION_GREEN',
-  main_sha:'4bbd5ffdd7063bdc7bb864c416b8a6f08cf2582e',tree_sha:'41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1',
-  production_pages_deploy_run:35999481927,production_live_resource_integrity_run:35999606857,
-  products_browser_proof_run:35999606928,products_route_proof_run:35999606852,remote_d1_queries:0
+  release:467,build:251,title:'CSP Style Injection-Surface Hardening',state:'PRODUCTION_GREEN',
+  main_sha:'f8e15d07e97e9a4e2953a65d09b494c73a36192a',tree_sha:'2d6d06e321693779cee55ed2dd892bff3b364a36',
+  production_pages_deploy_run:36031593630,production_live_resource_integrity_run:36031748408,
+  products_browser_proof_run:36031748531,products_route_proof_run:36031748437,remote_d1_queries:0
 });
 export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
