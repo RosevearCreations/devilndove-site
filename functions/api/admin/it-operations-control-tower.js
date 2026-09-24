@@ -58,8 +58,8 @@ function closurePayload(){
     release:467,build:249,title:'Refinement Runtime Measurement & Outcome Baseline',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35934272420,current_application_quality_run:35934272137,
-      it_admin_runtime_proof_run:35934272393,branch_hygiene_run:35945324865
+      system_gate_run:35945324462,current_application_quality_run:35945324867,
+      it_admin_runtime_proof_run:35945324872,branch_hygiene_run:35945324865
     },
     production_proofs:{
       production_pages_deploy_run:35945579057,production_live_resource_integrity_run:35945652794,
@@ -102,7 +102,7 @@ function markdownReport(pack){
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Current predecessor: Build 248 Refinement Outcomes Review & Roadmap Renewal
+- Current predecessor: Build 249 Refinement Runtime Measurement & Outcome Baseline
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -121,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:249,title:TITLE,authority:'release467-build249-refinement-runtime-measurement-outcome-baseline.json'},
+        current_closure_candidate:{release:467,build:250,title:TITLE,authority:'release467-build250-startup-provider-read-budget-verification.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -140,12 +140,12 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 248 is the exact last fully verified Development checkpoint.',
-      'Build 248 Production is GREEN on the identical tree bec700bf173ef7cc07b74aafdde4db6d362faad1.',
+      'Build 249 is the exact last fully verified Development checkpoint.',
+      'Build 249 Production is GREEN on the identical tree bec700bf173ef7cc07b74aafdde4db6d362faad1.',
       'Development proofs: System 35945324462, Quality 35945324867, I.T. 35945324872, Hygiene 35945324865.',
       'Production proofs: Pages 35945579057, Live Resources 35945652794, Product Browser 35945652743, Product Route 35945652805.',
       'Build 250 Startup & Provider Read-Budget Verification is the active Development candidate.',
-      'Build 249 measurement is browser-local/session-only and captures no query values, payloads, headers, secrets or remote telemetry.'
+      'Build 250 verifies browser-local startup ceilings and Development-only provider rows_read with zero Production D1 contact or business-data mutation.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
