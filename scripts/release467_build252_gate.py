@@ -67,14 +67,21 @@ for token in ('/css/current-responsive.css?v=current','admin-ergonomics-v237.css
 
 q('Build 253 — Session & Abuse-Control Runtime Evidence' in road,'Build 253 successor missing')
 q("run_current_contract('scripts/release467_build252_gate.py','Release 467 Build 252')" in sysgate,'System Gate must invoke Build 252')
-q(p.get('build')==252 and p.get('next_build')==253 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must expose Build 252 and successor 253')
-q(p.get('accepted_dev_sha')=='4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd' and p.get('accepted_dev_tree_sha')=='2d6d06e321693779cee55ed2dd892bff3b364a36','Build 252 accepted predecessor must be exact Build 251 Development')
+q(int(p.get('build') or 0)>=252 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 252 or a verified successor')
+if int(p.get('build') or 0)==252:
+    q(p.get('next_build')==253,'Build 252 successor pointer mismatch')
+else:
+    q((a.get('final_closure') or {}).get('dev_sha')=='ec749569908b2ebbf393ca1ec2181e586a10f548','Build 253+ must retain exact Build 252 Development closure')
+    q((a.get('production_checkpoint') or {}).get('main_sha')=='3c14d72ed481035d82f3cffa2d16f733f603f1d9','Build 253+ must retain exact Build 252 Production closure')
+if int(p.get('build') or 0)==252:
+    q(p.get('accepted_dev_sha')=='4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd' and p.get('accepted_dev_tree_sha')=='2d6d06e321693779cee55ed2dd892bff3b364a36','Build 252 accepted predecessor must be exact Build 251 Development')
 pc=p.get('production_checkpoint') or {}
-q(pc.get('build')==251 and pc.get('main_sha')=='f8e15d07e97e9a4e2953a65d09b494c73a36192a' and pc.get('tree_sha')=='2d6d06e321693779cee55ed2dd892bff3b364a36','Build 252 Production predecessor checkpoint mismatch')
+if int(p.get('build') or 0)==252:
+    q(pc.get('build')==251 and pc.get('main_sha')=='f8e15d07e97e9a4e2953a65d09b494c73a36192a' and pc.get('tree_sha')=='2d6d06e321693779cee55ed2dd892bff3b364a36','Build 252 Production predecessor checkpoint mismatch')
 
 for source,label in ((it,'I.T. tower'),(reliability,'Reliability'),(preflight,'Preflight')):
     q('252' in source and 'Cross-Device Accessibility Acceptance Refresh' in source,f'{label} must identify Build 252')
-q('Build 252 candidate' in guide and 'Build 251' in guide,'I.T. guide must expose Build 252 over Build 251 predecessor')
+q('Build 252' in guide and ('Build 252 candidate' in guide or 'Build 253 candidate' in guide),'I.T. guide must retain Build 252 provenance')
 
 for k,v in (a.get('safety') or {}).items():
     q(v is False,f'Build 252 safety drift: {k}')
