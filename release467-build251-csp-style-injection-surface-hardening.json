@@ -1,0 +1,83 @@
+{
+  "release": 467,
+  "build": 251,
+  "title": "CSP Style Injection-Surface Hardening",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build251-csp-style-injection-surface-hardening",
+  "predecessor": {
+    "build": 250,
+    "title": "Startup & Provider Read-Budget Verification",
+    "development_sha": "f2eb36f2cae76e44a7e225c38fb4102cf1f9a84d",
+    "development_tree_sha": "41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1",
+    "development_proofs": {
+      "system_gate_run": 35999263313,
+      "current_application_quality_run": 35999263281,
+      "it_admin_runtime_proof_run": 35999263373,
+      "branch_hygiene_run": 35999263534,
+      "dedicated_gate_run": 35999263213
+    },
+    "production_main_sha": "4bbd5ffdd7063bdc7bb864c416b8a6f08cf2582e",
+    "production_tree_sha": "41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1",
+    "production_proofs": {
+      "production_pages_deploy_run": 35999481927,
+      "production_live_resource_integrity_run": 35999606857,
+      "products_browser_proof_run": 35999606928,
+      "products_route_proof_run": 35999606852,
+      "build_specific_proof_run": 35999481765
+    },
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true
+  },
+  "scope": {
+    "runtime_style_element_nonce": true,
+    "static_style_element_nonce_stamping": true,
+    "dynamic_create_element_style_nonce_bootstrap": true,
+    "popup_print_style_nonce": true,
+    "same_origin_stylesheet_extraction": true,
+    "runtime_style_src_elem_nonce_enforcement": true,
+    "runtime_style_src_attr_legacy_compatibility": true,
+    "legacy_style_src_fallback_for_older_engines": true,
+    "dynamic_report_only_policy_with_matching_nonce": true,
+    "static_report_only_style_element_strictness": true,
+    "script_nonce_contract_preserved": true,
+    "csp_revision": "467b251-style-nonce-v1"
+  },
+  "compatibility": {
+    "pre_candidate_source_inventory": {
+      "javascript_files_using_create_element_style": 18,
+      "javascript_files_using_style_text_content": 15,
+      "public_javascript_files_with_raw_style_markup": 1,
+      "html_files_with_style_attributes": 155
+    },
+    "style_attributes": "RETAINED_VIA_STYLE_SRC_ATTR_UNSAFE_INLINE",
+    "style_elements": "NONCE_REQUIRED_IN_MODERN_CSP_ENGINES",
+    "dynamic_style_creation": "AUTO_NONCED_BY_DOCUMENT_CREATE_ELEMENT_BOOTSTRAP",
+    "packaging_print_style": "EXPLICIT_PARENT_RESPONSE_NONCE",
+    "reliability_inline_style_block": "EXTRACTED_TO_SAME_ORIGIN_STYLESHEET",
+    "full_style_attribute_removal": "DEFERRED_EVIDENCE_DRIVEN",
+    "compatibility_breaking_change": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "script_nonce_regression": false,
+    "legacy_style_attribute_breaking_change": false,
+    "production_business_data_copy": false,
+    "secret_capture": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build251_gate.py",
+    "workflow": ".github/workflows/release467-build251-csp-style-injection-surface-hardening.yml",
+    "next_build": 252,
+    "next_build_title": "Cross-Device Accessibility Acceptance Refresh",
+    "future_queue_exhausted": false
+  }
+}
