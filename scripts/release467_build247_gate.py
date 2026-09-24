@@ -19,11 +19,18 @@ catalog=j('public/data/media-content-slot-catalog.json')
 road=t('docs/operations/RELEASE_467_REFINEMENT_AUTONOMOUS_BUILDS_233_248.md')
 sysgate=t('scripts/current_system_gate_provenance_gate.py')
 
-q(a.get('build')==247 and a.get('state')=='DEVELOPMENT_CANDIDATE','Build 247 authority identity/state mismatch')
+q(a.get('build')==247 and a.get('state') in ('DEVELOPMENT_CANDIDATE','PRODUCTION_GREEN'),'Build 247 authority identity/state mismatch')
+if a.get('state')=='PRODUCTION_GREEN':
+    q((a.get('final_closure') or {}).get('dev_sha')=='6b201a410636d3e861e7a1e554c04afd16e81ce3','Build 247 successor closure must retain exact final dev SHA')
+    q((a.get('production_checkpoint') or {}).get('main_sha')=='7a51ae487552d3b2d7bdf4a048ef33380ccaa917','Build 247 successor closure must retain exact Production main')
 q(prev.get('state')=='PRODUCTION_GREEN','Build 246 predecessor must be Production GREEN')
 q((prev.get('final_closure') or {}).get('dev_sha')=='cfd9af8777699b8d7902eef0585693b2152e60c8','Build 246 final Development closure missing')
 q((prev.get('production_checkpoint') or {}).get('main_sha')=='e21f7b9bf60ab8b35ecd3724cee988f2beeebb32','Build 246 Production closure missing')
-q(p.get('build')==247 and p.get('next_build')==248 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must expose Build 247 candidate and Build 248 successor')
+q(int(p.get('build') or 0)>=247 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 247 or a verified successor')
+if int(p.get('build') or 0)==247:
+    q(p.get('next_build')==248,'Build 247 successor pointer mismatch')
+else:
+    q((a.get('final_closure') or {}).get('dev_sha')=='6b201a410636d3e861e7a1e554c04afd16e81ce3','Build 248+ must retain exact Build 247 Development closure')
 
 cov=m.get('coverage') or {}
 q(cov.get('priority_a_public_targets')==23,'Priority A target count must remain 23')

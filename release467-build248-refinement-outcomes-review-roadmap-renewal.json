@@ -1,0 +1,96 @@
+{
+  "release": 467,
+  "build": 248,
+  "title": "Refinement Outcomes Review & Roadmap Renewal",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build248-refinement-outcomes-review-roadmap-renewal",
+  "predecessor": {
+    "build": 247,
+    "title": "Non-Product Visual Coverage & Media Placement Closure",
+    "development_sha": "6b201a410636d3e861e7a1e554c04afd16e81ce3",
+    "development_tree_sha": "a581c34f7ad45f9a7fd75411f917df8f8f1f5a46",
+    "production_main_sha": "7a51ae487552d3b2d7bdf4a048ef33380ccaa917",
+    "production_tree_sha": "a581c34f7ad45f9a7fd75411f917df8f8f1f5a46",
+    "production_proofs": {
+      "production_pages_deploy_run": 35940742900,
+      "production_live_resource_integrity_run": 35940804209,
+      "products_browser_proof_run": 35940804268,
+      "products_route_proof_run": 35940804298,
+      "build_specific_proof_run": 35940744345
+    },
+    "state": "PRODUCTION_GREEN"
+  },
+  "measurement": {
+    "help_coverage": "APPLICATION_WIDE_CONTRACT_GREEN",
+    "workflow_recovery_guidance": "GREEN",
+    "navigation_consolidation": "DUPLICATE_ENTRYPOINT_CONTRACT_GREEN",
+    "runtime_outcome_telemetry": "NOT_YET_MEASURED",
+    "startup_read_streamlining": "COALESCING_AND_60S_READ_ONLY_CACHE_GREEN",
+    "provider_metered_delta": "NOT_REMEASURED_IN_REFINEMENT_STREAM",
+    "mobile_accessibility": "BUILD237_CONTRACT_GREEN",
+    "session_posture": "HTTP_ONLY_COOKIE_FIRST",
+    "csrf_origin_protection": "GREEN",
+    "csp_script_unsafe_inline": false,
+    "csp_style_unsafe_inline": true,
+    "abuse_session_controls": "GREEN",
+    "unresolved_non_product_svg_placeholders": 29,
+    "unresolved_non_product_placeholder_pages": 22,
+    "placeholder_interpretation": "REAL_MEDIA_EVIDENCE_DEPENDENT",
+    "production_reliability": "BUILD247_EXACT_TREE_PRODUCTION_GREEN",
+    "restart_provenance_refreshed": true,
+    "successor_compatibility_refreshed": true
+  },
+  "roadmap_decision": {
+    "future_queue_exhausted": false,
+    "next_build": 249,
+    "next_build_title": "Refinement Runtime Measurement & Outcome Baseline",
+    "roadmap": "docs/operations/RELEASE_467_REFINEMENT_OUTCOMES_AUTONOMOUS_BUILDS_249_256.md",
+    "rationale": [
+      "Runtime outcome telemetry remains unmeasured for operator click/route and startup/read movement.",
+      "Provider-metered read-budget movement was not remeasured during Builds 233-247.",
+      "CSP still intentionally retains style 'unsafe-inline'.",
+      "Mobile/accessibility hardening has contract proof but deserves cross-device acceptance refresh.",
+      "29 non-Product placeholders remain evidence-dependent and must not be replaced synthetically."
+    ]
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "synthetic_business_evidence": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build248_gate.py",
+    "workflow": ".github/workflows/release467-build248-refinement-outcomes-review-roadmap-renewal.yml",
+    "next_build": 249,
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "6b201a410636d3e861e7a1e554c04afd16e81ce3",
+      "tree": "a581c34f7ad45f9a7fd75411f917df8f8f1f5a46",
+      "system_gate_run": 35940527918,
+      "quality_run": 35940528047,
+      "it_admin_runtime_run": 35940528277,
+      "repository_hygiene_run": 35940527817,
+      "dedicated_gate_run": 35940528485,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "7a51ae487552d3b2d7bdf4a048ef33380ccaa917",
+      "tree_sha": "a581c34f7ad45f9a7fd75411f917df8f8f1f5a46",
+      "production_pages_deploy_run": 35940742900,
+      "production_live_resource_integrity_run": 35940804209,
+      "products_browser_proof_run": 35940804268,
+      "products_route_proof_run": 35940804298,
+      "build_specific_proof_run": 35940744345,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}

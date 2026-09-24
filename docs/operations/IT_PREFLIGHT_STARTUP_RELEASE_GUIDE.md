@@ -12,23 +12,21 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 247 candidate
+## Current Release 467 restart authority — Build 248 candidate
 
-Build 246 **Abuse Resistance, Session Control & Security Operations** is the exact verified predecessor:
+Build 247 **Non-Product Visual Coverage & Media Placement Closure** is the exact verified predecessor:
 
-- Development SHA: `cfd9af8777699b8d7902eef0585693b2152e60c8`
-- Shared tree: `d4a599779d835a4900560fd4970d475a089c983a`
-- Development proofs: System `35934272420`, Quality `35934272137`, I.T. `35934272393`, Hygiene `35934271806`
-- Build 246 dedicated proof: `35934272301`
-- Build 246 retained predecessor/security proof: `35934272301`
-- Production main: `e21f7b9bf60ab8b35ecd3724cee988f2beeebb32`
-- Production proofs: Pages `35934550990`, Live Resources `35934626619`, Product Browser `35934626644`, Product Route `35934626617`
-- Build 240 production gate: `35877289310`
+- Development SHA: `6b201a410636d3e861e7a1e554c04afd16e81ce3`
+- Shared tree: `a581c34f7ad45f9a7fd75411f917df8f8f1f5a46`
+- Development proofs: System `35940527918`, Quality `35940528047`, I.T. `35940528277`, Hygiene `35940527817`
+- Build 247 dedicated proof: `35940528485`
+- Production main: `7a51ae487552d3b2d7bdf4a048ef33380ccaa917`
+- Production proofs: Pages `35940742900`, Live Resources `35940804209`, Product Browser `35940804268`, Product Route `35940804298`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 247 **Non-Product Visual Coverage & Media Placement Closure** is the active owner-authorized refinement candidate. It classifies all roadmap visual targets, keeps Media & Content Studio as public non-Product photography authority, labels Admin illustrations non-evidentiary, and leaves real-photo requirements open until owned/approved media exists.
+Build 248 **Refinement Outcomes Review & Roadmap Renewal** is the active candidate. It records measured refinement outcomes, keeps unmeasured runtime/provider deltas explicit, and renews the evidence-driven queue through Build 256.
 
-Build 246 is exact-tree Development + Production GREEN. Build 247 remains blocked from Production until its exact Development head is fully GREEN.
+Build 247 is exact-tree Development + Production GREEN. Build 248 remains blocked from Production until its exact Development head is fully GREEN.
 
 ## Retained historical provenance — Build 171
 
