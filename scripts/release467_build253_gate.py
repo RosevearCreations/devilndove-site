@@ -29,9 +29,15 @@ q(prev.get('state')=='PRODUCTION_GREEN','Build 252 predecessor must be Productio
 fc=prev.get('final_closure') or {}; pc=prev.get('production_checkpoint') or {}
 q(fc.get('dev_sha')=='ec749569908b2ebbf393ca1ec2181e586a10f548' and fc.get('tree_sha')=='bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2','Build 252 final Development closure mismatch')
 q(pc.get('main_sha')=='3c14d72ed481035d82f3cffa2d16f733f603f1d9' and pc.get('tree_sha')=='bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2' and pc.get('state')=='PRODUCTION_GREEN','Build 252 Production checkpoint mismatch')
-q(p.get('build')==253 and p.get('next_build')==254 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must expose Build 253 and successor 254')
-q(p.get('accepted_dev_sha')=='ec749569908b2ebbf393ca1ec2181e586a10f548' and p.get('accepted_dev_tree_sha')=='bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2','Build 253 accepted predecessor must be exact Build 252 Development')
-q((p.get('production_checkpoint') or {}).get('main_sha')=='3c14d72ed481035d82f3cffa2d16f733f603f1d9','Build 253 Production predecessor mismatch')
+cur=int(p.get('build') or 0)
+q(cur>=253 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 253 or a verified successor')
+if cur==253:
+    q(p.get('next_build')==254,'Build 253 successor pointer mismatch')
+    q(p.get('accepted_dev_sha')=='ec749569908b2ebbf393ca1ec2181e586a10f548' and p.get('accepted_dev_tree_sha')=='bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2','Build 253 accepted predecessor must be exact Build 252 Development')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='3c14d72ed481035d82f3cffa2d16f733f603f1d9','Build 253 Production predecessor mismatch')
+else:
+    q((a.get('final_closure') or {}).get('dev_sha')=='42ad585550cbf76b39ab28d30ed345e177b8fb86','Build 254+ must retain exact Build 253 Development closure')
+    q((a.get('production_checkpoint') or {}).get('main_sha')=='ec4e665c34af6e6fbc1dc440411b8b7795deaeb5','Build 254+ must retain exact Build 253 Production closure')
 
 for token in ("login:{limit:8,window_seconds:900}","fingerprint_exposed:false","AUTH_RATE_LIMITED","Retry-After"):
     q(token in abuse,f'Build 253 abuse runtime contract missing {token}')
@@ -50,7 +56,10 @@ for token in ("login_throttle_runtime","csrf_origin_runtime","cookie_first_sessi
 q('Build 254 — Operator Journey Friction Review' in road,'Build 254 successor missing')
 q("run_current_contract('scripts/release467_build253_gate.py','Release 467 Build 253')" in sysgate,'System Gate must invoke Build 253')
 for source,label in ((rel,'Reliability'),(it,'I.T. tower'),(preflight,'Preflight'),(guide,'I.T. guide')):
-    q('253' in source and 'Session & Abuse-Control Runtime Evidence' in source,f'{label} must identify Build 253')
+    if cur==253:
+        q('253' in source and 'Session & Abuse-Control Runtime Evidence' in source,f'{label} must identify Build 253')
+    else:
+        q('254' in source and 'Operator Journey Friction Review' in source,f'{label} must identify Build 254 successor')
 for k,v in (a.get('safety') or {}).items():
     q(v is False,f'Build 253 safety drift: {k}')
 

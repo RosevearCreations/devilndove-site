@@ -1,0 +1,68 @@
+name: Release 467 Build 254 Operator Journey Friction Review
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build254:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Recover exact Build 253 Development and Production workflow evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json, subprocess, sys
+          repo='${{ github.repository }}'
+          targets=[
+            ('DEVELOPMENT','42ad585550cbf76b39ab28d30ed345e177b8fb86',[
+              'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof',
+              'Repository Branch Hygiene','Release 467 Build 253 Session Abuse-Control Runtime Evidence'
+            ]),
+            ('PRODUCTION','ec4e665c34af6e6fbc1dc440411b8b7795deaeb5',[
+              'Production Pages Deploy','Production Live Resource Integrity Proof',
+              'Release 467 Build 155 Products Production Browser Proof','Release 467 Build 154 Products Route Production Proof',
+              'Release 467 Build 253 Session Abuse-Control Runtime Evidence'
+            ])
+          ]
+          for label,sha,required in targets:
+            raw=subprocess.check_output(['gh','run','list','--repo',repo,'--commit',sha,'--limit','100',
+              '--json','databaseId,workflowName,event,status,conclusion,headSha'],text=True)
+            rows=json.loads(raw)
+            print(label,sha,json.dumps(rows,sort_keys=True))
+            by={r.get('workflowName'):r for r in rows if r.get('headSha')==sha}
+            missing=[]
+            for name in required:
+              row=by.get(name)
+              if not row or row.get('status')!='completed' or row.get('conclusion')!='success':
+                missing.append(name)
+              else:
+                print('GREEN',label,name,row.get('databaseId'))
+            if missing:
+              print('MISSING_OR_NOT_GREEN',label,missing,file=sys.stderr);sys.exit(1)
+          PY
+      - name: JavaScript syntax
+        run: |
+          node --check public/js/admin-route-usage.js
+          node --check public/js/admin-journey-friction-v254.js
+      - name: Build 254 bounded review gate
+        run: python scripts/release467_build254_gate.py
+      - name: Retain predecessor and consolidation contracts
+        run: |
+          python scripts/release467_build253_gate.py
+          python scripts/release467_build249_gate.py
+          python scripts/release467_build239_gate.py

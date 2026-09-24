@@ -125,7 +125,7 @@ home_load=home_dashboard.split('async function load',1)[1] if 'async function lo
 req('getJson(TODAY_URL)' not in home_load,'Admin home regained duplicate Today Tasks read')
 req('getJson(IT_URL)' not in home_load,'Admin home regained duplicate I.T. read')
 req('getJson(MANIFEST_URL,{auth:false})' in home_load,'Admin home static navigation manifest read missing')
-req('admin-route-usage.js?v=176' in admin_home,'Admin home Build 176 route-usage containment identity missing')
+req(('admin-route-usage.js?v=176' in admin_home or 'admin-route-usage.js?v=254' in admin_home),'Admin home route-usage containment identity missing')
 home_dashboard_identity_ok=('admin-home-dashboard-v123.js?v=467b176' in admin_home or 'admin-home-dashboard-v123.js?v=467b240' in admin_home)
 seller_identity_ok=('admin-seller-command-centre-build148.js?v=467b176' in admin_home or 'admin-seller-command-centre-build148.js?v=467b240' in admin_home)
 req(home_dashboard_identity_ok and seller_identity_ok,'Admin home bounded runtime cache identities missing')

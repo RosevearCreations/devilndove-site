@@ -1,23 +1,23 @@
-// Release 467 Build 253 — current read-only Deployment Preflight over Build 252 Production source.
+// Release 467 Build 254 — current read-only Deployment Preflight over Build 253 Production source.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=253;
-const TITLE='Session & Abuse-Control Runtime Evidence';
+const BUILD=254;
+const TITLE='Operator Journey Friction Review';
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
-const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 253 Session Abuse-Control Runtime Evidence']);
+const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 254 Operator Journey Friction Review']);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:252,title:'Cross-Device Accessibility Acceptance Refresh',state:'DEVELOPMENT_GREEN',
-  dev_sha:'ec749569908b2ebbf393ca1ec2181e586a10f548',tree_sha:'bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2',
-  system_gate_run:36042886754,current_application_quality_run:36042887036,it_admin_runtime_proof_run:36042887117,
-  branch_hygiene_run:36042886574,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',exact_preview_deployment:true
+  release:467,build:253,title:'Session & Abuse-Control Runtime Evidence',state:'DEVELOPMENT_GREEN',
+  dev_sha:'42ad585550cbf76b39ab28d30ed345e177b8fb86',tree_sha:'deeca5e877175af1c7c804b09bfbb14a9daa7df8',
+  system_gate_run:36066344734,current_application_quality_run:36066344961,it_admin_runtime_proof_run:36066344950,
+  branch_hygiene_run:36066346173,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:252,title:'Cross-Device Accessibility Acceptance Refresh',state:'PRODUCTION_GREEN',
-  main_sha:'3c14d72ed481035d82f3cffa2d16f733f603f1d9',tree_sha:'bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2',
-  production_pages_deploy_run:36043164640,production_live_resource_integrity_run:36043274946,
-  products_browser_proof_run:36043274912,products_route_proof_run:36043274915
+  release:467,build:253,title:'Session & Abuse-Control Runtime Evidence',state:'PRODUCTION_GREEN',
+  main_sha:'ec4e665c34af6e6fbc1dc440411b8b7795deaeb5',tree_sha:'deeca5e877175af1c7c804b09bfbb14a9daa7df8',
+  production_pages_deploy_run:36066849392,production_live_resource_integrity_run:36067030179,
+  products_browser_proof_run:36067030078,products_route_proof_run:36067030066
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true});
 const rows=(r)=>Array.isArray(r?.results)?r.results:[];
@@ -44,12 +44,12 @@ export async function onRequestGet(context){
     {status:truth.proof_recorded_count===23?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:truth.proof_recorded_count+'/23 proof rows recorded.'},
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:truth.foreign_key_violations+' violation(s).'},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
-    {status:'pass',code:'build252_verified_baseline',label:'Build 252 verified restart baseline',detail:'Build 252 Cross-Device Accessibility Acceptance Refresh is exact-tree Development and Production GREEN.'},
-    {status:'pass',code:'build252_source_promotion',label:'Build 252 Production source promotion',detail:'Build 252 is on main 3c14d72ed481035d82f3cffa2d16f733f603f1d9 with the identical Development tree bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2.'},
-    {status:'review',code:'build253_session_abuse_runtime_evidence',label:'Build 253 Session & Abuse-Control Runtime Evidence',detail:'Build 253 exercises cookie-first sessions, origin guards, throttling, revoke-other-sessions and step-up paths with synthetic bounded runtime evidence only.'}
+    {status:'pass',code:'build253_verified_baseline',label:'Build 253 verified restart baseline',detail:'Build 253 Session & Abuse-Control Runtime Evidence is exact-tree Development and Production GREEN.'},
+    {status:'pass',code:'build253_source_promotion',label:'Build 253 Production source promotion',detail:'Build 253 is on main ec4e665c34af6e6fbc1dc440411b8b7795deaeb5 with the identical Development tree deeca5e877175af1c7c804b09bfbb14a9daa7df8.'},
+    {status:'review',code:'build254_operator_journey_friction_review',label:'Build 254 Operator Journey Friction Review',detail:'Build 254 reviews browser-local Build 249 route evidence and does not claim friction without observed repeated navigation.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
-  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:253,title:TITLE,authority:'release467-build253-session-abuse-control-runtime-evidence.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 252 is the exact fully verified Development and Production restart boundary.','Build 252 Development and Production share tree bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2.','Canonical migration authority remains through data-only 0023.','Build 253 is bounded synthetic session/abuse-control runtime evidence only; no schema, business-data, provider, Product, Inventory, Finance or R2 mutation.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
+  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:254,title:TITLE,authority:'release467-build254-operator-journey-friction-review.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 252 is the exact fully verified Development and Production restart boundary.','Build 252 Development and Production share tree deeca5e877175af1c7c804b09bfbb14a9daa7df8.','Canonical migration authority remains through data-only 0023.','Build 253 is bounded synthetic session/abuse-control runtime evidence only; no schema, business-data, provider, Product, Inventory, Finance or R2 mutation.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
   if(new URL(context.request.url).searchParams.get('format')==='markdown')return new Response(markdownReport(data),{status:200,headers:{'Content-Type':'text/markdown; charset=utf-8','Cache-Control':'no-store'}});
   return jsonResponse(data,200,{'Cache-Control':'no-store'});
 }
