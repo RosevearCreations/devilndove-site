@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   build252:
@@ -25,6 +26,14 @@ jobs:
           node --check functions/_middleware.js
           node --check public/js/admin-ergonomics-v237.js
           node --check public/js/media-carousel.js
+      - name: Recover exact Build 251 predecessor workflow evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "BUILD251 DEVELOPMENT PUSH RUNS"
+          gh run list --repo "${GITHUB_REPOSITORY}" --commit 4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd --limit 100 --json databaseId,workflowName,event,status,conclusion,headSha
+          echo "BUILD251 PRODUCTION MAIN RUNS"
+          gh run list --repo "${GITHUB_REPOSITORY}" --commit f8e15d07e97e9a4e2953a65d09b494c73a36192a --limit 100 --json databaseId,workflowName,event,status,conclusion,headSha
       - name: Build 252 cross-device accessibility contract
         run: python scripts/release467_build252_gate.py
       - name: Retain predecessor security and ergonomics contracts
