@@ -14,21 +14,22 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
 ## Current Release 467 restart authority — Build 252 candidate
 
-Build 251 **CSP Style Injection-Surface Hardening** is the current Production source predecessor:
+Build 251 **CSP Style Injection-Surface Hardening** is the exact verified predecessor:
 
-- Development merge SHA: `4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd`
+- Development SHA: `4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd`
 - Shared Development/Production tree: `2d6d06e321693779cee55ed2dd892bff3b364a36`
-- Candidate PR: `#344`, head `0aa691e42d996f2fec28c8bd3f02bdafb82c34db`
-- PR-head proofs: System `36030944185`, Quality `36030944073`, I.T. `36030944009`, Build 251 dedicated `36030944096`
+- Development proofs: System `36031272271`, Quality `36031272780`, I.T. `36031272416`, Hygiene `36031272718`
+- Build 251 dedicated Development proof: `36031272407`
 - Production main: `f8e15d07e97e9a4e2953a65d09b494c73a36192a`
-- Build 251 source promotion keeps the exact Development tree on `main`.
-- Repository Branch Hygiene and Production deployment/resource workflows are push-only; the connected PR-run wrapper does not expose those run IDs, so Build 252 does not invent them.
+- Production proofs: Pages `36031593630`, Live Resources `36031748408`, Product Browser `36031748531`, Product Route `36031748437`
+- Build 251 Production-specific proof: `36031593481`
+- Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 250 remains the last restart checkpoint for which all four exact Development proof IDs and the Production proof IDs are enumerated in source. That distinction is preserved rather than back-filling unknown identifiers.
+Build 252 **Cross-Device Accessibility Acceptance Refresh** is the active candidate. It re-proves the existing phone/tablet/desktop layout boundaries, keyboard flow, focus visibility, coarse-pointer targets, dense Admin workspace behavior, local horizontal scrolling and reduced-motion behavior while retaining Build 251 CSP nonce protections.
 
-Build 252 **Cross-Device Accessibility Acceptance Refresh** is the active candidate. It re-proves the existing phone/tablet/desktop layout boundaries, keyboard flow, focus visibility, dense Admin workspaces, coarse-pointer targets, local horizontal scrolling and reduced-motion behavior. It adds no business-data mutation authority and retains Build 251 CSP protections.
+Build 252 changes presentation acceptance only. It adds no schema or request-time DDL, D1/R2 business mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy or secret capture.
 
-Build 252 remains blocked from Production until its exact candidate tree passes the current System, Quality, I.T. and Build 252 checks, is merged to `dev`, and the identical Development tree is promoted to protected `main`.
+Build 252 remains blocked from Production until its exact candidate tree passes the current System, Quality, I.T., Hygiene and Build 252 checks, is merged to `dev`, and the identical Development tree is promoted to protected `main`.
 
 ## Retained historical provenance — Build 171
 
