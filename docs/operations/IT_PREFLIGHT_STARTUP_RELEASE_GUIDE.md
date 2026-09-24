@@ -12,23 +12,23 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 241 candidate
+## Current Release 467 restart authority — Build 247 candidate
 
-Build 240 **API Read Budget, Cache & Batch Streamlining** is the exact verified predecessor:
+Build 246 **Abuse Resistance, Session Control & Security Operations** is the exact verified predecessor:
 
-- Development SHA: `b4eeed8895a8a04247b68a626c9018caadd8c9ad`
-- Shared tree: `8ac58d89c62750e7d266ad849a3ac23fdcabf7e9`
-- Development proofs: System `35928075029`, Quality `35928074148`, I.T. `35928075128`, Hygiene `35928075568`
-- Build 240 dedicated proof: `35874693925`
-- Retained Build 176 main-thread proof: `35874694016`
-- Production main: `2312b35c5d527721219c48985325eeba8f3ecd3f`
-- Production proofs: Pages `35928404982`, Live Resources `35928530977`, Product Browser `35928530972`, Product Route `35928530951`
+- Development SHA: `cfd9af8777699b8d7902eef0585693b2152e60c8`
+- Shared tree: `d4a599779d835a4900560fd4970d475a089c983a`
+- Development proofs: System `35934272420`, Quality `35934272137`, I.T. `35934272393`, Hygiene `35934271806`
+- Build 246 dedicated proof: `35934272301`
+- Build 246 retained predecessor/security proof: `35934272301`
+- Production main: `e21f7b9bf60ab8b35ecd3724cee988f2beeebb32`
+- Production proofs: Pages `35934550990`, Live Resources `35934626619`, Product Browser `35934626644`, Product Route `35934626617`
 - Build 240 production gate: `35877289310`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 241 **Release, Diagnostics & Evidence Streamlining** is the active owner-authorized refinement candidate. It passes existing identifiers between compatible Admin workspaces, lets destination clients preselect records they already own, and shows same-origin return-to-source links. It does not copy authoritative business records or add a business-write authority.
+Build 247 **Non-Product Visual Coverage & Media Placement Closure** is the active owner-authorized refinement candidate. It classifies all roadmap visual targets, keeps Media & Content Studio as public non-Product photography authority, labels Admin illustrations non-evidentiary, and leaves real-photo requirements open until owned/approved media exists.
 
-Build 240 is exact-tree Development + Production GREEN. Build 241 remains blocked from Production until its exact Development head is fully GREEN.
+Build 246 is exact-tree Development + Production GREEN. Build 247 remains blocked from Production until its exact Development head is fully GREEN.
 
 ## Retained historical provenance — Build 171
 

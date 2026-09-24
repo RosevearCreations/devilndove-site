@@ -3,15 +3,15 @@
 (() => {
   'use strict';
   const EVIDENCE=Object.freeze({
-    verified:{release:467,build:245,title:'CSP & Browser Injection-Surface Hardening',
-      dev_sha:'b4eeed8895a8a04247b68a626c9018caadd8c9ad',tree_sha:'8ac58d89c62750e7d266ad849a3ac23fdcabf7e9',
-      system_gate_run:35928075029,current_application_quality_run:35928074148,it_admin_runtime_proof_run:35928075128,
-      branch_hygiene_run:35928075568,dedicated_gate_run:35928075043},
-    production:{main_sha:'2312b35c5d527721219c48985325eeba8f3ecd3f',tree_sha:'8ac58d89c62750e7d266ad849a3ac23fdcabf7e9',
-      production_pages_deploy_run:35928404982,production_live_resource_integrity_run:35928530977,
-      products_browser_proof_run:35928530972,products_route_proof_run:35928530951,build_specific_proof_run:35928405141,
+    verified:{release:467,build:246,title:'Abuse Resistance, Session Control & Security Operations',
+      dev_sha:'cfd9af8777699b8d7902eef0585693b2152e60c8',tree_sha:'d4a599779d835a4900560fd4970d475a089c983a',
+      system_gate_run:35934272420,current_application_quality_run:35934272137,it_admin_runtime_proof_run:35934272393,
+      branch_hygiene_run:35934271806,dedicated_gate_run:35934272301},
+    production:{main_sha:'e21f7b9bf60ab8b35ecd3724cee988f2beeebb32',tree_sha:'d4a599779d835a4900560fd4970d475a089c983a',
+      production_pages_deploy_run:35934550990,production_live_resource_integrity_run:35934626619,
+      products_browser_proof_run:35934626644,products_route_proof_run:35934626617,build_specific_proof_run:35934551031,
       state:'PRODUCTION_GREEN'},
-    current:{release:467,build:246,title:'Abuse Resistance, Session Control & Security Operations',
+    current:{release:467,build:247,title:'Non-Product Visual Coverage & Media Placement Closure',
       state:'DEVELOPMENT_CANDIDATE',next_action:'Prove the exact final Development head GREEN before any Production promotion.'}
   });
   const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

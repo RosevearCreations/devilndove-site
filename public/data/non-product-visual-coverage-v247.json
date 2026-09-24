@@ -1,0 +1,385 @@
+{
+  "release": 467,
+  "build": 247,
+  "title": "Non-Product Visual Coverage & Media Placement Closure",
+  "source_plan": "SITE_WIDE_NON_PRODUCT_IMAGE_REQUIREMENTS.md",
+  "source_slot_catalog": "public/data/media-content-slot-catalog.json",
+  "source_image_space_plan": "docs/media-content/IMAGE_SPACE_REQUIREMENTS.csv",
+  "principles": {
+    "real_photography_for_real_world_evidence": true,
+    "generated_or_editorial_art_never_business_evidence": true,
+    "product_gallery_scope_excluded": true,
+    "public_non_product_photography_authority": "Media & Content Studio",
+    "packaging_artwork_authority": "Packaging Studio",
+    "admin_illustration_authority": "Static application assets with accessibility review"
+  },
+  "coverage": {
+    "priority_a_public_targets": 23,
+    "priority_b_admin_targets": 5,
+    "priority_c_helpful_targets": 7,
+    "tracked_targets_total": 35,
+    "existing_public_svg_placeholders": 29,
+    "existing_public_placeholder_pages": 22,
+    "closure_meaning": "Every roadmap target is classified, owned by an existing authority, and has an explicit placement/capture path. Evidence-dependent photography stays open until rights-safe real media exists."
+  },
+  "public_targets": [
+    {
+      "id": "A01",
+      "route": "/socials/",
+      "target": "socials section visual",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real content-creation/workbench photo; no private screens visible.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A02",
+      "route": "/marketplaces/",
+      "target": "marketplace hero",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Neutral listing-preparation setup; avoid third-party marketplace logos unless permitted.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A03",
+      "route": "/marketplaces/",
+      "target": "marketplace section visual",
+      "replacement_policy": "illustration_preferred",
+      "guidance": "Diagram: Devil n Dove item facts → reviewed listing → marketplace channel.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A04",
+      "route": "/contact/",
+      "target": "Where to find us visual",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Southern Ontario workshop/pickup-context photo without exposing private home address.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A05",
+      "route": "/gift-cards/",
+      "target": "flexible gifting section",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Gift presentation with Devil n Dove branding; no fake stored-value number.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A06",
+      "route": "/events/",
+      "target": "follow-up section",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real booth/table/pickup display image.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A07",
+      "route": "/about/",
+      "target": "What we do visual",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Wide real workshop capability photo showing truthful disciplines/tools.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A08",
+      "route": "/collections/",
+      "target": "Why this page exists visual",
+      "replacement_policy": "illustration_preferred",
+      "guidance": "Discovery diagram showing one Product authority feeding collections/categories.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A09",
+      "route": "/creations/",
+      "target": "creations section",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real in-progress creative bench with mixed disciplines; avoid implying everything is for sale.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A10",
+      "route": "/vintage-finds-ontario/",
+      "target": "section visual",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real vintage inspection setup showing patina/marks/condition review.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A11",
+      "route": "/laser-engraving-ontario/",
+      "target": "section visual",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real engraver setup or material-test board.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A12",
+      "route": "/custom-soap-making-ontario/",
+      "target": "request-details visual",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real ingredients/mould/label-planning flat lay; factual and non-medical.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A13",
+      "route": "/handmade-jewelry-ontario/",
+      "target": "search-clarity visual",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real jewelry workbench detail.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A14",
+      "route": "/custom-candle-making-ontario/",
+      "target": "request-details visual",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real candle planning/pouring/material setup; no unsafe flame staging.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A15",
+      "route": "/workshop-made-gifts-ontario/",
+      "target": "hero",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real cross-discipline gift-making process image.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A16",
+      "route": "/workshop-made-gifts-ontario/",
+      "target": "search-clarity visual",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real workshop overview focused on gift-making choices.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A17",
+      "route": "/polymer-clay-earrings-ontario/",
+      "target": "search-clarity visual",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real clay conditioning/cutting/assembly workbench scene.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A18",
+      "route": "/custom-gifts-southern-ontario/",
+      "target": "search-clarity visual",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real consultation-to-making flat lay.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A19",
+      "route": "/workshop-journal/",
+      "target": "journal section visual",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real notebook/story-planning/workbench photo.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A20",
+      "route": "/workshop-journal/story/",
+      "target": "story hero placeholder",
+      "replacement_policy": "story_specific_real_media_or_illustration_fallback",
+      "guidance": "Published story should use reviewed project/process media; fallback may be branded journal illustration, never fake project photo.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A21",
+      "route": "/toolshed/",
+      "target": "vintage-condition placeholder",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real tool-condition inspection image.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A22",
+      "route": "/tools/",
+      "target": "engraving-proof placeholder",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real workshop tool-in-use or material-test scene.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    },
+    {
+      "id": "A23",
+      "route": "/supplies/",
+      "target": "material placeholder",
+      "replacement_policy": "real_photo_required",
+      "guidance": "Real organized material/supply bins or bench stock without private supplier data.",
+      "placement_authority": "Media & Content Studio",
+      "product_gallery": false,
+      "status": "PLACEMENT_TRACKED_CONTENT_EVIDENCE_DEPENDENT"
+    }
+  ],
+  "admin_targets": [
+    {
+      "id": "B01",
+      "route": "/admin/customer-documents/",
+      "target": "client document workflow",
+      "replacement_policy": "illustration",
+      "guidance": "Order facts → draft document → review → issue/PDF → immutable history/void.",
+      "placement_authority": "Static application asset",
+      "evidentiary": false,
+      "status": "ADMIN_NON_EVIDENTIARY_VISUAL_TRACKED"
+    },
+    {
+      "id": "B02",
+      "route": "/admin/creative-process/",
+      "target": "content-only project flow",
+      "replacement_policy": "illustration",
+      "guidance": "Creative Project branches: Product outcome / content-only / CAIP / Content Studio.",
+      "placement_authority": "Static application asset",
+      "evidentiary": false,
+      "status": "ADMIN_NON_EVIDENTIARY_VISUAL_TRACKED"
+    },
+    {
+      "id": "B03",
+      "route": "/admin/creative-assets/",
+      "target": "CAIP planning flow",
+      "replacement_policy": "illustration",
+      "guidance": "Capture/import → sync → quality review → evidence → story/edit plan → reviewed handoff.",
+      "placement_authority": "Static application asset",
+      "evidentiary": false,
+      "status": "ADMIN_NON_EVIDENTIARY_VISUAL_TRACKED"
+    },
+    {
+      "id": "B04",
+      "route": "/admin/social-publishing/",
+      "target": "social publishing and preflight",
+      "replacement_policy": "illustration",
+      "guidance": "Reviewed content → privacy/preflight → explicit publish, plus platform readiness.",
+      "placement_authority": "Static application asset",
+      "evidentiary": false,
+      "status": "ADMIN_NON_EVIDENTIARY_VISUAL_TRACKED"
+    },
+    {
+      "id": "B05",
+      "route": "/admin/inventory-operations/",
+      "target": "inventory operations flow",
+      "replacement_policy": "illustration",
+      "guidance": "Receive → lot/source → on-hand → usage → reorder/review; Tools and Supplies separated.",
+      "placement_authority": "Static application asset",
+      "evidentiary": false,
+      "status": "ADMIN_NON_EVIDENTIARY_VISUAL_TRACKED"
+    }
+  ],
+  "helpful_targets": [
+    {
+      "id": "C01",
+      "route": "/help/",
+      "target": "Customer Help Centre",
+      "replacement_policy": "illustration",
+      "guidance": "Shop / Account / Custom Request / Contact.",
+      "evidentiary": false,
+      "status": "HELPFUL_VISUAL_TRACKED"
+    },
+    {
+      "id": "C02",
+      "route": "/admin/help/",
+      "target": "Creator & Operations Help Centre",
+      "replacement_policy": "illustration",
+      "guidance": "Storefront / Creator / Finance / I.T. with shared help layer.",
+      "evidentiary": false,
+      "status": "HELPFUL_VISUAL_TRACKED"
+    },
+    {
+      "id": "C03",
+      "route": "/custom-request/",
+      "target": "Custom Work intake",
+      "replacement_policy": "photo_or_diagram",
+      "guidance": "Reference upload → review → quote/proof → approval.",
+      "evidentiary": false,
+      "status": "HELPFUL_VISUAL_TRACKED"
+    },
+    {
+      "id": "C04",
+      "route": "/admin/packaging-studio/",
+      "target": "Packaging Studio",
+      "replacement_policy": "illustration",
+      "guidance": "Editable design preview versus approved print/material proof.",
+      "evidentiary": false,
+      "status": "HELPFUL_VISUAL_TRACKED"
+    },
+    {
+      "id": "C05",
+      "route": "/admin/today-tasks/",
+      "target": "Today Needs Attention",
+      "replacement_policy": "illustration",
+      "guidance": "What / Where / Age / Owner / Safe recheck.",
+      "evidentiary": false,
+      "status": "HELPFUL_VISUAL_TRACKED"
+    },
+    {
+      "id": "C06",
+      "route": "/admin/mobile/",
+      "target": "Mobile Workshop Assistant",
+      "replacement_policy": "illustration",
+      "guidance": "Scan/search → record evidence → return to job; not a fake screenshot.",
+      "evidentiary": false,
+      "status": "HELPFUL_VISUAL_TRACKED"
+    },
+    {
+      "id": "C07",
+      "route": "/members/",
+      "target": "Security/session help",
+      "replacement_policy": "illustration",
+      "guidance": "Signed-in sessions and revoke-other-sessions behavior without tokens.",
+      "evidentiary": false,
+      "status": "HELPFUL_VISUAL_TRACKED"
+    }
+  ],
+  "safety": {
+    "synthetic_product_evidence": false,
+    "synthetic_workshop_evidence": false,
+    "synthetic_customer_evidence": false,
+    "automatic_media_assignment": false,
+    "automatic_product_publication": false,
+    "product_gallery_placeholders_in_scope": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false
+  }
+}

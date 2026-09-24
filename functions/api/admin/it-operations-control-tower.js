@@ -1,27 +1,27 @@
-// Release 467 Build 246 — current release/restart authority over exact Build 240 GREEN predecessor.
+// Release 467 Build 247 — current release/restart authority over exact Build 240 GREEN predecessor.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=246;
-const TITLE='Abuse Resistance, Session Control & Security Operations';
-const AUTHORITY='release467-build246-abuse-session-security-operations';
-const EVIDENCE_ID='r467-b240-b239-35928075029-35928404982';
+const BUILD=247;
+const TITLE='Non-Product Visual Coverage & Media Placement Closure';
+const AUTHORITY='release467-build247-non-product-visual-coverage-media-placement-closure';
+const EVIDENCE_ID='r467-b247-b246-35934272420-35934550990';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:245,title:'CSP & Browser Injection-Surface Hardening',state:'DEVELOPMENT_GREEN',
-  dev_sha:'b4eeed8895a8a04247b68a626c9018caadd8c9ad',tree_sha:'8ac58d89c62750e7d266ad849a3ac23fdcabf7e9',
-  system_gate_run:35928075029,current_application_quality_run:35928074148,it_admin_runtime_proof_run:35928075128,
-  branch_hygiene_run:35928075568,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:246,title:'Abuse Resistance, Session Control & Security Operations',state:'DEVELOPMENT_GREEN',
+  dev_sha:'cfd9af8777699b8d7902eef0585693b2152e60c8',tree_sha:'d4a599779d835a4900560fd4970d475a089c983a',
+  system_gate_run:35934272420,current_application_quality_run:35934272137,it_admin_runtime_proof_run:35934272393,
+  branch_hygiene_run:35934271806,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:245,title:'CSP & Browser Injection-Surface Hardening',state:'PRODUCTION_GREEN',
-  main_sha:'2312b35c5d527721219c48985325eeba8f3ecd3f',tree_sha:'8ac58d89c62750e7d266ad849a3ac23fdcabf7e9',
-  production_pages_deploy_run:35928404982,production_live_resource_integrity_run:35928530977,
-  products_browser_proof_run:35928530972,products_route_proof_run:35928530951,remote_d1_queries:0
+  release:467,build:246,title:'Abuse Resistance, Session Control & Security Operations',state:'PRODUCTION_GREEN',
+  main_sha:'e21f7b9bf60ab8b35ecd3724cee988f2beeebb32',tree_sha:'d4a599779d835a4900560fd4970d475a089c983a',
+  production_pages_deploy_run:35934550990,production_live_resource_integrity_run:35934626619,
+  products_browser_proof_run:35934626644,products_route_proof_run:35934626617,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 246 API Read Budget Cache Batch Streamlining'
+  'Release 467 Build 247 API Read Budget Cache Batch Streamlining'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:245,title:'CSP & Browser Injection-Surface Hardening',
+    release:467,build:246,title:'Abuse Resistance, Session Control & Security Operations',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35928075029,current_application_quality_run:35928074148,
-      it_admin_runtime_proof_run:35928075128,branch_hygiene_run:35928075568
+      system_gate_run:35934272420,current_application_quality_run:35934272137,
+      it_admin_runtime_proof_run:35934272393,branch_hygiene_run:35934271806
     },
     production_proofs:{
-      production_pages_deploy_run:35928404982,production_live_resource_integrity_run:35928530977,
-      products_browser_proof_run:35928530972,products_route_proof_run:35928530951
+      production_pages_deploy_run:35934550990,production_live_resource_integrity_run:35934626619,
+      products_browser_proof_run:35934626644,products_route_proof_run:35934626617
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 241 is the active owner-authorized read-budget/browser-freeze correction; Build 241 follows only after exact Build 241 Production GREEN.'
+    next_build:'Build 248 follows only after exact Build 247 Production GREEN.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 246 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 247 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -102,7 +102,7 @@ function markdownReport(pack){
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Current candidate: Build 241 Release, Diagnostics & Evidence Streamlining
+- Current candidate: Build 247 Non-Product Visual Coverage & Media Placement Closure
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -121,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:240,title:TITLE,authority:'release467-build246-abuse-session-security-operations.json'},
+        current_closure_candidate:{release:467,build:247,title:TITLE,authority:'release467-build247-non-product-visual-coverage-media-placement-closure.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -141,11 +141,11 @@ export async function onRequestGet(context){
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
       'Build 240 source is the exact last fully verified Development checkpoint.',
-      'Build 240 Production is GREEN on the identical tree 8ac58d89c62750e7d266ad849a3ac23fdcabf7e9.',
-      'Development proofs: System 35928075029, Quality 35928074148, I.T. 35928075128, Hygiene 35928075568.',
-      'Production proofs: Pages 35928404982, Live Resources 35928530977, Product Browser 35928530972, Product Route 35928530951.',
-      'Build 241 Abuse Resistance, Session Control & Security Operations is the active Development candidate and contains the reported Admin lockup.',
-      'Build 241 adds no schema change, new business-write authority or automatic provider mutation.'
+      'Build 240 Production is GREEN on the identical tree d4a599779d835a4900560fd4970d475a089c983a.',
+      'Development proofs: System 35934272420, Quality 35934272137, I.T. 35934272393, Hygiene 35934271806.',
+      'Production proofs: Pages 35934550990, Live Resources 35934626619, Product Browser 35934626644, Product Route 35934626617.',
+      'Build 247 Non-Product Visual Coverage & Media Placement Closure is the active Development candidate.',
+      'Build 247 adds no schema change, business-write authority, automatic media assignment or provider mutation.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
