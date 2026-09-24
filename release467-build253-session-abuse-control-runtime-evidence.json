@@ -2,7 +2,7 @@
   "release": 467,
   "build": 253,
   "title": "Session & Abuse-Control Runtime Evidence",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build253-session-abuse-control-runtime-evidence",
   "predecessor": {
     "build": 252,
@@ -131,5 +131,30 @@
       "products_route_proof_run": 36043274915,
       "build_specific_proof_run": 36043164318
     }
+  },
+  "final_closure": {
+    "dev_sha": "42ad585550cbf76b39ab28d30ed345e177b8fb86",
+    "tree_sha": "deeca5e877175af1c7c804b09bfbb14a9daa7df8",
+    "proofs": {
+      "system_gate_run": 36066344734,
+      "current_application_quality_run": 36066344961,
+      "it_admin_runtime_proof_run": 36066344950,
+      "branch_hygiene_run": 36066346173
+    },
+    "dedicated_gate_run": 36066344836,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 254,
+    "recorded_by": "Build 254 restart ingestion; not self-recorded by Build 253"
+  },
+  "production_checkpoint": {
+    "main_sha": "ec4e665c34af6e6fbc1dc440411b8b7795deaeb5",
+    "tree_sha": "deeca5e877175af1c7c804b09bfbb14a9daa7df8",
+    "production_pages_deploy_run": 36066849392,
+    "production_live_resource_integrity_run": 36067030179,
+    "products_browser_proof_run": 36067030078,
+    "products_route_proof_run": 36067030066,
+    "build_specific_proof_run": 36066849362,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
