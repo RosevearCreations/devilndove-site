@@ -34,17 +34,19 @@ q(pred.get('development_tree_sha')=='2d6d06e321693779cee55ed2dd892bff3b364a36','
 q(pred.get('production_main_sha')=='f8e15d07e97e9a4e2953a65d09b494c73a36192a','Build 251 predecessor Production SHA mismatch')
 q(pred.get('production_tree_sha')=='2d6d06e321693779cee55ed2dd892bff3b364a36' and pred.get('same_tree') is True,'Build 251 same-tree Production predecessor missing')
 q(pred.get('state')=='PRODUCTION_GREEN','Build 251 predecessor must be Production GREEN')
-pr=pred.get('candidate_pr_proofs') or {}
-q(pr.get('system_gate_run')==36030944185,'Build 251 PR System Gate evidence mismatch')
-q(pr.get('current_application_quality_run')==36030944073,'Build 251 PR Quality evidence mismatch')
-q(pr.get('it_admin_runtime_proof_run')==36030944009,'Build 251 PR I.T. evidence mismatch')
-q(pr.get('dedicated_gate_run')==36030944096,'Build 251 PR dedicated evidence mismatch')
-q((pred.get('branch_hygiene') or {}).get('run_id') is None,'Build 252 must not fabricate unavailable push-only hygiene run ID')
+pr=pred.get('development_proofs') or {}
+q(pr.get('system_gate_run')==36031272271,'Build 251 System Gate evidence mismatch')
+q(pr.get('current_application_quality_run')==36031272780,'Build 251 Quality evidence mismatch')
+q(pr.get('it_admin_runtime_proof_run')==36031272416,'Build 251 I.T. evidence mismatch')
+q(pr.get('branch_hygiene_run')==36031272718 and pr.get('build_specific_proof_run')==36031272407,'Build 251 Hygiene/dedicated evidence mismatch')
+q((pred.get('branch_hygiene') or {}).get('run_id')==36031272718,'Build 251 exact branch hygiene evidence mismatch')
 
 q(b251.get('state')=='PRODUCTION_GREEN','Build 251 successor-ingested authority must be Production GREEN')
 final=b251.get('final_closure') or {}; prod=b251.get('production_checkpoint') or {}
 q(final.get('dev_sha')=='4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd' and final.get('tree_sha')=='2d6d06e321693779cee55ed2dd892bff3b364a36','Build 251 final Development closure mismatch')
 q(prod.get('main_sha')=='f8e15d07e97e9a4e2953a65d09b494c73a36192a' and prod.get('tree_sha')=='2d6d06e321693779cee55ed2dd892bff3b364a36' and prod.get('state')=='PRODUCTION_GREEN','Build 251 Production closure mismatch')
+q(prod.get('production_pages_deploy_run')==36031593630 and prod.get('production_live_resource_integrity_run')==36031748408,'Build 251 Production deploy/resource evidence mismatch')
+q(prod.get('products_browser_proof_run')==36031748531 and prod.get('products_route_proof_run')==36031748437 and prod.get('build_specific_proof_run')==36031593481,'Build 251 Production browser/route/build evidence mismatch')
 
 for token in ('@media(max-width:420px)','@media(max-width:720px)','@media(min-width:721px) and (max-width:1023px)','@media(min-width:1024px)','overflow-x:auto','prefers-reduced-motion:reduce'):
     q(token in responsive,f'Current responsive contract missing {token}')
