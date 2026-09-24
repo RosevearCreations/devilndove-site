@@ -151,6 +151,7 @@ function withPlatformClient(response, request) {
     let rewriter = new HTMLRewriter()
       .on('head', {
         element(element) {
+          element.prepend(styleNonceBootstrapMarkup(), { html: true });
           element.append('<link rel="stylesheet" href="/css/current-responsive.css?v=current">', { html: true });
           element.append(`<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`, { html: true });
           element.append('<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>', { html: true });
@@ -193,7 +194,11 @@ function cspForNonce(nonce) {
   return [
     "default-src 'self'",
     "img-src 'self' " + 'data' + ": blob: https:",
+    // Legacy fallback remains for older engines. Modern engines use the narrower
+    // style-src-elem/style-src-attr directives below.
     "style-src 'self' 'unsafe-inline'",
+    "style-src-elem 'self' 'nonce-" + nonce + "'",
+    "style-src-attr 'unsafe-inline'",
     "script-src 'self' 'nonce-" + nonce + "' https://static.cloudflareinsights.com",
     "script-src-attr 'unsafe-inline'",
     "connect-src 'self' https:",
@@ -206,6 +211,28 @@ function cspForNonce(nonce) {
     "upgrade-insecure-requests"
   ].join('; ');
 }
+function cspReportOnlyForNonce(nonce) {
+  return [
+    "default-src 'self'",
+    "img-src 'self' " + 'data' + ": blob: https:",
+    "style-src 'self'",
+    "style-src-elem 'self' 'nonce-" + nonce + "'",
+    "style-src-attr 'unsafe-inline'",
+    "script-src 'self' 'nonce-" + nonce + "' https://static.cloudflareinsights.com",
+    "script-src-attr 'unsafe-inline'",
+    "connect-src 'self' https:",
+    "font-src 'self' " + 'data' + ":",
+    "media-src 'self' https: blob:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "upgrade-insecure-requests"
+  ].join('; ');
+}
+function styleNonceBootstrapMarkup() {
+  return '<script data-dd-style-nonce-bootstrap-v251="1">(function(){var s=document.currentScript,n=s&&s.nonce;if(!n||window.DDCspStyleNonceV251)return;var original=Document.prototype.createElement;Document.prototype.createElement=function(name,options){var el=original.call(this,name,options);if(String(name||"").toLowerCase()==="style")el.setAttribute("nonce",n);return el;};window.DDCspStyleNonceV251=Object.freeze({build:251,style_element_nonce:true,style_attribute_compatibility:true});})();<\/script>';
+}
 function withScriptNonceCsp(response, request) {
   if (String(request?.method || 'GET').toUpperCase() !== 'GET') return response;
   const contentType = String(response?.headers?.get('Content-Type') || '').toLowerCase();
@@ -213,11 +240,13 @@ function withScriptNonceCsp(response, request) {
   const nonce = randomCspNonce();
   const headers = new Headers(response.headers);
   headers.set('Content-Security-Policy', cspForNonce(nonce));
-  headers.set('X-DND-CSP-Revision', '467b245-script-nonce-v1');
+  headers.set('Content-Security-Policy-Report-Only', cspReportOnlyForNonce(nonce));
+  headers.set('X-DND-CSP-Revision', '467b251-style-nonce-v1');
   const secured = new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   try {
     return new HTMLRewriter()
       .on('script', { element(element) { element.setAttribute('nonce', nonce); } })
+      .on('style', { element(element) { element.setAttribute('nonce', nonce); } })
       .transform(secured);
   } catch {
     return secured;

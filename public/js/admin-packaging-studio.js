@@ -4,6 +4,7 @@
   const STORAGE_KEY = 'dd_packaging_studio_local_draft_v5';
   const state = { projects: [], templates: [], products: [], inventory: [], printers: [], printersSchemaReady: true, referenceSources: [], formulaLibrary: [], contentLibrary: [], sourceMaterialLibrary: [], materialLibraryOpen: false, librarySchemaReady: true, sourceMaterialSchemaReady: true, sourceMaterialMetadataReady: true, detail: null, loading: false, activeTab: 'product', activeSourceMaterialId: 0, activeContentLibraryId: 0 };
   const id = (name) => document.getElementById(name);
+  const cspNonce = () => String(document.currentScript?.nonce || document.querySelector('script[nonce]')?.nonce || '').trim();
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   const xml = (value) => String(value ?? '').replace(/[<>&"']/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[char]));
   const num = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
@@ -545,7 +546,7 @@
         <clipPath id="soap-fr-ingredients"><rect x="${zones.fr.x}" y="${bandY+16}" width="${zones.fr.w-4}" height="${bandHeight-29}"/></clipPath>
         <clipPath id="soap-claims"><rect x="${zones.claims.x}" y="${bandY+8}" width="${zones.claims.w}" height="${bandHeight-27}"/></clipPath>
       </defs>
-      <style>
+      <style nonce="${xml(cspNonce())}">
         .pkg-copy{font-family:Arial,Helvetica,sans-serif;fill:${border}}.pkg-serif{font-family:Georgia,'Times New Roman',serif;fill:${border}}.pkg-script,.pkg-brand-title{font-family:'Brush Script MT','Segoe Script',cursive;fill:${secondary}}.pkg-brand-title{font-weight:700}
         .pkg-zone-line{stroke:${secondary};stroke-opacity:.22;stroke-width:1.2}
       </style>

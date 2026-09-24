@@ -12,22 +12,23 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 250 candidate
+## Current Release 467 restart authority — Build 251 candidate
 
-Build 249 **Refinement Runtime Measurement & Outcome Baseline** is the exact verified predecessor:
+Build 250 **Startup & Provider Read-Budget Verification** is the exact verified predecessor:
 
-- Development SHA: `fe7ac18156f2cbe83c67536be27b77756d29c696`
-- Shared tree: `bec700bf173ef7cc07b74aafdde4db6d362faad1`
-- Development proofs: System `35945324462`, Quality `35945324867`, I.T. `35945324872`, Hygiene `35945324865`
-- Build 249 dedicated proof: `35945324387`
-- Production main: `94e4561f6b47337538a23ef2404f456237961ca3`
-- Production proofs: Pages `35945579057`, Live Resources `35945652794`, Product Browser `35945652743`, Product Route `35945652805`
-- Build 249 Production-specific proof: `35945579187`
+- Development SHA: `f2eb36f2cae76e44a7e225c38fb4102cf1f9a84d`
+- Shared tree: `41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1`
+- Development proofs: System `35999263313`, Quality `35999263281`, I.T. `35999263373`, Hygiene `35999263534`
+- Build 250 dedicated proof: `35999263213`
+- Production main: `4bbd5ffdd7063bdc7bb864c416b8a6f08cf2582e`
+- Production proofs: Pages `35999481927`, Live Resources `35999606857`, Product Browser `35999606928`, Product Route `35999606852`
+- Build 250 Production-specific proof: `35999481765`
+- Build 250 Development provider evidence: Today Tasks `1,132`, Seller Daily `1,046`, aggregate `2,178` rows_read.
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 250 **Startup & Provider Read-Budget Verification** is the active candidate. It enforces browser-local Admin startup ceilings and runs SELECT-only provider rows_read probes against canonical Development D1 only. Production D1 contact/business-data copy, D1/R2 mutation, provider execution/publication, Inventory movement and Finance posting remain closed.
+Build 251 **CSP Style Injection-Surface Hardening** is the active candidate. Modern style elements are nonce-bound, dynamic `createElement('style')` paths inherit the response nonce, Packaging print styles are explicitly nonced, and Reliability's inline style block is moved to a same-origin stylesheet. Legacy `style=""` attributes remain explicitly compatible for this bounded release.
 
-Build 249 is exact-tree Development + Production GREEN. Build 250 remains blocked from Production until its exact Development head, provider budget proof and required release gates are GREEN.
+Build 250 is exact-tree Development + Production GREEN. Build 251 remains blocked from Production until its exact Development head and required release/security gates are GREEN.
 
 ## Retained historical provenance — Build 171
 

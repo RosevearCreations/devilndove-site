@@ -1,0 +1,5 @@
+/* Release 467 Build 251 — extracted same-origin styles from Reliability inline <style>. */
+.rel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.rel-score{font-size:2rem;font-weight:900}
+.rel-check{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}
+.rel-status{font-weight:800;text-transform:uppercase}
