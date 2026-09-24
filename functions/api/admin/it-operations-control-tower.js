@@ -1,27 +1,27 @@
-// Release 467 Build 253 — session and abuse-control runtime evidence candidate over Build 252 Production source.
+// Release 467 Build 254 — operator journey friction review candidate over Build 253 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=253;
-const TITLE='Session & Abuse-Control Runtime Evidence';
-const AUTHORITY='release467-build253-session-abuse-control-runtime-evidence';
-const EVIDENCE_ID='r467-b252-green-36042886754-36043164640';
+const BUILD=254;
+const TITLE='Operator Journey Friction Review';
+const AUTHORITY='release467-build254-operator-journey-friction-review';
+const EVIDENCE_ID='r467-b253-green-36066344734-36066849392';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:252,title:'Cross-Device Accessibility Acceptance Refresh',state:'DEVELOPMENT_GREEN',
-  dev_sha:'ec749569908b2ebbf393ca1ec2181e586a10f548',tree_sha:'bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2',
-  system_gate_run:36042886754,current_application_quality_run:36042887036,it_admin_runtime_proof_run:36042887117,
-  branch_hygiene_run:36042886574,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:253,title:'Session & Abuse-Control Runtime Evidence',state:'DEVELOPMENT_GREEN',
+  dev_sha:'42ad585550cbf76b39ab28d30ed345e177b8fb86',tree_sha:'deeca5e877175af1c7c804b09bfbb14a9daa7df8',
+  system_gate_run:36066344734,current_application_quality_run:36066344961,it_admin_runtime_proof_run:36066344950,
+  branch_hygiene_run:36066346173,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:252,title:'Cross-Device Accessibility Acceptance Refresh',state:'PRODUCTION_GREEN',
-  main_sha:'3c14d72ed481035d82f3cffa2d16f733f603f1d9',tree_sha:'bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2',
-  production_pages_deploy_run:36043164640,production_live_resource_integrity_run:36043274946,
-  products_browser_proof_run:36043274912,products_route_proof_run:36043274915,remote_d1_queries:0
+  release:467,build:253,title:'Session & Abuse-Control Runtime Evidence',state:'PRODUCTION_GREEN',
+  main_sha:'ec4e665c34af6e6fbc1dc440411b8b7795deaeb5',tree_sha:'deeca5e877175af1c7c804b09bfbb14a9daa7df8',
+  production_pages_deploy_run:36066849392,production_live_resource_integrity_run:36067030179,
+  products_browser_proof_run:36067030078,products_route_proof_run:36067030066,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 253 Session Abuse-Control Runtime Evidence'
+  'Release 467 Build 254 Operator Journey Friction Review'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:252,title:'Cross-Device Accessibility Acceptance Refresh',
+    release:467,build:253,title:'Session & Abuse-Control Runtime Evidence',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:36042886754,current_application_quality_run:36042887036,
-      it_admin_runtime_proof_run:36042887117,branch_hygiene_run:36042886574
+      system_gate_run:36066344734,current_application_quality_run:36066344961,
+      it_admin_runtime_proof_run:36066344950,branch_hygiene_run:36066346173
     },
     production_proofs:{
-      production_pages_deploy_run:36043164640,production_live_resource_integrity_run:36043274946,
-      products_browser_proof_run:36043274912,products_route_proof_run:36043274915
+      production_pages_deploy_run:36066849392,production_live_resource_integrity_run:36067030179,
+      products_browser_proof_run:36067030078,products_route_proof_run:36067030066
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 254 follows only after exact Build 253 Production GREEN.'
+    next_build:'Build 255 follows only after exact Build 254 Production GREEN.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 253 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 254 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -102,7 +102,7 @@ function markdownReport(pack){
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Current predecessor: Build 251 CSP Style Injection-Surface Hardening
+- Current Production baseline: Build 253 Session & Abuse-Control Runtime Evidence
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -121,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:253,title:TITLE,authority:'release467-build253-session-abuse-control-runtime-evidence.json'},
+        current_closure_candidate:{release:467,build:254,title:TITLE,authority:'release467-build254-operator-journey-friction-review.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -141,10 +141,10 @@ export async function onRequestGet(context){
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
       'Build 252 is the exact last fully verified Development checkpoint.',
-      'Build 252 Production is GREEN on the identical tree bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2.',
-      'Development proofs: System 36042886754, Quality 36042887036, I.T. 36042887117, Hygiene 36042886574.',
-      'Production proofs: Pages 36043164640, Live Resources 36043274946, Product Browser 36043274912, Product Route 36043274915.',
-      'Build 252 source was promoted to main 3c14d72ed481035d82f3cffa2d16f733f603f1d9 on the exact Development tree.',
+      'Build 252 Production is GREEN on the identical tree deeca5e877175af1c7c804b09bfbb14a9daa7df8.',
+      'Development proofs: System 36066344734, Quality 36066344961, I.T. 36066344950, Hygiene 36066346173.',
+      'Production proofs: Pages 36066849392, Live Resources 36067030179, Product Browser 36067030078, Product Route 36067030066.',
+      'Build 252 source was promoted to main ec4e665c34af6e6fbc1dc440411b8b7795deaeb5 on the exact Development tree.',
       'Build 253 Session & Abuse-Control Runtime Evidence is the active Development candidate and uses bounded synthetic runtime scenarios only.'
     ],
     safety:{
