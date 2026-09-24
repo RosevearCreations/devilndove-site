@@ -2,7 +2,7 @@
   "release": 467,
   "build": 251,
   "title": "CSP Style Injection-Surface Hardening",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build251-csp-style-injection-surface-hardening",
   "predecessor": {
     "build": 250,
@@ -102,5 +102,35 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_verified_development": true
     }
+  },
+  "accepted_dev_sha": "4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd",
+  "accepted_dev_tree_sha": "2d6d06e321693779cee55ed2dd892bff3b364a36",
+  "final_closure": {
+    "dev_sha": "4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd",
+    "tree_sha": "2d6d06e321693779cee55ed2dd892bff3b364a36",
+    "candidate_pr": 344,
+    "candidate_pr_head_sha": "0aa691e42d996f2fec28c8bd3f02bdafb82c34db",
+    "proofs": {
+      "system_gate_run": 36030944185,
+      "current_application_quality_run": 36030944073,
+      "it_admin_runtime_proof_run": 36030944009,
+      "dedicated_gate_run": 36030944096
+    },
+    "branch_hygiene": {
+      "workflow": ".github/workflows/repository-branch-hygiene.yml",
+      "trigger": "push_to_dev",
+      "run_id": null,
+      "evidence_note": "Push-only run is not returned by the connected PR-run wrapper; no identifier is invented."
+    },
+    "proof_state": "GREEN_PR_HEAD_IDENTICAL_TREE_TO_MERGED_DEV_WITH_PUSH_ONLY_HYGIENE_ID_UNAVAILABLE",
+    "ingested_by_build": 252
+  },
+  "production_checkpoint": {
+    "main_sha": "f8e15d07e97e9a4e2953a65d09b494c73a36192a",
+    "tree_sha": "2d6d06e321693779cee55ed2dd892bff3b364a36",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_development": true,
+    "production_proof_run_ids": null,
+    "evidence_note": "Exact Production source promotion is confirmed by main/tree identity; push-only Production workflow IDs are not exposed by the connected PR-run wrapper and are not fabricated."
   }
 }
