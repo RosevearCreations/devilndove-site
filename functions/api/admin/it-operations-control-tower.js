@@ -1,12 +1,12 @@
-// Release 467 Build 251 — CSP style hardening candidate over exact Build 250 GREEN predecessor.
+// Release 467 Build 252 — cross-device accessibility acceptance candidate over Build 251 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=251;
-const TITLE='CSP Style Injection-Surface Hardening';
-const AUTHORITY='release467-build251-csp-style-injection-surface-hardening';
+const BUILD=252;
+const TITLE='Cross-Device Accessibility Acceptance Refresh';
+const AUTHORITY='release467-build252-cross-device-accessibility-acceptance-refresh';
 const EVIDENCE_ID='r467-b250-green-35999263313-35999481927';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 251 CSP Style Injection Surface Hardening'
+  'Release 467 Build 252 Cross-Device Accessibility Acceptance Refresh'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 252 follows only after exact Build 251 Production GREEN.'
+    next_build:'Build 253 follows only after exact Build 252 Production GREEN.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 251 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 252 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -121,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:251,title:TITLE,authority:'release467-build251-csp-style-injection-surface-hardening.json'},
+        current_closure_candidate:{release:467,build:252,title:TITLE,authority:'release467-build252-cross-device-accessibility-acceptance-refresh.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -144,8 +144,9 @@ export async function onRequestGet(context){
       'Build 250 Production is GREEN on the identical tree 41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1.',
       'Development proofs: System 35999263313, Quality 35999263281, I.T. 35999263373, Hygiene 35999263534.',
       'Production proofs: Pages 35999481927, Live Resources 35999606857, Product Browser 35999606928, Product Route 35999606852.',
-      'Build 251 CSP Style Injection-Surface Hardening is the active Development candidate.',
-      'Build 251 nonce-binds style elements and preserves explicit legacy style-attribute compatibility without business-data mutation.'
+      'Build 251 source was promoted to main f8e15d07e97e9a4e2953a65d09b494c73a36192a on exact tree 2d6d06e321693779cee55ed2dd892bff3b364a36.',
+      'Build 251 PR-head proofs are System 36030944185, Quality 36030944073, I.T. 36030944009 and dedicated gate 36030944096; push-only workflow IDs are not fabricated when the connected wrapper cannot expose them.',
+      'Build 252 Cross-Device Accessibility Acceptance Refresh is the active Development candidate and changes no business-data authority.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
