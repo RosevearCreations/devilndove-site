@@ -2,7 +2,7 @@
   "release": 467,
   "build": 254,
   "title": "Operator Journey Friction Review",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build254-operator-journey-friction-review",
   "predecessor": {
     "build": 253,
@@ -115,5 +115,32 @@
       "products_route_proof_run": 36067030066,
       "build_specific_proof_run": 36066849362
     }
+  },
+  "accepted_dev_sha": "95ad971789a7f207c1bc64103e68cd28204a3e50",
+  "accepted_dev_tree_sha": "7da896d6d154460950844b44bc179a8354b836f2",
+  "final_closure": {
+    "dev_sha": "95ad971789a7f207c1bc64103e68cd28204a3e50",
+    "tree_sha": "7da896d6d154460950844b44bc179a8354b836f2",
+    "proofs": {
+      "system_gate_run": 36070577487,
+      "current_application_quality_run": 36070577680,
+      "it_admin_runtime_proof_run": 36070577821,
+      "branch_hygiene_run": 36070578110
+    },
+    "dedicated_gate_run": 36070577943,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 255,
+    "recorded_by": "Build 255 successor ingestion; Build 254 did not self-record later proof"
+  },
+  "production_checkpoint": {
+    "main_sha": "46224bcfebbf12bec95383a03e188e00674d3326",
+    "tree_sha": "7da896d6d154460950844b44bc179a8354b836f2",
+    "production_pages_deploy_run": 36071988396,
+    "production_live_resource_integrity_run": 36072048200,
+    "products_browser_proof_run": 36072048278,
+    "products_route_proof_run": 36072048280,
+    "build_specific_proof_run": 36071988190,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
