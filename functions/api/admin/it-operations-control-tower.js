@@ -7,21 +7,21 @@ const RELEASE=467;
 const BUILD=252;
 const TITLE='Cross-Device Accessibility Acceptance Refresh';
 const AUTHORITY='release467-build252-cross-device-accessibility-acceptance-refresh';
-const EVIDENCE_ID='r467-b250-green-35999263313-35999481927';
+const EVIDENCE_ID='r467-b251-green-36031272271-36031593630';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:250,title:'Startup & Provider Read-Budget Verification',state:'DEVELOPMENT_GREEN',
-  dev_sha:'f2eb36f2cae76e44a7e225c38fb4102cf1f9a84d',tree_sha:'41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1',
-  system_gate_run:35999263313,current_application_quality_run:35999263281,it_admin_runtime_proof_run:35999263373,
-  branch_hygiene_run:35999263534,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:251,title:'CSP Style Injection-Surface Hardening',state:'DEVELOPMENT_GREEN',
+  dev_sha:'4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd',tree_sha:'2d6d06e321693779cee55ed2dd892bff3b364a36',
+  system_gate_run:36031272271,current_application_quality_run:36031272780,it_admin_runtime_proof_run:36031272416,
+  branch_hygiene_run:36031272718,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:250,title:'Startup & Provider Read-Budget Verification',state:'PRODUCTION_GREEN',
-  main_sha:'4bbd5ffdd7063bdc7bb864c416b8a6f08cf2582e',tree_sha:'41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1',
-  production_pages_deploy_run:35999481927,production_live_resource_integrity_run:35999606857,
-  products_browser_proof_run:35999606928,products_route_proof_run:35999606852,remote_d1_queries:0
+  release:467,build:251,title:'CSP Style Injection-Surface Hardening',state:'PRODUCTION_GREEN',
+  main_sha:'f8e15d07e97e9a4e2953a65d09b494c73a36192a',tree_sha:'2d6d06e321693779cee55ed2dd892bff3b364a36',
+  production_pages_deploy_run:36031593630,production_live_resource_integrity_run:36031748408,
+  products_browser_proof_run:36031748531,products_route_proof_run:36031748437,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:250,title:'Startup & Provider Read-Budget Verification',
+    release:467,build:251,title:'CSP Style Injection-Surface Hardening',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:35999263313,current_application_quality_run:35999263281,
-      it_admin_runtime_proof_run:35999263373,branch_hygiene_run:35999263534
+      system_gate_run:36031272271,current_application_quality_run:36031272780,
+      it_admin_runtime_proof_run:36031272416,branch_hygiene_run:36031272718
     },
     production_proofs:{
-      production_pages_deploy_run:35999481927,production_live_resource_integrity_run:35999606857,
-      products_browser_proof_run:35999606928,products_route_proof_run:35999606852
+      production_pages_deploy_run:36031593630,production_live_resource_integrity_run:36031748408,
+      products_browser_proof_run:36031748531,products_route_proof_run:36031748437
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -102,7 +102,7 @@ function markdownReport(pack){
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Current predecessor: Build 250 Startup & Provider Read-Budget Verification
+- Current predecessor: Build 251 CSP Style Injection-Surface Hardening
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -140,10 +140,10 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 250 is the exact last fully verified Development checkpoint.',
-      'Build 250 Production is GREEN on the identical tree 41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1.',
-      'Development proofs: System 35999263313, Quality 35999263281, I.T. 35999263373, Hygiene 35999263534.',
-      'Production proofs: Pages 35999481927, Live Resources 35999606857, Product Browser 35999606928, Product Route 35999606852.',
+      'Build 251 is the exact last fully verified Development checkpoint.',
+      'Build 251 Production is GREEN on the identical tree 2d6d06e321693779cee55ed2dd892bff3b364a36.',
+      'Development proofs: System 36031272271, Quality 36031272780, I.T. 36031272416, Hygiene 36031272718.',
+      'Production proofs: Pages 36031593630, Live Resources 36031748408, Product Browser 36031748531, Product Route 36031748437.',
       'Build 251 source was promoted to main f8e15d07e97e9a4e2953a65d09b494c73a36192a on exact tree 2d6d06e321693779cee55ed2dd892bff3b364a36.',
       'Build 251 PR-head proofs are System 36030944185, Quality 36030944073, I.T. 36030944009 and dedicated gate 36030944096; push-only workflow IDs are not fabricated when the connected wrapper cannot expose them.',
       'Build 252 Cross-Device Accessibility Acceptance Refresh is the active Development candidate and changes no business-data authority.'
