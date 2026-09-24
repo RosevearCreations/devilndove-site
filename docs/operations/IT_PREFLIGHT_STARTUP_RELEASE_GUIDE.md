@@ -12,24 +12,24 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 252 candidate
+## Current Release 467 restart authority — Build 253 candidate
 
-Build 251 **CSP Style Injection-Surface Hardening** is the exact verified predecessor:
+Build 252 **Cross-Device Accessibility Acceptance Refresh** is the exact verified predecessor:
 
-- Development SHA: `4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd`
-- Shared Development/Production tree: `2d6d06e321693779cee55ed2dd892bff3b364a36`
-- Development proofs: System `36031272271`, Quality `36031272780`, I.T. `36031272416`, Hygiene `36031272718`
-- Build 251 dedicated Development proof: `36031272407`
-- Production main: `f8e15d07e97e9a4e2953a65d09b494c73a36192a`
-- Production proofs: Pages `36031593630`, Live Resources `36031748408`, Product Browser `36031748531`, Product Route `36031748437`
-- Build 251 Production-specific proof: `36031593481`
+- Development SHA: `ec749569908b2ebbf393ca1ec2181e586a10f548`
+- Shared Development/Production tree: `bc93b89d4b649d035e4dc5cb0f9deeb9d01399e2`
+- Development proofs: System `36042886754`, Quality `36042887036`, I.T. `36042887117`, Hygiene `36042886574`
+- Build 252 dedicated Development proof: `36042887105`
+- Production main: `3c14d72ed481035d82f3cffa2d16f733f603f1d9`
+- Production proofs: Pages `36043164640`, Live Resources `36043274946`, Product Browser `36043274912`, Product Route `36043274915`
+- Build 252 Production-specific proof: `36043164318`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 252 **Cross-Device Accessibility Acceptance Refresh** is the active candidate. It re-proves the existing phone/tablet/desktop layout boundaries, keyboard flow, focus visibility, coarse-pointer targets, dense Admin workspace behavior, local horizontal scrolling and reduced-motion behavior while retaining Build 251 CSP nonce protections.
+Build 253 **Session & Abuse-Control Runtime Evidence** is the active candidate. It exercises cookie-first session resolution, CSRF/origin guards, authentication throttling, revoke-other-sessions and admin step-up behavior using bounded synthetic in-memory runtime scenarios.
 
-Build 252 changes presentation acceptance only. It adds no schema or request-time DDL, D1/R2 business mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy or secret capture.
+Build 253 changes no authentication policy and uses no real credentials. It adds no schema or request-time DDL, D1/R2 business mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy or secret capture.
 
-Build 252 remains blocked from Production until its exact candidate tree passes the current System, Quality, I.T., Hygiene and Build 252 checks, is merged to `dev`, and the identical Development tree is promoted to protected `main`.
+Build 253 remains blocked from Production until its exact candidate tree passes the current System, Quality, I.T., Hygiene and Build 253 checks, is merged to `dev`, and the identical Development tree is promoted to protected `main`.
 
 ## Retained historical provenance — Build 171
 
