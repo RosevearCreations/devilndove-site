@@ -24,6 +24,10 @@
     node.className = `card small ${kind === 'error' ? 'is-error' : kind === 'success' ? 'is-success' : ''}`;
   }
 
+  function currentCspNonce() {
+    return String(document.currentScript?.nonce || document.querySelector('script[nonce]')?.nonce || '').trim();
+  }
+
   function selectedVersionId() {
     return Number(byId('printTestVersion')?.value || 0) || 0;
   }
@@ -186,7 +190,7 @@
     const title = `Packaging Version ${artifact.version_number || ''}${artifact.version_label ? ` — ${artifact.version_label}` : ''}`;
     const labelHtml = Array.from({ length: plan.count }, () => `<div class="label-cell ${plan.rotated ? 'rotated' : ''}"><div class="label-art">${svg}</div></div>`).join('');
     win.document.open();
-    win.document.write(`<!doctype html><html><head><title>${esc(title)} — ${plan.count} up Letter sheet</title><style>@page{size:letter ${plan.orientation};margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff}.sheet{width:${plan.pageW}mm;height:${plan.pageH}mm;padding:${plan.margin}mm;display:grid;grid-template-columns:repeat(${plan.cols},${plan.packedW}mm);grid-auto-rows:${plan.packedH}mm;gap:${plan.gap}mm;align-content:start;justify-content:start;overflow:hidden}.label-cell{position:relative;width:${plan.packedW}mm;height:${plan.packedH}mm;overflow:hidden}.label-art{position:absolute;left:0;top:0;width:${plan.labelWidth}mm;height:${plan.labelHeight}mm}.label-art>svg{display:block;width:${plan.labelWidth}mm!important;height:${plan.labelHeight}mm!important}.rotated .label-art{transform:rotate(90deg) translateY(-100%);transform-origin:top left}@media screen{body{background:#ddd}.sheet{margin:8px auto;background:#fff;box-shadow:0 1px 10px #777}}</style></head><body><main class="sheet">${labelHtml}</main><script>onload=()=>setTimeout(()=>print(),350)<\/script></body></html>`);
+    win.document.write(`<!doctype html><html><head><title>${esc(title)} — ${plan.count} up Letter sheet</title><style nonce="${esc(currentCspNonce())}">@page{size:letter ${plan.orientation};margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff}.sheet{width:${plan.pageW}mm;height:${plan.pageH}mm;padding:${plan.margin}mm;display:grid;grid-template-columns:repeat(${plan.cols},${plan.packedW}mm);grid-auto-rows:${plan.packedH}mm;gap:${plan.gap}mm;align-content:start;justify-content:start;overflow:hidden}.label-cell{position:relative;width:${plan.packedW}mm;height:${plan.packedH}mm;overflow:hidden}.label-art{position:absolute;left:0;top:0;width:${plan.labelWidth}mm;height:${plan.labelHeight}mm}.label-art>svg{display:block;width:${plan.labelWidth}mm!important;height:${plan.labelHeight}mm!important}.rotated .label-art{transform:rotate(90deg) translateY(-100%);transform-origin:top left}@media screen{body{background:#ddd}.sheet{margin:8px auto;background:#fff;box-shadow:0 1px 10px #777}}</style></head><body><main class="sheet">${labelHtml}</main><script>onload=()=>setTimeout(()=>print(),350)<\/script></body></html>`);
     win.document.close();
     message(`Prepared saved Version ${artifact.version_number || ''} from its immutable SVG: ${plan.count} label${plan.count === 1 ? '' : 's'} on one Letter sheet. Choose “${profile.name || 'the intended printer'}” and Actual Size / 100% in the system dialog.`, 'success');
   }
