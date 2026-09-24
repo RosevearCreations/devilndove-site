@@ -1,5 +1,3 @@
--- Release 467 Build 250 — exact Development read-only Seller Daily startup probe.
--- One SELECT statement mirrors the runtime summary read; no mutation/DDL.
 
 SELECT
   (SELECT COUNT(*) FROM orders) AS orders_count,

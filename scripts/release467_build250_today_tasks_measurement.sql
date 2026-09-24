@@ -1,5 +1,3 @@
--- Release 467 Build 250 — exact Development read-only Today Tasks startup probe.
--- 13 SELECT statements mirror the bounded runtime fan-out; no mutation/DDL.
 
 SELECT COUNT(*) AS readiness_count
 FROM products

@@ -81,7 +81,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$(cat scripts/release467_build250_today_tasks_measurement.sql)" > /tmp/build250-today.json
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$(grep -v '^[[:space:]]*--' scripts/release467_build250_today_tasks_measurement.sql)" > /tmp/build250-today.json
           python - <<'PY'
           import json
           raw=json.load(open('/tmp/build250-today.json'))
@@ -105,7 +105,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$(cat scripts/release467_build250_seller_daily_measurement.sql)" > /tmp/build250-seller.json
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$(grep -v '^[[:space:]]*--' scripts/release467_build250_seller_daily_measurement.sql)" > /tmp/build250-seller.json
           python - <<'PY'
           import json
           raw=json.load(open('/tmp/build250-seller.json'))
