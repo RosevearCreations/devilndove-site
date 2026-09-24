@@ -24,11 +24,18 @@ recovery=t('functions/api/auth/account-help-request.js')
 road=t('docs/operations/RELEASE_467_REFINEMENT_AUTONOMOUS_BUILDS_233_248.md')
 sysgate=t('scripts/current_system_gate_provenance_gate.py')
 
-q(a.get('build')==246 and a.get('state')=='DEVELOPMENT_CANDIDATE','Build 246 authority identity/state mismatch')
+q(a.get('build')==246 and a.get('state') in ('DEVELOPMENT_CANDIDATE','PRODUCTION_GREEN'),'Build 246 authority identity/state mismatch')
+if a.get('state')=='PRODUCTION_GREEN':
+    q((a.get('final_closure') or {}).get('dev_sha')=='cfd9af8777699b8d7902eef0585693b2152e60c8','Build 246 successor closure must retain exact final dev SHA')
+    q((a.get('production_checkpoint') or {}).get('main_sha')=='e21f7b9bf60ab8b35ecd3724cee988f2beeebb32','Build 246 successor closure must retain exact Production main')
 q(prev.get('state')=='PRODUCTION_GREEN','Build 245 predecessor must be Production GREEN')
 q((prev.get('final_closure') or {}).get('dev_sha')=='b4eeed8895a8a04247b68a626c9018caadd8c9ad','Build 245 final Development closure missing')
 q((prev.get('production_checkpoint') or {}).get('main_sha')=='2312b35c5d527721219c48985325eeba8f3ecd3f','Build 245 Production closure missing')
-q(p.get('build')==246 and p.get('next_build')==247 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must expose Build 246 candidate and Build 247 successor')
+q(int(p.get('build') or 0)>=246 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 246 or a verified successor')
+if int(p.get('build') or 0)==246:
+    q(p.get('next_build')==247,'Build 246 successor pointer mismatch')
+else:
+    q((a.get('final_closure') or {}).get('dev_sha')=='cfd9af8777699b8d7902eef0585693b2152e60c8','Build 247+ must retain exact Build 246 Development closure')
 
 for token in ('consumeAbuseBudget','cloudflare_cache','fingerprint_exposed:false','logs_secrets:false'):
     q(token in guard,f'Abuse guard missing {token}')

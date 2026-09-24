@@ -1,0 +1,96 @@
+{
+  "release": 467,
+  "build": 247,
+  "title": "Non-Product Visual Coverage & Media Placement Closure",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build247-non-product-visual-coverage-media-placement-closure",
+  "predecessor": {
+    "build": 246,
+    "title": "Abuse Resistance, Session Control & Security Operations",
+    "development_sha": "cfd9af8777699b8d7902eef0585693b2152e60c8",
+    "development_tree_sha": "d4a599779d835a4900560fd4970d475a089c983a",
+    "production_main_sha": "e21f7b9bf60ab8b35ecd3724cee988f2beeebb32",
+    "production_tree_sha": "d4a599779d835a4900560fd4970d475a089c983a",
+    "development_proofs": {
+      "system_gate_run": 35934272420,
+      "current_application_quality_run": 35934272137,
+      "it_admin_runtime_proof_run": 35934272393,
+      "branch_hygiene_run": 35934271806,
+      "dedicated_gate_run": 35934272301
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 35934550990,
+      "production_live_resource_integrity_run": 35934626619,
+      "products_browser_proof_run": 35934626644,
+      "products_route_proof_run": 35934626617,
+      "build_specific_proof_run": 35934551031
+    },
+    "state": "PRODUCTION_GREEN"
+  },
+  "scope": {
+    "source_plan": "SITE_WIDE_NON_PRODUCT_IMAGE_REQUIREMENTS.md",
+    "public_targets_tracked": 23,
+    "admin_targets_tracked": 5,
+    "helpful_visual_targets_tracked": 7,
+    "tracked_targets_total": 35,
+    "public_svg_placeholders_preserved_for_real_media": 29,
+    "public_placeholder_pages": 22,
+    "media_studio_read_only_coverage_projection": true,
+    "public_real_photo_requirements_remain_evidence_dependent": true,
+    "admin_existing_visuals_reclassified_non_evidentiary": true,
+    "help_centre_semantic_visuals_added": true,
+    "generated_or_editorial_art_is_not_evidence": true,
+    "product_gallery_placeholders_excluded": true
+  },
+  "implementation": {
+    "manifest": "public/data/non-product-visual-coverage-v247.json",
+    "projection_client": "public/js/admin-non-product-visual-coverage-v247.js",
+    "media_studio": "admin/media-content-studio/index.html",
+    "source_requirements": "SITE_WIDE_NON_PRODUCT_IMAGE_REQUIREMENTS.md",
+    "slot_catalog": "public/data/media-content-slot-catalog.json",
+    "image_space_plan": "docs/media-content/IMAGE_SPACE_REQUIREMENTS.csv"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_media_assignment": false,
+    "synthetic_product_evidence": false,
+    "synthetic_workshop_evidence": false,
+    "synthetic_customer_evidence": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build247_gate.py",
+    "workflow": ".github/workflows/release467-build247-non-product-visual-coverage.yml",
+    "next_build": 248,
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "cfd9af8777699b8d7902eef0585693b2152e60c8",
+      "tree": "d4a599779d835a4900560fd4970d475a089c983a",
+      "system_gate_run": 35934272420,
+      "quality_run": 35934272137,
+      "it_admin_runtime_run": 35934272393,
+      "repository_hygiene_run": 35934271806,
+      "dedicated_gate_run": 35934272301,
+      "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "e21f7b9bf60ab8b35ecd3724cee988f2beeebb32",
+      "tree_sha": "d4a599779d835a4900560fd4970d475a089c983a",
+      "production_pages_deploy_run": 35934550990,
+      "production_live_resource_integrity_run": 35934626619,
+      "products_browser_proof_run": 35934626644,
+      "products_route_proof_run": 35934626617,
+      "build_specific_proof_run": 35934551031,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}
