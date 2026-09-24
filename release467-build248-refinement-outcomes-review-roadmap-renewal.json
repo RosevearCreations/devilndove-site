@@ -2,7 +2,7 @@
   "release": 467,
   "build": 248,
   "title": "Refinement Outcomes Review & Roadmap Renewal",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build248-refinement-outcomes-review-roadmap-renewal",
   "predecessor": {
     "build": 247,
@@ -92,5 +92,32 @@
       "build_specific_proof_run": 35940744345,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "accepted_dev_sha": "2f46181a3c92568c2b192a83929a85f72a2b4374",
+  "accepted_dev_tree_sha": "2db3a312cd0e7a6e24b07de4495d1d97898c7028",
+  "final_closure": {
+    "dev_sha": "2f46181a3c92568c2b192a83929a85f72a2b4374",
+    "tree_sha": "2db3a312cd0e7a6e24b07de4495d1d97898c7028",
+    "proofs": {
+      "system_gate_run": 35942841810,
+      "current_application_quality_run": 35942841817,
+      "it_admin_runtime_proof_run": 35942841820,
+      "branch_hygiene_run": 35942841826
+    },
+    "dedicated_gate_run": 35942841818,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 249,
+    "recorded_by": "Build 249 successor ingestion; Build 248 did not self-record later proof"
+  },
+  "production_checkpoint": {
+    "main_sha": "e6ed352b5fe9f32b2cd6d049b00239fd643ebbc6",
+    "tree_sha": "2db3a312cd0e7a6e24b07de4495d1d97898c7028",
+    "production_pages_deploy_run": 35943937792,
+    "production_live_resource_integrity_run": 35944021002,
+    "products_browser_proof_run": 35944020958,
+    "products_route_proof_run": 35944020834,
+    "build_specific_proof_run": 35943937473,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
