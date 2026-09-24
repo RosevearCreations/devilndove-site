@@ -1,0 +1,34 @@
+name: Release 467 Build 252 Cross-Device Accessibility Acceptance Refresh
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+
+jobs:
+  build252:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check functions/_middleware.js
+          node --check public/js/admin-ergonomics-v237.js
+          node --check public/js/media-carousel.js
+      - name: Build 252 cross-device accessibility contract
+        run: python scripts/release467_build252_gate.py
+      - name: Retain predecessor security and ergonomics contracts
+        run: |
+          python scripts/release467_build251_gate.py
+          python scripts/release467_build245_gate.py
+          python scripts/release467_build237_gate.py
