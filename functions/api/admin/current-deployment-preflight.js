@@ -1,23 +1,23 @@
-// Release 467 Build 250 — current read-only Deployment Preflight over exact Build 249 GREEN predecessor.
+// Release 467 Build 251 — current read-only Deployment Preflight over exact Build 250 GREEN predecessor.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=250;
-const TITLE='Startup & Provider Read-Budget Verification';
+const BUILD=251;
+const TITLE='CSP Style Injection-Surface Hardening';
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
-const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 250 Startup Provider Read-Budget Verification']);
+const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 251 CSP Style Injection Surface Hardening']);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:249,title:'Refinement Runtime Measurement & Outcome Baseline',state:'DEVELOPMENT_GREEN',
-  dev_sha:'fe7ac18156f2cbe83c67536be27b77756d29c696',tree_sha:'bec700bf173ef7cc07b74aafdde4db6d362faad1',
-  system_gate_run:35945324462,current_application_quality_run:35945324867,it_admin_runtime_proof_run:35945324872,
-  branch_hygiene_run:35945324865,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',exact_preview_deployment:true
+  release:467,build:250,title:'Startup & Provider Read-Budget Verification',state:'DEVELOPMENT_GREEN',
+  dev_sha:'f2eb36f2cae76e44a7e225c38fb4102cf1f9a84d',tree_sha:'41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1',
+  system_gate_run:35999263313,current_application_quality_run:35999263281,it_admin_runtime_proof_run:35999263373,
+  branch_hygiene_run:35999263534,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:249,title:'Refinement Runtime Measurement & Outcome Baseline',state:'PRODUCTION_GREEN',
-  main_sha:'94e4561f6b47337538a23ef2404f456237961ca3',tree_sha:'bec700bf173ef7cc07b74aafdde4db6d362faad1',
-  production_pages_deploy_run:35945579057,production_live_resource_integrity_run:35945652794,
-  products_browser_proof_run:35945652743,products_route_proof_run:35945652805
+  release:467,build:250,title:'Startup & Provider Read-Budget Verification',state:'PRODUCTION_GREEN',
+  main_sha:'4bbd5ffdd7063bdc7bb864c416b8a6f08cf2582e',tree_sha:'41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1',
+  production_pages_deploy_run:35999481927,production_live_resource_integrity_run:35999606857,
+  products_browser_proof_run:35999606928,products_route_proof_run:35999606852
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true});
 const rows=(r)=>Array.isArray(r?.results)?r.results:[];
@@ -44,11 +44,11 @@ export async function onRequestGet(context){
     {status:truth.proof_recorded_count===23?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:truth.proof_recorded_count+'/23 proof rows recorded.'},
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:truth.foreign_key_violations+' violation(s).'},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
-    {status:'pass',code:'build249_verified_baseline',label:'Build 249 verified restart baseline',detail:'Build 249 Refinement Runtime Measurement & Outcome Baseline is exact-tree Development and Production GREEN.'},
-    {status:'review',code:'build250_read_budget_candidate',label:'Build 250 Startup & Provider Read-Budget Verification',detail:'Build 250 adds bounded browser-local startup ceilings and Development-only provider rows_read verification over the exact Build 249 GREEN boundary.'}
+    {status:'pass',code:'build250_verified_baseline',label:'Build 250 verified restart baseline',detail:'Build 250 Startup & Provider Read-Budget Verification is exact-tree Development and Production GREEN.'},
+    {status:'review',code:'build251_csp_style_candidate',label:'Build 251 CSP Style Injection-Surface Hardening',detail:'Build 251 narrows style-element CSP enforcement with response nonces while retaining explicit legacy style-attribute compatibility over the exact Build 250 GREEN boundary.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
-  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:250,title:TITLE,authority:'release467-build250-startup-provider-read-budget-verification.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 249 is the exact fully verified Development and Production restart boundary.','Build 249 is the exact predecessor closure for Build 250.','Canonical migration authority remains through data-only 0023.','Build 250 adds browser-local startup ceilings and Development-only read metering; no schema change, Product publication, Inventory movement, Finance posting, R2 mutation, provider action or Production D1 contact.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
+  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:251,title:TITLE,authority:'release467-build251-csp-style-injection-surface-hardening.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 250 is the exact fully verified Development and Production restart boundary.','Build 250 is the exact predecessor closure for Build 251.','Canonical migration authority remains through data-only 0023.','Build 251 changes browser CSP/style presentation plumbing only; no schema change, Product publication, Inventory movement, Finance posting, R2 mutation, provider action or Production business-data copy.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
   if(new URL(context.request.url).searchParams.get('format')==='markdown')return new Response(markdownReport(data),{status:200,headers:{'Content-Type':'text/markdown; charset=utf-8','Cache-Control':'no-store'}});
   return jsonResponse(data,200,{'Cache-Control':'no-store'});
 }

@@ -21,7 +21,7 @@ wf=t('.github/workflows/release467-build250-startup-provider-read-budget-verific
 road=t('docs/operations/RELEASE_467_REFINEMENT_OUTCOMES_AUTONOMOUS_BUILDS_249_256.md')
 sysgate=t('scripts/current_system_gate_provenance_gate.py')
 
-q(a.get('build')==250 and a.get('state')=='DEVELOPMENT_CANDIDATE','Build 250 identity/state mismatch')
+q(a.get('build')==250 and a.get('state') in ('DEVELOPMENT_CANDIDATE','PRODUCTION_GREEN'),'Build 250 identity/state mismatch')
 pred=a.get('predecessor') or {}
 q(pred.get('development_sha')=='fe7ac18156f2cbe83c67536be27b77756d29c696','Build 249 predecessor dev SHA mismatch')
 q(pred.get('production_main_sha')=='94e4561f6b47337538a23ef2404f456237961ca3','Build 249 predecessor main SHA mismatch')
@@ -77,7 +77,21 @@ q('d1 execute devilndove-prod' not in wf and 'd1 info devilndove-prod' not in wf
 
 q('Build 251 — CSP Style Injection-Surface Hardening' in road,'Build 251 successor missing')
 q("run_current_contract('scripts/release467_build250_gate.py','Release 467 Build 250')" in sysgate,'System Gate must invoke Build 250')
-q(p.get('build')==250 and p.get('next_build')==251 and p.get('state')=='DEVELOPMENT_GREEN','current authority must expose Build 250 and successor 251')
+pb=int(p.get('build') or 0)
+if pb==250:
+    q(p.get('next_build')==251 and p.get('state')=='DEVELOPMENT_GREEN','current authority must expose Build 250 and successor 251')
+elif pb>=251:
+    q(p.get('state')=='DEVELOPMENT_GREEN' and 'release467-build250-startup-provider-read-budget-verification.json' in (p.get('current_release_authorities') or []),'verified successors must retain Build 250 compatibility authority')
+else:
+    q(False,'current authority must be Build 250 or a verified successor')
+if a.get('state')=='PRODUCTION_GREEN':
+    final=a.get('final_closure') or {};prod=a.get('production_checkpoint') or {}
+    q(final.get('dev_sha')=='f2eb36f2cae76e44a7e225c38fb4102cf1f9a84d','Build 250 final dev SHA mismatch')
+    q(final.get('tree_sha')=='41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1','Build 250 final tree mismatch')
+    q((final.get('proofs') or {}).get('system_gate_run')==35999263313,'Build 250 final System proof mismatch')
+    q(prod.get('main_sha')=='4bbd5ffdd7063bdc7bb864c416b8a6f08cf2582e','Build 250 Production main mismatch')
+    q(prod.get('tree_sha')=='41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1','Build 250 Production tree mismatch')
+    q(prod.get('production_pages_deploy_run')==35999481927 and prod.get('production_live_resource_integrity_run')==35999606857,'Build 250 Production proof mismatch')
 for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 250 safety drift: {k}')
 node('public/js/admin-startup-read-budget-v250.js')
 
