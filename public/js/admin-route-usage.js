@@ -248,3 +248,204 @@ document.addEventListener('DOMContentLoaded', () => {
     path
   });
 });
+
+
+// Release 467 Build 249 — Refinement Runtime Measurement & Outcome Baseline.
+// Browser-local/session-only measurement. No remote telemetry, query-value, payload, header,
+// cookie, token, email, Product ID or other business-data capture.
+(() => {
+  'use strict';
+  if (window.DDRefinementRuntimeV249) return;
+
+  const VERSION='467b249-refinement-runtime-v1';
+  const BUILD=249;
+  const STARTUP_WINDOW_MS=15_000;
+  const STORAGE_KEY='dd_refinement_runtime_v249';
+  const MAX_KEYS=32;
+  const pageStarted=performance.now();
+
+  function sameOriginApiPath(value){
+    try{
+      const u=new URL(String(value||''),location.origin);
+      if(u.origin!==location.origin || !u.pathname.startsWith('/api/')) return '';
+      return u.pathname;
+    }catch{return '';}
+  }
+  function sameOriginAdminPath(value){
+    try{
+      const u=new URL(String(value||''),location.origin);
+      if(u.origin!==location.origin) return '';
+      const p=u.pathname.endsWith('/')?u.pathname:`${u.pathname}/`;
+      return p==='/admin/' || p.startsWith('/admin/') ? p : '';
+    }catch{return '';}
+  }
+  function blankState(){
+    return {
+      build:BUILD,
+      version:VERSION,
+      started_at:new Date().toISOString(),
+      route_visits:{},
+      transitions:{},
+      startup:{
+        window_ms:STARTUP_WINDOW_MS,
+        safe_get_requests:0,
+        non_get_requests_observed:0,
+        endpoint_counts:{}
+      },
+      baseline:null,
+      baseline_role:'BEFORE_BUILDS_250_255_REFINEMENT_COMPARISON',
+      privacy:{
+        storage:'sessionStorage',
+        remote_recording:false,
+        query_value_capture:false,
+        request_payload_capture:false,
+        response_payload_capture:false,
+        header_capture:false,
+        secret_capture:false
+      }
+    };
+  }
+  function load(){
+    try{
+      const parsed=JSON.parse(sessionStorage.getItem(STORAGE_KEY)||'null');
+      if(parsed && parsed.build===BUILD && parsed.version===VERSION) return parsed;
+    }catch{}
+    return blankState();
+  }
+  let state=load();
+
+  function save(){
+    try{sessionStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch{}
+  }
+  function bump(map,key){
+    if(!key) return;
+    if(Object.prototype.hasOwnProperty.call(map,key)){map[key]=Number(map[key]||0)+1;return;}
+    if(Object.keys(map).length<MAX_KEYS){map[key]=1;return;}
+    map._other=Number(map._other||0)+1;
+  }
+  function sumMap(map){
+    return Object.values(map||{}).reduce((n,v)=>n+(Number(v)||0),0);
+  }
+
+  const currentPath=sameOriginAdminPath(location.href);
+  if(currentPath) bump(state.route_visits,currentPath);
+  const sourcePath=sameOriginAdminPath(document.referrer);
+  if(sourcePath && currentPath && sourcePath!==currentPath) bump(state.transitions,`${sourcePath} -> ${currentPath}`);
+  save();
+
+  function installRequestMeasurement(){
+    if(!window.DDAuth?.apiFetch) return false;
+    if(window.DDAuth.apiFetch.__ddBuild249Measurement===true) return true;
+    const original=window.DDAuth.apiFetch.bind(window.DDAuth);
+    const measured=async(input,options={})=>{
+      const path=sameOriginApiPath(input);
+      if(path && performance.now()-pageStarted<=STARTUP_WINDOW_MS){
+        const method=String(options?.method||'GET').toUpperCase();
+        if(method==='GET'){
+          state.startup.safe_get_requests=Number(state.startup.safe_get_requests||0)+1;
+          bump(state.startup.endpoint_counts,path);
+        }else{
+          state.startup.non_get_requests_observed=Number(state.startup.non_get_requests_observed||0)+1;
+        }
+        save();
+        render();
+      }
+      return original(input,options);
+    };
+    measured.__ddBuild249Measurement=true;
+    measured.__ddOriginal=original;
+    window.DDAuth.apiFetch=measured;
+    return true;
+  }
+
+  function readBudgetSnapshot(){
+    const budget=window.DDAdminReadBudgetV240||{};
+    const delivery=window.DDAdminDataDeliveryHealth||{};
+    return {
+      cache_hits:Number(budget.cache_hits||0),
+      cache_misses:Number(budget.live_reads||0),
+      duplicate_reads_suppressed:Number(budget.coalesced_reads||0),
+      timed_out_reads:Number(budget.timed_out_reads||0),
+      product_snapshot_hits:Number(delivery.product_snapshot_hits||0),
+      product_snapshot_misses:Number(delivery.product_snapshot_misses||0)
+    };
+  }
+  function snapshot(){
+    const budget=readBudgetSnapshot();
+    return {
+      build:BUILD,
+      version:VERSION,
+      storage:'sessionStorage',
+      remote_recording:false,
+      baseline_role:state.baseline_role,
+      route_visits:sumMap(state.route_visits),
+      route_transitions:sumMap(state.transitions),
+      startup_safe_get_requests:Number(state.startup.safe_get_requests||0),
+      startup_non_get_requests_observed:Number(state.startup.non_get_requests_observed||0),
+      measured_endpoint_path_count:Object.keys(state.startup.endpoint_counts||{}).filter((k)=>k!=='_other').length,
+      cache_hits:budget.cache_hits,
+      cache_misses:budget.cache_misses,
+      duplicate_reads_suppressed:budget.duplicate_reads_suppressed,
+      timed_out_reads:budget.timed_out_reads,
+      product_snapshot_hits:budget.product_snapshot_hits,
+      product_snapshot_misses:budget.product_snapshot_misses,
+      baseline_captured:Boolean(state.baseline),
+      baseline:state.baseline ? {...state.baseline} : null,
+      privacy:{...state.privacy}
+    };
+  }
+  function captureBaseline(){
+    if(state.baseline) return {...state.baseline};
+    if(performance.now()-pageStarted<STARTUP_WINDOW_MS) return null;
+    const current=snapshot();
+    state.baseline={
+      captured_at:new Date().toISOString(),
+      baseline_role:state.baseline_role,
+      route_visits:current.route_visits,
+      route_transitions:current.route_transitions,
+      startup_safe_get_requests:current.startup_safe_get_requests,
+      cache_hits:current.cache_hits,
+      cache_misses:current.cache_misses,
+      duplicate_reads_suppressed:current.duplicate_reads_suppressed,
+      timed_out_reads:current.timed_out_reads,
+      product_snapshot_hits:current.product_snapshot_hits,
+      product_snapshot_misses:current.product_snapshot_misses,
+      sample_origin:'REAL_BROWSER_SESSION'
+    };
+    save();
+    render();
+    return {...state.baseline};
+  }
+  function setText(id,value){
+    const el=document.getElementById(id);
+    if(el) el.textContent=String(value);
+  }
+  function render(){
+    const s=snapshot();
+    setText('build249RouteTransitions',s.route_transitions);
+    setText('build249StartupGets',s.startup_safe_get_requests);
+    setText('build249CacheHits',s.cache_hits);
+    setText('build249CacheMisses',s.cache_misses);
+    setText('build249DuplicateSuppression',s.duplicate_reads_suppressed);
+    setText('build249BaselineState',s.baseline_captured?'Captured from this real browser session':'Collecting real browser session');
+  }
+
+  if(!installRequestMeasurement()){
+    document.addEventListener('dd:auth-verified',installRequestMeasurement,{once:true});
+    document.addEventListener('dd:admin-ready',installRequestMeasurement,{once:true});
+    setTimeout(installRequestMeasurement,0);
+  }
+  document.addEventListener('DOMContentLoaded',render,{once:true});
+  setTimeout(render,1_500);
+  setTimeout(()=>{captureBaseline();render();},STARTUP_WINDOW_MS+100);
+  window.addEventListener('pagehide',()=>{if(performance.now()-pageStarted>=STARTUP_WINDOW_MS) captureBaseline();},{once:true});
+
+  window.DDRefinementRuntimeV249=Object.freeze({
+    build:BUILD,
+    version:VERSION,
+    snapshot,
+    captureBaseline,
+    storage:'sessionStorage',
+    remote_recording:false
+  });
+})();
