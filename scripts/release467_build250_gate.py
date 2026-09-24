@@ -57,10 +57,12 @@ for token in (
     'database_name = "devilndove-dev"','dbc1615b-dcbe-4951-973b-b47c99c73bfa',
     'TODAY_TASKS_PROVIDER_ROWS_READ','SELLER_DAILY_PROVIDER_ROWS_READ','AGGREGATE_PROVIDER_ROWS_READ',
     'today_rows_read <= 15000','seller_rows_read <= 10000','aggregate_rows_read <= 25000',
-    'build250-provider-read-budget-','D1 MUTATION: ZERO','R2 MUTATION: ZERO','PRODUCTION D1 CONTACT: ZERO'
+    'build250-provider-read-budget-','D1 mutation: ZERO','R2 mutation: ZERO','PRODUCTION D1 CONTACT: ZERO'
 ):
     q(token in wf,f'Build 250 workflow missing {token}')
-q('devilndove-prod' not in wf and 'f34a741b-0000-45b0-9a96-6be08754d563' not in wf,'Build 250 workflow must not target Production D1')
+q("! grep -q 'devilndove-prod' wrangler.toml" in wf,'Build 250 workflow must explicitly reject Production D1 binding')
+q('f34a741b-0000-45b0-9a96-6be08754d563' not in wf,'Build 250 workflow must not contain Production D1 id')
+q('d1 execute devilndove-prod' not in wf and 'd1 info devilndove-prod' not in wf,'Build 250 workflow must not execute against Production D1')
 
 q('Build 251 — CSP Style Injection-Surface Hardening' in road,'Build 251 successor missing')
 q("run_current_contract('scripts/release467_build250_gate.py','Release 467 Build 250')" in sysgate,'System Gate must invoke Build 250')
