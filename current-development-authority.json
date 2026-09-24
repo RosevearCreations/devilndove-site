@@ -8,18 +8,18 @@
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 250,
-      "title": "Startup & Provider Read-Budget Verification",
-      "authority": "release467-build250-startup-provider-read-budget-verification.json",
-      "dev_sha": "f2eb36f2cae76e44a7e225c38fb4102cf1f9a84d",
-      "tree_sha": "41409f1d0a50793d9dda1f1184a2b8dcc8a2fda1",
+      "build": 251,
+      "title": "CSP Style Injection-Surface Hardening",
+      "authority": "release467-build251-csp-style-injection-surface-hardening.json",
+      "dev_sha": "4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd",
+      "tree_sha": "2d6d06e321693779cee55ed2dd892bff3b364a36",
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
-      "business_exit": "OWNER_AUTHORIZED_CSP_STYLE_INJECTION_SURFACE_HARDENING",
+      "business_exit": "OWNER_AUTHORIZED_CROSS_DEVICE_ACCESSIBILITY_ACCEPTANCE_REFRESH",
       "proofs": {
-        "system_gate_run": 35999263313,
-        "current_application_quality_run": 35999263281,
-        "it_admin_runtime_proof_run": 35999263373,
-        "branch_hygiene_run": 35999263534
+        "system_gate_run": 36031272271,
+        "current_application_quality_run": 36031272780,
+        "it_admin_runtime_proof_run": 36031272416,
+        "branch_hygiene_run": 36031272718
       }
     },
     "current_closure_candidate": {
@@ -42,10 +42,13 @@
     "authority": "release467-build251-csp-style-injection-surface-hardening.json",
     "main_sha": "f8e15d07e97e9a4e2953a65d09b494c73a36192a",
     "tree_sha": "2d6d06e321693779cee55ed2dd892bff3b364a36",
+    "production_pages_deploy_run": 36031593630,
+    "production_live_resource_integrity_run": 36031748408,
+    "products_browser_proof_run": 36031748531,
+    "products_route_proof_run": 36031748437,
+    "build_specific_proof_run": 36031593481,
     "state": "PRODUCTION_GREEN",
-    "same_tree_as_development": true,
-    "proof_run_ids": null,
-    "evidence_note": "Production source promotion is exact-tree; push-only Production workflow IDs are not exposed by the connected PR-run wrapper and are not fabricated.",
+    "same_tree_as_verified_development": true,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
@@ -180,14 +183,9 @@
   "accepted_dev_sha": "4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd",
   "accepted_dev_tree_sha": "2d6d06e321693779cee55ed2dd892bff3b364a36",
   "acceptance": {
-    "proof_basis": "GREEN_PR_HEAD_IDENTICAL_TREE_TO_MERGED_DEV",
-    "candidate_pr": 344,
-    "candidate_pr_head_sha": "0aa691e42d996f2fec28c8bd3f02bdafb82c34db",
-    "system_gate_run": 36030944185,
-    "current_application_quality_run": 36030944073,
-    "it_admin_runtime_proof_run": 36030944009,
-    "dedicated_gate_run": 36030944096,
-    "branch_hygiene_run": null,
-    "branch_hygiene_note": "Push-only run ID unavailable through connected PR-run wrapper; intentionally not fabricated."
+    "system_gate_run": 36031272271,
+    "current_application_quality_run": 36031272780,
+    "it_admin_runtime_proof_run": 36031272416,
+    "branch_hygiene_run": 36031272718
   }
 }
