@@ -1,0 +1,94 @@
+{
+  "release": 467,
+  "build": 254,
+  "title": "Operator Journey Friction Review",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build254-operator-journey-friction-review",
+  "predecessor": {
+    "build": 253,
+    "title": "Session & Abuse-Control Runtime Evidence",
+    "development_sha": "42ad585550cbf76b39ab28d30ed345e177b8fb86",
+    "development_tree_sha": "deeca5e877175af1c7c804b09bfbb14a9daa7df8",
+    "candidate_pr": 348,
+    "candidate_pr_head_sha": "8d0deaffe37fad1d5d6b723ef83ec997294e55f9",
+    "production_main_sha": "ec4e665c34af6e6fbc1dc440411b8b7795deaeb5",
+    "production_tree_sha": "deeca5e877175af1c7c804b09bfbb14a9daa7df8",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "proof_recovery": "LIVE_GH_RUN_LIST_BY_EXACT_COMMIT_IN_BUILD254_WORKFLOW"
+  },
+  "scope": {
+    "build249_browser_local_measurement_reused": true,
+    "route_visit_counts_reviewed": true,
+    "route_transition_counts_reviewed": true,
+    "query_values_captured": false,
+    "business_payloads_captured": false,
+    "remote_telemetry_added": false,
+    "route_specific_claim_requires_runtime_evidence": true,
+    "dead_end_inference_without_evidence": false,
+    "recovery_friction_inference_without_evidence": false,
+    "automatic_navigation_rewrite": false,
+    "new_parallel_ui": false
+  },
+  "review_policy": {
+    "repeated_transition_threshold": 2,
+    "repeated_route_threshold": 3,
+    "insufficient_evidence_state": "INSUFFICIENT_ROUTE_EVIDENCE",
+    "evidence_backed_candidate_state": "EVIDENCE_BACKED_REVIEW_CANDIDATE",
+    "no_candidate_state": "NO_EVIDENCE_BACKED_FRICTION",
+    "default_action": "OBSERVE_ONLY",
+    "remediation_preference": "REMOVAL_OR_CONSOLIDATION_BEFORE_NEW_UI"
+  },
+  "findings": {
+    "repository_evidence": [
+      "Build 239 already removes duplicate exact links from shared Admin navigation groups.",
+      "Build 249 stores route visits and Admin-to-Admin transitions only in browser sessionStorage.",
+      "Repository source does not contain a real operator session proving a route-specific dead end or recovery loop."
+    ],
+    "route_specific_remediation": "NOT_JUSTIFIED_WITHOUT_REAL_SESSION_EVIDENCE",
+    "navigation_change_applied": false,
+    "reason": "Build 254 does not convert absent browser-local evidence into synthetic friction."
+  },
+  "implementation": {
+    "measurement_source": "public/js/admin-route-usage.js",
+    "reviewer": "public/js/admin-journey-friction-v254.js",
+    "operator_surface": "admin/index.html#refinementRuntimeBaselineMount",
+    "dedicated_gate": "scripts/release467_build254_gate.py",
+    "workflow": ".github/workflows/release467-build254-operator-journey-friction-review.yml"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "personal_data_capture": false,
+    "synthetic_friction_evidence": false
+  },
+  "acceptance": {
+    "next_build": 255,
+    "next_build_title": "Production Reliability & Release Efficiency Review",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "42ad585550cbf76b39ab28d30ed345e177b8fb86",
+      "tree": "deeca5e877175af1c7c804b09bfbb14a9daa7df8",
+      "proof_recovery": "LIVE_BY_EXACT_SHA"
+    },
+    "production": {
+      "main_sha": "ec4e665c34af6e6fbc1dc440411b8b7795deaeb5",
+      "tree_sha": "deeca5e877175af1c7c804b09bfbb14a9daa7df8",
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true,
+      "proof_recovery": "LIVE_BY_EXACT_SHA"
+    }
+  }
+}
