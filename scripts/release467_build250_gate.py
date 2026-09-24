@@ -29,6 +29,17 @@ q(pred.get('development_tree_sha')=='bec700bf173ef7cc07b74aafdde4db6d362faad1' a
 q(pred.get('state')=='PRODUCTION_GREEN' and pred.get('same_tree') is True,'Build 249 exact-tree Production GREEN predecessor missing')
 q(b249.get('state')=='PRODUCTION_GREEN','Build 249 successor-ingested state must be Production GREEN')
 
+m=a.get('measurement') or {}
+q(m.get('state')=='EXACT_DEVELOPMENT_MEASURED_GREEN','Build 250 exact Development provider measurement must be recorded')
+q(m.get('source_dev_sha')=='14f1d1f9d29988d39902dc6667230a611fb0018e','Build 250 measurement source dev SHA mismatch')
+q(m.get('source_dev_tree')=='42e3797d5a575af10da0aa9d1d367b41d85908ed','Build 250 measurement source tree mismatch')
+q(m.get('provider_workflow_run')==35998730536 and m.get('provider_evidence_artifact_id')==10807715341,'Build 250 measurement proof identifiers mismatch')
+q(m.get('today_tasks_provider_rows_read')==1132 and m.get('today_tasks_provider_rows_read')<=15000,'Build 250 Today Tasks measured rows_read mismatch/over budget')
+q(m.get('seller_daily_provider_rows_read')==1046 and m.get('seller_daily_provider_rows_read')<=10000,'Build 250 Seller Daily measured rows_read mismatch/over budget')
+q(m.get('aggregate_provider_rows_read')==2178 and m.get('aggregate_provider_rows_read')<=25000,'Build 250 aggregate measured rows_read mismatch/over budget')
+q(m.get('highest_provider_read_hotspot')=='operations-today-tasks-read','Build 250 measured hotspot mismatch')
+q(m.get('provider_measurement_mutation') is False and m.get('production_d1_contact') is False,'Build 250 provider measurement safety drift')
+
 scope=a.get('scope') or {}
 q(scope.get('automatic_api_path_ceiling')==4,'browser safe GET ceiling drift')
 q(scope.get('provider_bound_live_read_ceiling')==2,'provider-bound browser live-read ceiling drift')
@@ -75,5 +86,5 @@ if F:
     print('FAIL');[print('-',x) for x in F];sys.exit(1)
 print('PASS')
 print('Browser budget: <=4 safe GETs / <=2 provider-bound live reads')
-print('Development provider ceilings: Today Tasks <=15000; Seller Daily <=10000; aggregate <=25000 rows_read')
+print('Measured provider rows_read: Today Tasks 1132; Seller Daily 1046; aggregate 2178 — GREEN')
 print('Future queue: OPEN; next Build 251')

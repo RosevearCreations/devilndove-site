@@ -31,9 +31,23 @@ The Build 250 workflow runs only on an exact `dev` push and executes read-only D
 
 The workflow reads D1 provider `meta.rows_read`, fails closed above any ceiling, writes a sanitized JSON evidence artifact, and identifies the highest-fanout remaining startup read surface. No Production D1/R2 contact or business-data copy is permitted.
 
+## Exact Development measurement
+
+Measured on Development SHA `14f1d1f9d29988d39902dc6667230a611fb0018e` / tree `42e3797d5a575af10da0aa9d1d367b41d85908ed` in workflow run `35998730536`:
+
+| Surface | Measured rows_read | Ceiling | Headroom |
+| --- | ---: | ---: | ---: |
+| Today Tasks startup | **1,132** | 15,000 | 13,868 |
+| Seller Daily summary | **1,046** | 10,000 | 8,954 |
+| Aggregate | **2,178** | 25,000 | 22,822 |
+
+Evidence artifact: `10807715341` / `build250-provider-read-budget-14f1d1f9d29988d39902dc6667230a611fb0018e`.
+
+All three provider ceilings are GREEN. No D1/R2 mutation, Production D1 contact, provider execution/publication, or Production business-data copy occurred.
+
 ## Current repeated-read hotspot
 
-Before exact provider measurement, source fan-out identifies **Operations Today Tasks** as the bounded hotspot: six count reads, one incident-detail read, and six indexed latest-action reads (13 read-only statements). Seller Daily is one statement. The exact provider rows-read comparison is recorded by the Development workflow, not fabricated in source.
+Exact provider measurement identifies **Operations Today Tasks** as the highest provider-read startup surface: 1,132 rows across 13 read-only statements, versus 1,046 rows for Seller Daily's one statement. This is measured evidence, not a synthetic estimate.
 
 ## Acceptance
 

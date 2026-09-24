@@ -45,7 +45,7 @@
     "remote_browser_telemetry": false
   },
   "measurement": {
-    "state": "PENDING_EXACT_DEVELOPMENT_PROVIDER_MEASUREMENT",
+    "state": "EXACT_DEVELOPMENT_MEASURED_GREEN",
     "local_runtime_source": "public/js/admin-startup-read-budget-v250.js",
     "today_tasks_sql": "scripts/release467_build250_today_tasks_measurement.sql",
     "seller_daily_sql": "scripts/release467_build250_seller_daily_measurement.sql",
@@ -59,8 +59,23 @@
       "seller_daily_summary": 1
     },
     "current_hotspot": "operations-today-tasks-read",
-    "current_hotspot_reason": "13 read-only D1 statements versus one seller-daily statement; exact provider rows_read remains pending Development measurement.",
-    "synthetic_samples": false
+    "current_hotspot_reason": "Exact Development provider measurement: Operations Today Tasks read 1,132 rows across 13 SELECT statements versus Seller Daily 1,046 rows in one SELECT; both and aggregate remain well below hard ceilings.",
+    "synthetic_samples": false,
+    "source_dev_sha": "14f1d1f9d29988d39902dc6667230a611fb0018e",
+    "source_dev_tree": "42e3797d5a575af10da0aa9d1d367b41d85908ed",
+    "provider_workflow_run": 35998730536,
+    "provider_job_id": 107629846131,
+    "provider_evidence_artifact_id": 10807715341,
+    "provider_evidence_artifact_name": "build250-provider-read-budget-14f1d1f9d29988d39902dc6667230a611fb0018e",
+    "today_tasks_provider_rows_read": 1132,
+    "seller_daily_provider_rows_read": 1046,
+    "aggregate_provider_rows_read": 2178,
+    "today_tasks_headroom_rows": 13868,
+    "seller_daily_headroom_rows": 8954,
+    "aggregate_headroom_rows": 22822,
+    "highest_provider_read_hotspot": "operations-today-tasks-read",
+    "provider_measurement_mutation": false,
+    "production_d1_contact": false
   },
   "safety": {
     "schema_change": false,
