@@ -1,0 +1,114 @@
+{
+  "release": 467,
+  "build": 252,
+  "title": "Cross-Device Accessibility Acceptance Refresh",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build252-cross-device-accessibility-acceptance-refresh",
+  "predecessor": {
+    "build": 251,
+    "title": "CSP Style Injection-Surface Hardening",
+    "development_sha": "4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd",
+    "development_tree_sha": "2d6d06e321693779cee55ed2dd892bff3b364a36",
+    "candidate_pr": 344,
+    "candidate_pr_head_sha": "0aa691e42d996f2fec28c8bd3f02bdafb82c34db",
+    "candidate_pr_proofs": {
+      "system_gate_run": 36030944185,
+      "current_application_quality_run": 36030944073,
+      "it_admin_runtime_proof_run": 36030944009,
+      "dedicated_gate_run": 36030944096
+    },
+    "branch_hygiene": {
+      "workflow": ".github/workflows/repository-branch-hygiene.yml",
+      "trigger": "push_to_dev",
+      "run_id": null,
+      "evidence_note": "The connected GitHub PR-run wrapper does not expose push-only workflow runs; no run ID is invented."
+    },
+    "production_main_sha": "f8e15d07e97e9a4e2953a65d09b494c73a36192a",
+    "production_tree_sha": "2d6d06e321693779cee55ed2dd892bff3b364a36",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true
+  },
+  "scope": {
+    "phone_layout_reproof": true,
+    "tablet_layout_reproof": true,
+    "desktop_layout_reproof": true,
+    "keyboard_flow_reproof": true,
+    "focus_visibility_reproof": true,
+    "coarse_pointer_target_reproof": true,
+    "dense_workspace_reproof": true,
+    "local_horizontal_scroll_reproof": true,
+    "reduced_motion_reproof": true,
+    "storefront_responsive_reproof": true,
+    "admin_responsive_reproof": true,
+    "build251_csp_preserved": true
+  },
+  "acceptance_matrix": {
+    "phone": {
+      "breakpoints": ["<=420px", "<=720px"],
+      "contracts": ["16px form controls at narrow phone width", "single-column grids", "reachable local overflow", "coarse-pointer targets"]
+    },
+    "tablet": {
+      "breakpoints": ["721-1023px", "721-1050px"],
+      "contracts": ["two-column bounded layouts where appropriate", "Product workspace reflow", "Packaging Studio reflow"]
+    },
+    "desktop": {
+      "breakpoints": [">=1024px"],
+      "contracts": ["centered shell", "wide workspace containment", "local table scrolling instead of document clipping"]
+    },
+    "keyboard_and_focus": {
+      "contracts": ["focus-visible outline", "keyboard Escape recovery", "table/card toggle aria-pressed state", "no presentation-only network mutation"]
+    },
+    "motion": {
+      "contracts": ["global reduced-motion suppression", "adaptive shell reduced-motion behavior", "storefront reduced-motion behavior", "carousel reduced-motion awareness"]
+    }
+  },
+  "implementation": {
+    "mode": "SOURCE_AND_CI_ACCEPTANCE_REFRESH",
+    "runtime_feature_change": false,
+    "audited_assets": [
+      "css/current-responsive.css",
+      "css/admin-ergonomics-v237.css",
+      "public/js/admin-ergonomics-v237.js",
+      "css/adaptive-shell.css",
+      "css/storefront-discovery.css",
+      "public/js/media-carousel.js",
+      "functions/_middleware.js"
+    ],
+    "dedicated_gate": "scripts/release467_build252_gate.py",
+    "workflow": ".github/workflows/release467-build252-cross-device-accessibility-acceptance-refresh.yml"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "production_business_data_copy": false,
+    "secret_capture": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build252_gate.py",
+    "workflow": ".github/workflows/release467-build252-cross-device-accessibility-acceptance-refresh.yml",
+    "next_build": 253,
+    "next_build_title": "Session & Abuse-Control Runtime Evidence",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd",
+      "tree": "2d6d06e321693779cee55ed2dd892bff3b364a36",
+      "proof_basis": "Build 251 PR head GREEN with identical merged Development tree; push-only hygiene run ID is intentionally not fabricated."
+    },
+    "production": {
+      "main_sha": "f8e15d07e97e9a4e2953a65d09b494c73a36192a",
+      "tree_sha": "2d6d06e321693779cee55ed2dd892bff3b364a36",
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
+  }
+}
