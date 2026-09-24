@@ -177,9 +177,9 @@
   "accepted_dev_sha": "6b201a410636d3e861e7a1e554c04afd16e81ce3",
   "accepted_dev_tree_sha": "a581c34f7ad45f9a7fd75411f917df8f8f1f5a46",
   "acceptance": {
-    "system_gate_run": 35934272420,
-    "current_application_quality_run": 35934272137,
-    "it_admin_runtime_proof_run": 35934272393,
-    "branch_hygiene_run": 35934271806
+    "system_gate_run": 35940527918,
+    "current_application_quality_run": 35940528047,
+    "it_admin_runtime_proof_run": 35940528277,
+    "branch_hygiene_run": 35940527817
   }
 }
