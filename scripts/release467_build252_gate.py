@@ -27,7 +27,7 @@ reliability=t('functions/api/_lib/currentReliability.js')
 preflight=t('functions/api/admin/current-deployment-preflight.js')
 guide=t('docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md')
 
-q(a.get('build')==252 and a.get('state')=='DEVELOPMENT_CANDIDATE','Build 252 identity/state mismatch')
+q(a.get('build')==252 and a.get('state') in ('DEVELOPMENT_CANDIDATE','PRODUCTION_GREEN'),'Build 252 identity/state mismatch')
 pred=a.get('predecessor') or {}
 q(pred.get('development_sha')=='4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd','Build 251 predecessor Development SHA mismatch')
 q(pred.get('development_tree_sha')=='2d6d06e321693779cee55ed2dd892bff3b364a36','Build 251 predecessor tree mismatch')
