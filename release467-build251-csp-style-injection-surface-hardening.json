@@ -2,7 +2,7 @@
   "release": 467,
   "build": 251,
   "title": "CSP Style Injection-Surface Hardening",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build251-csp-style-injection-surface-hardening",
   "predecessor": {
     "build": 250,
@@ -102,5 +102,32 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_verified_development": true
     }
+  },
+  "accepted_dev_sha": "4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd",
+  "accepted_dev_tree_sha": "2d6d06e321693779cee55ed2dd892bff3b364a36",
+  "final_closure": {
+    "dev_sha": "4d0c1c54c407393db5de3b6e3a519ddd7b1ce4dd",
+    "tree_sha": "2d6d06e321693779cee55ed2dd892bff3b364a36",
+    "proofs": {
+      "system_gate_run": 36031272271,
+      "current_application_quality_run": 36031272780,
+      "it_admin_runtime_proof_run": 36031272416,
+      "branch_hygiene_run": 36031272718
+    },
+    "build_specific_proof_run": 36031272407,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 252
+  },
+  "production_checkpoint": {
+    "main_sha": "f8e15d07e97e9a4e2953a65d09b494c73a36192a",
+    "tree_sha": "2d6d06e321693779cee55ed2dd892bff3b364a36",
+    "production_pages_deploy_run": 36031593630,
+    "production_live_resource_integrity_run": 36031748408,
+    "products_browser_proof_run": 36031748531,
+    "products_route_proof_run": 36031748437,
+    "build_specific_proof_run": 36031593481,
+    "remote_d1_queries": 0,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
