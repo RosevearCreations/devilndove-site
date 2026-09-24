@@ -2,7 +2,7 @@
   "release": 467,
   "build": 249,
   "title": "Refinement Runtime Measurement & Outcome Baseline",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build249-refinement-runtime-measurement-outcome-baseline",
   "predecessor": {
     "build": 248,
@@ -88,5 +88,32 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_verified_development": true
     }
+  },
+  "accepted_dev_sha": "fe7ac18156f2cbe83c67536be27b77756d29c696",
+  "accepted_dev_tree_sha": "bec700bf173ef7cc07b74aafdde4db6d362faad1",
+  "final_closure": {
+    "dev_sha": "fe7ac18156f2cbe83c67536be27b77756d29c696",
+    "tree_sha": "bec700bf173ef7cc07b74aafdde4db6d362faad1",
+    "proofs": {
+      "system_gate_run": 35945324462,
+      "current_application_quality_run": 35945324867,
+      "it_admin_runtime_proof_run": 35945324872,
+      "branch_hygiene_run": 35945324865
+    },
+    "dedicated_gate_run": 35945324387,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 250,
+    "recorded_by": "Build 250 successor ingestion; Build 249 did not self-record later proof"
+  },
+  "production_checkpoint": {
+    "main_sha": "94e4561f6b47337538a23ef2404f456237961ca3",
+    "tree_sha": "bec700bf173ef7cc07b74aafdde4db6d362faad1",
+    "production_pages_deploy_run": 35945579057,
+    "production_live_resource_integrity_run": 35945652794,
+    "products_browser_proof_run": 35945652743,
+    "products_route_proof_run": 35945652805,
+    "build_specific_proof_run": 35945579187,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
