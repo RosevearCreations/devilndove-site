@@ -37,7 +37,8 @@
     "unresolved_non_product_placeholder_pages": 22,
     "placeholder_interpretation": "REAL_MEDIA_EVIDENCE_DEPENDENT",
     "production_reliability": "BUILD247_EXACT_TREE_PRODUCTION_GREEN",
-    "restart_provenance_refreshed": true
+    "restart_provenance_refreshed": true,
+    "successor_compatibility_refreshed": true
   },
   "roadmap_decision": {
     "future_queue_exhausted": false,
