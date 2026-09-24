@@ -1,0 +1,278 @@
+{
+  "release": 467,
+  "build": 255,
+  "title": "Production Reliability & Release Efficiency Review",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build255-production-reliability-release-efficiency-review",
+  "predecessor": {
+    "build": 254,
+    "title": "Operator Journey Friction Review",
+    "development_sha": "95ad971789a7f207c1bc64103e68cd28204a3e50",
+    "development_tree_sha": "7da896d6d154460950844b44bc179a8354b836f2",
+    "candidate_pr": 349,
+    "candidate_pr_head_sha": "b6f241352dca2c11b923c14f44425a5621ee9f13",
+    "production_main_sha": "46224bcfebbf12bec95383a03e188e00674d3326",
+    "production_tree_sha": "7da896d6d154460950844b44bc179a8354b836f2",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36070577487,
+      "current_application_quality_run": 36070577680,
+      "it_admin_runtime_proof_run": 36070577821,
+      "branch_hygiene_run": 36070578110,
+      "build_specific_proof_run": 36070577943
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36071988396,
+      "production_live_resource_integrity_run": 36072048200,
+      "products_browser_proof_run": 36072048278,
+      "products_route_proof_run": 36072048280,
+      "build_specific_proof_run": 36071988190
+    }
+  },
+  "scope": {
+    "review_span": "BUILDS_242_254_ACCEPTED_DEV_MAIN_HEADS",
+    "release_proof_duplication_measured": true,
+    "failed_checks_measured": true,
+    "retried_checks_measured": true,
+    "deployment_continuity_measured": true,
+    "operator_diagnostics_reviewed": true,
+    "exact_sha_promotion_requirement_preserved": true,
+    "production_business_data_copy": false,
+    "remote_business_telemetry": false
+  },
+  "measurement": {
+    "source": "LIVE_GITHUB_ACTIONS_RUN_LISTS_BY_ACCEPTED_EXACT_SHA",
+    "builds_reviewed": 13,
+    "accepted_heads_reviewed": 26,
+    "total_workflow_runs": 1551,
+    "successful_runs": 1519,
+    "failed_runs": 19,
+    "skipped_runs": 13,
+    "retried_run_attempts": 0,
+    "accepted_dev_runs": 749,
+    "accepted_main_runs": 802,
+    "build254": {
+      "dev_runs": 70,
+      "dev_success": 70,
+      "main_runs": 64,
+      "main_success": 64,
+      "failed_runs": 0,
+      "skipped_runs": 0,
+      "retried_run_attempts": 0
+    },
+    "per_build": [
+      {
+        "build": 242,
+        "dev_runs": 59,
+        "dev_success": 59,
+        "dev_failure": 0,
+        "main_runs": 54,
+        "main_success": 53,
+        "main_failure": 1,
+        "main_skipped": 0
+      },
+      {
+        "build": 243,
+        "dev_runs": 60,
+        "dev_success": 60,
+        "dev_failure": 0,
+        "main_runs": 55,
+        "main_success": 54,
+        "main_failure": 1,
+        "main_skipped": 0
+      },
+      {
+        "build": 244,
+        "dev_runs": 61,
+        "dev_success": 61,
+        "dev_failure": 0,
+        "main_runs": 56,
+        "main_success": 55,
+        "main_failure": 1,
+        "main_skipped": 0
+      },
+      {
+        "build": 245,
+        "dev_runs": 62,
+        "dev_success": 62,
+        "dev_failure": 0,
+        "main_runs": 57,
+        "main_success": 56,
+        "main_failure": 1,
+        "main_skipped": 0
+      },
+      {
+        "build": 246,
+        "dev_runs": 63,
+        "dev_success": 59,
+        "dev_failure": 4,
+        "main_runs": 58,
+        "main_success": 57,
+        "main_failure": 1,
+        "main_skipped": 0
+      },
+      {
+        "build": 247,
+        "dev_runs": 75,
+        "dev_success": 75,
+        "dev_failure": 0,
+        "main_runs": 84,
+        "main_success": 69,
+        "main_failure": 2,
+        "main_skipped": 13
+      },
+      {
+        "build": 248,
+        "dev_runs": 13,
+        "dev_success": 13,
+        "dev_failure": 0,
+        "main_runs": 58,
+        "main_success": 57,
+        "main_failure": 1,
+        "main_skipped": 0
+      },
+      {
+        "build": 249,
+        "dev_runs": 69,
+        "dev_success": 69,
+        "dev_failure": 0,
+        "main_runs": 66,
+        "main_success": 63,
+        "main_failure": 3,
+        "main_skipped": 0
+      },
+      {
+        "build": 250,
+        "dev_runs": 13,
+        "dev_success": 13,
+        "dev_failure": 0,
+        "main_runs": 61,
+        "main_success": 60,
+        "main_failure": 1,
+        "main_skipped": 0
+      },
+      {
+        "build": 251,
+        "dev_runs": 69,
+        "dev_success": 69,
+        "dev_failure": 0,
+        "main_runs": 64,
+        "main_success": 63,
+        "main_failure": 1,
+        "main_skipped": 0
+      },
+      {
+        "build": 252,
+        "dev_runs": 67,
+        "dev_success": 67,
+        "dev_failure": 0,
+        "main_runs": 62,
+        "main_success": 61,
+        "main_failure": 1,
+        "main_skipped": 0
+      },
+      {
+        "build": 253,
+        "dev_runs": 68,
+        "dev_success": 68,
+        "dev_failure": 0,
+        "main_runs": 63,
+        "main_success": 62,
+        "main_failure": 1,
+        "main_skipped": 0
+      },
+      {
+        "build": 254,
+        "dev_runs": 70,
+        "dev_success": 70,
+        "dev_failure": 0,
+        "main_runs": 64,
+        "main_success": 64,
+        "main_failure": 0,
+        "main_skipped": 0
+      }
+    ],
+    "interpretation": "Accepted exact-SHA closures are reliable, but historical workflows fan out broadly; retained exact-SHA proof remains mandatory while duplicate historical gate triggers are candidates for later consolidation only with equivalent coverage."
+  },
+  "findings": {
+    "deployment_continuity": "BUILDS_242_254_RECORDED_IDENTICAL_DEV_PRODUCTION_TREES",
+    "exact_sha_promotion": "PRESERVE",
+    "proof_fanout": "HIGH",
+    "current_clean_closure": "BUILD254_134_OF_134_ACCEPTED_HEAD_RUNS_SUCCESS",
+    "historical_accepted_head_failures": 19,
+    "rerun_attempts_on_accepted_heads": 0,
+    "action": "DOCUMENT_AND_SURFACE_ONLY",
+    "prohibited_shortcut": "DO_NOT_REMOVE_EXACT_SHA_OR_PRODUCTION_RESOURCE_PROOFS"
+  },
+  "operator_diagnostics": {
+    "existing_surfaces_reused": [
+      "/admin/it/",
+      "/admin/reliability/",
+      "/admin/deployment-preflight/"
+    ],
+    "new_parallel_dashboard": false,
+    "summary_fields": [
+      "workflow_run_total",
+      "success",
+      "failure",
+      "skipped",
+      "rerun_attempts",
+      "exact_tree_continuity"
+    ],
+    "current_candidate_state": "REVIEW_ONLY"
+  },
+  "implementation": {
+    "evidence_document": "docs/operations/RELEASE_467_BUILD_255_PRODUCTION_RELIABILITY_RELEASE_EFFICIENCY_REVIEW.md",
+    "reliability_api": "functions/api/_lib/currentReliability.js",
+    "it_api": "functions/api/admin/it-operations-control-tower.js",
+    "preflight_api": "functions/api/admin/current-deployment-preflight.js",
+    "dedicated_gate": "scripts/release467_build255_gate.py",
+    "workflow": ".github/workflows/release467-build255-production-reliability-release-efficiency-review.yml"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "exact_sha_requirement_relaxed": false
+  },
+  "acceptance": {
+    "next_build": 256,
+    "next_build_title": "Refinement Outcomes Renewal II",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "95ad971789a7f207c1bc64103e68cd28204a3e50",
+      "tree": "7da896d6d154460950844b44bc179a8354b836f2",
+      "proof_recovery": "LIVE_BY_EXACT_SHA",
+      "system_gate_run": 36070577487,
+      "current_application_quality_run": 36070577680,
+      "it_admin_runtime_proof_run": 36070577821,
+      "branch_hygiene_run": 36070578110,
+      "build_specific_proof_run": 36070577943,
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "46224bcfebbf12bec95383a03e188e00674d3326",
+      "tree_sha": "7da896d6d154460950844b44bc179a8354b836f2",
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true,
+      "proof_recovery": "LIVE_BY_EXACT_SHA",
+      "production_pages_deploy_run": 36071988396,
+      "production_live_resource_integrity_run": 36072048200,
+      "products_browser_proof_run": 36072048278,
+      "products_route_proof_run": 36072048280,
+      "build_specific_proof_run": 36071988190
+    }
+  }
+}

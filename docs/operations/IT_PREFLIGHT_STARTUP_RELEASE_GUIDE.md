@@ -12,24 +12,26 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 254 candidate
+## Current Release 467 restart authority — Build 255 candidate
 
-Build 253 **Session & Abuse-Control Runtime Evidence** is the exact verified predecessor:
+Build 254 **Operator Journey Friction Review** is the exact verified predecessor:
 
-- Development SHA: `42ad585550cbf76b39ab28d30ed345e177b8fb86`
-- Shared Development/Production tree: `deeca5e877175af1c7c804b09bfbb14a9daa7df8`
-- Development proofs: System `36066344734`, Quality `36066344961`, I.T. `36066344950`, Hygiene `36066346173`
-- Build 253 dedicated Development proof: `36066344836`
-- Production main: `ec4e665c34af6e6fbc1dc440411b8b7795deaeb5`
-- Production proofs: Pages `36066849392`, Live Resources `36067030179`, Product Browser `36067030078`, Product Route `36067030066`
-- Build 253 Production-specific proof: `36066849362`
+- Development SHA: `95ad971789a7f207c1bc64103e68cd28204a3e50`
+- Shared Development/Production tree: `7da896d6d154460950844b44bc179a8354b836f2`
+- Development proofs: System `36070577487`, Quality `36070577680`, I.T. `36070577821`, Hygiene `36070578110`
+- Build 254 dedicated Development proof: `36070577943`
+- Production main: `46224bcfebbf12bec95383a03e188e00674d3326`
+- Production proofs: Pages `36071988396`, Live Resources `36072048200`, Product Browser `36072048278`, Product Route `36072048280`
+- Build 254 Production-specific proof: `36071988190`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 254 **Operator Journey Friction Review** is the active candidate. It uses the browser-local, pathname-only Build 249 route evidence and reports only threshold-backed repeated-navigation candidates. If the session has insufficient evidence, it records that fact rather than inventing friction.
+Build 255 **Production Reliability & Release Efficiency Review** is the active candidate. The bounded GitHub Actions review covers accepted `dev` and `main` heads for Builds 242–254: **1,551** workflow runs, **1,519** success, **19** failure, **13** skipped and **0** rerun attempts on those accepted heads. Build 254 itself is the clean current baseline at **70/70 Development + 64/64 Production** successful runs.
 
-Build 254 adds no parallel navigation layer and performs no automatic navigation rewrite. Build 239 exact-link consolidation remains the preferred remediation baseline. No schema/request-time DDL, D1/R2 business mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy, personal-data capture or secret capture is introduced.
+Build 255 preserves exact-SHA promotion and identical-tree continuity. It reuses the I.T., Reliability and Deployment Preflight surfaces instead of adding a parallel release dashboard. No workflow consolidation is applied unless equivalent exact-SHA proof coverage can be maintained.
 
-Build 254 remains blocked from Production until its exact candidate tree passes the current System, Quality, I.T., Hygiene and Build 254 checks, is merged to `dev`, and the identical Development tree is promoted to protected `main`.
+No schema/request-time DDL, D1/R2 business mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy, personal-data capture or secret capture is introduced.
+
+Build 255 remains blocked from Production until its exact candidate tree passes the current System, Quality, I.T., Hygiene and Build 255 checks, is merged to `dev`, and the identical Development tree is promoted to `main`.
 
 ## Retained historical provenance — Build 171
 
