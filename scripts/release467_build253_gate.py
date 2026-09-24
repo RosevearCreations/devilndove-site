@@ -54,7 +54,7 @@ for source,label in ((rel,'Reliability'),(it,'I.T. tower'),(preflight,'Preflight
 for k,v in (a.get('safety') or {}).items():
     q(v is False,f'Build 253 safety drift: {k}')
 
-run=subprocess.run(['node','--experimental-default-type=module','scripts/release467_build253_runtime_evidence.mjs'],cwd=R,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=False)
+run=subprocess.run(['node','scripts/release467_build253_runtime_evidence.mjs'],cwd=R,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=False)
 if run.stdout: print(run.stdout.strip())
 if run.stderr: print(run.stderr.strip(),file=sys.stderr)
 q(run.returncode==0,'Build 253 bounded runtime evidence harness failed')
