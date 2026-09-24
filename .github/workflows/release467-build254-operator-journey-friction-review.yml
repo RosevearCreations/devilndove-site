@@ -35,7 +35,7 @@ jobs:
             ]),
             ('PRODUCTION','ec4e665c34af6e6fbc1dc440411b8b7795deaeb5',[
               'Production Pages Deploy','Production Live Resource Integrity Proof',
-              'Products Browser Proof','Products Route Proof',
+              'Release 467 Build 155 Products Production Browser Proof','Release 467 Build 154 Products Route Production Proof',
               'Release 467 Build 253 Session Abuse-Control Runtime Evidence'
             ])
           ]
