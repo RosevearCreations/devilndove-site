@@ -1,0 +1,47 @@
+name: Release 467 Build 253 Session Abuse-Control Runtime Evidence
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build253:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          node --check functions/api/_lib/authAbuseGuard.js
+          node --check functions/api/_lib/csrfOriginProtection.js
+          node --check functions/api/_lib/accountAuthCompat.js
+          node --check functions/api/_lib/adminStepUp.js
+          node --check functions/api/auth/revoke-other-sessions.js
+          node --check scripts/release467_build253_runtime_evidence.mjs
+      - name: Recover exact Build 252 predecessor workflow evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "BUILD252 DEVELOPMENT PUSH RUNS"
+          gh run list --repo "${GITHUB_REPOSITORY}" --commit ec749569908b2ebbf393ca1ec2181e586a10f548 --limit 100 --json databaseId,workflowName,event,status,conclusion,headSha
+          echo "BUILD252 PRODUCTION MAIN RUNS"
+          gh run list --repo "${GITHUB_REPOSITORY}" --commit 3c14d72ed481035d82f3cffa2d16f733f603f1d9 --limit 100 --json databaseId,workflowName,event,status,conclusion,headSha
+      - name: Build 253 bounded runtime evidence
+        run: python scripts/release467_build253_gate.py
+      - name: Retain session and abuse-control predecessor contracts
+        run: |
+          python scripts/release467_build252_gate.py
+          python scripts/release467_build246_gate.py
+          python scripts/release467_build244_gate.py
+          python scripts/release467_build243_gate.py
