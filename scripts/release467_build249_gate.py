@@ -51,12 +51,13 @@ for token in ('TTL_MS=60_000','coalesced_reads','cache_hits','live_reads'):
 
 q('Build 250 — Startup & Provider Read-Budget Verification' in road,'Build 250 successor missing')
 q("run_current_contract('scripts/release467_build249_gate.py','Release 467 Build 249')" in sysgate,'System Gate must invoke Build 249')
-if p.get('build')==249:
+pb=int(p.get('build') or 0)
+if pb==249:
     q(p.get('next_build')==250 and p.get('state')=='DEVELOPMENT_GREEN','current authority must expose Build 249 and successor 250')
-elif p.get('build')==250:
-    q(p.get('next_build')==251 and p.get('state')=='DEVELOPMENT_GREEN','Build 250 successor must retain Build 249 compatibility')
+elif pb>=250:
+    q(p.get('state')=='DEVELOPMENT_GREEN' and 'release467-build249-refinement-runtime-measurement-outcome-baseline.json' in (p.get('current_release_authorities') or []),'verified successors must retain Build 249 compatibility authority')
 else:
-    q(False,'current authority must be Build 249 or direct successor Build 250')
+    q(False,'current authority must be Build 249 or a verified successor')
 
 if a.get('state')=='PRODUCTION_GREEN':
     final=a.get('final_closure') or {};prod=a.get('production_checkpoint') or {}
