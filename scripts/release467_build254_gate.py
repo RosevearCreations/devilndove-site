@@ -37,11 +37,11 @@ q('/public/js/admin-journey-friction-v254.js?v=254' in admin,'Build 254 reviewer
 q('dedupeExactLinks' in consolidation and 'canonicalOwners' in consolidation,'Build 239 consolidation must remain active')
 q('Build 255 — Production Reliability & Release Efficiency Review' in road,'Build 255 successor missing')
 q("run_current_contract('scripts/release467_build254_gate.py','Release 467 Build 254')" in sysgate,'System Gate must invoke Build 254')
-q(int(p.get('build') or 0)==254 and int(p.get('next_build') or 0)==255 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must expose Build 254 and successor 255')
-q(p.get('accepted_dev_sha')=='42ad585550cbf76b39ab28d30ed345e177b8fb86' and p.get('accepted_dev_tree_sha')=='deeca5e877175af1c7c804b09bfbb14a9daa7df8','Build 254 must start from exact Build 253 Development')
-q((p.get('production_checkpoint') or {}).get('main_sha')=='ec4e665c34af6e6fbc1dc440411b8b7795deaeb5','Build 254 Production baseline must be Build 253')
+q(int(p.get('build') or 0)>=254 and int(p.get('next_build') or 0)>=255 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 254 or a verified successor')
+q(int(p.get('build') or 0)>254 or (p.get('accepted_dev_sha')=='42ad585550cbf76b39ab28d30ed345e177b8fb86' and p.get('accepted_dev_tree_sha')=='deeca5e877175af1c7c804b09bfbb14a9daa7df8'),'Build 254 baseline must remain valid or be superseded by Build 255+')
+q(int(p.get('build') or 0)>254 or (p.get('production_checkpoint') or {}).get('main_sha')=='ec4e665c34af6e6fbc1dc440411b8b7795deaeb5','Build 254 Production baseline must remain valid or be superseded by Build 255+')
 for source,label in ((rel,'Reliability'),(it,'I.T. tower'),(preflight,'Preflight'),(guide,'I.T. guide')):
-    q('254' in source and 'Operator Journey Friction Review' in source,f'{label} must identify Build 254')
+    q(('254' in source and 'Operator Journey Friction Review' in source) or ('255' in source and 'Production Reliability' in source),f'{label} must identify Build 254 or verified Build 255 successor')
 for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 254 safety drift: {k}')
 
 for path in ('public/js/admin-route-usage.js','public/js/admin-journey-friction-v254.js'):

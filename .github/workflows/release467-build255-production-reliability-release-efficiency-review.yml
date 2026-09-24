@@ -1,0 +1,59 @@
+name: Release 467 Build 255 Production Reliability Release Efficiency Review
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build255:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 254 Development and Production workflow evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json, subprocess, sys
+          repo='${{ github.repository }}'
+          targets=[
+            ('DEVELOPMENT','95ad971789a7f207c1bc64103e68cd28204a3e50',[
+              'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof',
+              'Repository Branch Hygiene','Release 467 Build 254 Operator Journey Friction Review'
+            ]),
+            ('PRODUCTION','46224bcfebbf12bec95383a03e188e00674d3326',[
+              'Production Pages Deploy','Production Live Resource Integrity Proof',
+              'Release 467 Build 155 Products Production Browser Proof','Release 467 Build 154 Products Route Production Proof',
+              'Release 467 Build 254 Operator Journey Friction Review'
+            ])
+          ]
+          for label,sha,required in targets:
+            raw=subprocess.check_output(['gh','run','list','--repo',repo,'--commit',sha,'--limit','100',
+              '--json','databaseId,workflowName,event,status,conclusion,headSha,attempt'],text=True)
+            rows=json.loads(raw)
+            by={r.get('workflowName'):r for r in rows if r.get('headSha')==sha}
+            missing=[]
+            for name in required:
+              row=by.get(name)
+              if not row or row.get('status')!='completed' or row.get('conclusion')!='success':
+                missing.append(name)
+              else:
+                print('GREEN',label,name,row.get('databaseId'))
+            if missing:
+              print('MISSING_OR_NOT_GREEN',label,missing,file=sys.stderr);sys.exit(1)
+          PY
+      - name: Build 255 bounded review gate
+        run: python scripts/release467_build255_gate.py
+      - name: Retain predecessor and release-streamlining contracts
+        run: |
+          python scripts/release467_build254_gate.py
+          python scripts/release467_build242_gate.py
