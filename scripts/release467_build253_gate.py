@@ -59,7 +59,7 @@ for source,label in ((rel,'Reliability'),(it,'I.T. tower'),(preflight,'Preflight
     if cur==253:
         q('253' in source and 'Session & Abuse-Control Runtime Evidence' in source,f'{label} must identify Build 253')
     else:
-        q('254' in source and 'Operator Journey Friction Review' in source,f'{label} must identify Build 254 successor')
+        q(str(cur) in source and str(p.get('title') or '') in source,f'{label} must identify the current verified Build {cur} successor')
 for k,v in (a.get('safety') or {}).items():
     q(v is False,f'Build 253 safety drift: {k}')
 

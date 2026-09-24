@@ -2,7 +2,7 @@
   "release": 467,
   "build": 255,
   "title": "Production Reliability & Release Efficiency Review",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build255-production-reliability-release-efficiency-review",
   "predecessor": {
     "build": 254,
@@ -274,5 +274,32 @@
       "products_route_proof_run": 36072048280,
       "build_specific_proof_run": 36071988190
     }
+  },
+  "accepted_dev_sha": "6d8d006cad521f2ca9fb83b2d7a1ec62ad9347fb",
+  "accepted_dev_tree_sha": "7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398",
+  "final_closure": {
+    "dev_sha": "6d8d006cad521f2ca9fb83b2d7a1ec62ad9347fb",
+    "tree_sha": "7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398",
+    "proofs": {
+      "system_gate_run": 36073942618,
+      "current_application_quality_run": 36073942565,
+      "it_admin_runtime_proof_run": 36073942615,
+      "branch_hygiene_run": 36073943552
+    },
+    "dedicated_gate_run": 36073942420,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 256,
+    "recorded_by": "Build 256 successor ingestion; Build 255 did not self-record later proof"
+  },
+  "production_checkpoint": {
+    "main_sha": "c5ef57106fe84b386230d686b46d11ea30c35576",
+    "tree_sha": "7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398",
+    "production_pages_deploy_run": 36074089250,
+    "production_live_resource_integrity_run": 36074174209,
+    "products_browser_proof_run": 36074174144,
+    "products_route_proof_run": 36074174120,
+    "build_specific_proof_run": 36074089765,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }

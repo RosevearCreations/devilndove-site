@@ -1,0 +1,60 @@
+name: Release 467 Build 256 Refinement Outcomes Renewal II
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build256:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 255 Development and Production workflow evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json, subprocess, sys
+          repo='${{ github.repository }}'
+          targets=[
+            ('DEVELOPMENT','6d8d006cad521f2ca9fb83b2d7a1ec62ad9347fb',[
+              'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof',
+              'Repository Branch Hygiene','Release 467 Build 255 Production Reliability Release Efficiency Review'
+            ]),
+            ('PRODUCTION','c5ef57106fe84b386230d686b46d11ea30c35576',[
+              'Production Pages Deploy','Production Live Resource Integrity Proof',
+              'Release 467 Build 155 Products Production Browser Proof','Release 467 Build 154 Products Route Production Proof',
+              'Release 467 Build 255 Production Reliability Release Efficiency Review'
+            ])
+          ]
+          for label,sha,required in targets:
+            raw=subprocess.check_output(['gh','run','list','--repo',repo,'--commit',sha,'--limit','100',
+              '--json','databaseId,workflowName,event,status,conclusion,headSha,attempt'],text=True)
+            rows=json.loads(raw)
+            by={r.get('workflowName'):r for r in rows if r.get('headSha')==sha}
+            missing=[]
+            for name in required:
+              row=by.get(name)
+              if not row or row.get('status')!='completed' or row.get('conclusion')!='success':
+                missing.append(name)
+              else:
+                print('GREEN',label,name,row.get('databaseId'))
+            if missing:
+              print('MISSING_OR_NOT_GREEN',label,missing,file=sys.stderr);sys.exit(1)
+          PY
+      - name: Build 256 renewal gate
+        run: python scripts/release467_build256_gate.py
+      - name: Retain predecessor and measurement contracts
+        run: |
+          python scripts/release467_build255_gate.py
+          python scripts/release467_build250_gate.py
+          python scripts/release467_build249_gate.py
