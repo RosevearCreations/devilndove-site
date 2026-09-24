@@ -23,12 +23,13 @@ q(m.get('csp_script_unsafe_inline') is False and m.get('csp_style_unsafe_inline'
 q(m.get('unresolved_non_product_svg_placeholders')==29 and m.get('unresolved_non_product_placeholder_pages')==22,'visual residual mismatch')
 q((a.get('roadmap_decision') or {}).get('future_queue_exhausted') is False and (a.get('roadmap_decision') or {}).get('next_build')==249,'successor roadmap decision missing')
 for n in range(249,257): q(f'Build {n} —' in road,f'roadmap missing Build {n}')
-if p.get('build')==248:
+pb=int(p.get('build') or 0)
+if pb==248:
  q(p.get('next_build')==249 and p.get('state')=='DEVELOPMENT_GREEN','current authority must expose Build 248 and successor 249')
-elif p.get('build')==249:
- q(p.get('next_build')==250 and p.get('state')=='DEVELOPMENT_GREEN','Build 249 successor must retain Build 248 compatibility')
+elif pb>=249:
+ q(p.get('state')=='DEVELOPMENT_GREEN' and 'release467-build248-refinement-outcomes-review-roadmap-renewal.json' in (p.get('current_release_authorities') or []),'verified successors must retain Build 248 compatibility authority')
 else:
- q(False,'current authority must be Build 248 or direct successor Build 249')
+ q(False,'current authority must be Build 248 or a verified successor')
 q((b245.get('scope') or {}).get('script_src_unsafe_inline_removed') is True and (b245.get('scope') or {}).get('style_unsafe_inline_retained_for_incremental_migration') is True,'Build 245 CSP evidence drift')
 if a.get('state')=='PRODUCTION_GREEN':
  final=a.get('final_closure') or {};prod=a.get('production_checkpoint') or {}
