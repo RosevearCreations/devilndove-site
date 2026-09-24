@@ -3,7 +3,7 @@
   "build": 252,
   "title": "Cross-Device Accessibility Acceptance Refresh",
   "state": "DEVELOPMENT_GREEN",
-  "source_authority": "release467-build252-cross-device-accessibility-acceptance-refresh.json",
+  "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
