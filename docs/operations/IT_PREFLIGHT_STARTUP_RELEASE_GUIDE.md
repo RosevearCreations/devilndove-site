@@ -12,21 +12,22 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 248 candidate
+## Current Release 467 restart authority — Build 249 candidate
 
-Build 247 **Non-Product Visual Coverage & Media Placement Closure** is the exact verified predecessor:
+Build 248 **Refinement Outcomes Review & Roadmap Renewal** is the exact verified predecessor:
 
-- Development SHA: `6b201a410636d3e861e7a1e554c04afd16e81ce3`
-- Shared tree: `a581c34f7ad45f9a7fd75411f917df8f8f1f5a46`
-- Development proofs: System `35940527918`, Quality `35940528047`, I.T. `35940528277`, Hygiene `35940527817`
-- Build 247 dedicated proof: `35940528485`
-- Production main: `7a51ae487552d3b2d7bdf4a048ef33380ccaa917`
-- Production proofs: Pages `35940742900`, Live Resources `35940804209`, Product Browser `35940804268`, Product Route `35940804298`
+- Development SHA: `2f46181a3c92568c2b192a83929a85f72a2b4374`
+- Shared tree: `2db3a312cd0e7a6e24b07de4495d1d97898c7028`
+- Development proofs: System `35942841810`, Quality `35942841817`, I.T. `35942841820`, Hygiene `35942841826`
+- Build 248 dedicated proof: `35942841818`
+- Production main: `e6ed352b5fe9f32b2cd6d049b00239fd643ebbc6`
+- Production proofs: Pages `35943937792`, Live Resources `35944021002`, Product Browser `35944020958`, Product Route `35944020834`
+- Build 248 Production-specific proof: `35943937473`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 248 **Refinement Outcomes Review & Roadmap Renewal** is the active candidate. It records measured refinement outcomes, keeps unmeasured runtime/provider deltas explicit, and renews the evidence-driven queue through Build 256.
+Build 249 **Refinement Runtime Measurement & Outcome Baseline** is the active candidate. It adds browser-local, session-only measurement for Admin route transitions, bounded startup request counts, Build 240 cache hits/misses and duplicate-read suppression without capturing query values, payloads, headers, secrets or remote telemetry.
 
-Build 247 is exact-tree Development + Production GREEN. Build 248 remains blocked from Production until its exact Development head is fully GREEN.
+Build 248 is exact-tree Development + Production GREEN. Build 249 remains blocked from Production until its exact Development head is fully GREEN.
 
 ## Retained historical provenance — Build 171
 

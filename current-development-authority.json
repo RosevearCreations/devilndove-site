@@ -1,32 +1,32 @@
 {
   "release": 467,
-  "build": 248,
-  "title": "Refinement Outcomes Review & Roadmap Renewal",
+  "build": 249,
+  "title": "Refinement Runtime Measurement & Outcome Baseline",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 247,
-      "title": "Non-Product Visual Coverage & Media Placement Closure",
-      "authority": "release467-build247-non-product-visual-coverage-media-placement-closure.json",
-      "dev_sha": "6b201a410636d3e861e7a1e554c04afd16e81ce3",
-      "tree_sha": "a581c34f7ad45f9a7fd75411f917df8f8f1f5a46",
+      "build": 248,
+      "title": "Refinement Outcomes Review & Roadmap Renewal",
+      "authority": "release467-build248-refinement-outcomes-review-roadmap-renewal.json",
+      "dev_sha": "2f46181a3c92568c2b192a83929a85f72a2b4374",
+      "tree_sha": "2db3a312cd0e7a6e24b07de4495d1d97898c7028",
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
-      "business_exit": "OWNER_AUTHORIZED_REFINEMENT_QUEUE_OPEN",
+      "business_exit": "OWNER_AUTHORIZED_REFINEMENT_RUNTIME_MEASUREMENT",
       "proofs": {
-        "system_gate_run": 35940527918,
-        "current_application_quality_run": 35940528047,
-        "it_admin_runtime_proof_run": 35940528277,
-        "branch_hygiene_run": 35940527817
+        "system_gate_run": 35942841810,
+        "current_application_quality_run": 35942841817,
+        "it_admin_runtime_proof_run": 35942841820,
+        "branch_hygiene_run": 35942841826
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 248,
-      "title": "Refinement Outcomes Review & Roadmap Renewal",
-      "authority": "release467-build248-refinement-outcomes-review-roadmap-renewal.json",
+      "build": 249,
+      "title": "Refinement Runtime Measurement & Outcome Baseline",
+      "authority": "release467-build249-refinement-runtime-measurement-outcome-baseline.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -37,19 +37,21 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 247,
-    "title": "Non-Product Visual Coverage & Media Placement Closure",
-    "authority": "release467-build247-non-product-visual-coverage-media-placement-closure.json",
-    "main_sha": "7a51ae487552d3b2d7bdf4a048ef33380ccaa917",
-    "tree_sha": "a581c34f7ad45f9a7fd75411f917df8f8f1f5a46",
-    "production_pages_deploy_run": 35940742900,
-    "production_live_resource_integrity_run": 35940804209,
-    "products_browser_proof_run": 35940804268,
-    "products_route_proof_run": 35940804298,
+    "build": 248,
+    "title": "Refinement Outcomes Review & Roadmap Renewal",
+    "authority": "release467-build248-refinement-outcomes-review-roadmap-renewal.json",
+    "main_sha": "e6ed352b5fe9f32b2cd6d049b00239fd643ebbc6",
+    "tree_sha": "2db3a312cd0e7a6e24b07de4495d1d97898c7028",
+    "production_pages_deploy_run": 35943937792,
+    "production_live_resource_integrity_run": 35944021002,
+    "products_browser_proof_run": 35944020958,
+    "products_route_proof_run": 35944020834,
+    "build_specific_proof_run": 35943937473,
     "state": "PRODUCTION_GREEN",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build249-refinement-runtime-measurement-outcome-baseline.json",
     "release467-build248-refinement-outcomes-review-roadmap-renewal.json",
     "release467-build247-non-product-visual-coverage-media-placement-closure.json",
     "release467-build246-abuse-session-security-operations.json",
@@ -139,11 +141,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_REFINEMENT_OUTCOMES_AUTONOMOUS_BUILDS_249_256.md",
-  "next_build": 249,
+  "next_build": 250,
   "next_build_state": "AUTHORIZED_IN_PROGRESS",
-  "next_build_title": "Refinement Runtime Measurement & Outcome Baseline",
-  "promotion_state": "BUILD248_DEVELOPMENT_CANDIDATE_NOT_YET_PRODUCTION",
-  "successor_scope_state": "EVIDENCE_DRIVEN_REFINEMENT_OUTCOMES_ROADMAP_OPEN",
+  "next_build_title": "Startup & Provider Read-Budget Verification",
+  "promotion_state": "BUILD249_DEVELOPMENT_CANDIDATE_NOT_YET_PRODUCTION",
+  "successor_scope_state": "RUNTIME_MEASUREMENT_BASELINE_ACTIVE",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -164,22 +166,22 @@
     "interpretation": "NO_JUSTIFIED_AUTONOMOUS_SOFTWARE_SUCCESSOR"
   },
   "planned_successor": {
-    "first_build": 249,
+    "first_build": 250,
     "last_build": 256,
     "state": "EVIDENCE_DRIVEN_REFINEMENT_OUTCOMES_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 249,
-    "next_build_title": "Refinement Runtime Measurement & Outcome Baseline",
-    "reactivation_source": "BUILD248_MEASURED_RESIDUALS"
+    "next_build": 250,
+    "next_build_title": "Startup & Provider Read-Budget Verification",
+    "reactivation_source": "BUILD249_REAL_RUNTIME_BASELINE"
   },
   "canonical_data_migration_authorized": false,
-  "canonical_data_migration_scope": "NONE_BUILD248_REVIEW_ONLY",
-  "accepted_dev_sha": "6b201a410636d3e861e7a1e554c04afd16e81ce3",
-  "accepted_dev_tree_sha": "a581c34f7ad45f9a7fd75411f917df8f8f1f5a46",
+  "canonical_data_migration_scope": "NONE_BUILD249_MEASUREMENT_ONLY",
+  "accepted_dev_sha": "2f46181a3c92568c2b192a83929a85f72a2b4374",
+  "accepted_dev_tree_sha": "2db3a312cd0e7a6e24b07de4495d1d97898c7028",
   "acceptance": {
-    "system_gate_run": 35940527918,
-    "current_application_quality_run": 35940528047,
-    "it_admin_runtime_proof_run": 35940528277,
-    "branch_hygiene_run": 35940527817
+    "system_gate_run": 35942841810,
+    "current_application_quality_run": 35942841817,
+    "it_admin_runtime_proof_run": 35942841820,
+    "branch_hygiene_run": 35942841826
   }
 }
