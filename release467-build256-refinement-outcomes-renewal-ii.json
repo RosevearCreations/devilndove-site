@@ -1,0 +1,141 @@
+{
+  "release": 467,
+  "build": 256,
+  "title": "Refinement Outcomes Renewal II",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build256-refinement-outcomes-renewal-ii",
+  "predecessor": {
+    "build": 255,
+    "title": "Production Reliability & Release Efficiency Review",
+    "development_sha": "6d8d006cad521f2ca9fb83b2d7a1ec62ad9347fb",
+    "development_tree_sha": "7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398",
+    "candidate_pr": 350,
+    "candidate_pr_head_sha": "1ea22d39152a14476e0eda6b0e56461cbc9d82cc",
+    "production_main_sha": "c5ef57106fe84b386230d686b46d11ea30c35576",
+    "production_tree_sha": "7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36073942618,
+      "current_application_quality_run": 36073942565,
+      "it_admin_runtime_proof_run": 36073942615,
+      "branch_hygiene_run": 36073943552,
+      "build_specific_proof_run": 36073942420
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36074089250,
+      "production_live_resource_integrity_run": 36074174209,
+      "products_browser_proof_run": 36074174144,
+      "products_route_proof_run": 36074174120,
+      "build_specific_proof_run": 36074089765
+    }
+  },
+  "remeasurement": {
+    "source_builds": [
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255
+    ],
+    "all_source_builds_production_green": true,
+    "exact_tree_closure_preserved": true,
+    "accepted_heads_reviewed": 14,
+    "accepted_head_workflow_runs": 870,
+    "successful_runs": 863,
+    "failed_runs": 7,
+    "skipped_runs": 0,
+    "rerun_attempts": 0,
+    "outcomes": {
+      "build249": "PRIVACY_RESPECTING_RUNTIME_MEASUREMENT_BASELINE_GREEN",
+      "build250": {
+        "state": "PROVIDER_READ_BUDGET_GREEN",
+        "aggregate_rows_read": 2178,
+        "ceiling": 25000,
+        "headroom_rows": 22822,
+        "remaining_hotspot": "operations-today-tasks-read",
+        "select_statement_fanout": 13
+      },
+      "build251": "CSP_STYLE_NONCE_HARDENING_GREEN",
+      "build252": "CROSS_DEVICE_ACCESSIBILITY_ACCEPTANCE_GREEN",
+      "build253": "SESSION_ABUSE_CONTROL_RUNTIME_EVIDENCE_GREEN",
+      "build254": {
+        "state": "OPERATOR_JOURNEY_REVIEW_GREEN",
+        "route_specific_remediation": "NOT_JUSTIFIED_WITHOUT_REAL_SESSION_EVIDENCE"
+      },
+      "build255": {
+        "state": "PRODUCTION_RELIABILITY_REVIEW_GREEN",
+        "proof_fanout": "HIGH",
+        "build255_dev_runs": 70,
+        "build255_main_runs": 64,
+        "exact_sha_promotion": "PRESERVE"
+      }
+    }
+  },
+  "decision": {
+    "autonomous_queue_exhausted": false,
+    "action": "CREATE_EVIDENCE_DRIVEN_SUCCESSOR_ROADMAP",
+    "rationale": [
+      "Build 255 measures high workflow proof fan-out across accepted exact-SHA closures.",
+      "Build 250 still identifies operations-today-tasks-read as the highest provider-read hotspot with 13 SELECT statements despite remaining below the hard row ceiling.",
+      "Build 254 provides no evidence for route-specific navigation remediation, so no synthetic journey work is authorized."
+    ],
+    "successor_roadmap": "docs/operations/RELEASE_467_RELEASE_EFFICIENCY_READ_PATH_AUTONOMOUS_BUILDS_257_264.md",
+    "next_build": 257,
+    "next_build_title": "Workflow Trigger Inventory & Ownership Map"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "synthetic_business_evidence": false,
+    "exact_sha_requirement_relaxed": false
+  },
+  "implementation": {
+    "renewal_document": "docs/operations/RELEASE_467_BUILD_256_REFINEMENT_OUTCOMES_RENEWAL_II.md",
+    "successor_roadmap": "docs/operations/RELEASE_467_RELEASE_EFFICIENCY_READ_PATH_AUTONOMOUS_BUILDS_257_264.md",
+    "dedicated_gate": "scripts/release467_build256_gate.py",
+    "workflow": ".github/workflows/release467-build256-refinement-outcomes-renewal-ii.yml"
+  },
+  "acceptance": {
+    "next_build": 257,
+    "next_build_title": "Workflow Trigger Inventory & Ownership Map",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "6d8d006cad521f2ca9fb83b2d7a1ec62ad9347fb",
+      "tree": "7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398",
+      "proof_recovery": "LIVE_BY_EXACT_SHA",
+      "system_gate_run": 36073942618,
+      "quality_run": 36073942565,
+      "it_admin_runtime_run": 36073942615,
+      "repository_hygiene_run": 36073943552,
+      "build_specific_proof_run": 36073942420,
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "c5ef57106fe84b386230d686b46d11ea30c35576",
+      "tree_sha": "7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398",
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true,
+      "proof_recovery": "LIVE_BY_EXACT_SHA",
+      "production_pages_deploy_run": 36074089250,
+      "production_live_resource_integrity_run": 36074174209,
+      "products_browser_proof_run": 36074174144,
+      "products_route_proof_run": 36074174120,
+      "build_specific_proof_run": 36074089765
+    }
+  }
+}

@@ -41,15 +41,15 @@ q((m.get('build254') or {}).get('dev_success')==70 and (m.get('build254') or {})
 q((a.get('findings') or {}).get('exact_sha_promotion')=='PRESERVE','Build 255 must preserve exact-SHA promotion')
 q((a.get('operator_diagnostics') or {}).get('new_parallel_dashboard') is False,'Build 255 must reuse existing diagnostics surfaces')
 
-q(int(p.get('build') or 0)==255 and int(p.get('next_build') or 0)==256 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must expose Build 255 and successor 256')
-q(p.get('accepted_dev_sha')=='95ad971789a7f207c1bc64103e68cd28204a3e50' and p.get('accepted_dev_tree_sha')=='7da896d6d154460950844b44bc179a8354b836f2','Build 255 must start from exact Build 254 Development')
-q((p.get('production_checkpoint') or {}).get('main_sha')=='46224bcfebbf12bec95383a03e188e00674d3326','Build 255 Production baseline must be Build 254')
+q(int(p.get('build') or 0)>=255 and int(p.get('next_build') or 0)>=256 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 255 or a verified successor')
+q(int(p.get('build') or 0)>255 or (p.get('accepted_dev_sha')=='95ad971789a7f207c1bc64103e68cd28204a3e50' and p.get('accepted_dev_tree_sha')=='7da896d6d154460950844b44bc179a8354b836f2'),'Build 255 baseline must remain valid or be superseded by Build 256+')
+q(int(p.get('build') or 0)>255 or (p.get('production_checkpoint') or {}).get('main_sha')=='46224bcfebbf12bec95383a03e188e00674d3326','Build 255 Production baseline must remain valid or be superseded by Build 256+')
 q("run_current_contract('scripts/release467_build255_gate.py','Release 467 Build 255')" in sysgate,'System Gate must invoke Build 255')
 q('Build 256 — Refinement Outcomes Renewal II' in road,'Build 256 successor missing from roadmap')
 for token in ('1,551','1,519','19','13','70/70','64/64','exact-SHA'):
     q(token in review,f'Build 255 evidence document missing {token}')
 for source,label in ((rel,'Reliability'),(it,'I.T. tower'),(preflight,'Preflight'),(itpage,'I.T. page'),(relpage,'Reliability page'),(prepage,'Preflight page'),(guide,'I.T. guide')):
-    q('255' in source and 'Production Reliability' in source,f'{label} must identify Build 255 review')
+    q(('255' in source and 'Production Reliability' in source) or ('256' in source and 'Refinement Outcomes Renewal II' in source),f'{label} must identify Build 255 or verified Build 256 successor')
 for k,v in (a.get('safety') or {}).items():
     q(v is False,f'Build 255 safety drift: {k}')
 
