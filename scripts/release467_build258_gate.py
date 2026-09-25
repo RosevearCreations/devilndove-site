@@ -70,7 +70,7 @@ q(int(p.get('build') or 0)==258 and int(p.get('next_build') or 0)==259 and p.get
 q(p.get('accepted_dev_sha')=='5e6fa8772be5946a0cd53eadbd4b3daa36fce253' and p.get('accepted_dev_tree_sha')=='df03a29c947144f298f0908abf53ca3cdda1c159','Build 258 must start from exact Build 257 Development')
 q((p.get('production_checkpoint') or {}).get('main_sha')=='9e95bca825599dea1459838e10812c74d799c976','Build 258 Production baseline must be exact Build 257 Production')
 q('Build 259 — Reusable Exact-SHA Proof Composition' in road,'Build 259 successor missing from roadmap')
-for token in ('16','242','257','72','76','106','manual-only','Build 259'):
+for token in ('16','242','257','72','122','123','manual-only','Build 259'):
     q(token in doc,f'Build 258 document missing {token}')
 for source,label in ((rel,'Reliability'),(it,'I.T. tower'),(pre,'Preflight'),(itpage,'I.T. page'),(relpage,'Reliability page'),(prepage,'Preflight page'),(guide,'I.T. guide')):
     q('258' in source and 'Historical Workflow Trigger Scope Tightening' in source,f'{label} must identify Build 258')
