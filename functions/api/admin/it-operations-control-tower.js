@@ -1,27 +1,27 @@
-// Release 467 Build 256 — Refinement Outcomes Renewal II over Build 255 Production source.
+// Release 467 Build 257 — Workflow Trigger Inventory & Ownership Map over Build 256 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=256;
-const TITLE='Refinement Outcomes Renewal II';
-const AUTHORITY='release467-build256-refinement-outcomes-renewal-ii';
-const EVIDENCE_ID='r467-b255-green-36073942618-36074089250';
+const BUILD=257;
+const TITLE='Workflow Trigger Inventory & Ownership Map';
+const AUTHORITY='release467-build257-workflow-trigger-inventory-ownership-map';
+const EVIDENCE_ID='r467-b256-green-36075093498-36075244119';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:255,title:'Production Reliability & Release Efficiency Review',state:'DEVELOPMENT_GREEN',
-  dev_sha:'6d8d006cad521f2ca9fb83b2d7a1ec62ad9347fb',tree_sha:'7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398',
-  system_gate_run:36073942618,current_application_quality_run:36073942565,it_admin_runtime_proof_run:36073942615,
-  branch_hygiene_run:36073943552,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:256,title:'Refinement Outcomes Renewal II',state:'DEVELOPMENT_GREEN',
+  dev_sha:'601ea5eda5296c189388dc6df595d029687dfa1a',tree_sha:'f7f8d07bedc07cd6f335fcbb8fb1c2443cee2c06',
+  system_gate_run:36075093498,current_application_quality_run:36075093559,it_admin_runtime_proof_run:36075093555,
+  branch_hygiene_run:36075093385,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:255,title:'Production Reliability & Release Efficiency Review',state:'PRODUCTION_GREEN',
-  main_sha:'c5ef57106fe84b386230d686b46d11ea30c35576',tree_sha:'7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398',
-  production_pages_deploy_run:36074089250,production_live_resource_integrity_run:36074174209,
-  products_browser_proof_run:36074174144,products_route_proof_run:36074174120,remote_d1_queries:0
+  release:467,build:256,title:'Refinement Outcomes Renewal II',state:'PRODUCTION_GREEN',
+  main_sha:'36f48e66ea71b5cf598fb8bb7a9abce10e5ff7b9',tree_sha:'f7f8d07bedc07cd6f335fcbb8fb1c2443cee2c06',
+  production_pages_deploy_run:36075244119,production_live_resource_integrity_run:36075319609,
+  products_browser_proof_run:36075319580,products_route_proof_run:36075319601,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 256 Refinement Outcomes Renewal II'
+  'Release 467 Build 257 Workflow Trigger Inventory Ownership Map'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:255,title:'Production Reliability & Release Efficiency Review',
+    release:467,build:256,title:'Refinement Outcomes Renewal II',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:36073942618,current_application_quality_run:36073942565,
-      it_admin_runtime_proof_run:36073942615,branch_hygiene_run:36073943552
+      system_gate_run:36075093498,current_application_quality_run:36075093559,
+      it_admin_runtime_proof_run:36075093555,branch_hygiene_run:36075093385
     },
     production_proofs:{
-      production_pages_deploy_run:36074089250,production_live_resource_integrity_run:36074174209,
-      products_browser_proof_run:36074174144,products_route_proof_run:36074174120
+      production_pages_deploy_run:36075244119,production_live_resource_integrity_run:36075319609,
+      products_browser_proof_run:36075319580,products_route_proof_run:36075319601
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 257 follows only after exact Build 256 Production GREEN.'
+    next_build:'Build 258 follows only after exact Build 257 Production GREEN.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 256 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 257 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -102,7 +102,7 @@ function markdownReport(pack){
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Current Production baseline: Build 255 Production Reliability & Release Efficiency Review
+- Current Production baseline: Build 256 Refinement Outcomes Renewal II
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -121,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:256,title:TITLE,authority:'release467-build256-refinement-outcomes-renewal-ii.json'},
+        current_closure_candidate:{release:467,build:257,title:TITLE,authority:'release467-build257-workflow-trigger-inventory-ownership-map.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -138,15 +138,16 @@ export async function onRequestGet(context){
       foreign_key_violations:Number(base?.subsystems?.database?.metrics?.foreign_key_violations||0)
     },
     refinement_outcomes_renewal_ii:{source_builds:'249-255',accepted_heads:14,total_workflow_runs:870,successful_runs:863,failed_runs:7,skipped_runs:0,retried_run_attempts:0,build250_provider_rows_read:2178,build250_provider_rows_read_ceiling:25000,build250_operations_today_tasks_select_statements:13,build254_route_specific_remediation:'NOT_JUSTIFIED_WITHOUT_REAL_SESSION_EVIDENCE',build255_proof_fanout:'HIGH',exact_sha_promotion:'PRESERVE',future_queue_exhausted:false,next_build:257,successor_roadmap:'docs/operations/RELEASE_467_RELEASE_EFFICIENCY_READ_PATH_AUTONOMOUS_BUILDS_257_264.md'},
+    workflow_trigger_inventory:{baseline_workflow_files:146,primary_trigger_union:140,pull_request:86,push:90,workflow_dispatch:89,workflow_run:5,issues:1,workflow_disabled:false,workflow_deleted:false,historical_scope_tightening:'BUILD258_REVIEW_CANDIDATE',next_build:258,future_queue_exhausted:false},
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 255 is the exact last fully verified Development checkpoint.',
-      'Build 255 Production is GREEN on the identical tree 7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398.',
-      'Build 255 Development proofs: System 36073942618, Quality 36073942565, I.T. 36073942615, Hygiene 36073943552.',
-      'Build 255 Production proofs: Pages 36074089250, Live Resources 36074174209, Product Browser 36074174144, Product Route 36074174120.',
-      'Build 256 re-measures Builds 249-255: 870 accepted-head runs / 863 success / 7 historical failures / 0 skipped / 0 reruns.',
-      'The queue continues with Build 257 because high CI proof fan-out and the measured Build 250 read-path hotspot remain evidence-backed residuals.'
+      'Build 256 is the exact last fully verified Development checkpoint.',
+      'Build 256 Production is GREEN on the identical tree f7f8d07bedc07cd6f335fcbb8fb1c2443cee2c06.',
+      'Build 256 Development proofs: System 36075093498, Quality 36075093559, I.T. 36075093555, Hygiene 36075093385.',
+      'Build 256 Production proofs: Pages 36075244119, Live Resources 36075319609, Product Browser 36075319580, Product Route 36075319601.',
+      'Build 257 inventories 146 pre-build workflow files and maps every retained workflow to a current proof owner without disabling or deleting workflows.',
+      'The queue continues with Build 258 for evidence-backed historical trigger-scope tightening.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
