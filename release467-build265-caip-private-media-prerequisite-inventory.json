@@ -1,0 +1,100 @@
+{
+  "release": 467,
+  "build": 265,
+  "title": "CAIP Private-Media Prerequisite Inventory",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build265-caip-private-media-prerequisite-inventory",
+  "predecessor": {
+    "build": 264,
+    "title": "Refinement Outcomes Renewal III",
+    "development_sha": "9017e145286f2007646a1f4de9ebdb670ca23881",
+    "production_main_sha": "9cf042afb9b7938f160df89b49b82376eb8f9291",
+    "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
+    "state": "PRODUCTION_GREEN",
+    "content_baseline": "Build 264 authority/roadmap blobs verified identical on dev and main before Build 265"
+  },
+  "inventory": {
+    "build241_validation": {
+      "source": "data/site/build241-validation-summary.json",
+      "status": "ready_for_deployed_evidence",
+      "private_media_tables": 6,
+      "current_migration": "database_build241_caip_large_media_intake.sql",
+      "current_pass_identical": true,
+      "aggregate_schemas_synchronized": true,
+      "request_time_ddl": false,
+      "active_operational_workstreams": 21,
+      "active_startup_gates": 46
+    },
+    "storage_authority": {
+      "private_binding": "CAIP_PRIVATE_MEDIA_BUCKET",
+      "public_binding": "PRODUCT_MEDIA_BUCKET",
+      "private_bucket_required_for_binary_intake": true,
+      "public_r2_dev_or_custom_domain_allowed": false,
+      "d1_role": "metadata/state/rights/evidence/object references",
+      "r2_role": "binary originals",
+      "raw_namespace": "projects/{creative_project_id}/raw/*",
+      "raw_original_policy": "immutable_after_successful_completion",
+      "public_promotion": "review_only_no_public_copy"
+    },
+    "multipart_recovery": {
+      "current_transport": "authenticated_same_origin_worker_streamed_multipart",
+      "default_part_size_mib": 32,
+      "conservative_parallel_parts": 2,
+      "fallback_part_limit_mib": 256,
+      "completed_part_authority": "D1 part number/byte range/status/attempt/R2 ETag",
+      "interrupted_upload": "retain completed part evidence and resume remaining parts",
+      "full_browser_restart": "local file may require explicit reselection; server/R2 multipart state survives",
+      "completed_raw_delete_or_overwrite": "not_exposed_by_intake",
+      "preferred_future_transport": "direct_s3_presigned_multipart",
+      "preferred_future_transport_live": false
+    },
+    "production_operator_prerequisites": [
+      "Build 241 private-media schema is installed and current-pass/aggregate schema evidence is synchronized",
+      "Production Pages exposes CAIP_PRIVATE_MEDIA_BUCKET",
+      "The private raw-media bucket has no public r2.dev or custom-domain access",
+      "Operator works from an existing reviewed Creative Project in /admin/creative-assets/",
+      "Real multipart interruption/reconnect/reselection/resume is proven without intentionally resending completed parts",
+      "Completed object size and internal-only asset registration are verified",
+      "Secure authenticated no-store review is proven",
+      "Rights/consent/privacy remain review-gated and public promotion creates no automatic public copy",
+      "Phone/tablet/laptop/desktop controls, focus, touch targets and overflow are reviewed",
+      "Production evidence is recorded without secrets or unnecessary personal information"
+    ],
+    "current_production_only_remaining": [
+      "Create and bind private CAIP R2 bucket",
+      "Prove real multipart interruption/resume on production network/device",
+      "Complete remaining Startup evidence before declaring deployed acceptance"
+    ],
+    "classification": "PREREQUISITES_INVENTORIED_NOT_PRODUCTION_ACCEPTED"
+  },
+  "decision": {
+    "build265_complete_when": "Repository-only inventory is internally consistent and exact predecessor proof is GREEN; no Production media action is required.",
+    "next_build": 266,
+    "next_build_title": "CAIP Multipart Recovery Integrity Review",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_upload": false,
+    "private_media_delete": false,
+    "public_media_copy": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false
+  },
+  "implementation": {
+    "roadmap": "docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md",
+    "document": "docs/operations/RELEASE_467_BUILD_265_CAIP_PRIVATE_MEDIA_PREREQUISITE_INVENTORY.md",
+    "dedicated_gate": "scripts/release467_build265_gate.py",
+    "workflow": ".github/workflows/release467-build265-caip-private-media-prerequisite-inventory.yml"
+  }
+}
