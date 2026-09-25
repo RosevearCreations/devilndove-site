@@ -27,7 +27,7 @@ Build 257 **Workflow Trigger Inventory & Ownership Map** is the exact verified p
 
 Build 258 **Historical Workflow Trigger Scope Tightening** is the active candidate. It converts exactly **16** historical Release 467 proof workflows, Builds **242–257**, to **manual-only provenance** through `workflow_dispatch`. Every workflow file and historical Python gate script is retained.
 
-The Build 257 candidate baseline measured 147 workflow files, 87 pull-request, 91 push, 90 manual-dispatch and 5 workflow-run triggers. With the Build 258 workflow added, the expected candidate is 148 workflow files, **72 pull-request**, **76 push**, **106 manual-dispatch** and the same **5 workflow-run** chains. This removes 15 automatic PR and 15 automatic push runs net while the System Gate continues executing the retained historical gate contracts directly.
+The full repository scanner on exact Build 257 measured 147 workflow files, 87 pull-request, 137 push, 107 manual-dispatch and 5 workflow-run triggers. With the Build 258 workflow added, the exact candidate is 148 workflow files, **72 pull-request**, **122 push**, **123 manual-dispatch** and the same **5 workflow-run** chains. The earlier Build 257 search-derived trigger snapshot remains historical evidence but is not mixed with this full-scanner comparison. This removes 15 automatic PR and 15 automatic push runs net while the System Gate continues executing the retained historical gate contracts directly.
 
 Exact-SHA promotion, identical-tree continuity, the four canonical Development proofs, Production Pages Deploy, Live Resource Integrity, Product Browser and Product Route proofs remain mandatory.
 
