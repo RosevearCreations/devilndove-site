@@ -18,7 +18,7 @@ Build 256 full-scanner baseline: **87 pull-request workflows**.
 
 Build 259 full-scanner candidate: **149 workflow files / 73 pull_request / 123 push / 124 workflow_dispatch / 5 workflow_run**. Its exact final PR head ran **72** workflows.
 
-Build 260 identifies exactly **38** still-automatic historical release proof workflows—Builds **206–241 and 258–259**—whose same gate contracts are retained by the canonical System Gate. Only their `pull_request` sibling is removed. Every existing `push` evidence path remains. All 38 targets are manually dispatchable after Build 260; the seven that lacked manual dispatch gain it. Build 240 had no push trigger before Build 260 and becomes **manual-only provenance** after its PR trigger is removed.
+Build 260 identifies exactly **38** still-automatic historical release proof workflows—Builds **206–241 and 258–259**—whose same gate contracts are retained by the canonical System Gate. Only their `pull_request` sibling is removed. Every existing `push` evidence path remains. All 38 targets are manually dispatchable after Build 260; the seven that lacked manual dispatch gain it.
 
 With Build 260's own active proof workflow added, the expected scanner result is **150 workflow files / 36 pull_request / 124 push / 132 workflow_dispatch / 5 workflow_run**, with an expected **35 actual PR runs**.
 
