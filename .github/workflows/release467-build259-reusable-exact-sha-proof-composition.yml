@@ -1,0 +1,45 @@
+name: Release 467 Build 259 Reusable Exact-SHA Proof Composition
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build259:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 258 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 3675554c0c2ce64923ec3e1763a243e03d103f1a
+          production_sha: 436c4e724efc736492f9772ffea7d5141feb3416
+          build_proof_name: Release 467 Build 258 Historical Workflow Trigger Scope Tightening
+          report_path: /tmp/build259-exact-sha-proof-composition.json
+      - name: Reusable verifier self-test
+        run: python scripts/release467_exact_sha_proof_composition.py --self-test
+      - name: Build 259 composition gate
+        run: python scripts/release467_build259_gate.py
+      - name: Retain predecessor and release-efficiency contracts
+        run: |
+          python scripts/release467_build258_gate.py
+          python scripts/release467_build257_gate.py
+          python scripts/release467_build256_gate.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release467-build259-exact-sha-proof-composition
+          path: /tmp/build259-exact-sha-proof-composition.json
+          if-no-files-found: error
+          retention-days: 30
