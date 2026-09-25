@@ -105,7 +105,10 @@ q('Build 261 — Production Proof Dependency Orchestration' in road,'Build 261 s
 for token in ('38','206','241','258','259','36 pull_request','124 push','132 workflow_dispatch','Build 261'):
     q(token in doc,f'Build 260 document missing {token}')
 for source,label in ((rel,'Reliability'),(it,'I.T. tower'),(pre,'Preflight'),(itpage,'I.T. page'),(relpage,'Reliability page'),(prepage,'Preflight page'),(guide,'I.T. guide')):
-    q('260' in source and 'Pull-Request Matrix Fan-Out Reduction' in source,f'{label} must identify Build 260')
+    if not successor_active:
+        q('260' in source and 'Pull-Request Matrix Fan-Out Reduction' in source,f'{label} must identify Build 260')
+    else:
+        q(str(p.get('build') or '') in source and str(p.get('title') or '') in source,f'{label} must identify the current verified successor')
 for k,v in (a.get('safety') or {}).items():q(v is False,f'Build 260 safety drift: {k}')
 
 print('RELEASE 467 BUILD 260 PULL-REQUEST MATRIX FAN-OUT REDUCTION')
