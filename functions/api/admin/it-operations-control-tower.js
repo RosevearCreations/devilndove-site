@@ -1,27 +1,27 @@
-// Release 467 Build 259 — Reusable Exact-SHA Proof Composition over Build 258 Production source.
+// Release 467 Build 260 — Pull-Request Matrix Fan-Out Reduction over Build 259 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=259;
-const TITLE='Reusable Exact-SHA Proof Composition';
-const AUTHORITY='release467-build259-reusable-exact-sha-proof-composition';
-const EVIDENCE_ID='r467-b258-green-36081394811-36081526239';
+const BUILD=260;
+const TITLE='Pull-Request Matrix Fan-Out Reduction';
+const AUTHORITY='release467-build260-pull-request-matrix-fanout-reduction';
+const EVIDENCE_ID='r467-b259-green-36082784059-36082913970';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:258,title:'Historical Workflow Trigger Scope Tightening',state:'DEVELOPMENT_GREEN',
-  dev_sha:'3675554c0c2ce64923ec3e1763a243e03d103f1a',tree_sha:'64dab693be764fb11a3cb9c36d06352a2f02eb1a',
-  system_gate_run:36081394811,current_application_quality_run:36081394936,it_admin_runtime_proof_run:36081394824,
-  branch_hygiene_run:36081394851,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
+  release:467,build:259,title:'Reusable Exact-SHA Proof Composition',state:'DEVELOPMENT_GREEN',
+  dev_sha:'270eea921559b2439459180998cc367b6fe7c9bb',tree_sha:'e81b613e5a4b491927ab89c89800345025853b99',
+  system_gate_run:36082784059,current_application_quality_run:36082784168,it_admin_runtime_proof_run:36082783908,
+  branch_hygiene_run:36082784042,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:258,title:'Historical Workflow Trigger Scope Tightening',state:'PRODUCTION_GREEN',
-  main_sha:'436c4e724efc736492f9772ffea7d5141feb3416',tree_sha:'64dab693be764fb11a3cb9c36d06352a2f02eb1a',
-  production_pages_deploy_run:36081526239,production_live_resource_integrity_run:36081651628,
-  products_browser_proof_run:36081651602,products_route_proof_run:36081651629,remote_d1_queries:0
+  release:467,build:259,title:'Reusable Exact-SHA Proof Composition',state:'PRODUCTION_GREEN',
+  main_sha:'af294ad20ec26222ec0f7ccdb856f39de9fbbd2e',tree_sha:'e81b613e5a4b491927ab89c89800345025853b99',
+  production_pages_deploy_run:36082913970,production_live_resource_integrity_run:36082967263,
+  products_browser_proof_run:36082967302,products_route_proof_run:36082967286,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 259 Reusable Exact-SHA Proof Composition'
+  'Release 467 Build 260 Pull-Request Matrix Fan-Out Reduction'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:258,title:'Historical Workflow Trigger Scope Tightening',
+    release:467,build:259,title:'Reusable Exact-SHA Proof Composition',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:36081394811,current_application_quality_run:36081394936,
-      it_admin_runtime_proof_run:36081394824,branch_hygiene_run:36081394851
+      system_gate_run:36082784059,current_application_quality_run:36082784168,
+      it_admin_runtime_proof_run:36082783908,branch_hygiene_run:36082784042
     },
     production_proofs:{
-      production_pages_deploy_run:36081526239,production_live_resource_integrity_run:36081651628,
-      products_browser_proof_run:36081651602,products_route_proof_run:36081651629
+      production_pages_deploy_run:36082913970,production_live_resource_integrity_run:36082967263,
+      products_browser_proof_run:36082967302,products_route_proof_run:36082967286
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 260 follows only after exact Build 259 Production GREEN.'
+    next_build:'Build 261 follows only after exact Build 260 Production GREEN.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 259 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 260 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -102,7 +102,7 @@ function markdownReport(pack){
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Current Production baseline: Build 258 Historical Workflow Trigger Scope Tightening
+- Current Production baseline: Build 259 Reusable Exact-SHA Proof Composition
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -121,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:259,title:TITLE,authority:'release467-build259-reusable-exact-sha-proof-composition.json'},
+        current_closure_candidate:{release:467,build:260,title:TITLE,authority:'release467-build260-pull-request-matrix-fanout-reduction.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -141,15 +141,16 @@ export async function onRequestGet(context){
     workflow_trigger_inventory:{baseline_workflow_files:146,primary_trigger_union:140,pull_request:86,push:90,workflow_dispatch:89,workflow_run:5,issues:1,workflow_disabled:false,workflow_deleted:false,historical_scope_tightening:'COMPLETED_BUILD258_MANUAL_ONLY_242_257',next_build:259,future_queue_exhausted:false},
     workflow_trigger_scope_tightening:{target_build_span:'242-257',target_workflows:16,retirement_mode:'MANUAL_ONLY_PROVENANCE',candidate_workflow_files:148,pull_request:72,push:122,workflow_dispatch:123,workflow_run:5,net_pr_reduction:15,net_push_reduction:15,historical_gate_scripts_retained:true,workflow_files_deleted:false,exact_sha_promotion:'PRESERVE',next_build:259,future_queue_exhausted:false},
     exact_sha_proof_composition:{action:'.github/actions/release467-exact-sha-proof/action.yml',verifier:'scripts/release467_exact_sha_proof_composition.py',mode:'READ_ONLY_EXACT_SHA_NAMED_PROOF_COMPOSITION',development_named_proofs:5,production_named_proofs:5,build258_refactored:true,build259_uses_same_component:true,mutation_capability:'NONE',candidate_workflow_files:149,pull_request:73,push:123,workflow_dispatch:124,workflow_run:5,next_build:260,future_queue_exhausted:false},
+    pull_request_matrix_fanout_reduction:{target_workflows:38,target_builds:'206-241,258-259',mode:'REMOVE_PULL_REQUEST_TRIGGER_ONLY',candidate_workflow_files:150,pull_request:36,push:124,workflow_dispatch:125,workflow_run:5,expected_actual_pr_runs:35,system_gate_contract_coverage:true,push_retained:true,manual_retained:true,next_build:261,future_queue_exhausted:false},
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 258 is the exact last fully verified Development checkpoint.',
-      'Build 258 Production is GREEN on the identical tree 64dab693be764fb11a3cb9c36d06352a2f02eb1a.',
-      'Build 258 Development proofs: System 36081394811, Quality 36081394936, I.T. 36081394824, Hygiene 36081394851.',
-      'Build 258 Production proofs: Pages 36081526239, Live Resources 36081651628, Product Browser 36081651602, Product Route 36081651629.',
-      'Build 259 extracts exact-SHA Development/Production proof recovery into one read-only reusable composition while retaining every named proof requirement.',
-      'The queue continues with Build 260 for pull-request matrix fan-out reduction.'
+      'Build 259 is the exact last fully verified Development checkpoint.',
+      'Build 259 Production is GREEN on the identical tree e81b613e5a4b491927ab89c89800345025853b99.',
+      'Build 259 Development proofs: System 36082784059, Quality 36082784168, I.T. 36082783908, Hygiene 36082784042.',
+      'Build 259 Production proofs: Pages 36082913970, Live Resources 36082967263, Product Browser 36082967302, Product Route 36082967286.',
+      'Build 260 removes only redundant pull-request triggers from 38 historical proof workflows whose gate contracts remain covered by System Gate; push/manual evidence is retained.',
+      'The queue continues with Build 261 for Production proof dependency orchestration.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
