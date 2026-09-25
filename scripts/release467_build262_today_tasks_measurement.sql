@@ -38,50 +38,17 @@ WHERE COALESCE(review_status,'open') NOT IN ('resolved','ignored')
 ORDER BY datetime(created_at) DESC
 LIMIT 8;
 
-SELECT * FROM (
-  SELECT task_key, action_status, snooze_until, created_at
-  FROM today_task_actions
-  WHERE task_key='readiness'
-  ORDER BY created_at DESC, today_task_action_id DESC
-  LIMIT 1
+WITH task_keys(task_key) AS (
+  VALUES ('readiness'), ('custom_requests'), ('orders'), ('inventory'), ('accounting'), ('failed_api')
 )
-UNION ALL
-SELECT * FROM (
-  SELECT task_key, action_status, snooze_until, created_at
-  FROM today_task_actions
-  WHERE task_key='custom_requests'
-  ORDER BY created_at DESC, today_task_action_id DESC
-  LIMIT 1
-)
-UNION ALL
-SELECT * FROM (
-  SELECT task_key, action_status, snooze_until, created_at
-  FROM today_task_actions
-  WHERE task_key='orders'
-  ORDER BY created_at DESC, today_task_action_id DESC
-  LIMIT 1
-)
-UNION ALL
-SELECT * FROM (
-  SELECT task_key, action_status, snooze_until, created_at
-  FROM today_task_actions
-  WHERE task_key='inventory'
-  ORDER BY created_at DESC, today_task_action_id DESC
-  LIMIT 1
-)
-UNION ALL
-SELECT * FROM (
-  SELECT task_key, action_status, snooze_until, created_at
-  FROM today_task_actions
-  WHERE task_key='accounting'
-  ORDER BY created_at DESC, today_task_action_id DESC
-  LIMIT 1
-)
-UNION ALL
-SELECT * FROM (
-  SELECT task_key, action_status, snooze_until, created_at
-  FROM today_task_actions
-  WHERE task_key='failed_api'
-  ORDER BY created_at DESC, today_task_action_id DESC
-  LIMIT 1
-);
+SELECT a.task_key, a.action_status, a.snooze_until, a.created_at
+FROM task_keys k
+JOIN today_task_actions a
+  ON a.today_task_action_id = (
+    SELECT x.today_task_action_id
+    FROM today_task_actions x
+    WHERE x.task_key = k.task_key
+    ORDER BY x.created_at DESC, x.today_task_action_id DESC
+    LIMIT 1
+  )
+ORDER BY a.task_key;
