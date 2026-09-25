@@ -40,7 +40,7 @@ q(review.get('target_top_level_select_statements')==8 and review.get('statement_
 q(review.get('provider_rows_read_ceiling')==15000 and review.get('seller_daily_rows_read_ceiling')==10000 and review.get('aggregate_rows_read_ceiling')==25000,'Build 262 must retain Build 250 provider ceilings')
 q(review.get('production_d1_measurement') is False,'Build 262 Production D1 measurement must remain closed')
 
-for token in ('const pointLookup =','TASK_KEYS.map(() =>','UNION ALL',"bind(...TASK_KEYS)",'created_at DESC, today_task_action_id DESC','LIMIT 1'):
+for token in ('WITH task_keys(task_key) AS','VALUES (?), (?), (?), (?), (?), (?)',"bind(...TASK_KEYS)",'JOIN today_task_actions a','SELECT x.today_task_action_id','WHERE x.task_key = k.task_key','created_at DESC, x.today_task_action_id DESC','LIMIT 1'):
     q(token in service,f'Build 262 runtime batching missing {token}')
 q('Promise.all(TASK_KEYS.map' not in service,'Build 262 must remove six independent latest-action statements')
 q(len(re.findall(r"scalarRead\(db,\s*'[^']+'",service))==6,'Build 262 must preserve six task-count reads')
@@ -50,8 +50,8 @@ statements=sql_statements(probe)
 q(len(statements)==8,f'Build 262 provider probe must contain 8 top-level statements, got {len(statements)}')
 q(not re.search(r'(?im)^\s*(INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|REPLACE|PRAGMA|VACUUM|REINDEX)\b',probe),'Build 262 provider probe contains mutation/DDL')
 for key in ('readiness','custom_requests','orders','inventory','accounting','failed_api'):
-    q(f"task_key='{key}'" in probe,f'Build 262 provider probe missing latest-action key {key}')
-q(probe.count('UNION ALL')==5,'Build 262 latest-action probe must compose six branches into one statement')
+    q(f"('{key}')" in probe,f'Build 262 provider probe missing latest-action key {key}')
+q('WITH task_keys(task_key) AS' in probe and 'SELECT x.today_task_action_id' in probe,'Build 262 latest-action probe must use one indexed CTE statement')
 
 for token in (
   "development_sha: c4e57f8d4c47a709021fca65037b25f4e74d63e2",
