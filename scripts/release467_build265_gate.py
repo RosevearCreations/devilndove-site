@@ -57,9 +57,22 @@ q('production_sha: 9cf042afb9b7938f160df89b49b82376eb8f9291' in workflow,'Build 
 q('Release 467 Build 264 Refinement Outcomes Renewal III' in workflow,'Build 265 workflow missing predecessor proof name')
 q("run_current_contract('scripts/release467_build265_gate.py','Release 467 Build 265')" in sysgate,'System Gate must invoke Build 265')
 
-q(p.get('build')==265 and p.get('title')=='CAIP Private-Media Prerequisite Inventory','Current authority must identify Build 265')
-q(int(p.get('next_build') or 0)==266 and p.get('next_build_title')=='CAIP Multipart Recovery Integrity Review','Current authority must expose Build 266 successor')
-q((p.get('production_checkpoint') or {}).get('main_sha')=='9cf042afb9b7938f160df89b49b82376eb8f9291','Current Production checkpoint must identify Build 264 main')
+cur=int(p.get('build') or 0)
+q(cur>=265,'Current authority must retain Build 265 or a verified successor')
+if cur==265:
+    q(p.get('title')=='CAIP Private-Media Prerequisite Inventory','Current authority must identify Build 265 while current')
+    q(int(p.get('next_build') or 0)==266 and p.get('next_build_title')=='CAIP Multipart Recovery Integrity Review','Current authority must expose Build 266 successor while Build 265 is current')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='9cf042afb9b7938f160df89b49b82376eb8f9291','Build 265 candidate must retain Build 264 Production baseline')
+else:
+    q(a.get('state')=='PRODUCTION_GREEN','Build 266+ must retain Build 265 Production closure')
+    q((a.get('final_closure') or {}).get('dev_sha')=='1ac2f5f55228b3c8fbd86ea1e3d07cfb35edaa33','Build 265 final Development closure mismatch')
+    q((a.get('final_closure') or {}).get('tree_sha')=='d4f1da2902442d02e23becd06b5f05af30a86ac4','Build 265 final Development tree mismatch')
+    q((a.get('final_closure') or {}).get('dedicated_gate_run')==36151831255,'Build 265 final Development dedicated proof mismatch')
+    q((a.get('production_checkpoint') or {}).get('main_sha')=='28181d75fe8425244848ae5a06c86f54a446eb1b','Build 265 Production closure main mismatch')
+    q((a.get('production_checkpoint') or {}).get('tree_sha')=='d4f1da2902442d02e23becd06b5f05af30a86ac4','Build 265 Production closure tree mismatch')
+    q((a.get('production_checkpoint') or {}).get('build_specific_proof_run')==36152348667,'Build 265 Production dedicated proof mismatch')
+    q(int(p.get('next_build') or 0)>=267,'Build 266+ must advance beyond the Build 266 successor')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='28181d75fe8425244848ae5a06c86f54a446eb1b','Build 266+ current Production baseline must be Build 265 or later exact closure')
 q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md','Current authority roadmap mismatch')
 for k,vv in (a.get('safety') or {}).items(): q(vv is False,f'Build 265 safety drift: {k}')
 

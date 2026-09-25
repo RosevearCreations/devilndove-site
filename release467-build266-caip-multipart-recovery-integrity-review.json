@@ -1,0 +1,128 @@
+{
+  "release": 467,
+  "build": 266,
+  "title": "CAIP Multipart Recovery Integrity Review",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build266-caip-multipart-recovery-integrity-review",
+  "predecessor": {
+    "build": 265,
+    "title": "CAIP Private-Media Prerequisite Inventory",
+    "development_sha": "1ac2f5f55228b3c8fbd86ea1e3d07cfb35edaa33",
+    "development_tree_sha": "d4f1da2902442d02e23becd06b5f05af30a86ac4",
+    "development_proofs": {
+      "system_gate_run": 36151831375,
+      "current_application_quality_run": 36151831443,
+      "it_admin_runtime_proof_run": 36151831358,
+      "branch_hygiene_run": 36151831299,
+      "dedicated_gate_run": 36151831255
+    },
+    "production_main_sha": "28181d75fe8425244848ae5a06c86f54a446eb1b",
+    "production_tree_sha": "d4f1da2902442d02e23becd06b5f05af30a86ac4",
+    "production_proofs": {
+      "production_pages_deploy_run": 36152347971,
+      "production_live_resource_integrity_run": 36152439772,
+      "products_browser_proof_run": 36152439922,
+      "products_route_proof_run": 36152439676,
+      "build_specific_proof_run": 36152348667
+    },
+    "same_tree": true,
+    "state": "PRODUCTION_GREEN",
+    "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION"
+  },
+  "review": {
+    "scope": "STATIC_REPOSITORY_MULTIPART_RECOVERY_INTEGRITY",
+    "runtime_helper_copies_identical": true,
+    "interruption_resume": {
+      "server_completed_part_short_circuit": true,
+      "browser_completed_part_skip": true,
+      "d1_completed_part_etag_authority": true,
+      "persisted_byte_range_plan": true,
+      "conservative_parallel_parts": 2,
+      "full_browser_restart_may_require_reselection": true
+    },
+    "completion": {
+      "every_expected_part_required": true,
+      "every_uploaded_part_requires_etag": true,
+      "distinct_part_numbers_required": true,
+      "first_part_must_be_one": true,
+      "last_part_must_equal_expected_parts": true,
+      "uploaded_byte_sum_must_equal_file_size": true,
+      "r2_complete_blocked_when_plan_incomplete": true,
+      "r2_head_required_after_complete": true,
+      "r2_head_size_must_equal_expected_bytes": true,
+      "mismatched_finalized_binary_preserved": true,
+      "mismatched_finalized_binary_not_registered": true
+    },
+    "source_identity": {
+      "raw_namespace": "projects/{creative_project_id}/raw/*",
+      "generated_file_key_object_identity": true,
+      "successful_raw_original_immutable": true,
+      "uploaded_raw_abort_forbidden": true,
+      "integrity_failed_recovery_uses_new_object_identity": true,
+      "uncertain_r2_delete_authorized": false
+    },
+    "current_transport": "authenticated_same_origin_worker_streamed_multipart",
+    "preferred_future_transport": "direct_s3_presigned_multipart",
+    "preferred_future_transport_live": false,
+    "evidence_backed_gaps": [
+      "No retained live Production interruption/reconnect/reselection/resume proof currently closes the Build 241 acceptance gate.",
+      "Production CAIP_PRIVATE_MEDIA_BUCKET binding and non-public bucket exposure remain deployed operator evidence, not repository proof.",
+      "Static review cannot prove live Cloudflare R2 multipart state survives a real network/browser interruption.",
+      "No direct_s3_presigned_multipart transport is claimed live."
+    ],
+    "defect_repair_required_by_build266": false,
+    "classification": "STATIC_RECOVERY_INTEGRITY_COHERENT_PRODUCTION_INTERRUPTION_EVIDENCE_PENDING"
+  },
+  "decision": {
+    "build266_complete_when": "Static repository contracts prove fail-closed multipart recovery integrity and only evidence-backed deployed gaps remain; no Production media action is required.",
+    "next_build": 267,
+    "next_build_title": "CAIP Duplicate & Orphan Recovery Classification",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_upload": false,
+    "private_media_delete": false,
+    "uncertain_r2_delete": false,
+    "public_media_copy": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false
+  },
+  "implementation": {
+    "roadmap": "docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md",
+    "document": "docs/operations/RELEASE_467_BUILD_266_CAIP_MULTIPART_RECOVERY_INTEGRITY_REVIEW.md",
+    "dedicated_gate": "scripts/release467_build266_gate.py",
+    "workflow": ".github/workflows/release467-build266-caip-multipart-recovery-integrity-review.yml"
+  },
+  "starting_point": {
+    "development": {
+      "sha": "1ac2f5f55228b3c8fbd86ea1e3d07cfb35edaa33",
+      "tree": "d4f1da2902442d02e23becd06b5f05af30a86ac4",
+      "system_gate_run": 36151831375,
+      "quality_run": 36151831443,
+      "it_admin_runtime_run": 36151831358,
+      "repository_hygiene_run": 36151831299,
+      "dedicated_gate_run": 36151831255
+    },
+    "production": {
+      "main_sha": "28181d75fe8425244848ae5a06c86f54a446eb1b",
+      "tree_sha": "d4f1da2902442d02e23becd06b5f05af30a86ac4",
+      "production_pages_deploy_run": 36152347971,
+      "production_live_resource_integrity_run": 36152439772,
+      "products_browser_proof_run": 36152439922,
+      "products_route_proof_run": 36152439676,
+      "build_specific_proof_run": 36152348667,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}
