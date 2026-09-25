@@ -1,0 +1,89 @@
+{
+  "release": 467,
+  "build": 267,
+  "title": "CAIP Duplicate & Orphan Recovery Classification",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build267-caip-duplicate-orphan-recovery-classification",
+  "predecessor": {
+    "build": 266,
+    "title": "CAIP Multipart Recovery Integrity Review",
+    "development_sha": "c2f4a123b029853438260f06f0582a3902adf0c4",
+    "development_tree_sha": "6986989e2aa860a639ed8d6748a0c3143b32054d",
+    "development_proofs": {
+      "system_gate_run": 36156294854,
+      "current_application_quality_run": 36156294795,
+      "it_admin_runtime_proof_run": 36156294784,
+      "branch_hygiene_run": 36156294718,
+      "dedicated_gate_run": 36156294779
+    },
+    "production_main_sha": "1d4a1c204d19c4ecca16dd8dd6952b5107327db8",
+    "production_tree_sha": "6986989e2aa860a639ed8d6748a0c3143b32054d",
+    "production_proofs": {
+      "production_pages_deploy_run": 36156595435,
+      "production_live_resource_integrity_run": 36156682258,
+      "products_browser_proof_run": 36156682086,
+      "products_route_proof_run": 36156682143,
+      "build_specific_proof_run": 36156595028
+    },
+    "same_tree": true,
+    "state": "PRODUCTION_GREEN",
+    "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION"
+  },
+  "classification": {
+    "scope": "STATIC_METADATA_OBJECT_IDENTITY_CLASSIFICATION",
+    "helper_copies_identical_required": true,
+    "strong_duplicate_identity": "same_project + content_fingerprint + exact_size",
+    "legacy_duplicate_identity": "same_project + legacy_file_fingerprint + exact_size",
+    "binary_equivalence_requires_verified_equal_checksums": true,
+    "physical_cleanup_requires_reviewed_evidence": true,
+    "build267_executes_cleanup": false,
+    "uploaded_without_asset_is_not_safe_orphan": true,
+    "object_without_d1_is_candidate_not_delete_authority": true,
+    "integrity_failed_binary_preserved": true,
+    "recovery_lineage_preserved": true,
+    "completed_raw_original_immutable": true,
+    "uncertain_r2_delete_authorized": false,
+    "categories": [
+      {"key":"REGISTERED_CANONICAL_IMMUTABLE","action":"protect","physical_delete_authorized":false},
+      {"key":"STRONG_DUPLICATE_CANDIDATE_REVIEW","action":"review_duplicate","physical_delete_authorized":false},
+      {"key":"VERIFIED_REDUNDANT_COPY_REVIEWABLE","action":"review_existing_explicit_cleanup_authority_only","physical_delete_authorized":false},
+      {"key":"LEGACY_METADATA_DUPLICATE_CANDIDATE","action":"preserve_and_strengthen_evidence","physical_delete_authorized":false},
+      {"key":"CHECKSUM_CONFLICT_PRESERVE","action":"preserve_all_review_conflict","physical_delete_authorized":false},
+      {"key":"RESUMABLE_UNFINISHED_MULTIPART","action":"resume_existing_identity","physical_delete_authorized":false},
+      {"key":"INTEGRITY_FAILED_PRESERVE_NEW_IDENTITY_RECOVERY","action":"preserve_prior_binary_create_clean_recovery_identity","physical_delete_authorized":false},
+      {"key":"RECOVERY_DESCENDANT_ACTIVE","action":"retain_lineage","physical_delete_authorized":false},
+      {"key":"D1_COMPLETED_UNREGISTERED_BINARY_REVIEW","action":"review_registration_or_recovery","physical_delete_authorized":false},
+      {"key":"OBJECT_ONLY_ORPHAN_CANDIDATE","action":"preserve_pending_reconciliation","physical_delete_authorized":false},
+      {"key":"D1_ONLY_MISSING_OBJECT_RECOVERY","action":"preserve_metadata_recover_with_new_identity","physical_delete_authorized":false},
+      {"key":"ARCHIVED_OR_ABORTED_HISTORICAL","action":"retain_history_no_physical_delete_inference","physical_delete_authorized":false},
+      {"key":"UNCLASSIFIED_REVIEW_REQUIRED","action":"preserve_fail_closed","physical_delete_authorized":false}
+    ],
+    "classification": "DUPLICATE_ORPHAN_RECOVERY_CLASSES_DEFINED_CLEANUP_NOT_AUTHORIZED"
+  },
+  "decision": {
+    "next_build": 268,
+    "next_build_title": "CAIP Private-Media Recovery Hardening Closure",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_upload": false,
+    "private_media_delete": false,
+    "uncertain_r2_delete": false,
+    "duplicate_cleanup_execution": false,
+    "orphan_cleanup_execution": false,
+    "public_media_copy": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false
+  }
+}
