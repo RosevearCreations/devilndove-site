@@ -1,7 +1,5 @@
 name: Release 467 Build 227 Manufacturing Adoption Command Centre
 on:
-  pull_request:
-    branches: [dev, main]
   push:
     branches: [dev, main]
   workflow_dispatch:
