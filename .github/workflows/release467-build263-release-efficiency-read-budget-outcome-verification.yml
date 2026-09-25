@@ -1,0 +1,182 @@
+name: Release 467 Build 263 Release Efficiency & Read-Budget Outcome Verification
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build263:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Recover exact Build 262 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: dddbbb4c7fe7dfff8f59a4d54048e37a33fcf764
+          production_sha: e65d9122252e9832a9e29027b13af163cbb30914
+          build_proof_name: Release 467 Build 262 Operations Today-Tasks Read Fan-Out Review
+          report_path: /tmp/build263-predecessor-exact-sha-proof.json
+      - name: Measure Builds 257-262 exact accepted-head outcomes
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/release467_build263_outcome_measurement.py /tmp/build263-release-efficiency-outcomes.json
+      - name: Build 263 source contract
+        run: python scripts/release467_build263_gate.py
+      - name: Retain release-efficiency and read-path contracts
+        run: |
+          python scripts/release467_build262_gate.py
+          python scripts/release467_build261_gate.py
+          python scripts/release467_build260_gate.py
+          python scripts/release467_build259_gate.py
+          python scripts/release467_build258_gate.py
+          python scripts/release467_build257_gate.py
+          python scripts/release467_build256_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build263-release-efficiency-outcomes-${{ github.sha }}
+          path: |
+            /tmp/build263-predecessor-exact-sha-proof.json
+            /tmp/build263-release-efficiency-outcomes.json
+          if-no-files-found: error
+          retention-days: 30
+
+  development-provider-read-budget:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+      EXPECTED_TODAY_STATEMENTS: 8
+      TODAY_TASKS_ROWS_READ_CEILING: 15000
+      SELLER_DAILY_ROWS_READ_CEILING: 10000
+      AGGREGATE_ROWS_READ_CEILING: 25000
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prove exact Development source and D1 identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test -n "${CLOUDFLARE_API_TOKEN}"
+          grep -q '^name = "devilndove-site"$' wrangler.toml
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'devilndove-prod' wrangler.toml
+          npx --yes wrangler@4.128.0 d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/build263-d1-info.json
+          python - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/build263-d1-info.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          rows=list(walk(data))
+          ids={str(r.get('uuid') or r.get('id') or '') for r in rows}
+          names={str(r.get('name') or '') for r in rows}
+          assert os.environ['EXPECTED_DEV_D1_DATABASE_ID'] in ids,(ids,names)
+          assert os.environ['DEV_D1_DATABASE_NAME'] in names,(ids,names)
+          print('EXACT DEVELOPMENT D1 IDENTITY: PASS')
+          PY
+      - name: Re-measure Today Tasks provider rows_read and statement fan-out
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$(grep -v '^[[:space:]]*--' scripts/release467_build262_today_tasks_measurement.sql)" > /tmp/build263-today.json
+          python - <<'PY'
+          import json,os
+          raw=json.load(open('/tmp/build263-today.json'));reads=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None: reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(raw)
+          expected=int(os.environ['EXPECTED_TODAY_STATEMENTS']);ceiling=int(os.environ['TODAY_TASKS_ROWS_READ_CEILING'])
+          assert len(reads)==expected,('Today Tasks statement fan-out mismatch',len(reads),expected)
+          total=sum(reads);assert total<=ceiling,('Today Tasks rows_read budget exceeded',total,ceiling)
+          open('/tmp/build263-today-rows.txt','w').write(str(total));open('/tmp/build263-today-statements.txt','w').write(str(len(reads)))
+          print('TODAY_TASKS_PROVIDER_STATEMENTS=',len(reads),'EXPECTED=',expected)
+          print('TODAY_TASKS_PROVIDER_ROWS_READ=',total,'CEILING=',ceiling)
+          PY
+      - name: Re-measure Seller Daily provider rows_read
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$(grep -v '^[[:space:]]*--' scripts/release467_build250_seller_daily_measurement.sql)" > /tmp/build263-seller.json
+          python - <<'PY'
+          import json,os
+          raw=json.load(open('/tmp/build263-seller.json'));reads=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None: reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(raw)
+          ceiling=int(os.environ['SELLER_DAILY_ROWS_READ_CEILING']);total=sum(reads)
+          assert reads and total<=ceiling,('Seller Daily rows_read budget exceeded',total,ceiling)
+          open('/tmp/build263-seller-rows.txt','w').write(str(total))
+          print('SELLER_DAILY_PROVIDER_ROWS_READ=',total,'CEILING=',ceiling)
+          PY
+      - name: Enforce aggregate read budget and write sanitized evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os
+          today=int(open('/tmp/build263-today-rows.txt').read());statements=int(open('/tmp/build263-today-statements.txt').read());seller=int(open('/tmp/build263-seller-rows.txt').read())
+          aggregate=today+seller;ceiling=int(os.environ['AGGREGATE_ROWS_READ_CEILING']);assert aggregate<=ceiling,(aggregate,ceiling)
+          evidence={'release':467,'build':263,'title':'Release Efficiency & Read-Budget Outcome Verification','exact_development_sha':os.environ.get('GITHUB_SHA',''),
+          'today_tasks_statement_count':statements,'today_tasks_provider_rows_read':today,'today_tasks_ceiling':int(os.environ['TODAY_TASKS_ROWS_READ_CEILING']),
+          'seller_daily_provider_rows_read':seller,'seller_daily_ceiling':int(os.environ['SELLER_DAILY_ROWS_READ_CEILING']),
+          'aggregate_provider_rows_read':aggregate,'aggregate_ceiling':ceiling,'d1_mutation':False,'r2_mutation':False,'production_d1_contact':False,'credentials_emitted':False}
+          open('/tmp/build263-provider-read-budget.json','w').write(json.dumps(evidence,indent=2,sort_keys=True)+'\n')
+          print('AGGREGATE_PROVIDER_ROWS_READ=',aggregate,'CEILING=',ceiling)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build263-provider-read-budget-${{ github.sha }}
+          path: /tmp/build263-provider-read-budget.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Boundary
+        if: always()
+        run: |
+          echo 'D1 target: canonical Development devilndove-dev only'
+          echo 'D1 mutation: ZERO'
+          echo 'R2 mutation: ZERO'
+          echo 'PRODUCTION D1 CONTACT: ZERO'
+          echo 'Provider execution/publication: ZERO'
