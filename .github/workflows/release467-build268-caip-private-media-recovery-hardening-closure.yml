@@ -1,0 +1,38 @@
+name: Release 467 Build 268 CAIP Private-Media Recovery Hardening Closure
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build268:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 267 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: a3fe5cc3848b5f2f6bb3dfca26e0600bdd9d772c
+          production_sha: d60e1ac4d29ebc745643dda4297c8946ddae37fb
+          build_proof_name: Release 467 Build 267 CAIP Duplicate & Orphan Recovery Classification
+          report_path: /tmp/build268-predecessor-exact-sha-proof.json
+      - name: Build 268 recovery hardening closure gate
+        run: python scripts/release467_build268_gate.py
+      - name: Retain Build 267 predecessor contract
+        run: python scripts/release467_build267_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build268-recovery-hardening-closure-evidence-${{ github.sha }}
+          path: /tmp/build268-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30
