@@ -12,32 +12,41 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 262 candidate
+## Current Release 467 restart authority — Build 263 candidate
 
-Build 261 **Production Proof Dependency Orchestration** is the exact verified predecessor:
+Build 262 **Operations Today-Tasks Read Fan-Out Review** is the exact verified predecessor:
 
-- Development SHA: `c4e57f8d4c47a709021fca65037b25f4e74d63e2`
-- Shared Development/Production tree: `a442d160e1619e4b362de2bbda509ab25c310290`
-- Development proofs: System `36087874819`, Quality `36087874854`, I.T. `36087874772`, Hygiene `36087874784`
-- Build 261 dedicated Development proof: `36087874900`
-- Production main: `f90944f80ec193610d3b87312487799ec425d983`
-- Production proofs: Pages `36088094461`, Live Resources `36088159346`, Product Browser `36088159392`, Product Route `36088159367`
-- Build 261 Production-specific proof: `36088094406`
+- Development SHA: `dddbbb4c7fe7dfff8f59a4d54048e37a33fcf764`
+- Shared Development/Production tree: `931cf56eff07247f34eec69d753fa908027b72bf`
+- Development proofs: System `36132080145`, Quality `36132080034`, I.T. `36132080001`, Hygiene `36132080008`
+- Build 262 dedicated Development proof: `36132080219`
+- Final Build 262 Development provider proof: Today Tasks **8 statements / 1,133 rows**, Seller Daily **1,046 rows**, aggregate **2,179 rows**, Production D1 contact **ZERO**
+- Production main: `e65d9122252e9832a9e29027b13af163cbb30914`
+- Production proofs: Pages `36132870627`, Live Resources `36133110145`, Product Browser `36133110183`, Product Route `36133110049`
+- Build 262 Production-specific proof: `36132870623`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 262 **Operations Today-Tasks Read Fan-Out Review** is the active candidate. The Build 250 exact Development measurement remains the evidence baseline: **13 top-level Today Tasks SELECT statements**, **1,132 provider rows read**, Today Tasks hard ceiling **15,000**, Seller Daily ceiling **10,000**, and aggregate ceiling **25,000**.
+Build 263 **Release Efficiency & Read-Budget Outcome Verification** is the active candidate. It verifies the measured result of Builds 257–262 without authorizing another optimization.
 
-The bounded implementation changes only the six latest-action point lookups. The same six task keys and the same `created_at DESC, today_task_action_id DESC LIMIT 1` semantics are composed into one read-only D1 statement. The six task-count queries and runtime-incident detail query are unchanged.
+Release-efficiency evidence:
+- Build 256 baseline: **870 runs / 14 accepted heads = 62.14 runs/head**
+- Builds 257–262: **596 runs / 12 accepted heads = 49.67 runs/head**
+- normalized accepted-head reduction: **20.08%**
+- Build 255 closure: **134 runs**
+- Build 262 closure: **68 runs**, a **49.25%** reduction
+- required named Development and Production proofs remain GREEN for every accepted Build 257–262 pair
+- every accepted Development/Production pair retains exact-tree continuity
+- the **9 historical failures** in the accepted-head sample are all the noncanonical **Release 467 Build 155 Products Development Browser Proof** firing on Production heads; this remains a Build 264 renewal residual rather than a current required-proof failure.
 
-The target is therefore **13 → 8 top-level provider statements**, a reduction of **5**, with no provider ceiling increase. Exact Development provider measurement must prove **8** Today Tasks statement metadata rows and stay under all existing ceilings before Production promotion.
+The current pre-Build263 workflow surface is **152 files / 38 pull-request / 126 push / 134 manual-dispatch / 5 workflow-run**. Build 263 adds its own proof workflow, so candidate inventory must be **153 / 39 / 127 / 135 / 5**. The five workflow-run chains remain retained.
 
-Provider measurement is Development-only against `devilndove-dev`. Production D1 contact is **ZERO**. No schema/request-time DDL, D1/R2 business mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy, branch-protection mutation or secret capture is introduced.
+Read-budget verification remains Development-only against `devilndove-dev`. Build 263 must re-prove exactly **8 Today Tasks statements** and remain under the unchanged **15,000 / 10,000 / 25,000** provider-row ceilings. Production D1 contact is **ZERO**.
 
-The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 262, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
+The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 263, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
 
-Build 262 remains blocked from Production until its exact Development SHA passes the current proof set and Development provider read-budget measurement, is merged to `dev`, and the identical Development tree is promoted to `main`.
+No schema/request-time DDL, D1/R2 business mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy, workflow deletion, branch-protection mutation or secret capture is introduced.
 
-The future queue remains open. The next bounded release is **Build 263 — Release Efficiency & Read-Budget Outcome Verification**.
+The future queue remains open. The next bounded release is **Build 264 — Refinement Outcomes Renewal III**.
 
 ## Retained historical provenance — Build 171
 
