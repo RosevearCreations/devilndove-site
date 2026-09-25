@@ -1,0 +1,128 @@
+{
+  "release": 467,
+  "build": 259,
+  "title": "Reusable Exact-SHA Proof Composition",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build259-reusable-exact-sha-proof-composition",
+  "predecessor": {
+    "build": 258,
+    "title": "Historical Workflow Trigger Scope Tightening",
+    "development_sha": "3675554c0c2ce64923ec3e1763a243e03d103f1a",
+    "development_tree_sha": "64dab693be764fb11a3cb9c36d06352a2f02eb1a",
+    "candidate_pr": 353,
+    "candidate_pr_head_sha": "65d85b833ad1ace2c0f686f559399f92c3991a67",
+    "production_main_sha": "436c4e724efc736492f9772ffea7d5141feb3416",
+    "production_tree_sha": "64dab693be764fb11a3cb9c36d06352a2f02eb1a",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36081394811,
+      "current_application_quality_run": 36081394936,
+      "it_admin_runtime_proof_run": 36081394824,
+      "branch_hygiene_run": 36081394851,
+      "build_specific_proof_run": 36081394877
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36081526239,
+      "production_live_resource_integrity_run": 36081651628,
+      "products_browser_proof_run": 36081651602,
+      "products_route_proof_run": 36081651629,
+      "build_specific_proof_run": 36081526248
+    }
+  },
+  "composition": {
+    "action": ".github/actions/release467-exact-sha-proof/action.yml",
+    "verifier": "scripts/release467_exact_sha_proof_composition.py",
+    "mode": "READ_ONLY_EXACT_SHA_NAMED_PROOF_COMPOSITION",
+    "development_required": [
+      "System Gate",
+      "Current Application Quality Proof",
+      "I.T. Admin Runtime Proof",
+      "Repository Branch Hygiene",
+      "build-specific proof"
+    ],
+    "production_required": [
+      "Production Pages Deploy",
+      "Production Live Resource Integrity Proof",
+      "Release 467 Build 155 Products Production Browser Proof",
+      "Release 467 Build 154 Products Route Production Proof",
+      "build-specific proof"
+    ],
+    "exact_head_sha_filter": true,
+    "completed_success_required": true,
+    "highest_successful_attempt_selected": true,
+    "missing_or_non_green_fails_closed": true,
+    "mutation_capability": "NONE",
+    "build258_current_workflow_refactored": true,
+    "build259_workflow_uses_same_component": true,
+    "historical_manual_only_builds_242_257_rewritten": false
+  },
+  "workflow_surface": {
+    "build258_scanner": {
+      "workflow_files": 148,
+      "pull_request": 72,
+      "push": 122,
+      "workflow_dispatch": 123,
+      "workflow_run": 5
+    },
+    "expected_build259_candidate": {
+      "workflow_files": 149,
+      "pull_request": 73,
+      "push": 123,
+      "workflow_dispatch": 124,
+      "workflow_run": 5
+    },
+    "trigger_retirement_change": false
+  },
+  "implementation": {
+    "dedicated_gate": "scripts/release467_build259_gate.py",
+    "workflow": ".github/workflows/release467-build259-reusable-exact-sha-proof-composition.yml",
+    "document": "docs/operations/RELEASE_467_BUILD_259_REUSABLE_EXACT_SHA_PROOF_COMPOSITION.md"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "workflow_delete": false,
+    "branch_protection_change": false,
+    "exact_sha_requirement_relaxed": false,
+    "named_proof_requirement_relaxed": false
+  },
+  "acceptance": {
+    "next_build": 260,
+    "next_build_title": "Pull-Request Matrix Fan-Out Reduction",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "3675554c0c2ce64923ec3e1763a243e03d103f1a",
+      "tree": "64dab693be764fb11a3cb9c36d06352a2f02eb1a",
+      "system_gate_run": 36081394811,
+      "quality_run": 36081394936,
+      "it_admin_runtime_run": 36081394824,
+      "repository_hygiene_run": 36081394851,
+      "build_specific_proof_run": 36081394877,
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "436c4e724efc736492f9772ffea7d5141feb3416",
+      "tree_sha": "64dab693be764fb11a3cb9c36d06352a2f02eb1a",
+      "production_pages_deploy_run": 36081526239,
+      "production_live_resource_integrity_run": 36081651628,
+      "products_browser_proof_run": 36081651602,
+      "products_route_proof_run": 36081651629,
+      "build_specific_proof_run": 36081526248,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
+  }
+}

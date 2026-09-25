@@ -2,7 +2,7 @@
   "release": 467,
   "build": 258,
   "title": "Historical Workflow Trigger Scope Tightening",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build258-historical-workflow-trigger-scope-tightening",
   "predecessor": {
     "build": 257,
@@ -146,5 +146,32 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_development": true
     }
+  },
+  "accepted_dev_sha": "3675554c0c2ce64923ec3e1763a243e03d103f1a",
+  "accepted_dev_tree_sha": "64dab693be764fb11a3cb9c36d06352a2f02eb1a",
+  "final_closure": {
+    "dev_sha": "3675554c0c2ce64923ec3e1763a243e03d103f1a",
+    "tree_sha": "64dab693be764fb11a3cb9c36d06352a2f02eb1a",
+    "proofs": {
+      "system_gate_run": 36081394811,
+      "current_application_quality_run": 36081394936,
+      "it_admin_runtime_proof_run": 36081394824,
+      "branch_hygiene_run": 36081394851
+    },
+    "dedicated_gate_run": 36081394877,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 259,
+    "recorded_by": "Build 259 successor ingestion; Build 258 did not self-record later proof"
+  },
+  "production_checkpoint": {
+    "main_sha": "436c4e724efc736492f9772ffea7d5141feb3416",
+    "tree_sha": "64dab693be764fb11a3cb9c36d06352a2f02eb1a",
+    "production_pages_deploy_run": 36081526239,
+    "production_live_resource_integrity_run": 36081651628,
+    "products_browser_proof_run": 36081651602,
+    "products_route_proof_run": 36081651629,
+    "build_specific_proof_run": 36081526248,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
