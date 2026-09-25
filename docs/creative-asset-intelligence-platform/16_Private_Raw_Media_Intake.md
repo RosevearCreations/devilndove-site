@@ -3,7 +3,7 @@
 **Implementation boundary:** Build 269 (Build 241 foundation, Builds 265–268 recovery hardening)  
 **Authority:** This document rewrites the Rosie Dazzlers DAIP large-media design for Devil n Dove CAIP.  
 **Primary operating route:** `/admin/creative-assets/`  
-**Schema:** `database_build241_caip_large_media_intake.sql`
+**Schema:** Build 241 private-media foundation plus `database_build269_caip_social_project_dedupe_integrity.sql` for duplicate-safe fingerprint/recovery columns
 
 ## Purpose
 

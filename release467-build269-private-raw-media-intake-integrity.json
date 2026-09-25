@@ -1,0 +1,139 @@
+{
+  "release": 467,
+  "build": 269,
+  "title": "Private Raw Media Intake Integrity",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build269-private-raw-media-intake-integrity",
+  "predecessor": {
+    "build": 268,
+    "title": "CAIP Private-Media Recovery Hardening Closure",
+    "development_sha": "139310232fb103cb2c843dc4d409ecdb7d4bb701",
+    "production_main_sha": "44da8087958eb0c64df3de892ca8628293a96231",
+    "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
+    "exact_tree_continuity_required": true,
+    "state": "PRODUCTION_GREEN",
+    "development_tree_sha": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
+    "production_tree_sha": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36176223381,
+      "current_application_quality_run": 36176223395,
+      "it_admin_runtime_proof_run": 36176223268,
+      "branch_hygiene_run": 36176223158,
+      "dedicated_gate_run": 36176223314
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36176423497,
+      "production_live_resource_integrity_run": 36176498083,
+      "products_browser_proof_run": 36176498119,
+      "products_route_proof_run": 36176498113,
+      "build_specific_proof_run": 36176423468
+    }
+  },
+  "activation": {
+    "standalone_migration": "database_build269_caip_social_project_dedupe_integrity.sql",
+    "aggregate_schema": "database_schema.sql",
+    "duplicate_safe_columns": [
+      "content_fingerprint",
+      "content_fingerprint_version",
+      "recovery_of_file_id"
+    ],
+    "indexes": [
+      "idx_caip_media_files_content_fingerprint",
+      "idx_caip_media_files_recovery"
+    ],
+    "migration_mode": "ADDITIVE_OPERATOR_CONTROLLED_NO_REQUEST_TIME_DDL",
+    "content_fingerprint_version": "sample_sha256_v1",
+    "browser_sample_regions": [
+      "start",
+      "middle",
+      "end"
+    ],
+    "server_side_same_project_reclassification": true,
+    "renamed_file_duplicate_prevention": true,
+    "legacy_metadata_fingerprint_authoritative": false,
+    "clean_recovery_new_identity": true,
+    "recovery_lineage_field": "recovery_of_file_id",
+    "completed_raw_original_immutable": true,
+    "exact_multipart_part_count_required": true,
+    "exact_multipart_byte_sum_required": true,
+    "all_part_etags_required": true,
+    "r2_head_exact_size_required": true,
+    "bounded_part_plan": true,
+    "bounded_fingerprint_backfill": true,
+    "fingerprint_backfill_max_rows_per_request": 20,
+    "classification": "PRIVATE_RAW_MEDIA_INTAKE_INTEGRITY_SOURCE_READY_DEPLOYED_ACCEPTANCE_EVIDENCE_PENDING"
+  },
+  "fail_closed_readiness": {
+    "required_build241_private_media_tables": true,
+    "required_build269_duplicate_safe_columns": true,
+    "required_private_r2_binding": "CAIP_PRIVATE_MEDIA_BUCKET",
+    "binary_transfer_before_readiness": false,
+    "binary_transfer_before_content_classification": false,
+    "missing_prerequisite_action": "BLOCK_SELECT_AND_UPLOAD_AS_OPERATOR_CONFIGURATION_STATE"
+  },
+  "integrity_markers": {
+    "multipart_incomplete": "[CAIP_MULTIPART_INCOMPLETE]",
+    "r2_size_mismatch": "[CAIP_R2_SIZE_MISMATCH]",
+    "uncertain_finalized_binary_preserved": true,
+    "uncertain_r2_delete_authorized": false,
+    "sample_fingerprint_physical_delete_authority": false
+  },
+  "unresolved_deployed_acceptance": [
+    "production_private_bucket_binding_and_non_public_exposure",
+    "real_production_interruption_reconnect_reselection_resume",
+    "real_r2_multipart_survival_and_exact_head_size",
+    "authenticated_privacy_phone_desktop_review",
+    "startup_operational_acceptance"
+  ],
+  "safety": {
+    "schema_migration_artifact_added": true,
+    "production_schema_auto_apply": false,
+    "request_time_schema_mutation": false,
+    "production_d1_business_data_mutation": false,
+    "release_process_r2_mutation": false,
+    "release_process_private_media_upload": false,
+    "private_media_delete": false,
+    "uncertain_r2_delete": false,
+    "duplicate_cleanup_execution": false,
+    "orphan_cleanup_execution": false,
+    "public_media_copy": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false
+  },
+  "decision": {
+    "build269_complete_when": "Source/runtime duplicate-safe intake integrity, migration artifact alignment and exact predecessor proof are GREEN without fabricating live Production private-media acceptance.",
+    "next_build": 270,
+    "next_build_title": "Strong-Fingerprint Backfill & Recovery Reconciliation",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "139310232fb103cb2c843dc4d409ecdb7d4bb701",
+      "tree": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
+      "system_gate_run": 36176223381,
+      "quality_run": 36176223395,
+      "it_admin_runtime_run": 36176223268,
+      "repository_hygiene_run": 36176223158,
+      "dedicated_gate_run": 36176223314,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "44da8087958eb0c64df3de892ca8628293a96231",
+      "tree_sha": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
+      "production_pages_deploy_run": 36176423497,
+      "production_live_resource_integrity_run": 36176498083,
+      "products_browser_proof_run": 36176498119,
+      "products_route_proof_run": 36176498113,
+      "build_specific_proof_run": 36176423468,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}

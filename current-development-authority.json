@@ -1,33 +1,33 @@
 {
   "release": 467,
-  "build": 268,
-  "title": "CAIP Private-Media Recovery Hardening Closure",
+  "build": 269,
+  "title": "Private Raw Media Intake Integrity",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 267,
-      "title": "CAIP Duplicate & Orphan Recovery Classification",
-      "authority": "release467-build267-caip-duplicate-orphan-recovery-classification.json",
-      "dev_sha": "a3fe5cc3848b5f2f6bb3dfca26e0600bdd9d772c",
-      "tree_sha": "d647cb64914132631047c5a9276b976920ee556f",
-      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
-      "business_exit": "OWNER_AUTHORIZED_CAIP_PRIVATE_MEDIA_RECOVERY_HARDENING_CLOSURE",
-      "proofs": {
-        "system_gate_run": 36173340287,
-        "current_application_quality_run": 36173340863,
-        "it_admin_runtime_proof_run": 36173340931,
-        "branch_hygiene_run": 36173340694
-      },
-      "dedicated_gate_run": 36173340842
-    },
-    "current_closure_candidate": {
-      "release": 467,
       "build": 268,
       "title": "CAIP Private-Media Recovery Hardening Closure",
       "authority": "release467-build268-caip-private-media-recovery-hardening-closure.json",
+      "dev_sha": "139310232fb103cb2c843dc4d409ecdb7d4bb701",
+      "tree_sha": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
+      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+      "business_exit": "OWNER_AUTHORIZED_PRIVATE_RAW_MEDIA_INTAKE_INTEGRITY",
+      "proofs": {
+        "system_gate_run": 36176223381,
+        "current_application_quality_run": 36176223395,
+        "it_admin_runtime_proof_run": 36176223268,
+        "branch_hygiene_run": 36176223158
+      },
+      "dedicated_gate_run": 36176223314
+    },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 269,
+      "title": "Private Raw Media Intake Integrity",
+      "authority": "release467-build269-private-raw-media-intake-integrity.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -38,22 +38,23 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 267,
-    "title": "CAIP Duplicate & Orphan Recovery Classification",
-    "authority": "release467-build267-caip-duplicate-orphan-recovery-classification.json",
-    "main_sha": "d60e1ac4d29ebc745643dda4297c8946ddae37fb",
-    "tree_sha": "d647cb64914132631047c5a9276b976920ee556f",
+    "build": 268,
+    "title": "CAIP Private-Media Recovery Hardening Closure",
+    "authority": "release467-build268-caip-private-media-recovery-hardening-closure.json",
+    "main_sha": "44da8087958eb0c64df3de892ca8628293a96231",
+    "tree_sha": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
     "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
     "role": "CURRENT_PRODUCTION_BASELINE",
-    "production_pages_deploy_run": 36173617921,
-    "production_live_resource_integrity_run": 36173697814,
-    "products_browser_proof_run": 36173699875,
-    "products_route_proof_run": 36173697811,
-    "build_specific_proof_run": 36173617864
+    "production_pages_deploy_run": 36176423497,
+    "production_live_resource_integrity_run": 36176498083,
+    "products_browser_proof_run": 36176498119,
+    "products_route_proof_run": 36176498113,
+    "build_specific_proof_run": 36176423468
   },
   "current_release_authorities": [
+    "release467-build269-private-raw-media-intake-integrity.json",
     "release467-build268-caip-private-media-recovery-hardening-closure.json",
     "release467-build267-caip-duplicate-orphan-recovery-classification.json",
     "release467-build266-caip-multipart-recovery-integrity-review.json",
@@ -163,10 +164,10 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md",
-  "next_build": 269,
-  "next_build_state": "AUTHORIZED_IN_PROGRESS",
-  "next_build_title": "Private Raw Media Intake Integrity",
-  "promotion_state": "BUILD268_DEVELOPMENT_CANDIDATE_NOT_YET_PRODUCTION",
+  "next_build": 270,
+  "next_build_state": "AUTHORIZED_AFTER_BUILD269_GREEN",
+  "next_build_title": "Strong-Fingerprint Backfill & Recovery Reconciliation",
+  "promotion_state": "BUILD269_DEVELOPMENT_CANDIDATE_OVER_EXACT_BUILD268_PRODUCTION_GREEN",
   "successor_scope_state": "CAIP_RECOVERY_CONTINUITY_ROADMAP_ACTIVE",
   "measured_closure": {
     "source_build": 232,
@@ -192,20 +193,20 @@
     "last_build": 275,
     "state": "EVIDENCE_DRIVEN_CAIP_RECOVERY_CONTINUITY_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 269,
-    "next_build_title": "Private Raw Media Intake Integrity",
+    "next_build": 270,
+    "next_build_title": "Strong-Fingerprint Backfill & Recovery Reconciliation",
     "roadmap": "docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md",
     "reactivation_source": "BUILD264_REFINEMENT_OUTCOMES_RENEWAL_III"
   },
   "canonical_data_migration_authorized": false,
-  "canonical_data_migration_scope": "NONE_BUILD268_CAIP_PRIVATE_MEDIA_RECOVERY_HARDENING_CLOSURE",
-  "accepted_dev_sha": "a3fe5cc3848b5f2f6bb3dfca26e0600bdd9d772c",
-  "accepted_dev_tree_sha": "d647cb64914132631047c5a9276b976920ee556f",
+  "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
+  "accepted_dev_sha": "139310232fb103cb2c843dc4d409ecdb7d4bb701",
+  "accepted_dev_tree_sha": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
   "acceptance": {
-    "system_gate_run": 36173340287,
-    "current_application_quality_run": 36173340863,
-    "it_admin_runtime_proof_run": 36173340931,
-    "branch_hygiene_run": 36173340694
+    "system_gate_run": 36176223381,
+    "current_application_quality_run": 36176223395,
+    "it_admin_runtime_proof_run": 36176223268,
+    "branch_hygiene_run": 36176223158
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -510,5 +511,25 @@
     ],
     "destructive_cleanup_authorized": false,
     "production_media_mutation_authorized": false
+  },
+  "caip_private_raw_media_intake_integrity": {
+    "source_build": 268,
+    "standalone_migration": "database_build269_caip_social_project_dedupe_integrity.sql",
+    "standalone_migration_present": true,
+    "aggregate_schema_aligned": true,
+    "request_time_ddl": false,
+    "content_fingerprint_version": "sample_sha256_v1",
+    "renamed_file_duplicate_prevention": true,
+    "server_side_reclassification": true,
+    "clean_recovery_new_identity": true,
+    "recovery_lineage": "recovery_of_file_id",
+    "exact_multipart_completion": true,
+    "exact_r2_head_size": true,
+    "bounded_fingerprint_backfill_max_rows": 20,
+    "completed_raw_original_immutable": true,
+    "deployed_acceptance": "EVIDENCE_DEPENDENT_FAIL_CLOSED",
+    "classification": "PRIVATE_RAW_MEDIA_INTAKE_INTEGRITY_SOURCE_READY_DEPLOYED_ACCEPTANCE_EVIDENCE_PENDING",
+    "next_build": 270,
+    "future_queue_exhausted": false
   }
 }

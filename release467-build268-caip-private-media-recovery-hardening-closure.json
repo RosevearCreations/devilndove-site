@@ -2,7 +2,7 @@
   "release": 467,
   "build": 268,
   "title": "CAIP Private-Media Recovery Hardening Closure",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build268-caip-private-media-recovery-hardening-closure",
   "predecessor": {
     "build": 267,
@@ -117,5 +117,33 @@
       "build_specific_proof_run": 36173617864,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "139310232fb103cb2c843dc4d409ecdb7d4bb701",
+    "tree_sha": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
+    "proofs": {
+      "system_gate_run": 36176223381,
+      "current_application_quality_run": 36176223395,
+      "it_admin_runtime_proof_run": 36176223268,
+      "branch_hygiene_run": 36176223158
+    },
+    "dedicated_gate_run": 36176223314,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "ingested_by_build": 269,
+    "recorded_by": "Build 269 startup ingestion; not self-recorded by Build 268"
+  },
+  "production_checkpoint": {
+    "main_sha": "44da8087958eb0c64df3de892ca8628293a96231",
+    "tree_sha": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
+    "production_pages_deploy_run": 36176423497,
+    "production_live_resource_integrity_run": 36176498083,
+    "products_browser_proof_run": 36176498119,
+    "products_route_proof_run": 36176498113,
+    "build_specific_proof_run": 36176423468,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "ingested_by_build": 269,
+    "recorded_by": "Build 269 startup ingestion; not self-recorded by Build 268"
   }
 }
