@@ -1,0 +1,128 @@
+{
+  "release": 467,
+  "build": 260,
+  "title": "Pull-Request Matrix Fan-Out Reduction",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build260-pull-request-matrix-fanout-reduction",
+  "predecessor": {
+    "build": 259,
+    "title": "Reusable Exact-SHA Proof Composition",
+    "development_sha": "270eea921559b2439459180998cc367b6fe7c9bb",
+    "development_tree_sha": "e81b613e5a4b491927ab89c89800345025853b99",
+    "candidate_pr": 354,
+    "candidate_pr_head_sha": "bfe4fd44f4f13136c1d1449a1ff89bafdfdb5e00",
+    "production_main_sha": "af294ad20ec26222ec0f7ccdb856f39de9fbbd2e",
+    "production_tree_sha": "e81b613e5a4b491927ab89c89800345025853b99",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36082784059,
+      "current_application_quality_run": 36082784168,
+      "it_admin_runtime_proof_run": 36082783908,
+      "branch_hygiene_run": 36082784042,
+      "build_specific_proof_run": 36082783905
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36082913970,
+      "production_live_resource_integrity_run": 36082967263,
+      "products_browser_proof_run": 36082967302,
+      "products_route_proof_run": 36082967286,
+      "build_specific_proof_run": 36082914063
+    }
+  },
+  "baseline": {
+    "build256_scanner_pull_request": 87,
+    "build259_scanner": {
+      "workflow_files": 149,
+      "pull_request": 73,
+      "push": 123,
+      "workflow_dispatch": 124,
+      "workflow_run": 5
+    },
+    "build259_actual_pr_runs": 72,
+    "measurement": "FULL_REPOSITORY_SCANNER_PLUS_EXACT_BUILD259_PR_HEAD"
+  },
+  "reduction": {
+    "target_build_span": "206-241,258-259",
+    "target_workflow_count": 38,
+    "mode": "REMOVE_PULL_REQUEST_TRIGGER_ONLY",
+    "evidence_basis": "EACH_TARGET_GATE_CONTRACT_IS_RETAINED_BY_CANONICAL_SYSTEM_GATE",
+    "push_triggers_retained": true,
+    "workflow_dispatch_retained": true,
+    "workflow_files_deleted": false,
+    "gate_scripts_deleted": false,
+    "canonical_system_gate_retained": true,
+    "canonical_quality_retained": true,
+    "canonical_it_retained": true,
+    "canonical_hygiene_retained": true,
+    "exact_sha_promotion_preserved": true,
+    "named_production_proofs_preserved": true
+  },
+  "expected_candidate": {
+    "workflow_files": 150,
+    "pull_request": 36,
+    "push": 124,
+    "workflow_dispatch": 125,
+    "workflow_run": 5,
+    "issues": 0,
+    "expected_actual_pr_runs": 35,
+    "scanner_pr_reduction_from_build259": 37,
+    "actual_pr_reduction_from_build259": 37,
+    "scanner_pr_reduction_from_build256": 51
+  },
+  "implementation": {
+    "dedicated_gate": "scripts/release467_build260_gate.py",
+    "workflow": ".github/workflows/release467-build260-pull-request-matrix-fanout-reduction.yml",
+    "document": "docs/operations/RELEASE_467_BUILD_260_PULL_REQUEST_MATRIX_FANOUT_REDUCTION.md",
+    "reusable_exact_sha_action": ".github/actions/release467-exact-sha-proof/action.yml"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "workflow_delete": false,
+    "gate_script_delete": false,
+    "branch_protection_change": false,
+    "exact_sha_requirement_relaxed": false,
+    "named_proof_requirement_relaxed": false,
+    "push_proof_removed": false,
+    "manual_proof_removed": false
+  },
+  "acceptance": {
+    "next_build": 261,
+    "next_build_title": "Production Proof Dependency Orchestration",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "270eea921559b2439459180998cc367b6fe7c9bb",
+      "tree": "e81b613e5a4b491927ab89c89800345025853b99",
+      "system_gate_run": 36082784059,
+      "quality_run": 36082784168,
+      "it_admin_runtime_run": 36082783908,
+      "repository_hygiene_run": 36082784042,
+      "build_specific_proof_run": 36082783905,
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "af294ad20ec26222ec0f7ccdb856f39de9fbbd2e",
+      "tree_sha": "e81b613e5a4b491927ab89c89800345025853b99",
+      "production_pages_deploy_run": 36082913970,
+      "production_live_resource_integrity_run": 36082967263,
+      "products_browser_proof_run": 36082967302,
+      "products_route_proof_run": 36082967286,
+      "build_specific_proof_run": 36082914063,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
+  }
+}
