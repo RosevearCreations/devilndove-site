@@ -1,0 +1,47 @@
+name: Release 467 Build 269 Private Raw Media Intake Integrity
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build269:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 268 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 139310232fb103cb2c843dc4d409ecdb7d4bb701
+          production_sha: 44da8087958eb0c64df3de892ca8628293a96231
+          build_proof_name: Release 467 Build 268 CAIP Private-Media Recovery Hardening Closure
+          report_path: /tmp/build269-predecessor-exact-sha-proof.json
+      - name: Resolve exact Build 268 tree continuity
+        run: |
+          git fetch --no-tags --depth=1 origin 139310232fb103cb2c843dc4d409ecdb7d4bb701
+          git fetch --no-tags --depth=1 origin 44da8087958eb0c64df3de892ca8628293a96231
+          DEV_TREE="$(git rev-parse 139310232fb103cb2c843dc4d409ecdb7d4bb701^{tree})"
+          PROD_TREE="$(git rev-parse 44da8087958eb0c64df3de892ca8628293a96231^{tree})"
+          echo "BUILD268_DEV_TREE=$DEV_TREE"
+          echo "BUILD268_PROD_TREE=$PROD_TREE"
+          test "$DEV_TREE" = "$PROD_TREE"
+      - name: Build 269 private raw-media intake integrity gate
+        run: python scripts/release467_build269_gate.py
+      - name: Retain Build 268 recovery-hardening contract
+        run: python scripts/release467_build268_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build269-private-raw-media-intake-integrity-evidence-${{ github.sha }}
+          path: /tmp/build269-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30

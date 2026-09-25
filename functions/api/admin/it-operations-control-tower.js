@@ -1,27 +1,27 @@
-// Release 467 Build 268 — CAIP Private-Media Recovery Hardening Closure over exact Build 267 Production source.
+// Release 467 Build 269 — Private Raw Media Intake Integrity over exact Build 268 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=268;
-const TITLE='CAIP Private-Media Recovery Hardening Closure';
-const AUTHORITY='release467-build268-caip-private-media-recovery-hardening-closure';
-const EVIDENCE_ID='r467-b267-green-36173340287-36173617921';
+const BUILD=269;
+const TITLE='Private Raw Media Intake Integrity';
+const AUTHORITY='release467-build269-private-raw-media-intake-integrity';
+const EVIDENCE_ID='r467-b268-green-36176223381-36176423497';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:267,title:'CAIP Duplicate & Orphan Recovery Classification',state:'DEVELOPMENT_GREEN',
-  dev_sha:'a3fe5cc3848b5f2f6bb3dfca26e0600bdd9d772c',tree_sha:'d647cb64914132631047c5a9276b976920ee556f',
-  system_gate_run:36173340287,current_application_quality_run:36173340863,it_admin_runtime_proof_run:36173340931,
-  branch_hygiene_run:36173340694,dedicated_gate_run:36173340842,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
+  release:467,build:268,title:'CAIP Private-Media Recovery Hardening Closure',state:'DEVELOPMENT_GREEN',
+  dev_sha:'139310232fb103cb2c843dc4d409ecdb7d4bb701',tree_sha:'86f0a6c3e378944f0f97cbd32ff416d4abbe3767',
+  system_gate_run:36176223381,current_application_quality_run:36176223395,it_admin_runtime_proof_run:36176223268,
+  branch_hygiene_run:36176223158,dedicated_gate_run:36176223314,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:267,title:'CAIP Duplicate & Orphan Recovery Classification',state:'PRODUCTION_GREEN',
-  main_sha:'d60e1ac4d29ebc745643dda4297c8946ddae37fb',tree_sha:'d647cb64914132631047c5a9276b976920ee556f',
-  production_pages_deploy_run:36173617921,production_live_resource_integrity_run:36173697814,
-  products_browser_proof_run:36173699875,products_route_proof_run:36173697811,build_specific_proof_run:36173617864,remote_d1_queries:0
+  release:467,build:268,title:'CAIP Private-Media Recovery Hardening Closure',state:'PRODUCTION_GREEN',
+  main_sha:'44da8087958eb0c64df3de892ca8628293a96231',tree_sha:'86f0a6c3e378944f0f97cbd32ff416d4abbe3767',
+  production_pages_deploy_run:36176423497,production_live_resource_integrity_run:36176498083,
+  products_browser_proof_run:36176498119,products_route_proof_run:36176498113,build_specific_proof_run:36176423468,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 268 CAIP Private-Media Recovery Hardening Closure'
+  'Release 467 Build 269 Private Raw Media Intake Integrity'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:267,title:'CAIP Duplicate & Orphan Recovery Classification',
+    release:467,build:268,title:'CAIP Private-Media Recovery Hardening Closure',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:36173340287,current_application_quality_run:36173340863,
-      it_admin_runtime_proof_run:36173340931,branch_hygiene_run:36173340694
+      system_gate_run:36176223381,current_application_quality_run:36176223395,
+      it_admin_runtime_proof_run:36176223268,branch_hygiene_run:36176223158
     },
     production_proofs:{
-      production_pages_deploy_run:36173617921,production_live_resource_integrity_run:36173697814,
-      products_browser_proof_run:36173699875,products_route_proof_run:36173697811
+      production_pages_deploy_run:36176423497,production_live_resource_integrity_run:36176498083,
+      products_browser_proof_run:36176498119,products_route_proof_run:36176498113
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 269 follows after Build 268 private-media recovery hardening closure.'
+    next_build:'Build 270 follows after Build 269 private raw-media intake integrity.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 268 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 269 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -121,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:268,title:TITLE,authority:'release467-build268-caip-private-media-recovery-hardening-closure.json'},
+        current_closure_candidate:{release:467,build:269,title:TITLE,authority:'release467-build269-private-raw-media-intake-integrity.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -148,17 +148,17 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 267 is the exact last fully verified Development checkpoint.',
-      'Build 267 Production is GREEN on the identical tree d647cb64914132631047c5a9276b976920ee556f.',
-      'Build 267 Development proofs: System 36173340287, Quality 36173340863, I.T. 36173340931, Hygiene 36173340694, Build 267 36173340842.',
-      'Build 267 Production proofs: Pages 36173617921, Live Resources 36173697814, Product Browser 36173699875, Product Route 36173697811, Build 267 36173617864.',
+      'Build 268 is the exact last fully verified Development checkpoint.',
+      'Build 268 Production is GREEN on the identical tree 86f0a6c3e378944f0f97cbd32ff416d4abbe3767.',
+      'Build 268 Development proofs: System 36176223381, Quality 36176223395, I.T. 36176223268, Hygiene 36176223158, Build 268 36176223314.',
+      'Build 268 Production proofs: Pages 36176423497, Live Resources 36176498083, Product Browser 36176498119, Product Route 36176498113, Build 268 36176423468.',
       'Build 260 removed only redundant pull-request triggers from 38 historical proof workflows while preserving System Gate coverage and push/manual evidence.',
       'Build 261 removed 39 redundant historical Production main-push subscriptions while preserving Development push/manual evidence and all four canonical Production proofs.',
       'Build 262 batches six latest-action point lookups into one read-only D1 statement and closed exact Development at 8 statements under unchanged provider ceilings.',
       'Build 263 measures 584 closure-scoped GREEN runs across 12 accepted heads, a 21.69% normalized runs-per-head reduction while all required named proofs and exact-tree release pairs remain valid.',
       'Build 265 closed the CAIP private-media prerequisite inventory on exact Development/Production trees.',
-      'Build 268 closes the static recovery hardening prerequisites for Build 269 while live private-bucket/interruption acceptance remains evidence-dependent.',
-      'Build 268 is the next bounded CAIP Private-Media Recovery Hardening Closure release.'
+      'Build 269 activates duplicate-safe private raw-media intake integrity while live private-bucket/interruption acceptance remains evidence-dependent and fail closed.',
+      'Build 269 is the current bounded Private Raw Media Intake Integrity release; Build 270 is next.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
