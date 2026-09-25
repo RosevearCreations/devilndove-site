@@ -1,7 +1,7 @@
 name: Release 467 Build 218 Quote Production Cost Margin Guardrails
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'functions/api/admin/custom-work-margin-guardrails.js'
       - 'public/js/admin-custom-work-margin-guardrails-build218.js'
