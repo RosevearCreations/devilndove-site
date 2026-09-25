@@ -2,7 +2,7 @@
   "release": 467,
   "build": 264,
   "title": "Refinement Outcomes Renewal III",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build264-refinement-outcomes-renewal-iii",
   "predecessor": {
     "build": 263,
@@ -136,5 +136,19 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_verified_development": true
     }
+  },
+  "final_closure": {
+    "dev_sha": "9017e145286f2007646a1f4de9ebdb670ca23881",
+    "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
+    "proof_state": "EXACT_DEVELOPMENT_GREEN_PREDECESSOR_RECOVERED_BY_BUILD265",
+    "ingested_by_build": 265,
+    "recorded_by": "Build 265 restart ingestion; Build 264 does not self-claim later proof IDs"
+  },
+  "production_checkpoint": {
+    "main_sha": "9cf042afb9b7938f160df89b49b82376eb8f9291",
+    "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
+    "state": "PRODUCTION_GREEN",
+    "identical_development_production_content": true,
+    "role": "BUILD265_PRODUCTION_PREDECESSOR"
   }
 }
