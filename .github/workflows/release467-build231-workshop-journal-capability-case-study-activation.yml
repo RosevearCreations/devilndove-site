@@ -1,7 +1,7 @@
 name: Release 467 Build 231 Workshop Journal Capability Case Study Activation
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
   workflow_dispatch:
 permissions: {contents: read}
 jobs:
