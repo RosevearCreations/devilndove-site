@@ -1,0 +1,121 @@
+{
+  "release": 467,
+  "build": 268,
+  "title": "CAIP Private-Media Recovery Hardening Closure",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build268-caip-private-media-recovery-hardening-closure",
+  "predecessor": {
+    "build": 267,
+    "title": "CAIP Duplicate & Orphan Recovery Classification",
+    "development_sha": "a3fe5cc3848b5f2f6bb3dfca26e0600bdd9d772c",
+    "development_tree_sha": "d647cb64914132631047c5a9276b976920ee556f",
+    "development_proofs": {
+      "system_gate_run": 36173340287,
+      "current_application_quality_run": 36173340863,
+      "it_admin_runtime_proof_run": 36173340931,
+      "branch_hygiene_run": 36173340694,
+      "dedicated_gate_run": 36173340842
+    },
+    "production_main_sha": "d60e1ac4d29ebc745643dda4297c8946ddae37fb",
+    "production_tree_sha": "d647cb64914132631047c5a9276b976920ee556f",
+    "production_proofs": {
+      "production_pages_deploy_run": 36173617921,
+      "production_live_resource_integrity_run": 36173697814,
+      "products_browser_proof_run": 36173699875,
+      "products_route_proof_run": 36173697811,
+      "build_specific_proof_run": 36173617864
+    },
+    "same_tree": true,
+    "state": "PRODUCTION_GREEN",
+    "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION"
+  },
+  "closure": {
+    "source_builds": [
+      265,
+      266,
+      267
+    ],
+    "prerequisite_states": {
+      "build265": "PRIVATE_MEDIA_PREREQUISITES_INVENTORIED_DEPLOYED_ACCEPTANCE_PENDING",
+      "build266": "STATIC_RECOVERY_INTEGRITY_COHERENT_PRODUCTION_INTERRUPTION_EVIDENCE_PENDING",
+      "build267": "DUPLICATE_ORPHAN_RECOVERY_CLASSES_DEFINED_CLEANUP_NOT_AUTHORIZED"
+    },
+    "pre_binary_transfer_fail_closed": {
+      "required_build241_tables": true,
+      "required_build269_duplicate_safe_columns": true,
+      "required_private_r2_binding": true,
+      "content_sample_fingerprint_preflight_required": true,
+      "server_side_reclassification_required": true,
+      "binary_transfer_before_classification": false,
+      "missing_prerequisite_action": "BLOCK_SELECT_AND_UPLOAD_AS_OPERATOR_CONFIGURATION_STATE"
+    },
+    "recovery_invariants": {
+      "completed_part_etags_retained": true,
+      "exact_part_count_and_byte_sum_required_before_r2_complete": true,
+      "exact_r2_head_size_required_before_registration": true,
+      "integrity_failed_binary_preserved": true,
+      "clean_recovery_uses_new_identity": true,
+      "recovery_of_file_id_lineage_preserved": true,
+      "completed_raw_original_immutable": true,
+      "uncertain_r2_delete_authorized": false,
+      "duplicate_cleanup_authorized": false,
+      "orphan_cleanup_authorized": false
+    },
+    "unresolved_deployed_acceptance": [
+      "production_private_bucket_binding_and_non_public_exposure",
+      "real_production_interruption_reconnect_reselection_resume",
+      "real_r2_multipart_survival_and_exact_head_size",
+      "startup_operational_acceptance"
+    ],
+    "build269_activation_boundary": "IMPLEMENT_DUPLICATE_SAFE_PRIVATE_RAW_MEDIA_INTAKE_ONLY_AFTER_PRE_TRANSFER_PREREQUISITES_PROVE_READY",
+    "classification": "RECOVERY_HARDENING_PREREQUISITES_CLOSED_BUILD269_FAIL_CLOSED_READY"
+  },
+  "decision": {
+    "build268_complete_when": "Builds 265-267 static recovery prerequisites form one coherent fail-closed pre-transfer contract for Build 269 without fabricating deployed private-media acceptance.",
+    "next_build": 269,
+    "next_build_title": "Private Raw Media Intake Integrity",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_upload": false,
+    "private_media_delete": false,
+    "uncertain_r2_delete": false,
+    "duplicate_cleanup_execution": false,
+    "orphan_cleanup_execution": false,
+    "public_media_copy": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "a3fe5cc3848b5f2f6bb3dfca26e0600bdd9d772c",
+      "tree": "d647cb64914132631047c5a9276b976920ee556f",
+      "system_gate_run": 36173340287,
+      "quality_run": 36173340863,
+      "it_admin_runtime_run": 36173340931,
+      "repository_hygiene_run": 36173340694,
+      "dedicated_gate_run": 36173340842
+    },
+    "production": {
+      "main_sha": "d60e1ac4d29ebc745643dda4297c8946ddae37fb",
+      "tree_sha": "d647cb64914132631047c5a9276b976920ee556f",
+      "production_pages_deploy_run": 36173617921,
+      "production_live_resource_integrity_run": 36173697814,
+      "products_browser_proof_run": 36173699875,
+      "products_route_proof_run": 36173697811,
+      "build_specific_proof_run": 36173617864,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}
