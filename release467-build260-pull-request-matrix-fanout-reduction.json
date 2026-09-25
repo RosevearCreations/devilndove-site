@@ -59,9 +59,7 @@
     "named_production_proofs_preserved": true,
     "system_gate_contract_coverage": true,
     "existing_push_triggers_preserved": true,
-    "manual_dispatch_available_for_all_targets": true,
-    "build240_original_push_trigger": false,
-    "build240_final_mode": "MANUAL_ONLY_PROVENANCE"
+    "manual_dispatch_available_for_all_targets": true
   },
   "expected_candidate": {
     "workflow_files": 150,
