@@ -30,13 +30,13 @@ Build 263 **Release Efficiency & Read-Budget Outcome Verification** is the activ
 
 Release-efficiency evidence:
 - Build 256 baseline: **870 runs / 14 accepted heads = 62.14 runs/head**
-- Builds 257–262: **596 runs / 12 accepted heads = 49.67 runs/head**
-- normalized accepted-head reduction: **20.08%**
+- Builds 257–262: **584 closure-scoped runs / 12 accepted heads = 48.67 runs/head**
+- normalized accepted-head reduction: **21.69%**
 - Build 255 closure: **134 runs**
 - Build 262 closure: **68 runs**, a **49.25%** reduction
 - required named Development and Production proofs remain GREEN for every accepted Build 257–262 pair
 - every accepted Development/Production pair retains exact-tree continuity
-- the **9 historical failures** in the accepted-head sample are all the noncanonical **Release 467 Build 155 Products Development Browser Proof** firing on Production heads; this remains a Build 264 renewal residual rather than a current required-proof failure.
+- the closure-scoped sample is **584/584 GREEN with zero failures/skips**. Thirteen later post-closure workflow records are excluded from closed-release metrics; **10** are noncanonical **Release 467 Build 155 Products Development Browser Proof** failures and **3** are skips. This remains a Build 264 renewal residual.
 
 The current pre-Build263 workflow surface is **152 files / 38 pull-request / 126 push / 134 manual-dispatch / 5 workflow-run**. Build 263 adds its own proof workflow, so candidate inventory must be **153 / 39 / 127 / 135 / 5**. The five workflow-run chains remain retained.
 
