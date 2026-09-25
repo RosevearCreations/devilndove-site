@@ -12,40 +12,27 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 267 candidate
+## Current Release 467 restart authority — Build 268 candidate
 
-Build 266 **CAIP Multipart Recovery Integrity Review** is the exact Production predecessor:
+Build 267 **CAIP Duplicate & Orphan Recovery Classification** is the exact fully verified Development and Production predecessor.
 
-- Development SHA: `c2f4a123b029853438260f06f0582a3902adf0c4`
-- exact Development/Production tree: `6986989e2aa860a639ed8d6748a0c3143b32054d`
-- Development proofs: System `36156294854`, Quality `36156294795`, I.T. `36156294784`, Hygiene `36156294718`, Build 266 `36156294779`
-- Production main SHA: `1d4a1c204d19c4ecca16dd8dd6952b5107327db8`
-- Production proofs: Pages `36156595435`, Live Resource Integrity `36156682258`, Product Browser `36156682086`, Product Route `36156682143`, Build 266 `36156595028`
+- Development SHA: `a3fe5cc3848b5f2f6bb3dfca26e0600bdd9d772c`
+- exact Development/Production tree: `d647cb64914132631047c5a9276b976920ee556f`
+- Development proofs: System `36173340287`, Quality `36173340863`, I.T. `36173340931`, Hygiene `36173340694`, Build 267 `36173340842`
+- Production main SHA: `d60e1ac4d29ebc745643dda4297c8946ddae37fb`
+- Production proofs: Pages `36173617921`, Live Resource Integrity `36173697814`, Product Browser `36173699875`, Product Route `36173697811`, Build 267 `36173617864`
 - exact predecessor proof remains recoverable through the reusable exact-SHA composition;
 - canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 267 **CAIP Duplicate & Orphan Recovery Classification** is the active read-only candidate.
+Build 268 **CAIP Private-Media Recovery Hardening Closure** is the active read-only candidate. It closes the static recovery prerequisites from Builds 265–267 and proves Build 269 must fail closed before binary transfer unless the Build 241 tables, Build 269 duplicate-safe columns and private R2 binding are present and duplicate/recovery classification has completed.
 
-Current classification rules:
-- uploaded registered raw originals are canonical and immutable;
-- same-project strong content fingerprint + exact size is a duplicate candidate, not automatic delete proof;
-- legacy metadata fingerprint + exact size is weaker compatibility evidence;
-- equal verified checksums, zero asset/processing/promotion references, distinct object identity and exact R2 HEAD size are required before the existing explicit reviewed cleanup authority can even consider physical duplicate deletion;
-- Build 267 itself executes no duplicate cleanup and no orphan cleanup;
-- uploaded D1 rows without a Creative Asset are `D1_COMPLETED_UNREGISTERED_BINARY_REVIEW`, not safe orphans;
-- R2 raw objects without corresponding D1 identity are only `OBJECT_ONLY_ORPHAN_CANDIDATE` pending bounded reconciliation;
-- D1/asset identity whose referenced R2 object is proven missing becomes `D1_ONLY_MISSING_OBJECT_RECOVERY`; metadata/history stay preserved;
-- integrity-failed finalized binaries remain preserved and clean recovery uses a new identity;
-- `recovery_of_file_id` lineage remains intact;
-- uncertain R2 deletion remains unauthorized.
+The deployed acceptance gaps remain explicit: Production private-bucket/non-public proof, real interruption/reconnect/reselection/resume evidence, real R2 multipart survival plus exact HEAD-size evidence, and Startup/Operational Continuity acceptance. Build 268 does not synthesize any of these.
 
-The deployed Startup boundary remains evidence-dependent. Live Production interruption/reconnect/reselection/resume, private `CAIP_PRIVATE_MEDIA_BUCKET` binding, non-public exposure, and real object/D1 reconciliation still require operator/environment evidence before Production private-media acceptance can be declared.
+Uncertain R2 deletion, duplicate/orphan cleanup, private-media upload/delete, schema/request-time DDL, D1/R2 business-data mutation, provider action, Product publication, Inventory movement, Finance posting, Production business-data copy and synthetic acceptance remain unauthorized.
 
-The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 267, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
+The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 268, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
 
-No schema/request-time DDL, D1/R2 business or media mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, Production business-data copy, duplicate/orphan cleanup execution, uncertain R2 delete, branch-protection mutation or secret capture is introduced.
-
-The future queue remains open. The next bounded release is **Build 268 — CAIP Private-Media Recovery Hardening Closure**.
+The future queue remains open. Next: **Build 269 — Private Raw Media Intake Integrity**.
 
 ## Retained historical provenance — Build 171
 

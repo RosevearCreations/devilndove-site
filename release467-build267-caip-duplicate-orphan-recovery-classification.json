@@ -2,7 +2,7 @@
   "release": 467,
   "build": 267,
   "title": "CAIP Duplicate & Orphan Recovery Classification",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build267-caip-duplicate-orphan-recovery-classification",
   "predecessor": {
     "build": 266,
@@ -158,5 +158,33 @@
       "build_specific_proof_run": 36156595028,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "a3fe5cc3848b5f2f6bb3dfca26e0600bdd9d772c",
+    "tree_sha": "d647cb64914132631047c5a9276b976920ee556f",
+    "proofs": {
+      "system_gate_run": 36173340287,
+      "current_application_quality_run": 36173340863,
+      "it_admin_runtime_proof_run": 36173340931,
+      "branch_hygiene_run": 36173340694
+    },
+    "dedicated_gate_run": 36173340842,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "ingested_by_build": 268,
+    "recorded_by": "Build 268 startup ingestion; not self-recorded by Build 267"
+  },
+  "production_checkpoint": {
+    "main_sha": "d60e1ac4d29ebc745643dda4297c8946ddae37fb",
+    "tree_sha": "d647cb64914132631047c5a9276b976920ee556f",
+    "production_pages_deploy_run": 36173617921,
+    "production_live_resource_integrity_run": 36173697814,
+    "products_browser_proof_run": 36173699875,
+    "products_route_proof_run": 36173697811,
+    "build_specific_proof_run": 36173617864,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "ingested_by_build": 268,
+    "recorded_by": "Build 268 startup ingestion; not self-recorded by Build 267"
   }
 }

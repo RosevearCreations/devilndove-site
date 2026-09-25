@@ -152,6 +152,7 @@ run_current_contract('scripts/release467_build264_gate.py','Release 467 Build 26
 run_current_contract('scripts/release467_build265_gate.py','Release 467 Build 265')
 run_current_contract('scripts/release467_build266_gate.py','Release 467 Build 266')
 run_current_contract('scripts/release467_build267_gate.py','Release 467 Build 267')
+run_current_contract('scripts/release467_build268_gate.py','Release 467 Build 268')
 
 if FAIL:
     print('CURRENT SYSTEM GATE PROVENANCE: FAIL');[print('-',x) for x in FAIL];sys.exit(1)
