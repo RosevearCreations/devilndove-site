@@ -388,10 +388,20 @@
     "today_tasks_rows_read_ceiling": 15000,
     "seller_daily_rows_read_ceiling": 10000,
     "aggregate_rows_read_ceiling": 25000,
-    "measurement_state": "AWAITING_EXACT_BUILD263_DEVELOPMENT_REMEASUREMENT",
+    "measurement_state": "EXACT_DEVELOPMENT_MEASURED_GREEN",
     "production_d1_contact": false,
     "d1_mutation": false,
     "next_build": 264,
-    "future_queue_exhausted": false
+    "future_queue_exhausted": false,
+    "measurement_source_sha": "9459181b611d176da1ec5846c4b404a4c9878a08",
+    "measurement_source_tree": "54258d6c4d0647eef0da549d72f21d226c47ec3d",
+    "outcome_workflow_run": 36135571462,
+    "outcome_evidence_artifact_id": 10863761928,
+    "provider_job_id": 108072707003,
+    "provider_evidence_artifact_id": 10864795155,
+    "measured_today_tasks_select_statements": 8,
+    "measured_today_tasks_rows_read": 1133,
+    "measured_seller_daily_rows_read": 1046,
+    "measured_aggregate_rows_read": 2179
   }
 }
