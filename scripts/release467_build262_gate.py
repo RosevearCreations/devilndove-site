@@ -43,7 +43,7 @@ q(review.get('production_d1_measurement') is False,'Build 262 Production D1 meas
 for token in ('const pointLookup =','TASK_KEYS.map(() =>','UNION ALL',"bind(...TASK_KEYS)",'created_at DESC, today_task_action_id DESC','LIMIT 1'):
     q(token in service,f'Build 262 runtime batching missing {token}')
 q('Promise.all(TASK_KEYS.map' not in service,'Build 262 must remove six independent latest-action statements')
-q(service.count("scalarRead(db,")==6,'Build 262 must preserve six task-count reads')
+q(len(re.findall(r"scalarRead\(db,\s*'[^']+'",service))==6,'Build 262 must preserve six task-count reads')
 q('runtimeIncidentDetails(db)' in service,'Build 262 must preserve runtime incident detail read')
 
 statements=sql_statements(probe)
