@@ -12,50 +12,50 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 265 candidate
+## Current Release 467 restart authority — Build 266 candidate
 
-Build 264 **Refinement Outcomes Renewal III** is the exact Production predecessor:
+Build 265 **CAIP Private-Media Prerequisite Inventory** is the exact Production predecessor:
 
-- Development merge SHA: `9017e145286f2007646a1f4de9ebdb670ca23881`
-- exact Development/Production tree: `bbe175e82624a2043fb7fd8f84ca5ba9bb361410`
-- Development System Gate: `36146386642`
-- Development Current Application Quality Proof: `36146386016`
-- Development I.T. Admin Runtime Proof: `36146386111`
-- Development Repository Branch Hygiene: `36146385905`
-- Build 264 dedicated Development proof: `36146386405`
-- Production main SHA: `9cf042afb9b7938f160df89b49b82376eb8f9291`
-- Production Pages Deploy: `36147031112`
-- Production Live Resource Integrity: `36147115215`
-- Product Browser proof: `36147115091`
-- Product Route proof: `36147115289`
-- Build 264 Production proof: `36147031170`
-- exact predecessor proof is recoverable by the retained reusable exact-SHA composition;
-- Build 264 closed the Builds 257–263 refinement cycle and authorized the repository-resident Builds 265–275 CAIP recovery/continuity roadmap;
+- Development SHA: `1ac2f5f55228b3c8fbd86ea1e3d07cfb35edaa33`
+- exact Development/Production tree: `d4f1da2902442d02e23becd06b5f05af30a86ac4`
+- Development System Gate: `36151831375`
+- Development Current Application Quality Proof: `36151831443`
+- Development I.T. Admin Runtime Proof: `36151831358`
+- Development Repository Branch Hygiene: `36151831299`
+- Build 265 dedicated Development proof: `36151831255`
+- Production main SHA: `28181d75fe8425244848ae5a06c86f54a446eb1b`
+- Production Pages Deploy: `36152347971`
+- Production Live Resource Integrity: `36152439772`
+- Product Browser proof: `36152439922`
+- Product Route proof: `36152439676`
+- Build 265 Production proof: `36152348667`
+- exact predecessor proof remains recoverable through the reusable exact-SHA composition;
 - canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 265 **CAIP Private-Media Prerequisite Inventory** is the active candidate. It inventories the existing Build 241 schema, storage, multipart/recovery and operator prerequisites without uploading or mutating Production media.
+Build 266 **CAIP Multipart Recovery Integrity Review** is the active read-only candidate. It verifies the repository-resident interruption/resume, completed-part/ETag continuity, immutable-source identity and exact-size completion contracts without uploading or mutating Production media.
 
-Current prerequisite inventory:
-- Build 241 validation state: **ready_for_deployed_evidence**;
-- private-media tables: **6**;
-- private binary binding: `CAIP_PRIVATE_MEDIA_BUCKET`;
-- approved/public binding remains `PRODUCT_MEDIA_BUCKET`;
-- request-time DDL: **disabled**;
-- completed raw originals: **immutable** through CAIP intake;
-- current multipart transport: authenticated same-origin Worker-streamed parts;
-- default part size: **32 MiB**;
-- conservative parallelism: **2 parts**;
-- fallback part ceiling: **256 MiB**;
-- completed-part continuity retains D1 part metadata plus R2 ETags;
-- future direct S3-presigned multipart remains **not live**.
+Current integrity review:
+- already-uploaded D1 parts with retained R2 ETags are short-circuited server-side;
+- browser recovery queues only parts not already marked uploaded;
+- persisted byte ranges are used to slice the selected local file;
+- current Worker-streamed multipart concurrency remains **2 parts**;
+- each Worker-streamed part must exactly match the persisted part size;
+- completion requires every expected part, every retained ETag, distinct part numbering from 1 through `expected_parts`, and an exact uploaded-byte sum;
+- incomplete D1 evidence writes `[CAIP_MULTIPART_INCOMPLETE]` and blocks R2 `complete()`;
+- successful multipart finalization must pass R2 `HEAD` with exact object size before registration;
+- a finalized size mismatch writes `[CAIP_R2_SIZE_MISMATCH]`, remains unregistered, and preserves the binary for review;
+- completed raw originals remain immutable through the intake control;
+- integrity-failed recovery uses a new object identity rather than overwriting the uncertain prior R2 object;
+- uncertain R2 deletion remains unauthorized;
+- future `direct_s3_presigned_multipart` remains **not live**.
 
-The deployed Startup boundary remains open until the private Production R2 binding is proven private, real interruption/reselect/resume behavior is demonstrated, exact completion/internal-only registration is verified, secure no-store review is proven, and privacy/rights/consent plus device behavior are recorded as safe evidence.
+The deployed Startup boundary remains evidence-dependent. Live Production interruption/reconnect/reselection/resume, the private `CAIP_PRIVATE_MEDIA_BUCKET` binding, non-public bucket exposure and device/network recovery still require real operator/environment proof before Production CAIP private-media acceptance can be declared.
 
-The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 265, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
+The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 266, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
 
 No schema/request-time DDL, D1/R2 business or media mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy, uncertain R2 delete, branch-protection mutation or secret capture is introduced.
 
-The future queue remains open. The next bounded release is **Build 266 — CAIP Multipart Recovery Integrity Review**.
+The future queue remains open. The next bounded release is **Build 267 — CAIP Duplicate & Orphan Recovery Classification**.
 
 ## Retained historical provenance — Build 171
 

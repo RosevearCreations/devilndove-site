@@ -1,0 +1,41 @@
+name: Release 467 Build 266 CAIP Multipart Recovery Integrity Review
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build266:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 265 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 1ac2f5f55228b3c8fbd86ea1e3d07cfb35edaa33
+          production_sha: 28181d75fe8425244848ae5a06c86f54a446eb1b
+          build_proof_name: Release 467 Build 265 CAIP Private-Media Prerequisite Inventory
+          report_path: /tmp/build266-predecessor-exact-sha-proof.json
+      - name: Build 266 multipart recovery integrity gate
+        run: python scripts/release467_build266_gate.py
+      - name: Retain Build 265 predecessor contract
+        run: python scripts/release467_build265_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build266-multipart-recovery-integrity-evidence-${{ github.sha }}
+          path: /tmp/build266-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30
