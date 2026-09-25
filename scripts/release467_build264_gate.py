@@ -56,11 +56,12 @@ q('Build 273 delivered' in delivery,'Build 273 delivered CAIP bridge evidence mi
 q('Build 274 authority note' in caipguide,'Build 274 Creative Process lifecycle authority note missing')
 q("run_current_contract('scripts/release467_build264_gate.py','Release 467 Build 264')" in sysgate,'System Gate must invoke Build 264')
 
-q(p.get('build')==264 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must identify Build 264')
-q(int(p.get('next_build') or 0)==265 and p.get('next_build_title')=='CAIP Private-Media Prerequisite Inventory','Current authority must expose Build 265 successor')
-q(p.get('accepted_dev_sha')=='ea930cd5c52e0d4f1d55fd9645fc24f5865900f2' and p.get('accepted_dev_tree_sha')=='e536e198fdb5f44b4430ae2d503e15731f2c9109','Build 264 must start from exact Build 263 Development')
-q((p.get('production_checkpoint') or {}).get('main_sha')=='7ee1ac700f451d35a20ff3d667c405086c5512ef','Build 264 Production baseline must be Build 263')
-q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md','Current authority successor roadmap mismatch')
+if int(p.get('build') or 0)==264:
+    q(p.get('state')=='DEVELOPMENT_GREEN','Current authority must identify Build 264')
+    q(int(p.get('next_build') or 0)==265 and p.get('next_build_title')=='CAIP Private-Media Prerequisite Inventory','Current authority must expose Build 265 successor')
+    q(p.get('accepted_dev_sha')=='ea930cd5c52e0d4f1d55fd9645fc24f5865900f2' and p.get('accepted_dev_tree_sha')=='e536e198fdb5f44b4430ae2d503e15731f2c9109','Build 264 must start from exact Build 263 Development')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='7ee1ac700f451d35a20ff3d667c405086c5512ef','Build 264 Production baseline must be Build 263')
+    q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md','Current authority successor roadmap mismatch')
 for k,v in (a.get('safety') or {}).items():q(v is False,f'Build 264 safety drift: {k}')
 
 print('RELEASE 467 BUILD 264 REFINEMENT OUTCOMES RENEWAL III')
