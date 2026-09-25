@@ -1,0 +1,41 @@
+name: Release 467 Build 265 CAIP Private-Media Prerequisite Inventory
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build265:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 264 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 9017e145286f2007646a1f4de9ebdb670ca23881
+          production_sha: 9cf042afb9b7938f160df89b49b82376eb8f9291
+          build_proof_name: Release 467 Build 264 Refinement Outcomes Renewal III
+          report_path: /tmp/build265-predecessor-exact-sha-proof.json
+      - name: Build 265 prerequisite inventory gate
+        run: python scripts/release467_build265_gate.py
+      - name: Retain Build 264 predecessor contract
+        run: python scripts/release467_build264_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build265-prerequisite-inventory-evidence-${{ github.sha }}
+          path: /tmp/build265-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30
