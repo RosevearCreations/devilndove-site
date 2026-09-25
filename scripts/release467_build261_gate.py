@@ -74,8 +74,14 @@ report={}
 try:report=json.loads(Path(out).read_text(encoding='utf-8'))
 except Exception as e:q(False,f'Build 261 inventory unreadable: {e}')
 tc=report.get('trigger_counts') or {}
-for k,v in {'pull_request':37,'push':125,'workflow_dispatch':133,'workflow_run':5,'issues':0}.items():
-    q(tc.get(k)==v,f'Build 261 trigger count mismatch: {k} expected {v} got {tc.get(k)}')
+successor_active=(R/'release467-build262-operations-today-tasks-read-fanout-review.json').is_file()
+if not successor_active:
+    for k,v in {'pull_request':37,'push':125,'workflow_dispatch':133,'workflow_run':5,'issues':0}.items():
+        q(tc.get(k)==v,f'Build 261 trigger count mismatch: {k} expected {v} got {tc.get(k)}')
+else:
+    q(report.get('workflow_file_count',0)>=152,'Build 262+ must retain Build 261 workflow and successors')
+    q(tc.get('workflow_run')==5,'Build 262+ must preserve the five workflow_run chains')
+    q(tc.get('issues')==0,'Build 262+ must not introduce issues triggers')
 expected_runs={
 '.github/workflows/production-live-resource-integrity-proof.yml',
 '.github/workflows/recovery-product-r2-reference-preflight.yml',

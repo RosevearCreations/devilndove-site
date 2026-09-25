@@ -2,7 +2,7 @@
   "release": 467,
   "build": 261,
   "title": "Production Proof Dependency Orchestration",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build261-production-proof-dependency-orchestration",
   "predecessor": {
     "build": 260,
@@ -105,5 +105,32 @@
       "products_route_proof_run": 36084851949,
       "build_specific_proof_run": 36084775035
     }
+  },
+  "accepted_dev_sha": "c4e57f8d4c47a709021fca65037b25f4e74d63e2",
+  "accepted_dev_tree_sha": "a442d160e1619e4b362de2bbda509ab25c310290",
+  "final_closure": {
+    "dev_sha": "c4e57f8d4c47a709021fca65037b25f4e74d63e2",
+    "tree_sha": "a442d160e1619e4b362de2bbda509ab25c310290",
+    "proofs": {
+      "system_gate_run": 36087874819,
+      "current_application_quality_run": 36087874854,
+      "it_admin_runtime_proof_run": 36087874772,
+      "branch_hygiene_run": 36087874784
+    },
+    "dedicated_gate_run": 36087874900,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "ingested_by_build": 262,
+    "recorded_by": "Build 262 successor ingestion; Build 261 did not self-record later proof"
+  },
+  "production_checkpoint": {
+    "main_sha": "f90944f80ec193610d3b87312487799ec425d983",
+    "tree_sha": "a442d160e1619e4b362de2bbda509ab25c310290",
+    "production_pages_deploy_run": 36088094461,
+    "production_live_resource_integrity_run": 36088159346,
+    "products_browser_proof_run": 36088159392,
+    "products_route_proof_run": 36088159367,
+    "build_specific_proof_run": 36088094406,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
