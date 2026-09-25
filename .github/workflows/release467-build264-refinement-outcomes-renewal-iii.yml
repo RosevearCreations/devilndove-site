@@ -1,0 +1,44 @@
+name: Release 467 Build 264 Refinement Outcomes Renewal III
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build264:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 263 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: ea930cd5c52e0d4f1d55fd9645fc24f5865900f2
+          production_sha: 7ee1ac700f451d35a20ff3d667c405086c5512ef
+          build_proof_name: Release 467 Build 263 Release Efficiency & Read-Budget Outcome Verification
+          report_path: /tmp/build264-predecessor-exact-sha-proof.json
+      - name: Build 264 renewal gate
+        run: python scripts/release467_build264_gate.py
+      - name: Retain predecessor outcome contracts
+        run: |
+          python scripts/release467_build263_gate.py
+          python scripts/release467_build262_gate.py
+          python scripts/release467_build256_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build264-renewal-evidence-${{ github.sha }}
+          path: /tmp/build264-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30

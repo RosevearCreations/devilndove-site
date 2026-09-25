@@ -1,10 +1,8 @@
 name: Release 467 Build 263 Release Efficiency & Read-Budget Outcome Verification
 
 on:
-  pull_request:
-    branches: [dev, main]
-  push:
-    branches: [dev, main]
+  # Build 263 is exact-SHA Production GREEN and successor-ingested by Build 264.
+  # Retain its proof as manual historical provenance; Build 264 System Gate keeps the source contract live.
   workflow_dispatch:
 
 permissions:

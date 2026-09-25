@@ -1,0 +1,140 @@
+{
+  "release": 467,
+  "build": 264,
+  "title": "Refinement Outcomes Renewal III",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build264-refinement-outcomes-renewal-iii",
+  "predecessor": {
+    "build": 263,
+    "title": "Release Efficiency & Read-Budget Outcome Verification",
+    "development_sha": "ea930cd5c52e0d4f1d55fd9645fc24f5865900f2",
+    "development_tree_sha": "e536e198fdb5f44b4430ae2d503e15731f2c9109",
+    "development_proofs": {
+      "system_gate_run": 36136926977,
+      "current_application_quality_run": 36136927022,
+      "it_admin_runtime_proof_run": 36136927013,
+      "branch_hygiene_run": 36136926926,
+      "dedicated_gate_run": 36136927079
+    },
+    "production_main_sha": "7ee1ac700f451d35a20ff3d667c405086c5512ef",
+    "production_tree_sha": "e536e198fdb5f44b4430ae2d503e15731f2c9109",
+    "production_proofs": {
+      "production_pages_deploy_run": 36137622970,
+      "production_live_resource_integrity_run": 36138023445,
+      "products_browser_proof_run": 36138023151,
+      "products_route_proof_run": 36138023256,
+      "build_specific_proof_run": 36137622753
+    },
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true
+  },
+  "review": {
+    "source_builds": [
+      257,
+      258,
+      259,
+      260,
+      261,
+      262,
+      263
+    ],
+    "all_source_builds_production_green": true,
+    "exact_tree_closure_preserved": true,
+    "release_efficiency": {
+      "baseline_build256_runs_per_head": 62.142857,
+      "build263_runs_per_head": 48.666667,
+      "normalized_runs_per_head_reduction_percent": 21.6858,
+      "build255_closure_runs": 134,
+      "build262_closure_runs": 68,
+      "build255_to_build262_reduction_percent": 49.2537,
+      "closure_scoped_runs": 584,
+      "closure_scoped_successes": 584,
+      "closure_scoped_failures": 0,
+      "post_closure_noncanonical_browser_failures": 10,
+      "further_broad_trigger_rewrite": "NOT_JUSTIFIED"
+    },
+    "read_budget": {
+      "baseline_today_tasks_statements": 13,
+      "current_today_tasks_statements": 8,
+      "current_today_tasks_rows_read": 1133,
+      "current_seller_daily_rows_read": 1046,
+      "current_aggregate_rows_read": 2179,
+      "today_tasks_ceiling": 15000,
+      "seller_daily_ceiling": 10000,
+      "aggregate_ceiling": 25000,
+      "production_d1_contact": false
+    },
+    "caip_repository_evidence": {
+      "build269_documented_recovery_dependency": "Build 241 foundation, Builds 265-268 recovery hardening",
+      "build269_private_raw_media_intake": true,
+      "build271_standalone_social_workflow": true,
+      "build272_upload_prerequisite_rule": true,
+      "build273_content_studio_project_bridge": true,
+      "build274_creative_process_inventory_lifecycle": true
+    }
+  },
+  "decision": {
+    "autonomous_queue_exhausted": false,
+    "action": "CREATE_EVIDENCE_DRIVEN_SUCCESSOR_ROADMAP",
+    "rationale": [
+      "Builds 257-263 materially reduced release proof fan-out without weakening exact-SHA or named Production proofs.",
+      "Today Tasks statement fan-out is reduced from 13 to 8 with provider rows under unchanged ceilings, so another read-budget rewrite is not justified by current evidence.",
+      "The repository already carries explicit CAIP recovery/continuity implementation boundaries for Builds 265-274, including a Build 269 dependency on Builds 265-268 recovery hardening."
+    ],
+    "successor_roadmap": "docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md",
+    "next_build": 265,
+    "next_build_title": "CAIP Private-Media Prerequisite Inventory"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "production_business_data_copy": false,
+    "uncertain_r2_delete": false,
+    "secret_capture": false,
+    "synthetic_business_evidence": false,
+    "exact_sha_requirement_relaxed": false,
+    "named_proof_requirement_relaxed": false
+  },
+  "implementation": {
+    "renewal_document": "docs/operations/RELEASE_467_BUILD_264_REFINEMENT_OUTCOMES_RENEWAL_III.md",
+    "successor_roadmap": "docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md",
+    "dedicated_gate": "scripts/release467_build264_gate.py",
+    "workflow": ".github/workflows/release467-build264-refinement-outcomes-renewal-iii.yml"
+  },
+  "acceptance": {
+    "next_build": 265,
+    "next_build_title": "CAIP Private-Media Prerequisite Inventory",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "ea930cd5c52e0d4f1d55fd9645fc24f5865900f2",
+      "tree": "e536e198fdb5f44b4430ae2d503e15731f2c9109",
+      "system_gate_run": 36136926977,
+      "quality_run": 36136927022,
+      "it_admin_runtime_run": 36136927013,
+      "repository_hygiene_run": 36136926926,
+      "build_specific_proof_run": 36136927079,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN_WITH_PROVIDER_MEASUREMENT"
+    },
+    "production": {
+      "main_sha": "7ee1ac700f451d35a20ff3d667c405086c5512ef",
+      "tree_sha": "e536e198fdb5f44b4430ae2d503e15731f2c9109",
+      "production_pages_deploy_run": 36137622970,
+      "production_live_resource_integrity_run": 36138023445,
+      "products_browser_proof_run": 36138023151,
+      "products_route_proof_run": 36138023256,
+      "build_specific_proof_run": 36137622753,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_verified_development": true
+    }
+  }
+}
