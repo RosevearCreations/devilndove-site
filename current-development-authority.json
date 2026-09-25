@@ -1,33 +1,33 @@
 {
   "release": 467,
-  "build": 266,
-  "title": "CAIP Multipart Recovery Integrity Review",
+  "build": 267,
+  "title": "CAIP Duplicate & Orphan Recovery Classification",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 265,
-      "title": "CAIP Private-Media Prerequisite Inventory",
-      "authority": "release467-build265-caip-private-media-prerequisite-inventory.json",
-      "dev_sha": "1ac2f5f55228b3c8fbd86ea1e3d07cfb35edaa33",
-      "tree_sha": "d4f1da2902442d02e23becd06b5f05af30a86ac4",
-      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
-      "business_exit": "OWNER_AUTHORIZED_CAIP_MULTIPART_RECOVERY_INTEGRITY_REVIEW",
-      "proofs": {
-        "system_gate_run": 36151831375,
-        "current_application_quality_run": 36151831443,
-        "it_admin_runtime_proof_run": 36151831358,
-        "branch_hygiene_run": 36151831299
-      },
-      "dedicated_gate_run": 36151831255
-    },
-    "current_closure_candidate": {
-      "release": 467,
       "build": 266,
       "title": "CAIP Multipart Recovery Integrity Review",
       "authority": "release467-build266-caip-multipart-recovery-integrity-review.json",
+      "dev_sha": "c2f4a123b029853438260f06f0582a3902adf0c4",
+      "tree_sha": "6986989e2aa860a639ed8d6748a0c3143b32054d",
+      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+      "business_exit": "OWNER_AUTHORIZED_CAIP_DUPLICATE_ORPHAN_RECOVERY_CLASSIFICATION",
+      "proofs": {
+        "system_gate_run": 36156294854,
+        "current_application_quality_run": 36156294795,
+        "it_admin_runtime_proof_run": 36156294784,
+        "branch_hygiene_run": 36156294718
+      },
+      "dedicated_gate_run": 36156294779
+    },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 267,
+      "title": "CAIP Duplicate & Orphan Recovery Classification",
+      "authority": "release467-build267-caip-duplicate-orphan-recovery-classification.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -38,22 +38,23 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 265,
-    "title": "CAIP Private-Media Prerequisite Inventory",
-    "authority": "release467-build265-caip-private-media-prerequisite-inventory.json",
-    "main_sha": "28181d75fe8425244848ae5a06c86f54a446eb1b",
-    "tree_sha": "d4f1da2902442d02e23becd06b5f05af30a86ac4",
+    "build": 266,
+    "title": "CAIP Multipart Recovery Integrity Review",
+    "authority": "release467-build266-caip-multipart-recovery-integrity-review.json",
+    "main_sha": "1d4a1c204d19c4ecca16dd8dd6952b5107327db8",
+    "tree_sha": "6986989e2aa860a639ed8d6748a0c3143b32054d",
     "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
     "role": "CURRENT_PRODUCTION_BASELINE",
-    "production_pages_deploy_run": 36152347971,
-    "production_live_resource_integrity_run": 36152439772,
-    "products_browser_proof_run": 36152439922,
-    "products_route_proof_run": 36152439676,
-    "build_specific_proof_run": 36152348667
+    "production_pages_deploy_run": 36156595435,
+    "production_live_resource_integrity_run": 36156682258,
+    "products_browser_proof_run": 36156682086,
+    "products_route_proof_run": 36156682143,
+    "build_specific_proof_run": 36156595028
   },
   "current_release_authorities": [
+    "release467-build267-caip-duplicate-orphan-recovery-classification.json",
     "release467-build266-caip-multipart-recovery-integrity-review.json",
     "release467-build265-caip-private-media-prerequisite-inventory.json",
     "release467-build264-refinement-outcomes-renewal-iii.json",
@@ -161,10 +162,10 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md",
-  "next_build": 267,
+  "next_build": 268,
   "next_build_state": "AUTHORIZED_IN_PROGRESS",
-  "next_build_title": "CAIP Duplicate & Orphan Recovery Classification",
-  "promotion_state": "BUILD266_DEVELOPMENT_CANDIDATE_NOT_YET_PRODUCTION",
+  "next_build_title": "CAIP Private-Media Recovery Hardening Closure",
+  "promotion_state": "BUILD267_DEVELOPMENT_CANDIDATE_NOT_YET_PRODUCTION",
   "successor_scope_state": "CAIP_RECOVERY_CONTINUITY_ROADMAP_ACTIVE",
   "measured_closure": {
     "source_build": 232,
@@ -190,20 +191,20 @@
     "last_build": 275,
     "state": "EVIDENCE_DRIVEN_CAIP_RECOVERY_CONTINUITY_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 267,
-    "next_build_title": "CAIP Duplicate & Orphan Recovery Classification",
+    "next_build": 268,
+    "next_build_title": "CAIP Private-Media Recovery Hardening Closure",
     "roadmap": "docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md",
     "reactivation_source": "BUILD264_REFINEMENT_OUTCOMES_RENEWAL_III"
   },
   "canonical_data_migration_authorized": false,
-  "canonical_data_migration_scope": "NONE_BUILD266_CAIP_MULTIPART_RECOVERY_INTEGRITY_REVIEW",
-  "accepted_dev_sha": "1ac2f5f55228b3c8fbd86ea1e3d07cfb35edaa33",
-  "accepted_dev_tree_sha": "d4f1da2902442d02e23becd06b5f05af30a86ac4",
+  "canonical_data_migration_scope": "NONE_BUILD267_CAIP_DUPLICATE_ORPHAN_RECOVERY_CLASSIFICATION",
+  "accepted_dev_sha": "c2f4a123b029853438260f06f0582a3902adf0c4",
+  "accepted_dev_tree_sha": "6986989e2aa860a639ed8d6748a0c3143b32054d",
   "acceptance": {
-    "system_gate_run": 36151831375,
-    "current_application_quality_run": 36151831443,
-    "it_admin_runtime_proof_run": 36151831358,
-    "branch_hygiene_run": 36151831299
+    "system_gate_run": 36156294854,
+    "current_application_quality_run": 36156294795,
+    "it_admin_runtime_proof_run": 36156294784,
+    "branch_hygiene_run": 36156294718
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -470,6 +471,23 @@
     "production_interruption_acceptance_pending": true,
     "classification": "STATIC_RECOVERY_INTEGRITY_COHERENT_PRODUCTION_INTERRUPTION_EVIDENCE_PENDING",
     "next_build": 267,
+    "future_queue_exhausted": false
+  },
+  "caip_duplicate_orphan_recovery_classification": {
+    "source_build": 266,
+    "strong_duplicate_identity": "content_fingerprint + exact_size within same Creative Project",
+    "legacy_duplicate_identity": "legacy file_fingerprint + exact_size is review-only compatibility evidence",
+    "verified_redundant_copy_requires": "equal verified checksums + zero asset/processing/promotion refs + distinct object key + exact R2 HEAD size",
+    "uploaded_without_asset": "D1_COMPLETED_UNREGISTERED_BINARY_REVIEW",
+    "object_without_d1": "OBJECT_ONLY_ORPHAN_CANDIDATE",
+    "d1_without_object": "D1_ONLY_MISSING_OBJECT_RECOVERY",
+    "integrity_failed_binary": "INTEGRITY_FAILED_PRESERVE_NEW_IDENTITY_RECOVERY",
+    "recovery_lineage": "recovery_of_file_id retained",
+    "completed_raw_original_immutable": true,
+    "build267_cleanup_execution": false,
+    "uncertain_r2_delete": false,
+    "classification": "DUPLICATE_ORPHAN_RECOVERY_CLASSES_DEFINED_CLEANUP_NOT_AUTHORIZED",
+    "next_build": 268,
     "future_queue_exhausted": false
   }
 }
