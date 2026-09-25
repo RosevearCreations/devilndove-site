@@ -17,8 +17,19 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 Build 264 **Refinement Outcomes Renewal III** is the exact Production predecessor:
 
 - Development merge SHA: `9017e145286f2007646a1f4de9ebdb670ca23881`
+- exact Development/Production tree: `bbe175e82624a2043fb7fd8f84ca5ba9bb361410`
+- Development System Gate: `36146386642`
+- Development Current Application Quality Proof: `36146386016`
+- Development I.T. Admin Runtime Proof: `36146386111`
+- Development Repository Branch Hygiene: `36146385905`
+- Build 264 dedicated Development proof: `36146386405`
 - Production main SHA: `9cf042afb9b7938f160df89b49b82376eb8f9291`
-- exact predecessor proof is recovered by the retained reusable exact-SHA composition;
+- Production Pages Deploy: `36147031112`
+- Production Live Resource Integrity: `36147115215`
+- Product Browser proof: `36147115091`
+- Product Route proof: `36147115289`
+- Build 264 Production proof: `36147031170`
+- exact predecessor proof is recoverable by the retained reusable exact-SHA composition;
 - Build 264 closed the Builds 257–263 refinement cycle and authorized the repository-resident Builds 265–275 CAIP recovery/continuity roadmap;
 - canonical migrations remain **0001–0023**, with 0023 data-only.
 
