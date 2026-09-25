@@ -18,9 +18,9 @@ Production proofs: Pages `36078157785`, Live Resources `36078244247`, Product Br
 
 Exactly **16** build-proof workflows, Builds **242 through 257**, are converted from automatic pull-request/push triggering to manual-only provenance.
 
-Before Build 258, the Build 257 candidate tree had **147 workflow files**, **87 pull_request**, **91 push**, **90 workflow_dispatch** and **5 workflow_run** triggers.
+The full repository scanner on the exact Build 257 tree measured **147 workflow files**, **87 pull_request**, **137 push**, **107 workflow_dispatch**, **5 workflow_run** and **0 parser-visible issues** triggers. The earlier Build 257 search snapshot (87/91/90 on the candidate) used a different search-derived measurement and is retained only as historical search evidence.
 
-After the 16 historical workflows are narrowed and the active Build 258 workflow is added, the expected candidate is **148 workflow files**, **72 pull_request**, **76 push**, **106 workflow_dispatch** and the same **5 workflow_run** chains. This is a net reduction of **15 automatic pull-request workflows** and **15 automatic push workflows** while retaining all historical proof files.
+After the 16 historical workflows are narrowed and the active Build 258 workflow is added, the exact full-scanner candidate is **148 workflow files**, **72 pull_request**, **122 push**, **123 workflow_dispatch** and the same **5 workflow_run** chains. This is a net reduction of **15 automatic pull-request workflows** and **15 automatic push workflows** while retaining all historical proof files.
 
 ## Coverage retained
 
