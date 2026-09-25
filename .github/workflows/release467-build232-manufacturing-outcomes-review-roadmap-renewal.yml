@@ -1,7 +1,7 @@
 name: Release 467 Build 232 Manufacturing Outcomes Review Roadmap Renewal
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
   workflow_dispatch:
 permissions: {contents: read}
 jobs:
