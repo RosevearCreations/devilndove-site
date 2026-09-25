@@ -20,6 +20,8 @@ on:
       - 'admin/deployment-preflight/index.html'
       - 'admin/reliability/index.html'
       - '.github/workflows/release467-build236-save-confidence-unsaved-work-safe-batch-review.yml'
+  workflow_dispatch:
+
 jobs:
   build236:
     runs-on: ubuntu-latest
