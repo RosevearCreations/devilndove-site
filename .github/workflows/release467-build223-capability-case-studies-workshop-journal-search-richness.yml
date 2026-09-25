@@ -1,7 +1,5 @@
 name: Release 467 Build 223 Capability Case Studies Workshop Journal Search Richness
 on:
-  pull_request:
-    branches: [dev]
   push:
     branches: [dev, main]
     paths:
