@@ -25,11 +25,11 @@ Build 259 **Reusable Exact-SHA Proof Composition** is the exact verified predece
 - Build 259 Production-specific proof: `36082914063`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 260 **Pull-Request Matrix Fan-Out Reduction** is the active candidate. It removes only the `pull_request` trigger from exactly **38** historical release workflows: Builds **206–241 plus 258–259**. Their push and manual-dispatch evidence paths remain, every workflow file and historical gate script remains, and the canonical System Gate continues to execute the same gate contracts.
+Build 260 **Pull-Request Matrix Fan-Out Reduction** is the active candidate. It removes only the `pull_request` trigger from exactly **38** historical release workflows: Builds **206–241 plus 258–259**. Every existing push evidence path remains, all 38 targets are manually dispatchable, Build 240 is manual-only provenance, every workflow file and historical gate script remains, and the canonical System Gate continues to execute the same gate contracts.
 
 Build 256 full-scanner PR baseline: **87**. Build 259 full-scanner candidate: **149 workflow files / 73 pull-request / 123 push / 124 manual-dispatch / 5 workflow-run**; its exact final PR head ran **72** workflows.
 
-With Build 260's active proof workflow added, the expected candidate is **150 workflow files / 36 pull-request / 124 push / 125 manual-dispatch / 5 workflow-run**, with **35 expected actual PR runs**.
+With Build 260's active proof workflow added, the expected candidate is **150 workflow files / 36 pull-request / 124 push / 132 manual-dispatch / 5 workflow-run**, with **35 expected actual PR runs**.
 
 The reusable exact-SHA composition remains required for Build 260. System, Quality, I.T., Hygiene, Build 260, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
 
