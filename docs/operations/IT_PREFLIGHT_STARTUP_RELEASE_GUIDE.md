@@ -12,50 +12,40 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 266 candidate
+## Current Release 467 restart authority — Build 267 candidate
 
-Build 265 **CAIP Private-Media Prerequisite Inventory** is the exact Production predecessor:
+Build 266 **CAIP Multipart Recovery Integrity Review** is the exact Production predecessor:
 
-- Development SHA: `1ac2f5f55228b3c8fbd86ea1e3d07cfb35edaa33`
-- exact Development/Production tree: `d4f1da2902442d02e23becd06b5f05af30a86ac4`
-- Development System Gate: `36151831375`
-- Development Current Application Quality Proof: `36151831443`
-- Development I.T. Admin Runtime Proof: `36151831358`
-- Development Repository Branch Hygiene: `36151831299`
-- Build 265 dedicated Development proof: `36151831255`
-- Production main SHA: `28181d75fe8425244848ae5a06c86f54a446eb1b`
-- Production Pages Deploy: `36152347971`
-- Production Live Resource Integrity: `36152439772`
-- Product Browser proof: `36152439922`
-- Product Route proof: `36152439676`
-- Build 265 Production proof: `36152348667`
+- Development SHA: `c2f4a123b029853438260f06f0582a3902adf0c4`
+- exact Development/Production tree: `6986989e2aa860a639ed8d6748a0c3143b32054d`
+- Development proofs: System `36156294854`, Quality `36156294795`, I.T. `36156294784`, Hygiene `36156294718`, Build 266 `36156294779`
+- Production main SHA: `1d4a1c204d19c4ecca16dd8dd6952b5107327db8`
+- Production proofs: Pages `36156595435`, Live Resource Integrity `36156682258`, Product Browser `36156682086`, Product Route `36156682143`, Build 266 `36156595028`
 - exact predecessor proof remains recoverable through the reusable exact-SHA composition;
 - canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 266 **CAIP Multipart Recovery Integrity Review** is the active read-only candidate. It verifies the repository-resident interruption/resume, completed-part/ETag continuity, immutable-source identity and exact-size completion contracts without uploading or mutating Production media.
+Build 267 **CAIP Duplicate & Orphan Recovery Classification** is the active read-only candidate.
 
-Current integrity review:
-- already-uploaded D1 parts with retained R2 ETags are short-circuited server-side;
-- browser recovery queues only parts not already marked uploaded;
-- persisted byte ranges are used to slice the selected local file;
-- current Worker-streamed multipart concurrency remains **2 parts**;
-- each Worker-streamed part must exactly match the persisted part size;
-- completion requires every expected part, every retained ETag, distinct part numbering from 1 through `expected_parts`, and an exact uploaded-byte sum;
-- incomplete D1 evidence writes `[CAIP_MULTIPART_INCOMPLETE]` and blocks R2 `complete()`;
-- successful multipart finalization must pass R2 `HEAD` with exact object size before registration;
-- a finalized size mismatch writes `[CAIP_R2_SIZE_MISMATCH]`, remains unregistered, and preserves the binary for review;
-- completed raw originals remain immutable through the intake control;
-- integrity-failed recovery uses a new object identity rather than overwriting the uncertain prior R2 object;
-- uncertain R2 deletion remains unauthorized;
-- future `direct_s3_presigned_multipart` remains **not live**.
+Current classification rules:
+- uploaded registered raw originals are canonical and immutable;
+- same-project strong content fingerprint + exact size is a duplicate candidate, not automatic delete proof;
+- legacy metadata fingerprint + exact size is weaker compatibility evidence;
+- equal verified checksums, zero asset/processing/promotion references, distinct object identity and exact R2 HEAD size are required before the existing explicit reviewed cleanup authority can even consider physical duplicate deletion;
+- Build 267 itself executes no duplicate cleanup and no orphan cleanup;
+- uploaded D1 rows without a Creative Asset are `D1_COMPLETED_UNREGISTERED_BINARY_REVIEW`, not safe orphans;
+- R2 raw objects without corresponding D1 identity are only `OBJECT_ONLY_ORPHAN_CANDIDATE` pending bounded reconciliation;
+- D1/asset identity whose referenced R2 object is proven missing becomes `D1_ONLY_MISSING_OBJECT_RECOVERY`; metadata/history stay preserved;
+- integrity-failed finalized binaries remain preserved and clean recovery uses a new identity;
+- `recovery_of_file_id` lineage remains intact;
+- uncertain R2 deletion remains unauthorized.
 
-The deployed Startup boundary remains evidence-dependent. Live Production interruption/reconnect/reselection/resume, the private `CAIP_PRIVATE_MEDIA_BUCKET` binding, non-public bucket exposure and device/network recovery still require real operator/environment proof before Production CAIP private-media acceptance can be declared.
+The deployed Startup boundary remains evidence-dependent. Live Production interruption/reconnect/reselection/resume, private `CAIP_PRIVATE_MEDIA_BUCKET` binding, non-public exposure, and real object/D1 reconciliation still require operator/environment evidence before Production private-media acceptance can be declared.
 
-The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 266, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
+The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 267, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
 
-No schema/request-time DDL, D1/R2 business or media mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy, uncertain R2 delete, branch-protection mutation or secret capture is introduced.
+No schema/request-time DDL, D1/R2 business or media mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, Production business-data copy, duplicate/orphan cleanup execution, uncertain R2 delete, branch-protection mutation or secret capture is introduced.
 
-The future queue remains open. The next bounded release is **Build 267 — CAIP Duplicate & Orphan Recovery Classification**.
+The future queue remains open. The next bounded release is **Build 268 — CAIP Private-Media Recovery Hardening Closure**.
 
 ## Retained historical provenance — Build 171
 

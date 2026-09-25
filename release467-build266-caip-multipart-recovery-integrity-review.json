@@ -2,7 +2,7 @@
   "release": 467,
   "build": 266,
   "title": "CAIP Multipart Recovery Integrity Review",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build266-caip-multipart-recovery-integrity-review",
   "predecessor": {
     "build": 265,
@@ -124,5 +124,31 @@
       "build_specific_proof_run": 36152348667,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "c2f4a123b029853438260f06f0582a3902adf0c4",
+    "tree_sha": "6986989e2aa860a639ed8d6748a0c3143b32054d",
+    "proofs": {
+      "system_gate_run": 36156294854,
+      "current_application_quality_run": 36156294795,
+      "it_admin_runtime_proof_run": 36156294784,
+      "branch_hygiene_run": 36156294718
+    },
+    "dedicated_gate_run": 36156294779,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "ingested_by_build": 267,
+    "recorded_by": "Build 267 startup ingestion; not self-recorded by Build 266"
+  },
+  "production_checkpoint": {
+    "main_sha": "1d4a1c204d19c4ecca16dd8dd6952b5107327db8",
+    "tree_sha": "6986989e2aa860a639ed8d6748a0c3143b32054d",
+    "production_pages_deploy_run": 36156595435,
+    "production_live_resource_integrity_run": 36156682258,
+    "products_browser_proof_run": 36156682086,
+    "products_route_proof_run": 36156682143,
+    "build_specific_proof_run": 36156595028,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
