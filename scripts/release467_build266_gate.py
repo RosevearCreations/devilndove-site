@@ -82,7 +82,7 @@ for token in (
     'immutable'
 ):
     q(token in raw,f'Raw-media authority missing: {token}')
-for token in ('Interrupt a multipart upload','resume without intentionally re-uploading completed parts','exact HEAD size'):
+for token in ('Interrupt a multipart upload','resume without intentionally resending completed parts','exact HEAD size'):
     q(token in accept,f'Acceptance contract missing: {token}')
 for token in ('Build 266 — CAIP Multipart Recovery Integrity Review','Build 267 — CAIP Duplicate & Orphan Recovery Classification'):
     q(token in road,f'CAIP recovery roadmap missing {token}')
