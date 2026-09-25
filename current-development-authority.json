@@ -226,10 +226,14 @@
     "target_historical_workflows": 16,
     "expected_candidate_workflow_files": 148,
     "expected_pull_request": 72,
-    "expected_push": 76,
-    "expected_workflow_dispatch": 106,
+    "expected_push": 122,
+    "expected_workflow_dispatch": 123,
     "expected_workflow_run": 5,
-    "historical_gate_scripts_retained": true
+    "historical_gate_scripts_retained": true,
+    "scanner_baseline_pull_request": 87,
+    "scanner_baseline_push": 137,
+    "scanner_baseline_workflow_dispatch": 107,
+    "scanner_baseline_issues": 0
   },
   "historical_workflow_trigger_scope_tightening": {
     "source_build": 257,
