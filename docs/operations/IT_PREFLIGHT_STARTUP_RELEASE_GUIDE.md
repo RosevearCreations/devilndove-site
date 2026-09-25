@@ -25,7 +25,7 @@ Build 259 **Reusable Exact-SHA Proof Composition** is the exact verified predece
 - Build 259 Production-specific proof: `36082914063`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 260 **Pull-Request Matrix Fan-Out Reduction** is the active candidate. It removes only the `pull_request` trigger from exactly **38** historical release workflows: Builds **206–241 plus 258–259**. Every existing push evidence path remains, all 38 targets are manually dispatchable, Build 240 is manual-only provenance, every workflow file and historical gate script remains, and the canonical System Gate continues to execute the same gate contracts.
+Build 260 **Pull-Request Matrix Fan-Out Reduction** is the active candidate. It removes only the `pull_request` trigger from exactly **38** historical release workflows: Builds **206–241 plus 258–259**. Every existing push evidence path remains, all 38 targets are manually dispatchable, every workflow file and historical gate script remains, and the canonical System Gate continues to execute the same gate contracts.
 
 Build 256 full-scanner PR baseline: **87**. Build 259 full-scanner candidate: **149 workflow files / 73 pull-request / 123 push / 124 manual-dispatch / 5 workflow-run**; its exact final PR head ran **72** workflows.
 
