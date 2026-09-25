@@ -2,7 +2,7 @@ name: Release 467 Build 224 Manufacturing Era Closure Next Roadmap
 
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'release467-build223-capability-case-studies-workshop-journal-search-richness.json'
       - 'release467-build224-manufacturing-era-closure-next-roadmap.json'
