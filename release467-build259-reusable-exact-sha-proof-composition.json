@@ -101,5 +101,28 @@
     "next_build": 260,
     "next_build_title": "Pull-Request Matrix Fan-Out Reduction",
     "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "3675554c0c2ce64923ec3e1763a243e03d103f1a",
+      "tree": "64dab693be764fb11a3cb9c36d06352a2f02eb1a",
+      "system_gate_run": 36081394811,
+      "quality_run": 36081394936,
+      "it_admin_runtime_run": 36081394824,
+      "repository_hygiene_run": 36081394851,
+      "build_specific_proof_run": 36081394877,
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "436c4e724efc736492f9772ffea7d5141feb3416",
+      "tree_sha": "64dab693be764fb11a3cb9c36d06352a2f02eb1a",
+      "production_pages_deploy_run": 36081526239,
+      "production_live_resource_integrity_run": 36081651628,
+      "products_browser_proof_run": 36081651602,
+      "products_route_proof_run": 36081651629,
+      "build_specific_proof_run": 36081526248,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
   }
 }
