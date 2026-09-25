@@ -12,9 +12,16 @@
       "title": "CAIP Private-Media Recovery Hardening Closure",
       "authority": "release467-build268-caip-private-media-recovery-hardening-closure.json",
       "dev_sha": "139310232fb103cb2c843dc4d409ecdb7d4bb701",
-      "production_main_sha": "44da8087958eb0c64df3de892ca8628293a96231",
-      "proof_state": "LIVE_EXACT_SHA_COMPOSITION_REQUIRED_BY_BUILD269",
-      "business_exit": "OWNER_AUTHORIZED_PRIVATE_RAW_MEDIA_INTAKE_INTEGRITY"
+      "tree_sha": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
+      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+      "business_exit": "OWNER_AUTHORIZED_PRIVATE_RAW_MEDIA_INTAKE_INTEGRITY",
+      "proofs": {
+        "system_gate_run": 36176223381,
+        "current_application_quality_run": 36176223395,
+        "it_admin_runtime_proof_run": 36176223268,
+        "branch_hygiene_run": 36176223158
+      },
+      "dedicated_gate_run": 36176223314
     },
     "current_closure_candidate": {
       "release": 467,
@@ -35,9 +42,16 @@
     "title": "CAIP Private-Media Recovery Hardening Closure",
     "authority": "release467-build268-caip-private-media-recovery-hardening-closure.json",
     "main_sha": "44da8087958eb0c64df3de892ca8628293a96231",
+    "tree_sha": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
     "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
-    "state": "PRODUCTION_PROMOTED_PROOF_RECOVERY_REQUIRED_BY_BUILD269",
-    "role": "CURRENT_PRODUCTION_BASELINE"
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "role": "CURRENT_PRODUCTION_BASELINE",
+    "production_pages_deploy_run": 36176423497,
+    "production_live_resource_integrity_run": 36176498083,
+    "products_browser_proof_run": 36176498119,
+    "products_route_proof_run": 36176498113,
+    "build_specific_proof_run": 36176423468
   },
   "current_release_authorities": [
     "release467-build269-private-raw-media-intake-integrity.json",
@@ -153,7 +167,7 @@
   "next_build": 270,
   "next_build_state": "AUTHORIZED_AFTER_BUILD269_GREEN",
   "next_build_title": "Strong-Fingerprint Backfill & Recovery Reconciliation",
-  "promotion_state": "BUILD269_DEVELOPMENT_CANDIDATE_BUILD268_PRODUCTION_PROMOTED",
+  "promotion_state": "BUILD269_DEVELOPMENT_CANDIDATE_OVER_EXACT_BUILD268_PRODUCTION_GREEN",
   "successor_scope_state": "CAIP_RECOVERY_CONTINUITY_ROADMAP_ACTIVE",
   "measured_closure": {
     "source_build": 232,
@@ -187,12 +201,12 @@
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
   "accepted_dev_sha": "139310232fb103cb2c843dc4d409ecdb7d4bb701",
-  "accepted_dev_tree_sha": null,
+  "accepted_dev_tree_sha": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
   "acceptance": {
-    "system_gate_run": 36173340287,
-    "current_application_quality_run": 36173340863,
-    "it_admin_runtime_proof_run": 36173340931,
-    "branch_hygiene_run": 36173340694
+    "system_gate_run": 36176223381,
+    "current_application_quality_run": 36176223395,
+    "it_admin_runtime_proof_run": 36176223268,
+    "branch_hygiene_run": 36176223158
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
