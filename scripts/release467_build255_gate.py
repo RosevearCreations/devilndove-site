@@ -49,7 +49,7 @@ q('Build 256 — Refinement Outcomes Renewal II' in road,'Build 256 successor mi
 for token in ('1,551','1,519','19','13','70/70','64/64','exact-SHA'):
     q(token in review,f'Build 255 evidence document missing {token}')
 for source,label in ((rel,'Reliability'),(it,'I.T. tower'),(preflight,'Preflight'),(itpage,'I.T. page'),(relpage,'Reliability page'),(prepage,'Preflight page'),(guide,'I.T. guide')):
-    q(('255' in source and 'Production Reliability' in source) or ('256' in source and 'Refinement Outcomes Renewal II' in source) or ('257' in source and 'Workflow Trigger Inventory' in source),f'{label} must identify Build 255 or verified Build 256/257 successor')
+    q(('255' in source and 'Production Reliability' in source) or ('256' in source and 'Refinement Outcomes Renewal II' in source) or ('257' in source and 'Workflow Trigger Inventory' in source) or ('258' in source and 'Historical Workflow Trigger Scope Tightening' in source),f'{label} must identify Build 255 or verified Build 256-258 successor')
 for k,v in (a.get('safety') or {}).items():
     q(v is False,f'Build 255 safety drift: {k}')
 

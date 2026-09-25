@@ -2,7 +2,7 @@
   "release": 467,
   "build": 257,
   "title": "Workflow Trigger Inventory & Ownership Map",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build257-workflow-trigger-inventory-ownership-map",
   "predecessor": {
     "build": 256,
@@ -161,5 +161,32 @@
       "products_route_proof_run": 36075319601,
       "build_specific_proof_run": 36075244210
     }
+  },
+  "accepted_dev_sha": "5e6fa8772be5946a0cd53eadbd4b3daa36fce253",
+  "accepted_dev_tree_sha": "df03a29c947144f298f0908abf53ca3cdda1c159",
+  "final_closure": {
+    "dev_sha": "5e6fa8772be5946a0cd53eadbd4b3daa36fce253",
+    "tree_sha": "df03a29c947144f298f0908abf53ca3cdda1c159",
+    "proofs": {
+      "system_gate_run": 36077891398,
+      "current_application_quality_run": 36077890063,
+      "it_admin_runtime_proof_run": 36077891374,
+      "branch_hygiene_run": 36077890258
+    },
+    "dedicated_gate_run": 36077890220,
+    "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "ingested_by_build": 258,
+    "recorded_by": "Build 258 successor ingestion; Build 257 did not self-record later proof"
+  },
+  "production_checkpoint": {
+    "main_sha": "9e95bca825599dea1459838e10812c74d799c976",
+    "tree_sha": "df03a29c947144f298f0908abf53ca3cdda1c159",
+    "production_pages_deploy_run": 36078157785,
+    "production_live_resource_integrity_run": 36078244247,
+    "products_browser_proof_run": 36078244252,
+    "products_route_proof_run": 36078244289,
+    "build_specific_proof_run": 36078158019,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }

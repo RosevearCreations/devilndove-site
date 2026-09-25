@@ -1,38 +1,7 @@
 name: Release 467 Build 247 Non-Product Visual Coverage Media Placement Closure
 on:
-  push:
-    branches: [dev, main]
-    paths:
-      - 'SITE_WIDE_NON_PRODUCT_IMAGE_REQUIREMENTS.md'
-      - 'public/data/non-product-visual-coverage-v247.json'
-      - 'public/js/admin-non-product-visual-coverage-v247.js'
-      - 'admin/media-content-studio/index.html'
-      - 'admin/customer-documents/index.html'
-      - 'admin/creative-process/index.html'
-      - 'admin/creative-assets/index.html'
-      - 'admin/social-publishing/index.html'
-      - 'admin/inventory-operations/index.html'
-      - 'help/index.html'
-      - 'admin/help/index.html'
-      - 'current-development-authority.json'
-      - 'release467-build246-abuse-session-security-operations.json'
-      - 'release467-build247-non-product-visual-coverage-media-placement-closure.json'
-      - 'scripts/release467_build246_gate.py'
-      - 'scripts/release467_build247_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'public/js/admin-release-evidence-v242.js'
-      - 'admin/it/index.html'
-      - 'admin/deployment-preflight/index.html'
-      - 'admin/reliability/index.html'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'docs/operations/RELEASE_467_BUILD_247_NON_PRODUCT_VISUAL_COVERAGE_MEDIA_PLACEMENT_CLOSURE.md'
-      - '.github/workflows/release467-build247-non-product-visual-coverage.yml'
-  pull_request:
-    branches: [dev, main]
+  workflow_dispatch:
+
 jobs:
   build247:
     runs-on: ubuntu-latest

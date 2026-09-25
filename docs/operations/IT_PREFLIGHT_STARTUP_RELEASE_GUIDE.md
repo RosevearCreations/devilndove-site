@@ -12,28 +12,28 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 257 candidate
+## Current Release 467 restart authority — Build 258 candidate
 
-Build 256 **Refinement Outcomes Renewal II** is the exact verified predecessor:
+Build 257 **Workflow Trigger Inventory & Ownership Map** is the exact verified predecessor:
 
-- Development SHA: `601ea5eda5296c189388dc6df595d029687dfa1a`
-- Shared Development/Production tree: `f7f8d07bedc07cd6f335fcbb8fb1c2443cee2c06`
-- Development proofs: System `36075093498`, Quality `36075093559`, I.T. `36075093555`, Hygiene `36075093385`
-- Build 256 dedicated Development proof: `36075093678`
-- Production main: `36f48e66ea71b5cf598fb8bb7a9abce10e5ff7b9`
-- Production proofs: Pages `36075244119`, Live Resources `36075319609`, Product Browser `36075319580`, Product Route `36075319601`
-- Build 256 Production-specific proof: `36075244210`
+- Development SHA: `5e6fa8772be5946a0cd53eadbd4b3daa36fce253`
+- Shared Development/Production tree: `df03a29c947144f298f0908abf53ca3cdda1c159`
+- Development proofs: System `36077891398`, Quality `36077890063`, I.T. `36077891374`, Hygiene `36077890258`
+- Build 257 dedicated Development proof: `36077890220`
+- Production main: `9e95bca825599dea1459838e10812c74d799c976`
+- Production proofs: Pages `36078157785`, Live Resources `36078244247`, Product Browser `36078244252`, Product Route `36078244289`
+- Build 257 Production-specific proof: `36078158019`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 257 **Workflow Trigger Inventory & Ownership Map** is the active candidate. Its immutable pre-build baseline contains **146 workflow YAML files**. Trigger search before the Build 257 workflow was added measured **140 unique workflows** across the primary trigger families: **86 pull_request**, **90 push**, **89 workflow_dispatch**, **5 workflow_run**, and **1 issues**; schedule, repository_dispatch, workflow_call and pull_request_target were zero.
+Build 258 **Historical Workflow Trigger Scope Tightening** is the active candidate. It converts exactly **16** historical Release 467 proof workflows, Builds **242–257**, to **manual-only provenance** through `workflow_dispatch`. Every workflow file and historical Python gate script is retained.
 
-Build 257 keeps every pre-existing workflow file and adds only its own evidence workflow. It assigns every retained workflow a current proof owner. Historical Release 467 proof workflows with broad current-branch triggers are review candidates for **Build 258 — Historical Workflow Trigger Scope Tightening**; they are not disabled or deleted here. The five measured workflow_run chains remain separately owned post-deploy/recovery chains rather than being declared duplicates by trigger type alone.
+The full repository scanner on exact Build 257 measured 147 workflow files, 87 pull-request, 137 push, 107 manual-dispatch and 5 workflow-run triggers. With the Build 258 workflow added, the exact candidate is 148 workflow files, **72 pull-request**, **122 push**, **123 manual-dispatch** and the same **5 workflow-run** chains. The earlier Build 257 search-derived trigger snapshot remains historical evidence but is not mixed with this full-scanner comparison. This removes 15 automatic PR and 15 automatic push runs net while the System Gate continues executing the retained historical gate contracts directly.
 
 Exact-SHA promotion, identical-tree continuity, the four canonical Development proofs, Production Pages Deploy, Live Resource Integrity, Product Browser and Product Route proofs remain mandatory.
 
 No schema/request-time DDL, D1/R2 business mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy, branch-protection mutation or secret capture is introduced.
 
-Build 257 remains blocked from Production until its exact candidate tree passes the current System, Quality, I.T., Hygiene and Build 257 checks, is merged to `dev`, and the identical Development tree is promoted to `main`.
+Build 258 remains blocked from Production until its exact candidate tree passes the current System, Quality, I.T., Hygiene and Build 258 checks, is merged to `dev`, and the identical Development tree is promoted to `main`.
 
 ## Retained historical provenance — Build 171
 
