@@ -44,19 +44,71 @@
     "completed_raw_original_immutable": true,
     "uncertain_r2_delete_authorized": false,
     "categories": [
-      {"key":"REGISTERED_CANONICAL_IMMUTABLE","action":"protect","physical_delete_authorized":false},
-      {"key":"STRONG_DUPLICATE_CANDIDATE_REVIEW","action":"review_duplicate","physical_delete_authorized":false},
-      {"key":"VERIFIED_REDUNDANT_COPY_REVIEWABLE","action":"review_existing_explicit_cleanup_authority_only","physical_delete_authorized":false},
-      {"key":"LEGACY_METADATA_DUPLICATE_CANDIDATE","action":"preserve_and_strengthen_evidence","physical_delete_authorized":false},
-      {"key":"CHECKSUM_CONFLICT_PRESERVE","action":"preserve_all_review_conflict","physical_delete_authorized":false},
-      {"key":"RESUMABLE_UNFINISHED_MULTIPART","action":"resume_existing_identity","physical_delete_authorized":false},
-      {"key":"INTEGRITY_FAILED_PRESERVE_NEW_IDENTITY_RECOVERY","action":"preserve_prior_binary_create_clean_recovery_identity","physical_delete_authorized":false},
-      {"key":"RECOVERY_DESCENDANT_ACTIVE","action":"retain_lineage","physical_delete_authorized":false},
-      {"key":"D1_COMPLETED_UNREGISTERED_BINARY_REVIEW","action":"review_registration_or_recovery","physical_delete_authorized":false},
-      {"key":"OBJECT_ONLY_ORPHAN_CANDIDATE","action":"preserve_pending_reconciliation","physical_delete_authorized":false},
-      {"key":"D1_ONLY_MISSING_OBJECT_RECOVERY","action":"preserve_metadata_recover_with_new_identity","physical_delete_authorized":false},
-      {"key":"ARCHIVED_OR_ABORTED_HISTORICAL","action":"retain_history_no_physical_delete_inference","physical_delete_authorized":false},
-      {"key":"UNCLASSIFIED_REVIEW_REQUIRED","action":"preserve_fail_closed","physical_delete_authorized":false}
+      {
+        "key": "REGISTERED_CANONICAL_IMMUTABLE",
+        "action": "protect",
+        "physical_delete_authorized": false
+      },
+      {
+        "key": "STRONG_DUPLICATE_CANDIDATE_REVIEW",
+        "action": "review_duplicate",
+        "physical_delete_authorized": false
+      },
+      {
+        "key": "VERIFIED_REDUNDANT_COPY_REVIEWABLE",
+        "action": "review_existing_explicit_cleanup_authority_only",
+        "physical_delete_authorized": false
+      },
+      {
+        "key": "LEGACY_METADATA_DUPLICATE_CANDIDATE",
+        "action": "preserve_and_strengthen_evidence",
+        "physical_delete_authorized": false
+      },
+      {
+        "key": "CHECKSUM_CONFLICT_PRESERVE",
+        "action": "preserve_all_review_conflict",
+        "physical_delete_authorized": false
+      },
+      {
+        "key": "RESUMABLE_UNFINISHED_MULTIPART",
+        "action": "resume_existing_identity",
+        "physical_delete_authorized": false
+      },
+      {
+        "key": "INTEGRITY_FAILED_PRESERVE_NEW_IDENTITY_RECOVERY",
+        "action": "preserve_prior_binary_create_clean_recovery_identity",
+        "physical_delete_authorized": false
+      },
+      {
+        "key": "RECOVERY_DESCENDANT_ACTIVE",
+        "action": "retain_lineage",
+        "physical_delete_authorized": false
+      },
+      {
+        "key": "D1_COMPLETED_UNREGISTERED_BINARY_REVIEW",
+        "action": "review_registration_or_recovery",
+        "physical_delete_authorized": false
+      },
+      {
+        "key": "OBJECT_ONLY_ORPHAN_CANDIDATE",
+        "action": "preserve_pending_reconciliation",
+        "physical_delete_authorized": false
+      },
+      {
+        "key": "D1_ONLY_MISSING_OBJECT_RECOVERY",
+        "action": "preserve_metadata_recover_with_new_identity",
+        "physical_delete_authorized": false
+      },
+      {
+        "key": "ARCHIVED_OR_ABORTED_HISTORICAL",
+        "action": "retain_history_no_physical_delete_inference",
+        "physical_delete_authorized": false
+      },
+      {
+        "key": "UNCLASSIFIED_REVIEW_REQUIRED",
+        "action": "preserve_fail_closed",
+        "physical_delete_authorized": false
+      }
     ],
     "classification": "DUPLICATE_ORPHAN_RECOVERY_CLASSES_DEFINED_CLEANUP_NOT_AUTHORIZED"
   },
@@ -85,5 +137,26 @@
     "secret_capture": false,
     "synthetic_acceptance": false,
     "exact_sha_requirement_relaxed": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "c2f4a123b029853438260f06f0582a3902adf0c4",
+      "tree": "6986989e2aa860a639ed8d6748a0c3143b32054d",
+      "system_gate_run": 36156294854,
+      "quality_run": 36156294795,
+      "it_admin_runtime_run": 36156294784,
+      "repository_hygiene_run": 36156294718,
+      "dedicated_gate_run": 36156294779
+    },
+    "production": {
+      "main_sha": "1d4a1c204d19c4ecca16dd8dd6952b5107327db8",
+      "tree_sha": "6986989e2aa860a639ed8d6748a0c3143b32054d",
+      "production_pages_deploy_run": 36156595435,
+      "production_live_resource_integrity_run": 36156682258,
+      "products_browser_proof_run": 36156682086,
+      "products_route_proof_run": 36156682143,
+      "build_specific_proof_run": 36156595028,
+      "state": "PRODUCTION_GREEN"
+    }
   }
 }
