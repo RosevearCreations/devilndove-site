@@ -1,0 +1,36 @@
+name: Release 467 Exact-SHA Proof Composition
+description: Read-only reusable verification of exact Development and Production GitHub Actions proof sets.
+inputs:
+  github-token:
+    description: GitHub token with Actions read permission.
+    required: true
+  repository:
+    description: owner/repository.
+    required: true
+  development-sha:
+    description: Exact verified Development commit SHA.
+    required: true
+  production-sha:
+    description: Exact Production commit SHA.
+    required: true
+  build-proof-name:
+    description: Exact build-specific workflow name required in both lanes.
+    required: true
+  report-path:
+    description: Output JSON report path.
+    required: false
+    default: /tmp/release467-exact-sha-proof-composition.json
+runs:
+  using: composite
+  steps:
+    - name: Verify exact-SHA Development and Production proof composition
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        python scripts/release467_exact_sha_proof_composition.py \
+          --repo "${{ inputs.repository }}" \
+          --development-sha "${{ inputs.development-sha }}" \
+          --production-sha "${{ inputs.production-sha }}" \
+          --build-proof-name "${{ inputs.build-proof-name }}" \
+          --report-path "${{ inputs.report-path }}"
