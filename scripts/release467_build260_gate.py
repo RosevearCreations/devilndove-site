@@ -6,11 +6,24 @@ def t(p):return (R/p).read_text(encoding='utf-8',errors='replace')
 def j(p):return json.loads(t(p))
 def q(ok,msg):
     if not ok:F.append(msg)
-def header(body):
-    for marker in ('\npermissions:','\njobs:'):
-        if marker in body:return body.split(marker,1)[0]
-    return body
-
+def triggers(body):
+    found=set()
+    m=re.search(r'(?m)^on:\s*\[([^\]]+)\]\s*$',body)
+    if m:
+        for item in m.group(1).split(','):
+            key=item.strip().strip("'\"")
+            if key:found.add(key)
+    m=re.search(r'(?m)^on:\s*([A-Za-z_][A-Za-z0-9_]*)\s*$',body)
+    if m:found.add(m.group(1))
+    lines=body.splitlines()
+    for i,line in enumerate(lines):
+        if re.match(r'^on:\s*$',line):
+            for child in lines[i+1:]:
+                if child and not child.startswith((' ','\t')):break
+                mm=re.match(r'^\s{2}([A-Za-z_][A-Za-z0-9_-]*):',child)
+                if mm:found.add(mm.group(1))
+            break
+    return found
 a=j('release467-build260-pull-request-matrix-fanout-reduction.json')
 prev=j('release467-build259-reusable-exact-sha-proof-composition.json')
 p=j('current-development-authority.json')
@@ -48,10 +61,10 @@ for n in target_builds:
     q(len(matches)==1,f'Build {n} must resolve to exactly one target workflow, got {len(matches)}')
     if len(matches)!=1:continue
     path=matches[0];target_paths.append(path)
-    h=header(path.read_text(encoding='utf-8',errors='replace'))
-    q('pull_request:' not in h,f'{path.as_posix()} must not auto-run on pull requests')
-    q(('push:' in h) if n!=240 else red.get('build240_final_mode')=='MANUAL_ONLY_PROVENANCE',f'{path.as_posix()} push/manual provenance mismatch')
-    q('workflow_dispatch:' in h,f'{path.as_posix()} must retain manual evidence')
+    ts=triggers(path.read_text(encoding='utf-8',errors='replace'))
+    q('pull_request' not in ts,f'{path.as_posix()} must not auto-run on pull requests')
+    q('push' in ts,f'{path.as_posix()} must retain push evidence')
+    q('workflow_dispatch' in ts,f'{path.as_posix()} must retain manual evidence')
     q((R/f'scripts/release467_build{n}_gate.py').is_file(),f'Build {n} gate script must be retained')
     q(f"run_current_contract('scripts/release467_build{n}_gate.py'" in sysgate,f'System Gate must retain Build {n} contract coverage')
 q(len(target_paths)==38,'Build 260 must resolve all 38 target workflows')
