@@ -1,7 +1,5 @@
 name: Release 467 Build 231 Workshop Journal Capability Case Study Activation
 on:
-  pull_request:
-    branches: [dev, main]
   push:
     branches: [dev, main]
   workflow_dispatch:

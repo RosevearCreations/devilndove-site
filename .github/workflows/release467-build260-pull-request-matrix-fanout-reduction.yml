@@ -1,0 +1,43 @@
+name: Release 467 Build 260 Pull-Request Matrix Fan-Out Reduction
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build260:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 259 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 270eea921559b2439459180998cc367b6fe7c9bb
+          production_sha: af294ad20ec26222ec0f7ccdb856f39de9fbbd2e
+          build_proof_name: Release 467 Build 259 Reusable Exact-SHA Proof Composition
+          report_path: /tmp/build260-exact-sha-proof-composition.json
+      - name: Build 260 fan-out reduction gate
+        run: python scripts/release467_build260_gate.py
+      - name: Retain predecessor and release-efficiency contracts
+        run: |
+          python scripts/release467_build259_gate.py
+          python scripts/release467_build258_gate.py
+          python scripts/release467_build257_gate.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release467-build260-pull-request-matrix-fanout
+          path: /tmp/build260-exact-sha-proof-composition.json
+          if-no-files-found: error
+          retention-days: 30

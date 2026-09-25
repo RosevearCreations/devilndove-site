@@ -12,30 +12,30 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 259 candidate
+## Current Release 467 restart authority — Build 260 candidate
 
-Build 258 **Historical Workflow Trigger Scope Tightening** is the exact verified predecessor:
+Build 259 **Reusable Exact-SHA Proof Composition** is the exact verified predecessor:
 
-- Development SHA: `3675554c0c2ce64923ec3e1763a243e03d103f1a`
-- Shared Development/Production tree: `64dab693be764fb11a3cb9c36d06352a2f02eb1a`
-- Development proofs: System `36081394811`, Quality `36081394936`, I.T. `36081394824`, Hygiene `36081394851`
-- Build 258 dedicated Development proof: `36081394877`
-- Production main: `436c4e724efc736492f9772ffea7d5141feb3416`
-- Production proofs: Pages `36081526239`, Live Resources `36081651628`, Product Browser `36081651602`, Product Route `36081651629`
-- Build 258 Production-specific proof: `36081526248`
+- Development SHA: `270eea921559b2439459180998cc367b6fe7c9bb`
+- Shared Development/Production tree: `e81b613e5a4b491927ab89c89800345025853b99`
+- Development proofs: System `36082784059`, Quality `36082784168`, I.T. `36082783908`, Hygiene `36082784042`
+- Build 259 dedicated Development proof: `36082783905`
+- Production main: `af294ad20ec26222ec0f7ccdb856f39de9fbbd2e`
+- Production proofs: Pages `36082913970`, Live Resources `36082967263`, Product Browser `36082967302`, Product Route `36082967286`
+- Build 259 Production-specific proof: `36082914063`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 259 **Reusable Exact-SHA Proof Composition** is the active candidate. It introduces one read-only reusable GitHub composite action backed by a Python verifier. The component requires exact Development and Production SHAs and independently preserves the named System, Quality, I.T., Hygiene, Pages, Live Resource, Product Browser, Product Route and build-specific requirements.
+Build 260 **Pull-Request Matrix Fan-Out Reduction** is the active candidate. It removes only the `pull_request` trigger from exactly **38** historical release workflows: Builds **206–241 plus 258–259**. Every existing push evidence path remains, all 38 targets are manually dispatchable, every workflow file and historical gate script remains, and the canonical System Gate continues to execute the same gate contracts.
 
-Build 258's active proof workflow is refactored to use the reusable composition; Build 259 uses the same component against the exact Build 258 closure. Historical manual-only Build 242–257 workflows are intentionally not rewritten.
+Build 256 full-scanner PR baseline: **87**. Build 259 full-scanner candidate: **149 workflow files / 73 pull-request / 123 push / 124 manual-dispatch / 5 workflow-run**; its exact final PR head ran **72** workflows.
 
-The Build 258 full-scanner baseline is 148 workflow files / 72 pull-request / 122 push / 123 manual-dispatch / 5 workflow-run. Build 259 adds only its active proof workflow, for an expected 149 workflow files / **73 pull-request** / **123 push** / **124 manual-dispatch** / **5 workflow-run**.
+With Build 260's active proof workflow added, the expected candidate is **150 workflow files / 36 pull-request / 124 push / 132 manual-dispatch / 5 workflow-run**, with **35 expected actual PR runs**.
 
-Exact-SHA promotion, identical-tree continuity, the four canonical Development proofs, Production Pages Deploy, Live Resource Integrity, Product Browser and Product Route proofs remain mandatory.
+The reusable exact-SHA composition remains required for Build 260. System, Quality, I.T., Hygiene, Build 260, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
 
-No schema/request-time DDL, D1/R2 business mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy, branch-protection mutation or secret capture is introduced.
+No workflow or gate script deletion, schema/request-time DDL, D1/R2 business mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy, branch-protection mutation or secret capture is introduced.
 
-Build 259 remains blocked from Production until its exact candidate tree passes the current System, Quality, I.T., Hygiene and Build 259 checks, is merged to `dev`, and the identical Development tree is promoted to `main`.
+Build 260 remains blocked from Production until its exact candidate passes the current System, Quality, I.T., Hygiene and Build 260 checks, is merged to `dev`, and the identical Development tree is promoted to `main`.
 
 ## Retained historical provenance — Build 171
 
