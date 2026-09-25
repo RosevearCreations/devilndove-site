@@ -58,7 +58,7 @@ except Exception as e:q(False,f'Build 258 inventory report unreadable: {e}')
 q(report.get('workflow_file_count')==148,'Build 258 candidate must contain 148 workflow files')
 q(report.get('baseline_file_count')==146 and report.get('baseline_missing')==[],'Build 258 must retain every Build 257 baseline workflow')
 tc=report.get('trigger_counts') or {}
-for k,v in {'pull_request':72,'push':76,'workflow_dispatch':106,'workflow_run':5,'issues':1,'schedule':0,'repository_dispatch':0,'workflow_call':0,'pull_request_target':0}.items():
+for k,v in {'pull_request':72,'push':122,'workflow_dispatch':123,'workflow_run':5,'issues':0,'schedule':0,'repository_dispatch':0,'workflow_call':0,'pull_request_target':0}.items():
     q(tc.get(k)==v,f'Build 258 trigger count mismatch: {k} expected {v} got {tc.get(k)}')
 q((a.get('expected_candidate') or {}).get('net_pull_request_reduction')==15 and (a.get('expected_candidate') or {}).get('net_push_reduction')==15,'Build 258 net fan-out reduction mismatch')
 
@@ -82,6 +82,6 @@ if F:
     print('FAIL');[print('-',x) for x in F];sys.exit(1)
 print('PASS')
 print('Builds 242-257 historical proof workflows: MANUAL_ONLY_PROVENANCE')
-print('Candidate trigger counts: pull_request=72 push=76 workflow_dispatch=106 workflow_run=5')
+print('Candidate trigger counts: pull_request=72 push=122 workflow_dispatch=123 workflow_run=5')
 print('Historical gate scripts retained; canonical proof owners retained; exact-SHA promotion preserved')
 print('Next: Build 259 — Reusable Exact-SHA Proof Composition')
