@@ -1,7 +1,5 @@
 name: Release 467 Build 229 First Creative Project Prototype-to-Run Pilot
 on:
-  pull_request:
-    branches: [dev, main]
   push:
     branches: [dev, main]
   workflow_dispatch:
