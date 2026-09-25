@@ -17,7 +17,7 @@ Build 268 is the exact source predecessor.
 
 ## Build 269 schema integrity
 
-The runtime and aggregate schema already require the Build 269 fields, but the standalone migration named by the runtime was missing. Build 269 restores that deployment artifact:
+The runtime and aggregate schema already require the Build 269 fields, but the standalone migration named by the runtime was missing. Build 269 restores that deployment artifact as `database_build269_caip_social_project_dedupe_integrity.sql`:
 
 - `content_fingerprint`
 - `content_fingerprint_version`
