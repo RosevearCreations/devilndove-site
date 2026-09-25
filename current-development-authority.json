@@ -1,32 +1,32 @@
 {
   "release": 467,
-  "build": 258,
-  "title": "Historical Workflow Trigger Scope Tightening",
+  "build": 259,
+  "title": "Reusable Exact-SHA Proof Composition",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 257,
-      "title": "Workflow Trigger Inventory & Ownership Map",
-      "authority": "release467-build257-workflow-trigger-inventory-ownership-map.json",
-      "dev_sha": "5e6fa8772be5946a0cd53eadbd4b3daa36fce253",
-      "tree_sha": "df03a29c947144f298f0908abf53ca3cdda1c159",
+      "build": 258,
+      "title": "Historical Workflow Trigger Scope Tightening",
+      "authority": "release467-build258-historical-workflow-trigger-scope-tightening.json",
+      "dev_sha": "3675554c0c2ce64923ec3e1763a243e03d103f1a",
+      "tree_sha": "64dab693be764fb11a3cb9c36d06352a2f02eb1a",
       "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
-      "business_exit": "OWNER_AUTHORIZED_HISTORICAL_WORKFLOW_TRIGGER_SCOPE_TIGHTENING",
+      "business_exit": "OWNER_AUTHORIZED_REUSABLE_EXACT_SHA_PROOF_COMPOSITION",
       "proofs": {
-        "system_gate_run": 36077891398,
-        "current_application_quality_run": 36077890063,
-        "it_admin_runtime_proof_run": 36077891374,
-        "branch_hygiene_run": 36077890258
+        "system_gate_run": 36081394811,
+        "current_application_quality_run": 36081394936,
+        "it_admin_runtime_proof_run": 36081394824,
+        "branch_hygiene_run": 36081394851
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 258,
-      "title": "Historical Workflow Trigger Scope Tightening",
-      "authority": "release467-build258-historical-workflow-trigger-scope-tightening.json",
+      "build": 259,
+      "title": "Reusable Exact-SHA Proof Composition",
+      "authority": "release467-build259-reusable-exact-sha-proof-composition.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -37,21 +37,22 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 257,
-    "title": "Workflow Trigger Inventory & Ownership Map",
-    "authority": "release467-build257-workflow-trigger-inventory-ownership-map.json",
-    "main_sha": "9e95bca825599dea1459838e10812c74d799c976",
-    "tree_sha": "df03a29c947144f298f0908abf53ca3cdda1c159",
-    "production_pages_deploy_run": 36078157785,
-    "production_live_resource_integrity_run": 36078244247,
-    "products_browser_proof_run": 36078244252,
-    "products_route_proof_run": 36078244289,
-    "build_specific_proof_run": 36078158019,
+    "build": 258,
+    "title": "Historical Workflow Trigger Scope Tightening",
+    "authority": "release467-build258-historical-workflow-trigger-scope-tightening.json",
+    "main_sha": "436c4e724efc736492f9772ffea7d5141feb3416",
+    "tree_sha": "64dab693be764fb11a3cb9c36d06352a2f02eb1a",
+    "production_pages_deploy_run": 36081526239,
+    "production_live_resource_integrity_run": 36081651628,
+    "products_browser_proof_run": 36081651602,
+    "products_route_proof_run": 36081651629,
+    "build_specific_proof_run": 36081526248,
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build259-reusable-exact-sha-proof-composition.json",
     "release467-build258-historical-workflow-trigger-scope-tightening.json",
     "release467-build257-workflow-trigger-inventory-ownership-map.json",
     "release467-build256-refinement-outcomes-renewal-ii.json",
@@ -151,10 +152,10 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_RELEASE_EFFICIENCY_READ_PATH_AUTONOMOUS_BUILDS_257_264.md",
-  "next_build": 259,
+  "next_build": 260,
   "next_build_state": "AUTHORIZED_NEXT",
-  "next_build_title": "Reusable Exact-SHA Proof Composition",
-  "promotion_state": "BUILD258_DEVELOPMENT_CANDIDATE_NOT_YET_PRODUCTION",
+  "next_build_title": "Pull-Request Matrix Fan-Out Reduction",
+  "promotion_state": "BUILD259_DEVELOPMENT_CANDIDATE_NOT_YET_PRODUCTION",
   "successor_scope_state": "RELEASE_EFFICIENCY_READ_PATH_ROADMAP_ACTIVE",
   "measured_closure": {
     "source_build": 232,
@@ -180,20 +181,20 @@
     "last_build": 264,
     "state": "EVIDENCE_DRIVEN_RELEASE_EFFICIENCY_AND_READ_PATH_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 259,
-    "next_build_title": "Reusable Exact-SHA Proof Composition",
+    "next_build": 260,
+    "next_build_title": "Pull-Request Matrix Fan-Out Reduction",
     "roadmap": "docs/operations/RELEASE_467_RELEASE_EFFICIENCY_READ_PATH_AUTONOMOUS_BUILDS_257_264.md",
     "reactivation_source": "BUILD256_REFINEMENT_OUTCOMES_RENEWAL_II"
   },
   "canonical_data_migration_authorized": false,
-  "canonical_data_migration_scope": "NONE_BUILD258_HISTORICAL_WORKFLOW_TRIGGER_SCOPE_TIGHTENING",
-  "accepted_dev_sha": "5e6fa8772be5946a0cd53eadbd4b3daa36fce253",
-  "accepted_dev_tree_sha": "df03a29c947144f298f0908abf53ca3cdda1c159",
+  "canonical_data_migration_scope": "NONE_BUILD259_REUSABLE_EXACT_SHA_PROOF_COMPOSITION",
+  "accepted_dev_sha": "3675554c0c2ce64923ec3e1763a243e03d103f1a",
+  "accepted_dev_tree_sha": "64dab693be764fb11a3cb9c36d06352a2f02eb1a",
   "acceptance": {
-    "system_gate_run": 36077891398,
-    "current_application_quality_run": 36077890063,
-    "it_admin_runtime_proof_run": 36077891374,
-    "branch_hygiene_run": 36077890258
+    "system_gate_run": 36081394811,
+    "current_application_quality_run": 36081394936,
+    "it_admin_runtime_proof_run": 36081394824,
+    "branch_hygiene_run": 36081394851
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -247,6 +248,37 @@
     "workflow_files_deleted": false,
     "exact_sha_promotion_preserved": true,
     "next_build": 259,
+    "future_queue_exhausted": false
+  },
+  "reusable_exact_sha_proof_composition": {
+    "source_build": 258,
+    "component": ".github/actions/release467-exact-sha-proof/action.yml",
+    "verifier": "scripts/release467_exact_sha_proof_composition.py",
+    "development_requirements": [
+      "System Gate",
+      "Current Application Quality Proof",
+      "I.T. Admin Runtime Proof",
+      "Repository Branch Hygiene",
+      "build-specific proof"
+    ],
+    "production_requirements": [
+      "Production Pages Deploy",
+      "Production Live Resource Integrity Proof",
+      "Product Browser Production Proof",
+      "Product Route Production Proof",
+      "build-specific proof"
+    ],
+    "read_only": true,
+    "exact_sha_bound": true,
+    "build258_refactored_to_composition": true,
+    "build259_uses_composition": true,
+    "historical_manual_only_workflows_rewritten": false,
+    "expected_candidate_workflow_files": 149,
+    "expected_pull_request": 73,
+    "expected_push": 123,
+    "expected_workflow_dispatch": 124,
+    "expected_workflow_run": 5,
+    "next_build": 260,
     "future_queue_exhausted": false
   }
 }

@@ -62,12 +62,7 @@ else:
     q((a.get('production_checkpoint') or {}).get('main_sha')=='36f48e66ea71b5cf598fb8bb7a9abce10e5ff7b9','Build 257+ must retain exact Build 256 Production closure')
 q("run_current_contract('scripts/release467_build256_gate.py','Release 467 Build 256')" in sysgate,'System Gate must invoke Build 256')
 for source,label in ((rel,'Reliability'),(it,'I.T. tower'),(preflight,'Preflight'),(itpage,'I.T. page'),(relpage,'Reliability page'),(prepage,'Preflight page'),(guide,'I.T. guide')):
-    if cur==256:
-        q('256' in source and 'Refinement Outcomes Renewal II' in source,f'{label} must identify Build 256 renewal')
-    elif cur==257:
-        q('257' in source and 'Workflow Trigger Inventory' in source,f'{label} must identify Build 257 successor')
-    else:
-        q('258' in source and 'Historical Workflow Trigger Scope Tightening' in source,f'{label} must identify Build 258+ successor')
+    q(str(cur) in source and str(p.get('title') or '') in source,f'{label} must identify the current verified successor')
 for k,v in (a.get('safety') or {}).items():
     q(v is False,f'Build 256 safety drift: {k}')
 
