@@ -1,0 +1,38 @@
+name: Release 467 Build 267 CAIP Duplicate & Orphan Recovery Classification
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build267:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 266 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: c2f4a123b029853438260f06f0582a3902adf0c4
+          production_sha: 1d4a1c204d19c4ecca16dd8dd6952b5107327db8
+          build_proof_name: Release 467 Build 266 CAIP Multipart Recovery Integrity Review
+          report_path: /tmp/build267-predecessor-exact-sha-proof.json
+      - name: Build 267 classification gate
+        run: python scripts/release467_build267_gate.py
+      - name: Retain Build 266 predecessor contract
+        run: python scripts/release467_build266_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build267-classification-evidence-${{ github.sha }}
+          path: /tmp/build267-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30

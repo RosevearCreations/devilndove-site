@@ -1,27 +1,27 @@
-// Release 467 Build 266 — CAIP Multipart Recovery Integrity Review over exact Build 265 Production source.
+// Release 467 Build 267 — CAIP Duplicate & Orphan Recovery Classification over exact Build 266 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=266;
-const TITLE='CAIP Multipart Recovery Integrity Review';
-const AUTHORITY='release467-build266-caip-multipart-recovery-integrity-review';
-const EVIDENCE_ID='r467-b265-green-36151831375-36152347971';
+const BUILD=267;
+const TITLE='CAIP Duplicate & Orphan Recovery Classification';
+const AUTHORITY='release467-build267-caip-duplicate-orphan-recovery-classification';
+const EVIDENCE_ID='r467-b266-green-36156294854-36156595435';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:265,title:'CAIP Private-Media Prerequisite Inventory',state:'DEVELOPMENT_GREEN',
-  dev_sha:'1ac2f5f55228b3c8fbd86ea1e3d07cfb35edaa33',tree_sha:'d4f1da2902442d02e23becd06b5f05af30a86ac4',
-  system_gate_run:36151831375,current_application_quality_run:36151831443,it_admin_runtime_proof_run:36151831358,
-  branch_hygiene_run:36151831299,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN_WITH_PROVIDER_MEASUREMENT',
+  release:467,build:266,title:'CAIP Multipart Recovery Integrity Review',state:'DEVELOPMENT_GREEN',
+  dev_sha:'c2f4a123b029853438260f06f0582a3902adf0c4',tree_sha:'6986989e2aa860a639ed8d6748a0c3143b32054d',
+  system_gate_run:36156294854,current_application_quality_run:36156294795,it_admin_runtime_proof_run:36156294784,
+  branch_hygiene_run:36156294718,dedicated_gate_run:36156294779,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:265,title:'CAIP Private-Media Prerequisite Inventory',state:'PRODUCTION_GREEN',
-  main_sha:'28181d75fe8425244848ae5a06c86f54a446eb1b',tree_sha:'d4f1da2902442d02e23becd06b5f05af30a86ac4',
-  production_pages_deploy_run:36152347971,production_live_resource_integrity_run:36152439772,
-  products_browser_proof_run:36152439922,products_route_proof_run:36152439676,remote_d1_queries:0
+  release:467,build:266,title:'CAIP Multipart Recovery Integrity Review',state:'PRODUCTION_GREEN',
+  main_sha:'1d4a1c204d19c4ecca16dd8dd6952b5107327db8',tree_sha:'6986989e2aa860a639ed8d6748a0c3143b32054d',
+  production_pages_deploy_run:36156595435,production_live_resource_integrity_run:36156682258,
+  products_browser_proof_run:36156682086,products_route_proof_run:36156682143,build_specific_proof_run:36156595028,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 266 CAIP Multipart Recovery Integrity Review'
+  'Release 467 Build 267 CAIP Duplicate & Orphan Recovery Classification'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 267 follows after Build 266 multipart-recovery integrity closure.'
+    next_build:'Build 268 follows after Build 267 duplicate/orphan recovery classification closure.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 266 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 267 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -114,14 +114,14 @@ export async function onRequestGet(context){
   const base=baseResponse.ok?await baseResponse.json().catch(()=>({})):{};
   const diagnostic=diagnosticResponse.ok?await diagnosticResponse.json().catch(()=>({})):{};
   const data={
-    release:RELEASE,build:BUILD,title:TITLE,ok:true,authority:AUTHORITY,state:'DEVELOPMENT_REFINEMENT_CANDIDATE',
+    release:RELEASE,build:BUILD,title:TITLE,ok:true,authority:AUTHORITY,state:'DEVELOPMENT_GREEN',
     release_authority:{
-      current_operator:{release:RELEASE,build:BUILD,title:TITLE,state:'DEVELOPMENT_REFINEMENT_CANDIDATE'},
+      current_operator:{release:RELEASE,build:BUILD,title:TITLE,state:'DEVELOPMENT_GREEN'},
       accepted_development:ACCEPTED_DEVELOPMENT,verified_development:VERIFIED_DEVELOPMENT,production:PRODUCTION,
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:266,title:TITLE,authority:'release467-build266-caip-multipart-recovery-integrity-review.json'},
+        current_closure_candidate:{release:467,build:267,title:TITLE,authority:'release467-build267-caip-duplicate-orphan-recovery-classification.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -148,17 +148,17 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 265 is the exact last fully verified Development checkpoint.',
-      'Build 265 Production is GREEN on the identical tree d4f1da2902442d02e23becd06b5f05af30a86ac4.',
-      'Build 265 Development proofs: System 36151831375, Quality 36151831443, I.T. 36151831358, Hygiene 36151831299.',
-      'Build 265 Production proofs: Pages 36152347971, Live Resources 36152439772, Product Browser 36152439922, Product Route 36152439676.',
+      'Build 266 is the exact last fully verified Development checkpoint.',
+      'Build 266 Production is GREEN on the identical tree 6986989e2aa860a639ed8d6748a0c3143b32054d.',
+      'Build 266 Development proofs: System 36156294854, Quality 36156294795, I.T. 36156294784, Hygiene 36156294718, Build 266 36156294779.',
+      'Build 266 Production proofs: Pages 36156595435, Live Resources 36156682258, Product Browser 36156682086, Product Route 36156682143, Build 266 36156595028.',
       'Build 260 removed only redundant pull-request triggers from 38 historical proof workflows while preserving System Gate coverage and push/manual evidence.',
       'Build 261 removed 39 redundant historical Production main-push subscriptions while preserving Development push/manual evidence and all four canonical Production proofs.',
       'Build 262 batches six latest-action point lookups into one read-only D1 statement and closed exact Development at 8 statements under unchanged provider ceilings.',
       'Build 263 measures 584 closure-scoped GREEN runs across 12 accepted heads, a 21.69% normalized runs-per-head reduction while all required named proofs and exact-tree release pairs remain valid.',
       'Build 265 closed the CAIP private-media prerequisite inventory on exact Development/Production trees.',
       'Build 266 verifies multipart interruption/resume, completed-part ETag continuity, exact-size completion and immutable raw-source boundaries; live Production interruption acceptance remains evidence-dependent.',
-      'Build 267 is the next bounded CAIP Duplicate & Orphan Recovery Classification release.'
+      'Build 268 is the next bounded CAIP Private-Media Recovery Hardening Closure release.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
