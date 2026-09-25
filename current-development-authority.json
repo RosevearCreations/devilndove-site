@@ -2,8 +2,8 @@
   "release": 467,
   "build": 265,
   "title": "CAIP Private-Media Prerequisite Inventory",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "source_authority": "build265-caip-private-media-prerequisite-inventory",
+  "state": "DEVELOPMENT_GREEN",
+  "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
@@ -12,8 +12,16 @@
       "title": "Refinement Outcomes Renewal III",
       "authority": "release467-build264-refinement-outcomes-renewal-iii.json",
       "dev_sha": "9017e145286f2007646a1f4de9ebdb670ca23881",
-      "proof_state": "LIVE_BY_EXACT_SHA_COMPOSITION",
-      "business_exit": "OWNER_AUTHORIZED_CAIP_PRIVATE_MEDIA_PREREQUISITE_INVENTORY"
+      "tree_sha": "bbe175e82624a2043fb7fd8f84ca5ba9bb361410",
+      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+      "business_exit": "OWNER_AUTHORIZED_CAIP_PRIVATE_MEDIA_PREREQUISITE_INVENTORY",
+      "proofs": {
+        "system_gate_run": 36146386642,
+        "current_application_quality_run": 36146386016,
+        "it_admin_runtime_proof_run": 36146386111,
+        "branch_hygiene_run": 36146385905
+      },
+      "dedicated_gate_run": 36146386405
     },
     "current_closure_candidate": {
       "release": 467,
@@ -34,10 +42,16 @@
     "title": "Refinement Outcomes Renewal III",
     "authority": "release467-build264-refinement-outcomes-renewal-iii.json",
     "main_sha": "9cf042afb9b7938f160df89b49b82376eb8f9291",
+    "tree_sha": "bbe175e82624a2043fb7fd8f84ca5ba9bb361410",
     "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "role": "CURRENT_PRODUCTION_BASELINE"
+    "role": "CURRENT_PRODUCTION_BASELINE",
+    "production_pages_deploy_run": 36147031112,
+    "production_live_resource_integrity_run": 36147115215,
+    "products_browser_proof_run": 36147115091,
+    "products_route_proof_run": 36147115289,
+    "build_specific_proof_run": 36147031170
   },
   "current_release_authorities": [
     "release467-build265-caip-private-media-prerequisite-inventory.json",
@@ -147,7 +161,7 @@
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md",
   "next_build": 266,
-  "next_build_state": "AUTHORIZED_NEXT",
+  "next_build_state": "AUTHORIZED_IN_PROGRESS",
   "next_build_title": "CAIP Multipart Recovery Integrity Review",
   "promotion_state": "BUILD265_DEVELOPMENT_CANDIDATE_NOT_YET_PRODUCTION",
   "successor_scope_state": "CAIP_RECOVERY_CONTINUITY_ROADMAP_ACTIVE",
@@ -183,13 +197,12 @@
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_BUILD265_CAIP_PRIVATE_MEDIA_PREREQUISITE_INVENTORY",
   "accepted_dev_sha": "9017e145286f2007646a1f4de9ebdb670ca23881",
-  "accepted_dev_tree_sha": null,
+  "accepted_dev_tree_sha": "bbe175e82624a2043fb7fd8f84ca5ba9bb361410",
   "acceptance": {
-    "system_gate_run": 36136926977,
-    "current_application_quality_run": 36136927022,
-    "it_admin_runtime_proof_run": 36136927013,
-    "branch_hygiene_run": 36136926926,
-    "build_specific_proof_run": 36136927079
+    "system_gate_run": 36146386642,
+    "current_application_quality_run": 36146386016,
+    "it_admin_runtime_proof_run": 36146386111,
+    "branch_hygiene_run": 36146385905
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
