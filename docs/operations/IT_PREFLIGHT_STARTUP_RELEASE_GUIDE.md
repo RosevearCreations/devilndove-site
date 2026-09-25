@@ -12,28 +12,28 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 256 candidate
+## Current Release 467 restart authority — Build 257 candidate
 
-Build 255 **Production Reliability & Release Efficiency Review** is the exact verified predecessor:
+Build 256 **Refinement Outcomes Renewal II** is the exact verified predecessor:
 
-- Development SHA: `6d8d006cad521f2ca9fb83b2d7a1ec62ad9347fb`
-- Shared Development/Production tree: `7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398`
-- Development proofs: System `36073942618`, Quality `36073942565`, I.T. `36073942615`, Hygiene `36073943552`
-- Build 255 dedicated Development proof: `36073942420`
-- Production main: `c5ef57106fe84b386230d686b46d11ea30c35576`
-- Production proofs: Pages `36074089250`, Live Resources `36074174209`, Product Browser `36074174144`, Product Route `36074174120`
-- Build 255 Production-specific proof: `36074089765`
+- Development SHA: `601ea5eda5296c189388dc6df595d029687dfa1a`
+- Shared Development/Production tree: `f7f8d07bedc07cd6f335fcbb8fb1c2443cee2c06`
+- Development proofs: System `36075093498`, Quality `36075093559`, I.T. `36075093555`, Hygiene `36075093385`
+- Build 256 dedicated Development proof: `36075093678`
+- Production main: `36f48e66ea71b5cf598fb8bb7a9abce10e5ff7b9`
+- Production proofs: Pages `36075244119`, Live Resources `36075319609`, Product Browser `36075319580`, Product Route `36075319601`
+- Build 256 Production-specific proof: `36075244210`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 256 **Refinement Outcomes Renewal II** is the active candidate. It re-measures Builds 249–255. Their accepted Development/Production heads account for **870** workflow runs: **863** success, **7** historical failures, **0** skipped and **0** rerun attempts. Build 255 itself is clean at **70/70 Development + 64/64 Production**.
+Build 257 **Workflow Trigger Inventory & Ownership Map** is the active candidate. Its immutable pre-build baseline contains **146 workflow YAML files**. Trigger search before the Build 257 workflow was added measured **140 unique workflows** across the primary trigger families: **86 pull_request**, **90 push**, **89 workflow_dispatch**, **5 workflow_run**, and **1 issues**; schedule, repository_dispatch, workflow_call and pull_request_target were zero.
 
-The renewal does not invent route friction: Build 254 still has no real browser-local session evidence justifying route-specific remediation. The evidence-backed residuals are high release-proof fan-out and the Build 250 `operations-today-tasks-read` hotspot, measured at **2,178 / 25,000 rows read** with **13 SELECT statements**.
+Build 257 keeps every pre-existing workflow file and adds only its own evidence workflow. It assigns every retained workflow a current proof owner. Historical Release 467 proof workflows with broad current-branch triggers are review candidates for **Build 258 — Historical Workflow Trigger Scope Tightening**; they are not disabled or deleted here. The five measured workflow_run chains remain separately owned post-deploy/recovery chains rather than being declared duplicates by trigger type alone.
 
-Build 256 therefore authorizes the bounded successor roadmap **Builds 257–264**, beginning with **Build 257 — Workflow Trigger Inventory & Ownership Map**. Exact-SHA promotion, identical-tree continuity and named Production resource proofs remain mandatory.
+Exact-SHA promotion, identical-tree continuity, the four canonical Development proofs, Production Pages Deploy, Live Resource Integrity, Product Browser and Product Route proofs remain mandatory.
 
-No schema/request-time DDL, D1/R2 business mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy, personal-data capture or secret capture is introduced.
+No schema/request-time DDL, D1/R2 business mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy, branch-protection mutation or secret capture is introduced.
 
-Build 256 remains blocked from Production until its exact candidate tree passes the current System, Quality, I.T., Hygiene and Build 256 checks, is merged to `dev`, and the identical Development tree is promoted to `main`.
+Build 257 remains blocked from Production until its exact candidate tree passes the current System, Quality, I.T., Hygiene and Build 257 checks, is merged to `dev`, and the identical Development tree is promoted to `main`.
 
 ## Retained historical provenance — Build 171
 
