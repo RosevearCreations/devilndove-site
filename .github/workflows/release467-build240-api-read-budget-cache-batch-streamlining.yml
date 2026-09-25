@@ -5,7 +5,7 @@ permissions:
   actions: read
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'admin/index.html'
       - 'public/js/admin-read-budget-v240.js'
