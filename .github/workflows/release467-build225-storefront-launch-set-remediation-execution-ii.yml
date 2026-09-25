@@ -1,7 +1,5 @@
 name: Release 467 Build 225 Storefront Launch-Set Remediation Execution II
 on:
-  pull_request:
-    branches: [dev, main]
   push:
     branches: [dev, main]
     paths:
