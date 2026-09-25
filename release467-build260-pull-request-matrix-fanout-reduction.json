@@ -56,13 +56,18 @@
     "canonical_it_retained": true,
     "canonical_hygiene_retained": true,
     "exact_sha_promotion_preserved": true,
-    "named_production_proofs_preserved": true
+    "named_production_proofs_preserved": true,
+    "system_gate_contract_coverage": true,
+    "existing_push_triggers_preserved": true,
+    "manual_dispatch_available_for_all_targets": true,
+    "build240_original_push_trigger": false,
+    "build240_final_mode": "MANUAL_ONLY_PROVENANCE"
   },
   "expected_candidate": {
     "workflow_files": 150,
     "pull_request": 36,
     "push": 124,
-    "workflow_dispatch": 125,
+    "workflow_dispatch": 132,
     "workflow_run": 5,
     "issues": 0,
     "expected_actual_pr_runs": 35,
