@@ -22,6 +22,8 @@ on:
       - 'admin/deployment-preflight/index.html'
       - 'admin/reliability/index.html'
       - '.github/workflows/release467-build237-mobile-touch-keyboard-dense-workspace-ergonomics.yml'
+  workflow_dispatch:
+
 jobs:
   build237:
     runs-on: ubuntu-latest
