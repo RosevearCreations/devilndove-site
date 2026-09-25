@@ -1,23 +1,23 @@
-// Release 467 Build 256 — current read-only Deployment Preflight over Build 255 Production source.
+// Release 467 Build 257 — current read-only Deployment Preflight over Build 256 Production source.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=256;
-const TITLE='Refinement Outcomes Renewal II';
+const BUILD=257;
+const TITLE='Workflow Trigger Inventory & Ownership Map';
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
-const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 256 Refinement Outcomes Renewal II']);
+const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 257 Workflow Trigger Inventory Ownership Map']);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:255,title:'Production Reliability & Release Efficiency Review',state:'DEVELOPMENT_GREEN',
-  dev_sha:'6d8d006cad521f2ca9fb83b2d7a1ec62ad9347fb',tree_sha:'7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398',
-  system_gate_run:36073942618,current_application_quality_run:36073942565,it_admin_runtime_proof_run:36073942615,
-  branch_hygiene_run:36073943552,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',exact_preview_deployment:true
+  release:467,build:256,title:'Refinement Outcomes Renewal II',state:'DEVELOPMENT_GREEN',
+  dev_sha:'601ea5eda5296c189388dc6df595d029687dfa1a',tree_sha:'f7f8d07bedc07cd6f335fcbb8fb1c2443cee2c06',
+  system_gate_run:36075093498,current_application_quality_run:36075093559,it_admin_runtime_proof_run:36075093555,
+  branch_hygiene_run:36075093385,proof_state:'EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN',exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:255,title:'Production Reliability & Release Efficiency Review',state:'PRODUCTION_GREEN',
-  main_sha:'c5ef57106fe84b386230d686b46d11ea30c35576',tree_sha:'7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398',
-  production_pages_deploy_run:36074089250,production_live_resource_integrity_run:36074174209,
-  products_browser_proof_run:36074174144,products_route_proof_run:36074174120
+  release:467,build:256,title:'Refinement Outcomes Renewal II',state:'PRODUCTION_GREEN',
+  main_sha:'36f48e66ea71b5cf598fb8bb7a9abce10e5ff7b9',tree_sha:'f7f8d07bedc07cd6f335fcbb8fb1c2443cee2c06',
+  production_pages_deploy_run:36075244119,production_live_resource_integrity_run:36075319609,
+  products_browser_proof_run:36075319580,products_route_proof_run:36075319601
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true});
 const rows=(r)=>Array.isArray(r?.results)?r.results:[];
@@ -44,12 +44,12 @@ export async function onRequestGet(context){
     {status:truth.proof_recorded_count===23?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:truth.proof_recorded_count+'/23 proof rows recorded.'},
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:truth.foreign_key_violations+' violation(s).'},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
-    {status:'pass',code:'build255_verified_baseline',label:'Build 255 verified restart baseline',detail:'Build 255 Production Reliability & Release Efficiency Review is exact-tree Development and Production GREEN.'},
-    {status:'pass',code:'build255_source_promotion',label:'Build 255 Production source promotion',detail:'Build 255 is on main c5ef57106fe84b386230d686b46d11ea30c35576 with the identical Development tree 7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398.'},
-    {status:'review',code:'build256_refinement_outcomes_renewal_ii',label:'Build 256 Refinement Outcomes Renewal II',detail:'Build 256 re-measures Builds 249–255, keeps exact-SHA promotion, and authorizes the bounded Builds 257–264 successor roadmap from measured CI fan-out and read-path residuals.'}
+    {status:'pass',code:'build256_verified_baseline',label:'Build 256 verified restart baseline',detail:'Build 256 Refinement Outcomes Renewal II is exact-tree Development and Production GREEN.'},
+    {status:'pass',code:'build256_source_promotion',label:'Build 256 Production source promotion',detail:'Build 256 is on main 36f48e66ea71b5cf598fb8bb7a9abce10e5ff7b9 with the identical Development tree f7f8d07bedc07cd6f335fcbb8fb1c2443cee2c06.'},
+    {status:'review',code:'build257_workflow_trigger_inventory',label:'Build 257 Workflow Trigger Inventory & Ownership Map',detail:'Build 257 inventories 146 pre-build workflow files, maps every retained workflow to a proof owner, and leaves all workflows enabled for Build 258 evidence-backed scope tightening.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
-  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:256,title:TITLE,authority:'release467-build256-refinement-outcomes-renewal-ii.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 255 is the exact fully verified Development and Production restart boundary.','Build 255 Development and Production share tree 7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398.','Canonical migration authority remains through data-only 0023.','Build 256 Refinement Outcomes Renewal II keeps the queue open with Build 257 from measured residuals only.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
+  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:257,title:TITLE,authority:'release467-build257-workflow-trigger-inventory-ownership-map.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 256 is the exact fully verified Development and Production restart boundary.','Build 256 Development and Production share tree f7f8d07bedc07cd6f335fcbb8fb1c2443cee2c06.','Canonical migration authority remains through data-only 0023.','Build 257 inventories workflow triggers and ownership without disabling or deleting workflows; Build 258 is the next bounded release.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
   if(new URL(context.request.url).searchParams.get('format')==='markdown')return new Response(markdownReport(data),{status:200,headers:{'Content-Type':'text/markdown; charset=utf-8','Cache-Control':'no-store'}});
   return jsonResponse(data,200,{'Cache-Control':'no-store'});
 }

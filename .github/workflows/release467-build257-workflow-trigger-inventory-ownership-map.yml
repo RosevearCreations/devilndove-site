@@ -1,0 +1,65 @@
+name: Release 467 Build 257 Workflow Trigger Inventory Ownership Map
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build257:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 256 Development and Production workflow evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json, subprocess, sys
+          repo='${{ github.repository }}'
+          targets=[
+            ('DEVELOPMENT','601ea5eda5296c189388dc6df595d029687dfa1a',[
+              'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof',
+              'Repository Branch Hygiene','Release 467 Build 256 Refinement Outcomes Renewal II'
+            ]),
+            ('PRODUCTION','36f48e66ea71b5cf598fb8bb7a9abce10e5ff7b9',[
+              'Production Pages Deploy','Production Live Resource Integrity Proof',
+              'Release 467 Build 155 Products Production Browser Proof','Release 467 Build 154 Products Route Production Proof',
+              'Release 467 Build 256 Refinement Outcomes Renewal II'
+            ])
+          ]
+          for label,sha,required in targets:
+            raw=subprocess.check_output(['gh','run','list','--repo',repo,'--commit',sha,'--limit','100',
+              '--json','databaseId,workflowName,event,status,conclusion,headSha,attempt'],text=True)
+            rows=json.loads(raw);by={r.get('workflowName'):r for r in rows if r.get('headSha')==sha}
+            missing=[]
+            for name in required:
+              row=by.get(name)
+              if not row or row.get('status')!='completed' or row.get('conclusion')!='success': missing.append(name)
+              else: print('GREEN',label,name,row.get('databaseId'))
+            if missing: print('MISSING_OR_NOT_GREEN',label,missing,file=sys.stderr);sys.exit(1)
+          PY
+      - name: Build 257 inventory and ownership gate
+        run: python scripts/release467_build257_gate.py
+      - name: Emit full path-by-path workflow inventory
+        run: python scripts/release467_workflow_trigger_inventory.py /tmp/build257-workflow-inventory.json >/dev/null
+      - name: Retain predecessor and renewal contracts
+        run: |
+          python scripts/release467_build256_gate.py
+          python scripts/release467_build255_gate.py
+          python scripts/release467_build242_gate.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release467-build257-workflow-trigger-inventory
+          path: /tmp/build257-workflow-inventory.json
+          if-no-files-found: error
+          retention-days: 30

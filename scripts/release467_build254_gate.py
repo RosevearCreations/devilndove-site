@@ -41,7 +41,7 @@ q(int(p.get('build') or 0)>=254 and int(p.get('next_build') or 0)>=255 and p.get
 q(int(p.get('build') or 0)>254 or (p.get('accepted_dev_sha')=='42ad585550cbf76b39ab28d30ed345e177b8fb86' and p.get('accepted_dev_tree_sha')=='deeca5e877175af1c7c804b09bfbb14a9daa7df8'),'Build 254 baseline must remain valid or be superseded by Build 255+')
 q(int(p.get('build') or 0)>254 or (p.get('production_checkpoint') or {}).get('main_sha')=='ec4e665c34af6e6fbc1dc440411b8b7795deaeb5','Build 254 Production baseline must remain valid or be superseded by Build 255+')
 for source,label in ((rel,'Reliability'),(it,'I.T. tower'),(preflight,'Preflight'),(guide,'I.T. guide')):
-    q(('254' in source and 'Operator Journey Friction Review' in source) or ('255' in source and 'Production Reliability' in source),f'{label} must identify Build 254 or verified Build 255 successor')
+    q(('254' in source and 'Operator Journey Friction Review' in source) or ('255' in source and 'Production Reliability' in source) or ('256' in source and 'Refinement Outcomes Renewal II' in source) or ('257' in source and 'Workflow Trigger Inventory' in source),f'{label} must identify Build 254 or verified Build 255-257 successor')
 for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 254 safety drift: {k}')
 
 for path in ('public/js/admin-route-usage.js','public/js/admin-journey-friction-v254.js'):
