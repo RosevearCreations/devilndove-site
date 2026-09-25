@@ -19,9 +19,9 @@
         "system_gate_run": 36136926977,
         "current_application_quality_run": 36136927022,
         "it_admin_runtime_proof_run": 36136927013,
-        "branch_hygiene_run": 36136926926,
-        "dedicated_gate_run": 36136927079
-      }
+        "branch_hygiene_run": 36136926926
+      },
+      "dedicated_gate_run": 36136927079
     },
     "current_closure_candidate": {
       "release": 467,
