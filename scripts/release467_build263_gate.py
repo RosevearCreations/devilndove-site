@@ -26,9 +26,9 @@ q((prev.get('production_checkpoint') or {}).get('build_specific_proof_run')==361
 b=a.get('baseline') or {};m=a.get('remeasurement') or {}
 q(b.get('accepted_head_workflow_runs')==870 and b.get('accepted_heads_reviewed')==14,'Build 256 accepted-head baseline mismatch')
 q(m.get('accepted_heads_reviewed')==12 and int(m.get('accepted_head_workflow_runs') or 0)>0,'Build 263 accepted-head measurement missing')
-q(float(m.get('normalized_runs_per_head_reduction_percent') or 0)>0.0,'Build 263 normalized release-efficiency reduction not proven')
+q(float(m.get('normalized_runs_per_head_reduction_percent') or 0)>21.0,'Build 263 normalized release-efficiency reduction not proven')
 q(m.get('required_named_proofs_green') is True and m.get('exact_tree_continuity_preserved') is True,'Build 263 required proof/tree correctness missing')
-q(m.get('historical_noncanonical_failure_workflow')=='Release 467 Build 155 Products Development Browser Proof','Build 263 residual failure classification missing')
+q(m.get('historical_noncanonical_failure_workflow')=='Release 467 Build 155 Products Development Browser Proof' and int(m.get('historical_noncanonical_failure_count') or 0)>=10,'Build 263 residual failure classification missing')
 q(m.get('build262_closure_runs')==68 and float(m.get('build255_to_build262_closure_run_reduction_percent') or 0)>49.0,'Build 263 Build255->262 closure reduction mismatch')
 q(m.get('expected_build263_candidate_workflow_files')==153 and m.get('expected_build263_candidate_pull_request')==39 and m.get('expected_build263_candidate_push')==127 and m.get('expected_build263_candidate_workflow_dispatch')==135 and m.get('expected_build263_candidate_workflow_run')==5,'Build 263 candidate workflow surface mismatch')
 q(m.get('expected_today_tasks_select_statements')==8 and m.get('today_tasks_rows_read_ceiling')==15000 and m.get('seller_daily_rows_read_ceiling')==10000 and m.get('aggregate_rows_read_ceiling')==25000,'Build 263 read-budget boundary drift')
@@ -38,7 +38,7 @@ for token in ('uses: ./.github/actions/release467-exact-sha-proof','development_
     q(token in wf,f'Build 263 workflow missing {token}')
 q("run_current_contract('scripts/release467_build263_gate.py','Release 467 Build 263')" in sysgate,'System Gate must invoke Build 263')
 q('Build 264 — Refinement Outcomes Renewal III' in road,'Build 264 successor missing')
-for token in ('870','596','20.08%','134','68','8 statements','Build 264'):
+for token in ('870','584','21.69%','134','68','8 statements','Build 264'):
     q(token in doc,f'Build 263 document missing {token}')
 if int(p.get('build') or 0)==263:
     q(p.get('state')=='DEVELOPMENT_GREEN' and int(p.get('next_build') or 0)==264,'Current authority must expose Build 263 and successor 264')
