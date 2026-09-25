@@ -2,7 +2,7 @@
   "release": 467,
   "build": 260,
   "title": "Pull-Request Matrix Fan-Out Reduction",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build260-pull-request-matrix-fanout-reduction",
   "predecessor": {
     "build": 259,
@@ -127,5 +127,22 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_development": true
     }
+  },
+  "accepted_dev_sha": "28b6f64d43f05e6c00a1cec579fa51f6a8797c0d",
+  "accepted_dev_tree_sha": "bde6ee54115f549d47f9d1fcf1f59b016f099a79",
+  "final_closure": {
+    "dev_sha": "28b6f64d43f05e6c00a1cec579fa51f6a8797c0d",
+    "tree_sha": "bde6ee54115f549d47f9d1fcf1f59b016f099a79",
+    "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
+    "proof_state": "EXACT_BRANCH_HEAD_PROOF_RECOVERED_LIVE",
+    "ingested_by_build": 261,
+    "recorded_by": "Build 261 successor ingestion; Build 260 did not self-record later proof"
+  },
+  "production_checkpoint": {
+    "main_sha": "2f227d8ceb2239b5dc95b6f7a730c755a338d6f2",
+    "tree_sha": "bde6ee54115f549d47f9d1fcf1f59b016f099a79",
+    "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
