@@ -60,13 +60,18 @@ for build in range(257,263):
 assert not proof_errors,proof_errors
 assert tot=={'runs':596,'success':584,'failure':9,'skipped':3,'cancelled':0,'other':0,'rerun_attempts':0},tot
 assert all(x['name']=='Release 467 Build 155 Products Development Browser Proof' for x in failure_rows),failure_rows
+EXPECTED_CURRENT_RUNS_PER_HEAD=49.666667
+EXPECTED_NORMALIZED_REDUCTION_PERCENT=20.0766
 baseline_avg=870/14; current_avg=tot['runs']/12
+normalized_reduction=(baseline_avg-current_avg)/baseline_avg*100
+assert round(current_avg,6)==EXPECTED_CURRENT_RUNS_PER_HEAD,(current_avg,EXPECTED_CURRENT_RUNS_PER_HEAD)
+assert round(normalized_reduction,4)==EXPECTED_NORMALIZED_REDUCTION_PERCENT,(normalized_reduction,EXPECTED_NORMALIZED_REDUCTION_PERCENT)
 result={
 'release':467,'build':263,'title':'Release Efficiency & Read-Budget Outcome Verification',
 'exact_candidate_sha':os.environ.get('GITHUB_SHA',''),'workflow_inventory':{'workflow_files':inv.get('workflow_file_count'),'pull_request':tc.get('pull_request'),'push':tc.get('push'),'workflow_dispatch':tc.get('workflow_dispatch'),'workflow_run':tc.get('workflow_run')},
 'accepted_heads':detail,'accepted_head_totals':tot,'exact_tree_continuity':trees,'required_named_proofs_green':True,
 'historical_noncanonical_failures':failure_rows,'baseline_runs_per_head':round(baseline_avg,6),'current_runs_per_head':round(current_avg,6),
-'normalized_runs_per_head_reduction_percent':round((baseline_avg-current_avg)/baseline_avg*100,4),
+'normalized_runs_per_head_reduction_percent':round(normalized_reduction,4),
 'build255_closure_runs':134,'build262_closure_runs':68,'build255_to_build262_reduction_percent':round((134-68)/134*100,4),
 'workflow_mutation':False,'d1_mutation':False,'r2_mutation':False,'production_d1_contact':False}
 OUT.write_text(json.dumps(result,indent=2,sort_keys=True)+'\n')
