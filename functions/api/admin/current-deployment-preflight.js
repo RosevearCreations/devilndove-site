@@ -1,23 +1,23 @@
-// Release 467 Build 267 — current read-only Deployment Preflight over exact Build 266 Production source.
+// Release 467 Build 268 — current read-only Deployment Preflight over exact Build 267 Production source.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=267;
-const TITLE='CAIP Duplicate & Orphan Recovery Classification';
+const BUILD=268;
+const TITLE='CAIP Private-Media Recovery Hardening Closure';
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
-const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 267 CAIP Duplicate & Orphan Recovery Classification']);
+const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 268 CAIP Private-Media Recovery Hardening Closure']);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:266,title:'CAIP Multipart Recovery Integrity Review',state:'DEVELOPMENT_GREEN',
-  dev_sha:'c2f4a123b029853438260f06f0582a3902adf0c4',tree_sha:'6986989e2aa860a639ed8d6748a0c3143b32054d',
-  system_gate_run:36156294854,current_application_quality_run:36156294795,it_admin_runtime_proof_run:36156294784,
-  branch_hygiene_run:36156294718,dedicated_gate_run:36156294779,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',exact_preview_deployment:true
+  release:467,build:267,title:'CAIP Duplicate & Orphan Recovery Classification',state:'DEVELOPMENT_GREEN',
+  dev_sha:'a3fe5cc3848b5f2f6bb3dfca26e0600bdd9d772c',tree_sha:'d647cb64914132631047c5a9276b976920ee556f',
+  system_gate_run:36173340287,current_application_quality_run:36173340863,it_admin_runtime_proof_run:36173340931,
+  branch_hygiene_run:36173340694,dedicated_gate_run:36173340842,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:266,title:'CAIP Multipart Recovery Integrity Review',state:'PRODUCTION_GREEN',
-  main_sha:'1d4a1c204d19c4ecca16dd8dd6952b5107327db8',tree_sha:'6986989e2aa860a639ed8d6748a0c3143b32054d',
-  production_pages_deploy_run:36156595435,production_live_resource_integrity_run:36156682258,
-  products_browser_proof_run:36156682086,products_route_proof_run:36156682143,build_specific_proof_run:36156595028
+  release:467,build:267,title:'CAIP Duplicate & Orphan Recovery Classification',state:'PRODUCTION_GREEN',
+  main_sha:'d60e1ac4d29ebc745643dda4297c8946ddae37fb',tree_sha:'d647cb64914132631047c5a9276b976920ee556f',
+  production_pages_deploy_run:36173617921,production_live_resource_integrity_run:36173697814,
+  products_browser_proof_run:36173699875,products_route_proof_run:36173697811,build_specific_proof_run:36173617864
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true});
 const rows=(r)=>Array.isArray(r?.results)?r.results:[];
@@ -44,12 +44,12 @@ export async function onRequestGet(context){
     {status:truth.proof_recorded_count===23?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:truth.proof_recorded_count+'/23 proof rows recorded.'},
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:truth.foreign_key_violations+' violation(s).'},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
-    {status:'pass',code:'build266_verified_baseline',label:'Build 266 verified restart baseline',detail:'Build 266 CAIP Multipart Recovery Integrity Review is exact-tree Development and Production GREEN with all required named proofs.'},
-    {status:'pass',code:'build266_source_promotion',label:'Build 266 Production source promotion',detail:'Build 266 is on main 1d4a1c204d19c4ecca16dd8dd6952b5107327db8 with the identical Development tree 6986989e2aa860a639ed8d6748a0c3143b32054d.'},
-    {status:'review',code:'build267_caip_duplicate_orphan_classification',label:'Build 267 CAIP Duplicate & Orphan Recovery Classification',detail:'Build 267 classifies canonical, duplicate, recovery and orphan-candidate states without executing cleanup or claiming deployed Production media acceptance.'}
+    {status:'pass',code:'build267_verified_baseline',label:'Build 267 verified restart baseline',detail:'Build 267 CAIP Duplicate & Orphan Recovery Classification is exact-tree Development and Production GREEN with all required named proofs.'},
+    {status:'pass',code:'build267_source_promotion',label:'Build 267 Production source promotion',detail:'Build 267 is on main d60e1ac4d29ebc745643dda4297c8946ddae37fb with the identical Development tree d647cb64914132631047c5a9276b976920ee556f.'},
+    {status:'review',code:'build268_caip_recovery_hardening_closure',label:'Build 268 CAIP Private-Media Recovery Hardening Closure',detail:'Build 268 closes static recovery prerequisites for Build 269 pre-transfer fail-closed intake without claiming deployed Production private-media acceptance.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
-  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:267,title:TITLE,authority:'release467-build267-caip-duplicate-orphan-recovery-classification.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 266 is the exact fully verified Development and Production restart boundary.','Build 266 Development and Production share tree 6986989e2aa860a639ed8d6748a0c3143b32054d.','Canonical migration authority remains through data-only 0023.','Build 267 is a read-only duplicate/orphan recovery classification; cleanup and deployed Production private-media acceptance remain evidence-dependent.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
+  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:268,title:TITLE,authority:'release467-build268-caip-private-media-recovery-hardening-closure.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 267 is the exact fully verified Development and Production restart boundary.','Build 267 Development and Production share tree d647cb64914132631047c5a9276b976920ee556f.','Canonical migration authority remains through data-only 0023.','Build 268 is a read-only recovery-hardening closure; Build 269 must fail closed before binary transfer and deployed Production private-media acceptance remains evidence-dependent.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
   if(new URL(context.request.url).searchParams.get('format')==='markdown')return new Response(markdownReport(data),{status:200,headers:{'Content-Type':'text/markdown; charset=utf-8','Cache-Control':'no-store'}});
   return jsonResponse(data,200,{'Cache-Control':'no-store'});
 }
