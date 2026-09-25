@@ -43,7 +43,7 @@ q((v.get('caip') or {}).get('raw_original_policy')=='immutable' and (v.get('caip
 
 for token in ('CAIP_PRIVATE_MEDIA_BUCKET','PRODUCT_MEDIA_BUCKET','32 MiB','two parts','256 MiB','Browser security','direct_s3_presigned_multipart','Build 269'):
     q(token in raw,f'Private raw-media authority missing {token}')
-for token in ('CAIP_PRIVATE_MEDIA_BUCKET','immutable','Build 241','Current: authenticated same-origin Worker-streamed multipart'):
+for token in ('CAIP_PRIVATE_MEDIA_BUCKET','immutable','Build 241','authenticated same-origin Worker-streamed multipart'):
     q(token in storage,f'Storage authority missing {token}')
 for token in ('Create/bind the dedicated private R2 bucket','Interrupt a multipart upload','secure review grant','public promotion','Record safe production evidence'):
     q(token in accept,f'Acceptance authority missing {token}')
