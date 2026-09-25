@@ -51,18 +51,22 @@
   "baseline": {
     "workflow_files": 147,
     "pull_request": 87,
-    "push": 91,
-    "workflow_dispatch": 90,
-    "workflow_run": 5
+    "push": 137,
+    "workflow_dispatch": 107,
+    "workflow_run": 5,
+    "issues": 0,
+    "measurement": "FULL_REPOSITORY_SCANNER_ON_EXACT_BUILD257_TREE"
   },
   "expected_candidate": {
     "workflow_files": 148,
     "pull_request": 72,
-    "push": 76,
-    "workflow_dispatch": 106,
+    "push": 122,
+    "workflow_dispatch": 123,
     "workflow_run": 5,
+    "issues": 0,
     "net_pull_request_reduction": 15,
-    "net_push_reduction": 15
+    "net_push_reduction": 15,
+    "net_manual_dispatch_increase": 16
   },
   "target_workflows": [
     ".github/workflows/release467-build242-release-diagnostics-evidence-streamlining.yml",
