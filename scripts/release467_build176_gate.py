@@ -132,9 +132,16 @@ req(home_dashboard_identity_ok and seller_identity_ok,'Admin home bounded runtim
 if 'admin-home-dashboard-v123.js?v=467b240' in admin_home or 'admin-seller-command-centre-build148.js?v=467b240' in admin_home:
     req('admin-read-budget-v240.js?v=467b240-admin-read-budget-v1' in admin_home,'Build 240 cache identities require bounded Admin read-budget bootstrap')
 
-# Today Task suppression state is bounded to six indexed latest-state point reads.
-for token in ("const TASK_KEYS = Object.freeze(['readiness','custom_requests','orders','inventory','accounting','failed_api'])","WHERE task_key=?","ORDER BY created_at DESC, today_task_action_id DESC","LIMIT 1"):
-    req(token in today_tasks,f'Today Task bounded latest-state read missing: {token}')
+# Today Task suppression state remains bounded to the same six indexed latest-state point reads.
+build262_active=(ROOT/'release467-build262-operations-today-tasks-read-fanout-review.json').is_file()
+req("const TASK_KEYS = Object.freeze(['readiness','custom_requests','orders','inventory','accounting','failed_api'])" in today_tasks,'Today Task bounded task-key authority missing')
+if build262_active:
+    for token in ('WITH task_keys(task_key) AS','VALUES (?), (?), (?), (?), (?), (?)','WHERE x.task_key = k.task_key','ORDER BY x.created_at DESC, x.today_task_action_id DESC','LIMIT 1'):
+        req(token in today_tasks,f'Build 262 bounded latest-state batch missing: {token}')
+    req('Promise.all(TASK_KEYS.map' not in today_tasks,'Build 262 must not restore six independent D1 statements')
+else:
+    for token in ("WHERE task_key=?","ORDER BY created_at DESC, today_task_action_id DESC","LIMIT 1"):
+        req(token in today_tasks,f'Today Task bounded latest-state read missing: {token}')
 req("FROM today_task_actions\n      ORDER BY datetime(created_at) DESC" not in today_tasks,'Today Tasks returned to full action-history scan')
 
 # Lean startup keeps static Ctrl+K navigation but avoids presentation-only module D1 bootstrap
@@ -188,6 +195,6 @@ print('Orders: 80 ROW STARTUP / DUPLICATE LEGACY APP NOT EAGER')
 print('Catalog: FOCUSED WORKSPACE HUB / LEGACY ALL-IN-ONE APP NOT EAGER')
 print('Admin route telemetry: BROWSER-LOCAL / AUTOMATIC REMOTE D1 WRITES ZERO')
 print('Admin Home: 10-MINUTE CACHE-FIRST / SHARED SELLER SNAPSHOT / DUPLICATE I.T.+TODAY READS ZERO')
-print('Today Task action history: SIX INDEXED LATEST-STATE LOOKUPS / NO FULL HISTORY SCAN')
+print('Today Task action history: SIX INDEXED LATEST-STATE LOOKUPS / ONE BATCHED D1 STATEMENT WHEN BUILD 262 ACTIVE / NO FULL HISTORY SCAN')
 print('Lean application-module presentation bootstrap: SKIPPED / SERVER MIDDLEWARE AUTHORITY RETAINED')
 print('Schema/R2/provider/payment/refund/accounting mutation added: NONE')

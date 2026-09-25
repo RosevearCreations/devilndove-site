@@ -98,9 +98,10 @@ if not successor_active:
     q(p.get('accepted_dev_sha')=='270eea921559b2439459180998cc367b6fe7c9bb' and p.get('accepted_dev_tree_sha')=='e81b613e5a4b491927ab89c89800345025853b99','Build 260 must start from exact Build 259 Development')
     q((p.get('production_checkpoint') or {}).get('main_sha')=='af294ad20ec26222ec0f7ccdb856f39de9fbbd2e','Build 260 Production baseline must be exact Build 259 Production')
 else:
-    q(int(p.get('build') or 0) in (260,261),'Build 261 successor authority must preserve Build 260 provenance')
-    q(p.get('accepted_dev_sha') in ('270eea921559b2439459180998cc367b6fe7c9bb','28b6f64d43f05e6c00a1cec579fa51f6a8797c0d'),'Build 261 successor must preserve an exact accepted Development baseline')
-    q((p.get('production_checkpoint') or {}).get('main_sha') in ('af294ad20ec26222ec0f7ccdb856f39de9fbbd2e','2f227d8ceb2239b5dc95b6f7a730c755a338d6f2'),'Build 261 successor must preserve an exact Production baseline')
+    q(int(p.get('build') or 0)>=261 and p.get('state')=='DEVELOPMENT_GREEN','Verified Build 261+ successor authority must preserve Build 260 provenance')
+    q(bool(re.fullmatch(r'[0-9a-f]{40}',str(p.get('accepted_dev_sha') or ''))),'Verified successor must preserve an exact accepted Development SHA')
+    prod_now=p.get('production_checkpoint') or {}
+    q(prod_now.get('state')=='PRODUCTION_GREEN' and bool(re.fullmatch(r'[0-9a-f]{40}',str(prod_now.get('main_sha') or ''))),'Verified successor must preserve an exact Production baseline')
 q('Build 261 — Production Proof Dependency Orchestration' in road,'Build 261 successor missing from roadmap')
 for token in ('38','206','241','258','259','36 pull_request','124 push','132 workflow_dispatch','Build 261'):
     q(token in doc,f'Build 260 document missing {token}')

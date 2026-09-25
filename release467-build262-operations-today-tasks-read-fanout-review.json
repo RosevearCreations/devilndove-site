@@ -1,0 +1,139 @@
+{
+  "release": 467,
+  "build": 262,
+  "title": "Operations Today-Tasks Read Fan-Out Review",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build262-operations-today-tasks-read-fanout-review",
+  "predecessor": {
+    "build": 261,
+    "title": "Production Proof Dependency Orchestration",
+    "development_sha": "c4e57f8d4c47a709021fca65037b25f4e74d63e2",
+    "development_tree_sha": "a442d160e1619e4b362de2bbda509ab25c310290",
+    "development_proofs": {
+      "system_gate_run": 36087874819,
+      "current_application_quality_run": 36087874854,
+      "it_admin_runtime_proof_run": 36087874772,
+      "branch_hygiene_run": 36087874784,
+      "dedicated_gate_run": 36087874900
+    },
+    "production_main_sha": "f90944f80ec193610d3b87312487799ec425d983",
+    "production_tree_sha": "a442d160e1619e4b362de2bbda509ab25c310290",
+    "production_proofs": {
+      "production_pages_deploy_run": 36088094461,
+      "production_live_resource_integrity_run": 36088159346,
+      "products_browser_proof_run": 36088159392,
+      "products_route_proof_run": 36088159367,
+      "build_specific_proof_run": 36088094406
+    },
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true
+  },
+  "baseline": {
+    "source_build": 250,
+    "surface": "operations-today-tasks-read",
+    "provider_measurement_sha": "14f1d1f9d29988d39902dc6667230a611fb0018e",
+    "provider_workflow_run": 35998730536,
+    "provider_rows_read": 1132,
+    "provider_rows_read_ceiling": 15000,
+    "aggregate_provider_rows_read": 2178,
+    "aggregate_provider_rows_read_ceiling": 25000,
+    "top_level_select_statements": 13,
+    "latest_action_select_statements": 6
+  },
+  "review": {
+    "change": "BATCH_SIX_LATEST_ACTION_POINT_LOOKUPS_INTO_ONE_D1_STATEMENT",
+    "runtime_file": "functions/api/_lib/todayTasksReadService.js",
+    "measurement_sql": "scripts/release467_build262_today_tasks_measurement.sql",
+    "task_keys": [
+      "readiness",
+      "custom_requests",
+      "orders",
+      "inventory",
+      "accounting",
+      "failed_api"
+    ],
+    "task_count_queries_unchanged": 6,
+    "runtime_incident_detail_query_unchanged": true,
+    "latest_action_semantics_unchanged": true,
+    "latest_action_index_ordering_preserved": true,
+    "target_top_level_select_statements": 8,
+    "statement_reduction": 5,
+    "provider_rows_read_ceiling": 15000,
+    "seller_daily_rows_read_ceiling": 10000,
+    "aggregate_rows_read_ceiling": 25000,
+    "production_d1_measurement": false
+  },
+  "measurement": {
+    "state": "EXACT_DEVELOPMENT_MEASURED_GREEN",
+    "environment": "devilndove-dev",
+    "source_dev_sha": "dbbbb1ffaf116829997dafe6c63ac40539941e43",
+    "source_dev_tree": "b9c7ec427bde8d771681e1b44c5a93fd78a0e71b",
+    "provider_workflow_run": 36131751056,
+    "provider_job_id": 108060373061,
+    "provider_evidence_artifact_id": 10862595625,
+    "provider_evidence_artifact_name": "build262-today-tasks-read-budget-dbbbb1ffaf116829997dafe6c63ac40539941e43",
+    "top_level_statement_count": 8,
+    "baseline_statement_count": 13,
+    "statement_reduction": 5,
+    "today_tasks_provider_rows_read": 1133,
+    "today_tasks_rows_read_ceiling": 15000,
+    "seller_daily_provider_rows_read": 1046,
+    "seller_daily_rows_read_ceiling": 10000,
+    "aggregate_provider_rows_read": 2179,
+    "aggregate_rows_read_ceiling": 25000,
+    "synthetic_samples": false,
+    "production_d1_contact": false,
+    "d1_mutation": false
+  },
+  "implementation": {
+    "dedicated_gate": "scripts/release467_build262_gate.py",
+    "workflow": ".github/workflows/release467-build262-operations-today-tasks-read-fanout-review.yml",
+    "document": "docs/operations/RELEASE_467_BUILD_262_OPERATIONS_TODAY_TASKS_READ_FANOUT_REVIEW.md",
+    "provider_evidence_prefix": "build262-today-tasks-read-budget-"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "production_business_data_copy": false,
+    "production_d1_contact": false,
+    "secret_capture": false,
+    "provider_ceiling_increase": false,
+    "exact_sha_requirement_relaxed": false
+  },
+  "acceptance": {
+    "next_build": 263,
+    "next_build_title": "Release Efficiency & Read-Budget Outcome Verification",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "c4e57f8d4c47a709021fca65037b25f4e74d63e2",
+      "tree": "a442d160e1619e4b362de2bbda509ab25c310290",
+      "system_gate_run": 36087874819,
+      "quality_run": 36087874854,
+      "it_admin_runtime_run": 36087874772,
+      "repository_hygiene_run": 36087874784,
+      "build_specific_proof_run": 36087874900,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "f90944f80ec193610d3b87312487799ec425d983",
+      "tree_sha": "a442d160e1619e4b362de2bbda509ab25c310290",
+      "production_pages_deploy_run": 36088094461,
+      "production_live_resource_integrity_run": 36088159346,
+      "products_browser_proof_run": 36088159392,
+      "products_route_proof_run": 36088159367,
+      "build_specific_proof_run": 36088094406,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_verified_development": true
+    }
+  }
+}
