@@ -55,7 +55,7 @@ else:
     q((a.get('production_checkpoint') or {}).get('main_sha')=='d60e1ac4d29ebc745643dda4297c8946ddae37fb','Build 267 Production closure main mismatch')
     q((a.get('production_checkpoint') or {}).get('tree_sha')=='d647cb64914132631047c5a9276b976920ee556f','Build 267 Production closure tree mismatch')
     q((a.get('production_checkpoint') or {}).get('build_specific_proof_run')==36173617864,'Build 267 Production dedicated proof mismatch')
-    q((p.get('production_checkpoint') or {}).get('main_sha')=='d60e1ac4d29ebc745643dda4297c8946ddae37fb','Build 268+ current Production baseline must be exact Build 267')
+    q((cur==268 and (p.get('production_checkpoint') or {}).get('main_sha')=='d60e1ac4d29ebc745643dda4297c8946ddae37fb') or (cur>=269 and (p.get('production_checkpoint') or {}).get('main_sha')=='44da8087958eb0c64df3de892ca8628293a96231'),'Build 268+ current Production baseline must track the exact immediate verified predecessor')
     q(int(p.get('next_build') or 0)>=269,'Build 268+ must advance beyond Build 268 successor')
 q((p.get('caip_duplicate_orphan_recovery_classification') or {}).get('classification')=='DUPLICATE_ORPHAN_RECOVERY_CLASSES_DEFINED_CLEANUP_NOT_AUTHORIZED','current classification projection missing')
 for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 267 safety drift: {k}')
