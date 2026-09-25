@@ -2,7 +2,7 @@
   "release": 467,
   "build": 262,
   "title": "Operations Today-Tasks Read Fan-Out Review",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build262-operations-today-tasks-read-fanout-review",
   "predecessor": {
     "build": 261,
@@ -66,12 +66,12 @@
   "measurement": {
     "state": "EXACT_DEVELOPMENT_MEASURED_GREEN",
     "environment": "devilndove-dev",
-    "source_dev_sha": "dbbbb1ffaf116829997dafe6c63ac40539941e43",
-    "source_dev_tree": "b9c7ec427bde8d771681e1b44c5a93fd78a0e71b",
-    "provider_workflow_run": 36131751056,
-    "provider_job_id": 108060373061,
-    "provider_evidence_artifact_id": 10862595625,
-    "provider_evidence_artifact_name": "build262-today-tasks-read-budget-dbbbb1ffaf116829997dafe6c63ac40539941e43",
+    "source_dev_sha": "dddbbb4c7fe7dfff8f59a4d54048e37a33fcf764",
+    "source_dev_tree": "931cf56eff07247f34eec69d753fa908027b72bf",
+    "provider_workflow_run": 36132080219,
+    "provider_job_id": 108061422022,
+    "provider_evidence_artifact_id": 10861996794,
+    "provider_evidence_artifact_name": "build262-today-tasks-read-budget-dddbbb4c7fe7dfff8f59a4d54048e37a33fcf764",
     "top_level_statement_count": 8,
     "baseline_statement_count": 13,
     "statement_reduction": 5,
@@ -135,5 +135,32 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_verified_development": true
     }
+  },
+  "accepted_dev_sha": "dddbbb4c7fe7dfff8f59a4d54048e37a33fcf764",
+  "accepted_dev_tree_sha": "931cf56eff07247f34eec69d753fa908027b72bf",
+  "final_closure": {
+    "dev_sha": "dddbbb4c7fe7dfff8f59a4d54048e37a33fcf764",
+    "tree_sha": "931cf56eff07247f34eec69d753fa908027b72bf",
+    "proofs": {
+      "system_gate_run": 36132080145,
+      "current_application_quality_run": 36132080034,
+      "it_admin_runtime_proof_run": 36132080001,
+      "branch_hygiene_run": 36132080008
+    },
+    "dedicated_gate_run": 36132080219,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN_WITH_PROVIDER_MEASUREMENT",
+    "ingested_by_build": 263,
+    "recorded_by": "Build 263 successor ingestion; Build 262 did not self-record later Production proof"
+  },
+  "production_checkpoint": {
+    "main_sha": "e65d9122252e9832a9e29027b13af163cbb30914",
+    "tree_sha": "931cf56eff07247f34eec69d753fa908027b72bf",
+    "production_pages_deploy_run": 36132870627,
+    "production_live_resource_integrity_run": 36133110145,
+    "products_browser_proof_run": 36133110183,
+    "products_route_proof_run": 36133110049,
+    "build_specific_proof_run": 36132870623,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
