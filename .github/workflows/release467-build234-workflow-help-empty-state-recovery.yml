@@ -2,7 +2,7 @@ name: Release 467 Build 234 Workflow Help Empty State Recovery
 
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'public/js/admin-context-help.js'
       - 'public/js/admin-packaging-studio.js'

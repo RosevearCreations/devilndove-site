@@ -1,7 +1,7 @@
 name: Release 467 Build 208 Multi-Discipline Public Positioning Capability Navigation
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'index.html'
       - 'shop/index.html'

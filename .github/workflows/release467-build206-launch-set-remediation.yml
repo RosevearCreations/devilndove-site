@@ -1,7 +1,7 @@
 name: Release 467 Build 206 Launch-Set Remediation Campaign
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'functions/api/admin/storefront-launch-set.js'
       - 'functions/api/admin/storefront-launch-remediation.js'

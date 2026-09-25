@@ -1,7 +1,7 @@
 name: Release 467 Build 213 Digital Proof Customer Approval
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'migrations/canonical/0013_release467_digital_proof_customer_approval.sql'
       - 'migrations/canonical/manifest.json'

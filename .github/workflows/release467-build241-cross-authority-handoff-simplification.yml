@@ -1,7 +1,7 @@
 name: Release 467 Build 241 Cross-Authority Handoff Simplification
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'public/js/admin-handoff-v241.js'
       - 'functions/_middleware.js'

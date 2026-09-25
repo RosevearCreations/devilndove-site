@@ -1,7 +1,7 @@
 name: Release 467 Build 237 Mobile Touch Keyboard Dense-Workspace Ergonomics
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'css/admin-ergonomics-v237.css'
       - 'public/js/admin-ergonomics-v237.js'

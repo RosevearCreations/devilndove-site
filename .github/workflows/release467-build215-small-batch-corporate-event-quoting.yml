@@ -1,7 +1,7 @@
 name: Release 467 Build 215 Small-Batch Corporate Event Quoting
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'migrations/canonical/0015_release467_small_batch_corporate_event_quoting.sql'
       - 'migrations/canonical/manifest.json'

@@ -2,7 +2,7 @@ name: Release 467 Build 233 Universal Help QoL
 
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'public/js/admin-context-help.js'
       - 'public/js/site-auth-ui.js'

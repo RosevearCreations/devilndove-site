@@ -1,7 +1,7 @@
 name: Release 467 Build 228 First Real Custom Work Route-to-Proof Pilot
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
   workflow_dispatch:
 permissions: {contents: read}
 jobs:

@@ -1,7 +1,7 @@
 name: Release 467 Build 229 First Creative Project Prototype-to-Run Pilot
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
   workflow_dispatch:
 permissions: {contents: read}
 jobs:

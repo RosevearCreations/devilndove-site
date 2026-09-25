@@ -2,7 +2,7 @@ name: Release 467 Build 258 Historical Workflow Trigger Scope Tightening
 
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
   workflow_dispatch:
 
 permissions:

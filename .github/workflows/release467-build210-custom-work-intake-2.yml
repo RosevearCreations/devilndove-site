@@ -1,7 +1,7 @@
 name: Release 467 Build 210 Custom Work Intake 2
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'migrations/canonical/0010_release467_custom_work_intake_2.sql'
       - 'migrations/canonical/manifest.json'

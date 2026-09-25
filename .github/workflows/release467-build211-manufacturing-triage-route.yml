@@ -1,7 +1,7 @@
 name: Release 467 Build 211 Manufacturing Triage Route Proposal
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'migrations/canonical/0011_release467_manufacturing_triage_route.sql'
       - 'migrations/canonical/manifest.json'
