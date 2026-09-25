@@ -1,5 +1,4 @@
 name: Release 467 Build 240 API Read Budget Cache Batch Streamlining
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -19,6 +18,8 @@ on:
       - 'scripts/current_system_gate_provenance_gate.py'
       - 'docs/operations/RELEASE_467_BUILD_240_API_READ_BUDGET_CACHE_BATCH_STREAMLINING.md'
       - '.github/workflows/release467-build240-api-read-budget-cache-batch-streamlining.yml'
+  workflow_dispatch:
+
 jobs:
   build240:
     runs-on: ubuntu-latest
