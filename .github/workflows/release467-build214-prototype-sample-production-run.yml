@@ -1,7 +1,7 @@
 name: Release 467 Build 214 Prototype Sample Production Run
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'migrations/canonical/0014_release467_prototype_sample_production_run.sql'
       - 'migrations/canonical/manifest.json'
