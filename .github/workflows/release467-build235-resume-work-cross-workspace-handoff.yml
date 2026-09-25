@@ -1,7 +1,7 @@
 name: Release 467 Build 235 Resume Work Cross-Workspace Handoff
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'public/js/admin-resume-work-v235.js'
       - 'functions/_middleware.js'
