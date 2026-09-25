@@ -303,7 +303,6 @@
     "next_build": 261,
     "future_queue_exhausted": false,
     "manual_dispatch_available_for_all_targets": true,
-    "existing_push_triggers_preserved": true,
-    "build240_final_mode": "MANUAL_ONLY_PROVENANCE"
+    "existing_push_triggers_preserved": true
   }
 }
