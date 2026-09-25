@@ -12,39 +12,32 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 261 candidate
+## Current Release 467 restart authority — Build 262 candidate
 
-Build 260 **Pull-Request Matrix Fan-Out Reduction** is the exact verified predecessor:
+Build 261 **Production Proof Dependency Orchestration** is the exact verified predecessor:
 
-- Development SHA: `28b6f64d43f05e6c00a1cec579fa51f6a8797c0d`
-- Shared Development/Production tree: `bde6ee54115f549d47f9d1fcf1f59b016f099a79`
-- Development proofs: System `36084629755`, Quality `36084629532`, I.T. `36084629588`, Hygiene `36084629993`
-- Build 260 dedicated Development proof: `36084629902`
-- Production main: `2f227d8ceb2239b5dc95b6f7a730c755a338d6f2`
-- Production proofs: Pages `36084774858`, Live Resources `36084851964`, Product Browser `36084851996`, Product Route `36084851949`
-- Build 260 Production-specific proof: `36084775035`
+- Development SHA: `c4e57f8d4c47a709021fca65037b25f4e74d63e2`
+- Shared Development/Production tree: `a442d160e1619e4b362de2bbda509ab25c310290`
+- Development proofs: System `36087874819`, Quality `36087874854`, I.T. `36087874772`, Hygiene `36087874784`
+- Build 261 dedicated Development proof: `36087874900`
+- Production main: `f90944f80ec193610d3b87312487799ec425d983`
+- Production proofs: Pages `36088094461`, Live Resources `36088159346`, Product Browser `36088159392`, Product Route `36088159367`
+- Build 261 Production-specific proof: `36088094406`
 - Canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 261 **Production Proof Dependency Orchestration** is the active candidate. It removes only the Production `main` branch from the push filters of exactly **39** historical release-proof workflows: Builds **206–241 plus 258–260**. Development `dev` push evidence and `workflow_dispatch` manual evidence remain available, and no workflow or gate script is deleted.
+Build 262 **Operations Today-Tasks Read Fan-Out Review** is the active candidate. The Build 250 exact Development measurement remains the evidence baseline: **13 top-level Today Tasks SELECT statements**, **1,132 provider rows read**, Today Tasks hard ceiling **15,000**, Seller Daily ceiling **10,000**, and aggregate ceiling **25,000**.
 
-The canonical Production dependency is unchanged and remains independently visible:
+The bounded implementation changes only the six latest-action point lookups. The same six task keys and the same `created_at DESC, today_task_action_id DESC LIMIT 1` semantics are composed into one read-only D1 statement. The six task-count queries and runtime-incident detail query are unchanged.
 
-1. **Production Pages Deploy** on exact `main`.
-2. **Production Live Resource Integrity Proof** after successful Production Pages.
-3. **Release 467 Build 155 Products Production Browser Proof** after successful Production Pages.
-4. **Release 467 Build 154 Products Route Production Proof** after successful Production Pages.
+The target is therefore **13 → 8 top-level provider statements**, a reduction of **5**, with no provider ceiling increase. Exact Development provider measurement must prove **8** Today Tasks statement metadata rows and stay under all existing ceilings before Production promotion.
 
-All **5** repository `workflow_run` chains remain. Build 261 does not collapse separately owned post-deploy proofs merely to reduce workflow count.
+Provider measurement is Development-only against `devilndove-dev`. Production D1 contact is **ZERO**. No schema/request-time DDL, D1/R2 business mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy, branch-protection mutation or secret capture is introduced.
 
-With the Build 261 proof workflow included, the candidate inventory is **151 workflow files / 37 pull-request / 125 push / 133 manual-dispatch / 5 workflow-run**. The material Production reduction is **39 historical main-push subscriptions removed**.
+The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 262, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
 
-The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 261, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
+Build 262 remains blocked from Production until its exact Development SHA passes the current proof set and Development provider read-budget measurement, is merged to `dev`, and the identical Development tree is promoted to `main`.
 
-No workflow or gate script deletion, schema/request-time DDL, D1/R2 business mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy, branch-protection mutation or secret capture is introduced.
-
-Build 261 remains blocked from Production until its exact candidate passes the current System, Quality, I.T., Hygiene and Build 261 checks, is merged to `dev`, and the identical Development tree is promoted to `main`.
-
-The future queue remains open. The next bounded release is **Build 262 — Operations Today-Tasks Read Fan-Out Review**.
+The future queue remains open. The next bounded release is **Build 263 — Release Efficiency & Read-Budget Outcome Verification**.
 
 ## Retained historical provenance — Build 171
 
