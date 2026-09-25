@@ -10,6 +10,7 @@ def q(ok,msg):
 a=j('release467-build259-reusable-exact-sha-proof-composition.json')
 prev=j('release467-build258-historical-workflow-trigger-scope-tightening.json')
 p=j('current-development-authority.json')
+cur=int(p.get('build') or 0)
 road=t('docs/operations/RELEASE_467_RELEASE_EFFICIENCY_READ_PATH_AUTONOMOUS_BUILDS_257_264.md')
 doc=t('docs/operations/RELEASE_467_BUILD_259_REUSABLE_EXACT_SHA_PROOF_COMPOSITION.md')
 action=t('.github/actions/release467-exact-sha-proof/action.yml')
@@ -60,20 +61,32 @@ q(r.returncode==0,f'Build 259 inventory failed: {(r.stderr or r.stdout)[-2000:]}
 report={}
 try:report=json.loads(Path(out).read_text(encoding='utf-8'))
 except Exception as e:q(False,f'Build 259 inventory report unreadable: {e}')
-q(report.get('workflow_file_count')==149,'Build 259 candidate must contain 149 workflow files')
 tc=report.get('trigger_counts') or {}
-for k,v in {'pull_request':73,'push':123,'workflow_dispatch':124,'workflow_run':5,'issues':0,'schedule':0,'repository_dispatch':0,'workflow_call':0,'pull_request_target':0}.items():
-    q(tc.get(k)==v,f'Build 259 trigger count mismatch: {k} expected {v} got {tc.get(k)}')
+if cur==259:
+    q(report.get('workflow_file_count')==149,'Build 259 candidate must contain 149 workflow files')
+    for k,v in {'pull_request':73,'push':123,'workflow_dispatch':124,'workflow_run':5,'issues':0,'schedule':0,'repository_dispatch':0,'workflow_call':0,'pull_request_target':0}.items():
+        q(tc.get(k)==v,f'Build 259 trigger count mismatch: {k} expected {v} got {tc.get(k)}')
+else:
+    q(cur>=260 and report.get('workflow_file_count',0)>=149,'Build 260+ must retain Build 259 workflow and successors')
+    q(tc.get('workflow_run')==5,'Build 260+ must preserve the five workflow_run chains')
 
 q("run_current_contract('scripts/release467_build259_gate.py','Release 467 Build 259')" in sysgate,'System Gate must invoke Build 259')
-q(int(p.get('build') or 0)==259 and int(p.get('next_build') or 0)==260 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must expose Build 259 and successor 260')
-q(p.get('accepted_dev_sha')=='3675554c0c2ce64923ec3e1763a243e03d103f1a' and p.get('accepted_dev_tree_sha')=='64dab693be764fb11a3cb9c36d06352a2f02eb1a','Build 259 must start from exact Build 258 Development')
-q((p.get('production_checkpoint') or {}).get('main_sha')=='436c4e724efc736492f9772ffea7d5141feb3416','Build 259 Production baseline must be exact Build 258 Production')
+q(cur>=259 and int(p.get('next_build') or 0)>=260 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 259 or a verified successor')
+if cur==259:
+    q(p.get('accepted_dev_sha')=='3675554c0c2ce64923ec3e1763a243e03d103f1a' and p.get('accepted_dev_tree_sha')=='64dab693be764fb11a3cb9c36d06352a2f02eb1a','Build 259 must start from exact Build 258 Development')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='436c4e724efc736492f9772ffea7d5141feb3416','Build 259 Production baseline must be exact Build 258 Production')
+else:
+    final=a.get('final_closure') or {};prod=a.get('production_checkpoint') or {}
+    q(a.get('state')=='PRODUCTION_GREEN','Build 260+ must retain Build 259 Production closure')
+    q(final.get('dev_sha')=='270eea921559b2439459180998cc367b6fe7c9bb' and final.get('tree_sha')=='e81b613e5a4b491927ab89c89800345025853b99','Build 259 final Development closure mismatch')
+    q(final.get('dedicated_gate_run')==36082783905,'Build 259 dedicated Development proof mismatch')
+    q(prod.get('main_sha')=='af294ad20ec26222ec0f7ccdb856f39de9fbbd2e' and prod.get('tree_sha')=='e81b613e5a4b491927ab89c89800345025853b99','Build 259 Production closure mismatch')
+    q(prod.get('build_specific_proof_run')==36082914063,'Build 259 Production-specific proof mismatch')
 q('Build 260 — Pull-Request Matrix Fan-Out Reduction' in road,'Build 260 successor missing from roadmap')
 for token in ('read-only reusable composition','System Gate','Production Pages Deploy','149 workflow files','73 pull_request','123 push','124 workflow_dispatch','Build 260'):
     q(token in doc,f'Build 259 document missing {token}')
 for source,label in ((rel,'Reliability'),(it,'I.T. tower'),(pre,'Preflight'),(itpage,'I.T. page'),(relpage,'Reliability page'),(prepage,'Preflight page'),(guide,'I.T. guide')):
-    q('259' in source and 'Reusable Exact-SHA Proof Composition' in source,f'{label} must identify Build 259')
+    q(str(cur) in source and str(p.get('title') or '') in source,f'{label} must identify the current verified successor')
 for k,v in (a.get('safety') or {}).items():q(v is False,f'Build 259 safety drift: {k}')
 
 print('RELEASE 467 BUILD 259 REUSABLE EXACT-SHA PROOF COMPOSITION')

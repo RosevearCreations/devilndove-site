@@ -12,8 +12,8 @@ on:
       - 'scripts/current_system_gate_provenance_gate.py'
       - 'docs/operations/RELEASE_467_BUILD_235_RESUME_WORK_CROSS_WORKSPACE_HANDOFF.md'
       - '.github/workflows/release467-build235-resume-work-cross-workspace-handoff.yml'
-  pull_request:
-    branches: [dev, main]
+  workflow_dispatch:
+
 jobs:
   build235:
     runs-on: ubuntu-latest

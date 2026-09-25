@@ -1,8 +1,6 @@
 name: Release 467 Build 224 Manufacturing Era Closure Next Roadmap
 
 on:
-  pull_request:
-    branches: [dev]
   push:
     branches: [dev, main]
     paths:

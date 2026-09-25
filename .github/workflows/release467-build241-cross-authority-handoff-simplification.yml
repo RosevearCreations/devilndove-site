@@ -20,8 +20,8 @@ on:
       - 'admin/reliability/index.html'
       - 'docs/operations/RELEASE_467_BUILD_241_CROSS_AUTHORITY_HANDOFF_SIMPLIFICATION.md'
       - '.github/workflows/release467-build241-cross-authority-handoff-simplification.yml'
-  pull_request:
-    branches: [dev, main]
+  workflow_dispatch:
+
 jobs:
   build241:
     runs-on: ubuntu-latest
