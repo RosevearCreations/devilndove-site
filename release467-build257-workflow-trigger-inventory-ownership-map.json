@@ -1,0 +1,165 @@
+{
+  "release": 467,
+  "build": 257,
+  "title": "Workflow Trigger Inventory & Ownership Map",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build257-workflow-trigger-inventory-ownership-map",
+  "predecessor": {
+    "build": 256,
+    "title": "Refinement Outcomes Renewal II",
+    "development_sha": "601ea5eda5296c189388dc6df595d029687dfa1a",
+    "development_tree_sha": "f7f8d07bedc07cd6f335fcbb8fb1c2443cee2c06",
+    "candidate_pr": 351,
+    "candidate_pr_head_sha": "098df09bb5a3cf21946c9cedbee5ceb9dbc1dc6d",
+    "production_main_sha": "36f48e66ea71b5cf598fb8bb7a9abce10e5ff7b9",
+    "production_tree_sha": "f7f8d07bedc07cd6f335fcbb8fb1c2443cee2c06",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36075093498,
+      "current_application_quality_run": 36075093559,
+      "it_admin_runtime_proof_run": 36075093555,
+      "branch_hygiene_run": 36075093385,
+      "build_specific_proof_run": 36075093678
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36075244119,
+      "production_live_resource_integrity_run": 36075319609,
+      "products_browser_proof_run": 36075319580,
+      "products_route_proof_run": 36075319601,
+      "build_specific_proof_run": 36075244210
+    }
+  },
+  "inventory": {
+    "baseline_ref": "dev@601ea5eda5296c189388dc6df595d029687dfa1a",
+    "baseline_workflow_files": 146,
+    "baseline_trigger_search": {
+      "pull_request": 86,
+      "push": 90,
+      "workflow_dispatch": 89,
+      "workflow_run": 5,
+      "issues": 1,
+      "schedule": 0,
+      "repository_dispatch": 0,
+      "workflow_call": 0,
+      "pull_request_target": 0
+    },
+    "expected_candidate_workflow_files": 147,
+    "ownership_policy": "EVERY_RETAINED_WORKFLOW_CLASSIFIED_BY_CURRENT_PROOF_OWNER",
+    "destructive_action": "NONE",
+    "workflow_disabled": false,
+    "workflow_deleted": false
+  },
+  "canonical_owners": [
+    {
+      "path": ".github/workflows/system-gate.yml",
+      "owner": "DEVELOPMENT_SOURCE_SYSTEM",
+      "role": "canonical Development source/system proof"
+    },
+    {
+      "path": ".github/workflows/current-application-quality.yml",
+      "owner": "DEVELOPMENT_APPLICATION_QUALITY",
+      "role": "canonical Development application quality proof"
+    },
+    {
+      "path": ".github/workflows/it-admin-runtime-proof.yml",
+      "owner": "DEVELOPMENT_IT_RUNTIME",
+      "role": "canonical Development I.T. runtime proof"
+    },
+    {
+      "path": ".github/workflows/repository-branch-hygiene.yml",
+      "owner": "REPOSITORY_HYGIENE",
+      "role": "canonical persistent-branch hygiene proof"
+    },
+    {
+      "path": ".github/workflows/production-pages-deploy-current.yml",
+      "owner": "PRODUCTION_DEPLOY",
+      "role": "canonical Production deployment proof"
+    },
+    {
+      "path": ".github/workflows/production-live-resource-integrity-proof.yml",
+      "owner": "PRODUCTION_RESOURCE_INTEGRITY",
+      "role": "post-deploy live-resource proof"
+    },
+    {
+      "path": ".github/workflows/release467-build155-products-production-browser.yml",
+      "owner": "PRODUCTION_PRODUCT_BROWSER",
+      "role": "post-deploy Product browser proof"
+    },
+    {
+      "path": ".github/workflows/release467-build154-products-route-production-proof.yml",
+      "owner": "PRODUCTION_PRODUCT_ROUTE",
+      "role": "post-deploy Product route proof"
+    }
+  ],
+  "evidence_backed_candidates": {
+    "historical_release_trigger_scope": {
+      "state": "REVIEW_CANDIDATE_FOR_BUILD258",
+      "rationale": "Historical Release 467 build-proof workflows remain broadly triggered on current branches; Build 257 inventories them but does not disable or narrow them."
+    },
+    "workflow_run_chains": {
+      "state": "RETAIN",
+      "count_baseline": 5,
+      "rationale": "Chained post-deploy/recovery workflows are separately owned and are not treated as duplicates merely because they use workflow_run."
+    },
+    "exact_sha_promotion": {
+      "state": "RETAIN",
+      "rationale": "Build 256 renewal requires exact-SHA promotion and identical-tree continuity."
+    }
+  },
+  "implementation": {
+    "baseline": "data/release467-build257-workflow-baseline.txt",
+    "inventory_script": "scripts/release467_workflow_trigger_inventory.py",
+    "dedicated_gate": "scripts/release467_build257_gate.py",
+    "workflow": ".github/workflows/release467-build257-workflow-trigger-inventory-ownership-map.yml",
+    "document": "docs/operations/RELEASE_467_BUILD_257_WORKFLOW_TRIGGER_INVENTORY_OWNERSHIP_MAP.md"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "workflow_disable": false,
+    "workflow_delete": false,
+    "branch_protection_change": false,
+    "exact_sha_requirement_relaxed": false
+  },
+  "acceptance": {
+    "next_build": 258,
+    "next_build_title": "Historical Workflow Trigger Scope Tightening",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "601ea5eda5296c189388dc6df595d029687dfa1a",
+      "tree": "f7f8d07bedc07cd6f335fcbb8fb1c2443cee2c06",
+      "proof_recovery": "LIVE_BY_EXACT_SHA",
+      "system_gate_run": 36075093498,
+      "quality_run": 36075093559,
+      "it_admin_runtime_run": 36075093555,
+      "repository_hygiene_run": 36075093385,
+      "build_specific_proof_run": 36075093678,
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "36f48e66ea71b5cf598fb8bb7a9abce10e5ff7b9",
+      "tree_sha": "f7f8d07bedc07cd6f335fcbb8fb1c2443cee2c06",
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true,
+      "proof_recovery": "LIVE_BY_EXACT_SHA",
+      "production_pages_deploy_run": 36075244119,
+      "production_live_resource_integrity_run": 36075319609,
+      "products_browser_proof_run": 36075319580,
+      "products_route_proof_run": 36075319601,
+      "build_specific_proof_run": 36075244210
+    }
+  }
+}
