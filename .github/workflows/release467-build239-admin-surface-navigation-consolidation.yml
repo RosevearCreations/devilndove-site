@@ -13,8 +13,6 @@ on:
       - 'scripts/release467_build239_gate.py'
       - 'scripts/current_system_gate_provenance_gate.py'
       - '.github/workflows/release467-build239-admin-surface-navigation-consolidation.yml'
-  pull_request:
-    branches: [dev, main]
 jobs:
   build239:
     runs-on: ubuntu-latest
