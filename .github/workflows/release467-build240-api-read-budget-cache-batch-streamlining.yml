@@ -1,4 +1,6 @@
 name: Release 467 Build 240 API Read Budget Cache Batch Streamlining
+  workflow_dispatch:
+
 permissions:
   contents: read
   actions: read
