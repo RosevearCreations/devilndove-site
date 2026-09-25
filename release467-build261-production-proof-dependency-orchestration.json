@@ -1,0 +1,98 @@
+{
+  "release": 467,
+  "build": 261,
+  "title": "Production Proof Dependency Orchestration",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build261-production-proof-dependency-orchestration",
+  "predecessor": {
+    "build": 260,
+    "title": "Pull-Request Matrix Fan-Out Reduction",
+    "development_sha": "28b6f64d43f05e6c00a1cec579fa51f6a8797c0d",
+    "development_tree_sha": "bde6ee54115f549d47f9d1fcf1f59b016f099a79",
+    "candidate_pr": 355,
+    "candidate_pr_head_sha": "cbd384fabb61c08011795552706319ec722de158",
+    "production_main_sha": "2f227d8ceb2239b5dc95b6f7a730c755a338d6f2",
+    "production_tree_sha": "bde6ee54115f549d47f9d1fcf1f59b016f099a79",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION"
+  },
+  "review": {
+    "source_build": 260,
+    "historical_main_push_targets": 39,
+    "target_builds": "206-241,258-260",
+    "change": "REMOVE_MAIN_FROM_PUSH_BRANCH_FILTER_ONLY",
+    "development_push_retained": true,
+    "manual_dispatch_retained": true,
+    "workflow_files_deleted": false,
+    "gate_scripts_deleted": false,
+    "canonical_production_pages_push_retained": true,
+    "canonical_post_deploy_workflow_run_paths": [
+      ".github/workflows/production-live-resource-integrity-proof.yml",
+      ".github/workflows/release467-build155-products-production-browser.yml",
+      ".github/workflows/release467-build154-products-route-production-proof.yml"
+    ],
+    "nonproduction_workflow_run_paths_retained": [
+      ".github/workflows/recovery-product-r2-reference-preflight.yml",
+      ".github/workflows/release467-build155-products-development-browser.yml"
+    ],
+    "workflow_run_total_retained": 5,
+    "named_production_proofs_remain_independently_visible": true,
+    "exact_sha_binding_preserved": true,
+    "historical_main_push_subscriptions_removed": 39
+  },
+  "expected_candidate": {
+    "workflow_files": 151,
+    "pull_request": 37,
+    "push": 125,
+    "workflow_dispatch": 133,
+    "workflow_run": 5,
+    "issues": 0,
+    "historical_main_push_subscriptions_removed": 39
+  },
+  "implementation": {
+    "dedicated_gate": "scripts/release467_build261_gate.py",
+    "workflow": ".github/workflows/release467-build261-production-proof-dependency-orchestration.yml",
+    "document": "docs/operations/RELEASE_467_BUILD_261_PRODUCTION_PROOF_DEPENDENCY_ORCHESTRATION.md",
+    "reusable_exact_sha_action": ".github/actions/release467-exact-sha-proof/action.yml"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "workflow_delete": false,
+    "gate_script_delete": false,
+    "branch_protection_change": false,
+    "exact_sha_requirement_relaxed": false,
+    "named_proof_requirement_relaxed": false,
+    "production_pages_dependency_removed": false
+  },
+  "acceptance": {
+    "next_build": 262,
+    "next_build_title": "Operations Today-Tasks Read Fan-Out Review",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "28b6f64d43f05e6c00a1cec579fa51f6a8797c0d",
+      "tree": "bde6ee54115f549d47f9d1fcf1f59b016f099a79",
+      "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION"
+    },
+    "production": {
+      "main_sha": "2f227d8ceb2239b5dc95b6f7a730c755a338d6f2",
+      "tree_sha": "bde6ee54115f549d47f9d1fcf1f59b016f099a79",
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true,
+      "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION"
+    }
+  }
+}
