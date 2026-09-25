@@ -12,38 +12,39 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 264 candidate
+## Current Release 467 restart authority — Build 265 candidate
 
-Build 263 **Release Efficiency & Read-Budget Outcome Verification** is the exact verified predecessor:
+Build 264 **Refinement Outcomes Renewal III** is the exact Production predecessor:
 
-- Development SHA: `ea930cd5c52e0d4f1d55fd9645fc24f5865900f2`
-- Shared Development/Production tree: `e536e198fdb5f44b4430ae2d503e15731f2c9109`
-- Development proofs: System `36136926977`, Quality `36136927022`, I.T. `36136927013`, Hygiene `36136926926`
-- Build 263 dedicated Development proof: `36136927079`
-- Production main: `7ee1ac700f451d35a20ff3d667c405086c5512ef`
-- Production proofs: Pages `36137622970`, Live Resources `36138023445`, Product Browser `36138023151`, Product Route `36138023256`
-- Build 263 Production-specific proof: `36137622753`
-- Canonical migrations remain **0001–0023**, with 0023 data-only.
+- Development merge SHA: `9017e145286f2007646a1f4de9ebdb670ca23881`
+- Production main SHA: `9cf042afb9b7938f160df89b49b82376eb8f9291`
+- exact predecessor proof is recovered by the retained reusable exact-SHA composition;
+- Build 264 closed the Builds 257–263 refinement cycle and authorized the repository-resident Builds 265–275 CAIP recovery/continuity roadmap;
+- canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 264 **Refinement Outcomes Renewal III** is the active candidate. It reviews Builds 257–263, preserves the measured release-efficiency/read-budget gains, and renews the queue from repository-resident CAIP recovery evidence.
+Build 265 **CAIP Private-Media Prerequisite Inventory** is the active candidate. It inventories the existing Build 241 schema, storage, multipart/recovery and operator prerequisites without uploading or mutating Production media.
 
-Measured closure retained:
-- Build 256 baseline: **62.14 runs/head**
-- Build 263 remeasurement: **48.67 runs/head**, a **21.69%** normalized reduction
-- Build 255 closure **134 runs** → Build 262 closure **68 runs**, a **49.25%** reduction
-- closure-scoped sample: **584/584 GREEN**
-- Today Tasks: **13 → 8 statements**
-- Development provider rows: **2,179 / 25,000 aggregate ceiling**
-- Production D1 contact: **ZERO**
-- 10 later noncanonical Browser Proof failures remain outside recorded closure windows; Build 264 does not authorize another broad trigger rewrite from that signal alone.
+Current prerequisite inventory:
+- Build 241 validation state: **ready_for_deployed_evidence**;
+- private-media tables: **6**;
+- private binary binding: `CAIP_PRIVATE_MEDIA_BUCKET`;
+- approved/public binding remains `PRODUCT_MEDIA_BUCKET`;
+- request-time DDL: **disabled**;
+- completed raw originals: **immutable** through CAIP intake;
+- current multipart transport: authenticated same-origin Worker-streamed parts;
+- default part size: **32 MiB**;
+- conservative parallelism: **2 parts**;
+- fallback part ceiling: **256 MiB**;
+- completed-part continuity retains D1 part metadata plus R2 ETags;
+- future direct S3-presigned multipart remains **not live**.
 
-The repository already documents Build 269 as using the Build 241 foundation plus **Builds 265–268 recovery hardening**, and retains explicit Build 271, 272, 273 and 274 CAIP/Creative Process operating boundaries. Build 264 therefore authorizes `docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md`.
+The deployed Startup boundary remains open until the private Production R2 binding is proven private, real interruption/reselect/resume behavior is demonstrated, exact completion/internal-only registration is verified, secure no-store review is proven, and privacy/rights/consent plus device behavior are recorded as safe evidence.
 
-The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 264, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
+The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 265, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
 
-No schema/request-time DDL, D1/R2 business mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy, uncertain R2 delete, branch-protection mutation or secret capture is introduced.
+No schema/request-time DDL, D1/R2 business or media mutation, provider execution/publication, Product publication, Inventory movement, Finance posting, automatic business action, Production business-data copy, uncertain R2 delete, branch-protection mutation or secret capture is introduced.
 
-The future queue remains open. The next bounded release is **Build 265 — CAIP Private-Media Prerequisite Inventory**.
+The future queue remains open. The next bounded release is **Build 266 — CAIP Multipart Recovery Integrity Review**.
 
 ## Retained historical provenance — Build 171
 
