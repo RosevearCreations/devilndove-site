@@ -343,6 +343,16 @@
     "production_d1_contact": false,
     "d1_mutation": false,
     "next_build": 263,
-    "future_queue_exhausted": false
+    "future_queue_exhausted": false,
+    "measurement_state": "EXACT_DEVELOPMENT_MEASURED_GREEN",
+    "measurement_source_sha": "dbbbb1ffaf116829997dafe6c63ac40539941e43",
+    "measurement_source_tree": "b9c7ec427bde8d771681e1b44c5a93fd78a0e71b",
+    "provider_workflow_run": 36131751056,
+    "provider_evidence_artifact_id": 10862595625,
+    "measured_top_level_select_statements": 8,
+    "measured_statement_reduction": 5,
+    "measured_today_tasks_rows_read": 1133,
+    "measured_seller_daily_rows_read": 1046,
+    "measured_aggregate_rows_read": 2179
   }
 }
