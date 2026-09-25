@@ -1,10 +1,8 @@
 name: Release 467 Build 264 Refinement Outcomes Renewal III
 
 on:
-  pull_request:
-    branches: [dev, main]
-  push:
-    branches: [dev, main]
+  # Build 264 is exact-SHA Production GREEN and successor-ingested by Build 265.
+  # Retain its proof as manual historical provenance; Build 265 System Gate keeps the source contract live.
   workflow_dispatch:
 
 permissions:

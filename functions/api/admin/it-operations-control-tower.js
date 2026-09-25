@@ -1,27 +1,27 @@
-// Release 467 Build 264 — Refinement Outcomes Renewal III over exact Build 263 Production source.
+// Release 467 Build 265 — CAIP Private-Media Prerequisite Inventory over exact Build 264 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=264;
-const TITLE='Refinement Outcomes Renewal III';
-const AUTHORITY='release467-build264-refinement-outcomes-renewal-iii';
-const EVIDENCE_ID='r467-b263-green-36136926977-36137622970';
+const BUILD=265;
+const TITLE='CAIP Private-Media Prerequisite Inventory';
+const AUTHORITY='release467-build265-caip-private-media-prerequisite-inventory';
+const EVIDENCE_ID='r467-b264-green-36146386642-36147031112';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:263,title:'Release Efficiency & Read-Budget Outcome Verification',state:'DEVELOPMENT_GREEN',
-  dev_sha:'ea930cd5c52e0d4f1d55fd9645fc24f5865900f2',tree_sha:'e536e198fdb5f44b4430ae2d503e15731f2c9109',
-  system_gate_run:36136926977,current_application_quality_run:36136927022,it_admin_runtime_proof_run:36136927013,
-  branch_hygiene_run:36136926926,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN_WITH_PROVIDER_MEASUREMENT',
+  release:467,build:264,title:'Refinement Outcomes Renewal III',state:'DEVELOPMENT_GREEN',
+  dev_sha:'9017e145286f2007646a1f4de9ebdb670ca23881',tree_sha:'bbe175e82624a2043fb7fd8f84ca5ba9bb361410',
+  system_gate_run:36146386642,current_application_quality_run:36146386016,it_admin_runtime_proof_run:36146386111,
+  branch_hygiene_run:36146385905,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN_WITH_PROVIDER_MEASUREMENT',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:263,title:'Release Efficiency & Read-Budget Outcome Verification',state:'PRODUCTION_GREEN',
-  main_sha:'7ee1ac700f451d35a20ff3d667c405086c5512ef',tree_sha:'e536e198fdb5f44b4430ae2d503e15731f2c9109',
-  production_pages_deploy_run:36137622970,production_live_resource_integrity_run:36138023445,
-  products_browser_proof_run:36138023151,products_route_proof_run:36138023256,remote_d1_queries:0
+  release:467,build:264,title:'Refinement Outcomes Renewal III',state:'PRODUCTION_GREEN',
+  main_sha:'9cf042afb9b7938f160df89b49b82376eb8f9291',tree_sha:'bbe175e82624a2043fb7fd8f84ca5ba9bb361410',
+  production_pages_deploy_run:36147031112,production_live_resource_integrity_run:36147115215,
+  products_browser_proof_run:36147115091,products_route_proof_run:36147115289,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 264 Refinement Outcomes Renewal III'
+  'Release 467 Build 265 CAIP Private-Media Prerequisite Inventory'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -58,12 +58,12 @@ function closurePayload(){
     release:467,build:263,title:'Release Efficiency & Read-Budget Outcome Verification',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:36136926977,current_application_quality_run:36136927022,
-      it_admin_runtime_proof_run:36136927013,branch_hygiene_run:36136926926
+      system_gate_run:36146386642,current_application_quality_run:36146386016,
+      it_admin_runtime_proof_run:36146386111,branch_hygiene_run:36146385905
     },
     production_proofs:{
-      production_pages_deploy_run:36137622970,production_live_resource_integrity_run:36138023445,
-      products_browser_proof_run:36138023151,products_route_proof_run:36138023256
+      production_pages_deploy_run:36147031112,production_live_resource_integrity_run:36147115215,
+      products_browser_proof_run:36147115091,products_route_proof_run:36147115289
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 265 follows only after exact Build 264 Production GREEN.'
+    next_build:'Build 266 follows after Build 265 prerequisite-inventory closure.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 264 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 265 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -149,15 +149,15 @@ export async function onRequestGet(context){
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
       'Build 263 is the exact last fully verified Development checkpoint.',
-      'Build 263 Production is GREEN on the identical tree e536e198fdb5f44b4430ae2d503e15731f2c9109.',
-      'Build 263 Development proofs: System 36136926977, Quality 36136927022, I.T. 36136927013, Hygiene 36136926926.',
-      'Build 263 Production proofs: Pages 36137622970, Live Resources 36138023445, Product Browser 36138023151, Product Route 36138023256.',
+      'Build 263 Production is GREEN on the identical tree bbe175e82624a2043fb7fd8f84ca5ba9bb361410.',
+      'Build 263 Development proofs: System 36146386642, Quality 36146386016, I.T. 36146386111, Hygiene 36146385905.',
+      'Build 263 Production proofs: Pages 36147031112, Live Resources 36147115215, Product Browser 36147115091, Product Route 36147115289.',
       'Build 260 removed only redundant pull-request triggers from 38 historical proof workflows while preserving System Gate coverage and push/manual evidence.',
       'Build 261 removed 39 redundant historical Production main-push subscriptions while preserving Development push/manual evidence and all four canonical Production proofs.',
       'Build 262 batches six latest-action point lookups into one read-only D1 statement and closed exact Development at 8 statements under unchanged provider ceilings.',
       'Build 263 measures 584 closure-scoped GREEN runs across 12 accepted heads, a 21.69% normalized runs-per-head reduction while all required named proofs and exact-tree release pairs remain valid.',
-      'Build 264 classifies the 10 post-closure noncanonical Development Browser Proof failures as insufficient evidence for another broad trigger rewrite.',
-      'Build 264 renews the queue with CAIP recovery/continuity Builds 265–275; Build 265 is next.'
+      'Build 265 preserves the Build 264 release-efficiency decision and does not reopen broad CI trigger work.',
+      'Build 265 begins the CAIP recovery/continuity roadmap with a read-only private-media prerequisite inventory; Build 266 is next.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
