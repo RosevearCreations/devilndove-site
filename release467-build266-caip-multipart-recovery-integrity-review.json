@@ -103,5 +103,26 @@
     "document": "docs/operations/RELEASE_467_BUILD_266_CAIP_MULTIPART_RECOVERY_INTEGRITY_REVIEW.md",
     "dedicated_gate": "scripts/release467_build266_gate.py",
     "workflow": ".github/workflows/release467-build266-caip-multipart-recovery-integrity-review.yml"
+  },
+  "starting_point": {
+    "development": {
+      "sha": "1ac2f5f55228b3c8fbd86ea1e3d07cfb35edaa33",
+      "tree": "d4f1da2902442d02e23becd06b5f05af30a86ac4",
+      "system_gate_run": 36151831375,
+      "quality_run": 36151831443,
+      "it_admin_runtime_run": 36151831358,
+      "repository_hygiene_run": 36151831299,
+      "dedicated_gate_run": 36151831255
+    },
+    "production": {
+      "main_sha": "28181d75fe8425244848ae5a06c86f54a446eb1b",
+      "tree_sha": "d4f1da2902442d02e23becd06b5f05af30a86ac4",
+      "production_pages_deploy_run": 36152347971,
+      "production_live_resource_integrity_run": 36152439772,
+      "products_browser_proof_run": 36152439922,
+      "products_route_proof_run": 36152439676,
+      "build_specific_proof_run": 36152348667,
+      "state": "PRODUCTION_GREEN"
+    }
   }
 }
