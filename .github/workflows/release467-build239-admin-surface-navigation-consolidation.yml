@@ -1,7 +1,7 @@
 name: Release 467 Build 239 Admin Surface Navigation Consolidation
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'data/admin-navigation-modules.json'
       - 'public/js/admin-surface-consolidation-v239.js'

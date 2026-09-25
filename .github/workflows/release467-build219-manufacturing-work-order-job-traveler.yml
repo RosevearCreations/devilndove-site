@@ -1,7 +1,7 @@
 name: Release 467 Build 219 Manufacturing Work Order Job Traveler
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'migrations/canonical/manifest.json'
       - 'migrations/canonical/0018_release467_manufacturing_work_order_job_traveler.sql'

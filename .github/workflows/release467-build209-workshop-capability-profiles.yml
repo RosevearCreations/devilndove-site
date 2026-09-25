@@ -1,7 +1,7 @@
 name: Release 467 Build 209 Workshop Capability Profiles Constraints
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'migrations/canonical/0009_release467_workshop_capability_profiles.sql'
       - 'migrations/canonical/manifest.json'

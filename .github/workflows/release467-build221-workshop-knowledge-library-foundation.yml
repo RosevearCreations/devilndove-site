@@ -1,7 +1,7 @@
 name: Release 467 Build 221 Workshop Knowledge Library Foundation
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'migrations/canonical/manifest.json'
       - 'migrations/canonical/0020_release467_workshop_knowledge_library_foundation.sql'

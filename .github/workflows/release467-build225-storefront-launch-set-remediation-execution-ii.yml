@@ -1,7 +1,7 @@
 name: Release 467 Build 225 Storefront Launch-Set Remediation Execution II
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'admin/catalog-health/index.html'
       - 'public/js/admin-storefront-launch-remediation-v225.js'

@@ -1,0 +1,45 @@
+name: Release 467 Build 261 Production Proof Dependency Orchestration
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build261:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 260 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 28b6f64d43f05e6c00a1cec579fa51f6a8797c0d
+          production_sha: 2f227d8ceb2239b5dc95b6f7a730c755a338d6f2
+          build_proof_name: Release 467 Build 260 Pull-Request Matrix Fan-Out Reduction
+          report_path: /tmp/build261-exact-sha-proof-composition.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release467-build261-predecessor-exact-sha-proof
+          path: /tmp/build261-exact-sha-proof-composition.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Build 261 dependency orchestration gate
+        run: python scripts/release467_build261_gate.py
+      - name: Retain predecessor and release-efficiency contracts
+        run: |
+          python scripts/release467_build260_gate.py
+          python scripts/release467_build259_gate.py
+          python scripts/release467_build258_gate.py
+          python scripts/release467_build257_gate.py

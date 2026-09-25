@@ -1,7 +1,7 @@
 name: Release 467 Build 217 Production Cost Evidence v2
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'migrations/canonical/0017_release467_production_cost_evidence_v2.sql'
       - 'migrations/canonical/manifest.json'

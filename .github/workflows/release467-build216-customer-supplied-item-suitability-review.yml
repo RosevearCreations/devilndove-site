@@ -1,7 +1,7 @@
 name: Release 467 Build 216 Customer-Supplied Item Suitability Review
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'migrations/canonical/0016_release467_customer_supplied_item_suitability_review.sql'
       - 'migrations/canonical/manifest.json'

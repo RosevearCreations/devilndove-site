@@ -1,7 +1,7 @@
 name: Release 467 Build 212 Hybrid Creative Project Operations
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'migrations/canonical/0012_release467_hybrid_creative_project_operations.sql'
       - 'migrations/canonical/manifest.json'
