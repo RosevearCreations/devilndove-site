@@ -11,7 +11,24 @@
     "production_main_sha": "44da8087958eb0c64df3de892ca8628293a96231",
     "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
     "exact_tree_continuity_required": true,
-    "state": "PRODUCTION_PROMOTED_PROOF_RECOVERED_BY_BUILD269_WORKFLOW"
+    "state": "PRODUCTION_GREEN",
+    "development_tree_sha": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
+    "production_tree_sha": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36176223381,
+      "current_application_quality_run": 36176223395,
+      "it_admin_runtime_proof_run": 36176223268,
+      "branch_hygiene_run": 36176223158,
+      "dedicated_gate_run": 36176223314
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36176423497,
+      "production_live_resource_integrity_run": 36176498083,
+      "products_browser_proof_run": 36176498119,
+      "products_route_proof_run": 36176498113,
+      "build_specific_proof_run": 36176423468
+    }
   },
   "activation": {
     "standalone_migration": "database_build269_caip_social_project_dedupe_integrity.sql",
@@ -96,5 +113,27 @@
     "next_build": 270,
     "next_build_title": "Strong-Fingerprint Backfill & Recovery Reconciliation",
     "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "139310232fb103cb2c843dc4d409ecdb7d4bb701",
+      "tree": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
+      "system_gate_run": 36176223381,
+      "quality_run": 36176223395,
+      "it_admin_runtime_run": 36176223268,
+      "repository_hygiene_run": 36176223158,
+      "dedicated_gate_run": 36176223314,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "44da8087958eb0c64df3de892ca8628293a96231",
+      "tree_sha": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
+      "production_pages_deploy_run": 36176423497,
+      "production_live_resource_integrity_run": 36176498083,
+      "products_browser_proof_run": 36176498119,
+      "products_route_proof_run": 36176498113,
+      "build_specific_proof_run": 36176423468,
+      "state": "PRODUCTION_GREEN"
+    }
   }
 }
