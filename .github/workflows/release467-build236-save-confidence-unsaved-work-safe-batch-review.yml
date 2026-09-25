@@ -1,7 +1,7 @@
 name: Release 467 Build 236 Save Confidence Unsaved-Work Safe Batch Review
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'public/js/admin-save-confidence-v236.js'
       - 'functions/_middleware.js'
