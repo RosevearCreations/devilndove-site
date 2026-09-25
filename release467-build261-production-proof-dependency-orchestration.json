@@ -85,14 +85,25 @@
     "development": {
       "sha": "28b6f64d43f05e6c00a1cec579fa51f6a8797c0d",
       "tree": "bde6ee54115f549d47f9d1fcf1f59b016f099a79",
-      "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION"
+      "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
+      "system_gate_run": 36084629755,
+      "quality_run": 36084629532,
+      "it_admin_runtime_run": 36084629588,
+      "repository_hygiene_run": 36084629993,
+      "build_specific_proof_run": 36084629902,
+      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
     },
     "production": {
       "main_sha": "2f227d8ceb2239b5dc95b6f7a730c755a338d6f2",
       "tree_sha": "bde6ee54115f549d47f9d1fcf1f59b016f099a79",
       "state": "PRODUCTION_GREEN",
       "same_tree_as_development": true,
-      "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION"
+      "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
+      "production_pages_deploy_run": 36084774858,
+      "production_live_resource_integrity_run": 36084851964,
+      "products_browser_proof_run": 36084851996,
+      "products_route_proof_run": 36084851949,
+      "build_specific_proof_run": 36084775035
     }
   }
 }
