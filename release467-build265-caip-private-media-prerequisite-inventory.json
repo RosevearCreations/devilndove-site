@@ -11,7 +11,24 @@
     "production_main_sha": "9cf042afb9b7938f160df89b49b82376eb8f9291",
     "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
     "state": "PRODUCTION_GREEN",
-    "content_baseline": "Build 264 authority/roadmap blobs verified identical on dev and main before Build 265"
+    "content_baseline": "Build 264 authority/roadmap blobs verified identical on dev and main before Build 265",
+    "development_tree_sha": "bbe175e82624a2043fb7fd8f84ca5ba9bb361410",
+    "development_proofs": {
+      "system_gate_run": 36146386642,
+      "current_application_quality_run": 36146386016,
+      "it_admin_runtime_proof_run": 36146386111,
+      "branch_hygiene_run": 36146385905,
+      "dedicated_gate_run": 36146386405
+    },
+    "production_tree_sha": "bbe175e82624a2043fb7fd8f84ca5ba9bb361410",
+    "production_proofs": {
+      "production_pages_deploy_run": 36147031112,
+      "production_live_resource_integrity_run": 36147115215,
+      "products_browser_proof_run": 36147115091,
+      "products_route_proof_run": 36147115289,
+      "build_specific_proof_run": 36147031170
+    },
+    "same_tree": true
   },
   "inventory": {
     "build241_validation": {
@@ -96,5 +113,28 @@
     "document": "docs/operations/RELEASE_467_BUILD_265_CAIP_PRIVATE_MEDIA_PREREQUISITE_INVENTORY.md",
     "dedicated_gate": "scripts/release467_build265_gate.py",
     "workflow": ".github/workflows/release467-build265-caip-private-media-prerequisite-inventory.yml"
+  },
+  "starting_point": {
+    "development": {
+      "sha": "9017e145286f2007646a1f4de9ebdb670ca23881",
+      "tree": "bbe175e82624a2043fb7fd8f84ca5ba9bb361410",
+      "system_gate_run": 36146386642,
+      "quality_run": 36146386016,
+      "it_admin_runtime_run": 36146386111,
+      "repository_hygiene_run": 36146385905,
+      "build_specific_proof_run": 36146386405,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "9cf042afb9b7938f160df89b49b82376eb8f9291",
+      "tree_sha": "bbe175e82624a2043fb7fd8f84ca5ba9bb361410",
+      "production_pages_deploy_run": 36147031112,
+      "production_live_resource_integrity_run": 36147115215,
+      "products_browser_proof_run": 36147115091,
+      "products_route_proof_run": 36147115289,
+      "build_specific_proof_run": 36147031170,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_verified_development": true
+    }
   }
 }
