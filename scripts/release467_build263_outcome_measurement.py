@@ -21,6 +21,13 @@ BUILD_PROOFS={
 262:'Release 467 Build 262 Operations Today-Tasks Read Fan-Out Review'}
 DEV_REQUIRED=['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene']
 PROD_REQUIRED=['Production Pages Deploy','Production Live Resource Integrity Proof','Release 467 Build 155 Products Production Browser Proof','Release 467 Build 154 Products Route Production Proof']
+PROOF_RUN_IDS={
+257:{'dev':[36077891398,36077890063,36077891374,36077890258,36077890220],'prod':[36078157785,36078244247,36078244252,36078244289,36078158019]},
+258:{'dev':[36081394811,36081394936,36081394824,36081394851,36081394877],'prod':[36081526239,36081651628,36081651602,36081651629,36081526248]},
+259:{'dev':[36082784059,36082784168,36082783908,36082784042,36082783905],'prod':[36082913970,36082967263,36082967302,36082967286,36082914063]},
+260:{'dev':[36084629755,36084629532,36084629588,36084629993,36084629902],'prod':[36084774858,36084851964,36084851996,36084851949,36084775035]},
+261:{'dev':[36087874819,36087874854,36087874772,36087874784,36087874900],'prod':[36088094461,36088159346,36088159392,36088159367,36088094406]},
+262:{'dev':[36132080145,36132080034,36132080001,36132080008,36132080219],'prod':[36132870627,36133110145,36133110183,36133110049,36132870623]}}
 def api(path):
     if not TOKEN: raise RuntimeError('GITHUB_TOKEN is required')
     req=urllib.request.Request('https://api.github.com'+path,headers={'Authorization':'Bearer '+TOKEN,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'build263-outcome-verifier'})
@@ -31,6 +38,7 @@ def runs_for(sha):
     if int(data.get('total_count') or 0)>100:raise RuntimeError('accepted head has >100 runs; pagination required')
     return runs
 def commit_tree(sha):return str((api(f'/repos/{REPO}/git/commits/{sha}').get('tree') or {}).get('sha') or '')
+def run_by_id(run_id):return api(f'/repos/{REPO}/actions/runs/{run_id}')
 inv_path='/tmp/build263-workflow-inventory.json'
 subprocess.run([sys.executable,str(ROOT/'scripts/release467_workflow_trigger_inventory.py'),inv_path],cwd=ROOT,check=True,stdout=subprocess.DEVNULL)
 inv=json.loads(Path(inv_path).read_text())
@@ -42,10 +50,15 @@ detail={};tot={'runs':0,'success':0,'failure':0,'skipped':0,'cancelled':0,'other
 failure_rows=[];proof_errors=[];trees={}
 for label,sha in HEADS.items():
     runs=runs_for(sha); d={'total':len(runs),'success':0,'failure':0,'skipped':0,'cancelled':0,'other':0,'rerun_attempts':0}
-    names_success={r.get('name') for r in runs if r.get('conclusion')=='success'}
-    build=int(label.split('-')[0]); required=(DEV_REQUIRED if label.endswith('-dev') else PROD_REQUIRED)+[BUILD_PROOFS[build]]
-    missing=[x for x in required if x not in names_success]
-    if missing: proof_errors.append({'head':label,'missing_success':missing})
+    build=int(label.split('-')[0]); lane='dev' if label.endswith('-dev') else 'prod'
+    required=(DEV_REQUIRED if lane=='dev' else PROD_REQUIRED)+[BUILD_PROOFS[build]]
+    recorded=PROOF_RUN_IDS[build][lane]
+    recorded_rows=[run_by_id(run_id) for run_id in recorded]
+    recorded_names=[r.get('name') for r in recorded_rows]
+    if recorded_names!=required: proof_errors.append({'head':label,'recorded_proof_name_mismatch':{'expected':required,'actual':recorded_names}})
+    for r in recorded_rows:
+        if r.get('status')!='completed' or r.get('conclusion')!='success' or r.get('head_sha')!=sha:
+            proof_errors.append({'head':label,'recorded_proof_not_exact_green':{'run_id':r.get('id'),'name':r.get('name'),'status':r.get('status'),'conclusion':r.get('conclusion'),'head_sha':r.get('head_sha'),'expected_sha':sha}})
     for r in runs:
         c=r.get('conclusion')
         if c in ('success','failure','skipped','cancelled'):d[c]+=1
@@ -69,7 +82,7 @@ assert round(normalized_reduction,4)==EXPECTED_NORMALIZED_REDUCTION_PERCENT,(nor
 result={
 'release':467,'build':263,'title':'Release Efficiency & Read-Budget Outcome Verification',
 'exact_candidate_sha':os.environ.get('GITHUB_SHA',''),'workflow_inventory':{'workflow_files':inv.get('workflow_file_count'),'pull_request':tc.get('pull_request'),'push':tc.get('push'),'workflow_dispatch':tc.get('workflow_dispatch'),'workflow_run':tc.get('workflow_run')},
-'accepted_heads':detail,'accepted_head_totals':tot,'exact_tree_continuity':trees,'required_named_proofs_green':True,
+'accepted_heads':detail,'accepted_head_totals':tot,'exact_tree_continuity':trees,'required_named_proofs_green':True,'required_named_proof_source':'recorded immutable proof run IDs verified against exact accepted SHA',
 'historical_noncanonical_failures':failure_rows,'baseline_runs_per_head':round(baseline_avg,6),'current_runs_per_head':round(current_avg,6),
 'normalized_runs_per_head_reduction_percent':round(normalized_reduction,4),
 'build255_closure_runs':134,'build262_closure_runs':68,'build255_to_build262_reduction_percent':round((134-68)/134*100,4),
