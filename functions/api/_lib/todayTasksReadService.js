@@ -76,14 +76,22 @@ async function latestTaskActions(db) {
     // Release 467 Build 262: preserve the six indexed latest-action lookups, but
     // compose them into one read-only D1 statement to reduce provider statement fan-out.
     // Each UNION branch still uses task_key + created_at ordering and LIMIT 1.
-    const pointLookup = `
-      SELECT task_key, action_status, snooze_until, created_at
-      FROM today_task_actions
-      WHERE task_key=?
-      ORDER BY created_at DESC, today_task_action_id DESC
-      LIMIT 1
+    const sql = `
+      WITH task_keys(task_key) AS (
+        VALUES (?), (?), (?), (?), (?), (?)
+      )
+      SELECT a.task_key, a.action_status, a.snooze_until, a.created_at
+      FROM task_keys k
+      JOIN today_task_actions a
+        ON a.today_task_action_id = (
+          SELECT x.today_task_action_id
+          FROM today_task_actions x
+          WHERE x.task_key = k.task_key
+          ORDER BY x.created_at DESC, x.today_task_action_id DESC
+          LIMIT 1
+        )
+      ORDER BY a.task_key
     `;
-    const sql = TASK_KEYS.map(() => `SELECT * FROM (${pointLookup})`).join('\nUNION ALL\n');
     const result = await db.prepare(sql).bind(...TASK_KEYS).all();
     const latest = new Map();
     for (const row of rows(result)) {
