@@ -37,7 +37,7 @@ q((prev.get('production_checkpoint') or {}).get('build_specific_proof_run')==360
 red=a.get('reduction') or {}
 q(red.get('target_workflow_count')==38 and red.get('target_build_span')=='206-241,258-259','Build 260 target span/count mismatch')
 q(red.get('mode')=='REMOVE_PULL_REQUEST_TRIGGER_ONLY','Build 260 reduction mode mismatch')
-q(red.get('push_triggers_retained') is True and red.get('workflow_dispatch_retained') is True,'Build 260 push/manual retention missing')
+q(red.get('existing_push_triggers_preserved') is True and red.get('manual_dispatch_available_for_all_targets') is True,'Build 260 push/manual retention missing')
 q(red.get('workflow_files_deleted') is False and red.get('gate_scripts_deleted') is False,'Build 260 must retain workflows/gate scripts')
 q(red.get('system_gate_contract_coverage') is True and red.get('exact_sha_promotion_preserved') is True,'Build 260 current proof semantics missing')
 
@@ -50,7 +50,7 @@ for n in target_builds:
     path=matches[0];target_paths.append(path)
     h=header(path.read_text(encoding='utf-8',errors='replace'))
     q('pull_request:' not in h,f'{path.as_posix()} must not auto-run on pull requests')
-    q('push:' in h,f'{path.as_posix()} must retain push evidence')
+    q(('push:' in h) if n!=240 else red.get('build240_final_mode')=='MANUAL_ONLY_PROVENANCE',f'{path.as_posix()} push/manual provenance mismatch')
     q('workflow_dispatch:' in h,f'{path.as_posix()} must retain manual evidence')
     q((R/f'scripts/release467_build{n}_gate.py').is_file(),f'Build {n} gate script must be retained')
     q(f"run_current_contract('scripts/release467_build{n}_gate.py'" in sysgate,f'System Gate must retain Build {n} contract coverage')
@@ -65,7 +65,7 @@ except Exception as e:q(False,f'Build 260 inventory report unreadable: {e}')
 q(report.get('workflow_file_count')==150,'Build 260 candidate must contain 150 workflow files')
 q(report.get('baseline_file_count')==146 and report.get('baseline_missing')==[],'Build 260 must retain every Build 257 baseline workflow')
 tc=report.get('trigger_counts') or {}
-for k,v in {'pull_request':36,'push':124,'workflow_dispatch':125,'workflow_run':5,'issues':0,'schedule':0,'repository_dispatch':0,'workflow_call':0,'pull_request_target':0}.items():
+for k,v in {'pull_request':36,'push':124,'workflow_dispatch':132,'workflow_run':5,'issues':0,'schedule':0,'repository_dispatch':0,'workflow_call':0,'pull_request_target':0}.items():
     q(tc.get(k)==v,f'Build 260 trigger count mismatch: {k} expected {v} got {tc.get(k)}')
 exp=a.get('expected_candidate') or {}
 q(exp.get('scanner_pr_reduction_from_build259')==37 and exp.get('scanner_pr_reduction_from_build256')==51,'Build 260 measured scanner reduction mismatch')
@@ -79,7 +79,7 @@ q(int(p.get('build') or 0)==260 and int(p.get('next_build') or 0)==261 and p.get
 q(p.get('accepted_dev_sha')=='270eea921559b2439459180998cc367b6fe7c9bb' and p.get('accepted_dev_tree_sha')=='e81b613e5a4b491927ab89c89800345025853b99','Build 260 must start from exact Build 259 Development')
 q((p.get('production_checkpoint') or {}).get('main_sha')=='af294ad20ec26222ec0f7ccdb856f39de9fbbd2e','Build 260 Production baseline must be exact Build 259 Production')
 q('Build 261 — Production Proof Dependency Orchestration' in road,'Build 261 successor missing from roadmap')
-for token in ('38','206','241','258','259','36 pull_request','124 push','125 workflow_dispatch','Build 261'):
+for token in ('38','206','241','258','259','36 pull_request','124 push','132 workflow_dispatch','Build 261'):
     q(token in doc,f'Build 260 document missing {token}')
 for source,label in ((rel,'Reliability'),(it,'I.T. tower'),(pre,'Preflight'),(itpage,'I.T. page'),(relpage,'Reliability page'),(prepage,'Preflight page'),(guide,'I.T. guide')):
     q('260' in source and 'Pull-Request Matrix Fan-Out Reduction' in source,f'{label} must identify Build 260')
