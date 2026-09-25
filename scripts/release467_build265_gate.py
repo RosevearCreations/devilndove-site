@@ -72,7 +72,7 @@ else:
     q((a.get('production_checkpoint') or {}).get('tree_sha')=='d4f1da2902442d02e23becd06b5f05af30a86ac4','Build 265 Production closure tree mismatch')
     q((a.get('production_checkpoint') or {}).get('build_specific_proof_run')==36152348667,'Build 265 Production dedicated proof mismatch')
     q(int(p.get('next_build') or 0)>=267,'Build 266+ must advance beyond the Build 266 successor')
-    q((cur==266 and (p.get('production_checkpoint') or {}).get('main_sha')=='28181d75fe8425244848ae5a06c86f54a446eb1b') or (cur==267 and (p.get('production_checkpoint') or {}).get('main_sha')=='1d4a1c204d19c4ecca16dd8dd6952b5107327db8') or (cur>=268 and (p.get('production_checkpoint') or {}).get('main_sha')=='d60e1ac4d29ebc745643dda4297c8946ddae37fb'),'Build 266+ current Production baseline must track the exact immediate verified predecessor closure')
+    q((cur==266 and (p.get('production_checkpoint') or {}).get('main_sha')=='28181d75fe8425244848ae5a06c86f54a446eb1b') or (cur==267 and (p.get('production_checkpoint') or {}).get('main_sha')=='1d4a1c204d19c4ecca16dd8dd6952b5107327db8') or (cur==268 and (p.get('production_checkpoint') or {}).get('main_sha')=='d60e1ac4d29ebc745643dda4297c8946ddae37fb') or (cur>=269 and (p.get('production_checkpoint') or {}).get('main_sha')=='44da8087958eb0c64df3de892ca8628293a96231'),'Build 266+ current Production baseline must track the exact immediate verified predecessor closure')
 q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md','Current authority roadmap mismatch')
 for k,vv in (a.get('safety') or {}).items(): q(vv is False,f'Build 265 safety drift: {k}')
 
