@@ -2,7 +2,7 @@
   "release": 467,
   "build": 263,
   "title": "Release Efficiency & Read-Budget Outcome Verification",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build263-release-efficiency-read-budget-outcome-verification",
   "predecessor": {
     "build": 262,
@@ -173,5 +173,30 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_verified_development": true
     }
+  },
+  "final_closure": {
+    "dev_sha": "ea930cd5c52e0d4f1d55fd9645fc24f5865900f2",
+    "tree_sha": "e536e198fdb5f44b4430ae2d503e15731f2c9109",
+    "proofs": {
+      "system_gate_run": 36136926977,
+      "current_application_quality_run": 36136927022,
+      "it_admin_runtime_proof_run": 36136927013,
+      "branch_hygiene_run": 36136926926
+    },
+    "dedicated_gate_run": 36136927079,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN_WITH_PROVIDER_MEASUREMENT",
+    "ingested_by_build": 264,
+    "recorded_by": "Build 264 restart ingestion; not self-recorded by Build 263"
+  },
+  "production_checkpoint": {
+    "main_sha": "7ee1ac700f451d35a20ff3d667c405086c5512ef",
+    "tree_sha": "e536e198fdb5f44b4430ae2d503e15731f2c9109",
+    "production_pages_deploy_run": 36137622970,
+    "production_live_resource_integrity_run": 36138023445,
+    "products_browser_proof_run": 36138023151,
+    "products_route_proof_run": 36138023256,
+    "build_specific_proof_run": 36137622753,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true
   }
 }
