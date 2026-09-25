@@ -1,0 +1,146 @@
+{
+  "release": 467,
+  "build": 258,
+  "title": "Historical Workflow Trigger Scope Tightening",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build258-historical-workflow-trigger-scope-tightening",
+  "predecessor": {
+    "build": 257,
+    "title": "Workflow Trigger Inventory & Ownership Map",
+    "development_sha": "5e6fa8772be5946a0cd53eadbd4b3daa36fce253",
+    "development_tree_sha": "df03a29c947144f298f0908abf53ca3cdda1c159",
+    "candidate_pr": 352,
+    "candidate_pr_head_sha": "a1fb9797b6da29eede7456a03ff8fded87f870bb",
+    "production_main_sha": "9e95bca825599dea1459838e10812c74d799c976",
+    "production_tree_sha": "df03a29c947144f298f0908abf53ca3cdda1c159",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36077891398,
+      "current_application_quality_run": 36077890063,
+      "it_admin_runtime_proof_run": 36077891374,
+      "branch_hygiene_run": 36077890258,
+      "build_specific_proof_run": 36077890220
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36078157785,
+      "production_live_resource_integrity_run": 36078244247,
+      "products_browser_proof_run": 36078244252,
+      "products_route_proof_run": 36078244289,
+      "build_specific_proof_run": 36078158019
+    }
+  },
+  "scope": {
+    "evidence_sources": [
+      "Build 255 measured high accepted-head workflow fan-out across Builds 242-254.",
+      "Build 256 re-measured Builds 249-255 and preserved exact-SHA promotion.",
+      "Build 257 inventoried historical Release 467 broad-trigger candidates and current proof ownership."
+    ],
+    "target_build_span": "242-257",
+    "target_workflow_count": 16,
+    "retirement_mode": "MANUAL_ONLY_PROVENANCE",
+    "historical_proof_scripts_retained": true,
+    "historical_actions_history_retained": true,
+    "historical_git_history_retained": true,
+    "workflow_files_deleted": false,
+    "canonical_development_proofs_retained": true,
+    "canonical_production_proofs_retained": true,
+    "workflow_run_chains_retained": 5,
+    "exact_sha_promotion_preserved": true
+  },
+  "baseline": {
+    "workflow_files": 147,
+    "pull_request": 87,
+    "push": 91,
+    "workflow_dispatch": 90,
+    "workflow_run": 5
+  },
+  "expected_candidate": {
+    "workflow_files": 148,
+    "pull_request": 72,
+    "push": 76,
+    "workflow_dispatch": 106,
+    "workflow_run": 5,
+    "net_pull_request_reduction": 15,
+    "net_push_reduction": 15
+  },
+  "target_workflows": [
+    ".github/workflows/release467-build242-release-diagnostics-evidence-streamlining.yml",
+    ".github/workflows/release467-build243-session-architecture-hardening.yml",
+    ".github/workflows/release467-build244-csrf-origin-protection-mutating-routes.yml",
+    ".github/workflows/release467-build245-csp-browser-injection-hardening.yml",
+    ".github/workflows/release467-build246-abuse-session-security-operations.yml",
+    ".github/workflows/release467-build247-non-product-visual-coverage.yml",
+    ".github/workflows/release467-build248-refinement-outcomes-review-roadmap-renewal.yml",
+    ".github/workflows/release467-build249-refinement-runtime-measurement-outcome-baseline.yml",
+    ".github/workflows/release467-build250-startup-provider-read-budget-verification.yml",
+    ".github/workflows/release467-build251-csp-style-injection-surface-hardening.yml",
+    ".github/workflows/release467-build252-cross-device-accessibility-acceptance-refresh.yml",
+    ".github/workflows/release467-build253-session-abuse-control-runtime-evidence.yml",
+    ".github/workflows/release467-build254-operator-journey-friction-review.yml",
+    ".github/workflows/release467-build255-production-reliability-release-efficiency-review.yml",
+    ".github/workflows/release467-build256-refinement-outcomes-renewal-ii.yml",
+    ".github/workflows/release467-build257-workflow-trigger-inventory-ownership-map.yml"
+  ],
+  "canonical_owners_retained": [
+    ".github/workflows/system-gate.yml",
+    ".github/workflows/current-application-quality.yml",
+    ".github/workflows/it-admin-runtime-proof.yml",
+    ".github/workflows/repository-branch-hygiene.yml",
+    ".github/workflows/production-pages-deploy-current.yml",
+    ".github/workflows/production-live-resource-integrity-proof.yml",
+    ".github/workflows/release467-build155-products-production-browser.yml",
+    ".github/workflows/release467-build154-products-route-production-proof.yml"
+  ],
+  "implementation": {
+    "dedicated_gate": "scripts/release467_build258_gate.py",
+    "workflow": ".github/workflows/release467-build258-historical-workflow-trigger-scope-tightening.yml",
+    "inventory_script": "scripts/release467_workflow_trigger_inventory.py",
+    "document": "docs/operations/RELEASE_467_BUILD_258_HISTORICAL_WORKFLOW_TRIGGER_SCOPE_TIGHTENING.md"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "automatic_business_action": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "workflow_delete": false,
+    "branch_protection_change": false,
+    "exact_sha_requirement_relaxed": false
+  },
+  "acceptance": {
+    "next_build": 259,
+    "next_build_title": "Reusable Exact-SHA Proof Composition",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "5e6fa8772be5946a0cd53eadbd4b3daa36fce253",
+      "tree": "df03a29c947144f298f0908abf53ca3cdda1c159",
+      "system_gate_run": 36077891398,
+      "quality_run": 36077890063,
+      "it_admin_runtime_run": 36077891374,
+      "repository_hygiene_run": 36077890258,
+      "build_specific_proof_run": 36077890220,
+      "proof_state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "9e95bca825599dea1459838e10812c74d799c976",
+      "tree_sha": "df03a29c947144f298f0908abf53ca3cdda1c159",
+      "production_pages_deploy_run": 36078157785,
+      "production_live_resource_integrity_run": 36078244247,
+      "products_browser_proof_run": 36078244252,
+      "products_route_proof_run": 36078244289,
+      "build_specific_proof_run": 36078158019,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
+  }
+}
