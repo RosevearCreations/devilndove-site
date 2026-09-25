@@ -64,8 +64,10 @@ q("run_current_contract('scripts/release467_build256_gate.py','Release 467 Build
 for source,label in ((rel,'Reliability'),(it,'I.T. tower'),(preflight,'Preflight'),(itpage,'I.T. page'),(relpage,'Reliability page'),(prepage,'Preflight page'),(guide,'I.T. guide')):
     if cur==256:
         q('256' in source and 'Refinement Outcomes Renewal II' in source,f'{label} must identify Build 256 renewal')
-    else:
+    elif cur==257:
         q('257' in source and 'Workflow Trigger Inventory' in source,f'{label} must identify Build 257 successor')
+    else:
+        q('258' in source and 'Historical Workflow Trigger Scope Tightening' in source,f'{label} must identify Build 258+ successor')
 for k,v in (a.get('safety') or {}).items():
     q(v is False,f'Build 256 safety drift: {k}')
 

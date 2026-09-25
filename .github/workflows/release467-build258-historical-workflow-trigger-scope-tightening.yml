@@ -1,6 +1,10 @@
-name: Release 467 Build 257 Workflow Trigger Inventory Ownership Map
+name: Release 467 Build 258 Historical Workflow Trigger Scope Tightening
 
 on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
   workflow_dispatch:
 
 permissions:
@@ -8,14 +12,14 @@ permissions:
   actions: read
 
 jobs:
-  build257:
+  build258:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Recover exact Build 256 Development and Production workflow evidence
+      - name: Recover exact Build 257 Development and Production workflow evidence
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -23,14 +27,14 @@ jobs:
           import json, subprocess, sys
           repo='${{ github.repository }}'
           targets=[
-            ('DEVELOPMENT','601ea5eda5296c189388dc6df595d029687dfa1a',[
+            ('DEVELOPMENT','5e6fa8772be5946a0cd53eadbd4b3daa36fce253',[
               'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof',
-              'Repository Branch Hygiene','Release 467 Build 256 Refinement Outcomes Renewal II'
+              'Repository Branch Hygiene','Release 467 Build 257 Workflow Trigger Inventory Ownership Map'
             ]),
-            ('PRODUCTION','36f48e66ea71b5cf598fb8bb7a9abce10e5ff7b9',[
+            ('PRODUCTION','9e95bca825599dea1459838e10812c74d799c976',[
               'Production Pages Deploy','Production Live Resource Integrity Proof',
               'Release 467 Build 155 Products Production Browser Proof','Release 467 Build 154 Products Route Production Proof',
-              'Release 467 Build 256 Refinement Outcomes Renewal II'
+              'Release 467 Build 257 Workflow Trigger Inventory Ownership Map'
             ])
           ]
           for label,sha,required in targets:
@@ -44,18 +48,19 @@ jobs:
               else: print('GREEN',label,name,row.get('databaseId'))
             if missing: print('MISSING_OR_NOT_GREEN',label,missing,file=sys.stderr);sys.exit(1)
           PY
-      - name: Build 257 inventory and ownership gate
-        run: python scripts/release467_build257_gate.py
-      - name: Emit full path-by-path workflow inventory
-        run: python scripts/release467_workflow_trigger_inventory.py /tmp/build257-workflow-inventory.json >/dev/null
-      - name: Retain predecessor and renewal contracts
+      - name: Build 258 scope-tightening gate
+        run: python scripts/release467_build258_gate.py
+      - name: Emit post-tightening workflow inventory
+        run: python scripts/release467_workflow_trigger_inventory.py /tmp/build258-workflow-inventory.json >/dev/null
+      - name: Retain predecessor and historical contracts
         run: |
+          python scripts/release467_build257_gate.py
           python scripts/release467_build256_gate.py
           python scripts/release467_build255_gate.py
           python scripts/release467_build242_gate.py
       - uses: actions/upload-artifact@v4
         with:
-          name: release467-build257-workflow-trigger-inventory
-          path: /tmp/build257-workflow-inventory.json
+          name: release467-build258-historical-workflow-trigger-scope
+          path: /tmp/build258-workflow-inventory.json
           if-no-files-found: error
           retention-days: 30

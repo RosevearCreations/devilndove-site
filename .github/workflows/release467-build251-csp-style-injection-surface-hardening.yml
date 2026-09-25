@@ -1,10 +1,7 @@
 name: Release 467 Build 251 CSP Style Injection Surface Hardening
 
 on:
-  pull_request:
-    branches: [dev, main]
-  push:
-    branches: [dev, main]
+  workflow_dispatch:
 
 permissions:
   contents: read

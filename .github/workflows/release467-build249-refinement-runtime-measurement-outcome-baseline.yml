@@ -1,22 +1,7 @@
 name: Release 467 Build 249 Refinement Runtime Measurement Outcome Baseline
 on:
-  push:
-    branches: [dev, main]
-    paths:
-      - 'public/js/admin-route-usage.js'
-      - 'admin/index.html'
-      - 'admin/products/index.html'
-      - 'current-development-authority.json'
-      - 'release467-build248-refinement-outcomes-review-roadmap-renewal.json'
-      - 'release467-build249-refinement-runtime-measurement-outcome-baseline.json'
-      - 'docs/operations/RELEASE_467_BUILD_249_REFINEMENT_RUNTIME_MEASUREMENT_OUTCOME_BASELINE.md'
-      - 'docs/operations/RELEASE_467_REFINEMENT_OUTCOMES_AUTONOMOUS_BUILDS_249_256.md'
-      - 'scripts/release467_build248_gate.py'
-      - 'scripts/release467_build249_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - '.github/workflows/release467-build249-refinement-runtime-measurement-outcome-baseline.yml'
-  pull_request:
-    branches: [dev, main]
+  workflow_dispatch:
+
 jobs:
   build249:
     runs-on: ubuntu-latest
