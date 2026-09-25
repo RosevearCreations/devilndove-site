@@ -297,10 +297,13 @@
     "expected_candidate_workflow_files": 150,
     "expected_pull_request": 36,
     "expected_push": 124,
-    "expected_workflow_dispatch": 125,
+    "expected_workflow_dispatch": 132,
     "expected_workflow_run": 5,
     "expected_actual_pr_runs": 35,
     "next_build": 261,
-    "future_queue_exhausted": false
+    "future_queue_exhausted": false,
+    "manual_dispatch_available_for_all_targets": true,
+    "existing_push_triggers_preserved": true,
+    "build240_final_mode": "MANUAL_ONLY_PROVENANCE"
   }
 }
