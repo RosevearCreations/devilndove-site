@@ -1,7 +1,7 @@
 name: Release 467 Build 222 Project to Knowledge Promotion Recipe History
 on:
   push:
-    branches: [dev, main]
+    branches: [dev]
     paths:
       - 'migrations/canonical/manifest.json'
       - 'migrations/canonical/0021_release467_project_knowledge_recipe_history.sql'
