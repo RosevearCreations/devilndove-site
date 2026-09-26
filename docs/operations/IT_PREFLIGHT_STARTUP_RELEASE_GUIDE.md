@@ -39,3 +39,12 @@ Build 171 **Release & Restart Authority Convergence** remains historical provena
 ## Retained historical provenance — Builds 192–193
 
 Build 192 **Release Regression & Runtime Budget Convergence** and Build 193 **Current Authority & Handoff Convergence** remain historical restart authorities. Their artifacts stay immutable and successor-aware.
+
+
+## Current CAIP acceptance — Build 279
+
+Build 279 **Multipart Interruption & Resume Acceptance Drill** runs a bounded Development-only three-part private-media exercise against the exact deployed SHA. It interrupts after part 1, regenerates/reselects the same source, requires `resume_existing`, proves the same upload/object identity and preserved part-1 ETag, uploads part 2, requires `[CAIP_MULTIPART_INCOMPLETE]` when part 3 is deliberately absent, then aborts the exact unfinished multipart. Only sanitized hashes/counts/booleans are retained.
+
+A GREEN Build 279 runtime artifact closes the third current-release CAIP acceptance dimension: **3/3**, lane **ACCEPTED**. Production promotion remains identical-tree/read-deploy only; the Development drill creates no finalized test object and copies no Production media.
+
+The future queue remains open. Next: **Build 280 — Private-Media Reconciliation & Recovery Outcome Review**.
