@@ -12,28 +12,28 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 272 candidate
+## Current Release 467 restart authority — Build 273 candidate
 
-Build 271 **Standalone / Social CAIP Project Workflow** is the exact fully verified Development and Production predecessor.
+Build 272 **Upload Prerequisite & Operator Readiness** is the exact fully verified Development and Production predecessor.
 
-- Development SHA: `af45e733b673af8e8d7e9acb7e55e35f525bebec`
-- exact Development/Production tree: `f0da384a9d0be6f54d5e0b441f7aa333c158e69f`
-- Development proofs: System `36208079958`, Quality `36208080087`, I.T. `36208080075`, Hygiene `36208080004`, Build 271 `36208079968`
-- Production main SHA: `fce84316c0b5b22781b2ee30d35b205d96b39c09`
-- Production proofs: Pages `36208228266`, Live Resource Integrity `36208267834`, Product Browser `36208267848`, Product Route `36208267804`, Build 271 `36208228296`
+- Development SHA: `7cf4f6858c664a444499245a6b878491dceecb5f`
+- exact Development/Production tree: `875f5cf60dd1118036f6bf5a18c0748e6e9b8d71`
+- Development proofs: System `36209187858`, Quality `36209187822`, I.T. `36209187867`, Hygiene `36209187908`, Build 272 `36209187949`
+- Production main SHA: `e490a5a12f30d9046dda2a6e9ea9ee73ee33b48f`
+- Production proofs: Pages `36209298966`, Live Resource Integrity `36209339128`, Product Browser `36209339067`, Product Route `36209339102`, Build 272 `36209299044`
 - canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 272 **Upload Prerequisite & Operator Readiness** is the active bounded candidate.
+Build 273 **Content Studio Standalone-Project Bridge** is the active bounded candidate.
 
-Before the browser asks the operator to choose or drop a local file, CAIP must prove the Build 241 private-media tables, the Build 269 duplicate-safe columns and the private `CAIP_PRIVATE_MEDIA_BUCKET` binding. The same readiness contract is enforced again at the control plane, direct upload endpoint and multipart part endpoint.
+Content Studio may create or refresh exactly one package for an existing Creative Process project only when exactly one non-archived CAIP workspace matches the same `creative_work_project_id`. Missing, duplicate or conflicting CAIP identity fails closed.
 
-Missing prerequisites are explicit operator/configuration states. They return `CAIP_UPLOAD_PREREQUISITE_BLOCKED` with `transfer_started: false`; they do not create transfer-failure evidence and do not trigger automatic schema or binding repair.
+A missing Content Studio package is not treated as a missing Creative Process or CAIP project. Build 273 creates only the package row under the existing unique source identity and reuses that same package on refresh.
 
-Build 272 adds no migration, no request-time DDL, no automatic bucket/binding mutation, no R2 deletion, no public promotion, no Inventory/Finance movement and no provider execution.
+Build 273 adds no migration, request-time schema repair, Creative Process project creation, CAIP project creation, fake Product, R2 deletion, public promotion, Inventory/Finance movement or provider execution.
 
-The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 272, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
+The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 273, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
 
-The future queue remains open. Next: **Build 273 — Content Studio Standalone-Project Bridge**.
+The future queue remains open. Next: **Build 274 — Creative Process Planned-vs-Actual Inventory Lifecycle**.
 ## Retained historical provenance — Build 171
 
 Build 171 **Release & Restart Authority Convergence** remains historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It does not override current Build 227 truth.
