@@ -80,7 +80,9 @@
     ],
     "session_row_created_by_build278": false,
     "session_token_resolution": "TRANSIENT_MASKED_READ_ONLY_SCHEMA_COMPATIBLE_NOT_PERSISTED",
-    "session_schema_compatibility": "PRAGMA_SESSION_TOKEN_COLUMN_DETECTION_SESSION_TOKEN_OR_TOKEN"
+    "session_schema_compatibility": "PRAGMA_SESSION_TOKEN_COLUMN_DETECTION_SESSION_TOKEN_OR_TOKEN",
+    "d1_cli": "WRANGLER_MAJOR_4_CURRENT_REPOSITORY_PROVEN_PATH",
+    "d1_failure_diagnostics": "MASKED_STDERR_ONLY_NO_SESSION_TOKEN_OUTPUT"
   },
   "decision": {
     "build278_complete_when": "A fresh current-release authenticated Development administrator-bound secure-review request, using a configured or existing unexpired Development admin session resolved read-only, serves one byte through a real HTTP Range response with required private headers and records a qualifying review_proxy_served audit; the identical tree is then promoted to Production.",

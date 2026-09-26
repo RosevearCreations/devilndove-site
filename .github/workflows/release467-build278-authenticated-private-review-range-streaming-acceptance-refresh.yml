@@ -170,7 +170,16 @@ jobs:
             unset TOKEN COOKIE
           fi
 
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "PRAGMA table_info(sessions);" > /tmp/build278-session-columns.json
+          set +e
+          npx --yes wrangler@4 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "PRAGMA table_info(sessions);" > /tmp/build278-session-columns.json 2>/tmp/build278-session-columns.err
+          D1_CODE=$?
+          set -e
+          if [ "$D1_CODE" -ne 0 ]; then
+            echo 'STOP: Build 278 could not inspect the Development sessions schema.'
+            sed -E 's/(token|authorization|bearer)[=: ]+[^ ]+/\1=[MASKED]/Ig' /tmp/build278-session-columns.err | tail -40
+            exit 1
+          fi
+          rm -f /tmp/build278-session-columns.err
           TOKEN_EXPR="$(python - <<'PY'
           import json
           data=json.load(open('/tmp/build278-session-columns.json'));names=set()
@@ -188,7 +197,16 @@ jobs:
           PY
           )"
           rm -f /tmp/build278-session-columns.json
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT ${TOKEN_EXPR} AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(${TOKEN_EXPR},''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/build278-existing-session.json
+          set +e
+          npx --yes wrangler@4 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT ${TOKEN_EXPR} AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(${TOKEN_EXPR},''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/build278-existing-session.json 2>/tmp/build278-existing-session.err
+          D1_CODE=$?
+          set -e
+          if [ "$D1_CODE" -ne 0 ]; then
+            echo 'STOP: Build 278 could not resolve an existing Development administrator session.'
+            sed -E 's/(token|authorization|bearer)[=: ]+[^ ]+/\1=[MASKED]/Ig' /tmp/build278-existing-session.err | tail -40
+            exit 1
+          fi
+          rm -f /tmp/build278-existing-session.err
           TOKEN="$(python - <<'PY'
           import json
           data=json.load(open('/tmp/build278-existing-session.json'))
@@ -219,7 +237,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "SELECT ca.creative_project_id,ca.creative_asset_id FROM creative_assets ca INNER JOIN media_assets ma ON ma.media_asset_id=ca.media_asset_id WHERE length(trim(COALESCE(ma.object_key,'')))>0 AND (lower(trim(COALESCE(ma.storage_provider,'')))='r2_private_caip' OR upper(trim(COALESCE(ma.bucket_name,'')))='CAIP_PRIVATE_MEDIA_BUCKET' OR lower(trim(COALESCE(ma.bucket_name,''))) LIKE '%caip%') AND ca.asset_status<>'archived' ORDER BY CASE lower(COALESCE(ca.media_type,'')) WHEN 'video' THEN 1 WHEN 'audio' THEN 2 ELSE 3 END,ca.creative_asset_id LIMIT 1;"             > /tmp/build278-asset.json
+          npx --yes wrangler@4 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "SELECT ca.creative_project_id,ca.creative_asset_id FROM creative_assets ca INNER JOIN media_assets ma ON ma.media_asset_id=ca.media_asset_id WHERE length(trim(COALESCE(ma.object_key,'')))>0 AND (lower(trim(COALESCE(ma.storage_provider,'')))='r2_private_caip' OR upper(trim(COALESCE(ma.bucket_name,'')))='CAIP_PRIVATE_MEDIA_BUCKET' OR lower(trim(COALESCE(ma.bucket_name,''))) LIKE '%caip%') AND ca.asset_status<>'archived' ORDER BY CASE lower(COALESCE(ca.media_type,'')) WHEN 'video' THEN 1 WHEN 'audio' THEN 2 ELSE 3 END,ca.creative_asset_id LIMIT 1;"             > /tmp/build278-asset.json
           python - <<'PY'
           import json,os
           data=json.load(open('/tmp/build278-asset.json'));rows=[]
@@ -297,7 +315,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "SELECT event_type,outcome,CAST(json_extract(details_json,'$.ranged_streaming') AS INTEGER) AS ranged_streaming,CAST(json_extract(details_json,'$.no_copy') AS INTEGER) AS no_copy,CAST(json_extract(details_json,'$.no_cache') AS INTEGER) AS no_cache,CAST(json_extract(details_json,'$.raw_token_not_logged') AS INTEGER) AS raw_token_not_logged FROM creative_asset_access_audit WHERE creative_asset_access_grant_id=${BUILD278_GRANT_ID} AND event_type='review_proxy_served' ORDER BY created_at DESC LIMIT 1; SELECT access_count,max_access_count,bound_user_id,expires_at FROM creative_asset_access_grants WHERE creative_asset_access_grant_id=${BUILD278_GRANT_ID} LIMIT 1;"             > /tmp/build278-audit.json
+          npx --yes wrangler@4 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "SELECT event_type,outcome,CAST(json_extract(details_json,'$.ranged_streaming') AS INTEGER) AS ranged_streaming,CAST(json_extract(details_json,'$.no_copy') AS INTEGER) AS no_copy,CAST(json_extract(details_json,'$.no_cache') AS INTEGER) AS no_cache,CAST(json_extract(details_json,'$.raw_token_not_logged') AS INTEGER) AS raw_token_not_logged FROM creative_asset_access_audit WHERE creative_asset_access_grant_id=${BUILD278_GRANT_ID} AND event_type='review_proxy_served' ORDER BY created_at DESC LIMIT 1; SELECT access_count,max_access_count,bound_user_id,expires_at FROM creative_asset_access_grants WHERE creative_asset_access_grant_id=${BUILD278_GRANT_ID} LIMIT 1;"             > /tmp/build278-audit.json
           python - <<'PY'
           import json,os
           data=json.load(open('/tmp/build278-audit.json'));audits=[];grants=[]
