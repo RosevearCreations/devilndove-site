@@ -13,10 +13,10 @@ export const ACCEPTED_DEVELOPMENT=Object.freeze({
   branch_hygiene_run:36208080004,dedicated_gate_run:36208079968,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:270,title:'Strong-Fingerprint Backfill & Recovery Reconciliation',state:'DEVELOPMENT_GREEN',
-  dev_sha:'b51e15f9c150e1d740fe1383d8df98a962990b21',tree_sha:'9dc39ed9dde4946ad54e51b58c7b66ca38b75634',
-  system_gate_run:36206690243,current_application_quality_run:36206690338,it_admin_runtime_proof_run:36206690036,
-  branch_hygiene_run:36206690296,dedicated_gate_run:36206690389,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN'
+  release:467,build:271,title:'Standalone / Social CAIP Project Workflow',state:'DEVELOPMENT_GREEN',
+  dev_sha:'af45e733b673af8e8d7e9acb7e55e35f525bebec',tree_sha:'f0da384a9d0be6f54d5e0b441f7aa333c158e69f',
+  system_gate_run:36208079958,current_application_quality_run:36208080087,it_admin_runtime_proof_run:36208080075,
+  branch_hygiene_run:36208080004,dedicated_gate_run:36208079968,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN'
 });
 export const CURRENT_PRODUCTION=Object.freeze({
   release:467,build:271,title:'Standalone / Social CAIP Project Workflow',state:'PRODUCTION_GREEN',
