@@ -3,7 +3,7 @@ import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getD
 import {
   CAIP_MEDIA_INTAKE_BUILD, abortUploadFile, assertCaipMediaIntakeSchema, completeUploadFile,
   createUploadSession, createSafeReplacementUpload, initiateUploadFile, listCaipMediaIntake, requestPublicPromotion, retryUploadedFileRegistration,
-  safeUploadFileForClient, updateUploadFileGovernance, privateBucketAvailable, listCaipDuplicateAudit, cleanupCaipDuplicateGroup, backfillCaipContentFingerprints, setUploadFileContentFingerprint, getCaipMediaIntakeReadiness
+  safeUploadFileForClient, updateUploadFileGovernance, privateBucketAvailable, listCaipDuplicateAudit, cleanupCaipDuplicateGroup, backfillCaipContentFingerprints, reconcileCaipStrongFingerprintRecovery, setUploadFileContentFingerprint, getCaipMediaIntakeReadiness
 } from '../_lib/caipMediaIntake.js';
 
 function json(data,status=200){return jsonResponse(data,status,{'Cache-Control':'no-store'});}
@@ -54,6 +54,7 @@ export async function onRequestPost(context){
     else if(action==='create_safe_replacement') result=await createSafeReplacementUpload(state.db,context.env,fileId,state.adminUser.user_id);
     else if(action==='audit_duplicates') result=await listCaipDuplicateAudit(state.db,projectId);
     else if(action==='backfill_content_fingerprints') result=await backfillCaipContentFingerprints(state.db,context.env,projectId,state.adminUser.user_id,{limit:body.limit});
+    else if(action==='reconcile_existing_private_media') result=await reconcileCaipStrongFingerprintRecovery(state.db,context.env,projectId,state.adminUser.user_id,{limit:body.limit});
     else if(action==='cleanup_duplicate_group') result=await cleanupCaipDuplicateGroup(state.db,context.env,projectId,body.canonical_file_id,body.duplicate_file_ids,state.adminUser.user_id,{delete_private_r2_copy:Boolean(body.delete_private_r2_copy)});
     else if(action==='update_governance') result=await updateUploadFileGovernance(state.db,fileId,body,state.adminUser.user_id);
     else if(action==='request_public_promotion') result=await requestPublicPromotion(state.db,fileId,body.destination_role,state.adminUser.user_id);

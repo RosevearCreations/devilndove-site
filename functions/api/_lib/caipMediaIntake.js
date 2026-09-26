@@ -355,6 +355,100 @@ function bindingSummary(env) {
   };
 }
 
+export async function reconcileCaipStrongFingerprintRecovery(db, env, creativeProjectId, actorUserId, options={}) {
+  await assertCaipMediaIntakeSchema(db);
+  const projectId=integer(creativeProjectId);
+  if (!projectId) throw new Error('Choose a valid CAIP Creative Project first.');
+  if (!privateBucketAvailable(env)) throw new Error('Private CAIP R2 binding is unavailable; existing private-media reconciliation cannot be verified.');
+  const limit=Math.min(20,Math.max(1,integer(options.limit)||8));
+  const backfill=await backfillCaipContentFingerprints(db,env,projectId,actorUserId,{limit});
+  const remainingBudget=Math.max(0,limit-integer(backfill.processed_count));
+  const registrations=[]; const preserved=[]; const bucket=bucketBinding(env);
+
+  if (remainingBudget>0) {
+    const candidates=rows(await db.prepare(`SELECT * FROM caip_media_upload_files
+      WHERE creative_project_id=? AND upload_status='uploaded' AND creative_asset_id IS NULL
+        AND COALESCE(content_fingerprint,'')<>''
+        AND COALESCE(last_error,'') NOT LIKE '%CAIP_R2_SIZE_MISMATCH%'
+        AND COALESCE(last_error,'') NOT LIKE '%CAIP_MULTIPART_INCOMPLETE%'
+      ORDER BY caip_media_upload_file_id ASC LIMIT ?`).bind(projectId,remainingBudget).all());
+    for (const file of candidates) {
+      try {
+        const head=await bucket.head(file.object_key);
+        if (!head || numeric(head.size)!==numeric(file.file_size_bytes)) {
+          preserved.push({file_id:integer(file.caip_media_upload_file_id),reason:'r2_size_not_verified'});
+          continue;
+        }
+        const parentId=integer(file.recovery_of_file_id);
+        if (parentId) {
+          const parent=await db.prepare(`SELECT caip_media_upload_file_id,creative_project_id,object_key
+            FROM caip_media_upload_files WHERE caip_media_upload_file_id=? LIMIT 1`).bind(parentId).first();
+          if (!parent) {
+            preserved.push({file_id:integer(file.caip_media_upload_file_id),reason:'recovery_parent_missing'});
+            continue;
+          }
+          if (integer(parent.creative_project_id)!==projectId) {
+            preserved.push({file_id:integer(file.caip_media_upload_file_id),reason:'recovery_parent_cross_project'});
+            continue;
+          }
+          if (text(parent.object_key)===text(file.object_key)) {
+            preserved.push({file_id:integer(file.caip_media_upload_file_id),reason:'recovery_object_identity_not_distinct'});
+            continue;
+          }
+        }
+        const result=await retryUploadedFileRegistration(db,env,file.caip_media_upload_file_id,actorUserId);
+        if (result?.registration_pending) preserved.push({file_id:integer(file.caip_media_upload_file_id),reason:text(result.diagnostic_code||'registration_pending',120)});
+        else registrations.push({
+          file_id:integer(file.caip_media_upload_file_id),
+          creative_asset_id:integer(result?.creative_asset_id||result?.file?.creative_asset_id)||null,
+          relinked_existing_asset:Boolean(result?.relinked_existing_asset),
+          registered_private_asset:true
+        });
+      } catch (error) {
+        preserved.push({file_id:integer(file.caip_media_upload_file_id),reason:text(error?.message||error,600)});
+      }
+    }
+  }
+
+  const lineageRows=rows(await db.prepare(`SELECT
+      c.caip_media_upload_file_id AS child_file_id,c.recovery_of_file_id,c.creative_project_id AS child_project_id,
+      c.object_key AS child_object_key,c.upload_status AS child_status,
+      p.caip_media_upload_file_id AS parent_file_id,p.creative_project_id AS parent_project_id,p.object_key AS parent_object_key
+    FROM caip_media_upload_files c
+    LEFT JOIN caip_media_upload_files p ON p.caip_media_upload_file_id=c.recovery_of_file_id
+    WHERE c.creative_project_id=? AND c.recovery_of_file_id IS NOT NULL
+    ORDER BY c.caip_media_upload_file_id DESC LIMIT 100`).bind(projectId).all());
+  const lineage_review=[]; let lineage_verified=0;
+  for (const row of lineageRows) {
+    let reason='';
+    if (!integer(row.parent_file_id)) reason='recovery_parent_missing';
+    else if (integer(row.parent_project_id)!==projectId) reason='recovery_parent_cross_project';
+    else if (text(row.parent_object_key)===text(row.child_object_key)) reason='recovery_object_identity_not_distinct';
+    if (reason) lineage_review.push({file_id:integer(row.child_file_id),recovery_of_file_id:integer(row.recovery_of_file_id),reason});
+    else lineage_verified+=1;
+  }
+
+  const remainingUnregistered=await safeCount(db,`SELECT COUNT(*) c FROM caip_media_upload_files
+    WHERE creative_project_id=? AND upload_status='uploaded' AND creative_asset_id IS NULL`,projectId);
+  return {
+    build:270,
+    creative_project_id:projectId,
+    bounded_limit:limit,
+    fingerprint_backfill:backfill,
+    registration_reconciled:registrations,
+    registration_reconciled_count:registrations.length,
+    preserved_for_review:preserved,
+    preserved_for_review_count:preserved.length,
+    recovery_lineage_verified_count:lineage_verified,
+    recovery_lineage_review:lineage_review,
+    recovery_lineage_review_count:lineage_review.length,
+    remaining_unregistered_uploaded_rows:remainingUnregistered,
+    r2_deleted_count:0,
+    public_promotion_count:0,
+    uncertain_binaries_preserved:true
+  };
+}
+
 export async function createUploadSession(db, env, creativeProjectId, filesInput, actorUserId, options = {}) {
   await assertCaipMediaIntakeSchema(db);
   const uploadCols=await tableColumns(db,'caip_media_upload_files');
@@ -824,7 +918,9 @@ export async function listCaipDuplicateAudit(db, creativeProjectId) {
     reclaimable+=group.reclaimable_file_ids.length; groups.push(group);
   }
   const missing_strong_fingerprints=await safeCount(db,`SELECT COUNT(*) c FROM caip_media_upload_files WHERE creative_project_id=? AND upload_status='uploaded' AND COALESCE(content_fingerprint,'')=''`,projectId);
-  return {groups,duplicate_rows:groups.reduce((sum,g)=>sum+g.duplicate_file_ids.length,0),reclaimable_rows:reclaimable,missing_strong_fingerprints,content_fingerprint_version:CONTENT_FINGERPRINT_VERSION};
+  const unregistered_uploaded_rows=await safeCount(db,`SELECT COUNT(*) c FROM caip_media_upload_files WHERE creative_project_id=? AND upload_status='uploaded' AND creative_asset_id IS NULL`,projectId);
+  const recovery_lineage_rows=await safeCount(db,`SELECT COUNT(*) c FROM caip_media_upload_files WHERE creative_project_id=? AND recovery_of_file_id IS NOT NULL AND upload_status<>'archived'`,projectId);
+  return {groups,duplicate_rows:groups.reduce((sum,g)=>sum+g.duplicate_file_ids.length,0),reclaimable_rows:reclaimable,missing_strong_fingerprints,unregistered_uploaded_rows,recovery_lineage_rows,content_fingerprint_version:CONTENT_FINGERPRINT_VERSION};
 }
 
 export async function cleanupCaipDuplicateGroup(db, env, creativeProjectId, canonicalFileId, duplicateFileIds, actorUserId, options={}) {
