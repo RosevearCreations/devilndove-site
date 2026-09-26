@@ -65,8 +65,12 @@ else:
     q(a.get('state')=='PRODUCTION_GREEN','Build 274 successor-ingested authority must be Production GREEN')
     q((a.get('final_closure') or {}).get('dev_sha')=='434a267a5598439103f6942d1b7f58a7ce04dba6' and (a.get('final_closure') or {}).get('tree_sha')=='8d69b22f4634b70f3b10f247e42e0ca2165a4ccf','Build 274 final Development closure mismatch')
     q((a.get('production_checkpoint') or {}).get('main_sha')=='af5e99b3baa1d28f3949e7956905a0325d328d06' and (a.get('production_checkpoint') or {}).get('tree_sha')=='8d69b22f4634b70f3b10f247e42e0ca2165a4ccf','Build 274 final Production closure mismatch')
-    q((p.get('production_checkpoint') or {}).get('main_sha')=='af5e99b3baa1d28f3949e7956905a0325d328d06','Build 275+ current Production baseline must be exact Build 274')
-    q(int(p.get('next_build') or 0)>=276,'Build 275+ must advance beyond Build 275 successor')
+    if cur==275:
+        q((p.get('production_checkpoint') or {}).get('main_sha')=='af5e99b3baa1d28f3949e7956905a0325d328d06','Build 275 current Production baseline must be exact Build 274')
+        q(int(p.get('next_build') or 0)>=276,'Build 275 must advance beyond Build 275 successor')
+    else:
+        q((p.get('production_checkpoint') or {}).get('main_sha')=='86112270a5b0eb4bdbae4ffd418e34ecfd7b7587','Build 276+ current Production baseline must be exact Build 275')
+        q(int(p.get('next_build') or 0)>=277,'Build 276+ must advance beyond Build 276 successor')
 proj=p.get('creative_process_planned_vs_actual_inventory_lifecycle') or {}
 q(proj.get('classification')=='PLANNED_ESTIMATES_SEPARATE_FROM_REVIEWED_AND_POSTED_ACTUALS','Current authority missing Build 274 projection')
 q(proj.get('planned_material_estimates_move_inventory') is False and proj.get('posted_actuals_direct_edit_allowed') is False and proj.get('voided_and_corrected_history_preserved') is True,'Current authority Build 274 lifecycle safety mismatch')

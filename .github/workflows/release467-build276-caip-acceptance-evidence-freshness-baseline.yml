@@ -1,0 +1,44 @@
+name: Release 467 Build 276 CAIP Acceptance Evidence Freshness Baseline
+on:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build276:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 275 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 2453c99e4c459d7d31b16bd2004fa4afca081054
+          production_sha: 86112270a5b0eb4bdbae4ffd418e34ecfd7b7587
+          build_proof_name: Release 467 Build 275 CAIP Production Acceptance Outcomes Renewal
+          report_path: /tmp/build276-predecessor-exact-sha-proof.json
+      - name: Resolve exact Build 275 tree continuity
+        run: |
+          git fetch --no-tags --depth=1 origin 2453c99e4c459d7d31b16bd2004fa4afca081054
+          git fetch --no-tags --depth=1 origin 86112270a5b0eb4bdbae4ffd418e34ecfd7b7587
+          DEV_TREE="$(git rev-parse 2453c99e4c459d7d31b16bd2004fa4afca081054^{tree})"
+          PROD_TREE="$(git rev-parse 86112270a5b0eb4bdbae4ffd418e34ecfd7b7587^{tree})"
+          test "$DEV_TREE" = "$PROD_TREE"
+          test "$DEV_TREE" = "521888446fa549701da7109d266e0b73f7b40816"
+      - name: Build 276 gate
+        run: python scripts/release467_build276_gate.py
+      - name: Retain Build 275 contract
+        run: python scripts/release467_build275_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build276-caip-acceptance-evidence-freshness-baseline-${{ github.sha }}
+          path: /tmp/build276-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,131 @@
+{
+  "release": 467,
+  "build": 276,
+  "title": "CAIP Acceptance Evidence Freshness Baseline",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build276-caip-acceptance-evidence-freshness-baseline",
+  "predecessor": {
+    "build": 275,
+    "title": "CAIP Production Acceptance & Outcomes Renewal",
+    "development_sha": "2453c99e4c459d7d31b16bd2004fa4afca081054",
+    "development_tree_sha": "521888446fa549701da7109d266e0b73f7b40816",
+    "production_main_sha": "86112270a5b0eb4bdbae4ffd418e34ecfd7b7587",
+    "production_tree_sha": "521888446fa549701da7109d266e0b73f7b40816",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36213517016,
+      "current_application_quality_run": 36213517120,
+      "it_admin_runtime_proof_run": 36213516995,
+      "branch_hygiene_run": 36213517034,
+      "dedicated_gate_run": 36213517078
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36213629230,
+      "production_live_resource_integrity_run": 36213674697,
+      "products_browser_proof_run": 36213674721,
+      "products_route_proof_run": 36213674734,
+      "build_specific_proof_run": 36213629171
+    }
+  },
+  "baseline": {
+    "lane": "caip_private_media",
+    "current_lane_state": "EVIDENCE_DEPENDENT",
+    "freshness_rule": "FRESH_CURRENT_RELEASE_AUTHENTICATED_EVIDENCE_REQUIRED",
+    "evidence_dimensions": [
+      {
+        "key": "authenticated_private_review_range_streaming",
+        "required": true,
+        "known_evidence": "3 qualifying Release 466 Development review_proxy_served audits",
+        "timestamp_state": "NOT_RECORDED_IN_CARRY_FORWARD_AUTHORITY",
+        "current_release_freshness": "NOT_SATISFIED",
+        "status": "REFRESH_REQUIRED",
+        "accepted_for_current_release": false
+      },
+      {
+        "key": "deployed_private_bucket_binding_non_public_exposure",
+        "required": true,
+        "known_evidence": "CAIP_PRIVATE_MEDIA_BUCKET contract and Development CAIP R2 authority are documented",
+        "timestamp_state": "NO_CURRENT_RELEASE_DEPLOYED_OPERATOR_TIMESTAMP",
+        "current_release_freshness": "NOT_SATISFIED",
+        "status": "DEPLOYED_OPERATOR_EVIDENCE_REQUIRED",
+        "bucket_presence_alone_is_acceptance": false
+      },
+      {
+        "key": "multipart_interruption_reconnect_reselection_resume",
+        "required": true,
+        "known_evidence": "Static multipart integrity/recovery contracts are source-proven",
+        "timestamp_state": "NO_CURRENT_RELEASE_LIVE_DRILL_TIMESTAMP",
+        "current_release_freshness": "NOT_SATISFIED",
+        "status": "LIVE_DRILL_EVIDENCE_REQUIRED",
+        "static_source_is_live_acceptance": false
+      }
+    ],
+    "qualifying_historical_range_audits": 3,
+    "current_release_required_dimensions": 3,
+    "current_release_fresh_dimensions_satisfied": 0,
+    "current_release_acceptance_complete": false,
+    "synthetic_acceptance": false,
+    "source_review_only": true
+  },
+  "decision": {
+    "build276_complete_when": "The current CAIP acceptance lane has an explicit freshness inventory that separates historical/source proof from current-release runtime proof, records timestamp gaps, and leaves every unresolved dimension fail-closed.",
+    "next_build": 277,
+    "next_build_title": "Private Bucket Binding & Non-Public Exposure Evidence",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_upload": false,
+    "private_media_delete": false,
+    "uncertain_r2_delete": false,
+    "public_media_copy": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "payment_or_refund": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false,
+    "named_proof_requirement_relaxed": false
+  },
+  "implementation": {
+    "baseline_document": "docs/operations/RELEASE_467_BUILD_276_CAIP_ACCEPTANCE_EVIDENCE_FRESHNESS_BASELINE.md",
+    "dedicated_gate": "scripts/release467_build276_gate.py",
+    "workflow": ".github/workflows/release467-build276-caip-acceptance-evidence-freshness-baseline.yml",
+    "roadmap": "docs/operations/RELEASE_467_CAIP_PRODUCTION_ACCEPTANCE_AUTONOMOUS_BUILDS_276_284.md"
+  },
+  "starting_point": {
+    "development": {
+      "sha": "2453c99e4c459d7d31b16bd2004fa4afca081054",
+      "tree": "521888446fa549701da7109d266e0b73f7b40816",
+      "system_gate_run": 36213517016,
+      "quality_run": 36213517120,
+      "current_application_quality_run": 36213517120,
+      "it_admin_runtime_run": 36213516995,
+      "it_admin_runtime_proof_run": 36213516995,
+      "repository_hygiene_run": 36213517034,
+      "branch_hygiene_run": 36213517034,
+      "dedicated_gate_run": 36213517078,
+      "build_specific_proof_run": 36213517078,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "86112270a5b0eb4bdbae4ffd418e34ecfd7b7587",
+      "tree_sha": "521888446fa549701da7109d266e0b73f7b40816",
+      "production_pages_deploy_run": 36213629230,
+      "production_live_resource_integrity_run": 36213674697,
+      "products_browser_proof_run": 36213674721,
+      "products_route_proof_run": 36213674734,
+      "build_specific_proof_run": 36213629171,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
+  }
+}

@@ -1,27 +1,27 @@
-// Release 467 Build 275 — CAIP Production Acceptance & Outcomes Renewal over exact Build 274 Production source.
+// Release 467 Build 276 — CAIP Acceptance Evidence Freshness Baseline over exact Build 275 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=275;
-const TITLE='CAIP Production Acceptance & Outcomes Renewal';
-const AUTHORITY='release467-build275-caip-production-acceptance-outcomes-renewal';
-const EVIDENCE_ID='r467-b274-green-36211181947-36211313214';
+const BUILD=276;
+const TITLE='CAIP Acceptance Evidence Freshness Baseline';
+const AUTHORITY='release467-build276-caip-acceptance-evidence-freshness-baseline';
+const EVIDENCE_ID='r467-b275-green-36213517016-36213629230';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:274,title:'Creative Process Planned-vs-Actual Inventory Lifecycle',state:'DEVELOPMENT_GREEN',
-  dev_sha:'434a267a5598439103f6942d1b7f58a7ce04dba6',tree_sha:'8d69b22f4634b70f3b10f247e42e0ca2165a4ccf',
-  system_gate_run:36211181947,current_application_quality_run:36211181834,it_admin_runtime_proof_run:36211182652,
-  branch_hygiene_run:36211181960,dedicated_gate_run:36211182028,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
+  release:467,build:275,title:'CAIP Production Acceptance & Outcomes Renewal',state:'DEVELOPMENT_GREEN',
+  dev_sha:'2453c99e4c459d7d31b16bd2004fa4afca081054',tree_sha:'521888446fa549701da7109d266e0b73f7b40816',
+  system_gate_run:36213517016,current_application_quality_run:36213517120,it_admin_runtime_proof_run:36213516995,
+  branch_hygiene_run:36213517034,dedicated_gate_run:36213517078,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:274,title:'Creative Process Planned-vs-Actual Inventory Lifecycle',state:'PRODUCTION_GREEN',
-  main_sha:'af5e99b3baa1d28f3949e7956905a0325d328d06',tree_sha:'8d69b22f4634b70f3b10f247e42e0ca2165a4ccf',
-  production_pages_deploy_run:36211313214,production_live_resource_integrity_run:36211344703,
-  products_browser_proof_run:36211344669,products_route_proof_run:36211344770,build_specific_proof_run:36211313280,remote_d1_queries:0
+  release:467,build:275,title:'CAIP Production Acceptance & Outcomes Renewal',state:'PRODUCTION_GREEN',
+  main_sha:'86112270a5b0eb4bdbae4ffd418e34ecfd7b7587',tree_sha:'521888446fa549701da7109d266e0b73f7b40816',
+  production_pages_deploy_run:36213629230,production_live_resource_integrity_run:36213674697,
+  products_browser_proof_run:36213674721,products_route_proof_run:36213674734,build_specific_proof_run:36213629171,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 275 CAIP Production Acceptance Outcomes Renewal'
+  'Release 467 Build 276 CAIP Acceptance Evidence Freshness Baseline'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -55,14 +55,14 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:274,title:'Creative Process Planned-vs-Actual Inventory Lifecycle',
+    release:467,build:275,title:'CAIP Production Acceptance & Outcomes Renewal',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:36211181947,current_application_quality_run:36211181834,
-      it_admin_runtime_proof_run:36211182652,branch_hygiene_run:36211181960
+      system_gate_run:36213517016,current_application_quality_run:36213517120,
+      it_admin_runtime_proof_run:36213516995,branch_hygiene_run:36213517034
     },
     production_proofs:{
-      production_pages_deploy_run:36211313214,production_live_resource_integrity_run:36211344703,
+      production_pages_deploy_run:36213629230,production_live_resource_integrity_run:36213674697,
       products_browser_proof_run:36211344669,products_route_proof_run:36211344770
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 276 follows after Build 275 CAIP production-acceptance outcomes renewal.'
+    next_build:'Build 277 follows after Build 276 CAIP acceptance evidence freshness baseline.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 275 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 276 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -102,7 +102,7 @@ function markdownReport(pack){
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Current Production baseline: Build 274 Creative Process Planned-vs-Actual Inventory Lifecycle
+- Current Production baseline: Build 275 CAIP Production Acceptance & Outcomes Renewal
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -121,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:275,title:TITLE,authority:'release467-build275-caip-production-acceptance-outcomes-renewal.json'},
+        current_closure_candidate:{release:467,build:276,title:TITLE,authority:'release467-build276-caip-acceptance-evidence-freshness-baseline.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -148,17 +148,17 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 274 is the exact last fully verified Development checkpoint.',
-      'Build 274 Production is GREEN on the identical tree 8d69b22f4634b70f3b10f247e42e0ca2165a4ccf.',
-      'Build 274 Development proofs: System 36211181947, Quality 36211181834, I.T. 36211182652, Hygiene 36211181960, Build 274 36211182028.',
-      'Build 274 Production proofs: Pages 36211313214, Live Resources 36211344703, Product Browser 36211344669, Product Route 36211344770, Build 274 36211313280.',
+      'Build 275 is the exact last fully verified Development checkpoint.',
+      'Build 275 Production is GREEN on the identical tree 521888446fa549701da7109d266e0b73f7b40816.',
+      'Build 275 Development proofs: System 36213517016, Quality 36213517120, I.T. 36213516995, Hygiene 36213517034, Build 275 36213517078.',
+      'Build 275 Production proofs: Pages 36213629230, Live Resources 36213674697, Product Browser 36213674721, Product Route 36213674734, Build 275 36213629171.',
       'Build 260 removed only redundant pull-request triggers from 38 historical proof workflows while preserving System Gate coverage and push/manual evidence.',
       'Build 261 removed 39 redundant historical Production main-push subscriptions while preserving Development push/manual evidence and all four canonical Production proofs.',
       'Build 262 batches six latest-action point lookups into one read-only D1 statement and closed exact Development at 8 statements under unchanged provider ceilings.',
       'Build 263 measures 584 closure-scoped GREEN runs across 12 accepted heads, a 21.69% normalized runs-per-head reduction while all required named proofs and exact-tree release pairs remain valid.',
       'Build 265 closed the CAIP private-media prerequisite inventory on exact Development/Production trees.',
       'Build 274 separates planned material estimates from reviewed and posted actuals, with corrections and posted-entry voids using Inventory-owned compensating reversals.',
-      'Build 275 is the current CAIP Production Acceptance & Outcomes Renewal; current private-media acceptance remains EVIDENCE_DEPENDENT and Build 276 is next.'
+      'Build 276 is the current CAIP Acceptance Evidence Freshness Baseline; current private-media acceptance remains EVIDENCE_DEPENDENT at 0/3 fresh current-release dimensions and Build 277 is next.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
