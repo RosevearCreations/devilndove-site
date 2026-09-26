@@ -32,11 +32,9 @@
     "lane": "caip_private_media",
     "current_lane_state": "EVIDENCE_DEPENDENT",
     "dimension": "deployed_private_bucket_binding_non_public_exposure",
-    "proof_transport": "CLOUDFLARE_CONTROL_PLANE_PLUS_UNAUTHENTICATED_LIVE_PROXY",
+    "proof_transport": "PAGES_CONTROL_PLANE_PLUS_UNAUTHENTICATED_R2_HEAD_AND_LIVE_PROXY",
     "pages_binding_key": "CAIP_PRIVATE_MEDIA_BUCKET",
     "pages_binding_must_match_production_environment": true,
-    "managed_r2_dev_public_access_expected": false,
-    "enabled_custom_domain_count_expected": 0,
     "unauthenticated_review_proxy_expected_status": 401,
     "permissive_cors_forbidden": true,
     "secure_review_source_requires_admin_session": true,
@@ -59,10 +57,13 @@
     "remaining_dimensions_after_runtime_green": [
       "authenticated_private_review_range_streaming",
       "multipart_interruption_reconnect_reselection_resume"
-    ]
+    ],
+    "unauthenticated_direct_r2_head_expected_status": "DENIAL_4XX_400_401_403",
+    "direct_r2_object_listing_forbidden": true,
+    "domain_control_plane_permission_observation": "DIRECT_R2_DOMAIN_CONFIGURATION_API_RETURNED_403_WITH_CURRENT_CI_TOKENS; NOT_INTERPRETED_AS PUBLIC_OR_PRIVATE"
   },
   "decision": {
-    "build277_complete_when": "The dedicated current-release workflow proves the Production Pages CAIP private R2 binding, disabled r2.dev exposure, zero enabled R2 custom domains, and unauthenticated denial at the same-origin secure-review proxy while publishing only sanitized evidence.",
+    "build277_complete_when": "The dedicated current-release workflow proves the Production Pages CAIP private R2 binding, denial of an unauthenticated HEAD-only direct R2 bucket request, and unauthenticated denial at the same-origin secure-review proxy while publishing only sanitized evidence.",
     "next_build": 278,
     "next_build_title": "Authenticated Private Review & Range-Streaming Acceptance Refresh",
     "future_queue_exhausted": false

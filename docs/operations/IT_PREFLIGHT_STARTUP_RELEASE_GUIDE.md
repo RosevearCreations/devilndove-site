@@ -25,7 +25,7 @@ Build 276 **CAIP Acceptance Evidence Freshness Baseline** is the exact fully ver
 
 Build 277 **Private Bucket Binding & Non-Public Exposure Evidence** is the active bounded candidate.
 
-Its dedicated workflow must prove the deployed Production `CAIP_PRIVATE_MEDIA_BUCKET` binding, disabled `r2.dev` exposure, zero enabled R2 custom domains, and HTTP `401` for unauthenticated secure-review access. Only sanitized booleans/counts and boundary status are retained: no object list/download, no bucket ID/domain names, no secret values, no D1 business query and no mutation.
+Its dedicated workflow must prove the deployed Production `CAIP_PRIVATE_MEDIA_BUCKET` binding, denial of an unauthenticated HEAD-only request to the direct R2 S3 bucket endpoint, and HTTP `401` for unauthenticated secure-review access. The R2 public-domain configuration API returns `403` with the current CI tokens, so that permission result is not interpreted as either public or private. Only sanitized booleans/counts and boundary status are retained: no object list/download, no bucket ID/domain names, no secret values, no D1 business query and no mutation.
 
 A GREEN Build 277 runtime proof satisfies this dimension as **1/3** fresh current-release CAIP acceptance dimensions. Authenticated review/range-streaming and interruption/reconnect/reselection/resume remain separate. Overall CAIP remains `EVIDENCE_DEPENDENT`.
 

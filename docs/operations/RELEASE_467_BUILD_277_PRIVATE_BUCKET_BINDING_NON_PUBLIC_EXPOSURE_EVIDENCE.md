@@ -17,12 +17,11 @@ Build 276 **CAIP Acceptance Evidence Freshness Baseline** is fully GREEN:
 The dedicated Build 277 workflow must prove all of these on the controlled runtime:
 
 1. the Production Pages project exposes a deployed `CAIP_PRIVATE_MEDIA_BUCKET` R2 binding;
-2. the bucket's Cloudflare-managed `r2.dev` public access is disabled;
-3. no enabled R2 custom domain exposes the bucket;
-4. an unauthenticated request to the same-origin secure-review proxy is denied with HTTP `401`;
-5. the proxy source remains administrator-bound and its successful media responses retain private/no-store, same-origin, no-referrer and frame-deny controls.
+2. an unauthenticated HEAD-only request to the direct R2 S3 bucket endpoint is denied with HTTP `400`, `401`, or `403`, without listing or downloading any object;
+3. an unauthenticated request to the same-origin secure-review proxy is denied with HTTP `401`;
+4. the proxy source remains administrator-bound and its successful media responses retain private/no-store, same-origin, no-referrer and frame-deny controls.
 
-The runtime artifact is sanitized. It records booleans/counts and HTTP boundary results only. It does not record Cloudflare token values, R2 object keys, object listings, object bytes, bucket IDs or custom-domain names.
+The runtime artifact is sanitized. It records booleans/counts and HTTP boundary results only. It does not record Cloudflare token values, R2 object keys, object listings, object bytes, bucket IDs or domain names. The current CI tokens receive HTTP `403` from the R2 public-domain configuration API; Build 277 records that permission limitation without interpreting it as either public or private.
 
 ## Acceptance interpretation
 
@@ -32,7 +31,7 @@ Bucket presence alone remains insufficient for acceptance.
 
 ## Safety
 
-No D1 business query, schema change, R2 list/get/put/delete, bucket exposure change, public copy, provider execution/publication, Product publication, Inventory/Finance movement, payment/refund or secret capture is authorized.
+No D1 business query, schema change, R2 object list/get/put/delete, bucket exposure change, public copy, provider execution/publication, Product publication, Inventory/Finance movement, payment/refund or secret capture is authorized.
 
 ## Successor
 

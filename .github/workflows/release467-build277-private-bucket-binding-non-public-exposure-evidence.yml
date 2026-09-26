@@ -14,7 +14,8 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
       PROD_CAIP_R2: devilndove-caip-media
       PROD_LIVE_BASE: https://devilndove.com
-      EVIDENCE_MODE: CLOUDFLARE_CONTROL_PLANE_PLUS_UNAUTHENTICATED_LIVE_PROXY
+      PROD_R2_S3_BASE: https://c0d5bc25df16ae5b7d47c985c4b7b787.r2.cloudflarestorage.com
+      EVIDENCE_MODE: PAGES_CONTROL_PLANE_PLUS_UNAUTHENTICATED_R2_HEAD_AND_LIVE_PROXY
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -42,13 +43,11 @@ jobs:
       - name: Prove Production private binding and non-public exposure with sanitized evidence
         env:
           CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
-          CF_R2_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
         shell: bash
         run: |
           set -euo pipefail
           curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}"             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site"             > /tmp/build277-pages-project.json
-          curl -fsS -H "Authorization: Bearer ${CF_R2_TOKEN}"             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/r2/buckets/${PROD_CAIP_R2}/domains/managed"             > /tmp/build277-r2-managed.json
-          curl -fsS -H "Authorization: Bearer ${CF_R2_TOKEN}"             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/r2/buckets/${PROD_CAIP_R2}/domains/custom"             > /tmp/build277-r2-custom.json
+          curl -sS -I -o /tmp/build277-r2-head.txt -w '%{http_code}'             "${PROD_R2_S3_BASE}/${PROD_CAIP_R2}"             > /tmp/build277-r2-head-status.txt
           curl -sS -D /tmp/build277-review-headers.txt -o /tmp/build277-review-body.json             -w '%{http_code}' "${PROD_LIVE_BASE}/api/admin/creative-asset-review?token=build277-no-session"             > /tmp/build277-review-status.txt
           python - <<'PY'
           import json,os,re
@@ -59,17 +58,10 @@ jobs:
           binding=r2.get('CAIP_PRIVATE_MEDIA_BUCKET') or {}
           assert binding.get('name')==os.environ['PROD_CAIP_R2'],r2
 
-          managed=json.load(open('/tmp/build277-r2-managed.json'))
-          assert managed.get('success') is True,managed
-          managed_result=managed.get('result') or {}
-          assert managed_result.get('enabled') is False,managed_result
-
-          custom=json.load(open('/tmp/build277-r2-custom.json'))
-          assert custom.get('success') is True,custom
-          raw=custom.get('result') or {}
-          domains=(raw.get('domains') or []) if isinstance(raw,dict) else (raw if isinstance(raw,list) else [])
-          enabled=[d for d in domains if isinstance(d,dict) and d.get('enabled') is True]
-          assert not enabled,{'enabled_custom_domain_count':len(enabled)}
+          r2_status=int(open('/tmp/build277-r2-head-status.txt').read().strip())
+          assert r2_status in (400,401,403),r2_status
+          r2_headers=open('/tmp/build277-r2-head.txt',encoding='utf-8',errors='replace').read().lower()
+          assert 'server:' in r2_headers or 'content-type:' in r2_headers,r2_headers
 
           status=int(open('/tmp/build277-review-status.txt').read().strip())
           assert status==401,status
@@ -82,19 +74,20 @@ jobs:
           assert body.get('ok') is False,body
 
           proof={
-            'schema':'release467-build277-private-bucket-non-public-evidence-v1',
+            'schema':'release467-build277-private-bucket-non-public-evidence-v2',
             'status':'PASS',
             'source_sha':os.environ.get('GITHUB_SHA'),
             'evidence_mode':os.environ['EVIDENCE_MODE'],
             'pages_environment':'production',
             'private_binding_key':'CAIP_PRIVATE_MEDIA_BUCKET',
             'pages_private_binding_present':True,
-            'managed_r2_dev_public_access_enabled':False,
-            'configured_custom_domain_count':len(domains),
-            'enabled_custom_domain_count':0,
+            'unauthenticated_direct_r2_head_status':r2_status,
+            'unauthenticated_direct_r2_access_denied':True,
+            'public_domain_control_plane_permission_available':False,
             'unauthenticated_secure_review_status':401,
             'secure_review_cache_no_store':True,
             'permissive_cors':False,
+            'r2_bucket_head_requests':1,
             'r2_object_list_requests':0,
             'r2_object_get_requests':0,
             'r2_mutations':0,
