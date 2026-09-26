@@ -83,14 +83,24 @@ q('production_sha: 61cc1346f838a5dd742b0dbaeff345d95447ba6e' in wf,'Build 270 wo
 q('Release 467 Build 269 Private Raw Media Intake Integrity' in wf,'Build 270 workflow predecessor proof name drift')
 q("run_current_contract('scripts/release467_build270_gate.py','Release 467 Build 270')" in sysgate,'System Gate missing Build 270')
 
-q(p.get('release')==467 and int(p.get('build') or 0)==270,'Current authority must identify Build 270')
-q(p.get('title')=='Strong-Fingerprint Backfill & Recovery Reconciliation','Current authority Build 270 title mismatch')
-q(p.get('state') in ('DEVELOPMENT_CANDIDATE','DEVELOPMENT_GREEN','PRODUCTION_GREEN'),'Build 270 current authority state mismatch')
-q((p.get('production_checkpoint') or {}).get('main_sha')=='61cc1346f838a5dd742b0dbaeff345d95447ba6e','Build 270 candidate must retain exact Build 269 Production baseline')
-q(int(p.get('next_build') or 0)==271 and p.get('next_build_title')=='Standalone / Social CAIP Project Workflow','Build 270 successor pointer mismatch')
+cur=int(p.get('build') or 0)
+q(p.get('release')==467 and cur>=270,'Current authority must retain Build 270 or a verified successor')
 proj=p.get('caip_strong_fingerprint_backfill_recovery_reconciliation') or {}
 q(proj.get('classification')=='STRONG_FINGERPRINT_RECOVERY_RECONCILIATION_READY_OPERATOR_BOUNDED','Current authority missing Build 270 projection')
 q(proj.get('max_rows_per_request')==20 and proj.get('automatic_r2_delete') is False and proj.get('automatic_public_promotion') is False,'Current authority Build 270 safety projection mismatch')
+if cur==270:
+    q(p.get('title')=='Strong-Fingerprint Backfill & Recovery Reconciliation','Current authority Build 270 title mismatch')
+    q(p.get('state') in ('DEVELOPMENT_CANDIDATE','DEVELOPMENT_GREEN','PRODUCTION_GREEN'),'Build 270 current authority state mismatch')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='61cc1346f838a5dd742b0dbaeff345d95447ba6e','Build 270 candidate must retain exact Build 269 Production baseline')
+    q(int(p.get('next_build') or 0)==271 and p.get('next_build_title')=='Standalone / Social CAIP Project Workflow','Build 270 successor pointer mismatch')
+else:
+    q(a.get('state')=='PRODUCTION_GREEN','Build 271+ requires verified Build 270 closure')
+    q((a.get('final_closure') or {}).get('dev_sha')=='b51e15f9c150e1d740fe1383d8df98a962990b21','Build 270 final Development SHA mismatch')
+    q((a.get('final_closure') or {}).get('tree_sha')=='9dc39ed9dde4946ad54e51b58c7b66ca38b75634','Build 270 final Development tree mismatch')
+    q((a.get('production_checkpoint') or {}).get('main_sha')=='9c3ed0664d71ab66a3087047b35989c5ed5b6904','Build 270 final Production SHA mismatch')
+    q((a.get('production_checkpoint') or {}).get('tree_sha')=='9dc39ed9dde4946ad54e51b58c7b66ca38b75634','Build 270 final Production tree mismatch')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='9c3ed0664d71ab66a3087047b35989c5ed5b6904','Build 271+ current Production baseline must be exact Build 270')
+    q(int(p.get('next_build') or 0)>=272,'Build 271+ must advance beyond Build 271 successor')
 
 s=a.get('safety') or {}
 q(s.get('operator_triggered_private_metadata_reconciliation') is True,'Build 270 must identify the explicit bounded operator reconciliation')

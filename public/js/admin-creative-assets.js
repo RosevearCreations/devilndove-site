@@ -6,7 +6,7 @@
   const query = new URLSearchParams(window.location.search);
   const requestedProjectId = Number(query.get('creative_project_id') || query.get('project_id') || 0);
   const requestedProductId = Number(query.get('product_id') || 0);
-  const state = { projects: [], contentProjects: [], detail: null, operations: null, busy: false, reviewLink: null };
+  const state = { projects: [], contentProjects: [], creativeWorkProjects: [], detail: null, operations: null, busy: false, reviewLink: null };
 
   const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
   const text = (value) => String(value ?? '').trim();
@@ -49,6 +49,7 @@
   function apply(data) {
     state.projects = data.projects || state.projects;
     state.contentProjects = data.content_projects || state.contentProjects;
+    state.creativeWorkProjects = data.creative_work_projects || state.creativeWorkProjects;
     if (data.detail !== undefined) state.detail = data.detail;
     if (data.operations !== undefined) state.operations = data.operations;
   }
@@ -65,6 +66,17 @@
     return `<option value="">Choose a Content Studio project…</option>${options}`;
   }
 
+  function creativeWorkOptions() {
+    const options = state.creativeWorkProjects.map((item) => {
+      const linked = num(item.creative_project_id);
+      const packaged = num(item.content_project_id);
+      const title = item.project_title || item.project_key || `Creative Project ${num(item.creative_work_project_id)}`;
+      const tags = [linked ? 'CAIP ready' : 'create CAIP', packaged ? 'Content Studio linked' : 'standalone/social'].filter(Boolean).join(' · ');
+      return `<option value="${num(item.creative_work_project_id)}">${esc(title)} — ${esc(tags)}</option>`;
+    }).join('');
+    return `<option value="">Choose a Creative Process project…</option>${options}`;
+  }
+
   function projectOptions() {
     const options = state.projects.map((project) => {
       const standalone = !num(project.content_project_id);
@@ -75,7 +87,7 @@
   }
 
   function projectsList() {
-    if (!state.projects.length) return '<div class="content-empty-state">No CAIP projects yet. Choose an approved Content Studio package and create its reference-only intelligence record.</div>';
+    if (!state.projects.length) return '<div class="content-empty-state">No CAIP projects yet. Open an existing Creative Process project directly, or create one from a reviewed Content Studio package. A Product is not required for standalone/social work.</div>';
     return state.projects.map((project) => `<button class="caip-project-row ${num(state.detail?.project?.creative_project_id) === num(project.creative_project_id) ? 'is-active' : ''}" type="button" data-open-project="${num(project.creative_project_id)}"><strong>${esc(project.product_name || project.project_title)}</strong><small>${num(project.asset_count)} assets · ${num(project.evidence_count)} evidence records · ${esc(statusText(project.governance_status))}</small></button>`).join('');
   }
 
@@ -218,7 +230,7 @@
     const currentContentId = num(state.detail?.project?.content_project_id);
     const currentProjectId = num(state.detail?.project?.creative_project_id);
     mount.innerHTML = `${requestedProductId ? `<div class="card caip-product-bridge"><strong>Catalog product ${esc(String(requestedProductId))}</strong><span class="small">CAIP opened from the catalog media workspace. ${state.detail?.project ? 'Its linked creative intelligence record is selected below.' : 'No linked CAIP record exists yet; choose a reviewed Content Studio package to create one.'}</span><a class="btn secondary" href="/admin/catalog-media/?product_id=${encodeURIComponent(requestedProductId)}#product-media-workflow">Return to media workspace</a></div>` : ''}<div class="caip-page-grid">
-      <aside class="card caip-sidebar"><h2>Creative projects</h2><p class="small">Open any CAIP project here, including standalone/social projects that have no Content Studio package or physical product.</p><label>Open CAIP project<select class="input" id="caipProjectSelect">${projectOptions()}</select></label><div class="caip-sidebar-actions"><button class="btn secondary" type="button" id="caipRefresh">Refresh list</button></div><details class="caip-sync-panel"><summary>Create / refresh from Content Studio</summary><p class="small">This second selector is only for Content Studio-backed projects. Standalone projects are opened from the CAIP-project selector above.</p><label>Content Studio package<select class="input" id="caipContentProject">${contentOptions()}</select></label><button class="btn" type="button" id="caipSync">Create or refresh CAIP</button></details><div class="caip-project-list">${projectsList()}</div></aside>
+      <aside class="card caip-sidebar"><h2>Creative projects</h2><p class="small">Open any CAIP project here, including standalone/social projects that have no Content Studio package or physical product.</p><label>Open CAIP project<select class="input" id="caipProjectSelect">${projectOptions()}</select></label><div class="caip-sidebar-actions"><button class="btn secondary" type="button" id="caipRefresh">Refresh list</button></div><details class="caip-sync-panel" open><summary>Open from Creative Process</summary><p class="small">Build 271 preserves the existing Creative Process identity. This opens or refreshes one CAIP workspace for that project without creating a Product or Content Studio package.</p><label>Creative Process project<select class="input" id="caipCreativeWorkProject">${creativeWorkOptions()}</select></label><button class="btn" type="button" id="caipOpenCreativeWork">Open / create CAIP workspace</button></details><details class="caip-sync-panel"><summary>Create / refresh from Content Studio</summary><p class="small">Use this only when a reviewed Content Studio package already exists. Standalone/social CAIP does not require one.</p><label>Content Studio package<select class="input" id="caipContentProject">${contentOptions()}</select></label><button class="btn" type="button" id="caipSync">Create or refresh CAIP</button></details><div class="caip-project-list">${projectsList()}</div></aside>
       <main class="caip-main"><div id="caipMessage" class="content-studio-message" hidden></div>${renderDetail()}</main>
     </div>`;
     const selectedProject = $('#caipProjectSelect');
@@ -269,6 +281,11 @@
       url.searchParams.set('creative_project_id', String(projectId));
       history.replaceState({}, '', `${url.pathname}?${url.searchParams.toString()}${url.hash || '#creativeAssetIntelligenceMount'}`);
       load(projectId);
+    });
+    $('#caipOpenCreativeWork')?.addEventListener('click', () => {
+      const creativeWorkProjectId = num($('#caipCreativeWorkProject')?.value);
+      if (!creativeWorkProjectId) return message('Choose a Creative Process project first.', 'error');
+      perform({ action: 'open_creative_work_project', creative_work_project_id: creativeWorkProjectId }, 'Standalone/social CAIP workspace opened. No Product or Content Studio package was created.');
     });
     $('#caipSync')?.addEventListener('click', () => {
       const contentProjectId = num($('#caipContentProject')?.value);

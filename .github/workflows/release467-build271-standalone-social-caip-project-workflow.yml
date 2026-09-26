@@ -1,0 +1,46 @@
+name: Release 467 Build 271 Standalone Social CAIP Project Workflow
+on:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build271:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 270 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: b51e15f9c150e1d740fe1383d8df98a962990b21
+          production_sha: 9c3ed0664d71ab66a3087047b35989c5ed5b6904
+          build_proof_name: Release 467 Build 270 Strong-Fingerprint Backfill Recovery Reconciliation
+          report_path: /tmp/build271-predecessor-exact-sha-proof.json
+      - name: Resolve exact Build 270 tree continuity
+        run: |
+          git fetch --no-tags --depth=1 origin b51e15f9c150e1d740fe1383d8df98a962990b21
+          git fetch --no-tags --depth=1 origin 9c3ed0664d71ab66a3087047b35989c5ed5b6904
+          DEV_TREE="$(git rev-parse b51e15f9c150e1d740fe1383d8df98a962990b21^{tree})"
+          PROD_TREE="$(git rev-parse 9c3ed0664d71ab66a3087047b35989c5ed5b6904^{tree})"
+          echo "BUILD270_DEV_TREE=$DEV_TREE"
+          echo "BUILD270_PROD_TREE=$PROD_TREE"
+          test "$DEV_TREE" = "$PROD_TREE"
+          test "$DEV_TREE" = "9dc39ed9dde4946ad54e51b58c7b66ca38b75634"
+      - name: Build 271 standalone social CAIP workflow gate
+        run: python scripts/release467_build271_gate.py
+      - name: Retain Build 270 reconciliation contract
+        run: python scripts/release467_build270_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build271-standalone-social-caip-evidence-${{ github.sha }}
+          path: /tmp/build271-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30

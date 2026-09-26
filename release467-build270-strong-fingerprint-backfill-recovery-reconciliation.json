@@ -2,7 +2,7 @@
   "release": 467,
   "build": 270,
   "title": "Strong-Fingerprint Backfill & Recovery Reconciliation",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build270-strong-fingerprint-backfill-recovery-reconciliation",
   "predecessor": {
     "build": 269,
@@ -96,5 +96,29 @@
       "build_specific_proof_run": 36180648437,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "b51e15f9c150e1d740fe1383d8df98a962990b21",
+    "tree_sha": "9dc39ed9dde4946ad54e51b58c7b66ca38b75634",
+    "proofs": {
+      "system_gate_run": 36206690243,
+      "current_application_quality_run": 36206690338,
+      "it_admin_runtime_proof_run": 36206690036,
+      "branch_hygiene_run": 36206690296
+    },
+    "dedicated_gate_run": 36206690389,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "ingested_by_build": 271
+  },
+  "production_checkpoint": {
+    "main_sha": "9c3ed0664d71ab66a3087047b35989c5ed5b6904",
+    "tree_sha": "9dc39ed9dde4946ad54e51b58c7b66ca38b75634",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36206849648,
+    "production_live_resource_integrity_run": 36206908948,
+    "products_browser_proof_run": 36206908972,
+    "products_route_proof_run": 36206908996,
+    "build_specific_proof_run": 36206849597
   }
 }
