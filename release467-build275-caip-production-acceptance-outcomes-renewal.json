@@ -125,7 +125,10 @@
       "it_admin_runtime_proof_run": 36211182652,
       "branch_hygiene_run": 36211181960,
       "build_specific_proof_run": 36211182028,
-      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+      "quality_run": 36211181834,
+      "it_admin_runtime_run": 36211182652,
+      "repository_hygiene_run": 36211181960
     },
     "production": {
       "main_sha": "af5e99b3baa1d28f3949e7956905a0325d328d06",
