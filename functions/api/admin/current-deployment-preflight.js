@@ -1,23 +1,23 @@
-// Release 467 Build 274 — current read-only Deployment Preflight over exact Build 273 Production source.
+// Release 467 Build 275 — current read-only Deployment Preflight over exact Build 274 Production source.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=274;
-const TITLE='Creative Process Planned-vs-Actual Inventory Lifecycle';
+const BUILD=275;
+const TITLE='CAIP Production Acceptance & Outcomes Renewal';
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
-const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 274 Creative Process Planned vs Actual Inventory Lifecycle']);
+const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 275 CAIP Production Acceptance Outcomes Renewal']);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:273,title:'Content Studio Standalone-Project Bridge',state:'DEVELOPMENT_GREEN',
-  dev_sha:'4d415840158ee83d60eb19346520446cd158e657',tree_sha:'41db192daa04f81ca0bb2ec59ac290a7d4fc8bfb',
-  system_gate_run:36210339968,current_application_quality_run:36210340842,it_admin_runtime_proof_run:36210339975,
-  branch_hygiene_run:36210339599,dedicated_gate_run:36210339832,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',exact_preview_deployment:true
+  release:467,build:274,title:'Creative Process Planned-vs-Actual Inventory Lifecycle',state:'DEVELOPMENT_GREEN',
+  dev_sha:'434a267a5598439103f6942d1b7f58a7ce04dba6',tree_sha:'8d69b22f4634b70f3b10f247e42e0ca2165a4ccf',
+  system_gate_run:36211181947,current_application_quality_run:36211181834,it_admin_runtime_proof_run:36211182652,
+  branch_hygiene_run:36211181960,dedicated_gate_run:36211182028,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:273,title:'Content Studio Standalone-Project Bridge',state:'PRODUCTION_GREEN',
-  main_sha:'3c593eee38c7a05d2a5ad4df4a6b274e2275f492',tree_sha:'41db192daa04f81ca0bb2ec59ac290a7d4fc8bfb',
-  production_pages_deploy_run:36210476372,production_live_resource_integrity_run:36210520305,
-  products_browser_proof_run:36210520286,products_route_proof_run:36210520259,build_specific_proof_run:36210476306
+  release:467,build:274,title:'Creative Process Planned-vs-Actual Inventory Lifecycle',state:'PRODUCTION_GREEN',
+  main_sha:'af5e99b3baa1d28f3949e7956905a0325d328d06',tree_sha:'8d69b22f4634b70f3b10f247e42e0ca2165a4ccf',
+  production_pages_deploy_run:36211313214,production_live_resource_integrity_run:36211344703,
+  products_browser_proof_run:36211344669,products_route_proof_run:36211344770,build_specific_proof_run:36211313280
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true});
 const rows=(r)=>Array.isArray(r?.results)?r.results:[];
@@ -44,12 +44,12 @@ export async function onRequestGet(context){
     {status:truth.proof_recorded_count===23?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:truth.proof_recorded_count+'/23 proof rows recorded.'},
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:truth.foreign_key_violations+' violation(s).'},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
-    {status:'pass',code:'build273_verified_baseline',label:'Build 273 verified restart baseline',detail:'Build 273 Content Studio Standalone-Project Bridge is exact-tree Development and Production GREEN with all required named proofs.'},
-    {status:'pass',code:'build273_source_promotion',label:'Build 273 Production source promotion',detail:'Build 273 is on main 3c593eee38c7a05d2a5ad4df4a6b274e2275f492 with the identical Development tree 41db192daa04f81ca0bb2ec59ac290a7d4fc8bfb.'},
-    {status:'review',code:'build274_planned_actual_inventory_lifecycle',label:'Build 274 Creative Process Planned-vs-Actual Inventory Lifecycle',detail:'Build 274 keeps planned estimates non-posting, requires explicit actual Inventory posting, and preserves corrections/voids through Inventory-owned compensating reversals.'}
+    {status:'pass',code:'build274_verified_baseline',label:'Build 274 verified restart baseline',detail:'Build 274 Creative Process Planned-vs-Actual Inventory Lifecycle is exact-tree Development and Production GREEN with all required named proofs.'},
+    {status:'pass',code:'build274_source_promotion',label:'Build 274 Production source promotion',detail:'Build 274 is on main af5e99b3baa1d28f3949e7956905a0325d328d06 with the identical Development tree 8d69b22f4634b70f3b10f247e42e0ca2165a4ccf.'},
+    {status:'review',code:'build275_caip_acceptance_outcomes_renewal',label:'Build 275 CAIP Production Acceptance & Outcomes Renewal',detail:'Build 275 preserves CAIP private-media as EVIDENCE_DEPENDENT and creates only an evidence-driven successor roadmap; no synthetic acceptance is claimed.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
-  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:274,title:TITLE,authority:'release467-build274-creative-process-planned-vs-actual-inventory-lifecycle.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 273 is the exact fully verified Development and Production restart boundary.','Build 273 Development and Production share tree 41db192daa04f81ca0bb2ec59ac290a7d4fc8bfb.','Canonical migration authority remains through data-only 0023.','Build 274 separates planned estimates from reviewed/posted actuals and requires Inventory-owned compensating reversals for posted corrections and voids.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
+  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:275,title:TITLE,authority:'release467-build275-caip-production-acceptance-outcomes-renewal.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 274 is the exact fully verified Development and Production restart boundary.','Build 274 Development and Production share tree 8d69b22f4634b70f3b10f247e42e0ca2165a4ccf.','Canonical migration authority remains through data-only 0023.','Build 275 renews CAIP production-acceptance outcomes without converting historical or static evidence into current acceptance.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
   if(new URL(context.request.url).searchParams.get('format')==='markdown')return new Response(markdownReport(data),{status:200,headers:{'Content-Type':'text/markdown; charset=utf-8','Cache-Control':'no-store'}});
   return jsonResponse(data,200,{'Cache-Control':'no-store'});
 }
