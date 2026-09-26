@@ -170,7 +170,25 @@ jobs:
             unset TOKEN COOKIE
           fi
 
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT COALESCE(NULLIF(s.session_token,''),s.token) AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(NULLIF(s.session_token,''),s.token,''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/build278-existing-session.json
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "PRAGMA table_info(sessions);" > /tmp/build278-session-columns.json
+          TOKEN_EXPR="$(python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build278-session-columns.json'));names=set()
+          def walk(value):
+              if isinstance(value,dict):
+                  if str(value.get('name') or '').strip(): names.add(str(value['name']).strip().lower())
+                  for child in value.values(): walk(child)
+              elif isinstance(value,list):
+                  for child in value: walk(child)
+          walk(data)
+          if 'session_token' in names and 'token' in names: print("COALESCE(NULLIF(s.session_token,''),s.token)")
+          elif 'session_token' in names: print('s.session_token')
+          elif 'token' in names: print('s.token')
+          else: raise SystemExit('sessions table has no supported token column')
+          PY
+          )"
+          rm -f /tmp/build278-session-columns.json
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT ${TOKEN_EXPR} AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(${TOKEN_EXPR},''))>0 ORDER BY s.expires_at DESC LIMIT 1;" > /tmp/build278-existing-session.json
           TOKEN="$(python - <<'PY'
           import json
           data=json.load(open('/tmp/build278-existing-session.json'))

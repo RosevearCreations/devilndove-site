@@ -678,6 +678,7 @@
     "overall_lane_state_after_runtime_green": "EVIDENCE_DEPENDENT",
     "next_build": 279,
     "session_row_mutation": false,
-    "session_token_persisted": false
+    "session_token_persisted": false,
+    "session_schema_compatibility": "PRAGMA_SESSION_TOKEN_COLUMN_DETECTION"
   }
 }
