@@ -7,6 +7,7 @@ import {
   getCreativeProjectDetail,
   listCreativeAssetProjects,
   makeCreativeAssetManifest,
+  ensureCreativeProjectFromCreativeWorkProject,
   syncCreativeProjectFromContentProject,
   updateCreativeAsset,
   updateCreativeStoryEvidence,
@@ -74,13 +75,18 @@ export async function onRequestPost(context) {
   const action = normalizeText(body.action).toLowerCase();
   let creativeProjectId = number(body.creative_project_id || body.project_id);
   const contentProjectId = number(body.content_project_id);
+  const creativeWorkProjectId = number(body.creative_work_project_id);
   try {
     await ensureCreativeAssetIntelligenceSchema(state.db);
     await ensureCreativeAssetOperationsSchema(state.db);
     let detail = null;
     let operations = null;
     let result = {};
-    if (action === 'sync_project') {
+    if (action === 'open_creative_work_project') {
+      if (!creativeWorkProjectId) throw new Error('Choose a Creative Process project first.');
+      result = await ensureCreativeProjectFromCreativeWorkProject(state.db, creativeWorkProjectId, state.adminUser.user_id);
+      creativeProjectId = number(result?.project?.creative_project_id);
+    } else if (action === 'sync_project') {
       if (!contentProjectId) throw new Error('Choose a Content Studio project first.');
       result = await syncCreativeProjectFromContentProject(state.db, contentProjectId, state.adminUser.user_id, { trigger: 'caip_console' });
       creativeProjectId = number(result?.project?.creative_project_id);
@@ -143,6 +149,9 @@ export async function onRequestPost(context) {
       target_key: detail?.project?.creative_project_key || result?.project?.creative_project_key || null,
       details: {
         action, content_project_id: contentProjectId || result.content_project_id || null,
+        creative_work_project_id: creativeWorkProjectId || result?.creative_work_project?.creative_work_project_id || null,
+        product_created: action === 'open_creative_work_project' ? false : undefined,
+        content_project_created: action === 'open_creative_work_project' ? false : undefined,
         creative_asset_id: number(body.creative_asset_id) || null,
         derivative_id: number(body.creative_asset_derivative_id) || null,
         secure_review_grant_id: number(body.creative_asset_access_grant_id) || result?.grant?.creative_asset_access_grant_id || null,
@@ -155,7 +164,7 @@ export async function onRequestPost(context) {
     await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'creative_asset_intelligence', incident_code: 'caip_post_failed', severity: 'warning',
       message: error?.message || 'CAIP could not save.', related_user_id: state.adminUser.user_id,
-      details: { action, creative_project_id: creativeProjectId || null, content_project_id: contentProjectId || null, error: String(error?.stack || error?.message || error) }
+      details: { action, creative_project_id: creativeProjectId || null, content_project_id: contentProjectId || null, creative_work_project_id: creativeWorkProjectId || null, error: String(error?.stack || error?.message || error) }
     });
     return json({ ok: false, error: error?.message || 'CAIP could not save.' }, 400);
   }
