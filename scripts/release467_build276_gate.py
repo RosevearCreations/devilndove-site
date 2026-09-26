@@ -44,6 +44,12 @@ if cur==276:
     q(p.get('accepted_dev_sha')=='2453c99e4c459d7d31b16bd2004fa4afca081054' and p.get('accepted_dev_tree_sha')=='521888446fa549701da7109d266e0b73f7b40816','Current Build 276 accepted predecessor mismatch')
     q((p.get('production_checkpoint') or {}).get('main_sha')=='86112270a5b0eb4bdbae4ffd418e34ecfd7b7587','Current Build 276 Production predecessor mismatch')
     q(int(p.get('next_build') or 0)==277 and p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_PRODUCTION_ACCEPTANCE_AUTONOMOUS_BUILDS_276_284.md','Current Build 276 roadmap pointer mismatch')
+else:
+    q(a.get('state')=='PRODUCTION_GREEN','Build 276 successor-ingested authority must be Production GREEN')
+    q((a.get('final_closure') or {}).get('dev_sha')=='073ee3cacb7e7b7cac70e0e23db9ebebf386099f' and (a.get('final_closure') or {}).get('tree_sha')=='baed3242d5757a83832ab8526f940c971983bd73','Build 276 final Development closure mismatch')
+    q((a.get('production_checkpoint') or {}).get('main_sha')=='1bfcb248a8baf8cea42467a75c0dac53884ec5c3' and (a.get('production_checkpoint') or {}).get('tree_sha')=='baed3242d5757a83832ab8526f940c971983bd73','Build 276 final Production closure mismatch')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='1bfcb248a8baf8cea42467a75c0dac53884ec5c3','Build 277+ current Production baseline must be exact Build 276')
+    q(int(p.get('next_build') or 0)>=278,'Build 277+ must advance beyond Build 277 successor')
 for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 276 safety drift: {k}')
 print('RELEASE 467 BUILD 276 CAIP ACCEPTANCE EVIDENCE FRESHNESS BASELINE')
 if F:

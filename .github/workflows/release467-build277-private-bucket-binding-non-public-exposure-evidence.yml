@@ -1,0 +1,115 @@
+name: Release 467 Build 277 Private Bucket Binding Non-Public Exposure Evidence
+on:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build277:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      PROD_CAIP_R2: devilndove-caip-media
+      PROD_LIVE_BASE: https://devilndove.com
+      PROD_R2_S3_BASE: https://c0d5bc25df16ae5b7d47c985c4b7b787.r2.cloudflarestorage.com
+      EVIDENCE_MODE: PAGES_CONTROL_PLANE_PLUS_UNAUTHENTICATED_R2_HEAD_AND_LIVE_PROXY
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 276 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 073ee3cacb7e7b7cac70e0e23db9ebebf386099f
+          production_sha: 1bfcb248a8baf8cea42467a75c0dac53884ec5c3
+          build_proof_name: Release 467 Build 276 CAIP Acceptance Evidence Freshness Baseline
+          report_path: /tmp/build277-predecessor-exact-sha-proof.json
+      - name: Resolve exact Build 276 tree continuity
+        run: |
+          git fetch --no-tags --depth=1 origin 073ee3cacb7e7b7cac70e0e23db9ebebf386099f
+          git fetch --no-tags --depth=1 origin 1bfcb248a8baf8cea42467a75c0dac53884ec5c3
+          DEV_TREE="$(git rev-parse 073ee3cacb7e7b7cac70e0e23db9ebebf386099f^{tree})"
+          PROD_TREE="$(git rev-parse 1bfcb248a8baf8cea42467a75c0dac53884ec5c3^{tree})"
+          test "$DEV_TREE" = "$PROD_TREE"
+          test "$DEV_TREE" = "baed3242d5757a83832ab8526f940c971983bd73"
+      - name: Build 277 source contract
+        run: python scripts/release467_build277_gate.py
+      - name: Prove Production private binding and non-public exposure with sanitized evidence
+        env:
+          CF_PAGES_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN_EDIT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS -H "Authorization: Bearer ${CF_PAGES_TOKEN}"             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/devilndove-site"             > /tmp/build277-pages-project.json
+          curl -sS -I -o /tmp/build277-r2-head.txt -w '%{http_code}'             "${PROD_R2_S3_BASE}/${PROD_CAIP_R2}"             > /tmp/build277-r2-head-status.txt
+          curl -sS -D /tmp/build277-review-headers.txt -o /tmp/build277-review-body.json             -w '%{http_code}' "${PROD_LIVE_BASE}/api/admin/creative-asset-review?token=build277-no-session"             > /tmp/build277-review-status.txt
+          python - <<'PY'
+          import json,os,re
+          pages=json.load(open('/tmp/build277-pages-project.json'))
+          assert pages.get('success') is True,pages
+          prod=((pages.get('result') or {}).get('deployment_configs') or {}).get('production') or {}
+          r2=prod.get('r2_buckets') or {}
+          binding=r2.get('CAIP_PRIVATE_MEDIA_BUCKET') or {}
+          assert binding.get('name')==os.environ['PROD_CAIP_R2'],r2
+
+          r2_status=int(open('/tmp/build277-r2-head-status.txt').read().strip())
+          assert r2_status in (400,401,403),r2_status
+          r2_headers=open('/tmp/build277-r2-head.txt',encoding='utf-8',errors='replace').read().lower()
+          assert 'server:' in r2_headers or 'content-type:' in r2_headers,r2_headers
+
+          status=int(open('/tmp/build277-review-status.txt').read().strip())
+          assert status==401,status
+          headers=open('/tmp/build277-review-headers.txt',encoding='utf-8',errors='replace').read().lower()
+          assert 'cache-control:' in headers and 'no-store' in headers,headers
+          assert 'x-content-type-options: nosniff' in headers,headers
+          cors=re.findall(r'^access-control-allow-origin:\s*(.+)$',headers,re.M)
+          assert not any(v.strip()=='*' for v in cors),cors
+          body=json.load(open('/tmp/build277-review-body.json'))
+          assert body.get('ok') is False,body
+
+          proof={
+            'schema':'release467-build277-private-bucket-non-public-evidence-v2',
+            'status':'PASS',
+            'source_sha':os.environ.get('GITHUB_SHA'),
+            'evidence_mode':os.environ['EVIDENCE_MODE'],
+            'pages_environment':'production',
+            'private_binding_key':'CAIP_PRIVATE_MEDIA_BUCKET',
+            'pages_private_binding_present':True,
+            'unauthenticated_direct_r2_head_status':r2_status,
+            'unauthenticated_direct_r2_access_denied':True,
+            'public_domain_control_plane_permission_available':False,
+            'unauthenticated_secure_review_status':401,
+            'secure_review_cache_no_store':True,
+            'permissive_cors':False,
+            'r2_bucket_head_requests':1,
+            'r2_object_list_requests':0,
+            'r2_object_get_requests':0,
+            'r2_mutations':0,
+            'd1_business_queries':0,
+            'secret_values_recorded':False,
+            'fresh_acceptance_dimension':'deployed_private_bucket_binding_non_public_exposure',
+            'fresh_dimensions_satisfied_after_green':1,
+            'fresh_dimensions_required':3,
+            'overall_caip_state':'EVIDENCE_DEPENDENT'
+          }
+          json.dump(proof,open('/tmp/build277-private-bucket-non-public-evidence.json','w'),indent=2,sort_keys=True)
+          print('BUILD 277 SANITIZED PRIVATE-BUCKET NON-PUBLIC EXPOSURE EVIDENCE: PASS')
+          print(json.dumps(proof,indent=2,sort_keys=True))
+          PY
+      - name: Retain Build 276 contract
+        run: python scripts/release467_build276_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build277-private-bucket-non-public-evidence-${{ github.sha }}
+          path: |
+            /tmp/build277-predecessor-exact-sha-proof.json
+            /tmp/build277-private-bucket-non-public-evidence.json
+          if-no-files-found: error
+          retention-days: 30

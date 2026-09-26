@@ -48,8 +48,12 @@ else:
     q(a.get('state')=='PRODUCTION_GREEN','Build 275 successor-ingested authority must be Production GREEN')
     q((a.get('final_closure') or {}).get('dev_sha')=='2453c99e4c459d7d31b16bd2004fa4afca081054' and (a.get('final_closure') or {}).get('tree_sha')=='521888446fa549701da7109d266e0b73f7b40816','Build 275 final Development closure mismatch')
     q((a.get('production_checkpoint') or {}).get('main_sha')=='86112270a5b0eb4bdbae4ffd418e34ecfd7b7587' and (a.get('production_checkpoint') or {}).get('tree_sha')=='521888446fa549701da7109d266e0b73f7b40816','Build 275 final Production closure mismatch')
-    q((p.get('production_checkpoint') or {}).get('main_sha')=='86112270a5b0eb4bdbae4ffd418e34ecfd7b7587','Build 276+ current Production baseline must be exact Build 275')
-    q(int(p.get('next_build') or 0)>=277,'Build 276+ must advance beyond Build 276 successor')
+    if cur==276:
+        q((p.get('production_checkpoint') or {}).get('main_sha')=='86112270a5b0eb4bdbae4ffd418e34ecfd7b7587','Build 276 current Production baseline must be exact Build 275')
+        q(int(p.get('next_build') or 0)>=277,'Build 276 must advance beyond Build 276 successor')
+    else:
+        q((p.get('production_checkpoint') or {}).get('main_sha')=='1bfcb248a8baf8cea42467a75c0dac53884ec5c3','Build 277+ current Production baseline must be exact Build 276')
+        q(int(p.get('next_build') or 0)>=278,'Build 277+ must advance beyond Build 277 successor')
 for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 275 safety drift: {k}')
 print('RELEASE 467 BUILD 275 CAIP PRODUCTION ACCEPTANCE OUTCOMES RENEWAL')
 if F:

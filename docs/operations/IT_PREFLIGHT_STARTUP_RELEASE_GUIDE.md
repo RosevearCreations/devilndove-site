@@ -12,26 +12,24 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 276 candidate
+## Current Release 467 restart authority — Build 277 candidate
 
-Build 275 **CAIP Production Acceptance & Outcomes Renewal** is the exact fully verified Development and Production predecessor.
+Build 276 **CAIP Acceptance Evidence Freshness Baseline** is the exact fully verified Development and Production predecessor.
 
-- Development SHA: `2453c99e4c459d7d31b16bd2004fa4afca081054`
-- exact Development/Production tree: `521888446fa549701da7109d266e0b73f7b40816`
-- Development proofs: System `36213517016`, Quality `36213517120`, I.T. `36213516995`, Hygiene `36213517034`, Build 275 `36213517078`
-- Production main SHA: `86112270a5b0eb4bdbae4ffd418e34ecfd7b7587`
-- Production proofs: Pages `36213629230`, Live Resource Integrity `36213674697`, Product Browser `36213674721`, Product Route `36213674734`, Build 275 `36213629171`
+- Development SHA: `073ee3cacb7e7b7cac70e0e23db9ebebf386099f`
+- exact Development/Production tree: `baed3242d5757a83832ab8526f940c971983bd73`
+- Development proofs: System `36214675702`, Quality `36214675663`, I.T. `36214675743`, Hygiene `36214675846`, Build 276 `36214675710`
+- Production main SHA: `1bfcb248a8baf8cea42467a75c0dac53884ec5c3`
+- Production proofs: Pages `36214858334`, Live Resource Integrity `36214894567`, Product Browser `36214894586`, Product Route `36214894631`, Build 276 `36214858270`
 - canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 276 **CAIP Acceptance Evidence Freshness Baseline** is the active bounded candidate.
+Build 277 **Private Bucket Binding & Non-Public Exposure Evidence** is the active bounded candidate.
 
-The current CAIP private-media lane remains `EVIDENCE_DEPENDENT`. Build 276 records **0/3** current-release fresh acceptance dimensions: authenticated private review/range streaming requires refresh; private-bucket binding/non-public exposure requires deployed operator evidence; multipart interruption/reconnect/reselection/resume requires a live drill. The historical three Release 466 qualifying range audits remain provenance only.
+Its dedicated workflow must prove the deployed Production `CAIP_PRIVATE_MEDIA_BUCKET` binding, denial of an unauthenticated HEAD-only request to the direct R2 S3 bucket endpoint, and HTTP `401` for unauthenticated secure-review access. The R2 public-domain configuration API returns `403` with the current CI tokens, so that permission result is not interpreted as either public or private. Only sanitized booleans/counts and boundary status are retained: no object list/download, no bucket ID/domain names, no secret values, no D1 business query and no mutation.
 
-Build 276 is evidence inventory only. It performs no upload, schema repair, Production business-data mutation, R2 deletion, Inventory/Finance movement, payment/refund, public promotion or provider execution.
+A GREEN Build 277 runtime proof satisfies this dimension as **1/3** fresh current-release CAIP acceptance dimensions. Authenticated review/range-streaming and interruption/reconnect/reselection/resume remain separate. Overall CAIP remains `EVIDENCE_DEPENDENT`.
 
-The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 276, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
-
-The future queue remains open. Next: **Build 277 — Private Bucket Binding & Non-Public Exposure Evidence**.
+The future queue remains open. Next: **Build 278 — Authenticated Private Review & Range-Streaming Acceptance Refresh**.
 ## Retained historical provenance — Build 171
 
 Build 171 **Release & Restart Authority Convergence** remains historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It does not override current Build 227 truth.
