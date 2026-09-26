@@ -74,5 +74,27 @@
     "next_build": 271,
     "next_build_title": "Standalone / Social CAIP Project Workflow",
     "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "059aa3cf7854d075529ce976bb65ae2c1c6254fc",
+      "tree": "65b54187a47834a7a36a3f57b16f985eb5d4cb05",
+      "system_gate_run": 36180407045,
+      "quality_run": 36180407199,
+      "it_admin_runtime_run": 36180406666,
+      "repository_hygiene_run": 36180407194,
+      "dedicated_gate_run": 36180406990,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "61cc1346f838a5dd742b0dbaeff345d95447ba6e",
+      "tree_sha": "65b54187a47834a7a36a3f57b16f985eb5d4cb05",
+      "production_pages_deploy_run": 36180648384,
+      "production_live_resource_integrity_run": 36180717931,
+      "products_browser_proof_run": 36180718046,
+      "products_route_proof_run": 36180717954,
+      "build_specific_proof_run": 36180648437,
+      "state": "PRODUCTION_GREEN"
+    }
   }
 }
