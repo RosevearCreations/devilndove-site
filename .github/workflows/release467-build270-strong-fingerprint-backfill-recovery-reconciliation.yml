@@ -1,0 +1,48 @@
+name: Release 467 Build 270 Strong-Fingerprint Backfill Recovery Reconciliation
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build270:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 269 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 059aa3cf7854d075529ce976bb65ae2c1c6254fc
+          production_sha: 61cc1346f838a5dd742b0dbaeff345d95447ba6e
+          build_proof_name: Release 467 Build 269 Private Raw Media Intake Integrity
+          report_path: /tmp/build270-predecessor-exact-sha-proof.json
+      - name: Resolve exact Build 269 tree continuity
+        run: |
+          git fetch --no-tags --depth=1 origin 059aa3cf7854d075529ce976bb65ae2c1c6254fc
+          git fetch --no-tags --depth=1 origin 61cc1346f838a5dd742b0dbaeff345d95447ba6e
+          DEV_TREE="$(git rev-parse 059aa3cf7854d075529ce976bb65ae2c1c6254fc^{tree})"
+          PROD_TREE="$(git rev-parse 61cc1346f838a5dd742b0dbaeff345d95447ba6e^{tree})"
+          echo "BUILD269_DEV_TREE=$DEV_TREE"
+          echo "BUILD269_PROD_TREE=$PROD_TREE"
+          test "$DEV_TREE" = "$PROD_TREE"
+          test "$DEV_TREE" = "65b54187a47834a7a36a3f57b16f985eb5d4cb05"
+      - name: Build 270 strong-fingerprint recovery reconciliation gate
+        run: python scripts/release467_build270_gate.py
+      - name: Retain Build 269 private raw-media integrity contract
+        run: python scripts/release467_build269_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build270-strong-fingerprint-recovery-reconciliation-evidence-${{ github.sha }}
+          path: /tmp/build270-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30
