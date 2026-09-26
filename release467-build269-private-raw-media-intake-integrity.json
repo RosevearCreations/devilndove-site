@@ -2,7 +2,7 @@
   "release": 467,
   "build": 269,
   "title": "Private Raw Media Intake Integrity",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build269-private-raw-media-intake-integrity",
   "predecessor": {
     "build": 268,
@@ -135,5 +135,29 @@
       "build_specific_proof_run": 36176423468,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "059aa3cf7854d075529ce976bb65ae2c1c6254fc",
+    "tree_sha": "65b54187a47834a7a36a3f57b16f985eb5d4cb05",
+    "proofs": {
+      "system_gate_run": 36180407045,
+      "current_application_quality_run": 36180407199,
+      "it_admin_runtime_proof_run": 36180406666,
+      "branch_hygiene_run": 36180407194
+    },
+    "dedicated_gate_run": 36180406990,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "ingested_by_build": 270
+  },
+  "production_checkpoint": {
+    "main_sha": "61cc1346f838a5dd742b0dbaeff345d95447ba6e",
+    "tree_sha": "65b54187a47834a7a36a3f57b16f985eb5d4cb05",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36180648384,
+    "production_live_resource_integrity_run": 36180717931,
+    "products_browser_proof_run": 36180718046,
+    "products_route_proof_run": 36180717954,
+    "build_specific_proof_run": 36180648437
   }
 }
