@@ -50,7 +50,7 @@ else:
     q(a.get('state')=='PRODUCTION_GREEN','Build 277 successor-ingested authority must be Production GREEN')
     q((a.get('final_closure') or {}).get('dev_sha')=='8ebe7a3a0c3460d35fbf2e1509bdb728b82db927' and (a.get('final_closure') or {}).get('tree_sha')=='3451ae4990328425ef6929643f1c04efe03d9f37','Build 277 final Development closure mismatch')
     q((a.get('production_checkpoint') or {}).get('main_sha')=='552fe0fb1b192c7fd123c9a7369eea9f352f639e' and (a.get('production_checkpoint') or {}).get('tree_sha')=='3451ae4990328425ef6929643f1c04efe03d9f37','Build 277 final Production closure mismatch')
-    q((p.get('production_checkpoint') or {}).get('main_sha')=='552fe0fb1b192c7fd123c9a7369eea9f352f639e','Build 278+ current Production baseline must be exact Build 277')
+    q((cur==278 and (p.get('production_checkpoint') or {}).get('main_sha')=='552fe0fb1b192c7fd123c9a7369eea9f352f639e') or (cur>=279 and (p.get('production_checkpoint') or {}).get('main_sha')=='5d418eb1160caa7af855a247e1ff3510e4c1c9b8'),'Build 278+ current Production baseline must track the exact immediate verified predecessor')
     q(int(p.get('next_build') or 0)>=279,'Build 278+ must advance beyond Build 278 successor')
 for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 277 safety drift: {k}')
 print('RELEASE 467 BUILD 277 PRIVATE BUCKET BINDING NON-PUBLIC EXPOSURE EVIDENCE')

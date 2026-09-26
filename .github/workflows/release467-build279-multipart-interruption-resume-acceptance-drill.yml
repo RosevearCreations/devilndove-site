@@ -1,0 +1,529 @@
+name: Release 467 Build 279 Multipart Interruption Resume Acceptance Drill
+on:
+  push:
+    branches: [dev, main]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build279:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      DND_DEV_BASE_URL: https://dev.devilndove-site.pages.dev
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      DND_CONFIGURED_SESSION_COOKIE: ${{ secrets.DND_DEV_SESSION_COOKIE }}
+      CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      BUILD279_PROJECT_ID: ''
+      BUILD279_FILE_ID: ''
+      BUILD279_CONTENT_FP: ''
+      BUILD279_OBJECT_HASH: ''
+      BUILD279_UPLOAD_HASH: ''
+      BUILD279_PART1_ETAG_HASH: ''
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Recover exact Build 278 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 4a96fba89316d287771d34ef278b2404848e2996
+          production_sha: 5d418eb1160caa7af855a247e1ff3510e4c1c9b8
+          build_proof_name: Release 467 Build 278 Authenticated Private Review Range-Streaming Acceptance Refresh
+          report_path: /tmp/build279-predecessor-exact-sha-proof.json
+
+      - name: Resolve exact Build 278 tree continuity
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 4a96fba89316d287771d34ef278b2404848e2996
+          git fetch --no-tags --depth=1 origin 5d418eb1160caa7af855a247e1ff3510e4c1c9b8
+          DEV_TREE="$(git rev-parse 4a96fba89316d287771d34ef278b2404848e2996^{tree})"
+          PROD_TREE="$(git rev-parse 5d418eb1160caa7af855a247e1ff3510e4c1c9b8^{tree})"
+          test "$DEV_TREE" = "$PROD_TREE"
+          test "$DEV_TREE" = "b7ad133e79cd01a30d2056f77ffd069996560cf6"
+
+      - name: Build 279 source contract
+        run: python scripts/release467_build279_gate.py
+
+      - name: Wait for exact Development System Gate
+        if: ${{ github.ref_name == 'dev' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 90); do
+            curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json"               "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${GITHUB_SHA}&per_page=100" > /tmp/build279-runs.json
+            state="$(python - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/build279-runs.json'))
+          rows=[r for r in data.get('workflow_runs',[]) if r.get('name')=='System Gate' and r.get('head_sha')==os.environ['GITHUB_SHA']]
+          rows.sort(key=lambda r:str(r.get('created_at') or ''),reverse=True)
+          if not rows: print('WAIT')
+          else:
+              r=rows[0]
+              if r.get('status')!='completed': print('WAIT')
+              elif r.get('conclusion')=='success': print('GREEN:'+str(r.get('id')))
+              else: print('FAIL:'+str(r.get('id'))+':'+str(r.get('conclusion')))
+          PY
+          )"
+            case "$state" in
+              GREEN:*) echo "BUILD279_SYSTEM_GATE_RUN=${state#GREEN:}" >> "$GITHUB_ENV"; echo "Exact Development System Gate: ${state}"; exit 0 ;;
+              FAIL:*) echo "STOP: exact Development System Gate is not GREEN: ${state}"; exit 1 ;;
+              *) sleep 10 ;;
+            esac
+          done
+          echo 'STOP: timed out waiting for exact Development System Gate.'
+          exit 1
+
+      - name: Prove exact Development deployment artifact
+        if: ${{ github.ref_name == 'dev' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json"             "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs/${BUILD279_SYSTEM_GATE_RUN}/artifacts" > /tmp/build279-artifacts.json
+          ARTIFACT_ID="$(python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build279-artifacts.json'))
+          rows=[a for a in data.get('artifacts',[]) if a.get('name')=='current-development-deploy-proof' and not a.get('expired')]
+          print(rows[0]['id'] if rows else '')
+          PY
+          )"
+          test -n "$ARTIFACT_ID"
+          curl -fsSL -L -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json"             "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip" -o /tmp/build279-deploy.zip
+          rm -rf /tmp/build279-deploy && mkdir -p /tmp/build279-deploy
+          unzip -q /tmp/build279-deploy.zip -d /tmp/build279-deploy
+          python - <<'PY'
+          import glob,json,os
+          matches=glob.glob('/tmp/build279-deploy/**/current-development-deploy-proof.json',recursive=True)
+          assert matches,matches
+          d=json.load(open(matches[0]))
+          assert d.get('status')=='PASS',d
+          assert d.get('source_sha')==os.environ['GITHUB_SHA'],(d.get('source_sha'),os.environ['GITHUB_SHA'])
+          assert d.get('environment')=='preview' and d.get('branch')=='dev',d
+          print('EXACT BUILD 279 DEVELOPMENT DEPLOYMENT: PASS')
+          PY
+
+      - name: Validate Cloudflare Access credential pairing
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if { [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -z "${CF_ACCESS_CLIENT_SECRET}" ]; } || { [ -z "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; }; then
+            echo 'STOP: Cloudflare Access service-token credentials are only partially configured.'
+            exit 1
+          fi
+
+      - name: Resolve authenticated Development administrator session read-only
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'STOP: Development D1 credential is not configured.'; exit 1; }
+          validate_cookie() {
+            local cookie="$1"
+            local args=(-sS -o /tmp/build279-auth-me.json -w '%{http_code}' -H "Cookie: ${cookie}" -H 'Cache-Control: no-store')
+            if [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; then
+              args+=(-H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}")
+            fi
+            local status
+            status="$(curl "${args[@]}" "${DND_DEV_BASE_URL}/api/auth/me" || true)"
+            echo "Build 279 admin-session validation HTTP ${status}" >&2
+            [ "$status" = 200 ] || return 1
+            python - <<'PY'
+          import json
+          d=json.load(open('/tmp/build279-auth-me.json'));u=d.get('user') or {}
+          assert d.get('ok') is True,d
+          assert str(u.get('role') or '').strip().lower()=='admin',u
+          assert int(u.get('is_active') or 0)==1,u
+          PY
+          }
+          if [ -n "${DND_CONFIGURED_SESSION_COOKIE}" ]; then
+            COOKIE="${DND_CONFIGURED_SESSION_COOKIE#Cookie: }"
+            if [[ "$COOKIE" != *=* ]]; then COOKIE="dd_auth_token=${COOKIE}"; fi
+            COOKIE="${COOKIE%%;*}"; TOKEN="${COOKIE#*=}"; echo "::add-mask::${TOKEN}"
+            if validate_cookie "$COOKIE"; then
+              echo "DND_DEV_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
+              rm -f /tmp/build279-auth-me.json
+              unset TOKEN COOKIE
+              exit 0
+            fi
+            unset TOKEN COOKIE
+          fi
+          npx --yes wrangler@4 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "PRAGMA table_info(sessions);" > /tmp/build279-session-columns.json 2>/tmp/build279-session-columns.err
+          TOKEN_EXPR="$(python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build279-session-columns.json'));names=set()
+          def walk(v):
+              if isinstance(v,dict):
+                  if str(v.get('name') or '').strip(): names.add(str(v['name']).strip().lower())
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data)
+          if 'session_token' in names and 'token' in names: print("COALESCE(NULLIF(s.session_token,''),s.token)")
+          elif 'session_token' in names: print('s.session_token')
+          elif 'token' in names: print('s.token')
+          else: raise SystemExit('sessions table has no supported token column')
+          PY
+          )"
+          rm -f /tmp/build279-session-columns.json /tmp/build279-session-columns.err
+          npx --yes wrangler@4 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "SELECT ${TOKEN_EXPR} AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(${TOKEN_EXPR},''))>0 ORDER BY s.expires_at DESC LIMIT 1;"             > /tmp/build279-existing-session.json 2>/tmp/build279-existing-session.err
+          TOKEN="$(python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build279-existing-session.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  if v.get('runtime_token'): yield str(v['runtime_token'])
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          print(next(walk(data),'').strip())
+          PY
+          )"
+          rm -f /tmp/build279-existing-session.json /tmp/build279-existing-session.err
+          [ -n "$TOKEN" ] || { echo 'STOP: no configured or existing unexpired Development administrator session is available.'; exit 1; }
+          echo "::add-mask::${TOKEN}"; COOKIE="dd_auth_token=${TOKEN}"
+          validate_cookie "$COOKIE" || { echo 'STOP: resolved Development administrator session was rejected.'; exit 1; }
+          echo "DND_DEV_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
+          rm -f /tmp/build279-auth-me.json
+          unset TOKEN COOKIE
+
+      - name: Select one existing Development creative project
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "SELECT creative_project_id FROM creative_projects ORDER BY creative_project_id LIMIT 1;" > /tmp/build279-project.json
+          python - <<'PY'
+          import json,os
+          d=json.load(open('/tmp/build279-project.json'));ids=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if int(v.get('creative_project_id') or 0)>0: ids.append(int(v['creative_project_id']))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(d);assert ids,'No Development creative project exists for the controlled Build 279 drill.'
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('BUILD279_PROJECT_ID='+str(ids[0])+'\n')
+          print('EXISTING DEVELOPMENT CREATIVE PROJECT: PASS')
+          PY
+          rm -f /tmp/build279-project.json
+
+      - name: Generate deterministic 96 MiB non-Production WAV drill fixture
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,os,struct
+          path='/tmp/build279-source.wav';size=96*1024*1024;sample=1024*1024
+          data_bytes=size-44
+          header=(b'RIFF'+struct.pack('<I',size-8)+b'WAVEfmt '+struct.pack('<IHHIIHH',16,1,1,8000,16000,2,16)+b'data'+struct.pack('<I',data_bytes))
+          with open(path,'wb') as f:
+              f.write(header);f.truncate(size)
+          max_start=size-sample;starts=sorted(set([0,max_start//2,max_start]));desc=[]
+          with open(path,'rb') as f:
+              for off in starts:
+                  f.seek(off);chunk=f.read(sample);desc.append(f'{off}:{len(chunk)}:{hashlib.sha256(chunk).hexdigest()}')
+          fp=hashlib.sha256(('sample_sha256_v1|'+str(size)+'|'+'|'.join(desc)).encode()).hexdigest()
+          with open(os.environ['GITHUB_ENV'],'a') as env:
+              env.write('BUILD279_FIXTURE_SIZE='+str(size)+'\n')
+              env.write('BUILD279_CONTENT_FP='+fp+'\n')
+          print('DETERMINISTIC NON-PRODUCTION FIXTURE: PASS 96 MiB / 3 planned multipart parts')
+          PY
+
+      - name: Create and initiate the first multipart identity
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' > /tmp/build279-create.json
+          import json,os
+          print(json.dumps({'action':'create_session','creative_project_id':int(os.environ['BUILD279_PROJECT_ID']),'files':[{'name':'release467-build279-interruption-resume-drill.wav','type':'audio/wav','size':int(os.environ['BUILD279_FIXTURE_SIZE']),'lastModified':0,'content_fingerprint':os.environ['BUILD279_CONTENT_FP'],'content_fingerprint_version':'sample_sha256_v1','media_role':'reference','privacy_state':'private','consent_state':'not_applicable','rights_status':'internal_only'}],'upload_device':'github-actions-build279-drill','source_note':'Release 467 Build 279 controlled interruption/resume acceptance drill'}))
+          PY
+          args=(-sS -o /tmp/build279-create-response.json -w '%{http_code}' -X POST -H "Cookie: ${DND_DEV_SESSION_COOKIE}" -H 'Content-Type: application/json' -H 'Cache-Control: no-store')
+          if [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; then args+=(-H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}"); fi
+          status="$(curl "${args[@]}" --data-binary @/tmp/build279-create.json "${DND_DEV_BASE_URL}/api/admin/caip-media-intake")"
+          test "$status" = 200 || { echo "STOP: Build 279 create_session HTTP $status"; cat /tmp/build279-create-response.json; exit 1; }
+          python - <<'PY'
+          import json,os
+          d=json.load(open('/tmp/build279-create-response.json'));r=d.get('result') or {};files=r.get('files') or []
+          assert d.get('ok') is True and files,d
+          f=files[0];fid=int(f.get('caip_media_upload_file_id') or 0)
+          assert fid>0,f
+          assert int(f.get('expected_parts') or 0)==3,f
+          assert int(f.get('part_size_bytes') or 0)==33554432,f
+          assert str(f.get('content_fingerprint') or '')==os.environ['BUILD279_CONTENT_FP'],f
+          with open(os.environ['GITHUB_ENV'],'a') as env:env.write('BUILD279_FILE_ID='+str(fid)+'\n')
+          with open('/tmp/build279-file-id','w') as out: out.write(str(fid))
+          print('FIRST MULTIPART IDENTITY CREATED: PASS')
+          PY
+          BUILD279_FILE_ID="$(cat /tmp/build279-file-id)"
+          export BUILD279_FILE_ID
+          rm -f /tmp/build279-file-id /tmp/build279-create.json /tmp/build279-create-response.json
+          python - <<'PY' > /tmp/build279-init.json
+          import json,os
+          print(json.dumps({'action':'initiate_file','creative_project_id':int(os.environ['BUILD279_PROJECT_ID']),'file_id':int(os.environ['BUILD279_FILE_ID']),'compact_response':True}))
+          PY
+          status="$(curl "${args[@]}" --data-binary @/tmp/build279-init.json "${DND_DEV_BASE_URL}/api/admin/caip-media-intake")"
+          test "$status" = 200 || { echo "STOP: Build 279 initiate_file HTTP $status"; exit 1; }
+          rm -f /tmp/build279-init.json /tmp/build279-create-response.json
+
+      - name: Upload part 1 and capture sanitized interruption identity
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          dd if=/tmp/build279-source.wav of=/tmp/build279-part1.bin bs=1048576 count=32 status=none
+          args=(-sS -o /tmp/build279-part1-response.json -w '%{http_code}' -X PUT -H "Cookie: ${DND_DEV_SESSION_COOKIE}" -H 'Cache-Control: no-store' --data-binary @/tmp/build279-part1.bin)
+          if [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; then args+=(-H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}"); fi
+          status="$(curl "${args[@]}" "${DND_DEV_BASE_URL}/api/admin/caip-media-upload-part?file_id=${BUILD279_FILE_ID}&part_number=1")"
+          test "$status" = 200 || { echo "STOP: Build 279 part 1 upload HTTP $status"; exit 1; }
+          python - <<'PY'
+          import hashlib,json
+          d=json.load(open('/tmp/build279-part1-response.json'));assert d.get('ok') is True,d
+          etag=str(d.get('etag') or '');assert etag
+          print('::add-mask::'+etag)
+          print('PART 1 UPLOAD: PASS etag_hash='+hashlib.sha256(etag.encode()).hexdigest()[:16])
+          PY
+          rm -f /tmp/build279-part1-response.json /tmp/build279-part1.bin
+          npx --yes wrangler@4 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "SELECT f.caip_media_upload_file_id,f.object_key,f.r2_upload_id,f.content_fingerprint,f.uploaded_parts,f.uploaded_bytes,p.part_number,p.part_status,p.etag FROM caip_media_upload_files f JOIN caip_media_upload_parts p ON p.caip_media_upload_file_id=f.caip_media_upload_file_id WHERE f.caip_media_upload_file_id=${BUILD279_FILE_ID} AND p.part_number=1 LIMIT 1;" > /tmp/build279-before-raw.json
+          python - <<'PY'
+          import hashlib,json,os
+          d=json.load(open('/tmp/build279-before-raw.json'));rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if int(v.get('caip_media_upload_file_id') or 0)>0 and int(v.get('part_number') or 0)==1: rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(d);assert rows,rows;r=rows[0]
+          assert int(r.get('uploaded_parts') or 0)==1 and r.get('part_status')=='uploaded' and r.get('etag'),r
+          assert str(r.get('content_fingerprint') or '')==os.environ['BUILD279_CONTENT_FP'],r
+          vals={'object':str(r.get('object_key') or ''),'upload':str(r.get('r2_upload_id') or ''),'etag':str(r.get('etag') or '')}
+          assert all(vals.values()),vals
+          hashes={k:hashlib.sha256(v.encode()).hexdigest() for k,v in vals.items()}
+          with open(os.environ['GITHUB_ENV'],'a') as env:
+              env.write('BUILD279_OBJECT_HASH='+hashes['object']+'\n');env.write('BUILD279_UPLOAD_HASH='+hashes['upload']+'\n');env.write('BUILD279_PART1_ETAG_HASH='+hashes['etag']+'\n')
+          json.dump({'file_id':int(r['caip_media_upload_file_id']),'uploaded_parts':1,'uploaded_bytes':int(r.get('uploaded_bytes') or 0),'object_key_sha256':hashes['object'],'r2_upload_id_sha256':hashes['upload'],'part1_etag_sha256':hashes['etag'],'content_fingerprint':os.environ['BUILD279_CONTENT_FP']},open('/tmp/build279-before-sanitized.json','w'))
+          print('PRE-INTERRUPTION SERVER STATE: PASS sanitized identity captured')
+          PY
+          rm -f /tmp/build279-before-raw.json
+
+      - name: Simulate interruption reconnect and exact local reselection
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f /tmp/build279-source.wav
+          python - <<'PY'
+          import hashlib,os,struct
+          path='/tmp/build279-source.wav';size=96*1024*1024;sample=1024*1024
+          header=(b'RIFF'+struct.pack('<I',size-8)+b'WAVEfmt '+struct.pack('<IHHIIHH',16,1,1,8000,16000,2,16)+b'data'+struct.pack('<I',size-44))
+          with open(path,'wb') as f:f.write(header);f.truncate(size)
+          max_start=size-sample;desc=[]
+          with open(path,'rb') as f:
+              for off in sorted(set([0,max_start//2,max_start])):
+                  f.seek(off);chunk=f.read(sample);desc.append(f'{off}:{len(chunk)}:{hashlib.sha256(chunk).hexdigest()}')
+          fp=hashlib.sha256(('sample_sha256_v1|'+str(size)+'|'+'|'.join(desc)).encode()).hexdigest()
+          assert fp==os.environ['BUILD279_CONTENT_FP'],(fp,os.environ['BUILD279_CONTENT_FP'])
+          print('CLIENT RECONNECT + SOURCE RESELECTION: PASS exact fingerprint restored')
+          PY
+          python - <<'PY' > /tmp/build279-reselect.json
+          import json,os
+          print(json.dumps({'action':'create_session','creative_project_id':int(os.environ['BUILD279_PROJECT_ID']),'files':[{'name':'release467-build279-interruption-resume-drill.wav','type':'audio/wav','size':int(os.environ['BUILD279_FIXTURE_SIZE']),'lastModified':0,'content_fingerprint':os.environ['BUILD279_CONTENT_FP'],'content_fingerprint_version':'sample_sha256_v1','media_role':'reference','privacy_state':'private','consent_state':'not_applicable','rights_status':'internal_only'}],'upload_device':'github-actions-build279-drill-reconnect','source_note':'Release 467 Build 279 reconnect/reselection'}))
+          PY
+          args=(-sS -o /tmp/build279-reselect-response.json -w '%{http_code}' -X POST -H "Cookie: ${DND_DEV_SESSION_COOKIE}" -H 'Content-Type: application/json' -H 'Cache-Control: no-store')
+          if [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; then args+=(-H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}"); fi
+          status="$(curl "${args[@]}" --data-binary @/tmp/build279-reselect.json "${DND_DEV_BASE_URL}/api/admin/caip-media-intake")"
+          test "$status" = 200 || { echo "STOP: Build 279 reselection create_session HTTP $status"; exit 1; }
+          python - <<'PY'
+          import json,os
+          d=json.load(open('/tmp/build279-reselect-response.json'));files=(d.get('result') or {}).get('files') or []
+          assert d.get('ok') is True and files,d
+          f=files[0]
+          assert int(f.get('caip_media_upload_file_id') or 0)==int(os.environ['BUILD279_FILE_ID']),f
+          assert f.get('reused_existing') is True and f.get('duplicate_action')=='resume_existing',f
+          assert str(f.get('content_fingerprint') or '')==os.environ['BUILD279_CONTENT_FP'],f
+          print('SERVER RESELECTION CLASSIFICATION: PASS resume_existing / same file identity')
+          PY
+          rm -f /tmp/build279-reselect.json /tmp/build279-reselect-response.json
+
+      - name: Prove preserved part-1 ETag and resume existing multipart
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "SELECT f.caip_media_upload_file_id,f.object_key,f.r2_upload_id,f.content_fingerprint,f.uploaded_parts,f.uploaded_bytes,p.part_status,p.etag FROM caip_media_upload_files f JOIN caip_media_upload_parts p ON p.caip_media_upload_file_id=f.caip_media_upload_file_id WHERE f.caip_media_upload_file_id=${BUILD279_FILE_ID} AND p.part_number=1 LIMIT 1;" > /tmp/build279-after-reselect-raw.json
+          python - <<'PY'
+          import hashlib,json,os
+          d=json.load(open('/tmp/build279-after-reselect-raw.json'));rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if int(v.get('caip_media_upload_file_id') or 0)>0 and v.get('etag'): rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(d);assert rows,rows;r=rows[0]
+          assert int(r.get('caip_media_upload_file_id') or 0)==int(os.environ['BUILD279_FILE_ID'])
+          assert hashlib.sha256(str(r.get('object_key') or '').encode()).hexdigest()==os.environ['BUILD279_OBJECT_HASH']
+          assert hashlib.sha256(str(r.get('r2_upload_id') or '').encode()).hexdigest()==os.environ['BUILD279_UPLOAD_HASH']
+          assert hashlib.sha256(str(r.get('etag') or '').encode()).hexdigest()==os.environ['BUILD279_PART1_ETAG_HASH']
+          assert r.get('part_status')=='uploaded' and int(r.get('uploaded_parts') or 0)==1
+          print('PERSISTED IDENTITY + PART 1 ETAG: PASS unchanged across interruption/reselection')
+          PY
+          rm -f /tmp/build279-after-reselect-raw.json
+          python - <<'PY' > /tmp/build279-resume.json
+          import json,os
+          print(json.dumps({'action':'initiate_file','creative_project_id':int(os.environ['BUILD279_PROJECT_ID']),'file_id':int(os.environ['BUILD279_FILE_ID']),'compact_response':True}))
+          PY
+          args=(-sS -o /tmp/build279-resume-response.json -w '%{http_code}' -X POST -H "Cookie: ${DND_DEV_SESSION_COOKIE}" -H 'Content-Type: application/json' -H 'Cache-Control: no-store')
+          if [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; then args+=(-H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}"); fi
+          status="$(curl "${args[@]}" --data-binary @/tmp/build279-resume.json "${DND_DEV_BASE_URL}/api/admin/caip-media-intake")"
+          test "$status" = 200 || { echo "STOP: Build 279 resumed initiate_file HTTP $status"; exit 1; }
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/build279-resume-response.json'));r=d.get('result') or {}
+          assert d.get('ok') is True and r.get('resumed_existing_upload') is True,d
+          print('RESUMED EXISTING R2 MULTIPART IDENTITY: PASS')
+          PY
+          rm -f /tmp/build279-resume.json /tmp/build279-resume-response.json
+
+      - name: Upload part 2 after reconnect and verify two ETag-backed parts
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          dd if=/tmp/build279-source.wav of=/tmp/build279-part2.bin bs=1048576 skip=32 count=32 status=none
+          args=(-sS -o /tmp/build279-part2-response.json -w '%{http_code}' -X PUT -H "Cookie: ${DND_DEV_SESSION_COOKIE}" -H 'Cache-Control: no-store' --data-binary @/tmp/build279-part2.bin)
+          if [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; then args+=(-H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}"); fi
+          status="$(curl "${args[@]}" "${DND_DEV_BASE_URL}/api/admin/caip-media-upload-part?file_id=${BUILD279_FILE_ID}&part_number=2")"
+          test "$status" = 200 || { echo "STOP: Build 279 part 2 upload HTTP $status"; exit 1; }
+          rm -f /tmp/build279-part2-response.json /tmp/build279-part2.bin
+          npx --yes wrangler@4 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "SELECT f.caip_media_upload_file_id,f.object_key,f.r2_upload_id,f.uploaded_parts,f.uploaded_bytes,p.part_number,p.part_status,p.etag FROM caip_media_upload_files f JOIN caip_media_upload_parts p ON p.caip_media_upload_file_id=f.caip_media_upload_file_id WHERE f.caip_media_upload_file_id=${BUILD279_FILE_ID} ORDER BY p.part_number;" > /tmp/build279-two-parts-raw.json
+          python - <<'PY'
+          import hashlib,json,os
+          d=json.load(open('/tmp/build279-two-parts-raw.json'));rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if int(v.get('caip_media_upload_file_id') or 0)>0 and int(v.get('part_number') or 0)>0: rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(d);by={int(r['part_number']):r for r in rows}
+          assert by[1].get('part_status')=='uploaded' and by[1].get('etag'),by.get(1)
+          assert by[2].get('part_status')=='uploaded' and by[2].get('etag'),by.get(2)
+          assert hashlib.sha256(str(by[1]['etag']).encode()).hexdigest()==os.environ['BUILD279_PART1_ETAG_HASH']
+          assert hashlib.sha256(str(by[1].get('object_key') or '').encode()).hexdigest()==os.environ['BUILD279_OBJECT_HASH']
+          assert hashlib.sha256(str(by[1].get('r2_upload_id') or '').encode()).hexdigest()==os.environ['BUILD279_UPLOAD_HASH']
+          assert int(by[1].get('uploaded_parts') or 0)==2 and int(by[1].get('uploaded_bytes') or 0)==67108864,by[1]
+          print('POST-RESUME MULTIPART STATE: PASS two completed ETag-backed parts / exact 64 MiB')
+          PY
+          rm -f /tmp/build279-two-parts-raw.json
+
+      - name: Prove fail-closed completion with part 3 missing
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' > /tmp/build279-complete.json
+          import json,os
+          print(json.dumps({'action':'complete_file','creative_project_id':int(os.environ['BUILD279_PROJECT_ID']),'file_id':int(os.environ['BUILD279_FILE_ID']),'compact_response':True}))
+          PY
+          args=(-sS -o /tmp/build279-complete-response.json -w '%{http_code}' -X POST -H "Cookie: ${DND_DEV_SESSION_COOKIE}" -H 'Content-Type: application/json' -H 'Cache-Control: no-store')
+          if [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; then args+=(-H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}"); fi
+          status="$(curl "${args[@]}" --data-binary @/tmp/build279-complete.json "${DND_DEV_BASE_URL}/api/admin/caip-media-intake")"
+          test "$status" = 400 || { echo "STOP: incomplete completion must fail HTTP 400, got $status"; exit 1; }
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/build279-complete-response.json'))
+          assert d.get('ok') is False,d
+          assert '[CAIP_MULTIPART_INCOMPLETE]' in str(d.get('error') or ''),d
+          print('FAIL-CLOSED COMPLETION: PASS [CAIP_MULTIPART_INCOMPLETE] with part 3 deliberately absent')
+          PY
+          rm -f /tmp/build279-complete.json /tmp/build279-complete-response.json
+
+      - name: Abort exact unfinished multipart and retain sanitized evidence only
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY' > /tmp/build279-abort.json
+          import json,os
+          print(json.dumps({'action':'abort_file','creative_project_id':int(os.environ['BUILD279_PROJECT_ID']),'file_id':int(os.environ['BUILD279_FILE_ID'])}))
+          PY
+          args=(-sS -o /tmp/build279-abort-response.json -w '%{http_code}' -X POST -H "Cookie: ${DND_DEV_SESSION_COOKIE}" -H 'Content-Type: application/json' -H 'Cache-Control: no-store')
+          if [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; then args+=(-H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}"); fi
+          status="$(curl "${args[@]}" --data-binary @/tmp/build279-abort.json "${DND_DEV_BASE_URL}/api/admin/caip-media-intake")"
+          test "$status" = 200 || { echo "STOP: abort_file HTTP $status"; exit 1; }
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/build279-abort-response.json'));r=d.get('result') or {}
+          assert d.get('ok') is True and r.get('aborted') is True,d
+          assert r.get('raw_object_created') is False,d
+          print('EXACT ACTIVE MULTIPART ABORT: PASS no finalized raw drill object')
+          PY
+          rm -f /tmp/build279-abort.json /tmp/build279-abort-response.json /tmp/build279-source.wav
+          npx --yes wrangler@4 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "SELECT upload_status,creative_asset_id,uploaded_parts,uploaded_bytes FROM caip_media_upload_files WHERE caip_media_upload_file_id=${BUILD279_FILE_ID} LIMIT 1;" > /tmp/build279-final-row.json
+          python - <<'PY'
+          import json,os,datetime
+          d=json.load(open('/tmp/build279-final-row.json'));rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'upload_status' in v: rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(d);assert rows,rows;r=rows[0]
+          assert r.get('upload_status')=='aborted',r
+          assert not r.get('creative_asset_id'),r
+          evidence={
+            'schema':'release467-build279-multipart-interruption-resume-acceptance-v1',
+            'status':'PASS','source_sha':os.environ['GITHUB_SHA'],'environment':'development',
+            'live_runtime_drill':True,'deterministic_non_production_fixture':True,'production_media_copy':False,
+            'fixture_size_bytes':100663296,'part_size_bytes':33554432,'expected_parts':3,
+            'interruption_after_uploaded_parts':1,'reselection_same_content_fingerprint':True,
+            'same_upload_file_id_after_reselection':True,'same_object_key_hash_after_reselection':True,'same_r2_upload_id_hash_after_reselection':True,
+            'part1_etag_hash_preserved':True,'resumed_existing_upload':True,'uploaded_parts_after_resume':2,'uploaded_bytes_after_resume':67108864,
+            'completion_missing_part':3,'completion_fail_closed_marker':'[CAIP_MULTIPART_INCOMPLETE]','r2_complete_blocked':True,
+            'exact_active_multipart_aborted':True,'finalized_raw_object':False,'creative_asset_registered':False,
+            'object_key_sha256':os.environ['BUILD279_OBJECT_HASH'],'r2_upload_id_sha256':os.environ['BUILD279_UPLOAD_HASH'],'part1_etag_sha256':os.environ['BUILD279_PART1_ETAG_HASH'],
+            'raw_object_key_retained':False,'raw_r2_upload_id_retained':False,'raw_etag_retained':False,'raw_session_token_retained':False,
+            'current_release_caip_dimensions_after_green':'3/3','caip_lane_after_green':'ACCEPTED',
+            'observed_at_utc':datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
+          }
+          json.dump(evidence,open('/tmp/build279-multipart-interruption-resume-evidence.json','w'),indent=2,sort_keys=True)
+          print('SANITIZED BUILD 279 ACCEPTANCE EVIDENCE: PASS 3/3')
+          PY
+          rm -f /tmp/build279-final-row.json /tmp/build279-before-sanitized.json
+
+      - name: Upload sanitized Build 279 acceptance evidence
+        if: ${{ github.ref_name == 'dev' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build279-multipart-interruption-resume-evidence
+          path: /tmp/build279-multipart-interruption-resume-evidence.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Production branch remains runtime-read-only for Build 279
+        if: ${{ github.ref_name == 'main' }}
+        run: |
+          echo 'Build 279 runtime multipart drill is Development-only.'
+          echo 'Production promotion proves the exact already-accepted tree; no Production media drill runs here.'

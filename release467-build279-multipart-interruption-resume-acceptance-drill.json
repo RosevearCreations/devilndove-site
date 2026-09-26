@@ -1,0 +1,145 @@
+{
+  "release": 467,
+  "build": 279,
+  "title": "Multipart Interruption & Resume Acceptance Drill",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build279-multipart-interruption-resume-acceptance-drill",
+  "predecessor": {
+    "build": 278,
+    "title": "Authenticated Private Review & Range-Streaming Acceptance Refresh",
+    "development_sha": "4a96fba89316d287771d34ef278b2404848e2996",
+    "development_tree_sha": "b7ad133e79cd01a30d2056f77ffd069996560cf6",
+    "production_main_sha": "5d418eb1160caa7af855a247e1ff3510e4c1c9b8",
+    "production_tree_sha": "b7ad133e79cd01a30d2056f77ffd069996560cf6",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36247952924,
+      "current_application_quality_run": 36247952893,
+      "it_admin_runtime_proof_run": 36247952964,
+      "branch_hygiene_run": 36247953198,
+      "dedicated_gate_run": 36247952942
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36248115089,
+      "production_live_resource_integrity_run": 36248156311,
+      "products_browser_proof_run": 36248156279,
+      "products_route_proof_run": 36248156316,
+      "build_specific_proof_run": 36248115177
+    }
+  },
+  "evidence_contract": {
+    "lane": "caip_private_media",
+    "current_lane_state": "EVIDENCE_DEPENDENT",
+    "dimension": "multipart_interruption_reconnect_reselection_resume",
+    "environment": "DEVELOPMENT_EXACT_SHA_LIVE_MULTIPART_DRILL",
+    "live_runtime_required": true,
+    "static_source_is_live_acceptance": false,
+    "fixture_policy": "DETERMINISTIC_NON_PRODUCTION_MEDIA_DRILL_FIXTURE",
+    "production_media_copy": false,
+    "fixture_size_bytes": 100663296,
+    "part_size_bytes": 33554432,
+    "expected_parts": 3,
+    "interruption_after_uploaded_parts": 1,
+    "resume_uploads_additional_parts": 1,
+    "deliberately_missing_completion_part": 3,
+    "identity_requirements": [
+      "same_caip_media_upload_file_id",
+      "same_r2_upload_id_hash",
+      "same_object_key_hash",
+      "same_content_fingerprint"
+    ],
+    "completed_part_requirements": [
+      "part_1_uploaded_etag_present_before_interruption",
+      "part_1_same_etag_hash_after_reselection",
+      "part_2_uploaded_after_resume"
+    ],
+    "completion_guard": {
+      "expected_error_marker": "[CAIP_MULTIPART_INCOMPLETE]",
+      "missing_part_blocks_r2_complete": true,
+      "exact_expected_parts_required": true,
+      "distinct_contiguous_parts_required": true,
+      "etag_required_for_every_part": true,
+      "exact_uploaded_byte_total_required": true
+    },
+    "cleanup": {
+      "abort_exact_active_multipart_after_evidence": true,
+      "finalized_raw_object": false,
+      "uncertain_r2_delete": false,
+      "production_r2_contact": false
+    },
+    "retained_evidence": "SANITIZED_HASHES_COUNTS_BOOLEANS_ONLY",
+    "raw_r2_upload_id_persisted_in_artifact": false,
+    "raw_object_key_persisted_in_artifact": false,
+    "raw_etag_persisted_in_artifact": false,
+    "raw_session_token_persisted_in_artifact": false,
+    "fresh_dimensions_before_runtime_green": 2,
+    "fresh_dimensions_after_runtime_green": 3,
+    "required_dimensions_total": 3,
+    "overall_lane_after_runtime_green": "ACCEPTED"
+  },
+  "decision": {
+    "build279_complete_when": "The exact Development Build 279 deployment performs a real multipart interruption, reselects the same deterministic non-production source, resumes the same server-side upload identity with previously completed ETag state intact, proves incomplete completion fails closed, aborts the unfinished multipart, and retains only sanitized evidence. The identical tree is then promoted to Production.",
+    "next_build": 280,
+    "next_build_title": "Private-Media Reconciliation & Recovery Outcome Review",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "production_d1_business_data_mutation": false,
+    "production_r2_mutation": false,
+    "production_private_media_upload": false,
+    "production_media_copy": false,
+    "development_private_media_multipart_drill": true,
+    "finalized_drill_object_retained": false,
+    "private_media_delete": false,
+    "uncertain_r2_delete": false,
+    "public_media_copy": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "payment_or_refund": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "raw_r2_identity_capture": false,
+    "raw_etag_capture": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false,
+    "named_proof_requirement_relaxed": false
+  },
+  "implementation": {
+    "evidence_document": "docs/operations/RELEASE_467_BUILD_279_MULTIPART_INTERRUPTION_RESUME_ACCEPTANCE_DRILL.md",
+    "dedicated_gate": "scripts/release467_build279_gate.py",
+    "workflow": ".github/workflows/release467-build279-multipart-interruption-resume-acceptance-drill.yml",
+    "roadmap": "docs/operations/RELEASE_467_CAIP_PRODUCTION_ACCEPTANCE_AUTONOMOUS_BUILDS_276_284.md"
+  },
+  "starting_point": {
+    "development": {
+      "sha": "4a96fba89316d287771d34ef278b2404848e2996",
+      "tree": "b7ad133e79cd01a30d2056f77ffd069996560cf6",
+      "system_gate_run": 36247952924,
+      "current_application_quality_run": 36247952893,
+      "it_admin_runtime_proof_run": 36247952964,
+      "branch_hygiene_run": 36247953198,
+      "dedicated_gate_run": 36247952942,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+      "quality_run": 36247952893,
+      "it_admin_runtime_run": 36247952964,
+      "repository_hygiene_run": 36247953198
+    },
+    "production": {
+      "main_sha": "5d418eb1160caa7af855a247e1ff3510e4c1c9b8",
+      "tree_sha": "b7ad133e79cd01a30d2056f77ffd069996560cf6",
+      "production_pages_deploy_run": 36248115089,
+      "production_live_resource_integrity_run": 36248156311,
+      "products_browser_proof_run": 36248156279,
+      "products_route_proof_run": 36248156316,
+      "build_specific_proof_run": 36248115177,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
+  }
+}
