@@ -1,0 +1,46 @@
+name: Release 467 Build 274 Creative Process Planned vs Actual Inventory Lifecycle
+on:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build274:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 273 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 4d415840158ee83d60eb19346520446cd158e657
+          production_sha: 3c593eee38c7a05d2a5ad4df4a6b274e2275f492
+          build_proof_name: Release 467 Build 273 Content Studio Standalone Project Bridge
+          report_path: /tmp/build274-predecessor-exact-sha-proof.json
+      - name: Resolve exact Build 273 tree continuity
+        run: |
+          git fetch --no-tags --depth=1 origin 4d415840158ee83d60eb19346520446cd158e657
+          git fetch --no-tags --depth=1 origin 3c593eee38c7a05d2a5ad4df4a6b274e2275f492
+          DEV_TREE="$(git rev-parse 4d415840158ee83d60eb19346520446cd158e657^{tree})"
+          PROD_TREE="$(git rev-parse 3c593eee38c7a05d2a5ad4df4a6b274e2275f492^{tree})"
+          echo "BUILD273_DEV_TREE=$DEV_TREE"
+          echo "BUILD273_PROD_TREE=$PROD_TREE"
+          test "$DEV_TREE" = "$PROD_TREE"
+          test "$DEV_TREE" = "41db192daa04f81ca0bb2ec59ac290a7d4fc8bfb"
+      - name: Build 274 Creative Process planned-vs-actual lifecycle gate
+        run: python scripts/release467_build274_gate.py
+      - name: Retain Build 273 Content Studio bridge contract
+        run: python scripts/release467_build273_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build274-creative-process-planned-vs-actual-inventory-lifecycle-evidence-${{ github.sha }}
+          path: /tmp/build274-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30

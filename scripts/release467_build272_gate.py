@@ -74,8 +74,12 @@ else:
     q((a.get('final_closure') or {}).get('tree_sha')=='875f5cf60dd1118036f6bf5a18c0748e6e9b8d71','Build 272 final tree mismatch')
     q((a.get('production_checkpoint') or {}).get('main_sha')=='e490a5a12f30d9046dda2a6e9ea9ee73ee33b48f','Build 272 final Production SHA mismatch')
     q((a.get('production_checkpoint') or {}).get('tree_sha')=='875f5cf60dd1118036f6bf5a18c0748e6e9b8d71','Build 272 final Production tree mismatch')
-    q((p.get('production_checkpoint') or {}).get('main_sha')=='e490a5a12f30d9046dda2a6e9ea9ee73ee33b48f','Build 273+ current Production baseline must be exact Build 272')
-    q(int(p.get('next_build') or 0)>=274,'Build 273+ must advance beyond Build 273 successor')
+    if cur==273:
+        q((p.get('production_checkpoint') or {}).get('main_sha')=='e490a5a12f30d9046dda2a6e9ea9ee73ee33b48f','Build 273 current Production baseline must be exact Build 272')
+        q(int(p.get('next_build') or 0)>=274,'Build 273 must advance beyond Build 273 successor')
+    else:
+        q((p.get('production_checkpoint') or {}).get('main_sha')=='3c593eee38c7a05d2a5ad4df4a6b274e2275f492','Build 274+ current Production baseline must be exact Build 273')
+        q(int(p.get('next_build') or 0)>=275,'Build 274+ must advance beyond Build 274 successor')
 for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 272 safety drift: {k}')
 if F:
     print('RELEASE 467 BUILD 272 UPLOAD PREREQUISITE OPERATOR READINESS: FAIL')
