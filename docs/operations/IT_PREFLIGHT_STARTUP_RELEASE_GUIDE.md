@@ -12,31 +12,31 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 270 candidate
+## Current Release 467 restart authority — Build 271 candidate
 
-Build 269 **Private Raw Media Intake Integrity** is the exact fully verified Development and Production predecessor.
+Build 270 **Strong-Fingerprint Backfill & Recovery Reconciliation** is the exact fully verified Development and Production predecessor.
 
-- Development SHA: `059aa3cf7854d075529ce976bb65ae2c1c6254fc`
-- exact Development/Production tree: `65b54187a47834a7a36a3f57b16f985eb5d4cb05`
-- Development proofs: System `36180407045`, Quality `36180407199`, I.T. `36180406666`, Hygiene `36180407194`, Build 269 `36180406990`
-- Production main SHA: `61cc1346f838a5dd742b0dbaeff345d95447ba6e`
-- Production proofs: Pages `36180648384`, Live Resource Integrity `36180717931`, Product Browser `36180718046`, Product Route `36180717954`, Build 269 `36180648437`
+- Development SHA: `b51e15f9c150e1d740fe1383d8df98a962990b21`
+- exact Development/Production tree: `9dc39ed9dde4946ad54e51b58c7b66ca38b75634`
+- Development proofs: System `36206690243`, Quality `36206690338`, I.T. `36206690036`, Hygiene `36206690296`, Build 270 `36206690389`
+- Production main SHA: `9c3ed0664d71ab66a3087047b35989c5ed5b6904`
+- Production proofs: Pages `36206849648`, Live Resource Integrity `36206908948`, Product Browser `36206908972`, Product Route `36206908996`, Build 270 `36206849597`
 - exact predecessor proof remains recoverable through the reusable exact-SHA composition;
 - canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 270 **Strong-Fingerprint Backfill & Recovery Reconciliation** is the active bounded candidate. The explicit operator action strengthens missing `sample_sha256_v1` fingerprints and reconciles only existing uploaded/private registration state whose R2 object and recovery lineage are sufficiently proven.
+Build 271 **Standalone / Social CAIP Project Workflow** is the active bounded candidate.
 
-Each request is capped at 20 records and defaults to 8. Fingerprint backfill uses exact R2 HEAD-size verification plus bounded range reads. Uploaded/unregistered rows are eligible for private registration repair only when a strong fingerprint exists, the exact R2 size matches, no multipart/size-integrity marker is present, and any `recovery_of_file_id` parent is in the same project under a distinct object key.
+A non-archived Creative Process project can explicitly open or refresh one CAIP workspace using the existing unique identity `source_type='creative_work_project'` plus `source_id=creative_work_project_id`. Reopening the workflow updates the source snapshot and policy profile while preserving any existing Content Studio link and CAIP review/lifecycle state.
 
-Rows that cannot pass those checks remain preserved for review. Build 270 performs no automatic R2 deletion, no duplicate/orphan cleanup, no replacement upload and no public promotion.
+Build 271 does not create a Product, fake catalog item or Content Studio package. `product_id` and `content_project_id` remain optional. The CAIP workspace continues to own private media, evidence/story review and derivative plans; Content Studio remains a later reviewed package authority and publication remains separately approved.
 
-The deployed acceptance gaps remain explicit where not already proven: Production private-bucket/non-public proof, real interruption/reconnect/reselection/resume evidence, real R2 multipart survival plus exact HEAD-size evidence, authenticated/privacy/phone-desktop review and Startup/Operational Continuity acceptance. Build 270 does not synthesize any of these.
+All derivative plans remain reachable in a bounded scroll region with planned items first. A derivative plan remains optional for each source asset.
 
-Uncertain R2 deletion, private-media deletion, automatic Production D1 migration, provider action, Product publication, Inventory movement, Finance posting, Production business-data copy and synthetic acceptance remain unauthorized.
+Build 271 performs no schema migration, request-time DDL, automatic project creation, Inventory movement, Finance posting, R2 deletion, public media copy, provider execution or publication. Existing private binaries are unchanged.
 
-The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 270, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
+The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 271, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
 
-The future queue remains open. Next: **Build 271 — Standalone / Social CAIP Project Workflow**.
+The future queue remains open. Next: **Build 272 — Upload Prerequisite & Operator Readiness**.
 
 ## Retained historical provenance — Build 171
 
