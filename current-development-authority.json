@@ -172,7 +172,7 @@
   "next_build": 277,
   "next_build_state": "AUTHORIZED_AFTER_BUILD276_GREEN",
   "next_build_title": "Private Bucket Binding & Non-Public Exposure Evidence",
-  "promotion_state": "BUILD275_PRODUCTION_GREEN_BUILD276_DEVELOPMENT_CANDIDATE",
+  "promotion_state": "BUILD275_PRODUCTION_GREEN_BUILD276_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "CAIP_PRODUCTION_ACCEPTANCE_EVIDENCE_ROADMAP_ACTIVE",
   "measured_closure": {
     "source_build": 232,
