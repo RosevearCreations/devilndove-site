@@ -581,112 +581,111 @@ export async function createOrRefreshContentProjectForProduct(db, productId, act
   return { project, facts, archived_count: archivedCount, deliverables_created: deliverablesCreated };
 }
 
-async function caipMediaForCreativeWorkProject(db, creativeWorkProjectId) {
-  try {
-    const result = await db.prepare(`
-      SELECT cp.creative_project_id, ca.creative_asset_id, ca.media_asset_id, ca.source_url,
-        ca.logical_archive_path, ca.source_safety_status, ca.rights_status, ca.asset_status,
-        ca.media_type, ca.original_filename, ca.mime_type, ca.sort_order, ca.is_source_selected,
-        ca.is_source_featured, ca.manual_tags_json, ca.manual_caption, ca.source_metadata_json
-      FROM creative_projects cp
-      JOIN creative_assets ca ON ca.creative_project_id=cp.creative_project_id
-      WHERE cp.source_type='creative_work_project' AND cp.source_id=? AND ca.asset_status<>'archived'
-      ORDER BY ca.is_source_featured DESC, ca.is_source_selected DESC, ca.sort_order, ca.creative_asset_id
-    `).bind(String(creativeWorkProjectId)).all();
-    return rows(result).map((row, index) => {
-      const metadata = safeJson(row.source_metadata_json, {});
-      const safety = text(row.source_safety_status).toLowerCase();
-      const consent = text(metadata.consent_state).toLowerCase();
-      return {
-        creative_project_id: numeric(row.creative_project_id),
-        creative_asset_id: numeric(row.creative_asset_id),
-        media_asset_id: numeric(row.media_asset_id) || null,
-        source_url: text(row.source_url) || null,
-        original_filename: text(row.original_filename) || `caip-asset-${numeric(row.creative_asset_id)}`,
-        mime_type: text(row.mime_type) || null,
-        media_type: text(row.media_type) || 'image',
-        image_role: text(metadata.media_role) || 'project_evidence',
-        public_use_status: safety === 'public_allowed' ? 'all_public_ok' : safety === 'blocked' ? 'blocked' : 'internal_review',
-        consent_status: consent || 'needs_review',
-        consent_scope: safety === 'public_allowed' ? 'all_public' : 'internal',
-        public_use_allowed: safety === 'public_allowed' ? 1 : 0,
-        merchandising_score: numeric(row.is_source_selected) ? 72 : 55,
-        sort_order: numeric(row.sort_order) || index,
-        private_object_key: text(metadata.object_key || row.logical_archive_path),
-        manual_caption: text(row.manual_caption, 1800) || null,
-        manual_tags_json: row.manual_tags_json || '[]'
-      };
-    });
-  } catch {
-    return [];
-  }
+async function inspectCreativeProjectContentStudioBridge(db, creativeWorkProjectId) {
+  const sourceId=String(creativeWorkProjectId||'').trim();
+  if(!sourceId) throw new Error('Creative Process project identity is required for the Content Studio bridge.');
+  const caipRows=rows(await db.prepare(`SELECT creative_project_id,source_type,source_id,content_project_id,project_title,project_status,governance_status,lifecycle_stage FROM creative_projects WHERE source_type='creative_work_project' AND source_id=? AND project_status<>'archived' ORDER BY creative_project_id`).bind(sourceId).all().catch(()=>({results:[]})));
+  const contentRows=rows(await db.prepare(`SELECT content_project_id,content_project_key,source_type,source_id,project_title,project_status,review_status,public_release_status FROM content_projects WHERE source_type='creative_project' AND source_id=? ORDER BY content_project_id`).bind(sourceId).all().catch(()=>({results:[]})));
+  const caip=caipRows.length===1?caipRows[0]:null;
+  const contentProject=contentRows.length===1?contentRows[0]:null;
+  let state='READY_CREATE_PACKAGE';
+  let blocker=null;
+  if(caipRows.length===0){state='BLOCKED_CAIP_WORKSPACE_MISSING';blocker='Open the existing Creative Process project in CAIP first. Content Studio will not create a replacement CAIP project.';}
+  else if(caipRows.length>1){state='BLOCKED_CAIP_IDENTITY_AMBIGUOUS';blocker='More than one CAIP workspace maps to this Creative Process project. Reconcile identity before Content Studio handoff.';}
+  else if(contentRows.length>1){state='BLOCKED_CONTENT_PACKAGE_IDENTITY_AMBIGUOUS';blocker='More than one Content Studio package maps to this Creative Process project. Reconcile package identity before refresh.';}
+  else if(caip&&contentProject&&numeric(caip.content_project_id)&&numeric(caip.content_project_id)!==numeric(contentProject.content_project_id)){state='BLOCKED_EXISTING_LINK_CONFLICT';blocker='The existing CAIP workspace is linked to a different Content Studio package. No duplicate package will be created.';}
+  else if(caip&&numeric(caip.content_project_id)&&!contentProject){state='BLOCKED_EXISTING_LINK_CONFLICT';blocker='The existing CAIP workspace points to a Content Studio package outside this Creative Process identity. Reconcile the link before continuing.';}
+  else if(contentProject){state='READY_REFRESH_PACKAGE';}
+  return{source_id:sourceId,state,ready:state==='READY_CREATE_PACKAGE'||state==='READY_REFRESH_PACKAGE',blocker,caip_workspace_count:caipRows.length,content_package_count:contentRows.length,caip_project:caip,content_project:contentProject,identity_key:`creative_work_project:${sourceId}`};
 }
 
-async function attachContentProjectToExistingCreativeWorkCaip(db, creativeWorkProjectId, contentProjectId) {
-  try {
-    await db.prepare(`UPDATE creative_projects SET content_project_id=?, updated_at=CURRENT_TIMESTAMP WHERE source_type='creative_work_project' AND source_id=?`).bind(Number(contentProjectId), String(creativeWorkProjectId)).run();
-    return await db.prepare(`SELECT creative_project_id FROM creative_projects WHERE source_type='creative_work_project' AND source_id=? LIMIT 1`).bind(String(creativeWorkProjectId)).first();
-  } catch {
-    return null;
-  }
+export async function getCreativeProjectContentStudioBridgeReadiness(db, creativeWorkProjectId) {
+  await ensureContentAutomationSchema(db);
+  return inspectCreativeProjectContentStudioBridge(db,creativeWorkProjectId);
+}
+
+async function caipMediaForCreativeWorkProject(db, creativeProjectId) {
+  const result=await db.prepare(`
+    SELECT cp.creative_project_id, ca.creative_asset_id, ca.media_asset_id, ca.source_url,
+      ca.logical_archive_path, ca.source_safety_status, ca.rights_status, ca.asset_status,
+      ca.media_type, ca.original_filename, ca.mime_type, ca.sort_order, ca.is_source_selected,
+      ca.is_source_featured, ca.manual_tags_json, ca.manual_caption, ca.source_metadata_json
+    FROM creative_projects cp
+    JOIN creative_assets ca ON ca.creative_project_id=cp.creative_project_id
+    WHERE cp.creative_project_id=? AND ca.asset_status<>'archived'
+    ORDER BY ca.is_source_featured DESC, ca.is_source_selected DESC, ca.sort_order, ca.creative_asset_id
+  `).bind(Number(creativeProjectId)).all();
+  return rows(result).map((row,index)=>{
+    const metadata=safeJson(row.source_metadata_json,{});
+    const safety=text(row.source_safety_status).toLowerCase();
+    const consent=text(metadata.consent_state).toLowerCase();
+    return{
+      creative_project_id:numeric(row.creative_project_id),creative_asset_id:numeric(row.creative_asset_id),
+      media_asset_id:numeric(row.media_asset_id)||null,source_url:text(row.source_url)||null,
+      original_filename:text(row.original_filename)||`caip-asset-${numeric(row.creative_asset_id)}`,
+      mime_type:text(row.mime_type)||null,media_type:text(row.media_type)||'image',
+      image_role:text(metadata.media_role)||'project_evidence',
+      public_use_status:safety==='public_allowed'?'all_public_ok':safety==='blocked'?'blocked':'internal_review',
+      consent_status:consent||'needs_review',consent_scope:safety==='public_allowed'?'all_public':'internal',
+      public_use_allowed:safety==='public_allowed'?1:0,merchandising_score:numeric(row.is_source_selected)?72:55,
+      sort_order:numeric(row.sort_order)||index,private_object_key:text(metadata.object_key||row.logical_archive_path),
+      manual_caption:text(row.manual_caption,1800)||null,manual_tags_json:row.manual_tags_json||'[]'
+    };
+  });
+}
+
+async function attachContentProjectToExistingCreativeWorkCaip(db, caipProject, contentProjectId) {
+  const caipId=numeric(caipProject?.creative_project_id),target=numeric(contentProjectId),current=numeric(caipProject?.content_project_id);
+  if(!caipId||!target) throw new Error('Existing CAIP workspace and Content Studio package are required for bridge attachment.');
+  if(current&&current!==target) throw new Error('Existing CAIP workspace is already linked to a different Content Studio package. No duplicate package was created.');
+  await db.prepare(`UPDATE creative_projects SET content_project_id=?,updated_at=CURRENT_TIMESTAMP WHERE creative_project_id=? AND source_type='creative_work_project'`).bind(target,caipId).run();
+  return{creative_project_id:caipId,content_project_id:target};
 }
 
 export async function createOrRefreshContentProjectForCreativeProject(db, creativeProject, evidenceRows = [], actorUserId, options = {}) {
   await ensureContentAutomationSchema(db);
-  const sourceId = String(creativeProject?.creative_work_project_id || creativeProject?.project_id || '');
-  if (!sourceId) throw new Error('Creative Project is required for Content Automation Studio.');
-  const name = text(creativeProject?.project_title) || `Creative Project ${sourceId}`;
-  const category = text(creativeProject?.project_type).replace(/_/g, ' ') || 'content project';
-  const summary = text(creativeProject?.summary || creativeProject?.objective || creativeProject?.story_angle) || `${name} is a content-only creative project documented in the Creative Process Engine.`;
-  const key = `creative-project-${sourceId}-${slug(name)}`;
-  const policy = {
-    review_first: true,
-    no_auto_publish: true,
-    source_media_is_reference_only: true,
-    factual_copy_only: true,
-    content_only_project: true,
-    require_public_media_review_before_publish: true,
-    build: CONTENT_STUDIO_BUILD
-  };
+  const sourceId=String(creativeProject?.creative_work_project_id||creativeProject?.project_id||'');
+  if(!sourceId) throw new Error('Creative Process project is required for Content Automation Studio.');
+  const bridge=await inspectCreativeProjectContentStudioBridge(db,sourceId);
+  if(!bridge.ready) throw new Error(`Content Studio bridge blocked: ${bridge.blocker||bridge.state}`);
+  const existingContentProjectId=numeric(bridge.content_project?.content_project_id);
+  const caipProject=bridge.caip_project;
+  const name=text(creativeProject?.project_title)||`Creative Project ${sourceId}`;
+  const category=text(creativeProject?.project_type).replace(/_/g,' ')||'content project';
+  const summary=text(creativeProject?.summary||creativeProject?.objective||creativeProject?.story_angle)||`${name} is a content-only creative project documented in the Creative Process Engine.`;
+  const key=`creative-project-${sourceId}-${slug(name)}`;
+  const policy={review_first:true,no_auto_publish:true,source_media_is_reference_only:true,factual_copy_only:true,content_only_project:true,require_public_media_review_before_publish:true,existing_identity_bridge:true,build:CONTENT_STUDIO_BUILD};
   await db.prepare(`
     INSERT INTO content_projects (
-      content_project_key, source_type, source_id, product_id, project_title, project_status, review_status,
-      public_release_status, story_angle, factual_summary, source_snapshot_json, content_policy_json, created_by_user_id,
-      created_at, updated_at
+      content_project_key,source_type,source_id,product_id,project_title,project_status,review_status,
+      public_release_status,story_angle,factual_summary,source_snapshot_json,content_policy_json,created_by_user_id,
+      created_at,updated_at
     ) VALUES (?, 'creative_project', ?, NULL, ?, 'draft', 'needs_review', 'private', ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    ON CONFLICT(source_type, source_id) DO UPDATE SET
-      project_title=excluded.project_title, story_angle=excluded.story_angle, factual_summary=excluded.factual_summary,
-      source_snapshot_json=excluded.source_snapshot_json, content_policy_json=excluded.content_policy_json,
-      updated_at=CURRENT_TIMESTAMP
+    ON CONFLICT(source_type,source_id) DO UPDATE SET
+      project_title=excluded.project_title,story_angle=excluded.story_angle,factual_summary=excluded.factual_summary,
+      source_snapshot_json=excluded.source_snapshot_json,content_policy_json=excluded.content_policy_json,updated_at=CURRENT_TIMESTAMP
   `).bind(
-    key, sourceId, `${name} content package`, text(creativeProject?.story_angle) || `${category} story`, summary,
-    JSON.stringify({ creative_project: creativeProject, evidence_count: Array.isArray(evidenceRows) ? evidenceRows.length : 0, archived_at: new Date().toISOString(), build: CONTENT_STUDIO_BUILD }),
-    JSON.stringify(policy), actorUserId || null
+    key,sourceId,`${name} content package`,text(creativeProject?.story_angle)||`${category} story`,summary,
+    JSON.stringify({creative_project:creativeProject,caip_creative_project_id:numeric(caipProject.creative_project_id),evidence_count:Array.isArray(evidenceRows)?evidenceRows.length:0,archived_at:new Date().toISOString(),build:CONTENT_STUDIO_BUILD}),
+    JSON.stringify(policy),actorUserId||null
   ).run();
-  const project = await db.prepare(`SELECT * FROM content_projects WHERE source_type='creative_project' AND source_id=? LIMIT 1`).bind(sourceId).first();
-  const caipRows = await caipMediaForCreativeWorkProject(db, sourceId);
-  const evidenceMedia = (Array.isArray(evidenceRows) ? evidenceRows : []).filter((row) => text(row?.media_url)).map((row, index) => ({
-    source_url: text(row.media_url),
-    original_filename: filenameFromUrl(row.media_url, `creative-evidence-${index + 1}`),
-    mime_type: null,
-    image_role: text(row.evidence_role || row.event_type || 'process'),
-    public_use_status: 'internal_review',
-    consent_status: 'needs_review',
-    sort_order: caipRows.length + index,
-    merchandising_score: 55
+  const project=await db.prepare(`SELECT * FROM content_projects WHERE source_type='creative_project' AND source_id=? LIMIT 1`).bind(sourceId).first();
+  if(!project) throw new Error('Content Studio package could not be resolved after idempotent bridge upsert.');
+  if(existingContentProjectId&&existingContentProjectId!==numeric(project.content_project_id)) throw new Error('Content Studio source identity changed unexpectedly. No duplicate package will be accepted.');
+  const caipRows=await caipMediaForCreativeWorkProject(db,numeric(caipProject.creative_project_id));
+  const evidenceMedia=(Array.isArray(evidenceRows)?evidenceRows:[]).filter((row)=>text(row?.media_url)).map((row,index)=>({
+    source_url:text(row.media_url),original_filename:filenameFromUrl(row.media_url,`creative-evidence-${index+1}`),
+    mime_type:null,image_role:text(row.evidence_role||row.event_type||'process'),public_use_status:'internal_review',
+    consent_status:'needs_review',sort_order:caipRows.length+index,merchandising_score:55
   }));
-  const mediaRows = [...caipRows, ...evidenceMedia];
-  const archivedCount = await archiveSourceMedia(db, project, mediaRows, actorUserId);
-  const caipLink = await attachContentProjectToExistingCreativeWorkCaip(db, sourceId, project.content_project_id);
-  const assets = await getProjectMedia(db, project.content_project_id);
-  const facts = {
-    name, category, shortDescription: clip(summary, 420), description: summary, materials: '',
-    origin: 'creative project', storySummary: text(creativeProject?.story_angle || creativeProject?.objective || summary),
-    location: '', factualSummary: clip(summary, 1200)
-  };
-  const deliverablesCreated = await writeDeliverables(db, project, facts, assets, actorUserId, Boolean(options.refresh_copy));
-  await writeProjectEvent(db, project.content_project_id, 'creative_project_linked', actorUserId, { creative_work_project_id: Number(sourceId), content_only_project: true, caip_creative_project_id: numeric(caipLink?.creative_project_id) || null, caip_media_count: caipRows.length });
-  return { project, facts, archived_count: archivedCount, deliverables_created: deliverablesCreated, caip_creative_project_id: numeric(caipLink?.creative_project_id) || null, caip_media_count: caipRows.length };
+  const archivedCount=await archiveSourceMedia(db,project,[...caipRows,...evidenceMedia],actorUserId);
+  const caipLink=await attachContentProjectToExistingCreativeWorkCaip(db,caipProject,project.content_project_id);
+  const assets=await getProjectMedia(db,project.content_project_id);
+  const facts={name,category,shortDescription:clip(summary,420),description:summary,materials:'',origin:'creative project',storySummary:text(creativeProject?.story_angle||creativeProject?.objective||summary),location:'',factualSummary:clip(summary,1200)};
+  const deliverablesCreated=await writeDeliverables(db,project,facts,assets,actorUserId,Boolean(options.refresh_copy));
+  const bridgeOutcome=existingContentProjectId?'refreshed_existing_package':'created_package_for_existing_identity';
+  await writeProjectEvent(db,project.content_project_id,'creative_project_content_studio_bridge',actorUserId,{creative_work_project_id:Number(sourceId),content_only_project:true,caip_creative_project_id:numeric(caipLink.creative_project_id),bridge_outcome:bridgeOutcome,duplicate_project_created:false,caip_media_count:caipRows.length});
+  return{project,facts,archived_count:archivedCount,deliverables_created:deliverablesCreated,caip_creative_project_id:numeric(caipLink.creative_project_id),caip_media_count:caipRows.length,bridge_outcome:bridgeOutcome,bridge_identity:bridge.identity_key,duplicate_project_created:false};
 }
 
 export async function getContentProjectDetail(db, projectId) {
