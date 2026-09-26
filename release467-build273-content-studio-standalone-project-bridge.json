@@ -2,7 +2,7 @@
   "release": 467,
   "build": 273,
   "title": "Content Studio Standalone-Project Bridge",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build273-content-studio-standalone-project-bridge",
   "predecessor": {
     "build": 272,
@@ -94,5 +94,29 @@
       "build_specific_proof_run": 36209299044,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "4d415840158ee83d60eb19346520446cd158e657",
+    "tree_sha": "41db192daa04f81ca0bb2ec59ac290a7d4fc8bfb",
+    "proofs": {
+      "system_gate_run": 36210339968,
+      "current_application_quality_run": 36210340842,
+      "it_admin_runtime_proof_run": 36210339975,
+      "branch_hygiene_run": 36210339599
+    },
+    "dedicated_gate_run": 36210339832,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "ingested_by_build": 274
+  },
+  "production_checkpoint": {
+    "main_sha": "3c593eee38c7a05d2a5ad4df4a6b274e2275f492",
+    "tree_sha": "41db192daa04f81ca0bb2ec59ac290a7d4fc8bfb",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36210476372,
+    "production_live_resource_integrity_run": 36210520305,
+    "products_browser_proof_run": 36210520286,
+    "products_route_proof_run": 36210520259,
+    "build_specific_proof_run": 36210476306
   }
 }
