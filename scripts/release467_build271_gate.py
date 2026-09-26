@@ -81,14 +81,24 @@ q('production_sha: 9c3ed0664d71ab66a3087047b35989c5ed5b6904' in wf,'Build 271 wo
 q('Release 467 Build 270 Strong-Fingerprint Backfill Recovery Reconciliation' in wf,'Build 271 workflow predecessor proof name drift')
 q("run_current_contract('scripts/release467_build271_gate.py','Release 467 Build 271')" in sysgate,'System Gate missing Build 271')
 
-q(p.get('release')==467 and int(p.get('build') or 0)==271,'Current authority must identify Build 271')
-q(p.get('title')=='Standalone / Social CAIP Project Workflow','Current authority Build 271 title mismatch')
-q(p.get('state')=='DEVELOPMENT_GREEN','Build 271 pointer must retain inherited Development GREEN state')
-q((p.get('production_checkpoint') or {}).get('main_sha')=='9c3ed0664d71ab66a3087047b35989c5ed5b6904','Build 271 candidate must retain exact Build 270 Production baseline')
-q(int(p.get('next_build') or 0)==272 and p.get('next_build_title')=='Upload Prerequisite & Operator Readiness','Build 271 successor pointer mismatch')
+cur=int(p.get('build') or 0)
+q(p.get('release')==467 and cur>=271,'Current authority must retain Build 271 or a verified successor')
 proj=p.get('caip_standalone_social_project_workflow') or {}
 q(proj.get('classification')=='STANDALONE_SOCIAL_CAIP_IDENTITY_READY_REVIEW_FIRST','Current authority missing Build 271 projection')
 q(proj.get('product_optional') is True and proj.get('fake_product_forbidden') is True and proj.get('content_studio_created_by_build271') is False,'Current authority Build 271 authority split mismatch')
+if cur==271:
+    q(p.get('title')=='Standalone / Social CAIP Project Workflow','Current authority Build 271 title mismatch')
+    q(p.get('state')=='DEVELOPMENT_GREEN','Build 271 pointer must retain inherited Development GREEN state')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='9c3ed0664d71ab66a3087047b35989c5ed5b6904','Build 271 candidate must retain exact Build 270 Production baseline')
+    q(int(p.get('next_build') or 0)==272 and p.get('next_build_title')=='Upload Prerequisite & Operator Readiness','Build 271 successor pointer mismatch')
+else:
+    q(a.get('state')=='PRODUCTION_GREEN','Build 272+ requires verified Build 271 closure')
+    q((a.get('final_closure') or {}).get('dev_sha')=='af45e733b673af8e8d7e9acb7e55e35f525bebec','Build 271 final Development SHA mismatch')
+    q((a.get('final_closure') or {}).get('tree_sha')=='f0da384a9d0be6f54d5e0b441f7aa333c158e69f','Build 271 final Development tree mismatch')
+    q((a.get('production_checkpoint') or {}).get('main_sha')=='fce84316c0b5b22781b2ee30d35b205d96b39c09','Build 271 final Production SHA mismatch')
+    q((a.get('production_checkpoint') or {}).get('tree_sha')=='f0da384a9d0be6f54d5e0b441f7aa333c158e69f','Build 271 final Production tree mismatch')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='fce84316c0b5b22781b2ee30d35b205d96b39c09','Build 272+ current Production baseline must be exact Build 271')
+    q(int(p.get('next_build') or 0)>=273,'Build 272+ must advance beyond Build 272 successor')
 
 s=a.get('safety') or {}
 q(s.get('operator_triggered_caip_workspace_mapping') is True,'Build 271 must identify the explicit operator mapping')
