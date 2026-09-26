@@ -1,27 +1,27 @@
-// Release 467 Build 270 — Strong-Fingerprint Backfill & Recovery Reconciliation over exact Build 269 Production source.
+// Release 467 Build 271 — Standalone / Social CAIP Project Workflow over exact Build 270 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=270;
-const TITLE='Strong-Fingerprint Backfill & Recovery Reconciliation';
-const AUTHORITY='release467-build270-strong-fingerprint-backfill-recovery-reconciliation';
-const EVIDENCE_ID='r467-b269-green-36180407045-36180648384';
+const BUILD=271;
+const TITLE='Standalone / Social CAIP Project Workflow';
+const AUTHORITY='release467-build271-standalone-social-caip-project-workflow';
+const EVIDENCE_ID='r467-b270-green-36206690243-36206849648';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:269,title:'Private Raw Media Intake Integrity',state:'DEVELOPMENT_GREEN',
-  dev_sha:'059aa3cf7854d075529ce976bb65ae2c1c6254fc',tree_sha:'65b54187a47834a7a36a3f57b16f985eb5d4cb05',
-  system_gate_run:36180407045,current_application_quality_run:36180407199,it_admin_runtime_proof_run:36180406666,
-  branch_hygiene_run:36180407194,dedicated_gate_run:36180406990,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
+  release:467,build:270,title:'Strong-Fingerprint Backfill & Recovery Reconciliation',state:'DEVELOPMENT_GREEN',
+  dev_sha:'b51e15f9c150e1d740fe1383d8df98a962990b21',tree_sha:'9dc39ed9dde4946ad54e51b58c7b66ca38b75634',
+  system_gate_run:36206690243,current_application_quality_run:36206690338,it_admin_runtime_proof_run:36206690036,
+  branch_hygiene_run:36206690296,dedicated_gate_run:36206690389,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:269,title:'Private Raw Media Intake Integrity',state:'PRODUCTION_GREEN',
-  main_sha:'61cc1346f838a5dd742b0dbaeff345d95447ba6e',tree_sha:'65b54187a47834a7a36a3f57b16f985eb5d4cb05',
-  production_pages_deploy_run:36180648384,production_live_resource_integrity_run:36180717931,
-  products_browser_proof_run:36180718046,products_route_proof_run:36180717954,build_specific_proof_run:36180648437,remote_d1_queries:0
+  release:467,build:270,title:'Strong-Fingerprint Backfill & Recovery Reconciliation',state:'PRODUCTION_GREEN',
+  main_sha:'9c3ed0664d71ab66a3087047b35989c5ed5b6904',tree_sha:'9dc39ed9dde4946ad54e51b58c7b66ca38b75634',
+  production_pages_deploy_run:36206849648,production_live_resource_integrity_run:36206908948,
+  products_browser_proof_run:36206908972,products_route_proof_run:36206908996,build_specific_proof_run:36206849597,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 270 Strong-Fingerprint Backfill Recovery Reconciliation'
+  'Release 467 Build 271 Standalone Social CAIP Project Workflow'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:269,title:'Private Raw Media Intake Integrity',
+    release:467,build:270,title:'Strong-Fingerprint Backfill & Recovery Reconciliation',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:36180407045,current_application_quality_run:36180407199,
-      it_admin_runtime_proof_run:36180406666,branch_hygiene_run:36180407194
+      system_gate_run:36206690243,current_application_quality_run:36206690338,
+      it_admin_runtime_proof_run:36206690036,branch_hygiene_run:36206690296
     },
     production_proofs:{
-      production_pages_deploy_run:36180648384,production_live_resource_integrity_run:36180717931,
-      products_browser_proof_run:36180718046,products_route_proof_run:36180717954
+      production_pages_deploy_run:36206849648,production_live_resource_integrity_run:36206908948,
+      products_browser_proof_run:36206908972,products_route_proof_run:36206908996
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 271 follows after Build 270 strong-fingerprint recovery reconciliation.'
+    next_build:'Build 272 follows after Build 271 standalone/social CAIP workflow.'
   };
 }
 async function closurePack(){
@@ -87,7 +87,7 @@ async function closurePack(){
   }},canonical};
 }
 function markdownReport(pack){
-  return `# Devil n Dove Release 467 Build 270 Canonical Restart Evidence Pack
+  return `# Devil n Dove Release 467 Build 271 Canonical Restart Evidence Pack
 
 - Evidence ID: ${pack.evidence_id}
 - Production state: ${pack.production_state}
@@ -102,7 +102,7 @@ function markdownReport(pack){
 - Production Live Resource Integrity: ${pack.production_proofs.production_live_resource_integrity_run}
 - Product Browser Proof: ${pack.production_proofs.products_browser_proof_run}
 - Product Route Proof: ${pack.production_proofs.products_route_proof_run}
-- Current Production baseline: Build 263 Release Efficiency & Read-Budget Outcome Verification
+- Current Production baseline: Build 270 Strong-Fingerprint Backfill & Recovery Reconciliation
 - SHA-256: ${pack.integrity.digest_sha256}
 `;
 }
@@ -121,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:270,title:TITLE,authority:'release467-build270-strong-fingerprint-backfill-recovery-reconciliation.json'},
+        current_closure_candidate:{release:467,build:271,title:TITLE,authority:'release467-build271-standalone-social-caip-project-workflow.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -148,17 +148,17 @@ export async function onRequestGet(context){
     subsystems:base?.subsystems||{},self_diagnostics:diagnostic?.diagnostics||{},
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
-      'Build 269 is the exact last fully verified Development checkpoint.',
-      'Build 269 Production is GREEN on the identical tree 65b54187a47834a7a36a3f57b16f985eb5d4cb05.',
-      'Build 269 Development proofs: System 36180407045, Quality 36180407199, I.T. 36180406666, Hygiene 36180407194, Build 269 36180406990.',
-      'Build 269 Production proofs: Pages 36180648384, Live Resources 36180717931, Product Browser 36180718046, Product Route 36180717954, Build 269 36180648437.',
+      'Build 270 is the exact last fully verified Development checkpoint.',
+      'Build 270 Production is GREEN on the identical tree 9dc39ed9dde4946ad54e51b58c7b66ca38b75634.',
+      'Build 270 Development proofs: System 36206690243, Quality 36206690338, I.T. 36206690036, Hygiene 36206690296, Build 270 36206690389.',
+      'Build 270 Production proofs: Pages 36206849648, Live Resources 36206908948, Product Browser 36206908972, Product Route 36206908996, Build 270 36206849597.',
       'Build 260 removed only redundant pull-request triggers from 38 historical proof workflows while preserving System Gate coverage and push/manual evidence.',
       'Build 261 removed 39 redundant historical Production main-push subscriptions while preserving Development push/manual evidence and all four canonical Production proofs.',
       'Build 262 batches six latest-action point lookups into one read-only D1 statement and closed exact Development at 8 statements under unchanged provider ceilings.',
       'Build 263 measures 584 closure-scoped GREEN runs across 12 accepted heads, a 21.69% normalized runs-per-head reduction while all required named proofs and exact-tree release pairs remain valid.',
       'Build 265 closed the CAIP private-media prerequisite inventory on exact Development/Production trees.',
-      'Build 270 reconciles only bounded existing private-media records with strong fingerprints, exact-size verification and fail-closed recovery lineage review.',
-      'Build 270 is the current bounded Strong-Fingerprint Backfill & Recovery Reconciliation release; Build 271 is next.'
+      'Build 271 preserves one Creative Process identity for standalone/social CAIP work and does not create a Product or Content Studio package.',
+      'Build 271 is the current bounded Standalone / Social CAIP Project Workflow release; Build 272 is next.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,
