@@ -1,7 +1,6 @@
-// Devil n Dove Build 310 — Creative Process posting-consumer cutover.
-// The retained Build 308 Creative implementation remains the compatibility authority for
-// non-posting actions. All three current reviewed-material posting workflows are intercepted
-// here and delegated to the Inventory-owned Build 309 posting service.
+// Release 467 Build 274 — Creative Process Planned-vs-Actual Inventory Lifecycle.
+// Planned material fields remain editable estimates and never move stock. Reviewed actual use,
+// corrections, and posted-entry voids delegate to Inventory-owned posting/reversal contracts.
 
 import {
   auditAdminAction,
@@ -31,6 +30,7 @@ const INTERCEPTED_POST_ACTIONS = new Set([
   'post_material_inventory',
   'record_inventory_use',
   'correct_inventory_use',
+  'void_event',
 ]);
 
 function json(data, status = 200) {
@@ -60,6 +60,36 @@ async function parseResponse(response) {
   }
 }
 
+function lifecycleSummary(data = {}) {
+  const detail=data?.detail||null;
+  const events=Array.isArray(detail?.events)?detail.events:[];
+  const reviews=Array.isArray(detail?.material_reviews)?detail.material_reviews:[];
+  const voided=Array.isArray(detail?.voided_events)?detail.voided_events:[];
+  const reviewByEvent=new Map(reviews.map((row)=>[Number(row.creative_work_event_id||0),row]));
+  let planned=0,reviewedActual=0,postedActual=0;
+  for(const event of events){
+    if(!String(event?.material_name||'').trim()) continue;
+    const review=reviewByEvent.get(Number(event.creative_work_event_id||0));
+    const activePosted=review&&Number(review.inventory_consumed||0)===1&&String(review.posting_status||'').toLowerCase()!=='reversed';
+    if(activePosted) postedActual+=1;
+    else if(review&&String(review.review_status||'').toLowerCase()==='approved') reviewedActual+=1;
+    else planned+=1;
+  }
+  return {
+    classification:'PLANNED_ESTIMATES_SEPARATE_FROM_REVIEWED_AND_POSTED_ACTUALS',
+    project_type:detail?.project?.project_type||null,
+    planned_estimate_count:planned,
+    reviewed_actual_unposted_count:reviewedActual,
+    posted_actual_count:postedActual,
+    voided_or_corrected_history_count:voided.length,
+    planned_estimates_move_inventory:false,
+    actual_inventory_requires_explicit_post:true,
+    corrections_use_compensating_reversal:true,
+    posted_voids_use_compensating_reversal:true,
+    inventory_authority:'inventory',
+  };
+}
+
 function withConsumerMetadata(data = {}) {
   return {
     ...data,
@@ -68,6 +98,7 @@ function withConsumerMetadata(data = {}) {
     inventory_reversal_authority: 'inventory-reverse',
     inventory_post_consumer_build: POST_CONSUMER_BUILD,
     inventory_post_authority: 'inventory-post',
+    planned_actual_inventory_lifecycle: lifecycleSummary(data),
   };
 }
 
@@ -294,6 +325,54 @@ async function handleCorrectInventoryUse(context, granted, body, projectId) {
   };
 }
 
+async function handleVoidEvent(context, granted, body, projectId) {
+  const eventId=num(body.creative_work_event_id);
+  const reason=text(body.reason,500);
+  if(!projectId||!eventId||reason.length<8){
+    throw new Error('Choose an active timeline entry and provide a clear reason of at least 8 characters.');
+  }
+  const event=await granted.db.prepare(`
+    SELECT * FROM creative_work_events
+    WHERE creative_work_project_id=?1 AND creative_work_event_id=?2
+      AND COALESCE(entry_status,'active')='active'
+  `).bind(projectId,eventId).first();
+  if(!event) throw new Error('The active timeline entry was not found.');
+
+  const post=await granted.db.prepare(`
+    SELECT * FROM creative_project_inventory_posts
+    WHERE creative_work_project_id=?1 AND creative_work_event_id=?2
+      AND posting_status<>'reversed'
+    ORDER BY creative_project_inventory_post_id DESC LIMIT 1
+  `).bind(projectId,eventId).first();
+
+  let reversal=null;
+  if(post){
+    reversal=await reverseCreativeInventoryThroughContract(granted.db,{
+      projectId,
+      postId:Number(post.creative_project_inventory_post_id),
+      reason:`Voided timeline entry: ${reason}`,
+      userId:granted.adminUser.user_id,
+    });
+  }
+
+  await granted.db.batch([
+    granted.db.prepare(`UPDATE creative_work_events
+      SET entry_status='voided',void_reason=?3,voided_by=?4,voided_at=CURRENT_TIMESTAMP
+      WHERE creative_work_project_id=?1 AND creative_work_event_id=?2`
+    ).bind(projectId,eventId,reason,granted.adminUser.user_id),
+    granted.db.prepare(`UPDATE creative_project_evidence_selections
+      SET selected=0,review_notes=TRIM(COALESCE(review_notes,'') || ?3),reviewed_by=?4,reviewed_at=CURRENT_TIMESTAMP
+      WHERE creative_work_project_id=?1 AND creative_work_event_id=?2`
+    ).bind(projectId,eventId,` | Removed because timeline entry was voided: ${reason}`,granted.adminUser.user_id),
+  ]);
+
+  return {
+    message:reversal&&!reversal.alreadyReversed
+      ? `Timeline entry voided; ${reversal.restored} stock unit(s) restored through the Inventory-owned compensating reversal ledger. Audit history was preserved.`
+      : 'Timeline entry voided without erasing history. No active Inventory posting required reversal.',
+  };
+}
+
 async function finishInterceptedAction(context, granted, action, projectId, message) {
   const current = await snapshot(context, projectId);
   await auditAdminAction(context.env, context.request, granted.adminUser, {
@@ -350,8 +429,10 @@ export async function onRequestPost(context) {
       result = await handlePostMaterialInventory(context, granted, body, projectId);
     } else if (action === 'record_inventory_use') {
       result = await handleRecordInventoryUse(context, granted, body, projectId);
-    } else {
+    } else if (action === 'correct_inventory_use') {
       result = await handleCorrectInventoryUse(context, granted, body, projectId);
+    } else {
+      result = await handleVoidEvent(context, granted, body, projectId);
     }
     return finishInterceptedAction(context, granted, action, projectId, result.message);
   } catch (error) {
@@ -365,6 +446,7 @@ export async function onRequestPost(context) {
         action,
         inventory_post_consumer_build: POST_CONSUMER_BUILD,
         inventory_post_authority: 'inventory-post',
+        inventory_reversal_authority: 'inventory-reverse',
         error: String(error?.stack || error),
       },
     });
