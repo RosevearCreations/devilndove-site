@@ -162,9 +162,12 @@ if cur==269:
     q(p.get('state')=='DEVELOPMENT_GREEN','Build 269 candidate pointer must retain inherited Development GREEN state')
     q((p.get('production_checkpoint') or {}).get('main_sha')=='44da8087958eb0c64df3de892ca8628293a96231','Build 269 candidate must retain exact Build 268 Production baseline')
     q(int(p.get('next_build') or 0)==270 and p.get('next_build_title')=='Strong-Fingerprint Backfill & Recovery Reconciliation','Build 269 successor pointer mismatch')
+elif cur==270:
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='61cc1346f838a5dd742b0dbaeff345d95447ba6e','Build 270 current Production baseline must be exact Build 269')
+    q(int(p.get('next_build') or 0)>=271,'Build 270 must advance beyond Build 270 successor')
 else:
-    q((p.get('production_checkpoint') or {}).get('main_sha')=='61cc1346f838a5dd742b0dbaeff345d95447ba6e','Build 270+ current Production baseline must be exact Build 269')
-    q(int(p.get('next_build') or 0)>=271,'Build 270+ must advance beyond Build 270 successor')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='9c3ed0664d71ab66a3087047b35989c5ed5b6904','Build 271+ current Production baseline must be exact Build 270')
+    q(int(p.get('next_build') or 0)>=272,'Build 271+ must advance beyond Build 271 successor')
 
 s=a.get('safety') or {}
 q(s.get('schema_migration_artifact_added') is True,'Build 269 must record the bounded schema migration artifact')
