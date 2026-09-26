@@ -1,0 +1,145 @@
+{
+  "release": 467,
+  "build": 275,
+  "title": "CAIP Production Acceptance & Outcomes Renewal",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build275-caip-production-acceptance-outcomes-renewal",
+  "predecessor": {
+    "build": 274,
+    "title": "Creative Process Planned-vs-Actual Inventory Lifecycle",
+    "development_sha": "434a267a5598439103f6942d1b7f58a7ce04dba6",
+    "development_tree_sha": "8d69b22f4634b70f3b10f247e42e0ca2165a4ccf",
+    "production_main_sha": "af5e99b3baa1d28f3949e7956905a0325d328d06",
+    "production_tree_sha": "8d69b22f4634b70f3b10f247e42e0ca2165a4ccf",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36211181947,
+      "current_application_quality_run": 36211181834,
+      "it_admin_runtime_proof_run": 36211182652,
+      "branch_hygiene_run": 36211181960,
+      "dedicated_gate_run": 36211182028
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36211313214,
+      "production_live_resource_integrity_run": 36211344703,
+      "products_browser_proof_run": 36211344669,
+      "products_route_proof_run": 36211344770,
+      "build_specific_proof_run": 36211313280
+    }
+  },
+  "review": {
+    "source_builds": [
+      265,
+      266,
+      267,
+      268,
+      269,
+      270,
+      271,
+      272,
+      273,
+      274
+    ],
+    "all_source_builds_production_green": true,
+    "exact_tree_closure_preserved": true,
+    "closed_outcomes": {
+      "private_media_prerequisite_inventory": true,
+      "multipart_static_integrity_fail_closed": true,
+      "duplicate_orphan_classification_preserves_uncertain_binaries": true,
+      "private_media_recovery_hardening": true,
+      "duplicate_safe_raw_media_intake": true,
+      "strong_fingerprint_operator_reconciliation": true,
+      "standalone_social_project_identity": true,
+      "upload_prerequisites_fail_closed": true,
+      "content_studio_existing_identity_bridge": true,
+      "planned_vs_actual_inventory_lifecycle": true
+    },
+    "production_acceptance": {
+      "current_lane_state": "EVIDENCE_DEPENDENT",
+      "historical_development_range_evidence": {
+        "qualifying_review_proxy_audits": 3,
+        "accepted_for_current_release": false
+      },
+      "freshness_rule": "FRESH_CURRENT_RELEASE_AUTHENTICATED_EVIDENCE_REQUIRED",
+      "authenticated_private_review_range_streaming": "REFRESH_REQUIRED",
+      "production_private_bucket_binding_and_non_public_exposure": "DEPLOYED_OPERATOR_EVIDENCE_REQUIRED",
+      "live_interruption_reconnect_resume": "EVIDENCE_REQUIRED",
+      "bucket_presence_alone_is_acceptance": false,
+      "static_repository_review_is_live_acceptance": false,
+      "synthetic_acceptance": false,
+      "production_acceptance_claimed": false
+    }
+  },
+  "decision": {
+    "autonomous_queue_exhausted": false,
+    "action": "CREATE_EVIDENCE_DRIVEN_SUCCESSOR_ROADMAP",
+    "rationale": [
+      "Builds 265-274 close the bounded source/runtime contracts and preserve exact-tree release continuity.",
+      "The current CAIP private-media lane remains EVIDENCE_DEPENDENT and explicitly requires fresh authenticated private review/range-streaming evidence.",
+      "Build 266 retains deployed private-bucket/non-public-exposure and live interruption/resume evidence as unresolved operator/runtime proof rather than synthetic acceptance.",
+      "Historical Development range-streaming audits are useful provenance but do not satisfy the current-release freshness rule by themselves."
+    ],
+    "successor_roadmap": "docs/operations/RELEASE_467_CAIP_PRODUCTION_ACCEPTANCE_AUTONOMOUS_BUILDS_276_284.md",
+    "next_build": 276,
+    "next_build_title": "CAIP Acceptance Evidence Freshness Baseline"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_upload": false,
+    "private_media_delete": false,
+    "uncertain_r2_delete": false,
+    "public_media_copy": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "payment_or_refund": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false,
+    "named_proof_requirement_relaxed": false
+  },
+  "implementation": {
+    "renewal_document": "docs/operations/RELEASE_467_BUILD_275_CAIP_PRODUCTION_ACCEPTANCE_OUTCOMES_RENEWAL.md",
+    "successor_roadmap": "docs/operations/RELEASE_467_CAIP_PRODUCTION_ACCEPTANCE_AUTONOMOUS_BUILDS_276_284.md",
+    "dedicated_gate": "scripts/release467_build275_gate.py",
+    "workflow": ".github/workflows/release467-build275-caip-production-acceptance-outcomes-renewal.yml"
+  },
+  "acceptance": {
+    "next_build": 276,
+    "next_build_title": "CAIP Acceptance Evidence Freshness Baseline",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "434a267a5598439103f6942d1b7f58a7ce04dba6",
+      "tree": "8d69b22f4634b70f3b10f247e42e0ca2165a4ccf",
+      "system_gate_run": 36211181947,
+      "current_application_quality_run": 36211181834,
+      "it_admin_runtime_proof_run": 36211182652,
+      "branch_hygiene_run": 36211181960,
+      "build_specific_proof_run": 36211182028,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+      "quality_run": 36211181834,
+      "it_admin_runtime_run": 36211182652,
+      "repository_hygiene_run": 36211181960
+    },
+    "production": {
+      "main_sha": "af5e99b3baa1d28f3949e7956905a0325d328d06",
+      "tree_sha": "8d69b22f4634b70f3b10f247e42e0ca2165a4ccf",
+      "production_pages_deploy_run": 36211313214,
+      "production_live_resource_integrity_run": 36211344703,
+      "products_browser_proof_run": 36211344669,
+      "products_route_proof_run": 36211344770,
+      "build_specific_proof_run": 36211313280,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
+  }
+}

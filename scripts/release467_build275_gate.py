@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+from pathlib import Path
+import json,sys
+R=Path(__file__).resolve().parents[1];F=[]
+def t(p): return (R/p).read_text(encoding='utf-8',errors='replace')
+def j(p): return json.loads(t(p))
+def q(ok,msg):
+    if not ok:F.append(msg)
+a=j('release467-build275-caip-production-acceptance-outcomes-renewal.json');prev=j('release467-build274-creative-process-planned-vs-actual-inventory-lifecycle.json');p=j('current-development-authority.json')
+oldroad=t('docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md');road=t('docs/operations/RELEASE_467_CAIP_PRODUCTION_ACCEPTANCE_AUTONOMOUS_BUILDS_276_284.md')
+doc=t('docs/operations/RELEASE_467_BUILD_275_CAIP_PRODUCTION_ACCEPTANCE_OUTCOMES_RENEWAL.md');external=t('functions/api/admin/current-external-acceptance-control-center.js')
+live=t('LIVE_TESTING_GUIDE.md');historical=t('docs/operations/RELEASE_466_FOUR_BUILD_ROADMAP.md')
+wf=t('.github/workflows/release467-build275-caip-production-acceptance-outcomes-renewal.yml');sysgate=t('scripts/current_system_gate_provenance_gate.py')
+q(a.get('build')==275 and a.get('state') in ('DEVELOPMENT_CANDIDATE','DEVELOPMENT_GREEN','PRODUCTION_GREEN'),'Build 275 identity/state mismatch')
+pred=a.get('predecessor') or {}
+q(pred.get('development_sha')=='434a267a5598439103f6942d1b7f58a7ce04dba6' and pred.get('development_tree_sha')=='8d69b22f4634b70f3b10f247e42e0ca2165a4ccf','Build 274 Development predecessor mismatch')
+q(pred.get('production_main_sha')=='af5e99b3baa1d28f3949e7956905a0325d328d06' and pred.get('production_tree_sha')=='8d69b22f4634b70f3b10f247e42e0ca2165a4ccf' and pred.get('same_tree') is True,'Build 274 Production predecessor mismatch')
+q((pred.get('development_proofs') or {}).get('dedicated_gate_run')==36211182028,'Build 274 Development proof mismatch')
+q((pred.get('production_proofs') or {}).get('build_specific_proof_run')==36211313280,'Build 274 Production proof mismatch')
+q(prev.get('state')=='PRODUCTION_GREEN','Build 274 successor-ingested authority must be Production GREEN')
+q((prev.get('final_closure') or {}).get('dev_sha')=='434a267a5598439103f6942d1b7f58a7ce04dba6' and (prev.get('final_closure') or {}).get('tree_sha')=='8d69b22f4634b70f3b10f247e42e0ca2165a4ccf','Build 274 final Development closure missing')
+q((prev.get('production_checkpoint') or {}).get('main_sha')=='af5e99b3baa1d28f3949e7956905a0325d328d06' and (prev.get('production_checkpoint') or {}).get('tree_sha')=='8d69b22f4634b70f3b10f247e42e0ca2165a4ccf','Build 274 Production checkpoint missing')
+r=a.get('review') or {};acc=r.get('production_acceptance') or {}
+q(r.get('source_builds')==list(range(265,275)) and r.get('all_source_builds_production_green') is True and r.get('exact_tree_closure_preserved') is True,'Build 275 source closure review mismatch')
+q(acc.get('current_lane_state')=='EVIDENCE_DEPENDENT','CAIP lane must remain EVIDENCE_DEPENDENT')
+q((acc.get('historical_development_range_evidence') or {}).get('qualifying_review_proxy_audits')==3 and (acc.get('historical_development_range_evidence') or {}).get('accepted_for_current_release') is False,'Historical range provenance mismatch')
+q(acc.get('authenticated_private_review_range_streaming')=='REFRESH_REQUIRED','Fresh range evidence must remain required')
+q(acc.get('production_private_bucket_binding_and_non_public_exposure')=='DEPLOYED_OPERATOR_EVIDENCE_REQUIRED','Private bucket deployed proof missing')
+q(acc.get('live_interruption_reconnect_resume')=='EVIDENCE_REQUIRED','Interruption/resume proof requirement missing')
+q(acc.get('synthetic_acceptance') is False and acc.get('production_acceptance_claimed') is False,'Synthetic CAIP acceptance forbidden')
+d=a.get('decision') or {}
+q(d.get('autonomous_queue_exhausted') is False and d.get('action')=='CREATE_EVIDENCE_DRIVEN_SUCCESSOR_ROADMAP','Build 275 renewal decision mismatch')
+q(d.get('next_build')==276 and d.get('next_build_title')=='CAIP Acceptance Evidence Freshness Baseline','Build 276 successor missing')
+for n in range(276,285): q(f'Build {n} —' in road,f'Successor roadmap missing Build {n}')
+for token in ('EVIDENCE_DEPENDENT','3 qualifying','fresh authenticated private review/range-streaming evidence','CAIP_PRIVATE_MEDIA_BUCKET','interruption/reconnect/reselection/resume','Build 276'): q(token in doc,f'Build 275 document missing {token}')
+q("acceptance_state:accepted?'ACCEPTED':'EVIDENCE_DEPENDENT'" in external and 'Capture fresh authenticated private review/range-streaming evidence.' in external,'Current CAIP acceptance contract missing')
+q('Acceptance requires real authenticated Development evidence' in live and 'HTTP `206`' in live,'Live CAIP range acceptance contract missing')
+q('3 qualifying' in historical and 'review_proxy_served' in historical,'Historical CAIP range provenance missing')
+q('development_sha: 434a267a5598439103f6942d1b7f58a7ce04dba6' in wf and 'production_sha: af5e99b3baa1d28f3949e7956905a0325d328d06' in wf,'Workflow predecessor drift')
+q("run_current_contract('scripts/release467_build275_gate.py','Release 467 Build 275')" in sysgate,'System Gate missing Build 275')
+cur=int(p.get('build') or 0);q(p.get('release')==467 and cur>=275,'Current authority must retain Build 275 or successor')
+if cur==275:
+    q(p.get('title')=='CAIP Production Acceptance & Outcomes Renewal' and p.get('state')=='DEVELOPMENT_GREEN','Current Build 275 pointer mismatch')
+    q(p.get('accepted_dev_sha')=='434a267a5598439103f6942d1b7f58a7ce04dba6' and p.get('accepted_dev_tree_sha')=='8d69b22f4634b70f3b10f247e42e0ca2165a4ccf','Current Build 275 accepted predecessor mismatch')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='af5e99b3baa1d28f3949e7956905a0325d328d06','Current Build 275 Production predecessor mismatch')
+    q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_PRODUCTION_ACCEPTANCE_AUTONOMOUS_BUILDS_276_284.md' and int(p.get('next_build') or 0)==276,'Current Build 275 roadmap pointer mismatch')
+for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 275 safety drift: {k}')
+print('RELEASE 467 BUILD 275 CAIP PRODUCTION ACCEPTANCE OUTCOMES RENEWAL')
+if F:
+    print('FAIL');[print('-',x) for x in F];sys.exit(1)
+print('PASS')
+print('Builds 265-274: Production GREEN / exact-tree continuity retained')
+print('CAIP private-media: EVIDENCE_DEPENDENT / fresh runtime evidence remains required')
+print('Next: Build 276 — CAIP Acceptance Evidence Freshness Baseline')

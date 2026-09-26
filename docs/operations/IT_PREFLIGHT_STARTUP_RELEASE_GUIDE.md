@@ -12,28 +12,26 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 274 candidate
+## Current Release 467 restart authority — Build 275 candidate
 
-Build 273 **Content Studio Standalone-Project Bridge** is the exact fully verified Development and Production predecessor.
+Build 274 **Creative Process Planned-vs-Actual Inventory Lifecycle** is the exact fully verified Development and Production predecessor.
 
-- Development SHA: `4d415840158ee83d60eb19346520446cd158e657`
-- exact Development/Production tree: `41db192daa04f81ca0bb2ec59ac290a7d4fc8bfb`
-- Development proofs: System `36210339968`, Quality `36210340842`, I.T. `36210339975`, Hygiene `36210339599`, Build 273 `36210339832`
-- Production main SHA: `3c593eee38c7a05d2a5ad4df4a6b274e2275f492`
-- Production proofs: Pages `36210476372`, Live Resource Integrity `36210520305`, Product Browser `36210520286`, Product Route `36210520259`, Build 273 `36210476306`
+- Development SHA: `434a267a5598439103f6942d1b7f58a7ce04dba6`
+- exact Development/Production tree: `8d69b22f4634b70f3b10f247e42e0ca2165a4ccf`
+- Development proofs: System `36211181947`, Quality `36211181834`, I.T. `36211182652`, Hygiene `36211181960`, Build 274 `36211182028`
+- Production main SHA: `af5e99b3baa1d28f3949e7956905a0325d328d06`
+- Production proofs: Pages `36211313214`, Live Resource Integrity `36211344703`, Product Browser `36211344669`, Product Route `36211344770`, Build 274 `36211313280`
 - canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 274 **Creative Process Planned-vs-Actual Inventory Lifecycle** is the active bounded candidate.
+Build 275 **CAIP Production Acceptance & Outcomes Renewal** is the active bounded candidate.
 
-Planned material fields remain estimates and never move stock. Reviewed actuals remain unposted until an explicit Inventory post. Posted actuals cannot be directly rewritten; correction or void preserves history and uses the Inventory-owned compensating reversal authority before any replacement posting.
+Builds 265–274 are exact-tree Production GREEN. Current CAIP private-media acceptance remains `EVIDENCE_DEPENDENT`: fresh authenticated private review/range-streaming evidence, deployed private-bucket/non-public exposure evidence and live interruption/resume evidence must not be fabricated from static source proof or historical audits.
 
-The lifecycle applies to maker and content-only projects without fabricating a Product or alternate Inventory ledger.
+Build 275 is governance/evidence renewal only. It adds no migration, request-time schema repair, private-media upload/delete, Inventory/Finance movement, payment/refund, public promotion or provider execution.
 
-Build 274 adds no migration, request-time schema repair, automatic Inventory movement, Finance posting, R2 deletion, public promotion or provider execution.
+The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 275, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
 
-The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 274, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
-
-The future queue remains open. Next: **Build 275 — CAIP Production Acceptance & Outcomes Renewal**.
+The future queue remains open. Next: **Build 276 — CAIP Acceptance Evidence Freshness Baseline**.
 ## Retained historical provenance — Build 171
 
 Build 171 **Release & Restart Authority Convergence** remains historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It does not override current Build 227 truth.
