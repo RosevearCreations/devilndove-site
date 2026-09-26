@@ -737,12 +737,12 @@ export async function listContentStudioProjects(db) {
   const creativeProjects = rows(await db.prepare(`
     SELECT cwp.creative_work_project_id,cwp.project_key,cwp.project_title,cwp.project_type,cwp.project_status,cwp.updated_at,
       cp.content_project_id,cp.review_status AS content_review_status,cp.public_release_status,
-      caip.creative_project_id AS caip_creative_project_id,
-      (SELECT COUNT(*) FROM creative_assets a WHERE a.creative_project_id=caip.creative_project_id AND a.asset_status<>'archived') AS caip_asset_count,
+      (SELECT MIN(caip.creative_project_id) FROM creative_projects caip WHERE caip.source_type='creative_work_project' AND caip.source_id=CAST(cwp.creative_work_project_id AS TEXT) AND caip.project_status<>'archived') AS caip_creative_project_id,
+      (SELECT COUNT(*) FROM creative_projects caip WHERE caip.source_type='creative_work_project' AND caip.source_id=CAST(cwp.creative_work_project_id AS TEXT) AND caip.project_status<>'archived') AS caip_workspace_count,
+      (SELECT COUNT(*) FROM creative_assets a WHERE a.creative_project_id=(SELECT MIN(caip.creative_project_id) FROM creative_projects caip WHERE caip.source_type='creative_work_project' AND caip.source_id=CAST(cwp.creative_work_project_id AS TEXT) AND caip.project_status<>'archived') AND a.asset_status<>'archived') AS caip_asset_count,
       (SELECT COUNT(*) FROM creative_project_evidence_selections es WHERE es.creative_work_project_id=cwp.creative_work_project_id AND es.selected=1) AS selected_evidence_count
     FROM creative_work_projects cwp
     LEFT JOIN content_projects cp ON cp.source_type='creative_project' AND cp.source_id=CAST(cwp.creative_work_project_id AS TEXT)
-    LEFT JOIN creative_projects caip ON caip.source_type='creative_work_project' AND caip.source_id=CAST(cwp.creative_work_project_id AS TEXT)
     WHERE cwp.project_status<>'archived'
     ORDER BY cwp.updated_at DESC,cwp.creative_work_project_id DESC
     LIMIT 120
