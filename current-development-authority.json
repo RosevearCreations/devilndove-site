@@ -665,7 +665,7 @@
     "existing_private_asset_only": true,
     "synthetic_fixture": false,
     "production_media_copy": false,
-    "session_policy": "EXISTING_ADMIN_PREFERRED_ELSE_BOUNDED_EPHEMERAL_REMOVED",
+    "session_policy": "CONFIGURED_ADMIN_PREFERRED_ELSE_ONE_BOUNDED_EPHEMERAL_REMOVED",
     "range_request": "bytes=0-0",
     "expected_status": 206,
     "required_audit": "review_proxy_served:ranged_streaming+no_copy+no_cache",

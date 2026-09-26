@@ -143,6 +143,7 @@ jobs:
             fi
             local status
             status="$(curl "${args[@]}" "${DND_DEV_BASE_URL}/api/auth/me" || true)"
+            echo "Build 278 admin-session validation HTTP ${status}" >&2
             [ "$status" = 200 ] || return 1
             python - <<'PY'
           import json
@@ -154,32 +155,6 @@ jobs:
           PY
           }
 
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "SELECT s.session_token AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(s.session_token,''))>0 ORDER BY s.expires_at DESC LIMIT 8;"             > /tmp/build278-sessions.json
-          python - <<'PY'
-          import json
-          data=json.load(open('/tmp/build278-sessions.json'));tokens=[]
-          def walk(v):
-              if isinstance(v,dict):
-                  token=str(v.get('runtime_token') or '').strip()
-                  if token and token not in tokens: tokens.append(token)
-                  for x in v.values(): walk(x)
-              elif isinstance(v,list):
-                  for x in v: walk(x)
-          walk(data);open('/tmp/build278-session-candidates','w').write('\n'.join(tokens))
-          PY
-          while IFS= read -r TOKEN; do
-            [ -n "$TOKEN" ] || continue
-            echo "::add-mask::${TOKEN}"
-            COOKIE="dd_auth_token=${TOKEN}"
-            if validate_cookie "$COOKIE"; then
-              echo "DND_DEV_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
-              rm -f /tmp/build278-auth-me.json /tmp/build278-sessions.json /tmp/build278-session-candidates
-              unset TOKEN COOKIE
-              echo 'Existing active Development administrator session accepted.'
-              exit 0
-            fi
-          done < /tmp/build278-session-candidates
-
           if [ -n "${DND_CONFIGURED_SESSION_COOKIE}" ]; then
             COOKIE="${DND_CONFIGURED_SESSION_COOKIE#Cookie: }"
             if [[ "$COOKIE" != *=* ]]; then COOKIE="dd_auth_token=${COOKIE}"; fi
@@ -188,11 +163,12 @@ jobs:
             echo "::add-mask::${TOKEN}"
             if validate_cookie "$COOKIE"; then
               echo "DND_DEV_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
-              rm -f /tmp/build278-auth-me.json /tmp/build278-sessions.json /tmp/build278-session-candidates
+              rm -f /tmp/build278-auth-me.json
               unset TOKEN COOKIE
               echo 'Configured Development administrator session accepted.'
               exit 0
             fi
+            unset TOKEN COOKIE
           fi
 
           TOKEN="b278-$(python - <<'PY'
@@ -201,25 +177,41 @@ jobs:
           PY
           )"
           echo "::add-mask::${TOKEN}"
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "INSERT INTO sessions (user_id, session_token, token, expires_at, created_at) SELECT u.user_id, '${TOKEN}', '${TOKEN}', datetime('now','+15 minutes'), datetime('now') FROM users u WHERE u.is_active=1 AND lower(trim(u.role))='admin' ORDER BY u.user_id LIMIT 1; SELECT changes() AS inserted;"             > /tmp/build278-ephemeral-session.json
+          # Persist the masked cleanup handle before touching D1 so an interrupted or
+          # rejected validation can still be cleaned up by the always() step.
+          echo "BUILD278_EPHEMERAL_SESSION_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
+
+          code=1
+          for attempt in 1 2 3; do
+            set +e
+            npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command               "INSERT OR IGNORE INTO sessions (user_id, session_token, token, expires_at, created_at) SELECT u.user_id, '${TOKEN}', '${TOKEN}', datetime('now','+15 minutes'), datetime('now') FROM users u WHERE u.is_active=1 AND lower(trim(u.role))='admin' ORDER BY u.user_id LIMIT 1; SELECT COUNT(*) AS n FROM sessions WHERE session_token='${TOKEN}' AND token='${TOKEN}' AND expires_at>datetime('now');"               > /tmp/build278-ephemeral-session.json 2>/tmp/build278-ephemeral-session.err
+            code=$?
+            set -e
+            [ "$code" = 0 ] && break
+            echo "Development D1 bounded-session setup attempt ${attempt} failed; retrying without changing scope."
+            sleep 2
+          done
+          [ "$code" = 0 ] || { echo 'STOP: bounded Development session D1 setup failed after retries.'; exit 1; }
           python - <<'PY'
           import json
           data=json.load(open('/tmp/build278-ephemeral-session.json'));vals=[]
           def walk(v):
               if isinstance(v,dict):
-                  if 'inserted' in v: vals.append(int(v['inserted']))
+                  if 'n' in v: vals.append(int(v['n']))
                   for x in v.values(): walk(x)
               elif isinstance(v,list):
                   for x in v: walk(x)
           walk(data);assert any(v==1 for v in vals),(vals,data)
           PY
           COOKIE="dd_auth_token=${TOKEN}"
-          if ! validate_cookie "$COOKIE"; then echo 'STOP: bounded Development administrator session was rejected.'; exit 1; fi
-          echo "BUILD278_EPHEMERAL_SESSION_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
+          if ! validate_cookie "$COOKIE"; then
+            echo 'STOP: bounded Development administrator session was created but rejected by /api/auth/me.'
+            exit 1
+          fi
           echo "DND_DEV_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
-          rm -f /tmp/build278-auth-me.json /tmp/build278-sessions.json /tmp/build278-session-candidates /tmp/build278-ephemeral-session.json
+          rm -f /tmp/build278-auth-me.json /tmp/build278-ephemeral-session.json /tmp/build278-ephemeral-session.err
           unset TOKEN COOKIE
-          echo 'Bounded Development-only administrator session created for Build 278.'
+          echo 'Bounded Development-only administrator session authenticated for Build 278.'
 
       - name: Select existing private Development CAIP asset without reading object bytes
         if: ${{ github.ref_name == 'dev' }}
@@ -347,20 +339,30 @@ jobs:
           TOKEN="${BUILD278_EPHEMERAL_SESSION_TOKEN:-}"
           [ -n "$TOKEN" ] || { echo 'No ephemeral Build 278 session to remove.'; exit 0; }
           echo "::add-mask::${TOKEN}"
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "DELETE FROM sessions WHERE session_token='${TOKEN}' AND token='${TOKEN}'; SELECT changes() AS deleted;"             > /tmp/build278-session-cleanup.json
+          code=1
+          for attempt in 1 2 3; do
+            set +e
+            npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command               "DELETE FROM sessions WHERE session_token='${TOKEN}' AND token='${TOKEN}'; SELECT COUNT(*) AS remaining FROM sessions WHERE session_token='${TOKEN}' OR token='${TOKEN}';"               > /tmp/build278-session-cleanup.json 2>/tmp/build278-session-cleanup.err
+            code=$?
+            set -e
+            [ "$code" = 0 ] && break
+            echo "Development D1 bounded-session cleanup attempt ${attempt} failed; retrying."
+            sleep 2
+          done
+          [ "$code" = 0 ] || { echo 'STOP: bounded Development session cleanup failed after retries.'; exit 1; }
           python - <<'PY'
           import json
           data=json.load(open('/tmp/build278-session-cleanup.json'));vals=[]
           def walk(v):
               if isinstance(v,dict):
-                  if 'deleted' in v: vals.append(int(v['deleted']))
+                  if 'remaining' in v: vals.append(int(v['remaining']))
                   for x in v.values(): walk(x)
               elif isinstance(v,list):
                   for x in v: walk(x)
-          walk(data);assert any(v==1 for v in vals),(vals,data)
+          walk(data);assert vals and vals[-1]==0,(vals,data)
           PY
-          rm -f /tmp/build278-session-cleanup.json
-          echo 'Bounded Build 278 Development acceptance session removed.'
+          rm -f /tmp/build278-session-cleanup.json /tmp/build278-session-cleanup.err
+          echo 'Bounded Build 278 Development acceptance session is absent after cleanup.'
 
       - name: Prove verified Development Build 278 before Production source acceptance
         if: ${{ github.ref_name == 'main' }}

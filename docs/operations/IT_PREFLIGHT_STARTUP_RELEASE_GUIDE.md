@@ -27,7 +27,7 @@ Build 278 **Authenticated Private Review & Range-Streaming Acceptance Refresh** 
 
 Its dedicated Development proof waits for the exact System Gate deployment, uses one existing private Development CAIP asset, creates the normal 5-minute/one-access administrator-bound secure review grant, requests `Range: bytes=0-0`, requires HTTP `206` plus all private/no-store/same-origin protections, and confirms a fresh `review_proxy_served` audit with `ranged_streaming=true`, `no_copy=true`, and `no_cache=true`. Raw session/review tokens and R2 object keys are excluded from evidence.
 
-An existing active administrator session is preferred. If none is available, one bounded Development-only session may be created and must be deleted by the same workflow. No Production business-data mutation, Production media copy, R2 mutation, provider execution/publication, Product publication, Inventory/Finance movement or synthetic media is authorized.
+A configured valid administrator session is preferred. If it is unavailable, exactly one idempotent bounded Development-only session may be created; its masked cleanup handle is persisted before validation and the same workflow must prove the session is absent afterward. No Production business-data mutation, Production media copy, R2 mutation, provider execution/publication, Product publication, Inventory/Finance movement or synthetic media is authorized.
 
 A GREEN Build 278 runtime proof moves current-release CAIP acceptance from **1/3 to 2/3**. The overall lane remains `EVIDENCE_DEPENDENT` until the multipart interruption/reconnect/reselection/resume dimension is proven.
 

@@ -61,7 +61,7 @@
       "no_cache": true,
       "raw_token_logged": false
     },
-    "session_policy": "EXISTING_VALID_ADMIN_SESSION_PREFERRED_ELSE_BOUNDED_DEVELOPMENT_ONLY_EPHEMERAL_SESSION_REMOVED_AFTER_TEST",
+    "session_policy": "CONFIGURED_VALID_ADMIN_SESSION_PREFERRED_ELSE_ONE_BOUNDED_DEVELOPMENT_ONLY_EPHEMERAL_SESSION_REMOVED_AFTER_TEST",
     "d1_mutation_scope": [
       "optional ephemeral Development admin session insert/delete",
       "short-lived Development secure review grant",

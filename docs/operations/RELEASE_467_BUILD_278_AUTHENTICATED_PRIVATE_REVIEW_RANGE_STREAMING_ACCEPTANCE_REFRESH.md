@@ -17,7 +17,7 @@ Build 277 **Private Bucket Binding & Non-Public Exposure Evidence** is fully GRE
 The dedicated Build 278 workflow must:
 
 1. wait until System Gate has deployed the exact Build 278 Development SHA;
-2. use an existing active Development administrator session where possible, otherwise create one bounded Development-only session and remove it afterward;
+2. use a configured valid Development administrator session when available; otherwise create exactly one idempotent bounded Development-only session and remove it afterward;
 3. select one **existing** private Development CAIP asset with a bound private R2 object; no fixture/media copy is allowed;
 4. create the normal administrator-bound secure review link with a 5-minute lifetime and one successful access;
 5. request `Range: bytes=0-0` through `/api/admin/creative-asset-review` and discard the one-byte body;
@@ -29,7 +29,7 @@ A GREEN Build 278 proof moves the current-release CAIP acceptance count from **1
 
 ## Safety
 
-Production remains read/deploy-only. Development mutations are bounded to the normal short-lived review grant/audit and, only if necessary, one ephemeral administrator session that is removed in the same workflow. No R2 mutation, private-media upload/delete, provider execution/publication, Product publication, Inventory/Finance movement, payment/refund or synthetic acceptance is authorized.
+Production remains read/deploy-only. Development mutations are bounded to the normal short-lived review grant/audit and, only if necessary, exactly one ephemeral administrator session whose masked cleanup handle is persisted before validation and whose absence is proved during cleanup. No R2 mutation, private-media upload/delete, provider execution/publication, Product publication, Inventory/Finance movement, payment/refund or synthetic acceptance is authorized.
 
 ## Successor
 
