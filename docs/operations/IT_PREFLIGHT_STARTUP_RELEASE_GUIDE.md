@@ -12,28 +12,28 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 273 candidate
+## Current Release 467 restart authority — Build 274 candidate
 
-Build 272 **Upload Prerequisite & Operator Readiness** is the exact fully verified Development and Production predecessor.
+Build 273 **Content Studio Standalone-Project Bridge** is the exact fully verified Development and Production predecessor.
 
-- Development SHA: `7cf4f6858c664a444499245a6b878491dceecb5f`
-- exact Development/Production tree: `875f5cf60dd1118036f6bf5a18c0748e6e9b8d71`
-- Development proofs: System `36209187858`, Quality `36209187822`, I.T. `36209187867`, Hygiene `36209187908`, Build 272 `36209187949`
-- Production main SHA: `e490a5a12f30d9046dda2a6e9ea9ee73ee33b48f`
-- Production proofs: Pages `36209298966`, Live Resource Integrity `36209339128`, Product Browser `36209339067`, Product Route `36209339102`, Build 272 `36209299044`
+- Development SHA: `4d415840158ee83d60eb19346520446cd158e657`
+- exact Development/Production tree: `41db192daa04f81ca0bb2ec59ac290a7d4fc8bfb`
+- Development proofs: System `36210339968`, Quality `36210340842`, I.T. `36210339975`, Hygiene `36210339599`, Build 273 `36210339832`
+- Production main SHA: `3c593eee38c7a05d2a5ad4df4a6b274e2275f492`
+- Production proofs: Pages `36210476372`, Live Resource Integrity `36210520305`, Product Browser `36210520286`, Product Route `36210520259`, Build 273 `36210476306`
 - canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 273 **Content Studio Standalone-Project Bridge** is the active bounded candidate.
+Build 274 **Creative Process Planned-vs-Actual Inventory Lifecycle** is the active bounded candidate.
 
-Content Studio may create or refresh exactly one package for an existing Creative Process project only when exactly one non-archived CAIP workspace matches the same `creative_work_project_id`. Missing, duplicate or conflicting CAIP identity fails closed.
+Planned material fields remain estimates and never move stock. Reviewed actuals remain unposted until an explicit Inventory post. Posted actuals cannot be directly rewritten; correction or void preserves history and uses the Inventory-owned compensating reversal authority before any replacement posting.
 
-A missing Content Studio package is not treated as a missing Creative Process or CAIP project. Build 273 creates only the package row under the existing unique source identity and reuses that same package on refresh.
+The lifecycle applies to maker and content-only projects without fabricating a Product or alternate Inventory ledger.
 
-Build 273 adds no migration, request-time schema repair, Creative Process project creation, CAIP project creation, fake Product, R2 deletion, public promotion, Inventory/Finance movement or provider execution.
+Build 274 adds no migration, request-time schema repair, automatic Inventory movement, Finance posting, R2 deletion, public promotion or provider execution.
 
-The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 273, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
+The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 274, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
 
-The future queue remains open. Next: **Build 274 — Creative Process Planned-vs-Actual Inventory Lifecycle**.
+The future queue remains open. Next: **Build 275 — CAIP Production Acceptance & Outcomes Renewal**.
 ## Retained historical provenance — Build 171
 
 Build 171 **Release & Restart Authority Convergence** remains historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It does not override current Build 227 truth.
