@@ -271,9 +271,12 @@ jobs:
           assert int(f.get('part_size_bytes') or 0)==33554432,f
           assert str(f.get('content_fingerprint') or '')==os.environ['BUILD279_CONTENT_FP'],f
           with open(os.environ['GITHUB_ENV'],'a') as env:env.write('BUILD279_FILE_ID='+str(fid)+'\n')
+          with open('/tmp/build279-file-id','w') as out: out.write(str(fid))
           print('FIRST MULTIPART IDENTITY CREATED: PASS')
           PY
-          rm -f /tmp/build279-create.json /tmp/build279-create-response.json
+          BUILD279_FILE_ID="$(cat /tmp/build279-file-id)"
+          export BUILD279_FILE_ID
+          rm -f /tmp/build279-file-id /tmp/build279-create.json /tmp/build279-create-response.json
           python - <<'PY' > /tmp/build279-init.json
           import json,os
           print(json.dumps({'action':'initiate_file','creative_project_id':int(os.environ['BUILD279_PROJECT_ID']),'file_id':int(os.environ['BUILD279_FILE_ID']),'compact_response':True}))
