@@ -1,0 +1,109 @@
+{
+  "release": 467,
+  "build": 274,
+  "title": "Creative Process Planned-vs-Actual Inventory Lifecycle",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build274-creative-process-planned-vs-actual-inventory-lifecycle",
+  "predecessor": {
+    "build": 273,
+    "title": "Content Studio Standalone-Project Bridge",
+    "development_sha": "4d415840158ee83d60eb19346520446cd158e657",
+    "production_main_sha": "3c593eee38c7a05d2a5ad4df4a6b274e2275f492",
+    "tree_sha": "41db192daa04f81ca0bb2ec59ac290a7d4fc8bfb",
+    "same_tree": true,
+    "state": "PRODUCTION_GREEN",
+    "development_proofs": {
+      "system_gate_run": 36210339968,
+      "current_application_quality_run": 36210340842,
+      "it_admin_runtime_proof_run": 36210339975,
+      "branch_hygiene_run": 36210339599,
+      "dedicated_gate_run": 36210339832
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36210476372,
+      "production_live_resource_integrity_run": 36210520305,
+      "products_browser_proof_run": 36210520286,
+      "products_route_proof_run": 36210520259,
+      "build_specific_proof_run": 36210476306
+    }
+  },
+  "lifecycle": {
+    "classification": "PLANNED_ESTIMATES_SEPARATE_FROM_REVIEWED_AND_POSTED_ACTUALS",
+    "project_scope": [
+      "maker_project",
+      "content_only",
+      "education",
+      "research",
+      "archive"
+    ],
+    "planned_material_fields": [
+      "material_name",
+      "material_quantity",
+      "material_unit",
+      "material_cost_cents"
+    ],
+    "planned_material_estimates_move_inventory": false,
+    "planned_event_editable_until_posted": true,
+    "reviewed_actual_state": "approved_material_review_unposted",
+    "explicit_post_required": true,
+    "posted_actual_state": "inventory_consumed_with_active_post",
+    "posted_actual_direct_edit_allowed": false,
+    "correction_mode": "reverse_original_post_void_original_event_create_corrected_event_post_corrected_actual",
+    "void_mode": "reverse_active_post_then_void_event",
+    "history_preserved": true,
+    "inventory_post_authority": "inventory-post",
+    "inventory_reversal_authority": "inventory-reverse",
+    "inventory_owned_compensating_movement": true,
+    "finance_posting": false
+  },
+  "safety": {
+    "schema_migration": false,
+    "request_time_schema_mutation": false,
+    "automatic_inventory_movement": false,
+    "inventory_direct_stock_rewrite": false,
+    "destructive_usage_history_delete": false,
+    "creative_project_delete": false,
+    "private_media_delete": false,
+    "uncertain_r2_delete": false,
+    "public_media_copy": false,
+    "public_promotion": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "finance_posting": false,
+    "release_process_production_d1_mutation": false,
+    "release_process_r2_mutation": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false
+  },
+  "decision": {
+    "build274_complete_when": "Creative Process clearly distinguishes planned estimates, reviewed-but-unposted actuals and posted actuals; posted usage cannot be directly rewritten; corrections and voids preserve history and use the Inventory-owned compensating reversal authority across maker and content-only projects.",
+    "next_build": 275,
+    "next_build_title": "CAIP Production Acceptance & Outcomes Renewal",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "4d415840158ee83d60eb19346520446cd158e657",
+      "tree": "41db192daa04f81ca0bb2ec59ac290a7d4fc8bfb",
+      "system_gate_run": 36210339968,
+      "quality_run": 36210340842,
+      "it_admin_runtime_run": 36210339975,
+      "repository_hygiene_run": 36210339599,
+      "dedicated_gate_run": 36210339832,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "3c593eee38c7a05d2a5ad4df4a6b274e2275f492",
+      "tree_sha": "41db192daa04f81ca0bb2ec59ac290a7d4fc8bfb",
+      "production_pages_deploy_run": 36210476372,
+      "production_live_resource_integrity_run": 36210520305,
+      "products_browser_proof_run": 36210520286,
+      "products_route_proof_run": 36210520259,
+      "build_specific_proof_run": 36210476306,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}
