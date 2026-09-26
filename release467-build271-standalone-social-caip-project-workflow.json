@@ -2,7 +2,7 @@
   "release": 467,
   "build": 271,
   "title": "Standalone / Social CAIP Project Workflow",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build271-standalone-social-caip-project-workflow",
   "predecessor": {
     "build": 270,
@@ -98,5 +98,29 @@
       "build_specific_proof_run": 36206849597,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "af45e733b673af8e8d7e9acb7e55e35f525bebec",
+    "tree_sha": "f0da384a9d0be6f54d5e0b441f7aa333c158e69f",
+    "proofs": {
+      "system_gate_run": 36208079958,
+      "current_application_quality_run": 36208080087,
+      "it_admin_runtime_proof_run": 36208080075,
+      "branch_hygiene_run": 36208080004
+    },
+    "dedicated_gate_run": 36208079968,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "ingested_by_build": 272
+  },
+  "production_checkpoint": {
+    "main_sha": "fce84316c0b5b22781b2ee30d35b205d96b39c09",
+    "tree_sha": "f0da384a9d0be6f54d5e0b441f7aa333c158e69f",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36208228266,
+    "production_live_resource_integrity_run": 36208267834,
+    "products_browser_proof_run": 36208267848,
+    "products_route_proof_run": 36208267804,
+    "build_specific_proof_run": 36208228296
   }
 }
