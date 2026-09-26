@@ -231,13 +231,26 @@ export async function getCaipMediaIntakeReadiness(db, env = {}) {
     build269_schema_ready:false,
     missing_columns:[],
     private_bucket_ready:privateBucketAvailable(env),
+    selection_ready:false,
     upload_ready:false,
+    transfer_ready:false,
+    operator_state:'CHECKING',
+    blocker_codes:[],
+    prerequisites:[
+      {key:'build241_schema',label:'Build 241 CAIP media tables',ready:false,owner:'database'},
+      {key:'build269_columns',label:'Build 269 duplicate-safe columns',ready:false,owner:'database'},
+      {key:'private_r2_binding',label:'Private R2 binding CAIP_PRIVATE_MEDIA_BUCKET',ready:privateBucketAvailable(env),owner:'configuration'}
+    ],
+    required_base_migration:'database_build241_caip_large_media_intake.sql',
     required_migration:'database_build269_caip_social_project_dedupe_integrity.sql',
-    build:CAIP_MEDIA_INTAKE_BUILD
+    private_bucket_binding:CAIP_PRIVATE_BUCKET_BINDING,
+    build:CAIP_MEDIA_INTAKE_BUILD,
+    readiness_contract_build:272
   };
   try {
     await assertCaipMediaIntakeSchema(db);
     readiness.schema_base_ready=true;
+    readiness.prerequisites[0].ready=true;
     if (caipBuild269SchemaVerified) {
       readiness.missing_columns=[];
       readiness.build269_schema_ready=true;
@@ -247,18 +260,44 @@ export async function getCaipMediaIntakeReadiness(db, env = {}) {
       readiness.build269_schema_ready=readiness.missing_columns.length===0;
       if (readiness.build269_schema_ready) caipBuild269SchemaVerified=true;
     }
+    readiness.prerequisites[1].ready=readiness.build269_schema_ready;
   } catch (error) {
     readiness.schema_error=text(error?.message||error,800)||'CAIP media schema check failed.';
   }
-  readiness.upload_ready=Boolean(readiness.schema_base_ready&&readiness.build269_schema_ready&&readiness.private_bucket_ready);
+  if (!readiness.schema_base_ready) readiness.blocker_codes.push('BUILD241_SCHEMA_MISSING');
+  if (readiness.schema_base_ready && !readiness.build269_schema_ready) readiness.blocker_codes.push('BUILD269_COLUMNS_MISSING');
+  if (!readiness.private_bucket_ready) readiness.blocker_codes.push('PRIVATE_R2_BINDING_MISSING');
+  readiness.selection_ready=Boolean(readiness.schema_base_ready&&readiness.build269_schema_ready&&readiness.private_bucket_ready);
+  readiness.upload_ready=readiness.selection_ready;
+  readiness.transfer_ready=readiness.selection_ready;
+  readiness.operator_state=readiness.selection_ready?'READY':'BLOCKED_PREREQUISITE';
   readiness.message=!readiness.schema_base_ready
-    ? 'CAIP base media tables are missing.'
+    ? 'Build 241 CAIP media tables are not installed. File selection and binary upload are blocked until the database prerequisite is applied.'
     : !readiness.build269_schema_ready
-      ? `Build 269 CAIP intake columns are missing: ${readiness.missing_columns.join(', ')}.`
+      ? `Build 269 CAIP intake columns are missing: ${readiness.missing_columns.join(', ')}. File selection and binary upload are blocked until the migration is applied.`
       : !readiness.private_bucket_ready
-        ? 'Private CAIP R2 binding CAIP_PRIVATE_MEDIA_BUCKET is unavailable.'
+        ? 'Private CAIP R2 binding CAIP_PRIVATE_MEDIA_BUCKET is unavailable. File selection and binary upload are blocked until the Pages binding is configured and deployed.'
         : 'CAIP duplicate-safe private upload prerequisites are ready.';
+  readiness.operator_actions=readiness.selection_ready?[
+    'Choose the existing Creative Project.',
+    'Select or drop private source media.',
+    'Upload through the duplicate-safe CAIP intake path.'
+  ]:[
+    ...(!readiness.schema_base_ready?[`Back up D1 and apply ${readiness.required_base_migration}.`]:[]),
+    ...(readiness.schema_base_ready&&!readiness.build269_schema_ready?[`Back up D1 and apply ${readiness.required_migration}.`]:[]),
+    ...(!readiness.private_bucket_ready?[`Bind a private R2 bucket as ${CAIP_PRIVATE_BUCKET_BINDING} in the Pages environment and redeploy.`]:[]),
+    'Refresh this screen. Missing prerequisites are configuration/readiness states; no transfer has started and no upload failure should be recorded.'
+  ];
   return readiness;
+}
+
+export async function requireCaipMediaUploadReadiness(db, env = {}, stage = 'upload') {
+  const readiness=await getCaipMediaIntakeReadiness(db,env);
+  if (readiness.transfer_ready) return readiness;
+  const error=new Error(`CAIP upload prerequisite blocked before ${text(stage,80)||'upload'}: ${readiness.message}`);
+  error.code='CAIP_UPLOAD_PREREQUISITE_BLOCKED';
+  error.readiness=readiness;
+  throw error;
 }
 
 async function projectRow(db, creativeProjectId) {
