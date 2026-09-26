@@ -1,0 +1,102 @@
+{
+  "release": 467,
+  "build": 271,
+  "title": "Standalone / Social CAIP Project Workflow",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build271-standalone-social-caip-project-workflow",
+  "predecessor": {
+    "build": 270,
+    "title": "Strong-Fingerprint Backfill & Recovery Reconciliation",
+    "development_sha": "b51e15f9c150e1d740fe1383d8df98a962990b21",
+    "production_main_sha": "9c3ed0664d71ab66a3087047b35989c5ed5b6904",
+    "tree_sha": "9dc39ed9dde4946ad54e51b58c7b66ca38b75634",
+    "same_tree": true,
+    "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
+    "state": "PRODUCTION_GREEN",
+    "development_proofs": {
+      "system_gate_run": 36206690243,
+      "current_application_quality_run": 36206690338,
+      "it_admin_runtime_proof_run": 36206690036,
+      "branch_hygiene_run": 36206690296,
+      "dedicated_gate_run": 36206690389
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36206849648,
+      "production_live_resource_integrity_run": 36206908948,
+      "products_browser_proof_run": 36206908972,
+      "products_route_proof_run": 36206908996,
+      "build_specific_proof_run": 36206849597
+    }
+  },
+  "workflow": {
+    "source_authority": "creative_work_projects",
+    "caip_authority": "creative_projects",
+    "identity_key": "source_type=creative_work_project + source_id=creative_work_project_id",
+    "direct_caip_workspace_open": true,
+    "idempotent_open_refresh": true,
+    "product_optional": true,
+    "fake_product_forbidden": true,
+    "content_studio_package_optional": true,
+    "content_studio_package_created_by_build271": false,
+    "existing_content_project_link_preserved": true,
+    "private_media_authority": "caip",
+    "evidence_story_authority": "caip",
+    "reviewed_content_package_authority": "content_studio",
+    "publication_authority": "release_board_and_explicit_provider_approval",
+    "derivative_plan_list_complete": true,
+    "derivative_plan_pending_first": true,
+    "classification": "STANDALONE_SOCIAL_CAIP_IDENTITY_READY_REVIEW_FIRST"
+  },
+  "safety": {
+    "operator_triggered_caip_workspace_mapping": true,
+    "automatic_project_creation": false,
+    "product_creation": false,
+    "fake_product_creation": false,
+    "content_project_creation": false,
+    "schema_migration": false,
+    "request_time_schema_mutation": false,
+    "release_process_production_d1_mutation": false,
+    "release_process_r2_mutation": false,
+    "private_media_delete": false,
+    "uncertain_r2_delete": false,
+    "public_media_copy": false,
+    "public_promotion": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false
+  },
+  "decision": {
+    "build271_complete_when": "A Creative Process project can open or refresh exactly one CAIP workspace without requiring or fabricating a Product or Content Studio package, while private media, evidence/story, derivative planning and publication authorities remain separated.",
+    "next_build": 272,
+    "next_build_title": "Upload Prerequisite & Operator Readiness",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "b51e15f9c150e1d740fe1383d8df98a962990b21",
+      "tree": "9dc39ed9dde4946ad54e51b58c7b66ca38b75634",
+      "system_gate_run": 36206690243,
+      "quality_run": 36206690338,
+      "it_admin_runtime_run": 36206690036,
+      "repository_hygiene_run": 36206690296,
+      "dedicated_gate_run": 36206690389,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "9c3ed0664d71ab66a3087047b35989c5ed5b6904",
+      "tree_sha": "9dc39ed9dde4946ad54e51b58c7b66ca38b75634",
+      "production_pages_deploy_run": 36206849648,
+      "production_live_resource_integrity_run": 36206908948,
+      "products_browser_proof_run": 36206908972,
+      "products_route_proof_run": 36206908996,
+      "build_specific_proof_run": 36206849597,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}
