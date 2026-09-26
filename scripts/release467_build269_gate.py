@@ -152,14 +152,19 @@ q('production_sha: 44da8087958eb0c64df3de892ca8628293a96231' in wf,'Build 269 wo
 q('Release 467 Build 268 CAIP Private-Media Recovery Hardening Closure' in wf,'Build 269 workflow predecessor proof name drift')
 q("run_current_contract('scripts/release467_build269_gate.py','Release 467 Build 269')" in sysgate,'System Gate missing Build 269')
 
-q(p.get('release')==467 and int(p.get('build') or 0)==269,'Current authority must identify Build 269')
-q(p.get('title')=='Private Raw Media Intake Integrity','Current authority Build 269 title mismatch')
-q(p.get('state')=='DEVELOPMENT_GREEN','Build 269 candidate pointer must retain inherited Development GREEN state')
-q((p.get('production_checkpoint') or {}).get('main_sha')=='44da8087958eb0c64df3de892ca8628293a96231','Build 269 candidate must retain exact Build 268 Production baseline')
-q(int(p.get('next_build') or 0)==270 and p.get('next_build_title')=='Strong-Fingerprint Backfill & Recovery Reconciliation','Build 269 successor pointer mismatch')
+cur=int(p.get('build') or 0)
+q(p.get('release')==467 and cur>=269,'Current authority must retain Build 269 or a verified successor')
 proj=p.get('caip_private_raw_media_intake_integrity') or {}
 q(proj.get('classification')=='PRIVATE_RAW_MEDIA_INTAKE_INTEGRITY_SOURCE_READY_DEPLOYED_ACCEPTANCE_EVIDENCE_PENDING','Current authority missing Build 269 integrity projection')
 q(proj.get('standalone_migration_present') is True and proj.get('request_time_ddl') is False,'Current authority migration boundary mismatch')
+if cur==269:
+    q(p.get('title')=='Private Raw Media Intake Integrity','Current authority Build 269 title mismatch')
+    q(p.get('state')=='DEVELOPMENT_GREEN','Build 269 candidate pointer must retain inherited Development GREEN state')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='44da8087958eb0c64df3de892ca8628293a96231','Build 269 candidate must retain exact Build 268 Production baseline')
+    q(int(p.get('next_build') or 0)==270 and p.get('next_build_title')=='Strong-Fingerprint Backfill & Recovery Reconciliation','Build 269 successor pointer mismatch')
+else:
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='61cc1346f838a5dd742b0dbaeff345d95447ba6e','Build 270+ current Production baseline must be exact Build 269')
+    q(int(p.get('next_build') or 0)>=271,'Build 270+ must advance beyond Build 270 successor')
 
 s=a.get('safety') or {}
 q(s.get('schema_migration_artifact_added') is True,'Build 269 must record the bounded schema migration artifact')
