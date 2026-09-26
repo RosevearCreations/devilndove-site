@@ -48,7 +48,8 @@
     "production_live_resource_integrity_run": 36211344703,
     "products_browser_proof_run": 36211344669,
     "products_route_proof_run": 36211344770,
-    "build_specific_proof_run": 36211313280
+    "build_specific_proof_run": 36211313280,
+    "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
     "release467-build275-caip-production-acceptance-outcomes-renewal.json",
