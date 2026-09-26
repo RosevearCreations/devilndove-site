@@ -108,9 +108,12 @@ else:
     elif cur==273:
         q((p.get('production_checkpoint') or {}).get('main_sha')=='e490a5a12f30d9046dda2a6e9ea9ee73ee33b48f','Build 273 current Production baseline must be exact Build 272')
         q(int(p.get('next_build') or 0)>=274,'Build 273 must advance beyond Build 273 successor')
+    elif cur==274:
+        q((p.get('production_checkpoint') or {}).get('main_sha')=='3c593eee38c7a05d2a5ad4df4a6b274e2275f492','Build 274 current Production baseline must be exact Build 273')
+        q(int(p.get('next_build') or 0)>=275,'Build 274 must advance beyond Build 274 successor')
     else:
-        q((p.get('production_checkpoint') or {}).get('main_sha')=='3c593eee38c7a05d2a5ad4df4a6b274e2275f492','Build 274+ current Production baseline must be exact Build 273')
-        q(int(p.get('next_build') or 0)>=275,'Build 274+ must advance beyond Build 274 successor')
+        q((p.get('production_checkpoint') or {}).get('main_sha')=='af5e99b3baa1d28f3949e7956905a0325d328d06','Build 275+ current Production baseline must be exact Build 274')
+        q(int(p.get('next_build') or 0)>=276,'Build 275+ must advance beyond Build 275 successor')
 
 s=a.get('safety') or {}
 q(s.get('operator_triggered_private_metadata_reconciliation') is True,'Build 270 must identify the explicit bounded operator reconciliation')
