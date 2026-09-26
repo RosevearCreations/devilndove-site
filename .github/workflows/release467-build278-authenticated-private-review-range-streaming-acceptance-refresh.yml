@@ -176,6 +176,9 @@ jobs:
           set -e
           if [ "$D1_CODE" -ne 0 ]; then
             echo 'STOP: Build 278 could not inspect the Development sessions schema.'
+            echo 'Sanitized Wrangler stdout:'
+            sed -E 's/(token|authorization|bearer)[=: ]+[^ ]+/\1=[MASKED]/Ig' /tmp/build278-session-columns.json | tail -80
+            echo 'Sanitized Wrangler stderr:'
             sed -E 's/(token|authorization|bearer)[=: ]+[^ ]+/\1=[MASKED]/Ig' /tmp/build278-session-columns.err | tail -40
             exit 1
           fi
