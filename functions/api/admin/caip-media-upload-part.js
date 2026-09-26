@@ -14,8 +14,10 @@ export async function onRequestPut(context){
   const db=getDb(env);if(!db)return json({ok:false,error:'Database binding is not configured.'},500);
   const params=new URL(request.url).searchParams;const fileId=integer(params.get('file_id')||params.get('caip_media_upload_file_id'));const partNumber=integer(params.get('part_number'));
   if(!fileId||!partNumber||!request.body)return json({ok:false,error:'File ID, part number, and request body are required.'},400);
+  let readiness;
+  try { readiness=await requireCaipMediaUploadReadiness(db,env,'multipart_binary_transfer'); }
+  catch(error){ return json({ok:false,error:error?.message||'CAIP upload prerequisites are not ready.',error_code:'CAIP_UPLOAD_PREREQUISITE_BLOCKED',stage:'multipart_binary_transfer',operator_state:'BLOCKED_PREREQUISITE',readiness:error?.readiness||null,transfer_started:false},409); }
   try{
-    await requireCaipMediaUploadReadiness(db,env,'multipart_binary_transfer');
     if(!privateBucketAvailable(env))throw new Error('CAIP_PRIVATE_MEDIA_BUCKET is not configured.');
     const row=await db.prepare(`SELECT f.*,p.caip_media_upload_part_id,p.byte_start,p.byte_end,p.part_size_bytes,p.part_status FROM caip_media_upload_files f JOIN caip_media_upload_parts p ON p.caip_media_upload_file_id=f.caip_media_upload_file_id WHERE f.caip_media_upload_file_id=? AND p.part_number=? LIMIT 1`).bind(fileId,partNumber).first();
     if(!row)throw new Error('Multipart file/part record was not found.');
