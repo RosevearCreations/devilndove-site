@@ -2,7 +2,7 @@
   "release": 467,
   "build": 277,
   "title": "Private Bucket Binding & Non-Public Exposure Evidence",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build277-private-bucket-binding-non-public-exposure-evidence",
   "predecessor": {
     "build": 276,
@@ -124,5 +124,32 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_development": true
     }
+  },
+  "final_closure": {
+    "dev_sha": "8ebe7a3a0c3460d35fbf2e1509bdb728b82db927",
+    "tree_sha": "3451ae4990328425ef6929643f1c04efe03d9f37",
+    "proofs": {
+      "system_gate_run": 36241260475,
+      "current_application_quality_run": 36241260391,
+      "it_admin_runtime_proof_run": 36241260501,
+      "branch_hygiene_run": 36241260461
+    },
+    "dedicated_gate_run": 36241260291,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "ingested_by_build": 278,
+    "recorded_by": "Build 278 startup ingestion; not self-recorded by Build 277"
+  },
+  "production_checkpoint": {
+    "main_sha": "552fe0fb1b192c7fd123c9a7369eea9f352f639e",
+    "tree_sha": "3451ae4990328425ef6929643f1c04efe03d9f37",
+    "production_pages_deploy_run": 36241384277,
+    "production_live_resource_integrity_run": 36241428433,
+    "products_browser_proof_run": 36241428444,
+    "products_route_proof_run": 36241428506,
+    "build_specific_proof_run": 36241384223,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "ingested_by_build": 278,
+    "recorded_by": "Build 278 startup ingestion; not self-recorded by Build 277"
   }
 }

@@ -1,0 +1,145 @@
+{
+  "release": 467,
+  "build": 278,
+  "title": "Authenticated Private Review & Range-Streaming Acceptance Refresh",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build278-authenticated-private-review-range-streaming-acceptance-refresh",
+  "predecessor": {
+    "build": 277,
+    "title": "Private Bucket Binding & Non-Public Exposure Evidence",
+    "development_sha": "8ebe7a3a0c3460d35fbf2e1509bdb728b82db927",
+    "development_tree_sha": "3451ae4990328425ef6929643f1c04efe03d9f37",
+    "production_main_sha": "552fe0fb1b192c7fd123c9a7369eea9f352f639e",
+    "production_tree_sha": "3451ae4990328425ef6929643f1c04efe03d9f37",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36241260475,
+      "current_application_quality_run": 36241260391,
+      "it_admin_runtime_proof_run": 36241260501,
+      "branch_hygiene_run": 36241260461,
+      "dedicated_gate_run": 36241260291
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36241384277,
+      "production_live_resource_integrity_run": 36241428433,
+      "products_browser_proof_run": 36241428444,
+      "products_route_proof_run": 36241428506,
+      "build_specific_proof_run": 36241384223
+    }
+  },
+  "evidence_contract": {
+    "lane": "caip_private_media",
+    "current_lane_state": "EVIDENCE_DEPENDENT",
+    "dimension": "authenticated_private_review_range_streaming",
+    "environment": "DEVELOPMENT_EXACT_SHA_PROMOTED_IDENTICAL_TREE_TO_PRODUCTION",
+    "asset_rule": "EXISTING_PRIVATE_DEVELOPMENT_CAIP_ASSET_ONLY",
+    "production_media_copy": false,
+    "synthetic_fixture": false,
+    "administrator_bound_session_required": true,
+    "secure_review_grant_lifetime_minutes": 5,
+    "secure_review_max_access_count": 1,
+    "range_request": "bytes=0-0",
+    "expected_status": 206,
+    "required_headers": {
+      "content_range": "bytes 0-0/*",
+      "accept_ranges": "bytes",
+      "cache_control_contains": [
+        "private",
+        "no-store"
+      ],
+      "cross_origin_resource_policy": "same-origin",
+      "referrer_policy": "no-referrer",
+      "x_frame_options": "DENY",
+      "x_content_type_options": "nosniff"
+    },
+    "required_audit": {
+      "event_type": "review_proxy_served",
+      "outcome": "served",
+      "ranged_streaming": true,
+      "no_copy": true,
+      "no_cache": true,
+      "raw_token_logged": false
+    },
+    "session_policy": "EXISTING_VALID_ADMIN_SESSION_PREFERRED_ELSE_BOUNDED_DEVELOPMENT_ONLY_EPHEMERAL_SESSION_REMOVED_AFTER_TEST",
+    "d1_mutation_scope": [
+      "optional ephemeral Development admin session insert/delete",
+      "short-lived Development secure review grant",
+      "normal review_proxy_served audit/access_count"
+    ],
+    "r2_mutation": false,
+    "object_copy": false,
+    "public_exposure": false,
+    "provider_execution": false,
+    "production_mutation": false,
+    "fresh_dimensions_before_runtime_green": 1,
+    "fresh_dimensions_after_runtime_green": 2,
+    "required_dimensions_total": 3,
+    "overall_lane_after_runtime_green": "EVIDENCE_DEPENDENT",
+    "remaining_dimensions_after_runtime_green": [
+      "multipart_interruption_reconnect_reselection_resume"
+    ]
+  },
+  "decision": {
+    "build278_complete_when": "A fresh current-release authenticated Development administrator-bound secure-review request serves one byte through a real HTTP Range response with required private headers and records a qualifying review_proxy_served audit; the identical tree is then promoted to Production.",
+    "next_build": 279,
+    "next_build_title": "Multipart Interruption & Resume Acceptance Drill",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "production_d1_business_data_mutation": false,
+    "production_r2_mutation": false,
+    "production_media_copy": false,
+    "private_media_upload": false,
+    "private_media_delete": false,
+    "uncertain_r2_delete": false,
+    "public_media_copy": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "payment_or_refund": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "raw_review_token_persisted": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false,
+    "named_proof_requirement_relaxed": false
+  },
+  "implementation": {
+    "evidence_document": "docs/operations/RELEASE_467_BUILD_278_AUTHENTICATED_PRIVATE_REVIEW_RANGE_STREAMING_ACCEPTANCE_REFRESH.md",
+    "dedicated_gate": "scripts/release467_build278_gate.py",
+    "workflow": ".github/workflows/release467-build278-authenticated-private-review-range-streaming-acceptance-refresh.yml",
+    "roadmap": "docs/operations/RELEASE_467_CAIP_PRODUCTION_ACCEPTANCE_AUTONOMOUS_BUILDS_276_284.md"
+  },
+  "starting_point": {
+    "development": {
+      "sha": "8ebe7a3a0c3460d35fbf2e1509bdb728b82db927",
+      "tree": "3451ae4990328425ef6929643f1c04efe03d9f37",
+      "system_gate_run": 36241260475,
+      "quality_run": 36241260391,
+      "current_application_quality_run": 36241260391,
+      "it_admin_runtime_run": 36241260501,
+      "it_admin_runtime_proof_run": 36241260501,
+      "repository_hygiene_run": 36241260461,
+      "branch_hygiene_run": 36241260461,
+      "dedicated_gate_run": 36241260291,
+      "build_specific_proof_run": 36241260291,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "552fe0fb1b192c7fd123c9a7369eea9f352f639e",
+      "tree_sha": "3451ae4990328425ef6929643f1c04efe03d9f37",
+      "production_pages_deploy_run": 36241384277,
+      "production_live_resource_integrity_run": 36241428433,
+      "products_browser_proof_run": 36241428444,
+      "products_route_proof_run": 36241428506,
+      "build_specific_proof_run": 36241384223,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
+  }
+}

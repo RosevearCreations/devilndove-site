@@ -1,0 +1,412 @@
+name: Release 467 Build 278 Authenticated Private Review Range-Streaming Acceptance Refresh
+on:
+  push:
+    branches: [dev, main]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build278:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    env:
+      DND_DEV_BASE_URL: https://dev.devilndove-site.pages.dev
+      DND_CONFIGURED_SESSION_COOKIE: ${{ secrets.DND_DEV_SESSION_COOKIE }}
+      CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      BUILD278_EPHEMERAL_SESSION_TOKEN: ''
+      BUILD278_PROJECT_ID: ''
+      BUILD278_ASSET_ID: ''
+      BUILD278_GRANT_ID: ''
+      BUILD278_REVIEW_URL: ''
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Recover exact Build 277 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 8ebe7a3a0c3460d35fbf2e1509bdb728b82db927
+          production_sha: 552fe0fb1b192c7fd123c9a7369eea9f352f639e
+          build_proof_name: Release 467 Build 277 Private Bucket Binding Non-Public Exposure Evidence
+          report_path: /tmp/build278-predecessor-exact-sha-proof.json
+
+      - name: Resolve exact Build 277 tree continuity
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 8ebe7a3a0c3460d35fbf2e1509bdb728b82db927
+          git fetch --no-tags --depth=1 origin 552fe0fb1b192c7fd123c9a7369eea9f352f639e
+          DEV_TREE="$(git rev-parse 8ebe7a3a0c3460d35fbf2e1509bdb728b82db927^{tree})"
+          PROD_TREE="$(git rev-parse 552fe0fb1b192c7fd123c9a7369eea9f352f639e^{tree})"
+          test "$DEV_TREE" = "$PROD_TREE"
+          test "$DEV_TREE" = "3451ae4990328425ef6929643f1c04efe03d9f37"
+
+      - name: Build 278 source contract
+        run: python scripts/release467_build278_gate.py
+
+      - name: Wait for exact Development System Gate
+        if: ${{ github.ref_name == 'dev' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 72); do
+            curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json"               "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${GITHUB_SHA}&per_page=100" > /tmp/build278-runs.json
+            state="$(python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build278-runs.json'))
+          rows=[r for r in data.get('workflow_runs',[]) if r.get('name')=='System Gate' and r.get('head_sha')==__import__('os').environ['GITHUB_SHA']]
+          rows.sort(key=lambda r:str(r.get('created_at') or ''),reverse=True)
+          if not rows: print('WAIT')
+          else:
+              r=rows[0]
+              if r.get('status')!='completed': print('WAIT')
+              elif r.get('conclusion')=='success':
+                  print('GREEN:'+str(r.get('id')))
+              else: print('FAIL:'+str(r.get('id'))+':'+str(r.get('conclusion')))
+          PY
+          )"
+            case "$state" in
+              GREEN:*) echo "BUILD278_SYSTEM_GATE_RUN=${state#GREEN:}" >> "$GITHUB_ENV"; echo "Exact Development System Gate: ${state}"; exit 0 ;;
+              FAIL:*) echo "STOP: exact Development System Gate is not GREEN: ${state}"; exit 1 ;;
+              *) sleep 10 ;;
+            esac
+          done
+          echo 'STOP: timed out waiting for exact Development System Gate.'
+          exit 1
+
+      - name: Prove exact Development deployment artifact
+        if: ${{ github.ref_name == 'dev' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json"             "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs/${BUILD278_SYSTEM_GATE_RUN}/artifacts" > /tmp/build278-artifacts.json
+          ARTIFACT_ID="$(python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build278-artifacts.json'))
+          rows=[a for a in data.get('artifacts',[]) if a.get('name')=='current-development-deploy-proof' and not a.get('expired')]
+          print(rows[0]['id'] if rows else '')
+          PY
+          )"
+          test -n "$ARTIFACT_ID"
+          curl -fsSL -L -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json"             "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip" -o /tmp/build278-deploy.zip
+          rm -rf /tmp/build278-deploy && mkdir -p /tmp/build278-deploy
+          unzip -q /tmp/build278-deploy.zip -d /tmp/build278-deploy
+          python - <<'PY'
+          import glob,json,os
+          matches=glob.glob('/tmp/build278-deploy/**/current-development-deploy-proof.json',recursive=True)
+          assert matches,matches
+          d=json.load(open(matches[0]))
+          assert d.get('status')=='PASS',d
+          assert d.get('source_sha')==os.environ['GITHUB_SHA'],(d.get('source_sha'),os.environ['GITHUB_SHA'])
+          assert d.get('environment')=='preview' and d.get('branch')=='dev',d
+          print('EXACT BUILD 278 DEVELOPMENT DEPLOYMENT: PASS')
+          PY
+
+      - name: Validate Cloudflare Access credential pairing
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if { [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -z "${CF_ACCESS_CLIENT_SECRET}" ]; } || { [ -z "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; }; then
+            echo 'STOP: Cloudflare Access service-token credentials are only partially configured.'
+            exit 1
+          fi
+
+      - name: Resolve or provision bounded Development administrator session
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN}" || { echo 'STOP: Development D1 credential is not configured.'; exit 1; }
+
+          validate_cookie() {
+            local cookie="$1"
+            local args=(-sS -o /tmp/build278-auth-me.json -w '%{http_code}' -H "Cookie: ${cookie}" -H 'Cache-Control: no-store')
+            if [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; then
+              args+=(-H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}")
+            fi
+            local status
+            status="$(curl "${args[@]}" "${DND_DEV_BASE_URL}/api/auth/me" || true)"
+            [ "$status" = 200 ] || return 1
+            python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build278-auth-me.json'))
+          user=data.get('user') or {}
+          assert data.get('ok') is True,data
+          assert str(user.get('role') or '').strip().lower()=='admin',user
+          assert int(user.get('is_active') or 0)==1,user
+          PY
+          }
+
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "SELECT s.session_token AS runtime_token FROM sessions s JOIN users u ON u.user_id=s.user_id WHERE u.is_active=1 AND lower(trim(u.role))='admin' AND s.expires_at>datetime('now') AND length(COALESCE(s.session_token,''))>0 ORDER BY s.expires_at DESC LIMIT 8;"             > /tmp/build278-sessions.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build278-sessions.json'));tokens=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  token=str(v.get('runtime_token') or '').strip()
+                  if token and token not in tokens: tokens.append(token)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data);open('/tmp/build278-session-candidates','w').write('\n'.join(tokens))
+          PY
+          while IFS= read -r TOKEN; do
+            [ -n "$TOKEN" ] || continue
+            echo "::add-mask::${TOKEN}"
+            COOKIE="dd_auth_token=${TOKEN}"
+            if validate_cookie "$COOKIE"; then
+              echo "DND_DEV_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
+              rm -f /tmp/build278-auth-me.json /tmp/build278-sessions.json /tmp/build278-session-candidates
+              unset TOKEN COOKIE
+              echo 'Existing active Development administrator session accepted.'
+              exit 0
+            fi
+          done < /tmp/build278-session-candidates
+
+          if [ -n "${DND_CONFIGURED_SESSION_COOKIE}" ]; then
+            COOKIE="${DND_CONFIGURED_SESSION_COOKIE#Cookie: }"
+            if [[ "$COOKIE" != *=* ]]; then COOKIE="dd_auth_token=${COOKIE}"; fi
+            COOKIE="${COOKIE%%;*}"
+            TOKEN="${COOKIE#*=}"
+            echo "::add-mask::${TOKEN}"
+            if validate_cookie "$COOKIE"; then
+              echo "DND_DEV_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
+              rm -f /tmp/build278-auth-me.json /tmp/build278-sessions.json /tmp/build278-session-candidates
+              unset TOKEN COOKIE
+              echo 'Configured Development administrator session accepted.'
+              exit 0
+            fi
+          fi
+
+          TOKEN="b278-$(python - <<'PY'
+          import secrets
+          print(secrets.token_hex(32))
+          PY
+          )"
+          echo "::add-mask::${TOKEN}"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "INSERT INTO sessions (user_id, session_token, token, expires_at, created_at) SELECT u.user_id, '${TOKEN}', '${TOKEN}', datetime('now','+15 minutes'), datetime('now') FROM users u WHERE u.is_active=1 AND lower(trim(u.role))='admin' ORDER BY u.user_id LIMIT 1; SELECT changes() AS inserted;"             > /tmp/build278-ephemeral-session.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build278-ephemeral-session.json'));vals=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'inserted' in v: vals.append(int(v['inserted']))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data);assert any(v==1 for v in vals),(vals,data)
+          PY
+          COOKIE="dd_auth_token=${TOKEN}"
+          if ! validate_cookie "$COOKIE"; then echo 'STOP: bounded Development administrator session was rejected.'; exit 1; fi
+          echo "BUILD278_EPHEMERAL_SESSION_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
+          echo "DND_DEV_SESSION_COOKIE=${COOKIE}" >> "$GITHUB_ENV"
+          rm -f /tmp/build278-auth-me.json /tmp/build278-sessions.json /tmp/build278-session-candidates /tmp/build278-ephemeral-session.json
+          unset TOKEN COOKIE
+          echo 'Bounded Development-only administrator session created for Build 278.'
+
+      - name: Select existing private Development CAIP asset without reading object bytes
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "SELECT ca.creative_project_id,ca.creative_asset_id FROM creative_assets ca INNER JOIN media_assets ma ON ma.media_asset_id=ca.media_asset_id WHERE length(trim(COALESCE(ma.object_key,'')))>0 AND (lower(trim(COALESCE(ma.storage_provider,'')))='r2_private_caip' OR upper(trim(COALESCE(ma.bucket_name,'')))='CAIP_PRIVATE_MEDIA_BUCKET' OR lower(trim(COALESCE(ma.bucket_name,''))) LIKE '%caip%') AND ca.asset_status<>'archived' ORDER BY CASE lower(COALESCE(ca.media_type,'')) WHEN 'video' THEN 1 WHEN 'audio' THEN 2 ELSE 3 END,ca.creative_asset_id LIMIT 1;"             > /tmp/build278-asset.json
+          python - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/build278-asset.json'));rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if int(v.get('creative_project_id') or 0)>0 and int(v.get('creative_asset_id') or 0)>0: rows.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data);assert rows,'No existing private Development CAIP asset is available; Build 278 refuses to fabricate or copy media.'
+          row=rows[0]
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('BUILD278_PROJECT_ID='+str(int(row['creative_project_id']))+'\n')
+              f.write('BUILD278_ASSET_ID='+str(int(row['creative_asset_id']))+'\n')
+          print('EXISTING PRIVATE DEVELOPMENT CAIP ASSET: PASS')
+          PY
+          rm -f /tmp/build278-asset.json
+
+      - name: Create one bounded administrator-bound secure review grant
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(-sS -o /tmp/build278-grant.json -w '%{http_code}' -X POST -H "Cookie: ${DND_DEV_SESSION_COOKIE}" -H 'Content-Type: application/json' -H 'Cache-Control: no-store')
+          if [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; then
+            args+=(-H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}")
+          fi
+          status="$(curl "${args[@]}" --data "{\"action\":\"create_secure_review_link\",\"creative_project_id\":${BUILD278_PROJECT_ID},\"creative_asset_id\":${BUILD278_ASSET_ID},\"expires_in_minutes\":5,\"max_access_count\":1}" "${DND_DEV_BASE_URL}/api/admin/creative-assets")"
+          test "$status" = 200 || { echo "STOP: create secure review grant returned HTTP $status"; exit 1; }
+          python - <<'PY'
+          import json,os,urllib.parse
+          d=json.load(open('/tmp/build278-grant.json'))
+          assert d.get('ok') is True,d
+          result=d.get('result') or {};grant=result.get('grant') or {}
+          gid=int(grant.get('creative_asset_access_grant_id') or 0)
+          url=str(result.get('review_url') or '')
+          assert gid>0 and url.startswith('/api/admin/creative-asset-review?token=caip-rv1.'),(gid,bool(url))
+          token=urllib.parse.parse_qs(urllib.parse.urlparse(url).query).get('token',[''])[0]
+          assert token.startswith('caip-rv1.'),bool(token)
+          print('::add-mask::'+token)
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('BUILD278_GRANT_ID='+str(gid)+'\n')
+              f.write('BUILD278_REVIEW_URL='+url+'\n')
+          print('BOUNDED SECURE REVIEW GRANT: PASS id-only evidence retained; raw token masked')
+          PY
+          rm -f /tmp/build278-grant.json
+
+      - name: Execute real one-byte authenticated Range stream
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(-sS -D /tmp/build278-range-headers.txt -o /dev/null -w '%{http_code}' -H "Cookie: ${DND_DEV_SESSION_COOKIE}" -H 'Range: bytes=0-0' -H 'Cache-Control: no-store')
+          if [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; then
+            args+=(-H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}")
+          fi
+          status="$(curl "${args[@]}" "${DND_DEV_BASE_URL}${BUILD278_REVIEW_URL}")"
+          test "$status" = 206 || { echo "STOP: secure review Range request returned HTTP $status"; exit 1; }
+          python - <<'PY'
+          import re
+          h=open('/tmp/build278-range-headers.txt',encoding='utf-8',errors='replace').read().lower()
+          assert re.search(r'^content-range:\s*bytes\s+0-0/\d+',h,re.M),h
+          assert re.search(r'^accept-ranges:\s*bytes\s*$',h,re.M),h
+          cache=(re.search(r'^cache-control:\s*(.+)$',h,re.M) or [None,''])[1].lower()
+          assert 'private' in cache and 'no-store' in cache,cache
+          assert re.search(r'^cross-origin-resource-policy:\s*same-origin\s*$',h,re.M),h
+          assert re.search(r'^referrer-policy:\s*no-referrer\s*$',h,re.M),h
+          assert re.search(r'^x-frame-options:\s*deny\s*$',h,re.M),h
+          assert re.search(r'^x-content-type-options:\s*nosniff\s*$',h,re.M),h
+          print('AUTHENTICATED PRIVATE RANGE STREAM: PASS HTTP 206 / bytes 0-0 / private controls')
+          PY
+
+      - name: Confirm fresh qualifying review_proxy_served audit
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "SELECT event_type,outcome,CAST(json_extract(details_json,'$.ranged_streaming') AS INTEGER) AS ranged_streaming,CAST(json_extract(details_json,'$.no_copy') AS INTEGER) AS no_copy,CAST(json_extract(details_json,'$.no_cache') AS INTEGER) AS no_cache,CAST(json_extract(details_json,'$.raw_token_not_logged') AS INTEGER) AS raw_token_not_logged FROM creative_asset_access_audit WHERE creative_asset_access_grant_id=${BUILD278_GRANT_ID} AND event_type='review_proxy_served' ORDER BY created_at DESC LIMIT 1; SELECT access_count,max_access_count,bound_user_id,expires_at FROM creative_asset_access_grants WHERE creative_asset_access_grant_id=${BUILD278_GRANT_ID} LIMIT 1;"             > /tmp/build278-audit.json
+          python - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/build278-audit.json'));audits=[];grants=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if v.get('event_type')=='review_proxy_served': audits.append(v)
+                  if 'access_count' in v and 'max_access_count' in v and 'bound_user_id' in v: grants.append(v)
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data);assert audits,audits;assert grants,grants
+          a=audits[0];g=grants[0]
+          assert a.get('outcome')=='served',a
+          assert int(a.get('ranged_streaming') or 0)==1,a
+          assert int(a.get('no_copy') or 0)==1,a
+          assert int(a.get('no_cache') or 0)==1,a
+          assert int(g.get('access_count') or 0)==1 and int(g.get('max_access_count') or 0)==1 and int(g.get('bound_user_id') or 0)>0,g
+          evidence={
+            'schema':'release467-build278-authenticated-range-acceptance-v1',
+            'status':'PASS','source_sha':os.environ['GITHUB_SHA'],
+            'environment':'development','existing_private_asset_used':True,'synthetic_fixture':False,
+            'administrator_bound':True,'grant_lifetime_minutes':5,'grant_access_cap':1,
+            'range_request':'bytes=0-0','http_status':206,'content_range_valid':True,'accept_ranges_bytes':True,
+            'private_no_store':True,'same_origin_resource_policy':True,'no_referrer':True,'frame_denied':True,'nosniff':True,
+            'audit_event':'review_proxy_served','audit_outcome':'served','ranged_streaming':True,'no_copy':True,'no_cache':True,
+            'raw_session_token_recorded':False,'raw_review_token_recorded':False,'r2_object_key_recorded':False,
+            'production_mutation':False,'r2_mutation':False,'provider_execution':False,
+            'fresh_dimensions_satisfied_after_green':2,'fresh_dimensions_required':3,'overall_caip_state':'EVIDENCE_DEPENDENT'
+          }
+          json.dump(evidence,open('/tmp/build278-range-acceptance-evidence.json','w'),indent=2,sort_keys=True)
+          print('FRESH REVIEW_PROXY_SERVED AUDIT: PASS')
+          PY
+          rm -f /tmp/build278-audit.json /tmp/build278-range-headers.txt
+
+      - name: Remove bounded Development acceptance session
+        if: ${{ always() && github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOKEN="${BUILD278_EPHEMERAL_SESSION_TOKEN:-}"
+          [ -n "$TOKEN" ] || { echo 'No ephemeral Build 278 session to remove.'; exit 0; }
+          echo "::add-mask::${TOKEN}"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command             "DELETE FROM sessions WHERE session_token='${TOKEN}' AND token='${TOKEN}'; SELECT changes() AS deleted;"             > /tmp/build278-session-cleanup.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/build278-session-cleanup.json'));vals=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if 'deleted' in v: vals.append(int(v['deleted']))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(data);assert any(v==1 for v in vals),(vals,data)
+          PY
+          rm -f /tmp/build278-session-cleanup.json
+          echo 'Bounded Build 278 Development acceptance session removed.'
+
+      - name: Prove verified Development Build 278 before Production source acceptance
+        if: ${{ github.ref_name == 'main' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin dev
+          DEV_SHA="$(git rev-parse origin/dev)"
+          DEV_TREE="$(git rev-parse origin/dev^{tree})"
+          MAIN_TREE="$(git rev-parse HEAD^{tree})"
+          test "$DEV_TREE" = "$MAIN_TREE" || { echo 'STOP: main tree differs from verified dev tree.'; exit 1; }
+          curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json"             "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${DEV_SHA}&per_page=100" > /tmp/build278-dev-runs.json
+          DEV_SHA="$DEV_SHA" python - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/build278-dev-runs.json'))
+          name='Release 467 Build 278 Authenticated Private Review Range-Streaming Acceptance Refresh'
+          rows=[r for r in data.get('workflow_runs',[]) if r.get('name')==name and r.get('head_sha')==os.environ['DEV_SHA'] and r.get('status')=='completed' and r.get('conclusion')=='success']
+          assert rows,'Exact dev Build 278 authenticated range proof is not GREEN.'
+          print('EXACT DEVELOPMENT BUILD 278 AUTHENTICATED RANGE PROOF: PASS',rows[0].get('id'))
+          PY
+
+      - name: Retain Build 277 contract
+        run: python scripts/release467_build277_gate.py
+
+      - name: Preserve sanitized Build 278 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build278-authenticated-range-acceptance-${{ github.sha }}
+          path: |
+            /tmp/build278-predecessor-exact-sha-proof.json
+            /tmp/build278-range-acceptance-evidence.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Build 278 boundary
+        if: always()
+        run: |
+          echo "Branch: ${GITHUB_REF_NAME}"
+          echo "Exact source SHA: ${GITHUB_SHA}"
+          echo 'Development private-media acceptance only: existing CAIP asset / one-byte Range through authenticated same-origin proxy'
+          echo 'Raw session/review token evidence: NONE'
+          echo 'R2 object key evidence: NONE'
+          echo 'Production business-data mutation: NONE'
+          echo 'R2 mutation: NONE'
+          echo 'Provider execution/publication: CLOSED'
+          echo 'Fresh dimension when Development runtime proof is GREEN: authenticated_private_review_range_streaming'
