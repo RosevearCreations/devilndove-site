@@ -665,7 +665,7 @@
     "existing_private_asset_only": true,
     "synthetic_fixture": false,
     "production_media_copy": false,
-    "session_policy": "CONFIGURED_ADMIN_PREFERRED_ELSE_ONE_BOUNDED_EPHEMERAL_REMOVED",
+    "session_policy": "CONFIGURED_ADMIN_PREFERRED_ELSE_EXISTING_UNEXPIRED_ADMIN_READ_ONLY_FAIL_CLOSED",
     "range_request": "bytes=0-0",
     "expected_status": 206,
     "required_audit": "review_proxy_served:ranged_streaming+no_copy+no_cache",
@@ -676,6 +676,8 @@
     "fresh_dimensions_after_runtime_green": 2,
     "required_dimensions": 3,
     "overall_lane_state_after_runtime_green": "EVIDENCE_DEPENDENT",
-    "next_build": 279
+    "next_build": 279,
+    "session_row_mutation": false,
+    "session_token_persisted": false
   }
 }

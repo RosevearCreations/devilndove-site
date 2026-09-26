@@ -61,10 +61,9 @@
       "no_cache": true,
       "raw_token_logged": false
     },
-    "session_policy": "CONFIGURED_VALID_ADMIN_SESSION_PREFERRED_ELSE_ONE_BOUNDED_DEVELOPMENT_ONLY_EPHEMERAL_SESSION_REMOVED_AFTER_TEST",
+    "session_policy": "CONFIGURED_VALID_ADMIN_SESSION_PREFERRED_ELSE_EXISTING_UNEXPIRED_DEVELOPMENT_ADMIN_SESSION_RESOLVED_READ_ONLY_FAIL_CLOSED_IF_NONE",
     "d1_mutation_scope": [
-      "optional ephemeral Development admin session insert/delete",
-      "short-lived Development secure review grant",
+      "short-lived Development secure review grant through normal authenticated application route",
       "normal review_proxy_served audit/access_count"
     ],
     "r2_mutation": false,
@@ -78,10 +77,12 @@
     "overall_lane_after_runtime_green": "EVIDENCE_DEPENDENT",
     "remaining_dimensions_after_runtime_green": [
       "multipart_interruption_reconnect_reselection_resume"
-    ]
+    ],
+    "session_row_created_by_build278": false,
+    "session_token_resolution": "TRANSIENT_MASKED_READ_ONLY_NOT_PERSISTED"
   },
   "decision": {
-    "build278_complete_when": "A fresh current-release authenticated Development administrator-bound secure-review request serves one byte through a real HTTP Range response with required private headers and records a qualifying review_proxy_served audit; the identical tree is then promoted to Production.",
+    "build278_complete_when": "A fresh current-release authenticated Development administrator-bound secure-review request, using a configured or existing unexpired Development admin session resolved read-only, serves one byte through a real HTTP Range response with required private headers and records a qualifying review_proxy_served audit; the identical tree is then promoted to Production.",
     "next_build": 279,
     "next_build_title": "Multipart Interruption & Resume Acceptance Drill",
     "future_queue_exhausted": false
