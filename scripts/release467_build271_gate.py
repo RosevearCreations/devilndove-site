@@ -112,9 +112,12 @@ else:
     elif cur==276:
         q((p.get('production_checkpoint') or {}).get('main_sha')=='86112270a5b0eb4bdbae4ffd418e34ecfd7b7587','Build 276 current Production baseline must be exact Build 275')
         q(int(p.get('next_build') or 0)>=277,'Build 276 must advance beyond Build 276 successor')
+    elif cur==277:
+        q((p.get('production_checkpoint') or {}).get('main_sha')=='1bfcb248a8baf8cea42467a75c0dac53884ec5c3','Build 277 current Production baseline must be exact Build 276')
+        q(int(p.get('next_build') or 0)>=278,'Build 277 must advance beyond Build 277 successor')
     else:
-        q((p.get('production_checkpoint') or {}).get('main_sha')=='1bfcb248a8baf8cea42467a75c0dac53884ec5c3','Build 277+ current Production baseline must be exact Build 276')
-        q(int(p.get('next_build') or 0)>=278,'Build 277+ must advance beyond Build 277 successor')
+        q((p.get('production_checkpoint') or {}).get('main_sha')=='552fe0fb1b192c7fd123c9a7369eea9f352f639e','Build 278+ current Production baseline must be exact Build 277')
+        q(int(p.get('next_build') or 0)>=279,'Build 278+ must advance beyond Build 278 successor')
 
 s=a.get('safety') or {}
 q(s.get('operator_triggered_caip_workspace_mapping') is True,'Build 271 must identify the explicit operator mapping')

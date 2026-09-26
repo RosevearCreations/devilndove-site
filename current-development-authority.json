@@ -1,32 +1,32 @@
 {
   "release": 467,
-  "build": 277,
-  "title": "Private Bucket Binding & Non-Public Exposure Evidence",
+  "build": 278,
+  "title": "Authenticated Private Review & Range-Streaming Acceptance Refresh",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 276,
-      "title": "CAIP Acceptance Evidence Freshness Baseline",
-      "authority": "release467-build276-caip-acceptance-evidence-freshness-baseline.json",
-      "dev_sha": "073ee3cacb7e7b7cac70e0e23db9ebebf386099f",
-      "tree_sha": "baed3242d5757a83832ab8526f940c971983bd73",
-      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
-      "proofs": {
-        "system_gate_run": 36214675702,
-        "current_application_quality_run": 36214675663,
-        "it_admin_runtime_proof_run": 36214675743,
-        "branch_hygiene_run": 36214675846
-      },
-      "dedicated_gate_run": 36214675710
-    },
-    "current_closure_candidate": {
-      "release": 467,
       "build": 277,
       "title": "Private Bucket Binding & Non-Public Exposure Evidence",
       "authority": "release467-build277-private-bucket-binding-non-public-exposure-evidence.json",
+      "dev_sha": "8ebe7a3a0c3460d35fbf2e1509bdb728b82db927",
+      "tree_sha": "3451ae4990328425ef6929643f1c04efe03d9f37",
+      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+      "proofs": {
+        "system_gate_run": 36241260475,
+        "current_application_quality_run": 36241260391,
+        "it_admin_runtime_proof_run": 36241260501,
+        "branch_hygiene_run": 36241260461
+      },
+      "dedicated_gate_run": 36241260291
+    },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 278,
+      "title": "Authenticated Private Review & Range-Streaming Acceptance Refresh",
+      "authority": "release467-build278-authenticated-private-review-range-streaming-acceptance-refresh.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -37,21 +37,22 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 276,
-    "title": "CAIP Acceptance Evidence Freshness Baseline",
-    "authority": "release467-build276-caip-acceptance-evidence-freshness-baseline.json",
-    "main_sha": "1bfcb248a8baf8cea42467a75c0dac53884ec5c3",
-    "tree_sha": "baed3242d5757a83832ab8526f940c971983bd73",
+    "build": 277,
+    "title": "Private Bucket Binding & Non-Public Exposure Evidence",
+    "authority": "release467-build277-private-bucket-binding-non-public-exposure-evidence.json",
+    "main_sha": "552fe0fb1b192c7fd123c9a7369eea9f352f639e",
+    "tree_sha": "3451ae4990328425ef6929643f1c04efe03d9f37",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36214858334,
-    "production_live_resource_integrity_run": 36214894567,
-    "products_browser_proof_run": 36214894586,
-    "products_route_proof_run": 36214894631,
-    "build_specific_proof_run": 36214858270,
+    "production_pages_deploy_run": 36241384277,
+    "production_live_resource_integrity_run": 36241428433,
+    "products_browser_proof_run": 36241428444,
+    "products_route_proof_run": 36241428506,
+    "build_specific_proof_run": 36241384223,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build278-authenticated-private-review-range-streaming-acceptance-refresh.json",
     "release467-build277-private-bucket-binding-non-public-exposure-evidence.json",
     "release467-build276-caip-acceptance-evidence-freshness-baseline.json",
     "release467-build275-caip-production-acceptance-outcomes-renewal.json",
@@ -170,10 +171,10 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_CAIP_PRODUCTION_ACCEPTANCE_AUTONOMOUS_BUILDS_276_284.md",
-  "next_build": 278,
-  "next_build_state": "AUTHORIZED_AFTER_BUILD277_GREEN",
-  "next_build_title": "Authenticated Private Review & Range-Streaming Acceptance Refresh",
-  "promotion_state": "BUILD276_PRODUCTION_GREEN_BUILD277_CANDIDATE_NOT_YET_VERIFIED",
+  "next_build": 279,
+  "next_build_state": "AUTHORIZED_AFTER_BUILD278_GREEN",
+  "next_build_title": "Multipart Interruption & Resume Acceptance Drill",
+  "promotion_state": "BUILD277_PRODUCTION_GREEN_BUILD278_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "CAIP_PRODUCTION_ACCEPTANCE_EVIDENCE_ROADMAP_ACTIVE",
   "measured_closure": {
     "source_build": 232,
@@ -199,20 +200,20 @@
     "last_build": 284,
     "state": "EVIDENCE_DRIVEN_CAIP_PRODUCTION_ACCEPTANCE_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 278,
-    "next_build_title": "Authenticated Private Review & Range-Streaming Acceptance Refresh",
+    "next_build": 279,
+    "next_build_title": "Multipart Interruption & Resume Acceptance Drill",
     "roadmap": "docs/operations/RELEASE_467_CAIP_PRODUCTION_ACCEPTANCE_AUTONOMOUS_BUILDS_276_284.md"
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "073ee3cacb7e7b7cac70e0e23db9ebebf386099f",
-  "accepted_dev_tree_sha": "baed3242d5757a83832ab8526f940c971983bd73",
+  "accepted_dev_sha": "8ebe7a3a0c3460d35fbf2e1509bdb728b82db927",
+  "accepted_dev_tree_sha": "3451ae4990328425ef6929643f1c04efe03d9f37",
   "acceptance": {
-    "system_gate_run": 36214675702,
-    "current_application_quality_run": 36214675663,
-    "it_admin_runtime_proof_run": 36214675743,
-    "branch_hygiene_run": 36214675846,
-    "dedicated_gate_run": 36214675710
+    "system_gate_run": 36241260475,
+    "current_application_quality_run": 36241260391,
+    "it_admin_runtime_proof_run": 36241260501,
+    "branch_hygiene_run": 36241260461,
+    "dedicated_gate_run": 36241260291
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -638,7 +639,7 @@
     "next_build": 277
   },
   "caip_private_bucket_non_public_exposure_evidence": {
-    "classification": "CURRENT_RELEASE_SANITIZED_RUNTIME_PROOF_REQUIRED",
+    "classification": "CURRENT_RELEASE_RUNTIME_GREEN_BUILD277",
     "dimension": "deployed_private_bucket_binding_non_public_exposure",
     "proof_transport": "PAGES_CONTROL_PLANE_PLUS_UNAUTHENTICATED_R2_HEAD_AND_LIVE_PROXY",
     "private_binding_key": "CAIP_PRIVATE_MEDIA_BUCKET",
@@ -654,6 +655,30 @@
     "next_build": 278,
     "unauthenticated_direct_r2_head_expected_status": "DENIAL_4XX_400_401_403",
     "direct_r2_object_listing_forbidden": true,
-    "domain_control_plane_permission_observation": "HTTP_403_NOT_INTERPRETED"
+    "domain_control_plane_permission_observation": "HTTP_403_NOT_INTERPRETED",
+    "fresh_dimension_satisfied": true,
+    "production_proof_run": 36241384223
+  },
+  "caip_authenticated_private_review_range_streaming_acceptance_refresh": {
+    "classification": "CURRENT_RELEASE_AUTHENTICATED_RANGE_RUNTIME_PROOF_REQUIRED",
+    "environment": "DEVELOPMENT_EXACT_SHA_PROMOTED_IDENTICAL_TREE_TO_PRODUCTION",
+    "existing_private_asset_only": true,
+    "synthetic_fixture": false,
+    "production_media_copy": false,
+    "session_policy": "CONFIGURED_ADMIN_PREFERRED_ELSE_EXISTING_UNEXPIRED_ADMIN_READ_ONLY_FAIL_CLOSED",
+    "range_request": "bytes=0-0",
+    "expected_status": 206,
+    "required_audit": "review_proxy_served:ranged_streaming+no_copy+no_cache",
+    "r2_mutation": false,
+    "production_mutation": false,
+    "secret_capture": false,
+    "fresh_dimensions_before_runtime_green": 1,
+    "fresh_dimensions_after_runtime_green": 2,
+    "required_dimensions": 3,
+    "overall_lane_state_after_runtime_green": "EVIDENCE_DEPENDENT",
+    "next_build": 279,
+    "session_row_mutation": false,
+    "session_token_persisted": false,
+    "session_schema_compatibility": "PRAGMA_SESSION_TOKEN_COLUMN_DETECTION"
   }
 }

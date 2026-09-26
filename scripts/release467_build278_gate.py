@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+from pathlib import Path
+import json,sys
+R=Path(__file__).resolve().parents[1];F=[]
+def t(p): return (R/p).read_text(encoding='utf-8',errors='replace')
+def j(p): return json.loads(t(p))
+def q(ok,msg):
+    if not ok:F.append(msg)
+a=j('release467-build278-authenticated-private-review-range-streaming-acceptance-refresh.json')
+prev=j('release467-build277-private-bucket-binding-non-public-exposure-evidence.json')
+p=j('current-development-authority.json')
+doc=t('docs/operations/RELEASE_467_BUILD_278_AUTHENTICATED_PRIVATE_REVIEW_RANGE_STREAMING_ACCEPTANCE_REFRESH.md')
+road=t('docs/operations/RELEASE_467_CAIP_PRODUCTION_ACCEPTANCE_AUTONOMOUS_BUILDS_276_284.md')
+wf=t('.github/workflows/release467-build278-authenticated-private-review-range-streaming-acceptance-refresh.yml')
+proxy=t('functions/api/admin/creative-asset-review.js')
+ops=t('functions/api/_lib/creativeAssetOperations.js')
+sysgate=t('scripts/current_system_gate_provenance_gate.py')
+q(a.get('build')==278 and a.get('title')=='Authenticated Private Review & Range-Streaming Acceptance Refresh','Build 278 identity mismatch')
+q(a.get('state') in ('DEVELOPMENT_CANDIDATE','DEVELOPMENT_GREEN','PRODUCTION_GREEN'),'Build 278 state mismatch')
+pred=a.get('predecessor') or {}
+q(pred.get('development_sha')=='8ebe7a3a0c3460d35fbf2e1509bdb728b82db927' and pred.get('development_tree_sha')=='3451ae4990328425ef6929643f1c04efe03d9f37','Build 277 Development predecessor mismatch')
+q(pred.get('production_main_sha')=='552fe0fb1b192c7fd123c9a7369eea9f352f639e' and pred.get('production_tree_sha')=='3451ae4990328425ef6929643f1c04efe03d9f37' and pred.get('same_tree') is True,'Build 277 Production predecessor mismatch')
+q((pred.get('development_proofs') or {}).get('dedicated_gate_run')==36241260291,'Build 277 Development dedicated proof mismatch')
+q((pred.get('production_proofs') or {}).get('build_specific_proof_run')==36241384223,'Build 277 Production dedicated proof mismatch')
+q(prev.get('state')=='PRODUCTION_GREEN','Build 277 successor-ingested authority must be Production GREEN')
+q((prev.get('final_closure') or {}).get('dev_sha')=='8ebe7a3a0c3460d35fbf2e1509bdb728b82db927' and (prev.get('final_closure') or {}).get('tree_sha')=='3451ae4990328425ef6929643f1c04efe03d9f37','Build 277 final Development closure missing')
+q((prev.get('production_checkpoint') or {}).get('main_sha')=='552fe0fb1b192c7fd123c9a7369eea9f352f639e' and (prev.get('production_checkpoint') or {}).get('tree_sha')=='3451ae4990328425ef6929643f1c04efe03d9f37','Build 277 Production checkpoint missing')
+e=a.get('evidence_contract') or {}
+q(e.get('dimension')=='authenticated_private_review_range_streaming' and e.get('environment')=='DEVELOPMENT_EXACT_SHA_PROMOTED_IDENTICAL_TREE_TO_PRODUCTION','Build 278 evidence dimension/environment mismatch')
+q(e.get('asset_rule')=='EXISTING_PRIVATE_DEVELOPMENT_CAIP_ASSET_ONLY' and e.get('synthetic_fixture') is False and e.get('production_media_copy') is False,'Build 278 fixture/media boundary drift')
+q(e.get('secure_review_grant_lifetime_minutes')==5 and e.get('secure_review_max_access_count')==1 and e.get('range_request')=='bytes=0-0','Build 278 bounded grant/range contract drift')
+q(e.get('session_row_created_by_build278') is False and e.get('session_token_resolution')=='TRANSIENT_MASKED_READ_ONLY_SCHEMA_COMPATIBLE_NOT_PERSISTED' and e.get('session_schema_compatibility')=='PRAGMA_SESSION_TOKEN_COLUMN_DETECTION_SESSION_TOKEN_OR_TOKEN','Build 278 session fallback must remain schema-compatible, read-only and non-persistent')
+q(e.get('expected_status')==206,'Build 278 expected HTTP status drift')
+audit=e.get('required_audit') or {}
+q(audit.get('event_type')=='review_proxy_served' and audit.get('outcome')=='served' and audit.get('ranged_streaming') is True and audit.get('no_copy') is True and audit.get('no_cache') is True,'Build 278 audit contract drift')
+q(e.get('fresh_dimensions_before_runtime_green')==1 and e.get('fresh_dimensions_after_runtime_green')==2 and e.get('required_dimensions_total')==3 and e.get('overall_lane_after_runtime_green')=='EVIDENCE_DEPENDENT','Build 278 acceptance interpretation drift')
+for token in ('Build 278 — Authenticated Private Review & Range-Streaming Acceptance Refresh','Build 279 — Multipart Interruption & Resume Acceptance Drill'): q(token in road,f'Roadmap missing {token}')
+for token in ('1/3 to 2/3','Range: bytes=0-0','review_proxy_served','Build 279'): q(token in doc,f'Build 278 document missing {token}')
+for token in ('DND_DEV_SESSION_COOKIE','CF_ACCESS_CLIENT_ID','Range: bytes=0-0','create_secure_review_link','review_proxy_served','ranged_streaming','runtime_token','PRAGMA table_info(sessions)','Build 278 refuses to create one','MASKED','wrangler@4'): q(token in wf,f'Build 278 workflow missing {token}')
+q(proxy.find('getAdminUserFromRequest')>=0 and proxy.find('getAdminUserFromRequest')<proxy.find('authorizeSecureReviewGrant'),'Secure review must authenticate before grant authorization')
+for token in ("Cache-Control', 'private, no-store","Cross-Origin-Resource-Policy', 'same-origin","Referrer-Policy', 'no-referrer","X-Frame-Options', 'DENY","Accept-Ranges', 'bytes'"): q(token in proxy,f'Secure review response control missing: {token}')
+for token in ("'review_proxy_served'","ranged_streaming","no_copy","no_cache"): q(token in ops or token in proxy,f'Build 278 source audit marker missing: {token}')
+q("run_current_contract('scripts/release467_build278_gate.py','Release 467 Build 278')" in sysgate,'System Gate missing Build 278')
+cur=int(p.get('build') or 0);q(p.get('release')==467 and cur>=278,'Current authority must retain Build 278 or successor')
+if cur==278:
+    q(p.get('title')=='Authenticated Private Review & Range-Streaming Acceptance Refresh' and p.get('state')=='DEVELOPMENT_GREEN','Current Build 278 pointer mismatch')
+    q(p.get('accepted_dev_sha')=='8ebe7a3a0c3460d35fbf2e1509bdb728b82db927' and p.get('accepted_dev_tree_sha')=='3451ae4990328425ef6929643f1c04efe03d9f37','Current Build 278 accepted predecessor mismatch')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='552fe0fb1b192c7fd123c9a7369eea9f352f639e','Current Build 278 Production predecessor mismatch')
+    q(int(p.get('next_build') or 0)==279,'Current Build 278 successor pointer mismatch')
+for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 278 safety drift: {k}')
+print('RELEASE 467 BUILD 278 AUTHENTICATED PRIVATE REVIEW RANGE-STREAMING ACCEPTANCE REFRESH')
+if F:
+    print('FAIL');[print('-',x) for x in F];sys.exit(1)
+print('PASS')
+print('Fresh current-release CAIP dimensions after runtime GREEN: 2/3; overall lane remains EVIDENCE_DEPENDENT.')
+print('Next: Build 279 — Multipart Interruption & Resume Acceptance Drill')
