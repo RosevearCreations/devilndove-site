@@ -1,0 +1,78 @@
+{
+  "release": 467,
+  "build": 270,
+  "title": "Strong-Fingerprint Backfill & Recovery Reconciliation",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build270-strong-fingerprint-backfill-recovery-reconciliation",
+  "predecessor": {
+    "build": 269,
+    "title": "Private Raw Media Intake Integrity",
+    "development_sha": "059aa3cf7854d075529ce976bb65ae2c1c6254fc",
+    "production_main_sha": "61cc1346f838a5dd742b0dbaeff345d95447ba6e",
+    "tree_sha": "65b54187a47834a7a36a3f57b16f985eb5d4cb05",
+    "same_tree": true,
+    "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
+    "state": "PRODUCTION_GREEN",
+    "development_proofs": {
+      "system_gate_run": 36180407045,
+      "current_application_quality_run": 36180407199,
+      "it_admin_runtime_proof_run": 36180406666,
+      "branch_hygiene_run": 36180407194,
+      "dedicated_gate_run": 36180406990
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36180648384,
+      "production_live_resource_integrity_run": 36180717931,
+      "products_browser_proof_run": 36180718046,
+      "products_route_proof_run": 36180717954,
+      "build_specific_proof_run": 36180648437
+    }
+  },
+  "reconciliation": {
+    "content_fingerprint_version": "sample_sha256_v1",
+    "max_rows_per_request": 20,
+    "operator_default_rows": 8,
+    "exact_r2_head_size_before_metadata_repair": true,
+    "ranged_fingerprint_reads": true,
+    "existing_uploaded_unregistered_registration_retry": true,
+    "registration_requires_strong_fingerprint": true,
+    "integrity_failure_markers_excluded": true,
+    "recovery_parent_must_exist": true,
+    "recovery_parent_same_project": true,
+    "recovery_object_identity_distinct": true,
+    "review_limit": 100,
+    "automatic_r2_delete": false,
+    "automatic_public_promotion": false,
+    "uncertain_binary_preserved": true,
+    "classification": "STRONG_FINGERPRINT_RECOVERY_RECONCILIATION_READY_OPERATOR_BOUNDED"
+  },
+  "safety": {
+    "operator_triggered_private_metadata_reconciliation": true,
+    "automatic_reconciliation": false,
+    "schema_migration": false,
+    "request_time_schema_mutation": false,
+    "release_process_production_d1_mutation": false,
+    "release_process_r2_mutation": false,
+    "private_media_delete": false,
+    "uncertain_r2_delete": false,
+    "duplicate_cleanup_execution": false,
+    "orphan_cleanup_execution": false,
+    "public_media_copy": false,
+    "public_promotion": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false
+  },
+  "decision": {
+    "build270_complete_when": "Bounded strong-fingerprint backfill and evidence-backed private registration/recovery reconciliation are GREEN over exact Build 269 without deleting uncertain binaries or creating public promotion.",
+    "next_build": 271,
+    "next_build_title": "Standalone / Social CAIP Project Workflow",
+    "future_queue_exhausted": false
+  }
+}
