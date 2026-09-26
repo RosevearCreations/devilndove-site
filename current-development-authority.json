@@ -168,7 +168,7 @@
   "next_build": 271,
   "next_build_state": "AUTHORIZED_AFTER_BUILD270_GREEN",
   "next_build_title": "Standalone / Social CAIP Project Workflow",
-  "promotion_state": "BUILD270_DEVELOPMENT_CANDIDATE_OVER_EXACT_BUILD269_PRODUCTION_GREEN",
+  "promotion_state": "BUILD270_DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "successor_scope_state": "CAIP_RECOVERY_CONTINUITY_ROADMAP_ACTIVE",
   "measured_closure": {
     "source_build": 232,
