@@ -48,3 +48,22 @@ Build 279 **Multipart Interruption & Resume Acceptance Drill** runs a bounded De
 A GREEN Build 279 runtime artifact closes the third current-release CAIP acceptance dimension: **3/3**, lane **ACCEPTED**. Production promotion remains identical-tree/read-deploy only; the Development drill creates no finalized test object and copies no Production media.
 
 The future queue remains open. Next: **Build 280 — Private-Media Reconciliation & Recovery Outcome Review**.
+
+
+## Build 279 restart checkpoint — verified Build 278
+
+- Build 278 Development SHA: `4a96fba89316d287771d34ef278b2404848e2996`
+- Build 278 shared tree: `b7ad133e79cd01a30d2056f77ffd069996560cf6`
+- Development System Gate: `36247952924`
+- Current Application Quality Proof: `36247952893`
+- I.T. Admin Runtime Proof: `36247952964`
+- Repository Branch Hygiene: `36247953198`
+- Build 278 dedicated Development proof: `36247952942`
+- Build 278 Production main SHA: `5d418eb1160caa7af855a247e1ff3510e4c1c9b8`
+- Production Pages Deploy: `36248115089`
+- Production Live Resource Integrity: `36248156311`
+- Product Browser Production Proof: `36248156279`
+- Product Route Production Proof: `36248156316`
+- Build 278 dedicated Production proof: `36248115177`
+
+The current closure candidate is **Build 279 — Multipart Interruption & Resume Acceptance Drill**. Production remains the exact Build 278 baseline until Build 279 earns fresh exact-SHA Development proof and identical-tree promotion.

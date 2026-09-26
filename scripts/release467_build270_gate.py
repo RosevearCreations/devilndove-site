@@ -121,7 +121,7 @@ else:
         q((p.get('production_checkpoint') or {}).get('main_sha')=='1bfcb248a8baf8cea42467a75c0dac53884ec5c3','Build 277 current Production baseline must be exact Build 276')
         q(int(p.get('next_build') or 0)>=278,'Build 277 must advance beyond Build 277 successor')
     else:
-        q((p.get('production_checkpoint') or {}).get('main_sha')=='552fe0fb1b192c7fd123c9a7369eea9f352f639e','Build 278+ current Production baseline must be exact Build 277')
+        q((cur==278 and (p.get('production_checkpoint') or {}).get('main_sha')=='552fe0fb1b192c7fd123c9a7369eea9f352f639e') or (cur>=279 and (p.get('production_checkpoint') or {}).get('main_sha')=='5d418eb1160caa7af855a247e1ff3510e4c1c9b8'),'Build 278+ current Production baseline must track the exact immediate verified predecessor')
         q(int(p.get('next_build') or 0)>=279,'Build 278+ must advance beyond Build 278 successor')
 
 s=a.get('safety') or {}
