@@ -1,0 +1,46 @@
+name: Release 467 Build 272 Upload Prerequisite Operator Readiness
+on:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build272:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 271 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: af45e733b673af8e8d7e9acb7e55e35f525bebec
+          production_sha: fce84316c0b5b22781b2ee30d35b205d96b39c09
+          build_proof_name: Release 467 Build 271 Standalone Social CAIP Project Workflow
+          report_path: /tmp/build272-predecessor-exact-sha-proof.json
+      - name: Resolve exact Build 271 tree continuity
+        run: |
+          git fetch --no-tags --depth=1 origin af45e733b673af8e8d7e9acb7e55e35f525bebec
+          git fetch --no-tags --depth=1 origin fce84316c0b5b22781b2ee30d35b205d96b39c09
+          DEV_TREE="$(git rev-parse af45e733b673af8e8d7e9acb7e55e35f525bebec^{tree})"
+          PROD_TREE="$(git rev-parse fce84316c0b5b22781b2ee30d35b205d96b39c09^{tree})"
+          echo "BUILD271_DEV_TREE=$DEV_TREE"
+          echo "BUILD271_PROD_TREE=$PROD_TREE"
+          test "$DEV_TREE" = "$PROD_TREE"
+          test "$DEV_TREE" = "f0da384a9d0be6f54d5e0b441f7aa333c158e69f"
+      - name: Build 272 upload prerequisite and operator readiness gate
+        run: python scripts/release467_build272_gate.py
+      - name: Retain Build 271 standalone social identity contract
+        run: python scripts/release467_build271_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build272-upload-prerequisite-readiness-evidence-${{ github.sha }}
+          path: /tmp/build272-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30

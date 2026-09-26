@@ -3,7 +3,7 @@ import { auditAdminAction, captureRuntimeIncident, getAdminUserFromRequest, getD
 import {
   CAIP_MEDIA_INTAKE_BUILD, abortUploadFile, assertCaipMediaIntakeSchema, completeUploadFile,
   createUploadSession, createSafeReplacementUpload, initiateUploadFile, listCaipMediaIntake, requestPublicPromotion, retryUploadedFileRegistration,
-  safeUploadFileForClient, updateUploadFileGovernance, privateBucketAvailable, listCaipDuplicateAudit, cleanupCaipDuplicateGroup, backfillCaipContentFingerprints, reconcileCaipStrongFingerprintRecovery, setUploadFileContentFingerprint, getCaipMediaIntakeReadiness
+  safeUploadFileForClient, updateUploadFileGovernance, privateBucketAvailable, listCaipDuplicateAudit, cleanupCaipDuplicateGroup, backfillCaipContentFingerprints, reconcileCaipStrongFingerprintRecovery, setUploadFileContentFingerprint, getCaipMediaIntakeReadiness, requireCaipMediaUploadReadiness
 } from '../_lib/caipMediaIntake.js';
 
 function json(data,status=200){return jsonResponse(data,status,{'Cache-Control':'no-store'});}
@@ -12,6 +12,7 @@ async function access(context){const adminUser=await getAdminUserFromRequest(con
 function scrub(data){if(!data)return data;const clone=JSON.parse(JSON.stringify(data));const walk=(value)=>{if(!value||typeof value!=='object')return;if(Array.isArray(value)){for(const item of value)walk(item);return;}delete value.r2_upload_id;for(const item of Object.values(value))walk(item);};walk(clone);return clone;}
 function intakeErrorCode(error,action=''){
   const message=String(error?.message||error||'').toLowerCase();
+  if(message.includes('upload prerequisite blocked')) return 'CAIP_UPLOAD_PREREQUISITE_BLOCKED';
   if(message.includes('build 269 caip media schema')||message.includes('build 269 caip fingerprint columns')) return 'CAIP_BUILD269_MIGRATION_REQUIRED';
   if(message.includes('schema is not installed')) return 'CAIP_MEDIA_SCHEMA_MISSING';
   if(message.includes('valid caip creative project')||message.includes('creative project first')) return 'CAIP_PROJECT_INVALID';
@@ -28,8 +29,14 @@ export async function onRequestGet(context){
   const state=await access(context);if(state.error)return state.error;
   const projectId=integer(new URL(context.request.url).searchParams.get('creative_project_id'));
   try{
-    const data=await listCaipMediaIntake(state.db,projectId,context.env);
     const readiness=await getCaipMediaIntakeReadiness(state.db,context.env);
+    if(!readiness.schema_base_ready||!readiness.build269_schema_ready){
+      const projectsResult=await state.db.prepare(`SELECT creative_project_id,creative_project_key,product_id,project_title,project_status,governance_status,updated_at FROM creative_projects WHERE project_status<>'archived' ORDER BY updated_at DESC,creative_project_id DESC LIMIT 120`).all().catch(()=>({results:[]}));
+      const projects=Array.isArray(projectsResult?.results)?projectsResult.results:[];
+      const selected=projectId||integer(projects[0]?.creative_project_id)||null;
+      return json({ok:true,build:CAIP_MEDIA_INTAKE_BUILD,mode:'blocked_prerequisite_no_transfer',projects,selected_project_id:selected,sessions:[],files:[],parts:[],processing_jobs:[],promotion_requests:[],settings:[],stage_summary:null,binding:{private_bucket_binding:'CAIP_PRIVATE_MEDIA_BUCKET',private_bucket_available:Boolean(readiness.private_bucket_ready),transport_mode:'blocked_until_prerequisites_ready',raw_original_policy:'immutable',public_access:false},readiness:scrub(readiness),duplicate_audit:null});
+    }
+    const data=await listCaipMediaIntake(state.db,projectId,context.env);
     const duplicate_audit=projectId?await listCaipDuplicateAudit(state.db,projectId).catch(()=>({groups:[],duplicate_rows:0,reclaimable_rows:0,audit_warning:'Duplicate audit could not be loaded.'})):null;
     return json({ok:true,build:CAIP_MEDIA_INTAKE_BUILD,...scrub(data),readiness:scrub(readiness),duplicate_audit:scrub(duplicate_audit)});
   }
@@ -43,9 +50,11 @@ export async function onRequestPost(context){
   const projectId=integer(body.creative_project_id)||integer(new URL(context.request.url).searchParams.get('creative_project_id'));
   const fileId=integer(body.caip_media_upload_file_id||body.file_id);
   try{
-    await assertCaipMediaIntakeSchema(state.db);
+    const transferActions=new Set(['create_session','initiate_file','complete_file','create_safe_replacement']);
+    if(transferActions.has(action)) await requireCaipMediaUploadReadiness(state.db,context.env,action);
+    else await assertCaipMediaIntakeSchema(state.db);
     let result={};
-    if(action==='create_session'){ const readiness=await getCaipMediaIntakeReadiness(state.db,context.env); if(!readiness.build269_schema_ready) throw new Error(`Build 269 CAIP media schema is not installed. Missing columns: ${readiness.missing_columns.join(', ')||'unknown'}. Back up D1 and apply ${readiness.required_migration} before adding more raw media.`); if(!readiness.private_bucket_ready) throw new Error('Private CAIP R2 binding is unavailable. Bind the private R2 bucket as CAIP_PRIVATE_MEDIA_BUCKET in the Production Pages environment and redeploy before uploading.'); result=await createUploadSession(state.db,context.env,projectId,body.files,state.adminUser.user_id,{upload_device:body.upload_device,source_note:body.source_note,media_role:body.media_role,privacy_state:body.privacy_state,consent_state:body.consent_state,rights_status:body.rights_status}); }
+    if(action==='create_session'){ result=await createUploadSession(state.db,context.env,projectId,body.files,state.adminUser.user_id,{upload_device:body.upload_device,source_note:body.source_note,media_role:body.media_role,privacy_state:body.privacy_state,consent_state:body.consent_state,rights_status:body.rights_status}); }
     else if(action==='set_content_fingerprint') result={file:await setUploadFileContentFingerprint(state.db,fileId,body.content_fingerprint,body.content_fingerprint_version,state.adminUser.user_id)};
     else if(action==='initiate_file') result=await initiateUploadFile(state.db,context.env,fileId,state.adminUser.user_id);
     else if(action==='complete_file') result=await completeUploadFile(state.db,context.env,fileId,state.adminUser.user_id);
@@ -73,5 +82,5 @@ export async function onRequestPost(context){
       refresh_warning=String(refreshError?.message||refreshError||'CAIP state refresh failed after the requested action succeeded.');
     }
     return json({ok:true,build:CAIP_MEDIA_INTAKE_BUILD,message:action==='request_public_promotion'?'Public promotion review requested. No public copy was created.':'CAIP private-media action completed.',result:scrub({files:[safeUploadFileForClient(result?.file)],...result}),...scrub(data),duplicate_audit:scrub(duplicate_audit),refresh_warning});
-  }catch(error){const errorCode=intakeErrorCode(error,action);await captureRuntimeIncident(context.env,context.request,{incident_scope:'caip_media_intake',incident_code:'caip_media_intake_post_failed',severity:'warning',message:error?.message||'CAIP media intake action failed.',related_user_id:state.adminUser.user_id,details:{action,error_code:errorCode,creative_project_id:projectId||null,upload_file_id:fileId||null,error:String(error?.message||error)}}).catch(()=>null);return json({ok:false,error:error?.message||'CAIP media intake action failed.',error_code:errorCode,stage:action||'unknown',creative_project_id:projectId||null,upload_file_id:fileId||null,binding:{private_bucket_binding:'CAIP_PRIVATE_MEDIA_BUCKET',private_bucket_available:privateBucketAvailable(context.env)}},400);}
+  }catch(error){const errorCode=intakeErrorCode(error,action);const prerequisiteBlocked=errorCode==='CAIP_UPLOAD_PREREQUISITE_BLOCKED';if(!prerequisiteBlocked)await captureRuntimeIncident(context.env,context.request,{incident_scope:'caip_media_intake',incident_code:'caip_media_intake_post_failed',severity:'warning',message:error?.message||'CAIP media intake action failed.',related_user_id:state.adminUser.user_id,details:{action,error_code:errorCode,creative_project_id:projectId||null,upload_file_id:fileId||null,error:String(error?.message||error)}}).catch(()=>null);return json({ok:false,error:error?.message||'CAIP media intake action failed.',error_code:errorCode,stage:action||'unknown',operator_state:prerequisiteBlocked?'BLOCKED_PREREQUISITE':undefined,transfer_started:false,creative_project_id:projectId||null,upload_file_id:fileId||null,readiness:scrub(error?.readiness||null),binding:{private_bucket_binding:'CAIP_PRIVATE_MEDIA_BUCKET',private_bucket_available:privateBucketAvailable(context.env)}},prerequisiteBlocked?409:400);}
 }

@@ -1,33 +1,33 @@
 {
   "release": 467,
-  "build": 271,
-  "title": "Standalone / Social CAIP Project Workflow",
+  "build": 272,
+  "title": "Upload Prerequisite & Operator Readiness",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 270,
-      "title": "Strong-Fingerprint Backfill & Recovery Reconciliation",
-      "authority": "release467-build270-strong-fingerprint-backfill-recovery-reconciliation.json",
-      "dev_sha": "b51e15f9c150e1d740fe1383d8df98a962990b21",
-      "tree_sha": "9dc39ed9dde4946ad54e51b58c7b66ca38b75634",
-      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
-      "business_exit": "OWNER_AUTHORIZED_STANDALONE_SOCIAL_CAIP_PROJECT_WORKFLOW",
-      "proofs": {
-        "system_gate_run": 36206690243,
-        "current_application_quality_run": 36206690338,
-        "it_admin_runtime_proof_run": 36206690036,
-        "branch_hygiene_run": 36206690296
-      },
-      "dedicated_gate_run": 36206690389
-    },
-    "current_closure_candidate": {
-      "release": 467,
       "build": 271,
       "title": "Standalone / Social CAIP Project Workflow",
       "authority": "release467-build271-standalone-social-caip-project-workflow.json",
+      "dev_sha": "af45e733b673af8e8d7e9acb7e55e35f525bebec",
+      "tree_sha": "f0da384a9d0be6f54d5e0b441f7aa333c158e69f",
+      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+      "business_exit": "OWNER_AUTHORIZED_UPLOAD_PREREQUISITE_OPERATOR_READINESS",
+      "proofs": {
+        "system_gate_run": 36208079958,
+        "current_application_quality_run": 36208080087,
+        "it_admin_runtime_proof_run": 36208080075,
+        "branch_hygiene_run": 36208080004
+      },
+      "dedicated_gate_run": 36208079968
+    },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 272,
+      "title": "Upload Prerequisite & Operator Readiness",
+      "authority": "release467-build272-upload-prerequisite-operator-readiness.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -38,22 +38,23 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 270,
-    "title": "Strong-Fingerprint Backfill & Recovery Reconciliation",
-    "authority": "release467-build270-strong-fingerprint-backfill-recovery-reconciliation.json",
-    "main_sha": "9c3ed0664d71ab66a3087047b35989c5ed5b6904",
-    "tree_sha": "9dc39ed9dde4946ad54e51b58c7b66ca38b75634",
+    "build": 271,
+    "title": "Standalone / Social CAIP Project Workflow",
+    "authority": "release467-build271-standalone-social-caip-project-workflow.json",
+    "main_sha": "fce84316c0b5b22781b2ee30d35b205d96b39c09",
+    "tree_sha": "f0da384a9d0be6f54d5e0b441f7aa333c158e69f",
     "proof_recovery": "LIVE_BY_EXACT_SHA_COMPOSITION",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
     "role": "CURRENT_PRODUCTION_BASELINE",
-    "production_pages_deploy_run": 36206849648,
-    "production_live_resource_integrity_run": 36206908948,
-    "products_browser_proof_run": 36206908972,
-    "products_route_proof_run": 36206908996,
-    "build_specific_proof_run": 36206849597
+    "production_pages_deploy_run": 36208228266,
+    "production_live_resource_integrity_run": 36208267834,
+    "products_browser_proof_run": 36208267848,
+    "products_route_proof_run": 36208267804,
+    "build_specific_proof_run": 36208228296
   },
   "current_release_authorities": [
+    "release467-build272-upload-prerequisite-operator-readiness.json",
     "release467-build271-standalone-social-caip-project-workflow.json",
     "release467-build270-strong-fingerprint-backfill-recovery-reconciliation.json",
     "release467-build269-private-raw-media-intake-integrity.json",
@@ -166,10 +167,10 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md",
-  "next_build": 272,
-  "next_build_state": "AUTHORIZED_AFTER_BUILD271_GREEN",
-  "next_build_title": "Upload Prerequisite & Operator Readiness",
-  "promotion_state": "BUILD271_DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
+  "next_build": 273,
+  "next_build_state": "AUTHORIZED_AFTER_BUILD272_GREEN",
+  "next_build_title": "Content Studio Standalone-Project Bridge",
+  "promotion_state": "BUILD272_DEVELOPMENT_GREEN_NOT_YET_PRODUCTION",
   "successor_scope_state": "CAIP_RECOVERY_CONTINUITY_ROADMAP_ACTIVE",
   "measured_closure": {
     "source_build": 232,
@@ -195,20 +196,20 @@
     "last_build": 275,
     "state": "EVIDENCE_DRIVEN_CAIP_RECOVERY_CONTINUITY_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 272,
-    "next_build_title": "Upload Prerequisite & Operator Readiness",
+    "next_build": 273,
+    "next_build_title": "Content Studio Standalone-Project Bridge",
     "roadmap": "docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md",
     "reactivation_source": "BUILD264_REFINEMENT_OUTCOMES_RENEWAL_III"
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "b51e15f9c150e1d740fe1383d8df98a962990b21",
-  "accepted_dev_tree_sha": "9dc39ed9dde4946ad54e51b58c7b66ca38b75634",
+  "accepted_dev_sha": "af45e733b673af8e8d7e9acb7e55e35f525bebec",
+  "accepted_dev_tree_sha": "f0da384a9d0be6f54d5e0b441f7aa333c158e69f",
   "acceptance": {
-    "system_gate_run": 36206690243,
-    "current_application_quality_run": 36206690338,
-    "it_admin_runtime_proof_run": 36206690036,
-    "branch_hygiene_run": 36206690296
+    "system_gate_run": 36208079958,
+    "current_application_quality_run": 36208080087,
+    "it_admin_runtime_proof_run": 36208080075,
+    "branch_hygiene_run": 36208080004
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -559,5 +560,19 @@
     "derivative_plans_complete_scroll": true,
     "automatic_publication": false,
     "provider_execution": false
+  },
+  "caip_upload_prerequisite_operator_readiness": {
+    "classification": "UPLOAD_PREREQUISITES_FAIL_CLOSED_BEFORE_SELECTION_AND_TRANSFER",
+    "build241_schema_required": true,
+    "build269_duplicate_safe_columns_required": true,
+    "private_r2_binding_required": true,
+    "structured_operator_blockers": true,
+    "file_selection_fail_closed": true,
+    "direct_binary_transfer_fail_closed": true,
+    "multipart_binary_transfer_fail_closed": true,
+    "missing_prerequisite_is_transfer_failure": false,
+    "transfer_started_when_blocked": false,
+    "automatic_schema_repair": false,
+    "automatic_binding_mutation": false
   }
 }

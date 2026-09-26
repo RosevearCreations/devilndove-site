@@ -99,8 +99,12 @@ else:
     q((a.get('final_closure') or {}).get('tree_sha')=='9dc39ed9dde4946ad54e51b58c7b66ca38b75634','Build 270 final Development tree mismatch')
     q((a.get('production_checkpoint') or {}).get('main_sha')=='9c3ed0664d71ab66a3087047b35989c5ed5b6904','Build 270 final Production SHA mismatch')
     q((a.get('production_checkpoint') or {}).get('tree_sha')=='9dc39ed9dde4946ad54e51b58c7b66ca38b75634','Build 270 final Production tree mismatch')
-    q((p.get('production_checkpoint') or {}).get('main_sha')=='9c3ed0664d71ab66a3087047b35989c5ed5b6904','Build 271+ current Production baseline must be exact Build 270')
-    q(int(p.get('next_build') or 0)>=272,'Build 271+ must advance beyond Build 271 successor')
+    if cur==271:
+        q((p.get('production_checkpoint') or {}).get('main_sha')=='9c3ed0664d71ab66a3087047b35989c5ed5b6904','Build 271 current Production baseline must be exact Build 270')
+        q(int(p.get('next_build') or 0)>=272,'Build 271 must advance beyond Build 271 successor')
+    else:
+        q((p.get('production_checkpoint') or {}).get('main_sha')=='fce84316c0b5b22781b2ee30d35b205d96b39c09','Build 272+ current Production baseline must be exact Build 271')
+        q(int(p.get('next_build') or 0)>=273,'Build 272+ must advance beyond Build 272 successor')
 
 s=a.get('safety') or {}
 q(s.get('operator_triggered_private_metadata_reconciliation') is True,'Build 270 must identify the explicit bounded operator reconciliation')

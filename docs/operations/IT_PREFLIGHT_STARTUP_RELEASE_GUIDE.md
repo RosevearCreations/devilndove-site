@@ -12,32 +12,28 @@ Release 467 uses `main` as Production source and `dev` as Development candidate 
 6. Require exact Production Pages deployment and applicable runtime/resource acceptance.
 
 <!-- CURRENT_RELEASE_RESTART_AUTHORITY_START -->
-## Current Release 467 restart authority — Build 271 candidate
+## Current Release 467 restart authority — Build 272 candidate
 
-Build 270 **Strong-Fingerprint Backfill & Recovery Reconciliation** is the exact fully verified Development and Production predecessor.
+Build 271 **Standalone / Social CAIP Project Workflow** is the exact fully verified Development and Production predecessor.
 
-- Development SHA: `b51e15f9c150e1d740fe1383d8df98a962990b21`
-- exact Development/Production tree: `9dc39ed9dde4946ad54e51b58c7b66ca38b75634`
-- Development proofs: System `36206690243`, Quality `36206690338`, I.T. `36206690036`, Hygiene `36206690296`, Build 270 `36206690389`
-- Production main SHA: `9c3ed0664d71ab66a3087047b35989c5ed5b6904`
-- Production proofs: Pages `36206849648`, Live Resource Integrity `36206908948`, Product Browser `36206908972`, Product Route `36206908996`, Build 270 `36206849597`
-- exact predecessor proof remains recoverable through the reusable exact-SHA composition;
+- Development SHA: `af45e733b673af8e8d7e9acb7e55e35f525bebec`
+- exact Development/Production tree: `f0da384a9d0be6f54d5e0b441f7aa333c158e69f`
+- Development proofs: System `36208079958`, Quality `36208080087`, I.T. `36208080075`, Hygiene `36208080004`, Build 271 `36208079968`
+- Production main SHA: `fce84316c0b5b22781b2ee30d35b205d96b39c09`
+- Production proofs: Pages `36208228266`, Live Resource Integrity `36208267834`, Product Browser `36208267848`, Product Route `36208267804`, Build 271 `36208228296`
 - canonical migrations remain **0001–0023**, with 0023 data-only.
 
-Build 271 **Standalone / Social CAIP Project Workflow** is the active bounded candidate.
+Build 272 **Upload Prerequisite & Operator Readiness** is the active bounded candidate.
 
-A non-archived Creative Process project can explicitly open or refresh one CAIP workspace using the existing unique identity `source_type='creative_work_project'` plus `source_id=creative_work_project_id`. Reopening the workflow updates the source snapshot and policy profile while preserving any existing Content Studio link and CAIP review/lifecycle state.
+Before the browser asks the operator to choose or drop a local file, CAIP must prove the Build 241 private-media tables, the Build 269 duplicate-safe columns and the private `CAIP_PRIVATE_MEDIA_BUCKET` binding. The same readiness contract is enforced again at the control plane, direct upload endpoint and multipart part endpoint.
 
-Build 271 does not create a Product, fake catalog item or Content Studio package. `product_id` and `content_project_id` remain optional. The CAIP workspace continues to own private media, evidence/story review and derivative plans; Content Studio remains a later reviewed package authority and publication remains separately approved.
+Missing prerequisites are explicit operator/configuration states. They return `CAIP_UPLOAD_PREREQUISITE_BLOCKED` with `transfer_started: false`; they do not create transfer-failure evidence and do not trigger automatic schema or binding repair.
 
-All derivative plans remain reachable in a bounded scroll region with planned items first. A derivative plan remains optional for each source asset.
+Build 272 adds no migration, no request-time DDL, no automatic bucket/binding mutation, no R2 deletion, no public promotion, no Inventory/Finance movement and no provider execution.
 
-Build 271 performs no schema migration, request-time DDL, automatic project creation, Inventory movement, Finance posting, R2 deletion, public media copy, provider execution or publication. Existing private binaries are unchanged.
+The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 272, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
 
-The reusable exact-SHA composition remains required. System, Quality, I.T., Hygiene, Build 271, Production Pages, Live Resource Integrity, Product Browser and Product Route proof semantics remain mandatory.
-
-The future queue remains open. Next: **Build 272 — Upload Prerequisite & Operator Readiness**.
-
+The future queue remains open. Next: **Build 273 — Content Studio Standalone-Project Bridge**.
 ## Retained historical provenance — Build 171
 
 Build 171 **Release & Restart Authority Convergence** remains historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`. It does not override current Build 227 truth.

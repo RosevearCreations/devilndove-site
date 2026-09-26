@@ -1,6 +1,6 @@
 // Build 279 — CPU-hardened idempotent direct CAIP upload; verified R2 binary success is never downgraded by later metadata repair.
 import { captureRuntimeIncident, getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
-import { completeDirectUploadFile, DIRECT_UPLOAD_MAX_BYTES, privateBucketAvailable } from '../_lib/caipMediaIntake.js';
+import { completeDirectUploadFile, DIRECT_UPLOAD_MAX_BYTES, privateBucketAvailable, requireCaipMediaUploadReadiness } from '../_lib/caipMediaIntake.js';
 function json(data,status=200){return jsonResponse(data,status,{'Cache-Control':'no-store'});}
 function integer(value){const n=Number(value||0);return Number.isInteger(n)&&n>0?n:0;}
 function sameOrigin(request){const origin=request.headers.get('Origin');if(!origin)return true;try{return new URL(origin).host===new URL(request.url).host;}catch{return false;}}
@@ -10,6 +10,9 @@ export async function onRequestPut(context){
   if(!sameOrigin(request))return json({ok:false,error:'Cross-origin CAIP uploads are not allowed.'},403);
   const db=getDb(env);if(!db)return json({ok:false,error:'Database binding is not configured.'},500);
   const fileId=integer(new URL(request.url).searchParams.get('file_id')); if(!fileId||!request.body)return json({ok:false,error:'File ID and request body are required.'},400);
+  let readiness;
+  try { readiness=await requireCaipMediaUploadReadiness(db,env,'direct_binary_transfer'); }
+  catch(error){ return json({ok:false,error:error?.message||'CAIP upload prerequisites are not ready.',error_code:'CAIP_UPLOAD_PREREQUISITE_BLOCKED',stage:'direct_binary_transfer',operator_state:'BLOCKED_PREREQUISITE',readiness:error?.readiness||null,transfer_started:false},409); }
   try{
     if(!privateBucketAvailable(env))throw new Error('CAIP_PRIVATE_MEDIA_BUCKET is not configured.');
     const row=await db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=? LIMIT 1`).bind(fileId).first();
