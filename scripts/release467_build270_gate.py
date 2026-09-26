@@ -46,7 +46,7 @@ q(rec.get('classification')=='STRONG_FINGERPRINT_RECOVERY_RECONCILIATION_READY_O
 
 q(root==api,'CAIP media intake helper copies must remain byte-identical')
 start=api.find('export async function reconcileCaipStrongFingerprintRecovery')
-end=api.find('export async function listCaipDuplicateAudit',start)
+end=api.find('export async function createUploadSession',start)
 q(start>=0 and end>start,'Build 270 reconciliation helper missing')
 segment=api[start:end] if start>=0 and end>start else ''
 for token in (
