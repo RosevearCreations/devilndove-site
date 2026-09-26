@@ -10,8 +10,10 @@ export async function onRequestPut(context){
   if(!sameOrigin(request))return json({ok:false,error:'Cross-origin CAIP uploads are not allowed.'},403);
   const db=getDb(env);if(!db)return json({ok:false,error:'Database binding is not configured.'},500);
   const fileId=integer(new URL(request.url).searchParams.get('file_id')); if(!fileId||!request.body)return json({ok:false,error:'File ID and request body are required.'},400);
+  let readiness;
+  try { readiness=await requireCaipMediaUploadReadiness(db,env,'direct_binary_transfer'); }
+  catch(error){ return json({ok:false,error:error?.message||'CAIP upload prerequisites are not ready.',error_code:'CAIP_UPLOAD_PREREQUISITE_BLOCKED',stage:'direct_binary_transfer',operator_state:'BLOCKED_PREREQUISITE',readiness:error?.readiness||null,transfer_started:false},409); }
   try{
-    await requireCaipMediaUploadReadiness(db,env,'direct_binary_transfer');
     if(!privateBucketAvailable(env))throw new Error('CAIP_PRIVATE_MEDIA_BUCKET is not configured.');
     const row=await db.prepare(`SELECT * FROM caip_media_upload_files WHERE caip_media_upload_file_id=? LIMIT 1`).bind(fileId).first();
     if(!row)throw new Error('CAIP upload file was not found.'); if(row.upload_status==='uploaded' && Number(row.creative_asset_id||0)>0)return json({ok:true,already_complete:true,file:row}); if(row.upload_status==='aborted')throw new Error('Upload has been aborted.');
