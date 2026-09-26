@@ -11,6 +11,7 @@ jobs:
     timeout-minutes: 22
     env:
       DND_DEV_BASE_URL: https://dev.devilndove-site.pages.dev
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
       DND_CONFIGURED_SESSION_COOKIE: ${{ secrets.DND_DEV_SESSION_COOKIE }}
       CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
       CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
