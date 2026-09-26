@@ -2,7 +2,7 @@
   "release": 467,
   "build": 270,
   "title": "Strong-Fingerprint Backfill & Recovery Reconciliation",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
@@ -194,20 +194,20 @@
     "last_build": 275,
     "state": "EVIDENCE_DRIVEN_CAIP_RECOVERY_CONTINUITY_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 270,
-    "next_build_title": "Strong-Fingerprint Backfill & Recovery Reconciliation",
+    "next_build": 271,
+    "next_build_title": "Standalone / Social CAIP Project Workflow",
     "roadmap": "docs/operations/RELEASE_467_CAIP_RECOVERY_CONTINUITY_AUTONOMOUS_BUILDS_265_275.md",
     "reactivation_source": "BUILD264_REFINEMENT_OUTCOMES_RENEWAL_III"
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "139310232fb103cb2c843dc4d409ecdb7d4bb701",
-  "accepted_dev_tree_sha": "86f0a6c3e378944f0f97cbd32ff416d4abbe3767",
+  "accepted_dev_sha": "059aa3cf7854d075529ce976bb65ae2c1c6254fc",
+  "accepted_dev_tree_sha": "65b54187a47834a7a36a3f57b16f985eb5d4cb05",
   "acceptance": {
-    "system_gate_run": 36176223381,
-    "current_application_quality_run": 36176223395,
-    "it_admin_runtime_proof_run": 36176223268,
-    "branch_hygiene_run": 36176223158
+    "system_gate_run": 36180407045,
+    "current_application_quality_run": 36180407199,
+    "it_admin_runtime_proof_run": 36180406666,
+    "branch_hygiene_run": 36180407194
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
