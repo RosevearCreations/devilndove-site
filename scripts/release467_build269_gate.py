@@ -168,9 +168,12 @@ elif cur==270:
 elif cur==271:
     q((p.get('production_checkpoint') or {}).get('main_sha')=='9c3ed0664d71ab66a3087047b35989c5ed5b6904','Build 271 current Production baseline must be exact Build 270')
     q(int(p.get('next_build') or 0)>=272,'Build 271 must advance beyond Build 271 successor')
+elif cur==272:
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='fce84316c0b5b22781b2ee30d35b205d96b39c09','Build 272 current Production baseline must be exact Build 271')
+    q(int(p.get('next_build') or 0)>=273,'Build 272 must advance beyond Build 272 successor')
 else:
-    q((p.get('production_checkpoint') or {}).get('main_sha')=='fce84316c0b5b22781b2ee30d35b205d96b39c09','Build 272+ current Production baseline must be exact Build 271')
-    q(int(p.get('next_build') or 0)>=273,'Build 272+ must advance beyond Build 272 successor')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='e490a5a12f30d9046dda2a6e9ea9ee73ee33b48f','Build 273+ current Production baseline must be exact Build 272')
+    q(int(p.get('next_build') or 0)>=274,'Build 273+ must advance beyond Build 273 successor')
 
 s=a.get('safety') or {}
 q(s.get('schema_migration_artifact_added') is True,'Build 269 must record the bounded schema migration artifact')

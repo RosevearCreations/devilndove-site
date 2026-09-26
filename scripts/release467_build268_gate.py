@@ -66,10 +66,14 @@ elif cur==271:
     q((p.get('production_checkpoint') or {}).get('main_sha')=='9c3ed0664d71ab66a3087047b35989c5ed5b6904','Build 271 current Production baseline must be exact Build 270')
     q(int(p.get('next_build') or 0)>=272,'Build 271 must advance beyond the Build 271 successor')
     q((p.get('caip_private_media_recovery_hardening_closure') or {}).get('classification')=='RECOVERY_HARDENING_PREREQUISITES_CLOSED_BUILD269_FAIL_CLOSED_READY','Build 271 must retain Build 268 closure projection')
+elif cur==272:
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='fce84316c0b5b22781b2ee30d35b205d96b39c09','Build 272 current Production baseline must be exact Build 271')
+    q(int(p.get('next_build') or 0)>=273,'Build 272 must advance beyond the Build 272 successor')
+    q((p.get('caip_private_media_recovery_hardening_closure') or {}).get('classification')=='RECOVERY_HARDENING_PREREQUISITES_CLOSED_BUILD269_FAIL_CLOSED_READY','Build 272 must retain Build 268 closure projection')
 else:
-    q((p.get('production_checkpoint') or {}).get('main_sha')=='fce84316c0b5b22781b2ee30d35b205d96b39c09','Build 272+ current Production baseline must be exact Build 271')
-    q(int(p.get('next_build') or 0)>=273,'Build 272+ must advance beyond the Build 272 successor')
-    q((p.get('caip_private_media_recovery_hardening_closure') or {}).get('classification')=='RECOVERY_HARDENING_PREREQUISITES_CLOSED_BUILD269_FAIL_CLOSED_READY','Build 272+ must retain Build 268 closure projection')
+    q((p.get('production_checkpoint') or {}).get('main_sha')=='e490a5a12f30d9046dda2a6e9ea9ee73ee33b48f','Build 273+ current Production baseline must be exact Build 272')
+    q(int(p.get('next_build') or 0)>=274,'Build 273+ must advance beyond the Build 273 successor')
+    q((p.get('caip_private_media_recovery_hardening_closure') or {}).get('classification')=='RECOVERY_HARDENING_PREREQUISITES_CLOSED_BUILD269_FAIL_CLOSED_READY','Build 273+ must retain Build 268 closure projection')
 for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 268 safety drift: {k}')
 if F:
     print('RELEASE 467 BUILD 268 CAIP PRIVATE-MEDIA RECOVERY HARDENING CLOSURE: FAIL')

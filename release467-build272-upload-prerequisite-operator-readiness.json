@@ -2,7 +2,7 @@
   "release": 467,
   "build": 272,
   "title": "Upload Prerequisite & Operator Readiness",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build272-upload-prerequisite-operator-readiness",
   "predecessor": {
     "build": 271,
@@ -101,5 +101,29 @@
       "build_specific_proof_run": 36208228296,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "7cf4f6858c664a444499245a6b878491dceecb5f",
+    "tree_sha": "875f5cf60dd1118036f6bf5a18c0748e6e9b8d71",
+    "proofs": {
+      "system_gate_run": 36209187858,
+      "current_application_quality_run": 36209187822,
+      "it_admin_runtime_proof_run": 36209187867,
+      "branch_hygiene_run": 36209187908
+    },
+    "dedicated_gate_run": 36209187949,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "ingested_by_build": 273
+  },
+  "production_checkpoint": {
+    "main_sha": "e490a5a12f30d9046dda2a6e9ea9ee73ee33b48f",
+    "tree_sha": "875f5cf60dd1118036f6bf5a18c0748e6e9b8d71",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36209298966,
+    "production_live_resource_integrity_run": 36209339128,
+    "products_browser_proof_run": 36209339067,
+    "products_route_proof_run": 36209339102,
+    "build_specific_proof_run": 36209299044
   }
 }

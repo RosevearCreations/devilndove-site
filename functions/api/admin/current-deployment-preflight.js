@@ -1,23 +1,23 @@
-// Release 467 Build 272 — current read-only Deployment Preflight over exact Build 271 Production source.
+// Release 467 Build 273 — current read-only Deployment Preflight over exact Build 272 Production source.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=272;
-const TITLE='Upload Prerequisite & Operator Readiness';
+const BUILD=273;
+const TITLE='Content Studio Standalone-Project Bridge';
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
-const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 272 Upload Prerequisite Operator Readiness']);
+const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 273 Content Studio Standalone Project Bridge']);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:271,title:'Standalone / Social CAIP Project Workflow',state:'DEVELOPMENT_GREEN',
-  dev_sha:'af45e733b673af8e8d7e9acb7e55e35f525bebec',tree_sha:'f0da384a9d0be6f54d5e0b441f7aa333c158e69f',
-  system_gate_run:36208079958,current_application_quality_run:36208080087,it_admin_runtime_proof_run:36208080075,
-  branch_hygiene_run:36208080004,dedicated_gate_run:36208079968,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',exact_preview_deployment:true
+  release:467,build:272,title:'Upload Prerequisite & Operator Readiness',state:'DEVELOPMENT_GREEN',
+  dev_sha:'7cf4f6858c664a444499245a6b878491dceecb5f',tree_sha:'875f5cf60dd1118036f6bf5a18c0748e6e9b8d71',
+  system_gate_run:36209187858,current_application_quality_run:36209187822,it_admin_runtime_proof_run:36209187867,
+  branch_hygiene_run:36209187908,dedicated_gate_run:36209187949,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:271,title:'Standalone / Social CAIP Project Workflow',state:'PRODUCTION_GREEN',
-  main_sha:'fce84316c0b5b22781b2ee30d35b205d96b39c09',tree_sha:'f0da384a9d0be6f54d5e0b441f7aa333c158e69f',
-  production_pages_deploy_run:36208228266,production_live_resource_integrity_run:36208267834,
-  products_browser_proof_run:36208267848,products_route_proof_run:36208267804,build_specific_proof_run:36208228296
+  release:467,build:272,title:'Upload Prerequisite & Operator Readiness',state:'PRODUCTION_GREEN',
+  main_sha:'e490a5a12f30d9046dda2a6e9ea9ee73ee33b48f',tree_sha:'875f5cf60dd1118036f6bf5a18c0748e6e9b8d71',
+  production_pages_deploy_run:36209298966,production_live_resource_integrity_run:36209339128,
+  products_browser_proof_run:36209339067,products_route_proof_run:36209339102,build_specific_proof_run:36209299044
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true});
 const rows=(r)=>Array.isArray(r?.results)?r.results:[];
@@ -44,12 +44,12 @@ export async function onRequestGet(context){
     {status:truth.proof_recorded_count===23?'pass':'fail',code:'canonical_checksum_proofs',label:'Canonical migration proof rows',detail:truth.proof_recorded_count+'/23 proof rows recorded.'},
     {status:truth.foreign_key_violations===0?'pass':'fail',code:'canonical_foreign_keys',label:'D1 foreign-key integrity',detail:truth.foreign_key_violations+' violation(s).'},
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
-    {status:'pass',code:'build271_verified_baseline',label:'Build 271 verified restart baseline',detail:'Build 271 Standalone / Social CAIP Project Workflow is exact-tree Development and Production GREEN with all required named proofs.'},
-    {status:'pass',code:'build271_source_promotion',label:'Build 271 Production source promotion',detail:'Build 271 is on main fce84316c0b5b22781b2ee30d35b205d96b39c09 with the identical Development tree f0da384a9d0be6f54d5e0b441f7aa333c158e69f.'},
-    {status:'review',code:'build272_upload_prerequisite_readiness',label:'Build 272 Upload Prerequisite & Operator Readiness',detail:'Build 272 blocks local file selection and binary transfer until Build 241 tables, Build 269 duplicate-safe columns and the private R2 binding are proven.'}
+    {status:'pass',code:'build272_verified_baseline',label:'Build 272 verified restart baseline',detail:'Build 272 Upload Prerequisite & Operator Readiness is exact-tree Development and Production GREEN with all required named proofs.'},
+    {status:'pass',code:'build272_source_promotion',label:'Build 272 Production source promotion',detail:'Build 272 is on main e490a5a12f30d9046dda2a6e9ea9ee73ee33b48f with the identical Development tree 875f5cf60dd1118036f6bf5a18c0748e6e9b8d71.'},
+    {status:'review',code:'build273_content_studio_bridge',label:'Build 273 Content Studio Standalone-Project Bridge',detail:'Build 273 reuses an existing Creative Process identity and exactly one existing CAIP workspace for one Content Studio package; missing or conflicting identity fails closed.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
-  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:272,title:TITLE,authority:'release467-build272-upload-prerequisite-operator-readiness.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 271 is the exact fully verified Development and Production restart boundary.','Build 271 Development and Production share tree f0da384a9d0be6f54d5e0b441f7aa333c158e69f.','Canonical migration authority remains through data-only 0023.','Build 272 treats missing media prerequisites as blocked operator readiness before local selection or binary transfer; no automatic repair or false transfer failure is authorized.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
+  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:273,title:TITLE,authority:'release467-build273-content-studio-standalone-project-bridge.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 272 is the exact fully verified Development and Production restart boundary.','Build 272 Development and Production share tree 875f5cf60dd1118036f6bf5a18c0748e6e9b8d71.','Canonical migration authority remains through data-only 0023.','Build 273 reuses existing Creative Process and CAIP identity for one idempotent Content Studio package; missing, ambiguous or conflicting identity fails closed.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
   if(new URL(context.request.url).searchParams.get('format')==='markdown')return new Response(markdownReport(data),{status:200,headers:{'Content-Type':'text/markdown; charset=utf-8','Cache-Control':'no-store'}});
   return jsonResponse(data,200,{'Cache-Control':'no-store'});
 }

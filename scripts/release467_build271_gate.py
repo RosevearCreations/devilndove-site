@@ -97,8 +97,12 @@ else:
     q((a.get('final_closure') or {}).get('tree_sha')=='f0da384a9d0be6f54d5e0b441f7aa333c158e69f','Build 271 final Development tree mismatch')
     q((a.get('production_checkpoint') or {}).get('main_sha')=='fce84316c0b5b22781b2ee30d35b205d96b39c09','Build 271 final Production SHA mismatch')
     q((a.get('production_checkpoint') or {}).get('tree_sha')=='f0da384a9d0be6f54d5e0b441f7aa333c158e69f','Build 271 final Production tree mismatch')
-    q((p.get('production_checkpoint') or {}).get('main_sha')=='fce84316c0b5b22781b2ee30d35b205d96b39c09','Build 272+ current Production baseline must be exact Build 271')
-    q(int(p.get('next_build') or 0)>=273,'Build 272+ must advance beyond Build 272 successor')
+    if cur==272:
+        q((p.get('production_checkpoint') or {}).get('main_sha')=='fce84316c0b5b22781b2ee30d35b205d96b39c09','Build 272 current Production baseline must be exact Build 271')
+        q(int(p.get('next_build') or 0)>=273,'Build 272 must advance beyond Build 272 successor')
+    else:
+        q((p.get('production_checkpoint') or {}).get('main_sha')=='e490a5a12f30d9046dda2a6e9ea9ee73ee33b48f','Build 273+ current Production baseline must be exact Build 272')
+        q(int(p.get('next_build') or 0)>=274,'Build 273+ must advance beyond Build 273 successor')
 
 s=a.get('safety') or {}
 q(s.get('operator_triggered_caip_workspace_mapping') is True,'Build 271 must identify the explicit operator mapping')
