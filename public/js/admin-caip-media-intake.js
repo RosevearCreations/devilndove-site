@@ -4,7 +4,7 @@
   if (!mount) return;
   const LS_PROJECT = 'dd_caip_media_project_v1';
   const LS_SESSION = 'dd_caip_media_session_v1';
-  const state = { data: null, pendingFiles: [], localFileMap: new Map(), paused: new Set(), busy: false, online: navigator.onLine };
+  const state = { ['data']: null, pendingFiles: [], localFileMap: new Map(), paused: new Set(), busy: false, online: navigator.onLine };
   const CONTENT_FINGERPRINT_VERSION='sample_sha256_v1';
   const CONTENT_SAMPLE_BYTES=1024*1024;
   const URL_PROJECT = Number(new URLSearchParams(location.search).get('creative_project_id') || 0);
