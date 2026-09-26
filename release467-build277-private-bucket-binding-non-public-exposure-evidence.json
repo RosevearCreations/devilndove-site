@@ -1,0 +1,127 @@
+{
+  "release": 467,
+  "build": 277,
+  "title": "Private Bucket Binding & Non-Public Exposure Evidence",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build277-private-bucket-binding-non-public-exposure-evidence",
+  "predecessor": {
+    "build": 276,
+    "title": "CAIP Acceptance Evidence Freshness Baseline",
+    "development_sha": "073ee3cacb7e7b7cac70e0e23db9ebebf386099f",
+    "development_tree_sha": "baed3242d5757a83832ab8526f940c971983bd73",
+    "production_main_sha": "1bfcb248a8baf8cea42467a75c0dac53884ec5c3",
+    "production_tree_sha": "baed3242d5757a83832ab8526f940c971983bd73",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36214675702,
+      "current_application_quality_run": 36214675663,
+      "it_admin_runtime_proof_run": 36214675743,
+      "branch_hygiene_run": 36214675846,
+      "dedicated_gate_run": 36214675710
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36214858334,
+      "production_live_resource_integrity_run": 36214894567,
+      "products_browser_proof_run": 36214894586,
+      "products_route_proof_run": 36214894631,
+      "build_specific_proof_run": 36214858270
+    }
+  },
+  "evidence_contract": {
+    "lane": "caip_private_media",
+    "current_lane_state": "EVIDENCE_DEPENDENT",
+    "dimension": "deployed_private_bucket_binding_non_public_exposure",
+    "proof_transport": "CLOUDFLARE_CONTROL_PLANE_PLUS_UNAUTHENTICATED_LIVE_PROXY",
+    "pages_binding_key": "CAIP_PRIVATE_MEDIA_BUCKET",
+    "pages_binding_must_match_production_environment": true,
+    "managed_r2_dev_public_access_expected": false,
+    "enabled_custom_domain_count_expected": 0,
+    "unauthenticated_review_proxy_expected_status": 401,
+    "permissive_cors_forbidden": true,
+    "secure_review_source_requires_admin_session": true,
+    "secure_review_success_headers": [
+      "Cache-Control: private, no-store",
+      "Cross-Origin-Resource-Policy: same-origin",
+      "Referrer-Policy: no-referrer",
+      "X-Frame-Options: DENY"
+    ],
+    "object_listing_permitted": false,
+    "object_download_permitted": false,
+    "r2_mutation_permitted": false,
+    "d1_business_query_permitted": false,
+    "secret_value_capture": false,
+    "bucket_presence_alone_is_acceptance": false,
+    "runtime_green_effect": "CURRENT_RELEASE_PRIVATE_BUCKET_NON_PUBLIC_EXPOSURE_DIMENSION_SATISFIED",
+    "fresh_dimensions_after_runtime_green": 1,
+    "required_dimensions_total": 3,
+    "overall_lane_after_runtime_green": "EVIDENCE_DEPENDENT",
+    "remaining_dimensions_after_runtime_green": [
+      "authenticated_private_review_range_streaming",
+      "multipart_interruption_reconnect_reselection_resume"
+    ]
+  },
+  "decision": {
+    "build277_complete_when": "The dedicated current-release workflow proves the Production Pages CAIP private R2 binding, disabled r2.dev exposure, zero enabled R2 custom domains, and unauthenticated denial at the same-origin secure-review proxy while publishing only sanitized evidence.",
+    "next_build": 278,
+    "next_build_title": "Authenticated Private Review & Range-Streaming Acceptance Refresh",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "r2_object_list": false,
+    "r2_object_download": false,
+    "private_media_upload": false,
+    "private_media_delete": false,
+    "public_media_copy": false,
+    "public_bucket_enable": false,
+    "custom_domain_enable": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "payment_or_refund": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false,
+    "named_proof_requirement_relaxed": false
+  },
+  "implementation": {
+    "evidence_document": "docs/operations/RELEASE_467_BUILD_277_PRIVATE_BUCKET_BINDING_NON_PUBLIC_EXPOSURE_EVIDENCE.md",
+    "dedicated_gate": "scripts/release467_build277_gate.py",
+    "workflow": ".github/workflows/release467-build277-private-bucket-binding-non-public-exposure-evidence.yml",
+    "roadmap": "docs/operations/RELEASE_467_CAIP_PRODUCTION_ACCEPTANCE_AUTONOMOUS_BUILDS_276_284.md"
+  },
+  "starting_point": {
+    "development": {
+      "sha": "073ee3cacb7e7b7cac70e0e23db9ebebf386099f",
+      "tree": "baed3242d5757a83832ab8526f940c971983bd73",
+      "system_gate_run": 36214675702,
+      "quality_run": 36214675663,
+      "current_application_quality_run": 36214675663,
+      "it_admin_runtime_run": 36214675743,
+      "it_admin_runtime_proof_run": 36214675743,
+      "repository_hygiene_run": 36214675846,
+      "branch_hygiene_run": 36214675846,
+      "dedicated_gate_run": 36214675710,
+      "build_specific_proof_run": 36214675710,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "1bfcb248a8baf8cea42467a75c0dac53884ec5c3",
+      "tree_sha": "baed3242d5757a83832ab8526f940c971983bd73",
+      "production_pages_deploy_run": 36214858334,
+      "production_live_resource_integrity_run": 36214894567,
+      "products_browser_proof_run": 36214894586,
+      "products_route_proof_run": 36214894631,
+      "build_specific_proof_run": 36214858270,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
+  }
+}

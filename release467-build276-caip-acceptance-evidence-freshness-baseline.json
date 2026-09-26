@@ -2,7 +2,7 @@
   "release": 467,
   "build": 276,
   "title": "CAIP Acceptance Evidence Freshness Baseline",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build276-caip-acceptance-evidence-freshness-baseline",
   "predecessor": {
     "build": 275,
@@ -127,5 +127,32 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_development": true
     }
+  },
+  "final_closure": {
+    "dev_sha": "073ee3cacb7e7b7cac70e0e23db9ebebf386099f",
+    "tree_sha": "baed3242d5757a83832ab8526f940c971983bd73",
+    "proofs": {
+      "system_gate_run": 36214675702,
+      "current_application_quality_run": 36214675663,
+      "it_admin_runtime_proof_run": 36214675743,
+      "branch_hygiene_run": 36214675846
+    },
+    "dedicated_gate_run": 36214675710,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "ingested_by_build": 277,
+    "recorded_by": "Build 277 startup ingestion; not self-recorded by Build 276"
+  },
+  "production_checkpoint": {
+    "main_sha": "1bfcb248a8baf8cea42467a75c0dac53884ec5c3",
+    "tree_sha": "baed3242d5757a83832ab8526f940c971983bd73",
+    "production_pages_deploy_run": 36214858334,
+    "production_live_resource_integrity_run": 36214894567,
+    "products_browser_proof_run": 36214894586,
+    "products_route_proof_run": 36214894631,
+    "build_specific_proof_run": 36214858270,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "ingested_by_build": 277,
+    "recorded_by": "Build 277 startup ingestion; not self-recorded by Build 276"
   }
 }
