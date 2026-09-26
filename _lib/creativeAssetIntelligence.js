@@ -369,6 +369,82 @@ export async function ensureCreativeAssetIntelligenceSchema(db) {
   }
 }
 
+export async function ensureCreativeProjectFromCreativeWorkProject(db, creativeWorkProjectId, actorUserId = null) {
+  await ensureCreativeAssetIntelligenceSchema(db);
+  const workId = integer(creativeWorkProjectId);
+  if (!workId) throw new Error('Choose an existing Creative Process project first.');
+  const source = await db.prepare(`SELECT creative_work_project_id,project_key,project_title,project_type,project_status,
+      summary,objective,story_angle,product_id,privacy_status,rights_status,updated_at
+    FROM creative_work_projects WHERE creative_work_project_id=? LIMIT 1`).bind(workId).first();
+  if (!source) throw new Error('Creative Process project was not found.');
+  if (text(source.project_status).toLowerCase() === 'archived') throw new Error('Archived Creative Process projects cannot create a new CAIP workspace.');
+
+  const sourceId = String(workId);
+  const existing = await db.prepare(`SELECT creative_project_id,content_project_id,policy_profile_json
+    FROM creative_projects WHERE source_type='creative_work_project' AND source_id=? LIMIT 1`).bind(sourceId).first();
+  const key = `caip-work-${workId}-${slug(source.project_key || source.project_title)}`;
+  const snapshot = {
+    creative_work_project_id: workId,
+    project_key: source.project_key,
+    project_title: source.project_title,
+    project_type: source.project_type,
+    project_status: source.project_status,
+    summary: source.summary || null,
+    objective: source.objective || null,
+    story_angle: source.story_angle || null,
+    product_id: integer(source.product_id) || null,
+    privacy_status: source.privacy_status || null,
+    rights_status: source.rights_status || null,
+    source_updated_at: source.updated_at || null,
+    workflow_build: 271,
+    synced_at: new Date().toISOString()
+  };
+  const policy = {
+    ...safeJson(existing?.policy_profile_json, {}),
+    standalone_social_project: true,
+    creative_process_identity_authoritative: true,
+    product_optional: true,
+    fake_product_forbidden: true,
+    content_studio_package_optional: true,
+    private_media_authority: 'caip',
+    evidence_story_authority: 'caip',
+    content_package_authority: 'content_studio',
+    publication_requires_explicit_release_approval: true,
+    no_auto_publish: true,
+    no_implicit_rights: true,
+    human_review_required: true,
+    workflow_build: 271
+  };
+
+  await db.prepare(`
+    INSERT INTO creative_projects (
+      creative_project_key, content_project_id, source_type, source_id, product_id, project_title,
+      project_status, governance_status, lifecycle_stage, source_snapshot_json, policy_profile_json,
+      created_by_user_id, created_at, updated_at
+    ) VALUES (?, NULL, 'creative_work_project', ?, ?, ?, 'intake', 'needs_review', 'intake', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ON CONFLICT(source_type, source_id) DO UPDATE SET
+      creative_project_key=excluded.creative_project_key,
+      product_id=excluded.product_id,
+      project_title=excluded.project_title,
+      source_snapshot_json=excluded.source_snapshot_json,
+      policy_profile_json=excluded.policy_profile_json,
+      updated_at=CURRENT_TIMESTAMP
+  `).bind(key, sourceId, integer(source.product_id) || null, text(source.project_title, 180) || `Creative Project ${workId}`,
+    JSON.stringify(snapshot), JSON.stringify(policy), integer(actorUserId) || null).run();
+
+  const project = await db.prepare(`SELECT * FROM creative_projects WHERE source_type='creative_work_project' AND source_id=? LIMIT 1`).bind(sourceId).first();
+  await writeEvent(db, project.creative_project_id, existing ? 'standalone_project_refreshed' : 'standalone_project_opened', actorUserId, {
+    creative_work_project_id: workId,
+    product_id: integer(source.product_id) || null,
+    content_project_id: integer(project.content_project_id) || null,
+    product_created: false,
+    content_project_created: false,
+    private_media_unchanged: true,
+    build: 271
+  });
+  return { project, creative_work_project: source, created: !existing, product_created: false, content_project_created: false };
+}
+
 export async function syncCreativeProjectFromContentProject(db, contentProjectId, actorUserId = null, options = {}) {
   await ensureCreativeAssetIntelligenceSchema(db);
   const content = await latestContentContext(db, contentProjectId);
@@ -414,17 +490,36 @@ export async function listCreativeAssetProjects(db) {
     LEFT JOIN creative_projects caip ON caip.content_project_id=csp.content_project_id
     ORDER BY csp.updated_at DESC, csp.content_project_id DESC LIMIT 120
   `).all());
-  return { projects, content_projects: available };
+  const workProjects = rows(await db.prepare(`
+    SELECT cwp.creative_work_project_id,cwp.project_key,cwp.project_title,cwp.project_type,cwp.project_status,
+      cwp.product_id,cwp.updated_at,
+      caip.creative_project_id,caip.content_project_id AS caip_content_project_id,
+      csp.content_project_id AS content_project_id
+    FROM creative_work_projects cwp
+    LEFT JOIN creative_projects caip
+      ON caip.source_type='creative_work_project' AND caip.source_id=CAST(cwp.creative_work_project_id AS TEXT)
+    LEFT JOIN content_projects csp
+      ON csp.source_type='creative_project' AND csp.source_id=CAST(cwp.creative_work_project_id AS TEXT)
+    WHERE COALESCE(cwp.project_status,'active')<>'archived'
+    ORDER BY cwp.updated_at DESC,cwp.creative_work_project_id DESC LIMIT 120
+  `).all().catch(() => ({results:[]})));
+  return { projects, content_projects: available, creative_work_projects: workProjects };
 }
 
 export async function getCreativeProjectDetail(db, creativeProjectId) {
   await ensureCreativeAssetIntelligenceSchema(db);
   const project = await db.prepare(`
     SELECT cp.*, csp.content_project_key, csp.project_title AS content_project_title, csp.factual_summary,
-      p.name AS product_name, p.slug AS product_slug, p.featured_image_url, p.product_category
+      p.name AS product_name, p.slug AS product_slug, p.featured_image_url, p.product_category,
+      cwp.creative_work_project_id,cwp.project_key AS creative_work_project_key,
+      cwp.project_title AS creative_work_project_title,cwp.project_type AS creative_work_project_type,
+      cwp.project_status AS creative_work_project_status,cwp.summary AS creative_work_summary,
+      cwp.objective AS creative_work_objective,cwp.story_angle AS creative_work_story_angle
     FROM creative_projects cp
     LEFT JOIN content_projects csp ON csp.content_project_id=cp.content_project_id
     LEFT JOIN products p ON p.product_id=cp.product_id
+    LEFT JOIN creative_work_projects cwp
+      ON cp.source_type='creative_work_project' AND cp.source_id=CAST(cwp.creative_work_project_id AS TEXT)
     WHERE cp.creative_project_id=? LIMIT 1
   `).bind(integer(creativeProjectId)).first();
   if (!project) return null;
