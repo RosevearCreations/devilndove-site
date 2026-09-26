@@ -86,15 +86,31 @@ document.addEventListener('DOMContentLoaded', () => {
   function creativeProjectOptions() {
     const options = state.creativeProjects.map((project) => {
       const hasPackage = Number(project.content_project_id || 0) > 0;
+      const caipCount = Number(project.caip_workspace_count || 0);
       const media = Number(project.caip_asset_count || 0);
       const evidence = Number(project.selected_evidence_count || 0);
-      return `<option value="${esc(project.creative_work_project_id)}">${esc(project.project_title || project.project_key || 'Creative Project')} — ${media} CAIP asset${media===1?'':'s'} • ${evidence} selected evidence${hasPackage?' • package exists':''}</option>`;
+      const bridge = caipCount === 1 ? (hasPackage ? 'CAIP ready • package exists' : 'CAIP ready • package missing') : caipCount === 0 ? 'CAIP workspace required' : 'CAIP identity conflict';
+      return `<option value="${esc(project.creative_work_project_id)}" data-caip-count="${caipCount}" data-package-id="${esc(project.content_project_id||'')}">${esc(project.project_title || project.project_key || 'Creative Project')} — ${media} CAIP asset${media===1?'':'s'} • ${evidence} selected evidence • ${bridge}</option>`;
     }).join('');
     return `<option value="">Choose an existing Creative Process project…</option>${options}`;
   }
+  function selectedCreativeBridge() {
+    const select=byId('contentCreativeProjectSelect');
+    const option=select?.selectedOptions?.[0];
+    const id=Number(select?.value||0);
+    return {id,caipCount:Number(option?.dataset?.caipCount||0),packageId:Number(option?.dataset?.packageId||0)};
+  }
+  function refreshCreativeBridgeButton() {
+    const button=byId('createCreativeProjectPackage');
+    if(!button)return;
+    const bridge=selectedCreativeBridge();
+    const ready=bridge.id>0&&bridge.caipCount===1;
+    button.disabled=!ready;
+    button.textContent=!bridge.id?'Choose a project first':bridge.caipCount===0?'Open CAIP workspace first':bridge.caipCount>1?'Resolve CAIP identity first':bridge.packageId?'Refresh existing package':'Create package from existing CAIP';
+  }
 
   function creativeProjectPanel() {
-    return `<div class="content-source-panel"><h3>Creative Process projects</h3><p class="small">Use this for Gray Hair and other standalone/social projects. This creates or refreshes a Content Studio package from the existing project—it does <strong>not</strong> create another Creative Project.</p><label><span class="small">Find project</span><input class="input" type="search" id="contentCreativeProjectSearch" placeholder="Type Gray Hair, project key, or project type…"/></label><label><span class="small">Existing Creative Process project</span><select class="input" id="contentCreativeProjectSelect">${creativeProjectOptions()}</select></label><button class="btn primary" type="button" id="createCreativeProjectPackage">Create / refresh package from this project</button></div>`;
+    return `<div class="content-source-panel"><h3>Creative Process → CAIP → Content Studio</h3><p class="small">Build 273 reuses one existing Creative Process identity and its existing CAIP workspace. Content Studio may create or refresh the package, but it will never create a replacement Creative Process project or CAIP workspace just because the package is missing.</p><label><span class="small">Find project</span><input class="input" type="search" id="contentCreativeProjectSearch" placeholder="Type project name, key, or type…"/></label><label><span class="small">Existing Creative Process project</span><select class="input" id="contentCreativeProjectSelect">${creativeProjectOptions()}</select></label><button class="btn primary" type="button" id="createCreativeProjectPackage" disabled>Choose a project first</button><p class="small">If CAIP is missing or ambiguous, open/reconcile the existing project in CAIP first. This screen fails closed instead of creating a duplicate project identity.</p></div>`;
   }
 
   function projectList() {
@@ -299,12 +315,13 @@ document.addEventListener('DOMContentLoaded', () => {
   async function createOrRefreshCreativeProjectPackage(projectId, refreshCopy = false) {
     const id = Number(projectId || 0);
     if (!id) throw new Error('Choose an existing Creative Process project first.');
-    message('Linking the existing Creative Process project, CAIP media references, and Content Studio outputs…');
+    const bridge=state.creativeProjects.find((project)=>Number(project.creative_work_project_id||0)===id); const caipCount=Number(bridge?.caip_workspace_count||0); if(caipCount!==1)throw new Error(caipCount===0?'Open the existing Creative Process project in CAIP first. Content Studio will not create a replacement CAIP workspace.':'Resolve the CAIP project identity before creating or refreshing a Content Studio package.');
+    message('Reusing the existing Creative Process identity and CAIP workspace for the Content Studio package…');
     const data = await request({ action: 'create_from_creative_project', creative_work_project_id: id, refresh_copy: refreshCopy ? 1 : 0 });
     applyData(data, false);
     state.requestedCreativeProjectId = id;
     render();
-    message(`Content package ready. ${Number(data.result?.caip_media_count||0)} CAIP source reference${Number(data.result?.caip_media_count||0)===1?'':'s'} linked; ${Number(data.result?.evidence_count||0)} reviewed timeline evidence entr${Number(data.result?.evidence_count||0)===1?'y':'ies'} included.`, 'success');
+    const outcome=data.result?.bridge_outcome==='refreshed_existing_package'?'Existing package refreshed':'Package created for the existing project identity'; message(`${outcome}. ${Number(data.result?.caip_media_count||0)} CAIP source reference${Number(data.result?.caip_media_count||0)===1?'':'s'} linked; ${Number(data.result?.evidence_count||0)} reviewed timeline evidence entr${Number(data.result?.evidence_count||0)===1?'y':'ies'} included. No duplicate Creative Process or CAIP project was created.`, 'success');
   }
 
   function filterSelectOptions(select, query) {
@@ -315,6 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function bind() {
     byId('createCreativeProjectPackage')?.addEventListener('click', () => createOrRefreshCreativeProjectPackage(byId('contentCreativeProjectSelect')?.value).catch((error) => message(error.message, 'error')));
+    byId('contentCreativeProjectSelect')?.addEventListener('change', refreshCreativeBridgeButton); refreshCreativeBridgeButton();
     byId('refreshCreativeProjectPackage')?.addEventListener('click', () => createOrRefreshCreativeProjectPackage(state.detail?.creative_process_project?.creative_work_project_id || state.detail?.project?.source_id).catch((error) => message(error.message, 'error')));
     byId('contentCreativeProjectSearch')?.addEventListener('input', (event) => filterSelectOptions(byId('contentCreativeProjectSelect'), event.target.value));
     byId('contentPackageSearch')?.addEventListener('input', (event) => { const q=plain(event.target.value).toLowerCase(); mount.querySelectorAll('[data-open-project]').forEach((node)=>{ node.hidden = Boolean(q) && !plain(node.textContent).toLowerCase().includes(q); }); });
