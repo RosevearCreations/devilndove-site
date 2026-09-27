@@ -2,7 +2,7 @@
   "release": 467,
   "build": 279,
   "title": "Multipart Interruption & Resume Acceptance Drill",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build279-multipart-interruption-resume-acceptance-drill",
   "predecessor": {
     "build": 278,
@@ -141,5 +141,33 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_development": true
     }
+  },
+  "final_closure": {
+    "dev_sha": "16cf66164f95d8716da9d61d89833012a5efe2c1",
+    "tree_sha": "1c4d9091146915574bac1bc3466bab44e2347269",
+    "proofs": {
+      "system_gate_run": 36249725505,
+      "current_application_quality_run": 36249725434,
+      "it_admin_runtime_proof_run": 36249725489,
+      "branch_hygiene_run": 36249725470
+    },
+    "dedicated_gate_run": 36249725485,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "exact_preview_deployment": true,
+    "ingested_by_build": 280,
+    "recorded_by": "Build 280 startup ingestion; not self-recorded by Build 279"
+  },
+  "production_checkpoint": {
+    "main_sha": "048c67562efc20892cf9652841edd6b0b1a845d6",
+    "tree_sha": "1c4d9091146915574bac1bc3466bab44e2347269",
+    "production_pages_deploy_run": 36249900945,
+    "production_live_resource_integrity_run": 36249947458,
+    "products_browser_proof_run": 36249947466,
+    "products_route_proof_run": 36249947674,
+    "build_specific_proof_run": 36249900929,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "ingested_by_build": 280,
+    "recorded_by": "Build 280 startup ingestion; not self-recorded by Build 279"
   }
 }

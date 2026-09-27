@@ -1,0 +1,139 @@
+{
+  "release": 467,
+  "build": 280,
+  "title": "Private-Media Reconciliation & Recovery Outcome Review",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build280-private-media-reconciliation-recovery-outcome-review",
+  "predecessor": {
+    "build": 279,
+    "title": "Multipart Interruption & Resume Acceptance Drill",
+    "development_sha": "16cf66164f95d8716da9d61d89833012a5efe2c1",
+    "development_tree_sha": "1c4d9091146915574bac1bc3466bab44e2347269",
+    "production_main_sha": "048c67562efc20892cf9652841edd6b0b1a845d6",
+    "production_tree_sha": "1c4d9091146915574bac1bc3466bab44e2347269",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36249725505,
+      "current_application_quality_run": 36249725434,
+      "it_admin_runtime_proof_run": 36249725489,
+      "branch_hygiene_run": 36249725470,
+      "dedicated_gate_run": 36249725485
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36249900945,
+      "production_live_resource_integrity_run": 36249947458,
+      "products_browser_proof_run": 36249947466,
+      "products_route_proof_run": 36249947674,
+      "build_specific_proof_run": 36249900929
+    }
+  },
+  "outcome_review": {
+    "lane": "caip_private_media",
+    "current_lane_state": "ACCEPTED",
+    "source_builds": [
+      267,
+      269,
+      270,
+      279
+    ],
+    "strong_fingerprint_backfill": {
+      "version": "sample_sha256_v1",
+      "max_rows_per_request": 20,
+      "operator_default_rows": 8,
+      "exact_r2_head_size_before_metadata_repair": true,
+      "ranged_fingerprint_reads": true,
+      "existing_uploaded_unregistered_registration_retry": true,
+      "registration_requires_strong_fingerprint": true,
+      "integrity_failure_markers_excluded": true,
+      "automatic_reconciliation": false
+    },
+    "duplicate_and_orphan_classification": {
+      "strong_duplicate_identity": "same_project + content_fingerprint + exact_size",
+      "legacy_duplicate_identity": "same_project + legacy_file_fingerprint + exact_size",
+      "binary_equivalence_requires_verified_equal_checksums": true,
+      "uploaded_without_asset_is_not_safe_orphan": true,
+      "object_without_d1_is_candidate_not_delete_authority": true,
+      "cleanup_inferred_from_classification": false
+    },
+    "recovery_integrity": {
+      "recovery_lineage_preserved": true,
+      "recovery_parent_must_exist": true,
+      "recovery_parent_same_project": true,
+      "recovery_object_identity_distinct": true,
+      "integrity_failed_binary_preserved": true,
+      "completed_raw_original_immutable": true,
+      "uncertain_binary_preserved": true
+    },
+    "build279_acceptance": {
+      "fresh_dimensions": "3/3",
+      "lane_state": "ACCEPTED",
+      "exact_active_multipart_aborted": true,
+      "finalized_drill_object_retained": false,
+      "production_r2_contact": false
+    },
+    "conclusion": "Current private-media acceptance remains ACCEPTED. Existing reconciliation and recovery controls are operator-bounded and fail closed; classification alone authorizes no deletion or cleanup."
+  },
+  "decision": {
+    "build280_complete_when": "Exact Build 279 closure is ingested and reconciliation/recovery outcomes are reviewed against strong-fingerprint, duplicate/orphan, integrity-failure and recovery-lineage contracts without destructive cleanup or Production media mutation.",
+    "next_build": 281,
+    "next_build_title": "Standalone / Social Project Operator Acceptance",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_upload": false,
+    "private_media_delete": false,
+    "uncertain_r2_delete": false,
+    "duplicate_cleanup_execution": false,
+    "orphan_cleanup_execution": false,
+    "public_media_copy": false,
+    "automatic_reconciliation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "payment_or_refund": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false,
+    "named_proof_requirement_relaxed": false
+  },
+  "implementation": {
+    "evidence_document": "docs/operations/RELEASE_467_BUILD_280_PRIVATE_MEDIA_RECONCILIATION_RECOVERY_OUTCOME_REVIEW.md",
+    "dedicated_gate": "scripts/release467_build280_gate.py",
+    "workflow": ".github/workflows/release467-build280-private-media-reconciliation-recovery-outcome-review.yml",
+    "roadmap": "docs/operations/RELEASE_467_CAIP_PRODUCTION_ACCEPTANCE_AUTONOMOUS_BUILDS_276_284.md"
+  },
+  "starting_point": {
+    "development": {
+      "sha": "16cf66164f95d8716da9d61d89833012a5efe2c1",
+      "tree": "1c4d9091146915574bac1bc3466bab44e2347269",
+      "system_gate_run": 36249725505,
+      "current_application_quality_run": 36249725434,
+      "it_admin_runtime_proof_run": 36249725489,
+      "branch_hygiene_run": 36249725470,
+      "dedicated_gate_run": 36249725485,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+      "quality_run": 36249725434,
+      "it_admin_runtime_run": 36249725489,
+      "repository_hygiene_run": 36249725470
+    },
+    "production": {
+      "main_sha": "048c67562efc20892cf9652841edd6b0b1a845d6",
+      "tree_sha": "1c4d9091146915574bac1bc3466bab44e2347269",
+      "production_pages_deploy_run": 36249900945,
+      "production_live_resource_integrity_run": 36249947458,
+      "products_browser_proof_run": 36249947466,
+      "products_route_proof_run": 36249947674,
+      "build_specific_proof_run": 36249900929,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
+  }
+}

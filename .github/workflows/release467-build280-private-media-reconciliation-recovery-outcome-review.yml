@@ -1,0 +1,48 @@
+name: Release 467 Build 280 Private-Media Reconciliation Recovery Outcome Review
+on:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build280:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 279 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 16cf66164f95d8716da9d61d89833012a5efe2c1
+          production_sha: 048c67562efc20892cf9652841edd6b0b1a845d6
+          build_proof_name: Release 467 Build 279 Multipart Interruption Resume Acceptance Drill
+          report_path: /tmp/build280-predecessor-exact-sha-proof.json
+      - name: Resolve exact Build 279 tree continuity
+        run: |
+          git fetch --no-tags --depth=1 origin 16cf66164f95d8716da9d61d89833012a5efe2c1
+          git fetch --no-tags --depth=1 origin 048c67562efc20892cf9652841edd6b0b1a845d6
+          DEV_TREE="$(git rev-parse 16cf66164f95d8716da9d61d89833012a5efe2c1^{tree})"
+          PROD_TREE="$(git rev-parse 048c67562efc20892cf9652841edd6b0b1a845d6^{tree})"
+          test "$DEV_TREE" = "$PROD_TREE"
+          test "$DEV_TREE" = "1c4d9091146915574bac1bc3466bab44e2347269"
+      - name: Build 280 gate
+        run: python scripts/release467_build280_gate.py
+      - name: Retain Build 279 acceptance contract
+        run: python scripts/release467_build279_gate.py
+      - name: Retain Build 270 reconciliation contract
+        run: python scripts/release467_build270_gate.py
+      - name: Retain Build 267 classification contract
+        run: python scripts/release467_build267_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build280-private-media-reconciliation-recovery-outcome-review-evidence-${{ github.sha }}
+          path: /tmp/build280-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30
