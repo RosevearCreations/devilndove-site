@@ -42,8 +42,7 @@ export async function onRequestGet(context) {
     if (data.not_found) return json({ ...data, ok: false, error: 'Content project not found.' }, 404);
     return json({ provenance_build: CONTENT_STUDIO_BUILD, ...data });
   } catch (error) {
-    const bridgeBlocked=action==='create_from_creative_project' && String(error?.message||'').toLowerCase().includes('content studio bridge blocked');
-    if(!bridgeBlocked) await captureRuntimeIncident(context.env, context.request, {
+    await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'content_automation_studio', incident_code: 'content_studio_get_failed', severity: 'error',
       message: error?.message || 'Content Automation Studio failed to load.', related_user_id: adminUser.user_id,
       details: { release: RELEASE, provenance_build: 355, error: String(error?.stack || error?.message || error), request_time_schema_mutation: false }
@@ -179,7 +178,8 @@ export async function onRequestPost(context) {
     const listing = await listContentStudioProjects(db);
     return json({ ok: true, message: 'Release 448 Content Automation Studio saved.', provenance_build: CONTENT_STUDIO_BUILD, result, detail, ...listing, mode: 'review_first_no_auto_publish' });
   } catch (error) {
-    await captureRuntimeIncident(context.env, context.request, {
+    const bridgeBlocked=action==='create_from_creative_project' && String(error?.message||'').toLowerCase().includes('content studio bridge blocked');
+    if(!bridgeBlocked) await captureRuntimeIncident(context.env, context.request, {
       incident_scope: 'content_automation_studio', incident_code: 'content_studio_post_failed', severity: 'warning',
       message: error?.message || 'Content Automation Studio could not save.', related_user_id: adminUser.user_id,
       details: { release: RELEASE, provenance_build: CONTENT_STUDIO_BUILD, action, project_id: projectId || null, error: String(error?.stack || error?.message || error), render_readiness: error?.readiness || null }

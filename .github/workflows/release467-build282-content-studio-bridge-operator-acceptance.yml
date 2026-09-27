@@ -1,0 +1,126 @@
+name: Release 467 Build 282 Content Studio Bridge Operator Acceptance
+on:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build282:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    env:
+      DND_CONFIGURED_SESSION_COOKIE: ${{ secrets.DND_DEV_SESSION_COOKIE }}
+      CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      BUILD282_EXACT_DEV_BASE_URL: ''
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 2 }
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      - name: Recover exact Build 281 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 259cce5ced48e1ef0fb3d88937a53105156d1b34
+          production_sha: 707ecef36d8e6fbdcee2d15809441fafd8573ac4
+          build_proof_name: Release 467 Build 281 Standalone Social Project Operator Acceptance
+          report_path: /tmp/build282-predecessor-exact-sha-proof.json
+      - name: Resolve exact Build 281 tree continuity
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 259cce5ced48e1ef0fb3d88937a53105156d1b34
+          git fetch --no-tags --depth=1 origin 707ecef36d8e6fbdcee2d15809441fafd8573ac4
+          test "$(git rev-parse 259cce5ced48e1ef0fb3d88937a53105156d1b34^{tree})" = "$(git rev-parse 707ecef36d8e6fbdcee2d15809441fafd8573ac4^{tree})"
+          test "$(git rev-parse 259cce5ced48e1ef0fb3d88937a53105156d1b34^{tree})" = "7987af6909f73573cbc00b2229a73155bdecc67e"
+      - name: Build 282 source contract
+        run: python scripts/release467_build282_gate.py
+      - name: Retain Build 281 operator acceptance contract
+        run: python scripts/release467_build281_gate.py
+      - name: Retain Build 273 Content Studio bridge contract
+        run: python scripts/release467_build273_gate.py
+      - name: Wait for exact Development System Gate
+        if: ${{ github.ref_name == 'dev' }}
+        env: { GH_TOKEN: ${{ github.token }} }
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 90); do
+            curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${GITHUB_SHA}&per_page=100" > /tmp/build282-runs.json
+            state="$(python - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/build282-runs.json'));rows=[r for r in data.get('workflow_runs',[]) if r.get('name')=='System Gate' and r.get('head_sha')==os.environ['GITHUB_SHA']];rows.sort(key=lambda r:str(r.get('created_at') or ''),reverse=True)
+          if not rows:print('WAIT')
+          else:
+              r=rows[0]
+              if r.get('status')!='completed':print('WAIT')
+              elif r.get('conclusion')=='success':print('GREEN:'+str(r.get('id')))
+              else:print('FAIL:'+str(r.get('id'))+':'+str(r.get('conclusion')))
+          PY
+          )"
+            case "$state" in
+              GREEN:*) echo "BUILD282_SYSTEM_GATE_RUN=${state#GREEN:}" >> "$GITHUB_ENV"; exit 0 ;;
+              FAIL:*) echo "STOP: exact Development System Gate is not GREEN: $state"; exit 1 ;;
+              *) sleep 10 ;;
+            esac
+          done
+          echo 'STOP: timed out waiting for exact Development System Gate.'; exit 1
+      - name: Prove exact Development deployment artifact
+        if: ${{ github.ref_name == 'dev' }}
+        env: { GH_TOKEN: ${{ github.token }} }
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs/${BUILD282_SYSTEM_GATE_RUN}/artifacts" > /tmp/build282-artifacts.json
+          ARTIFACT_ID="$(python - <<'PY'
+          import json
+          d=json.load(open('/tmp/build282-artifacts.json'));rows=[a for a in d.get('artifacts',[]) if a.get('name')=='current-development-deploy-proof' and not a.get('expired')];print(rows[0]['id'] if rows else '')
+          PY
+          )"
+          test -n "$ARTIFACT_ID"
+          curl -fsSL -L -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip" -o /tmp/build282-deploy.zip
+          rm -rf /tmp/build282-deploy && mkdir -p /tmp/build282-deploy && unzip -q /tmp/build282-deploy.zip -d /tmp/build282-deploy
+          python - <<'PY'
+          import glob,json,os
+          p=glob.glob('/tmp/build282-deploy/**/current-development-deploy-proof.json',recursive=True);assert p,p
+          d=json.load(open(p[0]));assert d.get('status')=='PASS' and d.get('source_sha')==os.environ['GITHUB_SHA'],d
+          url=str(d.get('url') or '').strip();assert d.get('environment')=='preview' and d.get('branch')=='dev' and url.startswith('https://') and '.devilndove-site.pages.dev' in url,d
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('BUILD282_EXACT_DEV_BASE_URL='+url+'\n')
+          PY
+      - name: Validate Cloudflare Access credential pairing
+        if: ${{ github.ref_name == 'dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if { [ -n "${CF_ACCESS_CLIENT_ID}" ] && [ -z "${CF_ACCESS_CLIENT_SECRET}" ]; } || { [ -z "${CF_ACCESS_CLIENT_ID}" ] && [ -n "${CF_ACCESS_CLIENT_SECRET}" ]; }; then exit 1; fi
+      - name: Execute real Content Studio bridge operator acceptance
+        if: ${{ github.ref_name == 'dev' }}
+        run: python scripts/release467_build282_operator_acceptance.py
+      - name: Upload sanitized Build 282 operator evidence
+        if: ${{ github.ref_name == 'dev' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build282-content-studio-bridge-operator-acceptance-evidence
+          path: /tmp/build282-content-studio-bridge-operator-acceptance-evidence.json
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build282-predecessor-exact-sha-proof-${{ github.sha }}
+          path: /tmp/build282-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Production branch remains runtime-read-only for Build 282
+        if: ${{ github.ref_name == 'main' }}
+        run: |
+          echo 'Build 282 live operator acceptance is Development-only.'
+          echo 'Production receives the identical already-accepted tree; no Product, CAIP/Content Studio business-data, provider, publication, Inventory, Finance, payment, refund or R2 mutation runs here.'
