@@ -96,7 +96,7 @@ jobs:
           external=authority.get('external_lanes') or {}
           assert all(str(value).startswith('HOLD_EXTERNAL') for key,value in external.items() if key!='caip_private_media'),external
           caip_state=str(external.get('caip_private_media') or '')
-          assert caip_state=='EVIDENCE_DEPENDENT' or caip_state.startswith('HOLD_EXTERNAL'),external
+          assert caip_state in ('EVIDENCE_DEPENDENT','ACCEPTED') or caip_state.startswith('HOLD_EXTERNAL'),external
 
           assert environment['environment_release']==463, environment
           assert environment['canonical_pages_project']=='devilndove-site', environment
