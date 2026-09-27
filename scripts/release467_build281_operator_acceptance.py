@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import hashlib,json,os,subprocess,sys,urllib.error,urllib.request
+import hashlib,json,os,subprocess,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 BASE=os.environ.get("BUILD281_EXACT_DEV_BASE_URL","").rstrip("/")
@@ -31,13 +31,20 @@ def headers(cookie=None,content=False):
     if CF_ID and CF_SECRET:h["CF-Access-Client-Id"]=CF_ID;h["CF-Access-Client-Secret"]=CF_SECRET
     return h
 def request(path,cookie,method="GET",payload=None):
-    body=None if payload is None else json.dumps(payload,separators=(",",":")).encode()
-    req=urllib.request.Request(BASE+path,data=body,headers=headers(cookie,payload is not None),method=method)
-    try:
-        with urllib.request.urlopen(req,timeout=45) as r: raw=r.read();status=r.status
-    except urllib.error.HTTPError as e:stop(f"{path} returned HTTP {e.code}: "+e.read(1000).decode("utf-8","replace"))
-    except Exception as e:stop(f"{path} request failed: {e}")
-    if status!=200:stop(f"{path} returned HTTP {status}")
+    out=Path("/tmp/build281-http-response.json")
+    cmd=["curl","-sS","-o",str(out),"-w","%{http_code}","-X",method,
+         "-H","Cache-Control: no-store","-H","Accept: application/json",
+         "-H",f"Cookie: {cookie}","-H","User-Agent: curl/8.5.0"]
+    if payload is not None:
+        cmd+=["-H","Content-Type: application/json","--data-binary",json.dumps(payload,separators=(",",":"))]
+    if CF_ID and CF_SECRET:
+        cmd+=["-H",f"CF-Access-Client-Id: {CF_ID}","-H",f"CF-Access-Client-Secret: {CF_SECRET}"]
+    p=subprocess.run(cmd+[BASE+path],cwd=ROOT,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    if p.returncode:stop(f"{path} request failed: "+(p.stderr or p.stdout)[-1000:])
+    status=(p.stdout or "").strip()
+    raw=out.read_bytes() if out.exists() else b""
+    out.unlink(missing_ok=True)
+    if status!="200":stop(f"{path} returned HTTP {status}: "+raw[:1000].decode("utf-8","replace"))
     try:return json.loads(raw)
     except Exception:stop(f"{path} did not return JSON.")
 if not BASE.startswith("https://") or ".devilndove-site.pages.dev" not in BASE:stop("Exact Development Preview URL is missing or invalid.")
