@@ -1,3 +1,18 @@
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 280 candidate
+
+Build 280 is projected over the exact fully verified Build 279 closure.
+
+- Last fully verified Development: `16cf66164f95d8716da9d61d89833012a5efe2c1`
+- Verified tree: `1c4d9091146915574bac1bc3466bab44e2347269`
+- Development proofs: 36249725505, 36249725434, 36249725489, 36249725470; dedicated Build 279 proof 36249725485
+- Current Production main: `048c67562efc20892cf9652841edd6b0b1a845d6`
+- Production proofs: 36249900945, 36249947458, 36249947466, 36249947674, 36249900929
+- CAIP private-media acceptance: **3/3 — ACCEPTED**
+- Build 280 boundary: read-only reconciliation/recovery outcome review; no cleanup inferred from classification; uncertain binaries remain preserved.
+- Next after GREEN: Build 281 — Standalone / Social Project Operator Acceptance.
+
+---
+
 # I.T. Preflight, Startup & Release Guide
 
 ## Current release baseline

@@ -1,27 +1,27 @@
-// Release 467 Build 279 — Multipart Interruption & Resume Acceptance Drill over exact Build 278 Production source.
+// Release 467 Build 280 — Private-Media Reconciliation & Recovery Outcome Review over exact Build 279 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=279;
-const TITLE='Multipart Interruption & Resume Acceptance Drill';
-const AUTHORITY='release467-build279-multipart-interruption-resume-acceptance-drill';
-const EVIDENCE_ID='r467-b278-green-36247952924-36248115089';
+const BUILD=280;
+const TITLE='Private-Media Reconciliation & Recovery Outcome Review';
+const AUTHORITY='release467-build280-private-media-reconciliation-recovery-outcome-review';
+const EVIDENCE_ID='r467-b279-green-36249725505-36249900945';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:278,title:'Authenticated Private Review & Range-Streaming Acceptance Refresh',state:'DEVELOPMENT_GREEN',
-  dev_sha:'4a96fba89316d287771d34ef278b2404848e2996',tree_sha:'b7ad133e79cd01a30d2056f77ffd069996560cf6',
-  system_gate_run:36247952924,current_application_quality_run:36247952893,it_admin_runtime_proof_run:36247952964,
-  branch_hygiene_run:36247953198,dedicated_gate_run:36247952942,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
+  release:467,build:279,title:'Multipart Interruption & Resume Acceptance Drill',state:'DEVELOPMENT_GREEN',
+  dev_sha:'16cf66164f95d8716da9d61d89833012a5efe2c1',tree_sha:'1c4d9091146915574bac1bc3466bab44e2347269',
+  system_gate_run:36249725505,current_application_quality_run:36249725434,it_admin_runtime_proof_run:36249725489,
+  branch_hygiene_run:36249725470,dedicated_gate_run:36249725485,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:278,title:'Authenticated Private Review & Range-Streaming Acceptance Refresh',state:'PRODUCTION_GREEN',
-  main_sha:'5d418eb1160caa7af855a247e1ff3510e4c1c9b8',tree_sha:'b7ad133e79cd01a30d2056f77ffd069996560cf6',
-  production_pages_deploy_run:36248115089,production_live_resource_integrity_run:36248156311,
-  products_browser_proof_run:36248156279,products_route_proof_run:36248156316,build_specific_proof_run:36248115177,remote_d1_queries:0
+  release:467,build:279,title:'Multipart Interruption & Resume Acceptance Drill',state:'PRODUCTION_GREEN',
+  main_sha:'048c67562efc20892cf9652841edd6b0b1a845d6',tree_sha:'1c4d9091146915574bac1bc3466bab44e2347269',
+  production_pages_deploy_run:36249900945,production_live_resource_integrity_run:36249947458,
+  products_browser_proof_run:36249947466,products_route_proof_run:36249947674,build_specific_proof_run:36249900929,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,14 +31,14 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 279 Multipart Interruption Resume Acceptance Drill'
+  'Release 467 Build 280 Private-Media Reconciliation Recovery Outcome Review'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
   {key:'paypal_sandbox',state:'HOLD_EXTERNAL'},
   {key:'social_oauth',state:'HOLD_EXTERNAL'},
-  {key:'caip_private_media',state:'EVIDENCE_DEPENDENT'},
+  {key:'caip_private_media',state:'ACCEPTED'},
   {key:'cloudflare_access_service_token',state:'HOLD_EXTERNAL_CONFIGURED_AND_PROVEN_DEVELOPMENT'}
 ]);
 const self='self';
@@ -55,15 +55,15 @@ async function sha256Hex(text){
 }
 function closurePayload(){
   return {
-    release:467,build:278,title:'Authenticated Private Review & Range-Streaming Acceptance Refresh',
+    release:467,build:279,title:'Multipart Interruption & Resume Acceptance Drill',
     sha:VERIFIED_DEVELOPMENT.dev_sha,tree_sha:VERIFIED_DEVELOPMENT.tree_sha,
     development_proofs:{
-      system_gate_run:36247952924,current_application_quality_run:36247952893,
-      it_admin_runtime_proof_run:36247952964,branch_hygiene_run:36247953198
+      system_gate_run:36249725505,current_application_quality_run:36249725434,
+      it_admin_runtime_proof_run:36249725489,branch_hygiene_run:36249725470
     },
     production_proofs:{
-      production_pages_deploy_run:36248115089,production_live_resource_integrity_run:36248156311,
-      products_browser_proof_run:36248156279,products_route_proof_run:36248156316
+      production_pages_deploy_run:36249900945,production_live_resource_integrity_run:36249947458,
+      products_browser_proof_run:36249947466,products_route_proof_run:36249947674
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 280 follows after Build 279 multipart interruption and resume acceptance drill.'
+    next_build:'Build 281 follows after Build 280 private-media reconciliation and recovery outcome review.'
   };
 }
 async function closurePack(){
@@ -149,9 +149,9 @@ export async function onRequestGet(context){
     build86_diagnostic_contract:BUILD86_DIAGNOSTIC_CONTRACT,external_policy:EXTERNAL_POLICY,
     truth_notes:[
       'Build 278 is the exact last fully verified Development checkpoint.',
-      'Build 278 Production is GREEN on the identical tree b7ad133e79cd01a30d2056f77ffd069996560cf6.',
-      'Build 278 Development proofs: System 36247952924, Quality 36247952893, I.T. 36247952964, Hygiene 36247953198, Build 278 36247952942.',
-      'Build 278 Production proofs: Pages 36248115089, Live Resources 36248156311, Product Browser 36248156279, Product Route 36248156316, Build 278 36248115177.',
+      'Build 278 Production is GREEN on the identical tree 1c4d9091146915574bac1bc3466bab44e2347269.',
+      'Build 278 Development proofs: System 36249725505, Quality 36249725434, I.T. 36249725489, Hygiene 36249725470, Build 278 36249725485.',
+      'Build 278 Production proofs: Pages 36249900945, Live Resources 36249947458, Product Browser 36249947466, Product Route 36249947674, Build 278 36249900929.',
       'Build 260 removed only redundant pull-request triggers from 38 historical proof workflows while preserving System Gate coverage and push/manual evidence.',
       'Build 261 removed 39 redundant historical Production main-push subscriptions while preserving Development push/manual evidence and all four canonical Production proofs.',
       'Build 262 batches six latest-action point lookups into one read-only D1 statement and closed exact Development at 8 statements under unchanged provider ceilings.',
