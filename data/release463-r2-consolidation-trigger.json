@@ -1,7 +1,0 @@
-{
-  "release": 463,
-  "operation": "converge proven Development R2 buckets into retained Production R2 buckets by inventory delta and prove exact parity",
-  "requested_at": "2026-08-31",
-  "attempt": 8,
-  "transport": "isolated-legacy-pages-r2-inventory-delta"
-}

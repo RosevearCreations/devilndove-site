@@ -32,8 +32,7 @@ jobs:
           git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune --no-tags
 
           declare -A archive_sha
-          archive_sha["backup-main-before-dev-replacement-20260830"]="985ecfad41207f8bf46ad99e1346e6e69ece5a69"
-          archive_sha["release467-build7-handoff-convergence"]="1486777699808c1252f585b7024e2fcfd6296b26"
+          archive_sha["release467-build198-media-fit-attention-context-help"]="b3b9f1c4287604ff9f60402d1f782c1e5359d62e"
 
           deleted=0
           archived=0
