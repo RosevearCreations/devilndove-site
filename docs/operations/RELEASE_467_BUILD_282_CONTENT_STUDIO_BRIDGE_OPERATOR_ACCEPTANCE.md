@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Build 282 converts the Build 273 Content Studio bridge contract into fresh operator evidence on the exact Development deployment. The acceptance path uses one **existing**, non-archived Creative Process project and exactly one **existing** CAIP workspace. It creates or refreshes one Content Studio package, repeats the same operator action, and proves that the same package is reused.
+Build 282 converts the Build 273 Content Studio bridge contract into fresh operator evidence on the exact Development deployment. The acceptance path uses one **existing**, non-archived Creative Process project and exactly one **existing** CAIP workspace. It creates or refreshes one Content Studio package, repeats the same operator action, proves idempotence, and proves that the same package is reused.
 
 No Creative Process identity, CAIP workspace, Product, provider publication, public promotion or private-media object is fabricated for the test.
 

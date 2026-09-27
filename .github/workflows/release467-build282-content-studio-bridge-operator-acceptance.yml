@@ -50,7 +50,8 @@ jobs:
         run: python scripts/release467_build273_gate.py
       - name: Wait for exact Development System Gate
         if: ${{ github.ref_name == 'dev' }}
-        env: { GH_TOKEN: ${{ github.token }} }
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
@@ -76,7 +77,8 @@ jobs:
           echo 'STOP: timed out waiting for exact Development System Gate.'; exit 1
       - name: Prove exact Development deployment artifact
         if: ${{ github.ref_name == 'dev' }}
-        env: { GH_TOKEN: ${{ github.token }} }
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
