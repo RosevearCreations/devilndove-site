@@ -88,7 +88,8 @@ elif cur==277:
     q((p.get('production_checkpoint') or {}).get('main_sha')=='1bfcb248a8baf8cea42467a75c0dac53884ec5c3','Build 277 current Production baseline must be exact Build 276')
     q(int(p.get('next_build') or 0)>=278,'Build 277 must advance beyond Build 277 successor')
 else:
-    q((cur==278 and (p.get('production_checkpoint') or {}).get('main_sha')=='552fe0fb1b192c7fd123c9a7369eea9f352f639e') or ((cur==279 and (p.get('production_checkpoint') or {}).get('main_sha')=='5d418eb1160caa7af855a247e1ff3510e4c1c9b8') or (cur>=280 and (p.get('production_checkpoint') or {}).get('main_sha')=='048c67562efc20892cf9652841edd6b0b1a845d6')),'Build 278+ current Production baseline must track the exact immediate verified predecessor')
+    expected_main={278:'552fe0fb1b192c7fd123c9a7369eea9f352f639e',279:'5d418eb1160caa7af855a247e1ff3510e4c1c9b8',280:'048c67562efc20892cf9652841edd6b0b1a845d6'}.get(cur,'94e46cae035769ba61de379add1f7c1a6a1c21f0' if cur>=281 else '')
+    q((p.get('production_checkpoint') or {}).get('main_sha')==expected_main,'Build 278+ current Production baseline must track the exact immediate verified predecessor')
     q(int(p.get('next_build') or 0)>=279,'Build 278+ must advance beyond Build 278 successor')
     q((p.get('caip_private_media_recovery_hardening_closure') or {}).get('classification')=='RECOVERY_HARDENING_PREREQUISITES_CLOSED_BUILD269_FAIL_CLOSED_READY','Build 275+ must retain Build 268 closure projection')
 for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 268 safety drift: {k}')

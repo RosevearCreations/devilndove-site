@@ -1,27 +1,27 @@
-// Release 467 Build 280 — Private-Media Reconciliation & Recovery Outcome Review over exact Build 279 Production source.
+// Release 467 Build 281 — Standalone / Social Project Operator Acceptance over exact Build 280 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=280;
-const TITLE='Private-Media Reconciliation & Recovery Outcome Review';
-const AUTHORITY='release467-build280-private-media-reconciliation-recovery-outcome-review';
-const EVIDENCE_ID='r467-b279-green-36249725505-36249900945';
+const BUILD=281;
+const TITLE='Standalone / Social Project Operator Acceptance';
+const AUTHORITY='release467-build281-standalone-social-project-operator-acceptance';
+const EVIDENCE_ID='r467-b280-green-36353058900-36353256814';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:279,title:'Multipart Interruption & Resume Acceptance Drill',state:'DEVELOPMENT_GREEN',
-  dev_sha:'16cf66164f95d8716da9d61d89833012a5efe2c1',tree_sha:'1c4d9091146915574bac1bc3466bab44e2347269',
-  system_gate_run:36249725505,current_application_quality_run:36249725434,it_admin_runtime_proof_run:36249725489,
-  branch_hygiene_run:36249725470,dedicated_gate_run:36249725485,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
+  release:467,build:280,title:'Private-Media Reconciliation & Recovery Outcome Review',state:'DEVELOPMENT_GREEN',
+  dev_sha:'c8033413b5ff85865caecee2f3b2a88558b80b03',tree_sha:'c0f690478f6fdbd3748f8ecadc365abb2e0d1c06',
+  system_gate_run:36353058900,current_application_quality_run:36353058904,it_admin_runtime_proof_run:36353058892,
+  branch_hygiene_run:36353058965,dedicated_gate_run:36353058905,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:279,title:'Multipart Interruption & Resume Acceptance Drill',state:'PRODUCTION_GREEN',
-  main_sha:'048c67562efc20892cf9652841edd6b0b1a845d6',tree_sha:'1c4d9091146915574bac1bc3466bab44e2347269',
-  production_pages_deploy_run:36249900945,production_live_resource_integrity_run:36249947458,
-  products_browser_proof_run:36249947466,products_route_proof_run:36249947674,build_specific_proof_run:36249900929,remote_d1_queries:0
+  release:467,build:280,title:'Private-Media Reconciliation & Recovery Outcome Review',state:'PRODUCTION_GREEN',
+  main_sha:'94e46cae035769ba61de379add1f7c1a6a1c21f0',tree_sha:'c0f690478f6fdbd3748f8ecadc365abb2e0d1c06',
+  production_pages_deploy_run:36353256814,production_live_resource_integrity_run:36353294130,
+  products_browser_proof_run:36353294143,products_route_proof_run:36353294081,build_specific_proof_run:36249900929,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 280 Private-Media Reconciliation Recovery Outcome Review'
+  'Release 467 Build 281 Standalone Social Project Operator Acceptance'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -62,8 +62,8 @@ function closurePayload(){
       it_admin_runtime_proof_run:36249725489,branch_hygiene_run:36249725470
     },
     production_proofs:{
-      production_pages_deploy_run:36249900945,production_live_resource_integrity_run:36249947458,
-      products_browser_proof_run:36249947466,products_route_proof_run:36249947674
+      production_pages_deploy_run:36353256814,production_live_resource_integrity_run:36353294130,
+      products_browser_proof_run:36353294143,products_route_proof_run:36353294081
     },
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 281 follows after Build 280 private-media reconciliation and recovery outcome review.'
+    next_build:'Build 282 follows after Build 281 standalone/social project operator acceptance.'
   };
 }
 async function closurePack(){
@@ -121,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:279,title:TITLE,authority:'release467-build279-multipart-interruption-resume-acceptance-drill.json'},
+        current_closure_candidate:{release:467,build:281,title:TITLE,authority:'release467-build281-standalone-social-project-operator-acceptance.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
