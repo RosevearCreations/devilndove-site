@@ -1,6 +1,6 @@
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 281 candidate
 
-Build 281 is projected over the exact fully verified Build 280 closure after repository hygiene cleanup.
+Build 281 — Standalone / Social Project Operator Acceptance — is projected over the exact fully verified Build 280 closure after repository hygiene cleanup.
 
 - Last fully verified Development: `c8033413b5ff85865caecee2f3b2a88558b80b03`
 - Verified tree: `c0f690478f6fdbd3748f8ecadc365abb2e0d1c06`
