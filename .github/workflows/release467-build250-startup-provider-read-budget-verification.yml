@@ -2,7 +2,6 @@ name: Release 467 Build 250 Startup Provider Read-Budget Verification
 
 on:
   workflow_dispatch:
-
 permissions:
   contents: read
 
