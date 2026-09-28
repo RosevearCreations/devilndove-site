@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import hashlib,json,os,subprocess,sys
+import hashlib,json,os,re,subprocess,sys
 from pathlib import Path
 from urllib.parse import quote
 ROOT=Path(__file__).resolve().parents[1]
@@ -157,8 +157,29 @@ if not row:
     for erow in reviewed_rows:
         material=str(erow.get("material_name") or "").strip()
         if not material: continue
-        inv_search=request("/api/admin/contracts/inventory-read?q="+quote(material,safe="")+"&limit=20&include_tools=0",cookie)
-        items=[x for x in (inv_search.get("items") or []) if isinstance(x,dict) and int(x.get("site_item_inventory_id") or 0)>0]
+        normalized=" ".join(re.findall(r"[A-Za-z0-9]+",material)).strip()
+        tokens=[t for t in normalized.split() if len(t)>=3]
+        search_terms=[]
+        for n in (1,2,3):
+            if len(tokens)>=n:
+                term=" ".join(tokens[:n])[:60]
+                if term and term not in search_terms: search_terms.append(term)
+        if normalized:
+            term=normalized[:60]
+            if term and term not in search_terms: search_terms.append(term)
+        items=[]
+        material_key=normalized.lower()
+        for term in search_terms:
+            inv_search=request("/api/admin/contracts/inventory-read?q="+quote(term,safe="")+"&limit=20&include_tools=0",cookie)
+            found=[x for x in (inv_search.get("items") or []) if isinstance(x,dict) and int(x.get("site_item_inventory_id") or 0)>0]
+            strong=[]
+            for x in found:
+                item_key=" ".join(re.findall(r"[A-Za-z0-9]+",str(x.get("item_name") or ""))).strip().lower()
+                if item_key and (item_key in material_key or material_key in item_key): strong.append(x)
+            if len(strong)==1:
+                items=strong;break
+            if len(found)==1:
+                items=found;break
         if len(items)!=1: continue
         iid=int(items[0]["site_item_inventory_id"])
         profile=first_with(d1(f"""SELECT sii.site_item_inventory_id,sii.item_name,sii.on_hand_quantity,
