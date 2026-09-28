@@ -2,11 +2,11 @@
 
 Build 286 — Creative Process Resource-Link Operator Workflow — is projected over the exact fully verified Build 285 closure.
 
-- Last fully verified Development: `d1c70746fd937b05708306ea299ddb64559ff79c`
-- Verified tree: `cea56547d734e8c4db51d49d145edebeb806d762`
-- Development proofs: System `36368685098`, Quality `36368684950`, I.T. `36368685244`, Hygiene `36368685028`; dedicated Build 285 proof `36368684902`
-- Current Production main: `2056cc46ebb5589dddc0b5172d90ffbd0e3c4241`
-- Production proofs: Pages `36368898983`, Live Resources `36368970032`, Product Browser `36368970208`, Product Route `36368970050`; Build 285 `36368899022`
+- Last fully verified Development: `fe4dff65c47a00fc3c61a6ae48faa26828951898`
+- Verified tree: `a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec`
+- Development proofs: System `36374225700`, Quality `36374225637`, I.T. `36374225648`, Hygiene `36374225692`; dedicated Build 286 proof `36374225610`
+- Current Production main: `11a4924ce8f5a83bc6b688489404140e89456662`
+- Production proofs: Pages `36374409720`, Live Resources `36374501241`, Product Browser `36374501210`, Product Route `36374501223`; Build 286 `36374409434`
 - Build 286 adds an explicit operator-owned material-event → existing Supply/Tool Inventory identity link. Linking itself does not move stock.
 - Owner-reported login cache/session-client drift, dense Inventory editing, public Tools/Supplies card density and light-surface contrast are repaired in the same candidate.
 - Canonical migration authority advances additively through `0024_release467_creative_process_resource_link_operator_workflow.sql`.
