@@ -15,6 +15,7 @@ a=j('release467-build258-historical-workflow-trigger-scope-tightening.json')
 prev=j('release467-build257-workflow-trigger-inventory-ownership-map.json')
 p=j('current-development-authority.json')
 cur=int(p.get('build') or 0)
+fanout_retired=cur>=286 and (R/'scripts/d1_ci_fanout_guard.py').is_file()
 road=t('docs/operations/RELEASE_467_RELEASE_EFFICIENCY_READ_PATH_AUTONOMOUS_BUILDS_257_264.md')
 doc=t('docs/operations/RELEASE_467_BUILD_258_HISTORICAL_WORKFLOW_TRIGGER_SCOPE_TIGHTENING.md')
 sysgate=t('scripts/current_system_gate_provenance_gate.py')
@@ -64,7 +65,10 @@ if cur==258:
         q(tc.get(k)==v,f'Build 258 trigger count mismatch: {k} expected {v} got {tc.get(k)}')
 else:
     q(cur>=259 and report.get('workflow_file_count',0)>=149,'Build 259+ must retain Build 258 workflow plus successors')
-    q(tc.get('workflow_run')==5,'Build 259+ must preserve the five workflow_run chains')
+    if not fanout_retired:
+        q(tc.get('workflow_run')==5,'Build 259+ must preserve the five workflow_run chains')
+    else:
+        q((R/'.github/workflows/d1-ci-fanout-guard.yml').is_file(),'Build 286+ must retain the D1 CI fan-out guard')
 q((a.get('expected_candidate') or {}).get('net_pull_request_reduction')==15 and (a.get('expected_candidate') or {}).get('net_push_reduction')==15,'Build 258 net fan-out reduction mismatch')
 
 canon=set(a.get('canonical_owners_retained') or [])
