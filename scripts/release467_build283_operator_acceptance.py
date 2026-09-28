@@ -154,32 +154,25 @@ if not row:
             eid=int(item.get("creative_work_event_id") or 0)
             if eid and eid not in seen_events:
                 seen_events.add(eid);reviewed_rows.append(item)
+    inv_catalog=request("/api/admin/contracts/inventory-read?limit=1000&include_tools=0",cookie)
+    catalog_items=[x for x in (inv_catalog.get("items") or []) if isinstance(x,dict) and int(x.get("site_item_inventory_id") or 0)>0]
     for erow in reviewed_rows:
         material=str(erow.get("material_name") or "").strip()
         if not material: continue
-        normalized=" ".join(re.findall(r"[A-Za-z0-9]+",material)).strip()
-        tokens=[t for t in normalized.split() if len(t)>=3]
-        search_terms=[]
-        for n in (1,2,3):
-            if len(tokens)>=n:
-                term=" ".join(tokens[:n])[:60]
-                if term and term not in search_terms: search_terms.append(term)
-        if normalized:
-            term=normalized[:60]
-            if term and term not in search_terms: search_terms.append(term)
-        items=[]
-        material_key=normalized.lower()
-        for term in search_terms:
-            inv_search=request("/api/admin/contracts/inventory-read?q="+quote(term,safe="")+"&limit=20&include_tools=0",cookie)
-            found=[x for x in (inv_search.get("items") or []) if isinstance(x,dict) and int(x.get("site_item_inventory_id") or 0)>0]
-            strong=[]
-            for x in found:
-                item_key=" ".join(re.findall(r"[A-Za-z0-9]+",str(x.get("item_name") or ""))).strip().lower()
-                if item_key and (item_key in material_key or material_key in item_key): strong.append(x)
-            if len(strong)==1:
-                items=strong;break
-            if len(found)==1:
-                items=found;break
+        material_key=" ".join(re.findall(r"[A-Za-z0-9]+",material)).strip().lower()
+        if not material_key: continue
+        exact=[];contained=[]
+        for x in catalog_items:
+            item_key=" ".join(re.findall(r"[A-Za-z0-9]+",str(x.get("item_name") or ""))).strip().lower()
+            if not item_key: continue
+            if item_key==material_key: exact.append(x)
+            elif item_key in material_key or material_key in item_key: contained.append(x)
+        items=exact if len(exact)==1 else []
+        if not items and contained:
+            contained.sort(key=lambda x:len(" ".join(re.findall(r"[A-Za-z0-9]+",str(x.get("item_name") or ""))).strip()),reverse=True)
+            best_len=len(" ".join(re.findall(r"[A-Za-z0-9]+",str(contained[0].get("item_name") or ""))).strip())
+            best=[x for x in contained if len(" ".join(re.findall(r"[A-Za-z0-9]+",str(x.get("item_name") or ""))).strip())==best_len]
+            if len(best)==1: items=best
         if len(items)!=1: continue
         iid=int(items[0]["site_item_inventory_id"])
         profile=first_with(d1(f"""SELECT sii.site_item_inventory_id,sii.item_name,sii.on_hand_quantity,
@@ -194,7 +187,7 @@ if not row:
         if str(profile.get("tracking_mode") or "").lower() not in ("exact","estimated"): continue
         available=max(0.0,float(profile.get("on_hand_quantity") or 0)-float(profile.get("reserved_quantity") or 0))*max(0.001,float(profile.get("usage_units_per_stock_unit") or 1))
         if available+1e-9 < max(0.001,float(profile.get("minimum_usage_increment") or 0.001)): continue
-        row={**erow,**profile,"inventory_linkage":"operator_inventory_search_unique_result"}
+        row={**erow,**profile,"inventory_linkage":"operator_inventory_read_unique_match"}
         break
 if not row:
     counts=first_with(d1("""SELECT
