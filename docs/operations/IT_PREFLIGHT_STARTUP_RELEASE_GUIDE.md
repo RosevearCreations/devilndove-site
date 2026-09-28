@@ -1,19 +1,15 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 281 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 282 candidate
 
-Build 281 — Standalone / Social Project Operator Acceptance — is projected over the exact fully verified Build 280 closure after repository hygiene cleanup.
+Build 282 — Content Studio Bridge Operator Acceptance — is projected over the exact fully verified Build 281 closure.
 
-- Last fully verified Development: `c8033413b5ff85865caecee2f3b2a88558b80b03`
-- Verified tree: `c0f690478f6fdbd3748f8ecadc365abb2e0d1c06`
-- Development proofs: 36353058900, 36353058904, 36353058892, 36353058965; dedicated Build 280 proof 36353058905
-- Current Production main: `94e46cae035769ba61de379add1f7c1a6a1c21f0`
-- Production proofs: 36353256814, 36353294130, 36353294143, 36353294081, 36353256919
-- CAIP private-media acceptance: **3/3 — ACCEPTED**
-- Build 281 boundary: real Development operator evidence for an existing productless Creative Process → CAIP identity; no Product creation, provider publication, public promotion or Production business-data mutation.
-- Next after GREEN: Build 282 — Content Studio Bridge Operator Acceptance.
-
----
-
-# I.T. Preflight, Startup & Release Guide
+- Last fully verified Development: `259cce5ced48e1ef0fb3d88937a53105156d1b34`
+- Verified tree: `7987af6909f73573cbc00b2229a73155bdecc67e`
+- Development proofs: System `36358854444`, Quality `36358854372`, I.T. `36358854423`, Hygiene `36358854410`; dedicated Build 281 proof `36358854448`
+- Current Production main: `707ecef36d8e6fbdcee2d15809441fafd8573ac4`
+- Production proofs: Pages `36359022941`, Live Resources `36359060883`, Product Browser `36359060909`, Product Route `36359060888`; Build 281 `36359023015`
+- Build 282 runtime scope: one existing Creative Process identity + exactly one existing CAIP workspace → one idempotent Content Studio package on Development only.
+- Missing, ambiguous or conflicting CAIP identity remains fail closed.
+- Production receives only the identical already-accepted code tree; no Build 282 Production business-data mutation is authorized.
 
 ## Current release baseline
 
