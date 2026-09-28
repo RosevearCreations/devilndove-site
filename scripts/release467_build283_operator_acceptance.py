@@ -341,10 +341,13 @@ if not row:
       ORDER BY rv.creative_project_inventory_reversal_id DESC LIMIT 1;"""),
       "creative_project_inventory_post_id","creative_project_inventory_reversal_id","site_item_inventory_id","posting_status","inventory_consumed","usage_detail_count")
     if not planned or not reviewed or not history:
-        stop("No safe Build 283 evidence path is available (planned=%s, reviewed_unposted=%s, posts=%s, reversed_posts=%s, reversals=%s, operation_resources=%s, project_product_links=%s, linked_product_resources=%s, eligible_inventory=%s)."%(
+        planned_diag=[{"material":str(x.get("material_name") or "")[:120],"unit":str(x.get("planned_unit") or "")[:32]} for x in planned_rows[:5]]
+        eligible_diag=[{"item":str(x.get("item_name") or "")[:120],"usage_unit":str(x.get("usage_unit_label") or "")[:32],"stock_unit":str(x.get("stock_unit_label") or "")[:32],"tracking":str(x.get("tracking_mode") or "")[:24]} for x in eligible[:5]]
+        stop("No safe Build 283 evidence path is available (planned=%s, reviewed_unposted=%s, posts=%s, reversed_posts=%s, reversals=%s, operation_resources=%s, project_product_links=%s, linked_product_resources=%s, eligible_inventory=%s, planned_diag=%s, eligible_diag=%s)."%(
           int(counts.get("planned_count") or 0),int(counts.get("reviewed_unposted_count") or 0),int(counts.get("post_count") or 0),
           int(counts.get("reversed_post_count") or 0),int(counts.get("reversal_count") or 0),int(counts.get("project_resource_count") or 0),
-          int(counts.get("project_product_link_count") or 0),int(counts.get("linked_product_resource_count") or 0),int(counts.get("eligible_inventory_count") or 0)))
+          int(counts.get("project_product_link_count") or 0),int(counts.get("linked_product_resource_count") or 0),int(counts.get("eligible_inventory_count") or 0),
+          json.dumps(planned_diag,separators=(",",":")),json.dumps(eligible_diag,separators=(",",":"))))
     planned_project=int(planned["creative_work_project_id"]);reviewed_project=int(reviewed["creative_work_project_id"])
     before_journal=table_count("accounting_journal_entries");before_lines=table_count("accounting_journal_lines")
     before_item=first_with(d1(f"SELECT on_hand_quantity FROM site_item_inventory WHERE site_item_inventory_id={int(history['site_item_inventory_id'])};"),"on_hand_quantity") or {}
