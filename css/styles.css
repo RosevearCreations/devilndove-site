@@ -3425,3 +3425,61 @@ body[data-admin-page="creative-assets"] .caip-sync-panel{background:#1c2540;colo
 .inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode .site-inventory-list-thumb img{height:52px}
 @media(max-width:1000px){.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode tbody{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode tbody{grid-template-columns:1fr}}
+
+
+/* Build 288 — Inventory Operations desktop table legibility.
+   Keep editable controls readable instead of squeezing every column into the viewport.
+   The desktop table scrolls horizontally; card mode remains the compact alternative. */
+.inventory-operations-page .site-inventory-table-wrap {
+  overflow-x: auto !important;
+  overflow-y: visible;
+  scrollbar-gutter: stable;
+}
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) {
+  width: 100%;
+  min-width: 1820px !important;
+  table-layout: fixed !important;
+}
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) th,
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) td {
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) th:nth-child(1),
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) td:nth-child(1) { width: 360px; min-width: 360px; }
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) th:nth-child(2),
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) td:nth-child(2) { width: 230px; min-width: 230px; }
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) th:nth-child(3),
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) td:nth-child(3) { width: 120px; min-width: 120px; }
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) th:nth-child(4),
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) td:nth-child(4) { width: 360px; min-width: 360px; }
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) th:nth-child(5),
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) td:nth-child(5) { width: 160px; min-width: 160px; }
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) th:nth-child(6),
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) td:nth-child(6) { width: 130px; min-width: 130px; }
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) th:nth-child(7),
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) td:nth-child(7) { width: 180px; min-width: 180px; }
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) th:nth-child(8),
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) td:nth-child(8) { width: 280px; min-width: 280px; }
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) :where(input,select,textarea) {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box;
+}
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) .site-inventory-inline-units {
+  grid-template-columns: minmax(145px,1fr) minmax(145px,1fr);
+  gap: 10px;
+}
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) .site-inventory-action-buttons {
+  grid-template-columns: repeat(2,minmax(118px,1fr));
+}
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) .site-inventory-action-buttons .btn {
+  min-height: 40px;
+  white-space: normal;
+  line-height: 1.2;
+}
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) .site-inventory-item-name,
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) .small {
+  overflow-wrap: break-word;
+}
