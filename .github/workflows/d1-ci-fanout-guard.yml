@@ -1,0 +1,27 @@
+name: D1 CI Fan-Out Guard
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/**'
+      - 'scripts/d1_ci_fanout_guard.py'
+  pull_request:
+    branches: [dev]
+    paths:
+      - '.github/workflows/**'
+      - 'scripts/d1_ci_fanout_guard.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Reject automatic historical remote-D1 fan-out
+        run: python scripts/d1_ci_fanout_guard.py
