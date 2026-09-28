@@ -1,25 +1,7 @@
 name: Release 467 Build 199 Buyer Readiness Repair Workbench
 
 on:
-  pull_request:
-    branches: [dev]
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/api/admin/product-buyer-readiness.js'
-      - 'public/js/admin-catalog-buyer-readiness-v182.js'
-      - 'public/js/admin-product-buyer-readiness-v182.js'
-      - 'admin/catalog-health/index.html'
-      - 'admin/product-editor/index.html'
-      - 'docs/operations/RELEASE_467_BUILD_199_BUYER_READINESS_REPAIR_WORKBENCH.md'
-      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md'
-      - 'scripts/release467_build199_gate.py'
-      - 'scripts/release467_build198_gate.py'
-      - 'scripts/release467_build188_gate.py'
-      - 'scripts/release467_build182_gate.py'
-      - '.github/workflows/release467-build199-buyer-readiness-repair-workbench.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 
