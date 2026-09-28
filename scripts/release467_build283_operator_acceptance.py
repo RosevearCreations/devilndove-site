@@ -68,6 +68,7 @@ if not cookie:
     cookie="dd_auth_token="+token
     if not validate(cookie):stop("Existing Development administrator session was rejected.")
 
+# existing Development material event evidence stays real; no synthetic project/event/item is created.
 def candidate_row(sql):
     return first_with(d1(sql),"creative_work_project_id","creative_work_event_id","site_item_inventory_id","on_hand_quantity","tracking_mode","minimum_usage_increment","actual_quantity","inventory_linkage")
 common_tail="""
