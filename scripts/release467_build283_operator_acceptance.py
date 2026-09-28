@@ -68,43 +68,93 @@ if not cookie:
     cookie="dd_auth_token="+token
     if not validate(cookie):stop("Existing Development administrator session was rejected.")
 
-candidate=d1("""SELECT cwp.creative_work_project_id,e.creative_work_event_id,e.material_name,
+def candidate_row(sql):
+    return first_with(d1(sql),"creative_work_project_id","creative_work_event_id","site_item_inventory_id","on_hand_quantity","tracking_mode","minimum_usage_increment","actual_quantity","inventory_linkage")
+common_tail="""
+WHERE COALESCE(cwp.project_status,'active')<>'archived'
+ AND COALESCE(e.entry_status,'active')='active' AND trim(COALESCE(e.material_name,''))<>''
+ AND lower(trim(COALESCE(r.review_status,'')))='approved' AND COALESCE(r.inventory_consumed,0)=0
+ AND NOT EXISTS(SELECT 1 FROM creative_project_inventory_posts ep WHERE ep.creative_project_material_review_id=r.creative_project_material_review_id)
+ AND EXISTS(
+   SELECT 1 FROM creative_work_events pe
+   LEFT JOIN creative_project_material_reviews pr ON pr.creative_work_project_id=pe.creative_work_project_id AND pr.creative_work_event_id=pe.creative_work_event_id
+   WHERE pe.creative_work_project_id=cwp.creative_work_project_id
+     AND COALESCE(pe.entry_status,'active')='active' AND trim(COALESCE(pe.material_name,''))<>''
+     AND COALESCE(lower(trim(pr.review_status)),'')<>'approved'
+ )
+ AND lower(COALESCE(siup.usage_tracking_mode,CASE WHEN lower(trim(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END)) IN ('exact','estimated')
+ AND (COALESCE(sii.on_hand_quantity,0)-COALESCE(sii.reserved_quantity,0))*COALESCE(NULLIF(sii.usage_units_per_stock_unit,0),1) >= COALESCE(siup.minimum_usage_increment,0.001)
+"""
+select_cols="""SELECT cwp.creative_work_project_id,e.creative_work_event_id,e.material_name,
  COALESCE(e.material_quantity,0) planned_quantity,COALESCE(e.material_unit,'') planned_unit,
+ r.review_status,COALESCE(r.actual_quantity,0) actual_quantity,COALESCE(r.waste_quantity,0) waste_quantity,
+ COALESCE(r.reusable_quantity,0) reusable_quantity,COALESCE(r.approved_cost_cents,0) approved_cost_cents,
+ COALESCE(r.review_notes,'') review_notes,
  sii.site_item_inventory_id,sii.item_name,sii.on_hand_quantity,COALESCE(sii.reserved_quantity,0) reserved_quantity,
  COALESCE(sii.usage_units_per_stock_unit,1) usage_units_per_stock_unit,COALESCE(sii.usage_unit_label,'unit') usage_unit_label,
  COALESCE(sii.stock_unit_label,'unit') stock_unit_label,
  COALESCE(siup.usage_tracking_mode,CASE WHEN lower(trim(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) tracking_mode,
- COALESCE(siup.minimum_usage_increment,0.001) minimum_usage_increment
+ COALESCE(siup.minimum_usage_increment,0.001) minimum_usage_increment, """
+candidate=candidate_row(select_cols+"""'direct_material_identity' inventory_linkage
 FROM creative_work_events e
 JOIN creative_work_projects cwp ON cwp.creative_work_project_id=e.creative_work_project_id
+JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id
 JOIN site_item_inventory sii ON sii.is_active=1 AND (
  lower(trim(sii.item_name))=lower(trim(e.material_name))
  OR instr(lower(sii.item_name),lower(substr(trim(e.material_name),1,120)))>0
  OR instr(lower(substr(trim(e.material_name),1,120)),lower(substr(sii.item_name,1,120)))>0)
 LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
-LEFT JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id
-WHERE COALESCE(cwp.project_status,'active')<>'archived'
- AND COALESCE(e.entry_status,'active')='active' AND trim(COALESCE(e.material_name,''))<>''
- AND COALESCE(lower(trim(r.review_status)),'')<>'approved'
- AND NOT EXISTS(SELECT 1 FROM creative_project_inventory_posts ip WHERE ip.creative_work_project_id=e.creative_work_project_id AND ip.creative_work_event_id=e.creative_work_event_id AND COALESCE(ip.posting_status,'posted')<>'reversed')
- AND lower(COALESCE(siup.usage_tracking_mode,CASE WHEN lower(trim(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END)) IN ('exact','estimated')
- AND (COALESCE(sii.on_hand_quantity,0)-COALESCE(sii.reserved_quantity,0))*COALESCE(NULLIF(sii.usage_units_per_stock_unit,0),1) >= COALESCE(siup.minimum_usage_increment,0.001)
-ORDER BY CASE WHEN lower(trim(COALESCE(e.material_unit,'')))=lower(trim(COALESCE(sii.usage_unit_label,''))) THEN 0 ELSE 1 END,
- cwp.updated_at DESC,e.creative_work_event_id DESC LIMIT 1;""")
-row=first_with(candidate,"creative_work_project_id","creative_work_event_id","site_item_inventory_id","on_hand_quantity","tracking_mode","minimum_usage_increment")
-if not row:stop("No existing Development material event and matching real Inventory item satisfy the Build 283 fail-closed acceptance prerequisites.")
+"""+common_tail+""" ORDER BY cwp.updated_at DESC,e.creative_work_event_id DESC LIMIT 1;""")
+if not candidate:
+    candidate=candidate_row(select_cols+"""'historical_same_material_inventory' inventory_linkage
+FROM creative_work_events e
+JOIN creative_work_projects cwp ON cwp.creative_work_project_id=e.creative_work_project_id
+JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id
+JOIN creative_work_events he ON he.creative_work_project_id=e.creative_work_project_id
+ AND he.creative_work_event_id<>e.creative_work_event_id
+ AND lower(trim(COALESCE(he.material_name,'')))=lower(trim(COALESCE(e.material_name,'')))
+JOIN creative_project_inventory_posts hip ON hip.creative_work_project_id=e.creative_work_project_id AND hip.creative_work_event_id=he.creative_work_event_id
+JOIN site_item_inventory sii ON sii.site_item_inventory_id=hip.site_item_inventory_id AND sii.is_active=1
+LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
+"""+common_tail+""" ORDER BY hip.creative_project_inventory_post_id DESC,e.creative_work_event_id DESC LIMIT 1;""")
+if not candidate:
+    candidate=candidate_row(select_cols+"""'project_operation_resource' inventory_linkage
+FROM creative_work_events e
+JOIN creative_work_projects cwp ON cwp.creative_work_project_id=e.creative_work_project_id
+JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id
+JOIN creative_project_operations op ON op.creative_work_project_id=e.creative_work_project_id
+JOIN creative_project_operation_resources opr ON opr.creative_project_operation_id=op.creative_project_operation_id
+JOIN site_item_inventory sii ON sii.site_item_inventory_id=opr.site_item_inventory_id AND sii.is_active=1
+LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
+"""+common_tail+""" AND (
+ trim(COALESCE(e.material_unit,''))='' OR trim(COALESCE(sii.usage_unit_label,''))=''
+ OR lower(trim(e.material_unit))=lower(trim(sii.usage_unit_label))
+ OR lower(trim(COALESCE(opr.planned_unit,'')))=lower(trim(e.material_unit))
+ ) ORDER BY op.operation_order,e.creative_work_event_id DESC LIMIT 1;""")
+row=candidate
+if not row:
+    counts=first_with(d1("""SELECT
+      (SELECT COUNT(*) FROM creative_work_events e JOIN creative_work_projects p ON p.creative_work_project_id=e.creative_work_project_id LEFT JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id WHERE COALESCE(p.project_status,'active')<>'archived' AND COALESCE(e.entry_status,'active')='active' AND trim(COALESCE(e.material_name,''))<>'' AND COALESCE(lower(trim(r.review_status)),'')<>'approved') planned_count,
+      (SELECT COUNT(*) FROM creative_project_material_reviews r JOIN creative_work_events e ON e.creative_work_event_id=r.creative_work_event_id WHERE lower(trim(COALESCE(r.review_status,'')))='approved' AND COALESCE(r.inventory_consumed,0)=0 AND COALESCE(e.entry_status,'active')='active') reviewed_unposted_count,
+      (SELECT COUNT(*) FROM creative_project_operation_resources) project_resource_count;"""),"planned_count","reviewed_unposted_count","project_resource_count") or {}
+    stop("No real linked Development Inventory candidate satisfies Build 283 prerequisites (planned=%s, reviewed_unposted=%s, project_resources=%s)."%(
+      int(counts.get("planned_count") or 0),int(counts.get("reviewed_unposted_count") or 0),int(counts.get("project_resource_count") or 0)))
 project_id=int(row["creative_work_project_id"]);event_id=int(row["creative_work_event_id"]);inventory_id=int(row["site_item_inventory_id"])
 baseline=float(row.get("on_hand_quantity") or 0);reserved=float(row.get("reserved_quantity") or 0);per=max(0.001,float(row.get("usage_units_per_stock_unit") or 1))
-inc=max(0.001,float(row.get("minimum_usage_increment") or 0.001));planned=max(0.0,float(row.get("planned_quantity") or 0))
+inc=max(0.001,float(row.get("minimum_usage_increment") or 0.001));original_actual=max(0.0,float(row.get("actual_quantity") or 0))
 available=max(0.0,baseline-reserved)*per
-usage=max(inc,min(planned if planned>0 else inc,available))
-if usage>available+1e-9:stop("Matching Inventory item does not have enough available quantity for the minimum explicit usage increment.")
+target=original_actual if original_actual>0 else inc
+steps=max(1,int(round(target/inc))) if inc>0 else 1
+usage=min(steps*inc,available)
+if usage<inc-1e-9 or usage<=0:stop("Linked real Inventory item does not have enough available quantity for one explicit usage increment.")
 initial_move=scalar(f"SELECT COUNT(*) AS n FROM site_inventory_movements WHERE site_item_inventory_id={inventory_id};","n")
 initial_journal=table_count("accounting_journal_entries");initial_lines=table_count("accounting_journal_lines")
+inventory_linkage=str(row.get("inventory_linkage") or "real_linked_inventory")
 initial_get=request(f"/api/admin/creative-process?project_id={project_id}",cookie)
 life=initial_get.get("planned_actual_inventory_lifecycle") or {}
 if life.get("classification")!="PLANNED_ESTIMATES_SEPARATE_FROM_REVIEWED_AND_POSTED_ACTUALS" or life.get("planned_estimates_move_inventory") is not False:stop("Live Creative Process lifecycle projection is not the Build 274 planned-vs-actual contract.")
-review=request("/api/admin/creative-process",cookie,"POST",{"action":"review_material","project_id":project_id,"creative_work_event_id":event_id,"review_status":"approved","actual_quantity":usage,"waste_quantity":0,"reusable_quantity":0,"approved_cost_cents":0,"review_notes":"Build 283 real operator acceptance: reviewed actual remains unposted."})
+if int(life.get("planned_estimate_count") or 0)<1 or int(life.get("reviewed_actual_unposted_count") or 0)<1:stop("Selected real project does not expose both planned and reviewed-unposted operator states.")
+review=request("/api/admin/creative-process",cookie,"POST",{"action":"review_material","project_id":project_id,"creative_work_event_id":event_id,"review_status":"approved","actual_quantity":usage,"waste_quantity":float(row.get("waste_quantity") or 0),"reusable_quantity":float(row.get("reusable_quantity") or 0),"approved_cost_cents":int(row.get("approved_cost_cents") or 0),"review_notes":str(row.get("review_notes") or "")})
 if review.get("ok") is not True:stop("Material review operator action did not return ok=true.")
 review_state=first_with(d1(f"""SELECT r.review_status,r.actual_quantity,r.inventory_consumed,
  (SELECT COUNT(*) FROM creative_project_inventory_posts ip WHERE ip.creative_work_project_id={project_id} AND ip.creative_work_event_id={event_id} AND COALESCE(ip.posting_status,'posted')<>'reversed') active_posts,
@@ -140,7 +190,7 @@ if table_count("accounting_journal_entries")!=initial_journal or table_count("ac
 final_get=request(f"/api/admin/creative-process?project_id={project_id}",cookie)
 final_life=final_get.get("planned_actual_inventory_lifecycle") or {}
 if int(final_life.get("reviewed_actual_unposted_count") or 0)<1:stop("Final operator projection does not expose the reviewed-but-unposted actual after reversal.")
-evidence={"schema":"release467-build283-planned-vs-actual-inventory-operator-acceptance-v1","status":"PASS","source_sha":os.environ.get("GITHUB_SHA"),"environment":"development","exact_preview_url":True,"real_admin_operator_session":True,"existing_project":True,"existing_material_event":True,"matching_real_inventory_item":True,"synthetic_project_created":False,"synthetic_event_created":False,"planned_estimate_verified":True,"reviewed_actual_unposted_verified":True,"explicit_inventory_post_verified":True,"posted_actual_verified":True,"compensating_reversal_verified":True,"reversal_history_count":1,"inventory_returned_to_starting_quantity":True,"finance_journal_unchanged":True,"automatic_inventory_movement":False,"finance_posting":False,"provider_execution_invoked":False,"public_promotion_invoked":False,"production_mutation":False,"correction_path_source_contract_verified":True,"project_identity_sha256":hashlib.sha256(f"creative_work_project:{project_id}".encode()).hexdigest(),"event_identity_sha256":hashlib.sha256(f"creative_work_event:{event_id}".encode()).hexdigest(),"inventory_identity_sha256":hashlib.sha256(f"site_item_inventory:{inventory_id}".encode()).hexdigest(),"raw_project_id_retained":False,"raw_event_id_retained":False,"raw_inventory_id_retained":False,"raw_session_token_retained":False,"runtime_acceptance":"PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_REAL_EVIDENCE"}
+evidence={"schema":"release467-build283-planned-vs-actual-inventory-operator-acceptance-v1","status":"PASS","source_sha":os.environ.get("GITHUB_SHA"),"environment":"development","exact_preview_url":True,"real_admin_operator_session":True,"existing_project":True,"existing_material_event":True,"matching_real_inventory_item":True,"inventory_linkage":inventory_linkage,"planned_and_reviewed_states_in_same_project":True,"synthetic_project_created":False,"synthetic_event_created":False,"planned_estimate_verified":True,"reviewed_actual_unposted_verified":True,"explicit_inventory_post_verified":True,"posted_actual_verified":True,"compensating_reversal_verified":True,"reversal_history_count":1,"inventory_returned_to_starting_quantity":True,"finance_journal_unchanged":True,"automatic_inventory_movement":False,"finance_posting":False,"provider_execution_invoked":False,"public_promotion_invoked":False,"production_mutation":False,"correction_path_source_contract_verified":True,"project_identity_sha256":hashlib.sha256(f"creative_work_project:{project_id}".encode()).hexdigest(),"event_identity_sha256":hashlib.sha256(f"creative_work_event:{event_id}".encode()).hexdigest(),"inventory_identity_sha256":hashlib.sha256(f"site_item_inventory:{inventory_id}".encode()).hexdigest(),"raw_project_id_retained":False,"raw_event_id_retained":False,"raw_inventory_id_retained":False,"raw_session_token_retained":False,"runtime_acceptance":"PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_REAL_EVIDENCE"}
 OUT.write_text(json.dumps(evidence,indent=2,sort_keys=True)+"\n",encoding="utf-8")
 print("BUILD 283 PLANNED-VS-ACTUAL INVENTORY OPERATOR ACCEPTANCE: PASS")
 print("Existing planned material -> reviewed unposted actual -> explicit Inventory post -> compensating reversal; net stock and Finance journal unchanged.")

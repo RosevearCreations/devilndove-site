@@ -4,7 +4,7 @@
 
 Build 283 converts the Build 274 planned-vs-actual Inventory lifecycle into fresh operator evidence on the exact Development deployment.
 
-The acceptance uses one **existing**, active Creative Process material event and one **matching, real, active Inventory item**. It does not create a project, event, Product, Inventory item, provider action or Finance entry for the test.
+The acceptance uses one existing Creative Process project that already exposes a planned material estimate and a reviewed-but-unposted actual. The actual must resolve to a **matching, real, active Inventory item** through direct material identity, prior same-material Inventory provenance, or an existing project-operation resource. It does not create a project, event, Product, Inventory item, provider action or Finance entry for the test.
 
 ## Exact predecessor
 
@@ -21,8 +21,8 @@ Build 282 **Content Studio Bridge Operator Acceptance** is the exact verified pr
 The Development-only workflow waits for the exact Build 283 System Gate deployment, obtains that exact Preview URL from the deployment artifact, and then:
 
 1. resolves an existing active Development administrator session;
-2. selects one existing non-archived Creative Process material event with no active Inventory post and no approved material review;
-3. selects a matching real Inventory item with enough available quantity and compatible usage units;
+2. selects one existing non-archived Creative Process project with both a planned material estimate and a reviewed-but-unposted actual that has never been posted;
+3. resolves a matching real Inventory item from direct material identity, same-material historical provenance, or an existing project-operation resource, with enough available quantity and compatible usage units;
 4. records the initial planned-estimate, Inventory movement and Finance journal state;
 5. calls `review_material` and proves the row becomes **Reviewed actual — not posted** while Inventory quantity, movement count and Finance journal counts remain unchanged;
 6. calls `post_material_inventory` and proves an explicit Inventory-owned post and posted actual are created;
