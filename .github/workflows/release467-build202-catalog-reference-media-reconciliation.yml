@@ -1,22 +1,7 @@
 name: Release 467 Build 202 Catalog Reference Media Reconciliation
 
 on:
-  pull_request:
-    branches: [dev]
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/api/admin/catalog-image-repair.js'
-      - 'public/js/admin-catalog-media-reconciliation-v202.js'
-      - 'css/release467-build202-catalog-media-reconciliation.css'
-      - 'admin/catalog-health/index.html'
-      - 'docs/operations/RELEASE_467_BUILD_202_CATALOG_REFERENCE_MEDIA_RECONCILIATION.md'
-      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md'
-      - 'scripts/release467_build202_gate.py'
-      - 'scripts/release467_build201_gate.py'
-      - '.github/workflows/release467-build202-catalog-reference-media-reconciliation.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 
