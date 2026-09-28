@@ -69,6 +69,37 @@ if not cookie:
     cookie="dd_auth_token="+token
     if not validate(cookie):stop("Existing Development administrator session was rejected.")
 
+def normalized_item_name(value):
+    return " ".join(re.findall(r"[A-Za-z0-9]+",str(value or ""))).strip().lower()
+def match_catalog_item(material,catalog_items):
+    material_key=normalized_item_name(material)
+    if not material_key:return None
+    exact=[];contained=[];scored=[]
+    material_tokens={t for t in re.findall(r"[a-z0-9]+",material_key) if len(t)>=2}
+    for x in catalog_items:
+        item_key=normalized_item_name(x.get("item_name"))
+        if not item_key:continue
+        if item_key==material_key:exact.append(x);continue
+        if item_key in material_key or material_key in item_key:contained.append(x)
+        item_tokens={t for t in re.findall(r"[a-z0-9]+",item_key) if len(t)>=2}
+        if not item_tokens:continue
+        overlap=material_tokens & item_tokens
+        coverage=len(overlap)/len(item_tokens)
+        if len(overlap)>=2 and coverage>=0.60:
+            scored.append(((round(coverage,6),len(overlap),len(item_tokens)),x))
+    if len(exact)==1:return exact[0]
+    if contained:
+        contained.sort(key=lambda x:len(normalized_item_name(x.get("item_name"))),reverse=True)
+        best_len=len(normalized_item_name(contained[0].get("item_name")))
+        best=[x for x in contained if len(normalized_item_name(x.get("item_name")))==best_len]
+        if len(best)==1:return best[0]
+    if scored:
+        scored.sort(key=lambda pair:pair[0],reverse=True)
+        best_score=scored[0][0]
+        best=[x for score,x in scored if score==best_score]
+        if len(best)==1:return best[0]
+    return None
+
 # existing Development material event evidence stays real; no synthetic project/event/item is created.
 def candidate_row(sql):
     return first_with(d1(sql),"creative_work_project_id","creative_work_event_id","site_item_inventory_id","on_hand_quantity","tracking_mode","minimum_usage_increment","actual_quantity","inventory_linkage")
@@ -135,6 +166,42 @@ LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.
  ) ORDER BY op.operation_order,e.creative_work_event_id DESC LIMIT 1;""")
 row=candidate
 if not row:
+    planned_rows=[]
+    seen_planned=set()
+    for item in dicts(d1("""SELECT p.creative_work_project_id,e.creative_work_event_id,e.material_name,
+      COALESCE(e.material_quantity,0) planned_quantity,COALESCE(e.material_unit,'') planned_unit,
+      COALESCE(e.material_cost_cents,0) approved_cost_cents
+      FROM creative_work_events e
+      JOIN creative_work_projects p ON p.creative_work_project_id=e.creative_work_project_id
+      LEFT JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id
+      WHERE COALESCE(p.project_status,'active')<>'archived' AND COALESCE(e.entry_status,'active')='active'
+        AND trim(COALESCE(e.material_name,''))<>'' AND COALESCE(lower(trim(r.review_status)),'')<>'approved'
+      ORDER BY p.updated_at DESC,e.creative_work_event_id DESC LIMIT 12;""")):
+        if all(k in item for k in ("creative_work_project_id","creative_work_event_id","material_name","planned_quantity")):
+            eid=int(item.get("creative_work_event_id") or 0)
+            if eid and eid not in seen_planned:
+                seen_planned.add(eid);planned_rows.append(item)
+    inv_catalog=request("/api/admin/contracts/inventory-read?limit=1000&include_tools=0",cookie)
+    catalog_items=[x for x in (inv_catalog.get("items") or []) if isinstance(x,dict) and int(x.get("site_item_inventory_id") or 0)>0]
+    for erow in planned_rows:
+        matched=match_catalog_item(erow.get("material_name"),catalog_items)
+        if not matched:continue
+        iid=int(matched["site_item_inventory_id"])
+        profile=first_with(d1(f"""SELECT sii.site_item_inventory_id,sii.item_name,sii.on_hand_quantity,
+          COALESCE(sii.reserved_quantity,0) reserved_quantity,COALESCE(sii.usage_units_per_stock_unit,1) usage_units_per_stock_unit,
+          COALESCE(sii.usage_unit_label,'unit') usage_unit_label,COALESCE(sii.stock_unit_label,'unit') stock_unit_label,
+          COALESCE(siup.usage_tracking_mode,CASE WHEN lower(trim(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) tracking_mode,
+          COALESCE(siup.minimum_usage_increment,0.001) minimum_usage_increment
+          FROM site_item_inventory sii LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
+          WHERE sii.site_item_inventory_id={iid} AND sii.is_active=1 LIMIT 1;"""),
+          "site_item_inventory_id","on_hand_quantity","tracking_mode","minimum_usage_increment")
+        if not profile:continue
+        if str(profile.get("tracking_mode") or "").lower() not in ("exact","estimated"):continue
+        available=max(0.0,float(profile.get("on_hand_quantity") or 0)-float(profile.get("reserved_quantity") or 0))*max(0.001,float(profile.get("usage_units_per_stock_unit") or 1))
+        if available+1e-9 < max(0.001,float(profile.get("minimum_usage_increment") or 0.001)):continue
+        row={**erow,**profile,"review_status":"","actual_quantity":float(erow.get("planned_quantity") or 0),"waste_quantity":0,"reusable_quantity":0,"review_notes":"","inventory_linkage":"planned_event_owner_inventory_match"}
+        break
+if not row:
     reviewed_rows=[]
     seen_events=set()
     for item in dicts(d1("""SELECT r.creative_work_project_id,r.creative_work_event_id,e.material_name,
@@ -157,39 +224,9 @@ if not row:
     inv_catalog=request("/api/admin/contracts/inventory-read?limit=1000&include_tools=0",cookie)
     catalog_items=[x for x in (inv_catalog.get("items") or []) if isinstance(x,dict) and int(x.get("site_item_inventory_id") or 0)>0]
     for erow in reviewed_rows:
-        material=str(erow.get("material_name") or "").strip()
-        if not material: continue
-        material_key=" ".join(re.findall(r"[A-Za-z0-9]+",material)).strip().lower()
-        if not material_key: continue
-        exact=[];contained=[]
-        for x in catalog_items:
-            item_key=" ".join(re.findall(r"[A-Za-z0-9]+",str(x.get("item_name") or ""))).strip().lower()
-            if not item_key: continue
-            if item_key==material_key: exact.append(x)
-            elif item_key in material_key or material_key in item_key: contained.append(x)
-        items=exact if len(exact)==1 else []
-        if not items and contained:
-            contained.sort(key=lambda x:len(" ".join(re.findall(r"[A-Za-z0-9]+",str(x.get("item_name") or ""))).strip()),reverse=True)
-            best_len=len(" ".join(re.findall(r"[A-Za-z0-9]+",str(contained[0].get("item_name") or ""))).strip())
-            best=[x for x in contained if len(" ".join(re.findall(r"[A-Za-z0-9]+",str(x.get("item_name") or ""))).strip())==best_len]
-            if len(best)==1: items=best
-        if not items:
-            material_tokens={t for t in re.findall(r"[a-z0-9]+",material_key) if len(t)>=2}
-            scored=[]
-            for x in catalog_items:
-                item_tokens={t for t in re.findall(r"[a-z0-9]+"," ".join(re.findall(r"[A-Za-z0-9]+",str(x.get("item_name") or ""))).lower()) if len(t)>=2}
-                if not item_tokens: continue
-                overlap=material_tokens & item_tokens
-                coverage=len(overlap)/len(item_tokens)
-                if len(overlap)>=2 and coverage>=0.60:
-                    scored.append(((round(coverage,6),len(overlap),len(item_tokens)),x))
-            scored.sort(key=lambda pair:pair[0],reverse=True)
-            if scored:
-                best_score=scored[0][0]
-                tied=[x for score,x in scored if score==best_score]
-                if len(tied)==1: items=tied
-        if len(items)!=1: continue
-        iid=int(items[0]["site_item_inventory_id"])
+        matched=match_catalog_item(erow.get("material_name"),catalog_items)
+        if not matched:continue
+        iid=int(matched["site_item_inventory_id"])
         profile=first_with(d1(f"""SELECT sii.site_item_inventory_id,sii.item_name,sii.on_hand_quantity,
           COALESCE(sii.reserved_quantity,0) reserved_quantity,COALESCE(sii.usage_units_per_stock_unit,1) usage_units_per_stock_unit,
           COALESCE(sii.usage_unit_label,'unit') usage_unit_label,COALESCE(sii.stock_unit_label,'unit') stock_unit_label,
@@ -285,7 +322,11 @@ inventory_linkage=str(row.get("inventory_linkage") or "real_linked_inventory")
 initial_get=request(f"/api/admin/creative-process?project_id={project_id}",cookie)
 life=initial_get.get("planned_actual_inventory_lifecycle") or {}
 if life.get("classification")!="PLANNED_ESTIMATES_SEPARATE_FROM_REVIEWED_AND_POSTED_ACTUALS" or life.get("planned_estimates_move_inventory") is not False:stop("Live Creative Process lifecycle projection is not the Build 274 planned-vs-actual contract.")
-if int(life.get("reviewed_actual_unposted_count") or 0)<1:stop("Selected real project does not expose the reviewed-unposted operator state.")
+selected_started_planned=str(row.get("review_status") or "").lower()!="approved"
+if selected_started_planned:
+    if int(life.get("planned_estimate_count") or 0)<1:stop("Selected real project does not expose the planned-estimate operator state before review.")
+else:
+    if int(life.get("reviewed_actual_unposted_count") or 0)<1:stop("Selected real project does not expose the reviewed-unposted operator state.")
 planned_row=first_with(d1("""SELECT p.creative_work_project_id,e.creative_work_event_id
   FROM creative_work_events e JOIN creative_work_projects p ON p.creative_work_project_id=e.creative_work_project_id
   LEFT JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id
@@ -336,7 +377,7 @@ final_life=final_get.get("planned_actual_inventory_lifecycle") or {}
 if int(final_life.get("reviewed_actual_unposted_count") or 0)<1:stop("Final operator projection does not expose the reviewed-but-unposted actual after reversal.")
 restore=request("/api/admin/creative-process",cookie,"POST",{"action":"review_material","project_id":project_id,"creative_work_event_id":event_id,"review_status":"approved","actual_quantity":original_actual,"waste_quantity":float(row.get("waste_quantity") or 0),"reusable_quantity":float(row.get("reusable_quantity") or 0),"approved_cost_cents":int(row.get("approved_cost_cents") or 0),"review_notes":str(row.get("review_notes") or "")})
 if restore.get("ok") is not True:stop("Original reviewed actual values could not be restored after acceptance.")
-evidence={"schema":"release467-build283-planned-vs-actual-inventory-operator-acceptance-v1","status":"PASS","source_sha":os.environ.get("GITHUB_SHA"),"environment":"development","exact_preview_url":True,"real_admin_operator_session":True,"existing_project":True,"existing_material_event":True,"matching_real_inventory_item":True,"inventory_linkage":inventory_linkage,"planned_and_reviewed_states_in_same_project":planned_and_reviewed_same_project,"synthetic_project_created":False,"synthetic_event_created":False,"planned_estimate_verified":True,"reviewed_actual_unposted_verified":True,"explicit_inventory_post_verified":True,"posted_actual_verified":True,"compensating_reversal_verified":True,"reversal_history_count":1,"inventory_returned_to_starting_quantity":True,"finance_journal_unchanged":True,"automatic_inventory_movement":False,"finance_posting":False,"provider_execution_invoked":False,"public_promotion_invoked":False,"production_mutation":False,"correction_path_source_contract_verified":True,"project_identity_sha256":hashlib.sha256(f"creative_work_project:{project_id}".encode()).hexdigest(),"event_identity_sha256":hashlib.sha256(f"creative_work_event:{event_id}".encode()).hexdigest(),"inventory_identity_sha256":hashlib.sha256(f"site_item_inventory:{inventory_id}".encode()).hexdigest(),"raw_project_id_retained":False,"raw_event_id_retained":False,"raw_inventory_id_retained":False,"raw_session_token_retained":False,"runtime_acceptance":"PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_REAL_EVIDENCE"}
+evidence={"schema":"release467-build283-planned-vs-actual-inventory-operator-acceptance-v1","status":"PASS","source_sha":os.environ.get("GITHUB_SHA"),"environment":"development","exact_preview_url":True,"real_admin_operator_session":True,"existing_project":True,"existing_material_event":True,"matching_real_inventory_item":True,"inventory_linkage":inventory_linkage,"selected_started_as_planned_estimate":selected_started_planned,"planned_and_reviewed_states_in_same_project":planned_and_reviewed_same_project,"synthetic_project_created":False,"synthetic_event_created":False,"planned_estimate_verified":True,"reviewed_actual_unposted_verified":True,"explicit_inventory_post_verified":True,"posted_actual_verified":True,"compensating_reversal_verified":True,"reversal_history_count":1,"inventory_returned_to_starting_quantity":True,"finance_journal_unchanged":True,"automatic_inventory_movement":False,"finance_posting":False,"provider_execution_invoked":False,"public_promotion_invoked":False,"production_mutation":False,"correction_path_source_contract_verified":True,"project_identity_sha256":hashlib.sha256(f"creative_work_project:{project_id}".encode()).hexdigest(),"event_identity_sha256":hashlib.sha256(f"creative_work_event:{event_id}".encode()).hexdigest(),"inventory_identity_sha256":hashlib.sha256(f"site_item_inventory:{inventory_id}".encode()).hexdigest(),"raw_project_id_retained":False,"raw_event_id_retained":False,"raw_inventory_id_retained":False,"raw_session_token_retained":False,"runtime_acceptance":"PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_REAL_EVIDENCE"}
 OUT.write_text(json.dumps(evidence,indent=2,sort_keys=True)+"\n",encoding="utf-8")
 print("BUILD 283 PLANNED-VS-ACTUAL INVENTORY OPERATOR ACCEPTANCE: PASS")
 print("Existing planned material -> reviewed unposted actual -> explicit Inventory post -> compensating reversal; net stock and Finance journal unchanged.")
