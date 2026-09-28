@@ -50,7 +50,8 @@ jobs:
         run: |
           set -uo pipefail
           set +e
-          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --file scripts/release467_build287_probe.sql > /tmp/build287-probe.json 2>/tmp/build287-probe.stderr
+          BUILD287_SQL="$(cat scripts/release467_build287_probe.sql)"
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "${BUILD287_SQL}" > /tmp/build287-probe.json 2>/tmp/build287-probe.stderr
           status=$?
           set -e
           cat /tmp/build287-probe.stderr
