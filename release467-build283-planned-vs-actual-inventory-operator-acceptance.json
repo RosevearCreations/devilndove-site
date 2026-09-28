@@ -2,7 +2,7 @@
   "release": 467,
   "build": 283,
   "title": "Planned-vs-Actual Inventory Operator Acceptance",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build283-planned-vs-actual-inventory-operator-acceptance",
   "predecessor": {
     "build": 282,
@@ -153,5 +153,32 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_development": true
     }
+  },
+  "final_closure": {
+    "dev_sha": "046cf0bebea75de39aaf7a42fef0e0639581615a",
+    "tree_sha": "2e0e404c7b62a0167155f6b1d563b34250748c32",
+    "proofs": {
+      "system_gate_run": 36365773333,
+      "current_application_quality_run": 36365773581,
+      "it_admin_runtime_proof_run": 36365773340,
+      "branch_hygiene_run": 36365773372
+    },
+    "dedicated_gate_run": 36365774362,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "ingested_by_build": 284,
+    "recorded_by": "Build 284 startup ingestion from exact live Build 283 Development proof runs"
+  },
+  "production_checkpoint": {
+    "main_sha": "5bc70281e8ea2cb9818b14f216bef30f2d7d1463",
+    "tree_sha": "2e0e404c7b62a0167155f6b1d563b34250748c32",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36366107169,
+    "production_live_resource_integrity_run": 36366163222,
+    "products_browser_proof_run": 36366163229,
+    "products_route_proof_run": 36366163225,
+    "build_specific_proof_run": 36366107020,
+    "ingested_by_build": 284,
+    "recorded_by": "Build 284 startup ingestion from exact live Build 283 Production proof runs"
   }
 }

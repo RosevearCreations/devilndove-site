@@ -1,32 +1,32 @@
 {
   "release": 467,
-  "build": 283,
-  "title": "Planned-vs-Actual Inventory Operator Acceptance",
+  "build": 284,
+  "title": "CAIP Production Acceptance Closure & Outcomes Renewal",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 282,
-      "title": "Content Studio Bridge Operator Acceptance",
-      "authority": "release467-build282-content-studio-bridge-operator-acceptance.json",
-      "dev_sha": "9cd1892c878839982ab18c7a7745101fbe2015ed",
-      "tree_sha": "0f5448333945f050cd7c5a32b5fd9a363f1e2bad",
-      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
-      "proofs": {
-        "system_gate_run": 36360504891,
-        "current_application_quality_run": 36360504892,
-        "it_admin_runtime_proof_run": 36360505049,
-        "branch_hygiene_run": 36360505047
-      },
-      "dedicated_gate_run": 36360505062
-    },
-    "current_closure_candidate": {
-      "release": 467,
       "build": 283,
       "title": "Planned-vs-Actual Inventory Operator Acceptance",
       "authority": "release467-build283-planned-vs-actual-inventory-operator-acceptance.json",
+      "dev_sha": "046cf0bebea75de39aaf7a42fef0e0639581615a",
+      "tree_sha": "2e0e404c7b62a0167155f6b1d563b34250748c32",
+      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+      "proofs": {
+        "system_gate_run": 36365773333,
+        "current_application_quality_run": 36365773581,
+        "it_admin_runtime_proof_run": 36365773340,
+        "branch_hygiene_run": 36365773372
+      },
+      "dedicated_gate_run": 36365774362
+    },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 284,
+      "title": "CAIP Production Acceptance Closure & Outcomes Renewal",
+      "authority": "release467-build284-caip-production-acceptance-closure-outcomes-renewal.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -37,21 +37,22 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 282,
-    "title": "Content Studio Bridge Operator Acceptance",
-    "authority": "release467-build282-content-studio-bridge-operator-acceptance.json",
-    "main_sha": "034ab92e57b17765a7b946182256fb32ae25cf87",
-    "tree_sha": "0f5448333945f050cd7c5a32b5fd9a363f1e2bad",
+    "build": 283,
+    "title": "Planned-vs-Actual Inventory Operator Acceptance",
+    "authority": "release467-build283-planned-vs-actual-inventory-operator-acceptance.json",
+    "main_sha": "5bc70281e8ea2cb9818b14f216bef30f2d7d1463",
+    "tree_sha": "2e0e404c7b62a0167155f6b1d563b34250748c32",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36360676716,
-    "production_live_resource_integrity_run": 36360712757,
-    "products_browser_proof_run": 36360712745,
-    "products_route_proof_run": 36360712799,
-    "build_specific_proof_run": 36360676884,
+    "production_pages_deploy_run": 36366107169,
+    "production_live_resource_integrity_run": 36366163222,
+    "products_browser_proof_run": 36366163229,
+    "products_route_proof_run": 36366163225,
+    "build_specific_proof_run": 36366107020,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build284-caip-production-acceptance-closure-outcomes-renewal.json",
     "release467-build283-planned-vs-actual-inventory-operator-acceptance.json",
     "release467-build282-content-studio-bridge-operator-acceptance.json",
     "release467-build281-standalone-social-project-operator-acceptance.json",
@@ -175,11 +176,11 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "roadmap": "docs/operations/RELEASE_467_CAIP_PRODUCTION_ACCEPTANCE_AUTONOMOUS_BUILDS_276_284.md",
-  "next_build": 284,
-  "next_build_state": "AUTHORIZED_AFTER_BUILD283_GREEN",
-  "next_build_title": "CAIP Production Acceptance Closure & Outcomes Renewal",
-  "promotion_state": "BUILD282_PRODUCTION_GREEN_BUILD283_CANDIDATE_NOT_YET_VERIFIED",
+  "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md",
+  "next_build": 285,
+  "next_build_state": "AUTHORIZED_AFTER_BUILD284_GREEN",
+  "next_build_title": "Real Inventory Linkage Prerequisite Inventory",
+  "promotion_state": "BUILD283_PRODUCTION_GREEN_BUILD284_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "CAIP_PRODUCTION_ACCEPTANCE_EVIDENCE_ROADMAP_ACTIVE",
   "measured_closure": {
     "source_build": 232,
@@ -201,24 +202,24 @@
     "interpretation": "NO_JUSTIFIED_AUTONOMOUS_SOFTWARE_SUCCESSOR"
   },
   "planned_successor": {
-    "first_build": 276,
-    "last_build": 284,
-    "state": "EVIDENCE_DRIVEN_CAIP_PRODUCTION_ACCEPTANCE_ROADMAP",
+    "first_build": 285,
+    "last_build": 289,
+    "state": "REAL_INVENTORY_LINKAGE_ACCEPTANCE_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 284,
-    "next_build_title": "CAIP Production Acceptance Closure & Outcomes Renewal",
-    "roadmap": "docs/operations/RELEASE_467_CAIP_PRODUCTION_ACCEPTANCE_AUTONOMOUS_BUILDS_276_284.md"
+    "next_build": 285,
+    "next_build_title": "Real Inventory Linkage Prerequisite Inventory",
+    "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md"
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "9cd1892c878839982ab18c7a7745101fbe2015ed",
-  "accepted_dev_tree_sha": "0f5448333945f050cd7c5a32b5fd9a363f1e2bad",
+  "accepted_dev_sha": "046cf0bebea75de39aaf7a42fef0e0639581615a",
+  "accepted_dev_tree_sha": "2e0e404c7b62a0167155f6b1d563b34250748c32",
   "acceptance": {
-    "system_gate_run": 36360504891,
-    "current_application_quality_run": 36360504892,
-    "it_admin_runtime_proof_run": 36360505049,
-    "branch_hygiene_run": 36360505047,
-    "dedicated_gate_run": 36360505062
+    "system_gate_run": 36365773333,
+    "current_application_quality_run": 36365773581,
+    "it_admin_runtime_proof_run": 36365773340,
+    "branch_hygiene_run": 36365773372,
+    "dedicated_gate_run": 36365774362
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -807,7 +808,7 @@
     "public_promotion": false,
     "production_mutation": false,
     "evidence_artifact": "build283-planned-vs-actual-inventory-operator-acceptance-evidence",
-    "runtime_state": "PENDING_EXACT_DEVELOPMENT_BOUNDED_SUPPLY_ACCEPTANCE",
+    "runtime_state": "PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_BOUNDED_SUPPLY_FIXTURE_EVIDENCE",
     "next_build": 284,
     "future_queue_exhausted": false,
     "existing_material_event_preferred": true,
@@ -823,6 +824,26 @@
     "fixture_inventory_source_type": "supply",
     "fixture_inventory_tracking_mode": "exact",
     "fixture_inventory_archive_action": "PATCH site-item-inventory is_active=0",
-    "fixture_product_stock_forbidden": true
+    "fixture_product_stock_forbidden": true,
+    "exact_development_sha": "046cf0bebea75de39aaf7a42fef0e0639581615a",
+    "dedicated_gate_run": 36365774362,
+    "production_main_sha": "5bc70281e8ea2cb9818b14f216bef30f2d7d1463",
+    "production_state": "PRODUCTION_GREEN"
+  },
+  "caip_production_acceptance_closure_outcomes_renewal": {
+    "source_builds": "276-283",
+    "caip_private_media_lane": "ACCEPTED",
+    "fresh_dimensions_satisfied": 3,
+    "required_dimensions": 3,
+    "build281_real_operator_evidence": true,
+    "build282_real_operator_evidence": true,
+    "build283_bounded_supply_fixture_required": true,
+    "build283_fixture_cleaned_up": true,
+    "real_creative_process_inventory_linkage_observed": false,
+    "residual_classification": "REAL_CREATIVE_PROCESS_INVENTORY_LINKAGE_ADOPTION_EVIDENCE_GAP",
+    "accepted_caip_private_media_reopened": false,
+    "successor_roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md",
+    "next_build": 285,
+    "future_queue_exhausted": false
   }
 }

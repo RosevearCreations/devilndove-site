@@ -1,16 +1,16 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 283 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 284 candidate
 
-Build 283 — Planned-vs-Actual Inventory Operator Acceptance — is projected over the exact fully verified Build 282 closure.
+Build 284 — CAIP Production Acceptance Closure & Outcomes Renewal — is projected over the exact fully verified Build 283 closure.
 
-- Last fully verified Development: `9cd1892c878839982ab18c7a7745101fbe2015ed`
-- Verified tree: `0f5448333945f050cd7c5a32b5fd9a363f1e2bad`
-- Development proofs: System `36360504891`, Quality `36360504892`, I.T. `36360505049`, Hygiene `36360505047`; dedicated Build 282 proof `36360505062`
-- Current Production main: `034ab92e57b17765a7b946182256fb32ae25cf87`
-- Production proofs: Pages `36360676716`, Live Resources `36360712757`, Product Browser `36360712745`, Product Route `36360712799`; Build 282 `36360676884`
-- Build 283 runtime scope: one existing Creative Process material event + one matching real Inventory item → review, explicit post and compensating reversal on Development only.
-- Planned estimates and reviewed-but-unposted actuals must move no Inventory; Finance journal counts must remain unchanged.
-- The explicit post/reversal cycle must return Inventory to its exact starting quantity.
-- Production receives only the identical already-accepted code tree; no Build 283 Production business-data mutation is authorized.
+- Last fully verified Development: `046cf0bebea75de39aaf7a42fef0e0639581615a`
+- Verified tree: `2e0e404c7b62a0167155f6b1d563b34250748c32`
+- Development proofs: System `36365773333`, Quality `36365773581`, I.T. `36365773340`, Hygiene `36365773372`; dedicated Build 283 proof `36365774362`
+- Current Production main: `5bc70281e8ea2cb9818b14f216bef30f2d7d1463`
+- Production proofs: Pages `36366107169`, Live Resources `36366163222`, Product Browser `36366163229`, Product Route `36366163225`; Build 283 `36366107020`
+- CAIP private-media remains ACCEPTED at 3/3 current-release dimensions.
+- Build 284 is read-only governance/evidence renewal.
+- Measured residual: real Creative Process ↔ Supply/Tool Inventory linkage/adoption evidence remains open because Build 283 required a bounded Development Supply fixture.
+- Successor roadmap: Builds 285–289 real Inventory linkage acceptance.
 
 ## Current release baseline
 

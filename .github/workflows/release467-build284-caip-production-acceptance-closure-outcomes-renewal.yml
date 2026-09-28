@@ -1,0 +1,45 @@
+name: Release 467 Build 284 CAIP Production Acceptance Closure Outcomes Renewal
+on:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  build284:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 283 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 046cf0bebea75de39aaf7a42fef0e0639581615a
+          production_sha: 5bc70281e8ea2cb9818b14f216bef30f2d7d1463
+          build_proof_name: Release 467 Build 283 Planned-vs-Actual Inventory Operator Acceptance
+          report_path: /tmp/build284-predecessor-exact-sha-proof.json
+      - name: Resolve exact Build 283 tree continuity
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 046cf0bebea75de39aaf7a42fef0e0639581615a
+          git fetch --no-tags --depth=1 origin 5bc70281e8ea2cb9818b14f216bef30f2d7d1463
+          test "$(git rev-parse 046cf0bebea75de39aaf7a42fef0e0639581615a^{tree})" = "$(git rev-parse 5bc70281e8ea2cb9818b14f216bef30f2d7d1463^{tree})"
+          test "$(git rev-parse 046cf0bebea75de39aaf7a42fef0e0639581615a^{tree})" = "2e0e404c7b62a0167155f6b1d563b34250748c32"
+      - name: Build 284 gate
+        run: python scripts/release467_build284_gate.py
+      - name: Retain Build 283 contract
+        run: python scripts/release467_build283_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build284-caip-production-acceptance-closure-outcomes-renewal-evidence-${{ github.sha }}
+          path: /tmp/build284-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30
