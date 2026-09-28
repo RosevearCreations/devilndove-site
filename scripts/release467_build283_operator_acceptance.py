@@ -173,6 +173,21 @@ if not row:
             best_len=len(" ".join(re.findall(r"[A-Za-z0-9]+",str(contained[0].get("item_name") or ""))).strip())
             best=[x for x in contained if len(" ".join(re.findall(r"[A-Za-z0-9]+",str(x.get("item_name") or ""))).strip())==best_len]
             if len(best)==1: items=best
+        if not items:
+            material_tokens={t for t in re.findall(r"[a-z0-9]+",material_key) if len(t)>=2}
+            scored=[]
+            for x in catalog_items:
+                item_tokens={t for t in re.findall(r"[a-z0-9]+"," ".join(re.findall(r"[A-Za-z0-9]+",str(x.get("item_name") or ""))).lower()) if len(t)>=2}
+                if not item_tokens: continue
+                overlap=material_tokens & item_tokens
+                coverage=len(overlap)/len(item_tokens)
+                if len(overlap)>=2 and coverage>=0.60:
+                    scored.append(((round(coverage,6),len(overlap),len(item_tokens)),x))
+            scored.sort(key=lambda pair:pair[0],reverse=True)
+            if scored:
+                best_score=scored[0][0]
+                tied=[x for score,x in scored if score==best_score]
+                if len(tied)==1: items=tied
         if len(items)!=1: continue
         iid=int(items[0]["site_item_inventory_id"])
         profile=first_with(d1(f"""SELECT sii.site_item_inventory_id,sii.item_name,sii.on_hand_quantity,
