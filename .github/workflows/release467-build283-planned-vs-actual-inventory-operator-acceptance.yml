@@ -1,7 +1,5 @@
 name: Release 467 Build 283 Planned-vs-Actual Inventory Operator Acceptance
 on:
-  push:
-    branches: [dev, main]
   workflow_dispatch:
 permissions:
   contents: read
