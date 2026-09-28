@@ -239,7 +239,7 @@ async function getRecentMovements(db, limit = 30) {
   `).bind(safeLimit).all().catch(() => ({ results: [] })));
 }
 
-async function getItems(db, { q = '', stockView = '', includeHistory = false, page = 1, pageSize = 40 } = {}) {
+async function getItems(db, { q = '', stockView = '', includeHistory = false, includeLinkStats = true, page = 1, pageSize = 40 } = {}) {
   const safePage = Math.max(1, Number(page || 1) || 1);
   const safePageSize = Math.max(25, Math.min(100, Number(pageSize || 40) || 40));
   const offset = (safePage - 1) * safePageSize;
@@ -277,7 +277,9 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false, pa
     WHERE ${filterSql}
   `).bind(...filterBinds).first().catch(() => null);
 
-  const items = normalizeResults(await db.prepare(`
+  // Product-link aggregation is expensive and not needed for the normal Inventory editor.
+  // Keep it opt-in for compatibility, while the primary operator table requests include_link_stats=0.
+  const linkStatsCte = includeLinkStats ? `
     WITH link_stats AS (
       SELECT prl.resource_kind, prl.source_key,
              COUNT(DISTINCT prl.product_id) AS linked_product_count,
@@ -285,12 +287,20 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false, pa
       FROM product_resource_links prl
       LEFT JOIN products p ON p.product_id=prl.product_id
       GROUP BY prl.resource_kind,prl.source_key
-    )
+    )` : '';
+  const linkStatsSelect = includeLinkStats
+    ? "COALESCE(ls.linked_product_count,0) AS linked_product_count, COALESCE(ls.linked_product_names,'') AS linked_product_names,"
+    : "0 AS linked_product_count, '' AS linked_product_names,";
+  const linkStatsJoin = includeLinkStats
+    ? 'LEFT JOIN link_stats ls ON ls.resource_kind=sii.source_type AND ls.source_key=sii.external_key'
+    : '';
+
+  const items = normalizeResults(await db.prepare(`
+    ${linkStatsCte}
     SELECT sii.*,COALESCE(siid.item_description,'') AS item_description,
            COALESCE(siup.usage_tracking_mode,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
            COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment,
-           COALESCE(ls.linked_product_count,0) AS linked_product_count,
-           COALESCE(ls.linked_product_names,'') AS linked_product_names,
+           ${linkStatsSelect}
            COALESCE(iip.inventory_class,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable_equipment' ELSE 'consumable' END) AS inventory_class,
            COALESCE(iip.lifecycle_mode,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'consumable' END) AS lifecycle_mode,
            COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes
@@ -298,7 +308,7 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false, pa
     LEFT JOIN site_inventory_item_descriptions siid ON siid.site_item_inventory_id=sii.site_item_inventory_id
     LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
     LEFT JOIN inventory_item_profiles iip ON iip.site_item_inventory_id=sii.site_item_inventory_id
-    LEFT JOIN link_stats ls ON ls.resource_kind=sii.source_type AND ls.source_key=sii.external_key
+    ${linkStatsJoin}
     WHERE ${filterSql}
     ORDER BY LOWER(COALESCE(sii.item_name,'')) ASC,sii.site_item_inventory_id ASC
     LIMIT ? OFFSET ?
@@ -606,6 +616,7 @@ async function handleGet(context) {
     q: normalizeText(url.searchParams.get('q')).toLowerCase(),
     stockView: normalizeText(url.searchParams.get('stock_view')).toLowerCase(),
     includeHistory: ['1', 'true', 'yes'].includes(String(url.searchParams.get('include_history') || '').toLowerCase()),
+    includeLinkStats: !['0', 'false', 'no'].includes(String(url.searchParams.get('include_link_stats') || '').toLowerCase()),
     page: Math.max(1, Number(url.searchParams.get('page') || 1) || 1),
     pageSize: Math.max(25, Math.min(100, Number(url.searchParams.get('page_size') || 40) || 40))
   });
