@@ -2,7 +2,7 @@
   "release": 467,
   "build": 287,
   "title": "Real Existing Resource-Link Evidence Capture",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build287-real-existing-resource-link-evidence-capture",
   "predecessor": {
     "build": 286,
@@ -131,5 +131,30 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_development": true
     }
+  },
+  "final_closure": {
+    "dev_sha": "f3e84a0c5623eb0a74bccb537049d780944e2892",
+    "tree_sha": "981b7a5e7b851684821af087a428fe66ad8348f0",
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "proofs": {
+      "system_gate_run": 36432943282,
+      "current_application_quality_run": 36432943315,
+      "it_admin_runtime_proof_run": 36432943396,
+      "branch_hygiene_run": 36432943404
+    },
+    "dedicated_gate_run": 36432943286,
+    "ingested_by_build": 288,
+    "recorded_by": "Build 288 startup ingestion from exact Build 287 Development closure"
+  },
+  "production_checkpoint": {
+    "main_sha": "27a48e505b42c399fac0801cbd4e6394490957a4",
+    "tree_sha": "981b7a5e7b851684821af087a428fe66ad8348f0",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36433269795,
+    "production_live_resource_integrity_run": 36433368187,
+    "build_specific_proof_run": 36433269797,
+    "ingested_by_build": 288,
+    "recorded_by": "Build 288 startup ingestion from exact Build 287 Production closure"
   }
 }
