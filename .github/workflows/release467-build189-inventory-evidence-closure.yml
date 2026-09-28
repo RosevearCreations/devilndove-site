@@ -1,22 +1,7 @@
 name: Release 467 Build 189 Inventory Evidence Closure
 
 on:
-  pull_request:
-    branches: [dev]
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/api/admin/inventory-identity-health.js'
-      - 'functions/api/_lib/d1ReadBudget.js'
-      - 'public/js/admin-inventory-identity-cleanup-v183.js'
-      - 'admin/inventory-operations/index.html'
-      - 'docs/operations/RELEASE_467_BUILD_189_INVENTORY_EVIDENCE_CLOSURE.md'
-      - 'docs/operations/RELEASE_467_AUTONOMOUS_CLOSURE_BUILDS_187_192.md'
-      - 'scripts/release467_build189_gate.py'
-      - 'scripts/release467_build183_gate.py'
-      - '.github/workflows/release467-build189-inventory-evidence-closure.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 
