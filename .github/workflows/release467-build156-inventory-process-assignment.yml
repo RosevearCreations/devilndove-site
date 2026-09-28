@@ -1,7 +1,6 @@
 name: Release 467 Build 156 Inventory Process Assignment Proof
 on:
-  push:
-    branches: [dev]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
