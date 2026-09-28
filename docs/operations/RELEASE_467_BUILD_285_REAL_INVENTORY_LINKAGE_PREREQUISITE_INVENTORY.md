@@ -29,7 +29,29 @@ Build 284 is fully GREEN:
 
 The dedicated Development workflow runs `scripts/release467_build285_measurement.sql` against `devilndove-dev` with a 25,000-row provider-read ceiling and retains only counts/booleans/classification. It performs **zero D1 mutation** and never queries Production business data.
 
-The candidate begins fail-closed as `PENDING_EXACT_DEVELOPMENT_MEASUREMENT`. The measured counts and classification are ingested before final promotion.
+The exact Development measurement completed GREEN on `d606572be9855d263757c651c539d05ef0657125` at **14,698 / 25,000 provider rows read**.
+
+Measured data:
+
+- active Creative Projects: **5**
+- projects with active material events: **1**
+- active material events: **3** — **1 planned**, **2 approved/reviewed-unposted**
+- active Creative Project operations: **0**
+- operation-resource rows: **0**
+- Supply/Tool operation-resource rows: **0**
+- active Supply/Tool Inventory items: **1,040**
+- Supply/Tool Inventory items with usage profiles: **1,040**
+- Supply/Tool Inventory items with process assignments: **0**
+- Product resource links: **8**, all **8 Supply/Tool**, and all **8 resolve to active Inventory**
+- Creative Project Product links: **0**
+- direct `creative_work_events.creative_project_operation_id` linkage columns: **0**
+- direct material-review → operation-resource linkage columns: **0**
+- Inventory post/reversal history: **2 / 2**
+- foreign-key violations: **0**
+
+Classification: **`MISSING_REAL_LINKAGE_DATA_AND_EXPLICIT_EVENT_RESOURCE_WORKFLOW`**.
+
+This separates the residual cleanly: Inventory data and Product-resource linkage are present, and the Build 212 planning UI/API already supports saving an operation resource; however, no real Creative Project has adopted that operation/resource plan yet, and the actual material-event path has no explicit resource identity binding.
 
 ## Next
 
