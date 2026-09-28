@@ -26,7 +26,6 @@ active_inventory AS (
     site_item_inventory_id,
     item_name,
     LOWER(TRIM(COALESCE(source_type,''))) AS source_type,
-    external_key,
     COALESCE(on_hand_quantity,0) AS on_hand_quantity,
     COALESCE(stock_unit_label,'unit') AS stock_unit_label,
     LOWER(TRIM(COALESCE(item_name,''))) AS item_norm
@@ -59,7 +58,7 @@ existing_links AS (
   JOIN active_inventory i
     ON i.site_item_inventory_id=l.site_item_inventory_id
 ),
-ranked_candidates AS (
+exact_candidates AS (
   SELECT
     e.creative_work_project_id,
     e.project_title,
@@ -73,30 +72,10 @@ ranked_candidates AS (
     i.item_name AS inventory_name,
     i.source_type,
     i.on_hand_quantity,
-    i.stock_unit_label,
-    CASE
-      WHEN i.item_norm=e.material_norm THEN 'exact_name'
-      WHEN LENGTH(e.material_norm)>=4 AND i.item_norm LIKE '%'||e.material_norm||'%' THEN 'inventory_contains_material'
-      WHEN LENGTH(i.item_norm)>=4 AND e.material_norm LIKE '%'||i.item_norm||'%' THEN 'material_contains_inventory'
-      ELSE ''
-    END AS match_kind,
-    ROW_NUMBER() OVER (
-      PARTITION BY e.creative_work_event_id
-      ORDER BY
-        CASE
-          WHEN i.item_norm=e.material_norm THEN 0
-          WHEN LENGTH(e.material_norm)>=4 AND i.item_norm LIKE '%'||e.material_norm||'%' THEN 1
-          WHEN LENGTH(i.item_norm)>=4 AND e.material_norm LIKE '%'||i.item_norm||'%' THEN 2
-          ELSE 9
-        END,
-        LENGTH(i.item_name),
-        i.site_item_inventory_id
-    ) AS candidate_rank
+    i.stock_unit_label
   FROM material_events e
   JOIN active_inventory i
     ON i.item_norm=e.material_norm
-    OR (LENGTH(e.material_norm)>=4 AND i.item_norm LIKE '%'||e.material_norm||'%')
-    OR (LENGTH(i.item_norm)>=4 AND e.material_norm LIKE '%'||i.item_norm||'%')
 )
 SELECT
   'EXISTING_LINK' AS record_type,
@@ -119,7 +98,7 @@ SELECT
 FROM existing_links
 UNION ALL
 SELECT
-  'CANDIDATE',
+  'EXACT_NAME_CANDIDATE',
   creative_work_project_id,
   project_title,
   creative_work_event_id,
@@ -134,10 +113,9 @@ SELECT
   source_type,
   on_hand_quantity,
   stock_unit_label,
-  match_kind,
-  'Read-only candidate; not linked by this probe.'
-FROM ranked_candidates
-WHERE candidate_rank<=8
+  'exact_name',
+  'Read-only exact-name candidate; not linked by this probe.'
+FROM exact_candidates
 UNION ALL
 SELECT
   'MATERIAL_EVENT',
