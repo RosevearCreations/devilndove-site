@@ -1,7 +1,5 @@
 name: Release 467 Build 285 Real Inventory Linkage Prerequisite Inventory
 on:
-  push:
-    branches: [dev, main]
   workflow_dispatch:
 permissions:
   contents: read

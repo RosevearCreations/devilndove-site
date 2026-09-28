@@ -11,6 +11,7 @@ a=j('release467-build259-reusable-exact-sha-proof-composition.json')
 prev=j('release467-build258-historical-workflow-trigger-scope-tightening.json')
 p=j('current-development-authority.json')
 cur=int(p.get('build') or 0)
+fanout_retired=cur>=286 and (R/'scripts/d1_ci_fanout_guard.py').is_file()
 road=t('docs/operations/RELEASE_467_RELEASE_EFFICIENCY_READ_PATH_AUTONOMOUS_BUILDS_257_264.md')
 doc=t('docs/operations/RELEASE_467_BUILD_259_REUSABLE_EXACT_SHA_PROOF_COMPOSITION.md')
 action=t('.github/actions/release467-exact-sha-proof/action.yml')
@@ -68,7 +69,10 @@ if cur==259:
         q(tc.get(k)==v,f'Build 259 trigger count mismatch: {k} expected {v} got {tc.get(k)}')
 else:
     q(cur>=260 and report.get('workflow_file_count',0)>=149,'Build 260+ must retain Build 259 workflow and successors')
-    q(tc.get('workflow_run')==5,'Build 260+ must preserve the five workflow_run chains')
+    if not fanout_retired:
+        q(tc.get('workflow_run')==5,'Build 260+ must preserve the five workflow_run chains')
+    else:
+        q((R/'.github/workflows/d1-ci-fanout-guard.yml').is_file(),'Build 286+ must retain the D1 CI fan-out guard')
 
 q("run_current_contract('scripts/release467_build259_gate.py','Release 467 Build 259')" in sysgate,'System Gate must invoke Build 259')
 q(cur>=259 and int(p.get('next_build') or 0)>=260 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 259 or a verified successor')

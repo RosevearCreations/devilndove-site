@@ -1,27 +1,7 @@
 name: Release 467 Build 233 Universal Help QoL
 
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'public/js/admin-context-help.js'
-      - 'public/js/site-auth-ui.js'
-      - 'functions/_middleware.js'
-      - 'help/index.html'
-      - 'admin/help/index.html'
-      - 'css/admin-context-help.css'
-      - 'docs/architecture/admin-context-help.md'
-      - 'docs/operations/RELEASE_467_BUILD_233_UNIVERSAL_HELP_QUALITY_OF_LIFE_COVERAGE.md'
-      - 'docs/operations/RELEASE_467_REFINEMENT_AUTONOMOUS_BUILDS_233_248.md'
-      - 'SITE_WIDE_NON_PRODUCT_IMAGE_REQUIREMENTS.md'
-      - 'release467-build233-universal-help-quality-of-life-coverage.json'
-      - 'scripts/release467_build233_gate.py'
-      - 'scripts/release467_build198_gate.py'
-      - 'scripts/current_help_hygiene_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - '.github/workflows/release467-build233-universal-help-qol.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 

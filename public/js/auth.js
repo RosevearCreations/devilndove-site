@@ -111,7 +111,12 @@
       headers.set('Content-Type', 'application/json');
     }
     const response = await fetch(url, { ...options, headers, credentials: 'same-origin' });
-    if (response.status === 401 && !String(url).includes('/api/auth/login')) {
+    // Only the canonical session verifier may clear cached browser identity.
+    // Feature/admin endpoints can temporarily return 401 while D1/Worker services are
+    // degraded; treating those responses as a real logout caused false sign-outs.
+    let requestPath = '';
+    try { requestPath = new URL(String(url), window.location.origin).pathname; } catch {}
+    if ((response.status === 401 || response.status === 403) && requestPath === '/api/auth/me') {
       clearAuth();
       document.dispatchEvent(new CustomEvent('dd:auth-changed', { detail: { ok: false, logged_in: false, user: null } }));
     }

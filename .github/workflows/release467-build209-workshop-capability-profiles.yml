@@ -1,29 +1,5 @@
 name: Release 467 Build 209 Workshop Capability Profiles Constraints
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'migrations/canonical/0009_release467_workshop_capability_profiles.sql'
-      - 'migrations/canonical/manifest.json'
-      - 'functions/api/capabilities.js'
-      - 'functions/api/admin/workshop-capabilities.js'
-      - 'capabilities/**'
-      - 'admin/workshop-capabilities/**'
-      - 'public/js/capabilities.js'
-      - 'public/js/admin-workshop-capabilities.js'
-      - 'gallery/index.html'
-      - 'js/main.js'
-      - 'css/styles.css'
-      - 'current-development-authority.json'
-      - 'release467-build208-multi-discipline-public-positioning-capability-navigation.json'
-      - 'release467-build209-workshop-capability-profiles-constraints.json'
-      - 'docs/operations/RELEASE_467_BUILD_209_WORKSHOP_CAPABILITY_PROFILES_CONSTRAINTS.md'
-      - 'scripts/release467_build208_gate.py'
-      - 'scripts/release467_build209_gate.py'
-      - 'scripts/repository_forward_sanity.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'scripts/current_deployment_preflight_truth_gate.py'
-      - '.github/workflows/release467-build209-workshop-capability-profiles.yml'
   workflow_dispatch:
 permissions: {contents: read}
 jobs:

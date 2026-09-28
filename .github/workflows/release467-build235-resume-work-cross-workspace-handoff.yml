@@ -1,19 +1,6 @@
 name: Release 467 Build 235 Resume Work Cross-Workspace Handoff
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'public/js/admin-resume-work-v235.js'
-      - 'functions/_middleware.js'
-      - 'data/admin-navigation-modules.json'
-      - 'release467-build235-resume-work-cross-workspace-handoff.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build235_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'docs/operations/RELEASE_467_BUILD_235_RESUME_WORK_CROSS_WORKSPACE_HANDOFF.md'
-      - '.github/workflows/release467-build235-resume-work-cross-workspace-handoff.yml'
   workflow_dispatch:
-
 jobs:
   build235:
     runs-on: ubuntu-latest

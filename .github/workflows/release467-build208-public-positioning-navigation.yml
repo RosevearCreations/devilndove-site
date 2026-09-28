@@ -1,21 +1,5 @@
 name: Release 467 Build 208 Multi-Discipline Public Positioning Capability Navigation
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'index.html'
-      - 'shop/index.html'
-      - 'custom-request/index.html'
-      - 'js/main.js'
-      - 'css/styles.css'
-      - 'current-development-authority.json'
-      - 'release467-build207-workshop-capability-process-taxonomy-expansion.json'
-      - 'release467-build208-multi-discipline-public-positioning-capability-navigation.json'
-      - 'docs/operations/RELEASE_467_BUILD_208_MULTI_DISCIPLINE_PUBLIC_POSITIONING_CAPABILITY_NAVIGATION.md'
-      - 'scripts/release467_build207_gate.py'
-      - 'scripts/release467_build208_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - '.github/workflows/release467-build208-public-positioning-navigation.yml'
   workflow_dispatch:
 permissions: {contents: read}
 jobs:

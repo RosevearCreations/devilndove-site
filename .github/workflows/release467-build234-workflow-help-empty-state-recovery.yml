@@ -1,31 +1,7 @@
 name: Release 467 Build 234 Workflow Help Empty State Recovery
 
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'public/js/admin-context-help.js'
-      - 'public/js/admin-packaging-studio.js'
-      - 'public/js/site-auth-ui.js'
-      - 'functions/_middleware.js'
-      - 'functions/api/_lib/packagingDomainService.js'
-      - 'functions/api/_lib/packagingReadService.js'
-      - 'admin/help/index.html'
-      - 'admin/packaging-studio/index.html'
-      - 'css/styles.css'
-      - 'migrations/canonical/manifest.json'
-      - 'migrations/canonical/0023_release467_cupcake_soap_label_templates.sql'
-      - 'release467-build233-universal-help-quality-of-life-coverage.json'
-      - 'release467-build234-workflow-help-empty-state-recovery.json'
-      - 'current-development-authority.json'
-      - 'docs/operations/RELEASE_467_BUILD_234_WORKFLOW_HELP_EMPTY_STATE_RECOVERY.md'
-      - 'docs/operations/RELEASE_467_REFINEMENT_AUTONOMOUS_BUILDS_233_248.md'
-      - 'scripts/release467_build233_gate.py'
-      - 'scripts/release467_build234_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - '.github/workflows/release467-build234-workflow-help-empty-state-recovery.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 

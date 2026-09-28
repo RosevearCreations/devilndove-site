@@ -1,26 +1,5 @@
 name: Release 467 Build 212 Hybrid Creative Project Operations
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'migrations/canonical/0012_release467_hybrid_creative_project_operations.sql'
-      - 'migrations/canonical/manifest.json'
-      - 'functions/api/admin/creative-project-operations.js'
-      - 'public/js/admin-creative-project-operations-build212.js'
-      - 'admin/creative-process/index.html'
-      - 'current-development-authority.json'
-      - 'release467-build211-manufacturing-triage-route.json'
-      - 'release467-build212-hybrid-creative-project-operations.json'
-      - 'docs/operations/RELEASE_467_BUILD_212_HYBRID_CREATIVE_PROJECT_OPERATIONS.md'
-      - 'scripts/release467_build211_gate.py'
-      - 'scripts/release467_build212_gate.py'
-      - 'scripts/repository_forward_sanity.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'scripts/current_deployment_preflight_truth_gate.py'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - '.github/workflows/release467-build212-hybrid-creative-project-operations.yml'
   workflow_dispatch:
 permissions: {contents: read}
 jobs:

@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let seedLoadPromise = null;
   let listLoadPromise = null;
   let inventoryPage = 1;
-  const inventoryPageSize = 80;
+  const inventoryPageSize = 40;
   const INVENTORY_DRAFT_KEY = 'dd_inventory_form_draft_v244';
 
 
@@ -51,6 +51,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const value = Number(cents || 0);
     if (!Number.isFinite(value) || value <= 0) return '0.00';
     return (value / 100).toFixed(2);
+  }
+
+  function costPerUsageCents(item = {}) {
+    const costCents = Math.max(0, Number(item.unit_cost_cents || 0) || 0);
+    const usagePerStock = Math.max(0.001, Number(item.usage_units_per_stock_unit || 1) || 1);
+    return costCents / usagePerStock;
+  }
+
+  function updateRowUsageCost(row) {
+    if (!row) return;
+    const costInput = row.querySelector('[data-field="unit_cost_dollars"]');
+    const perStockInput = row.querySelector('[data-field="usage_units_per_stock_unit"]');
+    const usageInput = row.querySelector('[data-field="usage_unit_label"]');
+    const output = row.querySelector('[data-cost-per-usage]');
+    const label = row.querySelector('[data-cost-per-usage-label]');
+    if (!output) return;
+    const costDollars = Math.max(0, Number(costInput?.value || 0) || 0);
+    const perStock = Math.max(0.001, Number(perStockInput?.value || 1) || 1);
+    output.textContent = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'CAD', minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(costDollars / perStock);
+    if (label) label.textContent = String(usageInput?.value || 'unit').trim() || 'unit';
   }
 
   function describeStockUsage(item = {}) {
@@ -267,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const data = await window.DDAuth.apiJson(
             '/api/admin/inventory-bootstrap',
             { method: 'GET' },
-            { fallbackMessage: 'Failed to load inventory setup choices.', cacheKey: 'inventory-bootstrap-v252', cacheTtlMs: 300000, retries: 2, staleOnError: true }
+            { fallbackMessage: 'Failed to load inventory setup choices.', cacheKey: 'inventory-bootstrap-v252', cacheTtlMs: 300000, retries: 0, staleOnError: true }
           );
           categorySeedOptions = Array.isArray(data?.categories) ? data.categories.map((v)=>String(v||'').trim().toLowerCase()).filter(Boolean) : [];
           unitPresetOptions = Array.isArray(data?.unit_presets) && data.unit_presets.length ? data.unit_presets : unitPresetOptions;
@@ -281,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await window.DDAuth.apiJson(
           `/api/admin/product-resource-search?q=${encodeURIComponent(normalizedQuery)}&limit=120`,
           { method: 'GET' },
-          { fallbackMessage: 'Failed to search inventory source records.', cacheKey: `inventory-seed-resources:${normalizedQuery.toLowerCase()}`, cacheTtlMs: 120000, retries: 2, staleOnError: true }
+          { fallbackMessage: 'Failed to search inventory source records.', cacheKey: `inventory-seed-resources:${normalizedQuery.toLowerCase()}`, cacheTtlMs: 120000, retries: 0, staleOnError: true }
         );
         const rawResources = Array.isArray(data?.resources) ? data.resources : [];
         catalogSeedOptions = rawResources.map((item) => ({
@@ -516,7 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await sendBulkCostRequest(payload, button, 'Updating...');
       renderBulkCostPreview(data);
       setMessage(`Bulk inventory cost update completed for ${Number(data?.updated_count || 0)} item(s).`);
-      await loadList();
+      await loadList({ force: true });
     } catch (error) {
       setMessage(error.message || 'Bulk inventory cost update failed.', true);
     }
@@ -756,12 +776,12 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <div class="site-inventory-view-toolbar" style="margin-top:12px">
-          <div><strong>Inventory table editor</strong><div class="small">Change common values directly in a row, then choose Save row. Full edit remains available for descriptions, links, unit conversions and advanced rules.</div></div>
+          <div><strong>Inventory table editor</strong><div class="small">Edit quantity, stock unit, usage unit, usage-per-stock conversion and cost directly in the table. Cost per usage unit is calculated automatically.</div></div>
           <button class="btn" type="button" id="siteInventoryTableModeButton" aria-pressed="true">Table editing: On</button>
         </div>
-        <div class="admin-table-wrap site-inventory-table-wrap"><table class="site-inventory-admin-table"><thead><tr><th>Image / item</th><th>Category / supplier</th><th>On hand</th><th>Reorder at</th><th>Unit cost</th><th>Status</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="7" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
+        <div class="admin-table-wrap site-inventory-table-wrap"><table class="site-inventory-admin-table"><thead><tr><th>Image / item</th><th>Category / supplier</th><th>On hand</th><th>Stock &amp; usage</th><th>Unit cost</th><th>Reorder at</th><th>Status</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="8" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
         <div class="site-inventory-pagination" id="siteInventoryPagination" aria-live="polite"><button class="btn" type="button" id="siteInventoryPreviousPage">Previous</button><span class="small" id="siteInventoryPageStatus">Page 1</span><button class="btn" type="button" id="siteInventoryNextPage">Next</button></div>
-        <div class="card site-inventory-movements-card" style="margin-top:16px"><h4 style="margin-top:0">Recent Inventory Movements</h4><div class="admin-table-wrap site-inventory-movements-wrap"><table class="site-inventory-movements-table"><thead><tr><th>When</th><th>Item</th><th>Type</th><th>On Hand</th><th>Note</th></tr></thead><tbody id="siteInventoryMovementList"><tr><td colspan="5" style="padding:8px">Loading movement history...</td></tr></tbody></table></div></div>
+        <div class="card site-inventory-movements-card" style="margin-top:16px"><div class="section-heading-row"><div><h4 style="margin:0">Recent Inventory Movements</h4><div class="small">Not loaded during page startup so routine editing does not spend D1 reads on history.</div></div><button class="btn" type="button" id="siteInventoryLoadMovementsButton">Load recent movements</button></div><div class="admin-table-wrap site-inventory-movements-wrap"><table class="site-inventory-movements-table"><thead><tr><th>When</th><th>Item</th><th>Type</th><th>On Hand</th><th>Note</th></tr></thead><tbody id="siteInventoryMovementList"><tr><td colspan="5" style="padding:8px">Movement history is paused until requested.</td></tr></tbody></table></div></div>
       </div>`;
 
     document.getElementById('siteInventoryAmazonPreviewButton')?.addEventListener('click', previewAmazonLink);
@@ -774,8 +794,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventoryImageUrl')?.addEventListener('input', updateSiteInventoryImagePreview);
     updateSiteInventoryImagePreview();
     document.getElementById('siteInventoryRefreshButton')?.addEventListener('click', () => loadList({ force: true }));
+    document.getElementById('siteInventoryLoadMovementsButton')?.addEventListener('click', () => loadRecentMovements({ force: true }));
     document.getElementById('siteInventoryStockView')?.addEventListener('change', () => { inventoryPage = 1; loadList({ force: true }); });
     document.getElementById('siteInventorySourceType')?.addEventListener('change', () => { renderSeedDropdowns(); });
+    document.getElementById('siteInventorySeedSearch')?.addEventListener('focus', () => { if (!categorySeedOptions.length) loadSeedOptions(); }, { once: true });
     document.getElementById('siteInventorySeedSearch')?.addEventListener('input', debounce(async () => {
       seedSearchText = document.getElementById('siteInventorySeedSearch')?.value || '';
       await loadSeedOptions({ query: seedSearchText });
@@ -786,7 +808,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventorySyncToolsButton')?.addEventListener('click', () => syncCatalog(['tool']));
     document.getElementById('siteInventorySyncSuppliesButton')?.addEventListener('click', () => syncCatalog(['supply']));
     document.getElementById('siteInventorySyncAllButton')?.addEventListener('click', () => syncCatalog(['tool', 'supply']));
-    document.getElementById('siteInventorySearch')?.addEventListener('input', debounce(() => { inventoryPage = 1; loadList({ force: true }); }, 250));
+    document.getElementById('siteInventorySearch')?.addEventListener('input', debounce(() => { inventoryPage = 1; loadList({ force: true }); }, 500));
     document.getElementById('siteInventoryPreviousPage')?.addEventListener('click', () => { if (inventoryPage > 1) { inventoryPage -= 1; loadList({ force: true }); } });
     document.getElementById('siteInventoryNextPage')?.addEventListener('click', () => { inventoryPage += 1; loadList({ force: true }); });
     document.getElementById('siteInventoryResetButton')?.addEventListener('click', resetInventoryForm);
@@ -804,6 +826,10 @@ document.addEventListener('DOMContentLoaded', () => {
     updateBulkCostScopeHelpers();
     updateBulkCostPlaceholder();
     mountEl.addEventListener('click', onTableClick);
+    mountEl.addEventListener('input', (event) => {
+      if (!event.target?.matches?.('[data-field="unit_cost_dollars"],[data-field="usage_units_per_stock_unit"],[data-field="usage_unit_label"]')) return;
+      updateRowUsageCost(event.target.closest('[data-inventory-row]'));
+    });
   }
 
   function readForm() {
@@ -888,6 +914,27 @@ document.addEventListener('DOMContentLoaded', () => {
       <td data-label="On hand">${row.previous_on_hand_quantity || 0} → ${row.new_on_hand_quantity || 0}<div class="small">Reserved ${row.previous_reserved_quantity || 0} → ${row.new_reserved_quantity || 0} • Incoming ${row.previous_incoming_quantity || 0} → ${row.new_incoming_quantity || 0}</div></td>
       <td data-label="Note">${escapeHtml(row.note || '—')}</td>
     </tr>`).join('');
+  }
+
+  async function loadRecentMovements({ force = false } = {}) {
+    const body = document.getElementById('siteInventoryMovementList');
+    if (body) body.innerHTML = '<tr><td colspan="5" style="padding:8px">Loading recent movement history…</td></tr>';
+    try {
+      const data = await window.DDAuth.apiJson(
+        '/api/admin/site-item-inventory?history_only=1&limit=30',
+        { method: 'GET' },
+        {
+          fallbackMessage: 'Failed to load recent inventory movements.',
+          cacheKey: 'site-inventory:recent-movements',
+          cacheTtlMs: 30000,
+          preferCache: !force,
+          retries: 0,
+          staleOnError: true
+        }
+      );
+    } catch (error) {
+      if (body) body.innerHTML = `<tr><td colspan="5" class="site-inventory-empty-row">${escapeHtml(error.message || 'Movement history is temporarily unavailable.')}</td></tr>`;
+    }
   }
 
   async function syncCatalog(sourceTypes) {
@@ -1011,13 +1058,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const stockView = document.getElementById('siteInventoryStockView')?.value || '';
         const cacheKey = `site-inventory:${String(q).trim().toLowerCase()}:${String(stockView).trim().toLowerCase()}:${inventoryPage}`;
         const data = await window.DDAuth.apiJson(
-          `/api/admin/site-item-inventory?q=${encodeURIComponent(q)}&include_history=1&stock_view=${encodeURIComponent(stockView)}&page=${inventoryPage}&page_size=${inventoryPageSize}`,
+          `/api/admin/site-item-inventory?q=${encodeURIComponent(q)}&include_history=0&include_link_stats=0&stock_view=${encodeURIComponent(stockView)}&page=${inventoryPage}&page_size=${inventoryPageSize}`,
           { method: 'GET' },
           {
             fallbackMessage: 'Failed to load inventory list.',
             cacheKey,
             cacheTtlMs: 45000,
-            retries: 2,
+            preferCache: !force,
+            retries: 0,
             staleOnError: true
           }
         );
@@ -1041,7 +1089,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!body) return;
 
       if (!items.length) {
-        body.innerHTML = '<tr><td colspan="7" class="site-inventory-empty-row">No site inventory items matched the current view.</td></tr>';
+        body.innerHTML = '<tr><td colspan="8" class="site-inventory-empty-row">No site inventory items matched the current view.</td></tr>';
       } else {
         body.innerHTML = items.map((x) => {
           const edit = inventoryTableEditMode;
@@ -1057,9 +1105,17 @@ document.addEventListener('DOMContentLoaded', () => {
               ${edit ? `<input class="site-inventory-row-input" data-field="category" value="${escapeHtml(x.category || '')}" aria-label="Category"/><input class="site-inventory-row-input" data-field="supplier_name" value="${escapeHtml(x.supplier_name || '')}" aria-label="Supplier" placeholder="Supplier"/>` : `${escapeHtml(x.category || '—')}<div class="small">${escapeHtml(x.supplier_name || '—')}</div>`}
             </td>
             <td data-label="On hand">${edit ? `<input class="site-inventory-row-number" data-field="on_hand_quantity" type="number" min="0" step="0.001" value="${Number(x.on_hand_quantity || 0)}"/>` : Number(x.on_hand_quantity || 0)}<div class="small">${escapeHtml(x.stock_unit_label || 'unit')}</div></td>
-            <td data-label="Reorder at">${edit ? `<input class="site-inventory-row-number" data-field="reorder_level" type="number" min="0" step="0.001" value="${Number(x.reorder_level || 0)}"/>` : Number(x.reorder_level || 0)}<div class="small">${x.needs_reorder ? 'Needs reorder' : 'Stock okay'}</div></td>
+            <td data-label="Stock & usage">
+              ${edit ? `<div class="site-inventory-inline-units">
+                <label><span class="small">Stock unit</span><input class="site-inventory-row-input" data-field="stock_unit_label" list="siteInventoryUnitPresets" value="${escapeHtml(x.stock_unit_label || 'unit')}" /></label>
+                <label><span class="small">Usage unit</span><input class="site-inventory-row-input" data-field="usage_unit_label" list="siteInventoryUnitPresets" value="${escapeHtml(x.usage_unit_label || 'unit')}" /></label>
+                <label style="grid-column:1/-1"><span class="small">Usage units / stock unit</span><input class="site-inventory-row-number" data-field="usage_units_per_stock_unit" type="number" min="0.001" step="0.001" value="${Number(x.usage_units_per_stock_unit || 1)}" /></label>
+              </div>` : `<strong>${escapeHtml(x.stock_unit_label || 'unit')}</strong> → ${Number(x.usage_units_per_stock_unit || 1)} ${escapeHtml(x.usage_unit_label || 'unit')}`}
+              <div class="small">Cost / usage: <strong data-cost-per-usage>${fmtMoney(Number(x.cost_per_usage_unit_cents ?? costPerUsageCents(x)))}</strong> / <span data-cost-per-usage-label>${escapeHtml(x.usage_unit_label || 'unit')}</span></div>
+            </td>
             <td data-label="Unit cost">${edit ? `<input class="site-inventory-row-money" data-field="unit_cost_dollars" type="number" min="0" step="0.01" value="${escapeHtml(centsToDollarInput(x.unit_cost_cents || 0))}"/>` : fmtMoney(x.unit_cost_cents || 0)}<div class="small">CAD / ${escapeHtml(x.stock_unit_label || 'unit')}</div></td>
-            <td data-label="Status">${edit ? `<select class="site-inventory-row-input" data-field="is_active"><option value="1" ${Number(x.is_active)!==0?'selected':''}>Active</option><option value="0" ${Number(x.is_active)===0?'selected':''}>Inactive</option></select>` : (Number(x.is_active)===0?'Inactive':'Active')}<div class="small">${Number(x.linked_product_count || 0)} linked product(s)</div></td>
+            <td data-label="Reorder at">${edit ? `<input class="site-inventory-row-number" data-field="reorder_level" type="number" min="0" step="0.001" value="${Number(x.reorder_level || 0)}"/>` : Number(x.reorder_level || 0)}<div class="small">${x.needs_reorder ? 'Needs reorder' : 'Stock okay'}</div></td>
+            <td data-label="Status">${edit ? `<select class="site-inventory-row-input" data-field="is_active"><option value="1" ${Number(x.is_active)!==0?'selected':''}>Active</option><option value="0" ${Number(x.is_active)===0?'selected':''}>Inactive</option></select>` : (Number(x.is_active)===0?'Inactive':'Active')}<div class="small">${escapeHtml(x.usage_tracking_mode || (String(x.source_type||'').toLowerCase()==='tool'?'reusable':'exact'))} usage tracking</div></td>
             <td class="site-inventory-row-actions" data-label="Actions"><div class="site-inventory-action-buttons">
               ${edit ? `<button class="btn primary" type="button" data-save-row-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Save row</button>` : ''}
               <button class="btn" type="button" data-load-form-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Full edit</button>
@@ -1115,7 +1171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', { method: 'PATCH', body: JSON.stringify(payload) });
         const data = await readApiPayload(response, 'Row update failed.');
         setMessage(`${payload.item_name} updated.`);
-        await loadList();
+        await loadList({ force: true });
       } catch (error) {
         setMessage(error.message || 'Row update failed.', true);
         saveRowBtn.disabled = false; saveRowBtn.textContent = 'Save row';
@@ -1183,7 +1239,7 @@ document.addEventListener('DOMContentLoaded', () => {
           })
         });
         const data = await readApiPayload(response, 'Failed to update inventory item.');
-        await loadList();
+        await loadList({ force: true });
       } catch (error) {
         setMessage(error.message || 'Failed to update inventory item.', true);
       }
@@ -1215,7 +1271,7 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify({ action, site_item_inventory_id: id, quantity: qty, note })
         });
         const data = await readApiPayload(response, `Failed to ${action}.`);
-        await loadList();
+        await loadList({ force: true });
       } catch (error) {
         setMessage(error.message || `Failed to ${action}.`, true);
       }
@@ -1229,7 +1285,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setMessage('Deleting inventory item...');
         const response = await window.DDAuth.apiFetch(`/api/admin/site-item-inventory?site_item_inventory_id=${encodeURIComponent(id)}`, { method: 'DELETE' });
         const data = await readApiPayload(response, 'Failed to delete inventory item.');
-        await loadList();
+        await loadList({ force: true });
       } catch (error) {
         setMessage(error.message || 'Failed to delete inventory item.', true);
       }
@@ -1248,7 +1304,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const search = document.getElementById('siteInventorySearch');
       if (search) search.value = deepSearch;
     }
-    Promise.allSettled([loadSeedOptions(), loadList()]);
+    loadList();
   }
 
   document.addEventListener('dd:admin-ready', (event) => {

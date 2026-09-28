@@ -1,23 +1,7 @@
 name: Release 467 Build 166 Product Editing and Image Stabilization Proof
 
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'admin/products/index.html'
-      - 'shop/product/index.html'
-      - 'public/js/admin-products-browser-v162.js'
-      - 'public/js/product-detail-v166.js'
-      - 'functions/api/product-detail-core.js'
-      - 'functions/media/product.js'
-      - '.github/workflows/release467-build157-proof.yml'
-      - 'scripts/release467_build74_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'scripts/release467_build166_gate.py'
-      - 'release467-build166-product-editing-image-stabilization.json'
-      - '.github/workflows/release467-build166-product-editing-image-stabilization.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 

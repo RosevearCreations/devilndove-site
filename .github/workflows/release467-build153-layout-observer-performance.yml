@@ -1,15 +1,6 @@
 name: Release 467 Build 153 Layout Observer Performance Proof
 on:
-  pull_request:
-    branches: [dev]
-    paths:
-      - 'public/js/layout-overflow-guard.js'
-      - 'functions/_middleware.js'
-      - 'scripts/release467_build153_gate.py'
-      - 'release467-build152-sitewide-image-quality-media-qa.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - '.github/workflows/release467-build153-layout-observer-performance.yml'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

@@ -1,25 +1,5 @@
 name: Release 467 Build 177 Packaging Studio Reliability
 on:
-  push:
-    branches: [dev, main]
-    paths:
-      - 'admin/packaging-studio/index.html'
-      - 'public/js/admin-packaging-studio.js'
-      - 'public/js/admin-packaging-save-stabilizer-v300.js'
-      - 'public/js/admin-packaging-compatibility-v301.js'
-      - 'public/js/admin-packaging-native-client-v298.js'
-      - 'public/js/admin-packaging-client-transport-v297.js'
-      - 'public/js/modules/packaging/**'
-      - 'functions/api/_lib/packagingReadService.js'
-      - 'public/js/site-auth-ui.js'
-      - 'public/js/admin.js'
-      - 'public/js/core/dd-application-module-bootstrap.mjs'
-      - 'public/js/core/dd-admin-module-runtime.mjs'
-      - 'public/js/core/dd-module-definitions.mjs'
-      - 'scripts/packaging_bootstrap_resilience_gate.py'
-      - 'scripts/release467_build177_gate.py'
-      - 'docs/operations/RELEASE_467_BUILD_177_PACKAGING_STUDIO_RELIABILITY.md'
-      - '.github/workflows/release467-build177-packaging-studio-reliability.yml'
   workflow_dispatch:
 permissions:
   contents: read

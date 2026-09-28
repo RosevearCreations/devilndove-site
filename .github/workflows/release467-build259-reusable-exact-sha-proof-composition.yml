@@ -1,10 +1,7 @@
 name: Release 467 Build 259 Reusable Exact-SHA Proof Composition
 
 on:
-  push:
-    branches: [dev]
   workflow_dispatch:
-
 permissions:
   contents: read
   actions: read

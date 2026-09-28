@@ -1,32 +1,7 @@
 name: Release 467 Build 193 Current Authority Handoff Convergence
 
 on:
-  pull_request:
-    branches: [dev]
-  push:
-    branches: [dev, main]
-    paths:
-      - 'current-development-authority.json'
-      - 'release467-build192-release-runtime-budget-convergence-closure.json'
-      - 'release467-build193-current-authority-handoff-convergence.json'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/it/index.html'
-      - 'admin/deployment-preflight/index.html'
-      - 'admin/reliability/index.html'
-      - 'AI_HANDOFF.md'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'MARKDOWN_INDEX.md'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'docs/operations/RELEASE_467_BUILD_193_CURRENT_AUTHORITY_HANDOFF_CONVERGENCE.md'
-      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md'
-      - 'scripts/release467_build171_gate.py'
-      - 'scripts/release467_build193_gate.py'
-      - '.github/workflows/release467-build193-current-authority-handoff-convergence.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 

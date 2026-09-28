@@ -1,7 +1,5 @@
 name: Release 467 Build 274 Creative Process Planned vs Actual Inventory Lifecycle
 on:
-  push:
-    branches: [dev, main]
   workflow_dispatch:
 permissions:
   contents: read

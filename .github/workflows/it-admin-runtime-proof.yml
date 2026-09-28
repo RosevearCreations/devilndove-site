@@ -58,8 +58,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags origin main
-          git diff --name-only origin/main..."${GITHUB_SHA}" > /tmp/root-admin-changed-files.txt
+          BASE_SHA='${{ github.event.before }}'
+          ZERO_SHA='0000000000000000000000000000000000000000'
+          if [ -z "${BASE_SHA}" ] || [ "${BASE_SHA}" = "${ZERO_SHA}" ]; then
+            BASE_SHA="$(git rev-parse "${GITHUB_SHA}^" 2>/dev/null || true)"
+          fi
+          if [ -z "${BASE_SHA}" ]; then
+            echo 'requires_d1=true' >> "${GITHUB_OUTPUT}"
+            echo 'reason=no_safe_previous_dev_baseline' >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null || git fetch --no-tags --depth=1 origin "${BASE_SHA}"
+          git diff --name-only "${BASE_SHA}" "${GITHUB_SHA}" > /tmp/root-admin-changed-files.txt
           if grep -Eq '^(migrations/canonical/|scripts/release467_root_admin_access\.py$|functions/_middleware\.js$|functions/api/admin/_middleware\.js$|functions/api/_lib/appModules\.js$|functions/api/_lib/appModuleRoutes\.js$|functions/api/_lib/appModuleSessionGuard\.js$)' /tmp/root-admin-changed-files.txt; then
             echo 'requires_d1=true' >> "${GITHUB_OUTPUT}"
             echo 'reason=admin_authority_inputs_changed' >> "${GITHUB_OUTPUT}"

@@ -1,21 +1,7 @@
 name: Release 467 Build 164 Product Media CRUD Proof
 
 on:
-  push:
-    branches: [dev, main]
-    paths:
-      - 'admin/catalog-media/index.html'
-      - 'public/js/admin-product-media-editor-v164.js'
-      - 'public/js/admin-product-media-editor-v172.js'
-      - 'functions/api/admin/product-media-editor.js'
-      - 'functions/api/admin/product-image-editor.js'
-      - 'functions/api/admin/product-image-file.js'
-      - 'functions/api/admin/_productImageAnnotationsV172.js'
-      - 'scripts/release467_build163_gate.py'
-      - 'scripts/release467_build164_gate.py'
-      - '.github/workflows/release467-build164-product-media-crud.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 

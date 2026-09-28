@@ -1,41 +1,5 @@
 name: Release 467 Build 184 Product Tool Supply Image Repair
 on:
-  pull_request:
-    branches: [dev]
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/api/admin/catalog-image-repair.js'
-      - 'public/js/admin-catalog-image-repair-v184.js'
-      - 'css/release467-build184-catalog-image-repair.css'
-      - 'admin/catalog-health/index.html'
-      - 'public/js/admin-site-item-inventory.js'
-      - 'admin/inventory-operations/index.html'
-      - 'docs/operations/RELEASE_467_BUILD_184_PRODUCT_TOOL_SUPPLY_IMAGE_REPAIR.md'
-      - 'docs/operations/RELEASE_467_CATALOG_REWORK_BUILDS_181_186.md'
-      - 'scripts/release467_build184_gate.py'
-      - 'scripts/release467_build184_d1_quota_guard.py'
-      - 'functions/api/admin/inventory-identity-health.js'
-      - 'functions/api/admin/catalog-health.js'
-      - 'functions/api/_lib/d1ReadBudget.js'
-      - 'public/js/admin-catalog-health-v181.js'
-      - 'public/js/admin-tool-lifecycle-review.js'
-      - 'public/js/admin-inventory-material-usage-reconciliation-v112.js'
-      - 'public/js/admin-inventory-process-assignments-v156.js'
-      - 'public/js/admin-product-integrity-review.js'
-      - 'public/js/admin-inventory-receiving.js'
-      - 'public/js/admin-inventory-receiving-reversal.js'
-      - 'public/js/admin-product-resources.js'
-      - 'public/js/admin-inventory-kits.js'
-      - 'public/js/admin-inventory-kit-component-usage.js'
-      - 'public/js/admin-product-stock-report.js'
-      - 'public/js/admin-catalog-option-manager.js'
-      - 'docs/operations/RELEASE_467_BUILD_184_D1_QUOTA_REMEDIATION.md'
-      - 'scripts/release467_build183_gate.py'
-      - 'scripts/release467_build182_gate.py'
-      - 'scripts/release467_build181_gate.py'
-      - 'scripts/build440_resource_asset_url_regression_test.mjs'
-      - '.github/workflows/release467-build184-product-tool-supply-image-repair.yml'
   workflow_dispatch:
 permissions:
   contents: read

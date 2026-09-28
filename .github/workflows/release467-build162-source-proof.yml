@@ -1,10 +1,7 @@
 name: Release 467 Build 162 Product Admin D1 Reset Proof
 
 on:
-  push:
-    branches: [build162-product-admin-d1-reset]
   workflow_dispatch:
-
 permissions:
   contents: read
 

@@ -1,25 +1,5 @@
 name: Release 467 Build 211 Manufacturing Triage Route Proposal
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'migrations/canonical/0011_release467_manufacturing_triage_route.sql'
-      - 'migrations/canonical/manifest.json'
-      - 'functions/api/admin/custom-work-triage.js'
-      - 'public/js/admin-custom-work-triage-build211.js'
-      - 'admin/custom-request/index.html'
-      - 'current-development-authority.json'
-      - 'release467-build210-custom-work-intake-2.json'
-      - 'release467-build211-manufacturing-triage-route.json'
-      - 'docs/operations/RELEASE_467_BUILD_211_MANUFACTURING_TRIAGE_ROUTE_PROPOSAL.md'
-      - 'scripts/release467_build210_gate.py'
-      - 'scripts/release467_build211_gate.py'
-      - 'scripts/repository_forward_sanity.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'scripts/current_deployment_preflight_truth_gate.py'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'admin/deployment-preflight/index.html'
-      - '.github/workflows/release467-build211-manufacturing-triage-route.yml'
   workflow_dispatch:
 permissions: {contents: read}
 jobs:

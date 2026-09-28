@@ -1,20 +1,6 @@
 name: Release 467 Build 239 Admin Surface Navigation Consolidation
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'data/admin-navigation-modules.json'
-      - 'public/js/admin-surface-consolidation-v239.js'
-      - 'functions/_middleware.js'
-      - 'release467-build238-attention-notifications-operator-signal-cleanup.json'
-      - 'release467-build239-admin-surface-navigation-consolidation.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build238_gate.py'
-      - 'scripts/release467_build239_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - '.github/workflows/release467-build239-admin-surface-navigation-consolidation.yml'
   workflow_dispatch:
-
 jobs:
   build239:
     runs-on: ubuntu-latest

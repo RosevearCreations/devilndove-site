@@ -1,21 +1,5 @@
 name: Release 467 Build 206 Launch-Set Remediation Campaign
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/admin/storefront-launch-set.js'
-      - 'functions/api/admin/storefront-launch-remediation.js'
-      - 'functions/api/_lib/d1ReadBudget.js'
-      - 'public/js/admin-storefront-launch-remediation-v206.js'
-      - 'css/release467-build206-launch-remediation.css'
-      - 'admin/catalog-health/index.html'
-      - 'migrations/canonical/0007_release467_storefront_launch_remediation.sql'
-      - 'migrations/canonical/manifest.json'
-      - 'current-development-authority.json'
-      - 'release467-build205-current-authority-manufacturing-era-roadmap-convergence.json'
-      - 'release467-build206-launch-set-remediation-campaign.json'
-      - 'scripts/release467_build206_gate.py'
-      - '.github/workflows/release467-build206-launch-set-remediation.yml'
   workflow_dispatch:
 permissions: {contents: read}
 jobs:

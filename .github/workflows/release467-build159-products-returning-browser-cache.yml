@@ -1,19 +1,7 @@
 name: Release 467 Build 159 Products Returning Browser Cache Proof
 
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/_middleware.js'
-      - 'public/js/admin-products-request-budget-v156.js'
-      - 'public/js/product-media-fallback.js'
-      - 'scripts/products_build157_browser_probe.mjs'
-      - 'scripts/release467_build159_gate.py'
-      - 'release467-build159-products-returning-browser-cache-coherence.json'
-      - 'current-development-authority.json'
-      - '.github/workflows/release467-build159-products-returning-browser-cache.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 

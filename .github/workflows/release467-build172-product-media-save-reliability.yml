@@ -1,22 +1,7 @@
 name: Release 467 Build 172 Product Media Save Reliability Proof
 
 on:
-  push:
-    branches: [dev, main]
-    paths:
-      - 'admin/catalog-media/index.html'
-      - 'public/js/admin-product-media-editor-v172.js'
-      - 'functions/api/admin/product-media-editor.js'
-      - 'functions/api/admin/product-image-editor.js'
-      - 'functions/api/admin/product-image-file.js'
-      - 'functions/api/admin/_productImageAnnotationsV172.js'
-      - 'scripts/release467_build164_gate.py'
-      - 'scripts/release467_build165_gate.py'
-      - 'scripts/release467_build172_gate.py'
-      - 'docs/operations/RELEASE_467_BUILD_172_PRODUCT_MEDIA_SAVE_RELIABILITY.md'
-      - '.github/workflows/release467-build172-product-media-save-reliability.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 

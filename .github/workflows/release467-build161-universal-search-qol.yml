@@ -1,28 +1,7 @@
 name: Release 467 Build 161 Universal Search QoL Proof
 
 on:
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/_middleware.js'
-      - 'functions/api/admin/universal-search.js'
-      - 'public/js/admin-universal-search-v161.js'
-      - 'css/admin-universal-search-v161.css'
-      - 'admin/command-center/index.html'
-      - 'data/admin-navigation-modules.json'
-      - 'scripts/release467_build161_gate.py'
-      - 'release467-build161-universal-search-recent-work-command-centre.json'
-      - 'release467-build160-product-production-browser-recovery.json'
-      - 'current-development-authority.json'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/it/index.html'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - '.github/workflows/release467-build161-universal-search-qol.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 

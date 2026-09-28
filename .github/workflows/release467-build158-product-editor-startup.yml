@@ -1,18 +1,7 @@
 name: Release 467 Build 158 Product Editor Startup Proof
 
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'public/js/admin-products-editor-startup-v158.js'
-      - 'public/js/admin-product-quality-pending-v158.js'
-      - 'public/js/admin-products-request-budget-v156.js'
-      - 'scripts/release467_build158_gate.py'
-      - 'release467-build158-product-editor-startup-resilience.json'
-      - 'current-development-authority.json'
-      - '.github/workflows/release467-build158-product-editor-startup.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 

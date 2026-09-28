@@ -27,6 +27,7 @@ def triggers(body):
 a=j('release467-build260-pull-request-matrix-fanout-reduction.json')
 prev=j('release467-build259-reusable-exact-sha-proof-composition.json')
 p=j('current-development-authority.json')
+fanout_retired=int(p.get('build') or 0)>=286 and (R/'scripts/d1_ci_fanout_guard.py').is_file()
 road=t('docs/operations/RELEASE_467_RELEASE_EFFICIENCY_READ_PATH_AUTONOMOUS_BUILDS_257_264.md')
 doc=t('docs/operations/RELEASE_467_BUILD_260_PULL_REQUEST_MATRIX_FANOUT_REDUCTION.md')
 sysgate=t('scripts/current_system_gate_provenance_gate.py')
@@ -63,8 +64,11 @@ for n in target_builds:
     path=matches[0];target_paths.append(path)
     ts=triggers(path.read_text(encoding='utf-8',errors='replace'))
     q('pull_request' not in ts,f'{path.as_posix()} must not auto-run on pull requests')
-    q('push' in ts,f'{path.as_posix()} must retain push evidence')
     q('workflow_dispatch' in ts,f'{path.as_posix()} must retain manual evidence')
+    if fanout_retired:
+        q('push' not in ts,f'{path.as_posix()} must be manual-only after Build 286 D1 fan-out retirement')
+    else:
+        q('push' in ts,f'{path.as_posix()} must retain push evidence')
     q((R/f'scripts/release467_build{n}_gate.py').is_file(),f'Build {n} gate script must be retained')
     q(f"run_current_contract('scripts/release467_build{n}_gate.py'" in sysgate,f'System Gate must retain Build {n} contract coverage')
 q(len(target_paths)==38,'Build 260 must resolve all 38 target workflows')
@@ -84,7 +88,10 @@ if not successor_active:
         q(tc.get(k)==v,f'Build 260 trigger count mismatch: {k} expected {v} got {tc.get(k)}')
 else:
     q(report.get('workflow_file_count',0)>=151,'Build 261+ must retain Build 260 workflow and successors')
-    q(tc.get('workflow_run')==5,'Build 261+ must preserve the five workflow_run chains')
+    if not fanout_retired:
+        q(tc.get('workflow_run')==5,'Build 261+ must preserve the five workflow_run chains')
+    else:
+        q((R/'.github/workflows/d1-ci-fanout-guard.yml').is_file(),'Build 286+ must retain the D1 CI fan-out guard')
 exp=a.get('expected_candidate') or {}
 q(exp.get('scanner_pr_reduction_from_build259')==37 and exp.get('scanner_pr_reduction_from_build256')==51,'Build 260 measured scanner reduction mismatch')
 q((a.get('baseline') or {}).get('build259_actual_pr_runs')==72 and exp.get('expected_actual_pr_runs')==35,'Build 260 exact PR run baseline/target mismatch')

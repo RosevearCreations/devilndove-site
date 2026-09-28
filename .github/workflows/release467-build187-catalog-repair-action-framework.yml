@@ -1,22 +1,7 @@
 name: Release 467 Build 187 Catalog Repair Action Framework
 
 on:
-  pull_request:
-    branches: [dev]
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/api/admin/catalog-health.js'
-      - 'functions/api/_lib/d1ReadBudget.js'
-      - 'public/js/admin-catalog-health-v181.js'
-      - 'public/js/admin-catalog-repair-actions-v187.js'
-      - 'admin/catalog-health/index.html'
-      - 'docs/operations/RELEASE_467_BUILD_187_CATALOG_REPAIR_ACTION_FRAMEWORK.md'
-      - 'docs/operations/RELEASE_467_AUTONOMOUS_CLOSURE_BUILDS_187_192.md'
-      - 'scripts/release467_build187_gate.py'
-      - '.github/workflows/release467-build187-catalog-repair-action-framework.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 

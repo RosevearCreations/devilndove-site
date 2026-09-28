@@ -1,38 +1,7 @@
 name: Release 467 Build 163 Product Admin Low-Read Proof
 
 on:
-  push:
-    branches: [build163-product-editor-media-low-read-work4, dev, main]
-    paths:
-      - 'admin/products/index.html'
-      - 'admin/product-editor/index.html'
-      - 'admin/catalog-media/index.html'
-      - 'shop/product/index.html'
-      - 'public/js/admin-products-browser-v162.js'
-      - 'public/js/admin-product-editor-v163.js'
-      - 'public/js/admin-product-media-editor-v163.js'
-      - 'public/js/admin-product-media-editor-v164.js'
-      - 'public/js/product-detail-v166.js'
-      - 'functions/api/admin/product-browser.js'
-      - 'functions/api/admin/product-browser-images.js'
-      - 'functions/api/admin/product-editor-detail.js'
-      - 'functions/api/admin/product-editor-save.js'
-      - 'functions/api/admin/product-media-editor.js'
-      - 'functions/api/admin/product-image-editor.js'
-      - 'functions/api/product-detail-core.js'
-      - 'functions/media/product.js'
-      - 'functions/api/_lib/appModuleRoutes.js'
-      - 'sw.js'
-      - 'scripts/release467_build163_gate.py'
-      - 'scripts/release467_build164_gate.py'
-      - 'scripts/release467_build165_gate.py'
-      - 'scripts/release467_build166_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'scripts/release461_product_image_quality_gate.py'
-      - '.github/workflows/release467-build155-products-production-browser.yml'
-      - '.github/workflows/release467-build163-product-admin-low-read.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 

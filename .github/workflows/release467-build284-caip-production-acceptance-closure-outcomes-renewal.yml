@@ -1,7 +1,5 @@
 name: Release 467 Build 284 CAIP Production Acceptance Closure Outcomes Renewal
 on:
-  push:
-    branches: [dev, main]
   workflow_dispatch:
 permissions:
   contents: read
