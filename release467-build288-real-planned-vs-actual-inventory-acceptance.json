@@ -85,5 +85,26 @@
     "workflow": ".github/workflows/release467-build288-real-planned-vs-actual-inventory-acceptance.yml",
     "evidence_document": "docs/operations/RELEASE_467_BUILD_288_REAL_PLANNED_VS_ACTUAL_INVENTORY_ACCEPTANCE.md",
     "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md"
+  },
+  "starting_point": {
+    "development": {
+      "sha": "f3e84a0c5623eb0a74bccb537049d780944e2892",
+      "tree": "981b7a5e7b851684821af087a428fe66ad8348f0",
+      "system_gate_run": 36432943282,
+      "quality_run": 36432943315,
+      "it_admin_runtime_run": 36432943396,
+      "repository_hygiene_run": 36432943404,
+      "dedicated_gate_run": 36432943286,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "27a48e505b42c399fac0801cbd4e6394490957a4",
+      "tree_sha": "981b7a5e7b851684821af087a428fe66ad8348f0",
+      "production_pages_deploy_run": 36433269795,
+      "production_live_resource_integrity_run": 36433368187,
+      "build_specific_proof_run": 36433269797,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
   }
 }
