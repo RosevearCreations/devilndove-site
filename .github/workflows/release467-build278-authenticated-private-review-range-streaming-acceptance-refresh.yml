@@ -1,7 +1,6 @@
 name: Release 467 Build 278 Authenticated Private Review Range-Streaming Acceptance Refresh
 on:
-  push:
-    branches: [dev, main]
+  workflow_dispatch:
 permissions:
   contents: read
   actions: read

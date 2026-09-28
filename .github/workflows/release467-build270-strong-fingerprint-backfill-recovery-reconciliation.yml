@@ -1,9 +1,5 @@
 name: Release 467 Build 270 Strong-Fingerprint Backfill Recovery Reconciliation
 on:
-  pull_request:
-    branches: [dev, main]
-  push:
-    branches: [dev, main]
   workflow_dispatch:
 permissions:
   contents: read
