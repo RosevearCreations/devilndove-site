@@ -4,22 +4,7 @@ permissions:
   contents: read
   actions: read
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'admin/index.html'
-      - 'public/js/admin-read-budget-v240.js'
-      - 'public/js/admin-save-confidence-v236.js'
-      - 'public/js/admin-surface-consolidation-v239.js'
-      - 'release467-build240-api-read-budget-cache-batch-streamlining.json'
-      - 'scripts/release467_build176_gate.py'
-      - 'scripts/release467_build239_gate.py'
-      - 'scripts/release467_build240_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'docs/operations/RELEASE_467_BUILD_240_API_READ_BUDGET_CACHE_BATCH_STREAMLINING.md'
-      - '.github/workflows/release467-build240-api-read-budget-cache-batch-streamlining.yml'
   workflow_dispatch:
-
 jobs:
   build240:
     runs-on: ubuntu-latest
