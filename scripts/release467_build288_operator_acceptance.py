@@ -127,7 +127,7 @@ JOIN creative_process_resource_links l
 WHERE ip.creative_work_project_id=7 AND ip.creative_work_event_id=2
   AND ip.site_item_inventory_id=2801
   AND l.creative_process_resource_link_id=1
-  AND ip.notes LIKE '%Build 288 real planned-vs-actual operator acceptance%'
+  AND instr(COALESCE(ip.notes,''),'Build 288 real planned-vs-actual operator acceptance')>0
 ORDER BY ip.creative_project_inventory_post_id DESC
 LIMIT 1;
 """),"creative_project_inventory_post_id","posting_status","site_item_inventory_id","creative_process_resource_link_id")
