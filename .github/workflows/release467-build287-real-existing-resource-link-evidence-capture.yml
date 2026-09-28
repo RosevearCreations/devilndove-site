@@ -1,171 +1,49 @@
 name: Release 467 Build 287 Real Existing Resource-Link Evidence Capture
-# D1_ONE_SHOT_EVIDENCE_CAPTURE
 on:
   push:
-    branches: [dev]
-    paths:
-      - 'release467-build287-real-existing-link-authorization.json'
-      - '.github/workflows/release467-build287-real-existing-resource-link-evidence-capture.yml'
+    branches: [dev, main]
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
-  development-exact-link-evidence:
+  source-contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      D1_PROVIDER_ROWS_READ_CEILING: '20000'
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
-
-      - name: Enforce Development-only owner authorization
+      - name: Recover exact Build 286 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: fe4dff65c47a00fc3c61a6ae48faa26828951898
+          production_sha: 11a4924ce8f5a83bc6b688489404140e89456662
+          build_proof_name: Release 467 Build 286 Creative Process Resource-Link Operator Workflow
+          report_path: /tmp/build287-predecessor-exact-sha-proof.json
+      - name: Resolve exact Build 286 tree continuity
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import json
-          a=json.load(open('release467-build287-real-existing-link-authorization.json',encoding='utf-8'))
-          assert a['release']==467 and a['build']==287
-          assert a['environment']=='DEVELOPMENT_ONLY'
-          assert a['creative_work_project_id']==7
-          assert a['creative_work_event_id']==2
-          assert a['site_item_inventory_id']==2801
-          assert a['resource_role']=='material'
-          assert a['owner_authorized'] is True
-          assert a['reference_only'] is True
-          assert a['inventory_quantity_mutation'] is False
-          assert a['inventory_movement'] is False
-          assert a['finance_posting'] is False
-          assert a['product_owned_inventory'] is False
-          assert a['fixture_creation'] is False
-          assert a['allowed_mutation']=='creative_process_resource_links only'
-          PY
-          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
-          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
-          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
-
-      - name: Capture exact pre-link baseline
-        shell: bash
-        run: |
-          set -euo pipefail
-          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT e.creative_work_project_id,p.project_title,e.creative_work_event_id,TRIM(e.material_name) AS material_name,COALESCE(e.material_quantity,0) AS material_quantity,COALESCE(e.material_unit,'') AS material_unit,COALESCE(LOWER(TRIM(r.review_status)),'') AS review_status,COALESCE(r.inventory_consumed,0) AS inventory_consumed,i.site_item_inventory_id,i.item_name AS inventory_name,LOWER(TRIM(i.source_type)) AS inventory_source_type,COALESCE(i.on_hand_quantity,0) AS on_hand_quantity,COALESCE(i.stock_unit_label,'unit') AS stock_unit_label,(SELECT COUNT(*) FROM creative_process_resource_links l WHERE l.creative_work_project_id=7 AND l.creative_work_event_id=2 AND l.site_item_inventory_id=2801 AND l.resource_role='material') AS existing_link_count FROM creative_work_events e JOIN creative_work_projects p ON p.creative_work_project_id=e.creative_work_project_id LEFT JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id JOIN site_item_inventory i ON i.site_item_inventory_id=2801 WHERE e.creative_work_project_id=7 AND e.creative_work_event_id=2 AND COALESCE(e.entry_status,'active')='active' AND COALESCE(p.project_status,'active')<>'archived' AND i.is_active=1 AND LOWER(TRIM(COALESCE(i.source_type,''))) IN ('supply','tool') LIMIT 1;" > /tmp/build287-baseline.json
-
-      - name: Validate exact candidate before mutation
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import json
-          raw=json.load(open('/tmp/build287-baseline.json',encoding='utf-8'))
-          rows=[]
-          def walk(v):
-              if isinstance(v,dict):
-                  if isinstance(v.get('results'),list): rows.extend(v['results'])
-                  for x in v.values(): walk(x)
-              elif isinstance(v,list):
-                  for x in v: walk(x)
-          walk(raw)
-          assert len(rows)==1, f'Expected one exact baseline row, got {len(rows)}'
-          r=rows[0]
-          norm=lambda v:' '.join(str(v or '').strip().lower().split())
-          assert r['creative_work_project_id']==7 and r['creative_work_event_id']==2
-          assert r['site_item_inventory_id']==2801
-          assert norm(r['material_name'])==norm(r['inventory_name']), 'Material and Inventory names are not exact normalized matches.'
-          assert r['inventory_source_type'] in ('supply','tool')
-          assert r['review_status']=='approved'
-          assert int(r['inventory_consumed'] or 0)==0
-          assert int(r['existing_link_count'] or 0) in (0,1)
-          print('BUILD287_BASELINE='+json.dumps(r,sort_keys=True))
-          PY
-
-      - name: Create the single owner-authorized identity link
-        shell: bash
-        run: |
-          set -euo pipefail
-          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "INSERT INTO creative_process_resource_links(creative_work_project_id,creative_work_event_id,creative_project_operation_id,site_item_inventory_id,resource_role,link_notes,created_by_user_id,updated_by_user_id) SELECT 7,2,NULL,2801,'material','Build 287 owner-authorized exact-name association; existing approved material event to existing Supply Inventory; reference only; no stock movement.',NULL,NULL WHERE EXISTS (SELECT 1 FROM creative_work_events e JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id JOIN site_item_inventory i ON i.site_item_inventory_id=2801 WHERE e.creative_work_project_id=7 AND e.creative_work_event_id=2 AND COALESCE(e.entry_status,'active')='active' AND LOWER(TRIM(COALESCE(r.review_status,'')))='approved' AND COALESCE(r.inventory_consumed,0)=0 AND i.is_active=1 AND LOWER(TRIM(COALESCE(i.source_type,'')))='supply' AND LOWER(TRIM(COALESCE(e.material_name,'')))=LOWER(TRIM(COALESCE(i.item_name,'')))) AND NOT EXISTS (SELECT 1 FROM creative_process_resource_links l WHERE l.creative_work_project_id=7 AND l.creative_work_event_id=2 AND l.site_item_inventory_id=2801 AND l.resource_role='material');" > /tmp/build287-link-mutation.json
-
-      - name: Capture exact post-link evidence
-        shell: bash
-        run: |
-          set -euo pipefail
-          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT l.creative_process_resource_link_id,l.creative_work_project_id,p.project_title,l.creative_work_event_id,e.material_name,e.material_quantity,e.material_unit,LOWER(TRIM(COALESCE(r.review_status,''))) AS review_status,COALESCE(r.inventory_consumed,0) AS inventory_consumed,l.site_item_inventory_id,i.item_name AS inventory_name,LOWER(TRIM(i.source_type)) AS inventory_source_type,i.on_hand_quantity,i.stock_unit_label,l.resource_role,l.link_notes,l.created_by_user_id,l.updated_by_user_id,l.created_at,l.updated_at FROM creative_process_resource_links l JOIN creative_work_events e ON e.creative_work_event_id=l.creative_work_event_id AND e.creative_work_project_id=l.creative_work_project_id JOIN creative_work_projects p ON p.creative_work_project_id=l.creative_work_project_id JOIN site_item_inventory i ON i.site_item_inventory_id=l.site_item_inventory_id LEFT JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id WHERE l.creative_work_project_id=7 AND l.creative_work_event_id=2 AND l.site_item_inventory_id=2801 AND l.resource_role='material' LIMIT 1;" > /tmp/build287-exact-link.json
-
-      - name: Prove exact link, unchanged Inventory and bounded reads
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import json, os
-          files=['/tmp/build287-baseline.json','/tmp/build287-link-mutation.json','/tmp/build287-exact-link.json']
-          loaded=[json.load(open(p,encoding='utf-8')) for p in files]
-          def collect(raw):
-              rows=[]; reads=[]; changes=[]
-              def walk(v):
-                  if isinstance(v,dict):
-                      if isinstance(v.get('results'),list): rows.extend(v['results'])
-                      meta=v.get('meta')
-                      if isinstance(meta,dict):
-                          if meta.get('rows_read') is not None: reads.append(int(meta.get('rows_read') or 0))
-                          if meta.get('changes') is not None: changes.append(int(meta.get('changes') or 0))
-                      for x in v.values(): walk(x)
-                  elif isinstance(v,list):
-                      for x in v: walk(x)
-              walk(raw)
-              return rows,reads,changes
-          baseline_rows,baseline_reads,_=collect(loaded[0])
-          _,mutation_reads,mutation_changes=collect(loaded[1])
-          evidence_rows,evidence_reads,_=collect(loaded[2])
-          assert len(baseline_rows)==1 and len(evidence_rows)==1
-          before=baseline_rows[0]; after=evidence_rows[0]
-          norm=lambda v:' '.join(str(v or '').strip().lower().split())
-          assert int(after['creative_process_resource_link_id'] or 0)>0
-          assert after['creative_work_project_id']==7 and after['creative_work_event_id']==2 and after['site_item_inventory_id']==2801
-          assert after['resource_role']=='material'
-          assert after['inventory_source_type']=='supply'
-          assert after['review_status']=='approved'
-          assert int(after['inventory_consumed'] or 0)==0
-          assert norm(after['material_name'])==norm(after['inventory_name'])
-          assert float(after['on_hand_quantity'] or 0)==float(before['on_hand_quantity'] or 0), 'Inventory quantity changed during reference-only linking.'
-          existing=int(before['existing_link_count'] or 0)
-          changed=sum(mutation_changes)
-          if existing==0:
-              assert changed==1, f'Expected one link insert, mutation changes={changed}'
-          else:
-              assert changed==0, f'Idempotent re-run should not insert another link, mutation changes={changed}'
-          total_reads=sum(baseline_reads)+sum(mutation_reads)+sum(evidence_reads)
-          ceiling=int(os.environ['D1_PROVIDER_ROWS_READ_CEILING'])
-          assert total_reads<=ceiling, f'D1 rows_read ceiling exceeded: {total_reads}>{ceiling}'
-          summary={
-            'release':467,'build':287,'state':'EXACT_DEVELOPMENT_LINK_EVIDENCE_GREEN',
-            'creative_work_project_id':7,'creative_work_event_id':2,'site_item_inventory_id':2801,
-            'creative_process_resource_link_id':int(after['creative_process_resource_link_id']),
-            'material_name':after['material_name'],'inventory_name':after['inventory_name'],
-            'inventory_source_type':after['inventory_source_type'],'resource_role':after['resource_role'],
-            'review_status':after['review_status'],'inventory_consumed':int(after['inventory_consumed'] or 0),
-            'inventory_on_hand_before':before['on_hand_quantity'],'inventory_on_hand_after':after['on_hand_quantity'],
-            'mutation_changes':changed,'preexisting_link':bool(existing),
-            'd1_provider_rows_read':total_reads,'d1_rows_read_ceiling':ceiling,
-            'fixture_used':False,'inventory_mutation':False,'inventory_movement':False,'finance_posting':False
-          }
-          json.dump(summary,open('/tmp/build287-exact-evidence.json','w',encoding='utf-8'),indent=2)
-          print('BUILD287_EXACT_EVIDENCE='+json.dumps(summary,sort_keys=True))
-          PY
-
+          git fetch --no-tags --depth=1 origin fe4dff65c47a00fc3c61a6ae48faa26828951898
+          git fetch --no-tags --depth=1 origin 11a4924ce8f5a83bc6b688489404140e89456662
+          test "$(git rev-parse fe4dff65c47a00fc3c61a6ae48faa26828951898^{tree})" = "a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec"
+          test "$(git rev-parse 11a4924ce8f5a83bc6b688489404140e89456662^{tree})" = "a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec"
+      - name: Build 287 exact real-link evidence contract
+        run: python scripts/release467_build287_gate.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: release467-build287-real-existing-resource-link-evidence-${{ github.sha }}
-          path: |
-            /tmp/build287-baseline.json
-            /tmp/build287-link-mutation.json
-            /tmp/build287-exact-link.json
-            /tmp/build287-exact-evidence.json
-          if-no-files-found: warn
+          name: build287-predecessor-proof-${{ github.sha }}
+          path: /tmp/build287-predecessor-exact-sha-proof.json
+          if-no-files-found: error
           retention-days: 30
