@@ -22,7 +22,8 @@ const CORE_ASSETS = [
   '/workshop-journal/'
 ];
 const NO_CACHE_PATH_PREFIXES = ['/admin/', '/members/', '/login/', '/register/', '/account-help/', '/api/'];
-function shouldBypassCache(url){return url.pathname.startsWith('/media/')||NO_CACHE_PATH_PREFIXES.some((prefix)=>url.pathname.startsWith(prefix));}
+const AUTH_CRITICAL_ASSETS = new Set(['/public/js/auth.js','/public/js/login.js','/public/js/site-auth-ui.js','/auth.js']);
+function shouldBypassCache(url){return url.pathname.startsWith('/media/')||AUTH_CRITICAL_ASSETS.has(url.pathname)||NO_CACHE_PATH_PREFIXES.some((prefix)=>url.pathname.startsWith(prefix));}
 // Retained offline authority shape for source compatibility. Direct server-authority routes
 // are intentionally not intercepted below, so this response is not used for Admin/API traffic.
 function offlineAuthorityResponse(){return new Response(JSON.stringify({ok:false,error:'offline',authority:'server-required'}),{status:503,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});}

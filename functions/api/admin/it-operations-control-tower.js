@@ -1,27 +1,27 @@
-// Release 467 Build 285 — Real Inventory Linkage Prerequisite Inventory over exact Build 284 Production source.
+// Release 467 Build 286 — Creative Process Resource-Link Operator Workflow over exact Build 285 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=285;
-const TITLE='Real Inventory Linkage Prerequisite Inventory';
-const AUTHORITY='release467-build285-real-inventory-linkage-prerequisite-inventory';
-const EVIDENCE_ID='r467-b284-green-36367208103-36367368997';
+const BUILD=286;
+const TITLE='Creative Process Resource-Link Operator Workflow';
+const AUTHORITY='release467-build286-creative-process-resource-link-operator-workflow';
+const EVIDENCE_ID='r467-b285-green-36368685098-36368898983';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:284,title:'CAIP Production Acceptance Closure & Outcomes Renewal',state:'DEVELOPMENT_GREEN',
-  dev_sha:'64bc134807fb8a353f2a33c09d4fa7563684339b',tree_sha:'eefd83a3e142c627baa1082238d14a9e73f583e9',
-  system_gate_run:36367208103,current_application_quality_run:36367208059,it_admin_runtime_proof_run:36367207996,
-  branch_hygiene_run:36367208070,dedicated_gate_run:36367208032,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
+  release:467,build:285,title:'Real Inventory Linkage Prerequisite Inventory',state:'DEVELOPMENT_GREEN',
+  dev_sha:'d1c70746fd937b05708306ea299ddb64559ff79c',tree_sha:'cea56547d734e8c4db51d49d145edebeb806d762',
+  system_gate_run:36368685098,current_application_quality_run:36368684950,it_admin_runtime_proof_run:36368685244,
+  branch_hygiene_run:36368685028,dedicated_gate_run:36368684902,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:284,title:'CAIP Production Acceptance Closure & Outcomes Renewal',state:'PRODUCTION_GREEN',
-  main_sha:'0ad2adcec970d3dc96336bdee88192fea32531a9',tree_sha:'eefd83a3e142c627baa1082238d14a9e73f583e9',
-  production_pages_deploy_run:36367368997,production_live_resource_integrity_run:36367419236,
-  products_browser_proof_run:36367419244,products_route_proof_run:36367419227,build_specific_proof_run:36367369039,remote_d1_queries:0
+  release:467,build:285,title:'Real Inventory Linkage Prerequisite Inventory',state:'PRODUCTION_GREEN',
+  main_sha:'2056cc46ebb5589dddc0b5172d90ffbd0e3c4241',tree_sha:'cea56547d734e8c4db51d49d145edebeb806d762',
+  production_pages_deploy_run:36368898983,production_live_resource_integrity_run:36368970032,
+  products_browser_proof_run:36368970208,products_route_proof_run:36368970050,build_specific_proof_run:36368899022,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,9 +31,9 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 285 Real Inventory Linkage Prerequisite Inventory'
+  'Release 467 Build 286 Creative Process Resource-Link Operator Workflow'
 ]);
-const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql']);
+const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
   {key:'paypal_sandbox',state:'HOLD_EXTERNAL'},
@@ -68,13 +68,13 @@ function closurePayload(){
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
     canonical_migration_authority:'migrations/canonical/manifest.json + scripts/d1_migrate.py',
-    canonical_migrations:CANONICAL_MIGRATIONS.slice(0,23),
+    canonical_migrations:CANONICAL_MIGRATIONS.slice(0,24),
     external_lanes:Object.fromEntries(EXTERNAL_POLICY.map((x)=>[x.key,x.state])),
     runtime_closure:{
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 286 follows after Build 285 prerequisite measurement: Creative Process Resource-Link Operator Workflow.'
+    next_build:'Build 287 follows Build 286: Real Existing Resource-Link Evidence Capture.'
   };
 }
 async function closurePack(){
@@ -121,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:285,title:TITLE,authority:'release467-build285-real-inventory-linkage-prerequisite-inventory.json'},
+        current_closure_candidate:{release:467,build:286,title:TITLE,authority:'release467-build286-creative-process-resource-link-operator-workflow.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],

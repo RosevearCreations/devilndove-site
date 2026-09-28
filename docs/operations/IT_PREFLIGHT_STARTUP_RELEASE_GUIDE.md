@@ -1,20 +1,20 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 285 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 286 candidate
 
-Build 285 — Real Inventory Linkage Prerequisite Inventory — is projected over the exact fully verified Build 284 closure.
+Build 286 — Creative Process Resource-Link Operator Workflow — is projected over the exact fully verified Build 285 closure.
 
-- Last fully verified Development: `64bc134807fb8a353f2a33c09d4fa7563684339b`
-- Verified tree: `eefd83a3e142c627baa1082238d14a9e73f583e9`
-- Development proofs: System `36367208103`, Quality `36367208059`, I.T. `36367207996`, Hygiene `36367208070`; dedicated Build 284 proof `36367208032`
-- Current Production main: `0ad2adcec970d3dc96336bdee88192fea32531a9`
-- Production proofs: Pages `36367368997`, Live Resources `36367419236`, Product Browser `36367419244`, Product Route `36367419227`; Build 284 `36367369039`
-- Build 285 is a Development D1 read-only prerequisite measurement.
-- Existing Build 212 operation-resource planning workflow is measured separately from actual adoption data.
-- No link creation, Inventory movement, Finance posting, Production business-data query or schema change is authorized.
-- Next: Build 286 — Creative Process Resource-Link Operator Workflow.
+- Last fully verified Development: `d1c70746fd937b05708306ea299ddb64559ff79c`
+- Verified tree: `cea56547d734e8c4db51d49d145edebeb806d762`
+- Development proofs: System `36368685098`, Quality `36368684950`, I.T. `36368685244`, Hygiene `36368685028`; dedicated Build 285 proof `36368684902`
+- Current Production main: `2056cc46ebb5589dddc0b5172d90ffbd0e3c4241`
+- Production proofs: Pages `36368898983`, Live Resources `36368970032`, Product Browser `36368970208`, Product Route `36368970050`; Build 285 `36368899022`
+- Build 286 adds an explicit operator-owned material-event → existing Supply/Tool Inventory identity link. Linking itself does not move stock.
+- Owner-reported login cache/session-client drift, dense Inventory editing, public Tools/Supplies card density and light-surface contrast are repaired in the same candidate.
+- Canonical migration authority advances additively through `0024_release467_creative_process_resource_link_operator_workflow.sql`.
+- Next: Build 287 — Real Existing Resource-Link Evidence Capture.
 
 ## Current release baseline
 
-Release 467 uses `main` as Production source and `dev` as Development candidate lane. The canonical Cloudflare Pages project is `devilndove-site`. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through data-only `0023`. Request-time DDL and automatic Production promotion remain closed.
+Release 467 uses `main` as Production source and `dev` as Development candidate lane. The canonical Cloudflare Pages project is `devilndove-site`. Forward D1 authority remains `migrations/canonical/manifest.json` plus `scripts/d1_migrate.py`, with the canonical migration span `0001` through additive reference-only `0024`. Request-time DDL and automatic Production promotion remain closed.
 
 1. Verify the previous exact SHA/tree and external proofs.
 2. The next build ingests that closure; the previous build never self-records later proof.

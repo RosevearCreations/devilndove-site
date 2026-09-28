@@ -1095,6 +1095,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const payload = {
         ...original,
         site_item_inventory_id: id,
+        source_type: value('source_type') || original.source_type,
         item_name: value('item_name') || original.item_name,
         source_type: String(value('source_type') || original.source_type || 'other').trim().toLowerCase(),
         supplier_name: value('supplier_name') || '',
@@ -1107,7 +1108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reorder_level: Math.max(0, Number(value('reorder_level') || 0)),
         unit_cost_cents: Math.max(0, Math.round(Number(value('unit_cost_dollars') || 0) * 100)),
         is_active: Number(value('is_active')) === 0 ? 0 : 1,
-        movement_note: 'Saved from inventory table editor.'
+        movement_note: 'Saved from inventory card/table editor.'
       };
       try {
         saveRowBtn.disabled = true; saveRowBtn.textContent = 'Saving…';

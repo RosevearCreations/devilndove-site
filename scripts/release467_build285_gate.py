@@ -54,6 +54,10 @@ if cur==285:
     q((p.get('production_checkpoint') or {}).get('main_sha')=='0ad2adcec970d3dc96336bdee88192fea32531a9' and (p.get('production_checkpoint') or {}).get('tree_sha')=='eefd83a3e142c627baa1082238d14a9e73f583e9','Current Build 285 Production baseline mismatch')
     q(int(p.get('next_build') or 0)==286 and p.get('next_build_title')=='Creative Process Resource-Link Operator Workflow','Current Build 285 successor pointer mismatch')
     q(p.get('roadmap')=='docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md','Current Build 285 roadmap mismatch')
+else:
+    q(a.get('state')=='PRODUCTION_GREEN','Build 285 successor-ingested authority must be Production GREEN')
+    q((a.get('final_closure') or {}).get('dev_sha')=='d1c70746fd937b05708306ea299ddb64559ff79c' and (a.get('final_closure') or {}).get('tree_sha')=='cea56547d734e8c4db51d49d145edebeb806d762','Build 285 final Development closure mismatch')
+    q((a.get('production_checkpoint') or {}).get('main_sha')=='2056cc46ebb5589dddc0b5172d90ffbd0e3c4241' and (a.get('production_checkpoint') or {}).get('tree_sha')=='cea56547d734e8c4db51d49d145edebeb806d762','Build 285 final Production closure mismatch')
 for k,v in (a.get('safety') or {}).items():q(v is False,f'Build 285 safety drift: {k}')
 print('RELEASE 467 BUILD 285 REAL INVENTORY LINKAGE PREREQUISITE INVENTORY')
 if F:

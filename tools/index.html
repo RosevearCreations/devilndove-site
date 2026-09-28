@@ -19,7 +19,7 @@
 
     .subgrid{
       display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 12px;
     }
 
@@ -28,11 +28,11 @@
       overflow: hidden;
       display:flex;
       flex-direction: column;
-      min-height: 330px;
+      min-height: 270px;
     }
 
     .tool.card .thumb{
-      height: 160px;
+      height: 120px;
       width: 100%;
       background: rgba(255,255,255,0.03);
       border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -102,7 +102,7 @@
       opacity: .85;
       line-height: 1.35;
       display:-webkit-box;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow:hidden;
     }
@@ -130,6 +130,16 @@
       color: inherit;
     }
     .btnlink:hover{ background: rgba(255,255,255,0.10); }
+
+
+    .tool.card{transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+    @media (hover:hover){
+      .tool.card:hover,.tool.card:focus-within{transform:translateY(-3px);border-color:rgba(191,232,255,.36);box-shadow:0 14px 30px rgba(0,0,0,.28)}
+      .tool.card:hover .note,.tool.card:focus-within .note{-webkit-line-clamp:5}
+      .tool.card:hover .thumb img,.tool.card:focus-within .thumb img{transform:scale(1.025)}
+      .tool.card .thumb img{transition:transform .16s ease}
+    }
+    @media (prefers-reduced-motion:reduce){.tool.card,.tool.card .thumb img{transition:none!important}.tool.card:hover,.tool.card:focus-within{transform:none}}
 
     .controls .input { width: 100%; }
     .controls-row{
@@ -516,6 +526,6 @@
       initToolsPage();
     })();
   </script>
-<script src="/public/js/auth.js?v=279"></script><script src="/public/js/site-auth-ui.js"></script> 
+<script src="/public/js/auth.js?v=467b286-cookie-session"></script><script src="/public/js/site-auth-ui.js?v=467b286-cookie-session"></script> 
 </body>
 </html>
