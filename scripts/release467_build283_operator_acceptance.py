@@ -79,8 +79,8 @@ FROM creative_work_events e
 JOIN creative_work_projects cwp ON cwp.creative_work_project_id=e.creative_work_project_id
 JOIN site_item_inventory sii ON sii.is_active=1 AND (
  lower(trim(sii.item_name))=lower(trim(e.material_name))
- OR lower(sii.item_name) LIKE '%'||lower(trim(e.material_name))||'%'
- OR lower(trim(e.material_name)) LIKE '%'||lower(sii.item_name)||'%')
+ OR instr(lower(sii.item_name),lower(substr(trim(e.material_name),1,120)))>0
+ OR instr(lower(substr(trim(e.material_name),1,120)),lower(substr(sii.item_name,1,120)))>0)
 LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
 LEFT JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id
 WHERE COALESCE(cwp.project_status,'active')<>'archived'
