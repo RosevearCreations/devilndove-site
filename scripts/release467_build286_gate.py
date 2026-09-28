@@ -22,11 +22,11 @@ for token in ("devilndove-shell-r450","AUTH_CRITICAL_ASSETS","/public/js/auth.js
 q("467b286-cookie-session" in login_page and "467b286-cookie-session" in shop_page,'Build 286 login/shop auth cache-busting missing')
 q("new URL(node.src, window.location.href).pathname === wanted" in mainjs,'Build 286 duplicate auth script guard missing')
 q("inventoryCardDefault" not in ergjs and "if(mq.matches)table.classList.add('dd-v237-card-mode')" in ergjs,'Inventory Operations desktop table must remain the default while mobile retains card mode')
-for token in ('data-field="stock_unit_label"','data-field="usage_unit_label"','data-field="usage_units_per_stock_unit"','data-cost-per-usage','history_only=1','include_history=0','const inventoryPageSize = 40'):
+for token in ('data-field="stock_unit_label"','data-field="usage_unit_label"','data-field="usage_units_per_stock_unit"','data-cost-per-usage','history_only=1','include_history=0','include_link_stats=0','const inventoryPageSize = 40'):
     q(token in inventory_ui,'Inventory Operations repair missing '+token)
-q("cost_per_usage_unit_cents" in inventory_api and "read_profile: 'history_only'" in inventory_api,'Inventory Operations API lost calculated usage cost or bounded history profile')
+q("cost_per_usage_unit_cents" in inventory_api and "read_profile: 'history_only'" in inventory_api and "const linkStatsCte = includeLinkStats" in inventory_api,'Inventory Operations API lost calculated usage cost, bounded history, or opt-in product-link aggregation')
 q("requestPath === '/api/auth/me'" in authjs and "response.status === 401 && !String(url).includes('/api/auth/login')" not in authjs,'Feature API 401 must not clear browser identity; canonical auth/me remains logout authority')
-q('/public/js/auth.js?v=467b286-inventory-session' in inventory_page and '/public/js/admin-site-item-inventory.js?v=286.1' in inventory_page,'Inventory Operations cache-busting repair missing')
+q('/public/js/auth.js?v=467b286-inventory-session' in inventory_page and '/public/js/admin-site-item-inventory.js?v=286.2' in inventory_page,'Inventory Operations cache-busting repair missing')
 q("source_type: value('source_type') || original.source_type" in inventory_ui,'Build 286 inline Tool/Supply type save missing')
 for token in ("grid-template-columns:repeat(3,minmax(0,1fr))","content:attr(data-label)",".shop-collection-card{color:#1f2937}"):q(token in css,'Build 286 operator CSS repair missing '+token)
 for page,name in ((tools_page,'Tools'),(supplies_page,'Supplies')):
