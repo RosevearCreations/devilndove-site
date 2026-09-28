@@ -1,7 +1,5 @@
 name: Release 467 Build 226 Capability Profile Coverage Closure
 on:
-  push:
-    branches: [dev]
   workflow_dispatch:
 permissions: {contents: read}
 jobs:
