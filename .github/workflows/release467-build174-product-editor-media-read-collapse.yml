@@ -1,18 +1,5 @@
 name: Release 467 Build 174 Product Editor Media Read Collapse
 on:
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/api/admin/product-editor-media.js'
-      - 'public/js/admin-product-editor-v163.js'
-      - 'admin/product-editor/index.html'
-      - 'scripts/release467_build174_gate.py'
-      - 'scripts/release467_build173_gate.py'
-      - 'scripts/release467_build169_gate.py'
-      - 'scripts/release467_build168_gate.py'
-      - 'scripts/release467_build165_gate.py'
-      - 'docs/operations/RELEASE_467_BUILD_174_PRODUCT_EDITOR_MEDIA_READ_COLLAPSE.md'
-      - '.github/workflows/release467-build174-product-editor-media-read-collapse.yml'
   workflow_dispatch:
 permissions:
   contents: read
