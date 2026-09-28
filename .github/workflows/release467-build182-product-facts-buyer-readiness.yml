@@ -1,20 +1,5 @@
 name: Release 467 Build 182 Product Facts Buyer Readiness
 on:
-  pull_request:
-    branches: [dev]
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/api/admin/product-buyer-readiness.js'
-      - 'public/js/admin-product-buyer-readiness-v182.js'
-      - 'public/js/admin-catalog-buyer-readiness-v182.js'
-      - 'css/release467-build182-product-buyer-readiness.css'
-      - 'admin/product-editor/index.html'
-      - 'admin/catalog-health/index.html'
-      - 'docs/operations/RELEASE_467_BUILD_182_PRODUCT_FACTS_BUYER_READINESS.md'
-      - 'docs/operations/RELEASE_467_CATALOG_REWORK_BUILDS_181_186.md'
-      - 'scripts/release467_build182_gate.py'
-      - '.github/workflows/release467-build182-product-facts-buyer-readiness.yml'
   workflow_dispatch:
 permissions:
   contents: read
