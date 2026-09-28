@@ -2,7 +2,7 @@
   "release": 467,
   "build": 286,
   "title": "Creative Process Resource-Link Operator Workflow",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build286-creative-process-resource-link-operator-workflow",
   "predecessor": {
     "build": 285,
@@ -110,5 +110,31 @@
       "products_route_proof_run": 36368970050,
       "build_specific_proof_run": 36368899022
     }
+  },
+  "final_closure": {
+    "dev_sha": "fe4dff65c47a00fc3c61a6ae48faa26828951898",
+    "tree_sha": "a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec",
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "proofs": {
+      "system_gate_run": 36374225700,
+      "current_application_quality_run": 36374225637,
+      "it_admin_runtime_proof_run": 36374225648,
+      "branch_hygiene_run": 36374225692
+    },
+    "dedicated_gate_run": 36374225610,
+    "ingested_by_build": 287,
+    "recorded_by": "Build 287 startup ingestion; not self-recorded by Build 286"
+  },
+  "production_checkpoint": {
+    "build": 286,
+    "main_sha": "11a4924ce8f5a83bc6b688489404140e89456662",
+    "tree_sha": "a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec",
+    "production_pages_deploy_run": 36374409720,
+    "production_live_resource_integrity_run": 36374501241,
+    "products_browser_proof_run": 36374501210,
+    "products_route_proof_run": 36374501223,
+    "build_specific_proof_run": 36374409434,
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true
   }
 }

@@ -1,0 +1,49 @@
+name: Release 467 Build 287 Real Existing Resource-Link Evidence Capture
+on:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Recover exact Build 286 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: fe4dff65c47a00fc3c61a6ae48faa26828951898
+          production_sha: 11a4924ce8f5a83bc6b688489404140e89456662
+          build_proof_name: Release 467 Build 286 Creative Process Resource-Link Operator Workflow
+          report_path: /tmp/build287-predecessor-exact-sha-proof.json
+      - name: Resolve exact Build 286 tree continuity
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin fe4dff65c47a00fc3c61a6ae48faa26828951898
+          git fetch --no-tags --depth=1 origin 11a4924ce8f5a83bc6b688489404140e89456662
+          test "$(git rev-parse fe4dff65c47a00fc3c61a6ae48faa26828951898^{tree})" = "a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec"
+          test "$(git rev-parse 11a4924ce8f5a83bc6b688489404140e89456662^{tree})" = "a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec"
+      - name: Build 287 exact real-link evidence contract
+        run: python scripts/release467_build287_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build287-predecessor-proof-${{ github.sha }}
+          path: /tmp/build287-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30

@@ -1,16 +1,16 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 286 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 287 candidate
 
-Build 286 — Creative Process Resource-Link Operator Workflow — is projected over the exact fully verified Build 285 closure.
+Build 287 — Real Existing Resource-Link Evidence Capture — is projected over the exact fully verified Build 286 closure.
 
-- Last fully verified Development: `d1c70746fd937b05708306ea299ddb64559ff79c`
-- Verified tree: `cea56547d734e8c4db51d49d145edebeb806d762`
-- Development proofs: System `36368685098`, Quality `36368684950`, I.T. `36368685244`, Hygiene `36368685028`; dedicated Build 285 proof `36368684902`
-- Current Production main: `2056cc46ebb5589dddc0b5172d90ffbd0e3c4241`
-- Production proofs: Pages `36368898983`, Live Resources `36368970032`, Product Browser `36368970208`, Product Route `36368970050`; Build 285 `36368899022`
-- Build 286 adds an explicit operator-owned material-event → existing Supply/Tool Inventory identity link. Linking itself does not move stock.
-- Owner-reported login cache/session-client drift, dense Inventory editing, public Tools/Supplies card density and light-surface contrast are repaired in the same candidate.
-- Canonical migration authority advances additively through `0024_release467_creative_process_resource_link_operator_workflow.sql`.
-- Next: Build 287 — Real Existing Resource-Link Evidence Capture.
+- Last fully verified Development: `fe4dff65c47a00fc3c61a6ae48faa26828951898`
+- Verified tree: `a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec`
+- Development proofs: System `36374225700`, Current Application Quality `36374225637`, I.T. Admin Runtime `36374225648`, Repository Branch Hygiene `36374225692`; Build 286 dedicated `36374225610`
+- Current Production main: `11a4924ce8f5a83bc6b688489404140e89456662`
+- Production proofs: Pages `36374409720`, Live Resources `36374501241`, Product Browser `36374501210`, Product Route `36374501223`; Build 286 `36374409434`
+- Build 287 real Development evidence: project 7 / material event 2 → Supply Inventory 2801 → resource link 1; exact normalized material/Inventory name match.
+- Build 287 bounded D1 evidence: `170 rows_read` against a `20,000` ceiling; Inventory on-hand remained `1 → 1`; no Inventory movement and no Finance posting.
+- Inventory Operations repair remains active: desktop editable table, inline stock/usage conversions, calculated cost per usage unit, lazy history, low-read link aggregation profile, and feature API failures do not falsely clear login identity.
+- Next: Build 288 — Real Planned-vs-Actual Inventory Acceptance.
 
 ## Current release baseline
 
