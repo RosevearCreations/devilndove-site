@@ -1,0 +1,105 @@
+name: Release 467 Build 288 Real Planned-vs-Actual Inventory Acceptance
+# D1_ONE_SHOT_EVIDENCE_CAPTURE
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'release467-build288-real-planned-vs-actual-inventory-acceptance.json'
+      - 'scripts/release467_build288_operator_acceptance.py'
+      - 'scripts/release467_build288_gate.py'
+      - '.github/workflows/release467-build288-real-planned-vs-actual-inventory-acceptance.yml'
+      - 'css/styles.css'
+      - 'public/js/admin-site-item-inventory.js'
+      - 'admin/inventory-operations/index.html'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build288:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    env:
+      DND_CONFIGURED_SESSION_COOKIE: ${{ secrets.DND_DEV_SESSION_COOKIE }}
+      CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      D1_PROVIDER_ROWS_READ_CEILING: '20000'
+      BUILD288_EXACT_DEV_BASE_URL: ''
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Build 288 source contract
+        run: python scripts/release467_build288_gate.py
+      - name: Wait for exact Development System Gate
+        if: ${{ github.ref_name == 'dev' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 90); do
+            curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${GITHUB_SHA}&per_page=100" > /tmp/build288-runs.json
+            state="$(python - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/build288-runs.json'));rows=[r for r in data.get('workflow_runs',[]) if r.get('name')=='System Gate' and r.get('head_sha')==os.environ['GITHUB_SHA']];rows.sort(key=lambda r:str(r.get('created_at') or ''),reverse=True)
+          if not rows:print('WAIT')
+          else:
+              r=rows[0]
+              if r.get('status')!='completed':print('WAIT')
+              elif r.get('conclusion')=='success':print('GREEN:'+str(r.get('id')))
+              else:print('FAIL:'+str(r.get('id'))+':'+str(r.get('conclusion')))
+          PY
+          )"
+            case "$state" in
+              GREEN:*) echo "BUILD288_SYSTEM_GATE_RUN=${state#GREEN:}" >> "$GITHUB_ENV"; exit 0 ;;
+              FAIL:*) echo "STOP: exact Development System Gate is not GREEN: $state"; exit 1 ;;
+              *) sleep 10 ;;
+            esac
+          done
+          echo 'STOP: timed out waiting for exact Development System Gate.'; exit 1
+      - name: Resolve exact Development Preview
+        if: ${{ github.ref_name == 'dev' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs/${BUILD288_SYSTEM_GATE_RUN}/artifacts" > /tmp/build288-artifacts.json
+          ARTIFACT_ID="$(python - <<'PY'
+          import json
+          d=json.load(open('/tmp/build288-artifacts.json'));rows=[a for a in d.get('artifacts',[]) if a.get('name')=='current-development-deploy-proof' and not a.get('expired')];print(rows[0]['id'] if rows else '')
+          PY
+          )"
+          test -n "$ARTIFACT_ID"
+          curl -fsSL -L -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip" -o /tmp/build288-deploy.zip
+          rm -rf /tmp/build288-deploy && mkdir -p /tmp/build288-deploy && unzip -q /tmp/build288-deploy.zip -d /tmp/build288-deploy
+          python - <<'PY'
+          import glob,json,os
+          p=glob.glob('/tmp/build288-deploy/**/current-development-deploy-proof.json',recursive=True);assert p,p
+          d=json.load(open(p[0]));assert d.get('status')=='PASS' and d.get('source_sha')==os.environ['GITHUB_SHA'],d
+          url=str(d.get('url') or '').strip();assert d.get('environment')=='preview' and d.get('branch')=='dev' and url.startswith('https://') and '.devilndove-site.pages.dev' in url,d
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('BUILD288_EXACT_DEV_BASE_URL='+url+'\n')
+          PY
+      - name: Execute real planned-vs-actual Inventory acceptance
+        if: ${{ github.ref_name == 'dev' }}
+        run: python scripts/release467_build288_operator_acceptance.py
+      - name: Upload Build 288 real operator evidence
+        if: ${{ github.ref_name == 'dev' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build288-real-planned-vs-actual-inventory-acceptance-evidence-${{ github.sha }}
+          path: /tmp/build288-real-planned-vs-actual-inventory-acceptance-evidence.json
+          if-no-files-found: error
+          retention-days: 30
