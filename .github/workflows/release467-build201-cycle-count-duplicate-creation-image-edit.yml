@@ -1,31 +1,7 @@
 name: Release 467 Build 201 Cycle Count Duplicate + Creation Image Edit
 
 on:
-  pull_request:
-    branches: [dev]
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/api/admin/creation-media.js'
-      - 'admin/creation-media/index.html'
-      - 'public/js/admin-creation-media-v201.js'
-      - 'functions/api/creations.js'
-      - 'creations/index.html'
-      - 'public/js/creations-admin-image-edit-v201.js'
-      - 'functions/api/admin/media-content-studio.js'
-      - 'public/js/admin-inventory-identity-cleanup-v183.js'
-      - 'public/js/admin-inventory-integrity-review.js'
-      - 'admin/inventory-operations/index.html'
-      - 'docs/operations/RELEASE_467_BUILD_201_CYCLE_COUNT_DUPLICATE_IDENTITY_RESOLUTION.md'
-      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md'
-      - 'scripts/release467_build201_gate.py'
-      - 'scripts/release467_build200_gate.py'
-      - 'scripts/release467_build189_gate.py'
-      - 'scripts/release467_build183_gate.py'
-      - 'scripts/release467_build180_gate.py'
-      - '.github/workflows/release467-build201-cycle-count-duplicate-creation-image-edit.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 
