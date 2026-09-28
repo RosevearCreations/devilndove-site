@@ -1,7 +1,5 @@
 name: Release 467 Build 271 Standalone Social CAIP Project Workflow
 on:
-  push:
-    branches: [dev, main]
   workflow_dispatch:
 permissions:
   contents: read
