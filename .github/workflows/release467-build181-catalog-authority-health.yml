@@ -1,22 +1,5 @@
 name: Release 467 Build 181 Catalog Authority Health
 on:
-  pull_request:
-    branches: [dev]
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/api/admin/catalog-health.js'
-      - 'public/js/admin-catalog-health-v181.js'
-      - 'css/release467-build181-catalog-health.css'
-      - 'admin/catalog-health/index.html'
-      - 'functions/api/_lib/appModuleRoutes.js'
-      - 'admin/products/index.html'
-      - 'admin/inventory-operations/index.html'
-      - 'admin/catalog-media/index.html'
-      - 'scripts/release467_build181_gate.py'
-      - 'docs/operations/RELEASE_467_BUILD_181_CATALOG_AUTHORITY_HEALTH.md'
-      - 'docs/operations/RELEASE_467_CATALOG_REWORK_BUILDS_181_186.md'
-      - '.github/workflows/release467-build181-catalog-authority-health.yml'
   workflow_dispatch:
 permissions:
   contents: read
