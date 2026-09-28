@@ -1,30 +1,5 @@
 name: Release 467 Build 173 Product Media Repair
 on:
-  push:
-    branches: [dev, main]
-    paths:
-      - 'migrations/canonical/0006_release467_product_media_publication_guard.sql'
-      - 'migrations/canonical/manifest.json'
-      - 'functions/api/admin/product-image-editor.js'
-      - 'public/js/admin-product-editor-v163.js'
-      - 'public/js/admin-product-media-editor-v172.js'
-      - 'admin/catalog-media/index.html'
-      - 'admin/product-editor/index.html'
-      - 'scripts/release467_build173_gate.py'
-      - 'scripts/release467_build164_gate.py'
-      - 'scripts/repository_forward_sanity.py'
-      - 'scripts/release467_build156_gate.py'
-      - 'scripts/release467_build171_gate.py'
-      - 'scripts/release467_build172_gate.py'
-      - 'scripts/release467_build169_gate.py'
-      - 'scripts/release467_build168_gate.py'
-      - 'scripts/release467_build165_gate.py'
-      - 'scripts/release467_build161_gate.py'
-      - 'scripts/release467_build158_gate.py'
-      - 'scripts/release467_build157_gate.py'
-      - 'scripts/current_deployment_preflight_truth_gate.py'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - '.github/workflows/release467-build173-product-media-repair.yml'
   workflow_dispatch:
 jobs:
   product-media-repair-proof:
