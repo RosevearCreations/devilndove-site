@@ -1,0 +1,124 @@
+{
+  "release": 467,
+  "build": 285,
+  "title": "Real Inventory Linkage Prerequisite Inventory",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build285-real-inventory-linkage-prerequisite-inventory",
+  "predecessor": {
+    "build": 284,
+    "title": "CAIP Production Acceptance Closure & Outcomes Renewal",
+    "development_sha": "64bc134807fb8a353f2a33c09d4fa7563684339b",
+    "development_tree_sha": "eefd83a3e142c627baa1082238d14a9e73f583e9",
+    "production_main_sha": "0ad2adcec970d3dc96336bdee88192fea32531a9",
+    "production_tree_sha": "eefd83a3e142c627baa1082238d14a9e73f583e9",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36367208103,
+      "current_application_quality_run": 36367208059,
+      "it_admin_runtime_proof_run": 36367207996,
+      "branch_hygiene_run": 36367208070,
+      "dedicated_gate_run": 36367208032
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36367368997,
+      "production_live_resource_integrity_run": 36367419236,
+      "products_browser_proof_run": 36367419244,
+      "products_route_proof_run": 36367419227,
+      "build_specific_proof_run": 36367369039
+    }
+  },
+  "scope": {
+    "mode": "READ_ONLY_DEVELOPMENT_PREREQUISITE_MEASUREMENT",
+    "measures": [
+      "Creative Process material events",
+      "Creative Project operation plans",
+      "operation resource references",
+      "Product/resource links",
+      "Supply/Tool Inventory associations",
+      "direct event/resource linkage schema"
+    ],
+    "creates_links": false,
+    "creates_projects": false,
+    "creates_events": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "production_business_data_query": false,
+    "source_workflow_support": {
+      "operation_resource_api": "functions/api/admin/creative-project-operations.js",
+      "operator_ui": "public/js/admin-creative-project-operations-build212.js",
+      "save_resource_action_present": true,
+      "inventory_search_present": true,
+      "planning_only": true
+    }
+  },
+  "measurement": {
+    "state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "environment": "DEVELOPMENT_D1_READ_ONLY",
+    "sql": "scripts/release467_build285_measurement.sql",
+    "evidence_artifact": "release467-build285-real-inventory-linkage-prerequisite-inventory",
+    "d1_rows_read_ceiling": 25000,
+    "counts": null,
+    "classification": "PENDING",
+    "missing_data": null,
+    "missing_workflow_support": null
+  },
+  "decision": {
+    "build285_complete_when": "Exact Development read-only measurement separates missing real linkage data from missing workflow/schema support without creating project, event, link, Inventory movement or Finance evidence.",
+    "next_build": 286,
+    "next_build_title": "Creative Process Resource-Link Operator Workflow",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "creative_project_mutation": false,
+    "creative_event_mutation": false,
+    "resource_link_mutation": false,
+    "product_mutation": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "payment_or_refund": false,
+    "production_business_data_query": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false,
+    "named_proof_requirement_relaxed": false
+  },
+  "implementation": {
+    "measurement_sql": "scripts/release467_build285_measurement.sql",
+    "evidence_document": "docs/operations/RELEASE_467_BUILD_285_REAL_INVENTORY_LINKAGE_PREREQUISITE_INVENTORY.md",
+    "dedicated_gate": "scripts/release467_build285_gate.py",
+    "workflow": ".github/workflows/release467-build285-real-inventory-linkage-prerequisite-inventory.yml",
+    "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md"
+  },
+  "starting_point": {
+    "development": {
+      "sha": "64bc134807fb8a353f2a33c09d4fa7563684339b",
+      "tree": "eefd83a3e142c627baa1082238d14a9e73f583e9",
+      "system_gate_run": 36367208103,
+      "quality_run": 36367208059,
+      "it_admin_runtime_run": 36367207996,
+      "repository_hygiene_run": 36367208070,
+      "dedicated_gate_run": 36367208032,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "0ad2adcec970d3dc96336bdee88192fea32531a9",
+      "tree_sha": "eefd83a3e142c627baa1082238d14a9e73f583e9",
+      "production_pages_deploy_run": 36367368997,
+      "production_live_resource_integrity_run": 36367419236,
+      "products_browser_proof_run": 36367419244,
+      "products_route_proof_run": 36367419227,
+      "build_specific_proof_run": 36367369039,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
+  }
+}

@@ -1,0 +1,121 @@
+name: Release 467 Build 285 Real Inventory Linkage Prerequisite Inventory
+on:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Recover exact Build 284 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: 64bc134807fb8a353f2a33c09d4fa7563684339b
+          production_sha: 0ad2adcec970d3dc96336bdee88192fea32531a9
+          build_proof_name: Release 467 Build 284 CAIP Production Acceptance Closure Outcomes Renewal
+          report_path: /tmp/build285-predecessor-exact-sha-proof.json
+      - name: Resolve exact Build 284 tree continuity
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 64bc134807fb8a353f2a33c09d4fa7563684339b
+          git fetch --no-tags --depth=1 origin 0ad2adcec970d3dc96336bdee88192fea32531a9
+          test "$(git rev-parse 64bc134807fb8a353f2a33c09d4fa7563684339b^{tree})" = "$(git rev-parse 0ad2adcec970d3dc96336bdee88192fea32531a9^{tree})"
+          test "$(git rev-parse 64bc134807fb8a353f2a33c09d4fa7563684339b^{tree})" = "eefd83a3e142c627baa1082238d14a9e73f583e9"
+      - name: Build 285 gate
+        run: python scripts/release467_build285_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build285-predecessor-proof-${{ github.sha }}
+          path: /tmp/build285-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30
+
+  development-linkage-prerequisite-measurement:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 binding
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q '^database_id = "f34a741b-0000-45b0-9a96-6be08754d563"$' wrangler.toml
+      - name: Measure real Inventory linkage prerequisites
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "$(cat scripts/release467_build285_measurement.sql)" > /tmp/build285-measurement-raw.json
+          python - <<'PY'
+          import json,os
+          raw=json.load(open('/tmp/build285-measurement-raw.json'))
+          required=(
+            'active_projects','projects_with_material_events','active_material_events','planned_material_events',
+            'approved_material_events','reviewed_unposted_material_events','active_operations','projects_with_operations',
+            'operation_resources','operation_resources_supply_tool','operation_resources_actionable_supply_tool',
+            'projects_with_supply_tool_operation_resources','projects_with_material_and_supply_tool_operation_resource',
+            'active_supply_tool_inventory','supply_tool_with_usage_profile','supply_tool_with_process_assignment',
+            'product_resource_links','product_resource_links_supply_tool','product_resource_links_with_inventory_match',
+            'creative_project_product_links','event_operation_link_columns','review_resource_link_columns',
+            'inventory_posts_total','inventory_reversals_total','foreign_key_violations'
+          )
+          rows=[];reads=[]
+          def walk(v):
+            if isinstance(v,dict):
+              if all(k in v for k in required): rows.append(v)
+              meta=v.get('meta')
+              if isinstance(meta,dict) and meta.get('rows_read') is not None: reads.append(int(meta.get('rows_read') or 0))
+              for x in v.values(): walk(x)
+            elif isinstance(v,list):
+              for x in v: walk(x)
+          walk(raw)
+          assert rows,raw
+          counts={k:int(rows[0].get(k) or 0) for k in required}
+          assert counts['foreign_key_violations']==0,counts
+          provider_rows_read=sum(reads);ceiling=25000
+          assert provider_rows_read<=ceiling,(provider_rows_read,ceiling)
+          missing_data=counts['projects_with_material_and_supply_tool_operation_resource']==0
+          missing_workflow_support=(counts['event_operation_link_columns']==0 and counts['review_resource_link_columns']==0)
+          if missing_data and missing_workflow_support:
+            classification='MISSING_REAL_LINKAGE_DATA_AND_EXPLICIT_EVENT_RESOURCE_WORKFLOW'
+          elif missing_data:
+            classification='MISSING_REAL_LINKAGE_DATA'
+          elif missing_workflow_support:
+            classification='PROJECT_LEVEL_RESOURCE_DATA_EXISTS_EXPLICIT_EVENT_LINK_WORKFLOW_MISSING'
+          else:
+            classification='PREREQUISITES_PRESENT'
+          evidence={
+            'schema':'release467-build285-real-inventory-linkage-prerequisite-inventory-v1',
+            'status':'PASS','development_sha':os.environ.get('GITHUB_SHA',''),
+            'environment':'development','measurement_mode':'READ_ONLY',
+            'counts':counts,'d1_provider_rows_read':provider_rows_read,'d1_rows_read_ceiling':ceiling,
+            'planning_resource_workflow_supported':True,
+            'explicit_event_resource_link_support_present':not missing_workflow_support,
+            'missing_data':missing_data,'missing_workflow_support':missing_workflow_support,
+            'classification':classification,
+            'mutations':{'d1':'ZERO','r2':'ZERO','schema':'NONE','inventory':'ZERO','finance':'ZERO','production_business_data_query':'ZERO'}
+          }
+          json.dump(evidence,open('/tmp/release467-build285-real-inventory-linkage-prerequisite-inventory.json','w'),indent=2,sort_keys=True)
+          print('BUILD 285 REAL INVENTORY LINKAGE PREREQUISITE MEASUREMENT: PASS')
+          print('D1_PROVIDER_ROWS_READ=',provider_rows_read,'BUDGET=',ceiling)
+          print(json.dumps(evidence,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release467-build285-real-inventory-linkage-prerequisite-inventory-${{ github.sha }}
+          path: /tmp/release467-build285-real-inventory-linkage-prerequisite-inventory.json
+          if-no-files-found: error
+          retention-days: 30

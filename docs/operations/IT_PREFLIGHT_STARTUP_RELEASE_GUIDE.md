@@ -1,16 +1,16 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 284 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 285 candidate
 
-Build 284 — CAIP Production Acceptance Closure & Outcomes Renewal — is projected over the exact fully verified Build 283 closure.
+Build 285 — Real Inventory Linkage Prerequisite Inventory — is projected over the exact fully verified Build 284 closure.
 
-- Last fully verified Development: `046cf0bebea75de39aaf7a42fef0e0639581615a`
-- Verified tree: `2e0e404c7b62a0167155f6b1d563b34250748c32`
-- Development proofs: System `36365773333`, Quality `36365773581`, I.T. `36365773340`, Hygiene `36365773372`; dedicated Build 283 proof `36365774362`
-- Current Production main: `5bc70281e8ea2cb9818b14f216bef30f2d7d1463`
-- Production proofs: Pages `36366107169`, Live Resources `36366163222`, Product Browser `36366163229`, Product Route `36366163225`; Build 283 `36366107020`
-- CAIP private-media remains ACCEPTED at 3/3 current-release dimensions.
-- Build 284 is read-only governance/evidence renewal.
-- Measured residual: real Creative Process ↔ Supply/Tool Inventory linkage/adoption evidence remains open because Build 283 required a bounded Development Supply fixture.
-- Successor roadmap: Builds 285–289 real Inventory linkage acceptance.
+- Last fully verified Development: `64bc134807fb8a353f2a33c09d4fa7563684339b`
+- Verified tree: `eefd83a3e142c627baa1082238d14a9e73f583e9`
+- Development proofs: System `36367208103`, Quality `36367208059`, I.T. `36367207996`, Hygiene `36367208070`; dedicated Build 284 proof `36367208032`
+- Current Production main: `0ad2adcec970d3dc96336bdee88192fea32531a9`
+- Production proofs: Pages `36367368997`, Live Resources `36367419236`, Product Browser `36367419244`, Product Route `36367419227`; Build 284 `36367369039`
+- Build 285 is a Development D1 read-only prerequisite measurement.
+- Existing Build 212 operation-resource planning workflow is measured separately from actual adoption data.
+- No link creation, Inventory movement, Finance posting, Production business-data query or schema change is authorized.
+- Next: Build 286 — Creative Process Resource-Link Operator Workflow.
 
 ## Current release baseline
 

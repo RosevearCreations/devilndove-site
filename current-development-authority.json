@@ -1,32 +1,32 @@
 {
   "release": 467,
-  "build": 284,
-  "title": "CAIP Production Acceptance Closure & Outcomes Renewal",
+  "build": 285,
+  "title": "Real Inventory Linkage Prerequisite Inventory",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 283,
-      "title": "Planned-vs-Actual Inventory Operator Acceptance",
-      "authority": "release467-build283-planned-vs-actual-inventory-operator-acceptance.json",
-      "dev_sha": "046cf0bebea75de39aaf7a42fef0e0639581615a",
-      "tree_sha": "2e0e404c7b62a0167155f6b1d563b34250748c32",
-      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
-      "proofs": {
-        "system_gate_run": 36365773333,
-        "current_application_quality_run": 36365773581,
-        "it_admin_runtime_proof_run": 36365773340,
-        "branch_hygiene_run": 36365773372
-      },
-      "dedicated_gate_run": 36365774362
-    },
-    "current_closure_candidate": {
-      "release": 467,
       "build": 284,
       "title": "CAIP Production Acceptance Closure & Outcomes Renewal",
       "authority": "release467-build284-caip-production-acceptance-closure-outcomes-renewal.json",
+      "dev_sha": "64bc134807fb8a353f2a33c09d4fa7563684339b",
+      "tree_sha": "eefd83a3e142c627baa1082238d14a9e73f583e9",
+      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+      "proofs": {
+        "system_gate_run": 36367208103,
+        "current_application_quality_run": 36367208059,
+        "it_admin_runtime_proof_run": 36367207996,
+        "branch_hygiene_run": 36367208070
+      },
+      "dedicated_gate_run": 36367208032
+    },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 285,
+      "title": "Real Inventory Linkage Prerequisite Inventory",
+      "authority": "release467-build285-real-inventory-linkage-prerequisite-inventory.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -37,21 +37,22 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 283,
-    "title": "Planned-vs-Actual Inventory Operator Acceptance",
-    "authority": "release467-build283-planned-vs-actual-inventory-operator-acceptance.json",
-    "main_sha": "5bc70281e8ea2cb9818b14f216bef30f2d7d1463",
-    "tree_sha": "2e0e404c7b62a0167155f6b1d563b34250748c32",
+    "build": 284,
+    "title": "CAIP Production Acceptance Closure & Outcomes Renewal",
+    "authority": "release467-build284-caip-production-acceptance-closure-outcomes-renewal.json",
+    "main_sha": "0ad2adcec970d3dc96336bdee88192fea32531a9",
+    "tree_sha": "eefd83a3e142c627baa1082238d14a9e73f583e9",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36366107169,
-    "production_live_resource_integrity_run": 36366163222,
-    "products_browser_proof_run": 36366163229,
-    "products_route_proof_run": 36366163225,
-    "build_specific_proof_run": 36366107020,
+    "production_pages_deploy_run": 36367368997,
+    "production_live_resource_integrity_run": 36367419236,
+    "products_browser_proof_run": 36367419244,
+    "products_route_proof_run": 36367419227,
+    "build_specific_proof_run": 36367369039,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build285-real-inventory-linkage-prerequisite-inventory.json",
     "release467-build284-caip-production-acceptance-closure-outcomes-renewal.json",
     "release467-build283-planned-vs-actual-inventory-operator-acceptance.json",
     "release467-build282-content-studio-bridge-operator-acceptance.json",
@@ -177,10 +178,10 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md",
-  "next_build": 285,
-  "next_build_state": "AUTHORIZED_AFTER_BUILD284_GREEN",
-  "next_build_title": "Real Inventory Linkage Prerequisite Inventory",
-  "promotion_state": "BUILD283_PRODUCTION_GREEN_BUILD284_CANDIDATE_NOT_YET_VERIFIED",
+  "next_build": 286,
+  "next_build_state": "AUTHORIZED_AFTER_BUILD285_GREEN",
+  "next_build_title": "Creative Process Resource-Link Operator Workflow",
+  "promotion_state": "BUILD284_PRODUCTION_GREEN_BUILD285_CANDIDATE_NOT_YET_MEASURED",
   "successor_scope_state": "CAIP_PRODUCTION_ACCEPTANCE_EVIDENCE_ROADMAP_ACTIVE",
   "measured_closure": {
     "source_build": 232,
@@ -206,20 +207,20 @@
     "last_build": 289,
     "state": "REAL_INVENTORY_LINKAGE_ACCEPTANCE_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 285,
-    "next_build_title": "Real Inventory Linkage Prerequisite Inventory",
+    "next_build": 286,
+    "next_build_title": "Creative Process Resource-Link Operator Workflow",
     "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md"
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "046cf0bebea75de39aaf7a42fef0e0639581615a",
-  "accepted_dev_tree_sha": "2e0e404c7b62a0167155f6b1d563b34250748c32",
+  "accepted_dev_sha": "64bc134807fb8a353f2a33c09d4fa7563684339b",
+  "accepted_dev_tree_sha": "eefd83a3e142c627baa1082238d14a9e73f583e9",
   "acceptance": {
-    "system_gate_run": 36365773333,
-    "current_application_quality_run": 36365773581,
-    "it_admin_runtime_proof_run": 36365773340,
-    "branch_hygiene_run": 36365773372,
-    "dedicated_gate_run": 36365774362
+    "system_gate_run": 36367208103,
+    "current_application_quality_run": 36367208059,
+    "it_admin_runtime_proof_run": 36367207996,
+    "branch_hygiene_run": 36367208070,
+    "dedicated_gate_run": 36367208032
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -844,6 +845,22 @@
     "accepted_caip_private_media_reopened": false,
     "successor_roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md",
     "next_build": 285,
+    "future_queue_exhausted": false,
+    "exact_development_sha": "64bc134807fb8a353f2a33c09d4fa7563684339b",
+    "dedicated_gate_run": 36367208032,
+    "production_main_sha": "0ad2adcec970d3dc96336bdee88192fea32531a9",
+    "production_state": "PRODUCTION_GREEN"
+  },
+  "real_inventory_linkage_prerequisite_inventory": {
+    "source_build": 284,
+    "mode": "READ_ONLY_DEVELOPMENT_PREREQUISITE_MEASUREMENT",
+    "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "creates_links": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "production_business_data_query": false,
+    "planning_resource_workflow_supported": true,
+    "next_build": 286,
     "future_queue_exhausted": false
   }
 }
