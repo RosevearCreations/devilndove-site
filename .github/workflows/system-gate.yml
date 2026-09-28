@@ -222,13 +222,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags origin main
-          if ! git rev-parse --verify origin/main >/dev/null 2>&1; then
+          BASE_SHA='${{ github.event.before }}'
+          ZERO_SHA='0000000000000000000000000000000000000000'
+          if [ -z "${BASE_SHA}" ] || [ "${BASE_SHA}" = "${ZERO_SHA}" ]; then
+            BASE_SHA="$(git rev-parse "${GITHUB_SHA}^" 2>/dev/null || true)"
+          fi
+          if [ -z "${BASE_SHA}" ]; then
             echo 'requires_d1=true' >> "${GITHUB_OUTPUT}"
-            echo 'reason=no_safe_main_baseline' >> "${GITHUB_OUTPUT}"
+            echo 'reason=no_safe_previous_dev_baseline' >> "${GITHUB_OUTPUT}"
             exit 0
           fi
-          git diff --name-only origin/main..."${GITHUB_SHA}" > /tmp/development-candidate-changed-files.txt
+          git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null || git fetch --no-tags --depth=1 origin "${BASE_SHA}"
+          git diff --name-only "${BASE_SHA}" "${GITHUB_SHA}" > /tmp/development-candidate-changed-files.txt
           if grep -Eq '^(migrations/canonical/|development-release\.json$|scripts/d1_migrate\.py$)' /tmp/development-candidate-changed-files.txt; then
             echo 'requires_d1=true' >> "${GITHUB_OUTPUT}"
             echo 'reason=canonical_schema_inputs_changed' >> "${GITHUB_OUTPUT}"
@@ -236,7 +241,7 @@ jobs:
             echo 'requires_d1=false' >> "${GITHUB_OUTPUT}"
             echo 'reason=code_only_no_canonical_schema_change' >> "${GITHUB_OUTPUT}"
           fi
-          echo 'Development changed files vs main:'
+          echo 'Development changed files in this dev push:'
           cat /tmp/development-candidate-changed-files.txt
       - name: Apply and prove canonical Development D1 migrations
         if: steps.d1-classification.outputs.requires_d1 == 'true'
