@@ -46,7 +46,7 @@ for path in sorted(WORKFLOWS.glob("release467-build*.yml")):
             and triggers == ["push"]
             and "branches: [dev]" in text
             and "paths:" in text
-            and "D1_PROVIDER_ROWS_READ_CEILING=20000" in text
+            and ("D1_PROVIDER_ROWS_READ_CEILING=20000" in text or "D1_PROVIDER_ROWS_READ_CEILING: '20000'" in text or 'D1_PROVIDER_ROWS_READ_CEILING: "20000"' in text)
             and "workflow_dispatch:" in text
         )
         if triggers and not one_shot_successor:
