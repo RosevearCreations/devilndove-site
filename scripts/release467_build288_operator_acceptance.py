@@ -106,12 +106,8 @@ SELECT
   COALESCE(i.usage_units_per_stock_unit,1) AS usage_units_per_stock_unit,
   COALESCE(i.usage_unit_label,'unit') AS usage_unit_label,COALESCE(i.stock_unit_label,'unit') AS stock_unit_label,
   COALESCE(u.usage_tracking_mode,'exact') AS usage_tracking_mode,COALESCE(u.minimum_usage_increment,0.001) AS minimum_usage_increment,
-  (SELECT COUNT(*) FROM creative_work_events pe
-     LEFT JOIN creative_project_material_reviews pr ON pr.creative_work_project_id=pe.creative_work_project_id AND pr.creative_work_event_id=pe.creative_work_event_id
-    WHERE pe.creative_work_project_id=p.creative_work_project_id
-      AND COALESCE(pe.entry_status,'active')='active'
-      AND TRIM(COALESCE(pe.material_name,''))<>''
-      AND COALESCE(LOWER(TRIM(pr.review_status)),'')<>'approved') AS planned_material_count,
+  COALESCE(e.material_quantity,0) AS planned_quantity,
+  COALESCE(e.material_unit,'') AS planned_unit,
   (SELECT COUNT(*) FROM creative_project_inventory_posts ip WHERE ip.creative_project_material_review_id=r.creative_project_material_review_id) AS historical_post_count,
   (SELECT COUNT(*) FROM site_inventory_movements m WHERE m.site_item_inventory_id=i.site_item_inventory_id) AS movement_count,
   (SELECT COUNT(*) FROM accounting_journal_entries) AS journal_entries,
@@ -132,7 +128,7 @@ if not baseline: stop("Build 287 real project/material/Inventory linkage is unav
 if str(baseline.get("review_status") or "").lower()!="approved": stop("Build 287 material review is no longer approved.")
 if int(baseline.get("inventory_consumed") or 0)!=0: stop("Build 287 material is already marked consumed.")
 if str(baseline.get("inventory_source_type") or "") not in ("supply","tool"): stop("Build 287 link no longer resolves to non-Product Inventory.")
-if int(baseline.get("planned_material_count") or 0)<1: stop("The real linked project does not currently contain a planned material estimate.")
+if float(baseline.get("planned_quantity") or 0)<=0: stop("The real linked material event no longer carries a positive planned quantity.")
 if int(baseline.get("historical_post_count") or 0)!=0: stop("The linked review already has historical Inventory posting evidence; Build 288 will not overwrite it.")
 norm=lambda v:" ".join(str(v or "").strip().lower().split())
 if norm(baseline.get("material_name"))!=norm(baseline.get("inventory_name")): stop("Build 287 exact material/Inventory identity has drifted.")
@@ -152,7 +148,7 @@ initial=request(f"/api/admin/creative-process?project_id={project_id}",cookie)
 life=initial.get("planned_actual_inventory_lifecycle") or {}
 if life.get("classification")!="PLANNED_ESTIMATES_SEPARATE_FROM_REVIEWED_AND_POSTED_ACTUALS":
     stop("Live Creative Process lifecycle projection is not the planned-vs-actual contract.")
-if int(life.get("planned_estimate_count") or 0)<1: stop("Live project does not expose a planned material estimate.")
+if life.get("planned_estimates_move_inventory") is not False: stop("Planned material estimates must remain Inventory-neutral.")
 if int(life.get("reviewed_actual_unposted_count") or 0)<1: stop("Live project does not expose the reviewed-unposted linked material state.")
 
 review=request("/api/admin/creative-process",cookie,"POST",{
@@ -257,7 +253,7 @@ evidence={
   "project_id":project_id,"project_title":baseline.get("project_title"),"event_id":event_id,
   "resource_link_id":int(baseline.get("creative_process_resource_link_id") or 0),
   "inventory_id":inventory_id,"inventory_source_type":baseline.get("inventory_source_type"),
-  "planned_material_count":int(baseline.get("planned_material_count") or 0),
+  "planned_quantity":float(baseline.get("planned_quantity") or 0),"planned_unit":baseline.get("planned_unit"),
   "reviewed_unposted_verified":True,"explicit_post_verified":True,"compensating_reversal_verified":True,
   "inventory_on_hand_before":baseline_on_hand,"inventory_on_hand_after":float(restored.get("on_hand_quantity") or 0),
   "post_id":post_id,"stock_quantity_consumed":consumed,"usage_quantity_consumed":usage,
