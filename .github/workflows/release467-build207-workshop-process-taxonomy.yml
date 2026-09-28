@@ -1,29 +1,5 @@
 name: Release 467 Build 207 Workshop Capability Process Taxonomy
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'migrations/canonical/0008_release467_workshop_process_taxonomy.sql'
-      - 'migrations/canonical/manifest.json'
-      - 'functions/api/admin/inventory-process-assignments.js'
-      - 'admin/inventory-operations/index.html'
-      - 'current-development-authority.json'
-      - 'release467-build206-launch-set-remediation-campaign.json'
-      - 'release467-build207-workshop-capability-process-taxonomy-expansion.json'
-      - 'docs/operations/RELEASE_467_BUILD_207_WORKSHOP_CAPABILITY_PROCESS_TAXONOMY_EXPANSION.md'
-      - 'scripts/release467_build206_gate.py'
-      - 'scripts/release467_build207_gate.py'
-      - 'scripts/repository_forward_sanity.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'scripts/current_deployment_preflight_truth_gate.py'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'admin/deployment-preflight/index.html'
-      - 'admin/it/index.html'
-      - 'admin/reliability/index.html'
-      - 'public/js/admin-it-control-tower.js'
-      - '.github/workflows/release467-build207-workshop-process-taxonomy.yml'
   workflow_dispatch:
 permissions: {contents: read}
 jobs:
