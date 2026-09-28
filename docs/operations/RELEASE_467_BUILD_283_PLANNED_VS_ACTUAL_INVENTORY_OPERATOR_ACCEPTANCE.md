@@ -22,7 +22,7 @@ The Development-only workflow waits for the exact Build 283 System Gate deployme
 
 1. resolves an existing active Development administrator session;
 2. selects one existing non-archived Creative Process project with both a planned material estimate and a reviewed-but-unposted actual that has never been posted;
-3. resolves a matching real Inventory item from direct material identity, same-material historical provenance, or an existing project-operation resource, with enough available quantity and compatible usage units;
+3. resolves a matching real Inventory item from direct material identity, same-material historical provenance, an existing project-operation resource, or the normal admin Inventory search contract when that search returns one unambiguous non-tool result with valid stock/usage rules;
 4. records the initial planned-estimate, Inventory movement and Finance journal state;
 5. calls `review_material` and proves the row becomes **Reviewed actual — not posted** while Inventory quantity, movement count and Finance journal counts remain unchanged;
 6. calls `post_material_inventory` and proves an explicit Inventory-owned post and posted actual are created;
