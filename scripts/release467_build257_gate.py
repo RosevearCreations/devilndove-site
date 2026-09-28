@@ -19,6 +19,7 @@ doc=t('docs/operations/RELEASE_467_BUILD_257_WORKFLOW_TRIGGER_INVENTORY_OWNERSHI
 sysgate=t('scripts/current_system_gate_provenance_gate.py')
 workflow=t('.github/workflows/release467-build257-workflow-trigger-inventory-ownership-map.yml')
 cur=int(p.get('build') or 0)
+fanout_retired=cur>=286 and (R/'scripts/d1_ci_fanout_guard.py').is_file()
 
 q(a.get('build')==257 and a.get('state') in ('DEVELOPMENT_CANDIDATE','PRODUCTION_GREEN'),'Build 257 authority identity/state mismatch')
 pred=a.get('predecessor') or {}
@@ -42,7 +43,10 @@ report={}
 try:report=json.loads(Path(out).read_text(encoding='utf-8'))
 except Exception as e:q(False,f'Build 257 inventory report unreadable: {e}')
 q(report.get('baseline_file_count')==146 and report.get('baseline_missing')==[],'Build 257 baseline workflows must remain retained')
-q((report.get('trigger_counts') or {}).get('workflow_run')==5,'Build 257 must preserve five measured workflow_run chains')
+if not fanout_retired:
+    q((report.get('trigger_counts') or {}).get('workflow_run')==5,'Build 257 must preserve five measured workflow_run chains')
+else:
+    q((R/'.github/workflows/d1-ci-fanout-guard.yml').is_file(),'Build 286+ must retain the D1 CI fan-out guard')
 
 if cur==257:
     q(report.get('workflow_file_count')==147,'Build 257 candidate must contain 147 workflow files')
