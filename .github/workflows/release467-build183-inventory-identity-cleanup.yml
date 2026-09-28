@@ -1,21 +1,5 @@
 name: Release 467 Build 183 Inventory Identity Cleanup
 on:
-  pull_request:
-    branches: [dev]
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/api/admin/inventory-identity-health.js'
-      - 'public/js/admin-inventory-identity-cleanup-v183.js'
-      - 'css/release467-build183-inventory-identity-cleanup.css'
-      - 'admin/inventory-operations/index.html'
-      - 'docs/operations/RELEASE_467_BUILD_183_INVENTORY_IDENTITY_CLEANUP.md'
-      - 'docs/operations/RELEASE_467_CATALOG_REWORK_BUILDS_181_186.md'
-      - 'scripts/release467_build183_gate.py'
-      - 'scripts/release467_build182_gate.py'
-      - 'scripts/release467_build180_gate.py'
-      - 'scripts/release467_build179_gate.py'
-      - '.github/workflows/release467-build183-inventory-identity-cleanup.yml'
   workflow_dispatch:
 permissions:
   contents: read
