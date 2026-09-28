@@ -1,23 +1,5 @@
 name: Release 467 Build 217 Production Cost Evidence v2
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'migrations/canonical/0017_release467_production_cost_evidence_v2.sql'
-      - 'migrations/canonical/manifest.json'
-      - 'functions/api/admin/production-cost-evidence.js'
-      - 'public/js/admin-production-cost-evidence-build217.js'
-      - 'functions/api/admin/project-profitability-reconciliation.js'
-      - 'public/js/admin-project-profitability-reconciliation.js'
-      - 'admin/creative-process/index.html'
-      - 'current-development-authority.json'
-      - 'release467-build216-customer-supplied-item-suitability-review.json'
-      - 'release467-build217-production-cost-evidence-v2.json'
-      - 'docs/operations/RELEASE_467_BUILD_217_PRODUCTION_COST_EVIDENCE_V2.md'
-      - 'scripts/release467_build216_gate.py'
-      - 'scripts/release467_build217_gate.py'
-      - 'scripts/repository_forward_sanity.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
   workflow_dispatch:
 permissions:
   contents: read
