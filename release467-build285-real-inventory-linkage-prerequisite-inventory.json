@@ -166,11 +166,11 @@
       "system_gate_run": 36368685098,
       "current_application_quality_run": 36368684950,
       "it_admin_runtime_proof_run": 36368685244,
-      "branch_hygiene_run": 36368685028,
-      "dedicated_gate_run": 36368684902
+      "branch_hygiene_run": 36368685028
     },
     "ingested_by_build": 286,
-    "recorded_by": "Build 286 startup ingestion; not self-recorded by Build 285"
+    "recorded_by": "Build 286 startup ingestion; not self-recorded by Build 285",
+    "dedicated_gate_run": 36368684902
   },
   "production_checkpoint": {
     "build": 285,
