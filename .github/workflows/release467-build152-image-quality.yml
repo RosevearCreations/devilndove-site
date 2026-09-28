@@ -1,14 +1,6 @@
 name: Release 467 Build 152 Image Quality Proof
 on:
-  pull_request:
-    branches: [dev, build151-gifting-custom-pickup-events]
-    paths:
-      - 'public/js/image-quality-scorer-v152.js'
-      - 'public/js/site-image-quality-overlay-v152.js'
-      - 'public/js/media-content-runtime.js'
-      - 'admin/media-content-studio/index.html'
-      - 'scripts/release467_build152_gate.py'
-      - '.github/workflows/release467-build152-image-quality.yml'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
