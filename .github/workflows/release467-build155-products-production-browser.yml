@@ -1,11 +1,7 @@
 name: Release 467 Build 155 Products Production Browser Proof
 
 on:
-  workflow_run:
-    workflows: ['Production Pages Deploy']
-    types: [completed]
-    branches: [main]
-
+  workflow_dispatch:
 permissions: {contents: read}
 
 # Historical workflow name retained as provenance. Build 162+ successor paths prove source/delivery
