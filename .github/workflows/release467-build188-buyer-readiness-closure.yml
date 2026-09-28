@@ -1,27 +1,7 @@
 name: Release 467 Build 188 Buyer Readiness Closure
 
 on:
-  pull_request:
-    branches: [dev]
-  push:
-    branches: [dev, main]
-    paths:
-      - 'functions/api/admin/product-buyer-readiness.js'
-      - 'functions/api/_lib/d1ReadBudget.js'
-      - 'public/js/admin-product-buyer-readiness-v182.js'
-      - 'public/js/admin-catalog-buyer-readiness-v182.js'
-      - 'admin/product-editor/index.html'
-      - 'admin/catalog-health/index.html'
-      - 'functions/api/products.js'
-      - 'functions/api/product-detail-core.js'
-      - 'docs/operations/RELEASE_467_BUILD_188_BUYER_READINESS_CLOSURE.md'
-      - 'docs/operations/RELEASE_467_AUTONOMOUS_CLOSURE_BUILDS_187_192.md'
-      - 'scripts/release467_build188_gate.py'
-      - 'scripts/release467_build187_gate.py'
-      - 'scripts/release467_build182_gate.py'
-      - '.github/workflows/release467-build188-buyer-readiness-closure.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 
