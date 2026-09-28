@@ -67,11 +67,18 @@ live=t('.github/workflows/production-live-resource-integrity-proof.yml')
 browser=t('.github/workflows/release467-build155-products-production-browser.yml')
 route=t('.github/workflows/release467-build154-products-route-production-proof.yml')
 q('push:' in prod and 'branches: [main]' in prod,'Production Pages Deploy must remain on main push')
-for body,label in ((live,'Live Resource'),(browser,'Product Browser'),(route,'Product Route')):
-    q('workflow_run:' in body and 'Production Pages Deploy' in body,f'{label} must remain a Production Pages workflow_run dependency')
+q('workflow_run:' in live and 'Production Pages Deploy' in live,'Live Resource must remain a Production Pages workflow_run dependency')
 q('github.event.workflow_run.conclusion' in live and "head_branch == 'main'" in live,'Live Resource exact Production dependency guard missing')
-q('branches: [main]' in browser and 'github.event.workflow_run.conclusion' in browser,'Product Browser exact Production dependency guard missing')
-q("head_branch == 'main'" in route and 'github.event.workflow_run.conclusion' in route,'Product Route exact Production dependency guard missing')
+if fanout_retired:
+    for body,label in ((browser,'Product Browser'),(route,'Product Route')):
+        ts=triggers(body)
+        q('workflow_dispatch' in ts,f'{label} must retain manual historical recovery')
+        q('workflow_run' not in ts and 'push' not in ts and 'pull_request' not in ts,f'{label} historical workflow must remain manual-only after Build 286 fan-out retirement')
+else:
+    for body,label in ((browser,'Product Browser'),(route,'Product Route')):
+        q('workflow_run:' in body and 'Production Pages Deploy' in body,f'{label} must remain a Production Pages workflow_run dependency')
+    q('branches: [main]' in browser and 'github.event.workflow_run.conclusion' in browser,'Product Browser exact Production dependency guard missing')
+    q("head_branch == 'main'" in route and 'github.event.workflow_run.conclusion' in route,'Product Route exact Production dependency guard missing')
 with tempfile.NamedTemporaryFile(suffix='.json',delete=False) as fh:out=fh.name
 r=subprocess.run([sys.executable,'scripts/release467_workflow_trigger_inventory.py',out],cwd=R,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=False)
 q(r.returncode==0,f'Build 261 inventory failed: {(r.stderr or r.stdout)[-2000:]}')
@@ -113,6 +120,10 @@ if F:
 print('PASS')
 print('Historical Production main push subscriptions removed: 39 / Builds 206-241 + 258-260')
 print('Development push/manual evidence retained')
-print('Canonical Production Pages + Live Resource + Product Browser + Product Route proofs retained')
-print('workflow_run chains retained: 5')
+if fanout_retired:
+    print('Canonical Production Pages + Live Resource proof retained; historical Product Browser/Route proofs are manual-only')
+    print('Historical workflow_run fan-out: RETIRED')
+else:
+    print('Canonical Production Pages + Live Resource + Product Browser + Product Route proofs retained')
+    print('workflow_run chains retained: 5')
 print('Next: Build 262 — Operations Today-Tasks Read Fan-Out Review')
