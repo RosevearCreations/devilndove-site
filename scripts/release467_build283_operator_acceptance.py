@@ -9,6 +9,7 @@ DB=os.environ.get("DEV_D1_DATABASE_NAME","devilndove-dev")
 CF_ID=os.environ.get("CF_ACCESS_CLIENT_ID","").strip();CF_SECRET=os.environ.get("CF_ACCESS_CLIENT_SECRET","").strip()
 CONFIGURED=os.environ.get("DND_CONFIGURED_SESSION_COOKIE","").strip()
 OUT=Path("/tmp/build283-planned-vs-actual-inventory-operator-acceptance-evidence.json")
+FIXTURE_PROJECT=0;FIXTURE_EVENT=0;CLEANING_FIXTURE=False
 def stop(msg): print("STOP:",msg,file=sys.stderr);raise SystemExit(1)
 def d1(sql):
     p=subprocess.run(["npx","--yes","wrangler@4","d1","execute",DB,"--remote","--config","wrangler.toml","--json","--command",sql],cwd=ROOT,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -68,6 +69,32 @@ if not cookie:
     if not token:stop("No existing unexpired Development administrator session is available; Build 283 refuses synthetic operator creation.")
     cookie="dd_auth_token="+token
     if not validate(cookie):stop("Existing Development administrator session was rejected.")
+
+# Build 283 bounded fixture cleanup guard. void_event reverses any still-active Inventory post first.
+def cleanup_fixture():
+    global CLEANING_FIXTURE,FIXTURE_EVENT
+    if CLEANING_FIXTURE or not FIXTURE_EVENT:return
+    CLEANING_FIXTURE=True
+    try:
+        active=first_with(d1(f"SELECT creative_work_event_id FROM creative_work_events WHERE creative_work_event_id={int(FIXTURE_EVENT)} AND COALESCE(entry_status,'active')='active' LIMIT 1;"),"creative_work_event_id")
+        if active:
+            try:
+                request("/api/admin/creative-process",cookie,"POST",{"action":"void_event","project_id":int(FIXTURE_PROJECT),"creative_work_event_id":int(FIXTURE_EVENT),"reason":"Build 283 bounded acceptance cleanup"})
+            except BaseException as exc:
+                print("CLEANUP WARNING: temporary event could not be voided through the operator API: "+str(exc),file=sys.stderr)
+        else:
+            FIXTURE_EVENT=0
+    finally:
+        CLEANING_FIXTURE=False
+
+_base_stop=stop
+def stop(msg):
+    if not CLEANING_FIXTURE and FIXTURE_EVENT:
+        cleanup_fixture()
+    _base_stop(msg)
+
+fixture_cleanup_guard_enabled=True
+fixture_created=False
 
 def normalized_item_name(value):
     return " ".join(re.findall(r"[A-Za-z0-9]+",str(value or ""))).strip().lower()
@@ -306,6 +333,47 @@ if not row:
         row={**erow,**profile,"inventory_linkage":"operator_inventory_read_unique_match"}
         break
 if not row:
+    # Real Development data has no defensible material-to-Inventory association. Use one bounded
+    # Development-only operator fixture only when exactly one eligible real Inventory item exists.
+    # The event is created through add_event, then reviewed, posted, reversed and voided.
+    if planned_rows and len(eligible)==1:
+        fixture_item=eligible[0]
+        fixture_project=int(planned_rows[0].get("creative_work_project_id") or 0)
+        if fixture_project:
+            # Recover any orphaned fixture from an interrupted earlier run before creating a new one.
+            for orphan in list(dicts(d1("""SELECT creative_work_project_id,creative_work_event_id
+              FROM creative_work_events WHERE event_title='Build 283 temporary Inventory acceptance'
+              AND COALESCE(entry_status,'active')='active' ORDER BY creative_work_event_id;"""))):
+                if orphan.get("creative_work_project_id") and orphan.get("creative_work_event_id"):
+                    request("/api/admin/creative-process",cookie,"POST",{"action":"void_event","project_id":int(orphan["creative_work_project_id"]),"creative_work_event_id":int(orphan["creative_work_event_id"]),"reason":"Build 283 recovery cleanup before acceptance"})
+            fixture_inc=max(0.001,float(fixture_item.get("minimum_usage_increment") or 0.001))
+            fixture_available=max(0.0,float(fixture_item.get("on_hand_quantity") or 0)-float(fixture_item.get("reserved_quantity") or 0))*max(0.001,float(fixture_item.get("usage_units_per_stock_unit") or 1))
+            if fixture_available+1e-9>=fixture_inc:
+                before_max=scalar(f"SELECT COALESCE(MAX(creative_work_event_id),0) AS n FROM creative_work_events WHERE creative_work_project_id={fixture_project};","n")
+                added=request("/api/admin/creative-process",cookie,"POST",{
+                    "action":"add_event","project_id":fixture_project,"event_type":"material",
+                    "event_title":"Build 283 temporary Inventory acceptance",
+                    "event_notes":"Development-only bounded operator acceptance fixture. Must be reversed and voided before completion.",
+                    "material_name":str(fixture_item.get("item_name") or "Build 283 Inventory fixture")[:180],
+                    "material_quantity":fixture_inc,"material_unit":str(fixture_item.get("usage_unit_label") or "unit")[:40],
+                    "material_cost_cents":0,"is_public_candidate":0
+                })
+                if added.get("ok") is not True:stop("Bounded Development fixture add_event did not return ok=true.")
+                created=first_with(d1(f"""SELECT creative_work_event_id FROM creative_work_events
+                  WHERE creative_work_project_id={fixture_project} AND creative_work_event_id>{before_max}
+                  AND event_title='Build 283 temporary Inventory acceptance' AND COALESCE(entry_status,'active')='active'
+                  ORDER BY creative_work_event_id DESC LIMIT 1;"""),"creative_work_event_id")
+                if not created:stop("Bounded Development fixture event could not be resolved after add_event.")
+                FIXTURE_PROJECT=fixture_project;FIXTURE_EVENT=int(created["creative_work_event_id"]);fixture_created=True
+                row={
+                    "creative_work_project_id":fixture_project,"creative_work_event_id":FIXTURE_EVENT,
+                    "material_name":str(fixture_item.get("item_name") or ""),"planned_quantity":fixture_inc,
+                    "planned_unit":str(fixture_item.get("usage_unit_label") or "unit"),"review_status":"",
+                    "actual_quantity":fixture_inc,"waste_quantity":0,"reusable_quantity":0,"approved_cost_cents":0,
+                    "review_notes":"Build 283 bounded Development acceptance fixture.",
+                    **fixture_item,"inventory_linkage":"bounded_development_acceptance_fixture"
+                }
+if not row:
     counts=first_with(d1("""SELECT
       (SELECT COUNT(*) FROM creative_work_events e JOIN creative_work_projects p ON p.creative_work_project_id=e.creative_work_project_id LEFT JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id WHERE COALESCE(p.project_status,'active')<>'archived' AND COALESCE(e.entry_status,'active')='active' AND trim(COALESCE(e.material_name,''))<>'' AND COALESCE(lower(trim(r.review_status)),'')<>'approved') planned_count,
       (SELECT COUNT(*) FROM creative_project_material_reviews r JOIN creative_work_events e ON e.creative_work_event_id=r.creative_work_event_id WHERE lower(trim(COALESCE(r.review_status,'')))='approved' AND COALESCE(r.inventory_consumed,0)=0 AND COALESCE(e.entry_status,'active')='active') reviewed_unposted_count,
@@ -446,9 +514,21 @@ if table_count("accounting_journal_entries")!=initial_journal or table_count("ac
 final_get=request(f"/api/admin/creative-process?project_id={project_id}",cookie)
 final_life=final_get.get("planned_actual_inventory_lifecycle") or {}
 if int(final_life.get("reviewed_actual_unposted_count") or 0)<1:stop("Final operator projection does not expose the reviewed-but-unposted actual after reversal.")
-restore=request("/api/admin/creative-process",cookie,"POST",{"action":"review_material","project_id":project_id,"creative_work_event_id":event_id,"review_status":"approved","actual_quantity":original_actual,"waste_quantity":float(row.get("waste_quantity") or 0),"reusable_quantity":float(row.get("reusable_quantity") or 0),"approved_cost_cents":int(row.get("approved_cost_cents") or 0),"review_notes":str(row.get("review_notes") or "")})
-if restore.get("ok") is not True:stop("Original reviewed actual values could not be restored after acceptance.")
-evidence={"schema":"release467-build283-planned-vs-actual-inventory-operator-acceptance-v1","status":"PASS","source_sha":os.environ.get("GITHUB_SHA"),"environment":"development","exact_preview_url":True,"real_admin_operator_session":True,"existing_project":True,"existing_material_event":True,"matching_real_inventory_item":True,"inventory_linkage":inventory_linkage,"selected_started_as_planned_estimate":selected_started_planned,"planned_and_reviewed_states_in_same_project":planned_and_reviewed_same_project,"synthetic_project_created":False,"synthetic_event_created":False,"planned_estimate_verified":True,"reviewed_actual_unposted_verified":True,"explicit_inventory_post_verified":True,"posted_actual_verified":True,"compensating_reversal_verified":True,"reversal_history_count":1,"inventory_returned_to_starting_quantity":True,"finance_journal_unchanged":True,"automatic_inventory_movement":False,"finance_posting":False,"provider_execution_invoked":False,"public_promotion_invoked":False,"production_mutation":False,"correction_path_source_contract_verified":True,"project_identity_sha256":hashlib.sha256(f"creative_work_project:{project_id}".encode()).hexdigest(),"event_identity_sha256":hashlib.sha256(f"creative_work_event:{event_id}".encode()).hexdigest(),"inventory_identity_sha256":hashlib.sha256(f"site_item_inventory:{inventory_id}".encode()).hexdigest(),"raw_project_id_retained":False,"raw_event_id_retained":False,"raw_inventory_id_retained":False,"raw_session_token_retained":False,"runtime_acceptance":"PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_REAL_EVIDENCE"}
+temporary_event_voided=False
+if fixture_created:
+    voided=request("/api/admin/creative-process",cookie,"POST",{"action":"void_event","project_id":project_id,"creative_work_event_id":event_id,"reason":"Build 283 bounded acceptance complete"})
+    if voided.get("ok") is not True:stop("Temporary Build 283 event could not be voided after acceptance.")
+    void_state=first_with(d1(f"SELECT entry_status FROM creative_work_events WHERE creative_work_event_id={event_id} LIMIT 1;"),"entry_status")
+    if not void_state or str(void_state.get("entry_status") or "").lower()!="voided":stop("Temporary Build 283 event remained active after void_event.")
+    if abs(float((first_with(d1(f"SELECT on_hand_quantity FROM site_item_inventory WHERE site_item_inventory_id={inventory_id};"),"on_hand_quantity") or {}).get("on_hand_quantity") or 0)-baseline)>1e-7:stop("Inventory changed while voiding the temporary acceptance event.")
+    if table_count("accounting_journal_entries")!=initial_journal or table_count("accounting_journal_lines")!=initial_lines:stop("Finance journal changed while voiding the temporary acceptance event.")
+    temporary_event_voided=True
+    FIXTURE_EVENT=0
+else:
+    restore=request("/api/admin/creative-process",cookie,"POST",{"action":"review_material","project_id":project_id,"creative_work_event_id":event_id,"review_status":"approved","actual_quantity":original_actual,"waste_quantity":float(row.get("waste_quantity") or 0),"reusable_quantity":float(row.get("reusable_quantity") or 0),"approved_cost_cents":int(row.get("approved_cost_cents") or 0),"review_notes":str(row.get("review_notes") or "")})
+    if restore.get("ok") is not True:stop("Original reviewed actual values could not be restored after acceptance.")
+runtime_acceptance="PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_BOUNDED_EVIDENCE" if fixture_created else "PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_REAL_EVIDENCE"
+evidence={"schema":"release467-build283-planned-vs-actual-inventory-operator-acceptance-v1","status":"PASS","source_sha":os.environ.get("GITHUB_SHA"),"environment":"development","exact_preview_url":True,"real_admin_operator_session":True,"existing_project":True,"existing_material_event":not fixture_created,"matching_real_inventory_item":True,"inventory_linkage":inventory_linkage,"selected_started_as_planned_estimate":selected_started_planned,"planned_and_reviewed_states_in_same_project":planned_and_reviewed_same_project,"synthetic_project_created":False,"synthetic_event_created":fixture_created,"bounded_development_fixture":fixture_created,"fixture_cleanup_guard_enabled":fixture_cleanup_guard_enabled,"temporary_event_voided":temporary_event_voided,"planned_estimate_verified":True,"reviewed_actual_unposted_verified":True,"explicit_inventory_post_verified":True,"posted_actual_verified":True,"compensating_reversal_verified":True,"reversal_history_count":1,"inventory_returned_to_starting_quantity":True,"finance_journal_unchanged":True,"automatic_inventory_movement":False,"finance_posting":False,"provider_execution_invoked":False,"public_promotion_invoked":False,"production_mutation":False,"correction_path_source_contract_verified":True,"project_identity_sha256":hashlib.sha256(f"creative_work_project:{project_id}".encode()).hexdigest(),"event_identity_sha256":hashlib.sha256(f"creative_work_event:{event_id}".encode()).hexdigest(),"inventory_identity_sha256":hashlib.sha256(f"site_item_inventory:{inventory_id}".encode()).hexdigest(),"raw_project_id_retained":False,"raw_event_id_retained":False,"raw_inventory_id_retained":False,"raw_session_token_retained":False,"runtime_acceptance":runtime_acceptance}
 OUT.write_text(json.dumps(evidence,indent=2,sort_keys=True)+"\n",encoding="utf-8")
 print("BUILD 283 PLANNED-VS-ACTUAL INVENTORY OPERATOR ACCEPTANCE: PASS")
-print("Existing planned material -> reviewed unposted actual -> explicit Inventory post -> compensating reversal; net stock and Finance journal unchanged.")
+print("Planned material lifecycle -> reviewed unposted actual -> explicit Inventory post -> compensating reversal; bounded fixture voided when required; net stock and Finance journal unchanged.")

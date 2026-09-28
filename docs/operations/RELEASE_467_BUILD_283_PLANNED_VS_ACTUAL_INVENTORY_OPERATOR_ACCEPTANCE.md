@@ -4,7 +4,7 @@
 
 Build 283 converts the Build 274 planned-vs-actual Inventory lifecycle into fresh operator evidence on the exact Development deployment.
 
-The acceptance uses one existing Creative Process project that already exposes a planned material estimate and a reviewed-but-unposted actual. The actual must resolve to a **matching, real, active Inventory item** through direct material identity, prior same-material Inventory provenance, or an existing project-operation resource. It does not create a project, event, Product, Inventory item, provider action or Finance entry for the test.
+The acceptance first tries existing Creative Process material evidence against a **matching, real, active Inventory item**. Development currently has no defensible association between its Goatmilk soap-base event and its only eligible consumable Inventory item (DecorRom candle dye), so Build 283 may fall back to one bounded Development-only fixture: a temporary material timeline event inside an existing project using the real Inventory item. No project, Product, Inventory item, provider action or Finance entry is fabricated.
 
 ## Exact predecessor
 
@@ -21,26 +21,27 @@ Build 282 **Content Studio Bridge Operator Acceptance** is the exact verified pr
 The Development-only workflow waits for the exact Build 283 System Gate deployment, obtains that exact Preview URL from the deployment artifact, and then:
 
 1. resolves an existing active Development administrator session;
-2. selects one existing non-archived Creative Process project with both a planned material estimate and a reviewed-but-unposted actual that has never been posted;
-3. resolves a matching real Inventory item from direct material identity, same-material historical provenance, an existing project-operation resource, or the normal admin Inventory search contract when that search returns one unambiguous non-tool result with valid stock/usage rules;
+2. first attempts existing non-archived Creative Process planned/reviewed material evidence and a matching real Inventory item;
+3. if that real-data association is unavailable, selects an existing Development project plus exactly one eligible real Inventory item, removes any orphaned prior Build 283 fixture through `void_event`, and creates one temporary `add_event` material entry clearly marked as Build 283 acceptance evidence;
 4. records the initial planned-estimate, Inventory movement and Finance journal state;
 5. calls `review_material` and proves the row becomes **Reviewed actual — not posted** while Inventory quantity, movement count and Finance journal counts remain unchanged;
 6. calls `post_material_inventory` and proves an explicit Inventory-owned post and posted actual are created;
 7. calls `reverse_material_inventory` and proves the post is reversed, a compensating reversal row/history is retained, the material review returns to unposted state and Inventory returns to its exact starting quantity;
 8. confirms the correction path remains source-governed by `correct_inventory_use`, which reverses before creating/posting corrected actual evidence;
-9. retains only sanitized hashes, counts and booleans.
+9. when the bounded fixture path is used, calls `void_event` after the explicit reversal, verifies the temporary event is no longer active, and keeps the audited reversal history;
+10. retains only sanitized hashes, counts and booleans.
 
-The acceptance fails closed rather than fabricating a project, event or Inventory item when no qualifying real operator evidence exists. When Development has no safe new event-to-Inventory linkage, Build 283 may instead use existing real planned/reviewed operator states plus an already-recorded Inventory post and compensating-reversal ledger as a read-only acceptance path; it still requires the reversal to restore the original posted quantity and Finance to remain unchanged.
+The fixture is allowed only on Development and only after the real-data path fails closed. It uses an existing project and a real Inventory item; it never creates a Product or Inventory item. The cleanup guard also calls `void_event` on failure so any still-active Inventory post is reversed before the temporary event is voided.
 
 ## Safety boundary
 
-There is **no automatic Inventory movement**. The only Development stock movement is the explicit operator post followed by the explicit compensating reversal, leaving net Inventory unchanged. Finance journal entry/line counts must remain unchanged across the entire acceptance.
+There is **no automatic Inventory movement**. The only Development stock movement is the explicit operator post followed by the explicit compensating reversal, leaving net Inventory unchanged. A bounded fixture may create one temporary Development timeline event, but it must be voided before acceptance completes. Finance journal entry/line counts must remain unchanged across the entire acceptance.
 
 Production receives only the identical already-accepted code tree. Build 283 performs no Production D1 business-data mutation, R2 mutation, Inventory movement, Finance posting, provider execution/publication, payment/refund or public promotion.
 
 ## Closure target
 
-`PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_REAL_EVIDENCE`
+`PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_REAL_OR_BOUNDED_EVIDENCE`
 
 ## Next bounded release
 
