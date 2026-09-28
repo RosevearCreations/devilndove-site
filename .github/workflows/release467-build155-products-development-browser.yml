@@ -1,11 +1,7 @@
 name: Release 467 Build 155 Products Development Browser Proof
 
 on:
-  workflow_run:
-    workflows: ['System Gate']
-    types: [completed]
-    branches: [dev]
-
+  workflow_dispatch:
 permissions:
   contents: read
   actions: read
