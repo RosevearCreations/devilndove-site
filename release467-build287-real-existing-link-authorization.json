@@ -1,0 +1,20 @@
+{
+  "release": 467,
+  "build": 287,
+  "purpose": "Owner-authorized exact existing material-to-Inventory identity link for Build 287 evidence capture.",
+  "environment": "DEVELOPMENT_ONLY",
+  "creative_work_project_id": 7,
+  "creative_work_event_id": 2,
+  "site_item_inventory_id": 2801,
+  "resource_role": "material",
+  "candidate_basis": "Exact normalized material_name == Inventory item_name from Build 287 read-only probe.",
+  "owner_authorized": true,
+  "reference_only": true,
+  "inventory_quantity_mutation": false,
+  "inventory_movement": false,
+  "finance_posting": false,
+  "product_owned_inventory": false,
+  "fixture_creation": false,
+  "allowed_mutation": "creative_process_resource_links only",
+  "idempotent": true
+}
