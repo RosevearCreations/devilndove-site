@@ -202,6 +202,59 @@ if not row:
         row={**erow,**profile,"review_status":"","actual_quantity":float(erow.get("planned_quantity") or 0),"waste_quantity":0,"reusable_quantity":0,"review_notes":"","inventory_linkage":"planned_event_owner_inventory_match"}
         break
 if not row:
+    # Prefer canonical Product -> resource -> Inventory linkage for the existing planned event.
+    for erow in planned_rows:
+        pid=int(erow.get("creative_work_project_id") or 0)
+        if not pid:continue
+        linked=[]
+        for x in dicts(d1(f"""SELECT DISTINCT sii.site_item_inventory_id,sii.item_name,sii.on_hand_quantity,
+          COALESCE(sii.reserved_quantity,0) reserved_quantity,COALESCE(sii.usage_units_per_stock_unit,1) usage_units_per_stock_unit,
+          COALESCE(sii.usage_unit_label,'unit') usage_unit_label,COALESCE(sii.stock_unit_label,'unit') stock_unit_label,
+          COALESCE(siup.usage_tracking_mode,CASE WHEN lower(trim(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) tracking_mode,
+          COALESCE(siup.minimum_usage_increment,0.001) minimum_usage_increment
+          FROM product_resource_links prl
+          JOIN site_item_inventory sii
+            ON lower(trim(COALESCE(sii.source_type,'')))=lower(trim(COALESCE(prl.resource_kind,'')))
+           AND sii.external_key=prl.source_key AND COALESCE(sii.is_active,1)=1
+          LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
+          WHERE prl.product_id IN (
+            SELECT product_id FROM creative_project_product_links WHERE creative_work_project_id={pid}
+            UNION SELECT product_id FROM creative_work_projects WHERE creative_work_project_id={pid} AND product_id IS NOT NULL
+          )
+          AND lower(COALESCE(siup.usage_tracking_mode,CASE WHEN lower(trim(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END)) IN ('exact','estimated')
+          AND COALESCE(prl.consumption_mode,'per_unit')<>'story_only'
+          AND (COALESCE(sii.on_hand_quantity,0)-COALESCE(sii.reserved_quantity,0))*COALESCE(NULLIF(sii.usage_units_per_stock_unit,0),1) >= COALESCE(siup.minimum_usage_increment,0.001)
+          ORDER BY sii.site_item_inventory_id LIMIT 50;""")):
+            if all(k in x for k in ("site_item_inventory_id","on_hand_quantity","tracking_mode","minimum_usage_increment")):
+                linked.append(x)
+        matched=linked[0] if len(linked)==1 else match_catalog_item(erow.get("material_name"),linked)
+        if not matched:continue
+        row={**erow,**matched,"review_status":"","actual_quantity":float(erow.get("planned_quantity") or 0),"waste_quantity":0,"reusable_quantity":0,"review_notes":"","inventory_linkage":"planned_event_product_resource_authority"}
+        break
+if not row:
+    # A unit-only fallback is allowed only when the planned event has exactly one eligible Inventory item
+    # with the same explicit usage unit. Ambiguous or blank units remain fail-closed.
+    eligible=[]
+    for x in dicts(d1("""SELECT sii.site_item_inventory_id,sii.item_name,sii.on_hand_quantity,
+      COALESCE(sii.reserved_quantity,0) reserved_quantity,COALESCE(sii.usage_units_per_stock_unit,1) usage_units_per_stock_unit,
+      COALESCE(sii.usage_unit_label,'unit') usage_unit_label,COALESCE(sii.stock_unit_label,'unit') stock_unit_label,
+      COALESCE(siup.usage_tracking_mode,CASE WHEN lower(trim(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) tracking_mode,
+      COALESCE(siup.minimum_usage_increment,0.001) minimum_usage_increment
+      FROM site_item_inventory sii LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
+      WHERE COALESCE(sii.is_active,1)=1
+       AND lower(COALESCE(siup.usage_tracking_mode,CASE WHEN lower(trim(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END)) IN ('exact','estimated')
+       AND (COALESCE(sii.on_hand_quantity,0)-COALESCE(sii.reserved_quantity,0))*COALESCE(NULLIF(sii.usage_units_per_stock_unit,0),1) >= COALESCE(siup.minimum_usage_increment,0.001)
+      ORDER BY sii.site_item_inventory_id LIMIT 500;""")):
+        if all(k in x for k in ("site_item_inventory_id","on_hand_quantity","tracking_mode","minimum_usage_increment")):eligible.append(x)
+    for erow in planned_rows:
+        unit=normalized_item_name(erow.get("planned_unit"))
+        if not unit:continue
+        unit_matches=[x for x in eligible if normalized_item_name(x.get("usage_unit_label"))==unit]
+        if len(unit_matches)!=1:continue
+        matched=unit_matches[0]
+        row={**erow,**matched,"review_status":"","actual_quantity":float(erow.get("planned_quantity") or 0),"waste_quantity":0,"reusable_quantity":0,"review_notes":"","inventory_linkage":"planned_event_unique_usage_unit_match"}
+        break
+if not row:
     reviewed_rows=[]
     seen_events=set()
     for item in dicts(d1("""SELECT r.creative_work_project_id,r.creative_work_event_id,e.material_name,
@@ -246,9 +299,12 @@ if not row:
       (SELECT COUNT(*) FROM creative_work_events e JOIN creative_work_projects p ON p.creative_work_project_id=e.creative_work_project_id LEFT JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id WHERE COALESCE(p.project_status,'active')<>'archived' AND COALESCE(e.entry_status,'active')='active' AND trim(COALESCE(e.material_name,''))<>'' AND COALESCE(lower(trim(r.review_status)),'')<>'approved') planned_count,
       (SELECT COUNT(*) FROM creative_project_material_reviews r JOIN creative_work_events e ON e.creative_work_event_id=r.creative_work_event_id WHERE lower(trim(COALESCE(r.review_status,'')))='approved' AND COALESCE(r.inventory_consumed,0)=0 AND COALESCE(e.entry_status,'active')='active') reviewed_unposted_count,
       (SELECT COUNT(*) FROM creative_project_operation_resources) project_resource_count,
+      (SELECT COUNT(*) FROM creative_project_product_links) project_product_link_count,
+      (SELECT COUNT(*) FROM product_resource_links prl JOIN site_item_inventory sii ON lower(trim(COALESCE(sii.source_type,'')))=lower(trim(COALESCE(prl.resource_kind,''))) AND sii.external_key=prl.source_key AND COALESCE(sii.is_active,1)=1) linked_product_resource_count,
+      (SELECT COUNT(*) FROM site_item_inventory sii LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id WHERE COALESCE(sii.is_active,1)=1 AND lower(COALESCE(siup.usage_tracking_mode,CASE WHEN lower(trim(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END)) IN ('exact','estimated')) eligible_inventory_count,
       (SELECT COUNT(*) FROM creative_project_inventory_posts) post_count,
       (SELECT COUNT(*) FROM creative_project_inventory_posts WHERE lower(trim(COALESCE(posting_status,'')))='reversed') reversed_post_count,
-      (SELECT COUNT(*) FROM creative_project_inventory_reversals) reversal_count;"""),"planned_count","reviewed_unposted_count","project_resource_count","post_count","reversed_post_count","reversal_count") or {}
+      (SELECT COUNT(*) FROM creative_project_inventory_reversals) reversal_count;"""),"planned_count","reviewed_unposted_count","project_resource_count","project_product_link_count","linked_product_resource_count","eligible_inventory_count","post_count","reversed_post_count","reversal_count") or {}
     planned=first_with(d1("""SELECT p.creative_work_project_id,e.creative_work_event_id
       FROM creative_work_events e JOIN creative_work_projects p ON p.creative_work_project_id=e.creative_work_project_id
       LEFT JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id
@@ -274,9 +330,10 @@ if not row:
       ORDER BY rv.creative_project_inventory_reversal_id DESC LIMIT 1;"""),
       "creative_project_inventory_post_id","creative_project_inventory_reversal_id","site_item_inventory_id","posting_status","inventory_consumed","usage_detail_count")
     if not planned or not reviewed or not history:
-        stop("No safe Build 283 evidence path is available (planned=%s, reviewed_unposted=%s, posts=%s, reversed_posts=%s, reversals=%s, project_resources=%s)."%(
+        stop("No safe Build 283 evidence path is available (planned=%s, reviewed_unposted=%s, posts=%s, reversed_posts=%s, reversals=%s, operation_resources=%s, project_product_links=%s, linked_product_resources=%s, eligible_inventory=%s)."%(
           int(counts.get("planned_count") or 0),int(counts.get("reviewed_unposted_count") or 0),int(counts.get("post_count") or 0),
-          int(counts.get("reversed_post_count") or 0),int(counts.get("reversal_count") or 0),int(counts.get("project_resource_count") or 0)))
+          int(counts.get("reversed_post_count") or 0),int(counts.get("reversal_count") or 0),int(counts.get("project_resource_count") or 0),
+          int(counts.get("project_product_link_count") or 0),int(counts.get("linked_product_resource_count") or 0),int(counts.get("eligible_inventory_count") or 0)))
     planned_project=int(planned["creative_work_project_id"]);reviewed_project=int(reviewed["creative_work_project_id"])
     before_journal=table_count("accounting_journal_entries");before_lines=table_count("accounting_journal_lines")
     before_item=first_with(d1(f"SELECT on_hand_quantity FROM site_item_inventory WHERE site_item_inventory_id={int(history['site_item_inventory_id'])};"),"on_hand_quantity") or {}
