@@ -1,7 +1,5 @@
 name: Release 467 Build 273 Content Studio Standalone Project Bridge
 on:
-  push:
-    branches: [dev, main]
   workflow_dispatch:
 permissions:
   contents: read
