@@ -76,17 +76,28 @@ def match_catalog_item(material,catalog_items):
     if not material_key:return None
     exact=[];contained=[];scored=[]
     material_tokens={t for t in re.findall(r"[a-z0-9]+",material_key) if len(t)>=2}
+    stop_tokens={"the","and","for","with","from","this","that","best","result","natural","free"}
+    material_signal={t for t in material_tokens if t not in stop_tokens}
     for x in catalog_items:
         item_key=normalized_item_name(x.get("item_name"))
         if not item_key:continue
         if item_key==material_key:exact.append(x);continue
+        meta_key=normalized_item_name(" ".join(str(x.get(k) or "") for k in (
+            "item_name","category","supplier_name","supplier_sku","item_description",
+            "captured_ingredients","captured_benefits","captured_claims","source_material_link_role"
+        )))
         if item_key in material_key or material_key in item_key:contained.append(x)
-        item_tokens={t for t in re.findall(r"[a-z0-9]+",item_key) if len(t)>=2}
-        if not item_tokens:continue
-        overlap=material_tokens & item_tokens
-        coverage=len(overlap)/len(item_tokens)
-        if len(overlap)>=2 and coverage>=0.60:
-            scored.append(((round(coverage,6),len(overlap),len(item_tokens)),x))
+        item_tokens={t for t in re.findall(r"[a-z0-9]+",item_key) if len(t)>=2 and t not in stop_tokens}
+        meta_tokens={t for t in re.findall(r"[a-z0-9]+",meta_key) if len(t)>=2 and t not in stop_tokens}
+        if not meta_tokens:continue
+        overlap=material_signal & meta_tokens
+        item_overlap=material_signal & item_tokens
+        material_coverage=len(overlap)/max(1,len(material_signal))
+        item_coverage=len(item_overlap)/max(1,len(item_tokens))
+        strong_terms={t for t in overlap if len(t)>=4 or any(ch.isdigit() for ch in t)}
+        if (len(strong_terms)>=2 and material_coverage>=0.20) or (len(item_overlap)>=2 and item_coverage>=0.50):
+            score=(len(strong_terms),round(material_coverage,6),round(item_coverage,6),len(overlap),-len(meta_tokens))
+            scored.append((score,x))
     if len(exact)==1:return exact[0]
     if contained:
         contained.sort(key=lambda x:len(normalized_item_name(x.get("item_name"))),reverse=True)
