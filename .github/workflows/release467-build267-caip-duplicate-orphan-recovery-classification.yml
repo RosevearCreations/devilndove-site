@@ -1,9 +1,5 @@
 name: Release 467 Build 267 CAIP Duplicate & Orphan Recovery Classification
 on:
-  pull_request:
-    branches: [dev, main]
-  push:
-    branches: [dev, main]
   workflow_dispatch:
 permissions:
   contents: read
