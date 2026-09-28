@@ -50,7 +50,7 @@ else:
     q(a.get('state')=='PRODUCTION_GREEN','Build 277 successor-ingested authority must be Production GREEN')
     q((a.get('final_closure') or {}).get('dev_sha')=='8ebe7a3a0c3460d35fbf2e1509bdb728b82db927' and (a.get('final_closure') or {}).get('tree_sha')=='3451ae4990328425ef6929643f1c04efe03d9f37','Build 277 final Development closure mismatch')
     q((a.get('production_checkpoint') or {}).get('main_sha')=='552fe0fb1b192c7fd123c9a7369eea9f352f639e' and (a.get('production_checkpoint') or {}).get('tree_sha')=='3451ae4990328425ef6929643f1c04efe03d9f37','Build 277 final Production closure mismatch')
-    expected_main={278:'552fe0fb1b192c7fd123c9a7369eea9f352f639e',279:'5d418eb1160caa7af855a247e1ff3510e4c1c9b8',280:'048c67562efc20892cf9652841edd6b0b1a845d6',281:'94e46cae035769ba61de379add1f7c1a6a1c21f0',282:'707ecef36d8e6fbdcee2d15809441fafd8573ac4'}.get(cur,'')
+    expected_main={278:'552fe0fb1b192c7fd123c9a7369eea9f352f639e',279:'5d418eb1160caa7af855a247e1ff3510e4c1c9b8',280:'048c67562efc20892cf9652841edd6b0b1a845d6',281:'94e46cae035769ba61de379add1f7c1a6a1c21f0',282:'707ecef36d8e6fbdcee2d15809441fafd8573ac4',283:'034ab92e57b17765a7b946182256fb32ae25cf87'}.get(cur,'')
     q((p.get('production_checkpoint') or {}).get('main_sha')==expected_main,'Build 278+ current Production baseline must track the exact immediate verified predecessor')
     q(int(p.get('next_build') or 0)>=279,'Build 278+ must advance beyond Build 278 successor')
 for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 277 safety drift: {k}')
