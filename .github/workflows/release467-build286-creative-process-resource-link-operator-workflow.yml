@@ -1,7 +1,5 @@
 name: Release 467 Build 286 Creative Process Resource-Link Operator Workflow
 on:
-  push:
-    branches: [dev, main]
   workflow_dispatch:
 permissions:
   contents: read
