@@ -2,7 +2,7 @@
   "release": 467,
   "build": 282,
   "title": "Content Studio Bridge Operator Acceptance",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build282-content-studio-bridge-operator-acceptance",
   "predecessor": {
     "build": 281,
@@ -126,5 +126,32 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_development": true
     }
+  },
+  "final_closure": {
+    "dev_sha": "9cd1892c878839982ab18c7a7745101fbe2015ed",
+    "tree_sha": "0f5448333945f050cd7c5a32b5fd9a363f1e2bad",
+    "proofs": {
+      "system_gate_run": 36360504891,
+      "current_application_quality_run": 36360504892,
+      "it_admin_runtime_proof_run": 36360505049,
+      "branch_hygiene_run": 36360505047
+    },
+    "dedicated_gate_run": 36360505062,
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "ingested_by_build": 283,
+    "recorded_by": "Build 283 startup ingestion from exact live Build 282 Development proof runs"
+  },
+  "production_checkpoint": {
+    "main_sha": "034ab92e57b17765a7b946182256fb32ae25cf87",
+    "tree_sha": "0f5448333945f050cd7c5a32b5fd9a363f1e2bad",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36360676716,
+    "production_live_resource_integrity_run": 36360712757,
+    "products_browser_proof_run": 36360712745,
+    "products_route_proof_run": 36360712799,
+    "build_specific_proof_run": 36360676884,
+    "ingested_by_build": 283,
+    "recorded_by": "Build 283 startup ingestion from exact live Build 282 Production proof runs"
   }
 }

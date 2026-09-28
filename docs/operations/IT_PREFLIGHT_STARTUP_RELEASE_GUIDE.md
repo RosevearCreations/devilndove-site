@@ -1,15 +1,16 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 282 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 283 candidate
 
-Build 282 — Content Studio Bridge Operator Acceptance — is projected over the exact fully verified Build 281 closure.
+Build 283 — Planned-vs-Actual Inventory Operator Acceptance — is projected over the exact fully verified Build 282 closure.
 
-- Last fully verified Development: `259cce5ced48e1ef0fb3d88937a53105156d1b34`
-- Verified tree: `7987af6909f73573cbc00b2229a73155bdecc67e`
-- Development proofs: System `36358854444`, Quality `36358854372`, I.T. `36358854423`, Hygiene `36358854410`; dedicated Build 281 proof `36358854448`
-- Current Production main: `707ecef36d8e6fbdcee2d15809441fafd8573ac4`
-- Production proofs: Pages `36359022941`, Live Resources `36359060883`, Product Browser `36359060909`, Product Route `36359060888`; Build 281 `36359023015`
-- Build 282 runtime scope: one existing Creative Process identity + exactly one existing CAIP workspace → one idempotent Content Studio package on Development only.
-- Missing, ambiguous or conflicting CAIP identity remains fail closed.
-- Production receives only the identical already-accepted code tree; no Build 282 Production business-data mutation is authorized.
+- Last fully verified Development: `9cd1892c878839982ab18c7a7745101fbe2015ed`
+- Verified tree: `0f5448333945f050cd7c5a32b5fd9a363f1e2bad`
+- Development proofs: System `36360504891`, Quality `36360504892`, I.T. `36360505049`, Hygiene `36360505047`; dedicated Build 282 proof `36360505062`
+- Current Production main: `034ab92e57b17765a7b946182256fb32ae25cf87`
+- Production proofs: Pages `36360676716`, Live Resources `36360712757`, Product Browser `36360712745`, Product Route `36360712799`; Build 282 `36360676884`
+- Build 283 runtime scope: one existing Creative Process material event + one matching real Inventory item → review, explicit post and compensating reversal on Development only.
+- Planned estimates and reviewed-but-unposted actuals must move no Inventory; Finance journal counts must remain unchanged.
+- The explicit post/reversal cycle must return Inventory to its exact starting quantity.
+- Production receives only the identical already-accepted code tree; no Build 283 Production business-data mutation is authorized.
 
 ## Current release baseline
 
