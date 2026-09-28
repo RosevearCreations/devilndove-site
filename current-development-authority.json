@@ -217,11 +217,10 @@
   "accepted_dev_sha": "d1c70746fd937b05708306ea299ddb64559ff79c",
   "accepted_dev_tree_sha": "cea56547d734e8c4db51d49d145edebeb806d762",
   "acceptance": {
-    "system_gate_run": 36367208103,
-    "current_application_quality_run": 36367208059,
-    "it_admin_runtime_proof_run": 36367207996,
-    "branch_hygiene_run": 36367208070,
-    "dedicated_gate_run": 36367208032
+    "system_gate_run": 36368685098,
+    "current_application_quality_run": 36368684950,
+    "it_admin_runtime_proof_run": 36368685244,
+    "branch_hygiene_run": 36368685028
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",

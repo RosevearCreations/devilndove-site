@@ -88,5 +88,27 @@
     "inventory_editor": "Tools/Supplies Inventory defaults its main editable table to a responsive 3/2/1-column card editor and persists tool/supply type changes through the existing safe reclassification backend.",
     "public_resource_cards": "Public Tools and Supplies cards are reduced for 3–4-across browsing with hover/focus detail affordance.",
     "contrast": "Known light Shop-by-intent and resource-card surfaces now carry explicit dark foreground colours."
+  },
+  "starting_point": {
+    "development": {
+      "build": 285,
+      "sha": "d1c70746fd937b05708306ea299ddb64559ff79c",
+      "tree": "cea56547d734e8c4db51d49d145edebeb806d762",
+      "system_gate_run": 36368685098,
+      "quality_run": 36368684950,
+      "it_admin_runtime_run": 36368685244,
+      "repository_hygiene_run": 36368685028,
+      "dedicated_gate_run": 36368684902
+    },
+    "production": {
+      "build": 285,
+      "sha": "2056cc46ebb5589dddc0b5172d90ffbd0e3c4241",
+      "tree": "cea56547d734e8c4db51d49d145edebeb806d762",
+      "production_pages_deploy_run": 36368898983,
+      "production_live_resource_integrity_run": 36368970032,
+      "products_browser_proof_run": 36368970208,
+      "products_route_proof_run": 36368970050,
+      "build_specific_proof_run": 36368899022
+    }
   }
 }
