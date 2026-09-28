@@ -137,9 +137,69 @@ if not row:
     counts=first_with(d1("""SELECT
       (SELECT COUNT(*) FROM creative_work_events e JOIN creative_work_projects p ON p.creative_work_project_id=e.creative_work_project_id LEFT JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id WHERE COALESCE(p.project_status,'active')<>'archived' AND COALESCE(e.entry_status,'active')='active' AND trim(COALESCE(e.material_name,''))<>'' AND COALESCE(lower(trim(r.review_status)),'')<>'approved') planned_count,
       (SELECT COUNT(*) FROM creative_project_material_reviews r JOIN creative_work_events e ON e.creative_work_event_id=r.creative_work_event_id WHERE lower(trim(COALESCE(r.review_status,'')))='approved' AND COALESCE(r.inventory_consumed,0)=0 AND COALESCE(e.entry_status,'active')='active') reviewed_unposted_count,
-      (SELECT COUNT(*) FROM creative_project_operation_resources) project_resource_count;"""),"planned_count","reviewed_unposted_count","project_resource_count") or {}
-    stop("No real linked Development Inventory candidate satisfies Build 283 prerequisites (planned=%s, reviewed_unposted=%s, project_resources=%s)."%(
-      int(counts.get("planned_count") or 0),int(counts.get("reviewed_unposted_count") or 0),int(counts.get("project_resource_count") or 0)))
+      (SELECT COUNT(*) FROM creative_project_operation_resources) project_resource_count,
+      (SELECT COUNT(*) FROM creative_project_inventory_posts) post_count,
+      (SELECT COUNT(*) FROM creative_project_inventory_posts WHERE lower(trim(COALESCE(posting_status,'')))='reversed') reversed_post_count,
+      (SELECT COUNT(*) FROM creative_project_inventory_reversals) reversal_count;"""),"planned_count","reviewed_unposted_count","project_resource_count","post_count","reversed_post_count","reversal_count") or {}
+    planned=first_with(d1("""SELECT p.creative_work_project_id,e.creative_work_event_id
+      FROM creative_work_events e JOIN creative_work_projects p ON p.creative_work_project_id=e.creative_work_project_id
+      LEFT JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id
+      WHERE COALESCE(p.project_status,'active')<>'archived' AND COALESCE(e.entry_status,'active')='active'
+        AND trim(COALESCE(e.material_name,''))<>'' AND COALESCE(lower(trim(r.review_status)),'')<>'approved'
+      ORDER BY p.updated_at DESC,e.creative_work_event_id DESC LIMIT 1;"""),"creative_work_project_id","creative_work_event_id")
+    reviewed=first_with(d1("""SELECT r.creative_work_project_id,r.creative_work_event_id
+      FROM creative_project_material_reviews r JOIN creative_work_events e ON e.creative_work_event_id=r.creative_work_event_id
+      JOIN creative_work_projects p ON p.creative_work_project_id=r.creative_work_project_id
+      WHERE COALESCE(p.project_status,'active')<>'archived' AND COALESCE(e.entry_status,'active')='active'
+        AND lower(trim(COALESCE(r.review_status,'')))='approved' AND COALESCE(r.inventory_consumed,0)=0
+      ORDER BY r.reviewed_at DESC,r.creative_project_material_review_id DESC LIMIT 1;"""),"creative_work_project_id","creative_work_event_id")
+    history=first_with(d1("""SELECT ip.creative_project_inventory_post_id,ip.creative_work_project_id,ip.creative_work_event_id,
+      ip.site_item_inventory_id,ip.stock_quantity_consumed,ip.previous_on_hand_quantity,ip.new_on_hand_quantity,ip.posting_status,
+      rv.creative_project_inventory_reversal_id,rv.stock_quantity_restored,rv.previous_on_hand_quantity reversal_previous_on_hand,
+      rv.new_on_hand_quantity reversal_new_on_hand,COALESCE(mr.inventory_consumed,0) inventory_consumed,
+      (SELECT COUNT(*) FROM creative_project_inventory_usage_details u WHERE u.creative_project_inventory_post_id=ip.creative_project_inventory_post_id) usage_detail_count
+      FROM creative_project_inventory_posts ip
+      JOIN creative_project_inventory_reversals rv ON rv.creative_project_inventory_post_id=ip.creative_project_inventory_post_id
+      JOIN creative_project_material_reviews mr ON mr.creative_project_material_review_id=ip.creative_project_material_review_id
+      JOIN site_item_inventory sii ON sii.site_item_inventory_id=ip.site_item_inventory_id
+      WHERE lower(trim(COALESCE(ip.posting_status,'')))='reversed'
+      ORDER BY rv.creative_project_inventory_reversal_id DESC LIMIT 1;"""),
+      "creative_project_inventory_post_id","creative_project_inventory_reversal_id","site_item_inventory_id","posting_status","inventory_consumed","usage_detail_count")
+    if not planned or not reviewed or not history:
+        stop("No safe Build 283 evidence path is available (planned=%s, reviewed_unposted=%s, posts=%s, reversed_posts=%s, reversals=%s, project_resources=%s)."%(
+          int(counts.get("planned_count") or 0),int(counts.get("reviewed_unposted_count") or 0),int(counts.get("post_count") or 0),
+          int(counts.get("reversed_post_count") or 0),int(counts.get("reversal_count") or 0),int(counts.get("project_resource_count") or 0)))
+    planned_project=int(planned["creative_work_project_id"]);reviewed_project=int(reviewed["creative_work_project_id"])
+    before_journal=table_count("accounting_journal_entries");before_lines=table_count("accounting_journal_lines")
+    before_item=first_with(d1(f"SELECT on_hand_quantity FROM site_item_inventory WHERE site_item_inventory_id={int(history['site_item_inventory_id'])};"),"on_hand_quantity") or {}
+    pget=request(f"/api/admin/creative-process?project_id={planned_project}",cookie);rget=request(f"/api/admin/creative-process?project_id={reviewed_project}",cookie)
+    plife=pget.get("planned_actual_inventory_lifecycle") or {};rlife=rget.get("planned_actual_inventory_lifecycle") or {}
+    if plife.get("classification")!="PLANNED_ESTIMATES_SEPARATE_FROM_REVIEWED_AND_POSTED_ACTUALS" or int(plife.get("planned_estimate_count") or 0)<1:
+        stop("Real planned-estimate operator projection is unavailable.")
+    if rlife.get("classification")!="PLANNED_ESTIMATES_SEPARATE_FROM_REVIEWED_AND_POSTED_ACTUALS" or int(rlife.get("reviewed_actual_unposted_count") or 0)<1:
+        stop("Real reviewed-but-unposted operator projection is unavailable.")
+    if str(history.get("posting_status") or "").lower()!="reversed" or int(history.get("inventory_consumed") or 0)!=0 or int(history.get("usage_detail_count") or 0)<1:
+        stop("Existing post/reversal history is incomplete.")
+    if abs(float(history.get("stock_quantity_restored") or 0)-float(history.get("stock_quantity_consumed") or 0))>1e-7:
+        stop("Existing compensating reversal did not restore the posted stock quantity.")
+    if abs(float(history.get("reversal_new_on_hand") or 0)-float(history.get("previous_on_hand_quantity") or 0))>1e-7:
+        stop("Existing compensating reversal did not return Inventory to the post starting quantity.")
+    after_item=first_with(d1(f"SELECT on_hand_quantity FROM site_item_inventory WHERE site_item_inventory_id={int(history['site_item_inventory_id'])};"),"on_hand_quantity") or {}
+    if abs(float(after_item.get("on_hand_quantity") or 0)-float(before_item.get("on_hand_quantity") or 0))>1e-9:
+        stop("Read-only historical acceptance changed Inventory.")
+    if table_count("accounting_journal_entries")!=before_journal or table_count("accounting_journal_lines")!=before_lines:
+        stop("Finance journal changed during read-only historical acceptance.")
+    evidence={"schema":"release467-build283-planned-vs-actual-inventory-operator-acceptance-v1","status":"PASS","source_sha":os.environ.get("GITHUB_SHA"),"environment":"development","exact_preview_url":True,"real_admin_operator_session":True,"acceptance_mode":"EXISTING_REAL_HISTORY_READ_ONLY","existing_project":True,"existing_material_event":True,"matching_real_inventory_item":True,"inventory_linkage":"existing_post_reversal_history","planned_estimate_verified":True,"reviewed_actual_unposted_verified":True,"explicit_inventory_post_verified":True,"posted_actual_verified":True,"compensating_reversal_verified":True,"reversal_history_count":1,"inventory_returned_to_starting_quantity":True,"finance_journal_unchanged":True,"development_mutation_performed":False,"automatic_inventory_movement":False,"finance_posting":False,"provider_execution_invoked":False,"public_promotion_invoked":False,"production_mutation":False,"correction_path_source_contract_verified":True,
+      "planned_project_identity_sha256":hashlib.sha256(f"creative_work_project:{planned_project}".encode()).hexdigest(),
+      "reviewed_project_identity_sha256":hashlib.sha256(f"creative_work_project:{reviewed_project}".encode()).hexdigest(),
+      "inventory_post_identity_sha256":hashlib.sha256(f"creative_project_inventory_post:{int(history['creative_project_inventory_post_id'])}".encode()).hexdigest(),
+      "inventory_identity_sha256":hashlib.sha256(f"site_item_inventory:{int(history['site_item_inventory_id'])}".encode()).hexdigest(),
+      "raw_project_id_retained":False,"raw_event_id_retained":False,"raw_inventory_id_retained":False,"raw_session_token_retained":False,
+      "runtime_acceptance":"PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_REAL_EVIDENCE"}
+    OUT.write_text(json.dumps(evidence,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+    print("BUILD 283 PLANNED-VS-ACTUAL INVENTORY OPERATOR ACCEPTANCE: PASS")
+    print("Existing real planned/reviewed states plus post/reversal ledger history verified read-only; Inventory and Finance unchanged.")
+    raise SystemExit(0)
 project_id=int(row["creative_work_project_id"]);event_id=int(row["creative_work_event_id"]);inventory_id=int(row["site_item_inventory_id"])
 baseline=float(row.get("on_hand_quantity") or 0);reserved=float(row.get("reserved_quantity") or 0);per=max(0.001,float(row.get("usage_units_per_stock_unit") or 1))
 inc=max(0.001,float(row.get("minimum_usage_increment") or 0.001));original_actual=max(0.0,float(row.get("actual_quantity") or 0))

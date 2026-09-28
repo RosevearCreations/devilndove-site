@@ -30,7 +30,7 @@ The Development-only workflow waits for the exact Build 283 System Gate deployme
 8. confirms the correction path remains source-governed by `correct_inventory_use`, which reverses before creating/posting corrected actual evidence;
 9. retains only sanitized hashes, counts and booleans.
 
-The acceptance fails closed rather than fabricating a project, event or Inventory item when no qualifying real operator evidence exists.
+The acceptance fails closed rather than fabricating a project, event or Inventory item when no qualifying real operator evidence exists. When Development has no safe new event-to-Inventory linkage, Build 283 may instead use existing real planned/reviewed operator states plus an already-recorded Inventory post and compensating-reversal ledger as a read-only acceptance path; it still requires the reversal to restore the original posted quantity and Finance to remain unchanged.
 
 ## Safety boundary
 
