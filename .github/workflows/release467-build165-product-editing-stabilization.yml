@@ -1,26 +1,7 @@
 name: Release 467 Build 165 Product Editing Stabilization Proof
 
 on:
-  push:
-    branches: [dev, main]
-    paths:
-      - 'admin/products/index.html'
-      - 'admin/product-editor/index.html'
-      - 'shop/product/index.html'
-      - 'css/admin-product-v162.css'
-      - 'public/js/admin-products-browser-v162.js'
-      - 'public/js/admin-product-editor-v163.js'
-      - 'public/js/product-detail-v166.js'
-      - 'functions/api/admin/product-browser-images.js'
-      - 'functions/api/admin/product-media-editor.js'
-      - 'functions/api/product-detail-core.js'
-      - 'functions/media/product.js'
-      - 'scripts/release467_build164_gate.py'
-      - 'scripts/release467_build165_gate.py'
-      - 'scripts/release467_build166_gate.py'
-      - '.github/workflows/release467-build165-product-editing-stabilization.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 
