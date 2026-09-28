@@ -22,6 +22,15 @@ The exact Development deployment must prove all of the following:
 
 Direct Wrangler evidence reads are capped at 20,000 rows for the one-shot acceptance. The normal Build 288 proof is retired to source-only/manual mode after the exact evidence is captured.
 
+
+## Interrupted-run recovery rule
+
+A first exact Development attempt may reach the explicit Inventory-owned post and then stop during evidence validation. Build 288 treats that as durable audit history, not as disposable test data. A retry must first locate the exact Build 288 post, reverse it through the normal Inventory authority, and prove the linked review returns to approved/unconsumed state.
+
+Inventory tracking mode is authoritative. For `exact` or `estimated` tracking, the post must have a positive stock delta. For `log_only` or `reusable` tracking, a valid explicit post records positive usage with a zero stock delta and leaves on-hand unchanged. In both cases the compensating reversal must close the posting and leave Inventory at its recorded pre-post baseline.
+
+If an interrupted attempt changed review fields before it stopped, Build 288 does **not** invent a prior value. The recovery preserves the review state present at retry start and records that no pre-interruption review value was claimed. Finance-neutrality is enforced by the Inventory post/reversal source contracts and by unchanged journal counts across the recovery/reversal phase.
+
 ## Inventory Operations table repair
 
 The owner screenshot showed desktop editor fields squeezed so tightly that labels and button text wrapped character-by-character. Build 288 gives the desktop editor a deliberate wide table instead of compressing every editable control into the viewport.

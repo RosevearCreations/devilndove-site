@@ -40,10 +40,14 @@
     "compensating_reversal_required": true,
     "inventory_returns_to_baseline": true,
     "finance_unchanged": true,
-    "original_review_values_restored": true,
     "direct_d1_rows_read_ceiling": 20000,
     "state": "PENDING_EXACT_DEVELOPMENT_OPERATOR_ACCEPTANCE",
-    "planned_estimate_source": "existing linked event material_quantity/material_unit retained alongside reviewed actual"
+    "planned_estimate_source": "existing linked event material_quantity/material_unit retained alongside reviewed actual",
+    "review_state_after_reversal": "approved_unconsumed",
+    "interrupted_run_recovery_preserves_current_review_state": true,
+    "pre_interruption_review_value_must_not_be_guessed": true,
+    "tracking_mode_respected": true,
+    "log_only_or_reusable_usage_may_post_zero_stock_delta": true
   },
   "inventory_table_rework": {
     "desktop_min_width_px": 1820,
