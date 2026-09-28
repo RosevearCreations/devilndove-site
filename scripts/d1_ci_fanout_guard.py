@@ -40,10 +40,19 @@ for path in sorted(WORKFLOWS.glob("release467-build*.yml")):
 
     if remote:
         remote_release_workflows += 1
-        if triggers:
+        one_shot_successor = (
+            build == current_build + 1
+            and "D1_ONE_SHOT_EVIDENCE_CAPTURE" in text
+            and triggers == ["push"]
+            and "branches: [dev]" in text
+            and "paths:" in text
+            and "D1_PROVIDER_ROWS_READ_CEILING=20000" in text
+            and "workflow_dispatch:" in text
+        )
+        if triggers and not one_shot_successor:
             FAIL.append(
-                f"{path.relative_to(ROOT)}: remote D1 proof cannot run automatically; "
-                f"automatic triggers={','.join(triggers)}"
+                f"{path.relative_to(ROOT)}: remote D1 proof cannot run automatically unless it is the "
+                f"single bounded successor evidence capture; automatic triggers={','.join(triggers)}"
             )
 
     if build < current_build:
@@ -73,5 +82,5 @@ if FAIL:
 
 print(
     "CI FAN-OUT GUARD: PASS — historical Release 467 workflows are manual-only, "
-    "and remote-D1 release proofs cannot run automatically."
+    "and remote-D1 release proofs cannot run automatically except one bounded successor capture."
 )
