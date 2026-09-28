@@ -26,8 +26,9 @@ q((fc.get('proofs') or {}).get('system_gate_run')==36432943282 and int(fc.get('d
 q(pc.get('main_sha')=='27a48e505b42c399fac0801cbd4e6394490957a4' and pc.get('tree_sha')=='981b7a5e7b851684821af087a428fe66ad8348f0' and pc.get('state')=='PRODUCTION_GREEN','Build 287 Production checkpoint missing')
 q(int(pc.get('production_pages_deploy_run') or 0)==36433269795 and int(pc.get('production_live_resource_integrity_run') or 0)==36433368187 and int(pc.get('build_specific_proof_run') or 0)==36433269797,'Build 287 Production proof mismatch')
 e=a.get('evidence_contract') or {}
-for key in ('real_existing_link_required','planned_estimate_required','reviewed_unposted_required','explicit_post_required','compensating_reversal_required','inventory_returns_to_baseline','finance_unchanged','original_review_values_restored'):
+for key in ('real_existing_link_required','planned_estimate_required','reviewed_unposted_required','explicit_post_required','compensating_reversal_required','inventory_returns_to_baseline','finance_unchanged','interrupted_run_recovery_preserves_current_review_state','pre_interruption_review_value_must_not_be_guessed','tracking_mode_respected','log_only_or_reusable_usage_may_post_zero_stock_delta'):
     q(e.get(key) is True,'Build 288 evidence contract missing '+key)
+q(e.get('review_state_after_reversal')=='approved_unconsumed','Build 288 post-reversal review state contract drift')
 q(e.get('fixture_creation_allowed') is False and e.get('product_owned_inventory_allowed') is False,'Build 288 fixture/Product boundary drift')
 q(e.get('creative_work_project_id')==7 and e.get('creative_work_event_id')==2 and e.get('creative_process_resource_link_id')==1 and e.get('site_item_inventory_id')==2801,'Build 288 real identity binding mismatch')
 q(int(e.get('direct_d1_rows_read_ceiling') or 0)==20000,'Build 288 D1 read ceiling mismatch')
@@ -36,7 +37,9 @@ if a.get('state') in ('DEVELOPMENT_GREEN','PRODUCTION_GREEN'):
     q(e.get('fixture_used') is False and e.get('inventory_returned_to_baseline') is True and e.get('finance_unchanged') is True,'Build 288 accepted evidence safety mismatch')
 for token in ('Build 288 — Real Planned-vs-Actual Inventory Acceptance','Build 289 — Real Inventory Adoption Outcomes Renewal'):q(token in road,'Roadmap missing '+token)
 for token in ('Under the Sea','project 7','resource link 1','Inventory item 2801','1820px','Build 289'):q(token in doc,'Build 288 document missing '+token)
-for token in ('review_material','post_material_inventory','reverse_material_inventory','fixture_used','direct_d1_rows_read','creative_process_resource_link_id=1'):q(token in runtime,'Build 288 runtime missing '+token)
+for token in ('review_material','post_material_inventory','reverse_material_inventory','fixture_used','direct_d1_rows_read','creative_process_resource_link_id=1','interrupted_prior_run_recovered','usage_tracking_mode','stock_depletion_expected','pre_interruption_review_value_claimed'):q(token in runtime,'Build 288 runtime missing '+token)
+post_service=t('functions/api/_lib/inventoryPostService.js');reverse_service=t('functions/api/_lib/inventoryReversalService.js')
+q('accounting_journal' not in post_service and 'accounting_journal' not in reverse_service,'Build 288 Inventory post/reversal source must remain Finance-neutral')
 q('D1_ONE_SHOT_EVIDENCE_CAPTURE' in wf or 'workflow_dispatch:' in wf,'Build 288 workflow lacks bounded/manual proof mode')
 q('Build 288 — Inventory Operations desktop table legibility' in css and 'min-width: 1820px !important' in css and 'width: 360px; min-width: 360px' in css and 'width: 280px; min-width: 280px' in css,'Build 288 Inventory table CSS repair missing')
 q('scroll the table sideways' in ui,'Build 288 Inventory table operator guidance missing')
