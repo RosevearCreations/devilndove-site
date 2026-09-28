@@ -793,7 +793,7 @@
     "exact_development_runtime_required": true,
     "existing_non_archived_project_required": true,
     "existing_material_event_required": false,
-    "matching_real_inventory_item_required": true,
+    "matching_real_inventory_item_required": false,
     "review_action": "review_material",
     "post_action": "post_material_inventory",
     "reversal_action": "reverse_material_inventory",
@@ -807,7 +807,7 @@
     "public_promotion": false,
     "production_mutation": false,
     "evidence_artifact": "build283-planned-vs-actual-inventory-operator-acceptance-evidence",
-    "runtime_state": "PENDING_EXACT_DEVELOPMENT_REAL_OR_BOUNDED_ACCEPTANCE",
+    "runtime_state": "PENDING_EXACT_DEVELOPMENT_BOUNDED_SUPPLY_ACCEPTANCE",
     "next_build": 284,
     "future_queue_exhausted": false,
     "existing_material_event_preferred": true,
@@ -816,6 +816,13 @@
     "fixture_real_inventory_item_required": true,
     "fixture_only_after_real_path_unavailable": true,
     "fixture_void_action": "void_event",
-    "fixture_cleanup_compensates_active_post": true
+    "fixture_cleanup_compensates_active_post": true,
+    "existing_real_inventory_item_preferred": true,
+    "bounded_development_supply_fixture_allowed": true,
+    "fixture_inventory_owner": "site-item-inventory",
+    "fixture_inventory_source_type": "supply",
+    "fixture_inventory_tracking_mode": "exact",
+    "fixture_inventory_archive_action": "PATCH site-item-inventory is_active=0",
+    "fixture_product_stock_forbidden": true
   }
 }

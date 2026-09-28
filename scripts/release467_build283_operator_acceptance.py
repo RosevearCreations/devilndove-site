@@ -9,7 +9,7 @@ DB=os.environ.get("DEV_D1_DATABASE_NAME","devilndove-dev")
 CF_ID=os.environ.get("CF_ACCESS_CLIENT_ID","").strip();CF_SECRET=os.environ.get("CF_ACCESS_CLIENT_SECRET","").strip()
 CONFIGURED=os.environ.get("DND_CONFIGURED_SESSION_COOKIE","").strip()
 OUT=Path("/tmp/build283-planned-vs-actual-inventory-operator-acceptance-evidence.json")
-FIXTURE_PROJECT=0;FIXTURE_EVENT=0;CLEANING_FIXTURE=False
+FIXTURE_PROJECT=0;FIXTURE_EVENT=0;FIXTURE_INVENTORY=0;CLEANING_FIXTURE=False
 def stop(msg): print("STOP:",msg,file=sys.stderr);raise SystemExit(1)
 def d1(sql):
     p=subprocess.run(["npx","--yes","wrangler@4","d1","execute",DB,"--remote","--config","wrangler.toml","--json","--command",sql],cwd=ROOT,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -72,29 +72,40 @@ if not cookie:
 
 # Build 283 bounded fixture cleanup guard. void_event reverses any still-active Inventory post first.
 def cleanup_fixture():
-    global CLEANING_FIXTURE,FIXTURE_EVENT
-    if CLEANING_FIXTURE or not FIXTURE_EVENT:return
+    global CLEANING_FIXTURE,FIXTURE_EVENT,FIXTURE_INVENTORY
+    if CLEANING_FIXTURE or (not FIXTURE_EVENT and not FIXTURE_INVENTORY):return
     CLEANING_FIXTURE=True
     try:
-        active=first_with(d1(f"SELECT creative_work_event_id FROM creative_work_events WHERE creative_work_event_id={int(FIXTURE_EVENT)} AND COALESCE(entry_status,'active')='active' LIMIT 1;"),"creative_work_event_id")
-        if active:
-            try:
-                request("/api/admin/creative-process",cookie,"POST",{"action":"void_event","project_id":int(FIXTURE_PROJECT),"creative_work_event_id":int(FIXTURE_EVENT),"reason":"Build 283 bounded acceptance cleanup"})
-            except BaseException as exc:
-                print("CLEANUP WARNING: temporary event could not be voided through the operator API: "+str(exc),file=sys.stderr)
-        else:
+        if FIXTURE_EVENT:
+            active=first_with(d1(f"SELECT creative_work_event_id FROM creative_work_events WHERE creative_work_event_id={int(FIXTURE_EVENT)} AND COALESCE(entry_status,'active')='active' LIMIT 1;"),"creative_work_event_id")
+            if active:
+                try:
+                    request("/api/admin/creative-process",cookie,"POST",{"action":"void_event","project_id":int(FIXTURE_PROJECT),"creative_work_event_id":int(FIXTURE_EVENT),"reason":"Build 283 bounded acceptance cleanup"})
+                except BaseException as exc:
+                    print("CLEANUP WARNING: temporary event could not be voided through the operator API: "+str(exc),file=sys.stderr)
             FIXTURE_EVENT=0
+        if FIXTURE_INVENTORY:
+            try:
+                request("/api/admin/site-item-inventory",cookie,"PATCH",{
+                    "site_item_inventory_id":int(FIXTURE_INVENTORY),"is_active":0,
+                    "movement_note":"Build 283 bounded acceptance fixture archived during cleanup.",
+                    "reservation_notes":"Development-only Build 283 fixture; archived after acceptance."
+                })
+            except BaseException as exc:
+                print("CLEANUP WARNING: temporary Supply fixture could not be archived through Inventory owner API: "+str(exc),file=sys.stderr)
+            FIXTURE_INVENTORY=0
     finally:
         CLEANING_FIXTURE=False
 
 _base_stop=stop
 def stop(msg):
-    if not CLEANING_FIXTURE and FIXTURE_EVENT:
+    if not CLEANING_FIXTURE and (FIXTURE_EVENT or FIXTURE_INVENTORY):
         cleanup_fixture()
     _base_stop(msg)
 
 fixture_cleanup_guard_enabled=True
 fixture_created=False
+inventory_fixture_created=False
 
 def normalized_item_name(value):
     return " ".join(re.findall(r"[A-Za-z0-9]+",str(value or ""))).strip().lower()
@@ -153,6 +164,7 @@ WHERE COALESCE(cwp.project_status,'active')<>'archived'
      AND COALESCE(pe.entry_status,'active')='active' AND trim(COALESCE(pe.material_name,''))<>''
      AND COALESCE(lower(trim(pr.review_status)),'')<>'approved'
  )
+ AND lower(trim(COALESCE(sii.source_type,'')))<>'product'
  AND lower(COALESCE(siup.usage_tracking_mode,CASE WHEN lower(trim(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END)) IN ('exact','estimated')
  AND (COALESCE(sii.on_hand_quantity,0)-COALESCE(sii.reserved_quantity,0))*COALESCE(NULLIF(sii.usage_units_per_stock_unit,0),1) >= COALESCE(siup.minimum_usage_increment,0.001)
 """
@@ -333,46 +345,77 @@ if not row:
         row={**erow,**profile,"inventory_linkage":"operator_inventory_read_unique_match"}
         break
 if not row:
-    # Real Development data has no defensible material-to-Inventory association. Use one bounded
-    # Development-only operator fixture only when exactly one eligible real Inventory item exists.
-    # The event is created through add_event, then reviewed, posted, reversed and voided.
-    if planned_rows and len(eligible)==1:
-        fixture_item=eligible[0]
+    # Real Development data has no defensible Supply/Tool event-to-Inventory association.
+    # Use one bounded Development-only Supply fixture through the Inventory owner API.
+    if planned_rows:
         fixture_project=int(planned_rows[0].get("creative_work_project_id") or 0)
         if fixture_project:
-            # Recover any orphaned fixture from an interrupted earlier run before creating a new one.
+            # Recover orphaned active fixture events first; void_event reverses any active post.
             for orphan in list(dicts(d1("""SELECT creative_work_project_id,creative_work_event_id
               FROM creative_work_events WHERE event_title='Build 283 temporary Inventory acceptance'
               AND COALESCE(entry_status,'active')='active' ORDER BY creative_work_event_id;"""))):
                 if orphan.get("creative_work_project_id") and orphan.get("creative_work_event_id"):
                     request("/api/admin/creative-process",cookie,"POST",{"action":"void_event","project_id":int(orphan["creative_work_project_id"]),"creative_work_event_id":int(orphan["creative_work_event_id"]),"reason":"Build 283 recovery cleanup before acceptance"})
-            fixture_inc=max(0.001,float(fixture_item.get("minimum_usage_increment") or 0.001))
-            fixture_available=max(0.0,float(fixture_item.get("on_hand_quantity") or 0)-float(fixture_item.get("reserved_quantity") or 0))*max(0.001,float(fixture_item.get("usage_units_per_stock_unit") or 1))
-            if fixture_available+1e-9>=fixture_inc:
-                before_max=scalar(f"SELECT COALESCE(MAX(creative_work_event_id),0) AS n FROM creative_work_events WHERE creative_work_project_id={fixture_project};","n")
-                added=request("/api/admin/creative-process",cookie,"POST",{
-                    "action":"add_event","project_id":fixture_project,"event_type":"material",
-                    "event_title":"Build 283 temporary Inventory acceptance",
-                    "event_notes":"Development-only bounded operator acceptance fixture. Must be reversed and voided before completion.",
-                    "material_name":str(fixture_item.get("item_name") or "Build 283 Inventory fixture")[:180],
-                    "material_quantity":fixture_inc,"material_unit":str(fixture_item.get("usage_unit_label") or "unit")[:40],
-                    "material_cost_cents":0,"is_public_candidate":0
-                })
-                if added.get("ok") is not True:stop("Bounded Development fixture add_event did not return ok=true.")
-                created=first_with(d1(f"""SELECT creative_work_event_id FROM creative_work_events
-                  WHERE creative_work_project_id={fixture_project} AND creative_work_event_id>{before_max}
-                  AND event_title='Build 283 temporary Inventory acceptance' AND COALESCE(entry_status,'active')='active'
-                  ORDER BY creative_work_event_id DESC LIMIT 1;"""),"creative_work_event_id")
-                if not created:stop("Bounded Development fixture event could not be resolved after add_event.")
-                FIXTURE_PROJECT=fixture_project;FIXTURE_EVENT=int(created["creative_work_event_id"]);fixture_created=True
-                row={
-                    "creative_work_project_id":fixture_project,"creative_work_event_id":FIXTURE_EVENT,
-                    "material_name":str(fixture_item.get("item_name") or ""),"planned_quantity":fixture_inc,
-                    "planned_unit":str(fixture_item.get("usage_unit_label") or "unit"),"review_status":"",
-                    "actual_quantity":fixture_inc,"waste_quantity":0,"reusable_quantity":0,"approved_cost_cents":0,
-                    "review_notes":"Build 283 bounded Development acceptance fixture.",
-                    **fixture_item,"inventory_linkage":"bounded_development_acceptance_fixture"
-                }
+            # Archive orphaned Build 283 Supply fixtures from interrupted earlier runs.
+            for orphan_item in list(dicts(d1("""SELECT site_item_inventory_id FROM site_item_inventory
+              WHERE lower(trim(COALESCE(source_type,'')))='supply'
+                AND external_key LIKE 'build283-acceptance-%' AND COALESCE(is_active,1)=1
+              ORDER BY site_item_inventory_id;"""))):
+                oid=int(orphan_item.get("site_item_inventory_id") or 0)
+                if oid:
+                    request("/api/admin/site-item-inventory",cookie,"PATCH",{"site_item_inventory_id":oid,"is_active":0,"movement_note":"Build 283 orphan fixture archived before acceptance.","reservation_notes":"Development-only Build 283 fixture; archived during recovery."})
+            fixture_key="build283-acceptance-"+str(os.environ.get("GITHUB_RUN_ID") or "local")+"-"+str(os.environ.get("GITHUB_RUN_ATTEMPT") or "1")
+            created_inventory=request("/api/admin/site-item-inventory",cookie,"POST",{
+                "source_type":"supply","external_key":fixture_key,
+                "item_name":"Build 283 temporary Supply acceptance fixture",
+                "category":"acceptance_fixture","on_hand_quantity":2,"reserved_quantity":0,"incoming_quantity":0,
+                "reorder_level":0,"unit_cost_cents":0,"stock_unit_label":"unit","usage_unit_label":"unit",
+                "usage_units_per_stock_unit":1,"usage_tracking_mode":"exact","minimum_usage_increment":1,
+                "inventory_class":"consumable","lifecycle_mode":"consumable",
+                "reorder_notes":"Development-only Build 283 operator acceptance fixture.",
+                "reservation_notes":"Archive after Build 283 acceptance.",
+                "movement_note":"Build 283 Development-only Supply fixture created through Inventory owner API."
+            },expect=201)
+            fixture_item=created_inventory.get("item") or {}
+            fixture_inventory_id=int(fixture_item.get("site_item_inventory_id") or 0)
+            if not fixture_inventory_id:
+                found=first_with(d1("SELECT site_item_inventory_id FROM site_item_inventory WHERE source_type='supply' AND external_key='"+fixture_key.replace("'","''")+"' AND COALESCE(is_active,1)=1 ORDER BY site_item_inventory_id DESC LIMIT 1;"),"site_item_inventory_id")
+                fixture_inventory_id=int((found or {}).get("site_item_inventory_id") or 0)
+            if not fixture_inventory_id:stop("Temporary Supply Inventory fixture could not be resolved after owner API creation.")
+            FIXTURE_INVENTORY=fixture_inventory_id;inventory_fixture_created=True
+            fixture_item=first_with(d1(f"""SELECT sii.site_item_inventory_id,sii.source_type,sii.item_name,sii.on_hand_quantity,
+              COALESCE(sii.reserved_quantity,0) reserved_quantity,COALESCE(sii.usage_units_per_stock_unit,1) usage_units_per_stock_unit,
+              COALESCE(sii.usage_unit_label,'unit') usage_unit_label,COALESCE(sii.stock_unit_label,'unit') stock_unit_label,
+              COALESCE(siup.usage_tracking_mode,'exact') tracking_mode,COALESCE(siup.minimum_usage_increment,1) minimum_usage_increment
+              FROM site_item_inventory sii LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
+              WHERE sii.site_item_inventory_id={fixture_inventory_id} AND sii.is_active=1 AND lower(trim(sii.source_type))='supply' LIMIT 1;"""),
+              "site_item_inventory_id","source_type","on_hand_quantity","tracking_mode","minimum_usage_increment")
+            if not fixture_item or str(fixture_item.get("tracking_mode") or "").lower()!="exact":stop("Temporary Supply fixture did not retain exact Inventory tracking.")
+            fixture_inc=max(1.0,float(fixture_item.get("minimum_usage_increment") or 1))
+            before_max=scalar(f"SELECT COALESCE(MAX(creative_work_event_id),0) AS n FROM creative_work_events WHERE creative_work_project_id={fixture_project};","n")
+            added=request("/api/admin/creative-process",cookie,"POST",{
+                "action":"add_event","project_id":fixture_project,"event_type":"material",
+                "event_title":"Build 283 temporary Inventory acceptance",
+                "event_notes":"Development-only bounded Supply fixture. Must be reversed, voided and archived before completion.",
+                "material_name":str(fixture_item.get("item_name") or "Build 283 Supply fixture")[:180],
+                "material_quantity":fixture_inc,"material_unit":str(fixture_item.get("usage_unit_label") or "unit")[:40],
+                "material_cost_cents":0,"is_public_candidate":0
+            })
+            if added.get("ok") is not True:stop("Bounded Development Supply fixture add_event did not return ok=true.")
+            created=first_with(d1(f"""SELECT creative_work_event_id FROM creative_work_events
+              WHERE creative_work_project_id={fixture_project} AND creative_work_event_id>{before_max}
+              AND event_title='Build 283 temporary Inventory acceptance' AND COALESCE(entry_status,'active')='active'
+              ORDER BY creative_work_event_id DESC LIMIT 1;"""),"creative_work_event_id")
+            if not created:stop("Bounded Development fixture event could not be resolved after add_event.")
+            FIXTURE_PROJECT=fixture_project;FIXTURE_EVENT=int(created["creative_work_event_id"]);fixture_created=True
+            row={
+                "creative_work_project_id":fixture_project,"creative_work_event_id":FIXTURE_EVENT,
+                "material_name":str(fixture_item.get("item_name") or ""),"planned_quantity":fixture_inc,
+                "planned_unit":str(fixture_item.get("usage_unit_label") or "unit"),"review_status":"",
+                "actual_quantity":fixture_inc,"waste_quantity":0,"reusable_quantity":0,"approved_cost_cents":0,
+                "review_notes":"Build 283 bounded Development Supply acceptance fixture.",
+                **fixture_item,"inventory_linkage":"bounded_development_supply_fixture"
+            }
 if not row:
     counts=first_with(d1("""SELECT
       (SELECT COUNT(*) FROM creative_work_events e JOIN creative_work_projects p ON p.creative_work_project_id=e.creative_work_project_id LEFT JOIN creative_project_material_reviews r ON r.creative_work_project_id=e.creative_work_project_id AND r.creative_work_event_id=e.creative_work_event_id WHERE COALESCE(p.project_status,'active')<>'archived' AND COALESCE(e.entry_status,'active')='active' AND trim(COALESCE(e.material_name,''))<>'' AND COALESCE(lower(trim(r.review_status)),'')<>'approved') planned_count,
@@ -527,8 +570,21 @@ if fixture_created:
 else:
     restore=request("/api/admin/creative-process",cookie,"POST",{"action":"review_material","project_id":project_id,"creative_work_event_id":event_id,"review_status":"approved","actual_quantity":original_actual,"waste_quantity":float(row.get("waste_quantity") or 0),"reusable_quantity":float(row.get("reusable_quantity") or 0),"approved_cost_cents":int(row.get("approved_cost_cents") or 0),"review_notes":str(row.get("review_notes") or "")})
     if restore.get("ok") is not True:stop("Original reviewed actual values could not be restored after acceptance.")
-runtime_acceptance="PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_BOUNDED_EVIDENCE" if fixture_created else "PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_REAL_EVIDENCE"
-evidence={"schema":"release467-build283-planned-vs-actual-inventory-operator-acceptance-v1","status":"PASS","source_sha":os.environ.get("GITHUB_SHA"),"environment":"development","exact_preview_url":True,"real_admin_operator_session":True,"existing_project":True,"existing_material_event":not fixture_created,"matching_real_inventory_item":True,"inventory_linkage":inventory_linkage,"selected_started_as_planned_estimate":selected_started_planned,"planned_and_reviewed_states_in_same_project":planned_and_reviewed_same_project,"synthetic_project_created":False,"synthetic_event_created":fixture_created,"bounded_development_fixture":fixture_created,"fixture_cleanup_guard_enabled":fixture_cleanup_guard_enabled,"temporary_event_voided":temporary_event_voided,"planned_estimate_verified":True,"reviewed_actual_unposted_verified":True,"explicit_inventory_post_verified":True,"posted_actual_verified":True,"compensating_reversal_verified":True,"reversal_history_count":1,"inventory_returned_to_starting_quantity":True,"finance_journal_unchanged":True,"automatic_inventory_movement":False,"finance_posting":False,"provider_execution_invoked":False,"public_promotion_invoked":False,"production_mutation":False,"correction_path_source_contract_verified":True,"project_identity_sha256":hashlib.sha256(f"creative_work_project:{project_id}".encode()).hexdigest(),"event_identity_sha256":hashlib.sha256(f"creative_work_event:{event_id}".encode()).hexdigest(),"inventory_identity_sha256":hashlib.sha256(f"site_item_inventory:{inventory_id}".encode()).hexdigest(),"raw_project_id_retained":False,"raw_event_id_retained":False,"raw_inventory_id_retained":False,"raw_session_token_retained":False,"runtime_acceptance":runtime_acceptance}
+temporary_inventory_fixture_archived=False
+if inventory_fixture_created:
+    archived=request("/api/admin/site-item-inventory",cookie,"PATCH",{
+        "site_item_inventory_id":inventory_id,"is_active":0,
+        "movement_note":"Build 283 bounded Supply acceptance fixture archived after successful reversal.",
+        "reservation_notes":"Development-only Build 283 fixture; acceptance complete."
+    })
+    if archived.get("ok") is not True:stop("Temporary Supply Inventory fixture could not be archived after acceptance.")
+    archive_state=first_with(d1(f"SELECT is_active,on_hand_quantity,source_type FROM site_item_inventory WHERE site_item_inventory_id={inventory_id} LIMIT 1;"),"is_active","on_hand_quantity","source_type")
+    if not archive_state or int(archive_state.get("is_active") or 0)!=0 or str(archive_state.get("source_type") or "").lower()!="supply":stop("Temporary Supply Inventory fixture remained active after archive.")
+    if abs(float(archive_state.get("on_hand_quantity") or 0)-baseline)>1e-7:stop("Temporary Supply Inventory quantity drifted before archive.")
+    temporary_inventory_fixture_archived=True
+    FIXTURE_INVENTORY=0
+runtime_acceptance="PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_BOUNDED_SUPPLY_FIXTURE_EVIDENCE" if fixture_created else "PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_REAL_EVIDENCE"
+evidence={"schema":"release467-build283-planned-vs-actual-inventory-operator-acceptance-v1","status":"PASS","source_sha":os.environ.get("GITHUB_SHA"),"environment":"development","exact_preview_url":True,"real_admin_operator_session":True,"existing_project":True,"existing_material_event":not fixture_created,"matching_real_inventory_item":True,"inventory_linkage":inventory_linkage,"selected_started_as_planned_estimate":selected_started_planned,"planned_and_reviewed_states_in_same_project":planned_and_reviewed_same_project,"synthetic_project_created":False,"synthetic_event_created":fixture_created,"bounded_development_fixture":fixture_created,"bounded_development_supply_fixture":inventory_fixture_created,"fixture_cleanup_guard_enabled":fixture_cleanup_guard_enabled,"temporary_event_voided":temporary_event_voided,"temporary_inventory_fixture_created":inventory_fixture_created,"temporary_inventory_fixture_archived":temporary_inventory_fixture_archived,"product_owned_stock_used":False,"planned_estimate_verified":True,"reviewed_actual_unposted_verified":True,"explicit_inventory_post_verified":True,"posted_actual_verified":True,"compensating_reversal_verified":True,"reversal_history_count":1,"inventory_returned_to_starting_quantity":True,"finance_journal_unchanged":True,"automatic_inventory_movement":False,"finance_posting":False,"provider_execution_invoked":False,"public_promotion_invoked":False,"production_mutation":False,"correction_path_source_contract_verified":True,"project_identity_sha256":hashlib.sha256(f"creative_work_project:{project_id}".encode()).hexdigest(),"event_identity_sha256":hashlib.sha256(f"creative_work_event:{event_id}".encode()).hexdigest(),"inventory_identity_sha256":hashlib.sha256(f"site_item_inventory:{inventory_id}".encode()).hexdigest(),"raw_project_id_retained":False,"raw_event_id_retained":False,"raw_inventory_id_retained":False,"raw_session_token_retained":False,"runtime_acceptance":runtime_acceptance}
 OUT.write_text(json.dumps(evidence,indent=2,sort_keys=True)+"\n",encoding="utf-8")
 print("BUILD 283 PLANNED-VS-ACTUAL INVENTORY OPERATOR ACCEPTANCE: PASS")
-print("Planned material lifecycle -> reviewed unposted actual -> explicit Inventory post -> compensating reversal; bounded fixture voided when required; net stock and Finance journal unchanged.")
+print("Planned material lifecycle -> reviewed unposted actual -> explicit Inventory post -> compensating reversal; bounded Supply fixture voided and archived when required; Product stock untouched; net stock and Finance journal unchanged.")

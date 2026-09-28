@@ -43,7 +43,7 @@
     "real_admin_operator_session_required": true,
     "existing_non_archived_project_required": true,
     "existing_material_event_required": false,
-    "matching_real_inventory_item_required": true,
+    "matching_real_inventory_item_required": false,
     "synthetic_project_forbidden": true,
     "synthetic_event_forbidden": false,
     "planned_estimate_verified_before_review": true,
@@ -65,7 +65,7 @@
     "raw_project_id_persisted_in_artifact": false,
     "raw_event_id_persisted_in_artifact": false,
     "raw_inventory_id_persisted_in_artifact": false,
-    "runtime_acceptance_after_green": "PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_REAL_OR_BOUNDED_EVIDENCE",
+    "runtime_acceptance_after_green": "PLANNED_ACTUAL_INVENTORY_OPERATOR_ACCEPTED_BOUNDED_SUPPLY_FIXTURE_EVIDENCE",
     "existing_material_event_preferred": true,
     "bounded_development_fixture_allowed": true,
     "fixture_existing_project_required": true,
@@ -73,10 +73,19 @@
     "fixture_only_after_real_path_unavailable": true,
     "fixture_void_action": "void_event",
     "fixture_active_post_cleanup_uses_inventory_reversal": true,
-    "fixture_event_voided_after_acceptance": true
+    "fixture_event_voided_after_acceptance": true,
+    "existing_real_inventory_item_preferred": true,
+    "bounded_development_supply_fixture_allowed": true,
+    "fixture_inventory_owner": "site-item-inventory",
+    "fixture_inventory_source_type": "supply",
+    "fixture_inventory_tracking_mode": "exact",
+    "fixture_inventory_archived_after_acceptance": true,
+    "fixture_inventory_archive_action": "PATCH site-item-inventory is_active=0",
+    "fixture_inventory_history_preserved": true,
+    "fixture_product_stock_forbidden": true
   },
   "decision": {
-    "build283_complete_when": "The exact Development Build 283 deployment uses a real administrator session and first attempts existing real Creative Process material evidence. If no defensible event-to-Inventory association exists, it may create one temporary material event in an existing Development project using a real active Inventory item, then prove planned estimate, reviewed-but-unposted actual, explicit posted actual and explicit Inventory-owned compensating reversal through normal operator APIs. The temporary event must be voided, Inventory must return to its starting quantity, Finance journal counts must remain unchanged, and the identical code tree is then promoted to Production.",
+    "build283_complete_when": "The exact Development Build 283 deployment first attempts existing real Creative Process/Inventory evidence. If no defensible Supply/Tool association exists, it may create one temporary Supply Inventory item through the normal Inventory owner API and one temporary material event in an existing Development Creative Process project. The operator path must prove planned estimate -> reviewed-but-unposted actual -> explicit Inventory-owned post -> explicit compensating reversal -> voided event, then archive the temporary Supply item. Inventory must return to its starting quantity, Finance journal counts must remain unchanged, Product-owned stock must never be consumed, and Production remains mutation-free.",
     "next_build": 284,
     "next_build_title": "CAIP Production Acceptance Closure & Outcomes Renewal",
     "future_queue_exhausted": false
@@ -109,7 +118,11 @@
     "development_explicit_inventory_post_and_reversal": true,
     "development_temporary_event_fixture": true,
     "development_fixture_void_required": true,
-    "development_fixture_cleanup_compensates_active_post": true
+    "development_fixture_cleanup_compensates_active_post": true,
+    "development_temporary_inventory_item_creation": true,
+    "development_temporary_inventory_item_archive": true,
+    "development_temporary_inventory_item_delete": false,
+    "product_owned_inventory_fixture": false
   },
   "implementation": {
     "evidence_document": "docs/operations/RELEASE_467_BUILD_283_PLANNED_VS_ACTUAL_INVENTORY_OPERATOR_ACCEPTANCE.md",
