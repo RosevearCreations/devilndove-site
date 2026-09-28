@@ -1,32 +1,32 @@
 {
   "release": 467,
-  "build": 287,
-  "title": "Real Existing Resource-Link Evidence Capture",
+  "build": 288,
+  "title": "Real Planned-vs-Actual Inventory Acceptance",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 286,
-      "title": "Creative Process Resource-Link Operator Workflow",
-      "authority": "release467-build286-creative-process-resource-link-operator-workflow.json",
-      "dev_sha": "fe4dff65c47a00fc3c61a6ae48faa26828951898",
-      "tree_sha": "a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec",
-      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
-      "proofs": {
-        "system_gate_run": 36374225700,
-        "current_application_quality_run": 36374225637,
-        "it_admin_runtime_proof_run": 36374225648,
-        "branch_hygiene_run": 36374225692
-      },
-      "dedicated_gate_run": 36374225610
-    },
-    "current_closure_candidate": {
-      "release": 467,
       "build": 287,
       "title": "Real Existing Resource-Link Evidence Capture",
       "authority": "release467-build287-real-existing-resource-link-evidence-capture.json",
+      "dev_sha": "f3e84a0c5623eb0a74bccb537049d780944e2892",
+      "tree_sha": "981b7a5e7b851684821af087a428fe66ad8348f0",
+      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+      "proofs": {
+        "system_gate_run": 36432943282,
+        "current_application_quality_run": 36432943315,
+        "it_admin_runtime_proof_run": 36432943396,
+        "branch_hygiene_run": 36432943404
+      },
+      "dedicated_gate_run": 36432943286
+    },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 288,
+      "title": "Real Planned-vs-Actual Inventory Acceptance",
+      "authority": "release467-build288-real-planned-vs-actual-inventory-acceptance.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -37,21 +37,20 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 286,
-    "title": "Creative Process Resource-Link Operator Workflow",
-    "authority": "release467-build286-creative-process-resource-link-operator-workflow.json",
-    "main_sha": "11a4924ce8f5a83bc6b688489404140e89456662",
-    "tree_sha": "a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec",
+    "build": 287,
+    "title": "Real Existing Resource-Link Evidence Capture",
+    "authority": "release467-build287-real-existing-resource-link-evidence-capture.json",
+    "main_sha": "27a48e505b42c399fac0801cbd4e6394490957a4",
+    "tree_sha": "981b7a5e7b851684821af087a428fe66ad8348f0",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36374409720,
-    "production_live_resource_integrity_run": 36374501241,
-    "products_browser_proof_run": 36374501210,
-    "products_route_proof_run": 36374501223,
-    "build_specific_proof_run": 36374409434,
+    "production_pages_deploy_run": 36433269795,
+    "production_live_resource_integrity_run": 36433368187,
+    "build_specific_proof_run": 36433269797,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build288-real-planned-vs-actual-inventory-acceptance.json",
     "release467-build287-real-existing-resource-link-evidence-capture.json",
     "release467-build286-creative-process-resource-link-operator-workflow.json",
     "release467-build285-real-inventory-linkage-prerequisite-inventory.json",
@@ -180,11 +179,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md",
-  "next_build": 288,
+  "next_build": 289,
   "next_build_state": "AUTHORIZED_BY_ROADMAP",
-  "next_build_title": "Real Planned-vs-Actual Inventory Acceptance",
-  "promotion_state": "BUILD287_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD288_REAL_PLANNED_VS_ACTUAL_INVENTORY_ACCEPTANCE_AUTHORIZED",
+  "next_build_title": "Real Inventory Adoption Outcomes Renewal",
+  "promotion_state": "BUILD288_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD289_REAL_INVENTORY_ADOPTION_OUTCOMES_RENEWAL_AUTHORIZED",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -209,19 +208,19 @@
     "last_build": 289,
     "state": "REAL_INVENTORY_LINKAGE_ACCEPTANCE_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 288,
-    "next_build_title": "Real Planned-vs-Actual Inventory Acceptance",
+    "next_build": 289,
+    "next_build_title": "Real Inventory Adoption Outcomes Renewal",
     "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md"
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "fe4dff65c47a00fc3c61a6ae48faa26828951898",
-  "accepted_dev_tree_sha": "a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec",
+  "accepted_dev_sha": "f3e84a0c5623eb0a74bccb537049d780944e2892",
+  "accepted_dev_tree_sha": "981b7a5e7b851684821af087a428fe66ad8348f0",
   "acceptance": {
-    "system_gate_run": 36374225700,
-    "current_application_quality_run": 36374225637,
-    "it_admin_runtime_proof_run": 36374225648,
-    "branch_hygiene_run": 36374225692
+    "system_gate_run": 36432943282,
+    "current_application_quality_run": 36432943315,
+    "it_admin_runtime_proof_run": 36432943396,
+    "branch_hygiene_run": 36432943404
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -940,6 +939,22 @@
     "finance_posting": false,
     "owner_authorized": true,
     "next_build": 288,
+    "future_queue_exhausted": false
+  },
+  "real_planned_vs_actual_inventory_acceptance": {
+    "source_build": 287,
+    "classification": "REAL_EXISTING_LINK_PLANNED_ACTUAL_LIFECYCLE_ACCEPTANCE_PENDING",
+    "environment": "DEVELOPMENT_EXACT_SHA_LIVE_OPERATOR_ACCEPTANCE",
+    "project_id": 7,
+    "event_id": 2,
+    "resource_link_id": 1,
+    "inventory_id": 2801,
+    "fixture_allowed": false,
+    "automatic_inventory_movement": false,
+    "finance_posting": false,
+    "inventory_return_to_baseline_required": true,
+    "state": "PENDING_EXACT_DEVELOPMENT_OPERATOR_ACCEPTANCE",
+    "next_build": 289,
     "future_queue_exhausted": false
   }
 }

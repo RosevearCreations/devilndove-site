@@ -1,27 +1,27 @@
-// Release 467 Build 287 — Real Existing Resource-Link Evidence Capture over exact Build 286 Production source.
+// Release 467 Build 288 — Real Planned-vs-Actual Inventory Acceptance over exact Build 287 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=287;
-const TITLE='Real Existing Resource-Link Evidence Capture';
-const AUTHORITY='release467-build287-real-existing-resource-link-evidence-capture';
-const EVIDENCE_ID='r467-b286-green-36374225700-36374409720';
+const BUILD=288;
+const TITLE='Real Planned-vs-Actual Inventory Acceptance';
+const AUTHORITY='release467-build288-real-planned-vs-actual-inventory-acceptance';
+const EVIDENCE_ID='r467-b287-green-36432943282-36433269795';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:286,title:'Creative Process Resource-Link Operator Workflow',state:'DEVELOPMENT_GREEN',
-  dev_sha:'fe4dff65c47a00fc3c61a6ae48faa26828951898',tree_sha:'a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec',
-  system_gate_run:36374225700,current_application_quality_run:36374225637,it_admin_runtime_proof_run:36374225648,
-  branch_hygiene_run:36374225692,dedicated_gate_run:36374225610,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
+  release:467,build:287,title:'Real Existing Resource-Link Evidence Capture',state:'DEVELOPMENT_GREEN',
+  dev_sha:'f3e84a0c5623eb0a74bccb537049d780944e2892',tree_sha:'981b7a5e7b851684821af087a428fe66ad8348f0',
+  system_gate_run:36432943282,current_application_quality_run:36432943315,it_admin_runtime_proof_run:36432943396,
+  branch_hygiene_run:36432943404,dedicated_gate_run:36432943286,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:286,title:'Creative Process Resource-Link Operator Workflow',state:'PRODUCTION_GREEN',
-  main_sha:'11a4924ce8f5a83bc6b688489404140e89456662',tree_sha:'a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec',
-  production_pages_deploy_run:36374409720,production_live_resource_integrity_run:36374501241,
-  products_browser_proof_run:36374501210,products_route_proof_run:36374501223,build_specific_proof_run:36374409434,remote_d1_queries:0
+  release:467,build:287,title:'Real Existing Resource-Link Evidence Capture',state:'PRODUCTION_GREEN',
+  main_sha:'27a48e505b42c399fac0801cbd4e6394490957a4',tree_sha:'981b7a5e7b851684821af087a428fe66ad8348f0',
+  production_pages_deploy_run:36433269795,production_live_resource_integrity_run:36433368187,
+  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36433269797,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,7 +31,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 287 Real Existing Resource-Link Evidence Capture'
+  'Release 467 Build 288 Real Planned-vs-Actual Inventory Acceptance'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -74,7 +74,7 @@ function closurePayload(){
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 288 follows Build 287: Real Planned-vs-Actual Inventory Acceptance.'
+    next_build:'Build 289 follows Build 288: Real Inventory Adoption Outcomes Renewal.'
   };
 }
 async function closurePack(){

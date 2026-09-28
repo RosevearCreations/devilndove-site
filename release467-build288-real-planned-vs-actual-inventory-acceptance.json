@@ -1,0 +1,114 @@
+{
+  "release": 467,
+  "build": 288,
+  "title": "Real Planned-vs-Actual Inventory Acceptance",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build288-real-planned-vs-actual-inventory-acceptance",
+  "predecessor": {
+    "build": 287,
+    "title": "Real Existing Resource-Link Evidence Capture",
+    "development_sha": "f3e84a0c5623eb0a74bccb537049d780944e2892",
+    "development_tree_sha": "981b7a5e7b851684821af087a428fe66ad8348f0",
+    "production_main_sha": "27a48e505b42c399fac0801cbd4e6394490957a4",
+    "production_tree_sha": "981b7a5e7b851684821af087a428fe66ad8348f0",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36432943282,
+      "current_application_quality_run": 36432943315,
+      "it_admin_runtime_proof_run": 36432943396,
+      "branch_hygiene_run": 36432943404,
+      "dedicated_gate_run": 36432943286
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36433269795,
+      "production_live_resource_integrity_run": 36433368187,
+      "build_specific_proof_run": 36433269797
+    }
+  },
+  "evidence_contract": {
+    "environment": "DEVELOPMENT_EXACT_SHA_LIVE_OPERATOR_ACCEPTANCE",
+    "real_existing_link_required": true,
+    "creative_work_project_id": 7,
+    "creative_work_event_id": 2,
+    "creative_process_resource_link_id": 1,
+    "site_item_inventory_id": 2801,
+    "fixture_creation_allowed": false,
+    "product_owned_inventory_allowed": false,
+    "planned_estimate_required": true,
+    "reviewed_unposted_required": true,
+    "explicit_post_required": true,
+    "compensating_reversal_required": true,
+    "inventory_returns_to_baseline": true,
+    "finance_unchanged": true,
+    "direct_d1_rows_read_ceiling": 20000,
+    "state": "PENDING_EXACT_DEVELOPMENT_OPERATOR_ACCEPTANCE",
+    "planned_estimate_source": "existing linked event material_quantity/material_unit retained alongside reviewed actual",
+    "review_state_after_reversal": "approved_unconsumed",
+    "interrupted_run_recovery_preserves_current_review_state": true,
+    "pre_interruption_review_value_must_not_be_guessed": true,
+    "tracking_mode_respected": true,
+    "log_only_or_reusable_usage_may_post_zero_stock_delta": true
+  },
+  "inventory_table_rework": {
+    "desktop_min_width_px": 1820,
+    "horizontal_scroll": true,
+    "fixed_column_widths": true,
+    "readable_inputs": true,
+    "stock_usage_column_width_px": 360,
+    "actions_column_width_px": 280,
+    "card_view_retained": true,
+    "mobile_card_mode_retained": true
+  },
+  "contract": {
+    "next_build": 289,
+    "next_build_title": "Real Inventory Adoption Outcomes Renewal",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "fixture_creation": false,
+    "project_creation": false,
+    "event_creation": false,
+    "inventory_item_creation": false,
+    "product_owned_inventory": false,
+    "automatic_inventory_movement": false,
+    "finance_posting": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "payment_or_refund": false,
+    "production_business_data_mutation": false,
+    "r2_mutation": false,
+    "secret_capture": false,
+    "development_material_review": true,
+    "development_explicit_inventory_post_and_reversal": true
+  },
+  "implementation": {
+    "runtime_acceptance": "scripts/release467_build288_operator_acceptance.py",
+    "dedicated_gate": "scripts/release467_build288_gate.py",
+    "workflow": ".github/workflows/release467-build288-real-planned-vs-actual-inventory-acceptance.yml",
+    "evidence_document": "docs/operations/RELEASE_467_BUILD_288_REAL_PLANNED_VS_ACTUAL_INVENTORY_ACCEPTANCE.md",
+    "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md"
+  },
+  "starting_point": {
+    "development": {
+      "sha": "f3e84a0c5623eb0a74bccb537049d780944e2892",
+      "tree": "981b7a5e7b851684821af087a428fe66ad8348f0",
+      "system_gate_run": 36432943282,
+      "quality_run": 36432943315,
+      "it_admin_runtime_run": 36432943396,
+      "repository_hygiene_run": 36432943404,
+      "dedicated_gate_run": 36432943286,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "27a48e505b42c399fac0801cbd4e6394490957a4",
+      "tree_sha": "981b7a5e7b851684821af087a428fe66ad8348f0",
+      "production_pages_deploy_run": 36433269795,
+      "production_live_resource_integrity_run": 36433368187,
+      "build_specific_proof_run": 36433269797,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
+  }
+}
