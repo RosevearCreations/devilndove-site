@@ -38,6 +38,15 @@ if cur==286:
     q(p.get('accepted_dev_sha')=='d1c70746fd937b05708306ea299ddb64559ff79c' and p.get('accepted_dev_tree_sha')=='cea56547d734e8c4db51d49d145edebeb806d762','Current Build 286 predecessor mismatch')
     q((p.get('production_checkpoint') or {}).get('main_sha')=='2056cc46ebb5589dddc0b5172d90ffbd0e3c4241','Current Build 286 Production baseline mismatch')
     q(int(p.get('next_build') or 0)==287 and p.get('next_build_title')=='Real Existing Resource-Link Evidence Capture','Current Build 286 successor pointer mismatch')
+else:
+    q(a.get('state')=='PRODUCTION_GREEN','Build 286 successor-ingested authority must be Production GREEN')
+    final=a.get('final_closure') or {}
+    q(final.get('dev_sha')=='fe4dff65c47a00fc3c61a6ae48faa26828951898' and final.get('tree_sha')=='a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec','Build 286 final Development closure mismatch')
+    q(int(final.get('dedicated_gate_run') or 0)==36374225610,'Build 286 final Development dedicated proof mismatch')
+    prod=a.get('production_checkpoint') or {}
+    q(prod.get('main_sha')=='11a4924ce8f5a83bc6b688489404140e89456662' and prod.get('tree_sha')=='a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec' and prod.get('state')=='PRODUCTION_GREEN','Build 286 final Production closure mismatch')
+    q(int(prod.get('production_pages_deploy_run') or 0)==36374409720 and int(prod.get('production_live_resource_integrity_run') or 0)==36374501241,'Build 286 Production core proof mismatch')
+    q(int(prod.get('products_browser_proof_run') or 0)==36374501210 and int(prod.get('products_route_proof_run') or 0)==36374501223 and int(prod.get('build_specific_proof_run') or 0)==36374409434,'Build 286 Production named proof mismatch')
 for path in ('functions/api/admin/creative-process-resource-links.js','public/js/admin-creative-process-resource-links-build286.js','public/js/admin-site-item-inventory.js','public/js/auth.js','public/js/admin-ergonomics-v237.js','functions/api/admin/_siteItemInventoryLegacy.js'):
     r=subprocess.run(['node','--check',str(R/path)],text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE);q(r.returncode==0,path+' syntax failed: '+r.stderr)
 s=a.get('safety') or {};q(s.get('canonical_schema_addition') is True and s.get('operator_resource_link_mutation') is True,'Build 286 bounded authorization missing')
