@@ -37,6 +37,8 @@ a=j('release467-build261-production-proof-dependency-orchestration.json')
 doc=t('docs/operations/RELEASE_467_BUILD_261_PRODUCTION_PROOF_DEPENDENCY_ORCHESTRATION.md')
 road=t('docs/operations/RELEASE_467_RELEASE_EFFICIENCY_READ_PATH_AUTONOMOUS_BUILDS_257_264.md')
 wf=t('.github/workflows/release467-build261-production-proof-dependency-orchestration.yml')
+current=j('current-development-authority.json')
+fanout_retired=int(current.get('build') or 0)>=286 and (R/'scripts/d1_ci_fanout_guard.py').is_file()
 q(a.get('build')==261 and a.get('state') in ('DEVELOPMENT_CANDIDATE','PRODUCTION_GREEN'),'Build 261 authority identity/state mismatch')
 pred=a.get('predecessor') or {}
 q(pred.get('development_sha')=='28b6f64d43f05e6c00a1cec579fa51f6a8797c0d','Build 260 Development SHA missing')
@@ -52,9 +54,12 @@ for n in target_builds:
     p=matches[0];paths.append(p)
     body=p.read_text(encoding='utf-8',errors='replace')
     ts=triggers(body);branches=push_branches(body)
-    q('push' in ts,f'{p.as_posix()} must retain Development push evidence')
     q('workflow_dispatch' in ts,f'{p.as_posix()} must retain manual evidence')
-    q('dev' in branches and 'main' not in branches,f'{p.as_posix()} push must be Development-only')
+    if fanout_retired:
+        q('push' not in ts,f'{p.as_posix()} must be manual-only after Build 286 D1 fan-out retirement')
+    else:
+        q('push' in ts,f'{p.as_posix()} must retain Development push evidence')
+        q('dev' in branches and 'main' not in branches,f'{p.as_posix()} push must be Development-only')
     q((R/f'scripts/release467_build{n}_gate.py').is_file(),f'Build {n} gate script must remain')
 q(len(paths)==39,'Build 261 must resolve all 39 historical Production push targets')
 prod=t('.github/workflows/production-pages-deploy-current.yml')
@@ -80,7 +85,10 @@ if not successor_active:
         q(tc.get(k)==v,f'Build 261 trigger count mismatch: {k} expected {v} got {tc.get(k)}')
 else:
     q(report.get('workflow_file_count',0)>=152,'Build 262+ must retain Build 261 workflow and successors')
-    q(tc.get('workflow_run')==5,'Build 262+ must preserve the five workflow_run chains')
+    if not fanout_retired:
+        q(tc.get('workflow_run')==5,'Build 262+ must preserve the five workflow_run chains')
+    else:
+        q((R/'.github/workflows/d1-ci-fanout-guard.yml').is_file(),'Build 286+ must retain the D1 CI fan-out guard')
     q(tc.get('issues')==0,'Build 262+ must not introduce issues triggers')
 expected_runs={
 '.github/workflows/production-live-resource-integrity-proof.yml',
@@ -88,7 +96,10 @@ expected_runs={
 '.github/workflows/release467-build154-products-route-production-proof.yml',
 '.github/workflows/release467-build155-products-development-browser.yml',
 '.github/workflows/release467-build155-products-production-browser.yml'}
-q(set(report.get('workflow_run_paths') or [])==expected_runs,'Build 261 must retain the exact five workflow_run chains')
+if not fanout_retired:
+    q(set(report.get('workflow_run_paths') or [])==expected_runs,'Build 261 must retain the exact five workflow_run chains')
+else:
+    q('.github/workflows/production-live-resource-integrity-proof.yml' in expected_runs,'Canonical Production Live Resource proof must remain modeled')
 q('uses: ./.github/actions/release467-exact-sha-proof' in wf,'Build 261 must use reusable exact-SHA proof composition')
 q('development_sha: 28b6f64d43f05e6c00a1cec579fa51f6a8797c0d' in wf and 'production_sha: 2f227d8ceb2239b5dc95b6f7a730c755a338d6f2' in wf,'Build 261 exact Build 260 SHA binding missing')
 q('build_proof_name: Release 467 Build 260 Pull-Request Matrix Fan-Out Reduction' in wf,'Build 261 predecessor proof name missing')
