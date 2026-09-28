@@ -1,7 +1,5 @@
 name: Release 467 Build 276 CAIP Acceptance Evidence Freshness Baseline
 on:
-  push:
-    branches: [dev, main]
   workflow_dispatch:
 permissions:
   contents: read
