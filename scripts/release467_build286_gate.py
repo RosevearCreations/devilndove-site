@@ -18,7 +18,7 @@ for token in ("action==='save_resource_link'","action==='remove_resource_link'",
 for token in ('creativeProcessResourceLinks286Mount','Link existing Supply/Tool Inventory','Reference only','Find existing Inventory','No operation / material event only'):q(token in page+ui,'Build 286 operator UI missing '+token)
 q('0024_release467_creative_process_resource_link_operator_workflow.sql' in doc and 'Build 287' in doc,'Build 286 doc incomplete');
 css=t('css/styles.css');ergjs=t('public/js/admin-ergonomics-v237.js');inventory_ui=t('public/js/admin-site-item-inventory.js');tools_page=t('tools/index.html');supplies_page=t('supplies/index.html');login_page=t('login/index.html');shop_page=t('shop/index.html');sw=t('sw.js');mainjs=t('js/main.js')
-for token in ("devilndove-shell-r467b286","AUTH_CRITICAL_ASSETS","/public/js/auth.js"):q(token in sw,'Build 286 auth-cache repair missing '+token)
+for token in ("devilndove-shell-r450","AUTH_CRITICAL_ASSETS","/public/js/auth.js"):q(token in sw,'Build 286 auth-cache repair missing '+token)
 q("467b286-cookie-session" in login_page and "467b286-cookie-session" in shop_page,'Build 286 login/shop auth cache-busting missing')
 q("new URL(node.src, window.location.href).pathname === wanted" in mainjs,'Build 286 duplicate auth script guard missing')
 q("inventoryCardDefault" in ergjs and "site-inventory-admin-table" in ergjs,'Build 286 Inventory desktop-card default missing')
