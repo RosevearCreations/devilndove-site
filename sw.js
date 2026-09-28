@@ -1,5 +1,5 @@
 // Release 450 installable platform — Release 467 adaptive shell layer.
-const CACHE_NAME = 'devilndove-shell-r467b286';
+const CACHE_NAME = 'devilndove-shell-r450';
 const CORE_ASSETS = [
   '/',
   '/offline.html',
