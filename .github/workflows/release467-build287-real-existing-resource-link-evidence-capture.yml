@@ -1,0 +1,68 @@
+name: Release 467 Build 287 Real Existing Resource-Link Evidence Capture
+# D1_ONE_SHOT_EVIDENCE_CAPTURE
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'scripts/release467_build287_probe.sql'
+      - '.github/workflows/release467-build287-real-existing-resource-link-evidence-capture.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  development-evidence-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      D1_PROVIDER_ROWS_READ_CEILING: '20000'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Enforce read-only one-shot boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Eiq '^[[:space:]]*(INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|REPLACE|VACUUM|ATTACH|DETACH|PRAGMA[[:space:]].*=)' scripts/release467_build287_probe.sql
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+      - name: Capture existing Development material/link candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --file scripts/release467_build287_probe.sql > /tmp/build287-probe.json
+          python - <<'PY'
+          import json
+          raw=json.load(open('/tmp/build287-probe.json',encoding='utf-8'))
+          reads=[]
+          result_rows=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None:
+                      reads.append(int(meta.get('rows_read') or 0))
+                  if isinstance(v.get('results'),list):
+                      result_rows.extend(v['results'])
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(raw)
+          total=sum(reads)
+          ceiling=int(__import__('os').environ['D1_PROVIDER_ROWS_READ_CEILING'])
+          print(f'D1_PROVIDER_ROWS_READ={total} CEILING={ceiling}')
+          print('BUILD287_RESULT_ROWS='+str(len(result_rows)))
+          for row in result_rows:
+              print(json.dumps(row,sort_keys=True))
+          if total>ceiling:
+              raise SystemExit(f'Build 287 one-shot probe exceeded D1 rows_read ceiling: {total}>{ceiling}')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release467-build287-real-existing-resource-link-probe-${{ github.sha }}
+          path: /tmp/build287-probe.json
+          retention-days: 30
