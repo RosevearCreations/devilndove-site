@@ -123,6 +123,8 @@ function shape(row = {}) {
   const reserved = Number(row.reserved_quantity || 0);
   const incoming = Number(row.incoming_quantity || 0);
   const reorder = Number(row.reorder_level || 0);
+  const unitCostCents = Math.max(0, Number(row.unit_cost_cents || 0) || 0);
+  const usageUnitsPerStockUnit = Math.max(0.001, Number(row.usage_units_per_stock_unit || 1) || 1);
 
   return {
     site_item_inventory_id: Number(row.site_item_inventory_id || 0),
@@ -139,11 +141,13 @@ function shape(row = {}) {
     incoming_quantity: incoming,
     available_quantity: Math.max(0, onHand - reserved),
     reorder_level: reorder,
-    unit_cost_cents: Number(row.unit_cost_cents || 0),
-    unit_cost_dollars: (Number(row.unit_cost_cents || 0) / 100).toFixed(2),
+    unit_cost_cents: unitCostCents,
+    unit_cost_dollars: (unitCostCents / 100).toFixed(2),
     stock_unit_label: row.stock_unit_label || 'unit',
     usage_unit_label: row.usage_unit_label || 'unit',
-    usage_units_per_stock_unit: Math.max(0.001, Number(row.usage_units_per_stock_unit || 1) || 1),
+    usage_units_per_stock_unit: usageUnitsPerStockUnit,
+    cost_per_usage_unit_cents: unitCostCents / usageUnitsPerStockUnit,
+    cost_per_usage_unit_dollars: (unitCostCents / usageUnitsPerStockUnit / 100).toFixed(4),
     usage_tracking_mode: normalizeUsageTrackingMode(row.usage_tracking_mode, normalizeInventoryKind(row.source_type) === 'tool' ? 'reusable' : 'exact'),
     minimum_usage_increment: Math.max(0.0001, Number(row.minimum_usage_increment || 0.001) || 0.001),
     supplier_name: row.supplier_name || '',
@@ -223,9 +227,21 @@ async function logMovement(db, payload = {}) {
   return Number(result?.meta?.last_row_id || 0);
 }
 
-async function getItems(db, { q = '', stockView = '', includeHistory = false, page = 1, pageSize = 80 } = {}) {
+async function getRecentMovements(db, limit = 30) {
+  const safeLimit = Math.max(1, Math.min(50, Number(limit || 30) || 30));
+  return normalizeResults(await db.prepare(`
+    SELECT site_inventory_movement_id,site_item_inventory_id,source_type,external_key,item_name,movement_type,
+           quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,
+           previous_incoming_quantity,new_incoming_quantity,note,created_at
+    FROM site_inventory_movements
+    ORDER BY created_at DESC,site_inventory_movement_id DESC
+    LIMIT ?
+  `).bind(safeLimit).all().catch(() => ({ results: [] })));
+}
+
+async function getItems(db, { q = '', stockView = '', includeHistory = false, page = 1, pageSize = 40 } = {}) {
   const safePage = Math.max(1, Number(page || 1) || 1);
-  const safePageSize = Math.max(25, Math.min(150, Number(pageSize || 80) || 80));
+  const safePageSize = Math.max(25, Math.min(100, Number(pageSize || 40) || 40));
   const offset = (safePage - 1) * safePageSize;
   const like = `%${q}%`;
   const filterBinds = [q, like, like, like, like, like, stockView, stockView, stockView, stockView, stockView, stockView, stockView];
@@ -299,14 +315,7 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false, pa
     reorder_list_items: Number(summaryRow?.reorder_list_items || 0)
   };
 
-  const movements = includeHistory
-    ? normalizeResults(await db.prepare(`
-        SELECT site_inventory_movement_id,site_item_inventory_id,source_type,external_key,item_name,movement_type,
-               quantity_delta,previous_on_hand_quantity,new_on_hand_quantity,previous_reserved_quantity,new_reserved_quantity,
-               previous_incoming_quantity,new_incoming_quantity,note,created_at
-        FROM site_inventory_movements
-        ORDER BY created_at DESC,site_inventory_movement_id DESC LIMIT 50
-      `).all().catch(() => ({ results: [] }))) : [];
+  const movements = includeHistory ? await getRecentMovements(db, 30) : [];
 
   return {
     items: items.map(shape),
@@ -587,15 +596,21 @@ async function handleGet(context) {
   if (!adminUser) return json({ ok: false, error: 'Unauthorized.' }, 401);
 
   const url = new URL(request.url);
+  const historyOnly = ['1', 'true', 'yes'].includes(String(url.searchParams.get('history_only') || '').toLowerCase());
+  if (historyOnly) {
+    const historyLimit = Math.max(1, Math.min(50, Number(url.searchParams.get('limit') || 30) || 30));
+    return json({ ok: true, read_profile: 'history_only', movements: await getRecentMovements(db, historyLimit) });
+  }
+
   const payload = await getItems(db, {
     q: normalizeText(url.searchParams.get('q')).toLowerCase(),
     stockView: normalizeText(url.searchParams.get('stock_view')).toLowerCase(),
     includeHistory: ['1', 'true', 'yes'].includes(String(url.searchParams.get('include_history') || '').toLowerCase()),
     page: Math.max(1, Number(url.searchParams.get('page') || 1) || 1),
-    pageSize: Math.max(25, Math.min(150, Number(url.searchParams.get('page_size') || 80) || 80))
+    pageSize: Math.max(25, Math.min(100, Number(url.searchParams.get('page_size') || 40) || 40))
   });
 
-  return json({ ok: true, ...payload });
+  return json({ ok: true, read_profile: 'paged_inventory', ...payload });
 }
 
 
