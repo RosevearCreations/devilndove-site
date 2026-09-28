@@ -1,0 +1,141 @@
+{
+  "release": 467,
+  "build": 284,
+  "title": "CAIP Production Acceptance Closure & Outcomes Renewal",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build284-caip-production-acceptance-closure-outcomes-renewal",
+  "predecessor": {
+    "build": 283,
+    "title": "Planned-vs-Actual Inventory Operator Acceptance",
+    "development_sha": "046cf0bebea75de39aaf7a42fef0e0639581615a",
+    "development_tree_sha": "2e0e404c7b62a0167155f6b1d563b34250748c32",
+    "production_main_sha": "5bc70281e8ea2cb9818b14f216bef30f2d7d1463",
+    "production_tree_sha": "2e0e404c7b62a0167155f6b1d563b34250748c32",
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36365773333,
+      "current_application_quality_run": 36365773581,
+      "it_admin_runtime_proof_run": 36365773340,
+      "branch_hygiene_run": 36365773372,
+      "dedicated_gate_run": 36365774362
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36366107169,
+      "production_live_resource_integrity_run": 36366163222,
+      "products_browser_proof_run": 36366163229,
+      "products_route_proof_run": 36366163225,
+      "build_specific_proof_run": 36366107020
+    }
+  },
+  "review": {
+    "source_builds": [
+      276,
+      277,
+      278,
+      279,
+      280,
+      281,
+      282,
+      283
+    ],
+    "all_source_builds_production_green": true,
+    "exact_tree_closure_preserved": true,
+    "caip_private_media": {
+      "lane_state": "ACCEPTED",
+      "required_dimensions": 3,
+      "fresh_dimensions_satisfied": 3,
+      "private_bucket_non_public_exposure": true,
+      "authenticated_range_streaming": true,
+      "multipart_interruption_resume": true,
+      "reconciliation_reviewed": true,
+      "uncertain_binary_preserved": true,
+      "automatic_cleanup": false
+    },
+    "operator_acceptance": {
+      "standalone_social_real_operator_evidence": true,
+      "content_studio_bridge_real_operator_evidence": true,
+      "planned_vs_actual_contract_green": true,
+      "build283_fixture_required": true,
+      "build283_fixture_type": "BOUNDED_DEVELOPMENT_SUPPLY_OWNER_FIXTURE",
+      "build283_fixture_cleaned_up": true,
+      "real_creative_process_inventory_linkage_observed": false,
+      "product_owned_stock_used": false,
+      "finance_posting_observed": false
+    },
+    "residual": {
+      "exists": true,
+      "classification": "REAL_CREATIVE_PROCESS_INVENTORY_LINKAGE_ADOPTION_EVIDENCE_GAP",
+      "reason": "Build 283 proved the lifecycle contract and cleanup safety, but Development had no defensible real Creative Process material-to-Supply/Tool Inventory association, so bounded fixture evidence cannot be treated as real operational adoption.",
+      "accepted_caip_private_media_reopened": false
+    }
+  },
+  "decision": {
+    "autonomous_queue_exhausted": false,
+    "action": "CREATE_EVIDENCE_DRIVEN_SUCCESSOR_ROADMAP",
+    "rationale": [
+      "The CAIP private-media acceptance lane is current-release ACCEPTED at 3/3 fresh dimensions.",
+      "Builds 281 and 282 provide real operator evidence for productless CAIP identity and the Content Studio bridge.",
+      "Build 283 proved the planned-vs-actual Inventory contract only after a bounded temporary Supply fixture was required; this is not equivalent to real existing operational linkage.",
+      "A narrow real-Inventory-linkage roadmap is therefore justified; reopening private-media acceptance is not."
+    ],
+    "successor_roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md",
+    "next_build": 285,
+    "next_build_title": "Real Inventory Linkage Prerequisite Inventory"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_upload": false,
+    "private_media_delete": false,
+    "uncertain_r2_delete": false,
+    "public_media_copy": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "product_publication": false,
+    "inventory_movement": false,
+    "finance_posting": false,
+    "payment_or_refund": false,
+    "production_business_data_copy": false,
+    "secret_capture": false,
+    "synthetic_acceptance": false,
+    "exact_sha_requirement_relaxed": false,
+    "named_proof_requirement_relaxed": false
+  },
+  "implementation": {
+    "renewal_document": "docs/operations/RELEASE_467_BUILD_284_CAIP_PRODUCTION_ACCEPTANCE_CLOSURE_OUTCOMES_RENEWAL.md",
+    "successor_roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md",
+    "dedicated_gate": "scripts/release467_build284_gate.py",
+    "workflow": ".github/workflows/release467-build284-caip-production-acceptance-closure-outcomes-renewal.yml"
+  },
+  "acceptance": {
+    "next_build": 285,
+    "next_build_title": "Real Inventory Linkage Prerequisite Inventory",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "046cf0bebea75de39aaf7a42fef0e0639581615a",
+      "tree": "2e0e404c7b62a0167155f6b1d563b34250748c32",
+      "system_gate_run": 36365773333,
+      "quality_run": 36365773581,
+      "it_admin_runtime_run": 36365773340,
+      "repository_hygiene_run": 36365773372,
+      "dedicated_gate_run": 36365774362,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "5bc70281e8ea2cb9818b14f216bef30f2d7d1463",
+      "tree_sha": "2e0e404c7b62a0167155f6b1d563b34250748c32",
+      "production_pages_deploy_run": 36366107169,
+      "production_live_resource_integrity_run": 36366163222,
+      "products_browser_proof_run": 36366163229,
+      "products_route_proof_run": 36366163225,
+      "build_specific_proof_run": 36366107020,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
+  }
+}
