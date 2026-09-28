@@ -1,16 +1,17 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 287 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 288 candidate
 
-Build 287 — Real Existing Resource-Link Evidence Capture — is projected over the exact fully verified Build 286 closure.
+Build 288 — Real Planned-vs-Actual Inventory Acceptance — is projected over the exact fully verified Build 287 closure.
 
-- Last fully verified Development: `fe4dff65c47a00fc3c61a6ae48faa26828951898`
-- Verified tree: `a5d51c32f7a1e3696cdbfbfe16e204ecb3f419ec`
-- Development proofs: System `36374225700`, Current Application Quality `36374225637`, I.T. Admin Runtime `36374225648`, Repository Branch Hygiene `36374225692`; Build 286 dedicated `36374225610`
-- Current Production main: `11a4924ce8f5a83bc6b688489404140e89456662`
-- Production proofs: Pages `36374409720`, Live Resources `36374501241`, Product Browser `36374501210`, Product Route `36374501223`; Build 286 `36374409434`
-- Build 287 real Development evidence: project 7 / material event 2 → Supply Inventory 2801 → resource link 1; exact normalized material/Inventory name match.
-- Build 287 bounded D1 evidence: `170 rows_read` against a `20,000` ceiling; Inventory on-hand remained `1 → 1`; no Inventory movement and no Finance posting.
-- Inventory Operations repair remains active: desktop editable table, inline stock/usage conversions, calculated cost per usage unit, lazy history, low-read link aggregation profile, and feature API failures do not falsely clear login identity.
-- Next: Build 288 — Real Planned-vs-Actual Inventory Acceptance.
+- Last fully verified Development: `f3e84a0c5623eb0a74bccb537049d780944e2892`
+- Verified tree: `981b7a5e7b851684821af087a428fe66ad8348f0`
+- Development proofs: System `36432943282`, Current Application Quality `36432943315`, I.T. Admin Runtime `36432943396`, Repository Branch Hygiene `36432943404`; Build 287 dedicated `36432943286`
+- Current Production main: `27a48e505b42c399fac0801cbd4e6394490957a4`
+- Production proofs: Pages `36433269795`, Live Resources `36433368187`; Build 287 `36433269797`
+- Build 287 real linkage retained: project 7 / material event 2 → Supply Inventory 2801 → resource link 1.
+- Build 288 requires real-data reviewed-unposted → explicit Inventory post → compensating reversal, with Inventory restored exactly to baseline and Finance unchanged.
+- Build 288 creates no project, material event, Inventory item or Product fixture.
+- Inventory Operations desktop editing uses a wide horizontally scrollable table so input contents and actions remain readable.
+- Next: Build 289 — Real Inventory Adoption Outcomes Renewal.
 
 ## Current release baseline
 

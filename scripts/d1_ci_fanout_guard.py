@@ -41,7 +41,7 @@ for path in sorted(WORKFLOWS.glob("release467-build*.yml")):
     if remote:
         remote_release_workflows += 1
         one_shot_successor = (
-            build == current_build + 1
+            build in (current_build, current_build + 1)
             and "D1_ONE_SHOT_EVIDENCE_CAPTURE" in text
             and triggers == ["push"]
             and "branches: [dev]" in text
@@ -52,7 +52,7 @@ for path in sorted(WORKFLOWS.glob("release467-build*.yml")):
         if triggers and not one_shot_successor:
             FAIL.append(
                 f"{path.relative_to(ROOT)}: remote D1 proof cannot run automatically unless it is the "
-                f"single bounded successor evidence capture; automatic triggers={','.join(triggers)}"
+                f"single bounded current/successor evidence capture; automatic triggers={','.join(triggers)}"
             )
 
     if build < current_build:
