@@ -1,32 +1,6 @@
 name: Release 467 Build 238 Attention Notifications Operator Signal Cleanup
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'public/js/admin-attention-signals-v238.js'
-      - 'css/admin-attention-signals-v238.css'
-      - 'public/js/admin-notifications.js'
-      - 'public/js/admin-runtime-incidents.js'
-      - 'public/js/admin-today-tasks.js'
-      - 'functions/_middleware.js'
-      - 'release467-build237-mobile-touch-keyboard-dense-workspace-ergonomics.json'
-      - 'release467-build238-attention-notifications-operator-signal-cleanup.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build237_gate.py'
-      - 'scripts/release467_build238_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'docs/operations/RELEASE_467_BUILD_238_ATTENTION_NOTIFICATIONS_OPERATOR_SIGNAL_CLEANUP.md'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/it/index.html'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'admin/deployment-preflight/index.html'
-      - 'admin/reliability/index.html'
-      - '.github/workflows/release467-build238-attention-notifications-operator-signal-cleanup.yml'
   workflow_dispatch:
-
 jobs:
   build238:
     runs-on: ubuntu-latest
