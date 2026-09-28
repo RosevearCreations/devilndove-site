@@ -31,11 +31,33 @@ jobs:
           grep -q '^database_name = "devilndove-dev"$' wrangler.toml
           grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
           ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+      - name: Confirm Development D1 is available without scanning business rows
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT 1 AS d1_available;" > /tmp/build287-d1-preflight.txt 2>&1
+          status=$?
+          set -e
+          cat /tmp/build287-d1-preflight.txt
+          if [ "${status}" -ne 0 ]; then
+            echo "::error title=Development D1 unavailable::Build 287 evidence capture stopped before business-data scan."
+            exit "${status}"
+          fi
       - name: Capture existing Development material/link candidates
         shell: bash
         run: |
-          set -euo pipefail
-          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --file scripts/release467_build287_probe.sql > /tmp/build287-probe.json
+          set -uo pipefail
+          set +e
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --file scripts/release467_build287_probe.sql > /tmp/build287-probe.json 2>/tmp/build287-probe.stderr
+          status=$?
+          set -e
+          cat /tmp/build287-probe.stderr
+          if [ "${status}" -ne 0 ]; then
+            echo '--- D1 JSON/error payload ---'
+            cat /tmp/build287-probe.json || true
+            exit "${status}"
+          fi
           python - <<'PY'
           import json
           raw=json.load(open('/tmp/build287-probe.json',encoding='utf-8'))
@@ -62,7 +84,12 @@ jobs:
               raise SystemExit(f'Build 287 one-shot probe exceeded D1 rows_read ceiling: {total}>{ceiling}')
           PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: release467-build287-real-existing-resource-link-probe-${{ github.sha }}
-          path: /tmp/build287-probe.json
+          path: |
+            /tmp/build287-d1-preflight.txt
+            /tmp/build287-probe.json
+            /tmp/build287-probe.stderr
+          if-no-files-found: warn
           retention-days: 30
