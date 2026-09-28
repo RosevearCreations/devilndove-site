@@ -1,0 +1,92 @@
+{
+  "release": 467,
+  "build": 286,
+  "title": "Creative Process Resource-Link Operator Workflow",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build286-creative-process-resource-link-operator-workflow",
+  "predecessor": {
+    "build": 285,
+    "title": "Real Inventory Linkage Prerequisite Inventory",
+    "development_sha": "d1c70746fd937b05708306ea299ddb64559ff79c",
+    "development_tree_sha": "cea56547d734e8c4db51d49d145edebeb806d762",
+    "production_main_sha": "2056cc46ebb5589dddc0b5172d90ffbd0e3c4241",
+    "production_tree_sha": "cea56547d734e8c4db51d49d145edebeb806d762",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36368685098,
+      "current_application_quality_run": 36368684950,
+      "it_admin_runtime_proof_run": 36368685244,
+      "branch_hygiene_run": 36368685028,
+      "dedicated_gate_run": 36368684902
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36368898983,
+      "production_live_resource_integrity_run": 36368970032,
+      "products_browser_proof_run": 36368970208,
+      "products_route_proof_run": 36368970050,
+      "build_specific_proof_run": 36368899022
+    }
+  },
+  "implementation": {
+    "canonical_migration": "migrations/canonical/0024_release467_creative_process_resource_link_operator_workflow.sql",
+    "resource_link_table": "creative_process_resource_links",
+    "endpoint": "/api/admin/creative-process-resource-links",
+    "endpoint_source": "functions/api/admin/creative-process-resource-links.js",
+    "client": "public/js/admin-creative-process-resource-links-build286.js",
+    "workspace": "/admin/creative-process/",
+    "operator_mount": "creativeProcessResourceLinks286Mount",
+    "existing_operation_table": "creative_project_operations",
+    "existing_inventory_table": "site_item_inventory",
+    "existing_material_event_table": "creative_work_events"
+  },
+  "contract": {
+    "existing_project_required": true,
+    "existing_material_event_required": true,
+    "existing_supply_or_tool_inventory_required": true,
+    "existing_operation_optional": true,
+    "operator_explicit_save_required": true,
+    "identity_reference_only": true,
+    "product_owned_inventory_allowed": false,
+    "automatic_inventory_movement": false,
+    "inventory_quantity_mutation": false,
+    "inventory_reservation": false,
+    "finance_posting": false,
+    "actual_usage_post_authority": "inventory-post",
+    "next_build": 287,
+    "next_build_title": "Real Existing Resource-Link Evidence Capture",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "canonical_schema_addition": true,
+    "development_schema_migration": true,
+    "production_schema_migration_on_deliberate_promotion": true,
+    "request_time_schema_mutation": false,
+    "operator_resource_link_mutation": true,
+    "inventory_quantity_mutation": false,
+    "inventory_movement": false,
+    "inventory_direct_stock_rewrite": false,
+    "product_owned_inventory_substitution": false,
+    "product_mutation": false,
+    "creative_material_event_creation": false,
+    "finance_posting": false,
+    "payment_or_refund": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_business_data_copy": false,
+    "automatic_production_promotion": false,
+    "secret_capture": false
+  },
+  "acceptance": {
+    "dedicated_gate": "scripts/release467_build286_gate.py",
+    "workflow": ".github/workflows/release467-build286-creative-process-resource-link-operator-workflow.yml",
+    "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md",
+    "owner_reported_regression_gate": true
+  },
+  "owner_reported_repairs": {
+    "login_cookie_client_cache": "Auth-critical browser clients are cache-busted and bypass service-worker cache; login remains HttpOnly-cookie first.",
+    "inventory_editor": "Tools/Supplies Inventory defaults its main editable table to a responsive 3/2/1-column card editor and persists tool/supply type changes through the existing safe reclassification backend.",
+    "public_resource_cards": "Public Tools and Supplies cards are reduced for 3–4-across browsing with hover/focus detail affordance.",
+    "contrast": "Known light Shop-by-intent and resource-card surfaces now carry explicit dark foreground colours."
+  }
+}

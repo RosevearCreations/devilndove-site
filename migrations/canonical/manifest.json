@@ -174,6 +174,13 @@
       "release": 467,
       "description": "Add five owner-authorized editable 2 × 2 inch Soap Cupcake label system templates (Sweet Orange, Charcoal, Oatmeal & Goat Milk, Sea Breeze, Lavender Dream) to the existing Packaging authority without changing existing projects.",
       "recovery": "Forward-only additive reference templates. Deactivate or supersede a template for logical rollback; do not rewrite existing Packaging projects. Correct template facts with a later numbered migration."
+    },
+    {
+      "version": 24,
+      "file": "0024_release467_creative_process_resource_link_operator_workflow.sql",
+      "release": 467,
+      "description": "Add explicit operator-owned Creative Process material-event resource identity links to existing Supply/Tool Inventory, with optional existing operation context and no stock movement.",
+      "recovery": "Forward-only additive reference table. Remove incorrect identity-link rows through the reviewed operator workflow; never rewrite Inventory movement or Creative Process history. Repair schema defects only with a later numbered migration."
     }
   ]
 }

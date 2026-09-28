@@ -2,7 +2,7 @@
   "release": 467,
   "build": 285,
   "title": "Real Inventory Linkage Prerequisite Inventory",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build285-real-inventory-linkage-prerequisite-inventory",
   "predecessor": {
     "build": 284,
@@ -157,5 +157,31 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_development": true
     }
+  },
+  "final_closure": {
+    "dev_sha": "d1c70746fd937b05708306ea299ddb64559ff79c",
+    "tree_sha": "cea56547d734e8c4db51d49d145edebeb806d762",
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "proofs": {
+      "system_gate_run": 36368685098,
+      "current_application_quality_run": 36368684950,
+      "it_admin_runtime_proof_run": 36368685244,
+      "branch_hygiene_run": 36368685028,
+      "dedicated_gate_run": 36368684902
+    },
+    "ingested_by_build": 286,
+    "recorded_by": "Build 286 startup ingestion; not self-recorded by Build 285"
+  },
+  "production_checkpoint": {
+    "build": 285,
+    "main_sha": "2056cc46ebb5589dddc0b5172d90ffbd0e3c4241",
+    "tree_sha": "cea56547d734e8c4db51d49d145edebeb806d762",
+    "production_pages_deploy_run": 36368898983,
+    "production_live_resource_integrity_run": 36368970032,
+    "products_browser_proof_run": 36368970208,
+    "products_route_proof_run": 36368970050,
+    "build_specific_proof_run": 36368899022,
+    "state": "PRODUCTION_GREEN",
+    "same_tree": true
   }
 }

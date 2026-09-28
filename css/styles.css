@@ -3402,3 +3402,26 @@ body[data-admin-page="creative-assets"] .caip-sync-panel{background:#1c2540;colo
 .packaging-cupcake-colour span{display:block;width:38px;height:24px;border-radius:8px;border:2px solid rgba(255,255,255,.7)}
 .packaging-cupcake-colour small{font-size:.72rem}.packaging-cupcake-colour:hover,.packaging-cupcake-colour.is-active{border-color:var(--ice,#bfe8ff);background:rgba(46,168,255,.1)}
 @media(max-width:560px){.packaging-cupcake-presets{grid-template-columns:repeat(2,minmax(0,1fr))}.packaging-cupcake-colour{min-width:64px;flex:1 1 64px}}
+
+
+/* Build 286 owner-reported contrast + dense inventory-card repair. */
+.shop-collection-card{color:#1f2937}
+.shop-collection-card strong,.shop-collection-card h2,.shop-collection-card h3{color:#111827}
+.shop-collection-card .small,.shop-collection-card p{color:#374151}
+.shop-collection-card .btn{background:#fff7e6;color:#3b250c;border-color:#e8bd75}
+.resource-tile,.resource-linked-card{color:#111827}
+.resource-tile .small,.resource-linked-card .small{color:#4b5563}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode{display:block;width:100%!important;min-width:0!important;table-layout:auto!important}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode thead{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode tbody{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode tr{display:block;min-width:0;margin:0;padding:12px;border:1px solid rgba(191,232,255,.18);border-radius:14px;background:linear-gradient(180deg,rgba(24,32,47,.98),rgba(16,22,34,.98));box-shadow:0 8px 22px rgba(0,0,0,.16)}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode td{display:grid!important;grid-template-columns:minmax(82px,.42fr) minmax(0,1fr);gap:8px;width:100%!important;min-width:0!important;padding:7px 0!important;border:0!important;background:transparent!important;align-items:start}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode td::before{content:attr(data-label);font-size:.72rem;line-height:1.25;font-weight:800;color:#a9bdd8;text-transform:uppercase;letter-spacing:.035em}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode .site-inventory-row-actions{min-width:0!important;display:block;box-shadow:none!important}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode .site-inventory-action-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode :where(input,select,textarea,.btn){min-width:0;max-width:100%}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode .site-inventory-grid-identity{grid-template-columns:52px minmax(0,1fr)}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode .site-inventory-list-thumb{width:52px;min-height:52px;border-radius:10px}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode .site-inventory-list-thumb img{height:52px}
+@media(max-width:1000px){.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode tbody{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode tbody{grid-template-columns:1fr}}

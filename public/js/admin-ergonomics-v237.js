@@ -14,7 +14,8 @@
   const button=document.createElement('button');button.type='button';button.className='btn secondary dd-v237-table-toggle';button.textContent='Card view';button.setAttribute('aria-pressed','false');
   button.addEventListener('click',()=>{const on=!table.classList.contains('dd-v237-card-mode');table.classList.toggle('dd-v237-card-mode',on);button.setAttribute('aria-pressed',String(on));button.textContent=on?'Table view':'Card view';});
   tools.appendChild(button);table.parentNode?.insertBefore(tools,table);
-  if(mq.matches)table.classList.add('dd-v237-card-mode');
+  const inventoryCardDefault=location.pathname.startsWith('/admin/inventory-operations/')&&table.classList.contains('site-inventory-admin-table');
+  if(mq.matches||inventoryCardDefault)table.classList.add('dd-v237-card-mode');
   button.setAttribute('aria-pressed',String(table.classList.contains('dd-v237-card-mode')));button.textContent=table.classList.contains('dd-v237-card-mode')?'Table view':'Card view';
  }
  function apply(){stickySelectors.forEach(sel=>document.querySelectorAll(sel).forEach(el=>el.classList.add('dd-v237-sticky-actions')));document.querySelectorAll('.admin-shell table').forEach(labelTable);document.documentElement.dataset.ddBuild237Ergonomics='ready';}

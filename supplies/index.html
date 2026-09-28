@@ -25,7 +25,7 @@
 
     .subgrid{
       display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 12px;
     }
 
@@ -34,12 +34,12 @@
       overflow: hidden;
       display:flex;
       flex-direction: column;
-      min-height: 355px;
+      min-height: 280px;
       height: 100%;
     }
 
     .item.card .thumb{
-      height: 180px;
+      height: 125px;
       width: 100%;
       background: rgba(255,255,255,0.03);
       border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -160,6 +160,15 @@
     }
 
     .controls .input { width: 100%; }
+
+    .item.card{transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+    @media (hover:hover){
+      .item.card:hover,.item.card:focus-within{transform:translateY(-3px);border-color:rgba(191,232,255,.36);box-shadow:0 14px 30px rgba(0,0,0,.28)}
+      .item.card:hover .thumb img,.item.card:focus-within .thumb img{transform:scale(1.025)}
+      .item.card .thumb img{transition:transform .16s ease}
+    }
+    @media (prefers-reduced-motion:reduce){.item.card,.item.card .thumb img{transition:none!important}.item.card:hover,.item.card:focus-within{transform:none}}
+
     .controls-row{
       display:grid;
       grid-template-columns: 1fr 220px 220px 220px;
@@ -844,6 +853,6 @@
       initSuppliesPage();
     })();
   </script>
-<script src="/public/js/auth.js?v=279"></script><script src="/public/js/site-auth-ui.js"></script> 
+<script src="/public/js/auth.js?v=467b286-cookie-session"></script><script src="/public/js/site-auth-ui.js?v=467b286-cookie-session"></script> 
 </body>
 </html>

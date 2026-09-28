@@ -59,8 +59,11 @@ req("packageType === 'soap_cupcake_label'" in readsvc and '50.8' in readsvc and 
 req('Create 2 × 2 cupcake-soap label' in pack_html,'Packaging Studio cupcake creation action missing')
 
 files=[str(row.get('file') or '') for row in (manifest.get('migrations') or []) if isinstance(row,dict)]
-req(len(files)==23,'Build 234 canonical migration stream must contain exactly 23 migrations')
-req(files[-1]=='0023_release467_cupcake_soap_label_templates.sql','Build 234 canonical migration 0023 identity')
+if pb>=286:
+    req(len(files)>=24 and files[22]=='0023_release467_cupcake_soap_label_templates.sql' and files[23]=='0024_release467_creative_process_resource_link_operator_workflow.sql','Build 234 successor chain must preserve canonical 0001-0023 and Build 286 migration 0024')
+else:
+    req(len(files)==23,'Build 234 canonical migration stream must contain exactly 23 migrations before Build 286')
+    req(files[-1]=='0023_release467_cupcake_soap_label_templates.sql','Build 234 canonical migration 0023 identity')
 req((a.get('safety') or {}).get('data_only_forward_migration') is True and (a.get('safety') or {}).get('canonical_schema_addition') is False,'Build 234 migration must remain data-only')
 for key in ('product_mutation','inventory_quantity_mutation','finance_mutation','r2_mutation','provider_execution','provider_publication','automatic_product_publication','help_api_calls'):
     req((a.get('safety') or {}).get(key) is False,f'Build 234 safety boundary drifted: {key}')

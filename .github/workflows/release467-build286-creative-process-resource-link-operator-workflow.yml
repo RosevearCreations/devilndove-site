@@ -1,0 +1,48 @@
+name: Release 467 Build 286 Creative Process Resource-Link Operator Workflow
+on:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Recover exact Build 285 Development and Production workflow evidence
+        uses: ./.github/actions/release467-exact-sha-proof
+        with:
+          github_token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          development_sha: d1c70746fd937b05708306ea299ddb64559ff79c
+          production_sha: 2056cc46ebb5589dddc0b5172d90ffbd0e3c4241
+          build_proof_name: Release 467 Build 285 Real Inventory Linkage Prerequisite Inventory
+          report_path: /tmp/build286-predecessor-exact-sha-proof.json
+      - name: Resolve exact Build 285 tree continuity
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin d1c70746fd937b05708306ea299ddb64559ff79c
+          git fetch --no-tags --depth=1 origin 2056cc46ebb5589dddc0b5172d90ffbd0e3c4241
+          test "$(git rev-parse d1c70746fd937b05708306ea299ddb64559ff79c^{tree})" = "cea56547d734e8c4db51d49d145edebeb806d762"
+          test "$(git rev-parse 2056cc46ebb5589dddc0b5172d90ffbd0e3c4241^{tree})" = "cea56547d734e8c4db51d49d145edebeb806d762"
+      - name: Build 286 source and operator contract
+        run: |
+          python scripts/migration_policy_gate.py
+          python scripts/release467_build286_gate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build286-predecessor-proof-${{ github.sha }}
+          path: /tmp/build286-predecessor-exact-sha-proof.json
+          if-no-files-found: error
+          retention-days: 30

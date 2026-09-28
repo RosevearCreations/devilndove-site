@@ -515,7 +515,14 @@
   }
 
   function ensureGlobalScript(src) {
-    if (!src || document.querySelector(`script[src="${src}"]`)) return;
+    if (!src) return;
+    let wanted = '';
+    try { wanted = new URL(src, window.location.href).pathname; } catch { wanted = String(src).split('?')[0]; }
+    const exists = Array.from(document.querySelectorAll('script[src]')).some((node) => {
+      try { return new URL(node.src, window.location.href).pathname === wanted; }
+      catch { return String(node.getAttribute('src') || '').split('?')[0] === wanted; }
+    });
+    if (exists) return;
     const script = document.createElement('script');
     script.src = src;
     script.async = false;
@@ -534,8 +541,8 @@
     injectTrustSupportBlock();
     injectVisualPolishStrip();
     injectLowBandwidthToggle();
-    ensureGlobalScript('/public/js/auth.js');
-    ensureGlobalScript('/public/js/site-auth-ui.js');
+    ensureGlobalScript('/public/js/auth.js?v=467b286-cookie-session');
+    ensureGlobalScript('/public/js/site-auth-ui.js?v=467b286-cookie-session');
     ensureGlobalScript('/public/js/site-analytics.js?v=440');
   });
 })();

@@ -23,3 +23,6 @@
  .admin-shell :where(a,button,.btn,[role="button"]){touch-action:manipulation}
  .admin-shell :where(input[type="checkbox"],input[type="radio"]){min-width:22px;min-height:22px}
 }
+
+/* Build 286: desktop card-mode is available for the main Inventory editor. */
+.inventory-operations-page .dd-v237-table-tools{margin:8px 0 10px}
