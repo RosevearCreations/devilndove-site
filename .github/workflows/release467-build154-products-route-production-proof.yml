@@ -1,10 +1,7 @@
 name: Release 467 Build 154 Products Route Production Proof
 
 on:
-  workflow_run:
-    workflows: ['Production Pages Deploy']
-    types: [completed]
-
+  workflow_dispatch:
 permissions:
   contents: read
   actions: read
