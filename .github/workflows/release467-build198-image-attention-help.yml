@@ -1,38 +1,7 @@
 name: Release 467 Build 198 Image Fidelity Attention Shared Help
 
 on:
-  pull_request:
-    branches: [dev]
-  push:
-    branches: [dev, main]
-    paths:
-      - 'css/storefront-discovery.css'
-      - 'css/styles.css'
-      - 'css/admin-context-help.css'
-      - 'admin/catalog-media/index.html'
-      - 'admin/help/index.html'
-      - 'help/index.html'
-      - 'public/js/admin-product-media-editor-v172.js'
-      - 'public/js/admin-runtime-incidents.js'
-      - 'public/js/admin-context-help.js'
-      - 'public/js/site-auth-ui.js'
-      - 'functions/_middleware.js'
-      - 'docs/architecture/admin-context-help.md'
-      - 'docs/operations/RELEASE_467_BUILD_198_PRODUCT_IMAGE_FIDELITY_ATTENTION_SHARED_HELP.md'
-      - 'docs/operations/RELEASE_467_AUTONOMOUS_EXECUTION_BUILDS_193_200.md'
-      - 'scripts/release467_build198_gate.py'
-      - 'scripts/current_help_hygiene_gate.py'
-      - 'scripts/release455_storefront_discovery_gate.py'
-      - 'scripts/release448_storefront_merchandising_gate.py'
-      - 'scripts/release467_build197_gate.py'
-      - 'scripts/release467_build196_gate.py'
-      - 'scripts/release467_build195_gate.py'
-      - 'scripts/release467_build194_gate.py'
-      - 'scripts/release467_build193_gate.py'
-      - 'scripts/release467_build192_gate.py'
-      - '.github/workflows/release467-build198-image-attention-help.yml'
   workflow_dispatch:
-
 permissions:
   contents: read
 
