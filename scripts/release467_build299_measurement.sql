@@ -35,34 +35,30 @@ WHERE COALESCE(status,'active')='active'
 ORDER BY COALESCE(sort_order,999999),product_id DESC
 LIMIT 50;
 
--- 5: Creations priority query plan without search predicate.
+-- 5: Creations canonical query plan without an empty-search OR scan.
 EXPLAIN QUERY PLAN
-SELECT c.catalog_item_id,c.slug,c.name
-FROM catalog_items c
-LEFT JOIN public_display_priorities d
-  ON d.surface_key='creations' AND d.record_type='creation' AND d.record_id=c.catalog_item_id
-WHERE c.item_kind='creation' AND COALESCE(c.visible_public,1)=1 AND COALESCE(c.status,'active')='active'
-ORDER BY COALESCE(d.is_pinned,0) DESC,COALESCE(d.priority_rank,9999),COALESCE(c.sort_order,0),c.catalog_item_id
+SELECT catalog_item_id,slug,name
+FROM catalog_items
+WHERE item_kind='creation' AND COALESCE(visible_public,1)=1 AND COALESCE(status,'active')='active'
+ORDER BY COALESCE(sort_order,0),catalog_item_id
 LIMIT 50;
 
 -- 6: Universal-search reference-like prefix query plan.
 EXPLAIN QUERY PLAN
-SELECT product_id,name,sku,slug,product_number
+SELECT product_id,name,sku,slug
 FROM products
 WHERE LOWER(COALESCE(name,'')) LIKE 'a%'
    OR LOWER(COALESCE(sku,'')) LIKE 'a%'
    OR LOWER(COALESCE(slug,'')) LIKE 'a%'
-   OR LOWER(COALESCE(CAST(product_number AS TEXT),'')) LIKE 'a%'
 ORDER BY product_id DESC LIMIT 6;
 
 -- 7: Universal-search free-form substring query plan (retained only for human text semantics).
 EXPLAIN QUERY PLAN
-SELECT product_id,name,sku,slug,product_number
+SELECT product_id,name,sku,slug
 FROM products
 WHERE LOWER(COALESCE(name,'')) LIKE '%a%'
    OR LOWER(COALESCE(sku,'')) LIKE '%a%'
    OR LOWER(COALESCE(slug,'')) LIKE '%a%'
-   OR LOWER(COALESCE(CAST(product_number AS TEXT),'')) LIKE '%a%'
 ORDER BY product_id DESC LIMIT 6;
 
 -- 8: Actual bounded Product read.

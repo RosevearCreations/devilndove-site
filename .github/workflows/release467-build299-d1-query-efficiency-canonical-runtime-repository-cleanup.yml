@@ -2,6 +2,12 @@ name: Release 467 Build 299 D1 Query Efficiency Canonical Runtime Repository Cle
 on:
   push:
     branches: [dev]
+    paths:
+      - 'functions/api/**'
+      - 'scripts/release467_build299_*'
+      - 'release467-build299-*.json'
+      - 'current-development-authority.json'
+      - '.github/workflows/release467-build299-d1-query-efficiency-canonical-runtime-repository-cleanup.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -32,7 +38,7 @@ jobs:
       DEV_D1_DATABASE_NAME: devilndove-dev
       EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
       EXPECTED_STATEMENTS: 10
-      AGGREGATE_ROWS_READ_CEILING: 25000
+      D1_PROVIDER_ROWS_READ_CEILING: '20000'
     steps:
       - uses: actions/checkout@v7
         with: { fetch-depth: 2 }
@@ -40,6 +46,7 @@ jobs:
         with: { python-version: '3.12' }
       - uses: actions/setup-node@v7
         with: { node-version: '24' }
+      # D1_ONE_SHOT_EVIDENCE_CAPTURE — current Build 299 only; path-scoped dev push + manual recovery.
       - name: Prove exact Development source and D1 identity
         shell: bash
         run: |
@@ -71,7 +78,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$(grep -v '^[[:space:]]*--' scripts/release467_build299_measurement.sql)" > /tmp/build299-measurement.json
+          if ! npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$(grep -v '^[[:space:]]*--' scripts/release467_build299_measurement.sql)" > /tmp/build299-measurement.json 2>/tmp/build299-measurement.err; then
+            cat /tmp/build299-measurement.err >&2 || true
+            cat /tmp/build299-measurement.json >&2 || true
+            exit 1
+          fi
           python - <<'PY'
           import json,os
           raw=json.load(open('/tmp/build299-measurement.json'))
@@ -84,7 +95,7 @@ jobs:
           for item in statements:
               meta=item.get('meta') if isinstance(item,dict) else {}
               reads.append(int((meta or {}).get('rows_read') or 0))
-          aggregate=sum(reads);ceiling=int(os.environ['AGGREGATE_ROWS_READ_CEILING'])
+          aggregate=sum(reads);ceiling=int(os.environ['D1_PROVIDER_ROWS_READ_CEILING'])
           assert aggregate<=ceiling,('aggregate rows_read budget exceeded',aggregate,ceiling,reads)
           corpus={}
           if len(statements)>=3 and isinstance(statements[2],dict):
