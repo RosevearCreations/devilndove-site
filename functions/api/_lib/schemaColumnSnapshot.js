@@ -14,7 +14,12 @@ export async function loadSchemaColumnSnapshot(db,tableNames=[]){
   const promise=(async()=>{
     const out=emptyMap(names);
     try{
-      const sql=names.map((name)=>`SELECT '${name.replace(/'/g,"''")}' AS table_name,name FROM pragma_table_info('${name.replace(/'/g,"''")}')`).join(' UNION ALL ');
+      const quoted=names.map((name)=>`'${name.replace(/'/g,"''")}'`).join(',');
+      const sql=`SELECT m.name AS table_name,p.name AS name
+        FROM sqlite_schema m
+        JOIN pragma_table_info(m.name) p
+        WHERE m.type='table' AND m.name IN (${quoted})
+        ORDER BY m.name,p.cid`;
       const result=await db.prepare(sql).all();
       for(const row of rows(result)){const table=safe(row.table_name),column=safe(row.name);if(table&&column&&out.has(table))out.get(table).add(column);}
       return out;

@@ -2,22 +2,20 @@
 -- No DDL and no mutations. Statement order is part of the proof contract.
 
 -- 1: products/detail schema columns in one statement.
-SELECT 'products' table_name,name FROM pragma_table_info('products')
-UNION ALL SELECT 'tax_classes',name FROM pragma_table_info('tax_classes')
-UNION ALL SELECT 'product_seo',name FROM pragma_table_info('product_seo')
-UNION ALL SELECT 'product_story_public_notes',name FROM pragma_table_info('product_story_public_notes')
-UNION ALL SELECT 'product_images',name FROM pragma_table_info('product_images')
-UNION ALL SELECT 'product_image_annotations',name FROM pragma_table_info('product_image_annotations')
-UNION ALL SELECT 'media_consent_records',name FROM pragma_table_info('media_consent_records');
+SELECT m.name table_name,p.name
+FROM sqlite_schema m
+JOIN pragma_table_info(m.name) p
+WHERE m.type='table'
+  AND m.name IN ('products','tax_classes','product_seo','product_story_public_notes','product_images','product_image_annotations','media_consent_records')
+ORDER BY m.name,p.cid;
 
 -- 2: universal-search schema columns in one statement.
-SELECT 'products' table_name,name FROM pragma_table_info('products')
-UNION ALL SELECT 'site_item_inventory',name FROM pragma_table_info('site_item_inventory')
-UNION ALL SELECT 'creative_projects',name FROM pragma_table_info('creative_projects')
-UNION ALL SELECT 'orders',name FROM pragma_table_info('orders')
-UNION ALL SELECT 'custom_requests',name FROM pragma_table_info('custom_requests')
-UNION ALL SELECT 'content_projects',name FROM pragma_table_info('content_projects')
-UNION ALL SELECT 'media_assets',name FROM pragma_table_info('media_assets');
+SELECT m.name table_name,p.name
+FROM sqlite_schema m
+JOIN pragma_table_info(m.name) p
+WHERE m.type='table'
+  AND m.name IN ('products','site_item_inventory','creative_projects','orders','custom_requests','content_projects','media_assets')
+ORDER BY m.name,p.cid;
 
 -- 3: bounded corpus sizes for FTS/keyset decision evidence.
 SELECT

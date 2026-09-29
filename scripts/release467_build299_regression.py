@@ -13,7 +13,7 @@ universal=t('functions/api/admin/universal-search.js')
 creations=t('functions/api/creations.js')
 journal=t('functions/api/workshop-journal.js')
 caps=t('functions/api/capabilities.js')
-for token in ('loadSchemaColumnSnapshot','pragma_table_info','snapshots=new WeakMap','UNION ALL'):
+for token in ('loadSchemaColumnSnapshot','pragma_table_info','sqlite_schema','snapshots=new WeakMap'):
     q(token in helper,'schema snapshot helper missing '+token)
 q('PRAGMA table_info' not in products,'Products retained per-table PRAGMA introspection')
 q('PRAGMA table_info' not in detail and 'sqlite_master' not in detail,'Product Detail retained hot-path schema probes')
@@ -32,6 +32,8 @@ sql=t('scripts/release467_build299_measurement.sql').upper()
 for forbidden in (' INSERT ',' UPDATE ',' DELETE ',' CREATE ',' ALTER ',' DROP ',' REPLACE '):
     q(forbidden not in ' '+sql+' ','measurement SQL is not read-only: '+forbidden.strip())
 q(sql.count('EXPLAIN QUERY PLAN')>=4,'measurement SQL missing query-plan evidence')
+q('UNION ALL SELECT' not in sql,'measurement schema snapshot must avoid D1 compound SELECT fan-out')
+q('JOIN PRAGMA_TABLE_INFO(M.NAME)' in sql,'measurement schema snapshot must use one non-compound schema query')
 q('INVENTORY_WORKSTATION_MEMBERSHIPS' in sql,'measurement SQL missing workstation batch evidence')
 print('RELEASE 467 BUILD 299 D1 QUERY EFFICIENCY + CANONICAL RUNTIME/REPOSITORY CLEANUP')
 if F:
