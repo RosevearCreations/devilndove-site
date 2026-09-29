@@ -20,6 +20,7 @@ import { protectMutationOrigin } from './api/_lib/csrfOriginProtection.js';
 // Build 161 adds a shared Admin-only navigation/search QoL layer. It is browser-local for
 // recents/favourites and read-only for live universal record search.
 const PRODUCTS_ASSET_REVISION = '467-b159-products-returning-browser-cache-v1';
+const DESIGN_SYSTEM_REVISION = '467b293-design-system-v1';
 const LAYOUT_ASSET_REVISION = '467b292-observer-budget-v1';
 const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b159-products-media-admin-cache-v1';
 const PRODUCTS_REQUEST_BUDGET_REVISION = '467b159-request-budget-loader-v1';
@@ -86,6 +87,7 @@ function adminQolMarkup() {
     `<script data-dd-admin-qol-v161="1" defer src="/public/js/admin-universal-search-v161.js?v=${ADMIN_QOL_REVISION}"></script>`,
     `<script data-dd-admin-resume-work-v235="1" defer src="/public/js/admin-resume-work-v235.js?v=${ADMIN_RESUME_WORK_REVISION}"></script>`,
     `<script data-dd-admin-save-confidence-v236="1" defer src="/public/js/admin-save-confidence-v236.js?v=${ADMIN_SAVE_CONFIDENCE_REVISION}"></script>`,
+    `<link data-dd-admin-design-system-v293="1" rel="stylesheet" href="/css/admin-design-system-v293.css?v=${DESIGN_SYSTEM_REVISION}">`,
     `<link data-dd-admin-ergonomics-v237="1" rel="stylesheet" href="/css/admin-ergonomics-v237.css?v=${ADMIN_ERGONOMICS_REVISION}">`,
     `<script data-dd-admin-ergonomics-v237="1" defer src="/public/js/admin-ergonomics-v237.js?v=${ADMIN_ERGONOMICS_REVISION}"></script>`,
     `<link data-dd-admin-attention-signals-v238="1" rel="stylesheet" href="/css/admin-attention-signals-v238.css?v=${ADMIN_ATTENTION_SIGNALS_REVISION}">`,
@@ -97,6 +99,7 @@ function adminQolMarkup() {
 }
 function productsPlatformMarkup() {
   return [
+    `<link data-dd-design-system-v293="1" rel="stylesheet" href="/css/design-system-v293.css?v=${DESIGN_SYSTEM_REVISION}">`,
     '<link data-dd-products-static-platform="1" rel="stylesheet" href="/css/current-responsive.css?v=current">',
     `<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`,
     `<link rel="stylesheet" href="/css/admin-products-table-layout.css?v=${PRODUCTS_ASSET_REVISION}">`,
@@ -152,6 +155,7 @@ function withPlatformClient(response, request) {
       .on('head', {
         element(element) {
           element.prepend(styleNonceBootstrapMarkup(), { html: true });
+          element.append(`<link data-dd-design-system-v293="1" rel="stylesheet" href="/css/design-system-v293.css?v=${DESIGN_SYSTEM_REVISION}">`, { html: true });
           element.append('<link rel="stylesheet" href="/css/current-responsive.css?v=current">', { html: true });
           element.append(`<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`, { html: true });
           element.append('<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>', { html: true });
