@@ -511,9 +511,16 @@
 
     async function init(){
       try {
-        let res = await fetch(DATA_URL, { cache: 'no-store' });
-        let data = await res.json().catch(() => null);
-        if (!res.ok || !data?.ok) throw new Error(data?.error || `Creations API responded ${res.status}.`);
+        let res = await fetch(DATA_URL, { cache: 'no-store', headers: { Accept: 'application/json' } });
+        const raw = await res.text().catch(() => '');
+        let data = null;
+        if (raw.trim()) {
+          try { data = JSON.parse(raw); } catch { data = null; }
+        }
+        if (!res.ok || !data?.ok) {
+          console.warn('Creations API unavailable', { status: res.status, code: data?.code || (!raw.trim() ? 'empty_response' : 'invalid_or_error_json') });
+          throw new Error('creations_api_unavailable');
+        }
         if (data?.fallback_used || data?.summary?.authority === 'json_fallback') setStatus('Showing fallback creations data while the live catalog read recovers.', 'warning');
         state.all = (data.items || []).slice().sort((a,b)=>String(a.title || a.name || '').localeCompare(String(b.title || b.name || '')));
         if (!state.all.length) throw new Error('No creations were returned from the live API.');
@@ -562,8 +569,9 @@
           });
           return;
         }
-        setStatus(err?.message || 'We could not load the creations catalog just now.', 'error');
-        els.catalog.innerHTML = '<div class="panel muted-box" style="grid-column:1/-1">We could not load the creations catalog just now.</div>';
+        console.warn('Creations catalog fallback unavailable', { name: err?.name || 'Error' });
+        setStatus('Our creations catalog is temporarily unavailable. You can still browse the Gallery or contact us about a piece.', 'warning');
+        els.catalog.innerHTML = '<div class="panel muted-box" style="grid-column:1/-1"><p>Our creations catalog is temporarily unavailable.</p><p><a class="btn" href="/gallery/">Browse the Gallery</a> <a class="btn secondary" href="/contact/">Contact us</a></p></div>';
       }
     }
 
