@@ -117,5 +117,24 @@
     "next_build": 295,
     "next_build_title": "Storefront Buyer Journey Simplification",
     "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "f8645db239348f06098faa1915ef9376940746de",
+      "tree": "e74e6358bef93ee6d16802b488363145c4d66c04",
+      "system_gate_run": 36577048558,
+      "quality_run": 36577048520,
+      "it_admin_runtime_run": 36577048576,
+      "repository_hygiene_run": 36577048496,
+      "build293_run": 36577048557,
+      "state": "EXACT_BUILD293_GREEN"
+    },
+    "production": {
+      "main_sha": "229f9299561a820c029d1eec69e8f088b94c9a09",
+      "tree_sha": "e74e6358bef93ee6d16802b488363145c4d66c04",
+      "production_pages_deploy_run": 36577330288,
+      "production_live_resource_integrity_run": 36577451115,
+      "state": "PRODUCTION_GREEN"
+    }
   }
 }
