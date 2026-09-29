@@ -11,6 +11,11 @@ a=j('release467-build301-first-real-maker-story-adoption-completeness.json')
 prev=j('release467-build300-caip-maker-content-outcomes-renewal-automation-refinement.json')
 p=j('current-development-authority.json')
 q(a.get('build')==301 and a.get('title')=='First Real Maker Story Adoption & Completeness','Build 301 identity mismatch')
+q(a.get('phase')=='REAL_MAKER_STORY_ADOPTION_CANDIDATE','Build 301 adoption phase mismatch')
+sel=a.get('selected_real_project') or {}
+q(sel.get('creative_work_project_id')==7 and sel.get('project_key')=='CP-MSXCYQB6' and sel.get('project_title')=='Under the Sea','Build 301 selected real project mismatch')
+ad=a.get('adoption_contract') or {}
+q(ad.get('story_kind')=='maker_story' and ad.get('outcome_status')=='partial_win' and ad.get('story_review_status')=='needs_review' and ad.get('public_story_candidate')==0,'Build 301 review-first adoption contract mismatch')
 pred=a.get('predecessor') or {}
 q(pred.get('development_sha')==DEV and pred.get('development_tree_sha')==TREE,'Build 300 Development predecessor mismatch')
 q(pred.get('production_main_sha')==MAIN and pred.get('production_tree_sha')==TREE,'Build 300 Production predecessor mismatch')

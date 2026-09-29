@@ -193,7 +193,7 @@
   "next_build": 302,
   "next_build_state": "QUEUED_AFTER_BUILD301_PRODUCTION_GREEN",
   "next_build_title": "CAIP Evidence Selection & Public-Safety Review Adoption",
-  "promotion_state": "BUILD301_DISCOVERY_CANDIDATE_NOT_YET_VERIFIED",
+  "promotion_state": "BUILD301_REAL_MAKER_STORY_ADOPTION_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "BUILD301_ACTIVE_BUILDS_302_306_QUEUED",
   "measured_closure": {
     "source_build": 232,
@@ -1224,8 +1224,12 @@
   },
   "caip_content_adoption": {
     "source_build": 301,
-    "phase": "DISCOVER_REAL_PROJECT_FACTS",
-    "real_project_required": true,
+    "phase": "REAL_MAKER_STORY_ADOPTION_CANDIDATE",
+    "selected_real_project_id": 7,
+    "selected_real_project_key": "CP-MSXCYQB6",
+    "selected_real_project_title": "Under the Sea",
+    "story_review_status": "needs_review",
+    "public_story_candidate": 0,
     "automatic_story_creation": false,
     "content_studio_refresh": false,
     "publication": false,
