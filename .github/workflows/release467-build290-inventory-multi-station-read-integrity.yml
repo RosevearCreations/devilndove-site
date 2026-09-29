@@ -54,7 +54,8 @@ jobs:
       - name: Measure bounded membership read
         run: |
           set -euo pipefail
-          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --file scripts/release467_build290_measurement.sql > /tmp/build290-measurement-raw.json
+          SQL="$(sed '/^[[:space:]]*--/d' scripts/release467_build290_measurement.sql | tr '\n' ' ')"
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "$SQL" > /tmp/build290-measurement-raw.json
           python - <<'PY'
           import json,os
           raw=json.load(open('/tmp/build290-measurement-raw.json'))
