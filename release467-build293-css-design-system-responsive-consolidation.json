@@ -2,7 +2,7 @@
   "release": 467,
   "build": 293,
   "title": "CSS Design-System & Responsive Consolidation",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build293-css-design-system-responsive-consolidation",
   "starting_point": {
     "development": {
@@ -74,5 +74,26 @@
     "next_build": 294,
     "next_build_title": "CAIP Workshop Follies & Maker Story Foundation",
     "future_queue_exhausted": false
+  },
+  "final_closure": {
+    "dev_sha": "f8645db239348f06098faa1915ef9376940746de",
+    "tree_sha": "e74e6358bef93ee6d16802b488363145c4d66c04",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD293_GREEN",
+    "proofs": {
+      "system_gate_run": 36577048558,
+      "current_application_quality_run": 36577048520,
+      "it_admin_runtime_proof_run": 36577048576,
+      "branch_hygiene_run": 36577048496,
+      "build293_dedicated_run": 36577048557
+    }
+  },
+  "production_checkpoint": {
+    "main_sha": "229f9299561a820c029d1eec69e8f088b94c9a09",
+    "tree_sha": "e74e6358bef93ee6d16802b488363145c4d66c04",
+    "state": "PRODUCTION_GREEN",
+    "production_pages_deploy_run": 36577330288,
+    "production_live_resource_integrity_run": 36577451115,
+    "same_tree_as_verified_development": true,
+    "d1_promotion_mode": "CODE_ONLY_ZERO_D1"
   }
 }
