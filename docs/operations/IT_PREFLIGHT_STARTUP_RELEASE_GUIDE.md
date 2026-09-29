@@ -1,17 +1,17 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 291 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 292 candidate
 
-Build 291 — Public Runtime Reliability & Broken-Surface Closure — is projected over exact Build 290 Production GREEN.
+Build 292 — Client Runtime Observer & Memory-Churn Hardening — is projected over exact Build 291 Production GREEN.
 
-- Last fully verified Development: `dff1fb1c756de9a938bbbcc26a966205b0539b01`
-- Verified tree: `1cdfea3b551761ce18560bb95bed405cec594ab1`
-- Development proofs: System `36567123971`, Quality `36567124267`, I.T. `36567124051`, Hygiene `36567124022`, D1 Fan-Out `36567124170`, Build 290 `36567124048`
-- Current Production main: `a56c163c8c417a90b3e6a35da128cdaeaf73b668`
-- Production proofs: Pages `36567332316`, Live Resources `36567404285`
-- Build 291 is schema-neutral and performs no D1/R2/provider mutation.
-- Public runtime targets: `/capabilities/`, `/creations/`, `/api/capabilities`, `/api/creations`.
-- Buyer-facing raw parser/status errors are closed; diagnostics retain the technical signal.
-- Production acceptance crawls every public sitemap URL.
-- The future queue remains open. Next after Production GREEN: Build 292 — Client Runtime Observer & Memory-Churn Hardening.
+- Last fully verified Development: `853209c4ae3ee3db9f06a98dac649f65523961a1`
+- Verified tree: `ab10b9e3e5780f90ddab43893be7eb9fa97bcddd`
+- Development proofs: System `36570270322`, Quality `36570270693`, I.T. `36570270648`, Hygiene `36570270345`, D1 Fan-Out `36570270356`, Build 291 `36570270569`
+- Current Production main: `b9cd4d8c27b64e9b2c892575e38673681a8367fa`
+- Production proofs: Pages `36570536323`, Live Resources `36570637009`
+- Build 292 is schema-neutral and performs no D1/R2/provider mutation.
+- Runtime focus: public H1/layout, Storefront Discovery, Admin Ergonomics/Workspace State, Product-row enhancements, Packaging advanced layers and Inventory multi-station helper.
+- Hot paths require mutation filtering, coalescing/self-mutation containment and explicit page-exit cleanup.
+- The observer/render budget is retained in `scripts/release467_build292_observer_budget.py`.
+- The future queue remains open. Next after Production GREEN: Build 293 — CSS Design-System & Responsive Consolidation.
 
 ## Current release baseline
 
