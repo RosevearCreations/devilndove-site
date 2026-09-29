@@ -1,31 +1,31 @@
 {
   "release": 467,
-  "build": 296,
-  "title": "Custom Work Progressive Intake",
+  "build": 297,
+  "title": "Search-First HTML, Product + Story SEO & Crawl Control",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 295,
-      "title": "Storefront Buyer Journey Simplification",
-      "authority": "release467-build295-storefront-buyer-journey-simplification.json",
-      "dev_sha": "653a1952cee1a78aa131180fc798a45f4de344b0",
-      "tree_sha": "7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD295_GREEN",
+      "build": 296,
+      "title": "Custom Work Progressive Intake",
+      "authority": "release467-build296-custom-work-progressive-intake.json",
+      "dev_sha": "8b9a556e5d267f6c333032a1af64d1bb776bcf49",
+      "tree_sha": "65ab192e1dfb0b8f14ab88b9136d3bc925f6292d",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD296_GREEN",
       "proofs": {
-        "system_gate_run": 36588836053,
-        "current_application_quality_run": 36588836007,
-        "it_admin_runtime_proof_run": 36588836018,
-        "branch_hygiene_run": 36588836078
+        "system_gate_run": 36614334975,
+        "current_application_quality_run": 36614334938,
+        "it_admin_runtime_proof_run": 36614334896,
+        "branch_hygiene_run": 36614335013
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 296,
-      "title": "Custom Work Progressive Intake",
-      "authority": "release467-build296-custom-work-progressive-intake.json",
+      "build": 297,
+      "title": "Search-First HTML, Product + Story SEO & Crawl Control",
+      "authority": "release467-build297-search-first-html-product-story-seo-crawl-control.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -36,18 +36,19 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 295,
-    "title": "Storefront Buyer Journey Simplification",
-    "authority": "release467-build295-storefront-buyer-journey-simplification.json",
-    "main_sha": "9da8d3c7dc6ace186de0d69141e19fed998f5ddf",
-    "tree_sha": "7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3",
+    "build": 296,
+    "title": "Custom Work Progressive Intake",
+    "authority": "release467-build296-custom-work-progressive-intake.json",
+    "main_sha": "120b5b607bfe3b7ddcf36abf4aefaad772477ba9",
+    "tree_sha": "65ab192e1dfb0b8f14ab88b9136d3bc925f6292d",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36589115627,
-    "production_live_resource_integrity_run": 36589247196,
+    "production_pages_deploy_run": 36614590327,
+    "production_live_resource_integrity_run": 36614722378,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build297-search-first-html-product-story-seo-crawl-control.json",
     "release467-build296-custom-work-progressive-intake.json",
     "release467-build295-storefront-buyer-journey-simplification.json",
     "release467-build294-caip-workshop-follies-maker-story-foundation.json",
@@ -185,11 +186,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md",
-  "next_build": 297,
-  "next_build_state": "QUEUED_AFTER_BUILD296_PRODUCTION_GREEN",
-  "next_build_title": "Search-First HTML, Product + Story SEO & Crawl Control",
-  "promotion_state": "BUILD296_DEVELOPMENT_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD296_ACTIVE_BUILDS_297_300_QUEUED",
+  "next_build": 298,
+  "next_build_state": "QUEUED_AFTER_BUILD297_PRODUCTION_GREEN",
+  "next_build_title": "Merchant/Search Distribution + Public Content Discovery",
+  "promotion_state": "BUILD297_DEVELOPMENT_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD297_ACTIVE_BUILDS_298_300_QUEUED",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -212,21 +213,21 @@
   "planned_successor": {
     "first_build": 290,
     "last_build": 300,
-    "state": "BUILD296_ACTIVE_UX_SEARCH_DATABASE_EFFICIENCY_ROADMAP",
+    "state": "BUILD297_ACTIVE_UX_SEARCH_DATABASE_EFFICIENCY_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 297,
-    "next_build_title": "Search-First HTML, Product + Story SEO & Crawl Control",
+    "next_build": 298,
+    "next_build_title": "Merchant/Search Distribution + Public Content Discovery",
     "roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md"
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "653a1952cee1a78aa131180fc798a45f4de344b0",
-  "accepted_dev_tree_sha": "7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3",
+  "accepted_dev_sha": "8b9a556e5d267f6c333032a1af64d1bb776bcf49",
+  "accepted_dev_tree_sha": "65ab192e1dfb0b8f14ab88b9136d3bc925f6292d",
   "acceptance": {
-    "system_gate_run": 36588836053,
-    "current_application_quality_run": 36588836007,
-    "it_admin_runtime_proof_run": 36588836018,
-    "branch_hygiene_run": 36588836078
+    "system_gate_run": 36614334975,
+    "current_application_quality_run": 36614334938,
+    "it_admin_runtime_proof_run": 36614334896,
+    "branch_hygiene_run": 36614335013
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -1151,6 +1152,19 @@
     "automatic_quote": false,
     "automatic_publication": false,
     "next_build": 297,
+    "future_queue_exhausted": false
+  },
+  "search_first_html_product_story_seo": {
+    "source_build": 297,
+    "initial_product_metadata": true,
+    "initial_story_metadata": true,
+    "published_only_indexing": true,
+    "shop_query_permutations_noindex": true,
+    "dynamic_published_sitemap": true,
+    "browser_snapshot_reuse": true,
+    "schema_change": false,
+    "automatic_publication": false,
+    "next_build": 298,
     "future_queue_exhausted": false
   }
 }

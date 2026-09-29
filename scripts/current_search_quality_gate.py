@@ -49,6 +49,8 @@ search=read('search/index.html').lower().replace(' ','');req('name="robots"' in 
 req('Sitemap: https://devilndove.com/sitemap.xml' in read('robots.txt'),'robots.txt must advertise canonical sitemap')
 middleware=read('functions/_middleware.js')
 for needle in ('publicProductRequestInfo',"productRequest.slug ? 'index,follow' : 'noindex,follow'",'productRequest.canonical'):req(needle in middleware,f'product-shell/indexing middleware missing {needle!r}')
+for needle in ('loadPublishedProductSeo','loadPublishedStorySeo','dynamicSitemapResponse','build297InitialProductSnapshot','build297InitialProductJsonLd','build297InitialStorySnapshot','shopRequest?.filtered'):
+ req(needle in middleware,f'Build 297 search-first middleware missing {needle!r}')
 # Runtime H1 creation is normally forbidden. Three narrowly proven cases are allowed:
 # 1) the Workshop Journal story replaces the entire <main> that contains the source H1,
 #    so exactly one story H1 remains after render; and

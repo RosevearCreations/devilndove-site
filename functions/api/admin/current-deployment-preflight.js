@@ -1,23 +1,23 @@
-// Release 467 Build 296 — current read-only Deployment Preflight over exact Build 295 Production source.
+// Release 467 Build 297 — current read-only Deployment Preflight over exact Build 296 Production source.
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=296;
-const TITLE='Custom Work Progressive Intake';
+const BUILD=297;
+const TITLE='Search-First HTML, Product + Story SEO & Crawl Control';
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql','0026_release467_inventory_workstation_memberships.sql','0027_release467_caip_workshop_follies_maker_story_foundation.sql']);
-const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 296 Custom Work Progressive Intake']);
+const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 297 Search-First HTML Product Story SEO Crawl Control']);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:295,title:'Storefront Buyer Journey Simplification',state:'DEVELOPMENT_GREEN',
-  dev_sha:'653a1952cee1a78aa131180fc798a45f4de344b0',tree_sha:'7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3',
-  system_gate_run:36588836053,current_application_quality_run:36588836007,it_admin_runtime_proof_run:36588836018,
-  branch_hygiene_run:36588836078,proof_state:'EXACT_BRANCH_HEAD_BUILD294_GREEN',exact_preview_deployment:true
+  release:467,build:296,title:'Custom Work Progressive Intake',state:'DEVELOPMENT_GREEN',
+  dev_sha:'8b9a556e5d267f6c333032a1af64d1bb776bcf49',tree_sha:'65ab192e1dfb0b8f14ab88b9136d3bc925f6292d',
+  system_gate_run:36614334975,current_application_quality_run:36614334938,it_admin_runtime_proof_run:36614334896,
+  branch_hygiene_run:36614335013,proof_state:'EXACT_BRANCH_HEAD_BUILD294_GREEN',exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:295,title:'Storefront Buyer Journey Simplification',state:'PRODUCTION_GREEN',
-  main_sha:'9da8d3c7dc6ace186de0d69141e19fed998f5ddf',tree_sha:'7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3',
-  production_pages_deploy_run:36589115627,production_live_resource_integrity_run:36589247196,
-  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36588836000
+  release:467,build:296,title:'Custom Work Progressive Intake',state:'PRODUCTION_GREEN',
+  main_sha:'120b5b607bfe3b7ddcf36abf4aefaad772477ba9',tree_sha:'65ab192e1dfb0b8f14ab88b9136d3bc925f6292d',
+  production_pages_deploy_run:36614590327,production_live_resource_integrity_run:36614722378,
+  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36614335058
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true});
 const rows=(r)=>Array.isArray(r?.results)?r.results:[];
@@ -46,10 +46,10 @@ export async function onRequestGet(context){
     {status:'pass',code:'runtime_schema_mutation_boundary',label:'Request-time schema mutation boundary',detail:'Current endpoint is GET-only and exposes no repair capability.'},
     {status:'pass',code:'build292_verified_baseline',label:'Build 292 verified restart baseline',detail:'Build 292 Client Runtime Observer & Memory-Churn Hardening is exact-tree Development and Production GREEN with current named proofs.'},
     {status:'pass',code:'build292_source_promotion',label:'Build 292 Production source promotion',detail:'Build 292 is on main 6891ba76bb9fc07e97962ae36b94cad143412bfd with the identical Development tree e57f03fa2e58e30a827e587e4651029654e7b179.'},
-    {status:'review',code:'build296_progressive_custom_work',label:'Build 296 progressive Custom Work intake',detail:'Exact Development acceptance must retain minimal required fields, optional technical disclosure, private reference handling, customer-supplied-item continuity and tab-local draft safety.'}
+    {status:'review',code:'build297_search_first_seo',label:'Build 297 search-first Product/story SEO',detail:'Exact Development acceptance must retain published-only dynamic indexing, initial HTML metadata/structured data, Shop query noindex rules, runtime sitemap coverage and snapshot reuse.'}
   ];
   const blocker_count=checks.filter((x)=>x.status==='fail').length,warning_count=checks.filter((x)=>x.status==='review').length;
-  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:296,title:TITLE,authority:'release467-build296-custom-work-progressive-intake.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 295 is the exact fully verified Development and Production restart boundary.','Build 295 Development and Production share the exact predecessor tree.','Canonical migration authority remains through additive 0027 Maker Story profile/workstation references.','Build 296 is schema-neutral and makes Custom Work progressive while reusing the existing intake, supplied-item, media and manufacturing authorities.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
+  const data={ok:true,release:RELEASE,build:BUILD,title:TITLE,state:'CURRENT_READ_ONLY',generated_at:new Date().toISOString(),summary:{status:blocker_count?'blocked':warning_count?'review':'ready',blocker_count,warning_count,pass_count:checks.filter((x)=>x.status==='pass').length,check_count:checks.length},checks,recent_runs:Array.isArray(historical?.recent_runs)?historical.recent_runs:[],post_deploy_confirmations:Array.isArray(historical?.post_deploy_confirmations)?historical.post_deploy_confirmations:[],canonical_migration_truth:truth,release_authority:{current_release:RELEASE,current_build:BUILD,required_development_proofs:REQUIRED_DEVELOPMENT_PROOFS,verified_development_checkpoint:VERIFIED_DEVELOPMENT,production:PRODUCTION,production_proof_transport:PRODUCTION_PROOF_TRANSPORT,current_candidate:{release:467,build:297,title:TITLE,authority:'release467-build297-search-first-html-product-story-seo-crawl-control.json'},rollback_readiness:'release-neutral-read-only',historical_feature_authority:'release467-build37-deployment-preflight-canonical-migration.json'},truth_notes:['Build 296 is the exact fully verified Development and Production restart boundary.','Build 296 Development and Production share the exact predecessor tree.','Canonical migration authority remains through additive 0027 Maker Story profile/workstation references.','Build 297 is schema-neutral and projects published Product/story search identity into initial HTML while preserving existing source authorities.'],safety:{mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,production_mutation:false}};
   if(new URL(context.request.url).searchParams.get('format')==='markdown')return new Response(markdownReport(data),{status:200,headers:{'Content-Type':'text/markdown; charset=utf-8','Cache-Control':'no-store'}});
   return jsonResponse(data,200,{'Cache-Control':'no-store'});
 }

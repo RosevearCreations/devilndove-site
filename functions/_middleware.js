@@ -13,6 +13,7 @@ import {
 } from './api/_lib/appModuleSessionGuard.js';
 import { moduleKeyForPath, sharedServiceContractForPath } from './api/_lib/appModuleRoutes.js';
 import { protectMutationOrigin } from './api/_lib/csrfOriginProtection.js';
+import { loadPublishedProductSeo, loadPublishedStorySeo, loadDynamicSitemapEntries } from './api/_lib/publicSearchSeo.js';
 
 // Build 159: Product Admin returning-browser cache coherence.
 // Build 160 layers a read-only Product Production browser recovery client on top of the
@@ -72,6 +73,46 @@ function publicProductRequestInfo(request, pathname) {
   if(!slug)return { slug:'', canonical:'https://devilndove.com/shop/product/' };
   const canonical=`https://devilndove.com/shop/product/?slug=${encodeURIComponent(slug)}`;
   return { slug, canonical };
+}
+function publicStoryRequestInfo(request, pathname) {
+  if (normalizedPagePath(pathname) !== '/workshop-journal/story/') return null;
+  const url=new URL(request.url);
+  const slug=String(url.searchParams.get('story')||'').trim();
+  if(!slug)return { slug:'', canonical:'https://devilndove.com/workshop-journal/story/' };
+  const canonical=`https://devilndove.com/workshop-journal/story/?story=${encodeURIComponent(slug)}`;
+  return { slug, canonical };
+}
+function publicShopRequestInfo(request, pathname) {
+  if (normalizedPagePath(pathname) !== '/shop/') return null;
+  const url=new URL(request.url);
+  return { filtered:[...url.searchParams.keys()].length>0, canonical:'https://devilndove.com/shop/' };
+}
+function safeJsonForHtml(value){return JSON.stringify(value).replace(/</g,'\\u003c');}
+function xmlEscape(value){return String(value||'').replace(/[&<>"']/g,(ch)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[ch]));}
+async function dynamicSitemapResponse(response, env) {
+  const type=String(response?.headers?.get('Content-Type')||'').toLowerCase();
+  if(!type.includes('xml')&&!type.includes('text'))return response;
+  const fallback=response.clone();
+  try{
+    let xml=await response.text();
+    const db=env?.DB||env?.DD_DB;
+    const entries=await loadDynamicSitemapEntries(db);
+    const seen=new Set(Array.from(xml.matchAll(/<loc>([^<]+)<\/loc>/g),m=>m[1].replace(/&amp;/g,'&')));
+    const dynamic=entries.filter((row)=>row?.loc&&!seen.has(row.loc));
+    if(dynamic.length){
+      const block=dynamic.map((row)=>`  <url><loc>${xmlEscape(row.loc)}</loc>${row.lastmod?`<lastmod>${xmlEscape(row.lastmod)}</lastmod>`:''}<changefreq>weekly</changefreq><priority>${row.kind==='product'?'0.8':'0.7'}</priority></url>`).join('\n')+'\n';
+      xml=xml.replace('</urlset>',block+'</urlset>');
+    }
+    const headers=new Headers(response.headers);
+    headers.set('Content-Type','application/xml; charset=utf-8');
+    headers.set('Cache-Control','public, max-age=3600, stale-while-revalidate=86400');
+    headers.set('X-DND-Sitemap','dynamic-published-v297');
+    headers.set('X-DND-Sitemap-Dynamic-Count',String(dynamic.length));
+    return new Response(xml,{status:response.status,statusText:response.statusText,headers});
+  }catch{
+    const headers=new Headers(fallback.headers);headers.set('X-DND-Sitemap','static-fallback-v297');
+    return new Response(fallback.body,{status:fallback.status,statusText:fallback.statusText,headers});
+  }
 }
 function withGuardHeaders(response, { moduleKey = '', contractPath = '' } = {}) {
   const headers = new Headers(response.headers);
@@ -138,7 +179,7 @@ async function withProductsFastPlatformClient(response) {
     return new Response(fallback.body, { status: fallback.status, statusText: fallback.statusText, headers });
   }
 }
-function withPlatformClient(response, request) {
+async function withPlatformClient(response, request, env = {}) {
   if (String(request?.method || 'GET').toUpperCase() !== 'GET') return response;
   const contentType = String(response?.headers?.get('Content-Type') || '').toLowerCase();
   if (!contentType.includes('text/html')) return response;
@@ -150,6 +191,14 @@ function withPlatformClient(response, request) {
     return response;
   }
   const productRequest = publicProductRequestInfo(request, pathname);
+  const storyRequest = publicStoryRequestInfo(request, pathname);
+  const shopRequest = publicShopRequestInfo(request, pathname);
+  let searchSeo=null;
+  if(productRequest?.slug){
+    searchSeo=await loadPublishedProductSeo(env?.DB||env?.DD_DB,productRequest.slug).catch(()=>null);
+  }else if(storyRequest?.slug){
+    searchSeo=await loadPublishedStorySeo(env?.DB||env?.DD_DB,storyRequest.slug).catch(()=>null);
+  }
   try {
     let rewriter = new HTMLRewriter()
       .on('head', {
@@ -174,6 +223,12 @@ function withPlatformClient(response, request) {
           if (isStorefrontDiscoveryPath(pathname)) {
             element.append(`<link rel="stylesheet" href="/css/storefront-discovery.css?v=${STOREFRONT_DISCOVERY_REVISION}"><script defer src="/public/js/storefront-discovery-runtime.js?v=${STOREFRONT_DISCOVERY_REVISION}"></script>`, { html: true });
           }
+          if(searchSeo?.kind==='product'){
+            element.append(`<script id="build297InitialProductSnapshot" type="application/json">${safeJsonForHtml({product:searchSeo.product,images:searchSeo.images,storefront_images:searchSeo.images})}</script><script id="build297InitialProductJsonLd" type="application/ld+json">${safeJsonForHtml(searchSeo.structured_data)}</script>`,{html:true});
+          }
+          if(searchSeo?.kind==='story'){
+            element.append(`<script id="build297InitialStorySnapshot" type="application/json">${safeJsonForHtml({item:searchSeo.item})}</script>`,{html:true});
+          }
         },
       });
     if (productRequest) {
@@ -181,6 +236,56 @@ function withPlatformClient(response, request) {
         .on('meta[name="robots"]', { element(element) { element.setAttribute('content', productRequest.slug ? 'index,follow' : 'noindex,follow'); } })
         .on('link[rel="canonical"]', { element(element) { element.setAttribute('href', productRequest.canonical); } })
         .on('meta[property="og:url"]', { element(element) { element.setAttribute('content', productRequest.canonical); } });
+    }
+    if (productRequest?.slug) {
+      const published=searchSeo?.kind==='product';
+      const canonical=published?searchSeo.canonical:'https://devilndove.com/shop/product/';
+      rewriter=rewriter
+        .on('meta[name="robots"]',{element(element){element.setAttribute('content',published?'index,follow':'noindex,follow');}})
+        .on('link[rel="canonical"]',{element(element){element.setAttribute('href',canonical);}})
+        .on('meta[property="og:url"]',{element(element){element.setAttribute('content',canonical);}});
+      if(published){
+        rewriter=rewriter
+          .on('title',{element(element){element.setInnerContent(searchSeo.title);}})
+          .on('meta[name="description"]',{element(element){element.setAttribute('content',searchSeo.description);}})
+          .on('meta[property="og:title"]',{element(element){element.setAttribute('content',searchSeo.title);}})
+          .on('meta[property="og:description"]',{element(element){element.setAttribute('content',searchSeo.description);}})
+          .on('meta[property="og:image"]',{element(element){if(searchSeo.image)element.setAttribute('content',searchSeo.image);}})
+          .on('meta[name="twitter:title"]',{element(element){element.setAttribute('content',searchSeo.title);}})
+          .on('meta[name="twitter:description"]',{element(element){element.setAttribute('content',searchSeo.description);}})
+          .on('meta[name="twitter:image"]',{element(element){if(searchSeo.image)element.setAttribute('content',searchSeo.image);}})
+          .on('#pageH1',{element(element){element.setInnerContent(searchSeo.h1);}})
+          .on('#pageIntro',{element(element){element.setInnerContent(searchSeo.description);}})
+          .on('#productBreadcrumbLabel',{element(element){element.setInnerContent(String(searchSeo.product?.name||searchSeo.h1));}});
+      }
+    }
+    if (storyRequest) {
+      const published=Boolean(storyRequest.slug&&searchSeo?.kind==='story');
+      const canonical=published?searchSeo.canonical:'https://devilndove.com/workshop-journal/story/';
+      rewriter=rewriter
+        .on('meta[name="robots"]',{element(element){element.setAttribute('content',published?'index,follow':'noindex,follow');}})
+        .on('link[rel="canonical"]',{element(element){element.setAttribute('href',canonical);}})
+        .on('meta[property="og:url"]',{element(element){element.setAttribute('content',canonical);}});
+      if(published){
+        rewriter=rewriter
+          .on('title',{element(element){element.setInnerContent(searchSeo.title);}})
+          .on('meta[name="description"]',{element(element){element.setAttribute('content',searchSeo.description);}})
+          .on('meta[property="og:title"]',{element(element){element.setAttribute('content',searchSeo.title);}})
+          .on('meta[property="og:description"]',{element(element){element.setAttribute('content',searchSeo.description);}})
+          .on('meta[property="og:image"]',{element(element){if(searchSeo.image)element.setAttribute('content',searchSeo.image);}})
+          .on('meta[name="twitter:title"]',{element(element){element.setAttribute('content',searchSeo.title);}})
+          .on('meta[name="twitter:description"]',{element(element){element.setAttribute('content',searchSeo.description);}})
+          .on('meta[name="twitter:image"]',{element(element){if(searchSeo.image)element.setAttribute('content',searchSeo.image);}})
+          .on('#journalStoryStructuredData',{element(element){element.setAttribute('data-search-first-seo','build297');element.setInnerContent(safeJsonForHtml(searchSeo.structured_data),{html:true});}})
+          .on('[data-workshop-journal-story] h1',{element(element){element.setInnerContent(searchSeo.h1);}})
+          .on('[data-workshop-journal-story] .hero p',{element(element){element.setInnerContent(searchSeo.description);}});
+      }
+    }
+    if (shopRequest?.filtered) {
+      rewriter=rewriter
+        .on('meta[name="robots"]',{element(element){element.setAttribute('content','noindex,follow');}})
+        .on('link[rel="canonical"]',{element(element){element.setAttribute('href',shopRequest.canonical);}})
+        .on('meta[property="og:url"]',{element(element){element.setAttribute('content',shopRequest.canonical);}});
     }
     return rewriter.transform(response);
   } catch {
@@ -256,9 +361,9 @@ function withScriptNonceCsp(response, request) {
     return secured;
   }
 }
-async function finish(response, request, guard = null) {
+async function finish(response, request, guard = null, env = {}) {
   const guarded = guard ? withGuardHeaders(response, guard) : response;
-  const platform = await withPlatformClient(guarded, request);
+  const platform = await withPlatformClient(guarded, request, env);
   return withScriptNonceCsp(platform, request);
 }
 function readOnlyDeniedResponse(access) {
@@ -297,30 +402,33 @@ export async function onRequest(context) {
   const pathname = new URL(request.url).pathname;
   const mutationOriginDenied = protectMutationOrigin(request);
   if (mutationOriginDenied) return mutationOriginDenied;
+  if (pathname === '/sitemap.xml' && String(request.method || 'GET').toUpperCase() === 'GET') {
+    return dynamicSitemapResponse(await context.next(), env);
+  }
   if (shouldBypass(pathname)) {
     const response = await context.next();
-    return finish(isAdminClientAssetPath(pathname) ? withAdminClientNoStore(response) : response, request);
+    return finish(isAdminClientAssetPath(pathname) ? withAdminClientNoStore(response) : response, request, null, env);
   }
   const sharedContract = sharedServiceContractForPath(pathname);
   if (sharedContract) {
     const resolvedUser = await resolveGuardUser(request, env, pathname);
-    if (resolvedUser instanceof Response) return finish(resolvedUser, request, { contractPath: sharedContract.path });
+    if (resolvedUser instanceof Response) return finish(resolvedUser, request, { contractPath: sharedContract.path }, env);
     const sharedAccess = await sharedServiceAccessForRequest(request, env, sharedContract, { user: resolvedUser });
     context.data.ddSharedServiceAccess = sharedAccess;
     context.data.ddModuleRelease = CURRENT_RELEASE;
-    if (!sharedAccess.allowed) return finish(sharedServiceUnavailableResponse(sharedAccess), request, { contractPath: sharedContract.path });
-    return finish(await context.next(), request, { contractPath: sharedContract.path });
+    if (!sharedAccess.allowed) return finish(sharedServiceUnavailableResponse(sharedAccess), request, { contractPath: sharedContract.path }, env);
+    return finish(await context.next(), request, { contractPath: sharedContract.path }, env);
   }
   const moduleKey = moduleKeyForPath(pathname);
-  if (!moduleKey) return finish(await context.next(), request);
+  if (!moduleKey) return finish(await context.next(), request, null, env);
   const resolvedUser = await resolveGuardUser(request, env, pathname);
-  if (resolvedUser instanceof Response) return finish(resolvedUser, request, { moduleKey });
+  if (resolvedUser instanceof Response) return finish(resolvedUser, request, { moduleKey }, env);
   const access = await moduleAccessForRequest(request, env, moduleKey, { user: resolvedUser });
   context.data.ddModuleAccess = access;
   context.data.ddModuleRelease = CURRENT_RELEASE;
-  if (!access.allowed) return finish(moduleUnavailableResponse(access, { api: isApiPath(pathname) }), request, { moduleKey });
+  if (!access.allowed) return finish(moduleUnavailableResponse(access, { api: isApiPath(pathname) }), request, { moduleKey }, env);
   if (isApiPath(pathname) && access.access_level === 'read' && !isReadMethod(request.method)) {
-    return finish(readOnlyDeniedResponse(access), request, { moduleKey });
+    return finish(readOnlyDeniedResponse(access), request, { moduleKey }, env);
   }
-  return finish(await context.next(), request, { moduleKey });
+  return finish(await context.next(), request, { moduleKey }, env);
 }

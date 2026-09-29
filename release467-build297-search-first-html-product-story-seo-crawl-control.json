@@ -1,0 +1,104 @@
+{
+  "release": 467,
+  "build": 297,
+  "title": "Search-First HTML, Product + Story SEO & Crawl Control",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build297-search-first-html-product-story-seo-crawl-control",
+  "predecessor": {
+    "build": 296,
+    "title": "Custom Work Progressive Intake",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "8b9a556e5d267f6c333032a1af64d1bb776bcf49",
+    "development_tree_sha": "65ab192e1dfb0b8f14ab88b9136d3bc925f6292d",
+    "development_proofs": {
+      "system_gate_run": 36614334975,
+      "current_application_quality_run": 36614334938,
+      "it_admin_runtime_proof_run": 36614334896,
+      "branch_hygiene_run": 36614335013,
+      "build_specific_proof_run": 36614335058
+    },
+    "production_main_sha": "120b5b607bfe3b7ddcf36abf4aefaad772477ba9",
+    "production_tree_sha": "65ab192e1dfb0b8f14ab88b9136d3bc925f6292d",
+    "production_pages_deploy_run": 36614590327,
+    "production_live_resource_integrity_run": 36614722378,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "starting_point": {
+    "development": {
+      "sha": "8b9a556e5d267f6c333032a1af64d1bb776bcf49",
+      "tree": "65ab192e1dfb0b8f14ab88b9136d3bc925f6292d",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 36614334975,
+      "quality_run": 36614334938,
+      "it_admin_runtime_run": 36614334896,
+      "repository_hygiene_run": 36614335013,
+      "build_specific_proof_run": 36614335058
+    },
+    "production": {
+      "main_sha": "120b5b607bfe3b7ddcf36abf4aefaad772477ba9",
+      "tree": "65ab192e1dfb0b8f14ab88b9136d3bc925f6292d",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 36614590327,
+      "production_live_resource_integrity_run": 36614722378,
+      "remote_d1_queries": 0
+    }
+  },
+  "scope": {
+    "product_initial_html_metadata": true,
+    "story_initial_html_metadata": true,
+    "product_structured_data": [
+      "Product",
+      "Offer",
+      "BreadcrumbList"
+    ],
+    "story_structured_data": [
+      "BlogPosting",
+      "BreadcrumbList"
+    ],
+    "published_records_only": true,
+    "missing_or_unpublished_dynamic_urls_noindex": true,
+    "shop_filter_permutations": "noindex,follow + canonical /shop/",
+    "runtime_sitemap": "static canonical routes + active published Product/story URLs",
+    "browser_snapshot_reuse": true,
+    "duplicate_initial_product_read": false,
+    "duplicate_initial_story_read": false,
+    "static_source_sitemap_remains_canonical_route_authority": true
+  },
+  "retained_authorities": {
+    "products": "products + product_seo + product_images",
+    "stories": "content_publications",
+    "product_runtime": "release467-build166-product-editing-image-stabilization.json",
+    "story_publication": "release467-build294-caip-workshop-follies-maker-story-foundation.json",
+    "storefront": "release467-build295-storefront-buyer-journey-simplification.json"
+  },
+  "files": {
+    "middleware": "functions/_middleware.js",
+    "seo_helper": "functions/api/_lib/publicSearchSeo.js",
+    "product_page": "shop/product/index.html",
+    "product_client": "public/js/product-detail-v166.js",
+    "seo_compatibility": "public/js/seo-page-overrides.js",
+    "story_page": "workshop-journal/story/index.html",
+    "story_client": "public/js/workshop-journal-story.js",
+    "sitemap": "sitemap.xml",
+    "regression": "scripts/release467_build297_regression.py",
+    "gate": "scripts/release467_build297_gate.py",
+    "workflow": ".github/workflows/release467-build297-search-first-html-product-story-seo-crawl-control.yml"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "payment_or_refund": false,
+    "private_media_exposure": false,
+    "search_engine_cloaking": false
+  },
+  "contract": {
+    "next_build": 298,
+    "next_build_title": "Merchant/Search Distribution + Public Content Discovery",
+    "future_queue_exhausted": false
+  }
+}
