@@ -301,11 +301,12 @@ function deliverableSpecs(project, facts, assets) {
     });
   }
 
-  const title = clip(standalone ? `${facts.name} | Project Journal | Devil n Dove` : `${facts.name} | ${facts.category} | Devil n Dove`, 60);
+  const journalLabel = text(facts.journalLabel) || 'Project Journal';
+  const title = clip(standalone ? `${facts.name} | ${journalLabel} | Devil n Dove` : `${facts.name} | ${facts.category} | Devil n Dove`, 60);
   const meta = clip(standalone ? `${facts.shortDescription} A reviewed Devil n Dove project journal built from source evidence.` : `${facts.shortDescription} Explore this ${facts.category} from Devil n Dove in ${facts.location}.`, 155);
   const imageAlt = usable.slice(0, 8).map((asset, index) => standalone ? `${facts.name} — reviewed project media ${index + 1}` : `${facts.name} — ${index === 0 ? 'finished front view' : `workshop detail ${index + 1}`}`);
   const blogBody = standalone ? [
-    `# Project journal: ${facts.name}`, '', facts.shortDescription, '',
+    `# ${journalLabel}: ${facts.name}`, '', facts.shortDescription, '',
     facts.storySummary || `This draft is based on the Creative Process project record and should be expanded only with reviewed CAIP evidence.`, '',
     `## Evidence-backed process\n\nUse approved CAIP evidence and reviewed source moments to explain what happened.`, '',
     `## Result and lessons\n\nState only conclusions supported by the reviewed project record. Do not invent a product listing or unsupported claim.`
@@ -323,7 +324,7 @@ function deliverableSpecs(project, facts, assets) {
 
   items.push({
     key: 'website-gallery', channel: 'website', type: 'gallery', title: `${facts.name} — website gallery set`,
-    caption: '', script: '', body: standalone ? `Selected reviewed project media prepared for a Project Journal/gallery. Keep factual captions and approved public-use media only.` : `Selected project media prepared for the product gallery and Workshop Journal. Keep only factual captions and approved public-use media.`, aspect: '1:1 / 4:3', duration: 0,
+    caption: '', script: '', body: standalone ? `Selected reviewed project media prepared for a ${journalLabel}/gallery. Keep factual captions and approved public-use media only.` : `Selected project media prepared for the product gallery and Workshop Journal. Keep only factual captions and approved public-use media.`, aspect: '1:1 / 4:3', duration: 0,
     assetPlan: makeAssetPlan(projectKey, usable, 'website-gallery', 10), status: hasPublicCleared ? 'ready_for_review' : 'needs_media_review'
   });
   if (!standalone) {
@@ -338,7 +339,7 @@ function deliverableSpecs(project, facts, assets) {
     assetPlan: makeAssetPlan(projectKey, usable, 'seo-image', 8), status: hasPublicCleared ? 'ready_for_review' : 'needs_media_review'
   });
   items.push({
-    key: 'blog-article', channel: 'blog', type: 'blog_article', title: standalone ? `Project journal: ${facts.name}` : `From workshop to finished piece: ${facts.name}`,
+    key: 'blog-article', channel: 'blog', type: 'blog_article', title: standalone ? `${journalLabel}: ${facts.name}` : `From workshop to finished piece: ${facts.name}`,
     caption: '', script: '', body: blogBody, aspect: 'article', duration: 0,
     assetPlan: makeAssetPlan(projectKey, usable, 'article-hero', 6), status: hasPublicCleared ? 'ready_for_review' : 'needs_media_review'
   });
@@ -645,6 +646,20 @@ async function attachContentProjectToExistingCreativeWorkCaip(db, caipProject, c
 export async function createOrRefreshContentProjectForCreativeProject(db, creativeProject, evidenceRows = [], actorUserId, options = {}) {
   await ensureContentAutomationSchema(db);
   const sourceId=String(creativeProject?.creative_work_project_id||creativeProject?.project_id||'');
+  const makerStory=creativeProject?.maker_story&&typeof creativeProject.maker_story==='object'?creativeProject.maker_story:{};
+  const makerStoryKind=text(makerStory.story_kind).toLowerCase()||'ordinary_project';
+  const makerStoryActive=makerStoryKind!=='ordinary_project';
+  const makerStoryParts=[
+    text(makerStory.what_we_are_trying)&&`What we tried: ${text(makerStory.what_we_are_trying)}`,
+    text(makerStory.why_we_are_trying_it)&&`Why: ${text(makerStory.why_we_are_trying_it)}`,
+    text(makerStory.expected_result)&&`Expected: ${text(makerStory.expected_result)}`,
+    text(makerStory.actual_result)&&`Actual: ${text(makerStory.actual_result)}`,
+    text(makerStory.outcome_status)&&text(makerStory.outcome_status)!=='unknown'&&`Outcome: ${text(makerStory.outcome_status).replace(/_/g,' ')}`,
+    text(makerStory.surprise_or_problem)&&`Surprise/problem: ${text(makerStory.surprise_or_problem)}`,
+    text(makerStory.lesson_learned)&&`Lesson: ${text(makerStory.lesson_learned)}`,
+    text(makerStory.change_next_time)&&`Next time: ${text(makerStory.change_next_time)}`,
+    text(makerStory.try_again_status)&&text(makerStory.try_again_status)!=='undecided'&&`Try again: ${text(makerStory.try_again_status).replace(/_/g,' ')}`
+  ].filter(Boolean);
   if(!sourceId) throw new Error('Creative Process project is required for Content Automation Studio.');
   const bridge=await inspectCreativeProjectContentStudioBridge(db,sourceId);
   if(!bridge.ready) throw new Error(`Content Studio bridge blocked: ${bridge.blocker||bridge.state}`);
@@ -652,9 +667,10 @@ export async function createOrRefreshContentProjectForCreativeProject(db, creati
   const caipProject=bridge.caip_project;
   const name=text(creativeProject?.project_title)||`Creative Project ${sourceId}`;
   const category=text(creativeProject?.project_type).replace(/_/g,' ')||'content project';
-  const summary=text(creativeProject?.summary||creativeProject?.objective||creativeProject?.story_angle)||`${name} is a content-only creative project documented in the Creative Process Engine.`;
+  const baseSummary=text(creativeProject?.summary||creativeProject?.objective||creativeProject?.story_angle)||`${name} is a content-only creative project documented in the Creative Process Engine.`;
+  const summary=makerStoryParts.length?makerStoryParts.join('\n'):baseSummary;
   const key=`creative-project-${sourceId}-${slug(name)}`;
-  const policy={review_first:true,no_auto_publish:true,source_media_is_reference_only:true,factual_copy_only:true,content_only_project:true,require_public_media_review_before_publish:true,existing_identity_bridge:true,build:CONTENT_STUDIO_BUILD};
+  const policy={review_first:true,no_auto_publish:true,source_media_is_reference_only:true,factual_copy_only:true,content_only_project:true,require_public_media_review_before_publish:true,existing_identity_bridge:true,maker_story_foundation:true,maker_story_kind:makerStoryKind,productless_project_supported:true,build:CONTENT_STUDIO_BUILD,maker_story_foundation_build:294};
   await db.prepare(`
     INSERT INTO content_projects (
       content_project_key,source_type,source_id,product_id,project_title,project_status,review_status,
@@ -666,7 +682,7 @@ export async function createOrRefreshContentProjectForCreativeProject(db, creati
       source_snapshot_json=excluded.source_snapshot_json,content_policy_json=excluded.content_policy_json,updated_at=CURRENT_TIMESTAMP
   `).bind(
     key,sourceId,`${name} content package`,text(creativeProject?.story_angle)||`${category} story`,summary,
-    JSON.stringify({creative_project:creativeProject,caip_creative_project_id:numeric(caipProject.creative_project_id),evidence_count:Array.isArray(evidenceRows)?evidenceRows.length:0,archived_at:new Date().toISOString(),build:CONTENT_STUDIO_BUILD}),
+    JSON.stringify({creative_project:creativeProject,maker_story:makerStory,maker_story_workstations:Array.isArray(creativeProject?.maker_story_workstations)?creativeProject.maker_story_workstations:[],maker_story_foundation_build:294,caip_creative_project_id:numeric(caipProject.creative_project_id),evidence_count:Array.isArray(evidenceRows)?evidenceRows.length:0,archived_at:new Date().toISOString(),build:CONTENT_STUDIO_BUILD}),
     JSON.stringify(policy),actorUserId||null
   ).run();
   const project=await db.prepare(`SELECT * FROM content_projects WHERE source_type='creative_project' AND source_id=? LIMIT 1`).bind(sourceId).first();
@@ -681,10 +697,10 @@ export async function createOrRefreshContentProjectForCreativeProject(db, creati
   const archivedCount=await archiveSourceMedia(db,project,[...caipRows,...evidenceMedia],actorUserId);
   const caipLink=await attachContentProjectToExistingCreativeWorkCaip(db,caipProject,project.content_project_id);
   const assets=await getProjectMedia(db,project.content_project_id);
-  const facts={name,category,shortDescription:clip(summary,420),description:summary,materials:'',origin:'creative project',storySummary:text(creativeProject?.story_angle||creativeProject?.objective||summary),location:'',factualSummary:clip(summary,1200)};
+  const facts={name,category,shortDescription:clip(baseSummary,420),description:summary,materials:'',origin:'creative project',storySummary:makerStoryParts.length?makerStoryParts.join('\n'):text(creativeProject?.story_angle||creativeProject?.objective||summary),storyKind:makerStoryKind,journalLabel:makerStoryActive?'Workshop Journal':'Project Journal',location:'',factualSummary:clip(summary,1200)};
   const deliverablesCreated=await writeDeliverables(db,project,facts,assets,actorUserId,Boolean(options.refresh_copy));
   const bridgeOutcome=existingContentProjectId?'refreshed_existing_package':'created_package_for_existing_identity';
-  await writeProjectEvent(db,project.content_project_id,'creative_project_content_studio_bridge',actorUserId,{creative_work_project_id:Number(sourceId),content_only_project:true,caip_creative_project_id:numeric(caipLink.creative_project_id),bridge_outcome:bridgeOutcome,duplicate_project_created:false,caip_media_count:caipRows.length});
+  await writeProjectEvent(db,project.content_project_id,'creative_project_content_studio_bridge',actorUserId,{creative_work_project_id:Number(sourceId),content_only_project:true,maker_story_foundation:true,maker_story_kind:makerStoryKind,caip_creative_project_id:numeric(caipLink.creative_project_id),bridge_outcome:bridgeOutcome,duplicate_project_created:false,caip_media_count:caipRows.length});
   return{project,facts,archived_count:archivedCount,deliverables_created:deliverablesCreated,caip_creative_project_id:numeric(caipLink.creative_project_id),caip_media_count:caipRows.length,bridge_outcome:bridgeOutcome,bridge_identity:bridge.identity_key,duplicate_project_created:false};
 }
 

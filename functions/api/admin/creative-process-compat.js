@@ -1,3 +1,4 @@
+// Build 294 composes Workshop Follies / Maker Stories into the existing Creative Process → CAIP → Content Studio authority chain.
 // Build 274 Creative Process engine; Build 308 routes Creative inventory reversals through Inventory authority.
 import { createOrRefreshContentProjectForCreativeProject, createOrRefreshContentProjectForProduct, ensureContentAutomationSchema } from '../_lib/contentAutomationStudio.js';
 import { ensureCreativeAssetIntelligenceSchema, syncCreativeProjectFromContentProject } from '../_lib/creativeAssetIntelligence.js';
@@ -28,10 +29,12 @@ async function requireAdmin(context){
   return {adminUser,db};
 }
 async function listProjects(db){
-  const rows=await db.prepare(`SELECT p.*, COUNT(DISTINCT e.creative_work_event_id) event_count,
+  const rows=await db.prepare(`SELECT p.*,msp.story_kind,msp.outcome_status,msp.story_review_status,
+    COUNT(DISTINCT e.creative_work_event_id) event_count,
     COUNT(DISTINCT o.creative_work_output_id) output_count,
     SUM(CASE WHEN o.output_status='complete' THEN 1 ELSE 0 END) completed_output_count
     FROM creative_work_projects p
+    LEFT JOIN creative_project_maker_story_profiles msp ON msp.creative_work_project_id=p.creative_work_project_id
     LEFT JOIN creative_work_events e ON e.creative_work_project_id=p.creative_work_project_id AND COALESCE(e.entry_status,'active')='active'
     LEFT JOIN creative_work_outputs o ON o.creative_work_project_id=p.creative_work_project_id
     GROUP BY p.creative_work_project_id ORDER BY p.updated_at DESC, p.creative_work_project_id DESC`).all();
@@ -94,6 +97,48 @@ async function outputWorkflowContext(db,id){
   }catch(_err){ /* Content Studio is optional for older databases. */ }
   return context;
 }
+async function makerStoryContext(db,id){
+  const profile=await db.prepare(`SELECT msp.*,ip.process_key,ip.process_name
+    FROM creative_project_maker_story_profiles msp
+    LEFT JOIN inventory_processes ip ON ip.inventory_process_id=msp.primary_inventory_process_id
+    WHERE msp.creative_work_project_id=?1 LIMIT 1`).bind(id).first().catch(()=>null);
+  const selected=await db.prepare(`SELECT msw.site_item_inventory_id,msw.notes,sii.item_name,sii.source_type,
+      COALESCE(ipa.inventory_process_id,0) inventory_process_id,ip.process_key,ip.process_name
+    FROM creative_project_maker_story_workstations msw
+    JOIN site_item_inventory sii ON sii.site_item_inventory_id=msw.site_item_inventory_id
+    LEFT JOIN inventory_process_assignments ipa ON ipa.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN inventory_processes ip ON ip.inventory_process_id=ipa.inventory_process_id
+    WHERE msw.creative_work_project_id=?1
+    ORDER BY LOWER(sii.item_name),sii.site_item_inventory_id`).bind(id).all().catch(()=>({results:[]}));
+  const processes=await db.prepare(`SELECT inventory_process_id,process_key,process_name,process_group
+    FROM inventory_processes WHERE is_active=1
+    ORDER BY sort_order,LOWER(process_name),inventory_process_id`).all().catch(()=>({results:[]}));
+  const workstationOptions=await db.prepare(`SELECT sii.site_item_inventory_id,sii.item_name,sii.source_type,
+      COALESCE(ipa.inventory_process_id,0) inventory_process_id,ip.process_key,ip.process_name
+    FROM inventory_workstation_roles iwr
+    JOIN site_item_inventory sii ON sii.site_item_inventory_id=iwr.site_item_inventory_id AND sii.is_active=1
+    LEFT JOIN inventory_process_assignments ipa ON ipa.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN inventory_processes ip ON ip.inventory_process_id=ipa.inventory_process_id
+    WHERE iwr.workstation_role='station'
+    ORDER BY COALESCE(ip.sort_order,9999),LOWER(COALESCE(ip.process_name,'')),LOWER(sii.item_name),sii.site_item_inventory_id`).all().catch(()=>({results:[]}));
+  const knowledge=await db.prepare(`SELECT workshop_knowledge_entry_id,entry_key,title,review_status,confidence_status
+    FROM workshop_knowledge_entries
+    WHERE source_creative_work_project_id=?1 AND review_status<>'void'
+    ORDER BY updated_at DESC,workshop_knowledge_entry_id DESC LIMIT 12`).bind(id).all().catch(()=>({results:[]}));
+  const publications=await db.prepare(`SELECT pub.content_publication_id,pub.destination,pub.publication_slug,pub.title,pub.content_status,pub.canonical_path
+    FROM content_publications pub
+    JOIN content_projects cp ON cp.content_project_id=pub.content_project_id
+    WHERE cp.source_type='creative_project' AND cp.source_id=CAST(?1 AS TEXT)
+    ORDER BY pub.updated_at DESC,pub.content_publication_id DESC LIMIT 12`).bind(id).all().catch(()=>({results:[]}));
+  return {
+    profile:profile||null,
+    workstations:selected.results||[],
+    processes:processes.results||[],
+    workstation_options:workstationOptions.results||[],
+    related_knowledge:knowledge.results||[],
+    related_publications:publications.results||[]
+  };
+}
 async function detail(db,id){
   const project=await db.prepare(`SELECT * FROM creative_work_projects WHERE creative_work_project_id=?1`).bind(id).first();
   if(!project) return null;
@@ -113,8 +158,9 @@ async function detail(db,id){
   const reversals=await db.prepare(`SELECT * FROM creative_project_inventory_reversals WHERE creative_work_project_id=?1 ORDER BY authorized_at DESC`).bind(id).all();
   const summaries=await db.prepare(`SELECT * FROM creative_project_knowledge_summaries WHERE creative_work_project_id=?1 ORDER BY summary_type`).bind(id).all();
   const costContext=await db.prepare(`SELECT * FROM creative_project_cost_context WHERE creative_work_project_id=?1`).bind(id).first().catch(()=>null);
+  const makerStory=await makerStoryContext(db,id);
   const outputContext=await outputWorkflowContext(db,id);
-  return {project,events:events.results||[],voided_events:voidedEvents.results||[],outputs:outputs.results||[],totals:totals||{},linked_products:linked.results||[],selected_evidence:evidence.results||[],material_reviews:materials.results||[],profitability:profitability||{},content_handoffs:handoffs.results||[],inventory_items:inventoryItems.results||[],caip_mirrors:caipMirrors.results||[],cost_templates:costTemplates.results||[],cost_allocations:allocations.results||[],inventory_reversals:reversals.results||[],knowledge_summaries:summaries.results||[],cost_context:costContext||{},output_media_context:outputContext};
+  return {project,events:events.results||[],voided_events:voidedEvents.results||[],outputs:outputs.results||[],totals:totals||{},linked_products:linked.results||[],selected_evidence:evidence.results||[],material_reviews:materials.results||[],profitability:profitability||{},content_handoffs:handoffs.results||[],inventory_items:inventoryItems.results||[],caip_mirrors:caipMirrors.results||[],cost_templates:costTemplates.results||[],cost_allocations:allocations.results||[],inventory_reversals:reversals.results||[],knowledge_summaries:summaries.results||[],cost_context:costContext||{},maker_story:makerStory.profile,maker_story_workstations:makerStory.workstations,maker_story_processes:makerStory.processes,maker_story_workstation_options:makerStory.workstation_options,maker_story_related_knowledge:makerStory.related_knowledge,maker_story_related_publications:makerStory.related_publications,output_media_context:outputContext};
 }
 async function seedOutputs(db,id,projectType='maker_project'){
   const productless=['content_only','education','research','archive'].includes(String(projectType||'').toLowerCase());
@@ -147,10 +193,13 @@ async function ensureCaipProjectForWork(db,projectId,userId){
   if(!work) throw new Error('Creative Project was not found.');
   const primary=await db.prepare(`SELECT product_id FROM creative_project_product_links WHERE creative_work_project_id=?1 ORDER BY is_primary DESC,creative_project_product_link_id LIMIT 1`).bind(projectId).first().catch(()=>null);
   const key=`CAIP-WORK-${projectId}`;
+  const makerStory=await makerStoryContext(db,projectId);
+  const sourceSnapshot={creative_work_project_id:projectId,project_key:work.project_key,project_type:work.project_type,summary:work.summary||'',objective:work.objective||'',story_angle:work.story_angle||'',maker_story:makerStory.profile||null,maker_story_workstations:makerStory.workstations||[],maker_story_foundation_build:294};
+  const policy={review_first:true,no_auto_publish:true,creative_process_identity_authoritative:true,private_media_authority:'caip',content_package_authority:'content_studio',product_optional:true,productless_project_supported:true,maker_story_foundation:true,build:294};
   await db.prepare(`INSERT INTO creative_projects(creative_project_key,source_type,source_id,product_id,project_title,project_status,governance_status,lifecycle_stage,source_snapshot_json,policy_profile_json,created_by_user_id,created_at,updated_at)
-    VALUES(?1,'creative_work_project',?2,?3,?4,'intake','needs_review','intake',?5,'{}',?6,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
-    ON CONFLICT(source_type,source_id) DO UPDATE SET product_id=COALESCE(excluded.product_id,creative_projects.product_id),project_title=excluded.project_title,source_snapshot_json=excluded.source_snapshot_json,updated_at=CURRENT_TIMESTAMP`)
-    .bind(key,String(projectId),Number(primary?.product_id||work.product_id||0)||null,work.project_title||`Creative Project ${projectId}`,JSON.stringify({creative_work_project_id:projectId,project_key:work.project_key,project_type:work.project_type,summary:work.summary||'',objective:work.objective||'',story_angle:work.story_angle||''}),userId||null).run();
+    VALUES(?1,'creative_work_project',?2,?3,?4,'intake','needs_review','intake',?5,?6,?7,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+    ON CONFLICT(source_type,source_id) DO UPDATE SET product_id=COALESCE(excluded.product_id,creative_projects.product_id),project_title=excluded.project_title,source_snapshot_json=excluded.source_snapshot_json,policy_profile_json=excluded.policy_profile_json,updated_at=CURRENT_TIMESTAMP`)
+    .bind(key,String(projectId),Number(primary?.product_id||work.product_id||0)||null,work.project_title||`Creative Project ${projectId}`,JSON.stringify(sourceSnapshot),JSON.stringify(policy),userId||null).run();
   const caip=await db.prepare(`SELECT creative_project_id FROM creative_projects WHERE source_type='creative_work_project' AND source_id=?1 LIMIT 1`).bind(String(projectId)).first();
   if(!caip?.creative_project_id) throw new Error('CAIP workspace could not be created.');
   await db.prepare(`INSERT INTO creative_project_caip_mirrors(creative_work_project_id,creative_project_id,evidence_count,mirror_status,mirrored_by,mirrored_at,notes)
@@ -220,6 +269,62 @@ export async function onRequestPost(context){
       if(legacyProductId) await access.db.prepare(`INSERT OR IGNORE INTO creative_project_product_links (creative_work_project_id,product_id,relationship_type,is_primary,created_by) VALUES (?1,?2,'project_output',CASE WHEN EXISTS(SELECT 1 FROM creative_project_product_links WHERE creative_work_project_id=?1) THEN 0 ELSE 1 END,?3)`).bind(projectId,legacyProductId,access.adminUser.user_id).run();
       await seedOutputs(access.db,projectId,text(body.project_type,60)||'maker_project'); await ensureCaipProjectForWork(access.db,projectId,access.adminUser.user_id);
       message='Project overview saved.';
+    }else if(action==='save_maker_story'){
+      if(!projectId) throw new Error('Project is required.');
+      const storyKinds=new Set(['ordinary_project','workshop_folly','experiment','maker_story','research_learning']);
+      const outcomes=new Set(['unknown','win','partial_win','failure']);
+      const retryStates=new Set(['undecided','yes','no','modified']);
+      const reviewStates=new Set(['draft','needs_review','reviewed']);
+      const storyKind=storyKinds.has(text(body.story_kind,40))?text(body.story_kind,40):'ordinary_project';
+      const outcomeStatus=outcomes.has(text(body.outcome_status,40))?text(body.outcome_status,40):'unknown';
+      const tryAgainStatus=retryStates.has(text(body.try_again_status,40))?text(body.try_again_status,40):'undecided';
+      const storyReviewStatus=reviewStates.has(text(body.story_review_status,40))?text(body.story_review_status,40):'draft';
+      const processId=num(body.primary_inventory_process_id);
+      if(processId){
+        const process=await access.db.prepare(`SELECT inventory_process_id FROM inventory_processes WHERE inventory_process_id=?1 AND is_active=1 LIMIT 1`).bind(processId).first();
+        if(!process) throw new Error('Choose an active canonical workshop process/category.');
+      }
+      const workstationIds=[...new Set((Array.isArray(body.workstation_site_item_inventory_ids)?body.workstation_site_item_inventory_ids:[]).map(num).filter(Boolean))];
+      if(workstationIds.length>24) throw new Error('Choose no more than 24 workstation tools for one story.');
+      if(workstationIds.length){
+        const marks=workstationIds.map(()=>'?').join(',');
+        const valid=await access.db.prepare(`SELECT sii.site_item_inventory_id
+          FROM site_item_inventory sii
+          JOIN inventory_workstation_roles iwr ON iwr.site_item_inventory_id=sii.site_item_inventory_id AND iwr.workstation_role='station'
+          WHERE sii.is_active=1 AND sii.site_item_inventory_id IN (${marks})`).bind(...workstationIds).all();
+        const validIds=new Set((valid.results||[]).map(row=>num(row.site_item_inventory_id)));
+        const invalid=workstationIds.filter(value=>!validIds.has(value));
+        if(invalid.length) throw new Error('Every Maker Story workstation must be an active Inventory Tool explicitly marked as a workstation.');
+      }
+      const statements=[
+        access.db.prepare(`INSERT INTO creative_project_maker_story_profiles(
+          creative_work_project_id,story_kind,what_we_are_trying,why_we_are_trying_it,primary_inventory_process_id,
+          expected_result,actual_result,outcome_status,surprise_or_problem,lesson_learned,change_next_time,
+          try_again_status,story_review_status,public_story_candidate,updated_by_user_id,created_at,updated_at
+        ) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+        ON CONFLICT(creative_work_project_id) DO UPDATE SET
+          story_kind=excluded.story_kind,what_we_are_trying=excluded.what_we_are_trying,
+          why_we_are_trying_it=excluded.why_we_are_trying_it,primary_inventory_process_id=excluded.primary_inventory_process_id,
+          expected_result=excluded.expected_result,actual_result=excluded.actual_result,outcome_status=excluded.outcome_status,
+          surprise_or_problem=excluded.surprise_or_problem,lesson_learned=excluded.lesson_learned,
+          change_next_time=excluded.change_next_time,try_again_status=excluded.try_again_status,
+          story_review_status=excluded.story_review_status,public_story_candidate=excluded.public_story_candidate,
+          updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`).bind(
+            projectId,storyKind,text(body.what_we_are_trying,4000)||null,text(body.why_we_are_trying_it,4000)||null,processId||null,
+            text(body.expected_result,4000)||null,text(body.actual_result,4000)||null,outcomeStatus,text(body.surprise_or_problem,4000)||null,
+            text(body.lesson_learned,4000)||null,text(body.change_next_time,4000)||null,tryAgainStatus,storyReviewStatus,
+            Number(body.public_story_candidate)===1?1:0,access.adminUser.user_id
+          ),
+        access.db.prepare(`DELETE FROM creative_project_maker_story_workstations WHERE creative_work_project_id=?1`).bind(projectId)
+      ];
+      for(const workstationId of workstationIds){
+        statements.push(access.db.prepare(`INSERT INTO creative_project_maker_story_workstations(
+          creative_work_project_id,site_item_inventory_id,updated_by_user_id,created_at,updated_at
+        ) VALUES(?1,?2,?3,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(projectId,workstationId,access.adminUser.user_id));
+      }
+      await access.db.batch(statements);
+      await ensureCaipProjectForWork(access.db,projectId,access.adminUser.user_id);
+      message='Maker Story facts saved and the existing CAIP source snapshot refreshed. No Product, media, Content Studio package or publication was duplicated.';
     }else if(action==='add_event'){
       if(!projectId) throw new Error('Project is required.');
       const title=text(body.event_title,180); if(!title) throw new Error('Event title is required.');
@@ -302,10 +407,11 @@ export async function onRequestPost(context){
         const created=await createOrRefreshContentProjectForProduct(access.db,Number(primary.product_id),access.adminUser.user_id,{refresh_copy:false});
         contentProjectId=created?.project?.content_project_id||null;
       }else{
-        const created=await createOrRefreshContentProjectForCreativeProject(access.db,current.project,current.selected_evidence,access.adminUser.user_id,{refresh_copy:false});
+        const makerStorySource={...current.project,maker_story:current.maker_story||null,maker_story_workstations:current.maker_story_workstations||[]};
+        const created=await createOrRefreshContentProjectForCreativeProject(access.db,makerStorySource,current.selected_evidence,access.adminUser.user_id,{refresh_copy:false});
         contentProjectId=created?.project?.content_project_id||null;
       }
-      const pkg={build:BUILD,creative_work_project_id:projectId,project_key:current.project.project_key,project_title:current.project.project_title,summary:current.project.summary,objective:current.project.objective,story_angle:current.project.story_angle,primary_product_id:primary?.product_id||null,evidence:current.selected_evidence.map(row=>({event_id:row.creative_work_event_id,type:row.event_type,title:row.event_title,notes:row.event_notes,media_url:row.media_url,role:row.evidence_role})),lessons:current.selected_evidence.filter(row=>['lesson','mistake','repair','result'].includes(row.event_type)).map(row=>row.event_notes||row.event_title)};
+      const pkg={build:BUILD,maker_story_foundation_build:294,creative_work_project_id:projectId,project_key:current.project.project_key,project_title:current.project.project_title,summary:current.project.summary,objective:current.project.objective,story_angle:current.project.story_angle,maker_story:current.maker_story||null,maker_story_workstations:current.maker_story_workstations||[],primary_product_id:primary?.product_id||null,evidence:current.selected_evidence.map(row=>({event_id:row.creative_work_event_id,type:row.event_type,title:row.event_title,notes:row.event_notes,media_url:row.media_url,role:row.evidence_role})),lessons:current.selected_evidence.filter(row=>['lesson','mistake','repair','result'].includes(row.event_type)).map(row=>row.event_notes||row.event_title)};
       const handoffStatus=current.selected_evidence.length?'ready_for_review':'draft';
       await access.db.prepare(`INSERT INTO creative_project_content_handoffs (creative_work_project_id,content_project_id,handoff_status,evidence_count,package_json,created_by) VALUES (?1,?2,?3,?4,?5,?6)`).bind(projectId,contentProjectId,handoffStatus,current.selected_evidence.length,JSON.stringify(pkg),access.adminUser.user_id).run();
       message=current.selected_evidence.length?(primary?.product_id?'Reviewed evidence package created and linked to a product-backed Content Studio project.':'Reviewed evidence package created as a content-only Content Studio project. No store product is required.'):'Draft Content Studio package created from this existing Creative Process project and its CAIP media. Select/mirror reviewed evidence before approving story copy or release.';

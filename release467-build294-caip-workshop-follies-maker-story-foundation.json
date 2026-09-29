@@ -1,0 +1,140 @@
+{
+  "release": 467,
+  "build": 294,
+  "title": "CAIP Workshop Follies & Maker Story Foundation",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build294-caip-workshop-follies-maker-story-foundation",
+  "predecessor": {
+    "build": 293,
+    "title": "CSS Design-System & Responsive Consolidation",
+    "development_sha": "f8645db239348f06098faa1915ef9376940746de",
+    "development_tree_sha": "e74e6358bef93ee6d16802b488363145c4d66c04",
+    "production_main_sha": "229f9299561a820c029d1eec69e8f088b94c9a09",
+    "production_tree_sha": "e74e6358bef93ee6d16802b488363145c4d66c04",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36577048558,
+      "current_application_quality_run": 36577048520,
+      "it_admin_runtime_proof_run": 36577048576,
+      "branch_hygiene_run": 36577048496,
+      "dedicated_gate_run": 36577048557
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36577330288,
+      "production_live_resource_integrity_run": 36577451115
+    }
+  },
+  "architecture": {
+    "mode": "COMPOSE_EXISTING_AUTHORITIES_NOT_PARALLEL_PLATFORM",
+    "source_authority": "creative_work_projects",
+    "caip_authority": "creative_projects",
+    "content_studio_authority": "content_projects",
+    "publication_authority": "content_publications/social review authorities",
+    "identity_contract": "one creative_work_project -> one CAIP workspace -> one Content Studio package",
+    "product_optional": true,
+    "productless_project_supported": true,
+    "duplicate_project_required": false,
+    "duplicate_product_required": false,
+    "duplicate_media_store_required": false,
+    "automatic_publication": false,
+    "human_review_required": true
+  },
+  "maker_story": {
+    "profile_table": "creative_project_maker_story_profiles",
+    "workstation_table": "creative_project_maker_story_workstations",
+    "primary_process_authority": "inventory_processes",
+    "workstation_authority": "inventory_workstation_roles + site_item_inventory",
+    "story_kinds": [
+      "ordinary_project",
+      "workshop_folly",
+      "experiment",
+      "maker_story",
+      "research_learning"
+    ],
+    "outcomes": [
+      "unknown",
+      "win",
+      "partial_win",
+      "failure"
+    ],
+    "facts": [
+      "what_we_are_trying",
+      "why_we_are_trying_it",
+      "expected_result",
+      "actual_result",
+      "outcome_status",
+      "surprise_or_problem",
+      "lesson_learned",
+      "change_next_time",
+      "try_again_status"
+    ],
+    "zero_one_many_workstations": true,
+    "optional_related_outcomes": [
+      "Product",
+      "Custom Work example",
+      "Capability",
+      "Workshop Knowledge",
+      "Workshop Journal"
+    ]
+  },
+  "integration": {
+    "creative_process_operator_panel": true,
+    "caip_source_snapshot_enriched": true,
+    "content_studio_existing_bridge_reused": true,
+    "workshop_journal_semantics_for_maker_stories": true,
+    "standalone_productless_path_reused": true,
+    "private_media_intake_reused": true,
+    "evidence_review_reused": true,
+    "social_queue_reused": true,
+    "no_provider_publication": true
+  },
+  "implementation": {
+    "migration": "migrations/canonical/0027_release467_caip_workshop_follies_maker_story_foundation.sql",
+    "creative_process_api": "functions/api/admin/creative-process-compat.js",
+    "creative_process_ui": "public/js/admin-creative-process.js",
+    "caip_helper": "functions/api/_lib/creativeAssetIntelligence.js",
+    "content_studio_helper": "functions/api/_lib/contentAutomationStudio.js",
+    "regression": "scripts/release467_build294_regression.py",
+    "gate": "scripts/release467_build294_gate.py",
+    "workflow": ".github/workflows/release467-build294-caip-workshop-follies-maker-story-foundation.yml"
+  },
+  "safety": {
+    "schema_change": true,
+    "schema_change_scope": "ADDITIVE_MAKER_STORY_PROFILE_AND_REFERENCE_TABLES_ONLY",
+    "request_time_schema_mutation": false,
+    "development_schema_apply_required": true,
+    "production_schema_apply_required_before_dependent_deploy": true,
+    "automatic_inventory_movement": false,
+    "product_creation": false,
+    "duplicate_caip_creation": false,
+    "duplicate_content_package_creation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "payment_or_refund": false
+  },
+  "contract": {
+    "next_build": 295,
+    "next_build_title": "Storefront Buyer Journey Simplification",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "f8645db239348f06098faa1915ef9376940746de",
+      "tree": "e74e6358bef93ee6d16802b488363145c4d66c04",
+      "system_gate_run": 36577048558,
+      "quality_run": 36577048520,
+      "it_admin_runtime_run": 36577048576,
+      "repository_hygiene_run": 36577048496,
+      "build293_run": 36577048557,
+      "state": "EXACT_BUILD293_GREEN"
+    },
+    "production": {
+      "main_sha": "229f9299561a820c029d1eec69e8f088b94c9a09",
+      "tree_sha": "e74e6358bef93ee6d16802b488363145c4d66c04",
+      "production_pages_deploy_run": 36577330288,
+      "production_live_resource_integrity_run": 36577451115,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}

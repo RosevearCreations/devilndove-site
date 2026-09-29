@@ -1,17 +1,18 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 293 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 294 candidate
 
-Build 293 — CSS Design-System & Responsive Consolidation — is projected over exact Build 292 Production GREEN.
+Build 294 — CAIP Workshop Follies & Maker Story Foundation — is projected over exact Build 293 Production GREEN.
 
-- Last fully verified Development: `9d4461b189bcb6899ed4219ac7cdcc6192740240`
-- Verified tree: `e57f03fa2e58e30a827e587e4651029654e7b179`
-- Development proofs: System `36574363048`, Quality `36574363030`, I.T. `36574363037`, Hygiene `36574362807`, D1 Fan-Out `36574362888`, Build 292 `36574362894`
-- Current Production main: `6891ba76bb9fc07e97962ae36b94cad143412bfd`
-- Production proofs: Pages `36574667381`, Live Resources `36574807683`
-- Build 293 is presentation-only and performs no D1/R2/provider mutation.
-- Canonical shared CSS: `css/design-system-v293.css`; Admin-only layer: `css/admin-design-system-v293.css`.
-- Specificity budgets: styles <=190 important rules, current responsive <=49, Admin ergonomics <=16, new design-system layers = 0.
-- Regression coverage includes core contrast, overflow reachability, dropdown/menu, modal/dialog, dense-table/card mode and 44px touch targets.
-- The future queue remains open. Next after Production GREEN: Build 294 — CAIP Workshop Follies & Maker Story Foundation.
+- Last fully verified Development: `f8645db239348f06098faa1915ef9376940746de`
+- Verified tree: `e74e6358bef93ee6d16802b488363145c4d66c04`
+- Development proofs: System `36577048558`, Quality `36577048520`, I.T. `36577048576`, Hygiene `36577048496`, Build 293 `36577048557`
+- Current Production main: `229f9299561a820c029d1eec69e8f088b94c9a09`
+- Production proofs: Pages `36577330288`, Live Resources `36577451115`
+- Build 294 adds canonical migration `0027_release467_caip_workshop_follies_maker_story_foundation.sql`.
+- Migration 0027 creates only one-per-project Maker Story profiles plus reference-only project→workstation links; it creates no business rows.
+- Creative Process remains factual authority, CAIP remains private media/evidence/story authority, Content Studio remains review-first deliverable authority.
+- Productless Workshop Follies are supported; identity remains one Creative Process project → one CAIP workspace → one Content Studio package.
+- No automatic public/social/provider publication is authorized.
+- The future queue remains open. Next after Production GREEN: Build 295 — Storefront Buyer Journey Simplification.
 
 ## Current release baseline
 
