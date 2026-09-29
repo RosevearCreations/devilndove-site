@@ -1,7 +1,19 @@
 name: Release 467 Build 290 Inventory Multi-Station Read Integrity
+# D1_ONE_SHOT_EVIDENCE_CAPTURE
 on:
   push:
     branches: [dev]
+    paths:
+      - 'public/js/admin-site-item-inventory.js'
+      - 'public/js/admin-site-item-inventory-multistation.js'
+      - 'functions/api/admin/site-item-inventory.js'
+      - 'functions/api/admin/_siteItemInventoryLegacy.js'
+      - 'scripts/release467_build290_measurement.sql'
+      - 'scripts/release467_build290_regression.py'
+      - 'scripts/release467_build290_gate.py'
+      - 'release467-build290-inventory-multi-station-read-integrity-client-native-memberships.json'
+      - 'current-development-authority.json'
+      - '.github/workflows/release467-build290-inventory-multi-station-read-integrity.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,7 +38,8 @@ jobs:
     env:
       CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      D1_PROVIDER_ROWS_READ_CEILING: '5000'
+      D1_PROVIDER_ROWS_READ_CEILING: '20000'
+      BUILD290_ACCEPTANCE_ROWS_READ_CEILING: '5000'
     steps:
       - uses: actions/checkout@v7
       - name: Guard exact Development D1 binding
@@ -59,7 +72,7 @@ jobs:
           assert rows,raw
           row=rows[0]
           provider_rows_read=sum(reads)
-          ceiling=int(os.environ['D1_PROVIDER_ROWS_READ_CEILING'])
+          ceiling=int(os.environ['BUILD290_ACCEPTANCE_ROWS_READ_CEILING'])
           assert provider_rows_read<=ceiling,(provider_rows_read,ceiling)
           assert int(row.get('foreign_key_violations') or 0)==0,row
           assert int(row.get('invalid_membership_rows') or 0)==0,row
