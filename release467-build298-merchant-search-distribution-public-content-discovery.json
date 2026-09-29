@@ -2,7 +2,7 @@
   "release": 467,
   "build": 298,
   "title": "Merchant/Search Distribution + Public Content Discovery",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build298-merchant-search-distribution-public-content-discovery",
   "predecessor": {
     "build": 297,
@@ -103,5 +103,31 @@
     "next_build": 299,
     "next_build_title": "D1 Query Efficiency + Canonical Runtime/Repository Cleanup",
     "future_queue_exhausted": false
-  }
+  },
+  "final_closure": {
+    "dev_sha": "2fae62c9b5f78e31d8325bd63d93c1674a11c3c6",
+    "tree_sha": "396b3491620307b041cda8ac066f97ea44f2b0ef",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD298_GREEN",
+    "proofs": {
+      "system_gate_run": 36623313387,
+      "current_application_quality_run": 36623313316,
+      "it_admin_runtime_proof_run": 36623313302,
+      "branch_hygiene_run": 36623313126,
+      "d1_ci_fanout_guard_run": 36623313225
+    },
+    "build_specific_proof_run": 36623313494,
+    "ingested_by_build": 299
+  },
+  "production_checkpoint": {
+    "main_sha": "5da8e2457ec64a9a54523bd56eb523c9abd5ec8c",
+    "tree_sha": "396b3491620307b041cda8ac066f97ea44f2b0ef",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36624396660,
+    "production_live_resource_integrity_run": 36624531016,
+    "remote_d1_queries": 0,
+    "ingested_by_build": 299
+  },
+  "closure_ingested_by_build": 299
 }

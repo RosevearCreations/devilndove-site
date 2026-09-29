@@ -1,18 +1,19 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 298 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 299 candidate
 
-Build 298 — Merchant/Search Distribution + Public Content Discovery — is projected over exact Build 297 Production GREEN.
+Build 299 — D1 Query Efficiency + Canonical Runtime/Repository Cleanup — is projected over exact Build 298 Production GREEN.
 
-- Last fully verified Development: `24c2a0dc4f81b4323d96387b1f5a7109e976c226`
-- Verified tree: `22da804600e5d53151e06a4136b4a3c65d96a88f`
-- Development proofs: System `36617176553`, Quality `36617176471`, I.T. `36617176516`, Hygiene `36617176437`, Build 297 `36617176420`
-- Current Production main: `043799f8d89a6df392b4416a7908da4f9d92d537`
-- Production proofs: Pages `36617412141`, Live Resources `36617524593`
-- Build 298 adds no schema and performs no automatic provider publication.
-- Merchant feed: reviewed active physical Product authority, Canada/CAD only, shipping/return configuration fail-closed.
-- IndexNow: authenticated explicit submission only; exact confirmation phrase required; automatic submission OFF.
-- Search Console import authority is reused for measurable diagnostics.
-- Product/story/capability internal links are emitted only from factual existing relationships.
-- Next after Build 298 Production GREEN: Build 299 — D1 Query Efficiency + Canonical Runtime/Repository Cleanup.
+- Last fully verified Development: `2fae62c9b5f78e31d8325bd63d93c1674a11c3c6`
+- Verified tree: `396b3491620307b041cda8ac066f97ea44f2b0ef`
+- Development proofs: System `36623313387`, Quality `36623313316`, I.T. `36623313302`, Hygiene `36623313126`, D1 Fan-Out `36623313225`, Build 298 `36623313494`
+- Current Production main: `5da8e2457ec64a9a54523bd56eb523c9abd5ec8c`
+- Production proofs: Pages `36624396660`, Live Resources `36624531016`
+- Build 299 adds no schema.
+- Product/Detail/Featured/Universal Search schema discovery is consolidated into bounded snapshots.
+- Selected public sqlite_master preflights are removed in favour of fail-closed canonical reads.
+- Development provider measurement is read-only and targets only devilndove-dev.
+- Eight proven byte-identical root API copies are removed; canonical functions/api copies and all historical release evidence remain.
+- FTS/trigram and keyset changes remain evidence-dependent rather than speculative.
+- Next after Build 299 Production GREEN: Build 300 — CAIP Maker Content Outcomes Renewal & Automation Refinement.
 
 ## Current release baseline
 

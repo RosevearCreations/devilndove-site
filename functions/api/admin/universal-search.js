@@ -1,6 +1,7 @@
 // Release 467 Build 161 — read-only bounded universal Admin search.
 // Searches existing business authorities by name/SKU/reference without creating a second data authority.
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
+import { loadSchemaColumnSnapshot } from '../_lib/schemaColumnSnapshot.js';
 
 const BUILD = 161;
 const MAX_PER_SOURCE = 6;
@@ -19,16 +20,7 @@ const rows = (result) => Array.isArray(result?.results) ? result.results : [];
 const ident = (value) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(String(value || '')) ? String(value) : '';
 
 async function schema(db) {
-  const existing = new Set(rows(await db.prepare("SELECT name FROM sqlite_master WHERE type IN ('table','view')").all()).map((row) => String(row?.name || '')));
-  const out = new Map();
-  for (const source of SOURCES) {
-    if (!existing.has(source.table)) continue;
-    try {
-      const columns = new Set(rows(await db.prepare(`PRAGMA table_info(${ident(source.table)})`).all()).map((row) => String(row?.name || '')));
-      out.set(source.table, columns);
-    } catch {}
-  }
-  return out;
+  return loadSchemaColumnSnapshot(db,SOURCES.map((source)=>source.table));
 }
 
 function firstText(row, fields) {
@@ -46,7 +38,11 @@ async function searchSource(db, source, columns, q, perSource) {
   const projection = [...new Set([source.id, ...source.title, ...source.detail].filter((field) => columns.has(field) && ident(field)))];
   const where = searchColumns.map((field) => `LOWER(COALESCE(CAST(${field} AS TEXT),'')) LIKE ?`).join(' OR ');
   const sql = `SELECT ${projection.join(', ')} FROM ${ident(source.table)} WHERE ${where} ORDER BY ${ident(source.id)} DESC LIMIT ?`;
-  const like = `%${q.toLowerCase()}%`;
+  // Build 299: reference-like quick-jump searches use a prefix so existing B-tree
+  // indexes remain usable. Free-form human text retains substring semantics.
+  const normalized=q.toLowerCase();
+  const referenceLike=/^[a-z0-9@._-]+$/i.test(q)&&!q.includes(' ');
+  const like=referenceLike?`${normalized}%`:`%${normalized}%`;
   const result = await db.prepare(sql).bind(...searchColumns.map(() => like), perSource).all();
   return rows(result).map((row) => {
     const id = Number(row?.[source.id] || 0);
@@ -89,7 +85,7 @@ export async function onRequestGet({ request, env }) {
       build:BUILD,
       query:q,
       results,
-      diagnostics:{ source_count:SOURCES.length, available_source_count:columnMap.size, failed_source_count:settled.filter((entry) => entry.status === 'rejected').length, bounded:true, read_only:true },
+      diagnostics:{ source_count:SOURCES.length, available_source_count:[...columnMap.values()].filter((columns)=>columns.size).length, failed_source_count:settled.filter((entry) => entry.status === 'rejected').length, bounded:true, read_only:true, schema_snapshot:'single_statement_v299', reference_like_prefix_search:/^[a-z0-9@._-]+$/i.test(q)&&!q.includes(' ') },
     }, 200, { 'Cache-Control':'no-store' });
   } catch (error) {
     return jsonResponse({ ok:false, error:error?.message || 'Universal search is unavailable.' }, 500, { 'Cache-Control':'no-store' });

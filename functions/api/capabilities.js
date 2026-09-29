@@ -5,10 +5,8 @@ const rows=r=>Array.isArray(r?.results)?r.results:[];
 const text=v=>String(v??"").trim();
 const parseKeys=v=>{try{const x=JSON.parse(String(v||"[]"));return Array.isArray(x)?x.map(text).filter(Boolean):[];}catch{return[];}};
 
-async function tableReady(db){return Boolean(await db.prepare("SELECT 1 ok FROM sqlite_master WHERE type='table' AND name='workshop_capability_profiles' LIMIT 1").first().catch(()=>null));}
 export async function onRequestGet({request,env}){
  const db=env.DB||env.DD_DB;if(!db)return json({ok:false,error:"Capability data is temporarily unavailable."},503);
- if(!(await tableReady(db)))return json({ok:false,error:"Workshop capability profiles are not available yet.",code:"capability_profile_migration_required"},503);
  const key=text(new URL(request.url).searchParams.get("key")).toLowerCase();
  try{
   const profiles=rows(await db.prepare(`SELECT capability_key,display_name,summary,suitable_uses,common_materials,known_constraints,constraints_state,customer_supplied_policy,proof_sample_policy,related_process_keys_json,gallery_query,custom_request_path,source_note,review_status,updated_at

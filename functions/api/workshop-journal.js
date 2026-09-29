@@ -6,13 +6,9 @@ function json(data, status = 200) {
   return jsonResponse(data, status, { 'Cache-Control': status === 200 ? 'public, max-age=300, stale-while-revalidate=900' : 'no-store' });
 }
 
-async function hasTable(db) {
-  try { return Boolean(await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='content_publications' LIMIT 1").first()); } catch { return false; }
-}
-
 export async function onRequestGet(context) {
   const db = getDb(context.env);
-  if (!db || !(await hasTable(db))) return json({ ok: true, source: 'fallback', items: [], message: 'Published workshop stories will appear after the Build 200 migration and review.' });
+  if (!db) return json({ ok: true, source: 'fallback', items: [], message: 'Published workshop stories are temporarily unavailable.' });
   const url = new URL(context.request.url);
   const destination = String(url.searchParams.get('destination') || 'workshop_journal').toLowerCase();
   const slug = String(url.searchParams.get('story') || url.searchParams.get('slug') || '').trim();
