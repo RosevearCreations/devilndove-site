@@ -7,6 +7,7 @@ on:
       - 'public/js/**'
       - 'admin/**'
       - 'scripts/release467_build300_*'
+      - 'scripts/release467_build265_gate.py'
       - 'release467-build300-*.json'
       - 'current-development-authority.json'
       - 'docs/operations/RELEASE_467_BUILD_300_*'
