@@ -400,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const data = await window.DDAuth.apiJson(
             '/api/admin/inventory-bootstrap',
             { method: 'GET' },
-            { fallbackMessage: 'Failed to load inventory setup choices.', cacheKey: 'inventory-bootstrap-v289', cacheTtlMs: 300000, retries: 0, staleOnError: true }
+            { fallbackMessage: 'Failed to load inventory setup choices.', cacheKey: 'inventory-bootstrap-v289.2', cacheTtlMs: 300000, retries: 0, staleOnError: true }
           );
           categorySeedOptions = Array.isArray(data?.categories) ? data.categories.map((v)=>String(v||'').trim().toLowerCase()).filter(Boolean) : [];
           processOptions = Array.isArray(data?.processes) ? data.processes : [];
@@ -1535,7 +1535,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const search = document.getElementById('siteInventorySearch');
       if (search) search.value = deepSearch;
     }
-    loadList();
+    // Workstation/category and unit choices must exist before the cards/table render.
+    // Rendering the list first produced rows whose selects only contained their fallback item.
+    loadSeedOptions()
+      .then(() => loadList({ force: true }))
+      .catch(() => loadList({ force: true }));
   }
 
   document.addEventListener('dd:admin-ready', (event) => {

@@ -40,7 +40,9 @@ for token in ('Workstation / Category','This tool is the workstation','Associate
     q(token in ui,'Build 289 Inventory UI missing '+token)
 for token in ('current_price_cents','package_units','package_units_source','Amazon did not expose a reliable current CAD price'):
     q(token in amazon,'Build 289 Amazon missing '+token)
-q('/public/js/admin-site-item-inventory.js?v=289.1' in page,'Build 289 Inventory asset version missing')
+q(any(v in page for v in ('/public/js/admin-site-item-inventory.js?v=289.1','/public/js/admin-site-item-inventory.js?v=289.2')),'Build 289 Inventory asset version missing')
+q("loadSeedOptions()" in ui and ".then(() => loadList({ force: true }))" in ui,'Build 289 Inventory dropdown bootstrap must complete before first list render')
+q("inventory-bootstrap-v289.2" in ui,'Build 289 Inventory bootstrap cache key must refresh workstation/unit choices')
 for token in ('AUTONOMOUS_QUEUE_EXHAUSTED','build287_real_link_rows','build288_reversed_post_rows','direct_d1_rows_read','successor_justified'):
     q(token in runtime,'Build 289 runtime missing '+token)
 q('D1_ONE_SHOT_EVIDENCE_CAPTURE' in wf and "D1_PROVIDER_ROWS_READ_CEILING: '20000'" in wf and 'branches: [dev]' in wf,'Build 289 bounded Development workflow missing')
