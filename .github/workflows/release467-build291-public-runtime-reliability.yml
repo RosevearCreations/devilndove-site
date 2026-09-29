@@ -16,6 +16,14 @@ on:
       - '.github/workflows/production-pages-deploy-current.yml'
       - '.github/workflows/release467-build291-public-runtime-reliability.yml'
       - 'scripts/current_*_gate.py'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'admin/it/index.html'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'admin/reliability/index.html'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'admin/deployment-preflight/index.html'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
   workflow_dispatch:
 permissions:
   contents: read
