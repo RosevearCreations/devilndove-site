@@ -162,7 +162,7 @@ function shape(row = {}) {
     reservation_notes: row.reservation_notes || '',
     last_reorder_requested_at: row.last_reorder_requested_at || null,
     last_counted_at: row.last_counted_at || null,
-    needs_reorder: reorder > 0 && (onHand + incoming) <= reorder ? 1 : 0,
+    needs_reorder: Number(row.do_not_reorder || 0) === 1 ? 0 : (reorder > 0 && (onHand + incoming) <= reorder ? 1 : 0),
     is_active: Number(row.is_active || 0),
     linked_product_count: Number(row.linked_product_count || 0),
     linked_product_names: row.linked_product_names || '',
@@ -172,8 +172,100 @@ function shape(row = {}) {
     expiry_tracking_recommended: Number(row.expiry_tracking_recommended || 0),
     source_material_recommended: Number(row.source_material_recommended || 0),
     inventory_profile_notes: row.inventory_profile_notes || '',
+    inventory_process_id: Number(row.inventory_process_id || 0),
+    process_key: row.process_key || '',
+    process_name: row.process_name || '',
+    workstation_role: row.workstation_role || 'associated',
+    workstation_site_item_inventory_id: Number(row.workstation_site_item_inventory_id || 0),
+    workstation_item_name: row.workstation_item_name || '',
     updated_at: row.updated_at || null
   };
+}
+
+
+async function activeInventoryProcess(db, processId) {
+  const id = Number(processId || 0);
+  if (!id) return null;
+  return db.prepare(`
+    SELECT inventory_process_id,process_key,process_name
+    FROM inventory_processes
+    WHERE inventory_process_id=? AND is_active=1
+    LIMIT 1
+  `).bind(id).first().catch(() => null);
+}
+
+async function currentProcessAssignment(db, itemId) {
+  return db.prepare(`
+    SELECT ipa.inventory_process_id,ip.process_key,ip.process_name,
+           COALESCE(iwr.workstation_role,'associated') AS workstation_role,
+           COALESCE(iwr.workstation_site_item_inventory_id,0) AS workstation_site_item_inventory_id
+    FROM inventory_process_assignments ipa
+    JOIN inventory_processes ip ON ip.inventory_process_id=ipa.inventory_process_id
+    LEFT JOIN inventory_workstation_roles iwr ON iwr.site_item_inventory_id=ipa.site_item_inventory_id
+    WHERE ipa.site_item_inventory_id=?
+    LIMIT 1
+  `).bind(Number(itemId || 0)).first().catch(() => null);
+}
+
+async function saveWorkstationAssignment(db, itemId, body, userId, sourceType, process) {
+  const explicitProcess = Object.prototype.hasOwnProperty.call(body || {}, 'inventory_process_id');
+  if (!process) {
+    if (explicitProcess) {
+      await db.batch([
+        db.prepare('DELETE FROM inventory_workstation_roles WHERE site_item_inventory_id=?').bind(itemId),
+        db.prepare('DELETE FROM inventory_process_assignments WHERE site_item_inventory_id=?').bind(itemId)
+      ]);
+    }
+    return { inventory_process_id: 0, workstation_role: 'associated', workstation_site_item_inventory_id: 0 };
+  }
+
+  let role = normalizeText(body?.workstation_role).toLowerCase();
+  if (!['station','associated'].includes(role)) role = 'associated';
+  if (role === 'station' && normalizeInventoryKind(sourceType) !== 'tool') {
+    throw Object.assign(new Error('Only Tool inventory can be marked as the workstation itself.'), { status: 400, code: 'inventory_station_requires_tool' });
+  }
+
+  let parentId = role === 'associated' ? Number(body?.workstation_site_item_inventory_id || 0) : 0;
+  if (parentId === Number(itemId || 0)) {
+    throw Object.assign(new Error('An inventory item cannot be its own parent workstation.'), { status: 400, code: 'inventory_station_self_reference' });
+  }
+  if (parentId) {
+    const parent = await db.prepare(`
+      SELECT sii.site_item_inventory_id,sii.item_name,ipa.inventory_process_id
+      FROM site_item_inventory sii
+      JOIN inventory_process_assignments ipa ON ipa.site_item_inventory_id=sii.site_item_inventory_id
+      JOIN inventory_workstation_roles iwr ON iwr.site_item_inventory_id=sii.site_item_inventory_id
+      WHERE sii.site_item_inventory_id=?
+        AND COALESCE(sii.is_active,1)=1
+        AND LOWER(TRIM(COALESCE(sii.source_type,'')))='tool'
+        AND iwr.workstation_role='station'
+      LIMIT 1
+    `).bind(parentId).first().catch(() => null);
+    if (!parent || Number(parent.inventory_process_id || 0) !== Number(process.inventory_process_id || 0)) {
+      throw Object.assign(new Error('Choose a workstation tool from the same workshop category.'), { status: 400, code: 'inventory_station_parent_mismatch' });
+    }
+  }
+
+  await db.batch([
+    db.prepare(`
+      INSERT INTO inventory_process_assignments(site_item_inventory_id,inventory_process_id,assigned_by_user_id,assigned_at,updated_at)
+      VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+      ON CONFLICT(site_item_inventory_id) DO UPDATE SET
+        inventory_process_id=excluded.inventory_process_id,
+        assigned_by_user_id=excluded.assigned_by_user_id,
+        updated_at=CURRENT_TIMESTAMP
+    `).bind(itemId, Number(process.inventory_process_id), Number(userId || 0) || null),
+    db.prepare(`
+      INSERT INTO inventory_workstation_roles(site_item_inventory_id,workstation_role,workstation_site_item_inventory_id,updated_by_user_id,created_at,updated_at)
+      VALUES(?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+      ON CONFLICT(site_item_inventory_id) DO UPDATE SET
+        workstation_role=excluded.workstation_role,
+        workstation_site_item_inventory_id=excluded.workstation_site_item_inventory_id,
+        updated_by_user_id=excluded.updated_by_user_id,
+        updated_at=CURRENT_TIMESTAMP
+    `).bind(itemId, role, parentId || null, Number(userId || 0) || null)
+  ]);
+  return { inventory_process_id: Number(process.inventory_process_id), workstation_role: role, workstation_site_item_inventory_id: parentId || 0 };
 }
 
 function normalizeMovementType(value) {
