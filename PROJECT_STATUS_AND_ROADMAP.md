@@ -2,27 +2,19 @@
 
 ## Current checkpoint
 
-Build 289 Inventory many-to-many workstation stabilization is **Production GREEN**.
+**Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships** is active in Development.
 
-- Development: `a9d1fe0d8a03e6ccfab8c1b7be3c5e0f005e4400`
-- Production main: `238a7732049bbf9c5fead7b3ec4cc2c1e779fcd6`
-- Exact shared tree: `9303662ce708b1c1c02c3a94c618d8f2704ca0a1`
-- System Gate: `36517008091`
-- Current Application Quality: `36517008088`
-- I.T. Admin Runtime Proof: `36517008100`
-- Repository Branch Hygiene: `36517008107`
-- Production Pages Deploy: `36517150890`
-- Production Live Resource Integrity: `36517221739`
+Build 289 remains the Production baseline while Build 290 completes exact-SHA Development acceptance and promotion.
 
-The many-to-many Inventory model remains active: one primary process/category for reporting and cost rollups, with zero/one/many specific workstation tools available to associated Tools/Supplies.
+Build 290 is schema-neutral. It retains the existing many-to-many membership table, makes the primary Inventory client send the complete station-membership array directly, keeps one primary workshop category, reads page memberships in one set-based batch, and retires the global fetch interception from the compatibility helper.
 
 ## Next production queue — Builds 290–300
 
 The queue **has not run out** and is **ready to start**.
 
-**Next: Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships**
+**Active: Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships**
 
-1. Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships
+1. Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships — **ACTIVE**
 2. Build 291 — Public Runtime Reliability & Broken-Surface Closure
 3. Build 292 — Client Runtime Observer & Memory-Churn Hardening
 4. Build 293 — CSS Design-System & Responsive Consolidation
