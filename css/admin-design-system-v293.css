@@ -1,0 +1,50 @@
+/* Release 467 Build 293 — admin-only design-system convergence.
+   Loaded only on Admin HTML through the shared middleware. */
+.admin-shell{
+  --dd-admin-density-gap:.75rem;
+  --dd-admin-control-min:2.75rem;
+  color:var(--dd-color-text);
+}
+.admin-shell :where(.card,.admin-panel,.admin-stat,.admin-live-item,.resource-tile,.resource-linked-card){
+  background-color:var(--dd-color-surface);
+  color:var(--dd-color-text);
+  border-color:var(--dd-color-border);
+}
+.admin-shell :where(.card .card,.admin-panel .card){
+  background-color:var(--dd-color-surface-raised);
+}
+.admin-shell :where(input,select,textarea){
+  min-height:var(--dd-admin-control-min);
+  background-color:var(--dd-color-surface-soft);
+  color:var(--dd-color-text);
+}
+.admin-shell :where(select option){
+  background:var(--dd-color-surface-raised);
+  color:var(--dd-color-text);
+}
+.admin-shell :where(.small,.admin-stat-label,.admin-live-meta){color:var(--dd-color-text-muted)}
+.admin-shell :where(.dropdown-menu,[role="menu"],dialog,[role="dialog"],.modal,.modal-panel){
+  background:var(--dd-color-surface-raised);
+  color:var(--dd-color-text);
+}
+.admin-shell :where(.dropdown-menu,[role="menu"]) :where(a,button,[role="menuitem"]){
+  color:var(--dd-color-text);
+  min-height:var(--dd-touch-min);
+}
+.admin-shell :where(.admin-table-wrap,.table-wrap,.dd-table-scroll,.dd-horizontal-scroll-region){
+  background:var(--dd-color-surface-soft);
+  border-color:var(--dd-color-border);
+}
+.admin-shell :where(thead th){
+  background:var(--dd-color-surface-raised);
+  color:var(--dd-color-text);
+}
+.admin-shell :where(.dd-v237-table-tools){gap:var(--dd-admin-density-gap)}
+.admin-shell :where(.dd-v237-card-mode tr){background:var(--dd-color-surface);color:var(--dd-color-text)}
+.admin-shell :where(.dd-v237-card-mode td::before){color:var(--dd-color-text-muted)}
+.admin-shell :where(button,.btn,a.btn,[role="button"]){min-height:var(--dd-admin-control-min)}
+
+@media(max-width:720px){
+  .admin-shell :where(.admin-toolbar,.resource-picker-head,.mobile-capture-topline){align-items:stretch}
+  .admin-shell :where(.btn,button,input,select,textarea){min-height:var(--dd-touch-min)}
+}
