@@ -22,7 +22,7 @@ q((prev.get('production_checkpoint') or {}).get('ingested_by_build')==300,'Build
 scope=a.get('scope') or {}
 q(scope.get('duplicate_identity_measurement') is True and scope.get('private_media_boundary_measurement') is True,'Build 300 CAIP evidence scope incomplete')
 q(scope.get('content_studio_idempotency_measurement') is True and scope.get('human_approval_boundary_measurement') is True,'Build 300 review/identity measurement scope incomplete')
-q(scope.get('automation_refinement') in ('ONLY_AFTER_BUILD300_DEVELOPMENT_MEASUREMENT','EVIDENCE_GATED_REVIEW_FIRST'),'Build 300 automation boundary mismatch')
+q(scope.get('automation_refinement')=='EVIDENCE_GATED_REVIEW_FIRST','Build 300 automation boundary mismatch')
 s=a.get('safety') or {}
 q(s.get('schema_change') is False and s.get('production_d1_measurement_contact') is False and s.get('automatic_public_release') is False,'Build 300 safety boundary mismatch')
 r=subprocess.run([sys.executable,str(R/'scripts/release467_build300_regression.py')],cwd=R,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -32,8 +32,11 @@ q(int(p.get('build') or 0)>=300,'Current authority must retain Build 300 or succ
 if int(p.get('build') or 0)==300:
     q(p.get('accepted_dev_sha')==DEV and p.get('accepted_dev_tree_sha')==TREE,'Build 300 starting checkpoint mismatch')
     q((p.get('production_checkpoint') or {}).get('main_sha')==MAIN,'Build 300 Production predecessor pointer mismatch')
+    q(int(p.get('next_build') or 0)==301 and p.get('next_build_title')=='First Real Maker Story Adoption & Completeness','Build 301 successor pointer mismatch')
+    q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md','Build 300 successor roadmap pointer mismatch')
 print('RELEASE 467 BUILD 300 CAIP MAKER CONTENT OUTCOMES RENEWAL & AUTOMATION REFINEMENT')
 if F:
     print('FAIL');[print('-',x) for x in F];sys.exit(1)
 print('PASS')
-print('Future queue remains open; next roadmap is evidence-determined.')
+print('Measured decision: ADOPTION_GUIDANCE_ONLY_NO_NEW_AUTOMATION')
+print('Next: Build 301 — First Real Maker Story Adoption & Completeness')

@@ -2,43 +2,34 @@
 
 ## Current checkpoint
 
-**Build 300 — CAIP Maker Content Outcomes Renewal & Automation Refinement** is active in Development.
+**Build 300 — CAIP Maker Content Outcomes Renewal & Automation Refinement** is active in Development refinement.
 
-Build 299 is the exact Development and Production GREEN baseline. Build 300 closes the Builds 290–300 roadmap by measuring the real Creative Process → CAIP → Content Studio → reviewed publication path before changing automation.
+Build 299 is the exact Development and Production GREEN baseline. Build 300 measured the real Development path and found the infrastructure bridge healthy but Maker Story adoption not yet started: 5 active Creative Projects, 5 CAIP workspaces, 5 Content Studio packages, zero duplicate identities, zero Maker Story profiles, zero selected evidence, 95 unapproved factual-template drafts, and zero Journal/social publication rows.
 
-- Exact Build 299 Development: `c437998c7b17cf7bce4d6ae913d2273e3f96e038`
-- Exact Build 299 Production main: `9689e81f23722d58421df87b2ea6b41ca39005fb`
-- Shared predecessor tree: `95df4beae5394ebf85c9b2bc1665525ab6ed5eb5`
+- Build 300 measured D1 rows read: **471 / 20,000 ceiling**
 - Build 300 schema change: **NONE**
-- Development outcome measurement: **READ ONLY**
+- Refinement decision: **ADOPTION GUIDANCE ONLY — NO NEW AUTOMATION**
+- Automatic story creation / Content Studio refresh / approval / publication: **NONE**
 - Production D1 measurement contact: **NONE**
-- Automation refinement: **ONLY AFTER MEASURED EVIDENCE**
-- Automatic publication/provider execution: **NONE**
 - Future queue exhausted: **NO**
-- Successor roadmap: **DETERMINED BY BUILD 300 EVIDENCE**
+- Next: **Build 301 — First Real Maker Story Adoption & Completeness**
+- Successor roadmap: `docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md`
 
-## Next production queue — Builds 290–300
+## Next production queue — Builds 301–306
 
-The queue **has not run out** and is **ready to start**.
+The queue **has not run out**.
 
-**Active: Build 295 — Storefront Buyer Journey Simplification**
+**Next: Build 301 — First Real Maker Story Adoption & Completeness**
 
-1. Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships — **PRODUCTION GREEN**
-2. Build 291 — Public Runtime Reliability & Broken-Surface Closure — **PRODUCTION GREEN**
-3. Build 292 — Client Runtime Observer & Memory-Churn Hardening — **PRODUCTION GREEN**
-4. Build 293 — CSS Design-System & Responsive Consolidation — **PRODUCTION GREEN**
-5. Build 294 — CAIP Workshop Follies & Maker Story Foundation — **PRODUCTION GREEN**
-6. Build 295 — Storefront Buyer Journey Simplification — **ACTIVE**
-7. Build 297 — Search-First HTML, Product + Story SEO & Crawl Control
-8. Build 298 — Merchant/Search Distribution + Public Content Discovery
-9. Build 298 — Merchant/Search Distribution + Public Content Discovery
-10. Build 299 — D1 Query Efficiency + Canonical Runtime/Repository Cleanup
-11. Build 300 — CAIP Maker Content Outcomes Renewal & Automation Refinement
+1. Build 301 — First Real Maker Story Adoption & Completeness
+2. Build 302 — CAIP Evidence Selection & Public-Safety Review Adoption
+3. Build 303 — Content Studio Draft Review & Approval Adoption
+4. Build 304 — Workshop Journal & Social Review-First Publication Acceptance
+5. Build 305 — Buyer Discovery & Search Measurement Activation
+6. Build 306 — CAIP Content Adoption Outcomes Renewal & Roadmap Renewal
 
 Canonical roadmap:
-`docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md`
-
-The sequence deliberately prioritizes Builds 290–293 as stabilization/refactoring. Build 294 extends the existing Creative Process → CAIP → Content Studio path for Workshop Follies/Maker Stories. Build 295 now exposes that work through a simpler customer journey without creating a parallel media, project, social-queue or publishing system.
+`docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md`
 
 ## Permanent boundaries
 

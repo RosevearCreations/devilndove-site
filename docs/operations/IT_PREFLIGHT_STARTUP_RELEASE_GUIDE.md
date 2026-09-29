@@ -10,10 +10,12 @@ Build 300 — CAIP Maker Content Outcomes Renewal & Automation Refinement — is
 - Build 299 Development query-efficiency evidence: 10 read-only statements, 5,387 aggregate rows read under a 20,000 ceiling; FTS/trigram not justified at current scale.
 - Build 300 adds no schema.
 - Build 300 first measures real Maker Story adoption/completion, duplicate CAIP/Content Studio identities, private-media boundaries, handoff reuse, deliverable/publication usefulness, engagement and runtime/search health.
-- Automation refinement remains evidence-gated and review-first.
+- Measured Build 300 decision: **ADOPTION_GUIDANCE_ONLY_NO_NEW_AUTOMATION**.
 - Production D1 measurement contact: zero.
 - Automatic public/provider publication: zero.
-- The future queue remains open; Build 300 evidence determines the successor roadmap.
+- Build 300 adds read-only Maker Story next-safe-action guidance; no automatic create/refresh/approval/publication.
+- The future queue remains open. Next: Build 301 — First Real Maker Story Adoption & Completeness.
+- Successor roadmap: `docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md`.
 
 ## Current release baseline
 
