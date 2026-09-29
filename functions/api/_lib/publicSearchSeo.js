@@ -21,6 +21,53 @@ export function canonicalStoryUrl(item){
     return `${u.origin}${u.pathname}${u.search}`;
   }catch{return '';}
 }
+function publicPath(value){
+  const raw=clean(value);if(!raw)return '';
+  try{const u=new URL(raw,PRODUCTION_ORIGIN);if(u.origin!==PRODUCTION_ORIGIN)return '';return u.pathname+u.search;}catch{return '';}
+}
+async function loadProductDiscoveryLinks(db,product){
+  const out=[];const id=Number(product?.product_id||0);const slug=clean(product?.slug);if(!db||!id||!slug)return out;
+  const rel=`/shop/product/?slug=${encodeURIComponent(slug)}`,abs=PRODUCTION_ORIGIN+rel;
+  try{
+    const result=await db.prepare(`SELECT pub.publication_slug,pub.title,pub.canonical_path
+      FROM content_publications pub JOIN content_projects cp ON cp.content_project_id=pub.content_project_id
+      WHERE pub.destination='workshop_journal' AND pub.content_status='published'
+        AND (cp.product_id=? OR pub.product_path=? OR pub.product_path=?)
+      ORDER BY datetime(pub.published_at) DESC,pub.content_publication_id DESC LIMIT 5`).bind(id,rel,abs).all();
+    for(const row of rows(result)){
+      const href=publicPath(row.canonical_path)||`/workshop-journal/story/?story=${encodeURIComponent(clean(row.publication_slug))}`;
+      if(href)out.push({kind:'story',label:clean(row.title)||'Related workshop story',href});
+    }
+  }catch{}
+  return out;
+}
+async function loadStoryDiscoveryLinks(db,item){
+  const out=[];if(!db||!item)return out;
+  const productPath=publicPath(item.product_path);
+  if(productPath&&productPath!=='/shop/')out.push({kind:'product',label:'Related piece',href:productPath});
+  try{
+    const source=await db.prepare(`SELECT cp.source_type,cp.source_id,cp.product_id
+      FROM content_publications pub JOIN content_projects cp ON cp.content_project_id=pub.content_project_id
+      WHERE pub.content_publication_id=? AND pub.content_status='published' LIMIT 1`).bind(Number(item.content_publication_id||0)).first();
+    const projectId=clean(source?.source_type)==='creative_work_project'?Number(source?.source_id||0):0;
+    if(projectId){
+      const processes=rows(await db.prepare(`SELECT DISTINCT ip.process_key FROM creative_project_operations o
+        JOIN inventory_processes ip ON ip.inventory_process_id=o.inventory_process_id
+        WHERE o.creative_work_project_id=? AND COALESCE(o.plan_status,'planned')<>'retired' LIMIT 40`).bind(projectId).all().catch(()=>({results:[]})));
+      const keys=new Set(processes.map((row)=>clean(row.process_key)).filter(Boolean));
+      if(keys.size){
+        const profiles=rows(await db.prepare(`SELECT capability_key,display_name,related_process_keys_json
+          FROM workshop_capability_profiles WHERE is_public=1 AND review_status IN ('reviewed','published')
+          ORDER BY display_name LIMIT 80`).all().catch(()=>({results:[]})));
+        for(const p of profiles){
+          let related=[];try{const x=JSON.parse(String(p.related_process_keys_json||'[]'));related=Array.isArray(x)?x:[];}catch{}
+          if(related.some((key)=>keys.has(clean(key))))out.push({kind:'capability',label:clean(p.display_name)||clean(p.capability_key),href:`/capabilities/${encodeURIComponent(clean(p.capability_key))}/`});
+        }
+      }
+    }
+  }catch{}
+  const seen=new Set();return out.filter((link)=>{const key=link.href;if(!key||seen.has(key))return false;seen.add(key);return true;}).slice(0,6);
+}
 export async function loadPublishedProductSeo(db,slug){
   const key=clean(slug).toLowerCase(); if(!db||!key)return null;
   const product=await db.prepare("SELECT * FROM products WHERE lower(slug)=? AND lower(COALESCE(status,'active'))='active' AND lower(COALESCE(review_status,'published')) IN ('approved','published','') LIMIT 1").bind(key).first().catch(()=>null);
@@ -49,7 +96,8 @@ export async function loadPublishedProductSeo(db,slug){
     {'@type':'ListItem',position:2,name:'Shop',item:`${PRODUCTION_ORIGIN}/shop/`},
     {'@type':'ListItem',position:3,name:clean(merged.name)||'Product',item:canonical}
   ]};
-  return {kind:'product',canonical,title,description,h1:name,image:primary,product:merged,images,structured_data:{'@context':'https://schema.org','@graph':[productNode,breadcrumb]}};
+  const discovery_links=await loadProductDiscoveryLinks(db,merged);
+  return {kind:'product',canonical,title,description,h1:name,image:primary,product:merged,images,discovery_links,structured_data:{'@context':'https://schema.org','@graph':[productNode,breadcrumb]}};
 }
 export async function loadPublishedStorySeo(db,slug){
   if(!db||!clean(slug))return null;
@@ -68,7 +116,8 @@ export async function loadPublishedStorySeo(db,slug){
       {'@type':'ListItem',position:2,name:'Workshop Journal',item:`${PRODUCTION_ORIGIN}/workshop-journal/`},
       {'@type':'ListItem',position:3,name:clean(item.title)||'Workshop story',item:canonical}
     ]};
-    return {kind:'story',canonical,title,description,h1:clean(item.title)||'Workshop story',image:clean(item.hero_media_url),item,structured_data:{'@context':'https://schema.org','@graph':[article,breadcrumb]}};
+    const discovery_links=await loadStoryDiscoveryLinks(db,item);
+    return {kind:'story',canonical,title,description,h1:clean(item.title)||'Workshop story',image:clean(item.hero_media_url),item,discovery_links,structured_data:{'@context':'https://schema.org','@graph':[article,breadcrumb]}};
   }catch{return null;}
 }
 export async function loadDynamicSitemapEntries(db){

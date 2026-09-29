@@ -2,14 +2,14 @@
 
 ## Current checkpoint
 
-**Build 297 — Search-First HTML, Product + Story SEO & Crawl Control** is active in Development.
+**Build 298 — Merchant/Search Distribution + Public Content Discovery** is active in Development.
 
-Build 296 is the exact Development and Production GREEN baseline. Build 297 projects only approved Product and reviewed Workshop Journal publication facts into initial HTML, adds Product/Offer/Breadcrumb and BlogPosting/Breadcrumb structured data, noindexes arbitrary Shop query permutations, and augments the runtime sitemap with published dynamic URLs while preserving the static canonical sitemap source.
+Build 297 is the exact Development and Production GREEN baseline. Build 298 projects only approved Product and reviewed Workshop Journal publication facts into initial HTML, adds Product/Offer/Breadcrumb and BlogPosting/Breadcrumb structured data, noindexes arbitrary Shop query permutations, and augments the runtime sitemap with published dynamic URLs while preserving the static canonical sitemap source.
 
-- Exact Build 296 Development: `8b9a556e5d267f6c333032a1af64d1bb776bcf49`
-- Exact Build 296 Production main: `120b5b607bfe3b7ddcf36abf4aefaad772477ba9`
-- Shared predecessor tree: `65ab192e1dfb0b8f14ab88b9136d3bc925f6292d`
-- Build 297 schema change: **NONE**
+- Exact Build 297 Development: `24c2a0dc4f81b4323d96387b1f5a7109e976c226`
+- Exact Build 297 Production main: `043799f8d89a6df392b4416a7908da4f9d92d537`
+- Shared predecessor tree: `22da804600e5d53151e06a4136b4a3c65d96a88f`
+- Build 298 schema change: **NONE**
 - Dynamic indexing authority: **PUBLISHED RECORDS ONLY**
 - Arbitrary Shop query/filter URLs: **NOINDEX,FOLLOW**
 - Automatic publication / provider / payment / private-media action: **NONE**
@@ -27,8 +27,8 @@ The queue **has not run out** and is **ready to start**.
 4. Build 293 — CSS Design-System & Responsive Consolidation — **PRODUCTION GREEN**
 5. Build 294 — CAIP Workshop Follies & Maker Story Foundation — **PRODUCTION GREEN**
 6. Build 295 — Storefront Buyer Journey Simplification — **ACTIVE**
-7. Build 296 — Custom Work Progressive Intake
-8. Build 297 — Search-First HTML, Product + Story SEO & Crawl Control
+7. Build 297 — Search-First HTML, Product + Story SEO & Crawl Control
+8. Build 298 — Merchant/Search Distribution + Public Content Discovery
 9. Build 298 — Merchant/Search Distribution + Public Content Discovery
 10. Build 299 — D1 Query Efficiency + Canonical Runtime/Repository Cleanup
 11. Build 300 — CAIP Maker Content Outcomes Renewal & Automation Refinement

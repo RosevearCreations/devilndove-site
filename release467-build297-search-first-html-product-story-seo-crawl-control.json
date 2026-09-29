@@ -2,7 +2,7 @@
   "release": 467,
   "build": 297,
   "title": "Search-First HTML, Product + Story SEO & Crawl Control",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build297-search-first-html-product-story-seo-crawl-control",
   "predecessor": {
     "build": 296,
@@ -100,5 +100,30 @@
     "next_build": 298,
     "next_build_title": "Merchant/Search Distribution + Public Content Discovery",
     "future_queue_exhausted": false
-  }
+  },
+  "final_closure": {
+    "dev_sha": "24c2a0dc4f81b4323d96387b1f5a7109e976c226",
+    "tree_sha": "22da804600e5d53151e06a4136b4a3c65d96a88f",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD297_GREEN",
+    "proofs": {
+      "system_gate_run": 36617176553,
+      "current_application_quality_run": 36617176471,
+      "it_admin_runtime_proof_run": 36617176516,
+      "branch_hygiene_run": 36617176437
+    },
+    "build_specific_proof_run": 36617176420,
+    "ingested_by_build": 298
+  },
+  "production_checkpoint": {
+    "main_sha": "043799f8d89a6df392b4416a7908da4f9d92d537",
+    "tree_sha": "22da804600e5d53151e06a4136b4a3c65d96a88f",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36617412141,
+    "production_live_resource_integrity_run": 36617524593,
+    "remote_d1_queries": 0,
+    "ingested_by_build": 298
+  },
+  "closure_ingested_by_build": 298
 }

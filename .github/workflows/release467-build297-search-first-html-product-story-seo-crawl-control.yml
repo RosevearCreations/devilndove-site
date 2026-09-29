@@ -1,7 +1,5 @@
 name: Release 467 Build 297 Search-First HTML Product Story SEO Crawl Control
 on:
-  push:
-    branches: [dev]
   workflow_dispatch:
 permissions:
   contents: read

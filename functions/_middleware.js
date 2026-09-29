@@ -88,6 +88,12 @@ function publicShopRequestInfo(request, pathname) {
   return { filtered:[...url.searchParams.keys()].length>0, canonical:'https://devilndove.com/shop/' };
 }
 function safeJsonForHtml(value){return JSON.stringify(value).replace(/</g,'\\u003c');}
+function htmlEscape(value){return String(value??'').replace(/[&<>"']/g,(ch)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+function discoveryLinksMarkup(links=[]){
+  const safe=(Array.isArray(links)?links:[]).filter((x)=>x?.href&&x?.label).slice(0,6);
+  if(!safe.length)return '';
+  return `<nav class="card build298-related-discovery" data-build298-related-discovery aria-label="Related Devil n Dove content" style="margin-top:18px"><h2 style="margin-top:0">Related from the workshop</h2><p class="small">These links appear only when the published Product/story records have a factual relationship.</p><div class="dd-admin-responsive-actions">${safe.map((x)=>`<a class="btn secondary" href="${htmlEscape(x.href)}">${htmlEscape(x.label)}</a>`).join('')}</div></nav>`;
+}
 function xmlEscape(value){return String(value||'').replace(/[&<>"']/g,(ch)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[ch]));}
 async function dynamicSitemapResponse(response, env) {
   const type=String(response?.headers?.get('Content-Type')||'').toLowerCase();
@@ -257,6 +263,8 @@ async function withPlatformClient(response, request, env = {}) {
           .on('#pageH1',{element(element){element.setInnerContent(searchSeo.h1);}})
           .on('#pageIntro',{element(element){element.setInnerContent(searchSeo.description);}})
           .on('#productBreadcrumbLabel',{element(element){element.setInnerContent(String(searchSeo.product?.name||searchSeo.h1));}});
+        const productDiscoveryMarkup=discoveryLinksMarkup(searchSeo.discovery_links);
+        if(productDiscoveryMarkup)rewriter=rewriter.on('#productDetail',{element(element){element.after(productDiscoveryMarkup,{html:true});}});
       }
     }
     if (storyRequest) {
@@ -279,6 +287,8 @@ async function withPlatformClient(response, request, env = {}) {
           .on('#journalStoryStructuredData',{element(element){element.setAttribute('data-search-first-seo','build297');element.setInnerContent(safeJsonForHtml(searchSeo.structured_data),{html:true});}})
           .on('[data-workshop-journal-story] h1',{element(element){element.setInnerContent(searchSeo.h1);}})
           .on('[data-workshop-journal-story] .hero p',{element(element){element.setInnerContent(searchSeo.description);}});
+        const storyDiscoveryMarkup=discoveryLinksMarkup(searchSeo.discovery_links);
+        if(storyDiscoveryMarkup)rewriter=rewriter.on('[data-workshop-journal-story]',{element(element){element.after(storyDiscoveryMarkup,{html:true});}});
       }
     }
     if (shopRequest?.filtered) {
