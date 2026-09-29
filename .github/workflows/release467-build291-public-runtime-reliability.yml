@@ -16,6 +16,7 @@ on:
       - '.github/workflows/production-pages-deploy-current.yml'
       - '.github/workflows/release467-build291-public-runtime-reliability.yml'
       - 'scripts/current_*_gate.py'
+      - 'scripts/release467_build2*_gate.py'
       - 'functions/api/admin/it-operations-control-tower.js'
       - 'public/js/admin-it-control-tower.js'
       - 'admin/it/index.html'
