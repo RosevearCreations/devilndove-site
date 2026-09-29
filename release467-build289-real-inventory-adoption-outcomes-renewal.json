@@ -107,5 +107,25 @@
     "next_build_title": null,
     "future_queue_exhausted": false,
     "queue_state": "PENDING_EXACT_DEVELOPMENT_REMEASUREMENT"
+  },
+  "starting_point": {
+    "development": {
+      "sha": "49531694be53b4c8749817c95a4b3b0b28814b90",
+      "tree": "8e34e42a970c1aa8aab2325db5f2fab466703400",
+      "system_gate_run": 36439993698,
+      "quality_run": 36439993660,
+      "it_admin_runtime_run": 36439993643,
+      "repository_hygiene_run": 36439993798,
+      "dedicated_gate_run": 36439993633,
+      "state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN"
+    },
+    "production": {
+      "main_sha": "10ca103d83a2f0517eb1bbf3aac26cebd5e0e451",
+      "tree_sha": "8e34e42a970c1aa8aab2325db5f2fab466703400",
+      "production_pages_deploy_run": 36442437962,
+      "production_live_resource_integrity_run": 36442922542,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_development": true
+    }
   }
 }
