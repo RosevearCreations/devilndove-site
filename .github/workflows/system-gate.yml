@@ -132,6 +132,7 @@ jobs:
           node --check functions/api/payment-providers.js
           node --check public/js/admin-runtime-incidents.js
           node --check public/js/admin-site-item-inventory.js
+          node --check public/js/admin-site-item-inventory-multistation.js
           node --check public/js/admin-storefront-merchandising.js
           node --check public/js/admin-storefront-quality.js
           node --check public/js/admin-business-pipeline.js
