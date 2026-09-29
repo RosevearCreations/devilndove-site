@@ -108,7 +108,7 @@ req(guard.count('new MutationObserver')==1,'layout guard must retain one bounded
 req('setInterval(' not in guard,'layout guard must not add recurring polling')
 req('fetch(' not in guard and 'apiFetch(' not in guard,'layout guard must remain network-free')
 req('h1' not in guard.lower(),'layout guard must not mutate heading hierarchy')
-req("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer'" in middleware,'Build 153 layout cache revision missing')
+req("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer'" in middleware or "const LAYOUT_ASSET_REVISION = '467b292-observer-budget-v1'" in middleware,'Build 153 layout cache behavior must be retained by current successor')
 req('layout-overflow-guard.js?v=${LAYOUT_ASSET_REVISION}' in middleware,'Products route must retain the Build 153 layout cache revision')
 for token in ('sharedServiceAccessForRequest','moduleAccessForRequest','return finish(await context.next(), request'):
     req(token in middleware,f'middleware truncation/integrity token missing: {token}')
