@@ -1,0 +1,50 @@
+name: Release 467 Build 294 CAIP Workshop Follies Maker Story Foundation
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'migrations/canonical/0027_release467_caip_workshop_follies_maker_story_foundation.sql'
+      - 'migrations/canonical/manifest.json'
+      - 'functions/api/admin/creative-process-compat.js'
+      - 'public/js/admin-creative-process.js'
+      - 'admin/creative-process/index.html'
+      - 'css/styles.css'
+      - '_lib/creativeAssetIntelligence.js'
+      - 'functions/api/_lib/creativeAssetIntelligence.js'
+      - 'functions/api/_lib/contentAutomationStudio.js'
+      - 'scripts/release467_build294_regression.py'
+      - 'scripts/release467_build294_gate.py'
+      - 'release467-build294-caip-workshop-follies-maker-story-foundation.json'
+      - 'current-development-authority.json'
+      - 'scripts/current_*_gate.py'
+      - 'scripts/release467_build2*_gate.py'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'admin/it/index.html'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'admin/reliability/index.html'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'admin/deployment-preflight/index.html'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+      - '.github/workflows/release467-build294-caip-workshop-follies-maker-story-foundation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      - name: Productless Folly identity regression
+        run: python scripts/release467_build294_regression.py
+      - name: Build 294 source contract
+        run: python scripts/release467_build294_gate.py
+      - name: Build 294 boundary
+        run: |
+          echo 'Creative Process -> CAIP -> Content Studio: COMPOSED'
+          echo 'Duplicate Product/Project/media/package authority: NONE'
+          echo 'Automatic provider/publication action: NONE'
