@@ -1166,13 +1166,34 @@ async function handlePatch(context) {
 
     if (!existing) return json({ ok: false, error: 'Inventory item not found.' }, 404);
 
+    const currentAssignment = await currentProcessAssignment(db, id);
+    const hasProcessSelection = Object.prototype.hasOwnProperty.call(body, 'inventory_process_id');
+    const requestedProcessId = hasProcessSelection
+      ? Number(body.inventory_process_id || 0)
+      : Number(currentAssignment?.inventory_process_id || 0);
+    const selectedProcess = requestedProcessId ? await activeInventoryProcess(db, requestedProcessId) : null;
+    if (requestedProcessId && !selectedProcess) {
+      return json({ ok:false, error:'Choose an active workshop/workstation category.', code:'inventory_process_invalid' },400);
+    }
+    const canonicalCategory = selectedProcess
+      ? normalizeText(selectedProcess.process_name).toLowerCase()
+      : (hasProcessSelection ? '' : normalizeText(body.category ?? existing.category).toLowerCase());
+    const workstationBody = {
+      ...body,
+      inventory_process_id: requestedProcessId,
+      workstation_role: Object.prototype.hasOwnProperty.call(body,'workstation_role') ? body.workstation_role : (currentAssignment?.workstation_role || 'associated'),
+      workstation_site_item_inventory_id: Object.prototype.hasOwnProperty.call(body,'workstation_site_item_inventory_id')
+        ? body.workstation_site_item_inventory_id
+        : Number(currentAssignment?.workstation_site_item_inventory_id || 0)
+    };
+
     const merged = {
       ...existing,
       ...body,
       source_type: normalizeInventoryKind(body.source_type ?? existing.source_type, existing.source_type || 'other'),
       item_name: normalizeText(body.item_name || existing.item_name),
       item_description: normalizeText(body.item_description ?? existing.item_description),
-      category: normalizeText(body.category ?? existing.category).toLowerCase(),
+      category: canonicalCategory,
       source_url: normalizeText(body.source_url ?? existing.source_url),
       amazon_url: normalizeText(body.amazon_url ?? existing.amazon_url),
       image_url: normalizeText(body.image_url ?? existing.image_url),
@@ -1280,6 +1301,7 @@ async function handlePatch(context) {
 
     await saveUsageProfile(db, id, { usage_tracking_mode: merged.usage_tracking_mode, minimum_usage_increment: merged.minimum_usage_increment, notes: body.usage_profile_notes || '', user_id: adminUser.user_id });
     await saveInventoryProfile(db, id, {...existing,...body}, adminUser.user_id, merged.source_type);
+    await saveWorkstationAssignment(db, id, workstationBody, adminUser.user_id, merged.source_type, selectedProcess);
 
     await logMovement(db, {
       site_item_inventory_id: id,
