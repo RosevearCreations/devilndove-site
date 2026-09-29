@@ -169,7 +169,7 @@
   },
   "automatic_production_promotion_authorized": false,
   "request_time_schema_mutation": false,
-  "schema_change_authorized": true,
+  "schema_change_authorized": false,
   "d1_mutation_authorized": false,
   "r2_mutation_authorized": false,
   "provider_execution_authorized": false,
@@ -980,5 +980,6 @@
     "measured_software_residual": "PENDING",
     "queue_state": "PENDING",
     "successor_justified": null
-  }
+  },
+  "schema_change_state": "BUILD289_0025_DEVELOPMENT_APPLIED_AND_VERIFIED_PRODUCTION_APPLY_PENDING_PROMOTION"
 }
