@@ -127,6 +127,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function syncRowStationState(row) {
+    if (!row) return;
+    const process = row.querySelector('[data-field="inventory_process_id"]');
+    const role = row.querySelector('[data-field="workstation_role"]');
+    const parent = row.querySelector('[data-field="workstation_site_item_inventory_id"]');
+    const source = String(row.querySelector('[data-field="source_type"]')?.value || row.dataset.sourceType || '').toLowerCase();
+    if (!role || !parent) return;
+    const stationOption = Array.from(role.options).find((option) => option.value === 'station');
+    if (stationOption) stationOption.disabled = source !== 'tool';
+    if (source !== 'tool' && role.value === 'station') role.value = 'associated';
+    const current = Number(parent.value || 0);
+    parent.innerHTML = stationOptionsMarkup(Number(process?.value || 0), current, Number(row.dataset.inventoryRow || 0));
+    if (role.value === 'station') {
+      parent.value = '';
+      parent.disabled = true;
+    } else {
+      parent.disabled = false;
+      if (current && Array.from(parent.options).some((option) => Number(option.value || 0) === current)) parent.value = String(current);
+    }
+  }
+
   function syncFormReorderState() {
     const threshold = document.getElementById('siteInventoryReorder');
     const noReorder = document.getElementById('siteInventoryDoNotReorder');
