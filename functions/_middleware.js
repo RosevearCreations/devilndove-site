@@ -20,7 +20,7 @@ import { protectMutationOrigin } from './api/_lib/csrfOriginProtection.js';
 // Build 161 adds a shared Admin-only navigation/search QoL layer. It is browser-local for
 // recents/favourites and read-only for live universal record search.
 const PRODUCTS_ASSET_REVISION = '467-b159-products-returning-browser-cache-v1';
-const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';
+const LAYOUT_ASSET_REVISION = '467b292-observer-budget-v1';
 const PRODUCTS_MEDIA_FALLBACK_REVISION = '467-b159-products-media-admin-cache-v1';
 const PRODUCTS_REQUEST_BUDGET_REVISION = '467b159-request-budget-loader-v1';
 const PRODUCTS_AUTH_READY_REVISION = '467b156-auth-ready-v3';
@@ -29,12 +29,12 @@ const PRODUCTS_QUALITY_FALLBACK_REVISION = '467b156-quality-fallback-v1';
 const ADMIN_QOL_REVISION = '467b161-universal-search-v1';
 const ADMIN_RESUME_WORK_REVISION = '467b235-resume-work-v1';
 const ADMIN_SAVE_CONFIDENCE_REVISION = '467b236-save-confidence-v1';
-const ADMIN_ERGONOMICS_REVISION = '467b237-ergonomics-v1';
+const ADMIN_ERGONOMICS_REVISION = '467b292-observer-budget-v1';
 const ADMIN_ATTENTION_SIGNALS_REVISION = '467b238-attention-signals-v1';
 const ADMIN_SURFACE_CONSOLIDATION_REVISION = '467b239-admin-surface-consolidation-v1';
 const ADMIN_HANDOFF_REVISION = '467b241-cross-authority-handoff-v1';
 const ADMIN_RELEASE_EVIDENCE_REVISION = '467b247-release-evidence-baseline-v6';
-const STOREFRONT_DISCOVERY_REVISION = '467b198-product-image-fidelity';
+const STOREFRONT_DISCOVERY_REVISION = '467b292-observer-budget-v1';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
 function isReadMethod(method) { return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase()); }
@@ -164,7 +164,7 @@ function withPlatformClient(response, request) {
           }
           if (isPublicRuntimeIntelligencePath(pathname)) {
             element.append('<link data-dd-context-help-style="true" rel="stylesheet" href="/css/admin-context-help.css?v=467b234-workflow-help"><script defer src="/public/js/admin-context-help.js?v=467b234-workflow-help"></script>', { html: true });
-            element.append('<script defer src="/public/js/public-heading-guard.js?v=current"></script>', { html: true });
+            element.append('<script defer src="/public/js/public-heading-guard.js?v=467b292-observer-budget-v1"></script>', { html: true });
             element.append(`<script defer src="/public/js/runtime-intelligence.js?v=${CURRENT_RELEASE}"></script>`, { html: true });
           }
           if (isStorefrontDiscoveryPath(pathname)) {
