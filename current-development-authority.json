@@ -50,6 +50,7 @@
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build291-public-runtime-reliability-broken-surface-closure.json",
     "release467-build290-inventory-multi-station-read-integrity-client-native-memberships.json",
     "release467-build289-real-inventory-adoption-outcomes-renewal.json",
     "release467-build288-real-planned-vs-actual-inventory-acceptance.json",
