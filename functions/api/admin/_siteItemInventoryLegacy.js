@@ -348,7 +348,7 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false, in
     )
     AND (
       ? = ''
-      OR (? = 'low' AND (COALESCE(sii.on_hand_quantity, 0) + COALESCE(sii.incoming_quantity, 0)) <= COALESCE(sii.reorder_level, 0))
+      OR (? = 'low' AND COALESCE(sii.do_not_reorder,0)=0 AND COALESCE(sii.reorder_level,0)>0 AND (COALESCE(sii.on_hand_quantity, 0) + COALESCE(sii.incoming_quantity, 0)) <= COALESCE(sii.reorder_level, 0))
       OR (? = 'reorder' AND COALESCE(sii.is_on_reorder_list, 0) = 1)
       OR (? = 'no_reuse' AND COALESCE(sii.do_not_reuse, 0) = 1)
       OR (? = 'inactive' AND COALESCE(sii.is_active, 1) = 0)
@@ -360,7 +360,7 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false, in
     SELECT
       COUNT(*) AS total_items,
       SUM(CASE WHEN COALESCE(sii.is_active,1)=1 THEN 1 ELSE 0 END) AS active_items,
-      SUM(CASE WHEN (COALESCE(sii.on_hand_quantity,0)+COALESCE(sii.incoming_quantity,0)) <= COALESCE(sii.reorder_level,0) THEN 1 ELSE 0 END) AS low_stock_items,
+      SUM(CASE WHEN COALESCE(sii.do_not_reorder,0)=0 AND COALESCE(sii.reorder_level,0)>0 AND (COALESCE(sii.on_hand_quantity,0)+COALESCE(sii.incoming_quantity,0)) <= COALESCE(sii.reorder_level,0) THEN 1 ELSE 0 END) AS low_stock_items,
       COALESCE(SUM(COALESCE(sii.reserved_quantity,0)),0) AS total_reserved,
       COALESCE(SUM(COALESCE(sii.incoming_quantity,0)),0) AS total_incoming,
       SUM(CASE WHEN COALESCE(sii.is_on_reorder_list,0)=1 THEN 1 ELSE 0 END) AS reorder_list_items
@@ -395,11 +395,19 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false, in
            ${linkStatsSelect}
            COALESCE(iip.inventory_class,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable_equipment' ELSE 'consumable' END) AS inventory_class,
            COALESCE(iip.lifecycle_mode,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'consumable' END) AS lifecycle_mode,
-           COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes
+           COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes,
+           ipa.inventory_process_id,COALESCE(ip.process_key,'') AS process_key,COALESCE(ip.process_name,'') AS process_name,
+           COALESCE(iwr.workstation_role,'associated') AS workstation_role,
+           COALESCE(iwr.workstation_site_item_inventory_id,0) AS workstation_site_item_inventory_id,
+           COALESCE(ws.item_name,'') AS workstation_item_name
     FROM site_item_inventory sii
     LEFT JOIN site_inventory_item_descriptions siid ON siid.site_item_inventory_id=sii.site_item_inventory_id
     LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
     LEFT JOIN inventory_item_profiles iip ON iip.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN inventory_process_assignments ipa ON ipa.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN inventory_processes ip ON ip.inventory_process_id=ipa.inventory_process_id
+    LEFT JOIN inventory_workstation_roles iwr ON iwr.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN site_item_inventory ws ON ws.site_item_inventory_id=iwr.workstation_site_item_inventory_id
     ${linkStatsJoin}
     WHERE ${filterSql}
     ORDER BY LOWER(COALESCE(sii.item_name,'')) ASC,sii.site_item_inventory_id ASC
