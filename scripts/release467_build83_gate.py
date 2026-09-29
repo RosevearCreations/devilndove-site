@@ -80,7 +80,7 @@ req('button.click()' not in client, 'Build 83 must not trigger production printi
 
 for token in (
     'const RELEASE_WORKFLOW_BUILD = 83',
-    '/public/js/admin-packaging-release-workflow-v83.js?v=46783',
+    '/public/js/admin-packaging-release-workflow-v83.js?v=467b292',
     'loadReleaseWorkflow',
     'LABEL_PRODUCTION_BUILD,loadReleaseWorkflow',
     'releaseWorkflowBuild',
