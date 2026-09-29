@@ -1,17 +1,17 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 292 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 293 candidate
 
-Build 292 — Client Runtime Observer & Memory-Churn Hardening — is projected over exact Build 291 Production GREEN.
+Build 293 — CSS Design-System & Responsive Consolidation — is projected over exact Build 292 Production GREEN.
 
-- Last fully verified Development: `853209c4ae3ee3db9f06a98dac649f65523961a1`
-- Verified tree: `ab10b9e3e5780f90ddab43893be7eb9fa97bcddd`
-- Development proofs: System `36570270322`, Quality `36570270693`, I.T. `36570270648`, Hygiene `36570270345`, D1 Fan-Out `36570270356`, Build 291 `36570270569`
-- Current Production main: `b9cd4d8c27b64e9b2c892575e38673681a8367fa`
-- Production proofs: Pages `36570536323`, Live Resources `36570637009`
-- Build 292 is schema-neutral and performs no D1/R2/provider mutation.
-- Runtime focus: public H1/layout, Storefront Discovery, Admin Ergonomics/Workspace State, Product-row enhancements, Packaging advanced layers and Inventory multi-station helper.
-- Hot paths require mutation filtering, coalescing/self-mutation containment and explicit page-exit cleanup.
-- The observer/render budget is retained in `scripts/release467_build292_observer_budget.py`.
-- The future queue remains open. Next after Production GREEN: Build 293 — CSS Design-System & Responsive Consolidation.
+- Last fully verified Development: `9d4461b189bcb6899ed4219ac7cdcc6192740240`
+- Verified tree: `e57f03fa2e58e30a827e587e4651029654e7b179`
+- Development proofs: System `36574363048`, Quality `36574363030`, I.T. `36574363037`, Hygiene `36574362807`, D1 Fan-Out `36574362888`, Build 292 `36574362894`
+- Current Production main: `6891ba76bb9fc07e97962ae36b94cad143412bfd`
+- Production proofs: Pages `36574667381`, Live Resources `36574807683`
+- Build 293 is presentation-only and performs no D1/R2/provider mutation.
+- Canonical shared CSS: `css/design-system-v293.css`; Admin-only layer: `css/admin-design-system-v293.css`.
+- Specificity budgets: styles <=190 important rules, current responsive <=49, Admin ergonomics <=16, new design-system layers = 0.
+- Regression coverage includes core contrast, overflow reachability, dropdown/menu, modal/dialog, dense-table/card mode and 44px touch targets.
+- The future queue remains open. Next after Production GREEN: Build 294 — CAIP Workshop Follies & Maker Story Foundation.
 
 ## Current release baseline
 
