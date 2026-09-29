@@ -1,20 +1,18 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 297 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 298 candidate
 
-Build 297 — Search-First HTML, Product + Story SEO & Crawl Control — is projected over exact Build 296 Production GREEN.
+Build 298 — Merchant/Search Distribution + Public Content Discovery — is projected over exact Build 297 Production GREEN.
 
-- Last fully verified Development: `8b9a556e5d267f6c333032a1af64d1bb776bcf49`
-- Verified tree: `65ab192e1dfb0b8f14ab88b9136d3bc925f6292d`
-- Development proofs: System `36614334975`, Quality `36614334938`, I.T. `36614334896`, Hygiene `36614335013`, Build 296 `36614335058`
-- Current Production main: `120b5b607bfe3b7ddcf36abf4aefaad772477ba9`
-- Production proofs: Pages `36614590327`, Live Resources `36614722378`
-- Canonical migrations remain through `0027_release467_caip_workshop_follies_maker_story_foundation.sql`; Build 297 adds no schema.
-- Published Product and reviewed Workshop Journal records remain the only dynamic SEO data authorities.
-- Product/story title, description, canonical, robots, social metadata, structured data and visible search identity are projected into the initial HTML response.
-- Shop query/filter permutations remain buyer-usable but are `noindex,follow` and canonicalize to `/shop/`.
-- Runtime sitemap coverage adds only active published Product and reviewed story URLs and falls back to the checked-in static sitemap.
-- Embedded first-response snapshots are reused by the browser so Build 297 does not require an immediate duplicate Product/story detail read.
-- No automatic publication, provider execution, payment, private-media exposure, or Production business-data mutation is authorized.
-- The future queue remains open. Next after Build 297 Production GREEN: Build 298 — Merchant/Search Distribution + Public Content Discovery.
+- Last fully verified Development: `24c2a0dc4f81b4323d96387b1f5a7109e976c226`
+- Verified tree: `22da804600e5d53151e06a4136b4a3c65d96a88f`
+- Development proofs: System `36617176553`, Quality `36617176471`, I.T. `36617176516`, Hygiene `36617176437`, Build 297 `36617176420`
+- Current Production main: `043799f8d89a6df392b4416a7908da4f9d92d537`
+- Production proofs: Pages `36617412141`, Live Resources `36617524593`
+- Build 298 adds no schema and performs no automatic provider publication.
+- Merchant feed: reviewed active physical Product authority, Canada/CAD only, shipping/return configuration fail-closed.
+- IndexNow: authenticated explicit submission only; exact confirmation phrase required; automatic submission OFF.
+- Search Console import authority is reused for measurable diagnostics.
+- Product/story/capability internal links are emitted only from factual existing relationships.
+- Next after Build 298 Production GREEN: Build 299 — D1 Query Efficiency + Canonical Runtime/Repository Cleanup.
 
 ## Current release baseline
 

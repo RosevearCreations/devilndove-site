@@ -1,0 +1,107 @@
+{
+  "release": 467,
+  "build": 298,
+  "title": "Merchant/Search Distribution + Public Content Discovery",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build298-merchant-search-distribution-public-content-discovery",
+  "predecessor": {
+    "build": 297,
+    "title": "Search-First HTML, Product + Story SEO & Crawl Control",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "24c2a0dc4f81b4323d96387b1f5a7109e976c226",
+    "development_tree_sha": "22da804600e5d53151e06a4136b4a3c65d96a88f",
+    "development_proofs": {
+      "system_gate_run": 36617176553,
+      "current_application_quality_run": 36617176471,
+      "it_admin_runtime_proof_run": 36617176516,
+      "branch_hygiene_run": 36617176437,
+      "build_specific_proof_run": 36617176420
+    },
+    "production_main_sha": "043799f8d89a6df392b4416a7908da4f9d92d537",
+    "production_tree_sha": "22da804600e5d53151e06a4136b4a3c65d96a88f",
+    "production_pages_deploy_run": 36617412141,
+    "production_live_resource_integrity_run": 36617524593,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "starting_point": {
+    "development": {
+      "sha": "24c2a0dc4f81b4323d96387b1f5a7109e976c226",
+      "tree": "22da804600e5d53151e06a4136b4a3c65d96a88f",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 36617176553,
+      "quality_run": 36617176471,
+      "it_admin_runtime_run": 36617176516,
+      "repository_hygiene_run": 36617176437,
+      "build_specific_proof_run": 36617176420
+    },
+    "production": {
+      "main_sha": "043799f8d89a6df392b4416a7908da4f9d92d537",
+      "tree": "22da804600e5d53151e06a4136b4a3c65d96a88f",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 36617412141,
+      "production_live_resource_integrity_run": 36617524593,
+      "remote_d1_queries": 0
+    }
+  },
+  "scope": {
+    "merchant_feed_path": "/api/merchant-feed",
+    "merchant_formats": [
+      "rss_xml",
+      "tsv",
+      "json_preview"
+    ],
+    "merchant_target_country": "CA",
+    "merchant_currency": "CAD",
+    "merchant_review_authority": "existing Product status/review_status + Merchant shipping/return configuration",
+    "merchant_provider_submission": false,
+    "indexnow_support": true,
+    "indexnow_automatic_submission": false,
+    "indexnow_explicit_confirmation": "SUBMIT INDEXNOW",
+    "search_console_diagnostics_reused": true,
+    "internal_discovery_links": [
+      "Product → reviewed story",
+      "reviewed story → Product",
+      "reviewed story → source-backed capability"
+    ],
+    "factual_relationships_only": true,
+    "private_caip_exposure": false
+  },
+  "retained_authorities": {
+    "products": "products + product_seo",
+    "product_search_projection": "release467-build297-search-first-html-product-story-seo-crawl-control.json",
+    "stories": "content_publications",
+    "capabilities": "workshop_capability_profiles + inventory_processes",
+    "search_console": "existing search_console_page_queries import authority",
+    "external_provider_boundary": "explicit authenticated owner/admin action only"
+  },
+  "files": {
+    "merchant_helper": "functions/api/_lib/merchantSearchDistribution.js",
+    "merchant_feed": "functions/api/merchant-feed.js",
+    "admin_distribution": "functions/api/admin/merchant-search-distribution.js",
+    "admin_ui": "public/js/admin-merchant-search-distribution.js",
+    "admin_page": "admin/local-seo-review/index.html",
+    "search_helper": "functions/api/_lib/publicSearchSeo.js",
+    "middleware": "functions/_middleware.js",
+    "regression": "scripts/release467_build298_regression.py",
+    "gate": "scripts/release467_build298_gate.py",
+    "workflow": ".github/workflows/release467-build298-merchant-search-distribution-public-content-discovery.yml"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "automatic_provider_publication": false,
+    "automatic_indexnow_submission": false,
+    "merchant_provider_execution": false,
+    "indexnow_provider_execution_requires_explicit_owner_confirmation": true,
+    "payment_or_refund": false,
+    "private_media_exposure": false
+  },
+  "contract": {
+    "next_build": 299,
+    "next_build_title": "D1 Query Efficiency + Canonical Runtime/Repository Cleanup",
+    "future_queue_exhausted": false
+  }
+}
