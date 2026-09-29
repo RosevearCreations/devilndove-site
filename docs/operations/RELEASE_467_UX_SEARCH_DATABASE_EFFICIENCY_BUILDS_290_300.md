@@ -74,9 +74,49 @@ Replace accumulated CSS repair layers with a coherent design system.
 - Retire obsolete build-specific CSS after equivalence proof.
 - Add contrast, overflow, dropdown, modal, dense-table and touch-target regression checks.
 
-## Build 294 — Storefront Buyer Journey Simplification
+## Build 294 — CAIP Workshop Follies & Maker Story Foundation
 
-Make the public site feel like a small maker business rather than an operations console.
+Extend the existing Creative Process → CAIP → Content Studio architecture for real workshop experiments and maker stories. This build must compose existing authorities rather than create a parallel content platform.
+
+### Authority model
+
+- **Creative Process** owns project purpose, workstation/process relationships, tools/materials, planned-versus-actual usage, cost/time facts, outcome and lessons learned.
+- **CAIP** owns private raw photo/video/audio, immutable source identity, media review, evidence selection, timecodes, story beats, narrative structure and derivative planning.
+- **Content Studio** owns review-first channel deliverables such as Workshop Journal drafts, Maker Story scripts, Shorts/Reels/TikTok drafts, captions, gallery packages and SEO copy.
+- **Public Release / Social Publishing** remains the explicit human approval boundary.
+- One existing `creative_work_project` maps idempotently to one CAIP workspace and one Content Studio package. No duplicate Product, Creative Project, media store, social queue or publishing engine may be created for Follies.
+
+### Folly / Maker Story facts
+
+The Creative Project may classify itself as a workshop folly, experiment, maker story, research/learning project or ordinary creative project. A Folly/experiment should support:
+
+- what we are trying
+- why we are trying it
+- primary process/category and zero/one/many specific workstation tools
+- materials/tools actually used
+- expected result
+- actual result
+- win / partial win / failure
+- surprise or problem encountered
+- lesson learned
+- what we would change next time
+- whether we would try it again
+- optional resulting Product, Custom Work example, Capability, Workshop Knowledge entry or Journal entry
+
+### Integration requirements
+
+- Reuse the Build 271 standalone/productless Creative Project path.
+- Reuse CAIP private media intake, fingerprinting, evidence review and source-safe planning.
+- Reuse the Build 273/282 idempotent Content Studio bridge.
+- Reuse existing reviewed publication/social authorities.
+- Link the new many-to-many workstation model without duplicating Inventory authority.
+- Permit a Folly to remain permanently productless.
+- Preserve review-first publication; no automatic provider publication.
+- Add regression evidence proving a Folly can traverse Creative Process → CAIP → Content Studio without duplicate project/media/content records.
+
+## Build 295 — Storefront Buyer Journey Simplification
+
+Make the public site feel like a small maker business rather than an operations console, now backed by the CAIP Folly/Maker Story content model.
 
 Primary public paths:
 
@@ -90,94 +130,89 @@ Work includes:
 - Simplify public navigation and mobile calls to action.
 - Keep ordinary Shop search simple and move operator-like filters behind Advanced filters.
 - Improve product browsing by human shopping intent rather than internal manufacturing fields.
-- Preserve rich internal data without exposing unnecessary complexity.
+- Add a human-friendly Workshop Follies / Maker Stories discovery path sourced from reviewed CAIP/Content Studio releases.
+- Preserve rich internal data without exposing unnecessary complexity or private media.
 
-## Build 295 — Custom Work Progressive Intake
+## Build 296 — Custom Work Progressive Intake
 
 Turn Custom Work into a progressive conversation.
 
 - Start with what the customer wants made, reference image/file, quantity, approximate timing/budget and contact details.
 - Reveal technical fields only when the chosen work requires them.
 - Reuse existing manufacturing triage, customer-supplied-item and proof authorities behind the simpler intake.
+- Allow accepted custom-work projects to flow into the same Creative Process → CAIP → Content Studio story path when the owner chooses to document them.
 - Preserve accessibility, resumability and draft safety.
 - Measure abandonment and completion friction without dark patterns.
 
-## Build 296 — Search-First HTML, Product SEO & Crawl Control
+## Build 297 — Search-First HTML, Product + Story SEO & Crawl Control
 
-Move critical search identity out of post-load JavaScript.
+Move critical search identity out of post-load JavaScript for both Products and reviewed maker content.
 
 - Initial HTML/server output owns title, meta description, canonical, Open Graph and Twitter metadata.
 - Initial Product pages expose Product/Offer/Breadcrumb structured data.
-- Generate/maintain active Product sitemap coverage.
+- Reviewed Workshop Journal/Folly/Maker Story pages expose appropriate Article/BlogPosting/Breadcrumb structured data.
+- Generate/maintain active Product and reviewed story sitemap coverage.
 - Define canonical/noindex rules for arbitrary Shop search/filter permutations.
-- Preserve intentional indexable collection/capability/landing pages.
+- Preserve intentional indexable collection/capability/story/landing pages.
 - Remove obsolete structured-data features that no longer produce search features.
 - Add structured-data and initial-head regression validation.
 
-## Build 297 — Merchant Discovery & Search Engine Distribution
+## Build 298 — Merchant/Search Distribution + Public Content Discovery
 
-Use the existing Product authority to improve discoverability beyond ordinary web pages.
+Use existing Product authority for merchant discovery while improving discovery of reviewed maker content.
 
-- Build a reviewed Google Merchant Center feed/export path for eligible Canadian listings.
+- Build a reviewed Google Merchant Center feed/export path for eligible Canadian Product listings.
 - Ensure Product URL, CAD price, availability, imagery, shipping and return facts stay consistent.
-- Add IndexNow submission support for eligible public create/update/delete events.
+- Add IndexNow submission support for eligible public Product and reviewed story create/update/delete events.
 - Improve Search Console/merchant diagnostics and measurable coverage.
+- Add internal linking among Products, Capabilities, Workshop Journal entries and related reviewed Follies where factual relationships exist.
 - No automatic publication to an external provider without explicit owner authorization.
 
-## Build 298 — D1 Query Efficiency, Search & Read-Budget Hardening
+## Build 299 — D1 Query Efficiency + Canonical Runtime/Repository Cleanup
 
-Treat D1 efficiency as reliability work.
+Treat D1 efficiency and accumulated compatibility cleanup as one bounded reliability build.
 
 - Measure hot queries using rows-read evidence and `EXPLAIN QUERY PLAN`.
 - Replace repeated leading-wildcard full scans where justified.
-- Evaluate FTS5/trigram search for Inventory/Product/Creation text search based on measured benefit.
+- Evaluate FTS5/trigram search for Inventory/Product/Creation/Story text search based on measured benefit.
 - Batch workstation membership reads.
 - Reduce redundant runtime schema introspection.
 - Evaluate cursor/keyset pagination for large operational lists.
-- Keep provider rows-read budgets explicit in Development acceptance.
-
-## Build 299 — Canonical Schema Runtime Cleanup & Repository Slimming
-
-Remove legacy compatibility machinery after migration authority is proven.
-
 - Remove obsolete runtime `ensureSchema` / blocked DDL paths from retained APIs.
 - Move any still-required schema shape into forward-only canonical migrations.
 - Consolidate repeated schema-readiness probes behind bounded shared services.
 - Deduplicate identical code/media copies where ownership allows.
 - Archive or remove obsolete build artifacts only after reference/use proof.
 - Preserve required release provenance and exact-SHA evidence.
+- Keep provider rows-read budgets explicit in Development acceptance.
 
-## Build 300 — Workshop Follies, Maker Stories & Outcome Renewal
+## Build 300 — CAIP Maker Content Outcomes Renewal & Automation Refinement
 
-Turn real experimentation into a public storytelling and social-content advantage.
+Close the roadmap by proving that the composed CAIP maker-content path works with real operator evidence and by refining only what measured use justifies.
 
-A Follies/experiment record should support:
+Required end-to-end outcome:
 
-- idea
-- workstation/process
-- materials/tools
-- expected result
-- actual result
-- failure/win
-- lesson learned
-- whether we would try it again
-- optional link to a resulting Product, Custom Work example, Capability or Journal entry
+**Creative Process → workstation/inventory facts → CAIP private media → reviewed evidence → story/edit plan → Content Studio package → Workshop Journal/social drafts → human approval → public release**
 
-Content Studio may generate review-first draft Journal/Short/Reel/social copy from reviewed evidence, but publication remains human-approved.
+Measure:
 
-Build 300 closes with outcome measurement across:
-
-- buyer completion/friction
+- duplicate project/media/content rows: must remain zero
+- private-source/media boundary integrity
+- Folly/Maker Story operator completion friction
+- Content Studio handoff reuse/idempotency
+- reviewed Journal/social draft usefulness
+- human-approval boundary integrity
+- buyer discovery and story engagement where measurable
 - public runtime errors
 - client observer/render churn
 - CSS regressions
 - Core Web Vitals where measurable
 - search crawl/index health
 - Product/merchant coverage
-- D1 rows read
-- query-plan quality
+- D1 rows read and query-plan quality
 - repository/runtime reduction
-- Follies/Journal adoption
+
+Any automation refinement must remain review-first. Build 300 must not introduce automatic public/provider publication merely to improve throughput.
 
 The evidence from Build 300 determines the next roadmap. The future queue is therefore **not exhausted**.
 
@@ -189,13 +224,13 @@ The evidence from Build 300 determines the next roadmap. The future queue is the
 | 291 | Public Runtime Reliability & Broken-Surface Closure | QUEUED |
 | 292 | Client Runtime Observer & Memory-Churn Hardening | QUEUED |
 | 293 | CSS Design-System & Responsive Consolidation | QUEUED |
-| 294 | Storefront Buyer Journey Simplification | QUEUED |
-| 295 | Custom Work Progressive Intake | QUEUED |
-| 296 | Search-First HTML, Product SEO & Crawl Control | QUEUED |
-| 297 | Merchant Discovery & Search Engine Distribution | QUEUED |
-| 298 | D1 Query Efficiency, Search & Read-Budget Hardening | QUEUED |
-| 299 | Canonical Schema Runtime Cleanup & Repository Slimming | QUEUED |
-| 300 | Workshop Follies, Maker Stories & Outcome Renewal | QUEUED |
+| 294 | CAIP Workshop Follies & Maker Story Foundation | QUEUED |
+| 295 | Storefront Buyer Journey Simplification | QUEUED |
+| 296 | Custom Work Progressive Intake | QUEUED |
+| 297 | Search-First HTML, Product + Story SEO & Crawl Control | QUEUED |
+| 298 | Merchant/Search Distribution + Public Content Discovery | QUEUED |
+| 299 | D1 Query Efficiency + Canonical Runtime/Repository Cleanup | QUEUED |
+| 300 | CAIP Maker Content Outcomes Renewal & Automation Refinement | QUEUED |
 
 ## Queue contract
 
