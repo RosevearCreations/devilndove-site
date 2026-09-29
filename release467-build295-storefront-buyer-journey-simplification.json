@@ -1,0 +1,90 @@
+{
+  "release": 467,
+  "build": 295,
+  "title": "Storefront Buyer Journey Simplification",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build295-storefront-buyer-journey-simplification",
+  "predecessor": {
+    "build": 294,
+    "title": "CAIP Workshop Follies & Maker Story Foundation",
+    "development_sha": "22b0cb7074c9e5cba4a2f1b335d031f61d457c09",
+    "development_tree_sha": "3d4467f152bdd0e172e2ec512529b9c8bef578db",
+    "production_main_sha": "d731d823cbcf7708a6d978c9f399c2a72af55635",
+    "production_tree_sha": "3d4467f152bdd0e172e2ec512529b9c8bef578db",
+    "same_tree": true,
+    "development_proofs": {
+      "system_gate_run": 36583874154,
+      "current_application_quality_run": 36583873948,
+      "it_admin_runtime_proof_run": 36583874229,
+      "branch_hygiene_run": 36583874092,
+      "build294_dedicated_run": 36583874124
+    },
+    "production_proofs": {
+      "production_pages_deploy_run": 36584189791,
+      "production_live_resource_integrity_run": 36584379171
+    }
+  },
+  "scope": {
+    "mode": "PUBLIC_BUYER_JOURNEY_SIMPLIFICATION",
+    "primary_paths": [
+      "Shop something",
+      "Ask us to make something",
+      "Watch us try something"
+    ],
+    "public_navigation_simplified": true,
+    "shop_basic_search_first": true,
+    "advanced_filters_progressive": true,
+    "operator_only_shop_signals_hidden": true,
+    "workshop_follies_maker_stories_public_discovery": true,
+    "reviewed_publications_only": true,
+    "private_media_exposed": false
+  },
+  "implementation": {
+    "shared_navigation": "js/main.js",
+    "home": "index.html",
+    "shop": "shop/index.html",
+    "shop_runtime": "public/js/shop.js",
+    "collections": "collections/index.html",
+    "custom_work": "custom-request/index.html",
+    "workshop_journal": "workshop-journal/index.html",
+    "workshop_publications": "public/js/workshop-journal-publications.js",
+    "case_studies": "case-studies/index.html",
+    "regression": "scripts/release467_build295_regression.py",
+    "gate": "scripts/release467_build295_gate.py",
+    "workflow": ".github/workflows/release467-build295-storefront-buyer-journey-simplification.yml"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_caip_media_exposure": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "payment_or_refund": false
+  },
+  "contract": {
+    "next_build": 296,
+    "next_build_title": "Custom Work Progressive Intake",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "22b0cb7074c9e5cba4a2f1b335d031f61d457c09",
+      "tree": "3d4467f152bdd0e172e2ec512529b9c8bef578db",
+      "system_gate_run": 36583874154,
+      "quality_run": 36583873948,
+      "it_admin_runtime_run": 36583874229,
+      "repository_hygiene_run": 36583874092,
+      "build294_run": 36583874124,
+      "state": "EXACT_BUILD294_GREEN"
+    },
+    "production": {
+      "main_sha": "d731d823cbcf7708a6d978c9f399c2a72af55635",
+      "tree_sha": "3d4467f152bdd0e172e2ec512529b9c8bef578db",
+      "production_pages_deploy_run": 36584189791,
+      "production_live_resource_integrity_run": 36584379171,
+      "state": "PRODUCTION_GREEN"
+    }
+  }
+}

@@ -61,23 +61,23 @@
 
   const NAV_LINKS = [
     { href: "/index.html", nav: "/", label: "Home", desktop: true, group: "Essentials" },
-    { href: "/shop/index.html", nav: "/shop/", label: "Shop", desktop: true, group: "Shop & Browse" },
-    { href: "/collections/index.html", nav: "/collections/", label: "Collections", desktop: true, group: "Shop & Browse" },
-    { href: "/marketplaces/index.html", nav: "/marketplaces/", label: "Marketplaces", desktop: true, group: "Shop & Browse" },
-    { href: "/cart/index.html", nav: "/cart/", label: "Cart", desktop: true, group: "Shop & Browse" },
+    { href: "/shop/index.html", nav: "/shop/", label: "Shop", desktop: true, group: "Start here" },
+    { href: "/custom-request/index.html", nav: "/custom-request/", label: "Custom Work", desktop: true, group: "Start here" },
+    { href: "/workshop-journal/index.html", nav: "/workshop-journal/", label: "Watch us try", desktop: true, group: "Start here" },
+    { href: "/cart/index.html", nav: "/cart/", label: "Cart", desktop: true, group: "Start here" },
+    { href: "/collections/index.html", nav: "/collections/", label: "Collections", desktop: false, group: "Shop & Browse" },
+    { href: "/marketplaces/index.html", nav: "/marketplaces/", label: "Marketplaces", desktop: false, group: "Shop & Browse" },
     { href: "/gallery/index.html", nav: "/gallery/", label: "Gallery", desktop: false, group: "Workshop" },
-    { href: "/creations/index.html", nav: "/creations/", label: "What we make", desktop: true, group: "Workshop" },
-    { href: "/capabilities/index.html", nav: "/capabilities/", label: "How we make it", desktop: true, group: "Workshop" },
+    { href: "/creations/index.html", nav: "/creations/", label: "What we make", desktop: false, group: "Workshop" },
+    { href: "/capabilities/index.html", nav: "/capabilities/", label: "How we make it", desktop: false, group: "Workshop" },
     { href: "/case-studies/index.html", nav: "/case-studies/", label: "Case studies", desktop: false, group: "Workshop" },
-    { href: "/workshop-journal/index.html", nav: "/workshop-journal/", label: "Workshop Journal", desktop: false, group: "Workshop" },
     { href: "/tools/index.html", nav: "/tools/", label: "Tools", desktop: false, group: "Workshop" },
-    { href: "/supplies/index.html", nav: "/supplies/", label: "Materials", desktop: true, group: "Workshop" },
+    { href: "/supplies/index.html", nav: "/supplies/", label: "Materials", desktop: false, group: "Workshop" },
     { href: "/movies/index.html", nav: "/movies/", label: "Movies", desktop: false, group: "Workshop" },
-    { href: "/events/index.html", nav: "/events/", label: "Occasions & events", desktop: true, group: "Community" },
+    { href: "/events/index.html", nav: "/events/", label: "Occasions & events", desktop: false, group: "Community" },
     { href: "/pickup/index.html", nav: "/pickup/", label: "Pickup", desktop: false, group: "Community" },
     { href: "/socials/index.html", nav: "/socials/", label: "Socials", desktop: false, group: "Community" },
     { href: "/contact/index.html", nav: "/contact/", label: "Contact", desktop: true, group: "Community" },
-    { href: "/custom-request/index.html", nav: "/custom-request/", label: "Custom Work", desktop: true, group: "Community" },
     { href: "/about/index.html", nav: "/about/", label: "About", desktop: true, group: "Essentials" },
     { href: "/search/index.html", nav: "/search/", label: "Search", desktop: true, group: "Essentials" },
     { href: "/handmade-jewelry-ontario/index.html", nav: "/handmade-jewelry-ontario/", label: "Handmade jewelry Ontario", desktop: false, group: "Local pages" },
@@ -103,7 +103,7 @@
   }
 
   function mobileNavGroupsMarkup() {
-    const groupOrder = ["Essentials", "Shop & Browse", "Workshop", "Community", "Account", "Local pages"];
+    const groupOrder = ["Start here", "Shop & Browse", "Workshop", "Community", "Essentials", "Account", "Local pages"];
     return groupOrder.map((group) => {
       const rows = NAV_LINKS.filter((link) => link.group === group);
       if (!rows.length) return "";
@@ -135,14 +135,14 @@
         <div class="nav-mobile-panel-head">
           <div>
             <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Browse Devil n Dove</div>
-            <div class="small">What we make • how we make it • materials • occasions • Custom Work</div>
+            <div class="small">Shop something • Ask us to make something • Watch us try something</div>
           </div>
           <button class="btn nav-mobile-close" type="button">Close</button>
         </div>
         <div class="nav-mobile-quick-row" aria-label="Quick mobile navigation">
-          <a class="btn primary" href="/shop/index.html" data-nav="/shop/">Shop</a>
-          <a class="btn" href="/custom-request/index.html" data-nav="/custom-request/">Custom Work</a>
-          <a class="btn" href="/cart/index.html" data-nav="/cart/">Cart</a>
+          <a class="btn primary" href="/shop/index.html" data-nav="/shop/">Shop something</a>
+          <a class="btn" href="/custom-request/index.html" data-nav="/custom-request/">Ask us to make something</a>
+          <a class="btn" href="/workshop-journal/index.html" data-nav="/workshop-journal/">Watch us try something</a>
         </div>
         <div class="nav-mobile-groups" aria-label="Mobile navigation">
           ${mobileNavGroupsMarkup()}

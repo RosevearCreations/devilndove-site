@@ -117,32 +117,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!collectionsEl) return;
     const categories = Array.isArray(filterGroups.categories) ? filterGroups.categories.slice(0, 6) : [];
     const colors = Array.isArray(filterGroups.colors) ? filterGroups.colors.slice(0, 6) : [];
-    const types = Array.isArray(filterGroups.product_types) ? filterGroups.product_types.slice(0, 3) : [];
-    const origins = Array.isArray(filterGroups.merchandise_origins) ? filterGroups.merchandise_origins.slice(0, 6) : [];
-    const channels = Array.isArray(filterGroups.sale_channels) ? filterGroups.sale_channels.slice(0, 3) : [];
-    if (!categories.length && !colors.length && !types.length && !origins.length && !channels.length) {
-      collectionsEl.innerHTML = '';
-      return;
-    }
+    if (!categories.length && !colors.length) { collectionsEl.innerHTML = ''; return; }
     const originCards = [
-      { key: 'handmade', title: 'Handmade collection', copy: 'Finished jewelry, artwork, and workshop-made pieces that come directly from the Devil n Dove bench.' },
-      { key: 'vintage', title: 'Vintage & antique finds', copy: 'Older pieces, found items, and aged stock where provenance, wear, and condition notes matter.' },
-      { key: 'collectible', title: 'Collectibles & oddities', copy: 'Curious objects, tools, display pieces, and unusual stock that may also link out to marketplace listings.' },
-      { key: 'prebuilt', title: 'Pre-built / found items', copy: 'Not workshop-made, but still part of the Devil n Dove catalog when they fit the shop story.' },
+      { key: 'handmade', title: 'Made in our workshop', copy: 'Jewelry, artwork and other pieces made here.' },
+      { key: 'vintage', title: 'Vintage finds', copy: 'Older pieces and finds where age and condition matter.' },
+      { key: 'collectible', title: 'Collectibles & oddities', copy: 'Curious objects, display pieces and unusual finds.' },
+      { key: 'prebuilt', title: 'Found & sourced', copy: 'Useful or interesting pieces we found rather than made.' },
     ];
     collectionsEl.innerHTML = `
       <section class="card">
-        <h2 style="margin-top:0" data-content-slot="shop.text.collections.heading">Browse by collection direction</h2>
-        <p class="small" style="margin-top:0" data-content-slot="shop.text.collections.body">This helps move the shop toward clearer collection-style landing sections for handmade work, vintage stock, collectibles, oddities, and external-listing inventory instead of making every visit start with a blank search.</p>
+        <h2 style="margin-top:0" data-content-slot="shop.text.collections.heading">More ways to browse</h2>
+        <p class="small" style="margin-top:0" data-content-slot="shop.text.collections.body">Prefer browsing to searching? Start with the kind of piece, category, or colour that catches your eye.</p>
         <div class="shop-collection-card-grid">
-          ${originCards.map((card) => `<div class="shop-collection-card" data-color-slot="shop.collection.${escapeHtml(card.key)}.color"><strong data-content-slot="shop.collection.${escapeHtml(card.key)}.heading">${escapeHtml(card.title)}</strong><p class="small" data-content-slot="shop.collection.${escapeHtml(card.key)}.body">${escapeHtml(card.copy)}</p><button class="btn" type="button" data-origin-collection="${escapeHtml(card.key)}">Browse ${escapeHtml(card.key)}</button></div>`).join('')}
+          ${originCards.map((card) => `<div class="shop-collection-card" data-color-slot="shop.collection.${escapeHtml(card.key)}.color"><strong>${escapeHtml(card.title)}</strong><p class="small">${escapeHtml(card.copy)}</p><button class="btn" type="button" data-origin-collection="${escapeHtml(card.key)}">Browse</button></div>`).join('')}
         </div>
         <div class="shop-filter-pill-groups">
-          <div><strong>Categories</strong><div class="small" style="margin-top:8px">${categories.map((row) => `<button class="pill build75-filter-pill" type="button" data-build75-collection-filter="category" data-build75-collection-value="${escapeHtml(row.label)}">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</button>`).join(' ') || 'No categories yet.'}</div></div>
+          <div><strong>Popular categories</strong><div class="small" style="margin-top:8px">${categories.map((row) => `<button class="pill build75-filter-pill" type="button" data-build75-collection-filter="category" data-build75-collection-value="${escapeHtml(row.label)}">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</button>`).join(' ') || 'No categories yet.'}</div></div>
           <div><strong>Colours / themes</strong><div class="small" style="margin-top:8px">${colors.map((row) => `<button class="pill build75-filter-pill" type="button" data-build75-collection-filter="color" data-build75-collection-value="${escapeHtml(row.label)}">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</button>`).join(' ') || 'No colour groups yet.'}</div></div>
-          <div><strong>Product types</strong><div class="small" style="margin-top:8px">${types.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No product-type groups yet.'}</div></div>
-          <div><strong>Origins</strong><div class="small" style="margin-top:8px">${origins.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No origin groups yet.'}</div></div>
-          <div><strong>Sale channels</strong><div class="small" style="margin-top:8px">${channels.map((row) => `<span class="pill">${escapeHtml(row.label)} (${escapeHtml(String(row.count || 0))})</span>`).join(' ') || 'No channel groups yet.'}</div></div>
         </div>
       </section>`;
     collectionsEl.querySelectorAll('[data-origin-collection]').forEach((button) => {
@@ -217,18 +208,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       const price = escapeHtml(formatMoney(product.price_cents, product.currency));
       const images = productImages(product);
       const imageAlt = escapeHtml(product.seo_h1 || product.h1_override || product.meta_title || product.name || 'Product image');
-      const keywordBadge = product.keywords ? `<div class="small shop-card-keywords">${escapeHtml(product.keywords.split(',').slice(0,4).join(' • '))}</div>` : '';
-      const origin = escapeHtml(product.merchandise_origin || 'handmade');
-      const saleChannel = escapeHtml(product.sale_channel || 'onsite');
+      const originRaw = String(product.merchandise_origin || 'handmade').trim().toLowerCase();
+      const originLabels = { handmade:'Made here', vintage:'Vintage find', collectible:'Collectible', antique:'Antique', oddity:'Oddity', prebuilt:'Found / sourced' };
+      const origin = escapeHtml(originLabels[originRaw] || 'Shop item');
       const externalUrl = String(product.external_listing_url || '').trim();
       const externalLabel = escapeHtml(product.external_listing_label || 'External listing');
       const colorNames = Array.isArray(product.color_names) ? product.color_names : [];
-      const proofBits = [product.proof_material, product.proof_process, product.proof_locality].map((v) => String(v || '').trim()).filter(Boolean).slice(0, 3);
-      const proofMarkup = proofBits.length ? `<div class="shop-card-proof small">${proofBits.map((bit) => `<span class="pill">${escapeHtml(bit.split(',')[0])}</span>`).join('')}</div>` : '';
-      const trustBadgeMarkup = Number(product.has_public_trust_block || product.trust_block_count || 0) > 0
-        ? `<div class="shop-card-trust-badges small"><span class="pill trust-proof-pill">Approved proof</span><span class="pill">${escapeHtml(String(product.trust_block_count || 1))} trust note(s)</span></div>`
-        : (Number(product.ready_for_social || 0) === 1 ? `<div class="shop-card-trust-badges small"><span class="pill trust-proof-pill">Social-ready proof</span></div>` : '');
-      const originBadge = `<div class="small shop-card-badges"><span class="pill">${origin}</span><span class="pill">${saleChannel}</span>${product.era_label ? `<span class="pill">${escapeHtml(product.era_label)}</span>` : ''}</div>`;
+      const detailBits = [product.proof_material, product.proof_process].map((v) => String(v || '').trim()).filter(Boolean).slice(0, 2);
+      const detailMarkup = detailBits.length ? `<div class="shop-card-proof small">${detailBits.map((bit) => `<span class="pill">${escapeHtml(bit.split(',')[0])}</span>`).join('')}</div>` : '';
+      const originBadge = `<div class="small shop-card-badges"><span class="pill">${origin}</span>${product.era_label ? `<span class="pill">${escapeHtml(product.era_label)}</span>` : ''}</div>`;
       const swatchMarkup = colorNames.length ? `<div class="small shop-card-swatches">${colorNames.slice(0,5).map((color) => `<span class="pill" title="${escapeHtml(color)}"><span class="shop-swatch" style="background:${swatch(color)}"></span>${escapeHtml(color)}</span>`).join('')}</div>` : '';
       const mainImage = images[0]?.image_url || '';
       const imageMarkup = mainImage
@@ -246,10 +234,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             <div class="small shop-card-type">${productType}${product.product_category ? ` • ${escapeHtml(product.product_category)}` : ''}</div>
             <h3>${name}</h3>
             <div class="shop-card-price">${price}</div>
-            ${keywordBadge}
             ${swatchMarkup}
-            ${proofMarkup}
-            ${trustBadgeMarkup}
+            ${detailMarkup}
             <p class="small shop-card-description">${shortDescription || longDescription || 'No description available yet.'}</p>
             ${longDescription && longDescription !== shortDescription ? `<details class="shop-card-details"><summary>More details</summary><p class="small">${longDescription}</p></details>` : ''}
             ${storySnippet ? `<div class="shop-card-story small"><strong>${storyHeading}:</strong> ${storySnippet}</div>` : ''}

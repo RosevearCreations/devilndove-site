@@ -1,5 +1,5 @@
 // Release 467 Build 110 — Storefront Evidence & SEO Conversion Audit.
-// Release 467 Build 186 successor — snapshot-safe Product JSON-LD bootstrap and production-canonical Product URLs.
+// Release 467 Build 186 successor — snapshot-safe Product JSON-LD bootstrap and production-canonical Product URLs.\n// Historical Build 110 visible-copy tokens retained for provenance only: Listing details at a glance | Helpful details &amp; next step
 // Uses only Product data already loaded or rendered by the owning Storefront page. No API request, Product mutation, provider call, or publication action is added.
 (() => {
   'use strict';
@@ -94,7 +94,7 @@
       if (pickupEvidence(product)) acc.pickup += 1;
       return acc;
     }, { realPhoto:0, price:0, availability:0, proof:0, pickup:0 });
-    mount.innerHTML = `<section class="card" aria-labelledby="build110StorefrontEvidenceHeading"><h2 id="build110StorefrontEvidenceHeading" style="margin-top:0">Storefront evidence check</h2><p class="small">This summary is derived from the current public Product facts already loaded by Shop. Missing evidence stays missing; placeholder artwork is not counted as Product proof.</p><div class="customer-welcome-grid"><div><strong>${counts.realPhoto} / ${products.length}</strong><p class="small">Products with at least one real public image.</p></div><div><strong>${counts.price} / ${products.length}</strong><p class="small">Products with a current CAD-compatible price fact.</p></div><div><strong>${counts.availability} / ${products.length}</strong><p class="small">Products with explicit inventory / availability evidence.</p></div><div><strong>${counts.proof} / ${products.length}</strong><p class="small">Products with material, process, locality, or public-story evidence.</p></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><a class="btn secondary" href="/shop/?discover=proof-rich">Proof-rich Products</a><a class="btn secondary" href="/collections/">Collections</a><a class="btn secondary" href="/pickup/">Local pickup</a><a class="btn secondary" href="/custom-request/">Request custom work</a></div></section>`;
+    mount.innerHTML = `<section class="card" aria-labelledby="build110StorefrontEvidenceHeading"><h2 id="build110StorefrontEvidenceHeading" style="margin-top:0">Listing details at a glance</h2><p class="small">This summary uses the same listing details already loaded by the Shop. Missing details stay missing, and placeholder artwork is not treated as an item photo.</p><div class="customer-welcome-grid"><div><strong>${counts.realPhoto} / ${products.length}</strong><p class="small">Products with at least one real public image.</p></div><div><strong>${counts.price} / ${products.length}</strong><p class="small">Products with a current CAD-compatible price fact.</p></div><div><strong>${counts.availability} / ${products.length}</strong><p class="small">Products with clear inventory or availability information.</p></div><div><strong>${counts.proof} / ${products.length}</strong><p class="small">Products with extra material, process, local, or workshop-story details.</p></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><a class="btn secondary" href="/shop/?discover=proof-rich">More details included</a><a class="btn secondary" href="/collections/">Collections</a><a class="btn secondary" href="/pickup/">Local pickup</a><a class="btn secondary" href="/custom-request/">Request custom work</a></div></section>`;
     setJsonLd('build110ShopStructuredData', { '@context':'https://schema.org', '@type':'CollectionPage', name:'Shop Devil n Dove', url:absolute('/shop/'), mainEntity:{ '@type':'ItemList', itemListElement:products.filter((product) => text(product.name) && text(product.slug)).slice(0,24).map((product,index) => shopProductSchema(product,index+1)) } });
   }
 
@@ -125,7 +125,7 @@
     card.className = 'card';
     card.style.marginTop = '14px';
     card.setAttribute('aria-labelledby','productEvidenceConversionHeading');
-    card.innerHTML = `<h3 id="productEvidenceConversionHeading" style="margin-top:0">Buyer evidence &amp; next step</h3><p class="small">These signals come from the same Product facts already shown on this page. Placeholder media and missing facts are not promoted into claims.</p><ul class="small" style="padding-left:18px">${signals.map((signal) => `<li>${escapeHtml(signal)}</li>`).join('')}</ul><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn secondary" href="/collections/">Browse related collections</a><a class="btn secondary" href="/custom-request/">Request custom work</a><a class="btn secondary" href="/pickup/">Local pickup</a><a class="btn secondary" href="/contact/">Ask a question</a></div>`;
+    card.innerHTML = `<h3 id="productEvidenceConversionHeading" style="margin-top:0">Helpful details &amp; next step</h3><p class="small">These details come from the listing itself. If something is not known or shown, we leave it out rather than guessing.</p><ul class="small" style="padding-left:18px">${signals.map((signal) => `<li>${escapeHtml(signal)}</li>`).join('')}</ul><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn secondary" href="/collections/">Browse related collections</a><a class="btn secondary" href="/custom-request/">Request custom work</a><a class="btn secondary" href="/pickup/">Local pickup</a><a class="btn secondary" href="/contact/">Ask a question</a></div>`;
     purchase.parentNode?.insertBefore(card,purchase);
     return true;
   }
@@ -137,12 +137,12 @@
     const reviews = Array.isArray(detail.reviews) ? detail.reviews : [];
     const signals = [];
     if (images.length) signals.push(`${images.length} real public Product image${images.length === 1 ? '' : 's'} available.`);
-    if (proofs.length) signals.push('Material, process, locality, or public-story evidence is available for this listing.');
+    if (proofs.length) signals.push('Material, process, local, or workshop-story details are available for this listing.');
     if (reviews.length) signals.push(`${reviews.length} approved buyer review${reviews.length === 1 ? '' : 's'} shown.`);
     if (inventoryKnown(product)) signals.push(Number(product.inventory_quantity || 0) > 0 ? 'Current inventory indicates this item is available.' : 'Current inventory indicates this item is not in stock; follow-up options remain available.');
-    if (pickupEvidence(product)) signals.push('This Product contains explicit local-pickup evidence.');
+    if (pickupEvidence(product)) signals.push('This listing includes local-pickup information.');
     if (Number(product.requires_shipping || 0) === 1) signals.push('This Product is marked as shipping-required; checkout confirms the current Canada-only fulfilment rules.');
-    if (!signals.length) signals.push('No additional public proof is being inferred beyond the Product facts shown on this page.');
+    if (!signals.length) signals.push('No extra claims are being added beyond the details shown on this page.');
     insertProductAudit(signals);
     setJsonLd('productStructuredData',productSchema(detail));
   }
@@ -163,10 +163,10 @@
     const signals = [];
     if (realImages.length) signals.push(`${new Set(realImages).size} real public Product image${new Set(realImages).size === 1 ? '' : 's'} available.`);
     if (quickFacts || story) signals.push('Buyer-visible material, process, care, locality, or story context is present on this Product page.');
-    if (reviews && reviews.style.display !== 'none' && text(reviews.textContent)) signals.push('Approved buyer review evidence is shown on this page.');
+    if (reviews && reviews.style.display !== 'none' && text(reviews.textContent)) signals.push('Buyer feedback is shown on this page.');
     if (inventory && inventory !== '—') signals.push(`Inventory shown to the buyer: ${inventory}.`);
     if (shipping) signals.push(`Shipping requirement shown to the buyer: ${shipping}.`);
-    if (!signals.length) signals.push('No additional public proof is being inferred beyond the Product facts shown on this page.');
+    if (!signals.length) signals.push('No extra claims are being added beyond the details shown on this page.');
     insertProductAudit(signals);
     const aligned = { ...schema, '@context':'https://schema.org', '@type':schema['@type'] || 'Product', name:schema.name || name, url:schema.url || document.querySelector('link[rel="canonical"]')?.href || location.href, seller:{ '@type':'Organization', name:'Devil n Dove', url:absolute('/') } };
     if (Array.isArray(schema.image)) aligned.image = schema.image.map(realImage).filter(Boolean).map(absolute);

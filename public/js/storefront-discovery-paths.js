@@ -12,7 +12,7 @@
     'custom-gifts': 'Custom gifts',
     'laser-engraved': 'Laser engraved',
     'workshop-experiments': 'Workshop experiments',
-    'proof-rich': 'Proof-rich Products'
+    'proof-rich': 'More details included'
   });
   const text = (value) => String(value ?? '').replace(/\s+/g, ' ').trim();
   const lower = (value) => text(value).toLowerCase();
@@ -87,7 +87,7 @@
     const zero = document.getElementById('shopZeroAssist');
     if (zero && activeDiscover && !rows.length) {
       zero.style.display = '';
-      zero.innerHTML = `<div class="build75-zero-assist"><strong>No Products currently have enough public evidence for “${label}”.</strong><div class="small">This discovery path fails closed rather than guessing. Browse all Products or another collection.</div><div class="build75-zero-actions"><a class="btn secondary" href="/shop/">All Products</a><a class="btn secondary" href="/collections/">Browse Collections</a></div></div>`;
+      zero.innerHTML = `<div class="build75-zero-assist"><strong>No products currently match “${label}”.</strong><div class="small">Try all products or another collection.</div><div class="build75-zero-actions"><a class="btn secondary" href="/shop/">All Products</a><a class="btn secondary" href="/collections/">Browse Collections</a></div></div>`;
     }
   }
 
@@ -98,7 +98,7 @@
     const rows = window.DDStorefrontSearchCollections?.filterAndSortProducts
       ? window.DDStorefrontSearchCollections.filterAndSortProducts(evidenceMatched, localFilters())
       : evidenceMatched;
-    window.DDShopRuntime.present(rows, { summaryText: `${rows.length} evidence-backed discovery match${rows.length === 1 ? '' : 'es'}.` });
+    window.DDShopRuntime.present(rows, { summaryText: `${rows.length} discovery match${rows.length === 1 ? '' : 'es'}.` });
     restoreDiscoverInUrl();
     renderDiscoveryState(rows, sourceProducts.length);
   }
