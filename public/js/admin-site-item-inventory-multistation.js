@@ -63,6 +63,8 @@
     if (!select) return;
     const role = row.querySelector('[data-field="workstation_role"]');
     const roleIsStation = String(role?.value || '') === 'station';
+    const label = select.closest('label');
+    if (label?.firstChild?.nodeType === Node.TEXT_NODE) label.firstChild.nodeValue = 'Specific station tools';
     const existing = row.querySelector('[data-multistation-row]');
     const priorChecked = currentChecked(existing);
     const selected = priorChecked.length ? priorChecked : itemIdsFromRow(row);
@@ -86,6 +88,8 @@
     if (!select) return;
     const role = document.getElementById('siteInventoryWorkstationRole');
     const roleIsStation = String(role?.value || '') === 'station';
+    const fullLabel = document.querySelector('label[for="siteInventoryParentStation"]');
+    if (fullLabel) fullLabel.textContent = 'Specific station tools';
     let box = document.getElementById('siteInventoryParentStations');
     const priorChecked = currentChecked(box);
     const selected = priorChecked.length ? priorChecked : pendingFormIds.length ? pendingFormIds : uniqIds(select.value);
@@ -157,9 +161,9 @@
           let ids = [];
           const itemId = Number(body.site_item_inventory_id || 0);
           if (itemId) {
-            ids = currentChecked(document.querySelector(`[data-inventory-row="${itemId}"] [data-multistation-row]`));
-          }
-          if (!itemId || !ids.length) {
+            const rowBox = document.querySelector(`[data-inventory-row="${itemId}"] [data-multistation-row]`);
+            ids = rowBox ? currentChecked(rowBox) : [];
+          } else {
             ids = currentChecked(document.getElementById('siteInventoryParentStations'));
           }
           if (String(body.workstation_role || '') === 'station') ids = [];
