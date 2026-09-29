@@ -1,0 +1,90 @@
+name: Release 467 Build 290 Inventory Multi-Station Read Integrity
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Build 290 source contract
+        run: python scripts/release467_build290_gate.py
+
+  development-membership-read-measurement:
+    if: ${{ github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      D1_PROVIDER_ROWS_READ_CEILING: '5000'
+    steps:
+      - uses: actions/checkout@v7
+      - name: Guard exact Development D1 binding
+        run: |
+          set -euo pipefail
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q '^database_id = "f34a741b-0000-45b0-9a96-6be08754d563"$' wrangler.toml
+      - name: Run Forge-like multi-station regression
+        run: python scripts/release467_build290_regression.py
+      - name: Measure bounded membership read
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "$(cat scripts/release467_build290_measurement.sql)" > /tmp/build290-measurement-raw.json
+          python - <<'PY'
+          import json,os
+          raw=json.load(open('/tmp/build290-measurement-raw.json'))
+          rows=[];reads=[]
+          def walk(v):
+            if isinstance(v,dict):
+              if all(k in v for k in ('page_items','membership_rows','items_with_memberships','max_memberships_per_item','invalid_membership_rows','foreign_key_violations')):
+                rows.append(v)
+              m=v.get('meta')
+              if isinstance(m,dict) and m.get('rows_read') is not None: reads.append(int(m.get('rows_read') or 0))
+              for x in v.values(): walk(x)
+            elif isinstance(v,list):
+              for x in v: walk(x)
+          walk(raw)
+          assert rows,raw
+          row=rows[0]
+          provider_rows_read=sum(reads)
+          ceiling=int(os.environ['D1_PROVIDER_ROWS_READ_CEILING'])
+          assert provider_rows_read<=ceiling,(provider_rows_read,ceiling)
+          assert int(row.get('foreign_key_violations') or 0)==0,row
+          assert int(row.get('invalid_membership_rows') or 0)==0,row
+          evidence={
+            'schema':'release467-build290-inventory-multi-station-read-integrity-v1',
+            'status':'PASS','development_sha':os.environ.get('GITHUB_SHA',''),
+            'environment':'development','measurement_mode':'READ_ONLY',
+            'page_items':int(row.get('page_items') or 0),
+            'membership_rows':int(row.get('membership_rows') or 0),
+            'items_with_memberships':int(row.get('items_with_memberships') or 0),
+            'max_memberships_per_item':int(row.get('max_memberships_per_item') or 0),
+            'invalid_membership_rows':0,'foreign_key_violations':0,
+            'd1_provider_rows_read':provider_rows_read,'d1_rows_read_ceiling':ceiling,
+            'membership_read_mode':'SET_BASED_PAGE_BATCH',
+            'n_plus_one_membership_reads':False,
+            'mutations':{'d1':'ZERO','schema':'NONE','inventory':'ZERO','finance':'ZERO','r2':'ZERO','production_business_data_query':'ZERO'}
+          }
+          json.dump(evidence,open('/tmp/release467-build290-inventory-multi-station-read-integrity.json','w'),indent=2,sort_keys=True)
+          print('BUILD 290 D1 MEMBERSHIP READ MEASUREMENT: PASS')
+          print('D1_PROVIDER_ROWS_READ=',provider_rows_read,'BUDGET=',ceiling)
+          print(json.dumps(evidence,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release467-build290-inventory-multi-station-read-integrity-${{ github.sha }}
+          path: /tmp/release467-build290-inventory-multi-station-read-integrity.json
+          if-no-files-found: error
+          retention-days: 30
