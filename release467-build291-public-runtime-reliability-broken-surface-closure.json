@@ -7,16 +7,14 @@
   "starting_point": {
     "development": {
       "sha": "dff1fb1c756de9a938bbbcc26a966205b0539b01",
-      "tree_sha": "1cdfea3b551761ce18560bb95bed405cec594ab1",
-      "state": "EXACT_BUILD290_GREEN",
-      "proofs": {
-        "system_gate_run": 36567123971,
-        "current_application_quality_run": 36567124267,
-        "it_admin_runtime_proof_run": 36567124051,
-        "branch_hygiene_run": 36567124022,
-        "d1_ci_fanout_guard_run": 36567124170,
-        "build290_run": 36567124048
-      }
+      "tree": "1cdfea3b551761ce18560bb95bed405cec594ab1",
+      "system_gate_run": 36567123971,
+      "quality_run": 36567124267,
+      "it_admin_runtime_run": 36567124051,
+      "repository_hygiene_run": 36567124022,
+      "d1_ci_fanout_guard_run": 36567124170,
+      "build290_run": 36567124048,
+      "state": "EXACT_BUILD290_GREEN"
     },
     "production": {
       "main_sha": "a56c163c8c417a90b3e6a35da128cdaeaf73b668",
