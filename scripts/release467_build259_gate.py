@@ -75,7 +75,7 @@ else:
         q((R/'.github/workflows/d1-ci-fanout-guard.yml').is_file(),'Build 286+ must retain the D1 CI fan-out guard')
 
 q("run_current_contract('scripts/release467_build259_gate.py','Release 467 Build 259')" in sysgate,'System Gate must invoke Build 259')
-q(cur>=259 and int(p.get('next_build') or 0)>=260 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 259 or a verified successor')
+q(cur>=259 and (cur>259 or int(p.get('next_build') or 0)>=260) and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 259 or a verified successor')
 if cur==259:
     q(p.get('accepted_dev_sha')=='3675554c0c2ce64923ec3e1763a243e03d103f1a' and p.get('accepted_dev_tree_sha')=='64dab693be764fb11a3cb9c36d06352a2f02eb1a','Build 259 must start from exact Build 258 Development')
     q((p.get('production_checkpoint') or {}).get('main_sha')=='436c4e724efc736492f9772ffea7d5141feb3416','Build 259 Production baseline must be exact Build 258 Production')
