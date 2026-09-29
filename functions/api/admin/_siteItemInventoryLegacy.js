@@ -955,6 +955,15 @@ async function handlePost(context) {
   }
 
   try {
+    const requestedProcessId = Number(body.inventory_process_id || 0);
+    const selectedProcess = requestedProcessId ? await activeInventoryProcess(db, requestedProcessId) : null;
+    if (requestedProcessId && !selectedProcess) {
+      return json({ ok:false, error:'Choose an active workshop/workstation category.', code:'inventory_process_invalid' },400);
+    }
+    const canonicalCategory = selectedProcess
+      ? normalizeText(selectedProcess.process_name).toLowerCase()
+      : (normalizeText(body.category).toLowerCase() || null);
+
     const existingIdentity = await db.prepare(`
       SELECT site_item_inventory_id, item_name, source_type, external_key
       FROM site_item_inventory
@@ -985,7 +994,7 @@ async function handlePost(context) {
       sourceType,
       externalKey,
       itemName,
-      normalizeText(body.category).toLowerCase() || null,
+      canonicalCategory,
       normalizeText(body.source_url) || null,
       normalizeText(body.amazon_url) || null,
       normalizeText(body.image_url) || null,
@@ -1019,16 +1028,17 @@ async function handlePost(context) {
       user_id: adminUser.user_id
     });
     await saveInventoryProfile(db, newId, body, adminUser.user_id, sourceType);
+    await saveWorkstationAssignment(db, newId, body, adminUser.user_id, sourceType, selectedProcess);
     const catalogItemId = Number(body.catalog_item_id || 0);
     if (catalogItemId && ['tool','supply'].includes(sourceType)) {
       const catalogRow = await db.prepare(`SELECT catalog_item_id,item_kind,source_key FROM catalog_items WHERE catalog_item_id=? LIMIT 1`).bind(catalogItemId).first().catch(() => null);
       if (catalogRow && catalogRow.item_kind !== sourceType) {
         const conflict = await db.prepare(`SELECT catalog_item_id FROM catalog_items WHERE item_kind=? AND source_key=? AND catalog_item_id<>? LIMIT 1`).bind(sourceType,catalogRow.source_key,catalogItemId).first().catch(() => null);
         if (conflict?.catalog_item_id) {
-          await db.prepare(`UPDATE catalog_items SET name=COALESCE(NULLIF(?,''),name),category=COALESCE(NULLIF(?,''),category),updated_at=CURRENT_TIMESTAMP WHERE catalog_item_id=?`).bind(itemName,normalizeText(body.category).toLowerCase() || null,Number(conflict.catalog_item_id)).run().catch(()=>null);
+          await db.prepare(`UPDATE catalog_items SET name=COALESCE(NULLIF(?,''),name),category=COALESCE(NULLIF(?,''),category),updated_at=CURRENT_TIMESTAMP WHERE catalog_item_id=?`).bind(itemName,canonicalCategory,Number(conflict.catalog_item_id)).run().catch(()=>null);
           await db.prepare(`UPDATE catalog_items SET status='archived',visible_public=0,updated_at=CURRENT_TIMESTAMP WHERE catalog_item_id=?`).bind(catalogItemId).run().catch(()=>null);
         } else {
-          await db.prepare(`UPDATE catalog_items SET item_kind=?,name=COALESCE(NULLIF(?,''),name),category=COALESCE(NULLIF(?,''),category),updated_at=CURRENT_TIMESTAMP WHERE catalog_item_id=?`).bind(sourceType,itemName,normalizeText(body.category).toLowerCase() || null,catalogItemId).run();
+          await db.prepare(`UPDATE catalog_items SET item_kind=?,name=COALESCE(NULLIF(?,''),name),category=COALESCE(NULLIF(?,''),category),updated_at=CURRENT_TIMESTAMP WHERE catalog_item_id=?`).bind(sourceType,itemName,canonicalCategory,catalogItemId).run();
         }
       }
     }
@@ -1042,13 +1052,21 @@ async function handlePost(context) {
              COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment,
              COALESCE(iip.inventory_class,CASE WHEN sii.source_type='tool' THEN 'reusable_equipment' ELSE 'consumable' END) AS inventory_class,
              COALESCE(iip.lifecycle_mode,CASE WHEN sii.source_type='tool' THEN 'reusable' ELSE 'consumable' END) AS lifecycle_mode,
-             COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes
+             COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes,
+             ipa.inventory_process_id,COALESCE(ip.process_key,'') AS process_key,COALESCE(ip.process_name,'') AS process_name,
+             COALESCE(iwr.workstation_role,'associated') AS workstation_role,
+             COALESCE(iwr.workstation_site_item_inventory_id,0) AS workstation_site_item_inventory_id,
+             COALESCE(ws.item_name,'') AS workstation_item_name
       FROM site_item_inventory sii
       LEFT JOIN site_inventory_item_descriptions siid
         ON siid.site_item_inventory_id = sii.site_item_inventory_id
       LEFT JOIN site_inventory_usage_profiles siup
         ON siup.site_item_inventory_id = sii.site_item_inventory_id
       LEFT JOIN inventory_item_profiles iip ON iip.site_item_inventory_id=sii.site_item_inventory_id
+      LEFT JOIN inventory_process_assignments ipa ON ipa.site_item_inventory_id=sii.site_item_inventory_id
+      LEFT JOIN inventory_processes ip ON ip.inventory_process_id=ipa.inventory_process_id
+      LEFT JOIN inventory_workstation_roles iwr ON iwr.site_item_inventory_id=sii.site_item_inventory_id
+      LEFT JOIN site_item_inventory ws ON ws.site_item_inventory_id=iwr.workstation_site_item_inventory_id
       WHERE sii.site_item_inventory_id = ?
       LIMIT 1
     `).bind(newId).first();
