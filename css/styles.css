@@ -3504,3 +3504,15 @@ body[data-admin-page="creative-assets"] .caip-sync-panel{background:#1c2540;colo
 .inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode td[data-label="Reorder at"] input {
   width: 100%;
 }
+
+
+/* Release 467 Build 294 — Workshop Follies / Maker Story Creative Process panel */
+.creative-maker-story{display:grid;gap:16px}
+.creative-maker-workstations{display:grid;gap:10px}
+.creative-maker-station-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.creative-maker-station{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--dd-color-border,var(--border));border-radius:12px;background:var(--dd-color-surface-raised,rgba(255,255,255,.03));cursor:pointer}
+.creative-maker-station input{width:auto;margin-top:3px}
+.creative-maker-station span{display:grid;gap:4px;min-width:0}
+.creative-maker-station small{color:var(--dd-color-text-muted,var(--muted));overflow-wrap:anywhere}
+.creative-maker-related{padding-top:4px;border-top:1px solid var(--dd-color-border,var(--border))}
+@media(max-width:720px){.creative-maker-station-grid{grid-template-columns:1fr}.creative-maker-story .content-check{align-items:flex-start}}
