@@ -56,16 +56,24 @@
     }
     document.querySelector('link[rel="canonical"]')?.setAttribute('href', canonical);
     const data = document.getElementById('journalStoryStructuredData');
-    if (data && item.schema_json) data.textContent = item.schema_json;
+    if (data && item.schema_json && data.dataset.searchFirstSeo !== 'build297') data.textContent = item.schema_json;
     return true;
+  }
+  function initialStorySnapshot(){
+    const node=document.getElementById('build297InitialStorySnapshot');if(!node)return null;
+    try{const data=JSON.parse(node.textContent||'{}');return data?.item?data.item:null;}catch{return null;}
   }
   async function load() {
     if (!story) { mount.innerHTML = `<div class="content-empty-state"><h2>Choose a workshop story</h2><p>Published finished-project stories are collected in the <a href="/workshop-journal/">Workshop Journal</a>.</p></div>`; return; }
     try {
-      const response = await fetch(`/api/workshop-journal?destination=workshop_journal&story=${encodeURIComponent(story)}`, { headers: { Accept: 'application/json' } });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data?.item) throw new Error(data?.error || 'This workshop story is not available.');
-      const item = data.item;
+      const initial = initialStorySnapshot();
+      let item = initial;
+      if (!item) {
+        const response = await fetch(`/api/workshop-journal?destination=workshop_journal&story=${encodeURIComponent(story)}`, { headers: { Accept: 'application/json' } });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data?.item) throw new Error(data?.error || 'This workshop story is not available.');
+        item = data.item;
+      }
       if (!setMetaForPublishedStory(item)) throw new Error('This workshop story does not have a valid public canonical path.');
       mount.innerHTML = `<article class="journal-story-card"><header><span class="badge">Finished workshop story</span><h1>${esc(item.title || 'Workshop story')}</h1><p class="journal-story-summary">${esc(item.summary || '')}</p></header>${item.hero_media_url ? `<figure class="journal-story-hero"><img src="${esc(item.hero_media_url)}" alt="${esc(item.hero_alt_text || item.title || 'Devil n Dove workshop story')}"/><figcaption>${esc(item.hero_alt_text || '')}</figcaption></figure>` : `<div class="content-publication-placeholder journal-story-placeholder" aria-hidden="true"><span>✦</span><small>Approved lead image pending</small></div>`}<div class="journal-story-body">${md(item.body_content)}</div><footer class="journal-story-actions">${item.product_path ? `<a class="btn primary" href="${esc(item.product_path)}">View related piece</a>` : ''}<a class="btn secondary" href="/workshop-journal/">More workshop notes</a></footer></article>`;
     } catch (error) { mount.innerHTML = `<div class="content-empty-state"><h2>Story not available</h2><p>${esc(error.message)}</p><a class="btn" href="/workshop-journal/">Back to Workshop Journal</a></div>`; }

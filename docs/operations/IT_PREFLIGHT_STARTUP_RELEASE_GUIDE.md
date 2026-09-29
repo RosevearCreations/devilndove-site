@@ -1,18 +1,20 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 296 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 297 candidate
 
-Build 296 — Custom Work Progressive Intake — is projected over exact Build 295 Production GREEN.
+Build 297 — Search-First HTML, Product + Story SEO & Crawl Control — is projected over exact Build 296 Production GREEN.
 
-- Last fully verified Development: `653a1952cee1a78aa131180fc798a45f4de344b0`
-- Verified tree: `7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3`
-- Development proofs: System `36588836053`, Quality `36588836007`, I.T. `36588836018`, Hygiene `36588836078`, Build 295 `36588836000`
-- Current Production main: `9da8d3c7dc6ace186de0d69141e19fed998f5ddf`
-- Production proofs: Pages `36589115627`, Live Resources `36589247196`
-- Build 295 and Build 296 are schema-neutral; canonical migrations remain through `0027_release467_caip_workshop_follies_maker_story_foundation.sql`.
-- Build 296 reuses the existing `custom_requests`, customer-supplied-item, private reference-upload, manufacturing-triage and Creative Process authorities.
-- Public Custom Work requires only the project description, name, email and permission to contact; technical/material/process fields are progressive and optional.
-- Draft recovery is tab-local and excludes files and contact consent.
-- No automatic order, quote, stock reservation, production start, provider action, payment, or public/social publication is authorized.
-- The future queue remains open. Next after Build 296 Production GREEN: Build 297 — Search-First HTML, Product + Story SEO & Crawl Control.
+- Last fully verified Development: `8b9a556e5d267f6c333032a1af64d1bb776bcf49`
+- Verified tree: `65ab192e1dfb0b8f14ab88b9136d3bc925f6292d`
+- Development proofs: System `36614334975`, Quality `36614334938`, I.T. `36614334896`, Hygiene `36614335013`, Build 296 `36614335058`
+- Current Production main: `120b5b607bfe3b7ddcf36abf4aefaad772477ba9`
+- Production proofs: Pages `36614590327`, Live Resources `36614722378`
+- Canonical migrations remain through `0027_release467_caip_workshop_follies_maker_story_foundation.sql`; Build 297 adds no schema.
+- Published Product and reviewed Workshop Journal records remain the only dynamic SEO data authorities.
+- Product/story title, description, canonical, robots, social metadata, structured data and visible search identity are projected into the initial HTML response.
+- Shop query/filter permutations remain buyer-usable but are `noindex,follow` and canonicalize to `/shop/`.
+- Runtime sitemap coverage adds only active published Product and reviewed story URLs and falls back to the checked-in static sitemap.
+- Embedded first-response snapshots are reused by the browser so Build 297 does not require an immediate duplicate Product/story detail read.
+- No automatic publication, provider execution, payment, private-media exposure, or Production business-data mutation is authorized.
+- The future queue remains open. Next after Build 297 Production GREEN: Build 298 — Merchant/Search Distribution + Public Content Discovery.
 
 ## Current release baseline
 

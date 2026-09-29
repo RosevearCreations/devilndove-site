@@ -1,0 +1,26 @@
+name: Release 467 Build 297 Search-First HTML Product Story SEO Crawl Control
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      - name: Search-first SEO regression
+        run: python scripts/release467_build297_regression.py
+      - name: Build 297 source contract
+        run: python scripts/release467_build297_gate.py
+      - name: Build 297 boundary
+        run: |
+          echo 'Published Product/story source authorities: REUSED'
+          echo 'Initial metadata + structured data: SERVER HTML'
+          echo 'Filtered Shop permutations: NOINDEX,FOLLOW'
+          echo 'Schema / D1 mutation / provider publication: NONE'

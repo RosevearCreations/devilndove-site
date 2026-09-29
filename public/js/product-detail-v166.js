@@ -60,6 +60,10 @@
     catch(e){if(e?.name==='AbortError')throw new Error('Product details took too long to load. Please try again.');throw e;}
     finally{clearTimeout(timer);}
   }
+  function initialProductSnapshot(){
+    const node=document.getElementById('build297InitialProductSnapshot');if(!node)return null;
+    try{const data=JSON.parse(node.textContent||'{}');return data?.product?data:null;}catch{return null;}
+  }
   function render(product,rows){
     const images=[];const seen=new Set();
     const addImage=(row)=>{const raw=String(row?.image_url||row||'').trim();if(!raw)return;const key=raw.toLowerCase();if(seen.has(key))return;seen.add(key);images.push(typeof row==='string'?{image_url:row,alt_text:product.name||'Product image'}:row);};
@@ -92,7 +96,7 @@
   }
   (async()=>{
     hide(error);hide(detail);show(loading);
-    try{const slug=String(new URL(location.href).searchParams.get('slug')||'').trim();if(!slug)throw new Error('No product slug was provided.');const data=await fetchJson(`/api/product-detail-core?slug=${encodeURIComponent(slug)}`,8000);render(data.product||{},data.images||[]);}
+    try{const slug=String(new URL(location.href).searchParams.get('slug')||'').trim();if(!slug)throw new Error('No product slug was provided.');const initial=initialProductSnapshot();const data=initial||await fetchJson(`/api/product-detail-core?slug=${encodeURIComponent(slug)}`,8000);render(data.product||{},data.images||data.storefront_images||[]);}
     catch(e){if(error){error.textContent=e.message||'Failed to load product.';show(error);}}
     finally{hide(loading);}
   })();

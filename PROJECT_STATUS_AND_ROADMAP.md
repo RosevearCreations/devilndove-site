@@ -2,17 +2,18 @@
 
 ## Current checkpoint
 
-**Build 296 — Custom Work Progressive Intake** is active in Development.
+**Build 297 — Search-First HTML, Product + Story SEO & Crawl Control** is active in Development.
 
-Build 295 is the exact Development and Production GREEN baseline. Build 296 turns the existing Custom Work form into an outcome-first progressive conversation while preserving the Build 210 intake authority, Build 216 customer-supplied-item evidence path, optional private reference uploads, manufacturing triage, and owner-selected Creative Process → CAIP → Content Studio continuation.
+Build 296 is the exact Development and Production GREEN baseline. Build 297 projects only approved Product and reviewed Workshop Journal publication facts into initial HTML, adds Product/Offer/Breadcrumb and BlogPosting/Breadcrumb structured data, noindexes arbitrary Shop query permutations, and augments the runtime sitemap with published dynamic URLs while preserving the static canonical sitemap source.
 
-- Exact Build 295 Development: `653a1952cee1a78aa131180fc798a45f4de344b0`
-- Exact Build 295 Production main: `9da8d3c7dc6ace186de0d69141e19fed998f5ddf`
-- Shared predecessor tree: `7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3`
-- Build 296 schema change: **NONE**
-- Build 296 request-time DDL: **NONE**
-- Automatic order / quote / payment / production / publication: **NONE**
-- Next after Production GREEN: **Build 297 — Search-First HTML, Product + Story SEO & Crawl Control**
+- Exact Build 296 Development: `8b9a556e5d267f6c333032a1af64d1bb776bcf49`
+- Exact Build 296 Production main: `120b5b607bfe3b7ddcf36abf4aefaad772477ba9`
+- Shared predecessor tree: `65ab192e1dfb0b8f14ab88b9136d3bc925f6292d`
+- Build 297 schema change: **NONE**
+- Dynamic indexing authority: **PUBLISHED RECORDS ONLY**
+- Arbitrary Shop query/filter URLs: **NOINDEX,FOLLOW**
+- Automatic publication / provider / payment / private-media action: **NONE**
+- Next after Production GREEN: **Build 298 — Merchant/Search Distribution + Public Content Discovery**
 
 ## Next production queue — Builds 290–300
 

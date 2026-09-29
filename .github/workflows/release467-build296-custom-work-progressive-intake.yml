@@ -1,7 +1,5 @@
 name: Release 467 Build 296 Custom Work Progressive Intake
 on:
-  push:
-    branches: [dev]
   workflow_dispatch:
 permissions:
   contents: read

@@ -29,7 +29,11 @@
     const data=window.DDProductDetailSnapshot||null;if(!data?.product)return;
     const p=data.product,parity=window.DDStorefrontParity,canonicalUrl=parity?.canonicalFor?.(p,location.href)||`https://devilndove.com/shop/product/?slug=${encodeURIComponent(p.slug||slug)}`,desc=productDescription(p);const image=text(p.featured_image_url||(data.storefront_images||data.images||[])[0]?.image_url||(data.images||[])[0]?.url);
     document.title=text(p.meta_title||p.seo_title)||`${text(p.name)} — Devil n Dove`;description(desc);canonical(canonicalUrl);property('og:type','product');property('og:title',document.title);property('og:description',desc);property('og:url',canonicalUrl);if(image)property('og:image',image);twitter('twitter:card','summary_large_image');twitter('twitter:title',document.title);twitter('twitter:description',desc);if(image)twitter('twitter:image',image);
-    if(parity){
+    const serverProductSchema=document.getElementById('build297InitialProductJsonLd');
+    if(serverProductSchema){
+      const oldProduct=document.getElementById('update3ProductJsonLd');if(oldProduct)oldProduct.remove();
+      const oldBreadcrumb=document.getElementById('update3ProductBreadcrumbJsonLd');if(oldBreadcrumb)oldBreadcrumb.remove();
+    } else if(parity){
       const facts=parity.buyerFacts(p,data.listing_profile||{},data.story_notes||{});const images=(data.storefront_images||data.images||[]);const graph=parity.productSchema({product:p,facts,images,canonical:canonicalUrl});
       setJsonLd('update3ProductJsonLd',graph).setAttribute('data-storefront-parity','visible-facts');
       const oldBreadcrumb=document.getElementById('update3ProductBreadcrumbJsonLd');if(oldBreadcrumb)oldBreadcrumb.remove();

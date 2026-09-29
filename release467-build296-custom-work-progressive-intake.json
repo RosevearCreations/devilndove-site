@@ -2,7 +2,7 @@
   "release": 467,
   "build": 296,
   "title": "Custom Work Progressive Intake",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build296-custom-work-progressive-intake",
   "predecessor": {
     "build": 295,
@@ -104,5 +104,30 @@
     "next_build": 297,
     "next_build_title": "Search-First HTML, Product + Story SEO & Crawl Control",
     "future_queue_exhausted": false
-  }
+  },
+  "final_closure": {
+    "dev_sha": "8b9a556e5d267f6c333032a1af64d1bb776bcf49",
+    "tree_sha": "65ab192e1dfb0b8f14ab88b9136d3bc925f6292d",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD296_GREEN",
+    "proofs": {
+      "system_gate_run": 36614334975,
+      "current_application_quality_run": 36614334938,
+      "it_admin_runtime_proof_run": 36614334896,
+      "branch_hygiene_run": 36614335013
+    },
+    "build_specific_proof_run": 36614335058,
+    "ingested_by_build": 297
+  },
+  "production_checkpoint": {
+    "main_sha": "120b5b607bfe3b7ddcf36abf4aefaad772477ba9",
+    "tree_sha": "65ab192e1dfb0b8f14ab88b9136d3bc925f6292d",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36614590327,
+    "production_live_resource_integrity_run": 36614722378,
+    "remote_d1_queries": 0,
+    "ingested_by_build": 297
+  },
+  "closure_ingested_by_build": 297
 }
