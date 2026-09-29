@@ -23,7 +23,7 @@ for token in ("res.text().catch(() => '')","throw new Error('creations_api_unava
     q(token in creations,'Creations recovery missing '+token)
 q('Creations API responded ${res.status}.' not in creations,'Creations page still exposes raw API status')
 q("key: 'capabilities'" in health and "key: 'creations'" in health,'Public API diagnostics must cover creations and capabilities')
-for token in ('("capabilities", "capabilities/")','("creations", "creations/")','capabilities_no_raw_runtime_error','creations_no_raw_runtime_error'):
+for token in ('("capabilities", "capabilities/")','("creations", "creations/")','for public_name in ("capabilities", "creations")','no_raw_runtime_error'):
     q(token in preview,'Preview public-route smoke missing '+token)
 for token in ("'live_capabilities'","'live_creations'","'live_capabilities_api'","'live_creations_api'","sitemap_routes","ET.fromstring"):
     q(token in prod,'Production public-route smoke missing '+token)
