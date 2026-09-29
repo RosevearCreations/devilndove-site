@@ -1158,11 +1158,19 @@ async function handlePatch(context) {
       SELECT sii.*, COALESCE(siid.item_description, '') AS item_description,
              COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
              COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment,
-             COALESCE(iip.inventory_class,CASE WHEN sii.source_type='tool' THEN 'reusable_equipment' ELSE 'consumable' END) AS inventory_class,COALESCE(iip.lifecycle_mode,CASE WHEN sii.source_type='tool' THEN 'reusable' ELSE 'consumable' END) AS lifecycle_mode,COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes
+             COALESCE(iip.inventory_class,CASE WHEN sii.source_type='tool' THEN 'reusable_equipment' ELSE 'consumable' END) AS inventory_class,COALESCE(iip.lifecycle_mode,CASE WHEN sii.source_type='tool' THEN 'reusable' ELSE 'consumable' END) AS lifecycle_mode,COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes,
+             ipa.inventory_process_id,COALESCE(ip.process_key,'') AS process_key,COALESCE(ip.process_name,'') AS process_name,
+             COALESCE(iwr.workstation_role,'associated') AS workstation_role,
+             COALESCE(iwr.workstation_site_item_inventory_id,0) AS workstation_site_item_inventory_id,
+             COALESCE(ws.item_name,'') AS workstation_item_name
       FROM site_item_inventory sii
       LEFT JOIN site_inventory_item_descriptions siid ON siid.site_item_inventory_id = sii.site_item_inventory_id
       LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id = sii.site_item_inventory_id
       LEFT JOIN inventory_item_profiles iip ON iip.site_item_inventory_id=sii.site_item_inventory_id
+      LEFT JOIN inventory_process_assignments ipa ON ipa.site_item_inventory_id=sii.site_item_inventory_id
+      LEFT JOIN inventory_processes ip ON ip.inventory_process_id=ipa.inventory_process_id
+      LEFT JOIN inventory_workstation_roles iwr ON iwr.site_item_inventory_id=sii.site_item_inventory_id
+      LEFT JOIN site_item_inventory ws ON ws.site_item_inventory_id=iwr.workstation_site_item_inventory_id
       WHERE sii.site_item_inventory_id = ?
       LIMIT 1
     `).bind(id).first();
@@ -1374,7 +1382,7 @@ async function handlePatch(context) {
 
     return json({ ok: true, item: shape(saved || {}) });
   } catch (e) {
-    return json({ ok: false, error: e.message || 'Failed to update inventory item.' }, 500);
+    return json({ ok: false, error: e.message || 'Failed to update inventory item.', code: e?.code || 'inventory_update_failed' }, Number(e?.status || 500));
   }
 }
 
