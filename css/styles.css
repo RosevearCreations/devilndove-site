@@ -3437,7 +3437,7 @@ body[data-admin-page="creative-assets"] .caip-sync-panel{background:#1c2540;colo
 }
 .inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) {
   width: 100%;
-  min-width: 1820px !important;
+  min-width: 1950px !important;
   table-layout: fixed !important;
 }
 .inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) th,
@@ -3448,7 +3448,7 @@ body[data-admin-page="creative-assets"] .caip-sync-panel{background:#1c2540;colo
 .inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) th:nth-child(1),
 .inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) td:nth-child(1) { width: 360px; min-width: 360px; }
 .inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) th:nth-child(2),
-.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) td:nth-child(2) { width: 230px; min-width: 230px; }
+.inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) td:nth-child(2) { width: 360px; min-width: 360px; }
 .inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) th:nth-child(3),
 .inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) td:nth-child(3) { width: 120px; min-width: 120px; }
 .inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) th:nth-child(4),
@@ -3482,4 +3482,34 @@ body[data-admin-page="creative-assets"] .caip-sync-panel{background:#1c2540;colo
 .inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) .site-inventory-item-name,
 .inventory-operations-page .site-inventory-admin-table:not(.dd-v237-card-mode) .small {
   overflow-wrap: break-word;
+}
+
+
+/* Build 289 — Inventory card editor workstation/unit/reorder controls.
+   Keep card labels in the left rail and all editable controls in the readable right rail. */
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode td > * {
+  grid-column: 2;
+  min-width: 0;
+}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode td::before {
+  grid-column: 1;
+  grid-row: 1;
+}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode td > :where(input,select,textarea,.small,div,label,button,strong,span) {
+  width: 100%;
+  box-sizing: border-box;
+}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode td label {
+  display: grid;
+  gap: 4px;
+}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode td[data-label="Category / supplier"] {
+  row-gap: 10px;
+}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode td[data-label="Category / supplier"] .btn {
+  margin-top: 2px;
+}
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode td[data-label="Reorder at"] select,
+.inventory-operations-page .site-inventory-admin-table.dd-v237-card-mode td[data-label="Reorder at"] input {
+  width: 100%;
 }

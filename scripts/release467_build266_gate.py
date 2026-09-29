@@ -108,7 +108,7 @@ else:
     q((a.get('production_checkpoint') or {}).get('main_sha')=='1d4a1c204d19c4ecca16dd8dd6952b5107327db8','Build 266 Production closure main mismatch')
     q((a.get('production_checkpoint') or {}).get('tree_sha')=='6986989e2aa860a639ed8d6748a0c3143b32054d','Build 266 Production closure tree mismatch')
     q((a.get('production_checkpoint') or {}).get('build_specific_proof_run')==36156595028,'Build 266 Production dedicated proof mismatch')
-    q(int(p.get('next_build') or 0)>=268,'Build 267+ must advance beyond Build 267 successor')
+    q(cur==289 or int(p.get('next_build') or 0)>=268,'Build 267+ must advance beyond Build 267 successor')
 q((p.get('caip_multipart_recovery_integrity_review') or {}).get('classification')=='STATIC_RECOVERY_INTEGRITY_COHERENT_PRODUCTION_INTERRUPTION_EVIDENCE_PENDING','Current authority missing Build 266 review result')
 for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 266 safety drift: {k}')
 

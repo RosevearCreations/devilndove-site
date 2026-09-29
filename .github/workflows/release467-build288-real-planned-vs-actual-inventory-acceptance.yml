@@ -1,16 +1,6 @@
 name: Release 467 Build 288 Real Planned-vs-Actual Inventory Acceptance
 # D1_ONE_SHOT_EVIDENCE_CAPTURE
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build288-real-planned-vs-actual-inventory-acceptance.json'
-      - 'scripts/release467_build288_operator_acceptance.py'
-      - 'scripts/release467_build288_gate.py'
-      - '.github/workflows/release467-build288-real-planned-vs-actual-inventory-acceptance.yml'
-      - 'css/styles.css'
-      - 'public/js/admin-site-item-inventory.js'
-      - 'admin/inventory-operations/index.html'
   workflow_dispatch:
 
 permissions:

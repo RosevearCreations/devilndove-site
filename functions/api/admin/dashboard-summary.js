@@ -11,7 +11,7 @@ async function compactSummary(db) {
       (SELECT COUNT(*) FROM products) AS products_count,
       (SELECT COUNT(*) FROM orders) AS orders_count,
       (SELECT COUNT(*) FROM payments) AS payments_count,
-      (SELECT COUNT(*) FROM site_item_inventory WHERE COALESCE(is_active,1)=1 AND (COALESCE(on_hand_quantity,0)+COALESCE(incoming_quantity,0))<=COALESCE(reorder_level,0)) AS low_stock_count,
+      (SELECT COUNT(*) FROM site_item_inventory WHERE COALESCE(is_active,1)=1 AND COALESCE(do_not_reorder,0)=0 AND COALESCE(reorder_level,0)>0 AND (COALESCE(on_hand_quantity,0)+COALESCE(incoming_quantity,0))<=COALESCE(reorder_level,0)) AS low_stock_count,
       (SELECT COUNT(*) FROM webhook_events WHERE process_status='failed') AS failed_webhooks_count,
       (SELECT COUNT(*) FROM payment_disputes WHERE dispute_status IN ('open','under_review')) AS open_disputes_count,
       (SELECT COUNT(*) FROM site_search_events WHERE created_at>=datetime('now','-1 day')) AS recent_searches_count,

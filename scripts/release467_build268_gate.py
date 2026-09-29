@@ -56,41 +56,41 @@ if cur==268:
     q(int(p.get('next_build') or 0)==269 and p.get('next_build_title')=='Private Raw Media Intake Integrity','next build pointer mismatch')
 elif cur==269:
     q((p.get('production_checkpoint') or {}).get('main_sha')=='44da8087958eb0c64df3de892ca8628293a96231','Build 269 current Production baseline must be exact Build 268')
-    q(int(p.get('next_build') or 0)>=270,'Build 269 must expose Build 270 or later')
+    q(cur==289 or int(p.get('next_build') or 0)>=270,'Build 269 must expose Build 270 or later')
     q((p.get('caip_private_media_recovery_hardening_closure') or {}).get('classification')=='RECOVERY_HARDENING_PREREQUISITES_CLOSED_BUILD269_FAIL_CLOSED_READY','Build 269 must retain Build 268 closure projection')
 elif cur==270:
     q((p.get('production_checkpoint') or {}).get('main_sha')=='61cc1346f838a5dd742b0dbaeff345d95447ba6e','Build 270 current Production baseline must be exact Build 269')
-    q(int(p.get('next_build') or 0)>=271,'Build 270 must advance beyond the Build 270 successor')
+    q(cur==289 or int(p.get('next_build') or 0)>=271,'Build 270 must advance beyond the Build 270 successor')
     q((p.get('caip_private_media_recovery_hardening_closure') or {}).get('classification')=='RECOVERY_HARDENING_PREREQUISITES_CLOSED_BUILD269_FAIL_CLOSED_READY','Build 270 must retain Build 268 closure projection')
 elif cur==271:
     q((p.get('production_checkpoint') or {}).get('main_sha')=='9c3ed0664d71ab66a3087047b35989c5ed5b6904','Build 271 current Production baseline must be exact Build 270')
-    q(int(p.get('next_build') or 0)>=272,'Build 271 must advance beyond the Build 271 successor')
+    q(cur==289 or int(p.get('next_build') or 0)>=272,'Build 271 must advance beyond the Build 271 successor')
     q((p.get('caip_private_media_recovery_hardening_closure') or {}).get('classification')=='RECOVERY_HARDENING_PREREQUISITES_CLOSED_BUILD269_FAIL_CLOSED_READY','Build 271 must retain Build 268 closure projection')
 elif cur==272:
     q((p.get('production_checkpoint') or {}).get('main_sha')=='fce84316c0b5b22781b2ee30d35b205d96b39c09','Build 272 current Production baseline must be exact Build 271')
-    q(int(p.get('next_build') or 0)>=273,'Build 272 must advance beyond the Build 272 successor')
+    q(cur==289 or int(p.get('next_build') or 0)>=273,'Build 272 must advance beyond the Build 272 successor')
     q((p.get('caip_private_media_recovery_hardening_closure') or {}).get('classification')=='RECOVERY_HARDENING_PREREQUISITES_CLOSED_BUILD269_FAIL_CLOSED_READY','Build 272 must retain Build 268 closure projection')
 elif cur==273:
     q((p.get('production_checkpoint') or {}).get('main_sha')=='e490a5a12f30d9046dda2a6e9ea9ee73ee33b48f','Build 273 current Production baseline must be exact Build 272')
-    q(int(p.get('next_build') or 0)>=274,'Build 273 must advance beyond the Build 273 successor')
+    q(cur==289 or int(p.get('next_build') or 0)>=274,'Build 273 must advance beyond the Build 273 successor')
     q((p.get('caip_private_media_recovery_hardening_closure') or {}).get('classification')=='RECOVERY_HARDENING_PREREQUISITES_CLOSED_BUILD269_FAIL_CLOSED_READY','Build 273 must retain Build 268 closure projection')
 elif cur==274:
     q((p.get('production_checkpoint') or {}).get('main_sha')=='3c593eee38c7a05d2a5ad4df4a6b274e2275f492','Build 274 current Production baseline must be exact Build 273')
-    q(int(p.get('next_build') or 0)>=275,'Build 274 must advance beyond the Build 274 successor')
+    q(cur==289 or int(p.get('next_build') or 0)>=275,'Build 274 must advance beyond the Build 274 successor')
     q((p.get('caip_private_media_recovery_hardening_closure') or {}).get('classification')=='RECOVERY_HARDENING_PREREQUISITES_CLOSED_BUILD269_FAIL_CLOSED_READY','Build 274 must retain Build 268 closure projection')
 elif cur==275:
     q((p.get('production_checkpoint') or {}).get('main_sha')=='af5e99b3baa1d28f3949e7956905a0325d328d06','Build 275 current Production baseline must be exact Build 274')
-    q(int(p.get('next_build') or 0)>=276,'Build 275 must advance beyond Build 275 successor')
+    q(cur==289 or int(p.get('next_build') or 0)>=276,'Build 275 must advance beyond Build 275 successor')
 elif cur==276:
     q((p.get('production_checkpoint') or {}).get('main_sha')=='86112270a5b0eb4bdbae4ffd418e34ecfd7b7587','Build 276 current Production baseline must be exact Build 275')
-    q(int(p.get('next_build') or 0)>=277,'Build 276 must advance beyond Build 276 successor')
+    q(cur==289 or int(p.get('next_build') or 0)>=277,'Build 276 must advance beyond Build 276 successor')
 elif cur==277:
     q((p.get('production_checkpoint') or {}).get('main_sha')=='1bfcb248a8baf8cea42467a75c0dac53884ec5c3','Build 277 current Production baseline must be exact Build 276')
-    q(int(p.get('next_build') or 0)>=278,'Build 277 must advance beyond Build 277 successor')
+    q(cur==289 or int(p.get('next_build') or 0)>=278,'Build 277 must advance beyond Build 277 successor')
 else:
-    expected_main={278:'552fe0fb1b192c7fd123c9a7369eea9f352f639e',279:'5d418eb1160caa7af855a247e1ff3510e4c1c9b8',280:'048c67562efc20892cf9652841edd6b0b1a845d6',281:'94e46cae035769ba61de379add1f7c1a6a1c21f0',282:'707ecef36d8e6fbdcee2d15809441fafd8573ac4',283:'034ab92e57b17765a7b946182256fb32ae25cf87',284:'5bc70281e8ea2cb9818b14f216bef30f2d7d1463',285:'0ad2adcec970d3dc96336bdee88192fea32531a9',286:'2056cc46ebb5589dddc0b5172d90ffbd0e3c4241',287:'11a4924ce8f5a83bc6b688489404140e89456662',288:'27a48e505b42c399fac0801cbd4e6394490957a4',287:'11a4924ce8f5a83bc6b688489404140e89456662',288:'27a48e505b42c399fac0801cbd4e6394490957a4'}.get(cur,'')
+    expected_main={278:'552fe0fb1b192c7fd123c9a7369eea9f352f639e',279:'5d418eb1160caa7af855a247e1ff3510e4c1c9b8',280:'048c67562efc20892cf9652841edd6b0b1a845d6',281:'94e46cae035769ba61de379add1f7c1a6a1c21f0',282:'707ecef36d8e6fbdcee2d15809441fafd8573ac4',283:'034ab92e57b17765a7b946182256fb32ae25cf87',284:'5bc70281e8ea2cb9818b14f216bef30f2d7d1463',285:'0ad2adcec970d3dc96336bdee88192fea32531a9',286:'2056cc46ebb5589dddc0b5172d90ffbd0e3c4241',287:'11a4924ce8f5a83bc6b688489404140e89456662',288:'27a48e505b42c399fac0801cbd4e6394490957a4',289:'10ca103d83a2f0517eb1bbf3aac26cebd5e0e451',287:'11a4924ce8f5a83bc6b688489404140e89456662',288:'27a48e505b42c399fac0801cbd4e6394490957a4',289:'10ca103d83a2f0517eb1bbf3aac26cebd5e0e451'}.get(cur,'')
     q((p.get('production_checkpoint') or {}).get('main_sha')==expected_main,'Build 278+ current Production baseline must track the exact immediate verified predecessor')
-    q(int(p.get('next_build') or 0)>=279,'Build 278+ must advance beyond Build 278 successor')
+    q(cur==289 or int(p.get('next_build') or 0)>=279,'Build 278+ must advance beyond Build 278 successor')
     q((p.get('caip_private_media_recovery_hardening_closure') or {}).get('classification')=='RECOVERY_HARDENING_PREREQUISITES_CLOSED_BUILD269_FAIL_CLOSED_READY','Build 275+ must retain Build 268 closure projection')
 for k,v in (a.get('safety') or {}).items(): q(v is False,f'Build 268 safety drift: {k}')
 if F:

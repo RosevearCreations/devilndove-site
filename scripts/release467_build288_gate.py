@@ -41,7 +41,7 @@ for token in ('review_material','post_material_inventory','reverse_material_inve
 post_service=t('functions/api/_lib/inventoryPostService.js');reverse_service=t('functions/api/_lib/inventoryReversalService.js')
 q('accounting_journal' not in post_service and 'accounting_journal' not in reverse_service,'Build 288 Inventory post/reversal source must remain Finance-neutral')
 q('D1_ONE_SHOT_EVIDENCE_CAPTURE' in wf or 'workflow_dispatch:' in wf,'Build 288 workflow lacks bounded/manual proof mode')
-q('Build 288 — Inventory Operations desktop table legibility' in css and 'min-width: 1820px !important' in css and 'width: 360px; min-width: 360px' in css and 'width: 280px; min-width: 280px' in css,'Build 288 Inventory table CSS repair missing')
+q('Build 288 — Inventory Operations desktop table legibility' in css and any(token in css for token in ('min-width: 1820px !important','min-width: 1950px !important')) and 'width: 360px; min-width: 360px' in css and 'width: 280px; min-width: 280px' in css,'Build 288 Inventory table CSS repair missing')
 q('scroll the table sideways' in ui,'Build 288 Inventory table operator guidance missing')
 q("run_current_contract('scripts/release467_build288_gate.py','Release 467 Build 288')" in sysgate,'System Gate missing Build 288')
 cur=int(p.get('build') or 0);q(p.get('release')==467 and cur>=288,'Current authority must retain Build 288 or successor')

@@ -1,27 +1,27 @@
-// Release 467 Build 288 — Real Planned-vs-Actual Inventory Acceptance over exact Build 287 Production source.
+// Release 467 Build 289 — Real Inventory Adoption Outcomes Renewal over exact Build 288 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=288;
-const TITLE='Real Planned-vs-Actual Inventory Acceptance';
-const AUTHORITY='release467-build288-real-planned-vs-actual-inventory-acceptance';
-const EVIDENCE_ID='r467-b287-green-36432943282-36433269795';
+const BUILD=289;
+const TITLE='Real Inventory Adoption Outcomes Renewal';
+const AUTHORITY='release467-build289-real-inventory-adoption-outcomes-renewal';
+const EVIDENCE_ID='r467-b288-green-36439993698-36442437962';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:287,title:'Real Existing Resource-Link Evidence Capture',state:'DEVELOPMENT_GREEN',
-  dev_sha:'f3e84a0c5623eb0a74bccb537049d780944e2892',tree_sha:'981b7a5e7b851684821af087a428fe66ad8348f0',
-  system_gate_run:36432943282,current_application_quality_run:36432943315,it_admin_runtime_proof_run:36432943396,
-  branch_hygiene_run:36432943404,dedicated_gate_run:36432943286,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
+  release:467,build:288,title:'Real Planned-vs-Actual Inventory Acceptance',state:'DEVELOPMENT_GREEN',
+  dev_sha:'49531694be53b4c8749817c95a4b3b0b28814b90',tree_sha:'8e34e42a970c1aa8aab2325db5f2fab466703400',
+  system_gate_run:36439993698,current_application_quality_run:36439993660,it_admin_runtime_proof_run:36439993643,
+  branch_hygiene_run:36439993798,dedicated_gate_run:36439993633,proof_state:'EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({...VERIFIED_DEVELOPMENT,accepted_sha:VERIFIED_DEVELOPMENT.dev_sha,accepted_tree_sha:VERIFIED_DEVELOPMENT.tree_sha});
 const PRODUCTION=Object.freeze({
-  release:467,build:287,title:'Real Existing Resource-Link Evidence Capture',state:'PRODUCTION_GREEN',
-  main_sha:'27a48e505b42c399fac0801cbd4e6394490957a4',tree_sha:'981b7a5e7b851684821af087a428fe66ad8348f0',
-  production_pages_deploy_run:36433269795,production_live_resource_integrity_run:36433368187,
-  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36433269797,remote_d1_queries:0
+  release:467,build:288,title:'Real Planned-vs-Actual Inventory Acceptance',state:'PRODUCTION_GREEN',
+  main_sha:'10ca103d83a2f0517eb1bbf3aac26cebd5e0e451',tree_sha:'8e34e42a970c1aa8aab2325db5f2fab466703400',
+  production_pages_deploy_run:36442437962,production_live_resource_integrity_run:36442922542,
+  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:0,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -31,9 +31,9 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 288 Real Planned-vs-Actual Inventory Acceptance'
+  'Release 467 Build 289 Real Inventory Adoption Outcomes Renewal'
 ]);
-const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql']);
+const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
   {key:'paypal_sandbox',state:'HOLD_EXTERNAL'},
@@ -68,13 +68,13 @@ function closurePayload(){
     production_main_sha:PRODUCTION.main_sha,production_state:'PRODUCTION_GREEN',same_tree:true,remote_d1_queries:0,
     retry_policy:PRODUCTION_PROOF_TRANSPORT,
     canonical_migration_authority:'migrations/canonical/manifest.json + scripts/d1_migrate.py',
-    canonical_migrations:CANONICAL_MIGRATIONS.slice(0,24),
+    canonical_migrations:CANONICAL_MIGRATIONS.slice(0,25),
     external_lanes:Object.fromEntries(EXTERNAL_POLICY.map((x)=>[x.key,x.state])),
     runtime_closure:{
       product_detail_core_requests:1,request_time_schema_mutation:false,bucket_wide_r2_listing:false,
       background_polling:false,automatic_inventory_assignment:false,build230_evidence_adoption:true
     },
-    next_build:'Build 289 follows Build 288: Real Inventory Adoption Outcomes Renewal.'
+    next_build:'Build 289 is the terminal real Inventory adoption renewal; successor remains unassigned pending exact remeasurement.'
   };
 }
 async function closurePack(){
@@ -121,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:286,title:TITLE,authority:'release467-build286-creative-process-resource-link-operator-workflow.json'},
+        current_closure_candidate:{release:467,build:289,title:TITLE,authority:'release467-build289-real-inventory-adoption-outcomes-renewal.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
@@ -158,7 +158,7 @@ export async function onRequestGet(context){
       'Build 263 measures 584 closure-scoped GREEN runs across 12 accepted heads, a 21.69% normalized runs-per-head reduction while all required named proofs and exact-tree release pairs remain valid.',
       'Build 265 closed the CAIP private-media prerequisite inventory on exact Development/Production trees.',
       'Build 274 separates planned material estimates from reviewed and posted actuals, with corrections and posted-entry voids using Inventory-owned compensating reversals.',
-      'Build 279 is the current Multipart Interruption & Resume Acceptance Drill candidate; a fresh GREEN Development drill closes current-release CAIP acceptance at 3/3 and Build 280 is next.'
+      'Build 289 is the current real Inventory adoption renewal candidate over exact Build 288 Development/Production closure; station classifications remain owner-reviewed and are never synthesized.'
     ],
     safety:{
       read_only_projection:true,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,

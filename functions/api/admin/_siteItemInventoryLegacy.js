@@ -162,7 +162,7 @@ function shape(row = {}) {
     reservation_notes: row.reservation_notes || '',
     last_reorder_requested_at: row.last_reorder_requested_at || null,
     last_counted_at: row.last_counted_at || null,
-    needs_reorder: reorder > 0 && (onHand + incoming) <= reorder ? 1 : 0,
+    needs_reorder: Number(row.do_not_reorder || 0) === 1 ? 0 : (reorder > 0 && (onHand + incoming) <= reorder ? 1 : 0),
     is_active: Number(row.is_active || 0),
     linked_product_count: Number(row.linked_product_count || 0),
     linked_product_names: row.linked_product_names || '',
@@ -172,8 +172,100 @@ function shape(row = {}) {
     expiry_tracking_recommended: Number(row.expiry_tracking_recommended || 0),
     source_material_recommended: Number(row.source_material_recommended || 0),
     inventory_profile_notes: row.inventory_profile_notes || '',
+    inventory_process_id: Number(row.inventory_process_id || 0),
+    process_key: row.process_key || '',
+    process_name: row.process_name || '',
+    workstation_role: row.workstation_role || 'associated',
+    workstation_site_item_inventory_id: Number(row.workstation_site_item_inventory_id || 0),
+    workstation_item_name: row.workstation_item_name || '',
     updated_at: row.updated_at || null
   };
+}
+
+
+async function activeInventoryProcess(db, processId) {
+  const id = Number(processId || 0);
+  if (!id) return null;
+  return db.prepare(`
+    SELECT inventory_process_id,process_key,process_name
+    FROM inventory_processes
+    WHERE inventory_process_id=? AND is_active=1
+    LIMIT 1
+  `).bind(id).first().catch(() => null);
+}
+
+async function currentProcessAssignment(db, itemId) {
+  return db.prepare(`
+    SELECT ipa.inventory_process_id,ip.process_key,ip.process_name,
+           COALESCE(iwr.workstation_role,'associated') AS workstation_role,
+           COALESCE(iwr.workstation_site_item_inventory_id,0) AS workstation_site_item_inventory_id
+    FROM inventory_process_assignments ipa
+    JOIN inventory_processes ip ON ip.inventory_process_id=ipa.inventory_process_id
+    LEFT JOIN inventory_workstation_roles iwr ON iwr.site_item_inventory_id=ipa.site_item_inventory_id
+    WHERE ipa.site_item_inventory_id=?
+    LIMIT 1
+  `).bind(Number(itemId || 0)).first().catch(() => null);
+}
+
+async function saveWorkstationAssignment(db, itemId, body, userId, sourceType, process) {
+  const explicitProcess = Object.prototype.hasOwnProperty.call(body || {}, 'inventory_process_id');
+  if (!process) {
+    if (explicitProcess) {
+      await db.batch([
+        db.prepare('DELETE FROM inventory_workstation_roles WHERE site_item_inventory_id=?').bind(itemId),
+        db.prepare('DELETE FROM inventory_process_assignments WHERE site_item_inventory_id=?').bind(itemId)
+      ]);
+    }
+    return { inventory_process_id: 0, workstation_role: 'associated', workstation_site_item_inventory_id: 0 };
+  }
+
+  let role = normalizeText(body?.workstation_role).toLowerCase();
+  if (!['station','associated'].includes(role)) role = 'associated';
+  if (role === 'station' && normalizeInventoryKind(sourceType) !== 'tool') {
+    throw Object.assign(new Error('Only Tool inventory can be marked as the workstation itself.'), { status: 400, code: 'inventory_station_requires_tool' });
+  }
+
+  let parentId = role === 'associated' ? Number(body?.workstation_site_item_inventory_id || 0) : 0;
+  if (parentId === Number(itemId || 0)) {
+    throw Object.assign(new Error('An inventory item cannot be its own parent workstation.'), { status: 400, code: 'inventory_station_self_reference' });
+  }
+  if (parentId) {
+    const parent = await db.prepare(`
+      SELECT sii.site_item_inventory_id,sii.item_name,ipa.inventory_process_id
+      FROM site_item_inventory sii
+      JOIN inventory_process_assignments ipa ON ipa.site_item_inventory_id=sii.site_item_inventory_id
+      JOIN inventory_workstation_roles iwr ON iwr.site_item_inventory_id=sii.site_item_inventory_id
+      WHERE sii.site_item_inventory_id=?
+        AND COALESCE(sii.is_active,1)=1
+        AND LOWER(TRIM(COALESCE(sii.source_type,'')))='tool'
+        AND iwr.workstation_role='station'
+      LIMIT 1
+    `).bind(parentId).first().catch(() => null);
+    if (!parent || Number(parent.inventory_process_id || 0) !== Number(process.inventory_process_id || 0)) {
+      throw Object.assign(new Error('Choose a workstation tool from the same workshop category.'), { status: 400, code: 'inventory_station_parent_mismatch' });
+    }
+  }
+
+  await db.batch([
+    db.prepare(`
+      INSERT INTO inventory_process_assignments(site_item_inventory_id,inventory_process_id,assigned_by_user_id,assigned_at,updated_at)
+      VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+      ON CONFLICT(site_item_inventory_id) DO UPDATE SET
+        inventory_process_id=excluded.inventory_process_id,
+        assigned_by_user_id=excluded.assigned_by_user_id,
+        updated_at=CURRENT_TIMESTAMP
+    `).bind(itemId, Number(process.inventory_process_id), Number(userId || 0) || null),
+    db.prepare(`
+      INSERT INTO inventory_workstation_roles(site_item_inventory_id,workstation_role,workstation_site_item_inventory_id,updated_by_user_id,created_at,updated_at)
+      VALUES(?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+      ON CONFLICT(site_item_inventory_id) DO UPDATE SET
+        workstation_role=excluded.workstation_role,
+        workstation_site_item_inventory_id=excluded.workstation_site_item_inventory_id,
+        updated_by_user_id=excluded.updated_by_user_id,
+        updated_at=CURRENT_TIMESTAMP
+    `).bind(itemId, role, parentId || null, Number(userId || 0) || null)
+  ]);
+  return { inventory_process_id: Number(process.inventory_process_id), workstation_role: role, workstation_site_item_inventory_id: parentId || 0 };
 }
 
 function normalizeMovementType(value) {
@@ -256,7 +348,7 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false, in
     )
     AND (
       ? = ''
-      OR (? = 'low' AND (COALESCE(sii.on_hand_quantity, 0) + COALESCE(sii.incoming_quantity, 0)) <= COALESCE(sii.reorder_level, 0))
+      OR (? = 'low' AND COALESCE(sii.do_not_reorder,0)=0 AND COALESCE(sii.reorder_level,0)>0 AND (COALESCE(sii.on_hand_quantity, 0) + COALESCE(sii.incoming_quantity, 0)) <= COALESCE(sii.reorder_level, 0))
       OR (? = 'reorder' AND COALESCE(sii.is_on_reorder_list, 0) = 1)
       OR (? = 'no_reuse' AND COALESCE(sii.do_not_reuse, 0) = 1)
       OR (? = 'inactive' AND COALESCE(sii.is_active, 1) = 0)
@@ -268,7 +360,7 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false, in
     SELECT
       COUNT(*) AS total_items,
       SUM(CASE WHEN COALESCE(sii.is_active,1)=1 THEN 1 ELSE 0 END) AS active_items,
-      SUM(CASE WHEN (COALESCE(sii.on_hand_quantity,0)+COALESCE(sii.incoming_quantity,0)) <= COALESCE(sii.reorder_level,0) THEN 1 ELSE 0 END) AS low_stock_items,
+      SUM(CASE WHEN COALESCE(sii.do_not_reorder,0)=0 AND COALESCE(sii.reorder_level,0)>0 AND (COALESCE(sii.on_hand_quantity,0)+COALESCE(sii.incoming_quantity,0)) <= COALESCE(sii.reorder_level,0) THEN 1 ELSE 0 END) AS low_stock_items,
       COALESCE(SUM(COALESCE(sii.reserved_quantity,0)),0) AS total_reserved,
       COALESCE(SUM(COALESCE(sii.incoming_quantity,0)),0) AS total_incoming,
       SUM(CASE WHEN COALESCE(sii.is_on_reorder_list,0)=1 THEN 1 ELSE 0 END) AS reorder_list_items
@@ -303,11 +395,19 @@ async function getItems(db, { q = '', stockView = '', includeHistory = false, in
            ${linkStatsSelect}
            COALESCE(iip.inventory_class,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable_equipment' ELSE 'consumable' END) AS inventory_class,
            COALESCE(iip.lifecycle_mode,CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'consumable' END) AS lifecycle_mode,
-           COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes
+           COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes,
+           ipa.inventory_process_id,COALESCE(ip.process_key,'') AS process_key,COALESCE(ip.process_name,'') AS process_name,
+           COALESCE(iwr.workstation_role,'associated') AS workstation_role,
+           COALESCE(iwr.workstation_site_item_inventory_id,0) AS workstation_site_item_inventory_id,
+           COALESCE(ws.item_name,'') AS workstation_item_name
     FROM site_item_inventory sii
     LEFT JOIN site_inventory_item_descriptions siid ON siid.site_item_inventory_id=sii.site_item_inventory_id
     LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id=sii.site_item_inventory_id
     LEFT JOIN inventory_item_profiles iip ON iip.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN inventory_process_assignments ipa ON ipa.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN inventory_processes ip ON ip.inventory_process_id=ipa.inventory_process_id
+    LEFT JOIN inventory_workstation_roles iwr ON iwr.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN site_item_inventory ws ON ws.site_item_inventory_id=iwr.workstation_site_item_inventory_id
     ${linkStatsJoin}
     WHERE ${filterSql}
     ORDER BY LOWER(COALESCE(sii.item_name,'')) ASC,sii.site_item_inventory_id ASC
@@ -855,6 +955,18 @@ async function handlePost(context) {
   }
 
   try {
+    const requestedProcessId = Number(body.inventory_process_id || 0);
+    const selectedProcess = requestedProcessId ? await activeInventoryProcess(db, requestedProcessId) : null;
+    if (requestedProcessId && !selectedProcess) {
+      return json({ ok:false, error:'Choose an active workshop/workstation category.', code:'inventory_process_invalid' },400);
+    }
+    if (['tool','supply'].includes(sourceType) && !selectedProcess) {
+      return json({ ok:false, error:'Choose the existing workshop/workstation category for this Tool or Supply.', code:'inventory_process_required' },400);
+    }
+    const canonicalCategory = selectedProcess
+      ? normalizeText(selectedProcess.process_name).toLowerCase()
+      : (normalizeText(body.category).toLowerCase() || null);
+
     const existingIdentity = await db.prepare(`
       SELECT site_item_inventory_id, item_name, source_type, external_key
       FROM site_item_inventory
@@ -885,7 +997,7 @@ async function handlePost(context) {
       sourceType,
       externalKey,
       itemName,
-      normalizeText(body.category).toLowerCase() || null,
+      canonicalCategory,
       normalizeText(body.source_url) || null,
       normalizeText(body.amazon_url) || null,
       normalizeText(body.image_url) || null,
@@ -919,16 +1031,17 @@ async function handlePost(context) {
       user_id: adminUser.user_id
     });
     await saveInventoryProfile(db, newId, body, adminUser.user_id, sourceType);
+    await saveWorkstationAssignment(db, newId, body, adminUser.user_id, sourceType, selectedProcess);
     const catalogItemId = Number(body.catalog_item_id || 0);
     if (catalogItemId && ['tool','supply'].includes(sourceType)) {
       const catalogRow = await db.prepare(`SELECT catalog_item_id,item_kind,source_key FROM catalog_items WHERE catalog_item_id=? LIMIT 1`).bind(catalogItemId).first().catch(() => null);
       if (catalogRow && catalogRow.item_kind !== sourceType) {
         const conflict = await db.prepare(`SELECT catalog_item_id FROM catalog_items WHERE item_kind=? AND source_key=? AND catalog_item_id<>? LIMIT 1`).bind(sourceType,catalogRow.source_key,catalogItemId).first().catch(() => null);
         if (conflict?.catalog_item_id) {
-          await db.prepare(`UPDATE catalog_items SET name=COALESCE(NULLIF(?,''),name),category=COALESCE(NULLIF(?,''),category),updated_at=CURRENT_TIMESTAMP WHERE catalog_item_id=?`).bind(itemName,normalizeText(body.category).toLowerCase() || null,Number(conflict.catalog_item_id)).run().catch(()=>null);
+          await db.prepare(`UPDATE catalog_items SET name=COALESCE(NULLIF(?,''),name),category=COALESCE(NULLIF(?,''),category),updated_at=CURRENT_TIMESTAMP WHERE catalog_item_id=?`).bind(itemName,canonicalCategory,Number(conflict.catalog_item_id)).run().catch(()=>null);
           await db.prepare(`UPDATE catalog_items SET status='archived',visible_public=0,updated_at=CURRENT_TIMESTAMP WHERE catalog_item_id=?`).bind(catalogItemId).run().catch(()=>null);
         } else {
-          await db.prepare(`UPDATE catalog_items SET item_kind=?,name=COALESCE(NULLIF(?,''),name),category=COALESCE(NULLIF(?,''),category),updated_at=CURRENT_TIMESTAMP WHERE catalog_item_id=?`).bind(sourceType,itemName,normalizeText(body.category).toLowerCase() || null,catalogItemId).run();
+          await db.prepare(`UPDATE catalog_items SET item_kind=?,name=COALESCE(NULLIF(?,''),name),category=COALESCE(NULLIF(?,''),category),updated_at=CURRENT_TIMESTAMP WHERE catalog_item_id=?`).bind(sourceType,itemName,canonicalCategory,catalogItemId).run();
         }
       }
     }
@@ -942,13 +1055,21 @@ async function handlePost(context) {
              COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment,
              COALESCE(iip.inventory_class,CASE WHEN sii.source_type='tool' THEN 'reusable_equipment' ELSE 'consumable' END) AS inventory_class,
              COALESCE(iip.lifecycle_mode,CASE WHEN sii.source_type='tool' THEN 'reusable' ELSE 'consumable' END) AS lifecycle_mode,
-             COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes
+             COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes,
+             ipa.inventory_process_id,COALESCE(ip.process_key,'') AS process_key,COALESCE(ip.process_name,'') AS process_name,
+             COALESCE(iwr.workstation_role,'associated') AS workstation_role,
+             COALESCE(iwr.workstation_site_item_inventory_id,0) AS workstation_site_item_inventory_id,
+             COALESCE(ws.item_name,'') AS workstation_item_name
       FROM site_item_inventory sii
       LEFT JOIN site_inventory_item_descriptions siid
         ON siid.site_item_inventory_id = sii.site_item_inventory_id
       LEFT JOIN site_inventory_usage_profiles siup
         ON siup.site_item_inventory_id = sii.site_item_inventory_id
       LEFT JOIN inventory_item_profiles iip ON iip.site_item_inventory_id=sii.site_item_inventory_id
+      LEFT JOIN inventory_process_assignments ipa ON ipa.site_item_inventory_id=sii.site_item_inventory_id
+      LEFT JOIN inventory_processes ip ON ip.inventory_process_id=ipa.inventory_process_id
+      LEFT JOIN inventory_workstation_roles iwr ON iwr.site_item_inventory_id=sii.site_item_inventory_id
+      LEFT JOIN site_item_inventory ws ON ws.site_item_inventory_id=iwr.workstation_site_item_inventory_id
       WHERE sii.site_item_inventory_id = ?
       LIMIT 1
     `).bind(newId).first();
@@ -1037,16 +1158,45 @@ async function handlePatch(context) {
       SELECT sii.*, COALESCE(siid.item_description, '') AS item_description,
              COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
              COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment,
-             COALESCE(iip.inventory_class,CASE WHEN sii.source_type='tool' THEN 'reusable_equipment' ELSE 'consumable' END) AS inventory_class,COALESCE(iip.lifecycle_mode,CASE WHEN sii.source_type='tool' THEN 'reusable' ELSE 'consumable' END) AS lifecycle_mode,COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes
+             COALESCE(iip.inventory_class,CASE WHEN sii.source_type='tool' THEN 'reusable_equipment' ELSE 'consumable' END) AS inventory_class,COALESCE(iip.lifecycle_mode,CASE WHEN sii.source_type='tool' THEN 'reusable' ELSE 'consumable' END) AS lifecycle_mode,COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes,
+             ipa.inventory_process_id,COALESCE(ip.process_key,'') AS process_key,COALESCE(ip.process_name,'') AS process_name,
+             COALESCE(iwr.workstation_role,'associated') AS workstation_role,
+             COALESCE(iwr.workstation_site_item_inventory_id,0) AS workstation_site_item_inventory_id,
+             COALESCE(ws.item_name,'') AS workstation_item_name
       FROM site_item_inventory sii
       LEFT JOIN site_inventory_item_descriptions siid ON siid.site_item_inventory_id = sii.site_item_inventory_id
       LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id = sii.site_item_inventory_id
       LEFT JOIN inventory_item_profiles iip ON iip.site_item_inventory_id=sii.site_item_inventory_id
+      LEFT JOIN inventory_process_assignments ipa ON ipa.site_item_inventory_id=sii.site_item_inventory_id
+      LEFT JOIN inventory_processes ip ON ip.inventory_process_id=ipa.inventory_process_id
+      LEFT JOIN inventory_workstation_roles iwr ON iwr.site_item_inventory_id=sii.site_item_inventory_id
+      LEFT JOIN site_item_inventory ws ON ws.site_item_inventory_id=iwr.workstation_site_item_inventory_id
       WHERE sii.site_item_inventory_id = ?
       LIMIT 1
     `).bind(id).first();
 
     if (!existing) return json({ ok: false, error: 'Inventory item not found.' }, 404);
+
+    const currentAssignment = await currentProcessAssignment(db, id);
+    const hasProcessSelection = Object.prototype.hasOwnProperty.call(body, 'inventory_process_id');
+    const requestedProcessId = hasProcessSelection
+      ? Number(body.inventory_process_id || 0)
+      : Number(currentAssignment?.inventory_process_id || 0);
+    const selectedProcess = requestedProcessId ? await activeInventoryProcess(db, requestedProcessId) : null;
+    if (requestedProcessId && !selectedProcess) {
+      return json({ ok:false, error:'Choose an active workshop/workstation category.', code:'inventory_process_invalid' },400);
+    }
+    const canonicalCategory = selectedProcess
+      ? normalizeText(selectedProcess.process_name).toLowerCase()
+      : (hasProcessSelection ? '' : normalizeText(body.category ?? existing.category).toLowerCase());
+    const workstationBody = {
+      ...body,
+      inventory_process_id: requestedProcessId,
+      workstation_role: Object.prototype.hasOwnProperty.call(body,'workstation_role') ? body.workstation_role : (currentAssignment?.workstation_role || 'associated'),
+      workstation_site_item_inventory_id: Object.prototype.hasOwnProperty.call(body,'workstation_site_item_inventory_id')
+        ? body.workstation_site_item_inventory_id
+        : Number(currentAssignment?.workstation_site_item_inventory_id || 0)
+    };
 
     const merged = {
       ...existing,
@@ -1054,7 +1204,7 @@ async function handlePatch(context) {
       source_type: normalizeInventoryKind(body.source_type ?? existing.source_type, existing.source_type || 'other'),
       item_name: normalizeText(body.item_name || existing.item_name),
       item_description: normalizeText(body.item_description ?? existing.item_description),
-      category: normalizeText(body.category ?? existing.category).toLowerCase(),
+      category: canonicalCategory,
       source_url: normalizeText(body.source_url ?? existing.source_url),
       amazon_url: normalizeText(body.amazon_url ?? existing.amazon_url),
       image_url: normalizeText(body.image_url ?? existing.image_url),
@@ -1162,6 +1312,7 @@ async function handlePatch(context) {
 
     await saveUsageProfile(db, id, { usage_tracking_mode: merged.usage_tracking_mode, minimum_usage_increment: merged.minimum_usage_increment, notes: body.usage_profile_notes || '', user_id: adminUser.user_id });
     await saveInventoryProfile(db, id, {...existing,...body}, adminUser.user_id, merged.source_type);
+    await saveWorkstationAssignment(db, id, workstationBody, adminUser.user_id, merged.source_type, selectedProcess);
 
     await logMovement(db, {
       site_item_inventory_id: id,
@@ -1189,11 +1340,19 @@ async function handlePatch(context) {
       SELECT sii.*, COALESCE(siid.item_description, '') AS item_description,
              COALESCE(siup.usage_tracking_mode, CASE WHEN LOWER(TRIM(COALESCE(sii.source_type,'')))='tool' THEN 'reusable' ELSE 'exact' END) AS usage_tracking_mode,
              COALESCE(siup.minimum_usage_increment,0.001) AS minimum_usage_increment,
-             COALESCE(iip.inventory_class,CASE WHEN sii.source_type='tool' THEN 'reusable_equipment' ELSE 'consumable' END) AS inventory_class,COALESCE(iip.lifecycle_mode,CASE WHEN sii.source_type='tool' THEN 'reusable' ELSE 'consumable' END) AS lifecycle_mode,COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes
+             COALESCE(iip.inventory_class,CASE WHEN sii.source_type='tool' THEN 'reusable_equipment' ELSE 'consumable' END) AS inventory_class,COALESCE(iip.lifecycle_mode,CASE WHEN sii.source_type='tool' THEN 'reusable' ELSE 'consumable' END) AS lifecycle_mode,COALESCE(iip.lot_tracking_recommended,0) AS lot_tracking_recommended,COALESCE(iip.expiry_tracking_recommended,0) AS expiry_tracking_recommended,COALESCE(iip.source_material_recommended,0) AS source_material_recommended,COALESCE(iip.notes,'') AS inventory_profile_notes,
+             ipa.inventory_process_id,COALESCE(ip.process_key,'') AS process_key,COALESCE(ip.process_name,'') AS process_name,
+             COALESCE(iwr.workstation_role,'associated') AS workstation_role,
+             COALESCE(iwr.workstation_site_item_inventory_id,0) AS workstation_site_item_inventory_id,
+             COALESCE(ws.item_name,'') AS workstation_item_name
       FROM site_item_inventory sii
       LEFT JOIN site_inventory_item_descriptions siid ON siid.site_item_inventory_id = sii.site_item_inventory_id
       LEFT JOIN site_inventory_usage_profiles siup ON siup.site_item_inventory_id = sii.site_item_inventory_id
       LEFT JOIN inventory_item_profiles iip ON iip.site_item_inventory_id=sii.site_item_inventory_id
+      LEFT JOIN inventory_process_assignments ipa ON ipa.site_item_inventory_id=sii.site_item_inventory_id
+      LEFT JOIN inventory_processes ip ON ip.inventory_process_id=ipa.inventory_process_id
+      LEFT JOIN inventory_workstation_roles iwr ON iwr.site_item_inventory_id=sii.site_item_inventory_id
+      LEFT JOIN site_item_inventory ws ON ws.site_item_inventory_id=iwr.workstation_site_item_inventory_id
       WHERE sii.site_item_inventory_id = ?
       LIMIT 1
     `).bind(id).first();
@@ -1231,7 +1390,7 @@ async function handlePatch(context) {
 
     return json({ ok: true, item: shape(saved || {}) });
   } catch (e) {
-    return json({ ok: false, error: e.message || 'Failed to update inventory item.' }, 500);
+    return json({ ok: false, error: e.message || 'Failed to update inventory item.', code: e?.code || 'inventory_update_failed' }, Number(e?.status || 500));
   }
 }
 
