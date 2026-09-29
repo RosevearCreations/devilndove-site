@@ -2,7 +2,7 @@
   "release": 467,
   "build": 295,
   "title": "Storefront Buyer Journey Simplification",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build295-storefront-buyer-journey-simplification",
   "predecessor": {
     "build": 294,
@@ -86,5 +86,30 @@
       "production_live_resource_integrity_run": 36584379171,
       "state": "PRODUCTION_GREEN"
     }
-  }
+  },
+  "final_closure": {
+    "dev_sha": "653a1952cee1a78aa131180fc798a45f4de344b0",
+    "tree_sha": "7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD295_GREEN",
+    "proofs": {
+      "system_gate_run": 36588836053,
+      "current_application_quality_run": 36588836007,
+      "it_admin_runtime_proof_run": 36588836018,
+      "branch_hygiene_run": 36588836078
+    },
+    "build_specific_proof_run": 36588836000,
+    "ingested_by_build": 296
+  },
+  "production_checkpoint": {
+    "main_sha": "9da8d3c7dc6ace186de0d69141e19fed998f5ddf",
+    "tree_sha": "7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36589115627,
+    "production_live_resource_integrity_run": 36589247196,
+    "remote_d1_queries": 0,
+    "ingested_by_build": 296
+  },
+  "closure_ingested_by_build": 296
 }

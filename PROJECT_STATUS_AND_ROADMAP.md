@@ -2,11 +2,17 @@
 
 ## Current checkpoint
 
-**Build 295 — Storefront Buyer Journey Simplification** is active in Development.
+**Build 296 — Custom Work Progressive Intake** is active in Development.
 
-Build 294 is the exact Development and Production GREEN baseline while Build 295 simplifies the public buyer journey around three paths: Shop something, Ask us to make something, and Watch us try something.
+Build 295 is the exact Development and Production GREEN baseline. Build 296 turns the existing Custom Work form into an outcome-first progressive conversation while preserving the Build 210 intake authority, Build 216 customer-supplied-item evidence path, optional private reference uploads, manufacturing triage, and owner-selected Creative Process → CAIP → Content Studio continuation.
 
-Build 291 is schema-neutral. It focuses on `/capabilities/`, `/creations/`, their public APIs, graceful customer-safe fallback behavior, and sitemap-wide public route smoke acceptance.
+- Exact Build 295 Development: `653a1952cee1a78aa131180fc798a45f4de344b0`
+- Exact Build 295 Production main: `9da8d3c7dc6ace186de0d69141e19fed998f5ddf`
+- Shared predecessor tree: `7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3`
+- Build 296 schema change: **NONE**
+- Build 296 request-time DDL: **NONE**
+- Automatic order / quote / payment / production / publication: **NONE**
+- Next after Production GREEN: **Build 297 — Search-First HTML, Product + Story SEO & Crawl Control**
 
 ## Next production queue — Builds 290–300
 

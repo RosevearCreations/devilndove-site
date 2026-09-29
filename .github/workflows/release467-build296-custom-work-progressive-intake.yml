@@ -1,0 +1,26 @@
+name: Release 467 Build 296 Custom Work Progressive Intake
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      - name: Progressive intake regression
+        run: python scripts/release467_build296_regression.py
+      - name: Build 296 source contract
+        run: python scripts/release467_build296_gate.py
+      - name: Build 296 boundary
+        run: |
+          echo 'Existing custom_requests authority: REUSED'
+          echo 'Required fields: message/name/email/contact consent'
+          echo 'Technical fields: PROGRESSIVE / OPTIONAL'
+          echo 'Schema / D1 / provider / payment / automatic publication mutation: NONE'

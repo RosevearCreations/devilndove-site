@@ -5,7 +5,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width,initial-scale=1" name="viewport"/>
   <link href="/css/styles.css" rel="stylesheet"/>
-  <link href="/css/custom-request-journey.css?v=467b16" rel="stylesheet"/>
+  <link href="/css/custom-request-journey.css?v=467b296" rel="stylesheet"/>
   <link href="/assets/mark.png" rel="icon" type="image/png"/>
   <title>Custom Gift Request in Southern Ontario — Devil n Dove</title>
   <meta name="description" content="Request a custom handmade gift, engraving, jewelry idea, sublimation item, candle, soap, vintage-style find, local-pickup handoff, or event-ready Devil n Dove creation in Southern Ontario."/>
@@ -44,54 +44,105 @@
 
     <section class="card" style="margin-top:18px" aria-labelledby="customBrowseFirstHeading"><h2 id="customBrowseFirstHeading" style="margin-top:0">Browse real work before requesting</h2><p class="small">Browse finished work first if it helps explain your idea. An existing piece is not automatically customizable, but it can show us the style or kind of result you have in mind.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn secondary" href="/shop/?discover=proof-rich">Detailed listings</a><a class="btn secondary" href="/shop/?discover=custom-gifts">Custom-gift discovery</a><a class="btn secondary" href="/collections/">Collections</a><a class="btn secondary" href="/gallery/">Gallery</a><a class="btn secondary" href="/pickup/">Local pickup</a></div></section>
 
-    <section class="card" style="margin-top:18px"><h2 style="margin-top:0">Custom request form</h2><p class="small">Sending this form does not place an order. We review the idea first and contact you about feasibility, price, timing, and any questions.</p><form id="customRequestForm" class="admin-form-grid" style="margin-top:12px">
-        <label>Name<input class="input" name="name" autocomplete="name" required/></label>
-        <label>Email<input class="input" name="email" type="email" autocomplete="email" required/></label>
-        <label>Phone, optional<input class="input" name="phone" autocomplete="tel"/></label>
-        <label>Request type<select class="input" name="request_type"><option value="custom_piece">Custom piece / gift</option><option value="personalization">Personalization / wording / graphics</option><option value="prototype">Prototype or test piece</option><option value="batch_event">Batch, corporate or event work</option><option value="repair_or_remake">Repair, remake, or matching piece</option><option value="customer_supplied_item">Work on an item I supply</option><option value="other">Other workshop request</option></select></label>
-        <label>Project intent<select class="input" name="project_intent"><option value="one_off">One-off</option><option value="prototype">Prototype / experiment</option><option value="repeat">Repeat of an existing idea</option><option value="batch">Small batch</option><option value="corporate_event">Corporate / organisation / event</option><option value="repair_remake">Repair / remake / matching</option><option value="unknown">Not sure yet</option></select></label>
-        <label>Quantity<input class="input" name="quantity" type="number" min="1" step="1" value="1" inputmode="numeric"/></label>
-        <label>Preferred workshop capability<select class="input" name="requested_capability_key" id="customRequestedCapability"><option value="">No preference / not sure</option></select><span class="small">Choose only if you already have a process in mind. This is a preference, not a feasibility promise.</span></label>
-        <label class="small" style="grid-column:1/-1;display:flex;gap:8px;align-items:flex-start"><input name="help_choose_method" type="checkbox"/> <span><strong>Help me decide how to make it.</strong> I know the result I want, but I want Devil n Dove to review possible workshop methods.</span></label>
-        <label>Product or idea name<input class="input" name="product_interest" placeholder="Example: personalized keychain, memorial ornament, matching earrings"/></label>
-        <label>Requested-by date, optional<input class="input" name="deadline_date" type="date"/></label>
-        <label>Budget range, optional<input class="input" name="budget" inputmode="decimal" placeholder="Example: 40"/></label>
-        <label>Gift intent<select class="input" name="gift_intent"><option value="">Not specified</option><option value="gift">Gift</option><option value="memorial">Memorial</option><option value="personal">For myself / household</option><option value="event">Event / market</option><option value="other">Other</option></select></label>
-        <label>Recipient name, optional<input class="input" name="recipient_name" autocomplete="off"/></label>
-        <label>Occasion, optional<input class="input" name="occasion" placeholder="Birthday, anniversary, memorial, holiday…"/></label>
-        <label>Gift presentation<select class="input" name="wrap_preference"><option value="">No preference</option><option value="standard">Standard presentation</option><option value="gift">Gift presentation requested</option><option value="minimal">Minimal / low-waste</option><option value="discuss">Please discuss with me</option></select></label>
-        <label>Handoff preference<select class="input" name="fulfillment_preference"><option value="discuss">Please discuss with me</option><option value="pickup">Local pickup</option><option value="shipping">Canada shipping</option><option value="event">Event / market handoff</option></select></label>
-        <label>Event / market context, optional<input class="input" name="event_context" placeholder="Event name, date, market or meetup"/></label>
-        <label>Company / organisation, optional<input class="input" name="organization_name" placeholder="Business, team, club or organisation"/></label>
-        <label>Structured event / project context, optional<input class="input" name="event_context_structured" placeholder="Event, campaign, deadline or group context"/></label>
-        <label>Intended use, optional<input class="input" name="intended_use" placeholder="Display, daily use, gift, prototype, event handout…"/></label>
-        <label>Desired material, optional<input class="input" name="desired_material" placeholder="Wood, metal, vinyl, resin, stone, fabric…"/></label>
-        <label>Colour / finish, optional<input class="input" name="desired_finish" placeholder="Colour, sheen, texture, coating or finish"/></label>
-        <label style="display:flex;gap:8px;align-items:center"><input name="supplied_item" type="checkbox"/> I plan to supply the item or blank</label>
-        <div id="customSuppliedItemDetails" class="card" style="grid-column:1/-1;display:none;margin:0">
-          <h3 style="margin-top:0">Customer-supplied item details</h3>
-          <p class="small">These details help us identify and assess your actual item. They do not promise that a material, coating or process is safe or compatible; we review that separately before accepting the work.</p>
+    <section class="card custom-intake-shell" id="customRequestStart" style="margin-top:18px" aria-labelledby="customRequestHeading">
+      <p class="eyebrow">Ask us to make something</p>
+      <h2 id="customRequestHeading" style="margin-top:0">Tell us what you have in mind</h2>
+      <p class="small">Start with the result you want. You do not need to know the machine, material, or process. Optional technical questions stay tucked away unless they are useful.</p>
+      <p class="small custom-intake-draft-note" id="customDraftStatus">Your unfinished answers can be kept safely in this browser tab until you send or clear them. File selections are never saved in the draft.</p>
+      <form id="customRequestForm" class="custom-intake-form">
+        <nav class="custom-intake-progress" aria-label="Custom request sections">
+          <a href="#customIdeaStep">1. The idea</a><a href="#customPriorityStep">2. What matters</a><a href="#customContextStep">3. Helpful details</a><a href="#customContactStep">4. Contact</a>
+        </nav>
+
+        <fieldset class="custom-intake-step" id="customIdeaStep" data-intake-step="idea">
+          <legend><span>1</span> What would you like made?</legend>
+          <p class="small">A plain-language description is enough. Add a reference only if it helps explain the idea.</p>
           <div class="admin-form-grid">
-            <label>Item label<input class="input" name="supplied_item_label" placeholder="Example: 20 oz stainless tumbler, silver ring, hand tool"/></label>
-            <label>Who owns this item?<select class="input" name="supplied_item_ownership_status"><option value="unconfirmed">Not confirmed yet</option><option value="customer_owned">I own this item</option><option value="authorized_agent">I am authorized by the owner</option><option value="unknown">Not sure / discuss with me</option></select></label>
-            <label style="grid-column:1/-1">Item description<textarea class="input" name="supplied_item_description" rows="3" placeholder="Brand/model if known, approximate age, size, identifying details, or anything unusual."></textarea></label>
-            <label>Material, if known<input class="input" name="supplied_item_material_description" placeholder="Only what you know; unknown is okay."/></label>
-            <label>Finish/coating, if known<input class="input" name="supplied_item_finish_description" placeholder="Paint, powder coat, plating, clear coat, bare metal…"/></label>
-            <label style="grid-column:1/-1">Requested modification<textarea class="input" name="supplied_item_requested_modification" rows="3" placeholder="What would you like us to engrave, personalize, repair, alter, fit, or finish?"></textarea></label>
-            <label style="grid-column:1/-1">Current condition notes<textarea class="input" name="supplied_item_condition_notes" rows="3" placeholder="Existing scratches, dents, cracks, wear, loose parts, discoloration, coating damage, or other condition details."></textarea></label>
-            <label style="grid-column:1/-1">Current-condition photos<input class="input" name="supplied_item_condition_images" type="file" accept="image/*" multiple/><span class="small">These photos stay private with your request unless you later give us permission to use them publicly. General inspiration images can still be added below. Maximum 5 images total per request.</span></label>
+            <label>Product or idea name, optional<input class="input" name="product_interest" placeholder="Example: personalized keychain, memorial ornament, matching earrings"/></label>
+            <label>Quantity<input class="input" name="quantity" type="number" min="1" step="1" value="1" inputmode="numeric"/></label>
+            <label class="full">Tell us what you are hoping for<textarea class="input" name="message" rows="5" required minlength="12" placeholder="What would you like made? Tell us the result, style, wording, size, or anything else you already know."></textarea></label>
+            <label class="full">Reference images, optional<input class="input" name="reference_images" type="file" accept="image/*" multiple/><span class="small">Up to 5 images, 8 MB each. These stay private with your request unless you later give permission to use them publicly.</span></label>
+            <label class="full">Reference links, optional<textarea class="input" name="attachment_urls" rows="2" placeholder="Paste public image or inspiration links, one per line."></textarea></label>
           </div>
+        </fieldset>
+
+        <fieldset class="custom-intake-step" id="customPriorityStep" data-intake-step="priority">
+          <legend><span>2</span> What matters most?</legend>
+          <p class="small">Approximate answers are fine. We confirm feasibility, price, timing, stock, and handoff before making a promise.</p>
+          <div class="admin-form-grid">
+            <label>Requested-by date, optional<input class="input" name="deadline_date" type="date"/></label>
+            <label>Approximate budget, optional<input class="input" name="budget" inputmode="decimal" placeholder="Example: 40"/></label>
+            <label>What is it for?<select class="input" name="gift_intent" id="customGiftIntent"><option value="">Not specified</option><option value="gift">Gift</option><option value="memorial">Memorial</option><option value="personal">For myself / household</option><option value="event">Event / market</option><option value="other">Other</option></select></label>
+            <label>Handoff preference<select class="input" name="fulfillment_preference"><option value="discuss">Please discuss with me</option><option value="pickup">Local pickup</option><option value="shipping">Canada shipping</option><option value="event">Event / market handoff</option></select></label>
+            <div class="custom-intake-conditional full" id="customGiftDetails" hidden>
+              <div class="admin-form-grid">
+                <label>Recipient name, optional<input class="input" name="recipient_name" autocomplete="off"/></label>
+                <label>Occasion, optional<input class="input" name="occasion" placeholder="Birthday, anniversary, memorial, holiday…"/></label>
+                <label>Gift presentation<select class="input" name="wrap_preference"><option value="">No preference</option><option value="standard">Standard presentation</option><option value="gift">Gift presentation requested</option><option value="minimal">Minimal / low-waste</option><option value="discuss">Please discuss with me</option></select></label>
+                <label class="full">Gift message, optional<textarea class="input" name="gift_message" rows="2" placeholder="Optional wording or message for the recipient"></textarea></label>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="custom-intake-step" id="customContextStep" data-intake-step="context">
+          <legend><span>3</span> Anything we should know?</legend>
+          <p class="small">Choose only what is useful. Workshop/process questions are optional and can be left to us.</p>
+          <div class="admin-form-grid">
+            <label>Kind of request<select class="input" name="request_type" id="customRequestType"><option value="custom_piece">Custom piece / gift</option><option value="personalization">Personalization / wording / graphics</option><option value="prototype">Prototype or test piece</option><option value="batch_event">Batch, corporate or event work</option><option value="repair_or_remake">Repair, remake, or matching piece</option><option value="customer_supplied_item">Work on an item I supply</option><option value="other">Other workshop request</option></select></label>
+            <label>Intended use, optional<input class="input" name="intended_use" placeholder="Display, daily use, gift, prototype, event handout…"/></label>
+            <label class="full">Wording / personalization, optional<textarea class="input" name="personalization_text" rows="2" placeholder="Names, wording, dates, logo/graphic notes…"></textarea></label>
+            <label class="custom-intake-check full"><input name="supplied_item" type="checkbox"/> <span><strong>I plan to supply the item or blank.</strong> We will review the actual item and its condition before accepting work on it.</span></label>
+          </div>
+
+          <div id="customSuppliedItemDetails" class="custom-intake-conditional card" style="display:none;margin-top:12px">
+            <h3 style="margin-top:0">Your item</h3>
+            <p class="small">These details help us assess your actual item. They do not promise that a material, coating, or process is safe or compatible.</p>
+            <div class="admin-form-grid">
+              <label>Item label<input class="input" name="supplied_item_label" placeholder="Example: 20 oz stainless tumbler, silver ring, hand tool"/></label>
+              <label>Who owns this item?<select class="input" name="supplied_item_ownership_status"><option value="unconfirmed">Not confirmed yet</option><option value="customer_owned">I own this item</option><option value="authorized_agent">I am authorized by the owner</option><option value="unknown">Not sure / discuss with me</option></select></label>
+              <label class="full">Item description<textarea class="input" name="supplied_item_description" rows="2" placeholder="Brand/model if known, age, size, identifying details, or anything unusual."></textarea></label>
+              <label>Material, if known<input class="input" name="supplied_item_material_description" placeholder="Unknown is okay."/></label>
+              <label>Finish/coating, if known<input class="input" name="supplied_item_finish_description" placeholder="Paint, powder coat, plating, bare metal…"/></label>
+              <label class="full">Requested modification<textarea class="input" name="supplied_item_requested_modification" rows="2" placeholder="What would you like us to engrave, personalize, repair, alter, fit, or finish?"></textarea></label>
+              <label class="full">Current condition notes<textarea class="input" name="supplied_item_condition_notes" rows="2" placeholder="Scratches, dents, cracks, wear, loose parts, coating damage, or other condition details."></textarea></label>
+              <label class="full">Current-condition photos<input class="input" name="supplied_item_condition_images" type="file" accept="image/*" multiple/><span class="small">These stay private with your request. Maximum 5 images total per request, including general reference images.</span></label>
+            </div>
+          </div>
+
+          <details class="custom-intake-advanced" id="customTechnicalDetails">
+            <summary><strong>Optional materials, process &amp; fit details</strong><span>Open this only if you already know or care about these choices.</span></summary>
+            <div class="admin-form-grid">
+              <label>Project intent<select class="input" name="project_intent"><option value="unknown">Not sure yet</option><option value="one_off">One-off</option><option value="prototype">Prototype / experiment</option><option value="repeat">Repeat of an existing idea</option><option value="batch">Small batch</option><option value="corporate_event">Corporate / organisation / event</option><option value="repair_remake">Repair / remake / matching</option></select></label>
+              <label>Preferred workshop capability<select class="input" name="requested_capability_key" id="customRequestedCapability"><option value="">No preference / not sure</option></select><span class="small">A preference is not a feasibility promise.</span></label>
+              <label class="custom-intake-check full"><input name="help_choose_method" type="checkbox"/> <span><strong>Help me decide how to make it.</strong> I know the result I want and want Devil n Dove to review possible methods.</span></label>
+              <label>Desired material, optional<input class="input" name="desired_material" placeholder="Wood, metal, vinyl, resin, stone, fabric…"/></label>
+              <label>Colour / finish, optional<input class="input" name="desired_finish" placeholder="Colour, sheen, texture, coating or finish"/></label>
+              <label class="full">Size / tolerance notes, optional<textarea class="input" name="tolerance_size_notes" rows="2" placeholder="Approximate dimensions, fit, clearance or tolerance needs. Unknown is okay."></textarea></label>
+              <label>Company / organisation, optional<input class="input" name="organization_name" placeholder="Business, team, club or organisation"/></label>
+              <label>Event / market context, optional<input class="input" name="event_context" placeholder="Event name, date, market or meetup"/></label>
+              <label class="full">Structured event / project context, optional<input class="input" name="event_context_structured" placeholder="Event, campaign, deadline or group context"/></label>
+            </div>
+          </details>
+        </fieldset>
+
+        <fieldset class="custom-intake-step" id="customContactStep" data-intake-step="contact">
+          <legend><span>4</span> How can we reach you?</legend>
+          <div class="admin-form-grid">
+            <label>Name<input class="input" name="name" autocomplete="name" required/></label>
+            <label>Email<input class="input" name="email" type="email" autocomplete="email" required/></label>
+            <label>Phone, optional<input class="input" name="phone" autocomplete="tel"/></label>
+            <label class="custom-intake-check full"><input name="consent_to_contact" type="checkbox" required/> <span>We may contact you about this request. We will not publish your request details or images without separate review and permission.</span></label>
+          </div>
+        </fieldset>
+
+        <div class="custom-intake-submit">
+          <p class="small"><strong>Before you send:</strong> this is a request, not an order. It does not reserve unique stock, create a quote, take payment, or start production. We review availability and suitability first.</p>
+          <div class="custom-intake-actions"><button class="btn primary" type="submit">Send custom request</button><button class="btn secondary" id="clearCustomRequestDraft" type="button">Clear saved draft</button><a class="btn" href="/shop/">Browse current shop</a></div>
         </div>
-        <label style="grid-column:1/-1">Wording / personalization, optional<textarea class="input" name="personalization_text" rows="3" placeholder="Names, wording, dates, variable personalization, logo/graphic notes…"></textarea></label>
-        <label style="grid-column:1/-1">Size / tolerance notes, optional<textarea class="input" name="tolerance_size_notes" rows="3" placeholder="Approximate dimensions, fit, clearance or tolerance needs. Unknown is okay."></textarea></label>
-        <label style="grid-column:1/-1">Gift message, optional<textarea class="input" name="gift_message" rows="3" placeholder="Optional wording or message for the recipient"></textarea></label>
-        <label style="grid-column:1/-1">Reference image uploads, optional<input class="input" name="reference_images" type="file" accept="image/*" multiple/><span class="small">Up to 5 images, 8 MB each. Uploads are treated as private review references until we approve public use.</span></label>
-        <label style="grid-column:1/-1">Links or image URLs, optional<textarea class="input" name="attachment_urls" rows="3" placeholder="Paste public image links or reference URLs, one per line."></textarea></label>
-        <label style="grid-column:1/-1">Tell us what you are hoping for<textarea class="input" name="message" rows="6" required minlength="12" placeholder="Please include size, colours, wording, material ideas, pickup/shipping needs, or anything that matters."></textarea></label>
-        <div class="small" style="grid-column:1/-1"><strong>Availability rule:</strong> custom, pickup, or event requests do not reserve unique stock when submitted or while a device is offline. Availability is revalidated live before an order or sale is confirmed.</div>
-        <label class="small" style="grid-column:1/-1;display:flex;gap:8px;align-items:flex-start"><input name="consent_to_contact" type="checkbox" required/> <span>We may contact you about this request. We will not publish your request details or images without review/permission.</span></label>
-        <div style="grid-column:1/-1;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn primary" type="submit">Send custom request</button><a class="btn" href="/shop/">Browse current shop</a></div>
-      </form><div id="customRequestMessage" class="status-note" style="display:none;margin-top:12px"></div></section>
+      </form>
+      <div id="customRequestMessage" class="status-note" style="display:none;margin-top:12px" aria-live="polite"></div>
+    </section>
 
     <section class="card" style="margin-top:18px" aria-labelledby="customExamplesHeading"><h2 id="customExamplesHeading" style="margin-top:0">Real candle & soap examples</h2><p class="small">These blocks appear only when an existing public product has approved photography and actual candle/soap facts. Missing facts stay missing rather than being turned into marketing claims.</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px"><a class="btn secondary" href="/custom-candle-making-ontario/">Custom candle guide</a><a class="btn secondary" href="/custom-soap-making-ontario/">Custom soap guide</a></div><div id="customRequestExamplesMount"><p class="small">Loading reviewed examples…</p></div></section>
 

@@ -1,18 +1,18 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 295 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 296 candidate
 
-Build 294 — Storefront Buyer Journey Simplification — is projected over exact Build 293 Production GREEN.
+Build 296 — Custom Work Progressive Intake — is projected over exact Build 295 Production GREEN.
 
-- Last fully verified Development: `22b0cb7074c9e5cba4a2f1b335d031f61d457c09`
-- Verified tree: `3d4467f152bdd0e172e2ec512529b9c8bef578db`
-- Development proofs: System `36583874154`, Quality `36583873948`, I.T. `36583874229`, Hygiene `36583874092`, Build 293 `36583874124`
-- Current Production main: `d731d823cbcf7708a6d978c9f399c2a72af55635`
-- Production proofs: Pages `36584189791`, Live Resources `36584379171`
-- Build 294 adds canonical migration `0027_release467_caip_workshop_follies_maker_story_foundation.sql`.
-- Migration 0027 creates only one-per-project Maker Story profiles plus reference-only project→workstation links; it creates no business rows.
-- Creative Process remains factual authority, CAIP remains private media/evidence/story authority, Content Studio remains review-first deliverable authority.
-- Productless Workshop Follies are supported; identity remains one Creative Process project → one CAIP workspace → one Content Studio package.
-- No automatic public/social/provider publication is authorized.
-- The future queue remains open. Next after Production GREEN: Build 295 — Storefront Buyer Journey Simplification.
+- Last fully verified Development: `653a1952cee1a78aa131180fc798a45f4de344b0`
+- Verified tree: `7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3`
+- Development proofs: System `36588836053`, Quality `36588836007`, I.T. `36588836018`, Hygiene `36588836078`, Build 295 `36588836000`
+- Current Production main: `9da8d3c7dc6ace186de0d69141e19fed998f5ddf`
+- Production proofs: Pages `36589115627`, Live Resources `36589247196`
+- Build 295 and Build 296 are schema-neutral; canonical migrations remain through `0027_release467_caip_workshop_follies_maker_story_foundation.sql`.
+- Build 296 reuses the existing `custom_requests`, customer-supplied-item, private reference-upload, manufacturing-triage and Creative Process authorities.
+- Public Custom Work requires only the project description, name, email and permission to contact; technical/material/process fields are progressive and optional.
+- Draft recovery is tab-local and excludes files and contact consent.
+- No automatic order, quote, stock reservation, production start, provider action, payment, or public/social publication is authorized.
+- The future queue remains open. Next after Build 296 Production GREEN: Build 297 — Search-First HTML, Product + Story SEO & Crawl Control.
 
 ## Current release baseline
 
