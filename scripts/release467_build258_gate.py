@@ -75,7 +75,7 @@ canon=set(a.get('canonical_owners_retained') or [])
 q(len(canon)==8,'Build 258 canonical owner set mismatch')
 q(not canon.intersection(targets),'Canonical current proof owner cannot be in manual-only target set')
 q("run_current_contract('scripts/release467_build258_gate.py','Release 467 Build 258')" in sysgate,'System Gate must invoke Build 258')
-q(cur>=258 and int(p.get('next_build') or 0)>=259 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 258 or a verified successor')
+q(cur>=258 and (cur>258 or int(p.get('next_build') or 0)>=259) and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 258 or a verified successor')
 if cur==258:
     q(p.get('accepted_dev_sha')=='5e6fa8772be5946a0cd53eadbd4b3daa36fce253' and p.get('accepted_dev_tree_sha')=='df03a29c947144f298f0908abf53ca3cdda1c159','Build 258 must start from exact Build 257 Development')
     q((p.get('production_checkpoint') or {}).get('main_sha')=='9e95bca825599dea1459838e10812c74d799c976','Build 258 Production baseline must be exact Build 257 Production')
