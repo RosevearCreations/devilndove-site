@@ -185,6 +185,7 @@ export async function onRequestGet(context) {
     { key: 'tools', label: 'Public tools API', path: '/api/tools', next_action: 'If this fails, verify tools JSON and D1 catalog bridge.' },
     { key: 'supplies', label: 'Public supplies API', path: '/api/supplies', next_action: 'If this fails, verify supplies JSON and D1 catalog bridge.' },
     { key: 'creations', label: 'Public creations API', path: '/api/creations', next_action: 'If empty, confirm products/creations are in D1 or public JSON fallback.' },
+    { key: 'capabilities', label: 'Public capabilities API', path: '/api/capabilities', next_action: 'If this fails, verify workshop capability profiles and the public capability recovery path.' },
     { key: 'community_content', label: 'Community content API', path: '/api/community-content?limit=5', next_action: 'If this fails, check community content tables or fallback JSON.' },
     { key: 'trust_blocks', label: 'Public trust blocks API', path: '/api/trust-blocks?context=homepage&limit=4', next_action: 'If empty, seed approved trust_block_items from Operations > Testimonials / Trust Blocks.' },
     { key: 'seo_overrides', label: 'Public SEO override API', path: '/api/seo-page-overrides?path=/', next_action: 'If this fails, apply the Build 150 SEO override schema and retry.' },
