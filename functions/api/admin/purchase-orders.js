@@ -191,7 +191,7 @@ export async function onRequestPost(context) {
   const bindings = [];
   if (supplierName) { whereBits.push(`LOWER(COALESCE(supplier_name,'')) = ?`); bindings.push(supplierName.toLowerCase()); }
   if (selectedIds.length) { whereBits.push(`site_item_inventory_id IN (${selectedIds.map(() => '?').join(',')})`); bindings.push(...selectedIds); }
-  if (onlyReorderFlagged) whereBits.push(`(COALESCE(is_on_reorder_list,0)=1 OR (COALESCE(on_hand_quantity,0) + COALESCE(incoming_quantity,0)) <= COALESCE(reorder_level,0))`);
+  if (onlyReorderFlagged) whereBits.push(`COALESCE(do_not_reorder,0)=0 AND (COALESCE(is_on_reorder_list,0)=1 OR (COALESCE(reorder_level,0)>0 AND (COALESCE(on_hand_quantity,0) + COALESCE(incoming_quantity,0)) <= COALESCE(reorder_level,0)))`);
 
   const rows = normalizeResults(await db.prepare(`
     SELECT * FROM site_item_inventory

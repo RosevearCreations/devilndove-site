@@ -1,32 +1,32 @@
 {
   "release": 467,
-  "build": 288,
-  "title": "Real Planned-vs-Actual Inventory Acceptance",
+  "build": 289,
+  "title": "Real Inventory Adoption Outcomes Renewal",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 287,
-      "title": "Real Existing Resource-Link Evidence Capture",
-      "authority": "release467-build287-real-existing-resource-link-evidence-capture.json",
-      "dev_sha": "f3e84a0c5623eb0a74bccb537049d780944e2892",
-      "tree_sha": "981b7a5e7b851684821af087a428fe66ad8348f0",
-      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
-      "proofs": {
-        "system_gate_run": 36432943282,
-        "current_application_quality_run": 36432943315,
-        "it_admin_runtime_proof_run": 36432943396,
-        "branch_hygiene_run": 36432943404
-      },
-      "dedicated_gate_run": 36432943286
-    },
-    "current_closure_candidate": {
-      "release": 467,
       "build": 288,
       "title": "Real Planned-vs-Actual Inventory Acceptance",
       "authority": "release467-build288-real-planned-vs-actual-inventory-acceptance.json",
+      "dev_sha": "49531694be53b4c8749817c95a4b3b0b28814b90",
+      "tree_sha": "8e34e42a970c1aa8aab2325db5f2fab466703400",
+      "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+      "proofs": {
+        "system_gate_run": 36439993698,
+        "current_application_quality_run": 36439993660,
+        "it_admin_runtime_proof_run": 36439993643,
+        "branch_hygiene_run": 36439993798
+      },
+      "dedicated_gate_run": 36439993633
+    },
+    "current_closure_candidate": {
+      "release": 467,
+      "build": 289,
+      "title": "Real Inventory Adoption Outcomes Renewal",
+      "authority": "release467-build289-real-inventory-adoption-outcomes-renewal.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -37,19 +37,19 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 287,
-    "title": "Real Existing Resource-Link Evidence Capture",
-    "authority": "release467-build287-real-existing-resource-link-evidence-capture.json",
-    "main_sha": "27a48e505b42c399fac0801cbd4e6394490957a4",
-    "tree_sha": "981b7a5e7b851684821af087a428fe66ad8348f0",
+    "build": 288,
+    "title": "Real Planned-vs-Actual Inventory Acceptance",
+    "authority": "release467-build288-real-planned-vs-actual-inventory-acceptance.json",
+    "main_sha": "10ca103d83a2f0517eb1bbf3aac26cebd5e0e451",
+    "tree_sha": "8e34e42a970c1aa8aab2325db5f2fab466703400",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36433269795,
-    "production_live_resource_integrity_run": 36433368187,
-    "build_specific_proof_run": 36433269797,
+    "production_pages_deploy_run": 36442437962,
+    "production_live_resource_integrity_run": 36442922542,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build289-real-inventory-adoption-outcomes-renewal.json",
     "release467-build288-real-planned-vs-actual-inventory-acceptance.json",
     "release467-build287-real-existing-resource-link-evidence-capture.json",
     "release467-build286-creative-process-resource-link-operator-workflow.json",
@@ -179,11 +179,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md",
-  "next_build": 289,
-  "next_build_state": "AUTHORIZED_BY_ROADMAP",
-  "next_build_title": "Real Inventory Adoption Outcomes Renewal",
-  "promotion_state": "BUILD288_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD289_REAL_INVENTORY_ADOPTION_OUTCOMES_RENEWAL_AUTHORIZED",
+  "next_build": null,
+  "next_build_state": "PENDING_BUILD289_EXACT_REMEASUREMENT",
+  "next_build_title": null,
+  "promotion_state": "BUILD289_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD289_TERMINAL_RENEWAL_PENDING_EXACT_REMEASUREMENT",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -206,21 +206,21 @@
   "planned_successor": {
     "first_build": 285,
     "last_build": 289,
-    "state": "REAL_INVENTORY_LINKAGE_ACCEPTANCE_ROADMAP",
+    "state": "REAL_INVENTORY_LINKAGE_ACCEPTANCE_ROADMAP_TERMINAL_BUILD_ACTIVE",
     "future_queue_exhausted": false,
-    "next_build": 289,
-    "next_build_title": "Real Inventory Adoption Outcomes Renewal",
+    "next_build": null,
+    "next_build_title": null,
     "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md"
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "f3e84a0c5623eb0a74bccb537049d780944e2892",
-  "accepted_dev_tree_sha": "981b7a5e7b851684821af087a428fe66ad8348f0",
+  "accepted_dev_sha": "49531694be53b4c8749817c95a4b3b0b28814b90",
+  "accepted_dev_tree_sha": "8e34e42a970c1aa8aab2325db5f2fab466703400",
   "acceptance": {
-    "system_gate_run": 36432943282,
-    "current_application_quality_run": 36432943315,
-    "it_admin_runtime_proof_run": 36432943396,
-    "branch_hygiene_run": 36432943404
+    "system_gate_run": 36439993698,
+    "current_application_quality_run": 36439993660,
+    "it_admin_runtime_proof_run": 36439993643,
+    "branch_hygiene_run": 36439993798
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -956,5 +956,30 @@
     "state": "PENDING_EXACT_DEVELOPMENT_OPERATOR_ACCEPTANCE",
     "next_build": 289,
     "future_queue_exhausted": false
-  }
+  },
+  "real_inventory_adoption_outcomes_renewal": {
+    "source_builds": [
+      285,
+      286,
+      287,
+      288
+    ],
+    "environment": "DEVELOPMENT_EXACT_SHA_READ_ONLY_REMEASUREMENT",
+    "canonical_workshop_category_authority": "inventory_processes",
+    "workstation_role_authority": "inventory_workstation_roles",
+    "migration": "0025_release467_inventory_workstation_roles.sql",
+    "development_migration_run": 36503337920,
+    "development_migration_rows_read": 29,
+    "workstation_role_rows_created_automatically": 0,
+    "category_dropdown": true,
+    "station_vs_associated_model": true,
+    "stock_usage_unit_dropdowns": true,
+    "reorder_na": true,
+    "amazon_missing_only_enrichment": true,
+    "state": "PENDING_EXACT_DEVELOPMENT_REMEASUREMENT",
+    "measured_software_residual": "PENDING",
+    "queue_state": "PENDING",
+    "successor_justified": null
+  },
+  "schema_change_state": "BUILD289_0025_DEVELOPMENT_APPLIED_AND_VERIFIED_PRODUCTION_APPLY_PENDING_PROMOTION"
 }

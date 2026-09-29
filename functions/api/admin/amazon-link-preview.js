@@ -106,6 +106,53 @@ function inferCategory(title = '', description = '') {
   return rules.find(([, pattern]) => pattern.test(haystack))?.[0] || '';
 }
 
+function amazonOfferDetails(product = {}, html = '') {
+  const rawOffers = Array.isArray(product?.offers) ? product.offers : (product?.offers ? [product.offers] : []);
+  let price = 0;
+  let currency = '';
+  for (const offer of rawOffers) {
+    const value = Number(offer?.price ?? offer?.lowPrice ?? offer?.highPrice ?? 0);
+    if (Number.isFinite(value) && value > 0) { price = value; currency = normalizeText(offer?.priceCurrency || currency).toUpperCase(); break; }
+  }
+  if (!currency) {
+    const match = String(html || '').match(/itemprop=["']priceCurrency["'][^>]+content=["']([A-Z]{3})["']/i)
+      || String(html || '').match(/"priceCurrency"\s*:\s*"([A-Z]{3})"/i);
+    if (match?.[1]) currency = String(match[1]).toUpperCase();
+  }
+  if (!price) {
+    const match = String(html || '').match(/itemprop=["']price["'][^>]+content=["']([0-9]+(?:\.[0-9]{1,2})?)["']/i)
+      || String(html || '').match(/"price"\s*:\s*"?(\d+(?:\.\d{1,2})?)/i);
+    const value = Number(match?.[1] || 0);
+    if (Number.isFinite(value) && value > 0) price = value;
+  }
+  return {
+    current_price_currency: currency,
+    current_price_cents: currency === 'CAD' && price > 0 ? Math.round(price * 100) : 0,
+    current_price_value: price > 0 ? price : 0
+  };
+}
+
+function inferPackageUnits(title = '') {
+  const text = String(title || '');
+  const patterns = [
+    { re: /\bpack\s+of\s+(\d{1,4})\b/i, label: 'piece' },
+    { re: /\b(\d{1,4})\s*(?:count|ct)\b/i, label: 'piece' },
+    { re: /\b(\d{1,4})\s*(?:pcs?|pieces?)\b/i, label: 'piece' },
+    { re: /\b(\d{1,4})\s*sheets?\b/i, label: 'sheet' },
+    { re: /\b(\d{1,4})\s*rolls?\b/i, label: 'roll' },
+    { re: /\b(\d{1,4})\s*bags?\b/i, label: 'bag' },
+    { re: /\b(\d{1,4})\s*bottles?\b/i, label: 'bottle' }
+  ];
+  for (const rule of patterns) {
+    const match = text.match(rule.re);
+    const count = Number(match?.[1] || 0);
+    if (Number.isInteger(count) && count > 1 && count <= 1000) {
+      return { package_units: count, package_usage_unit_label: rule.label, package_units_source: 'amazon_title_pattern' };
+    }
+  }
+  return { package_units: 0, package_usage_unit_label: '', package_units_source: '' };
+}
+
 
 function flattenVisibleText(html = '') {
   return decodeHtml(String(html || '')
@@ -250,6 +297,8 @@ export async function onRequestPost(context) {
   const brand = normalizeText(typeof product.brand === 'object' ? product.brand?.name : product.brand).slice(0, 120);
   const sku = normalizeText(product.sku || product.mpn || asin).slice(0, 120);
   const category = normalizeText(product.category || inferCategory(title, description)).toLowerCase().slice(0, 120);
+  const offer = amazonOfferDetails(product, html);
+  const packageInfo = inferPackageUnits(title);
 
   const visibleText = flattenVisibleText(html);
   const ingredientDeclaration = labeledBlock(visibleText, ['Ingredients', 'Ingredient list', 'INCI', 'Ingredients List']);
@@ -284,6 +333,8 @@ export async function onRequestPost(context) {
   if (!asin) warnings.push('ASIN could not be identified from this URL.');
   if (!title) warnings.push('Amazon did not expose a product title to the preview request.');
   if (!imageUrl) warnings.push('Amazon did not expose a usable product image.');
+  if (offer.current_price_value > 0 && offer.current_price_currency && offer.current_price_currency !== 'CAD') warnings.push(`Amazon exposed a ${offer.current_price_currency} price. Inventory cost was not auto-filled because Devil n Dove cost authority is CAD.`);
+  if (!offer.current_price_cents) warnings.push('Amazon did not expose a reliable current CAD price. Existing Inventory cost remains authoritative.');
   if (!ingredientDeclaration) warnings.push('No reliable ingredient section was exposed by the Amazon page. Paste the supplier/manufacturer ingredient or INCI list manually before saving the source template.');
   warnings.push('Amazon data is a review-first convenience only. Verify the exact purchased item and supplier/manufacturer documentation before saving or printing.');
 
@@ -302,15 +353,20 @@ export async function onRequestPost(context) {
     supplier_contact: 'Amazon.ca',
     reorder_notes: asin ? `Imported from Amazon link for review. ASIN ${asin}.` : 'Imported from Amazon link for review.',
     stock_unit_label: normalizeText(body.source_type).toLowerCase() === 'tool' ? 'tool' : 'package',
-    usage_unit_label: normalizeText(body.source_type).toLowerCase() === 'tool' ? 'use' : 'unit',
-    usage_units_per_stock_unit: 1
+    usage_unit_label: normalizeText(body.source_type).toLowerCase() === 'tool' ? 'use' : (packageInfo.package_usage_unit_label || 'unit'),
+    usage_units_per_stock_unit: normalizeText(body.source_type).toLowerCase() === 'tool' ? 1 : (packageInfo.package_units || 1),
+    package_units: packageInfo.package_units,
+    package_units_source: packageInfo.package_units_source,
+    current_price_cents: offer.current_price_cents,
+    current_price_currency: offer.current_price_currency,
+    current_price_value: offer.current_price_value
   };
 
   await auditAdminAction(context.env, context.request, adminUser, {
     action_type: 'inventory_amazon_link_preview',
     target_type: 'amazon_product',
     target_key: asin || canonicalUrl,
-    details: { canonical_url: canonicalUrl, fields_found: Object.entries(draft).filter(([, value]) => Boolean(value)).map(([key]) => key), warnings }
+    details: { canonical_url: canonicalUrl, fields_found: Object.entries(draft).filter(([, value]) => Boolean(value)).map(([key]) => key), price_currency: offer.current_price_currency || null, package_units_source: packageInfo.package_units_source || null, warnings }
   }).catch(() => null);
 
   return json({ ok: true, draft, packaging_source_draft: packagingSourceDraft, asin, canonical_url: canonicalUrl, warnings, source: 'amazon_page_metadata_review_required' });

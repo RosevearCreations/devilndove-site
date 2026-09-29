@@ -1,17 +1,17 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 288 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 289 candidate
 
-Build 288 — Real Planned-vs-Actual Inventory Acceptance — is projected over the exact fully verified Build 287 closure.
+Build 289 — Real Inventory Adoption Outcomes Renewal — is projected over the exact fully verified Build 288 closure.
 
-- Last fully verified Development: `f3e84a0c5623eb0a74bccb537049d780944e2892`
-- Verified tree: `981b7a5e7b851684821af087a428fe66ad8348f0`
-- Development proofs: System `36432943282`, Current Application Quality `36432943315`, I.T. Admin Runtime `36432943396`, Repository Branch Hygiene `36432943404`; Build 287 dedicated `36432943286`
-- Current Production main: `27a48e505b42c399fac0801cbd4e6394490957a4`
-- Production proofs: Pages `36433269795`, Live Resources `36433368187`; Build 287 `36433269797`
+- Last fully verified Development: `49531694be53b4c8749817c95a4b3b0b28814b90`
+- Verified tree: `8e34e42a970c1aa8aab2325db5f2fab466703400`
+- Development proofs: System `36439993698`, Current Application Quality `36439993660`, I.T. Admin Runtime `36439993643`, Repository Branch Hygiene `36439993798`; Build 288 dedicated `36439993633`
+- Current Production main: `10ca103d83a2f0517eb1bbf3aac26cebd5e0e451`
+- Production proofs: Pages `36442437962`, Live Resources `36442922542`
 - Build 287 real linkage retained: project 7 / material event 2 → Supply Inventory 2801 → resource link 1.
-- Build 288 requires real-data reviewed-unposted → explicit Inventory post → compensating reversal, with Inventory restored exactly to baseline and Finance unchanged.
-- Build 288 creates no project, material event, Inventory item or Product fixture.
-- Inventory Operations desktop editing uses a wide horizontally scrollable table so input contents and actions remain readable.
-- Next: Build 289 — Real Inventory Adoption Outcomes Renewal.
+- Build 288 real planned-vs-actual post/reversal acceptance is fully closed.
+- Build 289 canonical migration 0025 is Development-applied and verified by run `36503337920`: 22 active workshop processes, zero foreign-key violations, 29 bounded provider rows_read and zero automatically created station-role rows.
+- Inventory Operations uses canonical workshop categories, owner-reviewed station-vs-associated roles, Stock/Usage Unit dropdowns, Reorder N/A and review-first missing-only Amazon enrichment.
+- Build 289 is the terminal roadmap build. Exact Development remeasurement decides whether the autonomous queue is exhausted.
 
 ## Current release baseline
 

@@ -67,7 +67,7 @@ export async function onRequestGet(context) {
                ${usageLabelExpr} AS usage_unit_label,
                ${usageUnitsExpr} AS usage_units_per_stock_unit,
                COALESCE(sii.unit_cost_cents,0) AS unit_cost_cents,
-               CASE WHEN COALESCE(sii.reorder_level,0) > 0 AND (COALESCE(sii.on_hand_quantity,0) + COALESCE(sii.incoming_quantity,0)) <= COALESCE(sii.reorder_level,0) THEN 1 ELSE 0 END AS reorder_needed
+               CASE WHEN COALESCE(sii.do_not_reorder,0)=0 AND COALESCE(sii.reorder_level,0) > 0 AND (COALESCE(sii.on_hand_quantity,0) + COALESCE(sii.incoming_quantity,0)) <= COALESCE(sii.reorder_level,0) THEN 1 ELSE 0 END AS reorder_needed
         FROM catalog_items ci
         LEFT JOIN site_item_inventory sii ON sii.source_type = ci.item_kind AND sii.external_key = ci.source_key
         WHERE ci.item_kind IN ('tool','supply') AND COALESCE(ci.status,'active') != 'archived'

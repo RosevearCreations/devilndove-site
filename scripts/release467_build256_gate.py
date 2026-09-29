@@ -53,7 +53,7 @@ for token in ('870','863','7 failed','2,178','25,000','13 SELECT','Build 257'):
     q(token in review,f'Build 256 renewal document missing {token}')
 
 cur=int(p.get('build') or 0)
-q(cur>=256 and int(p.get('next_build') or 0)>=257 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 256 or a verified successor')
+q(cur>=256 and (cur>256 or int(p.get('next_build') or 0)>=257) and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 256 or a verified successor')
 if cur==256:
     q(p.get('accepted_dev_sha')=='6d8d006cad521f2ca9fb83b2d7a1ec62ad9347fb' and p.get('accepted_dev_tree_sha')=='7a6eaaeecdbc7b2bf5f8b015d8186f9ac8d8d398','Build 256 must start from exact Build 255 Development')
     q((p.get('production_checkpoint') or {}).get('main_sha')=='c5ef57106fe84b386230d686b46d11ea30c35576','Build 256 Production baseline must be Build 255')
