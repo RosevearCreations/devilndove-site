@@ -369,6 +369,22 @@ export async function ensureCreativeAssetIntelligenceSchema(db) {
   }
 }
 
+async function makerStorySourceContext(db, workId) {
+  const profile = await db.prepare(`SELECT msp.*,ip.process_key,ip.process_name
+    FROM creative_project_maker_story_profiles msp
+    LEFT JOIN inventory_processes ip ON ip.inventory_process_id=msp.primary_inventory_process_id
+    WHERE msp.creative_work_project_id=? LIMIT 1`).bind(workId).first().catch(()=>null);
+  const workstations = rows(await db.prepare(`SELECT msw.site_item_inventory_id,sii.item_name,
+      COALESCE(ipa.inventory_process_id,0) inventory_process_id,ip.process_key,ip.process_name
+    FROM creative_project_maker_story_workstations msw
+    JOIN site_item_inventory sii ON sii.site_item_inventory_id=msw.site_item_inventory_id
+    LEFT JOIN inventory_process_assignments ipa ON ipa.site_item_inventory_id=sii.site_item_inventory_id
+    LEFT JOIN inventory_processes ip ON ip.inventory_process_id=ipa.inventory_process_id
+    WHERE msw.creative_work_project_id=?
+    ORDER BY LOWER(sii.item_name),sii.site_item_inventory_id`).bind(workId).all().catch(()=>({results:[]})));
+  return { profile: profile || null, workstations };
+}
+
 export async function ensureCreativeProjectFromCreativeWorkProject(db, creativeWorkProjectId, actorUserId = null) {
   await ensureCreativeAssetIntelligenceSchema(db);
   const workId = integer(creativeWorkProjectId);
@@ -378,6 +394,7 @@ export async function ensureCreativeProjectFromCreativeWorkProject(db, creativeW
     FROM creative_work_projects WHERE creative_work_project_id=? LIMIT 1`).bind(workId).first();
   if (!source) throw new Error('Creative Process project was not found.');
   if (text(source.project_status).toLowerCase() === 'archived') throw new Error('Archived Creative Process projects cannot create a new CAIP workspace.');
+  const makerStory = await makerStorySourceContext(db, workId);
 
   const sourceId = String(workId);
   const existing = await db.prepare(`SELECT creative_project_id,content_project_id,policy_profile_json
@@ -395,6 +412,9 @@ export async function ensureCreativeProjectFromCreativeWorkProject(db, creativeW
     product_id: integer(source.product_id) || null,
     privacy_status: source.privacy_status || null,
     rights_status: source.rights_status || null,
+    maker_story: makerStory.profile,
+    maker_story_workstations: makerStory.workstations,
+    maker_story_foundation_build: 294,
     source_updated_at: source.updated_at || null,
     workflow_build: 271,
     synced_at: new Date().toISOString()
@@ -413,7 +433,11 @@ export async function ensureCreativeProjectFromCreativeWorkProject(db, creativeW
     no_auto_publish: true,
     no_implicit_rights: true,
     human_review_required: true,
-    workflow_build: 271
+    maker_story_foundation: true,
+    maker_story_source_authority: 'creative_process',
+    workstation_identity_authority: 'inventory',
+    workflow_build: 271,
+    maker_story_foundation_build: 294
   };
 
   await db.prepare(`
