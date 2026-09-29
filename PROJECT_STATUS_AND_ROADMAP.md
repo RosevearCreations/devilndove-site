@@ -2,18 +2,18 @@
 
 ## Current checkpoint
 
-**Build 298 — Merchant/Search Distribution + Public Content Discovery** is active in Development.
+**Build 299 — D1 Query Efficiency + Canonical Runtime/Repository Cleanup** is active in Development.
 
-Build 297 is the exact Development and Production GREEN baseline. Build 298 projects only approved Product and reviewed Workshop Journal publication facts into initial HTML, adds Product/Offer/Breadcrumb and BlogPosting/Breadcrumb structured data, noindexes arbitrary Shop query permutations, and augments the runtime sitemap with published dynamic URLs while preserving the static canonical sitemap source.
+Build 298 is the exact Development and Production GREEN baseline. Build 299 reduces D1 schema-read fan-out, removes selected redundant public schema preflights, keeps workstation memberships batched, measures query plans/rows-read against Development only, and removes only exact duplicate root API copies with canonical `functions/api/` ownership retained.
 
-- Exact Build 297 Development: `24c2a0dc4f81b4323d96387b1f5a7109e976c226`
-- Exact Build 297 Production main: `043799f8d89a6df392b4416a7908da4f9d92d537`
-- Shared predecessor tree: `22da804600e5d53151e06a4136b4a3c65d96a88f`
-- Build 298 schema change: **NONE**
-- Dynamic indexing authority: **PUBLISHED RECORDS ONLY**
-- Arbitrary Shop query/filter URLs: **NOINDEX,FOLLOW**
-- Automatic publication / provider / payment / private-media action: **NONE**
-- Next after Production GREEN: **Build 298 — Merchant/Search Distribution + Public Content Discovery**
+- Exact Build 298 Development: `2fae62c9b5f78e31d8325bd63d93c1674a11c3c6`
+- Exact Build 298 Production main: `5da8e2457ec64a9a54523bd56eb523c9abd5ec8c`
+- Shared predecessor tree: `396b3491620307b041cda8ac066f97ea44f2b0ef`
+- Build 299 schema change: **NONE**
+- Development D1 measurement: **READ ONLY**
+- Production D1 measurement contact: **NONE**
+- Historical release evidence deletion: **NONE**
+- Next after Production GREEN: **Build 300 — CAIP Maker Content Outcomes Renewal & Automation Refinement**
 
 ## Next production queue — Builds 290–300
 

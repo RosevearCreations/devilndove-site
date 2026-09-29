@@ -1,33 +1,33 @@
-// Release 467 Build 298 — Merchant/Search Distribution + Public Content Discovery over exact Build 296 Production source.
+// Release 467 Build 299 — D1 Query Efficiency + Canonical Runtime/Repository Cleanup over exact Build 298 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=298;
-const TITLE='Merchant/Search Distribution + Public Content Discovery';
-const AUTHORITY='release467-build298-merchant-search-distribution-public-content-discovery';
-const EVIDENCE_ID='r467-b296-green-36617176553-36617412141';
+const BUILD=299;
+const TITLE='D1 Query Efficiency + Canonical Runtime/Repository Cleanup';
+const AUTHORITY='release467-build299-d1-query-efficiency-canonical-runtime-repository-cleanup';
+const EVIDENCE_ID='r467-b298-green-36623313387-36624396660';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:297,title:'Search-First HTML, Product + Story SEO & Crawl Control',state:'DEVELOPMENT_GREEN',
-  dev_sha:'24c2a0dc4f81b4323d96387b1f5a7109e976c226',tree_sha:'22da804600e5d53151e06a4136b4a3c65d96a88f',
-  system_gate_run:36617176553,current_application_quality_run:36617176471,it_admin_runtime_proof_run:36617176516,
-  branch_hygiene_run:36617176437,proof_state:'EXACT_BRANCH_HEAD_BUILD294_GREEN',
+  release:467,build:298,title:'Merchant/Search Distribution + Public Content Discovery',state:'DEVELOPMENT_GREEN',
+  dev_sha:'2fae62c9b5f78e31d8325bd63d93c1674a11c3c6',tree_sha:'396b3491620307b041cda8ac066f97ea44f2b0ef',
+  system_gate_run:36623313387,current_application_quality_run:36623313316,it_admin_runtime_proof_run:36623313302,
+  branch_hygiene_run:36623313126,proof_state:'EXACT_BRANCH_HEAD_BUILD298_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:296,title:'Build 298 starting point',state:'DEVELOPMENT_GREEN',
-  dev_sha:'24c2a0dc4f81b4323d96387b1f5a7109e976c226',tree_sha:'22da804600e5d53151e06a4136b4a3c65d96a88f',
-  accepted_sha:'24c2a0dc4f81b4323d96387b1f5a7109e976c226',accepted_tree_sha:'22da804600e5d53151e06a4136b4a3c65d96a88f',
-  system_gate_run:36617176553,current_application_quality_run:36617176471,it_admin_runtime_proof_run:36617176516,
-  branch_hygiene_run:36617176437,proof_state:'EXACT_BRANCH_HEAD_BUILD294_GREEN'
+  release:467,build:298,title:'Build 299 starting point',state:'DEVELOPMENT_GREEN',
+  dev_sha:'2fae62c9b5f78e31d8325bd63d93c1674a11c3c6',tree_sha:'396b3491620307b041cda8ac066f97ea44f2b0ef',
+  accepted_sha:'2fae62c9b5f78e31d8325bd63d93c1674a11c3c6',accepted_tree_sha:'396b3491620307b041cda8ac066f97ea44f2b0ef',
+  system_gate_run:36623313387,current_application_quality_run:36623313316,it_admin_runtime_proof_run:36623313302,
+  branch_hygiene_run:36623313126,proof_state:'EXACT_BRANCH_HEAD_BUILD298_GREEN'
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:297,title:'Search-First HTML, Product + Story SEO & Crawl Control',state:'PRODUCTION_GREEN',
-  main_sha:'043799f8d89a6df392b4416a7908da4f9d92d537',tree_sha:'22da804600e5d53151e06a4136b4a3c65d96a88f',
-  production_pages_deploy_run:36617412141,production_live_resource_integrity_run:36617524593,
-  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36617176420,remote_d1_queries:0
+  release:467,build:298,title:'Merchant/Search Distribution + Public Content Discovery',state:'PRODUCTION_GREEN',
+  main_sha:'5da8e2457ec64a9a54523bd56eb523c9abd5ec8c',tree_sha:'396b3491620307b041cda8ac066f97ea44f2b0ef',
+  production_pages_deploy_run:36624396660,production_live_resource_integrity_run:36624531016,
+  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36623313494,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -37,7 +37,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 295 Storefront Buyer Journey Simplification'
+  'Release 467 Build 299 D1 Query Efficiency Canonical Runtime Repository Cleanup'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql','0026_release467_inventory_workstation_memberships.sql','0027_release467_caip_workshop_follies_maker_story_foundation.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -127,7 +127,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:298,title:TITLE,authority:'release467-build298-merchant-search-distribution-public-content-discovery.json'},
+        current_closure_candidate:{release:467,build:299,title:TITLE,authority:'release467-build299-d1-query-efficiency-canonical-runtime-repository-cleanup.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],

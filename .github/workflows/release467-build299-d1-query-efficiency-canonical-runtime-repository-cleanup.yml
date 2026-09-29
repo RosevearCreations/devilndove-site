@@ -1,0 +1,138 @@
+name: Release 467 Build 299 D1 Query Efficiency Canonical Runtime Repository Cleanup
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/**'
+      - 'scripts/release467_build299_*'
+      - 'release467-build299-*.json'
+      - 'current-development-authority.json'
+      - '.github/workflows/release467-build299-d1-query-efficiency-canonical-runtime-repository-cleanup.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      - run: python scripts/release467_build299_regression.py
+      - run: python scripts/release467_build299_gate.py
+      - run: |
+          echo 'Runtime schema introspection: BATCHED'
+          echo 'Selected public sqlite_master preflights: REMOVED'
+          echo 'Repository duplicate cleanup: EXACT-BYTE COPIES ONLY'
+          echo 'Schema migration: NONE'
+
+  development-provider-query-efficiency:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+      EXPECTED_STATEMENTS: 10
+      D1_PROVIDER_ROWS_READ_CEILING: '20000'
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 2 }
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      # D1_ONE_SHOT_EVIDENCE_CAPTURE — current Build 299 only; path-scoped dev push + manual recovery.
+      - name: Prove exact Development source and D1 identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test -n "${CLOUDFLARE_API_TOKEN}"
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'devilndove-prod' wrangler.toml
+          npx --yes wrangler@4.128.0 d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/build299-d1-info.json
+          python - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/build299-d1-info.json'))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for x in v.values(): yield from walk(x)
+              elif isinstance(v,list):
+                  for x in v: yield from walk(x)
+          rows=list(walk(data))
+          ids={str(r.get('uuid') or r.get('id') or '') for r in rows}
+          names={str(r.get('name') or '') for r in rows}
+          assert os.environ['EXPECTED_DEV_D1_DATABASE_ID'] in ids,(ids,names)
+          assert os.environ['DEV_D1_DATABASE_NAME'] in names,(ids,names)
+          print('EXACT DEVELOPMENT D1 IDENTITY: PASS')
+          PY
+      - name: Measure hot queries and query plans
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$(grep -v '^[[:space:]]*--' scripts/release467_build299_measurement.sql)" > /tmp/build299-measurement.json 2>/tmp/build299-measurement.err; then
+            cat /tmp/build299-measurement.err >&2 || true
+            cat /tmp/build299-measurement.json >&2 || true
+            exit 1
+          fi
+          python - <<'PY'
+          import json,os
+          raw=json.load(open('/tmp/build299-measurement.json'))
+          statements=raw if isinstance(raw,list) else raw.get('results',raw if isinstance(raw,list) else [])
+          if not isinstance(statements,list):
+              raise AssertionError(type(statements))
+          expected=int(os.environ['EXPECTED_STATEMENTS'])
+          assert len(statements)==expected,('statement count',len(statements),expected)
+          reads=[]
+          for item in statements:
+              meta=item.get('meta') if isinstance(item,dict) else {}
+              reads.append(int((meta or {}).get('rows_read') or 0))
+          aggregate=sum(reads);ceiling=int(os.environ['D1_PROVIDER_ROWS_READ_CEILING'])
+          assert aggregate<=ceiling,('aggregate rows_read budget exceeded',aggregate,ceiling,reads)
+          corpus={}
+          if len(statements)>=3 and isinstance(statements[2],dict):
+              rs=statements[2].get('results') or []
+              if rs and isinstance(rs[0],dict):
+                  corpus={k:int(v or 0) for k,v in rs[0].items()}
+          corpus_total=sum(corpus.values())
+          fts_decision='NOT_JUSTIFIED_CURRENT_SCALE' if corpus_total<=5000 and aggregate<=ceiling else 'REVIEW_REQUIRED'
+          plans={}
+          for idx,label in ((3,'products'),(4,'creations'),(5,'universal_prefix'),(6,'universal_substring')):
+              rs=statements[idx].get('results') or []
+              plans[label]=[str(row.get('detail') or '') for row in rs if isinstance(row,dict)]
+          evidence={
+            'release':467,'build':299,'exact_development_sha':os.environ.get('GITHUB_SHA',''),
+            'database':'devilndove-dev','statement_count':len(statements),'rows_read_by_statement':reads,
+            'aggregate_rows_read':aggregate,'aggregate_rows_read_ceiling':ceiling,'corpus_counts':corpus,
+            'corpus_total':corpus_total,'fts_trigram_decision':fts_decision,'query_plans':plans,
+            'schema_snapshot_statement_count':2,'workstation_membership_read_batched':True,
+            'd1_mutation':False,'production_d1_contact':False,'r2_mutation':False,'credentials_emitted':False
+          }
+          open('/tmp/build299-query-efficiency-evidence.json','w').write(json.dumps(evidence,indent=2,sort_keys=True)+'\n')
+          print('BUILD299_PROVIDER_STATEMENTS=',len(statements))
+          print('BUILD299_ROWS_READ_BY_STATEMENT=',reads)
+          print('BUILD299_AGGREGATE_ROWS_READ=',aggregate,'CEILING=',ceiling)
+          print('BUILD299_CORPUS_COUNTS=',corpus)
+          print('BUILD299_FTS_TRIGRAM_DECISION=',fts_decision)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build299-query-efficiency-${{ github.sha }}
+          path: /tmp/build299-query-efficiency-evidence.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Boundary
+        if: always()
+        run: |
+          echo 'D1 target: canonical Development devilndove-dev only'
+          echo 'D1 mutation: ZERO'
+          echo 'Production D1 contact: ZERO'
+          echo 'Provider publication/execution: ZERO'

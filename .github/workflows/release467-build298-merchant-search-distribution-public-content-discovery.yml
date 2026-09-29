@@ -1,7 +1,5 @@
 name: Release 467 Build 298 Merchant Search Distribution Public Content Discovery
 on:
-  push:
-    branches: [dev]
   workflow_dispatch:
 permissions:
   contents: read

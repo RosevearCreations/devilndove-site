@@ -1,4 +1,5 @@
 import { captureRuntimeIncident } from "./_lib/adminAudit.js";
+import { loadSchemaColumnSet } from "./_lib/schemaColumnSnapshot.js";
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -32,6 +33,11 @@ function parseOptionalInteger(value) {
   return Number.isInteger(number) ? number : null;
 }
 
+const PRODUCT_SCHEMA_TABLES = Object.freeze([
+  "products","tax_classes","product_seo","product_story_public_notes",
+  "product_images","product_image_annotations","media_consent_records"
+]);
+
 function sqlString(value) {
   return `'${String(value || "").replace(/'/g, "''")}'`;
 }
@@ -39,25 +45,7 @@ function sqlString(value) {
 async function getStrictTableColumnSet(db, tableName) {
   const safeTable = safeIdentifier(tableName);
   if (!safeTable) return new Set();
-
-  try {
-    const result = await db.prepare(`PRAGMA table_info(${safeTable})`).all();
-    const rows = normalizeResults(result);
-    const names = rows
-      .map((row) => String(row?.name || "").trim())
-      .filter((name) => safeIdentifier(name));
-
-    if (names.length) return new Set(names);
-  } catch {
-    // Fall back below. Some older D1 mocks/tools do not support PRAGMA reliably.
-  }
-
-  try {
-    const sample = await db.prepare(`SELECT * FROM ${safeTable} LIMIT 1`).first();
-    return new Set(Object.keys(sample || {}).filter((name) => safeIdentifier(name)));
-  } catch {
-    return new Set();
-  }
+  return loadSchemaColumnSet(db, safeTable, PRODUCT_SCHEMA_TABLES);
 }
 
 function selectColumn(columns, alias, columnName, fallbackSql, outputName = columnName) {

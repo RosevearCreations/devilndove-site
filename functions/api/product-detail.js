@@ -1,4 +1,5 @@
 import { ensureProductOffersSchema, getBundleDetails, getQuantityPriceTiers } from './_lib/productOffers.js';
+import { loadSchemaColumnSet } from "./_lib/schemaColumnSnapshot.js";
 import { captureRuntimeIncident } from './_lib/adminAudit.js';
 // File: /functions/api/product-detail.js
 // Brief description: Returns one active storefront product with images, SEO fields,
@@ -81,6 +82,7 @@ function filterText(values) {
 }
 
 const SCHEMA_CACHE_MS = 5 * 60 * 1000;
+const PRODUCT_DETAIL_SCHEMA_TABLES = Object.freeze(["products","tax_classes","product_seo"]);
 const schemaColumnCache = new Map();
 
 const PRODUCT_COLUMN_CANDIDATES = [
@@ -110,21 +112,7 @@ function sqlString(value) {
 async function getTableColumnSet(db, tableName) {
   const safeTable = safeIdentifier(tableName);
   if (!safeTable) return new Set();
-  try {
-    const result = await db.prepare(`PRAGMA table_info(${safeTable})`).all();
-    const rows = Array.isArray(result?.results) ? result.results : [];
-    const names = rows.map((row) => String(row?.name || '').trim()).filter((name) => safeIdentifier(name));
-    if (names.length) return new Set(names);
-  } catch {
-    // Fall through to the SELECT * sample fallback below.
-  }
-
-  try {
-    const sample = await db.prepare(`SELECT * FROM ${safeTable} LIMIT 1`).first();
-    return new Set(Object.keys(sample || {}).filter((name) => safeIdentifier(name)));
-  } catch {
-    return new Set();
-  }
+  return loadSchemaColumnSet(db, safeTable, PRODUCT_DETAIL_SCHEMA_TABLES);
 }
 
 async function getVerifiedTableColumnSet(db, tableName, candidateColumns = []) {
@@ -695,17 +683,14 @@ async function handleProductDetailRequest(context) {
 
   let story_notes = {};
   try {
-    const storyTable = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='product_story_public_notes' LIMIT 1`).first();
-    if (storyTable) {
-      story_notes = await db.prepare(`
-        SELECT product_story_public_note_id, product_id, story_heading, story_summary, story_body,
-               process_notes, care_notes, local_pickup_note, display_status, updated_at
-        FROM product_story_public_notes
-        WHERE product_id = ? AND COALESCE(display_status,'draft') IN ('approved','published')
-        ORDER BY datetime(updated_at) DESC, product_story_public_note_id DESC
-        LIMIT 1
-      `).bind(product.product_id).first().catch(() => ({})) || {};
-    }
+    story_notes = await db.prepare(`
+      SELECT product_story_public_note_id, product_id, story_heading, story_summary, story_body,
+             process_notes, care_notes, local_pickup_note, display_status, updated_at
+      FROM product_story_public_notes
+      WHERE product_id = ? AND COALESCE(display_status,'draft') IN ('approved','published')
+      ORDER BY datetime(updated_at) DESC, product_story_public_note_id DESC
+      LIMIT 1
+    `).bind(product.product_id).first().catch(() => ({})) || {};
   } catch {}
 
   let listing_profile = null;
@@ -775,30 +760,27 @@ async function handleProductDetailRequest(context) {
   let reviews = [];
   let review_summary = { review_count: 0, average_rating: 0 };
   try {
-    const reviewsTable = await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='product_reviews' LIMIT 1`).first();
-    if (reviewsTable) {
-      const reviewRows = normalizeResults(await db.prepare(`
-        SELECT product_review_id, product_id, reviewer_name, rating, review_text, review_kind, is_featured, created_at
-        FROM product_reviews
-        WHERE status = 'approved' AND product_id = ?
-        ORDER BY is_featured DESC, created_at DESC, product_review_id DESC
-        LIMIT 12
-      `).bind(product.product_id).all());
-      reviews = reviewRows.map((row) => ({
-        product_review_id: Number(row.product_review_id || 0),
-        product_id: Number(row.product_id || 0),
-        reviewer_name: row.reviewer_name || 'Devil n Dove customer',
-        rating: Number(row.rating || 0),
-        review_text: row.review_text || '',
-        review_kind: row.review_kind || 'testimonial',
-        is_featured: Number(row.is_featured || 0),
-        created_at: row.created_at || null
-      }));
-      review_summary = {
-        review_count: reviews.length,
-        average_rating: reviews.length ? Number((reviews.reduce((sum, row) => sum + Number(row.rating || 0), 0) / reviews.length).toFixed(2)) : 0
-      };
-    }
+    const reviewRows = normalizeResults(await db.prepare(`
+      SELECT product_review_id, product_id, reviewer_name, rating, review_text, review_kind, is_featured, created_at
+      FROM product_reviews
+      WHERE status = 'approved' AND product_id = ?
+      ORDER BY is_featured DESC, created_at DESC, product_review_id DESC
+      LIMIT 12
+    `).bind(product.product_id).all().catch(() => ({ results: [] })));
+    reviews = reviewRows.map((row) => ({
+      product_review_id: Number(row.product_review_id || 0),
+      product_id: Number(row.product_id || 0),
+      reviewer_name: row.reviewer_name || 'Devil n Dove customer',
+      rating: Number(row.rating || 0),
+      review_text: row.review_text || '',
+      review_kind: row.review_kind || 'testimonial',
+      is_featured: Number(row.is_featured || 0),
+      created_at: row.created_at || null
+    }));
+    review_summary = {
+      review_count: reviews.length,
+      average_rating: reviews.length ? Number((reviews.reduce((sum, row) => sum + Number(row.rating || 0), 0) / reviews.length).toFixed(2)) : 0
+    };
   } catch {}
 
   const related_products = await relatedProductsByProof();

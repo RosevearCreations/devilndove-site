@@ -1,3 +1,4 @@
+import { loadSchemaColumnSnapshot } from "./_lib/schemaColumnSnapshot.js";
 // File: /functions/api/featured-products.js
 // Brief description: Small public storefront endpoint for a safe, curated featured-products section.
 
@@ -20,16 +21,17 @@ function clean(value) { return String(value || '').trim(); }
 function positiveInt(value, fallback, max) { const num = Number(value); return Number.isInteger(num) && num > 0 ? Math.min(num, max) : fallback; }
 async function schemaCapabilities(db) {
   if (featuredSchemaCache && Date.now() - featuredSchemaCache.cachedAt < FEATURED_SCHEMA_CACHE_MS) return featuredSchemaCache.value;
-  const tableRows = rows(await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('public_display_priorities','product_image_annotations','media_consent_records')").all().catch(() => ({ results: [] })));
-  const names = new Set(tableRows.map((row) => String(row?.name || '')));
-  const annotationColumns = names.has('product_image_annotations')
-    ? new Set(rows(await db.prepare('PRAGMA table_info(product_image_annotations)').all().catch(() => ({ results: [] }))).map((row) => String(row?.name || '').trim()).filter(Boolean))
-    : new Set();
-  const consentColumns = names.has('media_consent_records')
-    ? new Set(rows(await db.prepare('PRAGMA table_info(media_consent_records)').all().catch(() => ({ results: [] }))).map((row) => String(row?.name || '').trim()).filter(Boolean))
-    : new Set();
-  const value = { hasDisplayPriority:names.has('public_display_priorities'), hasAnnotations:names.has('product_image_annotations'), hasConsent:names.has('media_consent_records'), annotationColumns, consentColumns };
-  featuredSchemaCache = { cachedAt:Date.now(), value };
+  const map=await loadSchemaColumnSnapshot(db,['public_display_priorities','product_image_annotations','media_consent_records']);
+  const annotationColumns=map.get('product_image_annotations')||new Set();
+  const consentColumns=map.get('media_consent_records')||new Set();
+  const value={
+    hasDisplayPriority:(map.get('public_display_priorities')||new Set()).size>0,
+    hasAnnotations:annotationColumns.size>0,
+    hasConsent:consentColumns.size>0,
+    annotationColumns,
+    consentColumns
+  };
+  featuredSchemaCache={cachedAt:Date.now(),value};
   return value;
 }
 

@@ -1,0 +1,98 @@
+{
+  "release": 467,
+  "build": 299,
+  "title": "D1 Query Efficiency + Canonical Runtime/Repository Cleanup",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build299-d1-query-efficiency-canonical-runtime-repository-cleanup",
+  "predecessor": {
+    "build": 298,
+    "title": "Merchant/Search Distribution + Public Content Discovery",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "2fae62c9b5f78e31d8325bd63d93c1674a11c3c6",
+    "development_tree_sha": "396b3491620307b041cda8ac066f97ea44f2b0ef",
+    "development_proofs": {
+      "system_gate_run": 36623313387,
+      "current_application_quality_run": 36623313316,
+      "it_admin_runtime_proof_run": 36623313302,
+      "branch_hygiene_run": 36623313126,
+      "d1_ci_fanout_guard_run": 36623313225,
+      "build_specific_proof_run": 36623313494
+    },
+    "production_main_sha": "5da8e2457ec64a9a54523bd56eb523c9abd5ec8c",
+    "production_tree_sha": "396b3491620307b041cda8ac066f97ea44f2b0ef",
+    "production_pages_deploy_run": 36624396660,
+    "production_live_resource_integrity_run": 36624531016,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "starting_point": {
+    "development": {
+      "sha": "2fae62c9b5f78e31d8325bd63d93c1674a11c3c6",
+      "tree": "396b3491620307b041cda8ac066f97ea44f2b0ef",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 36623313387,
+      "quality_run": 36623313316,
+      "it_admin_runtime_run": 36623313302,
+      "repository_hygiene_run": 36623313126,
+      "d1_ci_fanout_guard_run": 36623313225,
+      "build_specific_proof_run": 36623313494
+    },
+    "production": {
+      "main_sha": "5da8e2457ec64a9a54523bd56eb523c9abd5ec8c",
+      "tree": "396b3491620307b041cda8ac066f97ea44f2b0ef",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 36624396660,
+      "production_live_resource_integrity_run": 36624531016,
+      "remote_d1_queries": 0
+    }
+  },
+  "scope": {
+    "batched_schema_snapshot": true,
+    "products_schema_introspection": "single bounded snapshot with compatibility fallback",
+    "product_detail_schema_introspection": "single bounded snapshot with compatibility fallback",
+    "featured_products_schema_introspection": "single bounded snapshot",
+    "universal_search_schema_introspection": "single bounded snapshot",
+    "universal_search_reference_mode": "prefix search for reference-like queries; free-form substring retained",
+    "public_preflight_probes_removed": [
+      "workshop-journal content_publications sqlite_master probe",
+      "capabilities workshop_capability_profiles sqlite_master probe",
+      "creations public_display_priorities sqlite_master probe",
+      "product-detail story/review sqlite_master probes"
+    ],
+    "creations_empty_search_predicate_removed": true,
+    "workstation_membership_batching_retained_from_build290": true,
+    "fts_trigram_decision": "measure current Development corpus/query plans; do not add FTS without measured justification",
+    "cursor_keyset_decision": "retain bounded limits until Development measurement justifies migration",
+    "repository_cleanup": {
+      "exact_duplicate_root_api_files_removed": [
+        "auth-login.js",
+        "catalog-items.js",
+        "health.js",
+        "image-derivative.js",
+        "movies.js",
+        "paypal-return.js",
+        "site-search-event.js",
+        "stripe-return.js"
+      ],
+      "canonical_copies": "functions/api/*",
+      "historical_release_evidence_preserved": true
+    },
+    "development_provider_measurement": true
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation_added": false,
+    "development_d1_measurement_read_only": true,
+    "production_d1_contact_for_measurement": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_publication": false,
+    "payment_or_refund": false,
+    "release_evidence_deletion": false
+  },
+  "contract": {
+    "next_build": 300,
+    "next_build_title": "CAIP Maker Content Outcomes Renewal & Automation Refinement",
+    "future_queue_exhausted": false
+  }
+}

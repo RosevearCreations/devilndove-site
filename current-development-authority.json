@@ -1,31 +1,32 @@
 {
   "release": 467,
-  "build": 298,
-  "title": "Merchant/Search Distribution + Public Content Discovery",
+  "build": 299,
+  "title": "D1 Query Efficiency + Canonical Runtime/Repository Cleanup",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 297,
-      "title": "Search-First HTML, Product + Story SEO & Crawl Control",
-      "authority": "release467-build297-search-first-html-product-story-seo-crawl-control.json",
-      "dev_sha": "24c2a0dc4f81b4323d96387b1f5a7109e976c226",
-      "tree_sha": "22da804600e5d53151e06a4136b4a3c65d96a88f",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD297_GREEN",
+      "build": 298,
+      "title": "Merchant/Search Distribution + Public Content Discovery",
+      "authority": "release467-build298-merchant-search-distribution-public-content-discovery.json",
+      "dev_sha": "2fae62c9b5f78e31d8325bd63d93c1674a11c3c6",
+      "tree_sha": "396b3491620307b041cda8ac066f97ea44f2b0ef",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD298_GREEN",
       "proofs": {
-        "system_gate_run": 36617176553,
-        "current_application_quality_run": 36617176471,
-        "it_admin_runtime_proof_run": 36617176516,
-        "branch_hygiene_run": 36617176437
+        "system_gate_run": 36623313387,
+        "current_application_quality_run": 36623313316,
+        "it_admin_runtime_proof_run": 36623313302,
+        "branch_hygiene_run": 36623313126,
+        "d1_ci_fanout_guard_run": 36623313225
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 298,
-      "title": "Merchant/Search Distribution + Public Content Discovery",
-      "authority": "release467-build298-merchant-search-distribution-public-content-discovery.json",
+      "build": 299,
+      "title": "D1 Query Efficiency + Canonical Runtime/Repository Cleanup",
+      "authority": "release467-build299-d1-query-efficiency-canonical-runtime-repository-cleanup.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -36,18 +37,19 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 297,
-    "title": "Search-First HTML, Product + Story SEO & Crawl Control",
-    "authority": "release467-build297-search-first-html-product-story-seo-crawl-control.json",
-    "main_sha": "043799f8d89a6df392b4416a7908da4f9d92d537",
-    "tree_sha": "22da804600e5d53151e06a4136b4a3c65d96a88f",
+    "build": 298,
+    "title": "Merchant/Search Distribution + Public Content Discovery",
+    "authority": "release467-build298-merchant-search-distribution-public-content-discovery.json",
+    "main_sha": "5da8e2457ec64a9a54523bd56eb523c9abd5ec8c",
+    "tree_sha": "396b3491620307b041cda8ac066f97ea44f2b0ef",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36617412141,
-    "production_live_resource_integrity_run": 36617524593,
+    "production_pages_deploy_run": 36624396660,
+    "production_live_resource_integrity_run": 36624531016,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build299-d1-query-efficiency-canonical-runtime-repository-cleanup.json",
     "release467-build298-merchant-search-distribution-public-content-discovery.json",
     "release467-build297-search-first-html-product-story-seo-crawl-control.json",
     "release467-build296-custom-work-progressive-intake.json",
@@ -187,11 +189,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md",
-  "next_build": 299,
-  "next_build_state": "QUEUED_AFTER_BUILD298_PRODUCTION_GREEN",
-  "next_build_title": "D1 Query Efficiency + Canonical Runtime/Repository Cleanup",
-  "promotion_state": "BUILD298_DEVELOPMENT_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD298_ACTIVE_BUILDS_299_300_QUEUED",
+  "next_build": 300,
+  "next_build_state": "QUEUED_AFTER_BUILD299_PRODUCTION_GREEN",
+  "next_build_title": "CAIP Maker Content Outcomes Renewal & Automation Refinement",
+  "promotion_state": "BUILD299_DEVELOPMENT_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD299_ACTIVE_BUILD_300_QUEUED",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -214,21 +216,22 @@
   "planned_successor": {
     "first_build": 290,
     "last_build": 300,
-    "state": "BUILD298_ACTIVE_UX_SEARCH_DATABASE_EFFICIENCY_ROADMAP",
+    "state": "BUILD299_ACTIVE_UX_SEARCH_DATABASE_EFFICIENCY_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 299,
-    "next_build_title": "D1 Query Efficiency + Canonical Runtime/Repository Cleanup",
+    "next_build": 300,
+    "next_build_title": "CAIP Maker Content Outcomes Renewal & Automation Refinement",
     "roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md"
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "24c2a0dc4f81b4323d96387b1f5a7109e976c226",
-  "accepted_dev_tree_sha": "22da804600e5d53151e06a4136b4a3c65d96a88f",
+  "accepted_dev_sha": "2fae62c9b5f78e31d8325bd63d93c1674a11c3c6",
+  "accepted_dev_tree_sha": "396b3491620307b041cda8ac066f97ea44f2b0ef",
   "acceptance": {
-    "system_gate_run": 36617176553,
-    "current_application_quality_run": 36617176471,
-    "it_admin_runtime_proof_run": 36617176516,
-    "branch_hygiene_run": 36617176437
+    "system_gate_run": 36623313387,
+    "current_application_quality_run": 36623313316,
+    "it_admin_runtime_proof_run": 36623313302,
+    "branch_hygiene_run": 36623313126,
+    "d1_ci_fanout_guard_run": 36623313225
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -1178,6 +1181,20 @@
     "search_console_diagnostics_reused": true,
     "factual_public_content_links": true,
     "next_build": 299,
+    "future_queue_exhausted": false
+  },
+  "d1_query_efficiency_canonical_cleanup": {
+    "source_build": 299,
+    "batched_schema_snapshot": true,
+    "selected_public_schema_preflights_removed": true,
+    "universal_reference_prefix_search": true,
+    "development_provider_measurement": true,
+    "fts_trigram_decision": "MEASURE_BEFORE_ADOPT",
+    "cursor_keyset_decision": "MEASURE_BEFORE_ADOPT",
+    "duplicate_root_api_cleanup_count": 8,
+    "schema_change": false,
+    "production_d1_measurement_contact": false,
+    "next_build": 300,
     "future_queue_exhausted": false
   }
 }
