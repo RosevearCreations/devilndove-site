@@ -37,15 +37,15 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 289,
-    "title": "Inventory Multi-Station Stabilization",
-    "authority": "release467-build289-real-inventory-adoption-outcomes-renewal.json",
-    "main_sha": "238a7732049bbf9c5fead7b3ec4cc2c1e779fcd6",
-    "tree_sha": "9303662ce708b1c1c02c3a94c618d8f2704ca0a1",
+    "build": 288,
+    "title": "Real Planned-vs-Actual Inventory Acceptance",
+    "authority": "release467-build288-real-planned-vs-actual-inventory-acceptance.json",
+    "main_sha": "10ca103d83a2f0517eb1bbf3aac26cebd5e0e451",
+    "tree_sha": "8e34e42a970c1aa8aab2325db5f2fab466703400",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36517150890,
-    "production_live_resource_integrity_run": 36517221739,
+    "production_pages_deploy_run": 36442437962,
+    "production_live_resource_integrity_run": 36442922542,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
