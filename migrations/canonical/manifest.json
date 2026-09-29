@@ -195,6 +195,13 @@
       "release": 467,
       "description": "Allow an associated Inventory Tool/Supply to link to zero, one or many workstation Tool rows while retaining one primary inventory_process/category assignment and preserving migration 0025 single-station relationships.",
       "recovery": "Forward-only additive membership table. Logical rollback is to clear inventory_workstation_memberships; migration 0025 role/category authority remains intact. Do not drop the table in place—repair only with a later numbered migration."
+    },
+    {
+      "version": 27,
+      "file": "0027_release467_caip_workshop_follies_maker_story_foundation.sql",
+      "release": 467,
+      "description": "Add one Creative Process maker-story profile per existing Creative Project plus reference-only links to canonical workstation Tool inventory, while retaining CAIP private media/evidence and Content Studio review-first publication authorities.",
+      "recovery": "Forward-only additive profile/reference tables. Logical rollback clears or revises maker-story metadata and workstation references only; never delete or rewrite source Creative Project, Inventory, CAIP media, Content Studio or publication evidence. Repair defects only with a later numbered migration."
     }
   ]
 }
