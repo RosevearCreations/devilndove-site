@@ -34,7 +34,7 @@ for token in ('saveWorkstationAssignment','workstation_site_item_inventory_ids',
     q(token in legacy,'Build 290 write authority missing '+token)
 for token in ('PRIMARY KEY(site_item_inventory_id, workstation_site_item_inventory_id)','idx_inventory_workstation_memberships_item','idx_inventory_workstation_memberships_station'):
     q(token in mig,'Build 290 canonical membership schema/index missing '+token)
-q('/public/js/admin-site-item-inventory.js?v=290.1' in page and '/public/js/admin-site-item-inventory-multistation.js?v=290.1' in page,'Build 290 Inventory asset revision missing')
+q('/public/js/admin-site-item-inventory.js?v=290.1' in page and any(v in page for v in ('/public/js/admin-site-item-inventory-multistation.js?v=290.1','/public/js/admin-site-item-inventory-multistation.js?v=292.1')),'Build 290 Inventory asset revision missing')
 q(not re.search(r'(?im)^\s*(INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|REPLACE|VACUUM|ATTACH|DETACH)\b',sql),'Build 290 measurement SQL contains mutation/DDL')
 for token in ('page_items','page_memberships','invalid_membership_rows','foreign_key_violations','LIMIT 40'):
     q(token in sql,'Build 290 measurement missing '+token)
