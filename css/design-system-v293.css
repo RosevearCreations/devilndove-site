@@ -1,0 +1,101 @@
+/* Release 467 Build 293 — canonical Devil n Dove design-system tokens.
+   This layer is shared by public, storefront and admin surfaces. */
+:root{
+  color-scheme:dark;
+  --dd-color-bg:#0b0d10;
+  --dd-color-surface:#121722;
+  --dd-color-surface-raised:#18202d;
+  --dd-color-surface-soft:#0f141d;
+  --dd-color-text:#f6f7fb;
+  --dd-color-text-muted:#b8c1cf;
+  --dd-color-border:#354154;
+  --dd-color-focus:#8bd3ff;
+  --dd-color-accent:#ff8a32;
+  --dd-color-danger:#ff8b98;
+  --dd-color-warning:#ffd27a;
+  --dd-color-success:#82d8aa;
+  --dd-color-on-light:#172033;
+
+  --dd-space-1:.25rem;
+  --dd-space-2:.5rem;
+  --dd-space-3:.75rem;
+  --dd-space-4:1rem;
+  --dd-space-5:1.5rem;
+  --dd-space-6:2rem;
+
+  --dd-radius-sm:.625rem;
+  --dd-radius-md:.875rem;
+  --dd-radius-lg:1.125rem;
+  --dd-control-min:2.75rem;
+  --dd-touch-min:2.75rem;
+  --dd-content-max:1100px;
+
+  /* CSS cannot use custom properties in media-query conditions.
+     These document the canonical responsive contract used below and by current-responsive.css. */
+  --dd-breakpoint-phone:420px;
+  --dd-breakpoint-mobile:720px;
+  --dd-breakpoint-tablet:1023px;
+  --dd-breakpoint-desktop:1024px;
+
+  /* Compatibility aliases retained for the existing application CSS. */
+  --bg:var(--dd-color-bg);
+  --card:var(--dd-color-surface);
+  --text:var(--dd-color-text);
+  --muted:var(--dd-color-text-muted);
+  --border:var(--dd-color-border);
+}
+
+html,body{background:var(--dd-color-bg);color:var(--dd-color-text)}
+body{accent-color:var(--dd-color-accent)}
+:where(.card,.admin-panel,.admin-stat,.dd-shell-drawer,.dd-shell-toast){
+  color:var(--dd-color-text);
+  border-color:var(--dd-color-border);
+}
+:where(input,select,textarea){
+  background:var(--dd-color-surface-soft);
+  color:var(--dd-color-text);
+  border-color:var(--dd-color-border);
+}
+:where(input,select,textarea)::placeholder{color:var(--dd-color-text-muted);opacity:1}
+:where(button,.btn,a.btn,[role="button"]){min-height:var(--dd-control-min)}
+:where(a,button,.btn,input,select,textarea,[role="button"],[tabindex]):focus-visible{
+  outline:3px solid var(--dd-color-focus);
+  outline-offset:3px;
+}
+:where(.small,.muted,[data-muted]){color:var(--dd-color-text-muted)}
+:where(.table-wrap,.admin-table-wrap,.dd-table-scroll,.dd-horizontal-scroll-region,[data-table-scroll]){
+  max-width:100%;
+  overflow-x:auto;
+  overscroll-behavior-inline:contain;
+}
+:where(table){border-color:var(--dd-color-border)}
+:where(th,td){border-color:var(--dd-color-border)}
+:where(dialog,[role="dialog"],.modal,.modal-panel,.dropdown-menu,[role="menu"],.nav-mobile-panel){
+  background:var(--dd-color-surface-raised);
+  color:var(--dd-color-text);
+  border:1px solid var(--dd-color-border);
+}
+:where(.dropdown-menu,[role="menu"],.nav-mobile-panel) :where(a,button,[role="menuitem"]){
+  color:var(--dd-color-text);
+}
+:where(.resource-tile,.resource-linked-card,.movie-cover-wrap,.resource-tile-media){
+  background:var(--dd-color-surface-raised);
+  color:var(--dd-color-text);
+  border-color:var(--dd-color-border);
+}
+:where(.resource-tile-placeholder,.movie-cover-placeholder){color:var(--dd-color-text-muted)}
+:where(.status-chip,.badge){border-color:var(--dd-color-border)}
+:where([hidden]){display:none}
+
+@media(max-width:720px){
+  :where(.btn,button,input,select,textarea){max-width:100%}
+  :where(dialog,[role="dialog"],.modal,.modal-panel){max-width:calc(100vw - 24px)}
+}
+@media(hover:none) and (pointer:coarse){
+  :where(button,.btn,a.btn,input[type="button"],input[type="submit"],select,[role="button"],[role="menuitem"]){
+    min-height:var(--dd-touch-min);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  :where(html:focus-within){scroll-behavior:auto}
+}

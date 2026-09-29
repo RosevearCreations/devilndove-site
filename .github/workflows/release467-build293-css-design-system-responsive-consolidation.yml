@@ -1,0 +1,49 @@
+name: Release 467 Build 293 CSS Design System Responsive Consolidation
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'css/styles.css'
+      - 'css/current-responsive.css'
+      - 'css/admin-ergonomics-v237.css'
+      - 'css/design-system-v293.css'
+      - 'css/admin-design-system-v293.css'
+      - 'functions/_middleware.js'
+      - 'scripts/current_responsive_layout_gate.py'
+      - 'scripts/release467_build293_css_budget.py'
+      - 'scripts/release467_build293_gate.py'
+      - 'release467-build293-css-design-system-responsive-consolidation.json'
+      - 'current-development-authority.json'
+      - 'scripts/current_*_gate.py'
+      - 'scripts/release467_build2*_gate.py'
+      - 'release467-build292-client-runtime-observer-memory-churn-hardening.json'
+      - '.github/workflows/release467-build292-client-runtime-observer-memory-churn.yml'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'admin/it/index.html'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'admin/reliability/index.html'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'admin/deployment-preflight/index.html'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+      - '.github/workflows/release467-build293-css-design-system-responsive-consolidation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      - name: Build 293 CSS budget
+        run: python scripts/release467_build293_css_budget.py
+      - name: Build 293 source contract
+        run: python scripts/release467_build293_gate.py
+      - name: Build 293 boundary
+        run: |
+          echo 'Presentation-only: YES'
+          echo 'Schema/D1/R2/provider mutation: NONE'

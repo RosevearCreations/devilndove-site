@@ -1,33 +1,33 @@
 {
   "release": 467,
-  "build": 292,
-  "title": "Client Runtime Observer & Memory-Churn Hardening",
+  "build": 293,
+  "title": "CSS Design-System & Responsive Consolidation",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 291,
-      "title": "Public Runtime Reliability & Broken-Surface Closure",
-      "authority": "release467-build291-public-runtime-reliability-broken-surface-closure.json",
-      "dev_sha": "853209c4ae3ee3db9f06a98dac649f65523961a1",
-      "tree_sha": "ab10b9e3e5780f90ddab43893be7eb9fa97bcddd",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD291_GREEN",
+      "build": 292,
+      "title": "Client Runtime Observer & Memory-Churn Hardening",
+      "authority": "release467-build292-client-runtime-observer-memory-churn-hardening.json",
+      "dev_sha": "9d4461b189bcb6899ed4219ac7cdcc6192740240",
+      "tree_sha": "e57f03fa2e58e30a827e587e4651029654e7b179",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD292_GREEN",
       "proofs": {
-        "system_gate_run": 36570270322,
-        "current_application_quality_run": 36570270693,
-        "it_admin_runtime_proof_run": 36570270648,
-        "branch_hygiene_run": 36570270345,
-        "d1_ci_fanout_guard_run": 36570270356,
-        "build291_dedicated_run": 36570270569
+        "system_gate_run": 36574363048,
+        "current_application_quality_run": 36574363030,
+        "it_admin_runtime_proof_run": 36574363037,
+        "branch_hygiene_run": 36574362807,
+        "d1_ci_fanout_guard_run": 36574362888,
+        "build292_dedicated_run": 36574362894
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 292,
-      "title": "Client Runtime Observer & Memory-Churn Hardening",
-      "authority": "release467-build292-client-runtime-observer-memory-churn-hardening.json",
+      "build": 293,
+      "title": "CSS Design-System & Responsive Consolidation",
+      "authority": "release467-build293-css-design-system-responsive-consolidation.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -38,18 +38,19 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 291,
-    "title": "Public Runtime Reliability & Broken-Surface Closure",
-    "authority": "release467-build291-public-runtime-reliability-broken-surface-closure.json",
-    "main_sha": "b9cd4d8c27b64e9b2c892575e38673681a8367fa",
-    "tree_sha": "ab10b9e3e5780f90ddab43893be7eb9fa97bcddd",
+    "build": 292,
+    "title": "Client Runtime Observer & Memory-Churn Hardening",
+    "authority": "release467-build292-client-runtime-observer-memory-churn-hardening.json",
+    "main_sha": "6891ba76bb9fc07e97962ae36b94cad143412bfd",
+    "tree_sha": "e57f03fa2e58e30a827e587e4651029654e7b179",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36570536323,
-    "production_live_resource_integrity_run": 36570637009,
+    "production_pages_deploy_run": 36574667381,
+    "production_live_resource_integrity_run": 36574807683,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build293-css-design-system-responsive-consolidation.json",
     "release467-build292-client-runtime-observer-memory-churn-hardening.json",
     "release467-build291-public-runtime-reliability-broken-surface-closure.json",
     "release467-build290-inventory-multi-station-read-integrity-client-native-memberships.json",
@@ -183,11 +184,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md",
-  "next_build": 293,
-  "next_build_state": "QUEUED_AFTER_BUILD292_PRODUCTION_GREEN",
-  "next_build_title": "CSS Design-System & Responsive Consolidation",
-  "promotion_state": "BUILD292_DEVELOPMENT_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD292_ACTIVE_BUILDS_293_300_QUEUED",
+  "next_build": 294,
+  "next_build_state": "QUEUED_AFTER_BUILD293_PRODUCTION_GREEN",
+  "next_build_title": "CAIP Workshop Follies & Maker Story Foundation",
+  "promotion_state": "BUILD293_DEVELOPMENT_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD293_ACTIVE_BUILDS_294_300_QUEUED",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -210,23 +211,23 @@
   "planned_successor": {
     "first_build": 290,
     "last_build": 300,
-    "state": "BUILD292_ACTIVE_UX_SEARCH_DATABASE_EFFICIENCY_ROADMAP",
+    "state": "BUILD293_ACTIVE_UX_SEARCH_DATABASE_EFFICIENCY_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 293,
-    "next_build_title": "CSS Design-System & Responsive Consolidation",
+    "next_build": 294,
+    "next_build_title": "CAIP Workshop Follies & Maker Story Foundation",
     "roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md"
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "853209c4ae3ee3db9f06a98dac649f65523961a1",
-  "accepted_dev_tree_sha": "ab10b9e3e5780f90ddab43893be7eb9fa97bcddd",
+  "accepted_dev_sha": "9d4461b189bcb6899ed4219ac7cdcc6192740240",
+  "accepted_dev_tree_sha": "e57f03fa2e58e30a827e587e4651029654e7b179",
   "acceptance": {
-    "system_gate_run": 36570270322,
-    "current_application_quality_run": 36570270693,
-    "it_admin_runtime_proof_run": 36570270648,
-    "branch_hygiene_run": 36570270345,
-    "d1_ci_fanout_guard_run": 36570270356,
-    "build_specific_run": 36570270569
+    "system_gate_run": 36574363048,
+    "current_application_quality_run": 36574363030,
+    "it_admin_runtime_proof_run": 36574363037,
+    "branch_hygiene_run": 36574362807,
+    "d1_ci_fanout_guard_run": 36574362888,
+    "build_specific_run": 36574362894
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -1104,6 +1105,23 @@
     "schema_change": false,
     "d1_mutation": false,
     "next_build": 293,
+    "future_queue_exhausted": false
+  },
+  "css_design_system_consolidation": {
+    "source_build": 293,
+    "state": "DEVELOPMENT_CANDIDATE",
+    "requirements": [
+      "canonical tokens",
+      "public/admin separation",
+      "responsive breakpoint convergence",
+      "contrast protection",
+      "overflow protection",
+      "dropdown/modal/dense-table/touch-target regression",
+      "important reduction"
+    ],
+    "schema_change": false,
+    "d1_mutation": false,
+    "next_build": 294,
     "future_queue_exhausted": false
   }
 }

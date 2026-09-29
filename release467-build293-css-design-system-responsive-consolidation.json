@@ -1,0 +1,78 @@
+{
+  "release": 467,
+  "build": 293,
+  "title": "CSS Design-System & Responsive Consolidation",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build293-css-design-system-responsive-consolidation",
+  "starting_point": {
+    "development": {
+      "sha": "9d4461b189bcb6899ed4219ac7cdcc6192740240",
+      "tree": "e57f03fa2e58e30a827e587e4651029654e7b179",
+      "system_gate_run": 36574363048,
+      "quality_run": 36574363030,
+      "it_admin_runtime_run": 36574363037,
+      "repository_hygiene_run": 36574362807,
+      "d1_ci_fanout_guard_run": 36574362888,
+      "build292_run": 36574362894,
+      "state": "EXACT_BUILD292_GREEN"
+    },
+    "production": {
+      "main_sha": "6891ba76bb9fc07e97962ae36b94cad143412bfd",
+      "tree_sha": "e57f03fa2e58e30a827e587e4651029654e7b179",
+      "production_pages_deploy_run": 36574667381,
+      "production_live_resource_integrity_run": 36574807683,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "canonical_shared_design_tokens": true,
+    "admin_only_design_layer": true,
+    "public_shared_design_layer": true,
+    "responsive_specificity_reduction": true,
+    "exact_duplicate_rule_retirement": true,
+    "contrast_regression": true,
+    "overflow_regression": true,
+    "dropdown_regression": true,
+    "modal_regression": true,
+    "dense_table_regression": true,
+    "touch_target_regression": true
+  },
+  "acceptance": {
+    "styles_important_ceiling": 190,
+    "current_responsive_important_ceiling": 49,
+    "admin_ergonomics_important_ceiling": 16,
+    "design_system_important_required": 0,
+    "admin_design_system_important_required": 0,
+    "top_level_exact_duplicate_rules_required": 0,
+    "core_contrast_ratio_minimum": 4.5,
+    "root_horizontal_clipping_forbidden": true,
+    "local_table_overflow_required": true,
+    "touch_target_minimum_px": 44
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "payment_or_refund": false,
+    "production_business_data_query": false
+  },
+  "implementation": {
+    "shared_css": "css/design-system-v293.css",
+    "admin_css": "css/admin-design-system-v293.css",
+    "responsive_css": "css/current-responsive.css",
+    "ergonomics_css": "css/admin-ergonomics-v237.css",
+    "legacy_css": "css/styles.css",
+    "budget": "scripts/release467_build293_css_budget.py",
+    "gate": "scripts/release467_build293_gate.py",
+    "workflow": ".github/workflows/release467-build293-css-design-system-responsive-consolidation.yml",
+    "roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md"
+  },
+  "contract": {
+    "next_build": 294,
+    "next_build_title": "CAIP Workshop Follies & Maker Story Foundation",
+    "future_queue_exhausted": false
+  }
+}

@@ -2,7 +2,7 @@
   "release": 467,
   "build": 292,
   "title": "Client Runtime Observer & Memory-Churn Hardening",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build292-client-runtime-observer-memory-churn-hardening",
   "starting_point": {
     "development": {
@@ -69,5 +69,27 @@
     "next_build": 293,
     "next_build_title": "CSS Design-System & Responsive Consolidation",
     "future_queue_exhausted": false
+  },
+  "final_closure": {
+    "dev_sha": "9d4461b189bcb6899ed4219ac7cdcc6192740240",
+    "tree_sha": "e57f03fa2e58e30a827e587e4651029654e7b179",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD292_GREEN",
+    "proofs": {
+      "system_gate_run": 36574363048,
+      "current_application_quality_run": 36574363030,
+      "it_admin_runtime_proof_run": 36574363037,
+      "branch_hygiene_run": 36574362807,
+      "d1_ci_fanout_guard_run": 36574362888,
+      "build292_dedicated_run": 36574362894
+    }
+  },
+  "production_checkpoint": {
+    "main_sha": "6891ba76bb9fc07e97962ae36b94cad143412bfd",
+    "tree_sha": "e57f03fa2e58e30a827e587e4651029654e7b179",
+    "state": "PRODUCTION_GREEN",
+    "production_pages_deploy_run": 36574667381,
+    "production_live_resource_integrity_run": 36574807683,
+    "same_tree_as_verified_development": true,
+    "d1_promotion_mode": "CODE_ONLY_ZERO_D1"
   }
 }

@@ -1,8 +1,8 @@
 /* Release 467 Build 237 — Mobile, Touch, Keyboard & Dense-Workspace Ergonomics */
-.admin-shell :where(button,.btn,a.btn,input,select,textarea,[role="button"],[tabindex]):focus-visible{outline:3px solid currentColor!important;outline-offset:3px!important}
+.admin-shell :where(button,.btn,a.btn,input,select,textarea,[role="button"],[tabindex]):focus-visible{outline:3px solid var(--dd-color-focus,currentColor);outline-offset:3px}
 .admin-shell :where(button,.btn,a.btn,input[type="button"],input[type="submit"],input[type="reset"],select){min-height:42px}
 .admin-shell :where(input,select,textarea){scroll-margin-block:92px}
-.admin-shell .dd-v237-sticky-actions{position:sticky!important;bottom:8px!important;z-index:1200!important;max-width:100%!important;padding:10px!important;border:1px solid var(--border)!important;border-radius:12px!important;background:color-mix(in srgb,var(--bg,#101216) 92%,transparent)!important;box-shadow:0 8px 24px rgba(0,0,0,.22)!important;backdrop-filter:blur(10px)}
+.admin-shell .dd-v237-sticky-actions{position:sticky;bottom:8px;z-index:1200;max-width:100%;padding:10px;border:1px solid var(--border);border-radius:12px;background:color-mix(in srgb,var(--bg,#101216) 92%,transparent);box-shadow:0 8px 24px rgba(0,0,0,.22);backdrop-filter:blur(10px)}
 .admin-shell .dd-v237-table-tools{display:flex;justify-content:flex-end;gap:8px;margin:8px 0;flex-wrap:wrap}
 .admin-shell .dd-v237-table-toggle{min-height:44px}
 .admin-shell table.dd-v237-dense-table{max-width:100%}
