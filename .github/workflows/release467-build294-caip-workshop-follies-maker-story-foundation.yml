@@ -18,6 +18,8 @@ on:
       - 'current-development-authority.json'
       - 'scripts/current_*_gate.py'
       - 'scripts/release467_build2*_gate.py'
+      - 'release467-build293-css-design-system-responsive-consolidation.json'
+      - '.github/workflows/release467-build293-css-design-system-responsive-consolidation.yml'
       - 'functions/api/admin/it-operations-control-tower.js'
       - 'public/js/admin-it-control-tower.js'
       - 'admin/it/index.html'
