@@ -63,7 +63,7 @@ require('overrides_preserved' in material, 'normalization must report preserved 
 require('label_composition_overrides' in material, 'Build 42 normalizer lost the Build 43 JSON compatibility bridge')
 require('ingredients_inci' in material and 'ingredients_en' in material and 'ingredients_fr' in material, 'inheritance normalization must converge aggregate project ingredient text')
 
-require('/public/js/admin-packaging-label-composition-v43.js?v=46743' in compat, 'Packaging compatibility checkpoint must load Build 43 browser layer')
+require('/public/js/admin-packaging-label-composition-v43.js?v=467b292' in compat, 'Packaging compatibility checkpoint must load the Build 292-hardened Build 43 browser layer')
 require("'dd:packaging-label-composition-active'" in compat and 'document.addEventListener' in compat and 'publishState' in compat, 'compatibility status must observe Build 43 activation')
 require('labelCompositionBuild' in compat and 'labelCompositionActive' in compat, 'compatibility snapshot must project Build 43 state')
 
