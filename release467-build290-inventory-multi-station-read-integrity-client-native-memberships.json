@@ -2,7 +2,7 @@
   "release": 467,
   "build": 290,
   "title": "Inventory Multi-Station Read Integrity & Client-Native Memberships",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build290-inventory-multi-station-read-integrity-client-native-memberships",
   "starting_point": {
     "development": {
@@ -84,5 +84,27 @@
     "next_build": 291,
     "next_build_title": "Public Runtime Reliability & Broken-Surface Closure",
     "future_queue_exhausted": false
+  },
+  "final_closure": {
+    "dev_sha": "dff1fb1c756de9a938bbbcc26a966205b0539b01",
+    "tree_sha": "1cdfea3b551761ce18560bb95bed405cec594ab1",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD290_GREEN",
+    "proofs": {
+      "system_gate_run": 36567123971,
+      "current_application_quality_run": 36567124267,
+      "it_admin_runtime_proof_run": 36567124051,
+      "branch_hygiene_run": 36567124022,
+      "d1_ci_fanout_guard_run": 36567124170,
+      "build290_dedicated_run": 36567124048
+    }
+  },
+  "production_checkpoint": {
+    "main_sha": "a56c163c8c417a90b3e6a35da128cdaeaf73b668",
+    "tree_sha": "1cdfea3b551761ce18560bb95bed405cec594ab1",
+    "state": "PRODUCTION_GREEN",
+    "production_pages_deploy_run": 36567332316,
+    "production_live_resource_integrity_run": 36567404285,
+    "same_tree_as_verified_development": true,
+    "d1_promotion_mode": "CODE_ONLY_ZERO_D1"
   }
 }
