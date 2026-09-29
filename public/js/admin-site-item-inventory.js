@@ -1296,7 +1296,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   function readEditableRowPayload(row, original = {}) {
-    const value = (field) => row.querySelector(\`[data-field="\${field}"]\`)?.value;
+    const value = (field) => row.querySelector(`[data-field="${field}"]`)?.value;
     const processSelect = row.querySelector('[data-field="inventory_process_id"]');
     const processName = String(processSelect?.selectedOptions?.[0]?.dataset?.processName || processSelect?.selectedOptions?.[0]?.textContent || '').trim();
     return {
