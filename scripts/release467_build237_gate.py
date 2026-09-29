@@ -12,7 +12,7 @@ road=read('docs/operations/RELEASE_467_REFINEMENT_AUTONOMOUS_BUILDS_233_248.md')
 for token in ('focus-visible','min-height:46px','dd-v237-sticky-actions','dd-v237-card-mode','data-dd-column','max-width:720px'): req(token in css,f'Build 237 CSS missing {token}')
 for token in ('Release 467 Build 237','DDAdminErgonomicsV237','dd:admin-ergonomics-ready','Card view','Table view','keydown','Escape','MutationObserver'): req(token in client,f'Build 237 client missing {token}')
 req('fetch(' not in client and 'apiFetch(' not in client and 'requestSubmit(' not in client,'Build 237 must remain presentation-only')
-req("ADMIN_ERGONOMICS_REVISION = '467b237-ergonomics-v1'" in middleware,'Build 237 middleware revision missing')
+req("ADMIN_ERGONOMICS_REVISION = '467b237-ergonomics-v1'" in middleware or "ADMIN_ERGONOMICS_REVISION = '467b292-observer-budget-v1'" in middleware,'Build 237 ergonomics revision must be retained by current successor')
 req('admin-ergonomics-v237.css' in middleware and 'admin-ergonomics-v237.js' in middleware,'Build 237 shared Admin bootstrap missing')
 req(authority.get('build')==237,'Build 237 authority identity drift')
 if int(pointer.get('build') or 0)==237:
