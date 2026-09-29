@@ -960,6 +960,9 @@ async function handlePost(context) {
     if (requestedProcessId && !selectedProcess) {
       return json({ ok:false, error:'Choose an active workshop/workstation category.', code:'inventory_process_invalid' },400);
     }
+    if (['tool','supply'].includes(sourceType) && !selectedProcess) {
+      return json({ ok:false, error:'Choose the existing workshop/workstation category for this Tool or Supply.', code:'inventory_process_required' },400);
+    }
     const canonicalCategory = selectedProcess
       ? normalizeText(selectedProcess.process_name).toLowerCase()
       : (normalizeText(body.category).toLowerCase() || null);
