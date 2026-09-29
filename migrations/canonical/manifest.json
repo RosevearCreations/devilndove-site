@@ -193,7 +193,7 @@
       "version": 26,
       "file": "0026_release467_inventory_workstation_memberships.sql",
       "release": 467,
-      "description": "Allow an associated Inventory Tool/Supply to link to zero, one or many workstation Tool rows while retaining one primary inventory_process/category assignment and preserving migration 0025 single-station relationships.",
+      "description": "Allow an associated Inventory Tool/Supply to link to zero, one or many workstation Tool rows while retaining one primary inventory_process/category assignment and preserving migration 0025 single-station relationships. This many-to-many membership is the cost-allocation authority for future workstation-level costing.",
       "recovery": "Forward-only additive membership table. Logical rollback is to clear inventory_workstation_memberships; migration 0025 role/category authority remains intact. Do not drop the table in place—repair only with a later numbered migration."
     }
   ]
