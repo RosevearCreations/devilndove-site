@@ -72,7 +72,7 @@
     "state": "REAL_INVENTORY_ADOPTION_OUTCOMES_RENEWAL_GREEN",
     "measured_software_residual": "NONE",
     "successor_justified": false,
-    "queue_state": "AUTONOMOUS_QUEUE_EXHAUSTED_AT_BUILD289_CLOSURE",
+    "queue_state": "AUTONOMOUS_QUEUE_EXHAUSTED",
     "interpretation": "Build 289 closed its original autonomous Inventory-linkage roadmap; the later Builds 290-300 queue was authorized by a subsequent UX/search/database audit."
   },
   "safety": {
@@ -107,7 +107,7 @@
     "next_build": null,
     "next_build_title": null,
     "future_queue_exhausted": true,
-    "queue_state": "AUTONOMOUS_QUEUE_EXHAUSTED_AT_BUILD289_CLOSURE"
+    "queue_state": "AUTONOMOUS_QUEUE_EXHAUSTED"
   },
   "starting_point": {
     "development": {
