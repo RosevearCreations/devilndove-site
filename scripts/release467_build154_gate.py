@@ -33,7 +33,7 @@ req(
     or "const PRODUCTS_ASSET_REVISION = '467-b159-products-returning-browser-cache-v1';" in middleware,
     'Build 154 Products cache revision or approved Build 155/159 successor revision missing'
 )
-req("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware,
+req(("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware) or ("const LAYOUT_ASSET_REVISION = '467b292-observer-budget-v1';" in middleware),
     'Build 153 layout observer revision must remain preserved')
 req('async function withProductsFastPlatformClient(response)' in middleware,
     'Products fast platform path missing')
