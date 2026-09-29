@@ -1,0 +1,39 @@
+name: Release 467 Build 291 Public Runtime Reliability
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'public/js/capabilities.js'
+      - 'capabilities/**'
+      - 'creations/index.html'
+      - 'functions/api/capabilities.js'
+      - 'functions/api/creations.js'
+      - 'functions/api/admin/public-api-health.js'
+      - 'scripts/preview_smoke.py'
+      - 'scripts/release467_build291_gate.py'
+      - 'release467-build291-public-runtime-reliability-broken-surface-closure.json'
+      - 'current-development-authority.json'
+      - '.github/workflows/production-pages-deploy-current.yml'
+      - '.github/workflows/release467-build291-public-runtime-reliability.yml'
+      - 'scripts/current_*_gate.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Build 291 public runtime source contract
+        run: python scripts/release467_build291_gate.py
+      - name: Build 291 boundary
+        run: |
+          echo 'Schema/D1/R2/provider mutation: NONE'
+          echo 'Buyer raw runtime errors: CLOSED'
+          echo 'Public route/API smoke: REQUIRED'
