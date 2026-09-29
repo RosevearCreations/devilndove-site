@@ -17,6 +17,7 @@ on:
       - 'release467-build294-caip-workshop-follies-maker-story-foundation.json'
       - 'current-development-authority.json'
       - 'scripts/current_*_gate.py'
+      - 'scripts/repository_forward_sanity.py'
       - 'scripts/release467_build2*_gate.py'
       - 'release467-build293-css-design-system-responsive-consolidation.json'
       - '.github/workflows/release467-build293-css-design-system-responsive-consolidation.yml'
