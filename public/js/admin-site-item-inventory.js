@@ -734,10 +734,11 @@ document.addEventListener('DOMContentLoaded', () => {
             <div><label class="small" for="siteInventoryExternalKey">External Key</label><input id="siteInventoryExternalKey" type="text" placeholder="sku, source key, item id" /></div>
             <div><label class="small" for="siteInventoryItemName">Item Name</label><input id="siteInventoryItemName" type="text" /></div>
           </div>
-          <div class="grid cols-4" style="gap:12px">
-            <div><label class="small" for="siteInventoryCategoryPreset">Existing category</label><select id="siteInventoryCategoryPreset"><option value="">Loading categories…</option></select></div>
-            <div><label class="small" for="siteInventoryCategory">Category</label><input id="siteInventoryCategory" type="text" /></div>
-            <div class="site-inventory-image-field"><label class="small" for="siteInventoryImageUrl">Image URL</label><input id="siteInventoryImageUrl" type="url" placeholder="https://..." /><div id="siteInventoryImagePreview" class="site-inventory-image-preview"><div class="site-inventory-image-placeholder small">No image URL yet.</div></div><div class="small">The item name is displayed directly under the picture in the inventory list.</div></div>
+          <div class="grid cols-5" style="gap:12px">
+            <div><label class="small" for="siteInventoryCategoryPreset">Workstation / Category</label><select id="siteInventoryCategoryPreset"><option value="">Loading workshop categories…</option></select><input id="siteInventoryCategory" type="hidden" /><div class="small">Uses our canonical workshop categories such as Laser Engraving &amp; Cutting, 3D Printing, CNC, Resin and General Workshop.</div></div>
+            <div><label class="small" for="siteInventoryWorkstationRole">Tool role</label><select id="siteInventoryWorkstationRole"><option value="associated">Associated tool / supply</option><option value="station">This tool is the workstation</option></select><div class="small">Mark machines such as a laser engraver or 3D printer as the workstation itself.</div></div>
+            <div><label class="small" for="siteInventoryParentStation">Specific station tool</label><select id="siteInventoryParentStation"><option value="">No specific station tool</option></select><div class="small">Optional for accessories/tools that belong to one particular workstation.</div></div>
+            <div class="site-inventory-image-field"><label class="small" for="siteInventoryImageUrl">Image URL</label><input id="siteInventoryImageUrl" type="url" placeholder="https://..." /><div id="siteInventoryImagePreview" class="site-inventory-image-preview"><div class="site-inventory-image-placeholder small">No image URL yet.</div></div><div class="small">Amazon fill can supply this only when the image is currently missing.</div></div>
             <div><label class="small" for="siteInventoryIsActive">Status</label><select id="siteInventoryIsActive"><option value="1">Active</option><option value="0">Inactive</option></select></div>
           </div>
           <div class="grid cols-3" style="gap:12px">
@@ -749,13 +750,13 @@ document.addEventListener('DOMContentLoaded', () => {
             <div><label class="small" for="siteInventoryOnHand">On Hand (stock units)</label><input id="siteInventoryOnHand" type="number" min="0" step="0.001" value="1" /></div>
             <div><label class="small" for="siteInventoryReservedInput">Reserved</label><input id="siteInventoryReservedInput" type="number" min="0" step="0.001" value="0" /></div>
             <div><label class="small" for="siteInventoryIncomingInput">Incoming</label><input id="siteInventoryIncomingInput" type="number" min="0" step="0.001" value="0" /></div>
-            <div><label class="small" for="siteInventoryReorder">Reorder At</label><input id="siteInventoryReorder" type="number" min="0" step="0.001" value="0" /></div>
+            <div><label class="small" for="siteInventoryReorder">Reorder At</label><input id="siteInventoryReorder" type="number" min="0" step="0.001" value="0" /><div class="small">Choose “Reorder N/A” below for items we do not plan to replace.</div></div>
             <div><label class="small" for="siteInventoryPreferredReorderQty">Preferred Reorder Qty</label><input id="siteInventoryPreferredReorderQty" type="number" min="0" step="0.001" value="0" /></div>
           </div>
           <div class="grid cols-6" style="gap:12px">
             <div><label class="small" for="siteInventoryUnitCost">Unit Cost (CAD)</label><input id="siteInventoryUnitCost" type="number" min="0" step="0.01" value="0.00" placeholder="33.99" /></div>
-            <div><label class="small" for="siteInventoryStockUnitLabel">Stock Unit</label><input id="siteInventoryStockUnitLabel" type="text" list="siteInventoryUnitPresets" placeholder="block, spool, bag, bottle" value="unit" /></div>
-            <div><label class="small" for="siteInventoryUsageUnitLabel">Usage Unit</label><input id="siteInventoryUsageUnitLabel" type="text" list="siteInventoryUnitPresets" placeholder="cup, wick, gram, use" value="unit" /></div>
+            <div><label class="small" for="siteInventoryStockUnitLabel">Stock Unit</label><select id="siteInventoryStockUnitLabel">${unitOptionsMarkup('unit')}</select></div>
+            <div><label class="small" for="siteInventoryUsageUnitLabel">Usage Unit</label><select id="siteInventoryUsageUnitLabel">${unitOptionsMarkup('unit')}</select></div>
             <div><label class="small" for="siteInventoryUsageUnitsPerStock">Usage Units Per Stock Unit</label><input id="siteInventoryUsageUnitsPerStock" type="number" min="0.001" step="0.001" value="1" /></div>
             <div><label class="small" for="siteInventorySupplierName">Supplier</label><input id="siteInventorySupplierName" type="text" /></div>
             <div><label class="small" for="siteInventorySupplierSku">Supplier SKU</label><input id="siteInventorySupplierSku" type="text" /></div>
@@ -776,7 +777,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="small inventory-usage-help">Examples: a 500 g mica jar can be <strong>stock unit = jar</strong>, <strong>usage unit = gram</strong>, <strong>500 usage units per stock unit</strong>. If a few sprinkles cannot be weighed reliably, choose <strong>Log use only</strong>; the use is recorded without pretending the jar is empty. Exact or estimated usage can also be fractional.</div>
           <div class="grid cols-4" style="gap:12px">
             <label class="small" style="display:flex;gap:8px;align-items:center"><input id="siteInventoryOnReorderList" type="checkbox" /> On reorder list</label>
-            <label class="small" style="display:flex;gap:8px;align-items:center"><input id="siteInventoryDoNotReorder" type="checkbox" /> Do not reorder</label>
+            <label class="small" style="display:flex;gap:8px;align-items:center"><input id="siteInventoryDoNotReorder" type="checkbox" /> Reorder N/A / do not reorder</label>
             <label class="small" style="display:flex;gap:8px;align-items:center"><input id="siteInventoryDoNotReuse" type="checkbox" /> Do not reuse</label>
             <div></div>
           </div>
@@ -885,7 +886,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventoryRefreshButton')?.addEventListener('click', () => loadList({ force: true }));
     document.getElementById('siteInventoryLoadMovementsButton')?.addEventListener('click', () => loadRecentMovements({ force: true }));
     document.getElementById('siteInventoryStockView')?.addEventListener('change', () => { inventoryPage = 1; loadList({ force: true }); });
-    document.getElementById('siteInventorySourceType')?.addEventListener('change', () => { renderSeedDropdowns(); });
+    document.getElementById('siteInventorySourceType')?.addEventListener('change', () => { renderSeedDropdowns(); syncFormStationState(); });
     document.getElementById('siteInventorySeedSearch')?.addEventListener('focus', () => { if (!categorySeedOptions.length) loadSeedOptions(); }, { once: true });
     document.getElementById('siteInventorySeedSearch')?.addEventListener('input', debounce(async () => {
       seedSearchText = document.getElementById('siteInventorySeedSearch')?.value || '';
@@ -893,7 +894,13 @@ document.addEventListener('DOMContentLoaded', () => {
       renderSeedDropdowns();
     }, 250));
     document.getElementById('siteInventorySeedItem')?.addEventListener('change', (event) => { applySeedItemByKey(event.target.value || ''); });
-    document.getElementById('siteInventoryCategoryPreset')?.addEventListener('change', (event) => { if (event.target.value) setInputValue('siteInventoryCategory', event.target.value); });
+    document.getElementById('siteInventoryCategoryPreset')?.addEventListener('change', (event) => {
+      const option = event.target.selectedOptions?.[0];
+      setInputValue('siteInventoryCategory', option?.dataset?.processName || option?.textContent || '');
+      syncFormStationState();
+    });
+    document.getElementById('siteInventoryWorkstationRole')?.addEventListener('change', syncFormStationState);
+    document.getElementById('siteInventoryDoNotReorder')?.addEventListener('change', syncFormReorderState);
     document.getElementById('siteInventorySyncToolsButton')?.addEventListener('click', () => syncCatalog(['tool']));
     document.getElementById('siteInventorySyncSuppliesButton')?.addEventListener('click', () => syncCatalog(['supply']));
     document.getElementById('siteInventorySyncAllButton')?.addEventListener('click', () => syncCatalog(['tool', 'supply']));
@@ -928,7 +935,10 @@ document.addEventListener('DOMContentLoaded', () => {
       external_key: document.getElementById('siteInventoryExternalKey')?.value || '',
       item_name: document.getElementById('siteInventoryItemName')?.value || '',
       item_description: document.getElementById('siteInventoryItemDescription')?.value || '',
+      inventory_process_id: Number(document.getElementById('siteInventoryCategoryPreset')?.value || 0),
       category: String(document.getElementById('siteInventoryCategory')?.value || '').trim().toLowerCase(),
+      workstation_role: String(document.getElementById('siteInventoryWorkstationRole')?.value || 'associated').trim().toLowerCase(),
+      workstation_site_item_inventory_id: Number(document.getElementById('siteInventoryParentStation')?.value || 0),
       image_url: document.getElementById('siteInventoryImageUrl')?.value || '',
       source_url: document.getElementById('siteInventorySourceUrl')?.value || '',
       amazon_url: document.getElementById('siteInventoryAmazonUrl')?.value || '',
