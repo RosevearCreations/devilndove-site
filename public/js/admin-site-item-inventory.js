@@ -1279,6 +1279,76 @@ document.addEventListener('DOMContentLoaded', () => {
     finally { if (listLoadPromise === task) listLoadPromise = null; }
   }
 
+
+  function readEditableRowPayload(row, original = {}) {
+    const value = (field) => row.querySelector(\`[data-field="\${field}"]\`)?.value;
+    const processSelect = row.querySelector('[data-field="inventory_process_id"]');
+    const processName = String(processSelect?.selectedOptions?.[0]?.dataset?.processName || processSelect?.selectedOptions?.[0]?.textContent || '').trim();
+    return {
+      ...original,
+      site_item_inventory_id: Number(row.dataset.inventoryRow || original.site_item_inventory_id || 0),
+      source_type: String(value('source_type') || original.source_type || 'other').trim().toLowerCase(),
+      item_name: value('item_name') || original.item_name,
+      inventory_process_id: Number(value('inventory_process_id') || 0),
+      category: processName && !/^unassigned/i.test(processName) ? processName.toLowerCase() : '',
+      workstation_role: String(value('workstation_role') || original.workstation_role || 'associated').trim().toLowerCase(),
+      workstation_site_item_inventory_id: Number(value('workstation_site_item_inventory_id') || 0),
+      supplier_name: value('supplier_name') || '',
+      amazon_url: String(value('amazon_url') || original.amazon_url || '').trim(),
+      on_hand_quantity: Math.max(0, Number(value('on_hand_quantity') || 0)),
+      stock_unit_label: String(value('stock_unit_label') || original.stock_unit_label || 'unit').trim().toLowerCase(),
+      usage_unit_label: String(value('usage_unit_label') || original.usage_unit_label || 'unit').trim().toLowerCase(),
+      usage_units_per_stock_unit: Math.max(0.001, Number(value('usage_units_per_stock_unit') || original.usage_units_per_stock_unit || 1) || 1),
+      usage_tracking_mode: String(value('usage_tracking_mode') || original.usage_tracking_mode || (String(value('source_type') || original.source_type || '').toLowerCase()==='tool'?'reusable':'exact')).trim().toLowerCase(),
+      reorder_level: Math.max(0, Number(value('reorder_level') || original.reorder_level || 0)),
+      do_not_reorder: Number(value('do_not_reorder')) === 1 ? 1 : 0,
+      unit_cost_cents: Math.max(0, Math.round(Number(value('unit_cost_dollars') || 0) * 100)),
+      is_active: Number(value('is_active')) === 0 ? 0 : 1,
+      movement_note: 'Saved from inventory card/table editor.'
+    };
+  }
+
+  async function fillMissingFromAmazon(row, original = {}, button) {
+    const payload = readEditableRowPayload(row, original);
+    const url = String(payload.amazon_url || '').trim();
+    if (!url) throw new Error('Paste the proper Amazon product link into this card first.');
+    const originalLabel = button?.textContent || 'Fill missing from Amazon';
+    if (button) { button.disabled = true; button.textContent = 'Checking Amazon…'; }
+    try {
+      const previewResponse = await window.DDAuth.apiFetch('/api/admin/amazon-link-preview', {
+        method: 'POST',
+        body: JSON.stringify({ amazon_url: url, source_type: payload.source_type })
+      });
+      const preview = await readApiPayload(previewResponse, 'Amazon metadata could not be loaded.');
+      const draft = preview?.draft || {};
+      const filled = [];
+      payload.amazon_url = draft.amazon_url || draft.source_url || url;
+      if (!String(payload.source_url || '').trim() && draft.source_url) { payload.source_url = draft.source_url; filled.push('source link'); }
+      if (!String(payload.image_url || '').trim() && draft.image_url) { payload.image_url = draft.image_url; filled.push('image'); }
+      if (!String(payload.supplier_name || '').trim() && draft.supplier_name) { payload.supplier_name = draft.supplier_name; filled.push('supplier'); }
+      if (!String(payload.supplier_sku || '').trim() && draft.supplier_sku) { payload.supplier_sku = draft.supplier_sku; filled.push('supplier SKU'); }
+      if (!String(payload.item_description || '').trim() && draft.item_description) { payload.item_description = draft.item_description; filled.push('description'); }
+      if (Number(payload.unit_cost_cents || 0) <= 0 && Number(draft.current_price_cents || 0) > 0) {
+        payload.unit_cost_cents = Number(draft.current_price_cents);
+        filled.push('current CAD price');
+      }
+      if (Number(payload.usage_units_per_stock_unit || 1) <= 1 && Number(draft.package_units || 0) > 1) {
+        payload.usage_units_per_stock_unit = Number(draft.package_units);
+        if (['unit','each','piece'].includes(String(payload.usage_unit_label || 'unit')) && draft.usage_unit_label) payload.usage_unit_label = draft.usage_unit_label;
+        if (String(payload.stock_unit_label || 'unit') === 'unit' && draft.stock_unit_label) payload.stock_unit_label = draft.stock_unit_label;
+        filled.push('units per package');
+      }
+      payload.movement_note = 'Filled missing Inventory facts from reviewed Amazon metadata; existing values were preserved.';
+      const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', { method: 'PATCH', body: JSON.stringify(payload) });
+      await readApiPayload(response, 'Amazon Inventory fill failed.');
+      const warnings = Array.isArray(preview?.warnings) && preview.warnings.length ? ' ' + preview.warnings.join(' ') : '';
+      setMessage(filled.length ? 'Filled missing ' + filled.join(', ') + '. Existing values were not overwritten.' + warnings : 'Amazon was checked, but there were no missing supported fields to fill.' + warnings);
+      await loadList({ force: true });
+    } finally {
+      if (button) { button.disabled = false; button.textContent = originalLabel; }
+    }
+  }
+
   async function onTableClick(event) {
     const saveRowBtn = event.target.closest('[data-save-row-id]');
     if (saveRowBtn) {
@@ -1287,25 +1357,7 @@ document.addEventListener('DOMContentLoaded', () => {
       let original = {};
       try { original = JSON.parse(saveRowBtn.getAttribute('data-item') || '{}'); } catch {}
       if (!id || !row) return;
-      const value = (field) => row.querySelector(`[data-field="${field}"]`)?.value;
-      const payload = {
-        ...original,
-        site_item_inventory_id: id,
-        source_type: value('source_type') || original.source_type,
-        item_name: value('item_name') || original.item_name,
-        source_type: String(value('source_type') || original.source_type || 'other').trim().toLowerCase(),
-        supplier_name: value('supplier_name') || '',
-        on_hand_quantity: Math.max(0, Number(value('on_hand_quantity') || 0)),
-        stock_unit_label: String(value('stock_unit_label') || original.stock_unit_label || 'unit').trim().toLowerCase(),
-        usage_unit_label: String(value('usage_unit_label') || original.usage_unit_label || 'unit').trim().toLowerCase(),
-        usage_units_per_stock_unit: Math.max(0.001, Number(value('usage_units_per_stock_unit') || original.usage_units_per_stock_unit || 1) || 1),
-        usage_tracking_mode: String(value('usage_tracking_mode') || original.usage_tracking_mode || (String(value('source_type') || original.source_type || '').toLowerCase()==='tool'?'reusable':'exact')).trim().toLowerCase(),
-        category: String(value('category') || '').trim().toLowerCase(),
-        reorder_level: Math.max(0, Number(value('reorder_level') || 0)),
-        unit_cost_cents: Math.max(0, Math.round(Number(value('unit_cost_dollars') || 0) * 100)),
-        is_active: Number(value('is_active')) === 0 ? 0 : 1,
-        movement_note: 'Saved from inventory card/table editor.'
-      };
+      const payload = readEditableRowPayload(row, original);
       try {
         saveRowBtn.disabled = true; saveRowBtn.textContent = 'Saving…';
         const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', { method: 'PATCH', body: JSON.stringify(payload) });
