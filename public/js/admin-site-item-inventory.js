@@ -9,13 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
   let rendered = false;
   let catalogSeedOptions = [];
   let categorySeedOptions = [];
+  let processOptions = [];
+  let stationToolOptions = [];
   // Render must be safe before the async inventory bootstrap returns. Keep the
   // same defaults as /api/admin/inventory-bootstrap, then allow the API to
   // replace/extend them after authentication.
   let unitPresetOptions = [
     'unit','each','piece','gram','kilogram','milligram','millilitre','litre',
     'ounce','pound','inch','foot','metre','centimetre','jar','bottle','bag','box',
-    'package','spool','sheet','pair','set','use'
+    'package','pack','roll','spool','sheet','pair','set','kit','cartridge','tube',
+    'can','pail','tool','machine','use'
   ];
   let seedSearchText = '';
   let editingSiteInventoryId = 0;
@@ -78,6 +81,76 @@ document.addEventListener('DOMContentLoaded', () => {
     const usageLabel = String(item?.usage_unit_label || 'unit').trim() || 'unit';
     const perStock = Math.max(0.001, Number(item?.usage_units_per_stock_unit || 1) || 1);
     return { stockLabel, usageLabel, perStock };
+  }
+
+  function unitOptionsMarkup(selected = 'unit') {
+    const current = String(selected || 'unit').trim().toLowerCase() || 'unit';
+    const options = [...new Set([current, ...unitPresetOptions.map((v) => String(v || '').trim().toLowerCase()).filter(Boolean)])];
+    return options.map((value) => `<option value="${escapeHtml(value)}" ${value === current ? 'selected' : ''}>${escapeHtml(value)}</option>`).join('');
+  }
+
+  function processOptionsMarkup(selectedId = 0, legacyCategory = '') {
+    const selected = Number(selectedId || 0);
+    const legacy = String(legacyCategory || '').trim().toLowerCase();
+    let html = '<option value="">Unassigned workshop category</option>';
+    html += processOptions.map((p) => {
+      const id = Number(p.inventory_process_id || 0);
+      const label = String(p.process_name || p.process_key || '').trim();
+      const chosen = selected ? id === selected : (!selected && legacy && label.toLowerCase() === legacy);
+      return `<option value="${id}" data-process-name="${escapeHtml(label)}" ${chosen ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+    }).join('');
+    return html;
+  }
+
+  function stationOptionsMarkup(processId = 0, selectedId = 0, currentItemId = 0) {
+    const process = Number(processId || 0);
+    const selected = Number(selectedId || 0);
+    let html = '<option value="">No specific station tool</option>';
+    html += stationToolOptions
+      .filter((row) => !process || Number(row.inventory_process_id || 0) === process)
+      .filter((row) => Number(row.site_item_inventory_id || 0) !== Number(currentItemId || 0))
+      .map((row) => {
+        const id = Number(row.site_item_inventory_id || 0);
+        return `<option value="${id}" ${id === selected ? 'selected' : ''}>${escapeHtml(row.item_name || ('Inventory #' + id))}</option>`;
+      }).join('');
+    return html;
+  }
+
+  function syncRowReorderState(row) {
+    if (!row) return;
+    const mode = row.querySelector('[data-field="do_not_reorder"]');
+    const threshold = row.querySelector('[data-field="reorder_level"]');
+    const na = Number(mode?.value || 0) === 1;
+    if (threshold) {
+      threshold.disabled = na;
+      threshold.setAttribute('aria-label', na ? 'Reorder not applicable' : 'Reorder threshold');
+    }
+  }
+
+  function syncFormReorderState() {
+    const threshold = document.getElementById('siteInventoryReorder');
+    const noReorder = document.getElementById('siteInventoryDoNotReorder');
+    if (!threshold || !noReorder) return;
+    threshold.disabled = Boolean(noReorder.checked);
+    threshold.placeholder = noReorder.checked ? 'N/A' : '0';
+  }
+
+  function syncFormStationState() {
+    const type = String(document.getElementById('siteInventorySourceType')?.value || '').toLowerCase();
+    const processSelect = document.getElementById('siteInventoryCategoryPreset');
+    const role = document.getElementById('siteInventoryWorkstationRole');
+    const parent = document.getElementById('siteInventoryParentStation');
+    if (!role || !parent) return;
+    const stationOption = Array.from(role.options).find((option) => option.value === 'station');
+    if (stationOption) stationOption.disabled = type !== 'tool';
+    if (type !== 'tool' && role.value === 'station') role.value = 'associated';
+    if (role.value === 'station') {
+      parent.value = '';
+      parent.disabled = true;
+    } else {
+      parent.disabled = false;
+      parent.innerHTML = stationOptionsMarkup(Number(processSelect?.value || 0), Number(parent.value || 0), editingSiteInventoryId);
+    }
   }
 
   function escapeHtml(v) {
