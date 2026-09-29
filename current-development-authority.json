@@ -37,15 +37,15 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 288,
-    "title": "Real Planned-vs-Actual Inventory Acceptance",
-    "authority": "release467-build288-real-planned-vs-actual-inventory-acceptance.json",
-    "main_sha": "10ca103d83a2f0517eb1bbf3aac26cebd5e0e451",
-    "tree_sha": "8e34e42a970c1aa8aab2325db5f2fab466703400",
+    "build": 289,
+    "title": "Inventory Multi-Station Stabilization",
+    "authority": "release467-build289-real-inventory-adoption-outcomes-renewal.json",
+    "main_sha": "238a7732049bbf9c5fead7b3ec4cc2c1e779fcd6",
+    "tree_sha": "9303662ce708b1c1c02c3a94c618d8f2704ca0a1",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36442437962,
-    "production_live_resource_integrity_run": 36442922542,
+    "production_pages_deploy_run": 36517150890,
+    "production_live_resource_integrity_run": 36517221739,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
@@ -178,12 +178,12 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md",
-  "next_build": null,
-  "next_build_state": "PENDING_BUILD289_EXACT_REMEASUREMENT",
-  "next_build_title": null,
-  "promotion_state": "BUILD289_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD289_TERMINAL_RENEWAL_PENDING_EXACT_REMEASUREMENT",
+  "roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md",
+  "next_build": 290,
+  "next_build_state": "READY_TO_START",
+  "next_build_title": "Inventory Multi-Station Read Integrity & Client-Native Memberships",
+  "promotion_state": "BUILD289_STABILIZATION_PRODUCTION_GREEN_BUILD290_READY",
+  "successor_scope_state": "BUILDS_290_300_UX_SEARCH_DATABASE_EFFICIENCY_QUEUE_READY",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -204,13 +204,13 @@
     "interpretation": "NO_JUSTIFIED_AUTONOMOUS_SOFTWARE_SUCCESSOR"
   },
   "planned_successor": {
-    "first_build": 285,
-    "last_build": 289,
-    "state": "REAL_INVENTORY_LINKAGE_ACCEPTANCE_ROADMAP_TERMINAL_BUILD_ACTIVE",
+    "first_build": 290,
+    "last_build": 300,
+    "state": "UX_SEARCH_DATABASE_EFFICIENCY_ROADMAP_READY",
     "future_queue_exhausted": false,
-    "next_build": null,
-    "next_build_title": null,
-    "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md"
+    "next_build": 290,
+    "next_build_title": "Inventory Multi-Station Read Integrity & Client-Native Memberships",
+    "roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md"
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
@@ -981,5 +981,31 @@
     "queue_state": "PENDING",
     "successor_justified": null
   },
-  "schema_change_state": "BUILD289_0025_DEVELOPMENT_APPLIED_AND_VERIFIED_PRODUCTION_APPLY_PENDING_PROMOTION"
+  "schema_change_state": "BUILD289_0025_DEVELOPMENT_APPLIED_AND_VERIFIED_PRODUCTION_APPLY_PENDING_PROMOTION",
+  "ux_search_database_efficiency_queue": {
+    "source": "application audit requested after Build 289 workstation stabilization",
+    "first_build": 290,
+    "last_build": 300,
+    "queue_state": "READY_TO_START",
+    "future_queue_exhausted": false,
+    "priorities": [
+      "inventory many-to-many read integrity",
+      "public runtime reliability",
+      "observer and memory-churn hardening",
+      "CSS design-system consolidation",
+      "storefront buyer journey simplification",
+      "progressive custom-work intake",
+      "search-first HTML and crawl control",
+      "merchant/search-engine distribution",
+      "D1 query and read-budget efficiency",
+      "canonical schema/runtime cleanup",
+      "Workshop Follies and maker-story outcomes"
+    ],
+    "stabilization_first_builds": [
+      290,
+      291,
+      292,
+      293
+    ]
+  }
 }
