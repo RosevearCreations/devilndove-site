@@ -97,5 +97,26 @@
     "caip_workspace_target_count": 1,
     "content_package_target_count": 1,
     "idempotent": true
+  },
+  "starting_point": {
+    "development": {
+      "sha": "6361b02f467fa4b9bf54dd8638cccefc57bd817e",
+      "tree": "6316130ee40beb8540e88da51065f3a75d1c527a",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 36645926155,
+      "quality_run": 36645926199,
+      "it_admin_runtime_run": 36645926079,
+      "repository_hygiene_run": 36645926110,
+      "build_specific_proof_run": 36645926113,
+      "d1_ci_fanout_guard_run": 36645926068
+    },
+    "production": {
+      "main_sha": "e569d5fce0ff5ab08a3d1dc6be1051211ed15ac2",
+      "tree": "6316130ee40beb8540e88da51065f3a75d1c527a",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 36646103793,
+      "production_live_resource_integrity_run": 36646198769,
+      "remote_d1_queries": 0
+    }
   }
 }
