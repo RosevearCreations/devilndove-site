@@ -89,7 +89,7 @@
     const role = document.getElementById('siteInventoryWorkstationRole');
     const roleIsStation = String(role?.value || '') === 'station';
     const fullLabel = document.querySelector('label[for="siteInventoryParentStation"]');
-    if (fullLabel) fullLabel.textContent = 'Specific station tools';
+    if (fullLabel && fullLabel.textContent !== 'Specific station tools') fullLabel.textContent = 'Specific station tools';
     let box = document.getElementById('siteInventoryParentStations');
     const priorChecked = currentChecked(box);
     const selected = priorChecked.length ? priorChecked : pendingFormIds.length ? pendingFormIds : uniqIds(select.value);
@@ -107,9 +107,27 @@
     syncLegacySelect(select, activeIds);
   }
 
+  let observer = null;
+  let observedMount = null;
+  let transforming = false;
+
+  function observeMount() {
+    if (!observer || !observedMount) return;
+    observer.observe(observedMount, { childList:true, subtree:true, attributes:true, attributeFilter:['disabled'] });
+  }
+
   function transformAll() {
-    document.querySelectorAll(ROW_SELECTOR).forEach(transformRow);
-    transformFullForm();
+    if (transforming) return;
+    transforming = true;
+    if (observer) observer.disconnect();
+    try {
+      document.querySelectorAll(ROW_SELECTOR).forEach(transformRow);
+      transformFullForm();
+    } finally {
+      if (observer) observer.takeRecords();
+      observeMount();
+      transforming = false;
+    }
   }
 
   function scheduleTransform() {
@@ -176,10 +194,17 @@
     return nativeFetch(input, init);
   };
 
-  const observer = new MutationObserver(scheduleTransform);
+  observer = new MutationObserver((records) => {
+    if (transforming) return;
+    const relevant = records.some((record) => {
+      const target = record.target instanceof Element ? record.target : record.target?.parentElement;
+      return !target?.closest?.('.dd-multistation-checklist');
+    });
+    if (relevant) scheduleTransform();
+  });
   const begin = () => {
-    const mount = document.getElementById('siteInventoryAdminMount') || document.body;
-    observer.observe(mount, { childList:true, subtree:true, attributes:true, attributeFilter:['disabled'] });
+    observedMount = document.getElementById('siteInventoryAdminMount') || document.body;
+    observeMount();
     scheduleTransform();
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', begin, { once:true });
