@@ -188,6 +188,13 @@
       "release": 467,
       "description": "Add workstation-role and optional parent-station metadata over the existing canonical inventory_processes and inventory_process_assignments authorities, without creating a parallel category taxonomy.",
       "recovery": "Forward-only additive role table. Clear or correct workstation-role/parent links for logical rollback; existing Inventory rows and canonical process assignments remain authoritative and untouched. Repair schema defects only with a later numbered migration."
+    },
+    {
+      "version": 26,
+      "file": "0026_release467_inventory_workstation_memberships.sql",
+      "release": 467,
+      "description": "Allow an associated Inventory Tool/Supply to link to zero, one or many workstation Tool rows while retaining one primary inventory_process/category assignment and preserving migration 0025 single-station relationships.",
+      "recovery": "Forward-only additive membership table. Logical rollback is to clear inventory_workstation_memberships; migration 0025 role/category authority remains intact. Do not drop the table in place—repair only with a later numbered migration."
     }
   ]
 }
