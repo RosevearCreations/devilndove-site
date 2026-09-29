@@ -71,6 +71,7 @@
   const pendingRoots = new Set();
   let scheduled = false;
   let observer = null;
+  let frameId = 0;
 
   const observe = () => {
     if (document.body && observer) observer.observe(document.body, { childList: true, subtree: true });
@@ -78,6 +79,7 @@
 
   const flush = () => {
     scheduled = false;
+    frameId = 0;
     const roots = Array.from(pendingRoots).filter((node) => node?.isConnected);
     pendingRoots.clear();
     if (!roots.length) return;
@@ -111,8 +113,8 @@
     pendingRoots.add(node);
     if (scheduled) return;
     scheduled = true;
-    if (typeof window.requestAnimationFrame === 'function') window.requestAnimationFrame(flush);
-    else window.setTimeout(flush, 16);
+    if (typeof window.requestAnimationFrame === 'function') frameId = window.requestAnimationFrame(flush);
+    else frameId = window.setTimeout(flush, 16);
   };
 
   observer = new MutationObserver((records) => {
@@ -123,7 +125,22 @@
     }
   });
 
-  const start = () => observe();
+  const stop = () => {
+    observer?.disconnect();
+    observer = null;
+    pendingRoots.clear();
+    if (frameId) {
+      if (typeof window.cancelAnimationFrame === 'function') window.cancelAnimationFrame(frameId);
+      else window.clearTimeout(frameId);
+    }
+    frameId = 0;
+    scheduled = false;
+  };
+
+  const start = () => {
+    observe();
+    window.addEventListener('pagehide', stop, { once: true });
+  };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
   else start();
 })();
