@@ -3,6 +3,7 @@
 -- CAIP remains private media/evidence/story-planning authority.
 -- Content Studio remains review-first deliverable authority.
 -- Inventory/process/workstation identities are referenced; never duplicated.
+-- Build 294 canonical schema classification marker.
 
 PRAGMA foreign_keys = ON;
 
