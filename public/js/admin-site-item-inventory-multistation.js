@@ -168,32 +168,9 @@
     }
   }, true);
 
-  const nativeFetch = window.fetch.bind(window);
-  window.fetch = async (input, init = {}) => {
-    try {
-      const url = typeof input === 'string' ? input : String(input?.url || '');
-      const method = String(init?.method || (typeof input !== 'string' ? input?.method : '') || 'GET').toUpperCase();
-      if (url.includes(API_PATH) && ['POST','PATCH'].includes(method) && typeof init?.body === 'string') {
-        const body = JSON.parse(init.body);
-        if (body && typeof body === 'object' && !Array.isArray(body)) {
-          let ids = [];
-          const itemId = Number(body.site_item_inventory_id || 0);
-          if (itemId) {
-            const rowBox = document.querySelector(`[data-inventory-row="${itemId}"] [data-multistation-row]`);
-            ids = rowBox ? currentChecked(rowBox) : [];
-          } else {
-            ids = currentChecked(document.getElementById('siteInventoryParentStations'));
-          }
-          if (String(body.workstation_role || '') === 'station') ids = [];
-          body.workstation_site_item_inventory_ids = uniqIds(ids);
-          body.workstation_site_item_inventory_id = body.workstation_site_item_inventory_ids[0] || 0;
-          init = { ...init, body: JSON.stringify(body) };
-        }
-      }
-    } catch {}
-    return nativeFetch(input, init);
-  };
-
+  // Build 290: the primary Inventory client now sends workstation_site_item_inventory_ids
+  // directly. The former window.fetch interception is intentionally retired; this helper
+  // remains only as the compatibility renderer for the multi-select checklist.
   observer = new MutationObserver((records) => {
     if (transforming) return;
     const relevant = records.some((record) => {

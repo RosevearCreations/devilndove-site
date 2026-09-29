@@ -1,0 +1,88 @@
+{
+  "release": 467,
+  "build": 290,
+  "title": "Inventory Multi-Station Read Integrity & Client-Native Memberships",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build290-inventory-multi-station-read-integrity-client-native-memberships",
+  "starting_point": {
+    "development": {
+      "sha": "8fa4bb20d6e7b43ea319ff0eaadeda49d4070b5c",
+      "tree": "72cf3793ab38424d26bb284ebf95721f902c7859",
+      "system_gate_run": 36520263635,
+      "quality_run": 36520263621,
+      "it_admin_runtime_run": 36520263581,
+      "repository_hygiene_run": 36520263613,
+      "d1_ci_fanout_guard_run": 36520263653,
+      "state": "EXACT_QUEUE_HEAD_GREEN"
+    },
+    "production": {
+      "main_sha": "238a7732049bbf9c5fead7b3ec4cc2c1e779fcd6",
+      "tree_sha": "9303662ce708b1c1c02c3a94c618d8f2704ca0a1",
+      "production_pages_deploy_run": 36517150890,
+      "production_live_resource_integrity_run": 36517221739,
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_build289_verified_development": true
+    }
+  },
+  "scope": {
+    "membership_table": "inventory_workstation_memberships",
+    "primary_category_authority": "inventory_process_assignments",
+    "station_role_authority": "inventory_workstation_roles",
+    "normal_page_read": "ONE_BOUNDED_INVENTORY_READ_PLUS_ONE_BATCHED_MEMBERSHIP_READ",
+    "n_plus_one_membership_reads": false,
+    "client_native_membership_payload": true,
+    "legacy_single_station_field": "COMPATIBILITY_FIRST_MEMBERSHIP_ONLY",
+    "global_fetch_interception": false,
+    "schema_change": false
+  },
+  "acceptance": {
+    "forge_like_three_station_regression": true,
+    "display_all_station_names": true,
+    "reload_all_membership_ids": true,
+    "same_category_station_validation": true,
+    "active_station_tool_validation": true,
+    "d1_measurement_state": "EXACT_DEVELOPMENT_MEASURED_GREEN",
+    "d1_rows_read_ceiling": 5000,
+    "foreign_key_violations_required": 0,
+    "invalid_membership_rows_required": 0,
+    "measurement_sha": "0c8d6d7c850643e4a23360f7ac273c25308db64e",
+    "measurement_run": 36558154559,
+    "measurement_artifact_id": 11028916294,
+    "d1_provider_rows_read": 163,
+    "page_items": 40,
+    "membership_rows": 0,
+    "items_with_memberships": 0,
+    "max_memberships_per_item": 0,
+    "invalid_membership_rows": 0,
+    "foreign_key_violations": 0
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "automatic_inventory_movement": false,
+    "finance_posting": false,
+    "product_publication": false,
+    "provider_publication": false,
+    "payment_or_refund": false,
+    "r2_mutation": false,
+    "production_business_data_query": false,
+    "secret_capture": false
+  },
+  "implementation": {
+    "inventory_api_wrapper": "functions/api/admin/site-item-inventory.js",
+    "inventory_write_authority": "functions/api/admin/_siteItemInventoryLegacy.js",
+    "inventory_ui": "public/js/admin-site-item-inventory.js",
+    "compatibility_ui": "public/js/admin-site-item-inventory-multistation.js",
+    "migration_authority": "migrations/canonical/0026_release467_inventory_workstation_memberships.sql",
+    "measurement_sql": "scripts/release467_build290_measurement.sql",
+    "regression": "scripts/release467_build290_regression.py",
+    "dedicated_gate": "scripts/release467_build290_gate.py",
+    "workflow": ".github/workflows/release467-build290-inventory-multi-station-read-integrity.yml",
+    "roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md"
+  },
+  "contract": {
+    "next_build": 291,
+    "next_build_title": "Public Runtime Reliability & Broken-Surface Closure",
+    "future_queue_exhausted": false
+  }
+}

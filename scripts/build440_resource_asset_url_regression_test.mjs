@@ -109,7 +109,7 @@ const safetyIndex = inventoryPage.indexOf('/public/js/admin-asset-url-safety.js?
 const transportIndex = inventoryPage.indexOf('/public/js/admin-inventory-asset-transport-guard.js?v=440.4');
 check(safetyIndex > 0, 'Inventory Operations page does not load the Admin asset URL safety layer with the new cache-busting version.');
 check(transportIndex > safetyIndex, 'Inventory Operations page must load the transport guard after the shared safety layer.');
-const inventoryEditorScript = ['/public/js/admin-site-item-inventory.js?v=289.2','/public/js/admin-site-item-inventory.js?v=289.1','/public/js/admin-site-item-inventory.js?v=288.1','/public/js/admin-site-item-inventory.js?v=286.2','/public/js/admin-site-item-inventory.js?v=286.1','/public/js/admin-site-item-inventory.js?v=286','/public/js/admin-site-item-inventory.js?v=440.4','/public/js/admin-site-item-inventory.js?v=440.3']
+const inventoryEditorScript = ['/public/js/admin-site-item-inventory.js?v=290.1','/public/js/admin-site-item-inventory.js?v=289.2','/public/js/admin-site-item-inventory.js?v=289.1','/public/js/admin-site-item-inventory.js?v=288.1','/public/js/admin-site-item-inventory.js?v=286.2','/public/js/admin-site-item-inventory.js?v=286.1','/public/js/admin-site-item-inventory.js?v=286','/public/js/admin-site-item-inventory.js?v=440.4','/public/js/admin-site-item-inventory.js?v=440.3']
   .find((script) => inventoryPage.includes(script));
 check(Boolean(inventoryEditorScript), 'Inventory Operations page lost the site-item Inventory editor script.');
 for (const script of [

@@ -1,12 +1,6 @@
 name: Release 467 Build 289 Workstation Inventory Model Migration
 # D1_ONE_SHOT_EVIDENCE_CAPTURE
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'migrations/canonical/0025_release467_inventory_workstation_roles.sql'
-      - 'migrations/canonical/manifest.json'
-      - '.github/workflows/release467-build289-workstation-inventory-model-migration.yml'
   workflow_dispatch:
 
 permissions:

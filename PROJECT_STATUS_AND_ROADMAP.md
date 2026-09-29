@@ -2,30 +2,52 @@
 
 ## Current checkpoint
 
-Build 215 **Small-Batch, Corporate & Event Quoting** is Production GREEN at c8366bde7fb2e7c673be656ff85265058a407c4a, exact tree f1facb7a27e22f3a129654713cc6dd109e3b6b16, with Development 825814b09a7c3f05c6fddc223ec8876ade0bbc35 and Production Pages/Live proofs 35548670491 / 35548742503.
+**Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships** is active in Development.
 
-## Active Build 216
+Build 289 remains the Production baseline while Build 290 completes exact-SHA Development acceptance and promotion.
 
-**Customer-Supplied Item Intake & Suitability Review** extends the existing Custom Work journey through canonical migration 0016. It reuses Build 211 triage plus existing reference uploads/stage photos for item identity, ownership, condition-at-intake evidence, append-only suitability decisions, limitations acknowledgement and post-work condition evidence. Build 217 remains blocked until exact-SHA Production GREEN.
+Build 290 is schema-neutral. It retains the existing many-to-many membership table, makes the primary Inventory client send the complete station-membership array directly, keeps one primary workshop category, reads page memberships in one set-based batch, and retires the global fetch interception from the compatibility helper.
+
+## Next production queue — Builds 290–300
+
+The queue **has not run out** and is **ready to start**.
+
+**Active: Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships**
+
+1. Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships — **ACTIVE**
+2. Build 291 — Public Runtime Reliability & Broken-Surface Closure
+3. Build 292 — Client Runtime Observer & Memory-Churn Hardening
+4. Build 293 — CSS Design-System & Responsive Consolidation
+5. Build 294 — CAIP Workshop Follies & Maker Story Foundation
+6. Build 295 — Storefront Buyer Journey Simplification
+7. Build 296 — Custom Work Progressive Intake
+8. Build 297 — Search-First HTML, Product + Story SEO & Crawl Control
+9. Build 298 — Merchant/Search Distribution + Public Content Discovery
+10. Build 299 — D1 Query Efficiency + Canonical Runtime/Repository Cleanup
+11. Build 300 — CAIP Maker Content Outcomes Renewal & Automation Refinement
+
+Canonical roadmap:
+`docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md`
+
+The sequence deliberately prioritizes Builds 290–293 as stabilization/refactoring. Build 294 then extends the existing Creative Process → CAIP → Content Studio path for Workshop Follies/Maker Stories before the public `Watch us try something` experience is introduced in Build 295. No parallel media, project, social-queue or publishing system is planned.
 
 ## Permanent boundaries
 
-Exact-green Development before protected-main promotion; Production-owned business data; forward-only canonical schema; no request-time DDL; no duplicate Product editor/readiness engine; no automatic publication/provider/payment/accounting action.
+Exact GREEN Development before protected-main promotion; Production-owned business data; forward-only canonical schema; no request-time DDL; no duplicate Product editor/readiness engine; no automatic publication/provider/payment/accounting action.
 
 ---
 
 ## Retained historical provenance — Release 467 Build 153
 
-# Build 153 — Layout Observer Performance Hotfix — CLOSED GREEN
+Build 153 — Layout Observer Performance Hotfix — remains closed GREEN historical provenance.
 
-- Products layout cache revision: `467-b153-layout-observer`.
 - Incident addressed: Firefox long-script / page responsiveness caused by excessive layout-observer churn.
-- Historical Build 153 canonical migration prefix was `0001–0004`; later forward-only canonical migrations remain valid successors and must preserve that immutable prefix.
+- Historical Build 153 canonical migration prefix was `0001–0004`; later forward-only canonical migrations remain valid successors and preserve that immutable prefix.
 
 ## Retained historical provenance — Release 467 Build 171
 
-Build 171 — Release & Restart Authority Convergence — remains immutable historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`.
+Build 171 — Release & Restart Authority Convergence — remains immutable historical provenance.
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain immutable historical release/restart provenance; they remain historical and do not supersede the current Build 216 authority.
+Builds 192–193 remain immutable historical release/restart provenance and do not supersede the current Release 467 authority.

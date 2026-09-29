@@ -44,8 +44,8 @@ for token in ('Workstation / Category','This tool is the workstation','Associate
     q(token in ui,'Build 289 Inventory UI missing '+token)
 for token in ('current_price_cents','package_units','package_units_source','Amazon did not expose a reliable current CAD price'):
     q(token in amazon,'Build 289 Amazon missing '+token)
-q(any(v in page for v in ('/public/js/admin-site-item-inventory.js?v=289.1','/public/js/admin-site-item-inventory.js?v=289.2')),'Build 289 Inventory asset version missing')
-q(any(v in page for v in ('/public/js/admin-site-item-inventory-multistation.js?v=289.3','/public/js/admin-site-item-inventory-multistation.js?v=289.4')),'Build 289 multi-station Inventory asset missing')
+q(any(v in page for v in ('/public/js/admin-site-item-inventory.js?v=289.1','/public/js/admin-site-item-inventory.js?v=289.2','/public/js/admin-site-item-inventory.js?v=290.1')),'Build 289 Inventory asset version missing')
+q(any(v in page for v in ('/public/js/admin-site-item-inventory-multistation.js?v=289.3','/public/js/admin-site-item-inventory-multistation.js?v=289.4','/public/js/admin-site-item-inventory-multistation.js?v=290.1')),'Build 289 multi-station Inventory asset missing')
 for token in ('workstation_site_item_inventory_ids','dd-multistation-checklist','No workstation tools have been marked in this category yet','window.fetch','observer.disconnect()','observer.takeRecords()','transforming = true'):
     q(token in multistation,'Build 289 multi-station UI missing '+token)
 q("loadSeedOptions()" in ui and ".then(() => loadList({ force: true }))" in ui,'Build 289 Inventory dropdown bootstrap must complete before first list render')

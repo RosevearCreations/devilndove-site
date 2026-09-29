@@ -1,12 +1,6 @@
 name: Release 467 Build 289 Workstation Many-to-Many Migration
 # D1_ONE_SHOT_EVIDENCE_CAPTURE
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'migrations/canonical/0026_release467_inventory_workstation_memberships.sql'
-      - 'migrations/canonical/manifest.json'
-      - '.github/workflows/release467-build289-workstation-many-to-many-migration.yml'
   workflow_dispatch:
 
 permissions:
