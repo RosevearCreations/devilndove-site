@@ -74,7 +74,7 @@ SELECT
   COUNT(*) social_rows,
   SUM(CASE WHEN approval_status='approved' THEN 1 ELSE 0 END) approved_social_rows,
   SUM(CASE WHEN post_status='posted' OR published_at IS NOT NULL THEN 1 ELSE 0 END) posted_social_rows,
-  SUM(CASE WHEN approved_by_user_id IS NOT NULL THEN 1 ELSE 0 END) human_social_approval_rows
+  SUM(CASE WHEN approval_status='approved' OR COALESCE(approved_for_public_post,0)=1 THEN 1 ELSE 0 END) human_social_approval_rows
 FROM social_post_queue
 WHERE source_type IN ('content_project','creative_project','workshop_journal');
 

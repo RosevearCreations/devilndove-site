@@ -2,6 +2,15 @@ name: Release 467 Build 300 CAIP Maker Content Outcomes Renewal Automation Refin
 on:
   push:
     branches: [dev]
+    paths:
+      - 'functions/api/**'
+      - 'public/js/**'
+      - 'admin/**'
+      - 'scripts/release467_build300_*'
+      - 'release467-build300-*.json'
+      - 'current-development-authority.json'
+      - 'docs/operations/RELEASE_467_BUILD_300_*'
+      - '.github/workflows/release467-build300-caip-maker-content-outcomes-renewal-automation-refinement.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -30,7 +39,7 @@ jobs:
       DEV_D1_DATABASE_NAME: devilndove-dev
       EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
       EXPECTED_STATEMENTS: 12
-      ROWS_READ_CEILING: 30000
+      D1_PROVIDER_ROWS_READ_CEILING: '20000'
     steps:
       - uses: actions/checkout@v7
         with: { fetch-depth: 2 }
@@ -38,6 +47,7 @@ jobs:
         with: { python-version: '3.12' }
       - uses: actions/setup-node@v7
         with: { node-version: '24' }
+      # D1_ONE_SHOT_EVIDENCE_CAPTURE — current Build 300 only; path-scoped dev push + manual recovery.
       - name: Prove exact Development source and D1 identity
         shell: bash
         run: |
@@ -69,7 +79,11 @@ jobs:
         run: |
           set -euo pipefail
           COMMAND="$(grep -v '^[[:space:]]*--' scripts/release467_build300_outcomes_measurement.sql)"
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b300-outcomes.json
+          if ! npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b300-outcomes.json 2>/tmp/b300-outcomes.err; then
+            cat /tmp/b300-outcomes.err >&2 || true
+            cat /tmp/b300-outcomes.json >&2 || true
+            exit 1
+          fi
           python - <<'PY'
           import json,os
           raw=json.load(open('/tmp/b300-outcomes.json'))
@@ -77,7 +91,7 @@ jobs:
           assert isinstance(statements,list)
           assert len(statements)==int(os.environ['EXPECTED_STATEMENTS']),(len(statements),os.environ['EXPECTED_STATEMENTS'])
           reads=[int((x.get('meta') or {}).get('rows_read') or 0) for x in statements if isinstance(x,dict)]
-          aggregate=sum(reads); ceiling=int(os.environ['ROWS_READ_CEILING'])
+          aggregate=sum(reads); ceiling=int(os.environ['D1_PROVIDER_ROWS_READ_CEILING'])
           assert aggregate<=ceiling,(aggregate,ceiling,reads)
           rows=[(x.get('results') or [{}])[0] if (x.get('results') or []) else {} for x in statements]
           identity=rows[1] if len(rows)>1 else {}
