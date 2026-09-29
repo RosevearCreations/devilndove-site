@@ -1,17 +1,17 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 290 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 291 candidate
 
-Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships — is projected over the exact fully verified Build 289 stabilization closure.
+Build 291 — Public Runtime Reliability & Broken-Surface Closure — is projected over exact Build 290 Production GREEN.
 
-- Last fully verified Development: `a9d1fe0d8a03e6ccfab8c1b7be3c5e0f005e4400`
-- Verified tree: `9303662ce708b1c1c02c3a94c618d8f2704ca0a1`
-- Development proofs: System `36517008091`, Current Application Quality `36517008088`, I.T. Admin Runtime `36517008100`, Repository Branch Hygiene `36517008107`
-- Current Production main: `238a7732049bbf9c5fead7b3ec4cc2c1e779fcd6`
-- Production proofs: Pages `36517150890`, Live Resources `36517221739`
-- Build 290 queue-authority starting point: `8fa4bb20d6e7b43ea319ff0eaadeda49d4070b5c`, tree `72cf3793ab38424d26bb284ebf95721f902c7859`
-- Build 290 measured Development evidence: run `36558154559`, artifact `11028916294`, 40 page items, 163 provider rows_read / 5,000, zero invalid memberships, zero foreign-key violations.
-- Build 290 is schema-neutral: the existing migration 0026 membership authority is reused.
-- The primary Inventory client now owns the full membership array; the compatibility helper no longer intercepts global fetch.
-- The future queue remains open. Next after Production GREEN: Build 291 — Public Runtime Reliability & Broken-Surface Closure.
+- Last fully verified Development: `dff1fb1c756de9a938bbbcc26a966205b0539b01`
+- Verified tree: `1cdfea3b551761ce18560bb95bed405cec594ab1`
+- Development proofs: System `36567123971`, Quality `36567124267`, I.T. `36567124051`, Hygiene `36567124022`, D1 Fan-Out `36567124170`, Build 290 `36567124048`
+- Current Production main: `a56c163c8c417a90b3e6a35da128cdaeaf73b668`
+- Production proofs: Pages `36567332316`, Live Resources `36567404285`
+- Build 291 is schema-neutral and performs no D1/R2/provider mutation.
+- Public runtime targets: `/capabilities/`, `/creations/`, `/api/capabilities`, `/api/creations`.
+- Buyer-facing raw parser/status errors are closed; diagnostics retain the technical signal.
+- Production acceptance crawls every public sitemap URL.
+- The future queue remains open. Next after Production GREEN: Build 292 — Client Runtime Observer & Memory-Churn Hardening.
 
 ## Current release baseline
 
