@@ -1,0 +1,147 @@
+name: Release 467 Build 300 CAIP Maker Content Outcomes Renewal Automation Refinement
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      - run: python scripts/release467_build300_regression.py
+      - run: python scripts/release467_build300_gate.py
+      - run: |
+          echo 'Build 300 source contract: REVIEW-FIRST'
+          echo 'AUTOMATIC PUBLICATION: ZERO'
+          echo 'PRODUCTION D1 CONTACT: ZERO'
+  outcomes-measurement:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+      EXPECTED_STATEMENTS: 12
+      ROWS_READ_CEILING: 30000
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 2 }
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      - name: Prove exact Development source and D1 identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test -n "${CLOUDFLARE_API_TOKEN}"
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          ! grep -q 'devilndove-prod' wrangler.toml
+          npx --yes wrangler@4.128.0 d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/b300-info.json
+          python - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/b300-info.json'))
+          def walk(v):
+            if isinstance(v,dict):
+              yield v
+              for x in v.values(): yield from walk(x)
+            elif isinstance(v,list):
+              for x in v: yield from walk(x)
+          rows=list(walk(data))
+          ids={str(r.get('uuid') or r.get('id') or '') for r in rows}
+          names={str(r.get('name') or '') for r in rows}
+          assert os.environ['EXPECTED_DEV_D1_DATABASE_ID'] in ids,(ids,names)
+          assert os.environ['DEV_D1_DATABASE_NAME'] in names,(ids,names)
+          print('EXACT DEVELOPMENT D1 IDENTITY: PASS')
+          PY
+      - name: Measure maker-content outcomes
+        shell: bash
+        run: |
+          set -euo pipefail
+          COMMAND="$(grep -v '^[[:space:]]*--' scripts/release467_build300_outcomes_measurement.sql)"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b300-outcomes.json
+          python - <<'PY'
+          import json,os
+          raw=json.load(open('/tmp/b300-outcomes.json'))
+          statements=raw if isinstance(raw,list) else raw.get('results',[])
+          assert isinstance(statements,list)
+          assert len(statements)==int(os.environ['EXPECTED_STATEMENTS']),(len(statements),os.environ['EXPECTED_STATEMENTS'])
+          reads=[int((x.get('meta') or {}).get('rows_read') or 0) for x in statements if isinstance(x,dict)]
+          aggregate=sum(reads); ceiling=int(os.environ['ROWS_READ_CEILING'])
+          assert aggregate<=ceiling,(aggregate,ceiling,reads)
+          rows=[(x.get('results') or [{}])[0] if (x.get('results') or []) else {} for x in statements]
+          identity=rows[1] if len(rows)>1 else {}
+          assert int(identity.get('duplicate_caip_source_identities') or 0)==0,identity
+          assert int(identity.get('duplicate_content_source_identities') or 0)==0,identity
+          assert int(identity.get('duplicate_workstation_memberships') or 0)==0,identity
+          assert int((rows[11] if len(rows)>11 else {}).get('foreign_key_violations') or 0)==0,rows[11] if len(rows)>11 else {}
+          maker=rows[0] if rows else {}
+          active=int(maker.get('active_maker_stories') or 0)
+          complete=int(maker.get('core_story_complete') or 0)
+          if active==0:
+            refinement='ADOPTION_GUIDANCE_ONLY_NO_NEW_AUTOMATION'
+          elif complete<active:
+            refinement='COMPLETENESS_GUIDANCE_BEFORE_EXPLICIT_REFRESH'
+          else:
+            refinement='EXPLICIT_IDEMPOTENT_REFRESH_REFINEMENT_ONLY'
+          evidence={'release':467,'build':300,'exact_development_sha':os.environ.get('GITHUB_SHA',''),
+            'statement_count':len(statements),'rows_read_by_statement':reads,'aggregate_rows_read':aggregate,'rows_read_ceiling':ceiling,
+            'maker_story':maker,'identity':identity,'private_media':rows[2],'bridge':rows[3],'deliverables':rows[4],
+            'journal':rows[5],'social':rows[6],'engagement_30d':rows[7],'runtime_search':rows[8],'merchant':rows[9],
+            'friction':rows[10],'foreign_keys':rows[11],'automation_refinement_decision':refinement,
+            'automatic_publication':False,'provider_execution':False,'production_d1_contact':False,'d1_mutation':False,'r2_mutation':False}
+          open('/tmp/build300-outcomes-evidence.json','w').write(json.dumps(evidence,indent=2,sort_keys=True)+'\n')
+          print('BUILD300_ROWS_READ=',reads)
+          print('BUILD300_AGGREGATE_ROWS_READ=',aggregate,'CEILING=',ceiling)
+          print('BUILD300_MAKER_STORY=',maker)
+          print('BUILD300_IDENTITY=',identity)
+          print('BUILD300_PRIVATE_MEDIA=',rows[2])
+          print('BUILD300_BRIDGE=',rows[3])
+          print('BUILD300_DELIVERABLES=',rows[4])
+          print('BUILD300_JOURNAL=',rows[5])
+          print('BUILD300_SOCIAL=',rows[6])
+          print('BUILD300_ENGAGEMENT=',rows[7])
+          print('BUILD300_RUNTIME_SEARCH=',rows[8])
+          print('BUILD300_MERCHANT=',rows[9])
+          print('BUILD300_FRICTION=',rows[10])
+          print('BUILD300_AUTOMATION_REFINEMENT_DECISION=',refinement)
+          PY
+      - name: Measure client/repository source outcomes
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('.')
+          js=list((root/'public/js').glob('*.js'))
+          css=list((root/'css').glob('*.css'))
+          observer=sum(p.read_text(encoding='utf-8',errors='ignore').count('MutationObserver') for p in js)
+          important=sum(p.read_text(encoding='utf-8',errors='ignore').count('!important') for p in css)
+          print('BUILD300_MUTATION_OBSERVER_TOKENS=',observer)
+          print('BUILD300_CSS_IMPORTANT_TOKENS=',important)
+          print('BUILD300_PUBLIC_JS_FILES=',len(js))
+          print('BUILD300_CSS_FILES=',len(css))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build300-outcomes-${{ github.sha }}
+          path: /tmp/build300-outcomes-evidence.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Boundary
+        if: always()
+        run: |
+          echo 'DEVELOPMENT D1 READ-ONLY: YES'
+          echo 'PRODUCTION D1 CONTACT: ZERO'
+          echo 'AUTOMATIC PUBLICATION: ZERO'
+          echo 'PROVIDER EXECUTION: ZERO'
+          echo 'R2 MUTATION: ZERO'

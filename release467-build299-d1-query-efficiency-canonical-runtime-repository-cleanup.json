@@ -2,7 +2,7 @@
   "release": 467,
   "build": 299,
   "title": "D1 Query Efficiency + Canonical Runtime/Repository Cleanup",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build299-d1-query-efficiency-canonical-runtime-repository-cleanup",
   "predecessor": {
     "build": 298,
@@ -94,5 +94,40 @@
     "next_build": 300,
     "next_build_title": "CAIP Maker Content Outcomes Renewal & Automation Refinement",
     "future_queue_exhausted": false
-  }
+  },
+  "final_closure": {
+    "dev_sha": "c437998c7b17cf7bce4d6ae913d2273e3f96e038",
+    "tree_sha": "95df4beae5394ebf85c9b2bc1665525ab6ed5eb5",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD299_GREEN",
+    "proofs": {
+      "system_gate_run": 36627208895,
+      "current_application_quality_run": 36627208854,
+      "it_admin_runtime_proof_run": 36627208869,
+      "branch_hygiene_run": 36627208912
+    },
+    "build_specific_proof_run": 36627208914,
+    "provider_measurement": {
+      "statements": 10,
+      "aggregate_rows_read": 5387,
+      "rows_read_ceiling": 20000,
+      "products": 45,
+      "inventory_items": 1043,
+      "creations": 0,
+      "workshop_stories": 0,
+      "fts_trigram_decision": "NOT_JUSTIFIED_CURRENT_SCALE"
+    },
+    "ingested_by_build": 300
+  },
+  "production_checkpoint": {
+    "main_sha": "9689e81f23722d58421df87b2ea6b41ca39005fb",
+    "tree_sha": "95df4beae5394ebf85c9b2bc1665525ab6ed5eb5",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36627976523,
+    "production_live_resource_integrity_run": 36628136953,
+    "remote_d1_queries": 0,
+    "ingested_by_build": 300
+  },
+  "closure_ingested_by_build": 300
 }

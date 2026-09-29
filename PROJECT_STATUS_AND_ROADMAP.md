@@ -2,18 +2,20 @@
 
 ## Current checkpoint
 
-**Build 299 — D1 Query Efficiency + Canonical Runtime/Repository Cleanup** is active in Development.
+**Build 300 — CAIP Maker Content Outcomes Renewal & Automation Refinement** is active in Development.
 
-Build 298 is the exact Development and Production GREEN baseline. Build 299 reduces D1 schema-read fan-out, removes selected redundant public schema preflights, keeps workstation memberships batched, measures query plans/rows-read against Development only, and removes only exact duplicate root API copies with canonical `functions/api/` ownership retained.
+Build 299 is the exact Development and Production GREEN baseline. Build 300 closes the Builds 290–300 roadmap by measuring the real Creative Process → CAIP → Content Studio → reviewed publication path before changing automation.
 
-- Exact Build 298 Development: `2fae62c9b5f78e31d8325bd63d93c1674a11c3c6`
-- Exact Build 298 Production main: `5da8e2457ec64a9a54523bd56eb523c9abd5ec8c`
-- Shared predecessor tree: `396b3491620307b041cda8ac066f97ea44f2b0ef`
-- Build 299 schema change: **NONE**
-- Development D1 measurement: **READ ONLY**
+- Exact Build 299 Development: `c437998c7b17cf7bce4d6ae913d2273e3f96e038`
+- Exact Build 299 Production main: `9689e81f23722d58421df87b2ea6b41ca39005fb`
+- Shared predecessor tree: `95df4beae5394ebf85c9b2bc1665525ab6ed5eb5`
+- Build 300 schema change: **NONE**
+- Development outcome measurement: **READ ONLY**
 - Production D1 measurement contact: **NONE**
-- Historical release evidence deletion: **NONE**
-- Next after Production GREEN: **Build 300 — CAIP Maker Content Outcomes Renewal & Automation Refinement**
+- Automation refinement: **ONLY AFTER MEASURED EVIDENCE**
+- Automatic publication/provider execution: **NONE**
+- Future queue exhausted: **NO**
+- Successor roadmap: **DETERMINED BY BUILD 300 EVIDENCE**
 
 ## Next production queue — Builds 290–300
 
