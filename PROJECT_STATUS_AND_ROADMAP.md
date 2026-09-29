@@ -2,30 +2,60 @@
 
 ## Current checkpoint
 
-Build 215 **Small-Batch, Corporate & Event Quoting** is Production GREEN at c8366bde7fb2e7c673be656ff85265058a407c4a, exact tree f1facb7a27e22f3a129654713cc6dd109e3b6b16, with Development 825814b09a7c3f05c6fddc223ec8876ade0bbc35 and Production Pages/Live proofs 35548670491 / 35548742503.
+Build 289 Inventory many-to-many workstation stabilization is **Production GREEN**.
 
-## Active Build 216
+- Development: `a9d1fe0d8a03e6ccfab8c1b7be3c5e0f005e4400`
+- Production main: `238a7732049bbf9c5fead7b3ec4cc2c1e779fcd6`
+- Exact shared tree: `9303662ce708b1c1c02c3a94c618d8f2704ca0a1`
+- System Gate: `36517008091`
+- Current Application Quality: `36517008088`
+- I.T. Admin Runtime Proof: `36517008100`
+- Repository Branch Hygiene: `36517008107`
+- Production Pages Deploy: `36517150890`
+- Production Live Resource Integrity: `36517221739`
 
-**Customer-Supplied Item Intake & Suitability Review** extends the existing Custom Work journey through canonical migration 0016. It reuses Build 211 triage plus existing reference uploads/stage photos for item identity, ownership, condition-at-intake evidence, append-only suitability decisions, limitations acknowledgement and post-work condition evidence. Build 217 remains blocked until exact-SHA Production GREEN.
+The many-to-many Inventory model remains active: one primary process/category for reporting and cost rollups, with zero/one/many specific workstation tools available to associated Tools/Supplies.
+
+## Next production queue — Builds 290–300
+
+The queue **has not run out** and is **ready to start**.
+
+**Next: Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships**
+
+1. Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships
+2. Build 291 — Public Runtime Reliability & Broken-Surface Closure
+3. Build 292 — Client Runtime Observer & Memory-Churn Hardening
+4. Build 293 — CSS Design-System & Responsive Consolidation
+5. Build 294 — Storefront Buyer Journey Simplification
+6. Build 295 — Custom Work Progressive Intake
+7. Build 296 — Search-First HTML, Product SEO & Crawl Control
+8. Build 297 — Merchant Discovery & Search Engine Distribution
+9. Build 298 — D1 Query Efficiency, Search & Read-Budget Hardening
+10. Build 299 — Canonical Schema Runtime Cleanup & Repository Slimming
+11. Build 300 — Workshop Follies, Maker Stories & Outcome Renewal
+
+Canonical roadmap:
+`docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md`
+
+The sequence deliberately prioritizes Builds 290–293 as stabilization/refactoring before major buyer-facing expansion.
 
 ## Permanent boundaries
 
-Exact-green Development before protected-main promotion; Production-owned business data; forward-only canonical schema; no request-time DDL; no duplicate Product editor/readiness engine; no automatic publication/provider/payment/accounting action.
+Exact GREEN Development before protected-main promotion; Production-owned business data; forward-only canonical schema; no request-time DDL; no duplicate Product editor/readiness engine; no automatic publication/provider/payment/accounting action.
 
 ---
 
 ## Retained historical provenance — Release 467 Build 153
 
-# Build 153 — Layout Observer Performance Hotfix — CLOSED GREEN
+Build 153 — Layout Observer Performance Hotfix — remains closed GREEN historical provenance.
 
-- Products layout cache revision: `467-b153-layout-observer`.
 - Incident addressed: Firefox long-script / page responsiveness caused by excessive layout-observer churn.
-- Historical Build 153 canonical migration prefix was `0001–0004`; later forward-only canonical migrations remain valid successors and must preserve that immutable prefix.
+- Historical Build 153 canonical migration prefix was `0001–0004`; later forward-only canonical migrations remain valid successors and preserve that immutable prefix.
 
 ## Retained historical provenance — Release 467 Build 171
 
-Build 171 — Release & Restart Authority Convergence — remains immutable historical provenance over exact Build 170 predecessor `879c8730040afaf6caec6374b5057b7261fdcfe2`.
+Build 171 — Release & Restart Authority Convergence — remains immutable historical provenance.
 
 ## Retained historical provenance — Release 467 Builds 192–193
 
-Build 192 and Build 193 remain immutable historical release/restart provenance; they remain historical and do not supersede the current Build 216 authority.
+Builds 192–193 remain immutable historical release/restart provenance and do not supersede the current Release 467 authority.
