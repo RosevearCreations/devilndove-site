@@ -1,0 +1,71 @@
+name: Release 467 Build 289 Workstation Inventory Model Migration
+# D1_ONE_SHOT_EVIDENCE_CAPTURE
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'migrations/canonical/0025_release467_inventory_workstation_roles.sql'
+      - 'migrations/canonical/manifest.json'
+      - '.github/workflows/release467-build289-workstation-inventory-model-migration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  development-migration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      D1_PROVIDER_ROWS_READ_CEILING: '20000'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Verify canonical migration policy
+        run: python scripts/migration_policy_gate.py
+      - name: Apply and verify Development canonical migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          grep -q '^database_id = "dbc1615b-dcbe-4951-973b-b47c99c73bfa"$' wrangler.toml
+          ! grep -q 'f34a741b-0000-45b0-9a96-6be08754d563' wrangler.toml
+          python scripts/d1_migrate.py --target development --apply --source-sha "${GITHUB_SHA}"
+      - name: Verify workstation role authority and bounded rows-read
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 d1 execute devilndove-dev --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM pragma_table_info('inventory_workstation_roles') WHERE name IN ('site_item_inventory_id','workstation_role','workstation_site_item_inventory_id','updated_by_user_id','created_at','updated_at')) AS required_columns,(SELECT COUNT(*) FROM inventory_processes WHERE is_active=1) AS active_processes,(SELECT COUNT(*) FROM inventory_workstation_roles) AS role_rows,(SELECT COUNT(*) FROM pragma_foreign_key_check) AS foreign_key_violations;" > /tmp/build289-workstation-schema.json
+          python - <<'PY'
+          import json,os
+          d=json.load(open('/tmp/build289-workstation-schema.json')); rows=[]; reads=[]
+          def walk(v):
+              if isinstance(v,dict):
+                  if all(k in v for k in ('required_columns','active_processes','role_rows','foreign_key_violations')): rows.append(v)
+                  meta=v.get('meta')
+                  if isinstance(meta,dict) and meta.get('rows_read') is not None: reads.append(int(meta.get('rows_read') or 0))
+                  for x in v.values(): walk(x)
+              elif isinstance(v,list):
+                  for x in v: walk(x)
+          walk(d); assert rows,d
+          r=rows[0]
+          assert int(r['required_columns'])==6,r
+          assert int(r['active_processes'])>=13,r
+          assert int(r['foreign_key_violations'])==0,r
+          total=sum(reads); ceiling=int(os.environ['D1_PROVIDER_ROWS_READ_CEILING'])
+          assert total<=ceiling,(total,ceiling)
+          print(f'D1_PROVIDER_ROWS_READ={total} CEILING={ceiling}')
+          print('BUILD289_WORKSTATION_SCHEMA='+json.dumps(r,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build289-workstation-schema-${{ github.sha }}
+          path: /tmp/build289-workstation-schema.json
+          retention-days: 30
