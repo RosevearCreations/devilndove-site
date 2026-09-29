@@ -41,7 +41,7 @@ q((m.get('build254') or {}).get('dev_success')==70 and (m.get('build254') or {})
 q((a.get('findings') or {}).get('exact_sha_promotion')=='PRESERVE','Build 255 must preserve exact-SHA promotion')
 q((a.get('operator_diagnostics') or {}).get('new_parallel_dashboard') is False,'Build 255 must reuse existing diagnostics surfaces')
 
-q(int(p.get('build') or 0)>=255 and int(p.get('next_build') or 0)>=256 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 255 or a verified successor')
+q(int(p.get('build') or 0)>=255 and (int(p.get('build') or 0)>255 or int(p.get('next_build') or 0)>=256) and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 255 or a verified successor')
 q(int(p.get('build') or 0)>255 or (p.get('accepted_dev_sha')=='95ad971789a7f207c1bc64103e68cd28204a3e50' and p.get('accepted_dev_tree_sha')=='7da896d6d154460950844b44bc179a8354b836f2'),'Build 255 baseline must remain valid or be superseded by Build 256+')
 q(int(p.get('build') or 0)>255 or (p.get('production_checkpoint') or {}).get('main_sha')=='46224bcfebbf12bec95383a03e188e00674d3326','Build 255 Production baseline must remain valid or be superseded by Build 256+')
 q("run_current_contract('scripts/release467_build255_gate.py','Release 467 Build 255')" in sysgate,'System Gate must invoke Build 255')
