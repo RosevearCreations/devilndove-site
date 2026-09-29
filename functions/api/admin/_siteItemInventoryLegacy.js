@@ -183,6 +183,11 @@ function shape(row = {}) {
 }
 
 
+function normalizeWorkstationIds(value) {
+  const raw = Array.isArray(value) ? value : (value == null || value === '' ? [] : String(value).split(','));
+  return [...new Set(raw.map((entry) => Number(entry || 0)).filter((id) => Number.isInteger(id) && id > 0))];
+}
+
 async function activeInventoryProcess(db, processId) {
   const id = Number(processId || 0);
   if (!id) return null;
@@ -198,7 +203,8 @@ async function currentProcessAssignment(db, itemId) {
   return db.prepare(`
     SELECT ipa.inventory_process_id,ip.process_key,ip.process_name,
            COALESCE(iwr.workstation_role,'associated') AS workstation_role,
-           COALESCE(iwr.workstation_site_item_inventory_id,0) AS workstation_site_item_inventory_id
+           COALESCE(iwr.workstation_site_item_inventory_id,0) AS workstation_site_item_inventory_id,
+           COALESCE((SELECT GROUP_CONCAT(iwm.workstation_site_item_inventory_id) FROM inventory_workstation_memberships iwm WHERE iwm.site_item_inventory_id=ipa.site_item_inventory_id),'') AS workstation_site_item_inventory_ids_csv
     FROM inventory_process_assignments ipa
     JOIN inventory_processes ip ON ip.inventory_process_id=ipa.inventory_process_id
     LEFT JOIN inventory_workstation_roles iwr ON iwr.site_item_inventory_id=ipa.site_item_inventory_id
@@ -209,63 +215,70 @@ async function currentProcessAssignment(db, itemId) {
 
 async function saveWorkstationAssignment(db, itemId, body, userId, sourceType, process) {
   const explicitProcess = Object.prototype.hasOwnProperty.call(body || {}, 'inventory_process_id');
+  const explicitStations = Object.prototype.hasOwnProperty.call(body || {}, 'workstation_site_item_inventory_ids')
+    || Object.prototype.hasOwnProperty.call(body || {}, 'workstation_site_item_inventory_id');
   if (!process) {
     if (explicitProcess) {
       await db.batch([
+        db.prepare('DELETE FROM inventory_workstation_memberships WHERE site_item_inventory_id=? OR workstation_site_item_inventory_id=?').bind(itemId,itemId),
         db.prepare('DELETE FROM inventory_workstation_roles WHERE site_item_inventory_id=?').bind(itemId),
         db.prepare('DELETE FROM inventory_process_assignments WHERE site_item_inventory_id=?').bind(itemId)
       ]);
     }
-    return { inventory_process_id: 0, workstation_role: 'associated', workstation_site_item_inventory_id: 0 };
+    return { inventory_process_id:0, workstation_role:'associated', workstation_site_item_inventory_ids:[], workstation_site_item_inventory_id:0 };
   }
 
   let role = normalizeText(body?.workstation_role).toLowerCase();
-  if (!['station','associated'].includes(role)) role = 'associated';
-  if (role === 'station' && normalizeInventoryKind(sourceType) !== 'tool') {
-    throw Object.assign(new Error('Only Tool inventory can be marked as the workstation itself.'), { status: 400, code: 'inventory_station_requires_tool' });
+  if (!['station','associated'].includes(role)) role='associated';
+  if (role==='station' && normalizeInventoryKind(sourceType)!=='tool') {
+    throw Object.assign(new Error('Only Tool inventory can be marked as a workstation tool.'),{status:400,code:'inventory_station_requires_tool'});
   }
 
-  let parentId = role === 'associated' ? Number(body?.workstation_site_item_inventory_id || 0) : 0;
-  if (parentId === Number(itemId || 0)) {
-    throw Object.assign(new Error('An inventory item cannot be its own parent workstation.'), { status: 400, code: 'inventory_station_self_reference' });
+  let stationIds = role==='associated'
+    ? normalizeWorkstationIds(Object.prototype.hasOwnProperty.call(body||{},'workstation_site_item_inventory_ids') ? body.workstation_site_item_inventory_ids : body?.workstation_site_item_inventory_id)
+    : [];
+  if (!explicitStations && role==='associated') {
+    const current=await currentProcessAssignment(db,itemId);
+    stationIds=normalizeWorkstationIds(current?.workstation_site_item_inventory_ids_csv || current?.workstation_site_item_inventory_id || '');
   }
-  if (parentId) {
-    const parent = await db.prepare(`
-      SELECT sii.site_item_inventory_id,sii.item_name,ipa.inventory_process_id
+  if (stationIds.includes(Number(itemId||0))) {
+    throw Object.assign(new Error('An inventory item cannot be assigned to itself as a workstation.'),{status:400,code:'inventory_station_self_reference'});
+  }
+
+  if (stationIds.length) {
+    const placeholders=stationIds.map(()=>'?').join(',');
+    const rows=normalizeResults(await db.prepare(`
+      SELECT sii.site_item_inventory_id,ipa.inventory_process_id
       FROM site_item_inventory sii
       JOIN inventory_process_assignments ipa ON ipa.site_item_inventory_id=sii.site_item_inventory_id
       JOIN inventory_workstation_roles iwr ON iwr.site_item_inventory_id=sii.site_item_inventory_id
-      WHERE sii.site_item_inventory_id=?
+      WHERE sii.site_item_inventory_id IN (${placeholders})
         AND COALESCE(sii.is_active,1)=1
         AND LOWER(TRIM(COALESCE(sii.source_type,'')))='tool'
         AND iwr.workstation_role='station'
-      LIMIT 1
-    `).bind(parentId).first().catch(() => null);
-    if (!parent || Number(parent.inventory_process_id || 0) !== Number(process.inventory_process_id || 0)) {
-      throw Object.assign(new Error('Choose a workstation tool from the same workshop category.'), { status: 400, code: 'inventory_station_parent_mismatch' });
-    }
+    `).bind(...stationIds).all());
+    const valid=new Set(rows.filter((row)=>Number(row.inventory_process_id||0)===Number(process.inventory_process_id||0)).map((row)=>Number(row.site_item_inventory_id||0)));
+    const invalid=stationIds.filter((id)=>!valid.has(id));
+    if (invalid.length) throw Object.assign(new Error('Every selected workstation tool must be active, marked as a workstation, and belong to the same workshop category.'),{status:400,code:'inventory_station_membership_mismatch',invalid_station_ids:invalid});
   }
 
-  await db.batch([
-    db.prepare(`
-      INSERT INTO inventory_process_assignments(site_item_inventory_id,inventory_process_id,assigned_by_user_id,assigned_at,updated_at)
+  const actorId=Number(userId||0)||null;
+  const statements=[
+    db.prepare(`INSERT INTO inventory_process_assignments(site_item_inventory_id,inventory_process_id,assigned_by_user_id,assigned_at,updated_at)
       VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
-      ON CONFLICT(site_item_inventory_id) DO UPDATE SET
-        inventory_process_id=excluded.inventory_process_id,
-        assigned_by_user_id=excluded.assigned_by_user_id,
-        updated_at=CURRENT_TIMESTAMP
-    `).bind(itemId, Number(process.inventory_process_id), Number(userId || 0) || null),
-    db.prepare(`
-      INSERT INTO inventory_workstation_roles(site_item_inventory_id,workstation_role,workstation_site_item_inventory_id,updated_by_user_id,created_at,updated_at)
+      ON CONFLICT(site_item_inventory_id) DO UPDATE SET inventory_process_id=excluded.inventory_process_id,assigned_by_user_id=excluded.assigned_by_user_id,updated_at=CURRENT_TIMESTAMP`)
+      .bind(itemId,Number(process.inventory_process_id),actorId),
+    db.prepare(`INSERT INTO inventory_workstation_roles(site_item_inventory_id,workstation_role,workstation_site_item_inventory_id,updated_by_user_id,created_at,updated_at)
       VALUES(?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
-      ON CONFLICT(site_item_inventory_id) DO UPDATE SET
-        workstation_role=excluded.workstation_role,
-        workstation_site_item_inventory_id=excluded.workstation_site_item_inventory_id,
-        updated_by_user_id=excluded.updated_by_user_id,
-        updated_at=CURRENT_TIMESTAMP
-    `).bind(itemId, role, parentId || null, Number(userId || 0) || null)
-  ]);
-  return { inventory_process_id: Number(process.inventory_process_id), workstation_role: role, workstation_site_item_inventory_id: parentId || 0 };
+      ON CONFLICT(site_item_inventory_id) DO UPDATE SET workstation_role=excluded.workstation_role,workstation_site_item_inventory_id=excluded.workstation_site_item_inventory_id,updated_by_user_id=excluded.updated_by_user_id,updated_at=CURRENT_TIMESTAMP`)
+      .bind(itemId,role,stationIds[0]||null,actorId),
+    db.prepare('DELETE FROM inventory_workstation_memberships WHERE site_item_inventory_id=?').bind(itemId)
+  ];
+  for (const stationId of stationIds) {
+    statements.push(db.prepare(`INSERT INTO inventory_workstation_memberships(site_item_inventory_id,workstation_site_item_inventory_id,updated_by_user_id,created_at,updated_at) VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)`).bind(itemId,stationId,actorId));
+  }
+  await db.batch(statements);
+  return { inventory_process_id:Number(process.inventory_process_id), workstation_role:role, workstation_site_item_inventory_ids:stationIds, workstation_site_item_inventory_id:stationIds[0]||0 };
 }
 
 function normalizeMovementType(value) {
