@@ -176,8 +176,10 @@ function shape(row = {}) {
     process_key: row.process_key || '',
     process_name: row.process_name || '',
     workstation_role: row.workstation_role || 'associated',
-    workstation_site_item_inventory_id: Number(row.workstation_site_item_inventory_id || 0),
-    workstation_item_name: row.workstation_item_name || '',
+    workstation_site_item_inventory_ids: normalizeWorkstationIds(row.workstation_site_item_inventory_ids_csv || row.workstation_site_item_inventory_id || ''),
+    workstation_item_names: String(row.workstation_item_names_csv || row.workstation_item_name || '').split('||').map((v)=>v.trim()).filter(Boolean),
+    workstation_site_item_inventory_id: normalizeWorkstationIds(row.workstation_site_item_inventory_ids_csv || row.workstation_site_item_inventory_id || '')[0] || 0,
+    workstation_item_name: String(row.workstation_item_names_csv || row.workstation_item_name || '').split('||').map((v)=>v.trim()).filter(Boolean)[0] || '',
     updated_at: row.updated_at || null
   };
 }
