@@ -2,9 +2,9 @@
 
 ## Current checkpoint
 
-**Build 291 — Public Runtime Reliability & Broken-Surface Closure** is active in Development.
+**Build 292 — Client Runtime Observer & Memory-Churn Hardening** is active in Development.
 
-Build 290 is the exact Production baseline while Build 291 closes buyer-visible public runtime failures and adds public-route smoke coverage.
+Build 291 is the exact Production baseline while Build 292 reduces long-session observer/render churn across public, storefront, Products, Packaging and Inventory runtimes.
 
 Build 291 is schema-neutral. It focuses on `/capabilities/`, `/creations/`, their public APIs, graceful customer-safe fallback behavior, and sitemap-wide public route smoke acceptance.
 
@@ -12,11 +12,11 @@ Build 291 is schema-neutral. It focuses on `/capabilities/`, `/creations/`, thei
 
 The queue **has not run out** and is **ready to start**.
 
-**Active: Build 291 — Public Runtime Reliability & Broken-Surface Closure**
+**Active: Build 292 — Client Runtime Observer & Memory-Churn Hardening**
 
 1. Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships — **PRODUCTION GREEN**
-2. Build 291 — Public Runtime Reliability & Broken-Surface Closure — **ACTIVE**
-3. Build 292 — Client Runtime Observer & Memory-Churn Hardening
+2. Build 291 — Public Runtime Reliability & Broken-Surface Closure — **PRODUCTION GREEN**
+3. Build 292 — Client Runtime Observer & Memory-Churn Hardening — **ACTIVE**
 4. Build 293 — CSS Design-System & Responsive Consolidation
 5. Build 294 — CAIP Workshop Follies & Maker Story Foundation
 6. Build 295 — Storefront Buyer Journey Simplification

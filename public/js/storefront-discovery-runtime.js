@@ -197,22 +197,52 @@
 
   function observe() {
     if (typeof MutationObserver !== 'function') return;
-    const bodyObserver = new MutationObserver((records) => {
+    let bodyObserver = null;
+    let headObserver = null;
+    let seoScheduled = false;
+
+    const subtreeNeedsPreparation = (node) => node instanceof Element && (
+      node.matches('img,.shop-card-no-image,.product-detail-no-image,.media-managed-placeholder,#shopLoading,#shopStatus,#shopSummary,#shopEmpty,#productLoading,#shopError,#productError,[data-storefront-merchandising],.shop-card-thumb,.product-detail-thumb,h1') ||
+      node.querySelector?.('img,.shop-card-no-image,.product-detail-no-image,.media-managed-placeholder,#shopLoading,#shopStatus,#shopSummary,#shopEmpty,#productLoading,#shopError,#productError,[data-storefront-merchandising],.shop-card-thumb,.product-detail-thumb,h1')
+    );
+
+    bodyObserver = new MutationObserver((records) => {
+      let headingAdded = false;
       for (const record of records) {
-        record.addedNodes.forEach((node) => {
-          if (!(node instanceof Element)) return;
+        for (const node of record.addedNodes || []) {
+          if (!(node instanceof Element) || !subtreeNeedsPreparation(node)) continue;
           if (node.matches('img')) prepareImage(node);
           prepareRoot(node);
-        });
+          if (node.matches('h1') || node.querySelector?.('h1')) headingAdded = true;
+        }
       }
-      protectSingleH1();
-      prepareStatuses();
-      prepareThumbState();
+      if (headingAdded) protectSingleH1();
     });
     bodyObserver.observe(document.body, { childList:true, subtree:true });
 
-    const headObserver = new MutationObserver(() => syncSocialSeo());
-    headObserver.observe(document.head, { childList:true, subtree:true, attributes:true, attributeFilter:['content','href'] });
+    const observeHead = () => headObserver?.observe(document.head, { childList:true, subtree:true, attributes:true, attributeFilter:['content','href'] });
+    const scheduleSeoSync = () => {
+      if (seoScheduled) return;
+      seoScheduled = true;
+      queueMicrotask(() => {
+        seoScheduled = false;
+        headObserver?.disconnect();
+        try { syncSocialSeo(); }
+        finally { observeHead(); }
+      });
+    };
+    headObserver = new MutationObserver((records) => {
+      if (records.some((record) => record.target instanceof Element && record.target.matches?.('title,meta,link'))) scheduleSeoSync();
+    });
+    observeHead();
+
+    window.addEventListener('pagehide', () => {
+      bodyObserver?.disconnect();
+      headObserver?.disconnect();
+      bodyObserver = null;
+      headObserver = null;
+      seoScheduled = false;
+    }, { once:true });
   }
 
   function boot() {

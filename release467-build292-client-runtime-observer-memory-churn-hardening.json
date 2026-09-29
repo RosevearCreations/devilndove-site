@@ -1,0 +1,73 @@
+{
+  "release": 467,
+  "build": 292,
+  "title": "Client Runtime Observer & Memory-Churn Hardening",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build292-client-runtime-observer-memory-churn-hardening",
+  "starting_point": {
+    "development": {
+      "sha": "853209c4ae3ee3db9f06a98dac649f65523961a1",
+      "tree": "ab10b9e3e5780f90ddab43893be7eb9fa97bcddd",
+      "system_gate_run": 36570270322,
+      "quality_run": 36570270693,
+      "it_admin_runtime_run": 36570270648,
+      "repository_hygiene_run": 36570270345,
+      "d1_ci_fanout_guard_run": 36570270356,
+      "build291_run": 36570270569,
+      "state": "EXACT_BUILD291_GREEN"
+    },
+    "production": {
+      "main_sha": "b9cd4d8c27b64e9b2c892575e38673681a8367fa",
+      "tree_sha": "ab10b9e3e5780f90ddab43893be7eb9fa97bcddd",
+      "production_pages_deploy_run": 36570536323,
+      "production_live_resource_integrity_run": 36570637009,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "public_heading_guard": true,
+    "layout_overflow_guard": true,
+    "storefront_discovery": true,
+    "admin_ergonomics": true,
+    "admin_workspace_state": true,
+    "products_table_enhancements": true,
+    "packaging_material_intelligence": true,
+    "packaging_label_composition": true,
+    "packaging_release_workflow": true,
+    "packaging_print_source": true,
+    "inventory_multistation": true,
+    "observer_budget_gate": true
+  },
+  "acceptance": {
+    "broad_rescans_removed_from_hot_paths": true,
+    "added_node_filtering": true,
+    "direct_child_filtering_where_applicable": true,
+    "self_mutation_avoidance": true,
+    "pagehide_disconnect": true,
+    "render_coalescing": true,
+    "current_product_browser_background_observers": 0,
+    "packaging_editor_continuous_observer": false,
+    "cache_revision": "467b292-observer-budget-v1"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "payment_or_refund": false,
+    "production_business_data_query": false
+  },
+  "implementation": {
+    "budget": "scripts/release467_build292_observer_budget.py",
+    "gate": "scripts/release467_build292_gate.py",
+    "workflow": ".github/workflows/release467-build292-client-runtime-observer-memory-churn.yml",
+    "roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md"
+  },
+  "contract": {
+    "next_build": 293,
+    "next_build_title": "CSS Design-System & Responsive Consolidation",
+    "future_queue_exhausted": false
+  }
+}

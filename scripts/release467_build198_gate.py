@@ -59,7 +59,7 @@ req('body[data-storefront-discovery-runtime="455"] .shop-card-thumb img' in disc
 req('body[data-storefront-discovery-runtime="455"] .product-detail-thumb img' in discovery, "Product detail thumbnail selector missing")
 req(discovery.count("object-fit:contain") >= 2, "Storefront Product media must explicitly use contain")
 req(".storefront-collage-item img" in discovery and "object-fit:cover" in discovery, "Collection/collage cover presentation should remain separate from Product media")
-req("STOREFRONT_DISCOVERY_REVISION = '467b198-product-image-fidelity'" in middleware, "Storefront Build 198 cache revision missing")
+req("STOREFRONT_DISCOVERY_REVISION = '467b198-product-image-fidelity'" in middleware or "STOREFRONT_DISCOVERY_REVISION = '467b292-observer-budget-v1'" in middleware, "Storefront Build 198 behavior must be retained by current successor")
 req("storefront-discovery.css?v=${STOREFRONT_DISCOVERY_REVISION}" in middleware, "Storefront CSS must use Build 198 asset revision")
 
 # Product Media editor keeps full image visible and makes crop/focal work explicit.

@@ -77,8 +77,15 @@
   function watchRenders() {
     const main = byId('packagingStudioMain');
     if (!main || typeof MutationObserver === 'undefined') return;
-    const observer = new MutationObserver(() => bindPrintSourceSelect());
+    const observer = new MutationObserver((records) => {
+      const relevant = records.some((record) => [...(record.addedNodes || [])].some((node) =>
+        node?.nodeType === Node.ELEMENT_NODE &&
+        (node.matches?.('#printTestVersion') || node.querySelector?.('#printTestVersion'))
+      ));
+      if (relevant) bindPrintSourceSelect();
+    });
     observer.observe(main, { childList: true, subtree: true });
+    window.addEventListener('pagehide', () => observer.disconnect(), { once: true });
     bindPrintSourceSelect();
   }
 

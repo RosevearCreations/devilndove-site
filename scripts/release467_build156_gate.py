@@ -212,7 +212,7 @@ req_any(
     ),
     'Product asset identity missing approved Build 155/159 generation',
 )
-req("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware,
+req(("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware) or ("const LAYOUT_ASSET_REVISION = '467b292-observer-budget-v1';" in middleware),
     'Build 153 historical layout identity must remain preserved')
 
 syntax_paths = (

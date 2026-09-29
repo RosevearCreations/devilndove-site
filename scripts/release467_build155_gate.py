@@ -53,7 +53,7 @@ req(
     or "const PRODUCTS_ASSET_REVISION = '467-b159-products-returning-browser-cache-v1';" in middleware,
     'Build 155 emergency Products asset revision or approved Build 159 successor missing'
 )
-req("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware,
+req(("const LAYOUT_ASSET_REVISION = '467-b153-layout-observer';" in middleware) or ("const LAYOUT_ASSET_REVISION = '467b292-observer-budget-v1';" in middleware),
     'Build 153 layout-observer revision must remain preserved')
 req("import('/public/js/admin-products-marketplace-readiness.js?v=467b155')" in loader,
     'Build 155 Marketplace Listing Readiness dynamic import cache revision missing')

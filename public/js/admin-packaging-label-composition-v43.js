@@ -274,9 +274,18 @@
   }
 
   function startObserver() {
-    if (observer || !document.body) return;
-    observer = new MutationObserver(() => scheduleRender(false));
-    observer.observe(document.body, { childList: true, subtree: true });
+    const main = byId('packagingStudioMain');
+    if (observer || !main) return;
+    observer = new MutationObserver((records) => {
+      const relevant = records.some((record) => [...(record.addedNodes || [])].some((node) =>
+        node?.nodeType === Node.ELEMENT_NODE &&
+        (node.matches?.('#soapIngredientRows,[data-soap-ingredient-row],#packagingProjectId,[data-build43-label-composition]') ||
+         node.querySelector?.('#soapIngredientRows,[data-soap-ingredient-row],#packagingProjectId,[data-build43-label-composition]'))
+      ));
+      if (relevant) scheduleRender(false);
+    });
+    observer.observe(main, { childList: true, subtree: true });
+    window.addEventListener('pagehide', () => { observer?.disconnect(); observer = null; }, { once: true });
   }
 
   function snapshot() {

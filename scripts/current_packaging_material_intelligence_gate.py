@@ -55,7 +55,7 @@ require('Build 43 will own per-label overrides' in browser, 'Build 42/43 respons
 require('schemaChange: false' in browser and 'requestTimeDdl: false' in browser, 'browser safety status must remain explicit')
 require('productionContacted: false' in browser, 'browser safety status must preserve Production isolation')
 
-require('/public/js/admin-packaging-material-intelligence-v42.js?v=46742' in compat, 'Packaging compatibility checkpoint must load Build 42 browser layer')
+require('/public/js/admin-packaging-material-intelligence-v42.js?v=467b292' in compat, 'Packaging compatibility checkpoint must load the Build 292-hardened Build 42 browser layer')
 require("'dd:packaging-material-intelligence-active'" in compat and 'document.addEventListener' in compat and 'publishState' in compat, 'compatibility status must observe Build 42 activation')
 require('materialIntelligenceBuild' in compat and 'materialIntelligenceActive' in compat, 'compatibility snapshot must project Build 42 state')
 

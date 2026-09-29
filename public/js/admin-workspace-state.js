@@ -1,9 +1,13 @@
 // Devil n Dove Release 454 — shared Admin loading/empty/error/recovery presentation.
+// Build 292 — targeted observer scope and page lifecycle cleanup.
 (()=>{
 'use strict';
 const ERROR_RE=/(could not|failed|failure|error|unavailable|unable to|not available)/i;
 const LOADING_RE=/(loading|reading|refreshing|preparing|recording|saving|checking|fetching|working)/i;
 const EMPTY_RE=/^(no |choose |select |not prepared|nothing )/i;
+const STATUS_SELECTOR='[role="status"],[data-admin-workspace-status]';
+let observer=null;
+
 function classify(value){const t=String(value||'').trim();if(!t)return 'ready';if(ERROR_RE.test(t))return 'error';if(LOADING_RE.test(t))return 'loading';if(EMPTY_RE.test(t))return 'empty';return 'ready';}
 function retryFor(el){
   const selector=el.dataset.adminRetryClick;
@@ -18,8 +22,29 @@ function retryFor(el){
 }
 function enhance(el,state){if(!el)return;const s=state||classify(el.textContent);el.classList.add('dd-workspace-status');el.dataset.state=s;el.setAttribute('role','status');el.setAttribute('aria-live','polite');el.setAttribute('aria-atomic','true');retryFor(el);}
 function set(target,state,message){const el=typeof target==='string'?document.querySelector(target):target;if(!el)return null;if(message!==undefined)el.textContent=message;enhance(el,state);return el;}
-function scan(root=document){root.querySelectorAll?.('[role="status"],[data-admin-workspace-status]').forEach(el=>enhance(el));}
-function init(){scan();const observer=new MutationObserver(records=>{for(const r of records){const el=r.target.nodeType===1?r.target:r.target.parentElement;const status=el?.closest?.('[role="status"],[data-admin-workspace-status]');if(status)enhance(status);}});observer.observe(document.body,{subtree:true,childList:true,characterData:true});}
+function scan(root=document){
+  if(root?.nodeType===Node.ELEMENT_NODE&&root.matches?.(STATUS_SELECTOR))enhance(root);
+  root.querySelectorAll?.(STATUS_SELECTOR).forEach(el=>enhance(el));
+}
+function init(){
+  scan();
+  if(!document.body||typeof MutationObserver!=='function')return;
+  observer=new MutationObserver(records=>{
+    for(const record of records){
+      if(record.type==='characterData'){
+        const status=record.target?.parentElement?.closest?.(STATUS_SELECTOR);
+        if(status)enhance(status);
+        continue;
+      }
+      const target=record.target?.nodeType===Node.ELEMENT_NODE?record.target:record.target?.parentElement;
+      const existingStatus=target?.closest?.(STATUS_SELECTOR);
+      if(existingStatus)enhance(existingStatus);
+      for(const node of record.addedNodes||[])if(node?.nodeType===Node.ELEMENT_NODE)scan(node);
+    }
+  });
+  observer.observe(document.body,{subtree:true,childList:true,characterData:true});
+  window.addEventListener('pagehide',()=>{observer?.disconnect();observer=null;},{once:true});
+}
 window.DDAdminWorkspaceState={classify,set,scan};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

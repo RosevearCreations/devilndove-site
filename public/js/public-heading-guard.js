@@ -1,6 +1,10 @@
 // Current public heading guard: an indexable/public document exposes one H1 at a time.
 (() => {
   if (window.location.pathname.startsWith('/admin/')) return;
+
+  let observer = null;
+  let scheduled = false;
+
   const demoteExtras = () => {
     const headings = [...document.querySelectorAll('h1')];
     if (headings.length <= 1) return;
@@ -12,11 +16,34 @@
     });
     console.warn(`[DD SEO] demoted ${headings.length - 1} unexpected extra H1 element(s).`);
   };
-  const run = () => demoteExtras();
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, { once: true });
-  else run();
-  const observer = new MutationObserver(() => demoteExtras());
-  const start = () => document.body && observer.observe(document.body, { childList: true, subtree: true });
+
+  const schedule = () => {
+    if (scheduled) return;
+    scheduled = true;
+    queueMicrotask(() => {
+      scheduled = false;
+      demoteExtras();
+    });
+  };
+
+  const mutationAddsHeading = (record) => [...(record.addedNodes || [])].some((node) =>
+    node?.nodeType === Node.ELEMENT_NODE &&
+    (node.matches?.('h1') || node.querySelector?.('h1'))
+  );
+
+  const start = () => {
+    demoteExtras();
+    if (!document.body || typeof MutationObserver !== 'function') return;
+    observer = new MutationObserver((records) => {
+      if (records.some(mutationAddsHeading)) schedule();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener('pagehide', () => {
+      observer?.disconnect();
+      observer = null;
+    }, { once: true });
+  };
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
   else start();
 })();

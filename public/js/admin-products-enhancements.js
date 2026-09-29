@@ -631,11 +631,24 @@ document.addEventListener('DOMContentLoaded', () => {
   scheduleDashboardRefresh(700);
   scheduleDashboardRefresh(1800);
 
-  const observer = new MutationObserver(() => {
-    applyColumnPrefs();
-    applyProductFilters();
+  let productObserverScheduled = false;
+  const observer = new MutationObserver((records) => {
+    const rowStructureChanged = (records || []).some((record) =>
+      record.target === tableBody && ((record.addedNodes?.length || 0) > 0 || (record.removedNodes?.length || 0) > 0)
+    );
+    if (!rowStructureChanged || productObserverScheduled) return;
+    productObserverScheduled = true;
+    queueMicrotask(() => {
+      productObserverScheduled = false;
+      applyColumnPrefs();
+      applyProductFilters();
+    });
   });
-  observer.observe(tableBody, { childList: true, subtree: true });
+  observer.observe(tableBody, { childList: true });
+  window.addEventListener('pagehide', () => {
+    observer.disconnect();
+    productObserverScheduled = false;
+  }, { once: true });
 
   document.addEventListener('dd:product-editor-target', (event) => updateCurrentProduct(event?.detail || null));
   document.addEventListener('dd:product-created', (event) => updateCurrentProduct(event?.detail || null));

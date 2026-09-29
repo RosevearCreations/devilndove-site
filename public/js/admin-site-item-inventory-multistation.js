@@ -186,6 +186,13 @@
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', begin, { once:true });
   else begin();
+  window.addEventListener('pagehide', () => {
+    observer?.disconnect();
+    observer = null;
+    observedMount = null;
+    scheduled = false;
+    pendingFormIds = [];
+  }, { once:true });
 
   const style = document.createElement('style');
   style.textContent = `

@@ -2,7 +2,7 @@
   "release": 467,
   "build": 291,
   "title": "Public Runtime Reliability & Broken-Surface Closure",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build291-public-runtime-reliability-broken-surface-closure",
   "starting_point": {
     "development": {
@@ -80,5 +80,39 @@
     "next_build": 292,
     "next_build_title": "Client Runtime Observer & Memory-Churn Hardening",
     "future_queue_exhausted": false
+  },
+  "accepted_dev_sha": "853209c4ae3ee3db9f06a98dac649f65523961a1",
+  "accepted_dev_tree_sha": "ab10b9e3e5780f90ddab43893be7eb9fa97bcddd",
+  "acceptance_runs": {
+    "system_gate_run": 36570270322,
+    "current_application_quality_run": 36570270693,
+    "it_admin_runtime_proof_run": 36570270648,
+    "branch_hygiene_run": 36570270345,
+    "d1_ci_fanout_guard_run": 36570270356,
+    "build_specific_run": 36570270569
+  },
+  "production_checkpoint": {
+    "main_sha": "b9cd4d8c27b64e9b2c892575e38673681a8367fa",
+    "tree_sha": "ab10b9e3e5780f90ddab43893be7eb9fa97bcddd",
+    "production_pages_deploy_run": 36570536323,
+    "production_live_resource_integrity_run": 36570637009,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "sitemap_routes_checked": 49,
+    "sitemap_route_failures": 0,
+    "d1_promotion_mode": "CODE_ONLY_ZERO_D1"
+  },
+  "final_closure": {
+    "dev_sha": "853209c4ae3ee3db9f06a98dac649f65523961a1",
+    "tree_sha": "ab10b9e3e5780f90ddab43893be7eb9fa97bcddd",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD291_GREEN",
+    "proofs": {
+      "system_gate_run": 36570270322,
+      "current_application_quality_run": 36570270693,
+      "it_admin_runtime_proof_run": 36570270648,
+      "branch_hygiene_run": 36570270345,
+      "d1_ci_fanout_guard_run": 36570270356,
+      "build291_dedicated_run": 36570270569
+    }
   }
 }
