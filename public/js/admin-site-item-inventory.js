@@ -261,12 +261,18 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>`;
   }
 
-  function syncCategoryPresetSelection(value) {
+  function syncCategoryPresetSelection(value, processId = 0) {
     const select = document.getElementById('siteInventoryCategoryPreset');
     if (!select) return;
+    const id = Number(processId || 0);
     const normalized = String(value || '').trim().toLowerCase();
-    const match = Array.from(select.options).find((option) => String(option.value || '').trim().toLowerCase() === normalized);
+    const match = id
+      ? Array.from(select.options).find((option) => Number(option.value || 0) === id)
+      : Array.from(select.options).find((option) => String(option.dataset?.processName || option.textContent || '').trim().toLowerCase() === normalized);
     select.value = match ? match.value : '';
+    const hidden = document.getElementById('siteInventoryCategory');
+    if (hidden) hidden.value = match ? String(match.dataset?.processName || match.textContent || '').trim().toLowerCase() : normalized;
+    syncFormStationState();
   }
 
   function resourceSeedLabel(item = {}) {
@@ -282,8 +288,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const itemSelect = document.getElementById('siteInventorySeedItem');
     const categorySelect = document.getElementById('siteInventoryCategoryPreset');
     if (categorySelect) {
-      categorySelect.innerHTML = '<option value="">Choose an existing category…</option>' + categorySeedOptions.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
+      const current = Number(categorySelect.value || 0);
+      categorySelect.innerHTML = processOptionsMarkup(current, document.getElementById('siteInventoryCategory')?.value || '');
     }
+    const stockUnitSelect = document.getElementById('siteInventoryStockUnitLabel');
+    if (stockUnitSelect) stockUnitSelect.innerHTML = unitOptionsMarkup(stockUnitSelect.value || 'unit');
+    const usageUnitSelect = document.getElementById('siteInventoryUsageUnitLabel');
+    if (usageUnitSelect) usageUnitSelect.innerHTML = unitOptionsMarkup(usageUnitSelect.value || 'unit');
+    const parentStation = document.getElementById('siteInventoryParentStation');
+    if (parentStation) parentStation.innerHTML = stationOptionsMarkup(Number(categorySelect?.value || 0), Number(parentStation.value || 0), editingSiteInventoryId);
+    syncFormStationState();
     if (!itemSelect) return;
     const sourceType = String(typeSelect?.value || 'tool').trim();
     const query = String(seedSearchText || '').trim().toLowerCase();
@@ -363,6 +377,8 @@ document.addEventListener('DOMContentLoaded', () => {
             { fallbackMessage: 'Failed to load inventory setup choices.', cacheKey: 'inventory-bootstrap-v252', cacheTtlMs: 300000, retries: 0, staleOnError: true }
           );
           categorySeedOptions = Array.isArray(data?.categories) ? data.categories.map((v)=>String(v||'').trim().toLowerCase()).filter(Boolean) : [];
+          processOptions = Array.isArray(data?.processes) ? data.processes : [];
+          stationToolOptions = Array.isArray(data?.station_tools) ? data.station_tools : [];
           unitPresetOptions = Array.isArray(data?.unit_presets) && data.unit_presets.length ? data.unit_presets : unitPresetOptions;
           catalogSeedOptions = [];
           renderSeedDropdowns();
