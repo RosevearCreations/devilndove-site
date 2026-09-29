@@ -927,7 +927,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventorySeedItem')?.addEventListener('change', (event) => { applySeedItemByKey(event.target.value || ''); });
     document.getElementById('siteInventoryCategoryPreset')?.addEventListener('change', (event) => {
       const option = event.target.selectedOptions?.[0];
-      setInputValue('siteInventoryCategory', String(option?.dataset?.processName || option?.textContent || '').trim().toLowerCase());
+      setInputValue('siteInventoryCategory', event.target.value ? String(option?.dataset?.processName || option?.textContent || '').trim().toLowerCase() : '');
       syncFormStationState();
     });
     document.getElementById('siteInventoryWorkstationRole')?.addEventListener('change', syncFormStationState);
