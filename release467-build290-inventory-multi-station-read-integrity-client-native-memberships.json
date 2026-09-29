@@ -7,21 +7,21 @@
   "starting_point": {
     "development": {
       "sha": "8fa4bb20d6e7b43ea319ff0eaadeda49d4070b5c",
-      "state": "QUEUE_HEAD_GREEN",
-      "proofs": {
-        "system_gate_run": 36520263635,
-        "current_application_quality_run": 36520263621,
-        "it_admin_runtime_proof_run": 36520263581,
-        "branch_hygiene_run": 36520263613,
-        "d1_ci_fanout_guard_run": 36520263653
-      }
+      "tree": "72cf3793ab38424d26bb284ebf95721f902c7859",
+      "system_gate_run": 36520263635,
+      "quality_run": 36520263621,
+      "it_admin_runtime_run": 36520263581,
+      "repository_hygiene_run": 36520263613,
+      "d1_ci_fanout_guard_run": 36520263653,
+      "state": "EXACT_QUEUE_HEAD_GREEN"
     },
     "production": {
       "main_sha": "238a7732049bbf9c5fead7b3ec4cc2c1e779fcd6",
       "tree_sha": "9303662ce708b1c1c02c3a94c618d8f2704ca0a1",
       "production_pages_deploy_run": 36517150890,
       "production_live_resource_integrity_run": 36517221739,
-      "state": "PRODUCTION_GREEN"
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_build289_verified_development": true
     }
   },
   "scope": {
@@ -41,10 +41,20 @@
     "reload_all_membership_ids": true,
     "same_category_station_validation": true,
     "active_station_tool_validation": true,
-    "d1_measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "d1_measurement_state": "EXACT_DEVELOPMENT_MEASURED_GREEN",
     "d1_rows_read_ceiling": 5000,
     "foreign_key_violations_required": 0,
-    "invalid_membership_rows_required": 0
+    "invalid_membership_rows_required": 0,
+    "measurement_sha": "0c8d6d7c850643e4a23360f7ac273c25308db64e",
+    "measurement_run": 36558154559,
+    "measurement_artifact_id": 11028916294,
+    "d1_provider_rows_read": 163,
+    "page_items": 40,
+    "membership_rows": 0,
+    "items_with_memberships": 0,
+    "max_memberships_per_item": 0,
+    "invalid_membership_rows": 0,
+    "foreign_key_violations": 0
   },
   "safety": {
     "schema_change": false,
