@@ -26,8 +26,8 @@ for token in ('data-field="stock_unit_label"','data-field="usage_unit_label"','d
     q(token in inventory_ui,'Inventory Operations repair missing '+token)
 q("cost_per_usage_unit_cents" in inventory_api and "read_profile: 'history_only'" in inventory_api and "const linkStatsCte = includeLinkStats" in inventory_api,'Inventory Operations API lost calculated usage cost, bounded history, or opt-in product-link aggregation')
 q("requestPath === '/api/auth/me'" in authjs and "response.status === 401 && !String(url).includes('/api/auth/login')" not in authjs,'Feature API 401 must not clear browser identity; canonical auth/me remains logout authority')
-q('/public/js/auth.js?v=467b286-inventory-session' in inventory_page and any(v in inventory_page for v in ('/public/js/admin-site-item-inventory.js?v=286.2','/public/js/admin-site-item-inventory.js?v=288.1')),'Inventory Operations cache-busting repair missing')
-q("source_type: value('source_type') || original.source_type" in inventory_ui,'Build 286 inline Tool/Supply type save missing')
+q('/public/js/auth.js?v=467b286-inventory-session' in inventory_page and any(v in inventory_page for v in ('/public/js/admin-site-item-inventory.js?v=286.2','/public/js/admin-site-item-inventory.js?v=288.1','/public/js/admin-site-item-inventory.js?v=289.1')),'Inventory Operations cache-busting repair missing')
+q("source_type: String(value('source_type') || original.source_type" in inventory_ui or "source_type: value('source_type') || original.source_type" in inventory_ui,'Build 286 inline Tool/Supply type save missing')
 for token in ("grid-template-columns:repeat(3,minmax(0,1fr))","content:attr(data-label)",".shop-collection-card{color:#1f2937}"):q(token in css,'Build 286 operator CSS repair missing '+token)
 for page,name in ((tools_page,'Tools'),(supplies_page,'Supplies')):
     q("minmax(220px, 1fr)" in page and "prefers-reduced-motion:reduce" in page,f'Build 286 compact {name} cards missing')
