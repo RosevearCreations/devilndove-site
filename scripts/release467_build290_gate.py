@@ -42,7 +42,7 @@ for token in ('Forge-like 3-station membership reload','Global fetch interceptio
     q(token in reg,'Build 290 regression missing '+token)
 q('Build 294 — CAIP Workshop Follies & Maker Story Foundation' in road and 'Build 291 — Public Runtime Reliability & Broken-Surface Closure' in road,'Build 290 successor roadmap drift')
 q("run_current_contract('scripts/release467_build290_gate.py','Release 467 Build 290')" in sysgate,'System Gate missing Build 290')
-q('development-membership-read-measurement' in wf and "D1_PROVIDER_ROWS_READ_CEILING: '5000'" in wf and 'devilndove-dev' in wf,'Build 290 D1 measurement workflow missing')
+q('D1_ONE_SHOT_EVIDENCE_CAPTURE' in wf and 'development-membership-read-measurement' in wf and "D1_PROVIDER_ROWS_READ_CEILING: '20000'" in wf and "BUILD290_ACCEPTANCE_ROWS_READ_CEILING: '5000'" in wf and 'branches: [dev]' in wf and 'paths:' in wf and 'devilndove-dev' in wf,'Build 290 D1 measurement workflow missing')
 q(int(p.get('build') or 0)>=290,'Current authority must retain Build 290 or successor')
 if int(p.get('build') or 0)==290:
     q(p.get('title')=='Inventory Multi-Station Read Integrity & Client-Native Memberships' and p.get('state')=='DEVELOPMENT_GREEN','Current Build 290 pointer mismatch')
