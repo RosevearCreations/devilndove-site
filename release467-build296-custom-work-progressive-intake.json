@@ -1,0 +1,108 @@
+{
+  "release": 467,
+  "build": 296,
+  "title": "Custom Work Progressive Intake",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build296-custom-work-progressive-intake",
+  "predecessor": {
+    "build": 295,
+    "title": "Storefront Buyer Journey Simplification",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "653a1952cee1a78aa131180fc798a45f4de344b0",
+    "development_tree_sha": "7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3",
+    "development_proofs": {
+      "system_gate_run": 36588836053,
+      "current_application_quality_run": 36588836007,
+      "it_admin_runtime_proof_run": 36588836018,
+      "branch_hygiene_run": 36588836078,
+      "build_specific_proof_run": 36588836000
+    },
+    "production_main_sha": "9da8d3c7dc6ace186de0d69141e19fed998f5ddf",
+    "production_tree_sha": "7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3",
+    "production_pages_deploy_run": 36589115627,
+    "production_live_resource_integrity_run": 36589247196,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "starting_point": {
+    "development": {
+      "sha": "653a1952cee1a78aa131180fc798a45f4de344b0",
+      "tree": "7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 36588836053,
+      "quality_run": 36588836007,
+      "it_admin_runtime_run": 36588836018,
+      "repository_hygiene_run": 36588836078,
+      "build_specific_proof_run": 36588836000
+    },
+    "production": {
+      "main_sha": "9da8d3c7dc6ace186de0d69141e19fed998f5ddf",
+      "tree": "7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 36589115627,
+      "production_live_resource_integrity_run": 36589247196,
+      "remote_d1_queries": 0
+    }
+  },
+  "scope": {
+    "progressive_sections": [
+      "What would you like made?",
+      "What matters most?",
+      "Anything we should know?",
+      "How can we reach you?"
+    ],
+    "minimal_required_fields": [
+      "message",
+      "name",
+      "email",
+      "consent_to_contact"
+    ],
+    "reference_media_optional": true,
+    "reference_links_optional": true,
+    "technical_fields_progressive": true,
+    "customer_supplied_item_conditional": true,
+    "tab_local_draft_recovery": true,
+    "draft_file_storage": false,
+    "existing_intake_authority": "custom_requests",
+    "existing_upload_authority": "custom-request-reference-upload",
+    "accepted_custom_work_story_path": "Creative Process → CAIP → Content Studio (owner-selected only)",
+    "abandonment_measurement": "existing DDAnalytics event hooks only",
+    "dark_patterns": false
+  },
+  "retained_authorities": {
+    "custom_work_intake": "release467-build210-custom-work-intake-2.json",
+    "customer_supplied_item": "release467-build216-customer-supplied-item-suitability-review.json",
+    "manufacturing_triage": "release467-build211-manufacturing-triage-route.json",
+    "hybrid_creative_project": "release467-build212-hybrid-creative-project-operations.json",
+    "caip_maker_story": "release467-build294-caip-workshop-follies-maker-story-foundation.json",
+    "storefront_buyer_journey": "release467-build295-storefront-buyer-journey-simplification.json"
+  },
+  "files": {
+    "public_page": "custom-request/index.html",
+    "client": "public/js/custom-request-intake.js",
+    "styles": "css/custom-request-journey.css",
+    "api": "functions/api/custom-request.js",
+    "upload_api": "functions/api/custom-request-reference-upload.js",
+    "regression": "scripts/release467_build296_regression.py",
+    "gate": "scripts/release467_build296_gate.py",
+    "workflow": ".github/workflows/release467-build296-custom-work-progressive-intake.yml"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "automatic_order": false,
+    "automatic_quote": false,
+    "automatic_production": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "payment_or_refund": false,
+    "private_media_publication": false
+  },
+  "contract": {
+    "next_build": 297,
+    "next_build_title": "Search-First HTML, Product + Story SEO & Crawl Control",
+    "future_queue_exhausted": false
+  }
+}

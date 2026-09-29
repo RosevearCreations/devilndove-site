@@ -1,33 +1,33 @@
-// Release 467 Build 295 — Storefront Buyer Journey Simplification over exact Build 293 Production source.
+// Release 467 Build 296 — Custom Work Progressive Intake over exact Build 295 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=295;
-const TITLE='Storefront Buyer Journey Simplification';
-const AUTHORITY='release467-build295-storefront-buyer-journey-simplification';
-const EVIDENCE_ID='r467-b294-green-36583874154-36584189791';
+const BUILD=296;
+const TITLE='Custom Work Progressive Intake';
+const AUTHORITY='release467-build296-custom-work-progressive-intake';
+const EVIDENCE_ID='r467-b295-green-36588836053-36589115627';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:293,title:'CSS Design-System & Responsive Consolidation',state:'DEVELOPMENT_GREEN',
-  dev_sha:'22b0cb7074c9e5cba4a2f1b335d031f61d457c09',tree_sha:'3d4467f152bdd0e172e2ec512529b9c8bef578db',
-  system_gate_run:36583874154,current_application_quality_run:36583873948,it_admin_runtime_proof_run:36583874229,
-  branch_hygiene_run:36583874092,proof_state:'EXACT_BRANCH_HEAD_BUILD294_GREEN',
+  release:467,build:295,title:'Storefront Buyer Journey Simplification',state:'DEVELOPMENT_GREEN',
+  dev_sha:'653a1952cee1a78aa131180fc798a45f4de344b0',tree_sha:'7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3',
+  system_gate_run:36588836053,current_application_quality_run:36588836007,it_admin_runtime_proof_run:36588836018,
+  branch_hygiene_run:36588836078,proof_state:'EXACT_BRANCH_HEAD_BUILD294_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:294,title:'Build 295 starting point',state:'DEVELOPMENT_GREEN',
-  dev_sha:'22b0cb7074c9e5cba4a2f1b335d031f61d457c09',tree_sha:'3d4467f152bdd0e172e2ec512529b9c8bef578db',
-  accepted_sha:'22b0cb7074c9e5cba4a2f1b335d031f61d457c09',accepted_tree_sha:'3d4467f152bdd0e172e2ec512529b9c8bef578db',
-  system_gate_run:36583874154,current_application_quality_run:36583873948,it_admin_runtime_proof_run:36583874229,
-  branch_hygiene_run:36583874092,proof_state:'EXACT_BRANCH_HEAD_BUILD294_GREEN'
+  release:467,build:295,title:'Build 296 starting point',state:'DEVELOPMENT_GREEN',
+  dev_sha:'653a1952cee1a78aa131180fc798a45f4de344b0',tree_sha:'7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3',
+  accepted_sha:'653a1952cee1a78aa131180fc798a45f4de344b0',accepted_tree_sha:'7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3',
+  system_gate_run:36588836053,current_application_quality_run:36588836007,it_admin_runtime_proof_run:36588836018,
+  branch_hygiene_run:36588836078,proof_state:'EXACT_BRANCH_HEAD_BUILD294_GREEN'
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:293,title:'CSS Design-System & Responsive Consolidation',state:'PRODUCTION_GREEN',
-  main_sha:'d731d823cbcf7708a6d978c9f399c2a72af55635',tree_sha:'3d4467f152bdd0e172e2ec512529b9c8bef578db',
-  production_pages_deploy_run:36584189791,production_live_resource_integrity_run:36584379171,
-  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36583874124,remote_d1_queries:0
+  release:467,build:295,title:'Storefront Buyer Journey Simplification',state:'PRODUCTION_GREEN',
+  main_sha:'9da8d3c7dc6ace186de0d69141e19fed998f5ddf',tree_sha:'7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3',
+  production_pages_deploy_run:36589115627,production_live_resource_integrity_run:36589247196,
+  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36588836000,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -127,7 +127,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:295,title:TITLE,authority:'release467-build295-storefront-buyer-journey-simplification.json'},
+        current_closure_candidate:{release:467,build:296,title:TITLE,authority:'release467-build296-custom-work-progressive-intake.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],

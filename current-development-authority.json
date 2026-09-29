@@ -1,32 +1,31 @@
 {
   "release": 467,
-  "build": 295,
-  "title": "Storefront Buyer Journey Simplification",
+  "build": 296,
+  "title": "Custom Work Progressive Intake",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 294,
-      "title": "CAIP Workshop Follies & Maker Story Foundation",
-      "authority": "release467-build294-caip-workshop-follies-maker-story-foundation.json",
-      "dev_sha": "22b0cb7074c9e5cba4a2f1b335d031f61d457c09",
-      "tree_sha": "3d4467f152bdd0e172e2ec512529b9c8bef578db",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD294_GREEN",
+      "build": 295,
+      "title": "Storefront Buyer Journey Simplification",
+      "authority": "release467-build295-storefront-buyer-journey-simplification.json",
+      "dev_sha": "653a1952cee1a78aa131180fc798a45f4de344b0",
+      "tree_sha": "7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD295_GREEN",
       "proofs": {
-        "system_gate_run": 36583874154,
-        "current_application_quality_run": 36583873948,
-        "it_admin_runtime_proof_run": 36583874229,
-        "branch_hygiene_run": 36583874092,
-        "build294_dedicated_run": 36583874124
+        "system_gate_run": 36588836053,
+        "current_application_quality_run": 36588836007,
+        "it_admin_runtime_proof_run": 36588836018,
+        "branch_hygiene_run": 36588836078
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 295,
-      "title": "Storefront Buyer Journey Simplification",
-      "authority": "release467-build295-storefront-buyer-journey-simplification.json",
+      "build": 296,
+      "title": "Custom Work Progressive Intake",
+      "authority": "release467-build296-custom-work-progressive-intake.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -37,18 +36,19 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 294,
-    "title": "CAIP Workshop Follies & Maker Story Foundation",
-    "authority": "release467-build294-caip-workshop-follies-maker-story-foundation.json",
-    "main_sha": "d731d823cbcf7708a6d978c9f399c2a72af55635",
-    "tree_sha": "3d4467f152bdd0e172e2ec512529b9c8bef578db",
+    "build": 295,
+    "title": "Storefront Buyer Journey Simplification",
+    "authority": "release467-build295-storefront-buyer-journey-simplification.json",
+    "main_sha": "9da8d3c7dc6ace186de0d69141e19fed998f5ddf",
+    "tree_sha": "7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36584189791,
-    "production_live_resource_integrity_run": 36584379171,
+    "production_pages_deploy_run": 36589115627,
+    "production_live_resource_integrity_run": 36589247196,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build296-custom-work-progressive-intake.json",
     "release467-build295-storefront-buyer-journey-simplification.json",
     "release467-build294-caip-workshop-follies-maker-story-foundation.json",
     "release467-build293-css-design-system-responsive-consolidation.json",
@@ -185,11 +185,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md",
-  "next_build": 296,
-  "next_build_state": "QUEUED_AFTER_BUILD295_PRODUCTION_GREEN",
-  "next_build_title": "Custom Work Progressive Intake",
-  "promotion_state": "BUILD295_DEVELOPMENT_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD295_ACTIVE_BUILDS_296_300_QUEUED",
+  "next_build": 297,
+  "next_build_state": "QUEUED_AFTER_BUILD296_PRODUCTION_GREEN",
+  "next_build_title": "Search-First HTML, Product + Story SEO & Crawl Control",
+  "promotion_state": "BUILD296_DEVELOPMENT_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD296_ACTIVE_BUILDS_297_300_QUEUED",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -212,21 +212,21 @@
   "planned_successor": {
     "first_build": 290,
     "last_build": 300,
-    "state": "BUILD295_ACTIVE_UX_SEARCH_DATABASE_EFFICIENCY_ROADMAP",
+    "state": "BUILD296_ACTIVE_UX_SEARCH_DATABASE_EFFICIENCY_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 296,
-    "next_build_title": "Custom Work Progressive Intake",
+    "next_build": 297,
+    "next_build_title": "Search-First HTML, Product + Story SEO & Crawl Control",
     "roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md"
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "22b0cb7074c9e5cba4a2f1b335d031f61d457c09",
-  "accepted_dev_tree_sha": "3d4467f152bdd0e172e2ec512529b9c8bef578db",
+  "accepted_dev_sha": "653a1952cee1a78aa131180fc798a45f4de344b0",
+  "accepted_dev_tree_sha": "7fc2c8c8147acd76b3ab64a8c62a96da5ac55ce3",
   "acceptance": {
-    "system_gate_run": 36583874154,
-    "current_application_quality_run": 36583873948,
-    "it_admin_runtime_proof_run": 36583874229,
-    "branch_hygiene_run": 36583874092
+    "system_gate_run": 36588836053,
+    "current_application_quality_run": 36588836007,
+    "it_admin_runtime_proof_run": 36588836018,
+    "branch_hygiene_run": 36588836078
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -1136,6 +1136,21 @@
     "canonical_process_authority": "inventory_processes",
     "canonical_workstation_authority": "inventory_workstation_roles + site_item_inventory",
     "next_build": 295,
+    "future_queue_exhausted": false
+  },
+  "custom_work_progressive_intake": {
+    "source_build": 296,
+    "existing_custom_request_authority": true,
+    "minimal_required_fields": 4,
+    "technical_fields_progressive": true,
+    "customer_supplied_item_conditional": true,
+    "reference_media_optional": true,
+    "tab_local_draft_recovery": true,
+    "draft_file_storage": false,
+    "automatic_order": false,
+    "automatic_quote": false,
+    "automatic_publication": false,
+    "next_build": 297,
     "future_queue_exhausted": false
   }
 }
