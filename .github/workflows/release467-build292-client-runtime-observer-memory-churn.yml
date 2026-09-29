@@ -1,0 +1,53 @@
+name: Release 467 Build 292 Client Runtime Observer Memory Churn
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'public/js/public-heading-guard.js'
+      - 'public/js/layout-overflow-guard.js'
+      - 'public/js/storefront-discovery-runtime.js'
+      - 'public/js/admin-ergonomics-v237.js'
+      - 'public/js/admin-workspace-state.js'
+      - 'public/js/admin-products-enhancements.js'
+      - 'public/js/admin-packaging-label-composition-v43.js'
+      - 'public/js/admin-packaging-material-intelligence-v42.js'
+      - 'public/js/admin-packaging-print-source-v299.js'
+      - 'public/js/admin-packaging-release-workflow-v83.js'
+      - 'public/js/admin-packaging-compatibility-v301.js'
+      - 'public/js/admin-site-item-inventory-multistation.js'
+      - 'admin/inventory-operations/index.html'
+      - 'functions/_middleware.js'
+      - 'scripts/release467_build292_observer_budget.py'
+      - 'scripts/release467_build292_gate.py'
+      - 'release467-build292-client-runtime-observer-memory-churn-hardening.json'
+      - 'current-development-authority.json'
+      - 'scripts/current_*_gate.py'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'admin/it/index.html'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'admin/reliability/index.html'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'admin/deployment-preflight/index.html'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+      - '.github/workflows/release467-build292-client-runtime-observer-memory-churn.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      - name: Build 292 observer budget
+        run: python scripts/release467_build292_observer_budget.py
+      - name: Build 292 source contract
+        run: python scripts/release467_build292_gate.py
+      - name: Build 292 boundary
+        run: |
+          echo 'Schema/D1/R2/provider mutation: NONE'
+          echo 'Observer hot paths: FILTERED / COALESCED / PAGE-LIFECYCLE CLEAN'
