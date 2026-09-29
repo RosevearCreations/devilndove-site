@@ -1,17 +1,17 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 289 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 290 candidate
 
-Build 289 — Real Inventory Adoption Outcomes Renewal — is projected over the exact fully verified Build 288 closure.
+Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships — is projected over the exact fully verified Build 289 stabilization closure.
 
-- Last fully verified Development: `49531694be53b4c8749817c95a4b3b0b28814b90`
-- Verified tree: `8e34e42a970c1aa8aab2325db5f2fab466703400`
-- Development proofs: System `36439993698`, Current Application Quality `36439993660`, I.T. Admin Runtime `36439993643`, Repository Branch Hygiene `36439993798`; Build 288 dedicated `36439993633`
-- Current Production main: `10ca103d83a2f0517eb1bbf3aac26cebd5e0e451`
-- Production proofs: Pages `36442437962`, Live Resources `36442922542`
-- Build 287 real linkage retained: project 7 / material event 2 → Supply Inventory 2801 → resource link 1.
-- Build 288 real planned-vs-actual post/reversal acceptance is fully closed.
-- Build 289 canonical migration 0025 is Development-applied and verified by run `36503337920`: 22 active workshop processes, zero foreign-key violations, 29 bounded provider rows_read and zero automatically created station-role rows.
-- Inventory Operations uses canonical workshop categories, owner-reviewed station-vs-associated roles, Stock/Usage Unit dropdowns, Reorder N/A and review-first missing-only Amazon enrichment.
-- Build 289 is the terminal roadmap build. Exact Development remeasurement decides whether the autonomous queue is exhausted.
+- Last fully verified Development: `a9d1fe0d8a03e6ccfab8c1b7be3c5e0f005e4400`
+- Verified tree: `9303662ce708b1c1c02c3a94c618d8f2704ca0a1`
+- Development proofs: System `36517008091`, Current Application Quality `36517008088`, I.T. Admin Runtime `36517008100`, Repository Branch Hygiene `36517008107`
+- Current Production main: `238a7732049bbf9c5fead7b3ec4cc2c1e779fcd6`
+- Production proofs: Pages `36517150890`, Live Resources `36517221739`
+- Build 290 queue-authority starting point: `8fa4bb20d6e7b43ea319ff0eaadeda49d4070b5c`, tree `72cf3793ab38424d26bb284ebf95721f902c7859`
+- Build 290 measured Development evidence: run `36558154559`, artifact `11028916294`, 40 page items, 163 provider rows_read / 5,000, zero invalid memberships, zero foreign-key violations.
+- Build 290 is schema-neutral: the existing migration 0026 membership authority is reused.
+- The primary Inventory client now owns the full membership array; the compatibility helper no longer intercepts global fetch.
+- The future queue remains open. Next after Production GREEN: Build 291 — Public Runtime Reliability & Broken-Surface Closure.
 
 ## Current release baseline
 
