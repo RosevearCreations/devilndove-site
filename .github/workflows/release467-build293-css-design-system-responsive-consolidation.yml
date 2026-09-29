@@ -16,6 +16,8 @@ on:
       - 'current-development-authority.json'
       - 'scripts/current_*_gate.py'
       - 'scripts/release467_build2*_gate.py'
+      - 'release467-build292-client-runtime-observer-memory-churn-hardening.json'
+      - '.github/workflows/release467-build292-client-runtime-observer-memory-churn.yml'
       - 'functions/api/admin/it-operations-control-tower.js'
       - 'public/js/admin-it-control-tower.js'
       - 'admin/it/index.html'
