@@ -993,13 +993,13 @@
       "public runtime reliability",
       "observer and memory-churn hardening",
       "CSS design-system consolidation",
+      "CAIP Workshop Follies and Maker Story foundation",
       "storefront buyer journey simplification",
       "progressive custom-work intake",
-      "search-first HTML and crawl control",
-      "merchant/search-engine distribution",
-      "D1 query and read-budget efficiency",
-      "canonical schema/runtime cleanup",
-      "Workshop Follies and maker-story outcomes"
+      "search-first Product and story HTML plus crawl control",
+      "merchant/search distribution and public content discovery",
+      "D1 query efficiency plus canonical runtime/repository cleanup",
+      "CAIP maker-content outcomes renewal and automation refinement"
     ],
     "stabilization_first_builds": [
       290,
@@ -1007,7 +1007,34 @@
       292,
       293
     ],
-    "roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md"
+    "roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md",
+    "caip_maker_story_architecture": {
+      "mode": "COMPOSE_EXISTING_AUTHORITIES_NOT_PARALLEL_PLATFORM",
+      "foundation_build": 294,
+      "public_discovery_build": 295,
+      "outcome_build": 300,
+      "creative_process_owner": "project/workstation/material/time/cost/outcome/lesson facts",
+      "caip_owner": "private raw media/source identity/review/evidence/story/edit planning",
+      "content_studio_owner": "review-first channel deliverables",
+      "publication_owner": "explicit human-approved public/social release",
+      "identity_contract": "one creative_work_project -> one CAIP workspace -> one Content Studio package",
+      "duplicate_product_required": false,
+      "productless_project_supported": true,
+      "automatic_provider_publication": false
+    },
+    "build_titles": {
+      "290": "Inventory Multi-Station Read Integrity & Client-Native Memberships",
+      "291": "Public Runtime Reliability & Broken-Surface Closure",
+      "292": "Client Runtime Observer & Memory-Churn Hardening",
+      "293": "CSS Design-System & Responsive Consolidation",
+      "294": "CAIP Workshop Follies & Maker Story Foundation",
+      "295": "Storefront Buyer Journey Simplification",
+      "296": "Custom Work Progressive Intake",
+      "297": "Search-First HTML, Product + Story SEO & Crawl Control",
+      "298": "Merchant/Search Distribution + Public Content Discovery",
+      "299": "D1 Query Efficiency + Canonical Runtime/Repository Cleanup",
+      "300": "CAIP Maker Content Outcomes Renewal & Automation Refinement"
+    }
   },
   "next_roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md"
 }
