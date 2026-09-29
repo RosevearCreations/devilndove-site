@@ -2,7 +2,7 @@
   "release": 467,
   "build": 289,
   "title": "Real Inventory Adoption Outcomes Renewal",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build289-real-inventory-adoption-outcomes-renewal",
   "predecessor": {
     "build": 288,
@@ -69,10 +69,11 @@
     "finance_mutation": false,
     "inventory_mutation": false,
     "d1_rows_read_ceiling": 20000,
-    "state": "PENDING_EXACT_DEVELOPMENT_REMEASUREMENT",
-    "measured_software_residual": "PENDING",
-    "successor_justified": null,
-    "queue_state": "PENDING"
+    "state": "REAL_INVENTORY_ADOPTION_OUTCOMES_RENEWAL_GREEN",
+    "measured_software_residual": "NONE",
+    "successor_justified": false,
+    "queue_state": "AUTONOMOUS_QUEUE_EXHAUSTED_AT_BUILD289_CLOSURE",
+    "interpretation": "Build 289 closed its original autonomous Inventory-linkage roadmap; the later Builds 290-300 queue was authorized by a subsequent UX/search/database audit."
   },
   "safety": {
     "schema_change": true,
@@ -105,8 +106,8 @@
   "contract": {
     "next_build": null,
     "next_build_title": null,
-    "future_queue_exhausted": false,
-    "queue_state": "PENDING_EXACT_DEVELOPMENT_REMEASUREMENT"
+    "future_queue_exhausted": true,
+    "queue_state": "AUTONOMOUS_QUEUE_EXHAUSTED_AT_BUILD289_CLOSURE"
   },
   "starting_point": {
     "development": {
@@ -127,5 +128,25 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_development": true
     }
+  },
+  "final_closure": {
+    "dev_sha": "a9d1fe0d8a03e6ccfab8c1b7be3c5e0f005e4400",
+    "tree_sha": "9303662ce708b1c1c02c3a94c618d8f2704ca0a1",
+    "state": "EXACT_BRANCH_HEAD_FOUR_PROOF_GREEN",
+    "proofs": {
+      "system_gate_run": 36517008091,
+      "current_application_quality_run": 36517008088,
+      "it_admin_runtime_proof_run": 36517008100,
+      "branch_hygiene_run": 36517008107
+    },
+    "closure_note": "Build 289 workstation many-to-many stabilization and observer-loop repair verified on exact Development head."
+  },
+  "production_checkpoint": {
+    "main_sha": "238a7732049bbf9c5fead7b3ec4cc2c1e779fcd6",
+    "tree_sha": "9303662ce708b1c1c02c3a94c618d8f2704ca0a1",
+    "state": "PRODUCTION_GREEN",
+    "production_pages_deploy_run": 36517150890,
+    "production_live_resource_integrity_run": 36517221739,
+    "same_tree_as_verified_development": true
   }
 }
