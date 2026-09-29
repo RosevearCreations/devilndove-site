@@ -375,7 +375,16 @@ jobs:
           python - <<'PY'
           import json, os, time, urllib.request
           exact=os.environ['EXACT_PROD_URL'].rstrip('/'); live=os.environ['PROD_LIVE_BASE'].rstrip('/')
-          targets=[('exact_home',exact+'/', 'html'),('live_home',live+'/', 'html'),('live_shop',live+'/shop/', 'html'),('live_manifest',live+'/manifest.webmanifest', 'manifest'),('live_public_api',live+'/api/creations', 'json')]
+          targets=[
+              ('exact_home',exact+'/', 'html'),
+              ('live_home',live+'/', 'html'),
+              ('live_shop',live+'/shop/', 'html'),
+              ('live_capabilities',live+'/capabilities/', 'html'),
+              ('live_creations',live+'/creations/', 'html'),
+              ('live_manifest',live+'/manifest.webmanifest', 'manifest'),
+              ('live_creations_api',live+'/api/creations', 'json'),
+              ('live_capabilities_api',live+'/api/capabilities', 'json'),
+          ]
           proof={}
           for name,url,kind in targets:
               last=''
@@ -395,6 +404,27 @@ jobs:
                   except Exception as exc: last=repr(exc)
                   time.sleep(3)
               else: raise SystemExit(f'Production smoke failed for {name} {url}: {last}')
+          import xml.etree.ElementTree as ET
+          sitemap_url=live+'/sitemap.xml'
+          req=urllib.request.Request(sitemap_url,headers={'User-Agent':'devilndove-production-smoke/1.0'})
+          with urllib.request.urlopen(req,timeout=20) as response:
+              sitemap_body=response.read(1000000)
+          root=ET.fromstring(sitemap_body)
+          ns={'sm':'http://www.sitemaps.org/schemas/sitemap/0.9'}
+          locs=[(node.text or '').strip() for node in root.findall('.//sm:loc',ns) if (node.text or '').strip()]
+          route_failures=[]
+          for route_url in locs:
+              try:
+                  req=urllib.request.Request(route_url,headers={'User-Agent':'devilndove-production-smoke/1.0'})
+                  with urllib.request.urlopen(req,timeout=20) as response:
+                      status=int(response.status); ctype=str(response.headers.get('content-type') or '').lower(); body=response.read(800000)
+                  text=body.decode('utf-8','replace')
+                  if status!=200 or ('text/html' in ctype and '<h1' not in text.lower()):
+                      route_failures.append({'url':route_url,'status':status,'content_type':ctype,'bytes':len(body)})
+              except Exception as exc:
+                  route_failures.append({'url':route_url,'error':repr(exc)})
+          assert not route_failures,route_failures
+          proof['sitemap_routes']={'status':'PASS','count':len(locs),'failures':0}
           json.dump({'status':'PASS','checks':proof},open('/tmp/production-smoke.json','w'),indent=2,sort_keys=True)
           print('PRODUCTION PUBLIC SMOKE: PASS')
           print(json.dumps(proof,indent=2,sort_keys=True))
