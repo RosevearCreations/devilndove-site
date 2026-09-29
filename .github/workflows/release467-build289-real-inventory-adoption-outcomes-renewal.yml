@@ -1,20 +1,7 @@
 name: Release 467 Build 289 Real Inventory Adoption Outcomes Renewal
 # D1_ONE_SHOT_EVIDENCE_CAPTURE
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build289-real-inventory-adoption-outcomes-renewal.json'
-      - 'scripts/release467_build289_operator_acceptance.py'
-      - 'scripts/release467_build289_gate.py'
-      - '.github/workflows/release467-build289-real-inventory-adoption-outcomes-renewal.yml'
-      - 'functions/api/admin/_siteItemInventoryLegacy.js'
-      - 'functions/api/admin/inventory-bootstrap.js'
-      - 'functions/api/admin/amazon-link-preview.js'
-      - 'public/js/admin-site-item-inventory.js'
-      - 'admin/inventory-operations/index.html'
   workflow_dispatch:
-
 permissions:
   contents: read
   actions: read

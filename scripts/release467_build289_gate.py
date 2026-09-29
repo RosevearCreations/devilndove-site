@@ -52,7 +52,7 @@ q("loadSeedOptions()" in ui and ".then(() => loadList({ force: true }))" in ui,'
 q("inventory-bootstrap-v289.2" in ui,'Build 289 Inventory bootstrap cache key must refresh workstation/unit choices')
 for token in ('AUTONOMOUS_QUEUE_EXHAUSTED','build287_real_link_rows','build288_reversed_post_rows','direct_d1_rows_read','successor_justified'):
     q(token in runtime,'Build 289 runtime missing '+token)
-q('D1_ONE_SHOT_EVIDENCE_CAPTURE' in wf and "D1_PROVIDER_ROWS_READ_CEILING: '20000'" in wf and 'branches: [dev]' in wf,'Build 289 bounded Development workflow missing')
+q('D1_ONE_SHOT_EVIDENCE_CAPTURE' in wf and "D1_PROVIDER_ROWS_READ_CEILING: '20000'" in wf and 'workflow_dispatch:' in wf and 'branches: [dev]' not in wf,'Build 289 accepted evidence workflow must be manual-only')
 for token in ('Build 289 — Real Inventory Adoption Outcomes Renewal','AUTONOMOUS_QUEUE_EXHAUSTED','36503337920','29 / 20,000'):
     q(token in doc,'Build 289 document missing '+token)
 q('Build 289 — Real Inventory Adoption Outcomes Renewal' in road,'Roadmap lost Build 289')
