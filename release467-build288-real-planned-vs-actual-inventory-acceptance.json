@@ -2,7 +2,7 @@
   "release": 467,
   "build": 288,
   "title": "Real Planned-vs-Actual Inventory Acceptance",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build288-real-planned-vs-actual-inventory-acceptance",
   "predecessor": {
     "build": 287,
@@ -41,13 +41,15 @@
     "inventory_returns_to_baseline": true,
     "finance_unchanged": true,
     "direct_d1_rows_read_ceiling": 20000,
-    "state": "PENDING_EXACT_DEVELOPMENT_OPERATOR_ACCEPTANCE",
+    "state": "REAL_PLANNED_ACTUAL_INVENTORY_ACCEPTANCE_GREEN",
     "planned_estimate_source": "existing linked event material_quantity/material_unit retained alongside reviewed actual",
     "review_state_after_reversal": "approved_unconsumed",
     "interrupted_run_recovery_preserves_current_review_state": true,
     "pre_interruption_review_value_must_not_be_guessed": true,
     "tracking_mode_respected": true,
-    "log_only_or_reusable_usage_may_post_zero_stock_delta": true
+    "log_only_or_reusable_usage_may_post_zero_stock_delta": true,
+    "fixture_used": false,
+    "inventory_returned_to_baseline": true
   },
   "inventory_table_rework": {
     "desktop_min_width_px": 1820,
@@ -110,5 +112,29 @@
       "state": "PRODUCTION_GREEN",
       "same_tree_as_development": true
     }
+  },
+  "final_closure": {
+    "dev_sha": "49531694be53b4c8749817c95a4b3b0b28814b90",
+    "tree_sha": "8e34e42a970c1aa8aab2325db5f2fab466703400",
+    "proof_state": "EXACT_BRANCH_HEAD_FIVE_PROOF_GREEN",
+    "proofs": {
+      "system_gate_run": 36439993698,
+      "current_application_quality_run": 36439993660,
+      "it_admin_runtime_proof_run": 36439993643,
+      "branch_hygiene_run": 36439993798
+    },
+    "dedicated_gate_run": 36439993633,
+    "ingested_by_build": 289,
+    "recorded_by": "Build 289 startup ingestion from exact Build 288 Development closure"
+  },
+  "production_checkpoint": {
+    "main_sha": "10ca103d83a2f0517eb1bbf3aac26cebd5e0e451",
+    "tree_sha": "8e34e42a970c1aa8aab2325db5f2fab466703400",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36442437962,
+    "production_live_resource_integrity_run": 36442922542,
+    "ingested_by_build": 289,
+    "recorded_by": "Build 289 startup ingestion from exact Build 288 Production closure"
   }
 }
