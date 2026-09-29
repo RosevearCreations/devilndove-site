@@ -2,7 +2,7 @@
   "release": 467,
   "build": 294,
   "title": "CAIP Workshop Follies & Maker Story Foundation",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build294-caip-workshop-follies-maker-story-foundation",
   "predecessor": {
     "build": 293,
@@ -136,5 +136,26 @@
       "production_live_resource_integrity_run": 36577451115,
       "state": "PRODUCTION_GREEN"
     }
+  },
+  "final_closure": {
+    "dev_sha": "22b0cb7074c9e5cba4a2f1b335d031f61d457c09",
+    "tree_sha": "3d4467f152bdd0e172e2ec512529b9c8bef578db",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD294_GREEN",
+    "proofs": {
+      "system_gate_run": 36583874154,
+      "current_application_quality_run": 36583873948,
+      "it_admin_runtime_proof_run": 36583874229,
+      "branch_hygiene_run": 36583874092,
+      "build294_dedicated_run": 36583874124
+    },
+    "ingested_by_build": 295
+  },
+  "production_checkpoint": {
+    "main_sha": "d731d823cbcf7708a6d978c9f399c2a72af55635",
+    "tree_sha": "3d4467f152bdd0e172e2ec512529b9c8bef578db",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36584189791,
+    "production_live_resource_integrity_run": 36584379171
   }
 }

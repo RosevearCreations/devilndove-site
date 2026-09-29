@@ -9,7 +9,7 @@ function badges(item){
  return b.map(x=>'<span class="badge">'+esc(x)+'</span>').join(' ');
 }
 function capabilityLinks(item){const rows=Array.isArray(item.capabilities)?item.capabilities:[];return rows.length?'<div class="small"><strong>Related capabilities:</strong> '+rows.map(c=>'<a href="'+esc(c.profile_path||'/capabilities/')+'">'+esc(c.display_name||c.capability_key)+'</a>').join(' · ')+'</div>':'';}
-function processLine(item){const rows=Array.isArray(item.processes)?item.processes:[];return rows.length?'<p class="small"><strong>Reviewed process evidence:</strong> '+rows.map(p=>esc(p.process_name||p.process_key)).join(' · ')+'</p>':'';}
+function processLine(item){const rows=Array.isArray(item.processes)?item.processes:[];return rows.length?'<p class="small"><strong>Processes used:</strong> '+rows.map(p=>esc(p.process_name||p.process_key)).join(' · ')+'</p>':'';}
 function card(item){
  const story='/workshop-journal/story/?story='+encodeURIComponent(item.publication_slug||'');
  return '<article class="card journal-card journal-live-card">'+
@@ -21,7 +21,7 @@ function card(item){
 async function load(){
  const u=new URL('/api/capability-case-studies',location.origin);u.searchParams.set('limit','24');if(capability)u.searchParams.set('capability',capability);if(q)u.searchParams.set('q',q);
  try{const r=await fetch(u.pathname+u.search,{headers:{Accept:'application/json'}}),d=await r.json().catch(()=>({}));if(!r.ok||!d.ok)throw new Error(d.error||'Case studies unavailable.');
- const items=Array.isArray(d.items)?d.items:[];if(!items.length){mount.innerHTML='<section class="card"><h2>No published case studies match yet</h2><p class="small">This page only shows stories that have already passed Content Studio, media/public-use review, and the existing Content Release publication process. Private/raw CAIP work never appears here.</p><p><a class="btn" href="/workshop-journal/">Workshop Journal</a> <a class="btn secondary" href="/capabilities/">Capabilities</a></p></section>';return;}
+ const items=Array.isArray(d.items)?d.items:[];if(!items.length){mount.innerHTML='<section class="card"><h2>No published case studies match yet</h2><p class="small">This page only shows workshop stories we have chosen to share publicly. Private photos, video and working notes stay private.</p><p><a class="btn" href="/workshop-journal/">Workshop Journal</a> <a class="btn secondary" href="/capabilities/">Capabilities</a></p></section>';return;}
  mount.innerHTML='<div class="workshop-journal-grid workshop-journal-live-grid">'+items.map(card).join('')+'</div>';
  }catch(e){mount.innerHTML='<section class="card"><h2>Case studies temporarily unavailable</h2><p class="small">'+esc(e.message||e)+'</p><p><a class="btn" href="/workshop-journal/">Workshop Journal</a></p></section>';}
 }

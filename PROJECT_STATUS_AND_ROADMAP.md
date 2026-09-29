@@ -2,9 +2,9 @@
 
 ## Current checkpoint
 
-**Build 294 — CAIP Workshop Follies & Maker Story Foundation** is active in Development.
+**Build 295 — Storefront Buyer Journey Simplification** is active in Development.
 
-Build 293 is the exact Production baseline while Build 294 composes Workshop Follies and Maker Stories into the existing Creative Process → CAIP → Content Studio identity chain.
+Build 294 is the exact Development and Production GREEN baseline while Build 295 simplifies the public buyer journey around three paths: Shop something, Ask us to make something, and Watch us try something.
 
 Build 291 is schema-neutral. It focuses on `/capabilities/`, `/creations/`, their public APIs, graceful customer-safe fallback behavior, and sitemap-wide public route smoke acceptance.
 
@@ -12,14 +12,14 @@ Build 291 is schema-neutral. It focuses on `/capabilities/`, `/creations/`, thei
 
 The queue **has not run out** and is **ready to start**.
 
-**Active: Build 294 — CAIP Workshop Follies & Maker Story Foundation**
+**Active: Build 295 — Storefront Buyer Journey Simplification**
 
 1. Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships — **PRODUCTION GREEN**
 2. Build 291 — Public Runtime Reliability & Broken-Surface Closure — **PRODUCTION GREEN**
 3. Build 292 — Client Runtime Observer & Memory-Churn Hardening — **PRODUCTION GREEN**
 4. Build 293 — CSS Design-System & Responsive Consolidation — **PRODUCTION GREEN**
-5. Build 294 — CAIP Workshop Follies & Maker Story Foundation — **ACTIVE**
-6. Build 295 — Storefront Buyer Journey Simplification
+5. Build 294 — CAIP Workshop Follies & Maker Story Foundation — **PRODUCTION GREEN**
+6. Build 295 — Storefront Buyer Journey Simplification — **ACTIVE**
 7. Build 296 — Custom Work Progressive Intake
 8. Build 297 — Search-First HTML, Product + Story SEO & Crawl Control
 9. Build 298 — Merchant/Search Distribution + Public Content Discovery
@@ -29,7 +29,7 @@ The queue **has not run out** and is **ready to start**.
 Canonical roadmap:
 `docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md`
 
-The sequence deliberately prioritizes Builds 290–293 as stabilization/refactoring. Build 294 then extends the existing Creative Process → CAIP → Content Studio path for Workshop Follies/Maker Stories before the public `Watch us try something` experience is introduced in Build 295. No parallel media, project, social-queue or publishing system is planned.
+The sequence deliberately prioritizes Builds 290–293 as stabilization/refactoring. Build 294 extends the existing Creative Process → CAIP → Content Studio path for Workshop Follies/Maker Stories. Build 295 now exposes that work through a simpler customer journey without creating a parallel media, project, social-queue or publishing system.
 
 ## Permanent boundaries
 

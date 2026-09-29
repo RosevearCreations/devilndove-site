@@ -1,28 +1,28 @@
-// Release 467 Build 294 — CAIP Workshop Follies & Maker Story Foundation over exact Build 293 Production source.
+// Release 467 Build 295 — Storefront Buyer Journey Simplification over exact Build 293 Production source.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=294;
-export const CURRENT_RELIABILITY_TITLE='CAIP Workshop Follies & Maker Story Foundation';
+export const CURRENT_RELIABILITY_BUILD=295;
+export const CURRENT_RELIABILITY_TITLE='Storefront Buyer Journey Simplification';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
 export const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:293,title:'Build 294 starting point',state:'DEVELOPMENT_GREEN',
-  dev_sha:'f8645db239348f06098faa1915ef9376940746de',tree_sha:'e74e6358bef93ee6d16802b488363145c4d66c04',
-  system_gate_run:36577048558,current_application_quality_run:36577048520,it_admin_runtime_proof_run:36577048576,
-  branch_hygiene_run:36577048496,proof_state:'EXACT_BRANCH_HEAD_BUILD293_GREEN'
+  release:467,build:294,title:'Build 295 starting point',state:'DEVELOPMENT_GREEN',
+  dev_sha:'22b0cb7074c9e5cba4a2f1b335d031f61d457c09',tree_sha:'3d4467f152bdd0e172e2ec512529b9c8bef578db',
+  system_gate_run:36583874154,current_application_quality_run:36583873948,it_admin_runtime_proof_run:36583874229,
+  branch_hygiene_run:36583874092,proof_state:'EXACT_BRANCH_HEAD_BUILD294_GREEN'
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({
   release:467,build:293,title:'CSS Design-System & Responsive Consolidation',state:'DEVELOPMENT_GREEN',
-  dev_sha:'f8645db239348f06098faa1915ef9376940746de',tree_sha:'e74e6358bef93ee6d16802b488363145c4d66c04',
-  system_gate_run:36577048558,current_application_quality_run:36577048520,it_admin_runtime_proof_run:36577048576,
-  branch_hygiene_run:36577048496,proof_state:'EXACT_BRANCH_HEAD_BUILD293_GREEN'
+  dev_sha:'22b0cb7074c9e5cba4a2f1b335d031f61d457c09',tree_sha:'3d4467f152bdd0e172e2ec512529b9c8bef578db',
+  system_gate_run:36583874154,current_application_quality_run:36583873948,it_admin_runtime_proof_run:36583874229,
+  branch_hygiene_run:36583874092,proof_state:'EXACT_BRANCH_HEAD_BUILD294_GREEN'
 });
 export const CURRENT_PRODUCTION=Object.freeze({
   release:467,build:293,title:'CSS Design-System & Responsive Consolidation',state:'PRODUCTION_GREEN',
-  main_sha:'229f9299561a820c029d1eec69e8f088b94c9a09',tree_sha:'e74e6358bef93ee6d16802b488363145c4d66c04',
-  production_pages_deploy_run:36577330288,production_live_resource_integrity_run:36577451115,
-  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36577048557,remote_d1_queries:0
+  main_sha:'d731d823cbcf7708a6d978c9f399c2a72af55635',tree_sha:'3d4467f152bdd0e172e2ec512529b9c8bef578db',
+  production_pages_deploy_run:36584189791,production_live_resource_integrity_run:36584379171,
+  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36583874124,remote_d1_queries:0
 });
 export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -34,14 +34,14 @@ export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
 export async function loadCurrentReliability(db,env={}){
   const inherited=await loadRelease466Reliability(db,env);
   return {
-    release:467,build:294,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
+    release:467,build:295,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
     environment:inherited.environment,score:inherited.score,status:inherited.status,scope:inherited.scope,slo_targets:inherited.slo_targets,
     checks:inherited.checks,migrations:inherited.migrations,runtime_incidents:inherited.runtime_incidents,
     foreign_key_violations:inherited.foreign_key_violations,resources:inherited.resources,
     governance:{...inherited.governance,current_release_authority:'current-development-authority.json',production_promotion_proof_count:4,production_closure_proof_count:6,rollback_readiness:'release-neutral-read-only',restart_integrity_protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1'},
     recovery:inherited.recovery,drift:inherited.drift,
     provenance:{
-      current_surface_release:467,current_surface_build:294,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
+      current_surface_release:467,current_surface_build:295,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
       historical_feature_authority:'release467-build36-current-reliability-operational-health.json',current_operator_authority:'current-development-authority.json',
       accepted_development:ACCEPTED_DEVELOPMENT,last_fully_verified_development:LAST_FULLY_VERIFIED_DEVELOPMENT,current_production:CURRENT_PRODUCTION,
       production_proof_transport_policy:PRODUCTION_PROOF_TRANSPORT_POLICY,implementation_acceptance_is_distinct_from_final_closure:true,

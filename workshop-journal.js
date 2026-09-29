@@ -12,7 +12,7 @@ async function hasTable(db) {
 
 export async function onRequestGet(context) {
   const db = getDb(context.env);
-  if (!db || !(await hasTable(db))) return json({ ok: true, source: 'fallback', items: [], message: 'Published workshop stories will appear after the Build 200 migration and review.' });
+  if (!db || !(await hasTable(db))) return json({ ok: true, source: 'fallback', items: [], message: 'Published workshop stories will appear here when they are ready to share.' });
   const url = new URL(context.request.url);
   const destination = String(url.searchParams.get('destination') || 'workshop_journal').toLowerCase();
   const slug = String(url.searchParams.get('story') || url.searchParams.get('slug') || '').trim();

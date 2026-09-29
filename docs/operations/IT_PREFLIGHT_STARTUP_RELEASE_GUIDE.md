@@ -1,12 +1,12 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 294 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 295 candidate
 
-Build 294 — CAIP Workshop Follies & Maker Story Foundation — is projected over exact Build 293 Production GREEN.
+Build 294 — Storefront Buyer Journey Simplification — is projected over exact Build 293 Production GREEN.
 
-- Last fully verified Development: `f8645db239348f06098faa1915ef9376940746de`
-- Verified tree: `e74e6358bef93ee6d16802b488363145c4d66c04`
-- Development proofs: System `36577048558`, Quality `36577048520`, I.T. `36577048576`, Hygiene `36577048496`, Build 293 `36577048557`
-- Current Production main: `229f9299561a820c029d1eec69e8f088b94c9a09`
-- Production proofs: Pages `36577330288`, Live Resources `36577451115`
+- Last fully verified Development: `22b0cb7074c9e5cba4a2f1b335d031f61d457c09`
+- Verified tree: `3d4467f152bdd0e172e2ec512529b9c8bef578db`
+- Development proofs: System `36583874154`, Quality `36583873948`, I.T. `36583874229`, Hygiene `36583874092`, Build 293 `36583874124`
+- Current Production main: `d731d823cbcf7708a6d978c9f399c2a72af55635`
+- Production proofs: Pages `36584189791`, Live Resources `36584379171`
 - Build 294 adds canonical migration `0027_release467_caip_workshop_follies_maker_story_foundation.sql`.
 - Migration 0027 creates only one-per-project Maker Story profiles plus reference-only project→workstation links; it creates no business rows.
 - Creative Process remains factual authority, CAIP remains private media/evidence/story authority, Content Studio remains review-first deliverable authority.
