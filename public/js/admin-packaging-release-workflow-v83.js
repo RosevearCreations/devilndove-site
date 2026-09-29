@@ -179,6 +179,7 @@
       if (projectId !== lastProjectId) schedule(true);
     });
     observer.observe(main, { childList: true, subtree: true });
+    window.addEventListener('pagehide', () => { observer?.disconnect(); observer = null; scheduled = false; }, { once: true });
   }
 
   function snapshot() {
