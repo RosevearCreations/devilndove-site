@@ -662,6 +662,9 @@ document.addEventListener('DOMContentLoaded', () => {
     lastAmazonPackagingSourceDraft = null;
     const seedEl = document.getElementById('siteInventorySeedItem'); if (seedEl) seedEl.value = '';
     const categoryPresetEl = document.getElementById('siteInventoryCategoryPreset'); if (categoryPresetEl) categoryPresetEl.value = '';
+    setInputValue('siteInventoryCategory', '');
+    const roleEl = document.getElementById('siteInventoryWorkstationRole'); if (roleEl) roleEl.value = 'associated';
+    const parentStationEl = document.getElementById('siteInventoryParentStation'); if (parentStationEl) { parentStationEl.value = ''; parentStationEl.innerHTML = stationOptionsMarkup(); }
     const onHandEl = document.getElementById('siteInventoryOnHand'); if (onHandEl) onHandEl.value = '1';
     const unitCostEl = document.getElementById('siteInventoryUnitCost'); if (unitCostEl) unitCostEl.value = '0.00';
     const stockUnitEl = document.getElementById('siteInventoryStockUnitLabel'); if (stockUnitEl) stockUnitEl.value = 'unit';
@@ -675,6 +678,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setInventoryEditMode({});
     const sourceTypeEl = document.getElementById('siteInventorySourceType'); if (sourceTypeEl) sourceTypeEl.disabled = false;
     const externalKeyEl = document.getElementById('siteInventoryExternalKey'); if (externalKeyEl) externalKeyEl.readOnly = false;
+    syncFormReorderState();
+    syncFormStationState();
     updateSiteInventoryImagePreview();
   }
 
@@ -1137,7 +1142,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const lotEl=document.getElementById('siteInventoryLotRecommended');if(lotEl)lotEl.checked=Number(item.lot_tracking_recommended||0)===1;
     const expEl=document.getElementById('siteInventoryExpiryRecommended');if(expEl)expEl.checked=Number(item.expiry_tracking_recommended||0)===1;
     const srcEl=document.getElementById('siteInventorySourceMaterialRecommended');if(srcEl)srcEl.checked=Number(item.source_material_recommended||0)===1;
-    syncCategoryPresetSelection(item.category || '');
+    syncCategoryPresetSelection(item.category || '', Number(item.inventory_process_id || 0));
+    const roleEl = document.getElementById('siteInventoryWorkstationRole'); if (roleEl) roleEl.value = item.workstation_role || 'associated';
+    const parentStationEl = document.getElementById('siteInventoryParentStation');
+    if (parentStationEl) {
+      parentStationEl.innerHTML = stationOptionsMarkup(Number(item.inventory_process_id || 0), Number(item.workstation_site_item_inventory_id || 0), Number(item.site_item_inventory_id || 0));
+      parentStationEl.value = String(Number(item.workstation_site_item_inventory_id || 0) || '');
+    }
+    syncFormReorderState();
+    syncFormStationState();
     const seedEl = document.getElementById('siteInventorySeedItem');
     if (seedEl) seedEl.value = item.external_key || '';
     updateSiteInventoryImagePreview();
