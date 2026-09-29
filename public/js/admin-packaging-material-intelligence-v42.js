@@ -325,9 +325,18 @@
   }
 
   function startObserver() {
-    if (observer || !document.body) return;
-    observer = new MutationObserver(() => scheduleRender(false));
-    observer.observe(document.body, { childList: true, subtree: true });
+    const main = byId('packagingStudioMain') || document.querySelector('.packaging-source-editor-body');
+    if (observer || !main) return;
+    observer = new MutationObserver((records) => {
+      const relevant = records.some((record) => [...(record.addedNodes || [])].some((node) =>
+        node?.nodeType === Node.ELEMENT_NODE &&
+        (node.matches?.('.packaging-source-editor-body,#packagingSourceMaterialTemplateId,[data-load-source-material],[data-use-source-material],[data-build42-material-intelligence]') ||
+         node.querySelector?.('.packaging-source-editor-body,#packagingSourceMaterialTemplateId,[data-load-source-material],[data-use-source-material],[data-build42-material-intelligence]'))
+      ));
+      if (relevant) scheduleRender(false);
+    });
+    observer.observe(main, { childList: true, subtree: true });
+    window.addEventListener('pagehide', () => { observer?.disconnect(); observer = null; }, { once: true });
   }
 
   function snapshot() {
