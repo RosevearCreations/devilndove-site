@@ -26,18 +26,18 @@ The queue **has not run out** and is **ready to start**.
 2. Build 291 — Public Runtime Reliability & Broken-Surface Closure
 3. Build 292 — Client Runtime Observer & Memory-Churn Hardening
 4. Build 293 — CSS Design-System & Responsive Consolidation
-5. Build 294 — Storefront Buyer Journey Simplification
-6. Build 295 — Custom Work Progressive Intake
-7. Build 296 — Search-First HTML, Product SEO & Crawl Control
-8. Build 297 — Merchant Discovery & Search Engine Distribution
-9. Build 298 — D1 Query Efficiency, Search & Read-Budget Hardening
-10. Build 299 — Canonical Schema Runtime Cleanup & Repository Slimming
-11. Build 300 — Workshop Follies, Maker Stories & Outcome Renewal
+5. Build 294 — CAIP Workshop Follies & Maker Story Foundation
+6. Build 295 — Storefront Buyer Journey Simplification
+7. Build 296 — Custom Work Progressive Intake
+8. Build 297 — Search-First HTML, Product + Story SEO & Crawl Control
+9. Build 298 — Merchant/Search Distribution + Public Content Discovery
+10. Build 299 — D1 Query Efficiency + Canonical Runtime/Repository Cleanup
+11. Build 300 — CAIP Maker Content Outcomes Renewal & Automation Refinement
 
 Canonical roadmap:
 `docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md`
 
-The sequence deliberately prioritizes Builds 290–293 as stabilization/refactoring before major buyer-facing expansion.
+The sequence deliberately prioritizes Builds 290–293 as stabilization/refactoring. Build 294 then extends the existing Creative Process → CAIP → Content Studio path for Workshop Follies/Maker Stories before the public `Watch us try something` experience is introduced in Build 295. No parallel media, project, social-queue or publishing system is planned.
 
 ## Permanent boundaries
 
