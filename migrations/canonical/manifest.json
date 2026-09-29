@@ -181,6 +181,13 @@
       "release": 467,
       "description": "Add explicit operator-owned Creative Process material-event resource identity links to existing Supply/Tool Inventory, with optional existing operation context and no stock movement.",
       "recovery": "Forward-only additive reference table. Remove incorrect identity-link rows through the reviewed operator workflow; never rewrite Inventory movement or Creative Process history. Repair schema defects only with a later numbered migration."
+    },
+    {
+      "version": 25,
+      "file": "0025_release467_inventory_workstation_roles.sql",
+      "release": 467,
+      "description": "Add workstation-role and optional parent-station metadata over the existing canonical inventory_processes and inventory_process_assignments authorities, without creating a parallel category taxonomy.",
+      "recovery": "Forward-only additive role table. Clear or correct workstation-role/parent links for logical rollback; existing Inventory rows and canonical process assignments remain authoritative and untouched. Repair schema defects only with a later numbered migration."
     }
   ]
 }
