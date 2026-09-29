@@ -1227,7 +1227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body.innerHTML = items.map((x) => {
           const edit = inventoryTableEditMode;
           return `
-          <tr data-inventory-row="${x.site_item_inventory_id}">
+          <tr data-inventory-row="${x.site_item_inventory_id}" data-source-type="${escapeHtml(x.source_type || '')}">
             <td data-label="Image / item">
               <div class="site-inventory-grid-identity">
                 ${x.image_url ? `<a class="site-inventory-list-thumb" href="${escapeHtml(x.image_url)}" target="_blank" rel="noopener noreferrer"><img src="${escapeHtml(x.image_url)}" alt="${escapeHtml(x.item_name)}" loading="lazy"/></a>` : '<div class="site-inventory-list-thumb is-empty small">No image</div>'}
@@ -1235,19 +1235,26 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             </td>
             <td data-label="Category / supplier">
-              ${edit ? `<input class="site-inventory-row-input" data-field="category" value="${escapeHtml(x.category || '')}" aria-label="Category"/><input class="site-inventory-row-input" data-field="supplier_name" value="${escapeHtml(x.supplier_name || '')}" aria-label="Supplier" placeholder="Supplier"/>` : `${escapeHtml(x.category || '—')}<div class="small">${escapeHtml(x.supplier_name || '—')}</div>`}
+              ${edit ? `
+                <label class="small">Workstation / category<select class="site-inventory-row-input" data-field="inventory_process_id" aria-label="Workstation category">${processOptionsMarkup(x.inventory_process_id, x.category)}</select></label>
+                <label class="small">Role<select class="site-inventory-row-input" data-field="workstation_role" aria-label="Workstation role"><option value="associated" ${String(x.workstation_role||'associated')!=='station'?'selected':''}>Associated tool / supply</option><option value="station" ${String(x.workstation_role||'')==='station'?'selected':''} ${String(x.source_type||'').toLowerCase()!=='tool'?'disabled':''}>This tool is the workstation</option></select></label>
+                <label class="small">Specific station<select class="site-inventory-row-input" data-field="workstation_site_item_inventory_id" aria-label="Specific station tool">${stationOptionsMarkup(x.inventory_process_id, x.workstation_site_item_inventory_id, x.site_item_inventory_id)}</select></label>
+                <label class="small">Supplier<input class="site-inventory-row-input" data-field="supplier_name" value="${escapeHtml(x.supplier_name || '')}" aria-label="Supplier" placeholder="Supplier"/></label>
+                <label class="small">Amazon link<input class="site-inventory-row-input" data-field="amazon_url" type="url" value="${escapeHtml(x.amazon_url || '')}" placeholder="https://www.amazon.ca/dp/..." aria-label="Amazon product URL"/></label>
+                <button class="btn" type="button" data-amazon-fill-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Fill missing from Amazon</button>
+              ` : `<strong>${escapeHtml(x.process_name || x.category || 'Unassigned')}</strong><div class="small">${escapeHtml(x.workstation_role === 'station' ? 'Workstation itself' : (x.workstation_item_name ? 'Associated with ' + x.workstation_item_name : 'Associated item'))}</div><div class="small">${escapeHtml(x.supplier_name || '—')}</div>`}
             </td>
             <td data-label="On hand">${edit ? `<input class="site-inventory-row-number" data-field="on_hand_quantity" type="number" min="0" step="0.001" value="${Number(x.on_hand_quantity || 0)}"/>` : Number(x.on_hand_quantity || 0)}<div class="small">${escapeHtml(x.stock_unit_label || 'unit')}</div></td>
             <td data-label="Stock & usage">
               ${edit ? `<div class="site-inventory-inline-units">
-                <label><span class="small">Stock unit</span><input class="site-inventory-row-input" data-field="stock_unit_label" list="siteInventoryUnitPresets" value="${escapeHtml(x.stock_unit_label || 'unit')}" /></label>
-                <label><span class="small">Usage unit</span><input class="site-inventory-row-input" data-field="usage_unit_label" list="siteInventoryUnitPresets" value="${escapeHtml(x.usage_unit_label || 'unit')}" /></label>
+                <label><span class="small">Stock unit</span><select class="site-inventory-row-input" data-field="stock_unit_label">${unitOptionsMarkup(x.stock_unit_label || 'unit')}</select></label>
+                <label><span class="small">Usage unit</span><select class="site-inventory-row-input" data-field="usage_unit_label">${unitOptionsMarkup(x.usage_unit_label || 'unit')}</select></label>
                 <label style="grid-column:1/-1"><span class="small">Usage units / stock unit</span><input class="site-inventory-row-number" data-field="usage_units_per_stock_unit" type="number" min="0.001" step="0.001" value="${Number(x.usage_units_per_stock_unit || 1)}" /></label>
               </div>` : `<strong>${escapeHtml(x.stock_unit_label || 'unit')}</strong> → ${Number(x.usage_units_per_stock_unit || 1)} ${escapeHtml(x.usage_unit_label || 'unit')}`}
               <div class="small">Cost / usage: <strong data-cost-per-usage>${fmtMoney(Number(x.cost_per_usage_unit_cents ?? costPerUsageCents(x)))}</strong> / <span data-cost-per-usage-label>${escapeHtml(x.usage_unit_label || 'unit')}</span></div>
             </td>
             <td data-label="Unit cost">${edit ? `<input class="site-inventory-row-money" data-field="unit_cost_dollars" type="number" min="0" step="0.01" value="${escapeHtml(centsToDollarInput(x.unit_cost_cents || 0))}"/>` : fmtMoney(x.unit_cost_cents || 0)}<div class="small">CAD / ${escapeHtml(x.stock_unit_label || 'unit')}</div></td>
-            <td data-label="Reorder at">${edit ? `<input class="site-inventory-row-number" data-field="reorder_level" type="number" min="0" step="0.001" value="${Number(x.reorder_level || 0)}"/>` : Number(x.reorder_level || 0)}<div class="small">${x.needs_reorder ? 'Needs reorder' : 'Stock okay'}</div></td>
+            <td data-label="Reorder at">${edit ? `<select class="site-inventory-row-input" data-field="do_not_reorder" aria-label="Reorder mode"><option value="0" ${Number(x.do_not_reorder||0)!==1?'selected':''}>Use reorder threshold</option><option value="1" ${Number(x.do_not_reorder||0)===1?'selected':''}>N/A — do not reorder</option></select><input class="site-inventory-row-number" data-field="reorder_level" type="number" min="0" step="0.001" value="${Number(x.reorder_level || 0)}" ${Number(x.do_not_reorder||0)===1?'disabled':''}/>` : (Number(x.do_not_reorder||0)===1 ? 'N/A' : Number(x.reorder_level || 0))}<div class="small">${Number(x.do_not_reorder||0)===1 ? 'Not reordered' : (x.needs_reorder ? 'Needs reorder' : 'Stock okay')}</div></td>
             <td data-label="Status">${edit ? `<select class="site-inventory-row-input" data-field="is_active"><option value="1" ${Number(x.is_active)!==0?'selected':''}>Active</option><option value="0" ${Number(x.is_active)===0?'selected':''}>Inactive</option></select>` : (Number(x.is_active)===0?'Inactive':'Active')}<div class="small">${escapeHtml(x.usage_tracking_mode || (String(x.source_type||'').toLowerCase()==='tool'?'reusable':'exact'))} usage tracking</div></td>
             <td class="site-inventory-row-actions" data-label="Actions"><div class="site-inventory-action-buttons">
               ${edit ? `<button class="btn primary" type="button" data-save-row-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Save row</button>` : ''}
