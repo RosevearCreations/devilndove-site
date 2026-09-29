@@ -2,7 +2,7 @@
   "release": 467,
   "build": 300,
   "title": "CAIP Maker Content Outcomes Renewal & Automation Refinement",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "authority": "release467-build300-caip-maker-content-outcomes-renewal-automation-refinement",
   "predecessor": {
     "build": 299,
@@ -186,5 +186,31 @@
     "automatic_content_refresh": false,
     "automatic_approval": false,
     "automatic_publication": false
-  }
+  },
+  "final_closure": {
+    "dev_sha": "6361b02f467fa4b9bf54dd8638cccefc57bd817e",
+    "tree_sha": "6316130ee40beb8540e88da51065f3a75d1c527a",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD300_GREEN",
+    "proofs": {
+      "system_gate_run": 36645926155,
+      "current_application_quality_run": 36645926199,
+      "it_admin_runtime_proof_run": 36645926079,
+      "branch_hygiene_run": 36645926110,
+      "d1_ci_fanout_guard_run": 36645926068
+    },
+    "build_specific_proof_run": 36645926113,
+    "ingested_by_build": 301
+  },
+  "production_checkpoint": {
+    "main_sha": "e569d5fce0ff5ab08a3d1dc6be1051211ed15ac2",
+    "tree_sha": "6316130ee40beb8540e88da51065f3a75d1c527a",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36646103793,
+    "production_live_resource_integrity_run": 36646198769,
+    "remote_d1_queries": 0,
+    "ingested_by_build": 301
+  },
+  "closure_ingested_by_build": 301
 }

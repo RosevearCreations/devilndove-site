@@ -1,0 +1,96 @@
+name: Release 467 Build 301 First Real Maker Story Adoption Completeness
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/admin/creative-process-compat.js'
+      - 'public/js/admin-creative-process.js'
+      - 'admin/creative-process/index.html'
+      - 'scripts/release467_build301_*'
+      - 'release467-build301-*.json'
+      - 'release467-build300-*.json'
+      - 'current-development-authority.json'
+      - 'docs/operations/RELEASE_467_BUILD_301_*'
+      - '.github/workflows/release467-build301-first-real-maker-story-adoption-completeness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - run: python scripts/release467_build301_regression.py
+      - run: python scripts/release467_build301_gate.py
+
+  real-project-discovery:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+      EXPECTED_STATEMENTS: 3
+      D1_PROVIDER_ROWS_READ_CEILING: '10000'
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 2 }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      # D1_ONE_SHOT_EVIDENCE_CAPTURE — Build 301 Development-only real-project discovery.
+      - name: Prove exact Development D1
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          ! grep -q 'devilndove-prod' wrangler.toml
+          npx --yes wrangler@4.128.0 d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/b301-info.json
+          node - <<'NODE'
+          const fs=require('fs');const data=JSON.parse(fs.readFileSync('/tmp/b301-info.json','utf8'));
+          const all=[];const walk=v=>{if(Array.isArray(v))v.forEach(walk);else if(v&&typeof v==='object'){all.push(v);Object.values(v).forEach(walk)}};walk(data);
+          const ids=new Set(all.map(x=>String(x.uuid||x.id||''))),names=new Set(all.map(x=>String(x.name||'')));
+          if(!ids.has(process.env.EXPECTED_DEV_D1_DATABASE_ID)||!names.has(process.env.DEV_D1_DATABASE_NAME))throw new Error('Development D1 identity mismatch');
+          console.log('EXACT DEVELOPMENT D1 IDENTITY: PASS');
+          NODE
+      - name: Discover one real eligible project
+        shell: bash
+        run: |
+          set -euo pipefail
+          COMMAND="$(grep -v '^[[:space:]]*--' scripts/release467_build301_real_project_discovery.sql)"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b301-discovery.json
+          node - <<'NODE'
+          const fs=require('fs');const raw=JSON.parse(fs.readFileSync('/tmp/b301-discovery.json','utf8'));
+          const rows=Array.isArray(raw)?raw:(raw.results||[]);
+          if(rows.length!==Number(process.env.EXPECTED_STATEMENTS))throw new Error('Unexpected statement count '+rows.length);
+          const reads=rows.map(x=>Number(x?.meta?.rows_read||0)),aggregate=reads.reduce((a,b)=>a+b,0);
+          if(aggregate>Number(process.env.D1_PROVIDER_ROWS_READ_CEILING))throw new Error('Rows-read ceiling exceeded '+aggregate);
+          const ranked=rows[0]?.results||[],events=rows[1]?.results||[],authority=rows[2]?.results?.[0]||{};
+          if(!ranked.length)throw new Error('No eligible real Creative Project without Maker Story profile');
+          const chosen=ranked[0];
+          console.log('BUILD301_ROWS_READ=',JSON.stringify(reads));
+          console.log('BUILD301_AGGREGATE_ROWS_READ=',aggregate);
+          console.log('BUILD301_CHOSEN_PROJECT=',JSON.stringify(chosen));
+          console.log('BUILD301_CHOSEN_EVENTS=',JSON.stringify(events));
+          console.log('BUILD301_EXISTING_AUTHORITY=',JSON.stringify(authority));
+          if(Number(authority.caip_workspace_count||0)!==1||Number(authority.content_package_count||0)!==1)throw new Error('Chosen project must retain exactly one CAIP workspace and one Content Studio package');
+          fs.writeFileSync('/tmp/build301-real-project-discovery.json',JSON.stringify({release:467,build:301,exact_development_sha:process.env.GITHUB_SHA,reads,aggregate_rows_read:aggregate,chosen,events,authority,mutation:false,production_d1_contact:false},null,2)+'\n');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build301-real-project-discovery-${{ github.sha }}
+          path: /tmp/build301-real-project-discovery.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Boundary
+        if: always()
+        run: |
+          echo 'DEVELOPMENT DISCOVERY: READ ONLY'
+          echo 'PRODUCTION D1 CONTACT: ZERO'
+          echo 'AUTOMATIC CONTENT REFRESH: ZERO'
+          echo 'AUTOMATIC PUBLICATION: ZERO'
