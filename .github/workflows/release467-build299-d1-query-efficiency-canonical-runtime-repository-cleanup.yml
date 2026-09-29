@@ -1,13 +1,5 @@
 name: Release 467 Build 299 D1 Query Efficiency Canonical Runtime Repository Cleanup
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/**'
-      - 'scripts/release467_build299_*'
-      - 'release467-build299-*.json'
-      - 'current-development-authority.json'
-      - '.github/workflows/release467-build299-d1-query-efficiency-canonical-runtime-repository-cleanup.yml'
   workflow_dispatch:
 permissions:
   contents: read

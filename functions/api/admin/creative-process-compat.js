@@ -139,6 +139,51 @@ async function makerStoryContext(db,id){
     related_publications:publications.results||[]
   };
 }
+function makerStoryAdoptionReadiness({profile,evidence=[],outputContext={},publications=[]}={}){
+  const storyKind=String(profile?.story_kind||'ordinary_project');
+  const active=Boolean(profile&&storyKind!=='ordinary_project');
+  const required=[
+    ['what_we_are_trying','What are we trying?'],
+    ['why_we_are_trying_it','Why are we trying it?'],
+    ['actual_result','Actual result'],
+    ['lesson_learned','Lesson learned']
+  ];
+  const missing=required.filter(([key])=>!String(profile?.[key]||'').trim()).map(([,label])=>label);
+  if(active&&String(profile?.outcome_status||'unknown')==='unknown')missing.push('Outcome');
+  const selectedEvidence=Array.isArray(evidence)?evidence.length:0;
+  const caipAssets=Number(outputContext?.caip_assets||0);
+  const contentProjectId=Number(outputContext?.content_project_id||0);
+  const reviewed=String(profile?.story_review_status||'draft')==='reviewed';
+  const publicCandidate=Number(profile?.public_story_candidate||0)===1;
+  let state='START_FIRST_REAL_MAKER_STORY';
+  let nextActions=[
+    'Choose Workshop Folly, Experiment, Maker Story, or Research / learning project.',
+    'Record what you tried, why, the actual result, outcome, and lesson learned.',
+    'Save the facts before changing Content Studio copy.'
+  ];
+  if(active&&missing.length){
+    state='COMPLETE_CORE_STORY_FACTS';
+    nextActions=[`Complete the core Maker Story facts: ${missing.join(', ')}.`,'Keep the story in Draft or Needs review until the facts are accurate.'];
+  }else if(active&&selectedEvidence===0){
+    state='SELECT_REVIEWABLE_EVIDENCE';
+    nextActions=['Select one or more factual timeline entries as story evidence.','Review CAIP media rights/privacy before any public use.'];
+  }else if(active&&!reviewed){
+    state='REVIEW_STORY_FACTS';
+    nextActions=['Review the completed Maker Story facts and selected evidence.','Mark the story Reviewed only after the facts are ready for draft refresh.'];
+  }else if(active&&reviewed&&!publicCandidate){
+    state='DECIDE_PUBLIC_CANDIDACY';
+    nextActions=['Decide whether this reviewed story should become a public storytelling candidate.','Keeping it internal is valid and does not block project completion.'];
+  }else if(active&&reviewed&&publicCandidate){
+    state='READY_FOR_EXPLICIT_CONTENT_REVIEW';
+    nextActions=['Open the existing Content Studio package and explicitly refresh/review drafts when wanted.','Human approval remains required before Journal or social publication.'];
+  }
+  return {
+    source_build:300,state,active_story:active,missing_core_fields:missing,core_story_complete:active&&missing.length===0,
+    selected_evidence_count:selectedEvidence,caip_asset_count:caipAssets,content_project_id:contentProjectId,
+    reviewed,public_story_candidate:publicCandidate,related_publication_count:Array.isArray(publications)?publications.length:0,
+    automation_refinement:'ADOPTION_GUIDANCE_ONLY_NO_NEW_AUTOMATION',automatic_content_refresh:false,automatic_publication:false,next_actions:nextActions
+  };
+}
 async function detail(db,id){
   const project=await db.prepare(`SELECT * FROM creative_work_projects WHERE creative_work_project_id=?1`).bind(id).first();
   if(!project) return null;
@@ -160,7 +205,8 @@ async function detail(db,id){
   const costContext=await db.prepare(`SELECT * FROM creative_project_cost_context WHERE creative_work_project_id=?1`).bind(id).first().catch(()=>null);
   const makerStory=await makerStoryContext(db,id);
   const outputContext=await outputWorkflowContext(db,id);
-  return {project,events:events.results||[],voided_events:voidedEvents.results||[],outputs:outputs.results||[],totals:totals||{},linked_products:linked.results||[],selected_evidence:evidence.results||[],material_reviews:materials.results||[],profitability:profitability||{},content_handoffs:handoffs.results||[],inventory_items:inventoryItems.results||[],caip_mirrors:caipMirrors.results||[],cost_templates:costTemplates.results||[],cost_allocations:allocations.results||[],inventory_reversals:reversals.results||[],knowledge_summaries:summaries.results||[],cost_context:costContext||{},maker_story:makerStory.profile,maker_story_workstations:makerStory.workstations,maker_story_processes:makerStory.processes,maker_story_workstation_options:makerStory.workstation_options,maker_story_related_knowledge:makerStory.related_knowledge,maker_story_related_publications:makerStory.related_publications,output_media_context:outputContext};
+  const makerStoryReadiness=makerStoryAdoptionReadiness({profile:makerStory.profile,evidence:evidence.results||[],outputContext,publications:makerStory.related_publications});
+  return {project,events:events.results||[],voided_events:voidedEvents.results||[],outputs:outputs.results||[],totals:totals||{},linked_products:linked.results||[],selected_evidence:evidence.results||[],material_reviews:materials.results||[],profitability:profitability||{},content_handoffs:handoffs.results||[],inventory_items:inventoryItems.results||[],caip_mirrors:caipMirrors.results||[],cost_templates:costTemplates.results||[],cost_allocations:allocations.results||[],inventory_reversals:reversals.results||[],knowledge_summaries:summaries.results||[],cost_context:costContext||{},maker_story:makerStory.profile,maker_story_workstations:makerStory.workstations,maker_story_processes:makerStory.processes,maker_story_workstation_options:makerStory.workstation_options,maker_story_related_knowledge:makerStory.related_knowledge,maker_story_related_publications:makerStory.related_publications,maker_story_adoption_readiness:makerStoryReadiness,output_media_context:outputContext};
 }
 async function seedOutputs(db,id,projectType='maker_project'){
   const productless=['content_only','education','research','archive'].includes(String(projectType||'').toLowerCase());

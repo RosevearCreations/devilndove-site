@@ -1,0 +1,190 @@
+{
+  "release": 467,
+  "build": 300,
+  "title": "CAIP Maker Content Outcomes Renewal & Automation Refinement",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build300-caip-maker-content-outcomes-renewal-automation-refinement",
+  "predecessor": {
+    "build": 299,
+    "title": "D1 Query Efficiency + Canonical Runtime/Repository Cleanup",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "c437998c7b17cf7bce4d6ae913d2273e3f96e038",
+    "development_tree_sha": "95df4beae5394ebf85c9b2bc1665525ab6ed5eb5",
+    "development_proofs": {
+      "system_gate_run": 36627208895,
+      "current_application_quality_run": 36627208854,
+      "it_admin_runtime_proof_run": 36627208869,
+      "branch_hygiene_run": 36627208912,
+      "build_specific_proof_run": 36627208914
+    },
+    "production_main_sha": "9689e81f23722d58421df87b2ea6b41ca39005fb",
+    "production_tree_sha": "95df4beae5394ebf85c9b2bc1665525ab6ed5eb5",
+    "production_pages_deploy_run": 36627976523,
+    "production_live_resource_integrity_run": 36628136953,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "starting_point": {
+    "development": {
+      "sha": "c437998c7b17cf7bce4d6ae913d2273e3f96e038",
+      "tree": "95df4beae5394ebf85c9b2bc1665525ab6ed5eb5",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 36627208895,
+      "quality_run": 36627208854,
+      "it_admin_runtime_run": 36627208869,
+      "repository_hygiene_run": 36627208912,
+      "build_specific_proof_run": 36627208914
+    },
+    "production": {
+      "main_sha": "9689e81f23722d58421df87b2ea6b41ca39005fb",
+      "tree": "95df4beae5394ebf85c9b2bc1665525ab6ed5eb5",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 36627976523,
+      "production_live_resource_integrity_run": 36628136953,
+      "remote_d1_queries": 0
+    }
+  },
+  "phase": "REFINED_FROM_MEASURED_EVIDENCE",
+  "scope": {
+    "end_to_end_path": "Creative Process → workstation/inventory facts → CAIP private media → reviewed evidence → story/edit plan → Content Studio package → Workshop Journal/social drafts → human approval → public release",
+    "duplicate_identity_measurement": true,
+    "private_media_boundary_measurement": true,
+    "maker_story_completion_measurement": true,
+    "content_studio_idempotency_measurement": true,
+    "reviewed_draft_usefulness_measurement": true,
+    "human_approval_boundary_measurement": true,
+    "buyer_discovery_measurement": true,
+    "runtime_error_measurement": true,
+    "client_observer_static_measurement": true,
+    "css_regression_reuse": true,
+    "search_health_measurement": true,
+    "merchant_coverage_measurement": true,
+    "d1_efficiency_baseline_reuse": true,
+    "repository_reduction_baseline_reuse": true,
+    "automation_refinement": "EVIDENCE_GATED_REVIEW_FIRST",
+    "automatic_publication": false,
+    "operator_refinement": "READ_ONLY_NEXT_SAFE_ACTION_GUIDANCE",
+    "automatic_content_refresh": false
+  },
+  "safety": {
+    "schema_change": false,
+    "development_d1_measurement_read_only": true,
+    "production_d1_measurement_contact": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "provider_publication": false,
+    "automatic_public_release": false,
+    "payment_or_refund": false,
+    "private_media_exposure": false
+  },
+  "contract": {
+    "next_roadmap": "docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md",
+    "next_build": 301,
+    "next_build_title": "First Real Maker Story Adoption & Completeness",
+    "future_queue_exhausted": false
+  },
+  "measurement_checkpoint": {
+    "source_sha": "79d5254ed16a60f4891d42fccb0b82e754b291a6",
+    "workflow_run": 36645202314,
+    "job_id": 109666448384,
+    "statements": 12,
+    "rows_read_by_statement": [
+      1,
+      13,
+      49,
+      193,
+      105,
+      0,
+      3,
+      26,
+      35,
+      45,
+      1,
+      0
+    ],
+    "aggregate_rows_read": 471,
+    "rows_read_ceiling": 20000,
+    "production_d1_contact": false,
+    "d1_mutation": false,
+    "r2_mutation": false
+  },
+  "outcome_evidence": {
+    "maker_story": {
+      "profiles": 0,
+      "active": 0,
+      "reviewed": 0,
+      "public_candidates": 0,
+      "core_complete": 0
+    },
+    "identity": {
+      "duplicate_caip_source_identities": 0,
+      "duplicate_content_source_identities": 0,
+      "duplicate_workstation_memberships": 0
+    },
+    "private_media": {
+      "caip_assets": 46,
+      "active_caip_assets": 45,
+      "public_allowed_assets": 0,
+      "non_public_assets": 46,
+      "selected_evidence_rows": 0
+    },
+    "bridge": {
+      "active_creative_projects": 5,
+      "linked_caip_workspaces": 5,
+      "linked_content_packages": 5,
+      "handoff_rows": 5,
+      "bridge_events": 42
+    },
+    "deliverables": {
+      "total": 95,
+      "approved": 0,
+      "published": 0,
+      "copy_locked": 0,
+      "factual_template": 95
+    },
+    "workshop_journal": {
+      "rows": 0,
+      "approved": 0,
+      "published": 0,
+      "human_publisher_recorded": 0
+    },
+    "social": {
+      "rows": 0,
+      "approved": 0,
+      "posted": 0,
+      "human_approval_rows": 0
+    },
+    "engagement_30d": {
+      "journal_page_views": 0,
+      "product_detail_views": 0,
+      "total_page_views": 25
+    },
+    "runtime_search": {
+      "runtime_errors_7d": 0,
+      "client_runtime_records_7d": 0,
+      "searches_30d": 0,
+      "search_console_rows": 0
+    },
+    "merchant": {
+      "active_products": 40,
+      "reviewed_products": 40,
+      "merchant_fact_complete_products": 40
+    },
+    "source_static": {
+      "mutation_observer_tokens": 75,
+      "css_important_tokens": 311,
+      "public_js_files": 427,
+      "css_files": 65
+    },
+    "foreign_key_violations": 0
+  },
+  "decision": {
+    "automation_refinement": "ADOPTION_GUIDANCE_ONLY_NO_NEW_AUTOMATION",
+    "rationale": "The composed CAIP and Content Studio bridge is already present for all five active Creative Projects, but no Maker Story profile, selected evidence, approved deliverable, Workshop Journal publication or social draft exists in the measured Development data.",
+    "implemented_refinement": "Expose read-only Maker Story adoption readiness and next-safe-action guidance in the existing Creative Process surface.",
+    "automatic_story_creation": false,
+    "automatic_content_refresh": false,
+    "automatic_approval": false,
+    "automatic_publication": false
+  }
+}
