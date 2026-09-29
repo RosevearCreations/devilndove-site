@@ -24,6 +24,7 @@ on:
       - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
       - 'scripts/current_*_gate.py'
       - 'scripts/release467_build2*_gate.py'
+      - 'scripts/build440_resource_asset_url_regression_test.mjs'
   workflow_dispatch:
 permissions:
   contents: read
