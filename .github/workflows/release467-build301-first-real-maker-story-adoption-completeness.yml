@@ -75,6 +75,7 @@ jobs:
           const chosen=ranked[0];
           console.log('BUILD301_ROWS_READ=',JSON.stringify(reads));
           console.log('BUILD301_AGGREGATE_ROWS_READ=',aggregate);
+          console.log('BUILD301_RANKED_PROJECTS=',JSON.stringify(ranked));
           console.log('BUILD301_CHOSEN_PROJECT=',JSON.stringify(chosen));
           console.log('BUILD301_CHOSEN_EVENTS=',JSON.stringify(events));
           console.log('BUILD301_EXISTING_AUTHORITY=',JSON.stringify(authority));
