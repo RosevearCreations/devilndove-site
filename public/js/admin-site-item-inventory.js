@@ -116,6 +116,16 @@ document.addEventListener('DOMContentLoaded', () => {
     return html;
   }
 
+  function workstationIdsFromScope(scope, fallbackSelect = null) {
+    const checked = Array.from(scope?.querySelectorAll?.('.dd-multistation-checklist input[data-station-id]:checked') || [])
+      .map((el) => Number(el.dataset.stationId || el.value || 0))
+      .filter((id) => Number.isInteger(id) && id > 0);
+    const ids = [...new Set(checked)];
+    if (ids.length) return ids;
+    const fallback = Number(fallbackSelect?.value || 0);
+    return fallback > 0 ? [fallback] : [];
+  }
+
   function syncRowReorderState(row) {
     if (!row) return;
     const mode = row.querySelector('[data-field="do_not_reorder"]');
@@ -966,6 +976,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function readForm() {
+    const workstationIds = workstationIdsFromScope(document.getElementById('siteInventoryForm'), document.getElementById('siteInventoryParentStation'));
     return {
       site_item_inventory_id: editingSiteInventoryId || undefined,
       source_type: String(document.getElementById('siteInventorySourceType')?.value || 'other').trim().toLowerCase(),
@@ -975,7 +986,8 @@ document.addEventListener('DOMContentLoaded', () => {
       inventory_process_id: Number(document.getElementById('siteInventoryCategoryPreset')?.value || 0),
       category: String(document.getElementById('siteInventoryCategory')?.value || '').trim().toLowerCase(),
       workstation_role: String(document.getElementById('siteInventoryWorkstationRole')?.value || 'associated').trim().toLowerCase(),
-      workstation_site_item_inventory_id: Number(document.getElementById('siteInventoryParentStation')?.value || 0),
+      workstation_site_item_inventory_ids: workstationIds,
+      workstation_site_item_inventory_id: workstationIds[0] || 0,
       image_url: document.getElementById('siteInventoryImageUrl')?.value || '',
       source_url: document.getElementById('siteInventorySourceUrl')?.value || '',
       amazon_url: document.getElementById('siteInventoryAmazonUrl')?.value || '',
@@ -1253,7 +1265,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <label class="small">Supplier<input class="site-inventory-row-input" data-field="supplier_name" value="${escapeHtml(x.supplier_name || '')}" aria-label="Supplier" placeholder="Supplier"/></label>
                 <label class="small">Amazon link<input class="site-inventory-row-input" data-field="amazon_url" type="url" value="${escapeHtml(x.amazon_url || '')}" placeholder="https://www.amazon.ca/dp/..." aria-label="Amazon product URL"/></label>
                 <button class="btn" type="button" data-amazon-fill-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Fill missing from Amazon</button>
-              ` : `<strong>${escapeHtml(x.process_name || x.category || 'Unassigned')}</strong><div class="small">${escapeHtml(x.workstation_role === 'station' ? 'Workstation itself' : (x.workstation_item_name ? 'Associated with ' + x.workstation_item_name : 'Associated item'))}</div><div class="small">${escapeHtml(x.supplier_name || '—')}</div>`}
+              ` : `<strong>${escapeHtml(x.process_name || x.category || 'Unassigned')}</strong><div class="small">${escapeHtml(x.workstation_role === 'station' ? 'Workstation itself' : (Array.isArray(x.workstation_item_names) && x.workstation_item_names.length ? 'Associated with ' + x.workstation_item_names.join(', ') : (x.workstation_item_name ? 'Associated with ' + x.workstation_item_name : 'Associated item')))}</div><div class="small">${escapeHtml(x.supplier_name || '—')}</div>`}
             </td>
             <td data-label="On hand">${edit ? `<input class="site-inventory-row-number" data-field="on_hand_quantity" type="number" min="0" step="0.001" value="${Number(x.on_hand_quantity || 0)}"/>` : Number(x.on_hand_quantity || 0)}<div class="small">${escapeHtml(x.stock_unit_label || 'unit')}</div></td>
             <td data-label="Stock & usage">
@@ -1298,6 +1310,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function readEditableRowPayload(row, original = {}) {
     const value = (field) => row.querySelector(`[data-field="${field}"]`)?.value;
     const processSelect = row.querySelector('[data-field="inventory_process_id"]');
+    const workstationIds = workstationIdsFromScope(row, row.querySelector('[data-field="workstation_site_item_inventory_id"]'));
     const processName = String(processSelect?.selectedOptions?.[0]?.dataset?.processName || processSelect?.selectedOptions?.[0]?.textContent || '').trim();
     return {
       ...original,
@@ -1307,7 +1320,8 @@ document.addEventListener('DOMContentLoaded', () => {
       inventory_process_id: Number(value('inventory_process_id') || 0),
       category: processName && !/^unassigned/i.test(processName) ? processName.toLowerCase() : '',
       workstation_role: String(value('workstation_role') || original.workstation_role || 'associated').trim().toLowerCase(),
-      workstation_site_item_inventory_id: Number(value('workstation_site_item_inventory_id') || 0),
+      workstation_site_item_inventory_ids: workstationIds,
+      workstation_site_item_inventory_id: workstationIds[0] || 0,
       supplier_name: value('supplier_name') || '',
       amazon_url: String(value('amazon_url') || original.amazon_url || '').trim(),
       on_hand_quantity: Math.max(0, Number(value('on_hand_quantity') || 0)),
