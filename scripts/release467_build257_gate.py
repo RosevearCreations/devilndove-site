@@ -83,7 +83,7 @@ q('Build 257 — Workflow Trigger Inventory & Ownership Map' in road and 'Build 
 for token in ('146','140','86','90','89','workflow_run','Build 258','No workflow is disabled'):
     q(token in doc,f'Build 257 evidence document missing {token}')
 q("run_current_contract('scripts/release467_build257_gate.py','Release 467 Build 257')" in sysgate,'System Gate must invoke Build 257')
-q(cur>=257 and int(p.get('next_build') or 0)>=258 and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 257 or verified successor')
+q(cur>=257 and (cur>257 or int(p.get('next_build') or 0)>=258) and p.get('state')=='DEVELOPMENT_GREEN','Current authority must retain Build 257 or verified successor')
 for k,v in (a.get('safety') or {}).items():q(v is False,f'Build 257 safety drift: {k}')
 
 print('RELEASE 467 BUILD 257 WORKFLOW TRIGGER INVENTORY & OWNERSHIP MAP')
