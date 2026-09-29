@@ -2,20 +2,20 @@
 
 ## Current checkpoint
 
-**Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships** is active in Development.
+**Build 291 — Public Runtime Reliability & Broken-Surface Closure** is active in Development.
 
-Build 289 remains the Production baseline while Build 290 completes exact-SHA Development acceptance and promotion.
+Build 290 is the exact Production baseline while Build 291 closes buyer-visible public runtime failures and adds public-route smoke coverage.
 
-Build 290 is schema-neutral. It retains the existing many-to-many membership table, makes the primary Inventory client send the complete station-membership array directly, keeps one primary workshop category, reads page memberships in one set-based batch, and retires the global fetch interception from the compatibility helper.
+Build 291 is schema-neutral. It focuses on `/capabilities/`, `/creations/`, their public APIs, graceful customer-safe fallback behavior, and sitemap-wide public route smoke acceptance.
 
 ## Next production queue — Builds 290–300
 
 The queue **has not run out** and is **ready to start**.
 
-**Active: Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships**
+**Active: Build 291 — Public Runtime Reliability & Broken-Surface Closure**
 
-1. Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships — **ACTIVE**
-2. Build 291 — Public Runtime Reliability & Broken-Surface Closure
+1. Build 290 — Inventory Multi-Station Read Integrity & Client-Native Memberships — **PRODUCTION GREEN**
+2. Build 291 — Public Runtime Reliability & Broken-Surface Closure — **ACTIVE**
 3. Build 292 — Client Runtime Observer & Memory-Churn Hardening
 4. Build 293 — CSS Design-System & Responsive Consolidation
 5. Build 294 — CAIP Workshop Follies & Maker Story Foundation

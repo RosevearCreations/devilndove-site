@@ -1,30 +1,6 @@
 name: Release 467 Build 290 Inventory Multi-Station Read Integrity
 # D1_ONE_SHOT_EVIDENCE_CAPTURE
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'public/js/admin-site-item-inventory.js'
-      - 'public/js/admin-site-item-inventory-multistation.js'
-      - 'functions/api/admin/site-item-inventory.js'
-      - 'functions/api/admin/_siteItemInventoryLegacy.js'
-      - 'scripts/release467_build290_measurement.sql'
-      - 'scripts/release467_build290_regression.py'
-      - 'scripts/release467_build290_gate.py'
-      - 'release467-build290-inventory-multi-station-read-integrity-client-native-memberships.json'
-      - 'current-development-authority.json'
-      - '.github/workflows/release467-build290-inventory-multi-station-read-integrity.yml'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/it/index.html'
-      - 'admin/reliability/index.html'
-      - 'admin/deployment-preflight/index.html'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'scripts/current_*_gate.py'
-      - 'scripts/release467_build2*_gate.py'
-      - 'scripts/build440_resource_asset_url_regression_test.mjs'
   workflow_dispatch:
 permissions:
   contents: read

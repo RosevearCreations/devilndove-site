@@ -86,6 +86,9 @@ def local_source_checks() -> list[tuple[str, bool, str]]:
     sw = (ROOT / "sw.js").read_text(encoding="utf-8", errors="replace")
     checks.append(("source_service_worker_runtime", "addEventListener" in sw, "event listener present"))
     checks.append(("source_public_api_route", (ROOT / "functions/api/creations.js").is_file(), "functions/api/creations.js"))
+    checks.append(("source_capabilities_api_route", (ROOT / "functions/api/capabilities.js").is_file(), "functions/api/capabilities.js"))
+    checks.append(("source_capabilities_page", (ROOT / "capabilities/index.html").is_file(), "capabilities/index.html"))
+    checks.append(("source_creations_page", (ROOT / "creations/index.html").is_file(), "creations/index.html"))
     return checks
 
 
@@ -100,6 +103,8 @@ def main() -> int:
 
     routes = [
         ("home", ""),
+        ("capabilities", "capabilities/"),
+        ("creations", "creations/"),
         ("manifest", "manifest.webmanifest"),
         ("service_worker", "sw.js"),
     ]
@@ -148,6 +153,13 @@ def main() -> int:
         sw = body.decode("utf-8", errors="replace")
         checks.append(("service_worker_200", status == 200, f"status={status} final={final_url}"))
         checks.append(("service_worker_runtime", "addEventListener" in sw, "event listener present"))
+
+        for public_name in ("capabilities", "creations"):
+            status, body, ctype, final_url, _ = observations[public_name]
+            public_html = body.decode("utf-8", errors="replace")
+            checks.append((f"{public_name}_200", status == 200, f"status={status} final={final_url}"))
+            checks.append((f"{public_name}_html", "<h1" in public_html.lower(), f"bytes={len(body)} content-type={ctype}"))
+            checks.append((f"{public_name}_no_raw_runtime_error", "unexpected end of json input" not in public_html.lower() and "creations api responded 404" not in public_html.lower(), "customer-safe source"))
 
         if not args.zero_d1:
             status, body, ctype, final_url, _ = observations["public_api"]

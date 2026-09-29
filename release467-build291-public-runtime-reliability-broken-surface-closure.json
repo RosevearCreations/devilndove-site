@@ -1,0 +1,84 @@
+{
+  "release": 467,
+  "build": 291,
+  "title": "Public Runtime Reliability & Broken-Surface Closure",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "authority": "release467-build291-public-runtime-reliability-broken-surface-closure",
+  "starting_point": {
+    "development": {
+      "sha": "dff1fb1c756de9a938bbbcc26a966205b0539b01",
+      "tree": "1cdfea3b551761ce18560bb95bed405cec594ab1",
+      "system_gate_run": 36567123971,
+      "quality_run": 36567124267,
+      "it_admin_runtime_run": 36567124051,
+      "repository_hygiene_run": 36567124022,
+      "d1_ci_fanout_guard_run": 36567124170,
+      "build290_run": 36567124048,
+      "state": "EXACT_BUILD290_GREEN"
+    },
+    "production": {
+      "main_sha": "a56c163c8c417a90b3e6a35da128cdaeaf73b668",
+      "tree_sha": "1cdfea3b551761ce18560bb95bed405cec594ab1",
+      "production_pages_deploy_run": 36567332316,
+      "production_live_resource_integrity_run": 36567404285,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "scope": {
+    "capabilities_page": "/capabilities/",
+    "capabilities_api": "/api/capabilities",
+    "creations_page": "/creations/",
+    "creations_api": "/api/creations",
+    "sitemap_route_smoke": true,
+    "public_raw_implementation_errors": false,
+    "graceful_buyer_recovery": true,
+    "admin_diagnostics": true,
+    "schema_change": false,
+    "d1_mutation": false
+  },
+  "acceptance": {
+    "capabilities_safe_json_parse": true,
+    "capabilities_customer_safe_recovery": true,
+    "creations_safe_json_parse": true,
+    "creations_local_json_fallback_retained": true,
+    "creations_customer_safe_terminal_recovery": true,
+    "capability_asset_revision": "467b291",
+    "preview_page_smoke": [
+      "/capabilities/",
+      "/creations/"
+    ],
+    "production_api_smoke": [
+      "/api/capabilities",
+      "/api/creations"
+    ],
+    "production_sitemap_crawl": true
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "payment_or_refund": false,
+    "production_business_data_query": false,
+    "secret_capture": false
+  },
+  "implementation": {
+    "capabilities_client": "public/js/capabilities.js",
+    "capabilities_api": "functions/api/capabilities.js",
+    "creations_page": "creations/index.html",
+    "creations_api": "functions/api/creations.js",
+    "public_api_diagnostics": "functions/api/admin/public-api-health.js",
+    "preview_smoke": "scripts/preview_smoke.py",
+    "production_smoke": ".github/workflows/production-pages-deploy-current.yml",
+    "dedicated_gate": "scripts/release467_build291_gate.py",
+    "workflow": ".github/workflows/release467-build291-public-runtime-reliability.yml",
+    "roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md"
+  },
+  "contract": {
+    "next_build": 292,
+    "next_build_title": "Client Runtime Observer & Memory-Churn Hardening",
+    "future_queue_exhausted": false
+  }
+}
