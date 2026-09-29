@@ -182,7 +182,7 @@
   "next_build": 291,
   "next_build_state": "QUEUED_AFTER_BUILD290_PRODUCTION_GREEN",
   "next_build_title": "Public Runtime Reliability & Broken-Surface Closure",
-  "promotion_state": "BUILD290_DEVELOPMENT_CANDIDATE",
+  "promotion_state": "BUILD290_DEVELOPMENT_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "BUILD290_ACTIVE_BUILDS_291_300_QUEUED",
   "measured_closure": {
     "source_build": 232,
