@@ -1,7 +1,7 @@
 {
   "release": 467,
-  "build": 289,
-  "title": "Real Inventory Adoption Outcomes Renewal",
+  "build": 290,
+  "title": "Inventory Multi-Station Read Integrity & Client-Native Memberships",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
@@ -24,9 +24,9 @@
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 289,
-      "title": "Real Inventory Adoption Outcomes Renewal",
-      "authority": "release467-build289-real-inventory-adoption-outcomes-renewal.json",
+      "build": 290,
+      "title": "Inventory Multi-Station Read Integrity & Client-Native Memberships",
+      "authority": "release467-build290-inventory-multi-station-read-integrity-client-native-memberships.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -49,6 +49,7 @@
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build290-inventory-multi-station-read-integrity-client-native-memberships.json",
     "release467-build289-real-inventory-adoption-outcomes-renewal.json",
     "release467-build288-real-planned-vs-actual-inventory-acceptance.json",
     "release467-build287-real-existing-resource-link-evidence-capture.json",
@@ -179,11 +180,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_REAL_INVENTORY_LINKAGE_ACCEPTANCE_AUTONOMOUS_BUILDS_285_289.md",
-  "next_build": 290,
-  "next_build_state": "READY_TO_START",
-  "next_build_title": "Inventory Multi-Station Read Integrity & Client-Native Memberships",
-  "promotion_state": "BUILD289_STABILIZATION_PRODUCTION_GREEN_BUILD290_READY",
-  "successor_scope_state": "BUILDS_290_300_UX_SEARCH_DATABASE_EFFICIENCY_QUEUE_READY",
+  "next_build": 291,
+  "next_build_state": "QUEUED_AFTER_BUILD290_PRODUCTION_GREEN",
+  "next_build_title": "Public Runtime Reliability & Broken-Surface Closure",
+  "promotion_state": "BUILD290_DEVELOPMENT_CANDIDATE",
+  "successor_scope_state": "BUILD290_ACTIVE_BUILDS_291_300_QUEUED",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -206,10 +207,10 @@
   "planned_successor": {
     "first_build": 290,
     "last_build": 300,
-    "state": "UX_SEARCH_DATABASE_EFFICIENCY_ROADMAP_READY",
+    "state": "BUILD290_ACTIVE_UX_SEARCH_DATABASE_EFFICIENCY_ROADMAP",
     "future_queue_exhausted": false,
-    "next_build": 290,
-    "next_build_title": "Inventory Multi-Station Read Integrity & Client-Native Memberships",
+    "next_build": 291,
+    "next_build_title": "Public Runtime Reliability & Broken-Surface Closure",
     "roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md"
   },
   "canonical_data_migration_authorized": false,
@@ -1036,5 +1037,19 @@
       "300": "CAIP Maker Content Outcomes Renewal & Automation Refinement"
     }
   },
-  "next_roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md"
+  "next_roadmap": "docs/operations/RELEASE_467_UX_SEARCH_DATABASE_EFFICIENCY_BUILDS_290_300.md",
+  "inventory_multi_station_read_integrity": {
+    "source_build": 290,
+    "state": "DEVELOPMENT_CANDIDATE",
+    "membership_authority": "inventory_workstation_memberships",
+    "read_mode": "ONE_BOUNDED_PAGE_PLUS_ONE_SET_BASED_MEMBERSHIP_QUERY",
+    "client_payload": "workstation_site_item_inventory_ids",
+    "global_fetch_interception": false,
+    "forge_like_three_station_regression": true,
+    "schema_change": false,
+    "d1_measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "d1_rows_read_ceiling": 5000,
+    "next_build": 291,
+    "future_queue_exhausted": false
+  }
 }
