@@ -14,6 +14,16 @@ on:
       - 'release467-build290-inventory-multi-station-read-integrity-client-native-memberships.json'
       - 'current-development-authority.json'
       - '.github/workflows/release467-build290-inventory-multi-station-read-integrity.yml'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'admin/it/index.html'
+      - 'admin/reliability/index.html'
+      - 'admin/deployment-preflight/index.html'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+      - 'scripts/current_*_gate.py'
+      - 'scripts/release467_build2*_gate.py'
   workflow_dispatch:
 permissions:
   contents: read
