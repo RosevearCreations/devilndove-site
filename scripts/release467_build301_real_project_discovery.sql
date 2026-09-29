@@ -14,6 +14,10 @@ SELECT
   COUNT(e.creative_work_event_id) active_event_count,
   SUM(CASE WHEN TRIM(COALESCE(e.event_notes,''))<>'' THEN 1 ELSE 0 END) noted_event_count,
   SUM(CASE WHEN TRIM(COALESCE(e.event_title,''))<>'' THEN 1 ELSE 0 END) titled_event_count,
+  GROUP_CONCAT(CASE WHEN TRIM(COALESCE(e.event_title,''))<>'' THEN
+    '['||COALESCE(e.event_type,'note')||'] '||e.event_title||
+    CASE WHEN TRIM(COALESCE(e.event_notes,''))<>'' THEN ' — '||REPLACE(REPLACE(e.event_notes,CHAR(10),' '),CHAR(13),' ') ELSE '' END
+    ELSE NULL END,' || ') event_facts,
   (CASE WHEN TRIM(COALESCE(p.summary,''))<>'' THEN 1 ELSE 0 END
    + CASE WHEN TRIM(COALESCE(p.objective,''))<>'' THEN 1 ELSE 0 END
    + CASE WHEN TRIM(COALESCE(p.story_angle,''))<>'' THEN 1 ELSE 0 END) project_fact_fields
