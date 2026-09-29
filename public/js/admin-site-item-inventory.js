@@ -231,6 +231,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setInputValue('siteInventoryStockUnitLabel', draft.stock_unit_label || 'package');
     setInputValue('siteInventoryUsageUnitLabel', draft.usage_unit_label || 'unit');
     setInputValue('siteInventoryUsageUnitsPerStock', Math.max(0.001, Number(draft.usage_units_per_stock_unit || 1)));
+    const currentCostEl = document.getElementById('siteInventoryUnitCost');
+    const currentCost = Math.max(0, Number(currentCostEl?.value || 0) || 0);
+    if (currentCost <= 0 && Number(draft.current_price_cents || 0) > 0) {
+      setInputValue('siteInventoryUnitCost', centsToDollarInput(draft.current_price_cents));
+    }
     setInputValue('siteInventoryUsageTrackingMode', draft.usage_tracking_mode || (String(draft.source_type || 'supply').toLowerCase() === 'tool' ? 'reusable' : 'exact'));
     setInputValue('siteInventoryMinimumUsageIncrement', Math.max(0.0001, Number(draft.minimum_usage_increment || 0.001) || 0.001));
     const sourceMaterialEl = document.getElementById('siteInventorySourceMaterialRecommended');
@@ -239,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInputValue('siteInventoryMovementNote', 'Created from reviewed Amazon link metadata.');
     updateSiteInventoryImagePreview();
     const warningText = Array.isArray(warnings) && warnings.length ? ` ${warnings.join(' ')}` : '';
-    setAmazonLinkPreviewStatus(`Amazon draft loaded. Review every field, enter the actual purchase cost, then save.${warningText}`);
+    setAmazonLinkPreviewStatus(`Amazon draft loaded. Review every field before saving. A current Amazon CAD price is used only when Inventory has no existing cost.${warningText}`);
     document.getElementById('siteInventoryForm')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -395,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const data = await window.DDAuth.apiJson(
             '/api/admin/inventory-bootstrap',
             { method: 'GET' },
-            { fallbackMessage: 'Failed to load inventory setup choices.', cacheKey: 'inventory-bootstrap-v252', cacheTtlMs: 300000, retries: 0, staleOnError: true }
+            { fallbackMessage: 'Failed to load inventory setup choices.', cacheKey: 'inventory-bootstrap-v289', cacheTtlMs: 300000, retries: 0, staleOnError: true }
           );
           categorySeedOptions = Array.isArray(data?.categories) ? data.categories.map((v)=>String(v||'').trim().toLowerCase()).filter(Boolean) : [];
           processOptions = Array.isArray(data?.processes) ? data.processes : [];
@@ -922,7 +927,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventorySeedItem')?.addEventListener('change', (event) => { applySeedItemByKey(event.target.value || ''); });
     document.getElementById('siteInventoryCategoryPreset')?.addEventListener('change', (event) => {
       const option = event.target.selectedOptions?.[0];
-      setInputValue('siteInventoryCategory', option?.dataset?.processName || option?.textContent || '');
+      setInputValue('siteInventoryCategory', String(option?.dataset?.processName || option?.textContent || '').trim().toLowerCase());
       syncFormStationState();
     });
     document.getElementById('siteInventoryWorkstationRole')?.addEventListener('change', syncFormStationState);
@@ -948,6 +953,12 @@ document.addEventListener('DOMContentLoaded', () => {
     updateBulkCostScopeHelpers();
     updateBulkCostPlaceholder();
     mountEl.addEventListener('click', onTableClick);
+    mountEl.addEventListener('change', (event) => {
+      const row = event.target?.closest?.('[data-inventory-row]');
+      if (!row) return;
+      if (event.target.matches('[data-field="do_not_reorder"]')) syncRowReorderState(row);
+      if (event.target.matches('[data-field="inventory_process_id"],[data-field="workstation_role"],[data-field="source_type"]')) syncRowStationState(row);
+    });
     mountEl.addEventListener('input', (event) => {
       if (!event.target?.matches?.('[data-field="unit_cost_dollars"],[data-field="usage_units_per_stock_unit"],[data-field="usage_unit_label"]')) return;
       updateRowUsageCost(event.target.closest('[data-inventory-row]'));
@@ -1266,6 +1277,10 @@ document.addEventListener('DOMContentLoaded', () => {
             </div></td>
           </tr>`;
         }).join('');
+        body.querySelectorAll('[data-inventory-row]').forEach((row) => {
+          syncRowReorderState(row);
+          syncRowStationState(row);
+        });
       }
 
       renderMovements(data.movements || []);
@@ -1362,6 +1377,17 @@ document.addEventListener('DOMContentLoaded', () => {
         saveRowBtn.disabled = true; saveRowBtn.textContent = 'Saving…';
         const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', { method: 'PATCH', body: JSON.stringify(payload) });
         const data = await readApiPayload(response, 'Row update failed.');
+        const savedItem = data?.item || payload;
+        stationToolOptions = stationToolOptions.filter((entry) => Number(entry.site_item_inventory_id || 0) !== id);
+        if (String(savedItem.workstation_role || payload.workstation_role || '') === 'station' && String(savedItem.source_type || payload.source_type || '').toLowerCase() === 'tool') {
+          stationToolOptions.push({
+            site_item_inventory_id: id,
+            item_name: savedItem.item_name || payload.item_name,
+            inventory_process_id: Number(savedItem.inventory_process_id || payload.inventory_process_id || 0),
+            process_key: savedItem.process_key || '',
+            process_name: savedItem.process_name || ''
+          });
+        }
         setMessage(`${payload.item_name} updated.`);
         await loadList({ force: true });
       } catch (error) {
@@ -1370,10 +1396,23 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       return;
     }
+    const amazonFillBtn = event.target.closest('[data-amazon-fill-id]');
     const editBtn = event.target.closest('[data-edit-id]');
     const deleteBtn = event.target.closest('[data-delete-id]');
     const loadFormBtn = event.target.closest('[data-load-form-id]');
 
+    if (amazonFillBtn) {
+      const row = amazonFillBtn.closest('[data-inventory-row]');
+      let original = {};
+      try { original = JSON.parse(amazonFillBtn.getAttribute('data-item') || '{}'); } catch {}
+      if (!row) return;
+      try {
+        await fillMissingFromAmazon(row, original, amazonFillBtn);
+      } catch (error) {
+        setMessage(error.message || 'Amazon Inventory fill failed.', true);
+      }
+      return;
+    }
 
     if (loadFormBtn) {
       let item = null;
