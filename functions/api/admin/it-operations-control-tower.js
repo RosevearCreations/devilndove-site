@@ -1,33 +1,33 @@
-// Release 467 Build 293 — CSS Design-System & Responsive Consolidation over exact Build 292 Production source.
+// Release 467 Build 294 — CAIP Workshop Follies & Maker Story Foundation over exact Build 293 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=293;
-const TITLE='CSS Design-System & Responsive Consolidation';
-const AUTHORITY='release467-build293-css-design-system-responsive-consolidation';
-const EVIDENCE_ID='r467-b292-green-36574363048-36574667381';
+const BUILD=294;
+const TITLE='CAIP Workshop Follies & Maker Story Foundation';
+const AUTHORITY='release467-build294-caip-workshop-follies-maker-story-foundation';
+const EVIDENCE_ID='r467-b293-green-36577048558-36577330288';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:292,title:'Client Runtime Observer & Memory-Churn Hardening',state:'DEVELOPMENT_GREEN',
-  dev_sha:'9d4461b189bcb6899ed4219ac7cdcc6192740240',tree_sha:'e57f03fa2e58e30a827e587e4651029654e7b179',
-  system_gate_run:36574363048,current_application_quality_run:36574363030,it_admin_runtime_proof_run:36574363037,
-  branch_hygiene_run:36574362807,proof_state:'EXACT_BRANCH_HEAD_BUILD292_GREEN',
+  release:467,build:293,title:'CSS Design-System & Responsive Consolidation',state:'DEVELOPMENT_GREEN',
+  dev_sha:'f8645db239348f06098faa1915ef9376940746de',tree_sha:'e74e6358bef93ee6d16802b488363145c4d66c04',
+  system_gate_run:36577048558,current_application_quality_run:36577048520,it_admin_runtime_proof_run:36577048576,
+  branch_hygiene_run:36577048496,proof_state:'EXACT_BRANCH_HEAD_BUILD293_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:292,title:'Build 293 starting point',state:'DEVELOPMENT_GREEN',
-  dev_sha:'9d4461b189bcb6899ed4219ac7cdcc6192740240',tree_sha:'e57f03fa2e58e30a827e587e4651029654e7b179',
-  accepted_sha:'9d4461b189bcb6899ed4219ac7cdcc6192740240',accepted_tree_sha:'e57f03fa2e58e30a827e587e4651029654e7b179',
-  system_gate_run:36574363048,current_application_quality_run:36574363030,it_admin_runtime_proof_run:36574363037,
-  branch_hygiene_run:36574362807,proof_state:'EXACT_BRANCH_HEAD_BUILD292_GREEN'
+  release:467,build:293,title:'Build 294 starting point',state:'DEVELOPMENT_GREEN',
+  dev_sha:'f8645db239348f06098faa1915ef9376940746de',tree_sha:'e74e6358bef93ee6d16802b488363145c4d66c04',
+  accepted_sha:'f8645db239348f06098faa1915ef9376940746de',accepted_tree_sha:'e74e6358bef93ee6d16802b488363145c4d66c04',
+  system_gate_run:36577048558,current_application_quality_run:36577048520,it_admin_runtime_proof_run:36577048576,
+  branch_hygiene_run:36577048496,proof_state:'EXACT_BRANCH_HEAD_BUILD293_GREEN'
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:292,title:'Client Runtime Observer & Memory-Churn Hardening',state:'PRODUCTION_GREEN',
-  main_sha:'6891ba76bb9fc07e97962ae36b94cad143412bfd',tree_sha:'e57f03fa2e58e30a827e587e4651029654e7b179',
-  production_pages_deploy_run:36574667381,production_live_resource_integrity_run:36574807683,
-  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36574362894,remote_d1_queries:0
+  release:467,build:293,title:'CSS Design-System & Responsive Consolidation',state:'PRODUCTION_GREEN',
+  main_sha:'229f9299561a820c029d1eec69e8f088b94c9a09',tree_sha:'e74e6358bef93ee6d16802b488363145c4d66c04',
+  production_pages_deploy_run:36577330288,production_live_resource_integrity_run:36577451115,
+  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36577048557,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -37,9 +37,9 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 293 CSS Design-System & Responsive Consolidation'
+  'Release 467 Build 294 CAIP Workshop Follies & Maker Story Foundation'
 ]);
-const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql','0026_release467_inventory_workstation_memberships.sql']);
+const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql','0026_release467_inventory_workstation_memberships.sql','0027_release467_caip_workshop_follies_maker_story_foundation.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
   {key:'paypal_sandbox',state:'HOLD_EXTERNAL'},
@@ -127,7 +127,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:293,title:TITLE,authority:'release467-build293-css-design-system-responsive-consolidation.json'},
+        current_closure_candidate:{release:467,build:294,title:TITLE,authority:'release467-build294-caip-workshop-follies-maker-story-foundation.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
