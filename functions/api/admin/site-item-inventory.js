@@ -53,6 +53,34 @@ function lifecycleError(error) {
   }, status);
 }
 
+async function loadWorkstationMemberships(db, itemIds = []) {
+  const ids = [...new Set((Array.isArray(itemIds) ? itemIds : []).map((id)=>Number(id||0)).filter((id)=>id>0))];
+  const out = new Map();
+  if (!ids.length) return out;
+  const placeholders = ids.map(()=>'?').join(',');
+  const result = await db.prepare(`
+    SELECT iwm.site_item_inventory_id,
+           iwm.workstation_site_item_inventory_id,
+           COALESCE(ws.item_name,'') AS workstation_item_name
+    FROM inventory_workstation_memberships iwm
+    JOIN site_item_inventory ws ON ws.site_item_inventory_id=iwm.workstation_site_item_inventory_id
+    WHERE iwm.site_item_inventory_id IN (${placeholders})
+    ORDER BY iwm.site_item_inventory_id, LOWER(COALESCE(ws.item_name,'')), iwm.workstation_site_item_inventory_id
+  `).bind(...ids).all().catch(()=>({results:[]}));
+  const rows = Array.isArray(result?.results) ? result.results : [];
+  for (const row of rows) {
+    const itemId = Number(row.site_item_inventory_id || 0);
+    if (!itemId) continue;
+    if (!out.has(itemId)) out.set(itemId,{ ids:[], names:[] });
+    const entry = out.get(itemId);
+    const stationId = Number(row.workstation_site_item_inventory_id || 0);
+    if (stationId && !entry.ids.includes(stationId)) entry.ids.push(stationId);
+    const name = String(row.workstation_item_name || '').trim();
+    if (name && !entry.names.includes(name)) entry.names.push(name);
+  }
+  return out;
+}
+
 async function enrichData(db, data = {}) {
   const itemIds = [];
   if (data?.item?.site_item_inventory_id) itemIds.push(Number(data.item.site_item_inventory_id));
@@ -62,10 +90,23 @@ async function enrichData(db, data = {}) {
   for (const row of (Array.isArray(data?.results) ? data.results : [])) {
     if (row?.site_item_inventory_id) itemIds.push(Number(row.site_item_inventory_id));
   }
-  const balances = await loadInventoryBaseBalances(db, itemIds);
-  const merge = (row) => row?.site_item_inventory_id
-    ? mergeInventoryBaseAuthority(row, balances.get(Number(row.site_item_inventory_id)) || null)
-    : row;
+  const [balances, workstationMemberships] = await Promise.all([
+    loadInventoryBaseBalances(db, itemIds),
+    loadWorkstationMemberships(db, itemIds)
+  ]);
+  const merge = (row) => {
+    if (!row?.site_item_inventory_id) return row;
+    const itemId = Number(row.site_item_inventory_id);
+    const membership = workstationMemberships.get(itemId) || { ids:[], names:[] };
+    const merged = mergeInventoryBaseAuthority(row, balances.get(itemId) || null);
+    return {
+      ...merged,
+      workstation_site_item_inventory_ids: membership.ids,
+      workstation_item_names: membership.names,
+      workstation_site_item_inventory_id: membership.ids[0] || Number(merged?.workstation_site_item_inventory_id || 0) || 0,
+      workstation_item_name: membership.names[0] || String(merged?.workstation_item_name || '')
+    };
+  };
   const out = {
     ...data,
     quantity_authority: 'base',
