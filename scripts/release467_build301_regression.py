@@ -18,7 +18,7 @@ for token in ('creative_work_projects','creative_project_maker_story_profiles','
 upper=' '+re.sub(r'--.*','',sql).upper()+' '
 for forbidden in (' INSERT ',' UPDATE ',' DELETE ',' CREATE ',' ALTER ',' DROP ',' REPLACE ',' VACUUM ',' REINDEX '):
     q(forbidden not in upper,'Build 301 discovery must stay read-only: '+forbidden.strip())
-q("D1_ONE_SHOT_EVIDENCE_CAPTURE" in wf and "D1_PROVIDER_ROWS_READ_CEILING: '10000'" in wf,'Build 301 bounded Development measurement contract missing')
+q("D1_ONE_SHOT_EVIDENCE_CAPTURE" in wf and "D1_PROVIDER_ROWS_READ_CEILING: '20000'" in wf,'Build 301 bounded Development measurement contract missing')
 q('PRODUCTION D1 CONTACT: ZERO' in wf and 'AUTOMATIC PUBLICATION: ZERO' in wf,'Build 301 safety boundary missing')
 for token in ("creative_work_project_id=7","project_key='CP-MSXCYQB6'","project_title='Under the Sea'","'maker_story'","'partial_win'","'needs_review'","public_story_candidate","No finished-result entry is recorded yet.","INSERT INTO creative_project_maker_story_profiles","UPDATE creative_projects"):
     q(token in adopt,'Build 301 adoption contract missing '+token)

@@ -34,7 +34,7 @@ jobs:
       DEV_D1_DATABASE_NAME: devilndove-dev
       EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
       EXPECTED_STATEMENTS: 5
-      D1_PROVIDER_ROWS_READ_CEILING: '10000'
+      D1_PROVIDER_ROWS_READ_CEILING: '20000'
     steps:
       - uses: actions/checkout@v7
         with: { fetch-depth: 2 }

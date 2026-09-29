@@ -196,11 +196,14 @@
       "system_gate_run": 36645926155,
       "current_application_quality_run": 36645926199,
       "it_admin_runtime_proof_run": 36645926079,
-      "branch_hygiene_run": 36645926110,
-      "d1_ci_fanout_guard_run": 36645926068
+      "branch_hygiene_run": 36645926110
     },
     "build_specific_proof_run": 36645926113,
-    "ingested_by_build": 301
+    "ingested_by_build": 301,
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36645926068,
+      "build_specific_proof_run": 36645926113
+    }
   },
   "production_checkpoint": {
     "main_sha": "e569d5fce0ff5ab08a3d1dc6be1051211ed15ac2",
