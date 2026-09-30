@@ -1,0 +1,22 @@
+import fs from 'node:fs';
+const [input,sha,output]=process.argv.slice(2);
+const raw=JSON.parse(fs.readFileSync(input,'utf8'));const sets=Array.isArray(raw)?raw:(raw.results||[]);
+if(sets.length!==6)throw new Error('Unexpected statement count '+sets.length);
+const reads=sets.map(x=>Number(x?.meta?.rows_read||0)),aggregate=reads.reduce((a,b)=>a+b,0);
+if(aggregate>20000)throw new Error('Rows-read ceiling exceeded '+aggregate);
+const publication=(sets[0]?.results||[])[0]||{},telemetry=(sets[1]?.results||[])[0]||{},gsc=(sets[2]?.results||[])[0]||{},products=(sets[3]?.results||[])[0]||{},sitemap=(sets[4]?.results||[])[0]||{},links=(sets[5]?.results||[])[0]||{};
+if(publication.publication_key!=='content-project-22-workshop_journal'||publication.content_status!=='published'||publication.destination!=='workshop_journal')throw new Error('Reviewed publication missing');
+if(Number(publication.social_ready)!==1||Number(publication.social_posted)!==0)throw new Error('Review-first social boundary drift');
+if(Number(sitemap.under_the_sea_sitemap_candidate)!==1)throw new Error('Under the Sea is not a sitemap candidate');
+if(Number(links.published_story_rows)!==1||Number(links.foreign_key_violations)!==0)throw new Error('Story/integrity boundary drift');
+for(const group of [telemetry,gsc,products,sitemap,links])for(const [k,v] of Object.entries(group)){if(k.includes('latest_'))continue;if(!Number.isFinite(Number(v||0)))throw new Error('Non-numeric measurement '+k);}
+console.log('BUILD305_ROWS_READ=',JSON.stringify(reads));
+console.log('BUILD305_AGGREGATE_ROWS_READ=',aggregate);
+console.log('BUILD305_PUBLICATION=',JSON.stringify(publication));
+console.log('BUILD305_TELEMETRY=',JSON.stringify(telemetry));
+console.log('BUILD305_SEARCH_CONSOLE=',JSON.stringify(gsc));
+console.log('BUILD305_PRODUCT_DISCOVERY=',JSON.stringify(products));
+console.log('BUILD305_SITEMAP=',JSON.stringify(sitemap));
+console.log('BUILD305_INTERNAL_DISCOVERY_INPUTS=',JSON.stringify(links));
+console.log('BUILD305_DISCOVERY_MEASUREMENT=GREEN');
+fs.writeFileSync(output,JSON.stringify({release:467,build:305,exact_development_sha:sha,reads,aggregate_rows_read:aggregate,publication,telemetry,search_console:gsc,product_discovery:products,sitemap,internal_discovery_inputs:links,provider_execution:false,indexnow_submission:false,production_d1_contact:false},null,2)+'\n');
