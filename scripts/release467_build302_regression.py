@@ -29,7 +29,10 @@ for forbidden in ('UPDATE creative_assets','UPDATE caip_media_upload_files','UPD
 for token in ('BUILD302_EVIDENCE_PUBLIC_SAFETY_ADOPTION=GREEN','selected.length!==3','public_story_candidates','fully_public_allowed_uploads','does not grant public-use rights'):
     q(token in verify,'Build 302 adoption verifier missing '+token)
 q('evidence-public-safety-adoption' in wf and 'release467_build302_verify_adoption.mjs' in wf,'Build 302 adoption runtime proof missing')
-q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md','Build 302 roadmap pointer mismatch')
+if int(p.get('build') or 0)<=305:
+    q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md','Build 302 roadmap pointer mismatch')
+else:
+    q((R/'docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md').exists(),'Build 302 historical roadmap artifact missing')
 if int(p.get('build') or 0)==302:
     q(int(p.get('next_build') or 0)==303,'Build 303 successor pointer missing')
 else:

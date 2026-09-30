@@ -27,7 +27,10 @@ for token in ("deliverable_key IN ('seo-assets','blog-article')","approval_statu
 for forbidden in ('INSERT INTO content_projects','INSERT INTO content_publications','INSERT INTO social_post_queue','UPDATE creative_assets','UPDATE caip_media_upload_files'):q(forbidden.lower() not in adopt.lower(),'Build 303 adoption crossed boundary: '+forbidden)
 for token in ('BUILD303_DRAFT_APPROVAL_ADOPTION=GREEN',"['blog-article','seo-assets']", 'changes.length!==17'):q(token in verify,'Build 303 adoption verifier missing '+token)
 for token in ('PRODUCTION D1 CONTACT: ZERO','AUTOMATIC REFRESH: ZERO','AUTOMATIC APPROVAL: ZERO','AUTOMATIC PUBLICATION: ZERO'):q(token in wf,'Build 303 workflow safety boundary missing '+token)
-q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md','Build 303 roadmap pointer mismatch')
+if int(p.get('build') or 0)<=305:
+    q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md','Build 303 roadmap pointer mismatch')
+else:
+    q((R/'docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md').exists(),'Build 303 historical roadmap artifact missing')
 if int(p.get('build') or 0)==303:q(int(p.get('next_build') or 0)==304 and p.get('next_build_title')=='Workshop Journal & Social Review-First Publication Acceptance','Build 304 successor pointer missing')
 else:q(int(p.get('build') or 0)>=304,'Build 303 successor must retain Build 304 or newer current authority')
 print('RELEASE 467 BUILD 303 CONTENT STUDIO DRAFT REVIEW & APPROVAL ADOPTION')

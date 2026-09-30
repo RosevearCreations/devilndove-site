@@ -24,7 +24,10 @@ for token in ("'content-project-22-workshop_journal'","'workshop_journal'","'pub
 for forbidden in ('devilndove-prod','bucket.put(','bucket.delete(','fetch('):q(forbidden.lower() not in sql.lower(),'Build 304 SQL crossed provider/Production boundary: '+forbidden)
 q("destination='website_gallery'" in sql and 'website_gallery_rows' in sql,'Build 304 gallery boundary proof missing')
 for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','PRODUCTION D1 CONTACT: ZERO','PROVIDER EXECUTION: ZERO','PROVIDER PUBLICATION: ZERO','WEBSITE GALLERY PUBLICATION: ZERO'):q(token in wf,'Build 304 workflow boundary missing '+token)
-q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md','Build 304 roadmap pointer mismatch')
+if int(p.get('build') or 0)<=305:
+    q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md','Build 304 roadmap pointer mismatch')
+else:
+    q((R/'docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md').exists(),'Build 304 historical roadmap artifact missing')
 if int(p.get('build') or 0)==304:q(int(p.get('next_build') or 0)==305 and p.get('next_build_title')=='Buyer Discovery & Search Measurement Activation','Build 305 successor pointer missing')
 else:q(int(p.get('build') or 0)>=305,'Build 304 successor must retain Build 305 or newer current authority')
 print('RELEASE 467 BUILD 304 WORKSHOP JOURNAL & SOCIAL REVIEW-FIRST PUBLICATION ACCEPTANCE')

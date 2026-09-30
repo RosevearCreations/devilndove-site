@@ -25,7 +25,10 @@ for token in ("creative_work_project_id=7","project_key='CP-MSXCYQB6'","project_
 for forbidden in ('UPDATE products','INSERT INTO content_publications','INSERT INTO social_post_queue','UPDATE site_item_inventory','INSERT INTO site_inventory_movements'):
     q(forbidden.lower() not in adopt.lower(),'Build 301 adoption crossed safety boundary: '+forbidden)
 q("real-maker-story-adoption" in wf and "EXPECTED_STATEMENTS: 5" in wf,'Build 301 adoption runtime proof missing')
-q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md','Build 301 roadmap pointer mismatch')
+if int(p.get('build') or 0)<=305:
+    q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md','Build 301 roadmap pointer mismatch')
+else:
+    q((R/'docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md').exists(),'Build 301 historical roadmap artifact missing')
 if int(p.get('build') or 0)==301:
     q(int(p.get('next_build') or 0)==302,'Build 302 successor pointer missing')
 else:
