@@ -24,6 +24,7 @@ q(c.get('second_story_publication_action')=='BLOCKED_UNTIL_EXPLICIT_MAKER_STORY_
 for body in (fn,root):
     q('makerStoryPublicationPrerequisite' in body,'Build 310 Maker Story publication prerequisite helper missing')
     q('content_project_source_type' in body and 'content_project_source_id' in body,'Build 310 publication source identity missing')
+    q('Cannot prepare public drafts until the Maker Story is explicitly reviewed and marked as a public story candidate.' in body,'Build 310 preparation fail-closed message missing')
     q('Cannot approve this public draft until the Maker Story is explicitly reviewed and marked as a public story candidate.' in body,'Build 310 approval fail-closed message missing')
     q('Cannot publish this public draft until the Maker Story is explicitly reviewed and marked as a public story candidate.' in body,'Build 310 publish fail-closed message missing')
 upper=' '+re.sub(r'--.*','',sql).upper()+' '
