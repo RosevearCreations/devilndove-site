@@ -2,8 +2,8 @@
   "release": 467,
   "build": 313,
   "title": "Second Maker Story Review Decision & Completeness",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "SECOND_MAKER_STORY_REVIEW_DECISION_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
+  "phase": "SECOND_MAKER_STORY_REVIEW_DECISION_COMPLETE",
   "authority": "release467-build313-second-maker-story-review-decision-completeness",
   "predecessor": {
     "build": 312,
@@ -140,5 +140,31 @@
     "provider_execution": false,
     "production_d1_contact": false
   },
-  "development_mutation_scope": "BOUNDED_REVIEW_DECISION_TRACEABILITY_ONLY"
+  "development_mutation_scope": "BOUNDED_REVIEW_DECISION_TRACEABILITY_ONLY",
+  "final_closure": {
+    "dev_sha": "6d62f2b7f8876715d3dc6a9afa2da9b1999979a3",
+    "tree_sha": "323d985b6385ee103552a51723b087187010ab53",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD313_GREEN",
+    "proofs": {
+      "system_gate_run": 36716969702,
+      "current_application_quality_run": 36716969803,
+      "it_admin_runtime_proof_run": 36716969886,
+      "branch_hygiene_run": 36716969713
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36716969773,
+      "build_specific_proof_run": 36716969717
+    },
+    "ingested_by_build": 314
+  },
+  "production_checkpoint": {
+    "main_sha": "14375bce8e1749b309e60ef3baf1804ee01bdc47",
+    "tree_sha": "323d985b6385ee103552a51723b087187010ab53",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36717227244,
+    "production_live_resource_integrity_run": 36717338240,
+    "remote_d1_queries": 0
+  }
 }
