@@ -1,4 +1,5 @@
 name: Release 467 Build 314 Second Story Publication Readiness Review Queue Continuity
+# Exact-head proof trigger after retained predecessor-map convergence.
 on:
   push:
     branches: [dev]
