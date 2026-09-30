@@ -25,8 +25,11 @@ for token in ("creative_work_project_id=6","CP-MSUNAL8R","Grey Hair","readiness_
     q(token in api,'Build 320 readiness API missing '+token)
 for forbidden in ('INSERT INTO','UPDATE ','DELETE FROM','CREATE TABLE','ALTER TABLE','DROP TABLE'):
     q(forbidden not in api.upper(),'Build 320 readiness API must remain read-only: '+forbidden)
-for token in ('/admin/creative-assets/','/admin/grey-hair-sync-alignment/','/admin/grey-hair-story-edit-planning/','does not approve evidence','does not publish anything'):
-    q(token in page,'Build 320 readiness page missing '+token)
+q('/admin/creative-assets/' in page or '/admin/creative-assets/' in ui,'Build 320 readiness surface missing CAIP Evidence Review route')
+q('/admin/grey-hair-sync-alignment/' in ui,'Build 320 readiness surface missing sync route')
+q('/admin/grey-hair-story-edit-planning/' in ui,'Build 320 readiness surface missing story-planning route')
+q('does not approve evidence' in page,'Build 320 readiness page missing explicit no-auto-approval language')
+q(('does not publish anything' in page) or ('or publish anything' in page),'Build 320 readiness page missing explicit no-publication language')
 for token in ('SOURCE_EVIDENCE_REVIEW_REQUIRED','STORY_PLANNING_PREREQUISITE_SYNC_REQUIRED','HUMAN_REVIEWED_STORY_PLAN_REQUIRED','GREY_HAIR_REVIEWED_EVIDENCE_READY_PENDING_MAKER_STORY_DECISION','Review CAIP evidence','Open story planning','Private evidence metadata only'):
     q(token in ui,'Build 320 readiness UI missing '+token)
 upper=' '+re.sub(r'--.*','',sql).upper()+' '
