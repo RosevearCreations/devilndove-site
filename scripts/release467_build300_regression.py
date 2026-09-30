@@ -36,7 +36,7 @@ for token in ('makerStoryAdoptionReadiness','START_FIRST_REAL_MAKER_STORY','ADOP
     q(token in api,'Build 300 Creative Process readiness missing '+token)
 for token in ('data-build300-maker-story-readiness','Build 300 • adoption guidance','never creates, refreshes, approves or publishes content automatically'):
     q(token in ui,'Build 300 operator guidance missing '+token)
-q(('/public/js/admin-creative-process.js?v=467b294-300' in page) or (int(p.get('build') or 0)>=307 and '/public/js/admin-creative-process.js?v=467b307' in page),'Build 300 Creative Process cache identity missing')
+q(('/public/js/admin-creative-process.js?v=467b294-300' in page) or (307<=int(p.get('build') or 0)<319 and '/public/js/admin-creative-process.js?v=467b307' in page) or (int(p.get('build') or 0)>=319 and '/public/js/admin-creative-process.js?v=467b319' in page),'Build 300 Creative Process cache identity missing')
 q((R/'docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md').exists(),'Build 300 successor roadmap missing')
 print('RELEASE 467 BUILD 300 CAIP MAKER CONTENT OUTCOMES RENEWAL & AUTOMATION REFINEMENT')
 if F:
