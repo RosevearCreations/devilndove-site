@@ -1,24 +1,5 @@
 name: Release 467 Build 323 Maker Story Coverage Publication Readiness Continuity
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build323_*'
-      - 'scripts/release467_build26*_gate.py'
-      - 'scripts/release467_build27*_gate.py'
-      - 'release467-build323-*.json'
-      - 'release467-build322-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_323_*'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/maker-story-coverage.js'
-      - 'admin/maker-story-coverage/index.html'
-      - 'public/js/admin-maker-story-coverage-v323.js'
-      - 'admin/creative-process/index.html'
-      - '.github/workflows/release467-build322-buyer-discovery-attribution-seo-review-evidence-continuity.yml'
-      - '.github/workflows/release467-build323-maker-story-coverage-publication-readiness-continuity.yml'
   workflow_dispatch:
 permissions:
   contents: read
