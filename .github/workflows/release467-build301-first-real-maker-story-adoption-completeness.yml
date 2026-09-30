@@ -7,6 +7,7 @@ on:
       - 'public/js/admin-creative-process.js'
       - 'admin/creative-process/index.html'
       - 'scripts/release467_build301_*'
+      - 'scripts/release467_build300_regression.py'
       - 'release467-build301-*.json'
       - 'current-development-authority.json'
       - 'docs/operations/RELEASE_467_BUILD_301_*'

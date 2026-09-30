@@ -28,8 +28,9 @@ upper=' '+re.sub(r'--.*','',sql).upper()+' '
 for forbidden in (' INSERT ',' UPDATE ',' DELETE ',' CREATE ',' ALTER ',' DROP ',' REPLACE ',' VACUUM ',' REINDEX '):
     q(forbidden not in upper,'Build 300 outcome measurement must remain read-only: '+forbidden.strip())
 q(sql.upper().count('SELECT')>=12,'Build 300 measurement must cover the full outcome set')
-for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE',"D1_PROVIDER_ROWS_READ_CEILING: '20000'","paths:","PRODUCTION D1 CONTACT: ZERO","AUTOMATIC PUBLICATION: ZERO"):
+for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE',"D1_PROVIDER_ROWS_READ_CEILING: '20000'","PRODUCTION D1 CONTACT: ZERO","AUTOMATIC PUBLICATION: ZERO"):
     q(token in workflow,'Build 300 bounded workflow contract missing '+token)
+q(('paths:' in workflow) or ('on:\n  workflow_dispatch:' in workflow),'Build 300 workflow must remain either bounded path-scoped while current or manual-only after successor ingestion')
 for token in ('makerStoryAdoptionReadiness','START_FIRST_REAL_MAKER_STORY','ADOPTION_GUIDANCE_ONLY_NO_NEW_AUTOMATION','automatic_content_refresh:false','automatic_publication:false','maker_story_adoption_readiness'):
     q(token in api,'Build 300 Creative Process readiness missing '+token)
 for token in ('data-build300-maker-story-readiness','Build 300 • adoption guidance','never creates, refreshes, approves or publishes content automatically'):
