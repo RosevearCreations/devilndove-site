@@ -23,6 +23,10 @@ Build 319:
 - does not auto-select evidence or alter Maker Story review/outcome/public candidacy;
 - does not publish, create social rows, infer media rights or execute providers;
 - measures execution + result + lesson completeness read-only in CI.
+- Exact Development measurement: `INTAKE_READY_AWAITING_REAL_EXECUTION_RESULT_LESSON_EVIDENCE`.
+- Current 35th promo evidence: planning **1**, execution **0**, result **0**, lesson **0**, selected execution evidence **0**.
+- Story remains `needs_review`, outcome `unknown`, public candidate `0`; publication/social rows remain `0 / 0`.
+- Build 319 measurement read **48 / 20,000** D1 rows and performed zero evidence mutation.
 
 Next after Build 319 Production GREEN: **Build 320 — Grey Hair Source-Evidence Review & Story-Plan Readiness**.
 
