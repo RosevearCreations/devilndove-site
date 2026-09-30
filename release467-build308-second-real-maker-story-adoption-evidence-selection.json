@@ -2,8 +2,8 @@
   "release": 467,
   "build": 308,
   "title": "Second Real Maker Story Adoption & Evidence Selection",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "SECOND_REAL_MAKER_STORY_ADOPTED_EVIDENCE_SELECTED",
+  "state": "PRODUCTION_GREEN",
+  "phase": "SECOND_REAL_MAKER_STORY_ADOPTION_COMPLETE",
   "authority": "release467-build308-second-real-maker-story-adoption-evidence-selection",
   "predecessor": {
     "build": 307,
@@ -178,5 +178,32 @@
     "branch_hygiene_run": 36665046288,
     "build_specific_proof_run": 36665046366,
     "note": "Build 308 source/runtime/adoption controls are GREEN after readiness diagnostics. Final closure requires fresh exact-head System, Quality, I.T., Hygiene, D1 Fan-Out and Build 308 proofs."
+  },
+  "final_closure": {
+    "dev_sha": "60b6a631a615c1653ecfb07b4cbf8bc117a496f8",
+    "tree_sha": "d78e7d76fb06395ee182271044314808454f6110",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD308_GREEN",
+    "proofs": {
+      "system_gate_run": 36665213124,
+      "current_application_quality_run": 36665213036,
+      "it_admin_runtime_proof_run": 36665213119,
+      "branch_hygiene_run": 36665213073
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36665213057,
+      "build_specific_proof_run": 36665213093
+    },
+    "ingested_by_build": 309
+  },
+  "production_checkpoint": {
+    "main_sha": "498ddd776ea3c52b243a5ef8800fc33570d159a4",
+    "tree_sha": "d78e7d76fb06395ee182271044314808454f6110",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36665406681,
+    "production_live_resource_integrity_run": 36665469007,
+    "remote_d1_queries": 0,
+    "ingested_by_build": 309
   }
 }
