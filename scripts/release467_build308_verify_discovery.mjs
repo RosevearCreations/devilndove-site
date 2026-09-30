@@ -26,6 +26,7 @@ console.log('BUILD308_SELECTED_EVENTS=',JSON.stringify(selectedEvents));
 console.log('BUILD308_GREY_HAIR_READINESS=',JSON.stringify(greyHair));
 console.log('BUILD308_GREY_HAIR_REVIEWED_EVIDENCE_READY=',greyHairReviewedEvidenceReady);
 console.log('BUILD308_GREY_HAIR_STORY_EVIDENCE=',JSON.stringify(greyHairStoryEvidence));
+console.log('BUILD308_GREY_HAIR_REVIEWED_READY=',greyHairReviewedEvidenceReady);
 console.log('BUILD308_DISCOVERY_ROWS_READ=',JSON.stringify(reads));
 console.log('BUILD308_DISCOVERY_AGGREGATE_ROWS_READ=',aggregate);
 console.log('BUILD308_SECOND_REAL_STORY_DISCOVERY=GREEN');
