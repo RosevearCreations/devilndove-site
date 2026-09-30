@@ -1,0 +1,30 @@
+import fs from 'node:fs';
+const [input,sha,output]=process.argv.slice(2);
+const raw=JSON.parse(fs.readFileSync(input,'utf8'));const sets=Array.isArray(raw)?raw:(raw.results||[]);
+if(sets.length!==5)throw new Error('Unexpected statement count '+sets.length);
+const reads=sets.map(x=>Number(x?.meta?.rows_read||0)),aggregate=reads.reduce((a,b)=>a+b,0);
+if(aggregate>20000)throw new Error('Rows-read ceiling exceeded '+aggregate);
+const pre=(sets[0]?.results||[])[0]||{},rows=sets[3]?.results||[],post=(sets[4]?.results||[])[0]||{};
+if(Number(pre.content_project_id)!==22||pre.content_project_key!=='creative-project-7-under-the-sea'||pre.source_type!=='creative_project'||String(pre.source_id)!=='7')throw new Error('Content package identity drift');
+if(Number(pre.content_packages)!==1||Number(pre.deliverables)!==19||Number(pre.factual_template_deliverables)!==19||Number(pre.selected_evidence)!==3)throw new Error('Build 303 prerequisite count drift');
+if(Number(pre.caip_assets||0)!==0||Number(pre.private_upload_files||0)!==0)throw new Error('Fail closed: CAIP media appeared before review adoption');
+if(rows.length!==19)throw new Error('Expected 19 reviewed deliverables');
+const approved=rows.filter(x=>x.approval_status==='approved'),changes=rows.filter(x=>x.approval_status==='changes_requested');
+if(approved.length!==2||changes.length!==17)throw new Error('Expected 2 approved copy drafts and 17 changes requested');
+const approvedKeys=approved.map(x=>x.deliverable_key).sort();
+if(JSON.stringify(approvedKeys)!==JSON.stringify(['blog-article','seo-assets']))throw new Error('Approved key set drift '+JSON.stringify(approvedKeys));
+for(const row of approved){
+  if(Number(row.copy_locked)!==1||!String(row.review_notes||'').includes('copy-only'))throw new Error('Approved copy lock/review note missing for '+row.deliverable_key);
+  if(String(row.published_at||'')!=='')throw new Error('Approved copy must not be published in Build 303');
+}
+const blog=approved.find(x=>x.deliverable_key==='blog-article')||{},seo=approved.find(x=>x.deliverable_key==='seo-assets')||{};
+if(!String(blog.body_content||'').includes('No finished-result event or reviewed project media is recorded yet'))throw new Error('Blog factual boundary missing');
+if(!String(blog.body_content||'').includes('2.5 pounds plus 2.5 pounds'))throw new Error('Blog material evidence missing');
+if(!String(seo.body_content||'').includes('documented from workshop planning and material-use records'))throw new Error('SEO factual evidence boundary missing');
+if(changes.some(x=>!String(x.review_notes||'').includes('changes requested')))throw new Error('Changes-requested review note missing');
+if(Number(post.content_packages)!==1||Number(post.deliverables)!==19||Number(post.approved_deliverables)!==2||Number(post.changes_requested_deliverables)!==17||Number(post.locked_deliverables)!==2)throw new Error('Post-review counts mismatch');
+for(const key of ['published_deliverables','publications','social_rows_total','caip_assets','private_upload_files','foreign_key_violations'])if(Number(post[key]||0)!==0)throw new Error('Build 303 boundary failed '+key+'='+post[key]);
+console.log('BUILD303_ADOPTION_ROWS_READ=',JSON.stringify(reads));console.log('BUILD303_ADOPTION_AGGREGATE_ROWS_READ=',aggregate);
+console.log('BUILD303_APPROVED_KEYS=',JSON.stringify(approvedKeys));console.log('BUILD303_CHANGES_REQUESTED=',changes.length);
+console.log('BUILD303_POST_REVIEW=',JSON.stringify(post));console.log('BUILD303_DRAFT_APPROVAL_ADOPTION=GREEN');
+fs.writeFileSync(output,JSON.stringify({release:467,build:303,exact_development_sha:sha,reads,aggregate_rows_read:aggregate,approved_keys:approvedKeys,changes_requested:changes.length,post,content_studio_refresh:false,package_recreated:false,publication:false,social_queue:false,provider_execution:false,production_d1_contact:false},null,2)+'\n');

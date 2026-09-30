@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-**Build 303 — Content Studio Draft Review & Approval Adoption** is active in Development discovery.
+**Build 303 — Content Studio Draft Review & Approval Adoption** is active in Development approval adoption.
 
 Build 302 is the exact Development and Production GREEN baseline. The real Creative Project **7 — Under the Sea** retains exactly one CAIP workspace, one Content Studio package, one Maker Story in review, and three selected factual text-only evidence rows. Build 303 is reviewing the existing Content Studio drafts before any human approval is recorded.
 
@@ -11,10 +11,10 @@ Build 302 is the exact Development and Production GREEN baseline. The real Creat
 - Shared predecessor tree: `2665c72c6947c3d9dbea2f1d89e69dab70c791fd`
 - Build 303 schema change: **NONE**
 - Content Studio package creation: **NONE**
-- Automatic refresh: **NONE**
+- Automatic refresh: **NONE — EXISTING PACKAGE REUSED**
 - Locked-copy overwrite: **FORBIDDEN**
-- Initial Development discovery: **READ ONLY**
-- Human approval: **PENDING DRAFT REVIEW**
+- Development discovery: **157 D1 ROWS / READ ONLY; 19 FACTUAL-TEMPLATE DRAFTS**
+- Human review outcome: **2 EVIDENCE-SAFE TEXT DRAFTS APPROVED + LOCKED; 17 CHANGES REQUESTED**
 - Publication/social/provider action: **NONE**
 - Next after Production GREEN: **Build 304 — Workshop Journal & Social Review-First Publication Acceptance**
 

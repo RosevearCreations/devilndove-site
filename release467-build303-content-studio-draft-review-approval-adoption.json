@@ -3,7 +3,7 @@
   "build": 303,
   "title": "Content Studio Draft Review & Approval Adoption",
   "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "DRAFT_REVIEW_DISCOVERY",
+  "phase": "DRAFT_APPROVAL_ADOPTION_CANDIDATE",
   "authority": "release467-build303-content-studio-draft-review-approval-adoption",
   "predecessor": {
     "build": 302,
@@ -63,5 +63,55 @@
     "next_build": 304,
     "next_build_title": "Workshop Journal & Social Review-First Publication Acceptance",
     "future_queue_exhausted": false
+  },
+  "discovery_checkpoint": {
+    "source_sha": "fe855929497d473c2dc68f4df4b94206f9ae4651",
+    "workflow_run": 36652657712,
+    "job_id": 109690091440,
+    "aggregate_rows_read": 157,
+    "mutation": false,
+    "refresh": false,
+    "approval": false,
+    "publication": false,
+    "production_d1_contact": false
+  },
+  "discovery_findings": {
+    "content_project_id": 22,
+    "content_project_key": "creative-project-7-under-the-sea",
+    "content_packages": 1,
+    "deliverables": 19,
+    "factual_template_deliverables": 19,
+    "locked_deliverables": 0,
+    "approved_deliverables": 0,
+    "selected_evidence": 3,
+    "handoff_status": "draft",
+    "handoff_evidence_count": 0,
+    "caip_assets": 0,
+    "private_upload_files": 0,
+    "publications": 0,
+    "social_rows": 0,
+    "foreign_key_violations": 0
+  },
+  "approval_contract": {
+    "approved_deliverable_keys": [
+      "seo-assets",
+      "blog-article"
+    ],
+    "approved_target_count": 2,
+    "changes_requested_target_count": 17,
+    "total_reviewed_target_count": 19,
+    "manual_copy_corrections": [
+      "seo-assets",
+      "blog-article"
+    ],
+    "approved_copy_locked": true,
+    "media_dependent_drafts_remain_unapproved": true,
+    "content_package_count_target": 1,
+    "content_studio_refresh": false,
+    "package_recreation": false,
+    "publication": false,
+    "social_queue": false,
+    "provider_execution": false,
+    "idempotent": true
   }
 }

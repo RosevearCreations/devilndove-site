@@ -195,7 +195,7 @@
   "next_build": 304,
   "next_build_state": "QUEUED_AFTER_BUILD303_PRODUCTION_GREEN",
   "next_build_title": "Workshop Journal & Social Review-First Publication Acceptance",
-  "promotion_state": "BUILD303_DRAFT_REVIEW_DISCOVERY_CANDIDATE_NOT_YET_VERIFIED",
+  "promotion_state": "BUILD303_DRAFT_APPROVAL_ADOPTION_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "BUILD303_ACTIVE_BUILDS_304_306_QUEUED",
   "measured_closure": {
     "source_build": 232,
@@ -1226,7 +1226,7 @@
   },
   "caip_content_adoption": {
     "source_build": 303,
-    "phase": "DRAFT_REVIEW_DISCOVERY",
+    "phase": "DRAFT_APPROVAL_ADOPTION_CANDIDATE",
     "selected_real_project_id": 7,
     "selected_real_project_key": "CP-MSXCYQB6",
     "selected_real_project_title": "Under the Sea",
@@ -1240,7 +1240,15 @@
     "publication": false,
     "automatic_publication": false,
     "next_build": 304,
-    "future_queue_exhausted": false
+    "future_queue_exhausted": false,
+    "content_project_id": 22,
+    "discovered_deliverables": 19,
+    "approved_deliverable_target_count": 2,
+    "changes_requested_target_count": 17,
+    "approved_deliverable_keys": [
+      "seo-assets",
+      "blog-article"
+    ]
   },
   "historical_gate_compatibility": {
     "build301_successor_aware": true
