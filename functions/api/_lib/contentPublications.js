@@ -53,6 +53,7 @@ async function writeProjectEvent(db, projectId, eventType, actorUserId, details 
 async function publicationRow(db, publicationId) {
   return db.prepare(`
     SELECT cpb.*, cp.content_project_key, cp.project_title, cp.factual_summary, cp.product_id,
+      cp.source_type AS content_project_source_type, cp.source_id AS content_project_source_id,
       p.name AS product_name, p.slug AS product_slug, p.featured_image_url AS product_featured_image_url,
       d.approval_status AS source_approval_status, d.deliverable_status AS source_deliverable_status,
       d.deliverable_key AS source_deliverable_key, d.title AS source_deliverable_title
@@ -168,6 +169,23 @@ export function publicationReadiness(row) {
   ];
   const blockers = checks.filter((item) => item.required && !item.pass);
   return { ready: blockers.length === 0, checks, blockers };
+}
+
+async function makerStoryPublicationPrerequisite(db, row) {
+  if (text(row?.content_project_source_type).toLowerCase() !== 'creative_project') return { required: false, ready: true, reason: 'not_creative_project' };
+  const projectId = number(row?.content_project_source_id);
+  if (!projectId) return { required: false, ready: true, reason: 'missing_creative_source_identity' };
+  const profile = await db.prepare(`SELECT story_review_status, public_story_candidate FROM creative_project_maker_story_profiles WHERE creative_work_project_id=? LIMIT 1`).bind(projectId).first().catch(() => null);
+  if (!profile) return { required: false, ready: true, reason: 'no_maker_story_profile' };
+  const reviewed = text(profile.story_review_status).toLowerCase() === 'reviewed';
+  const publicCandidate = Number(profile.public_story_candidate || 0) === 1;
+  return {
+    required: true,
+    ready: reviewed && publicCandidate,
+    reviewed,
+    public_story_candidate: publicCandidate,
+    story_review_status: text(profile.story_review_status)
+  };
 }
 
 function normalizePublication(row) {
@@ -289,6 +307,8 @@ export async function approveContentPublication(db, publicationId, actorUserId) 
   if (!current) throw new Error('Publication draft not found.');
   const readiness = publicationReadiness(current);
   if (!readiness.ready) throw new Error(`Cannot approve this public draft yet: ${readiness.blockers.map((item) => item.label).join(', ')}.`);
+  const storyPrerequisite = await makerStoryPublicationPrerequisite(db, current);
+  if (storyPrerequisite.required && !storyPrerequisite.ready) throw new Error('Cannot approve this public draft until the Maker Story is explicitly reviewed and marked as a public story candidate.');
   await db.prepare(`UPDATE content_publications SET content_status='approved', approved_by_user_id=?, approved_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE content_publication_id=?`).bind(actorUserId || null, current.content_publication_id).run();
   await writePublicationEvent(db, current.content_publication_id, 'publication_approved', actorUserId, { readiness_passed: true });
   await writeProjectEvent(db, current.content_project_id, 'publication_approved', actorUserId, { content_publication_id: current.content_publication_id, destination: current.destination });
@@ -301,6 +321,8 @@ export async function publishContentPublication(db, publicationId, actorUserId) 
   if (normalStatus(current.content_status) !== 'approved') throw new Error('Approve the public draft before publishing it.');
   const readiness = publicationReadiness(current);
   if (!readiness.ready) throw new Error(`Cannot publish this public draft yet: ${readiness.blockers.map((item) => item.label).join(', ')}.`);
+  const storyPrerequisite = await makerStoryPublicationPrerequisite(db, current);
+  if (storyPrerequisite.required && !storyPrerequisite.ready) throw new Error('Cannot publish this public draft until the Maker Story is explicitly reviewed and marked as a public story candidate.');
   await db.prepare(`UPDATE content_publications SET content_status='published', published_by_user_id=?, published_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE content_publication_id=?`).bind(actorUserId || null, current.content_publication_id).run();
   await writePublicationEvent(db, current.content_publication_id, 'publication_published', actorUserId, { public_path: current.canonical_path, destination: current.destination });
   await writeProjectEvent(db, current.content_project_id, 'publication_published', actorUserId, { content_publication_id: current.content_publication_id, destination: current.destination, public_path: current.canonical_path });
