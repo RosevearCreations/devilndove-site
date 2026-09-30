@@ -1,4 +1,5 @@
 name: Release 467 Build 318 Content Adoption Discovery Outcomes Renewal III
+# Exact-head reproving trigger after restart-integrity handoff convergence.
 # Final exact-head proof trigger after measured roadmap renewal and bounded D1 ceiling convergence.
 on:
   push:
