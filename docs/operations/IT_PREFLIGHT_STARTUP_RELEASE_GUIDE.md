@@ -1,21 +1,20 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 311 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 312 candidate
 
-Build 311 — Buyer Discovery Evidence Freshness & Search Intake — is projected over exact Build 310 Development/Production GREEN.
+Build 312 — Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal — is projected over exact Build 311 Development/Production GREEN.
 
-- Last fully verified Development: `c1a4778dd3aaf2a1fece8406e075da7eb2c2b74d`
-- Verified tree: `b4aa3deaa0eed32bc601ecf51d5456e5c5d85760`
-- Development proofs: System `36708995838`, Quality `36708995782`, I.T. `36708995900`, Hygiene `36708995938`
-- Supplemental Build 310 proofs: D1 Fan-Out `36708995804`, Build 310 `36708995807`
-- Current Production main: `43120a39d39aa0b0a2b0299967ad2e7b97eab0ee`
-- Production proofs: Pages `36709193312`, Live Resources `36709277731`
-- Build 310 preserves review-first publication: 35th promo remains blocked while Maker Story review/public-candidate prerequisites are unsatisfied.
-- Build 311 remeasures real public telemetry and Search Console staging over 30 days.
-- Search Console attribution is split into reviewed-story, reviewed-Product and other public-page evidence.
-- Search Console request-time schema creation/alter/index repair is removed; missing required tables fail closed to canonical migration.
-- Zero views, clicks and impressions remain factual zero evidence.
-- Search Console import remains explicit operator action; IndexNow remains explicit-owner-only with `SUBMIT INDEXNOW`.
-- No provider execution, automatic Search Console import, traffic fabrication or Production D1 contact is authorized.
-- Next after Build 311 Production GREEN: Build 312 — Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal.
+- Last fully verified Development: `9a785176369bc09d16c7a6d3748ac125f260bd91`
+- Verified tree: `c79e06aec8eeb2d0ec24e54021c359d31de8e469`
+- Development proofs: System `36711277604`, Quality `36711277548`, I.T. `36711277537`, Hygiene `36711277481`
+- Supplemental Build 311 proofs: D1 Fan-Out `36711277536`, Build 311 `36711277557`
+- Current Production main: `e6c48ac204393ee53859dc0366e36a13f15a5460`
+- Production proofs: Pages `36711481530`, Live Resources `36711577068`
+- Build 312 remeasures content-adoption coverage, review/publication state, public discovery, runtime/search health and D1 read cost against Builds 300 and 306.
+- Under the Sea remains the accepted reviewed/public-candidate text-only story with one published Workshop Journal row and one approved/ready review-first social row.
+- 35th promo remains the second adopted Maker Story with approved/locked text copy but explicit Maker Story review/public-candidate prerequisites still required before publication.
+- Search Console evidence remains real-input-only; zero evidence is preserved as zero.
+- The successor roadmap is `docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md`.
+- No autonomous generation, automatic approval/publication, provider execution or Production D1 contact is authorized.
+- Next after Build 312 Production GREEN: Build 313 — Second Maker Story Review Decision & Completeness.
 
 ## Current release baseline
 

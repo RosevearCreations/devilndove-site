@@ -1,0 +1,370 @@
+{
+  "release": 467,
+  "build": 312,
+  "title": "Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "CONTENT_ADOPTION_OUTCOMES_RENEWAL_II_CANDIDATE",
+  "authority": "release467-build312-content-adoption-coverage-outcomes-renewal-ii-roadmap-renewal",
+  "predecessor": {
+    "build": 311,
+    "title": "Buyer Discovery Evidence Freshness & Search Intake",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "9a785176369bc09d16c7a6d3748ac125f260bd91",
+    "development_tree_sha": "c79e06aec8eeb2d0ec24e54021c359d31de8e469",
+    "development_proofs": {
+      "system_gate_run": 36711277604,
+      "current_application_quality_run": 36711277548,
+      "it_admin_runtime_proof_run": 36711277537,
+      "branch_hygiene_run": 36711277481,
+      "d1_ci_fanout_guard_run": 36711277536,
+      "build_specific_proof_run": 36711277557
+    },
+    "production_main_sha": "e6c48ac204393ee53859dc0366e36a13f15a5460",
+    "production_tree_sha": "c79e06aec8eeb2d0ec24e54021c359d31de8e469",
+    "production_pages_deploy_run": 36711481530,
+    "production_live_resource_integrity_run": 36711577068,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "scope": {
+    "full_path_remeasurement": true,
+    "build300_comparison": true,
+    "build306_comparison": true,
+    "multi_project_coverage": true,
+    "approval_publication_discovery_runtime_d1_read_outcomes": true,
+    "next_roadmap_created_from_observed_evidence": true,
+    "schema_change": false,
+    "development_d1_read_only": true,
+    "production_d1_contact": false,
+    "next_roadmap_created": true
+  },
+  "expected_decision": {
+    "automation_refinement": "NO_NEW_AUTONOMOUS_GENERATION",
+    "second_story_requires_explicit_review": true,
+    "search_console_requires_real_operator_intake": true,
+    "additional_story_adoption_one_project_at_a_time": true,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "automatic_provider_execution": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_exposure": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "indexnow_execution": false,
+    "automatic_publication": false,
+    "traffic_fabrication": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "9a785176369bc09d16c7a6d3748ac125f260bd91",
+      "tree": "c79e06aec8eeb2d0ec24e54021c359d31de8e469",
+      "system_gate_run": 36711277604,
+      "quality_run": 36711277548,
+      "it_admin_runtime_run": 36711277537,
+      "repository_hygiene_run": 36711277481,
+      "d1_ci_fanout_guard_run": 36711277536,
+      "build_specific_proof_run": 36711277557
+    },
+    "production": {
+      "main_sha": "e6c48ac204393ee53859dc0366e36a13f15a5460",
+      "tree": "c79e06aec8eeb2d0ec24e54021c359d31de8e469",
+      "production_pages_deploy_run": 36711481530,
+      "production_live_resource_integrity_run": 36711577068
+    }
+  },
+  "contract": {
+    "next_roadmap": "docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md",
+    "next_build": 313,
+    "next_build_title": "Second Maker Story Review Decision & Completeness",
+    "future_queue_exhausted": false
+  },
+  "measurement_checkpoint": {
+    "source_sha": "a604675d6a9e8c760452069f14985bdb8f5ff9ef",
+    "workflow_run": 36713995745,
+    "job_id": 109882080196,
+    "statements": 16,
+    "rows_read_by_statement": [
+      7,
+      13,
+      50,
+      193,
+      105,
+      2,
+      4,
+      23,
+      39,
+      45,
+      7,
+      50,
+      69,
+      534,
+      1679,
+      0
+    ],
+    "aggregate_rows_read": 2820,
+    "rows_read_ceiling": 20000,
+    "production_d1_contact": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "indexnow_execution": false,
+    "traffic_fabrication": false
+  },
+  "outcome_evidence": {
+    "maker_story": {
+      "active_creative_projects": 5,
+      "maker_profiles": 2,
+      "active_maker_stories": 2,
+      "reviewed_maker_stories": 1,
+      "public_story_candidates": 1,
+      "core_story_complete": 1
+    },
+    "identity": {
+      "duplicate_caip_source_identities": 0,
+      "duplicate_content_source_identities": 0,
+      "duplicate_workstation_memberships": 0
+    },
+    "private_media": {
+      "caip_assets": 46,
+      "active_caip_assets": 45,
+      "public_allowed_assets": 0,
+      "non_public_assets": 46,
+      "selected_evidence_rows": 4
+    },
+    "bridge": {
+      "active_creative_projects": 5,
+      "linked_caip_workspaces": 5,
+      "linked_content_packages": 5,
+      "handoff_rows": 5,
+      "bridge_events": 42
+    },
+    "deliverables": {
+      "deliverables": 95,
+      "approved_deliverables": 4,
+      "changes_requested_deliverables": 34,
+      "published_deliverables": 0,
+      "copy_locked_deliverables": 4,
+      "factual_template_deliverables": 95
+    },
+    "workshop_journal": {
+      "workshop_journal_rows": 1,
+      "approved_journal_rows": 0,
+      "published_journal_rows": 1,
+      "human_publisher_recorded": 1,
+      "under_the_sea_published": 1
+    },
+    "social": {
+      "social_rows": 1,
+      "approved_social_rows": 1,
+      "ready_social_rows": 1,
+      "posted_social_rows": 0,
+      "human_social_approval_rows": 1,
+      "review_first_rows": 1
+    },
+    "engagement_30d": {
+      "journal_page_views": 0,
+      "workshop_story_views": 0,
+      "product_detail_views": 0,
+      "total_page_views": 22,
+      "unique_visitors": 22,
+      "latest_page_view_at": "2026-09-11 07:48:01"
+    },
+    "runtime_search": {
+      "runtime_errors_7d": 0,
+      "client_runtime_records_7d": 0,
+      "searches_30d": 0,
+      "search_console_rows_30d": 0,
+      "search_console_clicks_30d": 0,
+      "search_console_impressions_30d": 0,
+      "latest_search_console_report_date": "",
+      "search_console_import_batches": 0
+    },
+    "merchant": {
+      "active_products": 40,
+      "reviewed_products": 40,
+      "merchant_fact_complete_products": 40
+    },
+    "friction": {
+      "active_projects": 5,
+      "profiled_projects": 2,
+      "maker_story_projects": 2,
+      "needs_review_stories": 1,
+      "unknown_outcome_stories": 1,
+      "public_candidate_stories": 1
+    },
+    "under_the_sea": {
+      "maker_story_profile": 1,
+      "reviewed_profile": 1,
+      "public_candidate": 1,
+      "selected_evidence": 3,
+      "content_package": 1,
+      "approved_deliverables": 2,
+      "locked_deliverables": 2,
+      "published_journal": 1,
+      "social_ready_review_first": 1,
+      "social_posted": 0
+    },
+    "second_story_35th_promo": {
+      "maker_story_profile": 1,
+      "reviewed_profile": 0,
+      "public_candidate": 0,
+      "unknown_outcome": 1,
+      "selected_evidence": 1,
+      "content_package": 1,
+      "approved_deliverables": 2,
+      "changes_requested_deliverables": 17,
+      "locked_deliverables": 2,
+      "publications": 0,
+      "social_rows": 0
+    },
+    "coverage": {
+      "active_projects": 5,
+      "projects_with_maker_story_profile": 2,
+      "projects_with_reviewed_maker_story": 1,
+      "projects_public_story_candidate": 1,
+      "projects_with_caip_workspace": 5,
+      "projects_with_content_package": 5,
+      "projects_with_approved_deliverable": 2,
+      "projects_with_published_journal": 1
+    },
+    "search_console_schema": {
+      "search_console_import_batches_ready": 1,
+      "search_console_page_queries_ready": 1,
+      "seo_opportunity_actions_ready": 1,
+      "seo_page_overrides_ready": 1
+    },
+    "foreign_key_violations": 0
+  },
+  "comparison_to_build300": {
+    "maker_story_profiles": {
+      "before": 0,
+      "after": 2,
+      "delta": 2
+    },
+    "selected_evidence_rows": {
+      "before": 0,
+      "after": 4,
+      "delta": 4
+    },
+    "approved_deliverables": {
+      "before": 0,
+      "after": 4,
+      "delta": 4
+    },
+    "copy_locked_deliverables": {
+      "before": 0,
+      "after": 4,
+      "delta": 4
+    },
+    "published_journal_rows": {
+      "before": 0,
+      "after": 1,
+      "delta": 1
+    },
+    "approved_social_rows": {
+      "before": 0,
+      "after": 1,
+      "delta": 1
+    },
+    "search_console_rows": {
+      "before": 0,
+      "after": 0,
+      "delta": 0
+    },
+    "active_project_maker_story_coverage": {
+      "before": "0/5",
+      "after": "2/5"
+    },
+    "identity_duplicates": {
+      "before": 0,
+      "after": 0
+    },
+    "merchant_fact_complete_products": {
+      "before": 40,
+      "after": 40
+    }
+  },
+  "comparison_to_build306": {
+    "maker_story_profiles": {
+      "before": 1,
+      "after": 2,
+      "delta": 1
+    },
+    "reviewed_maker_stories": {
+      "before": 0,
+      "after": 1,
+      "delta": 1
+    },
+    "public_story_candidates": {
+      "before": 0,
+      "after": 1,
+      "delta": 1
+    },
+    "selected_evidence_rows": {
+      "before": 3,
+      "after": 4,
+      "delta": 1
+    },
+    "approved_deliverables": {
+      "before": 2,
+      "after": 4,
+      "delta": 2
+    },
+    "copy_locked_deliverables": {
+      "before": 2,
+      "after": 4,
+      "delta": 2
+    },
+    "published_journal_rows": {
+      "before": 1,
+      "after": 1,
+      "delta": 0
+    },
+    "approved_social_rows": {
+      "before": 1,
+      "after": 1,
+      "delta": 0
+    },
+    "search_console_rows": {
+      "before": 0,
+      "after": 0,
+      "delta": 0
+    },
+    "active_project_maker_story_coverage": {
+      "before": "1/5",
+      "after": "2/5"
+    },
+    "projects_with_approved_deliverable": {
+      "before": 1,
+      "after": 2,
+      "delta": 1
+    },
+    "projects_with_published_journal": {
+      "before": 1,
+      "after": 1,
+      "delta": 0
+    },
+    "merchant_fact_complete_products": {
+      "before": 40,
+      "after": 40,
+      "delta": 0
+    }
+  },
+  "decision": {
+    "classification": "REAL_MULTI_PROJECT_ADOPTION_PROVEN_SECOND_STORY_REVIEW_AND_DISCOVERY_GAPS_REMAIN",
+    "rationale": "The content-adoption path expanded from zero Maker Story profiles at Build 300 and one of five at Build 306 to two of five active projects at Build 312, with four selected evidence rows and four approved/locked deliverables. Under the Sea is reviewed/public-candidate and remains the single published story. The 35th promo story has approved copy but remains needs_review with unknown outcome and no publication/social row. Search Console remains empty and recorded Workshop/Product detail discovery remains zero, so the next bounded work is explicit second-story review/publication readiness and real operator-supplied discovery intake rather than new autonomous generation.",
+    "automation_refinement": "NO_NEW_AUTONOMOUS_GENERATION",
+    "next_strategy": "EXPLICIT_SECOND_STORY_REVIEW_THEN_REVIEW_QUEUE_AND_REAL_SEARCH_INTAKE_BEFORE_THIRD_PROJECT",
+    "automatic_story_creation": false,
+    "automatic_content_refresh": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "automatic_provider_execution": false
+  }
+}

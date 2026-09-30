@@ -2,8 +2,8 @@
   "release": 467,
   "build": 311,
   "title": "Buyer Discovery Evidence Freshness & Search Intake",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "BUYER_DISCOVERY_FRESHNESS_SEARCH_INTAKE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
+  "phase": "BUYER_DISCOVERY_FRESHNESS_SEARCH_INTAKE_COMPLETE",
   "authority": "release467-build311-buyer-discovery-evidence-freshness-search-intake",
   "predecessor": {
     "build": 310,
@@ -90,5 +90,31 @@
       "production_pages_deploy_run": 36709193312,
       "production_live_resource_integrity_run": 36709277731
     }
+  },
+  "final_closure": {
+    "dev_sha": "9a785176369bc09d16c7a6d3748ac125f260bd91",
+    "tree_sha": "c79e06aec8eeb2d0ec24e54021c359d31de8e469",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD311_GREEN",
+    "proofs": {
+      "system_gate_run": 36711277604,
+      "current_application_quality_run": 36711277548,
+      "it_admin_runtime_proof_run": 36711277537,
+      "branch_hygiene_run": 36711277481
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36711277536,
+      "build_specific_proof_run": 36711277557
+    },
+    "ingested_by_build": 312
+  },
+  "production_checkpoint": {
+    "main_sha": "e6c48ac204393ee53859dc0366e36a13f15a5460",
+    "tree_sha": "c79e06aec8eeb2d0ec24e54021c359d31de8e469",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36711481530,
+    "production_live_resource_integrity_run": 36711577068,
+    "remote_d1_queries": 0
   }
 }
