@@ -38,6 +38,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with: { node-version: '24' }
+      # D1_ONE_SHOT_EVIDENCE_CAPTURE — Build 306 bounded Development-only read measurement.
       - name: Prove exact Development D1
         run: |
           set -euo pipefail
