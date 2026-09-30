@@ -1,32 +1,36 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 324 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 324 measured candidate
 
-Build 324 — Content Adoption & Discovery Outcomes Renewal IV — starts from exact Build 323 Development/Production GREEN.
+Build 324 — Content Adoption & Discovery Outcomes Renewal IV — starts from exact Build 323 Development/Production GREEN and has completed its comparable Development outcomes measurement.
 
-- Verified Development SHA: `88db75c27e6817212fbed809294bd593ab049bb2`
-- Verified Development/Production tree: `9116bd69e701e15e464f5ea4c9a4e41d43c37974`
-- Build 323 System Gate: `36787129354`
-- Build 323 Current Application Quality Proof: `36787129334`
-- Build 323 I.T. Admin Runtime Proof: `36787129349`
-- Build 323 Repository Branch Hygiene: `36787129342`
-- Build 323 D1 Fan-Out Guard: `36787129445`
-- Build 323 dedicated proof: `36787129379`
-- Build 323 artifact: `11130950095`
-- Current Production main SHA: `14418df3be9d34baa3dd3436777f7911f022f39b`
-- Production Pages Deploy: `36787358329`
-- Production Live Resource Integrity: `36787427701`
+- Verified predecessor Development SHA: `88db75c27e6817212fbed809294bd593ab049bb2`
+- Verified predecessor tree: `9116bd69e701e15e464f5ea4c9a4e41d43c37974`
+- Build 323 System / Quality / I.T. / Hygiene: `36787129354` / `36787129334` / `36787129349` / `36787129342`
+- Build 323 D1 Fan-Out / dedicated proof: `36787129445` / `36787129379`
+- Production main: `14418df3be9d34baa3dd3436777f7911f022f39b`
+- Production Pages / Live Integrity: `36787358329` / `36787427701`
 
-Build 324:
-- reuses Build 318's 18-statement read-only outcomes measurement;
-- compares current adoption/discovery evidence against Builds 300, 306, 312 and 318;
-- retains Build 323's five-project readiness as narrower contextual evidence;
-- remeasures Maker Story coverage, review/public-candidate state, selected evidence, approved/locked copy, Workshop Journal publication and review-first social state;
-- remeasures public telemetry, runtime/search health, real Search Console freshness and evidence-backed SEO queue state;
-- rechecks 35th promo and Grey Hair evidence-completion lanes;
-- rechecks duplicate identity and foreign-key integrity;
-- renews the successor roadmap only after observed exact-Development evidence;
-- performs no business-data mutation, automatic story generation/approval/publication/SEO action, provider execution, private-media promotion or Production D1 contact.
+Build 324 measurement:
+- source Development SHA: `314f72c03e9597cf64eca06afe4cb73081ff5823`
+- workflow: `36789095993`
+- artifact: `11130494838`
+- decision: `ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST`
+- same-contract D1 cost: **2,847 / 20,000**, delta vs Build 318 **0**
+- Maker Story coverage **2/5**, reviewed/public **1**, third-story-ready **0**
+- 35th promo remains outcome-unknown / needs review
+- Grey Hair remains at one approved source range with no reviewed story plan
+- real Search Console evidence remains absent
+- runtime errors remain **0**
+- identity and foreign-key integrity remain clean.
 
-Next after Build 324 measurement: **observed-evidence roadmap renewal**.
+Observed-evidence successor roadmap:
+- Build 325 — Evidence Gap Owner Queue & Operator Action Traceability
+- Build 326 — 35th Promo Real Outcome Evidence Closure
+- Build 327 — Grey Hair Evidence Review Completion & Story-Plan Handoff
+- Build 328 — Search Console Real Export Freshness & Discovery Intake III
+- Build 329 — Maker Story Advancement & Publication Readiness Continuity II
+- Build 330 — Content Adoption & Discovery Outcomes Renewal V
+
+Build 324 still performs no business-data mutation, autonomous story/content/SEO action, private-media promotion, provider execution or Production D1 contact.
 
 ## Current release baseline
 
