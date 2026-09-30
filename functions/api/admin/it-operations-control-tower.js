@@ -18,11 +18,11 @@ const VERIFIED_DEVELOPMENT=Object.freeze({
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:309,title:'Second Story Content Studio Review & Approval',state:'DEVELOPMENT_GREEN',
-  dev_sha:'6c432524d8fad7eea5eabbd85f4f4a80e7aa1ec0',tree_sha:'9216756424a22feb66e6f0b69047ab340496a240',
+  release:467,build:310,title:'Review-First Publication & Distribution Continuity',state:'DEVELOPMENT_GREEN',
+  dev_sha:'c1a4778dd3aaf2a1fece8406e075da7eb2c2b74d',tree_sha:'b4aa3deaa0eed32bc601ecf51d5456e5c5d85760',
   accepted_sha:'c1a4778dd3aaf2a1fece8406e075da7eb2c2b74d',accepted_tree_sha:'b4aa3deaa0eed32bc601ecf51d5456e5c5d85760',
-  system_gate_run:36668355699,current_application_quality_run:36668355761,it_admin_runtime_proof_run:36668355615,
-  branch_hygiene_run:36668355696,proof_state:'EXACT_BRANCH_HEAD_BUILD309_GREEN'
+  system_gate_run:36708995838,current_application_quality_run:36708995782,it_admin_runtime_proof_run:36708995900,
+  branch_hygiene_run:36708995938,proof_state:'EXACT_BRANCH_HEAD_BUILD310_GREEN'
 });
 const PRODUCTION=Object.freeze({
   release:467,build:310,title:'Review-First Publication & Distribution Continuity',state:'PRODUCTION_GREEN',
