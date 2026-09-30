@@ -1,34 +1,34 @@
-/* CURRENT_BUILD_312_TRUTH: Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal; last verified dev 9a785176369bc09d16c7a6d3748ac125f260bd91; tree c79e06aec8eeb2d0ec24e54021c359d31de8e469; Production main e6c48ac204393ee53859dc0366e36a13f15a5460; Pages 36711481530; Live 36711577068. */
-// Release 467 Build 312 — Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal over exact Build 311 Production source.
+/* CURRENT_BUILD_313_TRUTH: Second Maker Story Review Decision & Completeness; last verified dev 0045b29b0635d91f1c6d03b784c841b19fffc763; tree 391c869e0587fe2f865d85af781a06296f07ef8d; Production main c5e7bb72ec990118057d6955223e60ddaf691eac; Pages 36714805674; Live 36714898168. */
+// Release 467 Build 313 — Second Maker Story Review Decision & Completeness over exact Build 312 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=312;
-const TITLE='Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal';
-const AUTHORITY='release467-build312-content-adoption-coverage-outcomes-renewal-ii-roadmap-renewal';
-const EVIDENCE_ID='r467-b312-candidate-36711277604-36711481530';
+const BUILD=313;
+const TITLE='Second Maker Story Review Decision & Completeness';
+const AUTHORITY='release467-build313-second-maker-story-review-decision-completeness';
+const EVIDENCE_ID='r467-b313-candidate-36714596371-36714805674';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:311,title:'Buyer Discovery Evidence Freshness & Search Intake',state:'DEVELOPMENT_GREEN',
-  dev_sha:'9a785176369bc09d16c7a6d3748ac125f260bd91',tree_sha:'c79e06aec8eeb2d0ec24e54021c359d31de8e469',
-  system_gate_run:36711277604,current_application_quality_run:36711277548,it_admin_runtime_proof_run:36711277537,
-  branch_hygiene_run:36711277481,proof_state:'EXACT_BRANCH_HEAD_BUILD311_GREEN',
+  release:467,build:312,title:'Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal',state:'DEVELOPMENT_GREEN',
+  dev_sha:'0045b29b0635d91f1c6d03b784c841b19fffc763',tree_sha:'391c869e0587fe2f865d85af781a06296f07ef8d',
+  system_gate_run:36714596371,current_application_quality_run:36714596654,it_admin_runtime_proof_run:36714596379,
+  branch_hygiene_run:36714596591,proof_state:'EXACT_BRANCH_HEAD_BUILD312_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
   release:467,build:311,title:'Buyer Discovery Evidence Freshness & Search Intake',state:'DEVELOPMENT_GREEN',
   dev_sha:'9a785176369bc09d16c7a6d3748ac125f260bd91',tree_sha:'c79e06aec8eeb2d0ec24e54021c359d31de8e469',
-  accepted_sha:'9a785176369bc09d16c7a6d3748ac125f260bd91',accepted_tree_sha:'c79e06aec8eeb2d0ec24e54021c359d31de8e469',
+  accepted_sha:'0045b29b0635d91f1c6d03b784c841b19fffc763',accepted_tree_sha:'391c869e0587fe2f865d85af781a06296f07ef8d',
   system_gate_run:36711277604,current_application_quality_run:36711277548,it_admin_runtime_proof_run:36711277537,
   branch_hygiene_run:36711277481,proof_state:'EXACT_BRANCH_HEAD_BUILD311_GREEN'
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:311,title:'Buyer Discovery Evidence Freshness & Search Intake',state:'PRODUCTION_GREEN',
-  main_sha:'e6c48ac204393ee53859dc0366e36a13f15a5460',tree_sha:'c79e06aec8eeb2d0ec24e54021c359d31de8e469',
-  production_pages_deploy_run:36711481530,production_live_resource_integrity_run:36711577068,
-  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36711277557,remote_d1_queries:0
+  release:467,build:312,title:'Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal',state:'PRODUCTION_GREEN',
+  main_sha:'c5e7bb72ec990118057d6955223e60ddaf691eac',tree_sha:'391c869e0587fe2f865d85af781a06296f07ef8d',
+  production_pages_deploy_run:36714805674,production_live_resource_integrity_run:36714898168,
+  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36714596878,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -38,7 +38,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 312 Content Adoption Coverage Outcomes Renewal II Roadmap Renewal'
+  'Release 467 Build 313 Second Maker Story Review Decision Completeness'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql','0026_release467_inventory_workstation_memberships.sql','0027_release467_caip_workshop_follies_maker_story_foundation.sql']);
 const EXTERNAL_POLICY=Object.freeze([
