@@ -27,16 +27,19 @@
     "remote_d1_queries": 0
   },
   "discovery_checkpoint": {
-    "source_sha": "c7900f1c9de80a27e35502f0211422227e566f6a",
-    "workflow_run": 36663359796,
+    "source_sha": "b7389bc0e472be0d27d59ccb14ba397f241679b8",
+    "workflow_run": 36665046366,
     "candidate_count": 4,
-    "all_remaining_timeline_events": 0,
+    "all_remaining_timeline_events": 1,
     "grey_hair": {
       "creative_work_project_id": 6,
       "active_assets": 45,
       "approved_source_evidence": 1,
+      "semantic_approved_evidence": 0,
       "confirmed_capture_groups": 0,
+      "confirmed_capture_tracks": 0,
       "reviewed_story_plans": 0,
+      "approved_story_plans": 0,
       "reviewed_evidence_ready": false,
       "public_allowed_assets": 0,
       "fully_public_allowed_uploads": 0
@@ -46,23 +49,23 @@
       "project_key": "CP-MSC1SUG2",
       "project_title": "35th promo",
       "metadata_readiness_score": 10,
-      "selection_basis": "richest existing Creative Project metadata after no remaining timeline-ready or reviewed-CAIP-ready candidate"
+      "selection_basis": "richest existing Creative Project metadata after no reviewed-CAIP-ready candidate; existing normalized Build 308 planning row remains idempotent"
     },
     "rows_read_by_statement": [
-      159,
-      9,
-      30,
+      175,
+      11,
+      31,
       101,
       3
     ],
-    "aggregate_rows_read": 302,
+    "aggregate_rows_read": 321,
     "rows_read_ceiling": 20000,
     "d1_mutation": false,
     "production_d1_contact": false
   },
   "adoption_baseline": {
-    "source_sha": "c7900f1c9de80a27e35502f0211422227e566f6a",
-    "workflow_run": 36663359796,
+    "source_sha": "b7389bc0e472be0d27d59ccb14ba397f241679b8",
+    "workflow_run": 36665046366,
     "target": {
       "creative_work_project_id": 5,
       "project_key": "CP-MSC1SUG2",
@@ -104,16 +107,16 @@
       "foreign_key_violations": 0
     },
     "rows_read_by_statement": [
-      6,
-      99,
-      13,
-      109,
+      8,
+      98,
+      5,
+      108,
       2,
       4,
       10,
       35
     ],
-    "aggregate_rows_read": 278,
+    "aggregate_rows_read": 270,
     "rows_read_ceiling": 20000,
     "production_d1_contact": false
   },
@@ -166,13 +169,14 @@
     }
   },
   "candidate_control_alignment": {
-    "state": "SOURCE_RUNTIME_AND_SUCCESSOR_CONTROLS_ALIGNED_FINAL_EXACT_HEAD_REPROOF_REQUIRED",
-    "intermediate_head": "0ee43f51cc8577ed6dd50333812988a3240a05da",
-    "system_gate_run": 36664336725,
-    "current_application_quality_run": 36664336668,
-    "it_admin_runtime_proof_run": 36664336678,
-    "branch_hygiene_run": 36664336666,
-    "build_specific_proof_run": 36664336710,
-    "note": "These runs prove Build 308 release-control alignment and idempotent adoption after the second real story was adopted. Final closure requires fresh exact-head System, Quality, I.T., Hygiene, D1 Fan-Out and Build 308 proofs."
+    "state": "SOURCE_RUNTIME_AND_ADOPTION_CONTROLS_ALIGNED_FINAL_EXACT_HEAD_REPROOF_REQUIRED",
+    "intermediate_head": "b7389bc0e472be0d27d59ccb14ba397f241679b8",
+    "intermediate_tree": "72253a3c2ee5c2689462847b7ec7dd53edee76d1",
+    "system_gate_run": 36665046362,
+    "current_application_quality_run": 36665046431,
+    "it_admin_runtime_proof_run": 36665046407,
+    "branch_hygiene_run": 36665046288,
+    "build_specific_proof_run": 36665046366,
+    "note": "Build 308 source/runtime/adoption controls are GREEN after readiness diagnostics. Final closure requires fresh exact-head System, Quality, I.T., Hygiene, D1 Fan-Out and Build 308 proofs."
   }
 }
