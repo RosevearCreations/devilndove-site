@@ -1,0 +1,79 @@
+{
+  "release": 467,
+  "build": 307,
+  "title": "Maker Story Review-State & Publication Traceability",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "REVIEW_PUBLICATION_TRACEABILITY_CANDIDATE",
+  "authority": "release467-build307-maker-story-review-state-publication-traceability",
+  "predecessor": {
+    "build": 306,
+    "title": "CAIP Content Adoption Outcomes Renewal & Roadmap Renewal",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "a0d04fb1fcbf22a714031c65e256f885b725d1c5",
+    "development_tree_sha": "0a80465e014d949ba750092b0154d78103d0760a",
+    "development_proofs": {
+      "system_gate_run": 36660652766,
+      "current_application_quality_run": 36660652777,
+      "it_admin_runtime_proof_run": 36660652789,
+      "branch_hygiene_run": 36660652786,
+      "d1_ci_fanout_guard_run": 36660652925,
+      "build_specific_proof_run": 36660652837
+    },
+    "production_main_sha": "1eb9df6dd6db02ad61fd4a32852e7f37a46c1ecd",
+    "production_tree_sha": "0a80465e014d949ba750092b0154d78103d0760a",
+    "production_pages_deploy_run": 36660821200,
+    "production_live_resource_integrity_run": 36660903854,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "starting_point": {
+    "development": {
+      "sha": "a0d04fb1fcbf22a714031c65e256f885b725d1c5",
+      "tree": "0a80465e014d949ba750092b0154d78103d0760a",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 36660652766,
+      "quality_run": 36660652777,
+      "it_admin_runtime_run": 36660652789,
+      "repository_hygiene_run": 36660652786,
+      "d1_ci_fanout_guard_run": 36660652925,
+      "build_specific_proof_run": 36660652837
+    },
+    "production": {
+      "main_sha": "1eb9df6dd6db02ad61fd4a32852e7f37a46c1ecd",
+      "tree": "0a80465e014d949ba750092b0154d78103d0760a",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 36660821200,
+      "production_live_resource_integrity_run": 36660903854,
+      "remote_d1_queries": 0
+    }
+  },
+  "target": {
+    "creative_work_project_id": 7,
+    "project_key": "CP-MSXCYQB6",
+    "project_title": "Under the Sea",
+    "content_project_id": 22,
+    "publication_key": "content-project-22-workshop_journal",
+    "social_post_key": "workshop-journal-22-under-the-sea"
+  },
+  "contract": {
+    "story_review_status": "reviewed",
+    "public_story_candidate": 1,
+    "public_story_candidate_scope": "reviewed_factual_story_text_only",
+    "media_rights_scope": "separate_never_inferred",
+    "traceability_surface": "Creative Process Maker Story panel",
+    "next_build": 308,
+    "next_build_title": "Second Real Maker Story Adoption & Evidence Selection",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "private_media_exposure": false,
+    "media_rights_inference": false,
+    "public_event_candidate_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  }
+}
