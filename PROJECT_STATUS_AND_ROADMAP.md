@@ -16,7 +16,9 @@ Build 318 is fully verified and promoted:
 
 Build 319 adds a dedicated operator lane to the canonical **35th promo** Creative Project. Only facts from real work may be recorded: setup/process/milestone/result/lesson/mistake/repair. A title and meaningful notes are required, the operator must confirm the work actually happened, and new rows are forced private with no media/public flag.
 
-Build 319 does **not** auto-select evidence, change the Maker Story review/outcome/public-candidate state, create publication/social rows, or infer media rights. CI only measures whether the factual evidence set has at least one execution/process-class record, one observed result, and one lesson.
+Exact Development measurement returned **INTAKE_READY_AWAITING_REAL_EXECUTION_RESULT_LESSON_EVIDENCE**: 1 planning event, **0 execution**, **0 result**, **0 lesson**, 1 selected planning evidence row, 0 selected execution evidence, and **48 / 20,000** D1 rows read. The Maker Story remains `needs_review`, outcome `unknown`, public candidate `0`, with 0 publication/social rows.
+
+Build 319 does **not** auto-select evidence, change the Maker Story review/outcome/public-candidate state, create publication/social rows, or infer media rights. The workflow is GREEN because the factual intake is ready and fail-closed; the Maker Story itself is not complete.
 
 The queue **has not run out**.
 
