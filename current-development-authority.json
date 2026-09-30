@@ -1,31 +1,31 @@
 {
   "release": 467,
-  "build": 308,
-  "title": "Second Real Maker Story Adoption & Evidence Selection",
+  "build": 309,
+  "title": "Second Story Content Studio Review & Approval",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 307,
-      "title": "Maker Story Review-State & Publication Traceability",
-      "authority": "release467-build307-maker-story-review-state-publication-traceability.json",
-      "dev_sha": "3ff916d9f1e7cc6aa9c29d9c998ace3731caf120",
-      "tree_sha": "70c9408afd2df7a3359b83937eda15161f49b4e2",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD307_GREEN",
+      "build": 308,
+      "title": "Second Real Maker Story Adoption & Evidence Selection",
+      "authority": "release467-build308-second-real-maker-story-adoption-evidence-selection.json",
+      "dev_sha": "60b6a631a615c1653ecfb07b4cbf8bc117a496f8",
+      "tree_sha": "d78e7d76fb06395ee182271044314808454f6110",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD308_GREEN",
       "proofs": {
-        "system_gate_run": 36661991953,
-        "current_application_quality_run": 36661991952,
-        "it_admin_runtime_proof_run": 36661991949,
-        "branch_hygiene_run": 36661991959
+        "system_gate_run": 36665213124,
+        "current_application_quality_run": 36665213036,
+        "it_admin_runtime_proof_run": 36665213119,
+        "branch_hygiene_run": 36665213073
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 308,
-      "title": "Second Real Maker Story Adoption & Evidence Selection",
-      "authority": "release467-build308-second-real-maker-story-adoption-evidence-selection.json",
+      "build": 309,
+      "title": "Second Story Content Studio Review & Approval",
+      "authority": "release467-build309-second-story-content-studio-review-approval.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -36,18 +36,19 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 307,
-    "title": "Maker Story Review-State & Publication Traceability",
-    "authority": "release467-build307-maker-story-review-state-publication-traceability.json",
-    "main_sha": "f8b3f7281ccd6e4bfc739abe1ba2566db336281a",
-    "tree_sha": "70c9408afd2df7a3359b83937eda15161f49b4e2",
+    "build": 308,
+    "title": "Second Real Maker Story Adoption & Evidence Selection",
+    "authority": "release467-build308-second-real-maker-story-adoption-evidence-selection.json",
+    "main_sha": "498ddd776ea3c52b243a5ef8800fc33570d159a4",
+    "tree_sha": "d78e7d76fb06395ee182271044314808454f6110",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36662200778,
-    "production_live_resource_integrity_run": 36662256691,
+    "production_pages_deploy_run": 36665406681,
+    "production_live_resource_integrity_run": 36665469007,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build309-second-story-content-studio-review-approval.json",
     "release467-build308-second-real-maker-story-adoption-evidence-selection.json",
     "release467-build307-maker-story-review-state-publication-traceability.json",
     "release467-build306-caip-content-adoption-outcomes-renewal-roadmap-renewal.json",
@@ -197,10 +198,10 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_CONTENT_ADOPTION_COVERAGE_DISCOVERY_BUILDS_307_312.md",
-  "next_build": 309,
-  "next_build_state": "QUEUED_AFTER_BUILD308_PRODUCTION_GREEN",
-  "next_build_title": "Second Story Content Studio Review & Approval",
-  "promotion_state": "BUILD308_FINAL_CANDIDATE_NOT_YET_VERIFIED",
+  "next_build": 310,
+  "next_build_state": "QUEUED_AFTER_BUILD309_PRODUCTION_GREEN",
+  "next_build_title": "Review-First Publication & Distribution Continuity",
+  "promotion_state": "BUILD309_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "BUILD308_ACTIVE_BUILD309_QUEUED",
   "measured_closure": {
     "source_build": 232,
@@ -232,13 +233,13 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "3ff916d9f1e7cc6aa9c29d9c998ace3731caf120",
-  "accepted_dev_tree_sha": "70c9408afd2df7a3359b83937eda15161f49b4e2",
+  "accepted_dev_sha": "60b6a631a615c1653ecfb07b4cbf8bc117a496f8",
+  "accepted_dev_tree_sha": "d78e7d76fb06395ee182271044314808454f6110",
   "acceptance": {
-    "system_gate_run": 36661991953,
-    "current_application_quality_run": 36661991952,
-    "it_admin_runtime_proof_run": 36661991949,
-    "branch_hygiene_run": 36661991959
+    "system_gate_run": 36665213124,
+    "current_application_quality_run": 36665213036,
+    "it_admin_runtime_proof_run": 36665213119,
+    "branch_hygiene_run": 36665213073
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -1230,8 +1231,8 @@
     "future_queue_exhausted": false
   },
   "caip_content_adoption": {
-    "source_build": 308,
-    "phase": "SECOND_REAL_MAKER_STORY_ADOPTED_EVIDENCE_SELECTED_FINAL_CANDIDATE",
+    "source_build": 309,
+    "phase": "SECOND_STORY_CONTENT_REVIEW_CANDIDATE",
     "measurement_source_sha": "dc3f63f3e1ab9e2d77ba2ed872a990ced46d8335",
     "measurement_run": 36659852174,
     "aggregate_rows_read": 1067,
@@ -1258,7 +1259,7 @@
     "provider_publication": false,
     "production_d1_contact": false,
     "successor_roadmap": "docs/operations/RELEASE_467_CONTENT_ADOPTION_COVERAGE_DISCOVERY_BUILDS_307_312.md",
-    "next_build": 309,
+    "next_build": 310,
     "future_queue_exhausted": false,
     "final_exact_head_proofs_pending": true,
     "control_plane_alignment": "BUILD308_SOURCE_RUNTIME_ADOPTION_CONTROLS_GREEN_BEFORE_FINAL_EXACT_HEAD_REPROOF",
@@ -1311,7 +1312,17 @@
     "grey_hair_confirmed_capture_groups": 0,
     "grey_hair_reviewed_story_plans": 0,
     "grey_hair_reviewed_evidence_ready": false,
-    "intermediate_tree": "72253a3c2ee5c2689462847b7ec7dd53edee76d1"
+    "intermediate_tree": "72253a3c2ee5c2689462847b7ec7dd53edee76d1",
+    "second_content_project_id": 23,
+    "second_story_approved_copy_keys": [
+      "seo-assets",
+      "blog-article"
+    ],
+    "second_story_approved_copy_count": 2,
+    "second_story_changes_requested_count": 17,
+    "second_story_locked_copy_count": 2,
+    "second_story_handoff_evidence_count": 1,
+    "automatic_content_refresh": false
   },
   "historical_gate_compatibility": {
     "build301_successor_aware": true
