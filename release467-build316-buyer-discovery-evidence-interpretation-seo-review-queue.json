@@ -1,0 +1,92 @@
+{
+  "release": 467,
+  "build": 316,
+  "title": "Buyer Discovery Evidence Interpretation & SEO Review Queue",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "BUYER_DISCOVERY_EVIDENCE_INTERPRETATION_SEO_REVIEW_QUEUE",
+  "authority": "release467-build316-buyer-discovery-evidence-interpretation-seo-review-queue",
+  "predecessor": {
+    "build": 315,
+    "title": "Search Console Operator Intake Acceptance",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "2a7c1aa8d90b4851073f50d67b87d5e199ea303d",
+    "development_tree_sha": "4f1816b0700157ac1c71d170d08a0116af19eac4",
+    "development_proofs": {
+      "system_gate_run": 36722013148,
+      "current_application_quality_run": 36722013116,
+      "it_admin_runtime_proof_run": 36722013224,
+      "branch_hygiene_run": 36722013237,
+      "d1_ci_fanout_guard_run": 36722013190,
+      "build_specific_proof_run": 36722013591
+    },
+    "production_main_sha": "7c8605c627c25443df24d08b5ffecb3fa315c084",
+    "production_tree_sha": "4f1816b0700157ac1c71d170d08a0116af19eac4",
+    "production_pages_deploy_run": 36722265165,
+    "production_live_resource_integrity_run": 36722386886,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "evidence_sources": [
+      "search_console_page_queries",
+      "site_page_views"
+    ],
+    "search_console_required_for_query_level_seo_actions": true,
+    "public_telemetry_supports_observation_only": true,
+    "opportunity_min_impressions_default": 10,
+    "opportunity_average_position_range": [
+      4,
+      20
+    ],
+    "queue_action": "generate_recommendations",
+    "queue_semantics": "EVIDENCE_BACKED_HUMAN_REVIEW_ONLY",
+    "generated_title": false,
+    "generated_meta_description": false,
+    "generated_internal_link": false,
+    "generated_h1": false,
+    "explicit_human_copy_required_before_apply": true,
+    "current_evidence_required_before_apply": true,
+    "existing_unsupported_actions_remain_non_actionable": true,
+    "zero_evidence_creates_zero_queue_rows": true,
+    "automatic_queue_generation": false,
+    "automatic_seo_apply": false,
+    "provider_execution": false,
+    "next_build": 317,
+    "next_build_title": "Third Project Maker Story Readiness & Evidence Selection",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "synthetic_search_rows": false,
+    "traffic_fabrication": false,
+    "automatic_queue_mutation": false,
+    "automatic_seo_copy_generation": false,
+    "automatic_seo_apply": false,
+    "indexnow_execution": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "2a7c1aa8d90b4851073f50d67b87d5e199ea303d",
+      "tree": "4f1816b0700157ac1c71d170d08a0116af19eac4",
+      "system_gate_run": 36722013148,
+      "quality_run": 36722013116,
+      "it_admin_runtime_run": 36722013224,
+      "repository_hygiene_run": 36722013237,
+      "d1_ci_fanout_guard_run": 36722013190,
+      "build_specific_proof_run": 36722013591
+    },
+    "production": {
+      "main_sha": "7c8605c627c25443df24d08b5ffecb3fa315c084",
+      "tree": "4f1816b0700157ac1c71d170d08a0116af19eac4",
+      "production_pages_deploy_run": 36722265165,
+      "production_live_resource_integrity_run": 36722386886
+    }
+  },
+  "measurement_state": "PENDING_EXACT_DEVELOPMENT",
+  "roadmap": "docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md"
+}
