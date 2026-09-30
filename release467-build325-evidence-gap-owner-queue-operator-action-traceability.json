@@ -92,5 +92,23 @@
     "write_capability_authorized": false,
     "next_build": 326,
     "next_build_title": "35th Promo Real Outcome Evidence Closure"
+  },
+  "starting_point": {
+    "development": {
+      "sha": "1ed7d181bea85004b181b93f1ba97e300946c575",
+      "tree": "1408954e028fbb8faa54ead2860c0e2b71b31588",
+      "system_gate_run": 36789662411,
+      "quality_run": 36789662388,
+      "it_admin_runtime_run": 36789662487,
+      "repository_hygiene_run": 36789662415,
+      "d1_ci_fanout_guard_run": 36789662359,
+      "build_specific_proof_run": 36789662348
+    },
+    "production": {
+      "main_sha": "06e40c332b1bacf2260f954ff2ac79a25d9788cc",
+      "tree": "1408954e028fbb8faa54ead2860c0e2b71b31588",
+      "production_pages_deploy_run": 36789878247,
+      "production_live_resource_integrity_run": 36789960286
+    }
   }
 }
