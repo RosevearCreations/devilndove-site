@@ -1,0 +1,86 @@
+{
+  "release": 467,
+  "build": 313,
+  "title": "Second Maker Story Review Decision & Completeness",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "SECOND_MAKER_STORY_REVIEW_DECISION_CANDIDATE",
+  "authority": "release467-build313-second-maker-story-review-decision-completeness",
+  "predecessor": {
+    "build": 312,
+    "title": "Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "0045b29b0635d91f1c6d03b784c841b19fffc763",
+    "development_tree_sha": "391c869e0587fe2f865d85af781a06296f07ef8d",
+    "development_proofs": {
+      "system_gate_run": 36714596371,
+      "current_application_quality_run": 36714596654,
+      "it_admin_runtime_proof_run": 36714596379,
+      "branch_hygiene_run": 36714596591,
+      "d1_ci_fanout_guard_run": 36714596884,
+      "build_specific_proof_run": 36714596878
+    },
+    "production_main_sha": "c5e7bb72ec990118057d6955223e60ddaf691eac",
+    "production_tree_sha": "391c869e0587fe2f865d85af781a06296f07ef8d",
+    "production_pages_deploy_run": 36714805674,
+    "production_live_resource_integrity_run": 36714898168,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "target": {
+    "creative_work_project_id": 5,
+    "project_key": "CP-MSC1SUG2",
+    "project_title": "35th promo",
+    "content_project_id": 23
+  },
+  "decision_contract": {
+    "required_factual_dimensions": [
+      "what_we_are_trying",
+      "why_we_are_trying_it",
+      "actual_result",
+      "outcome_status",
+      "lesson_learned"
+    ],
+    "observed_execution_evidence": "ABSENT_AT_BUILD312",
+    "observed_result_state": "UNKNOWN_AT_BUILD312",
+    "explicit_review_decision": "REMAIN_NEEDS_REVIEW_PENDING_EXECUTION_RESULT_LESSON_EVIDENCE",
+    "story_review_status": "needs_review",
+    "public_story_candidate": 0,
+    "public_story_candidate_scope": "NONE_UNTIL_EXPLICIT_REVIEW_COMPLETENESS",
+    "media_rights_scope": "separate_never_inferred",
+    "approved_copy_does_not_authorize_story_review": true,
+    "approved_copy_does_not_authorize_publication": true,
+    "next_build": 314,
+    "next_build_title": "Second Story Publication Readiness & Review-Queue Continuity",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "private_media_exposure": false,
+    "media_rights_inference": false,
+    "publication_mutation": false,
+    "social_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "0045b29b0635d91f1c6d03b784c841b19fffc763",
+      "tree": "391c869e0587fe2f865d85af781a06296f07ef8d",
+      "system_gate_run": 36714596371,
+      "quality_run": 36714596654,
+      "it_admin_runtime_run": 36714596379,
+      "repository_hygiene_run": 36714596591,
+      "d1_ci_fanout_guard_run": 36714596884,
+      "build_specific_proof_run": 36714596878
+    },
+    "production": {
+      "main_sha": "c5e7bb72ec990118057d6955223e60ddaf691eac",
+      "tree": "391c869e0587fe2f865d85af781a06296f07ef8d",
+      "production_pages_deploy_run": 36714805674,
+      "production_live_resource_integrity_run": 36714898168
+    }
+  }
+}
