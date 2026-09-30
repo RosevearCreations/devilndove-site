@@ -2,8 +2,8 @@
   "release": 467,
   "build": 321,
   "title": "Search Console Real Export Intake Continuity II",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "SEARCH_CONSOLE_REAL_EXPORT_CONTINUITY",
+  "state": "PRODUCTION_GREEN",
+  "phase": "SEARCH_CONSOLE_REAL_EXPORT_CONTINUITY_COMPLETE",
   "authority": "release467-build321-search-console-real-export-intake-continuity-ii",
   "predecessor": {
     "build": 320,
@@ -87,13 +87,65 @@
       "production_live_resource_integrity_run": 36756208135
     }
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "measurement_state": "EVIDENCE_PENDING_NO_REAL_EXPORT",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md",
   "decision": {
-    "classification": "AWAIT_EXACT_DEVELOPMENT_REAL_EXPORT_CONTINUITY_MEASUREMENT",
+    "classification": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "real_export_present": false,
     "synthetic_evidence_authorized": false,
     "automatic_import_authorized": false,
     "next_build": 322,
     "next_build_title": "Buyer Discovery Attribution & SEO Review Evidence Continuity"
+  },
+  "measurement": {
+    "exact_development_sha": "215b9277f62d1359fda07d3d72ba3cf6ee47a353",
+    "workflow_run": 36765313864,
+    "artifact_id": 11120372540,
+    "artifact_digest": "sha256:b1f1367fa5e0cfca28fe615917fbb2eb4c20a8d05a983ef35d6eb84467dfdc10",
+    "aggregate_rows_read": 2005,
+    "rows_read_ceiling": 20000,
+    "statement_rows_read": [
+      1679,
+      5,
+      319,
+      1,
+      1,
+      0
+    ],
+    "batch_count": 0,
+    "staged_rows": 0,
+    "clicks": 0,
+    "impressions": 0,
+    "interpretation": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "synthetic_rows": false,
+    "automatic_import": false,
+    "production_d1_contact": false
+  },
+  "final_closure": {
+    "dev_sha": "215b9277f62d1359fda07d3d72ba3cf6ee47a353",
+    "tree_sha": "7df16d3a91159cefaf66435854fdffb4914ad921",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD321_GREEN",
+    "proofs": {
+      "system_gate_run": 36765313336,
+      "current_application_quality_run": 36765313431,
+      "it_admin_runtime_proof_run": 36765313437,
+      "branch_hygiene_run": 36765313607
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36765313506,
+      "build_specific_proof_run": 36765313864
+    },
+    "artifact_id": 11120372540,
+    "ingested_by_build": 322
+  },
+  "production_checkpoint": {
+    "main_sha": "e761df76426a52e7bc3553189988058037979ad2",
+    "tree_sha": "7df16d3a91159cefaf66435854fdffb4914ad921",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36765763021,
+    "production_live_resource_integrity_run": 36765982082,
+    "remote_d1_queries": 0
   }
 }

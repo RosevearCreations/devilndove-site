@@ -30,9 +30,12 @@ for token in ('Evidence-backed review queue','suggested_title,suggested_meta_des
 q('titleCase(' not in api and 'const suggestedTitle' not in api and 'const suggestedMeta' not in api and 'const internalNote' not in api,'Build 316 must not generate SEO wording')
 for token in ('Queue evidence-backed reviews','Evidence-backed review','manual SEO wording','current evidence'):
     q(token in ui,'Build 316 Search Console UI missing '+token)
-for token in ('build:316','Buyer Discovery Evidence Interpretation & SEO Review Queue','seo_review_queue','query_level_action_state','public_telemetry_observation_only'):
+q(('build:316' in measure) or ('build:322' in measure),'Build 316 buyer measurement API missing compatible build marker')
+q(('Buyer Discovery Evidence Interpretation & SEO Review Queue' in measure) or ('Buyer Discovery Attribution & SEO Review Evidence Continuity' in measure),'Build 316 buyer measurement API missing compatible title')
+for token in ('seo_review_queue','query_level_action_state','public_telemetry_observation_only'):
     q(token in measure,'Build 316 buyer measurement API missing '+token)
-for token in ('Build 316 • evidence interpretation','SEO review queue','query-level SEO action','No query-level SEO action'):
+q(('Build 316 • evidence interpretation' in buyerui) or ('Build 322 • attribution continuity' in buyerui),'Build 316 buyer measurement UI missing compatible successor heading')
+for token in ('SEO review','query-level SEO action','No query-level SEO action'):
     q(token in buyerui,'Build 316 buyer measurement UI missing '+token)
 upper=' '+re.sub(r'--.*','',sql).upper()+' '
 for forbidden in (' INSERT ',' UPDATE ',' DELETE ',' CREATE ',' ALTER ',' DROP ',' REPLACE ',' VACUUM ',' REINDEX '):q(forbidden not in upper,'Build 316 measurement must remain read-only: '+forbidden.strip())
