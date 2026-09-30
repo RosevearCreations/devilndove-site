@@ -199,13 +199,16 @@ export function publicationReadiness(row) {
   const destination = safeDestination(row.destination);
   const sourceApproved = text(row.source_approval_status).toLowerCase() === 'approved';
   const bodyMin = destination === 'workshop_journal' ? 160 : 20;
+  // Build 304: a factual Workshop Journal article may be explicitly approved and
+  // published without media. Gallery publication still requires public-cleared media.
+  const mediaRequired = destination === 'website_gallery';
   const checks = [
     checklistItem('source_approved', 'Source deliverable approved', sourceApproved, sourceApproved ? 'The source content package is approved.' : 'Approve the source blog or gallery deliverable in Content Studio.'),
     checklistItem('title', 'Truthful public title', text(row.title).length >= 6, text(row.title).length >= 6 ? 'A reader-facing title is present.' : 'Add a clear factual title.'),
     checklistItem('summary', 'Helpful summary', text(row.summary).length >= 30, text(row.summary).length >= 30 ? 'A visible summary is present.' : 'Add at least one useful factual sentence.'),
     checklistItem('body', destination === 'workshop_journal' ? 'Article body' : 'Gallery explanation', text(row.body_content).length >= bodyMin, text(row.body_content).length >= bodyMin ? 'Visible copy is present.' : `Add ${destination === 'workshop_journal' ? 'a fuller factual article body' : 'a factual gallery explanation'}.`),
-    checklistItem('public_media', 'Public-cleared media', Array.isArray(media) && media.length > 0, Array.isArray(media) && media.length ? 'At least one selected media source is public-allowed.' : 'Select at least one public-allowed image in Content Studio.'),
-    checklistItem('hero', 'Lead image and alt text', Boolean(text(row.hero_media_url) && text(row.hero_alt_text)), text(row.hero_media_url) && text(row.hero_alt_text) ? 'A lead media URL and descriptive text are present.' : 'Choose a public image and add concise descriptive alt text.'),
+    checklistItem('public_media', 'Public-cleared media', Array.isArray(media) && media.length > 0, Array.isArray(media) && media.length ? 'At least one selected media source is public-allowed.' : (mediaRequired ? 'Select at least one public-allowed image in Content Studio.' : 'Optional for a factual text-only Workshop Journal article.'), mediaRequired),
+    checklistItem('hero', 'Lead image and alt text', Boolean(text(row.hero_media_url) && text(row.hero_alt_text)), text(row.hero_media_url) && text(row.hero_alt_text) ? 'A lead media URL and descriptive text are present.' : (mediaRequired ? 'Choose a public image and add concise descriptive alt text.' : 'Optional for a factual text-only Workshop Journal article.'), mediaRequired),
     checklistItem('slug', 'Stable public path', /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(text(row.publication_slug)), /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(text(row.publication_slug)) ? 'The public path uses a clean slug.' : 'Use lowercase letters, numbers, and hyphens only.'),
     checklistItem('meta', 'Search snippet copy', text(row.meta_title).length >= 10 && text(row.meta_description).length >= 50, text(row.meta_title).length >= 10 && text(row.meta_description).length >= 50 ? 'Title and description are prepared.' : 'Add a useful title and description that match visible content.'),
     checklistItem('meta_title_length', 'Title-length review', text(row.meta_title).length <= 60, text(row.meta_title).length <= 60 ? 'Title stays compact.' : 'Shorten title where possible; this is a quality review, not a hard indexing guarantee.', false),

@@ -2,28 +2,26 @@
 
 ## Current checkpoint
 
-**Build 303 — Content Studio Draft Review & Approval Adoption** is at the final Development exact-head proof candidate.
+**Build 304 — Workshop Journal & Social Review-First Publication Acceptance** is the active Development candidate.
 
-Build 302 is the exact Development and Production GREEN baseline. The real Creative Project **7 — Under the Sea** retains exactly one CAIP workspace, one Content Studio package, one Maker Story in review, and three selected factual text-only evidence rows. Build 303 is reviewing the existing Content Studio drafts before any human approval is recorded.
+Build 303 is fully GREEN in Development and Production. The real Creative Project **7 — Under the Sea** has one Content Studio package, 19 factual-template deliverables, exactly two approved/locked text-only drafts (`blog-article`, `seo-assets`), 17 changes requested, three selected factual evidence rows, and no reviewed public-use media.
 
-- Build 302 Development: `a6827f4ee093fcf0799ddb99c7a7957469bf3a2c`
-- Build 302 Production: `fffbafc4e9f27e830494140b48d9a3d266abd81e`
-- Shared predecessor tree: `2665c72c6947c3d9dbea2f1d89e69dab70c791fd`
-- Build 303 schema change: **NONE**
-- Content Studio package creation: **NONE**
-- Automatic refresh: **NONE — EXISTING PACKAGE REUSED**
-- Locked-copy overwrite: **FORBIDDEN**
-- Development discovery: **157 D1 ROWS / READ ONLY; 19 FACTUAL-TEMPLATE DRAFTS**
-- Human review outcome: **2 EVIDENCE-SAFE TEXT DRAFTS APPROVED + LOCKED; 17 CHANGES REQUESTED**
-- Publication/social/provider action: **NONE**
-- Final exact-head proof matrix: **PENDING ON FINAL CANDIDATE**
-- Next after Production GREEN: **Build 304 — Workshop Journal & Social Review-First Publication Acceptance**
+Build 304 reuses the existing Release Board and Social Queue. It allows a factual **text-only Workshop Journal article** to pass release readiness without inventing or exposing media; website-gallery publication still requires public-cleared media. Development acceptance will publish one reviewed Journal row and prepare one explicitly approved, review-first social link queue item. No social provider call is authorized or executed.
+
+- Build 303 Development: `2b260c9ff58ca56f75afe2f82144ba8f884d572e`
+- Build 303 Production: `5fe6e3b5c47f948d8e931fd7357801ca639cb7dd`
+- Shared predecessor tree: `d60f0f1812653cac9a85cd0f67730f4b7d2a587d`
+- Build 304 schema change: **NONE**
+- Production D1 business-data contact: **NONE**
+- Workshop Journal media mode: **TEXT-ONLY ALLOWED; GALLERY MEDIA REQUIREMENT PRESERVED**
+- Social provider execution/publication: **NONE**
+- Next after Production GREEN: **Build 305 — Buyer Discovery & Search Measurement Activation**
 
 ## Next production queue — Builds 301–306
 
 The queue **has not run out**.
 
-**Next: Build 303 — Content Studio Draft Review & Approval Adoption**
+**Next: Build 304 — Workshop Journal & Social Review-First Publication Acceptance**
 
 1. Build 301 — First Real Maker Story Adoption & Completeness
 2. Build 302 — CAIP Evidence Selection & Public-Safety Review Adoption
@@ -37,7 +35,8 @@ Canonical roadmap:
 
 ## Permanent boundaries
 
-Exact GREEN Development before protected-main promotion; Production-owned business data; forward-only canonical schema; no request-time DDL; no duplicate Product editor/readiness engine; no automatic publication/provider/payment/accounting action.
+Exact GREEN Development before protected-main promotion; Production-owned business data; forward-only canonical schema; no request-time DDL; no duplicate Product editor/readiness engine; no automatic provider/payment/accounting action.
+
 
 ---
 
