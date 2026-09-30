@@ -1,18 +1,23 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 318 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 318 measured candidate
 
-Build 318 — Content Adoption & Discovery Outcomes Renewal III — is projected over exact Build 317 Development/Production GREEN.
+Build 318 — Content Adoption & Discovery Outcomes Renewal III — has completed its exact Development D1 measurement over Build 317 Production GREEN.
 
-- Last fully verified Development: `66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5`
-- Verified tree: `b721482133a03fd851f36078320527784e247247`
-- Development proofs: System `36729883162`, Quality `36729883209`, I.T. `36729883145`, Hygiene `36729883405`
-- Supplemental Build 317 proofs: D1 Fan-Out `36729883348`, Build 317 `36729883266`
-- Current Production main: `9d2ccc468ea810fdd6cf0e6f2527d50c6418876e`
-- Production proofs: Pages `36730175002`, Live Resources `36730305787`
-- Build 317 selected no third project because none met factual readiness.
-- Build 318 compares current outcomes to Builds 300, 306 and 312.
-- It remeasures Maker Story coverage, review/publication, public discovery, runtime/search, SEO review-queue support, merchant coverage, private-media boundaries and D1 read cost.
-- Successor roadmap naming is deferred until exact Development evidence is measured.
-- Measurement is read-only; no business-data, R2, provider, publication, SEO-apply or Production D1 mutation is authorized.
+- Measurement SHA: `867432fea4ddfb9c28b6ea50f38c9a6c09c01373`
+- Measurement run: `36732719677`
+- Artifact: `11105773030`
+- D1 rows read: **2,847 / 20,000**
+- Maker Story coverage: **2/5**
+- Reviewed/public stories: **1**
+- Published Workshop Journal stories: **1**
+- 35th promo remains blocked: needs_review / outcome unknown / public candidate 0.
+- Search Console remains **0 rows**; SEO review queue remains **0 rows**.
+- Public telemetry is 22 page views / 22 unique visitors in 30 days, with 0 recorded Workshop Story/Product Detail views.
+- No third project is factually ready; Grey Hair remains closest with 1 approved source-evidence range and no execution/review-plan evidence.
+- Identity duplicates and foreign-key violations remain zero.
+- Decision: `ADOPTION_STABLE_DISCOVERY_AND_NEXT_STORY_EVIDENCE_GAPS_REMAIN`.
+- Successor roadmap: `docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md`.
+- Next: **Build 319 — 35th Promo Execution Evidence Intake & Completeness**.
+- Build 318 remains read-only; no business-data/R2/provider/publication/SEO-apply/Production D1 mutation is authorized.
 
 ## Current release baseline
 
