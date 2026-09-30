@@ -1,33 +1,6 @@
 name: Release 467 Build 319 35th Promo Execution Evidence Intake Completeness
 # Final exact-head proof trigger after measured intake-ready closure.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build319_*'
-      - 'release467-build319-*.json'
-      - 'release467-build318-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_319_*'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'scripts/release467_build26*_gate.py'
-      - 'scripts/release467_build27*_gate.py'
-      - 'scripts/release467_build294_gate.py'
-      - 'scripts/release467_build300_regression.py'
-      - 'scripts/release467_build307_regression.py'
-      - 'functions/api/admin/creative-process.js'
-      - 'public/js/admin-creative-process.js'
-      - 'admin/creative-process/index.html'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/it/index.html'
-      - 'admin/reliability/index.html'
-      - 'admin/deployment-preflight/index.html'
-      - '.github/workflows/release467-build319-35th-promo-execution-evidence-intake-completeness.yml'
   workflow_dispatch:
 permissions:
   contents: read
