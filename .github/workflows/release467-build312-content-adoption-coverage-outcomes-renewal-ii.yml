@@ -1,25 +1,5 @@
 name: Release 467 Build 312 Content Adoption Coverage Outcomes Renewal II
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build312_*'
-      - 'release467-build312-*.json'
-      - 'release467-build311-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_312_*'
-      - 'docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/it/index.html'
-      - 'admin/reliability/index.html'
-      - 'admin/deployment-preflight/index.html'
-      - '.github/workflows/release467-build312-content-adoption-coverage-outcomes-renewal-ii.yml'
   workflow_dispatch:
 permissions:
   contents: read

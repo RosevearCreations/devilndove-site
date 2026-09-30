@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+const [input,sha,out]=process.argv.slice(2);const raw=JSON.parse(fs.readFileSync(input,'utf8'));const sets=Array.isArray(raw)?raw:(raw.results||[]);
+if(sets.length!==5)throw new Error('Unexpected decision statement count '+sets.length);
+const reads=sets.map(x=>Number(x?.meta?.rows_read||0)),aggregate=reads.reduce((a,b)=>a+b,0);if(aggregate>20000)throw new Error('Rows-read ceiling exceeded '+aggregate);
+const pre=(sets[0]?.results||[])[0]||{},decision=(sets[3]?.results||[])[0]||{},safety=(sets[4]?.results||[])[0]||{};
+if(String(pre.story_review_status)!=='needs_review'||Number(pre.public_story_candidate||0)!==0||String(pre.outcome_status)!=='unknown')throw new Error('Preflight decision state drift');
+if(Number(pre.planning_events||0)!==1||Number(pre.non_planning_events||0)!==0||Number(pre.selected_evidence||0)!==1||Number(pre.selected_execution_evidence||0)!==0||Number(pre.approved_locked_copy||0)!==2||Number(pre.publications||0)!==0)throw new Error('Preflight evidence mismatch');
+if(String(decision.story_review_status)!=='needs_review'||Number(decision.public_story_candidate||0)!==0||String(decision.outcome_status)!=='unknown')throw new Error('Explicit review decision drift');
+if(Number(decision.review_decision_build||0)!==313||String(decision.review_decision)!=='REMAIN_NEEDS_REVIEW_PENDING_EXECUTION_RESULT_LESSON_EVIDENCE')throw new Error('Review traceability missing');
+if(String(decision.review_scope)!=='story_text_only_no_media_rights'||String(decision.media_rights_scope)!=='separate_never_inferred'||Number(decision.approved_copy_authorizes_publication||0)!==0)throw new Error('Review/media boundary drift');
+if(Number(decision.review_actor_user_id||0)<=0||Number(decision.snapshot_review_actor_user_id||0)<=0||!String(decision.snapshot_reviewed_at||''))throw new Error('Human review actor/timestamp missing');
+for(const [k,v] of Object.entries({publications:0,social_rows:0,public_event_candidates:0,selected_media_evidence:0,public_allowed_caip_assets:0,public_allowed_private_uploads:0,foreign_key_violations:0}))if(Number(safety[k]||0)!==v)throw new Error('Safety drift '+k+'='+safety[k]);
+const evidence={release:467,build:313,exact_development_sha:sha,phase:'decision',statement_count:5,rows_read_by_statement:reads,aggregate_rows_read:aggregate,rows_read_ceiling:20000,preflight:pre,decision,safety,explicit_human_decision:'REMAIN_NEEDS_REVIEW_PENDING_EXECUTION_RESULT_LESSON_EVIDENCE',profile_result_claim_mutation:false,media_rights_inference:false,publication_mutation:false,social_mutation:false,provider_execution:false,production_d1_contact:false};
+fs.writeFileSync(out,JSON.stringify(evidence,null,2)+'\n');
+console.log('BUILD313_REVIEW_DECISION=',JSON.stringify(decision));console.log('BUILD313_SAFETY=',JSON.stringify(safety));console.log('BUILD313_ROWS_READ=',JSON.stringify(reads));console.log('BUILD313_AGGREGATE_ROWS_READ=',aggregate);console.log('BUILD313_SECOND_MAKER_STORY_REVIEW_DECISION=GREEN');

@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+const [input,sha,out]=process.argv.slice(2);const raw=JSON.parse(fs.readFileSync(input,'utf8'));const sets=Array.isArray(raw)?raw:(raw.results||[]);
+if(sets.length!==3)throw new Error('Unexpected discovery statement count '+sets.length);
+const reads=sets.map(x=>Number(x?.meta?.rows_read||0)),aggregate=reads.reduce((a,b)=>a+b,0);if(aggregate>20000)throw new Error('Rows-read ceiling exceeded '+aggregate);
+const pre=(sets[0]?.results||[])[0]||{},events=sets[1]?.results||[],integrity=(sets[2]?.results||[])[0]||{};
+if(Number(pre.creative_work_project_id||0)!==5||String(pre.project_key)!=='CP-MSC1SUG2'||String(pre.project_title)!=='35th promo')throw new Error('Target identity drift');
+if(String(pre.story_review_status)!=='needs_review'||Number(pre.public_story_candidate||0)!==0||String(pre.outcome_status)!=='unknown')throw new Error('Expected pre-review state drift');
+if(Number(pre.active_events||0)!==1||Number(pre.planning_events||0)!==1||Number(pre.non_planning_events||0)!==0)throw new Error('Execution evidence state changed');
+if(Number(pre.selected_evidence||0)!==1||Number(pre.selected_execution_evidence||0)!==0)throw new Error('Selected evidence scope drift');
+if(Number(pre.approved_locked_copy||0)!==2||Number(pre.publications||0)!==0||Number(pre.social_rows||0)!==0)throw new Error('Downstream state drift');
+if(events.length!==1||String(events[0]?.event_type)!=='planning'||Number(events[0]?.selected||0)!==1)throw new Error('Planning evidence drift');
+if(Number(integrity.caip_workspaces||0)!==1||Number(integrity.content_packages||0)!==1||Number(integrity.duplicate_caip_source_identities||0)!==0||Number(integrity.duplicate_content_source_identities||0)!==0||Number(integrity.foreign_key_violations||0)!==0)throw new Error('Identity/integrity drift');
+const evidence={release:467,build:313,exact_development_sha:sha,phase:'discovery',statement_count:3,rows_read_by_statement:reads,aggregate_rows_read:aggregate,rows_read_ceiling:20000,preflight:pre,events,integrity,decision_supported:'REMAIN_NEEDS_REVIEW_PENDING_EXECUTION_RESULT_LESSON_EVIDENCE',production_d1_contact:false};
+fs.writeFileSync(out,JSON.stringify(evidence,null,2)+'\n');
+console.log('BUILD313_DISCOVERY_PREFLIGHT=',JSON.stringify(pre));console.log('BUILD313_DISCOVERY_ROWS_READ=',JSON.stringify(reads));console.log('BUILD313_DISCOVERY_AGGREGATE_ROWS_READ=',aggregate);console.log('BUILD313_DISCOVERY=GREEN');

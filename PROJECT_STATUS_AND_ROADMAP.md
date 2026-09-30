@@ -2,25 +2,23 @@
 
 ## Current checkpoint
 
-**Build 312 — Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal** is the active Development candidate over exact Build 311 Production GREEN.
+**Build 313 — Second Maker Story Review Decision & Completeness** is the active Development candidate over exact Build 312 Production GREEN.
 
-Build 311 is fully verified and promoted:
+Build 312 is fully verified and promoted:
 
-- Development SHA: **9a785176369bc09d16c7a6d3748ac125f260bd91**.
-- Exact tree: **c79e06aec8eeb2d0ec24e54021c359d31de8e469**.
-- Production main SHA: **e6c48ac204393ee53859dc0366e36a13f15a5460**.
-- Production Pages Deploy: **36711481530 — SUCCESS**.
-- Production Live Resource Integrity: **36711577068 — SUCCESS**.
+- Development SHA: **0045b29b0635d91f1c6d03b784c841b19fffc763**.
+- Exact tree: **391c869e0587fe2f865d85af781a06296f07ef8d**.
+- Production main SHA: **c5e7bb72ec990118057d6955223e60ddaf691eac**.
+- Production Pages Deploy: **36714805674 — SUCCESS**.
+- Production Live Resource Integrity: **36714898168 — SUCCESS**.
 
-Build 312 remeasured the full Creative Process → CAIP → Content Studio → reviewed publication → buyer-discovery path against Builds 300 and 306. Current evidence is **2/5 Maker Story coverage**, **1 reviewed/public-candidate story**, **4 selected evidence rows**, **4 approved + locked deliverables**, **1 published Workshop Journal story**, **1 approved/ready review-first social row**, and **0 Search Console rows/clicks/impressions**. The 35th promo story remains needs-review with unknown outcome and no publication.
+Build 313 reviews the existing **35th promo** Maker Story against the actual recorded evidence. The record remains planning-only: one selected planning source, two approved/locked text drafts, no execution event, no selected execution evidence, an unknown outcome, no completed-result proof and no execution-derived lesson.
 
-The renewed successor roadmap is **Builds 313–318**. It begins with the explicit review decision for the existing 35th promo Maker Story, then keeps publication and Search Console work review-first/evidence-driven before considering one additional real project.
-
-No autonomous story generation, automatic approval/publication, fabricated views/clicks/impressions, provider execution, R2 mutation or Production D1 contact is authorized.
+The Development acceptance is GREEN. The explicit decision is **remain `needs_review`, public candidate = 0**: 1 planning event, 0 execution events, 1 selected planning record, 0 selected execution evidence, 2 approved/locked drafts, and 0 publication/social rows. Reviewer/timestamp/reason traceability is recorded while result/lesson claims remain untouched. Approved draft copy does not grant Maker Story approval, media/public-use rights, publication authority or provider authority.
 
 The queue **has not run out**.
 
-**Next after Build 312 Production GREEN: Build 313 — Second Maker Story Review Decision & Completeness.**
+**Next after Build 313 Production GREEN: Build 314 — Second Story Publication Readiness & Review-Queue Continuity.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md`.
 
