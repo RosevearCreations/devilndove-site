@@ -2,8 +2,8 @@
   "release": 467,
   "build": 304,
   "title": "Workshop Journal & Social Review-First Publication Acceptance",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "REVIEW_FIRST_PUBLICATION_ACCEPTANCE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
+  "phase": "REVIEW_FIRST_PUBLICATION_ACCEPTANCE_COMPLETE",
   "authority": "release467-build304-workshop-journal-social-review-first-publication-acceptance",
   "predecessor": {
     "build": 303,
@@ -125,5 +125,31 @@
     "it_admin_runtime_proof_run": 36656766900,
     "branch_hygiene_run": 36656767011,
     "note": "These runs establish control alignment only; final closure still requires fresh proofs bound to the final dev head."
+  },
+  "final_closure": {
+    "dev_sha": "3dd7a39513f4dbea3d018675bbf9080397a811fc",
+    "tree_sha": "4c8fe967a08e09327e923f32aeac0df6c901b3bf",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD304_GREEN",
+    "proofs": {
+      "system_gate_run": 36656936137,
+      "current_application_quality_run": 36656936159,
+      "it_admin_runtime_proof_run": 36656936151,
+      "branch_hygiene_run": 36656936224
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36656936283,
+      "build_specific_proof_run": 36656936278
+    },
+    "ingested_by_build": 305
+  },
+  "production_checkpoint": {
+    "main_sha": "9666c57fd02b199359e2420db0f147c27e5c9386",
+    "tree_sha": "4c8fe967a08e09327e923f32aeac0df6c901b3bf",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36657083820,
+    "production_live_resource_integrity_run": 36657146626,
+    "remote_d1_queries": 0
   }
 }

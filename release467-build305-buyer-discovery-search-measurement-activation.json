@@ -1,0 +1,156 @@
+{
+  "release": 467,
+  "build": 305,
+  "title": "Buyer Discovery & Search Measurement Activation",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "BUYER_DISCOVERY_SEARCH_MEASUREMENT_ACTIVE",
+  "authority": "release467-build305-buyer-discovery-search-measurement-activation",
+  "predecessor": {
+    "build": 304,
+    "title": "Workshop Journal & Social Review-First Publication Acceptance",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "3dd7a39513f4dbea3d018675bbf9080397a811fc",
+    "development_tree_sha": "4c8fe967a08e09327e923f32aeac0df6c901b3bf",
+    "development_proofs": {
+      "system_gate_run": 36656936137,
+      "current_application_quality_run": 36656936159,
+      "it_admin_runtime_proof_run": 36656936151,
+      "branch_hygiene_run": 36656936224,
+      "d1_ci_fanout_guard_run": 36656936283,
+      "build_specific_proof_run": 36656936278
+    },
+    "production_main_sha": "9666c57fd02b199359e2420db0f147c27e5c9386",
+    "production_tree_sha": "4c8fe967a08e09327e923f32aeac0df6c901b3bf",
+    "production_pages_deploy_run": 36657083820,
+    "production_live_resource_integrity_run": 36657146626,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "target": {
+    "creative_work_project_id": 7,
+    "project_key": "CP-MSXCYQB6",
+    "project_title": "Under the Sea",
+    "content_project_id": 22,
+    "publication_key": "content-project-22-workshop_journal",
+    "publication_slug": "under-the-sea-workshop-story-22"
+  },
+  "measurement_baseline": {
+    "exact_development_sha": "9445c6a22a26cdae22cef3989f4222f7a149aee3",
+    "workflow_run": 36657523393,
+    "aggregate_rows_read": 168,
+    "rows_read_ceiling": 20000,
+    "publication": {
+      "published_story_rows": 1,
+      "social_ready": 1,
+      "social_posted": 0
+    },
+    "telemetry_28d": {
+      "under_the_sea_story_views": 0,
+      "workshop_journal_index_views": 0,
+      "product_detail_views": 0,
+      "total_page_views": 22,
+      "unique_visitors": 22,
+      "latest_page_view_at": "2026-09-11 07:48:01"
+    },
+    "search_console_28d": {
+      "rows": 0,
+      "clicks": 0,
+      "impressions": 0,
+      "latest_report_date": "",
+      "story_rows": 0,
+      "story_clicks": 0,
+      "story_impressions": 0,
+      "product_rows": 0
+    },
+    "product_discovery": {
+      "active_reviewed_products": 40,
+      "with_slug": 40,
+      "with_cad_price": 40,
+      "with_featured_image": 40,
+      "canada_shipping_flagged": 40,
+      "fact_complete_before_external_merchant_config": 40
+    },
+    "sitemap": {
+      "product_candidates": 40,
+      "story_candidates": 1,
+      "under_the_sea_candidate": 1
+    },
+    "internal_discovery_inputs": {
+      "project_operations": 0,
+      "public_capability_profiles": 13,
+      "published_story_rows": 1,
+      "foreign_key_violations": 0
+    }
+  },
+  "interpretation": {
+    "reviewed_story_is_public_and_sitemap_visible": true,
+    "recorded_story_views_observed": false,
+    "search_console_evidence_observed": false,
+    "product_fact_readiness_complete": true,
+    "factual_related_capability_links_justified": false,
+    "reason_no_related_capability_links": "Project 7 currently has zero active Creative Process operations, so Build 305 does not invent capability relationships.",
+    "search_console_next_action": "Import real Search Console evidence through the existing admin staging authority when available.",
+    "indexnow_next_action": "Remain explicit-owner-only; no Build 305 automatic submission."
+  },
+  "scope": {
+    "read_only_admin_measurement_surface": true,
+    "existing_public_telemetry_reused": true,
+    "existing_search_console_staging_reused": true,
+    "existing_merchant_distribution_reused": true,
+    "dynamic_sitemap_reused": true,
+    "indexnow_readiness_only": true,
+    "indexnow_submission": false,
+    "automatic_provider_publication": false,
+    "provider_execution": false,
+    "schema_change": false,
+    "production_d1_contact": false
+  },
+  "safety": {
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_exposure": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "indexnow_submission": false,
+    "automatic_publication": false,
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "production_d1_contact": false
+  },
+  "contract": {
+    "next_build": 306,
+    "next_build_title": "CAIP Content Adoption Outcomes Renewal & Roadmap Renewal",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "3dd7a39513f4dbea3d018675bbf9080397a811fc",
+      "tree": "4c8fe967a08e09327e923f32aeac0df6c901b3bf",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 36656936137,
+      "quality_run": 36656936159,
+      "it_admin_runtime_run": 36656936151,
+      "repository_hygiene_run": 36656936224,
+      "d1_ci_fanout_guard_run": 36656936283,
+      "build_specific_proof_run": 36656936278
+    },
+    "production": {
+      "main_sha": "9666c57fd02b199359e2420db0f147c27e5c9386",
+      "tree": "4c8fe967a08e09327e923f32aeac0df6c901b3bf",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 36657083820,
+      "production_live_resource_integrity_run": 36657146626,
+      "remote_d1_queries": 0
+    }
+  },
+  "candidate_control_alignment": {
+    "state": "SOURCE_AND_MEASUREMENT_CONTROLS_ALIGNED_FINAL_EXACT_HEAD_REPROOF_REQUIRED",
+    "intermediate_head": "873ebf9e3ad90968f1e1368e0399a40f227a4efb",
+    "system_gate_run": 36658102616,
+    "current_application_quality_run": 36658102494,
+    "it_admin_runtime_proof_run": 36658102561,
+    "branch_hygiene_run": 36658102649,
+    "build_specific_proof_run": 36658102512,
+    "note": "These runs establish candidate control alignment only. Final closure requires fresh exact-head proofs, including D1 CI Fan-Out, bound to the final dev SHA."
+  }
+}

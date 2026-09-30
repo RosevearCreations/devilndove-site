@@ -1,17 +1,17 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 304 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 305 candidate
 
-Build 304 — Workshop Journal & Social Review-First Publication Acceptance — is projected over exact Build 303 Development/Production GREEN.
+Build 305 — Buyer Discovery & Search Measurement Activation — is projected over exact Build 304 Development/Production GREEN.
 
-- Last fully verified Development: `2b260c9ff58ca56f75afe2f82144ba8f884d572e`
-- Verified tree: `d60f0f1812653cac9a85cd0f67730f4b7d2a587d`
-- Development proofs: System `36653801145`, Quality `36653801156`, I.T. `36653801176`, Hygiene `36653801148`
-- Supplemental Build 303 proofs: D1 Fan-Out `36653801203`, Build 303 `36653801155`
-- Current Production main: `5fe6e3b5c47f948d8e931fd7357801ca639cb7dd`
-- Production proofs: Pages `36655109591`, Live Resources `36655170381`
-- Build 303 review result: 19 factual drafts; `blog-article` + `seo-assets` approved/locked; 17 changes requested; no reviewed public-use media.
-- Build 304 acceptance: one factual text-only Workshop Journal row plus one approved `ready` social link draft in `review_first` mode; website-gallery publication remains media-gated.
-- Provider execution/publication: **ZERO**. Production D1 business-data contact: **ZERO**.
-- Next after Build 304 Production GREEN: Build 305 — Buyer Discovery & Search Measurement Activation.
+- Last fully verified Development: `3dd7a39513f4dbea3d018675bbf9080397a811fc`
+- Verified tree: `4c8fe967a08e09327e923f32aeac0df6c901b3bf`
+- Development proofs: System `36656936137`, Quality `36656936159`, I.T. `36656936151`, Hygiene `36656936224`
+- Supplemental Build 304 proofs: D1 Fan-Out `36656936283`, Build 304 `36656936278`
+- Current Production main: `9666c57fd02b199359e2420db0f147c27e5c9386`
+- Production proofs: Pages `36657083820`, Live Resources `36657146626`
+- Build 304 acceptance: Under the Sea is one reviewed text-only Workshop Journal publication; one social link draft remains approved/ready/review-first and unposted.
+- Build 305 measured 168 Development D1 rows: 0 Under the Sea views, 0 Search Console rows, 40/40 fact-complete reviewed Products, 1 published story sitemap candidate, and 0 Project 7 operations.
+- Build 305 activates read-only buyer-discovery measurement only. No IndexNow submission, provider execution/publication or Production D1 business-data contact.
+- Next after Build 305 Production GREEN: Build 306 — CAIP Content Adoption Outcomes Renewal & Roadmap Renewal.
 
 ## Current release baseline
 
