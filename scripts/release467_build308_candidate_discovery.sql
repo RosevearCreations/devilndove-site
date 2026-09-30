@@ -44,3 +44,40 @@ SELECT
  (SELECT COUNT(*) FROM (SELECT source_id,COUNT(*) n FROM creative_projects WHERE source_type='creative_work_project' AND project_status<>'archived' GROUP BY source_id HAVING COUNT(*)>1)) duplicate_caip_source_identities,
  (SELECT COUNT(*) FROM (SELECT source_id,COUNT(*) n FROM content_projects WHERE source_type='creative_project' GROUP BY source_id HAVING COUNT(*)>1)) duplicate_content_source_identities,
  (SELECT COUNT(*) FROM pragma_foreign_key_check) foreign_key_violations;
+
+
+-- 4: Grey Hair private CAIP readiness and reviewed planning state.
+SELECT
+ w.creative_work_project_id,w.project_key,w.project_title,w.project_type,w.project_status,COALESCE(w.summary,'') summary,
+ cp.creative_project_id caip_project_id,cp.creative_project_key caip_project_key,COALESCE(cp.content_project_id,0) caip_content_project_id,
+ (SELECT COUNT(*) FROM creative_assets a WHERE a.creative_project_id=cp.creative_project_id AND a.asset_status<>'archived') active_assets,
+ (SELECT COUNT(*) FROM creative_media_evidence_ranges r WHERE r.creative_project_id=cp.creative_project_id AND r.marker_status='active' AND r.review_status='approved') approved_source_evidence,
+ (SELECT COUNT(*) FROM caip_semantic_evidence_annotations a JOIN creative_media_evidence_ranges r ON r.creative_media_evidence_range_id=a.creative_media_evidence_range_id WHERE r.creative_project_id=cp.creative_project_id AND r.marker_status='active' AND r.review_status='approved' AND a.review_status='approved') semantic_approved_evidence,
+ (SELECT COUNT(*) FROM caip_capture_groups g WHERE g.creative_project_id=cp.creative_project_id AND g.sync_status='confirmed') confirmed_capture_groups,
+ (SELECT COUNT(*) FROM caip_capture_tracks t JOIN caip_capture_groups g ON g.caip_capture_group_id=t.caip_capture_group_id WHERE g.creative_project_id=cp.creative_project_id AND t.review_status='confirmed') confirmed_capture_tracks,
+ (SELECT COUNT(*) FROM caip_story_builder_drafts d WHERE d.creative_project_id=cp.creative_project_id AND d.story_status IN ('review','approved')) reviewed_story_plans,
+ (SELECT COUNT(*) FROM caip_story_builder_drafts d WHERE d.creative_project_id=cp.creative_project_id AND d.story_status='approved') approved_story_plans,
+ (SELECT COUNT(*) FROM caip_story_builder_items i JOIN caip_story_builder_drafts d ON d.caip_story_builder_draft_id=i.caip_story_builder_draft_id WHERE d.creative_project_id=cp.creative_project_id AND d.story_status IN ('review','approved')) reviewed_story_items,
+ (SELECT COUNT(*) FROM caip_edit_timeline_drafts t WHERE t.creative_project_id=cp.creative_project_id AND t.timeline_status='approved') approved_edit_plans,
+ (SELECT COUNT(*) FROM creative_assets a WHERE a.creative_project_id=cp.creative_project_id AND a.source_safety_status='public_allowed') public_allowed_assets,
+ (SELECT COUNT(*) FROM caip_media_upload_files f WHERE f.creative_project_id=cp.creative_project_id AND f.consent_state='public_allowed' AND f.rights_status='public_allowed') fully_public_allowed_uploads
+FROM creative_work_projects w
+JOIN creative_projects cp ON cp.source_type='creative_work_project' AND cp.source_id=CAST(w.creative_work_project_id AS TEXT) AND cp.project_status<>'archived'
+WHERE w.creative_work_project_id=6 AND w.project_key='CP-MSUNAL8R' AND w.project_title='Grey Hair';
+
+-- 5: reviewed private Grey Hair story-plan facts and source-backed evidence (no asset keys/filenames).
+SELECT
+ d.caip_story_builder_draft_id,d.story_key,d.title,d.story_status,COALESCE(d.opening_summary,'') opening_summary,
+ COALESCE(d.lesson_summary,'') lesson_summary,COALESCE(d.recommendation_summary,'') recommendation_summary,
+ COALESCE(d.reviewed_by_user_id,0) reviewed_by_user_id,COALESCE(d.reviewed_at,'') reviewed_at,
+ i.caip_story_builder_item_id,i.item_role,COALESCE(i.item_title,'') item_title,COALESCE(i.item_text,'') item_text,
+ r.creative_media_evidence_range_id,r.evidence_category,r.visibility,r.review_status evidence_review_status,
+ r.marker_status,COALESCE(r.title,'') evidence_title,COALESCE(r.note_text,'') evidence_note,
+ COALESCE(r.transcript_excerpt,'') transcript_excerpt
+FROM caip_story_builder_drafts d
+JOIN caip_story_builder_items i ON i.caip_story_builder_draft_id=d.caip_story_builder_draft_id
+JOIN creative_media_evidence_ranges r ON r.creative_media_evidence_range_id=i.creative_media_evidence_range_id
+WHERE d.creative_project_id=(SELECT MIN(cp.creative_project_id) FROM creative_projects cp WHERE cp.source_type='creative_work_project' AND cp.source_id='6' AND cp.project_status<>'archived')
+  AND d.story_status IN ('review','approved')
+  AND r.marker_status='active' AND r.review_status='approved'
+ORDER BY CASE d.story_status WHEN 'approved' THEN 0 ELSE 1 END,d.updated_at DESC,i.sort_order,i.caip_story_builder_item_id;
