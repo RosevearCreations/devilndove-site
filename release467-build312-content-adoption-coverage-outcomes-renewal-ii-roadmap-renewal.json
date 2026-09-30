@@ -1,0 +1,86 @@
+{
+  "release": 467,
+  "build": 312,
+  "title": "Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "CONTENT_ADOPTION_OUTCOMES_RENEWAL_II_CANDIDATE",
+  "authority": "release467-build312-content-adoption-coverage-outcomes-renewal-ii-roadmap-renewal",
+  "predecessor": {
+    "build": 311,
+    "title": "Buyer Discovery Evidence Freshness & Search Intake",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "9a785176369bc09d16c7a6d3748ac125f260bd91",
+    "development_tree_sha": "c79e06aec8eeb2d0ec24e54021c359d31de8e469",
+    "development_proofs": {
+      "system_gate_run": 36711277604,
+      "current_application_quality_run": 36711277548,
+      "it_admin_runtime_proof_run": 36711277537,
+      "branch_hygiene_run": 36711277481,
+      "d1_ci_fanout_guard_run": 36711277536,
+      "build_specific_proof_run": 36711277557
+    },
+    "production_main_sha": "e6c48ac204393ee53859dc0366e36a13f15a5460",
+    "production_tree_sha": "c79e06aec8eeb2d0ec24e54021c359d31de8e469",
+    "production_pages_deploy_run": 36711481530,
+    "production_live_resource_integrity_run": 36711577068,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "scope": {
+    "full_path_remeasurement": true,
+    "build300_comparison": true,
+    "build306_comparison": true,
+    "multi_project_coverage": true,
+    "approval_publication_discovery_runtime_d1_read_outcomes": true,
+    "next_roadmap_created_from_observed_evidence": true,
+    "schema_change": false,
+    "development_d1_read_only": true,
+    "production_d1_contact": false
+  },
+  "expected_decision": {
+    "automation_refinement": "NO_NEW_AUTONOMOUS_GENERATION",
+    "second_story_requires_explicit_review": true,
+    "search_console_requires_real_operator_intake": true,
+    "additional_story_adoption_one_project_at_a_time": true,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "automatic_provider_execution": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_exposure": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "indexnow_execution": false,
+    "automatic_publication": false,
+    "traffic_fabrication": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "9a785176369bc09d16c7a6d3748ac125f260bd91",
+      "tree": "c79e06aec8eeb2d0ec24e54021c359d31de8e469",
+      "system_gate_run": 36711277604,
+      "quality_run": 36711277548,
+      "it_admin_runtime_run": 36711277537,
+      "repository_hygiene_run": 36711277481,
+      "d1_ci_fanout_guard_run": 36711277536,
+      "build_specific_proof_run": 36711277557
+    },
+    "production": {
+      "main_sha": "e6c48ac204393ee53859dc0366e36a13f15a5460",
+      "tree": "c79e06aec8eeb2d0ec24e54021c359d31de8e469",
+      "production_pages_deploy_run": 36711481530,
+      "production_live_resource_integrity_run": 36711577068
+    }
+  },
+  "contract": {
+    "next_roadmap": "docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md",
+    "next_build": 313,
+    "next_build_title": "Second Maker Story Review Decision & Completeness",
+    "future_queue_exhausted": false
+  }
+}
