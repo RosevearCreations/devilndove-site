@@ -1,20 +1,21 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 312 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 313 candidate
 
-Build 312 — Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal — is projected over exact Build 311 Development/Production GREEN.
+Build 313 — Second Maker Story Review Decision & Completeness — is projected over exact Build 312 Development/Production GREEN.
 
-- Last fully verified Development: `9a785176369bc09d16c7a6d3748ac125f260bd91`
-- Verified tree: `c79e06aec8eeb2d0ec24e54021c359d31de8e469`
-- Development proofs: System `36711277604`, Quality `36711277548`, I.T. `36711277537`, Hygiene `36711277481`
-- Supplemental Build 311 proofs: D1 Fan-Out `36711277536`, Build 311 `36711277557`
-- Current Production main: `e6c48ac204393ee53859dc0366e36a13f15a5460`
-- Production proofs: Pages `36711481530`, Live Resources `36711577068`
-- Build 312 remeasures content-adoption coverage, review/publication state, public discovery, runtime/search health and D1 read cost against Builds 300 and 306.
-- Under the Sea remains the accepted reviewed/public-candidate text-only story with one published Workshop Journal row and one approved/ready review-first social row.
-- 35th promo remains the second adopted Maker Story with approved/locked text copy but explicit Maker Story review/public-candidate prerequisites still required before publication.
-- Search Console evidence remains real-input-only; zero evidence is preserved as zero.
-- The successor roadmap is `docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md`.
-- No autonomous generation, automatic approval/publication, provider execution or Production D1 contact is authorized.
-- Next after Build 312 Production GREEN: Build 313 — Second Maker Story Review Decision & Completeness.
+- Last fully verified Development: `0045b29b0635d91f1c6d03b784c841b19fffc763`
+- Verified tree: `391c869e0587fe2f865d85af781a06296f07ef8d`
+- Development proofs: System `36714596371`, Quality `36714596654`, I.T. `36714596379`, Hygiene `36714596591`
+- Supplemental Build 312 proofs: D1 Fan-Out `36714596884`, Build 312 `36714596878`
+- Current Production main: `c5e7bb72ec990118057d6955223e60ddaf691eac`
+- Production proofs: Pages `36714805674`, Live Resources `36714898168`
+- Build 313 target: Creative Project 5, **35th promo**, Content Project 23.
+- Existing evidence remains planning-only with no execution event or selected execution evidence.
+- Existing approved/locked copy count is 2, but approved copy does not authorize Maker Story review/public candidacy.
+- Explicit review decision: `REMAIN_NEEDS_REVIEW_PENDING_EXECUTION_RESULT_LESSON_EVIDENCE`.
+- Story review state remains `needs_review`; public-story candidate remains `0`.
+- Review decision reason, actor and timestamp are recorded in the existing CAIP source snapshot.
+- Result/lesson claims, media/public-use rights, publication/social rows and provider state are not inferred or mutated.
+- Next after Build 313 Production GREEN: Build 314 — Second Story Publication Readiness & Review-Queue Continuity.
 
 ## Current release baseline
 
