@@ -11,6 +11,11 @@ a=j('release467-build302-caip-evidence-selection-public-safety-review-adoption.j
 prev=j('release467-build301-first-real-maker-story-adoption-completeness.json')
 p=j('current-development-authority.json')
 q(a.get('build')==302 and a.get('title')=='CAIP Evidence Selection & Public-Safety Review Adoption','Build 302 identity mismatch')
+q(a.get('phase') in ('PUBLIC_SAFETY_DISCOVERY','EVIDENCE_PUBLIC_SAFETY_ADOPTION_CANDIDATE','EVIDENCE_PUBLIC_SAFETY_ADOPTED_COMPLETE'),'Build 302 phase mismatch')
+if a.get('phase')!='PUBLIC_SAFETY_DISCOVERY':
+    d=a.get('discovery_findings') or {}; ad=a.get('adoption_contract') or {}
+    q(d.get('active_timeline_events')==3 and d.get('event_ids')==[1,2,3] and d.get('caip_asset_count')==0 and d.get('private_upload_file_count')==0,'Build 302 measured discovery facts mismatch')
+    q(ad.get('selected_event_ids')==[1,2,3] and ad.get('selected_evidence_target_count')==3 and ad.get('public_rights_inference') is False and ad.get('caip_media_state_change') is False,'Build 302 adoption boundary mismatch')
 pred=a.get('predecessor') or {}
 q(pred.get('development_sha')==DEV and pred.get('development_tree_sha')==TREE,'Build 301 Development predecessor mismatch')
 q(pred.get('production_main_sha')==MAIN and pred.get('production_tree_sha')==TREE,'Build 301 Production predecessor mismatch')

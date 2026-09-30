@@ -9,8 +9,8 @@ Build 302 — CAIP Evidence Selection & Public-Safety Review Adoption — is pro
 - Current Production main: `3eec733afd9b8c585efaab1c8a89fa244d9f65d8`
 - Production proofs: Pages `36648294020`, Live Resources `36648362724`
 - Build 301 real adoption: Creative Project 7 — Under the Sea; one factual Maker Story; `needs_review`; public-story candidate `0`.
-- Build 302 first performs read-only Development discovery of the three active timeline facts plus linked CAIP asset/private-upload rights and privacy states.
-- Evidence selection does not grant public-use rights. No CAIP asset or private upload may be inferred `public_allowed`.
+- Build 302 discovery consumed 44 D1 rows and confirmed three active text-only timeline facts (events 1/2/3), zero CAIP assets, zero private-upload files and zero public candidacy.
+- Final adoption selects events 1/2/3 as internal factual evidence only (process/material/material). Evidence selection does not grant public-use rights; the operation fails closed if media appears before adoption.
 - No Content Studio refresh, approval, publication, provider execution, R2 mutation or Production D1 business-data contact.
 - Next after Build 302 Production GREEN: Build 303 — Content Studio Draft Review & Approval Adoption.
 

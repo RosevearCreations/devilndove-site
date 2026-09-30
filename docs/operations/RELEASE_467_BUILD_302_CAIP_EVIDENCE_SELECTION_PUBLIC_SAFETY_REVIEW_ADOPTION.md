@@ -2,15 +2,18 @@
 
 Build 302 starts from exact Build 301 Production GREEN and continues the real **Under the Sea** Maker Story.
 
-The first Build 302 candidate is read-only. It inspects the three active factual timeline entries, existing evidence-selection state, the one linked CAIP workspace, CAIP asset rights/safety states, and private-upload consent/rights state without exposing private filenames or object keys.
+Read-only Development discovery consumed 44 D1 rows and confirmed:
+- three active factual timeline events, IDs 1, 2 and 3;
+- all three have public-candidate state 0 and no media URL;
+- three pre-existing evidence-selection rows exist and all were unselected;
+- exactly one CAIP workspace and one Content Studio package remain;
+- the CAIP workspace currently has zero creative assets and zero private-upload files;
+- no approved deliverables, publications or social rows exist.
 
-The adoption step may select factual timeline entries as internal review evidence, but selection must not:
-- set timeline events to public candidates;
-- convert CAIP assets or private uploads to `public_allowed`;
-- expose private media or mutate R2;
-- refresh or approve Content Studio drafts;
-- create publication/social rows.
+The final Build 302 adoption therefore selects those three existing text/fact timeline rows only: event 1 as process evidence and events 2/3 as material evidence. Each review note explicitly records that internal evidence selection does not grant public-use rights.
 
-Evidence selection and public-use permission remain independent authorities.
+The mutation is idempotent and fail-closed. If CAIP media appears between discovery and adoption, the adoption refuses to proceed instead of inferring rights.
+
+Build 302 does not alter Maker Story public candidacy, event public candidacy, CAIP asset rights, private-upload consent/rights, R2, Content Studio drafts or approvals, publication queues, Inventory or Finance.
 
 Next: Build 303 — Content Studio Draft Review & Approval Adoption.

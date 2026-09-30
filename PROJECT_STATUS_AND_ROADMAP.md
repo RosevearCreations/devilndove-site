@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-**Build 302 — CAIP Evidence Selection & Public-Safety Review Adoption** is active in Development discovery.
+**Build 302 — CAIP Evidence Selection & Public-Safety Review Adoption** is active in Development adoption.
 
 Build 301 is the exact Development and Production GREEN baseline. The real Creative Project **7 — Under the Sea** already has one factual Maker Story in `needs_review` with no public-story candidacy. Build 302 now measures the three active timeline facts and the linked CAIP rights/privacy state before selecting evidence.
 
@@ -10,8 +10,10 @@ Build 301 is the exact Development and Production GREEN baseline. The real Creat
 - Build 301 Production: `3eec733afd9b8c585efaab1c8a89fa244d9f65d8`
 - Shared predecessor tree: `d11b3492ef6d389270d9acc58d94e4740591bb38`
 - Build 302 schema change: **NONE**
-- Initial Development discovery: **READ ONLY**
-- Evidence selection target: **FACTUAL TIMELINE ONLY**
+- Development discovery: **44 D1 ROWS / READ ONLY**
+- Selected factual event IDs: **1, 2, 3**
+- Final Development mutation: **THREE EXISTING EVIDENCE-SELECTION ROWS ONLY**
+- Evidence selection target: **EVENT 1 PROCESS / EVENTS 2–3 MATERIAL; TEXT-ONLY**
 - Public-use rights inference: **NONE**
 - CAIP private-media exposure/R2 mutation: **NONE**
 - Content Studio refresh/approval/publication: **NONE**

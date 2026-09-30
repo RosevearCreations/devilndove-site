@@ -23,7 +23,7 @@ jobs:
       - run: python scripts/release467_build302_regression.py
       - run: python scripts/release467_build302_gate.py
 
-  public-safety-discovery:
+  evidence-public-safety-adoption:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -32,74 +32,40 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       DEV_D1_DATABASE_NAME: devilndove-dev
       EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
-      EXPECTED_STATEMENTS: 6
       D1_PROVIDER_ROWS_READ_CEILING: '20000'
     steps:
       - uses: actions/checkout@v7
-        with: { fetch-depth: 2 }
       - uses: actions/setup-node@v7
         with: { node-version: '24' }
-      # D1_ONE_SHOT_EVIDENCE_CAPTURE — Build 302 Development-only rights/privacy discovery.
+      # D1_ONE_SHOT_EVIDENCE_CAPTURE — Build 302 Development-only evidence/public-safety adoption.
       - name: Prove exact Development D1
-        shell: bash
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
           grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
           grep -q '^database_name = "devilndove-dev"$' wrangler.toml
           ! grep -q 'devilndove-prod' wrangler.toml
-          npx --yes wrangler@4.128.0 d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/b302-info.json
-          node - <<'NODE'
-          const fs=require('fs');const data=JSON.parse(fs.readFileSync('/tmp/b302-info.json','utf8'));
-          const all=[];const walk=v=>{if(Array.isArray(v))v.forEach(walk);else if(v&&typeof v==='object'){all.push(v);Object.values(v).forEach(walk)}};walk(data);
-          const ids=new Set(all.map(x=>String(x.uuid||x.id||''))),names=new Set(all.map(x=>String(x.name||'')));
-          if(!ids.has(process.env.EXPECTED_DEV_D1_DATABASE_ID)||!names.has(process.env.DEV_D1_DATABASE_NAME))throw new Error('Development D1 identity mismatch');
-          console.log('EXACT DEVELOPMENT D1 IDENTITY: PASS');
-          NODE
-      - name: Discover factual evidence and CAIP public-safety state
-        shell: bash
+          npx --yes wrangler@4.128.0 d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/info.json
+          node -e "const d=require('/tmp/info.json');const s=JSON.stringify(d);if(!s.includes(process.env.EXPECTED_DEV_D1_DATABASE_ID)||!s.includes(process.env.DEV_D1_DATABASE_NAME))process.exit(1)"
+      - name: Select factual evidence and prove public-safety separation
         run: |
           set -euo pipefail
-          COMMAND="$(grep -v '^[[:space:]]*--' scripts/release467_build302_public_safety_discovery.sql)"
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b302-discovery.json
-          node - <<'NODE'
-          const fs=require('fs');const raw=JSON.parse(fs.readFileSync('/tmp/b302-discovery.json','utf8'));
-          const rows=Array.isArray(raw)?raw:(raw.results||[]);
-          if(rows.length!==Number(process.env.EXPECTED_STATEMENTS))throw new Error('Unexpected statement count '+rows.length);
-          const reads=rows.map(x=>Number(x?.meta?.rows_read||0)),aggregate=reads.reduce((a,b)=>a+b,0);
-          if(aggregate>Number(process.env.D1_PROVIDER_ROWS_READ_CEILING))throw new Error('Rows-read ceiling exceeded '+aggregate);
-          const project=(rows[0]?.results||[])[0]||{},events=rows[1]?.results||[],evidence=rows[2]?.results||[],assets=rows[3]?.results||[],uploads=(rows[4]?.results||[])[0]||{},boundary=(rows[5]?.results||[])[0]||{};
-          if(Number(project.creative_work_project_id)!==7||project.project_key!=='CP-MSXCYQB6'||project.project_title!=='Under the Sea')throw new Error('Build 302 project identity drift');
-          if(project.story_kind!=='maker_story'||project.story_review_status!=='needs_review'||Number(project.public_story_candidate)!==0)throw new Error('Maker Story review-first state drift');
-          if(Number(project.caip_workspace_count)!==1||Number(project.content_package_count)!==1)throw new Error('Project authority duplication');
-          if(events.length!==3)throw new Error('Expected exactly three active factual timeline entries; found '+events.length);
-          if(events.some(x=>Number(x.is_public_candidate||0)!==0))throw new Error('Timeline public candidacy must remain zero before review');
-          if(Number(project.selected_evidence_count||0)!==0||evidence.some(x=>Number(x.selected||0)===1))throw new Error('Build 302 discovery expected zero pre-existing selected evidence');
-          if(assets.some(x=>String(x.source_safety_status||'needs_review')==='public_allowed'))throw new Error('No CAIP asset may be inferred public-allowed');
-          if(Number(uploads.fully_public_allowed_count||0)!==0)throw new Error('No private upload may already have fully inferred public allowance');
-          if(Number(boundary.publications||0)!==0||Number(boundary.approved_deliverables||0)!==0||Number(boundary.foreign_key_violations||0)!==0)throw new Error('Downstream/public boundary drift');
-          console.log('BUILD302_ROWS_READ=',JSON.stringify(reads));
-          console.log('BUILD302_AGGREGATE_ROWS_READ=',aggregate);
-          console.log('BUILD302_PROJECT=',JSON.stringify(project));
-          console.log('BUILD302_EVENTS=',JSON.stringify(events));
-          console.log('BUILD302_PRESELECTED_EVIDENCE=',JSON.stringify(evidence));
-          console.log('BUILD302_CAIP_ASSET_SAFETY=',JSON.stringify(assets));
-          console.log('BUILD302_PRIVATE_UPLOAD_SAFETY=',JSON.stringify(uploads));
-          console.log('BUILD302_DOWNSTREAM_BOUNDARY=',JSON.stringify(boundary));
-          fs.writeFileSync('/tmp/build302-public-safety-discovery.json',JSON.stringify({release:467,build:302,exact_development_sha:process.env.GITHUB_SHA,reads,aggregate_rows_read:aggregate,project,events,evidence,assets,uploads,boundary,mutation:false,public_rights_inference:false,production_d1_contact:false},null,2)+'\n');
-          NODE
+          COMMAND="$(grep -v '^[[:space:]]*--' scripts/release467_build302_adopt_evidence_public_safety.sql)"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b302.json
+          node scripts/release467_build302_verify_adoption.mjs /tmp/b302.json "${GITHUB_SHA}" /tmp/build302-evidence-public-safety-adoption.json
       - uses: actions/upload-artifact@v4
         with:
-          name: build302-public-safety-discovery-${{ github.sha }}
-          path: /tmp/build302-public-safety-discovery.json
+          name: build302-evidence-public-safety-adoption-${{ github.sha }}
+          path: /tmp/build302-evidence-public-safety-adoption.json
           if-no-files-found: error
           retention-days: 30
       - name: Boundary
         if: always()
         run: |
-          echo 'DEVELOPMENT DISCOVERY: READ ONLY'
+          echo 'DEVELOPMENT MUTATION: THREE EXISTING FACTUAL EVIDENCE-SELECTION ROWS ONLY'
+          echo 'CAIP MEDIA RIGHTS / PRIVACY MUTATION: ZERO'
           echo 'PUBLIC RIGHTS INFERENCE: ZERO'
           echo 'R2 MUTATION: ZERO'
-          echo 'CONTENT STUDIO MUTATION: ZERO'
+          echo 'CONTENT STUDIO REFRESH / APPROVAL: ZERO'
           echo 'AUTOMATIC PUBLICATION: ZERO'
           echo 'PRODUCTION D1 CONTACT: ZERO'

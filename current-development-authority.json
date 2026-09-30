@@ -194,7 +194,7 @@
   "next_build": 303,
   "next_build_state": "QUEUED_AFTER_BUILD302_PRODUCTION_GREEN",
   "next_build_title": "Content Studio Draft Review & Approval Adoption",
-  "promotion_state": "BUILD302_PUBLIC_SAFETY_DISCOVERY_CANDIDATE_NOT_YET_VERIFIED",
+  "promotion_state": "BUILD302_EVIDENCE_PUBLIC_SAFETY_ADOPTION_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "BUILD302_ACTIVE_BUILDS_303_306_QUEUED",
   "measured_closure": {
     "source_build": 232,
@@ -1225,15 +1225,24 @@
   },
   "caip_content_adoption": {
     "source_build": 302,
-    "phase": "PUBLIC_SAFETY_DISCOVERY",
+    "phase": "EVIDENCE_PUBLIC_SAFETY_ADOPTION_CANDIDATE",
     "selected_real_project_id": 7,
     "selected_real_project_key": "CP-MSXCYQB6",
     "selected_real_project_title": "Under the Sea",
     "maker_story_review_status": "needs_review",
     "public_story_candidate": 0,
-    "evidence_selection_target": "FACTUAL_TIMELINE_ONLY",
-    "infer_public_allowance": false,
+    "selected_event_ids": [
+      1,
+      2,
+      3
+    ],
+    "selected_evidence_target_count": 3,
+    "caip_asset_count": 0,
+    "private_upload_file_count": 0,
+    "public_rights_inference": false,
+    "caip_media_state_change": false,
     "content_studio_refresh": false,
+    "approval": false,
     "publication": false,
     "next_build": 303,
     "future_queue_exhausted": false
