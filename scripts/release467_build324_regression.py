@@ -36,6 +36,13 @@ for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','ROADMAP RENEWAL: OBSERVED EVIDENCE
     q(token in wf,'Build 324 workflow boundary missing '+token)
 for token in ('same 18-statement outcomes model as Build 318','successor roadmap is intentionally not selected from assumptions','future queue has not run out'):
     q(token.lower() in doc.lower(),'Build 324 documentation missing '+token)
+road2=t('docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md')
+q(a.get('measurement_state')=='EXACT_DEVELOPMENT_MEASURED_GREEN','Build 324 exact measured state missing')
+q(a.get('roadmap_renewal_state')=='BUILDS_325_330_CREATED_FROM_OBSERVED_EVIDENCE','Build 324 roadmap renewal state missing')
+q(a.get('next_roadmap')=='docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md','Build 324 next roadmap authority missing')
+q(a.get('next_build')==325 and a.get('next_build_title')=='Evidence Gap Owner Queue & Operator Action Traceability','Build 325 successor authority missing')
+for token in ('Build 325 — Evidence Gap Owner Queue & Operator Action Traceability','Build 326 — 35th Promo Real Outcome Evidence Closure','Build 327 — Grey Hair Evidence Review Completion & Story-Plan Handoff','Build 328 — Search Console Real Export Freshness & Discovery Intake III','Build 329 — Maker Story Advancement & Publication Readiness Continuity II','Build 330 — Content Adoption & Discovery Outcomes Renewal V'):
+    q(token in road2,'Build 324 successor roadmap missing '+token)
 q(int(p.get('build') or 0)>=324,'Current pointer must retain Build 324 or successor')
 if int(p.get('build') or 0)==324:
     q(p.get('state')=='DEVELOPMENT_GREEN','Build 324 current authority must be DEVELOPMENT_GREEN')
