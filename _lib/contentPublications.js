@@ -223,7 +223,7 @@ async function makerStoryPublicationPrerequisite(db, row) {
   if (text(row?.content_project_source_type).toLowerCase() !== 'creative_project') return { required: false, ready: true, reason: 'not_creative_project' };
   const projectId = number(row?.content_project_source_id);
   if (!projectId) return { required: false, ready: true, reason: 'missing_creative_source_identity' };
-  const profile = await db.prepare(`SELECT story_review_status, public_story_candidate FROM creative_project_maker_story_profiles WHERE creative_work_project_id=? LIMIT 1`).bind(projectId).first().catch(() => null);
+  const profile = await db.prepare(`SELECT story_review_status, public_story_candidate FROM creative_project_maker_story_profiles WHERE creative_work_project_id=? LIMIT 1`).bind(projectId).first();
   if (!profile) return { required: false, ready: true, reason: 'no_maker_story_profile' };
   const reviewed = text(profile.story_review_status).toLowerCase() === 'reviewed';
   const publicCandidate = Number(profile.public_story_candidate || 0) === 1;
@@ -271,6 +271,8 @@ export async function listContentPublications(db, projectId = 0) {
 
 export async function prepareContentPublications(db, projectId, actorUserId) {
   const context = await projectContext(db, projectId);
+  const storyPrerequisite = await makerStoryPublicationPrerequisite(db, { content_project_source_type: context.project.source_type, content_project_source_id: context.project.source_id });
+  if (storyPrerequisite.required && !storyPrerequisite.ready) throw new Error('Cannot prepare public drafts until the Maker Story is explicitly reviewed and marked as a public story candidate.');
   const results = [];
   for (const destination of ['workshop_journal', 'website_gallery']) {
     const seed = toPublicationSeed(context, destination);
