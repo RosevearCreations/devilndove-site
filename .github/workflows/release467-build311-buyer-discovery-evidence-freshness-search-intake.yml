@@ -4,6 +4,7 @@ on:
     branches: [dev]
     paths:
       - 'scripts/release467_build311_*'
+      - 'scripts/release467_build305_regression.py'
       - 'release467-build311-*.json'
       - 'release467-build310-*.json'
       - 'functions/api/admin/buyer-discovery-measurement.js'
