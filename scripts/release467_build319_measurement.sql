@@ -15,7 +15,7 @@ SELECT
  (SELECT COUNT(*) FROM content_projects cp WHERE cp.source_type='creative_project' AND cp.source_id='5') content_packages,
  (SELECT COUNT(*) FROM content_project_deliverables d WHERE d.content_project_id=23 AND d.approval_status='approved' AND d.copy_locked=1) approved_locked_deliverables,
  (SELECT COUNT(*) FROM content_publications WHERE content_project_id=23) publications,
- (SELECT COUNT(*) FROM social_post_queue WHERE content_project_id=23) social_rows
+ (SELECT COUNT(*) FROM social_post_queue WHERE source_type IN ('content_project','creative_project') AND CAST(source_id AS TEXT) IN ('23','5')) social_rows
 FROM creative_work_projects p
 JOIN creative_project_maker_story_profiles m ON m.creative_work_project_id=p.creative_work_project_id
 WHERE p.creative_work_project_id=5 AND p.project_key='CP-MSC1SUG2' AND p.project_title='35th promo';
