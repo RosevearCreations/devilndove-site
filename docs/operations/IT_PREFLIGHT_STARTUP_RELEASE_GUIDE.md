@@ -1,19 +1,18 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 308 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 309 candidate
 
-Build 308 — Second Real Maker Story Adoption & Evidence Selection — is projected over exact Build 307 Development/Production GREEN.
+Build 309 — Second Story Content Studio Review & Approval — is projected over exact Build 308 Development/Production GREEN.
 
-- Last fully verified Development: `3ff916d9f1e7cc6aa9c29d9c998ace3731caf120`
-- Verified tree: `70c9408afd2df7a3359b83937eda15161f49b4e2`
-- Development proofs: System `36661991953`, Quality `36661991952`, I.T. `36661991949`, Hygiene `36661991959`
-- Supplemental Build 307 proofs: D1 Fan-Out `36661991955`, Build 307 `36661991981`
-- Current Production main: `f8b3f7281ccd6e4bfc739abe1ba2566db336281a`
-- Production proofs: Pages `36662200778`, Live Resources `36662256691`
-- Build 308 Development adoption: **35th promo** is the second real Maker Story, retained in **needs review** with outcome **unknown** and public-story candidate **false**.
-- One existing-project metadata brief was normalized into one internal text-only planning source record and selected as evidence.
-- Coverage is now **2 Maker Story profiles / 5 active projects** and **4 selected evidence rows** total.
-- New-project media/publication/social counts remain **0 / 0 / 0**; duplicate CAIP/Content identities and FK violations remain **0**.
-- Build 308 discovery used **302 rows read** and adoption acceptance used **278 rows read**; Production D1 contact: **ZERO**.
-- Next after Build 308 Production GREEN: Build 309 — Second Story Content Studio Review & Approval.
+- Last fully verified Development: `60b6a631a615c1653ecfb07b4cbf8bc117a496f8`
+- Verified tree: `d78e7d76fb06395ee182271044314808454f6110`
+- Development proofs: System `36665213124`, Quality `36665213036`, I.T. `36665213119`, Hygiene `36665213073`
+- Supplemental Build 308 proofs: D1 Fan-Out `36665213057`, Build 308 `36665213093`
+- Current Production main: `498ddd776ea3c52b243a5ef8800fc33570d159a4`
+- Production proofs: Pages `36665406681`, Live Resources `36665469007`
+- Build 309 Development review: 35th promo package 23 has 19 factual drafts; 2 corrected text-only drafts are approved+locked and 17 are changes_requested.
+- The Maker Story remains needs_review / outcome unknown / public-story candidate false.
+- No CAIP/private media, publication, provider execution, or Production D1 contact is authorized.
+- Initial Build 309 review acceptance used 363 rows read.
+- Next after Build 309 Production GREEN: Build 310 — Review-First Publication & Distribution Continuity.
 
 ## Current release baseline
 
