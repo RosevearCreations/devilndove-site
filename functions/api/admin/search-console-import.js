@@ -71,6 +71,25 @@ function parseCsv(text) {
   if (row.some((cell) => normalizeText(cell))) output.push(row);
   return output;
 }
+function searchConsoleRealExportHeaderReadiness(headers) {
+  const present = new Set((headers || []).map(slugKey).filter(Boolean));
+  const groups = {
+    page: ['page','page_url','url','landing_page','top_pages'].some((key) => present.has(key)),
+    clicks: ['clicks','click'].some((key) => present.has(key)),
+    impressions: ['impressions','impression'].some((key) => present.has(key)),
+    ctr: ['ctr','click_through_rate'].some((key) => present.has(key)),
+    position: ['position','average_position','avg_position'].some((key) => present.has(key)),
+  };
+  return {
+    ready: Object.values(groups).every(Boolean),
+    groups,
+    missing_header_groups: Object.entries(groups).filter(([, ok]) => !ok).map(([key]) => key),
+  };
+}
+function realExportConfirmed(value) {
+  if (value === true) return true;
+  return ['true','1','yes','on'].includes(normalizeText(value).toLowerCase());
+}
 function pick(record, aliases) {
   for (const alias of aliases) {
     const key = slugKey(alias);
@@ -305,7 +324,7 @@ export async function onRequestPost(context) {
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
   const schemaReadiness=await searchConsoleSchemaReadiness(db);
   if(!schemaReadiness.ready)return jsonResponse({
-    ok:false,release:467,build:316,
+    ok:false,release:467,build:321,
     error:'Search Console intake schema is not ready. Apply the canonical database migration before importing evidence.',
     schema_readiness:schemaReadiness
   },409,{'Cache-Control':'no-store'});
@@ -319,6 +338,7 @@ export async function onRequestPost(context) {
     payload.site_property = normalizeText(form.get('site_property'));
     payload.report_date = normalizeText(form.get('report_date'));
     payload.notes = normalizeText(form.get('notes'));
+    payload.confirm_real_export = realExportConfirmed(form.get('confirm_real_export'));
     payload.csv_text = file && typeof file.text === 'function' ? await file.text() : normalizeText(form.get('csv_text'));
   } else {
     payload = await context.request.json().catch(() => ({}));
@@ -355,14 +375,18 @@ export async function onRequestPost(context) {
     return jsonResponse({ ok: true, message: `Applied reviewed SEO override for ${applied.page_path}.`, ...applied, ...(await summary(db, filters)) }, 200, { 'Cache-Control': 'no-store' });
   }
 
+  if (!realExportConfirmed(payload.confirm_real_export)) return jsonResponse({ ok: false, error: 'Confirm that this is a real Google Search Console export before importing.' }, 400);
   const csvText = normalizeText(payload.csv_text);
   if (!csvText) return jsonResponse({ ok: false, error: 'CSV text or file is required.' }, 400);
 
   const parsed = parseCsv(csvText);
   if (parsed.length < 2) return jsonResponse({ ok: false, error: 'CSV must include a header row and at least one data row.' }, 400);
   const headers = parsed[0].map(slugKey);
+  const headerReadiness = searchConsoleRealExportHeaderReadiness(headers);
+  if (!headerReadiness.ready) return jsonResponse({ ok: false, error: `CSV does not match the expected Search Console export columns. Missing: ${headerReadiness.missing_header_groups.join(', ')}.`, header_readiness: headerReadiness }, 400);
   const importBatchKey = normalizeText(payload.import_batch_key) || `gsc_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
   const sourceFile = normalizeText(payload.source_file) || 'search-console.csv';
+  if (!sourceFile.toLowerCase().endsWith('.csv')) return jsonResponse({ ok: false, error: 'Search Console intake accepts CSV exports only.' }, 400);
   const siteProperty = normalizeText(payload.site_property) || '';
   const fallbackReportDate = normalizeText(payload.report_date) || new Date().toISOString().slice(0, 10);
   const statements = [];
@@ -374,7 +398,7 @@ export async function onRequestPost(context) {
   for (const cells of parsed.slice(1)) {
     const record = {};
     headers.forEach((header, index) => { record[header] = cells[index] ?? ''; });
-    const pageUrl = normalizeUrl(pick(record, ['page', 'page_url', 'url', 'landing page', 'landing_page']), context.request.url);
+    const pageUrl = normalizeUrl(pick(record, ['page', 'page_url', 'url', 'landing page', 'landing_page', 'top pages', 'top_pages']), context.request.url);
     if (!pageUrl) { skipped += 1; continue; }
     const queryText = pick(record, ['query', 'query_text', 'search query', 'top queries']);
     const reportDate = normalizeText(pick(record, ['date', 'report_date', 'day'])) || fallbackReportDate;
@@ -390,6 +414,6 @@ export async function onRequestPost(context) {
   statements.push(db.prepare(`UPDATE search_console_import_batches SET row_count = ? WHERE import_batch_key = ?`).bind(imported, importBatchKey));
 
   if (statements.length > 1) await db.batch(statements);
-  await auditAdminAction(context.env, context.request, adminUser, { action_type: 'search_console_import', target_type: 'search_console_import_batch', target_key: importBatchKey, details: { source_file: sourceFile, imported, skipped, site_property: siteProperty } });
-  return jsonResponse({ ok: true, message: `Imported ${imported} Search Console row(s).`, import_batch_key: importBatchKey, imported, skipped, ...(await summary(db, filters)) }, 200, { 'Cache-Control': 'no-store' });
+  await auditAdminAction(context.env, context.request, adminUser, { action_type: 'search_console_import', target_type: 'search_console_import_batch', target_key: importBatchKey, details: { source_file: sourceFile, imported, skipped, site_property: siteProperty, real_export_confirmed: true, header_readiness: headerReadiness } });
+  return jsonResponse({ ok: true, message: `Imported ${imported} real Search Console row(s).`, import_batch_key: importBatchKey, imported, skipped, real_export_confirmed: true, ...(await summary(db, filters)) }, 200, { 'Cache-Control': 'no-store' });
 }

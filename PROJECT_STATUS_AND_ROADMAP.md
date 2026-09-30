@@ -2,28 +2,26 @@
 
 ## Current checkpoint
 
-**Build 320 — Grey Hair Source-Evidence Review & Story-Plan Readiness** is the active Development candidate over exact Build 319 Production GREEN.
+**Build 321 — Search Console Real Export Intake Continuity II** is the active Development candidate over exact Build 320 Development/Production GREEN.
 
-Build 319 is fully verified and promoted:
+Build 320 is fully verified and promoted:
 
-- Development SHA: **a068ec13ec14aedf6d62dfa5e5324fd6bf876680**
-- Exact tree: **5c49464a39ef189845bc5406716fbd055f535370**
-- Development proofs: System **36752973485**, Quality **36752973506**, I.T. **36752973489**, Hygiene **36752973494**
-- Supplemental proofs: D1 Fan-Out **36752973577**, Build 319 **36752973432**
-- Production main SHA: **c753fe35a36096fa539f304a6b2fbd5f1d159a43**
-- Production Pages Deploy: **36753367985 — SUCCESS**
-- Production Live Resource Integrity: **36753496201 — SUCCESS**
-- Build 319 result: factual intake ready; 35th promo still has 0 execution / 0 result / 0 lesson evidence and remains review-blocked.
+- Development SHA: **a5348eea48616a934a2994309d0738f05d706af9**
+- Exact tree: **1bf94721855837958a546e033e0bead0f3f97580**
+- Development proofs: System **36755683525**, Quality **36755683559**, I.T. **36755683417**, Hygiene **36755683610**
+- Supplemental proofs: D1 Fan-Out **36755683521**, Build 320 **36755683468**
+- Production main SHA: **e84cda2db64f0af93aa1f88cc71fb7079fe5fd54**
+- Production Pages Deploy: **36755991930 — SUCCESS**
+- Production Live Resource Integrity: **36756208135 — SUCCESS**
+- Exact Development and Production tree: **MATCH**.
 
-Build 320 focuses only on **Grey Hair**. A dedicated read-only readiness workspace composes the existing CAIP Evidence Review, Grey Hair Sync & Audio Alignment, and Grey Hair Story & Edit Planning authorities. It shows the exact blocker and routes the operator to the correct review action.
+Build 321 keeps the existing Search Console intake operator-controlled and factual. New imports require explicit confirmation that the input is a real Google Search Console Performance export and recognizable Page/Clicks/Impressions/CTR/Position headers. CI remains read-only.
 
-Exact Development measurement returned **SOURCE_EVIDENCE_REVIEW_REQUIRED**: Grey Hair has **3 active source-evidence ranges**, **1 approved**, **2 needs_review**, **0 confirmed sync groups**, **0 reviewed story plans**, **0 source-backed story items**, and **0 Maker Story profiles**. All 45 active CAIP assets remain non-public; public-allowed assets/uploads remain **0 / 0**. Measurement read **165 / 20,000** D1 rows.
-
-A later Grey Hair Maker Story decision requires **≥2 approved source-evidence ranges + ≥1 human-reviewed story plan + ≥2 source-backed story items**. Build 320 itself never creates the Maker Story profile and never changes private/public media rights.
+If no real export is staged, the correct state is **EVIDENCE_PENDING_NO_REAL_EXPORT**. Build 321 never synthesizes queries, clicks, impressions or batches and never auto-imports provider data.
 
 The queue **has not run out**.
 
-**Next after Build 320 Production GREEN: Build 321 — Search Console Real Export Intake Continuity II.**
+**Next after Build 321 Production GREEN: Build 322 — Buyer Discovery Attribution & SEO Review Evidence Continuity.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md`.
 
