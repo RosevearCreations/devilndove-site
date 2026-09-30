@@ -1,0 +1,120 @@
+{
+  "release": 467,
+  "build": 323,
+  "title": "Maker Story Coverage & Publication Readiness Continuity",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "MAKER_STORY_COVERAGE_PUBLICATION_READINESS_CONTINUITY",
+  "authority": "release467-build323-maker-story-coverage-publication-readiness-continuity",
+  "predecessor": {
+    "build": 322,
+    "title": "Buyer Discovery Attribution & SEO Review Evidence Continuity",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "ad8f82fa23c943303a04f6273b735c1091913cf3",
+    "development_tree_sha": "3ba6acc882e399e0d3e6eb2b749ce8f43a215e9e",
+    "development_proofs": {
+      "system_gate_run": 36783745244,
+      "current_application_quality_run": 36783745477,
+      "it_admin_runtime_proof_run": 36783745601,
+      "branch_hygiene_run": 36783745609,
+      "d1_ci_fanout_guard_run": 36783745501,
+      "build_specific_proof_run": 36783745352
+    },
+    "measurement": {
+      "state": "EVIDENCE_PENDING_NO_REAL_SEARCH_CONSOLE_ATTRIBUTION",
+      "artifact_id": 11128653409,
+      "artifact_digest": "sha256:4ea85020b36e20a1243e9ff8313ae848ac5c5e76a4917c08a06652ba986f6678",
+      "aggregate_rows_read": 109,
+      "rows_read_ceiling": 20000,
+      "public_page_views_30d": 22,
+      "public_unique_visitors_30d": 22,
+      "search_console_rows": 0,
+      "seo_queue_rows": 0
+    },
+    "production_main_sha": "1d7ef26655905c057c6c064ef7e2d7bf4c94f6a0",
+    "production_tree_sha": "3ba6acc882e399e0d3e6eb2b749ce8f43a215e9e",
+    "production_pages_deploy_run": 36784108959,
+    "production_live_resource_integrity_run": 36784211626,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "coverage_population": "ALL_ACTIVE_CREATIVE_PROJECTS",
+    "expected_active_projects": 5,
+    "exact_one_caip_workspace_required": true,
+    "exact_one_content_package_required": true,
+    "maker_story_profile_required_for_story_readiness": true,
+    "factual_core_required": true,
+    "explicit_story_review_required": true,
+    "public_story_candidate_required": true,
+    "approved_content_copy_required": true,
+    "locked_content_copy_required": true,
+    "published_story_requires_human_publication_traceability": true,
+    "publication_readiness_is_read_only_classification": true,
+    "public_media_rights_separate_from_story_text_readiness": true,
+    "private_media_never_public_by_inference": true,
+    "provider_posting_independent": true,
+    "automatic_profile_creation": false,
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "automatic_content_approval": false,
+    "automatic_publication": false,
+    "automatic_social_posting": false,
+    "readiness_states": [
+      "MAKER_STORY_EVIDENCE_REQUIRED",
+      "MAKER_STORY_HUMAN_REVIEW_REQUIRED",
+      "FACTUAL_OUTCOME_EVIDENCE_REQUIRED",
+      "PUBLIC_CANDIDATE_REVIEW_REQUIRED",
+      "CONTENT_STUDIO_REVIEW_REQUIRED",
+      "PUBLICATION_REVIEW_READY",
+      "PUBLISHED_REVIEWED_STORY"
+    ],
+    "workspace": "/admin/maker-story-coverage/",
+    "next_build": 324,
+    "next_build_title": "Content Adoption & Discovery Outcomes Renewal IV",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "maker_story_profile_mutation": false,
+    "story_review_mutation": false,
+    "public_candidate_mutation": false,
+    "content_copy_mutation": false,
+    "publication_mutation": false,
+    "social_posting": false,
+    "private_media_exposure": false,
+    "media_rights_inference": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "ad8f82fa23c943303a04f6273b735c1091913cf3",
+      "tree": "3ba6acc882e399e0d3e6eb2b749ce8f43a215e9e",
+      "system_gate_run": 36783745244,
+      "quality_run": 36783745477,
+      "it_admin_runtime_run": 36783745601,
+      "repository_hygiene_run": 36783745609,
+      "d1_ci_fanout_guard_run": 36783745501,
+      "build_specific_proof_run": 36783745352
+    },
+    "production": {
+      "main_sha": "1d7ef26655905c057c6c064ef7e2d7bf4c94f6a0",
+      "tree": "3ba6acc882e399e0d3e6eb2b749ce8f43a215e9e",
+      "production_pages_deploy_run": 36784108959,
+      "production_live_resource_integrity_run": 36784211626
+    }
+  },
+  "measurement_state": "PENDING_EXACT_DEVELOPMENT_COVERAGE_MEASUREMENT",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md",
+  "decision": {
+    "classification": "AWAIT_EXACT_DEVELOPMENT_MAKER_STORY_COVERAGE_MEASUREMENT",
+    "automatic_advancement_authorized": false,
+    "automatic_publication_authorized": false,
+    "media_rights_inference_authorized": false,
+    "next_build": 324,
+    "next_build_title": "Content Adoption & Discovery Outcomes Renewal IV"
+  }
+}
