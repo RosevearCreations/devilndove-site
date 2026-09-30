@@ -25,7 +25,7 @@ c=a.get('contract') or {};s=a.get('safety') or {}
 q(c.get('queue_semantics')=='EVIDENCE_BACKED_HUMAN_REVIEW_ONLY' and c.get('search_console_required_for_query_level_seo_actions') is True,'Build 316 queue evidence policy mismatch')
 q(c.get('generated_title') is False and c.get('generated_meta_description') is False and c.get('generated_internal_link') is False and c.get('explicit_human_copy_required_before_apply') is True,'Build 316 no-generated-copy policy mismatch')
 q(all(v is False for v in s.values()),'Build 316 safety authority drift')
-for token in ('Evidence-backed review queue','suggested_title, suggested_meta_description, suggested_internal_link_note','null, null, null','Current Search Console evidence no longer supports','Enter reviewed SEO copy explicitly'):
+for token in ('Evidence-backed review queue','suggested_title,suggested_meta_description,suggested_internal_link_note','null,null,null','Current Search Console evidence no longer supports','Enter reviewed SEO copy explicitly'):
     q(token in api,'Build 316 Search Console API missing '+token)
 q('titleCase(' not in api and 'const suggestedTitle' not in api and 'const suggestedMeta' not in api and 'const internalNote' not in api,'Build 316 must not generate SEO wording')
 for token in ('Queue evidence-backed reviews','Evidence-backed review','manual SEO wording','current evidence'):
