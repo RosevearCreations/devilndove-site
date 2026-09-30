@@ -1,0 +1,31 @@
+import fs from 'node:fs';
+const [input,sha,out]=process.argv.slice(2);const raw=JSON.parse(fs.readFileSync(input,'utf8'));const sets=Array.isArray(raw)?raw:(raw.results||[]);
+if(sets.length!==5)throw new Error('Unexpected statement count '+sets.length);
+const reads=sets.map(x=>Number(x?.meta?.rows_read||0));const aggregate=reads.reduce((a,b)=>a+b,0);if(aggregate>20000)throw new Error('Rows-read ceiling exceeded '+aggregate);
+const candidates=sets[0]?.results||[],events=sets[1]?.results||[],integrity=(sets[2]?.results||[])[0]||{},greyHair=(sets[3]?.results||[])[0]||{},greyHairStoryEvidence=sets[4]?.results||[];
+if(Number(integrity.active_projects||0)!==5)throw new Error('Expected five active Creative Projects');
+if(![1,2].includes(Number(integrity.maker_story_profiles||0)))throw new Error('Expected Build 308 discovery/adoption state to contain one or two Maker Stories');
+if(Number(integrity.duplicate_caip_source_identities||0)!==0||Number(integrity.duplicate_content_source_identities||0)!==0||Number(integrity.foreign_key_violations||0)!==0)throw new Error('Identity/FK integrity drift');
+const score=c=>Number(c.active_events||0)*100+Number(c.process_result_events||0)*25+Number(c.planning_events||0)*10+Number(c.material_events||0)*8+Number(c.titled_events||0)*3+(String(c.summary||'').trim()?5:0)+(String(c.objective||'').trim()?3:0)+(String(c.story_angle||'').trim()?2:0);
+const eligible=c=>Number(c.maker_profiles||0)===0&&Number(c.caip_workspaces||0)===1&&Number(c.content_packages||0)===1&&Number(c.active_events||0)>0&&Number(c.safe_text_events||0)>0;
+const ranked=candidates.filter(eligible).map(c=>({...c,readiness_score:score(c)})).sort((a,b)=>b.readiness_score-a.readiness_score||Number(a.creative_work_project_id)-Number(b.creative_work_project_id));
+const greyHairReviewedEvidenceReady=Number(greyHair.caip_project_id||0)>0&&Number(greyHair.approved_source_evidence||0)>=3&&Number(greyHair.reviewed_story_plans||0)>=1&&greyHairStoryEvidence.length>=3;
+const metadataRanked=candidates.filter(c=>Number(c.maker_profiles||0)===0&&Number(c.caip_workspaces||0)===1&&Number(c.content_packages||0)===1)
+ .map(c=>({...c,metadata_readiness_score:(String(c.summary||'').trim()?5:0)+(String(c.objective||'').trim()?3:0)+(String(c.story_angle||'').trim()?2:0)}))
+ .sort((a,b)=>b.metadata_readiness_score-a.metadata_readiness_score||Number(a.creative_work_project_id)-Number(b.creative_work_project_id));
+const alreadyAdopted=candidates.find(c=>Number(c.creative_work_project_id)===5&&Number(c.maker_profiles||0)===1)||null;
+const selected=alreadyAdopted|| (greyHairReviewedEvidenceReady?candidates.find(c=>Number(c.creative_work_project_id)===6)||null:ranked[0]||metadataRanked[0]||null);
+const selectedEvents=selected?events.filter(e=>Number(e.creative_work_project_id)===Number(selected.creative_work_project_id)):[];
+if(Number(greyHair.public_allowed_assets||0)!==0||Number(greyHair.fully_public_allowed_uploads||0)!==0)throw new Error('Grey Hair public-media boundary changed before Build 308');
+const evidence={release:467,build:308,exact_development_sha:sha,statement_count:5,rows_read_by_statement:reads,aggregate_rows_read:aggregate,rows_read_ceiling:20000,candidates,ranked_eligible_candidates:ranked,metadata_ranked_candidates:metadataRanked,already_adopted_candidate:alreadyAdopted,selected_candidate:selected,selected_candidate_events:selectedEvents,grey_hair_private_caip_readiness:greyHair,grey_hair_reviewed_story_evidence:greyHairStoryEvidence,grey_hair_reviewed_evidence_ready:greyHairReviewedEvidenceReady,integrity,selection_rule:'prefer reviewed source-backed Grey Hair evidence; otherwise prefer an existing factual timeline; if none exists, normalize the richest existing Creative Project metadata into one internal planning evidence row',d1_mutation:false,media_rights_mutation:false,production_d1_contact:false};
+fs.writeFileSync(out,JSON.stringify(evidence,null,2)+'\n');
+console.log('BUILD308_CANDIDATES=',JSON.stringify(candidates));
+if(!selected||Number(selected.creative_work_project_id)!==5)throw new Error('Build 308 expected 35th promo as the strongest safe metadata-normalization candidate after discovery');
+console.log('BUILD308_SELECTED_CANDIDATE=',JSON.stringify(selected));
+console.log('BUILD308_SELECTED_EVENTS=',JSON.stringify(selectedEvents));
+console.log('BUILD308_GREY_HAIR_READINESS=',JSON.stringify(greyHair));
+console.log('BUILD308_GREY_HAIR_REVIEWED_EVIDENCE_READY=',greyHairReviewedEvidenceReady);
+console.log('BUILD308_GREY_HAIR_STORY_EVIDENCE=',JSON.stringify(greyHairStoryEvidence));
+console.log('BUILD308_DISCOVERY_ROWS_READ=',JSON.stringify(reads));
+console.log('BUILD308_DISCOVERY_AGGREGATE_ROWS_READ=',aggregate);
+console.log('BUILD308_SECOND_REAL_STORY_DISCOVERY=GREEN');

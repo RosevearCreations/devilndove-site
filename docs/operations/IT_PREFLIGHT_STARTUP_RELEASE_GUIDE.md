@@ -1,18 +1,19 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 307 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 308 candidate
 
-Build 307 — Maker Story Review-State & Publication Traceability — is projected over exact Build 306 Development/Production GREEN.
+Build 308 — Second Real Maker Story Adoption & Evidence Selection — is projected over exact Build 307 Development/Production GREEN.
 
-- Last fully verified Development: `a0d04fb1fcbf22a714031c65e256f885b725d1c5`
-- Verified tree: `0a80465e014d949ba750092b0154d78103d0760a`
-- Development proofs: System `36660652766`, Quality `36660652777`, I.T. `36660652789`, Hygiene `36660652786`
-- Supplemental Build 306 proofs: D1 Fan-Out `36660652925`, Build 306 `36660652837`
-- Current Production main: `1eb9df6dd6db02ad61fd4a32852e7f37a46c1ecd`
-- Production proofs: Pages `36660821200`, Live Resources `36660903854`
-- Build 307 Development acceptance: Under the Sea story review state is reconciled to **reviewed**, story-level public candidate is **true**, and the recorded profile/publication actor is user #1.
-- Media/public-use rights remain separate: 0 public event candidates, 0 selected media evidence, 0 public-allowed CAIP assets/uploads, 0 website-gallery rows.
-- Social remains approved/ready/review-first with **0 provider posts**.
-- Build 307 acceptance measured **144 rows read**; Production D1 contact: **ZERO**.
-- Next after Build 307 Production GREEN: Build 308 — Second Real Maker Story Adoption & Evidence Selection.
+- Last fully verified Development: `3ff916d9f1e7cc6aa9c29d9c998ace3731caf120`
+- Verified tree: `70c9408afd2df7a3359b83937eda15161f49b4e2`
+- Development proofs: System `36661991953`, Quality `36661991952`, I.T. `36661991949`, Hygiene `36661991959`
+- Supplemental Build 307 proofs: D1 Fan-Out `36661991955`, Build 307 `36661991981`
+- Current Production main: `f8b3f7281ccd6e4bfc739abe1ba2566db336281a`
+- Production proofs: Pages `36662200778`, Live Resources `36662256691`
+- Build 308 Development adoption: **35th promo** is the second real Maker Story, retained in **needs review** with outcome **unknown** and public-story candidate **false**.
+- One existing-project metadata brief was normalized into one internal text-only planning source record and selected as evidence.
+- Coverage is now **2 Maker Story profiles / 5 active projects** and **4 selected evidence rows** total.
+- New-project media/publication/social counts remain **0 / 0 / 0**; duplicate CAIP/Content identities and FK violations remain **0**.
+- Build 308 discovery used **302 rows read** and adoption acceptance used **278 rows read**; Production D1 contact: **ZERO**.
+- Next after Build 308 Production GREEN: Build 309 — Second Story Content Studio Review & Approval.
 
 ## Current release baseline
 

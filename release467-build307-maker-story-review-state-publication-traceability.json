@@ -2,7 +2,7 @@
   "release": 467,
   "build": 307,
   "title": "Maker Story Review-State & Publication Traceability",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "REVIEW_PUBLICATION_TRACEABILITY_ACCEPTED_CANDIDATE",
   "authority": "release467-build307-maker-story-review-state-publication-traceability",
   "predecessor": {
@@ -108,5 +108,33 @@
     "branch_hygiene_run": 36661797271,
     "initial_build_specific_acceptance_run": 36661539347,
     "note": "Build 307 real-path acceptance is GREEN and control-plane truth is aligned. Final closure requires fresh exact-head System, Quality, I.T., Hygiene, D1 Fan-Out and idempotent Build 307 acceptance proofs."
-  }
+  },
+  "final_closure": {
+    "dev_sha": "3ff916d9f1e7cc6aa9c29d9c998ace3731caf120",
+    "tree_sha": "70c9408afd2df7a3359b83937eda15161f49b4e2",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD307_GREEN",
+    "proofs": {
+      "system_gate_run": 36661991953,
+      "current_application_quality_run": 36661991952,
+      "it_admin_runtime_proof_run": 36661991949,
+      "branch_hygiene_run": 36661991959
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36661991955,
+      "build_specific_proof_run": 36661991981
+    },
+    "ingested_by_build": 308
+  },
+  "production_checkpoint": {
+    "main_sha": "f8b3f7281ccd6e4bfc739abe1ba2566db336281a",
+    "tree_sha": "70c9408afd2df7a3359b83937eda15161f49b4e2",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36662200778,
+    "production_live_resource_integrity_run": 36662256691,
+    "remote_d1_queries": 0,
+    "ingested_by_build": 308
+  },
+  "closure_ingested_by_build": 308
 }
