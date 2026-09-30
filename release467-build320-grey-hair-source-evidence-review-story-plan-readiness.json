@@ -3,7 +3,7 @@
   "build": 320,
   "title": "Grey Hair Source-Evidence Review & Story-Plan Readiness",
   "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "GREY_HAIR_SOURCE_EVIDENCE_STORY_PLAN_READINESS",
+  "phase": "GREY_HAIR_SOURCE_EVIDENCE_REVIEW_REQUIRED",
   "authority": "release467-build320-grey-hair-source-evidence-review-story-plan-readiness",
   "predecessor": {
     "build": 319,
@@ -91,6 +91,41 @@
       "production_live_resource_integrity_run": 36753496201
     }
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT",
-  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md"
+  "measurement_state": "SOURCE_EVIDENCE_REVIEW_REQUIRED",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md",
+  "measurement_checkpoint": {
+    "exact_development_sha": "d64e8ff21ceeefc9dd3de31e03f5dbf837b10038",
+    "workflow_run": 36755361860,
+    "artifact_id": 11116317901,
+    "aggregate_rows_read": 165,
+    "rows_read_ceiling": 20000,
+    "caip_project_id": 23,
+    "content_project_id": 21,
+    "active_assets": 45,
+    "active_source_evidence": 3,
+    "approved_source_evidence": 1,
+    "source_evidence_needs_review": 2,
+    "confirmed_capture_groups": 0,
+    "confirmed_capture_tracks": 0,
+    "reviewed_story_plans": 0,
+    "approved_story_plans": 0,
+    "source_backed_story_items": 0,
+    "maker_story_profiles": 0,
+    "public_allowed_assets": 0,
+    "public_allowed_uploads": 0,
+    "readiness_state": "SOURCE_EVIDENCE_REVIEW_REQUIRED",
+    "automatic_evidence_approval": false,
+    "automatic_story_plan_generation": false,
+    "automatic_maker_story_profile": false,
+    "production_d1_contact": false
+  },
+  "decision": {
+    "classification": "SOURCE_EVIDENCE_REVIEW_REQUIRED",
+    "rationale": "Grey Hair has three active source-evidence ranges, but only one is approved and two remain needs_review. Build 320 therefore does not advance to story planning or Maker Story creation. The next operator action is explicit review of the two existing source ranges in CAIP Evidence Review.",
+    "next_operator_action": "Review the two existing needs_review Grey Hair source-evidence ranges in CAIP Evidence Review.",
+    "maker_story_creation_authorized": false,
+    "publication_authorized": false,
+    "next_build": 321,
+    "next_build_title": "Search Console Real Export Intake Continuity II"
+  }
 }
