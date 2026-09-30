@@ -200,7 +200,7 @@
   "next_build": 309,
   "next_build_state": "QUEUED_AFTER_BUILD308_PRODUCTION_GREEN",
   "next_build_title": "Second Story Content Studio Review & Approval",
-  "promotion_state": "BUILD308_CANDIDATE_NOT_YET_VERIFIED",
+  "promotion_state": "BUILD308_FINAL_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "BUILD308_ACTIVE_BUILD309_QUEUED",
   "measured_closure": {
     "source_build": 232,
@@ -1261,12 +1261,12 @@
     "next_build": 309,
     "future_queue_exhausted": false,
     "final_exact_head_proofs_pending": true,
-    "control_plane_alignment": "BUILD307_SOURCE_RUNTIME_SUCCESSOR_CONTROLS_GREEN_BEFORE_FINAL_EXACT_HEAD_REPROOF",
-    "intermediate_head": "8e52962b5045eca19aa2fa6eea5e44b7a41b3575",
+    "control_plane_alignment": "BUILD308_SOURCE_RUNTIME_SUCCESSOR_CONTROLS_GREEN_BEFORE_FINAL_EXACT_HEAD_REPROOF",
+    "intermediate_head": "0ee43f51cc8577ed6dd50333812988a3240a05da",
     "intermediate_source_gate_run": 36660510517,
-    "intermediate_quality_run": 36661797341,
-    "intermediate_it_run": 36661797303,
-    "intermediate_hygiene_run": 36661797271,
+    "intermediate_quality_run": 36664336668,
+    "intermediate_it_run": 36664336678,
+    "intermediate_hygiene_run": 36664336666,
     "selected_real_project_id": 7,
     "story_review_status_target": "reviewed",
     "public_story_candidate_target": 1,
@@ -1285,7 +1285,7 @@
     "review_first_social_ready": 1,
     "acceptance_baseline_run": 36661539347,
     "acceptance_baseline_rows_read": 144,
-    "intermediate_system_gate_run": 36661797307,
+    "intermediate_system_gate_run": 36664336725,
     "second_real_project_id": 5,
     "second_real_project_key": "CP-MSC1SUG2",
     "second_real_project_title": "35th promo",
@@ -1305,7 +1305,8 @@
     "discovery_run": 36663359796,
     "discovery_rows_read": 302,
     "adoption_run": 36663359796,
-    "adoption_rows_read": 278
+    "adoption_rows_read": 278,
+    "intermediate_build_specific_run": 36664336710
   },
   "historical_gate_compatibility": {
     "build301_successor_aware": true

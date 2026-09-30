@@ -164,5 +164,15 @@
       "production_live_resource_integrity_run": 36662256691,
       "remote_d1_queries": 0
     }
+  },
+  "candidate_control_alignment": {
+    "state": "SOURCE_RUNTIME_AND_SUCCESSOR_CONTROLS_ALIGNED_FINAL_EXACT_HEAD_REPROOF_REQUIRED",
+    "intermediate_head": "0ee43f51cc8577ed6dd50333812988a3240a05da",
+    "system_gate_run": 36664336725,
+    "current_application_quality_run": 36664336668,
+    "it_admin_runtime_proof_run": 36664336678,
+    "branch_hygiene_run": 36664336666,
+    "build_specific_proof_run": 36664336710,
+    "note": "These runs prove Build 308 release-control alignment and idempotent adoption after the second real story was adopted. Final closure requires fresh exact-head System, Quality, I.T., Hygiene, D1 Fan-Out and Build 308 proofs."
   }
 }
