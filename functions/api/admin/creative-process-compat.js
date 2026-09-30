@@ -130,13 +130,41 @@ async function makerStoryContext(db,id){
     JOIN content_projects cp ON cp.content_project_id=pub.content_project_id
     WHERE cp.source_type='creative_project' AND cp.source_id=CAST(?1 AS TEXT)
     ORDER BY pub.updated_at DESC,pub.content_publication_id DESC LIMIT 12`).bind(id).all().catch(()=>({results:[]}));
+  const traceability=await db.prepare(`SELECT
+    COALESCE((SELECT story_review_status FROM creative_project_maker_story_profiles WHERE creative_work_project_id=?1),'draft') profile_review_status,
+    COALESCE((SELECT public_story_candidate FROM creative_project_maker_story_profiles WHERE creative_work_project_id=?1),0) story_public_candidate,
+    COALESCE((SELECT updated_by_user_id FROM creative_project_maker_story_profiles WHERE creative_work_project_id=?1),0) profile_review_actor_user_id,
+    (SELECT COUNT(*) FROM creative_project_evidence_selections WHERE creative_work_project_id=?1 AND selected=1) selected_evidence_count,
+    (SELECT COUNT(*) FROM creative_project_evidence_selections s JOIN creative_work_events e ON e.creative_work_event_id=s.creative_work_event_id AND e.creative_work_project_id=s.creative_work_project_id WHERE s.creative_work_project_id=?1 AND s.selected=1 AND TRIM(COALESCE(e.media_url,''))<>'') selected_media_evidence_count,
+    (SELECT COUNT(*) FROM creative_work_events WHERE creative_work_project_id=?1 AND COALESCE(entry_status,'active')='active' AND COALESCE(is_public_candidate,0)=1) public_event_candidate_count,
+    (SELECT COUNT(*) FROM content_project_deliverables d JOIN content_projects cp ON cp.content_project_id=d.content_project_id WHERE cp.source_type='creative_project' AND cp.source_id=CAST(?1 AS TEXT) AND d.approval_status='approved') approved_copy_count,
+    (SELECT COUNT(*) FROM content_project_deliverables d JOIN content_projects cp ON cp.content_project_id=d.content_project_id WHERE cp.source_type='creative_project' AND cp.source_id=CAST(?1 AS TEXT) AND d.copy_locked=1) locked_copy_count,
+    (SELECT COUNT(*) FROM content_publications pub JOIN content_projects cp ON cp.content_project_id=pub.content_project_id WHERE cp.source_type='creative_project' AND cp.source_id=CAST(?1 AS TEXT) AND pub.destination='workshop_journal' AND pub.content_status='published') published_journal_count,
+    COALESCE((SELECT pub.approved_by_user_id FROM content_publications pub JOIN content_projects cp ON cp.content_project_id=pub.content_project_id WHERE cp.source_type='creative_project' AND cp.source_id=CAST(?1 AS TEXT) AND pub.destination='workshop_journal' AND pub.content_status='published' ORDER BY pub.published_at DESC,pub.content_publication_id DESC LIMIT 1),0) publication_approved_by_user_id,
+    COALESCE((SELECT pub.published_by_user_id FROM content_publications pub JOIN content_projects cp ON cp.content_project_id=pub.content_project_id WHERE cp.source_type='creative_project' AND cp.source_id=CAST(?1 AS TEXT) AND pub.destination='workshop_journal' AND pub.content_status='published' ORDER BY pub.published_at DESC,pub.content_publication_id DESC LIMIT 1),0) publication_published_by_user_id,
+    COALESCE((SELECT pub.approved_at FROM content_publications pub JOIN content_projects cp ON cp.content_project_id=pub.content_project_id WHERE cp.source_type='creative_project' AND cp.source_id=CAST(?1 AS TEXT) AND pub.destination='workshop_journal' AND pub.content_status='published' ORDER BY pub.published_at DESC,pub.content_publication_id DESC LIMIT 1),'') publication_approved_at,
+    COALESCE((SELECT pub.published_at FROM content_publications pub JOIN content_projects cp ON cp.content_project_id=pub.content_project_id WHERE cp.source_type='creative_project' AND cp.source_id=CAST(?1 AS TEXT) AND pub.destination='workshop_journal' AND pub.content_status='published' ORDER BY pub.published_at DESC,pub.content_publication_id DESC LIMIT 1),'') publication_published_at,
+    (SELECT COUNT(*) FROM creative_assets ca WHERE ca.creative_project_id=(SELECT MIN(cp.creative_project_id) FROM creative_projects cp WHERE cp.source_type='creative_work_project' AND cp.source_id=CAST(?1 AS TEXT) AND cp.project_status<>'archived') AND ca.source_safety_status='public_allowed') public_allowed_caip_assets,
+    (SELECT COUNT(*) FROM caip_media_upload_files f WHERE f.creative_project_id=(SELECT MIN(cp.creative_project_id) FROM creative_projects cp WHERE cp.source_type='creative_work_project' AND cp.source_id=CAST(?1 AS TEXT) AND cp.project_status<>'archived') AND f.consent_state='public_allowed' AND f.rights_status='public_allowed') public_allowed_private_uploads,
+    (SELECT COUNT(*) FROM social_post_queue sp JOIN content_publications pub ON sp.source_type='workshop_journal' AND sp.source_id=CAST(pub.content_publication_id AS TEXT) JOIN content_projects cp ON cp.content_project_id=pub.content_project_id WHERE cp.source_type='creative_project' AND cp.source_id=CAST(?1 AS TEXT) AND sp.approval_status='approved' AND sp.post_status='ready' AND COALESCE(sp.api_publish_mode,'')='review_first') review_first_social_ready_count,
+    (SELECT COUNT(*) FROM social_post_queue sp JOIN content_publications pub ON sp.source_type='workshop_journal' AND sp.source_id=CAST(pub.content_publication_id AS TEXT) JOIN content_projects cp ON cp.content_project_id=pub.content_project_id WHERE cp.source_type='creative_project' AND cp.source_id=CAST(?1 AS TEXT) AND (sp.post_status='posted' OR sp.published_at IS NOT NULL)) posted_social_count
+  `).bind(id).first().catch(()=>({}));
   return {
     profile:profile||null,
     workstations:selected.results||[],
     processes:processes.results||[],
     workstation_options:workstationOptions.results||[],
     related_knowledge:knowledge.results||[],
-    related_publications:publications.results||[]
+    related_publications:publications.results||[],
+    review_publication_traceability:{
+      source_build:307,
+      story_scope:'reviewed_factual_story_text_only',
+      media_rights_scope:'separate_never_inferred',
+      ...traceability,
+      public_media_rights_inferred:false,
+      automatic_publication:false,
+      provider_execution:false
+    }
   };
 }
 function makerStoryAdoptionReadiness({profile,evidence=[],outputContext={},publications=[]}={}){
@@ -206,7 +234,7 @@ async function detail(db,id){
   const makerStory=await makerStoryContext(db,id);
   const outputContext=await outputWorkflowContext(db,id);
   const makerStoryReadiness=makerStoryAdoptionReadiness({profile:makerStory.profile,evidence:evidence.results||[],outputContext,publications:makerStory.related_publications});
-  return {project,events:events.results||[],voided_events:voidedEvents.results||[],outputs:outputs.results||[],totals:totals||{},linked_products:linked.results||[],selected_evidence:evidence.results||[],material_reviews:materials.results||[],profitability:profitability||{},content_handoffs:handoffs.results||[],inventory_items:inventoryItems.results||[],caip_mirrors:caipMirrors.results||[],cost_templates:costTemplates.results||[],cost_allocations:allocations.results||[],inventory_reversals:reversals.results||[],knowledge_summaries:summaries.results||[],cost_context:costContext||{},maker_story:makerStory.profile,maker_story_workstations:makerStory.workstations,maker_story_processes:makerStory.processes,maker_story_workstation_options:makerStory.workstation_options,maker_story_related_knowledge:makerStory.related_knowledge,maker_story_related_publications:makerStory.related_publications,maker_story_adoption_readiness:makerStoryReadiness,output_media_context:outputContext};
+  return {project,events:events.results||[],voided_events:voidedEvents.results||[],outputs:outputs.results||[],totals:totals||{},linked_products:linked.results||[],selected_evidence:evidence.results||[],material_reviews:materials.results||[],profitability:profitability||{},content_handoffs:handoffs.results||[],inventory_items:inventoryItems.results||[],caip_mirrors:caipMirrors.results||[],cost_templates:costTemplates.results||[],cost_allocations:allocations.results||[],inventory_reversals:reversals.results||[],knowledge_summaries:summaries.results||[],cost_context:costContext||{},maker_story:makerStory.profile,maker_story_workstations:makerStory.workstations,maker_story_processes:makerStory.processes,maker_story_workstation_options:makerStory.workstation_options,maker_story_related_knowledge:makerStory.related_knowledge,maker_story_related_publications:makerStory.related_publications,maker_story_review_publication_traceability:makerStory.review_publication_traceability,maker_story_adoption_readiness:makerStoryReadiness,output_media_context:outputContext};
 }
 async function seedOutputs(db,id,projectType='maker_project'){
   const productless=['content_only','education','research','archive'].includes(String(projectType||'').toLowerCase());

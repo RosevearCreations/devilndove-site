@@ -2,7 +2,7 @@
   "release": 467,
   "build": 306,
   "title": "CAIP Content Adoption Outcomes Renewal & Roadmap Renewal",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "OUTCOMES_REMEASURED_ROADMAP_RENEWED",
   "authority": "release467-build306-caip-content-adoption-outcomes-renewal-roadmap-renewal",
   "predecessor": {
@@ -267,5 +267,33 @@
     "it_admin_runtime_proof_run": 36660510510,
     "branch_hygiene_run": 36660510571,
     "note": "These runs prove Build 306 control-plane alignment after successor-map and roadmap convergence. Final closure still requires fresh exact-head System, Quality, I.T., Hygiene, D1 Fan-Out and Build 306 measurement proofs."
-  }
+  },
+  "final_closure": {
+    "dev_sha": "a0d04fb1fcbf22a714031c65e256f885b725d1c5",
+    "tree_sha": "0a80465e014d949ba750092b0154d78103d0760a",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD306_GREEN",
+    "proofs": {
+      "system_gate_run": 36660652766,
+      "current_application_quality_run": 36660652777,
+      "it_admin_runtime_proof_run": 36660652789,
+      "branch_hygiene_run": 36660652786
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36660652925,
+      "build_specific_proof_run": 36660652837
+    },
+    "ingested_by_build": 307
+  },
+  "production_checkpoint": {
+    "main_sha": "1eb9df6dd6db02ad61fd4a32852e7f37a46c1ecd",
+    "tree_sha": "0a80465e014d949ba750092b0154d78103d0760a",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36660821200,
+    "production_live_resource_integrity_run": 36660903854,
+    "remote_d1_queries": 0,
+    "ingested_by_build": 307
+  },
+  "closure_ingested_by_build": 307
 }

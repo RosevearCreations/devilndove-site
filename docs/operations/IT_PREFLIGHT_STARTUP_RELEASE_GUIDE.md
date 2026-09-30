@@ -1,17 +1,18 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 306 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 307 candidate
 
-Build 306 — CAIP Content Adoption Outcomes Renewal & Roadmap Renewal — is projected over exact Build 305 Development/Production GREEN.
+Build 307 — Maker Story Review-State & Publication Traceability — is projected over exact Build 306 Development/Production GREEN.
 
-- Last fully verified Development: `605ca2409c9aa4f5a1b9882ebcf498e19c4ba806`
-- Verified tree: `8490cb65bbde1ac3e9698da8af13605f57419a9d`
-- Development proofs: System `36658299831`, Quality `36658299756`, I.T. `36658299810`, Hygiene `36658299856`
-- Supplemental Build 305 proofs: D1 Fan-Out `36658299742`, Build 305 `36658299747`
-- Current Production main: `436eb9fac8ee3d9ee1a25b8fdad9a3820ceaa34e`
-- Production proofs: Pages `36658476609`, Live Resources `36658546053`
-- Build 306 remeasurement: 1 Maker Story profile / 5 active projects, 3 selected evidence rows, 2 approved+locked drafts, 1 published Journal story, 1 approved+ready review-first social row, 0 posted social rows.
-- Discovery remains evidence-limited: 0 Under the Sea story views and 0 Search Console rows/clicks/impressions in the measured window.
-- Build 306 Development measurement: 1,067 rows read; Production D1 contact: **ZERO**.
-- Next after Build 306 Production GREEN: Build 307 — Maker Story Review-State & Publication Traceability.
+- Last fully verified Development: `a0d04fb1fcbf22a714031c65e256f885b725d1c5`
+- Verified tree: `0a80465e014d949ba750092b0154d78103d0760a`
+- Development proofs: System `36660652766`, Quality `36660652777`, I.T. `36660652789`, Hygiene `36660652786`
+- Supplemental Build 306 proofs: D1 Fan-Out `36660652925`, Build 306 `36660652837`
+- Current Production main: `1eb9df6dd6db02ad61fd4a32852e7f37a46c1ecd`
+- Production proofs: Pages `36660821200`, Live Resources `36660903854`
+- Build 307 Development acceptance: Under the Sea story review state is reconciled to **reviewed**, story-level public candidate is **true**, and the recorded profile/publication actor is user #1.
+- Media/public-use rights remain separate: 0 public event candidates, 0 selected media evidence, 0 public-allowed CAIP assets/uploads, 0 website-gallery rows.
+- Social remains approved/ready/review-first with **0 provider posts**.
+- Build 307 acceptance measured **144 rows read**; Production D1 contact: **ZERO**.
+- Next after Build 307 Production GREEN: Build 308 — Second Real Maker Story Adoption & Evidence Selection.
 
 ## Current release baseline
 
