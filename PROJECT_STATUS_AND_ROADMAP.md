@@ -14,7 +14,7 @@ Build 312 is fully verified and promoted:
 
 Build 313 reviews the existing **35th promo** Maker Story against the actual recorded evidence. The record remains planning-only: one selected planning source, two approved/locked text drafts, no execution event, no selected execution evidence, an unknown outcome, no completed-result proof and no execution-derived lesson.
 
-The explicit decision is therefore **remain `needs_review`, public candidate = 0**. Build 313 records the decision reason, reviewer and timestamp while leaving result/lesson claims untouched. Approved draft copy does not grant Maker Story approval, media/public-use rights, publication authority or provider authority.
+The Development acceptance is GREEN. The explicit decision is **remain `needs_review`, public candidate = 0**: 1 planning event, 0 execution events, 1 selected planning record, 0 selected execution evidence, 2 approved/locked drafts, and 0 publication/social rows. Reviewer/timestamp/reason traceability is recorded while result/lesson claims remain untouched. Approved draft copy does not grant Maker Story approval, media/public-use rights, publication authority or provider authority.
 
 The queue **has not run out**.
 
