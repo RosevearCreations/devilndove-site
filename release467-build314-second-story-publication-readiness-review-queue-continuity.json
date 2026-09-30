@@ -93,5 +93,23 @@
     "duplicate_content_source_identities": 0,
     "foreign_key_violations": 0
   },
-  "roadmap": "docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md"
+  "roadmap": "docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md",
+  "starting_point": {
+    "development": {
+      "sha": "6d62f2b7f8876715d3dc6a9afa2da9b1999979a3",
+      "tree": "323d985b6385ee103552a51723b087187010ab53",
+      "system_gate_run": 36716969702,
+      "quality_run": 36716969803,
+      "it_admin_runtime_run": 36716969886,
+      "repository_hygiene_run": 36716969713,
+      "d1_ci_fanout_guard_run": 36716969773,
+      "build_specific_proof_run": 36716969717
+    },
+    "production": {
+      "main_sha": "14375bce8e1749b309e60ef3baf1804ee01bdc47",
+      "tree": "323d985b6385ee103552a51723b087187010ab53",
+      "production_pages_deploy_run": 36717227244,
+      "production_live_resource_integrity_run": 36717338240
+    }
+  }
 }
