@@ -2,7 +2,7 @@
 -- Read-only. No copy refresh, approval, publication, provider action, or Production D1 contact.
 
 SELECT
-  cp.content_project_id,cp.source_type,cp.source_id,cp.project_key,cp.project_title,cp.project_status,
+  cp.content_project_id,cp.source_type,cp.source_id,cp.content_project_key,cp.project_title,cp.project_status,
   COALESCE(cp.product_id,0) product_id,
   COALESCE(h.creative_project_content_handoff_id,0) handoff_id,
   COALESCE(h.handoff_status,'') handoff_status,
