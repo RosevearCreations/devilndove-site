@@ -7,19 +7,19 @@ import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 const RELEASE=467;
 const BUILD=322;
 const TITLE='Buyer Discovery Attribution & SEO Review Evidence Continuity';
-const AUTHORITY='release467-build321-search-console-real-export-intake-continuity-ii';
-const EVIDENCE_ID='r467-b321-candidate-36765313336-36765763021';
+const AUTHORITY='release467-build322-buyer-discovery-attribution-seo-review-evidence-continuity';
+const EVIDENCE_ID='r467-b322-candidate-36765313336-36765763021';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:320,title:'Search Console Real Export Intake Continuity II',state:'DEVELOPMENT_GREEN',
-  dev_sha:'215b9277f62d1359fda07d3d72ba3cf6ee47a353',tree_sha:'7df16d3a91159cefaf66435854fdffb4914ad921',system_gate_run:36765313336,current_application_quality_run:36765313431,it_admin_runtime_proof_run:36765313437,branch_hygiene_run:36765313607,proof_state:'EXACT_BRANCH_HEAD_BUILD320_GREEN',exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
+  release:467,build:321,title:'Search Console Real Export Intake Continuity II',state:'DEVELOPMENT_GREEN',
+  dev_sha:'215b9277f62d1359fda07d3d72ba3cf6ee47a353',tree_sha:'7df16d3a91159cefaf66435854fdffb4914ad921',system_gate_run:36765313336,current_application_quality_run:36765313431,it_admin_runtime_proof_run:36765313437,branch_hygiene_run:36765313607,proof_state:'EXACT_BRANCH_HEAD_BUILD321_GREEN',exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:320,title:'Search Console Real Export Intake Continuity II',state:'DEVELOPMENT_GREEN',
-  dev_sha:'215b9277f62d1359fda07d3d72ba3cf6ee47a353',tree_sha:'7df16d3a91159cefaf66435854fdffb4914ad921',accepted_sha:'215b9277f62d1359fda07d3d72ba3cf6ee47a353',accepted_tree_sha:'7df16d3a91159cefaf66435854fdffb4914ad921',system_gate_run:36765313336,current_application_quality_run:36765313431,it_admin_runtime_proof_run:36765313437,branch_hygiene_run:36765313607,proof_state:'EXACT_BRANCH_HEAD_BUILD320_GREEN'
+  release:467,build:321,title:'Search Console Real Export Intake Continuity II',state:'DEVELOPMENT_GREEN',
+  dev_sha:'215b9277f62d1359fda07d3d72ba3cf6ee47a353',tree_sha:'7df16d3a91159cefaf66435854fdffb4914ad921',accepted_sha:'215b9277f62d1359fda07d3d72ba3cf6ee47a353',accepted_tree_sha:'7df16d3a91159cefaf66435854fdffb4914ad921',system_gate_run:36765313336,current_application_quality_run:36765313431,it_admin_runtime_proof_run:36765313437,branch_hygiene_run:36765313607,proof_state:'EXACT_BRANCH_HEAD_BUILD321_GREEN'
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:320,title:'Search Console Real Export Intake Continuity II',state:'PRODUCTION_GREEN',
+  release:467,build:321,title:'Search Console Real Export Intake Continuity II',state:'PRODUCTION_GREEN',
   main_sha:'e761df76426a52e7bc3553189988058037979ad2',tree_sha:'7df16d3a91159cefaf66435854fdffb4914ad921',production_pages_deploy_run:36765763021,production_live_resource_integrity_run:36765982082,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36765313864,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
