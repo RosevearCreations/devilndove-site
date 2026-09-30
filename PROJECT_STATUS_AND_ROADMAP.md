@@ -2,29 +2,29 @@
 
 ## Current checkpoint
 
-**Build 308 — Second Real Maker Story Adoption & Evidence Selection** is at final Development candidate over exact Build 307 Production GREEN.
+**Build 309 — Second Story Content Studio Review & Approval** is at final Development candidate over exact Build 308 Production GREEN.
 
-Build 308 selected **35th promo** as the second real Maker Story from existing facts. The remaining projects initially had no timeline-ready second story. Grey Hair was explicitly checked and remains private/not ready for this adoption path: **45 active assets, 1 approved source-evidence range, 0 confirmed capture groups, 0 reviewed story plans, 0 public-allowed assets/uploads**.
+The real **35th promo** Content Studio review is accepted in Development:
 
-The 35th promo path remains deliberately review-first:
-
-- Maker Story profiles: **2** total.
-- Selected evidence rows: **4** total.
-- 35th promo Maker Story: **needs_review**, outcome **unknown**, public-story candidate **0**.
-- Exactly **1** internal text-only planning evidence row was normalized from the existing project summary/objective/story angle.
-- That evidence has **no media URL** and public-event candidate **0**.
-- Project 5 CAIP assets/private uploads/publications/social rows: **0 / 0 / 0 / 0**.
-- CAIP workspaces / Content Studio packages remain **5 / 5** with duplicate identities **0**.
-- Foreign-key violations: **0**.
-- Latest idempotent discovery: **321 rows read**.
-- Latest idempotent adoption acceptance: **270 rows read**.
+- Existing Content Studio package: **23**; no duplicate/refresh.
+- Factual-template drafts: **19**.
+- Corrected text-only drafts approved + locked: **2** — `seo-assets` and `blog-article`.
+- Unsupported/media/result-dependent drafts: **17 changes_requested**.
+- Blog title: **Project brief: 35th promo**.
+- Handoff evidence count: **1**, aligned to the existing selected internal text-only planning evidence.
+- Maker Story remains **needs_review**, outcome **unknown**, public-story candidate **0**.
+- Published deliverables/publications/social rows: **0 / 0 / 0**.
+- CAIP assets/private uploads for project 5: **0 / 0**.
+- Duplicate Content identities / FK violations: **0 / 0**.
+- Discovery: **57 Development D1 rows**.
+- Review acceptance: **363 Development D1 rows**.
 - Production D1 contact: **0**.
 
-No finished result, lesson, media permission, Content Studio approval, publication or provider action was invented or inferred.
+Approval is copy-only. No execution/result/lesson facts, media/public-use rights, public release, publication, or provider execution were inferred.
 
 The queue **has not run out**.
 
-**Next after Build 308 Production GREEN: Build 309 — Second Story Content Studio Review & Approval.**
+**Next after Build 309 Production GREEN: Build 310 — Review-First Publication & Distribution Continuity.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_CONTENT_ADOPTION_COVERAGE_DISCOVERY_BUILDS_307_312.md`.
 

@@ -1,0 +1,151 @@
+{
+  "release": 467,
+  "build": 309,
+  "title": "Second Story Content Studio Review & Approval",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "SECOND_STORY_CONTENT_REVIEW_ACCEPTED_CANDIDATE",
+  "authority": "release467-build309-second-story-content-studio-review-approval",
+  "predecessor": {
+    "build": 308,
+    "title": "Second Real Maker Story Adoption & Evidence Selection",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "60b6a631a615c1653ecfb07b4cbf8bc117a496f8",
+    "development_tree_sha": "d78e7d76fb06395ee182271044314808454f6110",
+    "development_proofs": {
+      "system_gate_run": 36665213124,
+      "current_application_quality_run": 36665213036,
+      "it_admin_runtime_proof_run": 36665213119,
+      "branch_hygiene_run": 36665213073,
+      "d1_ci_fanout_guard_run": 36665213057,
+      "build_specific_proof_run": 36665213093
+    },
+    "production_main_sha": "498ddd776ea3c52b243a5ef8800fc33570d159a4",
+    "production_tree_sha": "d78e7d76fb06395ee182271044314808454f6110",
+    "production_pages_deploy_run": 36665406681,
+    "production_live_resource_integrity_run": 36665469007,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "starting_point": {
+    "development": {
+      "sha": "60b6a631a615c1653ecfb07b4cbf8bc117a496f8",
+      "tree": "d78e7d76fb06395ee182271044314808454f6110",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 36665213124,
+      "quality_run": 36665213036,
+      "it_admin_runtime_run": 36665213119,
+      "repository_hygiene_run": 36665213073,
+      "d1_ci_fanout_guard_run": 36665213057,
+      "build_specific_proof_run": 36665213093
+    },
+    "production": {
+      "main_sha": "498ddd776ea3c52b243a5ef8800fc33570d159a4",
+      "tree": "d78e7d76fb06395ee182271044314808454f6110",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 36665406681,
+      "production_live_resource_integrity_run": 36665469007,
+      "remote_d1_queries": 0
+    }
+  },
+  "discovery_checkpoint": {
+    "source_sha": "b2caa587590ae77d51ec1b52d4d3393ce40cecbf",
+    "workflow_run": 36666067131,
+    "content_project_id": 23,
+    "content_project_key": "creative-project-5-35th-promo",
+    "deliverable_count": 19,
+    "factual_template_deliverables": 19,
+    "selected_evidence_rows": 1,
+    "story_review_status": "needs_review",
+    "public_story_candidate": 0,
+    "caip_assets": 0,
+    "private_upload_files": 0,
+    "publications": 0,
+    "social_rows": 0,
+    "rows_read_by_statement": [
+      6,
+      40,
+      4,
+      7
+    ],
+    "aggregate_rows_read": 57,
+    "production_d1_contact": false
+  },
+  "contract": {
+    "second_real_project_id": 5,
+    "second_real_project_title": "35th promo",
+    "content_project_id": 23,
+    "approved_copy_keys": [
+      "seo-assets",
+      "blog-article"
+    ],
+    "approved_copy_count": 2,
+    "changes_requested_count": 17,
+    "copy_locked_count": 2,
+    "maker_story_state_remains": "needs_review",
+    "public_story_candidate_remains": 0,
+    "handoff_evidence_count": 1,
+    "copy_refresh": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "next_build": 310,
+    "next_build_title": "Review-First Publication & Distribution Continuity",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "private_media_exposure": false,
+    "media_rights_inference": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "acceptance_baseline": {
+    "source_sha": "348bfa55199ad3f303f34fc3d6d3e4b5741a5834",
+    "workflow_run": 36666535254,
+    "discovery_rows_read": 57,
+    "adoption_rows_read": 363,
+    "adoption_rows_read_by_statement": [
+      69,
+      9,
+      55,
+      76,
+      39,
+      115
+    ],
+    "rows_read_ceiling": 20000,
+    "content_project_id": 23,
+    "handoff_id": 3,
+    "handoff_evidence_count": 1,
+    "approved_copy_keys": [
+      "seo-assets",
+      "blog-article"
+    ],
+    "approved_deliverables": 2,
+    "changes_requested_deliverables": 17,
+    "locked_deliverables": 2,
+    "published_deliverables": 0,
+    "maker_story_state": "needs_review",
+    "maker_story_public_candidate": 0,
+    "maker_story_outcome_status": "unknown",
+    "caip_assets": 0,
+    "private_upload_files": 0,
+    "publications": 0,
+    "social_rows": 0,
+    "duplicate_content_source_identities": 0,
+    "foreign_key_violations": 0,
+    "production_d1_contact": false
+  },
+  "candidate_control_alignment": {
+    "state": "SOURCE_RUNTIME_REVIEW_AND_SUCCESSOR_CONTROLS_ALIGNED_FINAL_EXACT_HEAD_REPROOF_REQUIRED",
+    "intermediate_head": "361dff69125bfbe3ef5da8e6fced3e4730ed7be8",
+    "intermediate_tree": "ad6ce0d0e0680c1aaf5d450983f4190ea9d3d25b",
+    "system_gate_run": 36667267975,
+    "current_application_quality_run": 36667267787,
+    "it_admin_runtime_proof_run": 36667267677,
+    "branch_hygiene_run": 36667267696,
+    "initial_build_specific_acceptance_run": 36666535254,
+    "note": "Build 309 review acceptance and current/restart/historical successor controls are GREEN. Final closure requires fresh exact-head System, Quality, I.T., Hygiene, D1 Fan-Out and idempotent Build 309 review proofs."
+  }
+}
