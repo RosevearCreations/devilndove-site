@@ -195,7 +195,7 @@
   "next_build": 304,
   "next_build_state": "QUEUED_AFTER_BUILD303_PRODUCTION_GREEN",
   "next_build_title": "Workshop Journal & Social Review-First Publication Acceptance",
-  "promotion_state": "BUILD303_FINAL_CANDIDATE_AWAITING_EXACT_HEAD_PROOFS",
+  "promotion_state": "BUILD303_FINAL_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "BUILD303_ACTIVE_BUILDS_304_306_QUEUED",
   "measured_closure": {
     "source_build": 232,
