@@ -8,10 +8,11 @@ Build 309 — Second Story Content Studio Review & Approval — is projected ove
 - Supplemental Build 308 proofs: D1 Fan-Out `36665213057`, Build 308 `36665213093`
 - Current Production main: `498ddd776ea3c52b243a5ef8800fc33570d159a4`
 - Production proofs: Pages `36665406681`, Live Resources `36665469007`
-- Build 309 Development review: 35th promo package 23 has 19 factual drafts; 2 corrected text-only drafts are approved+locked and 17 are changes_requested.
-- The Maker Story remains needs_review / outcome unknown / public-story candidate false.
-- No CAIP/private media, publication, provider execution, or Production D1 contact is authorized.
-- Initial Build 309 review acceptance used 363 rows read.
+- Build 309 Development review acceptance: **2** corrected text-only drafts approved + locked (`seo-assets`, `blog-article`); **17** unsupported/media-dependent drafts set to `changes_requested`.
+- The 35th promo Maker Story remains **needs_review**, outcome **unknown**, public-story candidate **false**.
+- Existing Content Studio handoff evidence count is aligned to the already-selected text evidence row: **1**.
+- Media/publication/provider boundaries remain closed: CAIP assets **0**, private uploads **0**, publications **0**, social rows **0**.
+- Build 309 discovery used **57 rows read** and review acceptance used **363 rows read**; Production D1 contact: **ZERO**.
 - Next after Build 309 Production GREEN: Build 310 — Review-First Publication & Distribution Continuity.
 
 ## Current release baseline

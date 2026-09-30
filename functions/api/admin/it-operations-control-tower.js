@@ -8,7 +8,7 @@ const RELEASE=467;
 const BUILD=309;
 const TITLE='Second Story Content Studio Review & Approval';
 const AUTHORITY='release467-build309-second-story-content-studio-review-approval';
-const EVIDENCE_ID='r467-b304-green-36665213124-36665406681';
+const EVIDENCE_ID='r467-b309-candidate-36665213124-36665406681';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
   release:467,build:308,title:'Second Real Maker Story Adoption & Evidence Selection',state:'DEVELOPMENT_GREEN',
