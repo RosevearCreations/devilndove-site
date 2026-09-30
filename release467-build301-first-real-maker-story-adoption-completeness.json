@@ -2,8 +2,8 @@
   "release": 467,
   "build": 301,
   "title": "First Real Maker Story Adoption & Completeness",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "REAL_MAKER_STORY_ADOPTION_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
+  "phase": "REAL_MAKER_STORY_ADOPTED_COMPLETE",
   "authority": "release467-build301-first-real-maker-story-adoption-completeness",
   "predecessor": {
     "build": 300,
@@ -118,5 +118,33 @@
       "production_live_resource_integrity_run": 36646198769,
       "remote_d1_queries": 0
     }
-  }
+  },
+  "final_closure": {
+    "dev_sha": "e180724a52210fdf56c4d53b5221be2f121c36de",
+    "tree_sha": "d11b3492ef6d389270d9acc58d94e4740591bb38",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD301_GREEN",
+    "proofs": {
+      "system_gate_run": 36648100957,
+      "current_application_quality_run": 36648101025,
+      "it_admin_runtime_proof_run": 36648101016,
+      "branch_hygiene_run": 36648100985
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36648101024,
+      "build_specific_proof_run": 36648100984
+    },
+    "ingested_by_build": 302
+  },
+  "production_checkpoint": {
+    "main_sha": "3eec733afd9b8c585efaab1c8a89fa244d9f65d8",
+    "tree_sha": "d11b3492ef6d389270d9acc58d94e4740591bb38",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36648294020,
+    "production_live_resource_integrity_run": 36648362724,
+    "remote_d1_queries": 0,
+    "ingested_by_build": 302
+  },
+  "closure_ingested_by_build": 302
 }

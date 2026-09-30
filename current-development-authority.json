@@ -1,31 +1,31 @@
 {
   "release": 467,
-  "build": 301,
-  "title": "First Real Maker Story Adoption & Completeness",
+  "build": 302,
+  "title": "CAIP Evidence Selection & Public-Safety Review Adoption",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 300,
-      "title": "CAIP Maker Content Outcomes Renewal & Automation Refinement",
-      "authority": "release467-build300-caip-maker-content-outcomes-renewal-automation-refinement.json",
-      "dev_sha": "6361b02f467fa4b9bf54dd8638cccefc57bd817e",
-      "tree_sha": "6316130ee40beb8540e88da51065f3a75d1c527a",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD300_GREEN",
+      "build": 301,
+      "title": "First Real Maker Story Adoption & Completeness",
+      "authority": "release467-build301-first-real-maker-story-adoption-completeness.json",
+      "dev_sha": "e180724a52210fdf56c4d53b5221be2f121c36de",
+      "tree_sha": "d11b3492ef6d389270d9acc58d94e4740591bb38",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD301_GREEN",
       "proofs": {
-        "system_gate_run": 36645926155,
-        "current_application_quality_run": 36645926199,
-        "it_admin_runtime_proof_run": 36645926079,
-        "branch_hygiene_run": 36645926110
+        "system_gate_run": 36648100957,
+        "current_application_quality_run": 36648101025,
+        "it_admin_runtime_proof_run": 36648101016,
+        "branch_hygiene_run": 36648100985
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 301,
-      "title": "First Real Maker Story Adoption & Completeness",
-      "authority": "release467-build301-first-real-maker-story-adoption-completeness.json",
+      "build": 302,
+      "title": "CAIP Evidence Selection & Public-Safety Review Adoption",
+      "authority": "release467-build302-caip-evidence-selection-public-safety-review-adoption.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -36,18 +36,19 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 300,
-    "title": "CAIP Maker Content Outcomes Renewal & Automation Refinement",
-    "authority": "release467-build300-caip-maker-content-outcomes-renewal-automation-refinement.json",
-    "main_sha": "e569d5fce0ff5ab08a3d1dc6be1051211ed15ac2",
-    "tree_sha": "6316130ee40beb8540e88da51065f3a75d1c527a",
+    "build": 301,
+    "title": "First Real Maker Story Adoption & Completeness",
+    "authority": "release467-build301-first-real-maker-story-adoption-completeness.json",
+    "main_sha": "3eec733afd9b8c585efaab1c8a89fa244d9f65d8",
+    "tree_sha": "d11b3492ef6d389270d9acc58d94e4740591bb38",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36646103793,
-    "production_live_resource_integrity_run": 36646198769,
+    "production_pages_deploy_run": 36648294020,
+    "production_live_resource_integrity_run": 36648362724,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build302-caip-evidence-selection-public-safety-review-adoption.json",
     "release467-build301-first-real-maker-story-adoption-completeness.json",
     "release467-build300-caip-maker-content-outcomes-renewal-automation-refinement.json",
     "release467-build299-d1-query-efficiency-canonical-runtime-repository-cleanup.json",
@@ -190,11 +191,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md",
-  "next_build": 302,
-  "next_build_state": "QUEUED_AFTER_BUILD301_PRODUCTION_GREEN",
-  "next_build_title": "CAIP Evidence Selection & Public-Safety Review Adoption",
-  "promotion_state": "BUILD301_REAL_MAKER_STORY_ADOPTION_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD301_ACTIVE_BUILDS_302_306_QUEUED",
+  "next_build": 303,
+  "next_build_state": "QUEUED_AFTER_BUILD302_PRODUCTION_GREEN",
+  "next_build_title": "Content Studio Draft Review & Approval Adoption",
+  "promotion_state": "BUILD302_EVIDENCE_PUBLIC_SAFETY_ADOPTION_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD302_ACTIVE_BUILDS_303_306_QUEUED",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -225,13 +226,13 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "6361b02f467fa4b9bf54dd8638cccefc57bd817e",
-  "accepted_dev_tree_sha": "6316130ee40beb8540e88da51065f3a75d1c527a",
+  "accepted_dev_sha": "e180724a52210fdf56c4d53b5221be2f121c36de",
+  "accepted_dev_tree_sha": "d11b3492ef6d389270d9acc58d94e4740591bb38",
   "acceptance": {
-    "system_gate_run": 36645926155,
-    "current_application_quality_run": 36645926199,
-    "it_admin_runtime_proof_run": 36645926079,
-    "branch_hygiene_run": 36645926110
+    "system_gate_run": 36648100957,
+    "current_application_quality_run": 36648101025,
+    "it_admin_runtime_proof_run": 36648101016,
+    "branch_hygiene_run": 36648100985
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -1223,17 +1224,30 @@
     "future_queue_exhausted": false
   },
   "caip_content_adoption": {
-    "source_build": 301,
-    "phase": "REAL_MAKER_STORY_ADOPTION_CANDIDATE",
+    "source_build": 302,
+    "phase": "EVIDENCE_PUBLIC_SAFETY_ADOPTION_CANDIDATE",
     "selected_real_project_id": 7,
     "selected_real_project_key": "CP-MSXCYQB6",
     "selected_real_project_title": "Under the Sea",
-    "story_review_status": "needs_review",
+    "maker_story_review_status": "needs_review",
     "public_story_candidate": 0,
-    "automatic_story_creation": false,
+    "selected_event_ids": [
+      1,
+      2,
+      3
+    ],
+    "selected_evidence_target_count": 3,
+    "caip_asset_count": 0,
+    "private_upload_file_count": 0,
+    "public_rights_inference": false,
+    "caip_media_state_change": false,
     "content_studio_refresh": false,
+    "approval": false,
     "publication": false,
-    "next_build": 302,
+    "next_build": 303,
     "future_queue_exhausted": false
+  },
+  "historical_gate_compatibility": {
+    "build301_successor_aware": true
   }
 }

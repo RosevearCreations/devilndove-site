@@ -12,7 +12,7 @@ sql=t('scripts/release467_build301_real_project_discovery.sql')
 adopt=t('scripts/release467_build301_adopt_real_maker_story.sql')
 wf=t('.github/workflows/release467-build301-first-real-maker-story-adoption-completeness.yml')
 q(a.get('build')==301 and a.get('title')=='First Real Maker Story Adoption & Completeness','Build 301 identity mismatch')
-q(a.get('phase')=='REAL_MAKER_STORY_ADOPTION_CANDIDATE','Build 301 phase mismatch')
+q(a.get('phase') in ('REAL_MAKER_STORY_ADOPTION_CANDIDATE','REAL_MAKER_STORY_ADOPTED_COMPLETE'),'Build 301 phase mismatch')
 for token in ('creative_work_projects','creative_project_maker_story_profiles','creative_work_events','creative_projects','content_projects','creative_project_evidence_selections'):
     q(token in sql,'Build 301 discovery SQL missing '+token)
 upper=' '+re.sub(r'--.*','',sql).upper()+' '
@@ -26,7 +26,10 @@ for forbidden in ('UPDATE products','INSERT INTO content_publications','INSERT I
     q(forbidden.lower() not in adopt.lower(),'Build 301 adoption crossed safety boundary: '+forbidden)
 q("real-maker-story-adoption" in wf and "EXPECTED_STATEMENTS: 5" in wf,'Build 301 adoption runtime proof missing')
 q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md','Build 301 roadmap pointer mismatch')
-q(int(p.get('next_build') or 0)==302,'Build 302 successor pointer missing')
+if int(p.get('build') or 0)==301:
+    q(int(p.get('next_build') or 0)==302,'Build 302 successor pointer missing')
+else:
+    q(int(p.get('build') or 0)>=302,'Build 301 successor must retain Build 302 or newer current authority')
 print('RELEASE 467 BUILD 301 FIRST REAL MAKER STORY ADOPTION & COMPLETENESS')
 if F:
     print('FAIL');[print('-',x) for x in F];sys.exit(1)

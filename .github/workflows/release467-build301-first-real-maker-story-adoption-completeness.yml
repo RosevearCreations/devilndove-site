@@ -1,17 +1,5 @@
 name: Release 467 Build 301 First Real Maker Story Adoption Completeness
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/admin/creative-process-compat.js'
-      - 'public/js/admin-creative-process.js'
-      - 'admin/creative-process/index.html'
-      - 'scripts/release467_build301_*'
-      - 'scripts/release467_build300_regression.py'
-      - 'release467-build301-*.json'
-      - 'current-development-authority.json'
-      - 'docs/operations/RELEASE_467_BUILD_301_*'
-      - '.github/workflows/release467-build301-first-real-maker-story-adoption-completeness.yml'
   workflow_dispatch:
 permissions:
   contents: read

@@ -1,0 +1,137 @@
+{
+  "release": 467,
+  "build": 302,
+  "title": "CAIP Evidence Selection & Public-Safety Review Adoption",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "EVIDENCE_PUBLIC_SAFETY_ADOPTION_CANDIDATE",
+  "authority": "release467-build302-caip-evidence-selection-public-safety-review-adoption",
+  "predecessor": {
+    "build": 301,
+    "title": "First Real Maker Story Adoption & Completeness",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "e180724a52210fdf56c4d53b5221be2f121c36de",
+    "development_tree_sha": "d11b3492ef6d389270d9acc58d94e4740591bb38",
+    "development_proofs": {
+      "system_gate_run": 36648100957,
+      "current_application_quality_run": 36648101025,
+      "it_admin_runtime_proof_run": 36648101016,
+      "branch_hygiene_run": 36648100985,
+      "d1_ci_fanout_guard_run": 36648101024,
+      "build_specific_proof_run": 36648100984
+    },
+    "production_main_sha": "3eec733afd9b8c585efaab1c8a89fa244d9f65d8",
+    "production_tree_sha": "d11b3492ef6d389270d9acc58d94e4740591bb38",
+    "production_pages_deploy_run": 36648294020,
+    "production_live_resource_integrity_run": 36648362724,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "starting_point": {
+    "development": {
+      "sha": "e180724a52210fdf56c4d53b5221be2f121c36de",
+      "tree": "d11b3492ef6d389270d9acc58d94e4740591bb38",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 36648100957,
+      "quality_run": 36648101025,
+      "it_admin_runtime_run": 36648101016,
+      "repository_hygiene_run": 36648100985,
+      "build_specific_proof_run": 36648100984,
+      "d1_ci_fanout_guard_run": 36648101024
+    },
+    "production": {
+      "main_sha": "3eec733afd9b8c585efaab1c8a89fa244d9f65d8",
+      "tree": "d11b3492ef6d389270d9acc58d94e4740591bb38",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 36648294020,
+      "production_live_resource_integrity_run": 36648362724,
+      "remote_d1_queries": 0
+    }
+  },
+  "target": {
+    "creative_work_project_id": 7,
+    "project_key": "CP-MSXCYQB6",
+    "project_title": "Under the Sea",
+    "maker_story_kind": "maker_story",
+    "maker_story_review_status": "needs_review",
+    "public_story_candidate": 0
+  },
+  "scope": {
+    "factual_timeline_evidence_selection": true,
+    "caip_private_media_rights_privacy_review": true,
+    "public_use_candidacy_separate_from_evidence_selection": true,
+    "infer_public_allowance": false,
+    "content_studio_refresh": false,
+    "publication": false,
+    "duplicate_identity_tolerance": 0
+  },
+  "safety": {
+    "schema_change": false,
+    "production_d1_contact": false,
+    "r2_mutation": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "content_studio_mutation": false,
+    "provider_execution": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "private_media_exposure": false,
+    "public_rights_inference": false
+  },
+  "contract": {
+    "next_build": 303,
+    "next_build_title": "Content Studio Draft Review & Approval Adoption",
+    "future_queue_exhausted": false
+  },
+  "discovery_checkpoint": {
+    "source_sha": "0ecd0a1090a3e376490657267a8e549dcbfdf52d",
+    "workflow_run": 36650729566,
+    "job_id": 109683987698,
+    "aggregate_rows_read": 44,
+    "mutation": false,
+    "production_d1_contact": false
+  },
+  "discovery_findings": {
+    "active_timeline_events": 3,
+    "event_ids": [
+      1,
+      2,
+      3
+    ],
+    "all_event_public_candidates": 0,
+    "all_event_media_urls_empty": true,
+    "existing_evidence_rows": 3,
+    "selected_evidence_rows": 0,
+    "caip_workspace_count": 1,
+    "caip_asset_count": 0,
+    "private_upload_file_count": 0,
+    "public_allowed_caip_assets": 0,
+    "fully_public_allowed_uploads": 0,
+    "publications": 0,
+    "approved_deliverables": 0,
+    "social_rows": 0
+  },
+  "adoption_contract": {
+    "selected_event_ids": [
+      1,
+      2,
+      3
+    ],
+    "evidence_roles": {
+      "1": "process_evidence",
+      "2": "material_evidence",
+      "3": "material_evidence"
+    },
+    "selected_evidence_target_count": 3,
+    "text_only": true,
+    "event_public_candidate_target": 0,
+    "maker_story_public_candidate_target": 0,
+    "caip_asset_target_count": 0,
+    "private_upload_target_count": 0,
+    "public_rights_inference": false,
+    "caip_media_state_change": false,
+    "content_studio_refresh": false,
+    "approval": false,
+    "publication": false,
+    "idempotent": true
+  }
+}
