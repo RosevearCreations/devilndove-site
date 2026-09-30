@@ -8,13 +8,14 @@ Build 317 — Third Project Maker Story Readiness & Evidence Selection — is pr
 - Supplemental Build 316 proofs: D1 Fan-Out `36726555683`, Build 316 `36726555652`
 - Current Production main: `ed9a89f070ecd05fcd3024df9b2ba4ddcbb7b33e`
 - Production proofs: Pages `36726827868`, Live Resources `36726943717`
-- Build 317 evaluates only active projects that do not already have a Maker Story profile.
-- Exactly one CAIP workspace and one Content Studio package are required.
+- Build 317 measured all three remaining unprofiled projects and returned `NO_THIRD_PROJECT_FACTUALLY_READY`.
+- Grey Hair is closest: 0 execution events, 1 approved source-evidence range, 0 reviewed story plans, 45 CAIP assets, 0 public-allowed assets.
+- Lime in you coconut and Shirley Not remain metadata-only with no qualifying execution/review evidence.
+- Exactly one CAIP workspace and one Content Studio package remain required.
 - Metadata alone is not sufficient.
-- Readiness requires real non-planning timeline evidence or reviewed source-backed CAIP evidence.
-- At most one project may be selected.
-- Private/public media rights remain separate; no private media is promoted by inference.
-- Initial discovery is Development-only and read-only.
+- No third Maker Story profile or evidence-selection row was created.
+- Private/public media rights remain separate; no private media was promoted by inference.
+- Build 317 discovery remained Development-only and read-only.
 - No automatic story/profile creation, publication, provider execution, R2 mutation or Production D1 contact.
 - Next after Build 317 Production GREEN: Build 318 — Content Adoption & Discovery Outcomes Renewal III.
 
