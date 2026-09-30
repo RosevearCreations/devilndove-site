@@ -72,7 +72,13 @@
   "starting_point": {
     "development": {
       "sha": "a5348eea48616a934a2994309d0738f05d706af9",
-      "tree": "1bf94721855837958a546e033e0bead0f3f97580"
+      "tree": "1bf94721855837958a546e033e0bead0f3f97580",
+      "system_gate_run": 36755683525,
+      "quality_run": 36755683559,
+      "it_admin_runtime_run": 36755683417,
+      "repository_hygiene_run": 36755683610,
+      "d1_ci_fanout_guard_run": 36755683521,
+      "build_specific_proof_run": 36755683468
     },
     "production": {
       "main_sha": "e84cda2db64f0af93aa1f88cc71fb7079fe5fd54",
