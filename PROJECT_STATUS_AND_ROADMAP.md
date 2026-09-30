@@ -15,9 +15,9 @@ Build 316 is fully verified and promoted:
 - Production Live Resource Integrity: **36726943717 — SUCCESS**.
 - Build 316 factual discovery state: **EVIDENCE_PENDING_NO_SEARCH_QUERY_DATA**, 0 Search Console rows, 0 eligible SEO pairs, 22 public page views / 30 days, 106 D1 rows read.
 
-Build 317 remeasures the remaining unprofiled Creative Projects. It may select at most one only when the project already has exactly one CAIP workspace and one Content Studio package plus either real non-planning timeline execution evidence or reviewed source-backed CAIP evidence. Metadata alone is insufficient for a third Maker Story.
+Build 317 remeasured all three remaining unprofiled Creative Projects and found **NO_THIRD_PROJECT_FACTUALLY_READY**. Grey Hair is the closest candidate but currently has 0 execution/timeline events, 1 approved CAIP source-evidence range, 0 reviewed story plans, 45 active CAIP assets and 0 public-allowed assets. Lime in you coconut and Shirley Not remain metadata-only projects with no execution or reviewed CAIP story evidence.
 
-Private CAIP media never becomes public by selection or inference. The initial Build 317 discovery is read-only; a profile/evidence mutation is permitted only after a real candidate is proven ready.
+No third Maker Story profile or evidence-selection row was created. Private CAIP media remains private and public-media rights were not inferred.
 
 The queue **has not run out**.
 
