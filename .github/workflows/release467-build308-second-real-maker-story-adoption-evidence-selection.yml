@@ -3,8 +3,7 @@ on:
   push:
     branches: [dev]
     paths:
-      - 'scripts/release467_build308_candidate_discovery.sql'
-      - 'scripts/release467_build308_verify_discovery.mjs'
+      - 'scripts/release467_build308_*'
       - '.github/workflows/release467-build308-second-real-maker-story-adoption-evidence-selection.yml'
   workflow_dispatch:
 permissions:
@@ -45,10 +44,23 @@ jobs:
           path: /tmp/build308-discovery.json
           if-no-files-found: error
           retention-days: 30
+      - name: Adopt second real Maker Story and select factual evidence
+        run: |
+          set -euo pipefail
+          COMMAND="$(grep -v '^[[:space:]]*--' scripts/release467_build308_adopt_second_real_maker_story.sql)"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b308-adoption.json
+          node scripts/release467_build308_verify_adoption.mjs /tmp/b308-adoption.json "${GITHUB_SHA}" /tmp/build308-adoption.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build308-adoption-${{ github.sha }}
+          path: /tmp/build308-adoption.json
+          if-no-files-found: error
+          retention-days: 30
       - name: Boundary
         if: always()
         run: |
-          echo 'DEVELOPMENT D1 MUTATION: ZERO'
-          echo 'MEDIA RIGHTS MUTATION: ZERO'
+          echo 'DEVELOPMENT D1 MUTATION: BOUNDED PROJECT-FACT NORMALIZATION + MAKER STORY + EVIDENCE SELECTION ONLY'
+          echo 'MEDIA RIGHTS INFERENCE: ZERO'
+          echo 'PUBLICATION MUTATION: ZERO'
           echo 'PROVIDER EXECUTION: ZERO'
           echo 'PRODUCTION D1 CONTACT: ZERO'

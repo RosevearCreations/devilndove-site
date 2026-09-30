@@ -10,12 +10,16 @@ const score=c=>Number(c.active_events||0)*100+Number(c.process_result_events||0)
 const eligible=c=>Number(c.maker_profiles||0)===0&&Number(c.caip_workspaces||0)===1&&Number(c.content_packages||0)===1&&Number(c.active_events||0)>0&&Number(c.safe_text_events||0)>0;
 const ranked=candidates.filter(eligible).map(c=>({...c,readiness_score:score(c)})).sort((a,b)=>b.readiness_score-a.readiness_score||Number(a.creative_work_project_id)-Number(b.creative_work_project_id));
 const greyHairReviewedEvidenceReady=Number(greyHair.caip_project_id||0)>0&&Number(greyHair.approved_source_evidence||0)>=3&&Number(greyHair.reviewed_story_plans||0)>=1&&greyHairStoryEvidence.length>=3;
-const selected=greyHairReviewedEvidenceReady?candidates.find(c=>Number(c.creative_work_project_id)===6)||null:ranked[0]||null;
+const metadataRanked=candidates.filter(c=>Number(c.maker_profiles||0)===0&&Number(c.caip_workspaces||0)===1&&Number(c.content_packages||0)===1)
+ .map(c=>({...c,metadata_readiness_score:(String(c.summary||'').trim()?5:0)+(String(c.objective||'').trim()?3:0)+(String(c.story_angle||'').trim()?2:0)}))
+ .sort((a,b)=>b.metadata_readiness_score-a.metadata_readiness_score||Number(a.creative_work_project_id)-Number(b.creative_work_project_id));
+const selected=greyHairReviewedEvidenceReady?candidates.find(c=>Number(c.creative_work_project_id)===6)||null:ranked[0]||metadataRanked[0]||null;
 const selectedEvents=selected?events.filter(e=>Number(e.creative_work_project_id)===Number(selected.creative_work_project_id)):[];
 if(Number(greyHair.public_allowed_assets||0)!==0||Number(greyHair.fully_public_allowed_uploads||0)!==0)throw new Error('Grey Hair public-media boundary changed before Build 308');
-const evidence={release:467,build:308,exact_development_sha:sha,statement_count:5,rows_read_by_statement:reads,aggregate_rows_read:aggregate,rows_read_ceiling:20000,candidates,ranked_eligible_candidates:ranked,selected_candidate:selected,selected_candidate_events:selectedEvents,grey_hair_private_caip_readiness:greyHair,grey_hair_reviewed_story_evidence:greyHairStoryEvidence,grey_hair_reviewed_evidence_ready:greyHairReviewedEvidenceReady,integrity,selection_rule:'prefer the existing Grey Hair research project when it has reviewed source-backed private CAIP story evidence; otherwise use the highest factual-readiness timeline candidate',d1_mutation:false,media_rights_mutation:false,production_d1_contact:false};
+const evidence={release:467,build:308,exact_development_sha:sha,statement_count:5,rows_read_by_statement:reads,aggregate_rows_read:aggregate,rows_read_ceiling:20000,candidates,ranked_eligible_candidates:ranked,metadata_ranked_candidates:metadataRanked,selected_candidate:selected,selected_candidate_events:selectedEvents,grey_hair_private_caip_readiness:greyHair,grey_hair_reviewed_story_evidence:greyHairStoryEvidence,grey_hair_reviewed_evidence_ready:greyHairReviewedEvidenceReady,integrity,selection_rule:'prefer reviewed source-backed Grey Hair evidence; otherwise prefer an existing factual timeline; if none exists, normalize the richest existing Creative Project metadata into one internal planning evidence row',d1_mutation:false,media_rights_mutation:false,production_d1_contact:false};
 fs.writeFileSync(out,JSON.stringify(evidence,null,2)+'\n');
 console.log('BUILD308_CANDIDATES=',JSON.stringify(candidates));
+if(!selected||Number(selected.creative_work_project_id)!==5)throw new Error('Build 308 expected 35th promo as the strongest safe metadata-normalization candidate after discovery');
 console.log('BUILD308_SELECTED_CANDIDATE=',JSON.stringify(selected));
 console.log('BUILD308_SELECTED_EVENTS=',JSON.stringify(selectedEvents));
 console.log('BUILD308_GREY_HAIR_READINESS=',JSON.stringify(greyHair));
