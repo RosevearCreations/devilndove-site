@@ -30,7 +30,10 @@ for token in ('BUILD302_EVIDENCE_PUBLIC_SAFETY_ADOPTION=GREEN','selected.length!
     q(token in verify,'Build 302 adoption verifier missing '+token)
 q('evidence-public-safety-adoption' in wf and 'release467_build302_verify_adoption.mjs' in wf,'Build 302 adoption runtime proof missing')
 q(p.get('roadmap')=='docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md','Build 302 roadmap pointer mismatch')
-q(int(p.get('next_build') or 0)==303,'Build 303 successor pointer missing')
+if int(p.get('build') or 0)==302:
+    q(int(p.get('next_build') or 0)==303,'Build 303 successor pointer missing')
+else:
+    q(int(p.get('build') or 0)>=303,'Build 302 successor must retain Build 303 or newer current authority')
 print('RELEASE 467 BUILD 302 CAIP EVIDENCE SELECTION & PUBLIC-SAFETY REVIEW ADOPTION')
 if F:
     print('FAIL');[print('-',x) for x in F];sys.exit(1)

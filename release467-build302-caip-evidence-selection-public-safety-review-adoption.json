@@ -2,8 +2,8 @@
   "release": 467,
   "build": 302,
   "title": "CAIP Evidence Selection & Public-Safety Review Adoption",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "EVIDENCE_PUBLIC_SAFETY_ADOPTION_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
+  "phase": "EVIDENCE_PUBLIC_SAFETY_ADOPTED_COMPLETE",
   "authority": "release467-build302-caip-evidence-selection-public-safety-review-adoption",
   "predecessor": {
     "build": 301,
@@ -133,5 +133,33 @@
     "approval": false,
     "publication": false,
     "idempotent": true
-  }
+  },
+  "final_closure": {
+    "dev_sha": "a6827f4ee093fcf0799ddb99c7a7957469bf3a2c",
+    "tree_sha": "2665c72c6947c3d9dbea2f1d89e69dab70c791fd",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD302_GREEN",
+    "proofs": {
+      "system_gate_run": 36651352321,
+      "current_application_quality_run": 36651352242,
+      "it_admin_runtime_proof_run": 36651352277,
+      "branch_hygiene_run": 36651352216
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36651352221,
+      "build_specific_proof_run": 36651352265
+    },
+    "ingested_by_build": 303
+  },
+  "production_checkpoint": {
+    "main_sha": "fffbafc4e9f27e830494140b48d9a3d266abd81e",
+    "tree_sha": "2665c72c6947c3d9dbea2f1d89e69dab70c791fd",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36651501581,
+    "production_live_resource_integrity_run": 36651569610,
+    "remote_d1_queries": 0,
+    "ingested_by_build": 303
+  },
+  "closure_ingested_by_build": 303
 }

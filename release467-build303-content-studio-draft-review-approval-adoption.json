@@ -1,0 +1,67 @@
+{
+  "release": 467,
+  "build": 303,
+  "title": "Content Studio Draft Review & Approval Adoption",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "DRAFT_REVIEW_DISCOVERY",
+  "authority": "release467-build303-content-studio-draft-review-approval-adoption",
+  "predecessor": {
+    "build": 302,
+    "title": "CAIP Evidence Selection & Public-Safety Review Adoption",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "a6827f4ee093fcf0799ddb99c7a7957469bf3a2c",
+    "development_tree_sha": "2665c72c6947c3d9dbea2f1d89e69dab70c791fd",
+    "development_proofs": {
+      "system_gate_run": 36651352321,
+      "current_application_quality_run": 36651352242,
+      "it_admin_runtime_proof_run": 36651352277,
+      "branch_hygiene_run": 36651352216,
+      "d1_ci_fanout_guard_run": 36651352221,
+      "build_specific_proof_run": 36651352265
+    },
+    "production_main_sha": "fffbafc4e9f27e830494140b48d9a3d266abd81e",
+    "production_tree_sha": "2665c72c6947c3d9dbea2f1d89e69dab70c791fd",
+    "production_pages_deploy_run": 36651501581,
+    "production_live_resource_integrity_run": 36651569610,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "target": {
+    "creative_work_project_id": 7,
+    "project_key": "CP-MSXCYQB6",
+    "project_title": "Under the Sea",
+    "content_source_type": "creative_project",
+    "content_source_id": "7",
+    "selected_evidence_count": 3
+  },
+  "scope": {
+    "reuse_existing_content_package": true,
+    "duplicate_content_package_tolerance": 0,
+    "explicit_refresh_only": true,
+    "refresh_requested": false,
+    "preserve_locked_copy": true,
+    "review_factual_template_drafts": true,
+    "record_human_approval_outcomes_after_review": true,
+    "automatic_approval": false,
+    "automatic_publication": false
+  },
+  "safety": {
+    "schema_change": false,
+    "production_d1_contact": false,
+    "r2_mutation": false,
+    "caip_media_rights_mutation": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "private_media_exposure": false,
+    "automatic_refresh": false,
+    "automatic_approval": false,
+    "automatic_publication": false
+  },
+  "contract": {
+    "next_build": 304,
+    "next_build_title": "Workshop Journal & Social Review-First Publication Acceptance",
+    "future_queue_exhausted": false
+  }
+}
