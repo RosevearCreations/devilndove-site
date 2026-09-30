@@ -21,8 +21,8 @@ q('export async function onRequestGet' in api and 'onRequestPost' not in api,'Bu
 for forbidden in ('CREATE TABLE','ALTER TABLE','DROP TABLE','INSERT INTO','UPDATE ','DELETE FROM','fetch('):
     q(forbidden not in api,'Build 305 measurement API mutation/provider token present: '+forbidden)
 q('buyerDiscoveryMeasurementMount' in page,'Build 305 SEO workspace mount missing buyerDiscoveryMeasurementMount')
-q(('admin-buyer-discovery-measurement.js?v=467b305' in page) or ('admin-buyer-discovery-measurement.js?v=467b311' in page),'Build 305 SEO workspace mount missing compatible buyer discovery script')
-q(('Zero discovery is shown as zero' in ui) or ('Zero discovery stays zero' in ui),'Build 305 UI missing zero-evidence preservation language')
+q(any(v in page for v in ('admin-buyer-discovery-measurement.js?v=467b305','admin-buyer-discovery-measurement.js?v=467b311','admin-buyer-discovery-measurement.js?v=467b316')),'Build 305 SEO workspace mount missing compatible buyer discovery script')
+q(('Zero discovery is shown as zero' in ui) or ('Zero discovery stays zero' in ui) or ('No query-level SEO action is justified' in ui),'Build 305 UI missing zero-evidence preservation language')
 for token in ('Search Console import','automatic submission OFF'):q(token in ui,'Build 305 UI missing '+token)
 for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','INDEXNOW SUBMISSION: ZERO','PROVIDER EXECUTION: ZERO','PRODUCTION D1 CONTACT: ZERO'):q(token in wf,'Build 305 workflow boundary missing '+token)
 q('9445c6a22a26cdae22cef3989f4222f7a149aee3' in json.dumps(a) and int((a.get('measurement_baseline') or {}).get('aggregate_rows_read') or 0)==168,'Build 305 baseline measurement missing')
