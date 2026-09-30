@@ -1,34 +1,34 @@
-/* CURRENT_BUILD_304_TRUTH: Workshop Journal & Social Review-First Publication Acceptance; last verified dev 2b260c9ff58ca56f75afe2f82144ba8f884d572e; tree d60f0f1812653cac9a85cd0f67730f4b7d2a587d; Production main 5fe6e3b5c47f948d8e931fd7357801ca639cb7dd; Pages 36655109591; Live 36655170381. */
-// Release 467 Build 304 — Content Studio Draft Review & Approval Adoption over exact Build 299 Production source.
+/* CURRENT_BUILD_305_TRUTH: Buyer Discovery & Search Measurement Activation; last verified dev 3dd7a39513f4dbea3d018675bbf9080397a811fc; tree 4c8fe967a08e09327e923f32aeac0df6c901b3bf; Production main 9666c57fd02b199359e2420db0f147c27e5c9386; Pages 36657083820; Live 36657146626. */
+// Release 467 Build 305 — Content Studio Draft Review & Approval Adoption over exact Build 299 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=304;
-const TITLE='Workshop Journal & Social Review-First Publication Acceptance';
-const AUTHORITY='release467-build304-workshop-journal-social-review-first-publication-acceptance';
-const EVIDENCE_ID='r467-b303-green-36653801145-36655109591';
+const BUILD=305;
+const TITLE='Buyer Discovery & Search Measurement Activation';
+const AUTHORITY='release467-build305-buyer-discovery-search-measurement-activation';
+const EVIDENCE_ID='r467-b304-green-36656936137-36657083820';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:303,title:'Content Studio Draft Review & Approval Adoption',state:'DEVELOPMENT_GREEN',
-  dev_sha:'2b260c9ff58ca56f75afe2f82144ba8f884d572e',tree_sha:'d60f0f1812653cac9a85cd0f67730f4b7d2a587d',
-  system_gate_run:36653801145,current_application_quality_run:36653801156,it_admin_runtime_proof_run:36653801176,
-  branch_hygiene_run:36653801148,proof_state:'EXACT_BRANCH_HEAD_BUILD303_GREEN',
+  release:467,build:304,title:'Workshop Journal & Social Review-First Publication Acceptance',state:'DEVELOPMENT_GREEN',
+  dev_sha:'3dd7a39513f4dbea3d018675bbf9080397a811fc',tree_sha:'4c8fe967a08e09327e923f32aeac0df6c901b3bf',
+  system_gate_run:36656936137,current_application_quality_run:36656936159,it_admin_runtime_proof_run:36656936151,
+  branch_hygiene_run:36656936224,proof_state:'EXACT_BRANCH_HEAD_BUILD304_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:303,title:'Build 304 starting point',state:'DEVELOPMENT_GREEN',
-  dev_sha:'2b260c9ff58ca56f75afe2f82144ba8f884d572e',tree_sha:'d60f0f1812653cac9a85cd0f67730f4b7d2a587d',
-  accepted_sha:'2b260c9ff58ca56f75afe2f82144ba8f884d572e',accepted_tree_sha:'d60f0f1812653cac9a85cd0f67730f4b7d2a587d',
-  system_gate_run:36653801145,current_application_quality_run:36653801156,it_admin_runtime_proof_run:36653801176,
-  branch_hygiene_run:36653801148,proof_state:'EXACT_BRANCH_HEAD_BUILD303_GREEN'
+  release:467,build:303,title:'Build 305 starting point',state:'DEVELOPMENT_GREEN',
+  dev_sha:'3dd7a39513f4dbea3d018675bbf9080397a811fc',tree_sha:'4c8fe967a08e09327e923f32aeac0df6c901b3bf',
+  accepted_sha:'3dd7a39513f4dbea3d018675bbf9080397a811fc',accepted_tree_sha:'4c8fe967a08e09327e923f32aeac0df6c901b3bf',
+  system_gate_run:36656936137,current_application_quality_run:36656936159,it_admin_runtime_proof_run:36656936151,
+  branch_hygiene_run:36656936224,proof_state:'EXACT_BRANCH_HEAD_BUILD304_GREEN'
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:303,title:'Content Studio Draft Review & Approval Adoption',state:'PRODUCTION_GREEN',
-  main_sha:'5fe6e3b5c47f948d8e931fd7357801ca639cb7dd',tree_sha:'d60f0f1812653cac9a85cd0f67730f4b7d2a587d',
-  production_pages_deploy_run:36655109591,production_live_resource_integrity_run:36655170381,
-  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36653801155,remote_d1_queries:0
+  release:467,build:304,title:'Workshop Journal & Social Review-First Publication Acceptance',state:'PRODUCTION_GREEN',
+  main_sha:'9666c57fd02b199359e2420db0f147c27e5c9386',tree_sha:'4c8fe967a08e09327e923f32aeac0df6c901b3bf',
+  production_pages_deploy_run:36657083820,production_live_resource_integrity_run:36657146626,
+  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36656936278,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -38,7 +38,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 304 Content Studio Draft Review Approval Adoption'
+  'Release 467 Build 305 Buyer Discovery Search Measurement Activation'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql','0026_release467_inventory_workstation_memberships.sql','0027_release467_caip_workshop_follies_maker_story_foundation.sql']);
 const EXTERNAL_POLICY=Object.freeze([
@@ -128,7 +128,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:304,title:TITLE,authority:'release467-build303-content-studio-draft-review-approval-adoption.json'},
+        current_closure_candidate:{release:467,build:305,title:TITLE,authority:'release467-build305-buyer-discovery-search-measurement-activation.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
