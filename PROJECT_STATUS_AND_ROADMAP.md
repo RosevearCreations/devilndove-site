@@ -2,23 +2,25 @@
 
 ## Current checkpoint
 
-**Build 313 — Second Maker Story Review Decision & Completeness** is the active Development candidate over exact Build 312 Production GREEN.
+**Build 314 — Second Story Publication Readiness & Review-Queue Continuity** is the active Development candidate over exact Build 313 Production GREEN.
 
-Build 312 is fully verified and promoted:
+Build 313 is fully verified and promoted:
 
-- Development SHA: **0045b29b0635d91f1c6d03b784c841b19fffc763**.
-- Exact tree: **391c869e0587fe2f865d85af781a06296f07ef8d**.
-- Production main SHA: **c5e7bb72ec990118057d6955223e60ddaf691eac**.
-- Production Pages Deploy: **36714805674 — SUCCESS**.
-- Production Live Resource Integrity: **36714898168 — SUCCESS**.
+- Development SHA: **6d62f2b7f8876715d3dc6a9afa2da9b1999979a3**.
+- Exact tree: **323d985b6385ee103552a51723b087187010ab53**.
+- Development proofs: System **36716969702**, Quality **36716969803**, I.T. **36716969886**, Hygiene **36716969713**.
+- Supplemental proofs: D1 Fan-Out **36716969773**, Build 313 **36716969717**.
+- Production main SHA: **14375bce8e1749b309e60ef3baf1804ee01bdc47**.
+- Production Pages Deploy: **36717227244 — SUCCESS**.
+- Production Live Resource Integrity: **36717338240 — SUCCESS**.
 
-Build 313 reviews the existing **35th promo** Maker Story against the actual recorded evidence. The record remains planning-only: one selected planning source, two approved/locked text drafts, no execution event, no selected execution evidence, an unknown outcome, no completed-result proof and no execution-derived lesson.
+Build 314 evaluates the existing **35th promo** second Maker Story against the publication prerequisites already enforced by the review-first pipeline. Build 313’s explicit decision remains authoritative: **`needs_review`, public candidate = 0**, because the record still has one planning event, zero execution events, zero selected execution evidence, outcome `unknown`, and no execution-derived result/lesson evidence.
 
-The Development acceptance is GREEN. The explicit decision is **remain `needs_review`, public candidate = 0**: 1 planning event, 0 execution events, 1 selected planning record, 0 selected execution evidence, 2 approved/locked drafts, and 0 publication/social rows. Reviewer/timestamp/reason traceability is recorded while result/lesson claims remain untouched. Approved draft copy does not grant Maker Story approval, media/public-use rights, publication authority or provider authority.
+The two corrected text drafts remain approved and locked, but approved copy alone does not grant Maker Story approval, publication authority, social distribution authority or media/public-use rights. Build 314 therefore preserves **publication readiness = BLOCKED**, with **0** second-story Workshop Journal rows and **0** second-story social review-queue rows. The proof is read-only and performs no provider, R2, schema, Finance, Inventory or Production D1 mutation.
 
 The queue **has not run out**.
 
-**Next after Build 313 Production GREEN: Build 314 — Second Story Publication Readiness & Review-Queue Continuity.**
+**Next after Build 314 Production GREEN: Build 315 — Search Console Operator Intake Acceptance.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md`.
 
