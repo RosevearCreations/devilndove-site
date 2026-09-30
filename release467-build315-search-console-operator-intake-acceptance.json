@@ -1,0 +1,89 @@
+{
+  "release": 467,
+  "build": 315,
+  "title": "Search Console Operator Intake Acceptance",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "SEARCH_CONSOLE_OPERATOR_INTAKE_ACCEPTANCE",
+  "authority": "release467-build315-search-console-operator-intake-acceptance",
+  "predecessor": {
+    "build": 314,
+    "title": "Second Story Publication Readiness & Review-Queue Continuity",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "59ca2152c7782b33e376b659d26e36e3388ebb05",
+    "development_tree_sha": "9d31caa6f6a18bdac8236fe158d711f0e898b622",
+    "development_proofs": {
+      "system_gate_run": 36719912502,
+      "current_application_quality_run": 36719912586,
+      "it_admin_runtime_proof_run": 36719912423,
+      "branch_hygiene_run": 36719912395,
+      "d1_ci_fanout_guard_run": 36719912388,
+      "build_specific_proof_run": 36719912439
+    },
+    "production_main_sha": "8bea4144e1a50d43b85e94218ce7f878a6023904",
+    "production_tree_sha": "9d31caa6f6a18bdac8236fe158d711f0e898b622",
+    "production_pages_deploy_run": 36720184639,
+    "production_live_resource_integrity_run": 36720280219,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "intake_route": "/api/admin/search-console-import",
+    "intake_mode": "EXPLICIT_OPERATOR_CSV_ONLY",
+    "required_tables": [
+      "search_console_import_batches",
+      "search_console_page_queries",
+      "seo_opportunity_actions",
+      "seo_page_overrides"
+    ],
+    "real_export_policy": "USE_REAL_OPERATOR_SUPPLIED_EXPORT_WHEN_AVAILABLE",
+    "no_real_export_state": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "synthetic_rows_forbidden": true,
+    "import_audit_action": "search_console_import",
+    "revert_action": "delete_batch",
+    "revert_audit_action": "search_console_delete_batch",
+    "reviewed_story_attribution": true,
+    "reviewed_product_attribution": true,
+    "batch_row_count_consistency_required": true,
+    "orphan_staged_rows_forbidden": true,
+    "request_time_schema_repair": false,
+    "automatic_import": false,
+    "provider_execution": false,
+    "next_build": 316,
+    "next_build_title": "Buyer Discovery Evidence Interpretation & SEO Review Queue",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "automatic_search_console_import": false,
+    "synthetic_discovery_rows": false,
+    "traffic_fabrication": false,
+    "automatic_seo_action_generation": false,
+    "automatic_seo_apply": false,
+    "indexnow_execution": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "59ca2152c7782b33e376b659d26e36e3388ebb05",
+      "tree": "9d31caa6f6a18bdac8236fe158d711f0e898b622",
+      "system_gate_run": 36719912502,
+      "quality_run": 36719912586,
+      "it_admin_runtime_run": 36719912423,
+      "repository_hygiene_run": 36719912395,
+      "d1_ci_fanout_guard_run": 36719912388,
+      "build_specific_proof_run": 36719912439
+    },
+    "production": {
+      "main_sha": "8bea4144e1a50d43b85e94218ce7f878a6023904",
+      "tree": "9d31caa6f6a18bdac8236fe158d711f0e898b622",
+      "production_pages_deploy_run": 36720184639,
+      "production_live_resource_integrity_run": 36720280219
+    }
+  },
+  "measurement_state": "PENDING_EXACT_DEVELOPMENT",
+  "roadmap": "docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md"
+}
