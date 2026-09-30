@@ -1,21 +1,21 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 313 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 314 candidate
 
-Build 313 — Second Maker Story Review Decision & Completeness — is projected over exact Build 312 Development/Production GREEN.
+Build 314 — Second Story Publication Readiness & Review-Queue Continuity — is projected over exact Build 313 Development/Production GREEN.
 
-- Last fully verified Development: `0045b29b0635d91f1c6d03b784c841b19fffc763`
-- Verified tree: `391c869e0587fe2f865d85af781a06296f07ef8d`
-- Development proofs: System `36714596371`, Quality `36714596654`, I.T. `36714596379`, Hygiene `36714596591`
-- Supplemental Build 312 proofs: D1 Fan-Out `36714596884`, Build 312 `36714596878`
-- Current Production main: `c5e7bb72ec990118057d6955223e60ddaf691eac`
-- Production proofs: Pages `36714805674`, Live Resources `36714898168`
-- Build 313 target: Creative Project 5, **35th promo**, Content Project 23.
-- Existing evidence remains planning-only with no execution event or selected execution evidence.
-- Existing approved/locked copy count is 2, but approved copy does not authorize Maker Story review/public candidacy.
-- Explicit review decision: `REMAIN_NEEDS_REVIEW_PENDING_EXECUTION_RESULT_LESSON_EVIDENCE`.
-- Story review state remains `needs_review`; public-story candidate remains `0`.
-- Review decision reason, actor and timestamp are recorded in the existing CAIP source snapshot.
-- Result/lesson claims, media/public-use rights, publication/social rows and provider state are not inferred or mutated.
-- Next after Build 313 Production GREEN: Build 314 — Second Story Publication Readiness & Review-Queue Continuity.
+- Last fully verified Development: `6d62f2b7f8876715d3dc6a9afa2da9b1999979a3`
+- Verified tree: `323d985b6385ee103552a51723b087187010ab53`
+- Development proofs: System `36716969702`, Quality `36716969803`, I.T. `36716969886`, Hygiene `36716969713`
+- Supplemental Build 313 proofs: D1 Fan-Out `36716969773`, Build 313 `36716969717`
+- Current Production main: `14375bce8e1749b309e60ef3baf1804ee01bdc47`
+- Production proofs: Pages `36717227244`, Live Resources `36717338240`
+- Build 314 target: Creative Project 5, **35th promo**, Content Project 23.
+- Build 313 review decision remains `REMAIN_NEEDS_REVIEW_PENDING_EXECUTION_RESULT_LESSON_EVIDENCE`.
+- Factual prerequisites remain unsatisfied: 1 planning event, 0 execution events, 1 selected planning record, 0 selected execution evidence, outcome `unknown`.
+- Existing approved/locked copy count is 2; 17 other deliverables remain `changes_requested`.
+- Publication readiness is **BLOCKED**; second-story Workshop Journal rows remain 0 and social review-queue rows remain 0.
+- Approved copy does not authorize Maker Story review/public candidacy, publication, provider posting or public-media rights.
+- Build 314 proof is read-only; no Development D1 business-data mutation, provider execution, R2 mutation or Production D1 contact is authorized.
+- Next after Build 314 Production GREEN: Build 315 — Search Console Operator Intake Acceptance.
 
 ## Current release baseline
 
