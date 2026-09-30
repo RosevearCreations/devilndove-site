@@ -1252,7 +1252,13 @@
     "production_d1_contact": false,
     "final_exact_head_proofs_pending": true,
     "next_build": 306,
-    "future_queue_exhausted": false
+    "future_queue_exhausted": false,
+    "control_plane_alignment": "BUILD305_SOURCE_GATES_GREEN_BEFORE_FINAL_EXACT_HEAD_REPROOF",
+    "intermediate_source_gate_run": 36658102616,
+    "intermediate_quality_run": 36658102494,
+    "intermediate_it_run": 36658102561,
+    "intermediate_hygiene_run": 36658102649,
+    "intermediate_build_specific_run": 36658102512
   },
   "historical_gate_compatibility": {
     "build301_successor_aware": true
