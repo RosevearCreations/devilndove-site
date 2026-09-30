@@ -2,28 +2,24 @@
 
 ## Current checkpoint
 
-**Build 317 — Third Project Maker Story Readiness & Evidence Selection** is the active Development candidate over exact Build 316 Production GREEN.
+**Build 318 — Content Adoption & Discovery Outcomes Renewal III** is the active Development candidate over exact Build 317 Production GREEN.
 
-Build 316 is fully verified and promoted:
+Build 317 is fully verified and promoted:
 
-- Development SHA: **d4511f2539b03e35e0989716065888c42b008fb1**.
-- Exact tree: **f89d348018b48ddcb9adad0229e745913051a168**.
-- Development proofs: System **36726555680**, Quality **36726555682**, I.T. **36726555759**, Hygiene **36726555685**.
-- Supplemental proofs: D1 Fan-Out **36726555683**, Build 316 **36726555652**.
-- Production main SHA: **ed9a89f070ecd05fcd3024df9b2ba4ddcbb7b33e**.
-- Production Pages Deploy: **36726827868 — SUCCESS**.
-- Production Live Resource Integrity: **36726943717 — SUCCESS**.
-- Build 316 factual discovery state: **EVIDENCE_PENDING_NO_SEARCH_QUERY_DATA**, 0 Search Console rows, 0 eligible SEO pairs, 22 public page views / 30 days, 106 D1 rows read.
+- Development SHA: **66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5**.
+- Exact tree: **b721482133a03fd851f36078320527784e247247**.
+- Development proofs: System **36729883162**, Quality **36729883209**, I.T. **36729883145**, Hygiene **36729883405**.
+- Supplemental proofs: D1 Fan-Out **36729883348**, Build 317 **36729883266**.
+- Production main SHA: **9d2ccc468ea810fdd6cf0e6f2527d50c6418876e**.
+- Production Pages Deploy: **36730175002 — SUCCESS**.
+- Production Live Resource Integrity: **36730305787 — SUCCESS**.
+- Build 317 result: **NO_THIRD_PROJECT_FACTUALLY_READY**, with zero Maker Story/evidence-selection mutation.
 
-Build 317 remeasured all three remaining unprofiled Creative Projects and found **NO_THIRD_PROJECT_FACTUALLY_READY**. Grey Hair is the closest candidate but currently has 0 execution/timeline events, 1 approved CAIP source-evidence range, 0 reviewed story plans, 45 active CAIP assets and 0 public-allowed assets. Lime in you coconut and Shirley Not remain metadata-only projects with no execution or reviewed CAIP story evidence.
+Build 318 remeasures the full content-adoption and buyer-discovery path against Builds 300, 306 and 312, including the bounded outcomes of Builds 313–317. It also measures SEO review-queue support, runtime/search health, D1 read cost, private-media boundaries and third-project readiness.
 
-No third Maker Story profile or evidence-selection row was created. Private CAIP media remains private and public-media rights were not inferred.
+**The Builds 319+ roadmap is intentionally pending the exact Build 318 Development measurement.** It will be written from observed evidence only; no successor is being invented in advance.
 
 The queue **has not run out**.
-
-**Next after Build 317 Production GREEN: Build 318 — Content Adoption & Discovery Outcomes Renewal III.**
-
-Canonical roadmap: `docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md`.
 
 ---
 

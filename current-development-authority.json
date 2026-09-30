@@ -1,31 +1,31 @@
 {
   "release": 467,
-  "build": 317,
-  "title": "Third Project Maker Story Readiness & Evidence Selection",
+  "build": 318,
+  "title": "Content Adoption & Discovery Outcomes Renewal III",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 316,
-      "title": "Buyer Discovery Evidence Interpretation & SEO Review Queue",
-      "authority": "release467-build316-buyer-discovery-evidence-interpretation-seo-review-queue.json",
-      "dev_sha": "d4511f2539b03e35e0989716065888c42b008fb1",
-      "tree_sha": "f89d348018b48ddcb9adad0229e745913051a168",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD316_GREEN",
+      "build": 317,
+      "title": "Third Project Maker Story Readiness & Evidence Selection",
+      "authority": "release467-build317-third-project-maker-story-readiness-evidence-selection.json",
+      "dev_sha": "66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5",
+      "tree_sha": "b721482133a03fd851f36078320527784e247247",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD317_GREEN",
       "proofs": {
-        "system_gate_run": 36726555680,
-        "current_application_quality_run": 36726555682,
-        "it_admin_runtime_proof_run": 36726555759,
-        "branch_hygiene_run": 36726555685
+        "system_gate_run": 36729883162,
+        "current_application_quality_run": 36729883209,
+        "it_admin_runtime_proof_run": 36729883145,
+        "branch_hygiene_run": 36729883405
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 317,
-      "title": "Third Project Maker Story Readiness & Evidence Selection",
-      "authority": "release467-build317-third-project-maker-story-readiness-evidence-selection.json",
+      "build": 318,
+      "title": "Content Adoption & Discovery Outcomes Renewal III",
+      "authority": "release467-build318-content-adoption-discovery-outcomes-renewal-iii.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -36,18 +36,19 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 316,
-    "title": "Buyer Discovery Evidence Interpretation & SEO Review Queue",
-    "authority": "release467-build316-buyer-discovery-evidence-interpretation-seo-review-queue.json",
-    "main_sha": "ed9a89f070ecd05fcd3024df9b2ba4ddcbb7b33e",
-    "tree_sha": "f89d348018b48ddcb9adad0229e745913051a168",
+    "build": 317,
+    "title": "Third Project Maker Story Readiness & Evidence Selection",
+    "authority": "release467-build317-third-project-maker-story-readiness-evidence-selection.json",
+    "main_sha": "9d2ccc468ea810fdd6cf0e6f2527d50c6418876e",
+    "tree_sha": "b721482133a03fd851f36078320527784e247247",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36726827868,
-    "production_live_resource_integrity_run": 36726943717,
+    "production_pages_deploy_run": 36730175002,
+    "production_live_resource_integrity_run": 36730305787,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build318-content-adoption-discovery-outcomes-renewal-iii.json",
     "release467-build317-third-project-maker-story-readiness-evidence-selection.json",
     "release467-build316-buyer-discovery-evidence-interpretation-seo-review-queue.json",
     "release467-build315-search-console-operator-intake-acceptance.json",
@@ -206,11 +207,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md",
-  "next_build": 318,
-  "next_build_state": "QUEUED_AFTER_BUILD317_PRODUCTION_GREEN",
-  "next_build_title": "Content Adoption & Discovery Outcomes Renewal III",
-  "promotion_state": "BUILD317_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD316_PRODUCTION_GREEN_BUILD317_ACTIVE",
+  "next_build": 319,
+  "next_build_state": "PENDING_BUILD318_OBSERVED_EVIDENCE",
+  "next_build_title": "Pending Build 318 evidence-driven roadmap",
+  "promotion_state": "BUILD318_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD317_PRODUCTION_GREEN_BUILD318_ACTIVE",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -241,13 +242,13 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "d4511f2539b03e35e0989716065888c42b008fb1",
-  "accepted_dev_tree_sha": "f89d348018b48ddcb9adad0229e745913051a168",
+  "accepted_dev_sha": "66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5",
+  "accepted_dev_tree_sha": "b721482133a03fd851f36078320527784e247247",
   "acceptance": {
-    "system_gate_run": 36726555680,
-    "current_application_quality_run": 36726555682,
-    "it_admin_runtime_proof_run": 36726555759,
-    "branch_hygiene_run": 36726555685
+    "system_gate_run": 36729883162,
+    "current_application_quality_run": 36729883209,
+    "it_admin_runtime_proof_run": 36729883145,
+    "branch_hygiene_run": 36729883405
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -1531,7 +1532,7 @@
   },
   "third_project_maker_story_readiness": {
     "source_build": 317,
-    "state": "DEVELOPMENT_MEASURED_NO_SELECTION",
+    "state": "PRODUCTION_GREEN_NO_SELECTION",
     "measurement_sha": "c07a62c01c8fd4fd57771bf47d74bf1f9ee87686",
     "measurement_run": 36729564164,
     "artifact_id": 11104089199,
@@ -1556,6 +1557,35 @@
     "provider_execution": false,
     "production_d1_contact": false,
     "next_build": 318,
+    "future_queue_exhausted": false,
+    "final_dev_sha": "66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5",
+    "final_tree_sha": "b721482133a03fd851f36078320527784e247247",
+    "production_main_sha": "9d2ccc468ea810fdd6cf0e6f2527d50c6418876e",
+    "production_pages_deploy_run": 36730175002,
+    "production_live_resource_integrity_run": 36730305787
+  },
+  "content_adoption_discovery_outcomes_renewal_iii": {
+    "source_build": 318,
+    "state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "compare_builds": [
+      300,
+      306,
+      312
+    ],
+    "rollup_builds": [
+      313,
+      314,
+      315,
+      316,
+      317
+    ],
+    "roadmap_renewal": "OBSERVED_EVIDENCE_ONLY",
+    "automatic_story_generation": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "production_d1_contact": false,
+    "next_build": 319,
+    "next_build_title": "Pending Build 318 evidence-driven roadmap",
     "future_queue_exhausted": false
   }
 }
