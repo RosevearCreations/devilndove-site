@@ -17,6 +17,8 @@ Build 319 is fully verified and promoted:
 
 Build 320 focuses only on **Grey Hair**. A dedicated read-only readiness workspace composes the existing CAIP Evidence Review, Grey Hair Sync & Audio Alignment, and Grey Hair Story & Edit Planning authorities. It shows the exact blocker and routes the operator to the correct review action.
 
+Exact Development measurement returned **SOURCE_EVIDENCE_REVIEW_REQUIRED**: Grey Hair has **3 active source-evidence ranges**, **1 approved**, **2 needs_review**, **0 confirmed sync groups**, **0 reviewed story plans**, **0 source-backed story items**, and **0 Maker Story profiles**. All 45 active CAIP assets remain non-public; public-allowed assets/uploads remain **0 / 0**. Measurement read **165 / 20,000** D1 rows.
+
 A later Grey Hair Maker Story decision requires **≥2 approved source-evidence ranges + ≥1 human-reviewed story plan + ≥2 source-backed story items**. Build 320 itself never creates the Maker Story profile and never changes private/public media rights.
 
 The queue **has not run out**.
