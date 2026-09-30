@@ -15,15 +15,16 @@ Build 322 — Buyer Discovery Attribution & SEO Review Evidence Continuity — s
 - Production Live Resource Integrity: `36765982082`
 
 Build 322:
-- preserves `/api/admin/search-console-import` as the operator-controlled intake;
-- requires explicit confirmation that an import is a real Google Search Console Performance export;
-- validates recognizable Page, Clicks, Impressions, CTR and Position header groups before staging;
-- preserves `search_console_import` and `search_console_delete_batch` audit traceability;
-- keeps safe operator revert through `delete_batch`;
+- composes `/api/admin/search-console-import` with the buyer-discovery measurement surface;
+- treats query-level attribution as valid only when backed by real current Search Console rows;
+- keeps first-party public telemetry observation-only and never converts it into search-query attribution;
+- classifies stale Search Console evidence as non-actionable;
+- keeps stale or unsupported open/in-progress SEO review rows non-actionable;
+- requires explicit human-authored SEO wording before apply and rechecks current evidence;
 - performs one read-only Development D1 continuity measurement;
-- remains `EVIDENCE_PENDING_NO_REAL_EXPORT` when no real export is staged;
-- creates no synthetic queries, clicks, impressions or batches;
-- executes no provider and contacts no Production D1.
+- creates no synthetic discovery evidence or SEO queue rows;
+- performs no automatic SEO apply, IndexNow or provider execution;
+- contacts no Production D1.
 
 Next after Build 322 Production GREEN: **Build 322 — Buyer Discovery Attribution & SEO Review Evidence Continuity**.
 
