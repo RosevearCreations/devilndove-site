@@ -258,5 +258,14 @@
     "next_build": 307,
     "next_build_title": "Maker Story Review-State & Publication Traceability",
     "future_queue_exhausted": false
+  },
+  "candidate_control_alignment": {
+    "state": "SOURCE_AND_RUNTIME_CONTROLS_ALIGNED_FINAL_EXACT_HEAD_REPROOF_REQUIRED",
+    "intermediate_head": "7df61fb5bfcdc5ed619b67c069dc481701644c1a",
+    "system_gate_run": 36660510517,
+    "current_application_quality_run": 36660510482,
+    "it_admin_runtime_proof_run": 36660510510,
+    "branch_hygiene_run": 36660510571,
+    "note": "These runs prove Build 306 control-plane alignment after successor-map and roadmap convergence. Final closure still requires fresh exact-head System, Quality, I.T., Hygiene, D1 Fan-Out and Build 306 measurement proofs."
   }
 }

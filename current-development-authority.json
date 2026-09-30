@@ -1258,7 +1258,13 @@
     "successor_roadmap": "docs/operations/RELEASE_467_CONTENT_ADOPTION_COVERAGE_DISCOVERY_BUILDS_307_312.md",
     "next_build": 307,
     "future_queue_exhausted": false,
-    "final_exact_head_proofs_pending": true
+    "final_exact_head_proofs_pending": true,
+    "control_plane_alignment": "BUILD306_SOURCE_AND_RUNTIME_CONTROLS_GREEN_BEFORE_FINAL_EXACT_HEAD_REPROOF",
+    "intermediate_head": "7df61fb5bfcdc5ed619b67c069dc481701644c1a",
+    "intermediate_source_gate_run": 36660510517,
+    "intermediate_quality_run": 36660510482,
+    "intermediate_it_run": 36660510510,
+    "intermediate_hygiene_run": 36660510571
   },
   "historical_gate_compatibility": {
     "build301_successor_aware": true
