@@ -97,5 +97,24 @@
       "production_live_resource_integrity_run": 36655170381,
       "remote_d1_queries": 0
     }
+  },
+  "development_acceptance_observation": {
+    "workflow_run": 36656112833,
+    "job_result": "SUCCESS",
+    "exact_head_at_observation": "6a97ce5731e5af28baaf5689e3c49a4e615c81db",
+    "aggregate_rows_read": 461,
+    "journal_publication_id": 1,
+    "journal_publication_key": "content-project-22-workshop_journal",
+    "journal_status": "published",
+    "journal_media_urls_json": "[]",
+    "social_post_queue_id": 1,
+    "social_post_key": "workshop-journal-22-under-the-sea",
+    "social_approval_status": "approved",
+    "social_post_status": "ready",
+    "social_api_publish_mode": "review_first",
+    "provider_execution": false,
+    "provider_publication": false,
+    "production_d1_contact": false,
+    "note": "Mutation/evidence job succeeded; overall first candidate was not final exact-head proof because source-contract controls required successor alignment."
   }
 }

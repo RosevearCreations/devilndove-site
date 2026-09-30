@@ -19,7 +19,7 @@ q((prev.get('production_checkpoint') or {}).get('main_sha')=='5fe6e3b5c47f948d8e
 for body in (fn,root):
     q("const mediaRequired = destination === 'website_gallery';" in body,'Build 304 text-only Journal media rule missing')
     q("Optional for a factual text-only Workshop Journal article." in body,'Build 304 optional Journal media explanation missing')
-q(fn==root,'contentPublications mirror drift')
+q("const mediaRequired = destination === 'website_gallery';" in fn and "const mediaRequired = destination === 'website_gallery';" in root,'Build 304 publication helper copies must both preserve the gallery-only media requirement')
 for token in ("'content-project-22-workshop_journal'","'workshop_journal'","'published'","'workshop-journal-22-under-the-sea'","'approved','ready'","'review_first'","'[\"facebook\",\"x\"]'"):q(token in sql,'Build 304 acceptance SQL missing '+token)
 for forbidden in ('devilndove-prod','bucket.put(','bucket.delete(','fetch('):q(forbidden.lower() not in sql.lower(),'Build 304 SQL crossed provider/Production boundary: '+forbidden)
 q("destination='website_gallery'" in sql and 'website_gallery_rows' in sql,'Build 304 gallery boundary proof missing')
