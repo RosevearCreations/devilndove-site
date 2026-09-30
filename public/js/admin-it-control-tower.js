@@ -1,4 +1,4 @@
-<!-- CURRENT_BUILD_322_TRUTH: Buyer Discovery Attribution & SEO Review Evidence Continuity; Build 319 is the exact verified Development/Production predecessor. -->
+<!-- CURRENT_BUILD_322_TRUTH: Buyer Discovery Attribution & SEO Review Evidence Continuity; Build 321 is the exact verified Development/Production predecessor. -->
 // Release 467 Build 322 — Buyer Discovery Attribution & SEO Review Evidence Continuity.
 // Release 467 Build 238 — current I.T. authority renderer over exact Build 233 GREEN restart boundary.
 document.addEventListener('DOMContentLoaded',()=>{
