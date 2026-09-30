@@ -1,37 +1,34 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 318 measured candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 319 candidate
 
-Build 317 remains the exact fully verified restart and Production predecessor:
+Build 319 — 35th Promo Execution Evidence Intake & Completeness — is projected over exact Build 318 Development/Production GREEN.
 
-- Last fully verified Development SHA: `66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5`
-- Last fully verified tree SHA: `b721482133a03fd851f36078320527784e247247`
-- Build 317 System Gate: `36729883162`
-- Build 317 Current Application Quality Proof: `36729883209`
-- Build 317 I.T. Admin Runtime Proof: `36729883145`
-- Build 317 Repository Branch Hygiene: `36729883405`
-- Current Production main SHA: `9d2ccc468ea810fdd6cf0e6f2527d50c6418876e`
-- Current Production tree SHA: `b721482133a03fd851f36078320527784e247247`
-- Production Pages Deploy: `36730175002`
-- Production Live Resource Integrity: `36730305787`
+- Last fully verified Development SHA: `90e3c5c14643dfef21b8d4435c81e92606eb75d4`
+- Last fully verified tree SHA: `0c1546c92eebdbdc6039a15c7fd7a7fd63055c3e`
+- Build 318 System Gate: `36735110215`
+- Build 318 Current Application Quality Proof: `36735110177`
+- Build 318 I.T. Admin Runtime Proof: `36735110176`
+- Build 318 Repository Branch Hygiene: `36735110294`
+- Build 318 D1 Fan-Out Guard: `36735110195`
+- Build 318 dedicated proof: `36735110092`
+- Current Production main SHA: `e51706c73352af58cac0640a12e915c5b4b2796d`
+- Current Production tree SHA: `0c1546c92eebdbdc6039a15c7fd7a7fd63055c3e`
+- Production Pages Deploy: `36735477464`
+- Production Live Resource Integrity: `36735618674`
 
+Build 319:
+- targets only Creative Project 5 / `CP-MSC1SUG2` / **35th promo**;
+- records only real setup/process/milestone/result/lesson/mistake/repair facts;
+- requires an explicit operator confirmation plus meaningful title/notes;
+- forces the dedicated intake record private/no media by default;
+- does not auto-select evidence or alter Maker Story review/outcome/public candidacy;
+- does not publish, create social rows, infer media rights or execute providers;
+- measures execution + result + lesson completeness read-only in CI.
+- Exact Development measurement: `INTAKE_READY_AWAITING_REAL_EXECUTION_RESULT_LESSON_EVIDENCE`.
+- Current 35th promo evidence: planning **1**, execution **0**, result **0**, lesson **0**, selected execution evidence **0**.
+- Story remains `needs_review`, outcome `unknown`, public candidate `0`; publication/social rows remain `0 / 0`.
+- Build 319 measurement read **48 / 20,000** D1 rows and performed zero evidence mutation.
 
-Build 318 — Content Adoption & Discovery Outcomes Renewal III — has completed its exact Development D1 measurement over Build 317 Production GREEN.
-
-- Measurement SHA: `867432fea4ddfb9c28b6ea50f38c9a6c09c01373`
-- Measurement run: `36732719677`
-- Artifact: `11105773030`
-- D1 rows read: **2,847 / 20,000**
-- Maker Story coverage: **2/5**
-- Reviewed/public stories: **1**
-- Published Workshop Journal stories: **1**
-- 35th promo remains blocked: needs_review / outcome unknown / public candidate 0.
-- Search Console remains **0 rows**; SEO review queue remains **0 rows**.
-- Public telemetry is 22 page views / 22 unique visitors in 30 days, with 0 recorded Workshop Story/Product Detail views.
-- No third project is factually ready; Grey Hair remains closest with 1 approved source-evidence range and no execution/review-plan evidence.
-- Identity duplicates and foreign-key violations remain zero.
-- Decision: `ADOPTION_STABLE_DISCOVERY_AND_NEXT_STORY_EVIDENCE_GAPS_REMAIN`.
-- Successor roadmap: `docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md`.
-- Next: **Build 319 — 35th Promo Execution Evidence Intake & Completeness**.
-- Build 318 remains read-only; no business-data/R2/provider/publication/SEO-apply/Production D1 mutation is authorized.
+Next after Build 319 Production GREEN: **Build 320 — Grey Hair Source-Evidence Review & Story-Plan Readiness**.
 
 ## Current release baseline
 

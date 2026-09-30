@@ -2,8 +2,8 @@
   "release": 467,
   "build": 318,
   "title": "Content Adoption & Discovery Outcomes Renewal III",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "OUTCOMES_REMEASURED_ROADMAP_RENEWED",
+  "state": "PRODUCTION_GREEN",
+  "phase": "OUTCOMES_RENEWAL_III_COMPLETE",
   "authority": "release467-build318-content-adoption-discovery-outcomes-renewal-iii",
   "predecessor": {
     "build": 317,
@@ -316,5 +316,31 @@
     "automatic_publication": false,
     "automatic_provider_execution": false
   },
-  "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md"
+  "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md",
+  "final_closure": {
+    "dev_sha": "90e3c5c14643dfef21b8d4435c81e92606eb75d4",
+    "tree_sha": "0c1546c92eebdbdc6039a15c7fd7a7fd63055c3e",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD318_GREEN",
+    "proofs": {
+      "system_gate_run": 36735110215,
+      "current_application_quality_run": 36735110177,
+      "it_admin_runtime_proof_run": 36735110176,
+      "branch_hygiene_run": 36735110294
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36735110195,
+      "build_specific_proof_run": 36735110092
+    },
+    "ingested_by_build": 319
+  },
+  "production_checkpoint": {
+    "main_sha": "e51706c73352af58cac0640a12e915c5b4b2796d",
+    "tree_sha": "0c1546c92eebdbdc6039a15c7fd7a7fd63055c3e",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36735477464,
+    "production_live_resource_integrity_run": 36735618674,
+    "remote_d1_queries": 0
+  }
 }

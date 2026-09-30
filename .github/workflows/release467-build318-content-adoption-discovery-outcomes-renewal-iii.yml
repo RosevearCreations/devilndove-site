@@ -3,28 +3,6 @@ name: Release 467 Build 318 Content Adoption Discovery Outcomes Renewal III
 # Exact-head reproving trigger after restart-integrity handoff convergence.
 # Final exact-head proof trigger after measured roadmap renewal and bounded D1 ceiling convergence.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build318_*'
-      - 'release467-build318-*.json'
-      - 'release467-build317-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_318_*'
-      - 'docs/operations/RELEASE_467_*_BUILDS_319_*'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'scripts/release467_build26*_gate.py'
-      - 'scripts/release467_build27*_gate.py'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/it/index.html'
-      - 'admin/reliability/index.html'
-      - 'admin/deployment-preflight/index.html'
-      - '.github/workflows/release467-build318-content-adoption-discovery-outcomes-renewal-iii.yml'
   workflow_dispatch:
 permissions:
   contents: read
