@@ -90,5 +90,21 @@
     "under_the_sea_posted_social_rows": 0,
     "duplicate_content_source_identities": 0,
     "foreign_key_violations": 0
+  },
+  "starting_point": {
+    "development": {
+      "sha": "6c432524d8fad7eea5eabbd85f4f4a80e7aa1ec0",
+      "tree": "9216756424a22feb66e6f0b69047ab340496a240",
+      "system_gate_run": 36668355699,
+      "quality_run": 36668355761,
+      "it_admin_runtime_run": 36668355615,
+      "repository_hygiene_run": 36668355696
+    },
+    "production": {
+      "main_sha": "a65463ee79a50ec16741958bc2913cf67b198966",
+      "tree": "9216756424a22feb66e6f0b69047ab340496a240",
+      "production_pages_deploy_run": 36668510235,
+      "production_live_resource_integrity_run": 36668575436
+    }
   }
 }
