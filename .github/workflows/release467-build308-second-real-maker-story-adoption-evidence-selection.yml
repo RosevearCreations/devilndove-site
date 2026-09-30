@@ -4,11 +4,30 @@ on:
     branches: [dev]
     paths:
       - 'scripts/release467_build308_*'
+      - 'scripts/release467_build307_regression.py'
+      - 'release467-build308-*.json'
+      - 'release467-build307-*.json'
+      - 'current-development-authority.json'
+      - 'PROJECT_STATUS_AND_ROADMAP.md'
+      - 'docs/operations/RELEASE_467_BUILD_308_*'
+      - 'docs/operations/RELEASE_467_CONTENT_ADOPTION_COVERAGE_DISCOVERY_BUILDS_307_312.md'
       - '.github/workflows/release467-build308-second-real-maker-story-adoption-evidence-selection.yml'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      - run: python scripts/release467_build308_regression.py
+      - run: python scripts/release467_build308_gate.py
+      - run: node --check scripts/release467_build308_verify_discovery.mjs
+      - run: node --check scripts/release467_build308_verify_adoption.mjs
   candidate-discovery:
     runs-on: ubuntu-latest
     timeout-minutes: 15

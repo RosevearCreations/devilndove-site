@@ -1,0 +1,147 @@
+{
+  "release": 467,
+  "build": 308,
+  "title": "Second Real Maker Story Adoption & Evidence Selection",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "SECOND_REAL_MAKER_STORY_ADOPTED_EVIDENCE_SELECTED",
+  "authority": "release467-build308-second-real-maker-story-adoption-evidence-selection",
+  "predecessor": {
+    "build": 307,
+    "title": "Maker Story Review-State & Publication Traceability",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "3ff916d9f1e7cc6aa9c29d9c998ace3731caf120",
+    "development_tree_sha": "70c9408afd2df7a3359b83937eda15161f49b4e2",
+    "development_proofs": {
+      "system_gate_run": 36661991953,
+      "current_application_quality_run": 36661991952,
+      "it_admin_runtime_proof_run": 36661991949,
+      "branch_hygiene_run": 36661991959,
+      "d1_ci_fanout_guard_run": 36661991955,
+      "build_specific_proof_run": 36661991981
+    },
+    "production_main_sha": "f8b3f7281ccd6e4bfc739abe1ba2566db336281a",
+    "production_tree_sha": "70c9408afd2df7a3359b83937eda15161f49b4e2",
+    "production_pages_deploy_run": 36662200778,
+    "production_live_resource_integrity_run": 36662256691,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "discovery_checkpoint": {
+    "source_sha": "c7900f1c9de80a27e35502f0211422227e566f6a",
+    "workflow_run": 36663359796,
+    "candidate_count": 4,
+    "all_remaining_timeline_events": 0,
+    "grey_hair": {
+      "creative_work_project_id": 6,
+      "active_assets": 45,
+      "approved_source_evidence": 1,
+      "confirmed_capture_groups": 0,
+      "reviewed_story_plans": 0,
+      "reviewed_evidence_ready": false,
+      "public_allowed_assets": 0,
+      "fully_public_allowed_uploads": 0
+    },
+    "selected_candidate": {
+      "creative_work_project_id": 5,
+      "project_key": "CP-MSC1SUG2",
+      "project_title": "35th promo",
+      "metadata_readiness_score": 10,
+      "selection_basis": "richest existing Creative Project metadata after no remaining timeline-ready or reviewed-CAIP-ready candidate"
+    },
+    "rows_read_by_statement": [
+      159,
+      9,
+      30,
+      101,
+      3
+    ],
+    "aggregate_rows_read": 302,
+    "rows_read_ceiling": 20000,
+    "d1_mutation": false,
+    "production_d1_contact": false
+  },
+  "adoption_baseline": {
+    "source_sha": "c7900f1c9de80a27e35502f0211422227e566f6a",
+    "workflow_run": 36663359796,
+    "target": {
+      "creative_work_project_id": 5,
+      "project_key": "CP-MSC1SUG2",
+      "project_title": "35th promo",
+      "normalized_event_id": 7,
+      "normalized_event_title": "35th promo - existing project brief"
+    },
+    "maker_story": {
+      "story_kind": "maker_story",
+      "story_review_status": "needs_review",
+      "public_story_candidate": 0,
+      "outcome_status": "unknown",
+      "updated_by_user_id": 1
+    },
+    "evidence": {
+      "selected_rows_for_target": 1,
+      "evidence_role": "process_evidence",
+      "origin": "existing Creative Project summary/objective/story_angle normalized into one internal text-only planning source record",
+      "media_url": "",
+      "event_public_candidate": 0
+    },
+    "safety": {
+      "public_event_candidates": 0,
+      "public_story_candidates": 0,
+      "selected_media_evidence": 0,
+      "caip_assets": 0,
+      "private_upload_files": 0,
+      "publications": 0,
+      "social_rows": 0
+    },
+    "global_integrity": {
+      "active_projects": 5,
+      "maker_story_profiles": 2,
+      "selected_evidence_rows": 4,
+      "caip_workspaces": 5,
+      "content_packages": 5,
+      "duplicate_caip_source_identities": 0,
+      "duplicate_content_source_identities": 0,
+      "foreign_key_violations": 0
+    },
+    "rows_read_by_statement": [
+      6,
+      99,
+      13,
+      109,
+      2,
+      4,
+      10,
+      35
+    ],
+    "aggregate_rows_read": 278,
+    "rows_read_ceiling": 20000,
+    "production_d1_contact": false
+  },
+  "contract": {
+    "second_real_project_id": 5,
+    "second_real_project_title": "35th promo",
+    "second_story_review_state": "needs_review",
+    "second_story_public_candidate": 0,
+    "evidence_origin": "existing_project_metadata_normalized_to_internal_text_planning_event",
+    "media_rights_scope": "separate_never_inferred",
+    "one_caip_workspace": true,
+    "one_content_package": true,
+    "automatic_content_refresh": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "next_build": 309,
+    "next_build_title": "Second Story Content Studio Review & Approval",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "private_media_exposure": false,
+    "media_rights_inference": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  }
+}

@@ -1,19 +1,5 @@
 name: Release 467 Build 307 Maker Story Review State Publication Traceability
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/admin/creative-process-compat.js'
-      - 'public/js/admin-creative-process.js'
-      - 'admin/creative-process/index.html'
-      - 'scripts/release467_build307_*'
-      - 'scripts/release467_build306_regression.py'
-      - 'release467-build307-*.json'
-      - 'release467-build306-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_307_*'
-      - '.github/workflows/release467-build307-maker-story-review-state-publication-traceability.yml'
   workflow_dispatch:
 permissions:
   contents: read
