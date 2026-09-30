@@ -1,4 +1,5 @@
 name: Release 467 Build 320 Grey Hair Source Evidence Review Story Plan Readiness
+# Final exact-head proof trigger after measured Grey Hair blocker closure.
 on:
   push:
     branches: [dev]
