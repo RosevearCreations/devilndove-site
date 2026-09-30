@@ -18,11 +18,11 @@ const VERIFIED_DEVELOPMENT=Object.freeze({
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:310,title:'Review-First Publication & Distribution Continuity',state:'DEVELOPMENT_GREEN',
-  dev_sha:'c1a4778dd3aaf2a1fece8406e075da7eb2c2b74d',tree_sha:'b4aa3deaa0eed32bc601ecf51d5456e5c5d85760',
+  release:467,build:311,title:'Buyer Discovery Evidence Freshness & Search Intake',state:'DEVELOPMENT_GREEN',
+  dev_sha:'9a785176369bc09d16c7a6d3748ac125f260bd91',tree_sha:'c79e06aec8eeb2d0ec24e54021c359d31de8e469',
   accepted_sha:'9a785176369bc09d16c7a6d3748ac125f260bd91',accepted_tree_sha:'c79e06aec8eeb2d0ec24e54021c359d31de8e469',
-  system_gate_run:36708995838,current_application_quality_run:36708995782,it_admin_runtime_proof_run:36708995900,
-  branch_hygiene_run:36708995938,proof_state:'EXACT_BRANCH_HEAD_BUILD310_GREEN'
+  system_gate_run:36711277604,current_application_quality_run:36711277548,it_admin_runtime_proof_run:36711277537,
+  branch_hygiene_run:36711277481,proof_state:'EXACT_BRANCH_HEAD_BUILD311_GREEN'
 });
 const PRODUCTION=Object.freeze({
   release:467,build:311,title:'Buyer Discovery Evidence Freshness & Search Intake',state:'PRODUCTION_GREEN',
