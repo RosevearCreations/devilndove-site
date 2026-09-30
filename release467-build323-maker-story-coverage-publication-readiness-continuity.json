@@ -2,8 +2,8 @@
   "release": 467,
   "build": 323,
   "title": "Maker Story Coverage & Publication Readiness Continuity",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "MAKER_STORY_COVERAGE_PUBLICATION_READINESS_CONTINUITY",
+  "state": "PRODUCTION_GREEN",
+  "phase": "MAKER_STORY_COVERAGE_PUBLICATION_READINESS_CONTINUITY_COMPLETE",
   "authority": "release467-build323-maker-story-coverage-publication-readiness-continuity",
   "predecessor": {
     "build": 322,
@@ -107,14 +107,59 @@
       "production_live_resource_integrity_run": 36784211626
     }
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT_COVERAGE_MEASUREMENT",
+  "measurement_state": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md",
   "decision": {
-    "classification": "AWAIT_EXACT_DEVELOPMENT_MAKER_STORY_COVERAGE_MEASUREMENT",
+    "classification": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+    "published_reviewed_story_count": 1,
+    "maker_story_evidence_required_count": 3,
+    "factual_outcome_evidence_required_count": 1,
     "automatic_advancement_authorized": false,
     "automatic_publication_authorized": false,
     "media_rights_inference_authorized": false,
     "next_build": 324,
     "next_build_title": "Content Adoption & Discovery Outcomes Renewal IV"
+  },
+  "measurement_checkpoint": {
+    "exact_development_sha": "88db75c27e6817212fbed809294bd593ab049bb2",
+    "workflow_run": 36787129379,
+    "artifact_id": 11130950095,
+    "artifact_digest": "sha256:50fc9a8f698f528e1a4301230cb44758e652d172e80fc6c8aefc4284eb361c56",
+    "aggregate_rows_read": 643,
+    "rows_read_ceiling": 20000,
+    "readiness_counts": {
+      "MAKER_STORY_EVIDENCE_REQUIRED": 3,
+      "FACTUAL_OUTCOME_EVIDENCE_REQUIRED": 1,
+      "PUBLISHED_REVIEWED_STORY": 1
+    },
+    "provider_posted_rows": 0,
+    "production_d1_contact": false
+  },
+  "final_closure": {
+    "dev_sha": "88db75c27e6817212fbed809294bd593ab049bb2",
+    "tree_sha": "9116bd69e701e15e464f5ea4c9a4e41d43c37974",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD323_GREEN",
+    "proofs": {
+      "system_gate_run": 36787129354,
+      "current_application_quality_run": 36787129334,
+      "it_admin_runtime_proof_run": 36787129349,
+      "branch_hygiene_run": 36787129342
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36787129445,
+      "build_specific_proof_run": 36787129379
+    },
+    "artifact_id": 11130950095,
+    "ingested_by_build": 324
+  },
+  "production_checkpoint": {
+    "main_sha": "14418df3be9d34baa3dd3436777f7911f022f39b",
+    "tree_sha": "9116bd69e701e15e464f5ea4c9a4e41d43c37974",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36787358329,
+    "production_live_resource_integrity_run": 36787427701,
+    "remote_d1_queries": 0
   }
 }
