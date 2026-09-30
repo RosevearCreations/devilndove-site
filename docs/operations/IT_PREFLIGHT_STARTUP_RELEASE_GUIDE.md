@@ -1,18 +1,18 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 302 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 303 candidate
 
-Build 302 — CAIP Evidence Selection & Public-Safety Review Adoption — is projected over exact Build 301 Production GREEN.
+Build 303 — Content Studio Draft Review & Approval Adoption — is projected over exact Build 302 Production GREEN.
 
-- Last fully verified Development: `e180724a52210fdf56c4d53b5221be2f121c36de`
-- Verified tree: `d11b3492ef6d389270d9acc58d94e4740591bb38`
-- Development proofs: System `36648100957`, Quality `36648101025`, I.T. `36648101016`, Hygiene `36648100985`
-- Supplemental Build 301 proofs: D1 Fan-Out `36648101024`, Build 301 `36648100984`
-- Current Production main: `3eec733afd9b8c585efaab1c8a89fa244d9f65d8`
-- Production proofs: Pages `36648294020`, Live Resources `36648362724`
-- Build 301 real adoption: Creative Project 7 — Under the Sea; one factual Maker Story; `needs_review`; public-story candidate `0`.
-- Build 302 discovery consumed 44 D1 rows and confirmed three active text-only timeline facts (events 1/2/3), zero CAIP assets, zero private-upload files and zero public candidacy.
-- Final adoption selects events 1/2/3 as internal factual evidence only (process/material/material). Evidence selection does not grant public-use rights; the operation fails closed if media appears before adoption.
-- No Content Studio refresh, approval, publication, provider execution, R2 mutation or Production D1 business-data contact.
-- Next after Build 302 Production GREEN: Build 303 — Content Studio Draft Review & Approval Adoption.
+- Last fully verified Development: `a6827f4ee093fcf0799ddb99c7a7957469bf3a2c`
+- Verified tree: `2665c72c6947c3d9dbea2f1d89e69dab70c791fd`
+- Development proofs: System `36651352321`, Quality `36651352242`, I.T. `36651352277`, Hygiene `36651352216`
+- Supplemental Build 301 proofs: D1 Fan-Out `36648101024`, Build 301 `36651352265`
+- Current Production main: `fffbafc4e9f27e830494140b48d9a3d266abd81e`
+- Production proofs: Pages `36651501581`, Live Resources `36651569610`
+- Build 302 real evidence adoption: Creative Project 7 — Under the Sea; three selected text-only factual evidence rows; no public-use rights inferred.
+- Build 303 discovery consumed 157 D1 rows and found one existing Content Studio package with 19 factual-template drafts, zero approvals, zero CAIP/private media and zero publication/social rows.
+- Build 303 human review approves and locks only the corrected `seo-assets` and `blog-article` copy; 17 media/result-dependent drafts receive `changes_requested`.
+- No automatic refresh, package recreation, publication, provider execution, R2 mutation or Production D1 business-data contact.
+- Next after Build 303 Production GREEN: Build 304 — Workshop Journal & Social Review-First Publication Acceptance.
 
 ## Current release baseline
 

@@ -2,7 +2,7 @@
   "release": 467,
   "build": 303,
   "title": "Content Studio Draft Review & Approval Adoption",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
