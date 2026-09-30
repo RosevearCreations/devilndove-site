@@ -1,31 +1,31 @@
 {
   "release": 467,
-  "build": 311,
-  "title": "Buyer Discovery Evidence Freshness & Search Intake",
+  "build": 312,
+  "title": "Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 310,
-      "title": "Review-First Publication & Distribution Continuity",
-      "authority": "release467-build310-review-first-publication-distribution-continuity.json",
-      "dev_sha": "c1a4778dd3aaf2a1fece8406e075da7eb2c2b74d",
-      "tree_sha": "b4aa3deaa0eed32bc601ecf51d5456e5c5d85760",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD310_GREEN",
+      "build": 311,
+      "title": "Buyer Discovery Evidence Freshness & Search Intake",
+      "authority": "release467-build311-buyer-discovery-evidence-freshness-search-intake.json",
+      "dev_sha": "9a785176369bc09d16c7a6d3748ac125f260bd91",
+      "tree_sha": "c79e06aec8eeb2d0ec24e54021c359d31de8e469",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD311_GREEN",
       "proofs": {
-        "system_gate_run": 36708995838,
-        "current_application_quality_run": 36708995782,
-        "it_admin_runtime_proof_run": 36708995900,
-        "branch_hygiene_run": 36708995938
+        "system_gate_run": 36711277604,
+        "current_application_quality_run": 36711277548,
+        "it_admin_runtime_proof_run": 36711277537,
+        "branch_hygiene_run": 36711277481
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 311,
-      "title": "Buyer Discovery Evidence Freshness & Search Intake",
-      "authority": "release467-build311-buyer-discovery-evidence-freshness-search-intake.json",
+      "build": 312,
+      "title": "Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal",
+      "authority": "release467-build312-content-adoption-coverage-outcomes-renewal-ii-roadmap-renewal.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -36,18 +36,19 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 310,
-    "title": "Review-First Publication & Distribution Continuity",
-    "authority": "release467-build310-review-first-publication-distribution-continuity.json",
-    "main_sha": "43120a39d39aa0b0a2b0299967ad2e7b97eab0ee",
-    "tree_sha": "b4aa3deaa0eed32bc601ecf51d5456e5c5d85760",
+    "build": 311,
+    "title": "Buyer Discovery Evidence Freshness & Search Intake",
+    "authority": "release467-build311-buyer-discovery-evidence-freshness-search-intake.json",
+    "main_sha": "e6c48ac204393ee53859dc0366e36a13f15a5460",
+    "tree_sha": "c79e06aec8eeb2d0ec24e54021c359d31de8e469",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36709193312,
-    "production_live_resource_integrity_run": 36709277731,
+    "production_pages_deploy_run": 36711481530,
+    "production_live_resource_integrity_run": 36711577068,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build312-content-adoption-coverage-outcomes-renewal-ii-roadmap-renewal.json",
     "release467-build311-buyer-discovery-evidence-freshness-search-intake.json",
     "release467-build310-review-first-publication-distribution-continuity.json",
     "release467-build309-second-story-content-studio-review-approval.json",
@@ -199,12 +200,12 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "roadmap": "docs/operations/RELEASE_467_CONTENT_ADOPTION_COVERAGE_DISCOVERY_BUILDS_307_312.md",
-  "next_build": 312,
-  "next_build_state": "QUEUED_AFTER_BUILD311_PRODUCTION_GREEN",
-  "next_build_title": "Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal",
-  "promotion_state": "BUILD311_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD310_PRODUCTION_GREEN_BUILD311_ACTIVE",
+  "roadmap": "docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md",
+  "next_build": 313,
+  "next_build_state": "QUEUED_AFTER_BUILD312_PRODUCTION_GREEN",
+  "next_build_title": "Second Maker Story Review Decision & Completeness",
+  "promotion_state": "BUILD312_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD311_PRODUCTION_GREEN_BUILD312_ACTIVE",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -235,13 +236,13 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "c1a4778dd3aaf2a1fece8406e075da7eb2c2b74d",
-  "accepted_dev_tree_sha": "b4aa3deaa0eed32bc601ecf51d5456e5c5d85760",
+  "accepted_dev_sha": "9a785176369bc09d16c7a6d3748ac125f260bd91",
+  "accepted_dev_tree_sha": "c79e06aec8eeb2d0ec24e54021c359d31de8e469",
   "acceptance": {
-    "system_gate_run": 36708995838,
-    "current_application_quality_run": 36708995782,
-    "it_admin_runtime_proof_run": 36708995900,
-    "branch_hygiene_run": 36708995938
+    "system_gate_run": 36711277604,
+    "current_application_quality_run": 36711277548,
+    "it_admin_runtime_proof_run": 36711277537,
+    "branch_hygiene_run": 36711277481
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -1371,6 +1372,23 @@
     "provider_execution": false,
     "production_d1_contact": false,
     "next_build": 312,
+    "future_queue_exhausted": false
+  },
+  "content_adoption_outcomes_renewal_ii": {
+    "source_build": 312,
+    "state": "DEVELOPMENT_CANDIDATE",
+    "compare_builds": [
+      300,
+      306
+    ],
+    "full_path_remeasurement": true,
+    "second_story_review_gap": true,
+    "search_console_real_intake_gap": true,
+    "autonomous_generation": false,
+    "provider_execution": false,
+    "production_d1_contact": false,
+    "next_roadmap": "docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md",
+    "next_build": 313,
     "future_queue_exhausted": false
   }
 }
