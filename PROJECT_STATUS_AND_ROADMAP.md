@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-**Build 303 — Content Studio Draft Review & Approval Adoption** is active in Development approval adoption.
+**Build 303 — Content Studio Draft Review & Approval Adoption** is at the final Development exact-head proof candidate.
 
 Build 302 is the exact Development and Production GREEN baseline. The real Creative Project **7 — Under the Sea** retains exactly one CAIP workspace, one Content Studio package, one Maker Story in review, and three selected factual text-only evidence rows. Build 303 is reviewing the existing Content Studio drafts before any human approval is recorded.
 
@@ -16,6 +16,7 @@ Build 302 is the exact Development and Production GREEN baseline. The real Creat
 - Development discovery: **157 D1 ROWS / READ ONLY; 19 FACTUAL-TEMPLATE DRAFTS**
 - Human review outcome: **2 EVIDENCE-SAFE TEXT DRAFTS APPROVED + LOCKED; 17 CHANGES REQUESTED**
 - Publication/social/provider action: **NONE**
+- Final exact-head proof matrix: **PENDING ON FINAL CANDIDATE**
 - Next after Production GREEN: **Build 304 — Workshop Journal & Social Review-First Publication Acceptance**
 
 ## Next production queue — Builds 301–306

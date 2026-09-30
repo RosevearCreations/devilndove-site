@@ -23,3 +23,9 @@ The exact Development discovery at `fe855929497d473c2dc68f4df4b94206f9ae4651` re
 Human review found that the generated video/social/gallery/thumbnail/caption drafts either depend on reviewed public-use media that does not exist yet or use “result/reviewed” wording that is not supported by the current record. Those 17 drafts therefore receive `changes_requested`.
 
 The two text-only drafts — `seo-assets` and `blog-article` — are corrected directly to the selected planning/material evidence, approved as **copy only**, and locked. Their approval does not approve media, public release, publication, or provider execution.
+
+## Final candidate boundary
+
+The measured adoption is complete in Development. A fresh exact-head proof matrix is still required before promotion. The final candidate must preserve: one Content Studio package; 19 factual-template drafts; exactly two approved and locked copy-only drafts (`seo-assets`, `blog-article`); exactly 17 `changes_requested`; zero publication/social rows; zero CAIP/private-media mutation; zero provider execution; and zero Production D1 contact.
+
+Promotion remains exact-tree only. Build 304 remains queued after Build 303 Production GREEN.
