@@ -37,8 +37,29 @@ Measured dimensions include:
 - Production Pages: `36787358329`
 - Production Live Resource Integrity: `36787427701`
 
+## Measured outcome
+
+Exact Development measurement at `314f72c03e9597cf64eca06afe4cb73081ff5823` produced artifact `11130494838`.
+
+- decision: `ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST`
+- Maker Story coverage: **2/5**
+- reviewed/public-candidate/published stories: **1**
+- selected evidence: **4**
+- approved + locked copy: **4 / 4**
+- Search Console evidence: **0 rows / 0 clicks / 0 impressions**
+- evidence-backed SEO rows: **0**
+- public telemetry: **22 / 22**
+- runtime errors: **0**
+- third-story-ready projects: **0**
+- rows read: **2,847 / 20,000**
+- same-contract rows-read delta vs Build 318: **0**
+
 ## Roadmap renewal
 
-The successor roadmap is intentionally not selected from assumptions. Build 324's exact Development evidence determines the next bounded lane. No fabricated execution/result/lesson evidence, synthetic Search Console rows, automatic Maker Story approval, publication, social/provider execution or private-media rights inference is permitted.
+Observed evidence created `docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md`.
+
+Next: **Build 325 — Evidence Gap Owner Queue & Operator Action Traceability**.
+
+The renewed lane targets the unchanged factual gaps directly and retains all permanent review, privacy, provider and Production boundaries.
 
 The future queue has not run out.
