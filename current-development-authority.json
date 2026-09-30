@@ -1,31 +1,31 @@
 {
   "release": 467,
-  "build": 316,
-  "title": "Buyer Discovery Evidence Interpretation & SEO Review Queue",
+  "build": 317,
+  "title": "Third Project Maker Story Readiness & Evidence Selection",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 315,
-      "title": "Search Console Operator Intake Acceptance",
-      "authority": "release467-build315-search-console-operator-intake-acceptance.json",
-      "dev_sha": "2a7c1aa8d90b4851073f50d67b87d5e199ea303d",
-      "tree_sha": "4f1816b0700157ac1c71d170d08a0116af19eac4",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD315_GREEN",
+      "build": 316,
+      "title": "Buyer Discovery Evidence Interpretation & SEO Review Queue",
+      "authority": "release467-build316-buyer-discovery-evidence-interpretation-seo-review-queue.json",
+      "dev_sha": "d4511f2539b03e35e0989716065888c42b008fb1",
+      "tree_sha": "f89d348018b48ddcb9adad0229e745913051a168",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD316_GREEN",
       "proofs": {
-        "system_gate_run": 36722013148,
-        "current_application_quality_run": 36722013116,
-        "it_admin_runtime_proof_run": 36722013224,
-        "branch_hygiene_run": 36722013237
+        "system_gate_run": 36726555680,
+        "current_application_quality_run": 36726555682,
+        "it_admin_runtime_proof_run": 36726555759,
+        "branch_hygiene_run": 36726555685
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 316,
-      "title": "Buyer Discovery Evidence Interpretation & SEO Review Queue",
-      "authority": "release467-build316-buyer-discovery-evidence-interpretation-seo-review-queue.json",
+      "build": 317,
+      "title": "Third Project Maker Story Readiness & Evidence Selection",
+      "authority": "release467-build317-third-project-maker-story-readiness-evidence-selection.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -36,18 +36,19 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 315,
-    "title": "Search Console Operator Intake Acceptance",
-    "authority": "release467-build315-search-console-operator-intake-acceptance.json",
-    "main_sha": "7c8605c627c25443df24d08b5ffecb3fa315c084",
-    "tree_sha": "4f1816b0700157ac1c71d170d08a0116af19eac4",
+    "build": 316,
+    "title": "Buyer Discovery Evidence Interpretation & SEO Review Queue",
+    "authority": "release467-build316-buyer-discovery-evidence-interpretation-seo-review-queue.json",
+    "main_sha": "ed9a89f070ecd05fcd3024df9b2ba4ddcbb7b33e",
+    "tree_sha": "f89d348018b48ddcb9adad0229e745913051a168",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36722265165,
-    "production_live_resource_integrity_run": 36722386886,
+    "production_pages_deploy_run": 36726827868,
+    "production_live_resource_integrity_run": 36726943717,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build317-third-project-maker-story-readiness-evidence-selection.json",
     "release467-build316-buyer-discovery-evidence-interpretation-seo-review-queue.json",
     "release467-build315-search-console-operator-intake-acceptance.json",
     "release467-build314-second-story-publication-readiness-review-queue-continuity.json",
@@ -205,11 +206,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md",
-  "next_build": 317,
-  "next_build_state": "QUEUED_AFTER_BUILD316_PRODUCTION_GREEN",
-  "next_build_title": "Third Project Maker Story Readiness & Evidence Selection",
-  "promotion_state": "BUILD316_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD315_PRODUCTION_GREEN_BUILD316_ACTIVE",
+  "next_build": 318,
+  "next_build_state": "QUEUED_AFTER_BUILD317_PRODUCTION_GREEN",
+  "next_build_title": "Content Adoption & Discovery Outcomes Renewal III",
+  "promotion_state": "BUILD317_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD316_PRODUCTION_GREEN_BUILD317_ACTIVE",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -240,13 +241,13 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "2a7c1aa8d90b4851073f50d67b87d5e199ea303d",
-  "accepted_dev_tree_sha": "4f1816b0700157ac1c71d170d08a0116af19eac4",
+  "accepted_dev_sha": "d4511f2539b03e35e0989716065888c42b008fb1",
+  "accepted_dev_tree_sha": "f89d348018b48ddcb9adad0229e745913051a168",
   "acceptance": {
-    "system_gate_run": 36722013148,
-    "current_application_quality_run": 36722013116,
-    "it_admin_runtime_proof_run": 36722013224,
-    "branch_hygiene_run": 36722013237
+    "system_gate_run": 36726555680,
+    "current_application_quality_run": 36726555682,
+    "it_admin_runtime_proof_run": 36726555759,
+    "branch_hygiene_run": 36726555685
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -1504,7 +1505,7 @@
   },
   "buyer_discovery_evidence_interpretation": {
     "source_build": 316,
-    "state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "state": "PRODUCTION_GREEN",
     "search_console_required_for_query_level_actions": true,
     "public_telemetry_observation_only": true,
     "evidence_threshold": {
@@ -1520,6 +1521,41 @@
     "provider_execution": false,
     "production_d1_contact": false,
     "next_build": 317,
+    "future_queue_exhausted": false,
+    "measurement_state": "EVIDENCE_PENDING_NO_SEARCH_QUERY_DATA",
+    "final_dev_sha": "d4511f2539b03e35e0989716065888c42b008fb1",
+    "final_tree_sha": "f89d348018b48ddcb9adad0229e745913051a168",
+    "production_main_sha": "ed9a89f070ecd05fcd3024df9b2ba4ddcbb7b33e",
+    "production_pages_deploy_run": 36726827868,
+    "production_live_resource_integrity_run": 36726943717
+  },
+  "third_project_maker_story_readiness": {
+    "source_build": 317,
+    "state": "DEVELOPMENT_MEASURED_NO_SELECTION",
+    "measurement_sha": "c07a62c01c8fd4fd57771bf47d74bf1f9ee87686",
+    "measurement_run": 36729564164,
+    "artifact_id": 11104089199,
+    "aggregate_rows_read": 189,
+    "remaining_unprofiled_projects": 3,
+    "selected_project_count": 0,
+    "selection_state": "NO_THIRD_PROJECT_FACTUALLY_READY",
+    "closest_candidate": {
+      "creative_work_project_id": 6,
+      "project_title": "Grey Hair",
+      "active_events": 0,
+      "approved_source_evidence": 1,
+      "reviewed_story_plans": 0,
+      "active_caip_assets": 45,
+      "public_allowed_assets": 0
+    },
+    "metadata_alone_sufficient": false,
+    "maker_story_profile_mutation": false,
+    "evidence_selection_mutation": false,
+    "private_media_promoted": false,
+    "media_rights_inference": false,
+    "provider_execution": false,
+    "production_d1_contact": false,
+    "next_build": 318,
     "future_queue_exhausted": false
   }
 }

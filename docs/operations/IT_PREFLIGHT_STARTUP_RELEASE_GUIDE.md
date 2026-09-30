@@ -1,21 +1,23 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 316 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 317 candidate
 
-Build 316 — Buyer Discovery Evidence Interpretation & SEO Review Queue — is projected over exact Build 315 Development/Production GREEN.
+Build 317 — Third Project Maker Story Readiness & Evidence Selection — is projected over exact Build 316 Development/Production GREEN.
 
-- Last fully verified Development: `2a7c1aa8d90b4851073f50d67b87d5e199ea303d`
-- Verified tree: `4f1816b0700157ac1c71d170d08a0116af19eac4`
-- Development proofs: System `36722013148`, Quality `36722013116`, I.T. `36722013224`, Hygiene `36722013237`
-- Supplemental Build 315 proofs: D1 Fan-Out `36722013190`, Build 315 `36722013591`
-- Current Production main: `7c8605c627c25443df24d08b5ffecb3fa315c084`
-- Production proofs: Pages `36722265165`, Live Resources `36722386886`
-- Build 315 measured 0 Search Console batches and 0 staged rows: `EVIDENCE_PENDING_NO_REAL_EXPORT`.
-- Build 316 may queue a query-level SEO review only from real page/query evidence with >=10 impressions and average position 4–20 by default.
-- Public page-view telemetry is observation-only and does not create query-level SEO work.
-- The queue stores facts only; no title/meta/H1/internal-link wording is generated.
-- Apply requires explicit human-written SEO copy and current supporting Search Console evidence.
-- CI remains read-only and performs no SEO queue mutation.
-- No synthetic discovery rows, automatic apply, IndexNow/provider execution, R2 mutation or Production D1 contact is authorized.
-- Next after Build 316 Production GREEN: Build 317 — Third Project Maker Story Readiness & Evidence Selection.
+- Last fully verified Development: `d4511f2539b03e35e0989716065888c42b008fb1`
+- Verified tree: `f89d348018b48ddcb9adad0229e745913051a168`
+- Development proofs: System `36726555680`, Quality `36726555682`, I.T. `36726555759`, Hygiene `36726555685`
+- Supplemental Build 316 proofs: D1 Fan-Out `36726555683`, Build 316 `36726555652`
+- Current Production main: `ed9a89f070ecd05fcd3024df9b2ba4ddcbb7b33e`
+- Production proofs: Pages `36726827868`, Live Resources `36726943717`
+- Build 317 measured all three remaining unprofiled projects and returned `NO_THIRD_PROJECT_FACTUALLY_READY`.
+- Grey Hair is closest: 0 execution events, 1 approved source-evidence range, 0 reviewed story plans, 45 CAIP assets, 0 public-allowed assets.
+- Lime in you coconut and Shirley Not remain metadata-only with no qualifying execution/review evidence.
+- Exactly one CAIP workspace and one Content Studio package remain required.
+- Metadata alone is not sufficient.
+- No third Maker Story profile or evidence-selection row was created.
+- Private/public media rights remain separate; no private media was promoted by inference.
+- Build 317 discovery remained Development-only and read-only.
+- No automatic story/profile creation, publication, provider execution, R2 mutation or Production D1 contact.
+- Next after Build 317 Production GREEN: Build 318 — Content Adoption & Discovery Outcomes Renewal III.
 
 ## Current release baseline
 

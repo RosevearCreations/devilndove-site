@@ -2,26 +2,26 @@
 
 ## Current checkpoint
 
-**Build 316 — Buyer Discovery Evidence Interpretation & SEO Review Queue** is the active Development candidate over exact Build 315 Production GREEN.
+**Build 317 — Third Project Maker Story Readiness & Evidence Selection** is the active Development candidate over exact Build 316 Production GREEN.
 
-Build 315 is fully verified and promoted:
+Build 316 is fully verified and promoted:
 
-- Development SHA: **2a7c1aa8d90b4851073f50d67b87d5e199ea303d**.
-- Exact tree: **4f1816b0700157ac1c71d170d08a0116af19eac4**.
-- Development proofs: System **36722013148**, Quality **36722013116**, I.T. **36722013224**, Hygiene **36722013237**.
-- Supplemental proofs: D1 Fan-Out **36722013190**, Build 315 **36722013591**.
-- Production main SHA: **7c8605c627c25443df24d08b5ffecb3fa315c084**.
-- Production Pages Deploy: **36722265165 — SUCCESS**.
-- Production Live Resource Integrity: **36722386886 — SUCCESS**.
-- Build 315 factual Search Console state: **EVIDENCE_PENDING_NO_REAL_EXPORT**, 0 batches, 0 staged rows, 2,049 D1 rows read.
+- Development SHA: **d4511f2539b03e35e0989716065888c42b008fb1**.
+- Exact tree: **f89d348018b48ddcb9adad0229e745913051a168**.
+- Development proofs: System **36726555680**, Quality **36726555682**, I.T. **36726555759**, Hygiene **36726555685**.
+- Supplemental proofs: D1 Fan-Out **36726555683**, Build 316 **36726555652**.
+- Production main SHA: **ed9a89f070ecd05fcd3024df9b2ba4ddcbb7b33e**.
+- Production Pages Deploy: **36726827868 — SUCCESS**.
+- Production Live Resource Integrity: **36726943717 — SUCCESS**.
+- Build 316 factual discovery state: **EVIDENCE_PENDING_NO_SEARCH_QUERY_DATA**, 0 Search Console rows, 0 eligible SEO pairs, 22 public page views / 30 days, 106 D1 rows read.
 
-Build 316 interprets only real Search Console/public telemetry evidence. Query-level SEO review items require real page/query/impression evidence. The operator queue no longer generates title, meta description, H1 or internal-link wording; those fields must be written explicitly by a reviewer, and the Search Console evidence is rechecked before Apply.
+Build 317 remeasured all three remaining unprofiled Creative Projects and found **NO_THIRD_PROJECT_FACTUALLY_READY**. Grey Hair is the closest candidate but currently has 0 execution/timeline events, 1 approved CAIP source-evidence range, 0 reviewed story plans, 45 active CAIP assets and 0 public-allowed assets. Lime in you coconut and Shirley Not remain metadata-only projects with no execution or reviewed CAIP story evidence.
 
-Public telemetry remains observation-only and cannot substitute for query/impression evidence. With no real Search Console export, Build 316 must preserve an evidence-pending/no-query-action state rather than manufacture SEO opportunities.
+No third Maker Story profile or evidence-selection row was created. Private CAIP media remains private and public-media rights were not inferred.
 
 The queue **has not run out**.
 
-**Next after Build 316 Production GREEN: Build 317 — Third Project Maker Story Readiness & Evidence Selection.**
+**Next after Build 317 Production GREEN: Build 318 — Content Adoption & Discovery Outcomes Renewal III.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md`.
 
