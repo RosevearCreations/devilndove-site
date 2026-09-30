@@ -210,7 +210,7 @@
   "next_build": 319,
   "next_build_state": "QUEUED_AFTER_BUILD318_PRODUCTION_GREEN",
   "next_build_title": "35th Promo Execution Evidence Intake & Completeness",
-  "promotion_state": "BUILD318_MEASURED_CANDIDATE_FINAL_EXACT_HEAD_REPROOF_REQUIRED",
+  "promotion_state": "BUILD318_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "BUILD318_MEASURED_ROADMAP_319_324_CREATED",
   "measured_closure": {
     "source_build": 232,
