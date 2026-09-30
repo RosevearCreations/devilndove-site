@@ -1,0 +1,133 @@
+{
+  "release": 467,
+  "build": 318,
+  "title": "Content Adoption & Discovery Outcomes Renewal III",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "OUTCOMES_RENEWAL_III_MEASUREMENT_PENDING",
+  "authority": "release467-build318-content-adoption-discovery-outcomes-renewal-iii",
+  "predecessor": {
+    "build": 317,
+    "title": "Third Project Maker Story Readiness & Evidence Selection",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5",
+    "development_tree_sha": "b721482133a03fd851f36078320527784e247247",
+    "development_proofs": {
+      "system_gate_run": 36729883162,
+      "current_application_quality_run": 36729883209,
+      "it_admin_runtime_proof_run": 36729883145,
+      "branch_hygiene_run": 36729883405,
+      "d1_ci_fanout_guard_run": 36729883348,
+      "build_specific_proof_run": 36729883266
+    },
+    "production_main_sha": "9d2ccc468ea810fdd6cf0e6f2527d50c6418876e",
+    "production_tree_sha": "b721482133a03fd851f36078320527784e247247",
+    "production_pages_deploy_run": 36730175002,
+    "production_live_resource_integrity_run": 36730305787,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "scope": {
+    "full_path_remeasurement": true,
+    "build300_comparison": true,
+    "build306_comparison": true,
+    "build312_comparison": true,
+    "builds313_317_outcome_rollup": true,
+    "maker_story_coverage": true,
+    "review_state": true,
+    "publication": true,
+    "discovery": true,
+    "runtime": true,
+    "d1_read_outcomes": true,
+    "seo_review_queue_continuity": true,
+    "third_project_readiness_continuity": true,
+    "next_roadmap_from_observed_evidence_only": true
+  },
+  "baselines": {
+    "build300": {
+      "maker_profiles": 0,
+      "reviewed_maker_stories": 0,
+      "public_story_candidates": 0,
+      "selected_evidence_rows": 0,
+      "approved_deliverables": 0,
+      "copy_locked_deliverables": 0,
+      "published_journal_rows": 0,
+      "approved_social_rows": 0,
+      "search_console_rows": 0,
+      "coverage": "0/5",
+      "rows_read": 471
+    },
+    "build306": {
+      "maker_profiles": 1,
+      "reviewed_maker_stories": 0,
+      "public_story_candidates": 0,
+      "selected_evidence_rows": 3,
+      "approved_deliverables": 2,
+      "copy_locked_deliverables": 2,
+      "published_journal_rows": 1,
+      "approved_social_rows": 1,
+      "search_console_rows": 0,
+      "coverage": "1/5",
+      "rows_read": 1067
+    },
+    "build312": {
+      "maker_profiles": 2,
+      "reviewed_maker_stories": 1,
+      "public_story_candidates": 1,
+      "selected_evidence_rows": 4,
+      "approved_deliverables": 4,
+      "copy_locked_deliverables": 4,
+      "published_journal_rows": 1,
+      "approved_social_rows": 1,
+      "search_console_rows": 0,
+      "coverage": "2/5",
+      "rows_read": 2820
+    }
+  },
+  "known_builds_313_317": {
+    "second_story_review_decision": "REMAIN_NEEDS_REVIEW_PENDING_EXECUTION_RESULT_LESSON_EVIDENCE",
+    "second_story_publication_readiness": "BLOCKED",
+    "search_console_intake": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "buyer_discovery_interpretation": "EVIDENCE_PENDING_NO_SEARCH_QUERY_DATA",
+    "third_project_selection": "NO_THIRD_PROJECT_FACTUALLY_READY"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_exposure": false,
+    "automatic_story_generation": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "automatic_social_posting": false,
+    "automatic_seo_apply": false,
+    "indexnow_execution": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "traffic_fabrication": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5",
+      "tree": "b721482133a03fd851f36078320527784e247247",
+      "system_gate_run": 36729883162,
+      "quality_run": 36729883209,
+      "it_admin_runtime_run": 36729883145,
+      "repository_hygiene_run": 36729883405,
+      "d1_ci_fanout_guard_run": 36729883348,
+      "build_specific_proof_run": 36729883266
+    },
+    "production": {
+      "main_sha": "9d2ccc468ea810fdd6cf0e6f2527d50c6418876e",
+      "tree": "b721482133a03fd851f36078320527784e247247",
+      "production_pages_deploy_run": 36730175002,
+      "production_live_resource_integrity_run": 36730305787
+    }
+  },
+  "measurement_state": "PENDING_EXACT_DEVELOPMENT",
+  "roadmap_renewal_state": "PENDING_OBSERVED_BUILD318_EVIDENCE",
+  "next_build": 319,
+  "next_build_title": "Pending Build 318 evidence-driven roadmap",
+  "future_queue_exhausted": false
+}
