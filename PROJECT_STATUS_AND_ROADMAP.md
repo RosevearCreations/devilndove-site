@@ -2,26 +2,26 @@
 
 ## Current checkpoint
 
-**Build 321 — Search Console Real Export Intake Continuity II** is the active Development candidate over exact Build 320 Development/Production GREEN.
+**Build 322 — Buyer Discovery Attribution & SEO Review Evidence Continuity** is the active Development candidate over exact Build 321 Development/Production GREEN.
 
-Build 320 is fully verified and promoted:
+Build 321 is fully verified and promoted:
 
-- Development SHA: **a5348eea48616a934a2994309d0738f05d706af9**
-- Exact tree: **1bf94721855837958a546e033e0bead0f3f97580**
-- Development proofs: System **36755683525**, Quality **36755683559**, I.T. **36755683417**, Hygiene **36755683610**
-- Supplemental proofs: D1 Fan-Out **36755683521**, Build 320 **36755683468**
-- Production main SHA: **e84cda2db64f0af93aa1f88cc71fb7079fe5fd54**
-- Production Pages Deploy: **36755991930 — SUCCESS**
-- Production Live Resource Integrity: **36756208135 — SUCCESS**
+- Development SHA: **215b9277f62d1359fda07d3d72ba3cf6ee47a353**
+- Exact tree: **7df16d3a91159cefaf66435854fdffb4914ad921**
+- Development proofs: System **36765313336**, Quality **36765313431**, I.T. **36765313437**, Hygiene **36765313607**
+- Supplemental proofs: D1 Fan-Out **36765313506**, Build 321 **36765313864**
+- Production main SHA: **e761df76426a52e7bc3553189988058037979ad2**
+- Production Pages Deploy: **36765763021 — SUCCESS**
+- Production Live Resource Integrity: **36765982082 — SUCCESS**
 - Exact Development and Production tree: **MATCH**.
 
-Build 321 keeps the existing Search Console intake operator-controlled and factual. New imports require explicit confirmation that the input is a real Google Search Console Performance export and recognizable Page/Clicks/Impressions/CTR/Position headers. CI remains read-only.
+Build 322 composes the existing operator-controlled Search Console intake with evidence-backed SEO review. Query-level attribution requires real current Search Console evidence; public telemetry is observation-only. Stale or unsupported review rows remain non-actionable, and SEO wording remains explicitly human-authored before apply.
 
-If no real export is staged, the correct state is **EVIDENCE_PENDING_NO_REAL_EXPORT**. Build 321 never synthesizes queries, clicks, impressions or batches and never auto-imports provider data.
+If no real export is staged, the correct attribution state is **EVIDENCE_PENDING_NO_REAL_SEARCH_CONSOLE_ATTRIBUTION**. Build 322 never synthesizes queries, clicks, impressions or queue rows, never auto-applies SEO, and never contacts Production D1.
 
 The queue **has not run out**.
 
-**Next after Build 321 Production GREEN: Build 322 — Buyer Discovery Attribution & SEO Review Evidence Continuity.**
+**Next after Build 322 Production GREEN: Build 323 — Maker Story Coverage & Publication Readiness Continuity.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md`.
 

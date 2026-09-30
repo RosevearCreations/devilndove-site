@@ -30,7 +30,7 @@ q(scope.get('request_time_schema_repair_removed') is True and scope.get('zero_ev
 q(contract.get('measurement_window_days')==30 and contract.get('missing_schema_fails_closed') is True,'Build 311 30-day/fail-closed contract mismatch')
 q(contract.get('indexnow_execution') is False and contract.get('provider_execution') is False,'Build 311 provider boundary mismatch')
 
-q(("build:311" in api) or ("build:316" in api),'Build 311 buyer measurement API missing compatible build marker')
+q(any(x in api for x in ("build:311","build:316","build:322")),'Build 311 buyer measurement API missing compatible build marker')
 for token in ("window_days:30","search_intake","schema_readiness","latest_report_age_days","other_public_rows","traffic_fabrication:false","indexnow_submission:false"):
     q(token in api,'Build 311 buyer measurement API missing '+token)
 q('export async function onRequestGet' in api and 'onRequestPost' not in api,'Build 311 buyer measurement API must remain GET-only')
@@ -42,9 +42,10 @@ for token in ('SEARCH_CONSOLE_REQUIRED_TABLES','searchConsoleSchemaReadiness','s
 for forbidden in ('CREATE TABLE IF NOT EXISTS','ALTER TABLE seo_opportunity_actions','CREATE INDEX IF NOT EXISTS'):
     q(forbidden not in intake,'Build 311 request-time schema mutation remains: '+forbidden)
 
-q(('Build 311 • evidence freshness' in ui) or ('Build 316 • evidence interpretation' in ui),'Build 311 UI missing compatible successor heading')
-for token in ('Search intake:','Request-time schema repair is OFF','Attribution:','30 days'):
+q(any(x in ui for x in ('Build 311 • evidence freshness','Build 316 • evidence interpretation','Build 322 • attribution continuity')),'Build 311 UI missing compatible successor heading')
+for token in ('Search intake:','Request-time schema repair is OFF','30 days'):
     q(token in ui,'Build 311 UI missing '+token)
+q(('Attribution:' in ui) or ('Real Search Console attribution:' in ui),'Build 311 UI missing compatible attribution label')
 q(('admin-buyer-discovery-measurement.js?v=467b311' in page) or ('admin-buyer-discovery-measurement.js?v=467b316' in page),'Build 311 buyer panel cache version missing')
 
 upper=' '+re.sub(r'--.*','',sql).upper()+' '

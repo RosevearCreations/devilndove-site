@@ -1,0 +1,107 @@
+{
+  "release": 467,
+  "build": 322,
+  "title": "Buyer Discovery Attribution & SEO Review Evidence Continuity",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "BUYER_DISCOVERY_ATTRIBUTION_SEO_REVIEW_CONTINUITY",
+  "authority": "release467-build322-buyer-discovery-attribution-seo-review-evidence-continuity",
+  "predecessor": {
+    "build": 321,
+    "title": "Search Console Real Export Intake Continuity II",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "215b9277f62d1359fda07d3d72ba3cf6ee47a353",
+    "development_tree_sha": "7df16d3a91159cefaf66435854fdffb4914ad921",
+    "development_proofs": {
+      "system_gate_run": 36765313336,
+      "current_application_quality_run": 36765313431,
+      "it_admin_runtime_proof_run": 36765313437,
+      "branch_hygiene_run": 36765313607,
+      "d1_ci_fanout_guard_run": 36765313506,
+      "build_specific_proof_run": 36765313864
+    },
+    "measurement": {
+      "state": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+      "artifact_id": 11120372540,
+      "aggregate_rows_read": 2005,
+      "rows_read_ceiling": 20000
+    },
+    "production_main_sha": "e761df76426a52e7bc3553189988058037979ad2",
+    "production_tree_sha": "7df16d3a91159cefaf66435854fdffb4914ad921",
+    "production_pages_deploy_run": 36765763021,
+    "production_live_resource_integrity_run": 36765982082,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "evidence_sources": [
+      "search_console_import_batches",
+      "search_console_page_queries",
+      "site_page_views",
+      "seo_opportunity_actions"
+    ],
+    "attribution_mode": "QUERY_LEVEL_ATTRIBUTION_ONLY_FROM_REAL_SEARCH_CONSOLE",
+    "query_level_attribution_requires_real_search_console": true,
+    "public_telemetry_supports_observation_only": true,
+    "current_evidence_window_days": 30,
+    "opportunity_min_impressions_default": 10,
+    "opportunity_average_position_range": [4, 20],
+    "queue_semantics": "EVIDENCE_BACKED_HUMAN_REVIEW_ONLY",
+    "unsupported_or_stale_pending_rows_non_actionable": true,
+    "generated_title": false,
+    "generated_meta_description": false,
+    "generated_internal_link": false,
+    "generated_h1": false,
+    "explicit_human_copy_required_before_apply": true,
+    "current_evidence_required_before_apply": true,
+    "zero_real_search_evidence_creates_zero_new_queue_rows": true,
+    "automatic_queue_generation": false,
+    "automatic_seo_apply": false,
+    "indexnow_execution": false,
+    "provider_execution": false,
+    "next_build": 323,
+    "next_build_title": "Maker Story Coverage & Publication Readiness Continuity",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "synthetic_search_rows": false,
+    "traffic_fabrication": false,
+    "automatic_queue_mutation": false,
+    "automatic_seo_copy_generation": false,
+    "automatic_seo_apply": false,
+    "indexnow_execution": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "215b9277f62d1359fda07d3d72ba3cf6ee47a353",
+      "tree": "7df16d3a91159cefaf66435854fdffb4914ad921",
+      "system_gate_run": 36765313336,
+      "quality_run": 36765313431,
+      "it_admin_runtime_run": 36765313437,
+      "repository_hygiene_run": 36765313607,
+      "d1_ci_fanout_guard_run": 36765313506,
+      "build_specific_proof_run": 36765313864
+    },
+    "production": {
+      "main_sha": "e761df76426a52e7bc3553189988058037979ad2",
+      "tree": "7df16d3a91159cefaf66435854fdffb4914ad921",
+      "production_pages_deploy_run": 36765763021,
+      "production_live_resource_integrity_run": 36765982082
+    }
+  },
+  "measurement_state": "PENDING_EXACT_DEVELOPMENT_ATTRIBUTION_MEASUREMENT",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md",
+  "decision": {
+    "classification": "AWAIT_EXACT_DEVELOPMENT_ATTRIBUTION_CONTINUITY_MEASUREMENT",
+    "synthetic_evidence_authorized": false,
+    "automatic_queue_generation_authorized": false,
+    "automatic_seo_apply_authorized": false,
+    "next_build": 323,
+    "next_build_title": "Maker Story Coverage & Publication Readiness Continuity"
+  }
+}
