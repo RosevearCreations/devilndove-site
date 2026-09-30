@@ -1,16 +1,18 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 301 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 302 candidate
 
-Build 301 — First Real Maker Story Adoption & Completeness — is projected over exact Build 300 Production GREEN.
+Build 302 — CAIP Evidence Selection & Public-Safety Review Adoption — is projected over exact Build 301 Production GREEN.
 
-- Last fully verified Development: `6361b02f467fa4b9bf54dd8638cccefc57bd817e`
-- Verified tree: `6316130ee40beb8540e88da51065f3a75d1c527a`
-- Development proofs: System `36645926155`, Quality `36645926199`, I.T. `36645926079`, Hygiene `36645926110`, Build 300 `36645926113`
-- Current Production main: `e569d5fce0ff5ab08a3d1dc6be1051211ed15ac2`
-- Production proofs: Pages `36646103793`, Live Resources `36646198769`
-- Build 301 discovery selected real Creative Project 7 — Under the Sea from 77 read-only D1 rows.
-- Final adoption is bounded to one Maker Story profile plus refresh of the existing CAIP source snapshot. The story uses only recorded project/timeline facts, explicitly says no finished-result entry exists yet, remains `needs_review`, and must retain exactly one CAIP workspace and one Content Studio package.
-- No automatic Content Studio refresh, evidence selection, private-media permission change, approval or publication.
-- Next after Build 301 Production GREEN: Build 302 — CAIP Evidence Selection & Public-Safety Review Adoption.
+- Last fully verified Development: `e180724a52210fdf56c4d53b5221be2f121c36de`
+- Verified tree: `d11b3492ef6d389270d9acc58d94e4740591bb38`
+- Development proofs: System `36648100957`, Quality `36648101025`, I.T. `36648101016`, Hygiene `36648100985`
+- Supplemental Build 301 proofs: D1 Fan-Out `36648101024`, Build 301 `36648100984`
+- Current Production main: `3eec733afd9b8c585efaab1c8a89fa244d9f65d8`
+- Production proofs: Pages `36648294020`, Live Resources `36648362724`
+- Build 301 real adoption: Creative Project 7 — Under the Sea; one factual Maker Story; `needs_review`; public-story candidate `0`.
+- Build 302 first performs read-only Development discovery of the three active timeline facts plus linked CAIP asset/private-upload rights and privacy states.
+- Evidence selection does not grant public-use rights. No CAIP asset or private upload may be inferred `public_allowed`.
+- No Content Studio refresh, approval, publication, provider execution, R2 mutation or Production D1 business-data contact.
+- Next after Build 302 Production GREEN: Build 303 — Content Studio Draft Review & Approval Adoption.
 
 ## Current release baseline
 

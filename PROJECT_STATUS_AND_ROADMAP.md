@@ -2,21 +2,20 @@
 
 ## Current checkpoint
 
-**Build 301 — First Real Maker Story Adoption & Completeness** is active in Development adoption.
+**Build 302 — CAIP Evidence Selection & Public-Safety Review Adoption** is active in Development discovery.
 
-Build 300 is the exact Development and Production GREEN baseline. Build 301 selected real Creative Project 7 — Under the Sea after read-only discovery. The final Development candidate adopts exactly one factual Maker Story from its recorded planning/material-use facts, remains needs_review, and does not claim a finished result.
+Build 301 is the exact Development and Production GREEN baseline. The real Creative Project **7 — Under the Sea** already has one factual Maker Story in `needs_review` with no public-story candidacy. Build 302 now measures the three active timeline facts and the linked CAIP rights/privacy state before selecting evidence.
 
-- Build 300 Development: `6361b02f467fa4b9bf54dd8638cccefc57bd817e`
-- Build 300 Production: `e569d5fce0ff5ab08a3d1dc6be1051211ed15ac2`
-- Shared predecessor tree: `6316130ee40beb8540e88da51065f3a75d1c527a`
-- Build 301 schema change: **NONE**
-- Discovery evidence: **77 D1 rows read / READ ONLY**
-- Selected real project: **7 — Under the Sea**
-- Final Development mutation: **ONE MAKER STORY PROFILE + EXISTING CAIP SNAPSHOT REFRESH**
-- Final story review status target: **NEEDS REVIEW**
-- Public-story candidate: **NO**
-- Automatic Content Studio refresh/publication: **NONE**
-- Next: **Build 302 — CAIP Evidence Selection & Public-Safety Review Adoption**
+- Build 301 Development: `e180724a52210fdf56c4d53b5221be2f121c36de`
+- Build 301 Production: `3eec733afd9b8c585efaab1c8a89fa244d9f65d8`
+- Shared predecessor tree: `d11b3492ef6d389270d9acc58d94e4740591bb38`
+- Build 302 schema change: **NONE**
+- Initial Development discovery: **READ ONLY**
+- Evidence selection target: **FACTUAL TIMELINE ONLY**
+- Public-use rights inference: **NONE**
+- CAIP private-media exposure/R2 mutation: **NONE**
+- Content Studio refresh/approval/publication: **NONE**
+- Next: **Build 303 — Content Studio Draft Review & Approval Adoption**
 
 ## Next production queue — Builds 301–306
 

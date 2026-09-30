@@ -12,7 +12,7 @@ sql=t('scripts/release467_build301_real_project_discovery.sql')
 adopt=t('scripts/release467_build301_adopt_real_maker_story.sql')
 wf=t('.github/workflows/release467-build301-first-real-maker-story-adoption-completeness.yml')
 q(a.get('build')==301 and a.get('title')=='First Real Maker Story Adoption & Completeness','Build 301 identity mismatch')
-q(a.get('phase')=='REAL_MAKER_STORY_ADOPTION_CANDIDATE','Build 301 phase mismatch')
+q(a.get('phase') in ('REAL_MAKER_STORY_ADOPTION_CANDIDATE','REAL_MAKER_STORY_ADOPTED_COMPLETE'),'Build 301 phase mismatch')
 for token in ('creative_work_projects','creative_project_maker_story_profiles','creative_work_events','creative_projects','content_projects','creative_project_evidence_selections'):
     q(token in sql,'Build 301 discovery SQL missing '+token)
 upper=' '+re.sub(r'--.*','',sql).upper()+' '
