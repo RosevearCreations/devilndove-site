@@ -116,5 +116,14 @@
     "provider_publication": false,
     "production_d1_contact": false,
     "note": "Mutation/evidence job succeeded; overall first candidate was not final exact-head proof because source-contract controls required successor alignment."
+  },
+  "candidate_control_alignment": {
+    "state": "SOURCE_AND_RUNTIME_CONTROLS_ALIGNED_FINAL_EXACT_HEAD_REPROOF_REQUIRED",
+    "intermediate_head": "b244b3f9eabab51b65cffd00b7cdf8e88903233c",
+    "system_gate_run": 36656767006,
+    "current_application_quality_run": 36656766999,
+    "it_admin_runtime_proof_run": 36656766900,
+    "branch_hygiene_run": 36656767011,
+    "note": "These runs establish control alignment only; final closure still requires fresh proofs bound to the final dev head."
   }
 }
