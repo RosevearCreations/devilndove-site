@@ -50,6 +50,7 @@ jobs:
         with: { node-version: '24' }
       # D1_ONE_SHOT_EVIDENCE_CAPTURE — Build 312 bounded Development-only read measurement.
       # Initial measured baseline: 16 statements / 2,820 rows; final exact-head rerun required.
+      # Historical roadmap compatibility is successor-aware through Build 312; this commit is the final exact-head proof trigger.
       - name: Prove exact Development D1
         run: |
           set -euo pipefail
