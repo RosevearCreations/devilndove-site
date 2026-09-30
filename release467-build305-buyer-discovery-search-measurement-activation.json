@@ -2,8 +2,8 @@
   "release": 467,
   "build": 305,
   "title": "Buyer Discovery & Search Measurement Activation",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "BUYER_DISCOVERY_SEARCH_MEASUREMENT_ACTIVE",
+  "state": "PRODUCTION_GREEN",
+  "phase": "BUYER_DISCOVERY_SEARCH_MEASUREMENT_COMPLETE",
   "authority": "release467-build305-buyer-discovery-search-measurement-activation",
   "predecessor": {
     "build": 304,
@@ -152,5 +152,32 @@
     "branch_hygiene_run": 36658102649,
     "build_specific_proof_run": 36658102512,
     "note": "These runs establish candidate control alignment only. Final closure requires fresh exact-head proofs, including D1 CI Fan-Out, bound to the final dev SHA."
+  },
+  "final_closure": {
+    "dev_sha": "605ca2409c9aa4f5a1b9882ebcf498e19c4ba806",
+    "tree_sha": "8490cb65bbde1ac3e9698da8af13605f57419a9d",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD305_GREEN",
+    "proofs": {
+      "system_gate_run": 36658299831,
+      "current_application_quality_run": 36658299756,
+      "it_admin_runtime_proof_run": 36658299810,
+      "branch_hygiene_run": 36658299856
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36658299742,
+      "build_specific_proof_run": 36658299747
+    },
+    "ingested_by_build": 306
+  },
+  "production_checkpoint": {
+    "main_sha": "436eb9fac8ee3d9ee1a25b8fdad9a3820ceaa34e",
+    "tree_sha": "8490cb65bbde1ac3e9698da8af13605f57419a9d",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36658476609,
+    "production_live_resource_integrity_run": 36658546053,
+    "remote_d1_queries": 0,
+    "ingested_by_build": 306
   }
 }

@@ -1,5 +1,18 @@
-name: Release 467 Build 305 Buyer Discovery Search Measurement
+name: Release 467 Build 306 CAIP Content Adoption Outcomes Renewal
 on:
+  push:
+    branches: [dev]
+    paths:
+      - 'scripts/release467_build306_*'
+      - 'scripts/release467_build305_regression.py'
+      - 'release467-build306-*.json'
+      - 'release467-build305-*.json'
+      - 'current-development-authority.json'
+      - 'PROJECT_STATUS_AND_ROADMAP.md'
+      - 'docs/operations/RELEASE_467_BUILD_306_*'
+      - 'docs/operations/RELEASE_467_CONTENT_ADOPTION_COVERAGE_DISCOVERY_BUILDS_307_312.md'
+      - 'docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md'
+      - '.github/workflows/release467-build306-caip-content-adoption-outcomes-renewal.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -10,9 +23,9 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with: { python-version: '3.12' }
-      - run: python scripts/release467_build305_regression.py
-      - run: python scripts/release467_build305_gate.py
-  discovery-measurement:
+      - run: python scripts/release467_build306_regression.py
+      - run: python scripts/release467_build306_gate.py
+  outcomes-measurement:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -25,7 +38,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with: { node-version: '24' }
-      # D1_ONE_SHOT_EVIDENCE_CAPTURE — Build 305 bounded Development-only read measurement.
+      # D1_ONE_SHOT_EVIDENCE_CAPTURE — Build 306 bounded Development-only read measurement.
       - name: Prove exact Development D1
         run: |
           set -euo pipefail
@@ -35,23 +48,24 @@ jobs:
           ! grep -q 'devilndove-prod' wrangler.toml
           npx --yes wrangler@4.128.0 d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/info.json
           node -e "const d=require('/tmp/info.json');const s=JSON.stringify(d);if(!s.includes(process.env.EXPECTED_DEV_D1_DATABASE_ID)||!s.includes(process.env.DEV_D1_DATABASE_NAME))process.exit(1)"
-      - name: Measure buyer discovery and search evidence
+      - name: Remeasure full content-adoption outcomes
         run: |
           set -euo pipefail
-          COMMAND="$(grep -v '^[[:space:]]*--' scripts/release467_build305_discovery.sql)"
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b305.json
-          node scripts/release467_build305_verify_discovery.mjs /tmp/b305.json "${GITHUB_SHA}" /tmp/build305-buyer-discovery-search-measurement.json
+          COMMAND="$(grep -v '^[[:space:]]*--' scripts/release467_build306_outcomes_measurement.sql)"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b306.json
+          node scripts/release467_build306_verify_measurement.mjs /tmp/b306.json "${GITHUB_SHA}" /tmp/build306-caip-content-adoption-outcomes.json
       - uses: actions/upload-artifact@v4
         with:
-          name: build305-buyer-discovery-search-measurement-${{ github.sha }}
-          path: /tmp/build305-buyer-discovery-search-measurement.json
+          name: build306-caip-content-adoption-outcomes-${{ github.sha }}
+          path: /tmp/build306-caip-content-adoption-outcomes.json
           if-no-files-found: error
           retention-days: 30
       - name: Boundary
         if: always()
         run: |
-          echo 'DEVELOPMENT D1 MUTATION: ZERO'
+          echo 'DEVELOPMENT D1 READ-ONLY: YES'
+          echo 'PRODUCTION D1 CONTACT: ZERO'
           echo 'INDEXNOW SUBMISSION: ZERO'
           echo 'PROVIDER EXECUTION: ZERO'
           echo 'PROVIDER PUBLICATION: ZERO'
-          echo 'PRODUCTION D1 CONTACT: ZERO'
+          echo 'R2 MUTATION: ZERO'

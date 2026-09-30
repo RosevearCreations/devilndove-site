@@ -49,3 +49,7 @@ Remeasure the full Creative Process → CAIP → Content Studio → reviewed pub
 No duplicate project/package authority. No automatic approval or public publication. No private CAIP media exposure. No request-time schema mutation. Production business data remains Production-owned. Exact GREEN Development tree must be promoted unchanged to Production.
 
 The future queue has **not** run out.
+
+## Build 306 measured closure
+
+Build 306 completed the 301–306 adoption cycle with one real end-to-end reviewed story path and zero duplicate identities/private-media exposure. Coverage remains 1/5 active Creative Projects and discovery/Search Console evidence remains absent. Successor roadmap: `docs/operations/RELEASE_467_CONTENT_ADOPTION_COVERAGE_DISCOVERY_BUILDS_307_312.md`.

@@ -1,0 +1,271 @@
+{
+  "release": 467,
+  "build": 306,
+  "title": "CAIP Content Adoption Outcomes Renewal & Roadmap Renewal",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "OUTCOMES_REMEASURED_ROADMAP_RENEWED",
+  "authority": "release467-build306-caip-content-adoption-outcomes-renewal-roadmap-renewal",
+  "predecessor": {
+    "build": 305,
+    "title": "Buyer Discovery & Search Measurement Activation",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "605ca2409c9aa4f5a1b9882ebcf498e19c4ba806",
+    "development_tree_sha": "8490cb65bbde1ac3e9698da8af13605f57419a9d",
+    "development_proofs": {
+      "system_gate_run": 36658299831,
+      "current_application_quality_run": 36658299756,
+      "it_admin_runtime_proof_run": 36658299810,
+      "branch_hygiene_run": 36658299856,
+      "d1_ci_fanout_guard_run": 36658299742,
+      "build_specific_proof_run": 36658299747
+    },
+    "production_main_sha": "436eb9fac8ee3d9ee1a25b8fdad9a3820ceaa34e",
+    "production_tree_sha": "8490cb65bbde1ac3e9698da8af13605f57419a9d",
+    "production_pages_deploy_run": 36658476609,
+    "production_live_resource_integrity_run": 36658546053,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "starting_point": {
+    "development": {
+      "sha": "605ca2409c9aa4f5a1b9882ebcf498e19c4ba806",
+      "tree": "8490cb65bbde1ac3e9698da8af13605f57419a9d",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 36658299831,
+      "quality_run": 36658299756,
+      "it_admin_runtime_run": 36658299810,
+      "repository_hygiene_run": 36658299856,
+      "d1_ci_fanout_guard_run": 36658299742,
+      "build_specific_proof_run": 36658299747
+    },
+    "production": {
+      "main_sha": "436eb9fac8ee3d9ee1a25b8fdad9a3820ceaa34e",
+      "tree": "8490cb65bbde1ac3e9698da8af13605f57419a9d",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 36658476609,
+      "production_live_resource_integrity_run": 36658546053,
+      "remote_d1_queries": 0
+    }
+  },
+  "measurement_checkpoint": {
+    "source_sha": "dc3f63f3e1ab9e2d77ba2ed872a990ced46d8335",
+    "workflow_run": 36659852174,
+    "job_id": 109711974444,
+    "statements": 14,
+    "rows_read_by_statement": [
+      6,
+      13,
+      49,
+      193,
+      105,
+      2,
+      4,
+      26,
+      39,
+      45,
+      6,
+      48,
+      531,
+      0
+    ],
+    "aggregate_rows_read": 1067,
+    "rows_read_ceiling": 20000,
+    "production_d1_contact": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "indexnow_submission": false
+  },
+  "outcome_evidence": {
+    "maker_story": {
+      "active_creative_projects": 5,
+      "maker_profiles": 1,
+      "active_maker_stories": 1,
+      "reviewed_maker_stories": 0,
+      "public_story_candidates": 0,
+      "core_story_complete": 1
+    },
+    "identity": {
+      "duplicate_caip_source_identities": 0,
+      "duplicate_content_source_identities": 0,
+      "duplicate_workstation_memberships": 0
+    },
+    "private_media": {
+      "caip_assets": 46,
+      "active_caip_assets": 45,
+      "public_allowed_assets": 0,
+      "non_public_assets": 46,
+      "selected_evidence_rows": 3
+    },
+    "bridge": {
+      "active_creative_projects": 5,
+      "linked_caip_workspaces": 5,
+      "linked_content_packages": 5,
+      "handoff_rows": 5,
+      "bridge_events": 42
+    },
+    "deliverables": {
+      "deliverables": 95,
+      "approved_deliverables": 2,
+      "changes_requested_deliverables": 17,
+      "published_deliverables": 0,
+      "copy_locked_deliverables": 2,
+      "factual_template_deliverables": 95
+    },
+    "workshop_journal": {
+      "workshop_journal_rows": 1,
+      "approved_journal_rows": 0,
+      "published_journal_rows": 1,
+      "human_publisher_recorded": 1,
+      "under_the_sea_published": 1
+    },
+    "social": {
+      "social_rows": 1,
+      "approved_social_rows": 1,
+      "ready_social_rows": 1,
+      "posted_social_rows": 0,
+      "human_social_approval_rows": 1,
+      "review_first_rows": 1
+    },
+    "engagement_30d": {
+      "journal_page_views": 0,
+      "under_the_sea_story_views": 0,
+      "product_detail_views": 0,
+      "total_page_views": 25,
+      "unique_visitors": 24,
+      "latest_page_view_at": "2026-09-11 07:48:01"
+    },
+    "runtime_search": {
+      "runtime_errors_7d": 0,
+      "client_runtime_records_7d": 0,
+      "searches_30d": 0,
+      "search_console_rows_30d": 0,
+      "search_console_clicks_30d": 0,
+      "search_console_impressions_30d": 0,
+      "under_the_sea_search_rows_30d": 0
+    },
+    "merchant": {
+      "active_products": 40,
+      "reviewed_products": 40,
+      "merchant_fact_complete_products": 40
+    },
+    "coverage": {
+      "active_projects": 5,
+      "projects_with_maker_story_profile": 1,
+      "projects_with_caip_workspace": 5,
+      "projects_with_content_package": 5,
+      "projects_with_approved_deliverable": 1,
+      "projects_with_published_journal": 1
+    },
+    "target_path": {
+      "maker_story_profile": 1,
+      "selected_evidence": 3,
+      "content_package": 1,
+      "approved_deliverables": 2,
+      "locked_deliverables": 2,
+      "published_journal": 1,
+      "social_ready_review_first": 1,
+      "social_posted": 0,
+      "project_operations": 0
+    },
+    "foreign_key_violations": 0
+  },
+  "comparison_to_build300": {
+    "maker_story_profiles": {
+      "before": 0,
+      "after": 1,
+      "delta": 1
+    },
+    "selected_evidence_rows": {
+      "before": 0,
+      "after": 3,
+      "delta": 3
+    },
+    "approved_deliverables": {
+      "before": 0,
+      "after": 2,
+      "delta": 2
+    },
+    "copy_locked_deliverables": {
+      "before": 0,
+      "after": 2,
+      "delta": 2
+    },
+    "published_journal_rows": {
+      "before": 0,
+      "after": 1,
+      "delta": 1
+    },
+    "approved_social_rows": {
+      "before": 0,
+      "after": 1,
+      "delta": 1
+    },
+    "search_console_rows": {
+      "before": 0,
+      "after": 0,
+      "delta": 0
+    },
+    "active_project_maker_story_coverage": {
+      "before": "0/5",
+      "after": "1/5"
+    },
+    "identity_duplicates": {
+      "before": 0,
+      "after": 0
+    },
+    "merchant_fact_complete_products": {
+      "before": 40,
+      "after": 40
+    }
+  },
+  "decision": {
+    "classification": "REAL_ADOPTION_PROVEN_COVERAGE_AND_DISCOVERY_GAPS_REMAIN",
+    "rationale": "The first real Creative Project completed the reviewed content path through evidence selection, approved locked copy, Workshop Journal publication and a review-first social handoff without duplicate identities or private-media exposure. Coverage remains 1/5 active projects, Maker Story profile review/public-candidate fields remain unreviewed/false, social provider posting remains intentionally absent, and no Search Console or story-view evidence has arrived.",
+    "automation_refinement": "NO_NEW_AUTONOMOUS_GENERATION",
+    "next_strategy": "EXPLICIT_REVIEW_TRACEABILITY_THEN_ONE_REAL_PROJECT_AT_A_TIME_WITH_DISCOVERY_EVIDENCE",
+    "automatic_story_creation": false,
+    "automatic_content_refresh": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "automatic_provider_execution": false
+  },
+  "scope": {
+    "full_path_remeasurement": true,
+    "build300_comparison": true,
+    "coverage_measurement": true,
+    "review_state_traceability_gap": true,
+    "search_evidence_gap": true,
+    "next_roadmap_created": true,
+    "schema_change": false,
+    "development_d1_read_only": true,
+    "production_d1_contact": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_exposure": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "indexnow_submission": false,
+    "automatic_publication": false,
+    "production_d1_contact": false
+  },
+  "contract": {
+    "next_roadmap": "docs/operations/RELEASE_467_CONTENT_ADOPTION_COVERAGE_DISCOVERY_BUILDS_307_312.md",
+    "next_build": 307,
+    "next_build_title": "Maker Story Review-State & Publication Traceability",
+    "future_queue_exhausted": false
+  },
+  "candidate_control_alignment": {
+    "state": "SOURCE_AND_RUNTIME_CONTROLS_ALIGNED_FINAL_EXACT_HEAD_REPROOF_REQUIRED",
+    "intermediate_head": "7df61fb5bfcdc5ed619b67c069dc481701644c1a",
+    "system_gate_run": 36660510517,
+    "current_application_quality_run": 36660510482,
+    "it_admin_runtime_proof_run": 36660510510,
+    "branch_hygiene_run": 36660510571,
+    "note": "These runs prove Build 306 control-plane alignment after successor-map and roadmap convergence. Final closure still requires fresh exact-head System, Quality, I.T., Hygiene, D1 Fan-Out and Build 306 measurement proofs."
+  }
+}

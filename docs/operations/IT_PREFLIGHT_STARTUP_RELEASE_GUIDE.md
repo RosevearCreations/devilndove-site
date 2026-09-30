@@ -1,17 +1,17 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 305 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 306 candidate
 
-Build 305 — Buyer Discovery & Search Measurement Activation — is projected over exact Build 304 Development/Production GREEN.
+Build 306 — CAIP Content Adoption Outcomes Renewal & Roadmap Renewal — is projected over exact Build 305 Development/Production GREEN.
 
-- Last fully verified Development: `3dd7a39513f4dbea3d018675bbf9080397a811fc`
-- Verified tree: `4c8fe967a08e09327e923f32aeac0df6c901b3bf`
-- Development proofs: System `36656936137`, Quality `36656936159`, I.T. `36656936151`, Hygiene `36656936224`
-- Supplemental Build 304 proofs: D1 Fan-Out `36656936283`, Build 304 `36656936278`
-- Current Production main: `9666c57fd02b199359e2420db0f147c27e5c9386`
-- Production proofs: Pages `36657083820`, Live Resources `36657146626`
-- Build 304 acceptance: Under the Sea is one reviewed text-only Workshop Journal publication; one social link draft remains approved/ready/review-first and unposted.
-- Build 305 measured 168 Development D1 rows: 0 Under the Sea views, 0 Search Console rows, 40/40 fact-complete reviewed Products, 1 published story sitemap candidate, and 0 Project 7 operations.
-- Build 305 activates read-only buyer-discovery measurement only. No IndexNow submission, provider execution/publication or Production D1 business-data contact.
-- Next after Build 305 Production GREEN: Build 306 — CAIP Content Adoption Outcomes Renewal & Roadmap Renewal.
+- Last fully verified Development: `605ca2409c9aa4f5a1b9882ebcf498e19c4ba806`
+- Verified tree: `8490cb65bbde1ac3e9698da8af13605f57419a9d`
+- Development proofs: System `36658299831`, Quality `36658299756`, I.T. `36658299810`, Hygiene `36658299856`
+- Supplemental Build 305 proofs: D1 Fan-Out `36658299742`, Build 305 `36658299747`
+- Current Production main: `436eb9fac8ee3d9ee1a25b8fdad9a3820ceaa34e`
+- Production proofs: Pages `36658476609`, Live Resources `36658546053`
+- Build 306 remeasurement: 1 Maker Story profile / 5 active projects, 3 selected evidence rows, 2 approved+locked drafts, 1 published Journal story, 1 approved+ready review-first social row, 0 posted social rows.
+- Discovery remains evidence-limited: 0 Under the Sea story views and 0 Search Console rows/clicks/impressions in the measured window.
+- Build 306 Development measurement: 1,067 rows read; Production D1 contact: **ZERO**.
+- Next after Build 306 Production GREEN: Build 307 — Maker Story Review-State & Publication Traceability.
 
 ## Current release baseline
 
