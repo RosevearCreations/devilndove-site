@@ -34,7 +34,7 @@ for token in ('build300','build306','build312','build318','ADOPTION_STABLE_EVIDE
     q(token in verify,'Build 324 verifier missing '+token)
 for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','ROADMAP RENEWAL: OBSERVED EVIDENCE ONLY','COMPARISON BASELINES: BUILDS 300 / 306 / 312 / 318','BUSINESS DATA MUTATION: ZERO','PROVIDER EXECUTION: ZERO','PRODUCTION D1 CONTACT: ZERO'):
     q(token in wf,'Build 324 workflow boundary missing '+token)
-for token in ('same 18-statement outcomes model as Build 318','successor roadmap is intentionally not selected from assumptions','future queue has not run out'):
+for token in ('same 18-statement outcomes model as Build 318','Observed evidence created','future queue has not run out'):
     q(token.lower() in doc.lower(),'Build 324 documentation missing '+token)
 road2=t('docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md')
 q(a.get('measurement_state')=='EXACT_DEVELOPMENT_MEASURED_GREEN','Build 324 exact measured state missing')
