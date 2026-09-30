@@ -2,27 +2,27 @@
 
 ## Current checkpoint
 
-**Build 311 — Buyer Discovery Evidence Freshness & Search Intake** is the active Development candidate over exact Build 310 Production GREEN.
+**Build 312 — Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal** is the active Development candidate over exact Build 311 Production GREEN.
 
-Build 310 is fully verified and promoted:
+Build 311 is fully verified and promoted:
 
-- Development SHA: **c1a4778dd3aaf2a1fece8406e075da7eb2c2b74d**.
-- Exact tree: **b4aa3deaa0eed32bc601ecf51d5456e5c5d85760**.
-- Production main SHA: **43120a39d39aa0b0a2b0299967ad2e7b97eab0ee**.
-- Production Pages Deploy: **36709193312 — SUCCESS**.
-- Production Live Resource Integrity: **36709277731 — SUCCESS**.
+- Development SHA: **9a785176369bc09d16c7a6d3748ac125f260bd91**.
+- Exact tree: **c79e06aec8eeb2d0ec24e54021c359d31de8e469**.
+- Production main SHA: **e6c48ac204393ee53859dc0366e36a13f15a5460**.
+- Production Pages Deploy: **36711481530 — SUCCESS**.
+- Production Live Resource Integrity: **36711577068 — SUCCESS**.
 
-Build 311 remeasures buyer discovery in a **30-day** window and separates reviewed-story, reviewed-Product and other public-page Search Console attribution. Zero views, clicks or impressions remain valid evidence and are never synthesized.
+Build 312 remeasures the full Creative Process → CAIP → Content Studio → reviewed publication → buyer-discovery path against Builds 300 and 306. It includes the accepted Under the Sea story, the review-blocked 35th promo story, all active project coverage, Search Console/public telemetry freshness, reviewed Product/Merchant facts, runtime health, identity integrity and D1 read cost.
 
-Search Console CSV intake remains explicit operator action. Build 311 removes request-time table/index/column repair from the import endpoint; missing required Search Console tables now fail closed and must be repaired through the canonical database migration path.
+The renewed successor roadmap is **Builds 313–318**. It begins with the explicit review decision for the existing 35th promo Maker Story, then keeps publication and Search Console work review-first/evidence-driven before considering one additional real project.
 
-IndexNow remains explicit-owner-only with the exact confirmation phrase `SUBMIT INDEXNOW`. No automatic Search Console import, provider execution, traffic fabrication, R2 mutation or Production D1 contact is authorized.
+No autonomous story generation, automatic approval/publication, fabricated views/clicks/impressions, provider execution, R2 mutation or Production D1 contact is authorized.
 
 The queue **has not run out**.
 
-**Next after Build 311 Production GREEN: Build 312 — Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal.**
+**Next after Build 312 Production GREEN: Build 313 — Second Maker Story Review Decision & Completeness.**
 
-Canonical roadmap: `docs/operations/RELEASE_467_CONTENT_ADOPTION_COVERAGE_DISCOVERY_BUILDS_307_312.md`.
+Canonical roadmap: `docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md`.
 
 ---
 
