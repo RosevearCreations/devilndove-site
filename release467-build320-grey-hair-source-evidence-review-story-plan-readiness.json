@@ -2,7 +2,7 @@
   "release": 467,
   "build": 320,
   "title": "Grey Hair Source-Evidence Review & Story-Plan Readiness",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "GREY_HAIR_SOURCE_EVIDENCE_REVIEW_REQUIRED",
   "authority": "release467-build320-grey-hair-source-evidence-review-story-plan-readiness",
   "predecessor": {
@@ -94,9 +94,9 @@
   "measurement_state": "SOURCE_EVIDENCE_REVIEW_REQUIRED",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md",
   "measurement_checkpoint": {
-    "exact_development_sha": "d64e8ff21ceeefc9dd3de31e03f5dbf837b10038",
-    "workflow_run": 36755361860,
-    "artifact_id": 11116317901,
+    "exact_development_sha": "a5348eea48616a934a2994309d0738f05d706af9",
+    "workflow_run": 36755683468,
+    "artifact_id": 11115559916,
     "aggregate_rows_read": 165,
     "rows_read_ceiling": 20000,
     "caip_project_id": 23,
@@ -127,5 +127,31 @@
     "publication_authorized": false,
     "next_build": 321,
     "next_build_title": "Search Console Real Export Intake Continuity II"
+  },
+  "final_closure": {
+    "dev_sha": "a5348eea48616a934a2994309d0738f05d706af9",
+    "tree_sha": "1bf94721855837958a546e033e0bead0f3f97580",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD320_GREEN",
+    "proofs": {
+      "system_gate_run": 36755683525,
+      "current_application_quality_run": 36755683559,
+      "it_admin_runtime_proof_run": 36755683417,
+      "branch_hygiene_run": 36755683610
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36755683521,
+      "build_specific_proof_run": 36755683468
+    },
+    "ingested_by_build": 321
+  },
+  "production_checkpoint": {
+    "main_sha": "e84cda2db64f0af93aa1f88cc71fb7079fe5fd54",
+    "tree_sha": "1bf94721855837958a546e033e0bead0f3f97580",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36755991930,
+    "production_live_resource_integrity_run": 36756208135,
+    "remote_d1_queries": 0
   }
 }
