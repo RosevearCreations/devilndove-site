@@ -1,5 +1,19 @@
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 318 measured candidate
 
+Build 317 remains the exact fully verified restart and Production predecessor:
+
+- Last fully verified Development SHA: `66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5`
+- Last fully verified tree SHA: `b721482133a03fd851f36078320527784e247247`
+- Build 317 System Gate: `36729883162`
+- Build 317 Current Application Quality Proof: `36729883209`
+- Build 317 I.T. Admin Runtime Proof: `36729883145`
+- Build 317 Repository Branch Hygiene: `36729883405`
+- Current Production main SHA: `9d2ccc468ea810fdd6cf0e6f2527d50c6418876e`
+- Current Production tree SHA: `b721482133a03fd851f36078320527784e247247`
+- Production Pages Deploy: `36730175002`
+- Production Live Resource Integrity: `36730305787`
+
+
 Build 318 — Content Adoption & Discovery Outcomes Renewal III — has completed its exact Development D1 measurement over Build 317 Production GREEN.
 
 - Measurement SHA: `867432fea4ddfb9c28b6ea50f38c9a6c09c01373`
