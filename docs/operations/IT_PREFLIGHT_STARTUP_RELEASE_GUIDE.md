@@ -1,34 +1,30 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 319 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 320 candidate
 
-Build 319 — 35th Promo Execution Evidence Intake & Completeness — is projected over exact Build 318 Development/Production GREEN.
+Build 320 — Grey Hair Source-Evidence Review & Story-Plan Readiness — is projected over exact Build 319 Development/Production GREEN.
 
-- Last fully verified Development SHA: `90e3c5c14643dfef21b8d4435c81e92606eb75d4`
-- Last fully verified tree SHA: `0c1546c92eebdbdc6039a15c7fd7a7fd63055c3e`
-- Build 318 System Gate: `36735110215`
-- Build 318 Current Application Quality Proof: `36735110177`
-- Build 318 I.T. Admin Runtime Proof: `36735110176`
-- Build 318 Repository Branch Hygiene: `36735110294`
-- Build 318 D1 Fan-Out Guard: `36735110195`
-- Build 318 dedicated proof: `36735110092`
-- Current Production main SHA: `e51706c73352af58cac0640a12e915c5b4b2796d`
-- Current Production tree SHA: `0c1546c92eebdbdc6039a15c7fd7a7fd63055c3e`
-- Production Pages Deploy: `36735477464`
-- Production Live Resource Integrity: `36735618674`
+- Last fully verified Development SHA: `a068ec13ec14aedf6d62dfa5e5324fd6bf876680`
+- Last fully verified tree SHA: `5c49464a39ef189845bc5406716fbd055f535370`
+- Build 319 System Gate: `36752973485`
+- Build 319 Current Application Quality Proof: `36752973506`
+- Build 319 I.T. Admin Runtime Proof: `36752973489`
+- Build 319 Repository Branch Hygiene: `36752973494`
+- Build 319 D1 Fan-Out Guard: `36752973577`
+- Build 319 dedicated proof: `36752973432`
+- Current Production main SHA: `c753fe35a36096fa539f304a6b2fbd5f1d159a43`
+- Current Production tree SHA: `5c49464a39ef189845bc5406716fbd055f535370`
+- Production Pages Deploy: `36753367985`
+- Production Live Resource Integrity: `36753496201`
 
-Build 319:
-- targets only Creative Project 5 / `CP-MSC1SUG2` / **35th promo**;
-- records only real setup/process/milestone/result/lesson/mistake/repair facts;
-- requires an explicit operator confirmation plus meaningful title/notes;
-- forces the dedicated intake record private/no media by default;
-- does not auto-select evidence or alter Maker Story review/outcome/public candidacy;
-- does not publish, create social rows, infer media rights or execute providers;
-- measures execution + result + lesson completeness read-only in CI.
-- Exact Development measurement: `INTAKE_READY_AWAITING_REAL_EXECUTION_RESULT_LESSON_EVIDENCE`.
-- Current 35th promo evidence: planning **1**, execution **0**, result **0**, lesson **0**, selected execution evidence **0**.
-- Story remains `needs_review`, outcome `unknown`, public candidate `0`; publication/social rows remain `0 / 0`.
-- Build 319 measurement read **48 / 20,000** D1 rows and performed zero evidence mutation.
+Build 320:
+- targets only Creative Work Project 6 / `CP-MSUNAL8R` / **Grey Hair**;
+- adds a read-only readiness workspace at `/admin/grey-hair-story-readiness/`;
+- reuses CAIP Evidence Review for explicit source-range approval;
+- reuses Grey Hair Sync & Audio Alignment for the confirmed synchronization prerequisite;
+- reuses Grey Hair Story & Edit Planning for human-reviewed source-backed story plans;
+- requires ≥2 approved source ranges, ≥1 reviewed/approved story plan, and ≥2 source-backed story items before a later Maker Story decision;
+- does not expose raw private URLs, infer media rights, create a Maker Story profile, publish, post socially, or execute providers.
 
-Next after Build 319 Production GREEN: **Build 320 — Grey Hair Source-Evidence Review & Story-Plan Readiness**.
+Next after Build 320 Production GREEN: **Build 321 — Search Console Real Export Intake Continuity II**.
 
 ## Current release baseline
 
