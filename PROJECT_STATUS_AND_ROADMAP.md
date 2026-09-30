@@ -2,42 +2,30 @@
 
 ## Current checkpoint
 
-**Build 324 — Content Adoption & Discovery Outcomes Renewal IV** has completed its exact Development measurement and renewed the successor roadmap from observed evidence. Final exact-head reproof and Production promotion remain the closure steps.
+**Build 325 — Evidence Gap Owner Queue & Operator Action Traceability** is the active Development candidate over exact Build 324 Development/Production GREEN.
 
-Verified Build 323 predecessor:
+Build 324 is fully verified and promoted:
 
-- Development SHA: **88db75c27e6817212fbed809294bd593ab049bb2**
-- Shared tree: **9116bd69e701e15e464f5ea4c9a4e41d43c37974**
-- Development proofs: System **36787129354**, Quality **36787129334**, I.T. **36787129349**, Hygiene **36787129342**
-- Supplemental proofs: D1 Fan-Out **36787129445**, Build 323 **36787129379**
-- Production main SHA: **14418df3be9d34baa3dd3436777f7911f022f39b**
-- Production Pages **36787358329 — SUCCESS**
-- Production Live Resource Integrity **36787427701 — SUCCESS**
+- Development SHA: **1ed7d181bea85004b181b93f1ba97e300946c575**
+- Exact tree: **1408954e028fbb8faa54ead2860c0e2b71b31588**
+- Development proofs: System **36789662411**, Quality **36789662388**, I.T. **36789662487**, Hygiene **36789662415**
+- Supplemental proofs: D1 Fan-Out **36789662359**, Build 324 **36789662348**
+- Build 324 artifact: **11131435921**
+- Build 324 measurement: **ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST**, **2,847 / 20,000** D1 rows read
+- Production main SHA: **06e40c332b1bacf2260f954ff2ac79a25d9788cc**
+- Production Pages Deploy: **36789878247 — SUCCESS**
+- Production Live Resource Integrity: **36789960286 — SUCCESS**
+- Exact Development and Production tree: **MATCH**.
 
-Build 324 exact measurement at Development SHA **314f72c03e9597cf64eca06afe4cb73081ff5823**:
+Build 325 provides one read-only queue over the factual gaps identified by Build 324. It routes 35th promo, Grey Hair, real Search Console intake and remaining unprofiled Maker Story evidence back to their existing source workspaces while showing the most recent real source/audit activity.
 
-- Decision: **ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST**
-- Maker Story coverage: **2/5**
-- Reviewed/public-candidate stories: **1**
-- Selected evidence rows: **4**
-- Approved + locked Content Studio deliverables: **4 / 4**
-- Published Workshop Journal stories: **1**
-- Review-first social: **1 approved / 0 provider-posted**
-- Search Console rows/clicks/impressions: **0 / 0 / 0**
-- Evidence-backed SEO rows: **0**
-- Public telemetry: **22 page views / 22 unique visitors**
-- Runtime errors, 7d: **0**
-- Third stories factually ready: **0**
-- D1 rows read: **2,847 / 20,000**, exactly unchanged from Build 318's same measurement contract
-- Evidence artifact: **11130494838**
-
-Because the evidence gaps did not move, the renewed roadmap concentrates on explicit operator action rather than additional autonomous generation.
+There is no generic current schema authority for user assignment, acknowledgement or resolution across these domains, so Build 325 intentionally creates no shadow task system and no queue-state completion mechanism.
 
 The queue **has not run out**.
 
-**Next after Build 324 Production GREEN: Build 325 — Evidence Gap Owner Queue & Operator Action Traceability.**
+**Next after Build 325 Production GREEN: Build 326 — 35th Promo Real Outcome Evidence Closure.**
 
-Canonical renewed roadmap: `docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md`.
+Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md`.
 
 ---
 
