@@ -1,20 +1,5 @@
 name: Release 467 Build 321 Search Console Real Export Intake Continuity II
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build321_*'
-      - 'release467-build321-*.json'
-      - 'release467-build320-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_321_*'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/search-console-import.js'
-      - 'public/js/admin-search-console-import.js'
-      - '.github/workflows/release467-build320-grey-hair-source-evidence-review-story-plan-readiness.yml'
-      - '.github/workflows/release467-build321-search-console-real-export-intake-continuity-ii.yml'
   workflow_dispatch:
 permissions:
   contents: read
