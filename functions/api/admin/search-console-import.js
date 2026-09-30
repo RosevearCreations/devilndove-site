@@ -131,84 +131,37 @@ function buildWhere(filters = {}) {
     bindings,
   };
 }
-async function ensureSchema(db) {
-  await db.prepare(`CREATE TABLE IF NOT EXISTS search_console_import_batches (
-    search_console_import_batch_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    import_batch_key TEXT NOT NULL UNIQUE,
-    source_file TEXT,
-    site_property TEXT,
-    row_count INTEGER NOT NULL DEFAULT 0,
-    imported_by_user_id INTEGER,
-    imported_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT
-  )`).run();
-  await db.prepare(`CREATE TABLE IF NOT EXISTS search_console_page_queries (
-    search_console_page_query_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    import_batch_key TEXT,
-    report_date TEXT,
-    page_url TEXT NOT NULL,
-    query_text TEXT,
-    clicks INTEGER NOT NULL DEFAULT 0,
-    impressions INTEGER NOT NULL DEFAULT 0,
-    ctr REAL NOT NULL DEFAULT 0,
-    average_position REAL NOT NULL DEFAULT 0,
-    country TEXT,
-    device TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )`).run();
-  await db.prepare(`CREATE TABLE IF NOT EXISTS seo_opportunity_actions (
-    seo_opportunity_action_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    action_key TEXT NOT NULL UNIQUE,
-    source TEXT NOT NULL DEFAULT 'search_console',
-    page_url TEXT NOT NULL,
-    query_text TEXT,
-    priority_score INTEGER NOT NULL DEFAULT 0,
-    suggested_title TEXT,
-    suggested_meta_description TEXT,
-    suggested_internal_link_note TEXT,
-    action_status TEXT NOT NULL DEFAULT 'open',
-    created_from_batch_key TEXT,
-    created_by_user_id INTEGER,
-    applied_override_id INTEGER,
-    applied_at TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT
-  )`).run();
-  await db.prepare(`CREATE TABLE IF NOT EXISTS seo_page_overrides (
-    seo_page_override_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    page_path TEXT NOT NULL UNIQUE,
-    page_url TEXT,
-    title TEXT,
-    meta_description TEXT,
-    h1_suggestion TEXT,
-    internal_link_note TEXT,
-    status TEXT NOT NULL DEFAULT 'approved',
-    source_action_key TEXT,
-    source_query_text TEXT,
-    reviewed_by_user_id INTEGER,
-    applied_at TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT
-  )`).run();
-  const seoActionAlters = [
-    `ALTER TABLE seo_opportunity_actions ADD COLUMN applied_override_id INTEGER`,
-    `ALTER TABLE seo_opportunity_actions ADD COLUMN applied_at TEXT`
-  ];
-  for (const sql of seoActionAlters) await db.prepare(sql).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_page ON search_console_page_queries(page_url, report_date)`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_query ON search_console_page_queries(query_text, report_date)`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_batch ON search_console_page_queries(import_batch_key)`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_search_console_page_queries_filters ON search_console_page_queries(report_date, country, device, impressions, average_position)`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_seo_opportunity_actions_status ON seo_opportunity_actions(action_status, priority_score)`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_seo_opportunity_actions_page ON seo_opportunity_actions(page_url)`).run().catch(() => null);
-  await db.prepare(`CREATE INDEX IF NOT EXISTS idx_seo_page_overrides_status ON seo_page_overrides(status, page_path)`).run().catch(() => null);
+const SEARCH_CONSOLE_REQUIRED_TABLES=Object.freeze([
+  'search_console_import_batches',
+  'search_console_page_queries',
+  'seo_opportunity_actions',
+  'seo_page_overrides'
+]);
+async function searchConsoleSchemaReadiness(db) {
+  const placeholders=SEARCH_CONSOLE_REQUIRED_TABLES.map(()=>'?').join(',');
+  const result=await db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name IN (${placeholders})`).bind(...SEARCH_CONSOLE_REQUIRED_TABLES).all().catch(()=>({results:[]}));
+  const present=new Set(rows(result).map((row)=>normalizeText(row.name)).filter(Boolean));
+  const missing=SEARCH_CONSOLE_REQUIRED_TABLES.filter((name)=>!present.has(name));
+  return {
+    ready:missing.length===0,
+    required_tables:[...SEARCH_CONSOLE_REQUIRED_TABLES],
+    present_tables:SEARCH_CONSOLE_REQUIRED_TABLES.filter((name)=>present.has(name)),
+    missing_tables:missing,
+    request_time_schema_mutation:false,
+    repair_mode:'canonical_migration_only'
+  };
 }
 
-async function summary(db, filters = {}) {
-  await ensureSchema(db);
+async function summary(db, filters = {}, providedReadiness = null) {
+  const schemaReadiness=providedReadiness||await searchConsoleSchemaReadiness(db);
   const limit = Math.round(clampNumber(filters.limit, 5, 100, 20));
+  if(!schemaReadiness.ready){
+    return {
+      schema_readiness:schemaReadiness,
+      totals:{row_count:0,clicks:0,impressions:0,average_position:0},
+      batches:[],top_pages:[],opportunity_queries:[],seo_actions:[],active_filters:filters
+    };
+  }
   const where = buildWhere(filters);
   const totals = await db.prepare(`SELECT COUNT(*) AS row_count, COALESCE(SUM(clicks),0) AS clicks, COALESCE(SUM(impressions),0) AS impressions, COALESCE(AVG(average_position),0) AS average_position FROM search_console_page_queries ${where.sql}`).bind(...where.bindings).first().catch(() => ({ row_count: 0, clicks: 0, impressions: 0, average_position: 0 }));
   const batches = rows(await db.prepare(`SELECT b.import_batch_key, b.source_file, b.site_property, b.row_count, b.imported_at, b.notes, COALESCE(q.live_rows, 0) AS live_rows FROM search_console_import_batches b LEFT JOIN (SELECT import_batch_key, COUNT(*) AS live_rows FROM search_console_page_queries GROUP BY import_batch_key) q ON q.import_batch_key = b.import_batch_key ORDER BY datetime(b.imported_at) DESC LIMIT 15`).all().catch(() => ({ results: [] })));
@@ -222,7 +175,7 @@ async function summary(db, filters = {}) {
   opportunityWhere.push(Math.min(positionFrom, positionTo), Math.max(positionFrom, positionTo));
   const opportunityQueries = rows(await db.prepare(`SELECT query_text, page_url, SUM(clicks) AS clicks, SUM(impressions) AS impressions, ROUND(AVG(average_position),2) AS average_position, MAX(import_batch_key) AS import_batch_key FROM search_console_page_queries ${where.sql ? `${where.sql} AND COALESCE(query_text,'') <> ''` : "WHERE COALESCE(query_text,'') <> ''"} GROUP BY query_text, page_url HAVING ${havingClauses.join(' AND ')} ORDER BY impressions DESC, average_position ASC LIMIT ?`).bind(...opportunityWhere, limit).all().catch(() => ({ results: [] })));
   const actions = rows(await db.prepare(`SELECT action_key, page_url, query_text, priority_score, suggested_title, suggested_meta_description, suggested_internal_link_note, action_status, created_from_batch_key, applied_override_id, applied_at, created_at, notes FROM seo_opportunity_actions ORDER BY CASE action_status WHEN 'open' THEN 0 WHEN 'in_progress' THEN 1 WHEN 'done' THEN 2 ELSE 3 END, priority_score DESC, datetime(updated_at) DESC LIMIT ?`).bind(limit).all().catch(() => ({ results: [] })));
-  return { totals, batches, top_pages: topPages, opportunity_queries: opportunityQueries, seo_actions: actions, active_filters: filters };
+  return { schema_readiness: schemaReadiness, totals, batches, top_pages: topPages, opportunity_queries: opportunityQueries, seo_actions: actions, active_filters: filters };
 }
 async function deleteBatch(db, importBatchKey) {
   const key = normalizeText(importBatchKey);
@@ -323,7 +276,9 @@ export async function onRequestGet(context) {
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
   const url = new URL(context.request.url);
-  return jsonResponse({ ok: true, generated_at: new Date().toISOString(), ...(await summary(db, buildFiltersFromUrl(url))) }, 200, { 'Cache-Control': 'no-store' });
+  const schemaReadiness=await searchConsoleSchemaReadiness(db);
+  const data=await summary(db,buildFiltersFromUrl(url),schemaReadiness);
+  return jsonResponse({ ok: true, release:467, build:311, generated_at: new Date().toISOString(), ...data }, 200, { 'Cache-Control': 'no-store' });
 }
 
 export async function onRequestPost(context) {
@@ -331,7 +286,12 @@ export async function onRequestPost(context) {
   if (!adminUser) return jsonResponse({ ok: false, error: 'Admin access required.' }, 401);
   const db = getDb(context.env);
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
-  await ensureSchema(db);
+  const schemaReadiness=await searchConsoleSchemaReadiness(db);
+  if(!schemaReadiness.ready)return jsonResponse({
+    ok:false,release:467,build:311,
+    error:'Search Console intake schema is not ready. Apply the canonical database migration before importing evidence.',
+    schema_readiness:schemaReadiness
+  },409,{'Cache-Control':'no-store'});
 
   let payload = {};
   const contentType = context.request.headers.get('Content-Type') || '';

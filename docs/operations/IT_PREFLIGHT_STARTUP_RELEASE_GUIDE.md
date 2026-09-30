@@ -1,20 +1,21 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 310 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 311 candidate
 
-Build 310 — Review-First Publication & Distribution Continuity — is projected over exact Build 309 Development/Production GREEN.
+Build 311 — Buyer Discovery Evidence Freshness & Search Intake — is projected over exact Build 310 Development/Production GREEN.
 
-- Last fully verified Development: `6c432524d8fad7eea5eabbd85f4f4a80e7aa1ec0`
-- Verified tree: `9216756424a22feb66e6f0b69047ab340496a240`
-- Development proofs: System `36668355699`, Quality `36668355761`, I.T. `36668355615`, Hygiene `36668355696`
-- Supplemental Build 309 proofs: D1 Fan-Out `36668355656`, Build 309 `36668355683`
-- Current Production main: `a65463ee79a50ec16741958bc2913cf67b198966`
-- Production proofs: Pages `36668510235`, Live Resources `36668575436`
-- Build 309 review acceptance: **2** corrected text-only 35th promo drafts approved + locked and **17** unsupported/media-dependent drafts retained in `changes_requested`.
-- The 35th promo Maker Story remains **needs_review**, outcome **unknown**, public-story candidate **false**.
-- Build 310 requires an existing Maker Story profile to be explicitly **reviewed** and marked **public candidate** before a public-release draft can be prepared, approved or published.
-- While that prerequisite remains unsatisfied, 35th promo stays at **0 publications / 0 social rows**.
-- Under the Sea continuity remains one published text-only Workshop Journal story plus one approved/ready `review_first` social link item and zero posted provider rows.
-- Build 310 executes no social provider, IndexNow, marketplace, R2, Finance, Inventory or Production D1 action.
-- Next after Build 310 Production GREEN: Build 311 — Buyer Discovery Evidence Freshness & Search Intake.
+- Last fully verified Development: `c1a4778dd3aaf2a1fece8406e075da7eb2c2b74d`
+- Verified tree: `b4aa3deaa0eed32bc601ecf51d5456e5c5d85760`
+- Development proofs: System `36708995838`, Quality `36708995782`, I.T. `36708995900`, Hygiene `36708995938`
+- Supplemental Build 310 proofs: D1 Fan-Out `36708995804`, Build 310 `36708995807`
+- Current Production main: `43120a39d39aa0b0a2b0299967ad2e7b97eab0ee`
+- Production proofs: Pages `36709193312`, Live Resources `36709277731`
+- Build 310 preserves review-first publication: 35th promo remains blocked while Maker Story review/public-candidate prerequisites are unsatisfied.
+- Build 311 remeasures real public telemetry and Search Console staging over 30 days.
+- Search Console attribution is split into reviewed-story, reviewed-Product and other public-page evidence.
+- Search Console request-time schema creation/alter/index repair is removed; missing required tables fail closed to canonical migration.
+- Zero views, clicks and impressions remain factual zero evidence.
+- Search Console import remains explicit operator action; IndexNow remains explicit-owner-only with `SUBMIT INDEXNOW`.
+- No provider execution, automatic Search Console import, traffic fabrication or Production D1 contact is authorized.
+- Next after Build 311 Production GREEN: Build 312 — Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal.
 
 ## Current release baseline
 

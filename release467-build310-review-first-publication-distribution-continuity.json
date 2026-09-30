@@ -2,8 +2,8 @@
   "release": 467,
   "build": 310,
   "title": "Review-First Publication & Distribution Continuity",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "REVIEW_FIRST_PUBLICATION_CONTINUITY_FAIL_CLOSED_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
+  "phase": "REVIEW_FIRST_PUBLICATION_CONTINUITY_COMPLETE",
   "authority": "release467-build310-review-first-publication-distribution-continuity",
   "predecessor": {
     "build": 309,
@@ -106,5 +106,31 @@
       "production_pages_deploy_run": 36668510235,
       "production_live_resource_integrity_run": 36668575436
     }
+  },
+  "final_closure": {
+    "dev_sha": "c1a4778dd3aaf2a1fece8406e075da7eb2c2b74d",
+    "tree_sha": "b4aa3deaa0eed32bc601ecf51d5456e5c5d85760",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD310_GREEN",
+    "proofs": {
+      "system_gate_run": 36708995838,
+      "current_application_quality_run": 36708995782,
+      "it_admin_runtime_proof_run": 36708995900,
+      "branch_hygiene_run": 36708995938
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36708995804,
+      "build_specific_proof_run": 36708995807
+    },
+    "ingested_by_build": 311
+  },
+  "production_checkpoint": {
+    "main_sha": "43120a39d39aa0b0a2b0299967ad2e7b97eab0ee",
+    "tree_sha": "b4aa3deaa0eed32bc601ecf51d5456e5c5d85760",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36709193312,
+    "production_live_resource_integrity_run": 36709277731,
+    "remote_d1_queries": 0
   }
 }
