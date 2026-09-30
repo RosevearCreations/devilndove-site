@@ -2,8 +2,8 @@
   "release": 467,
   "build": 322,
   "title": "Buyer Discovery Attribution & SEO Review Evidence Continuity",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "BUYER_DISCOVERY_ATTRIBUTION_SEO_REVIEW_CONTINUITY",
+  "state": "PRODUCTION_GREEN",
+  "phase": "BUYER_DISCOVERY_ATTRIBUTION_SEO_REVIEW_CONTINUITY_COMPLETE",
   "authority": "release467-build322-buyer-discovery-attribution-seo-review-evidence-continuity",
   "predecessor": {
     "build": 321,
@@ -44,7 +44,10 @@
     "public_telemetry_supports_observation_only": true,
     "current_evidence_window_days": 30,
     "opportunity_min_impressions_default": 10,
-    "opportunity_average_position_range": [4, 20],
+    "opportunity_average_position_range": [
+      4,
+      20
+    ],
     "queue_semantics": "EVIDENCE_BACKED_HUMAN_REVIEW_ONLY",
     "unsupported_or_stale_pending_rows_non_actionable": true,
     "generated_title": false,
@@ -94,14 +97,71 @@
       "production_live_resource_integrity_run": 36765982082
     }
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT_ATTRIBUTION_MEASUREMENT",
+  "measurement_state": "EVIDENCE_PENDING_NO_REAL_SEARCH_CONSOLE_ATTRIBUTION",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md",
   "decision": {
-    "classification": "AWAIT_EXACT_DEVELOPMENT_ATTRIBUTION_CONTINUITY_MEASUREMENT",
+    "classification": "EVIDENCE_PENDING_NO_REAL_SEARCH_CONSOLE_ATTRIBUTION",
+    "real_current_search_console_evidence_present": false,
     "synthetic_evidence_authorized": false,
     "automatic_queue_generation_authorized": false,
     "automatic_seo_apply_authorized": false,
     "next_build": 323,
     "next_build_title": "Maker Story Coverage & Publication Readiness Continuity"
+  },
+  "measurement": {
+    "exact_development_sha": "ad8f82fa23c943303a04f6273b735c1091913cf3",
+    "workflow_run": 36783745352,
+    "artifact_id": 11128653409,
+    "artifact_digest": "sha256:4ea85020b36e20a1243e9ff8313ae848ac5c5e76a4917c08a06652ba986f6678",
+    "aggregate_rows_read": 109,
+    "rows_read_ceiling": 20000,
+    "statement_rows_read": [
+      1,
+      2,
+      1,
+      1,
+      55,
+      3,
+      46
+    ],
+    "interpretation": "EVIDENCE_PENDING_NO_REAL_SEARCH_CONSOLE_ATTRIBUTION",
+    "search_console_rows": 0,
+    "search_console_clicks": 0,
+    "search_console_impressions": 0,
+    "seo_queue_rows": 0,
+    "public_page_views_30d": 22,
+    "public_unique_visitors_30d": 22,
+    "public_telemetry_observation_only": true,
+    "synthetic_search_rows": false,
+    "automatic_queue_generation": false,
+    "automatic_seo_apply": false,
+    "production_d1_contact": false
+  },
+  "final_closure": {
+    "dev_sha": "ad8f82fa23c943303a04f6273b735c1091913cf3",
+    "tree_sha": "3ba6acc882e399e0d3e6eb2b749ce8f43a215e9e",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD322_GREEN",
+    "proofs": {
+      "system_gate_run": 36783745244,
+      "current_application_quality_run": 36783745477,
+      "it_admin_runtime_proof_run": 36783745601,
+      "branch_hygiene_run": 36783745609
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36783745501,
+      "build_specific_proof_run": 36783745352
+    },
+    "artifact_id": 11128653409,
+    "ingested_by_build": 323
+  },
+  "production_checkpoint": {
+    "main_sha": "1d7ef26655905c057c6c064ef7e2d7bf4c94f6a0",
+    "tree_sha": "3ba6acc882e399e0d3e6eb2b749ce8f43a215e9e",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36784108959,
+    "production_live_resource_integrity_run": 36784211626,
+    "remote_d1_queries": 0
   }
 }
