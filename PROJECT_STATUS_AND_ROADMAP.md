@@ -2,29 +2,30 @@
 
 ## Current checkpoint
 
-**Build 323 — Maker Story Coverage & Publication Readiness Continuity** is the active Development candidate over exact Build 322 Development/Production GREEN.
+**Build 324 — Content Adoption & Discovery Outcomes Renewal IV** is the active Development candidate over exact Build 323 Development/Production GREEN.
 
-Build 322 is fully verified and promoted:
+Build 323 is fully verified and promoted:
 
-- Development SHA: **ad8f82fa23c943303a04f6273b735c1091913cf3**
-- Exact tree: **3ba6acc882e399e0d3e6eb2b749ce8f43a215e9e**
-- Development proofs: System **36783745244**, Quality **36783745477**, I.T. **36783745601**, Hygiene **36783745609**
-- Supplemental proofs: D1 Fan-Out **36783745501**, Build 322 **36783745352**
-- Build 322 measurement: **EVIDENCE_PENDING_NO_REAL_SEARCH_CONSOLE_ATTRIBUTION**, **109 / 20,000** D1 rows read
-- Production main SHA: **1d7ef26655905c057c6c064ef7e2d7bf4c94f6a0**
-- Production Pages Deploy: **36784108959 — SUCCESS**
-- Production Live Resource Integrity: **36784211626 — SUCCESS**
+- Development SHA: **88db75c27e6817212fbed809294bd593ab049bb2**
+- Exact tree: **9116bd69e701e15e464f5ea4c9a4e41d43c37974**
+- Development proofs: System **36787129354**, Quality **36787129334**, I.T. **36787129349**, Hygiene **36787129342**
+- Supplemental proofs: D1 Fan-Out **36787129445**, Build 323 **36787129379**
+- Build 323 measurement: **PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY**, **643 / 20,000** D1 rows read
+- Evidence artifact: **11130950095**
+- Production main SHA: **14418df3be9d34baa3dd3436777f7911f022f39b**
+- Production Pages Deploy: **36787358329 — SUCCESS**
+- Production Live Resource Integrity: **36787427701 — SUCCESS**
 - Exact Development and Production tree: **MATCH**.
 
-Build 323 remeasures all five active Creative Projects. Publication readiness is a read-only classification requiring factual Maker Story completeness, explicit human story review, explicit public-story candidacy, and approved/locked Content Studio copy. Published Workshop Journal rows must retain human approval/publication traceability.
+Build 324 reuses the same 18-statement outcomes-renewal model as Build 318 so adoption, review state, publication, discovery, runtime, identity integrity and D1-read cost are directly comparable against Builds 300, 306, 312 and 318. Build 323's narrower five-project readiness measurement remains contextual evidence only.
 
-Media/public-use rights remain a separate authority and are never inferred from story-text readiness. Build 323 creates no Maker Story profile, changes no review state, approves no copy, publishes nothing, posts nothing to providers, and contacts no Production D1.
+The successor roadmap is deliberately pending until Build 324's exact Development measurement is observed. No execution/result/lesson evidence, Search Console data, Maker Story approval, publication, media rights, social/provider activity or SEO action is synthesized.
 
 The queue **has not run out**.
 
-**Next after Build 323 Production GREEN: Build 324 — Content Adoption & Discovery Outcomes Renewal IV.**
+**Next after Build 324 measurement: roadmap renewal from observed evidence only.**
 
-Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md`.
+Canonical current roadmap: `docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md`.
 
 ---
 
