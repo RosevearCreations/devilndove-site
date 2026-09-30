@@ -1,0 +1,82 @@
+name: Release 467 Build 314 Second Story Publication Readiness Review Queue Continuity
+# Exact-head proof trigger after retained predecessor-map convergence.
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'scripts/release467_build314_*'
+      - 'release467-build314-*.json'
+      - 'release467-build313-*.json'
+      - 'current-development-authority.json'
+      - 'PROJECT_STATUS_AND_ROADMAP.md'
+      - 'docs/operations/RELEASE_467_BUILD_314_*'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'admin/it/index.html'
+      - 'admin/reliability/index.html'
+      - 'admin/deployment-preflight/index.html'
+      - '.github/workflows/release467-build314-second-story-publication-readiness-review-queue-continuity.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      - run: python scripts/release467_build314_regression.py
+      - run: python scripts/release467_build314_gate.py
+      - run: node --check scripts/release467_build314_verify_readiness.mjs
+  publication-readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+      D1_PROVIDER_ROWS_READ_CEILING: '20000'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      # D1_ONE_SHOT_EVIDENCE_CAPTURE — Build 314 read-only publication-readiness proof.
+      - name: Prove exact Development D1
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          ! grep -q 'devilndove-prod' wrangler.toml
+          npx --yes wrangler@4.128.0 d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/info.json
+          node -e "const d=require('/tmp/info.json');const s=JSON.stringify(d);if(!s.includes(process.env.EXPECTED_DEV_D1_DATABASE_ID)||!s.includes(process.env.DEV_D1_DATABASE_NAME))process.exit(1)"
+      - name: Measure blocked publication readiness
+        run: |
+          set -euo pipefail
+          COMMAND="$(grep -v '^[[:space:]]*--' scripts/release467_build314_readiness_discovery.sql)"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b314-readiness.json
+          node scripts/release467_build314_verify_readiness.mjs /tmp/b314-readiness.json "${GITHUB_SHA}" /tmp/build314-readiness.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build314-second-story-publication-readiness-${{ github.sha }}
+          path: /tmp/build314-readiness.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Boundary
+        if: always()
+        run: |
+          echo 'DEVELOPMENT D1 MUTATION: ZERO'
+          echo 'SECOND STORY PUBLICATION: BLOCKED'
+          echo 'SOCIAL REVIEW-QUEUE MUTATION: ZERO'
+          echo 'PROVIDER EXECUTION: ZERO'
+          echo 'MEDIA RIGHTS INFERENCE: ZERO'
+          echo 'R2 MUTATION: ZERO'
+          echo 'PRODUCTION D1 CONTACT: ZERO'
