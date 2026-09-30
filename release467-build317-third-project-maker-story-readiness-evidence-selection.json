@@ -2,8 +2,8 @@
   "release": 467,
   "build": 317,
   "title": "Third Project Maker Story Readiness & Evidence Selection",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "THIRD_PROJECT_READINESS_MEASURED_NO_SELECTION",
+  "state": "PRODUCTION_GREEN",
+  "phase": "THIRD_PROJECT_READINESS_COMPLETE_NO_SELECTION",
   "authority": "release467-build317-third-project-maker-story-readiness-evidence-selection",
   "predecessor": {
     "build": 316,
@@ -129,5 +129,31 @@
     "private_media_promoted": false,
     "media_rights_inference": false,
     "production_d1_contact": false
+  },
+  "final_closure": {
+    "dev_sha": "66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5",
+    "tree_sha": "b721482133a03fd851f36078320527784e247247",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD317_GREEN",
+    "proofs": {
+      "system_gate_run": 36729883162,
+      "current_application_quality_run": 36729883209,
+      "it_admin_runtime_proof_run": 36729883145,
+      "branch_hygiene_run": 36729883405
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36729883348,
+      "build_specific_proof_run": 36729883266
+    },
+    "ingested_by_build": 318
+  },
+  "production_checkpoint": {
+    "main_sha": "9d2ccc468ea810fdd6cf0e6f2527d50c6418876e",
+    "tree_sha": "b721482133a03fd851f36078320527784e247247",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36730175002,
+    "production_live_resource_integrity_run": 36730305787,
+    "remote_d1_queries": 0
   }
 }

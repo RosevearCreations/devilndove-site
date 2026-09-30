@@ -1,0 +1,320 @@
+{
+  "release": 467,
+  "build": 318,
+  "title": "Content Adoption & Discovery Outcomes Renewal III",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "OUTCOMES_REMEASURED_ROADMAP_RENEWED",
+  "authority": "release467-build318-content-adoption-discovery-outcomes-renewal-iii",
+  "predecessor": {
+    "build": 317,
+    "title": "Third Project Maker Story Readiness & Evidence Selection",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5",
+    "development_tree_sha": "b721482133a03fd851f36078320527784e247247",
+    "development_proofs": {
+      "system_gate_run": 36729883162,
+      "current_application_quality_run": 36729883209,
+      "it_admin_runtime_proof_run": 36729883145,
+      "branch_hygiene_run": 36729883405,
+      "d1_ci_fanout_guard_run": 36729883348,
+      "build_specific_proof_run": 36729883266
+    },
+    "production_main_sha": "9d2ccc468ea810fdd6cf0e6f2527d50c6418876e",
+    "production_tree_sha": "b721482133a03fd851f36078320527784e247247",
+    "production_pages_deploy_run": 36730175002,
+    "production_live_resource_integrity_run": 36730305787,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "scope": {
+    "full_path_remeasurement": true,
+    "build300_comparison": true,
+    "build306_comparison": true,
+    "build312_comparison": true,
+    "builds313_317_outcome_rollup": true,
+    "maker_story_coverage": true,
+    "review_state": true,
+    "publication": true,
+    "discovery": true,
+    "runtime": true,
+    "d1_read_outcomes": true,
+    "seo_review_queue_continuity": true,
+    "third_project_readiness_continuity": true,
+    "next_roadmap_from_observed_evidence_only": true
+  },
+  "baselines": {
+    "build300": {
+      "maker_profiles": 0,
+      "reviewed_maker_stories": 0,
+      "public_story_candidates": 0,
+      "selected_evidence_rows": 0,
+      "approved_deliverables": 0,
+      "copy_locked_deliverables": 0,
+      "published_journal_rows": 0,
+      "approved_social_rows": 0,
+      "search_console_rows": 0,
+      "coverage": "0/5",
+      "rows_read": 471
+    },
+    "build306": {
+      "maker_profiles": 1,
+      "reviewed_maker_stories": 0,
+      "public_story_candidates": 0,
+      "selected_evidence_rows": 3,
+      "approved_deliverables": 2,
+      "copy_locked_deliverables": 2,
+      "published_journal_rows": 1,
+      "approved_social_rows": 1,
+      "search_console_rows": 0,
+      "coverage": "1/5",
+      "rows_read": 1067
+    },
+    "build312": {
+      "maker_profiles": 2,
+      "reviewed_maker_stories": 1,
+      "public_story_candidates": 1,
+      "selected_evidence_rows": 4,
+      "approved_deliverables": 4,
+      "copy_locked_deliverables": 4,
+      "published_journal_rows": 1,
+      "approved_social_rows": 1,
+      "search_console_rows": 0,
+      "coverage": "2/5",
+      "rows_read": 2820
+    }
+  },
+  "known_builds_313_317": {
+    "second_story_review_decision": "REMAIN_NEEDS_REVIEW_PENDING_EXECUTION_RESULT_LESSON_EVIDENCE",
+    "second_story_publication_readiness": "BLOCKED",
+    "search_console_intake": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "buyer_discovery_interpretation": "EVIDENCE_PENDING_NO_SEARCH_QUERY_DATA",
+    "third_project_selection": "NO_THIRD_PROJECT_FACTUALLY_READY"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_exposure": false,
+    "automatic_story_generation": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "automatic_social_posting": false,
+    "automatic_seo_apply": false,
+    "indexnow_execution": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "traffic_fabrication": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5",
+      "tree": "b721482133a03fd851f36078320527784e247247",
+      "system_gate_run": 36729883162,
+      "quality_run": 36729883209,
+      "it_admin_runtime_run": 36729883145,
+      "repository_hygiene_run": 36729883405,
+      "d1_ci_fanout_guard_run": 36729883348,
+      "build_specific_proof_run": 36729883266
+    },
+    "production": {
+      "main_sha": "9d2ccc468ea810fdd6cf0e6f2527d50c6418876e",
+      "tree": "b721482133a03fd851f36078320527784e247247",
+      "production_pages_deploy_run": 36730175002,
+      "production_live_resource_integrity_run": 36730305787
+    }
+  },
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_GREEN",
+  "roadmap_renewal_state": "BUILDS_319_324_CREATED_FROM_OBSERVED_EVIDENCE",
+  "next_build": 319,
+  "next_build_title": "35th Promo Execution Evidence Intake & Completeness",
+  "future_queue_exhausted": false,
+  "measurement_checkpoint": {
+    "source_sha": "867432fea4ddfb9c28b6ea50f38c9a6c09c01373",
+    "workflow_run": 36732719677,
+    "artifact_id": 11105773030,
+    "statements": 18,
+    "aggregate_rows_read": 2847,
+    "rows_read_ceiling": 20000,
+    "production_d1_contact": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false
+  },
+  "outcome_evidence": {
+    "maker_story": {
+      "active_creative_projects": 5,
+      "maker_profiles": 2,
+      "active_maker_stories": 2,
+      "reviewed_maker_stories": 1,
+      "public_story_candidates": 1,
+      "core_story_complete": 1
+    },
+    "private_media": {
+      "caip_assets": 46,
+      "active_caip_assets": 45,
+      "public_allowed_assets": 0,
+      "non_public_assets": 46,
+      "selected_evidence_rows": 4
+    },
+    "bridge": {
+      "active_creative_projects": 5,
+      "linked_caip_workspaces": 5,
+      "linked_content_packages": 5,
+      "handoff_rows": 5,
+      "bridge_events": 42
+    },
+    "deliverables": {
+      "deliverables": 95,
+      "approved_deliverables": 4,
+      "changes_requested_deliverables": 34,
+      "published_deliverables": 0,
+      "copy_locked_deliverables": 4,
+      "factual_template_deliverables": 95
+    },
+    "workshop_journal": {
+      "workshop_journal_rows": 1,
+      "published_journal_rows": 1,
+      "under_the_sea_published": 1
+    },
+    "social": {
+      "social_rows": 1,
+      "approved_social_rows": 1,
+      "ready_social_rows": 1,
+      "posted_social_rows": 0,
+      "review_first_rows": 1
+    },
+    "engagement_30d": {
+      "journal_page_views_30d": 0,
+      "workshop_story_views_30d": 0,
+      "product_detail_views_30d": 0,
+      "total_page_views_30d": 22,
+      "unique_visitors_30d": 22,
+      "latest_page_view_at": "2026-09-11 07:48:01"
+    },
+    "runtime_search": {
+      "runtime_errors_7d": 0,
+      "client_runtime_records_7d": 0,
+      "searches_30d": 0,
+      "search_console_rows_30d": 0,
+      "search_console_clicks_30d": 0,
+      "search_console_impressions_30d": 0,
+      "search_console_import_batches": 0
+    },
+    "merchant": {
+      "active_products": 40,
+      "reviewed_products": 40,
+      "merchant_fact_complete_products": 40
+    },
+    "friction": {
+      "active_projects": 5,
+      "profiled_projects": 2,
+      "maker_story_projects": 2,
+      "needs_review_stories": 1,
+      "unknown_outcome_stories": 1,
+      "public_candidate_stories": 1
+    },
+    "second_story_35th_promo": {
+      "maker_story_profile": 1,
+      "reviewed_profile": 0,
+      "public_candidate": 0,
+      "unknown_outcome": 1,
+      "selected_evidence": 1,
+      "approved_deliverables": 2,
+      "locked_deliverables": 2,
+      "publications": 0,
+      "social_rows": 0
+    },
+    "coverage": {
+      "active_projects": 5,
+      "projects_with_maker_story_profile": 2,
+      "projects_with_reviewed_maker_story": 1,
+      "projects_public_story_candidate": 1,
+      "projects_with_caip_workspace": 5,
+      "projects_with_content_package": 5,
+      "projects_with_approved_deliverable": 2,
+      "projects_with_published_journal": 1
+    },
+    "seo_review_queue": {
+      "seo_queue_rows": 0,
+      "currently_supported_rows": 0
+    },
+    "third_project_readiness": {
+      "remaining_unprofiled_projects": 3,
+      "third_story_ready_projects": 0,
+      "grey_hair_approved_source_evidence": 1,
+      "grey_hair_execution_events": 0,
+      "grey_hair_reviewed_story_plans": 0
+    },
+    "identity": {
+      "duplicate_caip_source_identities": 0,
+      "duplicate_content_source_identities": 0,
+      "duplicate_workstation_memberships": 0
+    },
+    "foreign_key_violations": 0
+  },
+  "comparison_to_build312": {
+    "maker_story_profiles": {
+      "before": 2,
+      "after": 2,
+      "delta": 0
+    },
+    "reviewed_maker_stories": {
+      "before": 1,
+      "after": 1,
+      "delta": 0
+    },
+    "public_story_candidates": {
+      "before": 1,
+      "after": 1,
+      "delta": 0
+    },
+    "selected_evidence_rows": {
+      "before": 4,
+      "after": 4,
+      "delta": 0
+    },
+    "approved_deliverables": {
+      "before": 4,
+      "after": 4,
+      "delta": 0
+    },
+    "copy_locked_deliverables": {
+      "before": 4,
+      "after": 4,
+      "delta": 0
+    },
+    "published_journal_rows": {
+      "before": 1,
+      "after": 1,
+      "delta": 0
+    },
+    "approved_social_rows": {
+      "before": 1,
+      "after": 1,
+      "delta": 0
+    },
+    "search_console_rows": {
+      "before": 0,
+      "after": 0,
+      "delta": 0
+    },
+    "coverage": {
+      "before": "2/5",
+      "after": "2/5"
+    }
+  },
+  "decision": {
+    "classification": "ADOPTION_STABLE_DISCOVERY_AND_NEXT_STORY_EVIDENCE_GAPS_REMAIN",
+    "rationale": "Build 318 shows no adoption gain since Build 312: Maker Story coverage remains 2/5, one story is reviewed/public/published, 35th promo is still blocked by missing execution/result/lesson evidence, Search Console and SEO review queues remain empty, and no third project is factually ready. The next bounded work therefore targets explicit evidence completion and real operator discovery intake rather than autonomous generation.",
+    "automation_refinement": "NO_NEW_AUTONOMOUS_GENERATION",
+    "next_strategy": "EVIDENCE_COMPLETION_AND_REAL_OPERATOR_DISCOVERY_INPUT",
+    "automatic_story_creation": false,
+    "automatic_content_refresh": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "automatic_provider_execution": false
+  },
+  "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md"
+}

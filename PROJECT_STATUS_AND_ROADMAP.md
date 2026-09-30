@@ -2,28 +2,33 @@
 
 ## Current checkpoint
 
-**Build 317 — Third Project Maker Story Readiness & Evidence Selection** is the active Development candidate over exact Build 316 Production GREEN.
+**Build 318 — Content Adoption & Discovery Outcomes Renewal III** is the active measured Development candidate over exact Build 317 Production GREEN.
 
-Build 316 is fully verified and promoted:
+The exact Build 318 measurement returned:
 
-- Development SHA: **d4511f2539b03e35e0989716065888c42b008fb1**.
-- Exact tree: **f89d348018b48ddcb9adad0229e745913051a168**.
-- Development proofs: System **36726555680**, Quality **36726555682**, I.T. **36726555759**, Hygiene **36726555685**.
-- Supplemental proofs: D1 Fan-Out **36726555683**, Build 316 **36726555652**.
-- Production main SHA: **ed9a89f070ecd05fcd3024df9b2ba4ddcbb7b33e**.
-- Production Pages Deploy: **36726827868 — SUCCESS**.
-- Production Live Resource Integrity: **36726943717 — SUCCESS**.
-- Build 316 factual discovery state: **EVIDENCE_PENDING_NO_SEARCH_QUERY_DATA**, 0 Search Console rows, 0 eligible SEO pairs, 22 public page views / 30 days, 106 D1 rows read.
+- Maker Story coverage: **2/5**, unchanged from Build 312.
+- Reviewed/public-candidate stories: **1**.
+- Selected evidence rows: **4**.
+- Approved + locked deliverables: **4**.
+- Published Workshop Journal stories: **1**.
+- Review-first social: **1 ready / 0 posted**.
+- 35th promo: **needs_review**, outcome **unknown**, public candidate **0**, publications/social rows **0**.
+- Search Console: **0 imports / 0 rows / 0 clicks / 0 impressions**.
+- Evidence-backed SEO review queue: **0 rows**.
+- Public telemetry: **22 page views / 22 unique visitors** in 30 days, with 0 Workshop Story/Product Detail views.
+- Third-project-ready candidates: **0**.
+- Grey Hair: **1 approved source-evidence range, 0 execution events, 0 reviewed story plans**.
+- Runtime errors (7d): **0**.
+- Identity duplicates / FK violations: **0 / 0**.
+- D1 rows read: **2,847 / 20,000**.
 
-Build 317 remeasured all three remaining unprofiled Creative Projects and found **NO_THIRD_PROJECT_FACTUALLY_READY**. Grey Hair is the closest candidate but currently has 0 execution/timeline events, 1 approved CAIP source-evidence range, 0 reviewed story plans, 45 active CAIP assets and 0 public-allowed assets. Lime in you coconut and Shirley Not remain metadata-only projects with no execution or reviewed CAIP story evidence.
+Decision: **ADOPTION_STABLE_DISCOVERY_AND_NEXT_STORY_EVIDENCE_GAPS_REMAIN**.
 
-No third Maker Story profile or evidence-selection row was created. Private CAIP media remains private and public-media rights were not inferred.
+The queue **has not run out**. Build 318 created the evidence-driven **Builds 319–324** roadmap.
 
-The queue **has not run out**.
+**Next: Build 319 — 35th Promo Execution Evidence Intake & Completeness.**
 
-**Next after Build 317 Production GREEN: Build 318 — Content Adoption & Discovery Outcomes Renewal III.**
-
-Canonical roadmap: `docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md`.
+Canonical successor roadmap: `docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md`.
 
 ---
 

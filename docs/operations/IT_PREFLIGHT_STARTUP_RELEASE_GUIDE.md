@@ -1,23 +1,37 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 317 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 318 measured candidate
 
-Build 317 — Third Project Maker Story Readiness & Evidence Selection — is projected over exact Build 316 Development/Production GREEN.
+Build 317 remains the exact fully verified restart and Production predecessor:
 
-- Last fully verified Development: `d4511f2539b03e35e0989716065888c42b008fb1`
-- Verified tree: `f89d348018b48ddcb9adad0229e745913051a168`
-- Development proofs: System `36726555680`, Quality `36726555682`, I.T. `36726555759`, Hygiene `36726555685`
-- Supplemental Build 316 proofs: D1 Fan-Out `36726555683`, Build 316 `36726555652`
-- Current Production main: `ed9a89f070ecd05fcd3024df9b2ba4ddcbb7b33e`
-- Production proofs: Pages `36726827868`, Live Resources `36726943717`
-- Build 317 measured all three remaining unprofiled projects and returned `NO_THIRD_PROJECT_FACTUALLY_READY`.
-- Grey Hair is closest: 0 execution events, 1 approved source-evidence range, 0 reviewed story plans, 45 CAIP assets, 0 public-allowed assets.
-- Lime in you coconut and Shirley Not remain metadata-only with no qualifying execution/review evidence.
-- Exactly one CAIP workspace and one Content Studio package remain required.
-- Metadata alone is not sufficient.
-- No third Maker Story profile or evidence-selection row was created.
-- Private/public media rights remain separate; no private media was promoted by inference.
-- Build 317 discovery remained Development-only and read-only.
-- No automatic story/profile creation, publication, provider execution, R2 mutation or Production D1 contact.
-- Next after Build 317 Production GREEN: Build 318 — Content Adoption & Discovery Outcomes Renewal III.
+- Last fully verified Development SHA: `66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5`
+- Last fully verified tree SHA: `b721482133a03fd851f36078320527784e247247`
+- Build 317 System Gate: `36729883162`
+- Build 317 Current Application Quality Proof: `36729883209`
+- Build 317 I.T. Admin Runtime Proof: `36729883145`
+- Build 317 Repository Branch Hygiene: `36729883405`
+- Current Production main SHA: `9d2ccc468ea810fdd6cf0e6f2527d50c6418876e`
+- Current Production tree SHA: `b721482133a03fd851f36078320527784e247247`
+- Production Pages Deploy: `36730175002`
+- Production Live Resource Integrity: `36730305787`
+
+
+Build 318 — Content Adoption & Discovery Outcomes Renewal III — has completed its exact Development D1 measurement over Build 317 Production GREEN.
+
+- Measurement SHA: `867432fea4ddfb9c28b6ea50f38c9a6c09c01373`
+- Measurement run: `36732719677`
+- Artifact: `11105773030`
+- D1 rows read: **2,847 / 20,000**
+- Maker Story coverage: **2/5**
+- Reviewed/public stories: **1**
+- Published Workshop Journal stories: **1**
+- 35th promo remains blocked: needs_review / outcome unknown / public candidate 0.
+- Search Console remains **0 rows**; SEO review queue remains **0 rows**.
+- Public telemetry is 22 page views / 22 unique visitors in 30 days, with 0 recorded Workshop Story/Product Detail views.
+- No third project is factually ready; Grey Hair remains closest with 1 approved source-evidence range and no execution/review-plan evidence.
+- Identity duplicates and foreign-key violations remain zero.
+- Decision: `ADOPTION_STABLE_DISCOVERY_AND_NEXT_STORY_EVIDENCE_GAPS_REMAIN`.
+- Successor roadmap: `docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md`.
+- Next: **Build 319 — 35th Promo Execution Evidence Intake & Completeness**.
+- Build 318 remains read-only; no business-data/R2/provider/publication/SEO-apply/Production D1 mutation is authorized.
 
 ## Current release baseline
 
