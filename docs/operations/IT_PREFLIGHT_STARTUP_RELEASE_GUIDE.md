@@ -1,32 +1,33 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 322 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 323 candidate
 
-Build 322 — Buyer Discovery Attribution & SEO Review Evidence Continuity — starts from exact Build 321 Development/Production GREEN.
+Build 323 — Maker Story Coverage & Publication Readiness Continuity — starts from exact Build 322 Development/Production GREEN.
 
-- Verified Development SHA: `215b9277f62d1359fda07d3d72ba3cf6ee47a353`
-- Verified Development/Production tree: `7df16d3a91159cefaf66435854fdffb4914ad921`
-- Build 321 System Gate: `36765313336`
-- Build 321 Current Application Quality Proof: `36765313431`
-- Build 321 I.T. Admin Runtime Proof: `36765313437`
-- Build 321 Repository Branch Hygiene: `36765313607`
-- Build 321 D1 Fan-Out Guard: `36765313506`
-- Build 321 dedicated proof: `36765313864`
-- Current Production main SHA: `e761df76426a52e7bc3553189988058037979ad2`
-- Production Pages Deploy: `36765763021`
-- Production Live Resource Integrity: `36765982082`
+- Verified Development SHA: `ad8f82fa23c943303a04f6273b735c1091913cf3`
+- Verified Development/Production tree: `3ba6acc882e399e0d3e6eb2b749ce8f43a215e9e`
+- Build 322 System Gate: `36783745244`
+- Build 322 Current Application Quality Proof: `36783745477`
+- Build 322 I.T. Admin Runtime Proof: `36783745601`
+- Build 322 Repository Branch Hygiene: `36783745609`
+- Build 322 D1 Fan-Out Guard: `36783745501`
+- Build 322 dedicated proof: `36783745352`
+- Current Production main SHA: `1d7ef26655905c057c6c064ef7e2d7bf4c94f6a0`
+- Production Pages Deploy: `36784108959`
+- Production Live Resource Integrity: `36784211626`
 
-Build 322:
-- composes `/api/admin/search-console-import` with the buyer-discovery measurement surface;
-- treats query-level attribution as valid only when backed by real current Search Console rows;
-- keeps first-party public telemetry observation-only and never converts it into search-query attribution;
-- classifies stale Search Console evidence as non-actionable;
-- keeps stale or unsupported open/in-progress SEO review rows non-actionable;
-- requires explicit human-authored SEO wording before apply and rechecks current evidence;
-- performs one read-only Development D1 continuity measurement;
-- creates no synthetic discovery evidence or SEO queue rows;
-- performs no automatic SEO apply, IndexNow or provider execution;
+Build 323:
+- remeasures all five active Creative Projects;
+- requires exact one-to-one Creative Project → CAIP → Content Studio identity continuity;
+- classifies Maker Story/publication readiness from existing factual data only;
+- requires explicit human story review and explicit public-story candidacy;
+- requires approved and locked Content Studio copy before publication-review readiness;
+- requires human traceability for any published Workshop Journal story;
+- keeps CAIP/private-upload public-use rights separate from story-text readiness;
+- never promotes private media by inference;
+- creates no Maker Story profile and changes no review/public-candidate/copy/publication state;
+- performs no automatic social/provider posting;
 - contacts no Production D1.
 
-Next after Build 322 Production GREEN: **Build 322 — Buyer Discovery Attribution & SEO Review Evidence Continuity**.
+Next after Build 323 Production GREEN: **Build 324 — Content Adoption & Discovery Outcomes Renewal IV**.
 
 ## Current release baseline
 
