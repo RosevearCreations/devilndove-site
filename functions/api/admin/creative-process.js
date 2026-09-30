@@ -23,14 +23,16 @@ import {
   onRequestPost as compatibilityPost,
 } from './creative-process-compat.js';
 
-const BUILD = '274';
+const BUILD = '319';
 const POST_CONSUMER_BUILD = INVENTORY_POST_CONSUMER_BUILD;
 const REVERSAL_CONSUMER_BUILD = INVENTORY_REVERSAL_CONSUMER_BUILD;
+const STORY_EXECUTION_EVENT_TYPES = new Set(['setup','process','mistake','repair','milestone','result','lesson']);
 const INTERCEPTED_POST_ACTIONS = new Set([
   'post_material_inventory',
   'record_inventory_use',
   'correct_inventory_use',
   'void_event',
+  'record_story_execution_evidence',
 ]);
 
 function json(data, status = 200) {
@@ -373,6 +375,43 @@ async function handleVoidEvent(context, granted, body, projectId) {
   };
 }
 
+async function handleRecordStoryExecutionEvidence(context, granted, body, projectId) {
+  if (projectId !== 5) throw new Error('Build 319 execution-evidence intake is scoped only to the existing 35th promo project.');
+  const project = await granted.db.prepare(`SELECT creative_work_project_id,project_key,project_title FROM creative_work_projects WHERE creative_work_project_id=? AND COALESCE(project_status,'')<>'archived' LIMIT 1`).bind(projectId).first();
+  if (!project || String(project.project_key) !== 'CP-MSC1SUG2' || String(project.project_title) !== '35th promo') {
+    throw new Error('The canonical 35th promo Creative Project identity was not found.');
+  }
+  const maker = await granted.db.prepare(`SELECT story_review_status,public_story_candidate,outcome_status FROM creative_project_maker_story_profiles WHERE creative_work_project_id=? LIMIT 1`).bind(projectId).first();
+  if (!maker) throw new Error('The existing 35th promo Maker Story profile was not found.');
+  if (String(maker.story_review_status || '') !== 'needs_review' || Number(maker.public_story_candidate || 0) !== 0) {
+    throw new Error('35th promo is no longer in the expected review-blocked state. Re-evaluate it before recording more Build 319 intake.');
+  }
+
+  const eventType = text(body.event_type, 50).toLowerCase();
+  const title = text(body.event_title, 180);
+  const notes = text(body.event_notes, 4000);
+  const occurredAt = text(body.occurred_at, 40) || null;
+  const durationMinutes = Math.max(0, Number(body.duration_minutes || 0) || 0);
+
+  if (!STORY_EXECUTION_EVENT_TYPES.has(eventType)) {
+    throw new Error('Choose a factual setup, process, milestone, result, lesson, mistake, or repair evidence type.');
+  }
+  if (title.length < 5) throw new Error('Enter a specific factual evidence title of at least 5 characters.');
+  if (notes.length < 20) throw new Error('Describe what actually happened in at least 20 characters. Do not enter a placeholder or expected result.');
+
+  const inserted = await granted.db.prepare(`
+    INSERT INTO creative_work_events(
+      creative_work_project_id,event_type,event_title,event_notes,occurred_at,duration_minutes,
+      material_name,material_quantity,material_unit,material_cost_cents,media_url,is_public_candidate,created_by
+    ) VALUES(?1,?2,?3,?4,COALESCE(?5,CURRENT_TIMESTAMP),?6,NULL,NULL,NULL,0,NULL,0,?7)
+  `).bind(projectId,eventType,title,notes,occurredAt,durationMinutes,granted.adminUser.user_id).run();
+
+  return {
+    message: 'Real 35th promo execution evidence recorded privately. Nothing was auto-selected, approved, published, or made public.',
+    event_id: num(inserted.meta?.last_row_id),
+  };
+}
+
 async function finishInterceptedAction(context, granted, action, projectId, message) {
   const current = await snapshot(context, projectId);
   await auditAdminAction(context.env, context.request, granted.adminUser, {
@@ -386,6 +425,11 @@ async function finishInterceptedAction(context, granted, action, projectId, mess
       inventory_reversal_consumer_build: REVERSAL_CONSUMER_BUILD,
       inventory_post_consumer_build: POST_CONSUMER_BUILD,
       inventory_post_authority: 'inventory-post',
+      story_execution_intake_build: BUILD,
+      story_execution_intake_target: action === 'record_story_execution_evidence' ? '35th promo' : null,
+      evidence_auto_selected: false,
+      maker_story_auto_reviewed: false,
+      automatic_publication: false,
     },
   });
   return json(withConsumerMetadata({
@@ -431,6 +475,8 @@ export async function onRequestPost(context) {
       result = await handleRecordInventoryUse(context, granted, body, projectId);
     } else if (action === 'correct_inventory_use') {
       result = await handleCorrectInventoryUse(context, granted, body, projectId);
+    } else if (action === 'record_story_execution_evidence') {
+      result = await handleRecordStoryExecutionEvidence(context, granted, body, projectId);
     } else {
       result = await handleVoidEvent(context, granted, body, projectId);
     }
