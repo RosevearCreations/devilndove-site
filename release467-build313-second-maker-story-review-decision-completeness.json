@@ -40,8 +40,8 @@
       "outcome_status",
       "lesson_learned"
     ],
-    "observed_execution_evidence": "ABSENT_AT_BUILD312",
-    "observed_result_state": "UNKNOWN_AT_BUILD312",
+    "observed_execution_evidence": "ABSENT_CONFIRMED_BUILD313",
+    "observed_result_state": "UNKNOWN_CONFIRMED_BUILD313",
     "explicit_review_decision": "REMAIN_NEEDS_REVIEW_PENDING_EXECUTION_RESULT_LESSON_EVIDENCE",
     "story_review_status": "needs_review",
     "public_story_candidate": 0,
@@ -82,5 +82,63 @@
       "production_pages_deploy_run": 36714805674,
       "production_live_resource_integrity_run": 36714898168
     }
-  }
+  },
+  "acceptance_baseline": {
+    "source_sha": "4aa4493022df3d8935db9edeac48afe2eff3104d",
+    "workflow_run": 36716717654,
+    "job_id": 109891328978,
+    "discovery_rows_read": [
+      36,
+      4,
+      14
+    ],
+    "discovery_aggregate_rows_read": 54,
+    "decision_rows_read": [
+      33,
+      34,
+      3,
+      2,
+      7
+    ],
+    "decision_aggregate_rows_read": 79,
+    "rows_read_ceiling": 20000,
+    "target_state": {
+      "active_events": 1,
+      "planning_events": 1,
+      "non_planning_events": 0,
+      "selected_evidence": 1,
+      "selected_execution_evidence": 0,
+      "approved_locked_copy": 2,
+      "story_review_status": "needs_review",
+      "public_story_candidate": 0,
+      "outcome_status": "unknown",
+      "publications": 0,
+      "social_rows": 0,
+      "caip_assets": 0,
+      "private_upload_files": 0
+    },
+    "explicit_decision": {
+      "decision": "REMAIN_NEEDS_REVIEW_PENDING_EXECUTION_RESULT_LESSON_EVIDENCE",
+      "review_actor_user_id": 1,
+      "reviewed_at": "2026-09-30 12:44:50",
+      "review_scope": "story_text_only_no_media_rights",
+      "media_rights_scope": "separate_never_inferred",
+      "approved_copy_authorizes_publication": 0
+    },
+    "safety": {
+      "publications": 0,
+      "social_rows": 0,
+      "public_event_candidates": 0,
+      "selected_media_evidence": 0,
+      "public_allowed_caip_assets": 0,
+      "public_allowed_private_uploads": 0,
+      "foreign_key_violations": 0
+    },
+    "profile_result_lesson_claim_mutation": false,
+    "publication_mutation": false,
+    "social_mutation": false,
+    "provider_execution": false,
+    "production_d1_contact": false
+  },
+  "development_mutation_scope": "BOUNDED_REVIEW_DECISION_TRACEABILITY_ONLY"
 }
