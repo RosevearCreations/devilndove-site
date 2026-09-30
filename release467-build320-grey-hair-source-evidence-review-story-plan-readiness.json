@@ -1,0 +1,96 @@
+{
+  "release": 467,
+  "build": 320,
+  "title": "Grey Hair Source-Evidence Review & Story-Plan Readiness",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "GREY_HAIR_SOURCE_EVIDENCE_STORY_PLAN_READINESS",
+  "authority": "release467-build320-grey-hair-source-evidence-review-story-plan-readiness",
+  "predecessor": {
+    "build": 319,
+    "title": "35th Promo Execution Evidence Intake & Completeness",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "a068ec13ec14aedf6d62dfa5e5324fd6bf876680",
+    "development_tree_sha": "5c49464a39ef189845bc5406716fbd055f535370",
+    "development_proofs": {
+      "system_gate_run": 36752973485,
+      "current_application_quality_run": 36752973506,
+      "it_admin_runtime_proof_run": 36752973489,
+      "branch_hygiene_run": 36752973494,
+      "d1_ci_fanout_guard_run": 36752973577,
+      "build_specific_proof_run": 36752973432
+    },
+    "production_main_sha": "c753fe35a36096fa539f304a6b2fbd5f1d159a43",
+    "production_tree_sha": "5c49464a39ef189845bc5406716fbd055f535370",
+    "production_pages_deploy_run": 36753367985,
+    "production_live_resource_integrity_run": 36753496201,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "target": {
+    "creative_work_project_id": 6,
+    "project_key": "CP-MSUNAL8R",
+    "project_title": "Grey Hair"
+  },
+  "contract": {
+    "dedicated_readiness_workspace": "/admin/grey-hair-story-readiness/",
+    "evidence_review_authority": "/admin/creative-assets/",
+    "sync_review_authority": "/admin/grey-hair-sync-alignment/",
+    "story_plan_authority": "/admin/grey-hair-story-edit-planning/",
+    "approved_source_evidence_min": 2,
+    "reviewed_story_plans_min": 1,
+    "source_backed_story_items_min": 2,
+    "confirmed_sync_required_by_existing_story_planner": true,
+    "readiness_states": [
+      "SOURCE_EVIDENCE_REVIEW_REQUIRED",
+      "STORY_PLANNING_PREREQUISITE_SYNC_REQUIRED",
+      "HUMAN_REVIEWED_STORY_PLAN_REQUIRED",
+      "GREY_HAIR_REVIEWED_EVIDENCE_READY_PENDING_MAKER_STORY_DECISION"
+    ],
+    "workspace_read_only": true,
+    "raw_private_urls_exposed": false,
+    "automatic_evidence_approval": false,
+    "automatic_story_plan_generation": false,
+    "automatic_story_plan_review": false,
+    "automatic_maker_story_profile": false,
+    "automatic_publication": false,
+    "next_build": 321,
+    "next_build_title": "Search Console Real Export Intake Continuity II",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "source_media_mutation": false,
+    "private_media_exposure": false,
+    "media_rights_inference": false,
+    "automatic_evidence_approval": false,
+    "automatic_story_plan_generation": false,
+    "automatic_story_plan_review": false,
+    "automatic_maker_story_profile": false,
+    "automatic_publication": false,
+    "automatic_social_posting": false,
+    "provider_execution": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "a068ec13ec14aedf6d62dfa5e5324fd6bf876680",
+      "tree": "5c49464a39ef189845bc5406716fbd055f535370",
+      "system_gate_run": 36752973485,
+      "quality_run": 36752973506,
+      "it_admin_runtime_run": 36752973489,
+      "repository_hygiene_run": 36752973494,
+      "d1_ci_fanout_guard_run": 36752973577,
+      "build_specific_proof_run": 36752973432
+    },
+    "production": {
+      "main_sha": "c753fe35a36096fa539f304a6b2fbd5f1d159a43",
+      "tree": "5c49464a39ef189845bc5406716fbd055f535370",
+      "production_pages_deploy_run": 36753367985,
+      "production_live_resource_integrity_run": 36753496201
+    }
+  },
+  "measurement_state": "PENDING_EXACT_DEVELOPMENT",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md"
+}
