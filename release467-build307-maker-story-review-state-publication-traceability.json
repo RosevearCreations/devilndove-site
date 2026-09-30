@@ -3,7 +3,7 @@
   "build": 307,
   "title": "Maker Story Review-State & Publication Traceability",
   "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "REVIEW_PUBLICATION_TRACEABILITY_CANDIDATE",
+  "phase": "REVIEW_PUBLICATION_TRACEABILITY_ACCEPTED_CANDIDATE",
   "authority": "release467-build307-maker-story-review-state-publication-traceability",
   "predecessor": {
     "build": 306,
@@ -75,5 +75,38 @@
     "provider_publication": false,
     "r2_mutation": false,
     "production_d1_contact": false
+  },
+  "acceptance_baseline": {
+    "source_sha": "00db274ba84d91f67fb412a4424b90f93e9b115b",
+    "workflow_run": 36661539347,
+    "aggregate_rows_read": 144,
+    "rows_read_ceiling": 20000,
+    "story_review_status": "reviewed",
+    "public_story_candidate": 1,
+    "profile_review_actor_user_id": 1,
+    "approved_copy_count": 2,
+    "locked_copy_count": 2,
+    "published_journal_count": 1,
+    "publication_approved_by_user_id": 1,
+    "publication_published_by_user_id": 1,
+    "public_event_candidates": 0,
+    "selected_media_evidence": 0,
+    "public_allowed_caip_assets": 0,
+    "public_allowed_private_uploads": 0,
+    "website_gallery_rows": 0,
+    "review_first_social_ready": 1,
+    "posted_social_rows": 0,
+    "foreign_key_violations": 0,
+    "production_d1_contact": false
+  },
+  "candidate_control_alignment": {
+    "state": "SOURCE_RUNTIME_AND_SUCCESSOR_CONTROLS_ALIGNED_FINAL_EXACT_HEAD_REPROOF_REQUIRED",
+    "intermediate_head": "8e52962b5045eca19aa2fa6eea5e44b7a41b3575",
+    "system_gate_run": 36661797307,
+    "current_application_quality_run": 36661797341,
+    "it_admin_runtime_proof_run": 36661797303,
+    "branch_hygiene_run": 36661797271,
+    "initial_build_specific_acceptance_run": 36661539347,
+    "note": "Build 307 real-path acceptance is GREEN and control-plane truth is aligned. Final closure requires fresh exact-head System, Quality, I.T., Hygiene, D1 Fan-Out and idempotent Build 307 acceptance proofs."
   }
 }
