@@ -1,16 +1,5 @@
 name: Release 467 Build 303 Content Studio Draft Review Approval Adoption
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build303_*'
-      - 'scripts/release467_build302_regression.py'
-      - 'release467-build303-*.json'
-      - 'release467-build302-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_303_*'
-      - '.github/workflows/release467-build303-content-studio-draft-review-approval-adoption.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -24,7 +13,7 @@ jobs:
       - run: python scripts/release467_build303_regression.py
       - run: python scripts/release467_build303_gate.py
   draft-approval-adoption:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    if: ${{ false }} # Historical Build 303 mutation is closed after successor adoption.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:

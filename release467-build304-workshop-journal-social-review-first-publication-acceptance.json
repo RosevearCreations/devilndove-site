@@ -1,0 +1,129 @@
+{
+  "release": 467,
+  "build": 304,
+  "title": "Workshop Journal & Social Review-First Publication Acceptance",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "REVIEW_FIRST_PUBLICATION_ACCEPTANCE_CANDIDATE",
+  "authority": "release467-build304-workshop-journal-social-review-first-publication-acceptance",
+  "predecessor": {
+    "build": 303,
+    "title": "Content Studio Draft Review & Approval Adoption",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "2b260c9ff58ca56f75afe2f82144ba8f884d572e",
+    "development_tree_sha": "d60f0f1812653cac9a85cd0f67730f4b7d2a587d",
+    "development_proofs": {
+      "system_gate_run": 36653801145,
+      "current_application_quality_run": 36653801156,
+      "it_admin_runtime_proof_run": 36653801176,
+      "branch_hygiene_run": 36653801148,
+      "d1_ci_fanout_guard_run": 36653801203,
+      "build_specific_proof_run": 36653801155
+    },
+    "production_main_sha": "5fe6e3b5c47f948d8e931fd7357801ca639cb7dd",
+    "production_tree_sha": "d60f0f1812653cac9a85cd0f67730f4b7d2a587d",
+    "production_pages_deploy_run": 36655109591,
+    "production_live_resource_integrity_run": 36655170381,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "target": {
+    "creative_work_project_id": 7,
+    "project_key": "CP-MSXCYQB6",
+    "project_title": "Under the Sea",
+    "content_project_id": 22,
+    "approved_source_deliverable_key": "blog-article",
+    "selected_evidence_count": 3
+  },
+  "scope": {
+    "reuse_existing_release_board": true,
+    "workshop_journal_text_only_allowed": true,
+    "website_gallery_media_requirement_preserved": true,
+    "one_workshop_journal_publication": true,
+    "one_reviewed_social_link_queue_item": true,
+    "explicit_human_approval": true,
+    "provider_execution": false,
+    "provider_publication": false,
+    "production_d1_contact": false,
+    "schema_change": false
+  },
+  "safety": {
+    "private_media_exposure": false,
+    "caip_media_rights_mutation": false,
+    "gallery_publication": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "automatic_provider_publication": false,
+    "production_d1_contact": false,
+    "r2_mutation": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "schema_change": false
+  },
+  "acceptance_contract": {
+    "publication_key": "content-project-22-workshop_journal",
+    "destination": "workshop_journal",
+    "publication_slug": "under-the-sea-workshop-story-22",
+    "publication_status": "published",
+    "media_mode": "TEXT_ONLY_NO_PUBLIC_MEDIA",
+    "social_post_key": "workshop-journal-22-under-the-sea",
+    "social_source_type": "workshop_journal",
+    "social_approval_status": "approved",
+    "social_post_status": "ready",
+    "social_api_publish_mode": "review_first",
+    "social_provider_posted": false
+  },
+  "contract": {
+    "next_build": 305,
+    "next_build_title": "Buyer Discovery & Search Measurement Activation",
+    "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "2b260c9ff58ca56f75afe2f82144ba8f884d572e",
+      "tree": "d60f0f1812653cac9a85cd0f67730f4b7d2a587d",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 36653801145,
+      "quality_run": 36653801156,
+      "it_admin_runtime_run": 36653801176,
+      "repository_hygiene_run": 36653801148,
+      "d1_ci_fanout_guard_run": 36653801203,
+      "build_specific_proof_run": 36653801155
+    },
+    "production": {
+      "main_sha": "5fe6e3b5c47f948d8e931fd7357801ca639cb7dd",
+      "tree": "d60f0f1812653cac9a85cd0f67730f4b7d2a587d",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 36655109591,
+      "production_live_resource_integrity_run": 36655170381,
+      "remote_d1_queries": 0
+    }
+  },
+  "development_acceptance_observation": {
+    "workflow_run": 36656112833,
+    "job_result": "SUCCESS",
+    "exact_head_at_observation": "6a97ce5731e5af28baaf5689e3c49a4e615c81db",
+    "aggregate_rows_read": 461,
+    "journal_publication_id": 1,
+    "journal_publication_key": "content-project-22-workshop_journal",
+    "journal_status": "published",
+    "journal_media_urls_json": "[]",
+    "social_post_queue_id": 1,
+    "social_post_key": "workshop-journal-22-under-the-sea",
+    "social_approval_status": "approved",
+    "social_post_status": "ready",
+    "social_api_publish_mode": "review_first",
+    "provider_execution": false,
+    "provider_publication": false,
+    "production_d1_contact": false,
+    "note": "Mutation/evidence job succeeded; overall first candidate was not final exact-head proof because source-contract controls required successor alignment."
+  },
+  "candidate_control_alignment": {
+    "state": "SOURCE_AND_RUNTIME_CONTROLS_ALIGNED_FINAL_EXACT_HEAD_REPROOF_REQUIRED",
+    "intermediate_head": "b244b3f9eabab51b65cffd00b7cdf8e88903233c",
+    "system_gate_run": 36656767006,
+    "current_application_quality_run": 36656766999,
+    "it_admin_runtime_proof_run": 36656766900,
+    "branch_hygiene_run": 36656767011,
+    "note": "These runs establish control alignment only; final closure still requires fresh proofs bound to the final dev head."
+  }
+}

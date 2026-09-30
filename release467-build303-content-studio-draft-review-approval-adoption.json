@@ -2,8 +2,8 @@
   "release": 467,
   "build": 303,
   "title": "Content Studio Draft Review & Approval Adoption",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "DRAFT_APPROVAL_ADOPTION_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
+  "phase": "DRAFT_APPROVAL_ADOPTED_COMPLETE",
   "authority": "release467-build303-content-studio-draft-review-approval-adoption",
   "predecessor": {
     "build": 302,
@@ -168,5 +168,31 @@
     "system_gate_run": 36653423075,
     "result": "SOURCE_AND_HISTORICAL_COMPATIBILITY_CONVERGED",
     "note": "Final acceptance remains bound to fresh proofs on the successor exact dev head."
+  },
+  "final_closure": {
+    "dev_sha": "2b260c9ff58ca56f75afe2f82144ba8f884d572e",
+    "tree_sha": "d60f0f1812653cac9a85cd0f67730f4b7d2a587d",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD303_GREEN",
+    "proofs": {
+      "system_gate_run": 36653801145,
+      "current_application_quality_run": 36653801156,
+      "it_admin_runtime_proof_run": 36653801176,
+      "branch_hygiene_run": 36653801148
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36653801203,
+      "build_specific_proof_run": 36653801155
+    },
+    "ingested_by_build": 304
+  },
+  "production_checkpoint": {
+    "main_sha": "5fe6e3b5c47f948d8e931fd7357801ca639cb7dd",
+    "tree_sha": "d60f0f1812653cac9a85cd0f67730f4b7d2a587d",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36655109591,
+    "production_live_resource_integrity_run": 36655170381,
+    "remote_d1_queries": 0
   }
 }
