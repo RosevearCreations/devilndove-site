@@ -1,17 +1,5 @@
 name: Release 467 Build 300 CAIP Maker Content Outcomes Renewal Automation Refinement
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/**'
-      - 'public/js/**'
-      - 'admin/**'
-      - 'scripts/release467_build300_*'
-      - 'scripts/release467_build265_gate.py'
-      - 'release467-build300-*.json'
-      - 'current-development-authority.json'
-      - 'docs/operations/RELEASE_467_BUILD_300_*'
-      - '.github/workflows/release467-build300-caip-maker-content-outcomes-renewal-automation-refinement.yml'
   workflow_dispatch:
 permissions:
   contents: read

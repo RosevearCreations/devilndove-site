@@ -1,0 +1,122 @@
+{
+  "release": 467,
+  "build": 301,
+  "title": "First Real Maker Story Adoption & Completeness",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "REAL_MAKER_STORY_ADOPTION_CANDIDATE",
+  "authority": "release467-build301-first-real-maker-story-adoption-completeness",
+  "predecessor": {
+    "build": 300,
+    "title": "CAIP Maker Content Outcomes Renewal & Automation Refinement",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "6361b02f467fa4b9bf54dd8638cccefc57bd817e",
+    "development_tree_sha": "6316130ee40beb8540e88da51065f3a75d1c527a",
+    "development_proofs": {
+      "system_gate_run": 36645926155,
+      "current_application_quality_run": 36645926199,
+      "it_admin_runtime_proof_run": 36645926079,
+      "branch_hygiene_run": 36645926110,
+      "d1_ci_fanout_guard_run": 36645926068,
+      "build_specific_proof_run": 36645926113
+    },
+    "production_main_sha": "e569d5fce0ff5ab08a3d1dc6be1051211ed15ac2",
+    "production_tree_sha": "6316130ee40beb8540e88da51065f3a75d1c527a",
+    "production_pages_deploy_run": 36646103793,
+    "production_live_resource_integrity_run": 36646198769,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "scope": {
+    "real_creative_project_only": true,
+    "select_existing_project_with_no_profile": true,
+    "derive_story_only_from_existing_project_and_timeline_facts": true,
+    "create_exactly_one_maker_story_profile": true,
+    "story_review_status": "needs_review",
+    "public_story_candidate": 0,
+    "content_studio_refresh": false,
+    "publication": false,
+    "evidence_selection": false,
+    "private_media_state_change": false,
+    "duplicate_identity_tolerance": 0
+  },
+  "safety": {
+    "schema_change": false,
+    "production_d1_contact": false,
+    "development_mutation_bounded_to_one_profile": false,
+    "inventory_mutation": false,
+    "finance_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false,
+    "automatic_content_refresh": false,
+    "automatic_publication": false,
+    "private_media_exposure": false,
+    "development_mutation_bounded_to_one_profile_plus_existing_caip_snapshot": true
+  },
+  "contract": {
+    "next_build": 302,
+    "next_build_title": "CAIP Evidence Selection & Public-Safety Review Adoption",
+    "future_queue_exhausted": false
+  },
+  "discovery_checkpoint": {
+    "source_sha": "94e886215323e1005783c3480e78eec78155a865",
+    "workflow_run": 36647143103,
+    "job_id": 109672628245,
+    "aggregate_rows_read": 77,
+    "production_d1_contact": false,
+    "mutation": false
+  },
+  "selected_real_project": {
+    "creative_work_project_id": 7,
+    "project_key": "CP-MSXCYQB6",
+    "project_title": "Under the Sea",
+    "project_type": "maker_project",
+    "project_status": "idea",
+    "summary": "Loaf soap with sea creatures",
+    "recorded_timeline": {
+      "active_events": 3,
+      "planning_events_at_least": 1,
+      "material_events_at_least": 2,
+      "finished_result_recorded": false
+    },
+    "pre_adoption_authority": {
+      "caip_workspace_count": 1,
+      "content_package_count": 1,
+      "maker_story_profile_count": 0
+    }
+  },
+  "adoption_contract": {
+    "story_kind": "maker_story",
+    "outcome_status": "partial_win",
+    "outcome_rationale": "Recorded planning and material-use progress exists, but no finished-result event exists.",
+    "story_review_status": "needs_review",
+    "public_story_candidate": 0,
+    "selected_evidence_change": 0,
+    "content_studio_refresh": false,
+    "publication": false,
+    "workstation_membership_change": 0,
+    "caip_workspace_target_count": 1,
+    "content_package_target_count": 1,
+    "idempotent": true
+  },
+  "starting_point": {
+    "development": {
+      "sha": "6361b02f467fa4b9bf54dd8638cccefc57bd817e",
+      "tree": "6316130ee40beb8540e88da51065f3a75d1c527a",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 36645926155,
+      "quality_run": 36645926199,
+      "it_admin_runtime_run": 36645926079,
+      "repository_hygiene_run": 36645926110,
+      "build_specific_proof_run": 36645926113,
+      "d1_ci_fanout_guard_run": 36645926068
+    },
+    "production": {
+      "main_sha": "e569d5fce0ff5ab08a3d1dc6be1051211ed15ac2",
+      "tree": "6316130ee40beb8540e88da51065f3a75d1c527a",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 36646103793,
+      "production_live_resource_integrity_run": 36646198769,
+      "remote_d1_queries": 0
+    }
+  }
+}

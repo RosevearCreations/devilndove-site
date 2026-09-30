@@ -1,21 +1,16 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 300 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 301 candidate
 
-Build 300 — CAIP Maker Content Outcomes Renewal & Automation Refinement — is projected over exact Build 299 Production GREEN.
+Build 301 — First Real Maker Story Adoption & Completeness — is projected over exact Build 300 Production GREEN.
 
-- Last fully verified Development: `c437998c7b17cf7bce4d6ae913d2273e3f96e038`
-- Verified tree: `95df4beae5394ebf85c9b2bc1665525ab6ed5eb5`
-- Development proofs: System `36627208895`, Quality `36627208854`, I.T. `36627208869`, Hygiene `36627208912`, Build 299 `36627208914`
-- Current Production main: `9689e81f23722d58421df87b2ea6b41ca39005fb`
-- Production proofs: Pages `36627976523`, Live Resources `36628136953`
-- Build 299 Development query-efficiency evidence: 10 read-only statements, 5,387 aggregate rows read under a 20,000 ceiling; FTS/trigram not justified at current scale.
-- Build 300 adds no schema.
-- Build 300 first measures real Maker Story adoption/completion, duplicate CAIP/Content Studio identities, private-media boundaries, handoff reuse, deliverable/publication usefulness, engagement and runtime/search health.
-- Measured Build 300 decision: **ADOPTION_GUIDANCE_ONLY_NO_NEW_AUTOMATION**.
-- Production D1 measurement contact: zero.
-- Automatic public/provider publication: zero.
-- Build 300 adds read-only Maker Story next-safe-action guidance; no automatic create/refresh/approval/publication.
-- The future queue remains open. Next: Build 301 — First Real Maker Story Adoption & Completeness.
-- Successor roadmap: `docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md`.
+- Last fully verified Development: `6361b02f467fa4b9bf54dd8638cccefc57bd817e`
+- Verified tree: `6316130ee40beb8540e88da51065f3a75d1c527a`
+- Development proofs: System `36645926155`, Quality `36645926199`, I.T. `36645926079`, Hygiene `36645926110`, Build 300 `36645926113`
+- Current Production main: `e569d5fce0ff5ab08a3d1dc6be1051211ed15ac2`
+- Production proofs: Pages `36646103793`, Live Resources `36646198769`
+- Build 301 discovery selected real Creative Project 7 — Under the Sea from 77 read-only D1 rows.
+- Final adoption is bounded to one Maker Story profile plus refresh of the existing CAIP source snapshot. The story uses only recorded project/timeline facts, explicitly says no finished-result entry exists yet, remains `needs_review`, and must retain exactly one CAIP workspace and one Content Studio package.
+- No automatic Content Studio refresh, evidence selection, private-media permission change, approval or publication.
+- Next after Build 301 Production GREEN: Build 302 — CAIP Evidence Selection & Public-Safety Review Adoption.
 
 ## Current release baseline
 

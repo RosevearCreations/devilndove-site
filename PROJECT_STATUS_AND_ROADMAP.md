@@ -2,18 +2,21 @@
 
 ## Current checkpoint
 
-**Build 300 — CAIP Maker Content Outcomes Renewal & Automation Refinement** is active in Development refinement.
+**Build 301 — First Real Maker Story Adoption & Completeness** is active in Development adoption.
 
-Build 299 is the exact Development and Production GREEN baseline. Build 300 measured the real Development path and found the infrastructure bridge healthy but Maker Story adoption not yet started: 5 active Creative Projects, 5 CAIP workspaces, 5 Content Studio packages, zero duplicate identities, zero Maker Story profiles, zero selected evidence, 95 unapproved factual-template drafts, and zero Journal/social publication rows.
+Build 300 is the exact Development and Production GREEN baseline. Build 301 selected real Creative Project 7 — Under the Sea after read-only discovery. The final Development candidate adopts exactly one factual Maker Story from its recorded planning/material-use facts, remains needs_review, and does not claim a finished result.
 
-- Build 300 measured D1 rows read: **471 / 20,000 ceiling**
-- Build 300 schema change: **NONE**
-- Refinement decision: **ADOPTION GUIDANCE ONLY — NO NEW AUTOMATION**
-- Automatic story creation / Content Studio refresh / approval / publication: **NONE**
-- Production D1 measurement contact: **NONE**
-- Future queue exhausted: **NO**
-- Next: **Build 301 — First Real Maker Story Adoption & Completeness**
-- Successor roadmap: `docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md`
+- Build 300 Development: `6361b02f467fa4b9bf54dd8638cccefc57bd817e`
+- Build 300 Production: `e569d5fce0ff5ab08a3d1dc6be1051211ed15ac2`
+- Shared predecessor tree: `6316130ee40beb8540e88da51065f3a75d1c527a`
+- Build 301 schema change: **NONE**
+- Discovery evidence: **77 D1 rows read / READ ONLY**
+- Selected real project: **7 — Under the Sea**
+- Final Development mutation: **ONE MAKER STORY PROFILE + EXISTING CAIP SNAPSHOT REFRESH**
+- Final story review status target: **NEEDS REVIEW**
+- Public-story candidate: **NO**
+- Automatic Content Studio refresh/publication: **NONE**
+- Next: **Build 302 — CAIP Evidence Selection & Public-Safety Review Adoption**
 
 ## Next production queue — Builds 301–306
 

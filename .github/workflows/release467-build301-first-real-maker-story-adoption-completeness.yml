@@ -1,0 +1,116 @@
+name: Release 467 Build 301 First Real Maker Story Adoption Completeness
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/admin/creative-process-compat.js'
+      - 'public/js/admin-creative-process.js'
+      - 'admin/creative-process/index.html'
+      - 'scripts/release467_build301_*'
+      - 'scripts/release467_build300_regression.py'
+      - 'release467-build301-*.json'
+      - 'current-development-authority.json'
+      - 'docs/operations/RELEASE_467_BUILD_301_*'
+      - '.github/workflows/release467-build301-first-real-maker-story-adoption-completeness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - run: python scripts/release467_build301_regression.py
+      - run: python scripts/release467_build301_gate.py
+
+  real-maker-story-adoption:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+      EXPECTED_STATEMENTS: 5
+      D1_PROVIDER_ROWS_READ_CEILING: '20000'
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 2 }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      # D1_ONE_SHOT_EVIDENCE_CAPTURE — Build 301 Development-only bounded real-story adoption.
+      - name: Prove exact Development D1
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test -n "${CLOUDFLARE_API_TOKEN}"
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          ! grep -q 'devilndove-prod' wrangler.toml
+          npx --yes wrangler@4.128.0 d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/b301-info.json
+          node - <<'NODE'
+          const fs=require('fs');const data=JSON.parse(fs.readFileSync('/tmp/b301-info.json','utf8'));
+          const all=[];const walk=v=>{if(Array.isArray(v))v.forEach(walk);else if(v&&typeof v==='object'){all.push(v);Object.values(v).forEach(walk)}};walk(data);
+          const ids=new Set(all.map(x=>String(x.uuid||x.id||''))),names=new Set(all.map(x=>String(x.name||'')));
+          if(!ids.has(process.env.EXPECTED_DEV_D1_DATABASE_ID)||!names.has(process.env.DEV_D1_DATABASE_NAME))throw new Error('Development D1 identity mismatch');
+          console.log('EXACT DEVELOPMENT D1 IDENTITY: PASS');
+          NODE
+      - name: Adopt and prove the first real Maker Story
+        shell: bash
+        run: |
+          set -euo pipefail
+          COMMAND="$(grep -v '^[[:space:]]*--' scripts/release467_build301_adopt_real_maker_story.sql)"
+          if ! npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b301-adoption.json 2>/tmp/b301-adoption.err; then
+            cat /tmp/b301-adoption.err >&2 || true
+            cat /tmp/b301-adoption.json >&2 || true
+            exit 1
+          fi
+          node - <<'NODE'
+          const fs=require('fs');const raw=JSON.parse(fs.readFileSync('/tmp/b301-adoption.json','utf8'));
+          const rows=Array.isArray(raw)?raw:(raw.results||[]);
+          if(rows.length!==Number(process.env.EXPECTED_STATEMENTS))throw new Error('Unexpected statement count '+rows.length);
+          const reads=rows.map(x=>Number(x?.meta?.rows_read||0)),aggregate=reads.reduce((a,b)=>a+b,0);
+          if(aggregate>Number(process.env.D1_PROVIDER_ROWS_READ_CEILING))throw new Error('Rows-read ceiling exceeded '+aggregate);
+          const pre=(rows[0]?.results||[])[0]||{},story=(rows[3]?.results||[])[0]||{},boundary=(rows[4]?.results||[])[0]||{};
+          if(Number(pre.creative_work_project_id)!==7||pre.project_key!=='CP-MSXCYQB6'||pre.project_title!=='Under the Sea')throw new Error('Real project identity drift');
+          if(Number(pre.active_events)!==3||Number(pre.planning_events)<1||Number(pre.material_events)<2)throw new Error('Recorded timeline prerequisite drift');
+          if(Number(pre.caip_workspaces)!==1||Number(pre.content_packages)!==1)throw new Error('Pre-adoption authority duplication');
+          if(Number(story.creative_work_project_id)!==7||story.story_kind!=='maker_story'||story.outcome_status!=='partial_win')throw new Error('Adopted Maker Story identity/outcome mismatch');
+          if(story.story_review_status!=='needs_review'||Number(story.public_story_candidate)!==0||Number(story.core_story_complete)!==1)throw new Error('Review-first completeness boundary failed');
+          if(!String(story.actual_result||'').includes('No finished-result entry is recorded yet.'))throw new Error('Factual unfinished-result boundary missing');
+          if(Number(boundary.maker_story_profiles)!==1||Number(boundary.maker_story_workstations)!==0)throw new Error('Maker Story profile/workstation duplication');
+          if(Number(boundary.caip_workspaces)!==1||Number(boundary.content_packages)!==1)throw new Error('CAIP/Content Studio identity duplication');
+          if(Number(boundary.selected_evidence)!==0||Number(boundary.publications)!==0)throw new Error('Build 301 crossed Build 302/304 boundary');
+          if(Number(boundary.foreign_key_violations)!==0)throw new Error('Foreign-key violation');
+          console.log('BUILD301_ROWS_READ=',JSON.stringify(reads));
+          console.log('BUILD301_AGGREGATE_ROWS_READ=',aggregate);
+          console.log('BUILD301_PRE_ADOPTION=',JSON.stringify(pre));
+          console.log('BUILD301_ADOPTED_STORY=',JSON.stringify(story));
+          console.log('BUILD301_BOUNDARY=',JSON.stringify(boundary));
+          console.log('BUILD301_REAL_MAKER_STORY_ADOPTION=GREEN');
+          fs.writeFileSync('/tmp/build301-real-maker-story-adoption.json',JSON.stringify({
+            release:467,build:301,exact_development_sha:process.env.GITHUB_SHA,reads,aggregate_rows_read:aggregate,
+            project:{id:7,key:'CP-MSXCYQB6',title:'Under the Sea'},story,boundary,
+            development_d1_mutation:'one Maker Story profile + existing CAIP source snapshot refresh',
+            automatic_content_refresh:false,automatic_publication:false,production_d1_contact:false
+          },null,2)+'\n');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build301-real-maker-story-adoption-${{ github.sha }}
+          path: /tmp/build301-real-maker-story-adoption.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Boundary
+        if: always()
+        run: |
+          echo 'DEVELOPMENT MUTATION: ONE MAKER STORY PROFILE + EXISTING CAIP SNAPSHOT'
+          echo 'INVENTORY / FINANCE / R2 MUTATION: ZERO'
+          echo 'SELECTED EVIDENCE CHANGE: ZERO'
+          echo 'CONTENT STUDIO REFRESH: ZERO'
+          echo 'AUTOMATIC PUBLICATION: ZERO'
+          echo 'PRODUCTION D1 CONTACT: ZERO'

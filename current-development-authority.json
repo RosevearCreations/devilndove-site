@@ -1,31 +1,31 @@
 {
   "release": 467,
-  "build": 300,
-  "title": "CAIP Maker Content Outcomes Renewal & Automation Refinement",
+  "build": 301,
+  "title": "First Real Maker Story Adoption & Completeness",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 299,
-      "title": "D1 Query Efficiency + Canonical Runtime/Repository Cleanup",
-      "authority": "release467-build299-d1-query-efficiency-canonical-runtime-repository-cleanup.json",
-      "dev_sha": "c437998c7b17cf7bce4d6ae913d2273e3f96e038",
-      "tree_sha": "95df4beae5394ebf85c9b2bc1665525ab6ed5eb5",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD299_GREEN",
+      "build": 300,
+      "title": "CAIP Maker Content Outcomes Renewal & Automation Refinement",
+      "authority": "release467-build300-caip-maker-content-outcomes-renewal-automation-refinement.json",
+      "dev_sha": "6361b02f467fa4b9bf54dd8638cccefc57bd817e",
+      "tree_sha": "6316130ee40beb8540e88da51065f3a75d1c527a",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD300_GREEN",
       "proofs": {
-        "system_gate_run": 36627208895,
-        "current_application_quality_run": 36627208854,
-        "it_admin_runtime_proof_run": 36627208869,
-        "branch_hygiene_run": 36627208912
+        "system_gate_run": 36645926155,
+        "current_application_quality_run": 36645926199,
+        "it_admin_runtime_proof_run": 36645926079,
+        "branch_hygiene_run": 36645926110
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 300,
-      "title": "CAIP Maker Content Outcomes Renewal & Automation Refinement",
-      "authority": "release467-build300-caip-maker-content-outcomes-renewal-automation-refinement.json",
+      "build": 301,
+      "title": "First Real Maker Story Adoption & Completeness",
+      "authority": "release467-build301-first-real-maker-story-adoption-completeness.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -36,18 +36,19 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 299,
-    "title": "D1 Query Efficiency + Canonical Runtime/Repository Cleanup",
-    "authority": "release467-build299-d1-query-efficiency-canonical-runtime-repository-cleanup.json",
-    "main_sha": "9689e81f23722d58421df87b2ea6b41ca39005fb",
-    "tree_sha": "95df4beae5394ebf85c9b2bc1665525ab6ed5eb5",
+    "build": 300,
+    "title": "CAIP Maker Content Outcomes Renewal & Automation Refinement",
+    "authority": "release467-build300-caip-maker-content-outcomes-renewal-automation-refinement.json",
+    "main_sha": "e569d5fce0ff5ab08a3d1dc6be1051211ed15ac2",
+    "tree_sha": "6316130ee40beb8540e88da51065f3a75d1c527a",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 36627976523,
-    "production_live_resource_integrity_run": 36628136953,
+    "production_pages_deploy_run": 36646103793,
+    "production_live_resource_integrity_run": 36646198769,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build301-first-real-maker-story-adoption-completeness.json",
     "release467-build300-caip-maker-content-outcomes-renewal-automation-refinement.json",
     "release467-build299-d1-query-efficiency-canonical-runtime-repository-cleanup.json",
     "release467-build298-merchant-search-distribution-public-content-discovery.json",
@@ -189,11 +190,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md",
-  "next_build": 301,
-  "next_build_state": "QUEUED_AFTER_BUILD300_PRODUCTION_GREEN",
-  "next_build_title": "First Real Maker Story Adoption & Completeness",
-  "promotion_state": "BUILD300_DEVELOPMENT_REFINEMENT_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD300_EVIDENCE_RENEWED_BUILDS_301_306_QUEUED",
+  "next_build": 302,
+  "next_build_state": "QUEUED_AFTER_BUILD301_PRODUCTION_GREEN",
+  "next_build_title": "CAIP Evidence Selection & Public-Safety Review Adoption",
+  "promotion_state": "BUILD301_REAL_MAKER_STORY_ADOPTION_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD301_ACTIVE_BUILDS_302_306_QUEUED",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -224,13 +225,13 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "c437998c7b17cf7bce4d6ae913d2273e3f96e038",
-  "accepted_dev_tree_sha": "95df4beae5394ebf85c9b2bc1665525ab6ed5eb5",
+  "accepted_dev_sha": "6361b02f467fa4b9bf54dd8638cccefc57bd817e",
+  "accepted_dev_tree_sha": "6316130ee40beb8540e88da51065f3a75d1c527a",
   "acceptance": {
-    "system_gate_run": 36627208895,
-    "current_application_quality_run": 36627208854,
-    "it_admin_runtime_proof_run": 36627208869,
-    "branch_hygiene_run": 36627208912
+    "system_gate_run": 36645926155,
+    "current_application_quality_run": 36645926199,
+    "it_admin_runtime_proof_run": 36645926079,
+    "branch_hygiene_run": 36645926110
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -1219,6 +1220,20 @@
     "schema_change": false,
     "production_d1_measurement_contact": false,
     "next_build": 301,
+    "future_queue_exhausted": false
+  },
+  "caip_content_adoption": {
+    "source_build": 301,
+    "phase": "REAL_MAKER_STORY_ADOPTION_CANDIDATE",
+    "selected_real_project_id": 7,
+    "selected_real_project_key": "CP-MSXCYQB6",
+    "selected_real_project_title": "Under the Sea",
+    "story_review_status": "needs_review",
+    "public_story_candidate": 0,
+    "automatic_story_creation": false,
+    "content_studio_refresh": false,
+    "publication": false,
+    "next_build": 302,
     "future_queue_exhausted": false
   }
 }
