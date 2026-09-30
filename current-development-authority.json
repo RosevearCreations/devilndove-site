@@ -1779,6 +1779,13 @@
     "measurement_state": "PENDING_EXACT_DEVELOPMENT_COVERAGE_MEASUREMENT",
     "next_build": 324,
     "next_build_title": "Content Adoption & Discovery Outcomes Renewal IV",
-    "future_queue_exhausted": false
+    "future_queue_exhausted": false,
+    "social_source_attribution": "TYPED_SOURCE_ID_V1",
+    "social_source_identity_rules": {
+      "creative_project": "creative_work_project_id",
+      "content_project": "content_project_id",
+      "workshop_journal": "content_publication_id"
+    },
+    "numeric_source_id_collision_protection": true
   }
 }
