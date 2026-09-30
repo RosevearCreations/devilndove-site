@@ -1,4 +1,4 @@
-// Release 467 Build 311 — read-only buyer discovery evidence freshness and Search Console intake readiness.
+// Release 467 Build 316 — read-only buyer discovery evidence interpretation and SEO review-queue readiness.
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { merchantCoverage } from '../_lib/merchantSearchDistribution.js';
 import { loadDynamicSitemapEntries, loadPublishedStorySeo } from '../_lib/publicSearchSeo.js';
@@ -50,6 +50,7 @@ export async function onRequestGet(context){
 
   let search={row_count:0,clicks:0,impressions:0,latest_report_date:'',latest_report_age_days:null,story_rows:0,story_clicks:0,story_impressions:0,product_rows:0,product_clicks:0,product_impressions:0,other_public_rows:0,distinct_page_urls:0};
   let imports={batch_count:0,latest_import_at:'',latest_import_age_days:null,latest_batch_key:'',latest_source_file:'',latest_declared_rows:0,live_staged_rows:0};
+  let seoQueue={queue_rows:0,open_rows:0,applied_rows:0,current_supported_rows:0,unsupported_pending_rows:0,eligible_pairs:0,eligible_impressions:0};
   if(schema.ready){
     search=await db.prepare(`SELECT COUNT(*) row_count,COALESCE(SUM(clicks),0) clicks,COALESCE(SUM(impressions),0) impressions,COALESCE(MAX(report_date),'') latest_report_date,
       CASE WHEN MAX(report_date) IS NULL OR trim(MAX(report_date))='' THEN NULL ELSE ROUND(julianday('now')-julianday(MAX(report_date)),2) END latest_report_age_days,
@@ -69,6 +70,30 @@ export async function onRequestGet(context){
       COALESCE(b.import_batch_key,'') latest_batch_key,COALESCE(b.source_file,'') latest_source_file,COALESCE(b.row_count,0) latest_declared_rows,
       (SELECT COUNT(*) FROM search_console_page_queries) live_staged_rows
       FROM (SELECT 1) seed LEFT JOIN search_console_import_batches b ON b.search_console_import_batch_id=(SELECT search_console_import_batch_id FROM search_console_import_batches ORDER BY datetime(imported_at) DESC,search_console_import_batch_id DESC LIMIT 1)`).first().catch(()=>imports);
+    seoQueue=await db.prepare(`SELECT
+      (SELECT COUNT(*) FROM seo_opportunity_actions) queue_rows,
+      (SELECT COUNT(*) FROM seo_opportunity_actions WHERE action_status='open') open_rows,
+      (SELECT COUNT(*) FROM seo_opportunity_actions WHERE action_status='applied') applied_rows,
+      (SELECT COUNT(*) FROM seo_opportunity_actions a WHERE EXISTS(
+        SELECT 1 FROM search_console_page_queries q WHERE lower(q.page_url)=lower(a.page_url)
+        AND lower(COALESCE(q.query_text,''))=lower(COALESCE(a.query_text,''))
+        GROUP BY q.page_url,q.query_text HAVING SUM(q.impressions)>=10 AND AVG(q.average_position) BETWEEN 4 AND 20
+      )) current_supported_rows,
+      (SELECT COUNT(*) FROM seo_opportunity_actions a WHERE a.action_status IN ('open','in_progress') AND NOT EXISTS(
+        SELECT 1 FROM search_console_page_queries q WHERE lower(q.page_url)=lower(a.page_url)
+        AND lower(COALESCE(q.query_text,''))=lower(COALESCE(a.query_text,''))
+        GROUP BY q.page_url,q.query_text HAVING SUM(q.impressions)>=10 AND AVG(q.average_position) BETWEEN 4 AND 20
+      )) unsupported_pending_rows,
+      (SELECT COUNT(*) FROM (
+        SELECT page_url,query_text FROM search_console_page_queries
+        WHERE trim(COALESCE(page_url,''))<>'' AND trim(COALESCE(query_text,''))<>''
+        GROUP BY page_url,query_text HAVING SUM(impressions)>=10 AND AVG(average_position) BETWEEN 4 AND 20
+      )) eligible_pairs,
+      COALESCE((SELECT SUM(impressions) FROM (
+        SELECT SUM(impressions) impressions FROM search_console_page_queries
+        WHERE trim(COALESCE(page_url,''))<>'' AND trim(COALESCE(query_text,''))<>''
+        GROUP BY page_url,query_text HAVING SUM(impressions)>=10 AND AVG(average_position) BETWEEN 4 AND 20
+      )),0) eligible_impressions`).first().catch(()=>seoQueue);
   }
 
   const [merchant,sitemap,storySeo]=await Promise.all([merchantCoverage(db,context.env),loadDynamicSitemapEntries(db),loadPublishedStorySeo(db,'under-the-sea-workshop-story-22')]);
@@ -77,17 +102,20 @@ export async function onRequestGet(context){
   const telemetryAge=telemetry?.latest_page_view_age_days;
   const reportAge=search?.latest_report_age_days;
   const importAge=imports?.latest_import_age_days;
+  const searchRows=Number(search?.row_count||0),eligiblePairs=Number(seoQueue?.eligible_pairs||0);
+  const queryLevelActionState=searchRows===0?'EVIDENCE_PENDING_NO_SEARCH_QUERY_DATA':eligiblePairs>0?'REAL_EVIDENCE_REVIEW_QUEUE_ELIGIBLE':'REAL_EVIDENCE_NO_SUPPORTED_SEO_OPPORTUNITY';
 
-  return jsonResponse({ok:true,release:467,build:311,title:'Buyer Discovery Evidence Freshness & Search Intake',window_days:30,read_only:true,
+  return jsonResponse({ok:true,release:467,build:316,title:'Buyer Discovery Evidence Interpretation & SEO Review Queue',window_days:30,read_only:true,
     stories:{published_rows:Number(stories?.published_story_rows||0),published_projects:Number(stories?.published_story_projects||0),latest_updated_at:clean(stories?.latest_story_updated_at,80)},
     story:{published:Boolean(story),...story,page_views:Number(telemetry?.story_views||0),sitemap_visible:sitemapStory,discovery_links:Array.isArray(storySeo?.discovery_links)?storySeo.discovery_links:[]},
     telemetry:{story_views:Number(telemetry?.story_views||0),workshop_story_views:Number(telemetry?.workshop_story_views||0),journal_index_views:Number(telemetry?.journal_index_views||0),product_detail_views:Number(telemetry?.product_detail_views||0),total_page_views:Number(telemetry?.total_page_views||0),unique_visitors:Number(telemetry?.unique_visitors||0),latest_page_view_at:clean(telemetry?.latest_page_view_at,80),latest_page_view_age_days:telemetryAge,freshness:freshness(telemetryAge,Boolean(telemetry?.latest_page_view_at))},
     search_console:{row_count:Number(search?.row_count||0),clicks:Number(search?.clicks||0),impressions:Number(search?.impressions||0),latest_report_date:clean(search?.latest_report_date,80),latest_report_age_days:reportAge,freshness:freshness(reportAge,Boolean(search?.latest_report_date)),story_rows:Number(search?.story_rows||0),story_clicks:Number(search?.story_clicks||0),story_impressions:Number(search?.story_impressions||0),product_rows:Number(search?.product_rows||0),product_clicks:Number(search?.product_clicks||0),product_impressions:Number(search?.product_impressions||0),other_public_rows:Number(search?.other_public_rows||0),distinct_page_urls:Number(search?.distinct_page_urls||0),staging_authority:'/api/admin/search-console-import'},
     search_intake:{schema_readiness:schema,batch_count:Number(imports?.batch_count||0),latest_import_at:clean(imports?.latest_import_at,80),latest_import_age_days:importAge,freshness:freshness(importAge,Boolean(imports?.latest_import_at)),latest_batch_key:clean(imports?.latest_batch_key,160),latest_source_file:clean(imports?.latest_source_file,200),latest_declared_rows:Number(imports?.latest_declared_rows||0),live_staged_rows:Number(imports?.live_staged_rows||0),automatic_import:false},
+    seo_review_queue:{query_level_action_state:queryLevelActionState,queue_rows:Number(seoQueue?.queue_rows||0),open_rows:Number(seoQueue?.open_rows||0),applied_rows:Number(seoQueue?.applied_rows||0),current_supported_rows:Number(seoQueue?.current_supported_rows||0),unsupported_pending_rows:Number(seoQueue?.unsupported_pending_rows||0),eligible_pairs:eligiblePairs,eligible_impressions:Number(seoQueue?.eligible_impressions||0),evidence_threshold:{min_impressions:10,average_position_from:4,average_position_to:20},generated_seo_copy:false,automatic_queue_generation:false,explicit_human_copy_required:true,current_evidence_required_before_apply:true,public_telemetry_observation_only:true},
     merchant:{summary:merchant.summary,configuration:merchant.config},
     sitemap:{eligible_url_count:sitemap.length,product_count:sitemap.filter((x)=>x.kind==='product').length,story_count:sitemap.filter((x)=>x.kind==='story').length,under_the_sea_visible:sitemapStory},
     internal_discovery:{project_operations:Number(projectOperations?.count||0),factual_related_links:Array.isArray(storySeo?.discovery_links)?storySeo.discovery_links:[],invented_links:false},
     indexnow:indexNowReadiness(context.env),
-    boundaries:{provider_execution:false,provider_publication:false,indexnow_submission:false,automatic_search_console_import:false,automatic_publication:false,traffic_fabrication:false,request_time_schema_mutation:false,private_media_query:false,production_d1_contact:false}
+    boundaries:{provider_execution:false,provider_publication:false,indexnow_submission:false,automatic_search_console_import:false,automatic_publication:false,traffic_fabrication:false,request_time_schema_mutation:false,private_media_query:false,production_d1_contact:false,automatic_seo_queue_mutation:false,generated_seo_copy:false,automatic_seo_apply:false}
   },200,{'Cache-Control':'no-store'});
 }
