@@ -2,27 +2,26 @@
 
 ## Current checkpoint
 
-**Build 319 — 35th Promo Execution Evidence Intake & Completeness** is the active Development candidate over exact Build 318 Production GREEN.
+**Build 320 — Grey Hair Source-Evidence Review & Story-Plan Readiness** is the active Development candidate over exact Build 319 Production GREEN.
 
-Build 318 is fully verified and promoted:
+Build 319 is fully verified and promoted:
 
-- Development SHA: **90e3c5c14643dfef21b8d4435c81e92606eb75d4**
-- Exact tree: **0c1546c92eebdbdc6039a15c7fd7a7fd63055c3e**
-- Development proofs: System **36735110215**, Quality **36735110177**, I.T. **36735110176**, Hygiene **36735110294**
-- Supplemental proofs: D1 Fan-Out **36735110195**, Build 318 **36735110092**
-- Production main SHA: **e51706c73352af58cac0640a12e915c5b4b2796d**
-- Production Pages Deploy: **36735477464 — SUCCESS**
-- Production Live Resource Integrity: **36735618674 — SUCCESS**
+- Development SHA: **a068ec13ec14aedf6d62dfa5e5324fd6bf876680**
+- Exact tree: **5c49464a39ef189845bc5406716fbd055f535370**
+- Development proofs: System **36752973485**, Quality **36752973506**, I.T. **36752973489**, Hygiene **36752973494**
+- Supplemental proofs: D1 Fan-Out **36752973577**, Build 319 **36752973432**
+- Production main SHA: **c753fe35a36096fa539f304a6b2fbd5f1d159a43**
+- Production Pages Deploy: **36753367985 — SUCCESS**
+- Production Live Resource Integrity: **36753496201 — SUCCESS**
+- Build 319 result: factual intake ready; 35th promo still has 0 execution / 0 result / 0 lesson evidence and remains review-blocked.
 
-Build 319 adds a dedicated operator lane to the canonical **35th promo** Creative Project. Only facts from real work may be recorded: setup/process/milestone/result/lesson/mistake/repair. A title and meaningful notes are required, the operator must confirm the work actually happened, and new rows are forced private with no media/public flag.
+Build 320 focuses only on **Grey Hair**. A dedicated read-only readiness workspace composes the existing CAIP Evidence Review, Grey Hair Sync & Audio Alignment, and Grey Hair Story & Edit Planning authorities. It shows the exact blocker and routes the operator to the correct review action.
 
-Exact Development measurement returned **INTAKE_READY_AWAITING_REAL_EXECUTION_RESULT_LESSON_EVIDENCE**: 1 planning event, **0 execution**, **0 result**, **0 lesson**, 1 selected planning evidence row, 0 selected execution evidence, and **48 / 20,000** D1 rows read. The Maker Story remains `needs_review`, outcome `unknown`, public candidate `0`, with 0 publication/social rows.
-
-Build 319 does **not** auto-select evidence, change the Maker Story review/outcome/public-candidate state, create publication/social rows, or infer media rights. The workflow is GREEN because the factual intake is ready and fail-closed; the Maker Story itself is not complete.
+A later Grey Hair Maker Story decision requires **≥2 approved source-evidence ranges + ≥1 human-reviewed story plan + ≥2 source-backed story items**. Build 320 itself never creates the Maker Story profile and never changes private/public media rights.
 
 The queue **has not run out**.
 
-**Next after Build 319 Production GREEN: Build 320 — Grey Hair Source-Evidence Review & Story-Plan Readiness.**
+**Next after Build 320 Production GREEN: Build 321 — Search Console Real Export Intake Continuity II.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md`.
 
