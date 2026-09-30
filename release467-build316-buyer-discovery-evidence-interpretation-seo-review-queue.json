@@ -2,8 +2,8 @@
   "release": 467,
   "build": 316,
   "title": "Buyer Discovery Evidence Interpretation & SEO Review Queue",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "BUYER_DISCOVERY_EVIDENCE_INTERPRETATION_SEO_REVIEW_QUEUE",
+  "state": "PRODUCTION_GREEN",
+  "phase": "BUYER_DISCOVERY_EVIDENCE_INTERPRETATION_COMPLETE",
   "authority": "release467-build316-buyer-discovery-evidence-interpretation-seo-review-queue",
   "predecessor": {
     "build": 315,
@@ -87,6 +87,48 @@
       "production_live_resource_integrity_run": 36722386886
     }
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT",
-  "roadmap": "docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md"
+  "measurement_state": "EVIDENCE_PENDING_NO_SEARCH_QUERY_DATA",
+  "roadmap": "docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md",
+  "measurement": {
+    "exact_development_sha": "d4511f2539b03e35e0989716065888c42b008fb1",
+    "workflow_run": 36726555652,
+    "artifact_id": 11103340984,
+    "aggregate_rows_read": 106,
+    "rows_read_ceiling": 20000,
+    "search_rows": 0,
+    "eligible_pairs": 0,
+    "seo_review_queue_rows": 0,
+    "page_views_30d": 22,
+    "unique_visitors_30d": 22,
+    "interpretation": "EVIDENCE_PENDING_NO_SEARCH_QUERY_DATA",
+    "queue_mutation": false,
+    "generated_seo_copy": false,
+    "production_d1_contact": false
+  },
+  "final_closure": {
+    "dev_sha": "d4511f2539b03e35e0989716065888c42b008fb1",
+    "tree_sha": "f89d348018b48ddcb9adad0229e745913051a168",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD316_GREEN",
+    "proofs": {
+      "system_gate_run": 36726555680,
+      "current_application_quality_run": 36726555682,
+      "it_admin_runtime_proof_run": 36726555759,
+      "branch_hygiene_run": 36726555685
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36726555683,
+      "build_specific_proof_run": 36726555652
+    },
+    "ingested_by_build": 317
+  },
+  "production_checkpoint": {
+    "main_sha": "ed9a89f070ecd05fcd3024df9b2ba4ddcbb7b33e",
+    "tree_sha": "f89d348018b48ddcb9adad0229e745913051a168",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36726827868,
+    "production_live_resource_integrity_run": 36726943717,
+    "remote_d1_queries": 0
+  }
 }
