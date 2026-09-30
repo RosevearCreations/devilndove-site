@@ -50,6 +50,7 @@ jobs:
       - uses: actions/setup-node@v7
         with: { node-version: '24' }
       # D1_ONE_SHOT_EVIDENCE_CAPTURE — Build 310 bounded Development continuity proof.
+      # Historical Release 467 predecessor maps are successor-aware through Build 310 / exact Build 309 Production.
       - name: Prove exact Development D1
         run: |
           set -euo pipefail
