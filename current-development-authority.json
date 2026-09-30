@@ -1246,5 +1246,8 @@
     "publication": false,
     "next_build": 303,
     "future_queue_exhausted": false
+  },
+  "historical_gate_compatibility": {
+    "build301_successor_aware": true
   }
 }
