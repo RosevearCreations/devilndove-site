@@ -110,6 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const siteProperty = document.getElementById('searchConsoleSiteProperty')?.value || '';
       const reportDate = document.getElementById('searchConsoleReportDate')?.value || '';
       const notes = document.getElementById('searchConsoleNotes')?.value || '';
+      const realExportConfirmed = document.getElementById('searchConsoleRealExportConfirm')?.checked === true;
+      if (!realExportConfirmed) throw new Error('Confirm this is a real Google Search Console export before importing.');
       if (!file && !csvText.trim()) throw new Error('Choose a CSV file or paste CSV rows first.');
       setMsg('Importing Search Console CSV...');
       let response;
@@ -119,9 +121,10 @@ document.addEventListener('DOMContentLoaded', () => {
         form.set('site_property', siteProperty);
         form.set('report_date', reportDate);
         form.set('notes', notes);
+        form.set('confirm_real_export', 'true');
         response = await window.DDAuth.apiFetch('/api/admin/search-console-import', { method: 'POST', body: form });
       } else {
-        response = await window.DDAuth.apiFetch('/api/admin/search-console-import', { method: 'POST', body: JSON.stringify({ csv_text: csvText, site_property: siteProperty, report_date: reportDate, notes, filters: currentFilters() }) });
+        response = await window.DDAuth.apiFetch('/api/admin/search-console-import', { method: 'POST', body: JSON.stringify({ csv_text: csvText, site_property: siteProperty, report_date: reportDate, notes, confirm_real_export: realExportConfirmed, filters: currentFilters() }) });
       }
       const data = await readJson(response);
       render(data);
@@ -191,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
   mount.innerHTML = `
     <div class="card search-console-admin-panel" style="margin-top:18px">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-        <div><h2 style="margin-top:0">Search Console CSV Import</h2><p class="small" style="margin:8px 0 0 0">Private staging for Search Console exports. Use filters to queue only evidence-backed page/query reviews. Build 316 never generates public SEO wording.</p></div>
+        <div><h2 style="margin-top:0">Search Console CSV Import</h2><p class="small" style="margin:8px 0 0 0">Private staging for real Google Search Console exports. Build 321 requires explicit real-export confirmation; evidence-backed reviews still require manual SEO wording and current evidence.</p></div>
         <button class="btn" type="button" id="searchConsoleLoadButton">Refresh summary</button>
       </div>
       <div class="search-console-import-grid" style="margin-top:12px">
@@ -201,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <label>Notes<input id="searchConsoleNotes" placeholder="Example: May performance export"></label>
       </div>
       <label style="display:block;margin-top:10px">Or paste CSV rows<textarea id="searchConsoleCsvText" rows="5" placeholder="Page,Query,Clicks,Impressions,CTR,Position"></textarea></label>
-      <div class="dd-product-draft-media-actions" style="margin-top:10px"><button class="btn primary" type="button" id="searchConsoleUploadButton">Import Search Console CSV</button></div>
+      <label style="display:flex;gap:8px;align-items:flex-start;margin-top:10px"><input type="checkbox" id="searchConsoleRealExportConfirm"> <span>I confirm this CSV is a real Google Search Console Performance export, not generated or placeholder data.</span></label>\n      <div class="dd-product-draft-media-actions" style="margin-top:10px"><button class="btn primary" type="button" id="searchConsoleUploadButton">Import confirmed real Search Console CSV</button></div>
       <details class="search-console-filter-panel" style="margin-top:12px" open>
         <summary>Filters and review controls</summary>
         <div class="search-console-import-grid" style="margin-top:12px">

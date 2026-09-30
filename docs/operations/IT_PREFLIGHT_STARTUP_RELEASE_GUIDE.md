@@ -1,34 +1,31 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 320 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 321 candidate
 
-Build 320 — Grey Hair Source-Evidence Review & Story-Plan Readiness — is projected over exact Build 319 Development/Production GREEN.
+Build 321 — Search Console Real Export Intake Continuity II — starts from exact Build 320 Development/Production GREEN.
 
-- Last fully verified Development SHA: `a068ec13ec14aedf6d62dfa5e5324fd6bf876680`
-- Last fully verified tree SHA: `5c49464a39ef189845bc5406716fbd055f535370`
-- Build 319 System Gate: `36752973485`
-- Build 319 Current Application Quality Proof: `36752973506`
-- Build 319 I.T. Admin Runtime Proof: `36752973489`
-- Build 319 Repository Branch Hygiene: `36752973494`
-- Build 319 D1 Fan-Out Guard: `36752973577`
-- Build 319 dedicated proof: `36752973432`
-- Current Production main SHA: `c753fe35a36096fa539f304a6b2fbd5f1d159a43`
-- Current Production tree SHA: `5c49464a39ef189845bc5406716fbd055f535370`
-- Production Pages Deploy: `36753367985`
-- Production Live Resource Integrity: `36753496201`
+- Verified Development SHA: `a5348eea48616a934a2994309d0738f05d706af9`
+- Verified Development/Production tree: `1bf94721855837958a546e033e0bead0f3f97580`
+- Build 320 System Gate: `36755683525`
+- Build 320 Current Application Quality Proof: `36755683559`
+- Build 320 I.T. Admin Runtime Proof: `36755683417`
+- Build 320 Repository Branch Hygiene: `36755683610`
+- Build 320 D1 Fan-Out Guard: `36755683521`
+- Build 320 dedicated proof: `36755683468`
+- Current Production main SHA: `e84cda2db64f0af93aa1f88cc71fb7079fe5fd54`
+- Production Pages Deploy: `36755991930`
+- Production Live Resource Integrity: `36756208135`
 
-Build 320:
-- targets only Creative Work Project 6 / `CP-MSUNAL8R` / **Grey Hair**;
-- adds a read-only readiness workspace at `/admin/grey-hair-story-readiness/`;
-- reuses CAIP Evidence Review for explicit source-range approval;
-- reuses Grey Hair Sync & Audio Alignment for the confirmed synchronization prerequisite;
-- reuses Grey Hair Story & Edit Planning for human-reviewed source-backed story plans;
-- requires ≥2 approved source ranges, ≥1 reviewed/approved story plan, and ≥2 source-backed story items before a later Maker Story decision;
-- exact Development measurement returned `SOURCE_EVIDENCE_REVIEW_REQUIRED`;
-- Grey Hair currently has 3 active source ranges: **1 approved / 2 needs_review**;
-- confirmed sync groups **0**, reviewed story plans **0**, source-backed story items **0**, Maker Story profiles **0**;
-- public-allowed assets/uploads remain **0 / 0** and Build 320 measurement read **165 / 20,000** D1 rows;
-- does not expose raw private URLs, infer media rights, create a Maker Story profile, publish, post socially, or execute providers.
+Build 321:
+- preserves `/api/admin/search-console-import` as the operator-controlled intake;
+- requires explicit confirmation that an import is a real Google Search Console Performance export;
+- validates recognizable Page, Clicks, Impressions, CTR and Position header groups before staging;
+- preserves `search_console_import` and `search_console_delete_batch` audit traceability;
+- keeps safe operator revert through `delete_batch`;
+- performs one read-only Development D1 continuity measurement;
+- remains `EVIDENCE_PENDING_NO_REAL_EXPORT` when no real export is staged;
+- creates no synthetic queries, clicks, impressions or batches;
+- executes no provider and contacts no Production D1.
 
-Next after Build 320 Production GREEN: **Build 321 — Search Console Real Export Intake Continuity II**.
+Next after Build 321 Production GREEN: **Build 322 — Buyer Discovery Attribution & SEO Review Evidence Continuity**.
 
 ## Current release baseline
 
