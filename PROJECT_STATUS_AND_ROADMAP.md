@@ -12,7 +12,7 @@ Build 311 is fully verified and promoted:
 - Production Pages Deploy: **36711481530 — SUCCESS**.
 - Production Live Resource Integrity: **36711577068 — SUCCESS**.
 
-Build 312 remeasures the full Creative Process → CAIP → Content Studio → reviewed publication → buyer-discovery path against Builds 300 and 306. It includes the accepted Under the Sea story, the review-blocked 35th promo story, all active project coverage, Search Console/public telemetry freshness, reviewed Product/Merchant facts, runtime health, identity integrity and D1 read cost.
+Build 312 remeasured the full Creative Process → CAIP → Content Studio → reviewed publication → buyer-discovery path against Builds 300 and 306. Current evidence is **2/5 Maker Story coverage**, **1 reviewed/public-candidate story**, **4 selected evidence rows**, **4 approved + locked deliverables**, **1 published Workshop Journal story**, **1 approved/ready review-first social row**, and **0 Search Console rows/clicks/impressions**. The 35th promo story remains needs-review with unknown outcome and no publication.
 
 The renewed successor roadmap is **Builds 313–318**. It begins with the explicit review decision for the existing 35th promo Maker Story, then keeps publication and Search Console work review-first/evidence-driven before considering one additional real project.
 
