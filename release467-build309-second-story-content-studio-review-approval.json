@@ -139,13 +139,14 @@
   },
   "candidate_control_alignment": {
     "state": "SOURCE_RUNTIME_REVIEW_AND_SUCCESSOR_CONTROLS_ALIGNED_FINAL_EXACT_HEAD_REPROOF_REQUIRED",
-    "intermediate_head": "361dff69125bfbe3ef5da8e6fced3e4730ed7be8",
-    "intermediate_tree": "ad6ce0d0e0680c1aaf5d450983f4190ea9d3d25b",
-    "system_gate_run": 36667267975,
-    "current_application_quality_run": 36667267787,
-    "it_admin_runtime_proof_run": 36667267677,
-    "branch_hygiene_run": 36667267696,
+    "intermediate_head": "466cc687af8f22295d10ee6df40b72d2a0473356",
+    "intermediate_tree": "b1a2ed2a113efb4ceba878cd95e6f812ace8e02a",
+    "system_gate_run": 36668176925,
+    "current_application_quality_run": 36668176909,
+    "it_admin_runtime_proof_run": 36668176977,
+    "branch_hygiene_run": 36668176908,
     "initial_build_specific_acceptance_run": 36666535254,
-    "note": "Build 309 review acceptance and current/restart/historical successor controls are GREEN. Final closure requires fresh exact-head System, Quality, I.T., Hygiene, D1 Fan-Out and idempotent Build 309 review proofs."
+    "acceptance_baseline_rows_read": 363,
+    "note": "Build 309 review adoption is GREEN and operational/restart truth is aligned to exact Build 308 Production GREEN. Final closure requires fresh exact-head System, Quality, I.T., Hygiene, D1 Fan-Out and idempotent Build 309 review proofs on the final dev SHA."
   }
 }
