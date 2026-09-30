@@ -1,19 +1,20 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 309 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 310 candidate
 
-Build 309 — Second Story Content Studio Review & Approval — is projected over exact Build 308 Development/Production GREEN.
+Build 310 — Review-First Publication & Distribution Continuity — is projected over exact Build 309 Development/Production GREEN.
 
-- Last fully verified Development: `60b6a631a615c1653ecfb07b4cbf8bc117a496f8`
-- Verified tree: `d78e7d76fb06395ee182271044314808454f6110`
-- Development proofs: System `36665213124`, Quality `36665213036`, I.T. `36665213119`, Hygiene `36665213073`
-- Supplemental Build 308 proofs: D1 Fan-Out `36665213057`, Build 308 `36665213093`
-- Current Production main: `498ddd776ea3c52b243a5ef8800fc33570d159a4`
-- Production proofs: Pages `36665406681`, Live Resources `36665469007`
-- Build 309 Development review acceptance: **2** corrected text-only drafts approved + locked (`seo-assets`, `blog-article`); **17** unsupported/media-dependent drafts set to `changes_requested`.
+- Last fully verified Development: `6c432524d8fad7eea5eabbd85f4f4a80e7aa1ec0`
+- Verified tree: `9216756424a22feb66e6f0b69047ab340496a240`
+- Development proofs: System `36668355699`, Quality `36668355761`, I.T. `36668355615`, Hygiene `36668355696`
+- Supplemental Build 309 proofs: D1 Fan-Out `36668355656`, Build 309 `36668355683`
+- Current Production main: `a65463ee79a50ec16741958bc2913cf67b198966`
+- Production proofs: Pages `36668510235`, Live Resources `36668575436`
+- Build 309 review acceptance: **2** corrected text-only 35th promo drafts approved + locked and **17** unsupported/media-dependent drafts retained in `changes_requested`.
 - The 35th promo Maker Story remains **needs_review**, outcome **unknown**, public-story candidate **false**.
-- Existing Content Studio handoff evidence count is aligned to the already-selected text evidence row: **1**.
-- Media/publication/provider boundaries remain closed: CAIP assets **0**, private uploads **0**, publications **0**, social rows **0**.
-- Build 309 discovery used **57 rows read** and review acceptance used **363 rows read**; Production D1 contact: **ZERO**.
-- Next after Build 309 Production GREEN: Build 310 — Review-First Publication & Distribution Continuity.
+- Build 310 requires an existing Maker Story profile to be explicitly **reviewed** and marked **public candidate** before a public-release draft can be prepared, approved or published.
+- While that prerequisite remains unsatisfied, 35th promo stays at **0 publications / 0 social rows**.
+- Under the Sea continuity remains one published text-only Workshop Journal story plus one approved/ready `review_first` social link item and zero posted provider rows.
+- Build 310 executes no social provider, IndexNow, marketplace, R2, Finance, Inventory or Production D1 action.
+- Next after Build 310 Production GREEN: Build 311 — Buyer Discovery Evidence Freshness & Search Intake.
 
 ## Current release baseline
 

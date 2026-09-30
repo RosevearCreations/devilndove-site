@@ -1,17 +1,5 @@
 name: Release 467 Build 309 Second Story Content Studio Review Approval
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build309_*'
-      - 'scripts/release467_build308_regression.py'
-      - 'release467-build309-*.json'
-      - 'release467-build308-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_309_*'
-      - 'docs/operations/RELEASE_467_CONTENT_ADOPTION_COVERAGE_DISCOVERY_BUILDS_307_312.md'
-      - '.github/workflows/release467-build309-second-story-content-studio-review-approval.yml'
   workflow_dispatch:
 permissions:
   contents: read
