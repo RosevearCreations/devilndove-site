@@ -1,4 +1,5 @@
 name: Release 467 Build 317 Third Project Maker Story Readiness Evidence Selection
+# Final exact-head proof trigger after measured no-selection closure.
 on:
   push:
     branches: [dev]
