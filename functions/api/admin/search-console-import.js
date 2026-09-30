@@ -78,20 +78,6 @@ function pick(record, aliases) {
   }
   return '';
 }
-function titleCase(value) {
-  return normalizeText(value)
-    .toLowerCase()
-    .replace(/\b([a-z])/g, (match) => match.toUpperCase())
-    .replace(/\bAnd\b/g, 'and')
-    .replace(/\bOr\b/g, 'or')
-    .replace(/\bFor\b/g, 'for')
-    .replace(/\bIn\b/g, 'in');
-}
-function truncate(value, maxLength) {
-  const clean = normalizeText(value);
-  if (clean.length <= maxLength) return clean;
-  return `${clean.slice(0, Math.max(0, maxLength - 1)).trim()}…`;
-}
 function actionKeyFor(row) {
   const seed = `${normalizeText(row.page_url).toLowerCase()}|${normalizeText(row.query_text).toLowerCase()}`;
   let hash = 0;
@@ -198,7 +184,15 @@ async function summary(db, filters = {}, providedReadiness = null) {
   const positionTo = Number(filters.position_to || 20) || 20;
   opportunityWhere.push(Math.min(positionFrom, positionTo), Math.max(positionFrom, positionTo));
   const opportunityQueries = rows(await db.prepare(`SELECT query_text, page_url, SUM(clicks) AS clicks, SUM(impressions) AS impressions, ROUND(AVG(average_position),2) AS average_position, MAX(import_batch_key) AS import_batch_key FROM search_console_page_queries ${where.sql ? `${where.sql} AND COALESCE(query_text,'') <> ''` : "WHERE COALESCE(query_text,'') <> ''"} GROUP BY query_text, page_url HAVING ${havingClauses.join(' AND ')} ORDER BY impressions DESC, average_position ASC LIMIT ?`).bind(...opportunityWhere, limit).all().catch(() => ({ results: [] })));
-  const actions = rows(await db.prepare(`SELECT action_key, page_url, query_text, priority_score, suggested_title, suggested_meta_description, suggested_internal_link_note, action_status, created_from_batch_key, applied_override_id, applied_at, created_at, notes FROM seo_opportunity_actions ORDER BY CASE action_status WHEN 'open' THEN 0 WHEN 'in_progress' THEN 1 WHEN 'done' THEN 2 ELSE 3 END, priority_score DESC, datetime(updated_at) DESC LIMIT ?`).bind(limit).all().catch(() => ({ results: [] })));
+  const actions = rows(await db.prepare(`SELECT a.action_key,a.page_url,a.query_text,a.priority_score,a.suggested_title,a.suggested_meta_description,a.suggested_internal_link_note,a.action_status,a.created_from_batch_key,a.applied_override_id,a.applied_at,a.created_at,a.notes,
+    COALESCE(e.evidence_rows,0) evidence_rows,COALESCE(e.evidence_clicks,0) evidence_clicks,COALESCE(e.evidence_impressions,0) evidence_impressions,COALESCE(e.evidence_position,0) evidence_position,
+    CASE WHEN COALESCE(e.evidence_impressions,0)>=10 AND COALESCE(e.evidence_position,0) BETWEEN 4 AND 20 THEN 1 ELSE 0 END current_evidence_supported
+    FROM seo_opportunity_actions a
+    LEFT JOIN (
+      SELECT lower(page_url) page_key,lower(COALESCE(query_text,'')) query_key,COUNT(*) evidence_rows,SUM(clicks) evidence_clicks,SUM(impressions) evidence_impressions,ROUND(AVG(average_position),2) evidence_position
+      FROM search_console_page_queries GROUP BY lower(page_url),lower(COALESCE(query_text,''))
+    ) e ON e.page_key=lower(a.page_url) AND e.query_key=lower(COALESCE(a.query_text,''))
+    ORDER BY CASE a.action_status WHEN 'open' THEN 0 WHEN 'in_progress' THEN 1 WHEN 'done' THEN 2 ELSE 3 END,a.priority_score DESC,datetime(a.updated_at) DESC LIMIT ?`).bind(limit).all().catch(() => ({ results: [] })));
   return { schema_readiness: schemaReadiness, totals, batches, top_pages: topPages, opportunity_queries: opportunityQueries, seo_actions: actions, operator_acceptance: acceptance, active_filters: filters };
 }
 async function deleteBatch(db, importBatchKey) {
@@ -217,28 +211,36 @@ async function generateRecommendations(db, adminUser, filters = {}) {
   const data = await summary(db, { ...filters, limit: Math.min(50, Math.max(10, Number(filters.limit || 20))) });
   const opportunities = Array.isArray(data.opportunity_queries) ? data.opportunity_queries : [];
   let created = 0;
+  let updated = 0;
   let skipped = 0;
-  const inserted = [];
+  const queued = [];
   for (const row of opportunities) {
     const query = normalizeText(row.query_text);
     const pageUrl = normalizeText(row.page_url);
-    if (!query || !pageUrl) { skipped += 1; continue; }
+    const impressions = Number(row.impressions || 0);
+    const clicks = Number(row.clicks || 0);
+    const position = Number(row.average_position || 0);
+    if (!query || !pageUrl || impressions < 1 || !Number.isFinite(position)) { skipped += 1; continue; }
     const actionKey = actionKeyFor(row);
+    const priorityScore = Math.max(1, Math.min(100, Math.round(impressions / Math.max(1, position))));
+    const batchKey = normalizeText(row.import_batch_key) || null;
+    const evidenceNote = `Evidence-backed review queue: ${impressions} impressions, ${clicks} clicks, average position ${position}; source batch ${batchKey || 'unknown'}. No SEO title, meta description, H1 or internal-link wording was generated. Human review is required.`;
     const existing = await db.prepare('SELECT action_key FROM seo_opportunity_actions WHERE action_key = ? LIMIT 1').bind(actionKey).first().catch(() => null);
-    if (existing) { skipped += 1; continue; }
-    const queryTitle = titleCase(query);
-    const priorityScore = Math.max(1, Math.min(100, Math.round(Number(row.impressions || 0) / Math.max(1, Number(row.average_position || 1)))));
-    const suggestedTitle = truncate(`${queryTitle} | Devil n Dove Ontario`, 70);
-    const suggestedMeta = truncate(`Review this page for ${queryTitle}. Add clearer Southern Ontario wording, helpful product details, and internal links only if the query matches the page intent.`, 155);
-    const internalNote = truncate(`Add one natural internal link using words close to “${query}” from a related local, shop, collection, or blog page if it helps visitors.`, 220);
-    await db.prepare(`INSERT INTO seo_opportunity_actions (action_key, source, page_url, query_text, priority_score, suggested_title, suggested_meta_description, suggested_internal_link_note, action_status, created_from_batch_key, created_by_user_id, created_at, updated_at, notes) VALUES (?, 'search_console', ?, ?, ?, ?, ?, ?, 'open', ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)`)
-      .bind(actionKey, pageUrl, query, priorityScore, suggestedTitle, suggestedMeta, internalNote, normalizeText(row.import_batch_key) || null, Number(adminUser.user_id || 0), 'Generated from Search Console CSV opportunity review. Human review required before changing public SEO copy.')
-      .run();
-    created += 1;
-    inserted.push({ action_key: actionKey, page_url: pageUrl, query_text: query, priority_score: priorityScore, suggested_title: suggestedTitle, suggested_meta_description: suggestedMeta, suggested_internal_link_note: internalNote });
+    if (existing) {
+      await db.prepare(`UPDATE seo_opportunity_actions SET priority_score=?,created_from_batch_key=COALESCE(?,created_from_batch_key),notes=?,updated_at=CURRENT_TIMESTAMP WHERE action_key=?`)
+        .bind(priorityScore,batchKey,evidenceNote,actionKey).run();
+      updated += 1;
+    } else {
+      await db.prepare(`INSERT INTO seo_opportunity_actions (action_key,source,page_url,query_text,priority_score,suggested_title,suggested_meta_description,suggested_internal_link_note,action_status,created_from_batch_key,created_by_user_id,created_at,updated_at,notes)
+        VALUES (?,'search_console',?,?,?,?,?,?, 'open',?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,?)`)
+        .bind(actionKey,pageUrl,query,priorityScore,null,null,null,batchKey,Number(adminUser.user_id||0),evidenceNote).run();
+      created += 1;
+    }
+    queued.push({action_key:actionKey,page_url:pageUrl,query_text:query,clicks,impressions,average_position:position,priority_score:priorityScore,created_from_batch_key:batchKey,generated_copy:false});
   }
-  return { created, skipped, inserted };
+  return { created, updated, skipped, queued, mode:'EVIDENCE_BACKED_HUMAN_REVIEW_ONLY', generated_copy:false };
 }
+
 async function updateActionStatus(db, payload) {
   const actionKey = normalizeText(payload.action_key);
   const status = normalizeText(payload.action_status).toLowerCase();
@@ -254,44 +256,35 @@ async function applySeoAction(db, adminUser, payload, requestUrl) {
   const action = await db.prepare(`SELECT * FROM seo_opportunity_actions WHERE action_key=? LIMIT 1`).bind(actionKey).first();
   if (!action) throw new Error('SEO action was not found.');
   if (String(action.action_status || '').toLowerCase() === 'ignored') throw new Error('Ignored SEO actions cannot be applied.');
+  const support = await db.prepare(`SELECT COUNT(*) evidence_rows,COALESCE(SUM(clicks),0) clicks,COALESCE(SUM(impressions),0) impressions,COALESCE(AVG(average_position),0) average_position
+    FROM search_console_page_queries WHERE lower(page_url)=lower(?) AND lower(COALESCE(query_text,''))=lower(COALESCE(?,''))`)
+    .bind(normalizeText(action.page_url),normalizeText(action.query_text)).first().catch(()=>null);
+  const impressions=Number(support?.impressions||0),position=Number(support?.average_position||0);
+  if(!support||impressions<10||position<4||position>20)throw new Error('Current Search Console evidence no longer supports this review action. Refresh evidence before applying SEO changes.');
   const pagePath = pagePathFromUrl(payload.page_url || action.page_url, requestUrl);
-  const title = clampText(payload.title || action.suggested_title, 70);
-  const metaDescription = clampText(payload.meta_description || action.suggested_meta_description, 160);
-  const internalLinkNote = clampText(payload.internal_link_note || action.suggested_internal_link_note, 260);
-  const h1Suggestion = clampText(payload.h1_suggestion || '', 90);
+  const title = clampText(payload.title, 70);
+  const metaDescription = clampText(payload.meta_description, 160);
+  const internalLinkNote = clampText(payload.internal_link_note, 260);
+  const h1Suggestion = clampText(payload.h1_suggestion, 90);
   if (!pagePath) throw new Error('Could not derive a page path for this SEO action.');
-  if (!title && !metaDescription && !internalLinkNote && !h1Suggestion) throw new Error('Nothing to apply. Add a title, meta description, H1 suggestion, or internal-link note.');
+  if (!title && !metaDescription && !internalLinkNote && !h1Suggestion) throw new Error('Enter reviewed SEO copy explicitly before Apply: title, meta description, H1 suggestion, or internal-link note.');
   await db.prepare(`INSERT INTO seo_page_overrides (
       page_path, page_url, title, meta_description, h1_suggestion, internal_link_note, status,
       source_action_key, source_query_text, reviewed_by_user_id, applied_at, created_at, updated_at, notes
     ) VALUES (?, ?, ?, ?, ?, ?, 'applied', ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
     ON CONFLICT(page_path) DO UPDATE SET
-      page_url=excluded.page_url,
-      title=excluded.title,
-      meta_description=excluded.meta_description,
-      h1_suggestion=excluded.h1_suggestion,
-      internal_link_note=excluded.internal_link_note,
-      status='applied',
-      source_action_key=excluded.source_action_key,
-      source_query_text=excluded.source_query_text,
-      reviewed_by_user_id=excluded.reviewed_by_user_id,
-      applied_at=CURRENT_TIMESTAMP,
-      updated_at=CURRENT_TIMESTAMP,
-      notes=excluded.notes`).bind(
-    pagePath,
-    normalizeText(action.page_url),
-    title || null,
-    metaDescription || null,
-    h1Suggestion || null,
-    internalLinkNote || null,
-    actionKey,
-    normalizeText(action.query_text) || null,
-    Number(adminUser.user_id || 0),
-    normalizeText(payload.notes || 'Applied from reviewed Search Console SEO action.') || null
+      page_url=excluded.page_url,title=excluded.title,meta_description=excluded.meta_description,h1_suggestion=excluded.h1_suggestion,
+      internal_link_note=excluded.internal_link_note,status='applied',source_action_key=excluded.source_action_key,
+      source_query_text=excluded.source_query_text,reviewed_by_user_id=excluded.reviewed_by_user_id,
+      applied_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP,notes=excluded.notes`).bind(
+    pagePath,normalizeText(action.page_url),title||null,metaDescription||null,h1Suggestion||null,internalLinkNote||null,
+    actionKey,normalizeText(action.query_text)||null,Number(adminUser.user_id||0),
+    normalizeText(payload.notes || 'Human-reviewed SEO override from evidence-backed Search Console review action.') || null
   ).run();
   const override = await db.prepare(`SELECT seo_page_override_id FROM seo_page_overrides WHERE page_path=? LIMIT 1`).bind(pagePath).first().catch(() => null);
-  await db.prepare(`UPDATE seo_opportunity_actions SET action_status='applied', applied_override_id=?, applied_at=CURRENT_TIMESTAMP, notes=COALESCE(?, notes), updated_at=CURRENT_TIMESTAMP WHERE action_key=?`).bind(Number(override?.seo_page_override_id || 0) || null, normalizeText(payload.notes) || null, actionKey).run();
-  return { applied: 1, page_path: pagePath, seo_page_override_id: Number(override?.seo_page_override_id || 0) || null };
+  await db.prepare(`UPDATE seo_opportunity_actions SET action_status='applied',applied_override_id=?,applied_at=CURRENT_TIMESTAMP,notes=COALESCE(?,notes),updated_at=CURRENT_TIMESTAMP WHERE action_key=?`)
+    .bind(Number(override?.seo_page_override_id||0)||null,normalizeText(payload.notes)||null,actionKey).run();
+  return { applied:1,page_path:pagePath,seo_page_override_id:Number(override?.seo_page_override_id||0)||null,current_evidence:{rows:Number(support?.evidence_rows||0),clicks:Number(support?.clicks||0),impressions,average_position:Number(position.toFixed(2))},human_copy_explicit:true };
 }
 
 export async function onRequestGet(context) {
@@ -302,7 +295,7 @@ export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const schemaReadiness=await searchConsoleSchemaReadiness(db);
   const data=await summary(db,buildFiltersFromUrl(url),schemaReadiness);
-  return jsonResponse({ ok: true, release:467, build:315, generated_at: new Date().toISOString(), ...data }, 200, { 'Cache-Control': 'no-store' });
+  return jsonResponse({ ok: true, release:467, build:316, generated_at: new Date().toISOString(), ...data }, 200, { 'Cache-Control': 'no-store' });
 }
 
 export async function onRequestPost(context) {
@@ -312,7 +305,7 @@ export async function onRequestPost(context) {
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
   const schemaReadiness=await searchConsoleSchemaReadiness(db);
   if(!schemaReadiness.ready)return jsonResponse({
-    ok:false,release:467,build:315,
+    ok:false,release:467,build:316,
     error:'Search Console intake schema is not ready. Apply the canonical database migration before importing evidence.',
     schema_readiness:schemaReadiness
   },409,{'Cache-Control':'no-store'});
@@ -346,8 +339,8 @@ export async function onRequestPost(context) {
 
   if (action === 'generate_recommendations') {
     const generated = await generateRecommendations(db, adminUser, filters);
-    await auditAdminAction(context.env, context.request, adminUser, { action_type: 'search_console_generate_recommendations', target_type: 'seo_opportunity_actions', target_key: 'search_console', details: generated });
-    return jsonResponse({ ok: true, message: `Created ${generated.created} SEO action item(s). ${generated.skipped} already existed or were skipped.`, ...generated, ...(await summary(db, filters)) }, 200, { 'Cache-Control': 'no-store' });
+    await auditAdminAction(context.env, context.request, adminUser, { action_type: 'search_console_queue_evidence_reviews', target_type: 'seo_opportunity_actions', target_key: 'search_console', details: generated });
+    return jsonResponse({ ok: true, message: `Evidence-backed review queue updated: ${generated.created} created, ${generated.updated} refreshed, ${generated.skipped} skipped.`, ...generated, ...(await summary(db, filters)) }, 200, { 'Cache-Control': 'no-store' });
   }
 
   if (action === 'update_action_status') {
