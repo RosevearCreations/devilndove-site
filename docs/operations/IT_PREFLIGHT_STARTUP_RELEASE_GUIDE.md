@@ -1,18 +1,17 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 303 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 304 candidate
 
-Build 303 — Content Studio Draft Review & Approval Adoption — is projected over exact Build 302 Production GREEN.
+Build 304 — Workshop Journal & Social Review-First Publication Acceptance — is projected over exact Build 303 Development/Production GREEN.
 
-- Last fully verified Development: `a6827f4ee093fcf0799ddb99c7a7957469bf3a2c`
-- Verified tree: `2665c72c6947c3d9dbea2f1d89e69dab70c791fd`
-- Development proofs: System `36651352321`, Quality `36651352242`, I.T. `36651352277`, Hygiene `36651352216`
-- Supplemental Build 301 proofs: D1 Fan-Out `36648101024`, Build 301 `36651352265`
-- Current Production main: `fffbafc4e9f27e830494140b48d9a3d266abd81e`
-- Production proofs: Pages `36651501581`, Live Resources `36651569610`
-- Build 302 real evidence adoption: Creative Project 7 — Under the Sea; three selected text-only factual evidence rows; no public-use rights inferred.
-- Build 303 discovery consumed 157 D1 rows and found one existing Content Studio package with 19 factual-template drafts, zero approvals, zero CAIP/private media and zero publication/social rows.
-- Build 303 human review approves and locks only the corrected `seo-assets` and `blog-article` copy; 17 media/result-dependent drafts receive `changes_requested`.
-- No automatic refresh, package recreation, publication, provider execution, R2 mutation or Production D1 business-data contact.
-- Next after Build 303 Production GREEN: Build 304 — Workshop Journal & Social Review-First Publication Acceptance.
+- Last fully verified Development: `2b260c9ff58ca56f75afe2f82144ba8f884d572e`
+- Verified tree: `d60f0f1812653cac9a85cd0f67730f4b7d2a587d`
+- Development proofs: System `36653801145`, Quality `36653801156`, I.T. `36653801176`, Hygiene `36653801148`
+- Supplemental Build 303 proofs: D1 Fan-Out `36653801203`, Build 303 `36653801155`
+- Current Production main: `5fe6e3b5c47f948d8e931fd7357801ca639cb7dd`
+- Production proofs: Pages `36655109591`, Live Resources `36655170381`
+- Build 303 review result: 19 factual drafts; `blog-article` + `seo-assets` approved/locked; 17 changes requested; no reviewed public-use media.
+- Build 304 acceptance: one factual text-only Workshop Journal row plus one approved `ready` social link draft in `review_first` mode; website-gallery publication remains media-gated.
+- Provider execution/publication: **ZERO**. Production D1 business-data contact: **ZERO**.
+- Next after Build 304 Production GREEN: Build 305 — Buyer Discovery & Search Measurement Activation.
 
 ## Current release baseline
 
