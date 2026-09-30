@@ -152,14 +152,38 @@ async function searchConsoleSchemaReadiness(db) {
   };
 }
 
+async function operatorAcceptance(db, providedReadiness = null) {
+  const schemaReadiness=providedReadiness||await searchConsoleSchemaReadiness(db);
+  if(!schemaReadiness.ready){
+    return { state:'SCHEMA_BLOCKED', schema_ready:false, import_batches:0, live_rows:0, mismatched_batches:0, orphan_rows:0, import_audits:0, revert_audits:0, automatic_import:false, synthetic_rows:false, safe_revert_action:'delete_batch' };
+  }
+  const stats=await db.prepare(`SELECT
+    (SELECT COUNT(*) FROM search_console_import_batches) import_batches,
+    COALESCE((SELECT SUM(row_count) FROM search_console_import_batches),0) declared_rows,
+    (SELECT COUNT(*) FROM search_console_page_queries) live_rows,
+    (SELECT COUNT(*) FROM search_console_import_batches b WHERE COALESCE(b.row_count,0)<>(SELECT COUNT(*) FROM search_console_page_queries q WHERE q.import_batch_key=b.import_batch_key)) mismatched_batches,
+    (SELECT COUNT(*) FROM search_console_page_queries q WHERE NOT EXISTS (SELECT 1 FROM search_console_import_batches b WHERE b.import_batch_key=q.import_batch_key)) orphan_rows,
+    (SELECT COUNT(*) FROM search_console_import_batches WHERE trim(COALESCE(source_file,''))<>'' AND COALESCE(imported_by_user_id,0)>0) operator_bound_batches,
+    (SELECT COUNT(*) FROM admin_action_audit WHERE action_type='search_console_import') import_audits,
+    (SELECT COUNT(*) FROM admin_action_audit WHERE action_type='search_console_delete_batch') revert_audits`).first().catch(()=>null);
+  if(!stats)return { state:'TRACEABILITY_REVIEW_REQUIRED', schema_ready:true, automatic_import:false, synthetic_rows:false, safe_revert_action:'delete_batch' };
+  const batches=Number(stats.import_batches||0),live=Number(stats.live_rows||0),mismatch=Number(stats.mismatched_batches||0),orphans=Number(stats.orphan_rows||0),operatorBound=Number(stats.operator_bound_batches||0),importAudits=Number(stats.import_audits||0);
+  let state='EVIDENCE_PENDING_NO_REAL_EXPORT';
+  if(batches===0&&live===0)state='EVIDENCE_PENDING_NO_REAL_EXPORT';
+  else if(batches>0&&live>0&&mismatch===0&&orphans===0&&operatorBound===batches&&importAudits>0)state='REAL_OPERATOR_EVIDENCE_PRESENT';
+  else state='TRACEABILITY_REVIEW_REQUIRED';
+  return { state, schema_ready:true, ...stats, automatic_import:false, synthetic_rows:false, request_time_schema_mutation:false, safe_revert_action:'delete_batch', import_audit_action:'search_console_import', revert_audit_action:'search_console_delete_batch' };
+}
+
 async function summary(db, filters = {}, providedReadiness = null) {
   const schemaReadiness=providedReadiness||await searchConsoleSchemaReadiness(db);
+  const acceptance=await operatorAcceptance(db,schemaReadiness);
   const limit = Math.round(clampNumber(filters.limit, 5, 100, 20));
   if(!schemaReadiness.ready){
     return {
       schema_readiness:schemaReadiness,
       totals:{row_count:0,clicks:0,impressions:0,average_position:0},
-      batches:[],top_pages:[],opportunity_queries:[],seo_actions:[],active_filters:filters
+      batches:[],top_pages:[],opportunity_queries:[],seo_actions:[],operator_acceptance:acceptance,active_filters:filters
     };
   }
   const where = buildWhere(filters);
@@ -175,7 +199,7 @@ async function summary(db, filters = {}, providedReadiness = null) {
   opportunityWhere.push(Math.min(positionFrom, positionTo), Math.max(positionFrom, positionTo));
   const opportunityQueries = rows(await db.prepare(`SELECT query_text, page_url, SUM(clicks) AS clicks, SUM(impressions) AS impressions, ROUND(AVG(average_position),2) AS average_position, MAX(import_batch_key) AS import_batch_key FROM search_console_page_queries ${where.sql ? `${where.sql} AND COALESCE(query_text,'') <> ''` : "WHERE COALESCE(query_text,'') <> ''"} GROUP BY query_text, page_url HAVING ${havingClauses.join(' AND ')} ORDER BY impressions DESC, average_position ASC LIMIT ?`).bind(...opportunityWhere, limit).all().catch(() => ({ results: [] })));
   const actions = rows(await db.prepare(`SELECT action_key, page_url, query_text, priority_score, suggested_title, suggested_meta_description, suggested_internal_link_note, action_status, created_from_batch_key, applied_override_id, applied_at, created_at, notes FROM seo_opportunity_actions ORDER BY CASE action_status WHEN 'open' THEN 0 WHEN 'in_progress' THEN 1 WHEN 'done' THEN 2 ELSE 3 END, priority_score DESC, datetime(updated_at) DESC LIMIT ?`).bind(limit).all().catch(() => ({ results: [] })));
-  return { schema_readiness: schemaReadiness, totals, batches, top_pages: topPages, opportunity_queries: opportunityQueries, seo_actions: actions, active_filters: filters };
+  return { schema_readiness: schemaReadiness, totals, batches, top_pages: topPages, opportunity_queries: opportunityQueries, seo_actions: actions, operator_acceptance: acceptance, active_filters: filters };
 }
 async function deleteBatch(db, importBatchKey) {
   const key = normalizeText(importBatchKey);
@@ -278,7 +302,7 @@ export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const schemaReadiness=await searchConsoleSchemaReadiness(db);
   const data=await summary(db,buildFiltersFromUrl(url),schemaReadiness);
-  return jsonResponse({ ok: true, release:467, build:311, generated_at: new Date().toISOString(), ...data }, 200, { 'Cache-Control': 'no-store' });
+  return jsonResponse({ ok: true, release:467, build:315, generated_at: new Date().toISOString(), ...data }, 200, { 'Cache-Control': 'no-store' });
 }
 
 export async function onRequestPost(context) {
@@ -288,7 +312,7 @@ export async function onRequestPost(context) {
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
   const schemaReadiness=await searchConsoleSchemaReadiness(db);
   if(!schemaReadiness.ready)return jsonResponse({
-    ok:false,release:467,build:311,
+    ok:false,release:467,build:315,
     error:'Search Console intake schema is not ready. Apply the canonical database migration before importing evidence.',
     schema_readiness:schemaReadiness
   },409,{'Cache-Control':'no-store'});
