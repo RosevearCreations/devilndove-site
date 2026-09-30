@@ -202,7 +202,7 @@
   "next_build": 311,
   "next_build_state": "QUEUED_AFTER_BUILD310_PRODUCTION_GREEN",
   "next_build_title": "Buyer Discovery Evidence Freshness & Search Intake",
-  "promotion_state": "BUILD310_CANDIDATE_AWAITING_EXACT_HEAD_PROOFS",
+  "promotion_state": "BUILD310_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "BUILD309_PRODUCTION_GREEN_BUILD310_ACTIVE",
   "measured_closure": {
     "source_build": 232,
