@@ -2,8 +2,8 @@
   "release": 467,
   "build": 315,
   "title": "Search Console Operator Intake Acceptance",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "SEARCH_CONSOLE_OPERATOR_INTAKE_ACCEPTANCE",
+  "state": "PRODUCTION_GREEN",
+  "phase": "SEARCH_CONSOLE_OPERATOR_INTAKE_ACCEPTANCE_COMPLETE",
   "authority": "release467-build315-search-console-operator-intake-acceptance",
   "predecessor": {
     "build": 314,
@@ -84,6 +84,44 @@
       "production_live_resource_integrity_run": 36720280219
     }
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT",
-  "roadmap": "docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md"
+  "measurement_state": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+  "roadmap": "docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md",
+  "measurement": {
+    "exact_development_sha": "2a7c1aa8d90b4851073f50d67b87d5e199ea303d",
+    "workflow_run": 36722013591,
+    "aggregate_rows_read": 2049,
+    "rows_read_ceiling": 20000,
+    "import_batches": 0,
+    "live_rows": 0,
+    "interpretation": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "synthetic_rows": false,
+    "automatic_import": false,
+    "production_d1_contact": false
+  },
+  "final_closure": {
+    "dev_sha": "2a7c1aa8d90b4851073f50d67b87d5e199ea303d",
+    "tree_sha": "4f1816b0700157ac1c71d170d08a0116af19eac4",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD315_GREEN",
+    "proofs": {
+      "system_gate_run": 36722013148,
+      "current_application_quality_run": 36722013116,
+      "it_admin_runtime_proof_run": 36722013224,
+      "branch_hygiene_run": 36722013237
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36722013190,
+      "build_specific_proof_run": 36722013591
+    },
+    "ingested_by_build": 316
+  },
+  "production_checkpoint": {
+    "main_sha": "7c8605c627c25443df24d08b5ffecb3fa315c084",
+    "tree_sha": "4f1816b0700157ac1c71d170d08a0116af19eac4",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36722265165,
+    "production_live_resource_integrity_run": 36722386886,
+    "remote_d1_queries": 0
+  }
 }

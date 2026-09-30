@@ -43,7 +43,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function renderStatusButton(action) {
     const applied = action.action_status === 'applied' || Number(action.applied_override_id || 0) > 0;
-    return `<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn small" type="button" data-seo-action-status="${esc(action.action_key)}">Status</button>${applied ? '<span class="admin-status-pill ok">applied</span>' : `<button class="btn small primary" type="button" data-seo-action-apply="${esc(action.action_key)}">Apply</button>`}</div>`;
+    const supported = Number(action.current_evidence_supported || 0) === 1;
+    const apply = applied
+      ? '<span class="admin-status-pill ok">applied</span>'
+      : supported
+        ? `<button class="btn small primary" type="button" data-seo-action-apply="${esc(action.action_key)}">Review & apply</button>`
+        : '<span class="admin-status-pill">no current evidence</span>';
+    return `<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn small" type="button" data-seo-action-status="${esc(action.action_key)}">Status</button>${apply}</div>`;
   }
   function render(data) {
     const totals = data.totals || {};
@@ -76,15 +82,15 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="admin-table-wrap"><table><thead><tr><th>Page</th><th>Clicks</th><th>Impressions</th><th>CTR</th><th>Avg position</th></tr></thead><tbody>
         ${rows.map((row) => `<tr><td><code>${esc(row.page_url)}</code></td><td>${num(row.clicks)}</td><td>${num(row.impressions)}</td><td>${pct(row.ctr)}</td><td>${esc(row.average_position)}</td></tr>`).join('') || '<tr><td colspan="5">No Search Console rows match the current filters.</td></tr>'}
       </tbody></table></div>
-      <h3>SEO opportunities</h3>
-      <p class="small">Queries with impressions and average positions around 4-20 are candidates for title/meta/internal-link review. These are hints, not automatic public edits.</p>
+      <h3>Evidence-backed SEO opportunities</h3>
+      <p class="small">Only real Search Console page/query pairs with impressions and average positions around 4-20 qualify for the human SEO review queue. Public telemetry alone cannot create a query-level SEO action.</p>
       <div class="admin-table-wrap"><table><thead><tr><th>Query</th><th>Page</th><th>Clicks</th><th>Impressions</th><th>Avg position</th></tr></thead><tbody>
         ${opps.map((row) => `<tr><td>${esc(row.query_text)}</td><td><code>${esc(row.page_url)}</code></td><td>${num(row.clicks)}</td><td>${num(row.impressions)}</td><td>${esc(row.average_position)}</td></tr>`).join('') || '<tr><td colspan="5">No opportunity rows match the current filters.</td></tr>'}
       </tbody></table></div>
-      <h3>Reviewable SEO action list</h3>
-      <p class="small">Generated actions stay private until reviewed. Use Apply only after the suggested title/meta/internal-link note matches the real page intent; applied rows save a D1 SEO override and a client-side enhancement uses it as a fallback.</p>
-      <div class="admin-table-wrap"><table><thead><tr><th>Status</th><th>Priority</th><th>Query/Page</th><th>Suggested title</th><th>Suggested meta/link note</th><th>Action</th></tr></thead><tbody>
-        ${actions.map((action) => `<tr><td><strong>${esc(action.action_status)}</strong><div class="small">${action.applied_at ? `applied ${esc(action.applied_at)}` : ''}</div></td><td>${esc(action.priority_score)}</td><td><div>${esc(action.query_text)}</div><code>${esc(action.page_url)}</code></td><td>${esc(action.suggested_title)}</td><td><div>${esc(action.suggested_meta_description)}</div><div class="small">${esc(action.suggested_internal_link_note)}</div></td><td>${renderStatusButton(action)}</td></tr>`).join('') || '<tr><td colspan="6">No SEO actions generated yet.</td></tr>'}
+      <h3>SEO review queue</h3>
+      <p class="small">Evidence-backed review rows contain the real query/page metrics only. Build 316 generates no title, meta description, H1, or internal-link wording. Manual SEO wording is entered only during Review & apply, and current evidence is rechecked before the override can be saved.</p>
+      <div class="admin-table-wrap"><table><thead><tr><th>Status</th><th>Priority</th><th>Query/Page</th><th>Current evidence</th><th>Review note</th><th>Action</th></tr></thead><tbody>
+        ${actions.map((action) => `<tr><td><strong>${esc(action.action_status)}</strong><div class="small">${action.applied_at ? `applied ${esc(action.applied_at)}` : ''}</div></td><td>${esc(action.priority_score)}</td><td><div>${esc(action.query_text)}</div><code>${esc(action.page_url)}</code></td><td><div>${num(action.evidence_impressions||0)} impressions • ${num(action.evidence_clicks||0)} clicks</div><div class="small">avg position ${esc(action.evidence_position||0)} • ${Number(action.current_evidence_supported||0)===1?'supported now':'not currently supported'}</div></td><td><div class="small">${esc(action.notes||'Evidence-backed review; human copy required.')}</div></td><td>${renderStatusButton(action)}</td></tr>`).join('') || '<tr><td colspan="6">No evidence-backed SEO review actions yet.</td></tr>'}
       </tbody></table></div>
       <details style="margin-top:12px" open><summary>Recent imports and safe revert</summary><div class="admin-table-wrap"><table><thead><tr><th>Batch</th><th>File</th><th>Rows</th><th>Live rows</th><th>Imported</th><th>Action</th></tr></thead><tbody>${batches.map((row) => `<tr><td><code>${esc(row.import_batch_key)}</code></td><td>${esc(row.source_file)}</td><td>${num(row.row_count)}</td><td>${num(row.live_rows)}</td><td>${esc(row.imported_at)}</td><td><button class="btn small danger" type="button" data-delete-search-console-batch="${esc(row.import_batch_key)}">Delete/revert batch</button></td></tr>`).join('') || '<tr><td colspan="6">No imports yet.</td></tr>'}</tbody></table></div></details>`;
   }
@@ -136,12 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   async function generateRecommendations() {
     try {
-      setMsg('Generating private SEO action items from current opportunity filters...');
+      setMsg('Queuing evidence-backed SEO reviews from current real Search Console rows...');
       const response = await window.DDAuth.apiFetch('/api/admin/search-console-import', { method: 'POST', body: JSON.stringify({ action: 'generate_recommendations', filters: currentFilters() }) });
       const data = await readJson(response);
       render(data);
-      setMsg(data.message || 'SEO action list updated.');
-    } catch (error) { setMsg(error.message || 'Unable to generate SEO recommendations.', true); }
+      setMsg(data.message || 'Evidence-backed review queue updated.');
+    } catch (error) { setMsg(error.message || 'Unable to update evidence-backed SEO review queue.', true); }
   }
   async function updateActionStatus(actionKey) {
     const next = window.prompt('Set action status to open, in_progress, done, ignored, or applied:', 'in_progress');
@@ -156,21 +162,36 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   async function applySeoAction(actionKey) {
     if (!actionKey) return;
-    const note = window.prompt('Optional note for this reviewed SEO apply action:', 'Reviewed and applied from Search Console action.');
+    const title = window.prompt('Reviewed title (leave blank to keep unchanged):', '');
+    if (title === null) return;
+    const metaDescription = window.prompt('Reviewed meta description (leave blank to keep unchanged):', '');
+    if (metaDescription === null) return;
+    const h1Suggestion = window.prompt('Reviewed H1 suggestion (leave blank to keep unchanged):', '');
+    if (h1Suggestion === null) return;
+    const internalLinkNote = window.prompt('Reviewed internal-link note (leave blank to keep unchanged):', '');
+    if (internalLinkNote === null) return;
+    if (![title, metaDescription, h1Suggestion, internalLinkNote].some((value) => String(value || '').trim())) {
+      setMsg('Enter at least one piece of manual SEO wording before Apply.', true);
+      return;
+    }
+    const note = window.prompt('Optional review note:', 'Human-reviewed from current Search Console evidence.');
     if (note === null) return;
     try {
-      setMsg('Applying reviewed SEO override...');
-      const response = await window.DDAuth.apiFetch('/api/admin/search-console-import', { method: 'POST', body: JSON.stringify({ action: 'apply_seo_action', action_key: actionKey, notes: note, filters: currentFilters() }) });
+      setMsg('Rechecking current evidence and applying human-reviewed SEO override...');
+      const response = await window.DDAuth.apiFetch('/api/admin/search-console-import', { method: 'POST', body: JSON.stringify({
+        action: 'apply_seo_action', action_key: actionKey, title, meta_description: metaDescription,
+        h1_suggestion: h1Suggestion, internal_link_note: internalLinkNote, notes: note, filters: currentFilters()
+      }) });
       const data = await readJson(response);
       render(data);
-      setMsg(data.message || 'SEO override applied.');
+      setMsg(data.message || 'Human-reviewed SEO override applied.');
     } catch (error) { setMsg(error.message || 'Unable to apply SEO override.', true); }
   }
 
   mount.innerHTML = `
     <div class="card search-console-admin-panel" style="margin-top:18px">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-        <div><h2 style="margin-top:0">Search Console CSV Import</h2><p class="small" style="margin:8px 0 0 0">Private staging for Search Console exports. Use filters and the action list to turn page/query data into human-reviewed SEO tasks.</p></div>
+        <div><h2 style="margin-top:0">Search Console CSV Import</h2><p class="small" style="margin:8px 0 0 0">Private staging for Search Console exports. Use filters to queue only evidence-backed page/query reviews. Build 316 never generates public SEO wording.</p></div>
         <button class="btn" type="button" id="searchConsoleLoadButton">Refresh summary</button>
       </div>
       <div class="search-console-import-grid" style="margin-top:12px">
@@ -198,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="dd-product-draft-media-actions" style="margin-top:10px">
           <button class="btn" type="button" id="searchConsoleApplyFiltersButton">Apply filters</button>
           <button class="btn" type="button" id="searchConsoleClearFiltersButton">Clear filters</button>
-          <button class="btn primary" type="button" id="searchConsoleGenerateRecommendationsButton">Generate private SEO actions</button>
+          <button class="btn primary" type="button" id="searchConsoleGenerateRecommendationsButton">Queue evidence-backed reviews</button>
         </div>
       </details>
       <div id="searchConsoleImportMessage" class="small" style="display:none;margin-top:10px"></div>

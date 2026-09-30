@@ -1,20 +1,21 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 315 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 316 candidate
 
-Build 315 — Search Console Operator Intake Acceptance — is projected over exact Build 314 Development/Production GREEN.
+Build 316 — Buyer Discovery Evidence Interpretation & SEO Review Queue — is projected over exact Build 315 Development/Production GREEN.
 
-- Last fully verified Development: `59ca2152c7782b33e376b659d26e36e3388ebb05`
-- Verified tree: `9d31caa6f6a18bdac8236fe158d711f0e898b622`
-- Development proofs: System `36719912502`, Quality `36719912586`, I.T. `36719912423`, Hygiene `36719912395`
-- Supplemental Build 314 proofs: D1 Fan-Out `36719912388`, Build 314 `36719912439`
-- Current Production main: `8bea4144e1a50d43b85e94218ce7f878a6023904`
-- Production proofs: Pages `36720184639`, Live Resources `36720280219`
-- Search Console intake remains explicit administrator CSV input through `/api/admin/search-console-import`.
-- Canonical tables must already exist; request-time schema repair remains OFF.
-- Build 315 measures batch/live-row reconciliation, orphan rows, import/revert audit evidence, and reviewed story/Product attribution.
-- No real export means `EVIDENCE_PENDING_NO_REAL_EXPORT`; no rows are synthesized.
-- CI performs read-only Development D1 measurement only.
-- No automatic SEO generation/apply, IndexNow/provider execution, R2 mutation or Production D1 contact is authorized.
-- Next after Build 315 Production GREEN: Build 316 — Buyer Discovery Evidence Interpretation & SEO Review Queue.
+- Last fully verified Development: `2a7c1aa8d90b4851073f50d67b87d5e199ea303d`
+- Verified tree: `4f1816b0700157ac1c71d170d08a0116af19eac4`
+- Development proofs: System `36722013148`, Quality `36722013116`, I.T. `36722013224`, Hygiene `36722013237`
+- Supplemental Build 315 proofs: D1 Fan-Out `36722013190`, Build 315 `36722013591`
+- Current Production main: `7c8605c627c25443df24d08b5ffecb3fa315c084`
+- Production proofs: Pages `36722265165`, Live Resources `36722386886`
+- Build 315 measured 0 Search Console batches and 0 staged rows: `EVIDENCE_PENDING_NO_REAL_EXPORT`.
+- Build 316 may queue a query-level SEO review only from real page/query evidence with >=10 impressions and average position 4–20 by default.
+- Public page-view telemetry is observation-only and does not create query-level SEO work.
+- The queue stores facts only; no title/meta/H1/internal-link wording is generated.
+- Apply requires explicit human-written SEO copy and current supporting Search Console evidence.
+- CI remains read-only and performs no SEO queue mutation.
+- No synthetic discovery rows, automatic apply, IndexNow/provider execution, R2 mutation or Production D1 contact is authorized.
+- Next after Build 316 Production GREEN: Build 317 — Third Project Maker Story Readiness & Evidence Selection.
 
 ## Current release baseline
 
