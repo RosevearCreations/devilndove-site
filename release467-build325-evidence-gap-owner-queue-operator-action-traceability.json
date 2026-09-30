@@ -1,0 +1,96 @@
+{
+  "release": 467,
+  "build": 325,
+  "title": "Evidence Gap Owner Queue & Operator Action Traceability",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "EVIDENCE_GAP_OWNER_QUEUE_OPERATOR_ACTION_TRACEABILITY",
+  "authority": "release467-build325-evidence-gap-owner-queue-operator-action-traceability",
+  "predecessor": {
+    "build": 324,
+    "title": "Content Adoption & Discovery Outcomes Renewal IV",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "1ed7d181bea85004b181b93f1ba97e300946c575",
+    "development_tree_sha": "1408954e028fbb8faa54ead2860c0e2b71b31588",
+    "development_proofs": {
+      "system_gate_run": 36789662411,
+      "current_application_quality_run": 36789662388,
+      "it_admin_runtime_proof_run": 36789662487,
+      "branch_hygiene_run": 36789662415,
+      "d1_ci_fanout_guard_run": 36789662359,
+      "build_specific_proof_run": 36789662348
+    },
+    "measurement": {
+      "decision": "ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
+      "artifact_id": 11131435921,
+      "artifact_digest": "sha256:fc2d354f91833723dd27a3c2c7335c82a19cf5efb04e9e5f2085e242d29c356c",
+      "aggregate_rows_read": 2847,
+      "rows_read_ceiling": 20000,
+      "maker_story_coverage": "2/5",
+      "search_console_rows": 0,
+      "third_story_ready_projects": 0
+    },
+    "production_main_sha": "06e40c332b1bacf2260f954ff2ac79a25d9788cc",
+    "production_tree_sha": "1408954e028fbb8faa54ead2860c0e2b71b31588",
+    "production_pages_deploy_run": 36789878247,
+    "production_live_resource_integrity_run": 36789960286,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "queue_mode": "READ_ONLY_DERIVED_FROM_EXISTING_SOURCE_AUTHORITIES",
+    "gap_families": [
+      "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+      "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+      "REAL_SEARCH_CONSOLE_EXPORT",
+      "UNPROFILED_MAKER_STORY_EVIDENCE"
+    ],
+    "owner_identity": "MODULE_AND_WORKSPACE_ROUTE_ONLY",
+    "user_assignment_persistence": false,
+    "acknowledgement_persistence": false,
+    "resolution_persistence": false,
+    "shadow_task_table": false,
+    "traceability_sources": [
+      "creative_work_events",
+      "creative_media_evidence_ranges",
+      "creative_project_evidence_selections",
+      "creative_project_maker_story_profiles",
+      "search_console_import_batches",
+      "search_console_page_queries",
+      "admin_action_audit"
+    ],
+    "workspace_routes": {
+      "35th_promo": "/admin/creative-process/?project_id=5",
+      "grey_hair": "/admin/grey-hair-story-readiness/",
+      "search_console": "/admin/release-control/runtime-storefront-intelligence/",
+      "unprofiled_projects": "/admin/creative-process/"
+    },
+    "no_completion_by_queue_state": true,
+    "next_build": 326,
+    "next_build_title": "35th Promo Real Outcome Evidence Closure",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "business_data_mutation": false,
+    "owner_assignment_mutation": false,
+    "acknowledgement_mutation": false,
+    "resolution_mutation": false,
+    "evidence_mutation": false,
+    "story_mutation": false,
+    "publication_mutation": false,
+    "search_console_mutation": false,
+    "seo_mutation": false,
+    "provider_execution": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "measurement_state": "PENDING_EXACT_DEVELOPMENT_OWNER_QUEUE_MEASUREMENT",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md",
+  "decision": {
+    "classification": "AWAIT_EXACT_DEVELOPMENT_OWNER_QUEUE_MEASUREMENT",
+    "write_capability_authorized": false,
+    "next_build": 326,
+    "next_build_title": "35th Promo Real Outcome Evidence Closure"
+  }
+}
