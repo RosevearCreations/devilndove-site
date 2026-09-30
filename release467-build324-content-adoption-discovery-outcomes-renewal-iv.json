@@ -1,0 +1,317 @@
+{
+  "release": 467,
+  "build": 324,
+  "title": "Content Adoption & Discovery Outcomes Renewal IV",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "OUTCOMES_RENEWAL_IV_MEASURED_ROADMAP_RENEWED",
+  "authority": "release467-build324-content-adoption-discovery-outcomes-renewal-iv",
+  "predecessor": {
+    "build": 323,
+    "title": "Maker Story Coverage & Publication Readiness Continuity",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "88db75c27e6817212fbed809294bd593ab049bb2",
+    "development_tree_sha": "9116bd69e701e15e464f5ea4c9a4e41d43c37974",
+    "development_proofs": {
+      "system_gate_run": 36787129354,
+      "current_application_quality_run": 36787129334,
+      "it_admin_runtime_proof_run": 36787129349,
+      "branch_hygiene_run": 36787129342,
+      "d1_ci_fanout_guard_run": 36787129445,
+      "build_specific_proof_run": 36787129379
+    },
+    "measurement": {
+      "state": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+      "artifact_id": 11130950095,
+      "artifact_digest": "sha256:50fc9a8f698f528e1a4301230cb44758e652d172e80fc6c8aefc4284eb361c56",
+      "aggregate_rows_read": 643,
+      "rows_read_ceiling": 20000,
+      "readiness_counts": {
+        "MAKER_STORY_EVIDENCE_REQUIRED": 3,
+        "FACTUAL_OUTCOME_EVIDENCE_REQUIRED": 1,
+        "PUBLISHED_REVIEWED_STORY": 1
+      }
+    },
+    "production_main_sha": "14418df3be9d34baa3dd3436777f7911f022f39b",
+    "production_tree_sha": "9116bd69e701e15e464f5ea4c9a4e41d43c37974",
+    "production_pages_deploy_run": 36787358329,
+    "production_live_resource_integrity_run": 36787427701,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "scope": {
+    "full_path_remeasurement": true,
+    "build300_comparison": true,
+    "build306_comparison": true,
+    "build312_comparison": true,
+    "build318_comparison": true,
+    "build323_readiness_context": true,
+    "maker_story_coverage": true,
+    "review_state": true,
+    "publication": true,
+    "discovery": true,
+    "runtime": true,
+    "identity_integrity": true,
+    "d1_read_outcomes": true,
+    "seo_review_queue_continuity": true,
+    "third_project_readiness_continuity": true,
+    "next_roadmap_from_observed_evidence_only": true
+  },
+  "baselines": {
+    "build300": {
+      "maker_profiles": 0,
+      "reviewed_maker_stories": 0,
+      "public_story_candidates": 0,
+      "selected_evidence_rows": 0,
+      "approved_deliverables": 0,
+      "copy_locked_deliverables": 0,
+      "published_journal_rows": 0,
+      "approved_social_rows": 0,
+      "search_console_rows": 0,
+      "coverage": "0/5",
+      "rows_read": 471
+    },
+    "build306": {
+      "maker_profiles": 1,
+      "reviewed_maker_stories": 0,
+      "public_story_candidates": 0,
+      "selected_evidence_rows": 3,
+      "approved_deliverables": 2,
+      "copy_locked_deliverables": 2,
+      "published_journal_rows": 1,
+      "approved_social_rows": 1,
+      "search_console_rows": 0,
+      "coverage": "1/5",
+      "rows_read": 1067
+    },
+    "build312": {
+      "maker_profiles": 2,
+      "reviewed_maker_stories": 1,
+      "public_story_candidates": 1,
+      "selected_evidence_rows": 4,
+      "approved_deliverables": 4,
+      "copy_locked_deliverables": 4,
+      "published_journal_rows": 1,
+      "approved_social_rows": 1,
+      "search_console_rows": 0,
+      "coverage": "2/5",
+      "rows_read": 2820
+    },
+    "build318": {
+      "maker_profiles": 2,
+      "reviewed_maker_stories": 1,
+      "public_story_candidates": 1,
+      "selected_evidence_rows": 4,
+      "approved_deliverables": 4,
+      "copy_locked_deliverables": 4,
+      "published_journal_rows": 1,
+      "approved_social_rows": 1,
+      "search_console_rows": 0,
+      "coverage": "2/5",
+      "rows_read": 2847
+    },
+    "build323": {
+      "coverage": "2/5",
+      "readiness_counts": {
+        "MAKER_STORY_EVIDENCE_REQUIRED": 3,
+        "FACTUAL_OUTCOME_EVIDENCE_REQUIRED": 1,
+        "PUBLISHED_REVIEWED_STORY": 1
+      },
+      "rows_read": 643,
+      "measurement_scope": "NARROWER_BUILD323_COVERAGE_CONTRACT"
+    }
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_exposure": false,
+    "automatic_story_generation": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "automatic_social_posting": false,
+    "automatic_seo_apply": false,
+    "indexnow_execution": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "traffic_fabrication": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "88db75c27e6817212fbed809294bd593ab049bb2",
+      "tree": "9116bd69e701e15e464f5ea4c9a4e41d43c37974",
+      "system_gate_run": 36787129354,
+      "quality_run": 36787129334,
+      "it_admin_runtime_run": 36787129349,
+      "repository_hygiene_run": 36787129342,
+      "d1_ci_fanout_guard_run": 36787129445,
+      "build_specific_proof_run": 36787129379
+    },
+    "production": {
+      "main_sha": "14418df3be9d34baa3dd3436777f7911f022f39b",
+      "tree": "9116bd69e701e15e464f5ea4c9a4e41d43c37974",
+      "production_pages_deploy_run": 36787358329,
+      "production_live_resource_integrity_run": 36787427701
+    }
+  },
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_GREEN",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md",
+  "roadmap_renewal_state": "BUILDS_325_330_CREATED_FROM_OBSERVED_EVIDENCE",
+  "successor_selection": "OBSERVED_EVIDENCE_BUILD324",
+  "future_queue_exhausted": false,
+  "measurement_checkpoint": {
+    "source_sha": "314f72c03e9597cf64eca06afe4cb73081ff5823",
+    "workflow_run": 36789095993,
+    "artifact_id": 11130494838,
+    "artifact_digest": "sha256:bb4d0210a15303967b3997585b8c7f207e3c6a5c7e05e3ff35523e59bae74161",
+    "statement_count": 18,
+    "aggregate_rows_read": 2847,
+    "rows_read_ceiling": 20000,
+    "production_d1_contact": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false
+  },
+  "outcome_evidence": {
+    "maker_story": {
+      "active_creative_projects": 5,
+      "maker_profiles": 2,
+      "reviewed_maker_stories": 1,
+      "public_story_candidates": 1,
+      "core_story_complete": 1
+    },
+    "adoption": {
+      "selected_evidence_rows": 4,
+      "approved_deliverables": 4,
+      "copy_locked_deliverables": 4,
+      "published_journal_rows": 1,
+      "approved_social_rows": 1
+    },
+    "engagement_30d": {
+      "total_page_views": 22,
+      "unique_visitors": 22,
+      "journal_page_views": 0,
+      "workshop_story_views": 0,
+      "product_detail_views": 0
+    },
+    "discovery": {
+      "search_console_import_batches": 0,
+      "search_console_rows": 0,
+      "search_console_clicks": 0,
+      "search_console_impressions": 0,
+      "seo_supported_rows": 0
+    },
+    "runtime": {
+      "runtime_errors_7d": 0,
+      "client_runtime_records_7d": 0
+    },
+    "second_story_35th_promo": {
+      "maker_story_profile": 1,
+      "reviewed_profile": 0,
+      "public_candidate": 0,
+      "unknown_outcome": 1,
+      "selected_evidence": 1,
+      "approved_deliverables": 2,
+      "locked_deliverables": 2,
+      "publications": 0,
+      "social_rows": 0
+    },
+    "third_project_readiness": {
+      "remaining_unprofiled_projects": 3,
+      "third_story_ready_projects": 0,
+      "grey_hair_approved_source_evidence": 1,
+      "grey_hair_execution_events": 0,
+      "grey_hair_reviewed_story_plans": 0
+    },
+    "identity": {
+      "duplicate_caip_source_identities": 0,
+      "duplicate_content_source_identities": 0,
+      "foreign_key_violations": 0
+    }
+  },
+  "comparison_to_build318": {
+    "maker_profiles": {
+      "before": 2,
+      "after": 2,
+      "delta": 0
+    },
+    "reviewed_maker_stories": {
+      "before": 1,
+      "after": 1,
+      "delta": 0
+    },
+    "public_story_candidates": {
+      "before": 1,
+      "after": 1,
+      "delta": 0
+    },
+    "selected_evidence_rows": {
+      "before": 4,
+      "after": 4,
+      "delta": 0
+    },
+    "approved_deliverables": {
+      "before": 4,
+      "after": 4,
+      "delta": 0
+    },
+    "copy_locked_deliverables": {
+      "before": 4,
+      "after": 4,
+      "delta": 0
+    },
+    "published_journal_rows": {
+      "before": 1,
+      "after": 1,
+      "delta": 0
+    },
+    "approved_social_rows": {
+      "before": 1,
+      "after": 1,
+      "delta": 0
+    },
+    "search_console_rows": {
+      "before": 0,
+      "after": 0,
+      "delta": 0
+    },
+    "page_views_30d": {
+      "before": 22,
+      "after": 22,
+      "delta": 0
+    },
+    "unique_visitors_30d": {
+      "before": 22,
+      "after": 22,
+      "delta": 0
+    },
+    "runtime_errors_7d": {
+      "before": 0,
+      "after": 0,
+      "delta": 0
+    },
+    "same_contract_rows_read": {
+      "before": 2847,
+      "after": 2847,
+      "delta": 0
+    },
+    "coverage": {
+      "before": "2/5",
+      "after": "2/5"
+    }
+  },
+  "decision": {
+    "classification": "ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
+    "rationale": "The Build 324 same-contract renewal shows zero adoption/discovery delta from Build 318: coverage remains 2/5, one Maker Story is reviewed/public/published, 35th promo still lacks factual outcome evidence, Grey Hair still lacks enough reviewed evidence/story planning, real Search Console evidence remains absent, and no third project is factually ready. The renewed lane therefore focuses on explicit operator action against those observed gaps rather than autonomous generation.",
+    "next_strategy": "EVIDENCE_GAP_OPERATOR_ACTION_AND_REAL_INPUT_CONTINUITY",
+    "automatic_story_creation": false,
+    "automatic_content_refresh": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "automatic_provider_execution": false
+  },
+  "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md",
+  "next_build": 325,
+  "next_build_title": "Evidence Gap Owner Queue & Operator Action Traceability"
+}
