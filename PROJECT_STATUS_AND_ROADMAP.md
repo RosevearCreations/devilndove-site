@@ -2,33 +2,27 @@
 
 ## Current checkpoint
 
-**Build 318 — Content Adoption & Discovery Outcomes Renewal III** is the active measured Development candidate over exact Build 317 Production GREEN.
+**Build 319 — 35th Promo Execution Evidence Intake & Completeness** is the active Development candidate over exact Build 318 Production GREEN.
 
-The exact Build 318 measurement returned:
+Build 318 is fully verified and promoted:
 
-- Maker Story coverage: **2/5**, unchanged from Build 312.
-- Reviewed/public-candidate stories: **1**.
-- Selected evidence rows: **4**.
-- Approved + locked deliverables: **4**.
-- Published Workshop Journal stories: **1**.
-- Review-first social: **1 ready / 0 posted**.
-- 35th promo: **needs_review**, outcome **unknown**, public candidate **0**, publications/social rows **0**.
-- Search Console: **0 imports / 0 rows / 0 clicks / 0 impressions**.
-- Evidence-backed SEO review queue: **0 rows**.
-- Public telemetry: **22 page views / 22 unique visitors** in 30 days, with 0 Workshop Story/Product Detail views.
-- Third-project-ready candidates: **0**.
-- Grey Hair: **1 approved source-evidence range, 0 execution events, 0 reviewed story plans**.
-- Runtime errors (7d): **0**.
-- Identity duplicates / FK violations: **0 / 0**.
-- D1 rows read: **2,847 / 20,000**.
+- Development SHA: **90e3c5c14643dfef21b8d4435c81e92606eb75d4**
+- Exact tree: **0c1546c92eebdbdc6039a15c7fd7a7fd63055c3e**
+- Development proofs: System **36735110215**, Quality **36735110177**, I.T. **36735110176**, Hygiene **36735110294**
+- Supplemental proofs: D1 Fan-Out **36735110195**, Build 318 **36735110092**
+- Production main SHA: **e51706c73352af58cac0640a12e915c5b4b2796d**
+- Production Pages Deploy: **36735477464 — SUCCESS**
+- Production Live Resource Integrity: **36735618674 — SUCCESS**
 
-Decision: **ADOPTION_STABLE_DISCOVERY_AND_NEXT_STORY_EVIDENCE_GAPS_REMAIN**.
+Build 319 adds a dedicated operator lane to the canonical **35th promo** Creative Project. Only facts from real work may be recorded: setup/process/milestone/result/lesson/mistake/repair. A title and meaningful notes are required, the operator must confirm the work actually happened, and new rows are forced private with no media/public flag.
 
-The queue **has not run out**. Build 318 created the evidence-driven **Builds 319–324** roadmap.
+Build 319 does **not** auto-select evidence, change the Maker Story review/outcome/public-candidate state, create publication/social rows, or infer media rights. CI only measures whether the factual evidence set has at least one execution/process-class record, one observed result, and one lesson.
 
-**Next: Build 319 — 35th Promo Execution Evidence Intake & Completeness.**
+The queue **has not run out**.
 
-Canonical successor roadmap: `docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md`.
+**Next after Build 319 Production GREEN: Build 320 — Grey Hair Source-Evidence Review & Story-Plan Readiness.**
+
+Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md`.
 
 ---
 
