@@ -1,34 +1,33 @@
-/* CURRENT_BUILD_318_TRUTH: Content Adoption & Discovery Outcomes Renewal III; last verified dev 66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5; tree b721482133a03fd851f36078320527784e247247; Production main 9d2ccc468ea810fdd6cf0e6f2527d50c6418876e; Pages 36730175002; Live 36730305787. */
-// Release 467 Build 318 — Content Adoption & Discovery Outcomes Renewal III over exact Build 317 Production source.
+/* CURRENT_BUILD_319_TRUTH: 35th Promo Execution Evidence Intake & Completeness; last verified dev 90e3c5c14643dfef21b8d4435c81e92606eb75d4; tree 0c1546c92eebdbdc6039a15c7fd7a7fd63055c3e; Production main e51706c73352af58cac0640a12e915c5b4b2796d; Pages 36735477464; Live 36735618674. */
+// Release 467 Build 319 — 35th Promo Execution Evidence Intake & Completeness over exact Build 318 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=318;
-const TITLE='Content Adoption & Discovery Outcomes Renewal III';
-const AUTHORITY='release467-build318-content-adoption-discovery-outcomes-renewal-iii';
-const EVIDENCE_ID='r467-b318-candidate-36729883162-36730175002';
+const BUILD=319;
+const TITLE='35th Promo Execution Evidence Intake & Completeness';
+const AUTHORITY='release467-build319-35th-promo-execution-evidence-intake-completeness';
+const EVIDENCE_ID='r467-b319-candidate-36735110215-36735477464';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:317,title:'Third Project Maker Story Readiness & Evidence Selection',state:'DEVELOPMENT_GREEN',
-  dev_sha:'66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5',tree_sha:'b721482133a03fd851f36078320527784e247247',
-  system_gate_run:36729883162,current_application_quality_run:36729883209,it_admin_runtime_proof_run:36729883145,
-  branch_hygiene_run:36729883405,proof_state:'EXACT_BRANCH_HEAD_BUILD317_GREEN',
+  release:467,build:318,title:'Content Adoption & Discovery Outcomes Renewal III',state:'DEVELOPMENT_GREEN',
+  dev_sha:'90e3c5c14643dfef21b8d4435c81e92606eb75d4',tree_sha:'0c1546c92eebdbdc6039a15c7fd7a7fd63055c3e',
+  system_gate_run:36735110215,current_application_quality_run:36735110177,it_admin_runtime_proof_run:36735110176,
+  branch_hygiene_run:36735110294,proof_state:'EXACT_BRANCH_HEAD_BUILD318_GREEN',
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:317,title:'Third Project Maker Story Readiness & Evidence Selection',state:'DEVELOPMENT_GREEN',
-  dev_sha:'66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5',tree_sha:'b721482133a03fd851f36078320527784e247247',
-  accepted_sha:'66c944cfcff4c60ad90ff0df00d7bbbd67a1c1f5',accepted_tree_sha:'b721482133a03fd851f36078320527784e247247',
-  system_gate_run:36729883162,current_application_quality_run:36729883209,it_admin_runtime_proof_run:36729883145,
-  branch_hygiene_run:36729883405,proof_state:'EXACT_BRANCH_HEAD_BUILD317_GREEN'
+  release:467,build:318,title:'Content Adoption & Discovery Outcomes Renewal III',state:'DEVELOPMENT_GREEN',
+  dev_sha:'90e3c5c14643dfef21b8d4435c81e92606eb75d4',tree_sha:'0c1546c92eebdbdc6039a15c7fd7a7fd63055c3e',accepted_sha:'90e3c5c14643dfef21b8d4435c81e92606eb75d4',accepted_tree_sha:'0c1546c92eebdbdc6039a15c7fd7a7fd63055c3e',
+  system_gate_run:36735110215,current_application_quality_run:36735110177,it_admin_runtime_proof_run:36735110176,
+  branch_hygiene_run:36735110294,proof_state:'EXACT_BRANCH_HEAD_BUILD318_GREEN'
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:317,title:'Third Project Maker Story Readiness & Evidence Selection',state:'PRODUCTION_GREEN',
-  main_sha:'9d2ccc468ea810fdd6cf0e6f2527d50c6418876e',tree_sha:'b721482133a03fd851f36078320527784e247247',
-  production_pages_deploy_run:36730175002,production_live_resource_integrity_run:36730305787,
-  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36729883266,remote_d1_queries:0
+  release:467,build:318,title:'Content Adoption & Discovery Outcomes Renewal III',state:'PRODUCTION_GREEN',
+  main_sha:'e51706c73352af58cac0640a12e915c5b4b2796d',tree_sha:'0c1546c92eebdbdc6039a15c7fd7a7fd63055c3e',
+  production_pages_deploy_run:36735477464,production_live_resource_integrity_run:36735618674,
+  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36735110092,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -38,7 +37,7 @@ const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
 });
 const CURRENT_GUARDS=Object.freeze([
   'System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene',
-  'Release 467 Build 318 Content Adoption Discovery Outcomes Renewal III'
+  'Release 467 Build 319 35th Promo Execution Evidence Intake Completeness'
 ]);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql','0026_release467_inventory_workstation_memberships.sql','0027_release467_caip_workshop_follies_maker_story_foundation.sql']);
 const EXTERNAL_POLICY=Object.freeze([
