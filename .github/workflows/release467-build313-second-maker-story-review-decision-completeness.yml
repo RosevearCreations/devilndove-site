@@ -49,6 +49,7 @@ jobs:
       - uses: actions/setup-node@v7
         with: { node-version: '24' }
       # D1_ONE_SHOT_EVIDENCE_CAPTURE — Build 313 bounded Development review decision.
+      # Accepted baseline run 36716717654; this source revision is the final exact-head proof trigger.
       - name: Prove exact Development D1
         run: |
           set -euo pipefail
