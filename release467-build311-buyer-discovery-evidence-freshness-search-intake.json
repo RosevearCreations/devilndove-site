@@ -1,0 +1,94 @@
+{
+  "release": 467,
+  "build": 311,
+  "title": "Buyer Discovery Evidence Freshness & Search Intake",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "BUYER_DISCOVERY_FRESHNESS_SEARCH_INTAKE_CANDIDATE",
+  "authority": "release467-build311-buyer-discovery-evidence-freshness-search-intake",
+  "predecessor": {
+    "build": 310,
+    "title": "Review-First Publication & Distribution Continuity",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "c1a4778dd3aaf2a1fece8406e075da7eb2c2b74d",
+    "development_tree_sha": "b4aa3deaa0eed32bc601ecf51d5456e5c5d85760",
+    "development_proofs": {
+      "system_gate_run": 36708995838,
+      "current_application_quality_run": 36708995782,
+      "it_admin_runtime_proof_run": 36708995900,
+      "branch_hygiene_run": 36708995938,
+      "d1_ci_fanout_guard_run": 36708995804,
+      "build_specific_proof_run": 36708995807
+    },
+    "production_main_sha": "43120a39d39aa0b0a2b0299967ad2e7b97eab0ee",
+    "production_tree_sha": "b4aa3deaa0eed32bc601ecf51d5456e5c5d85760",
+    "production_pages_deploy_run": 36709193312,
+    "production_live_resource_integrity_run": 36709277731,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "scope": {
+    "remeasure_public_telemetry": true,
+    "remeasure_search_console_staging": true,
+    "reviewed_story_attribution": true,
+    "reviewed_product_attribution": true,
+    "import_schema_readiness": true,
+    "request_time_schema_repair_removed": true,
+    "zero_evidence_preserved_as_zero": true,
+    "automatic_search_console_import": false,
+    "indexnow_submission": false,
+    "provider_execution": false
+  },
+  "contract": {
+    "measurement_window_days": 30,
+    "required_search_console_tables": [
+      "search_console_import_batches",
+      "search_console_page_queries",
+      "seo_opportunity_actions",
+      "seo_page_overrides"
+    ],
+    "import_requires_existing_canonical_schema": true,
+    "missing_schema_fails_closed": true,
+    "search_console_data_requires_explicit_operator_import": true,
+    "attribution_categories": [
+      "reviewed_story",
+      "reviewed_product",
+      "other_public_page"
+    ],
+    "automatic_traffic_generation": false,
+    "automatic_provider_import": false,
+    "indexnow_explicit_confirmation": "SUBMIT INDEXNOW",
+    "indexnow_execution": false,
+    "provider_execution": false,
+    "next_build": 312,
+    "next_build_title": "Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_measurement_mutation": false,
+    "search_console_auto_import": false,
+    "traffic_fabrication": false,
+    "indexnow_execution": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "c1a4778dd3aaf2a1fece8406e075da7eb2c2b74d",
+      "tree": "b4aa3deaa0eed32bc601ecf51d5456e5c5d85760",
+      "system_gate_run": 36708995838,
+      "quality_run": 36708995782,
+      "it_admin_runtime_run": 36708995900,
+      "repository_hygiene_run": 36708995938
+    },
+    "production": {
+      "main_sha": "43120a39d39aa0b0a2b0299967ad2e7b97eab0ee",
+      "tree": "b4aa3deaa0eed32bc601ecf51d5456e5c5d85760",
+      "production_pages_deploy_run": 36709193312,
+      "production_live_resource_integrity_run": 36709277731
+    }
+  }
+}
