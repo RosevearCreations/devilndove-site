@@ -15,13 +15,13 @@ Build 321 is fully verified and promoted:
 - Production Live Resource Integrity: **36765982082 — SUCCESS**
 - Exact Development and Production tree: **MATCH**.
 
-Build 322 keeps the existing Search Console intake operator-controlled and factual. New imports require explicit confirmation that the input is a real Google Search Console Performance export and recognizable Page/Clicks/Impressions/CTR/Position headers. CI remains read-only.
+Build 322 composes the existing operator-controlled Search Console intake with evidence-backed SEO review. Query-level attribution requires real current Search Console evidence; public telemetry is observation-only. Stale or unsupported review rows remain non-actionable, and SEO wording remains explicitly human-authored before apply.
 
-If no real export is staged, the correct state is **EVIDENCE_PENDING_NO_REAL_EXPORT**. Build 322 never synthesizes queries, clicks, impressions or batches and never auto-imports provider data.
+If no real export is staged, the correct attribution state is **EVIDENCE_PENDING_NO_REAL_SEARCH_CONSOLE_ATTRIBUTION**. Build 322 never synthesizes queries, clicks, impressions or queue rows, never auto-applies SEO, and never contacts Production D1.
 
 The queue **has not run out**.
 
-**Next after Build 322 Production GREEN: Build 322 — Buyer Discovery Attribution & SEO Review Evidence Continuity.**
+**Next after Build 322 Production GREEN: Build 323 — Maker Story Coverage & Publication Readiness Continuity.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md`.
 
