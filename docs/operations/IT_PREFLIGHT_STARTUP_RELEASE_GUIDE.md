@@ -1,20 +1,20 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 321 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 322 candidate
 
-Build 321 — Search Console Real Export Intake Continuity II — starts from exact Build 320 Development/Production GREEN.
+Build 322 — Buyer Discovery Attribution & SEO Review Evidence Continuity — starts from exact Build 321 Development/Production GREEN.
 
-- Verified Development SHA: `a5348eea48616a934a2994309d0738f05d706af9`
-- Verified Development/Production tree: `1bf94721855837958a546e033e0bead0f3f97580`
-- Build 320 System Gate: `36755683525`
-- Build 320 Current Application Quality Proof: `36755683559`
-- Build 320 I.T. Admin Runtime Proof: `36755683417`
-- Build 320 Repository Branch Hygiene: `36755683610`
-- Build 320 D1 Fan-Out Guard: `36755683521`
-- Build 320 dedicated proof: `36755683468`
-- Current Production main SHA: `e84cda2db64f0af93aa1f88cc71fb7079fe5fd54`
-- Production Pages Deploy: `36755991930`
-- Production Live Resource Integrity: `36756208135`
+- Verified Development SHA: `215b9277f62d1359fda07d3d72ba3cf6ee47a353`
+- Verified Development/Production tree: `7df16d3a91159cefaf66435854fdffb4914ad921`
+- Build 321 System Gate: `36765313336`
+- Build 321 Current Application Quality Proof: `36765313431`
+- Build 321 I.T. Admin Runtime Proof: `36765313437`
+- Build 321 Repository Branch Hygiene: `36765313607`
+- Build 321 D1 Fan-Out Guard: `36765313506`
+- Build 321 dedicated proof: `36765313864`
+- Current Production main SHA: `e761df76426a52e7bc3553189988058037979ad2`
+- Production Pages Deploy: `36765763021`
+- Production Live Resource Integrity: `36765982082`
 
-Build 321:
+Build 322:
 - preserves `/api/admin/search-console-import` as the operator-controlled intake;
 - requires explicit confirmation that an import is a real Google Search Console Performance export;
 - validates recognizable Page, Clicks, Impressions, CTR and Position header groups before staging;
@@ -25,7 +25,7 @@ Build 321:
 - creates no synthetic queries, clicks, impressions or batches;
 - executes no provider and contacts no Production D1.
 
-Next after Build 321 Production GREEN: **Build 322 — Buyer Discovery Attribution & SEO Review Evidence Continuity**.
+Next after Build 322 Production GREEN: **Build 322 — Buyer Discovery Attribution & SEO Review Evidence Continuity**.
 
 ## Current release baseline
 
