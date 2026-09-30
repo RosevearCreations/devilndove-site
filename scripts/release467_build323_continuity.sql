@@ -53,17 +53,29 @@ SELECT
    WHERE a.creative_project_id=(SELECT MIN(cp.creative_project_id) FROM creative_projects cp WHERE cp.source_type='creative_work_project' AND cp.source_id=CAST(p.creative_work_project_id AS TEXT) AND cp.project_status<>'archived')
      AND a.asset_status<>'archived' AND COALESCE(a.source_safety_status,'needs_review')<>'public_allowed') non_public_caip_assets,
  (SELECT COUNT(*) FROM social_post_queue s
-   WHERE s.source_type IN ('content_project','creative_project','workshop_journal')
-     AND CAST(s.source_id AS TEXT) IN (
-       CAST(p.creative_work_project_id AS TEXT),
-       CAST((SELECT MIN(cp.content_project_id) FROM content_projects cp WHERE cp.source_type='creative_project' AND cp.source_id=CAST(p.creative_work_project_id AS TEXT)) AS TEXT)
+   WHERE (
+       (s.source_type='creative_project' AND CAST(s.source_id AS TEXT)=CAST(p.creative_work_project_id AS TEXT))
+       OR
+       (s.source_type='content_project' AND CAST(s.source_id AS TEXT)=CAST((SELECT MIN(cp.content_project_id) FROM content_projects cp WHERE cp.source_type='creative_project' AND cp.source_id=CAST(p.creative_work_project_id AS TEXT)) AS TEXT))
+       OR
+       (s.source_type='workshop_journal' AND CAST(s.source_id AS TEXT) IN (
+         SELECT CAST(pub.content_publication_id AS TEXT) FROM content_publications pub
+         WHERE pub.content_project_id=(SELECT MIN(cp.content_project_id) FROM content_projects cp WHERE cp.source_type='creative_project' AND cp.source_id=CAST(p.creative_work_project_id AS TEXT))
+           AND pub.destination='workshop_journal'
+       ))
      )
      AND s.approval_status='approved' AND s.post_status='ready' AND COALESCE(s.api_publish_mode,'')='review_first') review_first_social_ready,
  (SELECT COUNT(*) FROM social_post_queue s
-   WHERE s.source_type IN ('content_project','creative_project','workshop_journal')
-     AND CAST(s.source_id AS TEXT) IN (
-       CAST(p.creative_work_project_id AS TEXT),
-       CAST((SELECT MIN(cp.content_project_id) FROM content_projects cp WHERE cp.source_type='creative_project' AND cp.source_id=CAST(p.creative_work_project_id AS TEXT)) AS TEXT)
+   WHERE (
+       (s.source_type='creative_project' AND CAST(s.source_id AS TEXT)=CAST(p.creative_work_project_id AS TEXT))
+       OR
+       (s.source_type='content_project' AND CAST(s.source_id AS TEXT)=CAST((SELECT MIN(cp.content_project_id) FROM content_projects cp WHERE cp.source_type='creative_project' AND cp.source_id=CAST(p.creative_work_project_id AS TEXT)) AS TEXT))
+       OR
+       (s.source_type='workshop_journal' AND CAST(s.source_id AS TEXT) IN (
+         SELECT CAST(pub.content_publication_id AS TEXT) FROM content_publications pub
+         WHERE pub.content_project_id=(SELECT MIN(cp.content_project_id) FROM content_projects cp WHERE cp.source_type='creative_project' AND cp.source_id=CAST(p.creative_work_project_id AS TEXT))
+           AND pub.destination='workshop_journal'
+       ))
      )
      AND (s.post_status='posted' OR s.published_at IS NOT NULL)) provider_posted_social_rows
 FROM creative_work_projects p
