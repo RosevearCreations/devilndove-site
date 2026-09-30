@@ -1,4 +1,5 @@
 name: Release 467 Build 319 35th Promo Execution Evidence Intake Completeness
+# Final exact-head proof trigger after measured intake-ready closure.
 on:
   push:
     branches: [dev]
