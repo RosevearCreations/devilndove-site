@@ -1,33 +1,32 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 323 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 324 candidate
 
-Build 323 — Maker Story Coverage & Publication Readiness Continuity — starts from exact Build 322 Development/Production GREEN.
+Build 324 — Content Adoption & Discovery Outcomes Renewal IV — starts from exact Build 323 Development/Production GREEN.
 
-- Verified Development SHA: `ad8f82fa23c943303a04f6273b735c1091913cf3`
-- Verified Development/Production tree: `3ba6acc882e399e0d3e6eb2b749ce8f43a215e9e`
-- Build 322 System Gate: `36783745244`
-- Build 322 Current Application Quality Proof: `36783745477`
-- Build 322 I.T. Admin Runtime Proof: `36783745601`
-- Build 322 Repository Branch Hygiene: `36783745609`
-- Build 322 D1 Fan-Out Guard: `36783745501`
-- Build 322 dedicated proof: `36783745352`
-- Current Production main SHA: `1d7ef26655905c057c6c064ef7e2d7bf4c94f6a0`
-- Production Pages Deploy: `36784108959`
-- Production Live Resource Integrity: `36784211626`
+- Verified Development SHA: `88db75c27e6817212fbed809294bd593ab049bb2`
+- Verified Development/Production tree: `9116bd69e701e15e464f5ea4c9a4e41d43c37974`
+- Build 323 System Gate: `36787129354`
+- Build 323 Current Application Quality Proof: `36787129334`
+- Build 323 I.T. Admin Runtime Proof: `36787129349`
+- Build 323 Repository Branch Hygiene: `36787129342`
+- Build 323 D1 Fan-Out Guard: `36787129445`
+- Build 323 dedicated proof: `36787129379`
+- Build 323 artifact: `11130950095`
+- Current Production main SHA: `14418df3be9d34baa3dd3436777f7911f022f39b`
+- Production Pages Deploy: `36787358329`
+- Production Live Resource Integrity: `36787427701`
 
-Build 323:
-- remeasures all five active Creative Projects;
-- requires exact one-to-one Creative Project → CAIP → Content Studio identity continuity;
-- classifies Maker Story/publication readiness from existing factual data only;
-- requires explicit human story review and explicit public-story candidacy;
-- requires approved and locked Content Studio copy before publication-review readiness;
-- requires human traceability for any published Workshop Journal story;
-- keeps CAIP/private-upload public-use rights separate from story-text readiness;
-- never promotes private media by inference;
-- creates no Maker Story profile and changes no review/public-candidate/copy/publication state;
-- performs no automatic social/provider posting;
-- contacts no Production D1.
+Build 324:
+- reuses Build 318's 18-statement read-only outcomes measurement;
+- compares current adoption/discovery evidence against Builds 300, 306, 312 and 318;
+- retains Build 323's five-project readiness as narrower contextual evidence;
+- remeasures Maker Story coverage, review/public-candidate state, selected evidence, approved/locked copy, Workshop Journal publication and review-first social state;
+- remeasures public telemetry, runtime/search health, real Search Console freshness and evidence-backed SEO queue state;
+- rechecks 35th promo and Grey Hair evidence-completion lanes;
+- rechecks duplicate identity and foreign-key integrity;
+- renews the successor roadmap only after observed exact-Development evidence;
+- performs no business-data mutation, automatic story generation/approval/publication/SEO action, provider execution, private-media promotion or Production D1 contact.
 
-Next after Build 323 Production GREEN: **Build 324 — Content Adoption & Discovery Outcomes Renewal IV**.
+Next after Build 324 measurement: **observed-evidence roadmap renewal**.
 
 ## Current release baseline
 
