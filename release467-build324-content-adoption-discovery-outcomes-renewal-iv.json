@@ -2,8 +2,8 @@
   "release": 467,
   "build": 324,
   "title": "Content Adoption & Discovery Outcomes Renewal IV",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "OUTCOMES_RENEWAL_IV_MEASURED_ROADMAP_RENEWED",
+  "state": "PRODUCTION_GREEN",
+  "phase": "OUTCOMES_RENEWAL_IV_COMPLETE",
   "authority": "release467-build324-content-adoption-discovery-outcomes-renewal-iv",
   "predecessor": {
     "build": 323,
@@ -161,10 +161,10 @@
   "successor_selection": "OBSERVED_EVIDENCE_BUILD324",
   "future_queue_exhausted": false,
   "measurement_checkpoint": {
-    "source_sha": "314f72c03e9597cf64eca06afe4cb73081ff5823",
-    "workflow_run": 36789095993,
-    "artifact_id": 11130494838,
-    "artifact_digest": "sha256:bb4d0210a15303967b3997585b8c7f207e3c6a5c7e05e3ff35523e59bae74161",
+    "source_sha": "1ed7d181bea85004b181b93f1ba97e300946c575",
+    "workflow_run": 36789662348,
+    "artifact_id": 11131435921,
+    "artifact_digest": "sha256:fc2d354f91833723dd27a3c2c7335c82a19cf5efb04e9e5f2085e242d29c356c",
     "statement_count": 18,
     "aggregate_rows_read": 2847,
     "rows_read_ceiling": 20000,
@@ -313,5 +313,32 @@
   },
   "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md",
   "next_build": 325,
-  "next_build_title": "Evidence Gap Owner Queue & Operator Action Traceability"
+  "next_build_title": "Evidence Gap Owner Queue & Operator Action Traceability",
+  "final_closure": {
+    "dev_sha": "1ed7d181bea85004b181b93f1ba97e300946c575",
+    "tree_sha": "1408954e028fbb8faa54ead2860c0e2b71b31588",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD324_GREEN",
+    "proofs": {
+      "system_gate_run": 36789662411,
+      "current_application_quality_run": 36789662388,
+      "it_admin_runtime_proof_run": 36789662487,
+      "branch_hygiene_run": 36789662415
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36789662359,
+      "build_specific_proof_run": 36789662348
+    },
+    "artifact_id": 11131435921,
+    "ingested_by_build": 325
+  },
+  "production_checkpoint": {
+    "main_sha": "06e40c332b1bacf2260f954ff2ac79a25d9788cc",
+    "tree_sha": "1408954e028fbb8faa54ead2860c0e2b71b31588",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36789878247,
+    "production_live_resource_integrity_run": 36789960286,
+    "remote_d1_queries": 0
+  }
 }

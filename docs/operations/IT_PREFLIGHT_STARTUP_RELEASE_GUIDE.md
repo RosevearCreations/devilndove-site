@@ -1,36 +1,31 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 324 measured candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 325 candidate
 
-Build 324 — Content Adoption & Discovery Outcomes Renewal IV — starts from exact Build 323 Development/Production GREEN and has completed its comparable Development outcomes measurement.
+Build 325 — Evidence Gap Owner Queue & Operator Action Traceability — starts from exact Build 324 Development/Production GREEN.
 
-- Verified predecessor Development SHA: `88db75c27e6817212fbed809294bd593ab049bb2`
-- Verified predecessor tree: `9116bd69e701e15e464f5ea4c9a4e41d43c37974`
-- Build 323 System / Quality / I.T. / Hygiene: `36787129354` / `36787129334` / `36787129349` / `36787129342`
-- Build 323 D1 Fan-Out / dedicated proof: `36787129445` / `36787129379`
-- Production main: `14418df3be9d34baa3dd3436777f7911f022f39b`
-- Production Pages / Live Integrity: `36787358329` / `36787427701`
+- Verified Development SHA: `1ed7d181bea85004b181b93f1ba97e300946c575`
+- Verified Development/Production tree: `1408954e028fbb8faa54ead2860c0e2b71b31588`
+- Build 324 System Gate: `36789662411`
+- Build 324 Current Application Quality Proof: `36789662388`
+- Build 324 I.T. Admin Runtime Proof: `36789662487`
+- Build 324 Repository Branch Hygiene: `36789662415`
+- Build 324 D1 Fan-Out Guard: `36789662359`
+- Build 324 dedicated proof: `36789662348`
+- Build 324 artifact: `11131435921`
+- Current Production main SHA: `06e40c332b1bacf2260f954ff2ac79a25d9788cc`
+- Production Pages Deploy: `36789878247`
+- Production Live Resource Integrity: `36789960286`
 
-Build 324 measurement:
-- source Development SHA: `314f72c03e9597cf64eca06afe4cb73081ff5823`
-- workflow: `36789095993`
-- artifact: `11130494838`
-- decision: `ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST`
-- same-contract D1 cost: **2,847 / 20,000**, delta vs Build 318 **0**
-- Maker Story coverage **2/5**, reviewed/public **1**, third-story-ready **0**
-- 35th promo remains outcome-unknown / needs review
-- Grey Hair remains at one approved source range with no reviewed story plan
-- real Search Console evidence remains absent
-- runtime errors remain **0**
-- identity and foreign-key integrity remain clean.
+Build 325:
+- derives one operator queue from existing Creative Process, CAIP, Search Console and Maker Story source authorities;
+- routes every row back to the existing source workspace where real work is performed;
+- reports existing source/audit timestamps for action traceability;
+- creates no task/owner table and no second completion authority;
+- persists no user assignment, acknowledgement or resolution state;
+- never treats queue state as source completion;
+- performs no evidence/story/publication/SEO/provider mutation;
+- contacts no Production D1.
 
-Observed-evidence successor roadmap:
-- Build 325 — Evidence Gap Owner Queue & Operator Action Traceability
-- Build 326 — 35th Promo Real Outcome Evidence Closure
-- Build 327 — Grey Hair Evidence Review Completion & Story-Plan Handoff
-- Build 328 — Search Console Real Export Freshness & Discovery Intake III
-- Build 329 — Maker Story Advancement & Publication Readiness Continuity II
-- Build 330 — Content Adoption & Discovery Outcomes Renewal V
-
-Build 324 still performs no business-data mutation, autonomous story/content/SEO action, private-media promotion, provider execution or Production D1 contact.
+Next after Build 325 Production GREEN: **Build 326 — 35th Promo Real Outcome Evidence Closure**.
 
 ## Current release baseline
 
