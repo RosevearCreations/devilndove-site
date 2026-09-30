@@ -213,11 +213,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md",
-  "next_build": null,
-  "next_build_state": "PENDING_BUILD324_OBSERVED_EVIDENCE",
-  "next_build_title": "Pending Build 324 observed-evidence roadmap renewal",
+  "next_build": 325,
+  "next_build_state": "SLOT_RESERVED_SCOPE_PENDING_BUILD324_OBSERVED_EVIDENCE",
+  "next_build_title": "Observed-evidence successor slot — scope pending Build 324 measurement",
   "promotion_state": "BUILD324_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "PENDING_OBSERVED_BUILD324_EVIDENCE",
+  "successor_scope_state": "BUILD325_SLOT_RESERVED_SCOPE_PENDING_OBSERVED_BUILD324_EVIDENCE",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -1803,6 +1803,9 @@
     "automatic_seo_apply": false,
     "provider_execution": false,
     "production_d1_contact": false,
-    "future_queue_exhausted": false
+    "future_queue_exhausted": false,
+    "next_build": 325,
+    "next_build_title": "Observed-evidence successor slot — scope pending Build 324 measurement",
+    "successor_scope_selected": false
   }
 }
