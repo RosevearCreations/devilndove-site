@@ -1,19 +1,5 @@
 name: Release 467 Build 305 Buyer Discovery Search Measurement
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/admin/buyer-discovery-measurement.js'
-      - 'public/js/admin-buyer-discovery-measurement.js'
-      - 'admin/local-seo-review/index.html'
-      - 'scripts/release467_build305_*'
-      - 'scripts/release467_build304_regression.py'
-      - 'release467-build305-*.json'
-      - 'release467-build304-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_305_*'
-      - '.github/workflows/release467-build305-buyer-discovery-search-measurement.yml'
   workflow_dispatch:
 permissions:
   contents: read

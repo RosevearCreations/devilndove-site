@@ -3,13 +3,28 @@ on:
   push:
     branches: [dev]
     paths:
-      - 'scripts/release467_build306_outcomes_measurement.sql'
-      - 'scripts/release467_build306_verify_measurement.mjs'
+      - 'scripts/release467_build306_*'
+      - 'scripts/release467_build305_regression.py'
+      - 'release467-build306-*.json'
+      - 'release467-build305-*.json'
+      - 'current-development-authority.json'
+      - 'PROJECT_STATUS_AND_ROADMAP.md'
+      - 'docs/operations/RELEASE_467_BUILD_306_*'
+      - 'docs/operations/RELEASE_467_CONTENT_ADOPTION_COVERAGE_DISCOVERY_BUILDS_307_312.md'
+      - 'docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md'
       - '.github/workflows/release467-build306-caip-content-adoption-outcomes-renewal.yml'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - run: python scripts/release467_build306_regression.py
+      - run: python scripts/release467_build306_gate.py
   outcomes-measurement:
     runs-on: ubuntu-latest
     timeout-minutes: 15
