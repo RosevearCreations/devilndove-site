@@ -121,5 +121,26 @@
     "next_build": 306,
     "next_build_title": "CAIP Content Adoption Outcomes Renewal & Roadmap Renewal",
     "future_queue_exhausted": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "3dd7a39513f4dbea3d018675bbf9080397a811fc",
+      "tree": "4c8fe967a08e09327e923f32aeac0df6c901b3bf",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 36656936137,
+      "quality_run": 36656936159,
+      "it_admin_runtime_run": 36656936151,
+      "repository_hygiene_run": 36656936224,
+      "d1_ci_fanout_guard_run": 36656936283,
+      "build_specific_proof_run": 36656936278
+    },
+    "production": {
+      "main_sha": "9666c57fd02b199359e2420db0f147c27e5c9386",
+      "tree": "4c8fe967a08e09327e923f32aeac0df6c901b3bf",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 36657083820,
+      "production_live_resource_integrity_run": 36657146626,
+      "remote_d1_queries": 0
+    }
   }
 }
