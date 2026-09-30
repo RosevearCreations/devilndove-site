@@ -3,7 +3,7 @@
   "build": 309,
   "title": "Second Story Content Studio Review & Approval",
   "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "SECOND_STORY_CONTENT_REVIEW_CANDIDATE",
+  "phase": "SECOND_STORY_CONTENT_REVIEW_ACCEPTED_CANDIDATE",
   "authority": "release467-build309-second-story-content-studio-review-approval",
   "predecessor": {
     "build": 308,
@@ -100,5 +100,52 @@
     "provider_publication": false,
     "r2_mutation": false,
     "production_d1_contact": false
+  },
+  "acceptance_baseline": {
+    "source_sha": "348bfa55199ad3f303f34fc3d6d3e4b5741a5834",
+    "workflow_run": 36666535254,
+    "discovery_rows_read": 57,
+    "adoption_rows_read": 363,
+    "adoption_rows_read_by_statement": [
+      69,
+      9,
+      55,
+      76,
+      39,
+      115
+    ],
+    "rows_read_ceiling": 20000,
+    "content_project_id": 23,
+    "handoff_id": 3,
+    "handoff_evidence_count": 1,
+    "approved_copy_keys": [
+      "seo-assets",
+      "blog-article"
+    ],
+    "approved_deliverables": 2,
+    "changes_requested_deliverables": 17,
+    "locked_deliverables": 2,
+    "published_deliverables": 0,
+    "maker_story_state": "needs_review",
+    "maker_story_public_candidate": 0,
+    "maker_story_outcome_status": "unknown",
+    "caip_assets": 0,
+    "private_upload_files": 0,
+    "publications": 0,
+    "social_rows": 0,
+    "duplicate_content_source_identities": 0,
+    "foreign_key_violations": 0,
+    "production_d1_contact": false
+  },
+  "candidate_control_alignment": {
+    "state": "SOURCE_RUNTIME_REVIEW_AND_SUCCESSOR_CONTROLS_ALIGNED_FINAL_EXACT_HEAD_REPROOF_REQUIRED",
+    "intermediate_head": "361dff69125bfbe3ef5da8e6fced3e4730ed7be8",
+    "intermediate_tree": "ad6ce0d0e0680c1aaf5d450983f4190ea9d3d25b",
+    "system_gate_run": 36667267975,
+    "current_application_quality_run": 36667267787,
+    "it_admin_runtime_proof_run": 36667267677,
+    "branch_hygiene_run": 36667267696,
+    "initial_build_specific_acceptance_run": 36666535254,
+    "note": "Build 309 review acceptance and current/restart/historical successor controls are GREEN. Final closure requires fresh exact-head System, Quality, I.T., Hygiene, D1 Fan-Out and idempotent Build 309 review proofs."
   }
 }
