@@ -3,7 +3,7 @@
   "build": 319,
   "title": "35th Promo Execution Evidence Intake & Completeness",
   "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "35TH_PROMO_EXECUTION_EVIDENCE_INTAKE",
+  "phase": "35TH_PROMO_EXECUTION_EVIDENCE_INTAKE_READY",
   "authority": "release467-build319-35th-promo-execution-evidence-intake-completeness",
   "predecessor": {
     "build": 318,
@@ -94,6 +94,35 @@
       "production_live_resource_integrity_run": 36735618674
     }
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT",
-  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md"
+  "measurement_state": "INTAKE_READY_AWAITING_REAL_EXECUTION_RESULT_LESSON_EVIDENCE",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md",
+  "measurement_checkpoint": {
+    "exact_development_sha": "79573c5406d43bab46a7eeafa3e6cdbea4d30edf",
+    "workflow_run": 36752506174,
+    "artifact_id": 11115770334,
+    "aggregate_rows_read": 48,
+    "rows_read_ceiling": 20000,
+    "completeness_state": "INTAKE_READY_AWAITING_REAL_EXECUTION_RESULT_LESSON_EVIDENCE",
+    "planning_events": 1,
+    "execution_events": 0,
+    "result_events": 0,
+    "lesson_events": 0,
+    "selected_evidence": 1,
+    "selected_execution_evidence": 0,
+    "story_review_status": "needs_review",
+    "public_story_candidate": 0,
+    "outcome_status": "unknown",
+    "publications": 0,
+    "social_rows": 0,
+    "ci_evidence_mutation": false,
+    "production_d1_contact": false
+  },
+  "decision": {
+    "classification": "OPERATOR_INTAKE_READY_REAL_EXECUTION_RESULT_LESSON_EVIDENCE_STILL_REQUIRED",
+    "rationale": "The Build 319 operator lane is present and protected, but exact Development measurement still shows planning-only evidence: zero execution/process, result and lesson records. The Maker Story therefore remains review-blocked until the operator records real work.",
+    "automatic_story_review": false,
+    "automatic_publication": false,
+    "next_build": 320,
+    "next_build_title": "Grey Hair Source-Evidence Review & Story-Plan Readiness"
+  }
 }
