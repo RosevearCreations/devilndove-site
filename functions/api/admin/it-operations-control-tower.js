@@ -18,11 +18,11 @@ const VERIFIED_DEVELOPMENT=Object.freeze({
   exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:311,title:'Buyer Discovery Evidence Freshness & Search Intake',state:'DEVELOPMENT_GREEN',
-  dev_sha:'9a785176369bc09d16c7a6d3748ac125f260bd91',tree_sha:'c79e06aec8eeb2d0ec24e54021c359d31de8e469',
+  release:467,build:312,title:'Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal',state:'DEVELOPMENT_GREEN',
+  dev_sha:'0045b29b0635d91f1c6d03b784c841b19fffc763',tree_sha:'391c869e0587fe2f865d85af781a06296f07ef8d',
   accepted_sha:'0045b29b0635d91f1c6d03b784c841b19fffc763',accepted_tree_sha:'391c869e0587fe2f865d85af781a06296f07ef8d',
-  system_gate_run:36711277604,current_application_quality_run:36711277548,it_admin_runtime_proof_run:36711277537,
-  branch_hygiene_run:36711277481,proof_state:'EXACT_BRANCH_HEAD_BUILD311_GREEN'
+  system_gate_run:36714596371,current_application_quality_run:36714596654,it_admin_runtime_proof_run:36714596379,
+  branch_hygiene_run:36714596591,proof_state:'EXACT_BRANCH_HEAD_BUILD312_GREEN'
 });
 const PRODUCTION=Object.freeze({
   release:467,build:312,title:'Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal',state:'PRODUCTION_GREEN',
