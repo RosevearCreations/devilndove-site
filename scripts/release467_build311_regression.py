@@ -30,7 +30,8 @@ q(scope.get('request_time_schema_repair_removed') is True and scope.get('zero_ev
 q(contract.get('measurement_window_days')==30 and contract.get('missing_schema_fails_closed') is True,'Build 311 30-day/fail-closed contract mismatch')
 q(contract.get('indexnow_execution') is False and contract.get('provider_execution') is False,'Build 311 provider boundary mismatch')
 
-for token in ("build:311","window_days:30","search_intake","schema_readiness","latest_report_age_days","other_public_rows","traffic_fabrication:false","indexnow_submission:false"):
+q(("build:311" in api) or ("build:316" in api),'Build 311 buyer measurement API missing compatible build marker')
+for token in ("window_days:30","search_intake","schema_readiness","latest_report_age_days","other_public_rows","traffic_fabrication:false","indexnow_submission:false"):
     q(token in api,'Build 311 buyer measurement API missing '+token)
 q('export async function onRequestGet' in api and 'onRequestPost' not in api,'Build 311 buyer measurement API must remain GET-only')
 for forbidden in ('CREATE TABLE','ALTER TABLE','DROP TABLE','INSERT INTO','UPDATE ','DELETE FROM','fetch('):
@@ -41,9 +42,10 @@ for token in ('SEARCH_CONSOLE_REQUIRED_TABLES','searchConsoleSchemaReadiness','s
 for forbidden in ('CREATE TABLE IF NOT EXISTS','ALTER TABLE seo_opportunity_actions','CREATE INDEX IF NOT EXISTS'):
     q(forbidden not in intake,'Build 311 request-time schema mutation remains: '+forbidden)
 
-for token in ('Build 311 • evidence freshness','Search intake:','Request-time schema repair is OFF','Attribution:','30 days'):
+q(('Build 311 • evidence freshness' in ui) or ('Build 316 • evidence interpretation' in ui),'Build 311 UI missing compatible successor heading')
+for token in ('Search intake:','Request-time schema repair is OFF','Attribution:','30 days'):
     q(token in ui,'Build 311 UI missing '+token)
-q('admin-buyer-discovery-measurement.js?v=467b311' in page,'Build 311 buyer panel cache version missing')
+q(('admin-buyer-discovery-measurement.js?v=467b311' in page) or ('admin-buyer-discovery-measurement.js?v=467b316' in page),'Build 311 buyer panel cache version missing')
 
 upper=' '+re.sub(r'--.*','',sql).upper()+' '
 for forbidden in (' INSERT ',' UPDATE ',' DELETE ',' CREATE ',' ALTER ',' DROP ',' REPLACE ',' VACUUM ',' REINDEX '):
