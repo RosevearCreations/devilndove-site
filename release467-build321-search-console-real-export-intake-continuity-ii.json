@@ -1,0 +1,93 @@
+{
+  "release": 467,
+  "build": 321,
+  "title": "Search Console Real Export Intake Continuity II",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "SEARCH_CONSOLE_REAL_EXPORT_CONTINUITY",
+  "authority": "release467-build321-search-console-real-export-intake-continuity-ii",
+  "predecessor": {
+    "build": 320,
+    "title": "Grey Hair Source-Evidence Review & Story-Plan Readiness",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "a5348eea48616a934a2994309d0738f05d706af9",
+    "development_tree_sha": "1bf94721855837958a546e033e0bead0f3f97580",
+    "development_proofs": {
+      "system_gate_run": 36755683525,
+      "current_application_quality_run": 36755683559,
+      "it_admin_runtime_proof_run": 36755683417,
+      "branch_hygiene_run": 36755683610,
+      "d1_ci_fanout_guard_run": 36755683521,
+      "build_specific_proof_run": 36755683468
+    },
+    "production_main_sha": "e84cda2db64f0af93aa1f88cc71fb7079fe5fd54",
+    "production_tree_sha": "1bf94721855837958a546e033e0bead0f3f97580",
+    "production_pages_deploy_run": 36755991930,
+    "production_live_resource_integrity_run": 36756208135,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "intake_route": "/api/admin/search-console-import",
+    "intake_mode": "EXPLICIT_OPERATOR_REAL_GSC_CSV_ONLY",
+    "real_export_confirmation_required": true,
+    "required_header_groups": [
+      "page",
+      "clicks",
+      "impressions",
+      "ctr",
+      "position"
+    ],
+    "csv_source_required": true,
+    "no_real_export_state": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "real_export_state": "REAL_OPERATOR_EVIDENCE_ACCEPTED",
+    "traceability_review_state": "TRACEABILITY_REVIEW_REQUIRED",
+    "import_audit_action": "search_console_import",
+    "revert_action": "delete_batch",
+    "revert_audit_action": "search_console_delete_batch",
+    "batch_row_count_consistency_required": true,
+    "orphan_staged_rows_forbidden": true,
+    "synthetic_rows_forbidden": true,
+    "request_time_schema_repair": false,
+    "automatic_import": false,
+    "automatic_seo_action_generation": false,
+    "automatic_seo_apply": false,
+    "next_build": 322,
+    "next_build_title": "Buyer Discovery Attribution & SEO Review Evidence Continuity",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "automatic_search_console_import": false,
+    "synthetic_discovery_rows": false,
+    "traffic_fabrication": false,
+    "automatic_seo_action_generation": false,
+    "automatic_seo_apply": false,
+    "indexnow_execution": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "a5348eea48616a934a2994309d0738f05d706af9",
+      "tree": "1bf94721855837958a546e033e0bead0f3f97580"
+    },
+    "production": {
+      "main_sha": "e84cda2db64f0af93aa1f88cc71fb7079fe5fd54",
+      "tree": "1bf94721855837958a546e033e0bead0f3f97580",
+      "production_pages_deploy_run": 36755991930,
+      "production_live_resource_integrity_run": 36756208135
+    }
+  },
+  "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_COMPLETION_DISCOVERY_ADOPTION_BUILDS_319_324.md",
+  "decision": {
+    "classification": "AWAIT_EXACT_DEVELOPMENT_REAL_EXPORT_CONTINUITY_MEASUREMENT",
+    "synthetic_evidence_authorized": false,
+    "automatic_import_authorized": false,
+    "next_build": 322,
+    "next_build_title": "Buyer Discovery Attribution & SEO Review Evidence Continuity"
+  }
+}
