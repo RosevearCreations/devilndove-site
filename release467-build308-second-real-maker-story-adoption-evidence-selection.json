@@ -143,5 +143,26 @@
     "provider_publication": false,
     "r2_mutation": false,
     "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "3ff916d9f1e7cc6aa9c29d9c998ace3731caf120",
+      "tree": "70c9408afd2df7a3359b83937eda15161f49b4e2",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 36661991953,
+      "quality_run": 36661991952,
+      "it_admin_runtime_run": 36661991949,
+      "repository_hygiene_run": 36661991959,
+      "d1_ci_fanout_guard_run": 36661991955,
+      "build_specific_proof_run": 36661991981
+    },
+    "production": {
+      "main_sha": "f8b3f7281ccd6e4bfc739abe1ba2566db336281a",
+      "tree": "70c9408afd2df7a3359b83937eda15161f49b4e2",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 36662200778,
+      "production_live_resource_integrity_run": 36662256691,
+      "remote_d1_queries": 0
+    }
   }
 }
