@@ -51,7 +51,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const opps = Array.isArray(data.opportunity_queries) ? data.opportunity_queries : [];
     const batches = Array.isArray(data.batches) ? data.batches : [];
     const actions = Array.isArray(data.seo_actions) ? data.seo_actions : [];
+    const acceptance = data.operator_acceptance || {};
+    const acceptanceState = String(acceptance.state || 'UNKNOWN');
+    const evidenceMessage = acceptanceState === 'EVIDENCE_PENDING_NO_REAL_EXPORT'
+      ? 'No real Search Console export is staged. Leave discovery evidence pending until we import a genuine operator export.'
+      : acceptanceState === 'REAL_OPERATOR_EVIDENCE_PRESENT'
+        ? 'Real Search Console evidence is staged with batch and audit traceability.'
+        : acceptanceState === 'SCHEMA_BLOCKED'
+          ? 'Canonical Search Console schema is not ready; import remains blocked.'
+          : 'Search Console intake traceability needs operator review before interpreting discovery evidence.';
     document.getElementById('searchConsoleImportResults').innerHTML = `
+      <div class="card" style="margin-top:12px">
+        <div class="small"><strong>Operator intake:</strong> ${esc(acceptanceState)}</div>
+        <p class="small" style="margin:8px 0 0">${esc(evidenceMessage)}</p>
+        <p class="small" style="margin:8px 0 0">Current batches: <strong>${num(acceptance.import_batches||0)}</strong> • live staged rows: <strong>${num(acceptance.live_rows||0)}</strong> • import audits: <strong>${num(acceptance.import_audits||0)}</strong> • revert audits: <strong>${num(acceptance.revert_audits||0)}</strong>. The safe batch revert remains the explicit <code>delete_batch</code> action.</p>
+      </div>
       <div class="grid cols-4 media-diagnostic-metrics" style="margin-top:12px">
         <div class="card"><div class="small">Rows</div><strong>${num(totals.row_count || 0)}</strong></div>
         <div class="card"><div class="small">Clicks</div><strong>${num(totals.clicks || 0)}</strong></div>
