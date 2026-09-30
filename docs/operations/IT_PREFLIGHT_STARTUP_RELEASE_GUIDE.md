@@ -22,6 +22,10 @@ Build 320:
 - reuses Grey Hair Sync & Audio Alignment for the confirmed synchronization prerequisite;
 - reuses Grey Hair Story & Edit Planning for human-reviewed source-backed story plans;
 - requires ≥2 approved source ranges, ≥1 reviewed/approved story plan, and ≥2 source-backed story items before a later Maker Story decision;
+- exact Development measurement returned `SOURCE_EVIDENCE_REVIEW_REQUIRED`;
+- Grey Hair currently has 3 active source ranges: **1 approved / 2 needs_review**;
+- confirmed sync groups **0**, reviewed story plans **0**, source-backed story items **0**, Maker Story profiles **0**;
+- public-allowed assets/uploads remain **0 / 0** and Build 320 measurement read **165 / 20,000** D1 rows;
 - does not expose raw private URLs, infer media rights, create a Maker Story profile, publish, post socially, or execute providers.
 
 Next after Build 320 Production GREEN: **Build 321 — Search Console Real Export Intake Continuity II**.
