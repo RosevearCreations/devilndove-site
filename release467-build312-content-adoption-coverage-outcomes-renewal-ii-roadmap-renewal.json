@@ -2,8 +2,8 @@
   "release": 467,
   "build": 312,
   "title": "Content Adoption Coverage Outcomes Renewal II & Roadmap Renewal",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "CONTENT_ADOPTION_OUTCOMES_RENEWAL_II_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
+  "phase": "CONTENT_ADOPTION_OUTCOMES_RENEWAL_II_COMPLETE",
   "authority": "release467-build312-content-adoption-coverage-outcomes-renewal-ii-roadmap-renewal",
   "predecessor": {
     "build": 311,
@@ -366,5 +366,31 @@
     "automatic_approval": false,
     "automatic_publication": false,
     "automatic_provider_execution": false
+  },
+  "final_closure": {
+    "dev_sha": "0045b29b0635d91f1c6d03b784c841b19fffc763",
+    "tree_sha": "391c869e0587fe2f865d85af781a06296f07ef8d",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD312_GREEN",
+    "proofs": {
+      "system_gate_run": 36714596371,
+      "current_application_quality_run": 36714596654,
+      "it_admin_runtime_proof_run": 36714596379,
+      "branch_hygiene_run": 36714596591
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36714596884,
+      "build_specific_proof_run": 36714596878
+    },
+    "ingested_by_build": 313
+  },
+  "production_checkpoint": {
+    "main_sha": "c5e7bb72ec990118057d6955223e60ddaf691eac",
+    "tree_sha": "391c869e0587fe2f865d85af781a06296f07ef8d",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36714805674,
+    "production_live_resource_integrity_run": 36714898168,
+    "remote_d1_queries": 0
   }
 }
