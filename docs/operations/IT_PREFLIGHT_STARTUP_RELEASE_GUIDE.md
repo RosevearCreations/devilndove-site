@@ -1,21 +1,20 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 314 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 315 candidate
 
-Build 314 — Second Story Publication Readiness & Review-Queue Continuity — is projected over exact Build 313 Development/Production GREEN.
+Build 315 — Search Console Operator Intake Acceptance — is projected over exact Build 314 Development/Production GREEN.
 
-- Last fully verified Development: `6d62f2b7f8876715d3dc6a9afa2da9b1999979a3`
-- Verified tree: `323d985b6385ee103552a51723b087187010ab53`
-- Development proofs: System `36716969702`, Quality `36716969803`, I.T. `36716969886`, Hygiene `36716969713`
-- Supplemental Build 313 proofs: D1 Fan-Out `36716969773`, Build 313 `36716969717`
-- Current Production main: `14375bce8e1749b309e60ef3baf1804ee01bdc47`
-- Production proofs: Pages `36717227244`, Live Resources `36717338240`
-- Build 314 target: Creative Project 5, **35th promo**, Content Project 23.
-- Build 313 review decision remains `REMAIN_NEEDS_REVIEW_PENDING_EXECUTION_RESULT_LESSON_EVIDENCE`.
-- Factual prerequisites remain unsatisfied: 1 planning event, 0 execution events, 1 selected planning record, 0 selected execution evidence, outcome `unknown`.
-- Existing approved/locked copy count is 2; 17 other deliverables remain `changes_requested`.
-- Publication readiness is **BLOCKED**; second-story Workshop Journal rows remain 0 and social review-queue rows remain 0.
-- Approved copy does not authorize Maker Story review/public candidacy, publication, provider posting or public-media rights.
-- Build 314 proof is read-only; no Development D1 business-data mutation, provider execution, R2 mutation or Production D1 contact is authorized.
-- Next after Build 314 Production GREEN: Build 315 — Search Console Operator Intake Acceptance.
+- Last fully verified Development: `59ca2152c7782b33e376b659d26e36e3388ebb05`
+- Verified tree: `9d31caa6f6a18bdac8236fe158d711f0e898b622`
+- Development proofs: System `36719912502`, Quality `36719912586`, I.T. `36719912423`, Hygiene `36719912395`
+- Supplemental Build 314 proofs: D1 Fan-Out `36719912388`, Build 314 `36719912439`
+- Current Production main: `8bea4144e1a50d43b85e94218ce7f878a6023904`
+- Production proofs: Pages `36720184639`, Live Resources `36720280219`
+- Search Console intake remains explicit administrator CSV input through `/api/admin/search-console-import`.
+- Canonical tables must already exist; request-time schema repair remains OFF.
+- Build 315 measures batch/live-row reconciliation, orphan rows, import/revert audit evidence, and reviewed story/Product attribution.
+- No real export means `EVIDENCE_PENDING_NO_REAL_EXPORT`; no rows are synthesized.
+- CI performs read-only Development D1 measurement only.
+- No automatic SEO generation/apply, IndexNow/provider execution, R2 mutation or Production D1 contact is authorized.
+- Next after Build 315 Production GREEN: Build 316 — Buyer Discovery Evidence Interpretation & SEO Review Queue.
 
 ## Current release baseline
 

@@ -2,25 +2,25 @@
 
 ## Current checkpoint
 
-**Build 314 — Second Story Publication Readiness & Review-Queue Continuity** is the active Development candidate over exact Build 313 Production GREEN.
+**Build 315 — Search Console Operator Intake Acceptance** is the active Development candidate over exact Build 314 Production GREEN.
 
-Build 313 is fully verified and promoted:
+Build 314 is fully verified and promoted:
 
-- Development SHA: **6d62f2b7f8876715d3dc6a9afa2da9b1999979a3**.
-- Exact tree: **323d985b6385ee103552a51723b087187010ab53**.
-- Development proofs: System **36716969702**, Quality **36716969803**, I.T. **36716969886**, Hygiene **36716969713**.
-- Supplemental proofs: D1 Fan-Out **36716969773**, Build 313 **36716969717**.
-- Production main SHA: **14375bce8e1749b309e60ef3baf1804ee01bdc47**.
-- Production Pages Deploy: **36717227244 — SUCCESS**.
-- Production Live Resource Integrity: **36717338240 — SUCCESS**.
+- Development SHA: **59ca2152c7782b33e376b659d26e36e3388ebb05**.
+- Exact tree: **9d31caa6f6a18bdac8236fe158d711f0e898b622**.
+- Development proofs: System **36719912502**, Quality **36719912586**, I.T. **36719912423**, Hygiene **36719912395**.
+- Supplemental proofs: D1 Fan-Out **36719912388**, Build 314 **36719912439**.
+- Production main SHA: **8bea4144e1a50d43b85e94218ce7f878a6023904**.
+- Production Pages Deploy: **36720184639 — SUCCESS**.
+- Production Live Resource Integrity: **36720280219 — SUCCESS**.
 
-Build 314 evaluates the existing **35th promo** second Maker Story against the publication prerequisites already enforced by the review-first pipeline. Build 313’s explicit decision remains authoritative: **`needs_review`, public candidate = 0**, because the record still has one planning event, zero execution events, zero selected execution evidence, outcome `unknown`, and no execution-derived result/lesson evidence.
+Build 315 verifies the existing explicit Search Console CSV intake path. Canonical schema readiness, current batch/live-row consistency, import/revert audit traceability, safe batch deletion, and factual story/Product attribution are measured without generating Search Console data.
 
-The two corrected text drafts remain approved and locked, but approved copy alone does not grant Maker Story approval, publication authority, social distribution authority or media/public-use rights. Build 314 therefore preserves **publication readiness = BLOCKED**, with **0** second-story Workshop Journal rows and **0** second-story social review-queue rows. The proof is read-only and performs no provider, R2, schema, Finance, Inventory or Production D1 mutation.
+If no real operator Search Console export is staged, the truthful acceptance state is **EVIDENCE_PENDING_NO_REAL_EXPORT**. That does not block the software release; it prevents Build 316 from interpreting nonexistent traffic evidence. No automatic import, synthetic clicks/impressions/queries, automatic SEO apply, IndexNow execution, provider execution or Production D1 contact is authorized.
 
 The queue **has not run out**.
 
-**Next after Build 314 Production GREEN: Build 315 — Search Console Operator Intake Acceptance.**
+**Next after Build 315 Production GREEN: Build 316 — Buyer Discovery Evidence Interpretation & SEO Review Queue.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_REVIEWED_STORY_DISCOVERY_ADOPTION_BUILDS_313_318.md`.
 
