@@ -1,18 +1,5 @@
 name: Release 467 Build 304 Workshop Journal Social Review First Publication Acceptance
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/_lib/contentPublications.js'
-      - '_lib/contentPublications.js'
-      - 'scripts/release467_build304_*'
-      - 'scripts/release467_build303_regression.py'
-      - 'release467-build304-*.json'
-      - 'release467-build303-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_304_*'
-      - '.github/workflows/release467-build304-workshop-journal-social-review-first-publication-acceptance.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,7 +13,7 @@ jobs:
       - run: python scripts/release467_build304_regression.py
       - run: python scripts/release467_build304_gate.py
   review-first-publication-acceptance:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    if: ${{ false }} # Historical Build 304 Development mutation is closed after Build 305 starts.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
