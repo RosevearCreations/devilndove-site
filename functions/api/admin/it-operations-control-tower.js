@@ -1,37 +1,38 @@
-/* BUILD332_CURRENT_PROVENANCE: 35th Promo Factual Evidence Completion Continuity II; verified Build 331 dev 5246cd2c0ea6ec6568c31f91f272e225d1e40cbe; tree 269ea72e333d4ff7883121456d9b65aab83070c3; System 36844052823; Quality 36844052767; IT 36844052757; Hygiene 36844052753; Production 0fce96f146d63411feb401b546c12b945ab861ac; Pages 36844288432; Live 36844371166. */
-/* BUILD331_CURRENT_PROVENANCE: Evidence Gap Execution Workbench & Input Completion Continuity; verified Build 330 dev 5246cd2c0ea6ec6568c31f91f272e225d1e40cbe; tree 269ea72e333d4ff7883121456d9b65aab83070c3; System 36844052823; Quality 36844052767; IT 36844052757; Hygiene 36844052753; Production 0fce96f146d63411feb401b546c12b945ab861ac; Pages 36844288432; Live 36844371166. */
-/* BUILD330_CURRENT_PROVENANCE: Evidence Gap Execution Workbench & Input Completion Continuity; verified Build 329 dev 5246cd2c0ea6ec6568c31f91f272e225d1e40cbe; tree 269ea72e333d4ff7883121456d9b65aab83070c3; System 36844052823; Quality 36844052767; IT 36844052757; Hygiene 36844052753; Production 0fce96f146d63411feb401b546c12b945ab861ac; Pages 36844288432; Live 36844371166. */
-/* BUILD329_CURRENT_PROVENANCE: Evidence Gap Execution Workbench & Input Completion Continuity; verified Build 328 dev 5246cd2c0ea6ec6568c31f91f272e225d1e40cbe; tree 269ea72e333d4ff7883121456d9b65aab83070c3; System 36844052823; Quality 36844052767; IT 36844052757; Hygiene 36844052753; Production 0fce96f146d63411feb401b546c12b945ab861ac; Pages 36844288432; Live 36844371166. */
-/* BUILD328_CURRENT_PROVENANCE: Evidence Gap Execution Workbench & Input Completion Continuity; verified Build 327 dev 5246cd2c0ea6ec6568c31f91f272e225d1e40cbe; tree 269ea72e333d4ff7883121456d9b65aab83070c3; Production 0fce96f146d63411feb401b546c12b945ab861ac; Pages 36844288432; Live 36844371166. */
-/* BUILD327_CURRENT_PROVENANCE: verified Build 326 dev 5246cd2c0ea6ec6568c31f91f272e225d1e40cbe; tree 269ea72e333d4ff7883121456d9b65aab83070c3; System 36844052823; Quality 36844052767; IT 36844052757; Hygiene 36844052753; Production 0fce96f146d63411feb401b546c12b945ab861ac; Pages 36844288432; Live 36844371166. */
-/* CURRENT_BUILD_332_TRUTH: Evidence Gap Execution Workbench & Input Completion Continuity; last verified dev 5246cd2c0ea6ec6568c31f91f272e225d1e40cbe; tree 269ea72e333d4ff7883121456d9b65aab83070c3; Production main 0fce96f146d63411feb401b546c12b945ab861ac; Pages 36844288432; Live 36844371166. */
-// Release 467 Build 332 — 35th Promo Factual Evidence Completion Continuity II over exact Build 326 Production source.
+/* BUILD333_CURRENT_PROVENANCE: Grey Hair Source Review & Story-Plan Completion Continuity II; verified Build 332 dev d4fcede4adf76a511d754012042ba91a98693812; tree 4ff23c38bbe0acb7ce6ff6f9ad5ef964b329d229; System 36858284606; Quality 36858284626; IT 36858284765; Hygiene 36858284620; Production 69fd16b6322e7cbd52c5341ef2b7e871529a65ee; Pages 36858576609; Live 36858655776. */
+/* BUILD332_CURRENT_PROVENANCE: 35th Promo Factual Evidence Completion Continuity II; verified Build 331 dev d4fcede4adf76a511d754012042ba91a98693812; tree 4ff23c38bbe0acb7ce6ff6f9ad5ef964b329d229; System 36858284606; Quality 36858284626; IT 36858284765; Hygiene 36858284620; Production 69fd16b6322e7cbd52c5341ef2b7e871529a65ee; Pages 36858576609; Live 36858655776. */
+/* BUILD331_CURRENT_PROVENANCE: 35th Promo Factual Evidence Completion Continuity II; verified Build 330 dev d4fcede4adf76a511d754012042ba91a98693812; tree 4ff23c38bbe0acb7ce6ff6f9ad5ef964b329d229; System 36858284606; Quality 36858284626; IT 36858284765; Hygiene 36858284620; Production 69fd16b6322e7cbd52c5341ef2b7e871529a65ee; Pages 36858576609; Live 36858655776. */
+/* BUILD330_CURRENT_PROVENANCE: 35th Promo Factual Evidence Completion Continuity II; verified Build 329 dev d4fcede4adf76a511d754012042ba91a98693812; tree 4ff23c38bbe0acb7ce6ff6f9ad5ef964b329d229; System 36858284606; Quality 36858284626; IT 36858284765; Hygiene 36858284620; Production 69fd16b6322e7cbd52c5341ef2b7e871529a65ee; Pages 36858576609; Live 36858655776. */
+/* BUILD329_CURRENT_PROVENANCE: 35th Promo Factual Evidence Completion Continuity II; verified Build 328 dev d4fcede4adf76a511d754012042ba91a98693812; tree 4ff23c38bbe0acb7ce6ff6f9ad5ef964b329d229; System 36858284606; Quality 36858284626; IT 36858284765; Hygiene 36858284620; Production 69fd16b6322e7cbd52c5341ef2b7e871529a65ee; Pages 36858576609; Live 36858655776. */
+/* BUILD328_CURRENT_PROVENANCE: 35th Promo Factual Evidence Completion Continuity II; verified Build 327 dev d4fcede4adf76a511d754012042ba91a98693812; tree 4ff23c38bbe0acb7ce6ff6f9ad5ef964b329d229; Production 69fd16b6322e7cbd52c5341ef2b7e871529a65ee; Pages 36858576609; Live 36858655776. */
+/* BUILD327_CURRENT_PROVENANCE: verified Build 326 dev d4fcede4adf76a511d754012042ba91a98693812; tree 4ff23c38bbe0acb7ce6ff6f9ad5ef964b329d229; System 36858284606; Quality 36858284626; IT 36858284765; Hygiene 36858284620; Production 69fd16b6322e7cbd52c5341ef2b7e871529a65ee; Pages 36858576609; Live 36858655776. */
+/* CURRENT_BUILD_333_TRUTH: 35th Promo Factual Evidence Completion Continuity II; last verified dev d4fcede4adf76a511d754012042ba91a98693812; tree 4ff23c38bbe0acb7ce6ff6f9ad5ef964b329d229; Production main 69fd16b6322e7cbd52c5341ef2b7e871529a65ee; Pages 36858576609; Live 36858655776. */
+// Release 467 Build 333 — Grey Hair Source Review & Story-Plan Completion Continuity II over exact Build 326 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=332;
-const TITLE='35th Promo Factual Evidence Completion Continuity II';
-const AUTHORITY='release467-build332-35th-promo-factual-evidence-completion-continuity-ii';
-const EVIDENCE_ID='r467-b327-candidate-36844052823-36844288432';
+const BUILD=333;
+const TITLE='Grey Hair Source Review & Story-Plan Completion Continuity II';
+const AUTHORITY='release467-build333-grey-hair-source-review-story-plan-completion-continuity-ii';
+const EVIDENCE_ID='r467-b327-candidate-36858284606-36858576609';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:326,title:'Evidence Gap Execution Workbench & Input Completion Continuity',state:'DEVELOPMENT_GREEN',
-  dev_sha:'5246cd2c0ea6ec6568c31f91f272e225d1e40cbe',tree_sha:'269ea72e333d4ff7883121456d9b65aab83070c3',system_gate_run:36844052823,current_application_quality_run:36844052767,it_admin_runtime_proof_run:36844052757,branch_hygiene_run:36844052753,proof_state:'EXACT_BRANCH_HEAD_BUILD331_GREEN',exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
+  release:467,build:326,title:'35th Promo Factual Evidence Completion Continuity II',state:'DEVELOPMENT_GREEN',
+  dev_sha:'d4fcede4adf76a511d754012042ba91a98693812',tree_sha:'4ff23c38bbe0acb7ce6ff6f9ad5ef964b329d229',system_gate_run:36858284606,current_application_quality_run:36858284626,it_admin_runtime_proof_run:36858284765,branch_hygiene_run:36858284620,proof_state:'EXACT_BRANCH_HEAD_BUILD332_GREEN',exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:326,title:'Evidence Gap Execution Workbench & Input Completion Continuity',state:'DEVELOPMENT_GREEN',
-  dev_sha:'5246cd2c0ea6ec6568c31f91f272e225d1e40cbe',tree_sha:'269ea72e333d4ff7883121456d9b65aab83070c3',accepted_sha:'5246cd2c0ea6ec6568c31f91f272e225d1e40cbe',accepted_tree_sha:'269ea72e333d4ff7883121456d9b65aab83070c3',system_gate_run:36844052823,current_application_quality_run:36844052767,it_admin_runtime_proof_run:36844052757,branch_hygiene_run:36844052753,proof_state:'EXACT_BRANCH_HEAD_BUILD331_GREEN'
+  release:467,build:326,title:'35th Promo Factual Evidence Completion Continuity II',state:'DEVELOPMENT_GREEN',
+  dev_sha:'d4fcede4adf76a511d754012042ba91a98693812',tree_sha:'4ff23c38bbe0acb7ce6ff6f9ad5ef964b329d229',accepted_sha:'d4fcede4adf76a511d754012042ba91a98693812',accepted_tree_sha:'4ff23c38bbe0acb7ce6ff6f9ad5ef964b329d229',system_gate_run:36858284606,current_application_quality_run:36858284626,it_admin_runtime_proof_run:36858284765,branch_hygiene_run:36858284620,proof_state:'EXACT_BRANCH_HEAD_BUILD332_GREEN'
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:326,title:'Evidence Gap Execution Workbench & Input Completion Continuity',state:'PRODUCTION_GREEN',
-  main_sha:'0fce96f146d63411feb401b546c12b945ab861ac',tree_sha:'269ea72e333d4ff7883121456d9b65aab83070c3',production_pages_deploy_run:36844288432,production_live_resource_integrity_run:36844371166,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36844052805,remote_d1_queries:0
+  release:467,build:326,title:'35th Promo Factual Evidence Completion Continuity II',state:'PRODUCTION_GREEN',
+  main_sha:'69fd16b6322e7cbd52c5341ef2b7e871529a65ee',tree_sha:'4ff23c38bbe0acb7ce6ff6f9ad5ef964b329d229',production_pages_deploy_run:36858576609,production_live_resource_integrity_run:36858655776,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36858284635,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true,workflow:'.github/workflows/production-live-resource-integrity-proof.yml'
 });
-const CURRENT_GUARDS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 332 Grey Hair Evidence Review Completion Story Plan Handoff']);
+const CURRENT_GUARDS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 333 Grey Hair Evidence Review Completion Story Plan Handoff']);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql','0026_release467_inventory_workstation_memberships.sql','0027_release467_caip_workshop_follies_maker_story_foundation.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
@@ -120,7 +121,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:332,title:TITLE,authority:'release467-build332-35th-promo-factual-evidence-completion-continuity-ii.json'},
+        current_closure_candidate:{release:467,build:333,title:TITLE,authority:'release467-build333-grey-hair-source-review-story-plan-completion-continuity-ii.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
