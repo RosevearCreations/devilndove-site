@@ -86,13 +86,15 @@ function outputFeed(o,d){
   const lessons=events.filter(e=>String(e.event_type||'').toLowerCase()==='lesson').length;
   const eventComplete=execution>0&&results>0&&lessons>0;
   const maker=d.maker_story||{};
-  const factsComplete=['what_we_are_trying','why_we_are_trying_it','actual_result','lesson_learned'].every(k=>String(maker[k]||'').trim().length>0);
+  const placeholderGuard=/\b(no (?:execution|completed-result|result|lesson|outcome)|not recorded|does not claim|evidence is required|pending execution)\b/i;
+  const substantiveFact=v=>String(v||'').trim().length>0&&!placeholderGuard.test(String(v||''));
+  const factsComplete=String(maker.what_we_are_trying||'').trim().length>0&&String(maker.why_we_are_trying_it||'').trim().length>0&&substantiveFact(maker.actual_result)&&substantiveFact(maker.lesson_learned);
   const outcomeResolved=['win','partial_win','failure'].includes(String(maker.outcome_status||''));
   const reviewReady=eventComplete&&factsComplete&&outcomeResolved;
   const closureLabel=reviewReady?'ready for explicit human review':eventComplete?'story facts still incomplete':(execution+results+lessons)>0?'real outcome evidence partial':'real outcome evidence still required';
   const missing=[];
   if(!execution)missing.push('execution/process');if(!results)missing.push('result');if(!lessons)missing.push('lesson');
-  if(!String(maker.what_we_are_trying||'').trim())missing.push('what we are trying');if(!String(maker.why_we_are_trying_it||'').trim())missing.push('why we are trying it');if(!String(maker.actual_result||'').trim())missing.push('actual result');if(!outcomeResolved)missing.push('resolved outcome');if(!String(maker.lesson_learned||'').trim())missing.push('lesson learned');
+  if(!String(maker.what_we_are_trying||'').trim())missing.push('what we are trying');if(!String(maker.why_we_are_trying_it||'').trim())missing.push('why we are trying it');if(!substantiveFact(maker.actual_result))missing.push('actual result');if(!outcomeResolved)missing.push('resolved outcome');if(!substantiveFact(maker.lesson_learned))missing.push('lesson learned');
   return `<section class="card" data-build319-execution-evidence-intake data-build326-real-outcome-closure>
     <div class="section-title-row"><div><p class="eyebrow">Build 326 • real outcome closure</p><h3>35th promo — factual evidence and review readiness</h3></div><span class="pill">${esc(closureLabel)}</span></div>
     <p class="small"><strong>Build 319 • factual evidence intake</strong> remains the underlying private source authority. Build 319 does not change these fields. Build 326 reuses the Build 319 private factual-evidence intake. Readiness requires real execution/process, result and lesson events plus completed Maker Story facts. Readiness never auto-sets reviewed/public-candidate state, never publishes, and never infers media rights.</p>

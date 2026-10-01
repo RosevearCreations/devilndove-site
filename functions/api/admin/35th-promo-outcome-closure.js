@@ -18,7 +18,9 @@ export async function onRequestGet(context){
   if(!target)return json({ok:false,release:467,build:BUILD,error:'Canonical 35th promo project/profile not found.',safety:SAFETY},409);
   const execution=n(target.execution_events),results=n(target.result_events),lessons=n(target.lesson_events);
   const eventComplete=execution>0&&results>0&&lessons>0;
-  const facts=['what_we_are_trying','why_we_are_trying_it','actual_result','lesson_learned'].every(k=>s(target[k]).length>0);
+  const placeholderGuard=/\b(no (?:execution|completed-result|result|lesson|outcome)|not recorded|does not claim|evidence is required|pending execution)\b/i;
+  const substantiveFact=v=>s(v).length>0&&!placeholderGuard.test(s(v));
+  const facts=s(target.what_we_are_trying).length>0&&s(target.why_we_are_trying_it).length>0&&substantiveFact(target.actual_result)&&substantiveFact(target.lesson_learned);
   const outcomeResolved=['win','partial_win','failure'].includes(s(target.outcome_status));
   const ready=eventComplete&&facts&&outcomeResolved;
   let closure_state='REAL_OUTCOME_EVIDENCE_STILL_REQUIRED';
@@ -28,7 +30,7 @@ export async function onRequestGet(context){
   if(ready&&(s(target.story_review_status)==='reviewed'||n(target.public_story_candidate)===1))closure_state='REAL_OUTCOME_FACTS_COMPLETE_HUMAN_REVIEW_ALREADY_RECORDED';
   const missing=[];
   if(execution===0)missing.push('execution_or_process_event');if(results===0)missing.push('result_event');if(lessons===0)missing.push('lesson_event');
-  if(!s(target.what_we_are_trying))missing.push('what_we_are_trying');if(!s(target.why_we_are_trying_it))missing.push('why_we_are_trying_it');if(!s(target.actual_result))missing.push('actual_result');if(!outcomeResolved)missing.push('resolved_outcome_status');if(!s(target.lesson_learned))missing.push('lesson_learned');
+  if(!s(target.what_we_are_trying))missing.push('what_we_are_trying');if(!s(target.why_we_are_trying_it))missing.push('why_we_are_trying_it');if(!substantiveFact(target.actual_result))missing.push('actual_result');if(!outcomeResolved)missing.push('resolved_outcome_status');if(!substantiveFact(target.lesson_learned))missing.push('lesson_learned');
   return json({ok:true,release:467,build:BUILD,title:'35th Promo Real Outcome Evidence Closure',target,closure_state,missing_requirements:missing,
    readiness:{event_complete:eventComplete,profile_facts_complete:facts,outcome_resolved:outcomeResolved,ready_for_explicit_human_review:ready},
    operator_action:{record_evidence:'record_story_execution_evidence',workspace_href:'/admin/creative-process/?project_id=5',review_action:'explicit_human_review_only'},

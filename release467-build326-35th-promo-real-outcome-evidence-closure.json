@@ -46,12 +46,28 @@
   },
   "contract": {
     "reuses_build319_operator_action": "record_story_execution_evidence",
-    "execution_event_types": ["setup","process","milestone","mistake","repair"],
+    "execution_event_types": [
+      "setup",
+      "process",
+      "milestone",
+      "mistake",
+      "repair"
+    ],
     "result_event_type": "result",
     "lesson_event_type": "lesson",
-    "required_profile_facts": ["what_we_are_trying","why_we_are_trying_it","actual_result","outcome_status","lesson_learned"],
-    "resolved_outcomes": ["win","partial_win","failure"],
-    "readiness_rule": "at least one execution/process-class event plus one result event plus one lesson event plus complete factual Maker Story fields",
+    "required_profile_facts": [
+      "what_we_are_trying",
+      "why_we_are_trying_it",
+      "substantive_actual_result",
+      "resolved_outcome_status",
+      "substantive_lesson_learned"
+    ],
+    "resolved_outcomes": [
+      "win",
+      "partial_win",
+      "failure"
+    ],
+    "readiness_rule": "at least one execution/process-class event plus one result event plus one lesson event plus complete substantive non-placeholder factual Maker Story fields",
     "readiness_only": true,
     "automatic_story_review": false,
     "automatic_public_candidate": false,
@@ -60,7 +76,8 @@
     "media_rights_inference": false,
     "next_build": 327,
     "next_build_title": "Grey Hair Evidence Review Completion & Story-Plan Handoff",
-    "future_queue_exhausted": false
+    "future_queue_exhausted": false,
+    "placeholder_absence_text_does_not_satisfy_readiness": true
   },
   "safety": {
     "schema_change": false,

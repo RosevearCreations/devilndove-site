@@ -10,7 +10,9 @@ for(const [k,v] of Object.entries({exact_project_identity:1,maker_profiles:1,cai
 if(Number(target.approved_locked_deliverables||0)!==2)throw new Error('35th promo approved/locked Content Studio continuity drift');
 if(Number(target.publications||0)!==0||Number(target.social_rows||0)!==0)throw new Error('35th promo publication/social boundary drift');
 const execution=Number(target.execution_events||0),results=Number(target.result_events||0),lessons=Number(target.lesson_events||0);
-const textComplete=['what_we_are_trying','why_we_are_trying_it','actual_result','lesson_learned'].every(k=>String(target[k]||'').trim().length>0);
+const placeholderGuard=/\b(no (?:execution|completed-result|result|lesson|outcome)|not recorded|does not claim|evidence is required|pending execution)\b/i;
+const substantiveFact=v=>String(v||'').trim().length>0&&!placeholderGuard.test(String(v||''));
+const textComplete=String(target.what_we_are_trying||'').trim().length>0&&String(target.why_we_are_trying_it||'').trim().length>0&&substantiveFact(target.actual_result)&&substantiveFact(target.lesson_learned);
 const outcomeResolved=['win','partial_win','failure'].includes(String(target.outcome_status||''));
 const eventComplete=execution>0&&results>0&&lessons>0;
 const ready=eventComplete&&textComplete&&outcomeResolved;
