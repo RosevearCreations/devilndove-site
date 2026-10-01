@@ -101,7 +101,7 @@
       "state": "PRODUCTION_GREEN"
     }
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT",
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_331_336.md",
   "next_build": 336,
   "next_build_title": "Content Adoption & Discovery Outcomes Renewal VI",
@@ -111,5 +111,68 @@
   "toolchain_reliability": {
     "wrangler_version": "4.128.0",
     "business_logic_changed": false
+  },
+  "decision": {
+    "classification": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+    "rationale": "Exact Development measurement shows the one reviewed/published Maker Story remains stable while three projects still lack Maker Story evidence and the 35th Promo still lacks substantive real outcome evidence. No automatic advancement is authorized.",
+    "published_reviewed_story_count": 1,
+    "maker_story_evidence_required_count": 3,
+    "factual_outcome_evidence_required_count": 1,
+    "new_publication_review_ready_count": 0,
+    "automatic_advancement_authorized": false,
+    "automatic_publication_authorized": false,
+    "media_rights_inference_authorized": false,
+    "next_build": 336,
+    "next_build_title": "Content Adoption & Discovery Outcomes Renewal VI"
+  },
+  "measurement": {
+    "source_sha": "1d9e115ea28c1d27227cf2c9a32a62854d1f6db6",
+    "source_tree_sha": "1b0538dc1513fb3a821d26140ebb665aa940210f",
+    "workflow_run": 36902499406,
+    "artifact_id": 11182885462,
+    "artifact_name": "build335-maker-story-advancement-readiness-1d9e115ea28c1d27227cf2c9a32a62854d1f6db6",
+    "artifact_digest": "sha256:2477a94ee20e32b2426165b0d83feb9eb526cf6d3f215e1ed18cb07c7c64f4ff",
+    "aggregate_rows_read": 672,
+    "rows_read_ceiling": 20000,
+    "rows_read_by_statement": [
+      456,
+      19,
+      16,
+      163,
+      4,
+      14
+    ],
+    "decision": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+    "readiness_counts": {
+      "MAKER_STORY_EVIDENCE_REQUIRED": 3,
+      "FACTUAL_OUTCOME_EVIDENCE_REQUIRED": 1,
+      "PUBLISHED_REVIEWED_STORY": 1
+    },
+    "promo35": {
+      "execution_events": 0,
+      "result_events": 0,
+      "lesson_events": 0
+    },
+    "grey_hair": {
+      "approved_source_evidence": 1,
+      "source_evidence_needs_review": 2,
+      "reviewed_story_plans": 0,
+      "source_backed_story_items": 0
+    },
+    "media_rights": {
+      "active_caip_assets": 45,
+      "public_allowed_caip_assets": 0,
+      "non_public_caip_assets": 45,
+      "public_allowed_private_uploads": 0
+    },
+    "social": {
+      "social_rows": 1,
+      "review_first_ready_rows": 1,
+      "provider_posted_rows": 0
+    },
+    "automatic_advancement": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "production_d1_contact": false
   }
 }
