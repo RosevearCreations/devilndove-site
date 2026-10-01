@@ -1,3 +1,18 @@
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 333 candidate
+
+Build 333 — Grey Hair Source Review & Story-Plan Completion Continuity II — starts from exact Build 332 Development/Production GREEN.
+
+- Verified Development SHA: `d4fcede4adf76a511d754012042ba91a98693812`
+- Verified Development/Production tree: `4ff23c38bbe0acb7ce6ff6f9ad5ef964b329d229`
+- System / Quality / I.T. / Hygiene: `36858284606 / 36858284626 / 36858284765 / 36858284620`
+- D1 Fan-Out / Build 332: `36858284562 / 36858284635`
+- Production main: `69fd16b6322e7cbd52c5341ef2b7e871529a65ee`
+- Production Pages / Live: `36858576609 / 36858655776`
+
+Build 333 is read-only in CI and preserves explicit human review at every evidence/story-planning boundary.
+
+The future queue **has not run out**.
+
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 332 candidate
 
 Build 332 — 35th Promo Factual Evidence Completion Continuity II — starts from exact Build 331 Development/Production GREEN.
