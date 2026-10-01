@@ -2,17 +2,22 @@
 
 ## Current checkpoint
 
-**Build 331 — Evidence Gap Execution Workbench & Input Completion Continuity** is the active Development candidate over exact Build 330 Development/Production GREEN.
+**Build 331 — Evidence Gap Execution Workbench & Input Completion Continuity** is the active measured Development candidate over exact Build 330 Development/Production GREEN.
 
-Build 330 final closure:
-- Development SHA: **9d0340a3038f05a0a80d25288ffedc316499438f**
-- Exact tree: **585bb8a35b46f20278b64e97aa314ee11a9f4ccc**
-- System / Quality / I.T. / Hygiene: **36837717408 / 36837717402 / 36837717337 / 36837717374**
-- D1 Fan-Out / Build proof: **36837717376 / 36837717330**
-- Production main: **88b5113016acef9a0e7cc7cb7ef087b46ae01924**
-- Production Pages / Live Integrity: **36837991058 / 36838082462**
+### Build 331 measured Development checkpoint
 
-Build 331 creates no shadow task system. It shows required inputs, observed completion, completion signal and next safe human action for the real gaps already measured by Build 330, then routes the operator to the existing authoritative workspace.
+Decision: **EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED**.
+
+- Open workbench rows: **5**
+- Active gap families: **4**
+- 35th Promo: **0 execution / 0 result / 0 lesson events**, needs review, outcome unknown
+- Search Console: **0 batches / 0 rows / 0 fresh rows / 0 clicks / 0 impressions**
+- Grey Hair: **3 active source ranges / 1 approved / 2 needs-review / 0 reviewed story plans / 0 Maker Story profiles**
+- Other unprofiled workbench projects: **lime in you coconut** and **Shirley Not**, both with 0 active events / 0 selected evidence
+- Workbench writes/completion persistence: **0**
+- D1 rows read: **1,659 / 20,000**
+
+The workbench only routes real operator input to existing source authorities. It cannot assign, acknowledge, resolve, fabricate evidence, approve a story or mark source work complete.
 
 The queue **has not run out**.
 
