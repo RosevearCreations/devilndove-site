@@ -11,21 +11,21 @@
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=337;
-export const CURRENT_RELIABILITY_TITLE='Evidence Gap Execution Workbench & Input Completion Continuity II';
+export const CURRENT_RELIABILITY_BUILD=338;
+export const CURRENT_RELIABILITY_TITLE='35th Promo Factual Evidence Completion Continuity III';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
 export const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:336,title:'Content Adoption & Discovery Outcomes Renewal VI',state:'DEVELOPMENT_GREEN',
-  dev_sha:'537cc518573159ea2c511c32f01469bbd97ccf63',tree_sha:'334706f50429ceb0796abc98a4f516390036d6b5',system_gate_run:36906245515,current_application_quality_run:36906245469,it_admin_runtime_proof_run:36906245709,branch_hygiene_run:36906245367,proof_state:'EXACT_BRANCH_HEAD_BUILD336_GREEN'
+  release:467,build:337,title:'Evidence Gap Execution Workbench & Input Completion Continuity II',state:'DEVELOPMENT_GREEN',
+  dev_sha:'8f5d038fa7c7d5b3213f6d64f51d659c3ce74994',tree_sha:'3d173e98cfdf48b2efafdfb55a326c275e9cd041',system_gate_run:36931039442,current_application_quality_run:36931039645,it_admin_runtime_proof_run:36931039474,branch_hygiene_run:36931039538,proof_state:'EXACT_BRANCH_HEAD_BUILD337_GREEN'
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:336,title:'Content Adoption & Discovery Outcomes Renewal VI',state:'DEVELOPMENT_GREEN',
-  dev_sha:'537cc518573159ea2c511c32f01469bbd97ccf63',tree_sha:'334706f50429ceb0796abc98a4f516390036d6b5',system_gate_run:36906245515,current_application_quality_run:36906245469,it_admin_runtime_proof_run:36906245709,branch_hygiene_run:36906245367,proof_state:'EXACT_BRANCH_HEAD_BUILD336_GREEN'
+  release:467,build:337,title:'Evidence Gap Execution Workbench & Input Completion Continuity II',state:'DEVELOPMENT_GREEN',
+  dev_sha:'8f5d038fa7c7d5b3213f6d64f51d659c3ce74994',tree_sha:'3d173e98cfdf48b2efafdfb55a326c275e9cd041',system_gate_run:36931039442,current_application_quality_run:36931039645,it_admin_runtime_proof_run:36931039474,branch_hygiene_run:36931039538,proof_state:'EXACT_BRANCH_HEAD_BUILD337_GREEN'
 });
 export const CURRENT_PRODUCTION=Object.freeze({
-  release:467,build:336,title:'Content Adoption & Discovery Outcomes Renewal VI',state:'PRODUCTION_GREEN',
-  main_sha:'1419a505747871a5703ad087134b3b7bebafd337',tree_sha:'334706f50429ceb0796abc98a4f516390036d6b5',production_pages_deploy_run:36906590213,production_live_resource_integrity_run:36906709351,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36906245475,remote_d1_queries:0
+  release:467,build:337,title:'Evidence Gap Execution Workbench & Input Completion Continuity II',state:'PRODUCTION_GREEN',
+  main_sha:'cf588329be80a4cf463d0632845521f4e3685991',tree_sha:'3d173e98cfdf48b2efafdfb55a326c275e9cd041',production_pages_deploy_run:36931257221,production_live_resource_integrity_run:36931361695,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36931039501,remote_d1_queries:0
 });
 export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -37,7 +37,7 @@ export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
 export async function loadCurrentReliability(db,env={}){
   const inherited=await loadRelease466Reliability(db,env);
   return {
-    release:467,build:337,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
+    release:467,build:338,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
     environment:inherited.environment,score:inherited.score,status:inherited.status,scope:inherited.scope,slo_targets:inherited.slo_targets,
     checks:inherited.checks,migrations:inherited.migrations,runtime_incidents:inherited.runtime_incidents,
     foreign_key_violations:inherited.foreign_key_violations,resources:inherited.resources,
