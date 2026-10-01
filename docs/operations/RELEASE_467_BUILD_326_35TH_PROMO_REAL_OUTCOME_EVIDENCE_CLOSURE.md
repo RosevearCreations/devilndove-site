@@ -13,11 +13,11 @@ A story can become **ready for explicit human review** only when all of these ar
 - at least one real lesson event exists;
 - `what_we_are_trying` is populated;
 - `why_we_are_trying_it` is populated;
-- `actual_result` is populated;
+- `actual_result` contains a substantive observed result, not an absence/placeholder statement;
 - `outcome_status` is one of `win`, `partial_win`, or `failure`;
 - `lesson_learned` is populated.
 
-Readiness does **not** set `story_review_status=reviewed`, does not set `public_story_candidate=1`, and does not grant media/public-use rights.
+Existing text such as “no execution is recorded yet” or “no lesson is recorded yet” is treated as **missing evidence**, even though the field is technically non-empty.\n\nReadiness does **not** set `story_review_status=reviewed`, does not set `public_story_candidate=1`, and does not grant media/public-use rights.
 
 ## Build 325 predecessor closure
 
