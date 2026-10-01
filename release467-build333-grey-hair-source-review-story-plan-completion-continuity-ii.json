@@ -2,7 +2,7 @@
   "release": 467,
   "build": 333,
   "title": "Grey Hair Source Review & Story-Plan Completion Continuity II",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "GREY_HAIR_SOURCE_REVIEW_STORY_PLAN_COMPLETION_CONTINUITY_II",
   "authority": "release467-build333-grey-hair-source-review-story-plan-completion-continuity-ii",
   "predecessor": {
@@ -169,11 +169,35 @@
     "next_build": 334,
     "next_build_title": "Search Console Real Export & Fresh Discovery Intake IV"
   },
-  "measurement_lane_state": "ENABLED_EXACT_DEVELOPMENT",
+  "measurement_lane_state": "HISTORICAL_MANUAL_ONLY",
   "measurement_lane_owner": "release467-build333-grey-hair-source-review-story-plan-completion-continuity-ii.yml",
   "toolchain_reliability": {
     "wrangler_version": "4.128.0",
     "reason": "Pin canonical Development and Production Pages deploys after floating wrangler@4 resolved to unavailable 4.146.0",
     "business_logic_changed": false
+  },
+  "final_closure": {
+    "dev_sha": "ed3a8674ec5fd0e4363043034d694fdbb0a6822a",
+    "tree_sha": "295ee32365ac51c2988181b63d8b83a6fcae3da3",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD333_GREEN",
+    "proofs": {
+      "system_gate_run": 36894103075,
+      "current_application_quality_run": 36894103073,
+      "it_admin_runtime_proof_run": 36894103067,
+      "branch_hygiene_run": 36894103040,
+      "d1_ci_fanout_guard_run": 36894103200,
+      "build_specific_proof_run": 36894103049
+    },
+    "ingested_by_build": 334
+  },
+  "production_checkpoint": {
+    "main_sha": "7b934186dcef69d76c9ad3dd6a25c4aed8ba4de4",
+    "tree_sha": "295ee32365ac51c2988181b63d8b83a6fcae3da3",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36894463676,
+    "production_live_resource_integrity_run": 36894596996,
+    "remote_d1_queries": 0
   }
 }
