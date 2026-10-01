@@ -2,8 +2,8 @@
   "release": 467,
   "build": 325,
   "title": "Evidence Gap Owner Queue & Operator Action Traceability",
-  "state": "DEVELOPMENT_CANDIDATE",
-  "phase": "EVIDENCE_GAP_OWNER_QUEUE_OPERATOR_ACTION_TRACEABILITY",
+  "state": "PRODUCTION_GREEN",
+  "phase": "EVIDENCE_GAP_OWNER_QUEUE_OPERATOR_ACTION_TRACEABILITY_COMPLETE",
   "authority": "release467-build325-evidence-gap-owner-queue-operator-action-traceability",
   "predecessor": {
     "build": 324,
@@ -85,11 +85,12 @@
     "r2_mutation": false,
     "production_d1_contact": false
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT_OWNER_QUEUE_MEASUREMENT",
+  "measurement_state": "EXACT_DEVELOPMENT_OWNER_QUEUE_MEASURED_GREEN",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md",
   "decision": {
-    "classification": "AWAIT_EXACT_DEVELOPMENT_OWNER_QUEUE_MEASUREMENT",
-    "write_capability_authorized": false,
+    "classification": "ACTION_QUEUE_OPEN_REAL_EVIDENCE_REQUIRED",
+    "active_queue_rows": 5,
+    "active_gap_families": 4,
     "next_build": 326,
     "next_build_title": "35th Promo Real Outcome Evidence Closure"
   },
@@ -110,5 +111,48 @@
       "production_pages_deploy_run": 36789878247,
       "production_live_resource_integrity_run": 36789960286
     }
-  }
+  },
+  "measurement_checkpoint": {
+    "exact_development_sha": "0da51ee0e377c81909ed9c90627ca206026027b1",
+    "workflow_run": 36791682181,
+    "artifact_id": 11131158891,
+    "artifact_digest": "sha256:f37f35c4d78367a692d140de04e16ef3dcee9cd1fc84a28d959e7d3353f5c697",
+    "aggregate_rows_read": 1657,
+    "rows_read_ceiling": 20000,
+    "active_queue_rows": 5,
+    "active_gap_families": 4,
+    "promo_execution_events": 0,
+    "promo_result_events": 0,
+    "promo_lesson_events": 0,
+    "production_d1_contact": false
+  },
+  "final_closure": {
+    "dev_sha": "0da51ee0e377c81909ed9c90627ca206026027b1",
+    "tree_sha": "b38a0844c106d2ff27ff50de306a61c4d325f724",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD325_GREEN",
+    "proofs": {
+      "system_gate_run": 36791681965,
+      "current_application_quality_run": 36791681953,
+      "it_admin_runtime_proof_run": 36791681907,
+      "branch_hygiene_run": 36791681937
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36791681867,
+      "build_specific_proof_run": 36791682181
+    },
+    "artifact_id": 11131158891,
+    "ingested_by_build": 326
+  },
+  "production_checkpoint": {
+    "main_sha": "782627bb0bc0850622abc42512e3886f5556efbd",
+    "tree_sha": "b38a0844c106d2ff27ff50de306a61c4d325f724",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36791987829,
+    "production_live_resource_integrity_run": 36792048457,
+    "remote_d1_queries": 0
+  },
+  "next_build": 326,
+  "next_build_title": "35th Promo Real Outcome Evidence Closure"
 }
