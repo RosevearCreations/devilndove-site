@@ -19,3 +19,9 @@ No business-data mutation, fabricated story evidence, synthetic Search Console r
 - Development and Production trees: **MATCH**.
 
 The future queue **has not run out**.
+
+## Measured Development outcome
+
+Exact Development measurement at `8b6b1013a60e9a7fa6d5e756fbd1478dd6229320` produced decision **ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST**. The comparable contract shows zero delta from Build 330: Maker Story coverage 2/5, reviewed/public/published stories 1, selected evidence 4, approved/locked copy 4/4, Search Console rows/clicks/impressions 0, fresh evidence-backed SEO rows 0, public telemetry 22/22, runtime errors 0 and third-story-ready projects 0. Provider D1 cost remains **2,847 / 20,000 rows read**, exactly equal to Builds 318, 324 and 330.
+
+Observed evidence created `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_337_342.md`. Next: **Build 337 — Evidence Gap Execution Workbench & Input Completion Continuity II**.
