@@ -1,21 +1,6 @@
 name: Release 467 Build 337 Evidence Gap Execution Workbench Input Completion Continuity II
+# Historical after Build 338 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build337_*'
-      - 'release467-build337-*.json'
-      - 'release467-build336-*.json'
-      - 'functions/api/admin/evidence-gap-execution-workbench.js'
-      - 'admin/evidence-gap-execution-workbench/index.html'
-      - 'public/js/admin-evidence-gap-execution-workbench-v337.js'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_337_*'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - '.github/workflows/release467-build336-content-adoption-discovery-outcomes-renewal-vi.yml'
-      - '.github/workflows/release467-build337-evidence-gap-execution-workbench-input-completion-continuity-ii.yml'
   workflow_dispatch:
 permissions:
   contents: read

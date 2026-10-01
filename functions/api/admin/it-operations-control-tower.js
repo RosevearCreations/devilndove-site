@@ -13,27 +13,27 @@ import { onRequestGet as getReadinessControlTower } from './it-control-tower.js'
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=337;
-const TITLE='Evidence Gap Execution Workbench & Input Completion Continuity II';
-const AUTHORITY='release467-build337-evidence-gap-execution-workbench-input-completion-continuity-ii';
-const EVIDENCE_ID='r467-b337-candidate-36906245515-36906590213';
+const BUILD=338;
+const TITLE='35th Promo Factual Evidence Completion Continuity III';
+const AUTHORITY='release467-build338-35th-promo-factual-evidence-completion-continuity-iii';
+const EVIDENCE_ID='r467-b338-candidate-36931039442-36931257221';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:336,title:'Content Adoption & Discovery Outcomes Renewal VI',state:'DEVELOPMENT_GREEN',
-  dev_sha:'537cc518573159ea2c511c32f01469bbd97ccf63',tree_sha:'334706f50429ceb0796abc98a4f516390036d6b5',system_gate_run:36906245515,current_application_quality_run:36906245469,it_admin_runtime_proof_run:36906245709,branch_hygiene_run:36906245367,proof_state:'EXACT_BRANCH_HEAD_BUILD336_GREEN',exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
+  release:467,build:337,title:'Evidence Gap Execution Workbench & Input Completion Continuity II',state:'DEVELOPMENT_GREEN',
+  dev_sha:'8f5d038fa7c7d5b3213f6d64f51d659c3ce74994',tree_sha:'3d173e98cfdf48b2efafdfb55a326c275e9cd041',system_gate_run:36931039442,current_application_quality_run:36931039645,it_admin_runtime_proof_run:36931039474,branch_hygiene_run:36931039538,proof_state:'EXACT_BRANCH_HEAD_BUILD337_GREEN',exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:336,title:'Content Adoption & Discovery Outcomes Renewal VI',state:'DEVELOPMENT_GREEN',
-  dev_sha:'537cc518573159ea2c511c32f01469bbd97ccf63',tree_sha:'334706f50429ceb0796abc98a4f516390036d6b5',accepted_sha:'537cc518573159ea2c511c32f01469bbd97ccf63',accepted_tree_sha:'334706f50429ceb0796abc98a4f516390036d6b5',system_gate_run:36906245515,current_application_quality_run:36906245469,it_admin_runtime_proof_run:36906245709,branch_hygiene_run:36906245367,proof_state:'EXACT_BRANCH_HEAD_BUILD336_GREEN'
+  release:467,build:337,title:'Evidence Gap Execution Workbench & Input Completion Continuity II',state:'DEVELOPMENT_GREEN',
+  dev_sha:'8f5d038fa7c7d5b3213f6d64f51d659c3ce74994',tree_sha:'3d173e98cfdf48b2efafdfb55a326c275e9cd041',accepted_sha:'8f5d038fa7c7d5b3213f6d64f51d659c3ce74994',accepted_tree_sha:'3d173e98cfdf48b2efafdfb55a326c275e9cd041',system_gate_run:36931039442,current_application_quality_run:36931039645,it_admin_runtime_proof_run:36931039474,branch_hygiene_run:36931039538,proof_state:'EXACT_BRANCH_HEAD_BUILD337_GREEN'
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:336,title:'Content Adoption & Discovery Outcomes Renewal VI',state:'PRODUCTION_GREEN',
-  main_sha:'1419a505747871a5703ad087134b3b7bebafd337',tree_sha:'334706f50429ceb0796abc98a4f516390036d6b5',production_pages_deploy_run:36906590213,production_live_resource_integrity_run:36906709351,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36906245475,remote_d1_queries:0
+  release:467,build:337,title:'Evidence Gap Execution Workbench & Input Completion Continuity II',state:'PRODUCTION_GREEN',
+  main_sha:'cf588329be80a4cf463d0632845521f4e3685991',tree_sha:'3d173e98cfdf48b2efafdfb55a326c275e9cd041',production_pages_deploy_run:36931257221,production_live_resource_integrity_run:36931361695,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36931039501,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true,workflow:'.github/workflows/production-live-resource-integrity-proof.yml'
 });
-const CURRENT_GUARDS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 337 Evidence Gap Execution Workbench Input Completion Continuity II']);
+const CURRENT_GUARDS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 338 35th Promo Factual Evidence Completion Continuity III']);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql','0026_release467_inventory_workstation_memberships.sql','0027_release467_caip_workshop_follies_maker_story_foundation.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
@@ -122,7 +122,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:337,title:TITLE,authority:'release467-build337-evidence-gap-execution-workbench-input-completion-continuity-ii.json'},
+        current_closure_candidate:{release:467,build:338,title:TITLE,authority:'release467-build338-35th-promo-factual-evidence-completion-continuity-iii.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],

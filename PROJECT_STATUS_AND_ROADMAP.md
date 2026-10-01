@@ -2,40 +2,44 @@
 
 ## Current checkpoint
 
-**Build 337 — Evidence Gap Execution Workbench & Input Completion Continuity II** is the active Development candidate over exact Build 336 Development/Production GREEN.
+**Build 338 — 35th Promo Factual Evidence Completion Continuity III** is the active Development candidate over exact Build 337 Development/Production GREEN.
 
-Build 336 final closure:
+Build 337 final closure:
 
-- Development SHA: **537cc518573159ea2c511c32f01469bbd97ccf63**
-- Exact tree: **334706f50429ceb0796abc98a4f516390036d6b5**
-- System / Quality / I.T. / Hygiene: **36906245515 / 36906245469 / 36906245709 / 36906245367**
-- D1 Fan-Out / Build 336: **36906245333 / 36906245475**
-- Production main SHA: **1419a505747871a5703ad087134b3b7bebafd337**
-- Production Pages / Live: **36906590213 / 36906709351**
+- Development SHA: **8f5d038fa7c7d5b3213f6d64f51d659c3ce74994**
+- Exact tree: **3d173e98cfdf48b2efafdfb55a326c275e9cd041**
+- System / Quality / I.T. / Hygiene: **36931039442 / 36931039645 / 36931039474 / 36931039538**
+- D1 Fan-Out / Build 337: **36931039684 / 36931039501**
+- Production main SHA: **cf588329be80a4cf463d0632845521f4e3685991**
+- Production Pages / Live: **36931257221 / 36931361695**
 - Exact Development and Production tree: **MATCH**.
 
-Build 337 refreshes the existing read-only Evidence Gap Execution Workbench across the four observed gap families. It derives required inputs and completion state directly from source authorities and creates no shadow task or completion state.
+Build 338 remeasures the 35th Promo factual-outcome lane. Only real execution/process, result and lesson evidence plus substantive non-placeholder Maker Story facts can create explicit human-review readiness.
 
-### Build 337 measured Development checkpoint
+### Build 338 measured Development checkpoint
 
-Decision: **EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED**.
+Decision: **REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW**.
 
-- Open workbench rows: **5**
-- Gap families: **4**
-- 35th Promo execution / result / lesson events: **0 / 0 / 0**
-- Search Console batches / rows / fresh rows: **0 / 0 / 0**
-- Grey Hair active / approved / needs-review source ranges: **3 / 1 / 2**
-- Grey Hair reviewed story plans / Maker Story profiles: **0 / 0**
-- Other unprofiled projects: **2** — `lime in you coconut`, `Shirley Not`
-- Those two projects active events / selected evidence: **0 / 0**
-- D1 rows read: **1,659 / 20,000**
-- Measurement proof: **36930012580 — SUCCESS**
+- Execution/process events: **0**
+- Result events: **0**
+- Lesson events: **0**
+- Selected execution evidence: **0**
+- Maker Story review: **needs_review**
+- Public candidate: **0**
+- Outcome: **unknown**
+- Substantive actual result: **no**
+- Substantive lesson learned: **no**
+- Ready for explicit human review: **no**
+- Approved/locked deliverables: **2**
+- Publications / social rows: **0 / 0**
+- D1 rows read: **45 / 20,000**
+- Measurement proof: **36932807352 — SUCCESS**
 
-The workbench remains read-only; source workspaces remain authoritative and no completion is persisted by Build 337.
+The factual lane remains fail-closed. Placeholder/absence text does not satisfy readiness, and Build 338 performs no automatic review or publication.
 
 The queue **has not run out**.
 
-**Next after Build 337 Production GREEN: Build 338 — 35th Promo Factual Evidence Completion Continuity III.**
+**Next after Build 338 Production GREEN: Build 339 — Grey Hair Source Review & Story-Plan Completion Continuity III.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_337_342.md`.
 
