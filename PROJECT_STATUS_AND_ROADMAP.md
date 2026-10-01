@@ -2,28 +2,28 @@
 
 ## Current checkpoint
 
-**Build 333 — Grey Hair Source Review & Story-Plan Completion Continuity II** is the active measured Development candidate over exact Build 332 Development/Production GREEN.
+**Build 334 — Search Console Real Export & Fresh Discovery Intake IV** is the active Development candidate over exact Build 333 Development/Production GREEN.
 
-### Build 333 measured Development checkpoint
+Build 333 final closure:
 
-Decision: **SOURCE_EVIDENCE_REVIEW_REQUIRED**.
+- Development SHA: **ed3a8674ec5fd0e4363043034d694fdbb0a6822a**
+- Exact tree: **295ee32365ac51c2988181b63d8b83a6fcae3da3**
+- System Gate: **36894103075 — SUCCESS**
+- Current Application Quality: **36894103073 — SUCCESS**
+- I.T. Admin Runtime: **36894103067 — SUCCESS**
+- Repository Branch Hygiene: **36894103040 — SUCCESS**
+- D1 Fan-Out Guard: **36894103200 — SUCCESS**
+- Build 333 proof: **36894103049 — SUCCESS**
+- Production main SHA: **7b934186dcef69d76c9ad3dd6a25c4aed8ba4de4**
+- Production Pages Deploy: **36894463676 — SUCCESS**
+- Production Live Resource Integrity: **36894596996 — SUCCESS**
+- Exact Development and Production tree: **MATCH**.
 
-- Active Grey Hair assets: **45**
-- Active source-evidence ranges: **3**
-- Approved source ranges: **1**
-- Source ranges still needing explicit review: **2**
-- Confirmed sync groups / tracks: **0 / 0**
-- Reviewed / approved story plans: **0 / 0**
-- Source-backed story items: **0**
-- Maker Story profiles: **0**
-- Delta versus Build 331 across all continuity counters: **0**
-- D1 rows read: **124 / 20,000**
-
-The next safe action remains explicit operator review of the two outstanding Grey Hair source ranges in CAIP Evidence Review. Build 333 does not approve evidence, confirm synchronization, generate or review a story plan, create a Maker Story, infer media rights, or publish anything.
+Build 334 reuses the existing explicit real Google Search Console Performance CSV intake. Search evidence is query-level actionable only inside the current **30-day freshness window**; a CSV without a Date column still requires an explicit operator-supplied report date. Batch import audit and explicit revert/delete traceability remain mandatory. No synthetic discovery evidence, automatic import, automatic SEO queue generation, automatic SEO apply, IndexNow, provider publication or Production D1 contact is authorized.
 
 The queue **has not run out**.
 
-**Next after Build 333 Production GREEN: Build 334 — Search Console Real Export & Fresh Discovery Intake IV.**
+**Next after Build 334 Production GREEN: Build 335 — Maker Story Advancement & Publication Readiness Continuity III.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_331_336.md`.
 
