@@ -2711,7 +2711,7 @@
   "promo35_factual_evidence_completion_continuity_iii": {
     "source_build": 338,
     "state": "DEVELOPMENT_CANDIDATE",
-    "measurement_state": "PENDING_EXACT_DEVELOPMENT",
+    "measurement_state": "EXACT_DEVELOPMENT_MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
     "readiness_only": true,
     "explicit_human_review_required": true,
     "automatic_story_review": false,
@@ -2721,6 +2721,19 @@
     "production_d1_contact": false,
     "next_build": 339,
     "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity III",
-    "future_queue_exhausted": false
+    "future_queue_exhausted": false,
+    "decision": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW",
+    "measurement": {
+      "source_sha": "c3c41e1f5c49fd5ab304b0699e6bf746cfef86c7",
+      "source_tree_sha": "54f81df42d73dd7630d7f10bacf11dbd1f3d8add",
+      "workflow_run": 36932807352,
+      "artifact_id": 11197450164,
+      "aggregate_rows_read": 45,
+      "rows_read_ceiling": 20000,
+      "execution_events": 0,
+      "result_events": 0,
+      "lesson_events": 0,
+      "ready_for_explicit_human_review": false
+    }
   }
 }
