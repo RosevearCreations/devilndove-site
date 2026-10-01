@@ -84,7 +84,7 @@
       "state": "PRODUCTION_GREEN"
     }
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT",
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EVIDENCE_PENDING_NO_REAL_EXPORT",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_331_336.md",
   "next_build": 335,
   "next_build_title": "Maker Story Advancement & Publication Readiness Continuity III",
@@ -94,5 +94,45 @@
   "toolchain_reliability": {
     "wrangler_version": "4.128.0",
     "business_logic_changed": false
-  }
+  },
+  "measurement": {
+    "source_sha": "a75361de5b6ec616ee662f6b44a57f0abee1697e",
+    "source_tree_sha": "fb763c94a2239263ca34a013073b703d861fe7ca",
+    "workflow_run": 36898231789,
+    "artifact_id": 11181200550,
+    "artifact_name": "build334-search-console-fresh-discovery-a75361de5b6ec616ee662f6b44a57f0abee1697e",
+    "artifact_digest": "sha256:e4d160d56b681e3d51ea53380d4744fd4c42f83f6193cbde5d3d6a04625b7ad5",
+    "interpretation": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "aggregate_rows_read": 2056,
+    "rows_read_ceiling": 20000,
+    "rows_read_by_statement": [
+      1679,
+      6,
+      319,
+      1,
+      1,
+      2,
+      1,
+      1,
+      46
+    ],
+    "import_batches": 0,
+    "live_rows": 0,
+    "recent_search_rows": 0,
+    "recent_clicks": 0,
+    "recent_impressions": 0,
+    "eligible_pairs": 0,
+    "seo_queue_rows": 0,
+    "latest_report_date": "",
+    "latest_report_age_days": null,
+    "freshness_window_days": 30,
+    "synthetic_rows": false,
+    "automatic_import": false,
+    "automatic_queue_generation": false,
+    "automatic_seo_apply": false,
+    "provider_execution": false,
+    "production_d1_contact": false
+  },
+  "interpretation": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+  "operator_next_action": "Import an explicitly confirmed real Google Search Console Performance CSV when available; provide the report end date if the CSV has no Date column."
 }
