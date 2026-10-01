@@ -1,20 +1,6 @@
 name: Release 467 Build 328 Search Console Real Export Freshness Discovery Intake III
+# D1_ONE_SHOT_EVIDENCE_CAPTURE — historical Build 328 proof; Build 329 owns the automatic Development D1 lane once enabled.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build328_*'
-      - 'release467-build328-*.json'
-      - 'release467-build327-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_328_*'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/search-console-import.js'
-      - 'public/js/admin-search-console-import.js'
-      - '.github/workflows/release467-build327-grey-hair-evidence-review-completion-story-plan-handoff.yml'
-      - '.github/workflows/release467-build328-search-console-real-export-freshness-discovery-intake-iii.yml'
   workflow_dispatch:
 permissions:
   contents: read
