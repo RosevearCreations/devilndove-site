@@ -366,5 +366,9 @@
     "automatic_provider_execution": false
   },
   "roadmap_renewal_state": "BUILDS_331_336_CREATED_FROM_OBSERVED_EVIDENCE",
-  "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_331_336.md"
+  "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_331_336.md",
+  "retained_compatibility": {
+    "build265_roadmap_allowlist_extended_for_builds_331_336": true,
+    "historical_private_media_logic_unchanged": true
+  }
 }
