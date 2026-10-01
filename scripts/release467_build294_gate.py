@@ -61,7 +61,7 @@ for token in (
  "data-maker-workstation","action:'save_maker_story'",'public_story_candidate'
 ):
     q(token in ui,'Build 294 operator UI missing '+token)
-q(('/public/js/admin-creative-process.js?v=467b294' in page) or (307<=int(p.get('build') or 0)<319 and '/public/js/admin-creative-process.js?v=467b307' in page) or (int(p.get('build') or 0)>=319 and '/public/js/admin-creative-process.js?v=467b319' in page),'Build 294 Creative Process cache identity missing')
+q(('/public/js/admin-creative-process.js?v=467b294' in page) or (307<=int(p.get('build') or 0)<319 and '/public/js/admin-creative-process.js?v=467b307' in page) or (int(p.get('build') or 0)>=319 and '/public/js/admin-creative-process.js?v=467b319' in page) or (int(p.get('build') or 0)>=326 and '/public/js/admin-creative-process.js?v=467b326' in page),'Build 294 Creative Process cache identity missing')
 q('Build 294 Maker Story foundation:' in page,'Build 294 Creative Process safety statement missing')
 
 q(caip_root==caip_api,'Creative Asset Intelligence helper copies must remain byte-identical')
