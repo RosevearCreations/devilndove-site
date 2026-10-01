@@ -260,13 +260,13 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "d4fcede4adf76a511d754012042ba91a98693812",
-  "accepted_dev_tree_sha": "4ff23c38bbe0acb7ce6ff6f9ad5ef964b329d229",
+  "accepted_dev_sha": "ed3a8674ec5fd0e4363043034d694fdbb0a6822a",
+  "accepted_dev_tree_sha": "295ee32365ac51c2988181b63d8b83a6fcae3da3",
   "acceptance": {
-    "system_gate_run": 36858284606,
-    "current_application_quality_run": 36858284626,
-    "it_admin_runtime_proof_run": 36858284765,
-    "branch_hygiene_run": 36858284620
+    "system_gate_run": 36894103075,
+    "current_application_quality_run": 36894103073,
+    "it_admin_runtime_proof_run": 36894103067,
+    "branch_hygiene_run": 36894103040
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
