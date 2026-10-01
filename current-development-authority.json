@@ -2734,6 +2734,7 @@
       "result_events": 0,
       "lesson_events": 0,
       "ready_for_explicit_human_review": false
-    }
+    },
+    "exact_head_reproof_state": "PENDING_FINAL_EXACT_HEAD_MATRIX"
   }
 }
