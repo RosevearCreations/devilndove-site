@@ -2,30 +2,30 @@
   "release": 467,
   "build": 327,
   "title": "Grey Hair Evidence Review Completion & Story-Plan Handoff",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 325,
-      "title": "Evidence Gap Owner Queue & Operator Action Traceability",
-      "authority": "release467-build325-evidence-gap-owner-queue-operator-action-traceability.json",
-      "dev_sha": "0da51ee0e377c81909ed9c90627ca206026027b1",
-      "tree_sha": "b38a0844c106d2ff27ff50de306a61c4d325f724",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD325_GREEN",
+      "build": 326,
+      "title": "35th Promo Real Outcome Evidence Closure",
+      "authority": "release467-build326-35th-promo-real-outcome-evidence-closure.json",
+      "dev_sha": "2bc3b4f93ae4111773db71249dc394de8db0a08d",
+      "tree_sha": "409c9dca0d1e0205ec496b3100e891132c71db8e",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD326_GREEN",
       "proofs": {
-        "system_gate_run": 36791681965,
-        "current_application_quality_run": 36791681953,
-        "it_admin_runtime_proof_run": 36791681907,
-        "branch_hygiene_run": 36791681937
+        "system_gate_run": 36798462026,
+        "current_application_quality_run": 36798462010,
+        "it_admin_runtime_proof_run": 36798462006,
+        "branch_hygiene_run": 36798462040
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 326,
-      "title": "35th Promo Real Outcome Evidence Closure",
-      "authority": "release467-build326-35th-promo-real-outcome-evidence-closure.json",
+      "build": 327,
+      "title": "Grey Hair Evidence Review Completion & Story-Plan Handoff",
+      "authority": "release467-build327-grey-hair-evidence-review-completion-story-plan-handoff.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -48,6 +48,7 @@
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build327-grey-hair-evidence-review-completion-story-plan-handoff.json",
     "release467-build326-35th-promo-real-outcome-evidence-closure.json",
     "release467-build325-evidence-gap-owner-queue-operator-action-traceability.json",
     "release467-build324-content-adoption-discovery-outcomes-renewal-iv.json",

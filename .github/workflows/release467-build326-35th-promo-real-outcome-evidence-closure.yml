@@ -1,5 +1,6 @@
 name: Release 467 Build 326 35th Promo Real Outcome Evidence Closure
 # Historical Build 326 exact-head proof. Build 327 is now the sole automatic remote-D1 successor.
+# D1_ONE_SHOT_EVIDENCE_CAPTURE — historical read-only Development evidence proof.
 on:
   workflow_dispatch:
 permissions:
