@@ -1,29 +1,30 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 327 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 328 candidate
 
-Build 327 — Grey Hair Evidence Review Completion & Story-Plan Handoff — starts from exact Build 326 Development/Production GREEN.
+Build 328 — Search Console Real Export Freshness & Discovery Intake III — starts from exact Build 327 Development/Production GREEN.
 
-- Verified Development SHA: `2bc3b4f93ae4111773db71249dc394de8db0a08d`
-- Verified Development/Production tree: `409c9dca0d1e0205ec496b3100e891132c71db8e`
-- Build 326 System Gate: `36798462026`
-- Build 326 Current Application Quality Proof: `36798462010`
-- Build 326 I.T. Admin Runtime Proof: `36798462006`
-- Build 326 Repository Branch Hygiene: `36798462040`
-- Build 326 D1 Fan-Out Guard: `36798462025`
-- Build 326 dedicated proof: `36798462054`
-- Current Production main SHA: `6729aaa40106553b37995892b43ff982d145c3db`
-- Production Pages Deploy: `36798718111`
-- Production Live Resource Integrity: `36798786802`
+- Verified Development SHA: `26577d73b3747ffc2c02e31e11df86b924abdb2f`
+- Verified Development/Production tree: `935849941e1a9907487abcf984505233f9bfb803`
+- Build 327 System Gate: `36820729684`
+- Build 327 Current Application Quality Proof: `36820729675`
+- Build 327 I.T. Admin Runtime Proof: `36820729677`
+- Build 327 Repository Branch Hygiene: `36820729686`
+- Build 327 D1 Fan-Out Guard: `36820729705`
+- Build 327 dedicated proof: `36820729700`
+- Current Production main SHA: `f5675f69194586933fe0fefa231bde9f249216ce`
+- Production Pages Deploy: `36820941969`
+- Production Live Resource Integrity: `36821004653`
 
-Build 327:
-- reuses the existing Build 320 Grey Hair evidence-review, sync, and story-planning authorities;
-- keeps the readiness surface read-only;
-- measures only real Development evidence/sync/story-plan state;
-- requires explicit human evidence review and human story-plan review;
-- never auto-creates or approves a Maker Story;
-- never infers media/public-use rights;
+Build 328:
+- reuses the operator-controlled Search Console CSV intake;
+- accepts only explicitly confirmed real Google Search Console Performance exports;
+- requires an explicit fallback report date when the CSV has no Date column;
+- measures a 30-day freshness window;
+- prevents stale Search Console evidence from supporting SEO queue/apply decisions;
+- preserves import/revert audit traceability;
+- creates no synthetic query, click, impression, attribution or SEO queue data in CI;
 - contacts no Production D1.
 
-Next after Build 327 Production GREEN: **Build 328 — Search Console Real Export Freshness & Discovery Intake III**.
+Next after Build 328 Production GREEN: **Build 329 — Maker Story Advancement & Publication Readiness Continuity II**.
 
 ## Current release baseline
 
