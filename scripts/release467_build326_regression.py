@@ -34,7 +34,7 @@ for token in ('REAL_OUTCOME_EVIDENCE_STILL_REQUIRED','REAL_OUTCOME_EVIDENCE_PART
 upper=' '+re.sub(r'--.*','',sql).upper()+' '
 for forbidden in (' INSERT ',' UPDATE ',' DELETE ',' CREATE ',' ALTER ',' DROP ',' REPLACE ',' VACUUM ',' REINDEX '):q(forbidden not in upper,'Build 326 measurement must remain read-only: '+forbidden.strip())
 for token in ('execution_events','result_events','lesson_events','actual_result','lesson_learned','execution_rows_with_public_or_media_flags','pragma_foreign_key_check'):q(token in sql,'Build 326 measurement missing '+token)
-for token in ('data-build326-real-outcome-closure','Build 326 • real outcome closure','ready for explicit human review','Still missing:','does not auto-sets reviewed/public-candidate state'):
+for token in ('data-build326-real-outcome-closure','Build 326 • real outcome closure','ready for explicit human review','Still missing:','never auto-sets reviewed/public-candidate state'):
     q(token in ui,'Build 326 Creative Process UI missing '+token)
 q('data-build326-real-outcome-closure' in page and '/public/js/admin-creative-process.js?v=467b326' in page,'Build 326 Creative Process page/cache marker missing')
 for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','SYNTHETIC EVIDENCE: ZERO','AUTOMATIC STORY REVIEW: ZERO','PUBLIC CANDIDACY MUTATION: ZERO','PRODUCTION D1 CONTACT: ZERO'):
