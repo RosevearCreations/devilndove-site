@@ -16,6 +16,23 @@ Build 336 final closure:
 
 Build 337 refreshes the existing read-only Evidence Gap Execution Workbench across the four observed gap families. It derives required inputs and completion state directly from source authorities and creates no shadow task or completion state.
 
+### Build 337 measured Development checkpoint
+
+Decision: **EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED**.
+
+- Open workbench rows: **5**
+- Gap families: **4**
+- 35th Promo execution / result / lesson events: **0 / 0 / 0**
+- Search Console batches / rows / fresh rows: **0 / 0 / 0**
+- Grey Hair active / approved / needs-review source ranges: **3 / 1 / 2**
+- Grey Hair reviewed story plans / Maker Story profiles: **0 / 0**
+- Other unprofiled projects: **2** — `lime in you coconut`, `Shirley Not`
+- Those two projects active events / selected evidence: **0 / 0**
+- D1 rows read: **1,659 / 20,000**
+- Measurement proof: **36930012580 — SUCCESS**
+
+The workbench remains read-only; source workspaces remain authoritative and no completion is persisted by Build 337.
+
 The queue **has not run out**.
 
 **Next after Build 337 Production GREEN: Build 338 — 35th Promo Factual Evidence Completion Continuity III.**
