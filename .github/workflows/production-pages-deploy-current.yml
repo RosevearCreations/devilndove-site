@@ -162,7 +162,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
-          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "SELECT (SELECT COUNT(*) FROM users) AS users, (SELECT COUNT(*) FROM products) AS products, (SELECT COUNT(*) FROM site_item_inventory) AS site_item_inventory, (SELECT COUNT(*) FROM orders) AS orders;" > /tmp/production-business-before-raw.json
+          npx --yes wrangler@4.128.0 d1 execute "${PROD_D1_NAME}" --remote --json --command "SELECT (SELECT COUNT(*) FROM users) AS users, (SELECT COUNT(*) FROM products) AS products, (SELECT COUNT(*) FROM site_item_inventory) AS site_item_inventory, (SELECT COUNT(*) FROM orders) AS orders;" > /tmp/production-business-before-raw.json
           python - <<'PY'
           import json
           data=json.load(open('/tmp/production-business-before-raw.json')); rows=[]
@@ -191,8 +191,8 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
-          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "SELECT (SELECT COUNT(*) FROM users) AS users, (SELECT COUNT(*) FROM products) AS products, (SELECT COUNT(*) FROM site_item_inventory) AS site_item_inventory, (SELECT COUNT(*) FROM orders) AS orders, (SELECT COUNT(*) FROM app_modules) AS app_modules, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%') AS tables, (SELECT COUNT(*) FROM d1_migrations WHERE name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql')) AS canonical_migrations, (SELECT COUNT(*) FROM app_schema_migration_proofs WHERE migration_name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql') AND environment='production') AS migration_proofs, (SELECT COUNT(*) FROM sqlite_master WHERE type='trigger' AND name LIKE 'release465_%') AS baseline_release465_triggers, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('creative_project_profitability','creative_project_profitability_extensions','creative_work_projects','creative_work_events','accounting_payment_applications','accounting_hst_gst_reviews','accounting_period_closures','accountant_export_packages','accounting_evidence_attachments','runtime_incidents','operational_retention_reviews')) AS required_authority_tables;" > /tmp/production-d1.json
-          npx --yes wrangler@4 d1 execute "${PROD_D1_NAME}" --remote --json --command "PRAGMA foreign_key_check;" > /tmp/production-fk.json
+          npx --yes wrangler@4.128.0 d1 execute "${PROD_D1_NAME}" --remote --json --command "SELECT (SELECT COUNT(*) FROM users) AS users, (SELECT COUNT(*) FROM products) AS products, (SELECT COUNT(*) FROM site_item_inventory) AS site_item_inventory, (SELECT COUNT(*) FROM orders) AS orders, (SELECT COUNT(*) FROM app_modules) AS app_modules, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%') AS tables, (SELECT COUNT(*) FROM d1_migrations WHERE name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql')) AS canonical_migrations, (SELECT COUNT(*) FROM app_schema_migration_proofs WHERE migration_name IN ('0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql') AND environment='production') AS migration_proofs, (SELECT COUNT(*) FROM sqlite_master WHERE type='trigger' AND name LIKE 'release465_%') AS baseline_release465_triggers, (SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('creative_project_profitability','creative_project_profitability_extensions','creative_work_projects','creative_work_events','accounting_payment_applications','accounting_hst_gst_reviews','accounting_period_closures','accountant_export_packages','accounting_evidence_attachments','runtime_incidents','operational_retention_reviews')) AS required_authority_tables;" > /tmp/production-d1.json
+          npx --yes wrangler@4.128.0 d1 execute "${PROD_D1_NAME}" --remote --json --command "PRAGMA foreign_key_check;" > /tmp/production-fk.json
           python - <<'PY'
           import json
           data=json.load(open('/tmp/production-d1.json')); rows=[]
@@ -292,7 +292,7 @@ jobs:
           ! grep -q 'dbc1615b-dcbe-4951-973b-b47c99c73bfa' wrangler.toml
           ! grep -q 'devilndove-toolshed-images-dev' wrangler.toml
           ! grep -q 'devilndove-caip-media-dev' wrangler.toml
-          npx --yes wrangler@4 pages deploy . \
+          npx --yes wrangler@4.128.0 pages deploy . \
             --project-name=devilndove-site \
             --branch=main \
             --commit-hash="${GITHUB_SHA}" \
