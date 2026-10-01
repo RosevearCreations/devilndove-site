@@ -28,8 +28,8 @@ q(c.get('next_build')==327 and c.get('next_build_title')=='Grey Hair Evidence Re
 q(all(v is False for v in s.values()),'Build 326 safety authority drift')
 for token in ('record_story_execution_evidence','STORY_EXECUTION_EVENT_TYPES','notes.length < 20','media_url,is_public_candidate,created_by','NULL,0,?7','maker_story_auto_reviewed: false'):
     q(token in cpapi,'Build 319 factual intake authority missing '+token)
-q('onRequestPost' not in api,'Build 326 closure endpoint must remain GET-only')
-for token in ('REAL_OUTCOME_EVIDENCE_STILL_REQUIRED','REAL_OUTCOME_EVIDENCE_PARTIAL','REAL_EVENTS_COMPLETE_MAKER_STORY_FACTS_STILL_REQUIRED','REAL_OUTCOME_FACTS_COMPLETE_READY_FOR_EXPLICIT_HUMAN_REVIEW','automatic_story_review:false','production_d1_contact:false'):
+q('onRequestPost' not in api,'Build 326 closure endpoint must remain GET-only')\nq('placeholderGuard' in api and 'substantiveFact' in api,'Build 326 closure API must reject placeholder absence facts')
+for token in ('REAL_OUTCOME_EVIDENCE_STILL_REQUIRED','REAL_OUTCOME_EVIDENCE_PARTIAL','REAL_EVENTS_COMPLETE_MAKER_STORY_FACTS_STILL_REQUIRED','REAL_OUTCOME_FACTS_COMPLETE_READY_FOR_EXPLICIT_HUMAN_REVIEW','placeholderGuard','substantiveFact','automatic_story_review:false','production_d1_contact:false'):
     q(token in verify,'Build 326 verifier missing '+token)
 upper=' '+re.sub(r'--.*','',sql).upper()+' '
 for forbidden in (' INSERT ',' UPDATE ',' DELETE ',' CREATE ',' ALTER ',' DROP ',' REPLACE ',' VACUUM ',' REINDEX '):q(forbidden not in upper,'Build 326 measurement must remain read-only: '+forbidden.strip())
