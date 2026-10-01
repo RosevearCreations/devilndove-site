@@ -2019,7 +2019,7 @@
   },
   "maker_story_advancement_publication_readiness_continuity_ii": {
     "source_build": 329,
-    "state": "DEVELOPMENT_CANDIDATE",
+    "state": "DEVELOPMENT_GREEN_MEASURED",
     "coverage_population": "ALL_ACTIVE_CREATIVE_PROJECTS",
     "expected_active_projects": 5,
     "substantive_non_placeholder_result_and_lesson_required": true,
@@ -2029,7 +2029,7 @@
     "human_publication_traceability_required": true,
     "public_media_rights_separate": true,
     "provider_posting_independent": true,
-    "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "measurement_state": "EXACT_DEVELOPMENT_MEASURED_PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
     "automatic_profile_creation": false,
     "automatic_story_review": false,
     "automatic_public_candidate": false,
@@ -2040,6 +2040,62 @@
     "production_d1_contact": false,
     "next_build": 330,
     "next_build_title": "Content Adoption & Discovery Outcomes Renewal V",
-    "future_queue_exhausted": false
+    "future_queue_exhausted": false,
+    "measurement": {
+      "source_sha": "f8f93f5de75c6d62984fb6eb30e65df7a6f4cc6b",
+      "source_tree_sha": "54f8cbbd4c60307281a5841bbcec81393ed1ee69",
+      "workflow_run": 36825510445,
+      "artifact_id": 11145395312,
+      "artifact_name": "build329-maker-story-advancement-readiness-f8f93f5de75c6d62984fb6eb30e65df7a6f4cc6b",
+      "artifact_digest": "sha256:7064bfee4ea81b1c302e1b45ffaf405a8ca2241303cdb46d4892f64960d7eb0f",
+      "aggregate_rows_read": 672,
+      "rows_read_ceiling": 20000,
+      "rows_read_by_statement": [
+        456,
+        19,
+        16,
+        163,
+        4,
+        14
+      ],
+      "decision": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+      "readiness_counts": {
+        "MAKER_STORY_EVIDENCE_REQUIRED": 3,
+        "FACTUAL_OUTCOME_EVIDENCE_REQUIRED": 1,
+        "PUBLISHED_REVIEWED_STORY": 1
+      },
+      "promo35": {
+        "execution_events": 0,
+        "result_events": 0,
+        "lesson_events": 0
+      },
+      "grey_hair": {
+        "approved_source_evidence": 1,
+        "source_evidence_needs_review": 2,
+        "reviewed_story_plans": 0,
+        "source_backed_story_items": 0
+      },
+      "media_rights": {
+        "active_caip_assets": 45,
+        "public_allowed_caip_assets": 0,
+        "non_public_caip_assets": 45,
+        "public_allowed_private_uploads": 0
+      },
+      "social": {
+        "social_rows": 1,
+        "review_first_ready_rows": 1,
+        "provider_posted_rows": 0
+      },
+      "automatic_advancement": false,
+      "automatic_publication": false,
+      "provider_execution": false,
+      "production_d1_contact": false
+    },
+    "decision": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+    "operator_next_actions": [
+      "35th Promo: record real execution, result and lesson evidence before explicit human story review.",
+      "Grey Hair: explicitly review the two remaining source-evidence ranges, then complete sync/story-plan prerequisites.",
+      "Other unprofiled projects: add real Maker Story evidence before profile/review decisions."
+    ]
   }
 }

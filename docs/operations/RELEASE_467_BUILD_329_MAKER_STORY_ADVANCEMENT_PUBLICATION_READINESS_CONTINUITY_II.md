@@ -9,3 +9,7 @@ No schema change, profile creation, evidence fabrication, story review, public-c
 Next: **Build 330 — Content Adoption & Discovery Outcomes Renewal V**.
 
 The future queue **has not run out**.
+
+## Measured Development outcome
+
+Build 329 measured **PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY**. Readiness counts are 3 `MAKER_STORY_EVIDENCE_REQUIRED`, 1 `FACTUAL_OUTCOME_EVIDENCE_REQUIRED`, and 1 `PUBLISHED_REVIEWED_STORY`. There are no new publication-review-ready projects. The 35th Promo remains at 0 execution/result/lesson events; Grey Hair remains at 1 approved source range, 2 needs-review ranges, 0 reviewed plans and 0 source-backed items. D1 cost: **672 / 20,000 rows read**.
