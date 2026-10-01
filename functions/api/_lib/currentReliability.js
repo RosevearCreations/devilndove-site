@@ -1,7 +1,7 @@
 /* BUILD328_CURRENT_PROVENANCE: Search Console Real Export Freshness & Discovery Intake III; verified Build 327 dev 26577d73b3747ffc2c02e31e11df86b924abdb2f; tree 935849941e1a9907487abcf984505233f9bfb803; Production f5675f69194586933fe0fefa231bde9f249216ce; Pages 36820941969; Live 36821004653. */
-/* BUILD327_CURRENT_PROVENANCE: last_fully_verified_development Build 326 dev 26577d73b3747ffc2c02e31e11df86b924abdb2f; tree 935849941e1a9907487abcf984505233f9bfb803; System 36820729684; Quality 36820729675; IT 36820729677; Hygiene 36820729686; Production f5675f69194586933fe0fefa231bde9f249216ce; Pages 36820941969; Live 36821004653. */
+/* BUILD327_CURRENT_PROVENANCE: last_fully_verified_development Build 327 dev 26577d73b3747ffc2c02e31e11df86b924abdb2f; tree 935849941e1a9907487abcf984505233f9bfb803; System 36820729684; Quality 36820729675; IT 36820729677; Hygiene 36820729686; Production f5675f69194586933fe0fefa231bde9f249216ce; Pages 36820941969; Live 36821004653. */
 /* CURRENT_BUILD_328_TRUTH: Grey Hair Evidence Review Completion & Story-Plan Handoff; last verified dev 26577d73b3747ffc2c02e31e11df86b924abdb2f; tree 935849941e1a9907487abcf984505233f9bfb803; Production main f5675f69194586933fe0fefa231bde9f249216ce; Pages 36820941969; Live 36821004653. */
-// Release 467 Build 328 — Search Console Real Export Freshness & Discovery Intake III over exact Build 326 Production source.
+// Release 467 Build 328 — Search Console Real Export Freshness & Discovery Intake III over exact Build 327 Production source.
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
@@ -10,19 +10,19 @@ export const CURRENT_RELIABILITY_TITLE='Search Console Real Export Freshness & D
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
 export const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:326,title:'Grey Hair Evidence Review Completion & Story-Plan Handoff',state:'DEVELOPMENT_GREEN',
+  release:467,build:327,title:'Grey Hair Evidence Review Completion & Story-Plan Handoff',state:'DEVELOPMENT_GREEN',
   dev_sha:'26577d73b3747ffc2c02e31e11df86b924abdb2f',tree_sha:'935849941e1a9907487abcf984505233f9bfb803',
   system_gate_run:36820729684,current_application_quality_run:36820729675,it_admin_runtime_proof_run:36820729677,
   branch_hygiene_run:36820729686,proof_state:'EXACT_BRANCH_HEAD_BUILD327_GREEN'
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:326,title:'Grey Hair Evidence Review Completion & Story-Plan Handoff',state:'DEVELOPMENT_GREEN',
+  release:467,build:327,title:'Grey Hair Evidence Review Completion & Story-Plan Handoff',state:'DEVELOPMENT_GREEN',
   dev_sha:'26577d73b3747ffc2c02e31e11df86b924abdb2f',tree_sha:'935849941e1a9907487abcf984505233f9bfb803',
   system_gate_run:36820729684,current_application_quality_run:36820729675,it_admin_runtime_proof_run:36820729677,
   branch_hygiene_run:36820729686,proof_state:'EXACT_BRANCH_HEAD_BUILD327_GREEN'
 });
 export const CURRENT_PRODUCTION=Object.freeze({
-  release:467,build:326,title:'Grey Hair Evidence Review Completion & Story-Plan Handoff',state:'PRODUCTION_GREEN',
+  release:467,build:327,title:'Grey Hair Evidence Review Completion & Story-Plan Handoff',state:'PRODUCTION_GREEN',
   main_sha:'f5675f69194586933fe0fefa231bde9f249216ce',tree_sha:'935849941e1a9907487abcf984505233f9bfb803',
   production_pages_deploy_run:36820941969,production_live_resource_integrity_run:36821004653,
   products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36820729700,remote_d1_queries:0
