@@ -2,7 +2,7 @@
   "release": 467,
   "build": 326,
   "title": "35th Promo Real Outcome Evidence Closure",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "35TH_PROMO_REAL_OUTCOME_EVIDENCE_CLOSURE",
   "authority": "release467-build326-35th-promo-real-outcome-evidence-closure",
   "predecessor": {
@@ -140,5 +140,31 @@
     "outcome_resolved": false,
     "ready_for_explicit_human_review": false,
     "production_d1_contact": false
+  },
+  "final_closure": {
+    "dev_sha": "2bc3b4f93ae4111773db71249dc394de8db0a08d",
+    "tree_sha": "409c9dca0d1e0205ec496b3100e891132c71db8e",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD326_GREEN",
+    "proofs": {
+      "system_gate_run": 36798462026,
+      "current_application_quality_run": 36798462010,
+      "it_admin_runtime_proof_run": 36798462006,
+      "branch_hygiene_run": 36798462040
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36798462025,
+      "build_specific_proof_run": 36798462054
+    },
+    "ingested_by_build": 327
+  },
+  "production_checkpoint": {
+    "main_sha": "6729aaa40106553b37995892b43ff982d145c3db",
+    "tree_sha": "409c9dca0d1e0205ec496b3100e891132c71db8e",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36798718111,
+    "production_live_resource_integrity_run": 36798786802,
+    "remote_d1_queries": 0
   }
 }

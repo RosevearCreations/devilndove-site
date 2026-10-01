@@ -1,24 +1,7 @@
 name: Release 467 Build 326 35th Promo Real Outcome Evidence Closure
+# Historical Build 326 exact-head proof. Build 327 is now the sole automatic remote-D1 successor.
+# D1_ONE_SHOT_EVIDENCE_CAPTURE — historical read-only Development evidence proof.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build326_*'
-      - 'scripts/release467_build26*_gate.py'
-      - 'scripts/release467_build27*_gate.py'
-      - 'release467-build326-*.json'
-      - 'release467-build325-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_326_*'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/35th-promo-outcome-closure.js'
-      - 'functions/api/admin/creative-process.js'
-      - 'public/js/admin-creative-process.js'
-      - 'admin/creative-process/index.html'
-      - '.github/workflows/release467-build325-evidence-gap-owner-queue-operator-action-traceability.yml'
-      - '.github/workflows/release467-build326-35th-promo-real-outcome-evidence-closure.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -49,7 +32,6 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with: { node-version: '24' }
-      # D1_ONE_SHOT_EVIDENCE_CAPTURE — read-only factual 35th promo closure/readiness.
       - name: Prove exact Development D1
         run: |
           set -euo pipefail
