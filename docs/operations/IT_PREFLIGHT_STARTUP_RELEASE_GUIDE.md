@@ -1,18 +1,40 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 328 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 329 candidate
 
-Build 328 — Search Console Real Export Freshness & Discovery Intake III — starts from exact Build 327 Development/Production GREEN.
+Build 329 — Maker Story Advancement & Publication Readiness Continuity II — starts from exact Build 328 Development/Production GREEN.
 
-- Verified Development SHA: `26577d73b3747ffc2c02e31e11df86b924abdb2f`
-- Verified Development/Production tree: `935849941e1a9907487abcf984505233f9bfb803`
-- Build 327 System Gate: `36820729684`
-- Build 327 Current Application Quality Proof: `36820729675`
-- Build 327 I.T. Admin Runtime Proof: `36820729677`
-- Build 327 Repository Branch Hygiene: `36820729686`
+- Verified Development SHA: `d6bf534016c85e4fa295aa6fbdaa12efb4659647`
+- Verified Development/Production tree: `3f456f3d9cd2cde9ecf809c4530a0a46bbd45e4e`
+- Build 328 System Gate: `36822476304`
+- Build 328 Current Application Quality Proof: `36822476389`
+- Build 328 I.T. Admin Runtime Proof: `36822476303`
+- Build 328 Repository Branch Hygiene: `36822476318`
+- Build 328 D1 Fan-Out Guard: `36822476512`
+- Build 328 dedicated proof: `36822476326`
+- Current Production main SHA: `13210bde05ea77607095f532681d78024758bd23`
+- Production Pages Deploy: `36822798028`
+- Production Live Resource Integrity: `36822855257`
+
+Build 329 remeasures all five active Creative Projects. Substantive, non-placeholder result/lesson facts and factual evidence are required; the 35th Promo retains the stronger real execution/result/lesson event requirement. Human story review, public candidacy, approved/locked copy, and human publication traceability remain mandatory. Media rights stay separate and provider posting remains independent.
+
+Next after Build 329 Production GREEN: **Build 330 — Content Adoption & Discovery Outcomes Renewal V**.
+
+The future queue **has not run out**.
+
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 329 candidate
+
+Build 329 — Maker Story Advancement & Publication Readiness Continuity II — starts from exact Build 327 Development/Production GREEN.
+
+- Verified Development SHA: `d6bf534016c85e4fa295aa6fbdaa12efb4659647`
+- Verified Development/Production tree: `3f456f3d9cd2cde9ecf809c4530a0a46bbd45e4e`
+- Build 327 System Gate: `36822476304`
+- Build 327 Current Application Quality Proof: `36822476389`
+- Build 327 I.T. Admin Runtime Proof: `36822476303`
+- Build 327 Repository Branch Hygiene: `36822476318`
 - Build 327 D1 Fan-Out Guard: `36820729705`
-- Build 327 dedicated proof: `36820729700`
-- Current Production main SHA: `f5675f69194586933fe0fefa231bde9f249216ce`
-- Production Pages Deploy: `36820941969`
-- Production Live Resource Integrity: `36821004653`
+- Build 327 dedicated proof: `36822476326`
+- Current Production main SHA: `13210bde05ea77607095f532681d78024758bd23`
+- Production Pages Deploy: `36822798028`
+- Production Live Resource Integrity: `36822855257`
 
 Build 328:
 - reuses the operator-controlled Search Console CSV intake;
