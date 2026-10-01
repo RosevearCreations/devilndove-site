@@ -13,27 +13,27 @@ import { onRequestGet as getReadinessControlTower } from './it-control-tower.js'
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=335;
-const TITLE='Maker Story Advancement & Publication Readiness Continuity III';
-const AUTHORITY='release467-build335-maker-story-advancement-publication-readiness-continuity-iii';
-const EVIDENCE_ID='r467-b335-candidate-36901438814-36901706854';
+const BUILD=336;
+const TITLE='Content Adoption & Discovery Outcomes Renewal VI';
+const AUTHORITY='release467-build336-content-adoption-discovery-outcomes-renewal-vi';
+const EVIDENCE_ID='r467-b336-candidate-36903396649-36903693731';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:334,title:'Search Console Real Export & Fresh Discovery Intake IV',state:'DEVELOPMENT_GREEN',
-  dev_sha:'e18b37a22fb5e4f0e58e8d5e240d922c499fabec',tree_sha:'192445094dd80dd19570b86ad989cfffea1d4fdf',system_gate_run:36901438814,current_application_quality_run:36901438501,it_admin_runtime_proof_run:36901438713,branch_hygiene_run:36901438510,proof_state:'EXACT_BRANCH_HEAD_BUILD334_GREEN',exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
+  release:467,build:335,title:'Maker Story Advancement & Publication Readiness Continuity III',state:'DEVELOPMENT_GREEN',
+  dev_sha:'bec1c4bf76cf69e6b42dc3768b1de22400e0b052',tree_sha:'d8b3b0139055920106b78ee17b1a65b3cc19f3b4',system_gate_run:36903396649,current_application_quality_run:36903397080,it_admin_runtime_proof_run:36903397012,branch_hygiene_run:36903396815,proof_state:'EXACT_BRANCH_HEAD_BUILD335_GREEN',exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:334,title:'Search Console Real Export & Fresh Discovery Intake IV',state:'DEVELOPMENT_GREEN',
-  dev_sha:'e18b37a22fb5e4f0e58e8d5e240d922c499fabec',tree_sha:'192445094dd80dd19570b86ad989cfffea1d4fdf',accepted_sha:'e18b37a22fb5e4f0e58e8d5e240d922c499fabec',accepted_tree_sha:'192445094dd80dd19570b86ad989cfffea1d4fdf',system_gate_run:36901438814,current_application_quality_run:36901438501,it_admin_runtime_proof_run:36901438713,branch_hygiene_run:36901438510,proof_state:'EXACT_BRANCH_HEAD_BUILD334_GREEN'
+  release:467,build:335,title:'Maker Story Advancement & Publication Readiness Continuity III',state:'DEVELOPMENT_GREEN',
+  dev_sha:'bec1c4bf76cf69e6b42dc3768b1de22400e0b052',tree_sha:'d8b3b0139055920106b78ee17b1a65b3cc19f3b4',accepted_sha:'bec1c4bf76cf69e6b42dc3768b1de22400e0b052',accepted_tree_sha:'d8b3b0139055920106b78ee17b1a65b3cc19f3b4',system_gate_run:36903396649,current_application_quality_run:36903397080,it_admin_runtime_proof_run:36903397012,branch_hygiene_run:36903396815,proof_state:'EXACT_BRANCH_HEAD_BUILD335_GREEN'
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:334,title:'Search Console Real Export & Fresh Discovery Intake IV',state:'PRODUCTION_GREEN',
-  main_sha:'2840cdc2ee09a2a585ec003e5f57bdc0c08cbc6c',tree_sha:'192445094dd80dd19570b86ad989cfffea1d4fdf',production_pages_deploy_run:36901706854,production_live_resource_integrity_run:36901831473,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36901438699,remote_d1_queries:0
+  release:467,build:335,title:'Maker Story Advancement & Publication Readiness Continuity III',state:'PRODUCTION_GREEN',
+  main_sha:'8bda25fe29647f23a4a3b4bcb3f0ded515ae2d87',tree_sha:'d8b3b0139055920106b78ee17b1a65b3cc19f3b4',production_pages_deploy_run:36903693731,production_live_resource_integrity_run:36903805049,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36903396887,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true,workflow:'.github/workflows/production-live-resource-integrity-proof.yml'
 });
-const CURRENT_GUARDS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 335 Maker Story Advancement Publication Readiness Continuity III']);
+const CURRENT_GUARDS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 336 Content Adoption Discovery Outcomes Renewal VI']);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql','0026_release467_inventory_workstation_memberships.sql','0027_release467_caip_workshop_follies_maker_story_foundation.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
@@ -122,7 +122,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:335,title:TITLE,authority:'release467-build335-maker-story-advancement-publication-readiness-continuity-iii.json'},
+        current_closure_candidate:{release:467,build:336,title:TITLE,authority:'release467-build336-content-adoption-discovery-outcomes-renewal-vi.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
