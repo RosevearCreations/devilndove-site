@@ -1,0 +1,100 @@
+{
+  "release": 467,
+  "build": 337,
+  "title": "Evidence Gap Execution Workbench & Input Completion Continuity II",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "EVIDENCE_GAP_EXECUTION_WORKBENCH_INPUT_COMPLETION_CONTINUITY_II",
+  "authority": "release467-build337-evidence-gap-execution-workbench-input-completion-continuity-ii",
+  "predecessor": {
+    "build": 336,
+    "title": "Content Adoption & Discovery Outcomes Renewal VI",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "537cc518573159ea2c511c32f01469bbd97ccf63",
+    "development_tree_sha": "334706f50429ceb0796abc98a4f516390036d6b5",
+    "development_proofs": {
+      "system_gate_run": 36906245515,
+      "current_application_quality_run": 36906245469,
+      "it_admin_runtime_proof_run": 36906245709,
+      "branch_hygiene_run": 36906245367,
+      "d1_ci_fanout_guard_run": 36906245333,
+      "build_specific_proof_run": 36906245475
+    },
+    "production_main_sha": "1419a505747871a5703ad087134b3b7bebafd337",
+    "production_tree_sha": "334706f50429ceb0796abc98a4f516390036d6b5",
+    "production_pages_deploy_run": 36906590213,
+    "production_live_resource_integrity_run": 36906709351,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "workbench_mode": "READ_ONLY_DERIVED_FROM_EXISTING_SOURCE_AUTHORITIES",
+    "refreshes_existing_build331_workbench": true,
+    "shows_required_inputs": true,
+    "shows_observed_completion": true,
+    "shows_completion_signal": true,
+    "shows_next_safe_human_action": true,
+    "direct_source_workspace_links": true,
+    "shadow_task_table": false,
+    "user_assignment_persistence": false,
+    "acknowledgement_persistence": false,
+    "resolution_persistence": false,
+    "completion_persistence": false,
+    "source_workspaces_remain_authoritative": true,
+    "expected_gap_families": [
+      "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+      "REAL_SEARCH_CONSOLE_EXPORT",
+      "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+      "UNPROFILED_MAKER_STORY_EVIDENCE"
+    ],
+    "next_build": 338,
+    "next_build_title": "35th Promo Factual Evidence Completion Continuity III",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_exposure": false,
+    "evidence_mutation": false,
+    "story_mutation": false,
+    "search_console_mutation": false,
+    "seo_mutation": false,
+    "automatic_completion": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "537cc518573159ea2c511c32f01469bbd97ccf63",
+      "tree": "334706f50429ceb0796abc98a4f516390036d6b5",
+      "system_gate_run": 36906245515,
+      "quality_run": 36906245469,
+      "it_admin_runtime_run": 36906245709,
+      "repository_hygiene_run": 36906245367,
+      "d1_ci_fanout_guard_run": 36906245333,
+      "build_specific_proof_run": 36906245475,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "1419a505747871a5703ad087134b3b7bebafd337",
+      "tree": "334706f50429ceb0796abc98a4f516390036d6b5",
+      "production_pages_deploy_run": 36906590213,
+      "production_live_resource_integrity_run": 36906709351,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "PENDING_EXACT_DEVELOPMENT",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_337_342.md",
+  "next_build": 338,
+  "next_build_title": "35th Promo Factual Evidence Completion Continuity III",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "ENABLED_EXACT_DEVELOPMENT",
+  "measurement_lane_owner": "release467-build337-evidence-gap-execution-workbench-input-completion-continuity-ii.yml",
+  "toolchain_reliability": {
+    "wrangler_version": "4.128.0",
+    "business_logic_changed": false
+  }
+}
