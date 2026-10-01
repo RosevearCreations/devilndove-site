@@ -2699,6 +2699,7 @@
         "UNPROFILED_MAKER_STORY_EVIDENCE"
       ],
       "unprofiled_projects": 3
-    }
+    },
+    "exact_head_reproof_state": "PENDING_FINAL_EXACT_HEAD_MATRIX"
   }
 }
