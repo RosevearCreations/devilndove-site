@@ -1,32 +1,33 @@
-/* BUILD327_CURRENT_PROVENANCE: verified Build 326 dev 2bc3b4f93ae4111773db71249dc394de8db0a08d; tree 409c9dca0d1e0205ec496b3100e891132c71db8e; System 36798462026; Quality 36798462010; IT 36798462006; Hygiene 36798462040; Production 6729aaa40106553b37995892b43ff982d145c3db; Pages 36798718111; Live 36798786802. */
-/* CURRENT_BUILD_327_TRUTH: 35th Promo Real Outcome Evidence Closure; last verified dev 2bc3b4f93ae4111773db71249dc394de8db0a08d; tree 409c9dca0d1e0205ec496b3100e891132c71db8e; Production main 6729aaa40106553b37995892b43ff982d145c3db; Pages 36798718111; Live 36798786802. */
-// Release 467 Build 327 — Grey Hair Evidence Review Completion & Story-Plan Handoff over exact Build 326 Production source.
+/* BUILD328_CURRENT_PROVENANCE: Search Console Real Export Freshness & Discovery Intake III; verified Build 327 dev 26577d73b3747ffc2c02e31e11df86b924abdb2f; tree 935849941e1a9907487abcf984505233f9bfb803; Production f5675f69194586933fe0fefa231bde9f249216ce; Pages 36820941969; Live 36821004653. */
+/* BUILD327_CURRENT_PROVENANCE: verified Build 326 dev 26577d73b3747ffc2c02e31e11df86b924abdb2f; tree 935849941e1a9907487abcf984505233f9bfb803; System 36820729684; Quality 36820729675; IT 36820729677; Hygiene 36820729686; Production f5675f69194586933fe0fefa231bde9f249216ce; Pages 36820941969; Live 36821004653. */
+/* CURRENT_BUILD_328_TRUTH: Grey Hair Evidence Review Completion & Story-Plan Handoff; last verified dev 26577d73b3747ffc2c02e31e11df86b924abdb2f; tree 935849941e1a9907487abcf984505233f9bfb803; Production main f5675f69194586933fe0fefa231bde9f249216ce; Pages 36820941969; Live 36821004653. */
+// Release 467 Build 328 — Search Console Real Export Freshness & Discovery Intake III over exact Build 326 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=327;
-const TITLE='Grey Hair Evidence Review Completion & Story-Plan Handoff';
-const AUTHORITY='release467-build327-grey-hair-evidence-review-completion-story-plan-handoff';
-const EVIDENCE_ID='r467-b327-candidate-36798462026-36798718111';
+const BUILD=328;
+const TITLE='Search Console Real Export Freshness & Discovery Intake III';
+const AUTHORITY='release467-build328-search-console-real-export-freshness-discovery-intake-iii';
+const EVIDENCE_ID='r467-b327-candidate-36820729684-36820941969';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:326,title:'35th Promo Real Outcome Evidence Closure',state:'DEVELOPMENT_GREEN',
-  dev_sha:'2bc3b4f93ae4111773db71249dc394de8db0a08d',tree_sha:'409c9dca0d1e0205ec496b3100e891132c71db8e',system_gate_run:36798462026,current_application_quality_run:36798462010,it_admin_runtime_proof_run:36798462006,branch_hygiene_run:36798462040,proof_state:'EXACT_BRANCH_HEAD_BUILD326_GREEN',exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
+  release:467,build:326,title:'Grey Hair Evidence Review Completion & Story-Plan Handoff',state:'DEVELOPMENT_GREEN',
+  dev_sha:'26577d73b3747ffc2c02e31e11df86b924abdb2f',tree_sha:'935849941e1a9907487abcf984505233f9bfb803',system_gate_run:36820729684,current_application_quality_run:36820729675,it_admin_runtime_proof_run:36820729677,branch_hygiene_run:36820729686,proof_state:'EXACT_BRANCH_HEAD_BUILD327_GREEN',exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:326,title:'35th Promo Real Outcome Evidence Closure',state:'DEVELOPMENT_GREEN',
-  dev_sha:'2bc3b4f93ae4111773db71249dc394de8db0a08d',tree_sha:'409c9dca0d1e0205ec496b3100e891132c71db8e',accepted_sha:'2bc3b4f93ae4111773db71249dc394de8db0a08d',accepted_tree_sha:'409c9dca0d1e0205ec496b3100e891132c71db8e',system_gate_run:36798462026,current_application_quality_run:36798462010,it_admin_runtime_proof_run:36798462006,branch_hygiene_run:36798462040,proof_state:'EXACT_BRANCH_HEAD_BUILD326_GREEN'
+  release:467,build:326,title:'Grey Hair Evidence Review Completion & Story-Plan Handoff',state:'DEVELOPMENT_GREEN',
+  dev_sha:'26577d73b3747ffc2c02e31e11df86b924abdb2f',tree_sha:'935849941e1a9907487abcf984505233f9bfb803',accepted_sha:'26577d73b3747ffc2c02e31e11df86b924abdb2f',accepted_tree_sha:'935849941e1a9907487abcf984505233f9bfb803',system_gate_run:36820729684,current_application_quality_run:36820729675,it_admin_runtime_proof_run:36820729677,branch_hygiene_run:36820729686,proof_state:'EXACT_BRANCH_HEAD_BUILD327_GREEN'
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:326,title:'35th Promo Real Outcome Evidence Closure',state:'PRODUCTION_GREEN',
-  main_sha:'6729aaa40106553b37995892b43ff982d145c3db',tree_sha:'409c9dca0d1e0205ec496b3100e891132c71db8e',production_pages_deploy_run:36798718111,production_live_resource_integrity_run:36798786802,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36798462054,remote_d1_queries:0
+  release:467,build:326,title:'Grey Hair Evidence Review Completion & Story-Plan Handoff',state:'PRODUCTION_GREEN',
+  main_sha:'f5675f69194586933fe0fefa231bde9f249216ce',tree_sha:'935849941e1a9907487abcf984505233f9bfb803',production_pages_deploy_run:36820941969,production_live_resource_integrity_run:36821004653,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36820729700,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true,workflow:'.github/workflows/production-live-resource-integrity-proof.yml'
 });
-const CURRENT_GUARDS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 327 Grey Hair Evidence Review Completion Story Plan Handoff']);
+const CURRENT_GUARDS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 328 Grey Hair Evidence Review Completion Story Plan Handoff']);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql','0026_release467_inventory_workstation_memberships.sql','0027_release467_caip_workshop_follies_maker_story_foundation.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
@@ -115,7 +116,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:327,title:TITLE,authority:'release467-build327-grey-hair-evidence-review-completion-story-plan-handoff.json'},
+        current_closure_candidate:{release:467,build:328,title:TITLE,authority:'release467-build328-search-console-real-export-freshness-discovery-intake-iii.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],

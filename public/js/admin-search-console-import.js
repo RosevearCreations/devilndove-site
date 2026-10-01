@@ -58,7 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const batches = Array.isArray(data.batches) ? data.batches : [];
     const actions = Array.isArray(data.seo_actions) ? data.seo_actions : [];
     const acceptance = data.operator_acceptance || {};
+    const freshness = data.freshness || {};
     const acceptanceState = String(acceptance.state || 'UNKNOWN');
+    const freshnessState = String(freshness.state || 'UNKNOWN');
     const evidenceMessage = acceptanceState === 'EVIDENCE_PENDING_NO_REAL_EXPORT'
       ? 'No real Search Console export is staged. Leave discovery evidence pending until we import a genuine operator export.'
       : acceptanceState === 'REAL_OPERATOR_EVIDENCE_PRESENT'
@@ -71,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="small"><strong>Operator intake:</strong> ${esc(acceptanceState)}</div>
         <p class="small" style="margin:8px 0 0">${esc(evidenceMessage)}</p>
         <p class="small" style="margin:8px 0 0">Current batches: <strong>${num(acceptance.import_batches||0)}</strong> • live staged rows: <strong>${num(acceptance.live_rows||0)}</strong> • import audits: <strong>${num(acceptance.import_audits||0)}</strong> • revert audits: <strong>${num(acceptance.revert_audits||0)}</strong>. The safe batch revert remains the explicit <code>delete_batch</code> action.</p>
+        <p class="small" style="margin:8px 0 0"><strong>Build 328 freshness:</strong> ${esc(freshnessState)} • window <strong>${num(freshness.freshness_window_days||30)} days</strong> • recent rows <strong>${num(freshness.recent_rows||0)}</strong> • latest report <strong>${esc(freshness.latest_report_date||'none')}</strong>${freshness.latest_report_age_days == null ? '' : ` • age <strong>${esc(freshness.latest_report_age_days)} days</strong>`}. Stale evidence is non-actionable for queue/apply decisions.</p>
       </div>
       <div class="grid cols-4 media-diagnostic-metrics" style="margin-top:12px">
         <div class="card"><div class="small">Rows</div><strong>${num(totals.row_count || 0)}</strong></div>
@@ -83,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ${rows.map((row) => `<tr><td><code>${esc(row.page_url)}</code></td><td>${num(row.clicks)}</td><td>${num(row.impressions)}</td><td>${pct(row.ctr)}</td><td>${esc(row.average_position)}</td></tr>`).join('') || '<tr><td colspan="5">No Search Console rows match the current filters.</td></tr>'}
       </tbody></table></div>
       <h3>Evidence-backed SEO opportunities</h3>
-      <p class="small">Only real Search Console page/query pairs with impressions and average positions around 4-20 qualify for the human SEO review queue. Public telemetry alone cannot create a query-level SEO action.</p>
+      <p class="small">Only real Search Console page/query pairs within the current 30-day freshness window, with impressions and average positions around 4-20, qualify for the human SEO review queue. Public telemetry alone cannot create a query-level SEO action.</p>
       <div class="admin-table-wrap"><table><thead><tr><th>Query</th><th>Page</th><th>Clicks</th><th>Impressions</th><th>Avg position</th></tr></thead><tbody>
         ${opps.map((row) => `<tr><td>${esc(row.query_text)}</td><td><code>${esc(row.page_url)}</code></td><td>${num(row.clicks)}</td><td>${num(row.impressions)}</td><td>${esc(row.average_position)}</td></tr>`).join('') || '<tr><td colspan="5">No opportunity rows match the current filters.</td></tr>'}
       </tbody></table></div>
@@ -194,13 +197,13 @@ document.addEventListener('DOMContentLoaded', () => {
   mount.innerHTML = `
     <div class="card search-console-admin-panel" style="margin-top:18px">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-        <div><h2 style="margin-top:0">Search Console CSV Import</h2><p class="small" style="margin:8px 0 0 0">Private staging for real Google Search Console exports. Build 321 requires explicit real-export confirmation; evidence-backed reviews still require manual SEO wording and current evidence.</p></div>
+        <div><h2 style="margin-top:0">Search Console CSV Import</h2><p class="small" style="margin:8px 0 0 0">Private staging for real Google Search Console exports. Build 328 keeps explicit real-export confirmation, measures a 30-day freshness window, and blocks stale evidence from queue/apply decisions. If the export has no Date column, enter its report end date explicitly.</p></div>
         <button class="btn" type="button" id="searchConsoleLoadButton">Refresh summary</button>
       </div>
       <div class="search-console-import-grid" style="margin-top:12px">
         <label>CSV file<input type="file" id="searchConsoleCsvFile" accept=".csv,text/csv"></label>
         <label>Site property<input id="searchConsoleSiteProperty" placeholder="https://devilndove.com/"></label>
-        <label>Fallback report date<input id="searchConsoleReportDate" type="date"></label>
+        <label>Report end date / fallback date<input id="searchConsoleReportDate" type="date"><span class="small">Required when the CSV has no Date column.</span></label>
         <label>Notes<input id="searchConsoleNotes" placeholder="Example: May performance export"></label>
       </div>
       <label style="display:block;margin-top:10px">Or paste CSV rows<textarea id="searchConsoleCsvText" rows="5" placeholder="Page,Query,Clicks,Impressions,CTR,Position"></textarea></label>
