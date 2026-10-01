@@ -2,7 +2,7 @@
   "release": 467,
   "build": 329,
   "title": "Maker Story Advancement & Publication Readiness Continuity II",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "MAKER_STORY_ADVANCEMENT_PUBLICATION_READINESS_CONTINUITY_II",
   "authority": "release467-build329-maker-story-advancement-publication-readiness-continuity-ii",
   "predecessor": {
@@ -164,5 +164,36 @@
     "automatic_publication": false,
     "provider_execution": false,
     "production_d1_contact": false
+  },
+  "final_closure": {
+    "dev_sha": "aaeeb829d092d0174db29084e35380d83c0d620c",
+    "tree_sha": "8310fde78f64bfb80aa2169c9a60a33685cd3d6e",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD329_GREEN",
+    "proofs": {
+      "system_gate_run": 36825720274,
+      "current_application_quality_run": 36825720283,
+      "it_admin_runtime_proof_run": 36825720356,
+      "branch_hygiene_run": 36825720291
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36825720306,
+      "build_specific_proof_run": 36825720270
+    },
+    "artifact_id": 11144952322,
+    "artifact_name": "build329-maker-story-advancement-readiness-aaeeb829d092d0174db29084e35380d83c0d620c",
+    "artifact_digest": "sha256:f02065acb8bde34546c47e6fa7002d6dd9d2ab15a8a50a08255de70e15f94224",
+    "ingested_by_build": 330
+  },
+  "production_checkpoint": {
+    "main_sha": "05bf93a1deba88f4222397f7288cae2851fc7278",
+    "tree_sha": "8310fde78f64bfb80aa2169c9a60a33685cd3d6e",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36826043608,
+    "production_live_resource_integrity_run": 36826115468,
+    "production_promotion_artifact_id": 11145665349,
+    "production_promotion_artifact_digest": "sha256:32c7d8ddd5b076705a15208f0babbec19980052c690326808bac40f8684be815",
+    "remote_d1_queries": 0
   }
 }
