@@ -1,5 +1,5 @@
 name: D1 CI Fan-Out Guard
-# Build 326 closure marker: fan-out policy unchanged; intentional exact-head reproof.
+# Build 327 candidate marker: fan-out policy unchanged; one exact Development D1 measurement workflow remains intentional.
 on:
   push:
     branches: [dev]
