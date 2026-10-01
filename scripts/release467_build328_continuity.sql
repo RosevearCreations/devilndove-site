@@ -41,7 +41,7 @@ FROM search_console_page_queries;
 -- 5: 30-day freshness.
 SELECT
  COUNT(*) all_search_rows,
- SUM(CASE WHEN date(COALESCE(report_date,created_at))>=date('now','-30 days') THEN 1 ELSE 0 END) recent_search_rows,
+ COALESCE(SUM(CASE WHEN date(COALESCE(report_date,created_at))>=date('now','-30 days') THEN 1 ELSE 0 END),0) recent_search_rows,
  COALESCE(SUM(CASE WHEN date(COALESCE(report_date,created_at))>=date('now','-30 days') THEN clicks ELSE 0 END),0) recent_clicks,
  COALESCE(SUM(CASE WHEN date(COALESCE(report_date,created_at))>=date('now','-30 days') THEN impressions ELSE 0 END),0) recent_impressions,
  COUNT(DISTINCT CASE WHEN date(COALESCE(report_date,created_at))>=date('now','-30 days') THEN page_url END) recent_distinct_pages,
@@ -74,20 +74,20 @@ FROM search_console_page_queries WHERE date(COALESCE(report_date,created_at))>=d
 -- 8: SEO queue support from fresh Search Console evidence only.
 SELECT
  COUNT(*) queue_rows,
- SUM(CASE WHEN a.action_status='open' THEN 1 ELSE 0 END) open_rows,
- SUM(CASE WHEN a.action_status='in_progress' THEN 1 ELSE 0 END) in_progress_rows,
- SUM(CASE WHEN a.action_status='applied' THEN 1 ELSE 0 END) applied_rows,
- SUM(CASE WHEN EXISTS(
+ COALESCE(SUM(CASE WHEN a.action_status='open' THEN 1 ELSE 0 END),0) open_rows,
+ COALESCE(SUM(CASE WHEN a.action_status='in_progress' THEN 1 ELSE 0 END),0) in_progress_rows,
+ COALESCE(SUM(CASE WHEN a.action_status='applied' THEN 1 ELSE 0 END),0) applied_rows,
+ COALESCE(SUM(CASE WHEN EXISTS(
    SELECT 1 FROM search_console_page_queries q
    WHERE date(COALESCE(q.report_date,q.created_at))>=date('now','-30 days') AND lower(q.page_url)=lower(a.page_url) AND lower(COALESCE(q.query_text,''))=lower(COALESCE(a.query_text,''))
    GROUP BY q.page_url,q.query_text HAVING SUM(q.impressions)>=10 AND AVG(q.average_position) BETWEEN 4 AND 20
- ) THEN 1 ELSE 0 END) currently_supported_rows,
- SUM(CASE WHEN a.action_status IN ('open','in_progress') AND NOT EXISTS(
+ ) THEN 1 ELSE 0 END),0) currently_supported_rows,
+ COALESCE(SUM(CASE WHEN a.action_status IN ('open','in_progress') AND NOT EXISTS(
    SELECT 1 FROM search_console_page_queries q
    WHERE date(COALESCE(q.report_date,q.created_at))>=date('now','-30 days') AND lower(q.page_url)=lower(a.page_url) AND lower(COALESCE(q.query_text,''))=lower(COALESCE(a.query_text,''))
    GROUP BY q.page_url,q.query_text HAVING SUM(q.impressions)>=10 AND AVG(q.average_position) BETWEEN 4 AND 20
- ) THEN 1 ELSE 0 END) stale_or_unsupported_pending_rows,
- SUM(CASE WHEN trim(COALESCE(a.suggested_title,''))<>'' OR trim(COALESCE(a.suggested_meta_description,''))<>'' OR trim(COALESCE(a.suggested_internal_link_note,''))<>'' THEN 1 ELSE 0 END) generated_wording_rows
+ ) THEN 1 ELSE 0 END),0) stale_or_unsupported_pending_rows,
+ COALESCE(SUM(CASE WHEN trim(COALESCE(a.suggested_title,''))<>'' OR trim(COALESCE(a.suggested_meta_description,''))<>'' OR trim(COALESCE(a.suggested_internal_link_note,''))<>'' THEN 1 ELSE 0 END),0) generated_wording_rows
 FROM seo_opportunity_actions a;
 
 -- 9: reviewed public population and relational integrity.
