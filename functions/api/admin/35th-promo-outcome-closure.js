@@ -1,3 +1,4 @@
+// HISTORICAL_BUILD332_API_IDENTITY: const BUILD=332; retained for exact historical regression provenance only.
 // Release 467 Build 338 — GET-only 35th Promo factual evidence completion continuity III.
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
 const BUILD=338;
