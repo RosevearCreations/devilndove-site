@@ -1,30 +1,29 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 326 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 327 candidate
 
-Build 326 — 35th Promo Real Outcome Evidence Closure — starts from exact Build 325 Development/Production GREEN.
+Build 327 — Grey Hair Evidence Review Completion & Story-Plan Handoff — starts from exact Build 326 Development/Production GREEN.
 
-- Verified Development SHA: `0da51ee0e377c81909ed9c90627ca206026027b1`
-- Verified Development/Production tree: `b38a0844c106d2ff27ff50de306a61c4d325f724`
-- Build 325 System Gate: `36791681965`
-- Build 325 Current Application Quality Proof: `36791681953`
-- Build 325 I.T. Admin Runtime Proof: `36791681907`
-- Build 325 Repository Branch Hygiene: `36791681937`
-- Build 325 D1 Fan-Out Guard: `36791681867`
-- Build 325 dedicated proof: `36791682181`
-- Build 325 artifact: `11131158891`
-- Current Production main SHA: `782627bb0bc0850622abc42512e3886f5556efbd`
-- Production Pages Deploy: `36791987829`
-- Production Live Resource Integrity: `36792048457`
+- Verified Development SHA: `2bc3b4f93ae4111773db71249dc394de8db0a08d`
+- Verified Development/Production tree: `409c9dca0d1e0205ec496b3100e891132c71db8e`
+- Build 326 System Gate: `36798462026`
+- Build 326 Current Application Quality Proof: `36798462010`
+- Build 326 I.T. Admin Runtime Proof: `36798462006`
+- Build 326 Repository Branch Hygiene: `36798462040`
+- Build 326 D1 Fan-Out Guard: `36798462025`
+- Build 326 dedicated proof: `36798462054`
+- Current Production main SHA: `6729aaa40106553b37995892b43ff982d145c3db`
+- Production Pages Deploy: `36798718111`
+- Production Live Resource Integrity: `36798786802`
 
-Build 326:
-- reuses the existing Build 319 `record_story_execution_evidence` operator action;
-- measures only real active execution/process, result and lesson events;
-- requires complete factual Maker Story fields and a resolved outcome before human-review readiness;
-- never converts readiness into automatic review/public candidacy;
-- never auto-selects evidence or creates publications/social rows;
+Build 327:
+- reuses the existing Build 320 Grey Hair evidence-review, sync, and story-planning authorities;
+- keeps the readiness surface read-only;
+- measures only real Development evidence/sync/story-plan state;
+- requires explicit human evidence review and human story-plan review;
+- never auto-creates or approves a Maker Story;
 - never infers media/public-use rights;
 - contacts no Production D1.
 
-Next after Build 326 Production GREEN: **Build 327 — Grey Hair Evidence Review Completion & Story-Plan Handoff**.
+Next after Build 327 Production GREEN: **Build 328 — Search Console Real Export Freshness & Discovery Intake III**.
 
 ## Current release baseline
 
