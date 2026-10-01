@@ -1,3 +1,18 @@
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 335 candidate
+
+Build 335 — Maker Story Advancement & Publication Readiness Continuity III — starts from exact Build 334 Development/Production GREEN.
+
+- Verified Development SHA: `e18b37a22fb5e4f0e58e8d5e240d922c499fabec`
+- Verified Development/Production tree: `192445094dd80dd19570b86ad989cfffea1d4fdf`
+- System / Quality / I.T. / Hygiene: `36901438814 / 36901438501 / 36901438713 / 36901438510`
+- D1 Fan-Out / Build 334: `36901438593 / 36901438699`
+- Production main: `2840cdc2ee09a2a585ec003e5f57bdc0c08cbc6c`
+- Production Pages / Live: `36901706854 / 36901831473`
+
+Build 335 is read-only classification over five Creative Projects. Human review and publication traceability remain mandatory; media rights remain separate.
+
+The future queue **has not run out**.
+
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 334 candidate
 
 Build 334 — Search Console Real Export & Fresh Discovery Intake IV — starts from exact Build 333 Development/Production GREEN.

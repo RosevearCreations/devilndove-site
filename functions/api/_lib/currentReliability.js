@@ -11,27 +11,27 @@
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=334;
-export const CURRENT_RELIABILITY_TITLE='Search Console Real Export & Fresh Discovery Intake IV';
+export const CURRENT_RELIABILITY_BUILD=335;
+export const CURRENT_RELIABILITY_TITLE='Maker Story Advancement & Publication Readiness Continuity III';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
 export const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:333,title:'Grey Hair Source Review & Story-Plan Completion Continuity II',state:'DEVELOPMENT_GREEN',
-  dev_sha:'ed3a8674ec5fd0e4363043034d694fdbb0a6822a',tree_sha:'295ee32365ac51c2988181b63d8b83a6fcae3da3',
-  system_gate_run:36894103075,current_application_quality_run:36894103073,it_admin_runtime_proof_run:36894103067,
-  branch_hygiene_run:36894103040,proof_state:'EXACT_BRANCH_HEAD_BUILD333_GREEN'
+  release:467,build:334,title:'Search Console Real Export & Fresh Discovery Intake IV',state:'DEVELOPMENT_GREEN',
+  dev_sha:'e18b37a22fb5e4f0e58e8d5e240d922c499fabec',tree_sha:'192445094dd80dd19570b86ad989cfffea1d4fdf',
+  system_gate_run:36901438814,current_application_quality_run:36901438501,it_admin_runtime_proof_run:36901438713,
+  branch_hygiene_run:36901438510,proof_state:'EXACT_BRANCH_HEAD_BUILD334_GREEN'
 });
 export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:333,title:'Grey Hair Source Review & Story-Plan Completion Continuity II',state:'DEVELOPMENT_GREEN',
-  dev_sha:'ed3a8674ec5fd0e4363043034d694fdbb0a6822a',tree_sha:'295ee32365ac51c2988181b63d8b83a6fcae3da3',
-  system_gate_run:36894103075,current_application_quality_run:36894103073,it_admin_runtime_proof_run:36894103067,
-  branch_hygiene_run:36894103040,proof_state:'EXACT_BRANCH_HEAD_BUILD333_GREEN'
+  release:467,build:334,title:'Search Console Real Export & Fresh Discovery Intake IV',state:'DEVELOPMENT_GREEN',
+  dev_sha:'e18b37a22fb5e4f0e58e8d5e240d922c499fabec',tree_sha:'192445094dd80dd19570b86ad989cfffea1d4fdf',
+  system_gate_run:36901438814,current_application_quality_run:36901438501,it_admin_runtime_proof_run:36901438713,
+  branch_hygiene_run:36901438510,proof_state:'EXACT_BRANCH_HEAD_BUILD334_GREEN'
 });
 export const CURRENT_PRODUCTION=Object.freeze({
-  release:467,build:333,title:'Grey Hair Source Review & Story-Plan Completion Continuity II',state:'PRODUCTION_GREEN',
-  main_sha:'7b934186dcef69d76c9ad3dd6a25c4aed8ba4de4',tree_sha:'295ee32365ac51c2988181b63d8b83a6fcae3da3',
-  production_pages_deploy_run:36894463676,production_live_resource_integrity_run:36894596996,
-  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36894103049,remote_d1_queries:0
+  release:467,build:334,title:'Search Console Real Export & Fresh Discovery Intake IV',state:'PRODUCTION_GREEN',
+  main_sha:'2840cdc2ee09a2a585ec003e5f57bdc0c08cbc6c',tree_sha:'192445094dd80dd19570b86ad989cfffea1d4fdf',
+  production_pages_deploy_run:36901706854,production_live_resource_integrity_run:36901831473,
+  products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36901438699,remote_d1_queries:0
 });
 export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
@@ -43,7 +43,7 @@ export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
 export async function loadCurrentReliability(db,env={}){
   const inherited=await loadRelease466Reliability(db,env);
   return {
-    release:467,build:334,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
+    release:467,build:335,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
     environment:inherited.environment,score:inherited.score,status:inherited.status,scope:inherited.scope,slo_targets:inherited.slo_targets,
     checks:inherited.checks,migrations:inherited.migrations,runtime_incidents:inherited.runtime_incidents,
     foreign_key_violations:inherited.foreign_key_violations,resources:inherited.resources,

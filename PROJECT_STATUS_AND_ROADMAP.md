@@ -2,43 +2,41 @@
 
 ## Current checkpoint
 
-**Build 334 — Search Console Real Export & Fresh Discovery Intake IV** is the active Development candidate over exact Build 333 Development/Production GREEN.
+**Build 335 — Maker Story Advancement & Publication Readiness Continuity III** is the active Development candidate over exact Build 334 Development/Production GREEN.
 
-Build 333 final closure:
+Build 334 final closure:
 
-- Development SHA: **ed3a8674ec5fd0e4363043034d694fdbb0a6822a**
-- Exact tree: **295ee32365ac51c2988181b63d8b83a6fcae3da3**
-- System Gate: **36894103075 — SUCCESS**
-- Current Application Quality: **36894103073 — SUCCESS**
-- I.T. Admin Runtime: **36894103067 — SUCCESS**
-- Repository Branch Hygiene: **36894103040 — SUCCESS**
-- D1 Fan-Out Guard: **36894103200 — SUCCESS**
-- Build 333 proof: **36894103049 — SUCCESS**
-- Production main SHA: **7b934186dcef69d76c9ad3dd6a25c4aed8ba4de4**
-- Production Pages Deploy: **36894463676 — SUCCESS**
-- Production Live Resource Integrity: **36894596996 — SUCCESS**
+- Development SHA: **e18b37a22fb5e4f0e58e8d5e240d922c499fabec**
+- Exact tree: **192445094dd80dd19570b86ad989cfffea1d4fdf**
+- System / Quality / I.T. / Hygiene: **36901438814 / 36901438501 / 36901438713 / 36901438510**
+- D1 Fan-Out / Build 334: **36901438593 / 36901438699**
+- Production main SHA: **2840cdc2ee09a2a585ec003e5f57bdc0c08cbc6c**
+- Production Pages / Live: **36901706854 / 36901831473**
 - Exact Development and Production tree: **MATCH**.
 
-Build 334 reuses the existing explicit real Google Search Console Performance CSV intake. Search evidence is query-level actionable only inside the current **30-day freshness window**; a CSV without a Date column still requires an explicit operator-supplied report date. Batch import audit and explicit revert/delete traceability remain mandatory. No synthetic discovery evidence, automatic import, automatic SEO queue generation, automatic SEO apply, IndexNow, provider publication or Production D1 contact is authorized.
+Build 335 remeasures all five active Creative Projects through the existing Maker Story coverage authority. Advancement requires factual evidence, substantive result/lesson facts, explicit human story review, public-candidate decisions, approved/locked copy and human publication traceability. Media/public-use rights remain separate; no automatic profile creation, review, publication, provider posting or Production D1 contact is authorized.
 
-### Build 334 measured Development checkpoint
+### Build 335 measured Development checkpoint
 
-Decision: **EVIDENCE_PENDING_NO_REAL_EXPORT**.
+Decision: **PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY**.
 
-- Import batches / live rows: **0 / 0**
-- Fresh Search Console rows: **0**
-- Fresh clicks / impressions: **0 / 0**
-- Eligible fresh query/page pairs: **0**
-- SEO review queue rows: **0**
-- D1 rows read: **2,056 / 20,000**
-- Exact measurement source: `a75361de5b6ec616ee662f6b44a57f0abee1697e`
-- Build 334 measurement proof: **36898231789 — SUCCESS**
+- 3 projects: **MAKER_STORY_EVIDENCE_REQUIRED**
+- 1 project: **FACTUAL_OUTCOME_EVIDENCE_REQUIRED**
+- 1 project: **PUBLISHED_REVIEWED_STORY**
+- New publication-review-ready projects: **0**
+- 35th Promo execution/result/lesson events: **0 / 0 / 0**
+- Grey Hair approved / needs-review source evidence: **1 / 2**
+- Grey Hair reviewed plans / source-backed items: **0 / 0**
+- Public-allowed / non-public CAIP assets: **0 / 45**
+- Review-first-ready / provider-posted social rows: **1 / 0**
+- D1 rows read: **672 / 20,000**
+- Measurement proof: **36902499406 — SUCCESS**
 
-This is a valid GREEN software outcome. The lane remains correctly pending until we explicitly import a real Google Search Console Performance CSV; Build 334 creates no synthetic discovery evidence.
+No automatic profile creation, story review, publication, media-rights inference or provider posting is authorized.
 
 The queue **has not run out**.
 
-**Next after Build 334 Production GREEN: Build 335 — Maker Story Advancement & Publication Readiness Continuity III.**
+**Next after Build 335 Production GREEN: Build 336 — Content Adoption & Discovery Outcomes Renewal VI.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_331_336.md`.
 
