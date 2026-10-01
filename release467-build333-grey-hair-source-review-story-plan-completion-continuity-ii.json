@@ -170,5 +170,10 @@
     "next_build_title": "Search Console Real Export & Fresh Discovery Intake IV"
   },
   "measurement_lane_state": "ENABLED_EXACT_DEVELOPMENT",
-  "measurement_lane_owner": "release467-build333-grey-hair-source-review-story-plan-completion-continuity-ii.yml"
+  "measurement_lane_owner": "release467-build333-grey-hair-source-review-story-plan-completion-continuity-ii.yml",
+  "toolchain_reliability": {
+    "wrangler_version": "4.128.0",
+    "reason": "Pin canonical Development and Production Pages deploys after floating wrangler@4 resolved to unavailable 4.146.0",
+    "business_logic_changed": false
+  }
 }
