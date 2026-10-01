@@ -109,12 +109,12 @@
   "next_build_title": "Search Console Real Export & Fresh Discovery Intake IV",
   "future_queue_exhausted": false,
   "measurement": {
-    "source_sha": "b83897baa88ba086f7e7d53ef570e8588ea45877",
-    "source_tree_sha": "28d4e470ca4ac3cf1d3ac962dc26dbfbb5f5352a",
-    "workflow_run": 36891238761,
-    "artifact_id": 11176876103,
-    "artifact_name": "build333-grey-hair-source-review-story-plan-continuity-b83897baa88ba086f7e7d53ef570e8588ea45877",
-    "artifact_digest": "sha256:3b9fdde0bea7f3d9b985b96fba0a679926ce68d88a9b493d48fa8a1e8c6899e6",
+    "source_sha": "bd622f38061459878b246e1835b749d6bccf44b9",
+    "source_tree_sha": "f287b692a3860d839c861554d829fc6b8345bfa1",
+    "workflow_run": 36893540494,
+    "artifact_id": 11178170950,
+    "artifact_name": "build333-grey-hair-source-review-story-plan-continuity-bd622f38061459878b246e1835b749d6bccf44b9",
+    "artifact_digest": "sha256:0f1a93c12f1acc06c67994168aba28c004055ca12352c1bb81417d806d6687ac",
     "aggregate_rows_read": 124,
     "rows_read_ceiling": 20000,
     "rows_read_by_statement": [
@@ -159,7 +159,8 @@
   },
   "decision": {
     "classification": "SOURCE_EVIDENCE_REVIEW_REQUIRED",
-    "rationale": "Exact Development measurement still shows two active Grey Hair source-evidence ranges requiring explicit operator review. No downstream sync or story-plan prerequisite can truthfully advance yet.",
+    "rationale": "Exact Development measurement shows two active Grey Hair source-evidence ranges still require explicit operator review. No sync group, confirmed tracks, reviewed story plan, source-backed story items, or Maker Story profile exists. All deltas versus Build 331 are zero.",
+    "operator_next_action": "Explicitly review the two remaining active Grey Hair source-evidence ranges in CAIP Evidence Review. Only after evidence review is complete should sync and human story-plan prerequisites advance.",
     "automatic_evidence_approval": false,
     "automatic_story_plan_generation": false,
     "automatic_story_plan_review": false,

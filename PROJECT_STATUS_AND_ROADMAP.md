@@ -12,15 +12,14 @@ Decision: **SOURCE_EVIDENCE_REVIEW_REQUIRED**.
 - Active source-evidence ranges: **3**
 - Approved source ranges: **1**
 - Source ranges still needing explicit review: **2**
-- Rejected source ranges: **0**
 - Confirmed sync groups / tracks: **0 / 0**
 - Reviewed / approved story plans: **0 / 0**
 - Source-backed story items: **0**
 - Maker Story profiles: **0**
-- Delta versus Build 331 across all tracked completion counters: **zero**
+- Delta versus Build 331 across all continuity counters: **0**
 - D1 rows read: **124 / 20,000**
 
-The next safe action remains explicit review of the two outstanding source-evidence ranges. No sync confirmation, story-plan review, Maker Story creation, media-rights inference or publication was synthesized.
+The next safe action remains explicit operator review of the two outstanding Grey Hair source ranges in CAIP Evidence Review. Build 333 does not approve evidence, confirm synchronization, generate or review a story plan, create a Maker Story, infer media rights, or publish anything.
 
 The queue **has not run out**.
 
