@@ -16,11 +16,32 @@ Build 335 final closure:
 
 Build 336 repeats the comparable 18-statement content-adoption/discovery renewal against Builds 300, 306, 312, 318, 324 and 330, retaining Build 335 readiness as context. The successor roadmap is selected only after real Development measurement.
 
+### Build 336 measured Development checkpoint
+
+Decision: **ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST**.
+
+- Maker Story coverage: **2/5**
+- Reviewed / public-candidate / published stories: **1 / 1 / 1**
+- Selected evidence / approved copy / locked copy: **4 / 4 / 4**
+- Search Console rows / clicks / impressions: **0 / 0 / 0**
+- Evidence-backed fresh SEO rows: **0**
+- 35th Promo: **profile present; review 0; public candidate 0; outcome unknown**
+- Remaining unprofiled projects: **3**
+- Third-story-ready projects: **0**
+- Grey Hair approved evidence / execution events / reviewed plans: **1 / 0 / 0**
+- Public telemetry: **22 views / 22 unique visitors**
+- Runtime errors (7d): **0**
+- D1 rows read: **2,847 / 20,000**
+- Comparable delta vs Build 330: **ZERO**
+- Measurement proof: **36905516991 — SUCCESS**
+
+Observed evidence renewed the queue as **Builds 337–342**. No synthetic progress, automatic approval/publication, or provider execution is authorized.
+
 The queue **has not run out**.
 
-**Next after measurement: Build 337 — evidence-determined successor slot.**
+**Next after Build 336 Production GREEN: Build 337 — Evidence Gap Execution Workbench & Input Completion Continuity II.**
 
-Canonical current roadmap: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_331_336.md`.
+Canonical renewed roadmap: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_337_342.md`.
 
 ---
 
