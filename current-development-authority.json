@@ -219,7 +219,7 @@
   "next_build": 328,
   "next_build_state": "QUEUED_AFTER_BUILD327_PRODUCTION_GREEN",
   "next_build_title": "Search Console Real Export Freshness & Discovery Intake III",
-  "promotion_state": "BUILD327_FINAL_EXACT_HEAD_REPROOF_PENDING",
+  "promotion_state": "BUILD327_EXACT_HEAD_GREEN_NOT_YET_PRODUCTION",
   "successor_scope_state": "BUILD328_DEFINED_BY_CANONICAL_ROADMAP",
   "measured_closure": {
     "source_build": 232,
