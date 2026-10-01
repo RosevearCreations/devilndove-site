@@ -1,22 +1,6 @@
 name: Release 467 Build 331 Evidence Gap Execution Workbench Input Completion Continuity
+# Historical Build 331 exact Development proof; Build 332 owns the automatic remote-D1 successor lane once enabled.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build331_*'
-      - 'release467-build331-*.json'
-      - 'release467-build330-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_331_*'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'functions/api/admin/evidence-gap-execution-workbench.js'
-      - 'public/js/admin-evidence-gap-execution-workbench-v331.js'
-      - 'admin/evidence-gap-execution-workbench/index.html'
-      - 'admin/creative-process/index.html'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - '.github/workflows/release467-build330-content-adoption-discovery-outcomes-renewal-v.yml'
-      - '.github/workflows/release467-build331-evidence-gap-execution-workbench-input-completion-continuity.yml'
   workflow_dispatch:
 permissions:
   contents: read
