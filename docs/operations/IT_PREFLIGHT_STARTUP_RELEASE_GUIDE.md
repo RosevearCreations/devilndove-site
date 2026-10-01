@@ -1,31 +1,30 @@
-# CURRENT RELEASE CHECKPOINT — Release 467 Build 325 candidate
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 326 candidate
 
-Build 325 — Evidence Gap Owner Queue & Operator Action Traceability — starts from exact Build 324 Development/Production GREEN.
+Build 326 — 35th Promo Real Outcome Evidence Closure — starts from exact Build 325 Development/Production GREEN.
 
-- Verified Development SHA: `1ed7d181bea85004b181b93f1ba97e300946c575`
-- Verified Development/Production tree: `1408954e028fbb8faa54ead2860c0e2b71b31588`
-- Build 324 System Gate: `36789662411`
-- Build 324 Current Application Quality Proof: `36789662388`
-- Build 324 I.T. Admin Runtime Proof: `36789662487`
-- Build 324 Repository Branch Hygiene: `36789662415`
-- Build 324 D1 Fan-Out Guard: `36789662359`
-- Build 324 dedicated proof: `36789662348`
-- Build 324 artifact: `11131435921`
-- Current Production main SHA: `06e40c332b1bacf2260f954ff2ac79a25d9788cc`
-- Production Pages Deploy: `36789878247`
-- Production Live Resource Integrity: `36789960286`
+- Verified Development SHA: `0da51ee0e377c81909ed9c90627ca206026027b1`
+- Verified Development/Production tree: `b38a0844c106d2ff27ff50de306a61c4d325f724`
+- Build 325 System Gate: `36791681965`
+- Build 325 Current Application Quality Proof: `36791681953`
+- Build 325 I.T. Admin Runtime Proof: `36791681907`
+- Build 325 Repository Branch Hygiene: `36791681937`
+- Build 325 D1 Fan-Out Guard: `36791681867`
+- Build 325 dedicated proof: `36791682181`
+- Build 325 artifact: `11131158891`
+- Current Production main SHA: `782627bb0bc0850622abc42512e3886f5556efbd`
+- Production Pages Deploy: `36791987829`
+- Production Live Resource Integrity: `36792048457`
 
-Build 325:
-- derives one operator queue from existing Creative Process, CAIP, Search Console and Maker Story source authorities;
-- routes every row back to the existing source workspace where real work is performed;
-- reports existing source/audit timestamps for action traceability;
-- creates no task/owner table and no second completion authority;
-- persists no user assignment, acknowledgement or resolution state;
-- never treats queue state as source completion;
-- performs no evidence/story/publication/SEO/provider mutation;
+Build 326:
+- reuses the existing Build 319 `record_story_execution_evidence` operator action;
+- measures only real active execution/process, result and lesson events;
+- requires complete factual Maker Story fields and a resolved outcome before human-review readiness;
+- never converts readiness into automatic review/public candidacy;
+- never auto-selects evidence or creates publications/social rows;
+- never infers media/public-use rights;
 - contacts no Production D1.
 
-Next after Build 325 Production GREEN: **Build 326 — 35th Promo Real Outcome Evidence Closure**.
+Next after Build 326 Production GREEN: **Build 327 — Grey Hair Evidence Review Completion & Story-Plan Handoff**.
 
 ## Current release baseline
 
