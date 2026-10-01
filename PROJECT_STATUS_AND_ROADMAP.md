@@ -2,28 +2,26 @@
 
 ## Current checkpoint
 
-**Build 325 — Evidence Gap Owner Queue & Operator Action Traceability** is the active Development candidate over exact Build 324 Development/Production GREEN.
+**Build 326 — 35th Promo Real Outcome Evidence Closure** is the active Development candidate over exact Build 325 Development/Production GREEN.
 
-Build 324 is fully verified and promoted:
+Build 325 is fully verified and promoted:
 
-- Development SHA: **1ed7d181bea85004b181b93f1ba97e300946c575**
-- Exact tree: **1408954e028fbb8faa54ead2860c0e2b71b31588**
-- Development proofs: System **36789662411**, Quality **36789662388**, I.T. **36789662487**, Hygiene **36789662415**
-- Supplemental proofs: D1 Fan-Out **36789662359**, Build 324 **36789662348**
-- Build 324 artifact: **11131435921**
-- Build 324 measurement: **ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST**, **2,847 / 20,000** D1 rows read
-- Production main SHA: **06e40c332b1bacf2260f954ff2ac79a25d9788cc**
-- Production Pages Deploy: **36789878247 — SUCCESS**
-- Production Live Resource Integrity: **36789960286 — SUCCESS**
+- Development SHA: **0da51ee0e377c81909ed9c90627ca206026027b1**
+- Exact tree: **b38a0844c106d2ff27ff50de306a61c4d325f724**
+- Development proofs: System **36791681965**, Quality **36791681953**, I.T. **36791681907**, Hygiene **36791681937**
+- Supplemental proofs: D1 Fan-Out **36791681867**, Build 325 **36791682181**
+- Build 325 artifact: **11131158891**
+- Build 325 measurement: **5 active queue rows / 4 gap families / 1,657 rows read**
+- Production main SHA: **782627bb0bc0850622abc42512e3886f5556efbd**
+- Production Pages Deploy: **36791987829 — SUCCESS**
+- Production Live Resource Integrity: **36792048457 — SUCCESS**
 - Exact Development and Production tree: **MATCH**.
 
-Build 325 provides one read-only queue over the factual gaps identified by Build 324. It routes 35th promo, Grey Hair, real Search Console intake and remaining unprofiled Maker Story evidence back to their existing source workspaces while showing the most recent real source/audit activity.
-
-There is no generic current schema authority for user assignment, acknowledgement or resolution across these domains, so Build 325 intentionally creates no shadow task system and no queue-state completion mechanism.
+Build 326 reuses the Build 319 private factual-evidence intake for the existing 35th promo project. Human-review readiness requires real execution/process, result and lesson events plus complete factual Maker Story fields. The build does not fabricate evidence, auto-select evidence, auto-review the Maker Story, set public candidacy, publish content or infer media rights.
 
 The queue **has not run out**.
 
-**Next after Build 325 Production GREEN: Build 326 — 35th Promo Real Outcome Evidence Closure.**
+**Next after Build 326 Production GREEN: Build 327 — Grey Hair Evidence Review Completion & Story-Plan Handoff.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md`.
 

@@ -30,7 +30,7 @@ for forbidden in ('creative_project_evidence_selections','UPDATE creative_projec
     q(forbidden not in seg,'Build 319 intake crossed review/publication/media boundary: '+forbidden)
 for token in ('data-build319-execution-evidence-intake','Build 319 • factual evidence intake','I confirm this describes work that actually happened',"action:'record_story_execution_evidence'",'Build 319 does not change these fields'):
     q(token in ui,'Build 319 operator UI missing '+token)
-q('data-build319-evidence-intake' in page and '/public/js/admin-creative-process.js?v=467b319' in page,'Build 319 Creative Process page/cache marker missing')
+q('data-build319-evidence-intake' in page and (('/public/js/admin-creative-process.js?v=467b319' in page) or (int(p.get('build') or 0)>=326 and '/public/js/admin-creative-process.js?v=467b326' in page)),'Build 319 Creative Process page/cache marker missing')
 upper=' '+re.sub(r'--.*','',sql).upper()+' '
 for forbidden in (' INSERT ',' UPDATE ',' DELETE ',' CREATE ',' ALTER ',' DROP ',' REPLACE ',' VACUUM ',' REINDEX '):q(forbidden not in upper,'Build 319 measurement must remain read-only: '+forbidden.strip())
 for token in ('execution_events','result_events','lesson_events','selected_execution_evidence','execution_rows_with_public_or_media_flags','pragma_foreign_key_check'):q(token in sql,'Build 319 measurement missing '+token)
