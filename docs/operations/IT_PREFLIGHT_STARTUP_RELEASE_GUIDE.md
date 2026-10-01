@@ -1,3 +1,18 @@
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 331 candidate
+
+Build 331 — Evidence Gap Execution Workbench & Input Completion Continuity — starts from exact Build 330 Development/Production GREEN.
+
+- Verified Development SHA: `9d0340a3038f05a0a80d25288ffedc316499438f`
+- Verified Development/Production tree: `585bb8a35b46f20278b64e97aa314ee11a9f4ccc`
+- System / Quality / I.T. / Hygiene: `36837717408 / 36837717402 / 36837717337 / 36837717374`
+- D1 Fan-Out / Build 330: `36837717376 / 36837717330`
+- Production main: `88b5113016acef9a0e7cc7cb7ef087b46ae01924`
+- Production Pages / Live: `36837991058 / 36838082462`
+
+Build 331 is schema-neutral, GET-only and source-authority driven. The source workspace, not the workbench, owns completion.
+
+The future queue **has not run out**.
+
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 330 candidate
 
 Build 330 — Content Adoption & Discovery Outcomes Renewal V — starts from exact Build 329 Development/Production GREEN.

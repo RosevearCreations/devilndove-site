@@ -1,5 +1,5 @@
-name: Release 467 Build 330 Content Adoption Discovery Outcomes Renewal V
-# Historical Build 330 exact Development proof; Build 331 owns the automatic remote-D1 successor lane once enabled.
+name: Release 467 Build 331 Evidence Gap Execution Workbench Input Completion Continuity
+# Manual-only during candidate preparation. Automatic dev D1 proof is enabled after current gates converge.
 on:
   workflow_dispatch:
 permissions:
@@ -13,10 +13,12 @@ jobs:
         with: { python-version: '3.12' }
       - uses: actions/setup-node@v7
         with: { node-version: '24' }
-      - run: python scripts/release467_build330_regression.py
-      - run: python scripts/release467_build330_gate.py
-      - run: node --check scripts/release467_build330_verify_measurement.mjs
-  outcomes-renewal:
+      - run: python scripts/release467_build331_regression.py
+      - run: python scripts/release467_build331_gate.py
+      - run: node --check scripts/release467_build331_verify_execution_workbench.mjs
+      - run: node --check functions/api/admin/evidence-gap-execution-workbench.js
+      - run: node --check public/js/admin-evidence-gap-execution-workbench-v331.js
+  execution-workbench:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -29,7 +31,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with: { node-version: '24' }
-      # D1_ONE_SHOT_EVIDENCE_CAPTURE — read-only full-path outcomes renewal V.
+      # D1_ONE_SHOT_EVIDENCE_CAPTURE — read-only workbench projection.
       - name: Prove exact Development D1
         run: |
           set -euo pipefail
@@ -39,30 +41,28 @@ jobs:
           ! grep -q 'devilndove-prod' wrangler.toml
           npx --yes wrangler@4.128.0 d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/info.json
           node -e "const d=require('/tmp/info.json');const s=JSON.stringify(d);if(!s.includes(process.env.EXPECTED_DEV_D1_DATABASE_ID)||!s.includes(process.env.DEV_D1_DATABASE_NAME))process.exit(1)"
-      - name: Measure renewal outcomes
+      - name: Measure execution workbench
         run: |
           set -euo pipefail
-          COMMAND="$(grep -v '^[[:space:]]*--' scripts/release467_build330_outcomes_measurement.sql)"
-          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b330.json
-          node scripts/release467_build330_verify_measurement.mjs /tmp/b330.json "${GITHUB_SHA}" /tmp/build330.json
+          COMMAND="$(grep -v '^[[:space:]]*--' scripts/release467_build331_execution_workbench.sql)"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b331.json
+          node scripts/release467_build331_verify_execution_workbench.mjs /tmp/b331.json "${GITHUB_SHA}" /tmp/build331.json
       - uses: actions/upload-artifact@v4
         with:
-          name: build330-content-adoption-discovery-renewal-${{ github.sha }}
-          path: /tmp/build330.json
+          name: build331-evidence-gap-execution-workbench-${{ github.sha }}
+          path: /tmp/build331.json
           if-no-files-found: error
           retention-days: 30
       - name: Boundary
         if: always()
         run: |
-          echo 'ROADMAP RENEWAL: OBSERVED EVIDENCE ONLY'
-          echo 'COMPARISON BASELINES: BUILDS 300 / 306 / 312 / 318 / 324'
-          echo 'BUILD 329 READINESS CONTEXT: RETAINED'
-          echo 'SEARCH CONSOLE ACTIONABILITY: CURRENT 30-DAY FRESHNESS'
-          echo 'BUSINESS DATA MUTATION: ZERO'
-          echo 'SYNTHETIC DISCOVERY EVIDENCE: ZERO'
-          echo 'PRIVATE MEDIA PROMOTION: ZERO'
-          echo 'AUTOMATIC STORY GENERATION: ZERO'
-          echo 'AUTOMATIC PUBLICATION: ZERO'
-          echo 'AUTOMATIC SEO APPLY: ZERO'
+          echo 'WORKBENCH MODE: READ-ONLY DERIVED SOURCE AUTHORITY'
+          echo 'SOURCE WORKSPACES: AUTHORITATIVE'
+          echo 'COMPLETION PERSISTENCE: ZERO'
+          echo 'OWNER ASSIGNMENT PERSISTENCE: ZERO'
+          echo 'ACKNOWLEDGEMENT PERSISTENCE: ZERO'
+          echo 'RESOLUTION PERSISTENCE: ZERO'
+          echo 'SHADOW TASK TABLE: ZERO'
+          echo 'EVIDENCE/STORY/SEARCH/SEO MUTATION: ZERO'
           echo 'PROVIDER EXECUTION: ZERO'
           echo 'PRODUCTION D1 CONTACT: ZERO'
