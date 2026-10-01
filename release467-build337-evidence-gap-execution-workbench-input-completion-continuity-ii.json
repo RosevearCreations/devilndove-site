@@ -86,7 +86,7 @@
       "state": "PRODUCTION_GREEN"
     }
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT",
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_337_342.md",
   "next_build": 338,
   "next_build_title": "35th Promo Factual Evidence Completion Continuity III",
@@ -96,5 +96,84 @@
   "toolchain_reliability": {
     "wrangler_version": "4.128.0",
     "business_logic_changed": false
+  },
+  "measurement": {
+    "source_sha": "7fd4bb5c4b0e291ac441f399b6e0a7c684c2dd46",
+    "source_tree_sha": "5ed0b2e3ff350838e0a632b310aa6363c7d5f73a",
+    "workflow_run": 36930012580,
+    "artifact_id": 11195023646,
+    "artifact_name": "build337-evidence-gap-execution-workbench-7fd4bb5c4b0e291ac441f399b6e0a7c684c2dd46",
+    "artifact_digest": "sha256:e0d323be4226f699becf5ecacbc0da84b116defd870af036a6c5e88fe5188981",
+    "aggregate_rows_read": 1659,
+    "rows_read_ceiling": 20000,
+    "rows_read_by_statement": [
+      11,
+      14,
+      961,
+      10,
+      649,
+      14
+    ],
+    "active_workbench_rows": 5,
+    "active_gap_families": 4,
+    "gap_families": [
+      "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+      "REAL_SEARCH_CONSOLE_EXPORT",
+      "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+      "UNPROFILED_MAKER_STORY_EVIDENCE"
+    ],
+    "unprofiled_projects": 3,
+    "promo35": {
+      "execution_events": 0,
+      "result_events": 0,
+      "lesson_events": 0,
+      "story_review_status": "needs_review",
+      "public_story_candidate": 0,
+      "outcome_status": "unknown"
+    },
+    "search_console": {
+      "import_batches": 0,
+      "live_rows": 0,
+      "fresh_rows": 0,
+      "clicks": 0,
+      "impressions": 0,
+      "latest_report_date": ""
+    },
+    "grey_hair": {
+      "active_source_evidence": 3,
+      "approved_source_evidence": 1,
+      "source_evidence_needs_review": 2,
+      "reviewed_story_plans": 0,
+      "maker_story_profiles": 0
+    },
+    "other_unprofiled": [
+      {
+        "creative_work_project_id": 1,
+        "title": "lime in you coconut",
+        "active_events": 0,
+        "selected_evidence_rows": 0
+      },
+      {
+        "creative_work_project_id": 2,
+        "title": "Shirley Not",
+        "active_events": 0,
+        "selected_evidence_rows": 0
+      }
+    ],
+    "decision": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "production_d1_contact": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false
+  },
+  "decision": {
+    "classification": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "rationale": "Exact Development measurement derives five current workbench rows across the same four factual gap families observed by Build 336. The workbench only refreshes required-input routing; all completion remains owned by existing source workspaces.",
+    "active_workbench_rows": 5,
+    "active_gap_families": 4,
+    "automatic_completion_authorized": false,
+    "source_workspaces_authoritative": true,
+    "next_build": 338,
+    "next_build_title": "35th Promo Factual Evidence Completion Continuity III"
   }
 }
