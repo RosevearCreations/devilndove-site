@@ -80,7 +80,23 @@
     "confirmed_capture_tracks": 0,
     "reviewed_story_plans": 0,
     "source_backed_story_items": 0,
-    "maker_story_profiles": 0
+    "maker_story_profiles": 0,
+    "development": {
+      "sha": "2bc3b4f93ae4111773db71249dc394de8db0a08d",
+      "tree": "409c9dca0d1e0205ec496b3100e891132c71db8e",
+      "system_gate_run": 36798462026,
+      "quality_run": 36798462010,
+      "it_admin_runtime_run": 36798462006,
+      "repository_hygiene_run": 36798462040,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "6729aaa40106553b37995892b43ff982d145c3db",
+      "tree": "409c9dca0d1e0205ec496b3100e891132c71db8e",
+      "production_pages_deploy_run": 36798718111,
+      "production_live_resource_integrity_run": 36798786802,
+      "state": "PRODUCTION_GREEN"
+    }
   },
   "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md",
