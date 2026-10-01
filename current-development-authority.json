@@ -2654,6 +2654,7 @@
     "decision": "ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
     "comparison_to_build330": "ZERO_COMPARABLE_ADOPTION_DISCOVERY_DELTA",
     "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_337_342.md",
-    "roadmap_renewal_state": "BUILDS_337_342_CREATED_FROM_OBSERVED_EVIDENCE"
+    "roadmap_renewal_state": "BUILDS_337_342_CREATED_FROM_OBSERVED_EVIDENCE",
+    "exact_head_reproof_state": "PENDING_FINAL_EXACT_HEAD_MATRIX"
   }
 }
