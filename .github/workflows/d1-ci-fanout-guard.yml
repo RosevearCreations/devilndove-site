@@ -1,4 +1,5 @@
 name: D1 CI Fan-Out Guard
+# Build 326 closure marker: fan-out policy unchanged; intentional exact-head reproof.
 on:
   push:
     branches: [dev]

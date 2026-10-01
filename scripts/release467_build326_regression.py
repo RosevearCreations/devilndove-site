@@ -25,6 +25,11 @@ c=a.get('contract') or {};s=a.get('safety') or {}
 q(c.get('reuses_build319_operator_action')=='record_story_execution_evidence','Build 326 must reuse Build 319 factual intake')
 q(c.get('readiness_only') is True and c.get('automatic_story_review') is False and c.get('automatic_public_candidate') is False,'Build 326 review-first readiness boundary mismatch')
 q(c.get('next_build')==327 and c.get('next_build_title')=='Grey Hair Evidence Review Completion & Story-Plan Handoff','Build 327 successor mismatch')
+q(a.get('measurement_state')=='EXACT_DEVELOPMENT_MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED','Build 326 corrected measurement state missing')
+m=a.get('measurement_checkpoint') or {}
+q(m.get('closure_state')=='REAL_OUTCOME_EVIDENCE_STILL_REQUIRED' and int(m.get('execution_events') or 0)==0 and int(m.get('result_events') or 0)==0 and int(m.get('lesson_events') or 0)==0,'Build 326 measured factual blocker drift')
+q(m.get('profile_facts_complete') is False and m.get('outcome_resolved') is False and m.get('ready_for_explicit_human_review') is False,'Build 326 measured readiness must remain fail-closed')
+
 q(all(v is False for v in s.values()),'Build 326 safety authority drift')
 for token in ('record_story_execution_evidence','STORY_EXECUTION_EVENT_TYPES','notes.length < 20','media_url,is_public_candidate,created_by','NULL,0,?7','maker_story_auto_reviewed: false'):
     q(token in cpapi,'Build 319 factual intake authority missing '+token)

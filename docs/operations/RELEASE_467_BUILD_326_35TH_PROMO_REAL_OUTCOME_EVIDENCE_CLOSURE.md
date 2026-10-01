@@ -30,6 +30,22 @@ Existing text such as “no execution is recorded yet” or “no lesson is reco
 - Production main: `782627bb0bc0850622abc42512e3886f5556efbd`
 - Production Pages / Live Integrity: `36791987829` / `36792048457`
 
+## Exact Development measurement
+
+At Development SHA `7333d300d76115ddd1b1caf710b27e06ed08f380`, workflow `36798011459` produced artifact `11134721702`.
+
+- closure state: `REAL_OUTCOME_EVIDENCE_STILL_REQUIRED`
+- execution/process events: **0**
+- result events: **0**
+- lesson events: **0**
+- profile factual readiness: **false**
+- outcome resolved: **false**
+- ready for explicit human review: **false**
+- D1 rows read: **45 / 20,000**
+- Production D1 contact: **0**
+
+The existing `actual_result` and `lesson_learned` values are explicit absence statements and are correctly treated as missing factual evidence.
+
 ## Successor
 
 Next: **Build 327 — Grey Hair Evidence Review Completion & Story-Plan Handoff**.
