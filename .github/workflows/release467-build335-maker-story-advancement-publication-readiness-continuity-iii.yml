@@ -1,21 +1,6 @@
 name: Release 467 Build 335 Maker Story Advancement Publication Readiness Continuity III
+# Historical after Build 336 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build335_*'
-      - 'release467-build335-*.json'
-      - 'release467-build334-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_335_*'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/_lib/currentReliability.js'
-      - '.github/workflows/release467-build334-search-console-real-export-fresh-discovery-intake-iv.yml'
-      - '.github/workflows/release467-build335-maker-story-advancement-publication-readiness-continuity-iii.yml'
   workflow_dispatch:
 permissions:
   contents: read

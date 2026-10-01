@@ -1,3 +1,18 @@
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 336 candidate
+
+Build 336 — Content Adoption & Discovery Outcomes Renewal VI — starts from exact Build 335 Development/Production GREEN.
+
+- Verified Development SHA: `bec1c4bf76cf69e6b42dc3768b1de22400e0b052`
+- Verified Development/Production tree: `d8b3b0139055920106b78ee17b1a65b3cc19f3b4`
+- System / Quality / I.T. / Hygiene: `36903396649 / 36903397080 / 36903397012 / 36903396815`
+- D1 Fan-Out / Build 335: `36903396603 / 36903396887`
+- Production main: `8bda25fe29647f23a4a3b4bcb3f0ded515ae2d87`
+- Production Pages / Live: `36903693731 / 36903805049`
+
+Build 336 is read-only outcomes renewal. Successor scope remains evidence-determined until measurement.
+
+The future queue **has not run out**.
+
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 335 candidate
 
 Build 335 — Maker Story Advancement & Publication Readiness Continuity III — starts from exact Build 334 Development/Production GREEN.

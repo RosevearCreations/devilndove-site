@@ -2,43 +2,46 @@
 
 ## Current checkpoint
 
-**Build 335 — Maker Story Advancement & Publication Readiness Continuity III** is the active Development candidate over exact Build 334 Development/Production GREEN.
+**Build 336 — Content Adoption & Discovery Outcomes Renewal VI** is the active Development candidate over exact Build 335 Development/Production GREEN.
 
-Build 334 final closure:
+Build 335 final closure:
 
-- Development SHA: **e18b37a22fb5e4f0e58e8d5e240d922c499fabec**
-- Exact tree: **192445094dd80dd19570b86ad989cfffea1d4fdf**
-- System / Quality / I.T. / Hygiene: **36901438814 / 36901438501 / 36901438713 / 36901438510**
-- D1 Fan-Out / Build 334: **36901438593 / 36901438699**
-- Production main SHA: **2840cdc2ee09a2a585ec003e5f57bdc0c08cbc6c**
-- Production Pages / Live: **36901706854 / 36901831473**
+- Development SHA: **bec1c4bf76cf69e6b42dc3768b1de22400e0b052**
+- Exact tree: **d8b3b0139055920106b78ee17b1a65b3cc19f3b4**
+- System / Quality / I.T. / Hygiene: **36903396649 / 36903397080 / 36903397012 / 36903396815**
+- D1 Fan-Out / Build 335: **36903396603 / 36903396887**
+- Production main SHA: **8bda25fe29647f23a4a3b4bcb3f0ded515ae2d87**
+- Production Pages / Live: **36903693731 / 36903805049**
 - Exact Development and Production tree: **MATCH**.
 
-Build 335 remeasures all five active Creative Projects through the existing Maker Story coverage authority. Advancement requires factual evidence, substantive result/lesson facts, explicit human story review, public-candidate decisions, approved/locked copy and human publication traceability. Media/public-use rights remain separate; no automatic profile creation, review, publication, provider posting or Production D1 contact is authorized.
+Build 336 repeats the comparable 18-statement content-adoption/discovery renewal against Builds 300, 306, 312, 318, 324 and 330, retaining Build 335 readiness as context. The successor roadmap is selected only after real Development measurement.
 
-### Build 335 measured Development checkpoint
+### Build 336 measured Development checkpoint
 
-Decision: **PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY**.
+Decision: **ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST**.
 
-- 3 projects: **MAKER_STORY_EVIDENCE_REQUIRED**
-- 1 project: **FACTUAL_OUTCOME_EVIDENCE_REQUIRED**
-- 1 project: **PUBLISHED_REVIEWED_STORY**
-- New publication-review-ready projects: **0**
-- 35th Promo execution/result/lesson events: **0 / 0 / 0**
-- Grey Hair approved / needs-review source evidence: **1 / 2**
-- Grey Hair reviewed plans / source-backed items: **0 / 0**
-- Public-allowed / non-public CAIP assets: **0 / 45**
-- Review-first-ready / provider-posted social rows: **1 / 0**
-- D1 rows read: **672 / 20,000**
-- Measurement proof: **36902499406 — SUCCESS**
+- Maker Story coverage: **2/5**
+- Reviewed / public-candidate / published stories: **1 / 1 / 1**
+- Selected evidence / approved copy / locked copy: **4 / 4 / 4**
+- Search Console rows / clicks / impressions: **0 / 0 / 0**
+- Evidence-backed fresh SEO rows: **0**
+- 35th Promo: **profile present; review 0; public candidate 0; outcome unknown**
+- Remaining unprofiled projects: **3**
+- Third-story-ready projects: **0**
+- Grey Hair approved evidence / execution events / reviewed plans: **1 / 0 / 0**
+- Public telemetry: **22 views / 22 unique visitors**
+- Runtime errors (7d): **0**
+- D1 rows read: **2,847 / 20,000**
+- Comparable delta vs Build 330: **ZERO**
+- Measurement proof: **36905516991 — SUCCESS**
 
-No automatic profile creation, story review, publication, media-rights inference or provider posting is authorized.
+Observed evidence renewed the queue as **Builds 337–342**. No synthetic progress, automatic approval/publication, or provider execution is authorized.
 
 The queue **has not run out**.
 
-**Next after Build 335 Production GREEN: Build 336 — Content Adoption & Discovery Outcomes Renewal VI.**
+**Next after Build 336 Production GREEN: Build 337 — Evidence Gap Execution Workbench & Input Completion Continuity II.**
 
-Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_331_336.md`.
+Canonical renewed roadmap: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_337_342.md`.
 
 ---
 
