@@ -144,9 +144,7 @@
       "system_gate_run": 36901438814,
       "current_application_quality_run": 36901438501,
       "it_admin_runtime_proof_run": 36901438713,
-      "branch_hygiene_run": 36901438510
-    },
-    "supplemental_proofs": {
+      "branch_hygiene_run": 36901438510,
       "d1_ci_fanout_guard_run": 36901438593,
       "build_specific_proof_run": 36901438699
     },
