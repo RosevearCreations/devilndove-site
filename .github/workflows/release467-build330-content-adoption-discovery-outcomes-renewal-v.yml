@@ -1,19 +1,6 @@
 name: Release 467 Build 330 Content Adoption Discovery Outcomes Renewal V
+# Historical Build 330 exact Development proof; Build 331 owns the automatic remote-D1 successor lane once enabled.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build330_*'
-      - 'release467-build330-*.json'
-      - 'release467-build329-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_330_*'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'docs/operations/RELEASE_467_*BUILDS_331_*'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - '.github/workflows/release467-build329-maker-story-advancement-publication-readiness-continuity-ii.yml'
-      - '.github/workflows/release467-build330-content-adoption-discovery-outcomes-renewal-v.yml'
   workflow_dispatch:
 permissions:
   contents: read

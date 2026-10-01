@@ -2,7 +2,7 @@
   "release": 467,
   "build": 330,
   "title": "Content Adoption & Discovery Outcomes Renewal V",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "CONTENT_ADOPTION_DISCOVERY_OUTCOMES_RENEWAL_V",
   "authority": "release467-build330-content-adoption-discovery-outcomes-renewal-v",
   "predecessor": {
@@ -370,5 +370,36 @@
   "retained_compatibility": {
     "build265_roadmap_allowlist_extended_for_builds_331_336": true,
     "historical_private_media_logic_unchanged": true
+  },
+  "final_closure": {
+    "dev_sha": "9d0340a3038f05a0a80d25288ffedc316499438f",
+    "tree_sha": "585bb8a35b46f20278b64e97aa314ee11a9f4ccc",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD330_GREEN",
+    "proofs": {
+      "system_gate_run": 36837717408,
+      "current_application_quality_run": 36837717402,
+      "it_admin_runtime_proof_run": 36837717337,
+      "branch_hygiene_run": 36837717374
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36837717376,
+      "build_specific_proof_run": 36837717330
+    },
+    "artifact_id": 11150296134,
+    "artifact_name": "build330-content-adoption-discovery-renewal-9d0340a3038f05a0a80d25288ffedc316499438f",
+    "artifact_digest": "sha256:b95f005cc2077b3b33cef1910503bc3489949927a0237f38803e87c35712d3f0",
+    "ingested_by_build": 331
+  },
+  "production_checkpoint": {
+    "main_sha": "88b5113016acef9a0e7cc7cb7ef087b46ae01924",
+    "tree_sha": "585bb8a35b46f20278b64e97aa314ee11a9f4ccc",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36837991058,
+    "production_live_resource_integrity_run": 36838082462,
+    "production_promotion_artifact_id": 11149847776,
+    "production_promotion_artifact_digest": "sha256:11a3ca8c84eab759d11768e6ec0e8cd83e4cf74cd6aa7eb8f97a342b8e211750",
+    "remote_d1_queries": 0
   }
 }
