@@ -1,3 +1,18 @@
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 334 candidate
+
+Build 334 — Search Console Real Export & Fresh Discovery Intake IV — starts from exact Build 333 Development/Production GREEN.
+
+- Verified Development SHA: `ed3a8674ec5fd0e4363043034d694fdbb0a6822a`
+- Verified Development/Production tree: `295ee32365ac51c2988181b63d8b83a6fcae3da3`
+- System / Quality / I.T. / Hygiene: `36894103075 / 36894103073 / 36894103067 / 36894103040`
+- D1 Fan-Out / Build 333: `36894103200 / 36894103049`
+- Production main: `7b934186dcef69d76c9ad3dd6a25c4aed8ba4de4`
+- Production Pages / Live: `36894463676 / 36894596996`
+
+Build 334 preserves the real Search Console CSV intake, 30-day freshness, audit/revert traceability, and fail-closed query-level attribution. No synthetic search evidence, generated SEO copy, automatic SEO apply or Production D1 contact is authorized.
+
+The future queue **has not run out**.
+
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 333 candidate
 
 Build 333 — Grey Hair Source Review & Story-Plan Completion Continuity II — starts from exact Build 332 Development/Production GREEN.
