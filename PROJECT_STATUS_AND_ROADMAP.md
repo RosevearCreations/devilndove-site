@@ -2,17 +2,25 @@
 
 ## Current checkpoint
 
-**Build 333 — Grey Hair Source Review & Story-Plan Completion Continuity II** is the active Development candidate over exact Build 332 Development/Production GREEN.
+**Build 333 — Grey Hair Source Review & Story-Plan Completion Continuity II** is the active measured Development candidate over exact Build 332 Development/Production GREEN.
 
-Build 332 final closure:
-- Development SHA: **d4fcede4adf76a511d754012042ba91a98693812**
-- Exact tree: **4ff23c38bbe0acb7ce6ff6f9ad5ef964b329d229**
-- System / Quality / I.T. / Hygiene: **36858284606 / 36858284626 / 36858284765 / 36858284620**
-- D1 Fan-Out / Build proof: **36858284562 / 36858284635**
-- Production main: **69fd16b6322e7cbd52c5341ef2b7e871529a65ee**
-- Production Pages / Live Integrity: **36858576609 / 36858655776**
+### Build 333 measured Development checkpoint
 
-Build 333 rechecks Grey Hair's two outstanding evidence reviews, sync prerequisites, human-reviewed story planning and source-backed story items. All completion remains operator-owned in the existing authoritative workspaces.
+Decision: **SOURCE_EVIDENCE_REVIEW_REQUIRED**.
+
+- Active Grey Hair assets: **45**
+- Active source-evidence ranges: **3**
+- Approved source ranges: **1**
+- Source ranges still needing explicit review: **2**
+- Rejected source ranges: **0**
+- Confirmed sync groups / tracks: **0 / 0**
+- Reviewed / approved story plans: **0 / 0**
+- Source-backed story items: **0**
+- Maker Story profiles: **0**
+- Delta versus Build 331 across all tracked completion counters: **zero**
+- D1 rows read: **124 / 20,000**
+
+The next safe action remains explicit review of the two outstanding source-evidence ranges. No sync confirmation, story-plan review, Maker Story creation, media-rights inference or publication was synthesized.
 
 The queue **has not run out**.
 
