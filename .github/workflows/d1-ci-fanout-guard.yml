@@ -1,3 +1,4 @@
+# Build 331 exact measurement: Build 330 historical D1 workflow is manual-only; Build 331 is the sole automatic remote-D1 successor.
 # Build 331 candidate preparation: Build 330 remote-D1 workflow is historical manual-only; Build 331 becomes the sole automatic remote-D1 successor after gate convergence.
 # Build 330 final compatibility closure: retained Build 265 roadmap allowlist recognizes the observed-evidence Builds 331-336 roadmap; D1 lane unchanged.
 # Build 330 final exact-head reproof after measured roadmap renewal; Build 330 remains the sole automatic remote-D1 successor.
