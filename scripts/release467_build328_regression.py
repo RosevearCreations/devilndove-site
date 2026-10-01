@@ -12,6 +12,7 @@ p=j('current-development-authority.json')
 api=t('functions/api/admin/search-console-import.js');ui=t('public/js/admin-search-console-import.js')
 sql=t('scripts/release467_build328_continuity.sql');verify=t('scripts/release467_build328_verify_continuity.mjs')
 road=t('docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md')
+wf=t('.github/workflows/release467-build328-search-console-real-export-freshness-discovery-intake-iii.yml')
 q(a.get('build')==328 and a.get('title')=='Search Console Real Export Freshness & Discovery Intake III','Build 328 identity mismatch')
 q(prev.get('state')=='PRODUCTION_GREEN','Build 327 Production closure not successor-ingested')
 q((prev.get('final_closure') or {}).get('dev_sha')=='26577d73b3747ffc2c02e31e11df86b924abdb2f' and (prev.get('final_closure') or {}).get('tree_sha')=='935849941e1a9907487abcf984505233f9bfb803','Build 327 exact Development closure missing')
@@ -31,6 +32,8 @@ for token in ('operator_bound_batches','csv_named_batches','import_audits','inva
     q(token in sql,'Build 328 SQL missing '+token)
 for token in ('EVIDENCE_PENDING_NO_REAL_EXPORT','REAL_EVIDENCE_STALE_NON_ACTIONABLE','REAL_EVIDENCE_FRESH_NO_SUPPORTED_SEO_OPPORTUNITY','REAL_EVIDENCE_FRESH_REVIEW_QUEUE_ELIGIBLE','freshness_window_days:30','synthetic_rows:false','queue_mutation:false','production_d1_contact:false'):
     q(token in verify,'Build 328 verifier missing '+token)
+for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','REAL EXPORT CONFIRMATION REQUIRED','FRESHNESS WINDOW: 30 DAYS','FALLBACK REPORT DATE REQUIRED WHEN DATE COLUMN ABSENT','STALE SEARCH EVIDENCE: NON-ACTIONABLE','SYNTHETIC DISCOVERY ROWS: ZERO','AUTOMATIC SEO APPLY: ZERO','PROVIDER EXECUTION: ZERO','PRODUCTION D1 CONTACT: ZERO'):
+    q(token in wf,'Build 328 workflow boundary missing '+token)
 q('Build 329 — Maker Story Advancement & Publication Readiness Continuity II' in road,'Build 329 successor roadmap missing')
 q(int(p.get('build') or 0)>=328,'Current pointer must retain Build 328 or successor')
 if int(p.get('build') or 0)==328:q(int(p.get('next_build') or 0)==329,'Build 329 successor pointer missing')

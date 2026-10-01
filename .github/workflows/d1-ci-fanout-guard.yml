@@ -1,5 +1,5 @@
 name: D1 CI Fan-Out Guard
-# Build 327 final exact-head reproof: Build 326 historical workflow remains manual-only; Build 327 is the sole automatic remote-D1 workflow.
+# Build 328 candidate: Build 327 historical D1 workflow is manual-only; Build 328 is the sole automatic remote-D1 successor.
 on:
   push:
     branches: [dev]
