@@ -1,34 +1,35 @@
-/* BUILD329_CURRENT_PROVENANCE: Maker Story Advancement & Publication Readiness Continuity II; verified Build 328 dev d6bf534016c85e4fa295aa6fbdaa12efb4659647; tree 3f456f3d9cd2cde9ecf809c4530a0a46bbd45e4e; System 36822476304; Quality 36822476389; IT 36822476303; Hygiene 36822476318; Production 13210bde05ea77607095f532681d78024758bd23; Pages 36822798028; Live 36822855257. */
-/* BUILD328_CURRENT_PROVENANCE: Search Console Real Export Freshness & Discovery Intake III; verified Build 327 dev d6bf534016c85e4fa295aa6fbdaa12efb4659647; tree 3f456f3d9cd2cde9ecf809c4530a0a46bbd45e4e; Production 13210bde05ea77607095f532681d78024758bd23; Pages 36822798028; Live 36822855257. */
-/* BUILD327_CURRENT_PROVENANCE: verified Build 326 dev d6bf534016c85e4fa295aa6fbdaa12efb4659647; tree 3f456f3d9cd2cde9ecf809c4530a0a46bbd45e4e; System 36822476304; Quality 36822476389; IT 36822476303; Hygiene 36822476318; Production 13210bde05ea77607095f532681d78024758bd23; Pages 36822798028; Live 36822855257. */
-/* CURRENT_BUILD_329_TRUTH: Search Console Real Export Freshness & Discovery Intake III; last verified dev d6bf534016c85e4fa295aa6fbdaa12efb4659647; tree 3f456f3d9cd2cde9ecf809c4530a0a46bbd45e4e; Production main 13210bde05ea77607095f532681d78024758bd23; Pages 36822798028; Live 36822855257. */
-// Release 467 Build 329 — Maker Story Advancement & Publication Readiness Continuity II over exact Build 326 Production source.
+/* BUILD330_CURRENT_PROVENANCE: Content Adoption & Discovery Outcomes Renewal V; verified Build 329 dev aaeeb829d092d0174db29084e35380d83c0d620c; tree 8310fde78f64bfb80aa2169c9a60a33685cd3d6e; System 36825720274; Quality 36825720283; IT 36825720356; Hygiene 36825720291; Production 05bf93a1deba88f4222397f7288cae2851fc7278; Pages 36826043608; Live 36826115468. */
+/* BUILD329_CURRENT_PROVENANCE: Maker Story Advancement & Publication Readiness Continuity II; verified Build 328 dev aaeeb829d092d0174db29084e35380d83c0d620c; tree 8310fde78f64bfb80aa2169c9a60a33685cd3d6e; System 36825720274; Quality 36825720283; IT 36825720356; Hygiene 36825720291; Production 05bf93a1deba88f4222397f7288cae2851fc7278; Pages 36826043608; Live 36826115468. */
+/* BUILD328_CURRENT_PROVENANCE: Maker Story Advancement & Publication Readiness Continuity II; verified Build 327 dev aaeeb829d092d0174db29084e35380d83c0d620c; tree 8310fde78f64bfb80aa2169c9a60a33685cd3d6e; Production 05bf93a1deba88f4222397f7288cae2851fc7278; Pages 36826043608; Live 36826115468. */
+/* BUILD327_CURRENT_PROVENANCE: verified Build 326 dev aaeeb829d092d0174db29084e35380d83c0d620c; tree 8310fde78f64bfb80aa2169c9a60a33685cd3d6e; System 36825720274; Quality 36825720283; IT 36825720356; Hygiene 36825720291; Production 05bf93a1deba88f4222397f7288cae2851fc7278; Pages 36826043608; Live 36826115468. */
+/* CURRENT_BUILD_330_TRUTH: Maker Story Advancement & Publication Readiness Continuity II; last verified dev aaeeb829d092d0174db29084e35380d83c0d620c; tree 8310fde78f64bfb80aa2169c9a60a33685cd3d6e; Production main 05bf93a1deba88f4222397f7288cae2851fc7278; Pages 36826043608; Live 36826115468. */
+// Release 467 Build 330 — Content Adoption & Discovery Outcomes Renewal V over exact Build 326 Production source.
 import { jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getReadinessControlTower } from './it-control-tower.js';
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=329;
-const TITLE='Maker Story Advancement & Publication Readiness Continuity II';
-const AUTHORITY='release467-build329-maker-story-advancement-publication-readiness-continuity-ii';
-const EVIDENCE_ID='r467-b327-candidate-36822476304-36822798028';
+const BUILD=330;
+const TITLE='Content Adoption & Discovery Outcomes Renewal V';
+const AUTHORITY='release467-build330-content-adoption-discovery-outcomes-renewal-v';
+const EVIDENCE_ID='r467-b327-candidate-36825720274-36826043608';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:326,title:'Search Console Real Export Freshness & Discovery Intake III',state:'DEVELOPMENT_GREEN',
-  dev_sha:'d6bf534016c85e4fa295aa6fbdaa12efb4659647',tree_sha:'3f456f3d9cd2cde9ecf809c4530a0a46bbd45e4e',system_gate_run:36822476304,current_application_quality_run:36822476389,it_admin_runtime_proof_run:36822476303,branch_hygiene_run:36822476318,proof_state:'EXACT_BRANCH_HEAD_BUILD328_GREEN',exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
+  release:467,build:326,title:'Maker Story Advancement & Publication Readiness Continuity II',state:'DEVELOPMENT_GREEN',
+  dev_sha:'aaeeb829d092d0174db29084e35380d83c0d620c',tree_sha:'8310fde78f64bfb80aa2169c9a60a33685cd3d6e',system_gate_run:36825720274,current_application_quality_run:36825720283,it_admin_runtime_proof_run:36825720356,branch_hygiene_run:36825720291,proof_state:'EXACT_BRANCH_HEAD_BUILD329_GREEN',exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:326,title:'Search Console Real Export Freshness & Discovery Intake III',state:'DEVELOPMENT_GREEN',
-  dev_sha:'d6bf534016c85e4fa295aa6fbdaa12efb4659647',tree_sha:'3f456f3d9cd2cde9ecf809c4530a0a46bbd45e4e',accepted_sha:'d6bf534016c85e4fa295aa6fbdaa12efb4659647',accepted_tree_sha:'3f456f3d9cd2cde9ecf809c4530a0a46bbd45e4e',system_gate_run:36822476304,current_application_quality_run:36822476389,it_admin_runtime_proof_run:36822476303,branch_hygiene_run:36822476318,proof_state:'EXACT_BRANCH_HEAD_BUILD328_GREEN'
+  release:467,build:326,title:'Maker Story Advancement & Publication Readiness Continuity II',state:'DEVELOPMENT_GREEN',
+  dev_sha:'aaeeb829d092d0174db29084e35380d83c0d620c',tree_sha:'8310fde78f64bfb80aa2169c9a60a33685cd3d6e',accepted_sha:'aaeeb829d092d0174db29084e35380d83c0d620c',accepted_tree_sha:'8310fde78f64bfb80aa2169c9a60a33685cd3d6e',system_gate_run:36825720274,current_application_quality_run:36825720283,it_admin_runtime_proof_run:36825720356,branch_hygiene_run:36825720291,proof_state:'EXACT_BRANCH_HEAD_BUILD329_GREEN'
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:326,title:'Search Console Real Export Freshness & Discovery Intake III',state:'PRODUCTION_GREEN',
-  main_sha:'13210bde05ea77607095f532681d78024758bd23',tree_sha:'3f456f3d9cd2cde9ecf809c4530a0a46bbd45e4e',production_pages_deploy_run:36822798028,production_live_resource_integrity_run:36822855257,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36822476326,remote_d1_queries:0
+  release:467,build:326,title:'Maker Story Advancement & Publication Readiness Continuity II',state:'PRODUCTION_GREEN',
+  main_sha:'05bf93a1deba88f4222397f7288cae2851fc7278',tree_sha:'8310fde78f64bfb80aa2169c9a60a33685cd3d6e',production_pages_deploy_run:36826043608,production_live_resource_integrity_run:36826115468,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36825720270,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true,workflow:'.github/workflows/production-live-resource-integrity-proof.yml'
 });
-const CURRENT_GUARDS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 329 Grey Hair Evidence Review Completion Story Plan Handoff']);
+const CURRENT_GUARDS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 330 Grey Hair Evidence Review Completion Story Plan Handoff']);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql','0026_release467_inventory_workstation_memberships.sql','0027_release467_caip_workshop_follies_maker_story_foundation.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
@@ -117,7 +118,7 @@ export async function onRequestGet(context){
       production_proof_transport:PRODUCTION_PROOF_TRANSPORT,
       restart_integrity:{
         protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1',last_fully_verified:VERIFIED_DEVELOPMENT,
-        current_closure_candidate:{release:467,build:329,title:TITLE,authority:'release467-build329-maker-story-advancement-publication-readiness-continuity-ii.json'},
+        current_closure_candidate:{release:467,build:330,title:TITLE,authority:'release467-build330-content-adoption-discovery-outcomes-renewal-v.json'},
         candidate_must_not_self_claim_final_proof:true,exact_current_sha_resolution:'VERIFY dev AND main REFS AT RESTART'
       },
       current_automatic_guards:CURRENT_GUARDS,persistent_branches:['main','dev'],
