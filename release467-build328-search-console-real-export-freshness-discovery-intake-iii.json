@@ -2,7 +2,7 @@
   "release": 467,
   "build": 328,
   "title": "Search Console Real Export Freshness & Discovery Intake III",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "SEARCH_CONSOLE_REAL_EXPORT_FRESHNESS_DISCOVERY_INTAKE_III",
   "authority": "release467-build328-search-console-real-export-freshness-discovery-intake-iii",
   "predecessor": {
@@ -144,5 +144,36 @@
     "automatic_seo_apply": false,
     "provider_execution": false,
     "production_d1_contact": false
+  },
+  "final_closure": {
+    "dev_sha": "d6bf534016c85e4fa295aa6fbdaa12efb4659647",
+    "tree_sha": "3f456f3d9cd2cde9ecf809c4530a0a46bbd45e4e",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD328_GREEN",
+    "proofs": {
+      "system_gate_run": 36822476304,
+      "current_application_quality_run": 36822476389,
+      "it_admin_runtime_proof_run": 36822476303,
+      "branch_hygiene_run": 36822476318
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36822476512,
+      "build_specific_proof_run": 36822476326
+    },
+    "artifact_id": 11143437960,
+    "artifact_name": "build328-search-console-freshness-intake-d6bf534016c85e4fa295aa6fbdaa12efb4659647",
+    "artifact_digest": "sha256:f755263eaebcfc07a57d090333955e43ae82aad2312fc06cd7a4a3ceccc3fbf0",
+    "ingested_by_build": 329
+  },
+  "production_checkpoint": {
+    "main_sha": "13210bde05ea77607095f532681d78024758bd23",
+    "tree_sha": "3f456f3d9cd2cde9ecf809c4530a0a46bbd45e4e",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36822798028,
+    "production_live_resource_integrity_run": 36822855257,
+    "production_promotion_artifact_id": 11143388466,
+    "production_promotion_artifact_digest": "sha256:18e54c543192c1ac535a3c929d177c93cc024d2c1cd5a8e6093f7936ba544723",
+    "remote_d1_queries": 0
   }
 }
