@@ -98,14 +98,65 @@
       "state": "PRODUCTION_GREEN"
     }
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "measurement_state": "MEASURED_EXACT_DEVELOPMENT",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md",
   "decision": {
-    "classification": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
-    "rationale": "Build 327 rechecks the two historically needs-review Grey Hair source ranges and hands off only through the existing CAIP Evidence Review, Sync & Audio Alignment, and human-reviewed Story/Edit Planning authorities.",
+    "classification": "SOURCE_EVIDENCE_REVIEW_REQUIRED",
+    "rationale": "Exact Development measurement shows two active Grey Hair source ranges still require explicit operator review. Build 327 is software-GREEN and intentionally reports the real blocker rather than manufacturing evidence completion.",
+    "approved_source_evidence": 1,
+    "source_evidence_needs_review": 2,
+    "confirmed_capture_groups": 0,
+    "confirmed_capture_tracks": 0,
+    "reviewed_story_plans": 0,
+    "source_backed_story_items": 0,
     "automatic_maker_story_creation_authorized": false,
     "publication_authorized": false,
     "next_build": 328,
     "next_build_title": "Search Console Real Export Freshness & Discovery Intake III"
+  },
+  "measurement_checkpoint": {
+    "source_sha": "18ba3ea169875dc564ca6b39cb77abe36d7f44ea",
+    "source_tree_sha": "6dc424e8187fc97f88acddc5801a59f4b930a62a",
+    "dedicated_workflow_run": 36804838090,
+    "artifact_id": 11137666249,
+    "artifact_name": "build327-grey-hair-evidence-review-story-plan-handoff-18ba3ea169875dc564ca6b39cb77abe36d7f44ea",
+    "artifact_digest": "sha256:3ae4515b5caa702b160a61fd104f90bf7f03ee5a2e912fd50afdb8f4f97fb426",
+    "d1_rows_read_by_statement": [
+      62,
+      7,
+      2,
+      53
+    ],
+    "aggregate_d1_rows_read": 124,
+    "d1_rows_read_ceiling": 20000,
+    "handoff_state": "SOURCE_EVIDENCE_REVIEW_REQUIRED",
+    "active_assets": 45,
+    "active_source_evidence": 3,
+    "approved_source_evidence": 1,
+    "source_evidence_needs_review": 2,
+    "rejected_source_evidence": 0,
+    "latest_evidence_review_at": "2026-08-26 18:50:19",
+    "confirmed_capture_groups": 0,
+    "confirmed_capture_tracks": 0,
+    "reviewed_story_plans": 0,
+    "approved_story_plans": 0,
+    "source_backed_story_items": 0,
+    "maker_story_profiles": 0,
+    "measurement_is_descriptive": true,
+    "synthetic_completion": false,
+    "production_d1_contact": false
+  },
+  "development_candidate_checkpoint": {
+    "source_sha": "18ba3ea169875dc564ca6b39cb77abe36d7f44ea",
+    "source_tree_sha": "6dc424e8187fc97f88acddc5801a59f4b930a62a",
+    "state": "DEVELOPMENT_GREEN",
+    "proofs": {
+      "system_gate_run": 36804838059,
+      "current_application_quality_run": 36804838099,
+      "it_admin_runtime_proof_run": 36804838228,
+      "branch_hygiene_run": 36804838125,
+      "build_specific_proof_run": 36804838090
+    },
+    "note": "Final closure commit must be re-proven at its exact branch head before promotion."
   }
 }

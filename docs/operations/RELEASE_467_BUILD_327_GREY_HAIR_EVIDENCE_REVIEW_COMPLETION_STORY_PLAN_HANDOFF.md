@@ -14,3 +14,17 @@ The CI measurement is descriptive: a remaining blocker is a valid GREEN software
 After Build 327 is Production GREEN, the queue continues with **Build 328 — Search Console Real Export Freshness & Discovery Intake III**.
 
 The future queue **has not run out**.
+
+## Measured Development outcome
+
+Exact candidate `18ba3ea169875dc564ca6b39cb77abe36d7f44ea` / tree `6dc424e8187fc97f88acddc5801a59f4b930a62a` measured **124 rows read** against a **20,000-row ceiling**. State: **SOURCE_EVIDENCE_REVIEW_REQUIRED**.
+
+- Active source evidence: 3
+- Approved: 1
+- Needs review: 2
+- Confirmed sync groups/tracks: 0 / 0
+- Reviewed story plans: 0
+- Source-backed story items: 0
+- Maker Story profiles: 0
+
+The software path is GREEN while the content handoff remains intentionally blocked on explicit operator review.

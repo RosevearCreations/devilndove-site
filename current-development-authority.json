@@ -219,7 +219,7 @@
   "next_build": 328,
   "next_build_state": "QUEUED_AFTER_BUILD327_PRODUCTION_GREEN",
   "next_build_title": "Search Console Real Export Freshness & Discovery Intake III",
-  "promotion_state": "BUILD327_CANDIDATE_NOT_YET_VERIFIED",
+  "promotion_state": "BUILD327_FINAL_EXACT_HEAD_REPROOF_PENDING",
   "successor_scope_state": "BUILD328_DEFINED_BY_CANONICAL_ROADMAP",
   "measured_closure": {
     "source_build": 232,
@@ -1887,7 +1887,7 @@
   },
   "grey_hair_evidence_review_completion_story_plan_handoff": {
     "source_build": 327,
-    "state": "DEVELOPMENT_CANDIDATE",
+    "state": "DEVELOPMENT_GREEN_MEASURED",
     "target_creative_work_project_id": 6,
     "target_project_key": "CP-MSUNAL8R",
     "target_title": "Grey Hair",
@@ -1895,7 +1895,7 @@
     "evidence_review_authority": "/admin/creative-assets/",
     "sync_review_authority": "/admin/grey-hair-sync-alignment/",
     "story_plan_authority": "/admin/grey-hair-story-edit-planning/",
-    "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "measurement_state": "MEASURED_EXACT_DEVELOPMENT",
     "automatic_evidence_approval": false,
     "automatic_story_plan_generation": false,
     "automatic_story_plan_review": false,
@@ -1906,6 +1906,41 @@
     "production_d1_contact": false,
     "next_build": 328,
     "next_build_title": "Search Console Real Export Freshness & Discovery Intake III",
-    "future_queue_exhausted": false
+    "future_queue_exhausted": false,
+    "measurement_checkpoint": {
+      "source_sha": "18ba3ea169875dc564ca6b39cb77abe36d7f44ea",
+      "source_tree_sha": "6dc424e8187fc97f88acddc5801a59f4b930a62a",
+      "dedicated_workflow_run": 36804838090,
+      "artifact_id": 11137666249,
+      "artifact_name": "build327-grey-hair-evidence-review-story-plan-handoff-18ba3ea169875dc564ca6b39cb77abe36d7f44ea",
+      "artifact_digest": "sha256:3ae4515b5caa702b160a61fd104f90bf7f03ee5a2e912fd50afdb8f4f97fb426",
+      "d1_rows_read_by_statement": [
+        62,
+        7,
+        2,
+        53
+      ],
+      "aggregate_d1_rows_read": 124,
+      "d1_rows_read_ceiling": 20000,
+      "handoff_state": "SOURCE_EVIDENCE_REVIEW_REQUIRED",
+      "active_assets": 45,
+      "active_source_evidence": 3,
+      "approved_source_evidence": 1,
+      "source_evidence_needs_review": 2,
+      "rejected_source_evidence": 0,
+      "latest_evidence_review_at": "2026-08-26 18:50:19",
+      "confirmed_capture_groups": 0,
+      "confirmed_capture_tracks": 0,
+      "reviewed_story_plans": 0,
+      "approved_story_plans": 0,
+      "source_backed_story_items": 0,
+      "maker_story_profiles": 0,
+      "measurement_is_descriptive": true,
+      "synthetic_completion": false,
+      "production_d1_contact": false
+    },
+    "handoff_state": "SOURCE_EVIDENCE_REVIEW_REQUIRED",
+    "operator_next_action": "Review the two remaining active Grey Hair source-evidence ranges in CAIP Evidence Review.",
+    "automatic_completion": false
   }
 }
