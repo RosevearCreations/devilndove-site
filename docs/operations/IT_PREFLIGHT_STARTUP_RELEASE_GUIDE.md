@@ -1,3 +1,18 @@
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 332 candidate
+
+Build 332 — 35th Promo Factual Evidence Completion Continuity II — starts from exact Build 331 Development/Production GREEN.
+
+- Verified Development SHA: `5246cd2c0ea6ec6568c31f91f272e225d1e40cbe`
+- Verified Development/Production tree: `269ea72e333d4ff7883121456d9b65aab83070c3`
+- System / Quality / I.T. / Hygiene: `36844052823 / 36844052767 / 36844052757 / 36844052753`
+- D1 Fan-Out / Build 331: `36844052740 / 36844052805`
+- Production main: `0fce96f146d63411feb401b546c12b945ab861ac`
+- Production Pages / Live: `36844288432 / 36844371166`
+
+Build 332 is read-only in CI and reuses the existing human factual intake. No automatic review or publication is authorized.
+
+The future queue **has not run out**.
+
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 331 candidate
 
 Build 331 — Evidence Gap Execution Workbench & Input Completion Continuity — starts from exact Build 330 Development/Production GREEN.

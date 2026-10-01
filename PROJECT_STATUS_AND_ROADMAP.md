@@ -2,26 +2,21 @@
 
 ## Current checkpoint
 
-**Build 331 — Evidence Gap Execution Workbench & Input Completion Continuity** is the active measured Development candidate over exact Build 330 Development/Production GREEN.
+**Build 332 — 35th Promo Factual Evidence Completion Continuity II** is the active Development candidate over exact Build 331 Development/Production GREEN.
 
-### Build 331 measured Development checkpoint
+Build 331 final closure:
+- Development SHA: **5246cd2c0ea6ec6568c31f91f272e225d1e40cbe**
+- Exact tree: **269ea72e333d4ff7883121456d9b65aab83070c3**
+- System / Quality / I.T. / Hygiene: **36844052823 / 36844052767 / 36844052757 / 36844052753**
+- D1 Fan-Out / Build proof: **36844052740 / 36844052805**
+- Production main: **0fce96f146d63411feb401b546c12b945ab861ac**
+- Production Pages / Live Integrity: **36844288432 / 36844371166**
 
-Decision: **EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED**.
-
-- Open workbench rows: **5**
-- Active gap families: **4**
-- 35th Promo: **0 execution / 0 result / 0 lesson events**, needs review, outcome unknown
-- Search Console: **0 batches / 0 rows / 0 fresh rows / 0 clicks / 0 impressions**
-- Grey Hair: **3 active source ranges / 1 approved / 2 needs-review / 0 reviewed story plans / 0 Maker Story profiles**
-- Other unprofiled workbench projects: **lime in you coconut** and **Shirley Not**, both with 0 active events / 0 selected evidence
-- Workbench writes/completion persistence: **0**
-- D1 rows read: **1,659 / 20,000**
-
-The workbench only routes real operator input to existing source authorities. It cannot assign, acknowledge, resolve, fabricate evidence, approve a story or mark source work complete.
+Build 332 rechecks only real 35th Promo execution/process, result and lesson evidence plus substantive Maker Story facts. It can declare explicit human-review readiness, but never performs the review or public-candidate decision automatically.
 
 The queue **has not run out**.
 
-**Next after Build 331 Production GREEN: Build 332 — 35th Promo Factual Evidence Completion Continuity II.**
+**Next after Build 332 Production GREEN: Build 333 — Grey Hair Source Review & Story-Plan Completion Continuity II.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_331_336.md`.
 
