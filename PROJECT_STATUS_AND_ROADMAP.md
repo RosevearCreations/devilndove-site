@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-**Build 330 — Content Adoption & Discovery Outcomes Renewal V** is the active Development candidate over exact Build 329 Development/Production GREEN.
+**Build 330 — Content Adoption & Discovery Outcomes Renewal V** is the active measured Development candidate over exact Build 329 Development/Production GREEN.
 
 Build 329 final closure:
 - Development SHA: **aaeeb829d092d0174db29084e35380d83c0d620c**
@@ -16,15 +16,33 @@ Build 329 final closure:
 - Production main SHA: **05bf93a1deba88f4222397f7288cae2851fc7278**
 - Production Pages Deploy: **36826043608 — SUCCESS**
 - Production Live Resource Integrity: **36826115468 — SUCCESS**
-- Exact Development and Production tree: **MATCH**.
 
-Build 330 repeats the comparable full-path adoption/discovery renewal against Builds 300, 306, 312, 318 and 324, with Build 329 readiness retained as context. The next roadmap will be created only from the measured Build 330 evidence.
+### Build 330 measured Development checkpoint
+
+Decision: **ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST**.
+
+- Maker Story coverage: **2/5**
+- Reviewed/public-candidate/published stories: **1**
+- Selected evidence: **4**
+- Approved / locked copy: **4 / 4**
+- Review-first social: **1 ready / 0 posted**
+- Search Console: **0 recent rows / 0 clicks / 0 impressions**
+- Evidence-backed fresh SEO rows: **0**
+- 35th Promo remains outcome-unknown and not reviewed/public
+- Grey Hair: **1 approved source range / 0 execution / 0 reviewed story plans**
+- Third-story-ready projects: **0**
+- Public telemetry: **22 / 22**
+- Runtime errors: **0**
+- D1 rows read: **2,847 / 20,000**
+- Delta vs Build 324: **zero across the comparable adoption/discovery contract**
+
+Observed evidence created the renewed Builds **331–336** roadmap.
 
 The queue **has not run out**.
 
-**Next slot after Build 330 Production GREEN: Build 331 — evidence-determined from Build 330 measurement.**
+**Next after Build 330 Production GREEN: Build 331 — Evidence Gap Execution Workbench & Input Completion Continuity.**
 
-Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md`.
+Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_331_336.md`.
 
 ---
 

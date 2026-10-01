@@ -21,9 +21,15 @@ for token in ('Maker Story adoption/completeness','Buyer discovery/public teleme
 for token in ('build300','build306','build312','build318','build324','build329','ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST','ADOPTION_PROGRESS_OBSERVED','REAL_DISCOVERY_EVIDENCE_OBSERVED','comparison_to_build324','automatic_story_generation:false','production_d1_contact:false'):q(token in verify,'Build 330 verifier missing '+token)
 for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','COMPARISON BASELINES: BUILDS 300 / 306 / 312 / 318 / 324','ROADMAP RENEWAL: OBSERVED EVIDENCE ONLY','BUSINESS DATA MUTATION: ZERO','PROVIDER EXECUTION: ZERO','PRODUCTION D1 CONTACT: ZERO'):q(token in wf,'Build 330 workflow boundary missing '+token)
 q('Build 330 — Content Adoption & Discovery Outcomes Renewal V' in road,'Build 330 canonical roadmap entry missing')
+q(a.get('measurement_state')=='EXACT_DEVELOPMENT_MEASURED_GREEN','Build 330 exact measured state missing')
+q(a.get('roadmap_renewal_state')=='BUILDS_331_336_CREATED_FROM_OBSERVED_EVIDENCE','Build 330 roadmap renewal state missing')
+q(a.get('next_roadmap')=='docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_331_336.md','Build 330 successor roadmap authority missing')
+road2=t('docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_331_336.md')
+for token in ('Build 331 — Evidence Gap Execution Workbench & Input Completion Continuity','Build 332 — 35th Promo Factual Evidence Completion Continuity II','Build 333 — Grey Hair Source Review & Story-Plan Completion Continuity II','Build 334 — Search Console Real Export & Fresh Discovery Intake IV','Build 335 — Maker Story Advancement & Publication Readiness Continuity III','Build 336 — Content Adoption & Discovery Outcomes Renewal VI'):
+ q(token in road2,'Build 330 renewed roadmap missing '+token)
 q(int(p.get('build') or 0)>=330,'Current pointer must retain Build 330 or successor')
 if int(p.get('build') or 0)==330:q(p.get('state')=='DEVELOPMENT_GREEN' and int(p.get('next_build') or 0)==331,'Build 330 current authority/successor slot mismatch')
 print('RELEASE 467 BUILD 330 CONTENT ADOPTION & DISCOVERY OUTCOMES RENEWAL V')
 if F:
  print('FAIL');[print('-',x) for x in F];sys.exit(1)
-print('PASS');print('Successor roadmap remains evidence-determined until exact Development measurement')
+print('PASS');print('Observed Build 330 evidence renewed Builds 331-336')
