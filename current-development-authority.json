@@ -2591,6 +2591,7 @@
         "provider_posted_rows": 0
       }
     },
-    "automatic_advancement": false
+    "automatic_advancement": false,
+    "exact_head_reproof_state": "PENDING_FINAL_EXACT_HEAD_MATRIX"
   }
 }
