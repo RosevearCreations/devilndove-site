@@ -1,3 +1,18 @@
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 338 candidate
+
+Build 338 — 35th Promo Factual Evidence Completion Continuity III — starts from exact Build 337 Development/Production GREEN.
+
+- Verified Development SHA: `8f5d038fa7c7d5b3213f6d64f51d659c3ce74994`
+- Verified Development/Production tree: `3d173e98cfdf48b2efafdfb55a326c275e9cd041`
+- System / Quality / I.T. / Hygiene: `36931039442 / 36931039645 / 36931039474 / 36931039538`
+- D1 Fan-Out / Build 337: `36931039684 / 36931039501`
+- Production main: `cf588329be80a4cf463d0632845521f4e3685991`
+- Production Pages / Live: `36931257221 / 36931361695`
+
+Build 338 is a read-only factual-completeness measurement over the existing operator-controlled evidence intake. Human review remains explicit.
+
+The future queue **has not run out**.
+
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 337 candidate
 
 Build 337 — Evidence Gap Execution Workbench & Input Completion Continuity II — starts from exact Build 336 Development/Production GREEN.
