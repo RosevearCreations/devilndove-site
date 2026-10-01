@@ -1,5 +1,5 @@
 name: D1 CI Fan-Out Guard
-# Build 329 candidate preparation: Build 328 remote-D1 workflow is historical manual-only; Build 329 becomes the sole automatic remote-D1 successor after gate convergence.
+# Build 329 exact proof: Build 328 historical D1 workflow is manual-only; Build 329 is the sole automatic remote-D1 successor.
 on:
   push:
     branches: [dev]
