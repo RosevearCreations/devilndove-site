@@ -1,3 +1,18 @@
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 337 candidate
+
+Build 337 — Evidence Gap Execution Workbench & Input Completion Continuity II — starts from exact Build 336 Development/Production GREEN.
+
+- Verified Development SHA: `537cc518573159ea2c511c32f01469bbd97ccf63`
+- Verified Development/Production tree: `334706f50429ceb0796abc98a4f516390036d6b5`
+- System / Quality / I.T. / Hygiene: `36906245515 / 36906245469 / 36906245709 / 36906245367`
+- D1 Fan-Out / Build 336: `36906245333 / 36906245475`
+- Production main: `1419a505747871a5703ad087134b3b7bebafd337`
+- Production Pages / Live: `36906590213 / 36906709351`
+
+Build 337 refreshes the existing GET-only evidence-gap projection. Source workspaces remain authoritative and completion persistence remains zero.
+
+The future queue **has not run out**.
+
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 336 candidate
 
 Build 336 — Content Adoption & Discovery Outcomes Renewal VI — starts from exact Build 335 Development/Production GREEN.
