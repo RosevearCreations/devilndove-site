@@ -180,15 +180,38 @@ async function operatorAcceptance(db, providedReadiness = null) {
   return { state, schema_ready:true, ...stats, automatic_import:false, synthetic_rows:false, request_time_schema_mutation:false, safe_revert_action:'delete_batch', import_audit_action:'search_console_import', revert_audit_action:'search_console_delete_batch' };
 }
 
+async function searchConsoleFreshness(db, providedReadiness = null) {
+  const schemaReadiness=providedReadiness||await searchConsoleSchemaReadiness(db);
+  if(!schemaReadiness.ready)return {state:'SCHEMA_BLOCKED',freshness_window_days:30,total_rows:0,recent_rows:0,latest_report_date:'',latest_report_age_days:null,actionable:false};
+  const row=await db.prepare(`SELECT
+    COUNT(*) total_rows,
+    SUM(CASE WHEN date(COALESCE(report_date,created_at))>=date('now','-30 days') THEN 1 ELSE 0 END) recent_rows,
+    COALESCE(SUM(CASE WHEN date(COALESCE(report_date,created_at))>=date('now','-30 days') THEN clicks ELSE 0 END),0) recent_clicks,
+    COALESCE(SUM(CASE WHEN date(COALESCE(report_date,created_at))>=date('now','-30 days') THEN impressions ELSE 0 END),0) recent_impressions,
+    COALESCE(MAX(report_date),'') latest_report_date,
+    CASE WHEN MAX(report_date) IS NULL OR trim(MAX(report_date))='' THEN NULL ELSE ROUND(julianday('now')-julianday(MAX(report_date)),2) END latest_report_age_days,
+    SUM(CASE WHEN report_date IS NULL OR trim(COALESCE(report_date,''))='' OR date(report_date) IS NULL THEN 1 ELSE 0 END) invalid_report_date_rows,
+    COUNT(DISTINCT report_date) report_dates
+    FROM search_console_page_queries`).first().catch(()=>null);
+  if(!row)return {state:'TRACEABILITY_REVIEW_REQUIRED',freshness_window_days:30,actionable:false};
+  const total=Number(row.total_rows||0),recent=Number(row.recent_rows||0),invalid=Number(row.invalid_report_date_rows||0);
+  let state='EVIDENCE_PENDING_NO_REAL_EXPORT';
+  if(total>0&&invalid>0)state='REPORT_DATE_REVIEW_REQUIRED';
+  else if(total>0&&recent===0)state='REAL_EVIDENCE_STALE_NON_ACTIONABLE';
+  else if(recent>0)state='REAL_OPERATOR_EVIDENCE_FRESH';
+  return {...row,state,freshness_window_days:30,actionable:state==='REAL_OPERATOR_EVIDENCE_FRESH',query_level_attribution_requires_real_search_console:true,stale_evidence_non_actionable:true};
+}
+
 async function summary(db, filters = {}, providedReadiness = null) {
   const schemaReadiness=providedReadiness||await searchConsoleSchemaReadiness(db);
   const acceptance=await operatorAcceptance(db,schemaReadiness);
+  const freshness=await searchConsoleFreshness(db,schemaReadiness);
   const limit = Math.round(clampNumber(filters.limit, 5, 100, 20));
   if(!schemaReadiness.ready){
     return {
       schema_readiness:schemaReadiness,
       totals:{row_count:0,clicks:0,impressions:0,average_position:0},
-      batches:[],top_pages:[],opportunity_queries:[],seo_actions:[],operator_acceptance:acceptance,active_filters:filters
+      batches:[],top_pages:[],opportunity_queries:[],seo_actions:[],operator_acceptance:acceptance,freshness,active_filters:filters
     };
   }
   const where = buildWhere(filters);
@@ -202,17 +225,18 @@ async function summary(db, filters = {}, providedReadiness = null) {
   const positionFrom = Number(filters.position_from || 4) || 4;
   const positionTo = Number(filters.position_to || 20) || 20;
   opportunityWhere.push(Math.min(positionFrom, positionTo), Math.max(positionFrom, positionTo));
-  const opportunityQueries = rows(await db.prepare(`SELECT query_text, page_url, SUM(clicks) AS clicks, SUM(impressions) AS impressions, ROUND(AVG(average_position),2) AS average_position, MAX(import_batch_key) AS import_batch_key FROM search_console_page_queries ${where.sql ? `${where.sql} AND COALESCE(query_text,'') <> ''` : "WHERE COALESCE(query_text,'') <> ''"} GROUP BY query_text, page_url HAVING ${havingClauses.join(' AND ')} ORDER BY impressions DESC, average_position ASC LIMIT ?`).bind(...opportunityWhere, limit).all().catch(() => ({ results: [] })));
+  const actionableWhere = where.sql ? `${where.sql} AND date(COALESCE(report_date,created_at))>=date('now','-30 days')` : "WHERE date(COALESCE(report_date,created_at))>=date('now','-30 days')";
+  const opportunityQueries = rows(await db.prepare(`SELECT query_text, page_url, SUM(clicks) AS clicks, SUM(impressions) AS impressions, ROUND(AVG(average_position),2) AS average_position, MAX(import_batch_key) AS import_batch_key FROM search_console_page_queries ${actionableWhere} AND COALESCE(query_text,'') <> '' GROUP BY query_text, page_url HAVING ${havingClauses.join(' AND ')} ORDER BY impressions DESC, average_position ASC LIMIT ?`).bind(...opportunityWhere, limit).all().catch(() => ({ results: [] })));
   const actions = rows(await db.prepare(`SELECT a.action_key,a.page_url,a.query_text,a.priority_score,a.suggested_title,a.suggested_meta_description,a.suggested_internal_link_note,a.action_status,a.created_from_batch_key,a.applied_override_id,a.applied_at,a.created_at,a.notes,
     COALESCE(e.evidence_rows,0) evidence_rows,COALESCE(e.evidence_clicks,0) evidence_clicks,COALESCE(e.evidence_impressions,0) evidence_impressions,COALESCE(e.evidence_position,0) evidence_position,
     CASE WHEN COALESCE(e.evidence_impressions,0)>=10 AND COALESCE(e.evidence_position,0) BETWEEN 4 AND 20 THEN 1 ELSE 0 END current_evidence_supported
     FROM seo_opportunity_actions a
     LEFT JOIN (
       SELECT lower(page_url) page_key,lower(COALESCE(query_text,'')) query_key,COUNT(*) evidence_rows,SUM(clicks) evidence_clicks,SUM(impressions) evidence_impressions,ROUND(AVG(average_position),2) evidence_position
-      FROM search_console_page_queries GROUP BY lower(page_url),lower(COALESCE(query_text,''))
+      FROM search_console_page_queries WHERE date(COALESCE(report_date,created_at))>=date('now','-30 days') GROUP BY lower(page_url),lower(COALESCE(query_text,''))
     ) e ON e.page_key=lower(a.page_url) AND e.query_key=lower(COALESCE(a.query_text,''))
     ORDER BY CASE a.action_status WHEN 'open' THEN 0 WHEN 'in_progress' THEN 1 WHEN 'done' THEN 2 ELSE 3 END,a.priority_score DESC,datetime(a.updated_at) DESC LIMIT ?`).bind(limit).all().catch(() => ({ results: [] })));
-  return { schema_readiness: schemaReadiness, totals, batches, top_pages: topPages, opportunity_queries: opportunityQueries, seo_actions: actions, operator_acceptance: acceptance, active_filters: filters };
+  return { schema_readiness: schemaReadiness, totals, batches, top_pages: topPages, opportunity_queries: opportunityQueries, seo_actions: actions, operator_acceptance: acceptance, freshness, active_filters: filters };
 }
 async function deleteBatch(db, importBatchKey) {
   const key = normalizeText(importBatchKey);
@@ -276,7 +300,7 @@ async function applySeoAction(db, adminUser, payload, requestUrl) {
   if (!action) throw new Error('SEO action was not found.');
   if (String(action.action_status || '').toLowerCase() === 'ignored') throw new Error('Ignored SEO actions cannot be applied.');
   const support = await db.prepare(`SELECT COUNT(*) evidence_rows,COALESCE(SUM(clicks),0) clicks,COALESCE(SUM(impressions),0) impressions,COALESCE(AVG(average_position),0) average_position
-    FROM search_console_page_queries WHERE lower(page_url)=lower(?) AND lower(COALESCE(query_text,''))=lower(COALESCE(?,''))`)
+    FROM search_console_page_queries WHERE date(COALESCE(report_date,created_at))>=date('now','-30 days') AND lower(page_url)=lower(?) AND lower(COALESCE(query_text,''))=lower(COALESCE(?,''))`)
     .bind(normalizeText(action.page_url),normalizeText(action.query_text)).first().catch(()=>null);
   const impressions=Number(support?.impressions||0),position=Number(support?.average_position||0);
   if(!support||impressions<10||position<4||position>20)throw new Error('Current Search Console evidence no longer supports this review action. Refresh evidence before applying SEO changes.');
@@ -314,7 +338,7 @@ export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const schemaReadiness=await searchConsoleSchemaReadiness(db);
   const data=await summary(db,buildFiltersFromUrl(url),schemaReadiness);
-  return jsonResponse({ ok: true, release:467, build:316, generated_at: new Date().toISOString(), ...data }, 200, { 'Cache-Control': 'no-store' });
+  return jsonResponse({ ok: true, release:467, build:328, generated_at: new Date().toISOString(), ...data }, 200, { 'Cache-Control': 'no-store' });
 }
 
 export async function onRequestPost(context) {
@@ -324,7 +348,7 @@ export async function onRequestPost(context) {
   if (!db) return jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500);
   const schemaReadiness=await searchConsoleSchemaReadiness(db);
   if(!schemaReadiness.ready)return jsonResponse({
-    ok:false,release:467,build:321,
+    ok:false,release:467,build:328,
     error:'Search Console intake schema is not ready. Apply the canonical database migration before importing evidence.',
     schema_readiness:schemaReadiness
   },409,{'Cache-Control':'no-store'});
@@ -383,12 +407,15 @@ export async function onRequestPost(context) {
   if (parsed.length < 2) return jsonResponse({ ok: false, error: 'CSV must include a header row and at least one data row.' }, 400);
   const headers = parsed[0].map(slugKey);
   const headerReadiness = searchConsoleRealExportHeaderReadiness(headers);
+  const dateHeaderPresent = headers.some((header) => ['date','report_date','day'].includes(header));
+  const explicitFallbackReportDate = normalizeText(payload.report_date);
+  if (!dateHeaderPresent && !explicitFallbackReportDate) return jsonResponse({ ok:false, error:'This Search Console export has no Date column. Supply the report end date explicitly so freshness cannot be inferred from the import time.', freshness_window_days:30 },400,{'Cache-Control':'no-store'});
   if (!headerReadiness.ready) return jsonResponse({ ok: false, error: `CSV does not match the expected Search Console export columns. Missing: ${headerReadiness.missing_header_groups.join(', ')}.`, header_readiness: headerReadiness }, 400);
   const importBatchKey = normalizeText(payload.import_batch_key) || `gsc_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
   const sourceFile = normalizeText(payload.source_file) || 'search-console.csv';
   if (!sourceFile.toLowerCase().endsWith('.csv')) return jsonResponse({ ok: false, error: 'Search Console intake accepts CSV exports only.' }, 400);
   const siteProperty = normalizeText(payload.site_property) || '';
-  const fallbackReportDate = normalizeText(payload.report_date) || new Date().toISOString().slice(0, 10);
+  const fallbackReportDate = explicitFallbackReportDate || '';
   const statements = [];
   let imported = 0;
   let skipped = 0;
@@ -414,6 +441,6 @@ export async function onRequestPost(context) {
   statements.push(db.prepare(`UPDATE search_console_import_batches SET row_count = ? WHERE import_batch_key = ?`).bind(imported, importBatchKey));
 
   if (statements.length > 1) await db.batch(statements);
-  await auditAdminAction(context.env, context.request, adminUser, { action_type: 'search_console_import', target_type: 'search_console_import_batch', target_key: importBatchKey, details: { source_file: sourceFile, imported, skipped, site_property: siteProperty, real_export_confirmed: true, header_readiness: headerReadiness } });
-  return jsonResponse({ ok: true, message: `Imported ${imported} real Search Console row(s).`, import_batch_key: importBatchKey, imported, skipped, real_export_confirmed: true, ...(await summary(db, filters)) }, 200, { 'Cache-Control': 'no-store' });
+  await auditAdminAction(context.env, context.request, adminUser, { action_type: 'search_console_import', target_type: 'search_console_import_batch', target_key: importBatchKey, details: { source_file: sourceFile, imported, skipped, site_property: siteProperty, real_export_confirmed: true, header_readiness: headerReadiness, date_header_present: dateHeaderPresent, fallback_report_date: explicitFallbackReportDate || null, freshness_window_days:30 } });
+  return jsonResponse({ ok: true, release:467, build:328, message: `Imported ${imported} real Search Console row(s).`, import_batch_key: importBatchKey, imported, skipped, real_export_confirmed: true, freshness_window_days:30, ...(await summary(db, filters)) }, 200, { 'Cache-Control': 'no-store' });
 }

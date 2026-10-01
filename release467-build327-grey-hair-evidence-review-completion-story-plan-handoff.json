@@ -2,7 +2,7 @@
   "release": 467,
   "build": 327,
   "title": "Grey Hair Evidence Review Completion & Story-Plan Handoff",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "GREY_HAIR_EVIDENCE_REVIEW_COMPLETION_AND_STORY_PLAN_HANDOFF",
   "authority": "release467-build327-grey-hair-evidence-review-completion-story-plan-handoff",
   "predecessor": {
@@ -158,5 +158,33 @@
       "build_specific_proof_run": 36804838090
     },
     "note": "Final closure commit must be re-proven at its exact branch head before promotion."
+  },
+  "final_closure": {
+    "dev_sha": "26577d73b3747ffc2c02e31e11df86b924abdb2f",
+    "tree_sha": "935849941e1a9907487abcf984505233f9bfb803",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD327_GREEN",
+    "proofs": {
+      "system_gate_run": 36820729684,
+      "current_application_quality_run": 36820729675,
+      "it_admin_runtime_proof_run": 36820729677,
+      "branch_hygiene_run": 36820729686
+    },
+    "supplemental_proofs": {
+      "d1_ci_fanout_guard_run": 36820729705,
+      "build_specific_proof_run": 36820729700
+    },
+    "artifact_id": 11143016269,
+    "ingested_by_build": 328
+  },
+  "production_checkpoint": {
+    "main_sha": "f5675f69194586933fe0fefa231bde9f249216ce",
+    "tree_sha": "935849941e1a9907487abcf984505233f9bfb803",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36820941969,
+    "production_live_resource_integrity_run": 36821004653,
+    "production_promotion_artifact_id": 11143691319,
+    "remote_d1_queries": 0
   }
 }
