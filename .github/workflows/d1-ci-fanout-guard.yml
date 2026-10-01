@@ -1,3 +1,7 @@
+# Build 330 final compatibility closure: retained Build 265 roadmap allowlist recognizes the observed-evidence Builds 331-336 roadmap; D1 lane unchanged.
+# Build 330 final exact-head reproof after measured roadmap renewal; Build 330 remains the sole automatic remote-D1 successor.
+# Build 330 exact measurement: Build 329 historical D1 workflow is manual-only; Build 330 is the sole automatic remote-D1 successor.
+# Build 330 candidate preparation: Build 329 remote-D1 workflow is historical manual-only; Build 330 becomes the sole automatic remote-D1 successor after gate convergence.
 name: D1 CI Fan-Out Guard
 # Build 329 final exact-head reproof: Build 328 historical D1 workflow is manual-only; Build 329 is the sole automatic remote-D1 successor.
 on:
