@@ -81,5 +81,25 @@
     "automatic_import_authorized": false,
     "next_build": 329,
     "next_build_title": "Maker Story Advancement & Publication Readiness Continuity II"
+  },
+  "starting_point": {
+    "development": {
+      "sha": "26577d73b3747ffc2c02e31e11df86b924abdb2f",
+      "tree": "935849941e1a9907487abcf984505233f9bfb803",
+      "system_gate_run": 36820729684,
+      "quality_run": 36820729675,
+      "it_admin_runtime_run": 36820729677,
+      "repository_hygiene_run": 36820729686,
+      "d1_ci_fanout_guard_run": 36820729705,
+      "build_specific_proof_run": 36820729700,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "f5675f69194586933fe0fefa231bde9f249216ce",
+      "tree": "935849941e1a9907487abcf984505233f9bfb803",
+      "production_pages_deploy_run": 36820941969,
+      "production_live_resource_integrity_run": 36821004653,
+      "state": "PRODUCTION_GREEN"
+    }
   }
 }
