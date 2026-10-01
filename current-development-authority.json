@@ -2673,7 +2673,7 @@
       "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
       "UNPROFILED_MAKER_STORY_EVIDENCE"
     ],
-    "measurement_state": "PENDING_EXACT_DEVELOPMENT",
+    "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
     "source_workspaces_authoritative": true,
     "shadow_task_table": false,
     "completion_persistence": false,
@@ -2681,6 +2681,24 @@
     "production_d1_contact": false,
     "next_build": 338,
     "next_build_title": "35th Promo Factual Evidence Completion Continuity III",
-    "future_queue_exhausted": false
+    "future_queue_exhausted": false,
+    "decision": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "measurement": {
+      "source_sha": "7fd4bb5c4b0e291ac441f399b6e0a7c684c2dd46",
+      "source_tree_sha": "5ed0b2e3ff350838e0a632b310aa6363c7d5f73a",
+      "workflow_run": 36930012580,
+      "artifact_id": 11195023646,
+      "aggregate_rows_read": 1659,
+      "rows_read_ceiling": 20000,
+      "active_workbench_rows": 5,
+      "active_gap_families": 4,
+      "gap_families": [
+        "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+        "REAL_SEARCH_CONSOLE_EXPORT",
+        "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+        "UNPROFILED_MAKER_STORY_EVIDENCE"
+      ],
+      "unprofiled_projects": 3
+    }
   }
 }
