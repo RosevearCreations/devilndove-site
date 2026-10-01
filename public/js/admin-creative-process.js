@@ -84,13 +84,21 @@ function outputFeed(o,d){
   const execution=events.filter(e=>executionTypes.has(String(e.event_type||'').toLowerCase())).length;
   const results=events.filter(e=>String(e.event_type||'').toLowerCase()==='result').length;
   const lessons=events.filter(e=>String(e.event_type||'').toLowerCase()==='lesson').length;
-  const complete=execution>0&&results>0&&lessons>0;
+  const eventComplete=execution>0&&results>0&&lessons>0;
   const maker=d.maker_story||{};
-  return `<section class="card" data-build319-execution-evidence-intake>
-    <div class="section-title-row"><div><p class="eyebrow">Build 319 • factual evidence intake</p><h3>35th promo — record what actually happened</h3></div><span class="pill">${complete?'evidence set complete':'evidence still incomplete'}</span></div>
-    <p class="small">Use this lane only after real work happened. Record factual setup/process/milestone/result/lesson/mistake/repair evidence. Do not enter an expected outcome or placeholder. New records stay internal: they are not automatically selected as Maker Story evidence, do not change review status, and do not publish anything.</p>
+  const factsComplete=['what_we_are_trying','why_we_are_trying_it','actual_result','lesson_learned'].every(k=>String(maker[k]||'').trim().length>0);
+  const outcomeResolved=['win','partial_win','failure'].includes(String(maker.outcome_status||''));
+  const reviewReady=eventComplete&&factsComplete&&outcomeResolved;
+  const closureLabel=reviewReady?'ready for explicit human review':eventComplete?'story facts still incomplete':(execution+results+lessons)>0?'real outcome evidence partial':'real outcome evidence still required';
+  const missing=[];
+  if(!execution)missing.push('execution/process');if(!results)missing.push('result');if(!lessons)missing.push('lesson');
+  if(!String(maker.what_we_are_trying||'').trim())missing.push('what we are trying');if(!String(maker.why_we_are_trying_it||'').trim())missing.push('why we are trying it');if(!String(maker.actual_result||'').trim())missing.push('actual result');if(!outcomeResolved)missing.push('resolved outcome');if(!String(maker.lesson_learned||'').trim())missing.push('lesson learned');
+  return `<section class="card" data-build319-execution-evidence-intake data-build326-real-outcome-closure>
+    <div class="section-title-row"><div><p class="eyebrow">Build 326 • real outcome closure</p><h3>35th promo — factual evidence and review readiness</h3></div><span class="pill">${esc(closureLabel)}</span></div>
+    <p class="small">Build 326 reuses the Build 319 private factual-evidence intake. Readiness requires real execution/process, result and lesson events plus completed Maker Story facts. Readiness never auto-sets reviewed/public-candidate state, never publishes, and never infers media rights.</p>
     <div class="grid cols-3"><div><strong>${execution}</strong><small> execution/process record(s)</small></div><div><strong>${results}</strong><small> result record(s)</small></div><div><strong>${lessons}</strong><small> lesson record(s)</small></div></div>
-    <p class="small"><strong>Current Maker Story:</strong> review ${esc(maker.story_review_status||'needs_review')} • outcome ${esc(maker.outcome_status||'unknown')} • public candidate ${Number(maker.public_story_candidate||0)===1?'yes':'no'}. Build 319 does not change these fields.</p>
+    <p class="small"><strong>Current Maker Story:</strong> review ${esc(maker.story_review_status||'needs_review')} • outcome ${esc(maker.outcome_status||'unknown')} • public candidate ${Number(maker.public_story_candidate||0)===1?'yes':'no'}.</p>
+    <p class="small"><strong>Build 326 readiness:</strong> ${reviewReady?'All factual prerequisites are present. The story may now be explicitly reviewed by a human; nothing was auto-approved.':`Still missing: ${esc(missing.join(', ')||'explicit human review')}`}.</p>
     <div class="creative-event-form">
       <label>Evidence type<select class="input" id="b319EvidenceType"><option value="setup">Setup actually performed</option><option value="process">Process / work performed</option><option value="milestone">Milestone reached</option><option value="result">Observed result</option><option value="lesson">Lesson learned from actual work</option><option value="mistake">Mistake / problem encountered</option><option value="repair">Repair / correction performed</option></select></label>
       <label>Specific factual title<input class="input" id="b319EvidenceTitle" maxlength="180" placeholder="Example: First engraving pass completed"/></label>
