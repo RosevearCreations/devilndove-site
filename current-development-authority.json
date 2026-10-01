@@ -1853,7 +1853,7 @@
     "target_title": "35th promo",
     "reuses_operator_action": "record_story_execution_evidence",
     "readiness_rule": "REAL_EXECUTION_RESULT_LESSON_EVENTS_PLUS_COMPLETE_FACTUAL_MAKER_STORY_FIELDS",
-    "measurement_state": "PENDING_EXACT_DEVELOPMENT_REAL_OUTCOME_CLOSURE_MEASUREMENT",
+    "measurement_state": "EXACT_DEVELOPMENT_MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
     "automatic_evidence_selection": false,
     "automatic_story_review": false,
     "automatic_public_candidate": false,
@@ -1863,6 +1863,20 @@
     "production_d1_contact": false,
     "next_build": 327,
     "next_build_title": "Grey Hair Evidence Review Completion & Story-Plan Handoff",
-    "future_queue_exhausted": false
+    "future_queue_exhausted": false,
+    "measurement_run": 36798011459,
+    "artifact_id": 11134721702,
+    "aggregate_rows_read": 45,
+    "rows_read_ceiling": 20000,
+    "closure_state": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
+    "execution_events": 0,
+    "result_events": 0,
+    "lesson_events": 0,
+    "profile_facts_complete": false,
+    "outcome_resolved": false,
+    "ready_for_explicit_human_review": false,
+    "placeholder_absence_text_does_not_satisfy_readiness": true,
+    "factual_profile_rule": "SUBSTANTIVE_NON_PLACEHOLDER_ACTUAL_RESULT_AND_LESSON_REQUIRED",
+    "decision": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW"
   }
 }
