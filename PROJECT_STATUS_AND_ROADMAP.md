@@ -21,6 +21,10 @@ Build 327 final closure:
 
 Build 328 reuses the existing real Search Console CSV intake and Build 322 attribution rules. Search evidence is actionable only inside the current 30-day freshness window; a CSV without a Date column must carry an explicit operator-supplied report date. No synthetic discovery evidence, automatic import, automatic SEO queue generation, automatic SEO apply, IndexNow or provider execution is authorized.
 
+### Build 328 measured Development checkpoint
+
+Real Development D1 measurement returned **EVIDENCE_PENDING_NO_REAL_EXPORT**: 0 import batches, 0 staged rows, 0 recent rows/clicks/impressions, 0 eligible fresh query/page pairs, and 0 SEO review queue rows. The read-only measurement used **2,056 / 20,000 rows**. This is a valid GREEN software state; Build 328 does not fabricate Search Console evidence.
+
 The queue **has not run out**.
 
 **Next after Build 328 Production GREEN: Build 329 — Maker Story Advancement & Publication Readiness Continuity II.**
