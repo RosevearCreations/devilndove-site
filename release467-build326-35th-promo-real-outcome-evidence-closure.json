@@ -114,11 +114,31 @@
       "production_live_resource_integrity_run": 36792048457
     }
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT_REAL_OUTCOME_CLOSURE_MEASUREMENT",
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md",
   "decision": {
-    "classification": "AWAIT_EXACT_DEVELOPMENT_REAL_OUTCOME_CLOSURE_MEASUREMENT",
+    "classification": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW",
+    "rationale": "Exact Development measurement shows no real execution/process, result or lesson events. The existing actual_result and lesson_learned text are explicit absence markers and therefore do not satisfy factual readiness. Outcome remains unknown and the Maker Story remains needs_review / not public candidate.",
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "automatic_publication": false,
     "next_build": 327,
     "next_build_title": "Grey Hair Evidence Review Completion & Story-Plan Handoff"
+  },
+  "measurement_checkpoint": {
+    "source_sha": "7333d300d76115ddd1b1caf710b27e06ed08f380",
+    "workflow_run": 36798011459,
+    "artifact_id": 11134721702,
+    "artifact_digest": "sha256:065a6291676806df3b67fae3436335f0cce1d424ea8b9a8ea19d65d9b95f56e2",
+    "aggregate_rows_read": 45,
+    "rows_read_ceiling": 20000,
+    "closure_state": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
+    "execution_events": 0,
+    "result_events": 0,
+    "lesson_events": 0,
+    "profile_facts_complete": false,
+    "outcome_resolved": false,
+    "ready_for_explicit_human_review": false,
+    "production_d1_contact": false
   }
 }
