@@ -1,24 +1,5 @@
 name: Release 467 Build 325 Evidence Gap Owner Queue Operator Action Traceability
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build325_*'
-      - 'scripts/release467_build26*_gate.py'
-      - 'scripts/release467_build27*_gate.py'
-      - 'release467-build325-*.json'
-      - 'release467-build324-*.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_325_*'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/evidence-gap-owner-queue.js'
-      - 'admin/evidence-gap-owner-queue/index.html'
-      - 'public/js/admin-evidence-gap-owner-queue-v325.js'
-      - 'admin/creative-process/index.html'
-      - '.github/workflows/release467-build324-content-adoption-discovery-outcomes-renewal-iv.yml'
-      - '.github/workflows/release467-build325-evidence-gap-owner-queue-operator-action-traceability.yml'
   workflow_dispatch:
 permissions:
   contents: read

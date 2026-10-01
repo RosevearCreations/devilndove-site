@@ -1,0 +1,144 @@
+{
+  "release": 467,
+  "build": 326,
+  "title": "35th Promo Real Outcome Evidence Closure",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "35TH_PROMO_REAL_OUTCOME_EVIDENCE_CLOSURE",
+  "authority": "release467-build326-35th-promo-real-outcome-evidence-closure",
+  "predecessor": {
+    "build": 325,
+    "title": "Evidence Gap Owner Queue & Operator Action Traceability",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "0da51ee0e377c81909ed9c90627ca206026027b1",
+    "development_tree_sha": "b38a0844c106d2ff27ff50de306a61c4d325f724",
+    "development_proofs": {
+      "system_gate_run": 36791681965,
+      "current_application_quality_run": 36791681953,
+      "it_admin_runtime_proof_run": 36791681907,
+      "branch_hygiene_run": 36791681937,
+      "d1_ci_fanout_guard_run": 36791681867,
+      "build_specific_proof_run": 36791682181
+    },
+    "measurement": {
+      "decision": "ACTION_QUEUE_OPEN_REAL_EVIDENCE_REQUIRED",
+      "artifact_id": 11131158891,
+      "artifact_digest": "sha256:f37f35c4d78367a692d140de04e16ef3dcee9cd1fc84a28d959e7d3353f5c697",
+      "aggregate_rows_read": 1657,
+      "rows_read_ceiling": 20000,
+      "active_queue_rows": 5,
+      "active_gap_families": 4,
+      "promo_execution_events": 0,
+      "promo_result_events": 0,
+      "promo_lesson_events": 0
+    },
+    "production_main_sha": "782627bb0bc0850622abc42512e3886f5556efbd",
+    "production_tree_sha": "b38a0844c106d2ff27ff50de306a61c4d325f724",
+    "production_pages_deploy_run": 36791987829,
+    "production_live_resource_integrity_run": 36792048457,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "target": {
+    "creative_work_project_id": 5,
+    "project_key": "CP-MSC1SUG2",
+    "project_title": "35th promo",
+    "content_project_id": 23
+  },
+  "contract": {
+    "reuses_build319_operator_action": "record_story_execution_evidence",
+    "execution_event_types": [
+      "setup",
+      "process",
+      "milestone",
+      "mistake",
+      "repair"
+    ],
+    "result_event_type": "result",
+    "lesson_event_type": "lesson",
+    "required_profile_facts": [
+      "what_we_are_trying",
+      "why_we_are_trying_it",
+      "substantive_actual_result",
+      "resolved_outcome_status",
+      "substantive_lesson_learned"
+    ],
+    "resolved_outcomes": [
+      "win",
+      "partial_win",
+      "failure"
+    ],
+    "readiness_rule": "at least one execution/process-class event plus one result event plus one lesson event plus complete substantive non-placeholder factual Maker Story fields",
+    "readiness_only": true,
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "automatic_evidence_selection": false,
+    "automatic_publication": false,
+    "media_rights_inference": false,
+    "next_build": 327,
+    "next_build_title": "Grey Hair Evidence Review Completion & Story-Plan Handoff",
+    "future_queue_exhausted": false,
+    "placeholder_absence_text_does_not_satisfy_readiness": true
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "placeholder_evidence": false,
+    "synthetic_execution_evidence": false,
+    "evidence_mutation": false,
+    "automatic_evidence_selection": false,
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "publication_mutation": false,
+    "social_mutation": false,
+    "private_media_exposure": false,
+    "media_rights_inference": false,
+    "provider_execution": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "0da51ee0e377c81909ed9c90627ca206026027b1",
+      "tree": "b38a0844c106d2ff27ff50de306a61c4d325f724",
+      "system_gate_run": 36791681965,
+      "quality_run": 36791681953,
+      "it_admin_runtime_run": 36791681907,
+      "repository_hygiene_run": 36791681937,
+      "d1_ci_fanout_guard_run": 36791681867,
+      "build_specific_proof_run": 36791682181
+    },
+    "production": {
+      "main_sha": "782627bb0bc0850622abc42512e3886f5556efbd",
+      "tree": "b38a0844c106d2ff27ff50de306a61c4d325f724",
+      "production_pages_deploy_run": 36791987829,
+      "production_live_resource_integrity_run": 36792048457
+    }
+  },
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_ACTION_ADOPTION_BUILDS_325_330.md",
+  "decision": {
+    "classification": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW",
+    "rationale": "Exact Development measurement shows no real execution/process, result or lesson events. The existing actual_result and lesson_learned text are explicit absence markers and therefore do not satisfy factual readiness. Outcome remains unknown and the Maker Story remains needs_review / not public candidate.",
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "automatic_publication": false,
+    "next_build": 327,
+    "next_build_title": "Grey Hair Evidence Review Completion & Story-Plan Handoff"
+  },
+  "measurement_checkpoint": {
+    "source_sha": "7333d300d76115ddd1b1caf710b27e06ed08f380",
+    "workflow_run": 36798011459,
+    "artifact_id": 11134721702,
+    "artifact_digest": "sha256:065a6291676806df3b67fae3436335f0cce1d424ea8b9a8ea19d65d9b95f56e2",
+    "aggregate_rows_read": 45,
+    "rows_read_ceiling": 20000,
+    "closure_state": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
+    "execution_events": 0,
+    "result_events": 0,
+    "lesson_events": 0,
+    "profile_facts_complete": false,
+    "outcome_resolved": false,
+    "ready_for_explicit_human_review": false,
+    "production_d1_contact": false
+  }
+}
