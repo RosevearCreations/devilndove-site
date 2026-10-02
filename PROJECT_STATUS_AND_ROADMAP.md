@@ -1,3 +1,7 @@
+# CURRENT BUILD
+
+**Build 340 — Search Console Real Export & Fresh Discovery Intake V** is the active Development candidate over exact Build 339 Development/Production GREEN.
+
 # Devil n Dove — Project Status & Roadmap
 
 ## Current checkpoint
@@ -39,7 +43,7 @@ The factual lane remains fail-closed. Placeholder/absence text does not satisfy 
 
 The queue **has not run out**.
 
-**Next after Build 339 Production GREEN: Build 340 — Search Console Real Export & Fresh Discovery Intake V.**
+**Next after Build 340 Production GREEN: Build 341 — Maker Story Advancement & Publication Readiness Continuity IV.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_337_342.md`.
 
