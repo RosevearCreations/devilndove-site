@@ -2,7 +2,7 @@
   "release": 467,
   "build": 352,
   "title": "Search Console Real Export & Fresh Discovery Intake VII",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
@@ -245,7 +245,7 @@
   "next_build": 353,
   "next_build_state": "QUEUED_AFTER_BUILD352_PRODUCTION_GREEN",
   "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VI",
-  "promotion_state": "BUILD352_CANDIDATE_NOT_YET_VERIFIED",
+  "promotion_state": "BUILD352_ACTIVE_DEVELOPMENT_CANDIDATE",
   "successor_scope_state": "BUILD353_DEFINED_BY_CANONICAL_ROADMAP",
   "measured_closure": {
     "source_build": 232,
@@ -4059,7 +4059,7 @@
   },
   "search_console_real_export_fresh_discovery_intake_vii": {
     "source_build": 352,
-    "state": "DEVELOPMENT_CANDIDATE",
+    "state": "DEVELOPMENT_GREEN",
     "measurement_state": "EXACT_DEVELOPMENT_MEASUREMENT_PENDING",
     "freshness_window_days": 30,
     "explicit_report_date_only": true,
