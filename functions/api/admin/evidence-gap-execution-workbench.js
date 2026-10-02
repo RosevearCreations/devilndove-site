@@ -1,8 +1,9 @@
 // HISTORICAL_BUILD337_API_COMPAT: const BUILD=337; TITLE='Evidence Gap Execution Workbench & Input Completion Continuity II';
-// BUILD343_CURRENT_AUTHORITY: Release 467 Build 343 — Evidence Gap Execution Workbench & Input Completion Continuity III; reuses Build 337 GET-only workbench authority.
+// BUILD349_CURRENT_AUTHORITY: Release 467 Build 349 — Evidence Gap Execution Workbench & Input Completion Continuity IV; reuses the GET-only workbench authority.
+// BUILD343_CURRENT_AUTHORITY: retained historical provenance.
 // Release 467 Build 337 — GET-only Evidence Gap Execution Workbench continuity II.
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
-const BUILD=343,TITLE='Evidence Gap Execution Workbench & Input Completion Continuity III';
+const BUILD=349,TITLE='Evidence Gap Execution Workbench & Input Completion Continuity IV';
 const json=(d,s=200)=>jsonResponse(d,s,{'Cache-Control':'no-store'}),n=v=>Number(v||0)||0,sv=v=>String(v??'').trim(),rows=r=>Array.isArray(r?.results)?r.results:[];
 const SAFETY=Object.freeze({read_only:true,shadow_task_table:false,owner_assignment_persistence:false,acknowledgement_persistence:false,resolution_persistence:false,completion_persistence:false,no_completion_by_workbench_state:true,business_data_mutation:false,evidence_mutation:false,story_mutation:false,search_console_mutation:false,seo_mutation:false,provider_execution:false,r2_mutation:false,production_d1_contact:false});
 const item=x=>({...x,workbench_write_capability:'none',owner_assignment_persistence:false,acknowledgement_persistence:false,resolution_persistence:false,completion_persistence:false});
