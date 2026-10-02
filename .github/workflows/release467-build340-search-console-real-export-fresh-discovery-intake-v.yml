@@ -1,19 +1,6 @@
 name: Release 467 Build 340 Search Console Real Export Fresh Discovery Intake V
+# Historical after Build 341 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build340_*'
-      - 'release467-build340-*.json'
-      - 'release467-build339-*.json'
-      - 'functions/api/admin/search-console-import.js'
-      - 'public/js/admin-search-console-import.js'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_340_*'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - '.github/workflows/release467-build339-grey-hair-source-review-story-plan-completion-continuity-iii.yml'
-      - '.github/workflows/release467-build340-search-console-real-export-fresh-discovery-intake-v.yml'
   workflow_dispatch:
 permissions:
   contents: read
