@@ -2,7 +2,7 @@
   "release": 467,
   "build": 346,
   "title": "Search Console Real Export & Fresh Discovery Intake VI",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "SEARCH_CONSOLE_REAL_EXPORT_FRESH_DISCOVERY_INTAKE_VI",
   "authority": "release467-build346-search-console-real-export-fresh-discovery-intake-vi",
   "predecessor": {
@@ -96,7 +96,7 @@
   "next_build": 347,
   "next_build_title": "Maker Story Advancement & Publication Readiness Continuity V",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "ENABLED_EXACT_DEVELOPMENT",
+  "measurement_lane_state": "HISTORICAL_MANUAL_ONLY",
   "measurement_lane_owner": "release467-build346-search-console-real-export-fresh-discovery-intake-vi.yml",
   "toolchain_reliability": {
     "wrangler_version": "4.128.0",
@@ -175,5 +175,32 @@
   },
   "interpretation": "EVIDENCE_PENDING_NO_REAL_EXPORT",
   "operator_next_action": "Import an explicitly confirmed real Google Search Console Performance CSV when available; provide the report end date if the CSV has no Date column.",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED"
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD346_GREEN",
+  "final_closure": {
+    "dev_sha": "0f58e0243b5f4ca4b78278972e76b3514a395414",
+    "tree_sha": "19e7512f525608ce4a0e5dbf683be85d38a3165a",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD346_GREEN",
+    "proofs": {
+      "system_gate_run": 37016614148,
+      "current_application_quality_run": 37016613543,
+      "it_admin_runtime_proof_run": 37016613981,
+      "branch_hygiene_run": 37016613564,
+      "d1_ci_fanout_guard_run": 37016614052,
+      "build_specific_proof_run": 37016614289
+    },
+    "artifact_id": 11229813071,
+    "artifact_name": "build346-search-console-fresh-discovery-9dcca40d87dd2c7219a5c624520fd6ccdd4aeb0b",
+    "artifact_digest": "sha256:6b5a3aed682b0b5a8be162cb9077ff8cd28964f34c2a4a6da2ca598e1dfb1558",
+    "ingested_by_build": 347
+  },
+  "production_checkpoint": {
+    "main_sha": "f6f0d17f0cd8b7a879a8b771c236915fc39cb0c3",
+    "tree_sha": "19e7512f525608ce4a0e5dbf683be85d38a3165a",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37016934208,
+    "production_live_resource_integrity_run": 37017058797,
+    "remote_d1_queries": 0
+  }
 }
