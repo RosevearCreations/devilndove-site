@@ -124,7 +124,7 @@
   "future_queue_exhausted": false,
   "measurement_lane_state": "ACTIVE_DEVELOPMENT_MEASUREMENT",
   "measurement_lane_owner": "release467-build347-maker-story-advancement-publication-readiness-continuity-v.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_WITH_SCHEMA_PROOF_REQUESTED",
   "measurement": {
     "source_sha": "aa3e340569336898c753b5a64d2ab2c9be0828ac",
     "source_tree_sha": "efdaad247c5781d5b2e61c06076b21870217d3b9",

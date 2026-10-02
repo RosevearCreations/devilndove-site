@@ -241,7 +241,7 @@
   "next_build": 348,
   "next_build_state": "QUEUED_AFTER_BUILD347_PRODUCTION_GREEN",
   "next_build_title": "Content Adoption & Discovery Outcomes Renewal VIII",
-  "promotion_state": "EXACT_BRANCH_HEAD_BUILD347_REPROOF_IN_PROGRESS",
+  "promotion_state": "FINAL_EXACT_HEAD_BUILD347_MATRIX_WITH_CANONICAL_MIGRATION_PROOF",
   "successor_scope_state": "BUILD348_DEFINED_BY_CANONICAL_ROADMAP",
   "measured_closure": {
     "source_build": 232,
@@ -3554,6 +3554,6 @@
     "next_build": 348,
     "next_build_title": "Content Adoption & Discovery Outcomes Renewal VIII",
     "future_queue_exhausted": false,
-    "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED"
+    "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_WITH_SCHEMA_PROOF_REQUESTED"
   }
 }
