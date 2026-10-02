@@ -1,3 +1,4 @@
+// HISTORICAL_BUILD345_API_IDENTITY: const RELEASE=467,BUILD=345,TITLE='Grey Hair Source Review & Story-Plan Completion Continuity IV'; comparison_baseline:{source_build:343
 // HISTORICAL_BUILD339_API_IDENTITY: const RELEASE=467,BUILD=339,TITLE='Grey Hair Source Review & Story-Plan Completion Continuity III'; retained for regression provenance.
 // Release 467 Build 351 — Grey Hair Source Review & Story-Plan Completion Continuity V.
 // Read-only composition over existing CAIP evidence-review, synchronization and story-planning authorities.
