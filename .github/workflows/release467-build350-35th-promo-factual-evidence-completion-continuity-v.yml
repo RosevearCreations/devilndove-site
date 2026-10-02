@@ -1,31 +1,6 @@
 name: Release 467 Build 350 35th Promo Factual Evidence Completion Continuity V
+# Historical after Build 351 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build349-evidence-gap-execution-workbench-input-completion-continuity-iv.json'
-      - 'release467-build350-35th-promo-factual-evidence-completion-continuity-v.json'
-      - 'current-development-authority.json'
-      - 'docs/operations/RELEASE_467_BUILD_350_35TH_PROMO_FACTUAL_EVIDENCE_COMPLETION_CONTINUITY_V.md'
-      - 'docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_349_354.md'
-      - 'scripts/release467_build350_measurement.sql'
-      - 'scripts/release467_build350_verify_measurement.mjs'
-      - 'scripts/release467_build350_etsy_oauth_regression.mjs'
-      - 'scripts/release467_build350_regression.py'
-      - 'scripts/release467_build350_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/35th-promo-outcome-closure.js'
-      - 'functions/api/_lib/oauthSecurity.js'
-      - 'functions/api/_lib/oauthProviders.js'
-      - 'functions/api/admin/oauth-start.js'
-      - 'functions/api/social/oauth/_callback.js'
-      - 'functions/api/admin/oauth-connections.js'
-      - 'functions/api/admin/etsy-oauth-acceptance.js'
-      - 'public/js/admin-etsy-oauth-acceptance.js'
-      - 'admin/it-integrations/index.html'
-      - 'migrations/canonical/0029_release467_etsy_oauth_shop_identity.sql'
-      - 'migrations/canonical/manifest.json'
-      - '.github/workflows/release467-build350-35th-promo-factual-evidence-completion-continuity-v.yml'
   workflow_dispatch:
 permissions:
   contents: read

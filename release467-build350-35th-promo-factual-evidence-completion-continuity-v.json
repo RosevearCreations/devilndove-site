@@ -2,7 +2,7 @@
   "release": 467,
   "build": 350,
   "title": "35th Promo Factual Evidence Completion Continuity V",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "35TH_PROMO_FACTUAL_EVIDENCE_COMPLETION_CONTINUITY_V",
   "authority": "release467-build350-35th-promo-factual-evidence-completion-continuity-v",
   "predecessor": {
@@ -143,9 +143,9 @@
   "next_build": 351,
   "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity V",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "ACTIVE_DEVELOPMENT_MEASUREMENT",
+  "measurement_lane_state": "HISTORICAL_MANUAL_ONLY",
   "measurement_lane_owner": "release467-build350-35th-promo-factual-evidence-completion-continuity-v.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_AND_COMPATIBILITY_REPAIR",
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD350_GREEN",
   "toolchain_reliability": {
     "wrangler_version": "4.128.0",
     "business_logic_changed": true
@@ -202,5 +202,35 @@
     "automatic_publication": false,
     "next_build": 351,
     "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity V"
+  },
+  "final_closure": {
+    "dev_sha": "218bb33b7c8ef209e4cca5935bbdc0fab78ff62f",
+    "tree_sha": "40d411814199c34847a5eb35a9beb9b097a04876",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD350_GREEN",
+    "proofs": {
+      "system_gate_run": 37049411637,
+      "current_application_quality_run": 37049411609,
+      "it_admin_runtime_proof_run": 37049411613,
+      "branch_hygiene_run": 37049411624,
+      "build_specific_proof_run": 37049411636
+    },
+    "artifact_id": 11244993260,
+    "artifact_name": "build350-35th-promo-factual-evidence-continuity-5dbb2703a32bf7de0184b7ba42915988e81408fd",
+    "artifact_digest": "sha256:b03e0268bb7e786a59407e01bca3f40c5a96e150f479d58fe2e71ac54d4deb1b",
+    "ingested_by_build": 351,
+    "recorded_by": "Build 351 predecessor ingestion; not self-recorded by Build 350"
+  },
+  "production_checkpoint": {
+    "main_sha": "96ecfb1cdfdff1e632da3289b3c5219ebe1fd1e3",
+    "tree_sha": "40d411814199c34847a5eb35a9beb9b097a04876",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37049716763,
+    "production_live_resource_integrity_run": 37049877055,
+    "remote_d1_queries": 0,
+    "deployment_url": "https://2ea3b9d2.devilndove-site.pages.dev",
+    "deployment_id": "2ea3b9d2-e910-4c94-adc5-a3b4e134de1a",
+    "production_artifact_id": 11245544591
   }
 }
