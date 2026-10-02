@@ -1,3 +1,19 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 351 candidate over Build 350 Production GREEN
+
+- Development SHA: `218bb33b7c8ef209e4cca5935bbdc0fab78ff62f`
+- Shared tree: `40d411814199c34847a5eb35a9beb9b097a04876`
+- System Gate: `37049411637`
+- Current Application Quality Proof: `37049411609`
+- I.T. Admin Runtime Proof: `37049411613`
+- Repository Branch Hygiene: `37049411624`
+- Build 350 proof: `37049411636`
+- Production main: `96ecfb1cdfdff1e632da3289b3c5219ebe1fd1e3`
+- Production Pages Deploy: `37049716763`
+- Production Live Resource Integrity: `37049877055`
+- Current action: Build 351 Grey Hair Source Review & Story-Plan Completion Continuity V.
+- I.T. integration recovery: protected API startup waits for verified Development admin access; no auth bypass.
+- Etsy OAuth remains Development-only; Shop ID is auto-discovered and listing writes remain locked.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 350 candidate over Build 349 Production GREEN
 
 - Development SHA: `af5070400e0b9fb0da8be48753dcfef7737230b8`

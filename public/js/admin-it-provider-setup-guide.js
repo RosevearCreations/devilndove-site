@@ -32,6 +32,7 @@
     message(`Release ${payload.release}: ${providers.length} provider guides loaded; ${configured} have all required Cloudflare Preview references present. Payment execution switch: ${executionSwitch}; mutation switch: ${mutationSwitch}. Secret values were not returned.`);
   }
   async function load(){const button=byId('itSetupGuideRefresh');if(button)button.disabled=true;message('Loading safe provider setup authority…');try{render(await readJson(await apiFetch('/api/admin/it-provider-setup-guide',{method:'GET',cache:'no-store'})))}catch(error){message(error.message||String(error),true)}finally{if(button)button.disabled=false}}
-  function init(){byId('itSetupGuideRefresh')?.addEventListener('click',load);load()}
+  function startProtectedLoad(){if(window.DDWhenAdminReady){window.DDWhenAdminReady(load);return}if(window.DDAdminAccessState?.granted){load();return}message('Administrator sign-in required. Redirecting to Development login before loading provider setup.')}
+  function init(){byId('itSetupGuideRefresh')?.addEventListener('click',()=>{if(window.DDAdminAccessState?.granted)load();else message('Administrator sign-in required before setup can be refreshed.',true)});document.addEventListener('dd:admin-access-denied',()=>message('Administrator sign-in required. Redirecting to login…',true),{once:true});startProtectedLoad()}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

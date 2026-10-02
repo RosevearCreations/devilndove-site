@@ -15,6 +15,8 @@ async function load(){
   if(msg)msg.textContent=conn.connected?'Etsy Development OAuth connection verified.':'Ready for the one-time Etsy OAuth connection when the button is enabled.';
  }catch(e){if(msg)msg.textContent=e.message||String(e);if(btn)btn.disabled=true;}
 }
-function init(){id('etsyOauthConnect')?.addEventListener('click',()=>{location.href='/api/admin/oauth-start?provider=etsy&return_to='+encodeURIComponent('/admin/it-integrations/#etsy-oauth-acceptance')});id('etsyOauthRefresh')?.addEventListener('click',load);load();}
+function loginRedirect(){const next='/admin/it-integrations/#etsy-oauth-acceptance';const url=new URL('/login/',location.origin);url.searchParams.set('next',next);location.href=url.toString();}
+function startProtectedLoad(){const btn=id('etsyOauthConnect');if(btn)btn.disabled=true;if(window.DDWhenAdminReady){window.DDWhenAdminReady(()=>{if(btn)btn.disabled=false;load()});return}if(window.DDAdminAccessState?.granted){if(btn)btn.disabled=false;load();return}const msg=id('etsyOauthAcceptanceMessage');if(msg)msg.textContent='Administrator sign-in required. You will return here after Development login.'}
+function init(){id('etsyOauthConnect')?.addEventListener('click',()=>{if(!window.DDAdminAccessState?.granted){loginRedirect();return}location.href='/api/admin/oauth-start?provider=etsy&return_to='+encodeURIComponent('/admin/it-integrations/#etsy-oauth-acceptance')});id('etsyOauthRefresh')?.addEventListener('click',()=>{if(window.DDAdminAccessState?.granted)load();else loginRedirect()});document.addEventListener('dd:admin-access-denied',()=>{const msg=id('etsyOauthAcceptanceMessage');if(msg)msg.textContent='Administrator sign-in required. Redirecting to Development login…';const btn=id('etsyOauthConnect');if(btn)btn.disabled=true},{once:true});startProtectedLoad();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
