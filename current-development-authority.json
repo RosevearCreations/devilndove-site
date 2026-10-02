@@ -1,33 +1,33 @@
 {
   "release": 467,
-  "build": 344,
-  "title": "35th Promo Factual Evidence Completion Continuity IV",
+  "build": 345,
+  "title": "Grey Hair Source Review & Story-Plan Completion Continuity IV",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 343,
-      "title": "Evidence Gap Execution Workbench & Input Completion Continuity III",
-      "authority": "release467-build343-evidence-gap-execution-workbench-input-completion-continuity-iii.json",
-      "dev_sha": "9ba28adc49ce04cf69fd6e7d3a3c12d5b376d8fe",
-      "tree_sha": "719649ad678aabd932bd43414db87bc234d7fc92",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD343_GREEN",
+      "build": 344,
+      "title": "35th Promo Factual Evidence Completion Continuity IV",
+      "authority": "release467-build344-35th-promo-factual-evidence-completion-continuity-iv.json",
+      "dev_sha": "48fb55182bcd6b0a4208e0cc36e2253fd73b92e6",
+      "tree_sha": "541504c45ad45c8bd529ae42ee25abcc64980d67",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD344_GREEN",
       "proofs": {
-        "system_gate_run": 37007047792,
-        "current_application_quality_run": 37007047735,
-        "it_admin_runtime_proof_run": 37007047593,
-        "branch_hygiene_run": 37007047737,
-        "d1_ci_fanout_guard_run": 37007047655,
-        "build_specific_proof_run": 37007047625
+        "system_gate_run": 37009155831,
+        "current_application_quality_run": 37009155857,
+        "it_admin_runtime_proof_run": 37009155836,
+        "branch_hygiene_run": 37009155903,
+        "d1_ci_fanout_guard_run": 37009155833,
+        "build_specific_proof_run": 37009155813
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 344,
-      "title": "35th Promo Factual Evidence Completion Continuity IV",
-      "authority": "release467-build344-35th-promo-factual-evidence-completion-continuity-iv.json",
+      "build": 345,
+      "title": "Grey Hair Source Review & Story-Plan Completion Continuity IV",
+      "authority": "release467-build345-grey-hair-source-review-story-plan-completion-continuity-iv.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -38,18 +38,19 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 343,
-    "title": "Evidence Gap Execution Workbench & Input Completion Continuity III",
-    "authority": "release467-build343-evidence-gap-execution-workbench-input-completion-continuity-iii.json",
-    "main_sha": "b3db71eeb5bea3ed4f1428d96c18120b9e51c9bb",
-    "tree_sha": "719649ad678aabd932bd43414db87bc234d7fc92",
+    "build": 344,
+    "title": "35th Promo Factual Evidence Completion Continuity IV",
+    "authority": "release467-build344-35th-promo-factual-evidence-completion-continuity-iv.json",
+    "main_sha": "e797092067a1ba6c5d3d27f23db48e990e89edaf",
+    "tree_sha": "541504c45ad45c8bd529ae42ee25abcc64980d67",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 37007313881,
-    "production_live_resource_integrity_run": 37007416101,
+    "production_pages_deploy_run": 37009394369,
+    "production_live_resource_integrity_run": 37009593352,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build345-grey-hair-source-review-story-plan-completion-continuity-iv.json",
     "release467-build344-35th-promo-factual-evidence-completion-continuity-iv.json",
     "release467-build343-evidence-gap-execution-workbench-input-completion-continuity-iii.json",
     "release467-build342-content-adoption-discovery-outcomes-renewal-vii.json",
@@ -235,11 +236,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_343_348.md",
-  "next_build": 345,
-  "next_build_state": "QUEUED_AFTER_BUILD344_PRODUCTION_GREEN",
-  "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity IV",
-  "promotion_state": "BUILD344_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD345_DEFINED_BY_CANONICAL_ROADMAP",
+  "next_build": 346,
+  "next_build_state": "QUEUED_AFTER_BUILD345_PRODUCTION_GREEN",
+  "next_build_title": "Search Console Real Export & Fresh Discovery Intake VI",
+  "promotion_state": "BUILD345_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD346_DEFINED_BY_CANONICAL_ROADMAP",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -270,13 +271,13 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "9ba28adc49ce04cf69fd6e7d3a3c12d5b376d8fe",
-  "accepted_dev_tree_sha": "719649ad678aabd932bd43414db87bc234d7fc92",
+  "accepted_dev_sha": "48fb55182bcd6b0a4208e0cc36e2253fd73b92e6",
+  "accepted_dev_tree_sha": "541504c45ad45c8bd529ae42ee25abcc64980d67",
   "acceptance": {
-    "system_gate_run": 37007047792,
-    "current_application_quality_run": 37007047735,
-    "it_admin_runtime_proof_run": 37007047593,
-    "branch_hygiene_run": 37007047737
+    "system_gate_run": 37009155831,
+    "current_application_quality_run": 37009155857,
+    "it_admin_runtime_proof_run": 37009155836,
+    "branch_hygiene_run": 37009155903
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -3372,5 +3373,21 @@
       "provider_execution": false
     },
     "decision": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW"
+  },
+  "grey_hair_source_review_story_plan_completion_continuity_iv": {
+    "source_build": 345,
+    "state": "DEVELOPMENT_CANDIDATE",
+    "target_project_id": 6,
+    "target_project_key": "CP-MSUNAL8R",
+    "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "workspace_read_only": true,
+    "automatic_evidence_approval": false,
+    "automatic_story_plan_review": false,
+    "automatic_maker_story_profile": false,
+    "production_d1_contact": false,
+    "next_build": 346,
+    "next_build_title": "Search Console Real Export & Fresh Discovery Intake VI",
+    "future_queue_exhausted": false,
+    "exact_head_reproof_state": "PENDING_FINAL_EXACT_HEAD_MATRIX"
   }
 }
