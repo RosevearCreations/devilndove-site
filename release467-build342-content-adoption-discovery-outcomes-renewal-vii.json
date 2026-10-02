@@ -335,5 +335,9 @@
   },
   "roadmap_renewal_state": "BUILDS_343_348_CREATED_FROM_OBSERVED_EVIDENCE",
   "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_343_348.md",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED"
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED",
+  "retained_compatibility": {
+    "build265_roadmap_allowlist_extended_for_builds_343_348": true,
+    "historical_private_media_logic_unchanged": true
+  }
 }
