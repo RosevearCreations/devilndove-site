@@ -1,3 +1,18 @@
+<!-- BUILD346_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 345 dev 3ce6012f969d55fa13e917bfb00c8611f3452028; tree cd32fc6b82a7da8a645ca7a435d684b04e12e816; System 37013870629; Quality 37013870498; IT 37013870774; Hygiene 37013870321; D1 Fan-Out 37013870653; Build 345 37013870602; Production 8f435c2285f51d33e22ce1165227ea03b0abc50c; Pages 37014239323; Live 37014344594. -->
+
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 346 candidate
+
+Build 346 — Search Console Real Export & Fresh Discovery Intake VI — starts from exact Build 345 Development/Production GREEN.
+
+- Verified Development SHA: `3ce6012f969d55fa13e917bfb00c8611f3452028`
+- Verified Development/Production tree: `cd32fc6b82a7da8a645ca7a435d684b04e12e816`
+- System / Quality / I.T. / Hygiene: `37013870629 / 37013870498 / 37013870774 / 37013870321`
+- D1 Fan-Out / Build 345: `37013870653 / 37013870602`
+- Production main: `8f435c2285f51d33e22ce1165227ea03b0abc50c`
+- Production Pages / Live: `37014239323 / 37014344594`
+
+Build 346 keeps Search Console intake operator-controlled and uses only explicit real report dates for freshness. Import/creation timestamps cannot make evidence fresh.
+
 <!-- BUILD345_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 344 dev 48fb55182bcd6b0a4208e0cc36e2253fd73b92e6; tree 541504c45ad45c8bd529ae42ee25abcc64980d67; System 37009155831; Quality 37009155857; IT 37009155836; Hygiene 37009155903; D1 Fan-Out 37009155833; Build 344 37009155813; Production e797092067a1ba6c5d3d27f23db48e990e89edaf; Pages 37009394369; Live 37009593352. -->
 
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 345 candidate
