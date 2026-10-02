@@ -1,3 +1,4 @@
+// HISTORICAL_BUILD337_API_COMPAT: const BUILD=337; TITLE='Evidence Gap Execution Workbench & Input Completion Continuity II';
 // BUILD343_CURRENT_AUTHORITY: Release 467 Build 343 — Evidence Gap Execution Workbench & Input Completion Continuity III; reuses Build 337 GET-only workbench authority.
 // Release 467 Build 337 — GET-only Evidence Gap Execution Workbench continuity II.
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
