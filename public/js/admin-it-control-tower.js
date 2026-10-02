@@ -1,3 +1,4 @@
+/* BUILD347_REPROOF_TRIGGER: retained historical CAIP gates defer unknown future Production SHA mapping to current restart-integrity authority. */
 /* BUILD347_CURRENT_CLIENT: Release 467 Build 347 — Maker Story Advancement & Publication Readiness Continuity V; verified Build 346 dev 0f58e0243b5f4ca4b78278972e76b3514a395414; Production f6f0d17f0cd8b7a879a8b771c236915fc39cb0c3. */
 /* BUILD346_CURRENT_CLIENT: Release 467 Build 346 — Search Console Real Export & Fresh Discovery Intake VI; verified Build 345 dev 3ce6012f969d55fa13e917bfb00c8611f3452028; Production 8f435c2285f51d33e22ce1165227ea03b0abc50c. */
 /* BUILD345_CURRENT_CLIENT: Release 467 Build 345 — Grey Hair Source Review & Story-Plan Completion Continuity IV; verified Build 344 dev 48fb55182bcd6b0a4208e0cc36e2253fd73b92e6; Production e797092067a1ba6c5d3d27f23db48e990e89edaf. */
