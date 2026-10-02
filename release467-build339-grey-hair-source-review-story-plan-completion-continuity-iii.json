@@ -1,0 +1,129 @@
+{
+  "release": 467,
+  "build": 339,
+  "title": "Grey Hair Source Review & Story-Plan Completion Continuity III",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "GREY_HAIR_SOURCE_REVIEW_STORY_PLAN_COMPLETION_CONTINUITY_III",
+  "authority": "release467-build339-grey-hair-source-review-story-plan-completion-continuity-iii",
+  "predecessor": {
+    "build": 338,
+    "title": "35th Promo Factual Evidence Completion Continuity III",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "eb674de5006a63404d2a8076bef2024ba47272b3",
+    "development_tree_sha": "e10e2ca3b275e55d44b585c51b94bb26ca0bf8df",
+    "development_proofs": {
+      "system_gate_run": 36933234834,
+      "current_application_quality_run": 36933234856,
+      "it_admin_runtime_proof_run": 36933234896,
+      "branch_hygiene_run": 36933234830,
+      "d1_ci_fanout_guard_run": 36933234803,
+      "build_specific_proof_run": 36933234922
+    },
+    "production_main_sha": "cfdc10632bd5fe605b7cf60eef7e664e35cd11fb",
+    "production_tree_sha": "e10e2ca3b275e55d44b585c51b94bb26ca0bf8df",
+    "production_pages_deploy_run": 36933441853,
+    "production_live_resource_integrity_run": 36933549332,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "target": {
+    "creative_work_project_id": 6,
+    "project_key": "CP-MSUNAL8R",
+    "project_title": "Grey Hair"
+  },
+  "contract": {
+    "reuses_build327_authorities": true,
+    "reuses_build333_measurement_model": true,
+    "dedicated_readiness_workspace": "/admin/grey-hair-story-readiness/",
+    "evidence_review_authority": "/admin/creative-assets/",
+    "sync_review_authority": "/admin/grey-hair-sync-alignment/",
+    "story_plan_authority": "/admin/grey-hair-story-edit-planning/",
+    "maker_story_decision_authority": "/admin/creative-process/?project_id=6",
+    "approved_source_evidence_min": 2,
+    "reviewed_story_plans_min": 1,
+    "source_backed_story_items_min": 2,
+    "confirmed_capture_groups_min": 1,
+    "confirmed_capture_tracks_min": 4,
+    "evidence_review_must_be_complete": true,
+    "explicit_human_evidence_review_required": true,
+    "explicit_human_story_plan_review_required": true,
+    "workspace_read_only": true,
+    "raw_private_urls_exposed": false,
+    "automatic_evidence_approval": false,
+    "automatic_story_plan_generation": false,
+    "automatic_story_plan_review": false,
+    "automatic_maker_story_profile": false,
+    "automatic_publication": false,
+    "next_build": 340,
+    "next_build_title": "Search Console Real Export & Fresh Discovery Intake V",
+    "future_queue_exhausted": false
+  },
+  "build333_observed_start": {
+    "active_source_evidence": 3,
+    "approved_source_evidence": 1,
+    "source_evidence_needs_review": 2,
+    "confirmed_capture_groups": 0,
+    "confirmed_capture_tracks": 0,
+    "reviewed_story_plans": 0,
+    "source_backed_story_items": 0,
+    "maker_story_profiles": 0
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "source_media_mutation": false,
+    "private_media_exposure": false,
+    "media_rights_inference": false,
+    "automatic_evidence_approval": false,
+    "automatic_story_plan_generation": false,
+    "automatic_story_plan_review": false,
+    "automatic_maker_story_profile": false,
+    "automatic_publication": false,
+    "automatic_social_posting": false,
+    "provider_execution": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "eb674de5006a63404d2a8076bef2024ba47272b3",
+      "tree": "e10e2ca3b275e55d44b585c51b94bb26ca0bf8df",
+      "system_gate_run": 36933234834,
+      "quality_run": 36933234856,
+      "it_admin_runtime_run": 36933234896,
+      "repository_hygiene_run": 36933234830,
+      "d1_ci_fanout_guard_run": 36933234803,
+      "build_specific_proof_run": 36933234922,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "cfdc10632bd5fe605b7cf60eef7e664e35cd11fb",
+      "tree": "e10e2ca3b275e55d44b585c51b94bb26ca0bf8df",
+      "production_pages_deploy_run": 36933441853,
+      "production_live_resource_integrity_run": 36933549332,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_337_342.md",
+  "next_build": 340,
+  "next_build_title": "Search Console Real Export & Fresh Discovery Intake V",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "ENABLED_EXACT_DEVELOPMENT",
+  "measurement_lane_owner": "release467-build339-grey-hair-source-review-story-plan-completion-continuity-iii.yml",
+  "toolchain_reliability": {
+    "wrangler_version": "4.128.0",
+    "business_logic_changed": false
+  },
+  "decision": {
+    "classification": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "rationale": "Build 339 remeasures the existing Grey Hair review-first handoff without mutating evidence, synchronization, story plans, Maker Story state, media rights or publication state.",
+    "automatic_evidence_approval": false,
+    "automatic_story_plan_generation": false,
+    "automatic_story_plan_review": false,
+    "automatic_maker_story_profile": false,
+    "automatic_publication": false,
+    "next_build": 340,
+    "next_build_title": "Search Console Real Export & Fresh Discovery Intake V"
+  }
+}
