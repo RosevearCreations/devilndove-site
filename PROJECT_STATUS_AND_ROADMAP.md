@@ -1,5 +1,9 @@
 # CURRENT BUILD
 
+**Build 344 — 35th Promo Factual Evidence Completion Continuity IV** is the active Development candidate over exact Build 343 Development/Production GREEN.
+
+# CURRENT BUILD
+
 **Build 343 — Evidence Gap Execution Workbench & Input Completion Continuity III** is the active Development candidate over exact Build 342 Development/Production GREEN.
 
 # CURRENT BUILD
@@ -55,7 +59,7 @@ The factual lane remains fail-closed. Placeholder/absence text does not satisfy 
 
 The queue **has not run out**.
 
-**Next after Build 343 Production GREEN: Build 344 — 35th Promo Factual Evidence Completion Continuity IV.**
+**Next after Build 344 Production GREEN: Build 345 — Grey Hair Source Review & Story-Plan Completion Continuity IV.**
 
 Renewed roadmap authority: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_343_348.md`, created only from Build 342 exact Development evidence.
 
