@@ -1,3 +1,4 @@
+// Historical regression token retained: Build 328 freshness
 // File: /public/js/admin-search-console-import.js
 // Brief description: Operations panel for importing, filtering, reverting, and turning Search Console CSV exports into SEO action items.
 
@@ -73,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="small"><strong>Operator intake:</strong> ${esc(acceptanceState)}</div>
         <p class="small" style="margin:8px 0 0">${esc(evidenceMessage)}</p>
         <p class="small" style="margin:8px 0 0">Current batches: <strong>${num(acceptance.import_batches||0)}</strong> • live staged rows: <strong>${num(acceptance.live_rows||0)}</strong> • import audits: <strong>${num(acceptance.import_audits||0)}</strong> • revert audits: <strong>${num(acceptance.revert_audits||0)}</strong>. The safe batch revert remains the explicit <code>delete_batch</code> action.</p>
-        <p class="small" style="margin:8px 0 0"><strong>Build 328 freshness:</strong> ${esc(freshnessState)} • window <strong>${num(freshness.freshness_window_days||30)} days</strong> • recent rows <strong>${num(freshness.recent_rows||0)}</strong> • latest report <strong>${esc(freshness.latest_report_date||'none')}</strong>${freshness.latest_report_age_days == null ? '' : ` • age <strong>${esc(freshness.latest_report_age_days)} days</strong>`}. Stale evidence is non-actionable for queue/apply decisions.</p>
+        <p class="small" style="margin:8px 0 0"><strong>Build 340 freshness:</strong> ${esc(freshnessState)} • window <strong>${num(freshness.freshness_window_days||30)} days</strong> • recent rows <strong>${num(freshness.recent_rows||0)}</strong> • latest report <strong>${esc(freshness.latest_report_date||'none')}</strong>${freshness.latest_report_age_days == null ? '' : ` • age <strong>${esc(freshness.latest_report_age_days)} days</strong>`}. Stale evidence is non-actionable for queue/apply decisions.</p>
       </div>
       <div class="grid cols-4 media-diagnostic-metrics" style="margin-top:12px">
         <div class="card"><div class="small">Rows</div><strong>${num(totals.row_count || 0)}</strong></div>
@@ -197,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
   mount.innerHTML = `
     <div class="card search-console-admin-panel" style="margin-top:18px">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-        <div><h2 style="margin-top:0">Search Console CSV Import</h2><p class="small" style="margin:8px 0 0 0">Private staging for real Google Search Console exports. Build 328 keeps explicit real-export confirmation, measures a 30-day freshness window, and blocks stale evidence from queue/apply decisions. If the export has no Date column, enter its report end date explicitly.</p></div>
+        <div><h2 style="margin-top:0">Search Console CSV Import</h2><p class="small" style="margin:8px 0 0 0">Private staging for real Google Search Console exports. Build 340 keeps explicit real-export confirmation, measures a 30-day freshness window, and blocks stale evidence from queue/apply decisions. If the export has no Date column, enter its report end date explicitly.</p></div>
         <button class="btn" type="button" id="searchConsoleLoadButton">Refresh summary</button>
       </div>
       <div class="search-console-import-grid" style="margin-top:12px">

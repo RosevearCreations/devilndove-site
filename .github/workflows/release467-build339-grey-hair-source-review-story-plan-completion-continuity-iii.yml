@@ -1,20 +1,6 @@
 name: Release 467 Build 339 Grey Hair Source Review Story Plan Completion Continuity III
+# Historical after Build 340 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build339_*'
-      - 'release467-build339-*.json'
-      - 'release467-build338-*.json'
-      - 'functions/api/admin/grey-hair-story-readiness.js'
-      - 'public/js/admin-grey-hair-story-readiness-v320.js'
-      - 'admin/grey-hair-story-readiness/index.html'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_339_*'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - '.github/workflows/release467-build338-35th-promo-factual-evidence-completion-continuity-iii.yml'
-      - '.github/workflows/release467-build339-grey-hair-source-review-story-plan-completion-continuity-iii.yml'
   workflow_dispatch:
 permissions:
   contents: read
