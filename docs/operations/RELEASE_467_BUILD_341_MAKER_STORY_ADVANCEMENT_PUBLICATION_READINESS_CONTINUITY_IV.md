@@ -21,3 +21,19 @@ Build 341 performs no Maker Story profile creation, story review mutation, publi
 The queue **has not run out**.
 
 **Next after Build 341 Production GREEN: Build 342 — Content Adoption & Discovery Outcomes Renewal VII.**
+
+## Measured Development outcome
+
+Exact Development measurement at `8b85caca0833f47d99104982a5c54092902f859f` produced workflow `36959896986`, artifact `11206864679`, and decision **PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY**.
+
+- Active Creative Projects measured: **5**
+- Maker Story evidence required: **3**
+- Factual outcome evidence required: **1**
+- Published reviewed stories: **1**
+- 35th Promo execution / result / lesson events: **0 / 0 / 0**
+- Grey Hair approved source evidence / still-needs-review / reviewed story plans / source-backed story items: **1 / 2 / 0 / 0**
+- Active CAIP assets / explicit public-allowed assets: **45 / 0**
+- Social queue rows / review-first ready / provider-posted: **1 / 1 / 0**
+- Provider D1 rows read: **672 / 20,000**
+
+The one published reviewed story remains **Under the Sea**. No new project is publication-review ready. Advancement therefore remains evidence-driven and manual; Build 341 performs no automatic profile creation, review, public-candidate decision, copy approval, rights inference, publication or provider posting.
