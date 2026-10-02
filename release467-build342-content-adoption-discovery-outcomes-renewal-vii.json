@@ -2,7 +2,7 @@
   "release": 467,
   "build": 342,
   "title": "Content Adoption & Discovery Outcomes Renewal VII",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "CONTENT_ADOPTION_DISCOVERY_OUTCOMES_RENEWAL_VII",
   "authority": "release467-build342-content-adoption-discovery-outcomes-renewal-vii",
   "predecessor": {
@@ -209,7 +209,7 @@
   "next_build": 343,
   "next_build_title": "Evidence Gap Execution Workbench & Input Completion Continuity III",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "ENABLED_EXACT_DEVELOPMENT",
+  "measurement_lane_state": "HISTORICAL_MANUAL_ONLY",
   "measurement_lane_owner": "release467-build342-content-adoption-discovery-outcomes-renewal-vii.yml",
   "toolchain_reliability": {
     "wrangler_version": "4.128.0",
@@ -226,12 +226,12 @@
     "automatic_provider_execution": false
   },
   "measurement_checkpoint": {
-    "source_sha": "346c67d968ca3ded4bc24ce5feab773ac452baa8",
-    "source_tree_sha": "6af53f380709ef44fdc603084f93c34614322e8e",
-    "workflow_run": 36990231936,
-    "artifact_id": 11218619754,
-    "artifact_name": "build342-content-adoption-discovery-renewal-346c67d968ca3ded4bc24ce5feab773ac452baa8",
-    "artifact_digest": "sha256:06b1b5a9d2df49b54239e4e4a2c2cd58287bf10540798886db395f29f1541b9b",
+    "source_sha": "b2f8eb3d841de26b3200fde135be0cf35c71872c",
+    "source_tree_sha": "80139d90a4bd0835f694ceb25292184ca009930c",
+    "workflow_run": 36991370609,
+    "artifact_id": 11219837166,
+    "artifact_name": "build342-content-adoption-discovery-renewal-b2f8eb3d841de26b3200fde135be0cf35c71872c",
+    "artifact_digest": "sha256:9ea06ab204e9faf03ebb3019c051dd8ae0bab241125d8953ce4ee1904a01866e",
     "statement_count": 18,
     "aggregate_rows_read": 2847,
     "rows_read_ceiling": 20000,
@@ -335,9 +335,36 @@
   },
   "roadmap_renewal_state": "BUILDS_343_348_CREATED_FROM_OBSERVED_EVIDENCE",
   "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_343_348.md",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED",
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD342_GREEN",
   "retained_compatibility": {
     "build265_roadmap_allowlist_extended_for_builds_343_348": true,
     "historical_private_media_logic_unchanged": true
+  },
+  "final_closure": {
+    "dev_sha": "b2f8eb3d841de26b3200fde135be0cf35c71872c",
+    "tree_sha": "80139d90a4bd0835f694ceb25292184ca009930c",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD342_GREEN",
+    "proofs": {
+      "system_gate_run": 36991370553,
+      "current_application_quality_run": 36991370494,
+      "it_admin_runtime_proof_run": 36991372165,
+      "branch_hygiene_run": 36991370591,
+      "d1_ci_fanout_guard_run": 36991370667,
+      "build_specific_proof_run": 36991370609
+    },
+    "artifact_id": 11219837166,
+    "artifact_name": "build342-content-adoption-discovery-renewal-b2f8eb3d841de26b3200fde135be0cf35c71872c",
+    "artifact_digest": "sha256:9ea06ab204e9faf03ebb3019c051dd8ae0bab241125d8953ce4ee1904a01866e",
+    "ingested_by_build": 343
+  },
+  "production_checkpoint": {
+    "main_sha": "c884556bd869b55d721ea82ab6ac141d816f74ca",
+    "tree_sha": "80139d90a4bd0835f694ceb25292184ca009930c",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36991837922,
+    "production_live_resource_integrity_run": 36991925709,
+    "remote_d1_queries": 0
   }
 }

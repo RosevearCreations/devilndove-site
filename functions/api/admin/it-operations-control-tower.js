@@ -1,3 +1,4 @@
+/* BUILD343_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 342 dev b2f8eb3d841de26b3200fde135be0cf35c71872c; tree 80139d90a4bd0835f694ceb25292184ca009930c; System 36991370553; Quality 36991370494; IT 36991372165; Hygiene 36991370591; D1 Fan-Out 36991370667; Build 342 36991370609; Production c884556bd869b55d721ea82ab6ac141d816f74ca; Pages 36991837922; Live 36991925709. */
 /* BUILD342_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 341 dev 84074c82d258c26d313a28a4b4735382c812a9dd; tree 5e9a649b6f6eb8e8bb2a10d7c17b417c9b63d985; System 36960078167; Quality 36960078069; IT 36960078104; Hygiene 36960078071; D1 Fan-Out 36960078086; Build 341 36960078067; Production ff5b1106ee5515106fd501909461fc4078f24edd; Pages 36960239473; Live 36960292887. */
 /* BUILD341_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 340 dev 5e2c1d53ce8f96c29c526f78378a73f9c451c956; tree dfa4b627095b7f5c7fb4777bb6c38c1d0309b629; System 36958474203; Quality 36958474189; IT 36958474179; Hygiene 36958474226; D1 Fan-Out 36958474225; Build 340 36958474182; Production 104034bea4060c1696708cec8e145c7398525889; Pages 36958632089; Live 36958701913. */
 /* BUILD340_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 339 dev 71230f3cc4b6518f4f0e61068db2edd0fdf4db50; tree 2420704c0619bbf645ee600d80d8f29b8d9ba4cb; System 36956662304; Quality 36956662274; IT 36956662427; Hygiene 36956662310; D1 Fan-Out 36956662311; Build 339 36956662279; Production 8c7ff02b4748ebca9a0f5773ffe34589d5890305; Pages 36956802900; Live 36956890133. */
@@ -17,27 +18,27 @@ import { onRequestGet as getReadinessControlTower } from './it-control-tower.js'
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=342;
-const TITLE='Content Adoption & Discovery Outcomes Renewal VII';
-const AUTHORITY='release467-build342-content-adoption-discovery-outcomes-renewal-vii';
-const EVIDENCE_ID='r467-b342-candidate-36960078167-36960239473';
+const BUILD=343;
+const TITLE='Evidence Gap Execution Workbench & Input Completion Continuity III';
+const AUTHORITY='release467-build343-evidence-gap-execution-workbench-input-completion-continuity-iii';
+const EVIDENCE_ID='r467-b343-candidate-36991370553-36991837922';
 
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:341,title:'Maker Story Advancement & Publication Readiness Continuity IV',state:'DEVELOPMENT_GREEN',
-  dev_sha:'84074c82d258c26d313a28a4b4735382c812a9dd',tree_sha:'5e9a649b6f6eb8e8bb2a10d7c17b417c9b63d985',system_gate_run:36960078167,current_application_quality_run:36960078069,it_admin_runtime_proof_run:36960078104,branch_hygiene_run:36960078071,proof_state:'EXACT_BRANCH_HEAD_BUILD341_GREEN',exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
+  release:467,build:342,title:'Content Adoption & Discovery Outcomes Renewal VII',state:'DEVELOPMENT_GREEN',
+  dev_sha:'b2f8eb3d841de26b3200fde135be0cf35c71872c',tree_sha:'80139d90a4bd0835f694ceb25292184ca009930c',system_gate_run:36991370553,current_application_quality_run:36991370494,it_admin_runtime_proof_run:36991372165,branch_hygiene_run:36991370591,proof_state:'EXACT_BRANCH_HEAD_BUILD342_GREEN',exact_preview_deployment:true,role:'LAST_FULLY_VERIFIED_RESTART_CHECKPOINT'
 });
 const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:341,title:'Maker Story Advancement & Publication Readiness Continuity IV',state:'DEVELOPMENT_GREEN',
-  dev_sha:'84074c82d258c26d313a28a4b4735382c812a9dd',tree_sha:'5e9a649b6f6eb8e8bb2a10d7c17b417c9b63d985',accepted_sha:'84074c82d258c26d313a28a4b4735382c812a9dd',accepted_tree_sha:'5e9a649b6f6eb8e8bb2a10d7c17b417c9b63d985',system_gate_run:36960078167,current_application_quality_run:36960078069,it_admin_runtime_proof_run:36960078104,branch_hygiene_run:36960078071,proof_state:'EXACT_BRANCH_HEAD_BUILD341_GREEN'
+  release:467,build:342,title:'Content Adoption & Discovery Outcomes Renewal VII',state:'DEVELOPMENT_GREEN',
+  dev_sha:'b2f8eb3d841de26b3200fde135be0cf35c71872c',tree_sha:'80139d90a4bd0835f694ceb25292184ca009930c',accepted_sha:'b2f8eb3d841de26b3200fde135be0cf35c71872c',accepted_tree_sha:'80139d90a4bd0835f694ceb25292184ca009930c',system_gate_run:36991370553,current_application_quality_run:36991370494,it_admin_runtime_proof_run:36991372165,branch_hygiene_run:36991370591,proof_state:'EXACT_BRANCH_HEAD_BUILD342_GREEN'
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:341,title:'Maker Story Advancement & Publication Readiness Continuity IV',state:'PRODUCTION_GREEN',
-  main_sha:'ff5b1106ee5515106fd501909461fc4078f24edd',tree_sha:'5e9a649b6f6eb8e8bb2a10d7c17b417c9b63d985',production_pages_deploy_run:36960239473,production_live_resource_integrity_run:36960292887,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36960078067,remote_d1_queries:0
+  release:467,build:342,title:'Content Adoption & Discovery Outcomes Renewal VII',state:'PRODUCTION_GREEN',
+  main_sha:'c884556bd869b55d721ea82ab6ac141d816f74ca',tree_sha:'80139d90a4bd0835f694ceb25292184ca009930c',production_pages_deploy_run:36991837922,production_live_resource_integrity_run:36991925709,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36991370609,remote_d1_queries:0
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true,workflow:'.github/workflows/production-live-resource-integrity-proof.yml'
 });
-const CURRENT_GUARDS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 342 Content Adoption Discovery Outcomes Renewal VII']);
+const CURRENT_GUARDS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 343 Evidence Gap Execution Workbench Input Completion Continuity III']);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql','0026_release467_inventory_workstation_memberships.sql','0027_release467_caip_workshop_follies_maker_story_foundation.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
