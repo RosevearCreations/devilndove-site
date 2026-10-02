@@ -44,7 +44,7 @@ for token in ('discoverEtsyShop','/users/','/shops',"['shops_r','listings_r','li
 q("contract.key === 'etsy'" in start or "contract.key==='etsy'" in start,'Etsy OAuth start bootstrap missing')
 q('etsy_oauth_shop_connections' in callback,'Etsy callback must persist safe discovered shop identity')
 q('provider_listing_writes_allowed:false' in etsy and 'remote_draft_creation_enabled:false' in etsy,'Etsy acceptance must keep listing writes locked')
-q('Connect Etsy' in etsyui and 'etsy-oauth-acceptance' in ithtml,'Etsy operator connection UI missing')
+q('etsyOauthConnect' in etsyui and 'Connect Etsy' in ithtml and 'etsy-oauth-acceptance' in ithtml,'Etsy operator connection UI missing')
 files=[x.get('file') for x in manifest.get('migrations',[]) if isinstance(x,dict)]
 q(len(files)>=29 and files[28]=='0029_release467_etsy_oauth_shop_identity.sql','Migration 0029 must be canonical version 29')
 for token in ('etsy_oauth_shop_connections','ETSY_API_KEYSTRING','ETSY_SHARED_SECRET','ETSY_REDIRECT_URI'):q(token in migration,'Migration 0029 missing '+token)
