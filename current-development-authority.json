@@ -265,13 +265,13 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "8f5d038fa7c7d5b3213f6d64f51d659c3ce74994",
-  "accepted_dev_tree_sha": "3d173e98cfdf48b2efafdfb55a326c275e9cd041",
+  "accepted_dev_sha": "eb674de5006a63404d2a8076bef2024ba47272b3",
+  "accepted_dev_tree_sha": "e10e2ca3b275e55d44b585c51b94bb26ca0bf8df",
   "acceptance": {
-    "system_gate_run": 36931039442,
-    "current_application_quality_run": 36931039645,
-    "it_admin_runtime_proof_run": 36931039474,
-    "branch_hygiene_run": 36931039538
+    "system_gate_run": 36933234834,
+    "current_application_quality_run": 36933234856,
+    "it_admin_runtime_proof_run": 36933234896,
+    "branch_hygiene_run": 36933234830
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
