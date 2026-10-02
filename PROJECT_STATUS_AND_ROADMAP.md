@@ -1,3 +1,11 @@
+# CURRENT BUILD — Release 467 Build 350
+
+**35th Promo Factual Evidence Completion Continuity V**
+
+Build 349 is exact-tree Development/Production GREEN. Build 350 remeasures the 35th Promo factual outcome lane and includes Development-only Etsy OAuth connection hardening with automatic Shop ID discovery. Etsy listing writes/publication remain locked.
+
+**Verified Build 349:** Development `af5070400e0b9fb0da8be48753dcfef7737230b8`, Production `b4a2e20b96f7bbeea7a21136aa780d7425002891`, shared tree `c0f4a29f13d7f0bce5165f34a06c5140ec4f3ca1`.
+
 # BUILD 348 MEASUREMENT — observed evidence
 
 Build 348 exact Development measurement `37037329312` is GREEN: 18 read-only statements, **2,849** rows read, no adoption/discovery delta from Build 342, and decision **ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST**. The queue is renewed as Builds **349–354** from observed evidence only.
