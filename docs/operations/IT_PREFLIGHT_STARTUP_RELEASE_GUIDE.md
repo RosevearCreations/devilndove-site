@@ -1,3 +1,18 @@
+<!-- BUILD345_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 344 dev 48fb55182bcd6b0a4208e0cc36e2253fd73b92e6; tree 541504c45ad45c8bd529ae42ee25abcc64980d67; System 37009155831; Quality 37009155857; IT 37009155836; Hygiene 37009155903; D1 Fan-Out 37009155833; Build 344 37009155813; Production e797092067a1ba6c5d3d27f23db48e990e89edaf; Pages 37009394369; Live 37009593352. -->
+
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 345 candidate
+
+Build 345 — Grey Hair Source Review & Story-Plan Completion Continuity IV — starts from exact Build 344 Development/Production GREEN.
+
+- Verified Development SHA: `48fb55182bcd6b0a4208e0cc36e2253fd73b92e6`
+- Verified Development/Production tree: `541504c45ad45c8bd529ae42ee25abcc64980d67`
+- System / Quality / I.T. / Hygiene: `37009155831 / 37009155857 / 37009155836 / 37009155903`
+- D1 Fan-Out / Build 344: `37009155833 / 37009155813`
+- Production main: `e797092067a1ba6c5d3d27f23db48e990e89edaf`
+- Production Pages / Live: `37009394369 / 37009593352`
+
+Build 345 remains read-only: source-evidence approval, synchronization decisions, story-plan review and Maker Story creation remain explicit human/source-workspace actions.
+
 <!-- BUILD344_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 343 dev 9ba28adc49ce04cf69fd6e7d3a3c12d5b376d8fe; tree 719649ad678aabd932bd43414db87bc234d7fc92; System 37007047792; Quality 37007047735; IT 37007047593; Hygiene 37007047737; D1 Fan-Out 37007047655; Build 343 37007047625; Production b3db71eeb5bea3ed4f1428d96c18120b9e51c9bb; Pages 37007313881; Live 37007416101. -->
 
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 344 candidate
