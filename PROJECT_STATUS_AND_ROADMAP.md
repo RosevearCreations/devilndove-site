@@ -53,6 +53,8 @@ The queue **has not run out**.
 
 **Next after Build 342 Production GREEN: Build 343 — Evidence Gap Execution Workbench & Input Completion Continuity III.**
 
+Renewed roadmap authority: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_343_348.md`, created only from Build 342 exact Development evidence.
+
 Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_337_342.md`.
 
 ---
