@@ -35,4 +35,4 @@ console.log('BUILD344_TRACE=',JSON.stringify(trace));
 console.log('BUILD344_EVIDENCE_EVENTS=',JSON.stringify(events));
 console.log('BUILD344_ROWS_READ=',JSON.stringify(reads));
 console.log('BUILD344_AGGREGATE_ROWS_READ=',aggregate);
-console.log('BUILD344_35TH_PROMO_FACTUAL_EVIDENCE_CONTINUITY_II=GREEN');
+console.log('BUILD344_35TH_PROMO_FACTUAL_EVIDENCE_CONTINUITY_IV=GREEN');
