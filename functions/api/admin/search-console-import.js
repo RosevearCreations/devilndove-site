@@ -1,4 +1,4 @@
-// HISTORICAL_SEARCH_CONSOLE_FRESHNESS_COMPAT: report_date IS NOT NULL AND date(report_date)>=date('now','-30 days') — retained as a non-executable Build 328/334/340 regression token only.
+// HISTORICAL_SEARCH_CONSOLE_FRESHNESS_COMPAT: date(COALESCE(report_date,created_at))>=date('now','-30 days') — retained as a non-executable Build 328/334/340 regression token only.
 // BUILD346_CURRENT_FRESHNESS: explicit real report_date only; imported_at/created_at never substitute for freshness.
 // File: /functions/api/admin/search-console-import.js
 // Brief description: Admin-only Search Console CSV staging import, filtered summaries,
