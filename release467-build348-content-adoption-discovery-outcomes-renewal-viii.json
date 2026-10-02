@@ -208,14 +208,18 @@
       "it_admin_runtime_proof_run": 37029717295,
       "branch_hygiene_run": 37029717232,
       "build_specific_proof_run": 37029717110,
-      "state": "DEVELOPMENT_GREEN"
+      "state": "DEVELOPMENT_GREEN",
+      "quality_run": 37029717222,
+      "it_admin_runtime_run": 37029717295,
+      "repository_hygiene_run": 37029717232
     },
     "production": {
       "main_sha": "ec311f0e54f0aa6b2d2eafb7a8b6c668cf194fae",
       "tree": "51d1c8d3fee195d238d99a2500025d546f3dee14",
       "production_pages_deploy_run": 37030003885,
       "production_live_resource_integrity_run": 37030156716,
-      "state": "PRODUCTION_GREEN"
+      "state": "PRODUCTION_GREEN",
+      "tree_sha": "51d1c8d3fee195d238d99a2500025d546f3dee14"
     }
   },
   "measurement_state": "EXACT_DEVELOPMENT_MEASURED_ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
