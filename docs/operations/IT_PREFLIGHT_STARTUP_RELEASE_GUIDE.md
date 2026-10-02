@@ -1,3 +1,18 @@
+<!-- BUILD340_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 339 dev 71230f3cc4b6518f4f0e61068db2edd0fdf4db50; tree 2420704c0619bbf645ee600d80d8f29b8d9ba4cb; System 36956662304; Quality 36956662274; IT 36956662427; Hygiene 36956662310; D1 Fan-Out 36956662311; Build 339 36956662279; Production 8c7ff02b4748ebca9a0f5773ffe34589d5890305; Pages 36956802900; Live 36956890133. -->
+
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 340 candidate
+
+Build 340 — Search Console Real Export & Fresh Discovery Intake V — starts from exact Build 339 Development/Production GREEN.
+
+- Verified Development SHA: `71230f3cc4b6518f4f0e61068db2edd0fdf4db50`
+- Verified Development/Production tree: `2420704c0619bbf645ee600d80d8f29b8d9ba4cb`
+- System / Quality / I.T. / Hygiene: `36956662304 / 36956662274 / 36956662427 / 36956662310`
+- D1 Fan-Out / Build 339: `36956662311 / 36956662279`
+- Production main: `8c7ff02b4748ebca9a0f5773ffe34589d5890305`
+- Production Pages / Live: `36956802900 / 36956890133`
+
+Build 340 preserves operator-controlled real Search Console CSV intake, 30-day freshness, explicit fallback report date, audit/revert traceability and fail-closed query-level attribution. No synthetic search evidence or automatic SEO apply.
+
 <!-- BUILD339_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 338 dev eb674de5006a63404d2a8076bef2024ba47272b3; tree e10e2ca3b275e55d44b585c51b94bb26ca0bf8df; System 36933234834; Quality 36933234856; IT 36933234896; Hygiene 36933234830; D1 Fan-Out 36933234803; Build 338 36933234922; Production cfdc10632bd5fe605b7cf60eef7e664e35cd11fb; Pages 36933441853; Live 36933549332. -->
 
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 339 candidate
