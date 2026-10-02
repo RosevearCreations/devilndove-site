@@ -19,3 +19,18 @@ Grey Hair remains evidence-first and human-reviewed. At least two approved sourc
 Build 345 performs no evidence approval, sync mutation, story-plan generation/review, Maker Story profile creation, publication, social posting, media-rights inference, R2 mutation, provider execution, or Production D1 contact.
 
 **Next after Build 345 Production GREEN: Build 346 — Search Console Real Export & Fresh Discovery Intake VI.**
+
+## Measured Development outcome
+
+Exact Development measurement at `656c18f590d9c6712b29d0f4d20a82dd371854cf` produced workflow `37013075766`, artifact `11228103792`, and state **SOURCE_EVIDENCE_REVIEW_REQUIRED**.
+
+- Active Grey Hair assets: **45**
+- Active source-evidence ranges: **3**
+- Approved / needs-review / rejected: **1 / 2 / 0**
+- Confirmed sync groups / tracks: **0 / 0**
+- Reviewed / approved story plans: **0 / 0**
+- Source-backed story items: **0**
+- Maker Story profiles: **0**
+- Provider D1 rows read: **124 / 20,000**
+
+All measured deltas versus Build 343 are zero. The next factual action remains explicit human review of the two remaining source-evidence ranges.
