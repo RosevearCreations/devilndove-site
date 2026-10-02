@@ -3224,7 +3224,9 @@
   },
   "retained_compatibility": {
     "build342_build265_roadmap_allowlist_extended_for_builds_343_348": true,
-    "historical_private_media_logic_unchanged": true
+    "historical_private_media_logic_unchanged": true,
+    "build345_build333_grey_hair_ui_literal_retained": true,
+    "build345_build339_grey_hair_ui_literal_retained": true
   },
   "evidence_gap_execution_workbench_input_completion_continuity_iii": {
     "source_build": 343,
@@ -3438,6 +3440,8 @@
       "r2_mutation": false,
       "provider_execution": false
     },
-    "decision": "SOURCE_EVIDENCE_REVIEW_REQUIRED"
+    "decision": "SOURCE_EVIDENCE_REVIEW_REQUIRED",
+    "historical_ui_compatibility_proven": true,
+    "runtime_logic_changed_by_compatibility_fix": false
   }
 }
