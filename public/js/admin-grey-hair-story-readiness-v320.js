@@ -1,3 +1,4 @@
+// HISTORICAL_BUILD333_UI_COMPAT: Build 333 source review &amp; story-plan continuity II
 // HISTORICAL_BUILD339_UI: Build 339 source review &amp; story-plan continuity III
 // Release 467 Build 345 — Grey Hair source-review/story-plan completion continuity IV UI.
 // Historical regression token retained: Build 339 source review &amp; story-plan continuity III
