@@ -2,7 +2,7 @@
   "release": 467,
   "build": 340,
   "title": "Search Console Real Export & Fresh Discovery Intake V",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "SEARCH_CONSOLE_REAL_EXPORT_FRESH_DISCOVERY_INTAKE_V",
   "authority": "release467-build340-search-console-real-export-fresh-discovery-intake-v",
   "predecessor": {
@@ -94,7 +94,7 @@
   "next_build": 341,
   "next_build_title": "Maker Story Advancement & Publication Readiness Continuity IV",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "ENABLED_EXACT_DEVELOPMENT",
+  "measurement_lane_state": "HISTORICAL_MANUAL_ONLY",
   "measurement_lane_owner": "release467-build340-search-console-real-export-fresh-discovery-intake-v.yml",
   "toolchain_reliability": {
     "wrangler_version": "4.128.0",
@@ -169,5 +169,29 @@
   },
   "interpretation": "EVIDENCE_PENDING_NO_REAL_EXPORT",
   "operator_next_action": "Import an explicitly confirmed real Google Search Console Performance CSV when available; provide the report end date if the CSV has no Date column.",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED"
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED",
+  "final_closure": {
+    "dev_sha": "5e2c1d53ce8f96c29c526f78378a73f9c451c956",
+    "tree_sha": "dfa4b627095b7f5c7fb4777bb6c38c1d0309b629",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD340_GREEN",
+    "proofs": {
+      "system_gate_run": 36958474203,
+      "current_application_quality_run": 36958474189,
+      "it_admin_runtime_proof_run": 36958474179,
+      "branch_hygiene_run": 36958474226,
+      "d1_ci_fanout_guard_run": 36958474225,
+      "build_specific_proof_run": 36958474182
+    },
+    "ingested_by_build": 341
+  },
+  "production_checkpoint": {
+    "main_sha": "104034bea4060c1696708cec8e145c7398525889",
+    "tree_sha": "dfa4b627095b7f5c7fb4777bb6c38c1d0309b629",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36958632089,
+    "production_live_resource_integrity_run": 36958701913,
+    "remote_d1_queries": 0
+  }
 }

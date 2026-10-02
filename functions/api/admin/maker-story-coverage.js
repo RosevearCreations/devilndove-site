@@ -1,6 +1,7 @@
+// BUILD341_CURRENT_AUTHORITY: Release 467 Build 341 — Maker Story Advancement & Publication Readiness Continuity IV; reuses Build 329 GET-only coverage authority.
 // Release 467 Build 329 — read-only Maker Story advancement & publication readiness continuity II.
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
-const RELEASE=467,BUILD=329,TITLE='Maker Story Advancement & Publication Readiness Continuity II';
+const RELEASE=467,BUILD=341,TITLE='Maker Story Advancement & Publication Readiness Continuity IV';
 const rows=r=>Array.isArray(r?.results)?r.results:[];const n=v=>Number(v||0)||0;const s=v=>String(v??'').trim();
 const placeholderGuard=/\b(no (?:execution|completed-result|result|lesson|outcome)|not recorded|does not claim|evidence is required|pending execution)\b/i;
 const substantiveFact=v=>s(v).length>0&&!placeholderGuard.test(s(v));
