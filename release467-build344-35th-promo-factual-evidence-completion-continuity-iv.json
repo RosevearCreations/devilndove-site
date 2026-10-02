@@ -2,7 +2,7 @@
   "release": 467,
   "build": 344,
   "title": "35th Promo Factual Evidence Completion Continuity IV",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "35TH_PROMO_FACTUAL_EVIDENCE_COMPLETION_CONTINUITY_IV",
   "authority": "release467-build344-35th-promo-factual-evidence-completion-continuity-iv",
   "predecessor": {
@@ -118,7 +118,7 @@
   "next_build": 345,
   "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity IV",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "ENABLED_EXACT_DEVELOPMENT",
+  "measurement_lane_state": "HISTORICAL_MANUAL_ONLY",
   "measurement_lane_owner": "release467-build344-35th-promo-factual-evidence-completion-continuity-iv.yml",
   "toolchain_reliability": {
     "wrangler_version": "4.128.0",
@@ -134,12 +134,12 @@
     "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity IV"
   },
   "measurement": {
-    "source_sha": "5f6e04d81427b99d172eeeb32a35d3257dd3630d",
-    "source_tree_sha": "1e80a70f3d9a2d947cbc2863867e11db67626699",
-    "workflow_run": 37008832076,
-    "artifact_id": 11226888134,
-    "artifact_name": "build344-35th-promo-factual-evidence-continuity-5f6e04d81427b99d172eeeb32a35d3257dd3630d",
-    "artifact_digest": "sha256:5fbc84b9fe95e5bcca33039847280d4bae78dc763944a692b59ebf9e46741335",
+    "source_sha": "48fb55182bcd6b0a4208e0cc36e2253fd73b92e6",
+    "source_tree_sha": "541504c45ad45c8bd529ae42ee25abcc64980d67",
+    "workflow_run": 37009155813,
+    "artifact_id": 11227361156,
+    "artifact_name": "build344-35th-promo-factual-evidence-continuity-48fb55182bcd6b0a4208e0cc36e2253fd73b92e6",
+    "artifact_digest": "sha256:e1c331f3a1fba10e161a4a32033c5eda9c6a853c664c96d478e36613a7dbde66",
     "aggregate_rows_read": 45,
     "rows_read_ceiling": 20000,
     "rows_read_by_statement": [
@@ -177,5 +177,32 @@
     "r2_mutation": false,
     "provider_execution": false
   },
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED"
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD344_GREEN",
+  "final_closure": {
+    "dev_sha": "48fb55182bcd6b0a4208e0cc36e2253fd73b92e6",
+    "tree_sha": "541504c45ad45c8bd529ae42ee25abcc64980d67",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD344_GREEN",
+    "proofs": {
+      "system_gate_run": 37009155831,
+      "current_application_quality_run": 37009155857,
+      "it_admin_runtime_proof_run": 37009155836,
+      "branch_hygiene_run": 37009155903,
+      "d1_ci_fanout_guard_run": 37009155833,
+      "build_specific_proof_run": 37009155813
+    },
+    "artifact_id": 11227361156,
+    "artifact_name": "build344-35th-promo-factual-evidence-continuity-48fb55182bcd6b0a4208e0cc36e2253fd73b92e6",
+    "artifact_digest": "sha256:e1c331f3a1fba10e161a4a32033c5eda9c6a853c664c96d478e36613a7dbde66",
+    "ingested_by_build": 345
+  },
+  "production_checkpoint": {
+    "main_sha": "e797092067a1ba6c5d3d27f23db48e990e89edaf",
+    "tree_sha": "541504c45ad45c8bd529ae42ee25abcc64980d67",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37009394369,
+    "production_live_resource_integrity_run": 37009593352,
+    "remote_d1_queries": 0
+  }
 }
