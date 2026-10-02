@@ -1,3 +1,18 @@
+<!-- BUILD339_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 338 dev eb674de5006a63404d2a8076bef2024ba47272b3; tree e10e2ca3b275e55d44b585c51b94bb26ca0bf8df; System 36933234834; Quality 36933234856; IT 36933234896; Hygiene 36933234830; D1 Fan-Out 36933234803; Build 338 36933234922; Production cfdc10632bd5fe605b7cf60eef7e664e35cd11fb; Pages 36933441853; Live 36933549332. -->
+
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 339 candidate
+
+Build 339 — Grey Hair Source Review & Story-Plan Completion Continuity III — starts from exact Build 338 Development/Production GREEN.
+
+- Verified Development SHA: `eb674de5006a63404d2a8076bef2024ba47272b3`
+- Verified Development/Production tree: `e10e2ca3b275e55d44b585c51b94bb26ca0bf8df`
+- System / Quality / I.T. / Hygiene: `36933234834 / 36933234856 / 36933234896 / 36933234830`
+- D1 Fan-Out / Build 338: `36933234803 / 36933234922`
+- Production main: `cfdc10632bd5fe605b7cf60eef7e664e35cd11fb`
+- Production Pages / Live: `36933441853 / 36933549332`
+
+Build 339 remeasures Grey Hair prerequisites without automatic evidence approval, story-plan review, Maker Story creation, publication, or Production D1 contact.
+
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 338 candidate
 
 Build 338 — 35th Promo Factual Evidence Completion Continuity III — starts from exact Build 337 Development/Production GREEN.
