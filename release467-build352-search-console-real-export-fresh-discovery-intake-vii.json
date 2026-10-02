@@ -2,7 +2,7 @@
   "release": 467,
   "build": 352,
   "title": "Search Console Real Export & Fresh Discovery Intake VII",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "SEARCH_CONSOLE_REAL_EXPORT_FRESH_DISCOVERY_INTAKE_VII",
   "authority": "release467-build352-search-console-real-export-fresh-discovery-intake-vii",
   "predecessor": {
@@ -120,12 +120,12 @@
     "rows_read_ceiling": 20000
   },
   "measurement": {
-    "source_sha": "02381a7a4047d61a9b65885e913bf67e82058cb9",
-    "source_tree_sha": "e52beecda73d4e5e013ff09a9507a9466b5ef3af",
-    "workflow_run": 37075488375,
-    "artifact_id": 11256825734,
-    "artifact_name": "build352-search-console-fresh-discovery-02381a7a4047d61a9b65885e913bf67e82058cb9",
-    "artifact_digest": "sha256:fd5e00232e0f1c0f91f477379347526b7dfbe1922b568de086d8d68ac202a3c2",
+    "source_sha": "4767f4f041e35b1c6fc0cef51d7e83a2cd398b12",
+    "source_tree_sha": "c15a2b9cd49d4fdd2f634e5298420cab806216eb",
+    "workflow_run": 37077141859,
+    "artifact_id": 11257296535,
+    "artifact_name": "build352-search-console-fresh-discovery-4767f4f041e35b1c6fc0cef51d7e83a2cd398b12",
+    "artifact_digest": "sha256:ee6835ff21764fde45f5081fe3c86ea982e4b2fce61cb8ff689659606e005497",
     "statement_count": 9,
     "rows_read_by_statement": [
       1685,
@@ -167,5 +167,33 @@
     "provider_execution": false,
     "production_d1_contact": false
   },
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION"
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD352_GREEN",
+  "final_closure": {
+    "dev_sha": "4767f4f041e35b1c6fc0cef51d7e83a2cd398b12",
+    "tree_sha": "c15a2b9cd49d4fdd2f634e5298420cab806216eb",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD352_GREEN",
+    "proofs": {
+      "system_gate_run": 37077141850,
+      "current_application_quality_run": 37077141863,
+      "it_admin_runtime_proof_run": 37077141855,
+      "branch_hygiene_run": 37077141860,
+      "d1_ci_fanout_guard_run": 37077141885,
+      "build_specific_proof_run": 37077141859
+    },
+    "artifact_id": 11257296535,
+    "artifact_name": "build352-search-console-fresh-discovery-4767f4f041e35b1c6fc0cef51d7e83a2cd398b12",
+    "artifact_digest": "sha256:ee6835ff21764fde45f5081fe3c86ea982e4b2fce61cb8ff689659606e005497",
+    "ingested_by_build": 353,
+    "recorded_by": "Build 353 predecessor ingestion; not self-recorded by Build 352"
+  },
+  "production_checkpoint": {
+    "main_sha": "7fbf874fafa2c0838a07d0101500311707cfc9fe",
+    "tree_sha": "c15a2b9cd49d4fdd2f634e5298420cab806216eb",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37077294920,
+    "production_live_resource_integrity_run": 37077369791,
+    "remote_d1_queries": 0
+  }
 }

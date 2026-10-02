@@ -1,6 +1,7 @@
+// Historical Build 352 contract token retained: OAUTH_PROVIDER_AUTHORIZATION_MODE=development-explicit. Build 353 additionally requires an exact Development host and keeps Production closed.
 // Release 467 Build 352 — Etsy Development OAuth acceptance status. GET-only, safe blocker reporting.
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
-import { encryptionKeyConfigured, etsyDevelopmentAuthorizationOpen } from '../_lib/oauthSecurity.js';
+import { encryptionKeyConfigured, encryptionAuthoritySource, etsyDevelopmentAuthorizationOpen } from '../_lib/oauthSecurity.js';
 import { getOAuthContract, providerConfiguration } from '../_lib/oauthProviders.js';
 
 const json=(data,status=200)=>jsonResponse({release:467,build:352,...data},status,{'Cache-Control':'no-store'});
@@ -19,7 +20,8 @@ export async function onRequestGet({request,env}){
   const apiKeyReady=Boolean(text(env?.ETSY_API_KEYSTRING));
   const sharedSecretReady=Boolean(text(env?.ETSY_SHARED_SECRET));
   const redirectReady=Boolean(callback);
-  const encryptionReady=encryptionKeyConfigured(env);
+  const encryptionReady=encryptionKeyConfigured(env,'etsy');
+  const encryptionSource=encryptionAuthoritySource(env,'etsy');
   const authorizationOpen=etsyDevelopmentAuthorizationOpen(env,request.url);
   const connected=Boolean(conn&&conn.connection_status==='connected'&&shop&&shop.acceptance_status==='connected_verified');
   const connect_blockers=[];
@@ -27,12 +29,12 @@ export async function onRequestGet({request,env}){
   if(!sharedSecretReady)connect_blockers.push('ETSY_SHARED_SECRET is not configured in the Development environment.');
   if(!redirectReady)connect_blockers.push('ETSY_REDIRECT_URI is not configured in the Development environment.');
   if(!encryptionReady)connect_blockers.push('OAuth encryption authority is not configured.');
-  if(!authorizationOpen)connect_blockers.push('Set OAUTH_PROVIDER_AUTHORIZATION_MODE=development-explicit for the bounded Development OAuth acceptance.');
+  if(!authorizationOpen)connect_blockers.push('Open this Etsy connection from the Devil n Dove Development host (dev.devilndove-site.pages.dev). Production authorization stays closed.');
   if(!cfg.configured&&connect_blockers.length===0)connect_blockers.push('Etsy provider configuration is incomplete.');
   const connectAvailable=Boolean(cfg.configured&&encryptionReady&&authorizationOpen);
   return json({
     ok:true,authority:'etsy-development-oauth-acceptance',development_only:true,host,
-    configuration:{api_keystring_present:apiKeyReady,shared_secret_present:sharedSecretReady,redirect_uri_present:redirectReady,redirect_uri:callback||null,encryption_key_configured:encryptionReady},
+    configuration:{api_keystring_present:apiKeyReady,shared_secret_present:sharedSecretReady,redirect_uri_present:redirectReady,redirect_uri:callback||null,encryption_key_configured:encryptionReady,encryption_authority_source:encryptionSource},
     connect_authorization_available:connectAvailable,
     connect_blockers,
     connection:{status:conn?.connection_status||'not_connected',connected,scopes,access_expires_at:conn?.access_expires_at||null,refresh_expires_at:conn?.refresh_expires_at||null,diagnostic_code:conn?.diagnostic_code||null,updated_at:conn?.updated_at||null},

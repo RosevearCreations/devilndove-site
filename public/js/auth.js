@@ -314,10 +314,22 @@
   }
 
   async function me() {
-    const response = await apiFetch('/api/auth/me', { method: 'GET' });
-    const data = await parseJson(response);
-    setStoredUser(data?.user || null);
-    return data;
+    const AUTH_ME_TIMEOUT_MS=6000;
+    const controller=typeof AbortController==='function'?new AbortController():null;
+    const timer=controller?window.setTimeout(()=>controller.abort('auth-verification-timeout'),AUTH_ME_TIMEOUT_MS):0;
+    try{
+      const response=await apiFetch('/api/auth/me',{method:'GET',...(controller?{signal:controller.signal}:{})});
+      const data=await parseJson(response);
+      setStoredUser(data?.user||null);
+      return data;
+    }catch(error){
+      if(String(error?.name||'')==='AbortError'){
+        const timeoutError=new Error('Administrator session verification timed out. Cached identity is retained while live data stays paused.');
+        timeoutError.code='auth_verification_timeout';timeoutError.httpStatus=0;timeoutError.isRetryable=true;
+        throw timeoutError;
+      }
+      throw error;
+    }finally{if(timer)window.clearTimeout(timer);}
   }
 
   async function changePassword(current_password, new_password) {

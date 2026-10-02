@@ -21,7 +21,7 @@ export async function onRequestGet({request,env}) {
   const selectedProvider = oauthAcceptanceProvider(env);
   const remoteOpen = oauthProviderAuthorizationOpen(env, request.url, contract.key);
   const etsyMarketplaceAcceptance = contract.key === 'etsy';
-  const keyReady = encryptionKeyConfigured(env);
+  const keyReady = encryptionKeyConfigured(env, contract.key);
   const cfg = providerConfiguration(contract, env);
   const intended = providerIdentityExpectation(contract, env);
   if (!remoteOpen) {

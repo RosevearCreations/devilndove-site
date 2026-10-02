@@ -1,3 +1,5 @@
+/* BUILD353_CURRENT_SUCCESSOR: Release 467 Build 353 — Maker Story Advancement & Publication Readiness Continuity VI; verified predecessor Build 352. */
+/* BUILD353_RESTART_PROVENANCE: last_fully_verified_development Build 352 dev 4767f4f041e35b1c6fc0cef51d7e83a2cd398b12; tree c15a2b9cd49d4fdd2f634e5298420cab806216eb; System 37077141850; Quality 37077141863; IT 37077141855; Hygiene 37077141860; Build 352 37077141859; Production 7fbf874fafa2c0838a07d0101500311707cfc9fe; Pages 37077294920; Live 37077369791. */
 /* BUILD352_CURRENT_SUCCESSOR: Release 467 Build 352 — Search Console Real Export & Fresh Discovery Intake VII; verified predecessor Build 351. */
 /* BUILD352_RESTART_PROVENANCE: last_fully_verified_development Build 351 dev b2c5f5113dddf57e95ce866ab37140c26d2a8a3c; tree 57234a69014e86988ecb859130d9e2985776ea96; System 37073559299; Quality 37073559236; IT 37073559154; Hygiene 37073559155; Build 351 37073559190; Production 39b9550eba5a91c28d426e8556d09946cd739098; Pages 37073740571; Live 37073811582. */
 /* BUILD351_CURRENT_SUCCESSOR: Release 467 Build 351 — Grey Hair Source Review & Story-Plan Completion Continuity V; verified predecessor Build 350. */
@@ -39,13 +41,13 @@
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=352;
-export const CURRENT_RELIABILITY_TITLE='Search Console Real Export & Fresh Discovery Intake VII';
+export const CURRENT_RELIABILITY_BUILD=353;
+export const CURRENT_RELIABILITY_TITLE='Maker Story Advancement & Publication Readiness Continuity VI';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
-export const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:351,title:'Grey Hair Source Review & Story-Plan Completion Continuity V',state:'DEVELOPMENT_GREEN',dev_sha:'b2c5f5113dddf57e95ce866ab37140c26d2a8a3c',tree_sha:'57234a69014e86988ecb859130d9e2985776ea96',system_gate_run:37073559299,current_application_quality_run:37073559236,it_admin_runtime_proof_run:37073559154,branch_hygiene_run:37073559155,proof_state:'EXACT_BRANCH_HEAD_BUILD351_GREEN'});
-export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:351,title:'Grey Hair Source Review & Story-Plan Completion Continuity V',state:'DEVELOPMENT_GREEN',dev_sha:'b2c5f5113dddf57e95ce866ab37140c26d2a8a3c',tree_sha:'57234a69014e86988ecb859130d9e2985776ea96',system_gate_run:37073559299,current_application_quality_run:37073559236,it_admin_runtime_proof_run:37073559154,branch_hygiene_run:37073559155,proof_state:'EXACT_BRANCH_HEAD_BUILD351_GREEN'});
-export const CURRENT_PRODUCTION=Object.freeze({release:467,build:351,title:'Grey Hair Source Review & Story-Plan Completion Continuity V',state:'PRODUCTION_GREEN',main_sha:'39b9550eba5a91c28d426e8556d09946cd739098',tree_sha:'57234a69014e86988ecb859130d9e2985776ea96',production_pages_deploy_run:37073740571,production_live_resource_integrity_run:37073811582,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:37073559190,remote_d1_queries:0});
+export const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:352,title:'Search Console Real Export & Fresh Discovery Intake VII',state:'DEVELOPMENT_GREEN',dev_sha:'4767f4f041e35b1c6fc0cef51d7e83a2cd398b12',tree_sha:'c15a2b9cd49d4fdd2f634e5298420cab806216eb',system_gate_run:37077141850,current_application_quality_run:37077141863,it_admin_runtime_proof_run:37077141855,branch_hygiene_run:37077141860,proof_state:'EXACT_BRANCH_HEAD_BUILD352_GREEN'});
+export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:352,title:'Search Console Real Export & Fresh Discovery Intake VII',state:'DEVELOPMENT_GREEN',dev_sha:'4767f4f041e35b1c6fc0cef51d7e83a2cd398b12',tree_sha:'c15a2b9cd49d4fdd2f634e5298420cab806216eb',system_gate_run:37077141850,current_application_quality_run:37077141863,it_admin_runtime_proof_run:37077141855,branch_hygiene_run:37077141860,proof_state:'EXACT_BRANCH_HEAD_BUILD352_GREEN'});
+export const CURRENT_PRODUCTION=Object.freeze({release:467,build:352,title:'Search Console Real Export & Fresh Discovery Intake VII',state:'PRODUCTION_GREEN',main_sha:'7fbf874fafa2c0838a07d0101500311707cfc9fe',tree_sha:'c15a2b9cd49d4fdd2f634e5298420cab806216eb',production_pages_deploy_run:37077294920,production_live_resource_integrity_run:37077369791,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:37077141859,remote_d1_queries:0});
 export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
   retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],
@@ -56,14 +58,14 @@ export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
 export async function loadCurrentReliability(db,env={}){
   const inherited=await loadRelease466Reliability(db,env);
   return {
-    release:467,build:352,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
+    release:467,build:353,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
     environment:inherited.environment,score:inherited.score,status:inherited.status,scope:inherited.scope,slo_targets:inherited.slo_targets,
     checks:inherited.checks,migrations:inherited.migrations,runtime_incidents:inherited.runtime_incidents,
     foreign_key_violations:inherited.foreign_key_violations,resources:inherited.resources,
     governance:{...inherited.governance,current_release_authority:'current-development-authority.json',production_promotion_proof_count:4,production_closure_proof_count:6,rollback_readiness:'release-neutral-read-only',restart_integrity_protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1'},
     recovery:inherited.recovery,drift:inherited.drift,
     provenance:{
-      current_surface_release:467,current_surface_build:352,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
+      current_surface_release:467,current_surface_build:353,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
       historical_feature_authority:'release467-build36-current-reliability-operational-health.json',current_operator_authority:'current-development-authority.json',
       accepted_development:ACCEPTED_DEVELOPMENT,last_fully_verified_development:LAST_FULLY_VERIFIED_DEVELOPMENT,current_production:CURRENT_PRODUCTION,
       production_proof_transport_policy:PRODUCTION_PROOF_TRANSPORT_POLICY,implementation_acceptance_is_distinct_from_final_closure:true,

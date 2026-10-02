@@ -38,46 +38,63 @@ export async function createStateAndPkce() {
   return { state, stateHash: await sha256Base64Url(state), verifier, challenge, challengeMethod: 'S256' };
 }
 
-async function encryptionKey(env) {
-  const encoded = String(env?.OAUTH_TOKEN_ENCRYPTION_KEY_V1 || '').trim();
-  if (!encoded) throw new Error('oauth_encryption_key_missing');
-  let raw;
-  try { raw = base64UrlToBytes(encoded); } catch { throw new Error('oauth_encryption_key_invalid'); }
-  if (raw.byteLength !== 32) throw new Error('oauth_encryption_key_invalid');
-  return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+function oauthProviderFromAad(aad='') {
+  const match=String(aad||'').match(/^oauth-(?:pkce|token)\|([^|]+)\|/);
+  return String(match?.[1]||'').trim().toLowerCase();
 }
-
-export function encryptionKeyConfigured(env) {
-  const encoded = String(env?.OAUTH_TOKEN_ENCRYPTION_KEY_V1 || '').trim();
-  if (!encoded) return false;
-  try { return base64UrlToBytes(encoded).byteLength === 32; } catch { return false; }
+async function etsyDerivedEncryptionKey(env) {
+  const secret=String(env?.ETSY_SHARED_SECRET||'').trim();
+  if(!secret) throw new Error('oauth_encryption_key_missing');
+  const material=await crypto.subtle.digest('SHA-256',te.encode('devilndove|etsy-oauth-encryption|e1|'+secret));
+  return crypto.subtle.importKey('raw',material,{name:'AES-GCM'},false,['encrypt','decrypt']);
 }
-
-export async function encryptOAuthSecret(env, plaintext, aad) {
-  if (plaintext == null || plaintext === '') return null;
-  const iv = new Uint8Array(12);
-  crypto.getRandomValues(iv);
-  const key = await encryptionKey(env);
-  const additionalData = te.encode(String(aad || 'oauth'));
-  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData, tagLength: 128 }, key, te.encode(String(plaintext)));
-  return `v1.${bytesToBase64Url(iv)}.${bytesToBase64Url(new Uint8Array(encrypted))}`;
+async function dedicatedEncryptionKey(env) {
+  const encoded=String(env?.OAUTH_TOKEN_ENCRYPTION_KEY_V1||'').trim();
+  if(!encoded) throw new Error('oauth_encryption_key_missing');
+  let raw; try{raw=base64UrlToBytes(encoded);}catch{throw new Error('oauth_encryption_key_invalid');}
+  if(raw.byteLength!==32) throw new Error('oauth_encryption_key_invalid');
+  return crypto.subtle.importKey('raw',raw,{name:'AES-GCM'},false,['encrypt','decrypt']);
 }
-
-export async function decryptOAuthSecret(env, envelope, aad) {
-  if (!envelope) return null;
-  const [version, ivPart, dataPart, extra] = String(envelope).split('.');
-  if (version !== 'v1' || !ivPart || !dataPart || extra) throw new Error('oauth_ciphertext_invalid');
-  const key = await encryptionKey(env);
-  try {
-    const decrypted = await crypto.subtle.decrypt({
-      name: 'AES-GCM', iv: base64UrlToBytes(ivPart), additionalData: te.encode(String(aad || 'oauth')), tagLength: 128
-    }, key, base64UrlToBytes(dataPart));
+export function encryptionKeyConfigured(env,providerKey='') {
+  const encoded=String(env?.OAUTH_TOKEN_ENCRYPTION_KEY_V1||'').trim();
+  if(encoded){try{if(base64UrlToBytes(encoded).byteLength===32)return true;}catch{}}
+  return String(providerKey||'').trim().toLowerCase()==='etsy'&&Boolean(String(env?.ETSY_SHARED_SECRET||'').trim());
+}
+export function encryptionAuthoritySource(env,providerKey='') {
+  const encoded=String(env?.OAUTH_TOKEN_ENCRYPTION_KEY_V1||'').trim();
+  if(encoded){try{if(base64UrlToBytes(encoded).byteLength===32)return 'dedicated_v1';}catch{}}
+  return String(providerKey||'').trim().toLowerCase()==='etsy'&&String(env?.ETSY_SHARED_SECRET||'').trim()?'etsy_shared_secret_derived_e1':'missing';
+}
+async function encryptionKeyFor(env,aad,version='') {
+  const provider=oauthProviderFromAad(aad);
+  if(version==='e1'){if(provider!=='etsy')throw new Error('oauth_ciphertext_invalid');return etsyDerivedEncryptionKey(env);}
+  if(version==='v1')return dedicatedEncryptionKey(env);
+  if(String(env?.OAUTH_TOKEN_ENCRYPTION_KEY_V1||'').trim())return dedicatedEncryptionKey(env);
+  if(provider==='etsy')return etsyDerivedEncryptionKey(env);
+  throw new Error('oauth_encryption_key_missing');
+}
+export async function encryptOAuthSecret(env,plaintext,aad) {
+  if(plaintext==null||plaintext==='')return null;
+  const provider=oauthProviderFromAad(aad);
+  const dedicated=String(env?.OAUTH_TOKEN_ENCRYPTION_KEY_V1||'').trim();
+  const version=dedicated?'v1':(provider==='etsy'&&String(env?.ETSY_SHARED_SECRET||'').trim()?'e1':'');
+  if(!version)throw new Error('oauth_encryption_key_missing');
+  const iv=new Uint8Array(12);crypto.getRandomValues(iv);
+  const key=await encryptionKeyFor(env,aad,version);
+  const additionalData=te.encode(String(aad||'oauth'));
+  const encrypted=await crypto.subtle.encrypt({name:'AES-GCM',iv,additionalData,tagLength:128},key,te.encode(String(plaintext)));
+  return version+'.'+bytesToBase64Url(iv)+'.'+bytesToBase64Url(new Uint8Array(encrypted));
+}
+export async function decryptOAuthSecret(env,envelope,aad) {
+  if(!envelope)return null;
+  const [version,ivPart,dataPart,extra]=String(envelope).split('.');
+  if(!['v1','e1'].includes(version)||!ivPart||!dataPart||extra)throw new Error('oauth_ciphertext_invalid');
+  const key=await encryptionKeyFor(env,aad,version);
+  try{
+    const decrypted=await crypto.subtle.decrypt({name:'AES-GCM',iv:base64UrlToBytes(ivPart),additionalData:te.encode(String(aad||'oauth')),tagLength:128},key,base64UrlToBytes(dataPart));
     return td.decode(decrypted);
-  } catch {
-    throw new Error('oauth_ciphertext_authentication_failed');
-  }
+  }catch{throw new Error('oauth_ciphertext_authentication_failed');}
 }
-
 export function redactSensitive(value, depth = 0) {
   if (depth > 8) return '[REDACTED_DEPTH]';
   if (Array.isArray(value)) return value.map((item) => redactSensitive(item, depth + 1));
@@ -136,8 +153,8 @@ export function safeReturnPath(value, fallback = '/admin/it-integrations/') {
    This is Development-host only and does not authorize listing/publication writes. */
 export function etsyDevelopmentAuthorizationOpen(env, requestUrl) {
   let host='';
-  try { host=new URL(String(requestUrl||'')).hostname; } catch { return false; }
-  return isDevelopmentOAuthHost(host,env);
+  try { host=new URL(String(requestUrl||'')).hostname.toLowerCase(); } catch { return false; }
+  return host==='dev.devilndove-site.pages.dev'||/^[0-9a-f]{8}\.devilndove-site\.pages\.dev$/i.test(host)||host==='localhost'||host==='127.0.0.1';
 }
 
 export function oauthProviderAuthorizationOpen(env, requestUrl, providerKey) {

@@ -1,3 +1,13 @@
+# CURRENT BUILD — Release 467 Build 353
+
+Maker Story Advancement & Publication Readiness Continuity VI
+
+Build 352 is exact-tree Development/Production GREEN. Build 353 re-evaluates all five active Creative Projects for factual Maker Story readiness and includes two operator repairs: Admin-home live reads wait for verified authentication with a bounded verifier timeout, and Etsy Development OAuth can use a safe derived encryption authority from the already-configured Etsy shared secret when no dedicated OAuth key exists.
+
+Verified Build 352: Development 4767f4f041e35b1c6fc0cef51d7e83a2cd398b12, Production 7fbf874fafa2c0838a07d0101500311707cfc9fe, shared tree c15a2b9cd49d4fdd2f634e5298420cab806216eb.
+
+Next after Build 353 Production GREEN: Build 354 — Content Adoption & Discovery Outcomes Renewal IX.
+
 # CURRENT BUILD — Release 467 Build 352
 
 **Search Console Real Export & Fresh Discovery Intake VII**
