@@ -1,3 +1,21 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 353 candidate over Build 352 Production GREEN
+
+Build 352 is the last fully verified exact Development/Production closure ingested by Build 353.
+
+- Development SHA: 4767f4f041e35b1c6fc0cef51d7e83a2cd398b12
+- Shared tree: c15a2b9cd49d4fdd2f634e5298420cab806216eb
+- System Gate: 37077141850
+- Current Application Quality Proof: 37077141863
+- I.T. Admin Runtime Proof: 37077141855
+- Repository Branch Hygiene: 37077141860
+- Build 352 proof: 37077141859
+- Production main: 7fbf874fafa2c0838a07d0101500311707cfc9fe
+- Production Pages Deploy: 37077294920
+- Production Live Resource Integrity: 37077369791
+- Current action: Build 353 Maker Story Advancement & Publication Readiness Continuity VI.
+- Admin home: live Seller Daily D1 reads wait for verified Admin auth; /api/auth/me is bounded to 6 seconds.
+- Etsy Development OAuth: exact Development host only; dedicated OAuth encryption key preferred, with a domain-separated Etsy-shared-secret derived e1 fallback; listing writes stay locked.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 352 candidate over Build 351 Production GREEN
 
 Build 351 is the last fully verified exact Development/Production closure ingested by Build 352.

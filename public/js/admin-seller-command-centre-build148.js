@@ -1,5 +1,6 @@
 // Release 467 Build 148 — Seller Daily Command Centre.
 // Build 176 containment: cache-first, one bounded live snapshot, no duplicate I.T. read.
+// Build 353: never start Admin-home live D1 reads from provisional auth; wait for verified admin.
 (() => {
   'use strict';
   const BUILD=148;
@@ -64,8 +65,16 @@
     const el=mount();if(el)el.innerHTML=`<section class="card"><h2>Seller Daily Command Centre</h2><p class="small">${esc(message)}</p><button class="btn" id="sellerCommandRetry" type="button">Retry</button></section>`;
     document.getElementById('sellerCommandRetry')?.addEventListener('click',()=>void load({manual:true}));
   }
+  function verifiedAdmin(){
+    const ui=window.DDAuthUiState||{};
+    return ui.verified===true&&String(ui.user?.role||'').toLowerCase()==='admin';
+  }
   async function load({manual=false}={}){
     const cached=readCache();
+    if(!verifiedAdmin()){
+      if(cached)return render(cached.payload,{cached:true,savedAt:cached.saved_at,recent:cacheFresh(cached)});
+      return renderError('Live Seller Daily reads are paused until the administrator session is verified. Static Admin navigation remains available.');
+    }
     if(!manual&&cacheFresh(cached)){
       return render(cached.payload,{cached:true,savedAt:cached.saved_at,recent:true});
     }
@@ -89,11 +98,18 @@
     s.textContent='.dd-b148-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}.dd-b148-state{display:grid;gap:2px;text-align:right}.dd-b148-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}.dd-b148-metric{display:grid;gap:4px}.dd-b148-metric strong{font-size:1.55rem}.dd-b148-queues{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:12px}.dd-b148-queue{display:grid;gap:7px;text-decoration:none;color:inherit}.dd-b148-count{font-size:1.65rem;font-weight:900}.dd-b148-actions{display:flex;gap:8px;flex-wrap:wrap}@media(max-width:680px){.dd-b148-state{text-align:left}.dd-b148-grid,.dd-b148-queues{grid-template-columns:1fr}}';
     document.head.appendChild(s);
   }
+  let started=false;
   const start=()=>{
+    if(started)return;started=true;
     injectStyles();
     void load();
     window.addEventListener('offline',()=>{const c=readCache();if(c)render(c.payload,{cached:true,savedAt:c.saved_at,recent:cacheFresh(c)});});
   };
-  if(window.DDWhenAdminReady)window.DDWhenAdminReady(start,{delayMs:140});
-  else document.addEventListener('dd:admin-ready',(e)=>{if(e?.detail?.ok)start();},{once:true});
+  injectStyles();
+  const cached=readCache();
+  if(cached)render(cached.payload,{cached:true,savedAt:cached.saved_at,recent:cacheFresh(cached)});
+  else renderError('Waiting for verified administrator session before loading live Seller Daily data.');
+  if(verifiedAdmin())start();
+  else document.addEventListener('dd:auth-verified',(e)=>{if(String(e?.detail?.user?.role||'').toLowerCase()==='admin')start();},{once:true});
+  document.addEventListener('dd:auth-degraded',()=>{const c=readCache();if(c)render(c.payload,{cached:true,savedAt:c.saved_at,recent:cacheFresh(c)});},{once:true});
 })();

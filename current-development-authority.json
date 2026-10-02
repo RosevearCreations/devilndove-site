@@ -1,32 +1,33 @@
 {
   "release": 467,
-  "build": 352,
-  "title": "Search Console Real Export & Fresh Discovery Intake VII",
+  "build": 353,
+  "title": "Maker Story Advancement & Publication Readiness Continuity VI",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 351,
-      "title": "Grey Hair Source Review & Story-Plan Completion Continuity V",
-      "authority": "release467-build351-grey-hair-source-review-story-plan-completion-continuity-v.json",
-      "dev_sha": "b2c5f5113dddf57e95ce866ab37140c26d2a8a3c",
-      "tree_sha": "57234a69014e86988ecb859130d9e2985776ea96",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD351_GREEN",
+      "build": 352,
+      "title": "Search Console Real Export & Fresh Discovery Intake VII",
+      "authority": "release467-build352-search-console-real-export-fresh-discovery-intake-vii.json",
+      "dev_sha": "4767f4f041e35b1c6fc0cef51d7e83a2cd398b12",
+      "tree_sha": "c15a2b9cd49d4fdd2f634e5298420cab806216eb",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD352_GREEN",
       "proofs": {
-        "system_gate_run": 37073559299,
-        "current_application_quality_run": 37073559236,
-        "it_admin_runtime_proof_run": 37073559154,
-        "branch_hygiene_run": 37073559155,
-        "build_specific_proof_run": 37073559190
+        "system_gate_run": 37077141850,
+        "current_application_quality_run": 37077141863,
+        "it_admin_runtime_proof_run": 37077141855,
+        "branch_hygiene_run": 37077141860,
+        "d1_ci_fanout_guard_run": 37077141885,
+        "build_specific_proof_run": 37077141859
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 352,
-      "title": "Search Console Real Export & Fresh Discovery Intake VII",
-      "authority": "release467-build352-search-console-real-export-fresh-discovery-intake-vii.json",
+      "build": 353,
+      "title": "Maker Story Advancement & Publication Readiness Continuity VI",
+      "authority": "release467-build353-maker-story-advancement-publication-readiness-continuity-vi.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -37,18 +38,20 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 351,
-    "title": "Grey Hair Source Review & Story-Plan Completion Continuity V",
-    "authority": "release467-build351-grey-hair-source-review-story-plan-completion-continuity-v.json",
-    "main_sha": "39b9550eba5a91c28d426e8556d09946cd739098",
-    "tree_sha": "57234a69014e86988ecb859130d9e2985776ea96",
+    "build": 352,
+    "title": "Search Console Real Export & Fresh Discovery Intake VII",
+    "authority": "release467-build352-search-console-real-export-fresh-discovery-intake-vii.json",
+    "main_sha": "7fbf874fafa2c0838a07d0101500311707cfc9fe",
+    "tree_sha": "c15a2b9cd49d4fdd2f634e5298420cab806216eb",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 37073740571,
-    "production_live_resource_integrity_run": 37073811582,
+    "production_pages_deploy_run": 37077294920,
+    "production_live_resource_integrity_run": 37077369791,
+    "remote_d1_queries": 0,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build353-maker-story-advancement-publication-readiness-continuity-vi.json",
     "release467-build352-search-console-real-export-fresh-discovery-intake-vii.json",
     "release467-build351-grey-hair-source-review-story-plan-completion-continuity-v.json",
     "release467-build350-35th-promo-factual-evidence-completion-continuity-v.json",
@@ -242,11 +245,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_349_354.md",
-  "next_build": 353,
-  "next_build_state": "QUEUED_AFTER_BUILD352_PRODUCTION_GREEN",
-  "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VI",
-  "promotion_state": "BUILD352_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD353_DEFINED_BY_CANONICAL_ROADMAP",
+  "next_build": 354,
+  "next_build_state": "QUEUED_AFTER_BUILD353_PRODUCTION_GREEN",
+  "next_build_title": "Content Adoption & Discovery Outcomes Renewal IX",
+  "promotion_state": "BUILD353_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD354_DEFINED_BY_CANONICAL_ROADMAP",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -277,14 +280,14 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "b2c5f5113dddf57e95ce866ab37140c26d2a8a3c",
-  "accepted_dev_tree_sha": "57234a69014e86988ecb859130d9e2985776ea96",
+  "accepted_dev_sha": "4767f4f041e35b1c6fc0cef51d7e83a2cd398b12",
+  "accepted_dev_tree_sha": "c15a2b9cd49d4fdd2f634e5298420cab806216eb",
   "acceptance": {
-    "system_gate_run": 37073559299,
-    "current_application_quality_run": 37073559236,
-    "it_admin_runtime_proof_run": 37073559154,
-    "branch_hygiene_run": 37073559155,
-    "build_specific_proof_run": 37073559190
+    "system_gate_run": 37077141850,
+    "current_application_quality_run": 37077141863,
+    "it_admin_runtime_proof_run": 37077141855,
+    "branch_hygiene_run": 37077141860,
+    "build_specific_proof_run": 37077141859
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -4059,7 +4062,7 @@
   },
   "search_console_real_export_fresh_discovery_intake_vii": {
     "source_build": 352,
-    "state": "DEVELOPMENT_GREEN",
+    "state": "PRODUCTION_GREEN",
     "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EVIDENCE_PENDING_NO_REAL_EXPORT",
     "freshness_window_days": 30,
     "explicit_report_date_only": true,
@@ -4077,7 +4080,7 @@
     "next_build": 353,
     "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VI",
     "future_queue_exhausted": false,
-    "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+    "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD352_GREEN",
     "measurement": {
       "source_sha": "02381a7a4047d61a9b65885e913bf67e82058cb9",
       "source_tree_sha": "e52beecda73d4e5e013ff09a9507a9466b5ef3af",
@@ -4126,6 +4129,49 @@
       "provider_execution": false,
       "production_d1_contact": false
     },
-    "decision": "EVIDENCE_PENDING_NO_REAL_EXPORT"
+    "decision": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "final_closure": {
+      "dev_sha": "4767f4f041e35b1c6fc0cef51d7e83a2cd398b12",
+      "tree_sha": "c15a2b9cd49d4fdd2f634e5298420cab806216eb",
+      "state": "DEVELOPMENT_GREEN",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD352_GREEN",
+      "proofs": {
+        "system_gate_run": 37077141850,
+        "current_application_quality_run": 37077141863,
+        "it_admin_runtime_proof_run": 37077141855,
+        "branch_hygiene_run": 37077141860,
+        "d1_ci_fanout_guard_run": 37077141885,
+        "build_specific_proof_run": 37077141859
+      },
+      "artifact_id": 11257296535,
+      "artifact_name": "build352-search-console-fresh-discovery-4767f4f041e35b1c6fc0cef51d7e83a2cd398b12",
+      "artifact_digest": "sha256:ee6835ff21764fde45f5081fe3c86ea982e4b2fce61cb8ff689659606e005497",
+      "ingested_by_build": 353,
+      "recorded_by": "Build 353 predecessor ingestion; not self-recorded by Build 352"
+    },
+    "production_checkpoint": {
+      "main_sha": "7fbf874fafa2c0838a07d0101500311707cfc9fe",
+      "tree_sha": "c15a2b9cd49d4fdd2f634e5298420cab806216eb",
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_verified_development": true,
+      "production_pages_deploy_run": 37077294920,
+      "production_live_resource_integrity_run": 37077369791,
+      "remote_d1_queries": 0
+    }
+  },
+  "maker_story_advancement_publication_readiness_continuity_vi": {
+    "source_build": 353,
+    "state": "DEVELOPMENT_CANDIDATE",
+    "measurement_state": "EXACT_DEVELOPMENT_MEASUREMENT_PENDING",
+    "coverage_population": "ALL_ACTIVE_CREATIVE_PROJECTS",
+    "expected_active_projects": 5,
+    "automatic_advancement": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "admin_home_repair_included": true,
+    "etsy_oauth_repair_included": true,
+    "next_build": 354,
+    "next_build_title": "Content Adoption & Discovery Outcomes Renewal IX",
+    "future_queue_exhausted": false
   }
 }

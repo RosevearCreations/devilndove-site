@@ -1,24 +1,6 @@
 name: Release 467 Build 352 Search Console Real Export Fresh Discovery Intake VII
+# Historical after Build 353 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build351-grey-hair-source-review-story-plan-completion-continuity-v.json'
-      - '.github/workflows/release467-build351-grey-hair-source-review-story-plan-completion-continuity-v.yml'
-      - 'release467-build352-search-console-real-export-fresh-discovery-intake-vii.json'
-      - 'current-development-authority.json'
-      - 'docs/operations/RELEASE_467_BUILD_352_SEARCH_CONSOLE_REAL_EXPORT_FRESH_DISCOVERY_INTAKE_VII.md'
-      - 'scripts/release467_build352_continuity.sql'
-      - 'scripts/release467_build352_verify_continuity.mjs'
-      - 'scripts/release467_build352_regression.py'
-      - 'scripts/release467_build352_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/search-console-import.js'
-      - 'public/js/admin-search-console-import.js'
-      - 'functions/api/admin/etsy-oauth-acceptance.js'
-      - 'public/js/admin-etsy-oauth-acceptance.js'
-      - 'admin/it-integrations/index.html'
-      - '.github/workflows/release467-build352-search-console-real-export-fresh-discovery-intake-vii.yml'
   workflow_dispatch:
 permissions:
   contents: read
