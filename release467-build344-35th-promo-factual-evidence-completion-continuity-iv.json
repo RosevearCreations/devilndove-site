@@ -1,0 +1,181 @@
+{
+  "release": 467,
+  "build": 344,
+  "title": "35th Promo Factual Evidence Completion Continuity IV",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "35TH_PROMO_FACTUAL_EVIDENCE_COMPLETION_CONTINUITY_IV",
+  "authority": "release467-build344-35th-promo-factual-evidence-completion-continuity-iv",
+  "predecessor": {
+    "build": 343,
+    "title": "Evidence Gap Execution Workbench & Input Completion Continuity III",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "9ba28adc49ce04cf69fd6e7d3a3c12d5b376d8fe",
+    "development_tree_sha": "719649ad678aabd932bd43414db87bc234d7fc92",
+    "development_proofs": {
+      "system_gate_run": 37007047792,
+      "current_application_quality_run": 37007047735,
+      "it_admin_runtime_proof_run": 37007047593,
+      "branch_hygiene_run": 37007047737,
+      "d1_ci_fanout_guard_run": 37007047655,
+      "build_specific_proof_run": 37007047625
+    },
+    "production_main_sha": "b3db71eeb5bea3ed4f1428d96c18120b9e51c9bb",
+    "production_tree_sha": "719649ad678aabd932bd43414db87bc234d7fc92",
+    "production_pages_deploy_run": 37007313881,
+    "production_live_resource_integrity_run": 37007416101,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "target": {
+    "creative_work_project_id": 5,
+    "project_key": "CP-MSC1SUG2",
+    "project_title": "35th promo",
+    "content_project_id": 23
+  },
+  "contract": {
+    "reuses_operator_action": "record_story_execution_evidence",
+    "execution_event_types": [
+      "setup",
+      "process",
+      "milestone",
+      "mistake",
+      "repair"
+    ],
+    "result_event_type": "result",
+    "lesson_event_type": "lesson",
+    "required_profile_facts": [
+      "what_we_are_trying",
+      "why_we_are_trying_it",
+      "substantive_actual_result",
+      "resolved_outcome_status",
+      "substantive_lesson_learned"
+    ],
+    "resolved_outcomes": [
+      "win",
+      "partial_win",
+      "failure"
+    ],
+    "readiness_rule": "at least one real execution/process-class event plus one real result event plus one real lesson event plus complete substantive non-placeholder factual Maker Story fields",
+    "placeholder_absence_text_does_not_satisfy_readiness": true,
+    "readiness_only": true,
+    "explicit_human_review_required": true,
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "automatic_evidence_selection": false,
+    "automatic_publication": false,
+    "media_rights_inference": false,
+    "next_build": 345,
+    "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity IV",
+    "future_queue_exhausted": false
+  },
+  "build343_observed_start": {
+    "execution_events": 0,
+    "result_events": 0,
+    "lesson_events": 0,
+    "story_review_status": "needs_review",
+    "public_story_candidate": 0,
+    "outcome_status": "unknown"
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "placeholder_evidence": false,
+    "synthetic_execution_evidence": false,
+    "evidence_mutation": false,
+    "automatic_evidence_selection": false,
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "publication_mutation": false,
+    "social_mutation": false,
+    "private_media_exposure": false,
+    "media_rights_inference": false,
+    "provider_execution": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "9ba28adc49ce04cf69fd6e7d3a3c12d5b376d8fe",
+      "tree": "719649ad678aabd932bd43414db87bc234d7fc92",
+      "system_gate_run": 37007047792,
+      "quality_run": 37007047735,
+      "it_admin_runtime_run": 37007047593,
+      "repository_hygiene_run": 37007047737,
+      "d1_ci_fanout_guard_run": 37007047655,
+      "build_specific_proof_run": 37007047625,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "b3db71eeb5bea3ed4f1428d96c18120b9e51c9bb",
+      "tree": "719649ad678aabd932bd43414db87bc234d7fc92",
+      "production_pages_deploy_run": 37007313881,
+      "production_live_resource_integrity_run": 37007416101,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_343_348.md",
+  "next_build": 345,
+  "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity IV",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "ENABLED_EXACT_DEVELOPMENT",
+  "measurement_lane_owner": "release467-build344-35th-promo-factual-evidence-completion-continuity-iv.yml",
+  "toolchain_reliability": {
+    "wrangler_version": "4.128.0",
+    "business_logic_changed": false
+  },
+  "decision": {
+    "classification": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW",
+    "rationale": "Exact Development measurement shows zero real execution/process, result, or lesson events. Existing actual_result and lesson_learned remain absence markers, so factual readiness is incomplete; outcome stays unknown and the story remains needs_review / not a public candidate.",
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "automatic_publication": false,
+    "next_build": 345,
+    "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity IV"
+  },
+  "measurement": {
+    "source_sha": "5f6e04d81427b99d172eeeb32a35d3257dd3630d",
+    "source_tree_sha": "1e80a70f3d9a2d947cbc2863867e11db67626699",
+    "workflow_run": 37008832076,
+    "artifact_id": 11226888134,
+    "artifact_name": "build344-35th-promo-factual-evidence-continuity-5f6e04d81427b99d172eeeb32a35d3257dd3630d",
+    "artifact_digest": "sha256:5fbc84b9fe95e5bcca33039847280d4bae78dc763944a692b59ebf9e46741335",
+    "aggregate_rows_read": 45,
+    "rows_read_ceiling": 20000,
+    "rows_read_by_statement": [
+      33,
+      2,
+      2,
+      8
+    ],
+    "closure_state": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
+    "execution_events": 0,
+    "result_events": 0,
+    "lesson_events": 0,
+    "execution_events_delta_vs_build343": 0,
+    "result_events_delta_vs_build343": 0,
+    "lesson_events_delta_vs_build343": 0,
+    "selected_execution_evidence": 0,
+    "story_review_status": "needs_review",
+    "public_story_candidate": 0,
+    "outcome_status": "unknown",
+    "what_we_are_trying_present": true,
+    "why_we_are_trying_present": true,
+    "actual_result_substantive": false,
+    "lesson_learned_substantive": false,
+    "profile_facts_complete": false,
+    "outcome_resolved": false,
+    "ready_for_explicit_human_review": false,
+    "approved_locked_deliverables": 2,
+    "publications": 0,
+    "social_rows": 0,
+    "execution_intake_audits": 0,
+    "prior_review_decision": "REMAIN_NEEDS_REVIEW_PENDING_EXECUTION_RESULT_LESSON_EVIDENCE",
+    "prior_reviewed_at": "2026-09-30 13:01:10",
+    "production_d1_contact": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false
+  },
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED"
+}
