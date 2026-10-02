@@ -207,7 +207,7 @@
       "version": 28,
       "file": "0028_release467_inventory_all_stations_current_location.sql",
       "release": 467,
-      "description": "Add the All Stations canonical Inventory process and an independent current physical workstation-location pointer for tools and supplies.",
+      "description": "Add the All Stations canonical Inventory process and an independent current physical workstation-location pointer for tools and supplies. Production promotion reproof retains the exact applied migration bytes.",
       "recovery": "Forward-only additive taxonomy row and location table. Logical rollback clears inventory_current_locations and stops assigning All Stations; retain the schema and repair defects only with a later numbered migration."
     }
   ]
