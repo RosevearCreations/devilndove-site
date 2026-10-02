@@ -1,3 +1,5 @@
+// Historical compatibility: Build 346 freshness
+// BUILD352_CURRENT_CLIENT: Search Console Real Export & Fresh Discovery Intake VII; explicit report-date-only freshness.
 // Historical regression token retained: Build 340 freshness
 // BUILD346_CURRENT_CLIENT: Search Console Real Export & Fresh Discovery Intake VI; explicit report-date-only freshness.
 // Historical regression token retained: Build 328 freshness
@@ -200,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
   mount.innerHTML = `
     <div class="card search-console-admin-panel" style="margin-top:18px">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-        <div><h2 style="margin-top:0">Search Console CSV Import</h2><p class="small" style="margin:8px 0 0 0">Private staging for real Google Search Console exports. Build 346 keeps explicit real-export confirmation, measures a 30-day freshness window from the real report date only, and blocks stale evidence from queue/apply decisions. Import/creation time never substitutes for a report date. If the export has no Date column, enter its report end date explicitly.</p></div>
+        <div><h2 style="margin-top:0">Search Console CSV Import</h2><p class="small" style="margin:8px 0 0 0">Private staging for real Google Search Console exports. Build 352 keeps explicit real-export confirmation, measures a 30-day freshness window from the real report date only, and blocks stale evidence from queue/apply decisions. Import/creation time never substitutes for a report date. If the export has no Date column, enter its report end date explicitly.</p></div>
         <button class="btn" type="button" id="searchConsoleLoadButton">Refresh summary</button>
       </div>
       <div class="search-console-import-grid" style="margin-top:12px">

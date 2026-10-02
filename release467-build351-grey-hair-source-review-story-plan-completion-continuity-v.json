@@ -2,7 +2,7 @@
   "release": 467,
   "build": 351,
   "title": "Grey Hair Source Review & Story-Plan Completion Continuity V",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "GREY_HAIR_SOURCE_REVIEW_STORY_PLAN_COMPLETION_CONTINUITY_V",
   "authority": "release467-build351-grey-hair-source-review-story-plan-completion-continuity-v",
   "predecessor": {
@@ -121,7 +121,7 @@
   "future_queue_exhausted": false,
   "measurement_lane_state": "ACTIVE_DEVELOPMENT_MEASUREMENT",
   "measurement_lane_owner": "release467-build351-grey-hair-source-review-story-plan-completion-continuity-v.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD351_GREEN",
   "toolchain_reliability": {
     "wrangler_version": "4.128.0",
     "business_logic_changed": true
@@ -186,5 +186,29 @@
     "automatic_publication": false,
     "next_build": 352,
     "next_build_title": "Search Console Real Export & Fresh Discovery Intake VII"
+  },
+  "final_closure": {
+    "dev_sha": "b2c5f5113dddf57e95ce866ab37140c26d2a8a3c",
+    "tree_sha": "57234a69014e86988ecb859130d9e2985776ea96",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD351_GREEN",
+    "proofs": {
+      "system_gate_run": 37073559299,
+      "current_application_quality_run": 37073559236,
+      "it_admin_runtime_proof_run": 37073559154,
+      "branch_hygiene_run": 37073559155,
+      "build_specific_proof_run": 37073559190
+    },
+    "ingested_by_build": 352,
+    "recorded_by": "Build 352 predecessor ingestion; not self-recorded by Build 351"
+  },
+  "production_checkpoint": {
+    "main_sha": "39b9550eba5a91c28d426e8556d09946cd739098",
+    "tree_sha": "57234a69014e86988ecb859130d9e2985776ea96",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37073740571,
+    "production_live_resource_integrity_run": 37073811582,
+    "remote_d1_queries": 0
   }
 }

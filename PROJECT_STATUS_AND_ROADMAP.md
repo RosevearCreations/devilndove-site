@@ -1,3 +1,13 @@
+# CURRENT BUILD — Release 467 Build 352
+
+**Search Console Real Export & Fresh Discovery Intake VII**
+
+Build 351 is exact-tree Development/Production GREEN. Build 352 accepts only confirmed real Search Console exports, keeps freshness tied to explicit report dates inside the 30-day actionability window, and includes an Etsy Development connection repair so protected Etsy reads wait for verified admin authentication and Connect Etsy surfaces safe prerequisite blockers instead of silently doing nothing.
+
+**Verified Build 351:** Development `b2c5f5113dddf57e95ce866ab37140c26d2a8a3c`, Production `39b9550eba5a91c28d426e8556d09946cd739098`, shared tree `57234a69014e86988ecb859130d9e2985776ea96`.
+
+**Next after Build 352 Production GREEN:** Build 353 — Maker Story Advancement & Publication Readiness Continuity VI.
+
 # CURRENT BUILD — Release 467 Build 350
 
 **35th Promo Factual Evidence Completion Continuity V**

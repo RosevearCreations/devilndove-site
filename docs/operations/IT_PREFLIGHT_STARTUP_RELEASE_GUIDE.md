@@ -1,3 +1,21 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 352 candidate over Build 351 Production GREEN
+
+Build 351 is the last fully verified exact Development/Production closure ingested by Build 352.
+
+- Development SHA: `b2c5f5113dddf57e95ce866ab37140c26d2a8a3c`
+- Shared tree: `57234a69014e86988ecb859130d9e2985776ea96`
+- System Gate: `37073559299`
+- Current Application Quality Proof: `37073559236`
+- I.T. Admin Runtime Proof: `37073559154`
+- Repository Branch Hygiene: `37073559155`
+- Build 351 proof: `37073559190`
+- Production main: `39b9550eba5a91c28d426e8556d09946cd739098`
+- Production Pages Deploy: `37073740571`
+- Production Live Resource Integrity: `37073811582`
+- Current action: Build 352 Search Console Real Export & Fresh Discovery Intake VII.
+- Search Console freshness remains explicit-report-date-only with a 30-day actionability window.
+- Etsy Development OAuth protected reads require verified admin authentication; safe connect blockers are visible and listing writes remain locked.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 351 candidate over Build 350 Production GREEN
 
 - Development SHA: `218bb33b7c8ef209e4cca5935bbdc0fab78ff62f`
