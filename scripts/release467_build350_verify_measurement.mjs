@@ -21,18 +21,18 @@ if((execution+results+lessons)>0&&!eventComplete)state='REAL_OUTCOME_EVIDENCE_PA
 else if(eventComplete&&!ready)state='REAL_EVENTS_COMPLETE_MAKER_STORY_FACTS_STILL_REQUIRED';
 else if(ready)state='REAL_OUTCOME_FACTS_COMPLETE_READY_FOR_EXPLICIT_HUMAN_REVIEW';
 if(ready&&(String(target.story_review_status||'')==='reviewed'||Number(target.public_story_candidate||0)===1))state='REAL_OUTCOME_FACTS_COMPLETE_HUMAN_REVIEW_ALREADY_RECORDED';
-const comparedToBuild349={execution_events_delta:execution_events_delta:execution-0,result_events_delta:results-0,lesson_events_delta:lessons-0};
+const comparedToBuild349={execution_events_delta:execution-0,result_events_delta:results-0,lesson_events_delta:lessons-0};
 const evidence={release:467,build:350,exact_development_sha:sha,statement_count:4,rows_read_by_statement:reads,aggregate_rows_read:aggregate,rows_read_ceiling:20000,
  target,evidence_events:events,trace,closure_state:state,comparison_to_build349:comparedToBuild349,
  readiness:{event_complete:eventComplete,profile_facts_complete:textComplete,outcome_resolved:outcomeResolved,ready_for_explicit_human_review:ready,execution_events:execution,result_events:results,lesson_events:lessons},
  boundaries:{read_only:true,synthetic_evidence:false,evidence_mutation:false,automatic_evidence_selection:false,automatic_story_review:false,automatic_public_candidate:false,publication_mutation:false,social_mutation:false,media_rights_inference:false,provider_execution:false,production_d1_contact:false},
  integrity};
 fs.writeFileSync(out,JSON.stringify(evidence,null,2)+'\n');
-console.log('BUILD350_CLOSURE_STATE=',state);console.log('BUILD350_DELTA_VS_BUILD343=',JSON.stringify(comparedToBuild349));
+console.log('BUILD350_CLOSURE_STATE=',state);console.log('BUILD350_DELTA_VS_BUILD349=',JSON.stringify(comparedToBuild349));
 console.log('BUILD350_TARGET=',JSON.stringify(target));
 console.log('BUILD350_READINESS=',JSON.stringify(evidence.readiness));
 console.log('BUILD350_TRACE=',JSON.stringify(trace));
 console.log('BUILD350_EVIDENCE_EVENTS=',JSON.stringify(events));
 console.log('BUILD350_ROWS_READ=',JSON.stringify(reads));
 console.log('BUILD350_AGGREGATE_ROWS_READ=',aggregate);
-console.log('BUILD350_35TH_PROMO_FACTUAL_EVIDENCE_CONTINUITY_IV=GREEN');
+console.log('BUILD350_35TH_PROMO_FACTUAL_EVIDENCE_CONTINUITY_V=GREEN');
