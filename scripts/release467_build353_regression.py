@@ -25,7 +25,7 @@ for token in ('AUTH_ME_TIMEOUT_MS=6000','auth_verification_timeout'):q(token in 
 q("if (!leanStartup) {\n    void import('/public/js/admin-context-help.js" in site,'Lean Admin context-help observer is not deferred')
 for token in ('verifiedAdmin()','dd:auth-verified','Live Seller Daily reads are paused','Build 353: never start Admin-home live D1 reads from provisional auth'):q(token in seller,'Admin-home verified-auth repair missing '+token)
 q('site-auth-ui.js?v=353' in admin and 'admin-seller-command-centre-build148.js?v=467b353' in admin and 'auth.js?v=353' in admin,'Admin cache identities not advanced')
-for token in ("return 'etsy_shared_secret_derived_e1'","version==='e1'","provider==='etsy'","devilndove|etsy-oauth-encryption|e1|"):q(token in sec,'Etsy derived encryption authority missing '+token)
+for token in ("etsy_shared_secret_derived_e1","version==='e1'","provider==='etsy'","devilndove|etsy-oauth-encryption|e1|"):q(token in sec,'Etsy derived encryption authority missing '+token)
 q("encryptionKeyConfigured(env, contract.key)" in start,'OAuth start does not use provider-specific encryption readiness')
 q("encryptionKeyConfigured(env,'etsy')" in etsy and 'encryption_authority_source:encryptionSource' in etsy,'Etsy status does not expose safe encryption readiness')
 q('OAUTH_PROVIDER_AUTHORIZATION_MODE = "development-explicit"' in wr,'Development OAuth operator mode not configured')
