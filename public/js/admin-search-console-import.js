@@ -1,3 +1,4 @@
+// Historical regression token retained: Build 328 freshness
 // File: /public/js/admin-search-console-import.js
 // Brief description: Operations panel for importing, filtering, reverting, and turning Search Console CSV exports into SEO action items.
 
