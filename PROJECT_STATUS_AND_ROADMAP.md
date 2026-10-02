@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-**Build 338 — 35th Promo Factual Evidence Completion Continuity III** is the active Development candidate over exact Build 337 Development/Production GREEN.
+**Build 339 — Grey Hair Source Review & Story-Plan Completion Continuity III** is the active Development candidate over exact Build 338 Development/Production GREEN.
 
 Build 337 final closure:
 
@@ -39,7 +39,7 @@ The factual lane remains fail-closed. Placeholder/absence text does not satisfy 
 
 The queue **has not run out**.
 
-**Next after Build 338 Production GREEN: Build 339 — Grey Hair Source Review & Story-Plan Completion Continuity III.**
+**Next after Build 339 Production GREEN: Build 340 — Search Console Real Export & Fresh Discovery Intake V.**
 
 Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_337_342.md`.
 

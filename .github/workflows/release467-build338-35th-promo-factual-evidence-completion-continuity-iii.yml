@@ -1,22 +1,6 @@
 name: Release 467 Build 338 35th Promo Factual Evidence Completion Continuity III
+# Historical after Build 339 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build338_*'
-      - 'release467-build338-*.json'
-      - 'release467-build337-*.json'
-      - 'functions/api/admin/35th-promo-outcome-closure.js'
-      - 'functions/api/admin/creative-process.js'
-      - 'public/js/admin-creative-process.js'
-      - 'admin/creative-process/index.html'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_338_*'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - '.github/workflows/release467-build337-evidence-gap-execution-workbench-input-completion-continuity-ii.yml'
-      - '.github/workflows/release467-build338-35th-promo-factual-evidence-completion-continuity-iii.yml'
   workflow_dispatch:
 permissions:
   contents: read
