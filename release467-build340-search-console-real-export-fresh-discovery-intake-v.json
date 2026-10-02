@@ -1,0 +1,112 @@
+{
+  "release": 467,
+  "build": 340,
+  "title": "Search Console Real Export & Fresh Discovery Intake V",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "SEARCH_CONSOLE_REAL_EXPORT_FRESH_DISCOVERY_INTAKE_V",
+  "authority": "release467-build340-search-console-real-export-fresh-discovery-intake-v",
+  "predecessor": {
+    "build": 339,
+    "title": "Grey Hair Source Review & Story-Plan Completion Continuity III",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "71230f3cc4b6518f4f0e61068db2edd0fdf4db50",
+    "development_tree_sha": "2420704c0619bbf645ee600d80d8f29b8d9ba4cb",
+    "development_proofs": {
+      "system_gate_run": 36956662304,
+      "current_application_quality_run": 36956662274,
+      "it_admin_runtime_proof_run": 36956662427,
+      "branch_hygiene_run": 36956662310,
+      "d1_ci_fanout_guard_run": 36956662311,
+      "build_specific_proof_run": 36956662279
+    },
+    "production_main_sha": "8c7ff02b4748ebca9a0f5773ffe34589d5890305",
+    "production_tree_sha": "2420704c0619bbf645ee600d80d8f29b8d9ba4cb",
+    "production_pages_deploy_run": 36956802900,
+    "production_live_resource_integrity_run": 36956890133,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "reuses_build328_search_console_authorities": true,
+    "reuses_build334_measurement_model": true,
+    "intake_route": "/api/admin/search-console-import",
+    "intake_mode": "EXPLICIT_OPERATOR_REAL_GSC_CSV_ONLY",
+    "real_export_confirmation_required": true,
+    "mandatory_header_groups": [
+      "page",
+      "clicks",
+      "impressions",
+      "ctr",
+      "position"
+    ],
+    "freshness_window_days": 30,
+    "fallback_report_date_required_when_date_column_absent": true,
+    "imported_at_must_not_substitute_for_missing_report_date": true,
+    "import_audit_traceability_required": true,
+    "explicit_batch_revert_traceability_required": true,
+    "query_level_attribution_requires_real_search_console": true,
+    "stale_or_unsupported_pending_rows_non_actionable": true,
+    "explicit_human_copy_required_before_apply": true,
+    "automatic_import": false,
+    "automatic_queue_generation": false,
+    "automatic_seo_wording_generation": false,
+    "automatic_seo_apply": false,
+    "next_build": 341,
+    "next_build_title": "Maker Story Advancement & Publication Readiness Continuity IV",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "synthetic_search_evidence": false,
+    "automatic_search_console_import": false,
+    "automatic_queue_generation": false,
+    "automatic_seo_wording_generation": false,
+    "automatic_seo_apply": false,
+    "indexnow_execution": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "71230f3cc4b6518f4f0e61068db2edd0fdf4db50",
+      "tree": "2420704c0619bbf645ee600d80d8f29b8d9ba4cb",
+      "system_gate_run": 36956662304,
+      "quality_run": 36956662274,
+      "it_admin_runtime_run": 36956662427,
+      "repository_hygiene_run": 36956662310,
+      "d1_ci_fanout_guard_run": 36956662311,
+      "build_specific_proof_run": 36956662279,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "8c7ff02b4748ebca9a0f5773ffe34589d5890305",
+      "tree": "2420704c0619bbf645ee600d80d8f29b8d9ba4cb",
+      "production_pages_deploy_run": 36956802900,
+      "production_live_resource_integrity_run": 36956890133,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_337_342.md",
+  "next_build": 341,
+  "next_build_title": "Maker Story Advancement & Publication Readiness Continuity IV",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "ENABLED_EXACT_DEVELOPMENT",
+  "measurement_lane_owner": "release467-build340-search-console-real-export-fresh-discovery-intake-v.yml",
+  "toolchain_reliability": {
+    "wrangler_version": "4.128.0",
+    "business_logic_changed": false
+  },
+  "decision": {
+    "classification": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "automatic_import": false,
+    "synthetic_rows": false,
+    "automatic_queue_generation": false,
+    "automatic_seo_apply": false,
+    "next_build": 341,
+    "next_build_title": "Maker Story Advancement & Publication Readiness Continuity IV"
+  }
+}
