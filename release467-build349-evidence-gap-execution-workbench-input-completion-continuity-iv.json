@@ -2,7 +2,7 @@
   "release": 467,
   "build": 349,
   "title": "Evidence Gap Execution Workbench & Input Completion Continuity IV",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "EVIDENCE_GAP_EXECUTION_WORKBENCH_INPUT_COMPLETION_CONTINUITY_IV",
   "authority": "release467-build349-evidence-gap-execution-workbench-input-completion-continuity-iv",
   "predecessor": {
@@ -92,9 +92,9 @@
   "next_build": 350,
   "next_build_title": "35th Promo Factual Evidence Completion Continuity V",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "ACTIVE_DEVELOPMENT_MEASUREMENT",
+  "measurement_lane_state": "HISTORICAL_MANUAL_ONLY",
   "measurement_lane_owner": "release467-build349-evidence-gap-execution-workbench-input-completion-continuity-iv.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_FORWARD_COMPATIBILITY_REPAIR",
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD349_GREEN",
   "toolchain_reliability": {
     "wrangler_version": "4.128.0",
     "business_logic_changed": false
@@ -182,5 +182,35 @@
     "build265_roadmap_allowlist_extended_to_builds_349_354": true,
     "build343_shared_workbench_historical_literals_retained": true,
     "current_deployment_preflight_identity_converged": true
+  },
+  "final_closure": {
+    "dev_sha": "af5070400e0b9fb0da8be48753dcfef7737230b8",
+    "tree_sha": "c0f4a29f13d7f0bce5165f34a06c5140ec4f3ca1",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD349_GREEN",
+    "proofs": {
+      "system_gate_run": 37041295378,
+      "current_application_quality_run": 37041295310,
+      "it_admin_runtime_proof_run": 37041295306,
+      "branch_hygiene_run": 37041295409,
+      "build_specific_proof_run": 37041295359
+    },
+    "artifact_id": 11242436571,
+    "artifact_name": "build349-evidence-gap-execution-workbench-b8c08e66532931794bbc20de732dc23d52d64494",
+    "artifact_digest": "sha256:e0b61e563953736a5fe8ea22f3112d3819e45e962897f0232016186ef40a1ce5",
+    "ingested_by_build": 350,
+    "recorded_by": "Build 350 predecessor ingestion; not self-recorded by Build 349"
+  },
+  "production_checkpoint": {
+    "main_sha": "b4a2e20b96f7bbeea7a21136aa780d7425002891",
+    "tree_sha": "c0f4a29f13d7f0bce5165f34a06c5140ec4f3ca1",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37041638309,
+    "production_live_resource_integrity_run": 37041757924,
+    "remote_d1_queries": 0,
+    "deployment_url": "https://7f0ddf72.devilndove-site.pages.dev",
+    "deployment_id": "7f0ddf72-e702-4c49-a443-c927077ed834",
+    "production_artifact_id": 11241733638
   }
 }

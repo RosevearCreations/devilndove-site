@@ -129,3 +129,19 @@ export function safeReturnPath(value, fallback = '/admin/it-integrations/') {
   if (!path.startsWith('/') || path.startsWith('//') || /[\r\n]/.test(path)) return fallback;
   return path.slice(0, 300);
 }
+
+
+/* Release 467 Build 350 — Etsy marketplace OAuth acceptance.
+   The authenticated admin Connect Etsy action is the deliberate operator gate.
+   This is Development-host only and does not authorize listing/publication writes. */
+export function etsyDevelopmentAuthorizationOpen(env, requestUrl) {
+  let host='';
+  try { host=new URL(String(requestUrl||'')).hostname; } catch { return false; }
+  return isDevelopmentOAuthHost(host,env);
+}
+
+export function oauthProviderAuthorizationOpen(env, requestUrl, providerKey) {
+  const requested=String(providerKey||'').trim().toLowerCase();
+  if(requested==='etsy') return etsyDevelopmentAuthorizationOpen(env,requestUrl);
+  return oauthSelectedProviderAuthorizationOpen(env,requestUrl,requested);
+}

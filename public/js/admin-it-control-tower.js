@@ -1,3 +1,4 @@
+/* BUILD350_CURRENT_CLIENT: Release 467 Build 350 — 35th Promo Factual Evidence Completion Continuity V; verified Build 349 dev af5070400e0b9fb0da8be48753dcfef7737230b8; Production b4a2e20b96f7bbeea7a21136aa780d7425002891. */
 /* BUILD349_CURRENT_CLIENT: Release 467 Build 349 — Evidence Gap Execution Workbench & Input Completion Continuity IV; verified predecessor Build 348. */
 /* BUILD348_CURRENT_CLIENT: Release 467 Build 348 — Content Adoption & Discovery Outcomes Renewal VIII; verified Build 347 dev 2983bc6bf9e3a5376340e022183ab17f51c2ee4b; Production ec311f0e54f0aa6b2d2eafb7a8b6c668cf194fae. */
 /* BUILD347_REPROOF_TRIGGER: retained historical CAIP gates defer unknown future Production SHA mapping to current restart-integrity authority. */

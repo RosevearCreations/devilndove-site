@@ -1,8 +1,8 @@
 // Release 460 — redacted OAuth connection diagnostics plus guarded refresh/disconnect and intended-account lifecycle.
 // Release 467 Build 85 — remote refresh/revoke obey the selected Development social-provider boundary.
 import { getAdminUserFromRequest, getDb, jsonResponse, auditAdminAction } from '../_lib/adminAudit.js';
-import { decryptOAuthSecret, encryptOAuthSecret, encryptionKeyConfigured, oauthAcceptanceProvider, oauthRemoteAuthorizationOpen, oauthSelectedProviderAuthorizationOpen, safeDiagnosticCode } from '../_lib/oauthSecurity.js';
-import { getOAuthContract, listOAuthContracts, providerIdentityExpectation, providerIdentityStatus, refreshOAuthToken, revokeOAuthToken, verifyOAuthIdentity } from '../_lib/oauthProviders.js';
+import { decryptOAuthSecret, encryptOAuthSecret, encryptionKeyConfigured, oauthAcceptanceProvider, oauthRemoteAuthorizationOpen, oauthSelectedProviderAuthorizationOpen, oauthProviderAuthorizationOpen, safeDiagnosticCode } from '../_lib/oauthSecurity.js';
+import { getOAuthContract, listOAuthContracts, providerIdentityExpectation, providerIdentityStatus, refreshOAuthToken, revokeOAuthToken, verifyOAuthIdentity, discoverEtsyShop } from '../_lib/oauthProviders.js';
 import { CURRENT_RELEASE } from '../_lib/releaseAuthority.js';
 
 const json=(data,status=200)=>jsonResponse({release:CURRENT_RELEASE,...data},status,{'Cache-Control':'no-store'});
@@ -54,11 +54,12 @@ function safeConnection(row,contract,env){
 export async function onRequestGet({request,env}){
   const admin=await getAdminUserFromRequest(request,env); if(!admin)return json({ok:false,error:'Unauthorized.'},401);
   const db=getDb(env); if(!db)return json({ok:false,code:'oauth_database_unavailable'},503);
-  let rows=[]; let pending=0; let replayRejects=0;
+  let rows=[]; let pending=0; let replayRejects=0; let etsyShop=null;
   try{
     rows=(await db.prepare(`SELECT provider_key,remote_subject_id,refresh_token_ciphertext,token_type,scopes_json,access_expires_at,refresh_expires_at,connection_status,last_refresh_at,disconnected_at,remote_revoke_state,diagnostic_code,created_at,updated_at FROM oauth_provider_connections ORDER BY provider_key`).all()).results||[];
     pending=Number((await db.prepare(`SELECT COUNT(*) AS n FROM oauth_authorization_transactions WHERE terminal_status='pending' AND expires_at>CURRENT_TIMESTAMP`).first())?.n||0);
     replayRejects=Number((await db.prepare(`SELECT COUNT(*) AS n FROM oauth_security_events WHERE event_type='callback_state_validation' AND outcome='rejected'`).first())?.n||0);
+    try{etsyShop=await db.prepare(`SELECT shop_id,owner_user_id,shop_name,currency_code,listing_active_count,acceptance_status,verified_at,updated_at FROM etsy_oauth_shop_connections WHERE provider_key='etsy' LIMIT 1`).first();}catch{etsyShop=null;}
   }catch(error){return json({ok:false,code:'release460_schema_not_ready',error:'Release 460 OAuth schema is not ready.'},503);}
   const contracts=listOAuthContracts().map((item)=>({
     ...item,
@@ -75,7 +76,8 @@ export async function onRequestGet({request,env}){
     encryption_key_configured:encryptionKeyConfigured(env),secret_values_emitted:false,provider_subject_values_emitted:false,
     intended_account_verification_required:true,refresh_health_is_local_only:true,
     pending_authorization_transactions:pending,replay_or_invalid_state_rejections:replayRejects,
-    contracts,connections:rows.map((row)=>safeConnection(row,getOAuthContract(row.provider_key),env))
+    contracts,connections:rows.map((row)=>safeConnection(row,getOAuthContract(row.provider_key),env)),
+    etsy_shop:etsyShop?{shop_id:Number(etsyShop.shop_id),owner_user_id:Number(etsyShop.owner_user_id),shop_name:etsyShop.shop_name||'',currency_code:etsyShop.currency_code||'',listing_active_count:Number(etsyShop.listing_active_count||0),acceptance_status:etsyShop.acceptance_status||'',verified_at:etsyShop.verified_at||null,updated_at:etsyShop.updated_at||null}:null
   });
 }
 
@@ -88,7 +90,11 @@ export async function onRequestPost({request,env}){
   const row=await db.prepare(`SELECT * FROM oauth_provider_connections WHERE provider_key=? LIMIT 1`).bind(contract.key).first();
 
   if(action==='refresh'){
-    if(!oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key))return json({ok:false,code:'oauth_provider_not_selected_for_acceptance',error:'Remote OAuth refresh is closed unless this is the explicitly selected Development acceptance provider.'},423);
+    if(contract.key==='etsy'){
+      if(!oauthProviderAuthorizationOpen(env,request.url,contract.key))return json({ok:false,code:'oauth_live_authorization_closed',error:'Etsy OAuth refresh is Development-only and closed on this host.'},423);
+    }else{
+      if(!oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key))return json({ok:false,code:'oauth_provider_not_selected_for_acceptance',error:'Remote OAuth refresh is closed unless this is the explicitly selected Development acceptance provider.'},423);
+    }
     if(!row||row.connection_status==='disconnected'||!row.refresh_token_ciphertext)return json({ok:false,code:'oauth_refresh_token_unavailable'},409);
     try{
       const refresh=await decryptOAuthSecret(env,row.refresh_token_ciphertext,`oauth-token|${contract.key}|refresh`);
@@ -96,12 +102,14 @@ export async function onRequestPost({request,env}){
 
       // A refreshed credential is never persisted until the provider identity still matches the configured intended account.
       const identity=await verifyOAuthIdentity(contract,env,token.access_token);
+      const etsyShop=contract.key==='etsy'?await discoverEtsyShop(contract,env,token.access_token,identity.remoteSubject):null;
 
       const accessCipher=await encryptOAuthSecret(env,token.access_token,`oauth-token|${contract.key}|access`);
       const nextRefresh=token.refresh_token?await encryptOAuthSecret(env,token.refresh_token,`oauth-token|${contract.key}|refresh`):row.refresh_token_ciphertext;
       const nextScopes=scopes(token.scope,JSON.parse(row.scopes_json||'[]'));
       await db.prepare(`UPDATE oauth_provider_connections SET remote_subject_id=?,access_token_ciphertext=?,refresh_token_ciphertext=?,token_type=?,scopes_json=?,access_expires_at=?,refresh_expires_at=COALESCE(?,refresh_expires_at),connection_status='connected',last_refresh_at=CURRENT_TIMESTAMP,diagnostic_code=NULL,updated_at=CURRENT_TIMESTAMP WHERE provider_key=?`).bind(String(identity.remoteSubject||'').slice(0,180),accessCipher,nextRefresh,String(token.token_type||row.token_type||'Bearer').slice(0,30),JSON.stringify(nextScopes),expiry(token.expires_in),expiry(token.refresh_expires_in),contract.key).run();
-      await event(db,contract.key,'refresh','complete','intended_account_verified',admin.user_id);
+      if(etsyShop){try{await db.prepare(`UPDATE etsy_oauth_shop_connections SET owner_user_id=?,shop_id=?,shop_name=?,currency_code=?,listing_active_count=?,acceptance_status='connected_verified',verified_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE provider_key='etsy'`).bind(Number(etsyShop.user_id),Number(etsyShop.shop_id),etsyShop.shop_name,etsyShop.currency_code,Number(etsyShop.listing_active_count||0)).run();}catch{}}
+      await event(db,contract.key,'refresh','complete',etsyShop?'etsy_shop_discovered':'intended_account_verified',admin.user_id);
       await auditAdminAction(env,request,admin,{action_type:'oauth_token_refreshed',target_type:'provider',target_key:contract.key,details:{release:460,build:85,token_values_logged:false,intended_account_verified:true,selected_provider_acceptance:true,provider_subject_logged:false}});
       return json({ok:true,provider:contract.key,refreshed:true,intended_account_verified:true,selected_provider_acceptance:true,token_values_emitted:false,provider_subject_values_emitted:false});
     }catch(error){
@@ -115,7 +123,7 @@ export async function onRequestPost({request,env}){
   if(action==='disconnect'){
     if(!row||row.connection_status==='disconnected')return json({ok:true,provider:contract.key,already_disconnected:true,remote_revoke_state:row?.remote_revoke_state||'not_attempted'});
     let remoteState='closed_by_selected_provider_boundary';
-    if(oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key)&&row.access_token_ciphertext){
+    if(((contract.key==='etsy'&&oauthProviderAuthorizationOpen(env,request.url,contract.key))||(contract.key!=='etsy'&&oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key)))&&row.access_token_ciphertext){
       try{
         const access=await decryptOAuthSecret(env,row.access_token_ciphertext,`oauth-token|${contract.key}|access`);
         const result=await revokeOAuthToken(contract,env,access);
@@ -123,6 +131,7 @@ export async function onRequestPost({request,env}){
       }catch{ remoteState='revocation_failed'; }
     }
     await db.prepare(`UPDATE oauth_provider_connections SET access_token_ciphertext=NULL,refresh_token_ciphertext=NULL,id_token_ciphertext=NULL,connection_status='disconnected',disconnected_at=CURRENT_TIMESTAMP,remote_revoke_state=?,diagnostic_code=NULL,updated_at=CURRENT_TIMESTAMP WHERE provider_key=?`).bind(remoteState,contract.key).run();
+    if(contract.key==='etsy'){try{await db.prepare(`UPDATE etsy_oauth_shop_connections SET acceptance_status='disconnected',updated_at=CURRENT_TIMESTAMP WHERE provider_key='etsy'`).run();}catch{}}
     await event(db,contract.key,'disconnect','complete',remoteState,admin.user_id);
     await auditAdminAction(env,request,admin,{action_type:'oauth_provider_disconnected',target_type:'provider',target_key:contract.key,details:{release:460,build:85,remote_revoke_state:remoteState,local_token_material_destroyed:true}});
     return json({ok:true,provider:contract.key,disconnected:true,local_token_material_destroyed:true,remote_revoke_state:remoteState,token_values_emitted:false});

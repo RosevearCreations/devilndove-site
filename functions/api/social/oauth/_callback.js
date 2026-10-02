@@ -1,8 +1,8 @@
 // Release 460 — secure OAuth callback lifecycle.
 // Release 467 Build 85 — real callback finalization is restricted to the selected Development social provider.
 import { getDb } from '../../_lib/adminAudit.js';
-import { decryptOAuthSecret, encryptOAuthSecret, oauthAcceptanceProvider, oauthRemoteAuthorizationOpen, oauthSelectedProviderAuthorizationOpen, safeDiagnosticCode, sha256Base64Url } from '../../_lib/oauthSecurity.js';
-import { exchangeAuthorizationCode, getOAuthContract, providerConfiguration, verifyOAuthIdentity } from '../../_lib/oauthProviders.js';
+import { decryptOAuthSecret, encryptOAuthSecret, oauthAcceptanceProvider, oauthRemoteAuthorizationOpen, oauthSelectedProviderAuthorizationOpen, oauthProviderAuthorizationOpen, safeDiagnosticCode, sha256Base64Url } from '../../_lib/oauthSecurity.js';
+import { exchangeAuthorizationCode, getOAuthContract, providerConfiguration, verifyOAuthIdentity, discoverEtsyShop } from '../../_lib/oauthProviders.js';
 
 function escapeHtml(value = '') { return String(value).replace(/[&<>'"]/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 function htmlResponse(title,body,status=200){
@@ -30,7 +30,7 @@ export function createOAuthCallback(providerKey){
     const cfg=providerConfiguration(contract,env);
     const selectedProvider=oauthAcceptanceProvider(env);
     const globalRemoteOpen=oauthRemoteAuthorizationOpen(env,request.url);
-    const selectedRemoteOpen=oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key);
+    const selectedRemoteOpen=oauthProviderAuthorizationOpen(env,request.url,contract.key);
 
     // Plain callback browsing remains a safe readiness surface even while live authorization is closed.
     if(!code&&!state&&!url.searchParams.get('error')){
@@ -75,6 +75,7 @@ export function createOAuthCallback(providerKey){
       // Release 460 fail-closed intended-account gate: provider identity must be retrieved and match
       // the explicitly configured Development account before any new provider token material is persisted.
       const identity=await verifyOAuthIdentity(contract,env,token.access_token);
+      const etsyShop=contract.key==='etsy'?await discoverEtsyShop(contract,env,token.access_token,identity.remoteSubject):null;
 
       const accessCipher=await encryptOAuthSecret(env,token.access_token,`oauth-token|${contract.key}|access`);
       const refreshCipher=token.refresh_token?await encryptOAuthSecret(env,token.refresh_token,`oauth-token|${contract.key}|refresh`):null;
@@ -89,9 +90,21 @@ export function createOAuthCallback(providerKey){
         VALUES(?,?,?,?,?,?,?,?,?,'connected',NULL,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
         ON CONFLICT(provider_key) DO UPDATE SET remote_subject_id=excluded.remote_subject_id,access_token_ciphertext=excluded.access_token_ciphertext,refresh_token_ciphertext=excluded.refresh_token_ciphertext,id_token_ciphertext=excluded.id_token_ciphertext,token_type=excluded.token_type,scopes_json=excluded.scopes_json,access_expires_at=excluded.access_expires_at,refresh_expires_at=excluded.refresh_expires_at,connection_status='connected',diagnostic_code=NULL,connected_by_user_id=excluded.connected_by_user_id,disconnected_at=NULL,remote_revoke_state=NULL,updated_at=CURRENT_TIMESTAMP
       `).bind(contract.key,remoteSubject,accessCipher,refreshCipher,idCipher,String(token.token_type||'Bearer').slice(0,30),JSON.stringify(scopes),accessExpiry,refreshExpiry,tx.created_by_user_id||null).run();
+      if(etsyShop){
+        await db.prepare(`
+          INSERT INTO etsy_oauth_shop_connections
+            (provider_key,owner_user_id,shop_id,shop_name,currency_code,listing_active_count,acceptance_status,discovered_at,verified_at,updated_at)
+          VALUES ('etsy',?,?,?,?,?,'connected_verified',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+          ON CONFLICT(provider_key) DO UPDATE SET
+            owner_user_id=excluded.owner_user_id,shop_id=excluded.shop_id,shop_name=excluded.shop_name,
+            currency_code=excluded.currency_code,listing_active_count=excluded.listing_active_count,
+            acceptance_status='connected_verified',verified_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP
+        `).bind(Number(etsyShop.user_id),Number(etsyShop.shop_id),etsyShop.shop_name,etsyShop.currency_code,Number(etsyShop.listing_active_count||0)).run();
+      }
       await db.prepare(`UPDATE oauth_authorization_transactions SET terminal_status='complete',completed_at=CURRENT_TIMESTAMP,pkce_verifier_ciphertext=NULL,diagnostic_code=NULL,updated_at=CURRENT_TIMESTAMP WHERE transaction_id=?`).bind(tx.transaction_id).run();
-      await securityEvent(db,contract.key,'authorization','complete','intended_account_verified',tx.transaction_id,tx.created_by_user_id);
-      return htmlResponse(`${contract.label} Development connection stored securely`,'<p>The authorization code was consumed once, exchanged server-side, and the intended provider account was verified before encrypted token persistence.</p><p>Build 85 does not authorize provider publication. Return to Social Publishing to complete human draft review evidence.</p>');
+      await securityEvent(db,contract.key,'authorization','complete',etsyShop?'etsy_shop_discovered':'intended_account_verified',tx.transaction_id,tx.created_by_user_id);
+      const successBody=etsyShop?`<p>The Etsy authorization code was consumed once and exchanged server-side. Shop <strong>${escapeHtml(etsyShop.shop_name||etsyShop.shop_id)}</strong> (ID ${escapeHtml(etsyShop.shop_id)}) was discovered from the authenticated Etsy user and recorded as safe provider metadata.</p><p>No listing was created, changed, activated, deactivated or published.</p><p><a href="/admin/it-integrations/#etsy-oauth-acceptance">Return to Etsy connection status</a></p>`:'<p>The authorization code was consumed once, exchanged server-side, and the intended provider account was verified before encrypted token persistence.</p><p>Provider publication remains closed.</p>';
+      return htmlResponse(`${contract.label} Development connection stored securely`,successBody);
     }catch(error){
       const diagnostic=safeDiagnosticCode(error?.oauthProviderCode||error?.message,'authorization_finalize_failed');
       await db.prepare(`UPDATE oauth_authorization_transactions SET terminal_status='failed',pkce_verifier_ciphertext=NULL,diagnostic_code=?,updated_at=CURRENT_TIMESTAMP WHERE transaction_id=?`).bind(diagnostic,tx.transaction_id).run();

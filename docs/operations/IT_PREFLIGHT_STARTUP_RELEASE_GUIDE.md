@@ -1,3 +1,18 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 350 candidate over Build 349 Production GREEN
+
+- Development SHA: `af5070400e0b9fb0da8be48753dcfef7737230b8`
+- Shared tree: `c0f4a29f13d7f0bce5165f34a06c5140ec4f3ca1`
+- System Gate: `37041295378`
+- Current Application Quality Proof: `37041295310`
+- I.T. Admin Runtime Proof: `37041295306`
+- Repository Branch Hygiene: `37041295409`
+- Build 349 proof: `37041295359`
+- Production main: `b4a2e20b96f7bbeea7a21136aa780d7425002891`
+- Production Pages Deploy: `37041638309`
+- Production Live Resource Integrity: `37041757924`
+- Current action: Build 350 35th Promo Factual Evidence Completion Continuity V.
+- Etsy OAuth: Development-only admin initiated; Shop ID auto-discovered; listing writes locked.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 349 candidate over Build 348 Production GREEN
 
 - Development SHA: `2d3f691402a075f59fc74e7cd834bab20160dacd`

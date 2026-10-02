@@ -1,0 +1,99 @@
+name: Release 467 Build 350 35th Promo Factual Evidence Completion Continuity V
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'release467-build349-evidence-gap-execution-workbench-input-completion-continuity-iv.json'
+      - 'release467-build350-35th-promo-factual-evidence-completion-continuity-v.json'
+      - 'current-development-authority.json'
+      - 'docs/operations/RELEASE_467_BUILD_350_35TH_PROMO_FACTUAL_EVIDENCE_COMPLETION_CONTINUITY_V.md'
+      - 'docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_349_354.md'
+      - 'scripts/release467_build350_measurement.sql'
+      - 'scripts/release467_build350_verify_measurement.mjs'
+      - 'scripts/release467_build350_etsy_oauth_regression.mjs'
+      - 'scripts/release467_build350_regression.py'
+      - 'scripts/release467_build350_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'functions/api/admin/35th-promo-outcome-closure.js'
+      - 'functions/api/_lib/oauthSecurity.js'
+      - 'functions/api/_lib/oauthProviders.js'
+      - 'functions/api/admin/oauth-start.js'
+      - 'functions/api/social/oauth/_callback.js'
+      - 'functions/api/admin/oauth-connections.js'
+      - 'functions/api/admin/etsy-oauth-acceptance.js'
+      - 'public/js/admin-etsy-oauth-acceptance.js'
+      - 'admin/it-integrations/index.html'
+      - 'migrations/canonical/0029_release467_etsy_oauth_shop_identity.sql'
+      - 'migrations/canonical/manifest.json'
+      - '.github/workflows/release467-build350-35th-promo-factual-evidence-completion-continuity-v.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      - run: python scripts/release467_build350_regression.py
+      - run: python scripts/release467_build350_gate.py
+      - run: node scripts/release467_build350_etsy_oauth_regression.mjs
+      - run: node --check scripts/release467_build350_verify_measurement.mjs
+      - run: node --check functions/api/admin/35th-promo-outcome-closure.js
+      - run: node --check functions/api/_lib/oauthProviders.js
+      - run: node --check functions/api/admin/oauth-start.js
+      - run: node --check functions/api/social/oauth/_callback.js
+      - run: node --check functions/api/admin/oauth-connections.js
+  factual-evidence-continuity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+      D1_PROVIDER_ROWS_READ_CEILING: '20000'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      - name: Prove exact Development D1
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          ! grep -q 'devilndove-prod' wrangler.toml
+          npx --yes wrangler@4.128.0 d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/info.json
+          node -e "const d=require('/tmp/info.json');const s=JSON.stringify(d);if(!s.includes(process.env.EXPECTED_DEV_D1_DATABASE_ID)||!s.includes(process.env.DEV_D1_DATABASE_NAME))process.exit(1)"
+      - name: Measure factual evidence continuity
+        run: |
+          set -euo pipefail
+          COMMAND="$(grep -v '^[[:space:]]*--' scripts/release467_build350_measurement.sql)"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b350.json
+          node scripts/release467_build350_verify_measurement.mjs /tmp/b350.json "${GITHUB_SHA}" /tmp/build350.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build350-35th-promo-factual-evidence-continuity-${{ github.sha }}
+          path: /tmp/build350.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Boundary
+        if: always()
+        run: |
+          echo 'D1_ONE_SHOT_EVIDENCE_CAPTURE'
+          echo 'SYNTHETIC EVIDENCE: ZERO'
+          echo 'CI EVIDENCE MUTATION: ZERO'
+          echo 'AUTOMATIC EVIDENCE SELECTION: ZERO'
+          echo 'AUTOMATIC STORY REVIEW: ZERO'
+          echo 'PUBLIC CANDIDACY MUTATION: ZERO'
+          echo 'PUBLICATION/SOCIAL MUTATION: ZERO'
+          echo 'MEDIA RIGHTS INFERENCE: ZERO'
+          echo 'ETSY OAUTH CONNECTION: DEVELOPMENT ONLY / ADMIN INITIATED'
+          echo 'ETSY SHOP ID: AUTO-DISCOVERED AFTER OAUTH'
+          echo 'ETSY LISTING WRITES: ZERO'
+          echo 'PROVIDER PUBLICATION: ZERO'
+          echo 'PRODUCTION D1 CONTACT: ZERO'

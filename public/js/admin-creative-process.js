@@ -1,3 +1,4 @@
+// BUILD350_CURRENT_UI: Build 350 • factual evidence continuity V — real execution/result/lesson evidence only; explicit human review remains mandatory.
 // HISTORICAL_BUILD338_FACTUAL_CONTINUITY: Build 338 • factual evidence continuity III | data-build338-factual-evidence-continuity
 // HISTORICAL_BUILD332_FACTUAL_CONTINUITY: Build 332 • factual evidence continuity II | Build 326 • real outcome closure baseline retained | Build 326 readiness: historical baseline | data-build332-factual-evidence-continuity
 // Build 294 — Workshop Follies / Maker Stories composed into Creative Process → CAIP → Content Studio.

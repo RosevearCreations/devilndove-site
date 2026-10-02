@@ -209,6 +209,13 @@
       "release": 467,
       "description": "Add the All Stations canonical Inventory process and an independent current physical workstation-location pointer for tools and supplies. Production promotion reproof retains the exact applied migration bytes.",
       "recovery": "Forward-only additive taxonomy row and location table. Logical rollback clears inventory_current_locations and stops assigning All Stations; retain the schema and repair defects only with a later numbered migration."
+    },
+    {
+      "version": 29,
+      "file": "0029_release467_etsy_oauth_shop_identity.sql",
+      "release": 467,
+      "description": "Add Development Etsy OAuth owner/shop identity metadata so the numeric shop ID is discovered after authenticated OAuth instead of requiring a fourth Cloudflare variable; listing writes remain locked. Build 350 requests Development-first canonical schema reproof before Production promotion.",
+      "recovery": "Forward-only additive safe metadata table. Disconnect destroys local token material and marks the safe shop metadata disconnected. Repair OAuth/shop identity defects only with a later numbered migration; never edit this migration after Development application."
     }
   ]
 }

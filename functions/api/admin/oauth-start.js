@@ -1,7 +1,7 @@
 // Release 460 — administrator-only OAuth start authority.
 // Release 467 Build 85 — a second gate restricts Development acceptance to one selected social provider.
 import { getAdminUserFromRequest, getDb, jsonResponse, auditAdminAction } from '../_lib/adminAudit.js';
-import { createStateAndPkce, encryptOAuthSecret, encryptionKeyConfigured, oauthAcceptanceProvider, oauthRemoteAuthorizationOpen, oauthSelectedProviderAuthorizationOpen, randomBase64Url, safeReturnPath } from '../_lib/oauthSecurity.js';
+import { createStateAndPkce, encryptOAuthSecret, encryptionKeyConfigured, oauthAcceptanceProvider, oauthRemoteAuthorizationOpen, oauthSelectedProviderAuthorizationOpen, oauthProviderAuthorizationOpen, randomBase64Url, safeReturnPath } from '../_lib/oauthSecurity.js';
 import { buildAuthorizationUrl, getOAuthContract, providerConfiguration, providerIdentityExpectation } from '../_lib/oauthProviders.js';
 import { CURRENT_RELEASE } from '../_lib/releaseAuthority.js';
 
@@ -19,7 +19,8 @@ export async function onRequestGet({request,env}) {
 
   const globalRemoteOpen = oauthRemoteAuthorizationOpen(env, request.url);
   const selectedProvider = oauthAcceptanceProvider(env);
-  const remoteOpen = oauthSelectedProviderAuthorizationOpen(env, request.url, contract.key);
+  const remoteOpen = oauthProviderAuthorizationOpen(env, request.url, contract.key);
+  const etsyMarketplaceAcceptance = contract.key === 'etsy';
   const keyReady = encryptionKeyConfigured(env);
   const cfg = providerConfiguration(contract, env);
   const intended = providerIdentityExpectation(contract, env);
@@ -43,12 +44,13 @@ export async function onRequestGet({request,env}) {
       identity_lookup_configuration_ready:intended.lookup_configuration_ready,
       intended_account_label_configured:intended.account_label_configured,
       required_operator_switch:'OAUTH_PROVIDER_AUTHORIZATION_MODE=development-explicit',
-      required_selected_provider:'SOCIAL_OAUTH_ACCEPTANCE_PROVIDER=<one of pinterest|meta|x|tiktok|youtube>'
+      required_selected_provider:etsyMarketplaceAcceptance?null:'SOCIAL_OAUTH_ACCEPTANCE_PROVIDER=<one of pinterest|meta|x|tiktok|youtube>',
+      etsy_marketplace_acceptance:etsyMarketplaceAcceptance
     },423);
   }
   if (!keyReady) return json({ok:false,code:'oauth_encryption_authority_missing',error:'OAuth encryption authority is not configured.'},503);
   if (!cfg.configured) return json({ok:false,code:'oauth_provider_configuration_incomplete',error:'Provider configuration is incomplete.'},409);
-  if (!intended.configured) return json({ok:false,code:'oauth_intended_account_not_configured',error:'The intended provider account must be configured before authorization can start.',expected_subject_reference:intended.expected_subject_reference},409);
+  if (!intended.configured && !etsyMarketplaceAcceptance) return json({ok:false,code:'oauth_intended_account_not_configured',error:'The intended provider account must be configured before authorization can start.',expected_subject_reference:intended.expected_subject_reference},409);
   if (!intended.lookup_configuration_ready) return json({ok:false,code:'oauth_provider_identity_configuration_incomplete',error:'Provider identity verification configuration is incomplete.'},409);
 
   const proof = await createStateAndPkce();
@@ -58,7 +60,7 @@ export async function onRequestGet({request,env}) {
     ? await encryptOAuthSecret(env, proof.verifier, `oauth-pkce|${contract.key}|${transactionId}`)
     : null;
   const scopes = contract.scopes || [];
-  const returnTo = safeReturnPath(url.searchParams.get('return_to'), '/admin/social-publishing/#social-oauth-acceptance');
+  const returnTo = safeReturnPath(url.searchParams.get('return_to'), etsyMarketplaceAcceptance?'/admin/it-integrations/#etsy-oauth-acceptance':'/admin/social-publishing/#social-oauth-acceptance');
 
   await db.prepare(`
     INSERT INTO oauth_authorization_transactions
