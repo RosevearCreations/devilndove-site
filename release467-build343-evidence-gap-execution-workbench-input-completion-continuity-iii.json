@@ -2,7 +2,7 @@
   "release": 467,
   "build": 343,
   "title": "Evidence Gap Execution Workbench & Input Completion Continuity III",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "EVIDENCE_GAP_EXECUTION_WORKBENCH_INPUT_COMPLETION_CONTINUITY_III",
   "authority": "release467-build343-evidence-gap-execution-workbench-input-completion-continuity-iii",
   "predecessor": {
@@ -93,7 +93,7 @@
   "next_build": 344,
   "next_build_title": "35th Promo Factual Evidence Completion Continuity IV",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "ENABLED_EXACT_DEVELOPMENT",
+  "measurement_lane_state": "HISTORICAL_MANUAL_ONLY",
   "measurement_lane_owner": "release467-build343-evidence-gap-execution-workbench-input-completion-continuity-iii.yml",
   "toolchain_reliability": {
     "wrangler_version": "4.128.0",
@@ -110,12 +110,12 @@
     "next_build_title": "35th Promo Factual Evidence Completion Continuity IV"
   },
   "measurement": {
-    "source_sha": "91ec869503af79a51df98dbbfe76d7433f7572b5",
-    "source_tree_sha": "8ddfcc997e5df8b119828588f738fd2d116dd5d8",
-    "workflow_run": 37006813972,
-    "artifact_id": 11225848360,
-    "artifact_name": "build343-evidence-gap-execution-workbench-91ec869503af79a51df98dbbfe76d7433f7572b5",
-    "artifact_digest": "sha256:5226f864a92249b43a968e1a54f711bd5c2b7938d26c026f60bc8ba88375266e",
+    "source_sha": "9ba28adc49ce04cf69fd6e7d3a3c12d5b376d8fe",
+    "source_tree_sha": "719649ad678aabd932bd43414db87bc234d7fc92",
+    "workflow_run": 37007047625,
+    "artifact_id": 11226730028,
+    "artifact_name": "build343-evidence-gap-execution-workbench-9ba28adc49ce04cf69fd6e7d3a3c12d5b376d8fe",
+    "artifact_digest": "sha256:b2670a036a66e3e4e4539054bc6f27926339009b7d1af527a6b671a159657c4a",
     "aggregate_rows_read": 1659,
     "rows_read_ceiling": 20000,
     "rows_read_by_statement": [
@@ -178,5 +178,32 @@
     "r2_mutation": false,
     "provider_execution": false
   },
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED"
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD343_GREEN",
+  "final_closure": {
+    "dev_sha": "9ba28adc49ce04cf69fd6e7d3a3c12d5b376d8fe",
+    "tree_sha": "719649ad678aabd932bd43414db87bc234d7fc92",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD343_GREEN",
+    "proofs": {
+      "system_gate_run": 37007047792,
+      "current_application_quality_run": 37007047735,
+      "it_admin_runtime_proof_run": 37007047593,
+      "branch_hygiene_run": 37007047737,
+      "d1_ci_fanout_guard_run": 37007047655,
+      "build_specific_proof_run": 37007047625
+    },
+    "artifact_id": 11226730028,
+    "artifact_name": "build343-evidence-gap-execution-workbench-9ba28adc49ce04cf69fd6e7d3a3c12d5b376d8fe",
+    "artifact_digest": "sha256:b2670a036a66e3e4e4539054bc6f27926339009b7d1af527a6b671a159657c4a",
+    "ingested_by_build": 344
+  },
+  "production_checkpoint": {
+    "main_sha": "b3db71eeb5bea3ed4f1428d96c18120b9e51c9bb",
+    "tree_sha": "719649ad678aabd932bd43414db87bc234d7fc92",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37007313881,
+    "production_live_resource_integrity_run": 37007416101,
+    "remote_d1_queries": 0
+  }
 }
