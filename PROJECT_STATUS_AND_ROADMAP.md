@@ -1,3 +1,11 @@
+# CURRENT BUILD — Release 467 Build 347
+
+**Maker Story Advancement & Publication Readiness Continuity V**
+
+Build 346 is exact-tree Development/Production GREEN. Build 347 is the active Development candidate and continues five-project Maker Story readiness measurement without automatic publication. The same candidate also implements the requested Inventory Operations page jump, canonical **All Stations** category, independent **Current Location** workstation pointer, and shared-admin-session repairs for Notification Queue / Saved App Settings.
+
+**Next after Build 347 Production GREEN:** Build 348 — Content Adoption & Discovery Outcomes Renewal VIII.
+
 # CURRENT BUILD
 
 **Build 346 — Search Console Real Export & Fresh Discovery Intake VI** is the active Development candidate over exact Build 345 Development/Production GREEN.

@@ -202,6 +202,13 @@
       "release": 467,
       "description": "Add one Creative Process maker-story profile per existing Creative Project plus reference-only links to canonical workstation Tool inventory, while retaining CAIP private media/evidence and Content Studio review-first publication authorities.",
       "recovery": "Forward-only additive profile/reference tables. Logical rollback clears or revises maker-story metadata and workstation references only; never delete or rewrite source Creative Project, Inventory, CAIP media, Content Studio or publication evidence. Repair defects only with a later numbered migration."
+    },
+    {
+      "version": 28,
+      "file": "0028_release467_inventory_all_stations_current_location.sql",
+      "release": 467,
+      "description": "Add the All Stations canonical Inventory process and an independent current physical workstation-location pointer for tools and supplies.",
+      "recovery": "Forward-only additive taxonomy row and location table. Logical rollback clears inventory_current_locations and stops assigning All Stations; retain the schema and repair defects only with a later numbered migration."
     }
   ]
 }

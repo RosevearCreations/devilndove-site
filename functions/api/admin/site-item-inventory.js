@@ -81,6 +81,86 @@ async function loadWorkstationMemberships(db, itemIds = []) {
   return out;
 }
 
+async function loadCurrentLocations(db, itemIds = []) {
+  const ids = [...new Set((Array.isArray(itemIds) ? itemIds : []).map((id)=>Number(id||0)).filter((id)=>id>0))];
+  const out = new Map();
+  if (!ids.length) return out;
+  const placeholders = ids.map(()=>'?').join(',');
+  const result = await db.prepare(`
+    SELECT icl.site_item_inventory_id,
+           icl.current_location_site_item_inventory_id,
+           COALESCE(ws.item_name,'') AS current_location_item_name
+    FROM inventory_current_locations icl
+    LEFT JOIN site_item_inventory ws ON ws.site_item_inventory_id=icl.current_location_site_item_inventory_id
+    WHERE icl.site_item_inventory_id IN (${placeholders})
+  `).bind(...ids).all().catch(()=>({results:[]}));
+  for (const row of (Array.isArray(result?.results) ? result.results : [])) {
+    const itemId = Number(row.site_item_inventory_id || 0);
+    if (!itemId) continue;
+    out.set(itemId, {
+      id: Number(row.current_location_site_item_inventory_id || 0),
+      name: String(row.current_location_item_name || '').trim()
+    });
+  }
+  return out;
+}
+
+async function validateCurrentLocation(db, locationId, itemId = 0) {
+  const selected = Math.max(0, Number(locationId || 0) || 0);
+  const currentItem = Math.max(0, Number(itemId || 0) || 0);
+  if (!selected) return 0;
+  if (currentItem && selected === currentItem) {
+    const error = new Error('An inventory item cannot be its own Current Location.');
+    error.code = 'inventory_current_location_self_reference';
+    error.status = 400;
+    throw error;
+  }
+  const station = await db.prepare(`
+    SELECT sii.site_item_inventory_id,sii.item_name
+    FROM site_item_inventory sii
+    JOIN inventory_workstation_roles iwr ON iwr.site_item_inventory_id=sii.site_item_inventory_id
+    WHERE sii.site_item_inventory_id=?
+      AND LOWER(TRIM(COALESCE(sii.source_type,'')))='tool'
+      AND COALESCE(sii.is_active,1)=1
+      AND iwr.workstation_role='station'
+    LIMIT 1
+  `).bind(selected).first().catch(()=>null);
+  if (!station?.site_item_inventory_id) {
+    const error = new Error('Choose an active workstation Tool for Current Location.');
+    error.code = 'inventory_current_location_invalid';
+    error.status = 400;
+    throw error;
+  }
+  return selected;
+}
+
+async function saveCurrentLocation(db, itemId, locationId, userId) {
+  const id = Math.max(0, Number(itemId || 0) || 0);
+  const selected = Math.max(0, Number(locationId || 0) || 0);
+  if (!id) return;
+  if (!selected) {
+    await db.prepare('DELETE FROM inventory_current_locations WHERE site_item_inventory_id=?').bind(id).run();
+    return;
+  }
+  await db.prepare(`
+    INSERT INTO inventory_current_locations(
+      site_item_inventory_id,current_location_site_item_inventory_id,updated_by_user_id,created_at,updated_at
+    ) VALUES(?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+    ON CONFLICT(site_item_inventory_id) DO UPDATE SET
+      current_location_site_item_inventory_id=excluded.current_location_site_item_inventory_id,
+      updated_by_user_id=excluded.updated_by_user_id,
+      updated_at=CURRENT_TIMESTAMP
+  `).bind(id,selected,Number(userId || 0) || null).run();
+}
+
+function currentLocationError(error) {
+  return json({
+    ok: false,
+    error: String(error?.message || 'Current Location is invalid.'),
+    code: String(error?.code || 'inventory_current_location_invalid')
+  }, Math.max(400, Math.min(499, Number(error?.status || 400) || 400)));
+}
+
 async function enrichData(db, data = {}) {
   const itemIds = [];
   if (data?.item?.site_item_inventory_id) itemIds.push(Number(data.item.site_item_inventory_id));
@@ -90,21 +170,25 @@ async function enrichData(db, data = {}) {
   for (const row of (Array.isArray(data?.results) ? data.results : [])) {
     if (row?.site_item_inventory_id) itemIds.push(Number(row.site_item_inventory_id));
   }
-  const [balances, workstationMemberships] = await Promise.all([
+  const [balances, workstationMemberships, currentLocations] = await Promise.all([
     loadInventoryBaseBalances(db, itemIds),
-    loadWorkstationMemberships(db, itemIds)
+    loadWorkstationMemberships(db, itemIds),
+    loadCurrentLocations(db, itemIds)
   ]);
   const merge = (row) => {
     if (!row?.site_item_inventory_id) return row;
     const itemId = Number(row.site_item_inventory_id);
     const membership = workstationMemberships.get(itemId) || { ids:[], names:[] };
+    const location = currentLocations.get(itemId) || { id:0, name:'' };
     const merged = mergeInventoryBaseAuthority(row, balances.get(itemId) || null);
     return {
       ...merged,
       workstation_site_item_inventory_ids: membership.ids,
       workstation_item_names: membership.names,
       workstation_site_item_inventory_id: membership.ids[0] || Number(merged?.workstation_site_item_inventory_id || 0) || 0,
-      workstation_item_name: membership.names[0] || String(merged?.workstation_item_name || '')
+      workstation_item_name: membership.names[0] || String(merged?.workstation_item_name || ''),
+      current_location_site_item_inventory_id: location.id,
+      current_location_item_name: location.name
     };
   };
   const out = {
@@ -235,10 +319,24 @@ export async function onRequestPost(context) {
     }
   }
 
+  const hasCurrentLocation = Object.prototype.hasOwnProperty.call(body || {}, 'current_location_site_item_inventory_id');
+  let currentLocationId = 0;
+  if (hasCurrentLocation) {
+    try {
+      currentLocationId = await validateCurrentLocation(ready.db, body.current_location_site_item_inventory_id, Number(body.site_item_inventory_id || 0));
+    } catch (error) {
+      return currentLocationError(error);
+    }
+  }
+
   const response = await legacy.onRequestPost(context);
   if (!response.ok) return response;
   const data = await parseResponse(response);
   if (!data) return response;
+
+  if (hasCurrentLocation && data?.item?.site_item_inventory_id) {
+    await saveCurrentLocation(ready.db, Number(data.item.site_item_inventory_id), currentLocationId, ready.adminUser.user_id);
+  }
 
   if (action === 'sync_catalog') {
     await syncInventoryBaseBalancesBySource(ready.db, body?.source_types, ready.adminUser.user_id);
@@ -252,12 +350,25 @@ export async function onRequestPost(context) {
 export async function onRequestPatch(context) {
   const ready = await authorizedContext(context);
   if (ready.error) return ready.error;
+  const body = await readBodyClone(context.request);
+  const hasCurrentLocation = Object.prototype.hasOwnProperty.call(body || {}, 'current_location_site_item_inventory_id');
+  let currentLocationId = 0;
+  if (hasCurrentLocation) {
+    try {
+      currentLocationId = await validateCurrentLocation(ready.db, body.current_location_site_item_inventory_id, Number(body.site_item_inventory_id || 0));
+    } catch (error) {
+      return currentLocationError(error);
+    }
+  }
   const response = await legacy.onRequestPatch(context);
   if (!response.ok) return response;
   const data = await parseResponse(response);
   if (!data) return response;
   const id = Number(data?.item?.site_item_inventory_id || 0);
-  if (id) await syncInventoryBaseBalance(ready.db, id, ready.adminUser.user_id);
+  if (id) {
+    await syncInventoryBaseBalance(ready.db, id, ready.adminUser.user_id);
+    if (hasCurrentLocation) await saveCurrentLocation(ready.db, id, currentLocationId, ready.adminUser.user_id);
+  }
   return json(await enrichData(ready.db, data), response.status);
 }
 

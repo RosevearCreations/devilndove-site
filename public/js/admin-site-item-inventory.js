@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let seedLoadPromise = null;
   let listLoadPromise = null;
   let inventoryPage = 1;
+  let inventoryTotalPages = 1;
   const inventoryPageSize = 40;
   const INVENTORY_DRAFT_KEY = 'dd_inventory_form_draft_v244';
 
@@ -113,6 +114,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = Number(row.site_item_inventory_id || 0);
         return `<option value="${id}" ${id === selected ? 'selected' : ''}>${escapeHtml(row.item_name || ('Inventory #' + id))}</option>`;
       }).join('');
+    return html;
+  }
+
+  function currentLocationOptionsMarkup(selectedId = 0, currentItemId = 0) {
+    const selected = Number(selectedId || 0);
+    const current = Number(currentItemId || 0);
+    const rows = stationToolOptions
+      .filter((row) => Number(row.site_item_inventory_id || 0) !== current)
+      .slice()
+      .sort((a, b) => String(a.item_name || '').localeCompare(String(b.item_name || '')));
+    let html = '<option value="">Location not set</option>';
+    html += rows.map((row) => {
+      const id = Number(row.site_item_inventory_id || 0);
+      const station = String(row.item_name || ('Inventory #' + id)).trim();
+      const category = String(row.process_name || '').trim();
+      const label = category ? `${station} — ${category}` : station;
+      return `<option value="${id}" ${id === selected ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+    }).join('');
     return html;
   }
 
@@ -333,6 +352,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (usageUnitSelect) usageUnitSelect.innerHTML = unitOptionsMarkup(usageUnitSelect.value || 'unit');
     const parentStation = document.getElementById('siteInventoryParentStation');
     if (parentStation) parentStation.innerHTML = stationOptionsMarkup(Number(categorySelect?.value || 0), Number(parentStation.value || 0), editingSiteInventoryId);
+    const currentLocation = document.getElementById('siteInventoryCurrentLocation');
+    if (currentLocation) currentLocation.innerHTML = currentLocationOptionsMarkup(Number(currentLocation.value || 0), editingSiteInventoryId);
     syncFormStationState();
     if (!itemSelect) return;
     const sourceType = String(typeSelect?.value || 'tool').trim();
@@ -701,6 +722,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInputValue('siteInventoryCategory', '');
     const roleEl = document.getElementById('siteInventoryWorkstationRole'); if (roleEl) roleEl.value = 'associated';
     const parentStationEl = document.getElementById('siteInventoryParentStation'); if (parentStationEl) { parentStationEl.value = ''; parentStationEl.innerHTML = stationOptionsMarkup(); }
+    const currentLocationEl = document.getElementById('siteInventoryCurrentLocation'); if (currentLocationEl) { currentLocationEl.value = ''; currentLocationEl.innerHTML = currentLocationOptionsMarkup(); }
     const onHandEl = document.getElementById('siteInventoryOnHand'); if (onHandEl) onHandEl.value = '1';
     const unitCostEl = document.getElementById('siteInventoryUnitCost'); if (unitCostEl) unitCostEl.value = '0.00';
     const stockUnitEl = document.getElementById('siteInventoryStockUnitLabel'); if (stockUnitEl) stockUnitEl.value = 'unit';
@@ -734,6 +756,17 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSeedDropdowns();
     if (window.DDAuth?.isLoggedIn()) loadSeedOptions().then(() => renderSeedDropdowns()).catch(() => {});
     document.getElementById('siteInventoryItemName')?.focus();
+  }
+
+  function goToInventoryPage() {
+    const input = document.getElementById('siteInventoryPageJump');
+    const requested = Number(input?.value || inventoryPage);
+    if (!Number.isFinite(requested)) return;
+    const target = Math.max(1, Math.min(inventoryTotalPages, Math.trunc(requested)));
+    if (input) input.value = String(target);
+    if (target === inventoryPage) return;
+    inventoryPage = target;
+    loadList({ force: true });
   }
 
   function render() {
@@ -775,10 +808,11 @@ document.addEventListener('DOMContentLoaded', () => {
             <div><label class="small" for="siteInventoryExternalKey">External Key</label><input id="siteInventoryExternalKey" type="text" placeholder="sku, source key, item id" /></div>
             <div><label class="small" for="siteInventoryItemName">Item Name</label><input id="siteInventoryItemName" type="text" /></div>
           </div>
-          <div class="grid cols-5" style="gap:12px">
-            <div><label class="small" for="siteInventoryCategoryPreset">Workstation / Category</label><select id="siteInventoryCategoryPreset"><option value="">Loading workshop categories…</option></select><input id="siteInventoryCategory" type="hidden" /><div class="small">Uses our canonical workshop categories such as Laser Engraving &amp; Cutting, 3D Printing, CNC, Resin and General Workshop.</div></div>
+          <div class="grid cols-6" style="gap:12px">
+            <div><label class="small" for="siteInventoryCategoryPreset">Workstation / Category</label><select id="siteInventoryCategoryPreset"><option value="">Loading workshop categories…</option></select><input id="siteInventoryCategory" type="hidden" /><div class="small">Uses our canonical workshop categories, including All Stations for general-purpose items.</div></div>
             <div><label class="small" for="siteInventoryWorkstationRole">Tool role</label><select id="siteInventoryWorkstationRole"><option value="associated">Associated tool / supply</option><option value="station">This tool is the workstation</option></select><div class="small">Mark machines such as a laser engraver or 3D printer as the workstation itself.</div></div>
-            <div><label class="small" for="siteInventoryParentStation">Specific station tool</label><select id="siteInventoryParentStation"><option value="">No specific station tool</option></select><div class="small">Optional for accessories/tools that belong to one particular workstation.</div></div>
+            <div><label class="small" for="siteInventoryParentStation">Specific station tool</label><select id="siteInventoryParentStation"><option value="">No specific station tool</option></select><div class="small">Where this item can be used or belongs; multiple station memberships remain supported.</div></div>
+            <div><label class="small" for="siteInventoryCurrentLocation">Current Location</label><select id="siteInventoryCurrentLocation"><option value="">Location not set</option></select><div class="small">Where this item is physically sitting now. This is independent of its workstation/category.</div></div>
             <div class="site-inventory-image-field"><label class="small" for="siteInventoryImageUrl">Image URL</label><input id="siteInventoryImageUrl" type="url" placeholder="https://..." /><div id="siteInventoryImagePreview" class="site-inventory-image-preview"><div class="site-inventory-image-placeholder small">No image URL yet.</div></div><div class="small">Amazon fill can supply this only when the image is currently missing.</div></div>
             <div><label class="small" for="siteInventoryIsActive">Status</label><select id="siteInventoryIsActive"><option value="1">Active</option><option value="0">Inactive</option></select></div>
           </div>
@@ -910,8 +944,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <div><strong>Inventory table editor</strong><div class="small">Edit quantity, stock unit, usage unit, usage-per-stock conversion and cost directly in the table. Cost per usage unit is calculated automatically. On desktop, scroll the table sideways so every field stays wide enough to read.</div></div>
           <button class="btn" type="button" id="siteInventoryTableModeButton" aria-pressed="true">Table editing: On</button>
         </div>
-        <div class="admin-table-wrap site-inventory-table-wrap"><table class="site-inventory-admin-table"><thead><tr><th>Image / item</th><th>Category / supplier</th><th>On hand</th><th>Stock &amp; usage</th><th>Unit cost</th><th>Reorder at</th><th>Status</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="8" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
-        <div class="site-inventory-pagination" id="siteInventoryPagination" aria-live="polite"><button class="btn" type="button" id="siteInventoryPreviousPage">Previous</button><span class="small" id="siteInventoryPageStatus">Page 1</span><button class="btn" type="button" id="siteInventoryNextPage">Next</button></div>
+        <div class="admin-table-wrap site-inventory-table-wrap"><table class="site-inventory-admin-table"><thead><tr><th>Image / item</th><th>Category / supplier</th><th>Current location</th><th>On hand</th><th>Stock &amp; usage</th><th>Unit cost</th><th>Reorder at</th><th>Status</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="9" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
+        <div class="site-inventory-pagination" id="siteInventoryPagination" aria-live="polite"><button class="btn" type="button" id="siteInventoryPreviousPage">Previous</button><span class="small" id="siteInventoryPageStatus">Page 1</span><label class="small" for="siteInventoryPageJump">Jump to page</label><input id="siteInventoryPageJump" type="number" min="1" step="1" value="1" inputmode="numeric" style="width:6rem" aria-label="Inventory page number"/><button class="btn" type="button" id="siteInventoryGoToPage">Go</button><button class="btn" type="button" id="siteInventoryNextPage">Next</button></div>
         <div class="card site-inventory-movements-card" style="margin-top:16px"><div class="section-heading-row"><div><h4 style="margin:0">Recent Inventory Movements</h4><div class="small">Not loaded during page startup so routine editing does not spend D1 reads on history.</div></div><button class="btn" type="button" id="siteInventoryLoadMovementsButton">Load recent movements</button></div><div class="admin-table-wrap site-inventory-movements-wrap"><table class="site-inventory-movements-table"><thead><tr><th>When</th><th>Item</th><th>Type</th><th>On Hand</th><th>Note</th></tr></thead><tbody id="siteInventoryMovementList"><tr><td colspan="5" style="padding:8px">Movement history is paused until requested.</td></tr></tbody></table></div></div>
       </div>`;
 
@@ -947,7 +981,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('siteInventorySyncAllButton')?.addEventListener('click', () => syncCatalog(['tool', 'supply']));
     document.getElementById('siteInventorySearch')?.addEventListener('input', debounce(() => { inventoryPage = 1; loadList({ force: true }); }, 500));
     document.getElementById('siteInventoryPreviousPage')?.addEventListener('click', () => { if (inventoryPage > 1) { inventoryPage -= 1; loadList({ force: true }); } });
-    document.getElementById('siteInventoryNextPage')?.addEventListener('click', () => { inventoryPage += 1; loadList({ force: true }); });
+    document.getElementById('siteInventoryNextPage')?.addEventListener('click', () => { if (inventoryPage < inventoryTotalPages) { inventoryPage += 1; loadList({ force: true }); } });
+    document.getElementById('siteInventoryGoToPage')?.addEventListener('click', goToInventoryPage);
+    document.getElementById('siteInventoryPageJump')?.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); goToInventoryPage(); } });
     document.getElementById('siteInventoryResetButton')?.addEventListener('click', resetInventoryForm);
     document.getElementById('siteInventoryClearFieldsButton')?.addEventListener('click', clearInventoryWorkspaceFields);
     document.getElementById('siteInventoryBulkCostForm')?.addEventListener('submit', onBulkCostApply);
@@ -988,6 +1024,7 @@ document.addEventListener('DOMContentLoaded', () => {
       workstation_role: String(document.getElementById('siteInventoryWorkstationRole')?.value || 'associated').trim().toLowerCase(),
       workstation_site_item_inventory_ids: workstationIds,
       workstation_site_item_inventory_id: workstationIds[0] || 0,
+      current_location_site_item_inventory_id: Number(document.getElementById('siteInventoryCurrentLocation')?.value || 0),
       image_url: document.getElementById('siteInventoryImageUrl')?.value || '',
       source_url: document.getElementById('siteInventorySourceUrl')?.value || '',
       amazon_url: document.getElementById('siteInventoryAmazonUrl')?.value || '',
@@ -1193,6 +1230,11 @@ document.addEventListener('DOMContentLoaded', () => {
       parentStationEl.innerHTML = stationOptionsMarkup(Number(item.inventory_process_id || 0), Number(item.workstation_site_item_inventory_id || 0), Number(item.site_item_inventory_id || 0));
       parentStationEl.value = String(Number(item.workstation_site_item_inventory_id || 0) || '');
     }
+    const currentLocationEl = document.getElementById('siteInventoryCurrentLocation');
+    if (currentLocationEl) {
+      currentLocationEl.innerHTML = currentLocationOptionsMarkup(Number(item.current_location_site_item_inventory_id || 0), Number(item.site_item_inventory_id || 0));
+      currentLocationEl.value = String(Number(item.current_location_site_item_inventory_id || 0) || '');
+    }
     syncFormReorderState();
     syncFormStationState();
     const seedEl = document.getElementById('siteInventorySeedItem');
@@ -1235,9 +1277,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const items = Array.isArray(data.items) ? data.items : [];
       const pagination = data.pagination || {};
-      inventoryPage = Math.max(1, Number(pagination.page || inventoryPage || 1));
+      inventoryTotalPages = Math.max(1, Number(pagination.total_pages || 1));
+      inventoryPage = Math.max(1, Math.min(inventoryTotalPages, Number(pagination.page || inventoryPage || 1)));
       const pageStatus = document.getElementById('siteInventoryPageStatus');
-      if (pageStatus) pageStatus.textContent = `Page ${inventoryPage} of ${Math.max(1, Number(pagination.total_pages || 1))} • ${Number(pagination.total_items ?? summary.total_items ?? items.length)} matching item(s)`;
+      if (pageStatus) pageStatus.textContent = `Page ${inventoryPage} of ${inventoryTotalPages} • ${Number(pagination.total_items ?? summary.total_items ?? items.length)} matching item(s)`;
+      const pageJump = document.getElementById('siteInventoryPageJump');
+      if (pageJump) { pageJump.max = String(inventoryTotalPages); pageJump.value = String(inventoryPage); }
       const prevPage = document.getElementById('siteInventoryPreviousPage'); if (prevPage) prevPage.disabled = !pagination.has_previous;
       const nextPage = document.getElementById('siteInventoryNextPage'); if (nextPage) nextPage.disabled = !pagination.has_next;
       renderSeedDropdowns();
@@ -1245,7 +1290,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!body) return;
 
       if (!items.length) {
-        body.innerHTML = '<tr><td colspan="8" class="site-inventory-empty-row">No site inventory items matched the current view.</td></tr>';
+        body.innerHTML = '<tr><td colspan="9" class="site-inventory-empty-row">No site inventory items matched the current view.</td></tr>';
       } else {
         body.innerHTML = items.map((x) => {
           const edit = inventoryTableEditMode;
@@ -1267,6 +1312,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button class="btn" type="button" data-amazon-fill-id="${x.site_item_inventory_id}" data-item='${escapeHtml(JSON.stringify(x))}'>Fill missing from Amazon</button>
               ` : `<strong>${escapeHtml(x.process_name || x.category || 'Unassigned')}</strong><div class="small">${escapeHtml(x.workstation_role === 'station' ? 'Workstation itself' : (Array.isArray(x.workstation_item_names) && x.workstation_item_names.length ? 'Associated with ' + x.workstation_item_names.join(', ') : (x.workstation_item_name ? 'Associated with ' + x.workstation_item_name : 'Associated item')))}</div><div class="small">${escapeHtml(x.supplier_name || '—')}</div>`}
             </td>
+            <td data-label="Current location">${edit ? `<select class="site-inventory-row-input" data-field="current_location_site_item_inventory_id" aria-label="Current physical location">${currentLocationOptionsMarkup(x.current_location_site_item_inventory_id, x.site_item_inventory_id)}</select>` : `<strong>${escapeHtml(x.current_location_item_name || 'Not set')}</strong><div class="small">Physical location</div>`}</td>
             <td data-label="On hand">${edit ? `<input class="site-inventory-row-number" data-field="on_hand_quantity" type="number" min="0" step="0.001" value="${Number(x.on_hand_quantity || 0)}"/>` : Number(x.on_hand_quantity || 0)}<div class="small">${escapeHtml(x.stock_unit_label || 'unit')}</div></td>
             <td data-label="Stock & usage">
               ${edit ? `<div class="site-inventory-inline-units">
@@ -1322,6 +1368,7 @@ document.addEventListener('DOMContentLoaded', () => {
       workstation_role: String(value('workstation_role') || original.workstation_role || 'associated').trim().toLowerCase(),
       workstation_site_item_inventory_ids: workstationIds,
       workstation_site_item_inventory_id: workstationIds[0] || 0,
+      current_location_site_item_inventory_id: Math.max(0, Number(value('current_location_site_item_inventory_id') || 0)),
       supplier_name: value('supplier_name') || '',
       amazon_url: String(value('amazon_url') || original.amazon_url || '').trim(),
       on_hand_quantity: Math.max(0, Number(value('on_hand_quantity') || 0)),
