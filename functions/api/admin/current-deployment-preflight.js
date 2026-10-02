@@ -14,17 +14,17 @@ import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { onRequestGet as getHistoricalDeploymentPreflight } from './_historicalDeploymentPreflight.js';
 
 const RELEASE=467;
-const BUILD=338;
-const TITLE='35th Promo Factual Evidence Completion Continuity III';
+const BUILD=339;
+const TITLE='Grey Hair Source Review & Story-Plan Completion Continuity III';
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql','0026_release467_inventory_workstation_memberships.sql','0027_release467_caip_workshop_follies_maker_story_foundation.sql']);
-const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 338 35th Promo Factual Evidence Completion Continuity III']);
+const REQUIRED_DEVELOPMENT_PROOFS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 339 Grey Hair Source Review Story Plan Completion Continuity III']);
 const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:337,title:'Evidence Gap Execution Workbench & Input Completion Continuity II',state:'DEVELOPMENT_GREEN',
-  dev_sha:'8f5d038fa7c7d5b3213f6d64f51d659c3ce74994',tree_sha:'3d173e98cfdf48b2efafdfb55a326c275e9cd041',system_gate_run:36931039442,current_application_quality_run:36931039645,it_admin_runtime_proof_run:36931039474,branch_hygiene_run:36931039538,proof_state:'EXACT_BRANCH_HEAD_BUILD337_GREEN',exact_preview_deployment:true
+  release:467,build:338,title:'35th Promo Factual Evidence Completion Continuity III',state:'DEVELOPMENT_GREEN',
+  dev_sha:'eb674de5006a63404d2a8076bef2024ba47272b3',tree_sha:'e10e2ca3b275e55d44b585c51b94bb26ca0bf8df',system_gate_run:36933234834,current_application_quality_run:36933234856,it_admin_runtime_proof_run:36933234896,branch_hygiene_run:36933234830,proof_state:'EXACT_BRANCH_HEAD_BUILD338_GREEN',exact_preview_deployment:true
 });
 const PRODUCTION=Object.freeze({
-  release:467,build:337,title:'Evidence Gap Execution Workbench & Input Completion Continuity II',state:'PRODUCTION_GREEN',
-  main_sha:'cf588329be80a4cf463d0632845521f4e3685991',tree_sha:'3d173e98cfdf48b2efafdfb55a326c275e9cd041',production_pages_deploy_run:36931257221,production_live_resource_integrity_run:36931361695,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36931039501
+  release:467,build:338,title:'35th Promo Factual Evidence Completion Continuity III',state:'PRODUCTION_GREEN',
+  main_sha:'cfdc10632bd5fe605b7cf60eef7e664e35cd11fb',tree_sha:'e10e2ca3b275e55d44b585c51b94bb26ca0bf8df',production_pages_deploy_run:36933441853,production_live_resource_integrity_run:36933549332,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:36933234922
 });
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true});
 const rows=(r)=>Array.isArray(r?.results)?r.results:[];
