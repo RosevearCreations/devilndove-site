@@ -177,5 +177,10 @@
     "r2_mutation": false,
     "provider_execution": false
   },
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED"
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED",
+  "retained_compatibility": {
+    "build333_grey_hair_ui_literal_retained": true,
+    "build339_grey_hair_ui_literal_retained": true,
+    "runtime_logic_changed": false
+  }
 }
