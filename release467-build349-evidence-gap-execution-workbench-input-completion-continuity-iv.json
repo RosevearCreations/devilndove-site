@@ -1,0 +1,186 @@
+{
+  "release": 467,
+  "build": 349,
+  "title": "Evidence Gap Execution Workbench & Input Completion Continuity IV",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "EVIDENCE_GAP_EXECUTION_WORKBENCH_INPUT_COMPLETION_CONTINUITY_IV",
+  "authority": "release467-build349-evidence-gap-execution-workbench-input-completion-continuity-iv",
+  "predecessor": {
+    "build": 348,
+    "title": "Content Adoption & Discovery Outcomes Renewal VIII",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "2d3f691402a075f59fc74e7cd834bab20160dacd",
+    "development_tree_sha": "775111e9cf3760f844a883f3fb3b2895583c02da",
+    "development_proofs": {
+      "system_gate_run": 37038005169,
+      "current_application_quality_run": 37038005188,
+      "it_admin_runtime_proof_run": 37038005196,
+      "branch_hygiene_run": 37038005210,
+      "build_specific_proof_run": 37038005383
+    },
+    "production_main_sha": "05a4fe507da74fdf7165d8f537c298d5420b699d",
+    "production_tree_sha": "775111e9cf3760f844a883f3fb3b2895583c02da",
+    "production_pages_deploy_run": 37038281785,
+    "production_live_resource_integrity_run": 37038401472,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "workbench_mode": "READ_ONLY_DERIVED_FROM_EXISTING_SOURCE_AUTHORITIES",
+    "refreshes_existing_build343_workbench": true,
+    "source_outcomes_build": 348,
+    "shows_required_inputs": true,
+    "shows_observed_completion": true,
+    "shows_completion_signal": true,
+    "shows_next_safe_human_action": true,
+    "direct_source_workspace_links": true,
+    "shadow_task_table": false,
+    "user_assignment_persistence": false,
+    "acknowledgement_persistence": false,
+    "resolution_persistence": false,
+    "completion_persistence": false,
+    "source_workspaces_remain_authoritative": true,
+    "explicit_search_console_report_date_required": true,
+    "expected_gap_families": [
+      "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+      "REAL_SEARCH_CONSOLE_EXPORT",
+      "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+      "UNPROFILED_MAKER_STORY_EVIDENCE"
+    ],
+    "next_build": 350,
+    "next_build_title": "35th Promo Factual Evidence Completion Continuity V",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_exposure": false,
+    "evidence_mutation": false,
+    "story_mutation": false,
+    "search_console_mutation": false,
+    "seo_mutation": false,
+    "automatic_completion": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "2d3f691402a075f59fc74e7cd834bab20160dacd",
+      "tree": "775111e9cf3760f844a883f3fb3b2895583c02da",
+      "system_gate_run": 37038005169,
+      "quality_run": 37038005188,
+      "it_admin_runtime_run": 37038005196,
+      "repository_hygiene_run": 37038005210,
+      "build_specific_proof_run": 37038005383,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "05a4fe507da74fdf7165d8f537c298d5420b699d",
+      "tree": "775111e9cf3760f844a883f3fb3b2895583c02da",
+      "tree_sha": "775111e9cf3760f844a883f3fb3b2895583c02da",
+      "production_pages_deploy_run": 37038281785,
+      "production_live_resource_integrity_run": 37038401472,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_349_354.md",
+  "next_build": 350,
+  "next_build_title": "35th Promo Factual Evidence Completion Continuity V",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "ACTIVE_DEVELOPMENT_MEASUREMENT",
+  "measurement_lane_owner": "release467-build349-evidence-gap-execution-workbench-input-completion-continuity-iv.yml",
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_FORWARD_COMPATIBILITY_REPAIR",
+  "toolchain_reliability": {
+    "wrangler_version": "4.128.0",
+    "business_logic_changed": false
+  },
+  "measurement": {
+    "source_sha": "b8c08e66532931794bbc20de732dc23d52d64494",
+    "source_tree_sha": "dd697658088e664be98f502cf1c964abc11b4ddd",
+    "workflow_run": 37040573522,
+    "artifact_id": 11242436571,
+    "artifact_name": "build349-evidence-gap-execution-workbench-b8c08e66532931794bbc20de732dc23d52d64494",
+    "artifact_digest": "sha256:e0b61e563953736a5fe8ea22f3112d3819e45e962897f0232016186ef40a1ce5",
+    "aggregate_rows_read": 1659,
+    "rows_read_ceiling": 20000,
+    "rows_read_by_statement": [
+      11,
+      14,
+      961,
+      10,
+      649,
+      14
+    ],
+    "active_workbench_rows": 5,
+    "active_gap_families": 4,
+    "gap_families": [
+      "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+      "REAL_SEARCH_CONSOLE_EXPORT",
+      "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+      "UNPROFILED_MAKER_STORY_EVIDENCE"
+    ],
+    "unprofiled_projects": 3,
+    "promo35": {
+      "execution_events": 0,
+      "result_events": 0,
+      "lesson_events": 0,
+      "story_review_status": "needs_review",
+      "public_story_candidate": 0,
+      "outcome_status": "unknown"
+    },
+    "search_console": {
+      "import_batches": 0,
+      "live_rows": 0,
+      "fresh_rows": 0,
+      "clicks": 0,
+      "impressions": 0,
+      "latest_report_date": ""
+    },
+    "grey_hair": {
+      "active_source_evidence": 3,
+      "approved_source_evidence": 1,
+      "source_evidence_needs_review": 2,
+      "reviewed_story_plans": 0,
+      "maker_story_profiles": 0
+    },
+    "other_unprofiled": [
+      {
+        "creative_work_project_id": 1,
+        "title": "lime in you coconut",
+        "active_events": 0,
+        "selected_evidence_rows": 0
+      },
+      {
+        "creative_work_project_id": 2,
+        "title": "Shirley Not",
+        "active_events": 0,
+        "selected_evidence_rows": 0
+      }
+    ],
+    "decision": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "production_d1_contact": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false
+  },
+  "decision": {
+    "classification": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "rationale": "Exact Development measurement derives five current workbench rows across four factual gap families. The workbench only refreshes required-input routing; all completion remains owned by existing source workspaces.",
+    "active_workbench_rows": 5,
+    "active_gap_families": 4,
+    "automatic_completion_authorized": false,
+    "source_workspaces_authoritative": true,
+    "next_build": 350,
+    "next_build_title": "35th Promo Factual Evidence Completion Continuity V"
+  },
+  "compatibility_repairs": {
+    "build265_roadmap_allowlist_extended_to_builds_349_354": true,
+    "build343_shared_workbench_historical_literals_retained": true,
+    "current_deployment_preflight_identity_converged": true
+  }
+}

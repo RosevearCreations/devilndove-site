@@ -1,33 +1,33 @@
 {
   "release": 467,
-  "build": 348,
-  "title": "Content Adoption & Discovery Outcomes Renewal VIII",
+  "build": 349,
+  "title": "Evidence Gap Execution Workbench & Input Completion Continuity IV",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 347,
-      "title": "Maker Story Advancement & Publication Readiness Continuity V",
-      "authority": "release467-build347-maker-story-advancement-publication-readiness-continuity-v.json",
-      "dev_sha": "2983bc6bf9e3a5376340e022183ab17f51c2ee4b",
-      "tree_sha": "51d1c8d3fee195d238d99a2500025d546f3dee14",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD347_GREEN",
+      "build": 348,
+      "title": "Content Adoption & Discovery Outcomes Renewal VIII",
+      "authority": "release467-build348-content-adoption-discovery-outcomes-renewal-viii.json",
+      "dev_sha": "2d3f691402a075f59fc74e7cd834bab20160dacd",
+      "tree_sha": "775111e9cf3760f844a883f3fb3b2895583c02da",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD348_GREEN",
       "proofs": {
-        "system_gate_run": 37029717090,
-        "current_application_quality_run": 37029717222,
-        "it_admin_runtime_proof_run": 37029717295,
-        "branch_hygiene_run": 37029717232,
-        "build_specific_proof_run": 37029717110
+        "system_gate_run": 37038005169,
+        "current_application_quality_run": 37038005188,
+        "it_admin_runtime_proof_run": 37038005196,
+        "branch_hygiene_run": 37038005210,
+        "build_specific_proof_run": 37038005383
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 348,
-      "title": "Content Adoption & Discovery Outcomes Renewal VIII",
-      "authority": "release467-build348-content-adoption-discovery-outcomes-renewal-viii.json",
-      "state": "DEVELOPMENT_GREEN"
+      "build": 349,
+      "title": "Evidence Gap Execution Workbench & Input Completion Continuity IV",
+      "authority": "release467-build349-evidence-gap-execution-workbench-input-completion-continuity-iv.json",
+      "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
     "closure_candidate_must_not_self_claim_final_proof": true,
@@ -37,18 +37,19 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 347,
-    "title": "Maker Story Advancement & Publication Readiness Continuity V",
-    "authority": "release467-build347-maker-story-advancement-publication-readiness-continuity-v.json",
-    "main_sha": "ec311f0e54f0aa6b2d2eafb7a8b6c668cf194fae",
-    "tree_sha": "51d1c8d3fee195d238d99a2500025d546f3dee14",
+    "build": 348,
+    "title": "Content Adoption & Discovery Outcomes Renewal VIII",
+    "authority": "release467-build348-content-adoption-discovery-outcomes-renewal-viii.json",
+    "main_sha": "05a4fe507da74fdf7165d8f537c298d5420b699d",
+    "tree_sha": "775111e9cf3760f844a883f3fb3b2895583c02da",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 37030003885,
-    "production_live_resource_integrity_run": 37030156716,
+    "production_pages_deploy_run": 37038281785,
+    "production_live_resource_integrity_run": 37038401472,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build349-evidence-gap-execution-workbench-input-completion-continuity-iv.json",
     "release467-build348-content-adoption-discovery-outcomes-renewal-viii.json",
     "release467-build347-maker-story-advancement-publication-readiness-continuity-v.json",
     "release467-build346-search-console-real-export-fresh-discovery-intake-vi.json",
@@ -237,12 +238,12 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_343_348.md",
-  "next_build": 349,
-  "next_build_state": "QUEUED_AFTER_BUILD348_PRODUCTION_GREEN",
-  "next_build_title": "Evidence Gap Execution Workbench & Input Completion Continuity IV",
-  "promotion_state": "BUILD348_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILDS_349_354_CREATED_FROM_OBSERVED_EVIDENCE",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_349_354.md",
+  "next_build": 350,
+  "next_build_state": "QUEUED_AFTER_BUILD349_PRODUCTION_GREEN",
+  "next_build_title": "35th Promo Factual Evidence Completion Continuity V",
+  "promotion_state": "BUILD349_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD350_DEFINED_BY_CANONICAL_ROADMAP",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -273,13 +274,13 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "2983bc6bf9e3a5376340e022183ab17f51c2ee4b",
-  "accepted_dev_tree_sha": "51d1c8d3fee195d238d99a2500025d546f3dee14",
+  "accepted_dev_sha": "2d3f691402a075f59fc74e7cd834bab20160dacd",
+  "accepted_dev_tree_sha": "775111e9cf3760f844a883f3fb3b2895583c02da",
   "acceptance": {
-    "system_gate_run": 37029717090,
-    "current_application_quality_run": 37029717222,
-    "it_admin_runtime_proof_run": 37029717295,
-    "branch_hygiene_run": 37029717232
+    "system_gate_run": 37038005169,
+    "current_application_quality_run": 37038005188,
+    "it_admin_runtime_proof_run": 37038005196,
+    "branch_hygiene_run": 37038005210
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -3617,7 +3618,7 @@
   },
   "content_adoption_discovery_outcomes_renewal_viii": {
     "source_build": 348,
-    "state": "DEVELOPMENT_GREEN",
+    "state": "PRODUCTION_GREEN",
     "measurement_state": "EXACT_DEVELOPMENT_MEASURED_ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
     "statement_count": 18,
     "rows_read_ceiling": 20000,
@@ -3752,6 +3753,95 @@
     "roadmap_renewal_state": "BUILDS_349_354_CREATED_FROM_OBSERVED_EVIDENCE",
     "next_build": 349,
     "next_build_title": "Evidence Gap Execution Workbench & Input Completion Continuity IV",
+    "future_queue_exhausted": false,
+    "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD348_GREEN",
+    "final_closure": {
+      "dev_sha": "2d3f691402a075f59fc74e7cd834bab20160dacd",
+      "tree_sha": "775111e9cf3760f844a883f3fb3b2895583c02da",
+      "state": "DEVELOPMENT_GREEN",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD348_GREEN",
+      "proofs": {
+        "system_gate_run": 37038005169,
+        "current_application_quality_run": 37038005188,
+        "it_admin_runtime_proof_run": 37038005196,
+        "branch_hygiene_run": 37038005210,
+        "build_specific_proof_run": 37038005383
+      },
+      "artifact_id": 11240727357,
+      "artifact_name": "build348-content-adoption-discovery-renewal-7213323e4b25d812f208c97e3cd614cb9544fc98",
+      "artifact_digest": "sha256:7e66c9f1974395ea0de6ccc8df7627c63106dde560388b2db3b1566aecff82bc",
+      "ingested_by_build": 349,
+      "recorded_by": "Build 349 predecessor ingestion; not self-recorded by Build 348"
+    },
+    "production_checkpoint": {
+      "main_sha": "05a4fe507da74fdf7165d8f537c298d5420b699d",
+      "tree_sha": "775111e9cf3760f844a883f3fb3b2895583c02da",
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_verified_development": true,
+      "production_pages_deploy_run": 37038281785,
+      "production_live_resource_integrity_run": 37038401472,
+      "remote_d1_queries": 0,
+      "deployment_url": "https://1551d439.devilndove-site.pages.dev",
+      "deployment_id": "1551d439-520b-4a05-ab30-e7e2620cb9ef"
+    }
+  },
+  "evidence_gap_execution_workbench_input_completion_continuity_iv": {
+    "source_build": 349,
+    "state": "DEVELOPMENT_CANDIDATE",
+    "source_outcomes_build": 348,
+    "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "expected_gap_families": 4,
+    "read_only": true,
+    "source_workspaces_authoritative": true,
+    "completion_persistence": false,
+    "explicit_search_console_report_date_required": true,
+    "production_d1_contact": false,
+    "measurement": {
+      "source_sha": "b8c08e66532931794bbc20de732dc23d52d64494",
+      "source_tree_sha": "dd697658088e664be98f502cf1c964abc11b4ddd",
+      "workflow_run": 37040573522,
+      "artifact_id": 11242436571,
+      "artifact_name": "build349-evidence-gap-execution-workbench-b8c08e66532931794bbc20de732dc23d52d64494",
+      "artifact_digest": "sha256:e0b61e563953736a5fe8ea22f3112d3819e45e962897f0232016186ef40a1ce5",
+      "aggregate_rows_read": 1659,
+      "rows_read_ceiling": 20000,
+      "active_workbench_rows": 5,
+      "active_gap_families": 4,
+      "gap_families": [
+        "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+        "REAL_SEARCH_CONSOLE_EXPORT",
+        "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+        "UNPROFILED_MAKER_STORY_EVIDENCE"
+      ],
+      "unprofiled_projects": 3,
+      "promo35": {
+        "execution_events": 0,
+        "result_events": 0,
+        "lesson_events": 0,
+        "story_review_status": "needs_review",
+        "public_story_candidate": 0,
+        "outcome_status": "unknown"
+      },
+      "search_console": {
+        "import_batches": 0,
+        "live_rows": 0,
+        "fresh_rows": 0,
+        "clicks": 0,
+        "impressions": 0,
+        "latest_report_date": ""
+      },
+      "grey_hair": {
+        "active_source_evidence": 3,
+        "approved_source_evidence": 1,
+        "source_evidence_needs_review": 2,
+        "reviewed_story_plans": 0,
+        "maker_story_profiles": 0
+      },
+      "decision": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED"
+    },
+    "decision": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "next_build": 350,
+    "next_build_title": "35th Promo Factual Evidence Completion Continuity V",
     "future_queue_exhausted": false,
     "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED"
   }

@@ -1,3 +1,4 @@
+/* BUILD349_CURRENT_CLIENT: Release 467 Build 349 — Evidence Gap Execution Workbench & Input Completion Continuity IV; verified predecessor Build 348. */
 /* BUILD348_CURRENT_CLIENT: Release 467 Build 348 — Content Adoption & Discovery Outcomes Renewal VIII; verified Build 347 dev 2983bc6bf9e3a5376340e022183ab17f51c2ee4b; Production ec311f0e54f0aa6b2d2eafb7a8b6c668cf194fae. */
 /* BUILD347_REPROOF_TRIGGER: retained historical CAIP gates defer unknown future Production SHA mapping to current restart-integrity authority. */
 /* BUILD347_CURRENT_CLIENT: Release 467 Build 347 — Maker Story Advancement & Publication Readiness Continuity V; verified Build 346 dev 0f58e0243b5f4ca4b78278972e76b3514a395414; Production f6f0d17f0cd8b7a879a8b771c236915fc39cb0c3. */

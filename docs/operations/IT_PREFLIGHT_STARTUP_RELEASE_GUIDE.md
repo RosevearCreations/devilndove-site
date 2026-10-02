@@ -1,3 +1,18 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 349 candidate over Build 348 Production GREEN
+
+- Development SHA: `2d3f691402a075f59fc74e7cd834bab20160dacd`
+- Shared tree: `775111e9cf3760f844a883f3fb3b2895583c02da`
+- System Gate: `37038005169`
+- Current Application Quality Proof: `37038005188`
+- I.T. Admin Runtime Proof: `37038005196`
+- Repository Branch Hygiene: `37038005210`
+- Build 348 proof: `37038005383`
+- Production main: `05a4fe507da74fdf7165d8f537c298d5420b699d`
+- Production Pages Deploy: `37038281785`
+- Production Live Resource Integrity: `37038401472`
+- Current action: Build 349 Evidence Gap Execution Workbench & Input Completion Continuity IV.
+- Source workspaces remain authoritative; completion persistence remains zero.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 348 candidate over Build 347 Production GREEN
 
 Build 347 is the last fully verified exact Development/Production closure ingested by Build 348.

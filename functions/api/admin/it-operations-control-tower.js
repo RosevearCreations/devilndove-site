@@ -1,3 +1,5 @@
+/* BUILD349_CURRENT_SUCCESSOR: Release 467 Build 349 — Evidence Gap Execution Workbench & Input Completion Continuity IV; verified predecessor Build 348. */
+/* BUILD349_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 348 dev 2d3f691402a075f59fc74e7cd834bab20160dacd; tree 775111e9cf3760f844a883f3fb3b2895583c02da; System 37038005169; Quality 37038005188; IT 37038005196; Hygiene 37038005210; Build 348 37038005383; Production 05a4fe507da74fdf7165d8f537c298d5420b699d; Pages 37038281785; Live 37038401472. */
 /* BUILD348_CURRENT_SUCCESSOR: Release 467 Build 348 — Content Adoption & Discovery Outcomes Renewal VIII; verified predecessor Build 347. */
 /* BUILD348_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 347 dev 2983bc6bf9e3a5376340e022183ab17f51c2ee4b; tree 51d1c8d3fee195d238d99a2500025d546f3dee14; System 37029717090; Quality 37029717222; IT 37029717295; Hygiene 37029717232; Build 347 37029717110; Production ec311f0e54f0aa6b2d2eafb7a8b6c668cf194fae; Pages 37030003885; Live 37030156716. */
 /* BUILD347_CURRENT_SUCCESSOR: Release 467 Build 347 — Maker Story Advancement & Publication Readiness Continuity V; verified predecessor Build 346. */
@@ -25,23 +27,14 @@ import { onRequestGet as getReadinessControlTower } from './it-control-tower.js'
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=348;
-const TITLE='Content Adoption & Discovery Outcomes Renewal VIII';
-const AUTHORITY='release467-build347-maker-story-advancement-publication-readiness-continuity-v';
+const BUILD=349;
+const TITLE='Evidence Gap Execution Workbench & Input Completion Continuity IV';
+const AUTHORITY='release467-build348-content-adoption-discovery-outcomes-renewal-viii';
 const EVIDENCE_ID='r467-b347-closure-37029717090-37030003885';
 
-const VERIFIED_DEVELOPMENT=Object.freeze({
-  release:467,build:347,title:'Maker Story Advancement & Publication Readiness Continuity V',state:'DEVELOPMENT_GREEN',
-  dev_sha:'2983bc6bf9e3a5376340e022183ab17f51c2ee4b',tree_sha:'51d1c8d3fee195d238d99a2500025d546f3dee14',system_gate_run:37029717090,current_application_quality_run:37029717222,it_admin_runtime_proof_run:37029717295,branch_hygiene_run:37029717232,proof_state:'EXACT_BRANCH_HEAD_BUILD347_GREEN'
-});
-const ACCEPTED_DEVELOPMENT=Object.freeze({
-  release:467,build:347,title:'Maker Story Advancement & Publication Readiness Continuity V',state:'DEVELOPMENT_GREEN',
-  dev_sha:'2983bc6bf9e3a5376340e022183ab17f51c2ee4b',tree_sha:'51d1c8d3fee195d238d99a2500025d546f3dee14',system_gate_run:37029717090,current_application_quality_run:37029717222,it_admin_runtime_proof_run:37029717295,branch_hygiene_run:37029717232,proof_state:'EXACT_BRANCH_HEAD_BUILD347_GREEN'
-});
-const PRODUCTION=Object.freeze({
-  release:467,build:347,title:'Maker Story Advancement & Publication Readiness Continuity V',state:'PRODUCTION_GREEN',
-  main_sha:'ec311f0e54f0aa6b2d2eafb7a8b6c668cf194fae',tree_sha:'51d1c8d3fee195d238d99a2500025d546f3dee14',production_pages_deploy_run:37030003885,production_live_resource_integrity_run:37030156716,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:37029717110,remote_d1_queries:0
-});
+const VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:348,title:'Content Adoption & Discovery Outcomes Renewal VIII',state:'DEVELOPMENT_GREEN',dev_sha:'2d3f691402a075f59fc74e7cd834bab20160dacd',tree_sha:'775111e9cf3760f844a883f3fb3b2895583c02da',system_gate_run:37038005169,current_application_quality_run:37038005188,it_admin_runtime_proof_run:37038005196,branch_hygiene_run:37038005210,proof_state:'EXACT_BRANCH_HEAD_BUILD348_GREEN'});
+const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:348,title:'Content Adoption & Discovery Outcomes Renewal VIII',state:'DEVELOPMENT_GREEN',dev_sha:'2d3f691402a075f59fc74e7cd834bab20160dacd',tree_sha:'775111e9cf3760f844a883f3fb3b2895583c02da',system_gate_run:37038005169,current_application_quality_run:37038005188,it_admin_runtime_proof_run:37038005196,branch_hygiene_run:37038005210,proof_state:'EXACT_BRANCH_HEAD_BUILD348_GREEN'});
+const PRODUCTION=Object.freeze({release:467,build:348,title:'Content Adoption & Discovery Outcomes Renewal VIII',state:'PRODUCTION_GREEN',main_sha:'05a4fe507da74fdf7165d8f537c298d5420b699d',tree_sha:'775111e9cf3760f844a883f3fb3b2895583c02da',production_pages_deploy_run:37038281785,production_live_resource_integrity_run:37038401472,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:37038005383,remote_d1_queries:0});
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true,workflow:'.github/workflows/production-live-resource-integrity-proof.yml'
 });
