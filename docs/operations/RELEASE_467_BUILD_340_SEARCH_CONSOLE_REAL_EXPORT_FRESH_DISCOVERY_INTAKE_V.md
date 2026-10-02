@@ -21,3 +21,11 @@ CI is read-only: no import, no queue mutation, no SEO apply, no IndexNow/provide
 The queue **has not run out**.
 
 **Next after Build 340 Production GREEN: Build 341 — Maker Story Advancement & Publication Readiness Continuity IV.**
+
+## Measured Development outcome
+
+Exact Development measurement at `5c1ea89e91de67df15672389c7b2e692853ef701` produced workflow `36958306731`, artifact `11206707351`, and interpretation **EVIDENCE_PENDING_NO_REAL_EXPORT**.
+
+Current Search Console state is **0 import batches / 0 live rows / 0 recent rows / 0 clicks / 0 impressions / 0 eligible query-page pairs / 0 SEO queue rows**. The read-only measurement consumed **2,056 / 20,000 rows read**.
+
+The correct next operator action is unchanged: import a genuine confirmed Google Search Console Performance CSV when available, and supply the report end date when the CSV has no Date column. No synthetic evidence, automatic queue generation, automatic SEO apply, provider execution or Production D1 contact occurred.
