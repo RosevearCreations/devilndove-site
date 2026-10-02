@@ -1,3 +1,18 @@
+<!-- BUILD341_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 340 dev 5e2c1d53ce8f96c29c526f78378a73f9c451c956; tree dfa4b627095b7f5c7fb4777bb6c38c1d0309b629; System 36958474203; Quality 36958474189; IT 36958474179; Hygiene 36958474226; D1 Fan-Out 36958474225; Build 340 36958474182; Production 104034bea4060c1696708cec8e145c7398525889; Pages 36958632089; Live 36958701913. -->
+
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 341 candidate
+
+Build 341 — Maker Story Advancement & Publication Readiness Continuity IV — starts from exact Build 340 Development/Production GREEN.
+
+- Verified Development SHA: `5e2c1d53ce8f96c29c526f78378a73f9c451c956`
+- Verified Development/Production tree: `dfa4b627095b7f5c7fb4777bb6c38c1d0309b629`
+- System / Quality / I.T. / Hygiene: `36958474203 / 36958474189 / 36958474179 / 36958474226`
+- D1 Fan-Out / Build 340: `36958474225 / 36958474182`
+- Production main: `104034bea4060c1696708cec8e145c7398525889`
+- Production Pages / Live: `36958632089 / 36958701913`
+
+Build 341 remeasures five-project Maker Story advancement and publication readiness without automatic profile creation, review mutation, public-candidate mutation, copy approval, rights inference, publication, social posting, provider execution, or Production D1 contact.
+
 <!-- BUILD340_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 339 dev 71230f3cc4b6518f4f0e61068db2edd0fdf4db50; tree 2420704c0619bbf645ee600d80d8f29b8d9ba4cb; System 36956662304; Quality 36956662274; IT 36956662427; Hygiene 36956662310; D1 Fan-Out 36956662311; Build 339 36956662279; Production 8c7ff02b4748ebca9a0f5773ffe34589d5890305; Pages 36956802900; Live 36956890133. -->
 
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 340 candidate
