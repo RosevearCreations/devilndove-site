@@ -3789,13 +3789,57 @@
     "source_build": 349,
     "state": "DEVELOPMENT_CANDIDATE",
     "source_outcomes_build": 348,
-    "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
     "expected_gap_families": 4,
     "read_only": true,
     "source_workspaces_authoritative": true,
     "completion_persistence": false,
     "explicit_search_console_report_date_required": true,
     "production_d1_contact": false,
+    "measurement": {
+      "source_sha": "b8c08e66532931794bbc20de732dc23d52d64494",
+      "source_tree_sha": "dd697658088e664be98f502cf1c964abc11b4ddd",
+      "workflow_run": 37040573522,
+      "artifact_id": 11242436571,
+      "artifact_name": "build349-evidence-gap-execution-workbench-b8c08e66532931794bbc20de732dc23d52d64494",
+      "artifact_digest": "sha256:e0b61e563953736a5fe8ea22f3112d3819e45e962897f0232016186ef40a1ce5",
+      "aggregate_rows_read": 1659,
+      "rows_read_ceiling": 20000,
+      "active_workbench_rows": 5,
+      "active_gap_families": 4,
+      "gap_families": [
+        "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+        "REAL_SEARCH_CONSOLE_EXPORT",
+        "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+        "UNPROFILED_MAKER_STORY_EVIDENCE"
+      ],
+      "unprofiled_projects": 3,
+      "promo35": {
+        "execution_events": 0,
+        "result_events": 0,
+        "lesson_events": 0,
+        "story_review_status": "needs_review",
+        "public_story_candidate": 0,
+        "outcome_status": "unknown"
+      },
+      "search_console": {
+        "import_batches": 0,
+        "live_rows": 0,
+        "fresh_rows": 0,
+        "clicks": 0,
+        "impressions": 0,
+        "latest_report_date": ""
+      },
+      "grey_hair": {
+        "active_source_evidence": 3,
+        "approved_source_evidence": 1,
+        "source_evidence_needs_review": 2,
+        "reviewed_story_plans": 0,
+        "maker_story_profiles": 0
+      },
+      "decision": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED"
+    },
+    "decision": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
     "next_build": 350,
     "next_build_title": "35th Promo Factual Evidence Completion Continuity V",
     "future_queue_exhausted": false,
