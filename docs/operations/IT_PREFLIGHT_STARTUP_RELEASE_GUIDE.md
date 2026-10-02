@@ -1,3 +1,18 @@
+<!-- BUILD343_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 342 dev b2f8eb3d841de26b3200fde135be0cf35c71872c; tree 80139d90a4bd0835f694ceb25292184ca009930c; System 36991370553; Quality 36991370494; IT 36991372165; Hygiene 36991370591; D1 Fan-Out 36991370667; Build 342 36991370609; Production c884556bd869b55d721ea82ab6ac141d816f74ca; Pages 36991837922; Live 36991925709. -->
+
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 343 candidate
+
+Build 343 — Evidence Gap Execution Workbench & Input Completion Continuity III — starts from exact Build 342 Development/Production GREEN.
+
+- Verified Development SHA: `b2f8eb3d841de26b3200fde135be0cf35c71872c`
+- Verified Development/Production tree: `80139d90a4bd0835f694ceb25292184ca009930c`
+- System / Quality / I.T. / Hygiene: `36991370553 / 36991370494 / 36991372165 / 36991370591`
+- D1 Fan-Out / Build 342: `36991370667 / 36991370609`
+- Production main: `c884556bd869b55d721ea82ab6ac141d816f74ca`
+- Production Pages / Live: `36991837922 / 36991925709`
+
+Build 343 refreshes the GET-only evidence-gap execution workbench from existing source authorities. It persists no completion state and performs no evidence/story/Search Console/SEO/provider mutation.
+
 <!-- BUILD342_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 341 dev 84074c82d258c26d313a28a4b4735382c812a9dd; tree 5e9a649b6f6eb8e8bb2a10d7c17b417c9b63d985; System 36960078167; Quality 36960078069; IT 36960078104; Hygiene 36960078071; D1 Fan-Out 36960078086; Build 341 36960078067; Production ff5b1106ee5515106fd501909461fc4078f24edd; Pages 36960239473; Live 36960292887. -->
 
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 342 candidate
