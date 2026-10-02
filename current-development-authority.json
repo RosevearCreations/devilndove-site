@@ -2,7 +2,7 @@
   "release": 467,
   "build": 347,
   "title": "Maker Story Advancement & Publication Readiness Continuity V",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
@@ -28,7 +28,7 @@
       "build": 347,
       "title": "Maker Story Advancement & Publication Readiness Continuity V",
       "authority": "release467-build347-maker-story-advancement-publication-readiness-continuity-v.json",
-      "state": "DEVELOPMENT_CANDIDATE"
+      "state": "DEVELOPMENT_GREEN"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
     "closure_candidate_must_not_self_claim_final_proof": true,
@@ -241,7 +241,7 @@
   "next_build": 348,
   "next_build_state": "QUEUED_AFTER_BUILD347_PRODUCTION_GREEN",
   "next_build_title": "Content Adoption & Discovery Outcomes Renewal VIII",
-  "promotion_state": "BUILD347_CANDIDATE_NOT_YET_VERIFIED",
+  "promotion_state": "EXACT_BRANCH_HEAD_BUILD347_REPROOF_IN_PROGRESS",
   "successor_scope_state": "BUILD348_DEFINED_BY_CANONICAL_ROADMAP",
   "measured_closure": {
     "source_build": 232,
@@ -3527,7 +3527,7 @@
   },
   "maker_story_advancement_publication_readiness_continuity_v": {
     "source_build": 347,
-    "state": "DEVELOPMENT_CANDIDATE",
+    "state": "DEVELOPMENT_GREEN",
     "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
     "coverage_population": "ALL_ACTIVE_CREATIVE_PROJECTS",
     "expected_active_projects": 5,

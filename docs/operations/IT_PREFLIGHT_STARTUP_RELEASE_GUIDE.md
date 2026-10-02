@@ -1,3 +1,18 @@
+<!-- BUILD347_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 346 dev 0f58e0243b5f4ca4b78278972e76b3514a395414; tree 19e7512f525608ce4a0e5dbf683be85d38a3165a; System 37016614148; Quality 37016613543; IT 37016613981; Hygiene 37016613564; D1 Fan-Out 37016614052; Build 346 37016614289; Production f6f0d17f0cd8b7a879a8b771c236915fc39cb0c3; Pages 37016934208; Live 37017058797. -->
+
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 347 candidate
+
+Build 347 — Maker Story Advancement & Publication Readiness Continuity V — starts from exact Build 346 Development/Production GREEN.
+
+- Verified Development SHA: `0f58e0243b5f4ca4b78278972e76b3514a395414`
+- Verified Development/Production tree: `19e7512f525608ce4a0e5dbf683be85d38a3165a`
+- System / Quality / I.T. / Hygiene: `37016614148 / 37016613543 / 37016613981 / 37016613564`
+- D1 Fan-Out / Build 346: `37016614052 / 37016614289`
+- Production main: `f6f0d17f0cd8b7a879a8b771c236915fc39cb0c3`
+- Production Pages / Live: `37016934208 / 37017058797`
+
+Build 347 keeps Maker Story advancement factual and human-reviewed. The operator-requested Inventory Operations additions are bounded to direct page jump, canonical All Stations, independent Current Location, and shared admin-session authorization repair.
+
 <!-- BUILD346_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 345 dev 3ce6012f969d55fa13e917bfb00c8611f3452028; tree cd32fc6b82a7da8a645ca7a435d684b04e12e816; System 37013870629; Quality 37013870498; IT 37013870774; Hygiene 37013870321; D1 Fan-Out 37013870653; Build 345 37013870602; Production 8f435c2285f51d33e22ce1165227ea03b0abc50c; Pages 37014239323; Live 37014344594. -->
 
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 346 candidate
