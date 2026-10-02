@@ -2756,7 +2756,7 @@
     "next_build": 340,
     "next_build_title": "Search Console Real Export & Fresh Discovery Intake V",
     "future_queue_exhausted": false,
-    "exact_head_reproof_state": "PENDING_FINAL_EXACT_HEAD_MATRIX",
+    "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED",
     "decision": "SOURCE_EVIDENCE_REVIEW_REQUIRED",
     "measurement": {
       "source_sha": "2ffb37f6038264d10fc3c76cbf4a7f16db1e6d4b",
@@ -2806,6 +2806,7 @@
       "d1_mutation": false,
       "r2_mutation": false,
       "provider_execution": false
-    }
+    },
+    "final_exact_head_requested_after_shared_truth_green": true
   }
 }
