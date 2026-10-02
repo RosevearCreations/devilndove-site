@@ -90,7 +90,8 @@ export async function onRequestPost({request,env}){
   const row=await db.prepare(`SELECT * FROM oauth_provider_connections WHERE provider_key=? LIMIT 1`).bind(contract.key).first();
 
   if(action==='refresh'){
-    if(!oauthProviderAuthorizationOpen(env,request.url,contract.key))return json({ok:false,code:'oauth_provider_not_selected_for_acceptance',error:'Remote OAuth refresh is closed unless this is the explicitly selected Development acceptance provider.'},423);
+    if(contract.key!=='etsy'&&!oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key))return json({ok:false,code:'oauth_provider_not_selected_for_acceptance',error:'Remote OAuth refresh is closed unless this is the explicitly selected Development acceptance provider.'},423);
+    if(contract.key==='etsy'&&!oauthProviderAuthorizationOpen(env,request.url,contract.key))return json({ok:false,code:'oauth_live_authorization_closed',error:'Etsy OAuth refresh is Development-only and closed on this host.'},423);
     if(!row||row.connection_status==='disconnected'||!row.refresh_token_ciphertext)return json({ok:false,code:'oauth_refresh_token_unavailable'},409);
     try{
       const refresh=await decryptOAuthSecret(env,row.refresh_token_ciphertext,`oauth-token|${contract.key}|refresh`);
@@ -119,7 +120,7 @@ export async function onRequestPost({request,env}){
   if(action==='disconnect'){
     if(!row||row.connection_status==='disconnected')return json({ok:true,provider:contract.key,already_disconnected:true,remote_revoke_state:row?.remote_revoke_state||'not_attempted'});
     let remoteState='closed_by_selected_provider_boundary';
-    if(oauthProviderAuthorizationOpen(env,request.url,contract.key)&&row.access_token_ciphertext){
+    if(((contract.key==='etsy'&&oauthProviderAuthorizationOpen(env,request.url,contract.key))||(contract.key!=='etsy'&&oauthSelectedProviderAuthorizationOpen(env,request.url,contract.key)))&&row.access_token_ciphertext){
       try{
         const access=await decryptOAuthSecret(env,row.access_token_ciphertext,`oauth-token|${contract.key}|access`);
         const result=await revokeOAuthToken(contract,env,access);
