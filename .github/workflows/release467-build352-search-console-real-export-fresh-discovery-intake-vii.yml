@@ -4,6 +4,7 @@ on:
     branches: [dev]
     paths:
       - 'release467-build351-grey-hair-source-review-story-plan-completion-continuity-v.json'
+      - '.github/workflows/release467-build351-grey-hair-source-review-story-plan-completion-continuity-v.yml'
       - 'release467-build352-search-console-real-export-fresh-discovery-intake-vii.json'
       - 'current-development-authority.json'
       - 'docs/operations/RELEASE_467_BUILD_352_SEARCH_CONSOLE_REAL_EXPORT_FRESH_DISCOVERY_INTAKE_VII.md'
