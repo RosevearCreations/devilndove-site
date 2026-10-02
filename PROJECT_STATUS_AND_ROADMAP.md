@@ -1,3 +1,7 @@
+# BUILD 348 MEASUREMENT — observed evidence
+
+Build 348 exact Development measurement `37037329312` is GREEN: 18 read-only statements, **2,849** rows read, no adoption/discovery delta from Build 342, and decision **ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST**. The queue is renewed as Builds **349–354** from observed evidence only.
+
 # CURRENT BUILD — Release 467 Build 348
 
 **Content Adoption & Discovery Outcomes Renewal VIII**

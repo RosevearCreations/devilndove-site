@@ -31,6 +31,16 @@ q("date(COALESCE(report_date,created_at))>=date('now','-30 days')" not in sql,'B
 for token in ('build300','build306','build312','build318','build324','build330','build336','build342','build347','ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST','ADOPTION_PROGRESS_OBSERVED','REAL_DISCOVERY_EVIDENCE_OBSERVED','comparison_to_build342','automatic_story_generation:false','production_d1_contact:false'):q(token in verify,'Build 348 verifier missing '+token)
 for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','COMPARISON BASELINES: BUILDS 300 / 306 / 312 / 318 / 324 / 330 / 336 / 342','BUILD 347 READINESS CONTEXT: RETAINED','ROADMAP RENEWAL: OBSERVED EVIDENCE ONLY','BUSINESS DATA MUTATION: ZERO','PROVIDER EXECUTION: ZERO','PRODUCTION D1 CONTACT: ZERO'):q(token in wf,'Build 348 workflow boundary missing '+token)
 q('Build 348 — Content Adoption & Discovery Outcomes Renewal VIII' in road,'Build 348 canonical roadmap entry missing')
+
+measured=str(a.get('measurement_state') or '').startswith('EXACT_DEVELOPMENT_MEASURED')
+if measured:
+    q(a.get('decision')=='ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST','Build 348 measured decision drift')
+    q(a.get('roadmap_renewal_state')=='BUILDS_349_354_CREATED_FROM_OBSERVED_EVIDENCE','Build 348 roadmap renewal state missing')
+    q(a.get('next_roadmap')=='docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_349_354.md','Build 348 successor roadmap authority missing')
+    road2=t(a.get('next_roadmap'))
+    for token in ('Build 349 — Evidence Gap Execution Workbench & Input Completion Continuity IV','Build 350 — 35th Promo Factual Evidence Completion Continuity V','Build 351 — Grey Hair Source Review & Story-Plan Completion Continuity V','Build 352 — Search Console Real Export & Fresh Discovery Intake VII','Build 353 — Maker Story Advancement & Publication Readiness Continuity VI','Build 354 — Content Adoption & Discovery Outcomes Renewal IX'):
+        q(token in road2,'Build 348 renewed roadmap missing '+token)
+
 q(int(p.get('build') or 0)>=348,'Current pointer must retain Build 348 or successor')
 if int(p.get('build') or 0)==348:q(p.get('state') in ('DEVELOPMENT_CANDIDATE','DEVELOPMENT_GREEN'),'Build 348 current state invalid')
 print('RELEASE 467 BUILD 348 CONTENT ADOPTION & DISCOVERY OUTCOMES RENEWAL VIII')
