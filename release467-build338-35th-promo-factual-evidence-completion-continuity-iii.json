@@ -2,7 +2,7 @@
   "release": 467,
   "build": 338,
   "title": "35th Promo Factual Evidence Completion Continuity III",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "35TH_PROMO_FACTUAL_EVIDENCE_COMPLETION_CONTINUITY_III",
   "authority": "release467-build338-35th-promo-factual-evidence-completion-continuity-iii",
   "predecessor": {
@@ -176,5 +176,29 @@
     "automatic_publication": false,
     "next_build": 339,
     "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity III"
+  },
+  "final_closure": {
+    "dev_sha": "eb674de5006a63404d2a8076bef2024ba47272b3",
+    "tree_sha": "e10e2ca3b275e55d44b585c51b94bb26ca0bf8df",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD338_GREEN",
+    "proofs": {
+      "system_gate_run": 36933234834,
+      "current_application_quality_run": 36933234856,
+      "it_admin_runtime_proof_run": 36933234896,
+      "branch_hygiene_run": 36933234830,
+      "d1_ci_fanout_guard_run": 36933234803,
+      "build_specific_proof_run": 36933234922
+    },
+    "ingested_by_build": 339
+  },
+  "production_checkpoint": {
+    "main_sha": "cfdc10632bd5fe605b7cf60eef7e664e35cd11fb",
+    "tree_sha": "e10e2ca3b275e55d44b585c51b94bb26ca0bf8df",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36933441853,
+    "production_live_resource_integrity_run": 36933549332,
+    "remote_d1_queries": 0
   }
 }
