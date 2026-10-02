@@ -1,5 +1,9 @@
 # CURRENT BUILD
 
+**Build 346 — Search Console Real Export & Fresh Discovery Intake VI** is the active Development candidate over exact Build 345 Development/Production GREEN.
+
+# CURRENT BUILD
+
 **Build 345 — Grey Hair Source Review & Story-Plan Completion Continuity IV** is the active Development candidate over exact Build 344 Development/Production GREEN.
 
 # CURRENT BUILD
@@ -63,7 +67,7 @@ The factual lane remains fail-closed. Placeholder/absence text does not satisfy 
 
 The queue **has not run out**.
 
-**Next after Build 345 Production GREEN: Build 346 — Search Console Real Export & Fresh Discovery Intake VI.**
+**Next after Build 346 Production GREEN: Build 347 — Maker Story Advancement & Publication Readiness Continuity V.**
 
 Renewed roadmap authority: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_343_348.md`, created only from Build 342 exact Development evidence.
 

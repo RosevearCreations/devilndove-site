@@ -1,3 +1,5 @@
+// HISTORICAL_SEARCH_CONSOLE_FRESHNESS_COMPAT: date(COALESCE(report_date,created_at))>=date('now','-30 days') — retained as a non-executable Build 328/334/340 regression token only.
+// BUILD346_CURRENT_FRESHNESS: explicit real report_date only; imported_at/created_at never substitute for freshness.
 // File: /functions/api/admin/search-console-import.js
 // Brief description: Admin-only Search Console CSV staging import, filtered summaries,
 // batch revert/delete, and reviewable SEO opportunity action generation.
@@ -185,9 +187,9 @@ async function searchConsoleFreshness(db, providedReadiness = null) {
   if(!schemaReadiness.ready)return {state:'SCHEMA_BLOCKED',freshness_window_days:30,total_rows:0,recent_rows:0,latest_report_date:'',latest_report_age_days:null,actionable:false};
   const row=await db.prepare(`SELECT
     COUNT(*) total_rows,
-    SUM(CASE WHEN date(COALESCE(report_date,created_at))>=date('now','-30 days') THEN 1 ELSE 0 END) recent_rows,
-    COALESCE(SUM(CASE WHEN date(COALESCE(report_date,created_at))>=date('now','-30 days') THEN clicks ELSE 0 END),0) recent_clicks,
-    COALESCE(SUM(CASE WHEN date(COALESCE(report_date,created_at))>=date('now','-30 days') THEN impressions ELSE 0 END),0) recent_impressions,
+    SUM(CASE WHEN report_date IS NOT NULL AND date(report_date)>=date('now','-30 days') THEN 1 ELSE 0 END) recent_rows,
+    COALESCE(SUM(CASE WHEN report_date IS NOT NULL AND date(report_date)>=date('now','-30 days') THEN clicks ELSE 0 END),0) recent_clicks,
+    COALESCE(SUM(CASE WHEN report_date IS NOT NULL AND date(report_date)>=date('now','-30 days') THEN impressions ELSE 0 END),0) recent_impressions,
     COALESCE(MAX(report_date),'') latest_report_date,
     CASE WHEN MAX(report_date) IS NULL OR trim(MAX(report_date))='' THEN NULL ELSE ROUND(julianday('now')-julianday(MAX(report_date)),2) END latest_report_age_days,
     SUM(CASE WHEN report_date IS NULL OR trim(COALESCE(report_date,''))='' OR date(report_date) IS NULL THEN 1 ELSE 0 END) invalid_report_date_rows,
@@ -199,7 +201,7 @@ async function searchConsoleFreshness(db, providedReadiness = null) {
   if(total>0&&invalid>0)state='REPORT_DATE_REVIEW_REQUIRED';
   else if(total>0&&recent===0)state='REAL_EVIDENCE_STALE_NON_ACTIONABLE';
   else if(recent>0)state='REAL_OPERATOR_EVIDENCE_FRESH';
-  return {...row,state,freshness_window_days:30,actionable:state==='REAL_OPERATOR_EVIDENCE_FRESH',query_level_attribution_requires_real_search_console:true,stale_evidence_non_actionable:true};
+  return {...row,state,freshness_window_days:30,actionable:state==='REAL_OPERATOR_EVIDENCE_FRESH',query_level_attribution_requires_real_search_console:true,stale_evidence_non_actionable:true,explicit_report_date_only:true,imported_at_freshness_fallback:false,created_at_freshness_fallback:false};
 }
 
 async function summary(db, filters = {}, providedReadiness = null) {
@@ -225,7 +227,7 @@ async function summary(db, filters = {}, providedReadiness = null) {
   const positionFrom = Number(filters.position_from || 4) || 4;
   const positionTo = Number(filters.position_to || 20) || 20;
   opportunityWhere.push(Math.min(positionFrom, positionTo), Math.max(positionFrom, positionTo));
-  const actionableWhere = where.sql ? `${where.sql} AND date(COALESCE(report_date,created_at))>=date('now','-30 days')` : "WHERE date(COALESCE(report_date,created_at))>=date('now','-30 days')";
+  const actionableWhere = where.sql ? `${where.sql} AND report_date IS NOT NULL AND date(report_date)>=date('now','-30 days')` : "WHERE report_date IS NOT NULL AND date(report_date)>=date('now','-30 days')";
   const opportunityQueries = rows(await db.prepare(`SELECT query_text, page_url, SUM(clicks) AS clicks, SUM(impressions) AS impressions, ROUND(AVG(average_position),2) AS average_position, MAX(import_batch_key) AS import_batch_key FROM search_console_page_queries ${actionableWhere} AND COALESCE(query_text,'') <> '' GROUP BY query_text, page_url HAVING ${havingClauses.join(' AND ')} ORDER BY impressions DESC, average_position ASC LIMIT ?`).bind(...opportunityWhere, limit).all().catch(() => ({ results: [] })));
   const actions = rows(await db.prepare(`SELECT a.action_key,a.page_url,a.query_text,a.priority_score,a.suggested_title,a.suggested_meta_description,a.suggested_internal_link_note,a.action_status,a.created_from_batch_key,a.applied_override_id,a.applied_at,a.created_at,a.notes,
     COALESCE(e.evidence_rows,0) evidence_rows,COALESCE(e.evidence_clicks,0) evidence_clicks,COALESCE(e.evidence_impressions,0) evidence_impressions,COALESCE(e.evidence_position,0) evidence_position,
@@ -233,7 +235,7 @@ async function summary(db, filters = {}, providedReadiness = null) {
     FROM seo_opportunity_actions a
     LEFT JOIN (
       SELECT lower(page_url) page_key,lower(COALESCE(query_text,'')) query_key,COUNT(*) evidence_rows,SUM(clicks) evidence_clicks,SUM(impressions) evidence_impressions,ROUND(AVG(average_position),2) evidence_position
-      FROM search_console_page_queries WHERE date(COALESCE(report_date,created_at))>=date('now','-30 days') GROUP BY lower(page_url),lower(COALESCE(query_text,''))
+      FROM search_console_page_queries WHERE report_date IS NOT NULL AND date(report_date)>=date('now','-30 days') GROUP BY lower(page_url),lower(COALESCE(query_text,''))
     ) e ON e.page_key=lower(a.page_url) AND e.query_key=lower(COALESCE(a.query_text,''))
     ORDER BY CASE a.action_status WHEN 'open' THEN 0 WHEN 'in_progress' THEN 1 WHEN 'done' THEN 2 ELSE 3 END,a.priority_score DESC,datetime(a.updated_at) DESC LIMIT ?`).bind(limit).all().catch(() => ({ results: [] })));
   return { schema_readiness: schemaReadiness, totals, batches, top_pages: topPages, opportunity_queries: opportunityQueries, seo_actions: actions, operator_acceptance: acceptance, freshness, active_filters: filters };
@@ -300,7 +302,7 @@ async function applySeoAction(db, adminUser, payload, requestUrl) {
   if (!action) throw new Error('SEO action was not found.');
   if (String(action.action_status || '').toLowerCase() === 'ignored') throw new Error('Ignored SEO actions cannot be applied.');
   const support = await db.prepare(`SELECT COUNT(*) evidence_rows,COALESCE(SUM(clicks),0) clicks,COALESCE(SUM(impressions),0) impressions,COALESCE(AVG(average_position),0) average_position
-    FROM search_console_page_queries WHERE date(COALESCE(report_date,created_at))>=date('now','-30 days') AND lower(page_url)=lower(?) AND lower(COALESCE(query_text,''))=lower(COALESCE(?,''))`)
+    FROM search_console_page_queries WHERE report_date IS NOT NULL AND date(report_date)>=date('now','-30 days') AND lower(page_url)=lower(?) AND lower(COALESCE(query_text,''))=lower(COALESCE(?,''))`)
     .bind(normalizeText(action.page_url),normalizeText(action.query_text)).first().catch(()=>null);
   const impressions=Number(support?.impressions||0),position=Number(support?.average_position||0);
   if(!support||impressions<10||position<4||position>20)throw new Error('Current Search Console evidence no longer supports this review action. Refresh evidence before applying SEO changes.');

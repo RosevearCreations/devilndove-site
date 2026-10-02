@@ -2,7 +2,7 @@
   "release": 467,
   "build": 345,
   "title": "Grey Hair Source Review & Story-Plan Completion Continuity IV",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "GREY_HAIR_SOURCE_REVIEW_STORY_PLAN_COMPLETION_CONTINUITY_IV",
   "authority": "release467-build345-grey-hair-source-review-story-plan-completion-continuity-iv",
   "predecessor": {
@@ -110,7 +110,7 @@
   "next_build": 346,
   "next_build_title": "Search Console Real Export & Fresh Discovery Intake VI",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "ENABLED_EXACT_DEVELOPMENT",
+  "measurement_lane_state": "HISTORICAL_MANUAL_ONLY",
   "measurement_lane_owner": "release467-build345-grey-hair-source-review-story-plan-completion-continuity-iv.yml",
   "toolchain_reliability": {
     "wrangler_version": "4.128.0",
@@ -129,12 +129,12 @@
     "next_build_title": "Search Console Real Export & Fresh Discovery Intake VI"
   },
   "measurement": {
-    "source_sha": "656c18f590d9c6712b29d0f4d20a82dd371854cf",
-    "source_tree_sha": "ff965ac37e8b10e419c5672d5ba8cd7f916d4cca",
-    "workflow_run": 37013075766,
-    "artifact_id": 11228103792,
-    "artifact_name": "build345-grey-hair-source-review-story-plan-continuity-656c18f590d9c6712b29d0f4d20a82dd371854cf",
-    "artifact_digest": "sha256:f74eb30b89c46b46ab97273a5de292a21a8e1a3fb92a7c07733d24f4e7b445f2",
+    "source_sha": "3ce6012f969d55fa13e917bfb00c8611f3452028",
+    "source_tree_sha": "cd32fc6b82a7da8a645ca7a435d684b04e12e816",
+    "workflow_run": 37013870602,
+    "artifact_id": 11229100670,
+    "artifact_name": "build345-grey-hair-source-review-story-plan-continuity-3ce6012f969d55fa13e917bfb00c8611f3452028",
+    "artifact_digest": "sha256:7b5ffc68a1943dae1d7e8aa055f76b44c9200257d7b56ff24979bef98cb2cfcd",
     "aggregate_rows_read": 124,
     "rows_read_ceiling": 20000,
     "rows_read_by_statement": [
@@ -177,10 +177,37 @@
     "r2_mutation": false,
     "provider_execution": false
   },
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED",
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD345_GREEN",
   "retained_compatibility": {
     "build333_grey_hair_ui_literal_retained": true,
     "build339_grey_hair_ui_literal_retained": true,
     "runtime_logic_changed": false
+  },
+  "final_closure": {
+    "dev_sha": "3ce6012f969d55fa13e917bfb00c8611f3452028",
+    "tree_sha": "cd32fc6b82a7da8a645ca7a435d684b04e12e816",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD345_GREEN",
+    "proofs": {
+      "system_gate_run": 37013870629,
+      "current_application_quality_run": 37013870498,
+      "it_admin_runtime_proof_run": 37013870774,
+      "branch_hygiene_run": 37013870321,
+      "d1_ci_fanout_guard_run": 37013870653,
+      "build_specific_proof_run": 37013870602
+    },
+    "artifact_id": 11229100670,
+    "artifact_name": "build345-grey-hair-source-review-story-plan-continuity-3ce6012f969d55fa13e917bfb00c8611f3452028",
+    "artifact_digest": "sha256:7b5ffc68a1943dae1d7e8aa055f76b44c9200257d7b56ff24979bef98cb2cfcd",
+    "ingested_by_build": 346
+  },
+  "production_checkpoint": {
+    "main_sha": "8f435c2285f51d33e22ce1165227ea03b0abc50c",
+    "tree_sha": "cd32fc6b82a7da8a645ca7a435d684b04e12e816",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37014239323,
+    "production_live_resource_integrity_run": 37014344594,
+    "remote_d1_queries": 0
   }
 }
