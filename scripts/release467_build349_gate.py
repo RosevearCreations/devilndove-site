@@ -6,15 +6,15 @@ def t(p):return (R/p).read_text(encoding='utf-8',errors='replace')
 def j(p):return json.loads(t(p))
 def q(ok,msg):
     if not ok:F.append(msg)
-a=j('release467-build349-evidence-gap-execution-workbench-input-completion-continuity-iii.json');p=j('current-development-authority.json');pred=a.get('predecessor') or {}
+a=j('release467-build349-evidence-gap-execution-workbench-input-completion-continuity-iv.json');p=j('current-development-authority.json');pred=a.get('predecessor') or {}
 q(pred.get('development_sha')=='2d3f691402a075f59fc74e7cd834bab20160dacd' and pred.get('development_tree_sha')=='775111e9cf3760f844a883f3fb3b2895583c02da','Build 348 Development predecessor mismatch')
 q(pred.get('production_main_sha')=='05a4fe507da74fdf7165d8f537c298d5420b699d' and pred.get('production_tree_sha')=='775111e9cf3760f844a883f3fb3b2895583c02da','Build 348 Production predecessor mismatch')
 r=subprocess.run([sys.executable,str(R/'scripts/release467_build349_regression.py')],cwd=R,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE);print(r.stdout,end='');q(r.returncode==0,'Build 349 regression failed')
 q("run_current_contract('scripts/release467_build349_gate.py','Release 467 Build 349')" in t('scripts/current_system_gate_provenance_gate.py'),'System Gate missing Build 349')
 cur=int(p.get('build') or 0);q(cur>=349,'Current pointer must retain Build 349 or successor')
-if cur==349:q(p.get('state')=='DEVELOPMENT_GREEN' and int(p.get('next_build') or 0)==344,'Build 349 current authority/successor mismatch')
+if cur==349:q(p.get('state')=='DEVELOPMENT_GREEN' and int(p.get('next_build') or 0)==350,'Build 349 current authority/successor mismatch')
 print('RELEASE 467 BUILD 349 EVIDENCE GAP EXECUTION WORKBENCH & INPUT COMPLETION CONTINUITY IV')
 if F:
  print('FAIL');[print('-',x) for x in F];sys.exit(1)
 print('PASS')
-print('Next: Build 344 — 35th Promo Factual Evidence Completion Continuity IV')
+print('Next: Build 350 — 35th Promo Factual Evidence Completion Continuity V')
