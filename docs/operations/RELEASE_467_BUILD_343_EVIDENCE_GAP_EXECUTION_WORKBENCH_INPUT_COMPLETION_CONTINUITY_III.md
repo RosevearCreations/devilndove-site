@@ -28,3 +28,18 @@ The expected observed gap families are:
 - Unprofiled Maker Story evidence
 
 **Next after Build 343 Production GREEN: Build 344 — 35th Promo Factual Evidence Completion Continuity IV.**
+
+## Measured Development outcome
+
+Exact Development measurement at `91ec869503af79a51df98dbbfe76d7433f7572b5` produced workflow `37006813972`, artifact `11225848360`, and decision **EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED**.
+
+- Active workbench rows: **5**
+- Active gap families: **4**
+- 35th Promo execution / result / lesson events: **0 / 0 / 0**
+- Real Search Console import batches / rows / fresh rows: **0 / 0 / 0**
+- Grey Hair active / approved / needs-review source ranges: **3 / 1 / 2**
+- Grey Hair reviewed story plans / Maker Story profiles: **0 / 0**
+- Other unprofiled projects: **2** (`lime in you coconut`, `Shirley Not`) with **0** active events and **0** selected evidence rows
+- Provider D1 rows read: **1,659 / 20,000**
+
+No completion state, ownership, acknowledgement, evidence, story, Search Console, SEO or provider state was mutated.
