@@ -5,7 +5,7 @@ const CONTRACTS = {
   etsy: {
     key: 'etsy', label: 'Etsy', clientIdEnv: 'ETSY_API_KEYSTRING', clientSecretEnv: 'ETSY_SHARED_SECRET', redirectEnv: 'ETSY_REDIRECT_URI',
     authorizationEndpoint: 'https://www.etsy.com/oauth/connect', tokenEndpoint: 'https://api.etsy.com/v3/public/oauth/token', revokeEndpoint: null,
-    pkce: 'required', scopes: ['shops_r','listings_r','listings_w','transactions_r'], authClientParam: 'client_id', tokenClientParam: 'client_id', tokenAuth: 'body_id_only',
+    pkce: 'required', scopes: ['shops_r','listings_r','listings_w'], authClientParam: 'client_id', tokenClientParam: 'client_id', tokenAuth: 'body_id_only',
     identity: { expectedEnv: 'ETSY_EXPECTED_USER_ID', labelEnv: 'ETSY_EXPECTED_ACCOUNT_LABEL', subjectKind: 'user_id', endpoint: 'https://api.etsy.com/v3/application/users/me', apiKeyHeader: 'etsy' }
   },
   pinterest: {
@@ -127,7 +127,7 @@ export function providerIdentityExpectation(contract, env) {
 export function providerIdentityStatus(contract, env, remoteSubject, connectionStatus = 'connected') {
   const expectation = providerIdentityExpectation(contract, env);
   if (String(connectionStatus || '') === 'disconnected') return { ...expectation, status: 'not_connected' };
-  if (!expectation.configured) return { ...expectation, status: 'unconfigured' };
+  if (!expectation.configured) return contract?.key==='etsy' && text(remoteSubject) ? { ...expectation, status: 'bootstrap_verified' } : { ...expectation, status: 'unconfigured' };
   if (!text(remoteSubject)) return { ...expectation, status: 'not_verified' };
   const cfg = identityConfig(contract, env);
   return { ...expectation, status: sameSubject(remoteSubject, cfg.expected, cfg.identity.compare) ? 'verified' : 'mismatch' };
@@ -194,7 +194,8 @@ export async function refreshOAuthToken(contract, env, refreshToken, fetchImpl =
 export async function verifyOAuthIdentity(contract, env, accessToken, fetchImpl = fetch) {
   if (!contract?.identity) throw identityFailure('oauth_provider_identity_not_supported');
   const cfg = identityConfig(contract, env);
-  if (!cfg.configured) throw identityFailure('oauth_intended_account_not_configured');
+  const etsyBootstrap=contract?.key==='etsy';
+  if (!cfg.configured && !etsyBootstrap) throw identityFailure('oauth_intended_account_not_configured');
   if (!cfg.lookupConfigurationReady) throw identityFailure('oauth_provider_identity_configuration_incomplete');
   if (!text(accessToken)) throw identityFailure('oauth_provider_identity_failed');
 
@@ -208,7 +209,12 @@ export async function verifyOAuthIdentity(contract, env, accessToken, fetchImpl 
   if (!response.ok) throw identityFailure('oauth_provider_identity_failed', response.status);
 
   let remoteSubject = '';
-  if (contract.key === 'etsy') remoteSubject = text(payload?.user_id);
+  if (contract.key === 'etsy') {
+    const tokenSubject=etsyUserIdFromToken(accessToken);
+    remoteSubject=text(payload?.user_id)||tokenSubject;
+    if(!/^\d+$/.test(remoteSubject)) throw identityFailure('oauth_etsy_user_id_missing');
+    if(tokenSubject&&remoteSubject!==tokenSubject) throw identityFailure('oauth_provider_identity_failed');
+  }
   else if (contract.key === 'pinterest') remoteSubject = text(payload?.username);
   else if (contract.key === 'x') remoteSubject = text(payload?.data?.id);
   else if (contract.key === 'tiktok') remoteSubject = text(payload?.data?.user?.open_id);
@@ -222,7 +228,7 @@ export async function verifyOAuthIdentity(contract, env, accessToken, fetchImpl 
   }
 
   if (!remoteSubject) throw identityFailure('oauth_provider_identity_failed');
-  if (!sameSubject(remoteSubject, cfg.expected, cfg.identity.compare)) throw identityFailure('oauth_intended_account_mismatch');
+  if (cfg.expected && !sameSubject(remoteSubject, cfg.expected, cfg.identity.compare)) throw identityFailure('oauth_intended_account_mismatch');
   return { verified: true, remoteSubject, accountLabel: cfg.accountLabel, secondarySubjectVerified: Boolean(!cfg.secondaryExpected || contract.key === 'meta') };
 }
 
@@ -243,4 +249,42 @@ export async function revokeOAuthToken(contract, env, token, fetchImpl = fetch) 
   }
   const response = await fetchImpl(contract.revokeEndpoint, { method: 'POST', headers, body: formBody(body), redirect: 'error' });
   return { supported: true, ok: response.ok, status: response.status };
+}
+
+
+/* Release 467 Build 350 — Etsy identity/shop discovery.
+   Shop identity is safe provider metadata; token values remain server-side only. */
+function etsyApiHeaders(contract,env,accessToken=''){
+  const cfg=providerConfiguration(contract,env);
+  if(!cfg.configured) throw identityFailure('oauth_provider_identity_configuration_incomplete');
+  const headers={'Accept':'application/json','x-api-key':`${cfg.clientId}:${cfg.clientSecret}`};
+  if(text(accessToken)) headers.Authorization=`Bearer ${text(accessToken)}`;
+  return headers;
+}
+function etsyUserIdFromToken(accessToken){
+  const value=text(accessToken);
+  const prefix=value.includes('.')?value.split('.')[0]:'';
+  return /^\d+$/.test(prefix)?prefix:'';
+}
+export async function discoverEtsyShop(contract,env,accessToken,userId,fetchImpl=fetch){
+  if(contract?.key!=='etsy') throw identityFailure('oauth_etsy_shop_discovery_not_supported');
+  const subject=text(userId)||etsyUserIdFromToken(accessToken);
+  if(!/^\d+$/.test(subject)) throw identityFailure('oauth_etsy_user_id_missing');
+  const response=await fetchImpl(`https://api.etsy.com/v3/application/users/${encodeURIComponent(subject)}/shops`,{
+    method:'GET',headers:etsyApiHeaders(contract,env,accessToken),redirect:'error'
+  });
+  let payload={}; try{payload=await response.json();}catch{payload={};}
+  if(!response.ok) throw identityFailure('oauth_etsy_shop_discovery_failed',response.status);
+  const shop=Array.isArray(payload?.results)?payload.results[0]:payload;
+  const shopId=text(shop?.shop_id),owner=text(shop?.user_id||subject);
+  if(!/^\d+$/.test(shopId)||owner!==subject) throw identityFailure('oauth_etsy_shop_identity_invalid');
+  const expectedShop=text(env?.ETSY_SHOP_ID);
+  if(expectedShop&&expectedShop!==shopId) throw identityFailure('oauth_intended_shop_mismatch');
+  return {
+    shop_id:shopId,user_id:subject,shop_name:text(shop?.shop_name).slice(0,160),
+    currency_code:text(shop?.currency_code).slice(0,12),
+    listing_active_count:Number(shop?.listing_active_count||0)||0,
+    is_vacation:Boolean(shop?.is_vacation),
+    expected_shop_configured:Boolean(expectedShop)
+  };
 }
