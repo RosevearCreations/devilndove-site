@@ -94,7 +94,7 @@
   "future_queue_exhausted": false,
   "measurement_lane_state": "ACTIVE_DEVELOPMENT_MEASUREMENT",
   "measurement_lane_owner": "release467-build349-evidence-gap-execution-workbench-input-completion-continuity-iv.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED",
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_FORWARD_COMPATIBILITY_REPAIR",
   "toolchain_reliability": {
     "wrangler_version": "4.128.0",
     "business_logic_changed": false
@@ -177,5 +177,10 @@
     "source_workspaces_authoritative": true,
     "next_build": 350,
     "next_build_title": "35th Promo Factual Evidence Completion Continuity V"
+  },
+  "compatibility_repairs": {
+    "build265_roadmap_allowlist_extended_to_builds_349_354": true,
+    "build343_shared_workbench_historical_literals_retained": true,
+    "current_deployment_preflight_identity_converged": true
   }
 }
