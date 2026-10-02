@@ -1,3 +1,4 @@
+-- Build 347 Production-promotion retry proof: canonical version 28 remains required before dependent code.
 -- Build 347 final exact-head migration proof: Development D1 must record canonical version 28 before Production promotion.
 -- Release 467 Build 347 operator-requested Inventory Operations quality-of-life extension.
 -- Forward-only additive schema: one general-purpose canonical process and one independent physical-location pointer.
