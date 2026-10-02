@@ -245,7 +245,7 @@
   "next_build": 353,
   "next_build_state": "QUEUED_AFTER_BUILD352_PRODUCTION_GREEN",
   "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VI",
-  "promotion_state": "BUILD352_MEASUREMENT_INGESTED_FINAL_EXACT_HEAD_REPROOF_PENDING",
+  "promotion_state": "BUILD352_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "BUILD353_DEFINED_BY_CANONICAL_ROADMAP",
   "measured_closure": {
     "source_build": 232,
