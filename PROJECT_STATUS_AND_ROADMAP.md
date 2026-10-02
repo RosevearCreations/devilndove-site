@@ -1,3 +1,15 @@
+# BUILD 348 MEASUREMENT — observed evidence
+
+Build 348 exact Development measurement `37037329312` is GREEN: 18 read-only statements, **2,849** rows read, no adoption/discovery delta from Build 342, and decision **ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST**. The queue is renewed as Builds **349–354** from observed evidence only.
+
+# CURRENT BUILD — Release 467 Build 348
+
+**Content Adoption & Discovery Outcomes Renewal VIII**
+
+Build 347 is exact-tree Development/Production GREEN. Build 348 is the active Development candidate and repeats the comparable 18-statement content-adoption/discovery renewal through Build 342, with Build 347 retained as the five-project Maker Story readiness context. The successor queue is renewed only from observed exact Development evidence.
+
+**Verified Build 347:** Development `2983bc6bf9e3a5376340e022183ab17f51c2ee4b`, Production `ec311f0e54f0aa6b2d2eafb7a8b6c668cf194fae`, shared tree `51d1c8d3fee195d238d99a2500025d546f3dee14`.
+
 # CURRENT BUILD — Release 467 Build 347
 
 **Maker Story Advancement & Publication Readiness Continuity V**

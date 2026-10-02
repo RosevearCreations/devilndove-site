@@ -1,3 +1,20 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 348 candidate over Build 347 Production GREEN
+
+Build 347 is the last fully verified exact Development/Production closure ingested by Build 348.
+
+- Development SHA: `2983bc6bf9e3a5376340e022183ab17f51c2ee4b`
+- Shared tree: `51d1c8d3fee195d238d99a2500025d546f3dee14`
+- System Gate: `37029717090`
+- Current Application Quality Proof: `37029717222`
+- I.T. Admin Runtime Proof: `37029717295`
+- Repository Branch Hygiene: `37029717232`
+- Build 347 proof: `37029717110`
+- Production main: `ec311f0e54f0aa6b2d2eafb7a8b6c668cf194fae`
+- Production Pages Deploy: `37030003885`
+- Production Live Resource Integrity: `37030156716`
+- Current action: Build 348 Content Adoption & Discovery Outcomes Renewal VIII.
+- Build 348 performs read-only Development measurement; provider execution/publication remains closed.
+
 <!-- BUILD347_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 346 dev 0f58e0243b5f4ca4b78278972e76b3514a395414; tree 19e7512f525608ce4a0e5dbf683be85d38a3165a; System 37016614148; Quality 37016613543; IT 37016613981; Hygiene 37016613564; D1 Fan-Out 37016614052; Build 346 37016614289; Production f6f0d17f0cd8b7a879a8b771c236915fc39cb0c3; Pages 37016934208; Live 37017058797. -->
 
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 347 candidate
