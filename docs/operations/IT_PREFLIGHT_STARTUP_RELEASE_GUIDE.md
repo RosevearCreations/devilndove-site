@@ -1,3 +1,18 @@
+<!-- BUILD342_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 341 dev 84074c82d258c26d313a28a4b4735382c812a9dd; tree 5e9a649b6f6eb8e8bb2a10d7c17b417c9b63d985; System 36960078167; Quality 36960078069; IT 36960078104; Hygiene 36960078071; D1 Fan-Out 36960078086; Build 341 36960078067; Production ff5b1106ee5515106fd501909461fc4078f24edd; Pages 36960239473; Live 36960292887. -->
+
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 342 candidate
+
+Build 342 — Content Adoption & Discovery Outcomes Renewal VII — starts from exact Build 341 Development/Production GREEN.
+
+- Verified Development SHA: `84074c82d258c26d313a28a4b4735382c812a9dd`
+- Verified Development/Production tree: `5e9a649b6f6eb8e8bb2a10d7c17b417c9b63d985`
+- System / Quality / I.T. / Hygiene: `36960078167 / 36960078069 / 36960078104 / 36960078071`
+- D1 Fan-Out / Build 341: `36960078086 / 36960078067`
+- Production main: `ff5b1106ee5515106fd501909461fc4078f24edd`
+- Production Pages / Live: `36960239473 / 36960292887`
+
+Build 342 is the read-only 18-statement adoption/discovery outcomes renewal. Search Console evidence is fresh only from an explicit real report date. Successor scope is renewed only from observed exact-Development evidence.
+
 <!-- BUILD341_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 340 dev 5e2c1d53ce8f96c29c526f78378a73f9c451c956; tree dfa4b627095b7f5c7fb4777bb6c38c1d0309b629; System 36958474203; Quality 36958474189; IT 36958474179; Hygiene 36958474226; D1 Fan-Out 36958474225; Build 340 36958474182; Production 104034bea4060c1696708cec8e145c7398525889; Pages 36958632089; Live 36958701913. -->
 
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 341 candidate
