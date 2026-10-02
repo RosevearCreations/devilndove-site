@@ -1,28 +1,6 @@
 name: Release 467 Build 348 Content Adoption Discovery Outcomes Renewal VIII
+# Historical after Build 349 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build347-maker-story-advancement-publication-readiness-continuity-v.json'
-      - 'release467-build348-content-adoption-discovery-outcomes-renewal-viii.json'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_348_CONTENT_ADOPTION_DISCOVERY_OUTCOMES_RENEWAL_VIII.md'
-      - 'docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_343_348.md'
-      - 'docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_349_354.md'
-      - 'scripts/release467_build348_outcomes_measurement.sql'
-      - 'scripts/release467_build348_verify_measurement.mjs'
-      - 'scripts/release467_build348_regression.py'
-      - 'scripts/release467_build348_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/reliability/index.html'
-      - 'admin/deployment-preflight/index.html'
-      - 'admin/it/index.html'
-      - '.github/workflows/release467-build348-content-adoption-discovery-outcomes-renewal-viii.yml'
   workflow_dispatch:
 permissions:
   contents: read
