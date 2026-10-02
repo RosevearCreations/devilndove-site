@@ -128,20 +128,81 @@
       "state": "PRODUCTION_GREEN"
     }
   },
-  "measurement_state": "EXACT_DEVELOPMENT_MEASUREMENT_PENDING",
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_349_354.md",
   "next_build": 354,
   "next_build_title": "Content Adoption & Discovery Outcomes Renewal IX",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "measurement_lane_state": "MEASURED_PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
   "measurement_lane_owner": "release467-build353-maker-story-advancement-publication-readiness-continuity-vi.yml",
   "decision": {
-    "classification": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
-    "rationale": "Build 353 re-measures all five active Creative Projects for factual, human-reviewed publication readiness while repairing Admin-home startup and Etsy Development OAuth prerequisites without enabling publication.",
+    "classification": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+    "rationale": "Exact Development measurement found one already human-reviewed published story, three projects still requiring Maker Story evidence, and the 35th promo still requiring factual execution/result/lesson evidence. No automatic advancement is justified.",
+    "operator_next_action": "Retain explicit human review and evidence entry in the owning Maker Story/CAIP workspaces.",
     "automatic_advancement_authorized": false,
     "automatic_publication_authorized": false,
     "media_rights_inference_authorized": false,
+    "measurement_run": 37079831063,
+    "artifact_id": 11257484534,
+    "aggregate_rows_read": 672,
+    "rows_read_ceiling": 20000,
     "next_build": 354,
     "next_build_title": "Content Adoption & Discovery Outcomes Renewal IX"
-  }
+  },
+  "measurement": {
+    "source_sha": "94796ea01aeace7e2ddffba6d36f3f684c038259",
+    "source_tree_sha": "17275acd5a4ee8c87c35c4238766b1b462778844",
+    "workflow_run": 37079831063,
+    "artifact_id": 11257484534,
+    "artifact_name": "build353-maker-story-advancement-readiness-94796ea01aeace7e2ddffba6d36f3f684c038259",
+    "artifact_digest": "sha256:a56fdfe41005e1b7b929559cf69948f3114a365092967be2638506a1cac7bd6c",
+    "statement_count": 6,
+    "rows_read_by_statement": [
+      456,
+      19,
+      16,
+      163,
+      4,
+      14
+    ],
+    "aggregate_rows_read": 672,
+    "rows_read_ceiling": 20000,
+    "active_projects": 5,
+    "readiness_counts": {
+      "MAKER_STORY_EVIDENCE_REQUIRED": 3,
+      "FACTUAL_OUTCOME_EVIDENCE_REQUIRED": 1,
+      "PUBLISHED_REVIEWED_STORY": 1
+    },
+    "completion_lanes": {
+      "promo35_execution_events": 0,
+      "promo35_result_events": 0,
+      "promo35_lesson_events": 0,
+      "grey_hair_approved_source_evidence": 1,
+      "grey_hair_source_evidence_needs_review": 2,
+      "grey_hair_reviewed_story_plans": 0,
+      "grey_hair_source_backed_story_items": 0
+    },
+    "media_rights": {
+      "active_caip_assets": 45,
+      "public_allowed_caip_assets": 0,
+      "non_public_caip_assets": 45,
+      "public_allowed_private_uploads": 0
+    },
+    "social": {
+      "social_rows": 1,
+      "review_first_ready_rows": 1,
+      "provider_posted_rows": 0
+    },
+    "decision": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+    "publication_readiness_is_read_only_classification": true,
+    "automatic_profile_creation": false,
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "automatic_content_approval": false,
+    "publication_mutation": false,
+    "automatic_social_posting": false,
+    "provider_execution": false,
+    "production_d1_contact": false
+  },
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION"
 }

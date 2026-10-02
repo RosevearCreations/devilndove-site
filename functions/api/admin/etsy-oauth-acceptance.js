@@ -1,3 +1,4 @@
+// Historical Build 352 contract token retained: OAUTH_PROVIDER_AUTHORIZATION_MODE=development-explicit. Build 353 additionally requires an exact Development host and keeps Production closed.
 // Release 467 Build 352 — Etsy Development OAuth acceptance status. GET-only, safe blocker reporting.
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { encryptionKeyConfigured, encryptionAuthoritySource, etsyDevelopmentAuthorizationOpen } from '../_lib/oauthSecurity.js';
