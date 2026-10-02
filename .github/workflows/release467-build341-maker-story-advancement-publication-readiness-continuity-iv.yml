@@ -1,20 +1,6 @@
 name: Release 467 Build 341 Maker Story Advancement Publication Readiness Continuity IV
+# Historical after Build 342 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'scripts/release467_build341_*'
-      - 'release467-build341-*.json'
-      - 'release467-build340-*.json'
-      - 'functions/api/admin/maker-story-coverage.js'
-      - 'admin/maker-story-coverage/index.html'
-      - 'public/js/admin-maker-story-coverage-v329.js'
-      - 'current-development-authority.json'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - 'docs/operations/RELEASE_467_BUILD_341_*'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - '.github/workflows/release467-build340-search-console-real-export-fresh-discovery-intake-v.yml'
-      - '.github/workflows/release467-build341-maker-story-advancement-publication-readiness-continuity-iv.yml'
   workflow_dispatch:
 permissions:
   contents: read

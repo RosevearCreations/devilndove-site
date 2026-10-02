@@ -1,5 +1,9 @@
 # CURRENT BUILD
 
+**Build 342 — Content Adoption & Discovery Outcomes Renewal VII** is the active Development candidate over exact Build 341 Development/Production GREEN. Successor scope is renewed only from exact Development evidence.
+
+# CURRENT BUILD
+
 **Build 341 — Maker Story Advancement & Publication Readiness Continuity IV** is the active Development candidate over exact Build 340 Development/Production GREEN.
 
 # CURRENT BUILD
@@ -47,7 +51,9 @@ The factual lane remains fail-closed. Placeholder/absence text does not satisfy 
 
 The queue **has not run out**.
 
-**Next after Build 341 Production GREEN: Build 342 — Content Adoption & Discovery Outcomes Renewal VII.**
+**Next after Build 342 Production GREEN: Build 343 — Evidence Gap Execution Workbench & Input Completion Continuity III.**
+
+Renewed roadmap authority: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_343_348.md`, created only from Build 342 exact Development evidence.
 
 Canonical roadmap: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_337_342.md`.
 

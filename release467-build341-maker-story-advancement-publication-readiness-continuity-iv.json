@@ -2,7 +2,7 @@
   "release": 467,
   "build": 341,
   "title": "Maker Story Advancement & Publication Readiness Continuity IV",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "MAKER_STORY_ADVANCEMENT_PUBLICATION_READINESS_CONTINUITY_IV",
   "authority": "release467-build341-maker-story-advancement-publication-readiness-continuity-iv",
   "predecessor": {
@@ -107,7 +107,7 @@
   "next_build": 342,
   "next_build_title": "Content Adoption & Discovery Outcomes Renewal VII",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "ENABLED_EXACT_DEVELOPMENT",
+  "measurement_lane_state": "HISTORICAL_MANUAL_ONLY",
   "measurement_lane_owner": "release467-build341-maker-story-advancement-publication-readiness-continuity-iv.yml",
   "toolchain_reliability": {
     "wrangler_version": "4.128.0",
@@ -127,12 +127,12 @@
     "next_build_title": "Content Adoption & Discovery Outcomes Renewal VII"
   },
   "measurement": {
-    "source_sha": "8b85caca0833f47d99104982a5c54092902f859f",
-    "source_tree_sha": "dcf6c5663f5a355990bc0d50c4fc22d98a086840",
-    "workflow_run": 36959896986,
-    "artifact_id": 11206864679,
-    "artifact_name": "build341-maker-story-advancement-readiness-8b85caca0833f47d99104982a5c54092902f859f",
-    "artifact_digest": "sha256:28dfc28a93ed1b12e45b3fed06c52563aab0a725d65648d17ce068b08567d666",
+    "source_sha": "84074c82d258c26d313a28a4b4735382c812a9dd",
+    "source_tree_sha": "5e9a649b6f6eb8e8bb2a10d7c17b417c9b63d985",
+    "workflow_run": 36960078067,
+    "artifact_id": 11207333969,
+    "artifact_name": "build341-maker-story-advancement-readiness-84074c82d258c26d313a28a4b4735382c812a9dd",
+    "artifact_digest": "sha256:5a510dba900a5191c5d891c46bf1ac12a3ef7910672d1d67bf23fc87c2fba268",
     "aggregate_rows_read": 672,
     "rows_read_ceiling": 20000,
     "rows_read_by_statement": [
@@ -288,5 +288,32 @@
     "provider_execution": false,
     "production_d1_contact": false
   },
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_REQUESTED"
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD341_GREEN",
+  "final_closure": {
+    "dev_sha": "84074c82d258c26d313a28a4b4735382c812a9dd",
+    "tree_sha": "5e9a649b6f6eb8e8bb2a10d7c17b417c9b63d985",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD341_GREEN",
+    "proofs": {
+      "system_gate_run": 36960078167,
+      "current_application_quality_run": 36960078069,
+      "it_admin_runtime_proof_run": 36960078104,
+      "branch_hygiene_run": 36960078071,
+      "d1_ci_fanout_guard_run": 36960078086,
+      "build_specific_proof_run": 36960078067
+    },
+    "artifact_id": 11207333969,
+    "artifact_name": "build341-maker-story-advancement-readiness-84074c82d258c26d313a28a4b4735382c812a9dd",
+    "artifact_digest": "sha256:5a510dba900a5191c5d891c46bf1ac12a3ef7910672d1d67bf23fc87c2fba268",
+    "ingested_by_build": 342
+  },
+  "production_checkpoint": {
+    "main_sha": "ff5b1106ee5515106fd501909461fc4078f24edd",
+    "tree_sha": "5e9a649b6f6eb8e8bb2a10d7c17b417c9b63d985",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 36960239473,
+    "production_live_resource_integrity_run": 36960292887,
+    "remote_d1_queries": 0
+  }
 }
