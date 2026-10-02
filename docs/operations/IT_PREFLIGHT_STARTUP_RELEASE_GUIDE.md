@@ -1,3 +1,18 @@
+<!-- BUILD344_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 343 dev 9ba28adc49ce04cf69fd6e7d3a3c12d5b376d8fe; tree 719649ad678aabd932bd43414db87bc234d7fc92; System 37007047792; Quality 37007047735; IT 37007047593; Hygiene 37007047737; D1 Fan-Out 37007047655; Build 343 37007047625; Production b3db71eeb5bea3ed4f1428d96c18120b9e51c9bb; Pages 37007313881; Live 37007416101. -->
+
+# CURRENT RELEASE CHECKPOINT — Release 467 Build 344 candidate
+
+Build 344 — 35th Promo Factual Evidence Completion Continuity IV — starts from exact Build 343 Development/Production GREEN.
+
+- Verified Development SHA: `9ba28adc49ce04cf69fd6e7d3a3c12d5b376d8fe`
+- Verified Development/Production tree: `719649ad678aabd932bd43414db87bc234d7fc92`
+- System / Quality / I.T. / Hygiene: `37007047792 / 37007047735 / 37007047593 / 37007047737`
+- D1 Fan-Out / Build 343: `37007047655 / 37007047625`
+- Production main: `b3db71eeb5bea3ed4f1428d96c18120b9e51c9bb`
+- Production Pages / Live: `37007313881 / 37007416101`
+
+Build 344 remeasures 35th Promo factual execution/process, result and lesson evidence plus substantive Maker Story facts. Completion can only produce explicit human-review readiness; no automatic review, candidacy, publication, media-rights inference or provider execution occurs.
+
 <!-- BUILD343_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 342 dev b2f8eb3d841de26b3200fde135be0cf35c71872c; tree 80139d90a4bd0835f694ceb25292184ca009930c; System 36991370553; Quality 36991370494; IT 36991372165; Hygiene 36991370591; D1 Fan-Out 36991370667; Build 342 36991370609; Production c884556bd869b55d721ea82ab6ac141d816f74ca; Pages 36991837922; Live 36991925709. -->
 
 # CURRENT RELEASE CHECKPOINT — Release 467 Build 343 candidate
