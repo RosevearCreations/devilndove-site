@@ -1,5 +1,9 @@
 # CURRENT BUILD
 
+**Build 345 — Grey Hair Source Review & Story-Plan Completion Continuity IV** is the active Development candidate over exact Build 344 Development/Production GREEN.
+
+# CURRENT BUILD
+
 **Build 344 — 35th Promo Factual Evidence Completion Continuity IV** is the active Development candidate over exact Build 343 Development/Production GREEN.
 
 # CURRENT BUILD
@@ -59,7 +63,7 @@ The factual lane remains fail-closed. Placeholder/absence text does not satisfy 
 
 The queue **has not run out**.
 
-**Next after Build 344 Production GREEN: Build 345 — Grey Hair Source Review & Story-Plan Completion Continuity IV.**
+**Next after Build 345 Production GREEN: Build 346 — Search Console Real Export & Fresh Discovery Intake VI.**
 
 Renewed roadmap authority: `docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_343_348.md`, created only from Build 342 exact Development evidence.
 
