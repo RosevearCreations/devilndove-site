@@ -2,7 +2,7 @@
   "release": 467,
   "build": 347,
   "title": "Maker Story Advancement & Publication Readiness Continuity V",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "MAKER_STORY_ADVANCEMENT_PUBLICATION_READINESS_CONTINUITY_V",
   "authority": "release467-build347-maker-story-advancement-publication-readiness-continuity-v",
   "predecessor": {
@@ -122,9 +122,9 @@
   "next_build": 348,
   "next_build_title": "Content Adoption & Discovery Outcomes Renewal VIII",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "ACTIVE_DEVELOPMENT_MEASUREMENT",
+  "measurement_lane_state": "HISTORICAL_MANUAL_ONLY",
   "measurement_lane_owner": "release467-build347-maker-story-advancement-publication-readiness-continuity-v.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_MATRIX_WITH_SCHEMA_PROOF_REQUESTED",
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD347_GREEN",
   "measurement": {
     "source_sha": "aa3e340569336898c753b5a64d2ab2c9be0828ac",
     "source_tree_sha": "efdaad247c5781d5b2e61c06076b21870217d3b9",
@@ -187,5 +187,29 @@
     "media_rights_inference_authorized": false,
     "next_build": 348,
     "next_build_title": "Content Adoption & Discovery Outcomes Renewal VIII"
+  },
+  "final_closure": {
+    "dev_sha": "2983bc6bf9e3a5376340e022183ab17f51c2ee4b",
+    "tree_sha": "51d1c8d3fee195d238d99a2500025d546f3dee14",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD347_GREEN",
+    "proofs": {
+      "system_gate_run": 37029717090,
+      "current_application_quality_run": 37029717222,
+      "it_admin_runtime_proof_run": 37029717295,
+      "branch_hygiene_run": 37029717232,
+      "build_specific_proof_run": 37029717110
+    },
+    "ingested_by_build": 348,
+    "recorded_by": "Build 348 predecessor ingestion; not self-recorded by Build 347"
+  },
+  "production_checkpoint": {
+    "main_sha": "ec311f0e54f0aa6b2d2eafb7a8b6c668cf194fae",
+    "tree_sha": "51d1c8d3fee195d238d99a2500025d546f3dee14",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37030003885,
+    "production_live_resource_integrity_run": 37030156716,
+    "remote_d1_queries": 0
   }
 }
