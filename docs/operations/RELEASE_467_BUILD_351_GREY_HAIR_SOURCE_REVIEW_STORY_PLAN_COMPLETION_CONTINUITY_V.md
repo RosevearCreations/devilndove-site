@@ -22,3 +22,16 @@ The existing thresholds remain: zero source ranges needing review, at least two 
 **Next after Build 351 Production GREEN: Build 352 — Search Console Real Export & Fresh Discovery Intake VII.**
 
 The future queue **has not run out**.
+
+
+## Exact Development measurement
+
+The Build 351 Development measurement observed 45 active Grey Hair assets and 3 active source-evidence ranges. One range is approved and two still require explicit human review. Confirmed sync groups/tracks remain 0/0; reviewed story plans, source-backed story items and Maker Story profiles remain 0. The measured state is **SOURCE_EVIDENCE_REVIEW_REQUIRED** and every measured delta versus Build 349 is zero.
+
+The measurement is read-only. It neither approves evidence nor creates sync decisions, story plans, Maker Story profiles, public-media rights or provider actions.
+
+## Development admin-session recovery
+
+The reported Etsy/I.T. error was HTTP 401 from protected admin APIs while the Development account state showed **not logged in**. Build 351 keeps that 401 security boundary intact and changes protected I.T. clients to wait for the shared admin-access grant before loading. A logged-out Connect Etsy action routes through Development login and returns to the Etsy acceptance section; it never bypasses admin authorization.
+
+The Cloudflare Insights RUM CORS/404 console warning is external telemetry and is independent of the protected Devil n Dove API 401.
