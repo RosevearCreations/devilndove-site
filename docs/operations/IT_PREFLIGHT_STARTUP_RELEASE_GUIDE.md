@@ -1,3 +1,22 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 356 candidate over Build 355 Production GREEN
+
+**Current verified successor: Release 467 Build 356 — 35th Promo Factual Evidence Completion Continuity VI**
+
+Build 355 is the last fully verified exact Development/Production closure ingested by Build 356.
+
+- Development SHA: `31599bca8ead283f46a18bedbc19640c85f66faa`
+- Shared tree: `3be26b7b2497b1420c630c5ca891eda0a4aea0be`
+- System Gate: `37086186221`
+- Current Application Quality Proof: `37086186207`
+- I.T. Admin Runtime Proof: `37086186220`
+- Repository Branch Hygiene: `37086186214`
+- D1 CI Fan-Out Guard: `37086186242`
+- Build 355 proof: `37086186342`
+- Production main: `1ee3dc44c7f51da27f5cb9e61960896db839df06`
+- Production Pages Deploy: `37086313867`
+- Production Live Resource Integrity: `37086376436`
+- Production variables reference: `docs/operations/DEVILNDOVE_PRODUCTION_VARIABLES_REFERENCE.md`.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 355 candidate over Build 354 Production GREEN
 
 **Current verified successor: Release 467 Build 355 — Evidence Gap Execution Workbench & Input Completion Continuity V**

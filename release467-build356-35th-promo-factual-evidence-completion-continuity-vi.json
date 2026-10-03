@@ -1,0 +1,171 @@
+{
+  "release": 467,
+  "build": 356,
+  "title": "35th Promo Factual Evidence Completion Continuity VI",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "35TH_PROMO_FACTUAL_EVIDENCE_COMPLETION_CONTINUITY_VI",
+  "authority": "release467-build356-35th-promo-factual-evidence-completion-continuity-vi",
+  "predecessor": {
+    "build": 355,
+    "title": "Evidence Gap Execution Workbench & Input Completion Continuity V",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "31599bca8ead283f46a18bedbc19640c85f66faa",
+    "development_tree_sha": "3be26b7b2497b1420c630c5ca891eda0a4aea0be",
+    "development_proofs": {
+      "system_gate_run": 37086186221,
+      "current_application_quality_run": 37086186207,
+      "it_admin_runtime_proof_run": 37086186220,
+      "branch_hygiene_run": 37086186214,
+      "d1_ci_fanout_guard_run": 37086186242,
+      "build_specific_proof_run": 37086186342
+    },
+    "production_main_sha": "1ee3dc44c7f51da27f5cb9e61960896db839df06",
+    "production_tree_sha": "3be26b7b2497b1420c630c5ca891eda0a4aea0be",
+    "production_pages_deploy_run": 37086313867,
+    "production_live_resource_integrity_run": 37086376436,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "target": {
+    "creative_work_project_id": 5,
+    "project_key": "CP-MSC1SUG2",
+    "project_title": "35th promo",
+    "content_project_id": 23
+  },
+  "contract": {
+    "reuses_operator_action": "record_story_execution_evidence",
+    "execution_event_types": [
+      "setup",
+      "process",
+      "milestone",
+      "mistake",
+      "repair"
+    ],
+    "result_event_type": "result",
+    "lesson_event_type": "lesson",
+    "required_profile_facts": [
+      "what_we_are_trying",
+      "why_we_are_trying_it",
+      "substantive_actual_result",
+      "resolved_outcome_status",
+      "substantive_lesson_learned"
+    ],
+    "resolved_outcomes": [
+      "win",
+      "partial_win",
+      "failure"
+    ],
+    "readiness_rule": "at least one real execution/process-class event plus one real result event plus one real lesson event plus complete substantive non-placeholder factual Maker Story fields",
+    "placeholder_absence_text_does_not_satisfy_readiness": true,
+    "readiness_only": true,
+    "explicit_human_review_required": true,
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "automatic_evidence_selection": false,
+    "automatic_publication": false,
+    "media_rights_inference": false,
+    "production_variable_reference_refresh": true,
+    "secret_value_retrieval": false,
+    "next_build": 357,
+    "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity VI",
+    "future_queue_exhausted": false
+  },
+  "etsy_status": {
+    "oauth_start_reached_provider": true,
+    "provider_response_observed": "ETSY_TEMPORARY_ACCESS_RESTRICTION",
+    "interpretation": "Provider-side anti-abuse/interstitial reached after successful application OAuth redirect initiation; retry later from normal browser/network conditions.",
+    "automatic_retry": false,
+    "provider_bypass": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "placeholder_evidence": false,
+    "synthetic_execution_evidence": false,
+    "evidence_mutation": false,
+    "automatic_evidence_selection": false,
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "publication_mutation": false,
+    "social_mutation": false,
+    "private_media_exposure": false,
+    "media_rights_inference": false,
+    "provider_listing_writes": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false,
+    "secret_value_emission": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "31599bca8ead283f46a18bedbc19640c85f66faa",
+      "tree": "3be26b7b2497b1420c630c5ca891eda0a4aea0be",
+      "system_gate_run": 37086186221,
+      "current_application_quality_run": 37086186207,
+      "it_admin_runtime_proof_run": 37086186220,
+      "branch_hygiene_run": 37086186214,
+      "d1_ci_fanout_guard_run": 37086186242,
+      "build_specific_proof_run": 37086186342,
+      "state": "DEVELOPMENT_GREEN",
+      "quality_run": 37086186207,
+      "it_admin_runtime_run": 37086186220,
+      "repository_hygiene_run": 37086186214
+    },
+    "production": {
+      "main_sha": "1ee3dc44c7f51da27f5cb9e61960896db839df06",
+      "tree": "3be26b7b2497b1420c630c5ca891eda0a4aea0be",
+      "production_pages_deploy_run": 37086313867,
+      "production_live_resource_integrity_run": 37086376436,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_355_360.md",
+  "next_build": 357,
+  "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity VI",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
+  "measurement_lane_owner": "release467-build356-35th-promo-factual-evidence-completion-continuity-vi.yml",
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "decision": {
+    "classification": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW",
+    "rationale": "Exact Development measurement still shows zero real execution/process, result, or lesson events. Existing actual_result and lesson_learned remain absence markers, so factual readiness is incomplete; outcome stays unknown and the story remains needs_review / not a public candidate.",
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "automatic_publication": false,
+    "next_build": 357,
+    "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity VI"
+  },
+  "measurement": {
+    "source_sha": "438b0900716546c2064a26552ba4055cfe0ee222",
+    "source_tree_sha": "b44b76b56a6179ec65e449a5ac888cbb992b5ebc",
+    "workflow_run": 37088504142,
+    "artifact_id": 11261228813,
+    "artifact_name": "build356-35th-promo-factual-evidence-continuity-438b0900716546c2064a26552ba4055cfe0ee222",
+    "artifact_digest": "sha256:a8fe2a71edf2a7c232e1c0d7a15646e776638f787739777d51b04d372cfbce6e",
+    "aggregate_rows_read": 45,
+    "rows_read_by_statement": [
+      33,
+      2,
+      2,
+      8
+    ],
+    "rows_read_ceiling": 20000,
+    "closure_state": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
+    "execution_events": 0,
+    "result_events": 0,
+    "lesson_events": 0,
+    "selected_execution_evidence": 0,
+    "story_review_status": "needs_review",
+    "public_story_candidate": 0,
+    "outcome_status": "unknown",
+    "ready_for_explicit_human_review": false,
+    "approved_locked_deliverables": 2,
+    "publications": 0,
+    "social_rows": 0,
+    "production_d1_contact": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false
+  }
+}

@@ -1,3 +1,5 @@
+/* BUILD356_CURRENT_SUCCESSOR: Release 467 Build 356 — 35th Promo Factual Evidence Completion Continuity VI; verified predecessor Build 355. */
+/* BUILD356_RESTART_PROVENANCE: last_fully_verified_development Build 355 dev 31599bca8ead283f46a18bedbc19640c85f66faa; tree 3be26b7b2497b1420c630c5ca891eda0a4aea0be; System 37086186221; Quality 37086186207; IT 37086186220; Hygiene 37086186214; D1 Fan-Out 37086186242; Build 355 37086186342; Production 1ee3dc44c7f51da27f5cb9e61960896db839df06; Pages 37086313867; Live 37086376436. */
 /* BUILD355_CURRENT_SUCCESSOR: Release 467 Build 355 — Evidence Gap Execution Workbench & Input Completion Continuity V; verified predecessor Build 354. */
 /* BUILD355_RESTART_PROVENANCE: last_fully_verified_development Build 354 dev eac5ebfca9b04ed8e8cbed937053398bb0dec13a; tree 95b6c61cbfd0808a84663d557143bb53bed81f1d; System 37083343259; Quality 37083343033; IT 37083343161; Hygiene 37083343103; D1 Fan-Out 37083343100; Build 354 37083343116; Production e925852b63a4258d91c19ad4c6256f16501bac3a; Pages 37083483081; Live 37083542051. */
 /* BUILD354_CURRENT_SUCCESSOR: Release 467 Build 354 — Content Adoption & Discovery Outcomes Renewal IX; verified predecessor Build 353. */
@@ -45,13 +47,13 @@
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=355;
-export const CURRENT_RELIABILITY_TITLE='Evidence Gap Execution Workbench & Input Completion Continuity V';
+export const CURRENT_RELIABILITY_BUILD=356;
+export const CURRENT_RELIABILITY_TITLE='35th Promo Factual Evidence Completion Continuity VI';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
-export const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:354,title:'Content Adoption & Discovery Outcomes Renewal IX',state:'DEVELOPMENT_GREEN',dev_sha:'eac5ebfca9b04ed8e8cbed937053398bb0dec13a',tree_sha:'95b6c61cbfd0808a84663d557143bb53bed81f1d',system_gate_run:37083343259,current_application_quality_run:37083343033,it_admin_runtime_proof_run:37083343161,branch_hygiene_run:37083343103,proof_state:'EXACT_BRANCH_HEAD_BUILD354_GREEN'});
-export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:354,title:'Content Adoption & Discovery Outcomes Renewal IX',state:'DEVELOPMENT_GREEN',dev_sha:'eac5ebfca9b04ed8e8cbed937053398bb0dec13a',tree_sha:'95b6c61cbfd0808a84663d557143bb53bed81f1d',system_gate_run:37083343259,current_application_quality_run:37083343033,it_admin_runtime_proof_run:37083343161,branch_hygiene_run:37083343103,proof_state:'EXACT_BRANCH_HEAD_BUILD354_GREEN'});
-export const CURRENT_PRODUCTION=Object.freeze({release:467,build:354,title:'Content Adoption & Discovery Outcomes Renewal IX',state:'PRODUCTION_GREEN',main_sha:'e925852b63a4258d91c19ad4c6256f16501bac3a',tree_sha:'95b6c61cbfd0808a84663d557143bb53bed81f1d',production_pages_deploy_run:37083483081,production_live_resource_integrity_run:37083542051,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:37083343116,remote_d1_queries:0});
+export const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:355,title:'Evidence Gap Execution Workbench & Input Completion Continuity V',state:'DEVELOPMENT_GREEN',dev_sha:'31599bca8ead283f46a18bedbc19640c85f66faa',tree_sha:'3be26b7b2497b1420c630c5ca891eda0a4aea0be',system_gate_run:37086186221,current_application_quality_run:37086186207,it_admin_runtime_proof_run:37086186220,branch_hygiene_run:37086186214,proof_state:'EXACT_BRANCH_HEAD_BUILD355_GREEN'});
+export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:355,title:'Evidence Gap Execution Workbench & Input Completion Continuity V',state:'DEVELOPMENT_GREEN',dev_sha:'31599bca8ead283f46a18bedbc19640c85f66faa',tree_sha:'3be26b7b2497b1420c630c5ca891eda0a4aea0be',system_gate_run:37086186221,current_application_quality_run:37086186207,it_admin_runtime_proof_run:37086186220,branch_hygiene_run:37086186214,proof_state:'EXACT_BRANCH_HEAD_BUILD355_GREEN'});
+export const CURRENT_PRODUCTION=Object.freeze({release:467,build:355,title:'Evidence Gap Execution Workbench & Input Completion Continuity V',state:'PRODUCTION_GREEN',main_sha:'1ee3dc44c7f51da27f5cb9e61960896db839df06',tree_sha:'3be26b7b2497b1420c630c5ca891eda0a4aea0be',production_pages_deploy_run:37086313867,production_live_resource_integrity_run:37086376436,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:37086186342,remote_d1_queries:0});
 export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
   retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],
@@ -62,14 +64,14 @@ export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
 export async function loadCurrentReliability(db,env={}){
   const inherited=await loadRelease466Reliability(db,env);
   return {
-    release:467,build:355,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
+    release:467,build:356,title:CURRENT_RELIABILITY_TITLE,authority:CURRENT_RELIABILITY_AUTHORITY,state:CURRENT_READ_ONLY,
     environment:inherited.environment,score:inherited.score,status:inherited.status,scope:inherited.scope,slo_targets:inherited.slo_targets,
     checks:inherited.checks,migrations:inherited.migrations,runtime_incidents:inherited.runtime_incidents,
     foreign_key_violations:inherited.foreign_key_violations,resources:inherited.resources,
     governance:{...inherited.governance,current_release_authority:'current-development-authority.json',production_promotion_proof_count:4,production_closure_proof_count:6,rollback_readiness:'release-neutral-read-only',restart_integrity_protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1'},
     recovery:inherited.recovery,drift:inherited.drift,
     provenance:{
-      current_surface_release:467,current_surface_build:355,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
+      current_surface_release:467,current_surface_build:356,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
       historical_feature_authority:'release467-build36-current-reliability-operational-health.json',current_operator_authority:'current-development-authority.json',
       accepted_development:ACCEPTED_DEVELOPMENT,last_fully_verified_development:LAST_FULLY_VERIFIED_DEVELOPMENT,current_production:CURRENT_PRODUCTION,
       production_proof_transport_policy:PRODUCTION_PROOF_TRANSPORT_POLICY,implementation_acceptance_is_distinct_from_final_closure:true,

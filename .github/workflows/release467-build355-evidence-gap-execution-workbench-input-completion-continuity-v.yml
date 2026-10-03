@@ -1,37 +1,6 @@
 name: Release 467 Build 355 Evidence Gap Execution Workbench Input Completion Continuity V
+# Historical after Build 356 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build354-content-adoption-discovery-outcomes-renewal-ix.json'
-      - 'release467-build355-evidence-gap-execution-workbench-input-completion-continuity-v.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build355_execution_workbench.sql'
-      - 'scripts/release467_build355_verify_execution_workbench.mjs'
-      - 'scripts/release467_build355_cloudflare_env_diff.py'
-      - 'scripts/release467_build355_regression.py'
-      - 'scripts/release467_build355_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/evidence-gap-execution-workbench.js'
-      - 'admin/evidence-gap-execution-workbench/index.html'
-      - 'public/js/admin-evidence-gap-execution-workbench-v337.js'
-      - 'functions/api/admin/it-provider-setup-guide.js'
-      - 'public/js/admin-it-provider-setup-guide.js'
-      - 'functions/api/admin/etsy-oauth-acceptance.js'
-      - 'public/js/admin-etsy-oauth-acceptance.js'
-      - 'admin/it-integrations/index.html'
-      - '.github/workflows/release467-build354-content-adoption-discovery-outcomes-renewal-ix.yml'
-      - '.github/workflows/release467-build355-evidence-gap-execution-workbench-input-completion-continuity-v.yml'
-      - 'docs/operations/RELEASE_467_BUILD_355_EVIDENCE_GAP_EXECUTION_WORKBENCH_INPUT_COMPLETION_CONTINUITY_V.md'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'admin/reliability/index.html'
-      - 'admin/deployment-preflight/index.html'
-      - 'admin/it/index.html'
-      - 'public/js/admin-it-control-tower.js'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
   workflow_dispatch:
 permissions:
   contents: read
