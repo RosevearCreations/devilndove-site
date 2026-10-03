@@ -2,7 +2,7 @@
   "release": 467,
   "build": 354,
   "title": "Content Adoption & Discovery Outcomes Renewal IX",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "CONTENT_ADOPTION_DISCOVERY_OUTCOMES_RENEWAL_IX",
   "authority": "release467-build354-content-adoption-discovery-outcomes-renewal-ix",
   "predecessor": {
@@ -110,12 +110,12 @@
   "measurement_lane_owner": "release467-build354-content-adoption-discovery-outcomes-renewal-ix.yml",
   "decision": "ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
   "measurement": {
-    "source_sha": "a29696f01e048d06c23a451919df7a8dec8101a0",
-    "source_tree_sha": "d10676bdc29ce7bcb2ca07947a4d978fdf9be749",
-    "workflow_run": 37083156608,
-    "artifact_id": 11259109718,
-    "artifact_name": "build354-content-adoption-discovery-renewal-a29696f01e048d06c23a451919df7a8dec8101a0",
-    "artifact_digest": "sha256:5a86a97c0fd108b1ba92a80b980ed0562234ea0055b0228922a7ba84312431c0",
+    "source_sha": "eac5ebfca9b04ed8e8cbed937053398bb0dec13a",
+    "source_tree_sha": "95b6c61cbfd0808a84663d557143bb53bed81f1d",
+    "workflow_run": 37083343116,
+    "artifact_id": 11258359812,
+    "artifact_name": "build354-content-adoption-discovery-renewal-eac5ebfca9b04ed8e8cbed937053398bb0dec13a",
+    "artifact_digest": "sha256:5ad55abe691011a7bbef0414d85d3b4c3eb890c9835f7c8d1802bef911b799d9",
     "statement_count": 18,
     "rows_read_by_statement": [
       7,
@@ -206,5 +206,35 @@
   },
   "roadmap_renewal_state": "BUILDS_355_360_CREATED_FROM_OBSERVED_EVIDENCE",
   "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_355_360.md",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION"
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD354_GREEN",
+  "final_closure": {
+    "dev_sha": "eac5ebfca9b04ed8e8cbed937053398bb0dec13a",
+    "tree_sha": "95b6c61cbfd0808a84663d557143bb53bed81f1d",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD354_GREEN",
+    "proofs": {
+      "system_gate_run": 37083343259,
+      "current_application_quality_run": 37083343033,
+      "it_admin_runtime_proof_run": 37083343161,
+      "branch_hygiene_run": 37083343103,
+      "d1_ci_fanout_guard_run": 37083343100,
+      "build_specific_proof_run": 37083343116
+    },
+    "artifact_id": 11258359812,
+    "artifact_name": "build354-content-adoption-discovery-renewal-eac5ebfca9b04ed8e8cbed937053398bb0dec13a",
+    "artifact_digest": "sha256:5ad55abe691011a7bbef0414d85d3b4c3eb890c9835f7c8d1802bef911b799d9",
+    "ingested_by_build": 355,
+    "recorded_by": "Build 355 predecessor ingestion; not self-recorded by Build 354"
+  },
+  "production_checkpoint": {
+    "main_sha": "e925852b63a4258d91c19ad4c6256f16501bac3a",
+    "tree_sha": "95b6c61cbfd0808a84663d557143bb53bed81f1d",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37083483081,
+    "production_live_resource_integrity_run": 37083542051,
+    "remote_d1_queries": 0,
+    "deployment_url": "https://243c055a.devilndove-site.pages.dev",
+    "deployment_id": "243c055a-8815-43e7-a7ee-c3df4d518c75"
+  }
 }

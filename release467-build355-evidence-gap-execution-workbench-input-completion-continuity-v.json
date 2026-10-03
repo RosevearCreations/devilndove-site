@@ -1,0 +1,113 @@
+{
+  "release": 467,
+  "build": 355,
+  "title": "Evidence Gap Execution Workbench & Input Completion Continuity V",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "EVIDENCE_GAP_EXECUTION_WORKBENCH_INPUT_COMPLETION_CONTINUITY_V",
+  "authority": "release467-build355-evidence-gap-execution-workbench-input-completion-continuity-v",
+  "predecessor": {
+    "build": 354,
+    "title": "Content Adoption & Discovery Outcomes Renewal IX",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "eac5ebfca9b04ed8e8cbed937053398bb0dec13a",
+    "development_tree_sha": "95b6c61cbfd0808a84663d557143bb53bed81f1d",
+    "development_proofs": {
+      "system_gate_run": 37083343259,
+      "current_application_quality_run": 37083343033,
+      "it_admin_runtime_proof_run": 37083343161,
+      "branch_hygiene_run": 37083343103,
+      "d1_ci_fanout_guard_run": 37083343100,
+      "build_specific_proof_run": 37083343116
+    },
+    "production_main_sha": "e925852b63a4258d91c19ad4c6256f16501bac3a",
+    "production_tree_sha": "95b6c61cbfd0808a84663d557143bb53bed81f1d",
+    "production_pages_deploy_run": 37083483081,
+    "production_live_resource_integrity_run": 37083542051,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "workbench_mode": "READ_ONLY_DERIVED_FROM_EXISTING_SOURCE_AUTHORITIES",
+    "refreshes_existing_build349_workbench": true,
+    "source_outcomes_build": 354,
+    "shows_required_inputs": true,
+    "shows_observed_completion": true,
+    "shows_completion_signal": true,
+    "shows_next_safe_human_action": true,
+    "direct_source_workspace_links": true,
+    "shadow_task_table": false,
+    "user_assignment_persistence": false,
+    "acknowledgement_persistence": false,
+    "resolution_persistence": false,
+    "completion_persistence": false,
+    "source_workspaces_remain_authoritative": true,
+    "explicit_search_console_report_date_required": true,
+    "cloudflare_preview_production_config_diff": true,
+    "cloudflare_config_diff_emits_secret_values": false,
+    "etsy_main_site_redirect_diagnostic": true,
+    "operator_testing_surface": "MAIN_PRODUCTION_DIRECT",
+    "expected_gap_families": [
+      "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+      "REAL_SEARCH_CONSOLE_EXPORT",
+      "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+      "UNPROFILED_MAKER_STORY_EVIDENCE"
+    ],
+    "next_build": 356,
+    "next_build_title": "35th Promo Factual Evidence Completion Continuity VI",
+    "future_queue_exhausted": false
+  },
+  "operator_decision": {
+    "canonical_manual_test_surface": "https://devilndove.com/",
+    "canonical_etsy_connection_surface": "https://devilndove.com/admin/it-integrations/",
+    "expected_etsy_callback": "https://devilndove.com/api/social/oauth/etsy/callback",
+    "preview_manual_testing": false,
+    "development_automation_and_release_proofs": true
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_exposure": false,
+    "evidence_mutation": false,
+    "story_mutation": false,
+    "search_console_mutation": false,
+    "seo_mutation": false,
+    "automatic_completion": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "secret_value_emission": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "eac5ebfca9b04ed8e8cbed937053398bb0dec13a",
+      "tree": "95b6c61cbfd0808a84663d557143bb53bed81f1d",
+      "system_gate_run": 37083343259,
+      "quality_run": 37083343033,
+      "it_admin_runtime_run": 37083343161,
+      "repository_hygiene_run": 37083343103,
+      "d1_ci_fanout_guard_run": 37083343100,
+      "build_specific_proof_run": 37083343116,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "e925852b63a4258d91c19ad4c6256f16501bac3a",
+      "tree": "95b6c61cbfd0808a84663d557143bb53bed81f1d",
+      "production_pages_deploy_run": 37083483081,
+      "production_live_resource_integrity_run": 37083542051,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "EXACT_DEVELOPMENT_MEASUREMENT_PENDING",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_355_360.md",
+  "next_build": 356,
+  "next_build_title": "35th Promo Factual Evidence Completion Continuity VI",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "measurement_lane_owner": "release467-build355-evidence-gap-execution-workbench-input-completion-continuity-v.yml",
+  "exact_head_reproof_state": "PENDING_EXACT_HEAD_REPROOF",
+  "decision": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT"
+}

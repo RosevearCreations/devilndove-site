@@ -38,7 +38,7 @@ export async function onRequestGet({request,env}){
   const connectAvailable=Boolean(cfg.configured&&redirectMainReady&&encryptionReady&&authorizationOpen);
   return json({
     ok:true,authority:'etsy-main-site-oauth-acceptance',development_only:false,main_site_operator_acceptance:true,host,
-    configuration:{api_keystring_present:apiKeyReady,shared_secret_present:sharedSecretReady,redirect_uri_present:redirectReady,redirect_uri:callback||null,redirect_main_ready:redirectMainReady,encryption_key_configured:encryptionReady,encryption_authority_source:encryptionSource},
+    configuration:{api_keystring_present:apiKeyReady,shared_secret_present:sharedSecretReady,redirect_uri_present:redirectReady,redirect_uri:callback||null,expected_redirect_uri:'https://devilndove.com/api/social/oauth/etsy/callback',redirect_main_ready:redirectMainReady,encryption_key_configured:encryptionReady,encryption_authority_source:encryptionSource},
     connect_authorization_available:connectAvailable,
     connect_blockers,
     connection:{status:conn?.connection_status||'not_connected',connected,scopes,access_expires_at:conn?.access_expires_at||null,refresh_expires_at:conn?.refresh_expires_at||null,diagnostic_code:conn?.diagnostic_code||null,updated_at:conn?.updated_at||null},

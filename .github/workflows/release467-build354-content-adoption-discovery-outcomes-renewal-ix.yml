@@ -1,24 +1,6 @@
 name: Release 467 Build 354 Content Adoption Discovery Outcomes Renewal IX
+# Historical after Build 355 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build353-maker-story-advancement-publication-readiness-continuity-vi.json'
-      - 'release467-build354-content-adoption-discovery-outcomes-renewal-ix.json'
-      - 'current-development-authority.json'
-      - 'docs/operations/RELEASE_467_BUILD_354_CONTENT_ADOPTION_DISCOVERY_OUTCOMES_RENEWAL_IX.md'
-      - 'docs/operations/OPERATOR_TESTING_SURFACE_POLICY.md'
-      - 'scripts/release467_build354_outcomes_measurement.sql'
-      - 'scripts/release467_build354_verify_measurement.mjs'
-      - 'scripts/release467_build354_regression.py'
-      - 'scripts/release467_build354_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/_lib/oauthSecurity.js'
-      - 'functions/api/admin/etsy-oauth-acceptance.js'
-      - 'public/js/admin-etsy-oauth-acceptance.js'
-      - 'admin/it-integrations/index.html'
-      - '.github/workflows/release467-build353-maker-story-advancement-publication-readiness-continuity-vi.yml'
-      - '.github/workflows/release467-build354-content-adoption-discovery-outcomes-renewal-ix.yml'
   workflow_dispatch:
 permissions:
   contents: read
