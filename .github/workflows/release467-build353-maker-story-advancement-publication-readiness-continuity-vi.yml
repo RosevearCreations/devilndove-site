@@ -1,27 +1,6 @@
 name: Release 467 Build 353 Maker Story Advancement Publication Readiness Continuity VI
+# Historical after Build 354 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build352-search-console-real-export-fresh-discovery-intake-vii.json'
-      - 'release467-build353-maker-story-advancement-publication-readiness-continuity-vi.json'
-      - 'current-development-authority.json'
-      - 'docs/operations/RELEASE_467_BUILD_353_MAKER_STORY_ADVANCEMENT_PUBLICATION_READINESS_CONTINUITY_VI.md'
-      - 'scripts/release467_build353_continuity.sql'
-      - 'scripts/release467_build353_verify_continuity.mjs'
-      - 'scripts/release467_build353_regression.py'
-      - 'scripts/release467_build353_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'public/js/auth.js'
-      - 'public/js/site-auth-ui.js'
-      - 'public/js/admin-seller-command-centre-build148.js'
-      - 'admin/index.html'
-      - 'functions/api/_lib/oauthSecurity.js'
-      - 'functions/api/admin/oauth-start.js'
-      - 'functions/api/admin/etsy-oauth-acceptance.js'
-      - 'wrangler.toml'
-      - '.github/workflows/release467-build352-search-console-real-export-fresh-discovery-intake-vii.yml'
-      - '.github/workflows/release467-build353-maker-story-advancement-publication-readiness-continuity-vi.yml'
   workflow_dispatch:
 permissions:
   contents: read

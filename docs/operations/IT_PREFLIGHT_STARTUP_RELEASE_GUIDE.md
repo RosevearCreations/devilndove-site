@@ -1,3 +1,24 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 354 candidate over Build 353 Production GREEN
+
+**Current verified successor: Release 467 Build 354 — Content Adoption & Discovery Outcomes Renewal IX**
+
+Build 353 is the last fully verified exact Development/Production closure ingested by Build 354.
+
+- Development SHA: `2076cc66d5ae860de62bf9775820e5dc228e491c`
+- Shared tree: `56cc33ace347ddfb1ca779c805711dc19cc7eabb`
+- System Gate: `37079968214`
+- Current Application Quality Proof: `37079968169`
+- I.T. Admin Runtime Proof: `37079968182`
+- Repository Branch Hygiene: `37079968191`
+- D1 CI Fan-Out Guard: `37079968188`
+- Build 353 proof: `37079968173`
+- Production main: `8139d25fa79937e1b0acb141f88186878fe0e964`
+- Production Pages Deploy: `37080111186`
+- Production Live Resource Integrity: `37080182496`
+- Retained operator manual test surface: `https://devilndove.com/`.
+- Etsy connection acceptance surface: `https://devilndove.com/admin/it-integrations/`.
+- Development Preview remains an automated release-proof surface, not the normal manual test surface.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 353 candidate over Build 352 Production GREEN
 
 Build 352 is the last fully verified exact Development/Production closure ingested by Build 353.

@@ -1,10 +1,11 @@
-// Historical Build 352 contract token retained: OAUTH_PROVIDER_AUTHORIZATION_MODE=development-explicit. Build 353 additionally requires an exact Development host and keeps Production closed.
-// Release 467 Build 352 — Etsy Development OAuth acceptance status. GET-only, safe blocker reporting.
+// Historical Build 352 compatibility token retained: OAUTH_PROVIDER_AUTHORIZATION_MODE=development-explicit. Build 354 main-site Etsy acceptance supersedes the old manual-preview operating practice.
+// Build 354 operator policy: Etsy OAuth connection acceptance is performed directly from main at devilndove.com; listing writes/publication stay locked.
+// Release 467 Build 354 — Etsy main-site OAuth acceptance status. GET-only, safe blocker reporting.
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { encryptionKeyConfigured, encryptionAuthoritySource, etsyDevelopmentAuthorizationOpen } from '../_lib/oauthSecurity.js';
 import { getOAuthContract, providerConfiguration } from '../_lib/oauthProviders.js';
 
-const json=(data,status=200)=>jsonResponse({release:467,build:352,...data},status,{'Cache-Control':'no-store'});
+const json=(data,status=200)=>jsonResponse({release:467,build:354,...data},status,{'Cache-Control':'no-store'});
 const text=(v)=>String(v==null?'':v).trim();
 export async function onRequestGet({request,env}){
   const admin=await getAdminUserFromRequest(request,env);
@@ -23,18 +24,21 @@ export async function onRequestGet({request,env}){
   const encryptionReady=encryptionKeyConfigured(env,'etsy');
   const encryptionSource=encryptionAuthoritySource(env,'etsy');
   const authorizationOpen=etsyDevelopmentAuthorizationOpen(env,request.url);
+  let redirectMainReady=false;
+  try{const u=new URL(callback);redirectMainReady=u.protocol==='https:'&&u.hostname.toLowerCase()==='devilndove.com'&&u.pathname==='/api/social/oauth/etsy/callback';}catch{}
   const connected=Boolean(conn&&conn.connection_status==='connected'&&shop&&shop.acceptance_status==='connected_verified');
   const connect_blockers=[];
-  if(!apiKeyReady)connect_blockers.push('ETSY_API_KEYSTRING is not configured in the Development environment.');
-  if(!sharedSecretReady)connect_blockers.push('ETSY_SHARED_SECRET is not configured in the Development environment.');
-  if(!redirectReady)connect_blockers.push('ETSY_REDIRECT_URI is not configured in the Development environment.');
+  if(!apiKeyReady)connect_blockers.push('ETSY_API_KEYSTRING is not configured for the main Production environment.');
+  if(!sharedSecretReady)connect_blockers.push('ETSY_SHARED_SECRET is not configured for the main Production environment.');
+  if(!redirectReady)connect_blockers.push('ETSY_REDIRECT_URI is not configured for the main Production environment.');
+  else if(!redirectMainReady)connect_blockers.push('ETSY_REDIRECT_URI must be exactly https://devilndove.com/api/social/oauth/etsy/callback for main-site OAuth acceptance.');
   if(!encryptionReady)connect_blockers.push('OAuth encryption authority is not configured.');
-  if(!authorizationOpen)connect_blockers.push('Open this Etsy connection from the Devil n Dove Development host (dev.devilndove-site.pages.dev). Production authorization stays closed.');
+  if(!authorizationOpen)connect_blockers.push('Open this Etsy connection from https://devilndove.com/admin/it-integrations/. Main is the retained operator test surface.');
   if(!cfg.configured&&connect_blockers.length===0)connect_blockers.push('Etsy provider configuration is incomplete.');
-  const connectAvailable=Boolean(cfg.configured&&encryptionReady&&authorizationOpen);
+  const connectAvailable=Boolean(cfg.configured&&redirectMainReady&&encryptionReady&&authorizationOpen);
   return json({
-    ok:true,authority:'etsy-development-oauth-acceptance',development_only:true,host,
-    configuration:{api_keystring_present:apiKeyReady,shared_secret_present:sharedSecretReady,redirect_uri_present:redirectReady,redirect_uri:callback||null,encryption_key_configured:encryptionReady,encryption_authority_source:encryptionSource},
+    ok:true,authority:'etsy-main-site-oauth-acceptance',development_only:false,main_site_operator_acceptance:true,host,
+    configuration:{api_keystring_present:apiKeyReady,shared_secret_present:sharedSecretReady,redirect_uri_present:redirectReady,redirect_uri:callback||null,redirect_main_ready:redirectMainReady,encryption_key_configured:encryptionReady,encryption_authority_source:encryptionSource},
     connect_authorization_available:connectAvailable,
     connect_blockers,
     connection:{status:conn?.connection_status||'not_connected',connected,scopes,access_expires_at:conn?.access_expires_at||null,refresh_expires_at:conn?.refresh_expires_at||null,diagnostic_code:conn?.diagnostic_code||null,updated_at:conn?.updated_at||null},
@@ -44,6 +48,6 @@ export async function onRequestGet({request,env}){
       ? 'Connection verified. Keep listing writes closed until the separate reviewed draft-listing acceptance step.'
       : connectAvailable
         ? 'Click Connect Etsy and approve the Devil n Dove Seller App in Etsy.'
-        : (connect_blockers[0]||'Complete the Development OAuth prerequisites and refresh.')
+        : (connect_blockers[0]||'Complete the main-site OAuth prerequisites and refresh.')
   });
 }

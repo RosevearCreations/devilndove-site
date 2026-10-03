@@ -2,7 +2,7 @@
   "release": 467,
   "build": 353,
   "title": "Maker Story Advancement & Publication Readiness Continuity VI",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "MAKER_STORY_ADVANCEMENT_PUBLICATION_READINESS_CONTINUITY_VI",
   "authority": "release467-build353-maker-story-advancement-publication-readiness-continuity-vi",
   "predecessor": {
@@ -150,12 +150,12 @@
     "next_build_title": "Content Adoption & Discovery Outcomes Renewal IX"
   },
   "measurement": {
-    "source_sha": "94796ea01aeace7e2ddffba6d36f3f684c038259",
-    "source_tree_sha": "17275acd5a4ee8c87c35c4238766b1b462778844",
-    "workflow_run": 37079831063,
-    "artifact_id": 11257484534,
-    "artifact_name": "build353-maker-story-advancement-readiness-94796ea01aeace7e2ddffba6d36f3f684c038259",
-    "artifact_digest": "sha256:a56fdfe41005e1b7b929559cf69948f3114a365092967be2638506a1cac7bd6c",
+    "source_sha": "2076cc66d5ae860de62bf9775820e5dc228e491c",
+    "source_tree_sha": "56cc33ace347ddfb1ca779c805711dc19cc7eabb",
+    "workflow_run": 37079968173,
+    "artifact_id": 11258595069,
+    "artifact_name": "build353-maker-story-advancement-readiness-2076cc66d5ae860de62bf9775820e5dc228e491c",
+    "artifact_digest": "sha256:5f4d5cf05d2d03305540079ffda14c6ceb72acbaa44ba5244772d0b7386d24d4",
     "statement_count": 6,
     "rows_read_by_statement": [
       456,
@@ -204,5 +204,35 @@
     "provider_execution": false,
     "production_d1_contact": false
   },
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION"
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD353_GREEN",
+  "final_closure": {
+    "dev_sha": "2076cc66d5ae860de62bf9775820e5dc228e491c",
+    "tree_sha": "56cc33ace347ddfb1ca779c805711dc19cc7eabb",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD353_GREEN",
+    "proofs": {
+      "system_gate_run": 37079968214,
+      "current_application_quality_run": 37079968169,
+      "it_admin_runtime_proof_run": 37079968182,
+      "branch_hygiene_run": 37079968191,
+      "d1_ci_fanout_guard_run": 37079968188,
+      "build_specific_proof_run": 37079968173
+    },
+    "artifact_id": 11258595069,
+    "artifact_name": "build353-maker-story-advancement-readiness-2076cc66d5ae860de62bf9775820e5dc228e491c",
+    "artifact_digest": "sha256:5f4d5cf05d2d03305540079ffda14c6ceb72acbaa44ba5244772d0b7386d24d4",
+    "ingested_by_build": 354,
+    "recorded_by": "Build 354 predecessor ingestion; not self-recorded by Build 353"
+  },
+  "production_checkpoint": {
+    "main_sha": "8139d25fa79937e1b0acb141f88186878fe0e964",
+    "tree_sha": "56cc33ace347ddfb1ca779c805711dc19cc7eabb",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37080111186,
+    "production_live_resource_integrity_run": 37080182496,
+    "remote_d1_queries": 0,
+    "deployment_url": "https://bfdb8d08.devilndove-site.pages.dev",
+    "deployment_id": "bfdb8d08-6c87-45d3-9102-13444b0963db"
+  }
 }

@@ -1,3 +1,15 @@
+# CURRENT BUILD — Release 467 Build 354
+
+**Content Adoption & Discovery Outcomes Renewal IX**
+
+Build 353 is exact-tree Development/Production GREEN. Build 354 repeats comparable adoption/discovery measurement and retains the operator decision that manual interactive testing is performed directly on main at https://devilndove.com/. The Preview URL remains an automated proof surface, not the normal manual test surface.
+
+Etsy OAuth connection acceptance is main-site authoritative at https://devilndove.com/admin/it-integrations/ while listing writes/publication remain locked.
+
+**Verified Build 353:** Development `2076cc66d5ae860de62bf9775820e5dc228e491c`, Production `8139d25fa79937e1b0acb141f88186878fe0e964`, shared tree `56cc33ace347ddfb1ca779c805711dc19cc7eabb`.
+
+**Next after Build 354 Production GREEN:** Build 355 — Evidence Gap Execution Workbench & Input Completion Continuity V.
+
 # CURRENT BUILD — Release 467 Build 353
 
 Maker Story Advancement & Publication Readiness Continuity VI
