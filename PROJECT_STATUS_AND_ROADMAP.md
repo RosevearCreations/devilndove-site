@@ -1,3 +1,15 @@
+# CURRENT BUILD — Release 467 Build 356
+
+**35th Promo Factual Evidence Completion Continuity VI**
+
+Build 355 is exact-tree Development/Production GREEN. Build 356 re-measures the 35th Promo strictly from real execution/process, result and lesson evidence plus substantive Maker Story facts. Etsy's temporary access restriction is treated as provider-side and is not bypassed.
+
+A complete Production variable and binding checklist is maintained in `docs/operations/DEVILNDOVE_PRODUCTION_VARIABLES_REFERENCE.md`.
+
+**Verified Build 355:** Development `31599bca8ead283f46a18bedbc19640c85f66faa`, Production `1ee3dc44c7f51da27f5cb9e61960896db839df06`, shared tree `3be26b7b2497b1420c630c5ca891eda0a4aea0be`.
+
+**Next after Build 356 Production GREEN:** Build 357 — Grey Hair Source Review & Story-Plan Completion Continuity VI.
+
 # CURRENT BUILD — Release 467 Build 355
 
 **Evidence Gap Execution Workbench & Input Completion Continuity V**

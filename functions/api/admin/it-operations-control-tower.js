@@ -1,3 +1,5 @@
+/* BUILD356_CURRENT_SUCCESSOR: Release 467 Build 356 — 35th Promo Factual Evidence Completion Continuity VI; verified predecessor Build 355. */
+/* BUILD356_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 355 dev 31599bca8ead283f46a18bedbc19640c85f66faa; tree 3be26b7b2497b1420c630c5ca891eda0a4aea0be; System 37086186221; Quality 37086186207; IT 37086186220; Hygiene 37086186214; D1 Fan-Out 37086186242; Build 355 37086186342; Production 1ee3dc44c7f51da27f5cb9e61960896db839df06; Pages 37086313867; Live 37086376436. */
 /* BUILD355_CURRENT_SUCCESSOR: Release 467 Build 355 — Evidence Gap Execution Workbench & Input Completion Continuity V; verified predecessor Build 354. */
 /* BUILD355_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 354 dev eac5ebfca9b04ed8e8cbed937053398bb0dec13a; tree 95b6c61cbfd0808a84663d557143bb53bed81f1d; System 37083343259; Quality 37083343033; IT 37083343161; Hygiene 37083343103; D1 Fan-Out 37083343100; Build 354 37083343116; Production e925852b63a4258d91c19ad4c6256f16501bac3a; Pages 37083483081; Live 37083542051. */
 /* BUILD354_CURRENT_SUCCESSOR: Release 467 Build 354 — Content Adoption & Discovery Outcomes Renewal IX; verified predecessor Build 353. */
@@ -39,14 +41,14 @@ import { onRequestGet as getReadinessControlTower } from './it-control-tower.js'
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=355;
-const TITLE='Evidence Gap Execution Workbench & Input Completion Continuity V';
-const AUTHORITY='release467-build354-content-adoption-discovery-outcomes-renewal-ix';
+const BUILD=356;
+const TITLE='35th Promo Factual Evidence Completion Continuity VI';
+const AUTHORITY='release467-build355-evidence-gap-execution-workbench-input-completion-continuity-v';
 const EVIDENCE_ID='r467-b351-closure-37073559299-37073740571';
 
-const VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:354,title:'Content Adoption & Discovery Outcomes Renewal IX',state:'DEVELOPMENT_GREEN',dev_sha:'eac5ebfca9b04ed8e8cbed937053398bb0dec13a',tree_sha:'95b6c61cbfd0808a84663d557143bb53bed81f1d',system_gate_run:37083343259,current_application_quality_run:37083343033,it_admin_runtime_proof_run:37083343161,branch_hygiene_run:37083343103,proof_state:'EXACT_BRANCH_HEAD_BUILD354_GREEN'});
-const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:354,title:'Content Adoption & Discovery Outcomes Renewal IX',state:'DEVELOPMENT_GREEN',dev_sha:'eac5ebfca9b04ed8e8cbed937053398bb0dec13a',tree_sha:'95b6c61cbfd0808a84663d557143bb53bed81f1d',system_gate_run:37083343259,current_application_quality_run:37083343033,it_admin_runtime_proof_run:37083343161,branch_hygiene_run:37083343103,proof_state:'EXACT_BRANCH_HEAD_BUILD354_GREEN'});
-const PRODUCTION=Object.freeze({release:467,build:354,title:'Content Adoption & Discovery Outcomes Renewal IX',state:'PRODUCTION_GREEN',main_sha:'e925852b63a4258d91c19ad4c6256f16501bac3a',tree_sha:'95b6c61cbfd0808a84663d557143bb53bed81f1d',production_pages_deploy_run:37083483081,production_live_resource_integrity_run:37083542051,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:37083343116,remote_d1_queries:0});
+const VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:355,title:'Evidence Gap Execution Workbench & Input Completion Continuity V',state:'DEVELOPMENT_GREEN',dev_sha:'31599bca8ead283f46a18bedbc19640c85f66faa',tree_sha:'3be26b7b2497b1420c630c5ca891eda0a4aea0be',system_gate_run:37086186221,current_application_quality_run:37086186207,it_admin_runtime_proof_run:37086186220,branch_hygiene_run:37086186214,proof_state:'EXACT_BRANCH_HEAD_BUILD355_GREEN'});
+const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:355,title:'Evidence Gap Execution Workbench & Input Completion Continuity V',state:'DEVELOPMENT_GREEN',dev_sha:'31599bca8ead283f46a18bedbc19640c85f66faa',tree_sha:'3be26b7b2497b1420c630c5ca891eda0a4aea0be',system_gate_run:37086186221,current_application_quality_run:37086186207,it_admin_runtime_proof_run:37086186220,branch_hygiene_run:37086186214,proof_state:'EXACT_BRANCH_HEAD_BUILD355_GREEN'});
+const PRODUCTION=Object.freeze({release:467,build:355,title:'Evidence Gap Execution Workbench & Input Completion Continuity V',state:'PRODUCTION_GREEN',main_sha:'1ee3dc44c7f51da27f5cb9e61960896db839df06',tree_sha:'3be26b7b2497b1420c630c5ca891eda0a4aea0be',production_pages_deploy_run:37086313867,production_live_resource_integrity_run:37086376436,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:37086186342,remote_d1_queries:0});
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true,workflow:'.github/workflows/production-live-resource-integrity-proof.yml'
 });

@@ -1,3 +1,4 @@
+// BUILD356_CURRENT_API_IDENTITY: Release 467 Build 356 — 35th Promo Factual Evidence Completion Continuity VI; GET-only factual readiness over existing source authority.
 // BUILD350_CURRENT_API_IDENTITY: Release 467 Build 350 — 35th Promo Factual Evidence Completion Continuity V; GET-only factual readiness over the shared closure authority.
 // HISTORICAL_BUILD338_API_IDENTITY: const BUILD=344; title='35th Promo Factual Evidence Completion Continuity III'; retained for regression provenance.
 // HISTORICAL_BUILD332_API_IDENTITY: const BUILD=332; retained for exact historical regression provenance only.

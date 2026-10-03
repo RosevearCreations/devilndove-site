@@ -8,6 +8,7 @@ Exact Build 354 measurement confirms the same unresolved real-input gaps versus 
 Re-measure the real-input owner queue without fabricating completion.
 
 ## Build 356 — 35th Promo Factual Evidence Completion Continuity VI
+Re-measure the 35th Promo against real execution, result and lesson evidence plus substantive Maker Story facts. Etsy provider-side temporary restriction is treated as external and is not bypassed.
 Check real execution, result and lesson evidence; keep review/publication explicit.
 
 ## Build 357 — Grey Hair Source Review & Story-Plan Completion Continuity VI
