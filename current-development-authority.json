@@ -252,7 +252,7 @@
   "next_build": 356,
   "next_build_state": "QUEUED_AFTER_BUILD355_PRODUCTION_GREEN",
   "next_build_title": "35th Promo Factual Evidence Completion Continuity VI",
-  "promotion_state": "BUILD355_CANDIDATE_MEASURED_FINAL_EXACT_HEAD_REPROOF_PENDING",
+  "promotion_state": "BUILD355_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "BUILD356_DEFINED_BY_BUILD355_OBSERVED_EVIDENCE",
   "measured_closure": {
     "source_build": 232,
