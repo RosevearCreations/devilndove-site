@@ -119,13 +119,53 @@
       "state": "PRODUCTION_GREEN"
     }
   },
-  "measurement_state": "EXACT_DEVELOPMENT_MEASUREMENT_PENDING",
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_355_360.md",
   "next_build": 357,
   "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity VI",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "measurement_lane_state": "MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
   "measurement_lane_owner": "release467-build356-35th-promo-factual-evidence-completion-continuity-vi.yml",
-  "exact_head_reproof_state": "PENDING_EXACT_HEAD_REPROOF",
-  "decision": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT"
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "decision": {
+    "classification": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW",
+    "rationale": "Exact Development measurement still shows zero real execution/process, result, or lesson events. Existing actual_result and lesson_learned remain absence markers, so factual readiness is incomplete; outcome stays unknown and the story remains needs_review / not a public candidate.",
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "automatic_publication": false,
+    "next_build": 357,
+    "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity VI"
+  },
+  "measurement": {
+    "source_sha": "438b0900716546c2064a26552ba4055cfe0ee222",
+    "source_tree_sha": "b44b76b56a6179ec65e449a5ac888cbb992b5ebc",
+    "workflow_run": 37088504142,
+    "artifact_id": 11261228813,
+    "artifact_name": "build356-35th-promo-factual-evidence-continuity-438b0900716546c2064a26552ba4055cfe0ee222",
+    "artifact_digest": "sha256:a8fe2a71edf2a7c232e1c0d7a15646e776638f787739777d51b04d372cfbce6e",
+    "aggregate_rows_read": 45,
+    "rows_read_by_statement": [
+      33,
+      2,
+      2,
+      8
+    ],
+    "rows_read_ceiling": 20000,
+    "closure_state": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
+    "execution_events": 0,
+    "result_events": 0,
+    "lesson_events": 0,
+    "selected_execution_evidence": 0,
+    "story_review_status": "needs_review",
+    "public_story_candidate": 0,
+    "outcome_status": "unknown",
+    "ready_for_explicit_human_review": false,
+    "approved_locked_deliverables": 2,
+    "publications": 0,
+    "social_rows": 0,
+    "production_d1_contact": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false
+  }
 }

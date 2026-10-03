@@ -7,3 +7,7 @@ The Etsy screenshot reached Etsy itself and showed its temporary unusual-activit
 Build 356 also publishes the current Production variable/binding reference at `docs/operations/DEVILNDOVE_PRODUCTION_VARIABLES_REFERENCE.md`. Secret values remain intentionally unrecoverable from Cloudflare.
 
 Next: Build 357 — Grey Hair Source Review & Story-Plan Completion Continuity VI.
+
+## Exact Build 356 measurement
+
+The exact Development measurement remains **REAL_OUTCOME_EVIDENCE_STILL_REQUIRED**. It read **45 D1 rows** and found **0 execution/process events, 0 result events, and 0 lesson events**. The Maker Story remains `needs_review`, outcome remains `unknown`, and no automatic review/publication is authorized.
