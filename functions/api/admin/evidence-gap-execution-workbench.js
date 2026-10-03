@@ -1,3 +1,4 @@
+// HISTORICAL_BUILD349_API_COMPAT: const BUILD=349; TITLE='Evidence Gap Execution Workbench & Input Completion Continuity IV';
 // BUILD355_CURRENT_AUTHORITY: Release 467 Build 355 — Evidence Gap Execution Workbench & Input Completion Continuity V; GET-only derived source authority.
 // HISTORICAL_BUILD343_API_COMPAT: const BUILD=343; TITLE='Evidence Gap Execution Workbench & Input Completion Continuity III';
 // HISTORICAL_BUILD337_API_COMPAT: const BUILD=337; TITLE='Evidence Gap Execution Workbench & Input Completion Continuity II';
