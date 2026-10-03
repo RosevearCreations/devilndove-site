@@ -148,13 +148,14 @@ export function safeReturnPath(value, fallback = '/admin/it-integrations/') {
 }
 
 
-/* Release 467 Build 350 — Etsy marketplace OAuth acceptance.
-   The authenticated admin Connect Etsy action is the deliberate operator gate.
-   This is Development-host only and does not authorize listing/publication writes. */
+/* Release 467 Build 354 — Etsy marketplace OAuth operator acceptance.
+   Operator policy: interactive acceptance/testing is performed directly on main at devilndove.com.
+   The legacy function name is retained for import compatibility. This gate authorizes OAuth connection
+   only; Etsy listing writes/publication remain separately locked. */
 export function etsyDevelopmentAuthorizationOpen(env, requestUrl) {
   let host='';
   try { host=new URL(String(requestUrl||'')).hostname.toLowerCase(); } catch { return false; }
-  return host==='dev.devilndove-site.pages.dev'||/^[0-9a-f]{8}\.devilndove-site\.pages\.dev$/i.test(host)||host==='localhost'||host==='127.0.0.1';
+  return host==='devilndove.com'||host==='www.devilndove.com';
 }
 
 export function oauthProviderAuthorizationOpen(env, requestUrl, providerKey) {
