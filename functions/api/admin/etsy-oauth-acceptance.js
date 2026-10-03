@@ -1,3 +1,4 @@
+// Historical Build 352 compatibility token retained: OAUTH_PROVIDER_AUTHORIZATION_MODE=development-explicit. Build 354 main-site Etsy acceptance supersedes the old manual-preview operating practice.
 // Build 354 operator policy: Etsy OAuth connection acceptance is performed directly from main at devilndove.com; listing writes/publication stay locked.
 // Release 467 Build 354 — Etsy main-site OAuth acceptance status. GET-only, safe blocker reporting.
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
