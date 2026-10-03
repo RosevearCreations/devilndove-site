@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+from pathlib import Path
+import json,re,sys
+R=Path(__file__).resolve().parents[1];F=[]
+def t(p):return (R/p).read_text(encoding='utf-8',errors='replace')
+def j(p):return json.loads(t(p))
+def q(ok,msg):
+    if not ok:F.append(msg)
+a=j('release467-build355-evidence-gap-execution-workbench-input-completion-continuity-v.json')
+prev=j('release467-build354-content-adoption-discovery-outcomes-renewal-ix.json')
+p=j('current-development-authority.json')
+sql=t('scripts/release467_build355_execution_workbench.sql')
+verify=t('scripts/release467_build355_verify_execution_workbench.mjs')
+api=t('functions/api/admin/evidence-gap-execution-workbench.js')
+page=t('admin/evidence-gap-execution-workbench/index.html')
+ui=t('public/js/admin-evidence-gap-execution-workbench-v337.js')
+setup=t('functions/api/admin/it-provider-setup-guide.js')
+etsy=t('functions/api/admin/etsy-oauth-acceptance.js')
+etsyui=t('public/js/admin-etsy-oauth-acceptance.js')
+envdiff=t('scripts/release467_build355_cloudflare_env_diff.py')
+wf=t('.github/workflows/release467-build355-evidence-gap-execution-workbench-input-completion-continuity-v.yml')
+road=t('docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_355_360.md')
+q(a.get('build')==355 and a.get('title')=='Evidence Gap Execution Workbench & Input Completion Continuity V','Build 355 identity mismatch')
+q(prev.get('state')=='PRODUCTION_GREEN','Build 354 Production closure not successor-ingested')
+fc=prev.get('final_closure') or {};pc=prev.get('production_checkpoint') or {}
+q(fc.get('dev_sha')=='eac5ebfca9b04ed8e8cbed937053398bb0dec13a' and fc.get('tree_sha')=='95b6c61cbfd0808a84663d557143bb53bed81f1d','Build 354 exact Development closure missing')
+q(pc.get('main_sha')=='e925852b63a4258d91c19ad4c6256f16501bac3a' and pc.get('tree_sha')=='95b6c61cbfd0808a84663d557143bb53bed81f1d','Build 354 Production checkpoint missing')
+c=a.get('contract') or {};s=a.get('safety') or {}
+q(c.get('workbench_mode')=='READ_ONLY_DERIVED_FROM_EXISTING_SOURCE_AUTHORITIES','Build 355 workbench mode mismatch')
+q(c.get('refreshes_existing_build349_workbench') is True and c.get('source_outcomes_build')==354,'Build 355 predecessor workbench contract mismatch')
+for k in ('shows_required_inputs','shows_observed_completion','shows_completion_signal','shows_next_safe_human_action','direct_source_workspace_links','source_workspaces_remain_authoritative','explicit_search_console_report_date_required','cloudflare_preview_production_config_diff','etsy_main_site_redirect_diagnostic'):q(c.get(k) is True,'Build 355 contract missing '+k)
+for k in ('shadow_task_table','user_assignment_persistence','acknowledgement_persistence','resolution_persistence','completion_persistence'):q(c.get(k) is False,'Build 355 persistence boundary drift '+k)
+q(all(v is False for v in s.values()),'Build 355 safety authority drift')
+upper=' '+re.sub(r'--.*','',sql).upper()+' '
+for forbidden in (' INSERT ',' UPDATE ',' DELETE ',' CREATE ',' ALTER ',' DROP ',' REPLACE ',' VACUUM ',' REINDEX '):q(forbidden not in upper,'Build 355 measurement must remain read-only: '+forbidden.strip())
+for token in ('creative_process_record_story_execution_evidence','source_evidence_needs_review','search_console_import_batches',"report_date IS NOT NULL AND date(report_date)>=date('now','-30 days')",'pragma_foreign_key_check'):q(token in sql,'Build 355 SQL missing '+token)
+for token in ('required_inputs','observed_completion','completion_signal','next_safe_human_action','35TH_PROMO_REAL_OUTCOME_EVIDENCE','GREY_HAIR_SOURCE_EVIDENCE_REVIEW','REAL_SEARCH_CONSOLE_EXPORT','UNPROFILED_MAKER_STORY_EVIDENCE','completion_persistence:false','production_d1_contact:false'):q(token in verify,'Build 355 verifier missing '+token)
+for token in ("const BUILD=355","TITLE='Evidence Gap Execution Workbench & Input Completion Continuity V'","role:'read_only_evidence_gap_execution_workbench'",'onRequestGet'):q(token in api,'Build 355 API missing '+token)
+q('onRequestPost' not in api,'Build 355 workbench API must remain GET-only')
+q('Release 467 • Build 355' in page and 'Input Completion Continuity V' in page and 'Build 355' in ui,'Build 355 workbench UI not current')
+for token in ("environment=text(env?.DND_ENVIRONMENT).toLowerCase()==='production'?'production':'development'","pagesEnvironment=environment==='production'?'production':'preview'","api/social/oauth/etsy/callback"):q(token in setup,'Build 355 active-environment setup guide missing '+token)
+q("expected_redirect_uri:'https://devilndove.com/api/social/oauth/etsy/callback'" in etsy,'Build 355 Etsy expected redirect diagnostic missing')
+q('Configured redirect:' in etsyui and 'Expected main redirect:' in etsyui,'Build 355 Etsy redirect UI diagnostic missing')
+for token in ('preview_only','production_only','production_missing_etsy_required','production_missing_oauth_support','secret_values_emitted','oauth_provider_authorization_mode_required_for_etsy_main_connection'):q(token in envdiff,'Build 355 Cloudflare env diff missing '+token)
+for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','CLOUDFLARE_CONFIG_DIFF','SECRET VALUES: ZERO','PRODUCTION D1 CONTACT: ZERO'):q(token in wf,'Build 355 workflow boundary missing '+token)
+q('Build 355 — Evidence Gap Execution Workbench & Input Completion Continuity V' in road and 'Build 356 — 35th Promo Factual Evidence Completion Continuity VI' in road,'Build 355/356 roadmap continuity missing')
+q(int(p.get('build') or 0)>=355,'Current pointer must retain Build 355 or successor')
+if int(p.get('build') or 0)==355:q(p.get('state')=='DEVELOPMENT_GREEN' and int(p.get('next_build') or 0)==356,'Build 355 current authority/successor mismatch')
+print('RELEASE 467 BUILD 355 EVIDENCE GAP EXECUTION WORKBENCH & INPUT COMPLETION CONTINUITY V')
+if F:
+ print('FAIL');[print('-',x) for x in F];sys.exit(1)
+print('PASS')
+print('Workbench remains read-only; source workspaces remain authoritative; Cloudflare config diff emits no secret values')

@@ -1,3 +1,24 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 355 candidate over Build 354 Production GREEN
+
+**Current verified successor: Release 467 Build 355 — Evidence Gap Execution Workbench & Input Completion Continuity V**
+
+Build 354 is the last fully verified exact Development/Production closure ingested by Build 355.
+
+- Development SHA: `eac5ebfca9b04ed8e8cbed937053398bb0dec13a`
+- Shared tree: `95b6c61cbfd0808a84663d557143bb53bed81f1d`
+- System Gate: `37083343259`
+- Current Application Quality Proof: `37083343033`
+- I.T. Admin Runtime Proof: `37083343161`
+- Repository Branch Hygiene: `37083343103`
+- D1 CI Fan-Out Guard: `37083343100`
+- Build 354 proof: `37083343116`
+- Production main: `e925852b63a4258d91c19ad4c6256f16501bac3a`
+- Production Pages Deploy: `37083483081`
+- Production Live Resource Integrity: `37083542051`
+- Operator manual test surface: `https://devilndove.com/`.
+- Etsy callback expected on main: `https://devilndove.com/api/social/oauth/etsy/callback`.
+- Build 355 adds a safe Preview-vs-Production Cloudflare reference-name comparison; secret values are never emitted.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 354 candidate over Build 353 Production GREEN
 
 **Current verified successor: Release 467 Build 354 — Content Adoption & Discovery Outcomes Renewal IX**

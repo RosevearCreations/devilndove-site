@@ -1,33 +1,33 @@
 {
   "release": 467,
-  "build": 354,
-  "title": "Content Adoption & Discovery Outcomes Renewal IX",
+  "build": 355,
+  "title": "Evidence Gap Execution Workbench & Input Completion Continuity V",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 353,
-      "title": "Maker Story Advancement & Publication Readiness Continuity VI",
-      "authority": "release467-build353-maker-story-advancement-publication-readiness-continuity-vi.json",
-      "dev_sha": "2076cc66d5ae860de62bf9775820e5dc228e491c",
-      "tree_sha": "56cc33ace347ddfb1ca779c805711dc19cc7eabb",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD353_GREEN",
+      "build": 354,
+      "title": "Content Adoption & Discovery Outcomes Renewal IX",
+      "authority": "release467-build354-content-adoption-discovery-outcomes-renewal-ix.json",
+      "dev_sha": "eac5ebfca9b04ed8e8cbed937053398bb0dec13a",
+      "tree_sha": "95b6c61cbfd0808a84663d557143bb53bed81f1d",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD354_GREEN",
       "proofs": {
-        "system_gate_run": 37079968214,
-        "current_application_quality_run": 37079968169,
-        "it_admin_runtime_proof_run": 37079968182,
-        "branch_hygiene_run": 37079968191,
-        "d1_ci_fanout_guard_run": 37079968188,
-        "build_specific_proof_run": 37079968173
+        "system_gate_run": 37083343259,
+        "current_application_quality_run": 37083343033,
+        "it_admin_runtime_proof_run": 37083343161,
+        "branch_hygiene_run": 37083343103,
+        "d1_ci_fanout_guard_run": 37083343100,
+        "build_specific_proof_run": 37083343116
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 354,
-      "title": "Content Adoption & Discovery Outcomes Renewal IX",
-      "authority": "release467-build354-content-adoption-discovery-outcomes-renewal-ix.json",
+      "build": 355,
+      "title": "Evidence Gap Execution Workbench & Input Completion Continuity V",
+      "authority": "release467-build355-evidence-gap-execution-workbench-input-completion-continuity-v.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -38,21 +38,22 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 353,
-    "title": "Maker Story Advancement & Publication Readiness Continuity VI",
-    "authority": "release467-build353-maker-story-advancement-publication-readiness-continuity-vi.json",
-    "main_sha": "8139d25fa79937e1b0acb141f88186878fe0e964",
-    "tree_sha": "56cc33ace347ddfb1ca779c805711dc19cc7eabb",
+    "build": 354,
+    "title": "Content Adoption & Discovery Outcomes Renewal IX",
+    "authority": "release467-build354-content-adoption-discovery-outcomes-renewal-ix.json",
+    "main_sha": "e925852b63a4258d91c19ad4c6256f16501bac3a",
+    "tree_sha": "95b6c61cbfd0808a84663d557143bb53bed81f1d",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 37080111186,
-    "production_live_resource_integrity_run": 37080182496,
+    "production_pages_deploy_run": 37083483081,
+    "production_live_resource_integrity_run": 37083542051,
     "remote_d1_queries": 0,
-    "deployment_url": "https://bfdb8d08.devilndove-site.pages.dev",
-    "deployment_id": "bfdb8d08-6c87-45d3-9102-13444b0963db",
+    "deployment_url": "https://243c055a.devilndove-site.pages.dev",
+    "deployment_id": "243c055a-8815-43e7-a7ee-c3df4d518c75",
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build355-evidence-gap-execution-workbench-input-completion-continuity-v.json",
     "release467-build354-content-adoption-discovery-outcomes-renewal-ix.json",
     "release467-build353-maker-story-advancement-publication-readiness-continuity-vi.json",
     "release467-build352-search-console-real-export-fresh-discovery-intake-vii.json",
@@ -248,11 +249,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_349_354.md",
-  "next_build": 355,
-  "next_build_state": "QUEUED_AFTER_BUILD354_PRODUCTION_GREEN",
-  "next_build_title": "Evidence Gap Execution Workbench & Input Completion Continuity V",
-  "promotion_state": "BUILD354_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD355_DEFINED_BY_BUILD354_OBSERVED_EVIDENCE",
+  "next_build": 356,
+  "next_build_state": "QUEUED_AFTER_BUILD355_PRODUCTION_GREEN",
+  "next_build_title": "35th Promo Factual Evidence Completion Continuity VI",
+  "promotion_state": "BUILD355_CANDIDATE_MEASURED_FINAL_EXACT_HEAD_REPROOF_PENDING",
+  "successor_scope_state": "BUILD356_DEFINED_BY_BUILD355_OBSERVED_EVIDENCE",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -283,14 +284,15 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "2076cc66d5ae860de62bf9775820e5dc228e491c",
-  "accepted_dev_tree_sha": "56cc33ace347ddfb1ca779c805711dc19cc7eabb",
+  "accepted_dev_sha": "eac5ebfca9b04ed8e8cbed937053398bb0dec13a",
+  "accepted_dev_tree_sha": "95b6c61cbfd0808a84663d557143bb53bed81f1d",
   "acceptance": {
-    "system_gate_run": 37079968214,
-    "current_application_quality_run": 37079968169,
-    "it_admin_runtime_proof_run": 37079968182,
-    "branch_hygiene_run": 37079968191,
-    "build_specific_proof_run": 37079968173
+    "system_gate_run": 37083343259,
+    "current_application_quality_run": 37083343033,
+    "it_admin_runtime_proof_run": 37083343161,
+    "branch_hygiene_run": 37083343103,
+    "d1_ci_fanout_guard_run": 37083343100,
+    "build_specific_proof_run": 37083343116
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -4266,7 +4268,7 @@
   },
   "content_adoption_discovery_outcomes_renewal_ix": {
     "source_build": 354,
-    "state": "DEVELOPMENT_GREEN",
+    "state": "PRODUCTION_GREEN",
     "measurement_state": "EXACT_DEVELOPMENT_MEASURED_ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
     "decision": "ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
     "operator_testing_surface": "MAIN_PRODUCTION_DIRECT",
@@ -4371,7 +4373,37 @@
     },
     "roadmap_renewal_state": "BUILDS_355_360_CREATED_FROM_OBSERVED_EVIDENCE",
     "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_355_360.md",
-    "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION"
+    "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD354_GREEN",
+    "final_closure": {
+      "dev_sha": "eac5ebfca9b04ed8e8cbed937053398bb0dec13a",
+      "tree_sha": "95b6c61cbfd0808a84663d557143bb53bed81f1d",
+      "state": "DEVELOPMENT_GREEN",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD354_GREEN",
+      "proofs": {
+        "system_gate_run": 37083343259,
+        "current_application_quality_run": 37083343033,
+        "it_admin_runtime_proof_run": 37083343161,
+        "branch_hygiene_run": 37083343103,
+        "d1_ci_fanout_guard_run": 37083343100,
+        "build_specific_proof_run": 37083343116
+      },
+      "artifact_id": 11258359812,
+      "artifact_name": "build354-content-adoption-discovery-renewal-eac5ebfca9b04ed8e8cbed937053398bb0dec13a",
+      "artifact_digest": "sha256:5ad55abe691011a7bbef0414d85d3b4c3eb890c9835f7c8d1802bef911b799d9",
+      "ingested_by_build": 355,
+      "recorded_by": "Build 355 predecessor ingestion; not self-recorded by Build 354"
+    },
+    "production_checkpoint": {
+      "main_sha": "e925852b63a4258d91c19ad4c6256f16501bac3a",
+      "tree_sha": "95b6c61cbfd0808a84663d557143bb53bed81f1d",
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_verified_development": true,
+      "production_pages_deploy_run": 37083483081,
+      "production_live_resource_integrity_run": 37083542051,
+      "remote_d1_queries": 0,
+      "deployment_url": "https://243c055a.devilndove-site.pages.dev",
+      "deployment_id": "243c055a-8815-43e7-a7ee-c3df4d518c75"
+    }
   },
   "operator_testing_policy": {
     "canonical_manual_test_surface": "https://devilndove.com/",
@@ -4379,5 +4411,111 @@
     "development_automation_and_release_proofs": true,
     "etsy_connection_surface": "https://devilndove.com/admin/it-integrations/",
     "retained_from_operator_decision": true
+  },
+  "evidence_gap_execution_workbench_input_completion_continuity_v": {
+    "source_build": 355,
+    "state": "DEVELOPMENT_GREEN",
+    "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "measurement": {
+      "source_sha": "713838aafb0e1b75e29a513eee4e2cf0b7da47a4",
+      "source_tree_sha": "793b512a58140c43563757055af7b1c6615d8db0",
+      "workflow_run": 37085404701,
+      "artifact_id": 11259968683,
+      "artifact_name": "build355-evidence-gap-execution-workbench-713838aafb0e1b75e29a513eee4e2cf0b7da47a4",
+      "artifact_digest": "sha256:19f1f5027592ecc5bc39b81aba915c353ebd11f7b8999173f53dcc2840a7d639",
+      "aggregate_rows_read": 1659,
+      "rows_read_ceiling": 20000,
+      "rows_read_by_statement": [
+        11,
+        14,
+        961,
+        10,
+        649,
+        14
+      ],
+      "active_workbench_rows": 5,
+      "active_gap_families": 4,
+      "gap_families": [
+        "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+        "REAL_SEARCH_CONSOLE_EXPORT",
+        "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+        "UNPROFILED_MAKER_STORY_EVIDENCE"
+      ],
+      "unprofiled_projects": 3,
+      "decision": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+      "production_d1_contact": false,
+      "d1_mutation": false,
+      "r2_mutation": false,
+      "provider_execution": false
+    },
+    "cloudflare_environment_diff": {
+      "workflow_run": 37085404701,
+      "artifact_id": 11260293400,
+      "artifact_name": "build355-cloudflare-preview-production-config-diff-713838aafb0e1b75e29a513eee4e2cf0b7da47a4",
+      "artifact_digest": "sha256:2f9005212799f9c047a281c7ee14ecbe0fc9e85f89f8749cbff9e6e5ed51896c",
+      "preview_only": [
+        "CLOUDFLARE_API_TOKEN_NEW",
+        "OAUTH_PROVIDER_AUTHORIZATION_MODE",
+        "PAYPAL_CLIENT_ID",
+        "PAYPAL_SECRET",
+        "PAYPAL_WEBHOOK_ID",
+        "STRIPE_PUBLISHABLE_KEY",
+        "STRIPE_WEBHOOK_SECRET"
+      ],
+      "production_only": [
+        "ADMIN_TOKEN",
+        "DD_BOOTSTRAP_TOKEN",
+        "ETSY_API_KEYSTRING",
+        "ETSY_REDIRECT_URI",
+        "ETSY_SHARED_SECRET",
+        "FACEBOOK_PAGE_ACCESS_TOKEN",
+        "FACEBOOK_PAGE_ID",
+        "INSTAGRAM_ACCESS_TOKEN",
+        "INSTAGRAM_USER_ID",
+        "META_APP_ID",
+        "META_APP_SECRET",
+        "META_GRAPH_API_VERSION",
+        "PINTEREST_APP_ID",
+        "PINTEREST_APP_SECRET",
+        "PRIVATE_EVIDENCE_DOWNLOAD_SECRET",
+        "PRODUCT_MEDIA_PUBLIC_BASE_URL",
+        "PUBLIC_SITE_URL",
+        "R2_PUBLIC_BASE_URL",
+        "SESSION_SECRET",
+        "SITE_ORIGIN"
+      ],
+      "production_missing_etsy_required": [],
+      "production_missing_oauth_support": [
+        "OAUTH_PROVIDER_AUTHORIZATION_MODE",
+        "OAUTH_TOKEN_ENCRYPTION_KEY_V1",
+        "SOCIAL_OAUTH_ACCEPTANCE_PROVIDER"
+      ],
+      "etsy": {
+        "expected_main_callback": "https://devilndove.com/api/social/oauth/etsy/callback",
+        "production_redirect_present": true,
+        "production_redirect_safe_value": null,
+        "production_redirect_matches_expected": null,
+        "oauth_provider_authorization_mode_required_for_etsy_main_connection": false,
+        "oauth_token_encryption_key_v1_required_for_etsy_main_connection": false,
+        "etsy_shared_secret_derived_encryption_fallback_supported": true
+      },
+      "secret_values_emitted": false
+    },
+    "decision": {
+      "classification": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+      "rationale": "Exact Development measurement derives five current workbench rows across four factual gap families. Preview-vs-Production Cloudflare comparison also confirms Production has all three Etsy-required references, while three optional/general OAuth-support references are absent.",
+      "active_workbench_rows": 5,
+      "active_gap_families": 4,
+      "source_workspaces_authoritative": true,
+      "automatic_completion_authorized": false,
+      "etsy_required_production_references_present": true,
+      "oauth_provider_authorization_mode_required_for_etsy_main_connection": false,
+      "next_build": 356,
+      "next_build_title": "35th Promo Factual Evidence Completion Continuity VI"
+    },
+    "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+    "next_build": 356,
+    "next_build_title": "35th Promo Factual Evidence Completion Continuity VI",
+    "future_queue_exhausted": false
   }
 }

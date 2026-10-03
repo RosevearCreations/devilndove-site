@@ -1,3 +1,15 @@
+# CURRENT BUILD — Release 467 Build 355
+
+**Evidence Gap Execution Workbench & Input Completion Continuity V**
+
+Build 354 is exact-tree Development/Production GREEN. Build 355 refreshes the read-only evidence-gap workbench and adds a safe Cloudflare Preview-vs-Production configuration comparison so environment drift can be diagnosed without exposing secret values.
+
+Manual testing remains on `https://devilndove.com/`. Etsy main-site OAuth expects `https://devilndove.com/api/social/oauth/etsy/callback`. Listing writes/publication remain locked.
+
+**Verified Build 354:** Development `eac5ebfca9b04ed8e8cbed937053398bb0dec13a`, Production `e925852b63a4258d91c19ad4c6256f16501bac3a`, shared tree `95b6c61cbfd0808a84663d557143bb53bed81f1d`.
+
+**Next after Build 355 Production GREEN:** Build 356 — 35th Promo Factual Evidence Completion Continuity VI.
+
 # CURRENT BUILD — Release 467 Build 354
 
 **Content Adoption & Discovery Outcomes Renewal IX**
