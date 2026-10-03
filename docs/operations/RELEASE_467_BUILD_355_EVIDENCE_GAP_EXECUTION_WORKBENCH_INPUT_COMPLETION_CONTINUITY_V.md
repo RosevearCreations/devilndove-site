@@ -19,3 +19,11 @@ No source evidence is fabricated, no Search Console data is synthesized, no prov
 ## Next
 
 Build 356 — 35th Promo Factual Evidence Completion Continuity VI.
+
+## Exact Build 355 measurement
+
+The exact Development workbench measured **5 open rows across 4 gap families**, read **1,659 D1 rows**, and retained the decision **EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED**. The Cloudflare comparison confirmed that Production contains all three required Etsy references: `ETSY_API_KEYSTRING`, `ETSY_SHARED_SECRET`, and `ETSY_REDIRECT_URI`.
+
+Production does not contain `OAUTH_PROVIDER_AUTHORIZATION_MODE`, `OAUTH_TOKEN_ENCRYPTION_KEY_V1`, or `SOCIAL_OAUTH_ACCEPTANCE_PROVIDER`. None of those three is required for the current Etsy main-site connection path: Etsy authorization is host-gated, and Etsy can use the domain-separated shared-secret encryption fallback when the dedicated OAuth encryption key is absent.
+
+The Cloudflare control plane confirms that `ETSY_REDIRECT_URI` exists in Production, but does not expose its hidden value. A fresh Production deployment is therefore required after an operator changes that Production variable so runtime receives the new value.

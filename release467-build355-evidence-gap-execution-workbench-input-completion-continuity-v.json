@@ -101,13 +101,109 @@
       "state": "PRODUCTION_GREEN"
     }
   },
-  "measurement_state": "EXACT_DEVELOPMENT_MEASUREMENT_PENDING",
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_355_360.md",
   "next_build": 356,
   "next_build_title": "35th Promo Factual Evidence Completion Continuity VI",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "measurement_lane_state": "MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
   "measurement_lane_owner": "release467-build355-evidence-gap-execution-workbench-input-completion-continuity-v.yml",
-  "exact_head_reproof_state": "PENDING_EXACT_HEAD_REPROOF",
-  "decision": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT"
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "decision": {
+    "classification": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "rationale": "Exact Development measurement derives five current workbench rows across four factual gap families. Preview-vs-Production Cloudflare comparison also confirms Production has all three Etsy-required references, while three optional/general OAuth-support references are absent.",
+    "active_workbench_rows": 5,
+    "active_gap_families": 4,
+    "source_workspaces_authoritative": true,
+    "automatic_completion_authorized": false,
+    "etsy_required_production_references_present": true,
+    "oauth_provider_authorization_mode_required_for_etsy_main_connection": false,
+    "next_build": 356,
+    "next_build_title": "35th Promo Factual Evidence Completion Continuity VI"
+  },
+  "measurement": {
+    "source_sha": "713838aafb0e1b75e29a513eee4e2cf0b7da47a4",
+    "source_tree_sha": "793b512a58140c43563757055af7b1c6615d8db0",
+    "workflow_run": 37085404701,
+    "artifact_id": 11259968683,
+    "artifact_name": "build355-evidence-gap-execution-workbench-713838aafb0e1b75e29a513eee4e2cf0b7da47a4",
+    "artifact_digest": "sha256:19f1f5027592ecc5bc39b81aba915c353ebd11f7b8999173f53dcc2840a7d639",
+    "aggregate_rows_read": 1659,
+    "rows_read_ceiling": 20000,
+    "rows_read_by_statement": [
+      11,
+      14,
+      961,
+      10,
+      649,
+      14
+    ],
+    "active_workbench_rows": 5,
+    "active_gap_families": 4,
+    "gap_families": [
+      "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+      "REAL_SEARCH_CONSOLE_EXPORT",
+      "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+      "UNPROFILED_MAKER_STORY_EVIDENCE"
+    ],
+    "unprofiled_projects": 3,
+    "decision": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "production_d1_contact": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false
+  },
+  "cloudflare_environment_diff": {
+    "workflow_run": 37085404701,
+    "artifact_id": 11260293400,
+    "artifact_name": "build355-cloudflare-preview-production-config-diff-713838aafb0e1b75e29a513eee4e2cf0b7da47a4",
+    "artifact_digest": "sha256:2f9005212799f9c047a281c7ee14ecbe0fc9e85f89f8749cbff9e6e5ed51896c",
+    "preview_only": [
+      "CLOUDFLARE_API_TOKEN_NEW",
+      "OAUTH_PROVIDER_AUTHORIZATION_MODE",
+      "PAYPAL_CLIENT_ID",
+      "PAYPAL_SECRET",
+      "PAYPAL_WEBHOOK_ID",
+      "STRIPE_PUBLISHABLE_KEY",
+      "STRIPE_WEBHOOK_SECRET"
+    ],
+    "production_only": [
+      "ADMIN_TOKEN",
+      "DD_BOOTSTRAP_TOKEN",
+      "ETSY_API_KEYSTRING",
+      "ETSY_REDIRECT_URI",
+      "ETSY_SHARED_SECRET",
+      "FACEBOOK_PAGE_ACCESS_TOKEN",
+      "FACEBOOK_PAGE_ID",
+      "INSTAGRAM_ACCESS_TOKEN",
+      "INSTAGRAM_USER_ID",
+      "META_APP_ID",
+      "META_APP_SECRET",
+      "META_GRAPH_API_VERSION",
+      "PINTEREST_APP_ID",
+      "PINTEREST_APP_SECRET",
+      "PRIVATE_EVIDENCE_DOWNLOAD_SECRET",
+      "PRODUCT_MEDIA_PUBLIC_BASE_URL",
+      "PUBLIC_SITE_URL",
+      "R2_PUBLIC_BASE_URL",
+      "SESSION_SECRET",
+      "SITE_ORIGIN"
+    ],
+    "production_missing_etsy_required": [],
+    "production_missing_oauth_support": [
+      "OAUTH_PROVIDER_AUTHORIZATION_MODE",
+      "OAUTH_TOKEN_ENCRYPTION_KEY_V1",
+      "SOCIAL_OAUTH_ACCEPTANCE_PROVIDER"
+    ],
+    "etsy": {
+      "expected_main_callback": "https://devilndove.com/api/social/oauth/etsy/callback",
+      "production_redirect_present": true,
+      "production_redirect_safe_value": null,
+      "production_redirect_matches_expected": null,
+      "oauth_provider_authorization_mode_required_for_etsy_main_connection": false,
+      "oauth_token_encryption_key_v1_required_for_etsy_main_connection": false,
+      "etsy_shared_secret_derived_encryption_fallback_supported": true
+    },
+    "secret_values_emitted": false
+  }
 }
