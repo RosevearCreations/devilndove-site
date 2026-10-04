@@ -91,3 +91,5 @@ export async function onRequestGet(context){
   if(new URL(context.request.url).searchParams.get('format')==='markdown')return new Response(markdownReport(data),{status:200,headers:{'Content-Type':'text/markdown; charset=utf-8','Cache-Control':'no-store'}});
   return jsonResponse(data,200,{'Cache-Control':'no-store'});
 }
+
+// BUILD357_VERIFIED_BASELINE_FOR_BUILD358: verified_dev=9d508a74417c1007891d4877c35140d351d51faf tree=78aeaa4e11119620ebf71f264ec84b7939dd4adc production_main=f4806249d913fb779c734f332bfb05019c6c6f1b production_pages=37215653136 production_live=37215700395.

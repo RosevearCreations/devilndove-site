@@ -570,3 +570,20 @@ The future queue remains open. Next: **Build 280 — Private-Media Reconciliatio
 - Build 278 dedicated Production proof: `36248115177`
 
 The current closure candidate is **Build 279 — Multipart Interruption & Resume Acceptance Drill**. Production remains the exact Build 278 baseline until Build 279 earns fresh exact-SHA Development proof and identical-tree promotion.
+
+## Build 357 verified baseline for Build 358
+
+<!-- BUILD357_VERIFIED_BASELINE_FOR_BUILD358 -->
+- Verified Development SHA: `9d508a74417c1007891d4877c35140d351d51faf`
+- Verified Development tree: `78aeaa4e11119620ebf71f264ec84b7939dd4adc`
+- System Gate: `37215499577`
+- Current Application Quality: `37215499585`
+- I.T. Admin Runtime: `37215499593`
+- Repository Branch Hygiene: `37215499656`
+- D1 CI Fan-Out Guard: `37215499584`
+- Build 357 proof: `37215499609`
+- Production main SHA: `f4806249d913fb779c734f332bfb05019c6c6f1b`
+- Production Pages deploy: `37215653136`
+- Production Live Resource Integrity: `37215700395`
+
+This exact-tree Build 357 checkpoint is the immutable restart baseline consumed by Build 358.

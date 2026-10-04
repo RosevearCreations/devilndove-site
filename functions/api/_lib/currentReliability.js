@@ -84,3 +84,5 @@ export async function loadCurrentReliability(db,env={}){
     safety:{...inherited.safety,mutation_capability:'none',request_time_schema_mutation:false,d1_business_data_mutation:false,r2_mutation:false,binding_mutation:false,server_persistence:false,automatic_business_action:false,accounting_posting:false,period_close:false,inventory_mutation:false,creative_mutation:false,price_mutation:false,provider_execution:false,provider_publication:false,marketplace_publication:false,social_publication:false,backup_restore_execution:false,production_mutation:false,secrets_exposed:false}
   };
 }
+
+// BUILD357_VERIFIED_BASELINE_FOR_BUILD358: verified_dev=9d508a74417c1007891d4877c35140d351d51faf tree=78aeaa4e11119620ebf71f264ec84b7939dd4adc production_main=f4806249d913fb779c734f332bfb05019c6c6f1b production_pages=37215653136 production_live=37215700395.
