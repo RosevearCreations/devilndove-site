@@ -1,27 +1,6 @@
 name: Release 467 Build 357 Grey Hair Source Review Story Plan Completion Continuity VI
+# Historical after Build 358 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build356-35th-promo-factual-evidence-completion-continuity-vi.json'
-      - 'release467-build357-grey-hair-source-review-story-plan-completion-continuity-vi.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build357_measurement.sql'
-      - 'scripts/release467_build357_verify_measurement.mjs'
-      - 'scripts/release467_build357_regression.py'
-      - 'scripts/release467_build357_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/grey-hair-story-readiness.js'
-      - 'public/js/admin-grey-hair-story-readiness-v320.js'
-      - 'admin/grey-hair-story-readiness/index.html'
-      - 'functions/api/social/oauth/_callback.js'
-      - 'functions/api/_lib/oauthProviders.js'
-      - 'public/js/admin-site-item-inventory.js'
-      - 'css/styles.css'
-      - 'admin/inventory-operations/index.html'
-      - '.github/workflows/release467-build356-35th-promo-factual-evidence-completion-continuity-vi.yml'
-      - '.github/workflows/release467-build357-grey-hair-source-review-story-plan-completion-continuity-vi.yml'
-      - 'docs/operations/RELEASE_467_BUILD_357_GREY_HAIR_SOURCE_REVIEW_STORY_PLAN_COMPLETION_CONTINUITY_VI.md'
   workflow_dispatch:
 permissions:
   contents: read

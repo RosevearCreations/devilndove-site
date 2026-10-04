@@ -195,5 +195,10 @@
     "storefront_worker_cpu_hotfix_state": "SOURCE_PROVEN_PENDING_PRODUCTION_ACCEPTANCE",
     "next_build": 359,
     "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VII"
+  },
+  "release_hygiene": {
+    "predecessor_workflow": ".github/workflows/release467-build357-grey-hair-source-review-story-plan-completion-continuity-vi.yml",
+    "predecessor_workflow_state": "HISTORICAL_MANUAL_ONLY",
+    "automatic_remote_d1_current_build_only": true
   }
 }
