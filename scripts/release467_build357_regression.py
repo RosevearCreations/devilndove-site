@@ -6,7 +6,7 @@ def t(p):return (R/p).read_text(encoding='utf-8',errors='replace')
 def j(p):return json.loads(t(p))
 def q(ok,msg):
     if not ok:F.append(msg)
-a=j('release467-build357-grey-hair-source-review-story-plan-completion-continuity-vi.json');prev=j('release467-build350-35th-promo-factual-evidence-completion-continuity-vi.json');p=j('current-development-authority.json')
+a=j('release467-build357-grey-hair-source-review-story-plan-completion-continuity-vi.json');prev=j('release467-build356-35th-promo-factual-evidence-completion-continuity-vi.json');p=j('current-development-authority.json')
 api=t('functions/api/admin/grey-hair-story-readiness.js');page=t('admin/grey-hair-story-readiness/index.html');ui=t('public/js/admin-grey-hair-story-readiness-v320.js')
 sql=t('scripts/release467_build357_measurement.sql');verify=t('scripts/release467_build357_verify_measurement.mjs');wf=t('.github/workflows/release467-build357-grey-hair-source-review-story-plan-completion-continuity-vi.yml');road=t('docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_349_354.md')
 itpage=t('admin/it-integrations/index.html');registry=t('public/js/admin-it-integrations.js');readiness=t('public/js/admin-it-provider-readiness.js');setup=t('public/js/admin-it-provider-setup-guide.js');etsy=t('public/js/admin-etsy-oauth-acceptance.js');callback=t('functions/api/social/oauth/_callback.js');providers=t('functions/api/_lib/oauthProviders.js');inventory=t('public/js/admin-site-item-inventory.js');styles=t('css/styles.css');inventory_page=t('admin/inventory-operations/index.html')

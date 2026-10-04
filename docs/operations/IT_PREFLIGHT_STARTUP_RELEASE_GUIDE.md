@@ -10,6 +10,7 @@ Build 356 is the last fully verified exact Development/Production closure ingest
 - Current Application Quality Proof: `37088678209`
 - I.T. Admin Runtime Proof: `37088678164`
 - Repository Branch Hygiene: `37088678154`
+- D1 CI Fan-Out Guard: `37088678136`
 - Build 356 proof: `37088678110`
 - Production main: `b33ced533a4fd86e418516ca7b270387ed8bc7ce`
 - Production Pages Deploy: `37088915453`
