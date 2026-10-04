@@ -2,7 +2,7 @@
   "release": 467,
   "build": 356,
   "title": "35th Promo Factual Evidence Completion Continuity VI",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "35TH_PROMO_FACTUAL_EVIDENCE_COMPLETION_CONTINUITY_VI",
   "authority": "release467-build356-35th-promo-factual-evidence-completion-continuity-vi",
   "predecessor": {
@@ -126,7 +126,7 @@
   "future_queue_exhausted": false,
   "measurement_lane_state": "MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
   "measurement_lane_owner": "release467-build356-35th-promo-factual-evidence-completion-continuity-vi.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD356_GREEN",
   "decision": {
     "classification": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW",
     "rationale": "Exact Development measurement still shows zero real execution/process, result, or lesson events. Existing actual_result and lesson_learned remain absence markers, so factual readiness is incomplete; outcome stays unknown and the story remains needs_review / not a public candidate.",
@@ -167,5 +167,34 @@
     "d1_mutation": false,
     "r2_mutation": false,
     "provider_execution": false
+  },
+  "final_closure": {
+    "dev_sha": "e6b1c66ec636997623b90770ef86eaedc1bfc5ed",
+    "tree_sha": "30ed420bc2ad1dbbb24ff2457496db23060f30d3",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD356_GREEN",
+    "proofs": {
+      "system_gate_run": 37088678038,
+      "current_application_quality_run": 37088678209,
+      "it_admin_runtime_proof_run": 37088678164,
+      "branch_hygiene_run": 37088678154,
+      "d1_ci_fanout_guard_run": 37088678136,
+      "build_specific_proof_run": 37088678110
+    },
+    "artifact_id": 11261875785,
+    "artifact_name": "build356-35th-promo-factual-evidence-continuity-e6b1c66ec636997623b90770ef86eaedc1bfc5ed",
+    "artifact_digest": "sha256:751d2c3b6a23bd7b50d305f9e37c152007411313ad729479380aaa6ba1cb6852",
+    "ingested_by_build": 357,
+    "recorded_by": "Build 357 predecessor ingestion; not self-recorded by Build 356"
+  },
+  "production_checkpoint": {
+    "main_sha": "b33ced533a4fd86e418516ca7b270387ed8bc7ce",
+    "tree_sha": "30ed420bc2ad1dbbb24ff2457496db23060f30d3",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37088915453,
+    "production_live_resource_integrity_run": 37088969113,
+    "remote_d1_queries": 0,
+    "deployment_url": "https://289fc36f.devilndove-site.pages.dev"
   }
 }

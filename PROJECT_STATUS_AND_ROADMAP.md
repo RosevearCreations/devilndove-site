@@ -1,3 +1,13 @@
+# CURRENT BUILD — Release 467 Build 357
+
+**Grey Hair Source Review & Story-Plan Completion Continuity VI**
+
+Build 356 is exact-tree Development/Production GREEN. Build 357 re-measures Grey Hair evidence and story-plan readiness, adds an Etsy callback fail-safe so unexpected callback exceptions do not escape as a generic Cloudflare host 502, and restores the Inventory Card View/Table View control.
+
+**Verified Build 356:** Development `e6b1c66ec636997623b90770ef86eaedc1bfc5ed`, Production `b33ced533a4fd86e418516ca7b270387ed8bc7ce`, shared tree `30ed420bc2ad1dbbb24ff2457496db23060f30d3`.
+
+**Next after Build 357 Production GREEN:** Build 358 — Search Console Real Export & Fresh Discovery Intake VIII.
+
 # CURRENT BUILD — Release 467 Build 356
 
 **35th Promo Factual Evidence Completion Continuity VI**

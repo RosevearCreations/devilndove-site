@@ -1,23 +1,6 @@
 name: Release 467 Build 356 35th Promo Factual Evidence Completion Continuity VI
+# Historical after Build 357 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build355-evidence-gap-execution-workbench-input-completion-continuity-v.json'
-      - 'release467-build356-35th-promo-factual-evidence-completion-continuity-vi.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build356_measurement.sql'
-      - 'scripts/release467_build356_verify_measurement.mjs'
-      - 'scripts/release467_build356_regression.py'
-      - 'scripts/release467_build356_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'docs/operations/DEVILNDOVE_PRODUCTION_VARIABLES_REFERENCE.md'
-      - 'docs/operations/RELEASE_467_BUILD_356_35TH_PROMO_FACTUAL_EVIDENCE_COMPLETION_CONTINUITY_VI.md'
-      - 'admin/creative-process/index.html'
-      - 'public/js/admin-creative-process.js'
-      - 'functions/api/admin/35th-promo-outcome-closure.js'
-      - '.github/workflows/release467-build355-evidence-gap-execution-workbench-input-completion-continuity-v.yml'
-      - '.github/workflows/release467-build356-35th-promo-factual-evidence-completion-continuity-vi.yml'
   workflow_dispatch:
 permissions:
   contents: read

@@ -19,7 +19,7 @@ async function securityEvent(db,provider,eventType,outcome,diagnosticCode,transa
   try{await db.prepare(`INSERT INTO oauth_security_events(provider_key,event_type,outcome,diagnostic_code,transaction_id,actor_user_id,created_at) VALUES(?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(provider,eventType,outcome,diagnosticCode||null,transactionId||null,actorUserId||null).run();}catch{}
 }
 
-export function createOAuthCallback(providerKey){
+function createOAuthCallbackCore(providerKey){
   return async function onRequestGet({request,env}){
     const contract=getOAuthContract(providerKey);
     if(!contract)return htmlResponse('Unsupported OAuth provider','<p>The requested provider is not configured.</p>',404);
@@ -110,6 +110,21 @@ export function createOAuthCallback(providerKey){
       await db.prepare(`UPDATE oauth_authorization_transactions SET terminal_status='failed',pkce_verifier_ciphertext=NULL,diagnostic_code=?,updated_at=CURRENT_TIMESTAMP WHERE transaction_id=?`).bind(diagnostic,tx.transaction_id).run();
       await securityEvent(db,contract.key,'authorization_finalize','failed',diagnostic,tx.transaction_id,tx.created_by_user_id);
       return htmlResponse(`${contract.label} connection failed safely`,`<p>The provider token exchange or intended-account verification did not complete.</p><p class="code">${escapeHtml(diagnostic)}</p><p>No new token material was persisted. The one-time state has been consumed and cannot be replayed.</p>`,502);
+    }
+  };
+}
+
+
+// Release 467 Build 357 — final callback fail-safe boundary.
+// Unexpected callback exceptions are converted to a controlled response instead of a generic Cloudflare host 502.
+export function createOAuthCallback(providerKey){
+  const core=createOAuthCallbackCore(providerKey);
+  return async function onRequestGet(context){
+    try{return await core(context);}catch(error){
+      const code=safeDiagnosticCode(error?.oauthProviderCode||error?.message,'oauth_callback_unexpected_failure');
+      try{console.error('oauth_callback_fail_safe',String(providerKey||''),code);}catch{}
+      const body='<p>The OAuth callback reached Devil n Dove, but finalization did not complete.</p><p class="code">'+escapeHtml(code)+'</p><p>No listing was created, changed or published. Start a fresh connection attempt after reviewing the I.T. connection status.</p>';
+      return htmlResponse((String(providerKey||'OAuth')+' connection failed safely'),body,502);
     }
   };
 }

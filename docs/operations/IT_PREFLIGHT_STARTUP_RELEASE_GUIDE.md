@@ -1,3 +1,22 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 357 candidate over Build 356 Production GREEN
+
+**Current verified successor: Release 467 Build 357 — Grey Hair Source Review & Story-Plan Completion Continuity VI**
+
+Build 356 is the last fully verified exact Development/Production closure ingested by Build 357.
+
+- Development SHA: `e6b1c66ec636997623b90770ef86eaedc1bfc5ed`
+- Shared tree: `30ed420bc2ad1dbbb24ff2457496db23060f30d3`
+- System Gate: `37088678038`
+- Current Application Quality Proof: `37088678209`
+- I.T. Admin Runtime Proof: `37088678164`
+- Repository Branch Hygiene: `37088678154`
+- D1 CI Fan-Out Guard: `37088678136`
+- Build 356 proof: `37088678110`
+- Production main: `b33ced533a4fd86e418516ca7b270387ed8bc7ce`
+- Production Pages Deploy: `37088915453`
+- Production Live Resource Integrity: `37088969113`
+- Build 357 repair scope: Etsy callback fail-safe + Inventory Card View restoration.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 356 candidate over Build 355 Production GREEN
 
 **Current verified successor: Release 467 Build 356 — 35th Promo Factual Evidence Completion Continuity VI**
