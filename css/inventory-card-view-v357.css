@@ -1,0 +1,22 @@
+/* Release 467 Build 357 — Inventory Card View presentation only. */
+.inventory-operations-page .site-inventory-view-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.inventory-operations-page .site-inventory-table-wrap.is-card-view{overflow:visible;border:0;background:transparent}
+.inventory-operations-page .site-inventory-table-wrap.is-card-view .site-inventory-admin-table{display:block;min-width:0;width:100%;border:0;background:transparent}
+.inventory-operations-page .site-inventory-table-wrap.is-card-view thead{display:none}
+.inventory-operations-page .site-inventory-table-wrap.is-card-view tbody{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px;width:100%}
+.inventory-operations-page .site-inventory-table-wrap.is-card-view tbody tr{display:grid;align-content:start;min-width:0;border:1px solid rgba(191,232,255,.18);border-radius:14px;background:#0f1825;box-shadow:0 8px 22px rgba(0,0,0,.18);overflow:hidden;transition:transform .16s ease,border-color .16s ease}
+.inventory-operations-page .site-inventory-table-wrap.is-card-view tbody tr:hover{transform:translateY(-2px);border-color:rgba(191,232,255,.34)}
+.inventory-operations-page .site-inventory-table-wrap.is-card-view tbody td{display:block;min-width:0;width:auto;padding:10px 12px;border-bottom:1px solid rgba(191,232,255,.10);background:transparent;position:static;box-shadow:none;white-space:normal}
+.inventory-operations-page .site-inventory-table-wrap.is-card-view tbody td[data-label]::before{content:attr(data-label);display:block;margin-bottom:5px;color:#a9bdd1;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.inventory-operations-page .site-inventory-table-wrap.is-card-view .site-inventory-list-identity{display:grid;grid-template-columns:88px minmax(0,1fr);gap:10px}
+.inventory-operations-page .site-inventory-table-wrap.is-card-view .site-inventory-list-thumb,
+.inventory-operations-page .site-inventory-table-wrap.is-card-view .site-inventory-media-name{width:88px}
+.inventory-operations-page .site-inventory-table-wrap.is-card-view .site-inventory-list-thumb{min-height:76px}
+.inventory-operations-page .site-inventory-table-wrap.is-card-view .site-inventory-list-thumb img{height:76px}
+.inventory-operations-page .site-inventory-table-wrap.is-card-view .site-inventory-row-actions{min-width:0;background:rgba(191,232,255,.035)}
+.inventory-operations-page .site-inventory-table-wrap.is-card-view .site-inventory-action-buttons{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:680px){
+  .inventory-operations-page .site-inventory-view-actions{width:100%}
+  .inventory-operations-page .site-inventory-view-actions .btn{flex:1 1 150px}
+  .inventory-operations-page .site-inventory-table-wrap.is-card-view tbody{grid-template-columns:1fr}
+}

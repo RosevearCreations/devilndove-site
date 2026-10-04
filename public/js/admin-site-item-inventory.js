@@ -942,7 +942,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <div class="site-inventory-view-toolbar" style="margin-top:12px">
-          <div><strong>Inventory table editor</strong><div class="small">Edit quantity, stock unit, usage unit, usage-per-stock conversion and cost directly in the table. Cost per usage unit is calculated automatically. Switch to Card View when you want compact item cards instead of a wide table.</div></div>
+          <div><strong>Inventory table editor</strong><div class="small">Edit quantity, stock unit, usage unit, usage-per-stock conversion and cost directly in the table. Cost per usage unit is calculated automatically. On desktop, scroll the table sideways so every field stays wide enough to read, or switch to Card View for compact item cards.</div></div>
           <div class="site-inventory-view-actions"><button class="btn" type="button" id="siteInventoryCardViewButton" aria-pressed="false">Card View</button><button class="btn" type="button" id="siteInventoryTableModeButton" aria-pressed="true">Table editing: On</button></div>
         </div>
         <div class="admin-table-wrap site-inventory-table-wrap"><table class="site-inventory-admin-table"><thead><tr><th>Image / item</th><th>Category / supplier</th><th>Current location</th><th>On hand</th><th>Stock &amp; usage</th><th>Unit cost</th><th>Reorder at</th><th>Status</th><th>Actions</th></tr></thead><tbody id="siteInventoryList"><tr><td colspan="9" style="padding:8px">Loading inventory...</td></tr></tbody></table></div>
