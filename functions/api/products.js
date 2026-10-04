@@ -1,3 +1,4 @@
+// BUILD358_WORKER_CPU_BUDGET: bounded public list/enrichment work for Cloudflare Free Worker CPU safety; checkout remains authoritative for stock.
 import { captureRuntimeIncident } from "./_lib/adminAudit.js";
 import { loadSchemaColumnSet } from "./_lib/schemaColumnSnapshot.js";
 
@@ -194,17 +195,23 @@ async function enrichProductsWithOfferAvailability(db, products) {
   const list = Array.isArray(products) ? products : [];
   if (!db || !list.length) return list;
   try {
+    const ids=[...new Set(list.map((product)=>Number(product.product_id||0)).filter((id)=>Number.isInteger(id)&&id>0))].slice(0,120);
+    if(!ids.length)return list;
+    const marks=ids.map(()=>'?').join(',');
     const reservedRows = normalizeResults(await db.prepare(`
       SELECT component_product_id, COALESCE(SUM(reserved_component_quantity),0) reserved_quantity
-      FROM product_bundle_components GROUP BY component_product_id
-    `).all());
+      FROM product_bundle_components
+      WHERE component_product_id IN (${marks})
+      GROUP BY component_product_id
+    `).bind(...ids).all());
     const bundleRows = normalizeResults(await db.prepare(`
       SELECT bs.bundle_product_id, bs.reserved_bundle_quantity,
              COALESCE(MIN(CAST(bc.reserved_component_quantity / NULLIF(bc.quantity_per_bundle,0) AS INTEGER)),0) supported_quantity
       FROM product_bundle_settings bs
       LEFT JOIN product_bundle_components bc ON bc.bundle_product_id=bs.bundle_product_id
+      WHERE bs.bundle_product_id IN (${marks})
       GROUP BY bs.bundle_product_id, bs.reserved_bundle_quantity
-    `).all());
+    `).bind(...ids).all());
     const reservedByProduct = new Map(reservedRows.map((row)=>[Number(row.component_product_id||0),Math.max(0,Number(row.reserved_quantity||0))]));
     const bundleByProduct = new Map(bundleRows.map((row)=>[Number(row.bundle_product_id||0),Math.max(0,Math.min(Number(row.reserved_bundle_quantity||0),Number(row.supported_quantity||0))) ]));
     return list.map((product)=>{
@@ -226,7 +233,7 @@ async function enrichProductsWithStoryNotes(db, products) {
     const storyColumns = await getStrictTableColumnSet(db, "product_story_public_notes");
     if (!storyColumns.has("product_id")) return rows;
 
-    const ids = [...new Set(rows.map((product) => Number(product.product_id || 0)).filter((id) => Number.isInteger(id) && id > 0))].slice(0, 500);
+    const ids = [...new Set(rows.map((product) => Number(product.product_id || 0)).filter((id) => Number.isInteger(id) && id > 0))].slice(0, 120);
     if (!ids.length) return rows;
 
     const selectList = [
@@ -291,7 +298,7 @@ async function enrichProductsWithImages(db, products) {
   try {
     const imageColumns = await getStrictTableColumnSet(db, "product_images");
     if (!imageColumns.has("product_id") || !imageColumns.has("image_url")) return rows;
-    const ids = [...new Set(rows.map((product) => Number(product.product_id || 0)).filter((id) => Number.isInteger(id) && id > 0))].slice(0, 500);
+    const ids = [...new Set(rows.map((product) => Number(product.product_id || 0)).filter((id) => Number.isInteger(id) && id > 0))].slice(0, 120);
     if (!ids.length) return rows;
 
     const selectList = [
@@ -436,7 +443,7 @@ async function enrichProductsWithProofSignals(db, products) {
       const ready = imageCount >= 3 && product.short_description && product.meta_title && product.meta_description ? 1 : 0;
       return { ...product, has_proof_image: hasProof, proof_image_count: hasProof ? 1 : 0, blocked_public_image_count: 0, ready_for_social: ready };
     });
-    const ids = [...new Set(rows.map((product) => Number(product.product_id || 0)).filter((id) => Number.isInteger(id) && id > 0))].slice(0, 500);
+    const ids = [...new Set(rows.map((product) => Number(product.product_id || 0)).filter((id) => Number.isInteger(id) && id > 0))].slice(0, 120);
     if (!ids.length) return rows;
     const roleExpr = annotationColumns.has('image_role') ? 'image_role' : "''";
     const statusExpr = annotationColumns.has('public_use_status') ? 'public_use_status' : "''";
@@ -885,7 +892,7 @@ function buildProductSelectSql({ productColumns, taxColumns, seoColumns, hasTaxJ
     ${joins.join("\n    ")}
     WHERE ${whereSql}
     ORDER BY ${buildOrderBy(productColumns)}
-    LIMIT 500
+    LIMIT 120
   `;
 }
 
@@ -949,12 +956,12 @@ function buildProductSafeFallbackSql({ productColumns, whereSql }) {
     FROM products p
     WHERE ${whereSql}
     ORDER BY ${buildOrderBy(productColumns)}
-    LIMIT 500
+    LIMIT 120
   `;
 }
 
 async function runUltraProductFallback(db, filters) {
-  const rows = await runProductQuery(db, "SELECT * FROM products LIMIT 500");
+  const rows = await runProductQuery(db, "SELECT * FROM products LIMIT 120");
   const enrichedProducts = await enrichProductsWithStoryNotes(db, shapeProducts(rows));
   const products = enrichedProducts
     .filter((product) => String(product.status || "active").toLowerCase() === "active")

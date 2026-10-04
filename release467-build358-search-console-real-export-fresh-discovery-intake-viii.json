@@ -1,0 +1,207 @@
+{
+  "release": 467,
+  "build": 358,
+  "title": "Search Console Real Export & Fresh Discovery Intake VIII",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "SEARCH_CONSOLE_REAL_EXPORT_FRESH_DISCOVERY_INTAKE_VIII",
+  "authority": "release467-build358-search-console-real-export-fresh-discovery-intake-viii",
+  "predecessor": {
+    "build": 357,
+    "title": "Grey Hair Source Review & Story-Plan Completion Continuity VI",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "9d508a74417c1007891d4877c35140d351d51faf",
+    "development_tree_sha": "78aeaa4e11119620ebf71f264ec84b7939dd4adc",
+    "development_proofs": {
+      "system_gate_run": 37215499577,
+      "current_application_quality_run": 37215499585,
+      "it_admin_runtime_proof_run": 37215499593,
+      "branch_hygiene_run": 37215499656,
+      "d1_ci_fanout_guard_run": 37215499584,
+      "build_specific_proof_run": 37215499609
+    },
+    "development_artifact": {
+      "artifact_id": 11308710440,
+      "artifact_name": "build357-grey-hair-source-review-story-plan-continuity-9d508a74417c1007891d4877c35140d351d51faf",
+      "artifact_digest": "sha256:368c9269652e4834c7bae2dd2eac00ea9e7c1f6592b36240d5bfdc4c3e9e08bb"
+    },
+    "production_main_sha": "f4806249d913fb779c734f332bfb05019c6c6f1b",
+    "production_tree_sha": "78aeaa4e11119620ebf71f264ec84b7939dd4adc",
+    "production_pages_deploy_run": 37215653136,
+    "production_live_resource_integrity_run": 37215700395,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "reuses_build352_search_console_authorities": true,
+    "reuses_build346_measurement_model": true,
+    "explicit_report_date_freshness_rule": true,
+    "intake_route": "/api/admin/search-console-import",
+    "intake_mode": "EXPLICIT_OPERATOR_REAL_GSC_CSV_ONLY",
+    "real_export_confirmation_required": true,
+    "mandatory_header_groups": [
+      "page",
+      "clicks",
+      "impressions",
+      "ctr",
+      "position"
+    ],
+    "freshness_window_days": 30,
+    "fallback_report_date_required_when_date_column_absent": true,
+    "imported_at_must_not_substitute_for_missing_report_date": true,
+    "created_at_must_not_substitute_for_missing_report_date": true,
+    "import_audit_traceability_required": true,
+    "explicit_batch_revert_traceability_required": true,
+    "query_level_attribution_requires_real_search_console": true,
+    "stale_or_unsupported_pending_rows_non_actionable": true,
+    "explicit_human_copy_required_before_apply": true,
+    "automatic_import": false,
+    "automatic_queue_generation": false,
+    "automatic_seo_wording_generation": false,
+    "automatic_seo_apply": false,
+    "storefront_worker_cpu_hotfix": true,
+    "storefront_fast_paths": [
+      "/shop/",
+      "/collections/"
+    ],
+    "public_product_list_row_cap": 120,
+    "next_build": 359,
+    "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VII",
+    "future_queue_exhausted": false
+  },
+  "runtime_incident": {
+    "observed_at_utc": "2026-10-04T18:46:03Z",
+    "cloudflare_error": 1102,
+    "ray_id": "a45658dfeeb6961e-YYZ",
+    "classification": "WORKER_CPU_TIME_EXCEEDED",
+    "reported_context": "After one build, four new catalog items and four image updates, the public Devil n Dove storefront returned Cloudflare Error 1102.",
+    "interpretation": "1102 is a Worker CPU-time failure, not proof that a per-second network-request quota was exceeded.",
+    "remediation": "Use a bounded text fast path for Shop/Collections HTML and bound public product-list work while preserving existing catalog, consent and review rules."
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "synthetic_search_evidence": false,
+    "automatic_search_console_import": false,
+    "automatic_queue_generation": false,
+    "automatic_seo_wording_generation": false,
+    "automatic_seo_apply": false,
+    "indexnow_execution": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false,
+    "auth_bypass": false,
+    "paid_plan_dependency": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "9d508a74417c1007891d4877c35140d351d51faf",
+      "tree": "78aeaa4e11119620ebf71f264ec84b7939dd4adc",
+      "system_gate_run": 37215499577,
+      "current_application_quality_run": 37215499585,
+      "it_admin_runtime_proof_run": 37215499593,
+      "branch_hygiene_run": 37215499656,
+      "d1_ci_fanout_guard_run": 37215499584,
+      "build_specific_proof_run": 37215499609,
+      "state": "DEVELOPMENT_GREEN",
+      "quality_run": 37215499585,
+      "it_admin_runtime_run": 37215499593,
+      "repository_hygiene_run": 37215499656
+    },
+    "production": {
+      "main_sha": "f4806249d913fb779c734f332bfb05019c6c6f1b",
+      "tree": "78aeaa4e11119620ebf71f264ec84b7939dd4adc",
+      "production_pages_deploy_run": 37215653136,
+      "production_live_resource_integrity_run": 37215700395,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EVIDENCE_PENDING_NO_REAL_EXPORT",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_355_360.md",
+  "next_build": 359,
+  "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VII",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "MEASURED_EVIDENCE_PENDING_NO_REAL_EXPORT",
+  "measurement_lane_owner": "release467-build358-search-console-real-export-fresh-discovery-intake-viii.yml",
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "measurement": {
+    "source_sha": "9e67e1463eabb9f0a7ba9f0c425d2499f0e20958",
+    "source_tree_sha": "aaa94d78094700098aa0891493c248b987a382d8",
+    "workflow_run": 37234000993,
+    "artifact_id": 11315405195,
+    "artifact_name": "build358-search-console-fresh-discovery-9e67e1463eabb9f0a7ba9f0c425d2499f0e20958",
+    "artifact_digest": "sha256:3ce4c3755e452c9617e158f9cc10ba2f523ee2e75a73841a80850a6151fe6ffd",
+    "statement_count": 9,
+    "rows_read_by_statement": [
+      1685,
+      6,
+      319,
+      1,
+      1,
+      2,
+      1,
+      1,
+      46
+    ],
+    "aggregate_rows_read": 2062,
+    "rows_read_ceiling": 20000,
+    "interpretation": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "batches": {
+      "import_batches": 0,
+      "declared_rows": 0,
+      "live_rows": 0,
+      "mismatched_batches": 0,
+      "orphan_rows": 0,
+      "operator_bound_batches": 0,
+      "csv_named_batches": 0,
+      "latest_import_at": ""
+    },
+    "freshness": {
+      "all_search_rows": 0,
+      "recent_search_rows": 0,
+      "recent_clicks": 0,
+      "recent_impressions": 0,
+      "recent_distinct_pages": 0,
+      "recent_distinct_queries": 0,
+      "earliest_report_date": "",
+      "latest_report_date": "",
+      "latest_report_age_days": null,
+      "report_dates": 0
+    },
+    "eligible_review_pairs": {
+      "eligible_pairs": 0,
+      "eligible_impressions": 0
+    },
+    "seo_review_queue": {
+      "queue_rows": 0,
+      "open_rows": 0,
+      "in_progress_rows": 0,
+      "applied_rows": 0,
+      "currently_supported_rows": 0,
+      "stale_or_unsupported_pending_rows": 0,
+      "generated_wording_rows": 0
+    },
+    "freshness_window_days": 30,
+    "explicit_report_date_only": true,
+    "synthetic_rows": false,
+    "queue_mutation": false,
+    "automatic_seo_apply": false,
+    "production_d1_contact": false
+  },
+  "decision": {
+    "classification": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "rationale": "Exact Development measurement found zero Search Console import batches and zero Search Console rows. No discovery or SEO action is justified without a confirmed real export.",
+    "real_export_required": true,
+    "automatic_import": false,
+    "automatic_queue_generation": false,
+    "automatic_seo_apply": false,
+    "storefront_worker_cpu_hotfix_state": "SOURCE_PROVEN_PENDING_PRODUCTION_ACCEPTANCE",
+    "next_build": 359,
+    "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VII"
+  },
+  "release_hygiene": {
+    "predecessor_workflow": ".github/workflows/release467-build357-grey-hair-source-review-story-plan-completion-continuity-vi.yml",
+    "predecessor_workflow_state": "HISTORICAL_MANUAL_ONLY",
+    "automatic_remote_d1_current_build_only": true
+  }
+}

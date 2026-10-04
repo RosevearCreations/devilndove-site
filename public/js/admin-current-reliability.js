@@ -1,3 +1,4 @@
+/* BUILD358_CURRENT_CLIENT: Release 467 Build 358 — Search Console Real Export & Fresh Discovery Intake VIII; verified Build 357 Development/Production GREEN. */
 (() => {
   'use strict';
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));

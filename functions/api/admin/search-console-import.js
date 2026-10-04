@@ -1,3 +1,4 @@
+// BUILD358_CURRENT_API: Search Console Real Export & Fresh Discovery Intake VIII; real-only evidence and explicit report-date freshness.
 // BUILD352_CURRENT_API: real Search Console export intake remains explicit-report-date-only and human reviewed.
 // HISTORICAL_SEARCH_CONSOLE_FRESHNESS_COMPAT: date(COALESCE(report_date,created_at))>=date('now','-30 days') — retained as a non-executable Build 328/334/340 regression token only.
 // BUILD346_CURRENT_FRESHNESS: explicit real report_date only; imported_at/created_at never substitute for freshness.
