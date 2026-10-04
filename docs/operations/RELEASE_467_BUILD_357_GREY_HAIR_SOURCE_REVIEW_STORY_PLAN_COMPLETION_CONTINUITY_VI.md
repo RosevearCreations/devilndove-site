@@ -7,3 +7,9 @@ The operator reached Etsy's Grant Access screen and the callback then returned a
 Inventory Operations also regains a persisted Card View/Table View control. Card View is presentation-only and does not alter inventory data or write semantics.
 
 Next: Build 358 — Search Console Real Export & Fresh Discovery Intake VIII.
+
+## Exact Build 357 measurement
+
+The exact Development measurement remains **SOURCE_EVIDENCE_REVIEW_REQUIRED**. It read **124 D1 rows** and found **3 active Grey Hair evidence ranges: 1 approved and 2 still requiring explicit human review**. Confirmed sync groups/tracks remain **0/0**; reviewed story plans, source-backed story items and Maker Story profiles remain **0**.
+
+The Etsy callback repair and Inventory Card View restoration are source-proven in Build 357. Etsy still requires one fresh operator OAuth attempt to verify provider-side acceptance after deployment; no listing writes are enabled by this repair.
