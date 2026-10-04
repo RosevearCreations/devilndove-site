@@ -1,3 +1,4 @@
+/* BUILD358_CURRENT_CLIENT: Release 467 Build 358 — Search Console Real Export & Fresh Discovery Intake VIII; verified Build 357 Development/Production GREEN. */
 // Release 467 Build 39 — current read-only Deployment Preflight renderer.
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('deploymentPreflightMount');

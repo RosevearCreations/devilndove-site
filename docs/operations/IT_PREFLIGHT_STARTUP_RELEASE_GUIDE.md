@@ -1,3 +1,23 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 358 candidate over Build 357 Production GREEN
+
+**Current verified successor: Release 467 Build 358 — Search Console Real Export & Fresh Discovery Intake VIII**
+
+Build 357 is the last fully verified exact Development/Production closure ingested by Build 358.
+
+- Development SHA: `9d508a74417c1007891d4877c35140d351d51faf`
+- Shared tree: `78aeaa4e11119620ebf71f264ec84b7939dd4adc`
+- System Gate: `37215499577`
+- Current Application Quality Proof: `37215499585`
+- I.T. Admin Runtime Proof: `37215499593`
+- Repository Branch Hygiene: `37215499656`
+- D1 CI Fan-Out Guard: `37215499584`
+- Build 357 proof: `37215499609`
+- Production main: `f4806249d913fb779c734f332bfb05019c6c6f1b`
+- Production Pages Deploy: `37215653136`
+- Production Live Resource Integrity: `37215700395`
+- Build 358 scope: real-only Search Console freshness/discovery intake plus bounded Shop/Collections Worker CPU remediation for the reported Cloudflare 1102 incident.
+- No schema mutation, synthetic discovery evidence, automatic SEO apply, provider execution, Product/image business-data mutation, or Production D1 contact.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 357 candidate over Build 356 Production GREEN
 
 **Current verified successor: Release 467 Build 357 — Grey Hair Source Review & Story-Plan Completion Continuity VI**
