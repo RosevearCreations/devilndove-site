@@ -52,7 +52,7 @@ for token in ("STOREFRONT_FAST_RENDER_REVISION = '467b358-storefront-worker-budg
     q(token in mw,'Build 358 storefront CPU fast path missing '+token)
 q("['/shop/', '/collections/']" in mw,'Build 358 fast path must stay scoped to Shop/Collections')
 q('BUILD358_WORKER_CPU_BUDGET' in products and 'LIMIT 120' in products and '.slice(0, 120)' in products,'Build 358 public Products bound missing')
-q('WHERE component_product_id IN ({marks})' in products and 'WHERE bs.bundle_product_id IN ({marks})' in products,'Build 358 offer enrichment must remain Product-bounded')
+q('WHERE component_product_id IN (' in products and 'WHERE bs.bundle_product_id IN (' in products and '.bind(...ids).all()' in products,'Build 358 offer enrichment must remain Product-bounded')
 
 q('Build 358 — Search Console Real Export & Fresh Discovery Intake VIII' in road and 'Build 359 — Maker Story Advancement & Publication Readiness Continuity VII' in road,'Build 358/359 roadmap continuity missing')
 q(int(p.get('build') or 0)>=358,'Current pointer must retain Build 358 or successor')
