@@ -253,7 +253,7 @@
   "next_build": 359,
   "next_build_state": "QUEUED_AFTER_BUILD358_PRODUCTION_GREEN",
   "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VII",
-  "promotion_state": "BUILD358_MEASUREMENT_INGESTED_PENDING_EXACT_HEAD_REPROOF",
+  "promotion_state": "BUILD358_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "BUILD359_DEFINED_BY_BUILD358_OBSERVED_EVIDENCE",
   "measured_closure": {
     "source_build": 232,
