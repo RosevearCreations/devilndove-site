@@ -1,9 +1,9 @@
 // HISTORICAL_BUILD345_API_IDENTITY: const RELEASE=467,BUILD=345,TITLE='Grey Hair Source Review & Story-Plan Completion Continuity IV'; comparison_baseline:{source_build:343
 // HISTORICAL_BUILD339_API_IDENTITY: const RELEASE=467,BUILD=339,TITLE='Grey Hair Source Review & Story-Plan Completion Continuity III'; retained for regression provenance.
-// Release 467 Build 351 — Grey Hair Source Review & Story-Plan Completion Continuity V.
+// Release 467 Build 357 — Grey Hair Source Review & Story-Plan Completion Continuity VI.
 // Read-only composition over existing CAIP evidence-review, synchronization and story-planning authorities.
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
-const RELEASE=467,BUILD=351,TITLE='Grey Hair Source Review & Story-Plan Completion Continuity V';
+const RELEASE=467,BUILD=357,TITLE='Grey Hair Source Review & Story-Plan Completion Continuity VI';
 const rows=r=>Array.isArray(r?.results)?r.results:[]; const n=v=>Number(v||0)||0;
 export async function onRequestGet(context){
   const admin=await getAdminUserFromRequest(context.request,context.env);
@@ -47,7 +47,7 @@ export async function onRequestGet(context){
   return jsonResponse({ok:true,release:RELEASE,build:BUILD,title:TITLE,work_project:work,caip_project:project,counts,evidence,story_plans:plans,readiness_state:state,
     completion:{evidence_review_complete:evidenceComplete,approved_source_threshold_met:sourceThreshold,sync_prerequisite_met:syncReady,story_plan_handoff_ready:storyPlanReady,handoff_ready:handoffReady},
     readiness_rule:{approved_source_evidence_min:2,reviewed_story_plans_min:1,source_backed_story_items_min:2,confirmed_capture_groups_min:1,confirmed_capture_tracks_min:4,maker_story_profile_auto_created:false},
-    handoff:{chain:['CAIP_EVIDENCE_REVIEW','SYNC_AND_AUDIO_ALIGNMENT','HUMAN_REVIEWED_STORY_PLAN','EXPLICIT_MAKER_STORY_DECISION'],next_action:nextAction},comparison_baseline:{source_build:349,active_source_evidence:3,approved_source_evidence:1,source_evidence_needs_review:2,confirmed_capture_groups:0,confirmed_capture_tracks:0,reviewed_story_plans:0,source_backed_story_items:0,maker_story_profiles:0},
+    handoff:{chain:['CAIP_EVIDENCE_REVIEW','SYNC_AND_AUDIO_ALIGNMENT','HUMAN_REVIEWED_STORY_PLAN','EXPLICIT_MAKER_STORY_DECISION'],next_action:nextAction},comparison_baseline:{source_build:351,active_source_evidence:3,approved_source_evidence:1,source_evidence_needs_review:2,confirmed_capture_groups:0,confirmed_capture_tracks:0,reviewed_story_plans:0,source_backed_story_items:0,maker_story_profiles:0},
     actions:{evidence_review:'/admin/creative-assets/',sync_alignment:'/admin/grey-hair-sync-alignment/',story_planning:'/admin/grey-hair-story-edit-planning/',maker_story_decision:'/admin/creative-process/?project_id=6'},
     policy:{read_only:true,private_media_only:true,raw_private_urls:false,media_rights_inference:false,automatic_evidence_approval:false,automatic_story_plan_generation:false,automatic_story_plan_review:false,automatic_maker_story_profile:false,automatic_publication:false,provider_execution:false,r2_mutation:false,production_d1_contact:false}
   },200,{'Cache-Control':'no-store'});

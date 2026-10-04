@@ -1,3 +1,5 @@
+/* BUILD357_CURRENT_SUCCESSOR: Release 467 Build 357 — Grey Hair Source Review & Story-Plan Completion Continuity VI; verified predecessor Build 356. */
+/* BUILD357_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 356 dev e6b1c66ec636997623b90770ef86eaedc1bfc5ed; tree 30ed420bc2ad1dbbb24ff2457496db23060f30d3; System 37088678038; Quality 37088678209; IT 37088678164; Hygiene 37088678154; Build 356 37088678110; Production b33ced533a4fd86e418516ca7b270387ed8bc7ce; Pages 37088915453; Live 37088969113. */
 /* BUILD356_CURRENT_SUCCESSOR: Release 467 Build 356 — 35th Promo Factual Evidence Completion Continuity VI; verified predecessor Build 355. */
 /* BUILD356_RESTART_PROVENANCE: VERIFIED_DEVELOPMENT Build 355 dev 31599bca8ead283f46a18bedbc19640c85f66faa; tree 3be26b7b2497b1420c630c5ca891eda0a4aea0be; System 37086186221; Quality 37086186207; IT 37086186220; Hygiene 37086186214; D1 Fan-Out 37086186242; Build 355 37086186342; Production 1ee3dc44c7f51da27f5cb9e61960896db839df06; Pages 37086313867; Live 37086376436. */
 /* BUILD355_CURRENT_SUCCESSOR: Release 467 Build 355 — Evidence Gap Execution Workbench & Input Completion Continuity V; verified predecessor Build 354. */
@@ -41,14 +43,14 @@ import { onRequestGet as getReadinessControlTower } from './it-control-tower.js'
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=356;
-const TITLE='35th Promo Factual Evidence Completion Continuity VI';
-const AUTHORITY='release467-build355-evidence-gap-execution-workbench-input-completion-continuity-v';
+const BUILD=357;
+const TITLE='Grey Hair Source Review & Story-Plan Completion Continuity VI';
+const AUTHORITY='release467-build356-35th-promo-factual-evidence-completion-continuity-vi';
 const EVIDENCE_ID='r467-b351-closure-37073559299-37073740571';
 
-const VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:355,title:'Evidence Gap Execution Workbench & Input Completion Continuity V',state:'DEVELOPMENT_GREEN',dev_sha:'31599bca8ead283f46a18bedbc19640c85f66faa',tree_sha:'3be26b7b2497b1420c630c5ca891eda0a4aea0be',system_gate_run:37086186221,current_application_quality_run:37086186207,it_admin_runtime_proof_run:37086186220,branch_hygiene_run:37086186214,proof_state:'EXACT_BRANCH_HEAD_BUILD355_GREEN'});
-const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:355,title:'Evidence Gap Execution Workbench & Input Completion Continuity V',state:'DEVELOPMENT_GREEN',dev_sha:'31599bca8ead283f46a18bedbc19640c85f66faa',tree_sha:'3be26b7b2497b1420c630c5ca891eda0a4aea0be',system_gate_run:37086186221,current_application_quality_run:37086186207,it_admin_runtime_proof_run:37086186220,branch_hygiene_run:37086186214,proof_state:'EXACT_BRANCH_HEAD_BUILD355_GREEN'});
-const PRODUCTION=Object.freeze({release:467,build:355,title:'Evidence Gap Execution Workbench & Input Completion Continuity V',state:'PRODUCTION_GREEN',main_sha:'1ee3dc44c7f51da27f5cb9e61960896db839df06',tree_sha:'3be26b7b2497b1420c630c5ca891eda0a4aea0be',production_pages_deploy_run:37086313867,production_live_resource_integrity_run:37086376436,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:37086186342,remote_d1_queries:0});
+const VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:356,title:'35th Promo Factual Evidence Completion Continuity VI',state:'DEVELOPMENT_GREEN',dev_sha:'e6b1c66ec636997623b90770ef86eaedc1bfc5ed',tree_sha:'30ed420bc2ad1dbbb24ff2457496db23060f30d3',system_gate_run:37088678038,current_application_quality_run:37088678209,it_admin_runtime_proof_run:37088678164,branch_hygiene_run:37088678154,proof_state:'EXACT_BRANCH_HEAD_BUILD356_GREEN'});
+const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:356,title:'35th Promo Factual Evidence Completion Continuity VI',state:'DEVELOPMENT_GREEN',dev_sha:'e6b1c66ec636997623b90770ef86eaedc1bfc5ed',tree_sha:'30ed420bc2ad1dbbb24ff2457496db23060f30d3',system_gate_run:37088678038,current_application_quality_run:37088678209,it_admin_runtime_proof_run:37088678164,branch_hygiene_run:37088678154,proof_state:'EXACT_BRANCH_HEAD_BUILD356_GREEN'});
+const PRODUCTION=Object.freeze({release:467,build:356,title:'35th Promo Factual Evidence Completion Continuity VI',state:'PRODUCTION_GREEN',main_sha:'b33ced533a4fd86e418516ca7b270387ed8bc7ce',tree_sha:'30ed420bc2ad1dbbb24ff2457496db23060f30d3',production_pages_deploy_run:37088915453,production_live_resource_integrity_run:37088969113,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:37088678110,remote_d1_queries:0});
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true,workflow:'.github/workflows/production-live-resource-integrity-proof.yml'
 });

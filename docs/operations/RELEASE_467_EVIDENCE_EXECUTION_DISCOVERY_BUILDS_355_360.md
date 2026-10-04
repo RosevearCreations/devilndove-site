@@ -12,6 +12,7 @@ Re-measure the 35th Promo against real execution, result and lesson evidence plu
 Check real execution, result and lesson evidence; keep review/publication explicit.
 
 ## Build 357 — Grey Hair Source Review & Story-Plan Completion Continuity VI
+Re-measure Grey Hair evidence/sync/story-plan readiness. Also repair the Etsy callback fail-safe boundary and restore Inventory Card View without mutating business data.
 Recheck approved source evidence, review, story-plan completion and source-backed story items.
 
 ## Build 358 — Search Console Real Export & Fresh Discovery Intake VIII

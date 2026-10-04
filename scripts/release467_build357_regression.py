@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+from pathlib import Path
+import json,re,sys
+R=Path(__file__).resolve().parents[1];F=[]
+def t(p):return (R/p).read_text(encoding='utf-8',errors='replace')
+def j(p):return json.loads(t(p))
+def q(ok,msg):
+    if not ok:F.append(msg)
+a=j('release467-build357-grey-hair-source-review-story-plan-completion-continuity-vi.json');prev=j('release467-build350-35th-promo-factual-evidence-completion-continuity-vi.json');p=j('current-development-authority.json')
+api=t('functions/api/admin/grey-hair-story-readiness.js');page=t('admin/grey-hair-story-readiness/index.html');ui=t('public/js/admin-grey-hair-story-readiness-v320.js')
+sql=t('scripts/release467_build357_measurement.sql');verify=t('scripts/release467_build357_verify_measurement.mjs');wf=t('.github/workflows/release467-build357-grey-hair-source-review-story-plan-completion-continuity-vi.yml');road=t('docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_349_354.md')
+itpage=t('admin/it-integrations/index.html');registry=t('public/js/admin-it-integrations.js');readiness=t('public/js/admin-it-provider-readiness.js');setup=t('public/js/admin-it-provider-setup-guide.js');etsy=t('public/js/admin-etsy-oauth-acceptance.js');callback=t('functions/api/social/oauth/_callback.js');providers=t('functions/api/_lib/oauthProviders.js');inventory=t('public/js/admin-site-item-inventory.js');styles=t('css/styles.css');inventory_page=t('admin/inventory-operations/index.html')
+q(a.get('build')==351 and a.get('title')=='Grey Hair Source Review & Story-Plan Completion Continuity V','Build 357 identity mismatch')
+q(prev.get('state')=='PRODUCTION_GREEN','Build 350 Production closure not successor-ingested')
+q((prev.get('final_closure') or {}).get('dev_sha')=='e6b1c66ec636997623b90770ef86eaedc1bfc5ed' and (prev.get('final_closure') or {}).get('tree_sha')=='30ed420bc2ad1dbbb24ff2457496db23060f30d3','Build 350 exact Development closure missing')
+q((prev.get('production_checkpoint') or {}).get('main_sha')=='b33ced533a4fd86e418516ca7b270387ed8bc7ce' and (prev.get('production_checkpoint') or {}).get('tree_sha')=='30ed420bc2ad1dbbb24ff2457496db23060f30d3','Build 350 Production checkpoint missing')
+c=a.get('contract') or {};s=a.get('safety') or {};auth=a.get('it_integrations_auth_recovery') or {}
+q(c.get('reuses_build327_authorities') is True and c.get('reuses_build345_measurement_model') is True and c.get('workspace_read_only') is True,'Build 357 retained authority mismatch')
+q(c.get('approved_source_evidence_min')==2 and c.get('reviewed_story_plans_min')==1 and c.get('source_backed_story_items_min')==2 and c.get('confirmed_capture_tracks_min')==4,'Build 357 thresholds mismatch')
+q(c.get('next_build')==358 and c.get('next_build_title')=='Search Console Real Export & Fresh Discovery Intake VIII','Build 352 successor mismatch')
+q(all(v is False for v in s.values()),'Build 357 safety authority drift')
+q(auth.get('security_response')=='Preserve server-side admin authorization. Do not bypass or weaken authentication.','Build 357 auth recovery must preserve authorization')
+for token in ('SOURCE_EVIDENCE_REVIEW_REQUIRED','APPROVED_SOURCE_EVIDENCE_INSUFFICIENT','STORY_PLANNING_PREREQUISITE_SYNC_REQUIRED','HUMAN_REVIEWED_STORY_PLAN_REQUIRED','SOURCE_BACKED_STORY_ITEMS_REQUIRED','GREY_HAIR_REVIEWED_EVIDENCE_READY_PENDING_MAKER_STORY_DECISION','Build 357 source review &amp; story-plan continuity V','Review CAIP evidence','Open story planning'):q(token in ui,'Build 357 UI missing '+token)
+q('/public/js/admin-grey-hair-story-readiness-v320.js?v=467b357' in page and '/public/js/admin-grey-hair-story-readiness-v320.js?v=467b345' in page,'Build 357 current/historical cache identities missing')
+q('const RELEASE=467,BUILD=351' in api and "TITLE='Grey Hair Source Review & Story-Plan Completion Continuity V'" in api,'Build 357 API identity missing')
+q('comparison_baseline:{source_build:351' in api,'Build 357 API comparison baseline mismatch')
+upper=' '+re.sub(r'--.*','',sql).upper()+' '
+for forbidden in (' INSERT ',' UPDATE ',' DELETE ',' CREATE ',' ALTER ',' DROP ',' REPLACE ',' VACUUM ',' REINDEX '):q(forbidden not in upper,'Build 357 measurement must remain read-only: '+forbidden.strip())
+for token in ('source_evidence_needs_review','approved_source_evidence','confirmed_capture_groups','confirmed_capture_tracks','reviewed_story_plans','source_backed_story_items','maker_story_profiles','pragma_foreign_key_check'):q(token in sql,'Build 357 measurement missing '+token)
+for token in ('comparison_to_build349','evidence_approval_mutation:false','story_plan_review_mutation:false','maker_story_profile_mutation:false','production_d1_contact:false'):q(token in verify,'Build 357 verifier missing '+token)
+for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','EVIDENCE APPROVAL MUTATION: ZERO','SYNC MUTATION: ZERO','STORY PLAN REVIEW MUTATION: ZERO','MAKER STORY PROFILE MUTATION: ZERO','AUTH BYPASS: ZERO','PRODUCTION D1 CONTACT: ZERO'):q(token in wf,'Build 357 workflow boundary missing '+token)
+q('Build 357 — Grey Hair Source Review & Story-Plan Completion Continuity V' in road and 'Build 352 — Search Console Real Export & Fresh Discovery Intake VII' in road,'Build 357/352 roadmap continuity missing')
+q('id="adminAccessMessage"' in itpage and 'BUILD357_AUTH_GATING' in itpage,'I.T. integrations page missing protected auth state surface')
+for body,label in ((registry,'registry'),(readiness,'readiness'),(setup,'setup guide'),(etsy,'Etsy')):q('DDWhenAdminReady' in body and 'dd:admin-access-denied' in body,f'{label} must wait for shared admin access')
+q('loginRedirect' in etsy and 'provider=etsy' in etsy,'Etsy connection must preserve login return and OAuth start')
+q('oauth_callback_fail_safe' in callback and 'function createOAuthCallbackCore' in callback,'Build 357 Etsy callback fail-safe wrapper missing')
+q("identity_source:'etsy_access_token_subject'" in providers,'Build 357 Etsy token-subject bootstrap missing')
+q('siteInventoryCardViewButton' in inventory and 'dd_inventory_display_mode_v357' in inventory,'Build 357 Inventory Card View control/persistence missing')
+q('.site-inventory-table-wrap.is-card-view' in styles,'Build 357 Inventory Card View CSS missing')
+q('/public/js/admin-site-item-inventory.js?v=467b357' in inventory_page,'Build 357 Inventory asset cache identity missing')
+q(int(p.get('build') or 0)>=351,'Current pointer must retain Build 357 or successor')
+if int(p.get('build') or 0)==351:q(p.get('state')=='DEVELOPMENT_GREEN' and int(p.get('next_build') or 0)==352,'Build 357 current authority/successor mismatch')
+print('RELEASE 467 BUILD 357 GREY HAIR SOURCE REVIEW & STORY-PLAN COMPLETION CONTINUITY V')
+if F:
+ print('FAIL');[print('-',x) for x in F];sys.exit(1)
+print('PASS');print('I.T. auth recovery preserves authentication; protected startup waits for verified admin access')

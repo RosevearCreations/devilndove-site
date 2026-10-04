@@ -199,6 +199,12 @@ export async function verifyOAuthIdentity(contract, env, accessToken, fetchImpl 
   if (!cfg.lookupConfigurationReady) throw identityFailure('oauth_provider_identity_configuration_incomplete');
   if (!text(accessToken)) throw identityFailure('oauth_provider_identity_failed');
 
+  // Build 357: Etsy access tokens carry the authenticated numeric user subject before the first dot.
+  // Use that subject when available and verify shop ownership during discoverEtsyShop, removing one provider lookup.
+  if (contract.key === 'etsy') {
+    const tokenSubject=etsyUserIdFromToken(accessToken);
+    if (/^\d+$/.test(tokenSubject)) return { verified:true, remoteSubject:tokenSubject, accountLabel:cfg.accountLabel, secondarySubjectVerified:true, identity_source:'etsy_access_token_subject' };
+  }
   const headers = { 'Accept': 'application/json', 'Authorization': `Bearer ${text(accessToken)}` };
   if (cfg.identity.apiKeyHeader === 'etsy') {
     headers['x-api-key'] = `${text(env?.[contract.clientIdEnv])}:${text(env?.[contract.clientSecretEnv])}`;
