@@ -37,6 +37,7 @@ const ADMIN_SURFACE_CONSOLIDATION_REVISION = '467b239-admin-surface-consolidatio
 const ADMIN_HANDOFF_REVISION = '467b241-cross-authority-handoff-v1';
 const ADMIN_RELEASE_EVIDENCE_REVISION = '467b247-release-evidence-baseline-v6';
 const STOREFRONT_DISCOVERY_REVISION = '467b292-observer-budget-v1';
+const STOREFRONT_FAST_RENDER_REVISION = '467b358-storefront-worker-budget-v1';
 
 function isApiPath(pathname) { return String(pathname || '').startsWith('/api/'); }
 function isReadMethod(method) { return ['GET', 'HEAD', 'OPTIONS'].includes(String(method || 'GET').toUpperCase()); }
@@ -51,6 +52,9 @@ function isAdminRuntimePath(pathname) {
 }
 function isStorefrontDiscoveryPath(pathname) {
   return ['/shop/', '/shop/product/', '/collections/', '/collages/'].includes(normalizedPagePath(pathname));
+}
+function isStorefrontWorkerFastPath(pathname) {
+  return ['/shop/', '/collections/'].includes(normalizedPagePath(pathname));
 }
 function isPublicRuntimeIntelligencePath(pathname) {
   const path = normalizedPagePath(pathname);
@@ -185,6 +189,54 @@ async function withProductsFastPlatformClient(response) {
     return new Response(fallback.body, { status: fallback.status, statusText: fallback.statusText, headers });
   }
 }
+function storefrontFastPlatformMarkup() {
+  return [
+    styleNonceBootstrapMarkup(),
+    `<link data-dd-design-system-v293="1" rel="stylesheet" href="/css/design-system-v293.css?v=${DESIGN_SYSTEM_REVISION}">`,
+    '<link rel="stylesheet" href="/css/current-responsive.css?v=current">',
+    `<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`,
+    '<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>',
+    '<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>',
+    '<script defer src="/public/js/product-media-fallback.js?v=62"></script>',
+    `<script defer src="/public/js/pwa-platform.js?v=${CURRENT_RELEASE}"></script>`,
+    `<script defer src="/public/js/adaptive-shell.js?v=${CURRENT_RELEASE}b143"></script>`,
+    '<link data-dd-context-help-style="true" rel="stylesheet" href="/css/admin-context-help.css?v=467b234-workflow-help"><script defer src="/public/js/admin-context-help.js?v=467b234-workflow-help"></script>',
+    '<script defer src="/public/js/public-heading-guard.js?v=467b292-observer-budget-v1"></script>',
+    `<script defer src="/public/js/runtime-intelligence.js?v=${CURRENT_RELEASE}"></script>`,
+    `<link rel="stylesheet" href="/css/storefront-discovery.css?v=${STOREFRONT_DISCOVERY_REVISION}"><script defer src="/public/js/storefront-discovery-runtime.js?v=${STOREFRONT_DISCOVERY_REVISION}"></script>`,
+  ].join('');
+}
+async function withStorefrontFastPlatformClient(response, request) {
+  if (String(request?.method || 'GET').toUpperCase() !== 'GET') return response;
+  const contentType = String(response?.headers?.get('Content-Type') || '').toLowerCase();
+  if (!contentType.includes('text/html') || response.status < 200 || response.status >= 400) return response;
+  const fallback = response.clone();
+  try {
+    const nonce = randomCspNonce();
+    let html = await response.text();
+    const pathname = new URL(request.url).pathname;
+    if (!html.includes('data-dd-storefront-fast-v358="1"') && html.includes('</head>')) {
+      html = html.replace('</head>', `<meta data-dd-storefront-fast-v358="1" content="${STOREFRONT_FAST_RENDER_REVISION}" name="dd-storefront-render">${storefrontFastPlatformMarkup()}</head>`);
+    }
+    if (normalizedPagePath(pathname) === '/shop/' && new URL(request.url).searchParams.toString()) {
+      html = html.replace(/(<meta\s+content=")[^"]*("\s+name="robots">)/i, '$1noindex,follow$2');
+    }
+    html = html.replace(/<script(?![^>]*\bnonce=)/gi, `<script nonce="${nonce}"`);
+    html = html.replace(/<style(?![^>]*\bnonce=)/gi, `<style nonce="${nonce}"`);
+    const headers = new Headers(response.headers);
+    headers.set('Content-Security-Policy', cspForNonce(nonce));
+    headers.set('Content-Security-Policy-Report-Only', cspReportOnlyForNonce(nonce));
+    headers.set('X-DND-CSP-Revision', '467b251-style-nonce-v1');
+    headers.set('X-DND-Storefront-Render-Path', 'static-fast-path-b358');
+    headers.set('X-DND-Storefront-Worker-Budget', STOREFRONT_FAST_RENDER_REVISION);
+    return new Response(html, { status: response.status, statusText: response.statusText, headers });
+  } catch {
+    const headers = new Headers(fallback.headers);
+    headers.set('X-DND-Storefront-Render-Path', 'static-fast-path-fallback-b358');
+    return new Response(fallback.body, { status: fallback.status, statusText: fallback.statusText, headers });
+  }
+}
+
 async function withPlatformClient(response, request, env = {}) {
   if (String(request?.method || 'GET').toUpperCase() !== 'GET') return response;
   const contentType = String(response?.headers?.get('Content-Type') || '').toLowerCase();
@@ -373,6 +425,8 @@ function withScriptNonceCsp(response, request) {
 }
 async function finish(response, request, guard = null, env = {}) {
   const guarded = guard ? withGuardHeaders(response, guard) : response;
+  const pathname = new URL(request.url).pathname;
+  if (isStorefrontWorkerFastPath(pathname)) return withStorefrontFastPlatformClient(guarded, request);
   const platform = await withPlatformClient(guarded, request, env);
   return withScriptNonceCsp(platform, request);
 }

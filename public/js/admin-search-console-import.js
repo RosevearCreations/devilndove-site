@@ -1,3 +1,4 @@
+// BUILD358_CURRENT_CLIENT: Search Console Real Export & Fresh Discovery Intake VIII; real-only evidence and explicit report-date freshness.
 // Historical compatibility: Build 346 freshness
 // BUILD352_CURRENT_CLIENT: Search Console Real Export & Fresh Discovery Intake VII; explicit report-date-only freshness.
 // Historical regression token retained: Build 340 freshness
