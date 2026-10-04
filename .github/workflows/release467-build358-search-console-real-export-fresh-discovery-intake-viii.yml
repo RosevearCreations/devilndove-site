@@ -15,6 +15,13 @@ on:
       - 'public/js/admin-search-console-import.js'
       - 'functions/_middleware.js'
       - 'functions/api/products.js'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'admin/reliability/index.html'
+      - 'admin/deployment-preflight/index.html'
+      - 'public/js/admin-current-reliability.js'
+      - 'public/js/admin-current-deployment-preflight.js'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
       - 'docs/operations/RELEASE_467_BUILD_358_SEARCH_CONSOLE_REAL_EXPORT_FRESH_DISCOVERY_INTAKE_VIII.md'
       - '.github/workflows/release467-build358-search-console-real-export-fresh-discovery-intake-viii.yml'
   workflow_dispatch:
