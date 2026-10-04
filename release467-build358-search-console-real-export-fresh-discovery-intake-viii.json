@@ -103,7 +103,10 @@
       "branch_hygiene_run": 37215499656,
       "d1_ci_fanout_guard_run": 37215499584,
       "build_specific_proof_run": 37215499609,
-      "state": "DEVELOPMENT_GREEN"
+      "state": "DEVELOPMENT_GREEN",
+      "quality_run": 37215499585,
+      "it_admin_runtime_run": 37215499593,
+      "repository_hygiene_run": 37215499656
     },
     "production": {
       "main_sha": "f4806249d913fb779c734f332bfb05019c6c6f1b",
