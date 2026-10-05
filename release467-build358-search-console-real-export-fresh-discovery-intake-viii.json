@@ -2,7 +2,7 @@
   "release": 467,
   "build": 358,
   "title": "Search Console Real Export & Fresh Discovery Intake VIII",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "SEARCH_CONSOLE_REAL_EXPORT_FRESH_DISCOVERY_INTAKE_VIII",
   "authority": "release467-build358-search-console-real-export-fresh-discovery-intake-viii",
   "predecessor": {
@@ -123,7 +123,7 @@
   "future_queue_exhausted": false,
   "measurement_lane_state": "MEASURED_EVIDENCE_PENDING_NO_REAL_EXPORT",
   "measurement_lane_owner": "release467-build358-search-console-real-export-fresh-discovery-intake-viii.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD358_GREEN",
   "measurement": {
     "source_sha": "9e67e1463eabb9f0a7ba9f0c425d2499f0e20958",
     "source_tree_sha": "aaa94d78094700098aa0891493c248b987a382d8",
@@ -195,7 +195,7 @@
     "automatic_import": false,
     "automatic_queue_generation": false,
     "automatic_seo_apply": false,
-    "storefront_worker_cpu_hotfix_state": "SOURCE_PROVEN_PENDING_PRODUCTION_ACCEPTANCE",
+    "storefront_worker_cpu_hotfix_state": "PRODUCTION_GREEN",
     "next_build": 359,
     "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VII"
   },
@@ -203,5 +203,33 @@
     "predecessor_workflow": ".github/workflows/release467-build357-grey-hair-source-review-story-plan-completion-continuity-vi.yml",
     "predecessor_workflow_state": "HISTORICAL_MANUAL_ONLY",
     "automatic_remote_d1_current_build_only": true
+  },
+  "final_closure": {
+    "dev_sha": "66f32dd208f6337aa2212c23441652057c7fb7bd",
+    "tree_sha": "0bf65d6acf57b6ae8b6562bfcb2b658716d13470",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD358_GREEN",
+    "proofs": {
+      "system_gate_run": 37240168429,
+      "current_application_quality_run": 37240168459,
+      "it_admin_runtime_proof_run": 37240168456,
+      "branch_hygiene_run": 37240168436,
+      "d1_ci_fanout_guard_run": 37240168434,
+      "build_specific_proof_run": 37240168455
+    },
+    "artifact_id": 11317615866,
+    "artifact_name": "build358-search-console-fresh-discovery-66f32dd208f6337aa2212c23441652057c7fb7bd",
+    "artifact_digest": "sha256:cfff92242c413c8574099bc2f5c3569e6b10a2a9036010de65c84203c906870e",
+    "ingested_by_build": 359,
+    "recorded_by": "Build 359 predecessor ingestion; not self-recorded by Build 358"
+  },
+  "production_checkpoint": {
+    "main_sha": "88be5197b9c84814418116c4a7a3dd24ede01f34",
+    "tree_sha": "0bf65d6acf57b6ae8b6562bfcb2b658716d13470",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37240297064,
+    "production_live_resource_integrity_run": 37240352096,
+    "remote_d1_queries": 0
   }
 }

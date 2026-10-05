@@ -1,0 +1,108 @@
+name: Release 467 Build 359 Maker Story Advancement Publication Readiness Continuity VII
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'release467-build358-search-console-real-export-fresh-discovery-intake-viii.json'
+      - 'release467-build359-maker-story-advancement-publication-readiness-continuity-vii.json'
+      - 'current-development-authority.json'
+      - 'scripts/release467_build359_continuity.sql'
+      - 'scripts/release467_build359_verify_continuity.mjs'
+      - 'scripts/release467_build359_regression.py'
+      - 'scripts/release467_build359_gate.py'
+      - 'scripts/release467_build357_regression.py'
+      - 'scripts/release467_build358_regression.py'
+      - 'scripts/release467_build265_gate.py'
+      - 'scripts/current_system_gate_provenance_gate.py'
+      - 'migrations/canonical/0030_release467_inventory_workstation_category_additions.sql'
+      - 'migrations/canonical/manifest.json'
+      - 'scripts/repository_forward_sanity.py'
+      - 'admin/inventory-operations/index.html'
+      - 'css/inventory-card-view-v359.css'
+      - 'public/js/admin-site-item-inventory.js'
+      - 'functions/api/_lib/currentReliability.js'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'functions/api/admin/it-operations-control-tower.js'
+      - 'public/js/admin-it-control-tower.js'
+      - 'admin/it/index.html'
+      - 'admin/reliability/index.html'
+      - 'admin/deployment-preflight/index.html'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+      - 'docs/operations/RELEASE_467_BUILD_359_MAKER_STORY_ADVANCEMENT_PUBLICATION_READINESS_CONTINUITY_VII.md'
+      - '.github/workflows/release467-build359-maker-story-advancement-publication-readiness-continuity-vii.yml'
+      - '.github/workflows/release467-build358-search-console-real-export-fresh-discovery-intake-viii.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      - run: python scripts/release467_build359_regression.py
+      - run: python scripts/release467_build359_gate.py
+      - run: node --check scripts/release467_build359_verify_continuity.mjs
+      - run: node --check public/js/admin-site-item-inventory.js
+      - run: node --check functions/api/admin/current-deployment-preflight.js
+      - run: node --check functions/api/_lib/currentReliability.js
+  advancement-continuity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_ACCOUNT_ID: c0d5bc25df16ae5b7d47c985c4b7b787
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      DEV_D1_DATABASE_NAME: devilndove-dev
+      EXPECTED_DEV_D1_DATABASE_ID: dbc1615b-dcbe-4951-973b-b47c99c73bfa
+      D1_PROVIDER_ROWS_READ_CEILING: '20000'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: '24' }
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - name: Apply canonical Development workstation taxonomy
+        run: |
+          set -euo pipefail
+          python scripts/d1_migrate.py --target development --apply --source-sha "${GITHUB_SHA}"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM d1_migrations WHERE name='0030_release467_inventory_workstation_category_additions.sql') migration_rows,(SELECT COUNT(*) FROM inventory_processes WHERE process_key='jewelry-forge-work' AND process_name='Jewelry & Forge Work' AND is_active=1) jewelry_forge_rows,(SELECT COUNT(*) FROM inventory_processes WHERE process_key='auto-detailing' AND process_name='Auto Detailing' AND is_active=1) auto_detailing_rows,(SELECT COUNT(*) FROM pragma_foreign_key_check) fk;" > /tmp/b359-taxonomy.json
+          node -e "const d=require('/tmp/b359-taxonomy.json');const r=Array.isArray(d)?d[0]?.results?.[0]:d?.results?.[0];if(!r||Number(r.migration_rows)!==1||Number(r.jewelry_forge_rows)!==1||Number(r.auto_detailing_rows)!==1||Number(r.fk)!==0)process.exit(1)"
+      - name: Prove exact Development D1
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          grep -q '^DND_ENVIRONMENT = "development"$' wrangler.toml
+          grep -q '^database_name = "devilndove-dev"$' wrangler.toml
+          ! grep -q 'devilndove-prod' wrangler.toml
+          npx --yes wrangler@4.128.0 d1 info "${DEV_D1_DATABASE_NAME}" --json --config wrangler.toml > /tmp/info.json
+          node -e "const d=require('/tmp/info.json');const s=JSON.stringify(d);if(!s.includes(process.env.EXPECTED_DEV_D1_DATABASE_ID)||!s.includes(process.env.DEV_D1_DATABASE_NAME))process.exit(1)"
+      - name: Measure Maker Story advancement and publication readiness
+        run: |
+          set -euo pipefail
+          COMMAND="$(grep -v '^[[:space:]]*--' scripts/release467_build359_continuity.sql)"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b359.json
+          node scripts/release467_build359_verify_continuity.mjs /tmp/b359.json "${GITHUB_SHA}" /tmp/build359.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build359-maker-story-advancement-readiness-${{ github.sha }}
+          path: /tmp/build359.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Boundary
+        if: always()
+        run: |
+          echo 'D1_ONE_SHOT_EVIDENCE_CAPTURE'
+          echo 'FIVE ACTIVE PROJECTS: READ-ONLY ADVANCEMENT'
+          echo 'SUBSTANTIVE RESULT/LESSON FACTS: REQUIRED'
+          echo 'HUMAN STORY REVIEW: REQUIRED'
+          echo 'INVENTORY CARD MAX COLUMNS: THREE'
+          echo 'WORKSTATION CATEGORIES: JEWELRY & FORGE WORK + AUTO DETAILING'
+          echo 'DEVELOPMENT MIGRATION 0030: APPLY + VERIFY'
+          echo 'AUTOMATIC INVENTORY REASSIGNMENT: ZERO'
+          echo 'AUTOMATIC PUBLICATION: ZERO'
+          echo 'AUTOMATIC SOCIAL POSTING: ZERO'
+          echo 'PROVIDER EXECUTION: ZERO'
+          echo 'PRODUCTION D1 CONTACT: ZERO'

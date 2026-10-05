@@ -1,3 +1,4 @@
+// BUILD359_CARD_LAYOUT_AND_WORKSTATION_TAXONOMY: Card layout is capped at three columns by CSS; canonical workstation/category options include Jewelry & Forge Work and Auto Detailing after migration 0030.
 // File: /public/js/admin-site-item-inventory.js
 // Brief description: Admin editor for tools and supplies inventory, reorder queues,
 // do-not-reuse flags, supplier/source details, packaging-source capture, movement history, and bulk cost updates.

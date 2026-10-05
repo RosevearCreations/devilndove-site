@@ -1,33 +1,33 @@
 {
   "release": 467,
-  "build": 358,
-  "title": "Search Console Real Export & Fresh Discovery Intake VIII",
+  "build": 359,
+  "title": "Maker Story Advancement & Publication Readiness Continuity VII",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 357,
-      "title": "Grey Hair Source Review & Story-Plan Completion Continuity VI",
-      "authority": "release467-build357-grey-hair-source-review-story-plan-completion-continuity-vi.json",
-      "dev_sha": "9d508a74417c1007891d4877c35140d351d51faf",
-      "tree_sha": "78aeaa4e11119620ebf71f264ec84b7939dd4adc",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD357_GREEN",
+      "build": 358,
+      "title": "Search Console Real Export & Fresh Discovery Intake VIII",
+      "authority": "release467-build358-search-console-real-export-fresh-discovery-intake-viii.json",
+      "dev_sha": "66f32dd208f6337aa2212c23441652057c7fb7bd",
+      "tree_sha": "0bf65d6acf57b6ae8b6562bfcb2b658716d13470",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD358_GREEN",
       "proofs": {
-        "system_gate_run": 37215499577,
-        "current_application_quality_run": 37215499585,
-        "it_admin_runtime_proof_run": 37215499593,
-        "branch_hygiene_run": 37215499656,
-        "d1_ci_fanout_guard_run": 37215499584,
-        "build_specific_proof_run": 37215499609
+        "system_gate_run": 37240168429,
+        "current_application_quality_run": 37240168459,
+        "it_admin_runtime_proof_run": 37240168456,
+        "branch_hygiene_run": 37240168436,
+        "d1_ci_fanout_guard_run": 37240168434,
+        "build_specific_proof_run": 37240168455
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 358,
-      "title": "Search Console Real Export & Fresh Discovery Intake VIII",
-      "authority": "release467-build358-search-console-real-export-fresh-discovery-intake-viii.json",
+      "build": 359,
+      "title": "Maker Story Advancement & Publication Readiness Continuity VII",
+      "authority": "release467-build359-maker-story-advancement-publication-readiness-continuity-vii.json",
       "state": "DEVELOPMENT_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -38,19 +38,20 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 357,
-    "title": "Grey Hair Source Review & Story-Plan Completion Continuity VI",
-    "authority": "release467-build357-grey-hair-source-review-story-plan-completion-continuity-vi.json",
-    "main_sha": "f4806249d913fb779c734f332bfb05019c6c6f1b",
-    "tree_sha": "78aeaa4e11119620ebf71f264ec84b7939dd4adc",
+    "build": 358,
+    "title": "Search Console Real Export & Fresh Discovery Intake VIII",
+    "authority": "release467-build358-search-console-real-export-fresh-discovery-intake-viii.json",
+    "main_sha": "88be5197b9c84814418116c4a7a3dd24ede01f34",
+    "tree_sha": "0bf65d6acf57b6ae8b6562bfcb2b658716d13470",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 37215653136,
-    "production_live_resource_integrity_run": 37215700395,
+    "production_pages_deploy_run": 37240297064,
+    "production_live_resource_integrity_run": 37240352096,
     "remote_d1_queries": 0,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build359-maker-story-advancement-publication-readiness-continuity-vii.json",
     "release467-build358-search-console-real-export-fresh-discovery-intake-viii.json",
     "release467-build357-grey-hair-source-review-story-plan-completion-continuity-vi.json",
     "release467-build356-35th-promo-factual-evidence-completion-continuity-vi.json",
@@ -249,12 +250,12 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_349_354.md",
-  "next_build": 359,
-  "next_build_state": "QUEUED_AFTER_BUILD358_PRODUCTION_GREEN",
-  "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VII",
-  "promotion_state": "BUILD358_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD359_DEFINED_BY_BUILD358_OBSERVED_EVIDENCE",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_355_360.md",
+  "next_build": 360,
+  "next_build_state": "QUEUED_AFTER_BUILD359_PRODUCTION_GREEN",
+  "next_build_title": "Content Adoption & Discovery Outcomes Renewal X",
+  "promotion_state": "BUILD359_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD360_DEFINED_BY_BUILD359_OBSERVED_EVIDENCE",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -285,15 +286,15 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "9d508a74417c1007891d4877c35140d351d51faf",
-  "accepted_dev_tree_sha": "78aeaa4e11119620ebf71f264ec84b7939dd4adc",
+  "accepted_dev_sha": "66f32dd208f6337aa2212c23441652057c7fb7bd",
+  "accepted_dev_tree_sha": "0bf65d6acf57b6ae8b6562bfcb2b658716d13470",
   "acceptance": {
-    "system_gate_run": 37215499577,
-    "current_application_quality_run": 37215499585,
-    "it_admin_runtime_proof_run": 37215499593,
-    "branch_hygiene_run": 37215499656,
-    "d1_ci_fanout_guard_run": 37215499584,
-    "build_specific_proof_run": 37215499609
+    "system_gate_run": 37240168429,
+    "current_application_quality_run": 37240168459,
+    "it_admin_runtime_proof_run": 37240168456,
+    "branch_hygiene_run": 37240168436,
+    "d1_ci_fanout_guard_run": 37240168434,
+    "build_specific_proof_run": 37240168455
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -4722,7 +4723,7 @@
   },
   "search_console_real_export_fresh_discovery_intake_viii": {
     "source_build": 358,
-    "state": "DEVELOPMENT_GREEN",
+    "state": "PRODUCTION_GREEN",
     "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EVIDENCE_PENDING_NO_REAL_EXPORT",
     "runtime_incident": {
       "observed_at_utc": "2026-10-04T18:46:03Z",
@@ -4737,11 +4738,11 @@
       "automatic_import": false,
       "automatic_queue_generation": false,
       "automatic_seo_apply": false,
-      "storefront_worker_cpu_hotfix_state": "SOURCE_PROVEN_PENDING_PRODUCTION_ACCEPTANCE",
+      "storefront_worker_cpu_hotfix_state": "PRODUCTION_GREEN",
       "next_build": 359,
       "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VII"
     },
-    "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+    "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD358_GREEN",
     "next_build": 359,
     "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VII",
     "future_queue_exhausted": false,
@@ -4807,6 +4808,125 @@
       "synthetic_rows": false,
       "queue_mutation": false,
       "automatic_seo_apply": false,
+      "production_d1_contact": false
+    },
+    "final_closure": {
+      "dev_sha": "66f32dd208f6337aa2212c23441652057c7fb7bd",
+      "tree_sha": "0bf65d6acf57b6ae8b6562bfcb2b658716d13470",
+      "state": "DEVELOPMENT_GREEN",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD358_GREEN",
+      "proofs": {
+        "system_gate_run": 37240168429,
+        "current_application_quality_run": 37240168459,
+        "it_admin_runtime_proof_run": 37240168456,
+        "branch_hygiene_run": 37240168436,
+        "d1_ci_fanout_guard_run": 37240168434,
+        "build_specific_proof_run": 37240168455
+      },
+      "artifact_id": 11317615866,
+      "artifact_name": "build358-search-console-fresh-discovery-66f32dd208f6337aa2212c23441652057c7fb7bd",
+      "artifact_digest": "sha256:cfff92242c413c8574099bc2f5c3569e6b10a2a9036010de65c84203c906870e",
+      "ingested_by_build": 359,
+      "recorded_by": "Build 359 predecessor ingestion; not self-recorded by Build 358"
+    },
+    "production_checkpoint": {
+      "main_sha": "88be5197b9c84814418116c4a7a3dd24ede01f34",
+      "tree_sha": "0bf65d6acf57b6ae8b6562bfcb2b658716d13470",
+      "state": "PRODUCTION_GREEN",
+      "same_tree_as_verified_development": true,
+      "production_pages_deploy_run": 37240297064,
+      "production_live_resource_integrity_run": 37240352096,
+      "remote_d1_queries": 0
+    }
+  },
+  "maker_story_advancement_publication_readiness_continuity_vii": {
+    "source_build": 359,
+    "state": "DEVELOPMENT_GREEN",
+    "measurement_state": "EXACT_DEVELOPMENT_MEASURED_PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+    "operator_repairs": {
+      "inventory_card_view": {
+        "state": "SOURCE_PROVEN_DEVELOPMENT_PREVIEW_GREEN",
+        "max_columns": 3,
+        "overlap_repair": true,
+        "actual_identity_class_fixed": "site-inventory-grid-identity"
+      },
+      "workstation_taxonomy": {
+        "state": "DEVELOPMENT_MIGRATION_0030_APPLIED_AND_VERIFIED",
+        "categories": [
+          "Jewelry & Forge Work",
+          "Auto Detailing"
+        ],
+        "existing_assignments_changed": false,
+        "development_apply_run": 37363399353,
+        "verification": "migration row=1; Jewelry & Forge Work row=1; Auto Detailing row=1; foreign-key violations=0"
+      }
+    },
+    "decision": {
+      "classification": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+      "rationale": "Exact Development measurement found one already human-reviewed published story, three projects still requiring Maker Story evidence, and the 35th promo still requiring factual execution/result/lesson evidence. No automatic advancement is justified.",
+      "automatic_advancement_authorized": false,
+      "automatic_publication_authorized": false,
+      "media_rights_inference_authorized": false,
+      "next_build": 360,
+      "next_build_title": "Content Adoption & Discovery Outcomes Renewal X"
+    },
+    "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_DEVELOPMENT_MIGRATION_VERIFICATION",
+    "next_build": 360,
+    "next_build_title": "Content Adoption & Discovery Outcomes Renewal X",
+    "future_queue_exhausted": false,
+    "measurement": {
+      "source_sha": "ce70a310e9cb615c55d2aceada839d238c24ed98",
+      "source_tree_sha": "e581ebdab9232afec247ea71aa69d0f3f12cb4c6",
+      "workflow_run": 37362197530,
+      "artifact_id": 11367142542,
+      "artifact_name": "build359-maker-story-advancement-readiness-ce70a310e9cb615c55d2aceada839d238c24ed98",
+      "artifact_digest": "sha256:1fdac293873da68b54b2167eb5e6df547c42a2161b30f83bca75dc721065d05c",
+      "statement_count": 6,
+      "rows_read_by_statement": [
+        456,
+        19,
+        16,
+        163,
+        4,
+        14
+      ],
+      "aggregate_rows_read": 672,
+      "rows_read_ceiling": 20000,
+      "active_projects": 5,
+      "readiness_counts": {
+        "MAKER_STORY_EVIDENCE_REQUIRED": 3,
+        "FACTUAL_OUTCOME_EVIDENCE_REQUIRED": 1,
+        "PUBLISHED_REVIEWED_STORY": 1
+      },
+      "completion_lanes": {
+        "promo35_execution_events": 0,
+        "promo35_result_events": 0,
+        "promo35_lesson_events": 0,
+        "grey_hair_approved_source_evidence": 1,
+        "grey_hair_source_evidence_needs_review": 2,
+        "grey_hair_reviewed_story_plans": 0,
+        "grey_hair_source_backed_story_items": 0
+      },
+      "media_rights": {
+        "active_caip_assets": 45,
+        "public_allowed_caip_assets": 0,
+        "non_public_caip_assets": 45,
+        "public_allowed_private_uploads": 0
+      },
+      "social": {
+        "social_rows": 1,
+        "review_first_ready_rows": 1,
+        "provider_posted_rows": 0
+      },
+      "decision": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+      "publication_readiness_is_read_only_classification": true,
+      "automatic_profile_creation": false,
+      "automatic_story_review": false,
+      "automatic_public_candidate": false,
+      "automatic_content_approval": false,
+      "publication_mutation": false,
+      "automatic_social_posting": false,
+      "provider_execution": false,
       "production_d1_contact": false
     }
   }
