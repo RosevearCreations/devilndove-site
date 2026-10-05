@@ -2,7 +2,7 @@
   "release": 467,
   "build": 359,
   "title": "Maker Story Advancement & Publication Readiness Continuity VII",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
@@ -4841,8 +4841,8 @@
   },
   "maker_story_advancement_publication_readiness_continuity_vii": {
     "source_build": 359,
-    "state": "DEVELOPMENT_CANDIDATE",
-    "measurement_state": "AWAITING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "state": "DEVELOPMENT_GREEN",
+    "measurement_state": "EXACT_DEVELOPMENT_MEASURED_PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
     "operator_repairs": {
       "inventory_card_view": {
         "state": "SOURCE_IMPLEMENTED_PENDING_EXACT_DEVELOPMENT_PROOF",
@@ -4860,16 +4860,72 @@
       }
     },
     "decision": {
-      "classification": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+      "classification": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+      "rationale": "Exact Development measurement found one already human-reviewed published story, three projects still requiring Maker Story evidence, and the 35th promo still requiring factual execution/result/lesson evidence. No automatic advancement is justified.",
       "automatic_advancement_authorized": false,
       "automatic_publication_authorized": false,
       "media_rights_inference_authorized": false,
       "next_build": 360,
       "next_build_title": "Content Adoption & Discovery Outcomes Renewal X"
     },
-    "exact_head_reproof_state": "PENDING_AFTER_MEASUREMENT_INGESTION",
+    "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
     "next_build": 360,
     "next_build_title": "Content Adoption & Discovery Outcomes Renewal X",
-    "future_queue_exhausted": false
+    "future_queue_exhausted": false,
+    "measurement": {
+      "source_sha": "ce70a310e9cb615c55d2aceada839d238c24ed98",
+      "source_tree_sha": "e581ebdab9232afec247ea71aa69d0f3f12cb4c6",
+      "workflow_run": 37362197530,
+      "artifact_id": 11367142542,
+      "artifact_name": "build359-maker-story-advancement-readiness-ce70a310e9cb615c55d2aceada839d238c24ed98",
+      "artifact_digest": "sha256:1fdac293873da68b54b2167eb5e6df547c42a2161b30f83bca75dc721065d05c",
+      "statement_count": 6,
+      "rows_read_by_statement": [
+        456,
+        19,
+        16,
+        163,
+        4,
+        14
+      ],
+      "aggregate_rows_read": 672,
+      "rows_read_ceiling": 20000,
+      "active_projects": 5,
+      "readiness_counts": {
+        "MAKER_STORY_EVIDENCE_REQUIRED": 3,
+        "FACTUAL_OUTCOME_EVIDENCE_REQUIRED": 1,
+        "PUBLISHED_REVIEWED_STORY": 1
+      },
+      "completion_lanes": {
+        "promo35_execution_events": 0,
+        "promo35_result_events": 0,
+        "promo35_lesson_events": 0,
+        "grey_hair_approved_source_evidence": 1,
+        "grey_hair_source_evidence_needs_review": 2,
+        "grey_hair_reviewed_story_plans": 0,
+        "grey_hair_source_backed_story_items": 0
+      },
+      "media_rights": {
+        "active_caip_assets": 45,
+        "public_allowed_caip_assets": 0,
+        "non_public_caip_assets": 45,
+        "public_allowed_private_uploads": 0
+      },
+      "social": {
+        "social_rows": 1,
+        "review_first_ready_rows": 1,
+        "provider_posted_rows": 0
+      },
+      "decision": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+      "publication_readiness_is_read_only_classification": true,
+      "automatic_profile_creation": false,
+      "automatic_story_review": false,
+      "automatic_public_candidate": false,
+      "automatic_content_approval": false,
+      "publication_mutation": false,
+      "automatic_social_posting": false,
+      "provider_execution": false,
+      "production_d1_contact": false
+    }
   }
 }

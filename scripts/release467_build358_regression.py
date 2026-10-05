@@ -45,7 +45,9 @@ for token in ('operator_bound_batches','csv_named_batches','import_audits','reve
     q(token in sql,'Build 358 SQL missing '+token)
 for token in ('EVIDENCE_PENDING_NO_REAL_EXPORT','REAL_EVIDENCE_STALE_NON_ACTIONABLE','REAL_EVIDENCE_FRESH_NO_SUPPORTED_SEO_OPPORTUNITY','REAL_EVIDENCE_FRESH_REVIEW_QUEUE_ELIGIBLE','freshness_window_days:30','synthetic_rows:false','production_d1_contact:false'):
     q(token in verify,'Build 358 verifier missing '+token)
-for token in ('push:','branches: [dev]','D1_ONE_SHOT_EVIDENCE_CAPTURE','REAL EXPORT CONFIRMATION REQUIRED','FRESHNESS WINDOW: 30 DAYS','SYNTHETIC DISCOVERY ROWS: ZERO','PRODUCTION D1 CONTACT: ZERO'):
+current_build=int(p.get('build') or 0)
+trigger_tokens=('push:','branches: [dev]') if current_build==358 else ('workflow_dispatch:',)
+for token in (*trigger_tokens,'D1_ONE_SHOT_EVIDENCE_CAPTURE','REAL EXPORT CONFIRMATION REQUIRED','FRESHNESS WINDOW: 30 DAYS','SYNTHETIC DISCOVERY ROWS: ZERO','PRODUCTION D1 CONTACT: ZERO'):
     q(token in wf,'Build 358 workflow boundary missing '+token)
 
 for token in ("STOREFRONT_FAST_RENDER_REVISION = '467b358-storefront-worker-budget-v1'","function isStorefrontWorkerFastPath","async function withStorefrontFastPlatformClient","X-DND-Storefront-Render-Path","static-fast-path-b358","if (isStorefrontWorkerFastPath(pathname)) return withStorefrontFastPlatformClient"):
