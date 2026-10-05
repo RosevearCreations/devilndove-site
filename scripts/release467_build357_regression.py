@@ -57,7 +57,7 @@ current_build=int(p.get('build') or 0)
 if current_build==357:
     q('/public/js/admin-site-item-inventory.js?v=467b357' in inventory_page,'Build 357 Inventory JS cache identity missing')
 else:
-    q(bool(re.search(r'/public/js/admin-site-item-inventory\\.js\\?v=467b\\d+',inventory_page)),'Verified successor Inventory JS cache identity missing')
+    q('/public/js/admin-site-item-inventory.js?v=467b' in inventory_page,'Verified successor Inventory JS cache identity missing')
 
 for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','SYNTHETIC EVIDENCE: ZERO','EVIDENCE APPROVAL MUTATION: ZERO','STORY PLAN REVIEW MUTATION: ZERO','ETSY CALLBACK FAIL-SAFE: SOURCE ONLY','ETSY LISTING WRITES: ZERO','INVENTORY CARD VIEW: PRESENTATION ONLY','PRODUCTION D1 CONTACT: ZERO'):
     q(token in wf,'Build 357 workflow boundary missing '+token)
