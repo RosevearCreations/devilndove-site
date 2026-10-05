@@ -62,6 +62,14 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with: { node-version: '24' }
+      - uses: actions/setup-python@v7
+        with: { python-version: '3.12' }
+      - name: Apply canonical Development workstation taxonomy
+        run: |
+          set -euo pipefail
+          python scripts/d1_migrate.py --target development --apply --source-sha "${GITHUB_SHA}"
+          npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "SELECT (SELECT COUNT(*) FROM d1_migrations WHERE name='0030_release467_inventory_workstation_category_additions.sql') migration_rows,(SELECT COUNT(*) FROM inventory_processes WHERE process_key='jewelry-forge-work' AND process_name='Jewelry & Forge Work' AND is_active=1) jewelry_forge_rows,(SELECT COUNT(*) FROM inventory_processes WHERE process_key='auto-detailing' AND process_name='Auto Detailing' AND is_active=1) auto_detailing_rows,(SELECT COUNT(*) FROM pragma_foreign_key_check) fk;" > /tmp/b359-taxonomy.json
+          node -e "const d=require('/tmp/b359-taxonomy.json');const r=Array.isArray(d)?d[0]?.results?.[0]:d?.results?.[0];if(!r||Number(r.migration_rows)!==1||Number(r.jewelry_forge_rows)!==1||Number(r.auto_detailing_rows)!==1||Number(r.fk)!==0)process.exit(1)"
       - name: Prove exact Development D1
         run: |
           set -euo pipefail
@@ -92,6 +100,7 @@ jobs:
           echo 'HUMAN STORY REVIEW: REQUIRED'
           echo 'INVENTORY CARD MAX COLUMNS: THREE'
           echo 'WORKSTATION CATEGORIES: JEWELRY & FORGE WORK + AUTO DETAILING'
+          echo 'DEVELOPMENT MIGRATION 0030: APPLY + VERIFY'
           echo 'AUTOMATIC INVENTORY REASSIGNMENT: ZERO'
           echo 'AUTOMATIC PUBLICATION: ZERO'
           echo 'AUTOMATIC SOCIAL POSTING: ZERO'

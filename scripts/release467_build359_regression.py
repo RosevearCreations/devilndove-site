@@ -38,7 +38,7 @@ q('0030_release467_inventory_workstation_category_additions.sql' in sanity and '
 upper=' '+re.sub(r'--.*','',sql).upper()+' '
 for forbidden in (' INSERT ',' UPDATE ',' DELETE ',' CREATE ',' ALTER ',' DROP ',' REPLACE ',' VACUUM ',' REINDEX '):q(forbidden not in upper,'Build 359 Maker Story measurement must remain read-only: '+forbidden.strip())
 for token in ('placeholderGuard','PUBLISHED_REVIEWED_STORY','FACTUAL_OUTCOME_EVIDENCE_REQUIRED','publication_mutation:false','production_d1_contact:false'):q(token in verify,'Build 359 verifier missing '+token)
-for token in ('push:','branches: [dev]','D1_ONE_SHOT_EVIDENCE_CAPTURE','FIVE ACTIVE PROJECTS: READ-ONLY ADVANCEMENT','AUTOMATIC PUBLICATION: ZERO','PRODUCTION D1 CONTACT: ZERO'):q(token in wf,'Build 359 workflow boundary missing '+token)
+for token in ('push:','branches: [dev]','D1_ONE_SHOT_EVIDENCE_CAPTURE','FIVE ACTIVE PROJECTS: READ-ONLY ADVANCEMENT','--target development --apply','0030_release467_inventory_workstation_category_additions.sql','DEVELOPMENT MIGRATION 0030: APPLY + VERIFY','AUTOMATIC PUBLICATION: ZERO','PRODUCTION D1 CONTACT: ZERO'):q(token in wf,'Build 359 workflow boundary missing '+token)
 q('Build 360 — Content Adoption & Discovery Outcomes Renewal X' in road,'Build 360 roadmap missing')
 q(int(p.get('build') or 0)>=359,'Current pointer must retain Build 359 or successor')
 if int(p.get('build') or 0)==359:q(p.get('state') in ('DEVELOPMENT_CANDIDATE','DEVELOPMENT_GREEN') and int(p.get('next_build') or 0)==360,'Build 359 current authority/successor mismatch')
