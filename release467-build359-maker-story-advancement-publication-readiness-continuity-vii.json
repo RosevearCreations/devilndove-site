@@ -89,18 +89,20 @@
   },
   "operator_repairs": {
     "inventory_card_view": {
-      "state": "SOURCE_PROVEN_PENDING_EXACT_HEAD_REPROOF",
+      "state": "SOURCE_PROVEN_DEVELOPMENT_PREVIEW_GREEN",
       "max_columns": 3,
       "overlap_repair": true,
       "actual_identity_class_fixed": "site-inventory-grid-identity"
     },
     "workstation_taxonomy": {
-      "state": "CANONICAL_MIGRATION_PENDING_DEVELOPMENT_SYSTEM_GATE",
+      "state": "DEVELOPMENT_MIGRATION_0030_APPLIED_AND_VERIFIED",
       "categories": [
         "Jewelry & Forge Work",
         "Auto Detailing"
       ],
-      "existing_assignments_changed": false
+      "existing_assignments_changed": false,
+      "development_apply_run": 37363399353,
+      "verification": "migration row=1; Jewelry & Forge Work row=1; Auto Detailing row=1; foreign-key violations=0"
     }
   },
   "starting_point": {
@@ -194,5 +196,6 @@
     "media_rights_inference_authorized": false,
     "next_build": 360,
     "next_build_title": "Content Adoption & Discovery Outcomes Renewal X"
-  }
+  },
+  "development_candidate_note": "Migration 0030 was applied and verified on Development; exact-head reproof remains required before Production promotion."
 }

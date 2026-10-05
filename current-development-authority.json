@@ -4845,18 +4845,20 @@
     "measurement_state": "EXACT_DEVELOPMENT_MEASURED_PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
     "operator_repairs": {
       "inventory_card_view": {
-        "state": "SOURCE_IMPLEMENTED_PENDING_EXACT_DEVELOPMENT_PROOF",
+        "state": "SOURCE_PROVEN_DEVELOPMENT_PREVIEW_GREEN",
         "max_columns": 3,
         "overlap_repair": true,
         "actual_identity_class_fixed": "site-inventory-grid-identity"
       },
       "workstation_taxonomy": {
-        "state": "CANONICAL_MIGRATION_PENDING_DEVELOPMENT_APPLICATION",
+        "state": "DEVELOPMENT_MIGRATION_0030_APPLIED_AND_VERIFIED",
         "categories": [
           "Jewelry & Forge Work",
           "Auto Detailing"
         ],
-        "existing_assignments_changed": false
+        "existing_assignments_changed": false,
+        "development_apply_run": 37363399353,
+        "verification": "migration row=1; Jewelry & Forge Work row=1; Auto Detailing row=1; foreign-key violations=0"
       }
     },
     "decision": {
@@ -4868,7 +4870,7 @@
       "next_build": 360,
       "next_build_title": "Content Adoption & Discovery Outcomes Renewal X"
     },
-    "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+    "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_DEVELOPMENT_MIGRATION_VERIFICATION",
     "next_build": 360,
     "next_build_title": "Content Adoption & Discovery Outcomes Renewal X",
     "future_queue_exhausted": false,

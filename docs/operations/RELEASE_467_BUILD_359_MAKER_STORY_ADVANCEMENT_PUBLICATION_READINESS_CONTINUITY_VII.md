@@ -11,3 +11,12 @@ Canonical migration `0030_release467_inventory_workstation_category_additions.sq
 Factual result/lesson evidence, human story review, public-candidate choice, copy approval/locking and publication remain explicit. Public media rights remain separate and provider/social publication remains closed.
 
 Next: **Build 360 — Content Adoption & Discovery Outcomes Renewal X**.
+
+
+## Exact Development evidence
+
+The Build 359 Development workflow applied canonical migration 0030 idempotently and verified both requested categories in `devilndove-dev`: **Jewelry & Forge Work** and **Auto Detailing** each resolve exactly once and the foreign-key check remains clean.
+
+The Maker Story measurement remains conservative: one project has an already reviewed/published story baseline, three still require Maker Story evidence, and the 35th-promo lane still requires factual execution/result/lesson evidence. No automatic publication or social posting is authorized.
+
+The Inventory Operations Card View source is deployed to Development Preview with a maximum of three columns and responsive two/one-column fallbacks.
