@@ -1,3 +1,22 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 359 candidate over Build 358 Production GREEN
+
+**Current verified successor: Release 467 Build 359 — Maker Story Advancement & Publication Readiness Continuity VII**
+
+Build 358 is the last fully verified exact Development/Production closure ingested by Build 359.
+
+- Development SHA: `66f32dd208f6337aa2212c23441652057c7fb7bd`
+- Shared tree: `0bf65d6acf57b6ae8b6562bfcb2b658716d13470`
+- System Gate: `37240168429`
+- Current Application Quality Proof: `37240168459`
+- I.T. Admin Runtime Proof: `37240168456`
+- Repository Branch Hygiene: `37240168436`
+- D1 CI Fan-Out Guard: `37240168434`
+- Build 358 proof: `37240168455`
+- Production main: `88be5197b9c84814418116c4a7a3dd24ede01f34`
+- Production Pages Deploy: `37240297064`
+- Production Live Resource Integrity: `37240352096`
+- Build 359 scope: Maker Story readiness continuity VII; Inventory Card View maximum three columns; canonical migration 0030 adds Jewelry & Forge Work and Auto Detailing.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 358 candidate over Build 357 Production GREEN
 
 **Current verified successor: Release 467 Build 358 — Search Console Real Export & Fresh Discovery Intake VIII**

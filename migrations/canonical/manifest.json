@@ -216,6 +216,13 @@
       "release": 467,
       "description": "Add Development Etsy OAuth owner/shop identity metadata so the numeric shop ID is discovered after authenticated OAuth instead of requiring a fourth Cloudflare variable; listing writes remain locked. Build 350 requests Development-first canonical schema reproof before Production promotion.",
       "recovery": "Forward-only additive safe metadata table. Disconnect destroys local token material and marks the safe shop metadata disconnected. Repair OAuth/shop identity defects only with a later numbered migration; never edit this migration after Development application."
+    },
+    {
+      "version": 30,
+      "file": "0030_release467_inventory_workstation_category_additions.sql",
+      "release": 467,
+      "description": "Add operator-requested Jewelry & Forge Work and Auto Detailing categories to the existing canonical inventory_processes workstation/category authority without changing existing Inventory assignments.",
+      "recovery": "Forward-only reference-data extension. Existing categories and assignments remain intact. Reassign items through Inventory Operations for logical rollback; correct taxonomy facts only with a later numbered migration."
     }
   ]
 }

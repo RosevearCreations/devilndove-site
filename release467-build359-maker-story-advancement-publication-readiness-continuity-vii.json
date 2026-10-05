@@ -1,0 +1,134 @@
+{
+  "release": 467,
+  "build": 359,
+  "title": "Maker Story Advancement & Publication Readiness Continuity VII",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "MAKER_STORY_ADVANCEMENT_PUBLICATION_READINESS_CONTINUITY_VII",
+  "authority": "release467-build359-maker-story-advancement-publication-readiness-continuity-vii",
+  "predecessor": {
+    "build": 358,
+    "title": "Search Console Real Export & Fresh Discovery Intake VIII",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "66f32dd208f6337aa2212c23441652057c7fb7bd",
+    "development_tree_sha": "0bf65d6acf57b6ae8b6562bfcb2b658716d13470",
+    "development_proofs": {
+      "system_gate_run": 37240168429,
+      "current_application_quality_run": 37240168459,
+      "it_admin_runtime_proof_run": 37240168456,
+      "branch_hygiene_run": 37240168436,
+      "d1_ci_fanout_guard_run": 37240168434,
+      "build_specific_proof_run": 37240168455
+    },
+    "development_artifact": {
+      "artifact_id": 11317615866,
+      "artifact_name": "build358-search-console-fresh-discovery-66f32dd208f6337aa2212c23441652057c7fb7bd",
+      "artifact_digest": "sha256:cfff92242c413c8574099bc2f5c3569e6b10a2a9036010de65c84203c906870e"
+    },
+    "production_main_sha": "88be5197b9c84814418116c4a7a3dd24ede01f34",
+    "production_tree_sha": "0bf65d6acf57b6ae8b6562bfcb2b658716d13470",
+    "production_pages_deploy_run": 37240297064,
+    "production_live_resource_integrity_run": 37240352096,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "reuses_build353_maker_story_measurement": true,
+    "coverage_population": "ALL_ACTIVE_CREATIVE_PROJECTS",
+    "expected_active_projects": 5,
+    "exact_one_caip_workspace_required": true,
+    "exact_one_content_package_required": true,
+    "maker_story_profile_required_for_story_readiness": true,
+    "substantive_non_placeholder_result_and_lesson_required": true,
+    "factual_evidence_required": true,
+    "promo35_real_execution_result_lesson_events_required": true,
+    "explicit_story_review_required": true,
+    "public_story_candidate_required": true,
+    "approved_content_copy_required": true,
+    "locked_content_copy_required": true,
+    "published_story_requires_human_publication_traceability": true,
+    "publication_readiness_is_read_only_classification": true,
+    "public_media_rights_separate_from_story_text_readiness": true,
+    "private_media_never_public_by_inference": true,
+    "provider_posting_independent": true,
+    "automatic_profile_creation": false,
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "automatic_content_approval": false,
+    "automatic_publication": false,
+    "automatic_social_posting": false,
+    "inventory_card_max_columns": 3,
+    "inventory_card_two_column_breakpoint_px": 1200,
+    "inventory_card_single_column_breakpoint_px": 760,
+    "inventory_card_field_overflow_forbidden": true,
+    "canonical_workstation_category_migration": "migrations/canonical/0030_release467_inventory_workstation_category_additions.sql",
+    "operator_requested_categories": [
+      "Jewelry & Forge Work",
+      "Auto Detailing"
+    ],
+    "existing_inventory_assignments_preserved": true,
+    "next_build": 360,
+    "next_build_title": "Content Adoption & Discovery Outcomes Renewal X",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "maker_story_profile_mutation": false,
+    "story_review_mutation": false,
+    "public_candidate_mutation": false,
+    "content_copy_mutation": false,
+    "publication_mutation": false,
+    "social_posting": false,
+    "private_media_exposure": false,
+    "media_rights_inference": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "automatic_inventory_reassignment": false,
+    "production_d1_contact": false
+  },
+  "operator_repairs": {
+    "inventory_card_view": {
+      "state": "SOURCE_IMPLEMENTED_PENDING_EXACT_DEVELOPMENT_PROOF",
+      "max_columns": 3,
+      "overlap_repair": true,
+      "actual_identity_class_fixed": "site-inventory-grid-identity"
+    },
+    "workstation_taxonomy": {
+      "state": "CANONICAL_MIGRATION_PENDING_DEVELOPMENT_APPLICATION",
+      "categories": [
+        "Jewelry & Forge Work",
+        "Auto Detailing"
+      ],
+      "existing_assignments_changed": false
+    }
+  },
+  "starting_point": {
+    "development": {
+      "sha": "66f32dd208f6337aa2212c23441652057c7fb7bd",
+      "tree": "0bf65d6acf57b6ae8b6562bfcb2b658716d13470",
+      "system_gate_run": 37240168429,
+      "quality_run": 37240168459,
+      "it_admin_runtime_run": 37240168456,
+      "repository_hygiene_run": 37240168436,
+      "d1_ci_fanout_guard_run": 37240168434,
+      "build_specific_proof_run": 37240168455,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "88be5197b9c84814418116c4a7a3dd24ede01f34",
+      "tree": "0bf65d6acf57b6ae8b6562bfcb2b658716d13470",
+      "production_pages_deploy_run": 37240297064,
+      "production_live_resource_integrity_run": 37240352096,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "AWAITING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_355_360.md",
+  "next_build": 360,
+  "next_build_title": "Content Adoption & Discovery Outcomes Renewal X",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "measurement_lane_owner": "release467-build359-maker-story-advancement-publication-readiness-continuity-vii.yml",
+  "exact_head_reproof_state": "PENDING_AFTER_MEASUREMENT_INGESTION"
+}
