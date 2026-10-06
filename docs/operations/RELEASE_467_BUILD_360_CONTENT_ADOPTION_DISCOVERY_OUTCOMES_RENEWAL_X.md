@@ -18,3 +18,12 @@ Build 360 additionally measures current Development for duplicate active Invento
 - No automatic story generation, approval, publication, social posting, SEO apply or provider publication.
 - Private media remains private unless explicitly reviewed for public use.
 - Production data remains Production-owned.
+
+
+## Exact measurement outcome
+
+Build 360 measured **ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST** from 19 read-only Development statements and 6,199 aggregate provider rows read, below the 20,000 ceiling. Maker Story coverage remains 2/5; the 35th Promo factual outcome remains unresolved; three projects remain unprofiled; Grey Hair still lacks execution evidence and a reviewed story plan; there are no fresh real Search Console rows.
+
+Raw Inventory identity integrity passed: **0 duplicate active Inventory identities** were measured. The source contract also prevents a second active `source_type + external_key` record and repeated receiving adds to `on_hand_quantity`. Separate purchase-lot rows remain valid provenance linked to that single operational Inventory record.
+
+Observed evidence renews the queue as **Builds 361–366**.

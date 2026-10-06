@@ -16,6 +16,7 @@ wf=t('.github/workflows/release467-build360-content-adoption-discovery-outcomes-
 legacy=t('functions/api/admin/_siteItemInventoryLegacy.js')
 receiving=t('functions/api/_lib/inventoryReceiving.js')
 road=t('docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_355_360.md')
+next_road=t('docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_361_366.md')
 
 q(a.get('build')==360 and a.get('title')=='Content Adoption & Discovery Outcomes Renewal X','Build 360 identity mismatch')
 q(prev.get('state')=='PRODUCTION_GREEN','Build 359 Production closure not successor-ingested')
@@ -51,6 +52,7 @@ for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','ROADMAP RENEWAL: OBSERVED EVIDENCE
     q(token in wf,'Build 360 workflow boundary missing '+token)
 
 q('Build 360 — Content Adoption & Discovery Outcomes Renewal X' in road,'Build 360 roadmap entry missing')
+q('Build 361 — Evidence Gap Execution Workbench & Input Completion Continuity VI' in next_road and 'Build 366 — Content Adoption & Discovery Outcomes Renewal XI' in next_road,'Build 360 observed-evidence successor roadmap missing')
 cur=int(p.get('build') or 0); q(cur>=360,'Current pointer must retain Build 360 or successor')
 if cur==360:
     q(p.get('state') in ('DEVELOPMENT_CANDIDATE','DEVELOPMENT_GREEN'),'Build 360 current state mismatch')
