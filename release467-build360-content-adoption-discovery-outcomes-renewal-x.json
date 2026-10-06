@@ -1,0 +1,123 @@
+{
+  "release": 467,
+  "build": 360,
+  "title": "Content Adoption & Discovery Outcomes Renewal X",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "CONTENT_ADOPTION_DISCOVERY_OUTCOMES_RENEWAL_X",
+  "authority": "release467-build360-content-adoption-discovery-outcomes-renewal-x",
+  "predecessor": {
+    "build": 359,
+    "title": "Maker Story Advancement & Publication Readiness Continuity VII",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "b54800530aad16cf4056506e817aefd7d603d018",
+    "development_tree_sha": "ae7f5495c3830b9a168184fe596e361538ab31a8",
+    "development_proofs": {
+      "system_gate_run": 37367172851,
+      "current_application_quality_run": 37367172900,
+      "it_admin_runtime_proof_run": 37367172889,
+      "branch_hygiene_run": 37367172881,
+      "d1_ci_fanout_guard_run": 37367172912,
+      "build_specific_proof_run": 37367172849
+    },
+    "development_artifact": {
+      "artifact_id": 11368773930,
+      "artifact_name": "build359-maker-story-advancement-readiness-b54800530aad16cf4056506e817aefd7d603d018",
+      "artifact_digest": "sha256:476517cd73dfbcd4ac7fc47ffad8b8b5f1b6575bc75428d9246bba3615c70366"
+    },
+    "production_main_sha": "8c3461e494398f41e6053616f1cd57a0a2935c65",
+    "production_tree_sha": "ae7f5495c3830b9a168184fe596e361538ab31a8",
+    "production_pages_deploy_run": 37385261313,
+    "production_live_resource_integrity_run": 37385401599,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "scope": {
+    "full_path_remeasurement": true,
+    "build300_comparison": true,
+    "build306_comparison": true,
+    "build312_comparison": true,
+    "build318_comparison": true,
+    "build324_comparison": true,
+    "build330_comparison": true,
+    "build336_comparison": true,
+    "build342_comparison": true,
+    "build348_comparison": true,
+    "build354_comparison": true,
+    "build359_readiness_context": true,
+    "maker_story_coverage": true,
+    "review_state": true,
+    "publication": true,
+    "discovery": true,
+    "runtime": true,
+    "identity_integrity": true,
+    "d1_read_outcomes": true,
+    "seo_review_queue_continuity": true,
+    "search_console_freshness_rule": true,
+    "explicit_report_date_only_for_search_console_freshness": true,
+    "next_roadmap_from_observed_evidence_only": true,
+    "raw_inventory_identity_integrity": true,
+    "raw_inventory_one_operational_record_per_active_source_identity": true,
+    "raw_inventory_receiving_adds_to_existing_on_hand": true,
+    "raw_inventory_purchase_lots_preserve_receipt_provenance_separately": true,
+    "operator_testing_surface": "MAIN_PRODUCTION_DIRECT",
+    "operator_manual_preview_testing": false,
+    "development_branch_ci_proofs_retained": true,
+    "etsy_main_site_oauth_acceptance": true
+  },
+  "inventory_identity_policy": {
+    "identity": "LOWER(TRIM(source_type)) + external_key",
+    "duplicate_active_identity_allowed": false,
+    "repeated_receipt_behavior": "UPDATE_EXISTING_ON_HAND_QUANTITY",
+    "purchase_lot_behavior": "SEPARATE_PROVENANCE_ROWS_LINKED_TO_ONE_SITE_ITEM_INVENTORY_RECORD",
+    "source_contracts": [
+      "functions/api/admin/_siteItemInventoryLegacy.js",
+      "functions/api/_lib/inventoryReceiving.js"
+    ],
+    "note": "Multiple units/packages of the same active Inventory identity are represented by one site_item_inventory row with increased quantity. Purchase lots may remain separate for provenance/cost without duplicating the operational Inventory item."
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_exposure": false,
+    "automatic_story_generation": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "automatic_social_posting": false,
+    "automatic_seo_apply": false,
+    "indexnow_execution": false,
+    "content_provider_publication": false,
+    "traffic_fabrication": false,
+    "production_d1_measurement_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "b54800530aad16cf4056506e817aefd7d603d018",
+      "tree": "ae7f5495c3830b9a168184fe596e361538ab31a8",
+      "system_gate_run": 37367172851,
+      "quality_run": 37367172900,
+      "it_admin_runtime_run": 37367172889,
+      "repository_hygiene_run": 37367172881,
+      "d1_ci_fanout_guard_run": 37367172912,
+      "build_specific_proof_run": 37367172849,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "8c3461e494398f41e6053616f1cd57a0a2935c65",
+      "tree": "ae7f5495c3830b9a168184fe596e361538ab31a8",
+      "production_pages_deploy_run": 37385261313,
+      "production_live_resource_integrity_run": 37385401599,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "AWAITING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_355_360.md",
+  "successor_selection": "PENDING_OBSERVED_EVIDENCE_BUILD360",
+  "next_build": 361,
+  "next_build_title": "Pending observed-evidence roadmap renewal",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "measurement_lane_owner": "release467-build360-content-adoption-discovery-outcomes-renewal-x.yml",
+  "exact_head_reproof_state": "PENDING_AFTER_MEASUREMENT_INGESTION"
+}

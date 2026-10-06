@@ -2,7 +2,7 @@
   "release": 467,
   "build": 359,
   "title": "Maker Story Advancement & Publication Readiness Continuity VII",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "MAKER_STORY_ADVANCEMENT_PUBLICATION_READINESS_CONTINUITY_VII",
   "authority": "release467-build359-maker-story-advancement-publication-readiness-continuity-vii",
   "predecessor": {
@@ -132,7 +132,7 @@
   "future_queue_exhausted": false,
   "measurement_lane_state": "MEASURED_PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
   "measurement_lane_owner": "release467-build359-maker-story-advancement-publication-readiness-continuity-vii.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD359_GREEN",
   "measurement": {
     "source_sha": "ce70a310e9cb615c55d2aceada839d238c24ed98",
     "source_tree_sha": "e581ebdab9232afec247ea71aa69d0f3f12cb4c6",
@@ -197,5 +197,33 @@
     "next_build": 360,
     "next_build_title": "Content Adoption & Discovery Outcomes Renewal X"
   },
-  "development_candidate_note": "Migration 0030 was applied and verified on Development; exact-head reproof remains required before Production promotion."
+  "development_candidate_note": "Migration 0030 was applied and verified on Development; exact-head reproof remains required before Production promotion.",
+  "final_closure": {
+    "dev_sha": "b54800530aad16cf4056506e817aefd7d603d018",
+    "tree_sha": "ae7f5495c3830b9a168184fe596e361538ab31a8",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD359_GREEN",
+    "proofs": {
+      "system_gate_run": 37367172851,
+      "current_application_quality_run": 37367172900,
+      "it_admin_runtime_proof_run": 37367172889,
+      "branch_hygiene_run": 37367172881,
+      "d1_ci_fanout_guard_run": 37367172912,
+      "build_specific_proof_run": 37367172849
+    },
+    "artifact_id": 11368773930,
+    "artifact_name": "build359-maker-story-advancement-readiness-b54800530aad16cf4056506e817aefd7d603d018",
+    "artifact_digest": "sha256:476517cd73dfbcd4ac7fc47ffad8b8b5f1b6575bc75428d9246bba3615c70366",
+    "ingested_by_build": 360,
+    "recorded_by": "Build 360 predecessor ingestion; not self-recorded by Build 359"
+  },
+  "production_checkpoint": {
+    "main_sha": "8c3461e494398f41e6053616f1cd57a0a2935c65",
+    "tree_sha": "ae7f5495c3830b9a168184fe596e361538ab31a8",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37385261313,
+    "production_live_resource_integrity_run": 37385401599,
+    "remote_d1_queries": 0
+  }
 }
