@@ -35,9 +35,14 @@ upper=' '+re.sub(r'--.*','',sql).upper()+' '
 for forbidden in (' INSERT ',' UPDATE ',' DELETE ',' CREATE ',' ALTER ',' DROP ',' REPLACE ',' VACUUM ',' REINDEX '):q(forbidden not in upper,'Build 355 measurement must remain read-only: '+forbidden.strip())
 for token in ('creative_process_record_story_execution_evidence','source_evidence_needs_review','search_console_import_batches',"report_date IS NOT NULL AND date(report_date)>=date('now','-30 days')",'pragma_foreign_key_check'):q(token in sql,'Build 355 SQL missing '+token)
 for token in ('required_inputs','observed_completion','completion_signal','next_safe_human_action','35TH_PROMO_REAL_OUTCOME_EVIDENCE','GREY_HAIR_SOURCE_EVIDENCE_REVIEW','REAL_SEARCH_CONSOLE_EXPORT','UNPROFILED_MAKER_STORY_EVIDENCE','completion_persistence:false','production_d1_contact:false'):q(token in verify,'Build 355 verifier missing '+token)
-for token in ("const BUILD=355","TITLE='Evidence Gap Execution Workbench & Input Completion Continuity V'","role:'read_only_evidence_gap_execution_workbench'",'onRequestGet'):q(token in api,'Build 355 API missing '+token)
+cur=int(p.get('build') or 0)
+if cur==355:
+    for token in ("const BUILD=355","TITLE='Evidence Gap Execution Workbench & Input Completion Continuity V'","role:'read_only_evidence_gap_execution_workbench'",'onRequestGet'):q(token in api,'Build 355 API missing '+token)
+    q('Release 467 • Build 355' in page and 'Input Completion Continuity V' in page and 'Build 355' in ui,'Build 355 workbench UI not current')
+else:
+    for token in ('BUILD355_CURRENT_AUTHORITY',"role:'read_only_evidence_gap_execution_workbench'",'onRequestGet'):q(token in api,'Build 355 historical API provenance missing '+token)
+    q('BUILD355_CURRENT_PAGE' in page and 'BUILD355_CURRENT_CLIENT' in ui,'Build 355 historical UI provenance missing')
 q('onRequestPost' not in api,'Build 355 workbench API must remain GET-only')
-q('Release 467 • Build 355' in page and 'Input Completion Continuity V' in page and 'Build 355' in ui,'Build 355 workbench UI not current')
 for token in ("environment=text(env?.DND_ENVIRONMENT).toLowerCase()==='production'?'production':'development'","pagesEnvironment=environment==='production'?'production':'preview'","api/social/oauth/etsy/callback"):q(token in setup,'Build 355 active-environment setup guide missing '+token)
 q("expected_redirect_uri:'https://devilndove.com/api/social/oauth/etsy/callback'" in etsy,'Build 355 Etsy expected redirect diagnostic missing')
 q('Configured redirect:' in etsyui and 'Expected main redirect:' in etsyui,'Build 355 Etsy redirect UI diagnostic missing')

@@ -95,12 +95,54 @@
       "state": "PRODUCTION_GREEN"
     }
   },
-  "measurement_state": "AWAITING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_361_366.md",
   "next_build": 362,
   "next_build_title": "35th Promo Factual Evidence Completion Continuity VII",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "measurement_lane_state": "MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
   "measurement_lane_owner": "release467-build361-evidence-gap-execution-workbench-input-completion-continuity-vi.yml",
-  "exact_head_reproof_state": "PENDING_AFTER_MEASUREMENT_INGESTION"
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "measurement": {
+    "source_sha": "a985ec4f8a24cc88e165f4aa9ac16fb12b0223f8",
+    "source_tree_sha": "63dbb6b356b1ac5be771c847db4352bb1270b67a",
+    "workflow_run": 37476256661,
+    "artifact_id": 11418748479,
+    "artifact_name": "build361-evidence-gap-execution-workbench-a985ec4f8a24cc88e165f4aa9ac16fb12b0223f8",
+    "artifact_digest": "sha256:b3ed1fb4c9c3ebae53500e23f2650690c04407e7edf2bc936ba80ecee833223d",
+    "aggregate_rows_read": 1659,
+    "rows_read_ceiling": 20000,
+    "rows_read_by_statement": [
+      11,
+      14,
+      961,
+      10,
+      649,
+      14
+    ],
+    "active_workbench_rows": 5,
+    "active_gap_families": 4,
+    "gap_families": [
+      "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+      "REAL_SEARCH_CONSOLE_EXPORT",
+      "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+      "UNPROFILED_MAKER_STORY_EVIDENCE"
+    ],
+    "unprofiled_projects": 3,
+    "decision": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "production_d1_contact": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false
+  },
+  "decision": {
+    "classification": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "rationale": "Exact Development measurement derives five current workbench rows across four factual gap families from existing source authorities.",
+    "active_workbench_rows": 5,
+    "active_gap_families": 4,
+    "source_workspaces_authoritative": true,
+    "automatic_completion_authorized": false,
+    "next_build": 362,
+    "next_build_title": "35th Promo Factual Evidence Completion Continuity VII"
+  }
 }

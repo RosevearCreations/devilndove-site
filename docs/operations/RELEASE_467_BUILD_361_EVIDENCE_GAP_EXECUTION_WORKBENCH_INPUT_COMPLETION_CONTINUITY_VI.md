@@ -18,3 +18,12 @@ Measurement is Development-only and read-only. Source workspaces remain authorit
 ## Next
 
 Build 362 — 35th Promo Factual Evidence Completion Continuity VII.
+
+
+## Exact Build 361 measurement
+
+The exact Development workbench measured **5 open rows across 4 gap families**, reading **1,659 D1 rows** below the 20,000-row ceiling. The decision remains **EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED**.
+
+Measured gaps are unchanged in substance from the preceding renewal: the 35th Promo still lacks factual execution/result/lesson evidence, Grey Hair still has two source-evidence ranges needing review and no reviewed story plan, there is still no real Search Console export, and two non-Grey-Hair unprofiled projects still require real Maker Story evidence.
+
+No source workspace, evidence, story, Search Console, SEO, provider, R2 or Production D1 state was mutated.
