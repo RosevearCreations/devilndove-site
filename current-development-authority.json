@@ -4971,7 +4971,7 @@
       "next_build_title": "Evidence Gap Execution Workbench & Input Completion Continuity VI",
       "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_361_366.md"
     },
-    "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+    "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_BOUNDARY",
     "future_queue_exhausted": false,
     "measurement": {
       "source_sha": "199571c0d063dbba55bb487d4649ca2eaf2b2482",
