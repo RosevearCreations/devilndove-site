@@ -1,3 +1,22 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 360 candidate over Build 359 Production GREEN
+
+**Current verified successor: Release 467 Build 360 — Content Adoption & Discovery Outcomes Renewal X**
+
+Build 359 is the last fully verified exact Development/Production closure ingested by Build 360.
+
+- Development SHA: `b54800530aad16cf4056506e817aefd7d603d018`
+- Shared tree: `ae7f5495c3830b9a168184fe596e361538ab31a8`
+- System Gate: `37367172851`
+- Current Application Quality Proof: `37367172900`
+- I.T. Admin Runtime Proof: `37367172889`
+- Repository Branch Hygiene: `37367172881`
+- D1 CI Fan-Out Guard: `37367172912`
+- Build 359 proof: `37367172849`
+- Production main: `8c3461e494398f41e6053616f1cd57a0a2935c65`
+- Production Pages Deploy: `37385261313`
+- Production Live Resource Integrity: `37385401599`
+- Build 360 scope: content adoption/discovery outcomes renewal X plus Raw Inventory one-record identity verification.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 359 candidate over Build 358 Production GREEN
 
 **Current verified successor: Release 467 Build 359 — Maker Story Advancement & Publication Readiness Continuity VII**
