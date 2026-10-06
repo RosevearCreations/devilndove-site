@@ -1,29 +1,6 @@
 name: Release 467 Build 360 Content Adoption Discovery Outcomes Renewal X
+# Historical after Build 361 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build359-maker-story-advancement-publication-readiness-continuity-vii.json'
-      - 'release467-build360-content-adoption-discovery-outcomes-renewal-x.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build360_outcomes_measurement.sql'
-      - 'scripts/release467_build360_verify_measurement.mjs'
-      - 'scripts/release467_build360_regression.py'
-      - 'scripts/release467_build360_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/_siteItemInventoryLegacy.js'
-      - 'functions/api/_lib/inventoryReceiving.js'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/it/index.html'
-      - 'admin/reliability/index.html'
-      - 'admin/deployment-preflight/index.html'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'docs/operations/RELEASE_467_BUILD_360_CONTENT_ADOPTION_DISCOVERY_OUTCOMES_RENEWAL_X.md'
-      - '.github/workflows/release467-build360-content-adoption-discovery-outcomes-renewal-x.yml'
-      - '.github/workflows/release467-build359-maker-story-advancement-publication-readiness-continuity-vii.yml'
   workflow_dispatch:
 permissions:
   contents: read

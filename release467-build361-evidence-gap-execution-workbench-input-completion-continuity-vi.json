@@ -1,0 +1,148 @@
+{
+  "release": 467,
+  "build": 361,
+  "title": "Evidence Gap Execution Workbench & Input Completion Continuity VI",
+  "state": "DEVELOPMENT_CANDIDATE",
+  "phase": "EVIDENCE_GAP_EXECUTION_WORKBENCH_INPUT_COMPLETION_CONTINUITY_VI",
+  "authority": "release467-build361-evidence-gap-execution-workbench-input-completion-continuity-vi",
+  "predecessor": {
+    "build": 360,
+    "title": "Content Adoption & Discovery Outcomes Renewal X",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "19cebb7c763cfe8fd9d65a16da020bebe1d92cfc",
+    "development_tree_sha": "7e4c57f601c41ed38c784b1023afbed3e5ff94eb",
+    "development_proofs": {
+      "system_gate_run": 37469579357,
+      "current_application_quality_run": 37469579356,
+      "it_admin_runtime_proof_run": 37469579385,
+      "branch_hygiene_run": 37469579430,
+      "d1_ci_fanout_guard_run": 37469579311,
+      "build_specific_proof_run": 37469579314
+    },
+    "development_artifact": {
+      "artifact_id": 11416326038,
+      "artifact_name": "build360-content-adoption-discovery-renewal-19cebb7c763cfe8fd9d65a16da020bebe1d92cfc",
+      "artifact_digest": "sha256:35e33a9ce77edd7a2611b743bb1a6fec10b5d61daaba91244dfbe1ac14ab2fd6"
+    },
+    "production_main_sha": "1123ed75b3ad7eeffebaabaaadb1c4d41aaff038",
+    "production_tree_sha": "7e4c57f601c41ed38c784b1023afbed3e5ff94eb",
+    "production_pages_deploy_run": 37469934541,
+    "production_live_resource_integrity_run": 37470059255,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "workbench_mode": "READ_ONLY_DERIVED_FROM_EXISTING_SOURCE_AUTHORITIES",
+    "refreshes_existing_build355_workbench": true,
+    "source_outcomes_build": 360,
+    "shows_required_inputs": true,
+    "shows_observed_completion": true,
+    "shows_completion_signal": true,
+    "shows_next_safe_human_action": true,
+    "direct_source_workspace_links": true,
+    "shadow_task_table": false,
+    "user_assignment_persistence": false,
+    "acknowledgement_persistence": false,
+    "resolution_persistence": false,
+    "completion_persistence": false,
+    "source_workspaces_remain_authoritative": true,
+    "explicit_search_console_report_date_required": true,
+    "operator_testing_surface": "MAIN_PRODUCTION_DIRECT",
+    "expected_gap_families": [
+      "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+      "REAL_SEARCH_CONSOLE_EXPORT",
+      "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+      "UNPROFILED_MAKER_STORY_EVIDENCE"
+    ],
+    "next_build": 362,
+    "next_build_title": "35th Promo Factual Evidence Completion Continuity VII",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_exposure": false,
+    "evidence_mutation": false,
+    "story_mutation": false,
+    "search_console_mutation": false,
+    "seo_mutation": false,
+    "automatic_completion": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "19cebb7c763cfe8fd9d65a16da020bebe1d92cfc",
+      "tree": "7e4c57f601c41ed38c784b1023afbed3e5ff94eb",
+      "system_gate_run": 37469579357,
+      "quality_run": 37469579356,
+      "it_admin_runtime_run": 37469579385,
+      "repository_hygiene_run": 37469579430,
+      "d1_ci_fanout_guard_run": 37469579311,
+      "build_specific_proof_run": 37469579314,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "1123ed75b3ad7eeffebaabaaadb1c4d41aaff038",
+      "tree": "7e4c57f601c41ed38c784b1023afbed3e5ff94eb",
+      "production_pages_deploy_run": 37469934541,
+      "production_live_resource_integrity_run": 37470059255,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_361_366.md",
+  "next_build": 362,
+  "next_build_title": "35th Promo Factual Evidence Completion Continuity VII",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+  "measurement_lane_owner": "release467-build361-evidence-gap-execution-workbench-input-completion-continuity-vi.yml",
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "measurement": {
+    "source_sha": "a985ec4f8a24cc88e165f4aa9ac16fb12b0223f8",
+    "source_tree_sha": "63dbb6b356b1ac5be771c847db4352bb1270b67a",
+    "workflow_run": 37476256661,
+    "artifact_id": 11418748479,
+    "artifact_name": "build361-evidence-gap-execution-workbench-a985ec4f8a24cc88e165f4aa9ac16fb12b0223f8",
+    "artifact_digest": "sha256:b3ed1fb4c9c3ebae53500e23f2650690c04407e7edf2bc936ba80ecee833223d",
+    "aggregate_rows_read": 1659,
+    "rows_read_ceiling": 20000,
+    "rows_read_by_statement": [
+      11,
+      14,
+      961,
+      10,
+      649,
+      14
+    ],
+    "active_workbench_rows": 5,
+    "active_gap_families": 4,
+    "gap_families": [
+      "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+      "REAL_SEARCH_CONSOLE_EXPORT",
+      "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+      "UNPROFILED_MAKER_STORY_EVIDENCE"
+    ],
+    "unprofiled_projects": 3,
+    "decision": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "production_d1_contact": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false
+  },
+  "decision": {
+    "classification": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "rationale": "Exact Development measurement derives five current workbench rows across four factual gap families from existing source authorities.",
+    "active_workbench_rows": 5,
+    "active_gap_families": 4,
+    "source_workspaces_authoritative": true,
+    "automatic_completion_authorized": false,
+    "next_build": 362,
+    "next_build_title": "35th Promo Factual Evidence Completion Continuity VII"
+  }
+}

@@ -2,7 +2,7 @@
   "release": 467,
   "build": 360,
   "title": "Content Adoption & Discovery Outcomes Renewal X",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "CONTENT_ADOPTION_DISCOVERY_OUTCOMES_RENEWAL_X",
   "authority": "release467-build360-content-adoption-discovery-outcomes-renewal-x",
   "predecessor": {
@@ -119,7 +119,7 @@
   "future_queue_exhausted": false,
   "measurement_lane_state": "MEASURED_ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
   "measurement_lane_owner": "release467-build360-content-adoption-discovery-outcomes-renewal-x.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD360_GREEN",
   "measurement": {
     "source_sha": "199571c0d063dbba55bb487d4649ca2eaf2b2482",
     "source_tree_sha": "b66fb68a1e113f449eb100a91a4f5b5c73eddec9",
@@ -219,5 +219,33 @@
   },
   "decision": "ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
   "roadmap_renewal_state": "BUILDS_361_366_CREATED_FROM_OBSERVED_EVIDENCE",
-  "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_361_366.md"
+  "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_361_366.md",
+  "final_closure": {
+    "dev_sha": "19cebb7c763cfe8fd9d65a16da020bebe1d92cfc",
+    "tree_sha": "7e4c57f601c41ed38c784b1023afbed3e5ff94eb",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD360_GREEN",
+    "proofs": {
+      "system_gate_run": 37469579357,
+      "current_application_quality_run": 37469579356,
+      "it_admin_runtime_proof_run": 37469579385,
+      "branch_hygiene_run": 37469579430,
+      "d1_ci_fanout_guard_run": 37469579311,
+      "build_specific_proof_run": 37469579314
+    },
+    "artifact_id": 11416326038,
+    "artifact_name": "build360-content-adoption-discovery-renewal-19cebb7c763cfe8fd9d65a16da020bebe1d92cfc",
+    "artifact_digest": "sha256:35e33a9ce77edd7a2611b743bb1a6fec10b5d61daaba91244dfbe1ac14ab2fd6",
+    "ingested_by_build": 361,
+    "recorded_by": "Build 361 predecessor ingestion; not self-recorded by Build 360"
+  },
+  "production_checkpoint": {
+    "main_sha": "1123ed75b3ad7eeffebaabaaadb1c4d41aaff038",
+    "tree_sha": "7e4c57f601c41ed38c784b1023afbed3e5ff94eb",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37469934541,
+    "production_live_resource_integrity_run": 37470059255,
+    "remote_d1_queries": 0
+  }
 }

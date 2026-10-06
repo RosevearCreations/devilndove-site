@@ -1,3 +1,22 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 361 candidate over Build 360 Production GREEN
+
+**Current verified successor: Release 467 Build 361 — Evidence Gap Execution Workbench & Input Completion Continuity VI**
+
+Build 360 is the last fully verified exact Development/Production closure ingested by Build 361.
+
+- Development SHA: `19cebb7c763cfe8fd9d65a16da020bebe1d92cfc`
+- Shared tree: `7e4c57f601c41ed38c784b1023afbed3e5ff94eb`
+- System Gate: `37469579357`
+- Current Application Quality Proof: `37469579356`
+- I.T. Admin Runtime Proof: `37469579385`
+- Repository Branch Hygiene: `37469579430`
+- D1 CI Fan-Out Guard: `37469579311`
+- Build 360 proof: `37469579314`
+- Production main: `1123ed75b3ad7eeffebaabaaadb1c4d41aaff038`
+- Production Pages Deploy: `37469934541`
+- Production Live Resource Integrity: `37470059255`
+- Build 361 scope: read-only evidence-gap execution workbench continuity over observed Build 360 outcomes.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 360 candidate over Build 359 Production GREEN
 
 **Current verified successor: Release 467 Build 360 — Content Adoption & Discovery Outcomes Renewal X**
