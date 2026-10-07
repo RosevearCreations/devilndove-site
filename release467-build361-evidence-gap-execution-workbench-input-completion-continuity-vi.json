@@ -2,7 +2,7 @@
   "release": 467,
   "build": 361,
   "title": "Evidence Gap Execution Workbench & Input Completion Continuity VI",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "EVIDENCE_GAP_EXECUTION_WORKBENCH_INPUT_COMPLETION_CONTINUITY_VI",
   "authority": "release467-build361-evidence-gap-execution-workbench-input-completion-continuity-vi",
   "predecessor": {
@@ -102,7 +102,7 @@
   "future_queue_exhausted": false,
   "measurement_lane_state": "MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
   "measurement_lane_owner": "release467-build361-evidence-gap-execution-workbench-input-completion-continuity-vi.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD361_GREEN",
   "measurement": {
     "source_sha": "a985ec4f8a24cc88e165f4aa9ac16fb12b0223f8",
     "source_tree_sha": "63dbb6b356b1ac5be771c847db4352bb1270b67a",
@@ -144,5 +144,33 @@
     "automatic_completion_authorized": false,
     "next_build": 362,
     "next_build_title": "35th Promo Factual Evidence Completion Continuity VII"
+  },
+  "final_closure": {
+    "dev_sha": "3ff87de9bf8a91f1764778498ad4c7b2d28d1c57",
+    "tree_sha": "ff5988551b77c67ea72ebefd2d8d2b99aa014d82",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD361_GREEN",
+    "proofs": {
+      "system_gate_run": 37476731681,
+      "current_application_quality_run": 37476731556,
+      "it_admin_runtime_proof_run": 37476731691,
+      "branch_hygiene_run": 37476731549,
+      "d1_ci_fanout_guard_run": 37476731897,
+      "build_specific_proof_run": 37476731837
+    },
+    "artifact_id": 11418374948,
+    "artifact_name": "build361-evidence-gap-execution-workbench-3ff87de9bf8a91f1764778498ad4c7b2d28d1c57",
+    "artifact_digest": "sha256:8ca854d74cf7a448db95864137e733812c804f6d2e4169c242472aa638afbf04",
+    "ingested_by_build": 362,
+    "recorded_by": "Build 362 predecessor ingestion; not self-recorded by Build 361"
+  },
+  "production_checkpoint": {
+    "main_sha": "ac4f29f4cbeca4036b9f6ae57d7e0a563d6d8696",
+    "tree_sha": "ff5988551b77c67ea72ebefd2d8d2b99aa014d82",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37477107474,
+    "production_live_resource_integrity_run": 37477326494,
+    "remote_d1_queries": 0
   }
 }

@@ -1,30 +1,6 @@
 name: Release 467 Build 361 Evidence Gap Execution Workbench Input Completion Continuity VI
+# Historical after Build 362 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build360-content-adoption-discovery-outcomes-renewal-x.json'
-      - 'release467-build361-evidence-gap-execution-workbench-input-completion-continuity-vi.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build361_execution_workbench.sql'
-      - 'scripts/release467_build361_verify_execution_workbench.mjs'
-      - 'scripts/release467_build361_regression.py'
-      - 'scripts/release467_build361_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/evidence-gap-execution-workbench.js'
-      - 'public/js/admin-evidence-gap-execution-workbench-v337.js'
-      - 'admin/evidence-gap-execution-workbench/index.html'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/it/index.html'
-      - 'admin/reliability/index.html'
-      - 'admin/deployment-preflight/index.html'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'docs/operations/RELEASE_467_BUILD_361_EVIDENCE_GAP_EXECUTION_WORKBENCH_INPUT_COMPLETION_CONTINUITY_VI.md'
-      - '.github/workflows/release467-build361-evidence-gap-execution-workbench-input-completion-continuity-vi.yml'
-      - '.github/workflows/release467-build360-content-adoption-discovery-outcomes-renewal-x.yml'
   workflow_dispatch:
 permissions:
   contents: read
