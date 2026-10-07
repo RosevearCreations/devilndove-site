@@ -258,7 +258,7 @@
   "next_build": 365,
   "next_build_state": "QUEUED_AFTER_BUILD364_PRODUCTION_GREEN",
   "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VIII",
-  "promotion_state": "BUILD364_EXACT_HEAD_REPROOF_REQUESTED",
+  "promotion_state": "BUILD364_MEASURED_FINAL_EXACT_HEAD_REPROOF_REQUESTED",
   "successor_scope_state": "BUILD365_DEFINED_BY_BUILD364_OBSERVED_EVIDENCE",
   "measured_closure": {
     "source_build": 232,
@@ -5249,5 +5249,14 @@
     "next_build_title": "Search Console Real Export & Fresh Discovery Intake IX",
     "measurement_source_sha": "950bee317b70e44011968045b23b713e18f94dfb",
     "workflow_run": 37626046153
+  },
+  "measurement_lane": {
+    "build": 364,
+    "state": "MEASURED_EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "workflow_run": 37662853317,
+    "artifact_id": 11502027541,
+    "interpretation": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "aggregate_rows_read": 2062,
+    "rows_read_ceiling": 20000
   }
 }
