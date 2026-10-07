@@ -290,15 +290,15 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "3ff87de9bf8a91f1764778498ad4c7b2d28d1c57",
-  "accepted_dev_tree_sha": "ff5988551b77c67ea72ebefd2d8d2b99aa014d82",
+  "accepted_dev_sha": "44bd708887357fc7b3341afdae3e990bb3524719",
+  "accepted_dev_tree_sha": "c8ab10efe9bcd310e74d3b5debefb32bf0f77296",
   "acceptance": {
-    "system_gate_run": 37476731681,
-    "current_application_quality_run": 37476731556,
-    "it_admin_runtime_proof_run": 37476731691,
-    "branch_hygiene_run": 37476731549,
-    "d1_ci_fanout_guard_run": 37476731897,
-    "build_specific_proof_run": 37476731837
+    "system_gate_run": 37554433879,
+    "current_application_quality_run": 37554433885,
+    "it_admin_runtime_proof_run": 37554433890,
+    "branch_hygiene_run": 37554433976,
+    "d1_ci_fanout_guard_run": 37554433922,
+    "build_specific_proof_run": 37554433927
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -5243,10 +5243,12 @@
       "source_backed_story_items": 0,
       "maker_story_profiles": 0
     },
-    "measurement": "PENDING_EXACT_DEVELOPMENT",
+    "measurement": "SOURCE_EVIDENCE_REVIEW_REQUIRED",
     "review_first": true,
     "automatic_publication": false,
     "next_build": 364,
-    "next_build_title": "Search Console Real Export & Fresh Discovery Intake IX"
+    "next_build_title": "Search Console Real Export & Fresh Discovery Intake IX",
+    "measurement_source_sha": "950bee317b70e44011968045b23b713e18f94dfb",
+    "workflow_run": 37626046153
   }
 }

@@ -17,3 +17,21 @@ Build 363 records its conclusion only after the exact Development measurement wo
 ## Next
 
 Build 364 — Search Console Real Export & Fresh Discovery Intake IX.
+
+## Exact Build 363 Development measurement
+
+- Workflow: `37626046153` — GREEN
+- Source SHA: `950bee317b70e44011968045b23b713e18f94dfb`
+- Source tree: `60096ec921521a32d5751650a4ebaddcff3f6568`
+- D1 rows read: **124 / 20,000** across `[62, 7, 2, 53]`
+- Active source evidence: **3**
+- Approved source evidence: **1**
+- Still needs explicit review: **2**
+- Confirmed sync groups/tracks: **0 / 0**
+- Reviewed story plans: **0**
+- Source-backed story items: **0**
+- Maker Story profiles: **0**
+- Handoff state: **SOURCE_EVIDENCE_REVIEW_REQUIRED**
+- Delta versus Build 357: **zero across every tracked readiness measure**
+
+No evidence, story-plan, media-rights, publication, provider, R2, or Production D1 mutation occurred.
