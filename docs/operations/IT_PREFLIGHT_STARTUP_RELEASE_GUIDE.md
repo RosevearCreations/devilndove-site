@@ -1,3 +1,21 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 364 candidate over Build 363 Production GREEN
+
+**Current verified successor: Release 467 Build 364 — Search Console Real Export & Fresh Discovery Intake IX**
+
+Build 363 is the exact fully verified Development/Production closure ingested by Build 364.
+
+- Development SHA: `6a7cb2ad960f84b045ae62e52a8abd94fb69280f`
+- Shared tree: `8a43776566a46245931c9cb4ac3049a770d76a8c`
+- System Gate: `37626856319`
+- Current Application Quality Proof: `37626856310`
+- I.T. Admin Runtime Proof: `37626856401`
+- Repository Branch Hygiene: `37626856391`
+- Build 363 proof: `37626856355`
+- Production main: `33577629d67159d23888c59b3aa7fb2f52cc98e8`
+- Production Pages Deploy: `37629292828`
+- Production Live Resource Integrity: `37629523294`
+- Build 364 scope: real-only Search Console Performance evidence, explicit report-date freshness and read-only discovery measurement.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 363 candidate over Build 362 Production GREEN
 
 **Current verified successor: Release 467 Build 363 — Grey Hair Source Review & Story-Plan Completion Continuity VII**
