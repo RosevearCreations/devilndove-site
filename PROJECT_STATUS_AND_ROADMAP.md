@@ -1,3 +1,13 @@
+# CURRENT BUILD — Release 467 Build 363
+
+**Grey Hair Source Review & Story-Plan Completion Continuity VII**
+
+Build 362 is exact-tree Development/Production GREEN. Build 363 re-measures the canonical Grey Hair source-evidence review, synchronization prerequisites, human-reviewed story plans and source-backed story items. Build 357's prior values are historical baseline only until this exact Build 363 candidate measures Development D1.
+
+**Verified Build 362:** Development `44bd708887357fc7b3341afdae3e990bb3524719`, Production `314ceb7e38d946cc9cef8d0e03fc43d2be3d7b81`, shared tree `c8ab10efe9bcd310e74d3b5debefb32bf0f77296`.
+
+**Next after Build 363 Production GREEN:** Build 364 — Search Console Real Export & Fresh Discovery Intake IX.
+
 # CURRENT BUILD — Release 467 Build 357
 
 **Grey Hair Source Review & Story-Plan Completion Continuity VI**

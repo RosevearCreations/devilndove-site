@@ -1,3 +1,22 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 363 candidate over Build 362 Production GREEN
+
+**Current verified successor: Release 467 Build 363 — Grey Hair Source Review & Story-Plan Completion Continuity VII**
+
+Build 362 is the exact fully verified Development/Production closure ingested by Build 363.
+
+- Development SHA: `44bd708887357fc7b3341afdae3e990bb3524719`
+- Shared tree: `c8ab10efe9bcd310e74d3b5debefb32bf0f77296`
+- System Gate: `37554433879`
+- Current Application Quality Proof: `37554433885`
+- I.T. Admin Runtime Proof: `37554433890`
+- Repository Branch Hygiene: `37554433976`
+- D1 CI Fan-Out Guard: `37554433922`
+- Build 362 proof: `37554433927`
+- Production main: `314ceb7e38d946cc9cef8d0e03fc43d2be3d7b81`
+- Production Pages Deploy: `37555357735`
+- Production Live Resource Integrity: `37555436153`
+- Build 363 scope: read-only Grey Hair source-evidence review, synchronization prerequisite and human-reviewed story-plan continuity.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 362 candidate over Build 361 Production GREEN
 
 **Current verified successor: Release 467 Build 362 — 35th Promo Factual Evidence Completion Continuity VII**
