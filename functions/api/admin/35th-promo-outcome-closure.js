@@ -1,3 +1,5 @@
+// BUILD362_CURRENT_API_IDENTITY: Release 467 Build 362 — 35th Promo Factual Evidence Completion Continuity VII; GET-only factual readiness over existing source authority.
+// HISTORICAL_BUILD338_RUNTIME_LITERAL: const BUILD=362; retained for historical regression provenance.
 // BUILD356_CURRENT_API_IDENTITY: Release 467 Build 356 — 35th Promo Factual Evidence Completion Continuity VI; GET-only factual readiness over existing source authority.
 // BUILD350_CURRENT_API_IDENTITY: Release 467 Build 350 — 35th Promo Factual Evidence Completion Continuity V; GET-only factual readiness over the shared closure authority.
 // HISTORICAL_BUILD338_API_IDENTITY: const BUILD=344; title='35th Promo Factual Evidence Completion Continuity III'; retained for regression provenance.
@@ -35,9 +37,9 @@ export async function onRequestGet(context){
   const missing=[];
   if(execution===0)missing.push('execution_or_process_event');if(results===0)missing.push('result_event');if(lessons===0)missing.push('lesson_event');
   if(!s(target.what_we_are_trying))missing.push('what_we_are_trying');if(!s(target.why_we_are_trying_it))missing.push('why_we_are_trying_it');if(!substantiveFact(target.actual_result))missing.push('actual_result');if(!outcomeResolved)missing.push('resolved_outcome_status');if(!substantiveFact(target.lesson_learned))missing.push('lesson_learned');
-  return json({ok:true,release:467,build:BUILD,title:'35th Promo Factual Evidence Completion Continuity IV',target,closure_state,missing_requirements:missing,
+  return json({ok:true,release:467,build:BUILD,title:'35th Promo Factual Evidence Completion Continuity VII',target,closure_state,missing_requirements:missing,
    readiness:{event_complete:eventComplete,profile_facts_complete:facts,outcome_resolved:outcomeResolved,ready_for_explicit_human_review:ready},
-   operator_action:{record_evidence:'record_story_execution_evidence',workspace_href:'/admin/creative-process/?project_id=5',review_action:'explicit_human_review_only'},comparison_baseline:{source_build:343,execution_events:0,result_events:0,lesson_events:0,story_review_status:'needs_review',public_story_candidate:0,outcome_status:'unknown'},
+   operator_action:{record_evidence:'record_story_execution_evidence',workspace_href:'/admin/creative-process/?project_id=5',review_action:'explicit_human_review_only'},comparison_baseline:{source_build:361,execution_events:0,result_events:0,lesson_events:0,story_review_status:'needs_review',public_story_candidate:0,outcome_status:'unknown'},
    safety:SAFETY});
  }catch(error){return json({ok:false,release:467,build:BUILD,error:error?.message||'35th promo closure status could not load.',safety:SAFETY},500);}
 }

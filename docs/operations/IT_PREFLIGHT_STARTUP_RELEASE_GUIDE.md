@@ -1,3 +1,22 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 362 candidate over Build 361 Production GREEN
+
+**Current verified successor: Release 467 Build 362 — 35th Promo Factual Evidence Completion Continuity VII**
+
+Build 361 is the last fully verified exact Development/Production closure ingested by Build 362.
+
+- Development SHA: `3ff87de9bf8a91f1764778498ad4c7b2d28d1c57`
+- Shared tree: `ff5988551b77c67ea72ebefd2d8d2b99aa014d82`
+- System Gate: `37476731681`
+- Current Application Quality Proof: `37476731556`
+- I.T. Admin Runtime Proof: `37476731691`
+- Repository Branch Hygiene: `37476731549`
+- D1 CI Fan-Out Guard: `37476731897`
+- Build 361 proof: `37476731837`
+- Production main: `ac4f29f4cbeca4036b9f6ae57d7e0a563d6d8696`
+- Production Pages Deploy: `37477107474`
+- Production Live Resource Integrity: `37477326494`
+- Build 362 scope: read-only 35th Promo factual execution/result/lesson evidence continuity with explicit human review.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 361 candidate over Build 360 Production GREEN
 
 **Current verified successor: Release 467 Build 361 — Evidence Gap Execution Workbench & Input Completion Continuity VI**
