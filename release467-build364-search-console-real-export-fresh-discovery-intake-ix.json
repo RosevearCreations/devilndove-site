@@ -2,7 +2,7 @@
   "release": 467,
   "build": 364,
   "title": "Search Console Real Export & Fresh Discovery Intake IX",
-  "state": "DEVELOPMENT_GREEN",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
   "phase": "SEARCH_CONSOLE_REAL_EXPORT_FRESH_DISCOVERY_INTAKE_IX",
   "authority": "release467-build364-search-console-real-export-fresh-discovery-intake-ix",
   "predecessor": {
@@ -95,7 +95,10 @@
       "it_admin_runtime_proof_run": 37626856401,
       "branch_hygiene_run": 37626856391,
       "build_specific_proof_run": 37626856355,
-      "state": "DEVELOPMENT_GREEN"
+      "state": "DEVELOPMENT_GREEN",
+      "quality_run": 37626856310,
+      "it_admin_runtime_run": 37626856401,
+      "repository_hygiene_run": 37626856391
     },
     "production": {
       "main_sha": "33577629d67159d23888c59b3aa7fb2f52cc98e8",
