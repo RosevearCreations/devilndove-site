@@ -1,3 +1,11 @@
+# CURRENT BUILD — Release 467 Build 365
+
+**Maker Story Advancement & Publication Readiness Continuity VIII**
+
+Build 364 is exact-tree Development/Production GREEN. Build 365 re-measures all active Creative Projects from observed evidence only. Factual result/lesson evidence, explicit human review, public-candidate review, approved/locked copy, human publication traceability and explicit public-media rights remain separate gates. No automatic advancement, publication, social posting, provider execution, schema mutation, R2 mutation or Production D1 contact is authorized.
+
+**Next after Build 365 Production GREEN:** Build 366 — Content Adoption & Discovery Outcomes Renewal XI.
+
 # CURRENT BUILD — Release 467 Build 364
 
 **Search Console Real Export & Fresh Discovery Intake IX**
