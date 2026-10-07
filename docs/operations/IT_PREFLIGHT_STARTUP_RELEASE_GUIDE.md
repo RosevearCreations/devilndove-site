@@ -1,3 +1,22 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 365 candidate over Build 364 Production GREEN
+
+**Current verified successor: Release 467 Build 365 — Maker Story Advancement & Publication Readiness Continuity VIII**
+
+Build 364 is the exact fully verified Development/Production closure ingested by Build 365.
+
+- Development SHA: `94e61e0d2c37adce25857f41748ba28e9ff34378`
+- Shared tree: `db31cdf65544972babe34b2b1c57a24274fa7889`
+- System Gate: `37665417788`
+- Current Application Quality Proof: `37665417940`
+- I.T. Admin Runtime Proof: `37665417818`
+- Repository Branch Hygiene: `37665418163`
+- D1 CI Fan-Out Guard: `37665417875`
+- Build 364 proof: `37665417826`
+- Production main: `1ef40e8926042335846372c072cdd5c000317dfd`
+- Production Pages Deploy: `37665876093`
+- Production Live Resource Integrity: `37666043480`
+- Build 365 scope: read-only five-project Maker Story and publication-readiness continuity; human review and explicit public-media rights remain mandatory.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 364 candidate over Build 363 Production GREEN
 
 **Current verified successor: Release 467 Build 364 — Search Console Real Export & Fresh Discovery Intake IX**

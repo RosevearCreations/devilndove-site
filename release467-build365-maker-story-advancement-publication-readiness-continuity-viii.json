@@ -1,0 +1,280 @@
+{
+  "release": 467,
+  "build": 365,
+  "title": "Maker Story Advancement & Publication Readiness Continuity VIII",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "phase": "MAKER_STORY_ADVANCEMENT_PUBLICATION_READINESS_CONTINUITY_VIII",
+  "authority": "release467-build365-maker-story-advancement-publication-readiness-continuity-viii",
+  "predecessor": {
+    "build": 364,
+    "title": "Search Console Real Export & Fresh Discovery Intake IX",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "94e61e0d2c37adce25857f41748ba28e9ff34378",
+    "development_tree_sha": "db31cdf65544972babe34b2b1c57a24274fa7889",
+    "development_proofs": {
+      "system_gate_run": 37665417788,
+      "current_application_quality_run": 37665417940,
+      "it_admin_runtime_proof_run": 37665417818,
+      "branch_hygiene_run": 37665418163,
+      "d1_ci_fanout_guard_run": 37665417875,
+      "build_specific_proof_run": 37665417826
+    },
+    "development_artifact": {
+      "artifact_id": 11503185569,
+      "artifact_name": "build364-search-console-fresh-discovery-94e61e0d2c37adce25857f41748ba28e9ff34378",
+      "artifact_digest": "sha256:09641efce955e6073c4409fdc7fcc07fb3f8b5d58c46209a87b245b0162195e4"
+    },
+    "production_main_sha": "1ef40e8926042335846372c072cdd5c000317dfd",
+    "production_tree_sha": "db31cdf65544972babe34b2b1c57a24274fa7889",
+    "production_pages_deploy_run": 37665876093,
+    "production_live_resource_integrity_run": 37666043480,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "reuses_build359_maker_story_measurement": true,
+    "reuses_build364_search_console_real_only_boundary": true,
+    "coverage_population": "ALL_ACTIVE_CREATIVE_PROJECTS",
+    "expected_active_projects": 5,
+    "exact_one_caip_workspace_required": true,
+    "exact_one_content_package_required": true,
+    "maker_story_profile_required_for_story_readiness": true,
+    "substantive_non_placeholder_result_and_lesson_required": true,
+    "factual_evidence_required": true,
+    "promo35_real_execution_result_lesson_events_required": true,
+    "explicit_story_review_required": true,
+    "public_story_candidate_required": true,
+    "approved_content_copy_required": true,
+    "locked_content_copy_required": true,
+    "published_story_requires_human_publication_traceability": true,
+    "publication_readiness_is_read_only_classification": true,
+    "public_media_rights_separate_from_story_text_readiness": true,
+    "private_media_never_public_by_inference": true,
+    "provider_posting_independent": true,
+    "automatic_profile_creation": false,
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "automatic_content_approval": false,
+    "automatic_publication": false,
+    "automatic_social_posting": false,
+    "readiness_states": [
+      "MAKER_STORY_EVIDENCE_REQUIRED",
+      "FACTUAL_OUTCOME_EVIDENCE_REQUIRED",
+      "MAKER_STORY_HUMAN_REVIEW_REQUIRED",
+      "PUBLIC_CANDIDATE_REVIEW_REQUIRED",
+      "CONTENT_STUDIO_REVIEW_REQUIRED",
+      "PUBLICATION_REVIEW_READY",
+      "PUBLISHED_REVIEWED_STORY"
+    ],
+    "workspace": "/admin/maker-story-coverage/",
+    "next_build": 366,
+    "next_build_title": "Content Adoption & Discovery Outcomes Renewal XI",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "maker_story_profile_mutation": false,
+    "story_review_mutation": false,
+    "public_candidate_mutation": false,
+    "content_copy_mutation": false,
+    "publication_mutation": false,
+    "social_posting": false,
+    "private_media_exposure": false,
+    "media_rights_inference": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "94e61e0d2c37adce25857f41748ba28e9ff34378",
+      "tree": "db31cdf65544972babe34b2b1c57a24274fa7889",
+      "system_gate_run": 37665417788,
+      "current_application_quality_run": 37665417940,
+      "quality_run": 37665417940,
+      "it_admin_runtime_proof_run": 37665417818,
+      "it_admin_runtime_run": 37665417818,
+      "branch_hygiene_run": 37665418163,
+      "repository_hygiene_run": 37665418163,
+      "d1_ci_fanout_guard_run": 37665417875,
+      "build_specific_proof_run": 37665417826,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "1ef40e8926042335846372c072cdd5c000317dfd",
+      "tree_sha": "db31cdf65544972babe34b2b1c57a24274fa7889",
+      "production_pages_deploy_run": 37665876093,
+      "production_live_resource_integrity_run": 37666043480,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_361_366.md",
+  "next_build": 366,
+  "next_build_title": "Content Adoption & Discovery Outcomes Renewal XI",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "MEASURED_PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+  "measurement_lane_owner": "release467-build365-maker-story-advancement-publication-readiness-continuity-viii.yml",
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "prior_observed_baseline": {
+    "source_build": 359,
+    "decision": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+    "readiness_counts": {
+      "MAKER_STORY_EVIDENCE_REQUIRED": 3,
+      "FACTUAL_OUTCOME_EVIDENCE_REQUIRED": 1,
+      "PUBLISHED_REVIEWED_STORY": 1
+    },
+    "promo35": {
+      "execution_events": 0,
+      "result_events": 0,
+      "lesson_events": 0
+    },
+    "grey_hair": {
+      "approved_source_evidence": 1,
+      "source_evidence_needs_review": 2,
+      "reviewed_story_plans": 0,
+      "source_backed_story_items": 0
+    },
+    "note": "Historical context only; Build 365 exact Development measurement is authoritative."
+  },
+  "decision": {
+    "classification": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+    "rationale": "Exact Development measurement found one human-reviewed published story, three projects still requiring Maker Story evidence, and the 35th Promo still requiring factual execution/result/lesson evidence. No automatic advancement is justified.",
+    "published_reviewed_story_count": 1,
+    "maker_story_evidence_required_count": 3,
+    "factual_outcome_evidence_required_count": 1,
+    "new_publication_review_ready_count": 0,
+    "automatic_advancement_authorized": false,
+    "automatic_publication_authorized": false,
+    "media_rights_inference_authorized": false,
+    "next_build": 366,
+    "next_build_title": "Content Adoption & Discovery Outcomes Renewal XI"
+  },
+  "development_candidate_note": "Read-only Development measurement only; no Maker Story, publication, social, provider, schema, R2 or Production D1 mutation is authorized.",
+  "measurement": {
+    "source_sha": "57f9da962b24161e8e8b1c5a6041bab188b85d2d",
+    "source_tree_sha": "ee6b3f3ac88b737076a0c9b099f63af20335b586",
+    "workflow_run": 37703125777,
+    "artifact_id": 11518373076,
+    "artifact_name": "build365-maker-story-advancement-readiness-57f9da962b24161e8e8b1c5a6041bab188b85d2d",
+    "artifact_digest": "sha256:f5e38be209207b2436d7d06a31b9311d5c5b9000632ff6ac10c2e011fb83db2d",
+    "statement_count": 6,
+    "rows_read_by_statement": [
+      456,
+      19,
+      16,
+      163,
+      4,
+      14
+    ],
+    "aggregate_rows_read": 672,
+    "rows_read_ceiling": 20000,
+    "active_projects": 5,
+    "readiness_counts": {
+      "MAKER_STORY_EVIDENCE_REQUIRED": 3,
+      "FACTUAL_OUTCOME_EVIDENCE_REQUIRED": 1,
+      "PUBLISHED_REVIEWED_STORY": 1
+    },
+    "project_readiness": [
+      {
+        "creative_work_project_id": 1,
+        "project_key": "CP-MS2KGN2G",
+        "project_title": "lime in you coconut",
+        "readiness_state": "MAKER_STORY_EVIDENCE_REQUIRED",
+        "maker_story_profiles": 0,
+        "selected_evidence_rows": 0,
+        "approved_source_evidence": 0,
+        "reviewed_story_plans": 0,
+        "published_journal_rows": 0
+      },
+      {
+        "creative_work_project_id": 2,
+        "project_key": "CP-MS6GGUAW",
+        "project_title": "Shirley Not",
+        "readiness_state": "MAKER_STORY_EVIDENCE_REQUIRED",
+        "maker_story_profiles": 0,
+        "selected_evidence_rows": 0,
+        "approved_source_evidence": 0,
+        "reviewed_story_plans": 0,
+        "published_journal_rows": 0
+      },
+      {
+        "creative_work_project_id": 5,
+        "project_key": "CP-MSC1SUG2",
+        "project_title": "35th promo",
+        "readiness_state": "FACTUAL_OUTCOME_EVIDENCE_REQUIRED",
+        "maker_story_profiles": 1,
+        "story_review_status": "needs_review",
+        "public_story_candidate": 0,
+        "outcome_status": "unknown",
+        "selected_evidence_rows": 1,
+        "execution_events": 0,
+        "result_events": 0,
+        "lesson_events": 0,
+        "approved_deliverables": 2,
+        "locked_deliverables": 2,
+        "published_journal_rows": 0
+      },
+      {
+        "creative_work_project_id": 6,
+        "project_key": "CP-MSUNAL8R",
+        "project_title": "Grey Hair",
+        "readiness_state": "MAKER_STORY_EVIDENCE_REQUIRED",
+        "maker_story_profiles": 0,
+        "approved_source_evidence": 1,
+        "source_evidence_needs_review": 2,
+        "reviewed_story_plans": 0,
+        "source_backed_story_items": 0,
+        "published_journal_rows": 0,
+        "non_public_caip_assets": 45
+      },
+      {
+        "creative_work_project_id": 7,
+        "project_key": "CP-MSXCYQB6",
+        "project_title": "Under the Sea",
+        "readiness_state": "PUBLISHED_REVIEWED_STORY",
+        "maker_story_profiles": 1,
+        "story_review_status": "reviewed",
+        "public_story_candidate": 1,
+        "outcome_status": "partial_win",
+        "selected_evidence_rows": 3,
+        "approved_deliverables": 2,
+        "locked_deliverables": 2,
+        "published_journal_rows": 1,
+        "human_published_journal_rows": 1
+      }
+    ],
+    "completion_lanes": {
+      "promo35_execution_events": 0,
+      "promo35_result_events": 0,
+      "promo35_lesson_events": 0,
+      "grey_hair_approved_source_evidence": 1,
+      "grey_hair_source_evidence_needs_review": 2,
+      "grey_hair_reviewed_story_plans": 0,
+      "grey_hair_source_backed_story_items": 0
+    },
+    "media_rights": {
+      "active_caip_assets": 45,
+      "public_allowed_caip_assets": 0,
+      "non_public_caip_assets": 45,
+      "public_allowed_private_uploads": 0
+    },
+    "social": {
+      "social_rows": 1,
+      "review_first_ready_rows": 1,
+      "provider_posted_rows": 0
+    },
+    "decision": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+    "publication_readiness_is_read_only_classification": true,
+    "automatic_profile_creation": false,
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "automatic_content_approval": false,
+    "publication_mutation": false,
+    "automatic_social_posting": false,
+    "provider_execution": false,
+    "production_d1_contact": false
+  }
+}

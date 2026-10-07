@@ -24,10 +24,10 @@ for token in ('operator_bound_batches','csv_named_batches','import_audits','reve
 for token in ('EVIDENCE_PENDING_NO_REAL_EXPORT','REAL_EVIDENCE_STALE_NON_ACTIONABLE','REAL_EVIDENCE_FRESH_NO_SUPPORTED_SEO_OPPORTUNITY','REAL_EVIDENCE_FRESH_REVIEW_QUEUE_ELIGIBLE','freshness_window_days:30','synthetic_rows:false','production_d1_contact:false'):q(token in verify,'Build 364 verifier missing '+token)
 q('BUILD364_CURRENT_API' in api and 'BUILD364_CURRENT_CLIENT' in ui,'Build 364 Search Console current identity missing')
 for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','REAL EXPORT CONFIRMATION REQUIRED','FRESHNESS WINDOW: 30 DAYS','SYNTHETIC DISCOVERY ROWS: ZERO','PRODUCTION D1 CONTACT: ZERO'):q(token in wf,'Build 364 workflow boundary missing '+token)
-q('branches: [dev]' in wf,'Build 364 workflow is not active on dev')
+cur=int(p.get('build') or 0);q(('branches: [dev]' in wf) if cur==364 else ('workflow_dispatch:' in wf and 'branches: [dev]' not in wf),'Build 364 workflow trigger state mismatch')
 q('Historical after Build 364 activation; manual-only.' in oldwf and 'branches: [dev]' not in oldwf,'Build 363 workflow was not retired')
 q('Build 364 — Search Console Real Export & Fresh Discovery Intake IX' in road and 'Build 365 — Maker Story Advancement & Publication Readiness Continuity VIII' in road,'Build 364/365 roadmap continuity missing')
-cur=int(p.get('build') or 0);q(cur>=364,'Current pointer must retain Build 364 or successor')
+q(cur>=364,'Current pointer must retain Build 364 or successor')
 if cur==364:q(p.get('state') in ('DEVELOPMENT_CANDIDATE','DEVELOPMENT_GREEN') and int(p.get('next_build') or 0)==365,'Build 364 current authority/successor mismatch')
 for path in ('functions/api/admin/search-console-import.js','public/js/admin-search-console-import.js','scripts/release467_build364_verify_continuity.mjs'):
  r=subprocess.run(['node','--check',str(R/path)],cwd=R,text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE);q(r.returncode==0,path+' syntax failed')

@@ -1,30 +1,5 @@
 name: Release 467 Build 364 Search Console Real Export Fresh Discovery Intake IX
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build363-grey-hair-source-review-story-plan-completion-continuity-vii.json'
-      - 'release467-build364-search-console-real-export-fresh-discovery-intake-ix.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build364_continuity.sql'
-      - 'scripts/release467_build364_verify_continuity.mjs'
-      - 'scripts/release467_build364_regression.py'
-      - 'scripts/release467_build364_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/search-console-import.js'
-      - 'public/js/admin-search-console-import.js'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/it/index.html'
-      - 'admin/deployment-preflight/index.html'
-      - 'admin/reliability/index.html'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'docs/operations/RELEASE_467_BUILD_364_SEARCH_CONSOLE_REAL_EXPORT_FRESH_DISCOVERY_INTAKE_IX.md'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - '.github/workflows/release467-build364-search-console-real-export-fresh-discovery-intake-ix.yml'
-      - '.github/workflows/release467-build363-grey-hair-source-review-story-plan-completion-continuity-vii.yml'
   workflow_dispatch:
 permissions:
   contents: read

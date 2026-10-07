@@ -2,7 +2,7 @@
   "release": 467,
   "build": 364,
   "title": "Search Console Real Export & Fresh Discovery Intake IX",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "SEARCH_CONSOLE_REAL_EXPORT_FRESH_DISCOVERY_INTAKE_IX",
   "authority": "release467-build364-search-console-real-export-fresh-discovery-intake-ix",
   "predecessor": {
@@ -196,5 +196,33 @@
     "queue_mutation": false,
     "automatic_seo_apply": false,
     "production_d1_contact": false
+  },
+  "final_closure": {
+    "dev_sha": "94e61e0d2c37adce25857f41748ba28e9ff34378",
+    "tree_sha": "db31cdf65544972babe34b2b1c57a24274fa7889",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD364_GREEN",
+    "proofs": {
+      "system_gate_run": 37665417788,
+      "current_application_quality_run": 37665417940,
+      "it_admin_runtime_proof_run": 37665417818,
+      "branch_hygiene_run": 37665418163,
+      "d1_ci_fanout_guard_run": 37665417875,
+      "build_specific_proof_run": 37665417826
+    },
+    "artifact_id": 11503185569,
+    "artifact_name": "build364-search-console-fresh-discovery-94e61e0d2c37adce25857f41748ba28e9ff34378",
+    "artifact_digest": "sha256:09641efce955e6073c4409fdc7fcc07fb3f8b5d58c46209a87b245b0162195e4",
+    "ingested_by_build": 365,
+    "recorded_by": "Build 365 predecessor ingestion; not self-recorded by Build 364"
+  },
+  "production_checkpoint": {
+    "main_sha": "1ef40e8926042335846372c072cdd5c000317dfd",
+    "tree_sha": "db31cdf65544972babe34b2b1c57a24274fa7889",
+    "production_pages_deploy_run": 37665876093,
+    "production_live_resource_integrity_run": 37666043480,
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "remote_d1_queries": 0
   }
 }
