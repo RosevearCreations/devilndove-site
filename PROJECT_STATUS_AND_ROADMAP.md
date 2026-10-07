@@ -1,3 +1,13 @@
+# CURRENT BUILD — Release 467 Build 364
+
+**Search Console Real Export & Fresh Discovery Intake IX**
+
+Build 363 is exact-tree Development/Production GREEN. Build 364 re-measures the existing operator-controlled Search Console Performance CSV lane. Only explicitly confirmed real exports count; freshness remains tied to explicit report dates inside the 30-day actionability window, and no discovery/SEO action is synthesized.
+
+**Verified Build 363:** Development `6a7cb2ad960f84b045ae62e52a8abd94fb69280f`, Production `33577629d67159d23888c59b3aa7fb2f52cc98e8`, shared tree `8a43776566a46245931c9cb4ac3049a770d76a8c`.
+
+**Next after Build 364 Production GREEN:** Build 365 — Maker Story Advancement & Publication Readiness Continuity VIII.
+
 # CURRENT BUILD — Release 467 Build 363
 
 **Grey Hair Source Review & Story-Plan Completion Continuity VII**

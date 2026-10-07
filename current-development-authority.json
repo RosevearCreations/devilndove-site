@@ -1,34 +1,33 @@
 {
   "release": 467,
-  "build": 363,
-  "title": "Grey Hair Source Review & Story-Plan Completion Continuity VII",
+  "build": 364,
+  "title": "Search Console Real Export & Fresh Discovery Intake IX",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 362,
-      "title": "35th Promo Factual Evidence Completion Continuity VII",
-      "authority": "release467-build362-35th-promo-factual-evidence-completion-continuity-vii.json",
-      "dev_sha": "44bd708887357fc7b3341afdae3e990bb3524719",
-      "tree_sha": "c8ab10efe9bcd310e74d3b5debefb32bf0f77296",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD362_GREEN",
+      "build": 363,
+      "title": "Grey Hair Source Review & Story-Plan Completion Continuity VII",
+      "authority": "release467-build363-grey-hair-source-review-story-plan-completion-continuity-vii.json",
+      "dev_sha": "6a7cb2ad960f84b045ae62e52a8abd94fb69280f",
+      "tree_sha": "8a43776566a46245931c9cb4ac3049a770d76a8c",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD363_GREEN",
       "proofs": {
-        "system_gate_run": 37554433879,
-        "current_application_quality_run": 37554433885,
-        "it_admin_runtime_proof_run": 37554433890,
-        "branch_hygiene_run": 37554433976,
-        "d1_ci_fanout_guard_run": 37554433922,
-        "build_specific_proof_run": 37554433927
+        "system_gate_run": 37626856319,
+        "current_application_quality_run": 37626856310,
+        "it_admin_runtime_proof_run": 37626856401,
+        "branch_hygiene_run": 37626856391,
+        "build_specific_proof_run": 37626856355
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 363,
-      "title": "Grey Hair Source Review & Story-Plan Completion Continuity VII",
-      "authority": "release467-build363-grey-hair-source-review-story-plan-completion-continuity-vii.json",
-      "state": "DEVELOPMENT_CANDIDATE"
+      "build": 364,
+      "title": "Search Console Real Export & Fresh Discovery Intake IX",
+      "authority": "release467-build364-search-console-real-export-fresh-discovery-intake-ix.json",
+      "state": "DEVELOPMENT_GREEN"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
     "closure_candidate_must_not_self_claim_final_proof": true,
@@ -38,19 +37,20 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 362,
-    "title": "35th Promo Factual Evidence Completion Continuity VII",
-    "authority": "release467-build362-35th-promo-factual-evidence-completion-continuity-vii.json",
-    "main_sha": "314ceb7e38d946cc9cef8d0e03fc43d2be3d7b81",
-    "tree_sha": "c8ab10efe9bcd310e74d3b5debefb32bf0f77296",
+    "build": 363,
+    "title": "Grey Hair Source Review & Story-Plan Completion Continuity VII",
+    "authority": "release467-build363-grey-hair-source-review-story-plan-completion-continuity-vii.json",
+    "main_sha": "33577629d67159d23888c59b3aa7fb2f52cc98e8",
+    "tree_sha": "8a43776566a46245931c9cb4ac3049a770d76a8c",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 37555357735,
-    "production_live_resource_integrity_run": 37555436153,
+    "production_pages_deploy_run": 37629292828,
+    "production_live_resource_integrity_run": 37629523294,
     "remote_d1_queries": 0,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build364-search-console-real-export-fresh-discovery-intake-ix.json",
     "release467-build363-grey-hair-source-review-story-plan-completion-continuity-vii.json",
     "release467-build362-35th-promo-factual-evidence-completion-continuity-vii.json",
     "release467-build361-evidence-gap-execution-workbench-input-completion-continuity-vi.json",
@@ -255,11 +255,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_361_366.md",
-  "next_build": 364,
-  "next_build_state": "QUEUED_AFTER_BUILD363_PRODUCTION_GREEN",
-  "next_build_title": "Search Console Real Export & Fresh Discovery Intake IX",
-  "promotion_state": "BUILD363_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD364_DEFINED_BY_BUILD363_OBSERVED_EVIDENCE",
+  "next_build": 365,
+  "next_build_state": "QUEUED_AFTER_BUILD364_PRODUCTION_GREEN",
+  "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VIII",
+  "promotion_state": "BUILD364_MEASURED_FINAL_EXACT_HEAD_REPROOF_REQUESTED",
+  "successor_scope_state": "BUILD365_DEFINED_BY_BUILD364_OBSERVED_EVIDENCE",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -290,15 +290,14 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "44bd708887357fc7b3341afdae3e990bb3524719",
-  "accepted_dev_tree_sha": "c8ab10efe9bcd310e74d3b5debefb32bf0f77296",
+  "accepted_dev_sha": "6a7cb2ad960f84b045ae62e52a8abd94fb69280f",
+  "accepted_dev_tree_sha": "8a43776566a46245931c9cb4ac3049a770d76a8c",
   "acceptance": {
-    "system_gate_run": 37554433879,
-    "current_application_quality_run": 37554433885,
-    "it_admin_runtime_proof_run": 37554433890,
-    "branch_hygiene_run": 37554433976,
-    "d1_ci_fanout_guard_run": 37554433922,
-    "build_specific_proof_run": 37554433927
+    "system_gate_run": 37626856319,
+    "current_application_quality_run": 37626856310,
+    "it_admin_runtime_proof_run": 37626856401,
+    "branch_hygiene_run": 37626856391,
+    "build_specific_proof_run": 37626856355
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -5250,5 +5249,14 @@
     "next_build_title": "Search Console Real Export & Fresh Discovery Intake IX",
     "measurement_source_sha": "950bee317b70e44011968045b23b713e18f94dfb",
     "workflow_run": 37626046153
+  },
+  "measurement_lane": {
+    "build": 364,
+    "state": "MEASURED_EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "workflow_run": 37662853317,
+    "artifact_id": 11502027541,
+    "interpretation": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "aggregate_rows_read": 2062,
+    "rows_read_ceiling": 20000
   }
 }
