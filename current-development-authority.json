@@ -258,7 +258,7 @@
   "next_build": 365,
   "next_build_state": "QUEUED_AFTER_BUILD364_PRODUCTION_GREEN",
   "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VIII",
-  "promotion_state": "BUILD364_MEASURED_FINAL_EXACT_HEAD_REPROOF_REQUESTED",
+  "promotion_state": "BUILD364_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "BUILD365_DEFINED_BY_BUILD364_OBSERVED_EVIDENCE",
   "measured_closure": {
     "source_build": 232,
