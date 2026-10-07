@@ -2,7 +2,7 @@
   "release": 467,
   "build": 363,
   "title": "Grey Hair Source Review & Story-Plan Completion Continuity VII",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "GREY_HAIR_SOURCE_REVIEW_STORY_PLAN_COMPLETION_CONTINUITY_VII",
   "authority": "release467-build363-grey-hair-source-review-story-plan-completion-continuity-vii",
   "predecessor": {
@@ -118,7 +118,7 @@
   "future_queue_exhausted": false,
   "measurement_lane_state": "MEASURED_SOURCE_EVIDENCE_REVIEW_REQUIRED",
   "measurement_lane_owner": "release467-build363-grey-hair-source-review-story-plan-completion-continuity-vii.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD363_GREEN",
   "decision": {
     "classification": "SOURCE_EVIDENCE_REVIEW_REQUIRED",
     "rationale": "Exact Build 363 Development measurement matches the Build 357 baseline: three active Grey Hair source-evidence ranges remain, with one approved and two still requiring explicit human review. Confirmed synchronization groups/tracks, reviewed story plans, source-backed story items and Maker Story profiles remain zero.",
@@ -186,5 +186,32 @@
     "d1_mutation": false,
     "r2_mutation": false,
     "provider_execution": false
+  },
+  "final_closure": {
+    "dev_sha": "6a7cb2ad960f84b045ae62e52a8abd94fb69280f",
+    "tree_sha": "8a43776566a46245931c9cb4ac3049a770d76a8c",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD363_GREEN",
+    "proofs": {
+      "system_gate_run": 37626856319,
+      "current_application_quality_run": 37626856310,
+      "it_admin_runtime_proof_run": 37626856401,
+      "branch_hygiene_run": 37626856391,
+      "build_specific_proof_run": 37626856355
+    },
+    "artifact_id": 11484591624,
+    "artifact_name": "build363-grey-hair-source-review-story-plan-continuity-6a7cb2ad960f84b045ae62e52a8abd94fb69280f",
+    "artifact_digest": "sha256:be635b7cffc74b0448bc8ffb196b71e0d7426494429ed978e1daaa66828a9615",
+    "ingested_by_build": 364,
+    "recorded_by": "Build 364 predecessor ingestion; not self-recorded by Build 363"
+  },
+  "production_checkpoint": {
+    "main_sha": "33577629d67159d23888c59b3aa7fb2f52cc98e8",
+    "tree_sha": "8a43776566a46245931c9cb4ac3049a770d76a8c",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37629292828,
+    "production_live_resource_integrity_run": 37629523294,
+    "remote_d1_queries": 0
   }
 }

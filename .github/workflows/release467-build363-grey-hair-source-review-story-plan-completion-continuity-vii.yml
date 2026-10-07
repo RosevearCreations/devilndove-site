@@ -1,31 +1,6 @@
 name: Release 467 Build 363 Grey Hair Source Review Story Plan Completion Continuity VII
+# Historical after Build 364 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build362-35th-promo-factual-evidence-completion-continuity-vii.json'
-      - 'release467-build363-grey-hair-source-review-story-plan-completion-continuity-vii.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build363_measurement.sql'
-      - 'scripts/release467_build363_verify_measurement.mjs'
-      - 'scripts/release467_build363_regression.py'
-      - 'scripts/release467_build363_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/grey-hair-story-readiness.js'
-      - 'public/js/admin-grey-hair-story-readiness-v320.js'
-      - 'admin/grey-hair-story-readiness/index.html'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/it/index.html'
-      - 'admin/reliability/index.html'
-      - 'admin/deployment-preflight/index.html'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'docs/operations/RELEASE_467_BUILD_363_GREY_HAIR_SOURCE_REVIEW_STORY_PLAN_COMPLETION_CONTINUITY_VII.md'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - '.github/workflows/release467-build363-grey-hair-source-review-story-plan-completion-continuity-vii.yml'
-      - '.github/workflows/release467-build362-35th-promo-factual-evidence-completion-continuity-vii.yml'
   workflow_dispatch:
 permissions:
   contents: read
