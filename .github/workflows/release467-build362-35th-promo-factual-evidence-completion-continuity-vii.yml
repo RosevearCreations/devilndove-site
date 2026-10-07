@@ -1,30 +1,6 @@
 name: Release 467 Build 362 35th Promo Factual Evidence Completion Continuity VII
+# Historical after Build 363 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build361-evidence-gap-execution-workbench-input-completion-continuity-vi.json'
-      - 'release467-build362-35th-promo-factual-evidence-completion-continuity-vii.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build362_measurement.sql'
-      - 'scripts/release467_build362_verify_measurement.mjs'
-      - 'scripts/release467_build362_regression.py'
-      - 'scripts/release467_build362_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/35th-promo-outcome-closure.js'
-      - 'public/js/admin-creative-process.js'
-      - 'admin/creative-process/index.html'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/it/index.html'
-      - 'admin/reliability/index.html'
-      - 'admin/deployment-preflight/index.html'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'docs/operations/RELEASE_467_BUILD_362_35TH_PROMO_FACTUAL_EVIDENCE_COMPLETION_CONTINUITY_VII.md'
-      - '.github/workflows/release467-build362-35th-promo-factual-evidence-completion-continuity-vii.yml'
-      - '.github/workflows/release467-build361-evidence-gap-execution-workbench-input-completion-continuity-vi.yml'
   workflow_dispatch:
 permissions:
   contents: read

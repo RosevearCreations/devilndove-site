@@ -2,7 +2,7 @@
   "release": 467,
   "build": 362,
   "title": "35th Promo Factual Evidence Completion Continuity VII",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "35TH_PROMO_FACTUAL_EVIDENCE_COMPLETION_CONTINUITY_VII",
   "authority": "release467-build362-35th-promo-factual-evidence-completion-continuity-vii",
   "predecessor": {
@@ -120,7 +120,7 @@
   "future_queue_exhausted": false,
   "measurement_lane_state": "MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
   "measurement_lane_owner": "release467-build362-35th-promo-factual-evidence-completion-continuity-vii.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD362_GREEN",
   "measurement": {
     "source_sha": "c590356402116b8d9693b37258e147a33a6467af",
     "source_tree_sha": "8b19166ccb781733a17a0ae746e362ed259ee5f5",
@@ -161,5 +161,33 @@
     "automatic_publication": false,
     "next_build": 363,
     "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity VII"
+  },
+  "final_closure": {
+    "dev_sha": "44bd708887357fc7b3341afdae3e990bb3524719",
+    "tree_sha": "c8ab10efe9bcd310e74d3b5debefb32bf0f77296",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD362_GREEN",
+    "proofs": {
+      "system_gate_run": 37554433879,
+      "current_application_quality_run": 37554433885,
+      "it_admin_runtime_proof_run": 37554433890,
+      "branch_hygiene_run": 37554433976,
+      "d1_ci_fanout_guard_run": 37554433922,
+      "build_specific_proof_run": 37554433927
+    },
+    "artifact_id": 11453379196,
+    "artifact_name": "build362-35th-promo-factual-evidence-continuity-44bd708887357fc7b3341afdae3e990bb3524719",
+    "artifact_digest": "sha256:3e28f2217127626a6579520e8f890ecd139977f17c32a603c1e9c95b10d541cf",
+    "ingested_by_build": 363,
+    "recorded_by": "Build 363 predecessor ingestion; not self-recorded by Build 362"
+  },
+  "production_checkpoint": {
+    "main_sha": "314ceb7e38d946cc9cef8d0e03fc43d2be3d7b81",
+    "tree_sha": "c8ab10efe9bcd310e74d3b5debefb32bf0f77296",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37555357735,
+    "production_live_resource_integrity_run": 37555436153,
+    "remote_d1_queries": 0
   }
 }
