@@ -2,7 +2,7 @@
   "release": 467,
   "build": 364,
   "title": "Search Console Real Export & Fresh Discovery Intake IX",
-  "state": "DEVELOPMENT_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
@@ -27,7 +27,7 @@
       "build": 364,
       "title": "Search Console Real Export & Fresh Discovery Intake IX",
       "authority": "release467-build364-search-console-real-export-fresh-discovery-intake-ix.json",
-      "state": "DEVELOPMENT_CANDIDATE"
+      "state": "DEVELOPMENT_GREEN"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
     "closure_candidate_must_not_self_claim_final_proof": true,
@@ -258,7 +258,7 @@
   "next_build": 365,
   "next_build_state": "QUEUED_AFTER_BUILD364_PRODUCTION_GREEN",
   "next_build_title": "Maker Story Advancement & Publication Readiness Continuity VIII",
-  "promotion_state": "BUILD364_CANDIDATE_NOT_YET_VERIFIED",
+  "promotion_state": "BUILD364_EXACT_HEAD_REPROOF_REQUESTED",
   "successor_scope_state": "BUILD365_DEFINED_BY_BUILD364_OBSERVED_EVIDENCE",
   "measured_closure": {
     "source_build": 232,
