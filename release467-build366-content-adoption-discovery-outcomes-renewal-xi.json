@@ -1,0 +1,157 @@
+{
+  "release": 467,
+  "build": 366,
+  "title": "Content Adoption & Discovery Outcomes Renewal XI",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "phase": "CONTENT_ADOPTION_DISCOVERY_OUTCOMES_RENEWAL_XI",
+  "authority": "release467-build366-content-adoption-discovery-outcomes-renewal-xi",
+  "predecessor": {
+    "build": 365,
+    "title": "Maker Story Advancement & Publication Readiness Continuity VIII",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "5e12ea170eaec46c1d64d5e7d53772417fc31ab6",
+    "development_tree_sha": "3106fd7364176d9eeb07ce76ed3a60bb6f25d62e",
+    "development_proofs": {
+      "system_gate_run": 37703602883,
+      "current_application_quality_run": 37703602955,
+      "it_admin_runtime_proof_run": 37703602842,
+      "branch_hygiene_run": 37703602830,
+      "d1_ci_fanout_guard_run": 37703602806,
+      "build_specific_proof_run": 37703602749
+    },
+    "development_artifact": {
+      "artifact_id": 11518614816,
+      "artifact_name": "build365-maker-story-advancement-readiness-5e12ea170eaec46c1d64d5e7d53772417fc31ab6",
+      "artifact_digest": "sha256:8ffeb8c3c92da689afed50dfad59b015c2700e47657ca24b2722efdc4c9475f0"
+    },
+    "production_main_sha": "712011d85d54ae3183b455bcbc7a55082dc46528",
+    "production_tree_sha": "3106fd7364176d9eeb07ce76ed3a60bb6f25d62e",
+    "production_pages_deploy_run": 37704741533,
+    "production_live_resource_integrity_run": 37704823279,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "scope": {
+    "full_path_remeasurement": true,
+    "build360_comparison": true,
+    "build365_readiness_context": true,
+    "maker_story_coverage": true,
+    "review_state": true,
+    "publication": true,
+    "discovery": true,
+    "runtime": true,
+    "identity_integrity": true,
+    "d1_read_outcomes": true,
+    "seo_review_queue_continuity": true,
+    "search_console_freshness_rule": true,
+    "explicit_report_date_only_for_search_console_freshness": true,
+    "next_roadmap_from_observed_evidence_only": true,
+    "raw_inventory_identity_integrity": true,
+    "raw_inventory_one_operational_record_per_active_source_identity": true,
+    "raw_inventory_receiving_adds_to_existing_on_hand": true,
+    "raw_inventory_purchase_lots_preserve_receipt_provenance_separately": true,
+    "operator_testing_surface": "MAIN_PRODUCTION_DIRECT",
+    "operator_manual_preview_testing": false,
+    "development_branch_ci_proofs_retained": true,
+    "etsy_main_site_oauth_acceptance": true
+  },
+  "inventory_identity_policy": {
+    "identity": "LOWER(TRIM(source_type)) + external_key",
+    "duplicate_active_identity_allowed": false,
+    "repeated_receipt_behavior": "UPDATE_EXISTING_ON_HAND_QUANTITY",
+    "purchase_lot_behavior": "SEPARATE_PROVENANCE_ROWS_LINKED_TO_ONE_SITE_ITEM_INVENTORY_RECORD",
+    "source_contracts": [
+      "functions/api/admin/_siteItemInventoryLegacy.js",
+      "functions/api/_lib/inventoryReceiving.js"
+    ],
+    "note": "Multiple units/packages of the same active Inventory identity remain one operational inventory row with increased quantity; purchase lots remain separate provenance."
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_exposure": false,
+    "automatic_story_generation": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "automatic_social_posting": false,
+    "automatic_seo_apply": false,
+    "indexnow_execution": false,
+    "content_provider_publication": false,
+    "traffic_fabrication": false,
+    "production_d1_measurement_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "5e12ea170eaec46c1d64d5e7d53772417fc31ab6",
+      "tree": "3106fd7364176d9eeb07ce76ed3a60bb6f25d62e",
+      "system_gate_run": 37703602883,
+      "current_application_quality_run": 37703602955,
+      "quality_run": 37703602955,
+      "it_admin_runtime_proof_run": 37703602842,
+      "it_admin_runtime_run": 37703602842,
+      "branch_hygiene_run": 37703602830,
+      "repository_hygiene_run": 37703602830,
+      "d1_ci_fanout_guard_run": 37703602806,
+      "build_specific_proof_run": 37703602749,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "712011d85d54ae3183b455bcbc7a55082dc46528",
+      "tree": "3106fd7364176d9eeb07ce76ed3a60bb6f25d62e",
+      "production_pages_deploy_run": 37704741533,
+      "production_live_resource_integrity_run": 37704823279,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_361_366.md",
+  "successor_selection": "OBSERVED_EVIDENCE_BUILD366_PENDING",
+  "next_build": 367,
+  "next_build_title": "Observed-Evidence Successor Pending Build 366 Measurement",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "measurement_lane_owner": "release467-build366-content-adoption-discovery-outcomes-renewal-xi.yml",
+  "exact_head_reproof_state": "PENDING_EXACT_BRANCH_HEAD_PROOFS",
+  "prior_observed_baselines": {
+    "build360": {
+      "decision": "ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
+      "aggregate_rows_read": 6199,
+      "current": {
+        "maker_profiles": 2,
+        "reviewed_maker_stories": 1,
+        "public_story_candidates": 1,
+        "selected_evidence_rows": 4,
+        "approved_deliverables": 4,
+        "copy_locked_deliverables": 4,
+        "published_journal_rows": 1,
+        "approved_social_rows": 1,
+        "search_console_rows": 0,
+        "coverage": "2/5",
+        "page_views_30d": 11,
+        "unique_visitors_30d": 11,
+        "runtime_errors_7d": 0,
+        "seo_supported_rows": 0,
+        "third_story_ready_projects": 0
+      },
+      "raw_inventory_duplicate_active_identities": 0
+    },
+    "build365": {
+      "decision": "PUBLISHED_BASELINE_STABLE_REMAINING_PROJECTS_NOT_READY",
+      "readiness_counts": {
+        "MAKER_STORY_EVIDENCE_REQUIRED": 3,
+        "FACTUAL_OUTCOME_EVIDENCE_REQUIRED": 1,
+        "PUBLISHED_REVIEWED_STORY": 1
+      },
+      "aggregate_rows_read": 672
+    }
+  },
+  "decision": {
+    "classification": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "next_roadmap_from_observed_evidence_only": true,
+    "next_build": 367,
+    "next_build_title": "Observed-Evidence Successor Pending Build 366 Measurement"
+  },
+  "development_candidate_note": "Read-only Development measurement only. No business-data/schema/R2/provider/publication/SEO mutation or Production D1 measurement contact is authorized."
+}
