@@ -11,3 +11,11 @@ Gap families remain 35th Promo real outcome evidence, Grey Hair source-evidence 
 Development-only and read-only. No evidence, story, Search Console, SEO, provider, R2, Production D1 or publication mutation is authorized.
 
 Next: **Build 368 — 35th Promo Factual Evidence Completion Continuity VIII**.
+
+## Exact Build 367 measurement
+
+Build 367 measured **5 open workbench rows across 4 gap families**, reading **1,659 / 20,000** Development D1 rows. The decision remains **EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED**.
+
+The factual gaps remain: 35th Promo execution/result/lesson evidence; Grey Hair with 2 source-evidence ranges still needing review and no reviewed story plan; no real Search Console export; and two non-Grey-Hair unprofiled projects, **lime in you coconut** and **Shirley Not**, with no real events or selected evidence. The workbench made zero source, completion, provider, R2 or Production D1 mutations.
+
+Measurement artifact: `11568489838` — `sha256:38c6e04cc06363293c59a6edc979533a2d2ea671aec13c886c9d6fa20cf90634`.

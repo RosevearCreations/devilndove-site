@@ -5257,8 +5257,11 @@
   },
   "measurement_lane": {
     "build": 367,
-    "state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
-    "interpretation": "PENDING",
+    "state": "MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "workflow_run": 37821291198,
+    "artifact_id": 11568489838,
+    "interpretation": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "aggregate_rows_read": 1659,
     "rows_read_ceiling": 20000
   },
   "maker_story_advancement_publication_readiness_continuity_viii": {
@@ -5541,14 +5544,95 @@
   "evidence_gap_execution_workbench_input_completion_continuity_vii": {
     "source_build": 367,
     "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
-    "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
     "workbench_mode": "READ_ONLY_DERIVED_FROM_EXISTING_SOURCE_AUTHORITIES",
     "source_outcomes_build": 366,
+    "decision": {
+      "classification": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+      "rationale": "Exact Development measurement derives five current workbench rows across four factual gap families from existing source authorities.",
+      "active_workbench_rows": 5,
+      "active_gap_families": 4,
+      "source_workspaces_authoritative": true,
+      "automatic_completion_authorized": false,
+      "next_build": 368,
+      "next_build_title": "35th Promo Factual Evidence Completion Continuity VIII"
+    },
+    "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
     "next_build": 368,
     "next_build_title": "35th Promo Factual Evidence Completion Continuity VIII",
     "future_queue_exhausted": false,
-    "production_d1_contact": false
+    "measurement": {
+      "source_sha": "e39ac563a89adb2dd54081c0e78f5448a05e9c73",
+      "source_tree_sha": "176af554a3a419b1bec7cf1d72315d21bc163ccb",
+      "workflow_run": 37821291198,
+      "artifact_id": 11568489838,
+      "artifact_name": "build367-evidence-gap-execution-workbench-e39ac563a89adb2dd54081c0e78f5448a05e9c73",
+      "artifact_digest": "sha256:38c6e04cc06363293c59a6edc979533a2d2ea671aec13c886c9d6fa20cf90634",
+      "aggregate_rows_read": 1659,
+      "rows_read_ceiling": 20000,
+      "rows_read_by_statement": [
+        11,
+        14,
+        961,
+        10,
+        649,
+        14
+      ],
+      "active_workbench_rows": 5,
+      "active_gap_families": 4,
+      "gap_families": [
+        "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+        "REAL_SEARCH_CONSOLE_EXPORT",
+        "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+        "UNPROFILED_MAKER_STORY_EVIDENCE"
+      ],
+      "unprofiled_projects": 3,
+      "source_state": {
+        "promo": {
+          "execution_events": 0,
+          "result_events": 0,
+          "lesson_events": 0,
+          "story_review_status": "needs_review",
+          "public_story_candidate": 0,
+          "outcome_status": "unknown"
+        },
+        "grey_hair": {
+          "active_source_evidence": 3,
+          "approved_source_evidence": 1,
+          "source_evidence_needs_review": 2,
+          "reviewed_story_plans": 0,
+          "maker_story_profiles": 0
+        },
+        "search_console": {
+          "import_batches": 0,
+          "live_rows": 0,
+          "fresh_rows": 0,
+          "clicks": 0,
+          "impressions": 0,
+          "latest_report_date": ""
+        },
+        "unprofiled_non_grey_hair_projects": [
+          {
+            "id": 1,
+            "title": "lime in you coconut",
+            "active_events": 0,
+            "selected_evidence_rows": 0
+          },
+          {
+            "id": 2,
+            "title": "Shirley Not",
+            "active_events": 0,
+            "selected_evidence_rows": 0
+          }
+        ]
+      },
+      "decision": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+      "production_d1_contact": false,
+      "d1_mutation": false,
+      "r2_mutation": false,
+      "provider_execution": false
+    }
   },
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_BUILD367_ACTIVATION",
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_BUILD367_MEASUREMENT_INGESTION",
   "build367_exact_head_reproof_requested": true
 }

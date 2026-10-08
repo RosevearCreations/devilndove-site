@@ -98,14 +98,14 @@
       "state": "PRODUCTION_GREEN"
     }
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_367_372.md",
   "next_build": 368,
   "next_build_title": "35th Promo Factual Evidence Completion Continuity VIII",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "measurement_lane_state": "MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
   "measurement_lane_owner": "release467-build367-evidence-gap-execution-workbench-input-completion-continuity-vii.yml",
-  "exact_head_reproof_state": "PENDING_EXACT_BRANCH_HEAD_PROOFS",
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
   "prior_observed_baseline": {
     "source_build": 361,
     "decision": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
@@ -130,10 +130,85 @@
     "raw_inventory_duplicate_active_identities": 0
   },
   "decision": {
-    "classification": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "classification": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "rationale": "Exact Development measurement derives five current workbench rows across four factual gap families from existing source authorities.",
+    "active_workbench_rows": 5,
+    "active_gap_families": 4,
+    "source_workspaces_authoritative": true,
     "automatic_completion_authorized": false,
     "next_build": 368,
     "next_build_title": "35th Promo Factual Evidence Completion Continuity VIII"
   },
-  "development_candidate_note": "Read-only Development workbench derivation only; source workspaces remain authoritative and no gap can be completed by workbench state."
+  "development_candidate_note": "Read-only Development workbench derivation only; source workspaces remain authoritative and no gap can be completed by workbench state.",
+  "measurement": {
+    "source_sha": "e39ac563a89adb2dd54081c0e78f5448a05e9c73",
+    "source_tree_sha": "176af554a3a419b1bec7cf1d72315d21bc163ccb",
+    "workflow_run": 37821291198,
+    "artifact_id": 11568489838,
+    "artifact_name": "build367-evidence-gap-execution-workbench-e39ac563a89adb2dd54081c0e78f5448a05e9c73",
+    "artifact_digest": "sha256:38c6e04cc06363293c59a6edc979533a2d2ea671aec13c886c9d6fa20cf90634",
+    "aggregate_rows_read": 1659,
+    "rows_read_ceiling": 20000,
+    "rows_read_by_statement": [
+      11,
+      14,
+      961,
+      10,
+      649,
+      14
+    ],
+    "active_workbench_rows": 5,
+    "active_gap_families": 4,
+    "gap_families": [
+      "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+      "REAL_SEARCH_CONSOLE_EXPORT",
+      "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+      "UNPROFILED_MAKER_STORY_EVIDENCE"
+    ],
+    "unprofiled_projects": 3,
+    "source_state": {
+      "promo": {
+        "execution_events": 0,
+        "result_events": 0,
+        "lesson_events": 0,
+        "story_review_status": "needs_review",
+        "public_story_candidate": 0,
+        "outcome_status": "unknown"
+      },
+      "grey_hair": {
+        "active_source_evidence": 3,
+        "approved_source_evidence": 1,
+        "source_evidence_needs_review": 2,
+        "reviewed_story_plans": 0,
+        "maker_story_profiles": 0
+      },
+      "search_console": {
+        "import_batches": 0,
+        "live_rows": 0,
+        "fresh_rows": 0,
+        "clicks": 0,
+        "impressions": 0,
+        "latest_report_date": ""
+      },
+      "unprofiled_non_grey_hair_projects": [
+        {
+          "id": 1,
+          "title": "lime in you coconut",
+          "active_events": 0,
+          "selected_evidence_rows": 0
+        },
+        {
+          "id": 2,
+          "title": "Shirley Not",
+          "active_events": 0,
+          "selected_evidence_rows": 0
+        }
+      ]
+    },
+    "decision": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "production_d1_contact": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "provider_execution": false
+  }
 }
