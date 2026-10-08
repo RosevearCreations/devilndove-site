@@ -1,3 +1,23 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 367 candidate over Build 366 Production GREEN
+
+**Current verified successor: Release 467 Build 367 — Evidence Gap Execution Workbench & Input Completion Continuity VII**
+
+Build 366 is the exact fully verified Development/Production closure ingested by Build 367.
+
+- Development SHA: `d8773c0c92614d6633a1986db94a0b130d80c355`
+- Shared tree: `a9d5e384883142e0eedbc0a378e1567b0bdd3c0f`
+- System Gate: `37782526554`
+- Current Application Quality Proof: `37782526520`
+- I.T. Admin Runtime Proof: `37782526524`
+- Repository Branch Hygiene: `37782526487`
+- D1 CI Fan-Out Guard: `37782526522`
+- Build 366 proof: `37782526518`
+- Build 366 artifact: `11551934622` / `sha256:e2f94f0141e402d0d5792454203df434c946284984ea5f7ccf60bd58ddfc05f2`
+- Production main: `55df0d4682c5b068906c9f2c5788de47f15e873f`
+- Production Pages Deploy: `37783030050`
+- Production Live Resource Integrity: `37783166369`
+- Build 367 scope: read-only source-authority evidence-gap workbench refresh; no shadow completion state or source mutation.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 366 candidate over Build 365 Production GREEN
 
 **Current verified successor: Release 467 Build 366 — Content Adoption & Discovery Outcomes Renewal XI**
