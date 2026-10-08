@@ -259,10 +259,10 @@
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_361_366.md",
   "next_build": 367,
-  "next_build_state": "PENDING_BUILD366_OBSERVED_EVIDENCE_RENEWAL",
-  "next_build_title": "Observed-Evidence Successor Pending Build 366 Measurement",
+  "next_build_state": "QUEUED_AFTER_BUILD366_PRODUCTION_GREEN",
+  "next_build_title": "Evidence Gap Execution Workbench & Input Completion Continuity VII",
   "promotion_state": "BUILD366_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD367_PENDING_BUILD366_OBSERVED_EVIDENCE",
+  "successor_scope_state": "BUILD367_DEFINED_BY_BUILD366_OBSERVED_EVIDENCE",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -1117,7 +1117,7 @@
       "300": "CAIP Maker Content Outcomes Renewal & Automation Refinement"
     }
   },
-  "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_361_366.md",
+  "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_367_372.md",
   "inventory_multi_station_read_integrity": {
     "source_build": 290,
     "state": "EXACT_DEVELOPMENT_MEASUREMENT_GREEN",
@@ -5256,8 +5256,11 @@
   },
   "measurement_lane": {
     "build": 366,
-    "state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
-    "interpretation": "PENDING",
+    "state": "MEASURED_ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
+    "workflow_run": 37782188340,
+    "artifact_id": 11551809341,
+    "interpretation": "ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
+    "aggregate_rows_read": 6193,
     "rows_read_ceiling": 20000
   },
   "maker_story_advancement_publication_readiness_continuity_viii": {
@@ -5409,11 +5412,132 @@
   "content_adoption_discovery_outcomes_renewal_xi": {
     "source_build": 366,
     "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
-    "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
-    "next_roadmap_from_observed_evidence_only": true,
+    "measurement_state": "EXACT_DEVELOPMENT_MEASURED_ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
+    "decision": {
+      "classification": "ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
+      "rationale": "Exact Development measurement remains materially stable: Maker Story coverage 2/5, one reviewed/published story, the 35th Promo unresolved, three unprofiled projects, Grey Hair without execution/reviewed story-plan completion, no fresh real Search Console evidence, zero runtime errors, and zero duplicate active Raw Inventory identities.",
+      "next_roadmap_from_observed_evidence_only": true,
+      "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_367_372.md",
+      "next_build": 367,
+      "next_build_title": "Evidence Gap Execution Workbench & Input Completion Continuity VII"
+    },
+    "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
     "next_build": 367,
-    "next_build_title": "Observed-Evidence Successor Pending Build 366 Measurement",
+    "next_build_title": "Evidence Gap Execution Workbench & Input Completion Continuity VII",
+    "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_367_372.md",
     "future_queue_exhausted": false,
-    "production_d1_contact": false
+    "measurement": {
+      "source_sha": "ee0b6951898710d6b501829cbbf5372626d56e27",
+      "source_tree_sha": "59e2b7d7aeb7361c474edd5334b140dd25853885",
+      "workflow_run": 37782188340,
+      "artifact_id": 11551809341,
+      "artifact_name": "build366-content-adoption-discovery-renewal-ee0b6951898710d6b501829cbbf5372626d56e27",
+      "artifact_digest": "sha256:9349a8740f0278cb30ac9b0131ace75f680982f830a3a57a49c2709359e7269a",
+      "statement_count": 19,
+      "rows_read_by_statement": [
+        7,
+        13,
+        50,
+        193,
+        105,
+        2,
+        4,
+        6,
+        11,
+        45,
+        7,
+        50,
+        69,
+        534,
+        1685,
+        0,
+        1,
+        26,
+        3385
+      ],
+      "aggregate_rows_read": 6193,
+      "rows_read_ceiling": 20000,
+      "current": {
+        "maker_profiles": 2,
+        "reviewed_maker_stories": 1,
+        "public_story_candidates": 1,
+        "selected_evidence_rows": 4,
+        "approved_deliverables": 4,
+        "copy_locked_deliverables": 4,
+        "published_journal_rows": 1,
+        "approved_social_rows": 1,
+        "posted_social_rows": 0,
+        "search_console_rows": 0,
+        "search_console_clicks": 0,
+        "search_console_impressions": 0,
+        "coverage": "2/5",
+        "page_views_30d": 5,
+        "unique_visitors_30d": 5,
+        "runtime_errors_7d": 0,
+        "seo_supported_rows": 0,
+        "third_story_ready_projects": 0
+      },
+      "comparison_to_build360": {
+        "maker_profiles": 0,
+        "reviewed_maker_stories": 0,
+        "public_story_candidates": 0,
+        "selected_evidence_rows": 0,
+        "approved_deliverables": 0,
+        "copy_locked_deliverables": 0,
+        "published_journal_rows": 0,
+        "approved_social_rows": 0,
+        "search_console_rows": 0,
+        "page_views_30d": -6,
+        "unique_visitors_30d": -6,
+        "runtime_errors_7d": 0
+      },
+      "second_story_35th_promo": {
+        "maker_story_profile": 1,
+        "reviewed_profile": 0,
+        "public_candidate": 0,
+        "unknown_outcome": 1,
+        "selected_evidence": 1,
+        "content_package": 1,
+        "approved_deliverables": 2,
+        "changes_requested_deliverables": 17,
+        "locked_deliverables": 2,
+        "publications": 0,
+        "social_rows": 0
+      },
+      "third_project_readiness": {
+        "remaining_unprofiled_projects": 3,
+        "third_story_ready_projects": 0,
+        "grey_hair_approved_source_evidence": 1,
+        "grey_hair_execution_events": 0,
+        "grey_hair_reviewed_story_plans": 0
+      },
+      "raw_inventory_identity": {
+        "duplicate_active_inventory_identities": 0,
+        "one_operational_record_policy_verified": true
+      },
+      "decision": "ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
+      "roadmap_signal": {
+        "second_story_needs_execution_result_lesson": true,
+        "search_console_real_fresh_evidence_present": false,
+        "evidence_backed_fresh_seo_rows_present": false,
+        "third_project_factually_ready": false,
+        "grey_hair_approved_source_evidence": 1,
+        "grey_hair_execution_events": 0,
+        "grey_hair_reviewed_story_plans": 0,
+        "renewal_contract_rows_read_delta_vs_build360": -6,
+        "raw_inventory_duplicate_active_identities": 0,
+        "raw_inventory_one_record_policy_verified": true
+      },
+      "production_d1_contact": false,
+      "d1_mutation": false,
+      "r2_mutation": false,
+      "content_provider_execution": false,
+      "provider_publication": false,
+      "indexnow_execution": false,
+      "automatic_publication": false,
+      "automatic_story_generation": false,
+      "automatic_seo_apply": false,
+      "traffic_fabrication": false
+    }
   }
 }

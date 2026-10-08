@@ -22,3 +22,13 @@ No schema/business-data/R2 mutation, private-media promotion, automatic story ge
 ## Roadmap renewal
 
 Build 366 compares the fresh result to the last full renewal (Build 360) and retains Build 365 readiness as context. The next roadmap is chosen only after the exact Development measurement is observed.
+
+## Exact Development measurement
+
+Build 366 measured **ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST** on `ee0b6951898710d6b501829cbbf5372626d56e27` from 19 read-only Development statements and **6,193 / 20,000** aggregate provider rows read. Maker Story coverage remains **2/5**; one reviewed/public story remains stable; the 35th Promo is still not reviewed/public and retains an unknown outcome; three projects remain unprofiled; Grey Hair has one approved source-evidence range but no execution event or reviewed story plan; there are no fresh real Search Console rows or evidence-backed SEO opportunities; runtime errors remain zero.
+
+Raw Inventory identity integrity remains GREEN with **0 duplicate active identities**. Repeated receiving continues to add quantity to the one operational Inventory row while purchase lots remain separate provenance.
+
+Artifact: `11551809341` — `sha256:9349a8740f0278cb30ac9b0131ace75f680982f830a3a57a49c2709359e7269a`.
+
+Observed evidence renews the queue as **Builds 367–372**, beginning with **Build 367 — Evidence Gap Execution Workbench & Input Completion Continuity VII**.

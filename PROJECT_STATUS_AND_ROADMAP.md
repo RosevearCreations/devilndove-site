@@ -6,7 +6,7 @@ Build 365 is exact-tree Development/Production GREEN. Build 366 repeats the full
 
 No schema/business-data/R2 mutation, automatic story/publication/social/SEO action, provider execution, traffic fabrication or Production D1 measurement contact is authorized.
 
-**Next after Build 366:** selected only from the exact Development measurement; provisional build number 367.
+**Next after Build 366 Production GREEN:** Build 367 — Evidence Gap Execution Workbench & Input Completion Continuity VII.
 
 # CURRENT BUILD — Release 467 Build 365
 
