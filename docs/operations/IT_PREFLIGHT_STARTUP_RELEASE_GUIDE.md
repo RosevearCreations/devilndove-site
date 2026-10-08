@@ -1,3 +1,22 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 366 candidate over Build 365 Production GREEN
+
+**Current verified successor: Release 467 Build 366 — Content Adoption & Discovery Outcomes Renewal XI**
+
+Build 365 is the exact fully verified Development/Production closure ingested by Build 366.
+
+- Development SHA: `5e12ea170eaec46c1d64d5e7d53772417fc31ab6`
+- Shared tree: `3106fd7364176d9eeb07ce76ed3a60bb6f25d62e`
+- System Gate: `37703602883`
+- Current Application Quality Proof: `37703602955`
+- I.T. Admin Runtime Proof: `37703602842`
+- Repository Branch Hygiene: `37703602830`
+- D1 CI Fan-Out Guard: `37703602806`
+- Build 365 proof: `37703602749`
+- Production main: `712011d85d54ae3183b455bcbc7a55082dc46528`
+- Production Pages Deploy: `37704741533`
+- Production Live Resource Integrity: `37704823279`
+- Build 366 scope: read-only full adoption/discovery outcomes renewal with Raw Inventory identity integrity, real-only Search Console evidence and observed-evidence-only roadmap selection.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 365 candidate over Build 364 Production GREEN
 
 **Current verified successor: Release 467 Build 365 — Maker Story Advancement & Publication Readiness Continuity VIII**

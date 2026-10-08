@@ -2,7 +2,7 @@
   "release": 467,
   "build": 365,
   "title": "Maker Story Advancement & Publication Readiness Continuity VIII",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "MAKER_STORY_ADVANCEMENT_PUBLICATION_READINESS_CONTINUITY_VIII",
   "authority": "release467-build365-maker-story-advancement-publication-readiness-continuity-viii",
   "predecessor": {
@@ -276,5 +276,33 @@
     "automatic_social_posting": false,
     "provider_execution": false,
     "production_d1_contact": false
+  },
+  "final_closure": {
+    "dev_sha": "5e12ea170eaec46c1d64d5e7d53772417fc31ab6",
+    "tree_sha": "3106fd7364176d9eeb07ce76ed3a60bb6f25d62e",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD365_GREEN",
+    "proofs": {
+      "system_gate_run": 37703602883,
+      "current_application_quality_run": 37703602955,
+      "it_admin_runtime_proof_run": 37703602842,
+      "branch_hygiene_run": 37703602830,
+      "d1_ci_fanout_guard_run": 37703602806,
+      "build_specific_proof_run": 37703602749
+    },
+    "artifact_id": 11518614816,
+    "artifact_name": "build365-maker-story-advancement-readiness-5e12ea170eaec46c1d64d5e7d53772417fc31ab6",
+    "artifact_digest": "sha256:8ffeb8c3c92da689afed50dfad59b015c2700e47657ca24b2722efdc4c9475f0",
+    "ingested_by_build": 366,
+    "recorded_by": "Build 366 predecessor ingestion; not self-recorded by Build 365"
+  },
+  "production_checkpoint": {
+    "main_sha": "712011d85d54ae3183b455bcbc7a55082dc46528",
+    "tree_sha": "3106fd7364176d9eeb07ce76ed3a60bb6f25d62e",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37704741533,
+    "production_live_resource_integrity_run": 37704823279,
+    "remote_d1_queries": 0
   }
 }
