@@ -5548,5 +5548,7 @@
     "next_build_title": "35th Promo Factual Evidence Completion Continuity VIII",
     "future_queue_exhausted": false,
     "production_d1_contact": false
-  }
+  },
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_BUILD367_ACTIVATION",
+  "build367_exact_head_reproof_requested": true
 }
