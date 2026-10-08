@@ -41,11 +41,10 @@ for token in ('35th promo factual blocker','Grey Hair source-evidence blocker','
 for token in ('sets.length!==6','EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED','35TH_PROMO_REAL_OUTCOME_EVIDENCE','REAL_SEARCH_CONSOLE_EXPORT','GREY_HAIR_SOURCE_EVIDENCE_REVIEW','UNPROFILED_MAKER_STORY_EVIDENCE','production_d1_contact:false'):
     q(token in verify,'Build 361 verifier missing '+token)
 
-q("const BUILD=361,TITLE='Evidence Gap Execution Workbench & Input Completion Continuity VI'" in api,'Build 361 Workbench API identity mismatch')
-q('Release 467 • Build 361' in page and 'Input Completion Continuity VI' in page,'Build 361 Workbench page identity mismatch')
-q('BUILD361_CURRENT_CLIENT' in ui and 'Build 361' in ui,'Build 361 Workbench client identity mismatch')
-
 cur=int(p.get('build') or 0)
+q(("const BUILD=361,TITLE='Evidence Gap Execution Workbench & Input Completion Continuity VI'" in api) if cur==361 else ('BUILD361_CURRENT_AUTHORITY' in api),'Build 361 Workbench API identity mismatch')
+q(('Release 467 • Build 361' in page and 'Input Completion Continuity VI' in page) if cur==361 else ('BUILD361_CURRENT_PAGE' in page),'Build 361 Workbench page identity mismatch')
+q(('BUILD361_CURRENT_CLIENT' in ui and 'Build 361' in ui) if cur==361 else ('BUILD361_CURRENT_CLIENT' in ui),'Build 361 Workbench client identity mismatch')
 trigger_tokens=('push:','branches: [dev]') if cur==361 else ('workflow_dispatch:',)
 for token in (*trigger_tokens,'D1_ONE_SHOT_EVIDENCE_CAPTURE','WORKBENCH MODE: READ-ONLY DERIVED SOURCE AUTHORITY','SOURCE WORKSPACES: AUTHORITATIVE','COMPLETION PERSISTENCE: ZERO','EVIDENCE/STORY/SEARCH/SEO MUTATION: ZERO','PROVIDER EXECUTION: ZERO','PRODUCTION D1 CONTACT: ZERO'):
     q(token in wf,'Build 361 workflow boundary missing '+token)

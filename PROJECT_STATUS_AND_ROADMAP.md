@@ -1,3 +1,13 @@
+# CURRENT BUILD — Release 467 Build 367
+
+**Evidence Gap Execution Workbench & Input Completion Continuity VII**
+
+Build 366 is exact-tree Development/Production GREEN. Build 367 re-derives the active factual evidence-gap workbench from existing source authorities only. It shows required inputs, observed completion, factual completion signals, next safe human actions and direct links to the authoritative workspaces.
+
+No shadow task table, assignment/acknowledgement/resolution/completion persistence, evidence/story/Search Console/SEO mutation, provider action, R2 mutation or Production D1 contact is authorized.
+
+**Next after Build 367 Production GREEN:** Build 368 — 35th Promo Factual Evidence Completion Continuity VIII.
+
 # CURRENT BUILD — Release 467 Build 366
 
 **Content Adoption & Discovery Outcomes Renewal XI**

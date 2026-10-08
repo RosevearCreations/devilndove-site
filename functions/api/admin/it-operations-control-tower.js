@@ -1,3 +1,5 @@
+/* BUILD367_CURRENT_SUCCESSOR: Release 467 Build 367 — Evidence Gap Execution Workbench & Input Completion Continuity VII; verified predecessor Build 366. */
+/* BUILD367_RESTART_PROVENANCE: Build 366 dev d8773c0c92614d6633a1986db94a0b130d80c355; tree a9d5e384883142e0eedbc0a378e1567b0bdd3c0f; System 37782526554; Quality 37782526520; IT 37782526524; Hygiene 37782526487; D1 Fan-Out 37782526522; Build 366 37782526518; Production 55df0d4682c5b068906c9f2c5788de47f15e873f; Pages 37783030050; Live 37783166369. */
 /* BUILD366_CURRENT_SUCCESSOR: Release 467 Build 366 — Content Adoption & Discovery Outcomes Renewal XI; verified predecessor Build 365. */
 /* BUILD366_RESTART_PROVENANCE: Build 365 dev 5e12ea170eaec46c1d64d5e7d53772417fc31ab6; tree 3106fd7364176d9eeb07ce76ed3a60bb6f25d62e; System 37703602883; Quality 37703602955; IT 37703602842; Hygiene 37703602830; D1 Fan-Out 37703602806; Build 365 37703602749; Production 712011d85d54ae3183b455bcbc7a55082dc46528; Pages 37704741533; Live 37704823279. */
 /* BUILD365_CURRENT_SUCCESSOR: Release 467 Build 365 — Maker Story Advancement & Publication Readiness Continuity VIII; verified predecessor Build 364. */
@@ -61,8 +63,8 @@ import { onRequestGet as getReadinessControlTower } from './it-control-tower.js'
 import { onRequestGet as getSelfDiagnostics } from './it-self-diagnostics.js';
 
 const RELEASE=467;
-const BUILD=366;
-const TITLE='Content Adoption & Discovery Outcomes Renewal XI';
+const BUILD=367;
+const TITLE='Evidence Gap Execution Workbench & Input Completion Continuity VII';
 const AUTHORITY='release467-build362-35th-promo-factual-evidence-completion-continuity-vii';
 const EVIDENCE_ID='r467-b351-closure-37073559299-37073740571';
 
@@ -72,7 +74,7 @@ const PRODUCTION=Object.freeze({release:467,build:363,title:'Grey Hair Source Re
 const PRODUCTION_PROOF_TRANSPORT=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],permanent_4xx_fail_closed:true,resource_correctness_fail_closed:true,workflow:'.github/workflows/production-live-resource-integrity-proof.yml'
 });
-const CURRENT_GUARDS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 366 Content Adoption Discovery Outcomes Renewal XI']);
+const CURRENT_GUARDS=Object.freeze(['System Gate','Current Application Quality Proof','I.T. Admin Runtime Proof','Repository Branch Hygiene','Release 467 Build 367 Evidence Gap Execution Workbench Input Completion Continuity VII']);
 const CANONICAL_MIGRATIONS=Object.freeze(['0001_release464_migration_authority.sql','0002_release464_operational_acceptance.sql','0003_release464_business_growth.sql','0004_release465_storefront_quality.sql','0005_release467_inventory_process_assignment.sql','0006_release467_product_media_publication_guard.sql','0007_release467_storefront_launch_remediation.sql','0008_release467_workshop_process_taxonomy.sql','0009_release467_workshop_capability_profiles.sql','0010_release467_custom_work_intake_2.sql','0011_release467_manufacturing_triage_route.sql','0012_release467_hybrid_creative_project_operations.sql','0013_release467_digital_proof_customer_approval.sql','0014_release467_prototype_sample_production_run.sql','0015_release467_small_batch_corporate_event_quoting.sql','0016_release467_customer_supplied_item_suitability_review.sql','0017_release467_production_cost_evidence_v2.sql','0018_release467_manufacturing_work_order_job_traveler.sql','0019_release467_production_run_qa_rework_scrap_evidence.sql','0020_release467_workshop_knowledge_library_foundation.sql','0021_release467_project_knowledge_recipe_history.sql','0022_release467_capability_profile_coverage_closure.sql','0023_release467_cupcake_soap_label_templates.sql','0024_release467_creative_process_resource_link_operator_workflow.sql','0025_release467_inventory_workstation_roles.sql','0026_release467_inventory_workstation_memberships.sql','0027_release467_caip_workshop_follies_maker_story_foundation.sql','0028_release467_inventory_all_stations_current_location.sql']);
 const EXTERNAL_POLICY=Object.freeze([
   {key:'stripe_development',state:'HOLD_EXTERNAL'},
