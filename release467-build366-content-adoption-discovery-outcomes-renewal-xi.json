@@ -2,7 +2,7 @@
   "release": 467,
   "build": 366,
   "title": "Content Adoption & Discovery Outcomes Renewal XI",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "CONTENT_ADOPTION_DISCOVERY_OUTCOMES_RENEWAL_XI",
   "authority": "release467-build366-content-adoption-discovery-outcomes-renewal-xi",
   "predecessor": {
@@ -269,5 +269,33 @@
     "automatic_story_generation": false,
     "automatic_seo_apply": false,
     "traffic_fabrication": false
+  },
+  "final_closure": {
+    "dev_sha": "d8773c0c92614d6633a1986db94a0b130d80c355",
+    "tree_sha": "a9d5e384883142e0eedbc0a378e1567b0bdd3c0f",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD366_GREEN",
+    "proofs": {
+      "system_gate_run": 37782526554,
+      "current_application_quality_run": 37782526520,
+      "it_admin_runtime_proof_run": 37782526524,
+      "branch_hygiene_run": 37782526487,
+      "d1_ci_fanout_guard_run": 37782526522,
+      "build_specific_proof_run": 37782526518
+    },
+    "artifact_id": 11551934622,
+    "artifact_name": "build366-content-adoption-discovery-renewal-d8773c0c92614d6633a1986db94a0b130d80c355",
+    "artifact_digest": "sha256:e2f94f0141e402d0d5792454203df434c946284984ea5f7ccf60bd58ddfc05f2",
+    "ingested_by_build": 367,
+    "recorded_by": "Build 367 predecessor ingestion; not self-recorded by Build 366"
+  },
+  "production_checkpoint": {
+    "main_sha": "55df0d4682c5b068906c9f2c5788de47f15e873f",
+    "tree_sha": "a9d5e384883142e0eedbc0a378e1567b0bdd3c0f",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37783030050,
+    "production_live_resource_integrity_run": 37783166369,
+    "remote_d1_queries": 0
   }
 }
