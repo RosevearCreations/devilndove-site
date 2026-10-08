@@ -1,3 +1,5 @@
+/* BUILD367_CURRENT_SUCCESSOR: Release 467 Build 367 — Evidence Gap Execution Workbench & Input Completion Continuity VII; verified predecessor Build 366. */
+/* BUILD367_RESTART_PROVENANCE: Build 366 dev d8773c0c92614d6633a1986db94a0b130d80c355; tree a9d5e384883142e0eedbc0a378e1567b0bdd3c0f; System 37782526554; Quality 37782526520; IT 37782526524; Hygiene 37782526487; D1 Fan-Out 37782526522; Build 366 37782526518; Production 55df0d4682c5b068906c9f2c5788de47f15e873f; Pages 37783030050; Live 37783166369. */
 /* BUILD366_CURRENT_SUCCESSOR: Release 467 Build 366 — Content Adoption & Discovery Outcomes Renewal XI; verified predecessor Build 365. */
 /* BUILD366_RESTART_PROVENANCE: Build 365 dev 5e12ea170eaec46c1d64d5e7d53772417fc31ab6; tree 3106fd7364176d9eeb07ce76ed3a60bb6f25d62e; System 37703602883; Quality 37703602955; IT 37703602842; Hygiene 37703602830; D1 Fan-Out 37703602806; Build 365 37703602749; Production 712011d85d54ae3183b455bcbc7a55082dc46528; Pages 37704741533; Live 37704823279. */
 /* BUILD365_CURRENT_SUCCESSOR: Release 467 Build 365 — Maker Story Advancement & Publication Readiness Continuity VIII; verified predecessor Build 364. */
@@ -67,8 +69,8 @@
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=366;
-export const CURRENT_RELIABILITY_TITLE='Content Adoption & Discovery Outcomes Renewal XI';
+export const CURRENT_RELIABILITY_BUILD=367;
+export const CURRENT_RELIABILITY_TITLE='Evidence Gap Execution Workbench & Input Completion Continuity VII';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
 export const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:363,title:'Grey Hair Source Review & Story-Plan Completion Continuity VII',state:'DEVELOPMENT_GREEN',dev_sha:'6a7cb2ad960f84b045ae62e52a8abd94fb69280f',tree_sha:'8a43776566a46245931c9cb4ac3049a770d76a8c',system_gate_run:37626856319,current_application_quality_run:37626856310,it_admin_runtime_proof_run:37626856401,branch_hygiene_run:37626856391,proof_state:'EXACT_BRANCH_HEAD_BUILD363_GREEN'});
@@ -91,7 +93,7 @@ export async function loadCurrentReliability(db,env={}){
     governance:{...inherited.governance,current_release_authority:'current-development-authority.json',production_promotion_proof_count:4,production_closure_proof_count:6,rollback_readiness:'release-neutral-read-only',restart_integrity_protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1'},
     recovery:inherited.recovery,drift:inherited.drift,
     provenance:{
-      current_surface_release:467,current_surface_build:366,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
+      current_surface_release:467,current_surface_build:367,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
       historical_feature_authority:'release467-build36-current-reliability-operational-health.json',current_operator_authority:'current-development-authority.json',
       accepted_development:ACCEPTED_DEVELOPMENT,last_fully_verified_development:LAST_FULLY_VERIFIED_DEVELOPMENT,current_production:CURRENT_PRODUCTION,
       production_proof_transport_policy:PRODUCTION_PROOF_TRANSPORT_POLICY,implementation_acceptance_is_distinct_from_final_closure:true,
