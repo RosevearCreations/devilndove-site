@@ -1,0 +1,139 @@
+{
+  "release": 467,
+  "build": 367,
+  "title": "Evidence Gap Execution Workbench & Input Completion Continuity VII",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "phase": "EVIDENCE_GAP_EXECUTION_WORKBENCH_INPUT_COMPLETION_CONTINUITY_VII",
+  "authority": "release467-build367-evidence-gap-execution-workbench-input-completion-continuity-vii",
+  "predecessor": {
+    "build": 366,
+    "title": "Content Adoption & Discovery Outcomes Renewal XI",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "d8773c0c92614d6633a1986db94a0b130d80c355",
+    "development_tree_sha": "a9d5e384883142e0eedbc0a378e1567b0bdd3c0f",
+    "development_proofs": {
+      "system_gate_run": 37782526554,
+      "current_application_quality_run": 37782526520,
+      "it_admin_runtime_proof_run": 37782526524,
+      "branch_hygiene_run": 37782526487,
+      "d1_ci_fanout_guard_run": 37782526522,
+      "build_specific_proof_run": 37782526518
+    },
+    "development_artifact": {
+      "artifact_id": 11551934622,
+      "artifact_name": "build366-content-adoption-discovery-renewal-d8773c0c92614d6633a1986db94a0b130d80c355",
+      "artifact_digest": "sha256:e2f94f0141e402d0d5792454203df434c946284984ea5f7ccf60bd58ddfc05f2"
+    },
+    "production_main_sha": "55df0d4682c5b068906c9f2c5788de47f15e873f",
+    "production_tree_sha": "a9d5e384883142e0eedbc0a378e1567b0bdd3c0f",
+    "production_pages_deploy_run": 37783030050,
+    "production_live_resource_integrity_run": 37783166369,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "workbench_mode": "READ_ONLY_DERIVED_FROM_EXISTING_SOURCE_AUTHORITIES",
+    "refreshes_existing_build361_workbench": true,
+    "source_outcomes_build": 366,
+    "shows_required_inputs": true,
+    "shows_observed_completion": true,
+    "shows_completion_signal": true,
+    "shows_next_safe_human_action": true,
+    "direct_source_workspace_links": true,
+    "shadow_task_table": false,
+    "user_assignment_persistence": false,
+    "acknowledgement_persistence": false,
+    "resolution_persistence": false,
+    "completion_persistence": false,
+    "source_workspaces_remain_authoritative": true,
+    "explicit_search_console_report_date_required": true,
+    "operator_testing_surface": "MAIN_PRODUCTION_DIRECT",
+    "expected_gap_families": [
+      "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+      "REAL_SEARCH_CONSOLE_EXPORT",
+      "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+      "UNPROFILED_MAKER_STORY_EVIDENCE"
+    ],
+    "next_build": 368,
+    "next_build_title": "35th Promo Factual Evidence Completion Continuity VIII",
+    "future_queue_exhausted": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "d1_business_data_mutation": false,
+    "r2_mutation": false,
+    "private_media_exposure": false,
+    "evidence_mutation": false,
+    "story_mutation": false,
+    "search_console_mutation": false,
+    "seo_mutation": false,
+    "automatic_completion": false,
+    "automatic_approval": false,
+    "automatic_publication": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "d8773c0c92614d6633a1986db94a0b130d80c355",
+      "tree": "a9d5e384883142e0eedbc0a378e1567b0bdd3c0f",
+      "system_gate_run": 37782526554,
+      "current_application_quality_run": 37782526520,
+      "quality_run": 37782526520,
+      "it_admin_runtime_proof_run": 37782526524,
+      "it_admin_runtime_run": 37782526524,
+      "branch_hygiene_run": 37782526487,
+      "repository_hygiene_run": 37782526487,
+      "d1_ci_fanout_guard_run": 37782526522,
+      "build_specific_proof_run": 37782526518,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "55df0d4682c5b068906c9f2c5788de47f15e873f",
+      "tree": "a9d5e384883142e0eedbc0a378e1567b0bdd3c0f",
+      "production_pages_deploy_run": 37783030050,
+      "production_live_resource_integrity_run": 37783166369,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_367_372.md",
+  "next_build": 368,
+  "next_build_title": "35th Promo Factual Evidence Completion Continuity VIII",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "measurement_lane_owner": "release467-build367-evidence-gap-execution-workbench-input-completion-continuity-vii.yml",
+  "exact_head_reproof_state": "PENDING_EXACT_BRANCH_HEAD_PROOFS",
+  "prior_observed_baseline": {
+    "source_build": 361,
+    "decision": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
+    "active_workbench_rows": 5,
+    "active_gap_families": 4,
+    "unprofiled_projects": 3,
+    "aggregate_rows_read": 1659,
+    "gap_families": [
+      "35TH_PROMO_REAL_OUTCOME_EVIDENCE",
+      "REAL_SEARCH_CONSOLE_EXPORT",
+      "GREY_HAIR_SOURCE_EVIDENCE_REVIEW",
+      "UNPROFILED_MAKER_STORY_EVIDENCE"
+    ]
+  },
+  "source_outcomes_baseline": {
+    "source_build": 366,
+    "decision": "ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
+    "maker_story_coverage": "2/5",
+    "search_console_rows": 0,
+    "third_story_ready_projects": 0,
+    "runtime_errors_7d": 0,
+    "raw_inventory_duplicate_active_identities": 0
+  },
+  "decision": {
+    "classification": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "automatic_completion_authorized": false,
+    "next_build": 368,
+    "next_build_title": "35th Promo Factual Evidence Completion Continuity VIII"
+  },
+  "development_candidate_note": "Read-only Development workbench derivation only; source workspaces remain authoritative and no gap can be completed by workbench state."
+}
