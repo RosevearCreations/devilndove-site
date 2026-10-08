@@ -10,7 +10,7 @@ sql=t('scripts/release467_build365_continuity.sql');verify=t('scripts/release467
 api=t('functions/api/admin/maker-story-coverage.js');page=t('admin/maker-story-coverage/index.html');ui=t('public/js/admin-maker-story-coverage-v329.js')
 rel=t('functions/api/_lib/currentReliability.js');pre=t('functions/api/admin/current-deployment-preflight.js');it=t('functions/api/admin/it-operations-control-tower.js')
 q(a.get('build')==365 and a.get('title')=='Maker Story Advancement & Publication Readiness Continuity VIII','Build 365 identity mismatch')
-q(a.get('state') in ('DEVELOPMENT_CLOSURE_CANDIDATE','DEVELOPMENT_GREEN'),'Build 365 authority state mismatch')
+q(a.get('state') in ('DEVELOPMENT_CLOSURE_CANDIDATE','DEVELOPMENT_GREEN','PRODUCTION_GREEN'),'Build 365 authority state mismatch')
 q((prev.get('final_closure') or {}).get('dev_sha')=='94e61e0d2c37adce25857f41748ba28e9ff34378' and (prev.get('final_closure') or {}).get('tree_sha')=='db31cdf65544972babe34b2b1c57a24274fa7889','Build 364 exact Development closure missing')
 q((prev.get('production_checkpoint') or {}).get('main_sha')=='1ef40e8926042335846372c072cdd5c000317dfd' and (prev.get('production_checkpoint') or {}).get('tree_sha')=='db31cdf65544972babe34b2b1c57a24274fa7889','Build 364 Production checkpoint missing')
 c=a.get('contract') or {};s=a.get('safety') or {}
