@@ -1,5 +1,6 @@
 // BUILD368_CURRENT_API_IDENTITY: Release 467 Build 368 — 35th Promo Factual Evidence Completion Continuity VIII; GET-only factual readiness over existing source authority.
-// HISTORICAL_BUILD362_API_COMPAT: const BUILD=362; title:'35th Promo Factual Evidence Completion Continuity VIII';
+// HISTORICAL_BUILD362_API_COMPAT: const BUILD=362; title:'35th Promo Factual Evidence Completion Continuity VII';
+ // HISTORICAL_BUILD338_RUNTIME_COMPAT: const BUILD=338;
 // BUILD362_CURRENT_API_IDENTITY: Release 467 Build 362 — 35th Promo Factual Evidence Completion Continuity VII; GET-only factual readiness over existing source authority.
 // HISTORICAL_BUILD338_RUNTIME_LITERAL: const BUILD=362; retained for historical regression provenance.
 // BUILD356_CURRENT_API_IDENTITY: Release 467 Build 356 — 35th Promo Factual Evidence Completion Continuity VI; GET-only factual readiness over existing source authority.

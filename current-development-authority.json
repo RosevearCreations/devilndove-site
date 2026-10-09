@@ -5258,8 +5258,11 @@
   },
   "measurement_lane": {
     "build": 368,
-    "state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
-    "interpretation": "PENDING",
+    "state": "MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
+    "workflow_run": 37979409515,
+    "artifact_id": 11640196668,
+    "interpretation": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW",
+    "aggregate_rows_read": 45,
     "rows_read_ceiling": 20000
   },
   "maker_story_advancement_publication_readiness_continuity_viii": {
@@ -5631,19 +5634,61 @@
       "provider_execution": false
     }
   },
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_BUILD367_MEASUREMENT_INGESTION",
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_BUILD368_MEASUREMENT_INGESTION",
   "build367_exact_head_reproof_requested": true,
   "promo_factual_evidence_completion_continuity_viii": {
     "source_build": 368,
     "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
-    "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "measurement_state": "EXACT_DEVELOPMENT_MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
     "target_project_id": 5,
     "readiness_only": true,
     "explicit_human_review_required": true,
+    "decision": {
+      "classification": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW",
+      "rationale": "Exact Development measurement still shows zero real execution/process, result, or lesson events. Existing actual_result and lesson_learned remain absence markers, so factual readiness is incomplete; outcome stays unknown and the story remains needs_review / not a public candidate.",
+      "automatic_story_review": false,
+      "automatic_public_candidate": false,
+      "automatic_publication": false,
+      "next_build": 369,
+      "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity VIII"
+    },
+    "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
     "next_build": 369,
     "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity VIII",
     "users_security_cookie_auth_repair": true,
     "future_queue_exhausted": false,
-    "production_d1_contact": false
-  }
+    "measurement": {
+      "source_sha": "1e0b3407cec16023cccd8cb28ad686c96d46b78e",
+      "source_tree_sha": "093929c8fac99b99b224a7ec9f6ec8135b72041c",
+      "workflow_run": 37979409515,
+      "artifact_id": 11640196668,
+      "artifact_name": "build368-35th-promo-factual-evidence-continuity-1e0b3407cec16023cccd8cb28ad686c96d46b78e",
+      "artifact_digest": "sha256:952b8d86d79f1b070300c8c5dda8ce1648658a0c4172734fe9060934681cdce8",
+      "aggregate_rows_read": 45,
+      "rows_read_by_statement": [
+        33,
+        2,
+        2,
+        8
+      ],
+      "rows_read_ceiling": 20000,
+      "closure_state": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
+      "execution_events": 0,
+      "result_events": 0,
+      "lesson_events": 0,
+      "selected_execution_evidence": 0,
+      "story_review_status": "needs_review",
+      "public_story_candidate": 0,
+      "outcome_status": "unknown",
+      "ready_for_explicit_human_review": false,
+      "approved_locked_deliverables": 2,
+      "publications": 0,
+      "social_rows": 0,
+      "production_d1_contact": false,
+      "d1_mutation": false,
+      "r2_mutation": false,
+      "provider_execution": false
+    }
+  },
+  "build368_exact_head_reproof_requested": true
 }
