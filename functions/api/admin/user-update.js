@@ -1,3 +1,4 @@
+import { resolveSessionUser } from "../_lib/accountAuthCompat.js";
 // File: /functions/api/admin/user-update.js
 
 function json(data, status = 200) {
@@ -13,67 +14,6 @@ function normalizeText(value) {
   return String(value || "").trim();
 }
 
-function getBearerToken(request) {
-  const authHeader = request.headers.get("Authorization") || "";
-  const match = authHeader.match(/^Bearer\s+(.+)$/i);
-  return match ? String(match[1] || "").trim() : "";
-}
-
-function normalizeRole(value) {
-  const role = normalizeText(value).toLowerCase();
-  return ["member", "admin"].includes(role) ? role : "";
-}
-
-function normalizeIsActive(value) {
-  if (value === true || value === 1 || value === "1") return 1;
-  if (value === false || value === 0 || value === "0") return 0;
-  return null;
-}
-
-async function getAdminUserFromRequest(request, env) {
-  const token = getBearerToken(request);
-
-  if (!token) {
-    return null;
-  }
-
-  const session = await env.DB.prepare(`
-    SELECT
-      s.session_id,
-      s.user_id,
-      s.session_token,
-      s.token,
-      s.expires_at,
-      u.user_id AS resolved_user_id,
-      u.email,
-      u.display_name,
-      u.role,
-      u.is_active
-    FROM sessions s
-    INNER JOIN users u
-      ON u.user_id = s.user_id
-    WHERE (
-      s.session_token = ?
-      OR s.token = ?
-    )
-      AND s.expires_at > datetime('now')
-    LIMIT 1
-  `)
-    .bind(token, token)
-    .first();
-
-  if (!session) return null;
-  if (Number(session.is_active || 0) !== 1) return null;
-  if (String(session.role || "").toLowerCase() !== "admin") return null;
-
-  return {
-    session_id: Number(session.session_id || 0),
-    user_id: Number(session.resolved_user_id || session.user_id || 0),
-    email: session.email || "",
-    display_name: session.display_name || "",
-    role: session.role || "admin"
-  };
-}
 
 async function countActiveAdmins(env) {
   const row = await env.DB.prepare(`
@@ -92,7 +32,7 @@ async function countActiveAdmins(env) {
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  const adminUser = await getAdminUserFromRequest(request, env);
+  const adminUser = await resolveSessionUser(request, env.DB || env.DD_DB, { requireAdmin: true });
 
   if (!adminUser) {
     return json({ ok: false, error: "Unauthorized." }, 401);

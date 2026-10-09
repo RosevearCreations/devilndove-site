@@ -1,3 +1,4 @@
+import { resolveSessionUser } from "../_lib/accountAuthCompat.js";
 // File: /functions/api/admin/user-access-tiers.js
 
 function json(data, status = 200) {
@@ -7,53 +8,11 @@ function json(data, status = 200) {
   });
 }
 
-async function getSessionUser(env, token) {
-  if (!token) return null;
-
-  const sessionUser = await env.DB.prepare(`
-    SELECT
-      users.user_id,
-      users.email,
-      users.display_name,
-      users.role,
-      users.is_active
-    FROM sessions
-    JOIN users ON sessions.user_id = users.user_id
-    WHERE sessions.session_token = ?
-      AND sessions.expires_at > datetime('now')
-    LIMIT 1
-  `)
-    .bind(token)
-    .first();
-
-  return sessionUser || null;
-}
-
 async function requireAdmin(request, env) {
-  const auth = request.headers.get("Authorization") || "";
-  if (!auth.startsWith("Bearer ")) {
-    return { error: json({ ok: false, error: "Unauthorized." }, 401) };
-  }
-
-  const token = auth.slice(7).trim();
-  if (!token) {
-    return { error: json({ ok: false, error: "Missing session token." }, 401) };
-  }
-
-  const sessionUser = await getSessionUser(env, token);
-
-  if (!sessionUser) {
-    return { error: json({ ok: false, error: "Invalid session." }, 401) };
-  }
-
-  if (!sessionUser.is_active) {
-    return { error: json({ ok: false, error: "Account is inactive." }, 403) };
-  }
-
-  if (sessionUser.role !== "admin") {
-    return { error: json({ ok: false, error: "Forbidden." }, 403) };
-  }
-
+  const db = env.DB || env.DD_DB;
+  if (!db) return { error: json({ ok: false, error: "User access is temporarily unavailable." }, 503) };
+  const sessionUser = await resolveSessionUser(request, db, { requireAdmin: true });
+  if (!sessionUser) return { error: json({ ok: false, error: "Unauthorized." }, 401) };
   return { sessionUser };
 }
 

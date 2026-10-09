@@ -1,0 +1,156 @@
+{
+  "release": 467,
+  "build": 368,
+  "title": "35th Promo Factual Evidence Completion Continuity VIII",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "phase": "35TH_PROMO_FACTUAL_EVIDENCE_COMPLETION_CONTINUITY_VIII",
+  "authority": "release467-build368-35th-promo-factual-evidence-completion-continuity-viii",
+  "predecessor": {
+    "build": 367,
+    "title": "Evidence Gap Execution Workbench & Input Completion Continuity VII",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "531fe6d5d4599ecb79b747e6690191faa3134713",
+    "development_tree_sha": "c0dfeed5f2b2713bf747e592796aa6dbd28b6e02",
+    "development_proofs": {
+      "system_gate_run": 37821576326,
+      "current_application_quality_run": 37821576315,
+      "it_admin_runtime_proof_run": 37821576314,
+      "branch_hygiene_run": 37821576297,
+      "d1_ci_fanout_guard_run": 37821576270,
+      "build_specific_proof_run": 37821576522
+    },
+    "development_artifact": {
+      "artifact_id": 11569327684,
+      "artifact_name": "build367-evidence-gap-execution-workbench-531fe6d5d4599ecb79b747e6690191faa3134713",
+      "artifact_digest": "sha256:7506a353369d1b26e85a4cd9d949604d3dc50346382b991e23411620aed04331"
+    },
+    "production_main_sha": "bbdb69303d24005f38eb395273490c9c05fa1bdb",
+    "production_tree_sha": "c0dfeed5f2b2713bf747e592796aa6dbd28b6e02",
+    "production_pages_deploy_run": 37821853284,
+    "production_live_resource_integrity_run": 37821986280,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "target": {
+    "creative_work_project_id": 5,
+    "project_key": "CP-MSC1SUG2",
+    "project_title": "35th promo",
+    "content_project_id": 23
+  },
+  "contract": {
+    "source_workbench_build": 367,
+    "reuses_operator_action": "record_story_execution_evidence",
+    "execution_event_types": [
+      "setup",
+      "process",
+      "milestone",
+      "mistake",
+      "repair"
+    ],
+    "result_event_type": "result",
+    "lesson_event_type": "lesson",
+    "required_profile_facts": [
+      "what_we_are_trying",
+      "why_we_are_trying_it",
+      "substantive_actual_result",
+      "resolved_outcome_status",
+      "substantive_lesson_learned"
+    ],
+    "resolved_outcomes": [
+      "win",
+      "partial_win",
+      "failure"
+    ],
+    "readiness_rule": "at least one real execution/process-class event plus one real result event plus one real lesson event plus complete substantive non-placeholder factual Maker Story fields",
+    "placeholder_absence_text_does_not_satisfy_readiness": true,
+    "readiness_only": true,
+    "explicit_human_review_required": true,
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "automatic_evidence_selection": false,
+    "automatic_publication": false,
+    "media_rights_inference": false,
+    "operator_testing_surface": "MAIN_PRODUCTION_DIRECT",
+    "next_build": 369,
+    "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity VIII",
+    "future_queue_exhausted": false
+  },
+  "users_security_repair": {
+    "root_cause": "ADMIN_USER_ENDPOINTS_STILL_BEARER_ONLY_AFTER_COOKIE_FIRST_AUTH_MIGRATION",
+    "session_authority": "functions/api/_lib/accountAuthCompat.js resolveSessionUser",
+    "cookie_name": "dd_auth_token",
+    "http_only_cookie_supported": true,
+    "bearer_compatibility_retained": true,
+    "affected_surface": "/admin/users/",
+    "affected_endpoint": "/api/admin/users",
+    "adjacent_endpoints_repaired": [
+      "user-profile",
+      "user-update",
+      "delete-user",
+      "access-tiers",
+      "assign-user-access-tier",
+      "remove-user-access-tier",
+      "user-access-tiers"
+    ],
+    "variables_required": false,
+    "d1_migration_required": false,
+    "external_service_required": false
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "placeholder_evidence": false,
+    "synthetic_execution_evidence": false,
+    "evidence_mutation": false,
+    "automatic_evidence_selection": false,
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "publication_mutation": false,
+    "social_mutation": false,
+    "private_media_exposure": false,
+    "media_rights_inference": false,
+    "provider_listing_writes": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "531fe6d5d4599ecb79b747e6690191faa3134713",
+      "tree": "c0dfeed5f2b2713bf747e592796aa6dbd28b6e02",
+      "system_gate_run": 37821576326,
+      "current_application_quality_run": 37821576315,
+      "quality_run": 37821576315,
+      "it_admin_runtime_proof_run": 37821576314,
+      "it_admin_runtime_run": 37821576314,
+      "branch_hygiene_run": 37821576297,
+      "repository_hygiene_run": 37821576297,
+      "d1_ci_fanout_guard_run": 37821576270,
+      "build_specific_proof_run": 37821576522,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "bbdb69303d24005f38eb395273490c9c05fa1bdb",
+      "tree": "c0dfeed5f2b2713bf747e592796aa6dbd28b6e02",
+      "production_pages_deploy_run": 37821853284,
+      "production_live_resource_integrity_run": 37821986280,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_367_372.md",
+  "next_build": 369,
+  "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity VIII",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+  "measurement_lane_owner": "release467-build368-35th-promo-factual-evidence-completion-continuity-viii.yml",
+  "exact_head_reproof_state": "PENDING_EXACT_BRANCH_HEAD_PROOFS",
+  "decision": {
+    "classification": "PENDING_EXACT_DEVELOPMENT_MEASUREMENT",
+    "automatic_story_review": false,
+    "automatic_public_candidate": false,
+    "automatic_publication": false,
+    "next_build": 369,
+    "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity VIII"
+  }
+}
