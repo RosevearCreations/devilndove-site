@@ -10,6 +10,16 @@
   const VERSION='467b254-operator-journey-friction-v1';
   const REPEATED_TRANSITION_THRESHOLD=2;
   const REPEATED_ROUTE_THRESHOLD=3;
+  const BUILD368_LEAN_HOME_CONTAINMENT=window.DDAdminLeanStartup?.enabled===true&&(/^\/admin\/?(?:index\.html)?$/i).test(window.location.pathname);
+  if(BUILD368_LEAN_HOME_CONTAINMENT){
+    window.DDOperatorJourneyFrictionV254=Object.freeze({
+      build:BUILD,version:VERSION,disabled_on_lean_admin_home:true,superseded_by:368,
+      evaluate:()=>Object.freeze({build:BUILD,state:'RETIRED_ON_LEAN_ADMIN_HOME',summary:'Legacy journey measurement retired on Build 368 lean Admin home',remote_recording:false,automatic_navigation_change:false}),
+      render:()=>null,remote_recording:false,automatic_navigation_change:false
+    });
+    document.documentElement.dataset.ddBuild368LegacyJourneyFriction='retired';
+    return;
+  }
 
   const safeCount=(value)=>Math.max(0,Math.trunc(Number(value)||0));
   const copyCounts=(value)=>{
