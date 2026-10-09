@@ -1,32 +1,6 @@
 name: Release 467 Build 367 Evidence Gap Execution Workbench Input Completion Continuity VII
+# Historical after Build 368 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build366-content-adoption-discovery-outcomes-renewal-xi.json'
-      - 'release467-build367-evidence-gap-execution-workbench-input-completion-continuity-vii.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build367_execution_workbench.sql'
-      - 'scripts/release467_build367_verify_execution_workbench.mjs'
-      - 'scripts/release467_build367_regression.py'
-      - 'scripts/release467_build367_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/evidence-gap-execution-workbench.js'
-      - 'admin/evidence-gap-execution-workbench/index.html'
-      - 'public/js/admin-evidence-gap-execution-workbench-v337.js'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/it/index.html'
-      - 'admin/deployment-preflight/index.html'
-      - 'admin/reliability/index.html'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'docs/operations/RELEASE_467_BUILD_367_EVIDENCE_GAP_EXECUTION_WORKBENCH_INPUT_COMPLETION_CONTINUITY_VII.md'
-      - 'docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_367_372.md'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - '.github/workflows/release467-build367-evidence-gap-execution-workbench-input-completion-continuity-vii.yml'
-      - '.github/workflows/release467-build366-content-adoption-discovery-outcomes-renewal-xi.yml'
   workflow_dispatch:
 permissions:
   contents: read

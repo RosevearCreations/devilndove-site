@@ -1,3 +1,17 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 368 candidate over Build 367 Production GREEN
+
+**Current verified successor: Release 467 Build 368 — 35th Promo Factual Evidence Completion Continuity VIII**
+
+Build 367 is the exact fully verified Development/Production closure ingested by Build 368.
+
+- Development SHA: `531fe6d5d4599ecb79b747e6690191faa3134713`
+- Shared tree: `c0dfeed5f2b2713bf747e592796aa6dbd28b6e02`
+- System / Quality / I.T. / Hygiene: `37821576326 / 37821576315 / 37821576314 / 37821576297`
+- D1 Fan-Out / Build 367: `37821576270 / 37821576522`
+- Build 367 artifact: `11569327684` / `sha256:7506a353369d1b26e85a4cd9d949604d3dc50346382b991e23411620aed04331`
+- Production main / Pages / Live: `bbdb69303d24005f38eb395273490c9c05fa1bdb / 37821853284 / 37821986280`
+- Build 368 also repairs Users & Security cookie-first authorization; no variable, service or D1 migration is required.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 367 candidate over Build 366 Production GREEN
 
 **Current verified successor: Release 467 Build 367 — Evidence Gap Execution Workbench & Input Completion Continuity VII**

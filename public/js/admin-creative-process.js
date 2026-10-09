@@ -1,3 +1,4 @@
+// BUILD368_CURRENT_CLIENT: Build 368 • factual evidence continuity VIII — real execution/result/lesson evidence only; explicit human review remains mandatory.
 // BUILD362_CURRENT_CLIENT: Build 362 • factual evidence continuity VII — real execution/result/lesson evidence only; explicit human review remains mandatory.
 // BUILD356_CURRENT_CLIENT: Release 467 Build 356 — 35th Promo factual evidence continuity VI.
 // BUILD350_CURRENT_UI: Build 350 • factual evidence continuity V — real execution/result/lesson evidence only; explicit human review remains mandatory.
