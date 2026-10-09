@@ -5634,7 +5634,7 @@
       "provider_execution": false
     }
   },
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_BUILD368_MEASUREMENT_INGESTION",
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_BUILD368_ADMIN_RUNTIME_COMPATIBILITY_FIX",
   "build367_exact_head_reproof_requested": true,
   "promo_factual_evidence_completion_continuity_viii": {
     "source_build": 368,
@@ -5690,5 +5690,6 @@
       "provider_execution": false
     }
   },
-  "build368_exact_head_reproof_requested": true
+  "build368_exact_head_reproof_requested": true,
+  "build368_corrective_runtime_reproof_requested": true
 }
