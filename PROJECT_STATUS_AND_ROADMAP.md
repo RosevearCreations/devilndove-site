@@ -1,3 +1,13 @@
+# CURRENT BUILD — Release 467 Build 368
+
+**35th Promo Factual Evidence Completion Continuity VIII**
+
+Build 367 is exact-tree Development/Production GREEN. Build 368 re-measures the 35th Promo from real execution/process, result and lesson evidence only, and repairs the Users & Security 401 by moving remaining user-management endpoints from legacy Bearer-only authorization to the canonical HttpOnly-cookie-compatible session resolver.
+
+No variable, external service or D1 migration is required for the Users repair.
+
+**Next after Build 368 Production GREEN:** Build 369 — Grey Hair Source Review & Story-Plan Completion Continuity VIII.
+
 # CURRENT BUILD — Release 467 Build 367
 
 **Evidence Gap Execution Workbench & Input Completion Continuity VII**

@@ -1,3 +1,4 @@
+// BUILD368_CURRENT_CLIENT: Release 467 Build 368 — 35th Promo Factual Evidence Completion Continuity VIII; verified Build 367 Development/Production GREEN.
 // BUILD367_CURRENT_CLIENT: Release 467 Build 367 — Evidence Gap Execution Workbench & Input Completion Continuity VII; verified Build 366 Development/Production GREEN.
 // BUILD366_CURRENT_CLIENT: Release 467 Build 366 — Content Adoption & Discovery Outcomes Renewal XI; verified Build 365 Development/Production GREEN.
 // BUILD365_CURRENT_CLIENT: Release 467 Build 365 — Maker Story Advancement & Publication Readiness Continuity VIII; verified Build 364 Development/Production GREEN.
@@ -65,7 +66,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
   }
   async function load(){
-    mount.innerHTML='<section class="card" style="margin-top:18px"><p class="small">Running Release 467 Build 367 diagnostics; immutable verified evidence is shown once above…</p></section>';
+    mount.innerHTML='<section class="card" style="margin-top:18px"><p class="small">Running Release 467 Build 368 diagnostics; immutable verified evidence is shown once above…</p></section>';
     try{
       const r=await apiFetch('/api/admin/it-operations-control-tower',{cache:'no-store'}),d=await r.json();
       if(!r.ok||!d.ok)throw new Error(d.error||`I.T. control tower failed (${r.status}).`);

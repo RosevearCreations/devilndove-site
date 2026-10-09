@@ -1,33 +1,33 @@
 {
   "release": 467,
-  "build": 367,
-  "title": "Evidence Gap Execution Workbench & Input Completion Continuity VII",
+  "build": 368,
+  "title": "35th Promo Factual Evidence Completion Continuity VIII",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 366,
-      "title": "Content Adoption & Discovery Outcomes Renewal XI",
-      "authority": "release467-build366-content-adoption-discovery-outcomes-renewal-xi.json",
-      "dev_sha": "d8773c0c92614d6633a1986db94a0b130d80c355",
-      "tree_sha": "a9d5e384883142e0eedbc0a378e1567b0bdd3c0f",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD366_GREEN",
+      "build": 367,
+      "title": "Evidence Gap Execution Workbench & Input Completion Continuity VII",
+      "authority": "release467-build367-evidence-gap-execution-workbench-input-completion-continuity-vii.json",
+      "dev_sha": "531fe6d5d4599ecb79b747e6690191faa3134713",
+      "tree_sha": "c0dfeed5f2b2713bf747e592796aa6dbd28b6e02",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD367_GREEN",
       "proofs": {
-        "system_gate_run": 37782526554,
-        "current_application_quality_run": 37782526520,
-        "it_admin_runtime_proof_run": 37782526524,
-        "branch_hygiene_run": 37782526487,
-        "d1_ci_fanout_guard_run": 37782526522,
-        "build_specific_proof_run": 37782526518
+        "system_gate_run": 37821576326,
+        "current_application_quality_run": 37821576315,
+        "it_admin_runtime_proof_run": 37821576314,
+        "branch_hygiene_run": 37821576297,
+        "d1_ci_fanout_guard_run": 37821576270,
+        "build_specific_proof_run": 37821576522
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 367,
-      "title": "Evidence Gap Execution Workbench & Input Completion Continuity VII",
-      "authority": "release467-build367-evidence-gap-execution-workbench-input-completion-continuity-vii.json",
+      "build": 368,
+      "title": "35th Promo Factual Evidence Completion Continuity VIII",
+      "authority": "release467-build368-35th-promo-factual-evidence-completion-continuity-viii.json",
       "state": "DEVELOPMENT_CLOSURE_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -38,19 +38,20 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 366,
-    "title": "Content Adoption & Discovery Outcomes Renewal XI",
-    "authority": "release467-build366-content-adoption-discovery-outcomes-renewal-xi.json",
-    "main_sha": "55df0d4682c5b068906c9f2c5788de47f15e873f",
-    "tree_sha": "a9d5e384883142e0eedbc0a378e1567b0bdd3c0f",
+    "build": 367,
+    "title": "Evidence Gap Execution Workbench & Input Completion Continuity VII",
+    "authority": "release467-build367-evidence-gap-execution-workbench-input-completion-continuity-vii.json",
+    "main_sha": "bbdb69303d24005f38eb395273490c9c05fa1bdb",
+    "tree_sha": "c0dfeed5f2b2713bf747e592796aa6dbd28b6e02",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 37783030050,
-    "production_live_resource_integrity_run": 37783166369,
+    "production_pages_deploy_run": 37821853284,
+    "production_live_resource_integrity_run": 37821986280,
     "remote_d1_queries": 0,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build368-35th-promo-factual-evidence-completion-continuity-viii.json",
     "release467-build367-evidence-gap-execution-workbench-input-completion-continuity-vii.json",
     "release467-build366-content-adoption-discovery-outcomes-renewal-xi.json",
     "release467-build365-maker-story-advancement-publication-readiness-continuity-viii.json",
@@ -259,11 +260,11 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_367_372.md",
-  "next_build": 368,
-  "next_build_state": "QUEUED_AFTER_BUILD367_PRODUCTION_GREEN",
-  "next_build_title": "35th Promo Factual Evidence Completion Continuity VIII",
-  "promotion_state": "BUILD367_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD368_DEFINED_BY_BUILD366_OBSERVED_EVIDENCE",
+  "next_build": 369,
+  "next_build_state": "QUEUED_AFTER_BUILD368_PRODUCTION_GREEN",
+  "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity VIII",
+  "promotion_state": "BUILD368_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD369_DEFINED_BY_BUILD366_OBSERVED_EVIDENCE",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -294,15 +295,15 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "d8773c0c92614d6633a1986db94a0b130d80c355",
-  "accepted_dev_tree_sha": "a9d5e384883142e0eedbc0a378e1567b0bdd3c0f",
+  "accepted_dev_sha": "531fe6d5d4599ecb79b747e6690191faa3134713",
+  "accepted_dev_tree_sha": "c0dfeed5f2b2713bf747e592796aa6dbd28b6e02",
   "acceptance": {
-    "system_gate_run": 37782526554,
-    "current_application_quality_run": 37782526520,
-    "it_admin_runtime_proof_run": 37782526524,
-    "branch_hygiene_run": 37782526487,
-    "d1_ci_fanout_guard_run": 37782526522,
-    "build_specific_proof_run": 37782526518
+    "system_gate_run": 37821576326,
+    "current_application_quality_run": 37821576315,
+    "it_admin_runtime_proof_run": 37821576314,
+    "branch_hygiene_run": 37821576297,
+    "d1_ci_fanout_guard_run": 37821576270,
+    "build_specific_proof_run": 37821576522
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -5256,12 +5257,12 @@
     "workflow_run": 37626046153
   },
   "measurement_lane": {
-    "build": 367,
-    "state": "MEASURED_EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
-    "workflow_run": 37821291198,
-    "artifact_id": 11568489838,
-    "interpretation": "EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED",
-    "aggregate_rows_read": 1659,
+    "build": 368,
+    "state": "MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
+    "workflow_run": 37979409515,
+    "artifact_id": 11640196668,
+    "interpretation": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW",
+    "aggregate_rows_read": 45,
     "rows_read_ceiling": 20000
   },
   "maker_story_advancement_publication_readiness_continuity_viii": {
@@ -5633,6 +5634,61 @@
       "provider_execution": false
     }
   },
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_BUILD367_MEASUREMENT_INGESTION",
-  "build367_exact_head_reproof_requested": true
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_BUILD368_MEASUREMENT_INGESTION",
+  "build367_exact_head_reproof_requested": true,
+  "promo_factual_evidence_completion_continuity_viii": {
+    "source_build": 368,
+    "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+    "measurement_state": "EXACT_DEVELOPMENT_MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
+    "target_project_id": 5,
+    "readiness_only": true,
+    "explicit_human_review_required": true,
+    "decision": {
+      "classification": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW",
+      "rationale": "Exact Development measurement still shows zero real execution/process, result, or lesson events. Existing actual_result and lesson_learned remain absence markers, so factual readiness is incomplete; outcome stays unknown and the story remains needs_review / not a public candidate.",
+      "automatic_story_review": false,
+      "automatic_public_candidate": false,
+      "automatic_publication": false,
+      "next_build": 369,
+      "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity VIII"
+    },
+    "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+    "next_build": 369,
+    "next_build_title": "Grey Hair Source Review & Story-Plan Completion Continuity VIII",
+    "users_security_cookie_auth_repair": true,
+    "future_queue_exhausted": false,
+    "measurement": {
+      "source_sha": "1e0b3407cec16023cccd8cb28ad686c96d46b78e",
+      "source_tree_sha": "093929c8fac99b99b224a7ec9f6ec8135b72041c",
+      "workflow_run": 37979409515,
+      "artifact_id": 11640196668,
+      "artifact_name": "build368-35th-promo-factual-evidence-continuity-1e0b3407cec16023cccd8cb28ad686c96d46b78e",
+      "artifact_digest": "sha256:952b8d86d79f1b070300c8c5dda8ce1648658a0c4172734fe9060934681cdce8",
+      "aggregate_rows_read": 45,
+      "rows_read_by_statement": [
+        33,
+        2,
+        2,
+        8
+      ],
+      "rows_read_ceiling": 20000,
+      "closure_state": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
+      "execution_events": 0,
+      "result_events": 0,
+      "lesson_events": 0,
+      "selected_execution_evidence": 0,
+      "story_review_status": "needs_review",
+      "public_story_candidate": 0,
+      "outcome_status": "unknown",
+      "ready_for_explicit_human_review": false,
+      "approved_locked_deliverables": 2,
+      "publications": 0,
+      "social_rows": 0,
+      "production_d1_contact": false,
+      "d1_mutation": false,
+      "r2_mutation": false,
+      "provider_execution": false
+    }
+  },
+  "build368_exact_head_reproof_requested": true
 }

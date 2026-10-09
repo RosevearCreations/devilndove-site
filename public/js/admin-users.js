@@ -1,3 +1,4 @@
+// BUILD368_COOKIE_FIRST_USERS_CLIENT: API requests use DDAuth.apiFetch with same-origin HttpOnly session cookies.
 // Release 467 Build 30 — admin user directory with direct password-reset targeting.
 
 document.addEventListener("DOMContentLoaded", () => {

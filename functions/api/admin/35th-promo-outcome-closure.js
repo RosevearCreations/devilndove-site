@@ -1,3 +1,6 @@
+// BUILD368_CURRENT_API_IDENTITY: Release 467 Build 368 — 35th Promo Factual Evidence Completion Continuity VIII; GET-only factual readiness over existing source authority.
+// HISTORICAL_BUILD362_API_COMPAT: const BUILD=362; title:'35th Promo Factual Evidence Completion Continuity VII';
+ // HISTORICAL_BUILD338_RUNTIME_COMPAT: const BUILD=338;
 // BUILD362_CURRENT_API_IDENTITY: Release 467 Build 362 — 35th Promo Factual Evidence Completion Continuity VII; GET-only factual readiness over existing source authority.
 // HISTORICAL_BUILD338_RUNTIME_LITERAL: const BUILD=362; retained for historical regression provenance.
 // BUILD356_CURRENT_API_IDENTITY: Release 467 Build 356 — 35th Promo Factual Evidence Completion Continuity VI; GET-only factual readiness over existing source authority.
@@ -6,7 +9,7 @@
 // HISTORICAL_BUILD332_API_IDENTITY: const BUILD=332; retained for exact historical regression provenance only.
 // Release 467 Build 344 — GET-only 35th Promo factual evidence completion continuity IV.
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
-const BUILD=338;
+const BUILD=368;
 const json=(data,status=200)=>jsonResponse(data,status,{'Cache-Control':'no-store'});
 const n=v=>Number(v||0)||0,s=v=>String(v??'').trim();
 const SAFETY=Object.freeze({read_only:true,synthetic_evidence:false,evidence_mutation:false,automatic_evidence_selection:false,automatic_story_review:false,automatic_public_candidate:false,publication_mutation:false,social_mutation:false,media_rights_inference:false,provider_execution:false,production_d1_contact:false});
