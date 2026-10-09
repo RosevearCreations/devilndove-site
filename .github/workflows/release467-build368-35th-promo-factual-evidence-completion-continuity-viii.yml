@@ -24,6 +24,10 @@ on:
       - 'functions/api/admin/user-access-tiers.js'
       - 'admin/users/index.html'
       - 'public/js/admin-users.js'
+      - 'public/js/admin-route-usage.js'
+      - 'public/js/admin-startup-read-budget-v250.js'
+      - 'public/js/admin-journey-friction-v254.js'
+      - 'admin/index.html'
       - 'functions/api/_lib/currentReliability.js'
       - 'functions/api/admin/current-deployment-preflight.js'
       - 'functions/api/admin/it-operations-control-tower.js'
@@ -54,6 +58,9 @@ jobs:
       - run: node --check scripts/release467_build368_verify_measurement.mjs
       - run: node --check functions/api/admin/35th-promo-outcome-closure.js
       - run: node --check public/js/admin-creative-process.js
+      - run: node --check public/js/admin-route-usage.js
+      - run: node --check public/js/admin-startup-read-budget-v250.js
+      - run: node --check public/js/admin-journey-friction-v254.js
 
   factual-evidence-continuity:
     runs-on: ubuntu-latest

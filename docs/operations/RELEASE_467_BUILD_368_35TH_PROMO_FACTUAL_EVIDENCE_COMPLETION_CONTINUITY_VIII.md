@@ -17,3 +17,9 @@ Development measurement: **REAL_OUTCOME_EVIDENCE_STILL_REQUIRED**. The 35th Prom
 Measurement artifact: `11640196668` — `sha256:952b8d86d79f1b070300c8c5dda8ce1648658a0c4172734fe9060934681cdce8`.
 
 The Users & Security repair is code-only: no variable, secret, service, schema migration or Production D1 mutation is required.
+
+## Build 368 corrective Admin runtime repair
+
+The live Users & Security 401 was traced to legacy Bearer-only admin endpoints after the cookie-first session migration; Build 368 already moves those endpoints to the shared HttpOnly-cookie-compatible resolver. A subsequent Firefox Admin-home slowdown showed that the lean dashboard still executed obsolete Build 249/250/254 browser-measurement wrappers. The corrective Build 368 revision retires those wrappers **only on the lean Admin home**, while retaining Build 240's 60-second safe-read coalescing and 8-second live timeout.
+
+No Cloudflare variable, secret, external provider, D1 migration, R2 change or business-data mutation is required. Production verification surfaces are `https://devilndove.com/admin/` and `https://devilndove.com/admin/users/`.

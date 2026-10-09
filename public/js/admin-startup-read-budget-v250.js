@@ -11,6 +11,23 @@
   const SAFE_GET_CEILING=4;
   const PROVIDER_BOUND_LIVE_READ_CEILING=2;
   const STORAGE_KEY='dd_startup_read_budget_v250';
+  const BUILD368_LEAN_HOME_CONTAINMENT=window.DDAdminLeanStartup?.enabled===true&&document.body?.dataset?.adminPage==='home';
+  if(BUILD368_LEAN_HOME_CONTAINMENT){
+    const snapshot=()=>Object.freeze({
+      build:BUILD,version:VERSION,disabled_on_lean_admin_home:true,superseded_by:368,
+      startup_window_ms:STARTUP_WINDOW_MS,safe_gets:0,safe_get_ceiling:SAFE_GET_CEILING,
+      provider_bound_live_reads:Number(window.DDAdminReadBudgetV240?.live_reads||0),
+      provider_bound_live_read_ceiling:PROVIDER_BOUND_LIVE_READ_CEILING,
+      cache_hits:Number(window.DDAdminReadBudgetV240?.cache_hits||0),
+      duplicate_reads_suppressed:Number(window.DDAdminReadBudgetV240?.coalesced_reads||0),
+      timed_out_reads:Number(window.DDAdminReadBudgetV240?.timed_out_reads||0),
+      endpoint_counts:[],repeated_read_hotspots:[],pass:true,completed:true,
+      storage:'disabled_on_lean_admin_home',remote_recording:false
+    });
+    window.DDStartupReadBudgetV250=Object.freeze({build:BUILD,version:VERSION,disabled_on_lean_admin_home:true,superseded_by:368,snapshot});
+    document.documentElement.dataset.ddBuild368LegacyStartupBudget='retired';
+    return;
+  }
   const started=performance.now();
   const state={build:BUILD,version:VERSION,startup_window_ms:STARTUP_WINDOW_MS,safe_get_ceiling:SAFE_GET_CEILING,provider_bound_live_read_ceiling:PROVIDER_BOUND_LIVE_READ_CEILING,safe_gets:0,endpoint_counts:{},completed:false};
   function pathOnly(input){try{const u=new URL(String(input||''),location.origin);if(u.origin!==location.origin||!u.pathname.startsWith('/api/'))return '';return u.pathname;}catch{return '';}}

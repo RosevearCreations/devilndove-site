@@ -1,3 +1,7 @@
+# BUILD 368 CORRECTIVE RUNTIME RE-PROMOTION
+
+Build 368 remains the active build while a corrective exact-tree revision removes obsolete Build 249/250/254 request-measurement work from the lean Admin home and preserves the cookie-first Users & Security repair. Build 240 coalescing and timeout remain active. No variables, external services, D1 migrations or manual infrastructure changes are required.
+
 # CURRENT BUILD — Release 467 Build 368
 
 **35th Promo Factual Evidence Completion Continuity VIII**

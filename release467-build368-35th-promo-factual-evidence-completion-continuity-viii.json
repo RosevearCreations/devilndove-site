@@ -144,7 +144,7 @@
   "future_queue_exhausted": false,
   "measurement_lane_state": "MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
   "measurement_lane_owner": "release467-build368-35th-promo-factual-evidence-completion-continuity-viii.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_ADMIN_RUNTIME_CORRECTIVE_REPAIR",
   "decision": {
     "classification": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW",
     "rationale": "Exact Development measurement still shows zero real execution/process, result, or lesson events. Existing actual_result and lesson_learned remain absence markers, so factual readiness is incomplete; outcome stays unknown and the story remains needs_review / not a public candidate.",
@@ -185,5 +185,24 @@
     "d1_mutation": false,
     "r2_mutation": false,
     "provider_execution": false
-  }
+  },
+  "admin_home_runtime_repair": {
+    "root_cause": "LEAN_ADMIN_HOME_STILL_EXECUTED_LEGACY_BROWSER_MEASUREMENT_WRAPPERS_AFTER_BUILD353_CONTAINMENT",
+    "retained_live_guard": "Build 240 60-second coalescing plus 8-second timeout",
+    "retired_on_lean_admin_home": [
+      "Build 249 refinement runtime request wrapper",
+      "Build 250 startup read-budget request wrapper",
+      "Build 254 journey-friction timers"
+    ],
+    "cache_busted_assets": [
+      "/public/js/admin-route-usage.js?v=368",
+      "/public/js/admin-startup-read-budget-v250.js?v=368",
+      "/public/js/admin-journey-friction-v254.js?v=368"
+    ],
+    "business_mutation": false,
+    "d1_migration_required": false,
+    "variables_required": false,
+    "external_service_required": false
+  },
+  "corrective_production_repromotion_required": true
 }

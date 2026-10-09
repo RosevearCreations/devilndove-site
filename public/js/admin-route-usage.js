@@ -263,6 +263,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY='dd_refinement_runtime_v249';
   const MAX_KEYS=32;
   const pageStarted=performance.now();
+  const BUILD368_LEAN_HOME_CONTAINMENT=normalizeAdminPath(location.pathname)==='/admin/'&&window.DDAdminLeanStartup?.enabled===true;
+  if(BUILD368_LEAN_HOME_CONTAINMENT){
+    const disabledSnapshot=()=>Object.freeze({
+      build:BUILD,version:VERSION,disabled_on_lean_admin_home:true,superseded_by:368,
+      route_visits:0,route_transitions:0,startup_safe_get_requests:0,startup_non_get_requests_observed:0,
+      measured_endpoint_path_count:0,cache_hits:Number(window.DDAdminReadBudgetV240?.cache_hits||0),
+      cache_misses:Number(window.DDAdminReadBudgetV240?.live_reads||0),
+      duplicate_reads_suppressed:Number(window.DDAdminReadBudgetV240?.coalesced_reads||0),
+      timed_out_reads:Number(window.DDAdminReadBudgetV240?.timed_out_reads||0),
+      baseline_captured:false,storage:'disabled_on_lean_admin_home',remote_recording:false
+    });
+    window.DDRefinementRuntimeV249=Object.freeze({
+      build:BUILD,version:VERSION,disabled_on_lean_admin_home:true,superseded_by:368,
+      snapshot:disabledSnapshot,captureBaseline:()=>null,
+      routeEvidence:()=>Object.freeze({build:BUILD,route_visits:{},transitions:{},remote_recording:false,disabled_on_lean_admin_home:true}),
+      storage:'disabled_on_lean_admin_home',remote_recording:false
+    });
+    document.documentElement.dataset.ddBuild368LegacyRuntimeMeasurement='retired';
+    return;
+  }
 
   function sameOriginApiPath(value){
     try{
