@@ -123,5 +123,25 @@
     "media_rights_inference_authorized": false,
     "next_build": 372,
     "next_build_title": "Content Adoption & Discovery Outcomes Renewal XII"
+  },
+  "starting_point": {
+    "development": {
+      "sha": "b37a7c9fd67389bc55c035ca62155f0f122403a1",
+      "tree": "a4a81a25ebf48686aff025f79024dae6d3736b84",
+      "system_gate_run": 38013641058,
+      "quality_run": 38013641151,
+      "it_admin_runtime_run": 38013641040,
+      "repository_hygiene_run": 38013641059,
+      "d1_ci_fanout_guard_run": 38013641131,
+      "build_specific_proof_run": 38013641187,
+      "state": "DEVELOPMENT_GREEN"
+    },
+    "production": {
+      "main_sha": "a5da1ed88b79aade14fdd6ccae6dad8586d36a8e",
+      "tree_sha": "a4a81a25ebf48686aff025f79024dae6d3736b84",
+      "production_pages_deploy_run": 38013782448,
+      "production_live_resource_integrity_run": 38013833601,
+      "state": "PRODUCTION_GREEN"
+    }
   }
 }

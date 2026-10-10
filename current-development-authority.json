@@ -301,12 +301,12 @@
   "accepted_dev_sha": "b37a7c9fd67389bc55c035ca62155f0f122403a1",
   "accepted_dev_tree_sha": "a4a81a25ebf48686aff025f79024dae6d3736b84",
   "acceptance": {
-    "system_gate_run": 38011896949,
-    "current_application_quality_run": 38011896962,
-    "it_admin_runtime_proof_run": 38011897139,
-    "branch_hygiene_run": 38011897040,
-    "d1_ci_fanout_guard_run": 38011896951,
-    "build_specific_proof_run": 38011897111
+    "system_gate_run": 38013641058,
+    "current_application_quality_run": 38013641151,
+    "it_admin_runtime_proof_run": 38013641040,
+    "branch_hygiene_run": 38013641059,
+    "d1_ci_fanout_guard_run": 38013641131,
+    "build_specific_proof_run": 38013641187
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
