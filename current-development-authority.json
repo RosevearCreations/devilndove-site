@@ -268,7 +268,7 @@
   "next_build_state": "QUEUED_AFTER_BUILD372_PRODUCTION_GREEN",
   "next_build_title": "Evidence Gap Execution Workbench & Input Completion Continuity VIII",
   "promotion_state": "BUILD372_MEASURED_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD373_PROVISIONAL_PENDING_BUILD372_EXACT_MEASUREMENT",
+  "successor_scope_state": "BUILD373_DEFINED_BY_BUILD372_OBSERVED_EVIDENCE",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",

@@ -102,13 +102,13 @@
       "state": "PRODUCTION_GREEN"
     }
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT_READ_ONLY_MEASUREMENT",
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_373_378.md",
-  "successor_selection": "MEASUREMENT_DETERMINED_NOT_ASSUMED",
+  "successor_selection": "EXACT_BUILD372_OBSERVED_EVIDENCE",
   "next_build": 373,
   "next_build_title": "Evidence Gap Execution Workbench & Input Completion Continuity VIII",
   "future_queue_exhausted": false,
-  "measurement_lane_state": "AWAITING_EXACT_DEVELOPMENT_D1_MEASUREMENT",
+  "measurement_lane_state": "MEASURED_ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
   "measurement_lane_owner": "release467-build372-content-adoption-discovery-outcomes-renewal-xii.yml",
   "prior_observed_baselines": {
     "build366": {
@@ -146,12 +146,129 @@
     }
   },
   "decision": {
-    "classification": "PENDING_EXACT_MEASUREMENT",
+    "classification": "ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
+    "rationale": "Exact Development measurement retains Maker Story coverage 2/5, one reviewed and published Workshop Journal story, unresolved factual 35th Promo and Grey Hair human-reviewed-plan gaps, no real fresh Search Console rows, no recent runtime errors, zero Raw Inventory duplicate active identities, and 6,188 provider rows read within the 20,000 budget.",
     "next_roadmap_from_observed_evidence_only": true,
-    "automatic_publication_authorized": false,
     "next_roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_373_378.md",
     "next_build": 373,
     "next_build_title": "Evidence Gap Execution Workbench & Input Completion Continuity VIII"
   },
-  "development_candidate_note": "No schema, business data, R2, provider, publication, Search Console/SEO mutation, or Production D1 contact. Measurement only."
+  "development_candidate_note": "No schema, business data, R2, provider, publication, Search Console/SEO mutation, or Production D1 contact. Measurement only.",
+  "measurement": {
+    "source_sha": "3ce9787bb4470719da03f46696c48a208f21faec",
+    "source_tree_sha": "bf78ab5f4a61efbddcba18c0a4e60d435cbea341",
+    "workflow_run": 38015822527,
+    "artifact_id": 11656311269,
+    "artifact_name": "build372-content-adoption-discovery-renewal-3ce9787bb4470719da03f46696c48a208f21faec",
+    "artifact_digest": "sha256:84101fd04acfe3afbdf34df9d74bd8cd39724dd2bc274261c2f9d0315133948b",
+    "statement_count": 19,
+    "rows_read_by_statement": [
+      7,
+      13,
+      50,
+      193,
+      105,
+      2,
+      4,
+      4,
+      8,
+      45,
+      7,
+      50,
+      69,
+      534,
+      1685,
+      0,
+      1,
+      26,
+      3385
+    ],
+    "aggregate_rows_read": 6188,
+    "rows_read_ceiling": 20000,
+    "current": {
+      "maker_profiles": 2,
+      "reviewed_maker_stories": 1,
+      "public_story_candidates": 1,
+      "selected_evidence_rows": 4,
+      "approved_deliverables": 4,
+      "copy_locked_deliverables": 4,
+      "published_journal_rows": 1,
+      "approved_social_rows": 1,
+      "posted_social_rows": 0,
+      "search_console_rows": 0,
+      "search_console_clicks": 0,
+      "search_console_impressions": 0,
+      "coverage": "2/5",
+      "page_views_30d": 3,
+      "unique_visitors_30d": 3,
+      "runtime_errors_7d": 0,
+      "seo_supported_rows": 0,
+      "third_story_ready_projects": 0
+    },
+    "comparison_to_build360": {
+      "maker_profiles": 0,
+      "reviewed_maker_stories": 0,
+      "public_story_candidates": 0,
+      "selected_evidence_rows": 0,
+      "approved_deliverables": 0,
+      "copy_locked_deliverables": 0,
+      "published_journal_rows": 0,
+      "approved_social_rows": 0,
+      "search_console_rows": 0,
+      "page_views_30d": -8,
+      "unique_visitors_30d": -8,
+      "runtime_errors_7d": 0
+    },
+    "comparison_to_build366": {
+      "page_views_30d": -2,
+      "unique_visitors_30d": -2,
+      "rows_read": -5
+    },
+    "second_story_35th_promo": {
+      "maker_story_profile": 1,
+      "reviewed_profile": 0,
+      "public_candidate": 0,
+      "unknown_outcome": 1,
+      "selected_evidence": 1,
+      "content_package": 1,
+      "approved_deliverables": 2,
+      "changes_requested_deliverables": 17,
+      "locked_deliverables": 2,
+      "publications": 0,
+      "social_rows": 0
+    },
+    "third_project_readiness": {
+      "remaining_unprofiled_projects": 3,
+      "third_story_ready_projects": 0,
+      "grey_hair_approved_source_evidence": 1,
+      "grey_hair_execution_events": 0,
+      "grey_hair_reviewed_story_plans": 0
+    },
+    "raw_inventory_identity": {
+      "duplicate_active_inventory_identities": 0,
+      "one_operational_record_policy_verified": true
+    },
+    "decision": "ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST",
+    "roadmap_signal": {
+      "second_story_needs_execution_result_lesson": true,
+      "search_console_real_fresh_evidence_present": false,
+      "evidence_backed_fresh_seo_rows_present": false,
+      "third_project_factually_ready": false,
+      "grey_hair_approved_source_evidence": 1,
+      "grey_hair_execution_events": 0,
+      "grey_hair_reviewed_story_plans": 0,
+      "renewal_contract_rows_read_delta_vs_build366": -5,
+      "raw_inventory_duplicate_active_identities": 0
+    },
+    "production_d1_contact": false,
+    "d1_mutation": false,
+    "r2_mutation": false,
+    "content_provider_execution": false,
+    "provider_publication": false,
+    "indexnow_execution": false,
+    "automatic_publication": false,
+    "automatic_story_generation": false,
+    "automatic_seo_apply": false,
+    "traffic_fabrication": false
+  }
 }

@@ -1,6 +1,6 @@
 # Release 467 — Evidence-Driven Renewal Builds 373–378
 
-**Provisional until Build 372 exact Development measurement is ingested.** No factual gaps are considered closed by roadmap text. Follow-on titles are conditional; re-scope only from observed data.
+**Renewed from exact Build 372 Development evidence** (workflow 38015822527, 6,188/20,000 rows read). The outcome is `ADOPTION_STABLE_EVIDENCE_GAPS_PERSIST`: two of five Maker Story profiles, one reviewed/published story, one unresolved 35th Promo, no fresh real Search Console export rows, no new third story, zero recent runtime errors and zero duplicate active Raw Inventory identities. No factual gap is automatically closed; the next work requires operator evidence and explicit human review.
 
 ## Build 373 — Evidence Gap Execution Workbench & Input Completion Continuity VIII
 
