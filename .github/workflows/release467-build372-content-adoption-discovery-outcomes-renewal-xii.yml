@@ -8,6 +8,7 @@ on:
       - 'current-development-authority.json'
       - 'scripts/release467_build372_*'
       - 'scripts/current_system_gate_provenance_gate.py'
+      - 'scripts/release467_build265_gate.py'
       - 'functions/api/_lib/currentReliability.js'
       - 'functions/api/admin/current-deployment-preflight.js'
       - 'functions/api/admin/it-operations-control-tower.js'
