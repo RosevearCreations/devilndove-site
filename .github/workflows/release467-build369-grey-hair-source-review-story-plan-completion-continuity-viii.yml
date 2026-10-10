@@ -1,24 +1,6 @@
 name: Release 467 Build 369 Grey Hair Source Review Story Plan Completion Continuity VIII
+# Historical after Build 370 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build369-grey-hair-source-review-story-plan-completion-continuity-viii.json'
-      - 'release467-build368-35th-promo-factual-evidence-completion-continuity-viii.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build369_measurement.sql'
-      - 'scripts/release467_build369_verify_measurement.mjs'
-      - 'scripts/release467_build369_regression.py'
-      - 'scripts/release467_build369_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/grey-hair-story-readiness.js'
-      - 'public/js/admin-grey-hair-story-readiness-v320.js'
-      - 'admin/grey-hair-story-readiness/index.html'
-      - 'docs/operations/RELEASE_467_BUILD_369_GREY_HAIR_SOURCE_REVIEW_STORY_PLAN_COMPLETION_CONTINUITY_VIII.md'
-      - 'docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_367_372.md'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - '.github/workflows/release467-build369-grey-hair-source-review-story-plan-completion-continuity-viii.yml'
-      - '.github/workflows/release467-build368-35th-promo-factual-evidence-completion-continuity-viii.yml'
   workflow_dispatch:
 permissions:
   contents: read

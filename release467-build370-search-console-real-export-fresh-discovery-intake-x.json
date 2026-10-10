@@ -1,0 +1,202 @@
+{
+  "release": 467,
+  "build": 370,
+  "title": "Search Console Real Export & Fresh Discovery Intake X",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "phase": "SEARCH_CONSOLE_REAL_EXPORT_FRESH_DISCOVERY_INTAKE_X",
+  "authority": "release467-build370-search-console-real-export-fresh-discovery-intake-x",
+  "predecessor": {
+    "build": 369,
+    "title": "Grey Hair Source Review & Story-Plan Completion Continuity VIII",
+    "state": "PRODUCTION_GREEN",
+    "development_sha": "6f07ff2876162f7ee0dda683cd67a06f4f2082b6",
+    "development_tree_sha": "38ce92f73f710a302e2839055457ca156ca45cbb",
+    "development_proofs": {
+      "system_gate_run": 38011896949,
+      "current_application_quality_run": 38011896962,
+      "it_admin_runtime_proof_run": 38011897139,
+      "branch_hygiene_run": 38011897040,
+      "d1_ci_fanout_guard_run": 38011896951,
+      "build_specific_proof_run": 38011897111
+    },
+    "development_artifact": {
+      "artifact_id": 11654630008,
+      "artifact_name": "build369-grey-hair-source-review-story-plan-continuity-6f07ff2876162f7ee0dda683cd67a06f4f2082b6",
+      "artifact_digest": "sha256:b9b3c677ecb10eb3fc0f8bfc4d055b4201645165b236fe890a476f248f335371"
+    },
+    "production_main_sha": "ac54e0062f126e5b54636bd28974aa406702cc1c",
+    "production_tree_sha": "38ce92f73f710a302e2839055457ca156ca45cbb",
+    "production_pages_deploy_run": 38012046169,
+    "production_live_resource_integrity_run": 38012101526,
+    "same_tree": true,
+    "remote_d1_queries": 0
+  },
+  "contract": {
+    "reuses_build364_search_console_authorities": true,
+    "reuses_build364_measurement_model": true,
+    "explicit_report_date_freshness_rule": true,
+    "intake_route": "/api/admin/search-console-import",
+    "intake_mode": "EXPLICIT_OPERATOR_REAL_GSC_CSV_ONLY",
+    "real_export_confirmation_required": true,
+    "mandatory_header_groups": [
+      "page",
+      "clicks",
+      "impressions",
+      "ctr",
+      "position"
+    ],
+    "freshness_window_days": 30,
+    "fallback_report_date_required_when_date_column_absent": true,
+    "imported_at_must_not_substitute_for_missing_report_date": true,
+    "created_at_must_not_substitute_for_missing_report_date": true,
+    "import_audit_traceability_required": true,
+    "explicit_batch_revert_traceability_required": true,
+    "query_level_attribution_requires_real_search_console": true,
+    "stale_or_unsupported_pending_rows_non_actionable": true,
+    "explicit_human_copy_required_before_apply": true,
+    "automatic_import": false,
+    "automatic_queue_generation": false,
+    "automatic_seo_wording_generation": false,
+    "automatic_seo_apply": false,
+    "next_build": 371,
+    "next_build_title": "Maker Story Advancement & Publication Readiness Continuity IX",
+    "future_queue_exhausted": false
+  },
+  "prior_observed_baseline": {
+    "source_build": 364,
+    "interpretation": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "import_batches": 0,
+    "live_rows": 0,
+    "recent_search_rows": 0,
+    "eligible_pairs": 0,
+    "latest_report_date": ""
+  },
+  "safety": {
+    "schema_change": false,
+    "request_time_schema_mutation": false,
+    "synthetic_search_evidence": false,
+    "automatic_search_console_import": false,
+    "automatic_queue_generation": false,
+    "automatic_seo_wording_generation": false,
+    "automatic_seo_apply": false,
+    "indexnow_execution": false,
+    "provider_execution": false,
+    "provider_publication": false,
+    "r2_mutation": false,
+    "production_d1_contact": false,
+    "auth_bypass": false,
+    "paid_plan_dependency": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "6f07ff2876162f7ee0dda683cd67a06f4f2082b6",
+      "tree": "38ce92f73f710a302e2839055457ca156ca45cbb",
+      "system_gate_run": 38011896949,
+      "current_application_quality_run": 38011896962,
+      "it_admin_runtime_proof_run": 38011897139,
+      "branch_hygiene_run": 38011897040,
+      "d1_ci_fanout_guard_run": 38011896951,
+      "build_specific_proof_run": 38011897111,
+      "state": "DEVELOPMENT_GREEN",
+      "quality_run": 38011896962,
+      "it_admin_runtime_run": 38011897139,
+      "repository_hygiene_run": 38011897040
+    },
+    "production": {
+      "main_sha": "ac54e0062f126e5b54636bd28974aa406702cc1c",
+      "tree": "38ce92f73f710a302e2839055457ca156ca45cbb",
+      "production_pages_deploy_run": 38012046169,
+      "production_live_resource_integrity_run": 38012101526,
+      "state": "PRODUCTION_GREEN"
+    }
+  },
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_EVIDENCE_PENDING_NO_REAL_EXPORT",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_367_372.md",
+  "next_build": 371,
+  "next_build_title": "Maker Story Advancement & Publication Readiness Continuity IX",
+  "future_queue_exhausted": false,
+  "measurement_lane_state": "MEASURED_EVIDENCE_PENDING_NO_REAL_EXPORT",
+  "measurement_lane_owner": "release467-build370-search-console-real-export-fresh-discovery-intake-x.yml",
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "decision": {
+    "classification": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "rationale": "Exact Build 370 Development measurement found zero Search Console import batches and zero Search Console rows. No discovery or SEO action is justified without a confirmed real Google Search Console Performance export.",
+    "operator_next_action": "Import a genuine Google Search Console Performance CSV when available; if the export has no Date column, provide the explicit report end date.",
+    "real_export_required": true,
+    "explicit_report_date_only": true,
+    "automatic_import": false,
+    "automatic_queue_generation": false,
+    "automatic_seo_apply": false,
+    "next_build": 371,
+    "next_build_title": "Maker Story Advancement & Publication Readiness Continuity IX"
+  },
+  "release_hygiene": {
+    "predecessor_workflow": ".github/workflows/release467-build369-grey-hair-source-review-story-plan-completion-continuity-viii.yml",
+    "predecessor_workflow_state": "HISTORICAL_MANUAL_ONLY",
+    "automatic_remote_d1_current_build_only": true
+  },
+  "measurement": {
+    "source_sha": "f5348371270bd3286de3417209e56b37024c5758",
+    "source_tree_sha": "fb2e91b15778450e1f47651a0844d1dc2dc78dfe",
+    "workflow_run": 38013443311,
+    "artifact_id": 11655122014,
+    "artifact_name": "build370-search-console-fresh-discovery-f5348371270bd3286de3417209e56b37024c5758",
+    "artifact_digest": "sha256:9b497b80a69f44549c1c7ff11f3a8480b82eefded0dfda36a0528891fd0b1809",
+    "statement_count": 9,
+    "rows_read_by_statement": [
+      1685,
+      6,
+      319,
+      1,
+      1,
+      2,
+      1,
+      1,
+      46
+    ],
+    "aggregate_rows_read": 2062,
+    "rows_read_ceiling": 20000,
+    "interpretation": "EVIDENCE_PENDING_NO_REAL_EXPORT",
+    "batches": {
+      "import_batches": 0,
+      "declared_rows": 0,
+      "live_rows": 0,
+      "mismatched_batches": 0,
+      "orphan_rows": 0,
+      "operator_bound_batches": 0,
+      "csv_named_batches": 0,
+      "latest_import_at": ""
+    },
+    "freshness": {
+      "all_search_rows": 0,
+      "recent_search_rows": 0,
+      "recent_clicks": 0,
+      "recent_impressions": 0,
+      "recent_distinct_pages": 0,
+      "recent_distinct_queries": 0,
+      "earliest_report_date": "",
+      "latest_report_date": "",
+      "latest_report_age_days": null,
+      "report_dates": 0
+    },
+    "eligible_review_pairs": {
+      "eligible_pairs": 0,
+      "eligible_impressions": 0
+    },
+    "seo_review_queue": {
+      "queue_rows": 0,
+      "open_rows": 0,
+      "in_progress_rows": 0,
+      "applied_rows": 0,
+      "currently_supported_rows": 0,
+      "stale_or_unsupported_pending_rows": 0,
+      "generated_wording_rows": 0
+    },
+    "freshness_window_days": 30,
+    "explicit_report_date_only": true,
+    "synthetic_rows": false,
+    "queue_mutation": false,
+    "automatic_seo_apply": false,
+    "production_d1_contact": false
+  }
+}

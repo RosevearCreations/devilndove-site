@@ -1,3 +1,17 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 370 candidate over Build 369 Production GREEN
+
+**Current verified successor: Release 467 Build 370 — Search Console Real Export & Fresh Discovery Intake X**
+
+Build 369 is exact-tree Development/Production GREEN:
+- Development SHA: `6f07ff2876162f7ee0dda683cd67a06f4f2082b6`
+- Shared tree: `38ce92f73f710a302e2839055457ca156ca45cbb`
+- Development proofs: `38011896949`, `38011896962`, `38011897139`, `38011897040`, `38011896951`, `38011897111`
+- Production main: `ac54e0062f126e5b54636bd28974aa406702cc1c`
+- Production Pages: `38012046169`
+- Production live-resource integrity: `38012101526`
+
+Build 370 is read-only Search Console evidence measurement. Only explicitly confirmed real Performance CSV exports count; report dates control freshness.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 369 candidate over Build 368 Production GREEN
 
 **Current verified successor: Release 467 Build 369 — Grey Hair Source Review & Story-Plan Completion Continuity VIII**

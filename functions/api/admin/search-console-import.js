@@ -1,3 +1,4 @@
+// BUILD370_CURRENT_API: Search Console Real Export & Fresh Discovery Intake X; confirmed real evidence only and explicit report-date freshness.
 // BUILD364_CURRENT_API: Search Console Real Export & Fresh Discovery Intake IX; confirmed real evidence only and explicit report-date freshness.
 // BUILD358_CURRENT_API: Search Console Real Export & Fresh Discovery Intake VIII; real-only evidence and explicit report-date freshness.
 // BUILD352_CURRENT_API: real Search Console export intake remains explicit-report-date-only and human reviewed.

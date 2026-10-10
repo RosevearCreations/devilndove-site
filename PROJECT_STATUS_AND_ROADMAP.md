@@ -1,3 +1,11 @@
+# CURRENT BUILD — Release 467 Build 370
+
+**Search Console Real Export & Fresh Discovery Intake X**
+
+Build 369 is exact-tree Development/Production GREEN at shared tree `38ce92f73f710a302e2839055457ca156ca45cbb`. Build 370 re-measures the existing operator-controlled Search Console Performance CSV lane. Only explicitly confirmed real exports count; freshness uses explicit report dates inside the 30-day actionability window, and no discovery evidence or SEO wording/action is synthesized.
+
+**Next after Build 370 Production GREEN:** Build 371 — Maker Story Advancement & Publication Readiness Continuity IX.
+
 # CURRENT BUILD — Release 467 Build 369
 
 **Grey Hair Source Review & Story-Plan Completion Continuity VIII**
