@@ -792,3 +792,17 @@ The current closure candidate is **Build 279 — Multipart Interruption & Resume
 - Production Live Resource Integrity: `37215700395`
 
 This exact-tree Build 357 checkpoint is the immutable restart baseline consumed by Build 358.
+
+## Build 369 predecessor restart-integrity checkpoint
+
+BUILD369_PREDECESSOR_RESTART_INTEGRITY
+
+Build 368 exact-tree Development/Production GREEN:
+- verified Development SHA: `d36a643fc8b8805f1b4dbdb3fc0963ba375c07c3`
+- shared tree SHA: `18b63f5f1910fe48ac40497f217e99d08132c00b`
+- Development proofs: `37981315804`, `37981315817`, `37981315815`, `37981315760`, `37981315890`, `37981315756`
+- Production main SHA: `253824ef52cc4faa90b4f5fe42cc177264bf2df1`
+- Production Pages proof: `37981619129`
+- Production live-resource proof: `37981772067`
+
+Build 369 successor-ingests this checkpoint; no Production D1 mutation is implied.
