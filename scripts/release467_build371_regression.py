@@ -32,7 +32,7 @@ for name in ('actual_result','lesson_learned','human_published_journal_rows','pu
 for name in ('placeholderGuard','FACTUAL_OUTCOME_EVIDENCE_REQUIRED','PUBLISHED_REVIEWED_STORY','PUBLICATION_REVIEW_READY','publication_mutation:false','provider_execution:false','production_d1_contact:false'):
     need(name in ver,'verifier missing '+name)
 need('D1_ONE_SHOT_EVIDENCE_CAPTURE' in wf and 'PRODUCTION D1 CONTACT: ZERO' in wf and 'AUTOMATIC PUBLICATION: ZERO' in wf,'workflow boundaries')
-need('branches: [dev]' in wf and 'workflow_dispatch:' in wf,'build workflow triggers')
+need(('branches: [dev]' in wf if pointer['build']==371 else 'branches: [dev]' not in wf) and 'workflow_dispatch:' in wf,'build workflow triggers')
 need('branches: [dev]' not in old and 'workflow_dispatch:' in old,'Build 370 workflow must be manual-only')
 need('makerStoryCoverageBuild329Mount' in t('admin/maker-story-coverage/index.html'),'canonical workspace')
 need('automatic_publication:false' in t('functions/api/admin/maker-story-coverage.js'),'existing review-first API')

@@ -1,33 +1,33 @@
 {
   "release": 467,
-  "build": 371,
-  "title": "Maker Story Advancement & Publication Readiness Continuity IX",
+  "build": 372,
+  "title": "Content Adoption & Discovery Outcomes Renewal XII",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 370,
-      "title": "Search Console Real Export & Fresh Discovery Intake X",
-      "authority": "release467-build370-search-console-real-export-fresh-discovery-intake-x.json",
-      "dev_sha": "b37a7c9fd67389bc55c035ca62155f0f122403a1",
-      "tree_sha": "a4a81a25ebf48686aff025f79024dae6d3736b84",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD370_GREEN",
+      "build": 371,
+      "title": "Maker Story Advancement & Publication Readiness Continuity IX",
+      "authority": "release467-build371-maker-story-advancement-publication-readiness-continuity-ix.json",
+      "dev_sha": "1f34772a0e0576953d9c8184d947fa7cdd8b9beb",
+      "tree_sha": "e19ad27943f3089d84aa943f8dfaec109ef50e65",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD371_GREEN",
       "proofs": {
-        "system_gate_run": 38013641058,
-        "current_application_quality_run": 38013641151,
-        "it_admin_runtime_proof_run": 38013641040,
-        "branch_hygiene_run": 38013641059,
-        "d1_ci_fanout_guard_run": 38013641131,
-        "build_specific_proof_run": 38013641187
+        "system_gate_run": 38014614659,
+        "current_application_quality_run": 38014614662,
+        "it_admin_runtime_proof_run": 38014614656,
+        "branch_hygiene_run": 38014614650,
+        "d1_ci_fanout_guard_run": 38014614638,
+        "build_specific_proof_run": 38014614679
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 371,
-      "title": "Maker Story Advancement & Publication Readiness Continuity IX",
-      "authority": "release467-build371-maker-story-advancement-publication-readiness-continuity-ix.json",
+      "build": 372,
+      "title": "Content Adoption & Discovery Outcomes Renewal XII",
+      "authority": "release467-build372-content-adoption-discovery-outcomes-renewal-xii.json",
       "state": "DEVELOPMENT_CLOSURE_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -38,19 +38,20 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 370,
-    "title": "Search Console Real Export & Fresh Discovery Intake X",
-    "authority": "release467-build370-search-console-real-export-fresh-discovery-intake-x.json",
-    "main_sha": "a5da1ed88b79aade14fdd6ccae6dad8586d36a8e",
-    "tree_sha": "a4a81a25ebf48686aff025f79024dae6d3736b84",
+    "build": 371,
+    "title": "Maker Story Advancement & Publication Readiness Continuity IX",
+    "authority": "release467-build371-maker-story-advancement-publication-readiness-continuity-ix.json",
+    "main_sha": "eaaac6af5813e4d636188a7ba2f7036d45dacb5f",
+    "tree_sha": "e19ad27943f3089d84aa943f8dfaec109ef50e65",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 38013782448,
-    "production_live_resource_integrity_run": 38013833601,
+    "production_pages_deploy_run": 38014743826,
+    "production_live_resource_integrity_run": 38014805236,
     "remote_d1_queries": 0,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build372-content-adoption-discovery-outcomes-renewal-xii.json",
     "release467-build371-maker-story-advancement-publication-readiness-continuity-ix.json",
     "release467-build370-search-console-real-export-fresh-discovery-intake-x.json",
     "release467-build369-grey-hair-source-review-story-plan-completion-continuity-viii.json",
@@ -262,12 +263,12 @@
   "main_mutation_authorized": false,
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
-  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_367_372.md",
-  "next_build": 372,
-  "next_build_state": "QUEUED_AFTER_BUILD371_PRODUCTION_GREEN",
-  "next_build_title": "Content Adoption & Discovery Outcomes Renewal XII",
-  "promotion_state": "BUILD371_MEASURED_CANDIDATE_NOT_YET_VERIFIED",
-  "successor_scope_state": "BUILD372_DEFINED_BY_BUILD366_OBSERVED_EVIDENCE",
+  "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_373_378.md",
+  "next_build": 373,
+  "next_build_state": "QUEUED_AFTER_BUILD372_PRODUCTION_GREEN",
+  "next_build_title": "Evidence Gap Execution Workbench & Input Completion Continuity VIII",
+  "promotion_state": "BUILD372_MEASURED_CANDIDATE_NOT_YET_VERIFIED",
+  "successor_scope_state": "BUILD373_PROVISIONAL_PENDING_BUILD372_EXACT_MEASUREMENT",
   "measured_closure": {
     "source_build": 232,
     "measurement_sha": "17aa15b39bd96ca27be0069a8c50a1ccf807b85d",
@@ -298,15 +299,15 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NONE_AUTO_APPLY_BUILD269_OPERATOR_CONTROLLED_STANDALONE_MIGRATION",
-  "accepted_dev_sha": "b37a7c9fd67389bc55c035ca62155f0f122403a1",
-  "accepted_dev_tree_sha": "a4a81a25ebf48686aff025f79024dae6d3736b84",
+  "accepted_dev_sha": "1f34772a0e0576953d9c8184d947fa7cdd8b9beb",
+  "accepted_dev_tree_sha": "e19ad27943f3089d84aa943f8dfaec109ef50e65",
   "acceptance": {
-    "system_gate_run": 38013641058,
-    "current_application_quality_run": 38013641151,
-    "it_admin_runtime_proof_run": 38013641040,
-    "branch_hygiene_run": 38013641059,
-    "d1_ci_fanout_guard_run": 38013641131,
-    "build_specific_proof_run": 38013641187
+    "system_gate_run": 38014614659,
+    "current_application_quality_run": 38014614662,
+    "it_admin_runtime_proof_run": 38014614656,
+    "branch_hygiene_run": 38014614650,
+    "d1_ci_fanout_guard_run": 38014614638,
+    "build_specific_proof_run": 38014614679
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -5872,5 +5873,5 @@
     },
     "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_COMPATIBILITY_REPAIR"
   },
-  "authority": "release467-build371-maker-story-advancement-publication-readiness-continuity-ix.json"
+  "authority": "release467-build372-content-adoption-discovery-outcomes-renewal-xii.json"
 }

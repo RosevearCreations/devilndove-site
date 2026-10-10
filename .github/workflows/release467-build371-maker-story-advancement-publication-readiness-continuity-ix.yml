@@ -1,19 +1,6 @@
 name: Release 467 Build 371 Maker Story Advancement Publication Readiness Continuity IX
+# Historical after Build 372 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build371-${slug}.json'
-      - 'release467-build370-search-console-real-export-fresh-discovery-intake-x.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build371_*.py'
-      - 'scripts/release467_build371_*.mjs'
-      - 'scripts/release467_build371_continuity.sql'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - '.github/workflows/release467-build371-${slug}.yml'
   workflow_dispatch:
 permissions:
   contents: read

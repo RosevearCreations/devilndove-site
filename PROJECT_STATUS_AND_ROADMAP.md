@@ -1,3 +1,11 @@
+# CURRENT BUILD — Release 467 Build 372
+
+**Content Adoption & Discovery Outcomes Renewal XII**
+
+Build 371 is exact-tree Development/Production GREEN at tree `e19ad27943f3089d84aa943f8dfaec109ef50e65`. Build 372 uses a read-only, 19-statement Development-D1 outcomes measurement to compare Maker Story adoption, human publication, discovery, runtime, Raw Inventory identity and rows-read budget against Build 366 and the retained Build 360 baseline. Operator media rights, true Search Console report-date freshness and review-first publication remain independent. No automatic provider, publication or SEO action is authorized.
+
+**Next after measured Build 372 Production GREEN:** Build 373 — Evidence Gap Execution Workbench & Input Completion Continuity VIII, subject to observed evidence.
+
 # CURRENT BUILD — Release 467 Build 371
 
 **Maker Story Advancement & Publication Readiness Continuity IX**

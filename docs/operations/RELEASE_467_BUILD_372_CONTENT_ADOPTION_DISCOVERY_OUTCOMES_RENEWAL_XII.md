@@ -1,0 +1,5 @@
+# Release 467 Build 372 — Content Adoption & Discovery Outcomes Renewal XII
+
+The exact Build 371 Development (`1f34772a0e0576953d9c8184d947fa7cdd8b9beb`) and Production (`eaaac6af5813e4d636188a7ba2f7036d45dacb5f`) share tree `e19ad27943f3089d84aa943f8dfaec109ef50e65`. All six Development proofs passed (38014614659, 38014614662, 38014614656, 38014614650, 38014614638, 38014614679). Production Pages 38014743826 and live-resource integrity 38014805236 passed.
+
+Build 372 repeats the proven 19-statement read-only Development measurement from Build 366, including Maker Story profiles/reviews, Workshop Journal, real Google Search Console explicit-date evidence, browser telemetry, runtime incidents, SEO review action evidence, Raw Inventory one-record identities and rows-read limits. Compare against Build 366 and the latest Build 371 human-reviewed readiness evidence. Report observed gaps, not fictional progress. Protect private CAIP media; no automatic story, social, provider, or SEO actions. The successor roadmap is derived only after measured evidence.
