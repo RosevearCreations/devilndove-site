@@ -1,3 +1,11 @@
+# CURRENT BUILD — Release 467 Build 369
+
+**Grey Hair Source Review & Story-Plan Completion Continuity VIII**
+
+Build 368 is exact-tree Development/Production GREEN at shared tree `18b63f5f1910fe48ac40497f217e99d08132c00b`. Build 369 re-measures Grey Hair source-evidence review, synchronization prerequisites, human-reviewed story plans and source-backed story items. Private media remains private unless explicitly reviewed, and every readiness/approval decision remains human-controlled.
+
+**Next after Build 369 Production GREEN:** Build 370 — Search Console Real Export & Fresh Discovery Intake X.
+
 # BUILD 368 CORRECTIVE RUNTIME RE-PROMOTION
 
 Build 368 remains the active build while a corrective exact-tree revision removes obsolete Build 249/250/254 request-measurement work from the lean Admin home and preserves the cookie-first Users & Security repair. Build 240 coalescing and timeout remain active. No variables, external services, D1 migrations or manual infrastructure changes are required.
