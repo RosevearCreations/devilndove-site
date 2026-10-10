@@ -34,8 +34,11 @@ function normalizeResults(result) {
 }
 
 export async function onRequestGet(context) {
+  try {
   const { request, env } = context;
-  const adminUser = await resolveSessionUser(request, env.DB || env.DD_DB, { requireAdmin: true });
+  const db = env.DB || env.DD_DB;
+  if (!db || typeof db.prepare !== 'function') return json({ok:false,error:'User directory database unavailable.',code:'USERS_DB_UNAVAILABLE'},503);
+  const adminUser = await resolveSessionUser(request, db, { requireAdmin: true });
   if (!adminUser) return json({ ok: false, error: "Unauthorized." }, 401);
 
   const url = new URL(request.url);
@@ -125,8 +128,8 @@ export async function onRequestGet(context) {
   `;
 
   const result = bindings.length
-    ? await env.DB.prepare(sql).bind(...bindings).all()
-    : await env.DB.prepare(sql).all();
+    ? await db.prepare(sql).bind(...bindings).all()
+    : await db.prepare(sql).all();
 
   return json({
     ok: true,
@@ -161,4 +164,8 @@ export async function onRequestGet(context) {
       access_tier_codes: row.access_tier_codes || ""
     }))
   });
+  } catch (error) {
+    console.error('ADMIN_USERS_GET_ERROR',error?.name||'Error');
+    return json({ok:false,error:'User directory is temporarily unavailable. Check Worker logs and retry.',code:'USERS_READ_FAILED'},503);
+  }
 }

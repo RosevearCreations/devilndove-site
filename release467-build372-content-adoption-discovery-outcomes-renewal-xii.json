@@ -2,7 +2,7 @@
   "release": 467,
   "build": 372,
   "title": "Content Adoption & Discovery Outcomes Renewal XII",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "CONTENT_ADOPTION_DISCOVERY_OUTCOMES_RENEWAL_XII",
   "authority": "release467-build372-content-adoption-discovery-outcomes-renewal-xii",
   "predecessor": {
@@ -270,5 +270,30 @@
     "automatic_story_generation": false,
     "automatic_seo_apply": false,
     "traffic_fabrication": false
+  },
+  "final_closure": {
+    "dev_sha": "1a721196a9c8206b2d28263cac901c7b406836f4",
+    "tree_sha": "9a9c6ec964c35c4bdfe509e489331940d754cb00",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD372_GREEN",
+    "proofs": {
+      "system_gate_run": 38016052656,
+      "current_application_quality_run": 38016052615,
+      "it_admin_runtime_proof_run": 38016052614,
+      "branch_hygiene_run": 38016052609,
+      "d1_ci_fanout_guard_run": 38016052624,
+      "build_specific_proof_run": 38016052637
+    },
+    "recorded_by": "Build 373 successor ingestion",
+    "artifact_id": 11656311269
+  },
+  "production_checkpoint": {
+    "main_sha": "e0899743b6e7e9d87b1017479a7f90c5e95018a2",
+    "tree_sha": "9a9c6ec964c35c4bdfe509e489331940d754cb00",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38016166422,
+    "production_live_resource_integrity_run": 38016219921,
+    "remote_d1_queries": 0
   }
 }

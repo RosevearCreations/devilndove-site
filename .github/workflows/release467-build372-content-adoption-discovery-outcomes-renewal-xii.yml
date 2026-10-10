@@ -1,18 +1,6 @@
 name: Release 467 Build 372 Content Adoption Discovery Outcomes Renewal XII
+# Historical after Build 373 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build372-content-adoption-discovery-outcomes-renewal-xii.json'
-      - 'release467-build371-maker-story-advancement-publication-readiness-continuity-ix.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build372_*'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'scripts/release467_build265_gate.py'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - '.github/workflows/release467-build372-content-adoption-discovery-outcomes-renewal-xii.yml'
   workflow_dispatch:
 permissions:
   contents: read
