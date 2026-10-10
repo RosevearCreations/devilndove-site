@@ -49,6 +49,26 @@ document.addEventListener("DOMContentLoaded", () => {
     el.style.color = isError ? "#b00020" : "#0a7a2f";
   }
 
+
+  // BUILD373_PROFILE_HTTP_DIAGNOSTICS: never JSON.parse HTML, 1102 pages, or missing API routes.
+  async function readProfileApiResponse(response, action) {
+    const status = Number(response?.status || 0);
+    const ray = response?.headers?.get?.("cf-ray") || "";
+    const suffix = ray ? ` (Cloudflare Ray: ${ray})` : "";
+    const contentType = (response?.headers?.get?.("content-type") || "").toLowerCase();
+    if (!contentType.includes("application/json")) {
+      const detail = status ? `HTTP ${status}` : "unavailable response";
+      throw new Error(`${action} failed: server returned a non-JSON response (${detail}). This may be a Cloudflare Worker or route error. Check Worker logs and retry.${suffix}`);
+    }
+    let data;
+    try { data = await response.json(); }
+    catch { throw new Error(`${action} failed: the server returned invalid JSON (HTTP ${status}). Retry.${suffix}`); }
+    if (!response.ok || !data?.ok) {
+      throw new Error(`${action} failed (HTTP ${status}): ${data?.error || "Server error."}${suffix}`);
+    }
+    return data;
+  }
+
   function fill(profilePayload) {
     const user = profilePayload?.user || {};
     const profile = profilePayload?.profile || {};
@@ -81,9 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function loadProfile(userId) {
     const response = await window.DDAuth.apiFetch(`/api/admin/user-profile?user_id=${encodeURIComponent(userId)}`, { method: "GET" });
-    const data = await response.json();
-    if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to load profile.");
-    return data;
+    return readProfileApiResponse(response, "Load profile");
   }
 
   async function onSubmit(event) {
@@ -119,8 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setMessage("Saving profile...");
       if (button) { button.disabled = true; button.textContent = "Saving..."; }
       const response = await window.DDAuth.apiFetch("/api/admin/user-profile", { method: "POST", body: JSON.stringify(payload) });
-      const data = await response.json();
-      if (!response.ok || !data?.ok) throw new Error(data?.error || "Failed to save profile.");
+      const data = await readProfileApiResponse(response, "Save profile");
       fill(data);
       setMessage("Profile saved successfully.");
       document.dispatchEvent(new CustomEvent("dd:user-updated", { detail: { action: "profile_updated", user: data.user || null } }));

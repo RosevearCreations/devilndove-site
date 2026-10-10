@@ -1,3 +1,7 @@
+# CURRENT RESTART CHECKPOINT — Build 373 over Build 372 Production GREEN
+
+Build 372 verified exact dev `1a721196a9c8206b2d28263cac901c7b406836f4` and Production `e0899743b6e7e9d87b1017479a7f90c5e95018a2` (same tree `9a9c6ec964c35c4bdfe509e489331940d754cb00`). Dev System 38016052656; Quality 38016052615; I.T. 38016052614; Hygiene 38016052609; D1 fan-out 38016052624; Build-specific 38016052637. Production Pages 38016166422 and Live Resource 38016219921 both GREEN. Build 373 candidate is read-only evidence remeasurement plus targeted Profile/Users error-boundary code; no schema/R2/provider/SEO mutations.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 372 candidate over Build 371 Production GREEN
 
 Build 371 Development `1f34772a0e0576953d9c8184d947fa7cdd8b9beb` and Production `eaaac6af5813e4d636188a7ba2f7036d45dacb5f` share exact tree `e19ad27943f3089d84aa943f8dfaec109ef50e65`. Development proof runs: System 38014614659, Quality 38014614662, I.T. 38014614656, Hygiene 38014614650, D1 Fan-Out 38014614638, Build-specific 38014614679. Production Pages 38014743826, Production live 38014805236.

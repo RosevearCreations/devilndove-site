@@ -21,7 +21,7 @@ upper=' '+re.sub(r'--.*','',sql).upper()+' '
 for forbidden in (' INSERT ',' UPDATE ',' DELETE ',' CREATE ',' ALTER ',' DROP ',' REPLACE ',' VACUUM ',' REINDEX '):q(forbidden not in upper,'Build 367 measurement must remain read-only: '+forbidden.strip())
 for token in ('35th promo factual blocker','Grey Hair source-evidence blocker','Search Console real-export blocker','currently unprofiled active projects','relational integrity'):q(token in sql,'Build 367 SQL missing '+token)
 for token in ('sets.length!==6','EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED','35TH_PROMO_REAL_OUTCOME_EVIDENCE','REAL_SEARCH_CONSOLE_EXPORT','GREY_HAIR_SOURCE_EVIDENCE_REVIEW','UNPROFILED_MAKER_STORY_EVIDENCE','production_d1_contact:false'):q(token in verify,'Build 367 verifier missing '+token)
-q("const BUILD=367,TITLE='Evidence Gap Execution Workbench & Input Completion Continuity VII'" in api,'Build 367 Workbench API identity mismatch')
+q(("const BUILD=367,TITLE='Evidence Gap Execution Workbench & Input Completion Continuity VII'" in api) if int(p.get('build') or 0)==367 else ("const BUILD=373,TITLE='Evidence Gap Execution Workbench & Input Completion Continuity VIII'" in api and 'BUILD367_CURRENT_AUTHORITY' in api),'Build 367 historical source authority compatibility mismatch')
 q('Release 467 • Build 367' in page and 'Input Completion Continuity VII' in page,'Build 367 Workbench page identity mismatch')
 q('BUILD367_CURRENT_CLIENT' in ui and 'Build 367' in ui,'Build 367 Workbench client identity mismatch')
 cur=int(p.get('build') or 0);trigger_tokens=('push:','branches: [dev]') if cur==367 else ('workflow_dispatch:',)

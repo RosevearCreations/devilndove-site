@@ -4,11 +4,12 @@ import { resolveSessionUser } from "../_lib/accountAuthCompat.js";
 // It validates the admin session, supports profile reads and writes, and keeps profile
 // details separate from the core auth user record while still supporting future tiering.
 
+// BUILD373_PROFILE_BOUNDARY: every handled read/write error is JSON; Cloudflare 1102 may occur before this handler.
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store"
     }
   });
 }
@@ -38,8 +39,8 @@ function normalizeBool(value, fallback = 0) {
 }
 
 
-async function getTierCodesForUser(env, userId) {
-  const result = await env.DB.prepare(`
+async function getTierCodesForUser(db, userId) {
+  const result = await db.prepare(`
     SELECT at.code
     FROM user_access_tiers uat
     JOIN access_tiers at ON at.access_tier_id = uat.access_tier_id
@@ -50,8 +51,8 @@ async function getTierCodesForUser(env, userId) {
   return (Array.isArray(result?.results) ? result.results : []).map((row) => row.code || "");
 }
 
-async function readProfile(env, userId) {
-  const user = await env.DB.prepare(`
+async function readProfile(db, userId) {
+  const user = await db.prepare(`
     SELECT user_id, email, display_name, role, is_active, created_at, updated_at
     FROM users
     WHERE user_id = ?
@@ -60,7 +61,7 @@ async function readProfile(env, userId) {
 
   if (!user) return null;
 
-  const profile = await env.DB.prepare(`
+  const profile = await db.prepare(`
     SELECT
       user_profile_id,
       user_id,
@@ -92,7 +93,7 @@ async function readProfile(env, userId) {
     LIMIT 1
   `).bind(userId).first();
 
-  const access_tier_codes = await getTierCodesForUser(env, userId);
+  const access_tier_codes = await getTierCodesForUser(db, userId);
 
   return {
     user: {
@@ -136,8 +137,11 @@ async function readProfile(env, userId) {
 }
 
 export async function onRequestGet(context) {
+  try {
   const { request, env } = context;
-  const adminUser = await resolveSessionUser(request, env.DB || env.DD_DB, { requireAdmin: true });
+  const db = env.DB || env.DD_DB;
+  if (!db || typeof db.prepare !== "function") return json({ok:false,error:"User profile database is unavailable.",code:"PROFILE_DATABASE_UNAVAILABLE"},503);
+  const adminUser = await resolveSessionUser(request, db, { requireAdmin: true });
   if (!adminUser) return json({ ok: false, error: "Unauthorized." }, 401);
 
   const url = new URL(request.url);
@@ -146,7 +150,7 @@ export async function onRequestGet(context) {
     return json({ ok: false, error: "A valid user_id is required." }, 400);
   }
 
-  const payload = await readProfile(env, user_id);
+  const payload = await readProfile(db, user_id);
   if (!payload) return json({ ok: false, error: "User not found." }, 404);
 
   return json({
@@ -158,11 +162,18 @@ export async function onRequestGet(context) {
     },
     ...payload
   });
+  } catch (error) {
+    console.error("ADMIN_USER_PROFILE_GET_ERROR", error?.name || "Error");
+    return json({ok:false,error:"Unable to load profile. Retry or check Cloudflare Worker logs.",code:"PROFILE_READ_FAILED"},503);
+  }
 }
 
 export async function onRequestPost(context) {
+  try {
   const { request, env } = context;
-  const adminUser = await resolveSessionUser(request, env.DB || env.DD_DB, { requireAdmin: true });
+  const db = env.DB || env.DD_DB;
+  if (!db || typeof db.prepare !== "function") return json({ok:false,error:"User profile database is unavailable.",code:"PROFILE_DATABASE_UNAVAILABLE"},503);
+  const adminUser = await resolveSessionUser(request, db, { requireAdmin: true });
   if (!adminUser) return json({ ok: false, error: "Unauthorized." }, 401);
 
   let body;
@@ -177,7 +188,7 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: "A valid user_id is required." }, 400);
   }
 
-  const existingUser = await env.DB.prepare(`SELECT user_id FROM users WHERE user_id = ? LIMIT 1`).bind(user_id).first();
+  const existingUser = await db.prepare(`SELECT user_id FROM users WHERE user_id = ? LIMIT 1`).bind(user_id).first();
   if (!existingUser) return json({ ok: false, error: "User not found." }, 404);
 
   const profile_type = normalizeProfileType(body.profile_type);
@@ -202,7 +213,7 @@ export async function onRequestPost(context) {
   const department = normalizeText(body.department);
   const job_title = normalizeText(body.job_title);
 
-  await env.DB.prepare(`
+  await db.prepare(`
     INSERT INTO user_profiles (
       user_id, profile_type, preferred_name, company_name, phone, phone_verified,
       email_verified, preferred_contact_method, contact_notes, marketing_opt_in,
@@ -259,7 +270,7 @@ export async function onRequestPost(context) {
     job_title || null
   ).run();
 
-  const payload = await readProfile(env, user_id);
+  const payload = await readProfile(db, user_id);
   return json({
     ok: true,
     message: "User profile updated successfully.",
@@ -270,4 +281,8 @@ export async function onRequestPost(context) {
     },
     ...payload
   });
+  } catch (error) {
+    console.error("ADMIN_USER_PROFILE_POST_ERROR", error?.name || "Error");
+    return json({ok:false,error:"Unable to save profile; no saved confirmation was received. Retry after checking Worker logs.",code:"PROFILE_WRITE_FAILED"},503);
+  }
 }
