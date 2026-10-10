@@ -266,7 +266,7 @@
   "next_build": 372,
   "next_build_state": "QUEUED_AFTER_BUILD371_PRODUCTION_GREEN",
   "next_build_title": "Content Adoption & Discovery Outcomes Renewal XII",
-  "promotion_state": "BUILD371_MEASURED_CANDIDATE_AWAITING_EXACT_HEAD_PROOFS",
+  "promotion_state": "BUILD371_MEASURED_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "BUILD372_DEFINED_BY_BUILD366_OBSERVED_EVIDENCE",
   "measured_closure": {
     "source_build": 232,
