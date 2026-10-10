@@ -2,7 +2,7 @@
   "release": 467,
   "build": 370,
   "title": "Search Console Real Export & Fresh Discovery Intake X",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "SEARCH_CONSOLE_REAL_EXPORT_FRESH_DISCOVERY_INTAKE_X",
   "authority": "release467-build370-search-console-real-export-fresh-discovery-intake-x",
   "predecessor": {
@@ -198,5 +198,29 @@
     "queue_mutation": false,
     "automatic_seo_apply": false,
     "production_d1_contact": false
+  },
+  "final_closure": {
+    "dev_sha": "b37a7c9fd67389bc55c035ca62155f0f122403a1",
+    "tree_sha": "a4a81a25ebf48686aff025f79024dae6d3736b84",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD370_GREEN",
+    "proofs": {
+      "system_gate_run": 38013641058,
+      "current_application_quality_run": 38013641151,
+      "it_admin_runtime_proof_run": 38013641040,
+      "branch_hygiene_run": 38013641059,
+      "d1_ci_fanout_guard_run": 38013641131,
+      "build_specific_proof_run": 38013641187
+    },
+    "recorded_by": "Build 371 predecessor ingestion"
+  },
+  "production_checkpoint": {
+    "main_sha": "a5da1ed88b79aade14fdd6ccae6dad8586d36a8e",
+    "tree_sha": "a4a81a25ebf48686aff025f79024dae6d3736b84",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38013782448,
+    "production_live_resource_integrity_run": 38013833601,
+    "remote_d1_queries": 0
   }
 }

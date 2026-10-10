@@ -1,3 +1,9 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 371 candidate over Build 370 Production GREEN
+
+Build 370 verified Development SHA `b37a7c9fd67389bc55c035ca62155f0f122403a1`, Production main SHA `a5da1ed88b79aade14fdd6ccae6dad8586d36a8e`, matching tree `a4a81a25ebf48686aff025f79024dae6d3736b84`. Development proof runs: System 38013641058, Quality 38013641151, IT 38013641040, Hygiene 38013641059, D1 Fan-Out 38013641131, Build-specific 38013641187. Production Pages 38013782448 and live integrity 38013833601 passed.
+
+Build 371: Maker Story Advancement & Publication Readiness Continuity IX. Read-only five-project Development D1 measurement, explicit review and rights constraints; no automatic publication, social provider action or Production D1 contact. Do not call candidate GREEN before exact-head proofs.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 370 candidate over Build 369 Production GREEN
 
 **Current verified successor: Release 467 Build 370 — Search Console Real Export & Fresh Discovery Intake X**

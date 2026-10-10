@@ -1,3 +1,11 @@
+# CURRENT BUILD — Release 467 Build 371
+
+**Maker Story Advancement & Publication Readiness Continuity IX**
+
+Build 370 is verified Development and Production GREEN at exact shared tree `a4a81a25ebf48686aff025f79024dae6d3736b84`. Build 371 is a read-only exact-Development-D1 re-measurement across the five active Creative Projects. Publication readiness requires factual outcomes, evidence-backed Maker Stories, explicit human review, public-candidate approval, locked/approved content copy and separately verified media rights. It never auto-publishes, alters business data or reaches Production D1.
+
+**Next after Build 371 Production GREEN:** Build 372 — Content Adoption & Discovery Outcomes Renewal XII.
+
 # CURRENT BUILD — Release 467 Build 370
 
 **Search Console Real Export & Fresh Discovery Intake X**
