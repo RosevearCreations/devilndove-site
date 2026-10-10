@@ -12,3 +12,12 @@ Readiness requires substantive result and lesson evidence, explicit human story 
 The development workflow first verifies the exact configured Development D1 instance, executes six SELECT-only statements, bounds aggregate provider rows read to 20,000, records project classifications in an artifact and runs static source gates. **Zero** automatic profile, review, copy, publication, social, provider, schema, R2 or Production D1 mutations.
 
 Only after exact Development gates and a matching-tree Production Pages deploy and Production Live Resource Integrity proof can production be called GREEN. The next scoped build is 372 — Content Adoption & Discovery Outcomes Renewal XII.
+
+## Exact Development measurement
+
+Workflow [38014454127](https://github.com/RosevearCreations/devilndove-site/actions/runs/38014454127) measured 5 active projects at commit `f01cd473c4af15884103a7e8025560ea740a89c3` using 672 / 20,000 allowed database rows. Artifact `11655184031` has digest `sha256:c1c496774eef4301dba9d1d455a23af7043ac3b592f4339799d0fb4b4a0ccd6d`.
+
+- Three Maker Story evidence-required projects, one factual-outcome gap (35th Promo), one human-reviewed published story (Under the Sea), and no new publication-ready candidate.
+- 35th Promo: zero recorded execution, result and lesson events. Grey Hair: one approved and two review-needed source ranges, zero reviewed plans.
+- 45 non-public CAIP media assets, zero explicitly public-allowed media assets. Social: one review-first-ready queue row and zero provider-posted rows.
+- No story approval, publication, private-media rights inference, provider execution or Production D1 contact.
