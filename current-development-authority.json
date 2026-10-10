@@ -264,7 +264,7 @@
   "next_build": 370,
   "next_build_state": "QUEUED_AFTER_BUILD369_PRODUCTION_GREEN",
   "next_build_title": "Search Console Real Export & Fresh Discovery Intake X",
-  "promotion_state": "BUILD369_MEASURED_AWAITING_FINAL_EXACT_HEAD_REPROOF",
+  "promotion_state": "BUILD369_MEASURED_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "BUILD370_DEFINED_BY_BUILD366_OBSERVED_EVIDENCE",
   "measured_closure": {
     "source_build": 232,
