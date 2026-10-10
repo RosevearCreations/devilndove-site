@@ -25,7 +25,7 @@ for term in ('duplicate_active_inventory_identities','inventory_purchase_lots','
  q(term in sql,'SQL '+term)
 for term in ('sets.length!==19','raw_inventory_identity:inventory','comparison_to_build360','production_d1_contact:false','ADOPTION_PROGRESS_OBSERVED','REAL_DISCOVERY_EVIDENCE_OBSERVED'):
  q(term in verify,'Verifier '+term)
-for term in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','ROADMAP RENEWAL: OBSERVED EVIDENCE ONLY','RAW INVENTORY ACTIVE IDENTITY DUPLICATES: MUST BE ZERO','BUSINESS DATA MUTATION: ZERO','PRODUCTION D1 CONTACT: ZERO',('workflow_dispatch:',):
+for term in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','ROADMAP RENEWAL: OBSERVED EVIDENCE ONLY','RAW INVENTORY ACTIVE IDENTITY DUPLICATES: MUST BE ZERO','BUSINESS DATA MUTATION: ZERO','PRODUCTION D1 CONTACT: ZERO','workflow_dispatch:'):
  q(term in wf,'Workflow '+term)
 q(('branches: [dev]' in wf) if p['build']==372 else ('branches: [dev]' not in wf),'Build 372 historical workflow activation state')
 q('workflow_dispatch:' in old and 'branches: [dev]' not in old,'Build 371 workflow retired')

@@ -16,3 +16,9 @@ Profile UI now checks HTTP and Content-Type before JSON parsing, shows non-JSON/
 ## Operator URLs
 Production: https://devilndove.com/admin/users/ and https://devilndove.com/admin/evidence-gap-execution-workbench/
 Read-only evidence intake: https://devilndove.com/admin/creative-process/ ; human-reviewed Grey Hair workspace https://devilndove.com/admin/grey-hair-story-readiness/ ; real Search Console intake https://devilndove.com/admin/release-control/runtime-storefront-intelligence/
+
+## Exact Development measurement (source commit d09b90eb370dc5504969752dd3e8a79d2d28fc42)
+
+The dedicated Build 373 workflow [run 38086405332](https://github.com/RosevearCreations/devilndove-site/actions/runs/38086405332) passed all six read-only SELECTs with **1,659/20,000** rows read (statement counts 11, 14, 961, 10, 649, 14). Artifact 11682367830; digest sha256:6fd3aa515200a7eac0285931427da3f9279091c5e73d8d38b934eff016cbef82.
+
+Five open workbench rows, four gap families, three unprofiled projects. 35th Promo execution/result/lesson events 0/0/0. Grey Hair has one approved source range, two needing review, no reviewed plan. Search Console real import batches and fresh report-date rows 0. **Decision:** EXECUTION_WORKBENCH_OPEN_REAL_INPUTS_REQUIRED. No factual outcome is manufactured.
