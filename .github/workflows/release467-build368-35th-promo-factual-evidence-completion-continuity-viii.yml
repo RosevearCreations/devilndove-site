@@ -1,46 +1,6 @@
 name: Release 467 Build 368 35th Promo Factual Evidence Completion Continuity VIII
+# Historical after Build 369 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build367-evidence-gap-execution-workbench-input-completion-continuity-vii.json'
-      - 'release467-build368-35th-promo-factual-evidence-completion-continuity-viii.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build368_measurement.sql'
-      - 'scripts/release467_build368_verify_measurement.mjs'
-      - 'scripts/release467_build368_regression.py'
-      - 'scripts/release467_build368_gate.py'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/35th-promo-outcome-closure.js'
-      - 'admin/creative-process/index.html'
-      - 'public/js/admin-creative-process.js'
-      - 'functions/api/admin/users.js'
-      - 'functions/api/admin/user-profile.js'
-      - 'functions/api/admin/user-update.js'
-      - 'functions/api/admin/delete-user.js'
-      - 'functions/api/admin/access-tiers.js'
-      - 'functions/api/admin/assign-user-access-tier.js'
-      - 'functions/api/admin/remove-user-access-tier.js'
-      - 'functions/api/admin/user-access-tiers.js'
-      - 'admin/users/index.html'
-      - 'public/js/admin-users.js'
-      - 'public/js/admin-route-usage.js'
-      - 'public/js/admin-startup-read-budget-v250.js'
-      - 'public/js/admin-journey-friction-v254.js'
-      - 'admin/index.html'
-      - 'functions/api/_lib/currentReliability.js'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'functions/api/admin/it-operations-control-tower.js'
-      - 'public/js/admin-it-control-tower.js'
-      - 'admin/it/index.html'
-      - 'admin/deployment-preflight/index.html'
-      - 'admin/reliability/index.html'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'docs/operations/RELEASE_467_BUILD_368_35TH_PROMO_FACTUAL_EVIDENCE_COMPLETION_CONTINUITY_VIII.md'
-      - 'docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_367_372.md'
-      - 'PROJECT_STATUS_AND_ROADMAP.md'
-      - '.github/workflows/release467-build368-35th-promo-factual-evidence-completion-continuity-viii.yml'
-      - '.github/workflows/release467-build367-evidence-gap-execution-workbench-input-completion-continuity-vii.yml'
   workflow_dispatch:
 permissions:
   contents: read

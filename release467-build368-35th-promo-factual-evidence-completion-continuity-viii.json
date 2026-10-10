@@ -2,7 +2,7 @@
   "release": 467,
   "build": 368,
   "title": "35th Promo Factual Evidence Completion Continuity VIII",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "35TH_PROMO_FACTUAL_EVIDENCE_COMPLETION_CONTINUITY_VIII",
   "authority": "release467-build368-35th-promo-factual-evidence-completion-continuity-viii",
   "predecessor": {
@@ -144,7 +144,7 @@
   "future_queue_exhausted": false,
   "measurement_lane_state": "MEASURED_REAL_OUTCOME_EVIDENCE_STILL_REQUIRED",
   "measurement_lane_owner": "release467-build368-35th-promo-factual-evidence-completion-continuity-viii.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_ADMIN_RUNTIME_CORRECTIVE_REPAIR",
+  "exact_head_reproof_state": "EXACT_BRANCH_HEAD_BUILD368_GREEN",
   "decision": {
     "classification": "REAL_OUTCOME_EVIDENCE_STILL_REQUIRED_NO_AUTOMATIC_REVIEW",
     "rationale": "Exact Development measurement still shows zero real execution/process, result, or lesson events. Existing actual_result and lesson_learned remain absence markers, so factual readiness is incomplete; outcome stays unknown and the story remains needs_review / not a public candidate.",
@@ -204,5 +204,33 @@
     "variables_required": false,
     "external_service_required": false
   },
-  "corrective_production_repromotion_required": true
+  "corrective_production_repromotion_required": false,
+  "final_closure": {
+    "dev_sha": "d36a643fc8b8805f1b4dbdb3fc0963ba375c07c3",
+    "tree_sha": "18b63f5f1910fe48ac40497f217e99d08132c00b",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD368_GREEN",
+    "proofs": {
+      "system_gate_run": 37981315804,
+      "current_application_quality_run": 37981315817,
+      "it_admin_runtime_proof_run": 37981315815,
+      "branch_hygiene_run": 37981315760,
+      "d1_ci_fanout_guard_run": 37981315890,
+      "build_specific_proof_run": 37981315756
+    },
+    "artifact_id": 11641232719,
+    "artifact_name": "build368-35th-promo-factual-evidence-continuity-d36a643fc8b8805f1b4dbdb3fc0963ba375c07c3",
+    "artifact_digest": "sha256:70c2cf16acad3317e28fe5d4f59fc38e1a89144dd35506be9e777c9c5b538137",
+    "ingested_by_build": 369,
+    "recorded_by": "Build 369 predecessor ingestion; not self-recorded by Build 368"
+  },
+  "production_checkpoint": {
+    "main_sha": "253824ef52cc4faa90b4f5fe42cc177264bf2df1",
+    "tree_sha": "18b63f5f1910fe48ac40497f217e99d08132c00b",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 37981619129,
+    "production_live_resource_integrity_run": 37981772067,
+    "remote_d1_queries": 0
+  }
 }

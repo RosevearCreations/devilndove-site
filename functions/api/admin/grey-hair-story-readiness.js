@@ -1,3 +1,5 @@
+// Release 467 Build 369 — Grey Hair Source Review & Story-Plan Completion Continuity VIII.
+// Runtime composition remains on the existing reviewed authority; Build 369 adds no mutation path.
 // HISTORICAL_BUILD357_API_IDENTITY: const RELEASE=467,BUILD=363,TITLE='Grey Hair Source Review & Story-Plan Completion Continuity VII'; comparison_baseline:{source_build:357
 // HISTORICAL_BUILD351_API_IDENTITY: const RELEASE=467,BUILD=351,TITLE='Grey Hair Source Review & Story-Plan Completion Continuity V'; comparison_baseline:{source_build:349
 // HISTORICAL_BUILD345_API_IDENTITY: const RELEASE=467,BUILD=345,TITLE='Grey Hair Source Review & Story-Plan Completion Continuity IV'; comparison_baseline:{source_build:343
