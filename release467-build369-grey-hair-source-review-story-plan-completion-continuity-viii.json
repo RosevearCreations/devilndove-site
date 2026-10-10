@@ -122,7 +122,7 @@
   "future_queue_exhausted": false,
   "measurement_lane_state": "MEASURED_SOURCE_EVIDENCE_REVIEW_REQUIRED",
   "measurement_lane_owner": "release467-build369-grey-hair-source-review-story-plan-completion-continuity-viii.yml",
-  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_MEASUREMENT_INGESTION",
+  "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_RUNTIME_TRUTH_ALIGNMENT",
   "decision": {
     "classification": "SOURCE_EVIDENCE_REVIEW_REQUIRED",
     "rationale": "Exact Build 369 Development measurement matches the Build 363 baseline: three active Grey Hair source-evidence ranges remain, with one approved and two still requiring explicit human review. Confirmed synchronization groups/tracks, reviewed story plans, source-backed story items and Maker Story profiles remain zero.",

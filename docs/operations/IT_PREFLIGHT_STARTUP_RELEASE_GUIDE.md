@@ -1,3 +1,9 @@
+# CURRENT RESTART CHECKPOINT — Release 467 Build 369 candidate over Build 368 Production GREEN
+
+**Current verified successor: Release 467 Build 369 — Grey Hair Source Review & Story-Plan Completion Continuity VIII**
+
+Build 368 is the exact fully verified Development/Production predecessor. Build 369 is a read-only Grey Hair source-review/story-plan continuity measurement with explicit human review boundaries.
+
 # CURRENT RESTART CHECKPOINT — Release 467 Build 368 candidate over Build 367 Production GREEN
 
 **Current verified successor: Release 467 Build 368 — 35th Promo Factual Evidence Completion Continuity VIII**
