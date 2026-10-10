@@ -1,3 +1,4 @@
+// HISTORICAL_BUILD352_UI_CONTRACT: Build 352 keeps explicit real-export confirmation and report-date-only freshness.
 // BUILD370_CURRENT_CLIENT: Search Console Real Export & Fresh Discovery Intake X; real-only evidence, 30-day explicit report-date freshness, human review required.
 // BUILD364_CURRENT_CLIENT: Search Console Real Export & Fresh Discovery Intake IX; real-only evidence, 30-day explicit report-date freshness, human review required.
 // BUILD358_CURRENT_CLIENT: Search Console Real Export & Fresh Discovery Intake VIII; real-only evidence and explicit report-date freshness.
