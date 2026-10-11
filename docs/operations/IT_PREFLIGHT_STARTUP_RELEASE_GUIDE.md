@@ -1,6 +1,6 @@
 # CURRENT RESTART CHECKPOINT — Build 375 — Grey Hair Source Review & Story-Plan Completion Continuity IX over Build 374 Production GREEN
 
-Build 374 Development `e87a0f86c833ff581c9d5ef62ac37a39b6db5408` and Production `2ea0373d6054c6f45edab22d1b58b4a9c037f8eb` share tree `f1b14b8dd2e4784fe8a155e0d0e96d5b66e0619f`. Build 374 Development System 38107794220; Quality 38107794277; I.T. 38107794359; Hygiene 38107794226; dedicated measurement 38107794201. Production Pages 38107904551 and Live Resource 38107947580. Build 375 uses exact read-only Development D1 evidence review and story plan measurement; no private public media, schema, R2/provider, review or Production D1 writes.
+Build 374 Development `e87a0f86c833ff581c9d5ef62ac37a39b6db5408` and Production `2ea0373d6054c6f45edab22d1b58b4a9c037f8eb` share tree `f1b14b8dd2e4784fe8a155e0d0e96d5b66e0619f`. Build 374 Development System 38107794220; Quality 38107794277; I.T. 38107794359; Hygiene 38107794226; D1 Fan-Out 38107718125; dedicated measurement 38107794201. Production Pages 38107904551 and Live Resource 38107947580. Build 375 uses exact read-only Development D1 evidence review and story plan measurement; no private public media, schema, R2/provider, review or Production D1 writes.
 
 # CURRENT RESTART CHECKPOINT — Release 467 Build 374 — 35th Promo Factual Evidence Completion Continuity IX; verified Build 373 Production GREEN
 
