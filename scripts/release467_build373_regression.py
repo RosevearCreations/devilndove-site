@@ -27,7 +27,7 @@ for token in ('USERS_DB_UNAVAILABLE','USERS_READ_FAILED','db.prepare(sql)'):q(to
 q('const BUILD=373' in workbench and 'READ_ONLY_DERIVED_FROM_EXISTING_SOURCE_AUTHORITIES' in str(a['contract']),'Workbench source identity/contract')
 q('Release 467 • Build 373' in t('admin/evidence-gap-execution-workbench/index.html'),'Workbench page identity')
 q('BUILD373_CURRENT_CLIENT' in t('public/js/admin-evidence-gap-execution-workbench-v337.js'),'Workbench client identity')
-q('workflow_dispatch:' in wf and 'branches: [dev]' in wf,'Active Build 373 workflow')
+q('workflow_dispatch:' in wf and (('branches: [dev]' in wf) if p['build']==373 else ('branches: [dev]' not in wf)),'Build 373 active-or-historical workflow')
 q('workflow_dispatch:' in t('.github/workflows/release467-build372-content-adoption-discovery-outcomes-renewal-xii.yml') and 'branches: [dev]' not in t('.github/workflows/release467-build372-content-adoption-discovery-outcomes-renewal-xii.yml'),'Build 372 historical workflow retired')
 q(p.get('state')=='DEVELOPMENT_GREEN' and p.get('build')>=373,'Current authority state')
 if p['build']==373:q(p['next_build']==374 and p['next_build_title']=='35th Promo Factual Evidence Completion Continuity IX' and str(p['promotion_state']).endswith('_CANDIDATE_NOT_YET_VERIFIED'),'Build 373 roadmap governance')

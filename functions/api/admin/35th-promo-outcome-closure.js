@@ -1,3 +1,4 @@
+// BUILD374_CURRENT_API_IDENTITY: Release 467 Build 374 — 35th Promo Factual Evidence Completion Continuity IX; GET-only source-derived readiness, no inferred completion.
 // BUILD368_CURRENT_API_IDENTITY: Release 467 Build 368 — 35th Promo Factual Evidence Completion Continuity VIII; GET-only factual readiness over existing source authority.
 // HISTORICAL_BUILD362_API_COMPAT: const BUILD=362; title:'35th Promo Factual Evidence Completion Continuity VII';
  // HISTORICAL_BUILD338_RUNTIME_COMPAT: const BUILD=338;
@@ -9,7 +10,7 @@
 // HISTORICAL_BUILD332_API_IDENTITY: const BUILD=332; retained for exact historical regression provenance only.
 // Release 467 Build 344 — GET-only 35th Promo factual evidence completion continuity IV.
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
-const BUILD=368;
+const BUILD=374;
 const json=(data,status=200)=>jsonResponse(data,status,{'Cache-Control':'no-store'});
 const n=v=>Number(v||0)||0,s=v=>String(v??'').trim();
 const SAFETY=Object.freeze({read_only:true,synthetic_evidence:false,evidence_mutation:false,automatic_evidence_selection:false,automatic_story_review:false,automatic_public_candidate:false,publication_mutation:false,social_mutation:false,media_rights_inference:false,provider_execution:false,production_d1_contact:false});
@@ -40,7 +41,7 @@ export async function onRequestGet(context){
   const missing=[];
   if(execution===0)missing.push('execution_or_process_event');if(results===0)missing.push('result_event');if(lessons===0)missing.push('lesson_event');
   if(!s(target.what_we_are_trying))missing.push('what_we_are_trying');if(!s(target.why_we_are_trying_it))missing.push('why_we_are_trying_it');if(!substantiveFact(target.actual_result))missing.push('actual_result');if(!outcomeResolved)missing.push('resolved_outcome_status');if(!substantiveFact(target.lesson_learned))missing.push('lesson_learned');
-  return json({ok:true,release:467,build:BUILD,title:'35th Promo Factual Evidence Completion Continuity VII',target,closure_state,missing_requirements:missing,
+  return json({ok:true,release:467,build:BUILD,title:'35th Promo Factual Evidence Completion Continuity IX',target,closure_state,missing_requirements:missing,input_completion:{missing_count:missing.length,requires_real_execution_or_process_event:execution===0,requires_real_result_event:results===0,requires_real_lesson_event:lessons===0,requires_substantive_actual_result:!substantiveFact(target.actual_result),requires_substantive_lesson:!substantiveFact(target.lesson_learned),requires_resolved_outcome_status:!outcomeResolved,ready_for_human_review:ready},
    readiness:{event_complete:eventComplete,profile_facts_complete:facts,outcome_resolved:outcomeResolved,ready_for_explicit_human_review:ready},
    operator_action:{record_evidence:'record_story_execution_evidence',workspace_href:'/admin/creative-process/?project_id=5',review_action:'explicit_human_review_only'},comparison_baseline:{source_build:361,execution_events:0,result_events:0,lesson_events:0,story_review_status:'needs_review',public_story_candidate:0,outcome_status:'unknown'},
    safety:SAFETY});

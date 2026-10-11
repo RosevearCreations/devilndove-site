@@ -1,17 +1,6 @@
 name: Release 467 Build 373 Evidence Gap Execution Workbench Input Completion Continuity VIII
+# Historical after Build 374 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build373-evidence-gap-execution-workbench-input-completion-continuity-viii.json'
-      - 'release467-build372-content-adoption-discovery-outcomes-renewal-xii.json'
-      - 'scripts/release467_build373_*'
-      - 'scripts/release467_build372_regression.py'
-      - 'current-development-authority.json'
-      - 'functions/api/admin/user-profile.js'
-      - 'public/js/admin-user-profiles.js'
-      - 'functions/api/admin/evidence-gap-execution-workbench.js'
-      - '.github/workflows/release467-build373-evidence-gap-execution-workbench-input-completion-continuity-viii.yml'
   workflow_dispatch:
 permissions:
   contents: read
