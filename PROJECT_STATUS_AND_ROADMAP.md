@@ -1,3 +1,9 @@
+# CURRENT BUILD — Release 467 Build 374
+
+**35th Promo Factual Evidence Completion Continuity IX**
+
+Build 373 is Development/Production GREEN with identical tree `708c45e37c7a6a77c353816191ddc5271527808e`. Build 374 independently remeasures real factual events and human review prerequisites for the 35th promo; no synthetic evidence, invented actual result, auto-review, publication, rights inference, or provider calls. Queue after factual measurement: Build 375 — Grey Hair Source Review & Story-Plan Completion Continuity IX.
+
 # CURRENT BUILD — Release 467 Build 373
 
 **Evidence Gap Execution Workbench & Input Completion Continuity VIII**
