@@ -1,3 +1,5 @@
+// BUILD375_CURRENT_API_IDENTITY: Release 467 Build 375 — Grey Hair Source Review & Story-Plan Completion Continuity IX; authenticated GET-only evidence without rights inference.
+// HISTORICAL_BUILD357_ACTIVE_LITERAL: const RELEASE=467,BUILD=375,TITLE='Grey Hair Source Review & Story-Plan Completion Continuity IX';
 // Release 467 Build 369 — Grey Hair Source Review & Story-Plan Completion Continuity VIII.
 // Runtime composition remains on the existing reviewed authority; Build 369 adds no mutation path.
 // HISTORICAL_BUILD357_API_IDENTITY: const RELEASE=467,BUILD=363,TITLE='Grey Hair Source Review & Story-Plan Completion Continuity VII'; comparison_baseline:{source_build:357
@@ -48,7 +50,14 @@ export async function onRequestGet(context){
   else if(evidenceComplete&&sourceThreshold&&!syncReady)nextAction={label:'Confirm four-camera sync prerequisite',href:'/admin/grey-hair-sync-alignment/'};
   else if(evidenceComplete&&sourceThreshold&&syncReady&&!storyPlanReady)nextAction={label:'Create and human-review source-backed story plan',href:'/admin/grey-hair-story-edit-planning/'};
   else if(handoffReady)nextAction={label:'Open explicit Maker Story decision',href:'/admin/creative-process/?project_id=6'};
-  return jsonResponse({ok:true,release:RELEASE,build:BUILD,title:TITLE,work_project:work,caip_project:project,counts,evidence,story_plans:plans,readiness_state:state,
+  const blocking_inputs=[];
+  if(needs>0)blocking_inputs.push({step:'source_evidence_review',missing:needs,next_workspace:'/admin/creative-assets/'});
+  if(approved<2)blocking_inputs.push({step:'approved_source_evidence',missing:2-approved,next_workspace:'/admin/creative-assets/'});
+  if(groups<1)blocking_inputs.push({step:'confirmed_capture_groups',missing:1-groups,next_workspace:'/admin/grey-hair-sync-alignment/'});
+  if(tracks<4)blocking_inputs.push({step:'confirmed_capture_tracks',missing:4-tracks,next_workspace:'/admin/grey-hair-sync-alignment/'});
+  if(reviewed<1)blocking_inputs.push({step:'human_reviewed_story_plan',missing:1-reviewed,next_workspace:'/admin/grey-hair-story-edit-planning/'});
+  if(items<2)blocking_inputs.push({step:'source_backed_story_items',missing:2-items,next_workspace:'/admin/grey-hair-story-edit-planning/'});
+  return jsonResponse({ok:true,release:RELEASE,build:BUILD,title:TITLE,work_project:work,caip_project:project,counts,evidence,story_plans:plans,readiness_state:state,blocking_inputs,
     completion:{evidence_review_complete:evidenceComplete,approved_source_threshold_met:sourceThreshold,sync_prerequisite_met:syncReady,story_plan_handoff_ready:storyPlanReady,handoff_ready:handoffReady},
     readiness_rule:{approved_source_evidence_min:2,reviewed_story_plans_min:1,source_backed_story_items_min:2,confirmed_capture_groups_min:1,confirmed_capture_tracks_min:4,maker_story_profile_auto_created:false},
     handoff:{chain:['CAIP_EVIDENCE_REVIEW','SYNC_AND_AUDIO_ALIGNMENT','HUMAN_REVIEWED_STORY_PLAN','EXPLICIT_MAKER_STORY_DECISION'],next_action:nextAction},comparison_baseline:{source_build:351,active_source_evidence:3,approved_source_evidence:1,source_evidence_needs_review:2,confirmed_capture_groups:0,confirmed_capture_tracks:0,reviewed_story_plans:0,source_backed_story_items:0,maker_story_profiles:0},

@@ -1,15 +1,6 @@
 name: Release 467 Build 374 35th Promo Factual Evidence Completion Continuity IX
+# Historical after Build 375 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build374-35th-promo-factual-evidence-completion-continuity-ix.json'
-      - 'release467-build373-evidence-gap-execution-workbench-input-completion-continuity-viii.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build374_*'
-      - 'functions/api/admin/35th-promo-outcome-closure.js'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - '.github/workflows/release467-build374-35th-promo-factual-evidence-completion-continuity-ix.yml'
   workflow_dispatch:
 permissions:
   contents: read

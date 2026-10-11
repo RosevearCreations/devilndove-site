@@ -29,9 +29,9 @@ for term in ('sets.length!==4','REAL_OUTCOME_EVIDENCE_STILL_REQUIRED','REAL_OUTC
  q(term in verify,'Verifier '+term)
 for term in ("const BUILD=374","missing_requirements","explicit_human_review_only","record_story_execution_evidence","placeholderGuard","substantiveFact","no-store"):
  q(term in api,'Read-only GET factual API '+term)
-for term in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','SYNTHETIC EVIDENCE: ZERO','AUTOMATIC STORY REVIEW: ZERO','PUBLIC CANDIDACY MUTATION: ZERO','PRODUCTION D1 CONTACT: ZERO','branches: [dev]'):
+for term in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','SYNTHETIC EVIDENCE: ZERO','AUTOMATIC STORY REVIEW: ZERO','PUBLIC CANDIDACY MUTATION: ZERO','PRODUCTION D1 CONTACT: ZERO'):
  q(term in wf,'Workflow '+term)
-q('workflow_dispatch:' in wf,'Workflow manual')
+q('workflow_dispatch:' in wf and (('branches: [dev]' in wf) if p['build']==374 else ('branches: [dev]' not in wf)),'Build 374 historical/active workflow status')
 q('workflow_dispatch:' in t('.github/workflows/release467-build373-evidence-gap-execution-workbench-input-completion-continuity-viii.yml') and 'branches: [dev]' not in t('.github/workflows/release467-build373-evidence-gap-execution-workbench-input-completion-continuity-viii.yml'),'Build 373 historical lane')
 q('Build 374 — 35th Promo Factual Evidence Completion Continuity IX' in t('docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_373_378.md'),'Roadmap Build 374')
 q(p.get('state')=='DEVELOPMENT_GREEN' and p.get('build',0)>=374,'Current authority')

@@ -2,7 +2,7 @@
   "release": 467,
   "build": 374,
   "title": "35th Promo Factual Evidence Completion Continuity IX",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "PROMO_35TH_FACTUAL_EVIDENCE_COMPLETION_CONTINUITY_IX",
   "authority": "release467-build374-35th-promo-factual-evidence-completion-continuity-ix",
   "predecessor": {
@@ -275,5 +275,30 @@
     "provider_execution": false,
     "automatic_story_review": false,
     "automatic_public_candidate": false
+  },
+  "final_closure": {
+    "dev_sha": "e87a0f86c833ff581c9d5ef62ac37a39b6db5408",
+    "tree_sha": "f1b14b8dd2e4784fe8a155e0d0e96d5b66e0619f",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD374_GREEN",
+    "proofs": {
+      "system_gate_run": 38107794220,
+      "current_application_quality_run": 38107794277,
+      "it_admin_runtime_proof_run": 38107794359,
+      "branch_hygiene_run": 38107794226,
+      "d1_ci_fanout_guard_run": 38107718125,
+      "build_specific_proof_run": 38107794201
+    },
+    "recorded_by": "Build 375 successor ingestion",
+    "measurement_artifact_id": 11690530122
+  },
+  "production_checkpoint": {
+    "main_sha": "2ea0373d6054c6f45edab22d1b58b4a9c037f8eb",
+    "tree_sha": "f1b14b8dd2e4784fe8a155e0d0e96d5b66e0619f",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38107904551,
+    "production_live_resource_integrity_run": 38107947580,
+    "remote_d1_queries": 0
   }
 }

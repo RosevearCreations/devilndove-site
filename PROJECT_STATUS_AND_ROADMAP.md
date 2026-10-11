@@ -1,3 +1,9 @@
+# CURRENT BUILD — Release 467 Build 375
+
+**Grey Hair Source Review & Story-Plan Completion Continuity IX**
+
+Build 374 verified Development/Production GREEN at matching tree `f1b14b8dd2e4784fe8a155e0d0e96d5b66e0619f`. Build 375 renews the Grey Hair source-review and story-plan handoff using real Development evidence, exposes unmet prerequisite counts in the operator read-only workspace, never infers publication rights, and preserves human-owned CAIP evidence review, sync and story decisions. Next Build 376 — Search Console Real Export & Fresh Discovery Intake XI.
+
 # CURRENT BUILD — Release 467 Build 374
 
 **35th Promo Factual Evidence Completion Continuity IX**
