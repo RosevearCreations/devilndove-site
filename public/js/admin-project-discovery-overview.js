@@ -1,3 +1,4 @@
+// project_discovery_overview: system-wide admin portfolio endpoint renderer.
 // PROJECT_DISCOVERY_PORTFOLIO — Release 467 Build 376; cross-project read-only, not a Grey Hair-only workflow.
 document.addEventListener('DOMContentLoaded',()=>{
  const mount=document.getElementById('projectDiscoveryMount'),reload=document.getElementById('projectDiscoveryRefresh');

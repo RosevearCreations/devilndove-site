@@ -17,3 +17,7 @@ Build 377: Multi-Project Portfolio, Workflow & Evidence Routing Foundation; Buil
 ## Operator use
 
 Visit /admin/project-discovery-overview/ after signing into Admin. Click Open project for any active project. Genuine Search Console data comes from explicit user-provided exports through existing authorized import UI. Absence of exports means evidence-pending, not a failure of the portfolio.
+
+## Exact Development measurement (system-wide)
+
+The 10-statement read-only Development D1 measurement [workflow 38160645007](https://github.com/RosevearCreations/devilndove-site/actions/runs/38160645007) used 2,095 of 20,000 rows-read budget: statement counts 1685, 6, 319, 1, 1, 2, 1, 1, 46, 33. Evidence artifact 11710131448 (SHA256 61bd0ca5164358d9a633367edc6d39e8731d4c501ccd203cee02d3c300c9f986). Across the system, 5 active Creative Process projects, 5 linked CAIP workspaces, 2 Maker Story profiles and 2 projects with active events. Projects measured: lime in you coconut; Shirley Not; 35th promo; Grey Hair; Under the Sea. The two profiles belong to 35th promo and Under the Sea. The real Search Console record set remains 0 batches, 0 rows, 0 recent report rows, with no imported results or eligibility claimed. Decision: EVIDENCE_PENDING_NO_REAL_EXPORT. Missing real exports require an operator action, not synthetic fill.
