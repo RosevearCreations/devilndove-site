@@ -1,3 +1,9 @@
+# CURRENT BUILD — Release 467 Build 376: Search Console Real Export & Fresh Discovery Intake XI
+
+**System-wide platform direction** (requested): No more single-project-centered release loops. Build 376 delivers a project-agnostic [all-project portfolio](/admin/project-discovery-overview/) with Creative Process, CAIP, evidence and Search Console operational signals. Next Builds 377–384 expand portfolio workflows, workstations, jobs, cost control, scheduling, clients and cross-project financials. Human review and private media rights are independent; true Search Console report dates and real Performance exports remain mandatory.
+
+Build 375 was exact-tree Development and Production GREEN at `802af36bd8b3b9c2bcc7a6d7e6791cfb58c9b174`. Next Build 377 — Multi-Project Portfolio, Workflow & Evidence Routing Foundation. Roadmap `docs/operations/RELEASE_467_SYSTEM_WIDE_PLATFORM_BUILDS_377_384.md`.
+
 # CURRENT BUILD — Release 467 Build 375
 
 **Grey Hair Source Review & Story-Plan Completion Continuity IX**

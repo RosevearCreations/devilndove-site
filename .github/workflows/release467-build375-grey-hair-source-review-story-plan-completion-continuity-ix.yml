@@ -1,16 +1,6 @@
 name: Release 467 Build 375 Grey Hair Source Review Story Plan Completion Continuity IX
+# Historical after Build 376 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build375-grey-hair-source-review-story-plan-completion-continuity-ix.json'
-      - 'release467-build374-35th-promo-factual-evidence-completion-continuity-ix.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build375_*'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/grey-hair-story-readiness.js'
-      - 'public/js/admin-grey-hair-story-readiness-v320.js'
-      - '.github/workflows/release467-build375-grey-hair-source-review-story-plan-completion-continuity-ix.yml'
   workflow_dispatch:
 permissions:
   contents: read

@@ -2,7 +2,7 @@
   "release": 467,
   "build": 375,
   "title": "Grey Hair Source Review & Story-Plan Completion Continuity IX",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "GREY_HAIR_SOURCE_REVIEW_STORY_PLAN_COMPLETION_CONTINUITY_IX",
   "authority": "release467-build375-grey-hair-source-review-story-plan-completion-continuity-ix",
   "predecessor": {
@@ -243,5 +243,30 @@
     "d1_mutation": false,
     "r2_mutation": false,
     "provider_execution": false
+  },
+  "final_closure": {
+    "dev_sha": "c59a7a7c82b705462a378d6b5eb4a2aac10cfdfe",
+    "tree_sha": "802af36bd8b3b9c2bcc7a6d7e6791cfb58c9b174",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD375_GREEN",
+    "proofs": {
+      "system_gate_run": 38156097909,
+      "current_application_quality_run": 38156097955,
+      "it_admin_runtime_proof_run": 38156097898,
+      "branch_hygiene_run": 38156097888,
+      "d1_ci_fanout_guard_run": 38155871918,
+      "build_specific_proof_run": 38156097902
+    },
+    "recorded_by": "Build 376 successor ingestion",
+    "measurement_artifact_id": 11707903902
+  },
+  "production_checkpoint": {
+    "main_sha": "8e5400227cb209b9f821aaf987b809062fe3eb87",
+    "tree_sha": "802af36bd8b3b9c2bcc7a6d7e6791cfb58c9b174",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38156252860,
+    "production_live_resource_integrity_run": 38156316325,
+    "remote_d1_queries": 0
   }
 }
