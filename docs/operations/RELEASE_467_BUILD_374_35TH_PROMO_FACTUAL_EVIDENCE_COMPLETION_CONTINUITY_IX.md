@@ -17,3 +17,7 @@ Exactly four read-only Development D1 statements from `scripts/release467_build3
 ## Successor
 
 Build 375 — Grey Hair Source Review & Story-Plan Completion Continuity IX. The next build does not assume 35th Promo is resolved without factual human-supplied records.
+
+## Exact Build 374 Development observed evidence
+
+Read-only Development D1 workflow [38107718099](https://github.com/RosevearCreations/devilndove-site/actions/runs/38107718099) measured 45 provider rows read (33, 2, 2, 8), under 20,000. Artifact 11690530122, SHA256 10d4086141cffd361512bb6cc1bb29618c58c2f6f1e796972aa096b8b93739e8. Project 5 remains `idea`, with 0 execution, 0 result, 0 lesson events; zero selected execution evidence; two approved locked Content Studio deliverables; zero publications/social rows. The placeholder actual-result and lesson text explicitly state no finished outcome was recorded and do not count as facts. Existing review decision remains `REMAIN_NEEDS_REVIEW_PENDING_EXECUTION_RESULT_LESSON_EVIDENCE`; readiness for review is false. Do not fabricate outcome or publish.
