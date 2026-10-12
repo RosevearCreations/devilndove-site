@@ -1,0 +1,24 @@
+{
+  "release": 467,
+  "build": 379,
+  "title": "Work Orders, Task Sequencing & Time Capture",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "migration": "0031_release467_creative_work_order_execution_history.sql",
+  "contract": {
+    "admin_only": true,
+    "append_only": true,
+    "dependency_guard": true,
+    "manual_time": true,
+    "milestone_evidence": true
+  },
+  "safety": {
+    "automatic_completion": false,
+    "inventory_mutation": false,
+    "caip_media_mutation": false,
+    "finance_posting": false,
+    "publication": false,
+    "request_time_ddl": false
+  },
+  "next_build": 380,
+  "next_build_title": "Multi-Project Materials, Consumables & Costing"
+}
