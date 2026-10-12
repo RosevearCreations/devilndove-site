@@ -6,7 +6,7 @@ def read(p):return (r/p).read_text()
 def req(v,msg):
  if not v:bad.append(msg)
 p=json.loads(read('current-development-authority.json'));req(p['build']>=379,'pointer')
-m=json.loads(read('migrations/canonical/manifest.json'));req(m['migrations'][-1]['version']==31,'schema')
+m=json.loads(read('migrations/canonical/manifest.json'));req(len(m['migrations'])>=31 and m['migrations'][30]['version']==31 and m['migrations'][30]['file']=='0031_release467_creative_work_order_execution_history.sql','Build 379 canonical migration remains immutable at version 31')
 api=read('functions/api/admin/project-work-orders.js')
 for t in ('getAdminUserFromRequest','Origin','STALE_OR_BLOCKED','auditAdminAction','actor_user_id','creative_work_event_id'):req(t in api,'api:'+t)
 for path in ('functions/api/admin/project-work-orders.js','functions/api/admin/_lib/workOrderRules.js','public/js/admin-project-work-orders.js'):
