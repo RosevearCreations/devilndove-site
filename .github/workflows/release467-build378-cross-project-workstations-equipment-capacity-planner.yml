@@ -1,0 +1,36 @@
+name: Release 467 Build 378 Cross-Project Workstations Equipment Capacity Planner
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'release467-build378-cross-project-workstations-equipment-capacity-planner.json'
+      - 'functions/api/admin/project-capacity-planner.js'
+      - 'functions/api/admin/_lib/crossProjectCapacity.js'
+      - 'public/js/admin-project-capacity-planner.js'
+      - 'admin/project-capacity-planner/**'
+      - 'scripts/release467_build378_*'
+      - '.github/workflows/release467-build378-cross-project-workstations-equipment-capacity-planner.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  capacity-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - name: Source syntax and workstation contention regression
+        run: |
+          node --check functions/api/admin/project-capacity-planner.js
+          node --check functions/api/admin/_lib/crossProjectCapacity.js
+          node --check public/js/admin-project-capacity-planner.js
+          node --test scripts/release467_build378_capacity.test.mjs
+      - name: Read-only boundaries
+        run: |
+          grep -q 'getAdminUserFromRequest' functions/api/admin/project-capacity-planner.js
+          grep -q 'LIMIT 801' functions/api/admin/project-capacity-planner.js
+          grep -q 'inventory_workstation_memberships' functions/api/admin/project-capacity-planner.js
+          grep -q 'AVAILABILITY_UNVERIFIED' functions/api/admin/_lib/crossProjectCapacity.js
+          echo 'BUILD378=SOURCE_GREEN; LIVE_OCCUPANCY=UNVERIFIED; REMOTE_PRODUCTION_D1_QUERIES=0'

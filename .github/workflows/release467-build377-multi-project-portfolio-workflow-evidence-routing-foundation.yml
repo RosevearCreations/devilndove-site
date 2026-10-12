@@ -1,19 +1,5 @@
 name: Release 467 Build 377 Multi-Project Portfolio Workflow Evidence Routing Foundation
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build377-multi-project-portfolio-workflow-evidence-routing-foundation.json'
-      - 'release467-build376-search-console-real-export-fresh-discovery-intake-xi.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build377_*'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/project-discovery-overview.js'
-      - 'functions/api/admin/project-workflow-routing.js'
-      - 'public/js/admin-project-discovery-overview.js'
-      - 'admin/project-discovery-overview/index.html'
-      - 'public/js/admin-project-workflow-routing.js'
-      - '.github/workflows/release467-build377-multi-project-portfolio-workflow-evidence-routing-foundation.yml'
   workflow_dispatch:
 permissions:
   contents: read

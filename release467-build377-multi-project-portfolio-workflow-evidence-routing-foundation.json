@@ -2,7 +2,7 @@
   "release": 467,
   "build": 377,
   "title": "Multi-Project Portfolio, Workflow & Evidence Routing Foundation",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "phase": "SYSTEM_WIDE_MULTI_PROJECT_WORKFLOW_EVIDENCE_ROUTING",
   "authority": "release467-build377-multi-project-portfolio-workflow-evidence-routing-foundation",
   "predecessor": {
@@ -217,5 +217,33 @@
     "source_evidence_mutation": false,
     "production_d1_contact": false
   },
-  "measurement_lane_state": "MEASURED_HUMAN_INPUTS_AND_ROUTING_OBSERVED"
+  "measurement_lane_state": "MEASURED_HUMAN_INPUTS_AND_ROUTING_OBSERVED",
+  "final_closure": {
+    "dev_sha": "e9dfba707053afd8761dc6b40b203323382fd68b",
+    "tree_sha": "46f6c8142778bd0e299cc375fe8f5ef3bfd69293",
+    "proofs": {
+      "system_gate_run": 38198297909,
+      "current_application_quality_run": 38198297891,
+      "it_admin_runtime_proof_run": 38198297924,
+      "branch_hygiene_run": 38198297898,
+      "d1_ci_fanout_guard_run": 38198187483,
+      "build_specific_proof_run": 38198297934
+    },
+    "ingested_by_build": 378,
+    "verified_development": true
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 377,
+    "title": "Multi-Project Portfolio, Workflow & Evidence Routing Foundation",
+    "authority": "release467-build377-multi-project-portfolio-workflow-evidence-routing-foundation.json",
+    "main_sha": "f1f52639632b72ea96b4f4531be0459b084c39b4",
+    "tree_sha": "46f6c8142778bd0e299cc375fe8f5ef3bfd69293",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38198458436,
+    "production_live_resource_integrity_run": 38198516540,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
+  }
 }
