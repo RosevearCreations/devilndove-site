@@ -223,6 +223,13 @@
       "release": 467,
       "description": "Add operator-requested Jewelry & Forge Work and Auto Detailing categories to the existing canonical inventory_processes workstation/category authority without changing existing Inventory assignments.",
       "recovery": "Forward-only reference-data extension. Existing categories and assignments remain intact. Reassign items through Inventory Operations for logical rollback; correct taxonomy facts only with a later numbered migration."
+    },
+    {
+      "version": 31,
+      "file": "0031_release467_creative_work_order_execution_history.sql",
+      "release": 467,
+      "description": "Append-only per-operation execution status transitions, accountable manual work time and linked genuine project milestones, with authenticated actor and index-backed dependency checks.",
+      "recovery": "Stop new work-order writes and retain append-only rows for audit. Repair with a new forward-only correction migration; never drop existing business history, Inventory, Creative Process, or CAIP data."
     }
   ]
 }
