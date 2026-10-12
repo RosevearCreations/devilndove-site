@@ -1,0 +1,31 @@
+{
+  "release": 467,
+  "build": 381,
+  "title": "Production Calendar, Resource Conflicts & Availability",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "migration": "0033_release467_resource_calendar_conflicts.sql",
+  "contract": {
+    "canonical_resource_ids": true,
+    "project_operation_binding": true,
+    "UTC_windows": true,
+    "exclusive_overlap_guard": true,
+    "maintenance_blocking": true,
+    "admin_override": true,
+    "maintenance_acknowledgement": true,
+    "operator_deadlines": true,
+    "append_only_cancellation": true
+  },
+  "safety": {
+    "physical_presence_inferred": false,
+    "automatic_project_completion": false,
+    "inventory_consumption": false,
+    "automatic_finance_posting": false,
+    "automatic_maintenance_signoff": false,
+    "customer_publication": false,
+    "request_time_ddl": false
+  },
+  "operator_guide": "docs/operations/RELEASE_467_BUILD_381_PRODUCTION_CALENDAR_RESOURCE_CONFLICTS_AVAILABILITY.md",
+  "next_build": 382,
+  "next_build_title": "Customer Requests, Quotes & Commission Lifecycle",
+  "roadmap": "docs/operations/RELEASE_467_SYSTEM_WIDE_PLATFORM_BUILDS_377_384.md"
+}

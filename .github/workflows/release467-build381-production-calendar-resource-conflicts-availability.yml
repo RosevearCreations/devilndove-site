@@ -1,0 +1,30 @@
+name: Release 467 Build 381 Production Calendar Resource Conflicts Availability
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'release467-build381-production-calendar-resource-conflicts-availability.json'
+      - 'functions/api/admin/project-resource-calendar.js'
+      - 'functions/api/admin/_lib/calendarRules.js'
+      - 'public/js/admin-project-resource-calendar.js'
+      - 'admin/project-resource-calendar/**'
+      - 'migrations/canonical/0033_release467_resource_calendar_conflicts.sql'
+      - 'scripts/release467_build381_*'
+      - '.github/workflows/release467-build381-production-calendar-resource-conflicts-availability.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-calendar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - name: UTC booking conflict, maintenance and immutable audit regression
+        run: |
+          python scripts/release467_build381_gate.py
+          echo 'BUILD381_SOURCE=GREEN; NO_PROVIDER_WRITES=TRUE; NO_CALENDAR_INFERENCE=TRUE'
