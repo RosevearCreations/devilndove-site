@@ -2,7 +2,7 @@
   "release": 467,
   "build": 379,
   "title": "Work Orders, Task Sequencing & Time Capture",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "migration": "0031_release467_creative_work_order_execution_history.sql",
   "contract": {
     "admin_only": true,
@@ -40,5 +40,33 @@
       "production_pages_deploy_run": 38251740768,
       "production_live_resource_integrity_run": 38251872455
     }
+  },
+  "final_closure": {
+    "dev_sha": "612e53b3432ee3cb7a2a9e42543cd742f211ef9c",
+    "tree_sha": "12fd3195ccb67e7516a70100452a6c176333388b",
+    "proofs": {
+      "system_gate_run": 38255241641,
+      "current_application_quality_run": 38255241594,
+      "it_admin_runtime_proof_run": 38255241581,
+      "branch_hygiene_run": 38255241624,
+      "d1_ci_fanout_guard_run": 38254583669,
+      "build_specific_proof_run": 38254583632
+    },
+    "ingested_by_build": 380,
+    "verified_development": true
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 379,
+    "title": "Work Orders, Task Sequencing & Time Capture",
+    "authority": "release467-build379-work-orders-task-sequencing-time-capture.json",
+    "main_sha": "8aa02f0f2402d9d0e4ea03f485468de0954e424f",
+    "tree_sha": "12fd3195ccb67e7516a70100452a6c176333388b",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38255747128,
+    "production_live_resource_integrity_run": 38255898210,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
   }
 }

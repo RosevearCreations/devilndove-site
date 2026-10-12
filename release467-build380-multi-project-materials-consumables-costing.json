@@ -27,5 +27,25 @@
   "operator_guide": "docs/operations/RELEASE_467_BUILD_380_MULTI_PROJECT_MATERIALS_CONSUMABLES_COSTING.md",
   "roadmap": "docs/operations/RELEASE_467_SYSTEM_WIDE_PLATFORM_BUILDS_377_384.md",
   "next_build": 381,
-  "next_build_title": "Production Calendar, Resource Conflicts & Availability"
+  "next_build_title": "Production Calendar, Resource Conflicts & Availability",
+  "starting_point": {
+    "development": {
+      "sha": "612e53b3432ee3cb7a2a9e42543cd742f211ef9c",
+      "tree": "12fd3195ccb67e7516a70100452a6c176333388b",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38255241641,
+      "quality_run": 38255241594,
+      "it_admin_runtime_run": 38255241581,
+      "repository_hygiene_run": 38255241624,
+      "d1_ci_fanout_guard_run": 38254583669,
+      "build_specific_proof_run": 38254583632
+    },
+    "production": {
+      "main_sha": "8aa02f0f2402d9d0e4ea03f485468de0954e424f",
+      "tree_sha": "12fd3195ccb67e7516a70100452a6c176333388b",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38255747128,
+      "production_live_resource_integrity_run": 38255898210
+    }
+  }
 }
