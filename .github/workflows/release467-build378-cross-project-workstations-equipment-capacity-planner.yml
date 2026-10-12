@@ -1,15 +1,5 @@
 name: Release 467 Build 378 Cross-Project Workstations Equipment Capacity Planner
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build378-cross-project-workstations-equipment-capacity-planner.json'
-      - 'functions/api/admin/project-capacity-planner.js'
-      - 'functions/api/admin/_lib/crossProjectCapacity.js'
-      - 'public/js/admin-project-capacity-planner.js'
-      - 'admin/project-capacity-planner/**'
-      - 'scripts/release467_build378_*'
-      - '.github/workflows/release467-build378-cross-project-workstations-equipment-capacity-planner.yml'
   workflow_dispatch:
 permissions:
   contents: read

@@ -1,3 +1,4 @@
+// BUILD379_CURRENT_CLIENT: Release 467 Build 379 — Work Orders, Task Sequencing & Time Capture; verified Build 378 Production GREEN.
 // BUILD378_CURRENT_CLIENT: Release 467 Build 378 — Cross-Project Workstations, Equipment & Capacity Planner; verified Build 377 Production GREEN.
 // BUILD377_CURRENT_CLIENT: Release 467 Build 377 — Multi-Project Portfolio, Workflow & Evidence Routing Foundation; verified Build 376 Production GREEN.
 // BUILD376_CURRENT_CLIENT: Release 467 Build 376 — Multi-Project Portfolio, Workflow & Evidence Routing Foundation; all-project portfolio and Build 375 Production GREEN.
