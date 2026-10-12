@@ -168,14 +168,54 @@
       "private_media_urls": false
     }
   },
-  "measurement_state": "PENDING_EXACT_DEVELOPMENT_D1_MEASUREMENT",
+  "measurement_state": "EXACT_DEVELOPMENT_MEASURED_HUMAN_INPUTS_AND_ROUTING_OBSERVED",
   "measurement_lane_owner": ".github/workflows/release467-build377-multi-project-portfolio-workflow-evidence-routing-foundation.yml",
   "roadmap": "docs/operations/RELEASE_467_SYSTEM_WIDE_PLATFORM_BUILDS_377_384.md",
   "next_build": 378,
   "next_build_title": "Cross-Project Workstations, Equipment & Capacity Planner",
   "future_queue_exhausted": false,
   "decision": {
-    "classification": "PENDING_EXACT_MEASUREMENT",
-    "real_completion_only": true
-  }
+    "classification": "HUMAN_INPUTS_AND_ROUTING_OBSERVED",
+    "real_completion_only": true,
+    "operator_action": "Use the shared workflow routing page and explicitly record or review real Creative Process/CAIP evidence for each project.",
+    "automatic_approval_authorized": false,
+    "automatic_publication_authorized": false,
+    "next_build": 378,
+    "next_build_title": "Cross-Project Workstations, Equipment & Capacity Planner"
+  },
+  "measurement": {
+    "source_sha": "f8187303e5b4ffe8f658a9662c6ea9ac465defe2",
+    "workflow_run": 38198187460,
+    "artifact_id": 11724950285,
+    "artifact_name": "build377-project-workflow-routing-f8187303e5b4ffe8f658a9662c6ea9ac465defe2",
+    "artifact_digest": "sha256:bea93f2554c19f56d28d82dbc71f087c6bd9a2f8f025523fc9f7f90544513354",
+    "statement_count": 2,
+    "rows_read_by_statement": [
+      33,
+      5
+    ],
+    "aggregate_rows_read": 38,
+    "rows_read_ceiling": 20000,
+    "total_active_projects": 5,
+    "loaded_projects": 5,
+    "has_more": false,
+    "counts": {
+      "with_caip": 5,
+      "with_activity": 2,
+      "with_selected_evidence": 2,
+      "with_profiles": 2,
+      "needs_caip": 0,
+      "needs_events": 3,
+      "needs_evidence": 3,
+      "needs_profile": 3
+    },
+    "interpretation": "HUMAN_INPUTS_AND_ROUTING_OBSERVED",
+    "source_authorities": "CREATIVE_PROCESS_CAIP_AND_MAKER_STORY",
+    "synthetic_evidence": false,
+    "automatic_review": false,
+    "automatic_publication": false,
+    "source_evidence_mutation": false,
+    "production_d1_contact": false
+  },
+  "measurement_lane_state": "MEASURED_HUMAN_INPUTS_AND_ROUTING_OBSERVED"
 }

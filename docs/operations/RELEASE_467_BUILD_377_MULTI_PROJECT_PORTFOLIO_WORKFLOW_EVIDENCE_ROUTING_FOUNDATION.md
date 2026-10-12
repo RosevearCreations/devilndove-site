@@ -17,3 +17,7 @@ Build 376 Development `94c5c0868054108998a648b4e169a464f83c1e93` Production `f91
 ## Next queued
 
 **Build 378 — Cross-Project Workstations, Equipment & Capacity Planner**. Future Builds 379–384 deliver shared work orders, material costing, schedules, customer commissions, accounting and system analytics. The release queue does not refocus on any one named project.
+
+## Exact Development D1 acceptance — Build 377
+
+The [Build 377 Development run](https://github.com/RosevearCreations/devilndove-site/actions/runs/38198187460) used exactly two read-only Development D1 statements, with provider rows read **33 + 5 = 38 / 20,000**. Artifact 11724950285, SHA256 bea93f2554c19f56d28d82dbc71f087c6bd9a2f8f025523fc9f7f90544513354. Five active projects; five CAIP-linked; two have work events; two have real selected evidence; two have Maker Story profiles. Three projects lack events/evidence, and three have no Maker Story profile. All active project IDs were considered; no single project chosen as the build target. Interpretation: HUMAN_INPUTS_AND_ROUTING_OBSERVED. Missing human inputs are not artificially fulfilled.
