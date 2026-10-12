@@ -58,7 +58,7 @@ jobs:
           set -euo pipefail
           COMMAND="$(grep -v '^[[:space:]]*--' scripts/release467_build377_routing.sql)"
           npx --yes wrangler@4.128.0 d1 execute "${DEV_D1_DATABASE_NAME}" --remote --config wrangler.toml --json --command "$COMMAND" > /tmp/b377.json
-          node scripts/release467_build377_verify_continuity.mjs /tmp/b377.json "${GITHUB_SHA}" /tmp/build377.json
+          node scripts/release467_build377_verify_routing.mjs /tmp/b377.json "${GITHUB_SHA}" /tmp/build377.json
       - uses: actions/upload-artifact@v4
         with:
           name: build377-project-workflow-routing-${{ github.sha }}
