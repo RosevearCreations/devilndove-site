@@ -1,3 +1,4 @@
+-- Build 379 canonical Development-first D1 apply on verified current authority; no prior 0031 migration apply succeeded.
 -- Build 379. Additive append-only human work-order execution over existing project operations.
 CREATE TABLE IF NOT EXISTS creative_work_order_events (
  creative_work_order_event_id INTEGER PRIMARY KEY AUTOINCREMENT,
