@@ -1,0 +1,30 @@
+name: Release 467 Build 380 Multi-Project Materials Consumables Costing
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'release467-build380-multi-project-materials-consumables-costing.json'
+      - 'functions/api/admin/project-material-planner.js'
+      - 'functions/api/admin/_lib/projectMaterialMath.js'
+      - 'public/js/admin-project-material-planner.js'
+      - 'admin/project-material-planner/**'
+      - 'migrations/canonical/0032_release467_project_material_reservations.sql'
+      - 'scripts/release467_build380_*'
+      - '.github/workflows/release467-build380-multi-project-materials-consumables-costing.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  project-material-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - name: Project stock reservations and actual-post provenance
+        run: |
+          python scripts/release467_build380_gate.py
+          echo 'BUILD380=SOURCE_GREEN; D1_REMOTE_PROVIDER_CONTACT=0; FINANCE_POSTING=0'
