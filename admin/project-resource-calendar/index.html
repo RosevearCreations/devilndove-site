@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Resource Calendar — Devil n Dove</title><link rel="stylesheet" href="/css/styles.css?v=467"></head>
+<body data-admin-page="project-resource-calendar" data-admin-module="creator"><header class="site-header"><div class="wrap header-inner"><a class="brand" href="/admin/">Devil n Dove Admin</a><nav class="main-nav"><a href="/admin/">Dashboard</a><a href="/admin/project-capacity-planner/">Capacity</a><a href="/admin/project-work-orders/">Work Orders</a><a href="/admin/project-material-planner/">Materials</a><a href="/admin/inventory-operations/">Inventory</a></nav></div></header>
+<main class="wrap page-space">
+<section class="page-hero compact"><p class="eyebrow">Release 467 • Build 381</p><h1>Production Calendar, Resource Conflicts &amp; Availability</h1>
+<p>Schedule project work, mark maintenance, reserve shared tools and record deadlines using actual UTC time windows. Conflicts are checked against canonical saved bookings, including across projects.</p>
+<details><summary>ⓘ Help — recorded conflicts and physical availability</summary>
+<p>Only human-confirmed calendar entries constitute booking evidence. No recorded overlap means no conflicting entry in this application; it does <strong>not</strong> prove a machine is powered on, maintained, physically available or that someone else isn't using it. Resource capacity is one booking per active Inventory tool or workstation at a time. A project deadline records a delivery target, not a resource reservation.</p>
+<p>A real maintenance entry blocks overlapping bookings. A deliberate scheduling override requires an explanation; overriding maintenance requires a separate acknowledgement. Changes preserve prior history by cancelling and creating a new entry. There is no automatic maintenance sign-off, work order completion, inventory consumption, or customer notification.</p>
+</details></section>
+<section class="card"><h2>Calendar window</h2><div class="button-row">
+<label>From <input type="datetime-local" id="calendarFrom"></label><label>To <input type="datetime-local" id="calendarTo"></label>
+<label>Resource <select id="calendarResourceFilter"><option value="">All tools and workstations</option></select></label>
+<label>Project <select id="calendarProjectFilter"><option value="">All projects</option></select></label>
+<button type="button" class="btn secondary" id="calendarRefresh">Refresh calendar</button></div>
+<div id="calendarRecords" role="status" aria-live="polite">Loading source calendar…</div></section>
+<section class="card"><h2>Add a verified calendar entry</h2>
+<div class="button-row"><label>Type <select id="calendarKind"><option value="project_booking">Project resource booking</option><option value="maintenance">Maintenance block</option><option value="resource_hold">Shared-resource hold</option><option value="project_deadline">Project deadline</option></select></label>
+<label>Resource <select id="calendarResource"><option value="">Choose active tool</option></select></label>
+<label>Project <select id="calendarProject"><option value="">Choose project</option></select></label>
+<label>Operation (optional) <select id="calendarOperation"><option value="">Project-wide</option></select></label></div>
+<div class="button-row"><label>Start <input type="datetime-local" id="calendarStart"></label>
+<label>End <input type="datetime-local" id="calendarEnd"></label></div>
+<label>Booking title <input id="calendarTitle" type="text" maxlength="160" placeholder="For example: CNC fixture setup"></label>
+<label>Reason / work instructions (12+ characters) <textarea id="calendarNote" rows="3"></textarea></label>
+<details><summary>Explicit conflict override (only when needed)</summary><label><input type="checkbox" id="calendarOverride"> Authorize an overlapping calendar entry</label>
+<label>Override reason (20+ characters) <textarea id="calendarOverrideReason" rows="2" placeholder="Explain who approved and why"></textarea></label>
+<label><input type="checkbox" id="calendarMaintenanceAck"> Explicitly acknowledge an active maintenance conflict</label></details>
+<button id="calendarRecord" class="btn" type="button">Record calendar entry</button><p id="calendarResult" role="status"></p></section>
+</main><script src="/public/js/auth.js?v=467" defer></script><script src="/public/js/admin-project-resource-calendar.js?v=467b381" defer></script></body></html>
