@@ -1,3 +1,4 @@
+// BUILD381_CURRENT_CLIENT: Release 467 Build 381 — Production Calendar, Resource Conflicts & Availability; Build 380 Production GREEN.
 // BUILD380_CURRENT_CLIENT: Release 467 Build 380 — Multi-Project Materials, Consumables & Costing; Build 379 Production GREEN.
 // BUILD379_CURRENT_CLIENT: Release 467 Build 379 — Work Orders, Task Sequencing & Time Capture; verified Build 378 Production GREEN.
 // BUILD378_CURRENT_CLIENT: Release 467 Build 378 — Cross-Project Workstations, Equipment & Capacity Planner; verified Build 377 Production GREEN.

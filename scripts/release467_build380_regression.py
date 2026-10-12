@@ -9,8 +9,8 @@ def req(x,msg):
 pointer=json.loads(read('current-development-authority.json'))
 manifest=json.loads(read('migrations/canonical/manifest.json'))
 req(pointer.get('build',0)>=380,'current pointer must be Build 380 or newer')
-req(manifest['migrations'][-1]['version']==32,'canonical version 32')
-req(manifest['migrations'][-1]['file']=='0032_release467_project_material_reservations.sql','canonical migration file')
+req(len(manifest['migrations'])>=32 and manifest['migrations'][31]['version']==32,'canonical version 32 preserved')
+req(manifest['migrations'][31]['file']=='0032_release467_project_material_reservations.sql','canonical migration 0032 preserved at index 31')
 api=read('functions/api/admin/project-material-planner.js')
 for token in ('getAdminUserFromRequest','Origin','auditAdminAction','CAPACITY_OR_IDENTITY_CONFLICT','site_item_inventory','site_inventory_usage_profiles','creative_project_inventory_posts','creative_project_inventory_usage_details','inventory_purchase_lots','reserved_quantity'):
  req(token in api,'API token '+token)

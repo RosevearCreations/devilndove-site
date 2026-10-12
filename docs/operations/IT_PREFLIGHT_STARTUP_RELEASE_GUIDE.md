@@ -1,3 +1,7 @@
+# Current successor: Release 467 Build 381 — Production Calendar, Resource Conflicts & Availability
+
+Last fully GREEN predecessor Build 380 Development `046615cfe878935fb6fcdc42ce34eb3073c9836c` tree `408b5c97a851db668918f31333772ea4eaa38e54`: System 38290987654, Quality 38290987609, I.T. 38290987620, Hygiene 38290987610, D1 CI fan-out 38273333360, Build-specific 38290987708. Last Production GREEN Build 380 main `6894cdc60c5ff1fd4cae8f2b05ecc61c2f91ffcf`: Production Pages 38291293697, live-resource integrity 38292051690. Build 381 is Development candidate; release state must never claim its future Production before exact-green evidence. Next queued Build 382.
+
 Build 379 final predecessor proof inventory: D1 CI Fan-Out Guard 38254583669; Build-Specific Work Orders Proof 38254583632. Both are prior verified Development evidence and are not Build 380 final proof claims.
 
 # Current successor: Release 467 Build 380 — Multi-Project Materials, Consumables & Costing

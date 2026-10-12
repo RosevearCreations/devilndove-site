@@ -237,6 +237,13 @@
       "release": 467,
       "description": "Operator-owned project material reservations and partial releases atomically reflected in the canonical stock reserved_quantity and site_inventory_movements; item identity, actual posts and supplier lots remain source owned.",
       "recovery": "Forward-only; release outstanding reservations through the operator API. Do not delete records or reset canonical stock by dropping the table. Use later compensating migration for corrections."
+    },
+    {
+      "version": 33,
+      "file": "0033_release467_resource_calendar_conflicts.sql",
+      "release": 467,
+      "description": "Add operator-confirmed UTC production resource calendar and project deadline events; DB half-open overlap constraints, explicit maintenance acknowledgement, reviewed conflict overrides, and immutable cancellation history.",
+      "recovery": "Forward-only ledger. Cancel active entries through Admin to free calendar windows; preserve all rows and audit history. Repair future defects with a new numbered migration rather than editing applied SQL."
     }
   ]
 }
