@@ -1,3 +1,9 @@
+# Release 467 Build 380 — Multi-Project Materials, Consumables & Costing (Development candidate)
+
+System-wide authenticated [Materials & Costing](/admin/project-material-planner/) uses canonical Inventory stock holds, project-specific allocation references, partial release, supplier purchase-lot provenance and actual Creative Process stock postings with provisional cost estimates. No automatic consumption, purchasing, or accounting. See `docs/operations/RELEASE_467_BUILD_380_MULTI_PROJECT_MATERIALS_CONSUMABLES_COSTING.md`.
+
+**Next queued: Build 381 — Production Calendar, Resource Conflicts & Availability.**
+
 # BUILD 378 DEVELOPMENT CANDIDATE — Cross-Project Workstations, Equipment & Capacity Planner
 
 Authenticated, read-only [shared workstation capacity planner](/admin/project-capacity-planner/) uses existing Creative Project operations, Maker Story workstation links, canonical station Tools and multi-station memberships. Reports competing project demand and unmapped required equipment without fabricating calendar collisions or availability. **No dated reservation source exists yet; availability remains unverified.** Next Build 379 — Work Orders, Task Sequencing & Time Capture. See `docs/operations/RELEASE_467_BUILD_378_CROSS_PROJECT_CAPACITY.md`.
