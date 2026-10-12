@@ -1,16 +1,5 @@
 name: Release 467 Build 380 Multi-Project Materials Consumables Costing
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build380-multi-project-materials-consumables-costing.json'
-      - 'functions/api/admin/project-material-planner.js'
-      - 'functions/api/admin/_lib/projectMaterialMath.js'
-      - 'public/js/admin-project-material-planner.js'
-      - 'admin/project-material-planner/**'
-      - 'migrations/canonical/0032_release467_project_material_reservations.sql'
-      - 'scripts/release467_build380_*'
-      - '.github/workflows/release467-build380-multi-project-materials-consumables-costing.yml'
   workflow_dispatch:
 permissions:
   contents: read

@@ -27,5 +27,25 @@
   "operator_guide": "docs/operations/RELEASE_467_BUILD_381_PRODUCTION_CALENDAR_RESOURCE_CONFLICTS_AVAILABILITY.md",
   "next_build": 382,
   "next_build_title": "Customer Requests, Quotes & Commission Lifecycle",
-  "roadmap": "docs/operations/RELEASE_467_SYSTEM_WIDE_PLATFORM_BUILDS_377_384.md"
+  "roadmap": "docs/operations/RELEASE_467_SYSTEM_WIDE_PLATFORM_BUILDS_377_384.md",
+  "starting_point": {
+    "development": {
+      "sha": "046615cfe878935fb6fcdc42ce34eb3073c9836c",
+      "tree": "408b5c97a851db668918f31333772ea4eaa38e54",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38290987654,
+      "quality_run": 38290987609,
+      "it_admin_runtime_run": 38290987620,
+      "repository_hygiene_run": 38290987610,
+      "d1_ci_fanout_guard_run": 38273333360,
+      "build_specific_proof_run": 38290987708
+    },
+    "production": {
+      "main_sha": "6894cdc60c5ff1fd4cae8f2b05ecc61c2f91ffcf",
+      "tree_sha": "408b5c97a851db668918f31333772ea4eaa38e54",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38291293697,
+      "production_live_resource_integrity_run": 38292051690
+    }
+  }
 }
