@@ -30,8 +30,10 @@ for token in ('FROM creative_work_projects w','maker_story_profiles','active_eve
  q(token in sql,'D1 measurement '+token)
 for token in ('sets.length!==2','aggregate>20000','new Set(ids).size','HUMAN_INPUTS_AND_ROUTING_OBSERVED','production_d1_contact:false'):
  q(token in ver,'Verifier '+token)
-for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','ALL ACTIVE PROJECTS: NON-MUTATING EVIDENCE ROUTING','PRODUCTION D1 CONTACT: ZERO','branches: [dev]'):
+for token in ('D1_ONE_SHOT_EVIDENCE_CAPTURE','ALL ACTIVE PROJECTS: NON-MUTATING EVIDENCE ROUTING','PRODUCTION D1 CONTACT: ZERO'):
  q(token in wf,'Workflow '+token)
+if p.get('build')==377:q('branches: [dev]' in wf,'Build 377 current proof must have bounded Development push')
+else:q('branches: [dev]' not in wf,'Retired Build 377 D1 workflow must be manual-only after successor authorization')
 q('workflow_dispatch:' in wf,'Dispatch')
 oldwf=t('.github/workflows/release467-build376-search-console-real-export-fresh-discovery-intake-xi.yml')
 q('workflow_dispatch:' in oldwf and 'branches: [dev]' not in oldwf,'Build 376 workflow manual only')

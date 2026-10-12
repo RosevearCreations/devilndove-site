@@ -1,3 +1,7 @@
+# Active verified successor: Release 467 Build 378 — Cross-Project Workstations, Equipment & Capacity Planner
+
+Build 378 is the current **candidate**, not yet Development/Production GREEN. The last fully verified Development and Production baseline is Build 377; Build 379 is queued next.
+
 ## Build 378 verified predecessor checkpoint — Build 377
 
 Development SHA `e9dfba707053afd8761dc6b40b203323382fd68b`; exact shared tree `46f6c8142778bd0e299cc375fe8f5ef3bfd69293`; System Gate 38198297909, Quality 38198297891, I.T. 38198297924, Branch Hygiene 38198297898, D1 Fan-Out 38198187483, Build-Specific 38198297934. Production main `f1f52639632b72ea96b4f4531be0459b084c39b4`; Pages 38198458436; live integrity 38198516540. Build 378 remains a candidate until its own exact-head proofs pass and Production deploy/integrity succeed. Next: Build 379.
