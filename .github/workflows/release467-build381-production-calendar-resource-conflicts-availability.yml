@@ -1,7 +1,7 @@
 name: Release 467 Build 381 Production Calendar Resource Conflicts Availability
 on:
   push:
-    branches: [dev, build381-resource-calendar]
+    branches: [dev]
     paths:
       - 'release467-build381-production-calendar-resource-conflicts-availability.json'
       - 'functions/api/admin/project-resource-calendar.js'
