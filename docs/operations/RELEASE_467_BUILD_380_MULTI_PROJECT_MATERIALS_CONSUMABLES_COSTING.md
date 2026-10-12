@@ -1,0 +1,15 @@
+# Release 467 Build 380 — Multi-Project Materials, Consumables & Costing
+
+**Operator workspace:** https://devilndove.com/admin/project-material-planner/
+
+Existing canonical Inventory `site_item_inventory` is the single material identity; `site_item_inventory.reserved_quantity` remains the real shared stock hold. Build 380 adds project/operation-specific `creative_project_material_reservations` records, not a duplicate item catalogue. Canonical D1 migration `0032_release467_project_material_reservations.sql` installs atomic triggers that reject over-reserving, inactive items, tools, non-stock-tracked items and project/operation mismatches; changes to reservations update the canonical shared reserved balance and `site_inventory_movements` automatically in the same transaction. Release can be **partial** (stock units) and cannot exceed the balance. Request keys prevent accidental duplicate holds. All operations require authenticated Admin and same-origin POST with a meaningful operator reason and audit event.
+
+Actual partial consumption **does not happen through reservation actions**: release the relevant hold, then post actual usage through existing Creative Process; that canonical stock-posting contract handles precise usage quantities/units, stock decrements, corrective reversal, and source material events. Our planner **only reads actual posted, non-reversed usage**, and displays the current inventory unit cost × stock units as a provisional CAD estimate. Supplier names and latest receipt/lot codes are source-linked. Where cost is absent or zero, show **Unknown** rather than inventing zero cost. No duplicate expense entries, payroll, tax, purchasing, automatic accounting or supplier orders. Project totals count each inventory post once; do not also add the same material event cost. Mixed-unit stock quantities should never be treated as a convertible total.
+
+Bounds: first 100 projects, 100 process operations per project, 150 reservations, 150 actual posts, 30 supply search matches. Larger result sets surface incompleteness (totals not exhaustive). Real operator acceptance must verify an authenticated reserve → partial release → Creative Process material use → cost/report refresh, and test two projects competing for limited stock.
+
+**Security/rollback:** admin role required, same-origin POST, server-controlled supplier/cost snapshots, SQL capacity enforcement; no request-time DDL or real production D1 queries outside the canonical migration deployment proof. If reverting the code, preserve the reservation table and canonical held balances. Release outstanding holds via the operator UI before disabling writes.
+
+**Tests:** `python scripts/release467_build380_regression.py`, `node --test scripts/release467_build380_math.test.mjs`, exact-head Development System Gate/Quality/I.T./Hygiene, Development D1 migration, matching-tree Production migration/Pages deployment/live integrity.
+
+**Next queued: Build 381 — Production Calendar, Resource Conflicts & Availability.**
