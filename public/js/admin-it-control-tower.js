@@ -1,8 +1,9 @@
-// BUILD376_CURRENT_CLIENT: Release 467 Build 376 — Search Console Real Export & Fresh Discovery Intake XI; all-project portfolio and Build 375 Production GREEN.
-// BUILD375_CURRENT_CLIENT: Release 467 Build 375 — Search Console Real Export & Fresh Discovery Intake XI; verified Build 374 Development/Production GREEN.
-// BUILD374_CURRENT_CLIENT: Release 467 Build 374 — Search Console Real Export & Fresh Discovery Intake XI; verified Build 373 Development/Production GREEN.
-// BUILD373_CURRENT_CLIENT: Release 467 Build 373 — Search Console Real Export & Fresh Discovery Intake XI; verified Build 372 Development/Production GREEN.
-// BUILD372_CURRENT_CLIENT: Release 467 Build 372 — Search Console Real Export & Fresh Discovery Intake XI; verified Build 371 Development/Production GREEN.
+// BUILD377_CURRENT_CLIENT: Release 467 Build 377 — Multi-Project Portfolio, Workflow & Evidence Routing Foundation; verified Build 376 Production GREEN.
+// BUILD376_CURRENT_CLIENT: Release 467 Build 376 — Multi-Project Portfolio, Workflow & Evidence Routing Foundation; all-project portfolio and Build 375 Production GREEN.
+// BUILD375_CURRENT_CLIENT: Release 467 Build 375 — Multi-Project Portfolio, Workflow & Evidence Routing Foundation; verified Build 374 Development/Production GREEN.
+// BUILD374_CURRENT_CLIENT: Release 467 Build 374 — Multi-Project Portfolio, Workflow & Evidence Routing Foundation; verified Build 373 Development/Production GREEN.
+// BUILD373_CURRENT_CLIENT: Release 467 Build 373 — Multi-Project Portfolio, Workflow & Evidence Routing Foundation; verified Build 372 Development/Production GREEN.
+// BUILD372_CURRENT_CLIENT: Release 467 Build 372 — Multi-Project Portfolio, Workflow & Evidence Routing Foundation; verified Build 371 Development/Production GREEN.
 // BUILD371_CURRENT_CLIENT: Release 467 Build 371 — Maker Story Advancement & Publication Readiness Continuity IX; verified Build 370 Development/Production GREEN.
 // BUILD370_CURRENT_CLIENT: Release 467 Build 370 — Search Console Real Export & Fresh Discovery Intake X; verified Build 369 Development/Production GREEN.
 // BUILD369_CURRENT_CLIENT: Release 467 Build 369 — Grey Hair Source Review & Story-Plan Completion Continuity VIII; verified Build 368 Development/Production GREEN.

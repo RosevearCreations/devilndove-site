@@ -28,7 +28,7 @@ for token in ('PROJECT_DISCOVERY_PORTFOLIO','apiFetch','project_discovery_overvi
 q('Release 467 • Build 376' in page and 'admin-project-discovery-overview.js?v=467b376' in page,'Portfolio page identity/cache')
 q('/admin/project-discovery-overview/' in t('admin/index.html'),'Admin navigation entry')
 q('REAL EXPORT CONFIRMATION REQUIRED' in wf and 'SYNTHETIC DISCOVERY ROWS: ZERO' in wf and 'PRODUCTION D1 CONTACT: ZERO' in wf and 'ALL ACTIVE PROJECTS: PROJECT-AGNOSTIC PORTFOLIO' in wf,'Workflow boundary')
-q('workflow_dispatch:' in wf and 'branches: [dev]' in wf,'Current workflow active')
+q('workflow_dispatch:' in wf and (('branches: [dev]' in wf) if p['build']==376 else ('branches: [dev]' not in wf)),'Build 376 workflow active-or-historical')
 q('workflow_dispatch:' in t('.github/workflows/release467-build375-grey-hair-source-review-story-plan-completion-continuity-ix.yml') and 'branches: [dev]' not in t('.github/workflows/release467-build375-grey-hair-source-review-story-plan-completion-continuity-ix.yml'),'Predecessor workflow retired')
 q(p['build']>=376 and p['state']=='DEVELOPMENT_GREEN','Current pointer')
 if p['build']==376:q(p['next_build']==377 and p['next_build_title']=='Multi-Project Portfolio, Workflow & Evidence Routing Foundation' and p['promotion_state'].endswith('_CANDIDATE_NOT_YET_VERIFIED'),'Successor system-wide scope')
