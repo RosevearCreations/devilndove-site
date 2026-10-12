@@ -1,3 +1,4 @@
+-- Release 467 Build 380: Development-first canonical D1 application proof is required before subsequent production calendar builds.
 -- Build 380: real per-project reservations against canonical site_item_inventory.reserved_quantity.
 -- Allocation rows reference existing inventory identity, never create duplicate item records.
 CREATE TABLE IF NOT EXISTS creative_project_material_reservations (
