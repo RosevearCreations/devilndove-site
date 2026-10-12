@@ -1,17 +1,6 @@
 name: Release 467 Build 376 Search Console Real Export Fresh Discovery Intake XI
+# Historical after Build 377 activation; manual-only.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build376-search-console-real-export-fresh-discovery-intake-xi.json'
-      - 'release467-build375-grey-hair-source-review-story-plan-completion-continuity-ix.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build376_*'
-      - 'scripts/current_system_gate_provenance_gate.py'
-      - 'functions/api/admin/project-discovery-overview.js'
-      - 'public/js/admin-project-discovery-overview.js'
-      - 'admin/project-discovery-overview/index.html'
-      - '.github/workflows/release467-build376-search-console-real-export-fresh-discovery-intake-xi.yml'
   workflow_dispatch:
 permissions:
   contents: read

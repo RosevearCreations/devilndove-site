@@ -1,3 +1,7 @@
+# CURRENT BUILD — Release 467 Build 377: Multi-Project Portfolio, Workflow & Evidence Routing Foundation
+
+Reusable, authenticated, bounded [cross-project evidence routing](/admin/project-workflow-routing/) across all active maker projects (no project-specific release target). An operator can review source-based next actions and open the authoritative Creative Process workspace for any project; no fabricated completion or automatic publication. Build 376 predecessor exact tree `6cc4ab9a39c37e62bb3dc0df55dd12f0df64ea5c` verified GREEN. Next: **Build 378 — Cross-Project Workstations, Equipment & Capacity Planner**. The system-wide queue continues through 384.
+
 # CURRENT BUILD — Release 467 Build 376: Search Console Real Export & Fresh Discovery Intake XI
 
 **System-wide platform direction** (requested): No more single-project-centered release loops. Build 376 delivers a project-agnostic [all-project portfolio](/admin/project-discovery-overview/) with Creative Process, CAIP, evidence and Search Console operational signals. Next Builds 377–384 expand portfolio workflows, workstations, jobs, cost control, scheduling, clients and cross-project financials. Human review and private media rights are independent; true Search Console report dates and real Performance exports remain mandatory.
