@@ -1,3 +1,9 @@
+Build 379 final predecessor proof inventory: D1 CI Fan-Out Guard 38254583669; Build-Specific Work Orders Proof 38254583632. Both are prior verified Development evidence and are not Build 380 final proof claims.
+
+# Current successor: Release 467 Build 380 — Multi-Project Materials, Consumables & Costing
+
+Current candidate Build 380 consumes verified Build 379. Development `612e53b3432ee3cb7a2a9e42543cd742f211ef9c` and tree `12fd3195ccb67e7516a70100452a6c176333388b`; System 38255241641, Quality 38255241594, I.T. 38255241581, Hygiene 38255241624. Production main `8aa02f0f2402d9d0e4ea03f485468de0954e424f`; Pages 38255747128, Live 38255898210. Next Build 381.
+
 # Current verified successor: Release 467 Build 379 — Work Orders, Task Sequencing & Time Capture
 
 Build 379 is the candidate. Verified Development Build 378: 509c412adb53b7314b42f39b41daf2ba13b940b3; tree 33fa4d22d3feac3a7c95deb4a40232c86f0efce0; System 38251490326; Quality 38251490428; I.T. 38251490536; Branch Hygiene 38251490603; D1 CI 38251097239; Build-Specific 38250985069. Production main f9bc2dc6c0050edb3194e8eef92899d284a56b10; Production Pages 38251740768; live-resource proof 38251872455. Next Build 380.

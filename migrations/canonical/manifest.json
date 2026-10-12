@@ -230,6 +230,13 @@
       "release": 467,
       "description": "Append-only per-operation execution status transitions, accountable manual work time and linked genuine project milestones, with authenticated actor and index-backed dependency checks.",
       "recovery": "Stop new work-order writes and retain append-only rows for audit. Repair with a new forward-only correction migration; never drop existing business history, Inventory, Creative Process, or CAIP data."
+    },
+    {
+      "version": 32,
+      "file": "0032_release467_project_material_reservations.sql",
+      "release": 467,
+      "description": "Operator-owned project material reservations and partial releases atomically reflected in the canonical stock reserved_quantity and site_inventory_movements; item identity, actual posts and supplier lots remain source owned.",
+      "recovery": "Forward-only; release outstanding reservations through the operator API. Do not delete records or reset canonical stock by dropping the table. Use later compensating migration for corrections."
     }
   ]
 }
