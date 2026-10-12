@@ -1,3 +1,4 @@
+// BUILD378_CURRENT_CLIENT: Release 467 Build 378 — Cross-Project Workstations, Equipment & Capacity Planner; verified Build 377 Production GREEN.
 // BUILD377_CURRENT_CLIENT: Release 467 Build 377 — Multi-Project Portfolio, Workflow & Evidence Routing Foundation; verified Build 376 Production GREEN.
 // BUILD376_CURRENT_CLIENT: Release 467 Build 376 — Multi-Project Portfolio, Workflow & Evidence Routing Foundation; all-project portfolio and Build 375 Production GREEN.
 // BUILD375_CURRENT_CLIENT: Release 467 Build 375 — Multi-Project Portfolio, Workflow & Evidence Routing Foundation; verified Build 374 Development/Production GREEN.
