@@ -1,3 +1,7 @@
+# Current verified successor: Release 467 Build 379 — Work Orders, Task Sequencing & Time Capture
+
+Build 379 is the candidate. Verified Development Build 378: 509c412adb53b7314b42f39b41daf2ba13b940b3; tree 33fa4d22d3feac3a7c95deb4a40232c86f0efce0; System 38251490326; Quality 38251490428; I.T. 38251490536; Branch Hygiene 38251490603; D1 CI 38251097239; Build-Specific 38250985069. Production main f9bc2dc6c0050edb3194e8eef92899d284a56b10; Production Pages 38251740768; live-resource proof 38251872455. Next Build 380.
+
 # Active verified successor: Release 467 Build 378 — Cross-Project Workstations, Equipment & Capacity Planner
 
 Build 378 is the current **candidate**, not yet Development/Production GREEN. The last fully verified Development and Production baseline is Build 377; Build 379 is queued next.

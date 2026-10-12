@@ -1,3 +1,4 @@
+/* BUILD379_PREDECESSOR_EXACT_GREEN: Development 509c412adb53b7314b42f39b41daf2ba13b940b3; tree 33fa4d22d3feac3a7c95deb4a40232c86f0efce0; System 38251490326; Quality 38251490428; I.T. 38251490536; Hygiene 38251490603; fanout 38251097239; Build 378 38250985069; Production f9bc2dc6c0050edb3194e8eef92899d284a56b10; Pages 38251740768; Live 38251872455. */
 /* BUILD378_PREDECESSOR_EXACT_GREEN: Development e9dfba707053afd8761dc6b40b203323382fd68b; tree 46f6c8142778bd0e299cc375fe8f5ef3bfd69293; System 38198297909; Quality 38198297891; IT 38198297924; Hygiene 38198297898; D1 38198187483; Specific 38198297934; Production f1f52639632b72ea96b4f4531be0459b084c39b4; Pages 38198458436; Live 38198516540. */
 /* BUILD377_CURRENT_SUCCESSOR: Release 467 Build 377 — Multi-Project Portfolio, Workflow & Evidence Routing Foundation; Build 376 exact-tree Development/Production GREEN. */
 /* BUILD376_CURRENT_SUCCESSOR: Release 467 Build 376 — Search Console Real Export & Fresh Discovery Intake XI; project-agnostic discovery and verified Build 375 exact tree. */
@@ -90,13 +91,13 @@ Production live-resource 37981772067
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=378;
-export const CURRENT_RELIABILITY_TITLE='Cross-Project Workstations, Equipment & Capacity Planner';
+export const CURRENT_RELIABILITY_BUILD=379;
+export const CURRENT_RELIABILITY_TITLE='Work Orders, Task Sequencing & Time Capture';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
-export const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:377,title:'Multi-Project Portfolio, Workflow & Evidence Routing Foundation',state:'DEVELOPMENT_GREEN',dev_sha:'e9dfba707053afd8761dc6b40b203323382fd68b',tree_sha:'46f6c8142778bd0e299cc375fe8f5ef3bfd69293',system_gate_run:38198297909,current_application_quality_run:38198297891,it_admin_runtime_proof_run:38198297924,branch_hygiene_run:38198297898,d1_ci_fanout_guard_run:38198187483,build_specific_proof_run:38198297934,proof_state:'EXACT_BRANCH_HEAD_BUILD377_GREEN'});
-export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:377,title:'Multi-Project Portfolio, Workflow & Evidence Routing Foundation',state:'DEVELOPMENT_GREEN',dev_sha:'e9dfba707053afd8761dc6b40b203323382fd68b',tree_sha:'46f6c8142778bd0e299cc375fe8f5ef3bfd69293',system_gate_run:38198297909,current_application_quality_run:38198297891,it_admin_runtime_proof_run:38198297924,branch_hygiene_run:38198297898,d1_ci_fanout_guard_run:38198187483,build_specific_proof_run:38198297934,proof_state:'EXACT_BRANCH_HEAD_BUILD377_GREEN'});
-export const CURRENT_PRODUCTION=Object.freeze({release:467,build:377,title:'Multi-Project Portfolio, Workflow & Evidence Routing Foundation',state:'PRODUCTION_GREEN',main_sha:'f1f52639632b72ea96b4f4531be0459b084c39b4',tree_sha:'46f6c8142778bd0e299cc375fe8f5ef3bfd69293',production_pages_deploy_run:38198458436,production_live_resource_integrity_run:38198516540,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:38198297934,remote_d1_queries:0});
+export const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:378,title:'Cross-Project Workstations, Equipment & Capacity Planner',state:'DEVELOPMENT_GREEN',dev_sha:'509c412adb53b7314b42f39b41daf2ba13b940b3',tree_sha:'33fa4d22d3feac3a7c95deb4a40232c86f0efce0',system_gate_run:38251490326,current_application_quality_run:38251490428,it_admin_runtime_proof_run:38251490536,branch_hygiene_run:38251490603,d1_ci_fanout_guard_run:38251097239,build_specific_proof_run:38250985069,proof_state:'EXACT_BRANCH_HEAD_BUILD378_GREEN'});
+export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:378,title:'Cross-Project Workstations, Equipment & Capacity Planner',state:'DEVELOPMENT_GREEN',dev_sha:'509c412adb53b7314b42f39b41daf2ba13b940b3',tree_sha:'33fa4d22d3feac3a7c95deb4a40232c86f0efce0',system_gate_run:38251490326,current_application_quality_run:38251490428,it_admin_runtime_proof_run:38251490536,branch_hygiene_run:38251490603,d1_ci_fanout_guard_run:38251097239,build_specific_proof_run:38250985069,proof_state:'EXACT_BRANCH_HEAD_BUILD378_GREEN'});
+export const CURRENT_PRODUCTION=Object.freeze({release:467,build:378,title:'Cross-Project Workstations, Equipment & Capacity Planner',state:'PRODUCTION_GREEN',main_sha:'f9bc2dc6c0050edb3194e8eef92899d284a56b10',tree_sha:'33fa4d22d3feac3a7c95deb4a40232c86f0efce0',production_pages_deploy_run:38251740768,production_live_resource_integrity_run:38251872455,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:38250985069,remote_d1_queries:0});
 export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
   retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],
@@ -114,7 +115,7 @@ export async function loadCurrentReliability(db,env={}){
     governance:{...inherited.governance,current_release_authority:'current-development-authority.json',production_promotion_proof_count:4,production_closure_proof_count:6,rollback_readiness:'release-neutral-read-only',restart_integrity_protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1'},
     recovery:inherited.recovery,drift:inherited.drift,
     provenance:{
-      current_surface_release:467,current_surface_build:378,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
+      current_surface_release:467,current_surface_build:379,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
       historical_feature_authority:'release467-build36-current-reliability-operational-health.json',current_operator_authority:'current-development-authority.json',
       accepted_development:ACCEPTED_DEVELOPMENT,last_fully_verified_development:LAST_FULLY_VERIFIED_DEVELOPMENT,current_production:CURRENT_PRODUCTION,
       production_proof_transport_policy:PRODUCTION_PROOF_TRANSPORT_POLICY,implementation_acceptance_is_distinct_from_final_closure:true,

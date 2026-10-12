@@ -1,0 +1,25 @@
+name: Release 467 Build 379 Work Orders Task Sequencing Time Capture
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'release467-build379-work-orders-task-sequencing-time-capture.json'
+      - 'functions/api/admin/project-work-orders.js'
+      - 'functions/api/admin/_lib/workOrderRules.js'
+      - 'public/js/admin-project-work-orders.js'
+      - 'admin/project-work-orders/**'
+      - 'scripts/release467_build379_*'
+      - '.github/workflows/release467-build379-work-orders-task-sequencing-time-capture.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  work-order-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - run: python scripts/release467_build379_gate.py

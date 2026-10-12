@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+from pathlib import Path
+import subprocess,sys
+root=Path(__file__).resolve().parents[1]
+assert subprocess.run([sys.executable,str(root/'scripts/release467_build379_regression.py')],cwd=root).returncode==0
+print('RELEASE467_BUILD379_GATE=GREEN')

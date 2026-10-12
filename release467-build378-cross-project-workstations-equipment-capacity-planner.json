@@ -2,7 +2,7 @@
   "release": 467,
   "build": 378,
   "title": "Cross-Project Workstations, Equipment & Capacity Planner",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "predecessor": {
     "build": 377,
     "title": "Multi-Project Portfolio, Workflow & Evidence Routing Foundation",
@@ -67,5 +67,33 @@
       "production_pages_deploy_run": 38198458436,
       "production_live_resource_integrity_run": 38198516540
     }
+  },
+  "final_closure": {
+    "dev_sha": "509c412adb53b7314b42f39b41daf2ba13b940b3",
+    "tree_sha": "33fa4d22d3feac3a7c95deb4a40232c86f0efce0",
+    "proofs": {
+      "system_gate_run": 38251490326,
+      "current_application_quality_run": 38251490428,
+      "it_admin_runtime_proof_run": 38251490536,
+      "branch_hygiene_run": 38251490603,
+      "d1_ci_fanout_guard_run": 38251097239,
+      "build_specific_proof_run": 38250985069
+    },
+    "ingested_by_build": 379,
+    "verified_development": true
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 378,
+    "title": "Cross-Project Workstations, Equipment & Capacity Planner",
+    "authority": "release467-build378-cross-project-workstations-equipment-capacity-planner.json",
+    "main_sha": "f9bc2dc6c0050edb3194e8eef92899d284a56b10",
+    "tree_sha": "33fa4d22d3feac3a7c95deb4a40232c86f0efce0",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38251740768,
+    "production_live_resource_integrity_run": 38251872455,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
   }
 }
