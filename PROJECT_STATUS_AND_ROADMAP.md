@@ -1,3 +1,7 @@
+# BUILD 378 DEVELOPMENT CANDIDATE — Cross-Project Workstations, Equipment & Capacity Planner
+
+Authenticated, read-only [shared workstation capacity planner](/admin/project-capacity-planner/) uses existing Creative Project operations, Maker Story workstation links, canonical station Tools and multi-station memberships. Reports competing project demand and unmapped required equipment without fabricating calendar collisions or availability. **No dated reservation source exists yet; availability remains unverified.** Next Build 379 — Work Orders, Task Sequencing & Time Capture. See `docs/operations/RELEASE_467_BUILD_378_CROSS_PROJECT_CAPACITY.md`.
+
 # CURRENT BUILD — Release 467 Build 377: Multi-Project Portfolio, Workflow & Evidence Routing Foundation
 
 Reusable, authenticated, bounded [cross-project evidence routing](/admin/project-workflow-routing/) across all active maker projects (no project-specific release target). An operator can review source-based next actions and open the authoritative Creative Process workspace for any project; no fabricated completion or automatic publication. Build 376 predecessor exact tree `6cc4ab9a39c37e62bb3dc0df55dd12f0df64ea5c` verified GREEN. Next: **Build 378 — Cross-Project Workstations, Equipment & Capacity Planner**. The system-wide queue continues through 384.

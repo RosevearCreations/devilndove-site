@@ -1,0 +1,51 @@
+{
+  "release": 467,
+  "build": 378,
+  "title": "Cross-Project Workstations, Equipment & Capacity Planner",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "predecessor": {
+    "build": 377,
+    "title": "Multi-Project Portfolio, Workflow & Evidence Routing Foundation",
+    "development_sha": "e9dfba707053afd8761dc6b40b203323382fd68b",
+    "production_main_sha": "f1f52639632b72ea96b4f4531be0459b084c39b4",
+    "exact_same_tree": "46f6c8142778bd0e299cc375fe8f5ef3bfd69293",
+    "proofs": {
+      "system_gate_run": 38198297909,
+      "quality_run": 38198297891,
+      "admin_runtime_run": 38198297924,
+      "branch_hygiene_run": 38198297898,
+      "build_specific_run": 38198297934,
+      "production_pages_run": 38198458436,
+      "production_live_resource_run": 38198516540
+    }
+  },
+  "contract": {
+    "authenticated": true,
+    "read_only": true,
+    "multi_project": true,
+    "multi_station": true,
+    "source_owned": true,
+    "paginated": true,
+    "actual_availability_inferred": false,
+    "booking_authority_created": false,
+    "limits_disclosed": true,
+    "source_paths": [
+      "/api/admin/project-capacity-planner",
+      "/admin/project-capacity-planner/"
+    ]
+  },
+  "safety": {
+    "request_time_schema_mutation": false,
+    "db_writes": false,
+    "shadow_equipment_table": false,
+    "synthetic_allocations": false,
+    "automatic_publication": false,
+    "private_media_urls": false,
+    "production_d1_query": false
+  },
+  "next_build": 379,
+  "next_build_title": "Work Orders, Task Sequencing & Time Capture",
+  "roadmap": "docs/operations/RELEASE_467_SYSTEM_WIDE_PLATFORM_BUILDS_377_384.md",
+  "release_notes": "docs/operations/RELEASE_467_BUILD_378_CROSS_PROJECT_CAPACITY.md",
+  "limitation": "Existing project operation and maker story workstation references lack dated reservations; shared demand is a contention warning, not simultaneous collision or factual availability. Build 381 provides calendar reservation authority."
+}
