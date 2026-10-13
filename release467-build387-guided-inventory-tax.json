@@ -50,5 +50,7 @@
   },
   "operator_guide": "docs/operations/RELEASE_467_BUILD_387_GUIDED_INVENTORY_QUICK_EDIT.md",
   "next_build": 388,
-  "next_build_title": "Inventory Reconciliation Workspace & Purchase-Tax Evidence Review"
+  "next_build_title": "Inventory Reconciliation Workspace & Purchase-Tax Evidence Review",
+  "development_first_d1_apply_requested": true,
+  "promotion_requires_confirmed_development_0038": true
 }

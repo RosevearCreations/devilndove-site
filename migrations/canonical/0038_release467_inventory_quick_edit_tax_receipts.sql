@@ -1,4 +1,6 @@
 -- Release 467 Build 387. Additive, forward-only; existing raw inventory, receipts and movements are retained.
+-- Exact final Development source proof must apply 0038 BEFORE installing Build 387 dependent API in Production.
+-- Change in this commit explicitly triggers Development-first D1 migration validation.
 ALTER TABLE site_item_inventory ADD COLUMN last_quick_edit_key TEXT;
 CREATE TABLE IF NOT EXISTS inventory_quick_edit_receipts (
  inventory_quick_edit_receipt_id INTEGER PRIMARY KEY AUTOINCREMENT,
