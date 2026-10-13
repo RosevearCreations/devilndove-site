@@ -11,6 +11,16 @@ const PRODUCT_FIELDS = Object.freeze([
   'digital_file_url','featured_image_url','sort_order','merchandise_origin','sale_channel','external_listing_url',
   'external_listing_label','condition_summary','era_label','sourcing_notes'
 ]);
+async function validate389(db,category,shipping){
+ const allowedCat=['jewelry','earrings','necklaces','bracelets','rings','pendants','charms','keychains','accessories','candles','home decor','artwork','collectibles','craft supplies','tools','other'];
+ const allowedShip=['standard','tracked','letter_mail','local_pickup','oversize','digital_delivery'];
+ const known=async(col,v)=>Boolean(v&&(await db.prepare(`SELECT 1 AS found FROM products WHERE LOWER(${col})=LOWER(?) LIMIT 1`).bind(v).first())?.found);
+ if(category&&!allowedCat.includes(category.toLowerCase())&&!(await known('product_category',category)))
+  return 'Select an existing or approved Product category.';
+ if(shipping&&!allowedShip.includes(shipping.toLowerCase())&&!(await known('shipping_code',shipping)))
+  return 'Select a configured shipping code or leave it blank.';
+ return '';
+}
 const SEO_FIELDS = Object.freeze(['meta_title','meta_description','keywords','h1_override','canonical_url','og_title','og_description','og_image_url']);
 const PRODUCT_UPDATE_SQL=`UPDATE products SET ${PRODUCT_FIELDS.map((key)=>`${key}=?`).join(',')},updated_at=CURRENT_TIMESTAMP WHERE product_id=?`;
 const SEO_UPSERT_SQL=`INSERT INTO product_seo (product_id,${SEO_FIELDS.join(',')},created_at,updated_at) VALUES (?,${SEO_FIELDS.map(()=>'?').join(',')},CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(product_id) DO UPDATE SET ${SEO_FIELDS.map((key)=>`${key}=excluded.${key}`).join(',')},updated_at=CURRENT_TIMESTAMP`;
@@ -57,7 +67,7 @@ export async function onRequestPost(context){
   const db=getDb(context.env);if(!db)return json({ok:false,error:'Database binding is not configured.'},500);
   let body={};try{body=await context.request.json();}catch{return json({ok:false,error:'Invalid JSON body.'},400);}
   const productId=Number(body.product_id);if(!Number.isInteger(productId)||productId<=0)return json({ok:false,error:'A valid product_id is required.'},400);
-  const payload=productPayload(body);if(!payload.name)return json({ok:false,error:'Product name is required.'},400);if(!payload.slug)return json({ok:false,error:'A valid slug is required.'},400);
+  const payload=productPayload(body);const choiceError=await validate389(db,payload.product_category,payload.shipping_code);if(choiceError)return json({ok:false,error:choiceError,code:'product_choice_invalid'},400);if(!payload.name)return json({ok:false,error:'Product name is required.'},400);if(!payload.slug)return json({ok:false,error:'A valid slug is required.'},400);
   try{
     let measured=0;
     const productValues=PRODUCT_FIELDS.map((key)=>payload[key]);

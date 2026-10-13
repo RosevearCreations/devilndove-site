@@ -280,6 +280,16 @@ async function upsertProductSeo(db, productId, seo = {}) {
   }
 }
 
+async function validate389(db,category,shipping){
+ const allowedCat=['jewelry','earrings','necklaces','bracelets','rings','pendants','charms','keychains','accessories','candles','home decor','artwork','collectibles','craft supplies','tools','other'];
+ const allowedShip=['standard','tracked','letter_mail','local_pickup','oversize','digital_delivery'];
+ const known=async(col,v)=>Boolean(v&&(await db.prepare(`SELECT 1 AS found FROM products WHERE LOWER(${col})=LOWER(?) LIMIT 1`).bind(v).first())?.found);
+ if(category&&!allowedCat.includes(category.toLowerCase())&&!(await known('product_category',category)))
+  return 'Select an existing or approved Product category.';
+ if(shipping&&!allowedShip.includes(shipping.toLowerCase())&&!(await known('shipping_code',shipping)))
+  return 'Select a configured shipping code or leave it blank.';
+ return '';
+}
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -363,6 +373,8 @@ export async function onRequestPost(context) {
     const sourcing_notes = cleanText(body.sourcing_notes, 2000);
     const capture_entry_mode = String(body.capture_entry_mode || "full").trim().toLowerCase() === "wizard" ? "wizard" : "full";
 
+    const choiceError=await validate389(db,product_category,shipping_code);
+    if(choiceError)return json({ok:false,error:choiceError,code:'product_choice_invalid'},400);
     const readiness = computeReadiness({
       name,
       slug,
