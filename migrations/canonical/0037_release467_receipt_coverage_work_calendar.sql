@@ -1,4 +1,6 @@
 -- Release 467 Build 386: additive source-bound receipts; preserve Build 385 history untouched.
+-- Promotion contract: Development-first canonical D1 apply + proof BEFORE publishing Build 386 dependent API routes.
+-- This 0037 migration has not been applied by the earlier code-only Development preview.
 -- Existing work-order history remains unchanged; only new keyed writes participate.
 ALTER TABLE creative_work_order_events ADD COLUMN request_key TEXT;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_work_order_event_receipt_key ON creative_work_order_events(request_key) WHERE request_key IS NOT NULL;
