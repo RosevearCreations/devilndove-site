@@ -2,6 +2,7 @@
 import {getAdminUserFromRequest,getDb,jsonResponse,auditAdminAction} from '../_lib/adminAudit.js';
 import {loadProfitabilityIntelligence} from '../_lib/release465BusinessHealth.js';
 import {TYPES,RESULTS,SOURCES,positive,rows,deriveOrders,evidenceFlags} from './_lib/projectFinanceEvidence.js';
+import {payloadHash,readReceiptState,receiptInsert,atomicWriteReceipt} from './_lib/writeReceipts.js';
 const out=(d,s=200)=>jsonResponse({release:467,build:383,...d},s,{'Cache-Control':'no-store'});
 const clean=(v,max=1200)=>String(v??'').trim().slice(0,max);
 const SAFETY={accounting_posting:false,finance_mutation:false,payments_execution:false,tax_remittance:false,automatic_deposits:false,
@@ -109,15 +110,29 @@ export async function onRequestPost(ctx){
     !/^[0-9A-Za-z_-]{16,80}$/.test(key))return out({ok:false,error:'Project, review classification, source, 16+ character note and unique request key required'},400);
  if(result==='source_verified'&&(source==='operator_review'||!record))return out({ok:false,error:'Source verified requires an exact source-owned record ID'},409);
  try{
-  const p=await project(a.db,id);if(!p)return out({ok:false,error:'Project not found'},404);
-  const inserted=await a.db.prepare(`INSERT INTO creative_project_finance_review_events
+  const actor=positive(a.user.user_id);
+  const receiptScope='finance_review';
+  const payload={review_type:type,review_result:result,source_kind:source,source_record_id:record||null,evidence_note:note};
+  const hash=await payloadHash(receiptScope,actor,id,payload);
+  const prior=await readReceiptState(a.db,{scope:receiptScope,key,actor,target:id,hash});
+  if(prior)return out({...prior,source_data_unchanged:true},prior.status||200);
+  const projectSource=await project(a.db,id);
+  if(!projectSource)return out({ok:false,error:'Project not found'},404);
+  const write=a.db.prepare(`INSERT INTO creative_project_finance_review_events
   (creative_work_project_id,review_type,review_result,source_kind,source_record_id,evidence_note,actor_user_id,request_key)
-  VALUES(?,?,?,?,?,?,?,?)`).bind(id,type,result,source,record||null,note,positive(a.user.user_id),key).run();
-  const eventId=positive(inserted.meta?.last_row_id);
-  await auditAdminAction(ctx.env,ctx.request,a.user,{action_type:'creative_project_finance_source_review',target_type:'creative_work_project',target_id:id,
-    target_key:String(eventId),details:{review_type:type,review_result:result,source_kind:source,source_record_id:record||null,
-     accounting_posted:false,payment_executed:false,review_note:note}});
-  return out({ok:true,review_event_id:eventId,source_data_unchanged:true,message:'Human source review appended; no accounting, payment, tax or inventory posting was made.'});
- }catch(e){const msg=String(e?.message||'');if(/UNIQUE|constraint|finance_review_/.test(msg))return out({ok:false,error:'Duplicate key or project/source mismatch. Refresh source evidence.',code:'REVIEW_GUARD_REJECTED'},409);
-  console.error('BUILD383_REVIEW_SAVE_FAILED',e?.name||'Error');return out({ok:false,error:'Source review could not be recorded'},503);}
+  VALUES(?,?,?,?,?,?,?,?)`).bind(id,type,result,source,record||null,note,actor,key);
+  const receipt=receiptInsert(a.db,receiptScope,key,actor,'creative_work_project',id,hash,
+    'creative_project_finance_review_events','creative_project_finance_review_event_id');
+  const resultReceipt=await atomicWriteReceipt(a.db,write,receipt,{scope:receiptScope,key,actor,target:id,hash});
+  if(!resultReceipt.ok)return out(resultReceipt,resultReceipt.status||503);
+  if(!resultReceipt.replayed)await auditAdminAction(ctx.env,ctx.request,a.user,{
+    action_type:'creative_project_finance_source_review',target_type:'creative_work_project',target_id:id,
+    target_key:String(resultReceipt.source_record_id),details:{review_type:type,review_result:result,
+      source_kind:source,source_record_id:record||null,accounting_posted:false,payment_executed:false,review_note:note}});
+  return out({...resultReceipt,review_event_id:resultReceipt.source_record_id,source_data_unchanged:true,
+    message:resultReceipt.replayed?'OK — previously committed finance review; no repeat write.':'OK — source review committed with durable receipt.'});
+ }catch(error){
+  console.error('BUILD385_FINANCE_RECEIPT_FAILED',error?.name||'Error');
+  return out({ok:false,code:'RESULT_UNCONFIRMED',error:'Review result unconfirmed; check the receipt before retrying.'},503);
+ }
 }
