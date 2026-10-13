@@ -1,0 +1,30 @@
+{
+  "release": 467,
+  "build": 383,
+  "title": "Cross-Project Accounting, Revenue & Profitability",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "migration": "0035_release467_cross_project_finance_review.sql",
+  "contract": {
+    "existing_finance_authority": true,
+    "source_project_profitability": true,
+    "actual_work_order_time": true,
+    "posted_material_use": true,
+    "source_manufacturing_cost": true,
+    "linked_payments_and_refunds": true,
+    "order_tax_display": true,
+    "immutable_human_review": true,
+    "mixed_currency_warning": true
+  },
+  "safety": {
+    "accounting_posting": false,
+    "tax_remittance": false,
+    "payment_execution": false,
+    "payroll_execution": false,
+    "unknown_cost_as_zero": false,
+    "stock_reservation_as_consumption": false,
+    "request_time_ddl": false
+  },
+  "operator_guide": "docs/operations/RELEASE_467_BUILD_383_CROSS_PROJECT_ACCOUNTING_REVENUE_PROFITABILITY.md",
+  "next_build": 384,
+  "next_build_title": "System-Wide Analytics, Automation & Operational Reliability"
+}
