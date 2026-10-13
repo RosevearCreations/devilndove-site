@@ -46,6 +46,13 @@
           <tbody id="productBrowserBody"><tr><td colspan="4" class="dd-empty">Loading one compact Product page…</td></tr></tbody>
         </table>
       </div>
+      <details class="card" style="margin:14px 0" id="productBrowser390PriceAuditPanel">
+        <summary>Build 390 · Verify Products displaying $0.00</summary>
+        <p class="small">Some Product prices may have been set to zero by the previous malformed decimal validator. This read-only review never changes prices. Verify intended amounts from invoices or earlier source evidence.</p>
+        <button class="btn" id="productBrowser390PriceAudit" type="button">Review zero-priced Products</button>
+        <p id="productBrowser390PriceAuditStatus" class="small" role="status">No database read until you press Review.</p>
+        <div id="productBrowser390PriceAuditRows" style="overflow:auto"></div>
+      </details>
       <div class="dd-product-pager">
         <button class="btn" id="productBrowserPrev" type="button" disabled>Previous</button>
         <span id="productBrowserPageLabel" class="small">Page 1 • 8 per page</span>
@@ -56,5 +63,6 @@
 
   <script src="/public/js/auth.js?v=440"></script>\n  <script src="/public/js/admin-route-usage.js?v=249"></script>
   <script src="/public/js/admin-products-browser-v162.js?v=170"></script>
+<script src="/public/js/admin-product-zero-price-review-v390.js?v=390"></script>
 </body>
 </html>

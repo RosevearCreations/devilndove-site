@@ -1,3 +1,4 @@
+// BUILD390_CURRENT_CLIENT: Release 467 Build 390 — Product Video Review & Inventory Tax Evidence Operational Acceptance; verified Build 389 Production GREEN.
 // BUILD389_CURRENT_CLIENT: Release 467 Build 389 — Product Save End-to-End Acceptance & Purchase Invoice Evidence Review Decisions; verified Build 388 Production GREEN.
 // BUILD388_CURRENT_CLIENT: Release 467 Build 388 — Inventory Reconciliation Workspace & Purchase-Tax Evidence Review; verified Build 387 Production GREEN.
 // BUILD387_CURRENT_CLIENT: Release 467 Build 387 — Write Confirmation Coverage Audit & Guided Recovery Decisions; verified Build 386 Production GREEN.

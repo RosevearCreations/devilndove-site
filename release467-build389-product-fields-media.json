@@ -2,7 +2,7 @@
   "release": 467,
   "build": 389,
   "title": "Product Save End-to-End Acceptance & Purchase Invoice Evidence Review Decisions",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "starting_point": {
     "development": {
       "sha": "ba306bd2482f120f9fc2043771bcc37bd2d3fdc9",
@@ -57,5 +57,29 @@
   },
   "docs": "docs/operations/RELEASE_467_BUILD_389_PRODUCT_SAVE_MEDIA_VIDEO_ACCEPTANCE.md",
   "next_build": 390,
-  "next_build_title": "Product Video Review & Inventory Tax Evidence Operational Acceptance"
+  "next_build_title": "Product Video Review & Inventory Tax Evidence Operational Acceptance",
+  "final_closure": {
+    "dev_sha": "ea31d60bd3e5cb23be7c43b35474b8114215980f",
+    "tree_sha": "d78c6a8a4fce5a1e9a03647a75cbb6ea6c48556b",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD389_GREEN",
+    "proofs": {
+      "system_gate_run": 38454465063,
+      "current_application_quality_run": 38454465074,
+      "it_admin_runtime_proof_run": 38454465037,
+      "branch_hygiene_run": 38454465138,
+      "d1_ci_fanout_guard_run": 38454158726,
+      "build_specific_proof_run": 38454465107
+    },
+    "ingested_by_build": 390
+  },
+  "production_checkpoint": {
+    "main_sha": "454f5b43e8da3cf5119563f53e109a3bacdfd886",
+    "tree_sha": "d78c6a8a4fce5a1e9a03647a75cbb6ea6c48556b",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38454828495,
+    "production_live_resource_integrity_run": 38455024191,
+    "remote_d1_queries": 0
+  }
 }

@@ -1,0 +1,57 @@
+{
+  "release": 467,
+  "build": 390,
+  "title": "Product Video Review & Inventory Tax Evidence Operational Acceptance",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "ea31d60bd3e5cb23be7c43b35474b8114215980f",
+      "tree": "d78c6a8a4fce5a1e9a03647a75cbb6ea6c48556b",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38454465063,
+      "quality_run": 38454465074,
+      "it_admin_runtime_run": 38454465037,
+      "repository_hygiene_run": 38454465138,
+      "d1_ci_fanout_guard_run": 38454158726,
+      "build_specific_proof_run": 38454465107
+    },
+    "production": {
+      "main_sha": "454f5b43e8da3cf5119563f53e109a3bacdfd886",
+      "tree_sha": "d78c6a8a4fce5a1e9a03647a75cbb6ea6c48556b",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38454828495,
+      "production_live_resource_integrity_run": 38455024191
+    }
+  },
+  "regression": {
+    "identified_fault": "Prior Build 389 client price-cents validator escaped literal decimal point incorrectly. 8.00 could serialize to 0 cents.",
+    "historical_prices_automatically_restored": false,
+    "fix_valid_price_parsing": true,
+    "invalid_price_fails_closed": true,
+    "zero_price_requires_explicit_operator_confirmation": true,
+    "product_save_readback_price_cents": true,
+    "product_save_price_confirmation_in_response": true,
+    "bounded_admin_zero_price_source_review": true,
+    "automatic_price_repair": false
+  },
+  "operational_acceptance": {
+    "existing_video_review_counts": true,
+    "only_operator_approved_video_on_product_page": true,
+    "purchase_tax_invoice_not_verified": true,
+    "no_automatic_input_tax_credit": true,
+    "manual_original_price_evidence_required": true,
+    "price_save_confirmed_against_source": true
+  },
+  "canonical_migrations_up_to": "0039_release467_product_video_attachment.sql",
+  "new_schema_migration": false,
+  "safeguards": {
+    "preserve_products": true,
+    "preserve_original_media": true,
+    "no_inferred_historical_price": true,
+    "automatic_provider_publication": false,
+    "no_unbounded_D1_reads": true
+  },
+  "docs": "docs/operations/RELEASE_467_BUILD_390_PRODUCT_PRICE_FIX_VIDEO_TAX_ACCEPTANCE.md",
+  "next_build": 391,
+  "next_build_title": "Historical Price Reconciliation & Product Save Browser Acceptance"
+}

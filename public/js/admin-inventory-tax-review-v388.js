@@ -32,7 +32,7 @@ button.addEventListener('click',async()=>{
     '<td>'+esc(flags.length?flags.join(' · '):'Source linked; recorded count/cost still current')+
     '<div class="small">Supplier invoice not verified. No tax credit booked.</div></td></tr>';
   }).join('')+'</tbody></table>';
-  status.textContent='Showing '+items.length+' recent correction receipts'+(data.has_more?' (additional older records exist)':'')+
+  status.textContent='Operator decision: supplier purchase invoice, tax-paid amount and eligibility remain UNVERIFIED. No invoice attachment has been approved; no HST input tax credit is posted here. Showing '+items.length+' recent correction receipts'+(data.has_more?' (additional older records exist)':'')+
    '. Read-only reconciliation; compare each tax estimate with your actual purchase receipt.';
  }catch(e){status.textContent='Review could not load: '+e.message;}
  finally{button.disabled=false;button.textContent='Refresh recent corrections';}
