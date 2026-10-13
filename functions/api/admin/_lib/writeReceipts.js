@@ -39,9 +39,9 @@ export function receiptInsert(db,scope,key,actor,targetType,target,hash,sourceTa
   material_release:['creative_project_material_reservations','creative_project_material_reservation_id']
  };
  if(!allowed[scope]||allowed[scope][0]!==sourceTable||allowed[scope][1]!==pk)throw Error('Unsupported receipt source');
- const clause=scope==='material_release'?`${pk}=?`:'request_key=?';
+ const clause=scope==='material_release'?`${pk}=? AND release_note=?`:'request_key=?';
  return db.prepare(`INSERT INTO admin_write_receipts(action_scope,request_key,actor_user_id,target_type,target_id,source_record_id,payload_sha256)
- SELECT ?,?,?,?,?,${pk},? FROM ${sourceTable} WHERE ${clause} LIMIT 1`).bind(scope,key,positiveId(actor),targetType,positiveId(target),hash);
+ SELECT ?,?,?,?,?,${pk},? FROM ${sourceTable} WHERE ${clause} LIMIT 1`).bind(scope,key,positiveId(actor),targetType,positiveId(target),hash,...(scope==='material_release'?[positiveId(releaseSourceId),releaseMarker]:[key]));
 }
 export async function readReceiptState(db,{scope,key,actor,target,hash}){
  const row=await fetchReceipt(db,scope,key);
