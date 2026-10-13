@@ -1,0 +1,54 @@
+{
+  "release": 467,
+  "build": 387,
+  "title": "Write Confirmation Coverage Audit & Guided Recovery Decisions",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "contract": {
+    "source_backed_quick_edit": true,
+    "source_optimistic_concurrency": true,
+    "immutable_actor_payload_request_receipt": true,
+    "server_tax_rate_editable": true,
+    "default_ontario_hst_percent": 13,
+    "tax_included_supported": true,
+    "tax_receipts_are_estimations": true,
+    "automatic_input_tax_credits": false,
+    "full_inventory_form_tax_preview_only": true,
+    "production_post_explicit_only": true,
+    "preexisting_material_stock_post_contract_preserved": true,
+    "product_preview_invalidated_on_correction": true,
+    "automatic_write_retry": false,
+    "d1_provider_business_write_from_ci": false
+  },
+  "starting_point": {
+    "development": {
+      "sha": "d835406a070d2910799e0529f83c62aa1baa09e5",
+      "tree": "f1fa43bc92a84dc2ad9f5e1288ae0cb00647be40",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38427281660,
+      "quality_run": 38427281631,
+      "it_admin_runtime_run": 38427281717,
+      "repository_hygiene_run": 38427281636,
+      "d1_ci_fanout_guard_run": 38425920947,
+      "build_specific_proof_run": 38427281642
+    },
+    "production": {
+      "main_sha": "677b20ae484eb7577d262993ea75239a6083865b",
+      "tree_sha": "f1fa43bc92a84dc2ad9f5e1288ae0cb00647be40",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38427734307,
+      "production_live_resource_integrity_run": 38428099982
+    }
+  },
+  "migration": "0038_release467_inventory_quick_edit_tax_receipts.sql",
+  "safety": {
+    "blind_product_stock_deduction": false,
+    "automatic_product_post": false,
+    "provider_publication": false,
+    "provider_execution": false,
+    "automatic_purchase_tax_credit": false,
+    "destructive_history_rewrite": false
+  },
+  "operator_guide": "docs/operations/RELEASE_467_BUILD_387_GUIDED_INVENTORY_QUICK_EDIT.md",
+  "next_build": 388,
+  "next_build_title": "Inventory Reconciliation Workspace & Purchase-Tax Evidence Review"
+}

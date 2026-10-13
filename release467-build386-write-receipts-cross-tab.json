@@ -2,7 +2,7 @@
   "release": 467,
   "build": 386,
   "title": "Write Receipt Coverage Expansion & Cross-Tab Recovery",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "migration": "0037_release467_receipt_coverage_work_calendar.sql",
   "contract": {
     "existing_ledger_preserved": true,
@@ -67,5 +67,28 @@
       "production_pages_deploy_run": 38344480326,
       "production_live_resource_integrity_run": 38344610640
     }
+  },
+  "final_closure": {
+    "dev_sha": "d835406a070d2910799e0529f83c62aa1baa09e5",
+    "tree_sha": "f1fa43bc92a84dc2ad9f5e1288ae0cb00647be40",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD386_GREEN",
+    "proofs": {
+      "system_gate_run": 38427281660,
+      "current_application_quality_run": 38427281631,
+      "it_admin_runtime_proof_run": 38427281717,
+      "branch_hygiene_run": 38427281636,
+      "d1_ci_fanout_guard_run": 38425920947,
+      "build_specific_proof_run": 38427281642
+    },
+    "ingested_by_build": 387
+  },
+  "production_checkpoint": {
+    "main_sha": "677b20ae484eb7577d262993ea75239a6083865b",
+    "tree_sha": "f1fa43bc92a84dc2ad9f5e1288ae0cb00647be40",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38427734307,
+    "production_live_resource_integrity_run": 38428099982
   }
 }

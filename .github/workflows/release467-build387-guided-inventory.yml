@@ -1,0 +1,28 @@
+name: Release 467 Build 387 Guided Inventory and Tax
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'release467-build387-guided-inventory-tax.json'
+      - 'migrations/canonical/0038_release467_inventory_quick_edit_tax_receipts.sql'
+      - 'functions/api/admin/inventory-quick-edit.js'
+      - 'functions/api/admin/_lib/inventoryQuickEdit387.js'
+      - 'public/js/admin-inventory-tax-quickedit-v387.js'
+      - 'public/js/admin-product-resources.js'
+      - 'scripts/release467_build387_*'
+      - '.github/workflows/release467-build387-guided-inventory.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inventory-correction-tax-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - name: Prove source-linked receipt and purchase tax calculator
+        run: python scripts/release467_build387_gate.py

@@ -1,3 +1,9 @@
+# Current successor: Release 467 Build 387 — Write Confirmation Coverage Audit & Guided Recovery Decisions
+
+BUILD387_VERIFIED_BUILD386_CHECKPOINT: Development d835406a070d2910799e0529f83c62aa1baa09e5; tree f1fa43bc92a84dc2ad9f5e1288ae0cb00647be40; System 38427281660; Quality 38427281631; I.T. 38427281717; Hygiene 38427281636; D1 38425920947; Build 38427281642; Production 677b20ae484eb7577d262993ea75239a6083865b; Pages 38427734307; Live 38428099982.
+
+Build 386 has exact GREEN Development and Production evidence. Build 387 must pass new exact-head source, D1 and live checks before promotion.
+
 # Current successor: Release 467 Build 386 — Write Receipt Coverage Expansion & Cross-Tab Recovery
 
 Build 385 is the most recent fully GREEN Development and Production checkpoint. Build 386 remains a DEVELOPMENT CLOSURE CANDIDATE until its exact-head CI and Production Pages proof complete.
