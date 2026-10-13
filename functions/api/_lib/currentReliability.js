@@ -1,3 +1,4 @@
+/* BUILD384_VERIFIED_PREDECESSOR: Dev 727d3cad69f5cd586cbca74fec16b96e10595716; tree fbf1d379edb5361714e28773c38fcee31b5e57a2; System 38335121781; Quality 38335121776; I.T. 38335121674; Hygiene 38335121624; D1 Fan-out 38335121614; Build-specific 38335121703; Main 77ac5618e76d349f63aa8391846ef51c6883172d; Pages 38335320519; Live 38335448973. */
 /* BUILD383_GREEN_PREDECESSOR: dev f880dbe9f7ff6d9246486bb7042c6b78e1ab2790; tree 5675094afbfbf77f3dc4a2a4eed7c87eb5c31297; System 38327360241; Quality 38327360200; IT 38327360225; Hygiene 38327360258; D1 38327360222; Build 38327360252; main ffe72ac4bde3d2d4680c0946012aa26138652b84; Pages 38328855419; Live 38328981215. */
 /* BUILD382_VERIFIED_PREDECESSOR: dev fc94efcbfa204e639c1a13dd9f738e5c9e1fbc65; tree 7305c245ba8e2bbeffc2796b36c24bea358f5cb0; System 38320191082; Quality 38320191097; IT 38320191152; Hygiene 38320191035; D1 38320191090; Build 38320191048; main 90ed2ecb7d850cf36c10285f31276ac1e82e1f7c; Pages 38320417005; Live 38320529537. */
 /* BUILD381_PREDECESSOR_GREEN: Dev 046615cfe878935fb6fcdc42ce34eb3073c9836c; tree 408b5c97a851db668918f31333772ea4eaa38e54; System 38290987654; Quality 38290987609; I.T. 38290987620; Hygiene 38290987610; D1 CI 38273333360; Build-specific 38290987708; Main 6894cdc60c5ff1fd4cae8f2b05ecc61c2f91ffcf; Pages 38291293697; Live 38292051690. */
@@ -95,13 +96,13 @@ Production live-resource 37981772067
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=383;
-export const CURRENT_RELIABILITY_TITLE='Cross-Project Accounting, Revenue & Profitability';
+export const CURRENT_RELIABILITY_BUILD=384;
+export const CURRENT_RELIABILITY_TITLE='System-Wide Analytics, Automation & Operational Reliability';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
-export const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:382,title:'Customer Requests, Quotes & Commission Lifecycle',state:'DEVELOPMENT_GREEN',dev_sha:'f880dbe9f7ff6d9246486bb7042c6b78e1ab2790',tree_sha:'5675094afbfbf77f3dc4a2a4eed7c87eb5c31297',system_gate_run:38327360241,current_application_quality_run:38327360200,it_admin_runtime_proof_run:38327360225,branch_hygiene_run:38327360258,d1_ci_fanout_guard_run:38327360222,build_specific_proof_run:38327360252,proof_state:'EXACT_BRANCH_HEAD_BUILD382_GREEN'});
-export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:382,title:'Customer Requests, Quotes & Commission Lifecycle',state:'DEVELOPMENT_GREEN',dev_sha:'f880dbe9f7ff6d9246486bb7042c6b78e1ab2790',tree_sha:'5675094afbfbf77f3dc4a2a4eed7c87eb5c31297',system_gate_run:38327360241,current_application_quality_run:38327360200,it_admin_runtime_proof_run:38327360225,branch_hygiene_run:38327360258,d1_ci_fanout_guard_run:38327360222,build_specific_proof_run:38327360252,proof_state:'EXACT_BRANCH_HEAD_BUILD382_GREEN'});
-export const CURRENT_PRODUCTION=Object.freeze({release:467,build:382,title:'Customer Requests, Quotes & Commission Lifecycle',state:'PRODUCTION_GREEN',main_sha:'ffe72ac4bde3d2d4680c0946012aa26138652b84',tree_sha:'5675094afbfbf77f3dc4a2a4eed7c87eb5c31297',production_pages_deploy_run:38328855419,production_live_resource_integrity_run:38328981215,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:38327360252,remote_d1_queries:0});
+export const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:383,title:'Cross-Project Accounting, Revenue & Profitability',state:'DEVELOPMENT_GREEN',dev_sha:'727d3cad69f5cd586cbca74fec16b96e10595716',tree_sha:'fbf1d379edb5361714e28773c38fcee31b5e57a2',system_gate_run:38335121781,current_application_quality_run:38335121776,it_admin_runtime_proof_run:38335121674,branch_hygiene_run:38335121624,d1_ci_fanout_guard_run:38335121614,build_specific_proof_run:38335121703,proof_state:'EXACT_BRANCH_HEAD_BUILD383_GREEN'});
+export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:383,title:'Cross-Project Accounting, Revenue & Profitability',state:'DEVELOPMENT_GREEN',dev_sha:'727d3cad69f5cd586cbca74fec16b96e10595716',tree_sha:'fbf1d379edb5361714e28773c38fcee31b5e57a2',system_gate_run:38335121781,current_application_quality_run:38335121776,it_admin_runtime_proof_run:38335121674,branch_hygiene_run:38335121624,d1_ci_fanout_guard_run:38335121614,build_specific_proof_run:38335121703,proof_state:'EXACT_BRANCH_HEAD_BUILD383_GREEN'});
+export const CURRENT_PRODUCTION=Object.freeze({release:467,build:383,title:'Cross-Project Accounting, Revenue & Profitability',state:'PRODUCTION_GREEN',main_sha:'77ac5618e76d349f63aa8391846ef51c6883172d',tree_sha:'fbf1d379edb5361714e28773c38fcee31b5e57a2',production_pages_deploy_run:38335320519,production_live_resource_integrity_run:38335448973,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:38335121703,remote_d1_queries:0});
 export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
   retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],
@@ -119,7 +120,7 @@ export async function loadCurrentReliability(db,env={}){
     governance:{...inherited.governance,current_release_authority:'current-development-authority.json',production_promotion_proof_count:4,production_closure_proof_count:6,rollback_readiness:'release-neutral-read-only',restart_integrity_protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1'},
     recovery:inherited.recovery,drift:inherited.drift,
     provenance:{
-      current_surface_release:467,current_surface_build:383,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
+      current_surface_release:467,current_surface_build:384,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
       historical_feature_authority:'release467-build36-current-reliability-operational-health.json',current_operator_authority:'current-development-authority.json',
       accepted_development:ACCEPTED_DEVELOPMENT,last_fully_verified_development:LAST_FULLY_VERIFIED_DEVELOPMENT,current_production:CURRENT_PRODUCTION,
       production_proof_transport_policy:PRODUCTION_PROOF_TRANSPORT_POLICY,implementation_acceptance_is_distinct_from_final_closure:true,
