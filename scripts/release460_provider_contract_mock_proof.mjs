@@ -1,4 +1,5 @@
 // Release 460 — provider-contract and intended-account mock proof. No real provider network calls or credentials.
+// Build392: Workerd-compatible manual redirects MUST be verified; explicit 3xx blocking is regression tested by scripts/release467_build392_etsy_workerd.test.mjs.
 import assert from 'node:assert/strict';
 import {
   buildAuthorizationUrl,
@@ -75,7 +76,7 @@ for (const key of ['etsy','pinterest','meta','x','tiktok','youtube']) {
   assert.equal(token.access_token, `${key}-access`);
   assert.equal(exchangeRequest.url, contract.tokenEndpoint);
   assert.equal(exchangeRequest.options.method, 'POST');
-  assert.equal(exchangeRequest.options.redirect, 'error');
+  assert.equal(exchangeRequest.options.redirect, 'manual');
   const exchangeBody = exchangeRequest.options.body.toString();
   assert.match(exchangeBody, /grant_type=authorization_code/);
   assert.match(exchangeBody, /code=mock-code/);
@@ -90,7 +91,7 @@ for (const key of ['etsy','pinterest','meta','x','tiktok','youtube']) {
   assert.equal(identity.remoteSubject.toLowerCase(), EXPECTED[key].toLowerCase());
   assert.equal(identity.accountLabel, LABELS[key]);
   assert.equal(identityRequest.options.method, 'GET');
-  assert.equal(identityRequest.options.redirect, 'error');
+  assert.equal(identityRequest.options.redirect, 'manual');
   assert.equal(identityRequest.options.headers.Authorization, `Bearer ${key}-access`);
   if (key === 'etsy') assert.equal(identityRequest.options.headers['x-api-key'], 'mock-etsy-id:mock-etsy-secret');
   if (key === 'pinterest') assert.equal(identityRequest.url, 'https://api.pinterest.com/v5/user_account');
@@ -165,7 +166,7 @@ for (const key of ['x','tiktok','youtube']) {
   assert.equal(result.ok, true);
   assert.equal(revokeRequest.url, contract.revokeEndpoint);
   assert.equal(revokeRequest.options.method, 'POST');
-  assert.equal(revokeRequest.options.redirect, 'error');
+  assert.equal(revokeRequest.options.redirect, 'manual');
   assert.match(revokeRequest.options.body.toString(), /token=mock-access/);
 }
 
