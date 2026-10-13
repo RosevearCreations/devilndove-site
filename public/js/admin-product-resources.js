@@ -487,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await window.DDAuth.apiJson(
         `/api/admin/product-production-release?product_id=${encodeURIComponent(state.selectedProductId)}&output_quantity=${encodeURIComponent(state.productionOutputQuantity)}`,
         { method: 'GET' },
-        { fallbackMessage: 'Production release preview could not be loaded.', cacheKey: `product-production-preview:${state.selectedProductId}:${state.productionOutputQuantity}`, cacheTtlMs: 5000, retries: 1, staleOnError: false }
+        { fallbackMessage: 'Production release preview could not be loaded.', cacheKey: `product-production-preview:${state.selectedProductId}:${state.productionOutputQuantity}`, cacheTtlMs: 0, retries: 0, staleOnError: false }
       );
       state.productionPreview = data.preview || null;
       state.productionHistory = Array.isArray(data.history) ? data.history : [];

@@ -45,7 +45,7 @@ export async function onRequestPost({request,env}){
   v=validQuickEdit(body);
   if(typeof body.cost_dollars!=='string'&&typeof body.cost_dollars!=='number')throw Error('Enter a purchase cost.');
   const entered=Number(body.cost_dollars);
-  if(!Number.isFinite(entered)||entered<0||Math.round(entered*100)!==entered*100)throw Error('Cost must be nonnegative with no more than two decimals.');
+  if(!Number.isFinite(entered)||entered<0||Math.abs(Math.round(entered*100)-entered*100)>1e-7)throw Error('Cost must be nonnegative with no more than two decimals.');
   tax=costTaxEstimate(Math.round(entered*100),Number(body.tax_rate_percent),body.tax_included===true);
  }catch(e){return out({ok:false,error:String(e.message)},400);}
  const actor=integer(a.admin.user_id);

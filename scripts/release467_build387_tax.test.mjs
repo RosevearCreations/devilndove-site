@@ -6,6 +6,7 @@ test('Ontario 13 percent HST extra and included',()=>{
 });
 test('Ontario small-cost cents round, zero tax and alternate rates',()=>{
  assert.equal(tax(29,13,false).tax_estimate_cents,4);
+ assert.equal(tax(29,13.01,false).tax_rate_basis_points,1301);
  assert.equal(tax(1000,0,true).tax_estimate_cents,0);
  assert.equal(tax(1000,5,false).gross_unit_cost_cents,1050);
 });
