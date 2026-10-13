@@ -67,6 +67,12 @@ export async function onRequestPost(context){
   const db=getDb(context.env);if(!db)return json({ok:false,error:'Database binding is not configured.'},500);
   let body={};try{body=await context.request.json();}catch{return json({ok:false,error:'Invalid JSON body.'},400);}
   const productId=Number(body.product_id);if(!Number.isInteger(productId)||productId<=0)return json({ok:false,error:'A valid product_id is required.'},400);
+  // Build390: reject malformed/out-of-range cents BEFORE running any Product update.
+  const submitted=Number(body.price_cents),compare=body.compare_at_price_cents==null?null:Number(body.compare_at_price_cents);
+  if(!Number.isSafeInteger(submitted)||submitted<0||submitted>999999999||compare!==null&&(!Number.isSafeInteger(compare)||compare<0||compare>999999999))
+    return json({ok:false,error:'Price must be submitted as valid non-negative CAD cents; no Product fields were changed.',code:'invalid_price_cents'},400);
+  if(submitted===0&&body.confirm_zero_price!==true)
+    return json({ok:false,error:'A zero-dollar Product requires explicit confirmation. No Product fields were changed.',code:'zero_price_not_confirmed'},400);
   const payload=productPayload(body);const choiceError=await validate389(db,payload.product_category,payload.shipping_code);if(choiceError)return json({ok:false,error:choiceError,code:'product_choice_invalid'},400);if(!payload.name)return json({ok:false,error:'Product name is required.'},400);if(!payload.slug)return json({ok:false,error:'A valid slug is required.'},400);
   try{
     let measured=0;
@@ -77,8 +83,14 @@ export async function onRequestPost(context){
     const seo=seoPayload(body);const seoValues=SEO_FIELDS.map((key)=>seo[key]);
     const seoResult=await db.prepare(SEO_UPSERT_SQL).bind(productId,...seoValues).run();measured+=rowsRead(seoResult);
 
+    const check=await db.prepare('SELECT price_cents,compare_at_price_cents,currency FROM products WHERE product_id=? LIMIT 1').bind(productId).all();
+    measured+=rowsRead(check);
+    const saved=Array.isArray(check?.results)?check.results[0]:null;
+    const priceConfirmed=Boolean(saved&&Number(saved.price_cents)===submitted&&
+      (saved.compare_at_price_cents==null?null:Number(saved.compare_at_price_cents))===compare&&String(saved.currency||'').toUpperCase()===payload.currency);
+    if(!priceConfirmed)return json({ok:false,error:'Stored Product price could not be confirmed. Check the Product record before another write.',code:'product_price_readback_unconfirmed',retry_automatically:false},409);
     if(typeof context.waitUntil==='function')context.waitUntil(auditAdminAction(context.env,context.request,admin,{action_type:'update_product_low_read',target_type:'product',target_id:productId,target_key:payload.name,details:{build:175,fields:PRODUCT_FIELDS.length,seo_saved:true,schema_introspection_reads:0}}).catch(()=>null));
-    return json({ok:true,product_id:productId,message:'Product saved through the zero-introspection low-read editor path.',delivery:'single-product-save-v175',saved_fields:PRODUCT_FIELDS.length,seo_saved:true,schema_introspection_reads:0,d1_rows_read:measured,background_work_started:false,media_sync_started:false,readiness_scan_started:false},200,{'X-DD-D1-Rows-Read':String(measured)});
+    return json({ok:true,product_id:productId,message:'Product saved through the zero-introspection low-read editor path.',delivery:'single-product-save-v175',saved_fields:PRODUCT_FIELDS.length,seo_saved:true,price_cents_confirmed:true,price_cents:submitted,compare_at_price_cents:compare,currency:payload.currency,schema_introspection_reads:0,d1_rows_read:measured,background_work_started:false,media_sync_started:false,readiness_scan_started:false},200,{'X-DD-D1-Rows-Read':String(measured)});
   }catch(error){
     const message=String(error?.message||'Product save failed.');const quota=/rows read|daily|limit|quota|7500/i.test(message);
     return json({ok:false,error:quota?'D1 read capacity is temporarily unavailable. The Product save was not retried automatically.':message,code:quota?'d1_read_capacity_unavailable':'product_editor_save_failed',retry_automatically:false},quota?503:500);

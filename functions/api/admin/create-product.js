@@ -401,6 +401,8 @@ export async function onRequestPost(context) {
     if (!["pending_review", "approved", "needs_changes", "published"].includes(review_status)) {
       return json({ ok: false, error: "review_status must be pending_review, approved, needs_changes, or published." }, 400);
     }
+    if (body.source_editor_build390===true && price_cents===0 && body.confirm_zero_price!==true)
+      return json({ok:false,error:'Confirm a deliberately free Product before saving $0.00.',code:'zero_price_not_confirmed'},400);
     if (!Number.isInteger(price_cents) || price_cents < 0) {
       return json({ ok: false, error: "price_cents must be a valid whole number of cents." }, 400);
     }

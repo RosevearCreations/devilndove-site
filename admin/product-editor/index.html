@@ -55,8 +55,8 @@
       <section class="dd-editor-panel" data-editor-panel="pricing" hidden>
         <h2>Pricing &amp; Stock</h2>
         <p class="small">Prices are CAD dollars and cents (e.g. 8.00). Tax classes and shipping codes are selected from configured options; shipping codes do not calculate a delivery rate.</p><div class="dd-editor-grid cols-4">
-          <label><span class="small">Price</span><input class="input" type="text" inputmode="decimal" name="price" pattern="[0-9]+(\.[0-9]{1,2})?" placeholder="0.00" data-money-cad="1"/></label>
-          <label><span class="small">Compare-at price</span><input class="input" type="text" inputmode="decimal" name="compare_at_price" pattern="[0-9]+(\.[0-9]{1,2})?" placeholder="0.00" data-money-cad="1"/></label>
+          <label><span class="small">Price (CAD, dollars.cents)</span><input class="input" type="text" inputmode="decimal" name="price" pattern="[0-9]+(\.[0-9]{1,2})?" placeholder="0.00" data-money-cad="1"/></label>
+          <label><span class="small">Compare-at price (CAD)</span><input class="input" type="text" inputmode="decimal" name="compare_at_price" pattern="[0-9]+(\.[0-9]{1,2})?" placeholder="0.00" data-money-cad="1"/></label>
           <label><span class="small">Currency</span><input class="input" name="currency" maxlength="8" value="CAD"/></label>
           <label><span class="small">Sort order</span><input class="input" type="number" name="sort_order" min="0" step="1" value="0"/></label>
           <label><span class="small">Track inventory</span><select class="input" name="inventory_tracking"><option value="0">No</option><option value="1">Yes</option></select></label>
@@ -118,11 +118,11 @@
 
       <section class="dd-editor-panel" data-editor-panel="advanced" hidden><h2>Advanced workspaces</h2><p class="small">These systems remain separate so they cannot wake up merely because we edit a Product.</p><div class="dd-product-actions"><a class="btn" href="/admin/inventory-operations/">Inventory Operations</a><a class="btn" id="productEditorMediaAdvancedLink" href="/admin/catalog-media/">Image Editor</a><a class="btn" href="/admin/release-preflight/">Release Preflight</a><a class="btn" href="/admin/packaging-studio/">Packaging</a></div></section>
 
-      <div class="dd-editor-footer"><div class="small" aria-live="polite">Save Product remains available at the bottom of every tab. No autosave; confirm one Product write at a time.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
+      <div class="dd-editor-footer"><div class="small" aria-live="polite">Build 390: Save Product verifies the stored dollar amount; $0.00 needs confirmation. Save remains available at the bottom of every tab. No autosave; confirm one Product write at a time.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-editor-v163.js?v=178&b389=1"></script>
+  <script src="/public/js/admin-product-editor-v163.js?v=178&b390=1"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 </body>
 </html>
