@@ -244,6 +244,13 @@
       "release": 467,
       "description": "Add operator-confirmed UTC production resource calendar and project deadline events; DB half-open overlap constraints, explicit maintenance acknowledgement, reviewed conflict overrides, and immutable cancellation history.",
       "recovery": "Forward-only ledger. Cancel active entries through Admin to free calendar windows; preserve all rows and audit history. Repair future defects with a new numbered migration rather than editing applied SQL."
+    },
+    {
+      "version": 34,
+      "file": "0034_release467_commission_customer_lifecycle.sql",
+      "release": 467,
+      "description": "Append-only staff commission review decisions linked to existing Custom Requests, quote drafts/revisions, payment-request drafts, actual customer proof approvals, job drafts, manufacturing project identity and explicitly approved progress on active private order links.",
+      "recovery": "Preserve immutable commission evidence and all original quote/proof/payment/order records. Append compensating staff decisions; repair future defects through new forward-only migration."
     }
   ]
 }

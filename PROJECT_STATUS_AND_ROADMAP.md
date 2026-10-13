@@ -1,3 +1,9 @@
+# Release 467 Build 382 — Customer Requests, Quotes & Commission Lifecycle (Development candidate)
+
+Authenticated [Commission Workbench](/admin/commission-workbench/) routes actual Custom Request inquiries, existing quote/revision drafts, actual customer proof approval, deposit-request drafts, manufacturing job/project handoff evidence and explicitly customer-approved private progress through a source-linked append-only operator ledger. No automatic customer approvals, payment capture, accounting booking, automated customer communications or private-media exposure. Original modules retain source authority. See `docs/operations/RELEASE_467_BUILD_382_CUSTOMER_REQUESTS_QUOTES_COMMISSIONS.md`.
+
+**Next queued: Build 383 — Cross-Project Accounting, Revenue & Profitability.**
+
 # Release 467 Build 381 — Production Calendar, Resource Conflicts & Availability (Development candidate)
 
 Authenticated [Resource Calendar](/admin/project-resource-calendar/) records UTC dated capacity, project deadlines and maintenance blocking against one canonical Inventory tool identity; cross-project conflicts require explicit accountable overrides and distinct maintenance acknowledgements. No physical availability inference or automatic task completion. Guide: `docs/operations/RELEASE_467_BUILD_381_PRODUCTION_CALENDAR_RESOURCE_CONFLICTS_AVAILABILITY.md`.

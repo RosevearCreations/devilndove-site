@@ -29,6 +29,11 @@ export async function onRequestGet(context){
   const photos=rows(await db.prepare(`SELECT custom_order_stage_photo_id, custom_request_id, order_id, stage_key, image_url, image_caption, public_use_status, moderation_status, created_at FROM custom_order_stage_photos WHERE (custom_request_id=? OR order_id=?) AND COALESCE(public_use_status,'internal_review') IN ('customer_private','product_page_ok','social_ok','all_public_ok') AND COALESCE(moderation_status,'approved') IN ('approved','customer_private') ORDER BY datetime(created_at) DESC LIMIT 40`).bind(Number(link.custom_request_id||0),Number(order.order_id||0)).all().catch(()=>({results:[]})));
   const specs=rows(await db.prepare(`SELECT product_family, scent_profile, wax_or_base, colour_notes, batch_number, ingredient_notes, allergen_safety_notes, cure_ready_date FROM custom_candle_soap_product_specs WHERE custom_request_id=? ORDER BY datetime(updated_at) DESC LIMIT 4`).bind(Number(link.custom_request_id||0)).all().catch(()=>({results:[]})));
 
+  // Build 382: deliberately expose only explicit operator-approved customer copy.
+  // The existing private order-status token has already been verified.
+  const commissionProgress=await db.prepare(`SELECT progress_stage,public_progress_message,created_at
+    FROM custom_request_commission_events WHERE custom_request_id=? AND event_kind='progress_approval'
+      AND customer_visible=1 ORDER BY custom_request_commission_event_id DESC LIMIT 1`).bind(Number(link.custom_request_id||0)).first().catch(()=>null);
   const currentStage=customerStageMessage(link.order_stage||'planning');
   const journey=buildCustomerJourney({requestStatus:request?.status||'',quoteStatus:quote?.quote_status||'',orderStage:currentStage.key,orderStatus:order.order_status||''});
   const proof_consent={status:photos.some(photo=>['product_page_ok','social_ok','all_public_ok'].includes(String(photo.public_use_status||'').toLowerCase()))?'public_photo_permission_available':photos.some(photo=>String(photo.public_use_status||'').toLowerCase()==='customer_private')?'private_only':'not_recorded',public_ready_count:photos.filter(photo=>['product_page_ok','social_ok','all_public_ok'].includes(String(photo.public_use_status||'').toLowerCase())).length,private_photo_count:photos.filter(photo=>String(photo.public_use_status||'').toLowerCase()==='customer_private').length,publication_authorized:false,moderation_required:true};
@@ -46,6 +51,7 @@ export async function onRequestGet(context){
     follow_through,
     journey,
     customer_stage:currentStage,
+    commission_progress:commissionProgress?{stage:commissionProgress.progress_stage,message:commissionProgress.public_progress_message,approved_at:commissionProgress.created_at}:null,
     fulfillment_message:follow_through.handoff_message,
     next_step:currentStage.next_step||'',
     link:{link_status:link.link_status||'active',custom_request_id:Number(link.custom_request_id||0)||null,order_stage:currentStage.key,stage_updated_at:link.stage_updated_at||''}
