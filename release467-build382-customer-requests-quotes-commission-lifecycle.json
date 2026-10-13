@@ -1,0 +1,52 @@
+{
+  "release": 467,
+  "build": 382,
+  "title": "Customer Requests, Quotes & Commission Lifecycle",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "contract": {
+    "existing_request_intake": true,
+    "existing_quote_revision_authority": true,
+    "existing_deposit_request_authority": true,
+    "existing_customer_proof_acceptance": true,
+    "existing_job_draft_authority": true,
+    "reviewed_manufacturing_project_bridge": true,
+    "operator_decision_ledger": true,
+    "customer_safe_progress_approval": true,
+    "active_order_token_only": true
+  },
+  "safety": {
+    "new_quote_execution": false,
+    "charge_deposit": false,
+    "customer_proof_auto_accept": false,
+    "provider_messaging": false,
+    "accounting_posting": false,
+    "automatic_job_start": false,
+    "private_media_exposure": false,
+    "request_time_ddl": false
+  },
+  "migration": "0034_release467_commission_customer_lifecycle.sql",
+  "operator_guide": "docs/operations/RELEASE_467_BUILD_382_CUSTOMER_REQUESTS_QUOTES_COMMISSIONS.md",
+  "next_build": 383,
+  "next_build_title": "Cross-Project Accounting, Revenue & Profitability",
+  "roadmap": "docs/operations/RELEASE_467_SYSTEM_WIDE_PLATFORM_BUILDS_377_384.md",
+  "starting_point": {
+    "development": {
+      "sha": "fc94efcbfa204e639c1a13dd9f738e5c9e1fbc65",
+      "tree": "7305c245ba8e2bbeffc2796b36c24bea358f5cb0",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38320191082,
+      "quality_run": 38320191097,
+      "it_admin_runtime_run": 38320191152,
+      "repository_hygiene_run": 38320191035,
+      "d1_ci_fanout_guard_run": 38320191090,
+      "build_specific_proof_run": 38320191048
+    },
+    "production": {
+      "main_sha": "90ed2ecb7d850cf36c10285f31276ac1e82e1f7c",
+      "tree_sha": "7305c245ba8e2bbeffc2796b36c24bea358f5cb0",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38320417005,
+      "production_live_resource_integrity_run": 38320529537
+    }
+  }
+}

@@ -1,3 +1,4 @@
+/* BUILD382_VERIFIED_PREDECESSOR: dev fc94efcbfa204e639c1a13dd9f738e5c9e1fbc65; tree 7305c245ba8e2bbeffc2796b36c24bea358f5cb0; System 38320191082; Quality 38320191097; IT 38320191152; Hygiene 38320191035; D1 38320191090; Build 38320191048; main 90ed2ecb7d850cf36c10285f31276ac1e82e1f7c; Pages 38320417005; Live 38320529537. */
 /* BUILD381_PREDECESSOR_GREEN: Dev 046615cfe878935fb6fcdc42ce34eb3073c9836c; tree 408b5c97a851db668918f31333772ea4eaa38e54; System 38290987654; Quality 38290987609; I.T. 38290987620; Hygiene 38290987610; D1 CI 38273333360; Build-specific 38290987708; Main 6894cdc60c5ff1fd4cae8f2b05ecc61c2f91ffcf; Pages 38291293697; Live 38292051690. */
 /* BUILD380_VERIFIED_PREDECESSOR: dev 612e53b3432ee3cb7a2a9e42543cd742f211ef9c; tree 12fd3195ccb67e7516a70100452a6c176333388b; System 38255241641; Quality 38255241594; I.T. 38255241581; Hygiene 38255241624; Production 8aa02f0f2402d9d0e4ea03f485468de0954e424f; Pages 38255747128; Live 38255898210. */
 /* BUILD379_PREDECESSOR_EXACT_GREEN: Development 509c412adb53b7314b42f39b41daf2ba13b940b3; tree 33fa4d22d3feac3a7c95deb4a40232c86f0efce0; System 38251490326; Quality 38251490428; I.T. 38251490536; Hygiene 38251490603; fanout 38251097239; Build 378 38250985069; Production f9bc2dc6c0050edb3194e8eef92899d284a56b10; Pages 38251740768; Live 38251872455. */
@@ -93,13 +94,13 @@ Production live-resource 37981772067
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=381;
-export const CURRENT_RELIABILITY_TITLE='Production Calendar, Resource Conflicts & Availability';
+export const CURRENT_RELIABILITY_BUILD=382;
+export const CURRENT_RELIABILITY_TITLE='Customer Requests, Quotes & Commission Lifecycle';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
-export const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:380,title:'Multi-Project Materials, Consumables & Costing',state:'DEVELOPMENT_GREEN',dev_sha:'046615cfe878935fb6fcdc42ce34eb3073c9836c',tree_sha:'408b5c97a851db668918f31333772ea4eaa38e54',system_gate_run:38290987654,current_application_quality_run:38290987609,it_admin_runtime_proof_run:38290987620,branch_hygiene_run:38290987610,d1_ci_fanout_guard_run:38273333360,build_specific_proof_run:38290987708,proof_state:'EXACT_BRANCH_HEAD_BUILD380_GREEN'});
-export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:380,title:'Multi-Project Materials, Consumables & Costing',state:'DEVELOPMENT_GREEN',dev_sha:'046615cfe878935fb6fcdc42ce34eb3073c9836c',tree_sha:'408b5c97a851db668918f31333772ea4eaa38e54',system_gate_run:38290987654,current_application_quality_run:38290987609,it_admin_runtime_proof_run:38290987620,branch_hygiene_run:38290987610,d1_ci_fanout_guard_run:38273333360,build_specific_proof_run:38290987708,proof_state:'EXACT_BRANCH_HEAD_BUILD380_GREEN'});
-export const CURRENT_PRODUCTION=Object.freeze({release:467,build:380,title:'Multi-Project Materials, Consumables & Costing',state:'PRODUCTION_GREEN',main_sha:'6894cdc60c5ff1fd4cae8f2b05ecc61c2f91ffcf',tree_sha:'408b5c97a851db668918f31333772ea4eaa38e54',production_pages_deploy_run:38291293697,production_live_resource_integrity_run:38292051690,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:38290987708,remote_d1_queries:0});
+export const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:381,title:'Production Calendar, Resource Conflicts & Availability',state:'DEVELOPMENT_GREEN',dev_sha:'fc94efcbfa204e639c1a13dd9f738e5c9e1fbc65',tree_sha:'7305c245ba8e2bbeffc2796b36c24bea358f5cb0',system_gate_run:38320191082,current_application_quality_run:38320191097,it_admin_runtime_proof_run:38320191152,branch_hygiene_run:38320191035,d1_ci_fanout_guard_run:38320191090,build_specific_proof_run:38320191048,proof_state:'EXACT_BRANCH_HEAD_BUILD381_GREEN'});
+export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:381,title:'Production Calendar, Resource Conflicts & Availability',state:'DEVELOPMENT_GREEN',dev_sha:'fc94efcbfa204e639c1a13dd9f738e5c9e1fbc65',tree_sha:'7305c245ba8e2bbeffc2796b36c24bea358f5cb0',system_gate_run:38320191082,current_application_quality_run:38320191097,it_admin_runtime_proof_run:38320191152,branch_hygiene_run:38320191035,d1_ci_fanout_guard_run:38320191090,build_specific_proof_run:38320191048,proof_state:'EXACT_BRANCH_HEAD_BUILD381_GREEN'});
+export const CURRENT_PRODUCTION=Object.freeze({release:467,build:381,title:'Production Calendar, Resource Conflicts & Availability',state:'PRODUCTION_GREEN',main_sha:'90ed2ecb7d850cf36c10285f31276ac1e82e1f7c',tree_sha:'7305c245ba8e2bbeffc2796b36c24bea358f5cb0',production_pages_deploy_run:38320417005,production_live_resource_integrity_run:38320529537,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:38320191048,remote_d1_queries:0});
 export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
   retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],
@@ -117,7 +118,7 @@ export async function loadCurrentReliability(db,env={}){
     governance:{...inherited.governance,current_release_authority:'current-development-authority.json',production_promotion_proof_count:4,production_closure_proof_count:6,rollback_readiness:'release-neutral-read-only',restart_integrity_protocol:'EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1'},
     recovery:inherited.recovery,drift:inherited.drift,
     provenance:{
-      current_surface_release:467,current_surface_build:381,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
+      current_surface_release:467,current_surface_build:382,inherited_engine:'functions/api/_lib/release466Reliability.js',inherited_engine_role:'HISTORICAL_REGRESSION_COMPATIBILITY',
       historical_feature_authority:'release467-build36-current-reliability-operational-health.json',current_operator_authority:'current-development-authority.json',
       accepted_development:ACCEPTED_DEVELOPMENT,last_fully_verified_development:LAST_FULLY_VERIFIED_DEVELOPMENT,current_production:CURRENT_PRODUCTION,
       production_proof_transport_policy:PRODUCTION_PROOF_TRANSPORT_POLICY,implementation_acceptance_is_distinct_from_final_closure:true,
