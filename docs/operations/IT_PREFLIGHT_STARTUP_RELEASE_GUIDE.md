@@ -1,3 +1,7 @@
+# Current successor: Release 467 Build 383 — Cross-Project Accounting, Revenue & Profitability
+
+Last fully verified Development Build 382 `f880dbe9f7ff6d9246486bb7042c6b78e1ab2790` with tree `5675094afbfbf77f3dc4a2a4eed7c87eb5c31297`: System 38327360241, Quality 38327360200, IT 38327360225, Hygiene 38327360258, D1 Fan-Out 38327360222, dedicated Build 382 38327360252. Production Build 382 main `ffe72ac4bde3d2d4680c0946012aa26138652b84`, Pages 38328855419 GREEN, Live Integrity 38328981215 GREEN. Build 383 is the current Development candidate, not yet Production GREEN. Next queued Build 384.
+
 # Current successor: Release 467 Build 382 — Customer Requests, Quotes & Commission Lifecycle
 
 Last fully verified Build 381 Development `fc94efcbfa204e639c1a13dd9f738e5c9e1fbc65`, tree `7305c245ba8e2bbeffc2796b36c24bea358f5cb0`. System 38320191082, Quality 38320191097, I.T. 38320191152, Hygiene 38320191035, D1 Fan-Out 38320191090, Build-specific 38320191048. Last Production GREEN Build 381 main `90ed2ecb7d850cf36c10285f31276ac1e82e1f7c`; Production Pages 38320417005; live-resource integrity 38320529537. Build 382 is current Development candidate. Next queued Build 383.

@@ -1,18 +1,5 @@
 name: Release 467 Build 382 Customer Requests Quotes Commission Lifecycle
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build382-customer-requests-quotes-commission-lifecycle.json'
-      - 'functions/api/admin/commission-workbench.js'
-      - 'functions/api/admin/_lib/commissionRules.js'
-      - 'functions/api/commission-progress.js'
-      - 'functions/api/custom-request-order.js'
-      - 'public/js/admin-commission-workbench.js'
-      - 'admin/commission-workbench/**'
-      - 'migrations/canonical/0034_release467_commission_customer_lifecycle.sql'
-      - 'scripts/release467_build382_*'
-      - '.github/workflows/release467-build382-customer-requests-quotes-commission-lifecycle.yml'
   workflow_dispatch:
 permissions:
   contents: read
