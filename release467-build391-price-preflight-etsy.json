@@ -2,7 +2,7 @@
   "release": 467,
   "build": 391,
   "title": "Historical Price Reconciliation & Product Save Browser Acceptance",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "starting_point": {
     "development": {
       "sha": "7c69c023ede6d4a154d4c911aaa88039f26263c7",
@@ -48,5 +48,29 @@
   "new_canonical_migration": false,
   "operator_guide": "docs/operations/RELEASE_467_BUILD_391_PRICE_PREFLIGHT_ETSY_OAUTH_ACCEPTANCE.md",
   "next_build": 392,
-  "next_build_title": "Etsy OAuth Callback Edge Reliability & Price Reconciliation Source Acceptance"
+  "next_build_title": "Etsy OAuth Callback Edge Reliability & Price Reconciliation Source Acceptance",
+  "final_closure": {
+    "dev_sha": "d3a5818640838c4eb6860fe2d7e37484d477dc4b",
+    "tree_sha": "c7216df0acce7fee7968b5c3d443a2ad3bd28f3c",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD391_GREEN",
+    "proofs": {
+      "system_gate_run": 38461962133,
+      "current_application_quality_run": 38461962112,
+      "it_admin_runtime_proof_run": 38461962070,
+      "branch_hygiene_run": 38461962273,
+      "d1_ci_fanout_guard_run": 38461705912,
+      "build_specific_proof_run": 38461962113
+    },
+    "ingested_by_build": 392
+  },
+  "production_checkpoint": {
+    "main_sha": "329bcb7a289a5d16ea9940bd6c80664185779b1f",
+    "tree_sha": "c7216df0acce7fee7968b5c3d443a2ad3bd28f3c",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38462263342,
+    "production_live_resource_integrity_run": 38462385553,
+    "remote_d1_queries": 0
+  }
 }

@@ -165,7 +165,7 @@ function tokenRequest(contract, env, bodyValues) {
   return { cfg, headers, body: formBody(body) };
 }
 
-/* Build 392: Cloudflare workerd does not implement fetch redirect:"error".
+/* Build 392: Cloudflare workerd does not implement the browser error redirect mode.
    Use manual with explicit 3xx/opaque rejection so OAuth codes, secrets and bearer
    headers can never be forwarded to redirected origins. No automatic retry. */
 function blockOAuthRedirect(response,stage){

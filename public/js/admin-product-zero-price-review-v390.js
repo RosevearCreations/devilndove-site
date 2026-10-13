@@ -15,7 +15,7 @@ button.addEventListener('click',async()=>{
    data.items.map(item=>'<tr><td>'+esc(item.name)+' <small>#'+Number(item.product_id)+' · '+esc(item.sku)+'</small></td>'+
    '<td>$0.00 — verify intended price</td><td><a class="btn" href="/admin/product-editor/?product_id='+Number(item.product_id)+'&tab=pricing">Review &amp; edit</a></td></tr>').join('')+'</tbody>';
   container.append(table);
-  status.textContent=data.items.length+' zero-priced Products found'+(data.has_more?' (more may exist)':'')+'. Review original prices before saving; none were changed.';
+  status.textContent=data.items.length+' zero-priced Products found'+(data.has_more?' (more may exist)':'')+'. Use independently documented original prices; no source value was inferred and none were changed.';
  }catch(error){status.textContent='Price review could not load: '+error.message;}
  finally{button.disabled=false;button.textContent='Refresh zero-priced Product review';}
 });
