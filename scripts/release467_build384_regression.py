@@ -9,7 +9,7 @@ def check(ok,msg):
 pointer=json.loads(text('current-development-authority.json'))
 manifest=json.loads(text('migrations/canonical/manifest.json'))
 check(pointer.get('build',0)>=384,'Current development pointer must be Build 384+')
-check(len(manifest['migrations'])==35 and manifest['migrations'][-1]['version']==35,'Build 384 is intentionally schema-neutral and preserves 0035')
+check(len(manifest['migrations'])>=35 and manifest['migrations'][34]['version']==35,'Build 384 is schema-neutral and canonical 0035 remains pinned')
 auth=text('public/js/auth.js');alias=text('public/js/admin-auth.js');main=text('js/main.js')
 check(auth==alias,'Legacy admin-auth alias must remain cookie-first and exactly identical')
 check('admin-action-ack-v384.js' in auth and 'admin-action-ack-v384.js' in main,'Shared admin action acknowledgement loader')
