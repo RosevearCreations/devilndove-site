@@ -12,6 +12,6 @@ export async function onRequestGet(context){
   ORDER BY product_id DESC LIMIT 26`).all();
   const rows=Array.isArray(r?.results)?r.results:[];
   return json({ok:true,items:rows.slice(0,25),has_more:rows.length>25,read_only:true,
-   no_automatic_price_repair:true,evidence_required:true,reason:'Zero-priced items may be intentional or may have been affected by an earlier faulty decimal parser. Verify each against original pricing evidence before correcting.'});
+   no_automatic_price_repair:true,evidence_required:true,source_acceptance:'operator_approval_required',historical_price_inferred:false,reason:'Zero-priced items may be intentional or may have been affected by an earlier faulty decimal parser. Verify each against original pricing evidence before correcting.'});
  }catch{return json({ok:false,error:'Zero-price source review could not be verified; no prices were changed.'},503);}
 }

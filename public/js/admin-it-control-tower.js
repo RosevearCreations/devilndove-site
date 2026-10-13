@@ -1,3 +1,4 @@
+// BUILD392_CURRENT_CLIENT: Release 467 Build 392 — Etsy OAuth Callback Edge Reliability & Price Reconciliation Source Acceptance; verified Build 391 Production GREEN.
 // BUILD391_CURRENT_CLIENT: Release 467 Build 391 — Historical Price Reconciliation & Product Save Browser Acceptance; verified Build 390 Production GREEN.
 // BUILD390_CURRENT_CLIENT: Release 467 Build 390 — Product Video Review & Inventory Tax Evidence Operational Acceptance; verified Build 389 Production GREEN.
 // BUILD389_CURRENT_CLIENT: Release 467 Build 389 — Product Save End-to-End Acceptance & Purchase Invoice Evidence Review Decisions; verified Build 388 Production GREEN.

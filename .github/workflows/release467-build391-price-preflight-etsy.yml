@@ -1,15 +1,5 @@
 name: Release 467 Build 391 Price Preflight and Etsy Callback Acceptance
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build391-price-preflight-etsy.json'
-      - 'functions/api/admin/current-deployment-preflight.js'
-      - 'public/js/admin-current-deployment-preflight.js'
-      - 'functions/api/social/oauth/_callback.js'
-      - 'functions/api/admin/etsy-oauth-acceptance.js'
-      - 'scripts/release467_build391_regression.py'
-      - '.github/workflows/release467-build391-price-preflight-etsy.yml'
   workflow_dispatch:
 permissions:
   contents: read

@@ -1,3 +1,9 @@
+# Current successor: Release 467 Build 392 — Etsy OAuth Callback Edge Reliability & Price Reconciliation Source Acceptance
+
+BUILD392_VERIFIED_BUILD391_CHECKPOINT: Development d3a5818640838c4eb6860fe2d7e37484d477dc4b; tree c7216df0acce7fee7968b5c3d443a2ad3bd28f3c; System 38461962133; Quality 38461962112; I.T. 38461962070; Hygiene 38461962273; D1 fan-out 38461705912; Build 38461962113; Production 329bcb7a289a5d16ea9940bd6c80664185779b1f; Pages 38462263342; Live 38462385553.
+
+The October 13 live Etsy consent redirect error was a Cloudflare Workers unsupported fetch redirect:error mode; Build392 uses manual and blocks 3xx responses, preserving OAuth PKCE/state and no automatic provider retry. Historical price source acceptance stays read-only. Build391 is the last fully verified Development/Production baseline.
+
 # Current successor: Release 467 Build 391 — Historical Price Reconciliation & Product Save Browser Acceptance
 
 BUILD391_VERIFIED_BUILD390_CHECKPOINT: Development 7c69c023ede6d4a154d4c911aaa88039f26263c7; tree 140daf4d2800a26b38688144bc87fae8f344ead3; System 38458396593; Quality 38458396609; I.T. 38458396539; Hygiene 38458396516; D1 fan-out 38458396498; Build 38458396621; Production 6a2914aa98d2652a9ccd1d2a6de58280076985d3; Pages 38458723608; Live 38458843594.
