@@ -1,3 +1,9 @@
+# Current successor: Release 467 Build 390 — Product Video Review & Inventory Tax Evidence Operational Acceptance
+
+BUILD390_VERIFIED_BUILD389_CHECKPOINT: Development ea31d60bd3e5cb23be7c43b35474b8114215980f; tree d78c6a8a4fce5a1e9a03647a75cbb6ea6c48556b; System 38454465063; Quality 38454465074; I.T. 38454465037; Hygiene 38454465138; D1 fan-out 38454158726; Build 38454465107; Production 454f5b43e8da3cf5119563f53e109a3bacdfd886; Pages 38454828495; Live 38455024191.
+
+Build390 corrects the decimal price regression and requires authoritative cents readback before confirming Save. Existing source-zeroed prices require operator-reviewed evidence. No new D1 migration is authorized for this build. The Build389 video review and tax evidence remain approval gated.
+
 # Current successor: Release 467 Build 389 — Product Save End-to-End Acceptance & Purchase Invoice Evidence Review Decisions
 
 BUILD389_VERIFIED_BUILD388_CHECKPOINT: Development ba306bd2482f120f9fc2043771bcc37bd2d3fdc9; tree 75da53dcbb86619bf3cbc83adadd287f05feca9e; System 38448554424; Quality 38448554540; I.T. 38448554448; Hygiene 38448554514; D1 fan-out 38448376972; Build 38448554460; Production 7c18742546dcdbb41e67a6fc9b46da9ba24bb431; Pages 38448905048; Live 38449081983.

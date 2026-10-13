@@ -1,19 +1,5 @@
 name: Release 467 Build 389 Product Editor and Video Acceptance
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build389-product-fields-media.json'
-      - 'migrations/canonical/0039_release467_product_video_attachment.sql'
-      - 'admin/product-editor/index.html'
-      - 'admin/catalog-media/index.html'
-      - 'public/js/admin-product-editor-v163.js'
-      - 'public/js/admin-product-media-editor-v172.js'
-      - 'functions/api/admin/product-editor-options.js'
-      - 'functions/api/admin/product-video-attachments.js'
-      - 'functions/api/product-videos.js'
-      - 'scripts/release467_build389_regression.py'
-      - '.github/workflows/release467-build389-product-fields-media.yml'
   workflow_dispatch:
 permissions:
   contents: read

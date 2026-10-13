@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {readFileSync} from 'node:fs';
+const editor=readFileSync(new URL('../public/js/admin-product-editor-v163.js',import.meta.url),'utf8');
+const declaration=editor.match(/  const cents=\(value\)=>\{[^\n]+\};/);
+assert.ok(declaration,'Product Editor must provide the tested decimal parser');
+const cents=vm.runInNewContext(declaration[0]+'\ncents');
+test('CAD $8.00 is 800 cents, never silently zero',()=>{assert.equal(cents('8.00'),800);assert.equal(cents('8'),800);assert.equal(cents('8.0'),800);});
+test('decimal cents and long dollar values preserved',()=>{assert.equal(cents('0.29'),29);assert.equal(cents('1.01'),101);assert.equal(cents('1234.56'),123456);});
+test('deliberately free product may be zero',()=>{assert.equal(cents('0.00'),0);});
+test('malformed price fails closed, never becomes $0.00',()=>{for(const value of ['8.001','8x00','8,00','-1','', 'abc','NaN','8\\00','1e2'])assert.throws(()=>cents(value),/valid CAD price/);});
+test('oversized or unsafe price is rejected',()=>{assert.throws(()=>cents('9999999999999999.00'),/out of range/);});
+test('compare-at price uses the same correct parser',()=>{assert.ok(editor.includes("cents(get('compare_at_price'))"));});
+test('client requires explicit free Price intent and checks back from server',()=>{
+ assert.ok(editor.includes("body.confirm_zero_price=true"));
+ assert.ok(editor.includes('data.price_cents_confirmed'));
+ assert.ok(editor.includes('data.price_cents)!==body.price_cents'));
+ assert.ok(editor.includes("CAD price verified"));
+});

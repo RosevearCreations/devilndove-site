@@ -1,0 +1,27 @@
+name: Release 467 Build 390 Price Save and Video Invoice Acceptance
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'release467-build390-price-video-invoice.json'
+      - 'public/js/admin-product-editor-v163.js'
+      - 'functions/api/admin/product-editor-save.js'
+      - 'functions/api/admin/product-zero-price-review.js'
+      - 'public/js/admin-product-zero-price-review-v390.js'
+      - 'scripts/release467_build390_*'
+      - '.github/workflows/release467-build390-price-video-invoice.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  price-roundtrip-and-source-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - name: Verify source-backed CAD amounts, saved-price acceptance and review-only recovery
+        run: python scripts/release467_build390_regression.py
