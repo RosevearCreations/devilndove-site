@@ -1,3 +1,4 @@
+# Build 385 exact-head reproof: require Development-first D1 0036 application, Production gated on identical GREEN tree.
 name: Release 467 Build 385 Durable Write Receipts
 on:
   push:

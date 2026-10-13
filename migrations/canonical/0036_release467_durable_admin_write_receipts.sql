@@ -1,3 +1,4 @@
+-- Build 385 canonical Development migration activation: 0036 must be applied and proved before Production promotion.
 -- Release 467 Build 385: durable source-linked exactly-once-on-D1 commit receipts for selected admin writes.
 -- The original business source row and this receipt MUST be committed in the SAME D1 atomic batch.
 -- No standalone "started" row or unverified "success" receipt can be written by the API.
