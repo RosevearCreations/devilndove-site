@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  else input.reservation_id=id;
  if(!confirm('Confirm '+(action==='reserve'?'reserve':'release')+' '+qty+' stock units against the shared Inventory balance?'))return;
  if(status)status.textContent='Updating canonical reservation…';
- try{const r=await api('/api/admin/project-material-planner',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Reservation update failed');requestKey=null;search='';data=d;paint();el('matResult').textContent='Inventory reservation updated successfully.';}
+ try{const r=await api('/api/admin/project-material-planner',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input)});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Reservation update failed');requestKey=null;search='';data=d;paint();el('matResult').textContent='OK — reservation action confirmed'+(d.receipt_id?' with receipt #'+d.receipt_id:'')+(d.replayed?' (previously completed; no repeat write).':'.');}
  catch(e){if(status)status.textContent='Not confirmed: '+e.message;}
  }
  async function load(){const id=selector.value;if(!id){mount.textContent='Choose a Creative Project.';return;}mount.textContent='Loading source records…';try{const r=await api('/api/admin/project-material-planner?project_id='+encodeURIComponent(id)+'&q='+encodeURIComponent(search),{cache:'no-store'});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.error||'Material records unavailable');data=d;paint();}catch(e){mount.textContent='Material planner unavailable: '+e.message;}}

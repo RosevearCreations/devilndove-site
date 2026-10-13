@@ -26,5 +26,19 @@ document.addEventListener('DOMContentLoaded',()=>{
   }catch(e){mount.textContent='No reliable report available.';status.textContent='Unable to confirm report: '+e.message;}
   finally{refresh.disabled=false;refresh.textContent='Refresh bounded report';}
  }
+ const receiptButton=$('receiptCheck');
+ if(receiptButton)receiptButton.addEventListener('click',async()=>{
+  const scope=$('receiptScope')?.value||'',key=($('receiptKey')?.value||'').trim(),result=$('receiptResult');
+  if(!/^[A-Za-z0-9_-]{16,80}$/.test(key)){result.textContent='Enter the original 16–80 character request key.';return;}
+  receiptButton.disabled=true;receiptButton.textContent='Checking…';result.textContent='Reading this administrator\'s committed receipt…';
+  try{
+   const url='/api/admin/write-operation-receipt?scope='+encodeURIComponent(scope)+'&request_key='+encodeURIComponent(key);
+   const r=await (window.DDAuth?.apiFetch?window.DDAuth.apiFetch(url,{cache:'no-store'}):fetch(url,{credentials:'same-origin',cache:'no-store'}));
+   const v=await r.json();if(!r.ok||!v.ok)throw Error(v.error||'Receipt check failed');
+   result.textContent=v.found?'OK — committed receipt #'+v.receipt_id+' (source record #'+v.source_record_id+') at '+v.committed_at+'. Do not repeat the write.':
+    'No committed receipt found for this user. The outcome may still be uncertain; inspect the original source before retrying.';
+  }catch(e){result.textContent='Receipt status unknown: '+e.message+'. Do not blindly retry.';}
+  finally{receiptButton.disabled=false;receiptButton.textContent='Check original receipt';}
+ });
  refresh.addEventListener('click',load);load();
 });
