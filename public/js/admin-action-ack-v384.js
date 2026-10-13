@@ -86,7 +86,7 @@
       if(url.pathname.startsWith('/api/auth/') || url.pathname.startsWith('/api/analytics/'))return null;
       const body=options?.body;
       const fingerprint=typeof body==='string'&&body.length<=32768
-        ? method+'|'+url.href+'|'+body:null;
+        ? method+'|'+url.href+'|'+JSON.stringify(options?.headers||{})+'|'+body:null;
       return {method,url,fingerprint};
     }catch{return null;}
   }
