@@ -25,7 +25,7 @@ for file in ('functions/api/admin/_lib/writeReceipts.js','functions/api/admin/wr
  check(p.returncode==0,'JavaScript parse '+file+': '+p.stderr[-300:])
 t=subprocess.run(['node','--test','scripts/release467_build385_hash.test.mjs'],cwd=ROOT,capture_output=True,text=True)
 check(t.returncode==0,'Hash/actor/payload JS tests '+t.stdout[-2000:]+t.stderr[-1200:])
-db=sqlite3.connect(':memory:');db.execute('PRAGMA foreign_keys=ON')
+db=sqlite3.connect(':memory:',isolation_level=None);db.execute('PRAGMA foreign_keys=ON')
 db.executescript("""
 CREATE TABLE users(user_id INTEGER PRIMARY KEY);
 CREATE TABLE custom_requests(custom_request_id INTEGER PRIMARY KEY);
