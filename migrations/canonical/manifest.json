@@ -279,6 +279,13 @@
       "release": 467,
       "description": "Atomic operator-confirmed Tool/Supply count and unit correction with HST estimate, movement and immutable actor-bound source receipt.",
       "recovery": "Preserve existing stock data, movement rows, tax estimates and receipts. Repair via a later forward-only migration; no destructive rollback."
+    },
+    {
+      "version": 39,
+      "file": "0039_release467_product_video_attachment.sql",
+      "release": 467,
+      "description": "Additive product-bound R2 video references with private-review by default, bounded one-video uploads and explicit publication review.",
+      "recovery": "Preserve every original product, image, attachment and object. Correct via a forward-only migration; never drop existing media records."
     }
   ]
 }

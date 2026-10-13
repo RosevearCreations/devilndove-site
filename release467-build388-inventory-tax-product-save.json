@@ -2,7 +2,7 @@
   "release": 467,
   "build": 388,
   "title": "Inventory Reconciliation Workspace & Purchase-Tax Evidence Review",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "starting_point": {
     "development": {
       "sha": "57043418486f9e976c487c6b868f63924191997f",
@@ -56,5 +56,29 @@
   "new_canonical_migration": false,
   "docs": "docs/operations/RELEASE_467_BUILD_388_INVENTORY_TAX_PRODUCT_SAVE_MEDIA.md",
   "next_build": 389,
-  "next_build_title": "Product Save End-to-End Acceptance & Purchase Invoice Evidence Review Decisions"
+  "next_build_title": "Product Save End-to-End Acceptance & Purchase Invoice Evidence Review Decisions",
+  "final_closure": {
+    "dev_sha": "ba306bd2482f120f9fc2043771bcc37bd2d3fdc9",
+    "tree_sha": "75da53dcbb86619bf3cbc83adadd287f05feca9e",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD388_GREEN",
+    "proofs": {
+      "system_gate_run": 38448554424,
+      "current_application_quality_run": 38448554540,
+      "it_admin_runtime_proof_run": 38448554448,
+      "branch_hygiene_run": 38448554514,
+      "d1_ci_fanout_guard_run": 38448376972,
+      "build_specific_proof_run": 38448554460
+    },
+    "ingested_by_build": 389
+  },
+  "production_checkpoint": {
+    "main_sha": "7c18742546dcdbb41e67a6fc9b46da9ba24bb431",
+    "tree_sha": "75da53dcbb86619bf3cbc83adadd287f05feca9e",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38448905048,
+    "production_live_resource_integrity_run": 38449081983,
+    "remote_d1_queries": 0
+  }
 }
