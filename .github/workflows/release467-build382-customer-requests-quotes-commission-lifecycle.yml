@@ -1,7 +1,7 @@
 name: Release 467 Build 382 Customer Requests Quotes Commission Lifecycle
 on:
   push:
-    branches: [dev, build382-commission-lifecycle]
+    branches: [dev]
     paths:
       - 'release467-build382-customer-requests-quotes-commission-lifecycle.json'
       - 'functions/api/admin/commission-workbench.js'
