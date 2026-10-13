@@ -165,9 +165,22 @@ function tokenRequest(contract, env, bodyValues) {
   return { cfg, headers, body: formBody(body) };
 }
 
+/* Build 392: Cloudflare workerd does not implement fetch redirect:"error".
+   Use manual with explicit 3xx/opaque rejection so OAuth codes, secrets and bearer
+   headers can never be forwarded to redirected origins. No automatic retry. */
+function blockOAuthRedirect(response,stage){
+  const status=Number(response?.status||0);
+  if((status>=300&&status<400)||response?.type==='opaqueredirect'){
+    const error=new Error('oauth_provider_redirect_blocked');
+    error.oauthProviderCode='oauth_'+stage+'_redirect_blocked';
+    error.oauthStatus=status;
+    throw error;
+  }
+}
 async function fetchTokenJson(contract, env, bodyValues, fetchImpl = fetch) {
   const req = tokenRequest(contract, env, bodyValues);
-  const response = await fetchImpl(contract.tokenEndpoint, { method: 'POST', headers: req.headers, body: req.body, redirect: 'error' });
+  const response = await fetchImpl(contract.tokenEndpoint, { method: 'POST', headers: req.headers, body: req.body, redirect: 'manual' });
+  blockOAuthRedirect(response,'token');
   let payload = {};
   try { payload = await response.json(); } catch { payload = {}; }
   if (!response.ok || !text(payload?.access_token)) {
@@ -209,7 +222,8 @@ export async function verifyOAuthIdentity(contract, env, accessToken, fetchImpl 
   if (cfg.identity.apiKeyHeader === 'etsy') {
     headers['x-api-key'] = `${text(env?.[contract.clientIdEnv])}:${text(env?.[contract.clientSecretEnv])}`;
   }
-  const response = await fetchImpl(cfg.identity.endpoint, { method: 'GET', headers, redirect: 'error' });
+  const response = await fetchImpl(cfg.identity.endpoint, { method: 'GET', headers, redirect: 'manual' });
+  blockOAuthRedirect(response,'identity');
   let payload = {};
   try { payload = await response.json(); } catch { payload = {}; }
   if (!response.ok) throw identityFailure('oauth_provider_identity_failed', response.status);
@@ -253,7 +267,8 @@ export async function revokeOAuthToken(contract, env, token, fetchImpl = fetch) 
   } else {
     body.token = text(token);
   }
-  const response = await fetchImpl(contract.revokeEndpoint, { method: 'POST', headers, body: formBody(body), redirect: 'error' });
+  const response = await fetchImpl(contract.revokeEndpoint, { method: 'POST', headers, body: formBody(body), redirect: 'manual' });
+  blockOAuthRedirect(response,'revoke');
   return { supported: true, ok: response.ok, status: response.status };
 }
 
@@ -277,8 +292,9 @@ export async function discoverEtsyShop(contract,env,accessToken,userId,fetchImpl
   const subject=text(userId)||etsyUserIdFromToken(accessToken);
   if(!/^\d+$/.test(subject)) throw identityFailure('oauth_etsy_user_id_missing');
   const response=await fetchImpl(`https://api.etsy.com/v3/application/users/${encodeURIComponent(subject)}/shops`,{
-    method:'GET',headers:etsyApiHeaders(contract,env,accessToken),redirect:'error'
+    method:'GET',headers:etsyApiHeaders(contract,env,accessToken),redirect:'manual'
   });
+  blockOAuthRedirect(response,'etsy_shop');
   let payload={}; try{payload=await response.json();}catch{payload={};}
   if(!response.ok) throw identityFailure('oauth_etsy_shop_discovery_failed',response.status);
   const shop=Array.isArray(payload?.results)?payload.results[0]:payload;
