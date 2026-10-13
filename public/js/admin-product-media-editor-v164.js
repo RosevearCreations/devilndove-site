@@ -7,7 +7,7 @@
   const identity=byId('productMediaV164Identity'), gallery=byId('productMediaV164Gallery'), editor=byId('productMediaV164Editor'), editorForm=byId('productMediaV164EditorForm');
   if(!status||!gallery||!editorForm||!window.DDAuth)return;
 
-  const state={productId:0,product:null,images:[],selected:null,inFlight:false,stoppedForQuota:false,pendingFile:null};
+  const state={productId:0,product:null,images:[],selected:null,inFlight:false,stoppedForQuota:false,pendingFile:null,pendingFiles:[]};
   const PLACEHOLDER='/assets/product-image-recovery-placeholder.svg';
   const esc=(value)=>String(value??'').replace(/[&<>"']/g,(ch)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
   const setStatus=(message,tone='')=>{status.textContent=message;status.dataset.tone=tone;status.hidden=!message;};
@@ -117,19 +117,75 @@
     let outFile=pending.file;if(preset!=='original'){const blob=await canvasBlob(canvas,'image/jpeg',quality);const base=(pending.file.name||'product-image').replace(/\.[^.]+$/,'').replace(/[^a-z0-9_-]+/gi,'-')||'product-image';outFile=new File([blob],`${base}-${preset}.jpg`,{type:'image/jpeg',lastModified:Date.now()});}
     const orientation=Math.abs(canvas.width-canvas.height)<=Math.max(24,canvas.width*.03)?'square':canvas.width>canvas.height?'landscape':'portrait';const info={file:outFile,width:canvas.width,height:canvas.height,orientation,preset,label:crop.label};state.pendingFile={...pending,...info};byId('productMediaV164FileNote').textContent=`${pending.mode==='replace'?'Replacement':'New image'} • ${canvas.width}×${canvas.height} • ${orientation} • ${crop.label} • ${(outFile.size/1024).toFixed(1)} KB`;return state.pendingFile;
   }
-  function beginFile(mode,file){if(!file)return;state.pendingFile={mode,file};byId('productMediaV164FileTools').hidden=false;byId('productMediaV164FileHeading').textContent=mode==='replace'?'Prepare replacement image':'Prepare new gallery image';prepareFile().catch((error)=>setStatus(error.message,'error'));}
-  function cancelFile(){state.pendingFile=null;byId('productMediaV164FileTools').hidden=true;byId('productMediaV164AddInput').value='';byId('productMediaV164ReplaceInput').value='';}
+  function beginFiles(mode,selection){
+    if(state.inFlight)return;
+    const files=[...(selection||[])];
+    if(!files.length)return;
+    if(mode==='add'&&files.length>5){setStatus('Select at most five gallery images per batch, then try again. No images were uploaded.','error');return;}
+    if(files.some(file=>!String(file.type||'').startsWith('image/')||file.size<=0||file.size>10*1024*1024)){
+      setStatus('Every image must be a supported image file between 1 byte and 10 MB. No images were uploaded.','error');return;
+    }
+    state.pendingFiles=mode==='add'?files:[files[0]];
+    state.pendingFile={mode,file:state.pendingFiles[0]};
+    byId('productMediaV164FileTools').hidden=false;
+    byId('productMediaV164FileHeading').textContent=mode==='replace'?'Prepare replacement image':
+      files.length>1?'Prepare '+files.length+' gallery images (sequential upload)':'Prepare new gallery image';
+    byId('productMediaV164ApplyFile').textContent=files.length>1?'Add '+files.length+' images':'Apply image';
+    prepareFile().then(()=>{
+      if(files.length>1)byId('productMediaV164FileNote').textContent+=' · Batch of '+files.length+'; each image will be processed and saved separately.';
+    }).catch(error=>setStatus(error.message,'error'));
+  }
+  function cancelFile(){
+    state.pendingFile=null;state.pendingFiles=[];
+    byId('productMediaV164FileTools').hidden=true;byId('productMediaV164AddInput').value='';byId('productMediaV164ReplaceInput').value='';
+    byId('productMediaV164ApplyFile').textContent='Apply image';
+  }
   ['productMediaV164Preset','productMediaV164MaxSide','productMediaV164Quality'].forEach((id)=>byId(id)?.addEventListener('change',()=>{if(state.pendingFile)prepareFile().catch((error)=>setStatus(error.message,'error'));}));
   byId('productMediaV164AddButton')?.addEventListener('click',()=>byId('productMediaV164AddInput').click());
   byId('productMediaV164ReplaceButton')?.addEventListener('click',()=>byId('productMediaV164ReplaceInput').click());
-  byId('productMediaV164AddInput')?.addEventListener('change',(event)=>beginFile('add',event.target.files?.[0]));
-  byId('productMediaV164ReplaceInput')?.addEventListener('change',(event)=>beginFile('replace',event.target.files?.[0]));
+  byId('productMediaV164AddInput')?.addEventListener('change',(event)=>beginFiles('add',event.target.files));
+  byId('productMediaV164ReplaceInput')?.addEventListener('change',(event)=>beginFiles('replace',event.target.files));
   byId('productMediaV164CancelFile')?.addEventListener('click',cancelFile);
   byId('productMediaV164ApplyFile')?.addEventListener('click',async()=>{
-    if(state.inFlight||!state.pendingFile||!state.productId)return;state.inFlight=true;syncButtons();setStatus(state.pendingFile.mode==='replace'?'Replacing selected image…':'Adding image…');
-    try{const prepared=await prepareFile();if(prepared.mode==='replace'&&!state.selected)throw new Error('Select an image before replacing it.');const form=new FormData();form.append('action',prepared.mode);form.append('file',prepared.file);form.append('product_id',String(state.productId));form.append('product_image_id',String(state.selected?.product_image_id||0));form.append('sort_order',String(prepared.mode==='replace'?(state.selected?.sort_order??0):state.images.length));form.append('alt_text',prepared.file.name.replace(/\.[^.]+$/,'').replace(/[-_]+/g,' '));form.append('width_px',String(prepared.width));form.append('height_px',String(prepared.height));form.append('image_orientation',prepared.orientation);const response=await window.DDAuth.apiFetch('/api/admin/product-image-file',{method:'POST',body:form,headers:{}});const data=await readJson(response,'Image file update failed.');const targetId=Number(data.product_image_id||0);cancelFile();await loadProduct(state.productId);if(targetId)await loadImage(targetId);setStatus(`${prepared.mode==='replace'?'Image replaced':'Image added'} successfully.${rowsText(data)}`,'ok');}
-    catch(error){if(isQuota(error))state.stoppedForQuota=true;setStatus(`${error.message}${isQuota(error)?' Automatic retries are stopped.':''}`,'error');}
-    finally{state.inFlight=false;syncButtons();}
+    if(state.inFlight||!state.pendingFile||!state.productId)return;
+    const files=[...state.pendingFiles],mode=state.pendingFile.mode;
+    if(!files.length)return;
+    if(mode==='replace'&&!state.selected)return setStatus('Select an image before replacing it.','error');
+    if(!window.confirm('Upload '+files.length+' image'+(files.length===1?'':'s')+' to the current Product? Each image will be saved once in sequence, without automatic retry.'))return;
+    state.inFlight=true;syncButtons();
+    const applyButton=byId('productMediaV164ApplyFile');applyButton.disabled=true;
+    let saved=0,lastId=0,failure='';
+    try{
+      for(let index=0;index<files.length;index++){
+        state.pendingFile={mode,file:files[index]};
+        applyButton.textContent='Saving '+(index+1)+'/'+files.length+'…';
+        setStatus('Uploading image '+(index+1)+' of '+files.length+'…');
+        // Crop/resize is prepared individually. Each source operation stays the existing bounded one-file API.
+        const prepared=await prepareFile();
+        const form=new FormData();
+        form.append('action',mode);form.append('file',prepared.file);
+        form.append('product_id',String(state.productId));
+        form.append('product_image_id',String(state.selected?.product_image_id||0));
+        form.append('sort_order',String(mode==='replace'?(state.selected?.sort_order??0):state.images.length+index));
+        form.append('alt_text',prepared.file.name.replace(/\\.[^.]+$/,'').replace(/[-_]+/g,' '));
+        form.append('width_px',String(prepared.width));form.append('height_px',String(prepared.height));
+        form.append('image_orientation',prepared.orientation);
+        try{
+          const response=await window.DDAuth.apiFetch('/api/admin/product-image-file',{method:'POST',body:form,headers:{}});
+          const data=await readJson(response,'Image upload not confirmed.');
+          saved+=1;lastId=Number(data.product_image_id||0);
+        }catch(error){failure=error.message||'Unconfirmed image write. Review the gallery before trying again.';if(isQuota(error))state.stoppedForQuota=true;break;}
+      }
+    }catch(error){failure=error.message||'Could not prepare an image.';}
+    finally{
+      state.inFlight=false;applyButton.disabled=false;cancelFile();syncButtons();
+    }
+    // Previous Build 164 tried to refresh while inFlight=true, so loadProduct silently skipped its own refresh.
+    // Refresh now that the upload mutex is released. Never retry an uncertain upload.
+    if(saved>0&&!state.stoppedForQuota)await loadProduct(state.productId);
+    if(!failure&&mode==='replace'&&lastId&&!state.stoppedForQuota)await loadImage(lastId);
+    if(failure)setStatus(saved+'/'+files.length+' saved. Stopped at first unconfirmed image: '+failure+' Review the Product gallery before retrying any file.','error');
+    else setStatus('Saved and confirmed '+saved+' image'+(saved===1?'':'s')+'. Gallery refreshed.','ok');
   });
   byId('productMediaV164RemoveButton')?.addEventListener('click',async()=>{
     if(state.inFlight||!state.selected)return;const label=state.selected.alt_text||`Image #${state.selected.product_image_id}`;if(!window.confirm(`Remove ${label} from this Product gallery? The R2 source file will be preserved.`))return;state.inFlight=true;syncButtons();setStatus('Removing selected image from this Product…');
