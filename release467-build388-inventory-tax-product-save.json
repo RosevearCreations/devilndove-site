@@ -8,14 +8,12 @@
       "sha": "57043418486f9e976c487c6b868f63924191997f",
       "tree": "e427f704b4a9d23a51dff9b9f0054a7b38aea0d2",
       "state": "DEVELOPMENT_GREEN",
-      "proofs": {
-        "system_gate_run": 38442148758,
-        "current_application_quality_run": 38442148705,
-        "it_admin_runtime_proof_run": 38442148900,
-        "branch_hygiene_run": 38442148742,
-        "d1_ci_fanout_guard_run": 38441228984,
-        "build_specific_proof_run": 38442149111
-      }
+      "system_gate_run": 38442148758,
+      "quality_run": 38442148705,
+      "it_admin_runtime_run": 38442148900,
+      "repository_hygiene_run": 38442148742,
+      "d1_ci_fanout_guard_run": 38441228984,
+      "build_specific_proof_run": 38442149111
     },
     "production": {
       "main_sha": "a8dbc457689f8438ad81f2032cb69527cae5235f",

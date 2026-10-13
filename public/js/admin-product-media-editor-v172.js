@@ -195,10 +195,10 @@
     }catch(error){failure=error.message||'Image preparation failed';}
     finally{state.inFlight=false;apply.disabled=false;cancelFile();syncButtons();}
     if(saved&&!state.stoppedForQuota){
-      try{await fetchProduct(state.productId);if(mode==='replace'&&lastId)await fetchImage(lastId);}
+      try{await fetchProduct(state.productId);if(mode==='replace'&&lastId){const targetId=lastId;await fetchImage(targetId);}}
       catch(error){failure=(failure?failure+' ':'')+'Gallery refresh failed: '+error.message;}
     }
-    if(failure){setReceipt(saved+'/'+files.length+' confirmed. Review gallery before any new attempt.','error');
+    if(failure){setReceipt('Save failed — image was not confirmed. '+saved+'/'+files.length+' earlier writes confirmed; review gallery before another attempt.','error');
       setStatus(saved+'/'+files.length+' confirmed. Stopped without automatic retry: '+failure,'error');}
     else{const message='Saved ✓ '+saved+' image'+(saved===1?'':'s')+' at '+nowText();
       setReceipt(message,'ok');setStatus(message+'. Gallery refreshed.','ok');}

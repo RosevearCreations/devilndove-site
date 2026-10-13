@@ -1,6 +1,6 @@
 # Current successor: Release 467 Build 388 — Inventory Reconciliation Workspace & Purchase-Tax Evidence Review
 
-BUILD388_VERIFIED_BUILD387_CHECKPOINT: Development 57043418486f9e976c487c6b868f63924191997f; tree e427f704b4a9d23a51dff9b9f0054a7b38aea0d2; System 38442148758; Quality 38442148705; I.T. 38442148900; Hygiene 38442148742; Build 38442149111; Production a8dbc457689f8438ad81f2032cb69527cae5235f; Pages 38442477734; Live 38442667538.
+BUILD388_VERIFIED_BUILD387_CHECKPOINT: Development 57043418486f9e976c487c6b868f63924191997f; tree e427f704b4a9d23a51dff9b9f0054a7b38aea0d2; System 38442148758; Quality 38442148705; I.T. 38442148900; Hygiene 38442148742; D1 fan-out 38441228984; Build 38442149111; Production a8dbc457689f8438ad81f2032cb69527cae5235f; Pages 38442477734; Live 38442667538.
 
 Build 387 is the fully GREEN Development and Production baseline. Build 388 includes Product Save usability and gallery safety repairs alongside read-only cost/tax evidence review; no new canonical migration is needed.
 
