@@ -1,16 +1,5 @@
 name: Release 467 Build 387 Guided Inventory and Tax
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build387-guided-inventory-tax.json'
-      - 'migrations/canonical/0038_release467_inventory_quick_edit_tax_receipts.sql'
-      - 'functions/api/admin/inventory-quick-edit.js'
-      - 'functions/api/admin/_lib/inventoryQuickEdit387.js'
-      - 'public/js/admin-inventory-tax-quickedit-v387.js'
-      - 'public/js/admin-product-resources.js'
-      - 'scripts/release467_build387_*'
-      - '.github/workflows/release467-build387-guided-inventory.yml'
   workflow_dispatch:
 permissions:
   contents: read

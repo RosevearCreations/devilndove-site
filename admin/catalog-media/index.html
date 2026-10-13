@@ -57,15 +57,15 @@
       <div id="productMediaV164Identity"><strong>No Product selected.</strong></div>
       <div class="dd-media-toolbar">
         <div class="dd-media-actions">
-          <button class="btn" id="productMediaV164AddButton" type="button" disabled>Add image</button>
+          <button class="btn" id="productMediaV164AddButton" type="button" disabled>Add images (up to 5)</button>
           <button class="btn" id="productMediaV164ReplaceButton" type="button" disabled>Replace selected</button>
           <button class="btn" id="productMediaV164MoveLeft" type="button" disabled>← Move earlier</button>
           <button class="btn" id="productMediaV164MoveRight" type="button" disabled>Move later →</button>
           <button class="btn dd-media-danger" id="productMediaV164RemoveButton" type="button" disabled>Remove selected</button>
         </div>
-        <span class="small dd-media-muted">Nothing changes until you click an explicit action.</span>
+        <span class="small dd-media-muted">Choose up to five images; they upload one at a time only after you confirm Apply.</span>
       </div>
-      <input id="productMediaV164AddInput" type="file" accept="image/*" hidden/>
+      <input id="productMediaV164AddInput" type="file" accept="image/*" multiple hidden/>
       <input id="productMediaV164ReplaceInput" type="file" accept="image/*" hidden/>
       <div id="productMediaV164FileTools" class="dd-file-tools" hidden>
         <strong id="productMediaV164FileHeading">Prepare image</strong>
@@ -114,6 +114,6 @@
   </div>
   <script src="/public/js/auth.js?v=440"></script>
   <!-- Product Media compatibility DOM marker retained; Build 178 keeps selected-Product image work bounded and explicit. -->
-  <script src="/public/js/admin-product-media-editor-v172.js?v=467b198"></script>
+  <script src="/public/js/admin-product-media-editor-v172.js?v=467b198&b388=1"></script>
 </body>
 </html>

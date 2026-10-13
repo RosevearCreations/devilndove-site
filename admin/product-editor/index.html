@@ -25,7 +25,7 @@
     <div id="productEditorStatus" class="dd-product-status small" aria-live="polite"></div>
     <details class="dd-low-read-details"><summary>Low-read editor contract</summary><div class="dd-low-read-note small"><strong>Build 178:</strong> startup authority remains one selected-Product detail read. Product/admin fix links now return here instead of waking the retired all-in-one catalog editor. The browser handoff remains display-only. Media loads only when Media is opened. QA loads only when Run QA is pressed, reads the selected Product/SEO record plus at most two Product image rows, performs no request-time schema mutation, and does not automatically write QA history. Save updates only this Product and its SEO row through the proven schema contract, with no request-time PRAGMA/table introspection.</div></details>
 
-    <form id="productEditorForm" class="card">
+    <form id="productEditorForm" class="card" data-dd-unsaved-ignore="1" data-dd-save-label="Product Editor">
       <div class="dd-editor-tabs" role="tablist" aria-label="Product Editor sections">
         <button class="btn dd-editor-tab" type="button" data-editor-tab="basics" aria-selected="true">Basics</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="pricing" aria-selected="false">Pricing &amp; Stock</button>
@@ -101,7 +101,7 @@
       </section>
 
       <section class="dd-editor-panel" data-editor-panel="seo" hidden>
-        <h2>SEO / Publishing</h2>
+        <h2>SEO / Publishing</h2><p class="small" id="productEditorSeoGuidance">SEO title, H1, OpenGraph title and descriptions are suggested from Basics and Description. You can edit any SEO field manually; custom text will be preserved.</p>
         <div class="dd-editor-grid cols-2">
           <label><span class="small">SEO title</span><input class="input" name="meta_title" maxlength="160"/></label><label><span class="small">H1 override</span><input class="input" name="h1_override" maxlength="160"/></label>
           <label class="wide"><span class="small">Meta description</span><textarea class="input" name="meta_description" maxlength="500" rows="3"></textarea></label><label><span class="small">Keywords</span><input class="input" name="keywords" maxlength="1000"/></label>
@@ -118,11 +118,11 @@
 
       <section class="dd-editor-panel" data-editor-panel="advanced" hidden><h2>Advanced workspaces</h2><p class="small">These systems remain separate so they cannot wake up merely because we edit a Product.</p><div class="dd-product-actions"><a class="btn" href="/admin/inventory-operations/">Inventory Operations</a><a class="btn" id="productEditorMediaAdvancedLink" href="/admin/catalog-media/">Image Editor</a><a class="btn" href="/admin/release-preflight/">Release Preflight</a><a class="btn" href="/admin/packaging-studio/">Packaging</a></div></section>
 
-      <div class="dd-editor-footer"><div class="small">No autosave. Save and QA are explicit one-Product actions after live Product authority loads.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
+      <div class="dd-editor-footer"><div class="small" aria-live="polite">Save Product remains available at the bottom of every tab. No autosave; confirm one Product write at a time.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-editor-v163.js?v=178"></script>
+  <script src="/public/js/admin-product-editor-v163.js?v=178&b388=1"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 </body>
 </html>

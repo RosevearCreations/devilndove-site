@@ -2,7 +2,7 @@
   "release": 467,
   "build": 387,
   "title": "Write Confirmation Coverage Audit & Guided Recovery Decisions",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "contract": {
     "source_backed_quick_edit": true,
     "source_optimistic_concurrency": true,
@@ -52,5 +52,29 @@
   "next_build": 388,
   "next_build_title": "Inventory Reconciliation Workspace & Purchase-Tax Evidence Review",
   "development_first_d1_apply_requested": true,
-  "promotion_requires_confirmed_development_0038": true
+  "promotion_requires_confirmed_development_0038": true,
+  "final_closure": {
+    "dev_sha": "57043418486f9e976c487c6b868f63924191997f",
+    "tree_sha": "e427f704b4a9d23a51dff9b9f0054a7b38aea0d2",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD387_GREEN",
+    "proofs": {
+      "system_gate_run": 38442148758,
+      "current_application_quality_run": 38442148705,
+      "it_admin_runtime_proof_run": 38442148900,
+      "branch_hygiene_run": 38442148742,
+      "d1_ci_fanout_guard_run": 38441228984,
+      "build_specific_proof_run": 38442149111
+    },
+    "ingested_by_build": 388
+  },
+  "production_checkpoint": {
+    "main_sha": "a8dbc457689f8438ad81f2032cb69527cae5235f",
+    "tree_sha": "e427f704b4a9d23a51dff9b9f0054a7b38aea0d2",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38442477734,
+    "production_live_resource_integrity_run": 38442667538,
+    "remote_d1_queries": 0
+  }
 }

@@ -1,0 +1,60 @@
+{
+  "release": 467,
+  "build": 388,
+  "title": "Inventory Reconciliation Workspace & Purchase-Tax Evidence Review",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "57043418486f9e976c487c6b868f63924191997f",
+      "tree": "e427f704b4a9d23a51dff9b9f0054a7b38aea0d2",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38442148758,
+      "quality_run": 38442148705,
+      "it_admin_runtime_run": 38442148900,
+      "repository_hygiene_run": 38442148742,
+      "d1_ci_fanout_guard_run": 38441228984,
+      "build_specific_proof_run": 38442149111
+    },
+    "production": {
+      "main_sha": "a8dbc457689f8438ad81f2032cb69527cae5235f",
+      "tree_sha": "e427f704b4a9d23a51dff9b9f0054a7b38aea0d2",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38442477734,
+      "production_live_resource_integrity_run": 38442667538
+    }
+  },
+  "implemented": {
+    "inventory_source_receipt_review_on_demand": true,
+    "max_reviewed_receipt_rows": 40,
+    "verified_tax_invoice_claims": false,
+    "automatic_gst_hst_input_tax_credit": false,
+    "automatic_d1_repair": false,
+    "product_save_overlay_unblocked": true,
+    "local_beforeunload_guard": true,
+    "product_save_button_in_flight_disable": true,
+    "product_save_explicit_ok_message": true,
+    "seo_title_h1_og_from_name": true,
+    "seo_descriptions_from_user_content": true,
+    "manual_seo_override_preserved": true,
+    "image_multi_select_max": 5,
+    "image_upload_sequential": true,
+    "image_each_request_explicit_confirmation": true,
+    "image_unknown_result_no_retry": true,
+    "image_gallery_verified_after_batch": true
+  },
+  "safety": {
+    "request_time_schema_mutation": false,
+    "automatic_inventory_deduction": false,
+    "invoice_verified": false,
+    "provider_execution": false,
+    "payment_execution": false,
+    "production_only_after_green_exact_tree": true,
+    "destructive_cleanup": false,
+    "unbounded_search": false
+  },
+  "current_migration": "0038_release467_inventory_quick_edit_tax_receipts.sql",
+  "new_canonical_migration": false,
+  "docs": "docs/operations/RELEASE_467_BUILD_388_INVENTORY_TAX_PRODUCT_SAVE_MEDIA.md",
+  "next_build": 389,
+  "next_build_title": "Product Save End-to-End Acceptance & Purchase Invoice Evidence Review Decisions"
+}
