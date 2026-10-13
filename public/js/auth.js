@@ -368,6 +368,13 @@
 
   clearLegacyBrowserToken();
 
+  // Build 384: shared non-persistent action acknowledgement. The server remains write authority.
+  if (window.location.pathname.startsWith('/admin/') && !document.querySelector('script[src*="admin-action-ack-v384.js"]')) {
+    const feedback = document.createElement('script');
+    feedback.src = '/public/js/admin-action-ack-v384.js?v=467b384';
+    document.head.appendChild(feedback);
+  }
+
   window.DDAuth = {
     getToken,
     setToken,

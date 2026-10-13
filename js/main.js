@@ -542,6 +542,7 @@
     injectVisualPolishStrip();
     injectLowBandwidthToggle();
     ensureGlobalScript('/public/js/auth.js?v=467b286-cookie-session');
+    if (window.location.pathname.startsWith('/admin/')) ensureGlobalScript('/public/js/admin-action-ack-v384.js?v=467b384');
     ensureGlobalScript('/public/js/site-auth-ui.js?v=467b286-cookie-session');
     ensureGlobalScript('/public/js/site-analytics.js?v=440');
   });
