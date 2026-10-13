@@ -47,5 +47,25 @@
   },
   "operator_guide": "docs/operations/RELEASE_467_BUILD_386_WRITE_RECEIPT_CROSS_TAB_RECOVERY.md",
   "next_build": 387,
-  "next_build_title": "Write Confirmation Coverage Audit & Guided Recovery Decisions"
+  "next_build_title": "Write Confirmation Coverage Audit & Guided Recovery Decisions",
+  "starting_point": {
+    "development": {
+      "sha": "3cc45cbeb709dd4d6516249abefb2a6523d9e35e",
+      "tree": "ce6d4a35790203d2580a4bdf95a7a9790c5b230e",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38344246684,
+      "quality_run": 38344246645,
+      "it_admin_runtime_run": 38344246699,
+      "repository_hygiene_run": 38344246590,
+      "d1_ci_fanout_guard_run": 38344246686,
+      "build_specific_proof_run": 38344246599
+    },
+    "production": {
+      "main_sha": "8b527e0abdd3386357c37aecddbece88359910f5",
+      "tree_sha": "ce6d4a35790203d2580a4bdf95a7a9790c5b230e",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38344480326,
+      "production_live_resource_integrity_run": 38344610640
+    }
+  }
 }

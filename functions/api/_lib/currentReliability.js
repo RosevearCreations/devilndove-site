@@ -98,13 +98,13 @@ Production live-resource 37981772067
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=385;
-export const CURRENT_RELIABILITY_TITLE='Durable Server-Side Write Idempotency & Operation Receipts';
+export const CURRENT_RELIABILITY_BUILD=386;
+export const CURRENT_RELIABILITY_TITLE='Write Receipt Coverage Expansion & Cross-Tab Recovery';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
-export const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:384,title:'System-Wide Analytics, Automation & Operational Reliability',state:'DEVELOPMENT_GREEN',dev_sha:'78c5a8ae1196ecd113bf8041c36717fbe896411e',tree_sha:'3e53a510c5ae6d060af4169246470e3d6e8273f2',system_gate_run:38342325827,current_application_quality_run:38342325805,it_admin_runtime_proof_run:38342325852,branch_hygiene_run:38342325907,d1_ci_fanout_guard_run:38342325718,build_specific_proof_run:38342325846,proof_state:'EXACT_BRANCH_HEAD_BUILD384_GREEN'});
+export const ACCEPTED_DEVELOPMENT=Object.freeze({release:467,build:385,title:'Durable Server-Side Write Idempotency & Operation Receipts',state:'DEVELOPMENT_GREEN',dev_sha:'3cc45cbeb709dd4d6516249abefb2a6523d9e35e',tree_sha:'ce6d4a35790203d2580a4bdf95a7a9790c5b230e',system_gate_run:38344246684,current_application_quality_run:38344246645,it_admin_runtime_proof_run:38344246699,branch_hygiene_run:38344246590,d1_ci_fanout_guard_run:38344246686,build_specific_proof_run:38344246599,proof_state:'EXACT_BRANCH_HEAD_BUILD385_GREEN'});
 export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({release:467,build:384,title:'System-Wide Analytics, Automation & Operational Reliability',state:'DEVELOPMENT_GREEN',dev_sha:'78c5a8ae1196ecd113bf8041c36717fbe896411e',tree_sha:'3e53a510c5ae6d060af4169246470e3d6e8273f2',system_gate_run:38342325827,current_application_quality_run:38342325805,it_admin_runtime_proof_run:38342325852,branch_hygiene_run:38342325907,d1_ci_fanout_guard_run:38342325718,build_specific_proof_run:38342325846,proof_state:'EXACT_BRANCH_HEAD_BUILD384_GREEN'});
-export const CURRENT_PRODUCTION=Object.freeze({release:467,build:384,title:'System-Wide Analytics, Automation & Operational Reliability',state:'PRODUCTION_GREEN',main_sha:'97d11bfc0cb04de1d5ab4603969d0457f4f7e884',tree_sha:'3e53a510c5ae6d060af4169246470e3d6e8273f2',production_pages_deploy_run:38342517173,production_live_resource_integrity_run:38342618510,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:38342325846,remote_d1_queries:0});
+export const CURRENT_PRODUCTION=Object.freeze({release:467,build:385,title:'Durable Server-Side Write Idempotency & Operation Receipts',state:'PRODUCTION_GREEN',main_sha:'8b527e0abdd3386357c37aecddbece88359910f5',tree_sha:'ce6d4a35790203d2580a4bdf95a7a9790c5b230e',production_pages_deploy_run:38344480326,production_live_resource_integrity_run:38344610640,products_browser_proof_run:0,products_route_proof_run:0,build_specific_proof_run:38344246599,remote_d1_queries:0});
 export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
   retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],
