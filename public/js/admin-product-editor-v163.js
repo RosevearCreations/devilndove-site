@@ -21,7 +21,7 @@
   const seoSuggestion=()=>{
     const name=get('name');
     const raw=get('short_description')||get('description');
-    const desc=raw.replace(/<[^>]*>/g,' ').replace(/\\s+/g,' ').trim();
+    const desc=raw.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
     return {meta_title:name.slice(0,70),meta_description:desc.slice(0,180),
       h1_override:name.slice(0,120),og_title:name.slice(0,160),og_description:desc.slice(0,200)};
   };
@@ -43,6 +43,7 @@
   form.addEventListener('input',event=>{
     if(seoKeys.includes(event.target.name))autoSeo.delete(event.target.name);
     if(['name','short_description','description'].includes(event.target.name))syncSeo();
+    if(saveButton&&saveButton.textContent==='Saved ✓')saveButton.textContent='Save Product';
     refreshDirty();
   });
   form.addEventListener('change',refreshDirty);

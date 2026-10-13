@@ -7,7 +7,7 @@
   const identity=byId('productMediaV164Identity'),gallery=byId('productMediaV164Gallery'),editor=byId('productMediaV164Editor'),editorForm=byId('productMediaV164EditorForm'),receipt=byId('productMediaV172SaveReceipt');
   if(!status||!gallery||!editorForm||!window.DDAuth)return;
 
-  const state={productId:0,product:null,images:[],selected:null,inFlight:false,stoppedForQuota:false,pendingFile:null};
+  const state={productId:0,product:null,images:[],selected:null,inFlight:false,stoppedForQuota:false,pendingFile:null,pendingFiles:[]};
   const PLACEHOLDER='/assets/product-image-recovery-placeholder.svg';
   const esc=(value)=>String(value??'').replace(/[&<>"']/g,(ch)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const setStatus=(message,tone='')=>{status.textContent=message;status.dataset.tone=tone;status.hidden=!message;};
@@ -142,20 +142,66 @@
     let outFile=pending.file;if(preset!=='original'){const blob=await canvasBlob(canvas,'image/jpeg',quality);const base=(pending.file.name||'product-image').replace(/\.[^.]+$/,'').replace(/[^a-z0-9_-]+/gi,'-')||'product-image';outFile=new File([blob],`${base}-${preset}.jpg`,{type:'image/jpeg',lastModified:Date.now()});}
     const orientation=Math.abs(canvas.width-canvas.height)<=Math.max(24,canvas.width*.03)?'square':canvas.width>canvas.height?'landscape':'portrait';const info={file:outFile,width:canvas.width,height:canvas.height,orientation,preset,label:crop.label};state.pendingFile={...pending,...info};byId('productMediaV164FileNote').textContent=`${pending.mode==='replace'?'Replacement':'New image'} • ${canvas.width}×${canvas.height} • ${orientation} • ${crop.label} • ${(outFile.size/1024).toFixed(1)} KB`;return state.pendingFile;
   }
-  function beginFile(mode,file){if(!file)return;state.pendingFile={mode,file};byId('productMediaV164FileTools').hidden=false;byId('productMediaV164FileHeading').textContent=mode==='replace'?'Prepare replacement image':'Prepare new gallery image';prepareFile().catch((error)=>setStatus(error.message,'error'));}
-  function cancelFile(){state.pendingFile=null;byId('productMediaV164FileTools').hidden=true;byId('productMediaV164AddInput').value='';byId('productMediaV164ReplaceInput').value='';}
+  function beginFiles(mode,selection){
+    if(state.inFlight)return;
+    const files=[...(selection||[])];if(!files.length)return;
+    if(mode==='add'&&files.length>5)return setStatus('Select at most five images per batch. No uploads performed.','error');
+    if(files.some(f=>!String(f.type||'').startsWith('image/')||f.size<=0||f.size>10*1024*1024))
+      return setStatus('Every image must be under 10 MB. No uploads performed.','error');
+    state.pendingFiles=mode==='add'?files:[files[0]];
+    state.pendingFile={mode,file:state.pendingFiles[0]};
+    byId('productMediaV164FileTools').hidden=false;
+    byId('productMediaV164FileHeading').textContent=mode==='replace'?'Prepare replacement image':
+      files.length>1?'Prepare '+files.length+' images — sequential save':'Prepare new gallery image';
+    byId('productMediaV164ApplyFile').textContent=files.length>1?'Add '+files.length+' images':'Apply image';
+    prepareFile().catch(error=>setStatus(error.message,'error'));
+  }
+  function cancelFile(){
+    state.pendingFile=null;state.pendingFiles=[];
+    byId('productMediaV164FileTools').hidden=true;
+    byId('productMediaV164AddInput').value='';byId('productMediaV164ReplaceInput').value='';
+    byId('productMediaV164ApplyFile').textContent='Apply image';
+  }
   ['productMediaV164Preset','productMediaV164MaxSide','productMediaV164Quality'].forEach((id)=>byId(id)?.addEventListener('change',()=>{if(state.pendingFile)prepareFile().catch((error)=>setStatus(error.message,'error'));}));
   byId('productMediaV164AddButton')?.addEventListener('click',()=>byId('productMediaV164AddInput').click());byId('productMediaV164ReplaceButton')?.addEventListener('click',()=>byId('productMediaV164ReplaceInput').click());
-  byId('productMediaV164AddInput')?.addEventListener('change',(event)=>beginFile('add',event.target.files?.[0]));byId('productMediaV164ReplaceInput')?.addEventListener('change',(event)=>beginFile('replace',event.target.files?.[0]));byId('productMediaV164CancelFile')?.addEventListener('click',cancelFile);
+  byId('productMediaV164AddInput')?.addEventListener('change',(event)=>beginFiles('add',event.target.files));byId('productMediaV164ReplaceInput')?.addEventListener('change',(event)=>beginFiles('replace',event.target.files));byId('productMediaV164CancelFile')?.addEventListener('click',cancelFile);
   byId('productMediaV164ApplyFile')?.addEventListener('click',async()=>{
-    if(state.inFlight||!state.pendingFile||!state.productId)return;state.inFlight=true;syncButtons();const mode=state.pendingFile.mode;setStatus(mode==='replace'?'Replacing selected image…':'Adding image…');clearReceipt();
+    if(state.inFlight||!state.pendingFile||!state.productId)return;
+    const files=[...state.pendingFiles],mode=state.pendingFile.mode;
+    if(!files.length)return;
+    if(mode==='replace'&&!state.selected)return setStatus('Select an image before replacing it.','error');
+    if(!window.confirm('Save '+files.length+' Product image'+(files.length===1?'':'s')+'? Uploads are sequential; an uncertain upload is never retried automatically.'))return;
+    state.inFlight=true;syncButtons();clearReceipt();
+    const apply=byId('productMediaV164ApplyFile');apply.disabled=true;
+    let saved=0,lastId=0,failure='';
     try{
-      const prepared=await prepareFile();if(prepared.mode==='replace'&&!state.selected)throw new Error('Select an image before replacing it.');const form=new FormData();form.append('action',prepared.mode);form.append('file',prepared.file);form.append('product_id',String(state.productId));form.append('product_image_id',String(state.selected?.product_image_id||0));form.append('sort_order',String(prepared.mode==='replace'?(state.selected?.sort_order??0):state.images.filter((row)=>row.editable!==false).length));form.append('alt_text',prepared.file.name.replace(/\.[^.]+$/,'').replace(/[-_]+/g,' '));form.append('width_px',String(prepared.width));form.append('height_px',String(prepared.height));form.append('image_orientation',prepared.orientation);
-      const response=await window.DDAuth.apiFetch('/api/admin/product-image-file',{method:'POST',body:form,headers:{}});const data=await readJson(response,'Image file update failed.');const targetId=Number(data.product_image_id||0);cancelFile();
-      await fetchProduct(state.productId);if(targetId)await fetchImage(targetId);
-      const label=prepared.mode==='replace'?'Replacement image saved':'New image saved';setReceipt(`Saved ✓ ${label} as Image #${targetId} at ${nowText()}`,'ok');setStatus(`${data.message||label+'.'}${warningText(data)}${rowsText(data)}`,'ok');
-    }catch(error){if(isQuota(error))state.stoppedForQuota=true;setReceipt('Save failed — image was not confirmed in the Product gallery.','error');setStatus(`${error.message}${isQuota(error)?' Automatic retries are stopped.':''}`,'error');}
-    finally{state.inFlight=false;syncButtons();}
+      for(let i=0;i<files.length;i++){
+        state.pendingFile={mode,file:files[i]};apply.textContent='Saving '+(i+1)+' / '+files.length+'…';
+        setStatus('Saving Product image '+(i+1)+' of '+files.length+'…');
+        const prepared=await prepareFile(),form=new FormData();
+        form.append('action',mode);form.append('file',prepared.file);form.append('product_id',String(state.productId));
+        form.append('product_image_id',String(state.selected?.product_image_id||0));
+        const n=state.images.filter(row=>row.editable!==false).length;
+        form.append('sort_order',String(mode==='replace'?(state.selected?.sort_order??0):n+i));
+        form.append('alt_text',prepared.file.name.replace(/\\.[^.]+$/,'').replace(/[-_]+/g,' '));
+        form.append('width_px',String(prepared.width));form.append('height_px',String(prepared.height));
+        form.append('image_orientation',prepared.orientation);
+        try{
+          const response=await window.DDAuth.apiFetch('/api/admin/product-image-file',{method:'POST',body:form,headers:{}});
+          const data=await readJson(response,'Image save unconfirmed');
+          saved++;lastId=Number(data.product_image_id||0);
+        }catch(error){failure=error.message||'Image write not confirmed';if(isQuota(error))state.stoppedForQuota=true;break;}
+      }
+    }catch(error){failure=error.message||'Image preparation failed';}
+    finally{state.inFlight=false;apply.disabled=false;cancelFile();syncButtons();}
+    if(saved&&!state.stoppedForQuota){
+      try{await fetchProduct(state.productId);if(mode==='replace'&&lastId)await fetchImage(lastId);}
+      catch(error){failure=(failure?failure+' ':'')+'Gallery refresh failed: '+error.message;}
+    }
+    if(failure){setReceipt(saved+'/'+files.length+' confirmed. Review gallery before any new attempt.','error');
+      setStatus(saved+'/'+files.length+' confirmed. Stopped without automatic retry: '+failure,'error');}
+    else{const message='Saved ✓ '+saved+' image'+(saved===1?'':'s')+' at '+nowText();
+      setReceipt(message,'ok');setStatus(message+'. Gallery refreshed.','ok');}
   });
   byId('productMediaV164RemoveButton')?.addEventListener('click',async()=>{
     if(state.inFlight||!state.selected)return;const label=state.selected.alt_text||`Image #${state.selected.product_image_id}`;if(!window.confirm(`Remove ${label} from this Product gallery? The R2 source file will be preserved.`))return;state.inFlight=true;syncButtons();setStatus('Removing selected image from this Product…');clearReceipt();
