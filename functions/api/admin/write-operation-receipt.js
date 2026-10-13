@@ -1,7 +1,7 @@
 // Build 385 — authenticated operator receipt read-only lookup; never reveals cross-user receipts.
 import {getAdminUserFromRequest,getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {SCOPES,keyValid,fetchReceipt} from './_lib/writeReceipts.js';
-const out=(d,s=200)=>jsonResponse({release:467,build:385,...d},s,{'Cache-Control':'no-store'});
+const out=(d,s=200)=>jsonResponse({release:467,build:386,...d},s,{'Cache-Control':'no-store'});
 export async function onRequestGet({request,env}){
  const actor=await getAdminUserFromRequest(request,env);
  if(!actor)return out({ok:false,error:'Admin authentication required.'},401);

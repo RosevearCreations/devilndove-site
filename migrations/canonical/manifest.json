@@ -265,6 +265,13 @@
       "release": 467,
       "description": "Atomic source-linked immutable user-scoped write receipts for explicitly integrated commission decisions, Finance reviews, and project material reserve/release, with payload digest and request-key identity.",
       "recovery": "Preserve all business and receipt rows. A successful source operation and receipt commit atomically; do not delete receipts or regenerate. Add future compensating migrations for defects."
+    },
+    {
+      "version": 37,
+      "file": "0037_release467_receipt_coverage_work_calendar.sql",
+      "release": 467,
+      "description": "Add durable atomic receipts for work-order execution and resource calendar bookings, preserving Build 385 immutable receipt history and source-authored rows.",
+      "recovery": "Disable new Build 386 writes while preserving all work-order, calendar and receipt records; repair via a later forward-only migration and never rewrite existing receipts."
     }
   ]
 }
