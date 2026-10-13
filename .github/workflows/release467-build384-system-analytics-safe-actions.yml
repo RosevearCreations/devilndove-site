@@ -1,7 +1,7 @@
 name: Release 467 Build 384 System Analytics Safe Actions
 on:
   push:
-    branches: [dev, build384-analytics-safe-actions]
+    branches: [dev]
     paths:
       - 'release467-build384-system-analytics-safe-actions.json'
       - 'public/js/admin-action-ack-v384.js'

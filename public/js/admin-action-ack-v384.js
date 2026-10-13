@@ -108,10 +108,10 @@
         const contentType=String(response.headers?.get('content-type')||'');
         let result=null;
         if(contentType.includes('json'))result=await response.clone().json().catch(()=>null);
-        const good=response.ok && result?.ok!==false;
+        const good=response.ok && (result?.ok===true || result?.success===true || response.status===204);
         if(b)announce(good?'OK — action completed successfully.':response.status>=500?
           'Server error; the action may have completed. Refresh and verify before retrying.':
-          'Action not confirmed: '+String(result?.error||'server rejected this request').slice(0,150),good);
+          'Action not confirmed: '+String(result?.error||(response.ok?'server returned no explicit OK acknowledgement':'server rejected this request')).slice(0,150),good);
         return response;
       }catch(error){
         if(b)announce('Connection interrupted. The result is unknown — refresh and verify before repeating this action.',false);
