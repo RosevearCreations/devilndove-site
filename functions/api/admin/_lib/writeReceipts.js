@@ -1,6 +1,6 @@
 // Release 467 Build 385 — receipt-scoped, actor-bound, payload-bound D1 atomic batches.
 // No idempotency promise for endpoints that do not opt in.
-export const SCOPES=Object.freeze(['commission_decision','finance_review','material_reserve','material_release']);
+export const SCOPES=Object.freeze(['commission_decision','finance_review','material_reserve','material_release','work_order_event','calendar_schedule']);
 export const keyValid=key=>/^[A-Za-z0-9_-]{16,80}$/.test(String(key||''));
 export const positiveId=x=>Number.isSafeInteger(Number(x))&&Number(x)>0?Number(x):0;
 export function canonical(value){
@@ -16,9 +16,11 @@ export async function payloadHash(scope,actor,target,data){
  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(body));
  return Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,'0')).join('');
 }
+const ledgerFor=scope=>['work_order_event','calendar_schedule'].includes(scope)?'admin_write_receipts_extended':'admin_write_receipts';
 export async function fetchReceipt(db,scope,key){
+ if(!SCOPES.includes(scope)||!keyValid(key))return null;
  return db.prepare(`SELECT admin_write_receipt_id,action_scope,request_key,actor_user_id,target_type,target_id,source_record_id,
- payload_sha256,created_at FROM admin_write_receipts WHERE action_scope=? AND request_key=? LIMIT 1`).bind(scope,key).first();
+ payload_sha256,created_at FROM ${ledgerFor(scope)} WHERE action_scope=? AND request_key=? LIMIT 1`).bind(scope,key).first();
 }
 export function checkReceipt(receipt,{scope,key,actor,target,hash}){
  if(!receipt)return null;
@@ -36,11 +38,13 @@ export function receiptInsert(db,scope,key,actor,targetType,target,hash,sourceTa
   commission_decision:['custom_request_commission_events','custom_request_commission_event_id'],
   finance_review:['creative_project_finance_review_events','creative_project_finance_review_event_id'],
   material_reserve:['creative_project_material_reservations','creative_project_material_reservation_id'],
-  material_release:['creative_project_material_reservations','creative_project_material_reservation_id']
+  material_release:['creative_project_material_reservations','creative_project_material_reservation_id'],
+  work_order_event:['creative_work_order_events','creative_work_order_event_id'],
+  calendar_schedule:['creative_resource_calendar_entries','creative_resource_calendar_entry_id']
  };
  if(!allowed[scope]||allowed[scope][0]!==sourceTable||allowed[scope][1]!==pk)throw Error('Unsupported receipt source');
  const clause=scope==='material_release'?`${pk}=? AND release_note=?`:'request_key=?';
- return db.prepare(`INSERT INTO admin_write_receipts(action_scope,request_key,actor_user_id,target_type,target_id,source_record_id,payload_sha256)
+ return db.prepare(`INSERT INTO ${ledgerFor(scope)}(action_scope,request_key,actor_user_id,target_type,target_id,source_record_id,payload_sha256)
  SELECT ?,?,?,?,?,${pk},? FROM ${sourceTable} WHERE ${clause} LIMIT 1`).bind(scope,key,positiveId(actor),targetType,positiveId(target),hash,...(scope==='material_release'?[positiveId(releaseSourceId),releaseMarker]:[key]));
 }
 export async function readReceiptState(db,{scope,key,actor,target,hash}){

@@ -1,18 +1,6 @@
-# Build 385 exact-head reproof: require Development-first D1 0036 application, Production gated on identical GREEN tree.
+# Historical Build 385 evidence retained for manual dispatch only; Build 386 is current.
 name: Release 467 Build 385 Durable Write Receipts
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build385-durable-write-receipts.json'
-      - 'functions/api/admin/_lib/writeReceipts.js'
-      - 'functions/api/admin/write-operation-receipt.js'
-      - 'functions/api/admin/commission-workbench.js'
-      - 'functions/api/admin/cross-project-accounting.js'
-      - 'functions/api/admin/project-material-planner.js'
-      - 'migrations/canonical/0036_release467_durable_admin_write_receipts.sql'
-      - 'scripts/release467_build385_*'
-      - '.github/workflows/release467-build385-durable-write-receipts.yml'
   workflow_dispatch:
 permissions:
   contents: read

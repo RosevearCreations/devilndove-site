@@ -1,6 +1,7 @@
 // Release 467 Build 379. All reads bounded; writes human initiated, append-only and audited.
 import {getAdminUserFromRequest,getDb,jsonResponse,auditAdminAction} from '../_lib/adminAudit.js';
 import {NEXT,canTransition,positive,dateValid} from './_lib/workOrderRules.js';
+import {keyValid,payloadHash,readReceiptState,receiptInsert,atomicWriteReceipt} from './_lib/writeReceipts.js';
 const list=r=>Array.isArray(r?.results)?r.results:[];
 const out=(data,status=200)=>jsonResponse(data,status,{'Cache-Control':'no-store'});
 const clean=(x,max=900)=>String(x??'').trim().slice(0,max);
@@ -51,12 +52,20 @@ export async function onRequestPost(ctx){
  const origin=ctx.request.headers.get('Origin');
  if(origin!==new URL(ctx.request.url).origin)return out({ok:false,error:'Same-origin operator request required'},403);
  let body;try{body=await ctx.request.json()}catch{return out({ok:false,error:'Invalid JSON'},400)}
- const p=positive(body.project_id),id=positive(body.operation_id),action=clean(body.action,30),notes=clean(body.notes,1200);
- if(!p||!id||notes.length<12)return out({ok:false,error:'A project, operation and factual notes of at least 12 characters are required'},400);
+ const p=positive(body.project_id),id=positive(body.operation_id),action=clean(body.action,30),notes=clean(body.notes,1200),key=clean(body.request_key,80);
+ if(!p||!id||notes.length<12||!keyValid(key)||!['transition','time','milestone'].includes(action))return out({ok:false,error:'Project, operation, event type, factual notes and a unique receipt key are required'},400);
  try{
+  const actor=positive(a.admin.user_id),title=clean(body.title,140)||'Operator work update',scope='work_order_event';
+  const payload={action,operation_id:id,title,notes,expected_status:action==='transition'?clean(body.expected_status,30):null,
+   to_status:action==='transition'?clean(body.to_status,30):null,minutes:action==='time'?Number(body.minutes):null,
+   work_date:action==='time'?clean(body.work_date,10):null,
+   creative_work_event_id:action==='milestone'?positive(body.creative_work_event_id):null};
+  const hash=await payloadHash(scope,actor,p,payload);
+  const prior=await readReceiptState(a.db,{scope,key,actor,target:p,hash});
+  if(prior)return out(prior.ok?{...prior,build:386,event_id:prior.source_record_id,...(await snapshot(a.db,p)),safety}:{...prior,build:386},prior.status||200);
   const proj=await project(a.db,p),op=proj&&await operation(a.db,p,id);
   if(!op||op.plan_status==='retired')return out({ok:false,error:'Active operation not found for this project'},404);
-  const actor=positive(a.admin.user_id),title=clean(body.title,140)||'Operator work update';
+  let sourceWrite;
   if(action==='transition'){
    const expected=clean(body.expected_status,30),next=clean(body.to_status,30);
    if(op.status!==expected)return out({ok:false,error:'Status changed; refresh',code:'STALE_STATUS'},409);
@@ -65,34 +74,41 @@ export async function onRequestPost(ctx){
    if(predecessors.length>300)return out({ok:false,error:'Dependency scope too large'},409);
    const blocked=canTransition(expected,next,predecessors.map(x=>x.status),op.milestones);
    if(blocked)return out({ok:false,error:blocked,code:blocked},409);
-   const result=await a.db.prepare(`INSERT INTO creative_work_order_events
-   (creative_work_project_id,creative_project_operation_id,event_kind,from_status,to_status,event_title,notes,actor_user_id)
-   SELECT o.creative_work_project_id,o.creative_project_operation_id,'transition',?,?,?,?,?
+   sourceWrite=a.db.prepare(`INSERT INTO creative_work_order_events
+   (creative_work_project_id,creative_project_operation_id,event_kind,from_status,to_status,event_title,notes,actor_user_id,request_key)
+   SELECT o.creative_work_project_id,o.creative_project_operation_id,'transition',?,?,?,?,?,?
    FROM creative_project_operations o WHERE o.creative_work_project_id=? AND o.creative_project_operation_id=? AND o.plan_status<>'retired'
    AND COALESCE((SELECT e.to_status FROM creative_work_order_events e WHERE e.creative_project_operation_id=o.creative_project_operation_id AND e.event_kind='transition' ORDER BY e.creative_work_order_event_id DESC LIMIT 1),'not_started')=?
    AND (? NOT IN ('ready','in_progress','completed') OR NOT EXISTS(SELECT 1 FROM creative_project_operation_dependencies d WHERE d.creative_project_operation_id=o.creative_project_operation_id AND COALESCE((SELECT e.to_status FROM creative_work_order_events e WHERE e.creative_project_operation_id=d.predecessor_operation_id AND e.event_kind='transition' ORDER BY e.creative_work_order_event_id DESC LIMIT 1),'not_started')<>'completed'))
    AND (?<>'completed' OR EXISTS(SELECT 1 FROM creative_work_order_events e WHERE e.creative_project_operation_id=o.creative_project_operation_id AND e.event_kind='milestone'))`)
-   .bind(expected,next,title,notes,actor,p,id,expected,next,next).run();
-   if(!Number(result.meta?.changes||0))return out({ok:false,error:'Concurrent change, unresolved dependency or missing milestone; refresh',code:'STALE_OR_BLOCKED'},409);
+   .bind(expected,next,title,notes,actor,key,p,id,expected,next,next);
   }else if(action==='time'){
    const minutes=Number(body.minutes),day=clean(body.work_date,10);
    if(op.status!=='in_progress')return out({ok:false,error:'Work order must be in progress'},409);
    if(!Number.isSafeInteger(minutes)||minutes<1||minutes>720||!dateValid(day))return out({ok:false,error:'Minutes must be 1–720 and date valid'},400);
-   await a.db.prepare(`INSERT INTO creative_work_order_events
-   (creative_work_project_id,creative_project_operation_id,event_kind,minutes_worked,work_date,event_title,notes,actor_user_id)
-   VALUES (?,?,'time',?,?,?,?,?)`).bind(p,id,minutes,day,title,notes,actor).run();
+   sourceWrite=a.db.prepare(`INSERT INTO creative_work_order_events
+   (creative_work_project_id,creative_project_operation_id,event_kind,minutes_worked,work_date,event_title,notes,actor_user_id,request_key)
+   SELECT ?,?,'time',?,?,?,?,?,? FROM creative_project_operations o
+   WHERE o.creative_project_operation_id=? AND o.creative_work_project_id=? AND o.plan_status<>'retired'
+   AND COALESCE((SELECT e.to_status FROM creative_work_order_events e WHERE e.creative_project_operation_id=o.creative_project_operation_id
+    AND e.event_kind='transition' ORDER BY e.creative_work_order_event_id DESC LIMIT 1),'not_started')='in_progress'`)
+   .bind(p,id,minutes,day,title,notes,actor,key,id,p);
   }else if(action==='milestone'){
    const eventId=positive(body.creative_work_event_id);
    if(!eventId)return out({ok:false,error:'Real event required'},400);
    const real=await a.db.prepare('SELECT creative_work_event_id FROM creative_work_events WHERE creative_work_event_id=? AND creative_work_project_id=? LIMIT 1').bind(eventId,p).first();
    if(!real)return out({ok:false,error:'Evidence does not belong to this project'},400);
-   try{await a.db.prepare(`INSERT INTO creative_work_order_events
-    (creative_work_project_id,creative_project_operation_id,event_kind,creative_work_event_id,event_title,notes,actor_user_id)
-    VALUES (?,?,'milestone',?,?,?,?)`).bind(p,id,eventId,title,notes,actor).run();}
-   catch(e){if(/UNIQUE|constraint/i.test(String(e?.message)))return out({ok:false,error:'Milestone already linked to this task'},409);throw e}
+   sourceWrite=a.db.prepare(`INSERT INTO creative_work_order_events
+    (creative_work_project_id,creative_project_operation_id,event_kind,creative_work_event_id,event_title,notes,actor_user_id,request_key)
+    VALUES (?,?,'milestone',?,?,?,?,?)`).bind(p,id,eventId,title,notes,actor,key);
   }else return out({ok:false,error:'Unknown action'},400);
-  await auditAdminAction(ctx.env,ctx.request,a.admin,{action_type:'creative_work_order_'+action,target_type:'creative_project_operation',target_id:id,
+  const receipt=await atomicWriteReceipt(a.db,sourceWrite,
+   receiptInsert(a.db,scope,key,actor,'creative_work_project',p,hash,'creative_work_order_events','creative_work_order_event_id'),
+   {scope,key,actor,target:p,hash});
+  if(!receipt.ok)return out(receipt.code==='WRITE_NOT_CONFIRMED'?{...receipt,code:'STALE_OR_BLOCKED',error:'Concurrent change or a blocked source transition; refresh before retrying.'}:receipt.code==='SOURCE_CONSTRAINT'?{...receipt,code:'STALE_OR_SOURCE_CONSTRAINT'}:receipt,receipt.status||503);
+  if(!receipt.replayed)await auditAdminAction(ctx.env,ctx.request,a.admin,{action_type:'creative_work_order_'+action,target_type:'creative_project_operation',target_id:id,
     target_key:String(p),details:{project_id:p,operation_id:id,actor_user_id:actor,automatic_completion:false,inventory_mutation:false}});
-  return out({ok:true,build:379,message:'Operator action recorded; history is append-only',...(await snapshot(a.db,p)),safety});
+  return out({ok:true,build:386,...receipt,event_id:receipt.source_record_id,
+   message:receipt.replayed?'OK — original work action already committed.':'OK — work action saved with permanent receipt.',...(await snapshot(a.db,p)),safety});
  }catch(e){console.error('WORK_ORDER_WRITE',e?.name);return out({ok:false,error:'Update could not be verified',code:'WRITE_FAILED'},503)}
 }

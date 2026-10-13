@@ -1,5 +1,6 @@
 // Release 467 Build 381 — canonical, operator-confirmed scheduling; never physical availability inference.
 import {getAdminUserFromRequest,getDb,jsonResponse,auditAdminAction} from '../_lib/adminAudit.js';
+import {keyValid,payloadHash,readReceiptState,receiptInsert,atomicWriteReceipt} from './_lib/writeReceipts.js';
 import {KINDS,isoUtc,validateWindow,conflictAssessment} from './_lib/calendarRules.js';
 const rows=r=>Array.isArray(r?.results)?r.results:[];
 const reply=(data,status=200)=>jsonResponse(data,status,{'Cache-Control':'no-store'});
@@ -102,7 +103,14 @@ export async function onRequestPost(ctx){
      (operation&&!project))
    return reply({ok:false,error:'Project/resource identity does not match the selected entry type.',code:'BAD_SCHEDULE_IDENTITY'},400);
   const key=clean(body.request_key,80);
-  if(!/^[A-Za-z0-9_-]{16,80}$/.test(key))return reply({ok:false,error:'Unique request key is required.'},400);
+  if(!keyValid(key))return reply({ok:false,error:'Unique request key is required.'},400);
+  const scope='calendar_schedule',target=project||resource,targetType=project?'creative_work_project':'site_item_inventory';
+  const payload={action,kind,resource_id:resource||null,project_id:project||null,operation_id:operation||null,
+   starts_at_utc:starts,ends_at_utc:ends,title,note,override_conflict:Boolean(body.override_conflict),
+   override_maintenance_ack:Boolean(body.override_maintenance_ack),override_reason:clean(body.override_reason,800)};
+  const hash=await payloadHash(scope,actor,target,payload);
+  const prior=await readReceiptState(auth.db,{scope,key,actor,target,hash});
+  if(prior)return reply({...prior,build:386,entry_id:prior.source_record_id},prior.status||200);
   if(resource){
    const real=await auth.db.prepare(`SELECT site_item_inventory_id FROM site_item_inventory WHERE site_item_inventory_id=? AND COALESCE(is_active,1)=1 AND LOWER(TRIM(COALESCE(source_type,'')))='tool' LIMIT 1`).bind(resource).first();
    if(!real)return reply({ok:false,error:'Resource is not an active Inventory Tool.',code:'RESOURCE_NOT_AVAILABLE'},404);
@@ -129,25 +137,22 @@ export async function onRequestPost(ctx){
   if(conflict.maintenance_conflict&&!maintenanceAck)
    return reply({ok:false,error:'Maintenance conflicts require explicit acknowledgement.',code:'MAINTENANCE_BLOCK',conflicts:conflict.conflicts},409);
   if(override&&!conflict.requires_override)return reply({ok:false,error:'No recorded conflict to override. Refresh.',code:'UNNECESSARY_OVERRIDE'},409);
-  let id=0;
-  try{
-   const result=await auth.db.prepare(`INSERT INTO creative_resource_calendar_entries
+  const write=auth.db.prepare(`INSERT INTO creative_resource_calendar_entries
     (resource_site_item_inventory_id,creative_work_project_id,creative_project_operation_id,entry_kind,title,
     starts_at_utc,ends_at_utc,override_conflict,override_maintenance_ack,override_reason,operator_note,
     created_by_user_id,request_key) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`)
     .bind(resource||null,project||null,operation||null,kind,title,starts,ends,
-     override?1:0,maintenanceAck?1:0,override?reason:null,note,actor,key).run();
-   id=whole(result.meta?.last_row_id);
-  }catch(error){
-   if(/constraint|UNIQUE|calendar_/i.test(String(error?.message||'')))
-    return reply({ok:false,error:'Reservation rejected by canonical DB conflict or identity guard. Refresh calendar.',code:'DB_CONFLICT_OR_IDENTITY'},409);
-   throw error;
-  }
-  await auditAdminAction(ctx.env,ctx.request,auth.admin,{action_type:'creative_resource_calendar_schedule',target_type:'creative_resource_calendar_entry',target_id:id,target_key:key,
+     override?1:0,maintenanceAck?1:0,override?reason:null,note,actor,key);
+  const receipt=await atomicWriteReceipt(auth.db,write,
+   receiptInsert(auth.db,scope,key,actor,targetType,target,hash,'creative_resource_calendar_entries','creative_resource_calendar_entry_id'),
+   {scope,key,actor,target,hash});
+  if(!receipt.ok)return reply(receipt.code==='SOURCE_CONSTRAINT'?{...receipt,code:'DB_CONFLICT_OR_IDENTITY'}:receipt,receipt.status||503);
+  const id=receipt.source_record_id;
+  if(!receipt.replayed)  await auditAdminAction(ctx.env,ctx.request,auth.admin,{action_type:'creative_resource_calendar_schedule',target_type:'creative_resource_calendar_entry',target_id:id,target_key:key,
     details:{kind,resource_site_item_inventory_id:resource||null,creative_work_project_id:project||null,operation_id:operation||null,
      starts_at_utc:starts,ends_at_utc:ends,manual_override:override,maintenance_ack:maintenanceAck,
      operator_note:note,automatic_project_execution:false}});
-  return reply({ok:true,build:381,entry_id:id,recorded_conflicts:conflict.conflicts.length,
-   message:'Operator calendar entry recorded. Physical occupancy remains unverified.',safety});
+  return reply({ok:true,build:386,...receipt,entry_id:id,recorded_conflicts:conflict.conflicts.length,
+   message:receipt.replayed?'OK — original calendar entry already saved.':'OK — calendar entry saved with permanent receipt. Physical occupancy remains unverified.',safety});
  }catch(e){console.error('CALENDAR_WRITE_FAILED',e?.name||'Error');return reply({ok:false,error:'Calendar update could not be verified.',code:'CALENDAR_WRITE_FAILED'},503);}
 }
