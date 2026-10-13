@@ -42,7 +42,8 @@ document.addEventListener('DOMContentLoaded',()=>{
  const qty=action==='reserve'?Number(el('matQty')?.value):Number(mount.querySelector('[data-release-qty="'+id+'"]')?.value);
  const status=el('matResult'),input={project_id:Number(selector.value),action,stock_units:qty,note:reason};
  if(!reason||reason.length<12||!Number.isFinite(qty)||qty<=0){if(status)status.textContent='Enter a valid positive stock-unit quantity and a factual note (12+ characters).';return;}
- if(action==='reserve'){input.site_item_inventory_id=Number(el('matItem').value);input.operation_id=Number(el('matOperation').value)||null;requestKey=requestKey||crypto.randomUUID();input.request_key=requestKey;}
+ requestKey=requestKey||crypto.randomUUID();input.request_key=requestKey;
+ if(action==='reserve'){input.site_item_inventory_id=Number(el('matItem').value);input.operation_id=Number(el('matOperation').value)||null;}
  else input.reservation_id=id;
  if(!confirm('Confirm '+(action==='reserve'?'reserve':'release')+' '+qty+' stock units against the shared Inventory balance?'))return;
  if(status)status.textContent='Updating canonical reservation…';
