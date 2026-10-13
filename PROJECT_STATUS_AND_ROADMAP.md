@@ -1,3 +1,9 @@
+# Release 467 Build 384 — System-Wide Analytics, Automation & Operational Reliability (Development candidate)
+
+[System Operations](/admin/system-operations/) provides newest-100 source-owned module analytics, explicit truncation, zero mutation authority and no scheduled automation. Shared admin feedback disables the initiating add/save/update/delete button, displays a waiting label, reports server acknowledgement or uncertain result, and coalesces identical in-flight JSON writes in a single browser page. Other tabs/devices still require durable backend idempotency. Read `docs/operations/RELEASE_467_BUILD_384_ANALYTICS_SAFE_ACTIONS.md`.
+
+**Next proposed Build 385 — Durable Server-Side Write Idempotency & Operation Receipts.**
+
 # Release 467 Build 383 — Cross-Project Accounting, Revenue & Profitability (Development candidate)
 
 Authenticated [Cross-Project Accounting workspace](/admin/cross-project-accounting/) reconciles Creator, Finance profitability, work-order time, posted inventory, manufacturing cost, real order payments/refunds and tax facts. Unknown cost is unknown, current inventory cost is estimate-only, overlapping views must not be added, Finance revenue is not payment collection, and mixed-currency requires manual review. Immutable `creative_project_finance_review_events` holds accountable decisions, never financial postings. See `docs/operations/RELEASE_467_BUILD_383_CROSS_PROJECT_ACCOUNTING_REVENUE_PROFITABILITY.md`.

@@ -1,14 +1,5 @@
 name: Release 467 Build 383 Cross-Project Accounting Revenue Profitability
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build383-cross-project-accounting-revenue-profitability.json'
-      - 'functions/api/admin/cross-project-accounting.js'
-      - 'functions/api/admin/_lib/projectFinanceEvidence.js'
-      - 'migrations/canonical/0035_release467_cross_project_finance_review.sql'
-      - 'scripts/release467_build383_*'
-      - '.github/workflows/release467-build383-cross-project-accounting-revenue-profitability.yml'
   workflow_dispatch:
 permissions:
   contents: read

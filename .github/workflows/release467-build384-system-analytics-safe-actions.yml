@@ -1,0 +1,29 @@
+name: Release 467 Build 384 System Analytics Safe Actions
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'release467-build384-system-analytics-safe-actions.json'
+      - 'public/js/admin-action-ack-v384.js'
+      - 'public/js/admin-system-operations.js'
+      - 'functions/api/admin/system-operations-analytics.js'
+      - 'functions/api/admin/_lib/operationsAnalytics.js'
+      - 'scripts/release467_build384_*'
+      - '.github/workflows/release467-build384-system-analytics-safe-actions.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  analytics-and-write-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - name: Bounded analytics and single-flight write acknowledgements
+        run: |
+          python scripts/release467_build384_gate.py
+          echo 'BUILD384_SOURCE=GREEN; NEW_D1_MIGRATIONS=0; AUTOMATED_BUSINESS_WRITES=0'

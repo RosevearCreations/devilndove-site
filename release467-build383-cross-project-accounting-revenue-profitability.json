@@ -2,7 +2,7 @@
   "release": 467,
   "build": 383,
   "title": "Cross-Project Accounting, Revenue & Profitability",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "migration": "0035_release467_cross_project_finance_review.sql",
   "contract": {
     "existing_finance_authority": true,
@@ -46,5 +46,33 @@
       "production_pages_deploy_run": 38328855419,
       "production_live_resource_integrity_run": 38328981215
     }
+  },
+  "final_closure": {
+    "dev_sha": "727d3cad69f5cd586cbca74fec16b96e10595716",
+    "tree_sha": "fbf1d379edb5361714e28773c38fcee31b5e57a2",
+    "proofs": {
+      "system_gate_run": 38335121781,
+      "current_application_quality_run": 38335121776,
+      "it_admin_runtime_proof_run": 38335121674,
+      "branch_hygiene_run": 38335121624,
+      "d1_ci_fanout_guard_run": 38335121614,
+      "build_specific_proof_run": 38335121703
+    },
+    "ingested_by_build": 384,
+    "verified_development": true
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 383,
+    "title": "Cross-Project Accounting, Revenue & Profitability",
+    "authority": "release467-build383-cross-project-accounting-revenue-profitability.json",
+    "main_sha": "77ac5618e76d349f63aa8391846ef51c6883172d",
+    "tree_sha": "fbf1d379edb5361714e28773c38fcee31b5e57a2",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38335320519,
+    "production_live_resource_integrity_run": 38335448973,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
   }
 }
