@@ -251,6 +251,13 @@
       "release": 467,
       "description": "Append-only staff commission review decisions linked to existing Custom Requests, quote drafts/revisions, payment-request drafts, actual customer proof approvals, job drafts, manufacturing project identity and explicitly approved progress on active private order links.",
       "recovery": "Preserve immutable commission evidence and all original quote/proof/payment/order records. Append compensating staff decisions; repair future defects through new forward-only migration."
+    },
+    {
+      "version": 35,
+      "file": "0035_release467_cross_project_finance_review.sql",
+      "release": 467,
+      "description": "Append-only source-linked operator review of cross-project Finance, Accounting, materials, labour, tax and payment reconciliation evidence; no financial posting, and immutable history.",
+      "recovery": "Append follow-up review events; preserve all financial source records and repair schema through a new forward-only migration."
     }
   ]
 }

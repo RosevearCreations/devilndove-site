@@ -1,3 +1,9 @@
+# Release 467 Build 383 — Cross-Project Accounting, Revenue & Profitability (Development candidate)
+
+Authenticated [Cross-Project Accounting workspace](/admin/cross-project-accounting/) reconciles Creator, Finance profitability, work-order time, posted inventory, manufacturing cost, real order payments/refunds and tax facts. Unknown cost is unknown, current inventory cost is estimate-only, overlapping views must not be added, Finance revenue is not payment collection, and mixed-currency requires manual review. Immutable `creative_project_finance_review_events` holds accountable decisions, never financial postings. See `docs/operations/RELEASE_467_BUILD_383_CROSS_PROJECT_ACCOUNTING_REVENUE_PROFITABILITY.md`.
+
+**Next queued: Build 384 — System-Wide Analytics, Automation & Operational Reliability.**
+
 # Release 467 Build 382 — Customer Requests, Quotes & Commission Lifecycle (Development candidate)
 
 Authenticated [Commission Workbench](/admin/commission-workbench/) routes actual Custom Request inquiries, existing quote/revision drafts, actual customer proof approval, deposit-request drafts, manufacturing job/project handoff evidence and explicitly customer-approved private progress through a source-linked append-only operator ledger. No automatic customer approvals, payment capture, accounting booking, automated customer communications or private-media exposure. Original modules retain source authority. See `docs/operations/RELEASE_467_BUILD_382_CUSTOMER_REQUESTS_QUOTES_COMMISSIONS.md`.
