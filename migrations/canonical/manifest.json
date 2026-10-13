@@ -258,6 +258,13 @@
       "release": 467,
       "description": "Append-only source-linked operator review of cross-project Finance, Accounting, materials, labour, tax and payment reconciliation evidence; no financial posting, and immutable history.",
       "recovery": "Append follow-up review events; preserve all financial source records and repair schema through a new forward-only migration."
+    },
+    {
+      "version": 36,
+      "file": "0036_release467_durable_admin_write_receipts.sql",
+      "release": 467,
+      "description": "Atomic source-linked immutable user-scoped write receipts for explicitly integrated commission decisions, Finance reviews, and project material reserve/release, with payload digest and request-key identity.",
+      "recovery": "Preserve all business and receipt rows. A successful source operation and receipt commit atomically; do not delete receipts or regenerate. Add future compensating migrations for defects."
     }
   ]
 }

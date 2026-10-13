@@ -1,3 +1,9 @@
+# Release 467 Build 385 — Durable Server-Side Write Idempotency & Operation Receipts (Development candidate)
+
+Add [durable operator write receipts](/admin/system-operations/) for four current admin actions: Commission review, Finance review, Inventory project reservation and partial release. Bind request key+payload SHA256+actor+target, commit source mutation and immutable receipt atomically in D1; a legitimate identical replay returns OK with the stored receipt and does **not** reapply the write. Cross-tab/device source uniqueness is backed by D1 rather than browser state. User-facing result acknowledgement and read-only lookup remain; other legacy endpoints are not covered until separately reviewed. Read `docs/operations/RELEASE_467_BUILD_385_DURABLE_WRITE_RECEIPTS.md`.
+
+**Next queued: Build 386 — Write Receipt Coverage Expansion & Cross-Tab Recovery.**
+
 # Release 467 Build 384 — System-Wide Analytics, Automation & Operational Reliability (Development candidate)
 
 [System Operations](/admin/system-operations/) provides newest-100 source-owned module analytics, explicit truncation, zero mutation authority and no scheduled automation. Shared admin feedback disables the initiating add/save/update/delete button, displays a waiting label, reports server acknowledgement or uncertain result, and coalesces identical in-flight JSON writes in a single browser page. Other tabs/devices still require durable backend idempotency. Read `docs/operations/RELEASE_467_BUILD_384_ANALYTICS_SAFE_ACTIONS.md`.

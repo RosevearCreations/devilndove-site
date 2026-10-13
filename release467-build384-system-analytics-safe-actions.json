@@ -2,7 +2,7 @@
   "release": 467,
   "build": 384,
   "title": "System-Wide Analytics, Automation & Operational Reliability",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "migration": null,
   "schema_neutral": true,
   "contract": {
@@ -46,5 +46,33 @@
       "production_pages_deploy_run": 38335320519,
       "production_live_resource_integrity_run": 38335448973
     }
+  },
+  "final_closure": {
+    "dev_sha": "78c5a8ae1196ecd113bf8041c36717fbe896411e",
+    "tree_sha": "3e53a510c5ae6d060af4169246470e3d6e8273f2",
+    "proofs": {
+      "system_gate_run": 38342325827,
+      "current_application_quality_run": 38342325805,
+      "it_admin_runtime_proof_run": 38342325852,
+      "branch_hygiene_run": 38342325907,
+      "d1_ci_fanout_guard_run": 38342325718,
+      "build_specific_proof_run": 38342325846
+    },
+    "ingested_by_build": 385,
+    "verified_development": true
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 384,
+    "title": "System-Wide Analytics, Automation & Operational Reliability",
+    "authority": "release467-build384-system-analytics-safe-actions.json",
+    "main_sha": "97d11bfc0cb04de1d5ab4603969d0457f4f7e884",
+    "tree_sha": "3e53a510c5ae6d060af4169246470e3d6e8273f2",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38342517173,
+    "production_live_resource_integrity_run": 38342618510,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
   }
 }

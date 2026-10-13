@@ -1,6 +1,7 @@
 // Release 467 Build 380. Canonical project reservations; actual consumption remains Creative Process.
 import {getAdminUserFromRequest,getDb,jsonResponse,auditAdminAction} from '../_lib/adminAudit.js';
 import {quantity,money,summarize} from './_lib/projectMaterialMath.js';
+import {keyValid,payloadHash,readReceiptState,receiptInsert,atomicWriteReceipt} from './_lib/writeReceipts.js';
 const arr=r=>Array.isArray(r?.results)?r.results:[];
 const clean=(v,n=280)=>String(v??'').trim().slice(0,n);
 const whole=v=>Number.isSafeInteger(Number(v))&&Number(v)>0?Number(v):0;
@@ -76,50 +77,69 @@ export async function onRequestGet(ctx){
 }
 export async function onRequestPost(ctx){
  const a=await authenticate(ctx);if(a.response)return a.response;
- const origin=ctx.request.headers.get('Origin');
- if(!origin||origin!==new URL(ctx.request.url).origin)return reply({ok:false,code:'ORIGIN_REQUIRED',error:'Same-origin admin action required.'},403);
- let input;try{input=await ctx.request.json()}catch{return reply({ok:false,error:'Invalid JSON.'},400)}
- const projectId=whole(input.project_id),action=clean(input.action,30),note=clean(input.note,850);
- if(!projectId||note.length<12)return reply({ok:false,error:'Choose a project and provide an operator reason of at least 12 characters.'},400);
+ if(ctx.request.headers.get('Origin')!==new URL(ctx.request.url).origin)
+  return reply({ok:false,code:'ORIGIN_REQUIRED',error:'Same-origin admin action required.'},403);
+ let input;try{input=await ctx.request.json()}catch{return reply({ok:false,error:'Invalid JSON.'},400);}
+ const id=whole(input.project_id),action=clean(input.action,30),note=clean(input.note,850),key=clean(input.request_key,80);
+ if(!id||note.length<12||!keyValid(key)||!['reserve','release'].includes(action))
+  return reply({ok:false,error:'Project, action, operator reason (12+ characters), and unique request key required.'},400);
+ const actor=whole(a.admin.user_id),scope='material_'+action;
+ const amount=quantity(input.stock_units);
+ const reservation=action==='release'?whole(input.reservation_id):0;
+ const stockItem=action==='reserve'?whole(input.site_item_inventory_id):0;
+ const operation=action==='reserve'&&input.operation_id?whole(input.operation_id):null;
+ if(amount===null||(action==='release'&&!reservation)||
+    (action==='reserve'&&(!stockItem||(input.operation_id&&!operation))))
+  return reply({ok:false,error:'Valid inventory/reservation, stock-unit quantity and optional operation required.'},400);
+ const payload={action,stock_units:amount,note,reservation_id:reservation||null,
+  site_item_inventory_id:stockItem||null,operation_id:operation};
  try{
-  const p=await project(a.db,projectId);if(!p)return reply({ok:false,error:'Project unavailable.'},404);
-  const actor=whole(a.admin.user_id);
-  let inventoryId=0,change=0;
+  const hash=await payloadHash(scope,actor,id,payload);
+  const previous=await readReceiptState(a.db,{scope,key,actor,target:id,hash});
+  if(previous)return reply({...previous,build:385,source_data_unchanged:previous.replayed},
+    previous.status||200);
+  const active=await project(a.db,id);if(!active)return reply({ok:false,error:'Project unavailable.'},404);
+  let sourceWrite,sourceReceipt,inventoryId;
   if(action==='reserve'){
-   inventoryId=whole(input.site_item_inventory_id);change=quantity(input.stock_units);
-   const operationId=input.operation_id?whole(input.operation_id):null,key=clean(input.request_key,80);
-   if(!inventoryId||change===null||!key||key.length<16||!/^[-A-Za-z0-9_]{16,80}$/.test(key)||
-      (input.operation_id&&!operationId))return reply({ok:false,error:'Select a valid supply, amount, operation and request key.'},400);
-   // INSERT SELECT reads the canonical supplier/stock identity; DB triggers guard all cross-project reservations.
-   try {
-    const done=await a.db.prepare(`INSERT INTO creative_project_material_reservations
-      (creative_work_project_id,creative_project_operation_id,site_item_inventory_id,original_stock_quantity,
+   inventoryId=stockItem;
+   sourceWrite=a.db.prepare(`INSERT INTO creative_project_material_reservations
+     (creative_work_project_id,creative_project_operation_id,site_item_inventory_id,original_stock_quantity,
       unit_cost_cents_snapshot,supplier_name_snapshot,stock_unit_label_snapshot,reservation_note,created_by_user_id,request_key)
-      SELECT ?,?,i.site_item_inventory_id,?,CASE WHEN i.unit_cost_cents>0 THEN i.unit_cost_cents ELSE NULL END,
+     SELECT ?,?,i.site_item_inventory_id,?,CASE WHEN i.unit_cost_cents>0 THEN i.unit_cost_cents ELSE NULL END,
       i.supplier_name,COALESCE(i.stock_unit_label,'unit'),?,?,?
-      FROM site_item_inventory i WHERE i.site_item_inventory_id=? AND COALESCE(i.is_active,1)=1
+     FROM site_item_inventory i WHERE i.site_item_inventory_id=? AND COALESCE(i.is_active,1)=1
       AND LOWER(TRIM(COALESCE(i.source_type,'')))='supply'`)
-      .bind(projectId,operationId,change,note,actor,key,inventoryId).run();
-    if(!Number(done.meta?.changes||0))return reply({ok:false,error:'Active canonical supply item not found.'},404);
-   }catch(e){
-    if(/constraint|UNIQUE|project_material_/i.test(String(e?.message||'')))return reply({ok:false,code:'CAPACITY_OR_IDENTITY_CONFLICT',error:'Reservation rejected: duplicate request, invalid operation or insufficient shared free stock. Refresh Inventory.'},409);
-    throw e;
-   }
-  }else if(action==='release'){
-   const allocationId=whole(input.reservation_id);change=quantity(input.stock_units);
-   if(!allocationId||change===null)return reply({ok:false,error:'Valid reservation and partial release amount required.'},400);
-   const row=await a.db.prepare("SELECT * FROM creative_project_material_reservations WHERE creative_project_material_reservation_id=? AND creative_work_project_id=? LIMIT 1").bind(allocationId,projectId).first();
-   if(!row)return reply({ok:false,error:'Reservation not in this project.'},404);
+     .bind(id,operation,amount,note,actor,key,inventoryId);
+   sourceReceipt=receiptInsert(a.db,scope,key,actor,'creative_work_project',id,hash,
+     'creative_project_material_reservations','creative_project_material_reservation_id');
+  }else{
+   const row=await a.db.prepare(`SELECT creative_project_material_reservation_id,site_item_inventory_id,
+     original_stock_quantity,released_stock_quantity FROM creative_project_material_reservations
+     WHERE creative_project_material_reservation_id=? AND creative_work_project_id=? LIMIT 1`).bind(reservation,id).first();
+   if(!row)return reply({ok:false,error:'Reservation does not belong to selected project.'},404);
+   if(amount>Number(row.original_stock_quantity)-Number(row.released_stock_quantity)+0.000001)
+    return reply({ok:false,code:'RELEASE_EXCEEDS_REMAINING',error:'Release exceeds the reserved stock remaining.'},409);
    inventoryId=whole(row.site_item_inventory_id);
-   if(change>Number(row.original_stock_quantity)-Number(row.released_stock_quantity)+0.000001)return reply({ok:false,code:'RELEASE_EXCEEDS_REMAINING',error:'Release exceeds remaining reserved quantity.'},409);
-   const result=await a.db.prepare(`UPDATE creative_project_material_reservations
+   const marker='@receipt:'+key+':'+note;
+   sourceWrite=a.db.prepare(`UPDATE creative_project_material_reservations
      SET released_stock_quantity=released_stock_quantity+?,release_note=?,updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP
      WHERE creative_project_material_reservation_id=? AND creative_work_project_id=?
-     AND released_stock_quantity+?<=original_stock_quantity+0.000001`).bind(change,note,actor,allocationId,projectId,change).run();
-   if(!Number(result.meta?.changes||0))return reply({ok:false,code:'RELEASE_STALE',error:'Reservation changed; refresh.'},409);
-  }else return reply({ok:false,error:'Unsupported material action.'},400);
-  await auditAdminAction(ctx.env,ctx.request,a.admin,{action_type:'creative_project_material_'+action,target_type:'site_item_inventory',target_id:inventoryId,target_key:String(projectId),details:{project_id:projectId,quantity_stock_units:change,actor_user_id:actor,note,stock_consumed:false,finance_posted:false}});
-  const updated=await snapshot(a.db,projectId,'');
-  return reply({ok:true,build:380,message:'Reservation record and canonical reserved stock updated.',...updated});
- }catch(e){console.error('PROJECT_MATERIAL_WRITE_FAILED',e?.name||'Error');return reply({ok:false,error:'Material update could not be confirmed.',code:'MATERIAL_WRITE_FAILED'},503);}
+       AND released_stock_quantity+?<=original_stock_quantity+0.000001`).bind(
+        amount,marker,actor,reservation,id,amount);
+   sourceReceipt=receiptInsert(a.db,scope,key,actor,'creative_work_project',id,hash,
+     'creative_project_material_reservations','creative_project_material_reservation_id',reservation,marker);
+  }
+  const receipt=await atomicWriteReceipt(a.db,sourceWrite,sourceReceipt,{scope,key,actor,target:id,hash});
+  if(!receipt.ok)return reply(receipt.code==='SOURCE_CONSTRAINT'?{...receipt,code:'CAPACITY_OR_IDENTITY_CONFLICT'}:receipt,receipt.status||503);
+  if(!receipt.replayed)await auditAdminAction(ctx.env,ctx.request,a.admin,{
+   action_type:'creative_project_material_'+action,target_type:'site_item_inventory',target_id:inventoryId,target_key:String(id),
+   details:{receipt_id:receipt.receipt_id,project_id:id,quantity_stock_units:amount,actor_user_id:actor,
+    note,stock_consumed:false,finance_posted:false}});
+  return reply({...receipt,build:385,message:receipt.replayed?
+   'OK — existing receipt confirmed; no repeat inventory mutation.':'OK — Inventory reservation action committed with durable receipt.',
+   ...(await snapshot(a.db,id,''))});
+ }catch(error){
+  console.error('PROJECT_MATERIAL_RECEIPT_UNCONFIRMED',error?.name||'Error');
+  return reply({ok:false,code:'RESULT_UNCONFIRMED',error:'Write outcome uncertain. Look up its receipt before retrying.'},503);
+ }
 }

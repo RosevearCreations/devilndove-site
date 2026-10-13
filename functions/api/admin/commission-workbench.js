@@ -2,6 +2,7 @@
 // All quotes, payments, orders, proof approvals and manufacturing projects remain source-owned.
 import {getAdminUserFromRequest,getDb,jsonResponse,auditAdminAction} from '../_lib/adminAudit.js';
 import {EVENTS,STAGES,eventGuard,positive} from './_lib/commissionRules.js';
+import {payloadHash,readReceiptState,receiptInsert,atomicWriteReceipt} from './_lib/writeReceipts.js';
 const list=r=>Array.isArray(r?.results)?r.results:[];
 const out=(d,s=200)=>jsonResponse({build:382,...d},s,{'Cache-Control':'no-store'});
 const clean=(v,n=1200)=>String(v??'').trim().slice(0,n);
@@ -84,6 +85,12 @@ export async function onRequestPost(ctx){
  const sourceIds={quote:positive(b.source_quote_draft_id),revision:positive(b.source_quote_revision_id),payment:positive(b.source_payment_request_draft_id),
   proof:positive(b.source_proof_version_id),job:positive(b.source_job_draft_id),project:positive(b.source_creative_project_id)};
  try{
+  const actor=positive(auth.admin.user_id),scope='commission_decision';
+  const payload={event_kind:kind,internal_note:note,public_progress_message:kind==='progress_approval'?message:null,
+    progress_stage:kind==='progress_approval'?stage:null,sourceIds};
+  const hash=await payloadHash(scope,actor,requestId,payload);
+  const prior=await readReceiptState(auth.db,{scope,key,actor,target:requestId,hash});
+  if(prior)return out({...prior,safety},prior.status||200);
   const snapshot=await commission(auth.db,requestId);if(!snapshot)return out({ok:false,error:'Custom request not found.'},404);
   const lookup=(arr,field,id)=>arr.find(x=>Number(x[field])===id)||null;
   const source={
@@ -103,24 +110,23 @@ export async function onRequestPost(ctx){
    return out({ok:false,error:'Quote revision belongs to a different quote.',code:'REVISION_QUOTE_MISMATCH'},409);
   const denial=eventGuard(kind,source);
   if(denial)return out({ok:false,error:denial,code:denial},409);
-  let eventId;
-  try{
-   const result=await auth.db.prepare(`INSERT INTO custom_request_commission_events
+  const sourceWrite=auth.db.prepare(`INSERT INTO custom_request_commission_events
    (custom_request_id,event_kind,source_quote_draft_id,source_quote_revision_id,source_payment_request_draft_id,
     source_proof_version_id,source_job_draft_id,source_creative_project_id,progress_stage,customer_visible,
     public_progress_message,internal_note,actor_user_id,request_key) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(
     requestId,kind,sourceIds.quote||null,sourceIds.revision||null,sourceIds.payment||null,sourceIds.proof||null,
     sourceIds.job||null,sourceIds.project||null,kind==='progress_approval'?stage:null,
-    kind==='progress_approval'?1:0,kind==='progress_approval'?message:null,note,positive(auth.admin.user_id),key
-   ).run();
-   eventId=positive(result.meta?.last_row_id);
-  }catch(e){
-   if(/UNIQUE|constraint|commission_/i.test(String(e?.message||'')))return out({ok:false,error:'Duplicate request, invalid source, or missing active order status link. Refresh.',code:'COMMISSION_GUARD_REJECTED'},409);
-   throw e;
-  }
+    kind==='progress_approval'?1:0,kind==='progress_approval'?message:null,note,actor,key
+   );
+  const receipt=receiptInsert(auth.db,scope,key,actor,'custom_request',requestId,hash,
+    'custom_request_commission_events','custom_request_commission_event_id');
+  const outcome=await atomicWriteReceipt(auth.db,sourceWrite,receipt,{scope,key,actor,target:requestId,hash});
+  if(!outcome.ok)return out(outcome.code==='SOURCE_CONSTRAINT'?{...outcome,code:'COMMISSION_GUARD_REJECTED'}:outcome,outcome.status||503);
+  const eventId=outcome.source_record_id;
+  if(!outcome.replayed)
   await auditAdminAction(ctx.env,ctx.request,auth.admin,{action_type:'custom_request_commission_'+kind,target_type:'custom_request',target_id:requestId,target_key:String(eventId),details:{
    event_id:eventId,source_quote_draft_id:sourceIds.quote||null,source_payment_request_draft_id:sourceIds.payment||null,
    customer_visible:kind==='progress_approval',actual_payment_verified:false,customer_contact_sent:false,operator_note:note}});
-  return out({ok:true,event_id:eventId,message:'Operator decision appended to commission lifecycle. Source authorities unchanged.',...await commission(auth.db,requestId),safety});
+  return out({...outcome,ok:true,event_id:eventId,message:outcome.replayed?'OK — previously committed, no duplicate decision.':'OK — commission decision committed with durable receipt.',...await commission(auth.db,requestId),safety});
  }catch(e){console.error('COMMISSION_WRITE_FAILED',e?.name||'Error');return out({ok:false,error:'Commission entry could not be verified.',code:'COMMISSION_WRITE_FAILED'},503);}
 }

@@ -1,0 +1,55 @@
+{
+  "release": 467,
+  "build": 385,
+  "title": "Durable Server-Side Write Idempotency & Operation Receipts",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "migration": "0036_release467_durable_admin_write_receipts.sql",
+  "contract": {
+    "receipt_actor_bound": true,
+    "receipt_payload_sha256": true,
+    "atomic_d1_business_and_receipt": true,
+    "source_row_guarded": true,
+    "repeated_identical_action_returns_committed_receipt": true,
+    "different_payload_same_key_rejected": true,
+    "admin_receipt_lookup": true,
+    "scopes": [
+      "commission_decision",
+      "finance_review",
+      "material_reserve",
+      "material_release"
+    ]
+  },
+  "safety": {
+    "universal_all_endpoints": false,
+    "external_provider_exactly_once": false,
+    "transactional_d1_batch": true,
+    "durable_history_immutable": true,
+    "request_time_ddl": false,
+    "customer_charge": false,
+    "finance_posting": false,
+    "source_mutation_only_if_operator_requested": true
+  },
+  "operator_guide": "docs/operations/RELEASE_467_BUILD_385_DURABLE_WRITE_RECEIPTS.md",
+  "next_build": 386,
+  "next_build_title": "Write Receipt Coverage Expansion & Cross-Tab Recovery",
+  "starting_point": {
+    "development": {
+      "sha": "78c5a8ae1196ecd113bf8041c36717fbe896411e",
+      "tree": "3e53a510c5ae6d060af4169246470e3d6e8273f2",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38342325827,
+      "quality_run": 38342325805,
+      "it_admin_runtime_run": 38342325852,
+      "repository_hygiene_run": 38342325907,
+      "d1_ci_fanout_guard_run": 38342325718,
+      "build_specific_proof_run": 38342325846
+    },
+    "production": {
+      "main_sha": "97d11bfc0cb04de1d5ab4603969d0457f4f7e884",
+      "tree_sha": "3e53a510c5ae6d060af4169246470e3d6e8273f2",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38342517173,
+      "production_live_resource_integrity_run": 38342618510
+    }
+  }
+}
