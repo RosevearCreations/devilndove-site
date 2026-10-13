@@ -2,7 +2,7 @@
   "release": 467,
   "build": 390,
   "title": "Product Video Review & Inventory Tax Evidence Operational Acceptance",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "starting_point": {
     "development": {
       "sha": "ea31d60bd3e5cb23be7c43b35474b8114215980f",
@@ -53,5 +53,29 @@
   },
   "docs": "docs/operations/RELEASE_467_BUILD_390_PRODUCT_PRICE_FIX_VIDEO_TAX_ACCEPTANCE.md",
   "next_build": 391,
-  "next_build_title": "Historical Price Reconciliation & Product Save Browser Acceptance"
+  "next_build_title": "Historical Price Reconciliation & Product Save Browser Acceptance",
+  "final_closure": {
+    "dev_sha": "7c69c023ede6d4a154d4c911aaa88039f26263c7",
+    "tree_sha": "140daf4d2800a26b38688144bc87fae8f344ead3",
+    "state": "DEVELOPMENT_GREEN",
+    "proof_state": "EXACT_BRANCH_HEAD_BUILD390_GREEN",
+    "proofs": {
+      "system_gate_run": 38458396593,
+      "current_application_quality_run": 38458396609,
+      "it_admin_runtime_proof_run": 38458396539,
+      "branch_hygiene_run": 38458396516,
+      "d1_ci_fanout_guard_run": 38458396498,
+      "build_specific_proof_run": 38458396621
+    },
+    "ingested_by_build": 391
+  },
+  "production_checkpoint": {
+    "main_sha": "6a2914aa98d2652a9ccd1d2a6de58280076985d3",
+    "tree_sha": "140daf4d2800a26b38688144bc87fae8f344ead3",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38458723608,
+    "production_live_resource_integrity_run": 38458843594,
+    "remote_d1_queries": 0
+  }
 }

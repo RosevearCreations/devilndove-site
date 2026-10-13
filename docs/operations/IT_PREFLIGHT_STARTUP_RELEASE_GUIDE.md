@@ -1,3 +1,9 @@
+# Current successor: Release 467 Build 391 — Historical Price Reconciliation & Product Save Browser Acceptance
+
+BUILD391_VERIFIED_BUILD390_CHECKPOINT: Development 7c69c023ede6d4a154d4c911aaa88039f26263c7; tree 140daf4d2800a26b38688144bc87fae8f344ead3; System 38458396593; Quality 38458396609; I.T. 38458396539; Hygiene 38458396516; D1 fan-out 38458396498; Build 38458396621; Production 6a2914aa98d2652a9ccd1d2a6de58280076985d3; Pages 38458723608; Live 38458843594.
+
+Build 391 fixes hard-coded preflight migration count 30 when 39 are expected, restores readable diagnostic card rows, archives historical Build247 evidence, guides manual Product price verification and offers safe Etsy callback outcome diagnostics. No new migration or automatic Etsy token operation.
+
 # Current successor: Release 467 Build 390 — Product Video Review & Inventory Tax Evidence Operational Acceptance
 
 BUILD390_VERIFIED_BUILD389_CHECKPOINT: Development ea31d60bd3e5cb23be7c43b35474b8114215980f; tree d78c6a8a4fce5a1e9a03647a75cbb6ea6c48556b; System 38454465063; Quality 38454465074; I.T. 38454465037; Hygiene 38454465138; D1 fan-out 38454158726; Build 38454465107; Production 454f5b43e8da3cf5119563f53e109a3bacdfd886; Pages 38454828495; Live 38455024191.

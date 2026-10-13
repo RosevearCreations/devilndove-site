@@ -1,15 +1,5 @@
 name: Release 467 Build 390 Price Save and Video Invoice Acceptance
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build390-price-video-invoice.json'
-      - 'public/js/admin-product-editor-v163.js'
-      - 'functions/api/admin/product-editor-save.js'
-      - 'functions/api/admin/product-zero-price-review.js'
-      - 'public/js/admin-product-zero-price-review-v390.js'
-      - 'scripts/release467_build390_*'
-      - '.github/workflows/release467-build390-price-video-invoice.yml'
   workflow_dispatch:
 permissions:
   contents: read

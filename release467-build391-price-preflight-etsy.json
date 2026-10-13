@@ -1,0 +1,52 @@
+{
+  "release": 467,
+  "build": 391,
+  "title": "Historical Price Reconciliation & Product Save Browser Acceptance",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "7c69c023ede6d4a154d4c911aaa88039f26263c7",
+      "tree": "140daf4d2800a26b38688144bc87fae8f344ead3",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38458396593,
+      "quality_run": 38458396609,
+      "it_admin_runtime_run": 38458396539,
+      "repository_hygiene_run": 38458396516,
+      "d1_ci_fanout_guard_run": 38458396498,
+      "build_specific_proof_run": 38458396621
+    },
+    "production": {
+      "main_sha": "6a2914aa98d2652a9ccd1d2a6de58280076985d3",
+      "tree_sha": "140daf4d2800a26b38688144bc87fae8f344ead3",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38458723608,
+      "production_live_resource_integrity_run": 38458843594
+    }
+  },
+  "implementation": {
+    "canonical_migration_count_dynamic": true,
+    "current_expected_migrations": 39,
+    "preflight_false_fixed_30_count_removed": true,
+    "preflight_readable_cards": true,
+    "historical_build247_archived": true,
+    "zero_price_manual_reconciliation": true,
+    "product_save_readback_retained": true,
+    "etsy_main_site_callback_controlled_diagnostics": true,
+    "oauth_one_time_state_retained": true,
+    "oauth_secret_leak_prevented": true,
+    "etsy_connection_not_assumed": true
+  },
+  "safety": {
+    "no_schema_mutations": true,
+    "no_business_data_migrations": true,
+    "no_historical_price_rewrites": true,
+    "no_etsy_provider_auto_retries": true,
+    "no_token_or_pkce_exposure": true,
+    "listing_publication_closed": true,
+    "oauth_callback_failure_not_auto_success": true
+  },
+  "new_canonical_migration": false,
+  "operator_guide": "docs/operations/RELEASE_467_BUILD_391_PRICE_PREFLIGHT_ETSY_OAUTH_ACCEPTANCE.md",
+  "next_build": 392,
+  "next_build_title": "Etsy OAuth Callback Edge Reliability & Price Reconciliation Source Acceptance"
+}
