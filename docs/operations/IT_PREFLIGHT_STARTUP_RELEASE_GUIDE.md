@@ -1,4 +1,8 @@
-# Release 467 Build 386 — predecessor proof handoff
+# Current successor: Release 467 Build 386 — Write Receipt Coverage Expansion & Cross-Tab Recovery
+
+Build 385 is the most recent fully GREEN Development and Production checkpoint. Build 386 remains a DEVELOPMENT CLOSURE CANDIDATE until its exact-head CI and Production Pages proof complete.
+
+## Build 385 exact handoff
 
 BUILD386_VERIFIED_BUILD385_CHECKPOINT: Dev 3cc45cbeb709dd4d6516249abefb2a6523d9e35e; tree ce6d4a35790203d2580a4bdf95a7a9790c5b230e; System 38344246684; Quality 38344246645; I.T. 38344246699; Hygiene 38344246590; D1 38344246686; Build 38344246599; Main 8b527e0abdd3386357c37aecddbece88359910f5; Pages 38344480326; Live 38344610640.
 

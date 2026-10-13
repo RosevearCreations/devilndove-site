@@ -105,7 +105,7 @@ export async function onRequestPost(ctx){
   const receipt=await atomicWriteReceipt(a.db,sourceWrite,
    receiptInsert(a.db,scope,key,actor,'creative_work_project',p,hash,'creative_work_order_events','creative_work_order_event_id'),
    {scope,key,actor,target:p,hash});
-  if(!receipt.ok)return out(receipt.code==='SOURCE_CONSTRAINT'?{...receipt,code:'STALE_OR_SOURCE_CONSTRAINT'}:receipt,receipt.status||503);
+  if(!receipt.ok)return out(receipt.code==='WRITE_NOT_CONFIRMED'?{...receipt,code:'STALE_OR_BLOCKED',error:'Concurrent change or a blocked source transition; refresh before retrying.'}:receipt.code==='SOURCE_CONSTRAINT'?{...receipt,code:'STALE_OR_SOURCE_CONSTRAINT'}:receipt,receipt.status||503);
   if(!receipt.replayed)await auditAdminAction(ctx.env,ctx.request,a.admin,{action_type:'creative_work_order_'+action,target_type:'creative_project_operation',target_id:id,
     target_key:String(p),details:{project_id:p,operation_id:id,actor_user_id:actor,automatic_completion:false,inventory_mutation:false}});
   return out({ok:true,build:386,...receipt,event_id:receipt.source_record_id,
