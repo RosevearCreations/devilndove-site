@@ -34,7 +34,7 @@ CREATE TRIGGER IF NOT EXISTS trg_admin_write_receipts_insert_proof BEFORE INSERT
  WHERE NEW.action_scope='material_release' AND NOT EXISTS
  (SELECT 1 FROM creative_project_material_reservations e WHERE e.creative_project_material_reservation_id=NEW.source_record_id
  AND e.creative_work_project_id=NEW.target_id AND e.updated_by_user_id=NEW.actor_user_id AND NEW.target_type='creative_work_project'
- AND e.release_note IS NOT NULL);
+ AND e.release_note LIKE '@receipt:' || NEW.request_key || ':%');
 END;
 CREATE TRIGGER IF NOT EXISTS trg_admin_write_receipts_no_update BEFORE UPDATE ON admin_write_receipts BEGIN
  SELECT RAISE(ABORT,'receipt_history_immutable');

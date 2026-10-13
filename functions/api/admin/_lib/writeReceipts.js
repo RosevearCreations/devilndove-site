@@ -30,7 +30,7 @@ export function checkReceipt(receipt,{scope,key,actor,target,hash}){
   source_record_id:Number(receipt.source_record_id),committed_at:receipt.created_at,
   message:'OK — action was already committed. No duplicate database write was made.'};
 }
-export function receiptInsert(db,scope,key,actor,targetType,target,hash,sourceTable,pk){
+export function receiptInsert(db,scope,key,actor,targetType,target,hash,sourceTable,pk,releaseSourceId=0,releaseMarker=''){
  // Table + key column are ONLY internal string literals; never accept user-supplied SQL identifiers.
  const allowed={
   commission_decision:['custom_request_commission_events','custom_request_commission_event_id'],
