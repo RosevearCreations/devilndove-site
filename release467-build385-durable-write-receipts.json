@@ -1,0 +1,35 @@
+{
+  "release": 467,
+  "build": 385,
+  "title": "Durable Server-Side Write Idempotency & Operation Receipts",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "migration": "0036_release467_durable_admin_write_receipts.sql",
+  "contract": {
+    "receipt_actor_bound": true,
+    "receipt_payload_sha256": true,
+    "atomic_d1_business_and_receipt": true,
+    "source_row_guarded": true,
+    "repeated_identical_action_returns_committed_receipt": true,
+    "different_payload_same_key_rejected": true,
+    "admin_receipt_lookup": true,
+    "scopes": [
+      "commission_decision",
+      "finance_review",
+      "material_reserve",
+      "material_release"
+    ]
+  },
+  "safety": {
+    "universal_all_endpoints": false,
+    "external_provider_exactly_once": false,
+    "transactional_d1_batch": true,
+    "durable_history_immutable": true,
+    "request_time_ddl": false,
+    "customer_charge": false,
+    "finance_posting": false,
+    "source_mutation_only_if_operator_requested": true
+  },
+  "operator_guide": "docs/operations/RELEASE_467_BUILD_385_DURABLE_WRITE_RECEIPTS.md",
+  "next_build": 386,
+  "next_build_title": "Write Receipt Coverage Expansion & Cross-Tab Recovery"
+}
