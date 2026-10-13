@@ -1,33 +1,33 @@
 {
   "release": 467,
-  "build": 385,
-  "title": "Durable Server-Side Write Idempotency & Operation Receipts",
-  "state": "DEVELOPMENT_GREEN",
+  "build": 386,
+  "title": "Write Receipt Coverage Expansion & Cross-Tab Recovery",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 384,
-      "title": "System-Wide Analytics, Automation & Operational Reliability",
-      "authority": "release467-build384-system-analytics-safe-actions.json",
-      "dev_sha": "78c5a8ae1196ecd113bf8041c36717fbe896411e",
-      "tree_sha": "3e53a510c5ae6d060af4169246470e3d6e8273f2",
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD384_GREEN",
+      "build": 385,
+      "title": "Durable Server-Side Write Idempotency & Operation Receipts",
+      "authority": "release467-build385-durable-write-receipts.json",
+      "dev_sha": "3cc45cbeb709dd4d6516249abefb2a6523d9e35e",
+      "tree_sha": "ce6d4a35790203d2580a4bdf95a7a9790c5b230e",
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD385_GREEN",
       "proofs": {
-        "system_gate_run": 38342325827,
-        "current_application_quality_run": 38342325805,
-        "it_admin_runtime_proof_run": 38342325852,
-        "branch_hygiene_run": 38342325907,
-        "d1_ci_fanout_guard_run": 38342325718,
-        "build_specific_proof_run": 38342325846
+        "system_gate_run": 38344246684,
+        "current_application_quality_run": 38344246645,
+        "it_admin_runtime_proof_run": 38344246699,
+        "branch_hygiene_run": 38344246590,
+        "d1_ci_fanout_guard_run": 38344246686,
+        "build_specific_proof_run": 38344246599
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 385,
-      "title": "Durable Server-Side Write Idempotency & Operation Receipts",
-      "authority": "release467-build385-durable-write-receipts.json",
+      "build": 386,
+      "title": "Write Receipt Coverage Expansion & Cross-Tab Recovery",
+      "authority": "release467-build386-write-receipts-cross-tab.json",
       "state": "DEVELOPMENT_CLOSURE_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -38,19 +38,20 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 384,
-    "title": "System-Wide Analytics, Automation & Operational Reliability",
-    "authority": "release467-build384-system-analytics-safe-actions.json",
-    "main_sha": "97d11bfc0cb04de1d5ab4603969d0457f4f7e884",
-    "tree_sha": "3e53a510c5ae6d060af4169246470e3d6e8273f2",
+    "build": 385,
+    "title": "Durable Server-Side Write Idempotency & Operation Receipts",
+    "authority": "release467-build385-durable-write-receipts.json",
+    "main_sha": "8b527e0abdd3386357c37aecddbece88359910f5",
+    "tree_sha": "ce6d4a35790203d2580a4bdf95a7a9790c5b230e",
     "state": "PRODUCTION_GREEN",
     "same_tree_as_verified_development": true,
-    "production_pages_deploy_run": 38342517173,
-    "production_live_resource_integrity_run": 38342618510,
+    "production_pages_deploy_run": 38344480326,
+    "production_live_resource_integrity_run": 38344610640,
     "remote_d1_queries": 0,
     "role": "CURRENT_PRODUCTION_BASELINE"
   },
   "current_release_authorities": [
+    "release467-build386-write-receipts-cross-tab.json",
     "release467-build385-durable-write-receipts.json",
     "release467-build384-system-analytics-safe-actions.json",
     "release467-build383-cross-project-accounting-revenue-profitability.json",
@@ -277,10 +278,10 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_373_378.md",
-  "next_build": 386,
-  "next_build_state": "QUEUED_AFTER_BUILD385_PRODUCTION_GREEN",
-  "next_build_title": "Write Receipt Coverage Expansion & Cross-Tab Recovery",
-  "promotion_state": "BUILD385_DEVELOPMENT_CLOSURE_CANDIDATE_NOT_YET_VERIFIED",
+  "next_build": 387,
+  "next_build_state": "QUEUED_AFTER_BUILD386_PRODUCTION_GREEN",
+  "next_build_title": "Write Confirmation Coverage Audit & Guided Recovery Decisions",
+  "promotion_state": "BUILD386_DEVELOPMENT_CLOSURE_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "SYSTEM_WIDE_378_384_NO_SINGLE_PROJECT_BUILDS",
   "measured_closure": {
     "source_build": 232,
@@ -311,16 +312,16 @@
     "roadmap": "docs/operations/RELEASE_467_CAIP_CONTENT_ADOPTION_BUILDS_301_306.md"
   },
   "canonical_data_migration_authorized": true,
-  "canonical_data_migration_scope": "0036_release467_durable_admin_write_receipts.sql",
-  "accepted_dev_sha": "78c5a8ae1196ecd113bf8041c36717fbe896411e",
-  "accepted_dev_tree_sha": "3e53a510c5ae6d060af4169246470e3d6e8273f2",
+  "canonical_data_migration_scope": "0037_release467_receipt_coverage_work_calendar.sql",
+  "accepted_dev_sha": "3cc45cbeb709dd4d6516249abefb2a6523d9e35e",
+  "accepted_dev_tree_sha": "ce6d4a35790203d2580a4bdf95a7a9790c5b230e",
   "acceptance": {
-    "system_gate_run": 38342325827,
-    "current_application_quality_run": 38342325805,
-    "it_admin_runtime_proof_run": 38342325852,
-    "branch_hygiene_run": 38342325907,
-    "d1_ci_fanout_guard_run": 38342325718,
-    "build_specific_proof_run": 38342325846
+    "system_gate_run": 38344246684,
+    "current_application_quality_run": 38344246645,
+    "it_admin_runtime_proof_run": 38344246699,
+    "branch_hygiene_run": 38344246590,
+    "d1_ci_fanout_guard_run": 38344246686,
+    "build_specific_proof_run": 38344246599
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -5886,5 +5887,26 @@
     },
     "exact_head_reproof_state": "FINAL_EXACT_HEAD_REPROOF_REQUESTED_AFTER_COMPATIBILITY_REPAIR"
   },
-  "authority": "release467-build377-multi-project-portfolio-workflow-evidence-routing-foundation.json"
+  "authority": "release467-build377-multi-project-portfolio-workflow-evidence-routing-foundation.json",
+  "write_receipt_coverage_expansion": {
+    "build": 386,
+    "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+    "migration": "0037_release467_receipt_coverage_work_calendar.sql",
+    "new_scopes": [
+      "work_order_event",
+      "calendar_schedule"
+    ],
+    "prior_scopes": [
+      "commission_decision",
+      "finance_review",
+      "material_reserve",
+      "material_release"
+    ],
+    "client_cross_tab_recovery": true,
+    "never_retry_automatically": true,
+    "durable_receipt_actor_and_payload_bound": true,
+    "public_provider_execution": false,
+    "next_build": 387,
+    "next_build_title": "Write Confirmation Coverage Audit & Guided Recovery Decisions"
+  }
 }

@@ -94,7 +94,7 @@
    render();return response('RECEIPT_VERIFICATION_REQUIRED',messageFor(previous));
   }
   // For repeated sends in this tab use the original key; D1 rejects duplicate commits.
-  const key=previous?.key||(/^[A-Za-z0-9_-]{16,80}$/.test(data.request_key||'')?data.request_key:crypto.randomUUID());
+  const key=previous?.key||crypto.randomUUID(); // New payload = new key, even if an old form retained a stale key.
   data.request_key=key;
   const next={scope,key,state:'pending',owner:tabId,at:Date.now()};
   write(storageKey,next);

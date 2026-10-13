@@ -1,0 +1,51 @@
+{
+  "release": 467,
+  "build": 386,
+  "title": "Write Receipt Coverage Expansion & Cross-Tab Recovery",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "migration": "0037_release467_receipt_coverage_work_calendar.sql",
+  "contract": {
+    "existing_ledger_preserved": true,
+    "new_extended_ledger": true,
+    "expanded_scopes": [
+      "work_order_event",
+      "calendar_schedule"
+    ],
+    "existing_scopes": [
+      "commission_decision",
+      "finance_review",
+      "material_reserve",
+      "material_release"
+    ],
+    "source_and_receipt_atomic_batch": true,
+    "append_only_source_and_receipt": true,
+    "actor_and_payload_bound": true,
+    "original_request_key_retained_for_uncertain_actions": true,
+    "read_only_receipt_check": true,
+    "cross_tab_pending_status_recovery": true,
+    "automatic_write_retry": false
+  },
+  "limits": {
+    "no_universal_exactly_once_claim": true,
+    "not_protected": [
+      "calendar_cancel",
+      "third_party_payment",
+      "checkout",
+      "file_upload",
+      "other_unintegrated_admin_writes"
+    ],
+    "browser_cannot_enforce_arbitrary_direct_api_clients": true,
+    "manual_source_verification_required": true,
+    "private_payloads_not_stored": true
+  },
+  "verification": {
+    "gate": "python scripts/release467_build386_gate.py",
+    "node_test": "node --test scripts/release467_build386_recovery.test.mjs",
+    "migration_development_first": true,
+    "require_exact_green_dev": true,
+    "production_only_after_verified_dev": true
+  },
+  "operator_guide": "docs/operations/RELEASE_467_BUILD_386_WRITE_RECEIPT_CROSS_TAB_RECOVERY.md",
+  "next_build": 387,
+  "next_build_title": "Write Confirmation Coverage Audit & Guided Recovery Decisions"
+}
