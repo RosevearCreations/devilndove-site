@@ -1,7 +1,7 @@
 name: Release 467 Build 385 Durable Write Receipts
 on:
   push:
-    branches: [dev, build385-durable-write-receipts]
+    branches: [dev]
     paths:
       - 'release467-build385-durable-write-receipts.json'
       - 'functions/api/admin/_lib/writeReceipts.js'
