@@ -10,6 +10,7 @@
     const hint = String(button?.dataset?.waitText || button?.textContent || button?.value || '').toLowerCase();
     if (/delet|remov|void|cancel|archiv/.test(hint) || method === 'DELETE') return 'Deleting…';
     if (/add|creat|new|upload|import/.test(hint)) return 'Adding…';
+    if (/sav|apply|commit/.test(hint)) return 'Saving…';
     if (/updat|edit|chang/.test(hint) || method === 'PATCH' || method === 'PUT') return 'Updating…';
     if (/approv|publish|submit|send|confirm/.test(hint)) return 'Processing…';
     return 'Saving…';
