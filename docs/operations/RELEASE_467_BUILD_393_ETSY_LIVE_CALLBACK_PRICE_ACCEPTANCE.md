@@ -1,6 +1,6 @@
 # Release 467 Build 393 — Etsy Live Callback Acceptance & Verified Product Price Reconciliation
 
-Status: **ACCEPTANCE PENDING** (not a GREEN assertion).
+Status: **OPERATOR ACCEPTANCE REPORTED; CI AND PRODUCTION RELEASE PENDING**.
 
 ## Baseline
 Build 392 introduced Cloudflare Workers-compatible `redirect: 'manual'` with strict redirect rejection. Previously consumed Etsy authorization URLs cannot be reused.
@@ -30,10 +30,10 @@ Build 392 introduced Cloudflare Workers-compatible `redirect: 'manual'` with str
 ## Evidence ledger
 | Gate | Evidence | Result |
 | --- | --- | --- |
-| New Etsy grant completed | Pending human operator and live callback | PENDING |
-| Shop `connected_verified` | Pending live integration status | PENDING |
-| Source-backed Product price review | Pending approved source for each edited item | PENDING |
-| Authenticated save/readback and refresh | Pending real browser/API evidence | PENDING |
+| New Etsy grant completed | User reports Etsy connection verification validated; independent evidence not attached | USER VALIDATED |
+| Shop `connected_verified` | User reports connection verified; exact shop state not independently read | USER VALIDATED |
+| Source-backed Product price review | User reports reconciliation validated; source identifiers not independently read | USER VALIDATED |
+| Authenticated save/readback and refresh | User reports reconciliation validated; separate readback evidence not attached | USER VALIDATED |
 | Development CI/preview at exact SHA | Pending workflow checks | PENDING |
 | Production deployment/integrity at exact SHA | Not initiated | PENDING |
 
