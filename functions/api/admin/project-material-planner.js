@@ -130,7 +130,7 @@ export async function onRequestPost(ctx){
      'creative_project_material_reservations','creative_project_material_reservation_id',reservation,marker);
   }
   const receipt=await atomicWriteReceipt(a.db,sourceWrite,sourceReceipt,{scope,key,actor,target:id,hash});
-  if(!receipt.ok)return reply(receipt,receipt.status||503);
+  if(!receipt.ok)return reply(receipt.code==='SOURCE_CONSTRAINT'?{...receipt,code:'CAPACITY_OR_IDENTITY_CONFLICT'}:receipt,receipt.status||503);
   if(!receipt.replayed)await auditAdminAction(ctx.env,ctx.request,a.admin,{
    action_type:'creative_project_material_'+action,target_type:'site_item_inventory',target_id:inventoryId,target_key:String(id),
    details:{receipt_id:receipt.receipt_id,project_id:id,quantity_stock_units:amount,actor_user_id:actor,

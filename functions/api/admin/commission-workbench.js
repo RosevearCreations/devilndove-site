@@ -121,7 +121,7 @@ export async function onRequestPost(ctx){
   const receipt=receiptInsert(auth.db,scope,key,actor,'custom_request',requestId,hash,
     'custom_request_commission_events','custom_request_commission_event_id');
   const outcome=await atomicWriteReceipt(auth.db,sourceWrite,receipt,{scope,key,actor,target:requestId,hash});
-  if(!outcome.ok)return out(outcome,outcome.status||503);
+  if(!outcome.ok)return out(outcome.code==='SOURCE_CONSTRAINT'?{...outcome,code:'COMMISSION_GUARD_REJECTED'}:outcome,outcome.status||503);
   const eventId=outcome.source_record_id;
   if(!outcome.replayed)
   await auditAdminAction(ctx.env,ctx.request,auth.admin,{action_type:'custom_request_commission_'+kind,target_type:'custom_request',target_id:requestId,target_key:String(eventId),details:{
