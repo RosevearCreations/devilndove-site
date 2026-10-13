@@ -26,5 +26,25 @@
   },
   "operator_guide": "docs/operations/RELEASE_467_BUILD_383_CROSS_PROJECT_ACCOUNTING_REVENUE_PROFITABILITY.md",
   "next_build": 384,
-  "next_build_title": "System-Wide Analytics, Automation & Operational Reliability"
+  "next_build_title": "System-Wide Analytics, Automation & Operational Reliability",
+  "starting_point": {
+    "development": {
+      "sha": "f880dbe9f7ff6d9246486bb7042c6b78e1ab2790",
+      "tree": "5675094afbfbf77f3dc4a2a4eed7c87eb5c31297",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38327360241,
+      "quality_run": 38327360200,
+      "it_admin_runtime_run": 38327360225,
+      "repository_hygiene_run": 38327360258,
+      "d1_ci_fanout_guard_run": 38327360222,
+      "build_specific_proof_run": 38327360252
+    },
+    "production": {
+      "main_sha": "ffe72ac4bde3d2d4680c0946012aa26138652b84",
+      "tree_sha": "5675094afbfbf77f3dc4a2a4eed7c87eb5c31297",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38328855419,
+      "production_live_resource_integrity_run": 38328981215
+    }
+  }
 }

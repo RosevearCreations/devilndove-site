@@ -2,7 +2,7 @@
   "release": 467,
   "build": 382,
   "title": "Customer Requests, Quotes & Commission Lifecycle",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "contract": {
     "existing_request_intake": true,
     "existing_quote_revision_authority": true,
@@ -48,5 +48,33 @@
       "production_pages_deploy_run": 38320417005,
       "production_live_resource_integrity_run": 38320529537
     }
+  },
+  "final_closure": {
+    "dev_sha": "f880dbe9f7ff6d9246486bb7042c6b78e1ab2790",
+    "tree_sha": "5675094afbfbf77f3dc4a2a4eed7c87eb5c31297",
+    "proofs": {
+      "system_gate_run": 38327360241,
+      "current_application_quality_run": 38327360200,
+      "it_admin_runtime_proof_run": 38327360225,
+      "branch_hygiene_run": 38327360258,
+      "d1_ci_fanout_guard_run": 38327360222,
+      "build_specific_proof_run": 38327360252
+    },
+    "ingested_by_build": 383,
+    "verified_development": true
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 382,
+    "title": "Customer Requests, Quotes & Commission Lifecycle",
+    "authority": "release467-build382-customer-requests-quotes-commission-lifecycle.json",
+    "main_sha": "ffe72ac4bde3d2d4680c0946012aa26138652b84",
+    "tree_sha": "5675094afbfbf77f3dc4a2a4eed7c87eb5c31297",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38328855419,
+    "production_live_resource_integrity_run": 38328981215,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
   }
 }
