@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {webcrypto} from 'node:crypto';
 import {canonical,payloadHash,checkReceipt,receiptInsert,atomicWriteReceipt} from '../functions/api/admin/_lib/writeReceipts.js';
-globalThis.crypto=webcrypto;
+// Node 24 includes Web Crypto globally; avoid reassigning its read-only property.
 test('hash is canonical, actor/project-bound and payload-sensitive',async()=>{
  const a=await payloadHash('finance_review',7,21,{note:'review',cost:42});
  const b=await payloadHash('finance_review',7,21,{cost:42,note:'review'});

@@ -24,7 +24,7 @@ for file in ('functions/api/admin/_lib/writeReceipts.js','functions/api/admin/wr
  p=subprocess.run(['node','--check',str(ROOT/file)],capture_output=True,text=True)
  check(p.returncode==0,'JavaScript parse '+file+': '+p.stderr[-300:])
 t=subprocess.run(['node','--test','scripts/release467_build385_hash.test.mjs'],cwd=ROOT,capture_output=True,text=True)
-check(t.returncode==0,'Hash/actor/payload JS tests '+t.stdout[-450:]+t.stderr[-220:])
+check(t.returncode==0,'Hash/actor/payload JS tests '+t.stdout[-2000:]+t.stderr[-1200:])
 db=sqlite3.connect(':memory:');db.execute('PRAGMA foreign_keys=ON')
 db.executescript("""
 CREATE TABLE users(user_id INTEGER PRIMARY KEY);
@@ -64,7 +64,7 @@ try:
   db.execute('INSERT INTO admin_write_receipts(action_scope,request_key,actor_user_id,target_type,target_id,source_record_id,payload_sha256) VALUES(?,?,?,?,?,?,?)',
    ('finance_review','wrong_scope_12345678',8,'creative_work_project',21,fin_id,digest))
   fail.append('Forged cross-actor receipt accepted')
- except sqlite3.IntegrityError:pass
+ except sqlite3.IntegrityError:db.rollback()
  try:
   db.execute('BEGIN')
   db.execute("INSERT INTO creative_project_finance_review_events(creative_work_project_id,actor_user_id,request_key) VALUES(22,7,'rollback_test_123456')")
