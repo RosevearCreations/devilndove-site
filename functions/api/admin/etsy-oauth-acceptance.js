@@ -15,6 +15,12 @@ export async function onRequestGet({request,env}){
   let conn=null,shop=null;
   try{conn=await db.prepare("SELECT provider_key,remote_subject_id,scopes_json,access_expires_at,refresh_expires_at,connection_status,diagnostic_code,updated_at FROM oauth_provider_connections WHERE provider_key='etsy' LIMIT 1").first();}catch{}
   try{shop=await db.prepare("SELECT owner_user_id,shop_id,shop_name,currency_code,listing_active_count,acceptance_status,verified_at,updated_at FROM etsy_oauth_shop_connections WHERE provider_key='etsy' LIMIT 1").first();}catch{}
+  // Build391 bounded operator diagnostic: no OAuth codes, state hashes, tokens, verifier or secrets.
+  let latestAttempt=null;
+  try{
+    const row=await db.prepare("SELECT terminal_status,diagnostic_code,created_at,consumed_at,completed_at FROM oauth_authorization_transactions WHERE provider_key='etsy' ORDER BY transaction_id DESC LIMIT 1").first();
+    if(row)latestAttempt={status:String(row.terminal_status||'unknown').slice(0,40),diagnostic_code:String(row.diagnostic_code||'').slice(0,100)||null,created_at:row.created_at||null,consumed_at:row.consumed_at||null,completed_at:row.completed_at||null,contains_secrets:false};
+  }catch{}
   let scopes=[];try{scopes=JSON.parse(conn?.scopes_json||'[]');}catch{scopes=[];}
   const host=new URL(request.url).hostname;
   const callback=text(env?.ETSY_REDIRECT_URI);
@@ -41,6 +47,7 @@ export async function onRequestGet({request,env}){
     configuration:{api_keystring_present:apiKeyReady,shared_secret_present:sharedSecretReady,redirect_uri_present:redirectReady,redirect_uri:callback||null,expected_redirect_uri:'https://devilndove.com/api/social/oauth/etsy/callback',redirect_main_ready:redirectMainReady,encryption_key_configured:encryptionReady,encryption_authority_source:encryptionSource},
     connect_authorization_available:connectAvailable,
     connect_blockers,
+    latest_oauth_attempt:latestAttempt,
     connection:{status:conn?.connection_status||'not_connected',connected,scopes,access_expires_at:conn?.access_expires_at||null,refresh_expires_at:conn?.refresh_expires_at||null,diagnostic_code:conn?.diagnostic_code||null,updated_at:conn?.updated_at||null},
     shop:shop?{shop_id:Number(shop.shop_id),owner_user_id:Number(shop.owner_user_id),shop_name:shop.shop_name||'',currency_code:shop.currency_code||'',listing_active_count:Number(shop.listing_active_count||0),acceptance_status:shop.acceptance_status||'',verified_at:shop.verified_at||null}:null,
     security:{secret_values_emitted:false,token_values_emitted:false,shop_id_auto_discovered:true,etsy_test_mode_required:false,provider_listing_writes_allowed:false,provider_publication_allowed:false,remote_draft_creation_enabled:false},

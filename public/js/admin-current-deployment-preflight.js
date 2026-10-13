@@ -22,36 +22,38 @@ document.addEventListener('DOMContentLoaded', () => {
     message.style.color = error ? '#ffb4b4' : '';
   };
 
-  function renderMigrationTruth(data) {
-    const truth = data.canonical_migration_truth || {};
-    const rows = Array.isArray(truth.migrations) ? truth.migrations : [];
-    return `<section class="card" style="margin-top:14px">
-      <h3 style="margin-top:0">Canonical D1 migration authority</h3>
-      <p class="small"><code>${esc(truth.manifest_path || 'migrations/canonical/manifest.json')}</code> is the only forward schema authority. Applicator: <code>${esc(truth.applicator || 'scripts/d1_migrate.py')}</code>.</p>
-      <div class="admin-summary-grid">
-        <div class="admin-stat"><div class="admin-stat-label">Native ledger</div><div class="admin-stat-value">${esc(truth.native_applied_count ?? 0)} / ${esc(truth.expected_count ?? 0)}</div></div>
-        <div class="admin-stat"><div class="admin-stat-label">Proof rows</div><div class="admin-stat-value">${esc(truth.proof_recorded_count ?? 0)} / ${esc(truth.expected_count ?? 0)}</div></div>
-        <div class="admin-stat"><div class="admin-stat-label">FK violations</div><div class="admin-stat-value">${esc(truth.foreign_key_violations ?? 0)}</div></div>
+  // Build391: explanatory cards rather than scrolling wide tables with hidden columns.
+  function renderMigrationTruth(data){
+    const truth=data.canonical_migration_truth||{},rows=Array.isArray(truth.migrations)?truth.migrations:[];
+    const bad=rows.filter(row=>!row.native_applied||!row.proof_recorded);
+    return `<section class="card dd391-preflight" style="margin-top:14px"><h3>Canonical D1 migrations</h3>
+      <p class="small">The authoritative manifest is <code>${esc(truth.manifest_path||'migrations/canonical/manifest.json')}</code>. This page performs no migrations.</p>
+      <div class="dd391-stats">
+        <div>Applied migrations <strong>${esc(truth.native_applied_count??0)} / ${esc(truth.expected_count??0)}</strong></div>
+        <div>Checksum proofs <strong>${esc(truth.proof_recorded_count??0)} / ${esc(truth.expected_count??0)}</strong></div>
+        <div>Foreign-key violations <strong>${esc(truth.foreign_key_violations??0)}</strong></div>
       </div>
-      <div class="table-wrap" style="margin-top:12px"><table class="admin-table"><thead><tr><th>Version</th><th>Canonical migration</th><th>d1_migrations</th><th>Proof</th></tr></thead><tbody>
-        ${rows.map((row) => `<tr><td>${esc(row.version)}</td><td><code>${esc(row.file)}</code></td><td><span class="${statusClass(row.native_applied ? 'pass' : 'fail')}">${row.native_applied ? 'applied' : 'missing'}</span></td><td><span class="${statusClass(row.proof_recorded ? 'pass' : 'fail')}">${row.proof_recorded ? 'recorded' : 'missing'}</span></td></tr>`).join('')}
-      </tbody></table></div>
+      <details><summary>Review ${rows.length} individual migrations (${bad.length} incomplete)</summary>
+        <div class="dd391-migration-list">${rows.map(row=>`<div class="dd391-migration-item"><strong>#${esc(row.version)} • ${esc(row.file)}</strong>
+          <span>Migration: ${row.native_applied?'Applied':'Missing'}</span><span>Proof: ${row.proof_recorded?'Recorded':'Missing'}</span></div>`).join('')}</div></details>
     </section>`;
   }
-
-  function renderChecks(checks) {
-    const rows = Array.isArray(checks) ? checks : [];
-    return `<section class="card" style="margin-top:14px"><h3 style="margin-top:0">Current preflight checklist</h3>
-      <div class="table-wrap"><table class="admin-table"><thead><tr><th>Status</th><th>Area</th><th>Details</th><th>Operator action</th></tr></thead><tbody>
-      ${rows.map((row) => `<tr><td><span class="${statusClass(row.status)}">${esc(row.status || 'unknown')}</span></td><td><strong>${esc(row.label || row.code)}</strong><div class="small">${esc(row.code || '')}</div></td><td>${esc(row.detail || '')}</td><td>${esc(row.action || '—')}</td></tr>`).join('') || '<tr><td colspan="4">No checks returned.</td></tr>'}
-      </tbody></table></div></section>`;
+  function renderChecks(checks){
+    const rows=Array.isArray(checks)?checks:[];
+    return `<section class="card dd391-preflight" style="margin-top:14px"><h3>Current preflight checklist</h3>
+      <p class="small">Every check shows its status, reason, and operator action together. A historical proof is not a current blocker.</p>
+      <div class="dd391-check-list">${rows.map(row=>`<article class="dd391-check"><span class="${statusClass(row.status)}">${esc(row.status||'unknown')}</span>
+        <div><strong>${esc(row.label||row.code)}</strong><p class="small">${esc(row.detail||'No details available.')}</p>
+        <p class="small"><b>Action:</b> ${esc(row.action||'None; read-only evidence.')}</p>
+        <small>${esc(row.code||'')}</small></div></article>`).join('')||'<p>No checks returned.</p>'}</div>
+    </section>`;
   }
 
   function renderHistoricalEvidence(data) {
     const runs = Array.isArray(data.recent_runs) ? data.recent_runs : [];
     const confirmations = Array.isArray(data.post_deploy_confirmations) ? data.post_deploy_confirmations : [];
     return `<section class="card" style="margin-top:14px"><h3 style="margin-top:0">Historical evidence visibility</h3>
-      <p class="small">Previous saved snapshots and confirmation rows remain visible when their tables exist, but Build 39 does not create, update, or confirm them.</p>
+      <p class="small">Previous saved snapshots may reference old builds. They are historical only, not active Build 391 proof. No historical snapshot is automatically updated.</p>
       <details><summary><strong>Recent saved snapshots (${runs.length})</strong></summary><div class="table-wrap"><table class="admin-table"><thead><tr><th>When</th><th>Build label</th><th>Status</th><th>Blockers</th><th>Warnings</th></tr></thead><tbody>${runs.map((run) => `<tr><td>${esc(run.created_at || '')}</td><td>${esc(run.build_label || '')}</td><td>${esc(run.run_status || '')}</td><td>${esc(run.blocker_count ?? 0)}</td><td>${esc(run.warning_count ?? 0)}</td></tr>`).join('') || '<tr><td colspan="5">No historical snapshots returned.</td></tr>'}</tbody></table></div></details>
       <details style="margin-top:10px"><summary><strong>Post-deploy confirmation history (${confirmations.length})</strong></summary><div class="table-wrap"><table class="admin-table"><thead><tr><th>Item</th><th>Status</th><th>Notes</th></tr></thead><tbody>${confirmations.map((row) => `<tr><td>${esc(row.label || row.confirmation_label || row.confirmation_key || '')}</td><td>${esc(row.confirmation_status || 'pending')}</td><td>${esc(row.notes || row.detail || '')}</td></tr>`).join('') || '<tr><td colspan="3">No historical confirmation rows returned.</td></tr>'}</tbody></table></div></details>
     </section>`;

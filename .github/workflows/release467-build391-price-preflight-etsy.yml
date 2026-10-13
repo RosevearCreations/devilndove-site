@@ -1,0 +1,27 @@
+name: Release 467 Build 391 Price Preflight and Etsy Callback Acceptance
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'release467-build391-price-preflight-etsy.json'
+      - 'functions/api/admin/current-deployment-preflight.js'
+      - 'public/js/admin-current-deployment-preflight.js'
+      - 'functions/api/social/oauth/_callback.js'
+      - 'functions/api/admin/etsy-oauth-acceptance.js'
+      - 'scripts/release467_build391_regression.py'
+      - '.github/workflows/release467-build391-price-preflight-etsy.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  price-browser-preflight-and-etsy-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v7
+        with: {node-version: '24'}
+      - name: Prove canonical 39, all preflight cards, controlled callback and no price inference
+        run: python scripts/release467_build391_regression.py
