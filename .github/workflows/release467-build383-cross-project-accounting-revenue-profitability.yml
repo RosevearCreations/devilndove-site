@@ -1,7 +1,7 @@
 name: Release 467 Build 383 Cross-Project Accounting Revenue Profitability
 on:
   push:
-    branches: [dev, build383-accounting-reconciliation]
+    branches: [dev]
     paths:
       - 'release467-build383-cross-project-accounting-revenue-profitability.json'
       - 'functions/api/admin/cross-project-accounting.js'
