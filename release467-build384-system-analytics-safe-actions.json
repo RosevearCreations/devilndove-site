@@ -1,0 +1,30 @@
+{
+  "release": 467,
+  "build": 384,
+  "title": "System-Wide Analytics, Automation & Operational Reliability",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "migration": null,
+  "schema_neutral": true,
+  "contract": {
+    "admin_write_feedback": true,
+    "button_wait_labels": true,
+    "in_page_identical_write_coalescing": true,
+    "success_failure_ambiguous_response_feedback": true,
+    "read_only_system_analytics": true,
+    "per_module_sample_limit": 100,
+    "automation_disabled_by_default": true
+  },
+  "safety": {
+    "cross_tab_write_deduplication": false,
+    "server_transaction_idempotency_all_routes": false,
+    "unknown_response_cannot_be_retried_blindly": true,
+    "request_time_ddl": false,
+    "new_d1_operations_for_reporting": false,
+    "provider_execution": false,
+    "accounting_posting": false,
+    "automatic_publication": false
+  },
+  "operator_guide": "docs/operations/RELEASE_467_BUILD_384_ANALYTICS_SAFE_ACTIONS.md",
+  "next_build": 385,
+  "next_build_title": "Durable Server-Side Write Idempotency & Operation Receipts"
+}
