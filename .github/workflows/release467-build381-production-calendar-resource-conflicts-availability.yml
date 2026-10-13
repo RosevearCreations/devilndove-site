@@ -1,16 +1,5 @@
 name: Release 467 Build 381 Production Calendar Resource Conflicts Availability
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build381-production-calendar-resource-conflicts-availability.json'
-      - 'functions/api/admin/project-resource-calendar.js'
-      - 'functions/api/admin/_lib/calendarRules.js'
-      - 'public/js/admin-project-resource-calendar.js'
-      - 'admin/project-resource-calendar/**'
-      - 'migrations/canonical/0033_release467_resource_calendar_conflicts.sql'
-      - 'scripts/release467_build381_*'
-      - '.github/workflows/release467-build381-production-calendar-resource-conflicts-availability.yml'
   workflow_dispatch:
 permissions:
   contents: read

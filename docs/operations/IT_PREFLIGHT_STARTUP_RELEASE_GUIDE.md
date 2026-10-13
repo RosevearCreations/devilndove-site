@@ -1,3 +1,7 @@
+# Current successor: Release 467 Build 382 — Customer Requests, Quotes & Commission Lifecycle
+
+Last fully verified Build 381 Development `fc94efcbfa204e639c1a13dd9f738e5c9e1fbc65`, tree `7305c245ba8e2bbeffc2796b36c24bea358f5cb0`. System 38320191082, Quality 38320191097, I.T. 38320191152, Hygiene 38320191035, D1 Fan-Out 38320191090, Build-specific 38320191048. Last Production GREEN Build 381 main `90ed2ecb7d850cf36c10285f31276ac1e82e1f7c`; Production Pages 38320417005; live-resource integrity 38320529537. Build 382 is current Development candidate. Next queued Build 383.
+
 # Current successor: Release 467 Build 381 — Production Calendar, Resource Conflicts & Availability
 
 Last fully GREEN predecessor Build 380 Development `046615cfe878935fb6fcdc42ce34eb3073c9836c` tree `408b5c97a851db668918f31333772ea4eaa38e54`: System 38290987654, Quality 38290987609, I.T. 38290987620, Hygiene 38290987610, D1 CI fan-out 38273333360, Build-specific 38290987708. Last Production GREEN Build 380 main `6894cdc60c5ff1fd4cae8f2b05ecc61c2f91ffcf`: Production Pages 38291293697, live-resource integrity 38292051690. Build 381 is Development candidate; release state must never claim its future Production before exact-green evidence. Next queued Build 382.

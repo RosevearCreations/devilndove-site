@@ -2,7 +2,7 @@
   "release": 467,
   "build": 381,
   "title": "Production Calendar, Resource Conflicts & Availability",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "migration": "0033_release467_resource_calendar_conflicts.sql",
   "contract": {
     "canonical_resource_ids": true,
@@ -47,5 +47,33 @@
       "production_pages_deploy_run": 38291293697,
       "production_live_resource_integrity_run": 38292051690
     }
+  },
+  "final_closure": {
+    "dev_sha": "fc94efcbfa204e639c1a13dd9f738e5c9e1fbc65",
+    "tree_sha": "7305c245ba8e2bbeffc2796b36c24bea358f5cb0",
+    "proofs": {
+      "system_gate_run": 38320191082,
+      "current_application_quality_run": 38320191097,
+      "it_admin_runtime_proof_run": 38320191152,
+      "branch_hygiene_run": 38320191035,
+      "d1_ci_fanout_guard_run": 38320191090,
+      "build_specific_proof_run": 38320191048
+    },
+    "ingested_by_build": 382,
+    "verified_development": true
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 381,
+    "title": "Production Calendar, Resource Conflicts & Availability",
+    "authority": "release467-build381-production-calendar-resource-conflicts-availability.json",
+    "main_sha": "90ed2ecb7d850cf36c10285f31276ac1e82e1f7c",
+    "tree_sha": "7305c245ba8e2bbeffc2796b36c24bea358f5cb0",
+    "state": "PRODUCTION_GREEN",
+    "same_tree_as_verified_development": true,
+    "production_pages_deploy_run": 38320417005,
+    "production_live_resource_integrity_run": 38320529537,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
   }
 }
