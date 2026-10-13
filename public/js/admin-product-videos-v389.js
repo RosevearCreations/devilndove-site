@@ -29,7 +29,10 @@ async function load(id){
    const item=videos.find(x=>Number(x.product_video_id)===Number(row.dataset.videoId));
    if(item)row.querySelector('[data-video-approval]').value=item.publication_status;
   }
-  setStatus('Video attachments loaded. Approval is an explicit separate Save.');
+  const reviewCount=videos.filter(v=>v.publication_status==='internal_review').length;
+  const approvedCount=videos.filter(v=>v.publication_status==='product_page_ok').length;
+  const blockedCount=videos.filter(v=>v.publication_status==='blocked').length;
+  setStatus('Video review: '+reviewCount+' internal, '+approvedCount+' approved for Product page, '+blockedCount+' blocked. Each change requires explicit Save.');
  }catch(e){setStatus('Video attachment review unavailable: '+e.message);}
 }
 root.addEventListener('click',async e=>{
