@@ -26,7 +26,7 @@ CREATE TRIGGER IF NOT EXISTS trg_finance_review_source_scope BEFORE INSERT ON cr
  (NEW.source_kind='creative_project_production_cost_evidence' AND NOT EXISTS (SELECT 1 FROM creative_project_production_cost_evidence x WHERE x.creative_work_project_id=NEW.creative_work_project_id AND x.creative_project_production_cost_evidence_id=NEW.source_record_id)) OR
  (NEW.source_kind='orders_payments_refunds' AND NOT EXISTS (SELECT 1 FROM custom_request_order_status_links l JOIN creative_project_manufacturing_lifecycles ml ON ml.custom_request_id=l.custom_request_id WHERE ml.creative_work_project_id=NEW.creative_work_project_id AND l.order_id=NEW.source_record_id)) OR
  (NEW.source_kind='operator_review'));
- SELECT RAISE(ABORT,'finance_review_source_required') WHERE NEW.review_result='source_verified' AND NEW.source_kind='operator_review';
+ SELECT RAISE(ABORT,'finance_review_source_required') WHERE NEW.review_result='source_verified' AND (NEW.source_kind='operator_review' OR NEW.source_record_id IS NULL);
 END;
 SELECT COUNT(*) AS build383_review_tables FROM sqlite_master WHERE type='table' AND name='creative_project_finance_review_events';
 PRAGMA foreign_key_check;

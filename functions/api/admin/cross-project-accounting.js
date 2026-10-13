@@ -62,7 +62,7 @@ async function review(db,id){
  if(Number(inventory?.post_count||0)>Number(inventory?.valued_posts||0))sourceNeeds.push('Some actual inventory posts lack a current cost estimate');
  if(production?.evidence_rows>production?.cost_known_rows)sourceNeeds.push('Some manufacturing cost evidence remains unknown');
  const currencyWarning=orderResult.some(x=>x.currency&&String(x.currency).toUpperCase()!=='CAD');
- if(currencyWarning)sourceNeeds.push('Some linked orders use non-CAD currency; no automatic FX conversion');
+ if(currencyWarning){sourceNeeds.push('Some linked orders use non-CAD currency; no automatic FX conversion');for(const key of ['recorded_order_totals_cents','recorded_order_tax_cents','gross_paid_cents','refund_cents','net_paid_cents'])payments[key]=null;}
  const materials={
   posts_count:Number(inventory?.post_count||0),
   inventory_current_cost_estimate_cents:Number(inventory?.valued_posts||0)>0?Number(inventory.current_unit_price_estimate_cents||0):null,
@@ -71,7 +71,7 @@ async function review(db,id){
   reservations_excluded:true,unit_cost_is_current_not_historical:true,never_sum_two_material_views:true};
  const labour={actual_work_order_minutes:Number(time?.actual_minutes||0),time_entries:Number(time?.time_rows||0),
    finance_hourly_rate_cents:financeSource?.labour_rate_cents??null,
-   work_order_cost_estimate_cents:time?.time_rows>0&&Number.isFinite(Number(financeSource?.labour_rate_cents))?
+   work_order_cost_estimate_cents:time?.time_rows>0&&financeSource?.labour_rate_cents!=null&&Number.isFinite(Number(financeSource.labour_rate_cents))?
    Math.round(Number(time.actual_minutes)/60*Number(financeSource.labour_rate_cents)):null,
    creative_process_minutes:Number(creative?.creative_minutes||0),
    overlapping_time_logs_are_not_additive:true,not_payroll:true};
@@ -107,7 +107,7 @@ export async function onRequestPost(ctx){
    source=clean(b.source_kind,100),record=positive(b.source_record_id),note=clean(b.evidence_note,1200),key=clean(b.request_key,80);
  if(!id||!TYPES.includes(type)||!RESULTS.includes(result)||!SOURCES.includes(source)||note.length<16||
     !/^[0-9A-Za-z_-]{16,80}$/.test(key))return out({ok:false,error:'Project, review classification, source, 16+ character note and unique request key required'},400);
- if(result==='source_verified'&&source==='operator_review')return out({ok:false,error:'Source verified requires a source-owned record'},409);
+ if(result==='source_verified'&&(source==='operator_review'||!record))return out({ok:false,error:'Source verified requires an exact source-owned record ID'},409);
  try{
   const p=await project(a.db,id);if(!p)return out({ok:false,error:'Project not found'},404);
   const inserted=await a.db.prepare(`INSERT INTO creative_project_finance_review_events
