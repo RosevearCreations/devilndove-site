@@ -1,17 +1,5 @@
 name: Release 467 Build 388 Inventory Reconciliation and Product Save
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build388-inventory-tax-product-save.json'
-      - 'public/js/admin-product-editor-v163.js'
-      - 'admin/product-editor/index.html'
-      - 'css/admin-product-v162.css'
-      - 'public/js/admin-product-media-editor-v172.js'
-      - 'functions/api/admin/inventory-purchase-tax-review.js'
-      - 'public/js/admin-inventory-tax-review-v388.js'
-      - 'scripts/release467_build388_regression.py'
-      - '.github/workflows/release467-build388-inventory-product-save.yml'
   workflow_dispatch:
 permissions:
   contents: read

@@ -1,0 +1,61 @@
+{
+  "release": 467,
+  "build": 389,
+  "title": "Product Save End-to-End Acceptance & Purchase Invoice Evidence Review Decisions",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "ba306bd2482f120f9fc2043771bcc37bd2d3fdc9",
+      "tree": "75da53dcbb86619bf3cbc83adadd287f05feca9e",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38448554424,
+      "quality_run": 38448554540,
+      "it_admin_runtime_run": 38448554448,
+      "repository_hygiene_run": 38448554514,
+      "d1_ci_fanout_guard_run": 38448376972,
+      "build_specific_proof_run": 38448554460
+    },
+    "production": {
+      "main_sha": "7c18742546dcdbb41e67a6fc9b46da9ba24bb431",
+      "tree_sha": "75da53dcbb86619bf3cbc83adadd287f05feca9e",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38448905048,
+      "production_live_resource_integrity_run": 38449081983
+    }
+  },
+  "implementation": {
+    "product_price_cad_two_decimals": true,
+    "categories_select_existing_and_approved": true,
+    "shipping_code_dropdown": true,
+    "tax_class_dropdown_from_real_tax_classes": true,
+    "new_product_quantity_default_one": true,
+    "old_inventory_quantity_preserved": true,
+    "product_video_explicit_r2_upload": true,
+    "product_video_max_mb": 25,
+    "product_video_formats": [
+      "mp4",
+      "webm",
+      "mov"
+    ],
+    "video_isolated_from_images": true,
+    "video_review_default_internal": true,
+    "only_product_page_approved_video_public": true,
+    "per_image_alt_title_caption_and_public_approval_before_upload": true,
+    "max_image_batch": 5,
+    "automatic_retry": false,
+    "preexisting_product_save_contract_preserved": true
+  },
+  "migration": "0039_release467_product_video_attachment.sql",
+  "canonical_data_migration_required": true,
+  "safety": {
+    "request_time_schema_mutation": false,
+    "background_publication": false,
+    "video_requires_explicit_review": true,
+    "no_unapproved_video_on_product_detail": true,
+    "no_product_media_r2_listing": true,
+    "no_automatic_invoice_approval": true
+  },
+  "docs": "docs/operations/RELEASE_467_BUILD_389_PRODUCT_SAVE_MEDIA_VIDEO_ACCEPTANCE.md",
+  "next_build": 390,
+  "next_build_title": "Product Video Review & Inventory Tax Evidence Operational Acceptance"
+}
