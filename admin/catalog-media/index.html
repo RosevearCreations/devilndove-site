@@ -75,7 +75,7 @@
           <label><span class="small">JPEG quality %</span><input class="input" id="productMediaV164Quality" type="number" min="55" max="95" step="1" value="88"/></label>
         </div>
         <canvas id="productMediaV164FilePreview" class="dd-file-preview" width="420" height="315"></canvas>
-        <div id="productMediaV164FileNote" class="small" style="margin-top:8px"></div>
+        <div id="productMediaV164FileNote" class="small" style="margin-top:8px"></div><div id="productMedia389BatchReview" aria-label="Review each image before upload" style="display:grid;gap:8px;margin:12px 0"></div>
         <div class="dd-media-actions" style="margin-top:10px"><button class="btn" id="productMediaV164ApplyFile" type="button">Apply image</button><button class="btn" id="productMediaV164CancelFile" type="button">Cancel</button></div>
       </div>
       <div id="productMediaV164Gallery" class="dd-media-edit-grid" style="margin-top:14px"></div>
@@ -111,9 +111,23 @@
         </form>
       </div>
     </section>
+    <section class="card dd-media-section" id="productVideo389" hidden style="margin-top:20px">
+      <h2>Product Video Attachments</h2>
+      <p class="small">Add one MP4, WebM or MOV file up to 25 MB. Videos remain off the storefront until separately reviewed and approved. MOV playback varies by browser. An R2 source URL may be accessible to someone who knows it; do not upload private footage.</p>
+      <label>Choose video<input class="input" type="file" accept=".mp4,.webm,.mov,video/mp4,video/webm,video/quicktime" id="productVideo389File"/></label>
+      <div class="dd-editor-grid cols-2" style="margin:12px 0">
+        <label>Video title<input class="input" id="productVideo389Title" maxlength="160"/></label>
+        <label>Accessibility description<input class="input" id="productVideo389Alt" maxlength="500"/></label>
+        <label class="wide">Caption<input class="input" id="productVideo389Caption" maxlength="1000"/></label>
+      </div>
+      <button class="btn" id="productVideo389Upload" type="button">Attach video</button>
+      <p id="productVideo389Status" class="small" role="status" aria-live="polite">Select a saved Product to view video attachments.</p>
+      <div id="productVideo389List"></div>
+    </section>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
   <!-- Product Media compatibility DOM marker retained; Build 178 keeps selected-Product image work bounded and explicit. -->
-  <script src="/public/js/admin-product-media-editor-v172.js?v=467b198&b388=1"></script>
+  <script src="/public/js/admin-product-media-editor-v172.js?v=467b198&b389=1"></script>
+<script src="/public/js/admin-product-videos-v389.js?v=389"></script>
 </body>
 </html>

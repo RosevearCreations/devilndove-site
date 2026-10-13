@@ -37,7 +37,7 @@
     img.onload=()=>{if(notice)notice.textContent=img.src.includes('product-image-recovery-placeholder.svg')?'Original image is unavailable; placeholder shown.':'';};use();
   }
   function armGalleryImages(){gallery.querySelectorAll('img[data-media-raw]').forEach((img)=>armImage(img,img.dataset.mediaRaw||''));}
-  function updateUrl(id){const url=new URL(location.href);if(id)url.searchParams.set('product_id',String(id));else url.searchParams.delete('product_id');history.replaceState({},'',`${url.pathname}${url.search}`);}
+  function updateUrl(id){const url=new URL(location.href);if(id)url.searchParams.set('product_id',String(id));else url.searchParams.delete('product_id');history.replaceState({},'',`${url.pathname}${url.search}`);document.dispatchEvent(new CustomEvent('dd:media-selected-product',{detail:{product_id:Number(id)||0}}));}
   function selectedIndex(){return state.selected?state.images.findIndex((row)=>Number(row.product_image_id)===Number(state.selected.product_image_id)&&row.editable!==false):-1;}
   function syncButtons(){
     const hasProduct=state.productId>0,hasSelected=!!state.selected&&Number(state.selected.product_image_id)>0,index=selectedIndex();
@@ -142,6 +142,26 @@
     let outFile=pending.file;if(preset!=='original'){const blob=await canvasBlob(canvas,'image/jpeg',quality);const base=(pending.file.name||'product-image').replace(/\.[^.]+$/,'').replace(/[^a-z0-9_-]+/gi,'-')||'product-image';outFile=new File([blob],`${base}-${preset}.jpg`,{type:'image/jpeg',lastModified:Date.now()});}
     const orientation=Math.abs(canvas.width-canvas.height)<=Math.max(24,canvas.width*.03)?'square':canvas.width>canvas.height?'landscape':'portrait';const info={file:outFile,width:canvas.width,height:canvas.height,orientation,preset,label:crop.label};state.pendingFile={...pending,...info};byId('productMediaV164FileNote').textContent=`${pending.mode==='replace'?'Replacement':'New image'} • ${canvas.width}×${canvas.height} • ${orientation} • ${crop.label} • ${(outFile.size/1024).toFixed(1)} KB`;return state.pendingFile;
   }
+  function renderBatchReview(){
+    const panel=byId('productMedia389BatchReview');if(!panel)return;
+    const files=state.pendingFiles||[];
+    panel.innerHTML=files.map((file,index)=>{
+      const name=esc(file.name||'product-photo'),base=esc(String(file.name||'').replace(/\.[^.]+$/,'').replace(/[-_]+/g,' '));
+      return '<fieldset data-media389-review="'+index+'" style="border:1px solid #65728a;border-radius:8px;padding:10px">'+
+       '<legend>'+esc(index+1)+' / '+esc(files.length)+' · '+name+'</legend>'+
+       '<div class="dd-editor-grid cols-2">'+
+       '<label>Alt text<input class="input" data-b389-alt maxlength="300" value="'+base+'"></label>'+
+       '<label>Image title<input class="input" data-b389-title maxlength="250" value="'+base+'"></label>'+
+       '<label class="wide">Caption<textarea class="input" data-b389-caption maxlength="1000"></textarea></label>'+
+       '<label>Public use / approval<select class="input" data-b389-public>'+
+       '<option value="internal_review">Internal review — not approved</option>'+
+       '<option value="product_page_ok">Product page approved</option>'+
+       '<option value="social_ok">Social approved</option>'+
+       '<option value="all_public_ok">All public approved</option>'+
+       '<option value="consent_needed">Consent needed</option>'+
+       '<option value="blocked">Blocked</option></select></label></div></fieldset>';
+    }).join('');
+  }
   function beginFiles(mode,selection){
     if(state.inFlight)return;
     const files=[...(selection||[])];if(!files.length)return;
@@ -154,10 +174,10 @@
     byId('productMediaV164FileHeading').textContent=mode==='replace'?'Prepare replacement image':
       files.length>1?'Prepare '+files.length+' images — sequential save':'Prepare new gallery image';
     byId('productMediaV164ApplyFile').textContent=files.length>1?'Add '+files.length+' images':'Apply image';
-    prepareFile().catch(error=>setStatus(error.message,'error'));
+    renderBatchReview();prepareFile().catch(error=>setStatus(error.message,'error'));
   }
   function cancelFile(){
-    state.pendingFile=null;state.pendingFiles=[];
+    state.pendingFile=null;state.pendingFiles=[];byId('productMedia389BatchReview')?.replaceChildren();
     byId('productMediaV164FileTools').hidden=true;
     byId('productMediaV164AddInput').value='';byId('productMediaV164ReplaceInput').value='';
     byId('productMediaV164ApplyFile').textContent='Apply image';
@@ -168,6 +188,13 @@
   byId('productMediaV164ApplyFile')?.addEventListener('click',async()=>{
     if(state.inFlight||!state.pendingFile||!state.productId)return;
     const files=[...state.pendingFiles],mode=state.pendingFile.mode;
+    const reviews=files.map((file,index)=>{
+      const group=byId('productMedia389BatchReview')?.querySelector('[data-media389-review="'+index+'"]');
+      return {alt:group?.querySelector('[data-b389-alt]')?.value||file.name,
+       title:group?.querySelector('[data-b389-title]')?.value||'',
+       caption:group?.querySelector('[data-b389-caption]')?.value||'',
+       approval:group?.querySelector('[data-b389-public]')?.value||'internal_review'};
+    });
     if(!files.length)return;
     if(mode==='replace'&&!state.selected)return setStatus('Select an image before replacing it.','error');
     if(!window.confirm('Save '+files.length+' Product image'+(files.length===1?'':'s')+'? Uploads are sequential; an uncertain upload is never retried automatically.'))return;
@@ -183,7 +210,7 @@
         form.append('product_image_id',String(state.selected?.product_image_id||0));
         const n=state.images.filter(row=>row.editable!==false).length;
         form.append('sort_order',String(mode==='replace'?(state.selected?.sort_order??0):n+i));
-        form.append('alt_text',prepared.file.name.replace(/\\.[^.]+$/,'').replace(/[-_]+/g,' '));
+        form.append('alt_text',reviews[i].alt);form.append('image_title',reviews[i].title);form.append('caption',reviews[i].caption);form.append('public_use_status',reviews[i].approval);
         form.append('width_px',String(prepared.width));form.append('height_px',String(prepared.height));
         form.append('image_orientation',prepared.orientation);
         try{
