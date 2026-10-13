@@ -8,13 +8,17 @@
   const qaStatus=document.getElementById('productEditorQaStatus'),qaResults=document.getElementById('productEditorQaResults'),qaRun=document.getElementById('productEditorQaRun');
   if(!form||!status||!window.DDAuth)return;
   const params=new URLSearchParams(location.search);const rawId=Number(params.get('product_id')||0);const state={productId:Number.isInteger(rawId)&&rawId>0?rawId:0,product:null,inFlight:false,quotaStop:false,mediaLoaded:false,mediaLoading:false,images:[],authorityLoaded:false,qaRunning:false,qaData:null};
-  const field=(name)=>form.elements.namedItem(name);const set=(name,value)=>{const el=field(name);if(el)el.value=value==null?'':String(value);};const get=(name)=>String(field(name)?.value??'').trim();
+  const field=(name)=>form.elements.namedItem(name);const set=(name,value)=>{const el=field(name);if(el){
+    const desired=value==null?'':String(value);
+    if(el.tagName==='SELECT'&&desired&&![...el.options].some(option=>option.value===desired))el.add(new Option(desired+' (current)',desired));
+    el.value=desired;
+  }};const get=(name)=>String(field(name)?.value??'').trim();
   const esc=(value)=>String(value??'').replace(/[&<>"']/g,(ch)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
   const setStatus=(message,tone='')=>{status.textContent=message;status.dataset.tone=tone;status.hidden=!message;};
   const readJson=async(response,fallback)=>{const data=await response.json().catch(()=>null);if(!response.ok||!data?.ok){const error=new Error(data?.error||fallback||`Request failed (${response.status}).`);error.code=data?.code||'';error.status=response.status;throw error;}return data;};
   const quota=(error)=>error?.code==='d1_read_capacity_unavailable'||(error?.status===503&&/D1|quota|rows read|capacity/i.test(String(error?.message||'')));
   const rowsText=(data)=>Number.isFinite(Number(data?.d1_rows_read))?` D1 rows read: ${Number(data.d1_rows_read)}.`:'';
-  const cents=(value)=>{const n=Number(value);return Number.isFinite(n)?Math.max(0,Math.round(n*100)):0;};
+  const cents=(value)=>{const v=String(value??'').trim();if(!/^[0-9]+(?:\\.[0-9]{1,2})?$/.test(v))return 0;const n=Number(v);return Number.isFinite(n)?Math.max(0,Math.round(n*100)):0;};
   // Build 388: SEO suggestions are in-browser only, and never replace hand-edited SEO.
   const seoKeys=['meta_title','meta_description','h1_override','og_title','og_description'];
   const autoSeo=new Map();
@@ -51,6 +55,40 @@
     if(leavingAfterSave||form.dataset.productDirty!=='1')return;
     event.preventDefault();event.returnValue='';
   });
+  // Build389: load bounded configured dropdown values only on operator focus, not on startup.
+  const optionKeys=['product_category','shipping_code','tax_class_id'];
+  let optionsLoading=false,optionsLoaded=false,optionsError=false;
+  const baseChoices={product_category:['Jewelry','Earrings','Rings','Necklaces','Bracelets','Pendants','Charms','Accessories','Candles','Home Decor','Artwork','Collectibles','Craft Supplies','Tools','Other'],shipping_code:['standard','tracked','letter_mail','local_pickup','oversize','digital_delivery']};
+  function selectOptions(name,entries){
+    const select=field(name);if(!select)return;
+    const original=String(select.value||'').trim();
+    const options=[...new Set([...entries,original].filter(Boolean))];
+    select.replaceChildren(new Option(name==='product_category'?'Choose category…':'Choose shipping code (optional)',''));
+    options.forEach(value=>select.add(new Option(value,value)));
+    select.value=original;
+  }
+  async function loadOptions(){
+    if(optionsLoading||optionsLoaded||optionsError)return;
+    optionsLoading=true;
+    try{
+      const response=await window.DDAuth.apiFetch('/api/admin/product-editor-options',{method:'GET',cache:'no-store'});
+      const data=await readJson(response,'Could not load configured Product choices');
+      for(const name of ['product_category','shipping_code'])selectOptions(name,Array.isArray(data[name==='product_category'?'categories':'shipping_codes'])?data[name==='product_category'?'categories':'shipping_codes']:baseChoices[name]);
+      const el=field('tax_class_id');if(el){
+        const original=String(el.value||'');
+        el.replaceChildren(new Option('Default / no assigned class',''));
+        for(const tax of data.tax_classes||[]){if(Number(tax.tax_class_id)>0)el.add(new Option(String(tax.name)+(tax.is_active?'':' (inactive)')+' • '+String(tax.code),String(tax.tax_class_id)));}
+        if(original&&![...el.options].some(o=>o.value===original))el.add(new Option('Existing tax class #'+original,original));
+        el.value=original;
+      }
+      optionsLoaded=true;
+    }catch(error){optionsError=true;setStatus('Dropdown options could not load; existing saved choices are retained. Retry load before changing category, shipping or tax class: '+error.message,'warn');}
+    finally{optionsLoading=false;}
+  }
+  form.addEventListener('focusin',event=>{if(optionKeys.includes(event.target.name))loadOptions();});
+  const moneyFields=['price','compare_at_price'];
+  function normalizeMoney(name){const el=field(name);if(!el||!el.value.trim())return;const n=Number(el.value);if(Number.isFinite(n)&&n>=0&&Math.abs(n*100-Math.round(n*100))<1e-7){el.value=n.toFixed(2);refreshDirty();}}
+  moneyFields.forEach(name=>field(name)?.addEventListener('blur',()=>normalizeMoney(name)));
   const MEDIA_PLACEHOLDER='/assets/product-image-recovery-placeholder.svg';
   function mediaCandidates(raw){
     const value=String(raw||'').trim();if(!value)return [MEDIA_PLACEHOLDER];
@@ -82,7 +120,7 @@
   function setSaveReady(ready){state.authorityLoaded=Boolean(ready);if(saveButton)saveButton.disabled=state.productId?!state.authorityLoaded:false;if(qaRun)qaRun.disabled=!state.productId||!state.authorityLoaded||state.qaRunning;}
   function setFeaturedDraft(raw){const value=String(raw||'').trim();set('featured_image_url',value);if(state.product)state.product.featured_image_url=value;const preview=document.getElementById('productEditorFeaturedPreview');if(preview){armMediaImage(preview,value);preview.alt=get('name')?`Featured image for ${get('name')}`:'Featured image';}renderMedia();state.qaData=null;renderQa();setStatus('Featured image changed in this Product draft. Press Save Product to commit it.','warn');}
   function fill(product){
-    state.product=product||{};for(const key of ['name','slug','sku','product_category','color_name','color_names_text','shipping_code','review_status','short_description','description','product_type','status','currency','tax_class_id','weight_grams','inventory_quantity','digital_file_url','featured_image_url','sort_order','meta_title','meta_description','keywords','h1_override','canonical_url','og_title','og_description','og_image_url','merchandise_origin','sale_channel','external_listing_url','external_listing_label','condition_summary','era_label','sourcing_notes'])set(key,product?.[key]);set('price',Number(product?.price_cents||0)/100);set('compare_at_price',product?.compare_at_price_cents==null?'':Number(product.compare_at_price_cents||0)/100);set('taxable',Number(product?.taxable??1)===0?'0':'1');set('requires_shipping',Number(product?.requires_shipping??1)===1?'1':'0');set('inventory_tracking',Number(product?.inventory_tracking??0)===1?'1':'0');
+    state.product=product||{};for(const key of ['name','slug','sku','product_category','color_name','color_names_text','shipping_code','review_status','short_description','description','product_type','status','currency','tax_class_id','weight_grams','inventory_quantity','digital_file_url','featured_image_url','sort_order','meta_title','meta_description','keywords','h1_override','canonical_url','og_title','og_description','og_image_url','merchandise_origin','sale_channel','external_listing_url','external_listing_label','condition_summary','era_label','sourcing_notes'])set(key,product?.[key]);set('price',(Number(product?.price_cents||0)/100).toFixed(2));set('compare_at_price',product?.compare_at_price_cents==null?'':(Number(product.compare_at_price_cents||0)/100).toFixed(2));set('taxable',Number(product?.taxable??1)===0?'0':'1');set('requires_shipping',Number(product?.requires_shipping??1)===1?'1':'0');set('inventory_tracking',Number(product?.inventory_tracking??0)===1?'1':'0');
     syncSeo(true);markClean();
     title.textContent=product?.name?`Edit ${product.name}`:'Edit Product';identity.textContent=`Product #${Number(product?.product_id||state.productId)}${product?.product_number?` • No. ${product.product_number}`:''}${product?.sku?` • ${product.sku}`:''}`;
     const preview=document.getElementById('productEditorFeaturedPreview');if(preview){armMediaImage(preview,product?.featured_image_url);preview.alt=product?.name?`Featured image for ${product.name}`:'Featured image';}
@@ -95,7 +133,7 @@
     if(target==='media')loadMedia();
     if(focusName){const el=field(focusName);if(el){el.focus();el.scrollIntoView({block:'center'});}}
   }
-  async function load(){if(!state.productId){title.textContent='Create Product';identity.textContent='New Product';setSaveReady(true);setStatus('New Product mode. No Product list was loaded.','ok');syncSeo(true);markClean();renderQa();return;}if(state.inFlight||state.quotaStop)return;state.inFlight=true;setSaveReady(false);if(!browserSeed())setStatus('Loading one authoritative Product only…');try{const response=await window.DDAuth.apiFetch(`/api/admin/product-editor-detail?product_id=${encodeURIComponent(state.productId)}`,{method:'GET',cache:'no-store'});const data=await readJson(response,'Could not load Product.');fill(data.product||{});setSaveReady(true);try{sessionStorage.removeItem(`dnd:product-editor-seed:${state.productId}`);}catch{}setStatus(`Product authority loaded. Gallery, scoring, readiness, inventory-resource, pricing-evidence and QA systems remain unloaded until explicitly requested.${rowsText(data)}`,'ok');if(currentTab()==='media')loadMedia();}catch(error){setSaveReady(false);if(quota(error))state.quotaStop=true;setStatus(`${error.message}${quota(error)?' Automatic retries are stopped. Save remains disabled until Product authority loads.':''}`,'error');}finally{state.inFlight=false;}}
+  async function load(){if(!state.productId){set('inventory_quantity',1);title.textContent='Create Product';identity.textContent='New Product';setSaveReady(true);setStatus('New Product mode. No Product list was loaded.','ok');syncSeo(true);markClean();renderQa();return;}if(state.inFlight||state.quotaStop)return;state.inFlight=true;setSaveReady(false);if(!browserSeed())setStatus('Loading one authoritative Product only…');try{const response=await window.DDAuth.apiFetch(`/api/admin/product-editor-detail?product_id=${encodeURIComponent(state.productId)}`,{method:'GET',cache:'no-store'});const data=await readJson(response,'Could not load Product.');fill(data.product||{});setSaveReady(true);try{sessionStorage.removeItem(`dnd:product-editor-seed:${state.productId}`);}catch{}setStatus(`Product authority loaded. Gallery, scoring, readiness, inventory-resource, pricing-evidence and QA systems remain unloaded until explicitly requested.${rowsText(data)}`,'ok');if(currentTab()==='media')loadMedia();}catch(error){setSaveReady(false);if(quota(error))state.quotaStop=true;setStatus(`${error.message}${quota(error)?' Automatic retries are stopped. Save remains disabled until Product authority loads.':''}`,'error');}finally{state.inFlight=false;}}
   function renderMedia(){
     if(!mediaStrip)return;if(!state.productId){mediaStrip.innerHTML='<p class="small">Save the new Product first, then add images.</p>';return;}
     if(!state.mediaLoaded){mediaStrip.innerHTML='';return;}

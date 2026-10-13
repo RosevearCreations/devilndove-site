@@ -43,7 +43,7 @@
           <label><span class="small">Product name</span><input class="input" name="name" maxlength="160" required/></label>
           <label><span class="small">Slug</span><input class="input" name="slug" maxlength="180"/></label>
           <label><span class="small">SKU</span><input class="input" name="sku" maxlength="80"/></label>
-          <label><span class="small">Category</span><input class="input" name="product_category" maxlength="120"/></label>
+          <label><span class="small">Category</span><select class="input" name="product_category" required><option value="">Choose category…</option><option value="Jewelry">Jewelry</option><option value="Earrings">Earrings</option><option value="Rings">Rings</option><option value="Necklaces">Necklaces</option><option value="Other">Other</option></select></label>
           <label><span class="small">Product type</span><select class="input" name="product_type"><option value="physical">Physical</option><option value="digital">Digital</option></select></label>
           <label><span class="small">Status</span><select class="input" name="status"><option value="draft">Draft</option><option value="active">Active</option><option value="archived">Archived</option></select></label>
           <label><span class="small">Review status</span><select class="input" name="review_status"><option value="pending_review">Pending review</option><option value="approved">Approved</option><option value="needs_changes">Needs changes</option><option value="published">Published</option></select></label>
@@ -54,17 +54,17 @@
 
       <section class="dd-editor-panel" data-editor-panel="pricing" hidden>
         <h2>Pricing &amp; Stock</h2>
-        <div class="dd-editor-grid cols-4">
-          <label><span class="small">Price</span><input class="input" type="number" name="price" min="0" step="0.01"/></label>
-          <label><span class="small">Compare-at price</span><input class="input" type="number" name="compare_at_price" min="0" step="0.01"/></label>
+        <p class="small">Prices are CAD dollars and cents (e.g. 8.00). Tax classes and shipping codes are selected from configured options; shipping codes do not calculate a delivery rate.</p><div class="dd-editor-grid cols-4">
+          <label><span class="small">Price</span><input class="input" type="text" inputmode="decimal" name="price" pattern="[0-9]+(\\.[0-9]{1,2})?" placeholder="0.00" data-money-cad="1"/></label>
+          <label><span class="small">Compare-at price</span><input class="input" type="text" inputmode="decimal" name="compare_at_price" pattern="[0-9]+(\\.[0-9]{1,2})?" placeholder="0.00" data-money-cad="1"/></label>
           <label><span class="small">Currency</span><input class="input" name="currency" maxlength="8" value="CAD"/></label>
           <label><span class="small">Sort order</span><input class="input" type="number" name="sort_order" min="0" step="1" value="0"/></label>
           <label><span class="small">Track inventory</span><select class="input" name="inventory_tracking"><option value="0">No</option><option value="1">Yes</option></select></label>
-          <label><span class="small">Inventory quantity</span><input class="input" type="number" name="inventory_quantity" min="0" step="1" value="0"/></label>
+          <label><span class="small">Inventory quantity</span><input class="input" type="number" name="inventory_quantity" min="0" step="1" value="1"/></label>
           <label><span class="small">Taxable</span><select class="input" name="taxable"><option value="1">Yes</option><option value="0">No</option></select></label>
-          <label><span class="small">Tax class ID</span><input class="input" type="number" name="tax_class_id" min="1" step="1"/></label>
+          <label><span class="small">Tax class ID</span><select class="input" name="tax_class_id"><option value="">Default / no assigned class</option></select></label>
           <label><span class="small">Requires shipping</span><select class="input" name="requires_shipping"><option value="1">Yes</option><option value="0">No</option></select></label>
-          <label><span class="small">Shipping code</span><input class="input" name="shipping_code" maxlength="80"/></label>
+          <label><span class="small">Shipping code</span><select class="input" name="shipping_code"><option value="">Choose shipping code (optional)</option><option value="standard">standard</option><option value="tracked">tracked</option><option value="letter_mail">letter_mail</option><option value="local_pickup">local_pickup</option><option value="oversize">oversize</option><option value="digital_delivery">digital_delivery</option></select></label>
           <label><span class="small">Weight (grams)</span><input class="input" type="number" name="weight_grams" min="0" step="1"/></label>
           <label><span class="small">Digital file URL</span><input class="input" name="digital_file_url" type="url"/></label>
         </div>
@@ -122,7 +122,7 @@
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-editor-v163.js?v=178&b388=1"></script>
+  <script src="/public/js/admin-product-editor-v163.js?v=178&b389=1"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 </body>
 </html>
