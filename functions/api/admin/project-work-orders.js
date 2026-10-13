@@ -62,7 +62,7 @@ export async function onRequestPost(ctx){
    creative_work_event_id:action==='milestone'?positive(body.creative_work_event_id):null};
   const hash=await payloadHash(scope,actor,p,payload);
   const prior=await readReceiptState(a.db,{scope,key,actor,target:p,hash});
-  if(prior)return out({...prior,build:386,event_id:prior.source_record_id},prior.status||200);
+  if(prior)return out(prior.ok?{...prior,build:386,event_id:prior.source_record_id,...(await snapshot(a.db,p)),safety}:{...prior,build:386},prior.status||200);
   const proj=await project(a.db,p),op=proj&&await operation(a.db,p,id);
   if(!op||op.plan_status==='retired')return out({ok:false,error:'Active operation not found for this project'},404);
   let sourceWrite;

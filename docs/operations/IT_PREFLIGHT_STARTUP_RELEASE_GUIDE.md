@@ -1,3 +1,7 @@
+# Release 467 Build 386 — predecessor proof handoff
+
+BUILD386_VERIFIED_BUILD385_CHECKPOINT: Dev 3cc45cbeb709dd4d6516249abefb2a6523d9e35e; tree ce6d4a35790203d2580a4bdf95a7a9790c5b230e; System 38344246684; Quality 38344246645; I.T. 38344246699; Hygiene 38344246590; D1 38344246686; Build 38344246599; Main 8b527e0abdd3386357c37aecddbece88359910f5; Pages 38344480326; Live 38344610640.
+
 # Current successor: Release 467 Build 385 — Durable Server-Side Write Idempotency & Operation Receipts
 
 Fully GREEN predecessor Build 384 Development `78c5a8ae1196ecd113bf8041c36717fbe896411e`, tree `3e53a510c5ae6d060af4169246470e3d6e8273f2`: System 38342325827, Quality 38342325805, I.T. 38342325852, Hygiene 38342325907, D1 fan-out 38342325718, Build-specific 38342325846. Production Build 384 main `97d11bfc0cb04de1d5ab4603969d0457f4f7e884`, Cloudflare Pages 38342517173, Live Integrity 38342618510. Build 385 is current Development candidate, not yet Production GREEN; apply canonical migration 0036 Development first. Next queued Build 386.
