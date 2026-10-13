@@ -109,7 +109,7 @@ function createOAuthCallbackCore(providerKey){
       const diagnostic=safeDiagnosticCode(error?.oauthProviderCode||error?.message,'authorization_finalize_failed');
       await db.prepare(`UPDATE oauth_authorization_transactions SET terminal_status='failed',pkce_verifier_ciphertext=NULL,diagnostic_code=?,updated_at=CURRENT_TIMESTAMP WHERE transaction_id=?`).bind(diagnostic,tx.transaction_id).run();
       await securityEvent(db,contract.key,'authorization_finalize','failed',diagnostic,tx.transaction_id,tx.created_by_user_id);
-      return htmlResponse(`${contract.label} connection failed safely`,`<p>The provider token exchange or intended-account verification did not complete.</p><p class="code">${escapeHtml(diagnostic)}</p><p>No new token material was persisted. The one-time state has been consumed and cannot be replayed.</p>`,502);
+      return htmlResponse(`${contract.label} connection could not be completed`,`<p>The provider token exchange, shop discovery or intended-account verification did not complete.</p><p>Diagnostic: <span class="code">${escapeHtml(diagnostic)}</span></p><p>The one-time state is consumed. Do not click Grant access again on the same screen. Check Etsy connection status and start a fresh authorization only after reviewing this code.</p><p>No Etsy listing was published.</p>`,422);
     }
   };
 }
@@ -124,7 +124,7 @@ export function createOAuthCallback(providerKey){
       const code=safeDiagnosticCode(error?.oauthProviderCode||error?.message,'oauth_callback_unexpected_failure');
       try{console.error('oauth_callback_fail_safe',String(providerKey||''),code);}catch{}
       const body='<p>The OAuth callback reached Devil n Dove, but finalization did not complete.</p><p class="code">'+escapeHtml(code)+'</p><p>No listing was created, changed or published. Start a fresh connection attempt after reviewing the I.T. connection status.</p>';
-      return htmlResponse((String(providerKey||'OAuth')+' connection failed safely'),body,502);
+      return htmlResponse((String(providerKey||'OAuth')+' connection could not be completed'),body,422);
     }
   };
 }
