@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>` : ''}
         </div>
         <div class="resource-linked-actions">
-          <button class="btn" type="button" data-remove-link="${state.selectedLinkIndex}">Remove</button>
+          <button class="btn secondary" type="button" data-dd387-edit-id="${Number(resource.site_item_inventory_id||0)}" ${!Number(resource.site_item_inventory_id||0)?"disabled":""}>Quick edit Inventory, units &amp; HST</button><button class="btn" type="button" data-remove-link="${state.selectedLinkIndex}">Remove</button>
         </div>
       </div>`;
   }
@@ -807,6 +807,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadData({ bootstrap: true, resources: true });
   }
 
+  document.addEventListener('dd:inventory-quick-edit-saved',()=>{state.productionPreview=null;state.productionHistory=[];renderProductionPreview();if(initialLoadStarted)loadData({bootstrap:true,resources:true});});
   document.addEventListener('dd:catalog-options-updated', () => { if (initialLoadStarted && window.DDAuth?.isLoggedIn()) loadData({ bootstrap: false, resources: true }); });
   document.addEventListener('dd:product-editor-target', (event) => {
     const productId = Number(event?.detail?.product_id || event?.detail?.product?.product_id || 0);

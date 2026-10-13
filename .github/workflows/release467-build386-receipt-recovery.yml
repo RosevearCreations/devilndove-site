@@ -1,19 +1,5 @@
 name: Release 467 Build 386 Receipt Recovery
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build386-write-receipts-cross-tab.json'
-      - 'current-development-authority.json'
-      - 'functions/api/admin/_lib/writeReceipts.js'
-      - 'functions/api/admin/write-operation-receipt.js'
-      - 'functions/api/admin/project-work-orders.js'
-      - 'functions/api/admin/project-resource-calendar.js'
-      - 'migrations/canonical/0037_release467_receipt_coverage_work_calendar.sql'
-      - 'migrations/canonical/manifest.json'
-      - 'public/js/admin-write-receipt-recovery-v386.js'
-      - 'scripts/release467_build386_*'
-      - '.github/workflows/release467-build386-receipt-recovery.yml'
   workflow_dispatch:
 permissions:
   contents: read
