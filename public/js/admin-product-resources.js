@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>` : ''}
         </div>
         <div class="resource-linked-actions">
-          <button class="btn" type="button" data-remove-link="${state.selectedLinkIndex}">Remove</button>
+          <button class="btn secondary" type="button" data-dd387-edit-id="${Number(resource.site_item_inventory_id||0)}" ${!Number(resource.site_item_inventory_id||0)?"disabled":""}>Quick edit Inventory, units &amp; HST</button><button class="btn" type="button" data-remove-link="${state.selectedLinkIndex}">Remove</button>
         </div>
       </div>`;
   }
@@ -487,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await window.DDAuth.apiJson(
         `/api/admin/product-production-release?product_id=${encodeURIComponent(state.selectedProductId)}&output_quantity=${encodeURIComponent(state.productionOutputQuantity)}`,
         { method: 'GET' },
-        { fallbackMessage: 'Production release preview could not be loaded.', cacheKey: `product-production-preview:${state.selectedProductId}:${state.productionOutputQuantity}`, cacheTtlMs: 5000, retries: 1, staleOnError: false }
+        { fallbackMessage: 'Production release preview could not be loaded.', cacheKey: `product-production-preview:${state.selectedProductId}:${state.productionOutputQuantity}`, cacheTtlMs: 0, retries: 0, staleOnError: false }
       );
       state.productionPreview = data.preview || null;
       state.productionHistory = Array.isArray(data.history) ? data.history : [];
@@ -807,6 +807,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadData({ bootstrap: true, resources: true });
   }
 
+  document.addEventListener('dd:inventory-quick-edit-saved',()=>{state.productionPreview=null;state.productionHistory=[];renderProductionPreview();if(initialLoadStarted)loadData({bootstrap:true,resources:true});});
   document.addEventListener('dd:catalog-options-updated', () => { if (initialLoadStarted && window.DDAuth?.isLoggedIn()) loadData({ bootstrap: false, resources: true }); });
   document.addEventListener('dd:product-editor-target', (event) => {
     const productId = Number(event?.detail?.product_id || event?.detail?.product?.product_id || 0);

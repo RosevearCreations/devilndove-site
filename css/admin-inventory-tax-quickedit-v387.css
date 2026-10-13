@@ -1,0 +1,11 @@
+#dd387-inventory-quick-edit{color:#f8f6f0;background:#252434;border:1px solid #a58c50;border-radius:10px;max-width:min(580px,calc(100vw - 24px));width:100%;max-height:92vh;overflow:auto;padding:18px;box-shadow:0 12px 45px #0008}
+#dd387-inventory-quick-edit::backdrop{background:#0009}
+#dd387-inventory-quick-edit header,#dd387-inventory-quick-edit footer{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+#dd387-inventory-quick-edit label{display:block;margin:8px 0;font-size:14px}
+#dd387-inventory-quick-edit input:not([type=checkbox]){display:block;width:100%;padding:8px;margin-top:4px;background:#fff;color:#111;border:1px solid #9b97a4;border-radius:5px}
+#dd387-inventory-quick-edit .dd387-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}
+#dd387-inventory-quick-edit button{padding:8px 12px;border-radius:5px;border:1px solid #a58c50;cursor:pointer}
+#dd387-inventory-quick-edit button:disabled{opacity:.5;cursor:wait}
+.dd387-tax-inline{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:8px 0}
+.dd387-tax-inline input[type=number]{width:80px}
+@media(max-width:560px){#dd387-inventory-quick-edit .dd387-grid{grid-template-columns:1fr}}

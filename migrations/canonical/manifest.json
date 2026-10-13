@@ -272,6 +272,13 @@
       "release": 467,
       "description": "Add durable atomic receipts for work-order execution and resource calendar bookings, preserving Build 385 immutable receipt history and source-authored rows.",
       "recovery": "Disable new Build 386 writes while preserving all work-order, calendar and receipt records; repair via a later forward-only migration and never rewrite existing receipts."
+    },
+    {
+      "version": 38,
+      "file": "0038_release467_inventory_quick_edit_tax_receipts.sql",
+      "release": 467,
+      "description": "Atomic operator-confirmed Tool/Supply count and unit correction with HST estimate, movement and immutable actor-bound source receipt.",
+      "recovery": "Preserve existing stock data, movement rows, tax estimates and receipts. Repair via a later forward-only migration; no destructive rollback."
     }
   ]
 }
