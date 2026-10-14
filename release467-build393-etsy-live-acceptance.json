@@ -35,5 +35,23 @@
   },
   "docs": "docs/operations/RELEASE_467_BUILD_393_ETSY_LIVE_CALLBACK_PRICE_ACCEPTANCE.md",
   "next_build": 394,
-  "next_build_title": "Etsy Connection Monitoring & Product Price Drift Safeguards"
+  "next_build_title": "Etsy Connection Monitoring & Product Price Drift Safeguards",
+  "starting_point": {
+    "development": {
+      "sha": "0b233d65c7211e94b2e6accf792ff865babee7b5",
+      "tree": "f0ee23fdf0e7d2cc85a3afe24acd604015de92d3",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38464780569,
+      "quality_run": 38464780570,
+      "it_admin_runtime_run": 38464780565,
+      "repository_hygiene_run": 38464780598
+    },
+    "production": {
+      "main_sha": "298e2b9957b111fde1d2d047cb857985758ecf66",
+      "tree_sha": "f0ee23fdf0e7d2cc85a3afe24acd604015de92d3",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38465363456,
+      "production_live_resource_integrity_run": 38465810484
+    }
+  }
 }

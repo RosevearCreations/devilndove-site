@@ -17,7 +17,6 @@
       "current_application_quality_run": 38464780570,
       "it_admin_runtime_proof_run": 38464780565,
       "branch_hygiene_run": 38464780598,
-      "production_promotion_run": 38465363456,
       "proof_state": "EXACT_BRANCH_HEAD_BUILD392_GREEN",
       "authority": "release467-build392-etsy-workerd-price-evidence.json",
       "proofs": {
@@ -327,12 +326,10 @@
   "accepted_dev_sha": "0b233d65c7211e94b2e6accf792ff865babee7b5",
   "accepted_dev_tree_sha": "f0ee23fdf0e7d2cc85a3afe24acd604015de92d3",
   "acceptance": {
-    "system_gate_run": 38461962133,
-    "current_application_quality_run": 38461962112,
-    "it_admin_runtime_proof_run": 38461962070,
-    "branch_hygiene_run": 38461962273,
-    "d1_ci_fanout_guard_run": 38461705912,
-    "build_specific_proof_run": 38461962113
+    "system_gate_run": 38464780569,
+    "current_application_quality_run": 38464780570,
+    "it_admin_runtime_proof_run": 38464780565,
+    "branch_hygiene_run": 38464780598
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
