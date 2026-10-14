@@ -2,7 +2,7 @@
   "release": 467,
   "build": 395,
   "title": "Etsy Monitoring Operator Acceptance & Exception Resolution",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "starting_point": {
     "development": {
       "sha": "3e11bc31e2547ae11e5982fef42baa83f3c2da77",
@@ -41,7 +41,7 @@
     "operator_live_browser_acceptance": "PENDING_AUTHENTICATED_OPERATOR_TEST",
     "test_suite": "scripts/release467_build395_etsy_exceptions.test.mjs",
     "production_operator_evidence_attached": false,
-    "exact_ci_candidate_pending": true,
+    "exact_ci_candidate_pending": false,
     "explicit_production_green_claim": false
   },
   "safety": {
@@ -53,5 +53,29 @@
   },
   "docs": "docs/operations/RELEASE_467_BUILD_395_ETSY_MONITORING_OPERATOR_ACCEPTANCE.md",
   "next_build": 396,
-  "next_build_title": "Etsy Monitoring Reliability, Alert Routing & Audit Closure"
+  "next_build_title": "Etsy Monitoring Reliability, Alert Routing & Audit Closure",
+  "final_closure": {
+    "dev_sha": "aeb8d787cf414932b5c6a3012924f055e7ccf691",
+    "tree_sha": "8d9869b3f0ad94f1f3cdfece5fda677cff39abdd",
+    "proofs": {
+      "system_gate_run": 38505175037,
+      "current_application_quality_run": 38505174883,
+      "it_admin_runtime_proof_run": 38505174943,
+      "branch_hygiene_run": 38505174923
+    },
+    "ingested_by_build": 396,
+    "state": "EXACT_BRANCH_HEAD_BUILD395_GREEN"
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 395,
+    "title": "Etsy Monitoring Operator Acceptance & Exception Resolution",
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "62dc580df54721ea15d9274ac7dba2509c0161bc",
+    "tree_sha": "8d9869b3f0ad94f1f3cdfece5fda677cff39abdd",
+    "production_pages_deploy_run": 38505357264,
+    "production_live_resource_integrity_run": 38505426778,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
+  }
 }
