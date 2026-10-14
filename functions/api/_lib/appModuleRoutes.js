@@ -183,6 +183,7 @@ const ETSY_OPERATOR_ADMIN_APIS = Object.freeze([
   '/api/admin/etsy-connection-price-outcomes',
   '/api/admin/etsy-oauth-acceptance',
   '/api/admin/etsy-shop-identity',
+  '/api/admin/etsy-remote-draft-trial',
 ]);
 
 const STOREFRONT_ADMIN_APIS = Object.freeze([
