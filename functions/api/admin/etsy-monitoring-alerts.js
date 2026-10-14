@@ -44,7 +44,7 @@ async function projection(db,s){
  if(!exception)return null;
  const result=await db.prepare(ledgerSql).bind(s.type,s.id).all();
  const rows=Array.isArray(result?.results)?result.results:[];
- return {exception,history:lifecycle(rows,exception)};
+ return {exception,history:lifecycle(rows,exception),audit_head_id:Number(rows[0]?.admin_action_audit_id||0)};
 }
 export async function onRequestGet(context){
  const a=await authorize(context);if(a.error)return a.error;
@@ -91,11 +91,14 @@ export async function onRequestPost(context){
   const sql="INSERT INTO admin_action_audit (actor_user_id,action_type,target_type,target_id,target_key,request_method,request_path,details_json,created_at) "+
    "SELECT ?, 'etsy_monitoring_internal_alert', ?, ?, ?, 'POST', ?, ?, CURRENT_TIMESTAMP "+
    "WHERE NOT EXISTS (SELECT 1 FROM admin_action_audit WHERE actor_user_id=? AND action_type='etsy_monitoring_internal_alert' "+
-   "AND target_type=? AND target_id=? AND json_extract(details_json,'$.request_key')=?)";
+   "AND target_type=? AND target_id=? AND json_extract(details_json,'$.request_key')=?) "+
+   "AND NOT EXISTS (SELECT 1 FROM admin_action_audit WHERE action_type='etsy_monitoring_internal_alert' "+
+   "AND target_type=? AND target_id=? AND admin_action_audit_id>?)";
   const written=await a.db.prepare(sql).bind(a.admin.user_id,s.type,s.id,p.exception.code,
-   new URL(context.request.url).pathname,details,a.admin.user_id,s.type,s.id,input.request_key).run();
+   new URL(context.request.url).pathname,details,a.admin.user_id,s.type,s.id,input.request_key,
+   s.type,s.id,p.audit_head_id).run();
   const stored=await a.db.prepare(keySql).bind(s.type,s.id,a.admin.user_id,input.request_key).first();
-  if(!stored)return out({ok:false,code:'alert_receipt_unconfirmed',error:'Alert receipt outcome unknown. Inspect the queue before retrying.',retry_automatically:false},409);
+  if(!stored)return out({ok:false,code:'alert_receipt_unconfirmed',error:'Another operator may have changed this alert or the receipt outcome is unknown. Refresh the queue before retrying.',retry_automatically:false},409);
   return out({ok:true,receipt_id:Number(stored.admin_action_audit_id),action:input.action,
    already_recorded:Number(written?.meta?.changes||0)===0,alert_delivery:'internal_admin_queue_only',
    external_notification_sent:false,provider_calls_performed:false,product_price_written:false,

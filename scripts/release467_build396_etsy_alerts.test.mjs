@@ -61,6 +61,8 @@ test('GET and internal inbox are read-only; POST uses audited durable idempotent
  assert.doesNotMatch(get,/\.run\(|INSERT INTO|UPDATE products/);
  assert.match(api,/INSERT INTO admin_action_audit/);
  assert.match(api,/WHERE NOT EXISTS/);
+ assert.match(api,/admin_action_audit_id>\?/);
+ assert.match(api,/p\.audit_head_id/);
  assert.match(api,/alert_receipt_unconfirmed/);
  assert.match(api,/external_notification_sent:false/);
  assert.match(api,/json_extract\(details_json,'\$\.request_key'\)/);
