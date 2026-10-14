@@ -2,7 +2,7 @@
   "release": 467,
   "build": 398,
   "title": "Etsy Outcome Review Operator Acceptance & Evidence Recheck",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "starting_point": {
     "development": {
       "sha": "007c47446ea0ff4225efd6f973fc5c7fac6c8c05",
@@ -39,11 +39,11 @@
   },
   "acceptance": {
     "feature_contract_suite": "scripts/release467_build398_etsy_operator_recovery.test.mjs",
-    "ci_pending_exact_release_candidate": true,
+    "ci_pending_exact_release_candidate": false,
     "authenticated_frozen_browser_retest": "PENDING_OPERATOR_CONFIRMATION",
-    "etsy_oauth_admin_browser_acceptance": "PENDING_OPERATOR_CONFIRMATION",
-    "real_soap_product_selected": "PENDING_OPERATOR_SELECTION",
-    "local_staged_draft_created": "PENDING_OPERATOR_SELECTION_AND_SCHEMA",
+    "etsy_oauth_admin_browser_acceptance": "SCREENSHOT_CONFIRMED_SHOP_ID_57459161_REFRESH_DUE",
+    "real_soap_product_selected": "SCREENSHOT_CONFIRMED_PRODUCT_54",
+    "local_staged_draft_created": "SCREENSHOT_CONFIRMED",
     "remote_etsy_draft_upload_ready": false
   },
   "release_guard": {
@@ -54,5 +54,29 @@
   },
   "next_build": 399,
   "next_build_title": "Etsy Remote Draft Creation Preconditions & Controlled Trial (proposed)",
-  "docs": "docs/operations/RELEASE_467_BUILD_398_ETSY_OPERATOR_RECOVERY.md"
+  "docs": "docs/operations/RELEASE_467_BUILD_398_ETSY_OPERATOR_RECOVERY.md",
+  "final_closure": {
+    "dev_sha": "63f1591bc6d5f11dbfc77c03f9c136c3e7072174",
+    "tree_sha": "0d2dd320ffcedd60e955988720ae534a7c94a759",
+    "proofs": {
+      "system_gate_run": 38602886926,
+      "current_application_quality_run": 38602886961,
+      "it_admin_runtime_proof_run": 38602886918,
+      "branch_hygiene_run": 38602887221
+    },
+    "ingested_by_build": 399,
+    "state": "EXACT_BRANCH_HEAD_BUILD398_GREEN"
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 398,
+    "title": "Etsy Outcome Review Operator Acceptance & Evidence Recheck",
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "c4d9c517ed296908b457f9bacc5f7306069a40f6",
+    "tree_sha": "0d2dd320ffcedd60e955988720ae534a7c94a759",
+    "production_pages_deploy_run": 38603217148,
+    "production_live_resource_integrity_run": 38603435592,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
+  }
 }
