@@ -2,7 +2,7 @@
   "release": 467,
   "build": 393,
   "title": "Etsy Live Callback Acceptance & Verified Product Price Reconciliation",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "source_baseline": {
     "release": 467,
     "build": 392,
@@ -26,7 +26,7 @@
     "isolated_pre394_tree": "c74cde76ae4ff3ad44c310f9139ab6a4bce61bb9",
     "dev_history_continues_from": "e2319269dad3469a77bdefab4cf19869254d17f6",
     "later_dev_recovery_commit": "e2319269dad3469a77bdefab4cf19869254d17f6",
-    "preview_and_required_CI_pending": true
+    "preview_and_required_CI_pending": false
   },
   "safety": {
     "provider_listing_writes_authorized": false,
@@ -53,5 +53,29 @@
       "production_pages_deploy_run": 38465363456,
       "production_live_resource_integrity_run": 38465810484
     }
+  },
+  "final_closure": {
+    "dev_sha": "cf39f92c182bb184eabeb9580890f2f91923c2c3",
+    "tree_sha": "1cad2c70a51e18aa7329e11dee94f593310f2b1f",
+    "proofs": {
+      "system_gate_run": 38501069143,
+      "current_application_quality_run": 38501069146,
+      "it_admin_runtime_proof_run": 38501069199,
+      "branch_hygiene_run": 38501069126
+    },
+    "ingested_by_build": 394,
+    "state": "EXACT_BRANCH_HEAD_BUILD393_GREEN"
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 393,
+    "title": "Etsy Live Callback Acceptance & Verified Product Price Reconciliation",
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "9b147b05cf938c3f02fe981d91be54ae4304f54b",
+    "tree_sha": "1cad2c70a51e18aa7329e11dee94f593310f2b1f",
+    "production_pages_deploy_run": 38501261283,
+    "production_live_resource_integrity_run": 38501334075,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
   }
 }

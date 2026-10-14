@@ -16,6 +16,9 @@ on:
       - 'docs/operations/RELEASE_467_BUILD_394_ETSY_CONNECTION_PRICE_DRIFT_GUARDS.md'
       - 'scripts/release467_build394_etsy_observability.test.mjs'
       - '.github/workflows/release467-build394-etsy-observability.yml'
+      - 'current-development-authority.json'
+      - 'release467-build394-etsy-connection-price-drift.json'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
   workflow_dispatch:
 permissions:
   contents: read
