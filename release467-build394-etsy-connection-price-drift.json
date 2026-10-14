@@ -2,7 +2,7 @@
   "release": 467,
   "build": 394,
   "title": "Etsy Connection Monitoring & Product Price Drift Safeguards",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "starting_point": {
     "development": {
       "sha": "cf39f92c182bb184eabeb9580890f2f91923c2c3",
@@ -37,7 +37,7 @@
     "new_canonical_migration": false
   },
   "acceptance": {
-    "synthetic_source_checks_pending_exact_candidate_sha": true,
+    "synthetic_source_checks_pending_exact_candidate_sha": false,
     "production_operator_browser_evidence": "NOT_YET_ATTACHED",
     "independent_etsy_live_reauthorization_in_this_build": false
   },
@@ -50,5 +50,29 @@
   },
   "docs": "docs/operations/RELEASE_467_BUILD_394_ETSY_CONNECTION_PRICE_DRIFT_GUARDS.md",
   "next_build": 395,
-  "next_build_title": "Etsy Monitoring Operator Acceptance & Exception Resolution"
+  "next_build_title": "Etsy Monitoring Operator Acceptance & Exception Resolution",
+  "final_closure": {
+    "dev_sha": "3e11bc31e2547ae11e5982fef42baa83f3c2da77",
+    "tree_sha": "89cc00099dd4160d144a6baeafa8d9b4e1a5b758",
+    "proofs": {
+      "system_gate_run": 38503026354,
+      "current_application_quality_run": 38503026307,
+      "it_admin_runtime_proof_run": 38503026302,
+      "branch_hygiene_run": 38503026320
+    },
+    "ingested_by_build": 395,
+    "state": "EXACT_BRANCH_HEAD_BUILD394_GREEN"
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 394,
+    "title": "Etsy Connection Monitoring & Product Price Drift Safeguards",
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "26967afc6d00c8dbfbb1819a8a508ff99f30f6c7",
+    "tree_sha": "89cc00099dd4160d144a6baeafa8d9b4e1a5b758",
+    "production_pages_deploy_run": 38503227933,
+    "production_live_resource_integrity_run": 38503305710,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
+  }
 }
