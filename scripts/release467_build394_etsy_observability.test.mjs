@@ -98,7 +98,7 @@ test('audited source receipts are not Product writes or Etsy listings',()=>{
  assert.match(api,/price_changed_since_review/);
  assert.match(api,/review_receipt_unconfirmed/);
  assert.match(api,/WHERE NOT EXISTS/);
- assert.match(api,/operator_confirmed_source:true/);
+ assert.match(readSource('functions/api/_lib/priceSourceReview394.mjs'),/operator_confirmed_source!==true/);
  assert.doesNotMatch(api,/UPDATE\s+products|INSERT INTO products|etsy\.com/i);
  assert.match(ui,/submit\.disabled=true/);
  assert.match(ui,/No automatic retry/);
