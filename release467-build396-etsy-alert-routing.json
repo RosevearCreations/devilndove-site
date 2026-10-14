@@ -2,7 +2,7 @@
   "release": 467,
   "build": 396,
   "title": "Etsy Monitoring Reliability, Alert Routing & Audit Closure",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "starting_point": {
     "development": {
       "sha": "aeb8d787cf414932b5c6a3012924f055e7ccf691",
@@ -45,7 +45,7 @@
     "live_operator_browser_evidence": "PENDING_AUTHENTICATED_OPERATOR_TEST",
     "independent_live_etsy_provider_probe_performed": false,
     "external_notification_transport_verified": false,
-    "ci_candidate_pending": true
+    "ci_candidate_pending": false
   },
   "safety": {
     "etsy_listing_writes": false,
@@ -57,5 +57,29 @@
   },
   "docs": "docs/operations/RELEASE_467_BUILD_396_ETSY_RELIABILITY_ALERT_AUDIT.md",
   "next_build": 397,
-  "next_build_title": "Etsy Connection Observability & Price Review Outcomes"
+  "next_build_title": "Etsy Connection Observability & Price Review Outcomes",
+  "final_closure": {
+    "dev_sha": "dce1e5eb44411f926822a153775a3ae1656e04a9",
+    "tree_sha": "430c449f0c67291c15c7ef5589e7a9d355a643a3",
+    "proofs": {
+      "system_gate_run": 38509628146,
+      "current_application_quality_run": 38509628109,
+      "it_admin_runtime_proof_run": 38509628152,
+      "branch_hygiene_run": 38509628153
+    },
+    "ingested_by_build": 397,
+    "state": "EXACT_BRANCH_HEAD_BUILD396_GREEN"
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 396,
+    "title": "Etsy Monitoring Reliability, Alert Routing & Audit Closure",
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "1a696def192024066b234c7f6bbc56158c2405bf",
+    "tree_sha": "430c449f0c67291c15c7ef5589e7a9d355a643a3",
+    "production_pages_deploy_run": 38509872223,
+    "production_live_resource_integrity_run": 38509954292,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
+  }
 }

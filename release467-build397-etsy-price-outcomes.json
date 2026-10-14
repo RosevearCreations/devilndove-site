@@ -1,0 +1,60 @@
+{
+  "release": 467,
+  "build": 397,
+  "title": "Etsy Connection Observability & Price Review Outcomes",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "dce1e5eb44411f926822a153775a3ae1656e04a9",
+      "tree": "430c449f0c67291c15c7ef5589e7a9d355a643a3",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38509628146,
+      "quality_run": 38509628109,
+      "it_admin_runtime_run": 38509628152,
+      "repository_hygiene_run": 38509628153
+    },
+    "production": {
+      "main_sha": "1a696def192024066b234c7f6bbc56158c2405bf",
+      "tree_sha": "430c449f0c67291c15c7ef5589e7a9d355a643a3",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38509872223,
+      "production_live_resource_integrity_run": 38509954292
+    }
+  },
+  "feature_scope": {
+    "stored_connection_and_shop_evidence": true,
+    "callback_history_is_not_live_proof": true,
+    "secret_safe_observability": true,
+    "operator_requested_refresh_only": true,
+    "bounded_one_product_price_review": true,
+    "prior_operator_approved_source_receipt_required_for_match": true,
+    "source_discrepancy_not_proven_accidental_error": true,
+    "canonical_integer_cad_cents": true,
+    "three_explicit_review_outcomes": true,
+    "actor_bound_audit_receipts": true,
+    "idempotent_request_key": true,
+    "conditional_single_statement_source_and_product_guard": true,
+    "no_automatic_price_correction": true,
+    "no_etsy_listing_write": true,
+    "no_external_provider_call": true,
+    "no_new_database_schema": true
+  },
+  "acceptance": {
+    "test_suite": "scripts/release467_build397_etsy_price_outcomes.test.mjs",
+    "development_exact_sha_proof_pending": true,
+    "authenticated_operator_browser_evidence": "PENDING",
+    "live_etsy_provider_check_performed": false,
+    "independent_original_price_source_verification": false,
+    "production_release_not_yet_verified": true
+  },
+  "safety": {
+    "production_database_test_writes": false,
+    "production_provider_changes": false,
+    "price_writes": false,
+    "provider_publication": false,
+    "secret_values_emitted": false
+  },
+  "docs": "docs/operations/RELEASE_467_BUILD_397_ETSY_CONNECTION_PRICE_OUTCOMES.md",
+  "next_build": 398,
+  "next_build_title": "Etsy Outcome Review Operator Acceptance & Evidence Recheck (proposed)"
+}

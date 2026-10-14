@@ -1,36 +1,36 @@
 {
   "release": 467,
-  "build": 396,
-  "title": "Etsy Monitoring Reliability, Alert Routing & Audit Closure",
+  "build": 397,
+  "title": "Etsy Connection Observability & Price Review Outcomes",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 395,
-      "title": "Etsy Monitoring Operator Acceptance & Exception Resolution",
+      "build": 396,
+      "title": "Etsy Monitoring Reliability, Alert Routing & Audit Closure",
       "state": "DEVELOPMENT_GREEN",
-      "dev_sha": "aeb8d787cf414932b5c6a3012924f055e7ccf691",
-      "tree_sha": "8d9869b3f0ad94f1f3cdfece5fda677cff39abdd",
-      "system_gate_run": 38505175037,
-      "current_application_quality_run": 38505174883,
-      "it_admin_runtime_proof_run": 38505174943,
-      "branch_hygiene_run": 38505174923,
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD395_GREEN",
-      "authority": "release467-build395-etsy-operator-exceptions.json",
+      "dev_sha": "dce1e5eb44411f926822a153775a3ae1656e04a9",
+      "tree_sha": "430c449f0c67291c15c7ef5589e7a9d355a643a3",
+      "system_gate_run": 38509628146,
+      "current_application_quality_run": 38509628109,
+      "it_admin_runtime_proof_run": 38509628152,
+      "branch_hygiene_run": 38509628153,
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD396_GREEN",
+      "authority": "release467-build396-etsy-alert-routing.json",
       "proofs": {
-        "system_gate_run": 38505175037,
-        "current_application_quality_run": 38505174883,
-        "it_admin_runtime_proof_run": 38505174943,
-        "branch_hygiene_run": 38505174923
+        "system_gate_run": 38509628146,
+        "current_application_quality_run": 38509628109,
+        "it_admin_runtime_proof_run": 38509628152,
+        "branch_hygiene_run": 38509628153
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 396,
-      "title": "Etsy Monitoring Reliability, Alert Routing & Audit Closure",
-      "authority": "release467-build396-etsy-alert-routing.json",
+      "build": 397,
+      "title": "Etsy Connection Observability & Price Review Outcomes",
+      "authority": "release467-build397-etsy-price-outcomes.json",
       "state": "DEVELOPMENT_CLOSURE_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -41,19 +41,20 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 395,
-    "title": "Etsy Monitoring Operator Acceptance & Exception Resolution",
+    "build": 396,
+    "title": "Etsy Monitoring Reliability, Alert Routing & Audit Closure",
     "state": "PRODUCTION_GREEN",
-    "main_sha": "62dc580df54721ea15d9274ac7dba2509c0161bc",
-    "tree_sha": "8d9869b3f0ad94f1f3cdfece5fda677cff39abdd",
-    "production_pages_deploy_run": 38505357264,
-    "production_live_resource_integrity_run": 38505426778,
+    "main_sha": "1a696def192024066b234c7f6bbc56158c2405bf",
+    "tree_sha": "430c449f0c67291c15c7ef5589e7a9d355a643a3",
+    "production_pages_deploy_run": 38509872223,
+    "production_live_resource_integrity_run": 38509954292,
     "remote_d1_queries": 0,
     "same_tree_as_verified_development": true,
     "role": "CURRENT_PRODUCTION_BASELINE",
-    "authority": "release467-build395-etsy-operator-exceptions.json"
+    "authority": "release467-build396-etsy-alert-routing.json"
   },
   "current_release_authorities": [
+    "release467-build397-etsy-price-outcomes.json",
     "release467-build396-etsy-alert-routing.json",
     "release467-build395-etsy-operator-exceptions.json",
     "release467-build394-etsy-connection-price-drift.json",
@@ -291,10 +292,10 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_373_378.md",
-  "next_build": 397,
-  "next_build_state": "QUEUED_AFTER_BUILD396_PRODUCTION_GREEN",
-  "next_build_title": "Etsy Connection Observability & Price Review Outcomes",
-  "promotion_state": "BUILD396_DEVELOPMENT_CLOSURE_CANDIDATE_NOT_YET_VERIFIED",
+  "next_build": 398,
+  "next_build_state": "PROPOSED_AFTER_BUILD397_PRODUCTION_GREEN",
+  "next_build_title": "Etsy Outcome Review Operator Acceptance & Evidence Recheck (proposed)",
+  "promotion_state": "BUILD397_DEVELOPMENT_CLOSURE_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "SYSTEM_WIDE_378_384_NO_SINGLE_PROJECT_BUILDS",
   "measured_closure": {
     "source_build": 232,
@@ -326,13 +327,13 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NO_NEW_CANONICAL_D1_BUILD392",
-  "accepted_dev_sha": "aeb8d787cf414932b5c6a3012924f055e7ccf691",
-  "accepted_dev_tree_sha": "8d9869b3f0ad94f1f3cdfece5fda677cff39abdd",
+  "accepted_dev_sha": "dce1e5eb44411f926822a153775a3ae1656e04a9",
+  "accepted_dev_tree_sha": "430c449f0c67291c15c7ef5589e7a9d355a643a3",
   "acceptance": {
-    "system_gate_run": 38505175037,
-    "current_application_quality_run": 38505174883,
-    "it_admin_runtime_proof_run": 38505174943,
-    "branch_hygiene_run": 38505174923
+    "system_gate_run": 38509628146,
+    "current_application_quality_run": 38509628109,
+    "it_admin_runtime_proof_run": 38509628152,
+    "branch_hygiene_run": 38509628153
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -5999,5 +6000,12 @@
     "automatic_provider_and_customer_mutation": false,
     "source": "release467-build396-etsy-alert-routing.json",
     "next_build": 397
+  },
+  "etsy_price_outcomes_build397": {
+    "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+    "operator_review_only": true,
+    "provider_calls": false,
+    "no_automatic_product_price_write": true,
+    "authority": "release467-build397-etsy-price-outcomes.json"
   }
 }
