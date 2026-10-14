@@ -1,17 +1,5 @@
 name: Release 467 Build 396 Etsy Internal Alert Reliability
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/_lib/etsyAlertLifecycle396.mjs'
-      - 'functions/api/admin/etsy-monitoring-alerts.js'
-      - 'public/js/admin-etsy-monitoring-alerts-v396.js'
-      - 'admin/it-integrations/index.html'
-      - 'scripts/release467_build396_etsy_alerts.test.mjs'
-      - '.github/workflows/release467-build396-etsy-alerts.yml'
-      - 'current-development-authority.json'
-      - 'release467-build396-etsy-alert-routing.json'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
   workflow_dispatch:
 permissions:
   contents: read
