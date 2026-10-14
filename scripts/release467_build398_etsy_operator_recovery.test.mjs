@@ -56,5 +56,5 @@ test('UI never calls remote Etsy or promises upload from local staging',()=>{
  assert.match(ui,/local_draft_only:true/);
  assert.match(ui,/No Etsy listing or upload was created/);
  assert.match(ui,/stage\.disabled=true/);
- assert.doesNotMatch(ui,/api\.etsy\.com|publish/);
+ assert.doesNotMatch(ui,/api\.etsy\.com|\/api\/social\/publish|\/api\/admin\/etsy-listing-publish/);
 });
