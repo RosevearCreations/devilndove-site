@@ -1,0 +1,18 @@
+{
+  "release": 467,
+  "build": 400,
+  "title": "Etsy Remote Draft Provider Acceptance, Reconciliation & Listing Evidence",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "baseline": {
+    "dev_sha": "0badbe442cb22829544f6d4128ebe15e45ae3086",
+    "production_sha": "f2937858cbcc0797992e95e36e2d0e9f5f65530b"
+  },
+  "operator_only_provider_get": true,
+  "explicit_local_reconciliation": true,
+  "real_provider_acceptance": "PENDING_AUTHENTICATED_OPERATOR",
+  "no_remote_mutation": true,
+  "no_automatic_retry": true,
+  "no_publication": true,
+  "next_build": 401,
+  "next_title": "Etsy Draft Image Readiness, Compliance Review & Controlled Listing Completion"
+}
