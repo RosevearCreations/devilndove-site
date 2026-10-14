@@ -32,7 +32,9 @@ test('Admin home is static-first and does not run legacy observer/snapshot loade
 });
 test('Product selector uses only actual bounded Product Browser results, never example products',()=>{
  const src=file('public/js/admin-etsy-product-picker-v398.js');
- assert.match(src,/api\/admin\/product-browser\?limit=50/);
+ assert.match(src,/api\/admin\/etsy-operator-product-choices/);
+ assert.match(file('functions/api/admin/etsy-operator-product-choices.js'),/product_category LIKE/);
+ assert.match(file('functions/api/admin/etsy-operator-product-choices.js'),/verifiedAdminFromModule/);
  assert.match(src,/selected=records\.find/);
  assert.match(src,/etsyExceptionProductId/);
  assert.match(src,/etsyAlertProductId/);

@@ -33,10 +33,10 @@ function setProduct(id){
 async function load(){
  if(busy)return;
  busy=true;busyButton(search,true,'Find Products');select.replaceChildren();records=[];selected=null;
- msg.textContent='Searching the authenticated Product Browser (max 50 records, manual request only)…';
+ msg.textContent='Searching real Products by name, SKU or category (max 50, manual request only)…';
  try{
   const q=String(query.value||'').trim().slice(0,100);
-  const data=await json('/api/admin/product-browser?limit=50'+(q?'&q='+encodeURIComponent(q):''),{method:'GET'});
+  const data=await json('/api/admin/etsy-operator-product-choices'+(q?'?q='+encodeURIComponent(q):''),{method:'GET'});
   records=(Array.isArray(data.products)?data.products:[]).filter(p=>Number.isSafeInteger(Number(p.product_id))&&Number(p.product_id)>0);
   const placeholder=new Option(records.length?'Select a Product…':'No matching Products returned','');select.add(placeholder);
   for(const p of records)select.add(new Option('#'+Number(p.product_id)+' · '+String(p.name||'Unnamed').slice(0,85)+' · '+cad(Number(p.price_cents)),String(p.product_id)));
