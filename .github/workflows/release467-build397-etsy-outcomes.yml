@@ -1,17 +1,5 @@
 name: Release 467 Build 397 Etsy Connection And Price Outcomes
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/_lib/etsyPriceOutcomes397.mjs'
-      - 'functions/api/admin/etsy-connection-price-outcomes.js'
-      - 'public/js/admin-etsy-connection-price-outcomes-v397.js'
-      - 'admin/it-integrations/index.html'
-      - 'scripts/release467_build397_etsy_price_outcomes.test.mjs'
-      - '.github/workflows/release467-build397-etsy-outcomes.yml'
-      - 'current-development-authority.json'
-      - 'release467-build397-etsy-price-outcomes.json'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
   workflow_dispatch:
 permissions:
   contents: read

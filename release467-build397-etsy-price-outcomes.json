@@ -2,7 +2,7 @@
   "release": 467,
   "build": 397,
   "title": "Etsy Connection Observability & Price Review Outcomes",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "PRODUCTION_GREEN",
   "starting_point": {
     "development": {
       "sha": "dce1e5eb44411f926822a153775a3ae1656e04a9",
@@ -41,11 +41,11 @@
   },
   "acceptance": {
     "test_suite": "scripts/release467_build397_etsy_price_outcomes.test.mjs",
-    "development_exact_sha_proof_pending": true,
+    "development_exact_sha_proof_pending": false,
     "authenticated_operator_browser_evidence": "PENDING",
     "live_etsy_provider_check_performed": false,
     "independent_original_price_source_verification": false,
-    "production_release_not_yet_verified": true
+    "production_release_not_yet_verified": false
   },
   "safety": {
     "production_database_test_writes": false,
@@ -56,5 +56,29 @@
   },
   "docs": "docs/operations/RELEASE_467_BUILD_397_ETSY_CONNECTION_PRICE_OUTCOMES.md",
   "next_build": 398,
-  "next_build_title": "Etsy Outcome Review Operator Acceptance & Evidence Recheck (proposed)"
+  "next_build_title": "Etsy Outcome Review Operator Acceptance & Evidence Recheck (proposed)",
+  "final_closure": {
+    "dev_sha": "007c47446ea0ff4225efd6f973fc5c7fac6c8c05",
+    "tree_sha": "ee8da0752f775471bcc155919d837d28a60f27eb",
+    "proofs": {
+      "system_gate_run": 38571501385,
+      "current_application_quality_run": 38571501297,
+      "it_admin_runtime_proof_run": 38571501407,
+      "branch_hygiene_run": 38571501214
+    },
+    "ingested_by_build": 398,
+    "state": "EXACT_BRANCH_HEAD_BUILD397_GREEN"
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 397,
+    "title": "Etsy Connection Observability & Price Review Outcomes",
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "01b5dbb7a2bd6bd1c6e146e4e2d6adb67cfe258e",
+    "tree_sha": "ee8da0752f775471bcc155919d837d28a60f27eb",
+    "production_pages_deploy_run": 38571863065,
+    "production_live_resource_integrity_run": 38572017163,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
+  }
 }

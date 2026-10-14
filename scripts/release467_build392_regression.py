@@ -25,7 +25,7 @@ check('no_automatic_price_repair:true' in price and 'evidence_required:true' in 
 assertion=content('functions/api/admin/product-editor-save.js')
 check('product_price_readback_unconfirmed' in assertion and 'zero_price_not_confirmed' in assertion,'Price confirmed by source after operator Save')
 authority=json.loads(content('current-development-authority.json'))
-check(authority.get('build') in (392,393,394,395,396,397) and authority.get('next_build') == authority.get('build')+1,'Build392 retained and active successor advances one build at a time')
+check(authority.get('build') in (392,393,394,395,396,397,398) and authority.get('next_build') == authority.get('build')+1,'Build392 retained and active successor advances one build at a time')
 check('release467-build392-etsy-workerd-price-evidence.json' in content('current-development-authority.json'),'New machine authority registered')
 print('RELEASE467_BUILD392_GATE='+('FAIL' if bad else 'GREEN'))
 for f in bad:print('FAIL:',f)
