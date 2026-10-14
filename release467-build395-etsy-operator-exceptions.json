@@ -1,0 +1,57 @@
+{
+  "release": 467,
+  "build": 395,
+  "title": "Etsy Monitoring Operator Acceptance & Exception Resolution",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "3e11bc31e2547ae11e5982fef42baa83f3c2da77",
+      "tree": "89cc00099dd4160d144a6baeafa8d9b4e1a5b758",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38503026354,
+      "quality_run": 38503026307,
+      "it_admin_runtime_run": 38503026302,
+      "repository_hygiene_run": 38503026320
+    },
+    "production": {
+      "main_sha": "26967afc6d00c8dbfbb1819a8a508ff99f30f6c7",
+      "tree_sha": "89cc00099dd4160d144a6baeafa8d9b4e1a5b758",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38503227933,
+      "production_live_resource_integrity_run": 38503305710
+    }
+  },
+  "features": {
+    "operator_open_explicit": true,
+    "connection_failure_reasons": true,
+    "product_source_price_exception": true,
+    "admin_only_read_and_write": true,
+    "explicit_acknowledgement_receipts": true,
+    "manual_recovery_review_receipts": true,
+    "resolution_requires_recovered_state_and_earlier_ack": true,
+    "bounded_human_reference": true,
+    "durable_actor_bound_audit": true,
+    "idempotency_key_and_stale_fingerprint_guard": true,
+    "live_provider_polling": false,
+    "no_auto_resolution": true,
+    "no_etsy_listing_writes": true,
+    "no_product_price_writes": true
+  },
+  "acceptance": {
+    "operator_live_browser_acceptance": "PENDING_AUTHENTICATED_OPERATOR_TEST",
+    "test_suite": "scripts/release467_build395_etsy_exceptions.test.mjs",
+    "production_operator_evidence_attached": false,
+    "exact_ci_candidate_pending": true,
+    "explicit_production_green_claim": false
+  },
+  "safety": {
+    "real_provider_calls_performed": false,
+    "customer_product_changes_performed": false,
+    "production_D1_test_writes": false,
+    "financial_price_inference": false,
+    "secret_redaction": true
+  },
+  "docs": "docs/operations/RELEASE_467_BUILD_395_ETSY_MONITORING_OPERATOR_ACCEPTANCE.md",
+  "next_build": 396,
+  "next_build_title": "Etsy Monitoring Reliability, Alert Routing & Audit Closure"
+}

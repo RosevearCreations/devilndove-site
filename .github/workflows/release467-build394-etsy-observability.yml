@@ -1,24 +1,5 @@
 name: Release 467 Build 394 Etsy Passive Connection Observability
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/_lib/etsyConnectionObservability.mjs'
-      - 'functions/api/admin/etsy-oauth-acceptance.js'
-      - 'public/js/admin-etsy-oauth-acceptance.js'
-      - 'functions/api/admin/product-zero-price-review.js'
-      - 'functions/api/_lib/priceSourceReview394.mjs'
-      - 'functions/api/admin/product-price-source-review.js'
-      - 'public/js/admin-product-price-source-review-v394.js'
-      - 'admin/products/index.html'
-      - 'public/js/admin-product-zero-price-review-v390.js'
-      - 'admin/it-integrations/index.html'
-      - 'docs/operations/RELEASE_467_BUILD_394_ETSY_CONNECTION_PRICE_DRIFT_GUARDS.md'
-      - 'scripts/release467_build394_etsy_observability.test.mjs'
-      - '.github/workflows/release467-build394-etsy-observability.yml'
-      - 'current-development-authority.json'
-      - 'release467-build394-etsy-connection-price-drift.json'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
   workflow_dispatch:
 permissions:
   contents: read
