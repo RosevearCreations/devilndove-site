@@ -1,19 +1,5 @@
 name: Release 467 Build 399 Etsy Remote Draft Preconditions
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/_lib/etsyDraftTrial399.mjs'
-      - 'functions/api/admin/etsy-remote-draft-trial.js'
-      - 'public/js/admin-etsy-remote-draft-v399.js'
-      - 'public/js/admin-etsy-product-picker-v398.js'
-      - 'functions/api/_lib/appModuleRoutes.js'
-      - 'admin/it-integrations/index.html'
-      - 'scripts/release467_build399_etsy_draft.test.mjs'
-      - '.github/workflows/release467-build399-etsy-draft.yml'
-      - 'current-development-authority.json'
-      - 'release467-build399-etsy-remote-draft.json'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
   workflow_dispatch:
 permissions:
   contents: read

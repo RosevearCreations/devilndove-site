@@ -65,5 +65,24 @@
   },
   "docs": "docs/operations/RELEASE_467_BUILD_399_ETSY_REMOTE_DRAFT_TRIAL.md",
   "next_build": 400,
-  "next_build_title": "Etsy Remote Draft Provider Acceptance, Reconciliation & Listing Evidence (proposed)"
+  "next_build_title": "Etsy Remote Draft Provider Acceptance, Reconciliation & Listing Evidence (proposed)",
+  "final_closure": {
+    "dev_sha": "0badbe442cb22829544f6d4128ebe15e45ae3086",
+    "tree_sha": "f574e6f076833c3430781490ca056b054e954a88",
+    "proofs": {
+      "system_gate_run": 38605946826,
+      "current_application_quality_run": 38605946829,
+      "it_admin_runtime_proof_run": 38605946783,
+      "branch_hygiene_run": 38605946816
+    },
+    "ingested_by_build": 400,
+    "verified": true
+  },
+  "production_checkpoint": {
+    "main_sha": "f2937858cbcc0797992e95e36e2d0e9f5f65530b",
+    "tree_sha": "f574e6f076833c3430781490ca056b054e954a88",
+    "production_pages_deploy_run": 38606326017,
+    "production_live_resource_integrity_run": 38606480119,
+    "state": "PRODUCTION_GREEN"
+  }
 }
