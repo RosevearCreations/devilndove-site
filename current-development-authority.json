@@ -2,28 +2,28 @@
   "release": 467,
   "build": 400,
   "title": "Etsy Remote Draft Provider Acceptance, Reconciliation & Listing Evidence",
-  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 398,
-      "title": "Etsy Outcome Review Operator Acceptance & Evidence Recheck",
+      "build": 399,
+      "title": "Etsy Remote Draft Creation Preconditions & Controlled Trial",
       "state": "DEVELOPMENT_GREEN",
-      "dev_sha": "63f1591bc6d5f11dbfc77c03f9c136c3e7072174",
-      "tree_sha": "0d2dd320ffcedd60e955988720ae534a7c94a759",
-      "system_gate_run": 38602886926,
-      "current_application_quality_run": 38602886961,
-      "it_admin_runtime_proof_run": 38602886918,
-      "branch_hygiene_run": 38602887221,
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD398_GREEN",
-      "authority": "release467-build398-etsy-operator-recovery.json",
+      "dev_sha": "0badbe442cb22829544f6d4128ebe15e45ae3086",
+      "tree_sha": "f574e6f076833c3430781490ca056b054e954a88",
+      "system_gate_run": 38605946826,
+      "current_application_quality_run": 38605946829,
+      "it_admin_runtime_proof_run": 38605946783,
+      "branch_hygiene_run": 38605946816,
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD399_GREEN",
+      "authority": "release467-build399-etsy-remote-draft.json",
       "proofs": {
-        "system_gate_run": 38602886926,
-        "current_application_quality_run": 38602886961,
-        "it_admin_runtime_proof_run": 38602886918,
-        "branch_hygiene_run": 38602887221
+        "system_gate_run": 38605946826,
+        "current_application_quality_run": 38605946829,
+        "it_admin_runtime_proof_run": 38605946783,
+        "branch_hygiene_run": 38605946816
       }
     },
     "current_closure_candidate": {
@@ -45,10 +45,16 @@
     "title": "Etsy Remote Draft Creation Preconditions & Controlled Trial",
     "state": "PRODUCTION_GREEN",
     "main_sha": "f2937858cbcc0797992e95e36e2d0e9f5f65530b",
+    "tree_sha": "f574e6f076833c3430781490ca056b054e954a88",
     "production_pages_deploy_run": 38606326017,
-    "production_live_resource_integrity_run": 38606480119
+    "production_live_resource_integrity_run": 38606480119,
+    "remote_d1_queries": 0,
+    "same_tree_as_verified_development": true,
+    "role": "CURRENT_PRODUCTION_BASELINE",
+    "authority": "release467-build399-etsy-remote-draft.json"
   },
   "current_release_authorities": [
+    "release467-build400-etsy-provider-evidence.json",
     "release467-build399-etsy-remote-draft.json",
     "release467-build398-etsy-operator-recovery.json",
     "release467-build397-etsy-price-outcomes.json",
