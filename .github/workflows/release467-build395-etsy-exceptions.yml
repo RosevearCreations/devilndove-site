@@ -1,0 +1,32 @@
+name: Release 467 Build 395 Etsy Operator Exception Acceptance
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/_lib/etsyOperatorExceptions395.mjs'
+      - 'functions/api/admin/etsy-monitoring-exceptions.js'
+      - 'public/js/admin-etsy-monitoring-exceptions-v395.js'
+      - 'admin/it-integrations/index.html'
+      - 'scripts/release467_build395_etsy_exceptions.test.mjs'
+      - '.github/workflows/release467-build395-etsy-exceptions.yml'
+      - 'current-development-authority.json'
+      - 'release467-build395-etsy-operator-exceptions.json'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  operator-acceptance-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax and safe operator decisions
+        run: |
+          node --check functions/api/_lib/etsyOperatorExceptions395.mjs
+          node --check functions/api/admin/etsy-monitoring-exceptions.js
+          node --check public/js/admin-etsy-monitoring-exceptions-v395.js
+          node --test scripts/release467_build395_etsy_exceptions.test.mjs
