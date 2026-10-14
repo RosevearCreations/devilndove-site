@@ -1,6 +1,7 @@
+import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 // Build 394: explicit source-attested product price review with durable admin audit receipts.
 // GET is one-Product read and optional latest approval. POST never modifies products, tax, stock, or Etsy.
-import {getDb,jsonResponse,getAdminUserFromRequest} from '../_lib/adminAudit.js';
+import {getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {normalizeSourceReview,safeCents,sourcePriceOutcome} from '../_lib/priceSourceReview394.mjs';
 const out=(data,status=200)=>jsonResponse(data,status,{'Cache-Control':'no-store','X-DD-Price-Review':'operator-source-only'});
 const receiptSql="SELECT admin_action_audit_id, actor_user_id, details_json, created_at FROM admin_action_audit WHERE action_type='product_price_source_approved' AND target_type='product' AND target_id=? ORDER BY admin_action_audit_id DESC LIMIT 1";
@@ -9,7 +10,7 @@ const productSql="SELECT product_id,name,sku,price_cents,currency,updated_at FRO
 async function access(context) {
  const user=context?.data?.ddModuleAccess?.user;
  if(!user||String(user.role||'').toLowerCase()!=='admin')return {error:out({ok:false,error:'Administrator access required.'},401)};
- const admin=await getAdminUserFromRequest(context.request,context.env);
+ const admin=verifiedAdminFromModule(context);
  if(!admin?.user_id)return {error:out({ok:false,error:'Verified administrator session required.'},401)};
  const db=getDb(context.env);
  return db?{admin,db}:{error:out({ok:false,error:'Database unavailable.'},503)};

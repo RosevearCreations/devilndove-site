@@ -1,5 +1,6 @@
+import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 // Build 395 — on-demand admin-only Etsy exception review. No provider calls, Product writes or automatic recovery.
-import {getDb,getAdminUserFromRequest,jsonResponse} from '../_lib/adminAudit.js';
+import {getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {etsyException,productPriceException,normalizeOperatorDecision} from '../_lib/etsyOperatorExceptions395.mjs';
 import {safeCents} from '../_lib/priceSourceReview394.mjs';
 const out=(d,status=200)=>jsonResponse(d,status,{'Cache-Control':'no-store','X-DD-Exception-Mode':'on-demand-operator-only'});
@@ -14,7 +15,7 @@ const sqlAttempt="SELECT terminal_status,created_at,completed_at FROM oauth_auth
 async function authorize(context){
  const guard=context?.data?.ddModuleAccess?.user;
  if(!guard||String(guard.role||'').toLowerCase()!=='admin')return {error:out({ok:false,error:'Admin access required.'},401)};
- const admin=await getAdminUserFromRequest(context.request,context.env);
+ const admin=verifiedAdminFromModule(context);
  if(!admin?.user_id)return {error:out({ok:false,error:'Verified administrator session required.'},401)};
  const db=getDb(context.env);
  return db?{admin,db}:{error:out({ok:false,error:'Database unavailable.'},503)};

@@ -1,6 +1,7 @@
+import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 // Release 467 Build 397 — admin-only, bounded Etsy connection observability & Product price review outcomes.
 // GET cannot mutate. POST records idempotent operator audit only, never changes Products or Etsy.
-import {getDb,getAdminUserFromRequest,jsonResponse} from '../_lib/adminAudit.js';
+import {getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {safeCents} from '../_lib/priceSourceReview394.mjs';
 import {connectionEvidence397,priceEvidence397,normalizePriceOutcomeDecision,decisionAllowed397,outcomeReviewState397} from '../_lib/etsyPriceOutcomes397.mjs';
 const out=(body,status=200)=>jsonResponse(body,status,{'Cache-Control':'no-store','X-DD-Outcome-Mode':'operator-evidence-only'});
@@ -14,7 +15,7 @@ const keySql="SELECT admin_action_audit_id,details_json FROM admin_action_audit 
 async function access({request,env,data}){
  if(!data?.ddModuleAccess?.user||String(data.ddModuleAccess.user.role||'').toLowerCase()!=='admin')
   return {error:out({ok:false,error:'Administrator access required.'},401)};
- const admin=await getAdminUserFromRequest(request,env);
+ const admin=verifiedAdminFromModule({request,env,data});
  if(!admin?.user_id)return {error:out({ok:false,error:'Verified administrator session required.'},401)};
  const db=getDb(env);return db?{admin,db}:{error:out({ok:false,error:'Database unavailable.'},503)};
 }

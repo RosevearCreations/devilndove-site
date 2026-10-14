@@ -1,0 +1,58 @@
+{
+  "release": 467,
+  "build": 398,
+  "title": "Etsy Outcome Review Operator Acceptance & Evidence Recheck",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "007c47446ea0ff4225efd6f973fc5c7fac6c8c05",
+      "tree": "ee8da0752f775471bcc155919d837d28a60f27eb",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38571501385,
+      "quality_run": 38571501297,
+      "it_admin_runtime_run": 38571501407,
+      "repository_hygiene_run": 38571501214
+    },
+    "production": {
+      "main_sha": "01b5dbb7a2bd6bd1c6e146e4e2d6adb67cfe258e",
+      "tree_sha": "ee8da0752f775471bcc155919d837d28a60f27eb",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38571863065,
+      "production_live_resource_integrity_run": 38572017163
+    }
+  },
+  "fixes": {
+    "admin_home_default_static_fast": true,
+    "manual_single_bounded_snapshot": true,
+    "no_autostart_browser_observers": true,
+    "central_guard_verified_admin": true,
+    "legacy_session_reverification_removed_for_selected_etsy_endpoints": true,
+    "authenticated_real_product_picker": true,
+    "search_soap_by_name_sku": true,
+    "bounded_50_products": true,
+    "populated_product_review_ids": true,
+    "operator_confirmed_local_only_etsy_draft_stage": true,
+    "server_product_price_readback": true,
+    "idempotent_local_draft_receipts": true,
+    "no_remote_etsy_draft_created": true,
+    "no_product_price_inventory_or_listing_mutation": true
+  },
+  "acceptance": {
+    "feature_contract_suite": "scripts/release467_build398_etsy_operator_recovery.test.mjs",
+    "ci_pending_exact_release_candidate": true,
+    "authenticated_frozen_browser_retest": "PENDING_OPERATOR_CONFIRMATION",
+    "etsy_oauth_admin_browser_acceptance": "PENDING_OPERATOR_CONFIRMATION",
+    "real_soap_product_selected": "PENDING_OPERATOR_SELECTION",
+    "local_staged_draft_created": "PENDING_OPERATOR_SELECTION_AND_SCHEMA",
+    "remote_etsy_draft_upload_ready": false
+  },
+  "release_guard": {
+    "single_approved_dev_tree_only": true,
+    "no_force_merge": true,
+    "no_request_time_migrations": true,
+    "production_test_writes": false
+  },
+  "next_build": 399,
+  "next_build_title": "Etsy Remote Draft Creation Preconditions & Controlled Trial (proposed)",
+  "docs": "docs/operations/RELEASE_467_BUILD_398_ETSY_OPERATOR_RECOVERY.md"
+}

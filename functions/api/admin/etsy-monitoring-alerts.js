@@ -1,5 +1,6 @@
+import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 // Release 467 Build 396 — internal admin queue only. No email/SMS, Etsy provider call or Product mutation.
-import {getDb,getAdminUserFromRequest,jsonResponse} from '../_lib/adminAudit.js';
+import {getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {etsyException,productPriceException} from '../_lib/etsyOperatorExceptions395.mjs';
 import {safeCents} from '../_lib/priceSourceReview394.mjs';
 import {validateAlertDecision,lifecycle,mayWriteAlert,ALERT_CHANNEL} from '../_lib/etsyAlertLifecycle396.mjs';
@@ -15,7 +16,7 @@ const attemptSql="SELECT terminal_status,created_at,completed_at FROM oauth_auth
 async function authorize(context){
  const guard=context?.data?.ddModuleAccess?.user;
  if(!guard||String(guard.role||'').toLowerCase()!=='admin')return {error:out({ok:false,error:'Admin access required.'},401)};
- const admin=await getAdminUserFromRequest(context.request,context.env);
+ const admin=verifiedAdminFromModule(context);
  if(!admin?.user_id)return {error:out({ok:false,error:'Verified admin session required.'},401)};
  const db=getDb(context.env);return db?{admin,db}:{error:out({ok:false,error:'Database unavailable.'},503)};
 }
