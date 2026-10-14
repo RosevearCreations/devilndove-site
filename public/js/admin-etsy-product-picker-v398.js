@@ -18,7 +18,7 @@ async function json(url,options){
 function busyButton(button,working,label){button.disabled=working;button.textContent=working?'Please wait…':label;}
 function setProduct(id){
  selected=records.find(x=>Number(x.product_id)===Number(id))||null;
- const inputs=[el('etsyExceptionProductId'),el('etsyAlertProductId'),el('etsy397ProductId'),el('productPriceSourceId')];
+ const inputs=[el('etsyExceptionProductId'),el('etsyAlertProductId'),el('etsy397ProductId'),el('etsy399ProductId'),el('productPriceSourceId')];
  for(const input of inputs){if(input)input.value=selected?String(selected.product_id):'';}
  // For a Product test, select Product scope without changing unrelated Etsy connection evidence.
  if(selected){for(const id of ['etsyExceptionScope','etsyAlertScope']){const node=el(id);if(node)node.value='product';}}

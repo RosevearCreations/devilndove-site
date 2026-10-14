@@ -1,0 +1,69 @@
+{
+  "release": 467,
+  "build": 399,
+  "title": "Etsy Remote Draft Creation Preconditions & Controlled Trial",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "63f1591bc6d5f11dbfc77c03f9c136c3e7072174",
+      "tree": "0d2dd320ffcedd60e955988720ae534a7c94a759",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38602886926,
+      "quality_run": 38602886961,
+      "it_admin_runtime_run": 38602886918,
+      "repository_hygiene_run": 38602887221
+    },
+    "production": {
+      "main_sha": "c4d9c517ed296908b457f9bacc5f7306069a40f6",
+      "tree_sha": "0d2dd320ffcedd60e955988720ae534a7c94a759",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38603217148,
+      "production_live_resource_integrity_run": 38603435592
+    }
+  },
+  "features": {
+    "existing_local_draft_required": true,
+    "verified_shop_id": true,
+    "shops_r_and_listings_w_required": true,
+    "no_auto_token_refresh": true,
+    "valid_access_token_expiry_required": true,
+    "etsy_shop_currency_CAD_required": true,
+    "exact_staged_product_price_and_quantity": true,
+    "live_read_only_shipping_readiness_taxonomy_choices": true,
+    "required_physical_listing_fields": true,
+    "explicit_two_step_operator_confirmation": true,
+    "single_database_claim_before_etsy_POST": true,
+    "one_remote_attempt_per_local_draft": true,
+    "unknown_remote_outcome_manual_reconciliation": true,
+    "no_repeat_on_network_failure": true,
+    "provider_createDraftListing_only": true,
+    "publish_endpoint_disabled": true,
+    "no_inventory_sync": true,
+    "no_automatic_listing_image_upload": true,
+    "no_new_schema": true
+  },
+  "operator_acceptance": {
+    "shop_id_from_screenshots": "57459161",
+    "shop_label_from_screenshots": "DevilnDove",
+    "real_product_from_screenshots": 54,
+    "product_name": "Bar Soap Sweet Orange",
+    "product_price_cents": 900,
+    "quantity_from_screenshots": 3,
+    "local_draft_created": true,
+    "operator_has_not_authorized_a_remote_POST_in_chat": true,
+    "remote_provider_trial": "NOT_ATTEMPTED_BY_CI_OR_DEPLOYMENT",
+    "operator_browser_acceptance": "PENDING_AFTER_RELEASE",
+    "existing_connection_refresh_due_at_screen_capture": true
+  },
+  "safety": {
+    "automatic_provider_writes": false,
+    "listing_activation": false,
+    "provider_publication": false,
+    "remote_D1_test_writes": false,
+    "remote_etsy_test_writes": false,
+    "scope": "unpublished_draft_only"
+  },
+  "docs": "docs/operations/RELEASE_467_BUILD_399_ETSY_REMOTE_DRAFT_TRIAL.md",
+  "next_build": 400,
+  "next_build_title": "Etsy Remote Draft Provider Acceptance, Reconciliation & Listing Evidence (proposed)"
+}
