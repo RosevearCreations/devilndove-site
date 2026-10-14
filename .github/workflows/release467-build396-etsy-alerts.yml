@@ -1,0 +1,32 @@
+name: Release 467 Build 396 Etsy Internal Alert Reliability
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/_lib/etsyAlertLifecycle396.mjs'
+      - 'functions/api/admin/etsy-monitoring-alerts.js'
+      - 'public/js/admin-etsy-monitoring-alerts-v396.js'
+      - 'admin/it-integrations/index.html'
+      - 'scripts/release467_build396_etsy_alerts.test.mjs'
+      - '.github/workflows/release467-build396-etsy-alerts.yml'
+      - 'current-development-authority.json'
+      - 'release467-build396-etsy-alert-routing.json'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  internal-alerts-and-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate operator routing and audit closure
+        run: |
+          node --check functions/api/_lib/etsyAlertLifecycle396.mjs
+          node --check functions/api/admin/etsy-monitoring-alerts.js
+          node --check public/js/admin-etsy-monitoring-alerts-v396.js
+          node --test scripts/release467_build396_etsy_alerts.test.mjs
