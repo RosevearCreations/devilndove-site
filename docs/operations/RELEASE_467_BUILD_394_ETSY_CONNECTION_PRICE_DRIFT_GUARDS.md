@@ -1,6 +1,6 @@
 # Release 467 Build 394 — Etsy Connection Monitoring & Product Price Drift Safeguards
 
-Status: DEVELOPMENT SPECIFICATION — NOT PRODUCTION GREEN.
+Status: PARTIAL DEVELOPMENT IMPLEMENTATION — NOT PRODUCTION GREEN.
 
 ## Objective
 Provide an administrator-visible, read-only Etsy connection freshness check and Product price drift review. No automatic Etsy reconnect, listing publication, currency rewrite or Product mutation.
@@ -28,6 +28,6 @@ Provide an administrator-visible, read-only Etsy connection freshness check and 
 5. Verify identical approved code tree in production, Cloudflare Pages deployment success and Production Live Resource Integrity before marking GREEN.
 
 ## Delivery boundaries
-This file is a specification, not functioning monitoring software. Do not mark Build 394 implemented or production GREEN until runtime changes and proof are present.
+Implemented on Development: passive stored-evidence Etsy connection health, shop verification age, and a bounded read-only zero-priced Product review queue that explicitly refuses to claim price drift without an approved baseline. Missing: authoritative persisted approved price-source comparison, complete operator acceptance, and final release proofs. No automatic price correction or Etsy listing write. Do not mark Build 394 complete or Production GREEN until these are addressed.
 
 Next proposed: Build 395 — Etsy Monitoring Operator Acceptance & Exception Resolution.

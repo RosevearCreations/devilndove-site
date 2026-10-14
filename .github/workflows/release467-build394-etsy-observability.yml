@@ -6,6 +6,10 @@ on:
       - 'functions/api/_lib/etsyConnectionObservability.mjs'
       - 'functions/api/admin/etsy-oauth-acceptance.js'
       - 'public/js/admin-etsy-oauth-acceptance.js'
+      - 'functions/api/admin/product-zero-price-review.js'
+      - 'public/js/admin-product-zero-price-review-v390.js'
+      - 'admin/it-integrations/index.html'
+      - 'docs/operations/RELEASE_467_BUILD_394_ETSY_CONNECTION_PRICE_DRIFT_GUARDS.md'
       - 'scripts/release467_build394_etsy_observability.test.mjs'
       - '.github/workflows/release467-build394-etsy-observability.yml'
   workflow_dispatch:

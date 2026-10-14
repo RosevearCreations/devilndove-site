@@ -11,7 +11,9 @@ export async function onRequestGet(context){
   FROM products WHERE COALESCE(price_cents,0)=0
   ORDER BY product_id DESC LIMIT 26`).all();
   const rows=Array.isArray(r?.results)?r.results:[];
-  return json({ok:true,items:rows.slice(0,25),has_more:rows.length>25,read_only:true,
+  return json({ok:true,items:rows.slice(0,25).map((item)=>({...item,
+   price_review_state:'source_evidence_required',drift_confirmed:false,valid_zero_price_possible:true})),has_more:rows.length>25,read_only:true,
+   price_monitoring_mode:'manual_source_review_only',verified_source_baseline_available:false,
    no_automatic_price_repair:true,evidence_required:true,source_acceptance:'operator_approval_required',historical_price_inferred:false,reason:'Zero-priced items may be intentional or may have been affected by an earlier faulty decimal parser. Verify each against original pricing evidence before correcting.'});
  }catch{return json({ok:false,error:'Zero-price source review could not be verified; no prices were changed.'},503);}
 }

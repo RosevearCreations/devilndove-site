@@ -38,3 +38,31 @@ test('pure summary returns no tokens even if connection row had a secret', () =>
   const result=classifyEtsyConnection({...connected,access_token_ciphertext:'supersecret'},shop,now);
   assert.equal(JSON.stringify(result).includes('supersecret'),false);
 });
+
+import { readFileSync } from 'node:fs';
+const readSource=(path)=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
+test('zero-price review is bounded, admin-only, read-only and never calls an unverified price drift',()=>{
+ const s=readSource('functions/api/admin/product-zero-price-review.js');
+ assert.match(s,/export async function onRequestGet/);
+ assert.doesNotMatch(s,/export async function onRequestPost/);
+ assert.match(s,/ORDER BY product_id DESC LIMIT 26/);
+ assert.match(s,/drift_confirmed:false/);
+ assert.match(s,/valid_zero_price_possible:true/);
+ assert.match(s,/price_monitoring_mode:'manual_source_review_only'/);
+ assert.match(s,/verified_source_baseline_available:false/);
+ assert.match(s,/no_automatic_price_repair:true/);
+});
+test('admin links to human source review instead of claiming automatic Etsy price drift',()=>{
+ const html=readSource('admin/it-integrations/index.html');
+ const js=readSource('public/js/admin-product-zero-price-review-v390.js');
+ assert.match(html,/\/admin\/products\/#productBrowser390PriceAudit/);
+ assert.match(js,/not a confirmed price error/);
+ assert.match(js,/a legitimate \$0\.00 price may be correct/);
+ assert.doesNotMatch(js,/fetch\([^)]*method\s*:\s*['"]POST/);
+});
+test('Product Editor still verifies persisted cents and refuses ambiguous automatic retries',()=>{
+ const s=readSource('functions/api/admin/product-editor-save.js');
+ assert.match(s,/price_cents_confirmed:true/);
+ assert.match(s,/code:'product_price_readback_unconfirmed',retry_automatically:false/);
+ assert.match(s,/code:'zero_price_not_confirmed'/);
+});
