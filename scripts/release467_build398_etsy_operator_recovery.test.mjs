@@ -69,7 +69,8 @@ test('Etsy endpoints resolve through central module access instead of unclassifi
  '/api/admin/etsy-monitoring-exceptions',
  '/api/admin/etsy-monitoring-alerts',
  '/api/admin/etsy-connection-price-outcomes',
- '/api/admin/etsy-oauth-acceptance']){
+ '/api/admin/etsy-oauth-acceptance',
+ '/api/admin/etsy-shop-identity']){
   assert.equal(moduleKeyForPath(path),MODULE_KEYS.STOREFRONT,path);
  }
  assert.equal(moduleKeyForPath('/api/admin/product-browser'),MODULE_KEYS.STOREFRONT);
