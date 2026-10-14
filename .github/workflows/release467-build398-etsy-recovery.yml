@@ -1,0 +1,42 @@
+name: Release 467 Build 398 Etsy Operator Recovery Acceptance
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/_lib/verifiedAdmin398.mjs'
+      - 'functions/api/admin/etsy-monitoring-exceptions.js'
+      - 'functions/api/admin/etsy-monitoring-alerts.js'
+      - 'functions/api/admin/etsy-connection-price-outcomes.js'
+      - 'functions/api/admin/product-price-source-review.js'
+      - 'functions/api/admin/etsy-product-syndication.js'
+      - 'functions/_middleware.js'
+      - 'admin/index.html'
+      - 'public/js/admin-home-on-demand-v398.js'
+      - 'public/js/admin-etsy-product-picker-v398.js'
+      - 'admin/it-integrations/index.html'
+      - 'scripts/release467_build398_etsy_operator_recovery.test.mjs'
+      - '.github/workflows/release467-build398-etsy-recovery.yml'
+      - 'current-development-authority.json'
+      - 'release467-build398-etsy-operator-recovery.json'
+      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-recovery-and-operator-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate runtime and safety contracts
+        run: |
+          node --check functions/api/admin/etsy-product-syndication.js
+          node --check functions/api/admin/etsy-monitoring-exceptions.js
+          node --check functions/api/admin/etsy-monitoring-alerts.js
+          node --check functions/api/admin/etsy-connection-price-outcomes.js
+          node --check public/js/admin-home-on-demand-v398.js
+          node --check public/js/admin-etsy-product-picker-v398.js
+          node --test scripts/release467_build398_etsy_operator_recovery.test.mjs
