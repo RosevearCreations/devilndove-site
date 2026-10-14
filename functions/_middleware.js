@@ -243,6 +243,14 @@ async function withPlatformClient(response, request, env = {}) {
   if (!contentType.includes('text/html')) return response;
   const pathname = new URL(request.url).pathname;
   const normalizedPath = normalizedPagePath(pathname);
+  // Build 398 safe home: do not inject the global heavy observability, PWA, or admin QoL scripts.
+  // Keep centralized authentication and CSP via finish(), but ship the static admin navigation promptly.
+  if (normalizedPath === '/admin/') {
+    const headers=new Headers(response.headers);
+    headers.set('Cache-Control','no-store');
+    headers.set('X-DND-Admin-Home-Mode','build398-lean-manual-read');
+    return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
+  }
   const isProductsPage = normalizedPath === '/admin/products/';
   if (isProductsPage) {
     if (response.status >= 200 && response.status < 400) return withProductsFastPlatformClient(response);
