@@ -1,0 +1,29 @@
+name: Release 467 Build 394 Etsy Passive Connection Observability
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/_lib/etsyConnectionObservability.mjs'
+      - 'functions/api/admin/etsy-oauth-acceptance.js'
+      - 'public/js/admin-etsy-oauth-acceptance.js'
+      - 'scripts/release467_build394_etsy_observability.test.mjs'
+      - '.github/workflows/release467-build394-etsy-observability.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  etsy-connection-readonly-observability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Confirm helper, handler and client syntax
+        run: |
+          node --check functions/api/_lib/etsyConnectionObservability.mjs
+          node --check functions/api/admin/etsy-oauth-acceptance.js
+          node --check public/js/admin-etsy-oauth-acceptance.js
+      - name: Prove passive classification and redaction
+        run: node --test scripts/release467_build394_etsy_observability.test.mjs

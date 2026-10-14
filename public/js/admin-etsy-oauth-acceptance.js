@@ -45,6 +45,13 @@ async function load(){
     lastStatus=d;
     const c=d.configuration||{},s=d.shop||{},conn=d.connection||{},blockers=Array.isArray(d.connect_blockers)?d.connect_blockers:[];
     mount.innerHTML=`<div class="grid cols-3"><div><strong>Configuration</strong><div class="small">${c.api_keystring_present&&c.shared_secret_present&&c.redirect_uri_present?'3/3 Etsy references present':'Etsy references incomplete'}</div></div><div><strong>Connection</strong><div class="small">${esc(conn.status||'not_connected')}</div></div><div><strong>Shop</strong><div class="small">${s.shop_id?esc((s.shop_name||'Etsy shop')+' • ID '+s.shop_id):'Shop ID will be discovered automatically after OAuth'}</div></div></div><p class="small"><strong>Safety:</strong> Etsy stays in normal shop mode. Connecting does not create, edit, activate, deactivate or publish a listing. Provider draft writes remain locked.</p>${`<div class="small" style="margin-top:10px"><strong>Configured redirect:</strong> <code>${esc(c.redirect_uri||'not configured')}</code><br><strong>Expected main redirect:</strong> <code>${esc(c.expected_redirect_uri||'https://devilndove.com/api/social/oauth/etsy/callback')}</code></div>`}${blockers.length?`<div class="card" style="margin-top:10px"><strong>Connect prerequisites</strong><ul class="small">${blockers.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}<p class="small">${esc(d.next_action||'')}</p>`;
+    const monitor=d.monitoring||{};
+    const statusLine=document.createElement('p');
+    statusLine.className='small';
+    statusLine.setAttribute('role','status');
+    const age=Number.isFinite(monitor.verification_age_days)?(' • last shop verification '+monitor.verification_age_days+' day(s) ago'):' • no verified timestamp';
+    statusLine.textContent='Stored Etsy connection evidence: '+String(monitor.status||'unavailable')+age+'. This does not contact Etsy.';
+    mount.appendChild(statusLine);
     if(btn){btn.hidden=Boolean(conn.connected);btn.disabled=Boolean(conn.connected);}
     const attempt=d.latest_oauth_attempt, info=id('etsyOauth391LastAttempt');
     if(info){
@@ -54,7 +61,7 @@ async function load(){
         '. If a gateway error occurred, compare its Cloudflare Ray ID and timestamp with this diagnostic. Never reuse a consumed grant URL.'):
         'No recent Etsy OAuth callback diagnostic is available.';
     }
-    message(conn.connected?'Etsy main-site OAuth connection verified.':(d.connect_authorization_available?'Ready for the one-time Etsy OAuth connection.':'Etsy connection is not open yet. The required main-site prerequisite is shown below.'));
+    message(conn.connected?(monitor.status==='connected_verified'?'Etsy connection has stored verification evidence. This is not a live provider check.':'Etsy connection needs review: '+String(monitor.status||'verification_unknown')+'.'):(d.connect_authorization_available?'Ready for the one-time Etsy OAuth connection.':'Etsy connection is not open yet. The required main-site prerequisite is shown below.'));
   }catch(e){
     lastStatus=null;
     message(e.message||String(e));
