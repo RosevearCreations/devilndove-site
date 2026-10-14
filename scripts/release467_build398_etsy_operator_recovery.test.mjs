@@ -60,3 +60,18 @@ test('UI never calls remote Etsy or promises upload from local staging',()=>{
  assert.match(ui,/stage\.disabled=true/);
  assert.doesNotMatch(ui,/api\.etsy\.com|\/api\/social\/publish|\/api\/admin\/etsy-listing-publish/);
 });
+
+test('Etsy endpoints resolve through central module access instead of unclassified Core',async()=>{
+ const {moduleKeyForPath,MODULE_KEYS}=await import('../functions/api/_lib/appModuleRoutes.js');
+ for(const path of [
+ '/api/admin/etsy-operator-product-choices',
+ '/api/admin/etsy-product-syndication',
+ '/api/admin/etsy-monitoring-exceptions',
+ '/api/admin/etsy-monitoring-alerts',
+ '/api/admin/etsy-connection-price-outcomes',
+ '/api/admin/etsy-oauth-acceptance']){
+  assert.equal(moduleKeyForPath(path),MODULE_KEYS.STOREFRONT,path);
+ }
+ assert.equal(moduleKeyForPath('/api/admin/product-browser'),MODULE_KEYS.STOREFRONT);
+ assert.equal(moduleKeyForPath('/api/admin/unknown-private'),null);
+});
