@@ -1,4 +1,5 @@
-import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
+import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
+import { getDb, jsonResponse } from '../_lib/adminAudit.js';
 
 const RELEASE = 449;
 const TABLE = 'marketplace_syndication_drafts';
@@ -13,7 +14,7 @@ async function tableExists(db) {
 }
 
 async function requireAdmin(context) {
-  const adminUser = await getAdminUserFromRequest(context.request, context.env);
+  const adminUser = verifiedAdminFromModule(context);
   if (!adminUser) return { response: jsonResponse({ ok: false, error: 'Admin access required.' }, 401) };
   const db = getDb(context.env);
   if (!db) return { response: jsonResponse({ ok: false, error: 'Database binding is not configured.' }, 500) };
