@@ -1,0 +1,61 @@
+{
+  "release": 467,
+  "build": 396,
+  "title": "Etsy Monitoring Reliability, Alert Routing & Audit Closure",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "aeb8d787cf414932b5c6a3012924f055e7ccf691",
+      "tree": "8d9869b3f0ad94f1f3cdfece5fda677cff39abdd",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38505175037,
+      "quality_run": 38505174883,
+      "it_admin_runtime_run": 38505174943,
+      "repository_hygiene_run": 38505174923
+    },
+    "production": {
+      "main_sha": "62dc580df54721ea15d9274ac7dba2509c0161bc",
+      "tree_sha": "8d9869b3f0ad94f1f3cdfece5fda677cff39abdd",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38505357264,
+      "production_live_resource_integrity_run": 38505426778
+    }
+  },
+  "features": {
+    "internal_admin_alert_queue": true,
+    "manual_alert_routing": true,
+    "manual_acknowledgement": true,
+    "operator_reviewed_closure": true,
+    "source_health_and_price_discrepancy": true,
+    "no_background_provider_polling": true,
+    "bounded_queue_20": true,
+    "bounded_per_alert_ledger_16": true,
+    "idempotent_actor_bound_receipts": true,
+    "stale_evidence_fingerprint_guard": true,
+    "atomic_concurrent_audit_head_guard": true,
+    "closed_only_after_recovery_and_acknowledgement": true,
+    "historical_route_list_is_not_live_open_alert_count": true,
+    "external_email_sms_delivery": false,
+    "new_canonical_schema_migration": false,
+    "automatic_source_data_change": false
+  },
+  "acceptance": {
+    "test_suite": "scripts/release467_build396_etsy_alerts.test.mjs",
+    "synthetic_proof_not_live_operator_browsing": true,
+    "live_operator_browser_evidence": "PENDING_AUTHENTICATED_OPERATOR_TEST",
+    "independent_live_etsy_provider_probe_performed": false,
+    "external_notification_transport_verified": false,
+    "ci_candidate_pending": true
+  },
+  "safety": {
+    "etsy_listing_writes": false,
+    "product_price_writes": false,
+    "provider_calls": false,
+    "external_notifications": false,
+    "production_D1_test_writes": false,
+    "source_values_not_inferred": true
+  },
+  "docs": "docs/operations/RELEASE_467_BUILD_396_ETSY_RELIABILITY_ALERT_AUDIT.md",
+  "next_build": 397,
+  "next_build_title": "Etsy Connection Observability & Price Review Outcomes"
+}

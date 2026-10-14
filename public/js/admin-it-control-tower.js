@@ -1,3 +1,4 @@
+// BUILD396_CURRENT_CLIENT: Release 467 Build 396 — Etsy Monitoring Reliability, Alert Routing & Audit Closure; verified Build 395 Production GREEN.
 // BUILD395_CURRENT_CLIENT: Release 467 Build 395 — Etsy Monitoring Operator Acceptance & Exception Resolution; verified Build 394 Production GREEN.
 // BUILD394_CURRENT_CLIENT: Release 467 Build 394 — Etsy Connection Monitoring & Product Price Drift Safeguards; verified Build 393 Production GREEN.
 // BUILD393_CURRENT_CLIENT: Release 467 Build 393 — Etsy Live Callback Acceptance & Verified Product Price Reconciliation; verified Build 392 Production GREEN.
