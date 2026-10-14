@@ -1,3 +1,5 @@
+# Current successor: Release 467 Build 393 — Etsy Live Callback Acceptance & Verified Product Price Reconciliation
+
 BUILD393_VERIFIED_BUILD392_CHECKPOINT: Development 0b233d65c7211e94b2e6accf792ff865babee7b5; tree f0ee23fdf0e7d2cc85a3afe24acd604015de92d3; System 38464780569; Quality 38464780570; I.T. 38464780565; Hygiene 38464780598; Production 298e2b9957b111fde1d2d047cb857985758ecf66; Pages 38465363456; Live 38465810484.
 # Current successor: Release 467 Build 392 — Etsy OAuth Callback Edge Reliability & Price Reconciliation Source Acceptance
 
