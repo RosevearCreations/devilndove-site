@@ -50,5 +50,29 @@
   },
   "docs": "docs/operations/RELEASE_467_BUILD_392_ETSY_WORKER_EDGE_PRICE_EVIDENCE.md",
   "next_build": 393,
-  "next_build_title": "Etsy Live Callback Acceptance & Verified Product Price Reconciliation"
+  "next_build_title": "Etsy Live Callback Acceptance & Verified Product Price Reconciliation",
+  "final_closure": {
+    "dev_sha": "0b233d65c7211e94b2e6accf792ff865babee7b5",
+    "tree_sha": "f0ee23fdf0e7d2cc85a3afe24acd604015de92d3",
+    "proofs": {
+      "system_gate_run": 38464780569,
+      "current_application_quality_run": 38464780570,
+      "it_admin_runtime_proof_run": 38464780565,
+      "branch_hygiene_run": 38464780598
+    },
+    "ingested_by_build": 393,
+    "state": "EXACT_BRANCH_HEAD_BUILD392_GREEN"
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 392,
+    "title": "Etsy OAuth Callback Edge Reliability & Price Reconciliation Source Acceptance",
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "298e2b9957b111fde1d2d047cb857985758ecf66",
+    "tree_sha": "f0ee23fdf0e7d2cc85a3afe24acd604015de92d3",
+    "production_pages_deploy_run": 38465363456,
+    "production_live_resource_integrity_run": 38465810484,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
+  }
 }

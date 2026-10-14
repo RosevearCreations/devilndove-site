@@ -1,14 +1,5 @@
 name: Release 467 Build 392 Etsy Workerd OAuth and Price Evidence Acceptance
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'release467-build392-etsy-workerd-price-evidence.json'
-      - 'functions/api/_lib/oauthProviders.js'
-      - 'functions/api/admin/etsy-oauth-acceptance.js'
-      - 'scripts/release467_build392_etsy_workerd.test.mjs'
-      - 'scripts/release467_build392_regression.py'
-      - '.github/workflows/release467-build392-etsy-workerd-price-evidence.yml'
   workflow_dispatch:
 permissions:
   contents: read

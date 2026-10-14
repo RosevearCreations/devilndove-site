@@ -1,0 +1,57 @@
+{
+  "release": 467,
+  "build": 393,
+  "title": "Etsy Live Callback Acceptance & Verified Product Price Reconciliation",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "source_baseline": {
+    "release": 467,
+    "build": 392,
+    "main_sha": "298e2b9957b111fde1d2d047cb857985758ecf66",
+    "tree_sha": "f0ee23fdf0e7d2cc85a3afe24acd604015de92d3",
+    "production_deploy_run": 38465363456,
+    "production_integrity_run": 38465810484
+  },
+  "operator_evidence": {
+    "etsy_shop_verification": "USER_VALIDATED",
+    "historical_product_price_source_reconciliation": "USER_VALIDATED",
+    "independent_authenticated_save_readback": "NOT_ATTACHED",
+    "source_identifier_values_emitted": false
+  },
+  "automated_contract_proof": {
+    "source": "scripts/release467_build393_etsy_acceptance.test.mjs",
+    "synthetic_not_provider_contact": true,
+    "no_production_d1_contact": true
+  },
+  "source_scope": {
+    "isolated_pre394_tree": "c74cde76ae4ff3ad44c310f9139ab6a4bce61bb9",
+    "dev_history_continues_from": "e2319269dad3469a77bdefab4cf19869254d17f6",
+    "later_dev_recovery_commit": "e2319269dad3469a77bdefab4cf19869254d17f6",
+    "preview_and_required_CI_pending": true
+  },
+  "safety": {
+    "provider_listing_writes_authorized": false,
+    "bulk_price_rewrites_authorized": false,
+    "production_D1_mutation_authorized": false
+  },
+  "docs": "docs/operations/RELEASE_467_BUILD_393_ETSY_LIVE_CALLBACK_PRICE_ACCEPTANCE.md",
+  "next_build": 394,
+  "next_build_title": "Etsy Connection Monitoring & Product Price Drift Safeguards",
+  "starting_point": {
+    "development": {
+      "sha": "0b233d65c7211e94b2e6accf792ff865babee7b5",
+      "tree": "f0ee23fdf0e7d2cc85a3afe24acd604015de92d3",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38464780569,
+      "quality_run": 38464780570,
+      "it_admin_runtime_run": 38464780565,
+      "repository_hygiene_run": 38464780598
+    },
+    "production": {
+      "main_sha": "298e2b9957b111fde1d2d047cb857985758ecf66",
+      "tree_sha": "f0ee23fdf0e7d2cc85a3afe24acd604015de92d3",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38465363456,
+      "production_live_resource_integrity_run": 38465810484
+    }
+  }
+}
