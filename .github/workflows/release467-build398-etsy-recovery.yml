@@ -15,6 +15,10 @@ on:
       - 'public/js/admin-home-on-demand-v398.js'
       - 'public/js/admin-etsy-product-picker-v398.js'
       - 'functions/api/admin/etsy-operator-product-choices.js'
+      - 'functions/api/admin/etsy-shop-identity.js'
+      - 'functions/api/admin/etsy-oauth-acceptance.js'
+      - 'public/js/admin-etsy-oauth-acceptance.js'
+      - 'scripts/release467_build398_etsy_shop_id.test.mjs'
       - 'admin/it-integrations/index.html'
       - 'scripts/release467_build398_etsy_operator_recovery.test.mjs'
       - '.github/workflows/release467-build398-etsy-recovery.yml'
@@ -38,6 +42,10 @@ jobs:
           node --check functions/api/_lib/appModuleRoutes.js
           node --check functions/api/admin/etsy-product-syndication.js
           node --check functions/api/admin/etsy-operator-product-choices.js
+          node --check functions/api/admin/etsy-shop-identity.js
+          node --check functions/api/admin/etsy-oauth-acceptance.js
+          node --check public/js/admin-etsy-oauth-acceptance.js
+          node --test scripts/release467_build398_etsy_shop_id.test.mjs
           node --check functions/api/admin/etsy-monitoring-exceptions.js
           node --check functions/api/admin/etsy-monitoring-alerts.js
           node --check functions/api/admin/etsy-connection-price-outcomes.js
