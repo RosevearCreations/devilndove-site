@@ -4,6 +4,7 @@ on:
     branches: [dev]
     paths:
       - 'functions/api/_lib/verifiedAdmin398.mjs'
+      - 'functions/api/_lib/appModuleRoutes.js'
       - 'functions/api/admin/etsy-monitoring-exceptions.js'
       - 'functions/api/admin/etsy-monitoring-alerts.js'
       - 'functions/api/admin/etsy-connection-price-outcomes.js'
@@ -34,6 +35,7 @@ jobs:
           node-version: '24'
       - name: Validate runtime and safety contracts
         run: |
+          node --check functions/api/_lib/appModuleRoutes.js
           node --check functions/api/admin/etsy-product-syndication.js
           node --check functions/api/admin/etsy-operator-product-choices.js
           node --check functions/api/admin/etsy-monitoring-exceptions.js

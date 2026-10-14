@@ -170,6 +170,20 @@ const IT_ADMIN_PAGES = Object.freeze([
   '/admin/users',
 ]);
 
+// Build 398.1: these restricted Etsy operator endpoints previously fell through to
+// Application Core, leaving context.data.ddModuleAccess absent. Assign the same
+// Storefront module that owns Product Browser and marketplace drafts.
+// Central middleware must verify a real active session and enabled module;
+ // endpoints still require an explicit verified Admin role.
+const ETSY_OPERATOR_ADMIN_APIS = Object.freeze([
+  '/api/admin/etsy-operator-product-choices',
+  '/api/admin/etsy-product-syndication',
+  '/api/admin/etsy-monitoring-exceptions',
+  '/api/admin/etsy-monitoring-alerts',
+  '/api/admin/etsy-connection-price-outcomes',
+  '/api/admin/etsy-oauth-acceptance',
+]);
+
 const STOREFRONT_ADMIN_APIS = Object.freeze([
   '/api/admin/catalog',
   '/api/admin/catalog-health',
@@ -294,6 +308,7 @@ export function moduleKeyForPath(pathname) {
   if (matchesAny(path, FINANCIAL_ADMIN_PAGES) || matchesAny(path, FINANCIAL_ADMIN_APIS)) return MODULE_KEYS.FINANCIALS;
   if (matchesAny(path, SOCIAL_ADMIN_PAGES) || matchesAny(path, SOCIAL_ADMIN_APIS)) return MODULE_KEYS.SOCIALS;
   if (matchesAny(path, CREATOR_ADMIN_PAGES) || matchesAny(path, CREATOR_ADMIN_APIS)) return MODULE_KEYS.CREATORS;
+  if (matchesAny(path, ETSY_OPERATOR_ADMIN_APIS)) return MODULE_KEYS.STOREFRONT;
   if (matchesAny(path, STOREFRONT_ADMIN_PAGES) || matchesAny(path, STOREFRONT_ADMIN_APIS)) return MODULE_KEYS.STOREFRONT;
   if (matchesAny(path, SOCIAL_PUBLIC_PAGES) || matchesAny(path, SOCIAL_PUBLIC_APIS)) return MODULE_KEYS.SOCIALS;
   if (matchesAny(path, STOREFRONT_PUBLIC_PAGES) || matchesAny(path, STOREFRONT_PUBLIC_APIS)) return MODULE_KEYS.STOREFRONT;
