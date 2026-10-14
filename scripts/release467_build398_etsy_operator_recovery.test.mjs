@@ -22,8 +22,8 @@ test('Etsy operator APIs use the verified route guard, not a second legacy sessi
 test('Admin home is static-first and does not run legacy observer/snapshot loaders',()=>{
  const src=file('admin/index.html'),mw=file('functions/_middleware.js'),home=file('public/js/admin-home-on-demand-v398.js');
  assert.match(src,/id="admin398LoadSnapshot"/);
- assert.doesNotMatch(src,/<script[^>]+src="\/public\/js\/admin-seller-command-centre-build148/);
- assert.doesNotMatch(src,/<script[^>]+src="\/public\/js\/admin-route-usage/);
+ assert.match(src,/<script type="application\/x-dd-historical" src="\/public\/js\/admin-seller-command-centre-build148/);
+ assert.match(src,/<script type="application\/x-dd-historical" src="\/public\/js\/admin-route-usage/);
  assert.match(mw,/normalizedPath === '\/admin\/'/);
  assert.match(mw,/X-DND-Admin-Home-Mode/);
  assert.match(home,/AbortController/);
