@@ -14,5 +14,21 @@
   "no_automatic_retry": true,
   "no_publication": true,
   "next_build": 401,
-  "next_title": "Etsy Draft Image Readiness, Compliance Review & Controlled Listing Completion"
+  "next_title": "Etsy Draft Image Readiness, Compliance Review & Controlled Listing Completion",
+  "starting_point": {
+    "development": {
+      "sha": "0badbe442cb22829544f6d4128ebe15e45ae3086",
+      "tree": "f574e6f076833c3430781490ca056b054e954a88",
+      "system_gate_run": 38605946826,
+      "quality_run": 38605946829,
+      "it_admin_runtime_run": 38605946783,
+      "repository_hygiene_run": 38605946816
+    },
+    "production": {
+      "main_sha": "f2937858cbcc0797992e95e36e2d0e9f5f65530b",
+      "tree_sha": "f574e6f076833c3430781490ca056b054e954a88",
+      "production_pages_deploy_run": 38606326017,
+      "production_live_resource_integrity_run": 38606480119
+    }
+  }
 }

@@ -112,13 +112,13 @@ Production live-resource 37981772067
 import { loadRelease466Reliability } from './release466Reliability.js';
 
 export const CURRENT_RELIABILITY_RELEASE=467;
-export const CURRENT_RELIABILITY_BUILD=399;
-export const CURRENT_RELIABILITY_TITLE='Etsy Remote Draft Creation Preconditions & Controlled Trial';
+export const CURRENT_RELIABILITY_BUILD=400;
+export const CURRENT_RELIABILITY_TITLE='Etsy Remote Draft Provider Acceptance, Reconciliation & Listing Evidence';
 export const CURRENT_RELIABILITY_AUTHORITY='current-development-authority.json';
 export const CURRENT_READ_ONLY='CURRENT_READ_ONLY';
-export const ACCEPTED_DEVELOPMENT=Object.freeze({"release":467,"build":398,"title":"Etsy Outcome Review Operator Acceptance & Evidence Recheck","state":"DEVELOPMENT_GREEN","dev_sha":"63f1591bc6d5f11dbfc77c03f9c136c3e7072174","tree_sha":"0d2dd320ffcedd60e955988720ae534a7c94a759","system_gate_run":38602886926,"current_application_quality_run":38602886961,"it_admin_runtime_proof_run":38602886918,"branch_hygiene_run":38602887221,"proof_state":"EXACT_BRANCH_HEAD_BUILD398_GREEN"});
-export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({"release":467,"build":398,"title":"Etsy Outcome Review Operator Acceptance & Evidence Recheck","state":"DEVELOPMENT_GREEN","dev_sha":"63f1591bc6d5f11dbfc77c03f9c136c3e7072174","tree_sha":"0d2dd320ffcedd60e955988720ae534a7c94a759","system_gate_run":38602886926,"current_application_quality_run":38602886961,"it_admin_runtime_proof_run":38602886918,"branch_hygiene_run":38602887221,"proof_state":"EXACT_BRANCH_HEAD_BUILD398_GREEN"});
-export const CURRENT_PRODUCTION=Object.freeze({"release":467,"build":398,"title":"Etsy Outcome Review Operator Acceptance & Evidence Recheck","state":"PRODUCTION_GREEN","main_sha":"c4d9c517ed296908b457f9bacc5f7306069a40f6","tree_sha":"0d2dd320ffcedd60e955988720ae534a7c94a759","production_pages_deploy_run":38603217148,"production_live_resource_integrity_run":38603435592,"remote_d1_queries":0,"role":"CURRENT_PRODUCTION_BASELINE"});
+export const ACCEPTED_DEVELOPMENT=Object.freeze({"release":467,"build":399,"title":"Etsy Remote Draft Creation Preconditions & Controlled Trial","state":"DEVELOPMENT_GREEN","dev_sha":"0badbe442cb22829544f6d4128ebe15e45ae3086","tree_sha":"f574e6f076833c3430781490ca056b054e954a88","system_gate_run":38605946826,"current_application_quality_run":38605946829,"it_admin_runtime_proof_run":38605946783,"branch_hygiene_run":38605946816,"proof_state":"EXACT_BRANCH_HEAD_BUILD399_GREEN"});
+export const LAST_FULLY_VERIFIED_DEVELOPMENT=Object.freeze({"release":467,"build":399,"title":"Etsy Remote Draft Creation Preconditions & Controlled Trial","state":"DEVELOPMENT_GREEN","dev_sha":"0badbe442cb22829544f6d4128ebe15e45ae3086","tree_sha":"f574e6f076833c3430781490ca056b054e954a88","system_gate_run":38605946826,"current_application_quality_run":38605946829,"it_admin_runtime_proof_run":38605946783,"branch_hygiene_run":38605946816,"proof_state":"EXACT_BRANCH_HEAD_BUILD399_GREEN"});
+export const CURRENT_PRODUCTION=Object.freeze({"release":467,"build":399,"title":"Etsy Remote Draft Creation Preconditions & Controlled Trial","state":"PRODUCTION_GREEN","main_sha":"f2937858cbcc0797992e95e36e2d0e9f5f65530b","tree_sha":"f574e6f076833c3430781490ca056b054e954a88","production_pages_deploy_run":38606326017,"production_live_resource_integrity_run":38606480119,"remote_d1_queries":0,"role":"CURRENT_PRODUCTION_BASELINE"});
 export const PRODUCTION_PROOF_TRANSPORT_POLICY=Object.freeze({
   max_attempts:3,retry_http_statuses:[408,425,429,500,502,503,504],
   retry_exceptions:['urllib.error.URLError','ConnectionResetError','TimeoutError'],
