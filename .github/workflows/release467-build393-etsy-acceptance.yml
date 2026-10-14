@@ -1,19 +1,5 @@
 name: Release 467 Build 393 Etsy Operator Acceptance Safety Regression
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/admin/etsy-oauth-acceptance.js'
-      - 'functions/api/social/oauth/_callback.js'
-      - 'functions/api/_lib/oauthProviders.js'
-      - 'functions/api/admin/product-zero-price-review.js'
-      - 'functions/api/admin/product-editor-save.js'
-      - 'docs/operations/RELEASE_467_BUILD_393_ETSY_LIVE_CALLBACK_PRICE_ACCEPTANCE.md'
-      - 'docs/operations/IT_PREFLIGHT_STARTUP_RELEASE_GUIDE.md'
-      - 'release467-build393-etsy-live-acceptance.json'
-      - 'current-development-authority.json'
-      - 'scripts/release467_build393_etsy_acceptance.test.mjs'
-      - '.github/workflows/release467-build393-etsy-acceptance.yml'
   workflow_dispatch:
 permissions:
   contents: read

@@ -47,11 +47,20 @@
         </table>
       </div>
       <details class="card" style="margin:14px 0" id="productBrowser390PriceAuditPanel">
-        <summary>Build 390 · Verify Products displaying $0.00</summary>
+        <summary>Build 394 · Source-backed Product price review</summary>
         <p class="small">Some Product prices may have been set to zero by the previous malformed decimal validator. This read-only review never changes prices. Verify intended amounts from invoices or earlier source evidence.</p>
         <button class="btn" id="productBrowser390PriceAudit" type="button">Review zero-priced Products</button>
         <p class="small">Browser acceptance: verify the intended amount against original price evidence, enter it in Product Editor, Save, confirm the displayed “CAD price verified” message, then Refresh the Product Browser to verify the persisted price. Do not bulk-restore guessed prices.</p><p id="productBrowser390PriceAuditStatus" class="small" role="status">No database read until you press Review.</p>
         <div id="productBrowser390PriceAuditRows" style="overflow:auto"></div>
+        <section aria-labelledby="productPriceSourceHeading" style="margin-top:14px">
+          <h3 id="productPriceSourceHeading">Verify approved price source for one Product</h3>
+          <p class="small">Select any Product ID, including a nonzero-priced Product. This does not update the Product or any Etsy listing. The approved original CAD price must come from a real price decision or previously approved catalog record, not from estimated cost.</p>
+          <label for="productPriceSourceId">Product ID</label>
+          <div class="dd-admin-responsive-actions"><input class="input" type="number" min="1" step="1" id="productPriceSourceId" placeholder="Product ID" style="max-width:190px">
+          <button class="btn" id="productPriceSourceLoad" type="button">Read current price &amp; source approval</button></div>
+          <p class="small" id="productPriceSourceMessage" aria-live="polite">No source record loaded.</p>
+          <div id="productPriceSourceMount"></div>
+        </section>
       </details>
       <div class="dd-product-pager">
         <button class="btn" id="productBrowserPrev" type="button" disabled>Previous</button>
@@ -64,5 +73,6 @@
   <script src="/public/js/auth.js?v=440"></script>\n  <script src="/public/js/admin-route-usage.js?v=249"></script>
   <script src="/public/js/admin-products-browser-v162.js?v=170"></script>
 <script src="/public/js/admin-product-zero-price-review-v390.js?v=390"></script>
+<script src="/public/js/admin-product-price-source-review-v394.js?v=394"></script>
 </body>
 </html>

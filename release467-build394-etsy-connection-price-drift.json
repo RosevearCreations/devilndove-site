@@ -1,0 +1,54 @@
+{
+  "release": 467,
+  "build": 394,
+  "title": "Etsy Connection Monitoring & Product Price Drift Safeguards",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "cf39f92c182bb184eabeb9580890f2f91923c2c3",
+      "tree": "1cad2c70a51e18aa7329e11dee94f593310f2b1f",
+      "state": "DEVELOPMENT_GREEN",
+      "system_gate_run": 38501069143,
+      "quality_run": 38501069146,
+      "it_admin_runtime_run": 38501069199,
+      "repository_hygiene_run": 38501069126
+    },
+    "production": {
+      "main_sha": "9b147b05cf938c3f02fe981d91be54ae4304f54b",
+      "tree_sha": "1cad2c70a51e18aa7329e11dee94f593310f2b1f",
+      "state": "PRODUCTION_GREEN",
+      "production_pages_deploy_run": 38501261283,
+      "production_live_resource_integrity_run": 38501334075
+    }
+  },
+  "scope": {
+    "etsy_connected_status_passive": true,
+    "source_approval_single_product_explicit": true,
+    "approved_source_type_and_reference_required": true,
+    "reviewer_actor_and_timestamp_audited": true,
+    "canonical_integer_cents": true,
+    "source_is_operator_attested_not_independently_authenticated": true,
+    "source_discrepancy_is_manual_review_not_proven_drift": true,
+    "no_automatic_provider_calls": true,
+    "no_price_tax_or_inventory_write": true,
+    "source_approval_recorded_in_existing_admin_action_audit": true,
+    "source_approval_readback_required": true,
+    "duplicate_request_key_protected": true,
+    "new_canonical_migration": false
+  },
+  "acceptance": {
+    "synthetic_source_checks_pending_exact_candidate_sha": true,
+    "production_operator_browser_evidence": "NOT_YET_ATTACHED",
+    "independent_etsy_live_reauthorization_in_this_build": false
+  },
+  "safety": {
+    "no_automatic_reconnect": true,
+    "no_etsy_listing_writes": true,
+    "no_automatic_product_price_updates": true,
+    "no_supplier_price_guess": true,
+    "production_business_data_copied_from_dev": false
+  },
+  "docs": "docs/operations/RELEASE_467_BUILD_394_ETSY_CONNECTION_PRICE_DRIFT_GUARDS.md",
+  "next_build": 395,
+  "next_build_title": "Etsy Monitoring Operator Acceptance & Exception Resolution"
+}

@@ -4,6 +4,7 @@
 import { getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
 import { encryptionKeyConfigured, encryptionAuthoritySource, etsyDevelopmentAuthorizationOpen } from '../_lib/oauthSecurity.js';
 import { getOAuthContract, providerConfiguration } from '../_lib/oauthProviders.js';
+import { classifyEtsyConnection } from '../_lib/etsyConnectionObservability.mjs';
 
 const json=(data,status=200)=>jsonResponse({release:467,build:354,...data},status,{'Cache-Control':'no-store'});
 const text=(v)=>String(v==null?'':v).trim();
@@ -48,6 +49,7 @@ export async function onRequestGet({request,env}){
     connect_authorization_available:connectAvailable,
     connect_blockers,
     latest_oauth_attempt:latestAttempt,
+    monitoring:classifyEtsyConnection(conn,shop),
     connection:{status:conn?.connection_status||'not_connected',connected,scopes,access_expires_at:conn?.access_expires_at||null,refresh_expires_at:conn?.refresh_expires_at||null,diagnostic_code:conn?.diagnostic_code||null,updated_at:conn?.updated_at||null},
     shop:shop?{shop_id:Number(shop.shop_id),owner_user_id:Number(shop.owner_user_id),shop_name:shop.shop_name||'',currency_code:shop.currency_code||'',listing_active_count:Number(shop.listing_active_count||0),acceptance_status:shop.acceptance_status||'',verified_at:shop.verified_at||null}:null,
     security:{secret_values_emitted:false,token_values_emitted:false,shop_id_auto_discovered:true,etsy_test_mode_required:false,provider_listing_writes_allowed:false,provider_publication_allowed:false,remote_draft_creation_enabled:false},
