@@ -7,6 +7,10 @@ on:
       - 'functions/api/admin/etsy-oauth-acceptance.js'
       - 'public/js/admin-etsy-oauth-acceptance.js'
       - 'functions/api/admin/product-zero-price-review.js'
+      - 'functions/api/_lib/priceSourceReview394.mjs'
+      - 'functions/api/admin/product-price-source-review.js'
+      - 'public/js/admin-product-price-source-review-v394.js'
+      - 'admin/products/index.html'
       - 'public/js/admin-product-zero-price-review-v390.js'
       - 'admin/it-integrations/index.html'
       - 'docs/operations/RELEASE_467_BUILD_394_ETSY_CONNECTION_PRICE_DRIFT_GUARDS.md'
@@ -29,5 +33,7 @@ jobs:
           node --check functions/api/_lib/etsyConnectionObservability.mjs
           node --check functions/api/admin/etsy-oauth-acceptance.js
           node --check public/js/admin-etsy-oauth-acceptance.js
+          node --check functions/api/admin/product-price-source-review.js
+          node --check public/js/admin-product-price-source-review-v394.js
       - name: Prove passive classification and redaction
         run: node --test scripts/release467_build394_etsy_observability.test.mjs

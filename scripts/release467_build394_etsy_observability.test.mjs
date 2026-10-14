@@ -66,3 +66,41 @@ test('Product Editor still verifies persisted cents and refuses ambiguous automa
  assert.match(s,/code:'product_price_readback_unconfirmed',retry_automatically:false/);
  assert.match(s,/code:'zero_price_not_confirmed'/);
 });
+
+import {normalizeSourceReview,sourcePriceOutcome,parseCadInput} from '../functions/api/_lib/priceSourceReview394.mjs';
+const required={product_id:9,observed_price_cents:0,approved_price_cents:800,source_type:'prior_approved_catalog',
+ source_reference:'CATALOG-APPROVAL-123',request_key:'cafe1234deadbeef0000',operator_confirmed_source:true};
+test('only traceable operator-attested original price sources can be recorded',()=>{
+ assert.equal(normalizeSourceReview(required)?.approved_price_cents,800);
+ assert.equal(normalizeSourceReview({...required,source_reference:''}),null);
+ assert.equal(normalizeSourceReview({...required,source_type:'purchase_cost'}),null);
+ assert.equal(normalizeSourceReview({...required,operator_confirmed_source:false}),null);
+ assert.equal(normalizeSourceReview({...required,approved_price_cents:800.5}),null);
+ assert.equal(normalizeSourceReview({...required,request_key:'short'}),null);
+});
+test('cent parsing never rounds a float or guesses a missing amount',()=>{
+ assert.equal(parseCadInput('8'),800);assert.equal(parseCadInput('8.00'),800);
+ assert.equal(parseCadInput('8.7'),870);assert.equal(parseCadInput('0.00'),0);
+ assert.equal(parseCadInput('8.999'),null);assert.equal(parseCadInput('-1.00'),null);
+ assert.equal(parseCadInput('1,500.00'),null);assert.equal(parseCadInput(''),null);
+});
+test('source discrepancy is a manual review, legitimate zero remains valid',()=>{
+ assert.equal(sourcePriceOutcome(0,0),'matches_approved_source');
+ assert.equal(sourcePriceOutcome(0,800),'source_discrepancy_requires_manual_review');
+ assert.equal(sourcePriceOutcome(800,800),'matches_approved_source');
+ assert.equal(sourcePriceOutcome(800,900),'source_discrepancy_requires_manual_review');
+ assert.equal(sourcePriceOutcome(800,null),'source_evidence_required');
+});
+test('audited source receipts are not Product writes or Etsy listings',()=>{
+ const api=readSource('functions/api/admin/product-price-source-review.js');
+ const ui=readSource('public/js/admin-product-price-source-review-v394.js');
+ assert.match(api,/INSERT INTO admin_action_audit/);
+ assert.match(api,/price_changed_since_review/);
+ assert.match(api,/review_receipt_unconfirmed/);
+ assert.match(api,/WHERE NOT EXISTS/);
+ assert.match(api,/operator_confirmed_source:true/);
+ assert.doesNotMatch(api,/UPDATE\s+products|INSERT INTO products|etsy\.com/i);
+ assert.match(ui,/submit\.disabled=true/);
+ assert.match(ui,/No automatic retry/);
+ assert.match(ui,/crypto\.randomUUID/);
+});
