@@ -53,7 +53,12 @@ async function load(){
     const age=Number.isFinite(monitor.verification_age_days)?(' • last shop verification '+monitor.verification_age_days+' day(s) ago'):' • no verified timestamp';
     statusLine.textContent='Stored Etsy connection evidence: '+String(monitor.status||'unavailable')+age+'. This does not contact Etsy.';
     mount.appendChild(statusLine);
-    if(btn){btn.hidden=Boolean(conn.connected);btn.disabled=Boolean(conn.connected);}
+    const exp=Date.parse(String(conn.access_expires_at||''));
+    const needsReconnect=Boolean(conn.connected)&&(!Number.isFinite(exp)||exp<=Date.now()+120000);
+    if(btn){btn.hidden=Boolean(conn.connected)&&!needsReconnect;btn.disabled=Boolean(!d.connect_authorization_available);
+      btn.textContent=needsReconnect?'Reconnect Etsy — renew expired access':'Connect Etsy';}
+    if(needsReconnect){const note=document.createElement('p');note.className='small';
+      note.textContent='Stored Etsy access token has expired or is near expiry. Reconnect Etsy here, then return to Build 399 and read live categories and profiles. Connecting does NOT create an Etsy draft.';mount.appendChild(note);}
     const attempt=d.latest_oauth_attempt, info=id('etsyOauth391LastAttempt');
     if(info){
       info.textContent=attempt?('Last one-time Etsy callback: '+String(attempt.status||'unknown')+

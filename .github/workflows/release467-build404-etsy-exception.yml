@@ -1,17 +1,5 @@
 name: Release 467 Build 404 Etsy Exception Revalidation
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/_lib/etsyExceptionResolution404.mjs'
-      - 'functions/api/admin/etsy-exception-resolution.js'
-      - 'functions/api/_lib/appModuleRoutes.js'
-      - 'admin/it-integrations/index.html'
-      - 'public/js/admin-etsy-exception-resolution-v404.js'
-      - 'scripts/release467_build404_etsy_exception.test.mjs'
-      - '.github/workflows/release467-build404-etsy-exception.yml'
-      - 'current-development-authority.json'
-      - 'release467-build404-etsy-exception-resolution.json'
   workflow_dispatch:
 permissions:
   contents: read
