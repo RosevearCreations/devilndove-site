@@ -1,0 +1,44 @@
+# Build 406 final exact-head proof: destination policy, gallery source, shipping ban and safe settings audit.
+name: Release 467 Build 406 Canonical Channel Distribution
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/_lib/productDistribution406.mjs'
+      - 'functions/api/admin/product-distribution-406.js'
+      - 'functions/api/admin/production-variable-audit-406.js'
+      - 'functions/api/admin/marketplace-export-preview.js'
+      - 'functions/api/admin/marketplace-listing-profile.js'
+      - 'functions/api/admin/etsy-product-syndication.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'admin/product-editor/index.html'
+      - 'admin/it-integrations/index.html'
+      - 'public/js/admin-product-distribution-v406.js'
+      - 'public/js/admin-production-variable-audit-v406.js'
+      - 'scripts/release467_build406_distribution.test.mjs'
+      - '.github/workflows/release467-build406-distribution.yml'
+      - 'current-development-authority.json'
+      - 'release467-build406-unified-channel-policy.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-channel-policy-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify channel opt-in, image authority, shipping review, and safe local-only distribution
+        run: |
+          node --check functions/api/_lib/productDistribution406.mjs
+          node --check functions/api/admin/product-distribution-406.js
+          node --check functions/api/admin/production-variable-audit-406.js
+          node --check functions/api/admin/marketplace-export-preview.js
+          node --check functions/api/admin/marketplace-listing-profile.js
+          node --check functions/api/admin/etsy-product-syndication.js
+          node --check public/js/admin-product-distribution-v406.js
+          node --check public/js/admin-production-variable-audit-v406.js
+          node --test scripts/release467_build406_distribution.test.mjs

@@ -1,6 +1,7 @@
 // Release 450 marketplace export/readiness preview.
 // Uses migration-owned schema. No request-time DDL and no provider publication/network calls.
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
+import {outboundChannel,channelOn,reviewEvidence} from '../_lib/productDistribution406.mjs';
 import {
   MARKETPLACE_RELEASE,
   MARKETPLACE_CONTRACT,
@@ -35,14 +36,25 @@ async function imageRows(db){
   `).all().catch(()=>({results:[]})));
 }
 async function selectionMap(db,channel){
-  const result=rows(await db.prepare(`SELECT product_id,selected_image_urls_json,notes,updated_at FROM marketplace_export_image_selections WHERE channel=?`).bind(channel).all().catch(()=>({results:[]})));
+  const result=rows(await db.prepare(`SELECT product_id,selected_image_urls_json,selected_product_image_ids_json,notes,updated_at FROM marketplace_export_image_selections WHERE channel=?`).bind(channel).all().catch(()=>({results:[]})));
   const map=new Map();
-  for(const row of result)map.set(Number(row.product_id||0),{urls:cleanList(jsonArray(row.selected_image_urls_json||'[]',40),1200,40),notes:row.notes||'',updated_at:row.updated_at||''});
+  for(const row of result)map.set(Number(row.product_id||0),{urls:cleanList(jsonArray(row.selected_image_urls_json||'[]',40),1200,40),ids:jsonArray(row.selected_product_image_ids_json||'[]',10).map(Number),notes:row.notes||'',updated_at:row.updated_at||''});
   return map;
 }
 async function profileMap(db,channel){
   const result=rows(await db.prepare(`SELECT * FROM marketplace_listing_profiles WHERE channel_key=?`).bind(channel).all().catch(()=>({results:[]})));
   return new Map(result.map((row)=>[Number(row.product_id||0),row]));
+}
+async function destinationRecords(db,channel){
+ if(!outboundChannel(channel))return {preferences:new Map(),reviews:new Map()};
+ const [preferences,reviews]=await Promise.all([
+  db.prepare("SELECT target_key,details_json,admin_action_audit_id FROM admin_action_audit WHERE action_type='product_channel_intent_405' AND target_type='product' ORDER BY admin_action_audit_id DESC LIMIT 600").all(),
+  db.prepare("SELECT target_key,details_json,admin_action_audit_id FROM admin_action_audit WHERE action_type='product_distribution_policy_406' AND target_type='product' AND json_extract(details_json,'$.channel')=? ORDER BY admin_action_audit_id DESC LIMIT 600").bind(channel).all()
+ ]);
+ const prefs=new Map(),reviewMap=new Map();
+ for(const row of preferences?.results||[])if(!prefs.has(String(row.target_key)))prefs.set(String(row.target_key),row);
+ for(const row of reviews?.results||[])if(!reviewMap.has(String(row.target_key)))reviewMap.set(String(row.target_key),row);
+ return {preferences:prefs,reviews:reviewMap};
 }
 function groupedImages(all){
   const map=new Map();
@@ -84,21 +96,28 @@ function fieldPreview(row){
 async function buildPreview(db,channel){
   const policy=await readChannelPolicy(db,channel);
   if(!policy)return {policy:null,previews:[]};
-  const [products,images,selections,profiles]=await Promise.all([productRows(db),imageRows(db),selectionMap(db,channel),profileMap(db,channel)]);
+  const [products,images,selections,profiles,distribution]=await Promise.all([productRows(db),imageRows(db),selectionMap(db,channel),profileMap(db,channel),destinationRecords(db,channel)]);
   const grouped=groupedImages(images); const maxImages=Math.max(1,Number(policy.max_images||10));
-  const previews=products.map((product)=>{
+  const eligible=outboundChannel(channel)?products.filter(p=>channelOn(distribution.preferences.get(String(p.product_id)),channel)):products;
+  const previews=eligible.map((product)=>{
     const productId=Number(product.product_id||0); const available=publicImages(grouped.get(productId)||[]);
-    const saved=selections.get(productId)||{urls:[],notes:'',updated_at:''};
-    const selected=saved.urls.length?saved.urls.map((url)=>available.find((img)=>img.image_url===url)).filter(Boolean).slice(0,maxImages):autoImageOrder(available,maxImages);
+    const saved=selections.get(productId)||{urls:[],ids:[],notes:'',updated_at:''};
+    const selected=outboundChannel(channel)?saved.ids.map(id=>available.find(img=>Number(img.product_image_id)===Number(id))).filter(Boolean).slice(0,maxImages):
+      (saved.urls.length?saved.urls.map((url)=>available.find((img)=>img.image_url===url)).filter(Boolean).slice(0,maxImages):autoImageOrder(available,maxImages));
     const profile=effectiveProfile(product,profiles.get(productId));
     const validation=validateListingDraft({channel,product,profile,selectedImages:selected,policy});
+    const review=outboundChannel(channel)?reviewEvidence({channel,product,images:grouped.get(productId)||[],
+      selectedIds:saved.ids,preference:distribution.preferences.get(String(productId)),
+      policyReceipt:distribution.reviews.get(String(productId))}):null;
+    if(review?.blockers.length){validation.blockers.push(...review.blockers);validation.blocker_count=validation.blockers.length;
+      validation.validation_state='blocked';}
     const row={product_id:productId,name:product.name||'',sku:product.sku||'',slug:product.slug||'',channel,product,profile,policy,
       selected_images:selected,selected_image_urls:selected.map((img)=>img.image_url),available_images:available.slice(0,Math.max(maxImages,20)).map((img)=>({product_image_id:Number(img.product_image_id||0),image_url:img.image_url||'',alt_text:img.alt_text||'',image_role:img.image_role||'',width_px:Number(img.width_px||0),height_px:Number(img.height_px||0)})),
-      selection_saved:Boolean(saved.urls.length),selection_notes:saved.notes,selection_saved_at:saved.updated_at,validation};
+      selection_saved:Boolean(outboundChannel(channel)?saved.ids.length:saved.urls.length),distribution_review:review,selection_notes:saved.notes,selection_saved_at:saved.updated_at,validation};
     row.field_preview=fieldPreview(row); row.ok=validation.blocker_count===0; row.issues=[...validation.blockers,...validation.warnings];
     return row;
   });
-  return {policy,previews};
+  return {policy,previews,excluded_by_intent:products.length-eligible.length};
 }
 
 async function marginBlockers(db,channel,previewIds){
@@ -125,8 +144,9 @@ export async function onRequestGet(context){
   const schema=await marketplaceSchemaStatus(db); if(!schema.ready)return json({ok:false,release:MARKETPLACE_RELEASE,contract:MARKETPLACE_CONTRACT,schema_ready:false,missing_tables:schema.missing_tables,request_time_schema_mutation:false,error:'Release 450 marketplace schema is not active.'},503);
   const url=new URL(context.request.url); const channel=clean(url.searchParams.get('channel')||'etsy',40).toLowerCase();
   if(!SUPPORTED.includes(channel))return json({ok:false,error:`Supported channels: ${SUPPORTED.join(', ')}.`},400);
-  const {policy,previews}=await buildPreview(db,channel); if(!policy)return json({ok:false,error:'Marketplace channel policy is not configured.'},409);
+  const {policy,previews,excluded_by_intent}=await buildPreview(db,channel); if(!policy)return json({ok:false,error:'Marketplace channel policy is not configured.'},409);
   if(url.searchParams.get('format')==='csv'){
+     if(outboundChannel(channel)&&previews.length===0)return json({ok:false,error:'No Products explicitly enabled for this destination. Turn on the channel and approve the canonical gallery first.'},409);
     if(Number(policy.provider_execution_allowed||0)!==0||Number(policy.publication_allowed||0)!==0)return json({ok:false,error:'Release 450 refuses export while provider publication is enabled.'},409);
     const marginBlocked=await marginBlockers(db,channel,new Set(previews.map((row)=>row.product_id)));
     if(marginBlocked.length){await db.prepare(`INSERT INTO marketplace_download_block_events (channel,gate_status,hard_blocker_count,blocked,requested_by_user_id,created_at,notes) VALUES (?,'blocked_margin',?,1,?,CURRENT_TIMESTAMP,?)`).bind(channel,marginBlocked.length,Number(user.user_id||0)||null,'Release 450 local export blocked by margin completeness policy.').run().catch(()=>null);return json({ok:false,error:`CSV preparation is blocked: ${marginBlocked.length} product(s) need healthy margin data or an approved temporary override.`,margin_blockers:marginBlocked},409);}
@@ -139,7 +159,7 @@ export async function onRequestGet(context){
     return csv(lines.join('\n'),`devilndove-${channel}-release450-draft-preparation.csv`);
   }
   const history=rows(await db.prepare(`SELECT marketplace_export_history_id,channel,export_format,product_count,ready_count,blocked_count,created_at,notes FROM marketplace_export_history WHERE channel=? ORDER BY datetime(created_at) DESC LIMIT 20`).bind(channel).all().catch(()=>({results:[]})));
-  return json({ok:true,release:MARKETPLACE_RELEASE,contract:MARKETPLACE_CONTRACT,request_time_schema_mutation:false,provider_execution:false,publication_allowed:false,channel,policy,summary:{total:previews.length,draft_ready:previews.filter((row)=>row.validation.validation_state==='draft_ready').length,needs_review:previews.filter((row)=>row.validation.validation_state==='needs_review').length,blocked:previews.filter((row)=>row.validation.validation_state==='blocked').length,selected_products:previews.filter((row)=>row.selection_saved).length},previews,history});
+  return json({ok:true,release:MARKETPLACE_RELEASE,contract:MARKETPLACE_CONTRACT,request_time_schema_mutation:false,provider_execution:false,publication_allowed:false,channel,policy,summary:{excluded_by_intent,total:previews.length,draft_ready:previews.filter((row)=>row.validation.validation_state==='draft_ready').length,needs_review:previews.filter((row)=>row.validation.validation_state==='needs_review').length,blocked:previews.filter((row)=>row.validation.validation_state==='blocked').length,selected_products:previews.filter((row)=>row.selection_saved).length},previews,history});
 }
 
 export async function onRequestPost(context){
@@ -153,12 +173,14 @@ export async function onRequestPost(context){
   if(Number(policy.provider_execution_allowed||0)!==0||Number(policy.publication_allowed||0)!==0)return json({ok:false,error:'Release 450 refuses marketplace writes while provider publication is enabled.'},409);
   if(action==='validate_export_rows'){const {previews}=await buildPreview(db,channel);const summary=await saveValidationRows(db,channel,previews,Number(user.user_id||0)||null);return json({ok:true,release:MARKETPLACE_RELEASE,message:`Validated ${summary.total} local ${channel} draft row(s).`,summary,provider_execution:false});}
   if(action==='bulk_apply_role_order'){
+     if(outboundChannel(channel))return json({ok:false,error:'Build 406 requires manual canonical image selection, owner shipping review and channel opt-in; bulk mapping cannot bypass this.'},409);
     const {previews}=await buildPreview(db,channel);let saved=0;
     for(const row of previews){const ordered=autoImageOrder(row.available_images||[],Number(policy.max_images||10)).map((img)=>img.image_url).filter(Boolean);if(!ordered.length)continue;await db.prepare(`INSERT INTO marketplace_export_image_selections (channel,product_id,selected_image_urls_json,selected_product_image_ids_json,notes,created_by_user_id,created_at,updated_at) VALUES (?,?,?,'[]',?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(channel,product_id) DO UPDATE SET selected_image_urls_json=excluded.selected_image_urls_json,notes=excluded.notes,updated_at=CURRENT_TIMESTAMP`).bind(channel,row.product_id,JSON.stringify(ordered),'Release 450 automatic image-role order.',Number(user.user_id||0)||null).run();saved+=1;}
     return json({ok:true,message:`Applied image-role order to ${saved} product(s).`,saved,provider_execution:false});
   }
   if(action==='clear_channel_selections'){const result=await db.prepare(`DELETE FROM marketplace_export_image_selections WHERE channel=?`).bind(channel).run();return json({ok:true,message:`Cleared ${Number(result?.meta?.changes||0)} saved selection(s).`,provider_execution:false});}
-  if(action==='rollback_selection'){if(!productId)return json({ok:false,error:'product_id is required.'},400);await db.prepare(`DELETE FROM marketplace_export_image_selections WHERE channel=? AND product_id=?`).bind(channel,productId).run();return json({ok:true,message:'Marketplace image selection returned to automatic local ordering.',product_id:productId,provider_execution:false});}
+  if(action==='rollback_selection'){if(!productId)return json({ok:false,error:'product_id is required.'},400);
+   if(outboundChannel(channel))return json({ok:false,error:'Save canonical media with the Product Editor Build 406 distribution review instead; arbitrary image URL selections are blocked.'},409);await db.prepare(`DELETE FROM marketplace_export_image_selections WHERE channel=? AND product_id=?`).bind(channel,productId).run();return json({ok:true,message:'Marketplace image selection returned to automatic local ordering.',product_id:productId,provider_execution:false});}
   if(!productId)return json({ok:false,error:'product_id is required.'},400);
   const maxImages=Math.max(1,Number(policy.max_images||10));const urls=(Array.isArray(body.selected_image_urls)?body.selected_image_urls:[]).map((url)=>clean(url,1200)).filter(Boolean).slice(0,maxImages);
   await db.prepare(`INSERT INTO marketplace_export_image_selections (channel,product_id,selected_image_urls_json,selected_product_image_ids_json,notes,created_by_user_id,created_at,updated_at) VALUES (?,?,?,'[]',?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(channel,product_id) DO UPDATE SET selected_image_urls_json=excluded.selected_image_urls_json,notes=excluded.notes,updated_at=CURRENT_TIMESTAMP`).bind(channel,productId,JSON.stringify(urls),clean(body.notes||'',800),Number(user.user_id||0)||null).run();

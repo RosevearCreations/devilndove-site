@@ -1,5 +1,6 @@
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 import { getDb, jsonResponse } from '../_lib/adminAudit.js';
+import {channelOn,reviewEvidence} from '../_lib/productDistribution406.mjs';
 
 const RELEASE = 449;
 const TABLE = 'marketplace_syndication_drafts';
@@ -66,9 +67,19 @@ export async function onRequestPost(context) {
     return jsonResponse({ok:false,error:'Valid Product, title, description, request identifier and local-only consent are required.'},400);
   try{
     const product=await auth.db.prepare(
-      "SELECT product_id,name,price_cents,currency,inventory_quantity FROM products WHERE product_id=? LIMIT 1"
+      "SELECT product_id,name,description,status,price_cents,currency,inventory_quantity FROM products WHERE product_id=? LIMIT 1"
     ).bind(productId).first();
     if(!product)return jsonResponse({ok:false,error:'Original Product was not found.'},404);
+    const [pref,policy,images,selection]=await Promise.all([
+     auth.db.prepare("SELECT details_json FROM admin_action_audit WHERE action_type='product_channel_intent_405' AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id DESC LIMIT 1").bind(String(productId)).first(),
+     auth.db.prepare("SELECT details_json FROM admin_action_audit WHERE action_type='product_distribution_policy_406' AND target_type='product' AND target_key=? AND json_extract(details_json,'$.channel')='etsy' ORDER BY admin_action_audit_id DESC LIMIT 1").bind(String(productId)).first(),
+     auth.db.prepare("SELECT product_image_id,image_url,alt_text,image_role,public_use_status,width_px,height_px FROM product_images WHERE product_id=? LIMIT 60").bind(productId).all(),
+     auth.db.prepare("SELECT selected_product_image_ids_json FROM marketplace_export_image_selections WHERE channel='etsy' AND product_id=? LIMIT 1").bind(productId).first()
+    ]);
+    if(!channelOn(pref,'etsy'))return jsonResponse({ok:false,error:'Single Product Editor Etsy destination is OFF; cannot stage new remote-channel drafts.'},409);
+    let selectedIds=[];try{selectedIds=JSON.parse(selection?.selected_product_image_ids_json||'[]')}catch{}
+    const gate=reviewEvidence({channel:'etsy',product,images:images?.results||[],selectedIds,preference:pref,policyReceipt:policy});
+    if(!gate.ready_for_local_export)return jsonResponse({ok:false,error:'Build 406 canonical image and US-shipping review required before new Etsy staging.',blockers:gate.blockers},409);
     const cents=Number(product.price_cents), currency=String(product.currency||'').toUpperCase();
     if(currency!=='CAD'||!Number.isSafeInteger(cents)||cents<0)
       return jsonResponse({ok:false,error:'Product must have verified CAD cents before staging.'},409);
