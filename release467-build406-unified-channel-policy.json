@@ -1,0 +1,46 @@
+{
+  "release": 467,
+  "build": 406,
+  "title": "Unified Product Channel-Publishing Configuration, Canonical Media Mapping & Safe Distribution Policy Enforcement",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "846fe228e8badbea3e40179d9b2d288164241085",
+      "tree": "e872fa969c635ba4547e218be1a47265a4111e83",
+      "system_gate_run": 38745648871,
+      "quality_run": 38745648503,
+      "it_admin_runtime_run": 38745648640,
+      "repository_hygiene_run": 38745648531
+    },
+    "production": {
+      "main_sha": "24fe434294b03353eb03ce6cf872fc780e315b4c",
+      "tree_sha": "e872fa969c635ba4547e218be1a47265a4111e83",
+      "production_pages_deploy_run": 38745999418,
+      "production_live_resource_integrity_run": 38746149983
+    }
+  },
+  "features": {
+    "canonical_single_product_source": true,
+    "independent_destination_intent_etsy_facebook": true,
+    "approved_canonical_image_mapping": true,
+    "image_quality_and_public_use_gate": true,
+    "product_version_shipping_approval_review": true,
+    "per_channel_local_export_intent_gate": true,
+    "arbitrary_external_url_selection_blocked": true,
+    "prior_etsy_syndication_gated": true,
+    "production_variable_presence_only_operator_audit": true,
+    "new_replacement_image_register": true,
+    "provider_credentials_acquisition_guide": true,
+    "us_shipping_suspension_preserved": true,
+    "provider_get_or_local_only": true,
+    "no_provider_publication": true
+  },
+  "observed_runtime_secrets": "NOT_READABLE_FROM_GITHUB_USER_MUST_RUN_AUTHENTICATED_PRODUCTION_PRESENCE_AUDIT",
+  "real_provider_acceptance": "PENDING_OWNER_AUTHORIZATION_AND_MANUAL_TEST",
+  "no_external_changes_on_deploy": true,
+  "image_report": "docs/operations/RELEASE_467_BUILD_406_MISSING_IMAGE_REGISTER.md",
+  "variables_report": "docs/operations/RELEASE_467_BUILD_406_PRODUCTION_CONFIGURATION_AUDIT.md",
+  "docs": "docs/operations/RELEASE_467_BUILD_406_CHANNEL_DISTRIBUTION.md",
+  "next_build": 407,
+  "next_title": "Shared Product Destination Acceptance & Safe Listing-Sync Adapter Readiness (proposed)"
+}

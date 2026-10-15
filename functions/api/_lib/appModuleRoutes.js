@@ -190,6 +190,8 @@ const ETSY_OPERATOR_ADMIN_APIS = Object.freeze([
   '/api/admin/etsy-draft-decision',
   '/api/admin/etsy-exception-resolution',
   '/api/admin/etsy-publication-packet',
+  '/api/admin/product-distribution-406',
+  '/api/admin/production-variable-audit-406',
   '/api/admin/product-channel-intent',
 ]);
 

@@ -34,5 +34,31 @@
   "no_external_changes_on_deploy": true,
   "docs": "docs/operations/RELEASE_467_BUILD_405_ETSY_OWNER_PACKET.md",
   "next_build": 406,
-  "next_title": "Unified Product Channel-Publishing Configuration, Canonical Media Mapping & Safe Distribution Policy Enforcement (proposed)"
+  "next_title": "Unified Product Channel-Publishing Configuration, Canonical Media Mapping & Safe Distribution Policy Enforcement (proposed)",
+  "final_closure": {
+    "dev_sha": "846fe228e8badbea3e40179d9b2d288164241085",
+    "tree_sha": "e872fa969c635ba4547e218be1a47265a4111e83",
+    "proofs": {
+      "system_gate_run": 38745648871,
+      "current_application_quality_run": 38745648503,
+      "it_admin_runtime_proof_run": 38745648640,
+      "branch_hygiene_run": 38745648531
+    },
+    "ingested_by_build": 406,
+    "verified": true,
+    "release_workflow_run": 38745648915,
+    "d1_fanout_run": 38745648726
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 405,
+    "title": "Etsy Owner Publication Decision Packet & Non-Publishing Final Review",
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "24fe434294b03353eb03ce6cf872fc780e315b4c",
+    "tree_sha": "e872fa969c635ba4547e218be1a47265a4111e83",
+    "production_pages_deploy_run": 38745999418,
+    "production_live_resource_integrity_run": 38746149983,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
+  }
 }

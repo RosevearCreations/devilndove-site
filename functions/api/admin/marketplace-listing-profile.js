@@ -1,6 +1,7 @@
 // Release 450 local marketplace listing profile editor and validator.
 // No marketplace/provider network calls are made by this endpoint.
 import { getAdminUserFromRequest, getDb, jsonResponse, normalizeText } from '../_lib/adminAudit.js';
+import {outboundChannel,channelOn} from '../_lib/productDistribution406.mjs';
 import {
   MARKETPLACE_RELEASE,
   MARKETPLACE_CONTRACT,
@@ -26,9 +27,14 @@ async function productRow(db, productId) {
 }
 
 async function selectedImages(db, channel, productId) {
-  const row = await db.prepare(`SELECT selected_image_urls_json FROM marketplace_export_image_selections WHERE channel=? AND product_id=? LIMIT 1`)
-    .bind(channel, productId).first().catch(() => null);
-  return cleanList(jsonArray(row?.selected_image_urls_json || '[]', 40), 1200, 40);
+  const row=await db.prepare("SELECT selected_product_image_ids_json FROM marketplace_export_image_selections WHERE channel=? AND product_id=? LIMIT 1")
+   .bind(channel,productId).first().catch(()=>null);
+  let ids=[];try{ids=JSON.parse(row?.selected_product_image_ids_json||'[]')}catch{}
+  if(!Array.isArray(ids)||!ids.length)return [];
+  const result=await db.prepare("SELECT product_image_id,product_id,image_url,alt_text,image_role,public_use_status,width_px,height_px,merchandising_score FROM product_images WHERE product_id=? ORDER BY sort_order ASC,product_image_id ASC LIMIT 60")
+   .bind(productId).all().catch(()=>({results:[]}));
+  const map=new Map((result?.results||[]).map(image=>[Number(image.product_image_id),image]));
+  return ids.map(id=>map.get(Number(id))).filter(Boolean);
 }
 
 async function profileRow(db, channel, productId) {
@@ -95,6 +101,10 @@ export async function onRequestPost(context) {
   }
   const product = await productRow(db, productId);
   if (!product) return json({ ok: false, error: 'Product was not found.' }, 404);
+  if(outboundChannel(channel)){
+    const row=await db.prepare("SELECT details_json FROM admin_action_audit WHERE action_type='product_channel_intent_405' AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id DESC LIMIT 1").bind(String(productId)).first();
+    if(!channelOn(row,channel))return json({ok:false,error:'Destination is OFF in the single Product Editor. Enable and save its channel intent before preparing a channel-specific profile.'},409);
+  }
 
   const tags = cleanList(Array.isArray(body.tags) ? body.tags : [], 80, 50);
   const materials = cleanList(Array.isArray(body.materials) ? body.materials : [], 80, 50);

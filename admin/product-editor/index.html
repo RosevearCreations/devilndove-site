@@ -128,13 +128,26 @@
 <p class="small" id="productChannel405Status" role="status">OFF by default when no preference is configured. Save Product to create a source Product first.</p>
 <p class="small">Product gallery is edited in the Media tab and reused as the source for channel-specific draft/export reviews. Distribution remains subject to per-channel policy and explicit operator approval.</p>
 </section>
+<section class="card" id="productDistribution406" style="margin:14px 0;padding:18px">
+<h2>Build 406 — Canonical images &amp; destination distribution policy</h2>
+<p class="small">Select one original Product gallery for Etsy or Facebook Marketplace. Use the destination switches above first, then save this Product. Only public-use-approved images at least 800×800 pixels, with alt text, can be selected. No listing will be published.</p>
+<div class="dd-product-actions">
+<label>Destination <select class="input" id="productDistribution406Channel"><option value="etsy">Etsy</option><option value="facebook">Facebook Marketplace</option></select></label>
+<button type="button" class="btn" id="productDistribution406Load">Load approved Product gallery</button>
+</div>
+<div id="productDistribution406Gallery" aria-label="Canonical images available for channel mapping"></div>
+<label><input type="checkbox" id="productDistribution406UsOff"> I reviewed the destination profile: U.S. sales/shipping remain DISABLED, and only approved destination countries may be used.</label>
+<label><input type="checkbox" id="productDistribution406Local"> I approve local mapping and review only. No provider listing, price, inventory or images will be posted automatically.</label>
+<div class="dd-product-actions"><button type="button" class="btn" id="productDistribution406Save" disabled>Save selected Product images and owner shipping review</button></div>
+<p class="small" role="status" id="productDistribution406Status">Save Product first; destination controls are OFF until explicitly configured.</p>
+</section>
 <section class="dd-editor-panel" data-editor-panel="advanced" hidden><h2>Advanced workspaces</h2><p class="small">These systems remain separate so they cannot wake up merely because we edit a Product.</p><div class="dd-product-actions"><a class="btn" href="/admin/inventory-operations/">Inventory Operations</a><a class="btn" id="productEditorMediaAdvancedLink" href="/admin/catalog-media/">Image Editor</a><a class="btn" href="/admin/release-preflight/">Release Preflight</a><a class="btn" href="/admin/packaging-studio/">Packaging</a></div></section>
 
       <div class="dd-editor-footer"><div class="small" aria-live="polite">Build 390: Save Product verifies the stored dollar amount; $0.00 needs confirmation. Save remains available at the bottom of every tab. No autosave; confirm one Product write at a time.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-channel-intent-v405.js?v=405"></script><script src="/public/js/admin-product-editor-v163.js?v=178&b390=1"></script>
+  <script src="/public/js/admin-product-channel-intent-v405.js?v=405"></script><script src="/public/js/admin-product-distribution-v406.js?v=406"></script><script src="/public/js/admin-product-editor-v163.js?v=178&b390=1"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 </body>
 </html>

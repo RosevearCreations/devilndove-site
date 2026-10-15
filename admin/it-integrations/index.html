@@ -223,6 +223,14 @@
 <p class="small" id="etsy405Status" role="status" aria-live="polite">No Etsy provider call or final owner review.</p>
 <pre id="etsy405Result" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:390px;overflow:auto">No evidence yet.</pre>
 </section>
+<section class="card" id="productionVariableAudit406" style="margin-top:18px">
+<h2>Build 406 — Production secrets &amp; integration readiness audit</h2>
+<p class="small">Shows only PRESENT / NOT SET or binding status for this Cloudflare Function. Secret values are never returned. Optional providers need configuration only when you decide to activate them.</p>
+<button type="button" class="btn" id="productionVariableAudit406Run">Check current Production variables (no secret values)</button>
+<p role="status" id="productionVariableAudit406Status" class="small">Not checked. Click to inspect this Function environment.</p>
+<pre id="productionVariableAudit406Result" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:390px;overflow:auto">No audit yet.</pre>
+</section>
+<script src="/public/js/admin-production-variable-audit-v406.js?v=406"></script>
 <section class="card" id="etsy-reliability-alert-workspace" style="margin-top:18px">
 <h2>Etsy reliability — internal alert queue &amp; audit closure</h2>
 <p class="small">Stored-evidence status is checked only when requested. Route alerts into the internal Admin review queue, acknowledge receipt, and explicitly close only after the underlying condition has recovered. No external email, SMS, Etsy API call, automatic retry or Product write.</p>
