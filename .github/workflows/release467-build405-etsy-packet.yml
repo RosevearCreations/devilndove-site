@@ -1,0 +1,41 @@
+name: Release 467 Build 405 Etsy Packet and Product Channels
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/_lib/etsyPublicationPacket405.mjs'
+      - 'functions/api/admin/etsy-publication-packet.js'
+      - 'functions/api/admin/product-channel-intent.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'admin/it-integrations/index.html'
+      - 'admin/product-editor/index.html'
+      - 'public/js/admin-product-editor-v163.js'
+      - 'public/js/admin-product-channel-intent-v405.js'
+      - 'public/js/admin-etsy-owner-packet-v405.js'
+      - 'public/js/admin-etsy-oauth-acceptance.js'
+      - 'public/js/admin-etsy-remote-draft-v399.js'
+      - 'scripts/release467_build405_etsy_packet.test.mjs'
+      - '.github/workflows/release467-build405-etsy-packet.yml'
+      - 'current-development-authority.json'
+      - 'release467-build405-etsy-packet.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bounded-packet-and-product-channels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify product source, OAuth recovery, and never-publish packet
+        run: |
+          node --check functions/api/_lib/etsyPublicationPacket405.mjs
+          node --check functions/api/admin/product-channel-intent.js
+          node --check functions/api/admin/etsy-publication-packet.js
+          node --check public/js/admin-product-channel-intent-v405.js
+          node --check public/js/admin-etsy-owner-packet-v405.js
+          node --check public/js/admin-etsy-oauth-acceptance.js
+          node --test scripts/release467_build405_etsy_packet.test.mjs

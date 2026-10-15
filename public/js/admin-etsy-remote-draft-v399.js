@@ -47,6 +47,11 @@ function showSnapshot(data,updateDrafts){
   ', quantity '+data.selected_draft.quantity+'. Saved draft title: '+data.selected_draft.title+
   '. Draft description remains the exact local version; no changes to Product or stock.':
   'Select an existing local draft from this Product to review its exact saved contents.';
+ if((data.blockers||[]).includes('oauth_access_expired_or_near_expiry')){
+  ids.optionStatus.replaceChildren(document.createTextNode('Etsy access expired. '));
+  const link=document.createElement('a');link.href='/admin/it-integrations/#etsy-oauth-acceptance';
+  link.textContent='Go to Reconnect Etsy';ids.optionStatus.appendChild(link);
+ }else{ids.optionStatus.textContent='';}
  ids.status.textContent=ready?'Local draft and OAuth prerequisites checked. Read live Etsy options next.':
   'No Etsy write made. Follow the listed prerequisites before a controlled draft trial.';
 }

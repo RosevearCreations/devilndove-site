@@ -35,5 +35,31 @@
   "no_external_changes_on_deploy": true,
   "docs": "docs/operations/RELEASE_467_BUILD_404_ETSY_EXCEPTION_RESOLUTION.md",
   "next_build": 405,
-  "next_title": "Etsy Owner Publication Decision Packet & Non-Publishing Final Review (proposed)"
+  "next_title": "Etsy Owner Publication Decision Packet & Non-Publishing Final Review (proposed)",
+  "final_closure": {
+    "dev_sha": "6a9785bf185d61239a3444fa8e240ec5ca49b2d6",
+    "tree_sha": "b4f9e12f983340c6dae3d0e2e989f285b3cbbbe3",
+    "proofs": {
+      "system_gate_run": 38737206513,
+      "current_application_quality_run": 38737206602,
+      "it_admin_runtime_proof_run": 38737206790,
+      "branch_hygiene_run": 38737207166
+    },
+    "ingested_by_build": 405,
+    "verified": true,
+    "release_workflow_run": 38737206619,
+    "d1_fanout_run": 38737206562
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 404,
+    "title": "Etsy Operator Exception Resolution Evidence & Publication Decision Revalidation",
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "5b543db0229cb0e8676a2011d1f9ef8cd605ceaa",
+    "tree_sha": "b4f9e12f983340c6dae3d0e2e989f285b3cbbbe3",
+    "production_pages_deploy_run": 38737492199,
+    "production_live_resource_integrity_run": 38737606861,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
+  }
 }

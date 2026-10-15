@@ -1,0 +1,38 @@
+{
+  "release": 467,
+  "build": 405,
+  "title": "Etsy Owner Publication Decision Packet & Non-Publishing Final Review",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "6a9785bf185d61239a3444fa8e240ec5ca49b2d6",
+      "tree": "b4f9e12f983340c6dae3d0e2e989f285b3cbbbe3",
+      "system_gate_run": 38737206513,
+      "quality_run": 38737206602,
+      "it_admin_runtime_run": 38737206790,
+      "repository_hygiene_run": 38737207166
+    },
+    "production": {
+      "main_sha": "5b543db0229cb0e8676a2011d1f9ef8cd605ceaa",
+      "tree_sha": "b4f9e12f983340c6dae3d0e2e989f285b3cbbbe3",
+      "production_pages_deploy_run": 38737492199,
+      "production_live_resource_integrity_run": 38737606861
+    }
+  },
+  "features": {
+    "owner_nonpublishing_final_review": true,
+    "etsy_expired_oauth_reconnect_action": true,
+    "build399_profile_blocker_explained": true,
+    "unified_canonical_product_source": true,
+    "product_editor_channel_intent_etsy_facebook": true,
+    "canonical_image_source_preserved": true,
+    "channel_intent_does_not_publish": true,
+    "provider_get_only": true,
+    "no_auto_etsy_write": true
+  },
+  "live_operator_etsy_acceptance": "PENDING_USER_RECONNECT_AND_MANUAL_TEST",
+  "no_external_changes_on_deploy": true,
+  "docs": "docs/operations/RELEASE_467_BUILD_405_ETSY_OWNER_PACKET.md",
+  "next_build": 406,
+  "next_title": "Unified Product Channel-Publishing Configuration, Canonical Media Mapping & Safe Distribution Policy Enforcement (proposed)"
+}
