@@ -1,36 +1,36 @@
 {
   "release": 467,
-  "build": 400,
-  "title": "Etsy Remote Draft Provider Acceptance, Reconciliation & Listing Evidence",
+  "build": 401,
+  "title": "Etsy Draft Image Readiness, Compliance Review & Controlled Listing Completion",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 399,
-      "title": "Etsy Remote Draft Creation Preconditions & Controlled Trial",
+      "build": 400,
+      "title": "Etsy Remote Draft Provider Acceptance, Reconciliation & Listing Evidence",
       "state": "DEVELOPMENT_GREEN",
-      "dev_sha": "0badbe442cb22829544f6d4128ebe15e45ae3086",
-      "tree_sha": "f574e6f076833c3430781490ca056b054e954a88",
-      "system_gate_run": 38605946826,
-      "current_application_quality_run": 38605946829,
-      "it_admin_runtime_proof_run": 38605946783,
-      "branch_hygiene_run": 38605946816,
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD399_GREEN",
-      "authority": "release467-build399-etsy-remote-draft.json",
+      "dev_sha": "1278de0a3ff029061750bdd54ddaccd05d4f68a5",
+      "tree_sha": "6b5a50c1a37b581260ca48cd703bae790995fb57",
+      "system_gate_run": 38630144380,
+      "current_application_quality_run": 38630146619,
+      "it_admin_runtime_proof_run": 38630144379,
+      "branch_hygiene_run": 38630144400,
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD400_GREEN",
+      "authority": "release467-build400-etsy-provider-evidence.json",
       "proofs": {
-        "system_gate_run": 38605946826,
-        "current_application_quality_run": 38605946829,
-        "it_admin_runtime_proof_run": 38605946783,
-        "branch_hygiene_run": 38605946816
+        "system_gate_run": 38630144380,
+        "current_application_quality_run": 38630146619,
+        "it_admin_runtime_proof_run": 38630144379,
+        "branch_hygiene_run": 38630144400
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 400,
-      "title": "Etsy Remote Draft Provider Acceptance, Reconciliation & Listing Evidence",
-      "authority": "release467-build400-etsy-provider-evidence.json",
+      "build": 401,
+      "title": "Etsy Draft Image Readiness, Compliance Review & Controlled Listing Completion",
+      "authority": "release467-build401-etsy-draft-completion.json",
       "state": "DEVELOPMENT_CLOSURE_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -41,19 +41,20 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 399,
-    "title": "Etsy Remote Draft Creation Preconditions & Controlled Trial",
+    "build": 400,
+    "title": "Etsy Remote Draft Provider Acceptance, Reconciliation & Listing Evidence",
     "state": "PRODUCTION_GREEN",
-    "main_sha": "f2937858cbcc0797992e95e36e2d0e9f5f65530b",
-    "tree_sha": "f574e6f076833c3430781490ca056b054e954a88",
-    "production_pages_deploy_run": 38606326017,
-    "production_live_resource_integrity_run": 38606480119,
+    "main_sha": "38c49a5146f962a7aef74b9da58c10908c42433e",
+    "tree_sha": "6b5a50c1a37b581260ca48cd703bae790995fb57",
+    "production_pages_deploy_run": 38630586471,
+    "production_live_resource_integrity_run": 38630754123,
     "remote_d1_queries": 0,
-    "same_tree_as_verified_development": true,
     "role": "CURRENT_PRODUCTION_BASELINE",
-    "authority": "release467-build399-etsy-remote-draft.json"
+    "same_tree_as_verified_development": true,
+    "authority": "release467-build400-etsy-provider-evidence.json"
   },
   "current_release_authorities": [
+    "release467-build401-etsy-draft-completion.json",
     "release467-build400-etsy-provider-evidence.json",
     "release467-build399-etsy-remote-draft.json",
     "release467-build398-etsy-operator-recovery.json",
@@ -295,10 +296,10 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_373_378.md",
-  "next_build": 401,
-  "next_build_state": "PROPOSED_AFTER_BUILD400_PRODUCTION_GREEN",
-  "next_build_title": "Etsy Draft Image Readiness, Compliance Review & Controlled Listing Completion",
-  "promotion_state": "BUILD400_DEVELOPMENT_CLOSURE_CANDIDATE_NOT_YET_VERIFIED",
+  "next_build": 402,
+  "next_build_state": "PROPOSED_AFTER_BUILD401_PRODUCTION_GREEN",
+  "next_build_title": "Etsy Image Upload Outcome Reconciliation & Final Operator Acceptance (proposed)",
+  "promotion_state": "BUILD401_DEVELOPMENT_CLOSURE_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "SYSTEM_WIDE_378_384_NO_SINGLE_PROJECT_BUILDS",
   "measured_closure": {
     "source_build": 232,
@@ -330,13 +331,13 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NO_NEW_CANONICAL_D1_BUILD392",
-  "accepted_dev_sha": "0badbe442cb22829544f6d4128ebe15e45ae3086",
-  "accepted_dev_tree_sha": "f574e6f076833c3430781490ca056b054e954a88",
+  "accepted_dev_sha": "1278de0a3ff029061750bdd54ddaccd05d4f68a5",
+  "accepted_dev_tree_sha": "6b5a50c1a37b581260ca48cd703bae790995fb57",
   "acceptance": {
-    "system_gate_run": 38605946826,
-    "current_application_quality_run": 38605946829,
-    "it_admin_runtime_proof_run": 38605946783,
-    "branch_hygiene_run": 38605946816
+    "system_gate_run": 38630144380,
+    "current_application_quality_run": 38630146619,
+    "it_admin_runtime_proof_run": 38630144379,
+    "branch_hygiene_run": 38630144400
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -6028,5 +6029,13 @@
     "operator_get_only": true,
     "provider_acceptance_pending": true,
     "authority": "release467-build400-etsy-provider-evidence.json"
+  },
+  "etsy_draft_images_build401": {
+    "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+    "manual_image_upload_one_attempt": true,
+    "owner_image_compliance_attestation_required": true,
+    "provider_publication": false,
+    "real_etsy_acceptance_pending": true,
+    "authority": "release467-build401-etsy-draft-completion.json"
   }
 }

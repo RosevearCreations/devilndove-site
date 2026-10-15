@@ -1,0 +1,38 @@
+{
+  "release": 467,
+  "build": 401,
+  "title": "Etsy Draft Image Readiness, Compliance Review & Controlled Listing Completion",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "1278de0a3ff029061750bdd54ddaccd05d4f68a5",
+      "tree": "6b5a50c1a37b581260ca48cd703bae790995fb57",
+      "system_gate_run": 38630144380,
+      "quality_run": 38630146619,
+      "it_admin_runtime_run": 38630144379,
+      "repository_hygiene_run": 38630144400
+    },
+    "production": {
+      "main_sha": "38c49a5146f962a7aef74b9da58c10908c42433e",
+      "tree_sha": "6b5a50c1a37b581260ca48cd703bae790995fb57",
+      "production_pages_deploy_run": 38630586471,
+      "production_live_resource_integrity_run": 38630754123
+    }
+  },
+  "features": {
+    "manual_image_review": true,
+    "one_image_jpeg_png_8mib": true,
+    "verify_etys_image_GET": true,
+    "one_attempt_image_upload_audit_fence": true,
+    "no_unverified_provider_retry": true,
+    "compliance_operator_attestation": true,
+    "local_review_receipt_only": true,
+    "listing_state_unpublished": true,
+    "no_automatic_listing_activation": true
+  },
+  "provider_accepted": false,
+  "live_operator_acceptance": "PENDING_AUTHENTICATED_OWNER_ACTION",
+  "docs": "docs/operations/RELEASE_467_BUILD_401_ETSY_DRAFT_COMPLETION.md",
+  "next_build": 402,
+  "next_title": "Etsy Image Upload Outcome Reconciliation & Final Operator Acceptance (proposed)"
+}
