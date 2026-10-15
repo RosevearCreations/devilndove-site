@@ -1,0 +1,32 @@
+name: Release 467 Build 402 Etsy Image Outcome Acceptance
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/_lib/etsyImageReconciliation402.mjs'
+      - 'functions/api/admin/etsy-image-reconciliation.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'admin/it-integrations/index.html'
+      - 'public/js/admin-etsy-image-reconciliation-v402.js'
+      - 'scripts/release467_build402_etsy_reconciliation.test.mjs'
+      - '.github/workflows/release467-build402-etsy-reconciliation.yml'
+      - 'current-development-authority.json'
+      - 'release467-build402-etsy-image-outcomes.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  image-outcome-acceptance-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify unknown-outcome fail closed and final owner acceptance
+        run: |
+          node --check functions/api/_lib/etsyImageReconciliation402.mjs
+          node --check functions/api/admin/etsy-image-reconciliation.js
+          node --check public/js/admin-etsy-image-reconciliation-v402.js
+          node --test scripts/release467_build402_etsy_reconciliation.test.mjs

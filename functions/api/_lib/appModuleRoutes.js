@@ -186,6 +186,7 @@ const ETSY_OPERATOR_ADMIN_APIS = Object.freeze([
   '/api/admin/etsy-remote-draft-trial',
   '/api/admin/etsy-remote-draft-evidence',
   '/api/admin/etsy-draft-completion',
+  '/api/admin/etsy-image-reconciliation',
 ]);
 
 const STOREFRONT_ADMIN_APIS = Object.freeze([

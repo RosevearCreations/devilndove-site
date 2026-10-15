@@ -1,17 +1,5 @@
 name: Release 467 Build 401 Etsy Draft Image Completion
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/_lib/etsyDraftImages401.mjs'
-      - 'functions/api/admin/etsy-draft-completion.js'
-      - 'functions/api/_lib/appModuleRoutes.js'
-      - 'admin/it-integrations/index.html'
-      - 'public/js/admin-etsy-draft-completion-v401.js'
-      - 'scripts/release467_build401_etsy_completion.test.mjs'
-      - '.github/workflows/release467-build401-etsy-completion.yml'
-      - 'current-development-authority.json'
-      - 'release467-build401-etsy-draft-completion.json'
   workflow_dispatch:
 permissions:
   contents: read
