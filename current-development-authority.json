@@ -1,36 +1,36 @@
 {
   "release": 467,
-  "build": 402,
-  "title": "Etsy Image Upload Outcome Reconciliation & Final Operator Acceptance",
+  "build": 403,
+  "title": "Etsy Draft Review Exceptions & Owner Publication Decision Readiness",
   "state": "DEVELOPMENT_GREEN",
   "source_authority": "dev",
   "restart_integrity": {
     "protocol": "EXTERNAL_EXACT_BRANCH_HEAD_FOUR_PROOF_V1",
     "last_fully_verified": {
       "release": 467,
-      "build": 401,
-      "title": "Etsy Draft Image Readiness, Compliance Review & Controlled Listing Completion",
+      "build": 402,
+      "title": "Etsy Image Upload Outcome Reconciliation & Final Operator Acceptance",
       "state": "DEVELOPMENT_GREEN",
-      "dev_sha": "8bf31afb5363bcde3d40481b99e2914752b12522",
-      "tree_sha": "252a7a1b1517b6c80975393fe2064e22d8a7b5da",
-      "system_gate_run": 38661010327,
-      "current_application_quality_run": 38661010403,
-      "it_admin_runtime_proof_run": 38661010314,
-      "branch_hygiene_run": 38661010377,
-      "proof_state": "EXACT_BRANCH_HEAD_BUILD401_GREEN",
-      "authority": "release467-build401-etsy-draft-completion.json",
+      "dev_sha": "bffabd7017d2f15de4da017f6f5b97fa7b6cc6f5",
+      "tree_sha": "81f61bf2271e3ab42ead3aaf4356b2a562011160",
+      "system_gate_run": 38681819775,
+      "current_application_quality_run": 38681819726,
+      "it_admin_runtime_proof_run": 38681819825,
+      "branch_hygiene_run": 38681819692,
+      "proof_state": "EXACT_BRANCH_HEAD_BUILD402_GREEN",
+      "authority": "release467-build402-etsy-image-outcomes.json",
       "proofs": {
-        "system_gate_run": 38661010327,
-        "current_application_quality_run": 38661010403,
-        "it_admin_runtime_proof_run": 38661010314,
-        "branch_hygiene_run": 38661010377
+        "system_gate_run": 38681819775,
+        "current_application_quality_run": 38681819726,
+        "it_admin_runtime_proof_run": 38681819825,
+        "branch_hygiene_run": 38681819692
       }
     },
     "current_closure_candidate": {
       "release": 467,
-      "build": 402,
-      "title": "Etsy Image Upload Outcome Reconciliation & Final Operator Acceptance",
-      "authority": "release467-build402-etsy-image-outcomes.json",
+      "build": 403,
+      "title": "Etsy Draft Review Exceptions & Owner Publication Decision Readiness",
+      "authority": "release467-build403-etsy-decision.json",
       "state": "DEVELOPMENT_CLOSURE_CANDIDATE"
     },
     "restart_requires_exact_dev_head_proof_verification": true,
@@ -41,19 +41,20 @@
   },
   "production_checkpoint": {
     "release": 467,
-    "build": 401,
-    "title": "Etsy Draft Image Readiness, Compliance Review & Controlled Listing Completion",
+    "build": 402,
+    "title": "Etsy Image Upload Outcome Reconciliation & Final Operator Acceptance",
     "state": "PRODUCTION_GREEN",
-    "main_sha": "947d34f70cd5a496b4c2cc8c81718deb5b4f6c08",
-    "tree_sha": "252a7a1b1517b6c80975393fe2064e22d8a7b5da",
-    "production_pages_deploy_run": 38661292359,
-    "production_live_resource_integrity_run": 38661391832,
+    "main_sha": "4f09d902ba4ce3ed8329c9a4822f09e21ac8eb16",
+    "tree_sha": "81f61bf2271e3ab42ead3aaf4356b2a562011160",
+    "production_pages_deploy_run": 38682071549,
+    "production_live_resource_integrity_run": 38682152607,
     "remote_d1_queries": 0,
     "role": "CURRENT_PRODUCTION_BASELINE",
     "same_tree_as_verified_development": true,
-    "authority": "release467-build401-etsy-draft-completion.json"
+    "authority": "release467-build402-etsy-image-outcomes.json"
   },
   "current_release_authorities": [
+    "release467-build403-etsy-decision.json",
     "release467-build402-etsy-image-outcomes.json",
     "release467-build401-etsy-draft-completion.json",
     "release467-build400-etsy-provider-evidence.json",
@@ -297,10 +298,10 @@
   "production_mutation_authorized": false,
   "secret_values_emitted": false,
   "roadmap": "docs/operations/RELEASE_467_EVIDENCE_EXECUTION_DISCOVERY_BUILDS_373_378.md",
-  "next_build": 403,
-  "next_build_state": "PROPOSED_AFTER_BUILD402_PRODUCTION_GREEN",
-  "next_build_title": "Etsy Draft Review Exceptions & Owner Publication Decision Readiness (proposed)",
-  "promotion_state": "BUILD402_DEVELOPMENT_CLOSURE_CANDIDATE_NOT_YET_VERIFIED",
+  "next_build": 404,
+  "next_build_state": "PROPOSED_AFTER_BUILD403_PRODUCTION_GREEN",
+  "next_build_title": "Etsy Operator Exception Resolution Evidence & Publication Decision Revalidation (proposed)",
+  "promotion_state": "BUILD403_DEVELOPMENT_CLOSURE_CANDIDATE_NOT_YET_VERIFIED",
   "successor_scope_state": "SYSTEM_WIDE_378_384_NO_SINGLE_PROJECT_BUILDS",
   "measured_closure": {
     "source_build": 232,
@@ -332,13 +333,13 @@
   },
   "canonical_data_migration_authorized": false,
   "canonical_data_migration_scope": "NO_NEW_CANONICAL_D1_BUILD392",
-  "accepted_dev_sha": "8bf31afb5363bcde3d40481b99e2914752b12522",
-  "accepted_dev_tree_sha": "252a7a1b1517b6c80975393fe2064e22d8a7b5da",
+  "accepted_dev_sha": "bffabd7017d2f15de4da017f6f5b97fa7b6cc6f5",
+  "accepted_dev_tree_sha": "81f61bf2271e3ab42ead3aaf4356b2a562011160",
   "acceptance": {
-    "system_gate_run": 38661010327,
-    "current_application_quality_run": 38661010403,
-    "it_admin_runtime_proof_run": 38661010314,
-    "branch_hygiene_run": 38661010377
+    "system_gate_run": 38681819775,
+    "current_application_quality_run": 38681819726,
+    "it_admin_runtime_proof_run": 38681819825,
+    "branch_hygiene_run": 38681819692
   },
   "refinement_outcomes_renewal_ii": {
     "source_builds": "249-255",
@@ -6048,5 +6049,14 @@
     "no_etsy_activation": true,
     "real_provider_owner_acceptance_pending": true,
     "authority": "release467-build402-etsy-image-outcomes.json"
+  },
+  "etsy_draft_decision_build403": {
+    "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+    "owner_hold_audit": true,
+    "final_local_decision": true,
+    "live_provider_get_only": true,
+    "no_listing_publication": true,
+    "real_owner_acceptance_pending": true,
+    "authority": "release467-build403-etsy-decision.json"
   }
 }

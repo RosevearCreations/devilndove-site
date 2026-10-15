@@ -35,5 +35,31 @@
   "no_external_changes_on_deploy": true,
   "docs": "docs/operations/RELEASE_467_BUILD_402_ETSY_IMAGE_RECONCILIATION.md",
   "next_build": 403,
-  "next_title": "Etsy Draft Review Exceptions & Owner Publication Decision Readiness (proposed)"
+  "next_title": "Etsy Draft Review Exceptions & Owner Publication Decision Readiness (proposed)",
+  "final_closure": {
+    "dev_sha": "bffabd7017d2f15de4da017f6f5b97fa7b6cc6f5",
+    "tree_sha": "81f61bf2271e3ab42ead3aaf4356b2a562011160",
+    "proofs": {
+      "system_gate_run": 38681819775,
+      "current_application_quality_run": 38681819726,
+      "it_admin_runtime_proof_run": 38681819825,
+      "branch_hygiene_run": 38681819692
+    },
+    "ingested_by_build": 403,
+    "verified": true,
+    "release_workflow_run": 38681819781,
+    "d1_fanout_run": 38681819706
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 402,
+    "title": "Etsy Image Upload Outcome Reconciliation & Final Operator Acceptance",
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "4f09d902ba4ce3ed8329c9a4822f09e21ac8eb16",
+    "tree_sha": "81f61bf2271e3ab42ead3aaf4356b2a562011160",
+    "production_pages_deploy_run": 38682071549,
+    "production_live_resource_integrity_run": 38682152607,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
+  }
 }

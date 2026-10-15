@@ -1,17 +1,5 @@
 name: Release 467 Build 402 Etsy Image Outcome Acceptance
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/_lib/etsyImageReconciliation402.mjs'
-      - 'functions/api/admin/etsy-image-reconciliation.js'
-      - 'functions/api/_lib/appModuleRoutes.js'
-      - 'admin/it-integrations/index.html'
-      - 'public/js/admin-etsy-image-reconciliation-v402.js'
-      - 'scripts/release467_build402_etsy_reconciliation.test.mjs'
-      - '.github/workflows/release467-build402-etsy-reconciliation.yml'
-      - 'current-development-authority.json'
-      - 'release467-build402-etsy-image-outcomes.json'
   workflow_dispatch:
 permissions:
   contents: read
