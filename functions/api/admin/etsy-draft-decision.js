@@ -92,7 +92,7 @@ export async function onRequestPost(c){
    return await append(g,s,c.request,details);
   }
   const a=await auth(g.db,c.env);if(a.error)return a.error;
-  let report;try{report=await evaluate(a,s,b.image_id,action==='record_owner_ready'&&b.owner_checked_shipping===true);}
+  let report;try{report=await evaluate(a,s,b.image_id,b.owner_checked_shipping===true);}
   catch(err){return respond({...summary(s),error:'Etsy read unavailable; HOLD and record an exception locally. '+String(err?.message||'unknown')},409);}
   if(action==='inspect_exceptions')return respond({...summary(s),provider_read_performed:true,
    report,decision_readiness:report.readiness,message:'Fresh provider image and listing evidence inspected, no Etsy mutation. Owner publication choice is separate.'});

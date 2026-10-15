@@ -55,9 +55,11 @@ test('Admin API local GET is read-only; only provider GET allowed; audit receipt
  assert.match(s,/etsy_draft_403_owner_decision/);
  assert.match(s,/json_extract\(details_json,'\$\.request_key'\)/);
  assert.match(s,/publication_performed:false/);
+ assert.match(s,/shipping_reviewed:b.owner_checked_shipping===true/);
  assert.doesNotMatch(s,/method:'PATCH'|method:'PUT'|method:'DELETE'|createDraftListing|updateListing/);
  const get=s.split('export async function onRequestGet')[1].split('export async function onRequestPost')[0];
  assert.doesNotMatch(get,/fetch\(|getEtsy\(|decryptOAuthSecret|INSERT INTO|UPDATE /);
  const ui=file('public/js/admin-etsy-draft-decision-v403.js');
- assert.match(ui,/addEventListener\('click'/);assert.doesNotMatch(ui,/setTimeout|setInterval|api\.etsy\.com/);
+ assert.match(ui,/addEventListener\('click'/);
+ assert.match(ui,/owner_checked_shipping:n.checks\[2\].checked/);assert.doesNotMatch(ui,/setTimeout|setInterval|api\.etsy\.com/);
 });

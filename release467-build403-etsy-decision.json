@@ -34,5 +34,6 @@
   "no_external_changes_on_deploy": true,
   "docs": "docs/operations/RELEASE_467_BUILD_403_ETSY_DRAFT_DECISION.md",
   "next_build": 404,
-  "next_title": "Etsy Operator Exception Resolution Evidence & Publication Decision Revalidation (proposed)"
+  "next_title": "Etsy Operator Exception Resolution Evidence & Publication Decision Revalidation (proposed)",
+  "validation_note": "Final operator GET preview uses explicitly checked shipping attestation; final owner-ready action independently checks every consent."
 }

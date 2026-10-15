@@ -11,7 +11,7 @@ const id=()=>n.draft.value.trim();
 const ok=()=>n.checks.every(x=>x?.checked);
 function buttons(){n.load.disabled=busy;n.inspect.disabled=busy||!local?.listing_id;
  n.hold.disabled=busy||!local?.listing_id||n.notes.value.trim().length<12||!n.category.value;
- n.ready.disabled=busy||!report||report.readiness!=='HOLD_OWNER_REVIEW'&&report.readiness!=='READY_FOR_SEPARATE_MANUAL_ETSY_DECISION'||
+ n.ready.disabled=busy||!report||report.readiness!=='READY_FOR_SEPARATE_MANUAL_ETSY_DECISION'||
    !ok()||!n.image.value;
 }
 const show=x=>{n.evidence.textContent=JSON.stringify(x,null,2);n.status.textContent=x.error||x.message||x.decision_readiness||'Evidence shown.';};
@@ -25,7 +25,7 @@ const submit=async action=>{
   if(action==='load'){
    local=await call('/api/admin/etsy-draft-decision?draft_id='+encodeURIComponent(id()),{method:'GET'});report=null;
   }else{
-   const payload={action,draft_id:id(),image_id:n.image.value};
+   const payload={action,draft_id:id(),image_id:n.image.value,owner_checked_shipping:n.checks[2].checked};
    if(action==='record_owner_hold'){
     payload.category=n.category.value;payload.notes=n.notes.value.trim();
    }else if(action==='record_owner_ready'){
