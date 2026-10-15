@@ -20,7 +20,7 @@ export function assessDraftPublicationReadiness({listing,images,shop,product,dra
  const finalReceipt=parseReceipt(accepted);
  if(!accepted)blockers.push('build402_final_owner_acceptance_missing');
  if(accepted&&finalReceipt?.listing_id!==String(listing?.listing_id))blockers.push('build402_final_listing_identity_conflict');
- if(accepted&&finalReceipt?.image_id!==selected)blockers.push('build402_final_image_identity_conflict');
+ if(accepted&&(finalReceipt?.image_id!==selected||!image.photo.images.some(x=>x.id===imageId(finalReceipt?.image_id))))blockers.push('build402_final_image_identity_conflict');
  if(accepted&&finalReceipt?.compliance_review_receipt!==review?.admin_action_audit_id)
   blockers.push('build402_review_receipt_conflict');
  if(!shipping_reviewed)blockers.push('shipping_restrictions_owner_review_missing');
