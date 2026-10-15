@@ -1,3 +1,6 @@
+# Current successor: Release 467 Build 401 — Etsy Draft Image Readiness, Compliance Review & Controlled Listing Completion
+
+BUILD401_VERIFIED_BUILD400_CHECKPOINT: Development 1278de0a3ff029061750bdd54ddaccd05d4f68a5; tree 6b5a50c1a37b581260ca48cd703bae790995fb57; System 38630144380; Quality 38630146619; I.T. 38630144379; Hygiene 38630144400; Production 38c49a5146f962a7aef74b9da58c10908c42433e; Pages 38630586471; Live 38630754123.
 # Current successor: Release 467 Build 400 — Etsy Remote Draft Provider Acceptance, Reconciliation & Listing Evidence
 
 BUILD400_VERIFIED_BUILD399_CHECKPOINT: Development 0badbe442cb22829544f6d4128ebe15e45ae3086; tree f574e6f076833c3430781490ca056b054e954a88; System 38605946826; Quality 38605946829; I.T. 38605946783; Hygiene 38605946816; Production f2937858cbcc0797992e95e36e2d0e9f5f65530b; Pages 38606326017; Live 38606480119.

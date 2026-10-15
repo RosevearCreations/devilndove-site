@@ -1,17 +1,5 @@
 name: Release 467 Build 400 Etsy Listing Evidence
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/_lib/etsyListingEvidence400.mjs'
-      - 'functions/api/admin/etsy-remote-draft-evidence.js'
-      - 'functions/api/_lib/appModuleRoutes.js'
-      - 'admin/it-integrations/index.html'
-      - 'public/js/admin-etsy-draft-evidence-v400.js'
-      - 'scripts/release467_build400_etsy_evidence.test.mjs'
-      - '.github/workflows/release467-build400-etsy-evidence.yml'
-      - 'current-development-authority.json'
-      - 'release467-build400-etsy-provider-evidence.json'
   workflow_dispatch:
 permissions:
   contents: read

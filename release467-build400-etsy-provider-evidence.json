@@ -30,5 +30,29 @@
       "production_pages_deploy_run": 38606326017,
       "production_live_resource_integrity_run": 38606480119
     }
+  },
+  "final_closure": {
+    "dev_sha": "1278de0a3ff029061750bdd54ddaccd05d4f68a5",
+    "tree_sha": "6b5a50c1a37b581260ca48cd703bae790995fb57",
+    "proofs": {
+      "system_gate_run": 38630144380,
+      "current_application_quality_run": 38630146619,
+      "it_admin_runtime_proof_run": 38630144379,
+      "branch_hygiene_run": 38630144400
+    },
+    "ingested_by_build": 401,
+    "verified": true
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 400,
+    "title": "Etsy Remote Draft Provider Acceptance, Reconciliation & Listing Evidence",
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "38c49a5146f962a7aef74b9da58c10908c42433e",
+    "tree_sha": "6b5a50c1a37b581260ca48cd703bae790995fb57",
+    "production_pages_deploy_run": 38630586471,
+    "production_live_resource_integrity_run": 38630754123,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
   }
 }
