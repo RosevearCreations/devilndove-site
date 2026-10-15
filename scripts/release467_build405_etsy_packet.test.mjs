@@ -41,4 +41,9 @@ test('Module route security, product editor single source and provider GET-only 
  assert.match(html,/productChannel405Etsy/);assert.match(html,/productChannel405Facebook/);
  assert.match(f('public/js/admin-product-editor-v163.js'),/DDProductChannels405/);
  assert.match(f('public/js/admin-etsy-oauth-acceptance.js'),/needsReconnect/);
+ const packetClient=f('public/js/admin-etsy-owner-packet-v405.js');
+ assert.match(packetClient,/owner_checked_product:v.product.checked/);
+ assert.match(packetClient,/owner_checked_images:v.images.checked/);
+ assert.match(packetClient,/owner_confirmed_correction:v.correction.checked/);
+ assert.doesNotMatch(packetClient,/owner_checked_product:true|owner_checked_images:true|owner_confirmed_correction:true/);
 });
