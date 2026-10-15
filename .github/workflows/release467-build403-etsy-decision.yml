@@ -1,3 +1,4 @@
+# Build 403 final exact-dev-head proof after owner shipping-review parity and acceptance-image guards.
 name: Release 467 Build 403 Etsy Decision Readiness
 on:
   push:

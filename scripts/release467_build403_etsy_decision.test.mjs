@@ -55,7 +55,7 @@ test('Admin API local GET is read-only; only provider GET allowed; audit receipt
  assert.match(s,/etsy_draft_403_owner_decision/);
  assert.match(s,/json_extract\(details_json,'\$\.request_key'\)/);
  assert.match(s,/publication_performed:false/);
- assert.match(s,/shipping_reviewed:b.owner_checked_shipping===true/);
+ assert.match(s,/b\.image_id,b\.owner_checked_shipping===true/);
  assert.doesNotMatch(s,/method:'PATCH'|method:'PUT'|method:'DELETE'|createDraftListing|updateListing/);
  const get=s.split('export async function onRequestGet')[1].split('export async function onRequestPost')[0];
  assert.doesNotMatch(get,/fetch\(|getEtsy\(|decryptOAuthSecret|INSERT INTO|UPDATE /);
