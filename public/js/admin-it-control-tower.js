@@ -1,6 +1,7 @@
-// BUILD403_CURRENT_PAGE: Release 467 Build 403 — Etsy Draft Review Exceptions & Owner Publication Decision Readiness; verified Build 402 Production GREEN.
-// BUILD402_CURRENT_PAGE: Release 467 Build 403 — Etsy Draft Review Exceptions & Owner Publication Decision Readiness; verified Build 401 Production GREEN.
-// BUILD401_CURRENT_CLIENT: Release 467 Build 403 — Etsy Draft Review Exceptions & Owner Publication Decision Readiness; verified Build 400 Production GREEN.
+// BUILD404_CURRENT_PAGE: Release 467 Build 404 — Etsy Operator Exception Resolution Evidence & Publication Decision Revalidation; verified Build 403 Production GREEN.
+// BUILD403_CURRENT_PAGE: Release 467 Build 404 — Etsy Operator Exception Resolution Evidence & Publication Decision Revalidation; verified Build 402 Production GREEN.
+// BUILD402_CURRENT_PAGE: Release 467 Build 404 — Etsy Operator Exception Resolution Evidence & Publication Decision Revalidation; verified Build 401 Production GREEN.
+// BUILD401_CURRENT_CLIENT: Release 467 Build 404 — Etsy Operator Exception Resolution Evidence & Publication Decision Revalidation; verified Build 400 Production GREEN.
 // BUILD400_CURRENT_CLIENT: Release 467 Build 400 — Etsy Remote Draft Provider Acceptance, Reconciliation & Listing Evidence; verified Build 399 Production GREEN.
 // BUILD399_CURRENT_CLIENT: Release 467 Build 399 — Etsy Remote Draft Creation Preconditions & Controlled Trial; verified Build 398 Production GREEN.
 // BUILD398_CURRENT_CLIENT: Release 467 Build 398 — Etsy Outcome Review Operator Acceptance & Evidence Recheck; verified Build 397 Production GREEN.

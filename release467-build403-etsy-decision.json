@@ -35,5 +35,31 @@
   "docs": "docs/operations/RELEASE_467_BUILD_403_ETSY_DRAFT_DECISION.md",
   "next_build": 404,
   "next_title": "Etsy Operator Exception Resolution Evidence & Publication Decision Revalidation (proposed)",
-  "validation_note": "Final operator GET preview uses explicitly checked shipping attestation; final owner-ready action independently checks every consent."
+  "validation_note": "Final operator GET preview uses explicitly checked shipping attestation; final owner-ready action independently checks every consent.",
+  "final_closure": {
+    "dev_sha": "1ab8f0f3f1c5fc6e1650c380864a423deef9cc44",
+    "tree_sha": "2ea547cb46d5bccb3c3a6cd332c89e0c5fb446cd",
+    "proofs": {
+      "system_gate_run": 38709368501,
+      "current_application_quality_run": 38709368333,
+      "it_admin_runtime_proof_run": 38709368341,
+      "branch_hygiene_run": 38709368563
+    },
+    "ingested_by_build": 404,
+    "verified": true,
+    "release_workflow_run": 38709368344,
+    "d1_fanout_run": 38709368345
+  },
+  "production_checkpoint": {
+    "release": 467,
+    "build": 403,
+    "title": "Etsy Draft Review Exceptions & Owner Publication Decision Readiness",
+    "state": "PRODUCTION_GREEN",
+    "main_sha": "f404ae90e039af70405f6bdb4ec7886515e87b53",
+    "tree_sha": "2ea547cb46d5bccb3c3a6cd332c89e0c5fb446cd",
+    "production_pages_deploy_run": 38709622328,
+    "production_live_resource_integrity_run": 38709740946,
+    "remote_d1_queries": 0,
+    "role": "CURRENT_PRODUCTION_BASELINE"
+  }
 }

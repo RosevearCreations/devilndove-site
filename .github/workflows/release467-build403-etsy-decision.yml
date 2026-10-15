@@ -1,18 +1,6 @@
 # Build 403 final exact-dev-head proof after owner shipping-review parity and acceptance-image guards.
 name: Release 467 Build 403 Etsy Decision Readiness
 on:
-  push:
-    branches: [dev]
-    paths:
-      - 'functions/api/_lib/etsyDraftDecision403.mjs'
-      - 'functions/api/admin/etsy-draft-decision.js'
-      - 'functions/api/_lib/appModuleRoutes.js'
-      - 'admin/it-integrations/index.html'
-      - 'public/js/admin-etsy-draft-decision-v403.js'
-      - 'scripts/release467_build403_etsy_decision.test.mjs'
-      - '.github/workflows/release467-build403-etsy-decision.yml'
-      - 'current-development-authority.json'
-      - 'release467-build403-etsy-decision.json'
   workflow_dispatch:
 permissions:
   contents: read
