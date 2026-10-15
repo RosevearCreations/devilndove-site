@@ -188,6 +188,7 @@ const ETSY_OPERATOR_ADMIN_APIS = Object.freeze([
   '/api/admin/etsy-draft-completion',
   '/api/admin/etsy-image-reconciliation',
   '/api/admin/etsy-draft-decision',
+  '/api/admin/etsy-exception-resolution',
 ]);
 
 const STOREFRONT_ADMIN_APIS = Object.freeze([

@@ -1,0 +1,39 @@
+{
+  "release": 467,
+  "build": 404,
+  "title": "Etsy Operator Exception Resolution Evidence & Publication Decision Revalidation",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "1ab8f0f3f1c5fc6e1650c380864a423deef9cc44",
+      "tree": "2ea547cb46d5bccb3c3a6cd332c89e0c5fb446cd",
+      "system_gate_run": 38709368501,
+      "quality_run": 38709368333,
+      "it_admin_runtime_run": 38709368341,
+      "repository_hygiene_run": 38709368563
+    },
+    "production": {
+      "main_sha": "f404ae90e039af70405f6bdb4ec7886515e87b53",
+      "tree_sha": "2ea547cb46d5bccb3c3a6cd332c89e0c5fb446cd",
+      "production_pages_deploy_run": 38709622328,
+      "production_live_resource_integrity_run": 38709740946
+    }
+  },
+  "features": {
+    "owner_unverified_correction_evidence": true,
+    "original_hold_receipt_matching": true,
+    "one_resolution_per_hold": true,
+    "fresh_unpublished_etsy_get_gate": true,
+    "build401_402_compliance_checks": true,
+    "no_unresolved_holds": true,
+    "ready_403_after_latest_hold": true,
+    "owner_decision_revalidation_local_audit": true,
+    "provider_get_only": true,
+    "no_etsy_publish": true
+  },
+  "real_etsy_operator_acceptance": "PENDING_AUTHENTICATED_OWNER_ACTION",
+  "no_external_changes_on_deploy": true,
+  "docs": "docs/operations/RELEASE_467_BUILD_404_ETSY_EXCEPTION_RESOLUTION.md",
+  "next_build": 405,
+  "next_title": "Etsy Owner Publication Decision Packet & Non-Publishing Final Review (proposed)"
+}
