@@ -53,3 +53,17 @@ test('Build 406 production audit button loads after authenticated admin initiali
  assert.match(api,/value_exposed:false/);
  assert.doesNotMatch(api,/access_token_ciphertext|SELECT.*oauth_provider_connections/);
 });
+
+test('Every legacy local Etsy staging and channel CSV preparation path obeys Build 406 owner policy',()=>{
+ const exportApi=f('functions/api/admin/marketplace-export-preview.js');
+ const staging=f('functions/api/admin/etsy-product-syndication.js');
+ const listing=f('functions/api/admin/marketplace-listing-profile.js');
+ assert.match(exportApi,/eligible=outboundChannel\(channel\)\?products\.filter/);
+ assert.match(exportApi,/reviewEvidence\(\{channel,product/);
+ assert.match(exportApi,/arbitrary image URL selections are blocked/);
+ assert.match(exportApi,/manual canonical image selection/);
+ assert.match(staging,/if\(!channelOn\(pref,'etsy'\)\)/);
+ assert.match(staging,/reviewEvidence\(\{channel:'etsy'/);
+ assert.match(listing,/if\(!channelOn\(row,channel\)\)/);
+ assert.match(listing,/FROM product_images WHERE product_id=\?/);
+});

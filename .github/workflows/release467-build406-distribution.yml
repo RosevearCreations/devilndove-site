@@ -1,3 +1,4 @@
+# Build 406 final exact-head proof: destination policy, gallery source, shipping ban and safe settings audit.
 name: Release 467 Build 406 Canonical Channel Distribution
 on:
   push:
