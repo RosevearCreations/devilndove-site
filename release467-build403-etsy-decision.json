@@ -1,0 +1,38 @@
+{
+  "release": 467,
+  "build": 403,
+  "title": "Etsy Draft Review Exceptions & Owner Publication Decision Readiness",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "bffabd7017d2f15de4da017f6f5b97fa7b6cc6f5",
+      "tree": "81f61bf2271e3ab42ead3aaf4356b2a562011160",
+      "system_gate_run": 38681819775,
+      "quality_run": 38681819726,
+      "it_admin_runtime_run": 38681819825,
+      "repository_hygiene_run": 38681819692
+    },
+    "production": {
+      "main_sha": "4f09d902ba4ce3ed8329c9a4822f09e21ac8eb16",
+      "tree_sha": "81f61bf2271e3ab42ead3aaf4356b2a562011160",
+      "production_pages_deploy_run": 38682071549,
+      "production_live_resource_integrity_run": 38682152607
+    }
+  },
+  "features": {
+    "operator_exception_hold_with_reason": true,
+    "read_only_provider_image_decision_review": true,
+    "build401_402_receipt_consistency_gate": true,
+    "owner_manual_decision_readiness": true,
+    "shipping_policy_attestation": true,
+    "idempotent_audit_decisions": true,
+    "provider_requests_get_only": true,
+    "no_provider_write": true,
+    "no_publication": true
+  },
+  "real_owner_provider_acceptance": "PENDING_AUTHENTICATED_OWNER_ACTION",
+  "no_external_changes_on_deploy": true,
+  "docs": "docs/operations/RELEASE_467_BUILD_403_ETSY_DRAFT_DECISION.md",
+  "next_build": 404,
+  "next_title": "Etsy Operator Exception Resolution Evidence & Publication Decision Revalidation (proposed)"
+}

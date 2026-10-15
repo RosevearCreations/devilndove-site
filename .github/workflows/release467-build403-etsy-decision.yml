@@ -1,0 +1,32 @@
+name: Release 467 Build 403 Etsy Decision Readiness
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/_lib/etsyDraftDecision403.mjs'
+      - 'functions/api/admin/etsy-draft-decision.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'admin/it-integrations/index.html'
+      - 'public/js/admin-etsy-draft-decision-v403.js'
+      - 'scripts/release467_build403_etsy_decision.test.mjs'
+      - '.github/workflows/release467-build403-etsy-decision.yml'
+      - 'current-development-authority.json'
+      - 'release467-build403-etsy-decision.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  owner-publication-decision-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify no-publication, exception review and owner decision
+        run: |
+          node --check functions/api/_lib/etsyDraftDecision403.mjs
+          node --check functions/api/admin/etsy-draft-decision.js
+          node --check public/js/admin-etsy-draft-decision-v403.js
+          node --test scripts/release467_build403_etsy_decision.test.mjs
