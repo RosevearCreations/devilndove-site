@@ -1,0 +1,39 @@
+{
+  "release": 467,
+  "build": 402,
+  "title": "Etsy Image Upload Outcome Reconciliation & Final Operator Acceptance",
+  "state": "DEVELOPMENT_CLOSURE_CANDIDATE",
+  "starting_point": {
+    "development": {
+      "sha": "8bf31afb5363bcde3d40481b99e2914752b12522",
+      "tree": "252a7a1b1517b6c80975393fe2064e22d8a7b5da",
+      "system_gate_run": 38661010327,
+      "quality_run": 38661010403,
+      "it_admin_runtime_run": 38661010314,
+      "repository_hygiene_run": 38661010377
+    },
+    "production": {
+      "main_sha": "947d34f70cd5a496b4c2cc8c81718deb5b4f6c08",
+      "tree_sha": "252a7a1b1517b6c80975393fe2064e22d8a7b5da",
+      "production_pages_deploy_run": 38661292359,
+      "production_live_resource_integrity_run": 38661391832
+    }
+  },
+  "features": {
+    "operator_live_image_inspection": true,
+    "unknown_upload_outcome_fail_closed": true,
+    "require_exact_image_identity": true,
+    "one_time_owner_corroboration_audit": true,
+    "build401_compliance_receipt_required": true,
+    "final_owner_local_only_acceptance": true,
+    "cross_source_conflict_hold": true,
+    "provider_requests_get_only": true,
+    "no_provider_write": true,
+    "no_publication": true
+  },
+  "real_operator_provider_acceptance": "PENDING_AUTHENTICATED_OWNER_ACTION",
+  "no_external_changes_on_deploy": true,
+  "docs": "docs/operations/RELEASE_467_BUILD_402_ETSY_IMAGE_RECONCILIATION.md",
+  "next_build": 403,
+  "next_title": "Etsy Draft Review Exceptions & Owner Publication Decision Readiness (proposed)"
+}
