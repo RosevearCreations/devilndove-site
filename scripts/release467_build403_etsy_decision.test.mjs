@@ -45,7 +45,7 @@ test('Etsy shop, title, CAD price and quantity conflicts block owner readiness',
  assert.ok(status({shop:{shop_id:999}}).blockers.includes('shop_mismatch'));
  assert.ok(status({listing:{...listing,title:'Wrong Soap'}}).blockers.includes('title_mismatch'));
  assert.ok(status({listing:{...listing,quantity:99}}).blockers.includes('quantity_mismatch'));
- assert.ok(status({listing:{...listing,price:{amount:1200,divisor:100,currency_code:'CAD'}}).blockers.includes('cad_price_mismatch'));
+ assert.ok(status({listing:{...listing,price:{amount:1200,divisor:100,currency_code:'CAD'}}}).blockers.includes('cad_price_mismatch'));
 });
 test('Admin API local GET is read-only; only provider GET allowed; audit receipts idempotent',()=>{
  assert.equal(moduleKeyForPath('/api/admin/etsy-draft-decision'),MODULE_KEYS.STOREFRONT);
