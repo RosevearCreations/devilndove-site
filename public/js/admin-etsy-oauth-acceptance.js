@@ -55,7 +55,7 @@ async function load(){
     mount.appendChild(statusLine);
     const exp=Date.parse(String(conn.access_expires_at||''));
     const needsReconnect=Boolean(conn.connected)&&(!Number.isFinite(exp)||exp<=Date.now()+120000);
-    if(btn){btn.hidden=Boolean(conn.connected)&&!needsReconnect;btn.disabled=!d.connect_authorization_available;
+    if(btn){btn.hidden=Boolean(conn.connected)&&!needsReconnect;btn.disabled=Boolean(!d.connect_authorization_available);
       btn.textContent=needsReconnect?'Reconnect Etsy — renew expired access':'Connect Etsy';}
     if(needsReconnect){const note=document.createElement('p');note.className='small';
       note.textContent='Stored Etsy access token has expired or is near expiry. Reconnect Etsy here, then return to Build 399 and read live categories and profiles. Connecting does NOT create an Etsy draft.';mount.appendChild(note);}
