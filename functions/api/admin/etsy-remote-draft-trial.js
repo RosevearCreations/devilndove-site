@@ -3,6 +3,7 @@
 import {getDb,jsonResponse,auditAdminAction} from '../_lib/adminAudit.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 import {decryptOAuthSecret} from '../_lib/oauthSecurity.js';
+import {loadTrial409,isAuthorized409} from '../_lib/etsyTrialGate409.mjs';
 import {positive,safeSettings,connectionBlockers,localDraftReview,collectTaxonomy,remoteDraftForm} from '../_lib/etsyDraftTrial399.mjs';
 const output=(data,status=200)=>jsonResponse({ok:true,build:399,publication_performed:false,automatic_retry:false,...data},status,{'Cache-Control':'no-store'});
 const connSql="SELECT remote_subject_id,connection_status,scopes_json,access_expires_at,access_token_ciphertext FROM oauth_provider_connections WHERE provider_key='etsy' LIMIT 1";
@@ -105,6 +106,15 @@ export async function onRequestPost(context){
   if(review.blockers.length||review.fingerprint!==input.fingerprint)
    return output({ok:false,code:'local_evidence_changed',blockers:review.blockers,
     error:'Product, local draft or Etsy connection changed; reload readiness and review before any provider write.'},409);
+  // Build 409: a fresh canonical Product/image/shipping/owner approval is mandatory
+  // before the existing one-attempt unpublished Etsy POST can be claimed or sent.
+  const trial409=await loadTrial409(g.db,context.env,input.product_id,input.draft_id);
+  if(!trial409||!Number.isSafeInteger(Number(body.trial_409_receipt))||
+    !isAuthorized409({receipt:trial409.trial,source:trial409,draftId:input.draft_id,shippingProfileId:input.shipping_profile_id})||
+    Number(body.trial_409_receipt)!==Number(trial409.trial?.admin_action_audit_id))
+    return output({ok:false,code:'build409_operator_trial_authorization_missing_or_stale',
+      blockers:trial409?.blockers||['canonical_source_or_draft_not_found'],
+      error:'Fresh Build 409 owner authorization, original Product/media review, approved non-US shipping profile and bounded trial receipt are required. No Etsy request made.'},409);
   const prior=await g.db.prepare(claimsSql).bind(input.draft_id).first();
   if(prior)return output({ok:false,code:'prior_etsy_attempt_requires_reconciliation',
     receipt_id:Number(prior.admin_action_audit_id),

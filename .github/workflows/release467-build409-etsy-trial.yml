@@ -1,0 +1,28 @@
+name: Release 467 Build 409 Remote Draft Isolation
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/_lib/etsyTrialGate409.mjs'
+      - 'functions/api/admin/etsy-trial-409.js'
+      - 'functions/api/admin/etsy-remote-draft-trial.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'public/js/admin-etsy-trial-v409.js'
+      - 'public/js/admin-etsy-remote-draft-v399.js'
+      - 'admin/it-integrations/index.html'
+      - 'scripts/release467_build409_etsy_trial.test.mjs'
+      - '.github/workflows/release467-build409-etsy-trial.yml'
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+jobs:
+  operator-trial-and-publication-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build 409 provider-specific acceptance, audit, and legacy non-publishing regressions
+        run: node --test scripts/release467_build409_etsy_trial.test.mjs scripts/release467_build408_listing_operator.test.mjs scripts/release467_build407_listing_sync.test.mjs scripts/release467_build406_distribution.test.mjs scripts/release467_build399_etsy_draft.test.mjs
