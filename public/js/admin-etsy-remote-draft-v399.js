@@ -89,6 +89,9 @@ ids.options.addEventListener('click',async()=>{
 ids.create.addEventListener('click',async()=>{
  if(busy||!snapshot?.ready_for_operator_options||!options)return;
  if(!ids.c1.checked||!ids.c2.checked){ids.result.textContent='Confirm BOTH one-draft and no-retry safeguards first.';return;}
+ if(!Number(document.getElementById('etsy409TrialReceipt')?.value||0)){
+  ids.result.textContent='Use Build 409 to explicitly authorize the current Product, draft and non-US Etsy shipping profile first.';return;
+ }
  const tax=ids.taxonomy.value,ship=ids.shipping.value,ready=ids.ready.value;
  if(!idValid(tax)||!idValid(ship)||!idValid(ready)||!ids.who.value||!ids.when.value||!['true','false'].includes(ids.supply.value)){
   ids.result.textContent='Choose real Etsy taxonomy, shipping and processing profiles and product maker details.';return;
@@ -104,6 +107,7 @@ ids.create.addEventListener('click',async()=>{
    draft_id:snapshotAtClick.selected_draft.id,request_key:key,fingerprint:snapshotAtClick.fingerprint,
    taxonomy_id:Number(tax),shipping_profile_id:Number(ship),readiness_state_id:Number(ready),
    who_made:ids.who.value,when_made:ids.when.value,is_supply:ids.supply.value==='true',
+   trial_409_receipt:Number(document.getElementById('etsy409TrialReceipt')?.value||0),
    confirmed_unpublished_draft_only:true,confirmed_no_auto_retry:true
   })});
   ids.result.textContent='Etsy confirmed UNPUBLISHED draft listing #'+r.listing_id+
