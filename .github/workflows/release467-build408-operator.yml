@@ -1,0 +1,26 @@
+name: Release 467 Build 408 Operator Acceptance
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/_lib/listingSyncOperator408.mjs'
+      - 'functions/api/admin/listing-sync-408.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'public/js/admin-listing-sync-v408.js'
+      - 'admin/product-editor/index.html'
+      - 'scripts/release467_build408_listing_operator.test.mjs'
+      - '.github/workflows/release467-build408-operator.yml'
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+jobs:
+  operator-gated-local-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Safe local acceptance, draft preparation and reconciliation
+        run: node --test scripts/release467_build408_listing_operator.test.mjs scripts/release467_build407_listing_sync.test.mjs scripts/release467_build406_distribution.test.mjs

@@ -141,13 +141,21 @@
 <div class="dd-product-actions"><button type="button" class="btn" id="productDistribution406Save" disabled>Save selected Product images and owner shipping review</button></div>
 <p class="small" role="status" id="productDistribution406Status">Save Product first; destination controls are OFF until explicitly configured.</p>
 </section>
+<section class="card" id="listingSync408" style="margin:14px 0;padding:18px">
+<h2>Build 408 — Shared Product destination acceptance &amp; local draft evidence</h2>
+<p class="small">Load the existing Product's current Build 406 review first. This is a local-only operator acceptance and draft preparation step, not an Etsy or Facebook submission. All U.S. sales and shipping remain disabled.</p>
+<div class="dd-product-actions"><label>Destination <select class="input" id="listingSync408Channel"><option value="etsy">Etsy</option><option value="facebook">Facebook Marketplace</option></select></label><button type="button" class="btn" id="listingSync408Load">Load current source &amp; readiness</button></div>
+<label><input type="checkbox" id="listingSync408Consent"> I confirm draft-only preparation, U.S. shipping disabled, and no automated marketplace writes or publication.</label>
+<div class="dd-product-actions"><button type="button" class="btn" id="listingSync408Accept" disabled>Record owner destination acceptance</button><button type="button" class="btn" id="listingSync408Prepare" disabled>Prepare local draft payload</button><button type="button" class="btn" id="listingSync408Reconcile" disabled>Reconcile local preparation</button></div>
+<p class="small" id="listingSync408Status" role="status">This panel is idle until the operator clicks Load.</p>
+</section>
 <section class="dd-editor-panel" data-editor-panel="advanced" hidden><h2>Advanced workspaces</h2><p class="small">These systems remain separate so they cannot wake up merely because we edit a Product.</p><div class="dd-product-actions"><a class="btn" href="/admin/inventory-operations/">Inventory Operations</a><a class="btn" id="productEditorMediaAdvancedLink" href="/admin/catalog-media/">Image Editor</a><a class="btn" href="/admin/release-preflight/">Release Preflight</a><a class="btn" href="/admin/packaging-studio/">Packaging</a></div></section>
 
       <div class="dd-editor-footer"><div class="small" aria-live="polite">Build 390: Save Product verifies the stored dollar amount; $0.00 needs confirmation. Save remains available at the bottom of every tab. No autosave; confirm one Product write at a time.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-channel-intent-v405.js?v=405"></script><script src="/public/js/admin-product-distribution-v406.js?v=406"></script><script src="/public/js/admin-product-editor-v163.js?v=178&b390=1"></script>
+  <script src="/public/js/admin-product-channel-intent-v405.js?v=405"></script><script src="/public/js/admin-product-distribution-v406.js?v=406"></script><script src="/public/js/admin-listing-sync-v408.js?v=408"></script><script src="/public/js/admin-product-editor-v163.js?v=178&b390=1"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 </body>
 </html>
