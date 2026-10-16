@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {adapterContract,listingSyncReadiness} from '../functions/api/_lib/listingSyncReadiness407.mjs';
+import {reviewedSourceSignature} from '../functions/api/_lib/productDistribution406.mjs';
+const product={product_id:54,name:'Soap',description:'Handmade soap',price_cents:900,inventory_quantity:3,currency:'CAD',status:'draft'};
+const image={product_image_id:101,image_url:'https://assets.devilndove.com/products/54.webp',alt_text:'Handmade bar soap',public_use_status:'all_public_ok',width_px:1200,height_px:1200};
+const sig=reviewedSourceSignature(product,[101]);
+const receipt={details_json:JSON.stringify({channel:'etsy',product_id:54,image_ids:[101],owner_verified_destinations:true,us_shipping_disabled:true,source_signature:sig})};
+const base={destination:'etsy',product,images:[image],selectedIds:[101],preference:{details_json:'{"etsy":true,"facebook":false}'},policyReceipt:receipt};
+const providerEvidence={etsy_oauth_connected:true,shop_identity_verified:true,provider_draft_permission:true};
+const ownerAcceptance={destination:'etsy',product_id:54,accepted:true,source_signature:sig,owner_draft_approval:true};
+test('adapter capabilities cannot enable publishing',()=>{assert.equal(adapterContract('etsy').mode,'draft_only');assert.equal(adapterContract('facebook').mode,'review_only');assert.equal(adapterContract('unknown'),null);});
+test('acceptance is off by default and provider evidence required',()=>{const r=listingSyncReadiness(base);assert.equal(r.acceptance_complete,false);assert.equal(r.publication_allowed,false);assert.equal(r.external_execution_allowed,false);assert.ok(r.blockers.includes('acceptance_missing_etsy_oauth_connected'));});
+test('fresh reviewed canonical product allows only non-executing draft preparation',()=>{const r=listingSyncReadiness({...base,providerEvidence,ownerAcceptance});assert.deepEqual(r.blockers,[]);assert.equal(r.safe_to_prepare_draft,true);assert.equal(r.external_execution_allowed,false);assert.equal(r.publication_allowed,false);assert.equal(r.us_shipping_suspended,true);});
+test('unchanged product avoids duplicate sync',()=>{const r=listingSyncReadiness({...base,providerEvidence,ownerAcceptance,lastSyncedSignature:sig});assert.equal(r.sync_action,'no_change');assert.equal(r.safe_to_prepare_draft,false);});
+test('changed product invalidates stale owner and shipping/image reviews',()=>{const r=listingSyncReadiness({...base,product:{...product,price_cents:1000},providerEvidence,ownerAcceptance});assert.ok(r.blockers.includes('acceptance_stale_reapprove'));assert.ok(r.blockers.includes('source_or_media_changed_reapprove'));});
+test('unauthorized Facebook and unsupported destination always refuse execution',()=>{for(const destination of ['facebook','unknown']){const r=listingSyncReadiness({...base,destination,providerEvidence,ownerAcceptance});assert.equal(r.acceptance_complete,false);assert.equal(r.external_execution_allowed,false);assert.equal(r.publication_allowed,false);}});
