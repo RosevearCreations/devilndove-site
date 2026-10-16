@@ -1,0 +1,23 @@
+name: Release 467 Build 407 Listing Sync Readiness
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/_lib/listingSyncReadiness407.mjs'
+      - 'functions/api/_lib/productDistribution406.mjs'
+      - 'scripts/release467_build407_listing_sync.test.mjs'
+      - '.github/workflows/release467-build407-listing-sync.yml'
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+jobs:
+  safe-adapter-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fail-closed listing sync contract
+        run: node --test scripts/release467_build407_listing_sync.test.mjs
