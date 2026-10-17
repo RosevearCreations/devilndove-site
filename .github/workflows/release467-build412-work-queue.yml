@@ -1,0 +1,26 @@
+name: Release 467 Build 412 Escalation Work Queue
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/_lib/providerWorkQueue412.mjs'
+      - 'functions/api/admin/provider-work-queue-412.js'
+      - 'public/js/admin-provider-work-queue-v412.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'admin/it-integrations/index.html'
+      - 'scripts/release467_build412_work_queue.test.mjs'
+      - '.github/workflows/release467-build412-work-queue.yml'
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+jobs:
+  local-operator-assignment-and-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assert bounded queue, verified Admin assignments and safe local-only review
+        run: node --test scripts/release467_build412_work_queue.test.mjs scripts/release467_build411_evidence_governance.test.mjs scripts/release467_build410_draft_recovery.test.mjs scripts/release467_build409_etsy_trial.test.mjs scripts/release467_build408_listing_operator.test.mjs
