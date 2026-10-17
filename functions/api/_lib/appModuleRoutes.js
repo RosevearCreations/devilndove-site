@@ -195,6 +195,7 @@ const ETSY_OPERATOR_ADMIN_APIS = Object.freeze([
   '/api/admin/provider-draft-recovery-410',
   '/api/admin/provider-evidence-411',
   '/api/admin/provider-work-queue-412',
+  '/api/admin/provider-followup-413',
   '/api/admin/listing-sync-408',
   '/api/admin/production-variable-audit-406',
   '/api/admin/product-channel-intent',
