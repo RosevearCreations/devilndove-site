@@ -1,0 +1,26 @@
+name: Release 467 Build 414 Follow-Up Completion & SLA Exceptions
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'functions/api/_lib/providerCompletion414.mjs'
+      - 'functions/api/admin/provider-completion-414.js'
+      - 'public/js/admin-provider-completion-v414.js'
+      - 'admin/it-integrations/index.html'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'scripts/release467_build414_completion.test.mjs'
+      - '.github/workflows/release467-build414-completion.yml'
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+jobs:
+  evidence-safe-followup-completion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify immutable local completion, SLA exception routing and verified handoff chain
+        run: node --test scripts/release467_build414_completion.test.mjs scripts/release467_build413_followup.test.mjs scripts/release467_build412_work_queue.test.mjs scripts/release467_build411_evidence_governance.test.mjs scripts/release467_build410_draft_recovery.test.mjs
