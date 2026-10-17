@@ -6,7 +6,7 @@ const receiptId=r=>Number(r?.admin_action_audit_id||0);
 export const ASSIGN_ACTION='provider_escalation_412_assignment';
 export const REVIEW_ACTION='provider_escalation_412_destination_review';
 export const DECISIONS=Object.freeze({hold:'HOLD_DESTINATION_CHANGE',review:'REVIEWED_LOCAL_EVIDENCE_ONLY'});
-export const assigneeId=v=>Number.isSafeInteger(Number(v))&&Number(v)>0&&String(v).trim()===String(Number(v));
+export const assigneeId=v=>Number.isSafeInteger(Number(v))&&Number(v)>0&&String(v)===String(Number(v));
 export const noteValid=v=>typeof v==='string'&&v.trim().length>=12&&v.trim().length<=600;
 export function currentAssignment(row){
  const data=parseReceipt(row);
