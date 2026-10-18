@@ -43,7 +43,8 @@ export async function onRequestPost(c){
     d.product_id===Number(body.product_id)&&d.destination===body.destination&&
     d.draft_id===(body.destination==='etsy'?body.draft_id:null)&&d.decision===body.decision&&
     d.source_signature===body.expected_source_signature&&d.owner_note===String(body.owner_note||'').trim()&&
-    d.approval_receipt===body.expected_approval_receipt&&d.previous_review_receipt===body.expected_previous_decision_receipt;
+    d.approval_receipt===body.expected_approval_receipt&&d.previous_review_receipt===body.expected_previous_decision_receipt&&
+    sourceKeys.every(k=>d.expected_receipts?.[k]===body.expected_receipts?.[k]);
    return same?reply({receipt:old.admin_action_audit_id,idempotent:true,
     message:'Previously saved local review decision; no escalation or provider state was changed.'}):
     reply({error:'Conflicting idempotency key reuse.'},409);
@@ -56,6 +57,14 @@ export async function onRequestPost(c){
   const rows=(await db.prepare('SELECT admin_action_audit_id,actor_user_id,action_type,created_at,details_json FROM admin_action_audit WHERE target_type=? AND target_key=? AND action_type IN (?,?,?) ORDER BY admin_action_audit_id DESC LIMIT 101')
    .bind(targetType,targetKey,APPROVAL_TYPE,REOPEN_TYPE,REOPEN_DECISION_419_TYPE).all())?.results||[];
   const history=reconcileHistory418({rows:rows.slice(0,100),snapshot,scanComplete:rows.length<101});
+  // Independently reconcile the exact immutable Build 417 approval to all seven current source receipts.
+  const approval=rows.find(r=>r.action_type===APPROVAL_TYPE&&r.admin_action_audit_id===body.expected_approval_receipt);
+  let approvalData;try{approvalData=JSON.parse(approval?.details_json||'{}');}catch{approvalData=null;}
+  if(!approvalData||approvalData.action!=='approve_local_closure'||approvalData.local_only!==true||
+   approvalData.provider_called!==false||approvalData.publication_performed!==false||
+   approvalData.source_signature!==snapshot.source_signature||
+   !sourceKeys.every(k=>approvalData.expected_receipts?.[k]===snapshot.evidence_receipts?.[k]))
+   return reply({error:'The exact Build 417 owner approval does not reconcile to current source receipts.'},409);
   const verification=validateManualReopen419({snapshot,history,viewer:admin.user_id,body});
   if(!verification.allowed)return reply({error:'Local decision blocked. Reload and inspect audit evidence.',blockers:verification.blockers},409);
   const previous=rows.find(r=>r.action_type===DECISION_TYPE);
