@@ -42,10 +42,11 @@ export async function onRequestPost(c){
   const fields=['escalation','assignment','handoff','followup','completion','route','governance'];
   const predicate=types.map(()=>"(SELECT COALESCE(MAX(admin_action_audit_id),0) FROM admin_action_audit WHERE action_type=? AND target_type=? AND target_key=?)=?").join(' AND ');
   const sql="INSERT INTO admin_action_audit (actor_user_id,action_type,target_type,target_key,request_method,request_path,details_json,created_at) SELECT ?,?,?,?,'POST',?,?,CURRENT_TIMESTAMP WHERE "+predicate+
-   " AND NOT EXISTS(SELECT 1 FROM admin_action_audit WHERE action_type=? AND target_type=? AND target_key=? AND json_extract(details_json,'$.request_key')=?)";
+   " AND NOT EXISTS(SELECT 1 FROM admin_action_audit WHERE action_type=? AND target_type=? AND target_key=? AND json_extract(details_json,'$.request_key')=?)"+
+   " AND NOT EXISTS(SELECT 1 FROM admin_action_audit WHERE action_type=? AND target_type=? AND target_key=? AND json_extract(details_json,'$.expected_receipts.escalation')=?)";
   const values=[admin.user_id,TYPE,targetType,targetKey,new URL(c.request.url).pathname,JSON.stringify(record)];
   for(let i=0;i<types.length;i++)values.push(types[i],targetType,targetKey,Number(packet.evidence_receipts[fields[i]]||0));
-  values.push(TYPE,targetType,targetKey,body.request_key);
+  values.push(TYPE,targetType,targetKey,body.request_key,TYPE,targetType,targetKey,packet.evidence_receipts.escalation);
   const saved=await db.prepare(sql).bind(...values).run();
   if(Number(saved?.meta?.changes)!==1)return reply({error:'Concurrent audit change or duplicate approval; reload receipts.'},409);
   const verified=await db.prepare(find).bind(TYPE,targetType,targetKey,body.request_key).first();
