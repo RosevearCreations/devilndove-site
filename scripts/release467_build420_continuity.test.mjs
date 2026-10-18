@@ -38,3 +38,16 @@ test('invalid audit records and duplicate approvals hold',()=>{
  assert.ok(run([approved,{...approved,admin_action_audit_id:208}]).holds.includes('EXACT_ONE_CURRENT_APPROVAL_REQUIRED'));
  assert.ok(run([approved,{...first,details_json:'{invalid'}]).holds.includes('INVALID_OR_NONLOCAL_AUDIT_RECORD'));
 });
+
+test('new Admin continuity endpoint is Storefront gated and read only',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const {moduleKeyForPath,MODULE_KEYS}=await import('../functions/api/_lib/appModuleRoutes.js');
+ const api=readFileSync(new URL('../functions/api/admin/provider-reopen-continuity-420.js',import.meta.url),'utf8');
+ const html=readFileSync(new URL('../admin/it-integrations/index.html',import.meta.url),'utf8');
+ assert.equal(moduleKeyForPath('/api/admin/provider-reopen-continuity-420'),MODULE_KEYS.STOREFRONT);
+ assert.match(api,/verifiedAdminFromModule/);
+ assert.match(api,/LIMIT 101/);
+ assert.match(api,/scanComplete:records.length<101/);
+ assert.doesNotMatch(api,/\bfetch\s*\(|\bonRequestPost\b|\bINSERT\s+INTO\b|\bUPDATE\s+\w+\b|api\.etsy\.com|graph\.facebook\.com/);
+ assert.match(html,/admin-provider-reopen-continuity-v420\.js/);
+});
