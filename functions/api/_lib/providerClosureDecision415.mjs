@@ -40,7 +40,7 @@ export function closureDecision({
  // No current provider verification is ever inferred from D1-local receipts.
  // Even READY means human review of local audit records only, not provider closure.
  const ready=reasons.length===0;
- const verifiedClosed=positiveInt(closureReceipt?.receipt)&&closureReceipt?.verified===true&&
+ const verifiedClosed=ready&&positiveInt(closureReceipt?.receipt)&&closureReceipt?.verified===true&&
   closureReceipt?.escalation_receipt===escalation?.receipt&&
   closureReceipt?.assignment_receipt===assignment?.receipt&&
   closureReceipt?.completion_receipt===completion?.receipt&&
