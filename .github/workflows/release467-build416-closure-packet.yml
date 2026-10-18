@@ -5,6 +5,10 @@ on:
     paths:
       - 'functions/api/_lib/providerClosurePacket416.mjs'
       - 'scripts/release467_build416_closure_packet.test.mjs'
+      - 'functions/api/admin/provider-closure-packet-416.js'
+      - 'public/js/admin-provider-closure-packet-v416.js'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - 'admin/it-integrations/index.html'
       - '.github/workflows/release467-build416-closure-packet.yml'
   pull_request:
     branches: [dev, main]
