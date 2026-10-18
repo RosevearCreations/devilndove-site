@@ -37,3 +37,18 @@ test('no approval, absent open escalation and malformed request all fail closed'
  assert.equal(check({snapshot:{...snapshot,escalation_status:'CLOSED'}}).allowed,false);
  assert.equal(check({body:{...body,request_key:'bad'}}).allowed,false);
 });
+
+test('Admin-only endpoint preserves immutable audit CAS, no provider calls or draft mutation',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const {moduleKeyForPath,MODULE_KEYS}=await import('../functions/api/_lib/appModuleRoutes.js');
+ const api=readFileSync(new URL('../functions/api/admin/provider-reopen-decision-419.js',import.meta.url),'utf8');
+ const html=readFileSync(new URL('../admin/it-integrations/index.html',import.meta.url),'utf8');
+ assert.equal(moduleKeyForPath('/api/admin/provider-reopen-decision-419'),MODULE_KEYS.STOREFRONT);
+ assert.match(api,/verifiedAdminFromModule/);
+ assert.match(api,/LIMIT 101/);
+ assert.match(api,/NOT EXISTS/);
+ assert.match(api,/expected_previous_decision_receipt/);
+ assert.match(api,/admin_action_audit/);
+ assert.doesNotMatch(api,/\bfetch\s*\(|UPDATE marketplace_syndication_drafts|UPDATE provider_evidence|DELETE FROM admin_action_audit|api\.etsy\.com|graph\.facebook\.com/);
+ assert.match(html,/admin-provider-reopen-decision-v419\.js/);
+});
