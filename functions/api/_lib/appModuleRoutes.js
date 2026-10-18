@@ -204,6 +204,7 @@ const ETSY_OPERATOR_ADMIN_APIS = Object.freeze([
   '/api/admin/provider-reopen-decision-419',
   '/api/admin/provider-reopen-continuity-420',
   '/api/admin/provider-exception-followup-421',
+  '/api/admin/provider-exception-ack-422',
   '/api/admin/listing-sync-408',
   '/api/admin/production-variable-audit-406',
   '/api/admin/product-channel-intent',
