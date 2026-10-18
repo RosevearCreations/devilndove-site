@@ -17,7 +17,7 @@ export async function onRequestGet(context){
   sourceCurrent:snapshot.source_snapshot_current===true,
   assignedActive:Array.isArray(snapshot.admins)&&snapshot.admins.some(u=>Number(u.user_id)===Number(snapshot.assigned_user_id)),
   exceptionReasons:snapshot.exception_reasons,exceptionRoute:snapshot.route,
-  olderEvidenceOutsideScan:true // 414 scans only 160 receipts; fail closed on evidence beyond this bound
+  olderEvidenceOutsideScan:snapshot.evidence_scan_exhausted!==true // Require proof the 160-receipt scan was exhaustive
  });
  return Response.json({ok:true,build:415,product_id:snapshot.product_id,
   destination:snapshot.destination,evidence_receipts:receipts,closure_decision:result,
