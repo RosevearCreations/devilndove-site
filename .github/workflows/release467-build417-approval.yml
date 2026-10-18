@@ -1,0 +1,16 @@
+name: Release 467 Build 417 Closure Approval Proof
+on:
+  push:
+    branches: [dev, main, build417-closure-approval, build417-production-candidate]
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+jobs:
+  closure-approval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/release467_build417_approval.test.mjs scripts/release467_build416_closure_packet.test.mjs scripts/release467_build415_closure.test.mjs
