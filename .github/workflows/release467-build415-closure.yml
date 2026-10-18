@@ -1,0 +1,25 @@
+name: Release 467 Build 415 Closure Decision Proof
+on:
+  push:
+    branches: [dev, main, build415-sla-closure-decision]
+    paths:
+      - 'functions/api/_lib/providerClosureDecision415.mjs'
+      - 'scripts/release467_build415_closure.test.mjs'
+      - 'functions/api/admin/provider-closure-415.js'
+      - 'public/js/admin-provider-closure-v415.js'
+      - 'admin/it-integrations/index.html'
+      - 'functions/api/_lib/appModuleRoutes.js'
+      - '.github/workflows/release467-build415-closure.yml'
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+jobs:
+  local-decision-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/release467_build415_closure.test.mjs scripts/release467_build414_completion.test.mjs
