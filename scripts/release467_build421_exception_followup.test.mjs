@@ -41,3 +41,17 @@ test('no local exception cannot be presented as resolved',()=>{
  assert.equal(x.status,'NO_LOCAL_EXCEPTION_DECISION');
  assert.equal(x.exceptions_auto_resolved,false);
 });
+
+test('read-only Admin endpoint is module-gated, bounded and discoverable in IT Integrations',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const {moduleKeyForPath,MODULE_KEYS}=await import('../functions/api/_lib/appModuleRoutes.js');
+ const api=readFileSync(new URL('../functions/api/admin/provider-exception-followup-421.js',import.meta.url),'utf8');
+ const html=readFileSync(new URL('../admin/it-integrations/index.html',import.meta.url),'utf8');
+ assert.equal(moduleKeyForPath('/api/admin/provider-exception-followup-421'),MODULE_KEYS.STOREFRONT);
+ assert.match(api,/verifiedAdminFromModule/);
+ assert.match(api,/LIMIT 101/);
+ assert.match(api,/followupRows\.length<101/);
+ assert.match(api,/reconcileContinuity420/);
+ assert.doesNotMatch(api,/\bonRequestPost\b|\bINSERT INTO\b|\bUPDATE\s+\w+\b|\bDELETE FROM\b|\bfetch\s*\(/);
+ assert.match(html,/admin-provider-exception-followup-v421\.js/);
+});
