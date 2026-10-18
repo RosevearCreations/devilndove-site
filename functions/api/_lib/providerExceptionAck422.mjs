@@ -17,6 +17,8 @@ export function review422({snapshot,continuity,review,ackRows=[],complete=false}
  if(snapshot?.source_snapshot_current!==true||snapshot?.escalation_status!=='OPEN_OWNER_REVIEW')
   holds.push('SOURCE_ESCALATION_NOT_CURRENT');
  if(!id(continuity?.latest_decision_receipt)||!review?.exception_count)holds.push('EXCEPTION_DECISION_REQUIRED');
+ if(!Array.isArray(review?.exceptions)||review.exceptions.at(-1)?.exception_decision_receipt!==continuity?.latest_decision_receipt)
+  holds.push('LATEST_DECISION_NOT_CURRENT_EXCEPTION');
  const entries=Array.isArray(ackRows)?ackRows.map(row=>{
   let d;try{d=JSON.parse(row.details_json||'null');}catch{d=null;}
   const valid=d?.action==='ack_exception_followup'&&ACK_CHOICES.includes(d?.choice)&&
