@@ -5,7 +5,7 @@ const receipts={escalation:10,assignment:11,handoff:0,followup:12,completion:13,
 const snapshot={evidence_receipts:receipts,assigned_user_id:7,admins:[{user_id:7}],handoff:{status:'NOT_REQUIRED',verified:true},
  source_snapshot_current:true,escalation_status:'OPEN_OWNER_REVIEW',source_signature:'1234abcd'};
 const continuity={holds:[],scan_complete:true,latest_decision_receipt:30};
-const review={holds:[],scan_complete:true,exception_count:1,unresolved_evidence_count:0};
+const review={holds:[],scan_complete:true,exception_count:1,exceptions:[{exception_decision_receipt:30}],unresolved_evidence_count:0};
 const body={action:'ack_exception_followup',choice:'EVIDENCE_REVIEWED_FOLLOWUP_PENDING',
  request_key:'safe-ack-422-123456789',owner_note:'I reviewed the local evidence and retain manual control.',
  confirm_local_only:true,confirm_no_provider_action:true,confirm_no_publication:true,
@@ -54,4 +54,10 @@ test('Build 422 route and Admin UI are integrated; post only inserts into audit 
  assert.match(api,/expected_previous_ack_receipt/);
  assert.doesNotMatch(api,/\bfetch\s*\(|UPDATE marketplace_syndication_drafts|DELETE FROM admin_action_audit|api\.etsy\.com|graph\.facebook\.com/);
  assert.match(ui,/admin-provider-exception-ack-v422\.js/);
+});
+
+test('rejects a stale exception when a newer nonexception owner decision exists',()=>{
+ const newer={...continuity,latest_decision_receipt:31};
+ const state=review422({snapshot,continuity:newer,review,ackRows:[],complete:true});
+ assert.ok(state.holds.includes('LATEST_DECISION_NOT_CURRENT_EXCEPTION'));
 });
