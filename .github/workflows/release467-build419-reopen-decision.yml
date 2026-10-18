@@ -1,0 +1,22 @@
+name: Release 467 Build 419 Reopen Decision Proof
+on:
+  push:
+    branches: [dev, main, build419-reopen-decision, build419-production-candidate]
+    paths:
+      - 'functions/api/_lib/providerReopenDecision419.mjs'
+      - 'functions/api/admin/provider-reopen-decision-419.js'
+      - 'scripts/release467_build419_reopen_decision.test.mjs'
+      - '.github/workflows/release467-build419-reopen-decision.yml'
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+jobs:
+  manual-decision-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/release467_build419_reopen_decision.test.mjs scripts/release467_build418_history.test.mjs scripts/release467_build417_approval.test.mjs
