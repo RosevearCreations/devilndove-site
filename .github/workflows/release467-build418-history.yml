@@ -1,0 +1,16 @@
+name: Release 467 Build 418 Closure History Proof
+on:
+  push:
+    branches: [dev, main, build418-closure-history, build418-production-candidate]
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+jobs:
+  closure-history:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/release467_build418_history.test.mjs scripts/release467_build417_approval.test.mjs
