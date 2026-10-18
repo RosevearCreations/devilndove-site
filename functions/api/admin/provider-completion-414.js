@@ -64,7 +64,7 @@ async function load(db,dest,pid,did,people){
  const issues=exceptionReasons({sla,escalationOpen:open,assignedActive:active,assignment,
   sourceCurrent:sourceReady,handoff:chain,governance:gov,followup,completion:complete});
  const route=routeStatus({row:routeRow,escalationReceipt:e,assignment,followup,sourceSignature:source.signature});
- return {sc,product,source,escalationRow,assignment,handoff:chain,gov,followup,complete,sla,active,open,
+ return {sc,product,source,escalationRow,assignment,handoff:chain,gov,followup,complete,sla,active,open,auditCount:records.length,
   sourceReady,issues,route,routeRow,completionRow,govRow,handoffRow,followupRow,
   receipts:{escalation:e,assignment:assignment.receipt,handoff:handoff.receipt,followup:followup.receipt,
     completion:complete.receipt,route:route.receipt,governance:gov.receipt}};
@@ -75,7 +75,7 @@ function summary(s,people,admin){
  source_signature:s.source.signature,source_snapshot_current:s.sourceReady,assigned_user_id:s.assignment.assignee_user_id,
  viewer_user_id:admin.user_id,admins:people,sla:s.sla,handoff:s.handoff,governance:s.gov,
  followup:s.followup,completion:s.complete,exception_reasons:s.issues,route:s.route,
- evidence_receipts:s.receipts,scan_limit:160,provider_status_verified_now:false,
+ evidence_receipts:s.receipts,scan_limit:160,evidence_scan_exhausted:s.auditCount<160,provider_status_verified_now:false,
  publication_allowed:false,notifications_sent:false};
 }
 async function queue(db,people){
