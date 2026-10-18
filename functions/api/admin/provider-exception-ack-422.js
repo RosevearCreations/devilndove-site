@@ -79,22 +79,33 @@ export async function onRequestPost(c){
  const args=caseDetails(body);
  if(!args)return respond({error:'Invalid Product/draft selection.'},400);
  try{
+  // Exact idempotent retries are checked before current snapshot validation: a saved
+  // receipt is immutable and replay must not create another receipt after the first write.
+  const type=args.destination==='etsy'?'marketplace_draft':'product';
+  const key=args.destination==='etsy'?args.draft_id:String(args.product_id);
+  if(typeof body.request_key==='string'&&/^[A-Za-z0-9_-]{16,100}$/.test(body.request_key)){
+   const existing=await db.prepare("SELECT admin_action_audit_id,details_json FROM admin_action_audit WHERE action_type=? AND target_type=? AND target_key=? AND json_extract(details_json,'$.request_key')=? ORDER BY admin_action_audit_id DESC LIMIT 1")
+    .bind(ACK_TYPE,type,key,body.request_key).first();
+   if(existing){
+    let p;try{p=JSON.parse(existing.details_json||'null');}catch{p=null;}
+    const match=p&&p.actor_user_id===admin.user_id&&p.choice===body.choice&&
+     p.owner_note===String(body.owner_note||'').trim()&&
+     p.exception_decision_receipt===body.expected_exception_decision_receipt&&
+     p.previous_ack_receipt===body.expected_previous_ack_receipt&&
+     p.source_signature===body.expected_source_signature&&
+     RECEIPT_KEYS.every(k=>p.expected_receipts?.[k]===body.expected_receipts?.[k])&&
+     body.confirm_local_only===true&&body.confirm_no_provider_action===true&&
+     body.confirm_no_publication===true&&body.confirm_no_auto_resolution===true&&
+     body.confirm_us_shipping_suspended===true;
+    return match?respond({receipt:existing.admin_action_audit_id,idempotent:true,local_only:true}):
+     respond({error:'Conflicting acknowledgement request key.'},409);
+   }
+  }
   const data=await load(c,db,args);
   if(data.error)return data.error;
   const check=canAck422({snapshot:data.snapshot,continuity:data.continuity,review:data.review,
    state:data.state,body,viewer:admin.user_id});
   if(!check.allowed)return respond({error:'Explicit owner acknowledgement HOLD.',blockers:check.blockers},409);
-  const prior=await db.prepare("SELECT admin_action_audit_id,details_json FROM admin_action_audit WHERE action_type=? AND target_type=? AND target_key=? AND json_extract(details_json,'$.request_key')=? ORDER BY admin_action_audit_id DESC LIMIT 1")
-   .bind(ACK_TYPE,data.type,data.key,body.request_key).first();
-  if(prior){
-   let p;try{p=JSON.parse(prior.details_json||'null');}catch{p=null;}
-   const match=p&&p.actor_user_id===admin.user_id&&p.choice===body.choice&&
-    p.owner_note===body.owner_note.trim()&&p.exception_decision_receipt===body.expected_exception_decision_receipt&&
-    p.previous_ack_receipt===body.expected_previous_ack_receipt&&
-    RECEIPT_KEYS.every(k=>p.expected_receipts?.[k]===body.expected_receipts[k]);
-   return match?respond({receipt:prior.admin_action_audit_id,idempotent:true,local_only:true}):
-    respond({error:'Conflicting acknowledgement request key.'},409);
-  }
   const record={build:422,action:'ack_exception_followup',choice:body.choice,
    actor_user_id:admin.user_id,owner_note:body.owner_note.trim(),request_key:body.request_key,
    product_id:args.product_id,destination:args.destination,draft_id:args.draft_id,
