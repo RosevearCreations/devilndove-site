@@ -28,7 +28,9 @@ export async function onRequestPost(c){
   // Cross-action idempotency is scoped to this immutable approval ledger; no schema or provider changes.
   const find="SELECT admin_action_audit_id,details_json FROM admin_action_audit WHERE action_type=? AND target_type=? AND target_key=? AND json_extract(details_json,'$.request_key')=? ORDER BY admin_action_audit_id DESC LIMIT 1";
   const existing=await db.prepare(find).bind(TYPE,targetType,targetKey,body.request_key).first();
-  if(existing)return reply({receipt:existing.admin_action_audit_id,idempotent:true,local_only:true});
+  if(existing){const old=JSON.parse(existing.details_json||'{}');return old.action==='approve_local_closure'&&old.source_signature===body.expected_source_signature&&old.approved_by_user_id===admin.user_id?reply({receipt:existing.admin_action_audit_id,idempotent:true,local_only:true}):reply({error:'Conflicting approval request key.'},409);}
+  const previous=await db.prepare("SELECT admin_action_audit_id,details_json FROM admin_action_audit WHERE action_type=? AND target_type=? AND target_key=? ORDER BY admin_action_audit_id DESC LIMIT 1").bind(TYPE,targetType,targetKey).first();
+  if(previous){const prior=JSON.parse(previous.details_json||'{}');if(prior.expected_receipts?.escalation===packet.evidence_receipts.escalation)return reply({error:'This escalation already has a local approval receipt.',receipt:previous.admin_action_audit_id},409);}
   const record={build:417,action:'approve_local_closure',request_key:body.request_key,product_id:Number(body.product_id),
    destination:body.destination,draft_id:body.destination==='etsy'?targetKey:null,
    source_signature:snapshot.source_signature,expected_receipts:packet.evidence_receipts,
