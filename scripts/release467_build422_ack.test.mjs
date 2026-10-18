@@ -40,3 +40,18 @@ test('ack history becomes HOLD if owner changed or scan truncated',()=>{
  assert.equal(review422({snapshot,continuity,review,ackRows:[row],complete:false}).status,'HOLD_FOR_HUMAN_REVIEW');
  assert.equal(review422({snapshot:{...snapshot,assigned_user_id:8,admins:[{user_id:8}]},continuity,review,ackRows:[row],complete:true}).status,'HOLD_FOR_HUMAN_REVIEW');
 });
+
+test('Build 422 route and Admin UI are integrated; post only inserts into audit ledger',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const {moduleKeyForPath,MODULE_KEYS}=await import('../functions/api/_lib/appModuleRoutes.js');
+ const api=readFileSync(new URL('../functions/api/admin/provider-exception-ack-422.js',import.meta.url),'utf8');
+ const ui=readFileSync(new URL('../admin/it-integrations/index.html',import.meta.url),'utf8');
+ assert.equal(moduleKeyForPath('/api/admin/provider-exception-ack-422'),MODULE_KEYS.STOREFRONT);
+ assert.match(api,/verifiedAdminFromModule/);
+ assert.match(api,/LIMIT 101/);
+ assert.match(api,/NOT EXISTS/);
+ assert.match(api,/INSERT INTO admin_action_audit/);
+ assert.match(api,/expected_previous_ack_receipt/);
+ assert.doesNotMatch(api,/\bfetch\s*\(|UPDATE marketplace_syndication_drafts|DELETE FROM admin_action_audit|api\.etsy\.com|graph\.facebook\.com/);
+ assert.match(ui,/admin-provider-exception-ack-v422\.js/);
+});
