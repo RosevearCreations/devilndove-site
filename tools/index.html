@@ -178,29 +178,18 @@
 <img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
 <div>
 <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-<div class="small">Workshop • Art • Tools • Movies</div>
+<div class="small">Multi-discipline artisan & maker workshop</div>
 </div>
 </div>
-<div style="display:flex;gap:14px;flex-wrap:wrap">
-<a href="/index.html">Home</a>
-<a href="/about/index.html">About</a>
-<a href="/gallery/index.html">Art</a>
-<a href="/creations/index.html">Creations</a>
-<a href="/tools/index.html">Tools</a>
-<a href="/supplies/index.html">Supplies</a>
-<a href="/shop/index.html">Shop</a>
-<a href="/movies/index.html">Movies</a>
-<a href="/contact/index.html">Contact</a>
-</div>
+<nav class="links" aria-label="Main navigation"><a href="/">Home</a><a href="/shop/">Shop</a><a href="/custom-request/">Custom Work</a><a href="/tools/" aria-current="page">Tools</a><a href="/supplies/">Supplies</a><a href="/workshop-journal/">Watch us try</a><a href="/about/">About</a><a href="/cart/">Cart</a></nav>
 </div>
 <div class="hero">
 <span class="badge">Toolshed</span>
 <div class="hero-grid" style="margin-top:12px">
 <div class="card" style="padding:18px">
-<h1>Workshop tools we use at Devil n Dove</h1>
+<h1>Tools from our workshop</h1>
 <p>
-            Our toolshed is a real-world working collection — jewelry tools, resin gear, laser and CNC accessories,
-            safety equipment, filming tools, and workshop helpers. We use duplicates in some cases for different stations/jobs.
+            Discover the actual tools we use for jewelry, casting, resin, laser, CNC and maker experiments. Browse by workstation or search for a particular tool. These are workshop references, not products offered for checkout.
           </p>
 </div>
 <div class="hero-media">
@@ -260,7 +249,7 @@
 </div>
 <div id="toolsGrid" style="margin-top:12px"></div>
 <div class="small" style="margin-top:12px">
-        Links go to Amazon.ca (reference/search links only). Images are served from our R2 bucket.
+        Our workshop tools are shared as references, not automatically for sale. External links open Amazon.ca searches or manufacturer listings; no purchase is made on our site.
       </div>
 <div class="small-note">
         Public view hides internal storage/location details. Duplicate tools may be intentional (multiple stations / multiple jobs).
@@ -333,7 +322,7 @@
         if (typeof item.tags === 'string') return item.tags.split(',').map((x) => x.trim()).filter(Boolean);
         return [];
       }
-      const getHowWeUse = (item) => safeText(item.how_we_use) || safeText(item.use_case) || safeText(item.use_cases) || safeText(item.notes_public) || safeText(item.notes);
+      const getHowWeUse = (item) => safeText(item.notes_public) || safeText(item.how_we_use) || safeText(item.use_case) || safeText(item.use_cases);
       const getBrand = (item) => safeText(item.brand_guess) || safeText(item.brand);
       const toolKey = (item) => norm(item.source_key || item.item_group_key_strict || item.item_group_key_loose || getToolName(item));
       const qEl = document.getElementById('toolQ');
@@ -420,7 +409,7 @@
         Array.from(tags).sort((a,b) => a.localeCompare(b)).forEach((v) => { const opt = document.createElement('option'); opt.value = v; opt.textContent = v; tagEl.appendChild(opt); });
       }
       function buildToolCard(item, reorderKeys){
-        const name = getToolName(item), brand = getBrand(item), area = getPrimaryArea(item), cat = getCategory(item), tags = getProcessTags(item), how = getHowWeUse(item), imgUrl = getR2ImageUrl(item), amazon = getAmazonUrl(item), isReorder = reorderKeys.has(toolKey(item));
+        const name = getToolName(item), brand = getBrand(item), area = getPrimaryArea(item), cat = getCategory(item), tags = getProcessTags(item), how = getHowWeUse(item).replace(/\\b(?:amazon csv|asin|latest order|order number|purchase price|ppu)\\b[\\s\\S]*/i,'').trim(), imgUrl = getR2ImageUrl(item), amazon = getAmazonUrl(item), isReorder = reorderKeys.has(toolKey(item));
         return `
           <div class="tool card">
             <div class="thumb">
@@ -435,8 +424,8 @@
               </div>
               ${how ? `<div class="note">${escHtml(how)}</div>` : ''}
               <div class="actions">
-                <button class="btnlink secondary" type="button" data-add-reorder="${escHtml(toolKey(item))}">Add to reorder</button>
-                <a class="btnlink" href="${amazon}" target="_blank" rel="noopener">Amazon.ca search</a>
+                <button class="btnlink secondary" type="button" data-add-reorder="${escHtml(toolKey(item))}">Save to list</button>
+                <a class="btnlink" href="${amazon}" target="_blank" rel="noopener">Find similar on Amazon.ca</a>
               </div>
             </div>
           </div>`;
