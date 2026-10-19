@@ -59,6 +59,20 @@
  '/workshop-journal/coin-and-spoon-ring-care/':[['metal-work.hero.brand-v3-visual','122-metal-work-banner.webp']],
  '/custom-gifts-southern-ontario/':[['gift-ideas.hero.brand-v3-visual','125-gift-ideas-banner.webp']]
  };
+
+ // Additional verified page-route placements, asset batch 126-135.
+ Object.assign(additional,{
+  '/workshop-journal/':[...(additional['/workshop-journal/']||[]),['journal.feature.brand-v3-visual','126-workshop-journal-banner.webp']],
+  '/vintage-finds-ontario/':[['lapidary.feature.brand-v3-visual','127-lapidary-stones-banner.webp']],
+  '/laser-engraving-ontario/':[['fabrication.feature.brand-v3-visual','128-laser-cnc-3d-printing-banner.webp']],
+  '/capabilities/':[['auto-detailing.feature.brand-v3-visual','129-auto-detailing-banner.webp']],
+  '/collections/':[...(additional['/collections/']||[]),['paracord.feature.brand-v3-visual','130-paracord-creations-banner.webp']],
+  '/shop/':[['apparel.feature.brand-v3-visual','131-apparel-merchandise-banner.webp']],
+  '/marketplaces/':[['markets.feature.brand-v3-visual','132-market-events-banner.webp']],
+  '/contact/':[['wholesale.feature.brand-v3-visual','133-wholesale-opportunities-banner.webp']],
+  '/workshop-journal/coin-and-spoon-ring-care/':[...(additional['/workshop-journal/coin-and-spoon-ring-care/']||[]),['care.feature.brand-v3-visual','134-care-instructions-banner.webp']],
+  '/terms/':[['policies.feature.brand-v3-visual','135-shipping-policies-banner.webp']]
+ });
  function renderSupplemental(){
   let route=location.pathname.replace(/\\/index\\.html$/,'/');if(!route.endsWith('/'))route+='/';
   const placements=additional[route]||[];if(!placements.length)return;
