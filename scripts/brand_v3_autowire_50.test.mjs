@@ -26,7 +26,7 @@ test('exact 1-50 manifest uses stable, non-guessed brand-v3 filenames',()=>{
 });
 test('Set 08 maps ten correctly named category and featured assets without modifying real product imagery',()=>{
  const map=src.slice(src.indexOf('const assets={'),src.indexOf('};',src.indexOf('const assets={')));
- const matches=[...map.matchAll(/\\b(\\d+):'([^']+\\.webp)'/g)];
+ const matches=[...map.matchAll(/\b(\d+):'([^']+\.webp)'/g)];
  const assets=Object.fromEntries(matches.map(m=>[Number(m[1]),m[2]]));
  const expected=[
   '71-jewellery-category.webp','72-resin-art-category.webp',
