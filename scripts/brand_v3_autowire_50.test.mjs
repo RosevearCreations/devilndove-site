@@ -201,3 +201,30 @@ test('Set 13 Admin banners 121-130 have exact filenames and routes without chang
  // Owner-supplied binary WebPs are uploaded separately from the code commit.
  assert.doesNotMatch(loader,/fetch\(|POST\s*\(|\/api\//);
 });
+
+
+test('Set 14 Admin banners 131-140 map all ten named files to existing pages without modifying operations',()=>{
+ const manifest=read('public/js/brand-v3-auto.js');
+ const loader=read('public/js/admin-brand-v3-set14.js');
+ const css=read('css/brand-v3-theme.css');
+ const middleware=read('functions/_middleware.js');
+ const files=["131-admin-product-media-photography.webp","132-admin-design-creative-development.webp","133-admin-task-management-work-orders.webp","134-admin-shipping-logistics.webp","135-admin-customer-support-communications.webp","136-admin-finance-accounting.webp","137-admin-sales-business-analytics.webp","138-admin-integrations-api-connections.webp","139-admin-website-brand-customization.webp","140-admin-system-health-maintenance.webp"];
+ const routes=["/admin/product-image-quality/","/admin/creative-project-pilot/","/admin/today-tasks/","/admin/order-fulfillment-care/","/admin/customer-documents/","/admin/finance/","/admin/finance-product-inventory-unit-economics/","/admin/it-platform/","/admin/content-studio/","/admin/reliability/"];
+ const entries=[...manifest.matchAll(/\b(\d+):'([^']+\.webp)'/g)];
+ const assets=new Map(entries.map(match=>[Number(match[1]),match[2]]));
+ for(let i=0;i<files.length;i++){
+  const number=i+131;
+  const html=read(routes[i].slice(1)+'index.html');
+  assert.equal(assets.get(number),files[i],files[i]);
+  assert.ok(loader.includes('"'+routes[i]+'": "'+files[i]+'"'),routes[i]);
+  assert.ok(html.includes('/public/js/admin-brand-v3-set14.js?v=14'),routes[i]);
+  // The upload is independent: no test claims the WebP exists until uploaded.
+ }
+ assert.match(loader,/testImage.onload/);
+ assert.match(loader,/testImage.onerror/);
+ assert.match(loader,/insertAdjacentElement/);
+ assert.match(css,/dd-brand-v3-set14-banner/);
+ assert.match(css,/object-fit:contain/);
+ assert.match(middleware,/brand-v3-visual-20261019-set14/);
+ assert.doesNotMatch(loader,/fetch\(|XMLHttpRequest|\/api\/|checkout\s*\(/);
+});
