@@ -253,3 +253,28 @@ test('Set 15 Admin banners 141-150 use exact filename/route mappings and preserv
  assert.doesNotMatch(loader,/fetch\(|XMLHttpRequest|\/api\/|POST\s*\(/);
  // Owner uploads the binary WebPs independently; do not assert uploaded status here.
 });
+
+
+test('Set 16 Admin banners 151-160 map each filename to its real page without replacing operations',()=>{
+ const manifest=read('public/js/brand-v3-auto.js');
+ const loader=read('public/js/admin-brand-v3-set16.js');
+ const css=read('css/admin-brand-v3-set16.css');
+ const rows=[["151-admin-workshop-capabilities.webp","/admin/workshop-capabilities/"],["152-admin-workshop-knowledge.webp","/admin/workshop-knowledge/"],["153-admin-workshop-readiness.webp","/admin/workshop-readiness/"],["154-admin-project-work-orders.webp","/admin/project-work-orders/"],["155-admin-production-release.webp","/admin/order-production-release-readiness/"],["156-admin-inventory-fulfillment.webp","/admin/order-inventory-fulfillment-readiness/"],["157-admin-project-profitability.webp","/admin/project-profitability-reconciliation/"],["158-admin-mobile-workshop.webp","/admin/mobile-workshop-assistant/"],["159-admin-maker-stories.webp","/admin/maker-story-coverage/"],["160-admin-inventory-intelligence.webp","/admin/inventory-creator-intelligence/"]];
+ const matches=[...manifest.matchAll(/\b(\d+):'([^']+\.webp)'/g)];
+ const byId=new Map(matches.map(m=>[Number(m[1]),m[2]]));
+ for(let i=0;i<rows.length;i++){
+  const [file,route]=rows[i];
+  const html=read(route.slice(1)+'index.html');
+  assert.equal(byId.get(151+i),file);
+  assert.ok(loader.includes('"'+route+'": "'+file+'"'),route);
+  assert.ok(html.includes('/public/js/admin-brand-v3-set16.js?v=16'),route);
+  assert.ok(html.includes('/css/admin-brand-v3-set16.css?v=16'),route);
+ }
+ assert.match(loader,/image.onload/);
+ assert.match(loader,/image.onerror/);
+ assert.match(loader,/insertAdjacentElement\('beforebegin'/);
+ assert.match(css,/object-fit:contain/);
+ assert.match(css,/overflow-x:auto/);
+ assert.doesNotMatch(loader,/fetch\(|XMLHttpRequest|\/api\/|POST\s*\(/);
+ // User uploads physical WebPs separately; this test checks mapped intent only.
+});
