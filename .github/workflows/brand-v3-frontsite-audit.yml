@@ -1,0 +1,31 @@
+name: Devil n Dove — Full Frontsite Brand V3 Audit
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'scripts/brand_v3_frontsite_audit.mjs'
+      - '.github/workflows/brand-v3-frontsite-audit.yml'
+      - 'css/brand-v3-theme.css'
+      - 'functions/_middleware.js'
+      - 'index.html'
+      - '**/index.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  full-frontsite-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit every public HTML route and shared Brand V3 injections
+        run: node scripts/brand_v3_frontsite_audit.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: brand-v3-full-frontsite-audit
+          path: artifacts/brand-v3-frontsite-audit.json
+          retention-days: 14
