@@ -3727,3 +3727,33 @@ body:has(#toolsGrid) .tool.card .tag,body:has(#supGrid) .item.card .tag{font-siz
 body:has(#toolsGrid) .controls .toolbar-row,body:has(#supGrid) .controls .toolbar-row{padding-block:10px}
 body:has(#toolsGrid) .tool.card .thumb .ph,body:has(#supGrid) .item.card .thumb .ph{background:#172136;color:#c0cce0;overflow-wrap:anywhere}
 @media(max-width:590px){body[data-admin-page=system-operations] #opsStatus{display:block;margin:9px 0 0}}
+
+
+/* DEVIL N DOVE — BRAND V3 COPPER / PURPLE CONTINUITY (Oct 2026)
+   Approved art palette only; no new image URLs until optimized assets are deployed. */
+:root{
+ --dd-ink:#090d18;
+ --dd-night-plum:#180e2c;
+ --dd-purple:#914cff;
+ --dd-purple-bright:#b47bff;
+ --dd-copper:#c58b59;
+ --dd-antique-gold:#ddb46e;
+ --dd-cream:#fff0dc;
+ --dd-mist:#bfc7da;
+}
+body .nav .links a:hover,
+body .nav .links a[aria-current=page]{border-color:rgba(221,180,110,.6)}
+body :where(.card,.shop-collection-card,.shop-product-card,.tool.card,.item.card):hover{
+ border-color:rgba(193,138,94,.55)
+}
+body .btn.primary,
+body [data-add-shop-cart-id]{
+ box-shadow:0 3px 12px rgba(116,61,196,.22),inset 0 0 0 1px rgba(221,180,110,.24)
+}
+body .hero :where(h1,h2),body .page-hero :where(h1,h2){
+ text-shadow:0 2px 18px rgba(11,8,22,.28)
+}
+body :where(.tag,.pill){border-color:rgba(221,180,110,.36)}
+body :where(a,button,input,select,textarea):focus-visible{
+ outline-color:var(--dd-antique-gold)
+}
