@@ -1,0 +1,109 @@
+/* Devil n Dove — Brand V3 visual alignment.
+   Approved October 2026 references: visual boards, banners, real-looking
+   product cards, workshop photography and admin dashboard screenshots.
+   Decorative presentation only: product/order/account data stays live.
+   Loaded by shared middleware on storefront and admin routes.
+*/
+:root{
+  --dd-brand-v3-navy:#1a1230;
+  --dd-brand-v3-royal:#2e1b55;
+  --dd-brand-v3-purple:#5a3a8c;
+  --dd-brand-v3-lavender:#8b6aa9;
+  --dd-brand-v3-gold:#d4af37;
+  --dd-brand-v3-ivory:#f5e6d3;
+  --dd-brand-v3-charcoal:#0e0b14;
+  --dd-brand-v3-violet-action:#7c43db;
+  --dd-color-bg:#0e0b14;
+  --dd-color-surface:#141425;
+  --dd-color-surface-raised:#1a1730;
+  --dd-color-surface-soft:#110f20;
+  --dd-color-text:#f6f2fa;
+  --dd-color-text-muted:#c5bed7;
+  --dd-color-border:#4b3c62;
+  --dd-color-focus:#dbbcff;
+  --dd-color-accent:#b47bff;
+  --dd-color-on-light:#1a1230;
+  --bg:var(--dd-color-bg);
+  --card:var(--dd-color-surface);
+  --text:var(--dd-color-text);
+  --muted:var(--dd-color-text-muted);
+  --border:var(--dd-color-border);
+  --accent:var(--dd-color-accent);
+  --gold:var(--dd-brand-v3-gold);
+}
+html,body{background:var(--dd-color-bg);color:var(--dd-color-text)}
+body .nav,body .admin-shell>.nav{
+  background:linear-gradient(112deg,#0d111f 5%,#19122d 100%);
+  border-color:rgba(139,106,169,.46);
+  box-shadow:0 10px 30px rgba(0,0,0,.19);
+}
+body .nav .links>a,body .admin-shell>.nav .links>a{
+  border:1px solid transparent;
+  border-radius:11px;
+  transition:background-color .15s ease,border-color .15s ease;
+}
+body .nav .links>a:hover,body .nav .links>a.active,
+body .nav .links>a[aria-current="page"],
+body .admin-shell>.nav .links>a[aria-current="page"]{
+  background:linear-gradient(120deg,#281947,#3d2364);
+  border-color:rgba(180,123,255,.68);
+  color:#fff4ff;
+  text-decoration:none;
+}
+body .card,body .admin-panel,body .admin-stat{
+  border-color:rgba(139,106,169,.38);
+}
+body :where(.hero,.page-hero,.public-service-hero){
+  border-color:rgba(139,106,169,.42);
+}
+body .btn.primary,body [data-add-shop-cart-id]{
+  color:#fff;
+  background:linear-gradient(125deg,#5329b3,#773bcd);
+  border-color:#9b6ae0;
+  box-shadow:0 3px 16px rgba(92,45,172,.2),inset 0 0 0 1px rgba(212,175,55,.2);
+}
+body .btn.primary:hover,body [data-add-shop-cart-id]:hover{
+  background:linear-gradient(125deg,#6637c5,#884be2);
+  border-color:#d2a9ff;
+}
+body :where(.btn,a.btn):not(.primary):not([data-add-shop-cart-id]){
+  border-color:rgba(139,106,169,.56);
+}
+body :where(.btn,a.btn):not(.primary):not([data-add-shop-cart-id]):hover{
+  border-color:var(--dd-brand-v3-lavender);
+}
+body :where(.card,.shop-product-card,.shop-collection-card,.tool.card,.item.card){
+  transition:border-color .16s ease,box-shadow .16s ease;
+}
+body :where(.shop-product-card,.shop-collection-card,.tool.card,.item.card):hover{
+  border-color:rgba(212,175,55,.63);
+  box-shadow:0 8px 28px rgba(12,7,23,.36);
+}
+body:has(#shopIntentHeading) #shopProducts .shop-product-card,
+body:has(#shopIntentHeading) .shop-collection-card-grid>.shop-collection-card,
+body:has(#toolsGrid) .tool.card,
+body:has(#supGrid) .item.card{
+  background-color:#151425;
+  border-color:rgba(139,106,169,.48);
+}
+body:has(#shopIntentHeading) #shopProducts .shop-card-main-image,
+body:has(#toolsGrid) .tool.card .thumb,
+body:has(#supGrid) .item.card .thumb{
+  background-color:#0c0e1b;
+}
+body .admin-shell .dd-admin-dashboard-grid>*{
+  border-color:rgba(139,106,169,.42);
+}
+body :where(input,textarea,select){
+  background-color:var(--dd-color-surface-soft);
+  color:var(--dd-color-text);
+  border-color:var(--dd-color-border);
+}
+body :where(a,button,input,textarea,select,[role="button"]):focus-visible{
+  outline:3px solid var(--dd-color-focus);
+  outline-offset:3px;
+}
+@media(prefers-reduced-motion:reduce){
+  body .nav .links>a,
+  body :where(.card,.shop-product-card,.shop-collection-card,.tool.card,.item.card){transition:none}
+}

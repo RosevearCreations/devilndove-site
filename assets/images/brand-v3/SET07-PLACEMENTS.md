@@ -1,6 +1,6 @@
 # Devil n Dove Set 7 (61–70) — suggested decorative Admin placements
 
-These images are reusable, non-interactive section illustrations for the corresponding existing pages. They are *not* screenshots or data-bearing UI replacements.
+These images are **draft** non-interactive decorative illustrations and are **not approved visual masters**. The user-provided realistic UI / photographic references and the 01–60 image kits are the design standard. These drafts should not be rolled into live Admin screens until reworked to match the approved aesthetic.
 
 | File in `assets/images/brand-v3/` | Suggested Admin route |
 | --- | --- |
