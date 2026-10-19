@@ -1,0 +1,18 @@
+name: Devil n Dove Signature Design V1 UI Structural Acceptance
+on:
+  push:
+    branches: [dev, main, dd-signature-design-v1, dd-signature-v1-production-candidate]
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+jobs:
+  ui-signature:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/signature_design_v1.test.mjs
+      - run: node --test scripts/release467_build425_owner_acceptance.test.mjs scripts/release467_build424_acceptance.test.mjs
