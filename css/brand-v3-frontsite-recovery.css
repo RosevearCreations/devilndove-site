@@ -1,0 +1,71 @@
+/* Devil n Dove Brand V3 — 70-page public site polish, independent of Admin.
+   Real customer / product images use contain; no fictional listing data. */
+body:not([data-admin-page]) :where(.card,.public-service-card,.public-media-band){
+ border-color:rgba(139,106,169,.43);
+ border-radius:16px;
+}
+body:not([data-admin-page]) :where(.card,.public-service-card):hover{
+ border-color:rgba(212,175,55,.53);
+}
+body :where(.dd-brand-v3-illustrative-frame){
+ display:block;width:100%;max-width:100%;
+ margin:10px 0 20px;overflow:hidden;
+ border-radius:16px;border:1px solid rgba(139,106,169,.53);
+ background:linear-gradient(120deg,#111425,#281635);
+}
+body :where(.dd-brand-v3-illustrative-frame) img[data-brand-v3-recovered="1"]{
+ display:block;width:100%;height:auto;max-height:clamp(260px,38vw,485px);
+ object-fit:contain;object-position:center;background-color:#151123;
+}
+body :where(img[data-brand-v3-recovered="1"]){
+ max-width:100%;object-fit:contain;object-position:center;
+ background:linear-gradient(130deg,#161024,#1d1730);
+}
+/* Respect customer merchandise photography and show it fully within modern cards. */
+body :where(.shop-product-card,.shop-item-card,.tool.card,.item.card){
+ border:1px solid rgba(139,106,169,.48);border-radius:16px;
+ background:linear-gradient(138deg,#111929,#1a1529);
+ box-shadow:0 7px 24px rgba(0,0,0,.18);
+}
+body :where(.shop-product-card,.shop-item-card,.tool.card,.item.card) :where(.thumb,.shop-card-main-image){
+ display:grid;place-items:center;overflow:hidden;
+ border-radius:12px;background-color:#121322;
+}
+body :where(.shop-product-card,.shop-item-card,.tool.card,.item.card) :where(.thumb,.shop-card-main-image) img{
+ display:block;max-width:100%;max-height:100%;object-fit:contain;
+}
+/* Default content sections, guides and public support pages */
+body :where(.hero,.page-hero,.public-service-hero){
+ border-radius:17px;
+ background-image:linear-gradient(120deg,rgba(13,17,31,.95),rgba(45,22,70,.83));
+ border:1px solid rgba(139,106,169,.45);
+}
+body :where(.hero,.page-hero,.public-service-hero) :where(h1,h2){
+ line-height:1.18;overflow-wrap:break-word;
+}
+body :where(.grid,.shop-collection-card-grid,.dd-brand-v3-promo-grid){
+ max-width:100%;min-width:0;
+}
+body :where(.grid,.shop-collection-card-grid,.dd-brand-v3-promo-grid)>*{min-width:0}
+body :where(.media-managed-slot-frame,.public-media-band){
+ max-width:100%;
+}
+body :where(.dd-brand-v3-promo-card,.dd-brand-v3-category-tile) img{
+ width:100%;height:auto;object-fit:contain;
+}
+body :where(.workshop-journal-hero,.public-service-hero) .media-managed-image{
+ max-width:100%;height:auto;object-fit:contain;
+}
+@media(max-width:740px){
+ body :where(.container,main,.admin-shell){max-width:100%}
+ body :where(.grid.cols-4,.grid.cols-3){grid-template-columns:repeat(2,minmax(0,1fr))}
+ body :where(.public-service-hero,.hero,.page-hero){padding:clamp(15px,4vw,24px)}
+ body :where(.dd-brand-v3-illustrative-frame) img{max-height:320px}
+}
+@media(max-width:540px){
+ body :where(.grid.cols-4,.grid.cols-3,.grid.cols-2){grid-template-columns:minmax(0,1fr)}
+ body :where(.shop-product-card,.tool.card,.item.card){min-width:0}
+}
+@media(prefers-reduced-motion:reduce){
+ body :where(.shop-product-card,.tool.card,.item.card){transition:none}
+}
