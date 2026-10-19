@@ -19,6 +19,9 @@ export async function onRequestGet(context){
    return reply({error:'Verified governance report unavailable; manual HOLD.'},409);
   const review=reviewHandoffAcceptance424(source);
   return reply({product_id:source.product_id,destination:source.destination,review,
+   current_owner_user_id:source.current_owner_user_id,
+   current_source_signature:source.current_source_signature,
+   current_receipts:source.current_receipts,draft_id:source.draft_id,
    manual_review_only:true,operator_action:
    'Prioritize original receipts. Eligibility does not approve reassignment, exception resolution or closure.'});
  }catch{

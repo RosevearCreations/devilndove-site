@@ -1,0 +1,17 @@
+name: Release 467 Build 425 Owner Acceptance Receipt and Manual Closure Readiness Proof
+on:
+  push:
+    branches: [dev, main, build425-owner-acceptance-receipt, build425-production-candidate]
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+jobs:
+  owner-acceptance-receipt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/release467_build425_owner_acceptance.test.mjs scripts/release467_build424_acceptance.test.mjs scripts/release467_build423_handoff_governance.test.mjs
