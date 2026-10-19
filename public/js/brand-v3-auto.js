@@ -48,7 +48,17 @@ const assets={
  97:'97-about-what-we-do.webp',
  98:'98-home-creative-paths-card.webp',
  99:'99-home-resin-workshop-card.webp',
- 100:'100-admin-dashboard-laser-header.webp'
+ 100:'100-admin-dashboard-laser-header.webp',
+ 101:'101-home-workshop-journal-card.webp',
+ 102:'102-home-gallery-card.webp',
+ 103:'103-home-creations-card.webp',
+ 104:'104-home-collections-card.webp',
+ 105:'105-home-marketplaces-card.webp',
+ 106:'106-home-events-card.webp',
+ 107:'107-home-local-pickup-card.webp',
+ 108:'108-home-tools-card.webp',
+ 109:'109-home-supplies-card.webp',
+ 110:'110-home-members-area-card.webp'
 };
 const plans={
  '/':{hero:1, cards:[[21,'Our creative workshop','/about/'],[16,'Behind the workshop','/workshop-journal/'],[39,'Workshop stories','/workshop-journal/']]},
@@ -239,6 +249,25 @@ function installSet10ManagedPlaceholders(key){
  });
 }
 
+
+/* Set 11: original homepage anchors keep their real headings, descriptions,
+   navigation destinations and member visibility. A decorative image is added
+   only AFTER the corresponding exact WebP has loaded successfully. */
+function installSet11HomeNavigation(){
+ const host=document.getElementById('ddBrandV3HomeNavigation');
+ if(!host)return;
+ const cards=[...host.querySelectorAll('a[data-dd-brand-v3-card-image]')];
+ cards.forEach(card=>{
+  const id=Number(card.getAttribute('data-dd-brand-v3-card-image'));
+  if(!Number.isInteger(id)||id<101||id>110)return;
+  preload(id,url=>{
+   if(!card.isConnected)return;
+   card.style.setProperty('--dd-brand-v3-nav-art','url("'+url+'")');
+   card.classList.add('dd-brand-v3-home-art-ready');
+  });
+ });
+}
+
 function start(){
  const path=location.pathname.replace(/\/index\.html$/,'/').replace(/\/{2,}/g,'/');
  const key=path.endsWith('/')?path:path+'/';
@@ -250,6 +279,7 @@ function start(){
  if(key==='/')mountSet08FeaturedBanner();
  if(key==='/')installSet09WorkshopProcess();
  installSet10ManagedPlaceholders(key);
+ if(key==='/')installSet11HomeNavigation();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
 else start();
