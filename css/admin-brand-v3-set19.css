@@ -1,0 +1,31 @@
+/* Brand V3 Set 19: ten Admin detailed management pages, no product image replacement */
+body .dd-brand-v3-set19-banner{
+ display:block;box-sizing:border-box;width:100%;max-width:100%;
+ overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;margin:16px 0 18px;
+ border:1px solid rgba(212,175,55,.53);border-radius:15px;
+ background:linear-gradient(115deg,#130f22,#28153c);box-shadow:0 10px 27px rgba(4,5,15,.3);
+}
+body .dd-brand-v3-set19-banner img{
+ display:block;width:100%;height:auto;max-height:340px;
+ object-fit:contain;object-position:center;background:#151123;
+}
+body.dd-brand-v3-set19-active :where(.hero,.page-hero){
+ background:linear-gradient(120deg,#111827,#21172d);
+ border:1px solid rgba(139,106,169,.56);
+ padding:clamp(16px,2.5vw,30px);border-radius:16px;
+}
+body.dd-brand-v3-set19-active :where(.hero,.page-hero) h1{color:#f5e6d3;line-height:1.2}
+body.dd-brand-v3-set19-active :where(.hero,.page-hero) p{color:#d6cde1}
+body.dd-brand-v3-set19-active :where(.card,.admin-panel,.admin-summary-tile){
+ border-radius:15px;border-color:rgba(139,106,169,.48);
+}
+body.dd-brand-v3-set19-active :where(button,.btn):focus-visible{
+ outline:3px solid #dbbcff;outline-offset:3px;
+}
+body.dd-brand-v3-set19-active :where(.table-wrap,.admin-table-wrap){
+ max-width:100%;overflow-x:auto;
+}
+@media(max-width:740px){
+ body .dd-brand-v3-set19-banner img{min-width:1000px;width:1000px;max-height:none}
+ body.dd-brand-v3-set19-active :where(.hero,.page-hero){padding:16px}
+}

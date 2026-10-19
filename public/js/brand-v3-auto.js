@@ -128,7 +128,17 @@ const assets={
  177:'177-admin-month-end-cockpit.webp',
  178:'178-admin-mobile-inventory.webp',
  179:'179-admin-gift-card-management.webp',
- 180:'180-admin-deployment-preflight.webp'
+ 180:'180-admin-deployment-preflight.webp',
+ 181:'181-admin-business-operations.webp',
+ 182:'182-admin-website-content.webp',
+ 183:'183-admin-product-media-lifecycle.webp',
+ 184:'184-admin-customer-evidence.webp',
+ 185:'185-admin-inventory-optimization.webp',
+ 186:'186-admin-home-promotions.webp',
+ 187:'187-admin-accounting-reporting.webp',
+ 188:'188-admin-marketplace-mapping.webp',
+ 189:'189-admin-operational-fulfilment.webp',
+ 190:'190-admin-application-modules.webp'
 };
 const plans={
  '/':{hero:1, cards:[[21,'Our creative workshop','/about/'],[16,'Behind the workshop','/workshop-journal/'],[39,'Workshop stories','/workshop-journal/']]},
