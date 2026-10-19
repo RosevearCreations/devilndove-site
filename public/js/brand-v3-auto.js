@@ -38,7 +38,17 @@ const assets={
  83:'83-contact-care-banner.webp',84:'84-custom-request-banner.webp',
  85:'85-admin-dashboard-header.webp',86:'86-admin-product-management-header.webp',
  87:'87-admin-inventory-header.webp',88:'88-admin-orders-header.webp',
- 89:'89-admin-production-calendar-header.webp',90:'90-admin-workstations-header.webp'
+ 89:'89-admin-production-calendar-header.webp',90:'90-admin-workstations-header.webp',
+ 91:'91-shop-made-in-our-workshop-card.webp',
+ 92:'92-shop-vintage-finds-card.webp',
+ 93:'93-shop-collectibles-oddities-card.webp',
+ 94:'94-shop-found-sourced-card.webp',
+ 95:'95-workshop-journal-story-visual.webp',
+ 96:'96-contact-where-to-find-us.webp',
+ 97:'97-about-what-we-do.webp',
+ 98:'98-home-creative-paths-card.webp',
+ 99:'99-home-resin-workshop-card.webp',
+ 100:'100-admin-dashboard-laser-header.webp'
 };
 const plans={
  '/':{hero:1, cards:[[21,'Our creative workshop','/about/'],[16,'Behind the workshop','/workshop-journal/'],[39,'Workshop stories','/workshop-journal/']]},
@@ -195,6 +205,40 @@ function installSet09WorkshopProcess(){
   section.classList.add('dd-brand-v3-process-ready');
  });
 }
+
+/* Set 10. Only replace empty managed-image placeholders.
+   If a media owner has uploaded a different image, its src is authoritative.
+   Images 91-94 are rendered by the existing shop.js collection cards.
+   Image 100 is a decorative CSS-only Admin hero with image-85 fallback. */
+const set10Slots={
+ '/':[['home.what.visual.2',99],['home.what.visual.3',98]],
+ '/about/':[['about.section.visual.1',97]],
+ '/contact/':[['contact.section.visual.1',96]],
+ '/workshop-journal/':[['workshop-journal.section.visual.1',95]]
+};
+function installSet10ManagedPlaceholders(key){
+ const slots=set10Slots[key]||[];
+ slots.forEach(([slot,id])=>{
+  const img=[...document.querySelectorAll('img[data-media-slot]')].find(el=>el.getAttribute('data-media-slot')===slot);
+  if(!img||img.getAttribute('data-media-placeholder')!=='1')return;
+  preload(id,url=>{
+   const current=img.getAttribute('src')||'';
+   if(img.getAttribute('data-media-placeholder')!=='1'||!current.startsWith('/assets/placeholders/'))return;
+   img.src=url;
+   img.removeAttribute('data-media-placeholder');
+   img.setAttribute('data-brand-v3-asset',String(id));
+   img.alt='Decorative Devil n Dove artisan workshop artwork';
+   const frame=img.closest('.media-managed-placeholder');
+   if(frame){
+    frame.classList.remove('media-managed-placeholder');
+    frame.classList.add('dd-brand-v3-managed-artwork');
+    const note=frame.querySelector('figcaption');
+    if(note&&/Site image placeholder|Replace this image/i.test(note.textContent||''))note.remove();
+   }
+  });
+ });
+}
+
 function start(){
  const path=location.pathname.replace(/\/index\.html$/,'/').replace(/\/{2,}/g,'/');
  const key=path.endsWith('/')?path:path+'/';
@@ -205,6 +249,7 @@ function start(){
  if(key==='/shop/'||key==='/collections/')mountSet08CategoryGallery();
  if(key==='/')mountSet08FeaturedBanner();
  if(key==='/')installSet09WorkshopProcess();
+ installSet10ManagedPlaceholders(key);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
 else start();
