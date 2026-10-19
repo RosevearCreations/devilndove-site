@@ -138,7 +138,12 @@ const assets={
  187:'187-admin-accounting-reporting.webp',
  188:'188-admin-marketplace-mapping.webp',
  189:'189-admin-operational-fulfilment.webp',
- 190:'190-admin-application-modules.webp'
+ 190:'190-admin-application-modules.webp',
+ 191:'191-custom-request-what-made.webp',
+ 192:'192-custom-request-making-method.webp',
+ 193:'193-custom-request-material-ideas.webp',
+ 194:'194-custom-request-occasion-use.webp',
+ 195:'195-custom-request-not-sure.webp'
 };
 const plans={
  '/':{hero:1, cards:[[21,'Our creative workshop','/about/'],[16,'Behind the workshop','/workshop-journal/'],[39,'Workshop stories','/workshop-journal/']]},
