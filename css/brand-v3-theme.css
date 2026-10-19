@@ -107,3 +107,35 @@ body :where(a,button,input,textarea,select,[role="button"]):focus-visible{
   body .nav .links>a,
   body :where(.card,.shop-product-card,.shop-collection-card,.tool.card,.item.card){transition:none}
 }
+
+
+/* Set 08 approved enhanced maker-category cards. Never target #shopProducts
+   image/gallery descendants: those always display real inventory imagery. */
+.dd-brand-v3-category-gallery{
+ margin:18px 0 24px;padding:clamp(14px,2vw,24px);
+ background:linear-gradient(135deg,#0f1020,#1a1230);
+ border:1px solid rgba(139,106,169,.48);
+ border-radius:18px;
+}
+.dd-brand-v3-category-gallery[hidden]{display:none}
+.dd-brand-v3-category-gallery h2{margin:0 0 16px;color:#f5e6d3}
+.dd-brand-v3-category-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.dd-brand-v3-category-tile{
+ display:flex;flex-direction:column;min-width:0;overflow:hidden;
+ border:1px solid rgba(139,106,169,.55);
+ border-radius:15px;background:#141425;color:#f5e6d3;text-decoration:none;
+ box-shadow:0 4px 18px rgba(0,0,0,.2);
+}
+.dd-brand-v3-category-tile img{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover}
+.dd-brand-v3-category-tile span{display:block;padding:10px 14px;font-weight:700}
+.dd-brand-v3-category-tile:hover,.dd-brand-v3-category-tile:focus-visible{
+ border-color:#d4af37;box-shadow:0 9px 25px rgba(0,0,0,.35);text-decoration:none
+}
+.dd-brand-v3-featured-banner{margin:20px 0;overflow:hidden;border-radius:18px;border:1px solid rgba(212,175,55,.52)}
+.dd-brand-v3-featured-banner a{display:block;background:#141425;color:#f5e6d3;text-decoration:none}
+.dd-brand-v3-featured-banner img{width:100%;height:auto;max-height:410px;object-fit:cover;display:block}
+.dd-brand-v3-featured-banner span{display:block;padding:12px 16px;text-align:center;font-weight:700}
+.dd-brand-v3-featured-banner a:focus-visible{outline:3px solid #dbbcff;outline-offset:-5px}
+@media(max-width:900px){.dd-brand-v3-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.dd-brand-v3-category-grid{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){.dd-brand-v3-category-tile{transition:none}}

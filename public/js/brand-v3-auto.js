@@ -28,7 +28,12 @@ const assets={
  43:'43-best-sellers.webp',44:'44-workshop-tools.webp',
  45:'45-materials-supplies.webp',46:'46-vintage-treasures.webp',
  47:'47-custom-creations.webp',48:'48-gift-ideas.webp',
- 49:'49-pets-nature.webp',50:'50-community.webp'
+ 49:'49-pets-nature.webp',50:'50-community.webp',
+ 71:'71-jewellery-category.webp',72:'72-resin-art-category.webp',
+ 73:'73-polymer-clay-category.webp',74:'74-candles-category.webp',
+ 75:'75-workshop-experiments-category.webp',76:'76-custom-gifts-category.webp',
+ 77:'77-cricut-apparel-category.webp',78:'78-coin-spoon-rings-category.webp',
+ 79:'79-wire-wrapping-category.webp',80:'80-featured-collection-banner.webp'
 };
 const plans={
  '/':{hero:1, cards:[[21,'Our creative workshop','/about/'],[16,'Behind the workshop','/workshop-journal/'],[39,'Workshop stories','/workshop-journal/']]},
@@ -112,6 +117,70 @@ function mountCards(cards){
   });
  });
 }
+
+/* Set 08: decorative category artwork only. Real Product media and
+   Shop card controls, prices, stock, filters and cart remain untouched.
+   Missing files fail closed via preload() until the exact WebPs exist. */
+const set08Categories=[
+ [71,'Jewellery','/shop/?q=jewellery'],
+ [72,'Resin Art','/shop/?q=resin'],
+ [73,'Polymer Clay','/shop/?q=polymer%20clay'],
+ [74,'Candles','/shop/?q=candle'],
+ [75,'Workshop Experiments','/workshop-journal/'],
+ [76,'Custom Gifts','/shop/?discover=custom-gifts'],
+ [77,'Cricut & Apparel','/shop/?q=apparel'],
+ [78,'Coin & Spoon Rings','/shop/?q=ring'],
+ [79,'Wire Wrapping','/shop/?q=wire%20wrapped']
+];
+function mountSet08CategoryGallery(){
+ const shop=document.querySelector('#shopIntentHeading');
+ const anchor=shop?.closest('section')||document.querySelector('.public-media-band, .hero');
+ if(!anchor)return;
+ const section=document.createElement('section');
+ section.className='dd-brand-v3-category-gallery';
+ section.setAttribute('aria-label','Explore Devil n Dove maker categories');
+ section.hidden=true;
+ const heading=document.createElement('h2');heading.textContent='Explore creative categories';
+ const grid=document.createElement('div');grid.className='dd-brand-v3-category-grid';
+ section.append(heading,grid);anchor.insertAdjacentElement('afterend',section);
+ const ordered=set08Categories.map(([id,label,href],index)=>({id,label,href,index,element:null}));
+ ordered.forEach(item=>{
+  preload(item.id,url=>{
+   const a=document.createElement('a');
+   a.href=item.href;
+   a.className='dd-brand-v3-category-tile';
+   a.setAttribute('aria-label','Explore '+item.label);
+   const img=document.createElement('img');
+   img.src=url;img.alt='';img.loading='lazy';img.decoding='async';
+   const title=document.createElement('span');title.textContent=item.label;
+   a.append(img,title);
+   item.element=a;
+   grid.replaceChildren(...ordered.filter(x=>x.element).map(x=>x.element));
+   section.hidden=false;
+  });
+ });
+}
+function mountSet08FeaturedBanner(){
+ const anchor=document.querySelector('#homeFeaturedProductsMount');
+ if(!anchor)return;
+ preload(80,url=>{
+  if(document.querySelector('[data-dd-brand-v3-featured-80]'))return;
+  const section=document.createElement('section');
+  section.className='dd-brand-v3-featured-banner';
+  section.setAttribute('data-dd-brand-v3-featured-80','1');
+  const link=document.createElement('a');
+  link.href='/collections/';
+  link.setAttribute('aria-label','Explore our collections');
+  const img=document.createElement('img');
+  img.src=url;
+  img.alt='Illustrative Devil n Dove featured artisan collection artwork';
+  img.decoding='async';img.loading='lazy';
+  const caption=document.createElement('span');caption.textContent='Explore our collections';
+  link.append(img,caption);section.append(link);
+  anchor.insertAdjacentElement('afterend',section);
+ });
+}
+
 function start(){
  const path=location.pathname.replace(/\/index\.html$/,'/').replace(/\/{2,}/g,'/');
  const key=path.endsWith('/')?path:path+'/';
@@ -119,6 +188,8 @@ function start(){
  installHero(plan.hero);
  if(key==='/shop/')installShopIntent();
  mountCards(plan.cards);
+ if(key==='/shop/'||key==='/collections/')mountSet08CategoryGallery();
+ if(key==='/')mountSet08FeaturedBanner();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
 else start();
