@@ -35,6 +35,7 @@
    banner.dataset.ddBrandV3Asset=filename;
    banner.appendChild(image);
    hero.insertAdjacentElement('beforebegin',banner);
+   document.body.classList.add('dd-brand-v3-set13-active');
   };
   image.onerror=()=>{ /* No empty or broken frame while owner uploads artwork. */ };
   image.src=url;
