@@ -99,6 +99,20 @@
  '/about/':[...(additional['/about/']||[]),['about.story.v3-154','154-about-banner.webp']],
  '/help/':[...(additional['/help/']||[]),['help.support.v3-155','155-help-support-banner.webp']]
  });
+
+ // Brand V3 156–165 — verified 1712x324 standalone WebP placements.
+ Object.assign(additional,{
+ '/vintage-finds-ontario/':[...(additional['/vintage-finds-ontario/']||[]),['vintage.feature.v3-156','156-vintage-finds-feature-banner.webp']],
+ '/workshop-journal/':[...(additional['/workshop-journal/']||[]),['journal.learning.v3-157','157-workshop-learning-banner.webp']],
+ '/collections/':[...(additional['/collections/']||[]),['collections.seasonal.v3-158','158-seasonal-collections-banner.webp']],
+ '/custom-gifts-southern-ontario/':[...(additional['/custom-gifts-southern-ontario/']||[]),['gifts.artisan.v3-159','159-artisan-gifts-banner.webp']],
+ '/capabilities/':[...(additional['/capabilities/']||[]),['capabilities.services.v3-160','160-creative-services-banner.webp']],
+ '/events/':[...(additional['/events/']||[]),['events.community.v3-161','161-maker-community-banner.webp']],
+ '/supplies/':[...(additional['/supplies/']||[]),['supplies.reuse.v3-162','162-materials-reuse-banner.webp']],
+ '/workshop-journal/story/':[...(additional['/workshop-journal/story/']||[]),['journal.process.v3-163','163-behind-the-scenes-workshop-banner.webp']],
+ '/about/':[...(additional['/about/']||[]),['about.story.v3-164','164-our-story-banner.webp']],
+ '/help/':[...(additional['/help/']||[]),['help.questions.v3-165','165-questions-support-banner.webp']]
+ });
  function renderSupplemental(){
   let route=location.pathname.replace(/\\/index\\.html$/,'/');if(!route.endsWith('/'))route+='/';
   const placements=additional[route]||[];if(!placements.length)return;
