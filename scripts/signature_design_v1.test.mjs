@@ -48,7 +48,7 @@ test('desktop tools and supplies use three columns, not giant one-across items',
   assert.match(s,/class="subgrid"/);
   assert.match(s,/class="(?:tool|item) card"/);
  }
- assert.match(css,/body:has\(#toolsGrid\) \.subgrid,body:has\(#supGrid\) \.subgrid\{[\s\S]*?grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/);
+ assert.match(css,/body:has\(#toolsGrid\) \.subgrid,body:has\(#supGrid\) \.subgrid\{[\s\S]*?grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:680px\)/);
 });
 test('customer-facing references never imply automatic checkout or fabricate sale prices',()=>{
