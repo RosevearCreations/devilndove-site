@@ -58,7 +58,17 @@ const assets={
  107:'107-home-local-pickup-card.webp',
  108:'108-home-tools-card.webp',
  109:'109-home-supplies-card.webp',
- 110:'110-home-members-area-card.webp'
+ 110:'110-home-members-area-card.webp',
+ 111:'111-admin-dashboard-overview-card.webp',
+ 112:'112-admin-product-management-card.webp',
+ 113:'113-admin-inventory-operations-card.webp',
+ 114:'114-admin-orders-fulfillment-card.webp',
+ 115:'115-admin-production-calendar-card.webp',
+ 116:'116-admin-workstations-capacity-card.webp',
+ 117:'117-admin-materials-costing-card.webp',
+ 118:'118-admin-commissions-quotes-card.webp',
+ 119:'119-admin-cross-project-accounting-card.webp',
+ 120:'120-admin-system-operations-card.webp'
 };
 const plans={
  '/':{hero:1, cards:[[21,'Our creative workshop','/about/'],[16,'Behind the workshop','/workshop-journal/'],[39,'Workshop stories','/workshop-journal/']]},
