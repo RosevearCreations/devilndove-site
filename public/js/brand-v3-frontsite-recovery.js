@@ -155,6 +155,20 @@
  '/tools/':[...(additional['/tools/']||[]),['tools.making-methods.v3-194','194-tools-making-methods-banner.webp']],
  '/help/':[...(additional['/help/']||[]),['help.customer-guidance.v3-195','195-help-customer-guidance-banner.webp']]
  });
+
+ // Brand V3 196–205: standalone 1712x324 banners (decorative, no business-state claims).
+ Object.assign(additional,{
+ '/shop/':[...(additional['/shop/']||[]),['shop.new-arrivals.v3-196','196-new-arrivals-banner.webp']],
+ '/collections/':[...(additional['/collections/']||[]),['collections.favourites.v3-197','197-bestsellers-banner.webp']],
+ '/shop/':[...(additional['/shop/']||[]),['shop.offers.v3-198','198-sale-specials-banner.webp']],
+ '/tools/':[...(additional['/tools/']||[]),['tools.essentials.v3-199','199-workshop-essentials-banner.webp']],
+ '/custom-request/':[...(additional['/custom-request/']||[]),['custom-request.orders.v3-200','200-custom-orders-banner.webp']],
+ '/workshop-journal/coin-and-spoon-ring-care/':[...(additional['/workshop-journal/coin-and-spoon-ring-care/']||[]),['journal.care.v3-201','201-care-maintenance-banner.webp']],
+ '/pickup/':[...(additional['/pickup/']||[]),['pickup.shipping.v3-202','202-shipping-delivery-banner.webp']],
+ '/terms/':[...(additional['/terms/']||[]),['terms.returns.v3-203','203-returns-exchanges-banner.webp']],
+ '/about/':[...(additional['/about/']||[]),['about.community.v3-204','204-customer-reviews-banner.webp']],
+ '/help/':[...(additional['/help/']||[]),['help.questions.v3-205','205-need-help-banner.webp']]
+ });
  function renderSupplemental(){
   let route=location.pathname.replace(/\\/index\\.html$/,'/');if(!route.endsWith('/'))route+='/';
   const placements=additional[route]||[];if(!placements.length)return;
