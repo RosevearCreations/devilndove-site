@@ -3582,7 +3582,7 @@ body:has(#shopIntentHeading) .shop-collection-card-grid{
 body:has(#shopIntentHeading) .shop-collection-card-grid>.shop-collection-card{
  display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;
  min-height:258px;min-width:0;padding:130px 14px 14px;border:1px solid #304260;border-radius:15px;
- background:#101a29!important;color:#f7f7fd!important;isolation:isolate
+ background:#101a29;color:#f7f7fd;isolation:isolate
 }
 body:has(#shopIntentHeading) .shop-collection-card-grid>.shop-collection-card::before{
  content:"";position:absolute;inset:0 0 40% 0;z-index:-2;background-position:center;background-size:cover
@@ -3598,7 +3598,7 @@ body:has(#shopIntentHeading) .shop-collection-card:nth-child(5)::before{backgrou
 body:has(#shopIntentHeading) .shop-collection-card:nth-child(6)::before{background-image:url('/assets/images/site/laser-engraving-finished-example.webp')}
 body:has(#shopIntentHeading) .shop-collection-card:nth-child(7)::before{background-image:url('/assets/images/site/workshop-creative-paths.webp')}
 body:has(#shopIntentHeading) .shop-collection-card strong{font-size:1.04rem;line-height:1.25;color:#fff}
-body:has(#shopIntentHeading) .shop-collection-card .small{color:#cbd5e6!important;font-size:.84rem;line-height:1.4;margin:0;flex:1}
+body:has(#shopIntentHeading) .shop-collection-card .small{color:#cbd5e6;font-size:.84rem;line-height:1.4;margin:0;flex:1}
 body:has(#shopIntentHeading) .shop-collection-card .btn{margin-top:auto;align-self:stretch;justify-content:center;background:rgba(94,48,183,.27);border-color:#8154cf;color:#fff}
 body:has(#shopIntentHeading) #shopProducts{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
 body:has(#shopIntentHeading) #shopProducts .shop-product-card{
@@ -3619,13 +3619,13 @@ body:has(#shopIntentHeading) #shopProducts .shop-card-actions .btn{flex:1 1 44%;
 body:has(#shopIntentHeading) #shopProducts .shop-card-actions [data-add-shop-cart-id]{background:linear-gradient(135deg,#5424c1,#773fe1);border-color:#a36bff;color:#fff}
 @media(min-width:1450px){body:has(#shopIntentHeading) .shop-collection-card-grid{grid-template-columns:repeat(7,minmax(0,1fr))}}
 @media(max-width:1050px){body:has(#shopIntentHeading) .shop-collection-card-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:850px){body:has(#shopIntentHeading) #shopProducts{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-@media(max-width:650px){body:has(#shopIntentHeading) .shop-collection-card-grid,body:has(#shopIntentHeading) #shopProducts{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-@media(max-width:480px){body:has(#shopIntentHeading) .shop-collection-card-grid,body:has(#shopIntentHeading) #shopProducts{grid-template-columns:1fr!important}}
+@media(max-width:850px){body:has(#shopIntentHeading) #shopProducts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){body:has(#shopIntentHeading) .shop-collection-card-grid,body:has(#shopIntentHeading) #shopProducts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){body:has(#shopIntentHeading) .shop-collection-card-grid,body:has(#shopIntentHeading) #shopProducts{grid-template-columns:1fr}}
 /* Public tools/supplies remain workshop references, not fictional shopping inventory. */
 body:has(#toolsGrid) .container,body:has(#supGrid) .container{max-width:1480px}
 body:has(#toolsGrid) .hero-grid,body:has(#supGrid) .hero-grid{grid-template-columns:minmax(0,1.35fr) minmax(0,.8fr);align-items:stretch}
-body:has(#toolsGrid) .hero-grid>.card,body:has(#supGrid) .hero-grid>.card{padding:clamp(20px,3vw,40px)!important;display:flex;flex-direction:column;justify-content:center}
+body:has(#toolsGrid) .hero-grid>.card,body:has(#supGrid) .hero-grid>.card{padding:clamp(20px,3vw,40px);display:flex;flex-direction:column;justify-content:center}
 body:has(#toolsGrid) .hero-media,body:has(#supGrid) .hero-media{border-radius:17px;overflow:hidden;min-height:220px}
 body:has(#toolsGrid) .hero-media img,body:has(#supGrid) .hero-media img{width:100%;height:100%;object-fit:cover}
 body:has(#toolsGrid) .controls,body:has(#supGrid) .controls{background:#0d1726}
@@ -3633,7 +3633,7 @@ body:has(#toolsGrid) .controls-row,body:has(#supGrid) .controls-row{grid-templat
 body:has(#toolsGrid) .area-block,body:has(#supGrid) .area-block{min-width:0}
 body:has(#toolsGrid) .area-head h2,body:has(#supGrid) .area-head h2{font-size:1.2rem}
 body:has(#toolsGrid) .subgrid,body:has(#supGrid) .subgrid{
- display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:16px!important
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px
 }
 body:has(#toolsGrid) .tool.card,body:has(#supGrid) .item.card{
  min-width:0;height:100%;min-height:380px;border:1px solid #2a3c59;border-radius:16px;
@@ -3651,8 +3651,8 @@ body:has(#toolsGrid) .tool.card .actions,body:has(#supGrid) .item.card .actions{
 body:has(#toolsGrid) .tool.card .btnlink,body:has(#supGrid) .item.card .btnlink{flex:1 1 44%;min-width:0;min-height:42px;background:#251943;border-color:#8050c6;color:#eee1ff;font-size:.83rem}
 body:has(#toolsGrid) .dd-build189-visual-placeholder,body:has(#supGrid) .dd-build189-visual-placeholder{display:none}
 @media(max-width:1040px){body:has(#toolsGrid) .controls-row,body:has(#supGrid) .controls-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:900px){body:has(#toolsGrid) .subgrid,body:has(#supGrid) .subgrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-@media(max-width:680px){body:has(#toolsGrid) .hero-grid,body:has(#supGrid) .hero-grid,body:has(#toolsGrid) .subgrid,body:has(#supGrid) .subgrid,body:has(#toolsGrid) .controls-row,body:has(#supGrid) .controls-row{grid-template-columns:1fr!important}}
+@media(max-width:900px){body:has(#toolsGrid) .subgrid,body:has(#supGrid) .subgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){body:has(#toolsGrid) .hero-grid,body:has(#supGrid) .hero-grid,body:has(#toolsGrid) .subgrid,body:has(#supGrid) .subgrid,body:has(#toolsGrid) .controls-row,body:has(#supGrid) .controls-row{grid-template-columns:1fr}}
 /* Custom request customer journey. */
 body:has(#build208CustomDiscovery) .hero{padding:clamp(23px,3vw,48px);background:
  linear-gradient(90deg,rgba(7,13,24,.96),rgba(7,13,24,.64)),
@@ -3698,13 +3698,13 @@ body[data-admin-page=system-operations] .page-hero{padding:clamp(22px,3vw,40px);
  background:linear-gradient(90deg,#0c1523,rgba(12,21,35,.68)),url('/assets/images/site/laser-engraver-material-test.webp') center/cover;
  border:1px solid #2c405c;border-radius:17px}
 body[data-admin-page=system-operations] #opsMount{display:block}
-body[data-admin-page=system-operations] #opsMount>section.card{display:inline-block;vertical-align:top;width:calc(33.333% - 15px);min-width:240px;margin:8px 7px!important}
+body[data-admin-page=system-operations] #opsMount>section.card{display:inline-block;vertical-align:top;width:calc(33.333% - 15px);min-width:240px;margin:8px 7px}
 body[data-admin-page=system-operations] #opsMount>section.card dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 body[data-admin-page=system-operations] #opsMount>section.card dt{font-size:.8rem;color:#c3c9d9}
 body[data-admin-page=system-operations] #opsMount>section.card dd{margin:0;font-size:1.12rem;font-weight:800}
 @media(max-width:900px){body[data-admin-page=system-operations] #opsMount>section.card{width:calc(50% - 17px)}}
-@media(max-width:620px){body[data-admin-page=system-operations] #opsMount>section.card{display:block;width:100%;margin:8px 0!important}}
-@media(prefers-reduced-motion:reduce){body .btn,body .btnlink{transition:none!important}}
+@media(max-width:620px){body[data-admin-page=system-operations] #opsMount>section.card{display:block;width:100%;margin:8px 0}}
+@media(prefers-reduced-motion:reduce){body .btn,body .btnlink{transition:none}}
 
 
 /* Exact navigation widths, dashboard fallback treatments, and readability adjustments. */
