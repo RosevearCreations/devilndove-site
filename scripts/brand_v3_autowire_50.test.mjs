@@ -57,7 +57,7 @@ test('drop-in behavior never creates broken-image boxes when assets absent',()=>
 test('all fourteen customer-facing routes load shared image map',()=>{
  for(const page of pages){
   const html=read(page);
-  assert.match(html,/\/public\/js\/brand-v3-auto\.js\?v=100/,page);
+  assert.match(html,/\/public\/js\/brand-v3-auto\.js\?v=110/,page);
   assert.match(html,/\/css\/styles\.css/,page);
  }
 });
@@ -119,4 +119,36 @@ test('Set 10 named media placement is mapped; decorative images never rewrite pr
  assert.match(theme,/100-admin-dashboard-laser-header.webp/);
  // 91-100 are owner-upload assets: do not require physical files in GitHub CI.
  // Product stock, prices, cart handlers remain in original live Shop scripts.
+});
+
+
+test('Set 11 homepage navigation cards 101-110 map exact individual WebP files',()=>{
+ const map=src.slice(src.indexOf('const assets={'),src.indexOf('};',src.indexOf('const assets={')));
+ const matched=[...map.matchAll(/\b(\d+):'([^']+\.webp)'/g)];
+ const byNumber=new Map(matched.map(m=>[Number(m[1]),m[2]]));
+ const items=[
+ ['101-home-workshop-journal-card.webp','/workshop-journal/'],
+ ['102-home-gallery-card.webp','/gallery/'],
+ ['103-home-creations-card.webp','/creations/'],
+ ['104-home-collections-card.webp','/collections/'],
+ ['105-home-marketplaces-card.webp','/marketplaces/'],
+ ['106-home-events-card.webp','/events/'],
+ ['107-home-local-pickup-card.webp','/pickup/'],
+ ['108-home-tools-card.webp','/tools/'],
+ ['109-home-supplies-card.webp','/supplies/'],
+ ['110-home-members-area-card.webp','/members/']
+ ];
+ const home=read('index.html');
+ const theme=read('css/brand-v3-theme.css');
+ for(let i=0;i<items.length;i++){
+  const id=i+101;
+  assert.equal(byNumber.get(id),items[i][0]);
+  assert.ok(existsSync(new URL('../assets/images/brand-v3/'+items[i][0],import.meta.url)));
+  assert.match(home,new RegExp('data-dd-brand-v3-card-image="'+id+'"'));
+  assert.ok(home.includes('href="'+items[i][1]+'"'));
+ }
+ assert.match(src,/installSet11HomeNavigation/);
+ assert.match(src,/dd-brand-v3-home-art-ready/);
+ assert.match(theme,/background-size:contain/);
+ assert.match(home,/data-show-when-logged-in="" href="\/members\/"/);
 });
