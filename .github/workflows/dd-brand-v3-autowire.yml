@@ -1,0 +1,18 @@
+name: Devil n Dove Brand V3 Automatic Image Placement Proof
+on:
+  push:
+    branches: [dev, main, dd-brand-v3-image-autowire-50, dd-brand-v3-image-production-candidate]
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+jobs:
+  auto-image-map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check public/js/brand-v3-auto.js
+      - run: node --test scripts/brand_v3_autowire_50.test.mjs scripts/signature_design_v1.test.mjs scripts/brand_palette_v3.test.mjs
