@@ -57,7 +57,7 @@ test('drop-in behavior never creates broken-image boxes when assets absent',()=>
 test('all fourteen customer-facing routes load shared image map',()=>{
  for(const page of pages){
   const html=read(page);
-  assert.match(html,/\/public\/js\/brand-v3-auto\.js\?v=50/,page);
+  assert.match(html,/\/public\/js\/brand-v3-auto\.js\?v=90/,page);
   assert.match(html,/\/css\/styles\.css/,page);
  }
 });
@@ -72,4 +72,27 @@ test('responsive promo grid maintains contrast and does not force CSS specificit
  assert.match(block,/@media\(max-width:700px\)/);
  assert.doesNotMatch(block,/!important|https?:\/\//);
  assert.match(block,/focus-visible/);
+});
+
+test('Set 09 contains ten named decorative headers and preserves genuine product/workshop media',()=>{
+ const map=src.slice(src.indexOf('const assets={'),src.indexOf('};',src.indexOf('const assets={')));
+ const matches=[...map.matchAll(/\b(\d+):'([^']+\.webp)'/g)];
+ const byId=new Map(matches.map(m=>[Number(m[1]),m[2]]));
+ const names=[
+  '81-workshop-process-header.webp','82-our-story-banner.webp',
+  '83-contact-care-banner.webp','84-custom-request-banner.webp',
+  '85-admin-dashboard-header.webp','86-admin-product-management-header.webp',
+  '87-admin-inventory-header.webp','88-admin-orders-header.webp',
+  '89-admin-production-calendar-header.webp','90-admin-workstations-header.webp'
+ ];
+ for(let i=0;i<names.length;i++){
+  assert.equal(byId.get(i+81),names[i]);
+  assert.ok(existsSync(new URL('../assets/images/brand-v3/'+names[i],import.meta.url)));
+ }
+ assert.match(src,/installSet09WorkshopProcess/);
+ const theme=read('css/brand-v3-theme.css');
+ for(const name of names.slice(4))assert.ok(theme.includes(name));
+ assert.match(theme,/\.workshop-process-strip>\.media-managed-slot-frame img/);
+ assert.match(theme,/object-fit:contain/);
+ assert.doesNotMatch(src,/data-add-shop-cart-id|checkout\s*\(|POST\s*\(|fetch\s*\(/);
 });
