@@ -37,7 +37,7 @@ body :where(.shop-product-card,.shop-item-card,.tool.card,.item.card) :where(.th
 /* Default content sections, guides and public support pages */
 body :where(.hero,.page-hero,.public-service-hero){
  border-radius:17px;
- background-image:linear-gradient(120deg,rgba(13,17,31,.95),rgba(45,22,70,.83));
+ background-color:#191326; /* preserve existing owner-approved hero artwork */
  border:1px solid rgba(139,106,169,.45);
 }
 body :where(.hero,.page-hero,.public-service-hero) :where(h1,h2){
