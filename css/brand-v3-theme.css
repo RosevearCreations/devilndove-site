@@ -420,3 +420,62 @@ body[data-admin-page="home"] .admin-shell>.hero{
 @media(prefers-reduced-motion:reduce){
  #ddBrandV3HomeNavigation > a.card[data-dd-brand-v3-card-image]{transition:none}
 }
+
+
+/* SET 12: Admin workspace artwork 111–120, live native links (no fake metrics). */
+body[data-admin-page="home"] .dd-brand-v3-admin-workspaces{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:16px;margin:16px 0 24px;
+}
+body[data-admin-page="home"] .dd-brand-v3-admin-card{
+ display:flex;flex-direction:column;gap:0;min-width:0;
+ padding:10px;border:1px solid rgba(139,106,169,.55);border-radius:17px;
+ background:linear-gradient(130deg,#101929,#1b152c);
+ color:#f5e6d3;text-decoration:none;
+ box-shadow:0 7px 20px rgba(0,0,0,.24);
+}
+body[data-admin-page="home"] .dd-brand-v3-admin-card-art{
+ display:block;width:100%;aspect-ratio:1200/620;
+ border-radius:11px;border:1px solid rgba(212,175,55,.27);
+ background-color:#151123;background-size:contain;
+ background-position:center;background-repeat:no-repeat;
+}
+body[data-admin-page="home"] .dd-brand-v3-admin-card-text{
+ display:flex;flex:1;flex-direction:column;
+ gap:8px;padding:12px 7px 6px;
+}
+body[data-admin-page="home"] .dd-brand-v3-admin-card-text strong{
+ font-size:1.06rem;color:#f5e6d3;line-height:1.25;
+}
+body[data-admin-page="home"] .dd-brand-v3-admin-card-text small{
+ color:#cbc3d7;font-size:.86rem;line-height:1.45;
+}
+body[data-admin-page="home"] .dd-brand-v3-admin-card-open{
+ margin-top:auto;padding-top:8px;font-size:.82rem;font-weight:700;color:#d6b3fc;
+}
+body[data-admin-page="home"] .dd-brand-v3-admin-card:hover{
+ border-color:#d4af37;box-shadow:0 10px 27px rgba(0,0,0,.37);
+}
+body[data-admin-page="home"] .dd-brand-v3-admin-card:focus-visible{
+ outline:3px solid #dbbcff;outline-offset:3px;
+}
+body[data-admin-page="home"] .dd-brand-v3-admin-card[data-dd-brand-v3-admin-art="111"] .dd-brand-v3-admin-card-art{background-image:url('/assets/images/brand-v3/111-admin-dashboard-overview-card.webp');}
+body[data-admin-page="home"] .dd-brand-v3-admin-card[data-dd-brand-v3-admin-art="112"] .dd-brand-v3-admin-card-art{background-image:url('/assets/images/brand-v3/112-admin-product-management-card.webp');}
+body[data-admin-page="home"] .dd-brand-v3-admin-card[data-dd-brand-v3-admin-art="113"] .dd-brand-v3-admin-card-art{background-image:url('/assets/images/brand-v3/113-admin-inventory-operations-card.webp');}
+body[data-admin-page="home"] .dd-brand-v3-admin-card[data-dd-brand-v3-admin-art="114"] .dd-brand-v3-admin-card-art{background-image:url('/assets/images/brand-v3/114-admin-orders-fulfillment-card.webp');}
+body[data-admin-page="home"] .dd-brand-v3-admin-card[data-dd-brand-v3-admin-art="115"] .dd-brand-v3-admin-card-art{background-image:url('/assets/images/brand-v3/115-admin-production-calendar-card.webp');}
+body[data-admin-page="home"] .dd-brand-v3-admin-card[data-dd-brand-v3-admin-art="116"] .dd-brand-v3-admin-card-art{background-image:url('/assets/images/brand-v3/116-admin-workstations-capacity-card.webp');}
+body[data-admin-page="home"] .dd-brand-v3-admin-card[data-dd-brand-v3-admin-art="117"] .dd-brand-v3-admin-card-art{background-image:url('/assets/images/brand-v3/117-admin-materials-costing-card.webp');}
+body[data-admin-page="home"] .dd-brand-v3-admin-card[data-dd-brand-v3-admin-art="118"] .dd-brand-v3-admin-card-art{background-image:url('/assets/images/brand-v3/118-admin-commissions-quotes-card.webp');}
+body[data-admin-page="home"] .dd-brand-v3-admin-card[data-dd-brand-v3-admin-art="119"] .dd-brand-v3-admin-card-art{background-image:url('/assets/images/brand-v3/119-admin-cross-project-accounting-card.webp');}
+body[data-admin-page="home"] .dd-brand-v3-admin-card[data-dd-brand-v3-admin-art="120"] .dd-brand-v3-admin-card-art{background-image:url('/assets/images/brand-v3/120-admin-system-operations-card.webp');}
+@media(max-width:1030px){
+ body[data-admin-page="home"] .dd-brand-v3-admin-workspaces{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+}
+@media(max-width:620px){
+ body[data-admin-page="home"] .dd-brand-v3-admin-workspaces{
+  grid-template-columns:minmax(0,1fr);
+ }
+}
