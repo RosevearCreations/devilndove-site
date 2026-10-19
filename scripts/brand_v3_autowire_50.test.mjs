@@ -228,3 +228,28 @@ test('Set 14 Admin banners 131-140 map all ten named files to existing pages wit
  assert.match(middleware,/brand-v3-visual-20261019-set14/);
  assert.doesNotMatch(loader,/fetch\(|XMLHttpRequest|\/api\/|checkout\s*\(/);
 });
+
+
+test('Set 15 Admin banners 141-150 use exact filename/route mappings and preserve operational UI',()=>{
+ const source=read('public/js/brand-v3-auto.js');
+ const loader=read('public/js/admin-brand-v3-set15.js');
+ const css=read('css/admin-brand-v3-set15.css');
+ const entries=[...source.matchAll(/\b(\d+):'([^']+\.webp)'/g)];
+ const manifest=new Map(entries.map(m=>[Number(m[1]),m[2]]));
+ const rows=[["141-admin-packaging-studio.webp","/admin/packaging-studio/"],["142-admin-creative-process.webp","/admin/creative-process/"],["143-admin-creative-assets.webp","/admin/creative-assets/"],["144-admin-visual-enrichment.webp","/admin/visual-enrichment-studio/"],["145-admin-inventory-replenishment.webp","/admin/inventory-replenishment/"],["146-admin-tool-lifecycle.webp","/admin/tool-lifecycle/"],["147-admin-supply-sourcing.webp","/admin/supply-sourcing/"],["148-admin-storefront-merchandising.webp","/admin/storefront-merchandising/"],["149-admin-catalog-health.webp","/admin/catalog-health/"],["150-admin-manufacturing-readiness.webp","/admin/manufacturing-adoption/"]];
+ for(let i=0;i<rows.length;i++){
+  const [filename,route]=rows[i];
+  assert.equal(manifest.get(141+i),filename);
+  assert.ok(loader.includes('"'+route+'": "'+filename+'"'),route);
+  const html=read(route.slice(1)+'index.html');
+  assert.ok(html.includes('/public/js/admin-brand-v3-set15.js?v=15'),route);
+  assert.ok(html.includes('/css/admin-brand-v3-set15.css?v=15'),route);
+ }
+ assert.match(loader,/image.onload/);
+ assert.match(loader,/image.onerror/);
+ assert.match(loader,/insertAdjacentElement\('beforebegin'/);
+ assert.match(css,/object-fit:contain/);
+ assert.match(css,/overflow-x:auto/);
+ assert.doesNotMatch(loader,/fetch\(|XMLHttpRequest|\/api\/|POST\s*\(/);
+ // Owner uploads the binary WebPs independently; do not assert uploaded status here.
+});
