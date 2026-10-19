@@ -33,16 +33,21 @@ const assets={
  73:'73-polymer-clay-category.webp',74:'74-candles-category.webp',
  75:'75-workshop-experiments-category.webp',76:'76-custom-gifts-category.webp',
  77:'77-cricut-apparel-category.webp',78:'78-coin-spoon-rings-category.webp',
- 79:'79-wire-wrapping-category.webp',80:'80-featured-collection-banner.webp'
+ 79:'79-wire-wrapping-category.webp',80:'80-featured-collection-banner.webp',
+ 81:'81-workshop-process-header.webp',82:'82-our-story-banner.webp',
+ 83:'83-contact-care-banner.webp',84:'84-custom-request-banner.webp',
+ 85:'85-admin-dashboard-header.webp',86:'86-admin-product-management-header.webp',
+ 87:'87-admin-inventory-header.webp',88:'88-admin-orders-header.webp',
+ 89:'89-admin-production-calendar-header.webp',90:'90-admin-workstations-header.webp'
 };
 const plans={
  '/':{hero:1, cards:[[21,'Our creative workshop','/about/'],[16,'Behind the workshop','/workshop-journal/'],[39,'Workshop stories','/workshop-journal/']]},
  '/shop/':{hero:2,cards:[[11,'Find something special','#shopSearchInput'],[42,'New arrivals','/shop/?sort=newest'],[28,'One-of-a-kind','/shop/?discover=one-of-a-kind'],[29,'Vintage finds','/shop/?merchandise_origin=vintage'],[30,'Laser engraved','/shop/?discover=laser-engraved']]},
- '/custom-request/':{hero:3,cards:[[14,'Custom gifts','/shop/?discover=custom-gifts'],[23,'Custom work ideas','/gallery/'],[47,'Custom creations','#customRequestForm']]},
+ '/custom-request/':{hero:3,cards:[[14,'Custom gifts','/shop/?discover=custom-gifts'],[23,'Custom work ideas','/gallery/'],[47,'Custom creations','#customRequestForm'],[84,'Custom project inspiration','/custom-request/']]},
  '/tools/':{hero:4,cards:[[24,'Workshop tools','#toolsGrid'],[44,'Tools and equipment','#toolsGrid']]},
  '/supplies/':{hero:5,cards:[[25,'Materials and supplies','#supGrid'],[45,'Explore materials','#supGrid']]},
- '/about/':{hero:6,cards:[[26,'Our story','/about/'],[40,'Creating with purpose','/about/'],[49,'Nature-inspired work','/gallery/'],[50,'Our maker community','/workshop-journal/']]},
- '/contact/':{hero:7,cards:[[27,'Contact and help','/contact/'],[38,'Shipping questions','/contact/']]},
+ '/about/':{hero:6,cards:[[26,'Our story','/about/'],[40,'Creating with purpose','/about/'],[49,'Nature-inspired work','/gallery/'],[50,'Our maker community','/workshop-journal/'],[82,'Our story','/about/']]},
+ '/contact/':{hero:7,cards:[[27,'Contact and help','/contact/'],[38,'Shipping questions','/contact/'],[83,'Contact and care','/contact/']]},
  '/collections/':{hero:31,cards:[[22,'Jewellery','/shop/?q=jewellery'],[32,'Handmade jewellery','/shop/?q=earrings'],[33,'Resin creations','/shop/?q=resin'],[34,'Home décor','/shop/?q=home%20decor'],[35,'Apparel and accessories','/shop/?q=apparel'],[43,'Explore favourite styles','/shop/'],[46,'Vintage treasures','/shop/?merchandise_origin=vintage']]},
  '/pickup/':{hero:13,cards:[[20,'Order pickup','/pickup/'],[37,'Local pickup','/shop/?discover=local-pickup']]},
  '/gift-cards/':{hero:19,cards:[[36,'Gift cards','/gift-cards/'],[48,'Gift ideas','/shop/']]},
@@ -181,6 +186,15 @@ function mountSet08FeaturedBanner(){
  });
 }
 
+/* Set 09: decorative process background only; real media-slot images are unchanged. */
+function installSet09WorkshopProcess(){
+ const section=document.querySelector('.workshop-process-strip');
+ if(!section)return;
+ preload(81,url=>{
+  section.style.setProperty('--dd-brand-v3-process-art','url("'+url+'")');
+  section.classList.add('dd-brand-v3-process-ready');
+ });
+}
 function start(){
  const path=location.pathname.replace(/\/index\.html$/,'/').replace(/\/{2,}/g,'/');
  const key=path.endsWith('/')?path:path+'/';
@@ -190,6 +204,7 @@ function start(){
  mountCards(plan.cards);
  if(key==='/shop/'||key==='/collections/')mountSet08CategoryGallery();
  if(key==='/')mountSet08FeaturedBanner();
+ if(key==='/')installSet09WorkshopProcess();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
 else start();
