@@ -153,7 +153,7 @@ function productsPlatformMarkup() {
     `<link data-dd-design-system-v293="1" rel="stylesheet" href="/css/design-system-v293.css?v=${DESIGN_SYSTEM_REVISION}">`,
     '<link data-dd-products-static-platform="1" rel="stylesheet" href="/css/current-responsive.css?v=current">',
     `<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`,
-    `<link data-dd-brand-v3-theme="1" rel="stylesheet" href="/css/brand-v3-theme.css?v=brand-v3-visual-20261019-set13">`,
+    `<link data-dd-brand-v3-theme="1" rel="stylesheet" href="/css/brand-v3-theme.css?v=brand-v3-visual-20261019-set14">`,
     `<link rel="stylesheet" href="/css/admin-products-table-layout.css?v=${PRODUCTS_ASSET_REVISION}">`,
     adminQolMarkup(),
     '<script data-dd-products-runtime-v160="1" src="/public/js/admin-products-runtime-v160.js?v=467b160-production-browser-recovery-v1"></script>',
@@ -196,7 +196,7 @@ function storefrontFastPlatformMarkup() {
     `<link data-dd-design-system-v293="1" rel="stylesheet" href="/css/design-system-v293.css?v=${DESIGN_SYSTEM_REVISION}">`,
     '<link rel="stylesheet" href="/css/current-responsive.css?v=current">',
     `<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`,
-    `<link data-dd-brand-v3-theme="1" rel="stylesheet" href="/css/brand-v3-theme.css?v=brand-v3-visual-20261019-set13">`,
+    `<link data-dd-brand-v3-theme="1" rel="stylesheet" href="/css/brand-v3-theme.css?v=brand-v3-visual-20261019-set14">`,
     '<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>',
     '<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>',
     '<script defer src="/public/js/product-media-fallback.js?v=62"></script>',
@@ -275,7 +275,7 @@ async function withPlatformClient(response, request, env = {}) {
           element.append(`<link data-dd-design-system-v293="1" rel="stylesheet" href="/css/design-system-v293.css?v=${DESIGN_SYSTEM_REVISION}">`, { html: true });
           element.append('<link rel="stylesheet" href="/css/current-responsive.css?v=current">', { html: true });
           element.append(`<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`, { html: true });
-          element.append('<link data-dd-brand-v3-theme="1" rel="stylesheet" href="/css/brand-v3-theme.css?v=brand-v3-visual-20261019-set13">', { html: true });
+          element.append('<link data-dd-brand-v3-theme="1" rel="stylesheet" href="/css/brand-v3-theme.css?v=brand-v3-visual-20261019-set14">', { html: true });
           element.append('<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>', { html: true });
           element.append('<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>', { html: true });
           element.append('<script defer src="/public/js/product-media-fallback.js?v=62"></script>', { html: true });
