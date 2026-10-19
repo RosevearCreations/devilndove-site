@@ -1,0 +1,59 @@
+/* Devil n Dove Brand V3 / Set 16 — standalone Admin banners 151-160.
+   Designed to complement native functional content rather than depict fake data. */
+body .dd-brand-v3-set16-banner{
+  width:100%;max-width:100%;box-sizing:border-box;
+  margin:16px 0 18px;overflow-x:auto;overflow-y:hidden;
+  border:1px solid rgba(212,175,55,.55);
+  border-radius:16px;
+  background:linear-gradient(115deg,#120c21,#2e1b55);
+  box-shadow:0 11px 30px rgba(4,7,17,.32);
+  scrollbar-width:thin;
+}
+body .dd-brand-v3-set16-banner img{
+  display:block;width:100%;height:auto;
+  max-height:340px;
+  object-fit:contain;object-position:center;
+  background:#130e25;
+}
+body.dd-brand-v3-set16-active :where(.hero,.page-hero){
+  background:linear-gradient(118deg,#101828,#231634);
+  border:1px solid rgba(139,106,169,.55);
+  border-radius:16px;
+  padding:clamp(18px,2.3vw,32px);
+}
+body.dd-brand-v3-set16-active :where(.hero,.page-hero) :where(h1,h2){
+  color:#f5e6d3;
+  line-height:1.2;
+}
+body.dd-brand-v3-set16-active :where(.hero,.page-hero) p{
+  color:#d6c9e0;
+}
+body.dd-brand-v3-set16-active :where(.card,.admin-panel,.admin-summary-tile){
+  border-color:rgba(139,106,169,.48);
+  border-radius:15px;
+}
+body.dd-brand-v3-set16-active :where(.btn.primary,button.primary){
+  color:#fff;
+  background:linear-gradient(130deg,#5329b3,#773bcd);
+  border-color:#aa80e8;
+}
+body.dd-brand-v3-set16-active :where(a,button,input,select,textarea):focus-visible{
+  outline:3px solid #dbbcff;
+  outline-offset:3px;
+}
+body.dd-brand-v3-set16-active :where(.table-wrap,.admin-table-wrap){
+  max-width:100%;overflow-x:auto;
+}
+@media(max-width:740px){
+  body .dd-brand-v3-set16-banner img{
+    min-width:820px;
+    width:820px;
+    max-height:none;
+  }
+  body.dd-brand-v3-set16-active :where(.hero,.page-hero){
+    padding:16px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  body .dd-brand-v3-set16-banner{scroll-behavior:auto}
+}

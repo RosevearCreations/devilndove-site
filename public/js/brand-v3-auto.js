@@ -98,7 +98,17 @@ const assets={
  147:'147-admin-supply-sourcing.webp',
  148:'148-admin-storefront-merchandising.webp',
  149:'149-admin-catalog-health.webp',
- 150:'150-admin-manufacturing-readiness.webp'
+ 150:'150-admin-manufacturing-readiness.webp',
+ 151:'151-admin-workshop-capabilities.webp',
+ 152:'152-admin-workshop-knowledge.webp',
+ 153:'153-admin-workshop-readiness.webp',
+ 154:'154-admin-project-work-orders.webp',
+ 155:'155-admin-production-release.webp',
+ 156:'156-admin-inventory-fulfillment.webp',
+ 157:'157-admin-project-profitability.webp',
+ 158:'158-admin-mobile-workshop.webp',
+ 159:'159-admin-maker-stories.webp',
+ 160:'160-admin-inventory-intelligence.webp'
 };
 const plans={
  '/':{hero:1, cards:[[21,'Our creative workshop','/about/'],[16,'Behind the workshop','/workshop-journal/'],[39,'Workshop stories','/workshop-journal/']]},
