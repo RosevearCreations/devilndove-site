@@ -3757,3 +3757,29 @@ body :where(.tag,.pill){border-color:rgba(221,180,110,.36)}
 body :where(a,button,input,select,textarea):focus-visible{
  outline-color:var(--dd-antique-gold)
 }
+
+
+/* DEVIL N DOVE BRAND V3 DROP-IN — local artwork activates on file availability.
+   Brand-v3 JavaScript only creates visual elements after images preload successfully.
+   Existing Media & Content Studio images remain fallback until actual files are uploaded. */
+.dd-brand-v3-banner{margin:14px 0 20px;overflow:hidden;border-radius:18px;border:1px solid rgba(221,180,110,.35);
+ background:linear-gradient(130deg,#110d23,#221239);box-shadow:0 12px 32px rgba(0,0,0,.24)}
+.dd-brand-v3-banner img{display:block;width:100%;height:auto;max-height:450px;object-fit:contain}
+.dd-brand-v3-promos.card{margin:18px 0;padding:clamp(16px,2vw,24px);background:#100f20;border-color:rgba(221,180,110,.3)}
+.dd-brand-v3-promos[hidden]{display:none}
+.dd-brand-v3-promos h2{margin:0 0 14px;color:var(--dd-cream,#fff0dc)}
+.dd-brand-v3-promo-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.dd-brand-v3-promo-card{display:flex;min-width:0;flex-direction:column;overflow:hidden;border-radius:13px;
+ text-decoration:none;color:#fff;border:1px solid #6d4b7d;background:#1c1529}
+.dd-brand-v3-promo-card:hover,.dd-brand-v3-promo-card:focus-visible{border-color:var(--dd-antique-gold,#ddb46e);
+ box-shadow:0 8px 25px rgba(0,0,0,.3);text-decoration:none}
+.dd-brand-v3-promo-card img{width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;background:#120d25;display:block}
+.dd-brand-v3-promo-card span{padding:10px 12px;min-height:50px;color:#f9e7cc;font-weight:700;line-height:1.25}
+body:has(#shopIntentHeading) .shop-collection-card-grid>.shop-collection-card::before{
+ background-image:var(--dd-brand-v3-card-photo)
+}
+@media(max-width:1000px){.dd-brand-v3-promo-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.dd-brand-v3-promo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:430px){.dd-brand-v3-promo-grid{grid-template-columns:1fr 1fr;gap:8px}
+ .dd-brand-v3-promo-card span{font-size:.82rem;padding:9px}}
+@media(prefers-reduced-motion:reduce){.dd-brand-v3-promo-card{transition:none}}
