@@ -169,6 +169,20 @@
  '/about/':[...(additional['/about/']||[]),['about.community.v3-204','204-customer-reviews-banner.webp']],
  '/help/':[...(additional['/help/']||[]),['help.questions.v3-205','205-need-help-banner.webp']]
  });
+
+ // Brand V3 206–215: standalone 1712x324 WebP artwork, exact route/placement matches.
+ Object.assign(additional,{
+ '/':[...(additional['/']||[]),['home.handmade-journey.v3-206','206-home-handmade-journey-banner.webp']],
+ '/shop/':[...(additional['/shop/']||[]),['shop.creative-discovery.v3-207','207-shop-creative-discovery-banner.webp']],
+ '/collections/':[...(additional['/collections/']||[]),['collections.workshop-themes.v3-208','208-collections-workshop-themes-banner.webp']],
+ '/custom-request/':[...(additional['/custom-request/']||[]),['custom-request.idea-review.v3-209','209-custom-request-idea-review-banner.webp']],
+ '/gallery/':[...(additional['/gallery/']||[]),['gallery.making-moments.v3-210','210-gallery-making-moments-banner.webp']],
+ '/gift-cards/':[...(additional['/gift-cards/']||[]),['gift-cards.creative-giving.v3-211','211-gift-cards-creative-giving-banner.webp']],
+ '/supplies/':[...(additional['/supplies/']||[]),['supplies.colour-texture.v3-212','212-supplies-colour-texture-banner.webp']],
+ '/tools/':[...(additional['/tools/']||[]),['tools.maker-essentials.v3-213','213-tools-maker-essentials-banner.webp']],
+ '/workshop-journal/':[...(additional['/workshop-journal/']||[]),['journal.experiments.v3-214','214-journal-workshop-experiments-banner.webp']],
+ '/help/':[...(additional['/help/']||[]),['help.shopping-guides.v3-215','215-help-shopping-guides-banner.webp']]
+ });
  function renderSupplemental(){
   let route=location.pathname.replace(/\\/index\\.html$/,'/');if(!route.endsWith('/'))route+='/';
   const placements=additional[route]||[];if(!placements.length)return;
