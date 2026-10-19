@@ -264,29 +264,18 @@
 <img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/>
 <div>
 <div style="font-weight:800;letter-spacing:.2px;line-height:1.1">Devil n Dove</div>
-<div class="small">Workshop • Art • Tools • Movies</div>
+<div class="small">Multi-discipline artisan & maker workshop</div>
 </div>
 </div>
-<div style="display:flex;gap:14px;flex-wrap:wrap">
-<a href="/index.html">Home</a>
-<a href="/about/index.html">About</a>
-<a href="/gallery/index.html">Art</a>
-<a href="/creations/index.html">Creations</a>
-<a href="/tools/index.html">Tools</a>
-<a href="/supplies/index.html">Supplies</a>
-<a href="/shop/index.html">Shop</a>
-<a href="/movies/index.html">Movies</a>
-<a href="/contact/index.html">Contact</a>
-</div>
+<nav class="links" aria-label="Main navigation"><a href="/">Home</a><a href="/shop/">Shop</a><a href="/custom-request/">Custom Work</a><a href="/tools/">Tools</a><a href="/supplies/" aria-current="page">Supplies</a><a href="/workshop-journal/">Watch us try</a><a href="/about/">About</a><a href="/cart/">Cart</a></nav>
 </div>
 <div class="hero">
 <span class="badge">Supplies</span>
 <div class="hero-grid" style="margin-top:12px">
 <div class="card" style="padding:18px">
-<h1>Workshop supplies and consumables we use</h1>
+<h1>Materials &amp; supplies we use</h1>
 <p>
-            This is our running list of supplies — resins, abrasives, blades, tapes, pigments, packaging,
-            and all the little things that keep the workshop moving.
+            Explore the real materials and supplies behind our making process — films, pigments, resin, packaging, blanks and specialist consumables. These are workshop references rather than direct store checkout listings.
           </p>
 </div>
 <div class="hero-media">
@@ -343,7 +332,7 @@
 </div>
 <div id="supGrid" style="margin-top:12px"></div>
 <div class="small" style="margin-top:12px">
-        Links go to Amazon.ca (reference/search links only). Images are served from our R2 bucket.
+        Browse the supplies used in our workshop. External references are not Devil n Dove checkout items; prices and availability must be checked with the provider.
       </div>
 </div>
 <div class="footer">
@@ -611,7 +600,7 @@
         const type = getType(item);
         const area = getPrimaryArea(item);
         const hazards = getHazardTags(item);
-        const note = safeText(item.notes);
+        const note = safeText(item.notes_public || item.use_case || "").replace(/\\b(?:amazon csv|asin|latest order|order number|purchase price|ppu)\\b[\\s\\S]*/i, "").trim();
         const imgUrl = getR2ImageUrl(item);
         const amazon = getAmazonUrl(item);
         const itemKey = getItemKey(item);
@@ -647,13 +636,13 @@
               ${note ? `<div class="note">${escHtml(note)}</div>` : `<div class="note"></div>`}
 
               <div class="actions">
-                <a class="btnlink" href="${amazon}" target="_blank" rel="noopener">Amazon.ca search</a>
+                <a class="btnlink" href="${amazon}" target="_blank" rel="noopener">Find similar on Amazon.ca</a>
                 <button
                   class="btnlink secondary ${alreadyAdded ? "active" : ""}"
                   type="button"
                   data-add-reorder="${escHtml(itemKey)}"
                 >
-                  ${alreadyAdded ? "In Reorder List" : "Add to Reorder List"}
+                  ${alreadyAdded ? "Saved to list" : "Save to list"}
                 </button>
               </div>
 
