@@ -3669,7 +3669,7 @@ body:has(#build208CustomDiscovery) #build208CustomDiscovery article:nth-child(1)
 body:has(#build208CustomDiscovery) #build208CustomDiscovery article:nth-child(2)::before{background-image:url('/assets/images/site/laser-engraver-material-test.webp')}
 body:has(#build208CustomDiscovery) #build208CustomDiscovery article:nth-child(3)::before{background-image:url('/assets/images/site/collection-overview.webp')}
 body:has(#build208CustomDiscovery) #build208CustomDiscovery article:nth-child(4)::before{background-image:url('/assets/images/site/custom-gift-process-before-after.webp')}
-body:has(#build208CustomDiscovery) #build208CustomDiscovery article:nth-child(5)::before{background-image:url('/assets/images/site/workshop-discovery-illustration.webp')}
+body:has(#build208CustomDiscovery) #build208CustomDiscovery article:nth-child(5)::before{background-image:url('/assets/images/site/workshop-creative-paths.webp')}
 body:has(#build208CustomDiscovery) #build208CustomDiscovery article strong{font-size:1.04rem}
 body:has(#build208CustomDiscovery) #build208CustomDiscovery article .small{color:#c4cfe1}
 body:has(#build208CustomDiscovery) #build208CustomDiscovery .capability-navigation-links{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
@@ -3705,3 +3705,25 @@ body[data-admin-page=system-operations] #opsMount>section.card dd{margin:0;font-
 @media(max-width:900px){body[data-admin-page=system-operations] #opsMount>section.card{width:calc(50% - 17px)}}
 @media(max-width:620px){body[data-admin-page=system-operations] #opsMount>section.card{display:block;width:100%;margin:8px 0!important}}
 @media(prefers-reduced-motion:reduce){body .btn,body .btnlink{transition:none!important}}
+
+
+/* Exact navigation widths, dashboard fallback treatments, and readability adjustments. */
+body[data-admin-page=system-operations] .wrap{width:min(100%,1540px);max-width:1540px;padding:clamp(12px,2.2vw,30px);margin-inline:auto}
+body[data-admin-page=system-operations] .site-header .header-inner{padding-block:14px}
+body[data-admin-page=system-operations] .site-header .brand{font-weight:800;font-size:1.16rem}
+body[data-admin-page=system-operations] .site-header .main-nav>a:hover,
+body[data-admin-page=system-operations] .site-header .main-nav>a[aria-current=page]{
+ background:#29184c;color:#fff;text-decoration:none
+}
+body[data-admin-page=system-operations] #opsStatus{display:inline-flex;align-items:center;min-height:42px;margin-left:12px;color:#d8e3f3}
+body[data-admin-page=system-operations] #opsMount>section.card:focus-within,
+body[data-admin-page=system-operations] #opsMount>section.card:hover{border-color:#7f5bd0}
+body[data-admin-page=home] #adminHomeDashboardWorkspaces :where(a,.card){
+ border-color:#314362;border-radius:13px
+}
+body[data-admin-page=home] #adminHomeDashboardWorkspaces a:hover{border-color:#9668e3;background:#231c3c;text-decoration:none}
+body:has(#toolsGrid) .tool.card .tags,body:has(#supGrid) .item.card .tags{gap:5px}
+body:has(#toolsGrid) .tool.card .tag,body:has(#supGrid) .item.card .tag{font-size:.72rem;padding:4px 8px}
+body:has(#toolsGrid) .controls .toolbar-row,body:has(#supGrid) .controls .toolbar-row{padding-block:10px}
+body:has(#toolsGrid) .tool.card .thumb .ph,body:has(#supGrid) .item.card .thumb .ph{background:#172136;color:#c0cce0;overflow-wrap:anywhere}
+@media(max-width:590px){body[data-admin-page=system-operations] #opsStatus{display:block;margin:9px 0 0}}
