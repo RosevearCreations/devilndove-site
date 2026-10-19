@@ -152,3 +152,26 @@ test('Set 11 homepage navigation cards 101-110 map exact individual WebP files',
  assert.match(theme,/background-size:contain/);
  assert.match(home,/data-show-when-logged-in="" href="\/members\/"/);
 });
+
+
+test('Set 12 has ten Admin workspace image assets mapped to native links and CSS',()=>{
+ const manifest=read('public/js/brand-v3-auto.js');
+ const home=read('admin/index.html');
+ const styles=read('css/brand-v3-theme.css');
+ const matches=[...manifest.matchAll(/\\b(\\d+):'([^']+\\.webp)'/g)];
+ const names=new Map(matches.map(m=>[Number(m[1]),m[2]]));
+ const files=["111-admin-dashboard-overview-card.webp","112-admin-product-management-card.webp","113-admin-inventory-operations-card.webp","114-admin-orders-fulfillment-card.webp","115-admin-production-calendar-card.webp","116-admin-workstations-capacity-card.webp","117-admin-materials-costing-card.webp","118-admin-commissions-quotes-card.webp","119-admin-cross-project-accounting-card.webp","120-admin-system-operations-card.webp"];
+ const routes=["/admin/","/admin/products/","/admin/inventory-operations/","/admin/orders/","/admin/project-resource-calendar/","/admin/project-capacity-planner/","/admin/project-material-planner/","/admin/commission-workbench/","/admin/cross-project-accounting/","/admin/system-operations/"];
+ for(let i=0;i<10;i++){
+  const id=i+111;
+  assert.equal(names.get(id),files[i]);
+  assert.ok(existsSync(new URL('../assets/images/brand-v3/'+files[i],import.meta.url)));
+  assert.ok(home.includes('data-dd-brand-v3-admin-art="'+id+'"'));
+  assert.ok(home.includes('href="'+routes[i]+'"'));
+  assert.ok(styles.includes('/assets/images/brand-v3/'+files[i]));
+ }
+ assert.match(home,/id="ddBrandV3AdminWorkspaces"/);
+ assert.match(home,/admin398LoadSnapshot/);
+ assert.match(home,/adminHomeDashboardWorkspaces/);
+ assert.match(styles,/background-size:contain/);
+});
