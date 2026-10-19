@@ -61,3 +61,17 @@ test('owner change, acknowledgement before latest handoff and truncated scans HO
  const manual=review({ackRows:[ack(50,'EXCEPTION_HANDOFF_REQUIRED')]});
  assert.ok(manual.holds.includes('OWNER_REQUIRES_MANUAL_HANDOFF'));
 });
+
+test('verified Storefront Admin route exposes bounded and non-mutating governance',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const {moduleKeyForPath,MODULE_KEYS}=await import('../functions/api/_lib/appModuleRoutes.js');
+ const api=readFileSync(new URL('../functions/api/admin/provider-handoff-governance-423.js',import.meta.url),'utf8');
+ const html=readFileSync(new URL('../admin/it-integrations/index.html',import.meta.url),'utf8');
+ assert.equal(moduleKeyForPath('/api/admin/provider-handoff-governance-423'),MODULE_KEYS.STOREFRONT);
+ assert.match(api,/verifiedAdminFromModule/);
+ assert.match(api,/LIMIT 101/);
+ assert.match(api,/handoffs.length<101/);
+ assert.match(api,/acks.length<101/);
+ assert.doesNotMatch(api,/onRequestPost|INSERT INTO|UPDATE marketplace|DELETE FROM|\bfetch\s*\(/);
+ assert.match(html,/admin-provider-handoff-governance-v423\.js/);
+});
