@@ -55,6 +55,10 @@ export async function onRequestGet(c){
    handoffRows:handoffs.slice(0,100),ackRows:acks.slice(0,100),
    handoffScanComplete:handoffs.length<101,ackScanComplete:acks.length<101});
   return reply({product_id:snapshot.product_id,destination,governance,
+   current_owner_user_id:Number(snapshot.assigned_user_id)||0,
+   current_source_signature:snapshot.source_signature||null,
+   current_receipts:snapshot.evidence_receipts||{},
+   draft_id:destination==='etsy'?snapshot.draft_id:null,
    manual_review_only:true,
    owner_review_status:owner.status,followup_review_status:followup.status,
    operator_action:'Review original handoff and exception receipts. Escalations, assignments and provider state remain unchanged.'});
