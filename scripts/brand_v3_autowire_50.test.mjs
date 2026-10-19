@@ -330,3 +330,26 @@ test('Set 18 Admin banners 171-180 have exact files and mapped Admin routes',()=
  assert.doesNotMatch(loader,/fetch\(|XMLHttpRequest|\/api\/|POST\s*\(/);
  // This test validates mappings; WebP uploads and deployment status are separate.
 });
+
+
+test('Set 19 Admin banners 181-190 map all ten independent artwork files to live Admin pages',()=>{
+ const manifest=read('public/js/brand-v3-auto.js');
+ const loader=read('public/js/admin-brand-v3-set19.js');
+ const css=read('css/admin-brand-v3-set19.css');
+ const rows=[["181-admin-business-operations.webp","/admin/business-health/"],["182-admin-website-content.webp","/admin/content-publications/"],["183-admin-product-media-lifecycle.webp","/admin/catalog-media/"],["184-admin-customer-evidence.webp","/admin/evidence-gap-owner-queue/"],["185-admin-inventory-optimization.webp","/admin/inventory-intelligence/"],["186-admin-home-promotions.webp","/admin/home-carousel/"],["187-admin-accounting-reporting.webp","/admin/accounting/"],["188-admin-marketplace-mapping.webp","/admin/marketplace-mapping/"],["189-admin-operational-fulfilment.webp","/admin/operations/"],["190-admin-application-modules.webp","/admin/application-modules/"]];
+ const matches=[...manifest.matchAll(/\b(\d+):'([^']+\.webp)'/g)];
+ const assets=new Map(matches.map(m=>[Number(m[1]),m[2]]));
+ for(let i=0;i<10;i++){
+  const [file,route]=rows[i];
+  const html=read(route.slice(1)+'index.html');
+  assert.equal(assets.get(i+181),file);
+  assert.ok(loader.includes('"'+route+'": "'+file+'"'));
+  assert.ok(html.includes('/public/js/admin-brand-v3-set19.js?v=19'));
+  assert.ok(html.includes('/css/admin-brand-v3-set19.css?v=19'));
+ }
+ assert.match(loader,/img.onload/);
+ assert.match(loader,/img.onerror/);
+ assert.match(css,/object-fit:contain/);
+ assert.match(css,/overflow-x:auto/);
+ assert.doesNotMatch(loader,/fetch\(|XMLHttpRequest|\/api\/|POST\s*\(/);
+});
