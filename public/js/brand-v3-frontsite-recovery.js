@@ -73,6 +73,18 @@
   '/workshop-journal/coin-and-spoon-ring-care/':[...(additional['/workshop-journal/coin-and-spoon-ring-care/']||[]),['care.feature.brand-v3-visual','134-care-instructions-banner.webp']],
   '/terms/':[['policies.feature.brand-v3-visual','135-shipping-policies-banner.webp']]
  });
+
+ // Brand V3 batch 136-145: exact, upload-activated decorative placements.
+ Object.assign(additional,{
+ '/gallery/':[['gallery.hero.brand-v3-visual','136-photo-gallery-banner.webp']],
+ '/events/':[...(additional['/events/']||[]),['events.upcoming.brand-v3-visual','137-upcoming-events-banner.webp']],
+ '/marketplaces/':[...(additional['/marketplaces/']||[]),['marketplaces.hero.brand-v3-visual','138-marketplaces-banner.webp']],
+ '/login/':[['account.hero.brand-v3-visual','139-my-account-banner.webp']],
+ '/about/':[...(additional['/about/']||[]),['about.reviews.brand-v3-visual','140-reviews-banner.webp'],['about.sustainability.brand-v3-visual','142-sustainability-banner.webp']],
+ '/contact/':[...(additional['/contact/']||[]),['contact.collaboration.brand-v3-visual','141-collaborations-banner.webp'],['contact.hero.brand-v3-visual','145-contact-banner.webp']],
+ '/workshop-journal/':[...(additional['/workshop-journal/']||[]),['journal.behind-scenes.brand-v3-visual','143-behind-the-scenes-banner.webp']],
+ '/help/':[...(additional['/help/']||[]),['help.questions.brand-v3-visual','144-faq-banner.webp']]
+ });
  function renderSupplemental(){
   let route=location.pathname.replace(/\\/index\\.html$/,'/');if(!route.endsWith('/'))route+='/';
   const placements=additional[route]||[];if(!placements.length)return;
