@@ -37,6 +37,54 @@
      art.src=base+file;
    }
  }
+
+ // Explicit decorative placements for approved supplemental batches 106–125.
+ // Existing owner / Media Studio imagery is never changed or replaced.
+ const additional={
+ '/':[['home.newsletter.section.visual','106-newsletter-signup-banner.webp']],
+ '/events/':[['events.hero.brand-v3-visual','107-events-markets-banner.webp']],
+ '/gift-cards/':[['gift-cards.hero.brand-v3-visual','108-gift-card-banner.webp']],
+ '/about/':[['about.story.brand-v3-visual','109-about-meet-the-maker.webp']],
+ '/help/':[['help.faq.brand-v3-visual','110-help-faq-banner.webp']],
+ '/search/':[['search.hero.brand-v3-visual','111-search-banner.webp']],
+ '/collections/':[['collections.hero.brand-v3-visual','112-collections-banner.webp']],
+ '/supplies/':[['supplies.hero.brand-v3-visual','113-materials-supplies-banner.webp']],
+ '/tools/':[['tools.hero.brand-v3-visual','114-tools-equipment-banner.webp'],['tools.category.brand-v3-visual','123-tools-supplies-banner.webp']],
+ '/custom-request/':[['custom-request.supplement.brand-v3-visual','115-custom-request-not-sure-banner.webp'],['custom-request.hero.brand-v3-visual','124-custom-requests-banner.webp']],
+ '/creations/':[['creations.feature.brand-v3-visual','116-creations-feature-banner.webp']],
+ '/custom-candle-making-ontario/':[['candles.hero.brand-v3-visual','117-candles-home-decor-banner.webp']],
+ '/handmade-jewelry-ontario/':[['jewelry.hero.brand-v3-visual','118-jewelry-banner.webp'],['wire-wrapping.hero.brand-v3-visual','121-wire-wrapping-banner.webp']],
+ '/workshop-journal/':[['resin-art.hero.brand-v3-visual','119-resin-art-banner.webp']],
+ '/polymer-clay-earrings-ontario/':[['polymer-clay.hero.brand-v3-visual','120-polymer-clay-banner.webp']],
+ '/workshop-journal/coin-and-spoon-ring-care/':[['metal-work.hero.brand-v3-visual','122-metal-work-banner.webp']],
+ '/custom-gifts-southern-ontario/':[['gift-ideas.hero.brand-v3-visual','125-gift-ideas-banner.webp']]
+ };
+ function renderSupplemental(){
+  let route=location.pathname.replace(/\\/index\\.html$/,'/');if(!route.endsWith('/'))route+='/';
+  const placements=additional[route]||[];if(!placements.length)return;
+  const host=document.querySelector('main')||document.querySelector('.container')||document.body;
+  const firstHero=host.querySelector('.hero,.page-hero,.public-service-hero,h1');
+  for(const [slot,file] of placements){
+   if(document.querySelector('[data-brand-v3-placement="'+slot+'"]'))continue;
+   const probe=new Image();probe.onload=()=>{
+    if(!probe.naturalWidth||document.querySelector('[data-brand-v3-placement="'+slot+'"]'))return;
+    const figure=document.createElement('figure');
+    figure.className='dd-brand-v3-illustrative-frame dd-brand-v3-supplemental';
+    figure.dataset.brandV3Placement=slot;
+    figure.dataset.mediaSlot=slot;
+    const img=document.createElement('img');
+    img.src=base+file;img.alt='Decorative Devil n Dove artisan workshop artwork';
+    img.loading='lazy';img.decoding='async';img.dataset.brandV3Recovered='1';
+    figure.appendChild(img);
+    if(firstHero){const section=firstHero.closest('section')||firstHero;section.insertAdjacentElement('afterend',figure);}
+    else host.insertBefore(figure,host.firstChild);
+   };
+   probe.src=base+file;
+  }
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',renderSupplemental,{once:true});
+ else renderSupplemental();
+
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});
  else run();
 })();
