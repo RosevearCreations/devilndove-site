@@ -141,6 +141,20 @@
  '/workshop-journal/':[...(additional['/workshop-journal/']||[]),['journal.stories.v3-184','184-workshop-stories-banner.webp']],
  '/contact/':[...(additional['/contact/']||[]),['contact.connect.v3-185','185-contact-connect-banner.webp']]
  });
+
+ // Customer-facing Brand V3 186–195: distinct from existing Admin and Custom Request 191–195 assets.
+ Object.assign(additional,{
+ '/':[...(additional['/']||[]),['home.artisan-story.v3-186','186-home-artisan-story-banner.webp']],
+ '/shop/':[...(additional['/shop/']||[]),['shop.handmade-discovery.v3-187','187-shop-handmade-discovery-banner.webp']],
+ '/collections/':[...(additional['/collections/']||[]),['collections.curated.v3-188','188-collections-curated-banner.webp']],
+ '/custom-request/':[...(additional['/custom-request/']||[]),['custom-request.project-planning.v3-189','189-custom-project-planning-banner.webp']],
+ '/gallery/':[...(additional['/gallery/']||[]),['gallery.workshop-moments.v3-190','190-gallery-workshop-moments-banner.webp']],
+ '/contact/':[...(additional['/contact/']||[]),['contact.workshop-inquiries.v3-191','191-contact-workshop-inquiries-banner.webp']],
+ '/events/':[...(additional['/events/']||[]),['events.market-showcase.v3-192','192-events-market-showcase-banner.webp']],
+ '/supplies/':[...(additional['/supplies/']||[]),['supplies.creative-materials.v3-193','193-supplies-creative-materials-banner.webp']],
+ '/tools/':[...(additional['/tools/']||[]),['tools.making-methods.v3-194','194-tools-making-methods-banner.webp']],
+ '/help/':[...(additional['/help/']||[]),['help.customer-guidance.v3-195','195-help-customer-guidance-banner.webp']]
+ });
  function renderSupplemental(){
   let route=location.pathname.replace(/\\/index\\.html$/,'/');if(!route.endsWith('/'))route+='/';
   const placements=additional[route]||[];if(!placements.length)return;
