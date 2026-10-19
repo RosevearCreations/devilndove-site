@@ -561,3 +561,81 @@ body.dd-brand-v3-set13-active :where(.btn,button,input,select,textarea):focus-vi
 @media(prefers-reduced-motion:reduce) {
   body.dd-brand-v3-set13-active .dd-brand-v3-set13-banner {scroll-behavior:auto}
 }
+
+
+/* Brand V3 Set 14 — detailed Admin page banners: original functionality intact.
+   Full image uses CONTAIN, not COVER: no text or artwork may be cut off. */
+body .dd-brand-v3-set14-banner{
+  display:block;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  overflow-x:auto;
+  overflow-y:hidden;
+  margin:16px 0 18px;
+  border:1px solid rgba(212,175,55,.54);
+  border-radius:16px;
+  background:linear-gradient(135deg,#141024,#2e1b55);
+  box-shadow:0 10px 31px rgba(4,7,17,.33);
+  scrollbar-width:thin;
+}
+body .dd-brand-v3-set14-banner img{
+  display:block;
+  width:100%;
+  height:auto;
+  max-height:290px;
+  object-fit:contain;
+  object-position:center;
+  background-color:#141022;
+}
+/* The decorative banner is separate from the actual operable page header. */
+body.dd-brand-v3-set14-active :where(.hero,.page-hero){
+  padding:clamp(18px,2.5vw,32px);
+  border:1px solid rgba(139,106,169,.55);
+  border-radius:16px;
+  background:linear-gradient(120deg,#111726,#22152f);
+  box-shadow:0 6px 21px rgba(0,0,0,.22);
+}
+body.dd-brand-v3-set14-active :where(.hero,.page-hero) h1{
+  color:#f8f3ff;
+  font-weight:800;
+  line-height:1.2;
+}
+body.dd-brand-v3-set14-active :where(.hero,.page-hero) p{
+  color:#d0c8dc;
+}
+body.dd-brand-v3-set14-active :where(main,.admin-shell) > .card,
+body.dd-brand-v3-set14-active :where(main,.admin-shell) > section.card,
+body.dd-brand-v3-set14-active :where(.admin-panel,.admin-summary-tile){
+  border:1px solid rgba(139,106,169,.40);
+  border-radius:15px;
+  background:linear-gradient(145deg,#111b2a,#1b152c);
+  box-shadow:0 5px 20px rgba(0,0,0,.15);
+}
+body.dd-brand-v3-set14-active :where(.btn.primary,button.primary){
+  color:#fff;
+  background:linear-gradient(125deg,#5226b2,#7939d3);
+  border-color:#a879e2;
+}
+body.dd-brand-v3-set14-active :where(.table-wrap,.admin-table-wrap,.dd-table-scroll){
+  max-width:100%;
+  overflow-x:auto;
+}
+body.dd-brand-v3-set14-active :where(a,button,input,select,textarea):focus-visible{
+  outline:3px solid #dbbcff;
+  outline-offset:3px;
+}
+@media(max-width:740px){
+  body .dd-brand-v3-set14-banner img{
+    width:800px;
+    min-width:800px;
+    height:auto;
+    max-height:none;
+  }
+  body.dd-brand-v3-set14-active :where(.hero,.page-hero){
+    padding:16px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  body .dd-brand-v3-set14-banner{scroll-behavior:auto}
+}
