@@ -1,0 +1,57 @@
+name: Devil n Dove — Install Brand V3 Set 09
+on:
+  push:
+    branches: [dev]
+    paths:
+      - '.github/workflows/brand-v3-set09-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  install-set09:
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Pillow
+        run: python -m pip install --disable-pip-version-check pillow
+      - name: Create ten brand-v3 WebP banners
+        run: python scripts/generate_brand_v3_set09.py
+      - name: Check exact filenames, dimensions, and protections
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          root=Path('assets/images/brand-v3')
+          expected=[
+          '81-workshop-process-header.webp','82-our-story-banner.webp',
+          '83-contact-care-banner.webp','84-custom-request-banner.webp',
+          '85-admin-dashboard-header.webp','86-admin-product-management-header.webp',
+          '87-admin-inventory-header.webp','88-admin-orders-header.webp',
+          '89-admin-production-calendar-header.webp','90-admin-workstations-header.webp']
+          for name in expected:
+              path=root/name
+              with Image.open(path) as im:
+                  assert im.format=='WEBP' and im.size==(1440,640),(name,im.size)
+          assert len(expected)==10
+          print('Set 09: all 10 files checked')
+          PY
+      - name: Commit Set 09 WebPs to dev
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/images/brand-v3/8[1-9]-*.webp assets/images/brand-v3/90-*.webp
+          if ! git diff --cached --quiet; then
+            git commit -m "Install brand-v3 Set 09 decorative page and Admin headers"
+            git pull --rebase origin dev
+            git push origin HEAD:dev
+          fi
