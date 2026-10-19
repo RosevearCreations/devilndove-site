@@ -68,7 +68,17 @@ const assets={
  117:'117-admin-materials-costing-card.webp',
  118:'118-admin-commissions-quotes-card.webp',
  119:'119-admin-cross-project-accounting-card.webp',
- 120:'120-admin-system-operations-card.webp'
+ 120:'120-admin-system-operations-card.webp',
+ 121:'121-admin-users-management.webp',
+ 122:'122-admin-security-access-control.webp',
+ 123:'123-admin-system-configuration.webp',
+ 124:'124-admin-media-library-assets.webp',
+ 125:'125-admin-tools-consumables.webp',
+ 126:'126-admin-suppliers-purchases.webp',
+ 127:'127-admin-workflow-production.webp',
+ 128:'128-admin-reports-analytics.webp',
+ 129:'129-admin-backup-maintenance.webp',
+ 130:'130-admin-marketplace-integrations.webp'
 };
 const plans={
  '/':{hero:1, cards:[[21,'Our creative workshop','/about/'],[16,'Behind the workshop','/workshop-journal/'],[39,'Workshop stories','/workshop-journal/']]},
