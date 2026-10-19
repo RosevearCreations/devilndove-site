@@ -113,6 +113,20 @@
  '/about/':[...(additional['/about/']||[]),['about.story.v3-164','164-our-story-banner.webp']],
  '/help/':[...(additional['/help/']||[]),['help.questions.v3-165','165-questions-support-banner.webp']]
  });
+
+ // Brand V3 166–175: exact matched standalone 1712x324 decorative banners.
+ Object.assign(additional,{
+ '/workshop-journal/':[...(additional['/workshop-journal/']||[]),['journal.creative-process.v3-166','166-creative-process-banner.webp']],
+ '/tools/':[...(additional['/tools/']||[]),['tools.workshop-equipment.v3-167','167-workshop-tools-banner.webp']],
+ '/supplies/':[...(additional['/supplies/']||[]),['supplies.materials-exploration.v3-168','168-materials-exploration-banner.webp']],
+ '/custom-request/':[...(additional['/custom-request/']||[]),['custom-request.personalized.v3-169','169-personalized-creations-banner.webp']],
+ '/gallery/':[...(additional['/gallery/']||[]),['gallery.maker-showcase.v3-170','170-maker-gallery-banner.webp']],
+ '/custom-gifts-southern-ontario/':[...(additional['/custom-gifts-southern-ontario/']||[]),['gifts.inspiration.v3-171','171-gift-inspiration-banner.webp']],
+ '/handmade-jewelry-ontario/':[...(additional['/handmade-jewelry-ontario/']||[]),['jewelry.handmade.v3-172','172-handmade-jewelry-banner.webp']],
+ '/creations/':[...(additional['/creations/']||[]),['creations.resin-experiments.v3-173','173-resin-experiments-banner.webp']],
+ '/vintage-finds-ontario/':[...(additional['/vintage-finds-ontario/']||[]),['vintage.collectors.v3-174','174-collectors-corner-banner.webp']],
+ '/events/':[...(additional['/events/']||[]),['events.community-news.v3-175','175-community-events-banner.webp']]
+ });
  function renderSupplemental(){
   let route=location.pathname.replace(/\\/index\\.html$/,'/');if(!route.endsWith('/'))route+='/';
   const placements=additional[route]||[];if(!placements.length)return;
