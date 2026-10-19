@@ -3518,3 +3518,212 @@ body[data-admin-page="creative-assets"] .caip-sync-panel{background:#1c2540;colo
 @media(max-width:720px){.creative-maker-station-grid{grid-template-columns:1fr}.creative-maker-story .content-check{align-items:flex-start}}
 
 /* HISTORICAL_BUILD357_CARD_SELECTOR: .site-inventory-table-wrap.is-card-view; implementation lives in /css/inventory-card-view-v357.css */
+
+
+/* Devil n Dove Signature Design V1 — approved purple/navy workshop visual system.
+   Progressive enhancement only: no data, API, permissions, or transaction changes. */
+:root{
+ --bg:#070d17;--card:#101927;--text:#f7f7fd;--muted:#bbc6d7;
+ --border:#263650;--accent:#8b4bf4;--ice:#cab9ff;--blue:#8b4bf4;
+ --dd-purple:#914cff;--dd-purple-bright:#b47bff;--dd-navy:#0b1422;
+ --dd-focus:#c9a3ff;
+ --shadow:0 14px 36px rgba(0,0,0,.28);
+}
+html{color-scheme:dark;scroll-padding-top:24px}
+body{background:radial-gradient(ellipse at top right,rgba(76,31,135,.12),transparent 50%),#080d16;color:var(--text);line-height:1.5}
+body :where(input,select,textarea){color-scheme:dark}
+body :where(a,button,input,select,textarea,summary):focus-visible{outline:3px solid var(--dd-focus);outline-offset:3px}
+body .container{width:min(100%,1480px);max-width:1480px;margin-inline:auto;padding:clamp(14px,2.4vw,30px)}
+body .card{background:linear-gradient(140deg,#121b2b,#0d1522);border:1px solid #2a3954;border-radius:17px;box-shadow:0 8px 30px rgba(0,0,0,.13)}
+body .btn,body .btnlink{border-radius:12px;min-height:42px;transition:border-color .15s ease,background .15s ease}
+body .btn.primary,body .btnlink.active{background:linear-gradient(120deg,#5423bf,#7136dd);border-color:#a46fff;color:#fff}
+body .btn:hover,body .btnlink:hover{border-color:#9a6fea;background:rgba(121,75,214,.22);text-decoration:none}
+body :where(h1,h2,h3){letter-spacing:-.018em;text-wrap:balance}
+body :where(.small,.muted){color:var(--muted)}
+body .pill,body .tag{border-color:#405070;background:#19243a;color:#dcd5ff}
+body .nav{min-width:0;gap:14px;padding:12px 0 20px;margin-bottom:22px;border-bottom:1px solid #24334b}
+body .nav .brand{flex:0 0 auto;min-width:0;max-width:100%}
+body .nav .brand img{height:56px;width:56px;border-radius:50%;padding:4px;background:#0f1726;border:1px solid #40537e}
+body .nav .brand>div>div:first-child{font-size:clamp(18px,1.5vw,22px);font-weight:800}
+body .nav .links{display:flex;flex:1 1 auto;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px 8px;min-width:0}
+body .nav .links>a{padding:9px 12px;border-radius:12px;white-space:normal;line-height:1.2;min-height:40px;display:inline-flex;align-items:center;text-align:center}
+body .nav .links>a:hover{background:#251642;color:#efddff}
+body .nav a[aria-current=page]{color:#e6ccff;background:#251642;border:1px solid #7443c6}
+body .nav .links a[href="/tools/"],body .nav .links a[href="/supplies/"]{border:1px solid #693db5;background:rgba(101,48,183,.24);color:#e9dbff}
+body .nav .links button[data-nav-logout]{margin-left:5px;white-space:nowrap}
+body .hero{position:relative;border-radius:18px}
+body .hero h1,body .page-hero h1{font-size:clamp(1.9rem,3.2vw,3rem);line-height:1.13}
+body .hero p{max-width:85ch}
+body .capability-navigation-grid>article{background:#101a29;border:1px solid #324365;border-radius:14px;overflow:hidden}
+body .capability-navigation-links a{background:rgba(89,44,156,.18);border:1px solid #384a67;color:#e5d4ff}
+body .shop-quick-chips{gap:9px}
+body .status-note{border-radius:10px}
+body .footer.card{margin-top:24px}
+@media(min-width:1250px){body .nav .links{justify-content:flex-end}}
+@media(max-width:850px){
+ body .nav{align-items:flex-start}
+ body .nav .links{width:100%;flex:1 1 100%;justify-content:flex-start}
+ body .nav .links>a{min-height:44px;padding:10px 12px}
+}
+@media(max-width:520px){
+ body .nav .brand img{width:48px;height:48px}
+ body .container{padding:12px}
+ body .nav .links{gap:4px}
+ body .nav .links>a{font-size:.88rem}
+}
+/* Shop intent: use real, pre-existing workshop/collection photography only.
+   Static category artwork is decorative; filter URLs remain the existing authority. */
+body:has(#shopIntentHeading) .container{max-width:1560px}
+body:has(#shopIntentHeading) #shopIntentHeading{font-size:clamp(1.65rem,2.6vw,2.4rem);margin-bottom:4px}
+body:has(#shopIntentHeading) section:has(>#shopIntentHeading){background:#0c1523;border:1px solid #2c3b56;padding:clamp(16px,2vw,25px)}
+body:has(#shopIntentHeading) .shop-collection-card-grid{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px
+}
+body:has(#shopIntentHeading) .shop-collection-card-grid>.shop-collection-card{
+ display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;
+ min-height:258px;min-width:0;padding:130px 14px 14px;border:1px solid #304260;border-radius:15px;
+ background:#101a29;color:#f7f7fd;isolation:isolate
+}
+body:has(#shopIntentHeading) .shop-collection-card-grid>.shop-collection-card::before{
+ content:"";position:absolute;inset:0 0 40% 0;z-index:-2;background-position:center;background-size:cover
+}
+body:has(#shopIntentHeading) .shop-collection-card-grid>.shop-collection-card::after{
+ content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,transparent 18%,rgba(9,16,28,.65) 53%,#101a29 72%)
+}
+body:has(#shopIntentHeading) .shop-collection-card:nth-child(1)::before{background-image:url('/assets/images/site/devil-n-dove-gift-card.webp')}
+body:has(#shopIntentHeading) .shop-collection-card:nth-child(2)::before{background-image:url('/assets/images/site/handmade-jewelry-macro-detail.webp')}
+body:has(#shopIntentHeading) .shop-collection-card:nth-child(3)::before{background-image:url('/assets/images/site/pickup-ready-order.webp')}
+body:has(#shopIntentHeading) .shop-collection-card:nth-child(4)::before{background-image:url('/assets/images/site/custom-gift-process-before-after.webp')}
+body:has(#shopIntentHeading) .shop-collection-card:nth-child(5)::before{background-image:url('/assets/images/site/vintage-collection-preview.webp')}
+body:has(#shopIntentHeading) .shop-collection-card:nth-child(6)::before{background-image:url('/assets/images/site/laser-engraving-finished-example.webp')}
+body:has(#shopIntentHeading) .shop-collection-card:nth-child(7)::before{background-image:url('/assets/images/site/workshop-creative-paths.webp')}
+body:has(#shopIntentHeading) .shop-collection-card strong{font-size:1.04rem;line-height:1.25;color:#fff}
+body:has(#shopIntentHeading) .shop-collection-card .small{color:#cbd5e6;font-size:.84rem;line-height:1.4;margin:0;flex:1}
+body:has(#shopIntentHeading) .shop-collection-card .btn{margin-top:auto;align-self:stretch;justify-content:center;background:rgba(94,48,183,.27);border-color:#8154cf;color:#fff}
+body:has(#shopIntentHeading) #shopProducts{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+body:has(#shopIntentHeading) #shopProducts .shop-product-card{
+ min-width:0;padding:0;overflow:hidden;display:flex;flex-direction:column;
+ border-radius:16px;background:#101a29;border-color:#2b3e5b;box-shadow:none
+}
+body:has(#shopIntentHeading) #shopProducts .shop-card-gallery{padding:9px 9px 0}
+body:has(#shopIntentHeading) #shopProducts .shop-card-main-image{width:100%;aspect-ratio:4/3;min-height:0;overflow:hidden;background:#0a1220;border-radius:12px}
+body:has(#shopIntentHeading) #shopProducts .shop-card-main-image img{display:block;width:100%;height:100%;aspect-ratio:4/3;object-fit:contain;object-position:center;border-radius:12px}
+body:has(#shopIntentHeading) #shopProducts .shop-card-content{padding:15px;gap:9px;flex:1}
+body:has(#shopIntentHeading) #shopProducts .shop-card-content h3{font-size:1.04rem;line-height:1.32;min-height:2.6em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+body:has(#shopIntentHeading) #shopProducts .shop-card-description{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;min-height:3.7em}
+body:has(#shopIntentHeading) #shopProducts .shop-card-story,
+body:has(#shopIntentHeading) #shopProducts .shop-card-details{font-size:.85rem}
+body:has(#shopIntentHeading) #shopProducts .shop-card-price{font-size:1.22rem;font-weight:800;color:#fff}
+body:has(#shopIntentHeading) #shopProducts .shop-card-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto}
+body:has(#shopIntentHeading) #shopProducts .shop-card-actions .btn{flex:1 1 44%;min-width:0;justify-content:center;font-weight:650}
+body:has(#shopIntentHeading) #shopProducts .shop-card-actions [data-add-shop-cart-id]{background:linear-gradient(135deg,#5424c1,#773fe1);border-color:#a36bff;color:#fff}
+@media(min-width:1450px){body:has(#shopIntentHeading) .shop-collection-card-grid{grid-template-columns:repeat(7,minmax(0,1fr))}}
+@media(max-width:1050px){body:has(#shopIntentHeading) .shop-collection-card-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:850px){body:has(#shopIntentHeading) #shopProducts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){body:has(#shopIntentHeading) .shop-collection-card-grid,body:has(#shopIntentHeading) #shopProducts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){body:has(#shopIntentHeading) .shop-collection-card-grid,body:has(#shopIntentHeading) #shopProducts{grid-template-columns:1fr}}
+/* Public tools/supplies remain workshop references, not fictional shopping inventory. */
+body:has(#toolsGrid) .container,body:has(#supGrid) .container{max-width:1480px}
+body:has(#toolsGrid) .hero-grid,body:has(#supGrid) .hero-grid{grid-template-columns:minmax(0,1.35fr) minmax(0,.8fr);align-items:stretch}
+body:has(#toolsGrid) .hero-grid>.card,body:has(#supGrid) .hero-grid>.card{padding:clamp(20px,3vw,40px);display:flex;flex-direction:column;justify-content:center}
+body:has(#toolsGrid) .hero-media,body:has(#supGrid) .hero-media{border-radius:17px;overflow:hidden;min-height:220px}
+body:has(#toolsGrid) .hero-media img,body:has(#supGrid) .hero-media img{width:100%;height:100%;object-fit:cover}
+body:has(#toolsGrid) .controls,body:has(#supGrid) .controls{background:#0d1726}
+body:has(#toolsGrid) .controls-row,body:has(#supGrid) .controls-row{grid-template-columns:minmax(0,1.8fr) repeat(3,minmax(0,1fr));gap:12px}
+body:has(#toolsGrid) .area-block,body:has(#supGrid) .area-block{min-width:0}
+body:has(#toolsGrid) .area-head h2,body:has(#supGrid) .area-head h2{font-size:1.2rem}
+body:has(#toolsGrid) .subgrid,body:has(#supGrid) .subgrid{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px
+}
+body:has(#toolsGrid) .tool.card,body:has(#supGrid) .item.card{
+ min-width:0;height:100%;min-height:380px;border:1px solid #2a3c59;border-radius:16px;
+ background:#101a29;box-shadow:none;overflow:hidden
+}
+body:has(#toolsGrid) .tool.card .thumb,body:has(#supGrid) .item.card .thumb{
+ height:auto;aspect-ratio:4/3;padding:10px;background:#0a1422
+}
+body:has(#toolsGrid) .tool.card .thumb img,body:has(#supGrid) .item.card .thumb img{width:100%;height:100%;object-fit:contain}
+body:has(#toolsGrid) .tool.card .body,body:has(#supGrid) .item.card .body{padding:16px;gap:9px}
+body:has(#toolsGrid) .tool.card .tname,body:has(#supGrid) .item.card .tname{font-size:1.03rem;line-height:1.35;min-height:2.6em}
+body:has(#toolsGrid) .tool.card .meta-line,body:has(#supGrid) .item.card .meta-line{font-size:.85rem}
+body:has(#toolsGrid) .tool.card .note,body:has(#supGrid) .item.card .note{font-size:.85rem;min-height:0;color:#b7c5d8}
+body:has(#toolsGrid) .tool.card .actions,body:has(#supGrid) .item.card .actions{margin-top:auto;display:flex;gap:8px}
+body:has(#toolsGrid) .tool.card .btnlink,body:has(#supGrid) .item.card .btnlink{flex:1 1 44%;min-width:0;min-height:42px;background:#251943;border-color:#8050c6;color:#eee1ff;font-size:.83rem}
+body:has(#toolsGrid) .dd-build189-visual-placeholder,body:has(#supGrid) .dd-build189-visual-placeholder{display:none}
+@media(max-width:1040px){body:has(#toolsGrid) .controls-row,body:has(#supGrid) .controls-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){body:has(#toolsGrid) .subgrid,body:has(#supGrid) .subgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){body:has(#toolsGrid) .hero-grid,body:has(#supGrid) .hero-grid,body:has(#toolsGrid) .subgrid,body:has(#supGrid) .subgrid,body:has(#toolsGrid) .controls-row,body:has(#supGrid) .controls-row{grid-template-columns:1fr}}
+/* Custom request customer journey. */
+body:has(#build208CustomDiscovery) .hero{padding:clamp(23px,3vw,48px);background:
+ linear-gradient(90deg,rgba(7,13,24,.96),rgba(7,13,24,.64)),
+ url('/assets/images/site/laser-engraver-material-test.webp') center/cover;border:1px solid #30415d}
+body:has(#build208CustomDiscovery) #build208CustomDiscovery .capability-navigation-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+body:has(#build208CustomDiscovery) #build208CustomDiscovery .capability-navigation-grid>article{
+ min-height:240px;padding:124px 14px 14px;display:flex;flex-direction:column;gap:8px;background:#111c2d;
+ position:relative;overflow:hidden;isolation:isolate}
+body:has(#build208CustomDiscovery) #build208CustomDiscovery .capability-navigation-grid>article::before{
+ content:"";position:absolute;inset:0 0 35%;z-index:-2;background-size:cover;background-position:center}
+body:has(#build208CustomDiscovery) #build208CustomDiscovery .capability-navigation-grid>article::after{
+ content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,transparent 10%,#111c2d 70%)}
+body:has(#build208CustomDiscovery) #build208CustomDiscovery article:nth-child(1)::before{background-image:url('/assets/images/site/handmade-product-collection.webp')}
+body:has(#build208CustomDiscovery) #build208CustomDiscovery article:nth-child(2)::before{background-image:url('/assets/images/site/laser-engraver-material-test.webp')}
+body:has(#build208CustomDiscovery) #build208CustomDiscovery article:nth-child(3)::before{background-image:url('/assets/images/site/collection-overview.webp')}
+body:has(#build208CustomDiscovery) #build208CustomDiscovery article:nth-child(4)::before{background-image:url('/assets/images/site/custom-gift-process-before-after.webp')}
+body:has(#build208CustomDiscovery) #build208CustomDiscovery article:nth-child(5)::before{background-image:url('/assets/images/site/workshop-creative-paths.webp')}
+body:has(#build208CustomDiscovery) #build208CustomDiscovery article strong{font-size:1.04rem}
+body:has(#build208CustomDiscovery) #build208CustomDiscovery article .small{color:#c4cfe1}
+body:has(#build208CustomDiscovery) #build208CustomDiscovery .capability-navigation-links{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+body:has(#build208CustomDiscovery) .custom-request-journey{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+body:has(#build208CustomDiscovery) .custom-request-journey-step{padding:18px;gap:10px;background:#111c2c;border:1px solid #354562;border-radius:14px}
+body:has(#build208CustomDiscovery) .custom-request-journey-step strong{font-size:1.05rem;color:#e9d8ff}
+@media(max-width:1150px){body:has(#build208CustomDiscovery) #build208CustomDiscovery .capability-navigation-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:720px){body:has(#build208CustomDiscovery) #build208CustomDiscovery .capability-navigation-grid{grid-template-columns:repeat(2,minmax(0,1fr))}body:has(#build208CustomDiscovery) .custom-request-journey{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){body:has(#build208CustomDiscovery) #build208CustomDiscovery .capability-navigation-grid,body:has(#build208CustomDiscovery) .custom-request-journey{grid-template-columns:1fr}}
+/* Shared Admin chrome: protect multi-row navigation and meaningful dark contrast. */
+body .admin-shell>.nav{display:flex;flex-wrap:wrap;align-items:center;gap:16px;background:#0b1422;border:1px solid #24344f;border-radius:18px;padding:16px 20px}
+body .admin-shell>.nav .links{display:flex;flex:1 1 750px;min-width:0;flex-wrap:wrap;gap:5px 8px;justify-content:flex-end;align-items:center}
+body .admin-shell>.nav .links a{padding:9px 11px;border-radius:10px;line-height:1.3;min-height:40px;font-size:.87rem}
+body .admin-shell>.nav .links a:hover,body .admin-shell>.nav .links a[aria-current=page]{background:#29194d;color:#ecd9ff}
+body[data-admin-page=home] .admin-shell>.hero{padding:36px 28px;background:
+ linear-gradient(90deg,#080e18 20%,rgba(8,14,24,.58) 78%),
+ url('/assets/images/site/laser-engraver-material-test.webp') right center/cover;border:1px solid #2d3c57}
+body[data-admin-page=home] .dd-admin-dashboard-section{margin-top:26px}
+body[data-admin-page=home] #sellerDailyCommandCentreMount>.card{padding:22px}
+body[data-admin-page=home] .dd-admin-dashboard-grid{gap:14px}
+body[data-admin-page=system-operations] .site-header{background:#091320;border-bottom:1px solid #30405e}
+body[data-admin-page=system-operations] .site-header .header-inner{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+body[data-admin-page=system-operations] .site-header .main-nav{display:flex;gap:6px;flex-wrap:wrap}
+body[data-admin-page=system-operations] .site-header .main-nav>a{padding:10px 12px;border-radius:10px;color:#e6ddff}
+body[data-admin-page=system-operations] .page-hero{padding:clamp(22px,3vw,40px);margin-bottom:18px;
+ background:linear-gradient(90deg,#0c1523,rgba(12,21,35,.68)),url('/assets/images/site/laser-engraver-material-test.webp') center/cover;
+ border:1px solid #2c405c;border-radius:17px}
+body[data-admin-page=system-operations] #opsMount{display:block}
+body[data-admin-page=system-operations] #opsMount>section.card{display:inline-block;vertical-align:top;width:calc(33.333% - 15px);min-width:240px;margin:8px 7px}
+body[data-admin-page=system-operations] #opsMount>section.card dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+body[data-admin-page=system-operations] #opsMount>section.card dt{font-size:.8rem;color:#c3c9d9}
+body[data-admin-page=system-operations] #opsMount>section.card dd{margin:0;font-size:1.12rem;font-weight:800}
+@media(max-width:900px){body[data-admin-page=system-operations] #opsMount>section.card{width:calc(50% - 17px)}}
+@media(max-width:620px){body[data-admin-page=system-operations] #opsMount>section.card{display:block;width:100%;margin:8px 0}}
+@media(prefers-reduced-motion:reduce){body .btn,body .btnlink{transition:none}}
+
+
+/* Exact navigation widths, dashboard fallback treatments, and readability adjustments. */
+body[data-admin-page=system-operations] .wrap{width:min(100%,1540px);max-width:1540px;padding:clamp(12px,2.2vw,30px);margin-inline:auto}
+body[data-admin-page=system-operations] .site-header .header-inner{padding-block:14px}
+body[data-admin-page=system-operations] .site-header .brand{font-weight:800;font-size:1.16rem}
+body[data-admin-page=system-operations] .site-header .main-nav>a:hover,
+body[data-admin-page=system-operations] .site-header .main-nav>a[aria-current=page]{
+ background:#29184c;color:#fff;text-decoration:none
+}
+body[data-admin-page=system-operations] #opsStatus{display:inline-flex;align-items:center;min-height:42px;margin-left:12px;color:#d8e3f3}
+body[data-admin-page=system-operations] #opsMount>section.card:focus-within,
+body[data-admin-page=system-operations] #opsMount>section.card:hover{border-color:#7f5bd0}
+body[data-admin-page=home] #adminHomeDashboardWorkspaces :where(a,.card){
+ border-color:#314362;border-radius:13px
+}
+body[data-admin-page=home] #adminHomeDashboardWorkspaces a:hover{border-color:#9668e3;background:#231c3c;text-decoration:none}
+body:has(#toolsGrid) .tool.card .tags,body:has(#supGrid) .item.card .tags{gap:5px}
+body:has(#toolsGrid) .tool.card .tag,body:has(#supGrid) .item.card .tag{font-size:.72rem;padding:4px 8px}
+body:has(#toolsGrid) .controls .toolbar-row,body:has(#supGrid) .controls .toolbar-row{padding-block:10px}
+body:has(#toolsGrid) .tool.card .thumb .ph,body:has(#supGrid) .item.card .thumb .ph{background:#172136;color:#c0cce0;overflow-wrap:anywhere}
+@media(max-width:590px){body[data-admin-page=system-operations] #opsStatus{display:block;margin:9px 0 0}}
