@@ -127,6 +127,20 @@
  '/vintage-finds-ontario/':[...(additional['/vintage-finds-ontario/']||[]),['vintage.collectors.v3-174','174-collectors-corner-banner.webp']],
  '/events/':[...(additional['/events/']||[]),['events.community-news.v3-175','175-community-events-banner.webp']]
  });
+
+ // Brand V3 176–185: individually composed 1712×324 customer-page banners.
+ Object.assign(additional,{
+ '/':[...(additional['/']||[]),['home.workshop-discovery.v3-176','176-home-workshop-discovery-banner.webp']],
+ '/shop/':[...(additional['/shop/']||[]),['shop.discovery.v3-177','177-shop-discovery-banner.webp']],
+ '/collections/':[...(additional['/collections/']||[]),['collections.explore.v3-178','178-collections-explore-banner.webp']],
+ '/gallery/':[...(additional['/gallery/']||[]),['gallery.inspiration.v3-179','179-gallery-inspiration-banner.webp']],
+ '/custom-request/':[...(additional['/custom-request/']||[]),['custom-request.ideas.v3-180','180-custom-work-ideas-banner.webp']],
+ '/gift-cards/':[...(additional['/gift-cards/']||[]),['gift-cards.discovery.v3-181','181-gift-cards-discovery-banner.webp']],
+ '/supplies/':[...(additional['/supplies/']||[]),['supplies.workshop-materials.v3-182','182-workshop-materials-banner.webp']],
+ '/tools/':[...(additional['/tools/']||[]),['tools.feature.v3-183','183-workshop-tools-feature-banner.webp']],
+ '/workshop-journal/':[...(additional['/workshop-journal/']||[]),['journal.stories.v3-184','184-workshop-stories-banner.webp']],
+ '/contact/':[...(additional['/contact/']||[]),['contact.connect.v3-185','185-contact-connect-banner.webp']]
+ });
  function renderSupplemental(){
   let route=location.pathname.replace(/\\/index\\.html$/,'/');if(!route.endsWith('/'))route+='/';
   const placements=additional[route]||[];if(!placements.length)return;
