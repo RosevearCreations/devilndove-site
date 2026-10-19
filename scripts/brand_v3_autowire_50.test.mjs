@@ -304,3 +304,29 @@ test('Set 17 Admin banners 161-170 have exact separate filenames and working pag
  assert.doesNotMatch(loader,/fetch\(|XMLHttpRequest|\/api\/|POST\s*\(/);
  // Mapping proof does not assume separate owner WebP uploads have finished.
 });
+
+
+test('Set 18 Admin banners 171-180 have exact files and mapped Admin routes',()=>{
+ const manifest=read('public/js/brand-v3-auto.js');
+ const loader=read('public/js/admin-brand-v3-set18.js');
+ const css=read('css/admin-brand-v3-set18.css');
+ const rows=[["171-admin-command-center.webp","/admin/command-center/"],["172-admin-order-finance-settlement.webp","/admin/order-finance-settlement-readiness/"],["173-admin-inventory-valuation.webp","/admin/inventory-finance-valuation-readiness/"],["174-admin-vendor-reviews.webp","/admin/vendor-reviews/"],["175-admin-social-publishing.webp","/admin/social-publishing/"],["176-admin-local-seo-review.webp","/admin/local-seo-review/"],["177-admin-month-end-cockpit.webp","/admin/month-end/"],["178-admin-mobile-inventory.webp","/admin/mobile-inventory/"],["179-admin-gift-card-management.webp","/admin/gift-cards/"],["180-admin-deployment-preflight.webp","/admin/deployment-preflight/"]];
+ const matches=[...manifest.matchAll(/\b(\d+):'([^']+\.webp)'/g)];
+ const byId=new Map(matches.map(m=>[Number(m[1]),m[2]]));
+ for(let i=0;i<rows.length;i++){
+  const [file,route]=rows[i];
+  const html=read(route.slice(1)+'index.html');
+  assert.equal(byId.get(171+i),file);
+  assert.ok(loader.includes('"'+route+'": "'+file+'"'),route);
+  assert.ok(html.includes('/public/js/admin-brand-v3-set18.js?v=18'),route);
+  assert.ok(html.includes('/css/admin-brand-v3-set18.css?v=18'),route);
+ }
+ assert.match(loader,/image.onload/);
+ assert.match(loader,/image.onerror/);
+ assert.match(loader,/insertAdjacentElement\("beforebegin"/);
+ assert.match(loader,/insertAdjacentElement\("afterbegin"/);
+ assert.match(css,/object-fit:contain/);
+ assert.match(css,/overflow-x:auto/);
+ assert.doesNotMatch(loader,/fetch\(|XMLHttpRequest|\/api\/|POST\s*\(/);
+ // This test validates mappings; WebP uploads and deployment status are separate.
+});
