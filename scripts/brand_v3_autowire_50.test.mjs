@@ -158,7 +158,7 @@ test('Set 12 has ten Admin workspace image assets mapped to native links and CSS
  const manifest=read('public/js/brand-v3-auto.js');
  const home=read('admin/index.html');
  const styles=read('css/brand-v3-theme.css');
- const matches=[...manifest.matchAll(/\\b(\\d+):'([^']+\\.webp)'/g)];
+ const matches=[...manifest.matchAll(/\b(\d+):'([^']+\.webp)'/g)];
  const names=new Map(matches.map(m=>[Number(m[1]),m[2]]));
  const files=["111-admin-dashboard-overview-card.webp","112-admin-product-management-card.webp","113-admin-inventory-operations-card.webp","114-admin-orders-fulfillment-card.webp","115-admin-production-calendar-card.webp","116-admin-workstations-capacity-card.webp","117-admin-materials-costing-card.webp","118-admin-commissions-quotes-card.webp","119-admin-cross-project-accounting-card.webp","120-admin-system-operations-card.webp"];
  const routes=["/admin/","/admin/products/","/admin/inventory-operations/","/admin/orders/","/admin/project-resource-calendar/","/admin/project-capacity-planner/","/admin/project-material-planner/","/admin/commission-workbench/","/admin/cross-project-accounting/","/admin/system-operations/"];
