@@ -5,6 +5,8 @@ on:
     paths:
       - 'scripts/brand_v3_frontsite_audit.mjs'
       - 'scripts/brand_v3_frontsite_recovery.test.mjs'
+      - 'public/js/brand-v3-frontsite-recovery.js'
+      - 'assets/images/brand-v3/**'
       - '.github/workflows/brand-v3-frontsite-audit.yml'
       - 'css/brand-v3-theme.css'
       - 'functions/_middleware.js'
