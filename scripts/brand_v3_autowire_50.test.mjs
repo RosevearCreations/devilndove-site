@@ -57,7 +57,7 @@ test('drop-in behavior never creates broken-image boxes when assets absent',()=>
 test('all fourteen customer-facing routes load shared image map',()=>{
  for(const page of pages){
   const html=read(page);
-  assert.match(html,/\/public\/js\/brand-v3-auto\.js\?v=90/,page);
+  assert.match(html,/\/public\/js\/brand-v3-auto\.js\?v=100/,page);
   assert.match(html,/\/css\/styles\.css/,page);
  }
 });
@@ -95,4 +95,28 @@ test('Set 09 contains ten named decorative headers and preserves genuine product
  assert.match(theme,/\.workshop-process-strip>\.media-managed-slot-frame img/);
  assert.match(theme,/object-fit:contain/);
  assert.doesNotMatch(src,/data-add-shop-cart-id|checkout\s*\(|POST\s*\(|fetch\s*\(/);
+});
+
+test('Set 10 named media placement is mapped; decorative images never rewrite product data',()=>{
+ const map=src.slice(src.indexOf('const assets={'),src.indexOf('};',src.indexOf('const assets={')));
+ const entries=[...map.matchAll(/\b(\d+):'([^']+\.webp)'/g)];
+ const names=new Map(entries.map(m=>[Number(m[1]),m[2]]));
+ const needed=[
+ '91-shop-made-in-our-workshop-card.webp','92-shop-vintage-finds-card.webp',
+ '93-shop-collectibles-oddities-card.webp','94-shop-found-sourced-card.webp',
+ '95-workshop-journal-story-visual.webp','96-contact-where-to-find-us.webp',
+ '97-about-what-we-do.webp','98-home-creative-paths-card.webp',
+ '99-home-resin-workshop-card.webp','100-admin-dashboard-laser-header.webp'
+ ];
+ for(let i=0;i<needed.length;i++)assert.equal(names.get(i+91),needed[i]);
+ assert.match(src,/installSet10ManagedPlaceholders/);
+ assert.match(src,/data-media-placeholder/);
+ const shop=read('public/js/shop.js');
+ for(const name of needed.slice(0,4))assert.ok(shop.includes(name));
+ assert.match(shop,/data-origin-collection/);
+ const theme=read('css/brand-v3-theme.css');
+ assert.match(theme,/background-size:contain/);
+ assert.match(theme,/100-admin-dashboard-laser-header.webp/);
+ // 91-100 are owner-upload assets: do not require physical files in GitHub CI.
+ // Product stock, prices, cart handlers remain in original live Shop scripts.
 });
