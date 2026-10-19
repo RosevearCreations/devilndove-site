@@ -139,3 +139,158 @@ body :where(a,button,input,textarea,select,[role="button"]):focus-visible{
 @media(max-width:900px){.dd-brand-v3-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.dd-brand-v3-category-grid{grid-template-columns:minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){.dd-brand-v3-category-tile{transition:none}}
+
+
+
+/* BRAND V3 SET 09 — real-photo-safe frame polishing (Oct 2026).
+   Decorative artwork never replaces actual Product/Tool/Supply/showcase media. */
+body .dd-brand-v3-promo-card img, body .dd-brand-v3-category-tile img{
+ width:100%;height:auto;aspect-ratio:16/10;object-fit:contain;
+ background:linear-gradient(130deg,#100e21,#281840);
+}
+body .dd-brand-v3-banner img{width:100%;height:auto;max-height:clamp(230px,40vw,520px);object-fit:contain}
+body .dd-brand-v3-featured-banner{position:relative;isolation:isolate;background:#111022}
+body .dd-brand-v3-featured-banner::before{
+ content:"";position:absolute;inset:0;z-index:-1;
+ background:url('/assets/images/brand-v3/80-featured-collection-banner.webp') center/cover no-repeat;
+ filter:blur(12px) brightness(.43);
+}
+body .dd-brand-v3-featured-banner img{
+ width:100%;height:clamp(220px,32vw,440px);max-height:none;
+ object-fit:contain;object-position:center;
+}
+body:has(#shopIntentHeading) .shop-collection-card-grid>.shop-collection-card::before{
+ background-size:contain;background-repeat:no-repeat;background-color:#161025;
+}
+/* Actual inventory products use their own uploaded media, never illustrative AI products. */
+body:has(#shopIntentHeading) #shopProducts .shop-product-card{
+ border-radius:16px;border:1px solid rgba(137,109,185,.51);
+ background:linear-gradient(155deg,#111b2a,#171326);
+ box-shadow:0 8px 24px rgba(7,9,20,.24);
+}
+body:has(#shopIntentHeading) #shopProducts .shop-card-main-image{
+ display:grid;place-items:center;background:linear-gradient(135deg,#121421,#1c142b);
+}
+body:has(#shopIntentHeading) #shopProducts .shop-card-main-image img{
+ width:100%;height:100%;max-height:100%;object-fit:contain;object-position:center;
+}
+body:has(#shopIntentHeading) #shopProducts .shop-card-content{
+ display:flex;flex-direction:column;min-height:0;gap:10px;
+}
+body:has(#shopIntentHeading) #shopProducts .shop-card-actions{
+ display:flex;flex-wrap:wrap;gap:9px;margin-top:auto;
+}
+body:has(#shopIntentHeading) #shopProducts .shop-card-actions>.btn{
+ flex:1 1 44%;min-height:44px;border-radius:12px;
+}
+body:has(#shopIntentHeading) #shopProducts .shop-card-actions [data-add-shop-cart-id]{
+ background:linear-gradient(140deg,#5125b1,#7336d1);border-color:#a27bf2;
+}
+body:has(#shopIntentHeading) #shopProducts .shop-card-price{
+ color:#f7ecfb;font-variant-numeric:tabular-nums;
+}
+body:has(#shopIntentHeading) #shopProducts .shop-card-description{color:#cfc5dc}
+body:has(#toolsGrid) .tool.card,body:has(#supGrid) .item.card{
+ border-color:rgba(137,109,185,.51);
+ background:linear-gradient(155deg,#111b2a,#171326);
+}
+body:has(#toolsGrid) .tool.card .thumb,body:has(#supGrid) .item.card .thumb{
+ display:grid;place-items:center;background:#111320;
+}
+body:has(#toolsGrid) .tool.card .thumb img,body:has(#supGrid) .item.card .thumb img{
+ width:100%;height:100%;max-height:100%;object-fit:contain;
+}
+/* Preserve the real owner-selected workshop-process photograph in its entirety
+   and prevent huge edge-to-edge images from dominating the page. */
+body .workshop-process-strip{
+ border-radius:18px;border:1px solid rgba(139,106,169,.45);
+ padding:clamp(14px,2vw,24px);
+ background-image:linear-gradient(90deg,rgba(14,12,26,.96),rgba(18,13,32,.88)),
+ var(--dd-brand-v3-process-art,none);
+ background-position:center,right top;background-size:cover,cover;background-repeat:no-repeat;
+}
+body .workshop-process-strip>.media-managed-slot-frame{
+ display:grid;grid-template-rows:minmax(0,1fr) auto;place-items:center;
+ width:100%;height:clamp(210px,29vw,360px);max-width:min(100%,1120px);
+ overflow:hidden;border-radius:16px;margin:14px auto 22px;
+ background:radial-gradient(ellipse at center,#342341,#151425 75%);
+ border:1px solid rgba(139,106,169,.45);
+}
+body .workshop-process-strip>.media-managed-slot-frame img{
+ display:block;width:100%;height:100%;max-height:100%;min-height:0;
+ object-fit:contain;object-position:center;
+}
+body .workshop-process-strip>.media-managed-slot-frame figcaption{
+ padding:5px 10px;margin:0;font-size:.76rem;color:#cec2da;
+}
+/* Admin hierarchy: compact navigation, legible content, violet controls, no mock data. */
+body .admin-shell>.nav{
+ background:linear-gradient(115deg,#0d1321,#1b1532);border-color:rgba(139,106,169,.45);
+}
+body .admin-shell>.nav .links{gap:6px;align-items:center}
+body .admin-shell>.nav .links a{
+ border:1px solid transparent;border-radius:9px;padding:9px 11px;
+}
+body .admin-shell>.nav .links a:hover,
+body .admin-shell>.nav .links a[aria-current="page"]{
+ color:#f5e6d3;background:linear-gradient(125deg,#352058,#48297b);
+ border-color:rgba(184,125,241,.56);
+}
+body .admin-shell .card,body .admin-shell .admin-panel,body .admin-shell .admin-stat{
+ background:linear-gradient(145deg,#111927,#19152b);
+ border:1px solid rgba(139,106,169,.37);border-radius:15px;
+ box-shadow:0 4px 20px rgba(0,0,0,.15);
+}
+body .admin-shell :where(.admin-summary-grid,.dd-admin-dashboard-grid){gap:14px}
+body .admin-shell :where(.admin-live-item,.resource-linked-card,.resource-tile){
+ background:#19152a;border-color:#58436e;color:#f6f2fa;
+}
+body .admin-shell :where(.table-wrap,.admin-table-wrap,.dd-table-scroll){
+ max-width:100%;overflow-x:auto;
+}
+body .admin-shell :where(thead th){background:#231935;color:#f5e6d3}
+body .admin-shell :where(button,.btn,[role="button"]){border-radius:11px}
+body .admin-shell :where(.hero,.page-hero),body[data-admin-module="creator"] .page-hero{
+ padding:clamp(21px,3vw,42px);
+ border:1px solid rgba(139,106,169,.55);border-radius:18px;
+ background-color:#111225;background-repeat:no-repeat,no-repeat;
+ background-position:center,right center;background-size:cover,contain;min-height:180px;
+}
+body .admin-shell :where(.hero,.page-hero) h1,
+body[data-admin-module="creator"] .page-hero h1{
+ color:#f8f3ff;text-shadow:0 3px 14px #100c20;
+}
+body .admin-shell :where(.hero,.page-hero) p{color:#d1c9de}
+body[data-admin-page="home"] .admin-shell>.hero{
+ background-image:linear-gradient(90deg,#101322 6%,rgba(17,13,34,.90) 50%,rgba(17,13,34,.4)),
+ url('/assets/images/brand-v3/85-admin-dashboard-header.webp');
+}
+body[data-admin-page="product-browser-v166"] .admin-shell>.hero{
+ background-image:linear-gradient(90deg,#101322 6%,rgba(17,13,34,.90) 50%,rgba(17,13,34,.4)),
+ url('/assets/images/brand-v3/86-admin-product-management-header.webp');
+}
+body.inventory-operations-page .admin-shell>.hero{
+ background-image:linear-gradient(90deg,#101322 6%,rgba(17,13,34,.90) 50%,rgba(17,13,34,.4)),
+ url('/assets/images/brand-v3/87-admin-inventory-header.webp');
+}
+body[data-dd-brand-v3-section="orders"] .admin-shell>.hero{
+ background-image:linear-gradient(90deg,#101322 6%,rgba(17,13,34,.90) 50%,rgba(17,13,34,.4)),
+ url('/assets/images/brand-v3/88-admin-orders-header.webp');
+}
+body[data-admin-page="project-resource-calendar"] .page-hero{
+ background-image:linear-gradient(90deg,#101322 6%,rgba(17,13,34,.90) 50%,rgba(17,13,34,.4)),
+ url('/assets/images/brand-v3/89-admin-production-calendar-header.webp');
+}
+body[data-admin-page="project-capacity-planner"] .page-hero{
+ background-image:linear-gradient(90deg,#101322 6%,rgba(17,13,34,.90) 50%,rgba(17,13,34,.4)),
+ url('/assets/images/brand-v3/90-admin-workstations-header.webp');
+}
+@media(max-width:840px){
+ body .workshop-process-strip>.media-managed-slot-frame{height:clamp(195px,40vw,310px)}
+ body .admin-shell :where(.hero,.page-hero){min-height:150px}
+}
+@media(max-width:520px){
+ body .workshop-process-strip>.media-managed-slot-frame{height:240px}
+ body .dd-brand-v3-featured-banner img{height:265px}
+ body .admin-shell :where(.hero,.page-hero){padding:17px}
+}
