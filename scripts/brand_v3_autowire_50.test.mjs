@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const src=read('public/js/brand-v3-auto.js');
 const css=read('css/styles.css');
@@ -11,8 +11,9 @@ const pages=['index.html','shop/index.html','custom-request/index.html','tools/i
 test('exact 1-50 manifest uses stable, non-guessed brand-v3 filenames',()=>{
  const map=src.slice(src.indexOf('const assets={'),src.indexOf('};',src.indexOf('const assets={')));
  const ids=[...map.matchAll(/\b(\d+):'([^']+\.webp)'/g)].map(m=>({id:Number(m[1]),name:m[2]}));
- assert.equal(ids.length,50);
- assert.deepEqual(ids.map(x=>x.id),Array.from({length:50},(_,i)=>i+1));
+ const initial=ids.filter(x=>x.id>=1&&x.id<=50);
+ assert.equal(initial.length,50);
+ assert.deepEqual(initial.map(x=>x.id),Array.from({length:50},(_,i)=>i+1));
  assert.equal(ids.find(x=>x.id===1).name,'01-home-hero.webp');
  assert.equal(ids.find(x=>x.id===20).name,'20-order-pickup.webp');
  assert.equal(ids.find(x=>x.id===21).name,'brand-feature-promo.webp');
@@ -20,8 +21,32 @@ test('exact 1-50 manifest uses stable, non-guessed brand-v3 filenames',()=>{
  assert.equal(ids.find(x=>x.id===31).name,'31-collections-overview-promo.webp');
  assert.equal(ids.find(x=>x.id===41).name,'41-featured-creations.webp');
  assert.equal(ids.find(x=>x.id===50).name,'50-community.webp');
- assert.equal(new Set(ids.map(x=>x.name)).size,50);
+ assert.equal(new Set(initial.map(x=>x.name)).size,50);
+ assert.equal(new Set(ids.map(x=>x.name)).size,ids.length);
 });
+test('Set 08 maps ten correctly named category and featured assets without modifying real product imagery',()=>{
+ const map=src.slice(src.indexOf('const assets={'),src.indexOf('};',src.indexOf('const assets={')));
+ const matches=[...map.matchAll(/\\b(\\d+):'([^']+\\.webp)'/g)];
+ const assets=Object.fromEntries(matches.map(m=>[Number(m[1]),m[2]]));
+ const expected=[
+  '71-jewellery-category.webp','72-resin-art-category.webp',
+  '73-polymer-clay-category.webp','74-candles-category.webp',
+  '75-workshop-experiments-category.webp','76-custom-gifts-category.webp',
+  '77-cricut-apparel-category.webp','78-coin-spoon-rings-category.webp',
+  '79-wire-wrapping-category.webp','80-featured-collection-banner.webp'
+ ];
+ for(let i=0;i<expected.length;i++){
+  const id=71+i;
+  assert.equal(assets[id],expected[i]);
+  const path=new URL('../assets/images/brand-v3/'+expected[i],import.meta.url);
+  assert.ok(existsSync(path),expected[i]+' must exist under brand-v3');
+ }
+ assert.match(src,/mountSet08CategoryGallery/);
+ assert.match(src,/mountSet08FeaturedBanner/);
+ assert.match(src,/Real Product media and/);
+ assert.doesNotMatch(src,/\.shop-card-main-image\s*img\s*\{/);
+});
+
 test('drop-in behavior never creates broken-image boxes when assets absent',()=>{
  assert.match(src,/pic\.onload=\(\)=>done/);
  assert.match(src,/pic\.onerror=\(\)=>\{\}/);
