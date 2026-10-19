@@ -278,3 +278,29 @@ test('Set 16 Admin banners 151-160 map each filename to its real page without re
  assert.doesNotMatch(loader,/fetch\(|XMLHttpRequest|\/api\/|POST\s*\(/);
  // User uploads physical WebPs separately; this test checks mapped intent only.
 });
+
+
+test('Set 17 Admin banners 161-170 have exact separate filenames and working page placements',()=>{
+ const manifest=read('public/js/brand-v3-auto.js');
+ const loader=read('public/js/admin-brand-v3-set17.js');
+ const css=read('css/admin-brand-v3-set17.css');
+ const rows=[["161-admin-business-pipeline.webp","/admin/business-pipeline/"],["162-admin-trust-moderation.webp","/admin/trust-blocks/"],["163-admin-help-centre.webp","/admin/help/"],["164-admin-members-access.webp","/admin/members/"],["165-admin-custom-work-handoff.webp","/admin/custom-request/"],["166-admin-marketplace-readiness.webp","/admin/marketplace-readiness/"],["167-admin-analytics-visitors.webp","/admin/analytics/"],["168-admin-creative-automation.webp","/admin/creative-automation/"],["169-admin-product-editor.webp","/admin/product-editor/"],["170-admin-release-control.webp","/admin/release-control/"]];
+ const pairs=[...manifest.matchAll(/\b(\d+):'([^']+\.webp)'/g)];
+ const filenames=new Map(pairs.map(x=>[Number(x[1]),x[2]]));
+ for(let i=0;i<rows.length;i++){
+  const [name,route]=rows[i];
+  const page=read(route.slice(1)+'index.html');
+  assert.equal(filenames.get(161+i),name,name);
+  assert.ok(loader.includes('"'+route+'": "'+name+'"'),route);
+  assert.ok(page.includes('/public/js/admin-brand-v3-set17.js?v=17'),route);
+  assert.ok(page.includes('/css/admin-brand-v3-set17.css?v=17'),route);
+ }
+ assert.match(loader,/image.onload/);
+ assert.match(loader,/image.onerror/);
+ assert.match(loader,/insertAdjacentElement\('afterbegin'/);
+ assert.match(loader,/insertAdjacentElement\('beforebegin'/);
+ assert.match(css,/object-fit:contain/);
+ assert.match(css,/overflow-x:auto/);
+ assert.doesNotMatch(loader,/fetch\(|XMLHttpRequest|\/api\/|POST\s*\(/);
+ // Mapping proof does not assume separate owner WebP uploads have finished.
+});
