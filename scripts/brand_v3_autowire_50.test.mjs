@@ -175,3 +175,29 @@ test('Set 12 has ten Admin workspace image assets mapped to native links and CSS
  assert.match(home,/adminHomeDashboardWorkspaces/);
  assert.match(styles,/background-size:contain/);
 });
+
+
+test('Set 13 Admin banners 121-130 have exact filenames and routes without changing live operations',()=>{
+ const manifest=read('public/js/brand-v3-auto.js');
+ const loader=read('public/js/admin-brand-v3-set13.js');
+ const css=read('css/brand-v3-theme.css');
+ const middleware=read('functions/_middleware.js');
+ const files=["121-admin-users-management.webp","122-admin-security-access-control.webp","123-admin-system-configuration.webp","124-admin-media-library-assets.webp","125-admin-tools-consumables.webp","126-admin-suppliers-purchases.webp","127-admin-workflow-production.webp","128-admin-reports-analytics.webp","129-admin-backup-maintenance.webp","130-admin-marketplace-integrations.webp"];
+ const routes=["/admin/users/","/admin/membership/","/admin/it/","/admin/media-content-studio/","/admin/inventory-operations/","/admin/project-material-planner/","/admin/project-workflow-routing/","/admin/project-discovery-overview/","/admin/operational-continuity/","/admin/it-integrations/"];
+ for(let i=0;i<files.length;i++){
+  const id=121+i;
+  const route=routes[i];
+  const page=read(route.substring(1)+'index.html');
+  assert.ok(manifest.includes(id+":'"+files[i]+"'"),files[i]);
+  assert.ok(loader.includes('"'+route+'": "'+files[i]+'"'),route);
+  assert.ok(page.includes('/public/js/admin-brand-v3-set13.js?v=13'),route);
+ }
+ assert.match(loader,/image.onload/);
+ assert.match(loader,/image.onerror/);
+ assert.match(loader,/insertAdjacentElement/);
+ assert.match(css,/dd-brand-v3-set13-banner/);
+ assert.match(css,/object-fit:contain/);
+ assert.match(middleware,/brand-v3-visual-20261019-set13/);
+ // Owner-supplied binary WebPs are uploaded separately from the code commit.
+ assert.doesNotMatch(loader,/fetch\(|POST\s*\(|\/api\//);
+});
