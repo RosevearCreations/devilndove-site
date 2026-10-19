@@ -85,6 +85,20 @@
  '/workshop-journal/':[...(additional['/workshop-journal/']||[]),['journal.behind-scenes.brand-v3-visual','143-behind-the-scenes-banner.webp']],
  '/help/':[...(additional['/help/']||[]),['help.questions.brand-v3-visual','144-faq-banner.webp']]
  });
+
+ // Brand V3 146–155: filenames are distinct from existing Admin images.
+ Object.assign(additional,{
+ '/collections/':[...(additional['/collections/']||[]),['collections.overview.v3-146','146-collections-overview-banner.webp']],
+ '/supplies/':[...(additional['/supplies/']||[]),['supplies.materials.v3-147','147-materials-supplies-banner.webp']],
+ '/tools/':[...(additional['/tools/']||[]),['tools.equipment.v3-148','148-tools-equipment-banner.webp']],
+ '/custom-request/':[...(additional['/custom-request/']||[]),['custom-request.story.v3-149','149-custom-requests-banner.webp']],
+ '/gift-cards/':[...(additional['/gift-cards/']||[]),['gift-cards.promo.v3-150','150-gift-cards-banner.webp']],
+ '/shop/':[...(additional['/shop/']||[]),['shop.browse.v3-151','151-shop-all-creations-banner.webp']],
+ '/': [...(additional['/']||[]),['home.featured-creations.v3-152','152-featured-creations-banner.webp']],
+ '/events/':[...(additional['/events/']||[]),['events.markets.v3-153','153-events-markets-banner.webp']],
+ '/about/':[...(additional['/about/']||[]),['about.story.v3-154','154-about-banner.webp']],
+ '/help/':[...(additional['/help/']||[]),['help.support.v3-155','155-help-support-banner.webp']]
+ });
  function renderSupplemental(){
   let route=location.pathname.replace(/\\/index\\.html$/,'/');if(!route.endsWith('/'))route+='/';
   const placements=additional[route]||[];if(!placements.length)return;
