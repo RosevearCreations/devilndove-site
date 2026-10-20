@@ -1,34 +1,53 @@
-# Devil n Dove Brand V3 — Whole public site coverage, 70-page audit
+# Devil n Dove — Verified Brand V3 Media Slot Coverage
 
-The automated repository audit counts 70 public HTML pages, confirms global Brand V3 middleware CSS across normal and fast storefront paths, and reports default Media Studio slots.
+Audit source: `public/data/media-content-slot-catalog.json` and `public/js/brand-v3-frontsite-recovery.js`, checked on 2026-10-20. All paths relative to repository root. This is a source inventory, not a live browser/owner-media inspection.
 
-This change adds **safe placeholder-only recovery** on 22 public routes. Before any illustration is displayed, the script checks that the slot still has `data-media-placeholder="1"` and an `/assets/placeholders/` URL. If Media Studio has supplied an owner-selected image, no replacement is performed. The approved brand-v3 art images are all stored in `assets/images/brand-v3/`.
+## Replacement status
 
-| Page | Slot(s) | Approved decorative filename(s) |
-|---|---|---|
-| `/` | `home.section.visual.1`, `home.what.visual.2`, `home.what.visual.3` | `81-workshop-process-header.webp`, `99-home-resin-workshop-card.webp`, `98-home-creative-paths-card.webp` |
-| `/about/` | `about.section.visual.1` | `97-about-what-we-do.webp` |
-| `/collections/` | `collections.section.visual.1` | `31-collections-overview-promo.webp` |
-| `/contact/` | `contact.section.visual.1` | `96-contact-where-to-find-us.webp` |
-| `/creations/` | `creations.section.visual.1` | `41-featured-creations.webp` |
-| `/custom-candle-making-ontario/` | `custom-candle-making-ontario.section.visual.1` | `74-candles-category.webp` |
-| `/custom-gifts-southern-ontario/` | `custom-gifts-southern-ontario.section.visual.1` | `76-custom-gifts-category.webp` |
-| `/custom-soap-making-ontario/` | `custom-soap-making-ontario.section.visual.1` | `40-creating-with-purpose-promo.webp` |
-| `/events/` | `events.section.visual.1` | `50-community.webp` |
-| `/gift-cards/` | `gift-cards.section.visual.1` | `19-gift-cards.webp` |
-| `/handmade-jewelry-ontario/` | `handmade-jewelry-ontario.section.visual.1` | `71-jewellery-category.webp` |
-| `/laser-engraving-ontario/` | `laser-engraving-ontario.section.visual.1` | `10-laser-engraved-category.webp` |
-| `/marketplaces/` | `marketplaces.hero.image`, `marketplaces.section.visual.1` | `31-collections-overview-promo.webp`, `46-vintage-treasures.webp` |
-| `/polymer-clay-earrings-ontario/` | `polymer-clay-earrings-ontario.section.visual.1` | `73-polymer-clay-category.webp` |
-| `/socials/` | `socials.hero.image`, `socials.section.visual.1` | `50-community.webp`, `49-pets-nature.webp` |
-| `/vintage-finds-ontario/` | `vintage-finds-ontario.section.visual.1` | `09-vintage-finds-category.webp` |
-| `/workshop-journal/coin-and-spoon-ring-care/` | `workshop-journal-coin-and-spoon-ring-care.hero.image`, `workshop-journal-coin-and-spoon-ring-care.section.visual.1` | `78-coin-spoon-rings-category.webp`, `78-coin-spoon-rings-category.webp` |
-| `/workshop-journal/handmade-vintage-sourced-guide/` | `workshop-journal-handmade-vintage-sourced-guide.hero.image`, `workshop-journal-handmade-vintage-sourced-guide.section.visual.1` | `09-vintage-finds-category.webp`, `46-vintage-treasures.webp` |
-| `/workshop-journal/` | `workshop-journal.section.visual.1` | `95-workshop-journal-story-visual.webp` |
-| `/workshop-journal/polymer-clay-earring-care/` | `workshop-journal-polymer-clay-earring-care.hero.image`, `workshop-journal-polymer-clay-earring-care.section.visual.1` | `73-polymer-clay-category.webp`, `73-polymer-clay-category.webp` |
-| `/workshop-journal/story/` | `workshop-journal-story.section.visual.1` | `82-our-story-banner.webp` |
-| `/workshop-made-gifts-ontario/` | `workshop-made-gifts-ontario.section.visual.1` | `76-custom-gifts-category.webp` |
+- **6 required replacement slots**: all mapped to dedicated WebPs, present in `assets/images/brand-v3/` on `main` at audit time.
+- **23 recommended replacement slots**: all mapped to WebPs, present on `main` at audit time.
+- **70 Admin banner files (121–190)**: all referenced by `public/js/admin-brand-v3-set13.js` through `set19.js` and present in `assets/images/brand-v3/` on `main` at audit time. These are established banner routes, not Media Studio catalog replacement slots.
+- **2 additional authored-default generic SVGs**, not flagged for replacement by the catalog: `workshop-made-gifts-ontario.hero.image` and `workshop-made-gifts-ontario.image.1`, both using `/assets/visual-placeholders/product-process.svg`. For optional dedicated replacements, use **1600 × 1000 (8:5)** for each.
+- **68 optional background enhancements** in the catalog are choices, not missing required images.
 
-The shared `css/brand-v3-frontsite-recovery.css` standardizes panels, responsiveness and complete image framing, and avoids changing product, stock or payment logic. It loads via Cloudflare middleware on every public HTML response (normal and fast Shop/Collections paths).
+## Exact current public replacement mapping and recommended export sizes
 
-The detailed check is `scripts/brand_v3_frontsite_audit.mjs`, runnable by the "Devil n Dove — Full Frontsite Brand V3 Audit" workflow. Static inspection **does not equal browser visual verification** or `main`/Cloudflare Production deployment.
+| Page | Slot key | Catalog priority | Recommended export size | Existing mapped file |
+|---|---|---|---|---|
+| `/` | `home.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `286-home-workshop-process-visual.webp` |
+| `/` | `home.what.visual.2` | recommended replacement | 1600 × 1000 (8:5) | `99-home-resin-workshop-card.webp` |
+| `/` | `home.what.visual.3` | recommended replacement | 1600 × 1000 (8:5) | `98-home-creative-paths-card.webp` |
+| `/about` | `about.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `284-about-what-we-do-visual.webp` |
+| `/creations` | `creations.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `287-creations-featured-work-visual.webp` |
+| `/workshop-journal` | `workshop-journal.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `288-workshop-journal-introduction-visual.webp` |
+| `/collections` | `collections.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `289-collections-overview-visual.webp` |
+| `/contact` | `contact.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `285-contact-where-to-find-us-visual.webp` |
+| `/gift-cards` | `gift-cards.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `282-gift-cards-content-visual.webp` |
+| `/events` | `events.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `283-events-content-visual.webp` |
+| `/socials` | `socials.hero.image` | required replacement | 1600 × 1000 (8:5) | `276-social-hub-required-hero.webp` |
+| `/socials` | `socials.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `290-social-hub-content-visual.webp` |
+| `/custom-candle-making-ontario` | `custom-candle-making-ontario.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `291-custom-candle-making-ontario-content-visual.webp` |
+| `/custom-soap-making-ontario` | `custom-soap-making-ontario.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `292-custom-soap-making-ontario-content-visual.webp` |
+| `/custom-gifts-southern-ontario` | `custom-gifts-southern-ontario.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `293-custom-gifts-southern-ontario-content-visual.webp` |
+| `/handmade-jewelry-ontario` | `handmade-jewelry-ontario.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `294-handmade-jewelry-ontario-content-visual.webp` |
+| `/laser-engraving-ontario` | `laser-engraving-ontario.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `295-laser-engraving-ontario-content-visual.webp` |
+| `/polymer-clay-earrings-ontario` | `polymer-clay-earrings-ontario.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `73-polymer-clay-category.webp` |
+| `/vintage-finds-ontario` | `vintage-finds-ontario.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `09-vintage-finds-category.webp` |
+| `/workshop-made-gifts-ontario` | `workshop-made-gifts-ontario.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `76-custom-gifts-category.webp` |
+| `/workshop-journal/story` | `workshop-journal-story.hero.image` | required replacement | 1600 × 1000 (8:5) | `277-workshop-journal-story-required-hero.webp` |
+| `/workshop-journal/coin-and-spoon-ring-care` | `workshop-journal-coin-and-spoon-ring-care.hero.image` | required replacement | 1600 × 1000 (8:5) | `278-coin-spoon-ring-care-required-hero.webp` |
+| `/workshop-journal/coin-and-spoon-ring-care` | `workshop-journal-coin-and-spoon-ring-care.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `78-coin-spoon-rings-category.webp` |
+| `/workshop-journal/polymer-clay-earring-care` | `workshop-journal-polymer-clay-earring-care.hero.image` | required replacement | 1600 × 1000 (8:5) | `279-polymer-clay-earring-care-required-hero.webp` |
+| `/workshop-journal/polymer-clay-earring-care` | `workshop-journal-polymer-clay-earring-care.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `73-polymer-clay-category.webp` |
+| `/workshop-journal/handmade-vintage-sourced-guide` | `workshop-journal-handmade-vintage-sourced-guide.hero.image` | required replacement | 1600 × 1000 (8:5) | `280-handmade-vintage-sourced-required-hero.webp` |
+| `/workshop-journal/handmade-vintage-sourced-guide` | `workshop-journal-handmade-vintage-sourced-guide.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `46-vintage-treasures.webp` |
+| `/marketplaces` | `marketplaces.hero.image` | required replacement | 1600 × 1000 (8:5) | `281-marketplaces-required-hero.webp` |
+| `/marketplaces` | `marketplaces.section.visual.1` | recommended replacement | 1600 × 1000 (8:5) | `46-vintage-treasures.webp` |
+
+## Implementation guidance
+
+The current frontsite recovery script only substitutes images that are still explicit default Media Studio placeholders, preserving owner-selected media. Do not overwrite published product photographs, user content, records, prices, checkout, or authentication. The sizes above come from the actual catalog—not the original upload image dimensions. GitHub's text connector confirms binary paths exist but cannot inspect WebP dimensions, so pixel dimensions of the committed binaries were **not** verified in this audit.
+
+For Admin sets 13–19, existing images are wide decorative banners, not slots in the Media Studio dimension catalog. Inspect CSS/container geometry for any replacement; **1712 × 324** has been used for prior banner batches but must not be generalized to inline cards or Admin workflows.
+
+Earlier proposed alternate images 306–345 should not be counted as missing, or assumed activated, simply because ZIPs were prepared. The active Admin mappings currently use 121–190.
