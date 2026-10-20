@@ -71,9 +71,9 @@
     { href: "/creations/index.html", nav: "/creations/", label: "What we make", desktop: false, group: "Workshop" },
     { href: "/capabilities/index.html", nav: "/capabilities/", label: "How we make it", desktop: false, group: "Workshop" },
     { href: "/case-studies/index.html", nav: "/case-studies/", label: "Case studies", desktop: false, group: "Workshop" },
-    { href: "/tools/index.html", nav: "/tools/", label: "Tools", desktop: false, group: "Workshop" },
-    { href: "/supplies/index.html", nav: "/supplies/", label: "Materials", desktop: false, group: "Workshop" },
-    { href: "/movies/index.html", nav: "/movies/", label: "Movies", desktop: false, group: "Workshop" },
+    { href: "/tools/index.html", nav: "/tools/", label: "Tools", desktop: true, group: "Workshop" },
+    { href: "/supplies/index.html", nav: "/supplies/", label: "Supplies", desktop: true, group: "Workshop" },
+    { href: "/movies/index.html", nav: "/movies/", label: "Movies", desktop: true, group: "Workshop" },
     { href: "/events/index.html", nav: "/events/", label: "Occasions & events", desktop: false, group: "Community" },
     { href: "/pickup/index.html", nav: "/pickup/", label: "Pickup", desktop: false, group: "Community" },
     { href: "/socials/index.html", nav: "/socials/", label: "Socials", desktop: false, group: "Community" },
@@ -217,10 +217,10 @@
         <div>
           <div class="site-footer-heading">Search the site</div>
           <form action="/search/index.html" class="site-footer-search" method="get" role="search">
-            <input aria-label="Search Devil n Dove" name="q" placeholder="Search products, tools, supplies, art..." type="search" />
+            <input aria-label="Search Devil n Dove" name="q" placeholder="Search shop products and creations..." type="search" />
             <button class="btn" type="submit">Search</button>
           </form>
-          <p class="small">Search stays visible in the footer on every public page to improve discovery and crawl paths.</p>
+          <p class="small">Search shows shop products and creations, not internal workshop stock.</p>
         </div>
       </div>
       <div class="site-footer-bottom small">© ${year} Devil n Dove. Built for storefront discovery, workshop sharing, and member access.</div>`;
