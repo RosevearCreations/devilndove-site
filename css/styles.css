@@ -3859,3 +3859,22 @@ body[data-capability-key] .dd-brand-v3-capability-banner img{
  display:block;width:100%;height:auto;aspect-ratio:1712 / 324;object-fit:contain;
 }
 @media(max-width:640px){.dd-brand-v3-secondary-banner{margin:13px auto 17px;border-radius:8px}}
+
+/* Brand V3 — legacy SVG illustration replacement: responsive WebP framing. */
+.admin-page .visual-placeholder-card img,
+.customer-documents-page .visual-placeholder-card img,
+.creative-process-page .visual-placeholder-card img,
+.creative-assets-page .visual-placeholder-card img,
+.creative-automation-page .creative-automation-visual img,
+.inventory-operations-page .inventory-operations-hero-art img,
+.packaging-studio-page .packaging-system-placeholder-grid img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.social-preflight-icon { max-width: 100%; object-fit: contain; }
+@media (max-width: 640px) {
+  .inventory-operations-page .inventory-operations-hero-art { max-width: 100%; min-width: 0; }
+  .packaging-studio-page .packaging-system-placeholder-grid img { width: 100%; }
+}
