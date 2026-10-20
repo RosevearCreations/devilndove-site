@@ -128,3 +128,19 @@ body #build208CustomDiscovery .capability-navigation-links a{
  body #build208CustomDiscovery .custom-discovery-gallery,
  body .what-we-make-grid{grid-template-columns:minmax(0,1fr)}
 }
+
+/* Set 276–285: the *catalogued* media-slot dimensions are 1600x1000 (8:5),
+   not the 1712x324 supplemental banner ratio. Preserve the entire image. */
+img[data-media-slot="socials.hero.image"][data-brand-v3-recovered="1"],
+img[data-media-slot="workshop-journal-story.hero.image"][data-brand-v3-recovered="1"],
+img[data-media-slot="workshop-journal-coin-and-spoon-ring-care.hero.image"][data-brand-v3-recovered="1"],
+img[data-media-slot="workshop-journal-polymer-clay-earring-care.hero.image"][data-brand-v3-recovered="1"],
+img[data-media-slot="workshop-journal-handmade-vintage-sourced-guide.hero.image"][data-brand-v3-recovered="1"],
+img[data-media-slot="marketplaces.hero.image"][data-brand-v3-recovered="1"],
+img[data-media-slot="gift-cards.section.visual.1"][data-brand-v3-recovered="1"],
+img[data-media-slot="events.section.visual.1"][data-brand-v3-recovered="1"],
+img[data-media-slot="about.section.visual.1"][data-brand-v3-recovered="1"],
+img[data-media-slot="contact.section.visual.1"][data-brand-v3-recovered="1"]{
+ display:block;max-width:100%;width:100%;height:auto;max-height:none;
+ aspect-ratio:8 / 5;object-fit:contain;object-position:center;
+}
