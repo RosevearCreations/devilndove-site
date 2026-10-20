@@ -14,7 +14,7 @@
   "/socials/":["socials.community.hero.visual.235","235-social-hub-banner.webp","Decorative community and social hub artwork"]
   };
   function show(){
-    let route=location.pathname.replace(/\/index\\.html$/,"/");
+    let route=location.pathname.replace(/\/index\.html$/,"/");
     if(!route.endsWith("/"))route+="/";
     const entry=pages[route];
     if(!entry)return;
