@@ -3783,3 +3783,16 @@ body:has(#shopIntentHeading) .shop-collection-card-grid>.shop-collection-card::b
 @media(max-width:430px){.dd-brand-v3-promo-grid{grid-template-columns:1fr 1fr;gap:8px}
  .dd-brand-v3-promo-card span{font-size:.82rem;padding:9px}}
 @media(prefers-reduced-motion:reduce){.dd-brand-v3-promo-card{transition:none}}
+
+/* Brand V3 216–225: capability profile art, independently sized 1712×324. */
+body[data-capability-key] .dd-brand-v3-capability-banner{
+  display:block;width:100%;max-width:1712px;margin:20px auto 24px;
+  border:1px solid rgba(211,171,86,.32);border-radius:16px;
+  overflow:hidden;background:#160b26;box-shadow:0 12px 36px rgba(13,6,29,.23);
+}
+body[data-capability-key] .dd-brand-v3-capability-banner img{
+  display:block;width:100%;height:auto;aspect-ratio:1712 / 324;object-fit:contain;
+}
+@media (max-width:640px){
+ body[data-capability-key] .dd-brand-v3-capability-banner{margin:14px auto 20px;border-radius:9px}
+}
