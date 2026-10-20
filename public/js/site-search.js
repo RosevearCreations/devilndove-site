@@ -110,22 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
         image: row.featured_image_url || row.og_image_url || '',
         score: scoreText(q, row.name, row.short_description, row.meta_description, row.public_story_heading, row.public_story_summary, row.public_story_snippet, row.keywords, row.product_type)
       }), query),
-      fetchSearchSource('Tools', `/api/tools?q=${encodeURIComponent(query)}&limit=250`, (data) => Array.isArray(data.items) ? data.items : [], (row, q) => ({
-        type: 'Tool',
-        name: row.item_name_suggested || row.name || row.brand_guess || 'Workshop tool',
-        summary: [row.primary_area, row.category, row.notes_public, row.notes, row.location_zone, row.location_shelf].filter(Boolean).join(' • '),
-        url: '/tools/',
-        image: row.image_url || '',
-        score: scoreText(q, row.item_name_suggested, row.name, row.brand_guess, row.category, row.primary_area, row.notes_public, row.notes, row.location_zone, row.location_shelf)
-      }), query),
-      fetchSearchSource('Supplies', `/api/supplies?q=${encodeURIComponent(query)}&limit=250`, (data) => Array.isArray(data.items) ? data.items : [], (row, q) => ({
-        type: 'Supply',
-        name: row.item_name_suggested || row.name || row.consumable_type || 'Workshop supply',
-        summary: [row.consumable_type, row.primary_area, row.process_tags, row.notes, row.storage_location].filter(Boolean).join(' • '),
-        url: '/supplies/',
-        image: row.image_url || '',
-        score: scoreText(q, row.item_name_suggested, row.name, row.consumable_type, row.primary_area, row.process_tags, row.notes, row.storage_location)
-      }), query),
       fetchSearchSource('Creations', `/api/creations?q=${encodeURIComponent(query)}&limit=250`, (data) => Array.isArray(data.items) ? data.items : [], (row, q) => ({
         type: 'Creation',
         name: row.name || row.title || 'Featured creation',
@@ -134,14 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         image: row.image || row.image_url || '',
         score: scoreText(q, row.name, row.title, row.section, row.type, row.alt, row.caption, row.description)
       }), query),
-      fetchSearchSource('Movies', `/api/movies?q=${encodeURIComponent(query)}&limit=120`, (data) => Array.isArray(data.items) ? data.items : [], (row, q) => ({
-        type: 'Movie',
-        name: row.title || row.upc || 'Movie',
-        summary: [row.release_year, row.genre, row.director_names, row.actor_names, row.summary].filter(Boolean).join(' • '),
-        url: '/movies/',
-        image: row.front_image_url || '',
-        score: scoreText(q, row.title, row.upc, row.release_year, row.genre, row.director_names, row.actor_names, row.summary)
-      }), query)
+
     ]);
 
     const pages = fetchPages(query);
