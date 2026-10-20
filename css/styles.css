@@ -3820,3 +3820,18 @@ body[data-capability-key] .dd-brand-v3-capability-banner img{
  object-fit:contain;
 }
 @media(max-width:640px){.dd-brand-v3-ontario-banner{margin:13px auto 19px;border-radius:9px}}
+
+/* Brand V3 246–255: decorative account, toolshed and records banners. */
+.dd-brand-v3-account-banner{
+  display:block;width:100%;max-width:1712px;margin:18px auto 24px;
+  border:1px solid rgba(215,176,93,.36);border-radius:14px;
+  background:#170b29;overflow:hidden;
+  box-shadow:0 12px 32px rgba(14,5,33,.20);
+}
+.dd-brand-v3-account-banner>img{
+  display:block;width:100%;height:auto;aspect-ratio:1712 / 324;
+  object-fit:contain;
+}
+@media(max-width:640px){
+ .dd-brand-v3-account-banner{margin:12px auto 18px;border-radius:9px}
+}
