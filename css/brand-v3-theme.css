@@ -639,3 +639,15 @@ body.dd-brand-v3-set14-active :where(a,button,input,select,textarea):focus-visib
 @media(prefers-reduced-motion:reduce){
   body .dd-brand-v3-set14-banner{scroll-behavior:auto}
 }
+
+/* Admin home layout recovery 2026-10-20. Static read-only markup; avoids inline-style CSP dependencies. */
+body[data-admin-page="home"] nav#ddBrandV3AdminWorkspaces.dd-brand-v3-admin-workspaces{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:16px!important;margin:18px 0 26px!important}
+body[data-admin-page="home"] nav#ddBrandV3AdminWorkspaces>a.dd-brand-v3-admin-card{display:flex!important;flex-direction:column!important;min-width:0!important;padding:12px!important;margin:0!important;gap:8px!important;border:1px solid #594379!important;border-radius:15px!important;text-decoration:none!important;background:linear-gradient(130deg,#111c2c,#261a36)!important;color:#f7efff!important}
+body[data-admin-page="home"] nav#ddBrandV3AdminWorkspaces .dd-brand-v3-admin-card-art{display:block!important;min-height:125px;aspect-ratio:1200/620;background-position:center;background-repeat:no-repeat;background-size:contain;border-radius:10px}
+body[data-admin-page="home"] nav#ddBrandV3AdminWorkspaces .dd-brand-v3-admin-card-text{display:flex!important;flex-direction:column!important;gap:8px!important;padding:8px 6px!important;line-height:1.45!important}
+body[data-admin-page="home"] nav#ddBrandV3AdminWorkspaces .dd-brand-v3-admin-card-text>strong{display:block!important;color:#fff!important;font-size:1.04rem!important}
+body[data-admin-page="home"] nav#ddBrandV3AdminWorkspaces .dd-brand-v3-admin-card-text>small{display:block!important;color:#d6cadf!important;font-size:.9rem!important}
+body[data-admin-page="home"] nav#ddBrandV3AdminWorkspaces .dd-brand-v3-admin-card-open{display:block!important;color:#ddb5ff!important}
+body[data-admin-page="home"] nav#ddBrandV3AdminWorkspaces>a:focus-visible{outline:3px solid #d4a5ff;outline-offset:3px}
+@media(max-width:950px){body[data-admin-page="home"] nav#ddBrandV3AdminWorkspaces.dd-brand-v3-admin-workspaces{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:600px){body[data-admin-page="home"] nav#ddBrandV3AdminWorkspaces.dd-brand-v3-admin-workspaces{grid-template-columns:minmax(0,1fr)!important}}
