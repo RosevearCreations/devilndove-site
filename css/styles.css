@@ -3808,3 +3808,15 @@ body[data-capability-key] .dd-brand-v3-capability-banner img{
   display:block;width:100%;height:auto;aspect-ratio:1712 / 324;object-fit:contain;
 }
 @media(max-width:640px){.dd-brand-v3-editorial-banner{margin:12px auto 18px;border-radius:8px}}
+
+/* Brand V3 236–245: dedicated full-width Ontario category and discovery banners */
+.dd-brand-v3-ontario-banner{
+ display:block;width:100%;max-width:1712px;margin:20px auto 24px;
+ border:1px solid rgba(213,171,92,.34);border-radius:14px;
+ overflow:hidden;background:#170c2a;box-shadow:0 13px 30px rgba(21,9,32,.2);
+}
+.dd-brand-v3-ontario-banner>img{
+ display:block;width:100%;height:auto;aspect-ratio:1712 / 324;
+ object-fit:contain;
+}
+@media(max-width:640px){.dd-brand-v3-ontario-banner{margin:13px auto 19px;border-radius:9px}}
