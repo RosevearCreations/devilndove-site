@@ -8,6 +8,7 @@ on:
       - 'public/js/**'
       - 'js/**'
       - 'admin/**'
+      - 'capabilities/**'
       - 'css/**'
       - 'assets/visual-placeholders/**'
       - '*.html'
