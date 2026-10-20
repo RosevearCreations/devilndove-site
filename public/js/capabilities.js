@@ -62,7 +62,9 @@ const capabilityBanners={
   "laser-engraving":["capability.laser-engraving.hero.visual.222","222-capability-laser-engraving-banner.webp","Laser engraving workshop artwork"],
   "metal-lathe":["capability.metal-lathe.hero.visual.223","223-capability-metal-lathe-banner.webp","Metal lathe workshop artwork"],
   "paracord":["capability.paracord.hero.visual.224","224-capability-paracord-banner.webp","Paracord craft workshop artwork"],
-  "resin":["capability.resin.hero.visual.225","225-capability-resin-banner.webp","Resin casting workshop artwork"]
+  "resin":["capability.resin.hero.visual.225","225-capability-resin-banner.webp","Resin casting workshop artwork"],
+  "mechanical-automotive-fabrication":["capability.mechanical-automotive-fabrication.hero.visual.226","226-capability-mechanical-automotive-banner.webp","Illustrative mechanical and automotive fabrication workshop artwork"],
+  "packaging-labeling":["capability.packaging-labeling.hero.visual.227","227-capability-packaging-labeling-banner.webp","Illustrative packaging and labeling workshop artwork"]
 };
 function mountCapabilityBrandBanner(){
  const slug=String(document.body?.dataset?.capabilityKey||"");
