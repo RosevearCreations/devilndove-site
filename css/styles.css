@@ -3848,3 +3848,14 @@ body[data-capability-key] .dd-brand-v3-capability-banner img{
 @media(max-width:640px) {
  .dd-brand-v3-flow-banner {margin:12px auto 17px;border-radius:8px;}
 }
+
+/* Brand V3 266–275: responsive, nonintrusive secondary public-page illustration. */
+.dd-brand-v3-secondary-banner{
+ display:block;width:100%;max-width:1712px;margin:20px auto 25px;
+ border:1px solid rgba(213,171,91,.32);border-radius:13px;
+ overflow:hidden;background:#160b27;box-shadow:0 12px 32px rgba(15,5,31,.19);
+}
+.dd-brand-v3-secondary-banner>img{
+ display:block;width:100%;height:auto;aspect-ratio:1712 / 324;object-fit:contain;
+}
+@media(max-width:640px){.dd-brand-v3-secondary-banner{margin:13px auto 17px;border-radius:8px}}
