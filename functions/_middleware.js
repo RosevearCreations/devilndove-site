@@ -197,8 +197,8 @@ function storefrontFastPlatformMarkup() {
     '<link rel="stylesheet" href="/css/current-responsive.css?v=current">',
     `<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`,
     `<link data-dd-brand-v3-theme="1" rel="stylesheet" href="/css/brand-v3-theme.css?v=brand-v3-visual-20261019-set14-fullsite190">`,
-    '<link data-dd-brand-v3-frontsite="1" rel="stylesheet" href="/css/brand-v3-frontsite-recovery.css?v=195">',
-    '<script defer src="/public/js/brand-v3-frontsite-recovery.js?v=190"></script>',
+    '<link data-dd-brand-v3-frontsite="1" rel="stylesheet" href="/css/brand-v3-frontsite-recovery.css?v=295">',
+    '<script defer src="/public/js/brand-v3-frontsite-recovery.js?v=295"></script>',
     '<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>',
     '<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>',
     '<script defer src="/public/js/product-media-fallback.js?v=62"></script>',
@@ -279,7 +279,7 @@ async function withPlatformClient(response, request, env = {}) {
           element.append(`<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`, { html: true });
           element.append('<link data-dd-brand-v3-theme="1" rel="stylesheet" href="/css/brand-v3-theme.css?v=brand-v3-visual-20261019-set14-fullsite190">', { html: true });
           if (isPublicRuntimeIntelligencePath(pathname)) {
-            element.append('<link data-dd-brand-v3-frontsite="1" rel="stylesheet" href="/css/brand-v3-frontsite-recovery.css?v=195"><script defer src="/public/js/brand-v3-frontsite-recovery.js?v=190"></script>', { html: true });
+            element.append('<link data-dd-brand-v3-frontsite="1" rel="stylesheet" href="/css/brand-v3-frontsite-recovery.css?v=295"><script defer src="/public/js/brand-v3-frontsite-recovery.js?v=295"></script>', { html: true });
           }
           element.append('<script defer src="/public/js/layout-overflow-guard.js?v=current"></script>', { html: true });
           element.append('<script defer src="/public/js/packaging-safe-area-guard.js?v=current"></script>', { html: true });
