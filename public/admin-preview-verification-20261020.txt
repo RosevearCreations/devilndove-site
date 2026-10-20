@@ -1,0 +1,6 @@
+Devil n Dove — Cloudflare dev Preview verification
+Purpose: trigger a new dev branch deployment after Preview auto-deploy was enabled.
+Expected included fixes: external Admin home workspace grid, cache-busted theme CSS, and scoped legacy Admin navigation repairs.
+Admin home CSS cache version: brand-v3-admin-home-layout-20261020-b
+Reference commit: 80dbe5da5193c6139c99e3662801599b7c425ad5
+No production promotion; no application data or behaviour changes.
