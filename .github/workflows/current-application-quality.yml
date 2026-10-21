@@ -45,6 +45,8 @@ jobs:
           node --check functions/api/_lib/providerEvidenceFollowup428.mjs
           node --check functions/api/admin/provider-evidence-followup-428.js
           node scripts/release467_build428_regression.mjs
+      - name: Build 430 Production receipt fail-closed regression
+        run: python scripts/release430_production_receipt_test.py
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
