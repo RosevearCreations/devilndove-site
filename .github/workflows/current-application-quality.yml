@@ -47,6 +47,12 @@ jobs:
           node scripts/release467_build428_regression.mjs
       - name: Build 430 Production receipt fail-closed regression
         run: python scripts/release430_production_receipt_test.py
+      - name: Build 431 live deployment gate status regression
+        run: |
+          node --check functions/api/_lib/releaseGate431.mjs
+          node --check functions/api/admin/release-gate-status-431.js
+          node --check public/js/admin-release-gate-status-431.js
+          node scripts/release467_build431_regression.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
