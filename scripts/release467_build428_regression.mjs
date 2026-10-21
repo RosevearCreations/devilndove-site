@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {reviewEvidenceFollowup428} from '../functions/api/_lib/providerEvidenceFollowup428.mjs';
+const data={ok:true,build:427,read_only:true,local_only:true,provider_called:false,automatic_closure:false,us_shipping_suspended:true,review:{build:427,read_only:true,human_closure_authorized:false,independent_provider_verified:false,reviewed_acceptance_receipt:5,source_signature:'abcdef12',holds:['PROVIDER_EVIDENCE_MUST_BE_INDEPENDENTLY_VERIFIED','MANUAL_CLOSURE_DECISION_NOT_RECORDED']}};
+const good=reviewEvidenceFollowup428(data);
+assert.equal(good.source_integrity_holds.length,0);
+assert.equal(good.review_checklist.length,4);
+assert(good.review_checklist.every(row=>row.complete===false));
+assert.equal(good.closure_authorized,false);
+assert.equal(good.provider_called,false);
+assert.equal(good.us_shipping_suspended,true);
+const bad=reviewEvidenceFollowup428({...data,review:{...data.review,independent_provider_verified:true}});
+assert(bad.source_integrity_holds.includes('PROVENANCE_SOURCE_UNTRUSTED'));
+assert(reviewEvidenceFollowup428(null).source_integrity_holds.length>0);
+console.log('Build 428 read-only follow-up regression PASS');
