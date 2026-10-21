@@ -430,6 +430,14 @@ jobs:
           print(json.dumps(proof,indent=2,sort_keys=True))
           PY
 
+      - name: Build 430 verified Production receipt
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+          SOURCE_RUN: ${{ github.run_id }}
+        run: |
+          python scripts/release430_production_receipt_test.py
+          python scripts/release430_production_receipt.py --sha "${SOURCE_SHA}" --run-id "${SOURCE_RUN}"
+
       - name: Preserve Production promotion proof
         uses: actions/upload-artifact@v4
         with:
@@ -439,6 +447,7 @@ jobs:
             /tmp/production-d1-authority.json
             /tmp/production-control-plane-proof.json
             /tmp/production-smoke.json
+            /tmp/production-release-receipt.json
           retention-days: 90
           if-no-files-found: error
 
