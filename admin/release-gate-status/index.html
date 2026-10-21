@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="p:domain_verify" content="416962017515ec25302304e522b8bd8a">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Production Release Gate — Devil n Dove Admin</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" type="image/png" href="/assets/mark.png">
+  <style>
+    .release431-shell{max-width:1120px;margin-inline:auto}
+    .release431-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+    .release431-summary>div{min-width:0;background:rgba(98,69,131,.16);border:1px solid rgba(176,144,204,.32);border-radius:12px;padding:12px}
+    .release431-summary p{overflow-wrap:anywhere}
+    .release431-proof{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(130px,auto);gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(195,165,212,.28)}
+    .release431-proof p{margin:5px 0 0;overflow-wrap:anywhere}
+    .release431-pill{display:inline-block;border:1px solid #b2a5bf;border-radius:999px;padding:4px 10px;font-size:.85rem;font-weight:700;color:#f2e7ff;white-space:normal}
+    .release431-pill[data-state="GREEN"]{border-color:#5dd8a8;color:#bafbdd}
+    .release431-pill[data-state="FAILED"],.release431-pill[data-state="HOLD"]{border-color:#f2a9ac;color:#ffcbcd}
+    .release431-pill[data-state="MISSING"],.release431-pill[data-state="PENDING"]{border-color:#f2cc86;color:#ffe0aa}
+    .release431-unknown{color:#d2c3dc}
+    #release431Summary code,#release431Live code{overflow-wrap:anywhere;white-space:normal}
+    @media(max-width:650px){.release431-proof{grid-template-columns:minmax(0,1fr) auto}.release431-proof>div:last-child{grid-column:1/-1}}
+  </style>
+</head>
+<body class="theme-dark admin-page">
+  <main class="container admin-shell release431-shell">
+    <nav class="nav">
+      <div class="brand"><img src="/assets/logo-clear-nav.webp" alt="Devil n Dove logo"><div><strong>Devil n Dove</strong><div class="small">I.T. Admin · Release status</div></div></div>
+      <div class="links"><a href="/admin/">Admin</a><a href="/admin/release-control/">Release Control</a><a href="/admin/deployment-preflight/">Preflight</a><button type="button" class="btn" data-nav-logout>Logout</button></div>
+    </nav>
+    <section class="hero"><div><h1>Production Release Gate</h1><p>See exactly why a release is green, waiting, missing or blocked — with links to the GitHub evidence. This page cannot deploy or change Production.</p></div></section>
+    <section class="card" aria-live="polite"><h2>Release overview</h2><button id="release431Refresh" type="button" class="btn primary">Refresh release evidence</button><div id="release431Summary" style="margin-top:14px">Checking release evidence…</div></section>
+    <section class="card" aria-label="Required GitHub release proof results"><h2>Exact-commit Development checks</h2><p class="small">All four must be successful for the same Development commit. Older green runs do not count.</p><div id="release431Results" aria-live="polite"></div></section>
+    <section class="card"><h2>Live Cloudflare version</h2><div id="release431Live" aria-live="polite">Checking current deployment…</div><p class="small">The live SHA marker is added by the protected Production workflow. The dashboard never equates a branch update with a completed deployment.</p></section>
+    <footer class="footer card"><a href="/admin/">Admin Dashboard</a> · <a href="/admin/release-control/">Release Control</a> · <a href="/admin/deployment-preflight/">Deployment Preflight</a></footer>
+  </main>
+  <script src="/public/js/auth.js"></script>
+  <script src="/public/js/admin-route-usage.js"></script>
+  <script src="/public/js/site-auth-ui.js"></script>
+  <script src="/public/js/admin-self-protect.js"></script>
+  <script src="/public/js/admin-release-gate-status-431.js"></script>
+</body>
+</html>
