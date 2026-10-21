@@ -40,6 +40,11 @@ jobs:
           node --check functions/api/_lib/providerIndependentClosureReadiness427.mjs
           node --check functions/api/admin/provider-independent-closure-review-427.js
           node scripts/release467_build427_regression.mjs
+      - name: Build 428 independent evidence follow-up regression
+        run: |
+          node --check functions/api/_lib/providerEvidenceFollowup428.mjs
+          node --check functions/api/admin/provider-evidence-followup-428.js
+          node scripts/release467_build428_regression.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
