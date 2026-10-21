@@ -1,3 +1,11 @@
+# CURRENT ROADMAP — Build 429 and next builds (2026-10-21)
+
+Build 429: **Production Deployment Verification & Release Status Reliability**. It introduces a workflow-specific, exact-SHA GitHub release proof diagnostic without relaxing the existing production gate. Implementation and acceptance notes: [Build 429](docs/operations/RELEASE_467_BUILD_429_DEPLOYMENT_READINESS.md).
+
+**Next queued: Build 430 — Production Deployment Receipt & Live Version Verification.** Planned Builds 430–438 and their acceptance checks are detailed in [the forward roadmap](docs/operations/RELEASE_467_BUILD_429_438_ROADMAP.md). These are proposed scopes, not completed builds or Production GREEN claims.
+
+---
+
 # Release 467 Build 385 — Durable Server-Side Write Idempotency & Operation Receipts (Development candidate)
 
 Add [durable operator write receipts](/admin/system-operations/) for four current admin actions: Commission review, Finance review, Inventory project reservation and partial release. Bind request key+payload SHA256+actor+target, commit source mutation and immutable receipt atomically in D1; a legitimate identical replay returns OK with the stored receipt and does **not** reapply the write. Cross-tab/device source uniqueness is backed by D1 rather than browser state. User-facing result acknowledgement and read-only lookup remain; other legacy endpoints are not covered until separately reviewed. Read `docs/operations/RELEASE_467_BUILD_385_DURABLE_WRITE_RECEIPTS.md`.
