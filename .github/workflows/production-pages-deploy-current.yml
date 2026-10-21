@@ -292,6 +292,9 @@ jobs:
           ! grep -q 'dbc1615b-dcbe-4951-973b-b47c99c73bfa' wrangler.toml
           ! grep -q 'devilndove-toolshed-images-dev' wrangler.toml
           ! grep -q 'devilndove-caip-media-dev' wrangler.toml
+          # Build 431: immutable public marker, generated from this exact approved main run.
+          printf '{"source_sha":"%s","branch":"main","workflow_run_id":"%s","build":431}\\n' "${GITHUB_SHA}" "${GITHUB_RUN_ID}" > release-version.json
+          python -m json.tool release-version.json > /dev/null
           npx --yes wrangler@4.128.0 pages deploy . \
             --project-name=devilndove-site \
             --branch=main \
@@ -430,6 +433,37 @@ jobs:
           print(json.dumps(proof,indent=2,sort_keys=True))
           PY
 
+      - name: Build 431 prove live exact source version on custom domain
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os,time,urllib.parse,urllib.request
+          url='https://devilndove.com/release-version.json'
+          expected=os.environ['GITHUB_SHA']
+          last=''
+          for attempt in range(12):
+            try:
+              req=urllib.request.Request(url+'?sha='+urllib.parse.quote(expected),
+                headers={'User-Agent':'devilndove-live-release-431/1.0','Cache-Control':'no-cache'})
+              with urllib.request.urlopen(req,timeout=18) as response:
+                assert response.status==200,('HTTP',response.status)
+                payload=json.load(response)
+              assert payload.get('source_sha')==expected,(payload.get('source_sha'),expected)
+              assert payload.get('branch')=='main',payload
+              assert str(payload.get('workflow_run_id'))==os.environ['GITHUB_RUN_ID'],payload
+              result={'status':'PASS','source_sha':expected,'live_url':url,
+                      'workflow_run_id':os.environ['GITHUB_RUN_ID'],
+                      'proof':'CUSTOM_DOMAIN_EXACT_SHA_AND_RUN_MATCH'}
+              json.dump(result,open('/tmp/production-live-version.json','w'),indent=2,sort_keys=True)
+              print('EXACT CUSTOM DOMAIN RELEASE VERSION: PASS')
+              break
+            except Exception as exc:
+              last=repr(exc)
+              if attempt<11:time.sleep(5)
+          else:
+            raise SystemExit('Production version marker not verified; deployment cannot be GREEN: '+last)
+          PY
+
       - name: Build 430 verified Production receipt
         env:
           SOURCE_SHA: ${{ github.sha }}
@@ -448,6 +482,7 @@ jobs:
             /tmp/production-control-plane-proof.json
             /tmp/production-smoke.json
             /tmp/production-release-receipt.json
+            /tmp/production-live-version.json
           retention-days: 90
           if-no-files-found: error
 
