@@ -1,8 +1,10 @@
-# CURRENT ROADMAP — Build 429 and next builds (2026-10-21)
+# CURRENT ROADMAP — Build 431 and next builds (2026-10-21)
 
-Build 429: **Production Deployment Verification & Release Status Reliability**. It introduces a workflow-specific, exact-SHA GitHub release proof diagnostic without relaxing the existing production gate. Implementation and acceptance notes: [Build 429](docs/operations/RELEASE_467_BUILD_429_DEPLOYMENT_READINESS.md).
+**Current implementation:** Build 431 — Release Gate Dashboard & Human-Readable Blocker Reasons. The [release gate dashboard](/admin/release-gate-status/) reports exact-SHA Development checks, Production workflow evidence and live deployed source identity. Technical guide: [Build 431](docs/operations/RELEASE_467_BUILD_431_RELEASE_GATE_DASHBOARD.md).
 
-**Next queued: Build 430 — Production Deployment Receipt & Live Version Verification.** Planned Builds 430–438 and their acceptance checks are detailed in [the forward roadmap](docs/operations/RELEASE_467_BUILD_429_438_ROADMAP.md). These are proposed scopes, not completed builds or Production GREEN claims.
+**Prior builds:** Build 429 provides workflow-specific diagnostics; Build 430 generates control-plane and smoke-linked Production receipts. Source updates and matching branch trees alone do **not** establish Production GREEN.
+
+**Next queued:** Build 432 — Deployment Rollback Readiness & Safe Recovery. The rest of Builds 433–438 remain planned in the [forward roadmap](docs/operations/RELEASE_467_BUILD_429_438_ROADMAP.md). Advance only after the exact-SHA release proofs and Cloudflare live receipt are verified.
 
 ---
 
