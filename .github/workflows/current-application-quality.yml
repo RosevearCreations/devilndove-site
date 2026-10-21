@@ -35,6 +35,11 @@ jobs:
           node --check functions/api/_lib/providerAcceptanceContinuity426.mjs
           node --check functions/api/admin/provider-acceptance-continuity-426.js
           node scripts/release467_build426_regression.mjs
+      - name: Build 427 independent manual closure regression
+        run: |
+          node --check functions/api/_lib/providerIndependentClosureReadiness427.mjs
+          node --check functions/api/admin/provider-independent-closure-review-427.js
+          node scripts/release467_build427_regression.mjs
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
