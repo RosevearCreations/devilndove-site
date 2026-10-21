@@ -1,0 +1,41 @@
+name: Release 429 Deployment Readiness Diagnostic
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'scripts/release429_release_status.py'
+      - 'scripts/release429_release_status_test.py'
+      - '.github/workflows/release429-deployment-readiness.yml'
+      - 'docs/operations/RELEASE_467_BUILD_429_DEPLOYMENT_READINESS.md'
+      - 'docs/operations/RELEASE_467_BUILD_429_438_ROADMAP.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  explain-release-status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify diagnostic regression
+        run: python scripts/release429_release_status_test.py
+      - name: Query exact SHA proof workflows (read only)
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/release429_release_status.py --sha "${GITHUB_SHA}" --output release429-status.json
+      - name: Publish diagnostic even when readiness is blocked
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release429-exact-sha-diagnostic
+          path: release429-status.json
+          if-no-files-found: warn
+          retention-days: 30
