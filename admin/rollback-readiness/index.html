@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Rollback Readiness — Devil n Dove Admin</title>
+<link rel="stylesheet" href="/css/styles.css">
+<link rel="icon" type="image/png" href="/assets/mark.png">
+<style>
+  .dd432-shell{max-width:1120px;margin-inline:auto}
+  .dd432-status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .dd432-status-grid > div{min-width:0;background:rgba(94,65,135,.14);border:1px solid rgba(170,145,200,.4);border-radius:12px;padding:14px}
+  .dd432-status-grid code{overflow-wrap:anywhere;white-space:normal}
+  .dd432-hold{color:#ffdba7;font-weight:700}
+  .dd432-checklist{display:grid;gap:10px}
+  .dd432-checklist li{line-height:1.55}
+  .dd432-tools{display:flex;gap:10px;flex-wrap:wrap}
+  .dd432-tools a{overflow-wrap:anywhere}
+</style>
+</head>
+<body class="theme-dark admin-page">
+<main class="container admin-shell dd432-shell">
+<nav class="nav">
+ <div class="brand"><img src="/assets/logo-clear-nav.webp" alt="Devil n Dove logo"><div><strong>Devil n Dove</strong><div class="small">Admin · Safe Recovery</div></div></div>
+ <div class="links"><a href="/admin/">Admin</a><a href="/admin/release-gate-status/">Release Gate</a><a href="/admin/release-control/">Release Control</a><button class="btn" type="button" data-nav-logout>Logout</button></div>
+</nav>
+<section class="hero"><div><h1>Deployment Rollback Readiness</h1>
+<p>Review a previous verified Production release without changing the live site. This screen cannot promote, restore, delete or overwrite anything.</p></div></section>
+<section class="card"><h2>Current source and deployment proof</h2>
+<p class="dd432-hold">HOLD — no rollback is authorized from this page.</p>
+<div class="dd432-tools"><button id="dd432Read" class="btn" type="button">Check exact release evidence (read only)</button><a class="btn secondary" href="/admin/release-gate-status/">Open Release Gate Dashboard</a></div>
+<p id="dd432Message" role="status" aria-live="polite">No GitHub, Cloudflare or historical checkpoint was assumed.</p>
+<div class="dd432-status-grid" id="dd432Status" aria-live="polite"></div>
+</section>
+<section class="card">
+<h2>Protected rollback rehearsal</h2>
+<p>Select the historical source SHA and original successful Production Pages Deploy run ID only after confirming they belong together. The GitHub rehearsal reads archived production receipts and creates a review report; it <strong>never</strong> switches Cloudflare deployments.</p>
+<div class="dd432-tools">
+<a class="btn" href="https://github.com/RosevearCreations/devilndove-site/actions/workflows/release432-rollback-rehearsal.yml" target="_blank" rel="noopener noreferrer">Open read-only GitHub rehearsal</a>
+<a class="btn secondary" href="https://github.com/RosevearCreations/devilndove-site/actions/workflows/production-pages-deploy-current.yml" target="_blank" rel="noopener noreferrer">Historical Production runs</a>
+</div>
+<h3>Manual recovery acceptance checklist</h3>
+<ol class="dd432-checklist">
+<li>Identify and record the currently served Production commit and customer-facing incident.</li>
+<li>Confirm a previous successful Production deployment, its exact Git commit, verified Build 430 receipt and Cloudflare deployment identity.</li>
+<li>Rehearse the source and public asset differences; examine all Functions, schema and environment changes before deciding whether code-only recovery is safe.</li>
+<li>Obtain explicit owner authorization for the exact rollback candidate; prepare a separately reviewed Git PR and ensure the current Development gate can protect it.</li>
+<li>Never copy Development or old Production D1 into current Production, overwrite private R2 media, replay Etsy requests, or silently change shipping restrictions.</li>
+<li>After a separately authorized deployment, compare the Cloudflare control-plane receipt, custom-domain source marker and public smoke results before claiming GREEN.</li>
+</ol>
+<p class="small">This plan deliberately has no Rollback button. Historical successful workflows alone do not authorize an environment change, and missing evidence remains UNKNOWN.</p>
+</section>
+<footer class="card footer"><a href="/admin/">Admin</a> · <a href="/admin/release-control/">Release Control</a></footer>
+</main>
+<script src="/public/js/auth.js"></script>
+<script src="/public/js/admin-route-usage.js"></script>
+<script src="/public/js/site-auth-ui.js"></script>
+<script src="/public/js/admin-self-protect.js"></script>
+<script src="/public/js/admin-rollback-readiness-432.js"></script>
+</body></html>
