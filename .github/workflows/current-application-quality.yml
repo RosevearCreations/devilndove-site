@@ -73,6 +73,11 @@ jobs:
           node --check scripts/release467_build434_regression.mjs
           node --test scripts/release467_build434_regression.mjs
 
+      - name: Build 435 Standard theme and accessibility acceptance
+        run: |
+          node --check scripts/release467_build435_accessibility.test.mjs
+          node --test scripts/release467_build435_accessibility.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
