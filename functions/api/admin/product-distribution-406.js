@@ -1,11 +1,12 @@
 // Build 406 — checked canonical media mapping and distribution policy for existing source Products.
 import {getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
+import {readCanonicalDistributionGallery} from '../_lib/canonicalDistributionGallery436.mjs';
 import {outboundChannel,productIdValid,ownerKeyValid,imageSelectionValid,allowedImage,
  reviewedSourceSignature,reviewEvidence,auditJSON} from '../_lib/productDistribution406.mjs';
 const reply=(x,status=200)=>jsonResponse({ok:status<400,build:406,provider_called:false,publication_performed:false,provider_publication_allowed:false,...x},status,{'Cache-Control':'no-store'});
 const productSQL="SELECT product_id,name,description,price_cents,currency,inventory_quantity,status FROM products WHERE product_id=? LIMIT 1";
-const imagesSQL="SELECT product_image_id,product_id,image_url,alt_text,image_role,public_use_status,width_px,height_px,sort_order FROM product_images WHERE product_id=? ORDER BY sort_order ASC,product_image_id ASC LIMIT 60";
+// Canonical approval metadata lives in product_image_annotations (Build 436 fix).
 const preferenceSQL="SELECT admin_action_audit_id,details_json FROM admin_action_audit WHERE action_type='product_channel_intent_405' AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id DESC LIMIT 1";
 const reviewSQL="SELECT admin_action_audit_id,details_json FROM admin_action_audit WHERE action_type='product_distribution_policy_406' AND target_type='product' AND target_key=? AND json_extract(details_json,'$.channel')=? ORDER BY admin_action_audit_id DESC LIMIT 1";
 const selectedSQL="SELECT selected_product_image_ids_json FROM marketplace_export_image_selections WHERE channel=? AND product_id=? LIMIT 1";
@@ -13,14 +14,14 @@ function gate(c){const admin=verifiedAdminFromModule(c),db=getDb(c.env);
  return !admin?{error:reply({error:'Active Admin authorization required.'},401)}:!db?{error:reply({error:'D1 Production binding unavailable.'},503)}:{admin,db};}
 async function source(db,productId,channel){
  const [product,gallery,preference,review,selection]=await Promise.all([
-  db.prepare(productSQL).bind(productId).first(),db.prepare(imagesSQL).bind(productId).all(),
+  db.prepare(productSQL).bind(productId).first(),readCanonicalDistributionGallery(db,productId),
   db.prepare(preferenceSQL).bind(String(productId)).first(),db.prepare(reviewSQL).bind(String(productId),channel).first(),
   db.prepare(selectedSQL).bind(channel,productId).first()
  ]);
  if(!product)return null;
  let selectedIds=[];try{selectedIds=JSON.parse(selection?.selected_product_image_ids_json||'[]')}catch{}
- const images=gallery?.results||[];
- return {product,images,preference,review,selectedIds,
+ const images=gallery?.images||[];
+ return {product,images,preference,review,selectedIds,annotationAuthority:gallery.annotation_authority,
   status:reviewEvidence({channel,product,images,selectedIds,preference,policyReceipt:review})};
 }
 export async function onRequestGet(c){
@@ -34,7 +35,7 @@ export async function onRequestGet(c){
      alt_text:im.alt_text,width_px:im.width_px,height_px:im.height_px,image_role:im.image_role,
      approved_for_distribution:allowedImage(im)})),
    selected_image_ids:data.selectedIds,review_receipt:data.review?.admin_action_audit_id||null,
-   current_evidence:data.status,source:'CANONICAL_PRODUCTS_AND_PRODUCT_IMAGES_ONLY'}):
+   current_evidence:data.status,annotation_authority:data.annotationAuthority,source:'CANONICAL_PRODUCTS_AND_PRODUCT_IMAGES_WITH_ANNOTATIONS'}):
   reply({error:'Original Product not found.'},404);
  }catch{return reply({error:'Canonical gallery cannot be verified. No provider calls.'},503);}
 }
