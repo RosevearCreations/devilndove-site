@@ -34,13 +34,15 @@ const summaries=pages.map(p=>{
  const literalImgs=[...html.matchAll(/\b(?:src|data-src)=["'](\/assets\/(?:images|placeholders)\/[^"']+)["']/gi)].map(m=>m[1].split('?')[0]);
  const unresolved=literalImgs.filter(f=>!files.has(f));
  const labels=(html.match(/data-media-placeholder="1"/g)||[]).length;
+ const genericArtworkSvgRefs=(html.match(/\/assets\/visual-placeholders\/[^"'<>\\s]+\\.svg/gi)||[]).length;
+ const curatedBrandV3Defaults=(html.match(/data-brand-v3-curated-default="/g)||[]).length;
  const directTheme=html.includes('/css/brand-v3-theme.css');
  const mappedAuto=html.includes('/public/js/brand-v3-auto.js');
  const body=/<body\b/i.test(html);
  const sharedStyle=/\/css\/styles\.css/.test(html);
  const hasCards=/\bcard\b/.test(html);
  const hero=/\b(?:hero|page-hero|public-media-band)\b/.test(html);
- return {page:p,route:p==='index.html'?'/':'/'+p.replace(/index\.html$/,''),css:sharedStyle,directTheme,brandAuto:mappedAuto,body,cards:hasCards,hero,images:imgs.length,imagesMissingAlt:imgs.filter(img=>!/\balt\s*=/.test(img)).length,placeholderSlots:labels,missingStaticAssets:unresolved};
+ return {page:p,route:p==='index.html'?'/':'/'+p.replace(/index\.html$/,''),css:sharedStyle,directTheme,brandAuto:mappedAuto,body,cards:hasCards,hero,images:imgs.length,imagesMissingAlt:imgs.filter(img=>!/\balt\s*=/.test(img)).length,placeholderSlots:labels,genericArtworkSvgRefs,curatedBrandV3Defaults,missingStaticAssets:unresolved};
 });
 const middleware=fs.readFileSync(path.join(root,'functions/_middleware.js'),'utf8');
 const reports={
@@ -58,6 +60,10 @@ const reports={
   siteWideSharedTheme:middleware.includes('data-dd-brand-v3-theme'),
   pagesWithMediaPlaceholders:summaries.filter(x=>x.placeholderSlots).length,
   remainingMediaPlaceholders:summaries.reduce((sum,x)=>sum+x.placeholderSlots,0),
+  // Editable Media Studio hooks use a runtime WebP recovery map; do not call them unfilled assets.
+  mediaStudioEditablePlaceholderHooks:summaries.reduce((sum,x)=>sum+x.placeholderSlots,0),
+  genericArtworkSvgReferences:summaries.reduce((sum,x)=>sum+x.genericArtworkSvgRefs,0),
+  curatedBrandV3AuthoredDefaults:summaries.reduce((sum,x)=>sum+x.curatedBrandV3Defaults,0),
   imageElements:summaries.reduce((sum,x)=>sum+x.images,0),
   missingAlt:summaries.reduce((sum,x)=>sum+x.imagesMissingAlt,0),
   missingStaticImageReferences:summaries.reduce((sum,x)=>sum+x.missingStaticAssets.length,0),
@@ -72,7 +78,12 @@ console.log('NO_BASE_CSS='+JSON.stringify(summaries.filter(x=>!x.css).map(x=>x.p
 console.log('NO_EXPLICIT_BRAND_MAP='+JSON.stringify(summaries.filter(x=>!x.brandAuto).map(x=>x.page)));
 console.log('PLACEHOLDER_PAGES='+JSON.stringify(summaries.filter(x=>x.placeholderSlots).map(x=>({page:x.page,slots:x.placeholderSlots}))));
 console.log('MISSING_STATIC_IMAGES='+JSON.stringify(summaries.filter(x=>x.missingStaticAssets.length).map(x=>({page:x.page,assets:x.missingStaticAssets}))));
+console.log('GENERIC_SVG_ARTWORK='+JSON.stringify(summaries.filter(x=>x.genericArtworkSvgRefs).map(x=>({page:x.page,count:x.genericArtworkSvgRefs}))));
 console.log('MISSING_ALTS='+JSON.stringify(summaries.filter(x=>x.imagesMissingAlt).map(x=>({page:x.page,count:x.imagesMissingAlt}))));
+if(reports.counts.genericArtworkSvgReferences){
+ console.error('BUILD_433_PLACEHOLDER_HOLD: Generic SVG illustrations remain on customer routes');
+ process.exitCode=1;
+}
 if(pages.length<60 || !reports.serverThemeInjection.general || !reports.serverThemeInjection.storefrontFast || !reports.serverThemeInjection.productsFast){
  console.error('BASE_AUDIT_FAILED: missing pages or core Brand V3 stylesheet coverage');
  process.exitCode=1;
