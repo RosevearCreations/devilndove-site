@@ -1,0 +1,40 @@
+name: Release 467 Build 436 Admin Media Reliability
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'public/js/media-content-runtime.js'
+      - 'public/js/admin-media-content-studio.js'
+      - 'public/js/admin-brand-v3-set*.js'
+      - 'scripts/release467_build436_admin_artwork_audit.mjs'
+      - 'scripts/release467_build436_media_runtime.test.mjs'
+      - '.github/workflows/release467-build436-admin-media.yml'
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-admin-artwork-and-owner-media:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify Admin artwork and media owner-overrides are safe
+        run: |
+          node --check public/js/media-content-runtime.js
+          node --test scripts/release467_build436_admin_artwork_audit.mjs scripts/release467_build436_media_runtime.test.mjs
+      - name: Keep missing-artwork evidence for owner review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release436-admin-artwork-audit
+          path: release436-admin-artwork-audit.json
+          if-no-files-found: warn
+          retention-days: 30
