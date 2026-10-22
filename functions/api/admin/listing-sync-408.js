@@ -1,6 +1,7 @@
 // Release 467 Build 408 — authenticated, click-only local operator acceptance, draft preparation and reconciliation.
 import {getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
+import {readCanonicalDistributionGallery} from '../_lib/canonicalDistributionGallery436.mjs';
 import {outboundChannel,productIdValid,ownerKeyValid,reviewEvidence,reviewedSourceSignature} from '../_lib/productDistribution406.mjs';
 import {listingSyncReadiness} from '../_lib/listingSyncReadiness407.mjs';
 import {connectionBlockers} from '../_lib/etsyDraftTrial399.mjs';
@@ -8,7 +9,7 @@ import {parseReceipt,evidenceFingerprint,localDraftPayload,reconciliation} from 
 const reply=(v,status=200)=>jsonResponse({ok:status<400,build:408,provider_called:false,external_execution_allowed:false,publication_performed:false,...v},status,{'Cache-Control':'no-store'});
 const Q={
  product:"SELECT product_id,name,description,price_cents,currency,inventory_quantity,status FROM products WHERE product_id=? LIMIT 1",
- gallery:"SELECT product_image_id,product_id,image_url,alt_text,image_role,public_use_status,width_px,height_px,sort_order FROM product_images WHERE product_id=? ORDER BY sort_order ASC,product_image_id ASC LIMIT 60",
+ // Canonical gallery is read by the shared Build 436 helper; annotations own approval metadata.
  preference:"SELECT admin_action_audit_id,details_json FROM admin_action_audit WHERE action_type='product_channel_intent_405' AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id DESC LIMIT 1",
  policy:"SELECT admin_action_audit_id,details_json FROM admin_action_audit WHERE action_type='product_distribution_policy_406' AND target_type='product' AND target_key=? AND json_extract(details_json,'$.channel')=? ORDER BY admin_action_audit_id DESC LIMIT 1",
  selection:"SELECT selected_product_image_ids_json FROM marketplace_export_image_selections WHERE channel=? AND product_id=? LIMIT 1",
@@ -21,14 +22,14 @@ function gate(c){const admin=verifiedAdminFromModule(c),db=getDb(c.env);
  return !admin?{error:reply({error:'Verified administrator required.'},401)}:!db?{error:reply({error:'D1 binding unavailable.'},503)}:{admin,db};}
 async function load(db,env,id,channel){
  const [product,gallery,preference,policy,selection,acceptance,preparation,lastReconciliation]=await Promise.all([
-  db.prepare(Q.product).bind(id).first(),db.prepare(Q.gallery).bind(id).all(),
+  db.prepare(Q.product).bind(id).first(),readCanonicalDistributionGallery(db,id),
   db.prepare(Q.preference).bind(String(id)).first(),db.prepare(Q.policy).bind(String(id),channel).first(),
   db.prepare(Q.selection).bind(channel,id).first(),
   ...[types.accept,types.prepare,types.reconcile].map(t=>db.prepare(Q.receipt).bind(t,String(id),channel).first())
  ]);
  if(!product)return null;
  let selectedIds=[];try{selectedIds=JSON.parse(selection?.selected_product_image_ids_json||'[]')}catch{}
- const images=gallery?.results||[];
+ const images=gallery?.images||[];
  const local=reviewEvidence({channel,product,images,selectedIds,preference,policyReceipt:policy});
  const fingerprint=evidenceFingerprint({channel,product,images,selectedIds,preference,policyReceipt:policy});
  // Stored verified Etsy data are authoritative. A user checkbox never forges provider scopes.
@@ -50,7 +51,7 @@ async function load(db,env,id,channel){
   providerEvidence:evidence,ownerAcceptance:acceptanceState});
  if(!accepted&&acceptance)readiness.blockers.push('owner_acceptance_stale_reapprove');
  const reconcile=reconciliation({currentFingerprint:fingerprint,acceptance,preparation,latestReviewReceipt:policy?.admin_action_audit_id});
- return {product,images,selectedIds,local,providerBlockers,fingerprint,policy,preference,
+ return {product,images,selectedIds,local,providerBlockers,fingerprint,policy,preference,annotationAuthority:gallery.annotation_authority,
   acceptance,preparation,lastReconciliation,readiness,reconcile,accepted};
 }
 const publicSummary=s=>({product_id:Number(s.product.product_id),destination:s.local.destination,
@@ -62,7 +63,7 @@ const publicSummary=s=>({product_id:Number(s.product.product_id),destination:s.l
  readiness_blockers:s.readiness.blockers,local_draft_ready:s.readiness.safe_to_prepare_draft&&s.local.blockers.length===0,
  preparation_current:s.reconcile.status==='LOCAL_PREPARATION_MATCHED',
  reconciliation:s.reconcile,
- source:'CANONICAL_LOCAL_D1_NO_PROVIDER_CONTACT'});
+ annotation_authority:s.annotationAuthority,source:'CANONICAL_LOCAL_D1_NO_PROVIDER_CONTACT'});
 function validBody(b){return b&&productIdValid(b.product_id)&&outboundChannel(b.destination)&&
  ownerKeyValid(b.request_key)&&['accept','prepare','reconcile'].includes(b.action)&&
  b.confirmed_local_only===true&&b.us_shipping_disabled===true&&b.no_auto_publish===true&&
