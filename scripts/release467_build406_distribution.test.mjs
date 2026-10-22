@@ -35,7 +35,11 @@ test('Protected canonical mapping route, transactional source-gallery audit and 
  const api=f('functions/api/admin/product-distribution-406.js');
  assert.equal(moduleKeyForPath('/api/admin/product-distribution-406'),MODULE_KEYS.STOREFRONT);
  assert.match(api,/verifiedAdminFromModule/);assert.match(api,/db\.batch/);
- assert.match(api,/product_images WHERE product_id=\?/);
+ assert.match(api,/readCanonicalDistributionGallery\(db,productId\)/);
+ const source=f('functions/api/_lib/canonicalDistributionGallery436.mjs');
+ assert.match(source,/FROM product_images pi/);
+ assert.match(source,/LEFT JOIN product_image_annotations pia/);
+ assert.match(source,/pia\.public_use_status/);
  assert.match(api,/product_distribution_policy_406/);
  assert.match(api,/selected_product_image_ids_json/);
  assert.doesNotMatch(api,/api\.etsy\.com|graph\.facebook|method:'PUT'|method:'PATCH'|fetch\(/);
