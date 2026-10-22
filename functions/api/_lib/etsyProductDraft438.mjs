@@ -29,7 +29,9 @@ export function flattenEtsyTaxonomy(nodes,max=1200) {
       if(results.length>=max)break;
       const label=String(item?.name||'').trim();
       const next=label?[...path,label]:path;
-      if(positive(item?.id)&&label)results.push({id:Number(item.id),name:next.join(' › ').slice(0,220)});
+      // Parent nodes are navigation headings, not listing-ready categories.
+      if(positive(item?.id)&&label&&(!Array.isArray(item.children)||!item.children.length))
+        results.push({id:Number(item.id),name:next.join(' › ').slice(0,220)});
       walk(item?.children,next,depth+1);
     }
   }

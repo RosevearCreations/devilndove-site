@@ -34,7 +34,7 @@ test('generated Etsy listing body is draft-only and excludes publication/shippin
 });
 test('taxonomy choices include nested names without trusting arbitrary IDs',()=>{
   const entries=flattenEtsyTaxonomy([{id:10,name:'Bath',children:[{id:11,name:'Soap'}]}]);
-  assert.deepEqual(entries,[{id:10,name:'Bath'},{id:11,name:'Bath › Soap'}]);
+  assert.deepEqual(entries,[{id:11,name:'Bath › Soap'}]);
 });
 test('source Product or shop change invalidates previous Etsy fingerprint',()=>{
   const shop={shop_id:'7'},connection={access_expires_at:'2026-10-22T23:00:00Z'};
