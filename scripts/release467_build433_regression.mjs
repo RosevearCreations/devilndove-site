@@ -4,6 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import vm from 'node:vm';
 const read=p=>fs.readFileSync(p,'utf8');
 const selected=[
   {page:'tools/index.html',file:'44-workshop-tools.webp',key:'tools'},
@@ -52,6 +53,17 @@ test('catalog illustrations are placed once per page after area-group rendering,
    assert.match(html,/\)\.join\(['"]{2}\) \+ `\s*<section class="card visual-placeholder-band dd-brand-v3-public-art/,
       p+' art should be outside the group loop');
    assert.doesNotMatch(html,/<h2>(Tool proof placeholder|Materials placeholder|Tool condition placeholder)<\/h2>/);
+ }
+});
+test('customer tools and supplies inline JavaScript remains syntactically valid',()=>{
+ for(const p of ['tools/index.html','supplies/index.html','toolshed/index.html']){
+   const markup=read(p);
+   const scripts=[...markup.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
+     .filter(match=>!/(?:\\bsrc\\s*=|application\\/ld\\+json|type=[\"']application\\/json)/i.test(match[1]));
+   assert.ok(scripts.length>0,p+' expected an interactive catalog script');
+   for(const script of scripts){
+     if(script[2].trim())assert.doesNotThrow(()=>new vm.Script(script[2],{filename:p}),p+' embedded JavaScript invalid');
+   }
  }
 });
 test('workshop Media Studio ownership remains intact and catalog sizing is 1600x1000 for both assets',()=>{
