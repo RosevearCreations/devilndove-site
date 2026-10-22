@@ -57,6 +57,7 @@ test('successful assigned media is adopted only after image probe is loaded',asy
  await h.settle();
  assert.equal(h.attr.src,'/assets/approved.webp');
  assert.equal(h.element.dataset.mediaContentOverride,'1');
+ assert.equal(h.doc.documentElement.dataset.mediaContentStudio,'applied');
  assert.equal(h.element.alt,'Approved workshop image');
 });
 test('failed assigned URL preserves authored or previously approved owner media',async()=>{
@@ -66,6 +67,7 @@ test('failed assigned URL preserves authored or previously approved owner media'
  assert.equal(h.element.alt,'Owner supplied original');
  assert.equal(h.element.dataset.mediaContentOverride,undefined);
  assert.equal(h.element.dataset.mediaContentOverrideError,'assigned-media-unavailable');
+ assert.equal(h.doc.documentElement.dataset.mediaContentStudio,'degraded');
  assert.ok(h.events.some(e=>e.name==='dd:media-image-unavailable'&&e.detail.slot==='about.hero.image'));
 });
 test('stale slow image cannot overwrite the newest approved assignment',async()=>{
@@ -80,4 +82,12 @@ test('unsafe media URLs never replace existing authored owner assets',async()=>{
  await h.start();await h.settle();
  assert.equal(h.attr.src,'/assets/original-owner-image.webp');
  assert.equal(h.pending.length,0);
+});
+
+test('image status stays pending until the preload has actually settled',async()=>{
+ const h=harness([item('/assets/pending.webp')]);await h.start();
+ assert.equal(h.doc.documentElement.dataset.mediaContentStudio,'pending');
+ assert.notEqual(h.attr.src,'/assets/pending.webp');
+ await h.settle();
+ assert.equal(h.doc.documentElement.dataset.mediaContentStudio,'applied');
 });
