@@ -1,0 +1,36 @@
+name: Release 467 Build 436 Canonical Etsy Media Read Regression
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'functions/api/_lib/canonicalDistributionGallery436.mjs'
+      - 'functions/api/admin/product-distribution-406.js'
+      - 'functions/api/admin/listing-sync-408.js'
+      - 'scripts/release467_build436_channel_gallery_regression.mjs'
+      - 'admin/product-editor/index.html'
+      - 'css/admin-product-channel-review-436.css'
+      - '.github/workflows/release467-build436-etsy-gallery.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-etsy-gallery-read:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Test source gallery and safe local-review boundaries
+        run: |
+          node --check functions/api/_lib/canonicalDistributionGallery436.mjs
+          node --check functions/api/admin/product-distribution-406.js
+          node --check functions/api/admin/listing-sync-408.js
+          node --check scripts/release467_build436_channel_gallery_regression.mjs
+          node --test scripts/release467_build436_channel_gallery_regression.mjs
