@@ -39,3 +39,7 @@ The pre-existing `checkout-create-order` path currently subtracts a *redeemed* g
 - Confirm the gift-card redemption settlement risk remains recorded as an explicit hold and that no U.S. shipping toggle was enabled.
 
 Next planned: **Build 438 — Release Evidence Consolidation & Next Roadmap Renewal**.
+
+## Promotion proof
+
+Record each exact-SHA check and Cloudflare live identity independently. An open pull request or locally passing test does not authorize release without the protected gate; never use a forced ref update to satisfy this proof.
