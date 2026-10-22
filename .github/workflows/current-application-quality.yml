@@ -78,6 +78,13 @@ jobs:
           node --check scripts/release467_build435_accessibility.test.mjs
           node --test scripts/release467_build435_accessibility.test.mjs
 
+      - name: Build 436 Admin artwork and Media Studio reliability
+        run: |
+          node --check public/js/media-content-runtime.js
+          node --check scripts/release467_build436_admin_artwork_audit.mjs
+          node --check scripts/release467_build436_media_runtime.test.mjs
+          node --test scripts/release467_build436_admin_artwork_audit.mjs scripts/release467_build436_media_runtime.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
