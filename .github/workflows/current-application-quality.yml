@@ -59,6 +59,12 @@ jobs:
           python scripts/release432_rollback_rehearsal_test.py
           node --check public/js/admin-rollback-readiness-432.js
 
+      - name: Build 433 customer-side Brand V3 placeholder completeness
+        run: |
+          node --check scripts/release467_build433_regression.mjs
+          node --test scripts/release467_build433_regression.mjs
+          node --test scripts/brand_v3_frontsite_recovery.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
