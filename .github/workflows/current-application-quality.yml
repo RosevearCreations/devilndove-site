@@ -57,6 +57,7 @@ jobs:
         run: |
           python -m py_compile scripts/release432_rollback_rehearsal.py
           python scripts/release432_rollback_rehearsal_test.py
+          node --check public/js/admin-rollback-readiness-432.js
 
       - name: JavaScript syntax
         run: |
