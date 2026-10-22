@@ -1,10 +1,12 @@
-# CURRENT ROADMAP — Build 434 and next builds (2026-10-22)
+# CURRENT ROADMAP — Build 435 and next builds (2026-10-22)
 
-**Current implementation:** Build 434 — Public Search & Workshop Catalog Boundaries. The public Search results now admit published Products, Creations and navigational Page links only; legacy inventory-only Tool/Supply/Movie result feeds were removed from search, while Tools, Supplies, Toolshed and Movie Shelf remain explicit reference pages. Regression and deployment handoff: [Build 434](docs/operations/RELEASE_467_BUILD_434_PUBLIC_SEARCH_CATALOG_BOUNDARIES.md).
+**Current implementation:** Build 435 — Brand V3 Theme Tokens & Accessibility. The existing owner-approved dark-purple/gold style is now explicitly defined as **Standard** with reusable semantic tokens, WCAG AA-oriented text/button contrast acceptance, visible keyboard focus, reduced motion, high-contrast support, 44px touch controls, and responsive layouts. [Read Build 435 implementation and acceptance](docs/operations/RELEASE_467_BUILD_435_STANDARD_THEME_ACCESSIBILITY.md).
 
-**Next queued:** Build 435 — Brand V3 Theme Tokens & Accessibility. Subsequent Builds 436–438 remain scheduled in [the roadmap](docs/operations/RELEASE_467_BUILD_429_438_ROADMAP.md). The Etsy one-Product trial is paused by owner choice.
+**Previous builds:** Build 433 closed five remaining generic customer placeholder illustrations without overwriting Media Studio owner selections. Build 434 excludes operational Tool/Supply/Movie records from public merchandise search while retaining Tools, Supplies, Toolshed and Movie Shelf as informational navigation pages.
 
-**Production release authority:** Four successful exact-dev-SHA Development workflows, validated Preview, protected Cloudflare Production Pages Deploy, actual live source SHA and post-deployment smoke. GitHub `dev`/`main` equality by itself is not proof of Cloudflare Production GREEN.
+**Next queued:** Build 436 — Admin Artwork & Media Content Studio Reliability. Planned 437–438 remain documented in [the roadmap](docs/operations/RELEASE_467_BUILD_429_438_ROADMAP.md). The Etsy single-product listing trial remains on hold until the owner explicitly resumes it.
+
+**Production release authority:** The four exact-dev-SHA Development proofs, successful Preview, protected Cloudflare Production Pages Deploy, live version marker and post-deployment smoke must pass before reporting Production GREEN. Equal GitHub branch SHAs are not sufficient.
 
 ---
 
