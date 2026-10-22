@@ -101,6 +101,13 @@ jobs:
           node --check scripts/release467_build437_storefront_safety.test.mjs
           node scripts/release467_build437_storefront_safety.test.mjs
 
+      - name: Build 438 Etsy Product Editor real-draft safety and Meta boundary
+        run: |
+          node --check functions/api/_lib/etsyProductDraft438.mjs
+          node --check functions/api/admin/product-etsy-draft.js
+          node --check public/js/admin-product-marketplace-drafts-v438.js
+          node --test scripts/test_product_etsy_draft_438.mjs scripts/test_product_etsy_endpoint_438.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
