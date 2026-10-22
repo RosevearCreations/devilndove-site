@@ -197,7 +197,7 @@ test('Set 13 Admin banners 121-130 have exact filenames and routes without chang
  assert.match(loader,/insertAdjacentElement/);
  assert.match(css,/dd-brand-v3-set13-banner/);
  assert.match(css,/object-fit:contain/);
- assert.match(middleware,/brand-v3-visual-20261019-set\d+/);
+ assert.match(middleware,/brand-v3-theme\.css\?v=435-standard-accessibility/);
  // Owner-supplied binary WebPs are uploaded separately from the code commit.
  assert.doesNotMatch(loader,/fetch\(|POST\s*\(|\/api\//);
 });
@@ -225,7 +225,7 @@ test('Set 14 Admin banners 131-140 map all ten named files to existing pages wit
  assert.match(loader,/insertAdjacentElement/);
  assert.match(css,/dd-brand-v3-set14-banner/);
  assert.match(css,/object-fit:contain/);
- assert.match(middleware,/brand-v3-visual-20261019-set14/);
+ assert.match(middleware,/brand-v3-theme\.css\?v=435-standard-accessibility/);
  assert.doesNotMatch(loader,/fetch\(|XMLHttpRequest|\/api\/|checkout\s*\(/);
 });
 
