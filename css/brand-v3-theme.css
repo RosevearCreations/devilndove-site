@@ -23,6 +23,21 @@
   --dd-color-focus:#dbbcff;
   --dd-color-accent:#b47bff;
   --dd-color-on-light:#1a1230;
+  /* Release 467 Build 435: named Standard theme semantic aliases.
+     Existing approved palette remains the source of truth for future variants. */
+  --dd-v3-standard-canvas:var(--dd-color-bg);
+  --dd-v3-standard-panel:var(--dd-color-surface);
+  --dd-v3-standard-panel-raised:var(--dd-color-surface-raised);
+  --dd-v3-standard-foreground:var(--dd-color-text);
+  --dd-v3-standard-secondary-text:var(--dd-color-text-muted);
+  --dd-v3-standard-border:var(--dd-color-border);
+  --dd-v3-standard-focus:var(--dd-color-focus);
+  --dd-v3-standard-link:var(--dd-color-accent);
+  --dd-v3-standard-decorative-gold:var(--dd-brand-v3-gold);
+  --dd-v3-standard-primary-start:#5329b3;
+  --dd-v3-standard-primary-end:#773bcd;
+  --dd-v3-standard-radius:12px;
+  --dd-v3-standard-touch-target:44px;
   --bg:var(--dd-color-bg);
   --card:var(--dd-color-surface);
   --text:var(--dd-color-text);
@@ -58,7 +73,7 @@ body :where(.hero,.page-hero,.public-service-hero){
 }
 body .btn.primary,body [data-add-shop-cart-id]{
   color:#fff;
-  background:linear-gradient(125deg,#5329b3,#773bcd);
+  background:linear-gradient(125deg,var(--dd-v3-standard-primary-start),var(--dd-v3-standard-primary-end));
   border-color:#9b6ae0;
   box-shadow:0 3px 16px rgba(92,45,172,.2),inset 0 0 0 1px rgba(212,175,55,.2);
 }
@@ -651,3 +666,99 @@ body[data-admin-page="home"] nav#ddBrandV3AdminWorkspaces .dd-brand-v3-admin-car
 body[data-admin-page="home"] nav#ddBrandV3AdminWorkspaces>a:focus-visible{outline:3px solid #d4a5ff;outline-offset:3px}
 @media(max-width:950px){body[data-admin-page="home"] nav#ddBrandV3AdminWorkspaces.dd-brand-v3-admin-workspaces{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:600px){body[data-admin-page="home"] nav#ddBrandV3AdminWorkspaces.dd-brand-v3-admin-workspaces{grid-template-columns:minmax(0,1fr)!important}}
+
+
+/* Release 467 Build 435 — Standard theme accessibility and responsive contract.
+   Shared by customer and Admin routes. Never adjusts real inventory image source,
+   business-state badges, operational data, checkout or publication logic. */
+:root{color-scheme:dark}
+body{
+  background-color:var(--dd-v3-standard-canvas);
+  color:var(--dd-v3-standard-foreground);
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+body :where(.card,.admin-panel,.admin-stat,.public-service-card){
+  min-width:0;
+  overflow-wrap:break-word;
+}
+body :where(h1,h2,h3,.card-title,.hero-title){
+  overflow-wrap:break-word;
+  text-wrap:pretty;
+}
+body :where(.nav .links,.admin-shell>.nav .links){
+  min-width:0;
+  max-width:100%;
+}
+body :where(.nav .links>a,.admin-shell>.nav .links>a,.btn,button,[role="button"]){
+  min-height:var(--dd-v3-standard-touch-target);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+body :where(a,button,input,textarea,select,summary,[role="button"],[role="tab"],[tabindex]):focus-visible{
+  outline:3px solid var(--dd-v3-standard-focus);
+  outline-offset:3px;
+  box-shadow:0 0 0 2px var(--dd-v3-standard-canvas);
+}
+body :where(.card,.admin-panel,.shop-product-card,.shop-collection-card,.tool.card,.item.card):focus-within{
+  border-color:var(--dd-v3-standard-focus);
+}
+body :where(main,.container,.admin-shell) :where(p,li,dd,dt,blockquote) a:not(.btn):not([role="button"]){
+  text-decoration:underline;
+  text-decoration-thickness:1px;
+  text-underline-offset:.17em;
+}
+body :where(input,textarea,select){
+  color:var(--dd-v3-standard-foreground);
+  background-color:var(--dd-color-surface-soft);
+  accent-color:var(--dd-v3-standard-link);
+  min-width:0;
+  max-width:100%;
+}
+body :where(input,textarea,select)::placeholder{color:var(--dd-v3-standard-secondary-text);opacity:1}
+body :where(input,textarea,select):disabled,
+body :where(button,.btn):disabled,
+body :where([aria-disabled="true"]){
+  cursor:not-allowed;
+  opacity:.68;
+}
+body :where(fieldset,legend,label){max-width:100%}
+body :where(.table-wrap,.admin-table-wrap,.dd-table-scroll){max-width:100%;overflow-x:auto}
+body :where(.table,.admin-table) th{color:var(--dd-v3-standard-foreground)}
+body :where(.table,.admin-table) td{overflow-wrap:anywhere}
+body :where(img,video,svg){max-width:100%}
+body :where(.shop-card-main-image img,.shop-product-card img[data-product-id],.media-managed-image){
+  object-position:center;
+}
+@media(max-width:740px){
+  body :where(.nav,.admin-shell>.nav){min-width:0;max-width:100%;flex-wrap:wrap}
+  body :where(.nav .links,.admin-shell>.nav .links){flex-wrap:wrap;justify-content:flex-start}
+  body :where(.grid.cols-4,.grid.cols-3,.dd-brand-v3-category-grid){min-width:0}
+}
+@media(max-width:540px){
+  body :where(.grid.cols-4,.grid.cols-3,.grid.cols-2){grid-template-columns:minmax(0,1fr)}
+  body :where(.nav .links,.admin-shell>.nav .links){gap:6px}
+  body :where(.nav .links>a,.admin-shell>.nav .links>a){max-width:100%;white-space:normal;text-align:center}
+}
+@media(prefers-reduced-motion:reduce){
+  body :where(*, *::before, *::after){
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
+@media(forced-colors:active){
+  body :where(a,button,input,textarea,select,summary,[role="button"],[role="tab"],[tabindex]):focus-visible{
+    outline:3px solid Highlight;
+    box-shadow:none;
+  }
+  body :where(.btn,button,input,textarea,select){forced-color-adjust:auto}
+}
+@media(prefers-contrast:more){
+  body :where(.card,.admin-panel,.admin-stat,.shop-product-card,.shop-collection-card){
+    border-color:var(--dd-v3-standard-focus);
+  }
+  body :where(input,textarea,select,.btn){border-width:2px}
+}
