@@ -23,6 +23,16 @@
   // Build 436: preserve the last rendered image until assigned media actually loads.
   // Failure is visual-only; we NEVER rewrite the persisted owner assignment.
   const mediaImageAttempts=new WeakMap();
+  const pendingImageElements=new Set(),failedImageElements=new Set();
+  let manifestTracking={active:false,images:0,content:0,unresolved:0};
+  function syncMediaStatus(){
+    if(!manifestTracking.active)return;
+    const pending=pendingImageElements.size,failed=failedImageElements.size,unresolved=manifestTracking.unresolved;
+    const status=failed?'degraded':pending?'pending':unresolved?'partial':'applied';
+    document.documentElement.dataset.mediaContentStudio=status;
+    signalReady({ok:true,applied:status==='applied',images:manifestTracking.images,
+      content:manifestTracking.content,pending,failed,unresolved,status});
+  }
   function applyImage(item){
     const el=safeSelector(item.target_selector);
     const url=String(item.public_url||'').trim();
@@ -35,6 +45,9 @@
     if(earlier?.url===url)return earlier.status!=='failed';
     const attempt={url,status:'loading'};
     mediaImageAttempts.set(el,attempt);
+    pendingImageElements.add(el);
+    failedImageElements.delete(el);
+    syncMediaStatus();
     const probe=new Image();
     const apply=()=>{
       if(mediaImageAttempts.get(el)!==attempt||!el.isConnected)return;
@@ -55,12 +68,18 @@
         }
       }
       attempt.status='applied';
+      pendingImageElements.delete(el);
+      failedImageElements.delete(el);
+      syncMediaStatus();
       delete el.dataset.mediaContentOverrideError;
       el.dataset.mediaContentOverride='1';
     };
     const fail=()=>{
       if(mediaImageAttempts.get(el)!==attempt)return;
       attempt.status='failed';
+      pendingImageElements.delete(el);
+      failedImageElements.add(el);
+      syncMediaStatus();
       // Keep authored/previous media intact; only record a lightweight, non-public error state.
       el.dataset.mediaContentOverrideError='assigned-media-unavailable';
       try{document.dispatchEvent(new CustomEvent('dd:media-image-unavailable',{detail:{slot:item.slot_key||'',reason:'load_failed'}}));}catch{}
@@ -151,7 +170,7 @@
     const enabled=requestedEditMode();setEditMode(enabled,{persist:true,focusHash:enabled});
   });
 
-  async function run(){const refresh=String(new URLSearchParams(location.search).get('media-refresh')||'').slice(0,80);const params=new URLSearchParams({path:pagePath()});if(refresh)params.set('refresh',refresh);try{const response=await fetch(`/api/public-media-content-manifest?${params.toString()}`,{credentials:'same-origin',headers:{Accept:'application/json'},cache:refresh?'no-store':'default'});if(!response.ok){signalReady({ok:false,applied:false,reason:'manifest_http_error'});return;}const data=await response.json();if(!data?.ok){signalReady({ok:false,applied:false,reason:'manifest_not_ok'});return;}const images=Array.isArray(data.images)?data.images:[],content=Array.isArray(data.content)?data.content:[];if(!images.length&&!content.length){document.documentElement.dataset.mediaContentStudio='authored-default';signalReady({ok:true,applied:false,images:0,content:0});return;}const applyAll=()=>{let unresolved=0;images.forEach(item=>{if(!applyImage(item))unresolved++;});content.forEach(item=>{if(!applyContent(item))unresolved++;});return unresolved;};let unresolved=applyAll();document.documentElement.dataset.mediaContentStudio=unresolved?'partial':'applied';signalReady({ok:true,applied:true,images:images.length,content:content.length,unresolved});if(unresolved){const observer=new MutationObserver(()=>{unresolved=applyAll();document.documentElement.dataset.mediaContentStudio=unresolved?'partial':'applied';if(!unresolved)observer.disconnect();});observer.observe(document.documentElement,{childList:true,subtree:true});setTimeout(()=>observer.disconnect(),8000);}}catch{signalReady({ok:false,applied:false,reason:'manifest_exception'});}}
+  async function run(){const refresh=String(new URLSearchParams(location.search).get('media-refresh')||'').slice(0,80);const params=new URLSearchParams({path:pagePath()});if(refresh)params.set('refresh',refresh);try{const response=await fetch(`/api/public-media-content-manifest?${params.toString()}`,{credentials:'same-origin',headers:{Accept:'application/json'},cache:refresh?'no-store':'default'});if(!response.ok){signalReady({ok:false,applied:false,reason:'manifest_http_error'});return;}const data=await response.json();if(!data?.ok){signalReady({ok:false,applied:false,reason:'manifest_not_ok'});return;}const images=Array.isArray(data.images)?data.images:[],content=Array.isArray(data.content)?data.content:[];if(!images.length&&!content.length){document.documentElement.dataset.mediaContentStudio='authored-default';signalReady({ok:true,applied:false,images:0,content:0});return;}manifestTracking={active:true,images:images.length,content:content.length,unresolved:0};const applyAll=()=>{let unresolved=0;images.forEach(item=>{if(!applyImage(item))unresolved++;});content.forEach(item=>{if(!applyContent(item))unresolved++;});return unresolved;};let unresolved=applyAll();manifestTracking.unresolved=unresolved;syncMediaStatus();if(unresolved){const observer=new MutationObserver(()=>{unresolved=applyAll();manifestTracking.unresolved=unresolved;syncMediaStatus();if(!unresolved)observer.disconnect();});observer.observe(document.documentElement,{childList:true,subtree:true});setTimeout(()=>observer.disconnect(),8000);}}catch{signalReady({ok:false,applied:false,reason:'manifest_exception'});}}
   function start(){loadPageEnhancements();run();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
