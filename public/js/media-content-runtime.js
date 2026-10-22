@@ -30,7 +30,7 @@
     const isBackground=item.slot_type==='background'||item.target_attribute==='background-image';
     if(!isBackground && !(el.tagName==='IMG'||item.target_attribute==='src'))return false;
     // Block script and data URLs, and avoid leaking private Media Studio inputs.
-    if(!(/^(?:https?:\\/\\/|\\/)(?!\\/)/i.test(url)))return false;
+    if(!(url.startsWith('https://')||url.startsWith('http://')||(url.startsWith('/')&&!url.startsWith('//'))))return false;
     const earlier=mediaImageAttempts.get(el);
     if(earlier?.url===url)return earlier.status!=='failed';
     const attempt={url,status:'loading'};
@@ -40,11 +40,9 @@
       if(mediaImageAttempts.get(el)!==attempt||!el.isConnected)return;
       if(probe.naturalWidth<=0||probe.naturalHeight<=0){fail();return;}
       if(isBackground){
-        el.style.backgroundImage='url("' + url.replace(/["\\\\]/g,'\\\\$&') + '")';
+        el.style.backgroundImage='url("' + url.replaceAll('"','%22') + '")';
         el.style.backgroundPosition=`${Math.round(clamp(item.focal_x)*100)}% ${Math.round(clamp(item.focal_y)*100)}%`;
       } else {
-        const priorSrc=el.getAttribute('src');
-        const priorSrcset=el.getAttribute('srcset');
         el.setAttribute('src',url);
         if(el.tagName==='IMG'){
           el.removeAttribute('srcset');el.removeAttribute('sizes');
