@@ -144,3 +144,29 @@ img[data-media-slot="contact.section.visual.1"][data-brand-v3-recovered="1"]{
  display:block;max-width:100%;width:100%;height:auto;max-height:none;
  aspect-ratio:8 / 5;object-fit:contain;object-position:center;
 }
+
+
+/* Build 433 — curated public fallback art, not actual inventory/condition proof.
+   Media Studio slot attributes are retained for owner overrides. */
+body:not([data-admin-page]) .dd-brand-v3-public-art{
+  grid-template-columns:minmax(140px,220px) minmax(0,1fr);
+  gap:clamp(14px,2.5vw,24px);
+  align-items:center;
+  background:linear-gradient(130deg,rgba(23,17,44,.96),rgba(39,27,54,.96));
+  border:1px solid rgba(192,149,222,.55);
+  margin-block:clamp(16px,2vw,26px);
+}
+body:not([data-admin-page]) .dd-brand-v3-public-art img{
+  display:block;width:100%;max-width:220px;height:auto;
+  aspect-ratio:8/5;object-fit:contain;object-position:center;
+  background:#19152a;border-radius:12px;box-shadow:none;
+}
+body:not([data-admin-page]) .dd-brand-v3-public-art h2{color:#f7eafd;margin:0 0 8px}
+body:not([data-admin-page]) .dd-brand-v3-public-art p{color:#d7cadd;margin:0;line-height:1.6}
+body:not([data-admin-page]) .media-managed-hero-visual img[data-brand-v3-curated-default="workshop-gifts-hero"]{
+  width:100%;height:auto;max-height:485px;object-fit:contain;object-position:center;
+}
+@media(max-width:640px){
+ body:not([data-admin-page]) .dd-brand-v3-public-art{grid-template-columns:1fr}
+ body:not([data-admin-page]) .dd-brand-v3-public-art img{max-width:100%}
+}
