@@ -5,6 +5,8 @@ on:
     paths:
       - 'scripts/brand_v3_frontsite_audit.mjs'
       - 'scripts/brand_v3_frontsite_recovery.test.mjs'
+      - 'scripts/release467_build433_regression.mjs'
+      - 'css/brand-v3-frontsite-recovery.css'
       - 'public/js/brand-v3-frontsite-recovery.js'
       - 'assets/images/brand-v3/**'
       - '.github/workflows/brand-v3-frontsite-audit.yml'
@@ -26,6 +28,8 @@ jobs:
           node-version: '22'
       - name: Verify safe recovery for all 29 default media slots
         run: node --test scripts/brand_v3_frontsite_recovery.test.mjs
+      - name: Build 433 verify all remaining generic SVG slots and real WebP assets
+        run: node --test scripts/release467_build433_regression.mjs
       - name: Audit every public HTML route and shared Brand V3 injections
         run: node scripts/brand_v3_frontsite_audit.mjs
       - uses: actions/upload-artifact@v4
