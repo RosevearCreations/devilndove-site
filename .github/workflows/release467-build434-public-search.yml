@@ -1,0 +1,34 @@
+name: Release 467 Build 434 Public Search Boundary
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'public/js/site-search.js'
+      - 'public/js/search-boundary-434.js'
+      - 'site-search.js'
+      - 'search/index.html'
+      - 'scripts/release467_build434_regression.mjs'
+      - '.github/workflows/release467-build434-public-search.yml'
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-search-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prove search scripts parse and do not reintroduce inventory browsing
+        run: |
+          node --check public/js/search-boundary-434.js
+          node --check public/js/site-search.js
+          node --check site-search.js
+          node --test scripts/release467_build434_regression.mjs
