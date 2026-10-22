@@ -1,10 +1,10 @@
-# CURRENT ROADMAP — Build 433 and forward queue (2026-10-21)
+# CURRENT ROADMAP — Build 434 and next builds (2026-10-22)
 
-**Current Development implementation:** Build 433 — Brand V3 Remaining Customer Placeholder Replacement. This closes the five remaining generic authored-default SVG illustrations on customer Tools, Supplies, Toolshed and Workshop-Made Gifts pages using committed Brand V3 WebPs. Existing 29 mapped Media Studio placeholder hooks retain owner-media override behaviour. Acceptance notes: [Build 433 customer-site closure](docs/operations/RELEASE_467_BUILD_433_BRAND_V3_CUSTOMER_PLACEHOLDER_CLOSURE.md).
+**Current implementation:** Build 434 — Public Search & Workshop Catalog Boundaries. The public Search results now admit published Products, Creations and navigational Page links only; legacy inventory-only Tool/Supply/Movie result feeds were removed from search, while Tools, Supplies, Toolshed and Movie Shelf remain explicit reference pages. Regression and deployment handoff: [Build 434](docs/operations/RELEASE_467_BUILD_434_PUBLIC_SEARCH_CATALOG_BOUNDARIES.md).
 
-**Current release gate:** Four exact-dev-SHA Development workflows, Preview, the protected Cloudflare Production Pages Deploy workflow, live marker and smoke evidence must prove GREEN. Matching GitHub branch SHAs are not sufficient.
+**Next queued:** Build 435 — Brand V3 Theme Tokens & Accessibility. Subsequent Builds 436–438 remain scheduled in [the roadmap](docs/operations/RELEASE_467_BUILD_429_438_ROADMAP.md). The Etsy one-Product trial is paused by owner choice.
 
-**Next queued:** Build 434 — Public Search & Workshop Catalog Boundaries. Builds 435–438 remain in [the forward roadmap](docs/operations/RELEASE_467_BUILD_429_438_ROADMAP.md). The Etsy one-product test is still deferred until tomorrow by owner decision.
+**Production release authority:** Four successful exact-dev-SHA Development workflows, validated Preview, protected Cloudflare Production Pages Deploy, actual live source SHA and post-deployment smoke. GitHub `dev`/`main` equality by itself is not proof of Cloudflare Production GREEN.
 
 ---
 
