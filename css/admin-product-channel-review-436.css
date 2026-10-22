@@ -1,0 +1,52 @@
+/* Build 436 Product Editor owner review: readable, aligned native consent checkboxes.
+   This does not pre-check consent or change publishing/destination policy. */
+#productChannel405 .dd-editor-grid>label,
+#productDistribution406>label,
+#listingSync408>label {
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  flex-wrap:nowrap;
+  gap:12px;
+  line-height:1.5;
+  text-align:left;
+  min-width:0;
+  max-width:100%;
+  padding-block:5px;
+}
+#productChannel405Etsy,
+#productChannel405Facebook,
+#productDistribution406UsOff,
+#productDistribution406Local,
+#listingSync408Consent {
+  box-sizing:border-box;
+  display:block;
+  appearance:auto;
+  -webkit-appearance:checkbox;
+  width:20px!important;
+  height:20px!important;
+  min-width:20px!important;
+  min-height:20px!important;
+  max-width:20px!important;
+  max-height:20px!important;
+  flex:0 0 20px;
+  margin:1px 0 0!important;
+  padding:0!important;
+  accent-color:#ad78f1;
+  vertical-align:top;
+}
+#productChannel405 .dd-editor-grid>label:focus-within,
+#productDistribution406>label:focus-within,
+#listingSync408>label:focus-within{
+  outline:2px solid #dbbcff;
+  outline-offset:3px;
+  border-radius:4px;
+}
+#productDistribution406Gallery{max-width:100%;min-width:0}
+#productDistribution406Gallery label{display:flex;align-items:center;gap:12px;max-width:100%;overflow-wrap:anywhere}
+#productDistribution406Gallery label>input[type=checkbox]{flex:0 0 20px;width:20px;height:20px;min-width:20px;min-height:20px}
+#productDistribution406Gallery label>img{flex:0 0 90px;max-width:90px}
+@media(max-width:540px){
+ #productChannel405 .dd-editor-grid{grid-template-columns:minmax(0,1fr)}
+ #productDistribution406Gallery label{flex-wrap:wrap}
+}
