@@ -137,6 +137,8 @@ jobs:
           node --check public/js/public-heading-guard.js
       - name: Python syntax
         run: python -m py_compile scripts/current_application_quality_gate.py scripts/current_help_hygiene_gate.py scripts/current_search_quality_gate.py scripts/current_responsive_layout_gate.py scripts/current_packaging_safe_area_gate.py scripts/current_packaging_material_intelligence_gate.py scripts/current_packaging_label_composition_gate.py scripts/current_packaging_label_production_gate.py scripts/current_grey_hair_media_intelligence_gate.py scripts/current_grey_hair_sync_alignment_gate.py scripts/current_grey_hair_story_edit_planning_gate.py scripts/current_grey_hair_production_acceptance_gate.py scripts/current_grey_hair_content_studio_handoff_gate.py scripts/current_content_studio_schema_readiness_gate.py scripts/current_content_render_readiness_gate.py scripts/current_content_generated_review_state_gate.py scripts/current_authority_restart_integrity_gate.py scripts/current_it_release_truth_gate.py scripts/current_system_gate_provenance_gate.py scripts/current_production_promotion_provenance_gate.py scripts/current_reliability_truth_gate.py scripts/current_deployment_preflight_truth_gate.py scripts/current_accounting_schema_authority_gate.py scripts/current_product_numbering_schema_authority_gate.py scripts/current_product_social_automation_schema_authority_gate.py scripts/current_rollback_plan.py scripts/current_regression_evidence.py scripts/current_password_hash_gate.py scripts/main_promotion_gate.py
+      - name: Exact Development evidence lookup regression
+        run: python -m unittest scripts/test_main_promotion_gate.py
       - name: Diff safety
         run: git diff --check origin/dev...HEAD
       - name: Boundary
