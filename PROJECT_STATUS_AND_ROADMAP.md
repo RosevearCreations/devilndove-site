@@ -1,4 +1,10 @@
-# CURRENT ROADMAP — Build 436 and next builds (2026-10-22)
+# CURRENT ROADMAP — Build 437 and next builds (2026-10-22)
+
+**Current Development candidate:** Build 437 — Storefront Purchase & Shipping Safety Review. Checkout now also enforces Canada/CAD inside the order handler, rejects split duplicate Product lines and non-CAD Product/gift-card values, and has an executable offline storefront regression. [Build 437 safety review and acceptance](docs/operations/RELEASE_467_BUILD_437_STOREFRONT_SAFETY.md). The documented pending-order gift-card redemption settlement risk remains a HOLD for a future transactionally safe remediation; no existing balances were changed.
+
+**Next queued:** Build 438 — Release Evidence Consolidation & Next Roadmap Renewal. The Etsy single-Product listing trial remains deferred by owner instruction. Source implementation is **not** Production GREEN until exact-SHA release gates and the live Cloudflare site independently confirm it.
+
+---
 
 **Current Development implementation:** Build 436 — Admin Artwork & Media Content Studio Reliability. It adds a read-only 70-banner Admin artwork audit and executable owner-media preload/failure/race tests. The installed Media Studio honours the owner's active assignments and retains the authored/current picture if a newly assigned public image cannot load. [Build 436 acceptance and runbook](docs/operations/RELEASE_467_BUILD_436_ADMIN_MEDIA_RELIABILITY.md).
 

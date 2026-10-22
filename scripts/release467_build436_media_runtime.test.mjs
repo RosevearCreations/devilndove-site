@@ -43,7 +43,7 @@ function harness(images,{outcomes={},original='/assets/original-owner-image.webp
  };
  vm.runInNewContext(runtime,sandbox,{filename:'public/js/media-content-runtime.js'});
  assert.equal(typeof listeners.DOMContentLoaded,'function');
- const start=async()=>{listeners.DOMContentLoaded();await Promise.resolve();await Promise.resolve();await Promise.resolve();};
+ const start=async()=>{listeners.DOMContentLoaded();await new Promise(resolve=>setImmediate(resolve));};
  const settle=async()=>{await new Promise(resolve=>setImmediate(resolve));for(const next of pending.splice(0))next();};
  return {element,attr,events,doc,start,settle,pending};
 }

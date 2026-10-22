@@ -1,5 +1,6 @@
 import { getBundleDetails, resolveUnitPrice } from './_lib/productOffers.js';
 import { requireGiftCardSchema } from './_lib/giftCardSchemaReadiness.js';
+import { validateCommerceEnvelope } from '../../public/js/commerce-policy-core.js';
 // Release 467 Build 78 — idempotent, server-authoritative checkout order creation.
 // Storefront request handling remains schema-read-only; schema ownership belongs to migrations.
 
@@ -203,9 +204,21 @@ export async function onRequestPost(context) {
   const billing_province = normalizeText(body.billing_province || shipping_province);
   const billing_postal_code = normalizeText(body.billing_postal_code || shipping_postal_code);
   const billing_country = normalizeText(body.billing_country || shipping_country || "Canada");
+  // Enforce the Canada-first boundary here as well as in the shared API middleware.
+  // This protects direct handler execution and future routes that reuse this handler.
+  const commerce = validateCommerceEnvelope({ currency, billing_country, shipping_country });
+  if (!commerce.ok) return json({ ...commerce, local_order_mutation_performed: false, provider_network_call_performed: false }, 422);
 
   const cartItems = Array.isArray(body.items) ? body.items : [];
+  const cartIdentity = new Set();
+  for (const item of cartItems) {
+    const id = Number(item?.product_id);
+    if (!Number.isInteger(id) || id <= 0) continue;
+    if (cartIdentity.has(id)) return json({ ok: false, code: 'checkout_duplicate_product', error: 'Combine duplicate Product lines into one cart quantity before checkout.', local_order_mutation_performed: false }, 400);
+    cartIdentity.add(id);
+  }
   const giftCardPurchase = normalizeGiftCardPurchase(body.gift_card_purchase, sessionUser, customer_name, customer_email);
+  if (giftCardPurchase && giftCardPurchase.currency !== 'CAD') return json({ ok: false, code: 'gift_card_currency_not_supported', error: 'Storefront gift-card purchases are available in CAD only.', local_order_mutation_performed: false }, 422);
   if (!cartItems.length && !giftCardPurchase) return json({ ok: false, error: "At least one cart item or a gift-card purchase is required." }, 400);
 
   if (gift_card_code || giftCardPurchase) {
@@ -236,6 +249,7 @@ export async function onRequestPost(context) {
     const product = productMap.get(product_id);
     if (!product) return json({ ok: false, error: `Product ${product_id} was not found.` }, 404);
     if (String(product.status || "").toLowerCase() !== "active") return json({ ok: false, error: `Product ${product.name || product_id} is not available.` }, 400);
+    if (String(product.currency || 'CAD').toUpperCase() !== 'CAD') return json({ ok: false, code: 'checkout_product_currency_not_supported', error: 'This Product cannot be purchased in CAD until its currency is reviewed.', local_order_mutation_performed: false }, 409);
 
     const bundle = await getBundleDetails(db, product_id, { ensureSchema: false });
     const componentReservation = Number(bundle?.is_bundle || 0) === 1 ? 0 : Number((await db.prepare(`SELECT COALESCE(SUM(reserved_component_quantity),0) reserved_quantity FROM product_bundle_components WHERE component_product_id=?`).bind(product_id).first().catch(()=>({reserved_quantity:0})))?.reserved_quantity || 0);
