@@ -20,30 +20,57 @@
       frame.querySelectorAll('figcaption').forEach(cap=>{if(/site image placeholder/i.test(cap.textContent||'')){cap.hidden=true;cap.dataset.mediaPlaceholderCaption='hidden';}});
     }
   }
+  // Build 436: preserve the last rendered image until assigned media actually loads.
+  // Failure is visual-only; we NEVER rewrite the persisted owner assignment.
+  const mediaImageAttempts=new WeakMap();
   function applyImage(item){
-    const el=safeSelector(item.target_selector);if(!el||!item.public_url)return false;
-    const url=String(item.public_url);
-    if(item.slot_type==='background'||item.target_attribute==='background-image'){
-      el.style.backgroundImage='url("' + url.replace(/["\\]/g,'\\$&') + '")';
-      el.style.backgroundPosition=`${Math.round(clamp(item.focal_x)*100)}% ${Math.round(clamp(item.focal_y)*100)}%`;
-      el.dataset.mediaContentOverride='1';
-      return true;
-    }
-    if(el.tagName==='IMG'||item.target_attribute==='src'){
-      el.setAttribute('src',url);
-      if(el.tagName==='IMG'){
-        el.removeAttribute('srcset');el.removeAttribute('sizes');
-        const picture=el.closest('picture');
-        picture?.querySelectorAll('source').forEach(source=>{source.setAttribute('srcset',url);source.removeAttribute('sizes');});
-        el.alt=item.decorative?'':String(item.alt_text||el.alt||'');
-        if(item.image_title)el.title=String(item.image_title);else el.removeAttribute('title');
-        el.style.objectPosition=`${Math.round(clamp(item.focal_x)*100)}% ${Math.round(clamp(item.focal_y)*100)}%`;
-        clearPlaceholderState(el);
+    const el=safeSelector(item.target_selector);
+    const url=String(item.public_url||'').trim();
+    if(!el||!url)return false;
+    const isBackground=item.slot_type==='background'||item.target_attribute==='background-image';
+    if(!isBackground && !(el.tagName==='IMG'||item.target_attribute==='src'))return false;
+    // Block script and data URLs, and avoid leaking private Media Studio inputs.
+    if(!(/^(?:https?:\\/\\/|\\/)(?!\\/)/i.test(url)))return false;
+    const earlier=mediaImageAttempts.get(el);
+    if(earlier?.url===url)return earlier.status!=='failed';
+    const attempt={url,status:'loading'};
+    mediaImageAttempts.set(el,attempt);
+    const probe=new Image();
+    const apply=()=>{
+      if(mediaImageAttempts.get(el)!==attempt||!el.isConnected)return;
+      if(probe.naturalWidth<=0||probe.naturalHeight<=0){fail();return;}
+      if(isBackground){
+        el.style.backgroundImage='url("' + url.replace(/["\\\\]/g,'\\\\$&') + '")';
+        el.style.backgroundPosition=`${Math.round(clamp(item.focal_x)*100)}% ${Math.round(clamp(item.focal_y)*100)}%`;
+      } else {
+        const priorSrc=el.getAttribute('src');
+        const priorSrcset=el.getAttribute('srcset');
+        el.setAttribute('src',url);
+        if(el.tagName==='IMG'){
+          el.removeAttribute('srcset');el.removeAttribute('sizes');
+          const picture=el.closest('picture');
+          picture?.querySelectorAll('source').forEach(source=>{source.setAttribute('srcset',url);source.removeAttribute('sizes');});
+          el.alt=item.decorative?'':String(item.alt_text||el.alt||'');
+          if(item.image_title)el.title=String(item.image_title);else el.removeAttribute('title');
+          el.style.objectPosition=`${Math.round(clamp(item.focal_x)*100)}% ${Math.round(clamp(item.focal_y)*100)}%`;
+          clearPlaceholderState(el);
+        }
       }
+      attempt.status='applied';
+      delete el.dataset.mediaContentOverrideError;
       el.dataset.mediaContentOverride='1';
-      return true;
-    }
-    return false;
+    };
+    const fail=()=>{
+      if(mediaImageAttempts.get(el)!==attempt)return;
+      attempt.status='failed';
+      // Keep authored/previous media intact; only record a lightweight, non-public error state.
+      el.dataset.mediaContentOverrideError='assigned-media-unavailable';
+      try{document.dispatchEvent(new CustomEvent('dd:media-image-unavailable',{detail:{slot:item.slot_key||'',reason:'load_failed'}}));}catch{}
+    };
+    probe.onload=apply;
+    probe.onerror=fail;
+    probe.src=url;
+    return true;
   }
   function applyContent(item){const el=safeSelector(item.target_selector);if(!el)return false;const type=String(item.slot_type||'text');const value=String(item.value??item.text??'');if(type==='link'||item.target_attribute==='href')el.setAttribute('href',value);else if(type==='color'||item.target_attribute==='background-color')el.style.backgroundColor=value;else el.textContent=value;el.dataset.mediaContentOverride='1';return true;}
   function signalReady(detail={}){try{document.dispatchEvent(new CustomEvent('dd:media-content-ready',{detail}));}catch{}}
