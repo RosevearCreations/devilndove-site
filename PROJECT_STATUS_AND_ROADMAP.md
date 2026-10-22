@@ -1,10 +1,10 @@
-# CURRENT ROADMAP — Build 432 and next builds (2026-10-21)
+# CURRENT ROADMAP — Build 433 and forward queue (2026-10-21)
 
-**Current Development implementation:** Build 432 — Deployment Rollback Readiness & Safe Recovery. [Build 432 rollback runbook](docs/operations/RELEASE_467_BUILD_432_ROLLBACK_READINESS.md) and [read-only Admin recovery readiness](/admin/rollback-readiness/) provide verified-source rehearsal, historical Production evidence checks and non-mutating operator steps. This is **not** a live rollback or Production GREEN claim.
+**Current Development implementation:** Build 433 — Brand V3 Remaining Customer Placeholder Replacement. This closes the five remaining generic authored-default SVG illustrations on customer Tools, Supplies, Toolshed and Workshop-Made Gifts pages using committed Brand V3 WebPs. Existing 29 mapped Media Studio placeholder hooks retain owner-media override behaviour. Acceptance notes: [Build 433 customer-site closure](docs/operations/RELEASE_467_BUILD_433_BRAND_V3_CUSTOMER_PLACEHOLDER_CLOSURE.md).
 
-**Previous:** Build 429 workflow-specific Development diagnostics; Build 430 protected Production receipts; Build 431 Admin release gate dashboard and live source identity. All remain subject to independent exact-commit deployment evidence.
+**Current release gate:** Four exact-dev-SHA Development workflows, Preview, the protected Cloudflare Production Pages Deploy workflow, live marker and smoke evidence must prove GREEN. Matching GitHub branch SHAs are not sufficient.
 
-**Next queued:** Build 433 — Brand V3 Remaining Customer Placeholder Replacement. Full queue: [Builds 429–438 roadmap](docs/operations/RELEASE_467_BUILD_429_438_ROADMAP.md). Etsy single-Product trial is deferred by owner until tomorrow; do not start publication as part of infrastructure work.
+**Next queued:** Build 434 — Public Search & Workshop Catalog Boundaries. Builds 435–438 remain in [the forward roadmap](docs/operations/RELEASE_467_BUILD_429_438_ROADMAP.md). The Etsy one-product test is still deferred until tomorrow by owner decision.
 
 ---
 
