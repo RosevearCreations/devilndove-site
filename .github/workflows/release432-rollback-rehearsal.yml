@@ -1,0 +1,85 @@
+name: Release 432 Read-Only Rollback Rehearsal
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'scripts/release432_rollback_rehearsal.py'
+      - 'scripts/release432_rollback_rehearsal_test.py'
+      - '.github/workflows/release432-rollback-rehearsal.yml'
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: Exact historical Production source SHA to evaluate; NO ROLLBACK OCCURS
+        required: true
+        type: string
+      historical_run_id:
+        description: Successful prior Production Pages Deploy workflow run ID with the matching Build 430 receipt
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/release432_rollback_rehearsal_test.py
+
+  rehearsal:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Resolve current protected main history (read only)
+        run: |
+          git fetch --no-tags origin main
+          git rev-parse origin/main > /tmp/release432-current-sha
+      - name: Download exact historical Production proof artifact (read only)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE: ${{ inputs.candidate_sha }}
+          HISTORICAL_RUN: ${{ inputs.historical_run_id }}
+        run: |
+          mkdir -p /tmp/release432-historical
+          gh run download "${HISTORICAL_RUN}" --repo RosevearCreations/devilndove-site \
+            --name "production-promotion-proof-${CANDIDATE}" --dir /tmp/release432-historical
+      - name: Rehearse candidate and record manual HOLDs (never deploy)
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CANDIDATE: ${{ inputs.candidate_sha }}
+        run: |
+          CURRENT_SHA="$(cat /tmp/release432-current-sha)"
+          if test -f /tmp/release432-historical/production-release-receipt.json; then
+            python scripts/release432_rollback_rehearsal.py \
+              --current-sha "${CURRENT_SHA}" --candidate-sha "${CANDIDATE}" \
+              --receipt /tmp/release432-historical/production-release-receipt.json \
+              --output release432-rollback-rehearsal.json
+          else
+            python scripts/release432_rollback_rehearsal.py \
+              --current-sha "${CURRENT_SHA}" --candidate-sha "${CANDIDATE}" \
+              --output release432-rollback-rehearsal.json
+          fi
+      - name: Keep auditable read-only rehearsal report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release432-rollback-rehearsal
+          path: release432-rollback-rehearsal.json
+          if-no-files-found: warn
+          retention-days: 30
