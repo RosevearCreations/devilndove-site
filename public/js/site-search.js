@@ -1,9 +1,10 @@
 // File: /public/js/site-search.js
-// Brief description: Public site search across storefront products, tools, supplies,
-// featured creations, movies, and key landing pages with lightweight analytics logging.
+// Brief description: public Product + Creations + page discovery only.
+// Operational tools, supplies and movie records remain in separately marked reference pages.
 // It now degrades more gracefully when one or more live sources are unavailable.
 
 document.addEventListener('DOMContentLoaded', () => {
+  const boundary=window.DDSearchBoundary434;
   const inputEl = document.getElementById('siteSearchInput');
   const buttonEl = document.getElementById('siteSearchButton');
   const resetEl = document.getElementById('siteSearchReset');
@@ -17,10 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
     { type: 'Page', name: 'Shop', summary: 'Shop handmade jewelry, art and digital creations.', url: '/shop/' },
     { type: 'Page', name: 'Gallery', summary: 'Art, jewelry and workshop experiments.', url: '/gallery/' },
     { type: 'Page', name: 'Creations', summary: 'Browse finished creations and featured work.', url: '/creations/' },
-    { type: 'Page', name: 'Tools', summary: 'Workshop tools we use at Devil n Dove.', url: '/tools/' },
-    { type: 'Page', name: 'Supplies', summary: 'Workshop supplies and consumables we use.', url: '/supplies/' },
-    { type: 'Page', name: 'Toolshed', summary: 'Workshop gear, notes, and duplicate tool references.', url: '/toolshed/' },
-    { type: 'Page', name: 'Movies', summary: 'Movies, nostalgia and favourite picks.', url: '/movies/' },
+    { type: 'Page', name: 'Tools — reference only', summary: 'Workshop equipment we use; not a Devil n Dove checkout listing.', url: '/tools/' },
+    { type: 'Page', name: 'Supplies — reference only', summary: 'Materials used in our workshop; not offered for checkout.', url: '/supplies/' },
+    { type: 'Page', name: 'Toolshed — reference only', summary: 'Equipment and workroom notes; not a shop listing.', url: '/toolshed/' },
+    { type: 'Page', name: 'Movie Shelf', summary: 'Browse our movie collection; this is a reference library, not a shop listing.', url: '/movies/' },
     { type: 'Page', name: 'Contact', summary: 'Questions, custom work and shop help.', url: '/contact/' }
   ];
 
@@ -49,8 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await fetch(url, { cache: 'no-store' });
       const data = await response.json().catch(() => null);
       if (!response.ok || !data?.ok) throw new Error(data?.error || `${label} search source is unavailable.`);
+      if (!boundary?.canShowProduct || !boundary?.canShowResult)
+        throw new Error('Search display policy unavailable; no unverified merchandise may be shown.');
       const rows = extractor(data);
-      return { label, items: rows.map((row) => mapper(row, query)).filter((row) => row.score > 0 || !query), warning: Array.isArray(data?.diagnostics?.warnings) && data.diagnostics.warnings.length ? `${label} is using fallback data.` : '' };
+      const safeRows = label === 'Products' ? rows.filter(boundary.canShowProduct) :
+        label === 'Creations' ? rows : [];
+      return { label, items: safeRows.map((row) => mapper(row, query))
+        .filter((row) => boundary.canShowResult(row) && (row.score > 0 || !query)), warning: Array.isArray(data?.diagnostics?.warnings) && data.diagnostics.warnings.length ? `${label} is using fallback data.` : '' };
     } catch (error) {
       return { label, items: [], error: error?.message || `${label} search source is unavailable.` };
     }
@@ -59,7 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function fetchPages(query) {
     return staticPages
       .map((row) => ({ ...row, score: scoreText(query, row.name, row.summary) }))
-      .filter((row) => row.score > 0 || (!query && row.url === '/shop/'));
+      .filter((row) => boundary?.canShowResult(row) &&
+        (row.score > 0 || (!query && row.url === '/shop/')));
   }
 
   async function logSearch(term, resultCount) {
@@ -88,7 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="small">${escapeHtml(row.type)}</div>
         <h2 style="font-size:1.05rem;margin:8px 0">${escapeHtml(row.name)}</h2>
         <p class="small" style="min-height:3.2em">${escapeHtml(row.summary || 'No summary available.')}</p>
-        <div style="margin-top:12px"><a class="btn" href="${escapeHtml(row.url)}">Open</a></div>
+        ${boundary.resultContext(row) ? `<p class="small" data-search-reference-only="1">${escapeHtml(boundary.resultContext(row))}</p>` : ''}
+        <div style="margin-top:12px"><a class="btn" href="${escapeHtml(row.url)}">${escapeHtml(boundary.resultAction(row))}</a></div>
       </article>
     `).join('');
   }
@@ -123,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const pages = fetchPages(query);
     const results = [...sources.flatMap((source) => source.items), ...pages]
+      .filter(row => boundary?.canShowResult(row))
       .sort((a, b) => Number(b.score || 0) - Number(a.score || 0) || String(a.name || '').localeCompare(String(b.name || '')))
       .slice(0, 36);
 
