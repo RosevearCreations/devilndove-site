@@ -10,7 +10,7 @@ const routes=JSON.parse(raw[1]);
 test('fullsite Brand V3 is injected into general and fast public HTML paths',()=>{
  const middleware=read('functions/_middleware.js');
  assert.equal((middleware.match(/brand-v3-frontsite-recovery.js\?v=295/g)||[]).length,2);
- assert.equal((middleware.match(/brand-v3-frontsite-recovery.css\?v=295/g)||[]).length,2);
+ assert.equal((middleware.match(/brand-v3-frontsite-recovery.css\?v=433/g)||[]).length,2);
  assert.match(middleware,/brand-v3-visual-20261019-set14-fullsite190/);
 });
 test('each of 29 intended owner-safe placeholder slots exists on its exact public page',()=>{
