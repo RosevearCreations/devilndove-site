@@ -85,6 +85,15 @@ jobs:
           node --check scripts/release467_build436_media_runtime.test.mjs
           node --test scripts/release467_build436_admin_artwork_audit.mjs scripts/release467_build436_media_runtime.test.mjs
 
+      - name: Build 436 Product Editor Etsy canonical image evidence repair
+        run: |
+          node --check functions/api/_lib/canonicalDistributionGallery436.mjs
+          node --check functions/api/admin/product-distribution-406.js
+          node --check functions/api/admin/listing-sync-408.js
+          node --check public/js/admin-product-distribution-v406.js
+          node --check public/js/admin-listing-sync-v408.js
+          node --test scripts/release467_build436_channel_gallery_regression.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
