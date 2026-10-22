@@ -35,6 +35,8 @@
         <button class="btn dd-editor-tab" type="button" data-editor-tab="media" aria-selected="false">Media</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="seo" aria-selected="false">SEO / Publishing</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="qa" aria-selected="false">QA</button>
+        <button class="btn dd-editor-tab" type="button" data-editor-tab="etsy" aria-selected="false">Etsy</button>
+        <button class="btn dd-editor-tab" type="button" data-editor-tab="facebook" aria-selected="false">Facebook Marketplace</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="advanced" aria-selected="false">Advanced</button>
       </div>
 
@@ -117,6 +119,55 @@
         <div id="productEditorQaResults" style="display:grid;gap:10px;margin-top:12px"></div>
       </section>
 
+      <section class="dd-editor-panel" data-editor-panel="etsy" hidden>
+        <div class="dd-products-browser-heading"><div><h2>Etsy — live connection &amp; unpublished draft</h2>
+          <p class="small">Create a real <strong>unpublished Etsy draft</strong> directly from our saved Product. There is no manual Etsy Shop Manager drafting step. No live listing, photo upload, or shipping-policy change is performed.</p></div></div>
+        <div class="card" style="padding:16px;margin:12px 0">
+          <h3>1. Verify our existing Etsy connection</h3>
+          <p class="small">Test checks the granted account and live Etsy shop, refreshes an expiring access token when possible, and loads verified seller categories. It does not create a listing.</p>
+          <div class="dd-product-actions"><button class="btn" type="button" id="dd438EtsyTest">Test Etsy connection &amp; load categories</button>
+          <button class="btn" type="button" id="dd438EtsyRefresh">Refresh granted Etsy access</button>
+          <a class="btn" href="/admin/it-integrations/">Etsy connection settings</a></div>
+          <p class="small" id="dd438EtsyStatus" role="status" aria-live="polite">Press Test Etsy connection when our Product is saved. No Etsy API call runs automatically.</p>
+          <a id="dd438EtsyExisting" href="#" hidden target="_blank" rel="noopener noreferrer"></a>
+        </div>
+        <div class="card" style="padding:16px;margin:12px 0">
+          <h3>2. Review Etsy-specific listing details</h3>
+          <p class="small">The draft uses the Product's <strong>saved</strong> CAD price, inventory, name and description. To change them, save the Product first. Listing publication will require separate media and shipping approval.</p>
+          <div class="dd-editor-grid cols-2">
+            <label><span class="small">Find Etsy category</span><input class="input" id="dd438EtsySearch" placeholder="Search category, e.g. soap"></label>
+            <label><span class="small">Verified Etsy seller category</span><select class="input" id="dd438EtsyCategory"><option value="">Test connection to load choices…</option></select></label>
+            <label><span class="small">Who made it?</span><select class="input" id="dd438EtsyWhoMade">
+              <option value="i_did">We made it</option><option value="collective">Member of our team</option><option value="someone_else">Someone else</option></select></label>
+            <label><span class="small">When was it made?</span><select class="input" id="dd438EtsyWhenMade">
+              <option value="2020_2026">2020–2026</option><option value="made_to_order">Made to order</option><option value="2010_2019">2010–2019</option>
+              <option value="2007_2009">2007–2009</option><option value="before_2007">Before 2007 (check age)</option></select></label>
+          </div>
+          <label style="display:block;margin-top:10px"><input type="checkbox" id="dd438EtsySupply"> This Product is a craft supply (not a finished handmade item)</label>
+        </div>
+        <div class="card" style="padding:16px;margin:12px 0">
+          <h3>3. Create an unpublished Etsy draft</h3>
+          <p class="small">Only one Etsy creation attempt is allowed per Product until its result is reconciled. Double-clicks and background retries are blocked. A successful listing will stay in Etsy Drafts for further review.</p>
+          <label style="display:block;margin-bottom:12px"><input type="checkbox" id="dd438EtsyConfirm"> Yes — create <strong>one unpublished draft only</strong>, with no automatic retry or live publication.</label>
+          <button class="btn primary" type="button" id="dd438EtsyCreate" disabled>Create unpublished Etsy draft</button>
+        </div>
+      </section>
+
+      <section class="dd-editor-panel" data-editor-panel="facebook" hidden>
+        <h2>Facebook Marketplace — setup &amp; authorization</h2>
+        <p class="small">This channel has its own connection status. Etsy credentials cannot authorize Facebook Marketplace. We will not simulate success or send an unauthorized Marketplace listing.</p>
+        <div class="card" style="padding:16px;margin:12px 0">
+          <h3>1. Check Meta/Facebook connection</h3>
+          <div class="dd-product-actions"><button class="btn" type="button" id="dd438MetaTest">Check saved Facebook connection</button><a class="btn" href="/admin/it-integrations/">Provider setup</a></div>
+          <p class="small" id="dd438MetaStatus" role="status" aria-live="polite">Waiting for Meta app keys and approved Marketplace listing capability. No provider write will run.</p>
+        </div>
+        <div class="card" style="padding:16px;margin:12px 0">
+          <h3>2. Marketplace draft</h3>
+          <p class="small">Creating a Facebook Marketplace listing is disabled until we verify the exact account, Meta permissions, and a supported publishing API for our listing type. Having an app ID and secret alone does not grant Marketplace posting.</p>
+          <button class="btn" type="button" disabled title="Requires verified Meta listing API authorization">Create Facebook Marketplace draft — awaiting authorization</button>
+        </div>
+      </section>
+
       <section class="card" id="productChannel405" style="margin:14px 0;padding:18px">
 <h2>Where should this Product be offered?</h2>
 <p class="small">One source Product and one canonical media library for all channels. These local destination switches record your intent when saving this Product; they do not create, upload, activate or publish a marketplace listing. A new Product must be saved before its destination choices can be stored.</p>
@@ -157,6 +208,7 @@
   </div>
   <script src="/public/js/auth.js?v=440"></script>
   <script src="/public/js/admin-product-channel-intent-v405.js?v=437"></script><script src="/public/js/admin-product-distribution-v406.js?v=436"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-product-editor-v163.js?v=437&b390=1"></script>
+  <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=438"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">
 <script defer src="/public/js/admin-brand-v3-set17.js?v=17"></script>
