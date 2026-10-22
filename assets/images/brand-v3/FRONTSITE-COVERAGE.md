@@ -51,3 +51,17 @@ The current frontsite recovery script only substitutes images that are still exp
 For Admin sets 13–19, existing images are wide decorative banners, not slots in the Media Studio dimension catalog. Inspect CSS/container geometry for any replacement; **1712 × 324** has been used for prior banner batches but must not be generalized to inline cards or Admin workflows.
 
 Earlier proposed alternate images 306–345 should not be counted as missing, or assumed activated, simply because ZIPs were prepared. The active Admin mappings currently use 121–190.
+
+## Build 433 — authored-default customer placeholder closure
+
+The pre-existing 29 mapped Media Studio P1/P2 slots remain owner-editable and already have committed Brand V3 fallback WebPs. Build 433 addressed a **different class**: five generic SVG illustrations still authored directly on Tools, Supplies, Toolshed, and Workshop-Made Gifts. These are now mapped to existing Brand V3 WebPs, with two Workshop gift slots preserving their original Media Studio keys. The catalog pages use one illustrative card **after** the grouped results, rather than one card per category.
+
+| Page | Generic artwork removed | Curated fallback |
+| --- | --- | --- |
+| Tools | engraving-proof.svg | 44-workshop-tools.webp |
+| Supplies | product-material.svg | 45-materials-supplies.webp |
+| Toolshed | vintage-condition.svg | 09-vintage-finds-category.webp |
+| Workshop-Made Gifts hero | product-process.svg | 293-custom-gifts-southern-ontario-content-visual.webp |
+| Workshop-Made Gifts process | product-process.svg | 286-home-workshop-process-visual.webp |
+
+The current source audit distinguishes `genericArtworkSvgReferences` (target **zero**) from `mediaStudioEditablePlaceholderHooks` (**29 intentional edit hooks**, using the existing runtime artwork mapper). A source-code gate cannot independently certify Cloudflare's active Production state or the exact pixel sizes of WebP binaries. See [Build 433 release handoff](../../docs/operations/RELEASE_467_BUILD_433_BRAND_V3_CUSTOMER_PLACEHOLDER_CLOSURE.md).
