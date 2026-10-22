@@ -683,16 +683,17 @@
                 ${groups[area].map(buildSupplyCard).join("")}
               </div>
             </section>
+
+
+          `;
+        }).join("") + `
 <section class="card visual-placeholder-band dd-brand-v3-public-art build192-added" aria-label="Workshop materials and supplies">
   <img src="/assets/images/brand-v3/45-materials-supplies.webp" alt="Illustrative workshop materials and creative supplies artwork" loading="lazy" decoding="async" data-brand-v3-curated-default="supplies"/>
   <div>
     <h2>Materials and supplies</h2>
     <p class="small">Explore materials for our creative processes. Illustration only; actual availability and item details are listed above.</p>
   </div>
-</section>
-
-          `;
-        }).join("");
+</section>`;
 
         Array.from(supGridEl.querySelectorAll("[data-add-reorder]")).forEach(function (btn) {
           btn.addEventListener("click", function () {
