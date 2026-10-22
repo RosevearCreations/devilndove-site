@@ -58,8 +58,8 @@ test('catalog illustrations are placed once per page after area-group rendering,
 test('customer tools and supplies inline JavaScript remains syntactically valid',()=>{
  for(const p of ['tools/index.html','supplies/index.html','toolshed/index.html']){
    const markup=read(p);
-   const scripts=[...markup.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
-     .filter(match=>!/(?:\\bsrc\\s*=|application\\/ld\\+json|type=[\"']application\\/json)/i.test(match[1]));
+   const scripts=[...markup.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+     .filter(match=>!/(?:\bsrc\s*=|application\/ld\+json|type=[\"']application\/json)/i.test(match[1]));
    assert.ok(scripts.length>0,p+' expected an interactive catalog script');
    for(const script of scripts){
      if(script[2].trim())assert.doesNotThrow(()=>new vm.Script(script[2],{filename:p}),p+' embedded JavaScript invalid');
