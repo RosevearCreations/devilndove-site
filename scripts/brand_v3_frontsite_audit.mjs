@@ -34,7 +34,7 @@ const summaries=pages.map(p=>{
  const literalImgs=[...html.matchAll(/\b(?:src|data-src)=["'](\/assets\/(?:images|placeholders)\/[^"']+)["']/gi)].map(m=>m[1].split('?')[0]);
  const unresolved=literalImgs.filter(f=>!files.has(f));
  const labels=(html.match(/data-media-placeholder="1"/g)||[]).length;
- const genericArtworkSvgRefs=(html.match(/\/assets\/visual-placeholders\/[^"'<>\\s]+\\.svg/gi)||[]).length;
+ const genericArtworkSvgRefs=(html.match(/\/assets\/visual-placeholders\/[^"'<>\s]+\.svg/gi)||[]).length;
  const curatedBrandV3Defaults=(html.match(/data-brand-v3-curated-default="/g)||[]).length;
  const directTheme=html.includes('/css/brand-v3-theme.css');
  const mappedAuto=html.includes('/public/js/brand-v3-auto.js');
