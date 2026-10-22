@@ -48,6 +48,10 @@ class Safety(unittest.TestCase):
         self.assertIn("SCHEMA_OR_BINDING_DIFF_REQUIRES_MANUAL_DATA_REVIEW",p["holds"])
         self.assertIn("SERVER_FUNCTION_CHANGES_REQUIRE_OPERATOR_REVIEW",p["holds"])
         self.assertEqual(p["r2_mutations"],0)
+    def test_git_diff_unavailable_fails_closed(self):
+        p=inspect(changed_files=["UNKNOWN_GIT_DIFF"])
+        self.assertIn("GIT_DIFF_UNAVAILABLE",p["holds"])
+
     def test_no_source_fails_closed(self):
         p=inspect(candidate_tree=None,candidate_ancestor=False)
         self.assertIn("GIT_TREE_NOT_VERIFIED",p["holds"])
