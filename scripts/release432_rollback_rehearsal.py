@@ -56,6 +56,8 @@ def assess(*, current_sha: str, candidate_sha: str, current_tree: str | None,
         holds.append("CANDIDATE_EQUALS_CURRENT")
     if not SHA.fullmatch(str(current_tree or "")) or not SHA.fullmatch(str(candidate_tree or "")):
         holds.append("GIT_TREE_NOT_VERIFIED")
+    if "UNKNOWN_GIT_DIFF" in changed_files:
+        holds.append("GIT_DIFF_UNAVAILABLE")
     if candidate_tree and current_tree and candidate_tree == current_tree:
         holds.append("CANDIDATE_TREE_IDENTICAL")
     if not candidate_ancestor:
@@ -125,7 +127,7 @@ def main():
     try: ancestor=(git("merge-base",candidate,current)==candidate)
     except ValueError: ancestor=False
     try: changed=git("diff","--name-only",candidate,current).splitlines()
-    except ValueError: changed=[]
+    except ValueError: changed=["UNKNOWN_GIT_DIFF"]
     if not current_tree or not candidate_tree:
         changed.append("UNKNOWN_GIT_SOURCE")
     receipt=None
