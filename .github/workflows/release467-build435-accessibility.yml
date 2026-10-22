@@ -1,0 +1,31 @@
+name: Release 467 Build 435 Standard Theme Accessibility
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'css/brand-v3-theme.css'
+      - 'css/brand-v3-frontsite-recovery.css'
+      - 'functions/_middleware.js'
+      - 'scripts/release467_build435_accessibility.test.mjs'
+      - '.github/workflows/release467-build435-accessibility.yml'
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  standard-theme-a11y:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify fixed palette and semantic theme tokens
+        run: |
+          node --check scripts/release467_build435_accessibility.test.mjs
+          node --test scripts/release467_build435_accessibility.test.mjs
