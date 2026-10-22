@@ -444,14 +444,15 @@
             <div class="area-head"><h2>${escHtml(area)}</h2><div class="muted">${groups[area].length} item${groups[area].length === 1 ? '' : 's'}</div></div>
             <div class="subgrid">${groups[area].map((item) => buildToolCard(item, reorderKeys)).join('')}</div>
           </section>
+
+`).join('') + `
 <section class="card visual-placeholder-band dd-brand-v3-public-art build192-added" aria-label="Workshop tools and equipment">
   <img src="/assets/images/brand-v3/44-workshop-tools.webp" alt="Illustrative workshop tools and equipment artwork" loading="lazy" decoding="async" data-brand-v3-curated-default="tools"/>
   <div>
     <h2>Tools and equipment</h2>
     <p class="small">Explore the equipment and making methods used across our workshop projects. Illustrative artwork; individual tool details are shown in the catalog above.</p>
   </div>
-</section>
-`).join('');
+</section>`;
         Array.from(gridEl.querySelectorAll('[data-add-reorder]')).forEach((btn) => btn.addEventListener('click', () => {
           const key = btn.getAttribute('data-add-reorder');
           const item = allTools.find((entry) => toolKey(entry) === key);
