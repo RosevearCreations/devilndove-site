@@ -271,6 +271,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const root = document.getElementById('productVisualProofModules');
     if (!root) return;
     const safeImages = Array.isArray(images) ? images : [];
+    let approvedCount = 0;
     const slots = [
       ['process', ['process_story','process'], 'Process'],
       ['scale', ['scale_context','scale'], 'Scale'],
@@ -286,7 +287,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (image) { image.src = match.image_url; image.alt = match.alt_text || `${label} view for ${currentProduct?.name || 'product'}`; image.classList.add('is-approved-product-proof'); }
       if (note) note.textContent = match.caption || `${label} view from this listing.`;
       figure.classList.add('has-approved-product-proof');
+      figure.style.display = '';
+      approvedCount += 1;
     });
+    // Never present generic process/scale/material/care art as actual product evidence.
+    // Product-specific proof is only visible when a listing provides the real image.
+    root.style.display = approvedCount ? '' : 'none';
   }
 
   function renderProcessLinks(product, resourceLinks) {

@@ -45,6 +45,16 @@ test('all public HTML routes have zero remaining generic visual-placeholder SVG 
      p+' still shows a generic SVG instead of an intentional customer image');
  }
 });
+test('product-specific proof stays hidden until actual listing photos are available',()=>{
+ const markup=read('shop/product/index.html');
+ assert.match(markup,/id="productVisualProofModules" style="margin-top:14px;display:none"/);
+ for(const slot of ['process','scale','materials','care']){
+   assert.ok(markup.includes(`data-product-proof-slot="${slot}" style="display:none"`));
+ }
+ const script=read('public/js/product-detail.js');
+ assert.match(script,/root\.style\.display = approvedCount \? '' : 'none'/);
+ assert.match(script,/figure\.style\.display = ''/);
+});
 test('catalog illustrations are placed once per page after area-group rendering, never once per group',()=>{
  for(const p of ['tools/index.html','supplies/index.html','toolshed/index.html']){
    const html=read(p);
