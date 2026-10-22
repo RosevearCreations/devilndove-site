@@ -27,3 +27,16 @@ The source audit is not a rendered-browser screenshot audit, and a source image 
 Promotion requires successful four exact-Development-SHA workflows, Preview, protected Production Pages Deploy, Cloudflare deployment identity, live custom-domain release marker and post-deployment smoke. The Etsy one-Product test remains on hold until owner resumes it.
 
 **Next queued:** Build 437 — Storefront Purchase & Shipping Safety Review.
+
+
+## Product Editor Build 406 / 408 canonical Etsy review loading repair
+
+Owner observed Product **Bar Soap Sweet Orange** (SKU `DND-01131`, Draft / Pending Review) showing both `Canonical gallery cannot be verified` and `Local D1 evidence unavailable` in the Product Editor. This was a **local Product/D1 evidence failure**, not proof that Etsy OAuth failed or that a listing was sent.
+
+Builds 406/408 previously selected `image_role`, `public_use_status`, `width_px`, and `height_px` directly from `product_images`. The canonical Product Media editor stores these values in `product_image_annotations`. The shared `functions/api/_lib/canonicalDistributionGallery436.mjs` now joins owner-owned gallery rows to image annotations for **both** read endpoints. A legacy database without the annotation table may show unapproved Product images (never fake approvals/dimensions). Any other D1 failures still hold safely, and writes or provider posting are not retried automatically.
+
+The Product Editor loads `css/admin-product-channel-review-436.css` so Build 405/406/408 consent checkboxes no longer become enormous separate-line purple controls. The gallery and local-acceptance scripts are cache-busted; the fix doesn't check any owner consent automatically.
+
+Acceptance: `node --test scripts/release467_build436_channel_gallery_regression.mjs`, plus dedicated `Release 467 Build 436 Canonical Etsy Media Read Regression` and Current Application Quality workflows, test that the correct joined SQL runs, annotations are required for approval, missing metadata cannot be approved, and real D1 failures remain fail-closed.
+
+**Operator after confirmed live deployment:** Reload the Product Editor, open the Media tab to confirm at least one approved canonical photo with >=800×800 dimensions and suitable alt text, click Build 406 `Load approved Product gallery`, select a qualified photo, review U.S. shipping exclusion, and save local mapping. Only after the resulting local receipt is confirmed should Build 408 `Load current source & readiness` be attempted. The product's Draft / Pending Review state is not itself proof of missing D1, and does not authorize Etsy publication.
