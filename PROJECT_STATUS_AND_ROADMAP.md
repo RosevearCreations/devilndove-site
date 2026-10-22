@@ -1,12 +1,10 @@
-# CURRENT ROADMAP — Build 435 and next builds (2026-10-22)
+# CURRENT ROADMAP — Build 436 and next builds (2026-10-22)
 
-**Current implementation:** Build 435 — Brand V3 Theme Tokens & Accessibility. The existing owner-approved dark-purple/gold style is now explicitly defined as **Standard** with reusable semantic tokens, WCAG AA-oriented text/button contrast acceptance, visible keyboard focus, reduced motion, high-contrast support, 44px touch controls, and responsive layouts. [Read Build 435 implementation and acceptance](docs/operations/RELEASE_467_BUILD_435_STANDARD_THEME_ACCESSIBILITY.md).
+**Current Development implementation:** Build 436 — Admin Artwork & Media Content Studio Reliability. It adds a read-only 70-banner Admin artwork audit and executable owner-media preload/failure/race tests. The installed Media Studio honours the owner's active assignments and retains the authored/current picture if a newly assigned public image cannot load. [Build 436 acceptance and runbook](docs/operations/RELEASE_467_BUILD_436_ADMIN_MEDIA_RELIABILITY.md).
 
-**Previous builds:** Build 433 closed five remaining generic customer placeholder illustrations without overwriting Media Studio owner selections. Build 434 excludes operational Tool/Supply/Movie records from public merchandise search while retaining Tools, Supplies, Toolshed and Movie Shelf as informational navigation pages.
+**Next queued:** Build 437 — Storefront Purchase & Shipping Safety Review. Planned Build 438 — Release Evidence Consolidation & Next Roadmap Renewal remains documented in [the roadmap](docs/operations/RELEASE_467_BUILD_429_438_ROADMAP.md). The Etsy single-Product listing trial is deferred by owner instruction and has not been attempted.
 
-**Next queued:** Build 436 — Admin Artwork & Media Content Studio Reliability. Planned 437–438 remain documented in [the roadmap](docs/operations/RELEASE_467_BUILD_429_438_ROADMAP.md). The Etsy single-product listing trial remains on hold until the owner explicitly resumes it.
-
-**Production release authority:** The four exact-dev-SHA Development proofs, successful Preview, protected Cloudflare Production Pages Deploy, live version marker and post-deployment smoke must pass before reporting Production GREEN. Equal GitHub branch SHAs are not sufficient.
+**Production release authority:** Four successful exact-dev-SHA Development workflows and validated Preview, protected Cloudflare Production Pages Deploy, real deployment identity, live `/release-version.json` and post-deployment smoke. Matching GitHub branch SHAs alone are insufficient evidence of Production GREEN.
 
 ---
 
