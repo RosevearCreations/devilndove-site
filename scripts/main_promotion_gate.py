@@ -50,42 +50,58 @@ def workflow_green(dev_sha: str, workflow: str) -> dict:
     repo = str(os.environ.get("GITHUB_REPOSITORY") or "RosevearCreations/devilndove-site").strip()
     if not token:
         raise Stop("GITHUB_TOKEN is required to prove the exact Development acceptance set.")
-    # The repository-wide SHA-filtered endpoint retains workflow runs which the
-    # workflow-specific /actions/workflows/{filename}/runs lookup can omit.
-    # Verify the path, branch, event, exact SHA and conclusion ourselves.
+    # GitHub Actions can omit otherwise successful runs from an individual
+    # filtered listing. Look up independent SHA, branch, recent and workflow
+    # views, but never accept evidence without checking every identity field.
     expected_path = f".github/workflows/{workflow}"
     exact: list[dict] = []
-    for page in range(1, 11):
-        query = urllib.parse.urlencode({"head_sha": dev_sha, "per_page": 100, "page": page})
-        url = f"https://api.github.com/repos/{repo}/actions/runs?{query}"
-        request = urllib.request.Request(url, headers={
-            "Authorization": f"Bearer {token}",
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-            "User-Agent": "devilndove-current-production-promotion-gate",
-        })
-        try:
-            with urllib.request.urlopen(request, timeout=30) as response:
-                payload = json.load(response)
-        except Exception as exc:
-            raise Stop(f"Could not read {workflow} evidence for Development SHA {dev_sha}: {exc}") from exc
-        if not isinstance(payload, dict) or not isinstance(payload.get("workflow_runs"), list):
-            raise Stop(f"Invalid GitHub Actions evidence response for {workflow} and SHA {dev_sha}.")
-        runs = payload["workflow_runs"]
-        exact.extend(run for run in runs if isinstance(run, dict)
-                     and str(run.get("head_sha") or "") == dev_sha
-                     and str(run.get("head_branch") or "") == "dev"
-                     and str(run.get("event") or "") == "push"
-                     and str(run.get("path") or "").split("@", 1)[0] == expected_path)
-        total = int(payload.get("total_count") or 0)
-        if page * 100 >= total or len(runs) < 100:
+    listing_specs = (
+        ("exact-sha", f"https://api.github.com/repos/{repo}/actions/runs", {"head_sha": dev_sha}),
+        ("dev-branch", f"https://api.github.com/repos/{repo}/actions/runs", {"branch": "dev"}),
+        ("recent-runs", f"https://api.github.com/repos/{repo}/actions/runs", {}),
+        ("workflow", f"https://api.github.com/repos/{repo}/actions/workflows/{urllib.parse.quote(workflow, safe='')}/runs", {"branch": "dev"}),
+    )
+    source_counts: dict[str, dict[str, int]] = {}
+    for source, base_url, filters in listing_specs:
+        scanned = 0
+        matching_sha = 0
+        for page in range(1, 11):
+            query = urllib.parse.urlencode({**filters, "per_page": 100, "page": page})
+            request = urllib.request.Request(f"{base_url}?{query}", headers={
+                "Authorization": f"Bearer {token}",
+                "Accept": "application/vnd.github+json",
+                "X-GitHub-Api-Version": "2022-11-28",
+                "User-Agent": "devilndove-current-production-promotion-gate",
+            })
+            try:
+                with urllib.request.urlopen(request, timeout=30) as response:
+                    payload = json.load(response)
+            except Exception as exc:
+                raise Stop(f"Could not read {source} {workflow} evidence for Development SHA {dev_sha}: {exc}") from exc
+            if not isinstance(payload, dict) or not isinstance(payload.get("workflow_runs"), list):
+                raise Stop(f"Invalid {source} GitHub Actions evidence response for {workflow} and SHA {dev_sha}.")
+            runs = payload["workflow_runs"]
+            scanned += len(runs)
+            matching_sha += sum(1 for run in runs if isinstance(run, dict) and run.get("head_sha") == dev_sha)
+            exact.extend(run for run in runs if isinstance(run, dict)
+                         and str(run.get("head_sha") or "") == dev_sha
+                         and str(run.get("head_branch") or "") == "dev"
+                         and str(run.get("event") or "") == "push"
+                         and str(run.get("path") or "").split("@", 1)[0] == expected_path)
+            if any(run.get("status") == "completed" and run.get("conclusion") == "success" for run in exact):
+                break
+            total = int(payload.get("total_count") or 0)
+            if page * 100 >= total or len(runs) < 100:
+                break
+        else:
+            raise Stop(f"More than 1000 {source} runs for {workflow}; complete evidence cannot be verified.")
+        source_counts[source] = {"scanned": scanned, "sha_matches": matching_sha}
+        if any(run.get("status") == "completed" and run.get("conclusion") == "success" for run in exact):
             break
-    else:
-        raise Stop(f"Exact Development SHA {dev_sha} has more than 1000 runs; complete evidence cannot be verified.")
     green = [run for run in exact if run.get("status") == "completed" and run.get("conclusion") == "success"]
     if not green:
         detail = [{"id": run.get("id"), "status": run.get("status"), "conclusion": run.get("conclusion")} for run in exact[:5]]
-        raise Stop(f"Exact Development SHA {dev_sha} has no successful {workflow} run: {json.dumps(detail, sort_keys=True)}")
+        raise Stop(f"Exact Development SHA {dev_sha} has no successful {workflow} run: {json.dumps(detail, sort_keys=True)}; listing counts: {json.dumps(source_counts, sort_keys=True)}")
     chosen = sorted(green, key=lambda run: str(run.get("updated_at") or ""), reverse=True)[0]
     return {"workflow": workflow, "run_id": chosen.get("id"), "html_url": chosen.get("html_url"), "updated_at": chosen.get("updated_at")}
 

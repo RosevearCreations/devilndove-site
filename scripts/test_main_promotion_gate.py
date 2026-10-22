@@ -31,17 +31,22 @@ def run(**overrides):
 
 
 class WorkflowGreenTests(unittest.TestCase):
-    def lookup(self, runs, total=None):
-        response = io.BytesIO(json.dumps({
-            "total_count": len(runs) if total is None else total,
-            "workflow_runs": runs,
-        }).encode("utf-8"))
+    def lookup(self, runs, fallback_runs=None):
+        urls = []
+
+        def fetch(request, timeout):
+            urls.append(request.full_url)
+            selected = runs if "head_sha=" in request.full_url else (fallback_runs if fallback_runs is not None else runs)
+            return io.BytesIO(json.dumps({
+                "total_count": len(selected),
+                "workflow_runs": selected,
+            }).encode("utf-8"))
+
         with patch.dict(os.environ, {"GITHUB_TOKEN": "test-token", "GITHUB_REPOSITORY": "RosevearCreations/devilndove-site"}):
-            with patch("scripts.main_promotion_gate.urllib.request.urlopen", return_value=response) as fetch:
+            with patch("scripts.main_promotion_gate.urllib.request.urlopen", side_effect=fetch):
                 result = workflow_green(SHA, WORKFLOW)
-        url = fetch.call_args.args[0].full_url
-        self.assertIn("/actions/runs?", url)
-        self.assertIn("head_sha=" + SHA, url)
+        self.assertIn("/actions/runs?", urls[0])
+        self.assertIn("head_sha=" + SHA, urls[0])
         return result
 
     def test_accepts_exact_successful_push_evidence(self):
@@ -54,6 +59,10 @@ class WorkflowGreenTests(unittest.TestCase):
             run(id=6),
         ])
         self.assertEqual(6, result["run_id"])
+
+    def test_falls_back_when_sha_filtered_list_omits_the_success(self):
+        result = self.lookup([run(conclusion="failure")], fallback_runs=[run(id=42)])
+        self.assertEqual(42, result["run_id"])
 
     def test_rejects_only_irrelevant_successes(self):
         with self.assertRaisesRegex(Stop, "no successful system-gate.yml run"):
