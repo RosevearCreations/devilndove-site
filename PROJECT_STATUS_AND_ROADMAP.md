@@ -1,10 +1,10 @@
-# CURRENT ROADMAP — Build 431 and next builds (2026-10-21)
+# CURRENT ROADMAP — Build 432 and next builds (2026-10-21)
 
-**Current implementation:** Build 431 — Release Gate Dashboard & Human-Readable Blocker Reasons. The [release gate dashboard](/admin/release-gate-status/) reports exact-SHA Development checks, Production workflow evidence and live deployed source identity. Technical guide: [Build 431](docs/operations/RELEASE_467_BUILD_431_RELEASE_GATE_DASHBOARD.md).
+**Current Development implementation:** Build 432 — Deployment Rollback Readiness & Safe Recovery. [Build 432 rollback runbook](docs/operations/RELEASE_467_BUILD_432_ROLLBACK_READINESS.md) and [read-only Admin recovery readiness](/admin/rollback-readiness/) provide verified-source rehearsal, historical Production evidence checks and non-mutating operator steps. This is **not** a live rollback or Production GREEN claim.
 
-**Prior builds:** Build 429 provides workflow-specific diagnostics; Build 430 generates control-plane and smoke-linked Production receipts. Source updates and matching branch trees alone do **not** establish Production GREEN.
+**Previous:** Build 429 workflow-specific Development diagnostics; Build 430 protected Production receipts; Build 431 Admin release gate dashboard and live source identity. All remain subject to independent exact-commit deployment evidence.
 
-**Next queued:** Build 432 — Deployment Rollback Readiness & Safe Recovery. The rest of Builds 433–438 remain planned in the [forward roadmap](docs/operations/RELEASE_467_BUILD_429_438_ROADMAP.md). Advance only after the exact-SHA release proofs and Cloudflare live receipt are verified.
+**Next queued:** Build 433 — Brand V3 Remaining Customer Placeholder Replacement. Full queue: [Builds 429–438 roadmap](docs/operations/RELEASE_467_BUILD_429_438_ROADMAP.md). Etsy single-Product trial is deferred by owner until tomorrow; do not start publication as part of infrastructure work.
 
 ---
 
