@@ -314,6 +314,13 @@
       "release": 467,
       "description": "Immutable maker quality attempts, failed/reworked lineage, independent sale-safety reviews, approved Product handoffs and unique source-only Inventory recovery receipts; no stock or provider writes.",
       "recovery": "Retain all failed and approved quality history and canonical Inventory receipts. To supersede any decision append another review. Correct schema forward only; never reclassify material recovery by adding stock or rewriting historical attempts."
+    },
+    {
+      "version": 44,
+      "file": "0044_release467_shared_tools_maintenance_conflict_reviews.sql",
+      "release": 467,
+      "description": "Immutable human Tool inspection and exact calendar conflict approvals with additive SQLite booking guards for unsafe/out-of-service equipment, maintenance blocks and unreviewed shared-Tool overlaps. Preserve canonical multi-workstation memberships, location, lifecycle and calendar authorities.",
+      "recovery": "Disable Build 448 review writes if necessary; preserve approved/declined decisions and inspections. Do not delete calendar history, Inventory, lifecycle records or old traveler steps. Correct defects with a new forward-only migration and human review."
     }
   ]
 }
