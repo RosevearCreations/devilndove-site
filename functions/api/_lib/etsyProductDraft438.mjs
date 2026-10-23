@@ -84,8 +84,13 @@ export function canadaOnlyShippingProfile(profile,destinations,id){
   const rows=destinations?.results;
   if(!Array.isArray(rows)||!rows.length||!Number.isSafeInteger(Number(destinations.count))||
     Number(destinations.count)!==rows.length)return {allowed:false,reason:'Complete shipping destinations could not be verified; do not use this profile.'};
-  if(rows.some(x=>Number(x.shipping_profile_id)!==Number(id)||
-    String(x.destination_country_iso||'').toUpperCase()!=='CA'||
-    String(x.destination_region||'').trim()))return {allowed:false,reason:'This shipping profile includes a non-Canadian, regional or worldwide destination.'};
+  if(rows.some(x=>{
+    const country=String(x.destination_country_iso||'').trim().toUpperCase();
+    const region=String(x.destination_region||'').trim().toLowerCase();
+    // Etsy's API can represent an unselected region with the enum value 'none'.
+    // Only an explicit CA country is safe: 'none' without CA is not a destination.
+    return Number(x.shipping_profile_id)!==Number(id)||country!=='CA'||
+      (region!==''&&region!=='none');
+  }))return {allowed:false,reason:'This shipping profile includes a non-Canadian, regional or worldwide destination.'};
   return {allowed:true,destinations:rows.length,reason:'All verified destinations are Canada-only.'};
 }

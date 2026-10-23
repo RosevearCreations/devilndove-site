@@ -3,7 +3,15 @@
 **Recorded:** 2026-10-23
 **Repository:** `RosevearCreations/devilndove-site`
 **Status:** Approved queue for sequential implementation; **planning documentation only**, not a claim that these builds are implemented or Production GREEN.
-**Next build:** **439 — Etsy Live Draft Creation & Connection Acceptance**.
+**Current corrective build:** **441 — Etsy Canada-Only Delivery Verification Repair**.
+**Next Maker journey build:** to be renumbered after the corrective release and
+live Etsy draft acceptance.
+
+**2026-10-23 corrective release note:** Build **441** has been reassigned by the owner to
+**Etsy Canada-Only Delivery Verification Repair** to resolve an urgent live Product Editor
+shipping-profile HOLD. The previously proposed **Facebook Marketplace Integration & Authorization**
+scope below is **deferred and must receive a new build number** before implementation. The
+remaining numbered Maker journey entries are a planning queue, not claims of implementation.
 
 ## Why this queue exists
 
