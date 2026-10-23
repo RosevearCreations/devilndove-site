@@ -3,6 +3,8 @@
 from __future__ import annotations
 import json
 from pathlib import Path
+from inline_data_uri_budget import inline_data_uri_bytes
+
 ROOT=Path(__file__).resolve().parents[1]
 config=json.loads((ROOT/'release465-performance-budget.json').read_text(encoding='utf-8'))
 limits=config['limits']; roots=config['scope_roots']; fail=[]; files=[]; inline=0
@@ -14,7 +16,7 @@ for root_name in roots:
   if p.suffix.lower() not in {'.js','.mjs','.css','.html'}: continue
   size=p.stat().st_size; rel=p.relative_to(ROOT).as_posix(); files.append((rel,size,p.suffix.lower()))
   if p.suffix.lower() in {'.html','.css','.js','.mjs'}:
-   try:inline+=sum(len(x) for x in p.read_text(encoding='utf-8',errors='ignore').split('data:')[1:])
+   try:inline+=inline_data_uri_bytes(p.read_text(encoding='utf-8',errors='ignore'))
    except Exception: pass
   key={'.js':'max_js_bytes','.mjs':'max_js_bytes','.css':'max_css_bytes','.html':'max_html_bytes'}[p.suffix.lower()]
   if size>int(limits[key]): fail.append(f'{rel} = {size} bytes exceeds {key}={limits[key]}')

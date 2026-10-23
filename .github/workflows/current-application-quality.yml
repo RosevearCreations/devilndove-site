@@ -110,6 +110,7 @@ jobs:
 
       - name: Build 443 Product Editor recovery, approved Etsy photo transfer and manual Meta handoff
         run: |
+          python scripts/test_inline_data_uri_budget_443.py
           node --check functions/api/_lib/productEtsyImages443.mjs
           node --check functions/api/admin/product-etsy-images.js
           node --check public/js/admin-product-editor-v163.js

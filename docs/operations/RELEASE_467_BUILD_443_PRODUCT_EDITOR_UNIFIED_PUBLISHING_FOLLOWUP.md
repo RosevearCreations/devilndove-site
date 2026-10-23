@@ -15,6 +15,7 @@
 3. **Simpler Etsy readiness:** category, shipping, processing and parcel *input choices only* may be restored from browser session storage for 12 hours. A deliberate **Test Etsy connection** also performs a fresh live Canada-only destination verification if the owner previously selected a shipping profile. No shipping proof or owner consent is restored, and no Etsy write happens in the background.
 4. **Product Editor reliability:** a changed saved Product has a browser-session-only recovery snapshot (12 hours), explicit Restore/Discard controls, dirty-form protection before Retry load, a verified CAD save/read contract, and clearing of the temporary snapshot only on confirmed save. No server autosave or secret storage is introduced.
 5. **No new D1 migrations or secrets.** Uses existing canonical media, Product, OAuth and audit tables, Cloudflare R2 binding, and Etsy's current `listings_r/listings_w` grant.
+6. **Release gate repair:** the historical Release 465 inline-data-URI estimator counted all text after any JavaScript `data:` property as if it were an embedded image, causing an unrelated System Gate failure even while Product Editor tests passed. The parser now counts only actual inline `data:<MIME>,...` URI text. The unchanged 650,000-byte ceiling remains fail-closed, with a focused regression test.
 
 ## Owner acceptance (no automatic live uploads)
 
