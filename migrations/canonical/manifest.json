@@ -300,6 +300,13 @@
       "release": 467,
       "description": "Additive per-project BOM with process, supplier-lot and workstation references plus unique immutable classifications of actual canonical Inventory posting receipts; no competing stock authority.",
       "recovery": "Preserve every BOM line, canonical Inventory posting and classified actual-use receipt. Disable new Build 445 writes and correct forward only; never recalculate or overwrite physical stock or supplier lot balances."
+    },
+    {
+      "version": 42,
+      "file": "0042_release467_guided_manufacturing_traveler.sql",
+      "release": 467,
+      "description": "Immutable executions of reviewed traveler steps; operator pause/resume, cure/checklist, equipment/substitution and unique source-linked actual Work Order time and Creative Process evidence.",
+      "recovery": "Disable new guided execution writes, retaining all history; correct forward only. Never rewrite traveler snapshots, actual Work Order time, Inventory, media or source project plans."
     }
   ]
 }
