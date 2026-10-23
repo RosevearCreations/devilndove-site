@@ -114,6 +114,15 @@ export async function onRequestPost(ctx){
   if(resource){
    const real=await auth.db.prepare(`SELECT site_item_inventory_id FROM site_item_inventory WHERE site_item_inventory_id=? AND COALESCE(is_active,1)=1 AND LOWER(TRIM(COALESCE(source_type,'')))='tool' LIMIT 1`).bind(resource).first();
    if(!real)return reply({ok:false,error:'Resource is not an active Inventory Tool.',code:'RESOURCE_NOT_AVAILABLE'},404);
+   if(kind==='project_booking'){
+    const state=await auth.db.prepare(`SELECT i.do_not_reuse,p.lifecycle_status,p.condition_status,p.next_service_at FROM site_item_inventory i
+     LEFT JOIN inventory_tool_lifecycle_profiles p ON p.site_item_inventory_id=i.site_item_inventory_id
+     WHERE i.site_item_inventory_id=?`).bind(resource).first();
+    if(Number(state?.do_not_reuse||0)===1||(state?.lifecycle_status&&state.lifecycle_status!=='active')||
+       ['unsafe','damaged','service_due'].includes(state?.condition_status)||
+       (state?.next_service_at&&String(state.next_service_at).slice(0,10)<new Date().toISOString().slice(0,10)))
+     return reply({ok:false,error:'This Tool is out of service, unsafe, marked do-not-reuse or overdue for service. Resolve its real lifecycle before scheduling.',code:'TOOL_OUT_OF_SERVICE',tool_id:resource},409);
+   }
   }
   if(project){
    const p=await auth.db.prepare(`SELECT creative_work_project_id FROM creative_work_projects WHERE creative_work_project_id=? AND COALESCE(project_status,'active')<>'archived' LIMIT 1`).bind(project).first();
@@ -130,6 +139,8 @@ export async function onRequestPost(ctx){
      ORDER BY starts_at_utc LIMIT 51`).bind(resource,ends,starts).all()):[];
   if(existing.length>50)return reply({ok:false,error:'Too many conflicting records; narrow the window.',code:'CONFLICT_LIMIT_EXCEEDED'},409);
   const conflict=conflictAssessment(existing,{resource_site_item_inventory_id:resource,starts_at_utc:starts,ends_at_utc:ends});
+  if(kind==='project_booking'&&existing.some(x=>['maintenance','resource_hold'].includes(x.entry_kind)))
+   return reply({ok:false,error:'Maintenance or a resource hold blocks this Tool. Booking cannot override it; reschedule after the recorded block is resolved.',code:'MAINTENANCE_BLOCK',conflicts:existing},409);
   const override=Boolean(body.override_conflict),maintenanceAck=Boolean(body.override_maintenance_ack);
   const reason=clean(body.override_reason,800);
   if(conflict.requires_override&&(!override||reason.length<20))
@@ -137,6 +148,14 @@ export async function onRequestPost(ctx){
   if(conflict.maintenance_conflict&&!maintenanceAck)
    return reply({ok:false,error:'Maintenance conflicts require explicit acknowledgement.',code:'MAINTENANCE_BLOCK',conflicts:conflict.conflicts},409);
   if(override&&!conflict.requires_override)return reply({ok:false,error:'No recorded conflict to override. Refresh.',code:'UNNECESSARY_OVERRIDE'},409);
+  if(kind==='project_booking'&&existing.some(x=>x.entry_kind==='project_booking')){
+   const reviews=rows(await auth.db.prepare(`SELECT conflicting_calendar_entry_id FROM maker_tool_booking_decisions
+    WHERE calendar_request_key=? AND site_item_inventory_id=? AND creative_work_project_id=?
+    AND starts_at_utc=? AND ends_at_utc=? AND decision='approved_overlap' LIMIT 51`).bind(key,resource,project,starts,ends).all());
+   const approved=new Set(reviews.map(r=>Number(r.conflicting_calendar_entry_id)));
+   const pending=existing.filter(x=>x.entry_kind==='project_booking'&&!approved.has(Number(x.creative_resource_calendar_entry_id)));
+   if(pending.length)return reply({ok:false,error:'Overlapping project Tool bookings need a recorded human owner decision for each conflicting calendar entry. Open Tools & Workstations to review.',code:'OWNER_CONFLICT_REVIEW_REQUIRED',conflicts:pending},409);
+  }
   const write=auth.db.prepare(`INSERT INTO creative_resource_calendar_entries
     (resource_site_item_inventory_id,creative_work_project_id,creative_project_operation_id,entry_kind,title,
     starts_at_utc,ends_at_utc,override_conflict,override_maintenance_ack,override_reason,operator_note,
