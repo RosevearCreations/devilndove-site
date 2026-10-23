@@ -321,6 +321,13 @@
       "release": 467,
       "description": "Immutable human Tool inspection and exact calendar conflict approvals with additive SQLite booking guards for unsafe/out-of-service equipment, maintenance blocks and unreviewed shared-Tool overlaps. Preserve canonical multi-workstation memberships, location, lifecycle and calendar authorities.",
       "recovery": "Disable Build 448 review writes if necessary; preserve approved/declined decisions and inspections. Do not delete calendar history, Inventory, lifecycle records or old traveler steps. Correct defects with a new forward-only migration and human review."
+    },
+    {
+      "version": 45,
+      "file": "0045_release467_maker_project_cost_scenarios.sql",
+      "release": 467,
+      "description": "Immutable CAD costing assumptions and optional per-item pricing scenarios that reconcile actual canonical Inventory, Work Order labour, production evidence, BOM plan and quality attempts without duplicate costs, accounting posts, Product pricing or revenue.",
+      "recovery": "Retain every human cost review and source posting. Stop new costing reviews or supersede a scenario with a later review. Repair defects only with a new forward-only migration; never change physical Inventory, accounting, payment or sales authorities."
     }
   ]
 }
