@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/css/admin-product-channel-review-436.css?v=436"/>
   <link rel="stylesheet" href="/css/release467-build182-product-buyer-readiness.css?v=182"/>
   <link rel="stylesheet" href="/admin/product-editor/channel-assist-440.css?v=440"/>
+  <link rel="stylesheet" href="/admin/product-editor/unified-publishing-443.css?v=443"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -34,7 +35,7 @@
         <button class="btn dd-editor-tab" type="button" data-editor-tab="description" aria-selected="false">Description</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="buyer" aria-selected="false">Buyer Readiness</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="media" aria-selected="false">Media</button>
-        <button class="btn dd-editor-tab" type="button" data-editor-tab="seo" aria-selected="false">SEO / Publishing</button>
+        <button class="btn dd-editor-tab" type="button" data-editor-tab="seo" aria-selected="false">Storefront / SEO</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="qa" aria-selected="false">QA</button>
         <button class="btn dd-editor-tab dd-etsy-tab" type="button" data-editor-tab="etsy" aria-selected="false">Etsy <span class="dd-tab-channel-dot" aria-hidden="true"></span></button>
         <button class="btn dd-editor-tab dd-meta-tab" type="button" data-editor-tab="facebook" aria-selected="false">Facebook Marketplace <span class="dd-tab-channel-dot" aria-hidden="true"></span></button>
@@ -123,7 +124,7 @@
 
       <section class="dd-editor-panel dd-etsy-panel" data-editor-panel="etsy" hidden>
         <div class="dd-products-browser-heading"><div><h2>Etsy — live connection &amp; unpublished draft</h2>
-          <p class="small">Create a real <strong>unpublished Etsy draft</strong> directly from our saved Product. There is no manual Etsy Shop Manager drafting step. No live listing, photo upload, or shipping-policy change is performed.</p></div></div>
+          <p class="small">Create a real <strong>unpublished Etsy draft</strong> directly from our saved Product. No live listing or shipping-policy change is performed. After creation, approved gallery photos can be transferred separately in Step 4.</p></div></div>
         <div class="dd-channel-steps dd-etsy-steps" aria-label="Etsy draft readiness checklist">
           <h3>Our Etsy checklist</h3>
           <ol>
@@ -191,6 +192,16 @@
             <button type="button" class="btn" id="dd442EtsyReconcile" disabled>Reconcile the rejected attempt (no draft created)</button>
           </div>
         </div>
+        <div class="card dd443-channel-card" id="dd443EtsyImages" style="padding:16px;margin:12px 0">
+          <h3>4. Add our approved Product photographs to the Etsy draft</h3>
+          <p class="small">One saved Product supplies Etsy and our storefront. After a draft exists, we can send approved original JPEG/PNG gallery photos without manually uploading them again in Etsy. Only images approved for public use, with alt text and at least 800×800 pixels, qualify. No listing is published.</p>
+          <div class="dd-product-actions"><button class="btn" type="button" id="dd443EtsyImagesLoad">Load approved photos &amp; Etsy draft status</button><a class="btn" id="dd443EtsyImagesEdit" href="/admin/catalog-media/">Review our Product gallery</a><a class="btn" href="https://www.etsy.com/your/shops/me/listings/drafts" target="_blank" rel="noopener noreferrer">Check Etsy Drafts</a></div>
+          <p class="small" role="status" aria-live="polite" id="dd443EtsyImagesStatus">No Etsy image check runs automatically. First create an unpublished Etsy draft.</p>
+          <div id="dd443EtsyImagesList" class="dd443-image-list" aria-label="Approved product images awaiting Etsy transfer"></div>
+          <label class="dd443-consent"><input type="checkbox" id="dd443EtsyImagesConsent"> I checked these approved Product photographs and authorize transfer to our existing <strong>unpublished Canada-only Etsy draft</strong> only. Do not publish or retry an uncertain image upload.</label>
+          <button class="btn primary" type="button" id="dd443EtsyImagesSend" disabled>Transfer approved photos to Etsy Draft</button>
+          <p class="small">Each photo gets a separate one-attempt receipt. If any transfer is uncertain, the batch stops for manual Etsy review. We never overwrite existing Etsy photos.</p>
+        </div>
       </section>
 
       <section class="dd-editor-panel dd-meta-panel" data-editor-panel="facebook" hidden>
@@ -206,6 +217,18 @@
           <h3>2. Marketplace draft</h3>
           <p class="small">Creating a Facebook Marketplace listing is disabled until we verify the exact account, Meta permissions, and a supported publishing API for our listing type. Having an app ID and secret alone does not grant Marketplace posting.</p>
           <button class="btn" type="button" disabled title="Requires verified Meta listing API authorization">Create Facebook Marketplace draft — awaiting authorization</button>
+        </div>
+        <div class="card dd443-channel-card" style="padding:16px;margin:12px 0">
+          <h3>3. Prepare a manual Marketplace listing now — no API key needed</h3>
+          <p class="small">Marketplace Partner API access is restricted and must be approved by Meta. Until it is, we can reuse our saved Product information, copy it into Facebook's own listing screen, and upload images there ourselves. This does not authorize automated posting, and a Commerce catalog is not the same as a Marketplace listing.</p>
+          <div class="dd-product-actions"><button class="btn" type="button" id="dd443MetaPrepare">Prepare saved Product listing text</button><a class="btn" href="https://www.facebook.com/marketplace/create/item" target="_blank" rel="noopener noreferrer">Open Facebook Marketplace</a><a class="btn" href="https://www.facebook.com/business/help/646509171194744" target="_blank" rel="noopener noreferrer">Partner eligibility</a></div>
+          <p class="small" role="status" aria-live="polite" id="dd443MetaManualStatus">Manual copy-and-review is available after our Product is saved; no Facebook account or app key is accessed here.</p>
+          <div id="dd443MetaCopyFields" hidden>
+            <label class="dd443-copy-field">Title <textarea id="dd443MetaTitle" class="input" rows="2" readonly></textarea><button class="btn" type="button" data-dd443-copy="dd443MetaTitle">Copy title</button></label>
+            <label class="dd443-copy-field">Price (CAD) <input id="dd443MetaPrice" class="input" readonly><button class="btn" type="button" data-dd443-copy="dd443MetaPrice">Copy price</button></label>
+            <label class="dd443-copy-field">Description <textarea id="dd443MetaDescription" class="input" rows="5" readonly></textarea><button class="btn" type="button" data-dd443-copy="dd443MetaDescription">Copy description</button></label>
+            <p class="small">Choose the Facebook category and Canada-only location/delivery options inside Facebook. Add our approved photographs manually. Review the listing before pressing Facebook's own Publish button.</p>
+          </div>
         </div>
       </section>
 
@@ -244,12 +267,14 @@
 </section>
 <section class="dd-editor-panel" data-editor-panel="advanced" hidden><h2>Advanced workspaces</h2><p class="small">These systems remain separate so they cannot wake up merely because we edit a Product.</p><div class="dd-product-actions"><a class="btn" href="/admin/inventory-operations/">Inventory Operations</a><a class="btn" id="productEditorMediaAdvancedLink" href="/admin/catalog-media/">Image Editor</a><a class="btn" href="/admin/release-preflight/">Release Preflight</a><a class="btn" href="/admin/packaging-studio/">Packaging</a></div></section>
 
-      <div class="dd-editor-footer"><div class="small" aria-live="polite" id="dd440SaveHint">No autosave. Press Save Product after changing details; the saved CAD price is verified after saving. Nothing posts automatically to Etsy or Facebook.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
+      <div class="dd443-recovery" id="dd443Recovery" hidden role="region" aria-label="Unsaved Product recovery"><strong>Unsaved edits recovered from this browser session</strong><p class="small" id="dd443RecoveryStatus">Choose Restore to review them, or Discard to keep the saved Product.</p><div class="dd-product-actions"><button class="btn" id="dd443RecoveryRestore" type="button">Restore unsaved edits</button><button class="btn" id="dd443RecoveryDiscard" type="button">Discard recovered edits</button></div></div>
+      <div class="dd-editor-footer"><div class="small" aria-live="polite" id="dd440SaveHint">No server autosave. Unsaved edits are kept temporarily in this browser session for recovery; press Save Product to commit them. Nothing posts automatically to Etsy or Facebook.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
   <script src="/public/js/admin-product-channel-intent-v405.js?v=437"></script><script src="/public/js/admin-product-distribution-v406.js?v=436"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-product-editor-v163.js?v=437&b390=1"></script>
   <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=442"></script>
+  <script src="/public/js/admin-product-unified-publishing-v443.js?v=443"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">

@@ -7,6 +7,16 @@
   if(!etsyStatus||!window.DDAuth)return;
   const state={ready:false,working:false,taxonomy:[],fingerprint:'',existing:null,verifiedShippingId:0,
     connected:false,productDetails:null,shippingFailed:false,createdListingId:null,attemptFailed:false,recoveryEligible:false};
+  // Build 443: keep only non-authoritative operator choices for this browser tab.
+  // Consent and shipping verification are NEVER restored from storage.
+  const choicesKey=productId?`dnd:etsy:choices:443:${productId}`:null;
+  function rememberedChoices(){try{const data=JSON.parse(sessionStorage.getItem(choicesKey)||'null');
+    return data?.at&&Date.now()-data.at<12*60*60*1000?data:{};}catch{return {};}}
+  function saveChoices(){if(!choicesKey)return;try{sessionStorage.setItem(choicesKey,JSON.stringify({at:Date.now(),
+    category:$('dd438EtsyCategory')?.value||'',shipping:$('dd439EtsyShipping')?.value||'',
+    readiness:$('dd439EtsyReadiness')?.value||'',search:$('dd438EtsySearch')?.value||'',
+    parcel:parcel()}));}catch{}}
+  function restoreOption(id,value){const el=$(id);if(el&&value&&[...el.options].some(opt=>opt.value===String(value)))el.value=String(value);}
   const status=(el,message,tone='')=>{if(el){el.textContent=message;el.dataset.tone=tone;}};
   const read=async(response)=>{const data=await response.json().catch(()=>null);if(!response.ok||!data?.ok){
     const error=new Error(data?.error||`Request failed (${response.status})`);
@@ -73,16 +83,16 @@
     updateButtons();
   }
   $('dd438EtsySearch')?.addEventListener('input',event=>categories(event.target.value));
-  $('dd438EtsyCategory')?.addEventListener('change',updateButtons);
-  $('dd439EtsyReadiness')?.addEventListener('change',updateButtons);
+  $('dd438EtsyCategory')?.addEventListener('change',()=>{updateButtons();saveChoices();});
+  $('dd439EtsyReadiness')?.addEventListener('change',()=>{updateButtons();saveChoices();});
   for(const id of ['dd442EtsyWeight','dd442EtsyLength','dd442EtsyWidth','dd442EtsyHeight',
-    'dd442EtsyWeightUnit','dd442EtsyDimensionUnit'])$(id)?.addEventListener('input',updateButtons);
+    'dd442EtsyWeightUnit','dd442EtsyDimensionUnit'])$(id)?.addEventListener('input',()=>{updateButtons();saveChoices();});
   $('dd442EtsyNoDraftConfirm')?.addEventListener('change',updateButtons);
   for(const id of ['dd439EtsyCanadaConfirm','dd438EtsyConfirm'])$(id)?.addEventListener('change',updateButtons);
   $('dd439EtsyShipping')?.addEventListener('change',()=>{
     state.verifiedShippingId=0;state.shippingFailed=false;
     status($('dd439EtsyShippingStatus'),'Shipping profile changed. Verify the new profile before creating a draft.','warn');
-    updateButtons();
+    updateButtons();saveChoices();
   });
   const friendlyBlockers=items=>(items||[]).map(value=>({
     product_description_required_max_15000:'Save a Product description (up to 15,000 characters) in the Description tab',
@@ -104,6 +114,10 @@
     if(document.querySelector('#productEditorForm')?.dataset.productDirty==='1'){
       status(etsyStatus,'Unsaved Product changes detected. Press Save Product before testing Etsy.','warn');return;
     }
+    const retained=rememberedChoices();
+    // Preserve a choice made since the last test, even if storage is unavailable.
+    for(const [key,control] of [['category','dd438EtsyCategory'],['shipping','dd439EtsyShipping'],['readiness','dd439EtsyReadiness']])
+      if($(control)?.value)retained[key]=$(control).value;
     state.ready=false;state.connected=false;state.productDetails=null;state.verifiedShippingId=0;
     state.shippingFailed=false;state.attemptFailed=false;state.recoveryEligible=false;
     if($('dd442EtsyRecovery'))$('dd442EtsyRecovery').hidden=true;
@@ -138,18 +152,32 @@
       const options=verified.options||{};
       setOptions('dd439EtsyShipping',options.shipping||[],'Choose an Etsy shipping profile…');
       setOptions('dd439EtsyReadiness',options.readiness||[],'Choose an Etsy processing profile…');
+      restoreOption('dd439EtsyShipping',retained.shipping);
+      restoreOption('dd439EtsyReadiness',retained.readiness);
       const connectionView=verified.connection||{};
       status($('dd439EtsyConnection'),`Shop: ${verified.shop?.shop_name||verified.shop?.name||'Unknown'} #${verified.shop?.shop_id||'?'} • Grant: ${connectionView.status||'unknown'} • Scope: ${(connectionView.scopes||[]).join(', ')||'not available'} • Token expiry: ${connectionView.access_expires_at||'unknown'}`,'ok');
       const name=String(verified.product?.name||'').toLowerCase();
-      $('dd438EtsySearch').value=name.includes('soap')?'soap':'';
+      $('dd438EtsySearch').value=retained.search|| (name.includes('soap')?'soap':'');
       categories($('dd438EtsySearch').value);
+      restoreOption('dd438EtsyCategory',retained.category);
       const blockers=verified.blockers||[];
       state.ready=blockers.length===0&&Boolean(options.shipping?.length)&&Boolean(options.readiness?.length);
+      // An explicit Test click is also allowed to re-verify the retained shipping profile.
+      // This is GET-only and requires a fresh live destination result every time.
+      if(state.ready&&Number($('dd439EtsyShipping')?.value)>0){
+        const shippingId=Number($('dd439EtsyShipping').value);
+        try{
+          const review=await api('/api/admin/product-etsy-draft',{action:'test_shipping',product_id:productId,shipping_profile_id:shippingId});
+          if(review.shipping_profile_verified){state.verifiedShippingId=shippingId;
+            status($('dd439EtsyShippingStatus'),`Verified live: ${review.shipping_review?.destinations} Canadian destination(s); no U.S. or worldwide destinations.`, 'ok');}
+          else {state.shippingFailed=true;status($('dd439EtsyShippingStatus'),`HOLD: ${review.shipping_review?.reason||'Profile is not Canada-only'}. No draft attempted.`,'warn');}
+        }catch{state.shippingFailed=true;status($('dd439EtsyShippingStatus'),'Shipping could not be re-verified. Use Verify this profile delivers to Canada only. No draft attempted.','warn');}
+      }
       offerExisting(verified);
       if(state.ready){status(etsyStatus,`Live Etsy connection verified for ${verified.shop?.shop_name||verified.shop?.name||'our shop'} (CAD). Select a category, shipping and processing profiles, and verify Canada-only delivery before creating an unpublished draft.`,'ok');}
       else status(etsyStatus,`Etsy connection is live, but draft creation is blocked: ${friendlyBlockers(blockers)||'Etsy shipping or processing profile unavailable'}. Fix and Save Product, then Test again.`,'warn');
     }catch(error){state.ready=false;status(etsyStatus,`Etsy verification stopped: ${errorText(error)}. No draft was created. If refresh is unavailable, reconnect in IT Integrations.`,'error');}
-    finally{setBusy(false);}
+    finally{saveChoices();setBusy(false);}
   }
   $('dd439EtsyCheckShipping')?.addEventListener('click',async()=>{
     const id=Number($('dd439EtsyShipping')?.value||0);
@@ -162,7 +190,7 @@
         status($('dd439EtsyShippingStatus'),`Verified: ${result.shipping_review?.destinations} Canadian destination(s), with no foreign or worldwide destinations. Select the two owner confirmations below.`,'ok');}
       else {state.shippingFailed=true;status($('dd439EtsyShippingStatus'),`HOLD — ${result.shipping_review?.reason||'Profile not Canada-only'}. The Product is saved correctly; choose a Canada-only Etsy shipping profile or configure one in Etsy shipping settings. No draft was attempted.`,'warn');}
     }catch(error){state.shippingFailed=true;status($('dd439EtsyShippingStatus'),`Profile verification failed: ${errorText(error)}. No draft was attempted.`,'error');}
-    finally{setBusy(false);}
+    finally{saveChoices();setBusy(false);}
   });
   async function create(){
     if(!canCreate())return;
@@ -222,4 +250,11 @@
     }catch(e){status(metaStatus,`Meta connection read failed: ${errorText(e)}. No Marketplace action was attempted.`,'error');}
   });
   if(!productId)status(etsyStatus,'Save Product first; external channels need its saved Product ID.','warn');
+  if(productId){
+    const choice=rememberedChoices(),p=choice.parcel||{};
+    for(const [name,key] of [['dd442EtsyWeight','item_weight'],['dd442EtsyLength','item_length'],
+      ['dd442EtsyWidth','item_width'],['dd442EtsyHeight','item_height']])if(p[key])$(name).value=String(p[key]);
+    restoreOption('dd442EtsyWeightUnit',p.item_weight_unit);restoreOption('dd442EtsyDimensionUnit',p.item_dimensions_unit);
+  }
+  updateButtons();
 })();
