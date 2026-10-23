@@ -40,7 +40,7 @@ check('admin-product-videos-v389.js' in t('admin/catalog-media/index.html'),'Adm
 check('dd:media-selected-product' in media,'Media selected Product event')
 check('video.play(' not in t('public/js/product-videos-v389.js') and 'video.autoplay=true' not in t('public/js/product-videos-v389.js'),'No autoplay')
 manifest=json.loads(t('migrations/canonical/manifest.json'))
-check(manifest['migrations'][-1]['version']==39,'Forward-only migration manifest 0039')
+check(len(manifest['migrations'])>=39 and manifest['migrations'][38]['version']==39 and manifest['migrations'][38]['file']=='0039_release467_product_video_attachment.sql','Historical forward-only migration 0039 preserved')
 db=sqlite3.connect(':memory:');db.execute('PRAGMA foreign_keys=ON')
 try:
  db.executescript("""CREATE TABLE products(product_id INTEGER PRIMARY KEY);CREATE TABLE users(user_id INTEGER PRIMARY KEY);

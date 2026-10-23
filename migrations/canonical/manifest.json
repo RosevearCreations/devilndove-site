@@ -286,6 +286,13 @@
       "release": 467,
       "description": "Additive product-bound R2 video references with private-review by default, bounded one-video uploads and explicit publication review.",
       "recovery": "Preserve every original product, image, attachment and object. Correct via a forward-only migration; never drop existing media records."
+    },
+    {
+      "version": 40,
+      "file": "0040_release467_maker_design_file_revisions.sql",
+      "release": 467,
+      "description": "Immutable private CAD/CAM/reference originals with exact project revision ancestry, append-only human reviews and explicit canonical project-output design lineage.",
+      "recovery": "Disable Build 444 writes but retain the immutable revision, review and output lineage records and private R2 originals. Correct future defects only with a forward-only compensating migration; do not delete files or reset project history."
     }
   ]
 }
