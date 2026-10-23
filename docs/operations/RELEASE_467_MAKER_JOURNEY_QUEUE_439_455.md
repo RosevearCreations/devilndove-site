@@ -1,8 +1,8 @@
 # Devil n Dove — Maker Application Build Queue 439–455
 
-**Recorded:** 2026-10-23  
-**Repository:** `RosevearCreations/devilndove-site`  
-**Status:** Approved queue for sequential implementation; **planning documentation only**, not a claim that these builds are implemented or Production GREEN.  
+**Recorded:** 2026-10-23
+**Repository:** `RosevearCreations/devilndove-site`
+**Status:** Approved queue for sequential implementation; **planning documentation only**, not a claim that these builds are implemented or Production GREEN.
 **Next build:** **439 — Etsy Live Draft Creation & Connection Acceptance**.
 
 ## Why this queue exists
