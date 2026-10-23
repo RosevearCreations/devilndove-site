@@ -16,13 +16,13 @@ main.wrap.page-space :where(select,input,textarea){max-width:100%;box-sizing:bor
 @media(max-width:650px){.site-header .header-inner{padding:12px 16px}.site-header .main-nav>a{padding:8px 9px}main.wrap.page-space{padding:16px 14px 36px}}
 
 </style></head>
-<body data-admin-page="project-resource-calendar" data-admin-module="creator"><header class="site-header"><div class="wrap header-inner"><a class="brand" href="/admin/">Devil n Dove Admin</a><nav class="main-nav"><a href="/admin/">Dashboard</a><a href="/admin/project-capacity-planner/">Capacity</a><a href="/admin/project-work-orders/">Work Orders</a><a href="/admin/project-material-planner/">Materials</a><a href="/admin/inventory-operations/">Inventory</a><a href="/admin/commission-workbench/">Commissions &amp; Quotes</a></nav></div></header>
+<body data-admin-page="project-resource-calendar" data-admin-module="creator"><header class="site-header"><div class="wrap header-inner"><a class="brand" href="/admin/">Devil n Dove Admin</a><nav class="main-nav"><a href="/admin/">Dashboard</a><a href="/admin/project-capacity-planner/">Capacity</a><a href="/admin/shared-tools/">Shared Tool Reviews</a><a href="/admin/project-work-orders/">Work Orders</a><a href="/admin/project-material-planner/">Materials</a><a href="/admin/inventory-operations/">Inventory</a><a href="/admin/commission-workbench/">Commissions &amp; Quotes</a></nav></div></header>
 <main class="wrap page-space">
 <section class="page-hero compact"><p class="eyebrow">Release 467 • Build 381</p><h1>Production Calendar, Resource Conflicts &amp; Availability</h1>
 <p>Schedule project work, mark maintenance, reserve shared tools and record deadlines using actual UTC time windows. Conflicts are checked against canonical saved bookings, including across projects.</p>
 <details><summary>ⓘ Help — recorded conflicts and physical availability</summary>
 <p>Only human-confirmed calendar entries constitute booking evidence. No recorded overlap means no conflicting entry in this application; it does <strong>not</strong> prove a machine is powered on, maintained, physically available or that someone else isn't using it. Resource capacity is one booking per active Inventory tool or workstation at a time. A project deadline records a delivery target, not a resource reservation.</p>
-<p>A real maintenance entry blocks overlapping bookings. A deliberate scheduling override requires an explanation; overriding maintenance requires a separate acknowledgement. Changes preserve prior history by cancelling and creating a new entry. There is no automatic maintenance sign-off, work order completion, inventory consumption, or customer notification.</p>
+<p>Build 448: a real maintenance or resource hold is a <strong>hard block</strong> on project bookings, even when the old acknowledgement box is selected. For two overlapping project bookings, record a separate exact human decision in <a href="/admin/shared-tools/">Shared Tool Reviews</a> first; a generic override reason is no longer enough. Calendar and Tool lifecycle remain the authority. Existing calendar history is preserved by cancelling and creating a new entry. No automatic maintenance sign-off, work order completion, Inventory consumption or customer notification occurs.</p>
 </details></section>
 <section class="card"><h2>Calendar window</h2><div class="button-row">
 <label>From <input type="datetime-local" id="calendarFrom"></label><label>To <input type="datetime-local" id="calendarTo"></label>
@@ -39,8 +39,8 @@ main.wrap.page-space :where(select,input,textarea){max-width:100%;box-sizing:bor
 <label>End <input type="datetime-local" id="calendarEnd"></label></div>
 <label>Booking title <input id="calendarTitle" type="text" maxlength="160" placeholder="For example: CNC fixture setup"></label>
 <label>Reason / work instructions (12+ characters) <textarea id="calendarNote" rows="3"></textarea></label>
-<details><summary>Explicit conflict override (only when needed)</summary><label><input type="checkbox" id="calendarOverride"> Authorize an overlapping calendar entry</label>
+<details><summary>Explicit conflict override (only when needed)</summary><p>For overlapping project bookings, use <a href="/admin/shared-tools/">Build 448 Shared Tool Reviews</a> so the matching human decision is tied to the exact booking request. Maintenance and holds never become project-bookable through these controls.</p><label><input type="checkbox" id="calendarOverride"> Authorize an overlapping calendar entry</label>
 <label>Override reason (20+ characters) <textarea id="calendarOverrideReason" rows="2" placeholder="Explain who approved and why"></textarea></label>
-<label><input type="checkbox" id="calendarMaintenanceAck"> Explicitly acknowledge an active maintenance conflict</label></details>
+<label><input type="checkbox" id="calendarMaintenanceAck"> Acknowledge a maintenance conflict when managing maintenance/holds (not a project-booking bypass)</label></details>
 <button id="calendarRecord" class="btn" type="button">Record calendar entry</button><p id="calendarResult" role="status"></p></section>
 </main><script src="/public/js/auth.js?v=467" defer></script><script src="/public/js/admin-write-receipt-recovery-v386.js?v=467b386" defer></script><script src="/public/js/admin-project-resource-calendar.js?v=467b381" defer></script></body></html>
