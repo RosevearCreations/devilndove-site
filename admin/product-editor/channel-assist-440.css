@@ -1,0 +1,31 @@
+/* Build 440 — visually separate channel-specific actions and required fields. */
+.dd-editor-tab.dd-etsy-tab { border-color: #dc743b; color: #ffb98e; }
+.dd-editor-tab.dd-etsy-tab[aria-selected="true"] { background: #633318; border-color: #f88945; color: #fff6ee; }
+.dd-editor-tab.dd-meta-tab { border-color: #487dcb; color: #a9caff; }
+.dd-editor-tab.dd-meta-tab[aria-selected="true"] { background: #1b3563; border-color: #73a5ff; color: #eff6ff; }
+.dd-tab-channel-dot { display: inline-block; width: .55em; height: .55em; margin-left: .3em; border-radius: 50%; background: currentColor; vertical-align: middle; }
+.dd-etsy-panel > .dd-products-browser-heading { border-left: 4px solid #f58948; padding-left: 14px; }
+.dd-meta-panel > h2 { border-left: 4px solid #6a9fff; padding-left: 14px; }
+.dd-channel-required { display: inline-block; margin-left: .35em; padding: 2px 6px; border-radius: 5px; font-size: .75em; font-weight: 700; vertical-align: middle; letter-spacing: .015em; }
+.dd-channel-required--etsy { color: #fff5ea; background: #904616; border: 1px solid #f38b4a; }
+.dd-etsy-required-field > .input { border-color: #c86e35; }
+.dd-etsy-required-field > .input:focus { outline: 2px solid #ffb27e; outline-offset: 2px; }
+.dd-etsy-description-help { padding: 9px 12px; border-left: 3px solid #e78040; background: #302419; color: #ffe2cb; border-radius: 5px; }
+.dd-channel-steps { border: 1px solid #a96538; border-left-width: 5px; border-radius: 10px; padding: 14px 18px; margin: 14px 0 22px; background: #2b221d; }
+.dd-channel-steps h3 { margin-top: 0; }
+.dd-channel-steps ol { list-style: none; padding: 0; display: grid; gap: 9px; }
+.dd-channel-steps li { display: flex; align-items: flex-start; gap: 12px; line-height: 1.5; }
+.dd-step-state { display: inline-block; box-sizing: border-box; min-width: 100px; flex: 0 0 100px; text-align: center; padding: 3px 7px; font-size: .78rem; font-weight: 700; border-radius: 6px; color: #fce7c9; background: #68482a; }
+.dd-step-state[data-state="ok"] { color: #c1f4db; background: #17553e; }
+.dd-step-state[data-state="hold"] { color: #ffe1dd; background: #88382e; }
+.dd-step-jump { appearance: none; border: 0; background: none; font: inherit; color: #ffc291; cursor: pointer; text-decoration: underline; padding: 0 0 0 8px; }
+.dd-step-jump:focus-visible { outline: 2px solid #ffc291; outline-offset: 3px; }
+.dd-etsy-shipping-help { border: 1px solid #a66b44; background: #32271f; border-radius: 8px; padding: 12px 14px; line-height: 1.55; color: #fce1cb; margin-top: 10px; }
+.dd-etsy-shipping-help a { color: #ffcb9e; }
+.dd-meta-steps { border-color: #4b88d7; background: #17283c; }
+.dd-meta-steps .dd-step-state { background: #284d7b; color: #e1efff; }
+.dd-channel-optional { margin-top: 24px !important; }
+.dd-channel-advanced { margin-top: 18px; border: 1px solid #56516f; padding: 12px; border-radius: 8px; }
+.dd-channel-advanced > summary { cursor: pointer; font-weight: 700; }
+.dd-channel-advanced > .card { margin-top: 12px !important; }
+@media (max-width: 700px) { .dd-channel-steps li { flex-wrap: wrap; gap: 5px; } .dd-step-state { min-width: 85px; flex-basis: 85px; } }
