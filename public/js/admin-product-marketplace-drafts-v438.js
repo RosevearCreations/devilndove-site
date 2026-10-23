@@ -1,4 +1,4 @@
-// Build 439 — Etsy Product Editor live connection, Canada-only profiles + unpublished draft.
+// Build 442 — Etsy parcel measurements, guarded rejected-attempt reconciliation and draft.
 // No provider call runs on page load. Every Etsy write requires an explicit click.
 (() => {
   'use strict';
@@ -6,7 +6,7 @@
   const $=id=>document.getElementById(id),etsyStatus=$('dd438EtsyStatus'),metaStatus=$('dd438MetaStatus');
   if(!etsyStatus||!window.DDAuth)return;
   const state={ready:false,working:false,taxonomy:[],fingerprint:'',existing:null,verifiedShippingId:0,
-    connected:false,productDetails:null,shippingFailed:false,createdListingId:null,attemptFailed:false};
+    connected:false,productDetails:null,shippingFailed:false,createdListingId:null,attemptFailed:false,recoveryEligible:false};
   const status=(el,message,tone='')=>{if(el){el.textContent=message;el.dataset.tone=tone;}};
   const read=async(response)=>{const data=await response.json().catch(()=>null);if(!response.ok||!data?.ok){
     const error=new Error(data?.error||`Request failed (${response.status})`);
@@ -17,10 +17,20 @@
     body:JSON.stringify(body),cache:'no-store'}:{method:'GET',cache:'no-store'}).then(read);
   const errorText=e=>[e.message,e.providerMessage,e.providerStatus?`HTTP ${e.providerStatus}`:'',
     e.diagnostic,(e.blockers||[]).length?'Blockers: '+e.blockers.join(', '):''].filter(Boolean).join(' • ');
+  const parcel=()=>({item_weight:$('dd442EtsyWeight')?.value||'',item_length:$('dd442EtsyLength')?.value||'',
+    item_width:$('dd442EtsyWidth')?.value||'',item_height:$('dd442EtsyHeight')?.value||'',
+    item_weight_unit:$('dd442EtsyWeightUnit')?.value||'',item_dimensions_unit:$('dd442EtsyDimensionUnit')?.value||''});
+  function parcelReady(){
+    const p=parcel();
+    return ['item_weight','item_length','item_width','item_height'].every(k=>{
+      const s=String(p[k]).trim(),n=Number(s);
+      return /^\d{1,5}(?:\.\d{1,3})?$/.test(s)&&Number.isFinite(n)&&n>0&&n<=99999;
+    })&&['g','kg','oz','lb'].includes(p.item_weight_unit)&&['cm','mm','in'].includes(p.item_dimensions_unit);
+  }
   const canCreate=()=>state.ready&&!state.working&&state.verifiedShippingId>0&&
     state.verifiedShippingId===Number($('dd439EtsyShipping')?.value)&&
     Number($('dd439EtsyReadiness')?.value)>0&&Number($('dd438EtsyCategory')?.value)>0&&
-    Boolean($('dd439EtsyCanadaConfirm')?.checked)&&Boolean($('dd438EtsyConfirm')?.checked);
+    parcelReady()&&Boolean($('dd439EtsyCanadaConfirm')?.checked)&&Boolean($('dd438EtsyConfirm')?.checked);
   function step(id,label,level=''){
     const node=$(id);if(!node)return;
     node.textContent=label;node.dataset.state=level;
@@ -40,6 +50,10 @@
     for(const id of ['dd438EtsyTest','dd438EtsyRefresh'])if($(id))$(id).disabled=state.working;
     if($('dd439EtsyCheckShipping'))$('dd439EtsyCheckShipping').disabled=state.working||!Number($('dd439EtsyShipping')?.value);
     if($('dd438EtsyCreate'))$('dd438EtsyCreate').disabled=!canCreate();
+    if($('dd442EtsyReconcile'))$('dd442EtsyReconcile').disabled=state.working||!state.recoveryEligible||
+      !$('dd442EtsyNoDraftConfirm')?.checked;
+    status($('dd442EtsyParcelStatus'),parcelReady()?'Packaged weight and dimensions are complete; Etsy will receive the selected units.':
+      'Enter a positive packed weight, length, width and height (up to three decimal places). Never guess package sizes.',parcelReady()?'ok':'warn');
     checklist();
   }
   function setBusy(yes){state.working=yes;updateButtons();}
@@ -61,6 +75,9 @@
   $('dd438EtsySearch')?.addEventListener('input',event=>categories(event.target.value));
   $('dd438EtsyCategory')?.addEventListener('change',updateButtons);
   $('dd439EtsyReadiness')?.addEventListener('change',updateButtons);
+  for(const id of ['dd442EtsyWeight','dd442EtsyLength','dd442EtsyWidth','dd442EtsyHeight',
+    'dd442EtsyWeightUnit','dd442EtsyDimensionUnit'])$(id)?.addEventListener('input',updateButtons);
+  $('dd442EtsyNoDraftConfirm')?.addEventListener('change',updateButtons);
   for(const id of ['dd439EtsyCanadaConfirm','dd438EtsyConfirm'])$(id)?.addEventListener('change',updateButtons);
   $('dd439EtsyShipping')?.addEventListener('change',()=>{
     state.verifiedShippingId=0;state.shippingFailed=false;
@@ -88,7 +105,9 @@
       status(etsyStatus,'Unsaved Product changes detected. Press Save Product before testing Etsy.','warn');return;
     }
     state.ready=false;state.connected=false;state.productDetails=null;state.verifiedShippingId=0;
-    state.shippingFailed=false;state.attemptFailed=false;setBusy(true);status(etsyStatus,'Checking saved Etsy connection and Product…');
+    state.shippingFailed=false;state.attemptFailed=false;state.recoveryEligible=false;
+    if($('dd442EtsyRecovery'))$('dd442EtsyRecovery').hidden=true;
+    setBusy(true);status(etsyStatus,'Checking saved Etsy connection and Product…');
     try{
       // The lifecycle diagnostics endpoint is optional: a failure there must not
       // hide the authoritative Etsy draft preflight or live-shop test.
@@ -105,6 +124,13 @@
       }
       const verified=await api('/api/admin/product-etsy-draft',{action:'test_connection',product_id:productId});
       state.fingerprint=verified.fingerprint;state.taxonomy=verified.options?.taxonomy||[];
+      const recovery=verified.recovery||{};
+      state.recoveryEligible=recovery.eligible===true;
+      state.attemptFailed=Boolean(verified.prior_attempt)&&recovery.state!=='owner_reconciled_one_final_attempt';
+      const review=$('dd442EtsyRecovery');if(review)review.hidden=!state.recoveryEligible;
+      if($('dd442EtsyNoDraftConfirm'))$('dd442EtsyNoDraftConfirm').checked=false;
+      if(state.recoveryEligible)status($('dd442EtsyRecoveryStatus'),
+        `The earlier attempt has a matching HTTP 400 rejection (receipt #${recovery.claim_receipt_id}). Check Etsy Drafts, confirm none exists, then request one manual reconciliation. This action will not create a listing.`,'warn');
       const saved=verified.product||{};
       state.connected=true;state.productDetails=saved;
       status($('dd439EtsyProductSummary'),`Saved Product #${saved.id||productId}: ${saved.name||'(missing name)'} • CAD $${(Number(saved.price_cents||0)/100).toFixed(2)} • ${saved.quantity||0} available • Description (${saved.description_length||0} characters): ${saved.description_preview||'(missing saved description)'}`,
@@ -148,12 +174,13 @@
     if(document.querySelector('#productEditorForm')?.dataset.productDirty==='1'){
       status(etsyStatus,'Save Product changes before creating a remote draft.','warn');return;
     }
+    if(!parcelReady()){status(etsyStatus,'We need the packaged weight and all three parcel dimensions before Etsy draft creation.','warn');return;}
     setBusy(true);state.ready=false;
     status(etsyStatus,'Creating exactly ONE unpublished Etsy draft. Do not refresh or click again until a result is shown…');
     try{
       const result=await api('/api/admin/product-etsy-draft',{action:'create_draft',product_id:productId,
         taxonomy_id:id,shipping_profile_id:shippingId,readiness_state_id:readinessId,
-        who_made:maker,when_made:era,is_supply:supply,fingerprint:state.fingerprint,
+        who_made:maker,when_made:era,is_supply:supply,parcel:parcel(),fingerprint:state.fingerprint,
         request_key:crypto.randomUUID(),confirm_unpublished_draft_only:true,confirm_no_automatic_retry:true,
         confirm_canada_only_shipping_profile:true});
       const link=$('dd438EtsyExisting');if(link){link.hidden=false;link.href='https://www.etsy.com/your/shops/me/listings/drafts';
@@ -164,6 +191,20 @@
     finally{state.ready=false;setBusy(false);}
   }
   $('dd438EtsyTest')?.addEventListener('click',test);
+  $('dd442EtsyReconcile')?.addEventListener('click',async()=>{
+    if(state.working||!state.recoveryEligible||!$('dd442EtsyNoDraftConfirm')?.checked)return;
+    setBusy(true);
+    status($('dd442EtsyRecoveryStatus'),'Checking live Etsy Drafts and recording our signed-in owner review (no provider write)…');
+    try{
+      const result=await api('/api/admin/product-etsy-draft',{action:'reconcile_rejected_draft',product_id:productId,
+        confirm_etsy_drafts_checked:true,confirm_no_matching_draft:true});
+      state.recoveryEligible=false;
+      status(etsyStatus,`Recovery recorded after reviewing ${result.etsy_drafts_reviewed} Etsy draft(s). Now Test Etsy connection again before one final manual draft attempt.`,'ok');
+      status($('dd442EtsyRecoveryStatus'),'Reconciled. Run Test Etsy connection again; no Etsy draft was created by reconciliation.','ok');
+      if($('dd442EtsyRecovery'))$('dd442EtsyRecovery').hidden=true;
+    }catch(error){status($('dd442EtsyRecoveryStatus'),`Recovery stayed on HOLD: ${errorText(error)}. No listing created.`,'error');}
+    finally{setBusy(false);}
+  });
   $('dd438EtsyRefresh')?.addEventListener('click',()=>{
     state.ready=false;setBusy(true);status(etsyStatus,'Refreshing existing Etsy grant…');
     api('/api/admin/oauth-connections',{action:'refresh',provider:'etsy'})

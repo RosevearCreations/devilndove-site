@@ -39,6 +39,24 @@ export function flattenEtsyTaxonomy(nodes,max=1200) {
   return results;
 }
 
+// Build 442: Etsy calculated shipping requires the *packed parcel* measurements.
+// Accept a small, explicit set of units; never infer values from product size.
+export function safeEtsyParcel(value) {
+  if(!value||typeof value!=='object'||Array.isArray(value))return null;
+  const weightUnit=String(value.item_weight_unit||'');
+  const dimensionUnit=String(value.item_dimensions_unit||'');
+  if(!['g','kg','oz','lb'].includes(weightUnit)||!['cm','mm','in'].includes(dimensionUnit))return null;
+  const parcel={item_weight_unit:weightUnit,item_dimensions_unit:dimensionUnit};
+  for(const key of ['item_weight','item_length','item_width','item_height']){
+    const raw=value[key];
+    if(!['string','number'].includes(typeof raw)||!/^(?:\d{1,5})(?:\.\d{1,3})?$/.test(String(raw).trim()))return null;
+    const number=Number(raw);
+    if(!Number.isFinite(number)||number<=0||number>99999)return null;
+    parcel[key]=number;
+  }
+  return parcel;
+}
+
 export function safeEtsyDraftInput(body) {
   if(body?.action!=='create_draft'||body.confirm_unpublished_draft_only!==true||body.confirm_no_automatic_retry!==true||
     body.confirm_canada_only_shipping_profile!==true||
@@ -46,10 +64,11 @@ export function safeEtsyDraftInput(body) {
     !positive(body.shipping_profile_id)||!positive(body.readiness_state_id)||
     !WHO_MADE.includes(body.who_made)||!WHEN_MADE.includes(body.when_made)||
     typeof body.is_supply!=='boolean'||typeof body.fingerprint!=='string'||body.fingerprint.length<12||body.fingerprint.length>80000||
-    !/^[a-fA-F0-9-]{32,50}$/.test(String(body.request_key||'')))return null;
+    !/^[a-fA-F0-9-]{32,50}$/.test(String(body.request_key||''))||!safeEtsyParcel(body.parcel))return null;
   return {product_id:Number(body.product_id),taxonomy_id:Number(body.taxonomy_id),
     shipping_profile_id:Number(body.shipping_profile_id),readiness_state_id:Number(body.readiness_state_id),who_made:body.who_made,
-    when_made:body.when_made,is_supply:body.is_supply,fingerprint:body.fingerprint,request_key:body.request_key};
+    when_made:body.when_made,is_supply:body.is_supply,fingerprint:body.fingerprint,request_key:body.request_key,
+    parcel:safeEtsyParcel(body.parcel)};
 }
 
 export function etsyDraftForm(input,details) {
@@ -61,6 +80,7 @@ export function etsyDraftForm(input,details) {
   form.set('is_supply',String(input.is_supply));form.set('taxonomy_id',String(input.taxonomy_id));
   form.set('shipping_profile_id',String(input.shipping_profile_id));
   form.set('readiness_state_id',String(input.readiness_state_id));
+  for(const [key,value] of Object.entries(input.parcel||{}))form.set(key,String(value));
   form.set('type','physical');
   // Etsy requires shipping and processing IDs for physical drafts. Server-side
   // validation restricts the chosen profile to Canadian destinations only.

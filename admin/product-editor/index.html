@@ -159,6 +159,19 @@
             <label class="dd-etsy-required-field"><span class="small">Etsy shipping profile <span class="dd-channel-required dd-channel-required--etsy">Required</span></span><select class="input" id="dd439EtsyShipping"><option value="">Test connection to load our profiles…</option></select></label>
             <label class="dd-etsy-required-field"><span class="small">Etsy processing profile <span class="dd-channel-required dd-channel-required--etsy">Required</span></span><select class="input" id="dd439EtsyReadiness"><option value="">Test connection to load processing profiles…</option></select></label>
           </div>
+          <fieldset class="dd-etsy-parcel" style="margin-top:14px;padding:12px;border:1px solid #b9793a;border-radius:8px">
+            <legend>Packaged parcel measurements — Etsy calculated shipping <span class="dd-channel-required dd-channel-required--etsy">Required</span></legend>
+            <p class="small">Measure the <strong>packed parcel</strong>, including its box or wrapping (not just the soap). These measurements are sent only when we explicitly create an Etsy draft; they are not saved to the Product.</p>
+            <div class="dd-editor-grid cols-2">
+              <label class="dd-etsy-required-field"><span class="small">Packed weight <span class="dd-channel-required dd-channel-required--etsy">Required</span></span><input class="input" type="number" min="0.001" max="99999" step="any" inputmode="decimal" id="dd442EtsyWeight" placeholder="e.g. 200"></label>
+              <label><span class="small">Weight unit</span><select class="input" id="dd442EtsyWeightUnit"><option value="g">Grams (g)</option><option value="kg">Kilograms (kg)</option><option value="oz">Ounces (oz)</option><option value="lb">Pounds (lb)</option></select></label>
+              <label class="dd-etsy-required-field"><span class="small">Parcel length <span class="dd-channel-required dd-channel-required--etsy">Required</span></span><input class="input" type="number" min="0.001" max="99999" step="any" inputmode="decimal" id="dd442EtsyLength" placeholder="e.g. 12"></label>
+              <label class="dd-etsy-required-field"><span class="small">Parcel width <span class="dd-channel-required dd-channel-required--etsy">Required</span></span><input class="input" type="number" min="0.001" max="99999" step="any" inputmode="decimal" id="dd442EtsyWidth" placeholder="e.g. 9"></label>
+              <label class="dd-etsy-required-field"><span class="small">Parcel height <span class="dd-channel-required dd-channel-required--etsy">Required</span></span><input class="input" type="number" min="0.001" max="99999" step="any" inputmode="decimal" id="dd442EtsyHeight" placeholder="e.g. 4"></label>
+              <label><span class="small">Dimension unit</span><select class="input" id="dd442EtsyDimensionUnit"><option value="cm">Centimetres (cm)</option><option value="mm">Millimetres (mm)</option><option value="in">Inches (in)</option></select></label>
+            </div>
+            <p class="small" id="dd442EtsyParcelStatus" role="status" aria-live="polite">Enter all four real measurements before we can create an Etsy draft.</p>
+          </fieldset>
           <label style="display:block;margin-top:10px"><input type="checkbox" id="dd438EtsySupply"> This Product is a craft supply (not a finished handmade item)</label>
           <div class="dd-product-actions" style="margin-top:12px"><button class="btn" type="button" id="dd439EtsyCheckShipping" disabled>Verify this profile delivers to Canada only</button></div>
           <p class="small" id="dd439EtsyShippingStatus" role="status" aria-live="polite">No shipping destinations verified yet. Etsy's shipping profiles are never changed here.</p>
@@ -170,6 +183,13 @@
           <label style="display:block;margin-bottom:12px"><input type="checkbox" id="dd439EtsyCanadaConfirm"> I reviewed our chosen Etsy shipping profile and confirm that U.S. delivery remains disabled; this draft is for Canadian destinations only.</label>
           <label style="display:block;margin-bottom:12px"><input type="checkbox" id="dd438EtsyConfirm"> Yes — create <strong>one unpublished draft only</strong>, with no automatic retry or live publication.</label>
           <button class="btn primary" type="button" id="dd438EtsyCreate" disabled>Create unpublished Etsy draft</button>
+          <div class="dd-etsy-recovery" id="dd442EtsyRecovery" hidden style="margin-top:14px;padding:12px;border:1px solid #ac623d;border-radius:8px">
+            <h4>Review one rejected Etsy attempt</h4>
+            <p class="small" id="dd442EtsyRecoveryStatus" role="status" aria-live="polite">Recovery is available only for an auditable HTTP 400 rejection. Unknown results cannot be retried.</p>
+            <a href="https://www.etsy.com/your/shops/me/listings/drafts" target="_blank" rel="noopener noreferrer">Open our Etsy drafts and check for this Product</a>
+            <label style="display:block;margin:12px 0"><input type="checkbox" id="dd442EtsyNoDraftConfirm"> We checked our Etsy drafts and confirm there is <strong>no existing draft</strong> for this Product. Authorize one final manual attempt only after another live check.</label>
+            <button type="button" class="btn" id="dd442EtsyReconcile" disabled>Reconcile the rejected attempt (no draft created)</button>
+          </div>
         </div>
       </section>
 
@@ -229,7 +249,7 @@
   </div>
   <script src="/public/js/auth.js?v=440"></script>
   <script src="/public/js/admin-product-channel-intent-v405.js?v=437"></script><script src="/public/js/admin-product-distribution-v406.js?v=436"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-product-editor-v163.js?v=437&b390=1"></script>
-  <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=439"></script>
+  <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=442"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">

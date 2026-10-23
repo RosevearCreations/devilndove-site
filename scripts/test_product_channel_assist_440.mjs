@@ -9,7 +9,9 @@ const css = readFileSync(new URL('../admin/product-editor/channel-assist-440.css
 
 test('independent orange Etsy and blue Meta sections retain all existing provider controls', () => {
   for (const id of ['dd438EtsyTest', 'dd438EtsyCreate', 'dd439EtsyShipping', 'dd439EtsyReadiness',
-    'dd439EtsyCanadaConfirm', 'dd438EtsyConfirm', 'dd438MetaTest']) {
+    'dd439EtsyCanadaConfirm', 'dd438EtsyConfirm', 'dd438MetaTest','dd442EtsyWeight',
+    'dd442EtsyLength','dd442EtsyWidth','dd442EtsyHeight','dd442EtsyWeightUnit',
+    'dd442EtsyDimensionUnit','dd442EtsyRecovery','dd442EtsyNoDraftConfirm','dd442EtsyReconcile']) {
     assert.match(html, new RegExp(`id="${id}"`));
   }
   assert.match(html, /dd-etsy-tab/);
@@ -36,5 +38,7 @@ test('shipping must still verify Canada-only before any Etsy draft can be create
   assert.match(etsy, /Boolean\(\$\('dd439EtsyCanadaConfirm'\)\?\.checked\)/);
   assert.match(etsy, /Boolean\(\$\('dd438EtsyConfirm'\)\?\.checked\)/);
   assert.match(etsy, /action:'create_draft'/);
+  assert.match(etsy, /action:'reconcile_rejected_draft'/);
+  assert.match(etsy, /parcelReady\(\)/);
   assert.match(html, /No live listing, photo upload, or shipping-policy change is performed/);
 });
