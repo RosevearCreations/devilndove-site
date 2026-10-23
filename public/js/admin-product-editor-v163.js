@@ -44,14 +44,52 @@
   const fingerprint=()=>JSON.stringify([...form.elements].filter(el=>el.name&&!['button','submit','reset','file'].includes(el.type)).map(el=>[el.name,el.value]));
   const markClean=()=>{baseline=fingerprint();form.dataset.productDirty='0';};
   function refreshDirty(){form.dataset.productDirty=baseline&&fingerprint()!==baseline?'1':'0';}
+  // Build 443: local browser-session recovery, never an unsanctioned server autosave.
+  const recoveryKey=state.productId?`dnd:product-editor:recovery:443:${state.productId}`:null;
+  const recoveryBox=document.getElementById('dd443Recovery');let pendingRecovery=null;
+  function clearRecovery(){if(recoveryKey)try{sessionStorage.removeItem(recoveryKey);}catch{}
+    pendingRecovery=null;if(recoveryBox)recoveryBox.hidden=true;}
+  function snapshotEdits(){if(!recoveryKey||!baseline)return;
+    try{
+      if(form.dataset.productDirty!=='1')return;
+      const values={};for(const el of form.elements){if(el.name&&el.type!=='file'&&!el.disabled)values[el.name]=el.value;}
+      sessionStorage.setItem(recoveryKey,JSON.stringify({version:443,product_id:state.productId,
+        saved_at:Date.now(),baseline,values}));
+    }catch{/* Storage can be blocked; never interrupt Product editing. */}
+  }
+  function offerRecovery(){if(!recoveryKey||!recoveryBox)return;
+    let candidate=null;try{candidate=JSON.parse(sessionStorage.getItem(recoveryKey)||'null');}catch{}
+    if(candidate?.version!==443||candidate.product_id!==state.productId||
+      !candidate.values||Date.now()-candidate.saved_at>12*60*60*1000){clearRecovery();return;}
+    pendingRecovery=candidate;recoveryBox.hidden=false;
+    const same=candidate.baseline===baseline;
+    const notice=document.getElementById('dd443RecoveryStatus');
+    if(notice)notice.textContent=same?'This browser has edits we did not save. Restore and review them, or discard the temporary copy.':
+      'The saved Product changed since this browser copy. Restoring could overwrite newer work; compare every field before saving.';
+  }
+  document.getElementById('dd443RecoveryRestore')?.addEventListener('click',()=>{
+    if(!pendingRecovery||!state.authorityLoaded)return;
+    if(pendingRecovery.baseline!==baseline&&!window.confirm('Saved Product data has changed since these edits. Restore the old browser copy for careful review?'))return;
+    for(const [name,value] of Object.entries(pendingRecovery.values)){
+      const el=field(name);if(!el||el.type==='file')continue;
+      if(el.tagName==='SELECT'&&value&&![...el.options].some(option=>option.value===value))el.add(new Option(value+' (recovered)',value));
+      el.value=String(value??'');
+    }
+    refreshDirty();if(recoveryBox)recoveryBox.hidden=true;
+    setStatus('Unsaved browser edits restored for review. Press Save Product only when the fields are correct. No server or marketplace write occurred.','warn');
+  });
+  document.getElementById('dd443RecoveryDiscard')?.addEventListener('click',()=>{
+    clearRecovery();setStatus('Temporary browser copy discarded. Our saved Product is unchanged.','ok');
+  });
   form.addEventListener('input',event=>{
     if(seoKeys.includes(event.target.name))autoSeo.delete(event.target.name);
     if(['name','short_description','description'].includes(event.target.name))syncSeo();
     if(saveButton&&saveButton.textContent==='Saved ✓')saveButton.textContent='Save Product';
-    refreshDirty();
+    refreshDirty();snapshotEdits();
   });
-  form.addEventListener('change',refreshDirty);
+  form.addEventListener('change',()=>{refreshDirty();snapshotEdits();});
   window.addEventListener('beforeunload',event=>{
+    snapshotEdits();
     if(leavingAfterSave||form.dataset.productDirty!=='1')return;
     event.preventDefault();event.returnValue='';
   });
@@ -118,10 +156,11 @@
   function browserSeed(){if(!state.productId)return null;try{const raw=sessionStorage.getItem(`dnd:product-editor-seed:${state.productId}`);if(!raw)return null;const seed=JSON.parse(raw);if(Number(seed?.product_id)!==state.productId)return null;if(Date.now()-Number(seed?.captured_at||0)>30*60*1000)return null;return seed;}catch{return null;}}
   function primeFromBrowser(){const seed=browserSeed();if(!seed)return false;title.textContent=seed.name?`Edit ${seed.name}`:'Edit Product';identity.textContent=`Product #${state.productId}${seed.product_number?` • No. ${seed.product_number}`:''}${seed.sku?` • ${seed.sku}`:''}`;const preview=document.getElementById('productEditorFeaturedPreview');if(preview&&seed.featured_image_url){armMediaImage(preview,seed.featured_image_url);preview.alt=seed.name?`Featured image for ${seed.name}`:'Featured image';}setStatus('Product Browser handoff shown while one authoritative Product read loads. Save remains disabled until authority is confirmed.','warn');return true;}
   function setSaveReady(ready){state.authorityLoaded=Boolean(ready);if(saveButton)saveButton.disabled=state.productId?!state.authorityLoaded:false;if(qaRun)qaRun.disabled=!state.productId||!state.authorityLoaded||state.qaRunning;}
-  function setFeaturedDraft(raw){const value=String(raw||'').trim();set('featured_image_url',value);if(state.product)state.product.featured_image_url=value;const preview=document.getElementById('productEditorFeaturedPreview');if(preview){armMediaImage(preview,value);preview.alt=get('name')?`Featured image for ${get('name')}`:'Featured image';}renderMedia();state.qaData=null;renderQa();setStatus('Featured image changed in this Product draft. Press Save Product to commit it.','warn');}
+  function setFeaturedDraft(raw){const value=String(raw||'').trim();set('featured_image_url',value);if(state.product)state.product.featured_image_url=value;const preview=document.getElementById('productEditorFeaturedPreview');if(preview){armMediaImage(preview,value);preview.alt=get('name')?`Featured image for ${get('name')}`:'Featured image';}refreshDirty();snapshotEdits();renderMedia();state.qaData=null;renderQa();setStatus('Featured image changed in this Product draft. Press Save Product to commit it.','warn');}
   function fill(product){
     state.product=product||{};for(const key of ['name','slug','sku','product_category','color_name','color_names_text','shipping_code','review_status','short_description','description','product_type','status','currency','tax_class_id','weight_grams','inventory_quantity','digital_file_url','featured_image_url','sort_order','meta_title','meta_description','keywords','h1_override','canonical_url','og_title','og_description','og_image_url','merchandise_origin','sale_channel','external_listing_url','external_listing_label','condition_summary','era_label','sourcing_notes'])set(key,product?.[key]);set('price',(Number(product?.price_cents||0)/100).toFixed(2));set('compare_at_price',product?.compare_at_price_cents==null?'':(Number(product.compare_at_price_cents||0)/100).toFixed(2));set('taxable',Number(product?.taxable??1)===0?'0':'1');set('requires_shipping',Number(product?.requires_shipping??1)===1?'1':'0');set('inventory_tracking',Number(product?.inventory_tracking??0)===1?'1':'0');
     syncSeo(true);markClean();
+    offerRecovery();
     title.textContent=product?.name?`Edit ${product.name}`:'Edit Product';identity.textContent=`Product #${Number(product?.product_id||state.productId)}${product?.product_number?` • No. ${product.product_number}`:''}${product?.sku?` • ${product.sku}`:''}`;
     const preview=document.getElementById('productEditorFeaturedPreview');if(preview){armMediaImage(preview,product?.featured_image_url);preview.alt=product?.name?`Featured image for ${product.name}`:'Featured image';}
     for(const id of ['productEditorMediaLink','productEditorMediaAdvancedLink']){const link=document.getElementById(id);if(link)link.href=`/admin/catalog-media/?product_id=${encodeURIComponent(state.productId)}`;}
@@ -133,7 +172,7 @@
     if(target==='media')loadMedia();
     if(focusName){const el=field(focusName);if(el){el.focus();el.scrollIntoView({block:'center'});}}
   }
-  async function load(){if(!state.productId){set('inventory_quantity',1);title.textContent='Create Product';identity.textContent='New Product';setSaveReady(true);setStatus('New Product mode. No Product list was loaded.','ok');syncSeo(true);markClean();renderQa();return;}if(state.inFlight||state.quotaStop)return;state.inFlight=true;setSaveReady(false);if(!browserSeed())setStatus('Loading one authoritative Product only…');try{const response=await window.DDAuth.apiFetch(`/api/admin/product-editor-detail?product_id=${encodeURIComponent(state.productId)}`,{method:'GET',cache:'no-store'});const data=await readJson(response,'Could not load Product.');fill(data.product||{});setSaveReady(true);try{sessionStorage.removeItem(`dnd:product-editor-seed:${state.productId}`);}catch{}setStatus(`Product authority loaded. Gallery, scoring, readiness, inventory-resource, pricing-evidence and QA systems remain unloaded until explicitly requested.${rowsText(data)}`,'ok');if(currentTab()==='media')loadMedia();}catch(error){setSaveReady(false);if(quota(error))state.quotaStop=true;setStatus(`${error.message}${quota(error)?' Automatic retries are stopped. Save remains disabled until Product authority loads.':''}`,'error');}finally{state.inFlight=false;}}
+  async function load(){if(!state.productId){set('inventory_quantity',1);title.textContent='Create Product';identity.textContent='New Product';setSaveReady(true);setStatus('New Product mode. No Product list was loaded.','ok');syncSeo(true);markClean();renderQa();return;}if(state.inFlight||state.quotaStop)return;if(form.dataset.productDirty==='1'&&!window.confirm('Unsaved Product edits are in this browser. Reload the server copy and offer Restore?'))return;snapshotEdits();state.inFlight=true;setSaveReady(false);if(!browserSeed())setStatus('Loading one authoritative Product only…');try{const response=await window.DDAuth.apiFetch(`/api/admin/product-editor-detail?product_id=${encodeURIComponent(state.productId)}`,{method:'GET',cache:'no-store'});const data=await readJson(response,'Could not load Product.');fill(data.product||{});setSaveReady(true);try{sessionStorage.removeItem(`dnd:product-editor-seed:${state.productId}`);}catch{}setStatus(`Product authority loaded. Gallery, scoring, readiness, inventory-resource, pricing-evidence and QA systems remain unloaded until explicitly requested.${rowsText(data)}`,'ok');if(currentTab()==='media')loadMedia();}catch(error){setSaveReady(false);if(quota(error))state.quotaStop=true;setStatus(`${error.message}${quota(error)?' Automatic retries are stopped. Save remains disabled until Product authority loads.':''}`,'error');}finally{state.inFlight=false;}}
   function renderMedia(){
     if(!mediaStrip)return;if(!state.productId){mediaStrip.innerHTML='<p class="small">Save the new Product first, then add images.</p>';return;}
     if(!state.mediaLoaded){mediaStrip.innerHTML='';return;}
@@ -182,7 +221,7 @@
   setStatus('Saving and verifying the stored Product price…');const endpoint=state.productId?'/api/admin/product-editor-save':'/api/admin/create-product';try{const response=await window.DDAuth.apiFetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await readJson(response,'Product save failed.');const savedId=Number(data?.product_id||data?.product?.product_id||state.productId||0);if(state.productId&&(!data.price_cents_confirmed||Number(data.price_cents)!==body.price_cents||
   (data.compare_at_price_cents==null?null:Number(data.compare_at_price_cents))!==body.compare_at_price_cents)){
   throw new Error('The server did not confirm the saved CAD price. Check Product source before another Save; no automatic retry.');
-}if(!state.productId&&savedId){const destinationsSaved=await window.DDProductChannels405?.afterProductSave(savedId);leavingAfterSave=true;markClean();location.replace(`/admin/product-editor/?product_id=${encodeURIComponent(savedId)}&created=1${destinationsSaved===false?'&destination_save=unconfirmed':''}`);return;}if(state.product){state.product.featured_image_url=get('featured_image_url');state.product.price_cents=body.price_cents;state.product.compare_at_price_cents=body.compare_at_price_cents;}const destinationsSaved=await window.DDProductChannels405?.afterProductSave(savedId);markClean();if(destinationsSaved===false){if(saveButton)saveButton.textContent='Product saved; destinations pending';setStatus('Product saved and CAD price verified, but Etsy/Facebook destinations were NOT saved. Use Load saved destination choices to reconcile before trying again.','warn');return;}document.dispatchEvent(new CustomEvent('dd:save-succeeded',{detail:{form,message:'Product saved'}}));if(saveButton)saveButton.textContent='Saved ✓';state.qaData=null;renderMedia();renderQa();setStatus(`Saved ✓ CAD price verified as ${(Number(body.price_cents)/100).toFixed(2)}. Schema introspection reads: ${Number(data?.schema_introspection_reads||0)}. QA was invalidated but not rerun; no catalog refresh, media scan, scoring or readiness scan was started.${rowsText(data)}`,'ok');}catch(error){if(quota(error))state.quotaStop=true;setStatus(`${error.message}${quota(error)?' Automatic retries are stopped.':''}`,'error');if(saveButton)saveButton.textContent='Retry Save Product';}finally{state.inFlight=false;if(saveButton)saveButton.disabled=state.productId?!state.authorityLoaded:false;}});
+  }if(!state.productId&&savedId){const destinationsSaved=await window.DDProductChannels405?.afterProductSave(savedId);leavingAfterSave=true;markClean();clearRecovery();location.replace(`/admin/product-editor/?product_id=${encodeURIComponent(savedId)}&created=1${destinationsSaved===false?'&destination_save=unconfirmed':''}`);return;}if(state.product){state.product.featured_image_url=get('featured_image_url');state.product.price_cents=body.price_cents;state.product.compare_at_price_cents=body.compare_at_price_cents;}const destinationsSaved=await window.DDProductChannels405?.afterProductSave(savedId);markClean();clearRecovery();if(destinationsSaved===false){if(saveButton)saveButton.textContent='Product saved; destinations pending';setStatus('Product saved and CAD price verified, but Etsy/Facebook destinations were NOT saved. Use Load saved destination choices to reconcile before trying again.','warn');return;}document.dispatchEvent(new CustomEvent('dd:save-succeeded',{detail:{form,message:'Product saved'}}));if(saveButton)saveButton.textContent='Saved ✓';state.qaData=null;renderMedia();renderQa();setStatus(`Saved ✓ CAD price verified as ${(Number(body.price_cents)/100).toFixed(2)}. Schema introspection reads: ${Number(data?.schema_introspection_reads||0)}. QA was invalidated but not rerun; no catalog refresh, media scan, scoring or readiness scan was started.${rowsText(data)}`,'ok');}catch(error){if(quota(error))state.quotaStop=true;setStatus(`${error.message}${quota(error)?' Automatic retries are stopped.':''}`,'error');if(saveButton)saveButton.textContent='Retry Save Product';}finally{state.inFlight=false;if(saveButton)saveButton.disabled=state.productId?!state.authorityLoaded:false;}});
   document.getElementById('productEditorRetry')?.addEventListener('click',()=>{state.quotaStop=false;load();});
   document.querySelectorAll('[data-editor-tab]').forEach((button)=>button.addEventListener('click',()=>openTab(button.dataset.editorTab||'basics')));
   qaRun?.addEventListener('click',runQa);
