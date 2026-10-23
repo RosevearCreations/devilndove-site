@@ -1,3 +1,15 @@
+# CURRENT ROADMAP — Maker Application Queue 439–455 (2026-10-23)
+
+**Next queued (not yet implemented): Build 439 — Etsy Live Draft Creation & Connection Acceptance.** Seventeen prioritized builds `439–455` are documented with scopes, prerequisites, acceptance evidence and operator HOLD conditions in [Maker Application Queue 439–455](docs/operations/RELEASE_467_MAKER_JOURNEY_QUEUE_439_455.md).
+
+**Current latest source release:** Build 438 Product Editor Etsy/Facebook tabs and protected unpublished Etsy draft boundary, promoted to `main` at `f5a16a3974180decf474b8f70bb76fdcb07f1f40`. [Production Pages Deploy](https://github.com/RosevearCreations/devilndove-site/actions/runs/39890910076) and [live resource integrity](https://github.com/RosevearCreations/devilndove-site/actions/runs/39891012729) completed successfully. **Actual authenticated Etsy draft creation and Facebook provider publishing are not yet verified.** They remain work for Builds 439 and 441 respectively.
+
+**Queue discipline:** Extend canonical Maker project, inventory, manufacturing, knowledge, media and finance systems without duplication. Respect Canada-first shipping, noncommercial therapeutic work, owner-controlled provider activity, accessible UI and D1/Actions cost limits. Check for stuck GitHub Actions runs and enforce bounded workflows on each build. Report exact-SHA source/deployment status and separate owner integration acceptance; planning documentation is never proof of Production GREEN.
+
+---
+
+## Archived prior roadmap updates (historical snapshots, retained for provenance)
+
 # CURRENT ROADMAP — Build 437 and next builds (2026-10-22)
 
 **Current Development candidate:** Build 437 — Storefront Purchase & Shipping Safety Review. Checkout now also enforces Canada/CAD inside the order handler, rejects split duplicate Product lines and non-CAD Product/gift-card values, and has an executable offline storefront regression. [Build 437 safety review and acceptance](docs/operations/RELEASE_467_BUILD_437_STOREFRONT_SAFETY.md). The documented pending-order gift-card redemption settlement risk remains a HOLD for a future transactionally safe remediation; no existing balances were changed.
