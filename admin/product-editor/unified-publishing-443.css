@@ -1,0 +1,16 @@
+/* Build 443: readable channel evidence and browser-only Product recovery. */
+.dd443-channel-card h3 { margin-top: 0; }
+.dd443-channel-card .dd-product-actions { flex-wrap: wrap; gap: .5rem; }
+.dd443-image-list { display: grid; gap: .6rem; margin: 1rem 0; }
+.dd443-image-row { display: flex; gap: .8rem; align-items: center; padding: .6rem; border: 1px solid #77562f; border-radius: .5rem; }
+.dd443-image-row img { width: 76px; height: 76px; object-fit: cover; border-radius: .35rem; }
+.dd443-image-row p { margin: .2rem 0; overflow-wrap: anywhere; }
+.dd443-image-state { font-weight: 600; }
+.dd443-consent { display: flex; gap: .6rem; align-items: flex-start; margin: 1rem 0; max-width: 70ch; }
+.dd443-consent input { width: 1.25rem; height: 1.25rem; flex: 0 0 auto; }
+.dd443-copy-field { display: grid; gap: .4rem; margin: 1rem 0; max-width: 65ch; }
+.dd443-copy-field .btn { justify-self: start; }
+.dd443-copy-field textarea { min-height: 4rem; }
+.dd443-recovery { padding: 1rem; margin: 1rem 0; border: 2px solid #c58732; border-radius: .65rem; background: #2d241c; color: #fff; }
+.dd443-recovery .small { color: #f0d7bb; }
+@media (max-width: 520px) { .dd443-image-row { align-items: flex-start; } .dd443-image-row img { width: 60px; height: 60px; } }
