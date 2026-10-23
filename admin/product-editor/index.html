@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/css/admin-product-v162.css?v=178"/>
   <link rel="stylesheet" href="/css/admin-product-channel-review-436.css?v=436"/>
   <link rel="stylesheet" href="/css/release467-build182-product-buyer-readiness.css?v=182"/>
+  <link rel="stylesheet" href="/admin/product-editor/channel-assist-440.css?v=440"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -35,15 +36,15 @@
         <button class="btn dd-editor-tab" type="button" data-editor-tab="media" aria-selected="false">Media</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="seo" aria-selected="false">SEO / Publishing</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="qa" aria-selected="false">QA</button>
-        <button class="btn dd-editor-tab" type="button" data-editor-tab="etsy" aria-selected="false">Etsy</button>
-        <button class="btn dd-editor-tab" type="button" data-editor-tab="facebook" aria-selected="false">Facebook Marketplace</button>
+        <button class="btn dd-editor-tab dd-etsy-tab" type="button" data-editor-tab="etsy" aria-selected="false">Etsy <span class="dd-tab-channel-dot" aria-hidden="true"></span></button>
+        <button class="btn dd-editor-tab dd-meta-tab" type="button" data-editor-tab="facebook" aria-selected="false">Facebook Marketplace <span class="dd-tab-channel-dot" aria-hidden="true"></span></button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="advanced" aria-selected="false">Advanced</button>
       </div>
 
       <section class="dd-editor-panel" data-editor-panel="basics">
         <h2>Basics</h2>
         <div class="dd-editor-grid">
-          <label><span class="small">Product name</span><input class="input" name="name" maxlength="160" required/></label>
+          <label><span class="small">Product name <span class="dd-channel-required dd-channel-required--etsy">Etsy required</span></span><input class="input" name="name" maxlength="160" required/></label>
           <label><span class="small">Slug</span><input class="input" name="slug" maxlength="180"/></label>
           <label><span class="small">SKU</span><input class="input" name="sku" maxlength="80"/></label>
           <label><span class="small">Category</span><select class="input" name="product_category" required><option value="">Choose category…</option><option value="Jewelry">Jewelry</option><option value="Earrings">Earrings</option><option value="Rings">Rings</option><option value="Necklaces">Necklaces</option><option value="Other">Other</option></select></label>
@@ -58,12 +59,12 @@
       <section class="dd-editor-panel" data-editor-panel="pricing" hidden>
         <h2>Pricing &amp; Stock</h2>
         <p class="small">Prices are CAD dollars and cents (e.g. 8.00). Tax classes and shipping codes are selected from configured options; shipping codes do not calculate a delivery rate.</p><div class="dd-editor-grid cols-4">
-          <label><span class="small">Price (CAD, dollars.cents)</span><input class="input" type="text" inputmode="decimal" name="price" pattern="[0-9]+(\.[0-9]{1,2})?" placeholder="0.00" data-money-cad="1"/></label>
+          <label><span class="small">Price (CAD, dollars.cents) <span class="dd-channel-required dd-channel-required--etsy">Etsy required</span></span><input class="input" type="text" inputmode="decimal" name="price" pattern="[0-9]+(\.[0-9]{1,2})?" placeholder="0.00" data-money-cad="1"/></label>
           <label><span class="small">Compare-at price (CAD)</span><input class="input" type="text" inputmode="decimal" name="compare_at_price" pattern="[0-9]+(\.[0-9]{1,2})?" placeholder="0.00" data-money-cad="1"/></label>
           <label><span class="small">Currency</span><input class="input" name="currency" maxlength="8" value="CAD"/></label>
           <label><span class="small">Sort order</span><input class="input" type="number" name="sort_order" min="0" step="1" value="0"/></label>
           <label><span class="small">Track inventory</span><select class="input" name="inventory_tracking"><option value="0">No</option><option value="1">Yes</option></select></label>
-          <label><span class="small">Inventory quantity</span><input class="input" type="number" name="inventory_quantity" min="0" step="1" value="1"/></label>
+          <label><span class="small">Inventory quantity <span class="dd-channel-required dd-channel-required--etsy">Etsy required</span></span><input class="input" type="number" name="inventory_quantity" min="0" step="1" value="1"/></label>
           <label><span class="small">Taxable</span><select class="input" name="taxable"><option value="1">Yes</option><option value="0">No</option></select></label>
           <label><span class="small">Tax class ID</span><select class="input" name="tax_class_id"><option value="">Default / no assigned class</option></select></label>
           <label><span class="small">Requires shipping</span><select class="input" name="requires_shipping"><option value="1">Yes</option><option value="0">No</option></select></label>
@@ -75,6 +76,7 @@
 
       <section class="dd-editor-panel" data-editor-panel="description" hidden>
         <h2>Description &amp; Item Facts</h2>
+        <p class="dd-etsy-description-help"><span class="dd-channel-required dd-channel-required--etsy">Etsy required</span> Add a real description in either the short or long description box, then press Save Product. Our Etsy draft uses the saved description.</p>
         <div class="dd-editor-grid cols-2">
           <label class="wide"><span class="small">Short description</span><textarea class="input" name="short_description" rows="3"></textarea></label>
           <label class="wide"><span class="small">Long description</span><textarea class="input" name="description" rows="7"></textarea></label>
@@ -119,9 +121,19 @@
         <div id="productEditorQaResults" style="display:grid;gap:10px;margin-top:12px"></div>
       </section>
 
-      <section class="dd-editor-panel" data-editor-panel="etsy" hidden>
+      <section class="dd-editor-panel dd-etsy-panel" data-editor-panel="etsy" hidden>
         <div class="dd-products-browser-heading"><div><h2>Etsy — live connection &amp; unpublished draft</h2>
           <p class="small">Create a real <strong>unpublished Etsy draft</strong> directly from our saved Product. There is no manual Etsy Shop Manager drafting step. No live listing, photo upload, or shipping-policy change is performed.</p></div></div>
+        <div class="dd-channel-steps dd-etsy-steps" aria-label="Etsy draft readiness checklist">
+          <h3>Our Etsy checklist</h3>
+          <ol>
+            <li><span id="dd440EtsyProductStep" class="dd-step-state">Not tested</span><span>Saved product details <button class="dd-step-jump" type="button" data-editor-jump="description">Edit description</button></span></li>
+            <li><span id="dd440EtsyConnectionStep" class="dd-step-state">Not tested</span><span>Connected Etsy shop — use Test Etsy connection below</span></li>
+            <li><span id="dd440EtsyShippingStep" class="dd-step-state">Not verified</span><span>Canada-only shipping profile — no U.S. or worldwide destinations</span></li>
+            <li><span id="dd440EtsyCreateStep" class="dd-step-state">Waiting</span><span>Confirm once, then create one unpublished Etsy draft</span></li>
+          </ol>
+          <p class="small">Orange labels mark Etsy requirements. Red means we must fix a blocker. A missing photo approval does not block the <em>unpublished draft</em>.</p>
+        </div>
         <div class="card" style="padding:16px;margin:12px 0">
           <h3>1. Verify our existing Etsy connection</h3>
           <p class="small">Test checks the granted account, live Etsy shop, seller categories, shipping profiles and processing profiles. An expiring token is refreshed when possible. No draft is created by this test.</p>
@@ -138,18 +150,19 @@
           <p class="small" id="dd439EtsyProductSummary" role="status" aria-live="polite">Product data will appear after we test the connection.</p>
           <div class="dd-editor-grid cols-2">
             <label><span class="small">Find Etsy category</span><input class="input" id="dd438EtsySearch" placeholder="Search category, e.g. soap"></label>
-            <label><span class="small">Verified Etsy seller category</span><select class="input" id="dd438EtsyCategory"><option value="">Test connection to load choices…</option></select></label>
+            <label class="dd-etsy-required-field"><span class="small">Verified Etsy seller category <span class="dd-channel-required dd-channel-required--etsy">Required</span></span><select class="input" id="dd438EtsyCategory"><option value="">Test connection to load choices…</option></select></label>
             <label><span class="small">Who made it?</span><select class="input" id="dd438EtsyWhoMade">
               <option value="i_did">We made it</option><option value="collective">Member of our team</option><option value="someone_else">Someone else</option></select></label>
             <label><span class="small">When was it made?</span><select class="input" id="dd438EtsyWhenMade">
               <option value="2020_2026">2020–2026</option><option value="made_to_order">Made to order</option><option value="2010_2019">2010–2019</option>
               <option value="2007_2009">2007–2009</option><option value="before_2007">Before 2007 (check age)</option></select></label>
-            <label><span class="small">Etsy shipping profile</span><select class="input" id="dd439EtsyShipping"><option value="">Test connection to load our profiles…</option></select></label>
-            <label><span class="small">Etsy processing profile</span><select class="input" id="dd439EtsyReadiness"><option value="">Test connection to load processing profiles…</option></select></label>
+            <label class="dd-etsy-required-field"><span class="small">Etsy shipping profile <span class="dd-channel-required dd-channel-required--etsy">Required</span></span><select class="input" id="dd439EtsyShipping"><option value="">Test connection to load our profiles…</option></select></label>
+            <label class="dd-etsy-required-field"><span class="small">Etsy processing profile <span class="dd-channel-required dd-channel-required--etsy">Required</span></span><select class="input" id="dd439EtsyReadiness"><option value="">Test connection to load processing profiles…</option></select></label>
           </div>
           <label style="display:block;margin-top:10px"><input type="checkbox" id="dd438EtsySupply"> This Product is a craft supply (not a finished handmade item)</label>
           <div class="dd-product-actions" style="margin-top:12px"><button class="btn" type="button" id="dd439EtsyCheckShipping" disabled>Verify this profile delivers to Canada only</button></div>
           <p class="small" id="dd439EtsyShippingStatus" role="status" aria-live="polite">No shipping destinations verified yet. Etsy's shipping profiles are never changed here.</p>
+          <div class="dd-etsy-shipping-help">If verification says <strong>HOLD</strong>, we're not doing anything wrong. The selected Etsy profile includes a destination outside Canada. Choose another existing Canada-only profile, or create a separate <strong>Canada-only</strong> profile under <strong>Etsy Shop Manager → Settings → Shipping settings</strong>. Then return here, Test the connection, and verify again. <a href="https://help.etsy.com/hc/en-us/articles/115014115187-How-to-Set-Up-Shipping-Information" target="_blank" rel="noopener noreferrer">Etsy's shipping instructions</a>. We do not need to create a listing in Etsy.</div>
         </div>
         <div class="card" style="padding:16px;margin:12px 0">
           <h3>3. Create an unpublished Etsy draft</h3>
@@ -160,9 +173,10 @@
         </div>
       </section>
 
-      <section class="dd-editor-panel" data-editor-panel="facebook" hidden>
+      <section class="dd-editor-panel dd-meta-panel" data-editor-panel="facebook" hidden>
         <h2>Facebook Marketplace — setup &amp; authorization</h2>
         <p class="small">This channel has its own connection status. Etsy credentials cannot authorize Facebook Marketplace. We will not simulate success or send an unauthorized Marketplace listing.</p>
+        <div class="dd-channel-steps dd-meta-steps"><h3>Meta setup checklist</h3><ol><li><span class="dd-step-state">Pending</span><span>Connect an approved Meta account and verify permissions</span></li><li><span class="dd-step-state">Pending</span><span>Confirm a supported Marketplace publishing method for this product type</span></li><li><span class="dd-step-state">On hold</span><span>Enable draft creation only after both checks pass</span></li></ol></div>
         <div class="card" style="padding:16px;margin:12px 0">
           <h3>1. Check Meta/Facebook connection</h3>
           <div class="dd-product-actions"><button class="btn" type="button" id="dd438MetaTest">Check saved Facebook connection</button><a class="btn" href="/admin/it-integrations/">Provider setup</a></div>
@@ -210,12 +224,13 @@
 </section>
 <section class="dd-editor-panel" data-editor-panel="advanced" hidden><h2>Advanced workspaces</h2><p class="small">These systems remain separate so they cannot wake up merely because we edit a Product.</p><div class="dd-product-actions"><a class="btn" href="/admin/inventory-operations/">Inventory Operations</a><a class="btn" id="productEditorMediaAdvancedLink" href="/admin/catalog-media/">Image Editor</a><a class="btn" href="/admin/release-preflight/">Release Preflight</a><a class="btn" href="/admin/packaging-studio/">Packaging</a></div></section>
 
-      <div class="dd-editor-footer"><div class="small" aria-live="polite">Build 390: Save Product verifies the stored dollar amount; $0.00 needs confirmation. Save remains available at the bottom of every tab. No autosave; confirm one Product write at a time.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
+      <div class="dd-editor-footer"><div class="small" aria-live="polite" id="dd440SaveHint">Save Product when details change. Actual saved CAD price is verified after saving. Nothing is automatically posted to Etsy or Facebook.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
   <script src="/public/js/admin-product-channel-intent-v405.js?v=437"></script><script src="/public/js/admin-product-distribution-v406.js?v=436"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-product-editor-v163.js?v=437&b390=1"></script>
   <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=439"></script>
+  <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">
 <script defer src="/public/js/admin-brand-v3-set17.js?v=17"></script>

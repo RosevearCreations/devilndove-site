@@ -5,7 +5,8 @@
   const productId=Number(new URLSearchParams(location.search).get('product_id')||0);
   const $=id=>document.getElementById(id),etsyStatus=$('dd438EtsyStatus'),metaStatus=$('dd438MetaStatus');
   if(!etsyStatus||!window.DDAuth)return;
-  const state={ready:false,working:false,taxonomy:[],fingerprint:'',existing:null,verifiedShippingId:0};
+  const state={ready:false,working:false,taxonomy:[],fingerprint:'',existing:null,verifiedShippingId:0,
+    connected:false,productDetails:null,shippingFailed:false,createdListingId:null,attemptFailed:false};
   const status=(el,message,tone='')=>{if(el){el.textContent=message;el.dataset.tone=tone;}};
   const read=async(response)=>{const data=await response.json().catch(()=>null);if(!response.ok||!data?.ok){
     const error=new Error(data?.error||`Request failed (${response.status})`);
@@ -20,10 +21,26 @@
     state.verifiedShippingId===Number($('dd439EtsyShipping')?.value)&&
     Number($('dd439EtsyReadiness')?.value)>0&&Number($('dd438EtsyCategory')?.value)>0&&
     Boolean($('dd439EtsyCanadaConfirm')?.checked)&&Boolean($('dd438EtsyConfirm')?.checked);
+  function step(id,label,level=''){
+    const node=$(id);if(!node)return;
+    node.textContent=label;node.dataset.state=level;
+  }
+  function checklist(){
+    const product=state.productDetails;
+    step('dd440EtsyProductStep',product?(Number(product.price_cents)>0&&Number(product.description_length)>0&&Number(product.quantity)>0?'Saved ✓':'Needs attention'):'Not tested',
+      product&&(Number(product.price_cents)<=0||Number(product.description_length)<=0||Number(product.quantity)<=0)?'hold':product?'ok':'');
+    step('dd440EtsyConnectionStep',state.connected?'Connected ✓':'Not tested',state.connected?'ok':'');
+    step('dd440EtsyShippingStep',state.verifiedShippingId>0?'Canada only ✓':state.shippingFailed?'HOLD — profile':'Not verified',
+      state.verifiedShippingId>0?'ok':state.shippingFailed?'hold':'');
+    if(state.createdListingId){step('dd440EtsyCreateStep',`Draft #${state.createdListingId} ✓`,'ok');}
+    else if(state.attemptFailed){step('dd440EtsyCreateStep','Review attempt','hold');}
+    else step('dd440EtsyCreateStep',canCreate()?'Ready to create':'Waiting',canCreate()?'ok':'');
+  }
   function updateButtons(){
     for(const id of ['dd438EtsyTest','dd438EtsyRefresh'])if($(id))$(id).disabled=state.working;
     if($('dd439EtsyCheckShipping'))$('dd439EtsyCheckShipping').disabled=state.working||!Number($('dd439EtsyShipping')?.value);
     if($('dd438EtsyCreate'))$('dd438EtsyCreate').disabled=!canCreate();
+    checklist();
   }
   function setBusy(yes){state.working=yes;updateButtons();}
   function setOptions(id,items,label){
@@ -46,13 +63,13 @@
   $('dd439EtsyReadiness')?.addEventListener('change',updateButtons);
   for(const id of ['dd439EtsyCanadaConfirm','dd438EtsyConfirm'])$(id)?.addEventListener('change',updateButtons);
   $('dd439EtsyShipping')?.addEventListener('change',()=>{
-    state.verifiedShippingId=0;
+    state.verifiedShippingId=0;state.shippingFailed=false;
     status($('dd439EtsyShippingStatus'),'Shipping profile changed. Verify the new profile before creating a draft.','warn');
     updateButtons();
   });
   const friendlyBlockers=items=>(items||[]).map(value=>({
     product_description_required_max_15000:'Save a Product description (up to 15,000 characters) in the Description tab',
-    positive_saved_cad_price_required:'Save a real CAD price above $0.00 in the Basics tab',
+    positive_saved_cad_price_required:'Save a real CAD price above $0.00 in the Pricing & Stock tab',
     positive_inventory_required:'Save an available quantity of at least 1',
     product_name_required_max_140:'Save a Product name (up to 140 characters)',
     previous_etsy_remote_attempt_needs_reconciliation:'A prior Etsy attempt must be reconciled before another draft can be attempted',
@@ -70,7 +87,8 @@
     if(document.querySelector('#productEditorForm')?.dataset.productDirty==='1'){
       status(etsyStatus,'Unsaved Product changes detected. Press Save Product before testing Etsy.','warn');return;
     }
-    state.ready=false;state.verifiedShippingId=0;setBusy(true);status(etsyStatus,'Checking saved Etsy connection and Product…');
+    state.ready=false;state.connected=false;state.productDetails=null;state.verifiedShippingId=0;
+    state.shippingFailed=false;state.attemptFailed=false;setBusy(true);status(etsyStatus,'Checking saved Etsy connection and Product…');
     try{
       // The lifecycle diagnostics endpoint is optional: a failure there must not
       // hide the authoritative Etsy draft preflight or live-shop test.
@@ -88,6 +106,7 @@
       const verified=await api('/api/admin/product-etsy-draft',{action:'test_connection',product_id:productId});
       state.fingerprint=verified.fingerprint;state.taxonomy=verified.options?.taxonomy||[];
       const saved=verified.product||{};
+      state.connected=true;state.productDetails=saved;
       status($('dd439EtsyProductSummary'),`Saved Product #${saved.id||productId}: ${saved.name||'(missing name)'} • CAD $${(Number(saved.price_cents||0)/100).toFixed(2)} • ${saved.quantity||0} available • Description (${saved.description_length||0} characters): ${saved.description_preview||'(missing saved description)'}`,
         (Number(saved.price_cents)>0&&Number(saved.description_length)>0)?'ok':'warn');
       const options=verified.options||{};
@@ -115,8 +134,8 @@
       const result=await api('/api/admin/product-etsy-draft',{action:'test_shipping',product_id:productId,shipping_profile_id:id});
       if(result.shipping_profile_verified){state.verifiedShippingId=id;
         status($('dd439EtsyShippingStatus'),`Verified: ${result.shipping_review?.destinations} Canadian destination(s), with no foreign or worldwide destinations. Select the two owner confirmations below.`,'ok');}
-      else status($('dd439EtsyShippingStatus'),`HOLD — ${result.shipping_review?.reason||'Profile not Canada-only'}. Update the shipping profile in Etsy, then test again.`,'warn');
-    }catch(error){status($('dd439EtsyShippingStatus'),`Profile verification failed: ${errorText(error)}. No draft was attempted.`,'error');}
+      else {state.shippingFailed=true;status($('dd439EtsyShippingStatus'),`HOLD — ${result.shipping_review?.reason||'Profile not Canada-only'}. The Product is saved correctly; choose a Canada-only Etsy shipping profile or configure one in Etsy shipping settings. No draft was attempted.`,'warn');}
+    }catch(error){state.shippingFailed=true;status($('dd439EtsyShippingStatus'),`Profile verification failed: ${errorText(error)}. No draft was attempted.`,'error');}
     finally{setBusy(false);}
   });
   async function create(){
@@ -139,8 +158,9 @@
         confirm_canada_only_shipping_profile:true});
       const link=$('dd438EtsyExisting');if(link){link.hidden=false;link.href='https://www.etsy.com/your/shops/me/listings/drafts';
         link.textContent=`Open Etsy drafts — listing #${result.listing_id}`;}
+      state.createdListingId=result.listing_id;
       status(etsyStatus,`Success — Etsy confirmed unpublished draft #${result.listing_id}. Local receipt recorded. No publication, automatic retry, image upload or U.S. shipping change occurred.`,'ok');
-    }catch(error){status(etsyStatus,`Etsy draft was NOT confirmed: ${errorText(error)}. Do not retry until we reconcile the attempt; we keep a one-attempt safety record.`,'error');}
+    }catch(error){state.attemptFailed=true;status(etsyStatus,`Etsy draft was NOT confirmed: ${errorText(error)}. Do not retry until we reconcile the attempt; we keep a one-attempt safety record.`,'error');}
     finally{state.ready=false;setBusy(false);}
   }
   $('dd438EtsyTest')?.addEventListener('click',test);
