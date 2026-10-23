@@ -30,11 +30,16 @@ test('live Etsy check does only GET; draft click does one POST; repeat is fenced
   const conn={remote_subject_id:'999',connection_status:'connected',scopes_json:'["shops_r","listings_w"]',
     access_expires_at:new Date(Date.now()+3600000).toISOString(),access_token_ciphertext:access};
   env.DB=mockDb(conn,{claimed:false});
-  const visited=[];const originalFetch=globalThis.fetch;
+  const visited=[];let allowCanada=false;const originalFetch=globalThis.fetch;
   globalThis.fetch=async(url,options)=>{
     visited.push({url,method:options.method,body:String(options.body||'')});
     if(url.endsWith('/shops/555'))return Response.json({shop_id:555,user_id:999,currency_code:'CAD'});
     if(url.endsWith('/seller-taxonomy/nodes'))return Response.json({results:[{id:123,name:'Bath',children:[{id:124,name:'Soap'}]}]});
+    if(url.endsWith('/shops/555/shipping-profiles'))return Response.json({results:[{shipping_profile_id:17,title:'Canada only',origin_country_iso:'CA'}]});
+    if(url.endsWith('/shops/555/readiness-state-definitions'))return Response.json({results:[{readiness_state_id:27,readiness_state:'ready_to_ship'}]});
+    if(url.endsWith('/shops/555/shipping-profiles/17'))return Response.json({shipping_profile_id:17,origin_country_iso:'CA'});
+    if(url.includes('/shops/555/shipping-profiles/17/destinations'))return Response.json({count:1,
+      results:[{shipping_profile_id:17,destination_country_iso:allowCanada?'CA':'US',destination_region:null}]});
     if(url.endsWith('/shops/555/listings'))return Response.json({listing_id:9991,state:'draft'});
     throw Error('Unexpected provider path '+url);
   };
@@ -44,19 +49,30 @@ test('live Etsy check does only GET; draft click does one POST; repeat is fenced
   try{
     const live=await onRequestPost(context({action:'test_connection',product_id:54}));
     const evidence=await live.json();assert.equal(evidence.ok,true);assert.equal(evidence.live_connection_verified,true);
-    assert.deepEqual(visited.map(x=>x.method),['GET','GET']);
-    const create=await onRequestPost(context({action:'create_draft',product_id:54,taxonomy_id:124,
+    assert.deepEqual(visited.map(x=>x.method),['GET','GET','GET','GET']);
+    assert.equal(evidence.options.shipping[0].id,17);
+    assert.equal(evidence.options.readiness[0].id,27);
+    const shipping=await onRequestPost(context({action:'test_shipping',product_id:54,shipping_profile_id:17}));
+    assert.equal((await shipping.json()).shipping_profile_verified,false);
+    const request={action:'create_draft',product_id:54,taxonomy_id:124,shipping_profile_id:17,
+      readiness_state_id:27,confirm_canada_only_shipping_profile:true,
       who_made:'i_did',when_made:'2020_2026',is_supply:false,fingerprint:evidence.fingerprint,
       request_key:'550e8400-e29b-41d4-a716-446655440000',confirm_unpublished_draft_only:true,
-      confirm_no_automatic_retry:true}));
+      confirm_no_automatic_retry:true};
+    const held=await onRequestPost(context(request));
+    assert.equal(held.status,409);
+    assert.equal((await held.json()).code,'etsy_shipping_not_canada_only');
+    assert.equal(visited.filter(x=>x.method==='POST').length,0);
+    allowCanada=true;
+    const shipOk=await onRequestPost(context({action:'test_shipping',product_id:54,shipping_profile_id:17}));
+    assert.equal((await shipOk.json()).shipping_profile_verified,true);
+    const create=await onRequestPost(context(request));
     const saved=await create.json();assert.equal(saved.created,true);assert.equal(saved.listing_id,'9991');
     const posts=visited.filter(x=>x.method==='POST');assert.equal(posts.length,1);
     assert.equal(new URLSearchParams(posts[0].body).get('state'),null);
-    assert.equal(new URLSearchParams(posts[0].body).get('shipping_profile_id'),null);
-    const repeat=await onRequestPost(context({action:'create_draft',product_id:54,taxonomy_id:124,
-      who_made:'i_did',when_made:'2020_2026',is_supply:false,fingerprint:evidence.fingerprint,
-      request_key:'550e8400-e29b-41d4-a716-446655440000',confirm_unpublished_draft_only:true,
-      confirm_no_automatic_retry:true}));
+    assert.equal(new URLSearchParams(posts[0].body).get('shipping_profile_id'),'17');
+    assert.equal(new URLSearchParams(posts[0].body).get('readiness_state_id'),'27');
+    const repeat=await onRequestPost(context(request));
     assert.equal(repeat.status,409);assert.equal(visited.filter(x=>x.method==='POST').length,1);
   }finally{globalThis.fetch=originalFetch;}
 });

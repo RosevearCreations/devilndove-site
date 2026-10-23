@@ -124,16 +124,18 @@
           <p class="small">Create a real <strong>unpublished Etsy draft</strong> directly from our saved Product. There is no manual Etsy Shop Manager drafting step. No live listing, photo upload, or shipping-policy change is performed.</p></div></div>
         <div class="card" style="padding:16px;margin:12px 0">
           <h3>1. Verify our existing Etsy connection</h3>
-          <p class="small">Test checks the granted account and live Etsy shop, refreshes an expiring access token when possible, and loads verified seller categories. It does not create a listing.</p>
+          <p class="small">Test checks the granted account, live Etsy shop, seller categories, shipping profiles and processing profiles. An expiring token is refreshed when possible. No draft is created by this test.</p>
           <div class="dd-product-actions"><button class="btn" type="button" id="dd438EtsyTest">Test Etsy connection &amp; load categories</button>
           <button class="btn" type="button" id="dd438EtsyRefresh">Refresh granted Etsy access</button>
           <a class="btn" href="/admin/it-integrations/">Etsy connection settings</a></div>
           <p class="small" id="dd438EtsyStatus" role="status" aria-live="polite">Press Test Etsy connection when our Product is saved. No Etsy API call runs automatically.</p>
+          <p class="small" id="dd439EtsyConnection" role="status" aria-live="polite">Connection scope and expiry details will appear after testing.</p>
           <a id="dd438EtsyExisting" href="#" hidden target="_blank" rel="noopener noreferrer"></a>
         </div>
         <div class="card" style="padding:16px;margin:12px 0">
           <h3>2. Review Etsy-specific listing details</h3>
           <p class="small">The draft uses the Product's <strong>saved</strong> CAD price, inventory, name and description. To change them, save the Product first. Listing publication will require separate media and shipping approval.</p>
+          <p class="small" id="dd439EtsyProductSummary" role="status" aria-live="polite">Product data will appear after we test the connection.</p>
           <div class="dd-editor-grid cols-2">
             <label><span class="small">Find Etsy category</span><input class="input" id="dd438EtsySearch" placeholder="Search category, e.g. soap"></label>
             <label><span class="small">Verified Etsy seller category</span><select class="input" id="dd438EtsyCategory"><option value="">Test connection to load choices…</option></select></label>
@@ -142,12 +144,17 @@
             <label><span class="small">When was it made?</span><select class="input" id="dd438EtsyWhenMade">
               <option value="2020_2026">2020–2026</option><option value="made_to_order">Made to order</option><option value="2010_2019">2010–2019</option>
               <option value="2007_2009">2007–2009</option><option value="before_2007">Before 2007 (check age)</option></select></label>
+            <label><span class="small">Etsy shipping profile</span><select class="input" id="dd439EtsyShipping"><option value="">Test connection to load our profiles…</option></select></label>
+            <label><span class="small">Etsy processing profile</span><select class="input" id="dd439EtsyReadiness"><option value="">Test connection to load processing profiles…</option></select></label>
           </div>
           <label style="display:block;margin-top:10px"><input type="checkbox" id="dd438EtsySupply"> This Product is a craft supply (not a finished handmade item)</label>
+          <div class="dd-product-actions" style="margin-top:12px"><button class="btn" type="button" id="dd439EtsyCheckShipping" disabled>Verify this profile delivers to Canada only</button></div>
+          <p class="small" id="dd439EtsyShippingStatus" role="status" aria-live="polite">No shipping destinations verified yet. Etsy's shipping profiles are never changed here.</p>
         </div>
         <div class="card" style="padding:16px;margin:12px 0">
           <h3>3. Create an unpublished Etsy draft</h3>
           <p class="small">Only one Etsy creation attempt is allowed per Product until its result is reconciled. Double-clicks and background retries are blocked. A successful listing will stay in Etsy Drafts for further review.</p>
+          <label style="display:block;margin-bottom:12px"><input type="checkbox" id="dd439EtsyCanadaConfirm"> I reviewed our chosen Etsy shipping profile and confirm that U.S. delivery remains disabled; this draft is for Canadian destinations only.</label>
           <label style="display:block;margin-bottom:12px"><input type="checkbox" id="dd438EtsyConfirm"> Yes — create <strong>one unpublished draft only</strong>, with no automatic retry or live publication.</label>
           <button class="btn primary" type="button" id="dd438EtsyCreate" disabled>Create unpublished Etsy draft</button>
         </div>
@@ -208,7 +215,7 @@
   </div>
   <script src="/public/js/auth.js?v=440"></script>
   <script src="/public/js/admin-product-channel-intent-v405.js?v=437"></script><script src="/public/js/admin-product-distribution-v406.js?v=436"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-product-editor-v163.js?v=437&b390=1"></script>
-  <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=438"></script>
+  <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=439"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">
 <script defer src="/public/js/admin-brand-v3-set17.js?v=17"></script>
