@@ -139,6 +139,12 @@ jobs:
           python scripts/release467_build446_traveler_sql_regression.py
           node --test scripts/release467_build446_traveler_rules.test.mjs
 
+      - name: Build 447 finished quality, rework, salvage, stock and publication boundaries
+        run: |
+          node --check functions/api/admin/finished-quality.js
+          node --check public/js/admin-finished-quality.js
+          python scripts/release467_build447_quality_sql_regression.py
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
