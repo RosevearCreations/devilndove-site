@@ -49,8 +49,43 @@ async function view(db,runId){
   db.prepare(`SELECT e.creative_work_event_id,e.event_title,e.occurred_at,CASE WHEN NULLIF(e.media_url,'') IS NOT NULL THEN 1 ELSE 0 END has_media
   FROM creative_work_events e WHERE e.creative_work_project_id=? AND e.entry_status='active' ORDER BY e.creative_work_event_id DESC LIMIT 81`).bind(run.creative_work_project_id).all()
  ]);
+ // Build 448: look up LIVE canonical Tool condition, never trust an old traveler
+ // snapshot as proof of physical availability, maintenance or an inspection.
+ const referenced=new Set();
+ for(const s of steps)try{for(const item of JSON.parse(s.resource_snapshot_json||'[]')){
+  if(String(item?.source_type||'').toLowerCase()==='tool'&&validId(item?.site_item_inventory_id))referenced.add(validId(item.site_item_inventory_id));
+ }}catch{/* Reviewed snapshot remains immutable; an invalid Tool list is not a pass. */}
+ const selectedTools=[...referenced].slice(0,80),equipmentTruncated=referenced.size>80;
+ let equipment=[];
+ if(selectedTools.length){const placeholders=selectedTools.map(()=>'?').join(',');
+  const recorded=items(await db.prepare(`SELECT i.site_item_inventory_id,i.item_name,i.do_not_reuse,
+   p.lifecycle_status,p.condition_status,p.next_service_at,
+   (SELECT c.result FROM maker_tool_safety_checks c WHERE c.site_item_inventory_id=i.site_item_inventory_id ORDER BY c.maker_tool_safety_check_id DESC LIMIT 1) latest_check_result,
+   (SELECT c.created_at FROM maker_tool_safety_checks c WHERE c.site_item_inventory_id=i.site_item_inventory_id ORDER BY c.maker_tool_safety_check_id DESC LIMIT 1) latest_check_at,
+   (SELECT COUNT(*) FROM creative_resource_calendar_entries e WHERE e.resource_site_item_inventory_id=i.site_item_inventory_id
+    AND e.entry_status='active' AND e.entry_kind IN ('maintenance','resource_hold')
+    AND e.starts_at_utc<strftime('%Y-%m-%dT%H:%M:%SZ','now','+7 days') AND e.ends_at_utc>strftime('%Y-%m-%dT%H:%M:%SZ','now')) upcoming_maintenance_blocks,
+   (SELECT COUNT(*) FROM creative_resource_calendar_entries e WHERE e.resource_site_item_inventory_id=i.site_item_inventory_id
+    AND e.entry_status='active' AND e.entry_kind='project_booking' AND e.creative_work_project_id<>?
+    AND e.starts_at_utc<strftime('%Y-%m-%dT%H:%M:%SZ','now','+7 days') AND e.ends_at_utc>strftime('%Y-%m-%dT%H:%M:%SZ','now')) other_project_bookings
+   FROM site_item_inventory i LEFT JOIN inventory_tool_lifecycle_profiles p ON p.site_item_inventory_id=i.site_item_inventory_id
+   WHERE i.site_item_inventory_id IN (${placeholders})`).bind(run.creative_work_project_id,...selectedTools).all());
+  const byId=new Map(recorded.map(x=>[Number(x.site_item_inventory_id),x]));
+  equipment=selectedTools.map(toolId=>{const item=byId.get(toolId);
+   const blockers=[];if(!item)blockers.push('Missing canonical Tool Inventory');
+   if(Number(item?.do_not_reuse||0)===1)blockers.push('Do not reuse');
+   if(item?.lifecycle_status&&item.lifecycle_status!=='active')blockers.push('Lifecycle: '+item.lifecycle_status);
+   if(['unsafe','damaged','service_due'].includes(item?.condition_status))blockers.push('Condition: '+item.condition_status);
+   if(item?.next_service_at&&String(item.next_service_at).slice(0,10)<new Date().toISOString().slice(0,10))blockers.push('Service overdue');
+   if(Number(item?.upcoming_maintenance_blocks||0))blockers.push('Recorded maintenance/hold in next 7 days');
+   return {...item,site_item_inventory_id:toolId,blockers,
+    calendar_notice:Number(item?.other_project_bookings||0)?'Other projects have recorded bookings; check exact UTC windows.':null,
+    check_notice:item?.latest_check_at?'Last recorded check is historical, not live sign-off.':'NO safety check is recorded; do not infer one passed.'};
+  });
+ }
  return {run,steps,events:items(events).slice(0,150),events_truncated:items(events).length>150,
-   available_time_receipts:items(times).slice(0,80),available_evidence_events:items(evidence).slice(0,80)};
+   available_time_receipts:items(times).slice(0,80),available_evidence_events:items(evidence).slice(0,80),
+   equipment_readiness:equipment,equipment_truncated:equipmentTruncated};
 }
 async function selectedTraveler(db,travelerId){
  const t=await db.prepare(`SELECT creative_project_job_traveler_id,creative_work_project_id,traveler_status,snapshot_sha256,snapshot_json
