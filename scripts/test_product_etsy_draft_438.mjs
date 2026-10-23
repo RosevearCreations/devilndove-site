@@ -49,11 +49,20 @@ test('Canada-only shipping refuses US, worldwide, missing and incomplete destina
   const p={shipping_profile_id:17,origin_country_iso:'CA'};
   const only={count:1,results:[{shipping_profile_id:17,destination_country_iso:'CA',destination_region:null}]};
   assert.equal(canadaOnlyShippingProfile(p,only,17).allowed,true);
+  // Etsy's documented destination_region enum includes 'none'. It is an absent
+  // regional selection, not permission to ship outside the specified country.
+  assert.equal(canadaOnlyShippingProfile(p,{count:1,results:[{...only.results[0],destination_region:'none'}]},17).allowed,true);
+  assert.equal(canadaOnlyShippingProfile(p,{count:1,results:[{...only.results[0],destination_region:' NONE '}]},17).allowed,true);
   assert.equal(canadaOnlyShippingProfile({...p,origin_country_iso:'US'},only,17).allowed,false);
   assert.equal(canadaOnlyShippingProfile(p,{count:2,results:only.results},17).allowed,false);
   assert.equal(canadaOnlyShippingProfile(p,{count:1,results:[{...only.results[0],destination_country_iso:'US'}]},17).allowed,false);
   assert.equal(canadaOnlyShippingProfile(p,{count:1,results:[{...only.results[0],destination_country_iso:null}]},17).allowed,false);
+  assert.equal(canadaOnlyShippingProfile(p,{count:1,results:[{...only.results[0],destination_country_iso:null,destination_region:'none'}]},17).allowed,false);
+  assert.equal(canadaOnlyShippingProfile(p,{count:1,results:[{...only.results[0],destination_country_iso:'US',destination_region:'none'}]},17).allowed,false);
+  assert.equal(canadaOnlyShippingProfile(p,{count:1,results:[{...only.results[0],destination_region:'eu'}]},17).allowed,false);
+  assert.equal(canadaOnlyShippingProfile(p,{count:1,results:[{...only.results[0],destination_region:'non_eu'}]},17).allowed,false);
   assert.equal(canadaOnlyShippingProfile(p,{count:1,results:[{...only.results[0],destination_region:'north_america'}]},17).allowed,false);
+  assert.equal(canadaOnlyShippingProfile(p,{count:2,results:[only.results[0],{...only.results[0],destination_country_iso:'US'}]},17).allowed,false);
 });
 test('taxonomy choices include nested names without trusting arbitrary IDs',()=>{
   const entries=flattenEtsyTaxonomy([{id:10,name:'Bath',children:[{id:11,name:'Soap'}]}]);

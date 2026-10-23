@@ -101,7 +101,7 @@ jobs:
           node --check scripts/release467_build437_storefront_safety.test.mjs
           node scripts/release467_build437_storefront_safety.test.mjs
 
-      - name: Builds 438–439 Etsy profile-complete live-draft acceptance and Meta boundary
+      - name: Builds 438–439 and 441 Etsy Canada-only delivery verification and Meta boundary
         run: |
           node --check functions/api/_lib/etsyProductDraft438.mjs
           node --check functions/api/admin/product-etsy-draft.js
