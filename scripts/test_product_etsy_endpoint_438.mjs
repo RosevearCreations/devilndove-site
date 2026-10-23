@@ -13,7 +13,10 @@ function mockDb(conn,changes){
     if(sql.includes('FROM oauth_provider_connections'))return conn;
     if(sql.includes('FROM etsy_oauth_shop_connections'))return shop;
     if(sql.includes("external_reference IS NOT NULL ORDER BY"))return null;
+    if(sql.includes('SELECT COUNT(*) AS total'))return {total:changes.claimed?1:0};
     if(sql.includes("action_type='etsy_product_editor_draft_claimed'"))return changes.claimed?{admin_action_audit_id:22,created_at:'2026-10-22'}:null;
+    if(sql.includes("action_type='etsy_product_editor_draft_rejected'"))return null;
+    if(sql.includes("action_type='etsy_product_editor_rejected_attempt_reconciled'"))return null;
     if(sql.includes('SELECT external_reference FROM marketplace_syndication_drafts WHERE id='))return {external_reference:'9991'};
     throw Error('Unexpected first: '+sql);
   },async run(){
@@ -56,6 +59,7 @@ test('live Etsy check does only GET; draft click does one POST; repeat is fenced
     assert.equal((await shipping.json()).shipping_profile_verified,false);
     const request={action:'create_draft',product_id:54,taxonomy_id:124,shipping_profile_id:17,
       readiness_state_id:27,confirm_canada_only_shipping_profile:true,
+      parcel:{item_weight:'200',item_weight_unit:'g',item_length:'12',item_width:'9',item_height:'4',item_dimensions_unit:'cm'},
       who_made:'i_did',when_made:'2020_2026',is_supply:false,fingerprint:evidence.fingerprint,
       request_key:'550e8400-e29b-41d4-a716-446655440000',confirm_unpublished_draft_only:true,
       confirm_no_automatic_retry:true};
@@ -72,6 +76,7 @@ test('live Etsy check does only GET; draft click does one POST; repeat is fenced
     assert.equal(new URLSearchParams(posts[0].body).get('state'),null);
     assert.equal(new URLSearchParams(posts[0].body).get('shipping_profile_id'),'17');
     assert.equal(new URLSearchParams(posts[0].body).get('readiness_state_id'),'27');
+    assert.equal(new URLSearchParams(posts[0].body).get('item_weight_unit'),'g');
     const repeat=await onRequestPost(context(request));
     assert.equal(repeat.status,409);assert.equal(visited.filter(x=>x.method==='POST').length,1);
   }finally{globalThis.fetch=originalFetch;}

@@ -2,13 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   productDraftDetails,productDraftFingerprint,flattenEtsyTaxonomy,safeEtsyDraftInput,etsyDraftForm,
-  safeEtsyShopOptions,canadaOnlyShippingProfile
+  safeEtsyShopOptions,canadaOnlyShippingProfile,safeEtsyParcel
 } from '../functions/api/_lib/etsyProductDraft438.mjs';
 
 const product={product_id:54,name:'Bar Soap Sweet Orange',description:'Handmade sweet orange bar soap.',
   short_description:'soap',product_type:'physical',price_cents:1200,currency:'CAD',inventory_quantity:4};
 const input={action:'create_draft',product_id:54,taxonomy_id:123,who_made:'i_did',when_made:'2020_2026',
   shipping_profile_id:17,readiness_state_id:27,confirm_canada_only_shipping_profile:true,
+  parcel:{item_weight:'200',item_weight_unit:'g',item_length:'12',item_width:'9',item_height:'4',item_dimensions_unit:'cm'},
   is_supply:false,request_key:'550e8400-e29b-41d4-a716-446655440000',fingerprint:'long_safeguard_receipt',
   confirm_unpublished_draft_only:true,confirm_no_automatic_retry:true};
 
@@ -27,6 +28,17 @@ test('owner must explicitly authorize a single unpublished Etsy attempt',()=>{
   assert.equal(safeEtsyDraftInput({...input,readiness_state_id:0}),null);
   assert.equal(safeEtsyDraftInput({...input,taxonomy_id:0}),null);
   assert.equal(safeEtsyDraftInput({...input,who_made:'unknown'}),null);
+  assert.equal(safeEtsyDraftInput({...input,parcel:null}),null);
+  assert.equal(safeEtsyDraftInput({...input,parcel:{...input.parcel,item_length:'0'}}),null);
+});
+test('parcel validation rejects non-positive, missing, outrageous and unsupported measurements',()=>{
+  assert.deepEqual(safeEtsyParcel(input.parcel),{item_weight:200,item_weight_unit:'g',
+    item_length:12,item_width:9,item_height:4,item_dimensions_unit:'cm'});
+  for(const parcel of [{...input.parcel,item_weight:'Infinity'},{...input.parcel,item_height:'-3'},
+    {...input.parcel,item_width:'100000'},{...input.parcel,item_length:'0.0001'},
+    {...input.parcel,item_dimensions_unit:'metres'}, {...input.parcel,item_weight_unit:'stone'},
+    {...input.parcel,item_height:undefined},{...input.parcel,item_length:'2e3'}])
+    assert.equal(safeEtsyParcel(parcel),null);
 });
 test('physical Etsy draft includes mandatory shipping/processing; excludes activation',()=>{
   const form=etsyDraftForm(input,productDraftDetails(product));
@@ -36,6 +48,12 @@ test('physical Etsy draft includes mandatory shipping/processing; excludes activ
   assert.equal(form.get('type'),'physical');
   assert.equal(form.get('shipping_profile_id'),'17');
   assert.equal(form.get('readiness_state_id'),'27');
+  assert.equal(form.get('item_weight'),'200');
+  assert.equal(form.get('item_weight_unit'),'g');
+  assert.equal(form.get('item_length'),'12');
+  assert.equal(form.get('item_width'),'9');
+  assert.equal(form.get('item_height'),'4');
+  assert.equal(form.get('item_dimensions_unit'),'cm');
   for(const excluded of ['state','image_ids','is_active','published'])
     assert.equal(form.has(excluded),false,`unexpected provider field ${excluded}`);
 });
