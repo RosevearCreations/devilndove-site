@@ -3,7 +3,7 @@
 ## Operator workflow
 
 1. **Creative Process:** Create ordered manufacturing operations and record a real approved sample/production authorization.
-2. **Manufacturing Job Traveler (Build 219):** Review and save one versioned snapshot. The immutable reviewed operation, workstation, setup and materials/tool references are the execution source.
+2. **Custom Request → Manufacturing Job Traveler (Build 219):** Open `/admin/custom-request/`, review and save one versioned snapshot. The immutable reviewed operation, workstation, setup and materials/tool references are the execution source.
 3. **Guided Manufacturing:** Choose the approved version and create one execution using an operator note. The server atomically creates a permanent run and its 1–50 steps. Reopen this screen, select the same reviewed traveler and **resume** the execution across sessions.
 4. **Step controls:** Human action **Start → Pause/Hold → Resume → Complete**, append-only checklist checks, planned cure/timed deadlines, equipment unavailable/maintenance notes and named Inventory substitution references. Manual checklist/evidence proof is mandatory before completing each step. Any planned cure deadline must pass and receive a new operator check; no background timers, autocompletion or provider actions.
 5. **Actual time:** Enter real minutes once using existing **Work Orders & Time** (Build 379); link its existing unique time receipt in this screen. Time links never create another Work Order entry. Evidence/photos come from existing **Creative Process** events (Build 214), validated to belong to the same project and remain active. Private original media URLs are not exposed here.
