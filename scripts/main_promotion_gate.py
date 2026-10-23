@@ -50,16 +50,14 @@ def workflow_green(dev_sha: str, workflow: str) -> dict:
     repo = str(os.environ.get("GITHUB_REPOSITORY") or "RosevearCreations/devilndove-site").strip()
     if not token:
         raise Stop("GITHUB_TOKEN is required to prove the exact Development acceptance set.")
-    # GitHub Actions can omit otherwise successful runs from an individual
-    # filtered listing. Look up independent SHA, branch, recent and workflow
-    # views, but never accept evidence without checking every identity field.
+    # Query only this exact Development SHA. A repository with thousands of
+    # historical runs must not turn ordinary missing proof into an unrelated
+    # pagination failure, and a successful PR/main run must never count.
     expected_path = f".github/workflows/{workflow}"
     exact: list[dict] = []
     listing_specs = (
         ("exact-sha", f"https://api.github.com/repos/{repo}/actions/runs", {"head_sha": dev_sha}),
-        ("dev-branch", f"https://api.github.com/repos/{repo}/actions/runs", {"branch": "dev"}),
-        ("recent-runs", f"https://api.github.com/repos/{repo}/actions/runs", {}),
-        ("workflow", f"https://api.github.com/repos/{repo}/actions/workflows/{urllib.parse.quote(workflow, safe='')}/runs", {"branch": "dev"}),
+        ("workflow-exact-sha", f"https://api.github.com/repos/{repo}/actions/workflows/{urllib.parse.quote(workflow, safe='')}/runs", {"head_sha": dev_sha}),
     )
     source_counts: dict[str, dict[str, int]] = {}
     for source, base_url, filters in listing_specs:
@@ -94,7 +92,7 @@ def workflow_green(dev_sha: str, workflow: str) -> dict:
             if page * 100 >= total or len(runs) < 100:
                 break
         else:
-            raise Stop(f"More than 1000 {source} runs for {workflow}; complete evidence cannot be verified.")
+            raise Stop(f"More than 1000 exact-SHA {source} runs for {workflow}; complete evidence cannot be verified.")
         source_counts[source] = {"scanned": scanned, "sha_matches": matching_sha}
         if any(run.get("status") == "completed" and run.get("conclusion") == "success" for run in exact):
             break
