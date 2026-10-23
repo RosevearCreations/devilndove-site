@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Digital Designs &amp; Revisions — Devil n Dove</title><link rel="stylesheet" href="/css/styles.css?v=467">
+<style>
+body{background:#101524;color:#f7f0ff}main{max-width:1220px;margin:0 auto;padding:24px clamp(12px,3vw,32px) 60px}
+header{padding:18px clamp(12px,3vw,32px);background:#17223a;border-bottom:1px solid #6d548d}
+header nav{display:flex;flex-wrap:wrap;gap:12px}header a{color:#f7ddff}
+.maker-card{margin:18px 0;padding:clamp(15px,2vw,25px);background:#1b2640;border:1px solid #75638b;border-radius:13px}
+.maker-card h2,.maker-card h3{color:#fff4d6;margin-top:0}
+.maker-card label{display:block;margin:12px 0;color:#f8edff;font-weight:650}
+.maker-card :is(input,textarea,select){display:block;width:100%;max-width:100%;box-sizing:border-box;padding:11px;margin-top:6px;border-radius:8px;border:2px solid #928ab9;background:#111a30;color:#fff}
+.maker-card :is(button,.btn){min-height:44px;padding:9px 16px;cursor:pointer;border-radius:8px}
+.maker-card button:focus-visible,.maker-card a:focus-visible{outline:3px solid #ffd176;outline-offset:3px}
+.maker-card button:disabled{opacity:.55;cursor:wait}
+.maker-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:14px}
+.maker-status{padding:13px;border-radius:8px;border:1px solid #8d8ab4;background:#26365b;white-space:pre-wrap}
+.maker-item{border:1px solid #74638c;border-radius:10px;padding:16px;margin:12px 0;background:#172139;overflow-wrap:anywhere}
+.maker-item small{color:#e4d5ef}.maker-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.maker-item a{color:#ffe0ab}.maker-item :is(select,textarea){max-width:560px}
+.maker-alert{border-left:4px solid #ffcf74;padding-left:15px}
+@media(max-width:600px){main{padding:16px 12px 45px}header nav{gap:7px}}
+</style></head>
+<body data-admin-page="maker-design-files"><header><nav aria-label="Admin navigation"><a href="/admin/">Admin</a><a href="/admin/creative-process/">Creative Projects</a><a href="/admin/project-work-orders/">Work Orders</a><a href="/admin/project-design-files/" aria-current="page">Design Files</a></nav></header>
+<main><h1>Digital Designs, Files &amp; Revision History</h1><p>Build 444 • Keep original STL, 3MF, SVG, DXF, G-code and other design references private. Each revision is permanent, separately reviewed, and linked to a real project output only by our choice.</p>
+<section class="maker-card"><h2>1. Choose a Creative Project</h2><label for="makerProject">Project</label><select id="makerProject"><option value="">Loading projects…</option></select><button type="button" id="makerRefresh">Refresh file history</button><p id="makerMessage" class="maker-status" role="status" aria-live="polite">Connecting to private design library…</p></section>
+<section class="maker-card" id="makerUploadSection" hidden><h2>2. Save a private original or a new revision</h2><p>New designs start at revision 1. For an existing design, select its exact latest revision as the parent. A failed design remains available.</p>
+<form id="makerUpload"><div class="maker-grid"><label>Design key (e.g. ring-v1)
+<input name="design_key" required minlength="2" maxlength="80" pattern="[a-z0-9][a-z0-9_-]{1,79}" autocomplete="off"></label>
+<label>Human-readable title<input name="design_title" required minlength="2" maxlength="180"></label>
+<label>Parent revision<select name="parent_revision_id" id="makerParent"><option value="0">New design — revision 1</option></select></label>
+<label>Original digital design file<input name="file" required type="file" accept=".stl,.3mf,.svg,.dxf,.gcode,.nc,.step,.stp,.obj,.pdf,.png,.jpg,.jpeg,.webp,.zip"></label>
+<label>Source &amp; rights<select name="source_license"><option value="unknown">Unknown — hold review</option><option value="own_work">Our original work</option><option value="licensed">Licensed for our use</option><option value="third_party_reference">Third-party reference (not approved to manufacture)</option></select></label>
+<label>Machine readiness<select name="machine_readiness"><option value="unreviewed">Not checked</option><option value="needs_changes">Needs changes</option><option value="ready">Checked and ready for review</option></select></label></div>
+<label>License source / designer / permissions<textarea name="source_note" rows="2" maxlength="1200" placeholder="Where the design came from; include the licence or permissions for non-original files."></textarea></label>
+<label>Change note (what is different from the prior revision?)<textarea name="revision_note" rows="2" maxlength="1200"></textarea></label>
+<button type="submit" id="makerUploadBtn">Save a new private revision</button></form></section>
+<section class="maker-card" id="makerHistorySection" hidden><h2>3. Review and download exact revisions</h2><p>Approval means only that we checked the source and machine readiness. It does not publish a design or prove a manufactured object exists.</p><div id="makerHistory"></div></section>
+<section class="maker-card" id="makerOutputsSection" hidden><h2>4. Link an approved design to a project output</h2><p class="maker-alert">If we replace an earlier design reference, both assignments remain in the history. This does not manufacture, approve, or publish the output.</p>
+<form id="makerLink"><label>Canonical project output<select name="output_id" id="makerOutputSelect" required></select></label>
+<label>Approved exact design revision<select name="revision_id" id="makerApprovedSelect" required></select></label>
+<label>Why this revision belongs to the output<textarea name="link_note" rows="2" minlength="12" maxlength="1200" required></textarea></label>
+<label><input name="replace_existing" type="checkbox" style="display:inline;width:auto;margin:0 8px 0 0">I approve preserving the old link and appending a new one if already assigned.</label>
+<button type="submit" id="makerLinkBtn">Record exact design-to-output link</button></form><div id="makerOutputHistory"></div></section>
+<details class="maker-card"><summary>ⓘ Storage, limitations and safety</summary><p>Up to 12 MiB each. Private Cloudflare R2 originals are downloaded as attachments after Admin authentication; no public URLs. The SHA-256 fingerprint identifies exact file bytes. Uploads are never automatically approved, published, sent to Etsy/Meta, used as machine instructions, or converted to saleable Inventory.</p></details>
+</main><script src="/public/js/admin-auth.js?v=467" defer></script><script src="/public/js/admin-project-design-files.js?v=467b444" defer></script>
+</body></html>
