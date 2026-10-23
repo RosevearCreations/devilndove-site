@@ -44,16 +44,20 @@ async function load(context,productId) {
   if(!db)return {error:respond({ok:false,error:'Database is unavailable.'},503)};
   if(!positive(productId))return {error:respond({ok:false,error:'Save and open an existing Product first.'},400)};
   try{
-    const [product,conn,shop,existing,claim,count,rejection,recovery]=await Promise.all([
+    const [product,conn,shop,existing,claim,count,rejection,recovery,quality]=await Promise.all([
       db.prepare(productSql).bind(Number(productId)).first(),db.prepare(connSql).first(),db.prepare(shopSql).first(),
       db.prepare(existingSql).bind(String(productId)).first(),db.prepare(claimedSql).bind(String(productId)).first(),
       db.prepare(countSql).bind(String(productId)).first(),db.prepare(rejectionSql).bind(String(productId)).first(),
-      db.prepare(recoverySql).bind(String(productId)).first()
+      db.prepare(recoverySql).bind(String(productId)).first(),
+      db.prepare(`SELECT l.maker_quality_attempt_id,
+       (SELECT r.decision FROM maker_quality_release_reviews r WHERE r.maker_quality_attempt_id=l.maker_quality_attempt_id ORDER BY r.maker_quality_release_review_id DESC LIMIT 1) latest_quality_decision
+       FROM maker_quality_product_links l WHERE l.product_id=? LIMIT 1`).bind(Number(productId)).first().catch(()=>null)
     ]);
     if(!product)return {error:respond({ok:false,error:'Product does not exist.'},404)};
     const details=productDraftDetails(product),blockers=[...connectionBlockers(conn,shop,context.env),...details.blockers];
     if(String(product.product_type||'physical')!=='physical')blockers.push('physical_listing_only');
     if(existing?.external_reference)blockers.push('etsy_listing_already_created_for_product');
+    if(quality&&quality.latest_quality_decision!=='approved_for_sale')blockers.push('maker_quality_sale_hold_review_required');
     const claimCount=Number(count?.total||0);
     const g={admin,db,product,conn,shop,existing,claim,claimCount,rejection,recovery,details,blockers,
       fingerprint:productDraftFingerprint(product,shop,conn)};

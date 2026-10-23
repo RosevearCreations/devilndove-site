@@ -307,6 +307,13 @@
       "release": 467,
       "description": "Immutable executions of reviewed traveler steps; operator pause/resume, cure/checklist, equipment/substitution and unique source-linked actual Work Order time and Creative Process evidence.",
       "recovery": "Disable new guided execution writes, retaining all history; correct forward only. Never rewrite traveler snapshots, actual Work Order time, Inventory, media or source project plans."
+    },
+    {
+      "version": 43,
+      "file": "0043_release467_finished_quality_rework_salvage.sql",
+      "release": 467,
+      "description": "Immutable maker quality attempts, failed/reworked lineage, independent sale-safety reviews, approved Product handoffs and unique source-only Inventory recovery receipts; no stock or provider writes.",
+      "recovery": "Retain all failed and approved quality history and canonical Inventory receipts. To supersede any decision append another review. Correct schema forward only; never reclassify material recovery by adding stock or rewriting historical attempts."
     }
   ]
 }
