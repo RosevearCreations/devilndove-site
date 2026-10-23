@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+
+const source=readFileSync(new URL('../functions/api/admin/project-bom.js',import.meta.url),'utf8');
+const expression=source.match(/export function bomProgress\([\s\S]*?\n}\n/);
+assert.ok(expression,'Pure BOM roll-up must remain independently verifiable.');
+const roundInventoryQuantity=(v)=>Number(Number(v).toFixed(6));
+const normalizeUnitsPerPurchase=v=>Number(v)>0?Number(v):1;
+const bomProgress=Function('roundInventoryQuantity','normalizeUnitsPerPurchase',`${expression[0].replace('export function','function')}; return bomProgress;`)(roundInventoryQuantity,normalizeUnitsPerPurchase);
+const resin={maker_project_bom_line_id:1,site_item_inventory_id:1001,planned_usage_quantity:200,usage_units_per_stock_unit_snapshot:1000,line_status:'planned'};
+const silver={maker_project_bom_line_id:2,site_item_inventory_id:1002,planned_usage_quantity:5,usage_units_per_stock_unit_snapshot:50,line_status:'planned'};
+const holds=[{site_item_inventory_id:1001,original_stock_quantity:.2,released_stock_quantity:.125}];
+const links=[{maker_project_bom_line_id:1,usage_quantity_consumed:125,scrap_usage_quantity:25},{maker_project_bom_line_id:2,usage_quantity_consumed:2.5,scrap_usage_quantity:.5}];
+const a=bomProgress(resin,links,holds),b=bomProgress(silver,links,holds);
+assert.equal(a.state,'partially_consumed');assert.equal(a.planned_stock_quantity,.2);
+assert.equal(a.usable_usage_quantity,100);assert.equal(a.scrap_usage_quantity,25);assert.equal(a.remaining_usage_quantity,75);
+assert.equal(a.remaining_reserved_stock_quantity,.075);
+assert.equal(b.state,'partially_consumed');assert.equal(b.planned_stock_quantity,.1);assert.equal(b.usable_usage_quantity,2);
+assert.equal(b.remaining_usage_quantity,2.5);
+const returned=bomProgress(resin,[{...links[0],returned_at:'2026-10-23'}],holds);
+assert.equal(returned.state,'returned');assert.equal(returned.posted_usage_quantity,0);assert.equal(returned.reversed_usage_quantity,125);
+assert.equal(bomProgress({...resin,line_status:'retired'},links).state,'retired');
+console.log('BUILD445_BOM_MATH=GREEN; partial resin, silver, scrap and returned canonical usage classified correctly');

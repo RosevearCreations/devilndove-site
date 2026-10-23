@@ -293,6 +293,13 @@
       "release": 467,
       "description": "Immutable private CAD/CAM/reference originals with exact project revision ancestry, append-only human reviews and explicit canonical project-output design lineage.",
       "recovery": "Disable Build 444 writes but retain the immutable revision, review and output lineage records and private R2 originals. Correct future defects only with a forward-only compensating migration; do not delete files or reset project history."
+    },
+    {
+      "version": 41,
+      "file": "0041_release467_project_bom_actual_usage.sql",
+      "release": 467,
+      "description": "Additive per-project BOM with process, supplier-lot and workstation references plus unique immutable classifications of actual canonical Inventory posting receipts; no competing stock authority.",
+      "recovery": "Preserve every BOM line, canonical Inventory posting and classified actual-use receipt. Disable new Build 445 writes and correct forward only; never recalculate or overwrite physical stock or supplier lot balances."
     }
   ]
 }
