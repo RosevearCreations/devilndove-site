@@ -36,7 +36,7 @@ class WorkflowGreenTests(unittest.TestCase):
 
         def fetch(request, timeout):
             urls.append(request.full_url)
-            selected = runs if "head_sha=" in request.full_url else (fallback_runs if fallback_runs is not None else runs)
+            selected = (fallback_runs if fallback_runs is not None else runs) if "/actions/workflows/" in request.full_url else runs
             return io.BytesIO(json.dumps({
                 "total_count": len(selected),
                 "workflow_runs": selected,
@@ -63,6 +63,20 @@ class WorkflowGreenTests(unittest.TestCase):
     def test_falls_back_when_sha_filtered_list_omits_the_success(self):
         result = self.lookup([run(conclusion="failure")], fallback_runs=[run(id=42)])
         self.assertEqual(42, result["run_id"])
+
+    def test_does_not_scan_unrelated_historical_runs(self):
+        urls = []
+
+        def fetch(request, timeout):
+            urls.append(request.full_url)
+            return io.BytesIO(json.dumps({"total_count": 2500, "workflow_runs": []}).encode("utf-8"))
+
+        with patch.dict(os.environ, {"GITHUB_TOKEN": "test-token", "GITHUB_REPOSITORY": "RosevearCreations/devilndove-site"}):
+            with patch("scripts.main_promotion_gate.urllib.request.urlopen", side_effect=fetch):
+                with self.assertRaisesRegex(Stop, "no successful system-gate.yml run"):
+                    workflow_green(SHA, WORKFLOW)
+        self.assertEqual(2, len(urls))
+        self.assertTrue(all("head_sha=" + SHA in url for url in urls))
 
     def test_rejects_only_irrelevant_successes(self):
         with self.assertRaisesRegex(Stop, "no successful system-gate.yml run"):
