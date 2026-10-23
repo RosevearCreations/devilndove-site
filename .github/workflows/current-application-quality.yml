@@ -154,6 +154,14 @@ jobs:
           node --check public/js/admin-guided-manufacturing.js
           python scripts/release467_build448_shared_tools_sql_regression.py
 
+      - name: Build 449 actual maker cost sources, honest unknowns and optional CAD pricing
+        run: |
+          node --check functions/api/admin/_lib/projectCosting.mjs
+          node --check functions/api/admin/project-costs.js
+          node --check public/js/admin-project-costs.js
+          node --test scripts/release467_build449_costs_math.test.mjs
+          python scripts/release467_build449_costs_sql_regression.py
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
