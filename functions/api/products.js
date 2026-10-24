@@ -212,13 +212,21 @@ async function enrichProductsWithOfferAvailability(db, products) {
       WHERE bs.bundle_product_id IN (${marks})
       GROUP BY bs.bundle_product_id, bs.reserved_bundle_quantity
     `).bind(...ids).all());
+    // Build 450: only opt-in, serialised finished Products use individual
+    // physical-piece availability. An offsite hold must not look sellable.
+    const uniqueRows=normalizeResults(await db.prepare(`
+      SELECT product_id,available_quantity FROM maker_finished_piece_sellability
+      WHERE product_id IN (${marks})
+    `).bind(...ids).all().catch(()=>({results:[]})));
     const reservedByProduct = new Map(reservedRows.map((row)=>[Number(row.component_product_id||0),Math.max(0,Number(row.reserved_quantity||0))]));
     const bundleByProduct = new Map(bundleRows.map((row)=>[Number(row.bundle_product_id||0),Math.max(0,Math.min(Number(row.reserved_bundle_quantity||0),Number(row.supported_quantity||0))) ]));
+    const uniqueAvailable=new Map(uniqueRows.map(row=>[Number(row.product_id),Math.max(0,Number(row.available_quantity||0))]));
     return list.map((product)=>{
       const id=Number(product.product_id||0);
       if(bundleByProduct.has(id)) return {...product,is_bundle:1,inventory_tracking:1,inventory_quantity:bundleByProduct.get(id)};
       const reserved=reservedByProduct.get(id)||0;
-      return {...product,is_bundle:0,reserved_for_sets:reserved,inventory_quantity:Number(product.inventory_tracking||0)===1?Math.max(0,Number(product.inventory_quantity||0)-reserved):Number(product.inventory_quantity||0)};
+      const ordinary=Number(product.inventory_tracking||0)===1?Math.max(0,Number(product.inventory_quantity||0)-reserved):Number(product.inventory_quantity||0);
+      return {...product,is_bundle:0,reserved_for_sets:reserved,inventory_quantity:uniqueAvailable.has(id)?Math.min(ordinary,uniqueAvailable.get(id)):ordinary};
     });
   } catch {
     return list;
