@@ -335,6 +335,13 @@
       "release": 467,
       "description": "Unique physical serials and variants linked to human-approved QA and canonical Product stock, append-only cross-channel hold/release/paid-sale evidence, checkout protection against duplicate allocations and factual kit-component order-line links. No duplicate stock or provider posting.",
       "recovery": "Preserve serials, QA lineage, stock commitments and immutable claims. Release an unused channel hold with a new receipt; sold units require real return/restock review in a future workflow. Repair schema forward-only and never fabricate component use."
+    },
+    {
+      "version": 47,
+      "file": "0047_release467_maker_photography_video_stories.sql",
+      "release": 467,
+      "description": "Source-linked maker photography and video storyboard revisions with true Creative Project and canonical Product provenance, exact-media consent for public candidates, private learning/failure stories and append-only human editorial review. No R2 copies, product-gallery writes or provider publication.",
+      "recovery": "Retain private revisions, frames, human notes and original media. Create a superseding revision or HOLD review when consent or rights change; make repairs in a forward-only migration and never infer live public permission from candidate status."
     }
   ]
 }
