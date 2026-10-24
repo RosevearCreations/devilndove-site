@@ -301,6 +301,12 @@ async function handleProductDetailRequest(context) {
     product.reserved_for_sets = Math.max(0, Number(reserved?.reserved_quantity || 0));
     if (Number(product.inventory_tracking || 0) === 1) product.inventory_quantity = Math.max(0, Number(product.inventory_quantity || 0) - product.reserved_for_sets);
   }
+  // Build 450: serialised Product detail uses the same sold-once / offsite
+  // reservation availability as the catalogue and final checkout guard.
+  if(Number(bundle?.is_bundle||0)!==1){
+    const unique=await db.prepare('SELECT available_quantity FROM maker_finished_piece_sellability WHERE product_id=?').bind(product.product_id).first().catch(()=>null);
+    if(unique)product.inventory_quantity=Math.min(Math.max(0,Number(product.inventory_quantity||0)),Math.max(0,Number(unique.available_quantity||0)));
+  }
 
   const resourceLinkColumns = await getTableColumnSet(db, 'product_resource_links');
   const inventoryColumns = await getTableColumnSet(db, 'site_item_inventory');
