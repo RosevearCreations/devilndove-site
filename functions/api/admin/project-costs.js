@@ -55,7 +55,16 @@ async function detail(db,projectId){
   note:'Actual Inventory costs use current item unit cost as an estimate. BOM planned values, Creative time and historical Finance views are comparisons, not additional expenses. The latest reviewed scenario is an estimate, never a sale or a ledger posting.'};
 }
 export async function onRequestGet(ctx){const a=await access(ctx);if(a.error)return a.error;
- const projectId=validId(new URL(ctx.request.url).searchParams.get('project_id'));
+ const search=new URL(ctx.request.url).searchParams,lookupKey=search.get('lookup_key');
+ if(lookupKey!==null){
+  if(!/^[-A-Za-z0-9_]{16,80}$/.test(lookupKey))return out({ok:false,error:'Invalid cost receipt lookup key.'},400);
+  const actor=validId(a.user.user_id);if(!actor)return out({ok:false,error:'Verified reviewer required.'},401);
+  try{const receipt=await a.db.prepare(`SELECT maker_project_cost_review_id,creative_work_project_id,scenario_kind,created_at
+   FROM maker_project_cost_reviews WHERE request_key=? AND reviewed_by_user_id=? LIMIT 1`).bind(lookupKey,actor).first();
+   return out({ok:true,found:Boolean(receipt),receipt:receipt||null});
+  }catch(e){console.error('BUILD458_COST_LOOKUP_FAILED',e?.name);return out({ok:false,error:'Cost receipt lookup unavailable; keep the same key.'},503)}
+ }
+ const projectId=validId(search.get('project_id'));
  try{if(!projectId){const projects=rows(await a.db.prepare(`SELECT creative_work_project_id,project_title,project_type,project_status FROM creative_work_projects
   WHERE COALESCE(project_status,'active')<>'archived' ORDER BY creative_work_project_id DESC LIMIT 101`).all());
   return out({ok:true,projects:projects.slice(0,100),projects_truncated:projects.length>100,kinds,safety});}

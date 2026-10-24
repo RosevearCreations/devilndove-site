@@ -29,4 +29,4 @@ node --test scripts/release467_build457_maker_workbench.test.mjs
 python scripts/current_application_quality_gate.py
 ```
 
-The route, accessibility and safety tests are synthetic source contracts. An in-person owner session on a small-screen device, keyboard and actual maker evidence remains a separate manual acceptance. Build 458 Safe Draft Recovery & Offline Workshop Resumption is the next proposed roadmap item. Production GREEN is defined only by the protected `dev` → `main` release and Cloudflare Production D1/Pages/public smoke/independent integrity evidence.
+The route, accessibility and safety tests are synthetic source contracts. An in-person owner session on a small-screen device, keyboard and actual maker evidence remains a separate manual acceptance. Build 458 Safe Draft Recovery & Offline Workshop Resumption is the next authorized follow-up; see its separate runbook. Production GREEN is defined only by the protected `dev` → `main` release and Cloudflare Production D1/Pages/public smoke/independent integrity evidence.
