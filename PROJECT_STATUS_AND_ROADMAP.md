@@ -1,5 +1,11 @@
 # CURRENT ROADMAP — Maker Application Queue 439–455 (2026-10-23)
 
+**Current Development candidate (2026-10-23): Build 450 — Finished Pieces, Variants & Unique Inventory.** [Build 450 code, audit and acceptance](docs/operations/RELEASE_467_BUILD_450_FINISHED_PIECES_UNIQUE_STOCK.md) adds real approved-quality serials, cross-channel one-off holds and true component-order references without duplicating stock or publishing offsite. **Next queued: Build 451 — Maker Photography, Videos & Product Stories.** Development/Production GREEN must be proven by the current exact-tree GitHub checks and Cloudflare receipts, not inferred from this candidate note. Etsy physical account synchronisation is a separate owner acceptance HOLD.
+
+---
+
+## Archived queue baseline (as of the original 2026-10-23 planning snapshot)
+
 **Next queued (not yet implemented): Build 439 — Etsy Live Draft Creation & Connection Acceptance.** Seventeen prioritized builds `439–455` are documented with scopes, prerequisites, acceptance evidence and operator HOLD conditions in [Maker Application Queue 439–455](docs/operations/RELEASE_467_MAKER_JOURNEY_QUEUE_439_455.md).
 
 **Current latest source release:** Build 438 Product Editor Etsy/Facebook tabs and protected unpublished Etsy draft boundary, promoted to `main` at `f5a16a3974180decf474b8f70bb76fdcb07f1f40`. [Production Pages Deploy](https://github.com/RosevearCreations/devilndove-site/actions/runs/39890910076) and [live resource integrity](https://github.com/RosevearCreations/devilndove-site/actions/runs/39891012729) completed successfully. **Actual authenticated Etsy draft creation and Facebook provider publishing are not yet verified.** They remain work for Builds 439 and 441 respectively.
