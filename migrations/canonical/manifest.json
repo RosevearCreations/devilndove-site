@@ -356,6 +356,13 @@
       "release": 467,
       "description": "Append-only Admin evidence for protective packaging, Canadian shipment/pickup receipts, damage, returns, repairs and aftercare, linked to canonical orders. No carrier purchase, customer send, refund, stock posting or order status mutation.",
       "recovery": "Retain original order and immutable evidence. Append later corrected review or HOLD; make schema corrections forward-only. Never invent tracking, pickup acceptance or settled payment."
+    },
+    {
+      "version": 50,
+      "file": "0050_release467_owner_maker_trial_intake.sql",
+      "release": 467,
+      "description": "Private append-only manual owner trial checklist receipts for six actual Maker journeys, bound to canonical project, process, QA, media, design or commission evidence; accepts only explicitly attested source-backed checkpoints.",
+      "recovery": "Stop new Build 456 attestations if defects appear, preserve the original owner trial and source history, append a later HOLD/superseding review and correct schema only with a forward migration. Never infer external acceptance or alter maker, customer, stock or publication authorities."
     }
   ]
 }
