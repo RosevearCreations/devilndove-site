@@ -67,6 +67,15 @@ async function view(db,scenario,project,request){
 
 export async function onRequestGet(ctx){const a=await access(ctx);if(a.error)return a.error;
  const search=new URL(ctx.request.url).searchParams,scenario=search.get('scenario')||'';
+ const lookupKey=search.get('lookup_key');
+ if(lookupKey!==null){
+  if(!/^[a-zA-Z0-9_-]{16,80}$/.test(lookupKey))return answer({ok:false,error:'Invalid receipt lookup key.'},400);
+  const actor=id(a.admin.user_id);if(!actor)return answer({ok:false,error:'Verified Admin actor required.'},401);
+  try{const receipt=await a.db.prepare(`SELECT maker_owner_trial_review_id,scenario_key,checkpoint_key,decision,created_at
+   FROM maker_owner_trial_reviews WHERE request_key=? AND recorded_by_user_id=? LIMIT 1`).bind(lookupKey,actor).first();
+   return answer({ok:true,found:Boolean(receipt),receipt:receipt||null,manual_replay_required:false});
+  }catch(error){console.error('BUILD458_LOOKUP',error?.name);return answer({ok:false,error:'Receipt lookup unavailable; do not start a new key.'},503)}
+ }
  if(scenario&&!TRIALS[scenario])return answer({ok:false,error:'Invalid owner trial scenario.'},400);
  const project=id(search.get('project_id')),request=id(search.get('custom_request_id'));
  if(scenario==='custom_commission'&&project||scenario&&scenario!=='custom_commission'&&request)return answer({ok:false,error:'Scope conflicts with selected scenario.'},400);
