@@ -342,6 +342,13 @@
       "release": 467,
       "description": "Source-linked maker photography and video storyboard revisions with true Creative Project and canonical Product provenance, exact-media consent for public candidates, private learning/failure stories and append-only human editorial review. No R2 copies, product-gallery writes or provider publication.",
       "recovery": "Retain private revisions, frames, human notes and original media. Create a superseding revision or HOLD review when consent or rights change; make repairs in a forward-only migration and never infer live public permission from candidate status."
+    },
+    {
+      "version": 48,
+      "file": "0048_release467_commission_completion_handoff.sql",
+      "release": 467,
+      "description": "Private append-only commission change/cost impact and maker-completion reviews linked to actual customer-approved proof, quote revisions, commission cost reviews, completed traveler steps, quality-accepted finished pieces and source order status. Never creates a customer approval, payment settlement, inventory posting or delivered-order claim.",
+      "recovery": "Retain genuine source approvals, cost review and operator completion receipts; record an explicit later delivery HOLD or corrected review. Use forward-only fixes, never rewrite quote, payment, media or stock authorities."
     }
   ]
 }
