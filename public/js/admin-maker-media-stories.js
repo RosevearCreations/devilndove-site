@@ -27,5 +27,6 @@
  async function save(event){event.preventDefault();const f=event.currentTarget,action=f.dataset.action,body={action,project_id:num(project.value),revision_id:num(rev.value),request_key:key()};for(const [name,value] of new FormData(f).entries())body[name]=value;
   if(action==='add_frame'){const [kind,source]=String(body.source_ref||'').split(':');body.source_kind=kind;body.source_id=num(source);body.is_principal=body.is_principal==='1';delete body.source_ref}
   const button=f.querySelector('button[type=submit]');button.disabled=true;try{const d=await request('/api/admin/maker-media-stories',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});message(d.replayed?'Original matching receipt verified.':'Saved reviewed maker evidence #'+d.receipt_id+'.');await load(num(project.value),num(d.revision_id))}catch(e){message('Action not accepted: '+e.message,true)}finally{button.disabled=false}}
- project.addEventListener('change',()=>load(num(project.value),0));rev.addEventListener('change',()=>load(num(project.value),num(rev.value)));get('msRefresh').addEventListener('click',()=>load());load();
+ project.addEventListener('change',()=>load(num(project.value),0));rev.addEventListener('change',()=>load(num(project.value),num(rev.value)));get('msRefresh').addEventListener('click',()=>load());
+ const fromUrl=new URLSearchParams(location.search).get('project_id');load(/^[1-9]\d{0,9}$/.test(fromUrl||'')?Number(fromUrl):0);
 })();

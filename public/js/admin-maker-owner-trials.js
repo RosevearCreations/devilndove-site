@@ -26,7 +26,7 @@
   el('trialTruncated').hidden=!state.history_truncated;
   checkOptions();save.disabled=!selected;
  }
- async function load(){const values=scope(),chosen=scenario.value||'jewellery_metal';say('Refreshing private original records…');
+ async function load(initialScope=null){const values=initialScope||scope(),chosen=scenario.value||'jewellery_metal';say('Refreshing private original records…');
   const q=new URLSearchParams({scenario:chosen,...Object.fromEntries(Object.entries(values).map(([k,v])=>[k,String(v)]))});
   try{const data=await api('/api/admin/maker-owner-trials?'+q);state=data;
    fill(scenario,Object.entries(data.scenarios).map(([value,v])=>({value,label:v.label})),'Choose a scenario',chosen);
@@ -47,5 +47,9 @@
  }
  scenario.addEventListener('change',()=>{project.value='';request.value='';load()});project.addEventListener('change',load);request.addEventListener('change',load);
  checkpoint.addEventListener('change',updateSource);el('trialRefresh').addEventListener('click',load);el('trialForm').addEventListener('submit',submit);
- scenario.replaceChildren(option('jewellery_metal','Jewellery & metalwork'));scenario.value='jewellery_metal';load();
+ const query=new URLSearchParams(location.search),allowed=['jewellery_metal','resin_clay','digital_fabrication','failed_salvage','private_therapeutic','custom_commission'];
+ const initialScenario=allowed.includes(query.get('scenario'))?query.get('scenario'):'jewellery_metal';
+ const positive=raw=>/^[1-9]\d{0,9}$/.test(String(raw||''))?Number(raw):0;
+ const initialScope=initialScenario==='custom_commission'?{custom_request_id:positive(query.get('custom_request_id'))}:{project_id:positive(query.get('project_id'))};
+ scenario.replaceChildren(option(initialScenario,initialScenario.replaceAll('_',' ')));scenario.value=initialScenario;load(initialScope);
 })();
