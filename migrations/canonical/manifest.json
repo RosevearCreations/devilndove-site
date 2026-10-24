@@ -328,6 +328,13 @@
       "release": 467,
       "description": "Immutable CAD costing assumptions and optional per-item pricing scenarios that reconcile actual canonical Inventory, Work Order labour, production evidence, BOM plan and quality attempts without duplicate costs, accounting posts, Product pricing or revenue.",
       "recovery": "Retain every human cost review and source posting. Stop new costing reviews or supersede a scenario with a later review. Repair defects only with a new forward-only migration; never change physical Inventory, accounting, payment or sales authorities."
+    },
+    {
+      "version": 46,
+      "file": "0046_release467_finished_pieces_unique_allocation.sql",
+      "release": 467,
+      "description": "Unique physical serials and variants linked to human-approved QA and canonical Product stock, append-only cross-channel hold/release/paid-sale evidence, checkout protection against duplicate allocations and factual kit-component order-line links. No duplicate stock or provider posting.",
+      "recovery": "Preserve serials, QA lineage, stock commitments and immutable claims. Release an unused channel hold with a new receipt; sold units require real return/restock review in a future workflow. Repair schema forward-only and never fabricate component use."
     }
   ]
 }

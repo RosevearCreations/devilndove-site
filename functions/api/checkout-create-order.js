@@ -255,6 +255,10 @@ export async function onRequestPost(context) {
     const componentReservation = Number(bundle?.is_bundle || 0) === 1 ? 0 : Number((await db.prepare(`SELECT COALESCE(SUM(reserved_component_quantity),0) reserved_quantity FROM product_bundle_components WHERE component_product_id=?`).bind(product_id).first().catch(()=>({reserved_quantity:0})))?.reserved_quantity || 0);
     const availableQuantity = Number(bundle?.is_bundle || 0) === 1 ? Math.max(0, Number(bundle.available_quantity || 0)) : Math.max(0, Number(product.inventory_quantity || 0) - componentReservation);
     if (Number(product.inventory_tracking || 0) === 1 && quantity > availableQuantity) return json({ ok: false, code: 'checkout_stock_changed', error: `Only ${availableQuantity} of ${product.name || `product ${product_id}`} are currently available.`, retry_safe_after_cart_refresh: true }, 409);
+    // Build 450: actual serialised one-offs may already be held for Etsy/local
+    // sale; do not create a pending checkout for stock reserved elsewhere.
+    const uniqueStock=await db.prepare('SELECT available_quantity FROM maker_finished_piece_sellability WHERE product_id=?').bind(product_id).first().catch(()=>null);
+    if(uniqueStock&&quantity>Number(uniqueStock.available_quantity||0))return json({ok:false,code:'checkout_unique_piece_unavailable',error:'This handmade piece is reserved or already sold. Refresh the cart before trying again.',retry_safe_after_cart_refresh:true,local_order_mutation_performed:false},409);
 
     const pricing = await resolveUnitPrice(db, product_id, quantity, Number(product.price_cents || 0), { ensureSchema: false });
     const unit_price_cents = Number(pricing.unit_price_cents || 0);
@@ -337,7 +341,12 @@ export async function onRequestPost(context) {
   if (!order_id) return json({ ok: false, error: "Order could not be created." }, 500);
 
   for (const item of orderItems) {
-    await db.prepare(`INSERT INTO order_items (order_id,product_id,sku,product_name,product_type,unit_price_cents,quantity,line_subtotal_cents,taxable,tax_class_code,requires_shipping,digital_file_url,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(order_id,item.product_id,item.sku || null,item.product_name,item.product_type,item.unit_price_cents,item.quantity,item.line_subtotal_cents,item.taxable,item.tax_class_code || null,item.requires_shipping,item.digital_file_url || null).run();
+    try{
+      await db.prepare(`INSERT INTO order_items (order_id,product_id,sku,product_name,product_type,unit_price_cents,quantity,line_subtotal_cents,taxable,tax_class_code,requires_shipping,digital_file_url,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(order_id,item.product_id,item.sku || null,item.product_name,item.product_type,item.unit_price_cents,item.quantity,item.line_subtotal_cents,item.taxable,item.tax_class_code || null,item.requires_shipping,item.digital_file_url || null).run();
+    }catch(error){
+      if(String(error?.message||'').includes('piece_reserved_elsewhere_or_unserialized'))return json({ok:false,code:'checkout_unique_piece_unavailable',error:'A one-of-one was reserved while this order was being created. The order was safely cancelled; refresh the cart.',retry_safe_after_cart_refresh:true,local_order_mutation_performed:true},409);
+      throw error;
+    }
   }
 
   const historyNote = sessionUser ? `Order created by ${sessionUser.display_name || sessionUser.email || `user #${sessionUser.user_id}`}.` : "Order created from checkout.";
