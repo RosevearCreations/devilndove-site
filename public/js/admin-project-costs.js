@@ -48,5 +48,7 @@
  el('costProject').addEventListener('change',async()=>{state.project=Number(el('costProject').value)||0;if(state.project)try{await load();status('Project source costs loaded.');}catch(e){status(e.message,true);}});
  el('costRefresh').addEventListener('click',async()=>{try{await load();status('Current source receipts refreshed.');}catch(e){status(e.message,true);}});
  el('costSave').addEventListener('click',save);
- get('/api/admin/project-costs').then(j=>{const s=el('costProject');for(const p of j.projects||[])s.add(new Option(`#${p.creative_work_project_id} ${p.project_title}`,p.creative_work_project_id));status('Choose our Creative Project to review costing.');}).catch(e=>status('Please sign in to Admin first: '+e.message,true));
+ get('/api/admin/project-costs').then(async j=>{const s=el('costProject');for(const p of j.projects||[])s.add(new Option(`#${p.creative_work_project_id} ${p.project_title}`,p.creative_work_project_id));status('Choose our Creative Project to review costing.');
+  const fromUrl=new URLSearchParams(location.search).get('project_id');if(/^[1-9]\d{0,9}$/.test(fromUrl||'')&&(j.projects||[]).some(p=>String(p.creative_work_project_id)===fromUrl)){s.value=fromUrl;state.project=Number(fromUrl);await load();status('Loaded our source-linked project costs; no accounting action occurred.');}
+ }).catch(e=>status('Please sign in to Admin first: '+e.message,true));
 })();

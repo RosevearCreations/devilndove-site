@@ -202,6 +202,17 @@ jobs:
           node --test scripts/release467_build456_owner_trial_policy.test.mjs
           python scripts/release467_build456_owner_trial_sql_regression.py
 
+      - name: Build 457 Maker Workbench navigation and accessible owner trial continuity
+        run: |
+          node --check public/js/maker-workbench-policy-457.mjs
+          node --check public/js/admin-maker-workbench-457.js
+          node --check public/js/admin-maker-owner-trials.js
+          node --check public/js/admin-project-bom.js
+          node --check public/js/admin-project-costs.js
+          node --check public/js/admin-finished-quality.js
+          node --check public/js/admin-maker-media-stories.js
+          node --test scripts/release467_build457_maker_workbench.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

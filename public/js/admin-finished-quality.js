@@ -36,5 +36,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   try{const data=await fetchJson(await api('/api/admin/finished-quality',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}));pending.delete(kind);if(data.selected){current=data.selected;draw()}else await load(Number(project.value));say(data.replayed?'Existing matching receipt confirmed. No duplicate.':'Permanent receipt verified (#'+data.receipt_id+').');}
   catch(error){result.textContent='Not confirmed: '+error.message+' Refresh before retrying; the request key has been preserved.';button.disabled=false;}
  }
- $('fqRefresh').addEventListener('click',()=>load());project.addEventListener('change',()=>load(Number(project.value||0)));load();
+ $('fqRefresh').addEventListener('click',()=>load());project.addEventListener('change',()=>load(Number(project.value||0)));
+ const fromUrl=new URLSearchParams(location.search).get('project_id');load(/^[1-9]\d{0,9}$/.test(fromUrl||'')?Number(fromUrl):0);
 });
