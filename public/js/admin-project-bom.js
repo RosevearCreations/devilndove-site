@@ -46,7 +46,9 @@
    if(action==='link_actual'){el('bomScrap').value='0';el('bomActualReason').value='';}
   }catch(e){message(`${e.message}. Refresh before retrying if a write outcome is uncertain.`,true);}finally{if(button)button.disabled=false;}
  };
- const init=async()=>{try{const data=await fetchJSON('/api/admin/project-bom');fill('bomProject',data.projects||[],'Select our project…',p=>p.creative_work_project_id,p=>`#${p.creative_work_project_id} ${p.project_title}`);message('Select the Creative Project whose material usage we want to review.');}catch(e){message('Sign in to Devil n Dove Admin first: '+e.message,true);}};
+ const init=async()=>{try{const data=await fetchJSON('/api/admin/project-bom');fill('bomProject',data.projects||[],'Select our project…',p=>p.creative_work_project_id,p=>`#${p.creative_work_project_id} ${p.project_title}`);message('Select the Creative Project whose material usage we want to review.');
+  const fromUrl=new URLSearchParams(location.search).get('project_id');if(/^[1-9]\d{0,9}$/.test(fromUrl||'')&&(data.projects||[]).some(p=>String(p.creative_work_project_id)===fromUrl)){el('bomProject').value=fromUrl;state.project=Number(fromUrl);await load();message('Opened selected Creative Project BOM; no stock was changed.');}
+ }catch(e){message('Sign in to Devil n Dove Admin first: '+e.message,true);}};
  el('bomProject').addEventListener('change',async()=>{state.project=Number(el('bomProject').value)||0;if(state.project){try{await load();message('BOM loaded; no stock changed.');}catch(e){message(e.message,true);}}});
  el('bomRefresh').addEventListener('click',async()=>{try{await load(el('bomSearch').value);message('Refreshed current Inventory and actual receipts.');}catch(e){message(e.message,true);}});
  let searchTimer;el('bomSearch').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{if(state.project)load(el('bomSearch').value).catch(e=>message(e.message,true));},350);});
