@@ -1,4 +1,12 @@
-# CURRENT ROADMAP — Maker Application Acceptance Build 455 (2026-10-24)
+# CURRENT ROADMAP — Owner Maker Trial Build 456 (2026-10-24)
+
+**Current Development candidate: Build 456 — Owner Maker Trial & Evidence Intake.** The private [Admin Owner Maker Trials workspace](/admin/maker-owner-trials/) and [Build 456 runbook](docs/operations/RELEASE_467_BUILD_456_OWNER_MAKER_TRIAL_EVIDENCE.md) guide genuine jewellery/metal, resin/clay, CNC/laser/3D, failed/salvage, private therapeutic and commission acceptance. Canonical migration **0050** adds immutable, idempotent, Admin-attested per-checkpoint HOLD/accepted receipts, validated against existing project or request sources; a later HOLD supersedes prior acceptance. No synthetic script produces real owner evidence, changes stock, approves safety, captures payments, publishes or sends customer messages. Real owner and provider acceptance remain **HOLD** until independently witnessed and recorded. Build 456 requires the identical tested `dev` and `main` tree and completed Cloudflare Production integrity proof before it can be declared technically GREEN.
+
+**After Build 456:** Propose Build 457 — Maker Workbench Usability & Navigation, then the remaining [candidate 458–465 work](docs/operations/RELEASE_467_MAKER_JOURNEY_NEXT_QUEUE_456_465.md); none are assumed approved for automatic implementation.
+
+---
+
+## Previous Maker Source Acceptance (2026-10-24)
 
 **Current Development candidate: Build 455 — Full Maker Journey Acceptance & Next Roadmap.** The on-demand [source contract acceptance suite](docs/operations/RELEASE_467_BUILD_455_MAKER_JOURNEY_ACCEPTANCE.md) checks jewellery/metal, resin/clay, digital fabrication, rejected/salvaged attempts, private therapeutic work, commissions and Canada-only checkout/fulfillment without touching real business data. The existing canonical systems remain authoritative; no Build 455 schema or provider mutation is introduced. Source-contract GREEN is **not** physical/customer/provider acceptance: actual operator trials, authentic Etsy/Meta authorization, safety labels and live D1/Worker/R2 quota measurements remain named HOLD/UNKNOWN. Exact Development and Production source/deployment integrity proofs are required before reporting Build 455 Production GREEN.
 
