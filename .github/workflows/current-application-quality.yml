@@ -213,6 +213,15 @@ jobs:
           node --check public/js/admin-maker-media-stories.js
           node --test scripts/release467_build457_maker_workbench.test.mjs
 
+      - name: Build 458 opt-in Maker draft recovery, idempotent offline return and same-actor receipt lookup
+        run: |
+          node --check public/js/maker-draft-recovery-458.mjs
+          node --check public/js/admin-maker-owner-trials.js
+          node --check public/js/admin-project-costs.js
+          node --check functions/api/admin/maker-owner-trials.js
+          node --check functions/api/admin/project-costs.js
+          node --test scripts/release467_build458_maker_draft_recovery.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
