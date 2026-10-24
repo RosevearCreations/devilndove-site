@@ -1,4 +1,12 @@
-# CURRENT ROADMAP — Maker Application Queue 439–455 (2026-10-23)
+# CURRENT ROADMAP — Maker Application Acceptance Build 455 (2026-10-24)
+
+**Current Development candidate: Build 455 — Full Maker Journey Acceptance & Next Roadmap.** The on-demand [source contract acceptance suite](docs/operations/RELEASE_467_BUILD_455_MAKER_JOURNEY_ACCEPTANCE.md) checks jewellery/metal, resin/clay, digital fabrication, rejected/salvaged attempts, private therapeutic work, commissions and Canada-only checkout/fulfillment without touching real business data. The existing canonical systems remain authoritative; no Build 455 schema or provider mutation is introduced. Source-contract GREEN is **not** physical/customer/provider acceptance: actual operator trials, authentic Etsy/Meta authorization, safety labels and live D1/Worker/R2 quota measurements remain named HOLD/UNKNOWN. Exact Development and Production source/deployment integrity proofs are required before reporting Build 455 Production GREEN.
+
+**After Build 455:** The 439–455 implementation queue is exhausted. A [proposed 456–465 roadmap](docs/operations/RELEASE_467_MAKER_JOURNEY_NEXT_QUEUE_456_465.md) is recorded for owner review, not approved implementation or a claim of live provider acceptance.
+
+---
+
+## Historical Maker queue snapshot (2026-10-23)
 
 **Current Development candidate (2026-10-23): Build 453 — Custom Orders & Commission Completion.** [Build 453 workflow and acceptance](docs/operations/RELEASE_467_BUILD_453_CUSTOM_ORDER_COMMISSION_COMPLETION.md) extends the original Commission Workbench with real customer-approved quote-change provenance, signed **estimated** cost impact from canonical commission cost review, completed traveler/QA finished-piece maker handoff and separate delivery follow-up HOLD. Customer proof, quotes, payments, order fulfillment and inventory remain source-owned, never inferred. **Previous Build 452 — Maker Photography, Videos & Product Stories** was independently Production GREEN at matching `dev/main` source tree `e08b794ac1acdf7c25f02ca33d4028eca805f50b`; [Build 452 safety/runbook](docs/operations/RELEASE_467_BUILD_452_MAKER_PHOTOGRAPHY_VIDEO_PRODUCT_STORIES.md). Development/Production GREEN for 453 still requires exact live GitHub/Cloudflare evidence; Etsy and customer delivery publication remain separate owner acceptance HOLDs.
 
