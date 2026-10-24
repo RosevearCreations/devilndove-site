@@ -184,6 +184,16 @@ jobs:
           node --check functions/api/admin/commission-workbench.js
           python scripts/release467_build453_commission_completion_sql_regression.py
 
+      - name: Build 454 Canadian packaging, immutable receipt, returns and aftercare regression
+        run: |
+          node --check functions/api/admin/maker-fulfillment-evidence.js
+          node --check public/js/admin-maker-fulfillment-evidence.js
+          python scripts/release467_build454_fulfillment_sql_regression.py
+
+      - name: Build 455 independent Maker source journey acceptance and owner-HOLD boundary
+        run: |
+          python scripts/release467_build455_maker_journey_acceptance.py
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
