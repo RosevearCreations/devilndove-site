@@ -251,6 +251,13 @@ jobs:
           node --check public/js/admin-maker-workbench-457.js
           node --test scripts/release467_build462_maker_product_safety.test.mjs scripts/release467_build457_maker_workbench.test.mjs
 
+      - name: Build 463 Cloudflare resource and Actions-minute actual-source budget HOLD audit
+        run: |
+          node --check public/js/maker-resource-budget-policy-463.mjs
+          node --check public/js/admin-maker-resource-budget-463.js
+          node --check public/js/admin-maker-workbench-457.js
+          node --test scripts/release467_build463_resource_budget.test.mjs scripts/release467_build457_maker_workbench.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
