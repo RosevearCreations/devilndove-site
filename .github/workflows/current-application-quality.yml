@@ -244,6 +244,13 @@ jobs:
           node --check public/js/maker-workbench-policy-457.mjs
           node --test scripts/release467_build461_etsy_owner_acceptance.test.mjs scripts/release467_build457_maker_workbench.test.mjs
 
+      - name: Build 462 Canadian product safety and original operator evidence HOLD audit
+        run: |
+          node --check public/js/maker-product-safety-policy-462.mjs
+          node --check public/js/admin-maker-product-safety-462.js
+          node --check public/js/admin-maker-workbench-457.js
+          node --test scripts/release467_build462_maker_product_safety.test.mjs scripts/release467_build457_maker_workbench.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
