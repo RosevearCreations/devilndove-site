@@ -319,6 +319,13 @@ jobs:
           node --check public/js/admin-product-editor-v163.js
           node --test scripts/release467_build471_single_product_channel_acceptance.test.mjs scripts/test_product_unified_publishing_443.mjs scripts/release467_build468_product_login_recovery.test.mjs
 
+      - name: Build 472 actual Maker image/video ratio, captions, rights and accessibility owner HOLD
+        run: |
+          node --check public/js/maker-media-remediation-policy-472.mjs
+          node --check public/js/admin-maker-media-remediation-472.js
+          node --check public/js/admin-maker-media-acceptance-460.js
+          node --test scripts/release467_build472_actual_media_remediation.test.mjs scripts/release467_build460_maker_media_accessibility.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
