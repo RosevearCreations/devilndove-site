@@ -237,6 +237,13 @@ jobs:
           node --check public/js/admin-maker-workbench-457.js
           node --test scripts/release467_build460_maker_media_accessibility.test.mjs scripts/release467_build457_maker_workbench.test.mjs
 
+      - name: Build 461 Etsy draft owner evidence and Meta manual-only acceptance boundary
+        run: |
+          node --check public/js/etsy-owner-acceptance-policy-461.mjs
+          node --check public/js/admin-etsy-owner-acceptance-461.js
+          node --check public/js/maker-workbench-policy-457.mjs
+          node --test scripts/release467_build461_etsy_owner_acceptance.test.mjs scripts/release467_build457_maker_workbench.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
