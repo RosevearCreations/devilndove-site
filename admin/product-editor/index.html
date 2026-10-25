@@ -21,7 +21,7 @@
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
-      <div><p class="eyebrow">Release 467 • Build 178</p><h1 id="productEditorTitle">Product Editor</h1><p>Edit one Product at a time. <strong>No autosave:</strong> our browser can temporarily recover unsaved edits, but only Save Product writes them to the server. Product QA remains explicit: opening QA performs zero D1 reads until we press Run QA.</p></div>
+      <div><p class="eyebrow">Release 467 • Build 468</p><h1 id="productEditorTitle">Product Editor</h1><p>Edit one Product at a time. <strong>No autosave to the server:</strong> edits are temporarily saved only in this browser session for recovery. Save Product is the sole Product write. If a 503/1102 interrupts a save, reload and compare the authoritative Product before saving again. QA still requires an explicit Run QA.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
 
@@ -268,11 +268,11 @@
 <section class="dd-editor-panel" data-editor-panel="advanced" hidden><h2>Advanced workspaces</h2><p class="small">These systems remain separate so they cannot wake up merely because we edit a Product.</p><div class="dd-product-actions"><a class="btn" href="/admin/inventory-operations/">Inventory Operations</a><a class="btn" id="productEditorMediaAdvancedLink" href="/admin/catalog-media/">Image Editor</a><a class="btn" href="/admin/release-preflight/">Release Preflight</a><a class="btn" href="/admin/packaging-studio/">Packaging</a></div></section>
 
       <div class="dd443-recovery" id="dd443Recovery" hidden role="region" aria-label="Unsaved Product recovery"><strong>Unsaved edits recovered from this browser session</strong><p class="small" id="dd443RecoveryStatus">Choose Restore to review them, or Discard to keep the saved Product.</p><div class="dd-product-actions"><button class="btn" id="dd443RecoveryRestore" type="button">Restore unsaved edits</button><button class="btn" id="dd443RecoveryDiscard" type="button">Discard recovered edits</button></div></div>
-      <div class="dd-editor-footer"><div class="small" aria-live="polite" id="dd440SaveHint">No server autosave. Unsaved edits are kept temporarily in this browser session for recovery; press Save Product to commit them. Nothing posts automatically to Etsy or Facebook.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
+      <div class="dd-editor-footer"><div class="small" aria-live="polite" id="dd440SaveHint">Local draft recovery is browser-session only. No background Product writes or retries. After an uncertain save, press <strong>Retry load</strong> to compare the saved Product, then choose whether another Save is needed. Nothing posts automatically to Etsy or Facebook.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-channel-intent-v405.js?v=437"></script><script src="/public/js/admin-product-distribution-v406.js?v=436"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-product-editor-v163.js?v=437&b390=1"></script>
+  <script src="/public/js/admin-product-channel-intent-v405.js?v=437"></script><script src="/public/js/admin-product-distribution-v406.js?v=436"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-recovery-policy-468.js?v=467b468"></script><script src="/public/js/admin-product-editor-v163.js?v=467b468&b390=1"></script>
   <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=442"></script>
   <script src="/public/js/admin-product-unified-publishing-v443.js?v=443"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
