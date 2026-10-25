@@ -22,6 +22,8 @@ export const MAKER_LINKS = Object.freeze([
    description:'Review traveler steps, cures, holds and source-linked evidence.',help:'Opening a traveler does not start a machine or certify a physical result; select our project in the original module.'},
   {key:'quality',phase:'quality',title:'Quality & salvage',href:'/admin/finished-quality/',passProject:true,
    description:'Record real finished, failed or reworked piece evidence.',help:'A first-quality outcome is not automatically safe to sell. Human release decisions and Product readiness remain separate.'},
+  {key:'product-safety',phase:'quality',title:'Canadian Product Safety & Label Review',href:'/admin/maker-product-safety/',passProject:true,
+   description:'Compare one original Product with category-specific Canadian safety, packaging and owner evidence questions.',help:'This private worksheet references official Canadian guidance and original owner-trial receipts. It never certifies goods, writes an approval, changes labels or allows a sale. A child-directed or cosmetic product needs its specific human review.'},
   {key:'cost',phase:'cost',title:'True costs (CAD)',href:'/admin/project-costs/',passProject:true,
    description:'Compare actual costs, unknowns, labour, waste and potential prices.',help:'An estimate never posts Accounting, changes a Product price or creates a sale.'},
   {key:'media',phase:'media',title:'Photography & maker stories',href:'/admin/maker-media-stories/',passProject:true,
