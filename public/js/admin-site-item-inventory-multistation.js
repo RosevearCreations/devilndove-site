@@ -67,7 +67,10 @@
     if (label?.firstChild?.nodeType === Node.TEXT_NODE) label.firstChild.nodeValue = 'Specific station tools';
     const existing = row.querySelector('[data-multistation-row]');
     const priorChecked = currentChecked(existing);
-    const selected = priorChecked.length ? priorChecked : itemIdsFromRow(row);
+    // Explicitly clearing every box must survive re-render; otherwise the stale
+    // saved item payload silently reassigns the just-cleared workstation.
+    const selected = existing?.dataset.selectionTouched === '1' ? priorChecked :
+      priorChecked.length ? priorChecked : itemIdsFromRow(row);
     const candidates = candidatesFromSelect(select);
     select.hidden = true;
     select.setAttribute('aria-hidden','true');
@@ -92,7 +95,11 @@
     if (fullLabel && fullLabel.textContent !== 'Specific station tools') fullLabel.textContent = 'Specific station tools';
     let box = document.getElementById('siteInventoryParentStations');
     const priorChecked = currentChecked(box);
-    const selected = priorChecked.length ? priorChecked : pendingFormIds.length ? pendingFormIds : uniqIds(select.value);
+    // A different item/new form must not inherit a previous item's boxes.
+    const changedRecord = box?.dataset.resetFromSource === '1';
+    const selected = changedRecord ? (pendingFormIds.length ? pendingFormIds : uniqIds(select.value)) :
+      box?.dataset.selectionTouched === '1' ? priorChecked :
+      priorChecked.length ? priorChecked : pendingFormIds.length ? pendingFormIds : uniqIds(select.value);
     select.hidden = true;
     select.setAttribute('aria-hidden','true');
     select.tabIndex = -1;
@@ -103,6 +110,7 @@
       select.insertAdjacentElement('afterend', box);
     }
     box.innerHTML = checklistMarkup(candidatesFromSelect(select), selected, roleIsStation, 'siteInventoryParentStationMembership');
+    if (changedRecord) box.dataset.resetFromSource = '';
     const activeIds = roleIsStation ? [] : currentChecked(box);
     syncLegacySelect(select, activeIds);
   }
@@ -143,6 +151,7 @@
     const checkbox = event.target.closest?.('input[type="checkbox"][data-station-id]');
     if (checkbox) {
       const box = checkbox.closest('.dd-multistation-checklist');
+      if (box) box.dataset.selectionTouched = '1';
       const row = checkbox.closest(ROW_SELECTOR);
       if (row) syncLegacySelect(row.querySelector(LEGACY_ROW_SELECT), currentChecked(box));
       else syncLegacySelect(document.getElementById(FULL_SELECT_ID), currentChecked(box));
@@ -159,11 +168,15 @@
     if (fullEdit) {
       const item = parseItem(fullEdit);
       pendingFormIds = uniqIds(item.workstation_site_item_inventory_ids || item.workstation_site_item_inventory_id || []);
+      const checklist = document.getElementById('siteInventoryParentStations');
+      if (checklist) { checklist.dataset.selectionTouched = ''; checklist.dataset.resetFromSource = '1'; }
       setTimeout(scheduleTransform, 0);
       return;
     }
     if (event.target.closest?.('#siteInventoryResetButton, [data-site-inventory-new]')) {
       pendingFormIds = [];
+      const checklist = document.getElementById('siteInventoryParentStations');
+      if (checklist) { checklist.dataset.selectionTouched = ''; checklist.dataset.resetFromSource = '1'; }
       setTimeout(scheduleTransform, 0);
     }
   }, true);
