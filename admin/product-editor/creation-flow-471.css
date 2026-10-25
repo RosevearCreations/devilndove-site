@@ -1,0 +1,13 @@
+/* Build 471: keep channel preparation visible and accessible within one Product creation flow. */
+.dd471-creation-flow{margin:14px 0 20px;padding:18px;border:1px solid rgba(202,171,111,.5);border-radius:12px;background:linear-gradient(135deg,rgba(71,49,89,.28),rgba(54,46,30,.2))}
+.dd471-flow-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.dd471-flow-head h2{margin:.15rem 0 .5rem}
+.dd471-hold{border:1px solid #a78342;color:#f0d7a5;border-radius:999px;padding:5px 10px;font-size:.85rem}
+#productChannel471Mount>.card{padding:12px!important;margin:12px 0!important;background:rgba(22,19,27,.36)}
+.dd471-consent{display:flex;align-items:flex-start;gap:10px;margin:12px 0;padding:12px;border:1px solid #ad8950;border-radius:8px;line-height:1.5}
+.dd471-consent input{flex:0 0 auto;width:18px;height:18px;margin-top:3px;accent-color:#b99548}
+.dd471-flow-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.dd471-recovery{padding:12px;border-left:4px solid #e3b15b;background:rgba(141,103,45,.18);margin:10px 0}
+.dd471-recovery[hidden]{display:none}
+.dd471-creation-flow button:focus-visible,.dd471-creation-flow input:focus-visible{outline:3px solid #f3d78a;outline-offset:3px}
+@media(max-width:600px){.dd471-creation-flow{padding:12px}.dd471-flow-actions>*{max-width:100%}}

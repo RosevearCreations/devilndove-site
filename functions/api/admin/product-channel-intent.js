@@ -2,6 +2,7 @@
 import {getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 import {channelPrefsValid,normalizeChannelPrefs} from '../_lib/etsyPublicationPacket405.mjs';
+import {verifyProductChannelConsent471} from '../_lib/productChannelConsent471.mjs';
 const reply=(v,status=200)=>jsonResponse({ok:status<400,build:405,provider_called:false,publication_performed:false,external_listing_created:false,...v},status,{'Cache-Control':'no-store'});
 const validId=x=>/^[1-9]\d{0,14}$/.test(String(x||''))&&Number.isSafeInteger(Number(x));
 const latest="SELECT admin_action_audit_id,details_json,created_at FROM admin_action_audit WHERE target_type='product' AND action_type='product_channel_intent_405' AND target_key=? ORDER BY admin_action_audit_id DESC LIMIT 1";
@@ -22,13 +23,17 @@ export async function onRequestPost(c){
  const g=gate(c);if(g.error)return g.error;
  let b;try{b=await c.request.json();}catch{return reply({error:'JSON required.'},400);}
  if(!validId(b?.product_id)||!channelPrefsValid(b))return reply({error:'Valid Product, explicit boolean destination switches and no-publication confirmation required.'},400);
+ const consent471=verifyProductChannelConsent471(b);
+ if(!consent471.ok)return reply({error:consent471.error},400);
  const id=String(b.product_id);
  try{
   const p=await g.db.prepare('SELECT product_id FROM products WHERE product_id=? LIMIT 1').bind(id).first();
   if(!p)return reply({error:'Save the canonical Product before recording channel switches.'},409);
   const detail={build:405,product_id:Number(id),etsy:b.etsy,facebook:b.facebook,request_key:b.request_key,
    confirmed_no_provider_publication:true,canonical_product_source:true,canonical_media_source:true,
-   provider_called:false,publication_performed:false};
+   provider_called:false,publication_performed:false,
+   ...(consent471.legacy?{}:{intent_source_build:471,owner_confirmed_preparation:true,
+     canada_only:true,us_shipping_disabled:true,remote_draft_consent:false,provider_media_transfer_consent:false})};
   const prior=await g.db.prepare(latest).bind(id).first();
   // Refuse overwriting a newer explicit preference from another browser session.
   if(b.expected_receipt!=null&&Number(b.expected_receipt)!==Number(prior?.admin_action_audit_id||0))
