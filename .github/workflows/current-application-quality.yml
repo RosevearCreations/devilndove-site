@@ -265,6 +265,13 @@ jobs:
           node --check public/js/admin-maker-workbench-457.js
           node --test scripts/release467_build464_fulfillment_pilot.test.mjs scripts/release467_build457_maker_workbench.test.mjs
 
+      - name: Build 465 independent Maker Pilot closure HOLD and next proposed queue
+        run: |
+          node --check public/js/maker-pilot-closure-policy-465.mjs
+          node --check public/js/admin-maker-pilot-closure-465.js
+          node --check public/js/admin-maker-workbench-457.js
+          node --test scripts/release467_build465_maker_closure.test.mjs scripts/release467_build457_maker_workbench.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
