@@ -43,7 +43,9 @@ export const MAKER_LINKS = Object.freeze([
   {key:'fulfillment-pilot',phase:'owner',title:'Real fulfillment, returns & aftercare pilot',href:'/admin/maker-fulfillment-pilot/',passProject:false,
    description:'Review an actual order, Canadian pickup/carrier receipts, damage/returns and customer consent. Append owner evidence only.',help:'Original Orders and Build 454 records are required. Missing evidence stays HOLD; no refund, exchange, message, postage purchase, carrier booking or inventory/order transition is performed.'},
   {key:'maker-closure',phase:'owner',title:'Maker Pilot closure & next priority queue',href:'/admin/maker-pilot-closure/',passProject:false,
-   description:'Independent actual-source review of the Maker Pilot, unresolved owner/provider HOLDS and proposed Builds 466–475.',help:'Reads only selected original Admin sources on request. Session attestations and a downloadable HOLD packet cannot certify real customer, legal, billing, Etsy or delivery acceptance; no automatic external actions.'}
+   description:'Independent actual-source review of the Maker Pilot, unresolved owner/provider HOLDS and proposed Builds 466–475.',help:'Reads only selected original Admin sources on request. Session attestations and a downloadable HOLD packet cannot certify real customer, legal, billing, Etsy or delivery acceptance; no automatic external actions.'},
+  {key:'trial-debrief',phase:'owner',title:'Real Maker trial debrief & receipt reconciliation',href:'/admin/maker-trial-debrief/',passProject:false,
+   description:'Inspect latest real owner receipt IDs, source-kind matches and an optional actual order ledger. Collect factual debriefs across six journeys.',help:'Reads at most one actual owner trial and one optional order only when requested. Private notes remain in the tab and a clearly unverified local packet. Later HOLD decisions supersede older receipts; no production record or external action is written.'}
 ]);
 
 export const TRIAL_SCENARIOS = Object.freeze([
