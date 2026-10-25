@@ -18,7 +18,7 @@
   const readJson=async(response,fallback)=>window.DDAuth.readApiJson(response,{fallbackMessage:fallback||'Product request failed.'});
   const incident=(error,operation='load')=>window.DDRecovery468?.classify(error,operation)||{category:'review',guidance:String(error?.message||'Request failed.'),temporary:false,uncertainWrite:false};
   const quota=(error)=>['d1_503','worker_1102'].includes(incident(error).category);
-  const incidentMessage=(error,operation='load')=>{const result=incident(error,operation);return `${result.guidance}${result.cloudflareRay?` Cloudflare reference ${result.cloudflareRay}.`:''}`;};
+  const incidentMessage=(error,operation='load')=>{const result=incident(error,operation);return `${result.guidance}${['d1_503','worker_1102'].includes(result.category)?' Automatic retries are stopped.':''}${result.cloudflareRay?` Cloudflare reference ${result.cloudflareRay}.`:''}`;};
   const rowsText=(data)=>Number.isFinite(Number(data?.d1_rows_read))?` D1 rows read: ${Number(data.d1_rows_read)}.`:'';
   const cents=(value)=>{const v=String(value??'').trim();if(!/^[0-9]+(?:\.[0-9]{1,2})?$/.test(v))throw new Error('Enter a valid CAD price with no more than two decimal places (for example 8.00). Nothing was saved.');const n=Number(v),minor=Math.round(n*100);if(!Number.isSafeInteger(minor)||minor<0)throw new Error('CAD price is out of range; nothing was saved.');return minor;};
   // Build 388: SEO suggestions are in-browser only, and never replace hand-edited SEO.

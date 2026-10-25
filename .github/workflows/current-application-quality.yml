@@ -290,6 +290,7 @@ jobs:
           node --check public/js/admin-recovery-policy-468.js
           node --check public/js/admin-product-editor-v163.js
           node --check public/js/auth.js
+          node --check public/js/admin-auth.js
           node --check public/js/login.js
           node --test scripts/release467_build468_product_login_recovery.test.mjs scripts/release467_build467_admin_shell.test.mjs
 

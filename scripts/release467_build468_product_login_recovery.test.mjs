@@ -102,6 +102,7 @@ test('Build 468: Product UI uses one explicit write and a server-readback manual
   const login=file('login/index.html');
   const loginJs=file('public/js/login.js');
   const save=file('functions/api/admin/product-editor-save.js');
+  assert.equal(file('public/js/auth.js'),file('public/js/admin-auth.js'),'cookie-first Admin auth alias must remain identical');
   assert.match(editor,/refreshDirty\(\);snapshotEdits\(\);\s*const submittedFingerprint/);
   assert.match(editor,/const unlockFields=freezeFields\(\)/);
   assert.match(editor,/state\.saveNeedsReview=true/);

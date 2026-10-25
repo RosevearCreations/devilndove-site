@@ -6,6 +6,7 @@
 
 - Login makes only one credential POST per deliberate Sign In, with a 15-second response boundary. A timeout, 503 or Cloudflare Worker error 1102 keeps the form available and presents a safe status. It never stores or logs the password or silently retries. The pre-existing route alias is used only for an explicit HTTP 405.
 - The shared error reader recognizes branded Cloudflare 1102 HTML responses even when the platform omits `cf-error-type`, and avoids displaying the returned HTML to the operator. The optional Cloudflare Ray reference is validated before presentation.
+- The legacy private Admin auth script remains byte-identical to the canonical cookie-first auth script, retaining the existing Build 384 compatibility gate.
 - Product draft edits continue to be saved only in `sessionStorage` for a maximum 12-hour local restore window. No D1/R2 reads or writes are performed for draft capture.
 - Product Save temporarily locks form fields while one explicit write is in flight, preserving the submitted snapshot; a late result cannot silently mark newer edits clean.
 - A Product POST that yields HTTP 503, 1102, a network timeout, a readback mismatch or another uncertain 5xx is **not** treated as proof that the write failed. The browser draft remains; the editor disables Save until the operator presses **Retry load** and compares the authoritative Product record. An ambiguous *new Product* requires checking Product Browser for a possible duplicate first.
