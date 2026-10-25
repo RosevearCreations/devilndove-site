@@ -285,6 +285,14 @@ jobs:
           node --check public/js/admin-shell-467.js
           node --test scripts/release467_build467_admin_shell.test.mjs scripts/release467_build466_maker_real_debrief.test.mjs scripts/release467_build457_maker_workbench.test.mjs
 
+      - name: Build 468 Product Editor local draft, login and 503/1102 recovery acceptance
+        run: |
+          node --check public/js/admin-recovery-policy-468.js
+          node --check public/js/admin-product-editor-v163.js
+          node --check public/js/auth.js
+          node --check public/js/login.js
+          node --test scripts/release467_build468_product_login_recovery.test.mjs scripts/release467_build467_admin_shell.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
