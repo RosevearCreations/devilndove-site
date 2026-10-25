@@ -17,7 +17,7 @@ for token in ("LAYOUT_ASSET_REVISION = '467b292-observer-budget-v1'","ADMIN_ERGO
 compat=t('public/js/admin-packaging-compatibility-v301.js')
 for token in ('admin-packaging-material-intelligence-v42.js?v=467b292','admin-packaging-label-composition-v43.js?v=467b292','admin-packaging-release-workflow-v83.js?v=467b292'):
     q(token in compat,'Build 292 Packaging cache identity missing '+token)
-q('/public/js/admin-site-item-inventory-multistation.js?v=292.1' in t('admin/inventory-operations/index.html'),'Inventory Build 292 helper cache identity missing')
+q(any(v in t('admin/inventory-operations/index.html') for v in ('/public/js/admin-site-item-inventory-multistation.js?v=292.1','/public/js/admin-site-item-inventory-multistation.js?v=470')),'Inventory Build 292 helper cache identity missing')
 products=t('public/js/admin-products-browser-v162.js')
 for forbidden in ('setInterval(','setTimeout(','MutationObserver'):
     q(forbidden not in products,'Current lean Product Browser gained automatic background behavior: '+forbidden)
