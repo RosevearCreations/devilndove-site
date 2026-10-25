@@ -1,5 +1,5 @@
 /* Build 457 — one bounded, authenticated GET per page; no task, inventory, provider or approval writes. */
-import {MAKER_LINKS,MAKER_PHASES,TRIAL_SCENARIOS,nextMakerAction,projectId,workbenchUrl} from './maker-workbench-policy-457.mjs';
+import {MAKER_LINKS,MAKER_PHASES,TRIAL_SCENARIOS,nextMakerAction,projectId,workbenchUrl} from './maker-workbench-policy-457.mjs?v=459';
 
 const byId=id=>document.getElementById(id);
 const projectSelect=byId('mwProject'),focusSelect=byId('mwFocus'),trialSelect=byId('mwTrial');
