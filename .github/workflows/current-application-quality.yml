@@ -222,6 +222,14 @@ jobs:
           node --check functions/api/admin/project-costs.js
           node --test scripts/release467_build458_maker_draft_recovery.test.mjs
 
+      - name: Build 459 private source-linked Maker finder, bounded pagination and media isolation
+        run: |
+          node --check functions/api/admin/_lib/makerEvidenceSearch459.mjs
+          node --check functions/api/admin/maker-evidence-search.js
+          node --check public/js/admin-maker-evidence-search-459.js
+          node --check public/js/maker-workbench-policy-457.mjs
+          node --test scripts/release467_build459_maker_evidence_search.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
