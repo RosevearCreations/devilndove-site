@@ -29,7 +29,9 @@ export const MAKER_LINKS = Object.freeze([
   {key:'owner',phase:'owner',title:'Owner trial evidence',href:'/admin/maker-owner-trials/',passProject:false,
    description:'Review genuine owner observations and retain immutable HOLD or accepted receipts.',help:'Acceptance here only means we reviewed a linked source. It does not certify safety, authorize customer consent or publish anything.'},
   {key:'commission',phase:'commission',title:'Commission workbench',href:'/admin/commission-workbench/',passProject:false,
-   description:'Return to the real customer request, quote and approval authority.',help:'Customer requests must stay in their own module. Do not infer a customer’s permission from a Creative Project.'}
+   description:'Return to the real customer request, quote and approval authority.',help:'Customer requests must stay in their own module. Do not infer a customer’s permission from a Creative Project.'},
+  {key:'finder',phase:'overview',title:'Maker source & evidence finder',href:'/admin/maker-evidence-search/',passProject:true,
+   description:'Search original Creative Projects, designs, recipe versions, linked tools and finished-piece serials.',help:'Private Admin read-only results link to their canonical owning modules. No raw media keys, customer data, source downloads, permission change or maker acceptance is inferred.'}
 ]);
 
 export const TRIAL_SCENARIOS = Object.freeze([

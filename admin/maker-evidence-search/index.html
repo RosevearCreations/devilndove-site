@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Maker Evidence Finder — Devil n Dove</title><link rel="stylesheet" href="/css/styles.css?v=467">
+<style>
+body[data-admin-page="maker-evidence-search"]{background:#141323;color:#f9f2ff;font-size:1rem;line-height:1.55}
+.mf-shell{width:min(1150px,94%);margin:1rem auto 5rem}.mf-shell h1,.mf-shell h2,.mf-shell h3{color:#fff0cd}
+.mf-shell a{color:#f0c9ff;text-underline-offset:.2em}.mf-skip{position:absolute;top:-100px;left:1rem;padding:.7rem;background:#f9dc96;color:#23132b}.mf-skip:focus{top:1rem;z-index:5}
+.mf-panel{border:1px solid #9880b2;border-radius:16px;background:linear-gradient(140deg,#1f2538,#342440);padding:clamp(15px,2.5vw,25px);margin:1.2rem 0;min-width:0}
+.mf-crumbs,.mf-actions{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;margin:1rem 0}
+.mf-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:1rem}.mf-fields label{display:block;font-weight:700}
+.mf-fields :is(input,select){display:block;box-sizing:border-box;width:100%;min-height:48px;padding:.6rem;background:#11192b;color:#fff;border:2px solid #c0abd2;border-radius:8px;margin-top:.3rem}
+.mf-shell button{min-height:44px;border-radius:9px;padding:.6rem 1rem;background:#674b90;border:1px solid #d4b8e9;color:white;font-weight:750;cursor:pointer}.mf-shell button:disabled{opacity:.55;cursor:not-allowed}
+.mf-shell :is(button,input,select,a,summary):focus-visible{outline:3px solid #ffdd87;outline-offset:4px}
+.mf-status{padding:.8rem 1rem;margin:1rem 0;border-left:5px solid #e2b2ff;background:#191c33;overflow-wrap:anywhere}.mf-error{border-left-color:#ffaba7}
+.mf-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,315px),1fr));gap:1rem}.mf-result{border:1px solid #9680ad;border-radius:12px;background:#171f34;padding:1rem;min-width:0;overflow-wrap:anywhere}
+.mf-result h3{margin:.25rem 0}.mf-result p{margin:.4rem 0}.mf-kind{font-size:.87rem;color:#efd38e;font-weight:750}.mf-muted{color:#e5d9ed}.mf-result a{display:inline-flex;align-items:center;min-height:44px;margin-right:.85rem;font-weight:700}
+.mf-help{border-top:1px solid #6d637d;margin-top:.7rem;padding-top:.6rem}.mf-help summary{cursor:pointer;min-height:36px;font-weight:700}
+@media(max-width:600px){.mf-shell{width:calc(100% - 24px)}.mf-panel{padding:1rem}}
+@media(prefers-reduced-motion:reduce){.mf-shell *{transition:none!important}}
+</style></head>
+<body data-admin-module="creator" data-admin-page="maker-evidence-search"><a href="#mfMain" class="mf-skip">Skip to Maker Evidence Finder</a>
+<main class="mf-shell" id="mfMain">
+<nav class="mf-crumbs" aria-label="Breadcrumb"><a href="/admin/">← Admin</a><a href="/admin/maker-workbench/">Maker Workbench</a><a href="/admin/creative-process/">Original Creative Projects</a></nav>
+<header><p class="mf-muted">Devil n Dove · Build 459 · Private Admin source finder</p><h1>Maker Search &amp; Evidence Finder</h1>
+<p>Find a real Creative Project, design revision, reviewed recipe version, project-linked workshop tool or serialised finished piece. Results are pointers to their original modules, not copies of evidence or approval decisions.</p></header>
+<section class="mf-panel" aria-labelledby="mfFiltersHeading"><h2 id="mfFiltersHeading">1. Search source records</h2>
+<form id="mfForm"><div class="mf-fields"><label for="mfKind">Find source type<select id="mfKind" name="kind"><option value="project">Creative Projects</option><option value="design">Design / CAD revisions</option><option value="recipe">Workshop recipe versions</option><option value="tool">Tools linked to a project</option><option value="piece">Finished pieces (serials)</option></select></label>
+<label for="mfQuery">Search name, key or serial<input id="mfQuery" name="q" type="search" maxlength="80" placeholder="e.g., ring, forge, 3D, or serial"></label>
+<label for="mfProject">Exact Creative Project ID (optional except tools)<input id="mfProject" name="project_id" inputmode="numeric" pattern="[1-9][0-9]*" placeholder="Use a Project result below"></label></div>
+<div class="mf-actions"><button id="mfSearch" type="submit">Search original sources</button><button id="mfClear" type="button">Clear filters</button></div></form>
+<details class="mf-help"><summary>ⓘ What should we search first?</summary><p>Start with Creative Projects if we do not know an ID. Select <strong>Search linked evidence</strong> on a project result to keep its exact source identity. Other categories need two search characters or a real project scope; tool evidence always needs a project scope. Each search returns at most 20 results with explicit page controls, not a site-wide private-media scan.</p></details></section>
+<section class="mf-panel" aria-labelledby="mfResultsHeading"><h2 id="mfResultsHeading">2. Original source matches</h2>
+<p id="mfStatus" class="mf-status" role="status" aria-live="polite">Ready to search real records after Admin authorization.</p>
+<div id="mfResults" class="mf-results" role="list" aria-label="Maker evidence search results"></div>
+<div class="mf-actions"><button id="mfPrevious" type="button" disabled>Previous page</button><button id="mfNext" type="button" disabled>Next page</button><span id="mfPage" class="mf-muted" aria-live="polite"></span></div>
+<details class="mf-help"><summary>ⓘ Can we open original photos or approve finished pieces here?</summary><p>No. This search does not return original filenames, R2 object keys, private links, customer details, workshop notes or media. Open the original authorized module, select the exact source ID shown, and follow its separate rights, safety, stock and publication controls. A recipe can be superseded; a registered piece is not automatically safe or available to sell.</p></details></section>
+<section class="mf-panel"><h2>3. Human evidence and privacy boundaries</h2><p>Search is authenticated Admin-only and read-only. Private therapeutic work stays private. We do not automatically certify a design, a recipe, a piece, a photograph, a customer request, or an Etsy listing. Source IDs and review states are search hints; genuine owner evidence and external acceptance remain HOLD until reviewed in their own modules.</p></section>
+</main><script src="/public/js/auth.js?v=467" defer></script><script src="/public/js/admin-maker-evidence-search-459.js?v=467b459" defer></script></body></html>
