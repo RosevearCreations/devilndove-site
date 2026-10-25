@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="/css/release467-build182-product-buyer-readiness.css?v=182"/>
   <link rel="stylesheet" href="/admin/product-editor/channel-assist-440.css?v=440"/>
   <link rel="stylesheet" href="/admin/product-editor/unified-publishing-443.css?v=443"/>
+  <link rel="stylesheet" href="/admin/product-editor/creation-flow-471.css?v=471"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -41,6 +42,13 @@
         <button class="btn dd-editor-tab dd-meta-tab" type="button" data-editor-tab="facebook" aria-selected="false">Facebook Marketplace <span class="dd-tab-channel-dot" aria-hidden="true"></span></button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="advanced" aria-selected="false">Advanced</button>
       </div>
+
+      <section class="dd471-creation-flow" aria-labelledby="dd471FlowTitle">
+        <div class="dd471-flow-head"><div><p class="eyebrow">Build 471 • Create once, review each channel</p><h2 id="dd471FlowTitle">One Product, optional destinations</h2></div><span class="dd471-hold">No automatic external publication</span></div>
+        <p class="small">Save one canonical Product below. We can choose Etsy and/or Facebook Marketplace preparation in the same Save. Those switches never publish, create a remote draft, transfer images, change shipping settings or notify a buyer.</p>
+        <div id="productChannel471Mount"></div>
+        <div class="dd471-flow-actions"><button type="button" class="btn" id="dd471MediaReview" disabled>Review canonical gallery and media mapping</button><span class="small" id="dd471FlowStatus" role="status" aria-live="polite">New Product: enter its facts, choose destinations if desired, and save once.</span></div>
+      </section>
 
       <section class="dd-editor-panel" data-editor-panel="basics">
         <h2>Basics</h2>
@@ -239,8 +247,10 @@
 <label><input type="checkbox" id="productChannel405Etsy"> Prepare this Product for Etsy</label>
 <label><input type="checkbox" id="productChannel405Facebook"> Prepare this Product for Facebook Marketplace</label>
 </div>
+<label class="dd471-consent"><input type="checkbox" id="productChannel471Consent"> I am the owner or authorized operator. I choose these destinations for <strong>local preparation only</strong>; I understand an Etsy draft, media transfer, or Facebook listing requires its own separate explicit review and authorization. U.S. shipping stays disabled.</label>
 <div class="dd-product-actions"><button type="button" class="btn" id="productChannel405Reload">Load saved destination choices</button>
 <button type="button" class="btn" id="productChannel405Save">Save destination choices for existing Product</button></div>
+<div id="productChannel471Recovery" class="dd471-recovery" hidden><p class="small">The Product was created, but the destination write could not be confirmed. First we loaded the saved preference receipt; the unchecked options below are the confirmed state. We can restore the browser's intended switches for review, then explicitly consent and save only the destination choices. Do not create the Product again.</p><button class="btn" type="button" id="productChannel471Restore">Review unsaved destination choices</button></div>
 <p class="small" id="productChannel405Status" role="status">OFF by default when no preference is configured. Save Product to create a source Product first.</p>
 <p class="small">Product gallery is edited in the Media tab and reused as the source for channel-specific draft/export reviews. Distribution remains subject to per-channel policy and explicit operator approval.</p>
 </section>
@@ -272,7 +282,7 @@
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-channel-intent-v405.js?v=437"></script><script src="/public/js/admin-product-distribution-v406.js?v=436"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-recovery-policy-468.js?v=467b468"></script><script src="/public/js/admin-product-editor-v163.js?v=467b468&b390=1"></script>
+  <script src="/public/js/admin-product-channel-intent-v405.js?v=471"></script><script src="/public/js/admin-product-creation-flow-471.js?v=471"></script><script src="/public/js/admin-product-distribution-v406.js?v=436"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-recovery-policy-468.js?v=467b468"></script><script src="/public/js/admin-product-editor-v163.js?v=471&b390=1"></script>
   <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=442"></script>
   <script src="/public/js/admin-product-unified-publishing-v443.js?v=443"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
