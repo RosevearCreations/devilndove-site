@@ -30,6 +30,8 @@ export const MAKER_LINKS = Object.freeze([
    description:'Inspect source-linked frames, captions, principal-image, consent and hands-on accessibility HOLDs.',help:'This private read-only audit uses the original Maker Story sources. Real photo dimensions, consent evidence, keyboard/touch and actual owner acceptance must be checked manually; no image or story is auto-approved.'},
   {key:'owner',phase:'owner',title:'Owner trial evidence',href:'/admin/maker-owner-trials/',passProject:false,
    description:'Review genuine owner observations and retain immutable HOLD or accepted receipts.',help:'Acceptance here only means we reviewed a linked source. It does not certify safety, authorize customer consent or publish anything.'},
+  {key:'etsy-owner',phase:'owner',title:'Etsy draft & marketplace owner acceptance',href:'/admin/etsy-owner-acceptance/',passProject:false,
+   description:'Inspect verified Etsy shop, Product, local draft, receipt and Canada-only shipping source evidence.',help:'Production OAuth stays on devilndove.com. This read-only view never creates Etsy drafts or publishes, and Meta stays a manual Product Editor handoff until supported API permissions are proven.'},
   {key:'commission',phase:'commission',title:'Commission workbench',href:'/admin/commission-workbench/',passProject:false,
    description:'Return to the real customer request, quote and approval authority.',help:'Customer requests must stay in their own module. Do not infer a customer’s permission from a Creative Project.'},
   {key:'finder',phase:'overview',title:'Maker source & evidence finder',href:'/admin/maker-evidence-search/',passProject:true,
