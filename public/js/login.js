@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const passwordEl = document.getElementById("loginPassword");
   const messageEl = document.getElementById("loginMessage");
   const submitButton = document.getElementById("loginSubmitButton");
+  let signingIn = false;
 
   if (!form || !window.DDAuth) return;
 
@@ -17,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     messageEl.textContent = message;
     messageEl.style.display = message ? "block" : "none";
     messageEl.style.color = isError ? "#b00020" : "";
+    messageEl.setAttribute('role', isError ? 'alert' : 'status');
   }
 
   function isValidEmail(email) {
@@ -42,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (signingIn) return; // exactly one password POST per deliberate submit
 
     const email = String(emailEl?.value || "").trim().toLowerCase();
     const password = String(passwordEl?.value || "");
@@ -64,6 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const originalText = submitButton?.textContent || "Login";
 
     try {
+      signingIn = true;
       setMessage("Signing you in...");
 
       if (submitButton) {
@@ -85,11 +89,13 @@ document.addEventListener("DOMContentLoaded", () => {
       setMessage("Login successful.");
       window.location.href = getRedirectTarget(user);
     } catch (error) {
-      const retryHint = error?.isCloudflareResourceLimit
-        ? " No login or password change was completed. Wait a moment, then try again after the new deployment is active."
-        : "";
-      setMessage(`${error.message || "Login failed."}${retryHint}`, true);
+      const incident = window.DDRecovery468?.classify(error, 'login');
+      const reference = incident?.cloudflareRay ? ` Cloudflare reference ${incident.cloudflareRay}.` : '';
+      setMessage(incident?.temporary
+        ? `${incident.guidance}${reference}`
+        : `${error.message || 'Login failed.'}${incident?.category === 'authorization' ? ' Check our email and password.' : ''}`, true);
     } finally {
+      signingIn = false;
       if (submitButton) {
         submitButton.disabled = false;
         submitButton.textContent = originalText;

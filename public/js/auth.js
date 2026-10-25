@@ -138,7 +138,10 @@
 
     if (response?.ok && data?.ok) return data;
 
-    const resourceLimit = cloudflareErrorType === '1102' || /worker exceeded resource limits/i.test(raw);
+    // Cloudflare may return a branded HTML error page with HTTP 500/503 and no
+    // cf-error-type header; recognize its 1102 marker without exposing the HTML.
+    const resourceLimit = cloudflareErrorType === '1102' ||
+      /worker exceeded resource limits|error\s*(?:code\s*)?[:#]?\s*1102/i.test(raw);
     const malformedSuccess = Boolean(response?.ok && !data);
     const message = resourceLimit
       ? 'Cloudflare stopped this request because the Worker reached a CPU or memory limit. Wait a moment and retry; the page will keep any browser recovery copy.'
@@ -259,13 +262,26 @@
   }
 
   async function postLoginTo(endpoint, email, password) {
-    return fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      credentials: 'same-origin',
-      cache: 'no-store',
-      body: JSON.stringify({ email: normalizeText(email).toLowerCase(), password: String(password || '') })
-    });
+    // One bounded attempt only. A timed-out POST has an *unknown* outcome;
+    // never replay it automatically or log/persist the password.
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timeout = controller ? window.setTimeout(() => controller.abort(), 15000) : 0;
+    try {
+      return await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        credentials: 'same-origin', cache: 'no-store',
+        ...(controller ? { signal: controller.signal } : {}),
+        body: JSON.stringify({ email: normalizeText(email).toLowerCase(), password: String(password || '') })
+      });
+    } catch (error) {
+      if (String(error?.name || '') !== 'AbortError') throw error;
+      const bounded = new Error('Sign-in response timed out; we could not confirm the result.');
+      bounded.code = 'auth_login_timeout'; bounded.httpStatus = 0; bounded.isRetryable = true;
+      throw bounded;
+    } finally {
+      if (timeout) window.clearTimeout(timeout);
+    }
   }
 
   async function login(email, password) {
