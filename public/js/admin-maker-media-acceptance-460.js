@@ -31,8 +31,8 @@ function updateCheckCount(){const marked=checklist.querySelectorAll('input:check
 function paint(data){
  const selected=data.selected,audit=auditMakerMedia(selected);
  frames.replaceChildren();ownerLinks(positive(selected?.project?.creative_work_project_id),positive(selected?.current?.maker_media_story_revision_id),selected?.project?.privacy_status);
- if(!selected?.project){summary.textContent='Choose a real Creative Project. No media acceptance can be inferred.';return;}
- if(!selected.current){summary.textContent=`HOLD: ${selected.project.project_title} has no source-linked Maker Story revision. Create one with actual media in the original Maker Studio.`;return;}
+ if(!selected?.project){summary.textContent='Choose a real Creative Project. No media acceptance can be inferred.';return audit;}
+ if(!selected.current){summary.textContent=`HOLD: ${selected.project.project_title} has no source-linked Maker Story revision. Create one with actual media in the original Maker Studio.`;return audit;}
  const gaps=audit.gaps.length?audit.gaps.join(' '):'No overview gaps in this bounded source response.';
  summary.textContent=`HOLD: ${selected.project.project_title} · story revision #${selected.current.maker_media_story_revision_id} · ${audit.frames.length} frames · ${audit.automaticFindingCount} review findings. ${gaps} Source fields alone never certify media or accessibility.`;
  for(const frame of audit.frames){const article=node('article',undefined,'ma-item');article.setAttribute('role','listitem');
@@ -45,6 +45,7 @@ function paint(data){
   article.append(actions);frames.append(article);
  }
  if(!audit.frames.length)frames.append(node('p','No original source frames to inspect. Keep this case on HOLD.'));
+ return audit;
 }
 async function load(projectId=positive(project.value),revisionId=positive(revision.value)){
  if(busy)return;busy=true;refresh.disabled=true;project.disabled=true;revision.disabled=true;const id=++inFlight;
@@ -57,8 +58,10 @@ async function load(projectId=positive(project.value),revisionId=positive(revisi
   options(project,list,'creative_work_project_id',x=>`#${x.creative_work_project_id} ${x.project_title}`,'Choose a real Creative Project',projectId);
   const selected=data.selected;
   options(revision,selected?.revisions||[],'maker_media_story_revision_id',x=>`#${x.maker_media_story_revision_id} ${x.story_title}`,'Most recent original revision',revisionId);
-  paint(data);paintChecks(Boolean(selected?.current&&(selected?.frames||[]).length));message(projectId?`Private sources loaded. Review genuine owner evidence and leave missing steps on HOLD.`:`Choose one of ${list.length} bounded source projects. No records changed.`);
- }catch(error){frames.replaceChildren();paintChecks(false);summary.textContent='HOLD: original evidence could not be verified.';message('HOLD: '+error.message+' Check Admin sign-in and source migration 0047. No media or reviews were changed.',true)}
+  const audit=paint(data);paintChecks(Boolean(selected?.current&&(selected?.frames||[]).length));
+  document.dispatchEvent(new CustomEvent('dd:maker-media-audited',{detail:{audit}}));
+  message(projectId?`Private sources loaded. Review genuine owner evidence and leave missing steps on HOLD.`:`Choose one of ${list.length} bounded source projects. No records changed.`);
+ }catch(error){frames.replaceChildren();paintChecks(false);document.dispatchEvent(new CustomEvent('dd:maker-media-audited',{detail:{audit:null}}));summary.textContent='HOLD: original evidence could not be verified.';message('HOLD: '+error.message+' Check Admin sign-in and source migration 0047. No media or reviews were changed.',true)}
  finally{busy=false;refresh.disabled=false;project.disabled=false;revision.disabled=false;}
 }
 project.addEventListener('change',()=>load(positive(project.value),''));revision.addEventListener('change',()=>load(positive(project.value),positive(revision.value)));
