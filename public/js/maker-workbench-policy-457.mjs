@@ -39,7 +39,9 @@ export const MAKER_LINKS = Object.freeze([
   {key:'finder',phase:'overview',title:'Maker source & evidence finder',href:'/admin/maker-evidence-search/',passProject:true,
    description:'Search original Creative Projects, designs, recipe versions, linked tools and finished-piece serials.',help:'Private Admin read-only results link to their canonical owning modules. No raw media keys, customer data, source downloads, permission change or maker acceptance is inferred.'},
   {key:'resource-budget',phase:'overview',title:'D1, Workers, R2 & GitHub usage review',href:'/admin/maker-resource-budget/',passProject:false,
-   description:'Compare actual provider usage and plan ceilings with source links; inspect measured Build 462 GitHub workflow timings.',help:'Cloudflare dashboard billing and observability are the only authority for actual D1/Worker/R2 usage. The static GitHub sample is historical; missing metrics remain HOLD. No provider reads or quota/payment changes run automatically.'}
+   description:'Compare actual provider usage and plan ceilings with source links; inspect measured Build 462 GitHub workflow timings.',help:'Cloudflare dashboard billing and observability are the only authority for actual D1/Worker/R2 usage. The static GitHub sample is historical; missing metrics remain HOLD. No provider reads or quota/payment changes run automatically.'},
+  {key:'fulfillment-pilot',phase:'owner',title:'Real fulfillment, returns & aftercare pilot',href:'/admin/maker-fulfillment-pilot/',passProject:false,
+   description:'Review an actual order, Canadian pickup/carrier receipts, damage/returns and customer consent. Append owner evidence only.',help:'Original Orders and Build 454 records are required. Missing evidence stays HOLD; no refund, exchange, message, postage purchase, carrier booking or inventory/order transition is performed.'}
 ]);
 
 export const TRIAL_SCENARIOS = Object.freeze([
