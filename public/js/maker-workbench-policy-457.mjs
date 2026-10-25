@@ -26,6 +26,8 @@ export const MAKER_LINKS = Object.freeze([
    description:'Compare actual costs, unknowns, labour, waste and potential prices.',help:'An estimate never posts Accounting, changes a Product price or creates a sale.'},
   {key:'media',phase:'media',title:'Photography & maker stories',href:'/admin/maker-media-stories/',passProject:true,
    description:'Prepare a private factual story with original media and rights evidence.',help:'Private workshop photos do not imply consent for a public store, Etsy or social post.'},
+  {key:'media-acceptance',phase:'media',title:'Media & accessibility acceptance',href:'/admin/maker-media-acceptance/',passProject:true,
+   description:'Inspect source-linked frames, captions, principal-image, consent and hands-on accessibility HOLDs.',help:'This private read-only audit uses the original Maker Story sources. Real photo dimensions, consent evidence, keyboard/touch and actual owner acceptance must be checked manually; no image or story is auto-approved.'},
   {key:'owner',phase:'owner',title:'Owner trial evidence',href:'/admin/maker-owner-trials/',passProject:false,
    description:'Review genuine owner observations and retain immutable HOLD or accepted receipts.',help:'Acceptance here only means we reviewed a linked source. It does not certify safety, authorize customer consent or publish anything.'},
   {key:'commission',phase:'commission',title:'Commission workbench',href:'/admin/commission-workbench/',passProject:false,
