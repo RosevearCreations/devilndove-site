@@ -1,0 +1,29 @@
+/* Build 467 — self-contained additive Admin shell; Standard leaves existing Admin visuals intact. */
+.dd-as-467-shell{position:relative;z-index:5;box-sizing:border-box;display:flex;align-items:center;gap:12px;flex-wrap:wrap;width:min(1340px,calc(100% - 24px));margin:12px auto;padding:12px 16px;background:#1d2335;color:#f9f1ff;border:2px solid #977bb2;border-radius:14px;box-shadow:0 5px 22px rgba(0,0,0,.28);font:600 15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.dd-as-467-shell *{box-sizing:border-box}.dd-as-467-brand{font-size:1rem;font-weight:800;color:#fff5dd;letter-spacing:.01em;white-space:nowrap}
+.dd-as-467-links{display:flex;flex:1 1 390px;align-items:center;flex-wrap:wrap;gap:5px}.dd-as-467-shell a{display:inline-flex;align-items:center;min-height:44px;padding:6px 10px;border-radius:9px;text-decoration:none;color:#f8e8ff;border:1px solid transparent}
+.dd-as-467-shell a:hover,.dd-as-467-shell a[aria-current="page"]{background:#493358;border-color:#c49fe4;color:#fff}
+.dd-as-467-settings{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.dd-as-467-settings label{display:inline;font:inherit;margin:0;color:#f7e8ff}
+.dd-as-467-settings select{min-height:44px;max-width:245px;width:auto;margin:0;padding:8px 10px;border:2px solid #d9b8f5;border-radius:8px;background:#171b2b;color:#fff;font:inherit;cursor:pointer}
+.dd-as-467-help{position:relative;min-width:0;max-width:min(100%,360px)}.dd-as-467-help summary{list-style-position:inside;cursor:pointer;min-height:44px;display:flex;align-items:center;padding:6px 11px;border:1px solid #c1a2de;border-radius:9px;color:#fff4da;white-space:nowrap}
+.dd-as-467-help[open]{flex:1 0 min(100%,290px)}.dd-as-467-help p{font-size:.91rem;font-weight:500;line-height:1.55;margin:.5rem 0;padding:.45rem .65rem;color:#fff3df;background:#283247;border-radius:8px}
+.dd-as-467-status{flex-basis:100%;font-weight:500;color:#f5dbac;line-height:1.4}
+.dd-as-467-shell :is(a,select,summary):focus-visible,.dd-as-467-card-help summary:focus-visible{outline:3px solid #ffe69b;outline-offset:3px}
+.dd-as-467-card-help{margin-top:14px;padding:.65rem .8rem;border:1px solid #988ab0;border-radius:9px;background:rgba(13,21,34,.5);color:#fff4e2;font-size:.93rem;line-height:1.5}
+.dd-as-467-card-help summary{color:#ffdb9e;min-height:36px;cursor:pointer;font-weight:750}.dd-as-467-card-help p{margin:.6rem 0 .2rem;color:#f5eafa;font-weight:500}
+#ddBrandV3AdminWorkspaces > .dd-brand-v3-admin-card{position:relative}
+.dd-as-467-help-glyph{position:absolute;right:8px;top:8px;display:grid;place-items:center;width:28px;height:28px;border:2px solid #d9bded;border-radius:50%;background:#332045;color:#fff1d8;font:800 1rem/1 system-ui;pointer-events:none}
+.dd-as-467-screen-reader{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important}
+body[data-dd-admin-theme="purple"][data-admin-page]{background:linear-gradient(155deg,#25152d 0%,#38243c 48%,#201829 100%) fixed!important;color:#fff5e8}
+body[data-dd-admin-theme="purple"] :is(.card,.mw-panel,.mw-card,.pc-panel,.md-panel,.trial-card,.ps-panel,.ps-question,.dd-brand-v3-admin-card){background:linear-gradient(140deg,#38223e,#322b35 65%,#453127)!important;border-color:#bd9151!important;color:#fff5e9;box-shadow:0 5px 18px rgba(0,0,0,.16)}
+body[data-dd-admin-theme="purple"] :is(.mw-shell,.pc-shell,.md-shell,.trial-shell,.ps-shell) :is(h1,h2,h3){color:#ffe2a0}
+body[data-dd-admin-theme="purple"] :is(.mw-shell,.pc-shell,.md-shell,.trial-shell,.ps-shell) a{color:#ffe0ad}
+body[data-dd-admin-theme="purple"] :is(.dd-as-467-shell,.dd-as-467-card-help){background:#332139;border-color:#cb9c58}
+body[data-dd-admin-theme="purple"] .dd-as-467-shell :is(a:hover,a[aria-current="page"]){background:#614533;border-color:#d9b16a}
+body[data-dd-admin-theme="purple"] .dd-as-467-settings select{background:#272032;border-color:#e5be7f}
+body[data-dd-admin-theme="purple"] .dd-as-467-help-glyph{background:#594026;border-color:#f4d08b}
+@media(max-width:640px){.dd-as-467-shell{width:calc(100% - 16px);padding:10px}.dd-as-467-links{flex-basis:100%;gap:2px}.dd-as-467-shell a{padding:5px 7px}.dd-as-467-settings{width:100%}.dd-as-467-settings select{max-width:min(100%,245px)}}
+@media(prefers-reduced-motion:reduce){.dd-as-467-shell *,.dd-as-467-card-help *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(prefers-contrast:more){.dd-as-467-shell,.dd-as-467-card-help{border-width:3px}.dd-as-467-shell a{border-color:currentColor}.dd-as-467-shell :is(a,select,summary):focus-visible{outline-width:4px}}
+@media(forced-colors:active){.dd-as-467-shell,.dd-as-467-card-help{background:Canvas;color:CanvasText;border:2px solid CanvasText}.dd-as-467-help-glyph{color:CanvasText;background:Canvas;border-color:CanvasText}}
+@media print{.dd-as-467-shell,.dd-as-467-card-help{display:none!important}}
