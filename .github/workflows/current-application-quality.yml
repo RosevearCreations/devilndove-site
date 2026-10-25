@@ -294,6 +294,12 @@ jobs:
           node --check public/js/login.js
           node --test scripts/release467_build468_product_login_recovery.test.mjs scripts/release467_build467_admin_shell.test.mjs
 
+      - name: Build 469 source-linked Cloudflare Free usage and hotspot HOLD acceptance
+        run: |
+          node --check public/js/maker-budget-source-policy-469.mjs
+          node --check public/js/admin-maker-budget-source-469.js
+          node --test scripts/release467_build469_cloudflare_budget_sources.test.mjs scripts/release467_build463_resource_budget.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
