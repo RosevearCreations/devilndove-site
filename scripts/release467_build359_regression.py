@@ -31,7 +31,7 @@ q(len(files)>=30 and files[29]=='0030_release467_inventory_workstation_category_
 for token in ("'jewelry-forge-work'","'Jewelry & Forge Work'","'auto-detailing'","'Auto Detailing'","INSERT OR IGNORE INTO inventory_processes"):q(token in mig,'Migration 0030 missing '+token)
 for forbidden in ('DELETE FROM INVENTORY_PROCESSES','DROP TABLE','ALTER TABLE'):q(forbidden not in mig.upper(),'Migration 0030 must preserve existing taxonomy/assignments: '+forbidden)
 for token in ('grid-template-columns:repeat(3,minmax(0,1fr))','@media(max-width:1200px)','@media(max-width:760px)','.site-inventory-grid-identity','min-width:0!important','position:static!important'):q(token in css,'Build 359 Card View CSS missing '+token)
-q('/css/inventory-card-view-v359.css?v=359.1' in page and '/public/js/admin-site-item-inventory.js?v=467b359' in page,'Inventory cache identity missing Build 359')
+q('/css/inventory-card-view-v359.css?v=359.1' in page and any(v in page for v in ('/public/js/admin-site-item-inventory.js?v=467b359','/public/js/admin-site-item-inventory.js?v=470')),'Inventory cache identity missing Build 359')
 q('BUILD359_CARD_LAYOUT_AND_WORKSTATION_TAXONOMY' in ui,'Inventory Build 359 JS marker missing')
 q('0030_release467_inventory_workstation_category_additions.sql' in preflight and '===30' in preflight,'Deployment Preflight not advanced through migration 0030')
 q('0030_release467_inventory_workstation_category_additions.sql' in sanity and 'through 0030' in sanity,'Repository forward sanity not advanced through migration 0030')

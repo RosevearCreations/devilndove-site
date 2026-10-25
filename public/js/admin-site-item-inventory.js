@@ -142,9 +142,35 @@ document.addEventListener('DOMContentLoaded', () => {
       .map((el) => Number(el.dataset.stationId || el.value || 0))
       .filter((id) => Number.isInteger(id) && id > 0);
     const ids = [...new Set(checked)];
-    if (ids.length) return ids;
+    // Build 470: an explicit empty multi-checklist means REMOVE all station memberships.
+    // Never resurrect the previous legacy single-select association on an empty choice.
+    if (scope?.querySelector?.('.dd-multistation-checklist')) return ids;
     const fallback = Number(fallbackSelect?.value || 0);
     return fallback > 0 ? [fallback] : [];
+  }
+
+  function validateInventoryUnitInputs470(scope, inline = false) {
+    const factor = inline
+      ? scope?.querySelector?.('[data-field="usage_units_per_stock_unit"]')
+      : document.getElementById('siteInventoryUsageUnitsPerStock');
+    const minimum = inline ? null : document.getElementById('siteInventoryMinimumUsageIncrement');
+    const onHand = inline
+      ? scope?.querySelector?.('[data-field="on_hand_quantity"]')
+      : document.getElementById('siteInventoryOnHand');
+    const unitCost = inline
+      ? scope?.querySelector?.('[data-field="unit_cost_dollars"]')
+      : document.getElementById('siteInventoryUnitCost');
+    const inputs = [[factor,'Usage units per stock unit',0.001],[minimum,'Minimum usage increment',0.0001],
+      [onHand,'On-hand quantity',0],[unitCost,'Unit cost',0]];
+    for (const [input,label,min] of inputs) {
+      if (!input) continue;
+      const raw = String(input.value || '').trim();
+      const number = Number(raw);
+      if (!raw || !Number.isFinite(number) || number < min || input.validity?.badInput) {
+        input.focus();
+        throw new Error(`${label} must be a real number ${min === 0 ? 'of zero or more' : `at least ${min}`}. Review the original stock and usage units; this edit was not sent to the server.`);
+      }
+    }
   }
 
   function syncRowReorderState(row) {
@@ -1170,6 +1196,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveButton = document.getElementById('siteInventorySaveButton');
     const originalLabel = saveButton?.textContent || 'Save Inventory Item';
     try {
+      validateInventoryUnitInputs470(document.getElementById('siteInventoryForm'));
       const payload = readForm();
       saveInventoryDraft();
       const isEditing = Number(payload.site_item_inventory_id || 0) > 0;
@@ -1447,8 +1474,9 @@ document.addEventListener('DOMContentLoaded', () => {
       let original = {};
       try { original = JSON.parse(saveRowBtn.getAttribute('data-item') || '{}'); } catch {}
       if (!id || !row) return;
-      const payload = readEditableRowPayload(row, original);
       try {
+        validateInventoryUnitInputs470(row, true);
+        const payload = readEditableRowPayload(row, original);
         saveRowBtn.disabled = true; saveRowBtn.textContent = 'Saving…';
         const response = await window.DDAuth.apiFetch('/api/admin/site-item-inventory', { method: 'PATCH', body: JSON.stringify(payload) });
         const data = await readApiPayload(response, 'Row update failed.');
