@@ -279,6 +279,12 @@ jobs:
           node --check public/js/admin-maker-workbench-457.js
           node --test scripts/release467_build466_maker_real_debrief.test.mjs scripts/release467_build465_maker_closure.test.mjs scripts/release467_build457_maker_workbench.test.mjs
 
+      - name: Build 467 Admin Standard/Purple shell and contextual help audit
+        run: |
+          node --check public/js/admin-shell-policy-467.mjs
+          node --check public/js/admin-shell-467.js
+          node --test scripts/release467_build467_admin_shell.test.mjs scripts/release467_build466_maker_real_debrief.test.mjs scripts/release467_build457_maker_workbench.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
