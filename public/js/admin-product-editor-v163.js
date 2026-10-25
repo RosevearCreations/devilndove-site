@@ -234,7 +234,7 @@
   function freezeFields(){
     const locked=[];
     for(const el of form.elements){
-      if(el.disabled||!el.name||!['INPUT','SELECT','TEXTAREA'].includes(el.tagName))continue;
+      if(el.disabled||(!el.name&&!['productChannel405Etsy','productChannel405Facebook','productChannel471Consent'].includes(el.id))||!['INPUT','SELECT','TEXTAREA'].includes(el.tagName))continue;
       el.disabled=true;locked.push(el);
     }
     return ()=>locked.forEach(el=>{el.disabled=false;});
@@ -246,7 +246,9 @@
     }
     if(state.productId&&!state.authorityLoaded){setStatus('Product authority has not loaded. Save is blocked to prevent stale edits.','error');return;}
     if(!get('name')){setStatus('Product name is required.','error');field('name')?.focus();return;}
-    let body;try{body=payload();}catch(error){setStatus(error.message,'error');field('price')?.focus();return;}
+    let body,channelSnapshot;
+    try{body=payload();channelSnapshot=window.DDProductChannels405?.captureForProductSave?.()||{changed:false};}
+    catch(error){setStatus(error.message,'error');if(/consent/i.test(error.message))document.getElementById('productChannel471Consent')?.focus();else field('price')?.focus();return;}
     if(body.price_cents===0){
       if(!window.confirm('This Product is priced at $0.00. Save it as a deliberately FREE Product? Cancel to correct the price.')){
         setStatus('Save cancelled. Enter the intended CAD price before saving.','warn');field('price')?.focus();return;
@@ -271,7 +273,7 @@
       // A successful Product save is independent of optional destination choices;
       // a destination failure must never ask the operator to repeat Product POST.
       let destinationsSaved=true;
-      try{destinationsSaved=(await window.DDProductChannels405?.afterProductSave(savedId))!==false;}
+      try{destinationsSaved=(await window.DDProductChannels405?.afterProductSave(savedId,channelSnapshot))!==false;}
       catch{destinationsSaved=false;}
       const newerEdits=fingerprint()!==submittedFingerprint;
       if(!newerEdits){markClean();clearRecovery();}
