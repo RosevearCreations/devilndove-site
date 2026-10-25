@@ -300,6 +300,16 @@ jobs:
           node --check public/js/admin-maker-budget-source-469.js
           node --test scripts/release467_build469_cloudflare_budget_sources.test.mjs scripts/release467_build463_resource_budget.test.mjs
 
+      - name: Build 470 Inventory unit, workstation, location and original cost source HOLD
+        run: |
+          node --check functions/api/_lib/inventorySourceValidation470.js
+          node --check functions/api/admin/site-item-inventory.js
+          node --check public/js/inventory-consistency-policy-470.mjs
+          node --check public/js/admin-inventory-consistency-470.js
+          node --check public/js/admin-site-item-inventory.js
+          node --check public/js/admin-site-item-inventory-multistation.js
+          node --test scripts/release467_build470_inventory_consistency.test.mjs scripts/release467_build70_inventory_unit_runtime_test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

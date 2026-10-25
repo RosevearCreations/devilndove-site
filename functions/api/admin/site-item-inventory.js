@@ -3,6 +3,7 @@
 // Release 467 Build 71 intercepts lifecycle mutations here so receiving, reservation,
 // release, use, return, write-off and reorder semantics share one fail-closed authority.
 import * as legacy from './_siteItemInventoryLegacy.js';
+import { validateInventoryMutationSource470 } from '../_lib/inventorySourceValidation470.js';
 import { auditAdminAction, getAdminUserFromRequest, getDb, jsonResponse } from '../_lib/adminAudit.js';
 import {
   applyInventoryLifecycleAction,
@@ -245,6 +246,8 @@ export async function onRequestPost(context) {
   if (ready.error) return ready.error;
   const body = await readBodyClone(context.request);
   const action = String(body?.action || '').trim().toLowerCase().replace(/-/g, '_');
+  const sourceValidation=validateInventoryMutationSource470(body);
+  if(!sourceValidation.ok)return json({ok:false,build:470,...sourceValidation},400);
 
   if (LIFECYCLE_ACTIONS.has(action)) {
     try {
@@ -351,6 +354,8 @@ export async function onRequestPatch(context) {
   const ready = await authorizedContext(context);
   if (ready.error) return ready.error;
   const body = await readBodyClone(context.request);
+  const sourceValidation=validateInventoryMutationSource470(body);
+  if(!sourceValidation.ok)return json({ok:false,build:470,...sourceValidation},400);
   const hasCurrentLocation = Object.prototype.hasOwnProperty.call(body || {}, 'current_location_site_item_inventory_id');
   let currentLocationId = 0;
   if (hasCurrentLocation) {
