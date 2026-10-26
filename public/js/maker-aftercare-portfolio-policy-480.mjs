@@ -2,7 +2,7 @@
 const knownStates=new Set(['evidence_still_missing','awaiting_owner_action','awaiting_external_decision','reassessment_complete_case_open']);
 export function summarizeAftercarePortfolio480(receipts,{sampleLimit=250,hasMore=false}={}){
  const input=Array.isArray(receipts)?receipts.slice(0,sampleLimit):[];
- const latest=new Map(),byMonth=new Map(),annotations=new Map(),handoffs=new Map(),followupsByOrder=new Map();let unclassified=0,recognized=0,annotationReceipts=0,handoffReceipts=0;
+ const latest=new Map(),byMonth=new Map(),annotations=new Map(),handoffs=new Map(),reassessments=new Map(),followupsByOrder=new Map();let unclassified=0,recognized=0,annotationReceipts=0,handoffReceipts=0,reassessmentReceipts=0;
  for(const receipt of input){
   const note=String(receipt?.review_note??'');
   const annotation=/Build 481 priority review; source follow-up #(\d+); priority=(routine|priority|urgent_manual_review); next=(collect_missing_evidence|owner_followup|external_decision_pending|reassess_without_closure); evidence=[a-zA-Z0-9 _.-]{8,120}; owner observed; case remains open; no customer action\./.exec(note);
@@ -21,7 +21,17 @@ export function summarizeAftercarePortfolio480(receipts,{sampleLimit=250,hasMore
    const sourceId=Number(handoff[1]),priorityId=Number(handoff[2]),receiptId=Number(receipt.evidence_id);
    if(Number.isSafeInteger(sourceId)&&sourceId>0&&Number.isSafeInteger(priorityId)&&priorityId>0&&Number.isSafeInteger(receiptId)&&receiptId>0){
     const prior=handoffs.get(sourceId);
-    if(!prior||receiptId>prior.receipt_id)handoffs.set(sourceId,{receipt_id:receiptId,priority_receipt_id:priorityId,disposition:handoff[3]});
+    if(!prior||receiptId>prior.receipt_id)handoffs.set(sourceId,{receipt_id:receiptId,priority_receipt_id:priorityId,disposition:handoff[3],created_at:String(receipt.created_at??'').slice(0,19)});
+   }
+   continue;
+  }
+  const reassessment=/Build 483 handoff reassessment; source follow-up #(\d+); priority receipt #(\d+); handoff receipt #(\d+); finding=(further_evidence_required|owner_action_pending|external_authorization_pending|manual_reassessment_complete_case_open); evidence=[a-zA-Z0-9 _.-]{8,120}; independently reassessed; case remains open; no external action\./.exec(note);
+  if(reassessment&&receipt.event_kind==='aftercare_followup'){
+   reassessmentReceipts++;
+   const sourceId=Number(reassessment[1]),priorityId=Number(reassessment[2]),handoffId=Number(reassessment[3]),receiptId=Number(receipt.evidence_id);
+   if([sourceId,priorityId,handoffId,receiptId].every(x=>Number.isSafeInteger(x)&&x>0)){
+    const prior=reassessments.get(sourceId);
+    if(!prior||receiptId>prior.receipt_id)reassessments.set(sourceId,{receipt_id:receiptId,priority_receipt_id:priorityId,handoff_receipt_id:handoffId,finding:reassessment[4]});
    }
    continue;
   }
@@ -43,10 +53,13 @@ export function summarizeAftercarePortfolio480(receipts,{sampleLimit=250,hasMore
   const match=annotations.get(row.evidence_id);
   if(match){row.priority=match.priority;row.next_action=match.next_action;row.priority_receipt_id=match.receipt_id;
    const handoff=handoffs.get(row.evidence_id);
-   if(handoff?.priority_receipt_id===match.receipt_id){row.handoff_receipt_id=handoff.receipt_id;row.handoff_disposition=handoff.disposition;}
+   if(handoff?.priority_receipt_id===match.receipt_id){row.handoff_receipt_id=handoff.receipt_id;row.handoff_disposition=handoff.disposition;row.handoff_created_at=handoff.created_at;
+    const reassessment=reassessments.get(row.evidence_id);
+    if(reassessment?.priority_receipt_id===match.receipt_id&&reassessment.handoff_receipt_id===handoff.receipt_id){row.reassessment_receipt_id=reassessment.receipt_id;row.reassessment_finding=reassessment.finding;}
+   }
   }
  }
- return Object.freeze({sampled_receipts:input.length,recognized_receipts:recognized,priority_annotation_receipts:annotationReceipts,handoff_receipts:handoffReceipts,unclassified_receipts:unclassified,
+ return Object.freeze({sampled_receipts:input.length,recognized_receipts:recognized,priority_annotation_receipts:annotationReceipts,handoff_receipts:handoffReceipts,reassessment_receipts:reassessmentReceipts,unclassified_receipts:unclassified,
   orders_with_repeated_followups_in_sample:[...followupsByOrder.values()].filter(n=>n>1).length,
   distinct_orders_in_sample:latest.size,priority_annotations_in_sample:annotations.size,states,trend:[...byMonth].sort(([a],[b])=>a.localeCompare(b)).map(([month,count])=>({month,count})),
   cases:[...latest.values()].sort((a,b)=>b.evidence_id-a.evidence_id).slice(0,25),

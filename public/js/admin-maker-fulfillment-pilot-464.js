@@ -8,6 +8,7 @@ import {reconcileAudit478,reconciliationPayload478} from './maker-aftercare-owne
 import {followupOutstanding479,outstandingPayload479} from './maker-aftercare-outstanding-case-policy-479.mjs?v=479';
 import {assessPriority481,priorityPayload481} from './maker-aftercare-priority-policy-481.mjs?v=481';
 import {assessHandoff482,handoffPayload482} from './maker-aftercare-handoff-policy-482.mjs?v=482';
+import {handoffAge483,assessReassessment483,reassessmentPayload483} from './maker-aftercare-reassessment-policy-483.mjs?v=483';
 const el=id=>document.getElementById(id),api=(...args)=>(window.DDAuth?.apiFetch||fetch)(...args);
 const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const route=el('fpRoute'),record=el('fpRecord'),decisionEl=el('fpDecision'),receiptEl=el('fpReceipt');
@@ -71,7 +72,7 @@ el('fpReview').addEventListener('submit',async e=>{e.preventDefault();if(posting
 });
 const fromUrl=Number(new URLSearchParams(location.search).get('order_id'));if(Number.isSafeInteger(fromUrl)&&fromUrl>0)el('fpOrderId').value=String(fromUrl);
 /* Build 480 — read-only portfolio summary; no background polls or customer details. */
-let portfolio481=null,priorityKey481=null,priorityPosting481=false,handoffKey482=null,handoffPosting482=false;
+let portfolio481=null,priorityKey481=null,priorityPosting481=false,handoffKey482=null,handoffPosting482=false,reassessmentKey483=null,reassessmentPosting483=false;
 function priorityForm481(){return {order_id:el('fpPriorityOrder').value,source_receipt_id:el('fpPrioritySource').value,
  priority:el('fpPriorityLevel').value,next_action:el('fpPriorityAction').value,evidence_reference:el('fpPriorityEvidence').value,observed:el('fpPriorityObserved').checked};}
 for(const id of ['fpPriorityLevel','fpPriorityAction','fpPriorityEvidence','fpPriorityObserved']){
@@ -79,14 +80,14 @@ for(const id of ['fpPriorityLevel','fpPriorityAction','fpPriorityEvidence','fpPr
 }
 el('fpPortfolioLoad').addEventListener('click',async()=>{
  const button=el('fpPortfolioLoad');button.disabled=true;el('fpPortfolioStatus').textContent='Reading a bounded sample of original private evidence…';
- portfolio481=null;priorityKey481=null;handoffKey482=null;el('fpPrioritySubmit').disabled=true;el('fpHandoffSubmit').disabled=true;
+ portfolio481=null;priorityKey481=null;handoffKey482=null;reassessmentKey483=null;el('fpPrioritySubmit').disabled=true;el('fpHandoffSubmit').disabled=true;el('fpReassessmentSubmit').disabled=true;
  for(const id of ['fpPortfolioSummary','fpPortfolioTrend','fpPortfolioCases'])el(id).replaceChildren();
  try{
   const response=await api('/api/admin/maker-aftercare-portfolio',{method:'GET',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});
   const result=await response.json().catch(()=>({ok:false,error:'Invalid portfolio response.'}));
   if(!response.ok||!result.ok)throw Error(result.error||`HTTP ${response.status}`);
   const p=result.portfolio;if(!p||p.bounded_sample!==true||result.read_only!==true)throw Error('Invalid bounded portfolio response.');portfolio481=p;
-  el('fpPortfolioStatus').textContent=`Sample only: ${p.sampled_receipts} recent aftercare receipts; ${p.recognized_receipts} Build 479 follow-ups; ${p.priority_annotation_receipts||0} priority annotations; ${p.handoff_receipts||0} independent handoffs; ${p.unclassified_receipts} other receipts. ${p.history_incomplete?'Older receipts omitted.':'History beyond this sample is not verified.'}`;
+  el('fpPortfolioStatus').textContent=`Sample only: ${p.sampled_receipts} recent aftercare receipts; ${p.recognized_receipts} Build 479 follow-ups; ${p.priority_annotation_receipts||0} priority annotations; ${p.handoff_receipts||0} independent handoffs; ${p.reassessment_receipts||0} independent reassessments; ${p.unclassified_receipts} other receipts. ${p.history_incomplete?'Older receipts omitted.':'History beyond this sample is not verified.'}`;
   const s=el('fpPortfolioSummary');s.append(make('h3','Latest recognized case finding per order (sample only)'));
   s.append(make('p',`Distinct orders in the sample: ${p.distinct_orders_in_sample}. These are not verified open-case totals.`));
   s.append(make('p',`Orders with two or more Build 479 follow-up receipts in this sample: ${p.orders_with_repeated_followups_in_sample||0}. Repetition of receipts does not establish recurrence of the same incident, missed deadline or ongoing consent.`));
@@ -94,7 +95,7 @@ el('fpPortfolioLoad').addEventListener('click',async()=>{
   const trend=el('fpPortfolioTrend');trend.append(make('h3','Follow-up evidence receipts by UTC month (sample only)'));
   const trendList=make('ul');for(const item of p.trend||[])trendList.append(make('li',`${item.month}: ${item.count} receipts`));trend.append(trendList);
   const cases=el('fpPortfolioCases');cases.append(make('h3','Latest sample cases — original Orders for manual review'));
-  const list=make('ul');for(const item of p.cases||[]){const li=make('li',`Order #${item.order_id}: ${String(item.state).replaceAll('_',' ')} · receipt #${item.evidence_id} · ${item.created_at||'date unknown'} · ${item.recurrence_count_in_sample||1} follow-up receipt(s) in sample · ${item.priority?`Owner priority: ${item.priority.replaceAll('_',' ')} · `:''}${item.handoff_receipt_id?`Independent handoff #${item.handoff_receipt_id} · `:''}`);
+  const list=make('ul');for(const item of p.cases||[]){const age=item.handoff_receipt_id?handoffAge483(item.handoff_created_at):null;const li=make('li',`Order #${item.order_id}: ${String(item.state).replaceAll('_',' ')} · receipt #${item.evidence_id} · ${item.created_at||'date unknown'} · ${item.recurrence_count_in_sample||1} follow-up receipt(s) in sample · ${item.priority?`Owner priority: ${item.priority.replaceAll('_',' ')} · `:''}${item.handoff_receipt_id?`Independent handoff #${item.handoff_receipt_id} · ${age.days===null?'age unknown':`${age.days} days (${age.band})`} advisory only · `:''}${item.reassessment_receipt_id?`Reassessment #${item.reassessment_receipt_id} (${String(item.reassessment_finding).replaceAll('_',' ')}) · `:''}`);
    const link=make('a','Inspect original order');link.href=`/admin/orders/?order_id=${Number(item.order_id)}`;li.append(link);
    const select=make('button',item.priority_receipt_id?'Priority already recorded':'Select receipt for priority review');select.type='button';select.disabled=Boolean(item.priority_receipt_id);
    select.addEventListener('click',()=>{el('fpPriorityOrder').value=String(item.order_id);el('fpPrioritySource').value=String(item.evidence_id);
@@ -105,9 +106,33 @@ el('fpPortfolioLoad').addEventListener('click',async()=>{
     handoff.addEventListener('click',()=>{el('fpHandoffOrder').value=String(item.order_id);el('fpHandoffSource').value=String(item.evidence_id);el('fpHandoffPriorityReceipt').value=String(item.priority_receipt_id);
      el('fpHandoffObserved').checked=false;handoffKey482=null;el('fpHandoffSubmit').disabled=false;
      el('fpHandoffStatus').textContent=`Selected order #${item.order_id}, source #${item.evidence_id}, priority #${item.priority_receipt_id}. A different Admin must inspect original evidence before receiving this handoff.`;});li.append(handoff);}
+   if(item.handoff_receipt_id){const reassess=make('button',item.reassessment_receipt_id?'Reassessment already recorded':'Select handoff for independent reassessment');reassess.type='button';reassess.disabled=Boolean(item.reassessment_receipt_id);
+    reassess.addEventListener('click',()=>{el('fpReassessmentOrder').value=String(item.order_id);el('fpReassessmentSource').value=String(item.evidence_id);el('fpReassessmentPriority').value=String(item.priority_receipt_id);el('fpReassessmentHandoff').value=String(item.handoff_receipt_id);
+     el('fpReassessmentObserved').checked=false;reassessmentKey483=null;el('fpReassessmentSubmit').disabled=false;
+     el('fpReassessmentStatus').textContent=`Selected handoff #${item.handoff_receipt_id}; advisory age ${age.days===null?'unknown':`${age.days} days, ${age.band}`}. A different authenticated Admin must inspect original evidence.`;});li.append(reassess);}
    list.append(li);}cases.append(list);
  }catch(error){el('fpPortfolioStatus').textContent='HOLD — '+String(error.message||'Evidence unavailable').slice(0,180);}
  finally{button.disabled=false;}
+});
+function reassessmentForm483(){return {order_id:el('fpReassessmentOrder').value,source_receipt_id:el('fpReassessmentSource').value,priority_receipt_id:el('fpReassessmentPriority').value,handoff_receipt_id:el('fpReassessmentHandoff').value,
+ finding:el('fpReassessmentFinding').value,evidence_reference:el('fpReassessmentEvidence').value,observed:el('fpReassessmentObserved').checked};}
+for(const id of ['fpReassessmentFinding','fpReassessmentEvidence','fpReassessmentObserved']){
+ for(const eventName of ['change','input'])el(id).addEventListener(eventName,()=>{reassessmentKey483=null;el('fpReassessmentStatus').textContent='HOLD — recheck the selected handoff and original evidence before submitting.';});
+}
+el('fpReassessmentForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(reassessmentPosting483)return;
+ const form=reassessmentForm483(),decision=assessReassessment483({form,portfolio:portfolio481});
+ if(!decision.ready){el('fpReassessmentStatus').textContent='HOLD — '+decision.holds.join(' ');return;}
+ reassessmentPosting483=true;el('fpReassessmentSubmit').disabled=true;
+ try{
+  reassessmentKey483=reassessmentKey483||crypto.randomUUID().replaceAll('-','');
+  const payload=reassessmentPayload483({decision,form,requestKey:reassessmentKey483});if(!payload)throw Error('Original handoff reassessment not ready.');
+  const response=await api('/api/admin/maker-aftercare-reassessment',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(payload)});
+  const result=await response.json().catch(()=>({ok:false,error:'Invalid reassessment response.'}));if(!response.ok||!result.ok)throw Error(result.error||`HTTP ${response.status}`);
+  el('fpReassessmentStatus').textContent=`Independent reassessment receipt #${result.receipt_id} ${result.replayed?'replayed':'recorded'} for order #${decision.order_id}. The case stays open and no external action occurred; reload the sample for updated evidence.`;
+  reassessmentKey483=null;portfolio481=null;
+ }catch(error){el('fpReassessmentStatus').textContent='HOLD — '+String(error.message||'Reassessment response unknown').slice(0,200)+' Retry unchanged fields to preserve the original request key.';el('fpReassessmentSubmit').disabled=false;}
+ finally{reassessmentPosting483=false;}
 });
 function handoffForm482(){return {order_id:el('fpHandoffOrder').value,source_receipt_id:el('fpHandoffSource').value,priority_receipt_id:el('fpHandoffPriorityReceipt').value,
  disposition:el('fpHandoffDisposition').value,evidence_reference:el('fpHandoffEvidence').value,observed:el('fpHandoffObserved').checked};}

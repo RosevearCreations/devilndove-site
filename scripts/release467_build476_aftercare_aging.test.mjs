@@ -42,7 +42,7 @@ test('Build 476 UI preserves Build 474/475 workflows and zero-action boundaries'
  const page=readFileSync(new URL('../admin/maker-fulfillment-pilot/index.html',import.meta.url),'utf8');
  const js=readFileSync(new URL('../public/js/admin-maker-fulfillment-pilot-464.js',import.meta.url),'utf8');
  for(const key of ['fpEscalationSource','fpEscalationLevel','fpEscalationEvidence','fpFollowupState','fpEscalationObserved'])assert.match(page,new RegExp(`id="${key}"`));
- assert.match(page,/467b(47[6789]|48[012])/);assert.match(js,/reviewEscalation476/);assert.match(js,/escalationPayload476/);
+ assert.match(page,/467b(47[6789]|48[0123])/);assert.match(js,/reviewEscalation476/);assert.match(js,/escalationPayload476/);
  assert.match(js,/closurePayload475/);assert.match(js,/trialPayload474/);
  assert.doesNotMatch(js,/\/api\/admin\/update-order-status|\/api\/admin\/order-payments|\/api\/admin\/order-fulfillment-workflow/);
 });
