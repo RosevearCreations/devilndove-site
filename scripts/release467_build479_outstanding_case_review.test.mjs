@@ -33,7 +33,7 @@ test('Build 479 UI and server enforce original source and owner review, preservi
  const page=readFileSync(new URL('../admin/maker-fulfillment-pilot/index.html',import.meta.url),'utf8');
  const ui=readFileSync(new URL('../public/js/admin-maker-fulfillment-pilot-464.js',import.meta.url),'utf8');
  for(const id of ['fpOutstandingOwner','fpOutstandingEvidence','fpOutstandingState','fpOutstandingObserved'])assert.match(page,new RegExp(`id="${id}"`));
- assert.match(page,/467b(479|48[01234])/);assert.match(ui,/outstandingPayload479/);
+ assert.match(page,/467b(479|48[012345])/);assert.match(ui,/outstandingPayload479/);
  assert.match(server,/OUTSTANDING_CASE_SOURCE_HOLD/);assert.match(server,/OUTSTANDING_FOLLOWUP_ALREADY_RECORDED/);
  assert.match(server,/positive\(owner.actor_user_id\)===actor/);
  assert.doesNotMatch(ui,/\/api\/admin\/update-order-status|\/api\/admin\/order-payments|\/api\/admin\/order-fulfillment-workflow/);
