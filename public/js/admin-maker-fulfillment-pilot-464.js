@@ -10,6 +10,7 @@ import {assessPriority481,priorityPayload481} from './maker-aftercare-priority-p
 import {assessHandoff482,handoffPayload482} from './maker-aftercare-handoff-policy-482.mjs?v=482';
 import {handoffAge483,assessReassessment483,reassessmentPayload483} from './maker-aftercare-reassessment-policy-483.mjs?v=483';
 import {assessDecision484,decisionPayload484} from './maker-aftercare-decision-policy-484.mjs?v=484';
+import {assessDecisionHandoff485,decisionHandoffPayload485,decisionAge485} from './maker-aftercare-decision-handoff-policy-485.mjs?v=485';
 const el=id=>document.getElementById(id),api=(...args)=>(window.DDAuth?.apiFetch||fetch)(...args);
 const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const route=el('fpRoute'),record=el('fpRecord'),decisionEl=el('fpDecision'),receiptEl=el('fpReceipt');
@@ -73,7 +74,7 @@ el('fpReview').addEventListener('submit',async e=>{e.preventDefault();if(posting
 });
 const fromUrl=Number(new URLSearchParams(location.search).get('order_id'));if(Number.isSafeInteger(fromUrl)&&fromUrl>0)el('fpOrderId').value=String(fromUrl);
 /* Build 480 — read-only portfolio summary; no background polls or customer details. */
-let portfolio481=null,priorityKey481=null,priorityPosting481=false,handoffKey482=null,handoffPosting482=false,reassessmentKey483=null,reassessmentPosting483=false,decisionKey484=null,decisionPosting484=false;
+let portfolio481=null,priorityKey481=null,priorityPosting481=false,handoffKey482=null,handoffPosting482=false,reassessmentKey483=null,reassessmentPosting483=false,decisionKey484=null,decisionPosting484=false,decisionHandoffKey485=null,decisionHandoffPosting485=false;
 function priorityForm481(){return {order_id:el('fpPriorityOrder').value,source_receipt_id:el('fpPrioritySource').value,
  priority:el('fpPriorityLevel').value,next_action:el('fpPriorityAction').value,evidence_reference:el('fpPriorityEvidence').value,observed:el('fpPriorityObserved').checked};}
 for(const id of ['fpPriorityLevel','fpPriorityAction','fpPriorityEvidence','fpPriorityObserved']){
@@ -81,16 +82,16 @@ for(const id of ['fpPriorityLevel','fpPriorityAction','fpPriorityEvidence','fpPr
 }
 el('fpPortfolioLoad').addEventListener('click',async()=>{
  const button=el('fpPortfolioLoad');button.disabled=true;el('fpPortfolioStatus').textContent='Reading a bounded sample of original private evidence…';
- portfolio481=null;priorityKey481=null;handoffKey482=null;reassessmentKey483=null;decisionKey484=null;el('fpPrioritySubmit').disabled=true;el('fpHandoffSubmit').disabled=true;el('fpReassessmentSubmit').disabled=true;el('fpDecisionSubmit').disabled=true;el('fpExceptionLedger').textContent='HOLD — refreshing the bounded exception ledger.';
+ portfolio481=null;priorityKey481=null;handoffKey482=null;reassessmentKey483=null;decisionKey484=null;decisionHandoffKey485=null;el('fpPrioritySubmit').disabled=true;el('fpHandoffSubmit').disabled=true;el('fpReassessmentSubmit').disabled=true;el('fpDecisionSubmit').disabled=true;el('fpDecisionHandoffSubmit').disabled=true;el('fpExceptionLedger').textContent='HOLD — refreshing the bounded exception ledger.';
  for(const id of ['fpPortfolioSummary','fpPortfolioTrend','fpPortfolioCases'])el(id).replaceChildren();
  try{
   const response=await api('/api/admin/maker-aftercare-portfolio',{method:'GET',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});
   const result=await response.json().catch(()=>({ok:false,error:'Invalid portfolio response.'}));
   if(!response.ok||!result.ok)throw Error(result.error||`HTTP ${response.status}`);
   const p=result.portfolio;if(!p||p.bounded_sample!==true||result.read_only!==true)throw Error('Invalid bounded portfolio response.');portfolio481=p;
-  el('fpPortfolioStatus').textContent=`Sample only: ${p.sampled_receipts} recent aftercare receipts; ${p.recognized_receipts} Build 479 follow-ups; ${p.priority_annotation_receipts||0} priority annotations; ${p.handoff_receipts||0} independent handoffs; ${p.reassessment_receipts||0} independent reassessments; ${p.decision_receipts||0} owner decisions; ${p.unclassified_receipts} other receipts. ${p.history_incomplete?'Older receipts omitted.':'History beyond this sample is not verified.'}`;
+  el('fpPortfolioStatus').textContent=`Sample only: ${p.sampled_receipts} recent aftercare receipts; ${p.recognized_receipts} Build 479 follow-ups; ${p.priority_annotation_receipts||0} priority annotations; ${p.handoff_receipts||0} independent handoffs; ${p.reassessment_receipts||0} independent reassessments; ${p.decision_receipts||0} owner decisions; ${p.independent_decision_handoff_receipts||0} independent decision handoffs; ${p.unclassified_receipts} other receipts. ${p.history_incomplete?'Older receipts omitted.':'History beyond this sample is not verified.'}`;
   const ledger=el('fpExceptionLedger');ledger.replaceChildren();ledger.append(make('p',`Sample-limited exception ledger: ${p.exception_ledger?.length||0} latest recognized orders. Missing older receipts can make this incomplete; no closure is implied.`));
-  const ledgerList=make('ul');for(const row of p.exception_ledger||[]){const item=make('li',`Order #${row.order_id} · source #${row.source_receipt_id} · ${String(row.state).replaceAll('_',' ')} · priority ${row.priority} · reassessment ${row.reassessment_receipt_id||'not recorded'} · owner decision ${row.owner_decision.replaceAll('_',' ')}${row.decision_receipt_id?` (#${row.decision_receipt_id})`:''} · case OPEN (not independently verified)`);ledgerList.append(item);}ledger.append(ledgerList);
+  const ledgerList=make('ul');for(const row of p.exception_ledger||[]){const age=row.decision_receipt_id?decisionAge485(row.decision_created_at):null;const item=make('li',`Order #${row.order_id} · source #${row.source_receipt_id} · ${String(row.state).replaceAll('_',' ')} · priority ${row.priority} · ${row.recurrence_count_in_sample} Build 479 receipts in sample (not proven repeat incident) · reassessment ${row.reassessment_receipt_id||'not recorded'} · owner decision ${row.owner_decision.replaceAll('_',' ')}${row.decision_receipt_id?` (#${row.decision_receipt_id}; ${age.days===null?'age unknown':`${age.days} days, ${age.band}`} advisory, not SLA)`:''} · independent decision handoff ${row.independent_decision_handoff_receipt_id?`#${row.independent_decision_handoff_receipt_id}`:'not recorded'} · case OPEN (not independently verified)`);ledgerList.append(item);}ledger.append(ledgerList);
   const s=el('fpPortfolioSummary');s.append(make('h3','Latest recognized case finding per order (sample only)'));
   s.append(make('p',`Distinct orders in the sample: ${p.distinct_orders_in_sample}. These are not verified open-case totals.`));
   s.append(make('p',`Orders with two or more Build 479 follow-up receipts in this sample: ${p.orders_with_repeated_followups_in_sample||0}. Repetition of receipts does not establish recurrence of the same incident, missed deadline or ongoing consent.`));
@@ -98,7 +99,7 @@ el('fpPortfolioLoad').addEventListener('click',async()=>{
   const trend=el('fpPortfolioTrend');trend.append(make('h3','Follow-up evidence receipts by UTC month (sample only)'));
   const trendList=make('ul');for(const item of p.trend||[])trendList.append(make('li',`${item.month}: ${item.count} receipts`));trend.append(trendList);
   const cases=el('fpPortfolioCases');cases.append(make('h3','Latest sample cases — original Orders for manual review'));
-  const list=make('ul');for(const item of p.cases||[]){const age=item.handoff_receipt_id?handoffAge483(item.handoff_created_at):null;const li=make('li',`Order #${item.order_id}: ${String(item.state).replaceAll('_',' ')} · receipt #${item.evidence_id} · ${item.created_at||'date unknown'} · ${item.recurrence_count_in_sample||1} follow-up receipt(s) in sample · ${item.priority?`Owner priority: ${item.priority.replaceAll('_',' ')} · `:''}${item.handoff_receipt_id?`Independent handoff #${item.handoff_receipt_id} · ${age.days===null?'age unknown':`${age.days} days (${age.band})`} advisory only · `:''}${item.reassessment_receipt_id?`Reassessment #${item.reassessment_receipt_id} (${String(item.reassessment_finding).replaceAll('_',' ')}) · `:''}${item.decision_receipt_id?`Owner decision #${item.decision_receipt_id} · `:''}`);
+  const list=make('ul');for(const item of p.cases||[]){const age=item.handoff_receipt_id?handoffAge483(item.handoff_created_at):null;const decisionAge=item.decision_receipt_id?decisionAge485(item.decision_created_at):null;const li=make('li',`Order #${item.order_id}: ${String(item.state).replaceAll('_',' ')} · receipt #${item.evidence_id} · ${item.created_at||'date unknown'} · ${item.recurrence_count_in_sample||1} follow-up receipt(s) in sample · ${item.priority?`Owner priority: ${item.priority.replaceAll('_',' ')} · `:''}${item.handoff_receipt_id?`Independent handoff #${item.handoff_receipt_id} · ${age.days===null?'age unknown':`${age.days} days (${age.band})`} advisory only · `:''}${item.reassessment_receipt_id?`Reassessment #${item.reassessment_receipt_id} (${String(item.reassessment_finding).replaceAll('_',' ')}) · `:''}${item.decision_receipt_id?`Owner decision #${item.decision_receipt_id} (${decisionAge.days===null?'age unknown':`${decisionAge.days} days, ${decisionAge.band}`} advisory) · `:''}${item.independent_decision_handoff_receipt_id?`Independent decision handoff #${item.independent_decision_handoff_receipt_id} · `:''}`);
    const link=make('a','Inspect original order');link.href=`/admin/orders/?order_id=${Number(item.order_id)}`;li.append(link);
    const select=make('button',item.priority_receipt_id?'Priority already recorded':'Select receipt for priority review');select.type='button';select.disabled=Boolean(item.priority_receipt_id);
    select.addEventListener('click',()=>{el('fpPriorityOrder').value=String(item.order_id);el('fpPrioritySource').value=String(item.evidence_id);
@@ -117,6 +118,9 @@ el('fpPortfolioLoad').addEventListener('click',async()=>{
     choose.addEventListener('click',()=>{el('fpDecisionOrder').value=String(item.order_id);el('fpDecisionSource').value=String(item.evidence_id);el('fpDecisionPriority').value=String(item.priority_receipt_id);el('fpDecisionHandoff').value=String(item.handoff_receipt_id);el('fpDecisionReassessment').value=String(item.reassessment_receipt_id);
      el('fpDecisionObserved').checked=false;decisionKey484=null;el('fpDecisionSubmit').disabled=false;
      el('fpDecisionStatus').textContent=`Selected reassessment #${item.reassessment_receipt_id}. A different authenticated Admin must independently inspect the actual original order and receipts before deciding.`;});li.append(choose);}
+   if(item.decision_receipt_id){const choose=make('button',item.independent_decision_handoff_receipt_id?'Independent decision handoff already recorded':'Select decision for independent handoff');choose.type='button';choose.disabled=Boolean(item.independent_decision_handoff_receipt_id);
+    choose.addEventListener('click',()=>{for(const [target,value] of [['fpDecisionHandoffOrder',item.order_id],['fpDecisionHandoffSource',item.evidence_id],['fpDecisionHandoffPriority',item.priority_receipt_id],['fpDecisionHandoffOriginal',item.handoff_receipt_id],['fpDecisionHandoffReassessment',item.reassessment_receipt_id],['fpDecisionHandoffDecision',item.decision_receipt_id]])el(target).value=String(value);
+     el('fpDecisionHandoffObserved').checked=false;decisionHandoffKey485=null;el('fpDecisionHandoffSubmit').disabled=false;el('fpDecisionHandoffStatus').textContent=`Selected Build 484 decision #${item.decision_receipt_id}. A different receiving Admin must inspect all original evidence.`;});li.append(choose);}
    list.append(li);}cases.append(list);
  }catch(error){el('fpPortfolioStatus').textContent='HOLD — '+String(error.message||'Evidence unavailable').slice(0,180);el('fpExceptionLedger').textContent='HOLD — sampled owner exception ledger unavailable.';}
  finally{button.disabled=false;}
@@ -180,6 +184,24 @@ el('fpDecisionForm').addEventListener('submit',async e=>{
   decisionKey484=null;portfolio481=null;el('fpExceptionLedger').textContent='HOLD — owner decision just recorded; reload bounded portfolio to reconcile ledger.';
  }catch(error){el('fpDecisionStatus').textContent='HOLD — '+String(error.message||'Decision response unknown').slice(0,200)+' Retry unchanged fields to preserve the original request key.';el('fpDecisionSubmit').disabled=false;}
  finally{decisionPosting484=false;}
+});
+function decisionHandoffForm485(){return {order_id:el('fpDecisionHandoffOrder').value,source_receipt_id:el('fpDecisionHandoffSource').value,priority_receipt_id:el('fpDecisionHandoffPriority').value,handoff_receipt_id:el('fpDecisionHandoffOriginal').value,reassessment_receipt_id:el('fpDecisionHandoffReassessment').value,decision_receipt_id:el('fpDecisionHandoffDecision').value,
+ disposition:el('fpDecisionHandoffDisposition').value,evidence_reference:el('fpDecisionHandoffEvidence').value,observed:el('fpDecisionHandoffObserved').checked};}
+for(const id of ['fpDecisionHandoffDisposition','fpDecisionHandoffEvidence','fpDecisionHandoffObserved'])for(const eventName of ['change','input'])el(id).addEventListener(eventName,()=>{decisionHandoffKey485=null;el('fpDecisionHandoffStatus').textContent='HOLD — independently recheck original decision evidence before submitting.';});
+el('fpDecisionHandoffForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(decisionHandoffPosting485)return;
+ const form=decisionHandoffForm485(),assessment=assessDecisionHandoff485({form,portfolio:portfolio481});
+ if(!assessment.ready){el('fpDecisionHandoffStatus').textContent='HOLD — '+assessment.holds.join(' ');return;}
+ decisionHandoffPosting485=true;el('fpDecisionHandoffSubmit').disabled=true;
+ try{
+  decisionHandoffKey485=decisionHandoffKey485||crypto.randomUUID().replaceAll('-','');
+  const payload=decisionHandoffPayload485({assessment,form,requestKey:decisionHandoffKey485});if(!payload)throw Error('Original decision handoff not ready.');
+  const response=await api('/api/admin/maker-aftercare-decision-handoff',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(payload)});
+  const result=await response.json().catch(()=>({ok:false,error:'Invalid independent receipt response.'}));if(!response.ok||!result.ok)throw Error(result.error||`HTTP ${response.status}`);
+  el('fpDecisionHandoffStatus').textContent=`Append-only independent decision handoff #${result.receipt_id} ${result.replayed?'replayed':'recorded'} for order #${assessment.order_id}. Case remains open; no external action. Reload the sample for an updated ledger.`;
+  decisionHandoffKey485=null;portfolio481=null;el('fpExceptionLedger').textContent='HOLD — independent handoff recorded; reload sampled ledger.';
+ }catch(error){el('fpDecisionHandoffStatus').textContent='HOLD — '+String(error.message||'Unknown independent receipt response').slice(0,200)+' Retry unchanged fields to preserve request key.';el('fpDecisionHandoffSubmit').disabled=false;}
+ finally{decisionHandoffPosting485=false;}
 });
 el('fpPriorityForm').addEventListener('submit',async e=>{
  e.preventDefault();if(priorityPosting481)return;
