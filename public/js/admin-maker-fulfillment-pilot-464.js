@@ -68,3 +68,24 @@ el('fpReview').addEventListener('submit',async e=>{e.preventDefault();if(posting
  finally{posting=false;lockForm(false);record.disabled=!followupOutstanding479({detail:active?.detail,fulfillment:active?.fulfillment,form:pilotForm()}).can_append_existing_receipt;}
 });
 const fromUrl=Number(new URLSearchParams(location.search).get('order_id'));if(Number.isSafeInteger(fromUrl)&&fromUrl>0)el('fpOrderId').value=String(fromUrl);
+/* Build 480 — read-only portfolio summary; no background polls or customer details. */
+el('fpPortfolioLoad').addEventListener('click',async()=>{
+ const button=el('fpPortfolioLoad');button.disabled=true;el('fpPortfolioStatus').textContent='Reading a bounded sample of original private evidence…';
+ for(const id of ['fpPortfolioSummary','fpPortfolioTrend','fpPortfolioCases'])el(id).replaceChildren();
+ try{
+  const response=await api('/api/admin/maker-aftercare-portfolio',{method:'GET',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});
+  const result=await response.json().catch(()=>({ok:false,error:'Invalid portfolio response.'}));
+  if(!response.ok||!result.ok)throw Error(result.error||`HTTP ${response.status}`);
+  const p=result.portfolio;if(!p||p.bounded_sample!==true||result.read_only!==true)throw Error('Invalid bounded portfolio response.');
+  el('fpPortfolioStatus').textContent=`Sample only: ${p.sampled_receipts} recent aftercare receipts inspected; ${p.recognized_receipts} Build 479 follow-ups recognized; ${p.unclassified_receipts} other receipts. ${p.history_incomplete?'Older receipts omitted.':'History beyond this sample is not verified.'}`;
+  const s=el('fpPortfolioSummary');s.append(make('h3','Latest recognized case finding per order (sample only)'));
+  s.append(make('p',`Distinct orders in the sample: ${p.distinct_orders_in_sample}. These are not verified open-case totals.`));
+  for(const [state,count] of Object.entries(p.states||{}))s.append(make('p',`${state.replaceAll('_',' ')}: ${count}`));
+  const trend=el('fpPortfolioTrend');trend.append(make('h3','Follow-up evidence receipts by UTC month (sample only)'));
+  const trendList=make('ul');for(const item of p.trend||[])trendList.append(make('li',`${item.month}: ${item.count} receipts`));trend.append(trendList);
+  const cases=el('fpPortfolioCases');cases.append(make('h3','Latest sample cases — original Orders for manual review'));
+  const list=make('ul');for(const item of p.cases||[]){const li=make('li',`Order #${item.order_id}: ${String(item.state).replaceAll('_',' ')} · receipt #${item.evidence_id} · ${item.created_at||'date unknown'} · `);
+   const link=make('a','Inspect original order');link.href=`/admin/orders/?order_id=${Number(item.order_id)}`;li.append(link);list.append(li);}cases.append(list);
+ }catch(error){el('fpPortfolioStatus').textContent='HOLD — '+String(error.message||'Evidence unavailable').slice(0,180);}
+ finally{button.disabled=false;}
+});
