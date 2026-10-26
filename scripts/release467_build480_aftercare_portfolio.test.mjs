@@ -28,6 +28,6 @@ test('Build 480 Admin-only read-only portfolio never fetches customer PII or tri
  assert.match(api,/LIMIT 251/);assert.match(api,/read_only:true/);
  assert.doesNotMatch(api,/customer_email|shipping_address|customer_phone|\.run\(\)|INSERT INTO|UPDATE maker_order/);
  for(const id of ['fpPortfolioLoad','fpPortfolioStatus','fpPortfolioSummary','fpPortfolioTrend','fpPortfolioCases'])assert.match(page,new RegExp(`id="${id}"`));
- assert.match(page,/467b48[012345]/);assert.match(ui,/maker-aftercare-portfolio/);
+ assert.match(page,/467b48[0123456]/);assert.match(ui,/maker-aftercare-portfolio/);
  assert.doesNotMatch(ui,/setInterval|setTimeout\(/);
 });

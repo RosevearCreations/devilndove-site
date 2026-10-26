@@ -36,6 +36,6 @@ test('Existing Build 474 paths remain compatible and owner interface does not ex
  const page=readFileSync(new URL('../admin/maker-fulfillment-pilot/index.html',import.meta.url),'utf8');
  const ui=readFileSync(new URL('../public/js/admin-maker-fulfillment-pilot-464.js',import.meta.url),'utf8');
  for(const id of ['fpSourceHold','fpClosureReference','fpClosureDisposition','fpClosureObserved'])assert.match(page,new RegExp(`id="${id}"`));
- assert.match(page,/467b(47[56789]|48[012345])/);assert.match(ui,/reconcileClosure475/);assert.match(ui,/closurePayload475/);
+ assert.match(page,/467b(47[56789]|48[0123456])/);assert.match(ui,/reconcileClosure475/);assert.match(ui,/closurePayload475/);
  assert.doesNotMatch(ui,/\/api\/admin\/update-order-status|\/api\/admin\/order-payments|\/api\/admin\/order-fulfillment-workflow/);
 });
