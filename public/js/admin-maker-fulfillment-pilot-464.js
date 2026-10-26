@@ -6,6 +6,7 @@ import {agingBand476,reviewEscalation476,escalationPayload476} from './maker-aft
 import {auditAftercare477,auditPayload477} from './maker-aftercare-independent-audit-policy-477.mjs?v=477';
 import {reconcileAudit478,reconciliationPayload478} from './maker-aftercare-owner-reconciliation-policy-478.mjs?v=478';
 import {followupOutstanding479,outstandingPayload479} from './maker-aftercare-outstanding-case-policy-479.mjs?v=479';
+import {assessPriority481,priorityPayload481} from './maker-aftercare-priority-policy-481.mjs?v=481';
 const el=id=>document.getElementById(id),api=(...args)=>(window.DDAuth?.apiFetch||fetch)(...args);
 const make=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const route=el('fpRoute'),record=el('fpRecord'),decisionEl=el('fpDecision'),receiptEl=el('fpReceipt');
@@ -69,23 +70,51 @@ el('fpReview').addEventListener('submit',async e=>{e.preventDefault();if(posting
 });
 const fromUrl=Number(new URLSearchParams(location.search).get('order_id'));if(Number.isSafeInteger(fromUrl)&&fromUrl>0)el('fpOrderId').value=String(fromUrl);
 /* Build 480 — read-only portfolio summary; no background polls or customer details. */
+let portfolio481=null,priorityKey481=null,priorityPosting481=false;
+function priorityForm481(){return {order_id:el('fpPriorityOrder').value,source_receipt_id:el('fpPrioritySource').value,
+ priority:el('fpPriorityLevel').value,next_action:el('fpPriorityAction').value,evidence_reference:el('fpPriorityEvidence').value,observed:el('fpPriorityObserved').checked};}
+for(const id of ['fpPriorityLevel','fpPriorityAction','fpPriorityEvidence','fpPriorityObserved']){
+ el(id).addEventListener('change',()=>{priorityKey481=null;el('fpPriorityStatus').textContent='HOLD — recheck selected source and new priority before submitting.';});
+}
 el('fpPortfolioLoad').addEventListener('click',async()=>{
  const button=el('fpPortfolioLoad');button.disabled=true;el('fpPortfolioStatus').textContent='Reading a bounded sample of original private evidence…';
+ portfolio481=null;priorityKey481=null;el('fpPrioritySubmit').disabled=true;
  for(const id of ['fpPortfolioSummary','fpPortfolioTrend','fpPortfolioCases'])el(id).replaceChildren();
  try{
   const response=await api('/api/admin/maker-aftercare-portfolio',{method:'GET',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});
   const result=await response.json().catch(()=>({ok:false,error:'Invalid portfolio response.'}));
   if(!response.ok||!result.ok)throw Error(result.error||`HTTP ${response.status}`);
-  const p=result.portfolio;if(!p||p.bounded_sample!==true||result.read_only!==true)throw Error('Invalid bounded portfolio response.');
-  el('fpPortfolioStatus').textContent=`Sample only: ${p.sampled_receipts} recent aftercare receipts inspected; ${p.recognized_receipts} Build 479 follow-ups recognized; ${p.unclassified_receipts} other receipts. ${p.history_incomplete?'Older receipts omitted.':'History beyond this sample is not verified.'}`;
+  const p=result.portfolio;if(!p||p.bounded_sample!==true||result.read_only!==true)throw Error('Invalid bounded portfolio response.');portfolio481=p;
+  el('fpPortfolioStatus').textContent=`Sample only: ${p.sampled_receipts} recent aftercare receipts; ${p.recognized_receipts} Build 479 follow-ups; ${p.priority_annotation_receipts||0} priority annotations; ${p.unclassified_receipts} other receipts. ${p.history_incomplete?'Older receipts omitted.':'History beyond this sample is not verified.'}`;
   const s=el('fpPortfolioSummary');s.append(make('h3','Latest recognized case finding per order (sample only)'));
   s.append(make('p',`Distinct orders in the sample: ${p.distinct_orders_in_sample}. These are not verified open-case totals.`));
   for(const [state,count] of Object.entries(p.states||{}))s.append(make('p',`${state.replaceAll('_',' ')}: ${count}`));
   const trend=el('fpPortfolioTrend');trend.append(make('h3','Follow-up evidence receipts by UTC month (sample only)'));
   const trendList=make('ul');for(const item of p.trend||[])trendList.append(make('li',`${item.month}: ${item.count} receipts`));trend.append(trendList);
   const cases=el('fpPortfolioCases');cases.append(make('h3','Latest sample cases — original Orders for manual review'));
-  const list=make('ul');for(const item of p.cases||[]){const li=make('li',`Order #${item.order_id}: ${String(item.state).replaceAll('_',' ')} · receipt #${item.evidence_id} · ${item.created_at||'date unknown'} · `);
-   const link=make('a','Inspect original order');link.href=`/admin/orders/?order_id=${Number(item.order_id)}`;li.append(link);list.append(li);}cases.append(list);
+  const list=make('ul');for(const item of p.cases||[]){const li=make('li',`Order #${item.order_id}: ${String(item.state).replaceAll('_',' ')} · receipt #${item.evidence_id} · ${item.created_at||'date unknown'} · ${item.priority?`Owner priority: ${item.priority.replaceAll('_',' ')} · `:''}`);
+   const link=make('a','Inspect original order');link.href=`/admin/orders/?order_id=${Number(item.order_id)}`;li.append(link);
+   const select=make('button',item.priority_receipt_id?'Priority already recorded':'Select receipt for priority review');select.type='button';select.disabled=Boolean(item.priority_receipt_id);
+   select.addEventListener('click',()=>{el('fpPriorityOrder').value=String(item.order_id);el('fpPrioritySource').value=String(item.evidence_id);
+    el('fpPriorityObserved').checked=false;priorityKey481=null;el('fpPrioritySubmit').disabled=false;
+    el('fpPriorityStatus').textContent=`Selected order #${item.order_id}, Build 479 receipt #${item.evidence_id}. Review the original order and complete owner attestation.`;});
+   li.append(select);list.append(li);}cases.append(list);
  }catch(error){el('fpPortfolioStatus').textContent='HOLD — '+String(error.message||'Evidence unavailable').slice(0,180);}
  finally{button.disabled=false;}
+});
+el('fpPriorityForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(priorityPosting481)return;
+ const form=priorityForm481(),decision=assessPriority481({form,portfolio:portfolio481});
+ if(!decision.ready){el('fpPriorityStatus').textContent='HOLD — '+decision.holds.join(' ');return;}
+ priorityPosting481=true;el('fpPrioritySubmit').disabled=true;
+ try{
+  priorityKey481=priorityKey481||crypto.randomUUID().replaceAll('-','');
+  const payload=priorityPayload481({decision,form,requestKey:priorityKey481});if(!payload)throw Error('Original evidence annotation not ready.');
+  const response=await api('/api/admin/maker-aftercare-priority',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(payload)});
+  const result=await response.json().catch(()=>({ok:false,error:'Invalid annotation response.'}));if(!response.ok||!result.ok)throw Error(result.error||`HTTP ${response.status}`);
+  el('fpPriorityStatus').textContent=`Append-only priority receipt #${result.receipt_id} ${result.replayed?'replayed':'recorded'} for order #${decision.order_id}. The case remains open; nothing was sent or booked. Reload portfolio to see the new priority.`;
+  priorityKey481=null;portfolio481=null;
+ }catch(error){el('fpPriorityStatus').textContent='HOLD — '+String(error.message||'Receipt response unknown').slice(0,200)+' Retry unchanged fields to safely reuse the same request key.';
+  el('fpPrioritySubmit').disabled=false;}
+ finally{priorityPosting481=false;}
 });
