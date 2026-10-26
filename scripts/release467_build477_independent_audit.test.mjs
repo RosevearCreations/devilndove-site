@@ -36,7 +36,7 @@ test('Build 477 server validates current actor and original case linkage before 
  const page=readFileSync(new URL('../admin/maker-fulfillment-pilot/index.html',import.meta.url),'utf8');
  const ui=readFileSync(new URL('../public/js/admin-maker-fulfillment-pilot-464.js',import.meta.url),'utf8');
  for(const id of ['fpAuditSource','fpAuditFollowup','fpAuditEvidence','fpAuditDisposition','fpAuditObserved'])assert.match(page,new RegExp(`id="${id}"`));
- assert.match(page,/467b477/);assert.match(ui,/auditAftercare477/);assert.match(ui,/auditPayload477/);
+ assert.match(page,/467b478/);assert.match(ui,/auditAftercare477/);assert.match(ui,/auditPayload477/);
  assert.match(server,/reviewer_actor_id:positive\(a\.admin\.user_id\)/);
  assert.match(server,/INDEPENDENT_AUDIT_HOLD/);assert.match(server,/AUDIT_ALREADY_RECORDED/);
  assert.match(server,/x>0&&x!==actor/);assert.match(server,/audit_mode==='independent_aftercare_477'/);
