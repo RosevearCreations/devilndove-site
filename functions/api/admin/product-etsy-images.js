@@ -43,6 +43,14 @@ function localView(s){const linked=validId(s.draft?.external_reference)&&s.paylo
     transferred:s.images.filter(im=>im.transferred).length,
     pending:s.images.filter(im=>!im.transferred&&!s.claimed.has(recordKey(s.product.product_id,im.product_image_id))).length,
     provider_contacted:false,publication_allowed:false};}
+export function reconcileEtsyPhotoInventory487(remote,receipts){
+  if(!Array.isArray(remote)||!Array.isArray(receipts)||!remote.every(row=>validId(row?.listing_image_id)))return {ready:false,reason:'etsy_image_inventory_unverified',remote_count:null,tracked_count:receipts?.length||0};
+  const remoteIds=new Set(remote.map(row=>String(row.listing_image_id)));
+  const trackedIds=new Set(receipts.map(row=>String(row.etsy_image_id||'')));
+  const untracked=[...remoteIds].filter(id=>!trackedIds.has(id));
+  const missing=[...trackedIds].filter(id=>!remoteIds.has(id));
+  return {ready:untracked.length===0&&missing.length===0,reason:untracked.length?'existing_etsy_photos_need_manual_reconciliation':missing.length?'tracked_photo_missing_from_etsy':'matched',remote_count:remoteIds.size,tracked_count:trackedIds.size,untracked_count:untracked.length,missing_count:missing.length};
+}
 async function authorized(c,db){
   const [conn,shop]=await Promise.all([
     db.prepare("SELECT connection_status,scopes_json,access_expires_at,access_token_ciphertext FROM oauth_provider_connections WHERE provider_key='etsy' LIMIT 1").first(),
@@ -66,9 +74,18 @@ export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
   if(!validId(id))return respond({error:'Choose a saved Product.'},400);
   try{const s=await source(g.db,Number(id));
     if(!s.product)return respond({error:'Product not found.'},404);
-    return respond(localView(s));
+    const local=localView(s);
+    if(new URL(c.request.url).searchParams.get('reconcile')!=='1')return respond(local);
+    if(!local.listing_id)return respond({...local,remote_reconciliation:{ready:false,reason:'link_existing_draft_first'},provider_contacted:false});
+    const a=await authorized(c,g.db);if(a.error)return a.error;
+    const [listing,remoteImages]=await Promise.all([getEtsy('listings/'+encodeURIComponent(local.listing_id),a.headers),getEtsy('listings/'+encodeURIComponent(local.listing_id)+'/images',a.headers)]);
+    if(String(listing?.listing_id)!==local.listing_id||String(listing?.shop_id)!==String(a.shop.shop_id)||String(listing?.state).toLowerCase()!=='draft')
+      return respond({...local,remote_reconciliation:{ready:false,reason:'original_etsy_draft_identity_or_state_changed'},provider_contacted:true});
+    let receipts=[];try{receipts=s.receiptRows.map(row=>JSON.parse(row.details_json))}catch{}
+    return respond({...local,remote_reconciliation:reconcileEtsyPhotoInventory487(remoteImages?.results,receipts),provider_contacted:true});
   }catch{return respond({error:'Canonical Etsy media readiness is temporarily unavailable.'},503);}}
 export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error;
+  if(c.request.headers.get('Origin')!==new URL(c.request.url).origin)return respond({error:'Same-origin required for Etsy photo transfer.'},403);
   let b;try{b=await c.request.json();}catch{return respond({error:'JSON required.'},400);}
   if(b?.action!=='transfer_one'||!validId(b?.product_id)||!validId(b?.product_image_id)||
     !requestKey(b?.request_key)||b?.confirm_approved_media!==true||b?.confirm_unpublished_only!==true||
@@ -92,11 +109,9 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
     if(String(listing?.listing_id||'')!==listingId||String(listing?.shop_id||'')!==String(a.shop.shop_id)||
       String(listing?.state||'').toLowerCase()!=='draft')return respond({error:'Etsy listing is not our live unpublished draft. Nothing transferred.'},409);
     const remote=remoteImages?.results;
-    if(!Array.isArray(remote)||!remote.every(row=>validId(row?.listing_image_id)))
-      return respond({error:'Etsy image inventory could not be verified. Nothing transferred.'},409);
     let receipts=[];try{receipts=s.receiptRows.map(row=>JSON.parse(row.details_json));}catch{}
-    if(remote.length!==receipts.length||receipts.some(row=>!remote.some(image=>String(image.listing_image_id)===String(row.etsy_image_id))))
-      return respond({error:'Etsy already contains an untracked or missing image. Review the draft manually; no overwrite.'},409);
+    const comparison=reconcileEtsyPhotoInventory487(remote,receipts);
+    if(!comparison.ready)return respond({error:'Etsy photo inventory is not fully reconciled. Review the original draft manually; never overwrite or duplicate existing photos.',remote_reconciliation:comparison},409);
     const r2=bucket(c.env),objectKey=approvedR2Key(selected.image_url,id,c.env);
     if(!r2?.get||!objectKey)return respond({error:'Approved image R2 source unavailable.'},503);
     const object=await r2.get(objectKey);

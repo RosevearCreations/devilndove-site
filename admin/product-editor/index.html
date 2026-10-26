@@ -219,8 +219,10 @@
         <div class="card dd443-channel-card" id="dd443EtsyImages" style="padding:16px;margin:12px 0">
           <h3>4. Add our approved Product photographs to the Etsy draft</h3>
           <p class="small">One saved Product supplies Etsy and our storefront. After a draft exists, we can send approved original JPEG/PNG gallery photos without manually uploading them again in Etsy. Only images approved for public use, with alt text and at least 800×800 pixels, qualify. No listing is published.</p>
-          <div class="dd-product-actions"><button class="btn" type="button" id="dd443EtsyImagesLoad">Load approved photos &amp; Etsy draft status</button><a class="btn" id="dd443EtsyImagesEdit" href="/admin/catalog-media/">Review our Product gallery</a><a class="btn" href="https://www.etsy.com/your/shops/me/listings/drafts" target="_blank" rel="noopener noreferrer">Check Etsy Drafts</a></div>
+          <div class="dd-product-actions"><button class="btn" type="button" id="dd443EtsyImagesLoad">Load approved photos &amp; Etsy draft status</button><button class="btn" type="button" id="dd487EtsyReconcile">Compare photos with original Etsy draft (read only)</button><a class="btn" id="dd443EtsyImagesEdit" href="/admin/catalog-media/">Review our Product gallery</a><a class="btn" href="https://www.etsy.com/your/shops/me/listings/drafts" target="_blank" rel="noopener noreferrer">Check Etsy Drafts</a></div>
+          <p class="small">Build 487: For photos #341–343, open Product Media, select each original photograph, review and save an appropriate public-use status and meaningful alt text. Return here and reload; do not assume a visible photo is approved. Compare the original Etsy draft before transferring: photos already present on Etsy must be reviewed there, not overwritten or silently duplicated.</p>
           <p class="small" role="status" aria-live="polite" id="dd443EtsyImagesStatus">No Etsy image check runs automatically. First create an unpublished Etsy draft.</p>
+          <p class="small" role="status" aria-live="polite" id="dd487EtsyReconcileStatus">Read-only Etsy photo comparison has not run. It will never delete, replace or publish images.</p>
           <div id="dd443EtsyImagesList" class="dd443-image-list" aria-label="Approved product images awaiting Etsy transfer"></div>
           <label class="dd443-consent"><input type="checkbox" id="dd443EtsyImagesConsent"> I checked these approved Product photographs and authorize transfer to our existing <strong>unpublished Canada-only Etsy draft</strong> only. Do not publish or retry an uncertain image upload.</label>
           <button class="btn primary" type="button" id="dd443EtsyImagesSend" disabled>Transfer approved photos to Etsy Draft</button>
@@ -300,7 +302,7 @@
   <script src="/public/js/auth.js?v=440"></script>
   <script src="/public/js/admin-product-channel-intent-v405.js?v=471"></script><script src="/public/js/admin-product-creation-flow-471.js?v=471"></script><script src="/public/js/admin-product-distribution-v406.js?v=436"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-recovery-policy-468.js?v=467b468"></script><script src="/public/js/admin-product-editor-v163.js?v=471&b390=1"></script>
   <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=442"></script>
-  <script src="/public/js/admin-product-unified-publishing-v443.js?v=486"></script>
+  <script src="/public/js/admin-product-unified-publishing-v443.js?v=487"></script>
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=486"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
