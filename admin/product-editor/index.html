@@ -200,6 +200,22 @@
             <button type="button" class="btn" id="dd442EtsyReconcile" disabled>Reconcile the rejected attempt (no draft created)</button>
           </div>
         </div>
+        <div class="card dd443-channel-card" id="dd486EtsyExisting" style="padding:16px;margin:12px 0">
+          <h3>3a. Update the Etsy draft we already created — Build 486</h3>
+          <p class="small">You do <strong>not</strong> need to create another draft. If this Product was drafted previously through a different workflow, enter the listing number shown in Etsy Drafts. We will first verify that it belongs to our connected shop, is still unpublished, matches this Product title, and uses a Canada-only shipping profile. Linking is local only; it does not alter Etsy.</p>
+          <button class="btn" type="button" id="dd486EtsyExistingLoad">Check linked Etsy draft</button>
+          <p class="small" id="dd486EtsyExistingStatus" role="status" aria-live="polite">No existing draft inspection performed yet.</p>
+          <div class="dd-product-actions"><label for="dd486EtsyListingId">Existing Etsy draft listing number<input class="input" id="dd486EtsyListingId" inputmode="numeric" pattern="[0-9]*" placeholder="Exact listing ID from Etsy Drafts"></label><a class="btn" href="https://www.etsy.com/your/shops/me/listings/drafts" target="_blank" rel="noopener noreferrer">Find my existing Etsy draft</a></div>
+          <label><input type="checkbox" id="dd486EtsyLinkConfirm"> I checked this exact listing in our Etsy Drafts and authorize only a verified local Product link. Do not create or publish a listing.</label>
+          <p><button type="button" class="btn" id="dd486EtsyInspect" disabled>Verify listing ownership, state &amp; Canadian shipping</button></p>
+          <p class="small" id="dd486EtsyPreview" role="status" aria-live="polite">Verification required before linking.</p>
+          <label><input type="checkbox" id="dd486EtsyOlderTitle"> If the two verified titles differ, I independently confirmed this older Etsy draft is the very same Product (not another listing).</label>
+          <p><button type="button" class="btn" id="dd486EtsyLink" disabled>Link this verified existing draft</button></p>
+          <p class="small">After linking, save new Product fields here first. The next action updates <strong>title, description, CAD price and quantity</strong> in that same Etsy draft; it does not publish, change shipping, change photographs or edit other Etsy-only fields.</p>
+          <label><input type="checkbox" id="dd486EtsyUpdateConfirm"> I saved and checked these fields, verified the existing draft and authorize one manual, unpublished Etsy update. I understand uncertain responses require manual reconciliation, not retry.</label>
+          <p><button type="button" class="btn primary" id="dd486EtsyUpdate" disabled>Update saved Product fields on existing Etsy draft</button></p>
+          <p class="small" id="dd486EtsyUpdateStatus" role="status" aria-live="polite">No remote field update attempted.</p>
+        </div>
         <div class="card dd443-channel-card" id="dd443EtsyImages" style="padding:16px;margin:12px 0">
           <h3>4. Add our approved Product photographs to the Etsy draft</h3>
           <p class="small">One saved Product supplies Etsy and our storefront. After a draft exists, we can send approved original JPEG/PNG gallery photos without manually uploading them again in Etsy. Only images approved for public use, with alt text and at least 800×800 pixels, qualify. No listing is published.</p>
@@ -208,7 +224,7 @@
           <div id="dd443EtsyImagesList" class="dd443-image-list" aria-label="Approved product images awaiting Etsy transfer"></div>
           <label class="dd443-consent"><input type="checkbox" id="dd443EtsyImagesConsent"> I checked these approved Product photographs and authorize transfer to our existing <strong>unpublished Canada-only Etsy draft</strong> only. Do not publish or retry an uncertain image upload.</label>
           <button class="btn primary" type="button" id="dd443EtsyImagesSend" disabled>Transfer approved photos to Etsy Draft</button>
-          <p class="small">Each photo gets a separate one-attempt receipt. If any transfer is uncertain, the batch stops for manual Etsy review. We never overwrite existing Etsy photos.</p>
+          <p class="small">Each photo gets a separate one-attempt receipt. If any transfer is uncertain, the batch stops for manual Etsy review. We never overwrite existing Etsy photos. If this button is disabled, first verify/link the draft above and approve eligible original JPEG/PNG photographs in Product Media (public use, accurate dimensions and alt text).</p>
         </div>
       </section>
 
@@ -284,7 +300,8 @@
   <script src="/public/js/auth.js?v=440"></script>
   <script src="/public/js/admin-product-channel-intent-v405.js?v=471"></script><script src="/public/js/admin-product-creation-flow-471.js?v=471"></script><script src="/public/js/admin-product-distribution-v406.js?v=436"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-recovery-policy-468.js?v=467b468"></script><script src="/public/js/admin-product-editor-v163.js?v=471&b390=1"></script>
   <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=442"></script>
-  <script src="/public/js/admin-product-unified-publishing-v443.js?v=443"></script>
+  <script src="/public/js/admin-product-unified-publishing-v443.js?v=486"></script>
+  <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=486"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">

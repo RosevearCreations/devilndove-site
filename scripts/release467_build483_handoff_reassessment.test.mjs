@@ -42,5 +42,5 @@ test('Build 483 protected endpoint proves source chain, distinct actor, atomic f
  assert.match(server,/Number\(handoff.actor_user_id\)===actor/);assert.match(server,/WHERE NOT EXISTS/);assert.match(server,/payload_sha256/);
  for(const build of ['479','481','482'])assert.match(server,new RegExp(`Build ${build}`));
  for(const id of ['fpReassessmentForm','fpReassessmentOrder','fpReassessmentSource','fpReassessmentPriority','fpReassessmentHandoff','fpReassessmentFinding','fpReassessmentEvidence','fpReassessmentObserved','fpReassessmentSubmit','fpReassessmentStatus'])assert.match(page,new RegExp(`id="${id}"`));
- assert.match(page,/467b48[345]/);assert.match(ui,/assessReassessment483/);assert.match(ui,/reassessmentPayload483/);
+ assert.match(page,/467b48[3456]/);assert.match(ui,/assessReassessment483/);assert.match(ui,/reassessmentPayload483/);
 });

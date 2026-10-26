@@ -40,5 +40,5 @@ test('Build 484 endpoint and Admin UI enforce separate actor, append-only idempo
  assert.match(server,/Number\(review.actor_user_id\)===actor/);assert.match(server,/WHERE NOT EXISTS/);assert.match(server,/payload_sha256/);
  for(const build of ['479','481','482','483'])assert.match(server,new RegExp(`Build ${build}`));
  for(const id of ['fpExceptionLedger','fpDecisionForm','fpDecisionOrder','fpDecisionSource','fpDecisionPriority','fpDecisionHandoff','fpDecisionReassessment','fpDecisionChoice','fpDecisionEvidence','fpDecisionObserved','fpDecisionSubmit','fpDecisionStatus'])assert.match(page,new RegExp(`id="${id}"`));
- assert.match(page,/467b485/);assert.match(ui,/assessDecision484/);assert.match(ui,/decisionPayload484/);
+ assert.match(page,/467b486/);assert.match(ui,/assessDecision484/);assert.match(ui,/decisionPayload484/);
 });
