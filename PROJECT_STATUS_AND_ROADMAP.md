@@ -1,3 +1,7 @@
+# Current Build 481 candidate — manual aftercare priority annotations
+
+The latest sampled Build 479 follow-up cases can receive one explicit owner-attested, source-linked priority and next review action, recorded in the existing append-only D1 ledger. Server-side original source verification, same-origin Admin authentication, immutable idempotency and an atomic duplicate guard prohibit phantom case ratings or repeat priority receipts. Priority is advisory and cannot close an order, pay/refund, ship or contact a customer. **Next expected Build 482 — Aftercare Priority Review Recurrence & Owner Handoff Evidence X.**
+
 # Current Build 480 candidate — aftercare portfolio and trend review
 
 Bounded latest-250 aftercare receipt sample, Admin-only, manual refresh; classified Build 479 follow-up state per order and monthly UTC receipt trend. Read-only without private notes, case closure claims, US shipping changes, schema migrations or external actions. Mark sample truncation/unknown explicitly. Production readiness depends on protected branch checks, Cloudflare deployment and live-resource proof. **Next expected Build 481 — Aftercare Portfolio Review Annotations & Owner Follow-Up Priorities IX.**
