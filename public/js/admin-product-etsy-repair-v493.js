@@ -3,7 +3,7 @@
  const $=id=>document.getElementById(id),box=$('dd493EtsyBlockers'),form=$('productEditorForm');
  if(!box||!form)return;
  const productId=Number(new URLSearchParams(location.search).get('product_id')||0);
- let loaded=false,failed=false,mode='';
+ let loaded=form.dataset.productAuthority==='ready',failed=form.dataset.productAuthority==='failed',mode='';
  const val=id=>String($(id)?.value||'').trim(),field=name=>String(form.elements.namedItem(name)?.value||'').trim();
  const checked=id=>Boolean($(id)?.checked);
  function issues(){const errors=[];
@@ -38,8 +38,10 @@
  document.addEventListener('dd:product-loaded',()=>{loaded=true;failed=false;render();});
  document.addEventListener('dd:product-load-failed',()=>{loaded=false;failed=true;render();});
  document.addEventListener('dd:etsy-draft-mode-changed',event=>{mode=event.detail?.mode||'';render();});
- document.addEventListener('dd:save-succeeded',render);
+ document.addEventListener('dd:save-succeeded',()=>{loaded=form.dataset.productAuthority==='ready';render();});
  for(const type of ['input','change'])form.addEventListener(type,render);
  for(const id of ['dd438EtsyCreate','dd486EtsyUpdate','dd490Dispatch']){const button=$(id);if(button)new MutationObserver(render).observe(button,{attributes:true,attributeFilter:['disabled']});}
+ if($('dd488ChooseNew')?.getAttribute('aria-pressed')==='true')mode='new';
+ else if($('dd488ChooseExisting')?.getAttribute('aria-pressed')==='true')mode='existing';
  render();
 })();

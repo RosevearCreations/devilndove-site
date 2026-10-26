@@ -151,7 +151,7 @@
           <div class="dd490-dispatch" aria-label="One deliberate Etsy draft field dispatch">
             <h3>Send saved Product fields to Etsy — one action</h3>
             <p class="small">Select NEW or EXISTING above, finish the visible live Etsy checks, and save any Product edits. This one button uses the already verified draft action for that choice; it never publishes. Original photographs still require their separate approval and transfer below.</p>
-            <label><input type="checkbox" id="dd490Authorize"> I reviewed the selected Etsy target, saved title, description, CAD price, quantity, Canada-only delivery and current approval checks. Authorize one manual attempt; an uncertain result must be reconciled in Etsy before another attempt.</label>
+            <div class="dd494-authorization"><input type="checkbox" id="dd490Authorize"><label for="dd490Authorize">I reviewed the selected Etsy target, saved title, description, CAD price, quantity, Canada-only delivery and current approval checks. Authorize one manual attempt; an uncertain result must be reconciled in Etsy before another attempt.</label></div>
             <div class="dd-product-actions"><button class="btn primary" id="dd490Dispatch" type="button" disabled>Send approved fields to selected Etsy draft</button><button class="btn" id="dd490Reset" type="button">Reset review (no Etsy action)</button></div>
             <p class="small" id="dd490DispatchStatus" role="status" aria-live="polite">Choose NEW or EXISTING and complete its verification and consent boxes before sending.</p>
             <div class="dd493-repair" aria-label="Etsy button blocker explanations"><h4>Why is the Etsy button inactive?</h4><ul class="small" id="dd493EtsyBlockers" aria-live="polite"></ul><p class="small" id="dd493EtsyRepairStatus" role="status">Complete the requirements listed here. A failed Product load or unverified draft is never treated as ready.</p></div>
@@ -224,8 +224,8 @@
         <div class="card" style="padding:16px;margin:12px 0">
           <h3>3. Create an unpublished Etsy draft</h3>
           <p class="small">Only one Etsy creation attempt is allowed per Product until its result is reconciled. Double-clicks and background retries are blocked. A successful listing will stay in Etsy Drafts for further review.</p>
-          <label style="display:block;margin-bottom:12px"><input type="checkbox" id="dd439EtsyCanadaConfirm"> I reviewed our chosen Etsy shipping profile and confirm that U.S. delivery remains disabled; this draft is for Canadian destinations only.</label>
-          <label style="display:block;margin-bottom:12px"><input type="checkbox" id="dd438EtsyConfirm"> Yes — create <strong>one unpublished draft only</strong>, with no automatic retry or live publication.</label>
+          <div class="dd494-authorization"><input type="checkbox" id="dd439EtsyCanadaConfirm"><label for="dd439EtsyCanadaConfirm">I reviewed our chosen Etsy shipping profile and confirm that U.S. delivery remains disabled; this draft is for Canadian destinations only.</label></div>
+          <div class="dd494-authorization"><input type="checkbox" id="dd438EtsyConfirm"><label for="dd438EtsyConfirm">Yes — create <strong>one unpublished draft only</strong>, with no automatic retry or live publication.</label></div>
           <button class="btn primary" type="button" id="dd438EtsyCreate" disabled>Create unpublished Etsy draft</button>
           <div class="dd-etsy-recovery" id="dd442EtsyRecovery" hidden style="margin-top:14px;padding:12px;border:1px solid #ac623d;border-radius:8px">
             <h4>Review one rejected Etsy attempt</h4>
