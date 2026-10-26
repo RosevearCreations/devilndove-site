@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {approvedR2Key,checkedEtsyBytes,completedImageIds} from '../functions/api/_lib/productEtsyImages443.mjs';
 import {onRequestGet,onRequestPost} from '../functions/api/admin/product-etsy-images.js';
 
-const context=(url,body,db)=>({request:new Request(url,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{}),
+const context=(url,body,db)=>({request:new Request(url,body?{method:'POST',headers:{'Content-Type':'application/json','Origin':new URL(url).origin},body:JSON.stringify(body)}:{}),
   env:{DB:db},data:{ddModuleAccess:{allowed:true,user:{role:'admin',is_active:1,user_id:2,email:'test@example.invalid'}}}});
 const mockDb=()=>({prepare(sql){return {bind(){return this;},
   async first(){if(sql.includes('FROM products'))return {product_id:54,name:'Bar Soap',status:'draft'};return null;},
