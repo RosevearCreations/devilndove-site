@@ -33,3 +33,6 @@ Build 171 **Release & Restart Authority Convergence** remains immutable historic
 ## Retained historical provenance — Release 467 Builds 192–193
 
 Build 192 **Release Regression & Runtime Budget Convergence** and Build 193 **Current Authority & Handoff Convergence** remain retained historical release/restart provenance. Their exact artifacts and gates must remain valid, but current restart truth is Build 216 over exact Production-GREEN Build 215.
+# Build 474 candidate — Real Order Fulfillment, Damage/Returns & Customer Consent Trial II
+
+Build 474 extends the existing Build 464 owner pilot and Build 454 append-only fulfillment evidence ledger. Damage, returns, exchanges and repair paths require original case provenance, evidence-source classification and factual condition state. Declined consent stops outbound-related paths, and truncated fulfillment history holds shipment evidence. No provider booking, refund, status change, exchange, customer message, D1 migration or automatic real-world acceptance is introduced. Validate with `node --test scripts/release467_build464_fulfillment_pilot.test.mjs scripts/release467_build474_real_order_trial_ii.test.mjs`. Next expected: **Build 475 — Fulfillment Exception Reconciliation & Owner Closure Evidence III**, subject to Build 474 Production GREEN.
