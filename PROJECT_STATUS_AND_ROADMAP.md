@@ -1,3 +1,7 @@
+# Current Build 484 candidate — owner exception ledger and non-executing follow-up decisions
+
+Manual owner exception ledger derives only from the latest 25 recognized orders inside an explicit bounded 250-receipt Admin sample. Decision receipts require an authenticated separate Admin from the Build 483 reviewer, verified original 479 → 481 → 482 → 483 sources, private evidence and append-only duplicate guard. No automatic external action, closure, customer outreach, paid services or extra D1 database. **Next expected Build 485 — Aftercare Owner Decision Aging, Exception Recurrence & Independent Handoff XIII.**
+
 # Current Build 483 candidate — handoff age review and independent reassessment
 
 Only handoff receipts in the bounded current Admin sample receive advisory UTC age bands; missing or future timestamps remain unknown. A different authenticated reviewer from the original Build 482 handoff actor can write one append-only reassessment using the verified Build 479 → 481 → 482 receipt chain, explicit finding and private evidence reference. No case closure, external action, customer notification or new database. **Next expected Build 484 — Aftercare Reassessment Follow-Up Decisions & Owner Exception Ledger XII.**
