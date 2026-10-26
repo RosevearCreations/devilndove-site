@@ -6,6 +6,7 @@ import {decryptOAuthSecret} from '../_lib/oauthSecurity.js';
 import {connectionBlockers} from '../_lib/etsyDraftTrial399.mjs';
 import {readCanonicalDistributionGallery} from '../_lib/canonicalDistributionGallery436.mjs';
 import {approvedR2Key,checkedEtsyBytes,completedImageIds,imageReady,MAX_ETSY_IMAGE_BYTES} from '../_lib/productEtsyImages443.mjs';
+import {assessExistingDraftPhotoGap492} from '../_lib/etsyPhotoGap492.mjs';
 
 const respond=(value,status=200)=>jsonResponse({ok:status<400,build:443,publication_performed:false,
   automatic_retry:false,shipping_modified:false,...value},status,{'Cache-Control':'no-store'});
@@ -82,7 +83,8 @@ export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
     if(String(listing?.listing_id)!==local.listing_id||String(listing?.shop_id)!==String(a.shop.shop_id)||String(listing?.state).toLowerCase()!=='draft')
       return respond({...local,remote_reconciliation:{ready:false,reason:'original_etsy_draft_identity_or_state_changed'},provider_contacted:true});
     let receipts=[];try{receipts=s.receiptRows.map(row=>JSON.parse(row.details_json))}catch{}
-    return respond({...local,remote_reconciliation:reconcileEtsyPhotoInventory487(remoteImages?.results,receipts),provider_contacted:true});
+    return respond({...local,remote_reconciliation:reconcileEtsyPhotoInventory487(remoteImages?.results,receipts),
+      photo_gap_492:assessExistingDraftPhotoGap492(remoteImages?.results,receipts,s.images,s.claimed,id),provider_contacted:true});
   }catch{return respond({error:'Canonical Etsy media readiness is temporarily unavailable.'},503);}}
 export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error;
   if(c.request.headers.get('Origin')!==new URL(c.request.url).origin)return respond({error:'Same-origin required for Etsy photo transfer.'},403);
