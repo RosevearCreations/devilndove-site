@@ -14,9 +14,10 @@
  let timer=null;
  function calculate(){
   const fields=['name','price','inventory_quantity','description','product_category','sku','short_description'];
-  const passed=fields.filter(name=>name==='price'?Number(value(name))>0:name==='inventory_quantity'?Number(value(name))>0:value(name).length>0);
+  const passed=fields.filter(name=>name==='price'?Number(value(name))>0:name==='inventory_quantity'?Number(value(name))>0:
+    name==='description'?Boolean(value('description')||value('short_description')):value(name).length>0);
   const pct=Math.round(passed.length/fields.length*100);meter.value=pct;score.textContent=pct+'%';
-  document.getElementById('dd489EntryStatus').textContent=`${passed.length} of ${fields.length} selected entry fields filled. ${fields.filter(x=>!passed.includes(x)).map(x=>x.replaceAll('_',' ')).join(', ')||'All selected fields present.'} This is a local completeness indicator—not Product QA, image quality, Etsy acceptance or publication approval.`;
+  document.getElementById('dd489EntryStatus').textContent=`${passed.length} of ${fields.length} selected entry fields filled. ${fields.filter(x=>!passed.includes(x)).map(x=>x.replaceAll('_',' ')).join(', ')||'All selected fields present.'} Etsy accepts the saved short OR long description; Save Product must confirm it. This is local completeness—not Product QA, image quality or Etsy approval.`;
  }
  const schedule=()=>{clearTimeout(timer);timer=setTimeout(calculate,180)};
  form.addEventListener('input',schedule);form.addEventListener('change',schedule);
