@@ -1,5 +1,5 @@
-// Build 442 — Etsy parcel measurements, guarded rejected-attempt reconciliation and draft.
-// No provider call runs on page load. Every Etsy write requires an explicit click.
+// Build 489 — Etsy category persists locally and a deliberate Etsy tab click checks the connection.
+// No provider call runs on initial page load. Every Etsy LISTING write requires an explicit click.
 (() => {
   'use strict';
   const productId=Number(new URLSearchParams(location.search).get('product_id')||0);
@@ -10,6 +10,8 @@
   // Build 443: keep only non-authoritative operator choices for this browser tab.
   // Consent and shipping verification are NEVER restored from storage.
   const choicesKey=productId?`dnd:etsy:choices:443:${productId}`:null;
+  let openedEtsyOnce=false,categorySaveSerial=0;
+  const categoryStatus=()=>document.getElementById('dd489EtsyCategorySaveStatus');
   function rememberedChoices(){try{const data=JSON.parse(sessionStorage.getItem(choicesKey)||'null');
     return data?.at&&Date.now()-data.at<12*60*60*1000?data:{};}catch{return {};}}
   function saveChoices(){if(!choicesKey)return;try{sessionStorage.setItem(choicesKey,JSON.stringify({at:Date.now(),
@@ -83,7 +85,15 @@
     updateButtons();
   }
   $('dd438EtsySearch')?.addEventListener('input',event=>categories(event.target.value));
-  $('dd438EtsyCategory')?.addEventListener('change',()=>{updateButtons();saveChoices();});
+  async function persistCategory(){
+    const selected=$('dd438EtsyCategory')?.value||'';categorySaveSerial++;const serial=categorySaveSerial;
+    updateButtons();saveChoices();if(!productId||!selected)return;
+    status(categoryStatus(),'Saving Etsy category to the saved Product (local only)…');
+    try{const saved=await api('/api/admin/product-etsy-category-preference',{product_id:productId,taxonomy_id:selected,confirm_local_only:true});
+      if(serial===categorySaveSerial)status(categoryStatus(),`Saved Etsy category #${saved.taxonomy_id} to Product #${productId}. No Etsy listing was changed.`,'ok');
+    }catch(e){if(serial===categorySaveSerial)status(categoryStatus(),`NOT SAVED: ${errorText(e)}. Your selection may be lost on another device.`,'error');}
+  }
+  $('dd438EtsyCategory')?.addEventListener('change',()=>void persistCategory());
   $('dd439EtsyReadiness')?.addEventListener('change',()=>{updateButtons();saveChoices();});
   for(const id of ['dd442EtsyWeight','dd442EtsyLength','dd442EtsyWidth','dd442EtsyHeight',
     'dd442EtsyWeightUnit','dd442EtsyDimensionUnit'])$(id)?.addEventListener('input',()=>{updateButtons();saveChoices();});
@@ -115,6 +125,9 @@
       status(etsyStatus,'Unsaved Product changes detected. Press Save Product before testing Etsy.','warn');return;
     }
     const retained=rememberedChoices();
+    try{const preferred=await api(`/api/admin/product-etsy-category-preference?product_id=${productId}`);
+      if(preferred.taxonomy_id)retained.category=String(preferred.taxonomy_id);
+    }catch(e){status(categoryStatus(),`Saved category read unavailable: ${errorText(e)}`,'warn');}
     // Preserve a choice made since the last test, even if storage is unavailable.
     for(const [key,control] of [['category','dd438EtsyCategory'],['shipping','dd439EtsyShipping'],['readiness','dd439EtsyReadiness']])
       if($(control)?.value)retained[key]=$(control).value;
@@ -159,7 +172,13 @@
       const name=String(verified.product?.name||'').toLowerCase();
       $('dd438EtsySearch').value=retained.search|| (name.includes('soap')?'soap':'');
       categories($('dd438EtsySearch').value);
+      if(retained.category&&!state.taxonomy.some(t=>String(t.id)===String(retained.category)))status(categoryStatus(),`Saved category #${retained.category} no longer appears in Etsy's verified seller taxonomy; choose a new category.`,'warn');
+      else if(retained.category&&!Array.from($('dd438EtsyCategory').options).some(o=>o.value===String(retained.category))){
+        const found=state.taxonomy.find(t=>String(t.id)===String(retained.category));
+        if(found)$('dd438EtsyCategory').add(new Option(found.name,String(found.id)));
+      }
       restoreOption('dd438EtsyCategory',retained.category);
+      if(retained.category&&$('dd438EtsyCategory').value===String(retained.category))status(categoryStatus(),`Saved Etsy category #${retained.category} restored for this Product.`,'ok');
       const blockers=verified.blockers||[];
       state.ready=blockers.length===0&&Boolean(options.shipping?.length)&&Boolean(options.readiness?.length);
       // An explicit Test click is also allowed to re-verify the retained shipping profile.
@@ -219,6 +238,12 @@
     finally{state.ready=false;setBusy(false);}
   }
   $('dd438EtsyTest')?.addEventListener('click',test);
+  document.addEventListener('dd:editor-tab-opened',event=>{
+    if(event.detail?.tab!=='etsy'||openedEtsyOnce||!productId)return;
+    openedEtsyOnce=true;
+    status(etsyStatus,'Etsy tab opened: checking our connected shop and loading available category, shipping and processing choices…');
+    void test();
+  });
   $('dd442EtsyReconcile')?.addEventListener('click',async()=>{
     if(state.working||!state.recoveryEligible||!$('dd442EtsyNoDraftConfirm')?.checked)return;
     setBusy(true);
