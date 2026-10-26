@@ -9,6 +9,7 @@
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
   <link rel="stylesheet" href="/css/admin-product-v162.css?v=178"/>
+  <link rel="stylesheet" href="/admin/product-editor/entry-readiness-489.css?v=489"/>
   <style>
     .dd-media-editor-shell{max-width:1480px;margin:0 auto;padding:0 18px 48px}
     .dd-media-search-results,.dd-media-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -94,10 +95,10 @@
         </div>
         <form id="productMediaV164EditorForm">
           <div class="dd-editor-grid cols-2">
-            <label class="wide"><span class="small">Alt text</span><input class="input" name="alt_text" maxlength="1000"/></label>
+            <label class="wide"><span class="small">Alt text <span class="dd489-both">Required for Etsy + Marketplace</span></span><input class="input" name="alt_text" maxlength="1000"/></label>
             <label><span class="small">Gallery order</span><input class="input" name="sort_order" type="number" min="0" step="1"/></label>
             <label><span class="small">Image role</span><select class="input" name="image_role"><option value="">Unassigned</option><option value="hero_front">Hero / front</option><option value="detail_texture">Detail / texture</option><option value="scale_context">Scale / context</option><option value="back_side">Back / side</option><option value="process_story">Process / story</option><option value="packaging_pickup">Packaging / pickup</option><option value="material_tool_proof">Material / tool proof</option><option value="gallery_support">Gallery support</option></select></label>
-            <label data-context-help="public_use_status"><span class="small">Public use</span><select class="input" name="public_use_status"><option value="internal_review">Internal review</option><option value="product_page_ok">Product page OK</option><option value="social_ok">Social OK</option><option value="all_public_ok">All public OK</option><option value="consent_needed">Consent needed</option><option value="blocked">Blocked</option></select></label>
+            <label data-context-help="public_use_status"><span class="small">Public use <span class="dd489-both">Required for Etsy + Marketplace</span></span><select class="input" name="public_use_status"><option value="internal_review">Internal review</option><option value="product_page_ok">Product page OK</option><option value="social_ok">Social OK</option><option value="all_public_ok">All public OK</option><option value="consent_needed">Consent needed</option><option value="blocked">Blocked</option></select></label>
             <label data-context-help="focal_point"><span class="small">Focal point X %</span><input class="input" name="focal_point_x" type="number" min="0" max="100" step="0.1"/></label>
             <label data-context-help="focal_point"><span class="small">Focal point Y %</span><input class="input" name="focal_point_y" type="number" min="0" max="100" step="0.1"/></label>
             <label class="wide"><span class="small">Image title</span><input class="input" name="image_title" maxlength="250"/></label>

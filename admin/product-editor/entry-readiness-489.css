@@ -1,0 +1,11 @@
+/* Build 489: clear, accessible cross-channel requirement signals. */
+.dd489-readiness{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;padding:16px;margin:12px 0;border:1px solid rgba(199,153,58,.48);border-radius:14px;background:rgba(42,34,52,.32)}
+.dd489-readiness strong{display:block;margin-bottom:8px}.dd489-legend{display:flex;flex-wrap:wrap;gap:9px}
+.dd489-etsy,.dd-channel-required--etsy{color:#f5a34f!important;font-weight:700}
+.dd489-marketplace{color:#78b9ff!important;font-weight:700}
+.dd489-both{color:#83c8ff!important;font-weight:700;text-decoration:underline;text-decoration-color:#f5a34f;text-decoration-thickness:2px;text-underline-offset:3px}
+.dd489-export{color:#cfc4ed!important;font-weight:700}
+.dd489-legend>span{padding:6px 8px;background:rgba(255,255,255,.065);border-radius:7px}
+#dd489EntryMeter{display:block;width:100%;height:18px;accent-color:#d7a642}
+.dd489-readiness .small{line-height:1.5}
+@media(max-width:700px){.dd489-readiness{grid-template-columns:1fr}}

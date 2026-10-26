@@ -171,6 +171,7 @@
   function openTab(id,focusName=''){
     const available=[...document.querySelectorAll('[data-editor-panel]')].some((panel)=>panel.dataset.editorPanel===id);const target=available?id:'basics';
     document.querySelectorAll('[data-editor-panel]').forEach((panel)=>panel.hidden=panel.dataset.editorPanel!==target);document.querySelectorAll('[data-editor-tab]').forEach((tab)=>tab.setAttribute('aria-selected',tab.dataset.editorTab===target?'true':'false'));
+    document.dispatchEvent(new CustomEvent('dd:editor-tab-opened',{detail:{tab:target,product_id:state.productId}}));
     if(target==='media')loadMedia();
     if(focusName){const el=field(focusName);if(el){el.focus();el.scrollIntoView({block:'center'});}}
   }
@@ -184,6 +185,7 @@
       const response=await window.DDAuth.apiFetch(`/api/admin/product-editor-detail?product_id=${encodeURIComponent(state.productId)}`,{method:'GET',cache:'no-store'});
       const data=await readJson(response,'Could not load Product.');
       fill(data.product||{});state.saveNeedsReview=false;state.quotaStop=false;setSaveReady(true);
+      document.dispatchEvent(new CustomEvent('dd:product-loaded',{detail:{product_id:state.productId}}));
       try{sessionStorage.removeItem(`dnd:product-editor-seed:${state.productId}`);}catch{}
       setStatus(`Product authority loaded. Compare any recovered browser edits before another Save. Optional gallery, scoring, pricing and QA remain unloaded until requested.${rowsText(data)}`,'ok');
       if(currentTab()==='media')loadMedia();
