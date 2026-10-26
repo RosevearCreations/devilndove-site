@@ -1,3 +1,7 @@
+# Current Build 483 candidate — handoff age review and independent reassessment
+
+Only handoff receipts in the bounded current Admin sample receive advisory UTC age bands; missing or future timestamps remain unknown. A different authenticated reviewer from the original Build 482 handoff actor can write one append-only reassessment using the verified Build 479 → 481 → 482 receipt chain, explicit finding and private evidence reference. No case closure, external action, customer notification or new database. **Next expected Build 484 — Aftercare Reassessment Follow-Up Decisions & Owner Exception Ledger XII.**
+
 # Current Build 482 candidate — sampled recurrence and independent owner handoff
 
 The Admin aftercare portfolio counts repeated Build 479 receipts *within the bounded sample* without inferring repeated complaints. A different authenticated Admin can attest to one handoff per original Build 481 priority annotation; exact order/source/priority linkage, same-origin security and atomic duplicate prevention are enforced. Append-only Build 454 ledger; no D1 proliferation, automatic contact, external decisions or case closure. **Next expected Build 483 — Aftercare Handoff Follow-Up Aging & Independent Reassessment XI.**
