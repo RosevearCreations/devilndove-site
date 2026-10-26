@@ -148,7 +148,14 @@
           <div class="dd-product-actions"><button class="btn" type="button" id="dd488CheckReadiness">Check what is missing — read only</button><a class="btn" id="dd488MediaLink" href="/admin/catalog-media/">Approve Product images</a></div>
           <p class="small" id="dd488ReadinessStatus" role="status" aria-live="polite">This check reads the saved Product, local draft link and photo approvals only; it does not contact Etsy or change anything.</p>
           <ul class="small" id="dd488ReadinessList" aria-label="Etsy draft readiness findings"></ul>
-          <p class="small">Goal for a future one-step send: saved required fields, eligible approved original photographs, verified Canada-only shipping and a confirmed Etsy draft target. Until those safeguards are met, the separate buttons below remain deliberate approvals, not automatic background writes.</p>
+          <div class="dd490-dispatch" aria-label="One deliberate Etsy draft field dispatch">
+            <h3>Send saved Product fields to Etsy — one action</h3>
+            <p class="small">Select NEW or EXISTING above, finish the visible live Etsy checks, and save any Product edits. This one button uses the already verified draft action for that choice; it never publishes. Original photographs still require their separate approval and transfer below.</p>
+            <label><input type="checkbox" id="dd490Authorize"> I reviewed the selected Etsy target, saved title, description, CAD price, quantity, Canada-only delivery and current approval checks. Authorize one manual attempt; an uncertain result must be reconciled in Etsy before another attempt.</label>
+            <div class="dd-product-actions"><button class="btn primary" id="dd490Dispatch" type="button" disabled>Send approved fields to selected Etsy draft</button><button class="btn" id="dd490Reset" type="button">Reset review (no Etsy action)</button></div>
+            <p class="small" id="dd490DispatchStatus" role="status" aria-live="polite">Choose NEW or EXISTING and complete its verification and consent boxes before sending.</p>
+          </div>
+          <p class="small">Build 490 provides one deliberate field-update action for the selected draft mode. Shipping identity, consent and authorization remain verified by the existing controls. Original image transfer remains separately approved while we complete the future one-step send for all media; no background Etsy writes occur.</p>
         </div>
         <div id="dd488NewWorkflow">
         <div class="dd-channel-steps dd-etsy-steps" aria-label="Etsy draft readiness checklist">
@@ -325,6 +332,7 @@
   <script src="/public/js/admin-product-unified-publishing-v443.js?v=487"></script>
   <script src="/public/js/admin-product-etsy-guide-v488.js?v=488"></script>
   <script src="/public/js/admin-product-entry-readiness-v489.js?v=489"></script>
+  <script src="/public/js/admin-product-etsy-dispatch-v490.js?v=490"></script>
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=486"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
