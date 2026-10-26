@@ -50,7 +50,7 @@
       showGallery();
       status('dd443EtsyImagesStatus',state.listingId?
         `Etsy draft #${state.listingId} • ${data.transferred} image(s) already confirmed • ${data.pending} awaiting review. ${state.uncertain?'HOLD: a previous image result needs reconciliation.':''}`:
-        'No confirmed Product Editor Etsy draft is recorded. Create one unpublished Canada-only draft first.');
+        'No confirmed Product Editor Etsy draft is linked. If one already exists in Etsy, use “Update the Etsy draft we already created” above to verify and link its listing ID. Do NOT create another draft.');
     }catch(e){state.loaded=false;status('dd443EtsyImagesStatus',`Could not load current draft/photos: ${e.message}. No provider write.`);}
     finally{state.busy=false;update();}
   }

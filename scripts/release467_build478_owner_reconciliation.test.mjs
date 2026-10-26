@@ -32,7 +32,7 @@ test('Build 478 server and page demand protected owner audit evidence',()=>{
  const page=readFileSync(new URL('../admin/maker-fulfillment-pilot/index.html',import.meta.url),'utf8');
  const ui=readFileSync(new URL('../public/js/admin-maker-fulfillment-pilot-464.js',import.meta.url),'utf8');
  for(const id of ['fpReconcileAudit','fpReconcileEvidence','fpReconcileDisposition','fpReconcileObserved'])assert.match(page,new RegExp(`id="${id}"`));
- assert.match(page,/467b(47[89]|48[012345])/);assert.match(ui,/reconciliationPayload478/);
+ assert.match(page,/467b(47[89]|48[0123456])/);assert.match(ui,/reconciliationPayload478/);
  assert.match(server,/OWNER_RECONCILIATION_HOLD/);assert.match(server,/OWNER_RECONCILIATION_ALREADY_RECORDED/);
  assert.match(server,/positive\(audit\.actor_user_id\)===actor/);
  assert.doesNotMatch(ui,/\/api\/admin\/update-order-status|\/api\/admin\/order-payments|\/api\/admin\/order-fulfillment-workflow/);
