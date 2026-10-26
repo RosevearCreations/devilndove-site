@@ -1,3 +1,7 @@
+# Build 481 candidate — Aftercare Portfolio Review Annotations & Owner Follow-Up Priorities IX
+
+Build 481 adds an authenticated manual owner priority annotation to a real Build 479 follow-up from the Build 480 bounded portfolio sample. Exact original order and receipt IDs, allowed priority and next action, private reference and explicit attestation are required; the server verifies the actual original receipt and atomically prevents duplicate annotations in existing immutable Build 454 evidence ledger. Annotated priorities are read-only evidence when the portfolio is reloaded, not automatic escalations, closure, refunds or customer notifications. No D1 schema or database proliferation. Production requires protected checks and live proof. **Next expected: Build 482 — Aftercare Priority Review Recurrence & Owner Handoff Evidence X.**
+
 # Build 480 candidate — Outstanding Aftercare Portfolio Review & Exception Trend Evidence VIII
 
 Adds an explicit Admin-only GET endpoint for a sampled latest-250 aftercare receipt review, source-derived monthly UTC follow-up trends, latest per-order finding and original order links. No raw private notes or customer PII leave the new API. Bounded sample is never reported as all-time case totals or real case closure. No new D1 databases, schema changes, paid services, automatic notifications, refunds or customer actions. Promotion requires the exact tested tree and Production live proof. **Next expected: Build 481 — Aftercare Portfolio Review Annotations & Owner Follow-Up Priorities IX.**
