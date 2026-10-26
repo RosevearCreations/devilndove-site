@@ -191,7 +191,8 @@
       if(currentTab()==='media')loadMedia();
     }catch(error){
       setSaveReady(false);if(quota(error))state.quotaStop=true;
-      setStatus(incidentMessage(error,'load'),'error');
+      setStatus(incidentMessage(error,'load')+' No Etsy control may operate from this failed load. Your existing saved Product has not been erased. Use Retry load after the service recovers.','error');
+      document.dispatchEvent(new CustomEvent('dd:product-load-failed',{detail:{product_id:state.productId,reason:incident(error,'load').category}}));
     }finally{state.inFlight=false;}
   }
   function renderMedia(){
@@ -267,7 +268,7 @@
       const response=await window.DDAuth.apiFetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
       const data=await readJson(response,'Product save failed.');
       const savedId=Number(data?.product_id||data?.product?.product_id||state.productId||0);
-      if(state.productId&&(!data.price_cents_confirmed||Number(data.price_cents)!==body.price_cents||
+      if(state.productId&&(!data.product_fields_confirmed||!data.price_cents_confirmed||Number(data.price_cents)!==body.price_cents||
         (data.compare_at_price_cents==null?null:Number(data.compare_at_price_cents))!==body.compare_at_price_cents)){
         const unconfirmed=new Error('Product price readback did not match the requested value.');
         unconfirmed.code='product_price_readback_unconfirmed';unconfirmed.httpStatus=409;throw unconfirmed;
@@ -300,7 +301,7 @@
       const failure=incident(error,'save');
       // Write outcome may be unknown after 5xx/1102/timeout/readback mismatch.
       // Keep browser recovery and require an explicit authoritative reload.
-      if(failure.uncertainWrite){state.saveNeedsReview=true;state.quotaStop=quota(error);}
+      if(failure.uncertainWrite||/product_fields_readback_unconfirmed|product_price_readback_unconfirmed/.test(String(error?.code||''))){state.saveNeedsReview=true;state.quotaStop=quota(error);}
       refreshDirty();snapshotEdits();
       setStatus(`${incidentMessage(error,'save')}${!state.productId&&failure.uncertainWrite?' Check Products for an existing new Product before creating another.':''}`,'error');
       if(saveButton)saveButton.textContent=failure.uncertainWrite?'Review server copy first':'Save Product';
