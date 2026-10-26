@@ -6,6 +6,7 @@
  const say=value=>$('dd488ReadinessStatus').textContent=value;
  function choose(next){
   mode=next;
+  document.dispatchEvent(new CustomEvent('dd:etsy-draft-mode-changed',{detail:{mode}}));
   $('dd488NewWorkflow').hidden=mode!=='new';$('dd486EtsyExisting').hidden=mode!=='existing';
   $('dd488ChooseNew').setAttribute('aria-pressed',String(mode==='new'));
   $('dd488ChooseExisting').setAttribute('aria-pressed',String(mode==='existing'));
