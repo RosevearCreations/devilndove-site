@@ -40,6 +40,7 @@ test('shipping must still verify Canada-only before any Etsy draft can be create
   assert.match(etsy, /action:'create_draft'/);
   assert.match(etsy, /action:'reconcile_rejected_draft'/);
   assert.match(etsy, /parcelReady\(\)/);
-  assert.match(html, /No live listing or shipping-policy change is performed/);
-  assert.match(html, /After creation, approved gallery photos can be transferred separately in Step 4/);
+  assert.match(html, /neither publishes a listing automatically/);
+  assert.match(html, /future one-step send/);
+  assert.match(html, /Canada-only shipping/);
 });

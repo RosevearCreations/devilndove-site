@@ -132,7 +132,20 @@
 
       <section class="dd-editor-panel dd-etsy-panel" data-editor-panel="etsy" hidden>
         <div class="dd-products-browser-heading"><div><h2>Etsy — live connection &amp; unpublished draft</h2>
-          <p class="small">Create a real <strong>unpublished Etsy draft</strong> directly from our saved Product. No live listing or shipping-policy change is performed. After creation, approved gallery photos can be transferred separately in Step 4.</p></div></div>
+          <p class="small">Choose whether you are creating a draft or updating one already in Etsy. Both use the saved Devil n Dove Product; neither publishes a listing automatically.</p></div></div>
+        <div class="card" id="dd488EtsyGuide" style="padding:18px;margin:12px 0;border:1px solid #ae8245">
+          <h3>What do you want to do on Etsy?</h3>
+          <div class="dd-product-actions" role="group" aria-label="Choose Etsy draft workflow">
+            <button class="btn" type="button" id="dd488ChooseNew" aria-pressed="false">Create a NEW Etsy draft</button>
+            <button class="btn" type="button" id="dd488ChooseExisting" aria-pressed="false">UPDATE my existing Etsy draft</button>
+          </div>
+          <p class="small" id="dd488ChoiceStatus" role="status">Choose either option to show only its relevant draft controls. Existing listings are never replaced with a new draft.</p>
+          <div class="dd-product-actions"><button class="btn" type="button" id="dd488CheckReadiness">Check what is missing — read only</button><a class="btn" id="dd488MediaLink" href="/admin/catalog-media/">Approve Product images</a></div>
+          <p class="small" id="dd488ReadinessStatus" role="status" aria-live="polite">This check reads the saved Product, local draft link and photo approvals only; it does not contact Etsy or change anything.</p>
+          <ul class="small" id="dd488ReadinessList" aria-label="Etsy draft readiness findings"></ul>
+          <p class="small">Goal for a future one-step send: saved required fields, eligible approved original photographs, verified Canada-only shipping and a confirmed Etsy draft target. Until those safeguards are met, the separate buttons below remain deliberate approvals, not automatic background writes.</p>
+        </div>
+        <div id="dd488NewWorkflow">
         <div class="dd-channel-steps dd-etsy-steps" aria-label="Etsy draft readiness checklist">
           <h3>Our Etsy checklist</h3>
           <ol>
@@ -200,8 +213,9 @@
             <button type="button" class="btn" id="dd442EtsyReconcile" disabled>Reconcile the rejected attempt (no draft created)</button>
           </div>
         </div>
+        </div>
         <div class="card dd443-channel-card" id="dd486EtsyExisting" style="padding:16px;margin:12px 0">
-          <h3>3a. Update the Etsy draft we already created — Build 486</h3>
+          <h3>Update your EXISTING Etsy draft</h3>
           <p class="small">You do <strong>not</strong> need to create another draft. If this Product was drafted previously through a different workflow, enter the listing number shown in Etsy Drafts. We will first verify that it belongs to our connected shop, is still unpublished, matches this Product title, and uses a Canada-only shipping profile. Linking is local only; it does not alter Etsy.</p>
           <button class="btn" type="button" id="dd486EtsyExistingLoad">Check linked Etsy draft</button>
           <p class="small" id="dd486EtsyExistingStatus" role="status" aria-live="polite">No existing draft inspection performed yet.</p>
@@ -303,6 +317,7 @@
   <script src="/public/js/admin-product-channel-intent-v405.js?v=471"></script><script src="/public/js/admin-product-creation-flow-471.js?v=471"></script><script src="/public/js/admin-product-distribution-v406.js?v=436"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-recovery-policy-468.js?v=467b468"></script><script src="/public/js/admin-product-editor-v163.js?v=471&b390=1"></script>
   <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=442"></script>
   <script src="/public/js/admin-product-unified-publishing-v443.js?v=487"></script>
+  <script src="/public/js/admin-product-etsy-guide-v488.js?v=488"></script>
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=486"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
