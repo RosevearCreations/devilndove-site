@@ -36,7 +36,10 @@ export async function onRequestPost(ctx){const a=await access(ctx);if(a.error)re
  if(eventKind==='pickup_receipt'&&!receiptReference)return reply({ok:false,error:'Record the actual pickup receipt/reference.'},400);
  const actor=positive(a.admin.user_id);if(!actor)return reply({ok:false,error:'Verified Admin actor required.'},401);
  const auditMode=b?.audit_mode==='independent_aftercare_477';
+ const reconciliationMode=b?.reconciliation_mode==='owner_aftercare_478';
  if(reviewNote.includes('Build 477 independent audit;')&&!auditMode)return reply({ok:false,error:'Independent audit requires the protected Build 477 source-validation path.'},400);
+ if(reviewNote.includes('Build 478 owner reconciliation;')&&!reconciliationMode)return reply({ok:false,error:'Owner reconciliation requires protected original evidence checks.'},400);
+ if(auditMode&&reconciliationMode)return reply({ok:false,error:'Select only one evidence review mode.'},400);
  const sourceId=positive(b?.audit_source_hold_id),followupId=positive(b?.audit_followup_id),caseRef=clean(b?.audit_case_reference,120);
  if(auditMode){
   if(eventKind!=='aftercare_followup'||!sourceId||!followupId||sourceId===followupId||!/^[a-zA-Z0-9 _.-]{8,120}$/.test(caseRef))return reply({ok:false,error:'Original case, separate source and follow-up receipts are required for independent audit.'},400);
@@ -50,15 +53,34 @@ export async function onRequestPost(ctx){const a=await access(ctx);if(a.error)re
     ||!reviewNote.includes(`Build 477 independent audit; source hold #${sourceId}; follow-up #${followupId}; case=${caseRef};`))
    return reply({ok:false,error:'HOLD: original HOLD/follow-up provenance or independent actor check failed. No audit receipt recorded.',code:'INDEPENDENT_AUDIT_HOLD'},409);
  }
+ const reconcileAuditId=positive(b?.reconcile_audit_id);
+ if(reconciliationMode){
+  if(eventKind!=='aftercare_followup'||!sourceId||!followupId||!reconcileAuditId||new Set([sourceId,followupId,reconcileAuditId]).size!==3||!/^[a-zA-Z0-9 _.-]{8,120}$/.test(caseRef))return reply({ok:false,error:'Three distinct source receipts and an exact private case are required.'},400);
+  const evidence=rows(await a.db.prepare('SELECT evidence_id,event_kind,review_note,actor_user_id FROM maker_order_fulfillment_evidence WHERE order_id=? AND evidence_id IN (?,?,?)').bind(orderId,sourceId,followupId,reconcileAuditId).all().catch(()=>({results:[]})));
+  const source=evidence.find(e=>positive(e.evidence_id)===sourceId),followup=evidence.find(e=>positive(e.evidence_id)===followupId),audit=evidence.find(e=>positive(e.evidence_id)===reconcileAuditId);
+  if(!source||!followup||!audit||!['damage_hold','return_hold','repair_followup'].includes(source.event_kind)||followup.event_kind!=='aftercare_followup'||audit.event_kind!=='aftercare_followup'
+   ||!String(source.review_note||'').includes(`Trial II case ref=${caseRef};`)
+   ||!String(followup.review_note||'').includes(`source hold #${sourceId};`)||!String(followup.review_note||'').includes(`case=${caseRef};`)
+   ||!String(audit.review_note||'').includes(`Build 477 independent audit; source hold #${sourceId}; follow-up #${followupId}; case=${caseRef};`)
+   ||!positive(audit.actor_user_id)||positive(audit.actor_user_id)===actor
+   ||!reviewNote.includes(`Build 478 owner reconciliation; audit #${reconcileAuditId}; source hold #${sourceId}; follow-up #${followupId}; case=${caseRef};`)
+   ||!/; evidence=[a-zA-Z0-9 _.-]{8,120}; exception=(missing_evidence|owner_followup_needed|external_decision_pending|owner_evidence_reconciled); review only, no closure or external action\.$/.test(reviewNote))
+   return reply({ok:false,error:'HOLD: original evidence chain or separate owner actor cannot be verified.',code:'OWNER_RECONCILIATION_HOLD'},409);
+ }
  // Preserve pre-477 request digests exactly, so historical idempotent retries still replay.
  const payload={orderId,eventKind,reviewNote,packageInstructions,carrier,trackingReference,receiptReference};
  if(auditMode)Object.assign(payload,{auditMode:true,sourceId,followupId,caseRef});
+ if(reconciliationMode)Object.assign(payload,{reconciliationMode:true,sourceId,followupId,reconcileAuditId,caseRef});
  const hash=await digest(payload);
  const previous=await a.db.prepare('SELECT evidence_id,actor_user_id,payload_sha256 FROM maker_order_fulfillment_evidence WHERE request_key=?').bind(key).first();
  if(previous)return previous.actor_user_id===actor&&previous.payload_sha256===hash?reply({ok:true,replayed:true,receipt_id:previous.evidence_id,policy}):reply({ok:false,error:'Request key conflict.'},409);
  if(auditMode){
   const prior=await a.db.prepare("SELECT evidence_id FROM maker_order_fulfillment_evidence WHERE order_id=? AND event_kind='aftercare_followup' AND review_note LIKE ? LIMIT 1").bind(orderId,`%Build 477 independent audit; source hold #${sourceId}; follow-up #${followupId};%`).first();
   if(prior)return reply({ok:false,error:'HOLD: independent audit already exists for this evidence pair.',code:'AUDIT_ALREADY_RECORDED'},409);
+ }
+ if(reconciliationMode){
+  const prior=await a.db.prepare("SELECT evidence_id FROM maker_order_fulfillment_evidence WHERE order_id=? AND event_kind='aftercare_followup' AND review_note LIKE ? LIMIT 1").bind(orderId,`%Build 478 owner reconciliation; audit #${reconcileAuditId}; source hold #${sourceId}; follow-up #${followupId};%`).first();
+  if(prior)return reply({ok:false,error:'HOLD: audit already has an owner reconciliation receipt.',code:'OWNER_RECONCILIATION_ALREADY_RECORDED'},409);
  }
  try{
   const run=await a.db.prepare('INSERT INTO maker_order_fulfillment_evidence(order_id,event_kind,package_instructions,carrier,tracking_reference,receipt_reference,review_note,actor_user_id,request_key,payload_sha256) VALUES(?,?,?,?,?,?,?,?,?,?)').bind(orderId,eventKind,packageInstructions,carrier,trackingReference,receiptReference,reviewNote,actor,key,hash).run();
