@@ -37,7 +37,7 @@ function paintStatus(){const result=evaluated();holds.replaceChildren();for(cons
  worksheet.disabled=!product;
 }
 function draw(){renderSources();renderQuestions();paintStatus();}
-function resetProduct(){product=null;sourceProductId=0;checks={};worksheet.disabled=true;status(productStatus,'HOLD: Product selection changed. Load this exact original Product before reviewing.');draw();}
+function resetProduct(){product=null;sourceProductId=0;checks={};worksheet.disabled=true;document.dispatchEvent(new CustomEvent('dd:maker-safety-product-verified',{detail:{productId:null}}));status(productStatus,'HOLD: Product selection changed. Load this exact original Product before reviewing.');draw();}
 function resetTrial(){ownerTrial=null;sourceProjectId=0;sourceScenario='';status(trialStatus,'HOLD: Project or journey changed. Reload original owner receipts to verify scope.');paintStatus();}
 productInput.addEventListener('input',()=>{const id=validProduct();el('psEditorLink').href=id?`/admin/product-editor/?product_id=${id}`:'/admin/product-editor/';resetProduct();});
 categoryInput.addEventListener('change',()=>{checks={};draw();});
@@ -47,8 +47,8 @@ loadProduct.addEventListener('click',async()=>{const id=validProduct();if(!id||b
  busy=true;loadProduct.disabled=true;product=null;checks={};draw();status(productStatus,'Reading one original Product from its canonical Admin authority…');
  try{const data=await get('/api/admin/product-editor-detail?product_id='+id);
   if(!data.ok||safetyProductId462(data.product?.product_id)!==id)throw Error(data.error||'Product identity mismatch.');
-  product=data.product;sourceProductId=id;status(productStatus,`Loaded original Product #${id}: ${String(product.name||'Unnamed Product').slice(0,100)}. Saved category: ${String(product.product_category||'Not recorded').slice(0,100)}. Status: ${String(product.status||'unknown').slice(0,30)}. Its category is a hint, not legal classification. No write occurred.`);
- }catch(error){status(productStatus,'HOLD: '+String(error.message||'Product source unavailable.'),true);}
+  product=data.product;sourceProductId=id;document.dispatchEvent(new CustomEvent('dd:maker-safety-product-verified',{detail:{productId:id}}));status(productStatus,`Loaded original Product #${id}: ${String(product.name||'Unnamed Product').slice(0,100)}. Saved category: ${String(product.product_category||'Not recorded').slice(0,100)}. Status: ${String(product.status||'unknown').slice(0,30)}. Its category is a hint, not legal classification. No write occurred.`);
+ }catch(error){document.dispatchEvent(new CustomEvent('dd:maker-safety-product-verified',{detail:{productId:null}}));status(productStatus,'HOLD: '+String(error.message||'Product source unavailable.'),true);}
  finally{busy=false;loadProduct.disabled=false;draw();}
 });
 loadTrial.addEventListener('click',async()=>{const id=validProject(),scenario=scenarioInput.value;

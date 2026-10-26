@@ -325,6 +325,12 @@ jobs:
           node --check public/js/admin-maker-media-remediation-472.js
           node --check public/js/admin-maker-media-acceptance-460.js
           node --test scripts/release467_build472_actual_media_remediation.test.mjs scripts/release467_build460_maker_media_accessibility.test.mjs
+      - name: Build 473 Canadian physical sample, printed labels and specialist safety HOLD
+        run: |
+          node --check public/js/maker-sample-acceptance-policy-473.mjs
+          node --check public/js/admin-maker-sample-acceptance-473.js
+          node --check public/js/admin-maker-product-safety-462.js
+          node --test scripts/release467_build473_canadian_sample_safety.test.mjs scripts/release467_build462_maker_product_safety.test.mjs
 
       - name: JavaScript syntax
         run: |
