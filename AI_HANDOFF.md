@@ -33,6 +33,10 @@ Build 171 **Release & Restart Authority Convergence** remains immutable historic
 ## Retained historical provenance — Release 467 Builds 192–193
 
 Build 192 **Release Regression & Runtime Budget Convergence** and Build 193 **Current Authority & Handoff Convergence** remain retained historical release/restart provenance. Their exact artifacts and gates must remain valid, but current restart truth is Build 216 over exact Production-GREEN Build 215.
-# Build 474 candidate — Real Order Fulfillment, Damage/Returns & Customer Consent Trial II
+# Build 475 candidate — Fulfillment Exception Reconciliation & Owner Closure Evidence III
+
+Build 475 extends the live Build 474 case-review interface. Owner reconciliation now requires a matching original Build 474 damage/return/repair HOLD receipt, identical private case reference, a separate owner follow-up reference, an explicit review disposition, and independent owner attestation. Truncated or duplicate ledger evidence fails closed. It appends only an existing `aftercare_followup` Build 454 ledger record; it does not close cases, send messages, issue refunds, book carriers, mutate Orders/Inventory, or change D1 schema. Test with `node --test scripts/release467_build464_fulfillment_pilot.test.mjs scripts/release467_build474_real_order_trial_ii.test.mjs scripts/release467_build475_fulfillment_closure.test.mjs`. Next expected: **Build 476 — Aftercare Exception Aging, Escalation & Evidence Review IV**, after Build 475 Production GREEN.
+
+# Build 474 — Real Order Fulfillment, Damage/Returns & Customer Consent Trial II
 
 Build 474 extends the existing Build 464 owner pilot and Build 454 append-only fulfillment evidence ledger. Damage, returns, exchanges and repair paths require original case provenance, evidence-source classification and factual condition state. Declined consent stops outbound-related paths, and truncated fulfillment history holds shipment evidence. No provider booking, refund, status change, exchange, customer message, D1 migration or automatic real-world acceptance is introduced. Validate with `node --test scripts/release467_build464_fulfillment_pilot.test.mjs scripts/release467_build474_real_order_trial_ii.test.mjs`. Next expected: **Build 475 — Fulfillment Exception Reconciliation & Owner Closure Evidence III**, subject to Build 474 Production GREEN.
