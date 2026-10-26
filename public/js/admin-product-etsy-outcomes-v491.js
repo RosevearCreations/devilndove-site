@@ -28,12 +28,19 @@
   try{
    const result=await get(`/api/admin/product-etsy-images?product_id=${id}&reconcile=1`),comparison=result.remote_reconciliation||{};
    item(`Live Etsy photo comparison: ${comparison.reason||'unavailable'}; tracked ${comparison.tracked_count??'unknown'}, remote ${comparison.remote_count??'unknown'}.`,comparison.ready!==true);
+   const gap=result.photo_gap_492,box=$('dd492PhotoGaps');if(box){box.replaceChildren();const line=(message,hold)=>{const li=document.createElement('li');li.textContent=(hold?'HOLD — ':'✓ ')+message;li.dataset.outcome=hold?'hold':'confirmed';box.append(li);};
+    if(gap){line(`Photo status: ${gap.state.replaceAll('_',' ')}. ${gap.next_step}`,gap.state==='hold');
+     for(const remoteId of gap.unexpected_etsy_image_ids||[])line(`Etsy photo #${remoteId} has no accepted local receipt. Do not replace it.`,true);
+     for(const remoteId of gap.missing_etsy_image_ids||[])line(`Previously confirmed Etsy photo #${remoteId} is now absent. Inspect the draft.`,true);
+     for(const imageId of gap.uncertain_product_image_ids||[])line(`Local image #${imageId} has an unconfirmed upload claim. Never retry blindly.`,true);
+     for(const photo of gap.pending_local_images||[])line(`Local image #${photo.product_image_id}: ${photo.transferable&&photo.alt_text_ready?'eligible for separate owner-approved transfer':'check original JPEG/PNG and image alt description before transfer'}.`,false);
+    }else line('Gap evidence unavailable. No transfer allowed from this diagnostic.',true);}
    say(comparison.ready?'Live Etsy photos match tracked receipts. Check all remaining Product QA and media requirements before further transfer.':'HOLD: live Etsy photographs differ or could not be verified. Inspect the original draft; no automatic retry or replacement.');
   }catch(e){item('Live Etsy read failed: '+e.message,true);say('HOLD: Etsy photo verification could not be completed; no provider write attempted.');}
   finally{busy=false;controls();}
  }
  local.addEventListener('click',()=>void review());remote.addEventListener('click',()=>void live());
- document.addEventListener('dd:save-succeeded',()=>{latest=null;$('dd491OutcomeList').replaceChildren();say('Product changed. Run a fresh local outcome review before trusting previous results.');controls();});
+ document.addEventListener('dd:save-succeeded',()=>{latest=null;$('dd491OutcomeList').replaceChildren();$('dd492PhotoGaps')?.replaceChildren();say('Product changed. Run a fresh local outcome review before trusting previous results.');controls();});
  if(id)$('dd491MediaScoreLink').href=`/admin/catalog-media/?product_id=${encodeURIComponent(id)}`;
  controls();
 })();

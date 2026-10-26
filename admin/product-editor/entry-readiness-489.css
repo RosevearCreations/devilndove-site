@@ -17,3 +17,4 @@
 .dd491-outcomes h3{margin:0 0 8px}.dd491-outcomes .dd-product-actions{display:flex;flex-wrap:wrap;gap:8px}.dd491-outcomes .dd-product-actions>.btn{min-height:42px}
 #dd491OutcomeList{padding-left:23px;line-height:1.5}#dd491OutcomeList li{margin:6px 0}#dd491OutcomeList li[data-outcome="hold"]{color:#ffb36d;font-weight:650}
 @media(max-width:520px){.dd491-outcomes{padding:12px}.dd491-outcomes .dd-product-actions>.btn{width:100%;white-space:normal}}
+.dd492-gap{border-top:1px solid rgba(106,171,218,.35);margin-top:14px;padding-top:10px}.dd492-gap h4{margin:0 0 7px}.dd492-gap ul{padding-left:22px;overflow-wrap:anywhere}.dd492-gap li{margin:5px 0}.dd492-gap li[data-outcome="hold"]{color:#ffb36d;font-weight:650}
