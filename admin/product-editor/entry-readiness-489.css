@@ -13,3 +13,7 @@
 .dd490-dispatch h3{margin:0 0 10px}.dd490-dispatch label{display:block;line-height:1.6;margin:10px 0 14px}
 .dd490-dispatch .dd-product-actions{display:flex;flex-wrap:wrap;gap:10px}.dd490-dispatch .dd-product-actions>.btn{min-height:42px}
 @media(max-width:520px){.dd490-dispatch{padding:12px}.dd490-dispatch .dd-product-actions>.btn{width:100%;white-space:normal}}
+.dd491-outcomes{margin:16px 0;padding:16px;border:1px solid rgba(106,171,218,.6);border-radius:12px;background:rgba(30,43,58,.28)}
+.dd491-outcomes h3{margin:0 0 8px}.dd491-outcomes .dd-product-actions{display:flex;flex-wrap:wrap;gap:8px}.dd491-outcomes .dd-product-actions>.btn{min-height:42px}
+#dd491OutcomeList{padding-left:23px;line-height:1.5}#dd491OutcomeList li{margin:6px 0}#dd491OutcomeList li[data-outcome="hold"]{color:#ffb36d;font-weight:650}
+@media(max-width:520px){.dd491-outcomes{padding:12px}.dd491-outcomes .dd-product-actions>.btn{width:100%;white-space:normal}}
