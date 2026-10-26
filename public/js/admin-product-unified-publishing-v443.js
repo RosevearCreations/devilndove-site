@@ -54,6 +54,22 @@
     }catch(e){state.loaded=false;status('dd443EtsyImagesStatus',`Could not load current draft/photos: ${e.message}. No provider write.`);}
     finally{state.busy=false;update();}
   }
+  async function reconcile487(){
+    if(state.busy||!id)return;
+    state.busy=true;update();status('dd487EtsyReconcileStatus','Reading the original Etsy draft and its remote photo inventory; no changes…');
+    try{
+      const data=await api(`/api/admin/product-etsy-images?product_id=${encodeURIComponent(id)}&reconcile=1`);
+      const check=data.remote_reconciliation||{};
+      if(check.ready){
+        status('dd487EtsyReconcileStatus',`Verified original unpublished Etsy draft #${data.listing_id}: ${check.remote_count} remote image(s) match ${check.tracked_count} recorded transfer(s). Return to photo approval and reload before any upload.`);
+      }else if(check.reason==='existing_etsy_photos_need_manual_reconciliation'){
+        status('dd487EtsyReconcileStatus',`HOLD: original draft #${data.listing_id} already has ${check.untracked_count} untracked Etsy photo(s). Open Etsy Drafts to inspect and retain these. This app will not overwrite or duplicate them. A human must reconcile the originals before upload.`);
+      }else{
+        status('dd487EtsyReconcileStatus',`HOLD: ${String(check.reason||'remote inventory unavailable').replaceAll('_',' ')}. ${check.remote_count==null?'':'Remote photos: '+check.remote_count+'. '}No provider write; inspect the draft before continuing.`);
+      }
+    }catch(e){status('dd487EtsyReconcileStatus',`HOLD: Etsy photo comparison could not complete: ${e.message}. No image changed.`);}
+    finally{state.busy=false;update();}
+  }
   async function send(){
     if(state.busy||state.uncertain||!state.listingId||!$('dd443EtsyImagesConsent')?.checked||dirty())return;
     if(!globalThis.crypto?.randomUUID){status('dd443EtsyImagesStatus','Secure one-time request keys are not available. Nothing sent.');return;}
@@ -78,6 +94,7 @@
     state.busy=false;update();
   }
   $('dd443EtsyImagesLoad')?.addEventListener('click',()=>void load());
+  $('dd487EtsyReconcile')?.addEventListener('click',()=>void reconcile487());
   $('dd443EtsyImagesSend')?.addEventListener('click',()=>void send());
   $('dd443EtsyImagesConsent')?.addEventListener('change',update);
   if(id)$('dd443EtsyImagesEdit')?.setAttribute('href',`/admin/catalog-media/?product_id=${encodeURIComponent(id)}`);

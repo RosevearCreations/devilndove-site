@@ -38,5 +38,5 @@ test('Build 486 Etsy controls reconcile an actual existing draft without duplica
 test('Blocked gallery checkbox reasons are explicitly distinguishable and protections are retained',()=>{
  const endpoint=read('../functions/api/admin/product-distribution-406.js'),gallery=read('../public/js/admin-product-distribution-v406.js'),photos=read('../functions/api/admin/product-etsy-images.js');
  assert.match(endpoint,/imageHolds/);assert.match(endpoint,/public-use approval missing/);assert.match(endpoint,/descriptive alt text missing/);assert.match(endpoint,/verified dimensions below 800×800 or missing/);
- assert.match(gallery,/hold_reasons/);assert.match(photos,/checkedEtsyBytes/);assert.match(photos,/remote\.length!==receipts\.length/);
+ assert.match(gallery,/hold_reasons/);assert.match(photos,/checkedEtsyBytes/);assert.match(photos,/reconcileEtsyPhotoInventory487\(remote,receipts\)/);
 });
