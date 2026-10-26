@@ -33,7 +33,11 @@ Build 171 **Release & Restart Authority Convergence** remains immutable historic
 ## Retained historical provenance — Release 467 Builds 192–193
 
 Build 192 **Release Regression & Runtime Budget Convergence** and Build 193 **Current Authority & Handoff Convergence** remain retained historical release/restart provenance. Their exact artifacts and gates must remain valid, but current restart truth is Build 216 over exact Production-GREEN Build 215.
-# Build 475 candidate — Fulfillment Exception Reconciliation & Owner Closure Evidence III
+# Build 476 candidate — Aftercare Exception Aging, Escalation & Evidence Review IV
+
+Build 476 extends the live Build 475/474 review. It classifies original D1 UTC evidence timestamps into advisory 7/14/30-day aging bands, and requires original source HOLD/case identity, owner-assessed urgency, follow-up status, private evidence reference and explicit attestation for an append-only `aftercare_followup` review. Missing/future time, truncated history and duplicate source escalation reviews stay HOLD. Age bands are not formal SLA determinations; no automatic escalation, message, refund, shipping, closure, order change or D1 schema mutation is authorized. Run `node --test scripts/release467_build464_fulfillment_pilot.test.mjs scripts/release467_build474_real_order_trial_ii.test.mjs scripts/release467_build475_fulfillment_closure.test.mjs scripts/release467_build476_aftercare_aging.test.mjs`. Next: **Build 477 — Aftercare Follow-Up Reassessment & Independent Closure Audit V** after Production GREEN.
+
+# Build 475 — Fulfillment Exception Reconciliation & Owner Closure Evidence III
 
 Build 475 extends the live Build 474 case-review interface. Owner reconciliation now requires a matching original Build 474 damage/return/repair HOLD receipt, identical private case reference, a separate owner follow-up reference, an explicit review disposition, and independent owner attestation. Truncated or duplicate ledger evidence fails closed. It appends only an existing `aftercare_followup` Build 454 ledger record; it does not close cases, send messages, issue refunds, book carriers, mutate Orders/Inventory, or change D1 schema. Test with `node --test scripts/release467_build464_fulfillment_pilot.test.mjs scripts/release467_build474_real_order_trial_ii.test.mjs scripts/release467_build475_fulfillment_closure.test.mjs`. Next expected: **Build 476 — Aftercare Exception Aging, Escalation & Evidence Review IV**, after Build 475 Production GREEN.
 
