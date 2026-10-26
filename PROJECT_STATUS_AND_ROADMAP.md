@@ -404,3 +404,6 @@ Candidate: exact-source owner closure-review evidence on original Build 474 dama
 # Release 467 Build 474 — Real Order Trial II
 
 Candidate: owner-observed original order fulfillment, damage, returns, repair and consent evidence checks in the established Build 464 workbench. Case provenance and observed condition must be recorded before an append-only Build 454 receipt; case resolution, real-world fulfillment, contact, refunds and exchanges remain manual and separate. No database schema change. Next queued: **Build 475 — Fulfillment Exception Reconciliation & Owner Closure Evidence III**.
+# Current Build 478 candidate — owner aftercare evidence reconciliation
+
+Build 478 extends the existing real-order fulfillment pilot with protected, append-only owner review of a verified original HOLD, follow-up and independent audit; manual exception categories cannot close cases or trigger provider/payment/contact actions. On each receipt, the source ledger and actor separation are rechecked server-side. `dev` and `main` release gates and live production integrity must finish GREEN before any completion claim. **Next expected Build 479 — Aftercare Owner Reconciliation Follow-Up & Outstanding Case Review VII.**
