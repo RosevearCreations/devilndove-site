@@ -83,14 +83,17 @@ export async function onRequestPost(context){
     const seo=seoPayload(body);const seoValues=SEO_FIELDS.map((key)=>seo[key]);
     const seoResult=await db.prepare(SEO_UPSERT_SQL).bind(productId,...seoValues).run();measured+=rowsRead(seoResult);
 
-    const check=await db.prepare('SELECT price_cents,compare_at_price_cents,currency FROM products WHERE product_id=? LIMIT 1').bind(productId).all();
+    const check=await db.prepare('SELECT name,short_description,description,product_category,inventory_quantity,price_cents,compare_at_price_cents,currency FROM products WHERE product_id=? LIMIT 1').bind(productId).all();
     measured+=rowsRead(check);
     const saved=Array.isArray(check?.results)?check.results[0]:null;
     const priceConfirmed=Boolean(saved&&Number(saved.price_cents)===submitted&&
       (saved.compare_at_price_cents==null?null:Number(saved.compare_at_price_cents))===compare&&String(saved.currency||'').toUpperCase()===payload.currency);
     if(!priceConfirmed)return json({ok:false,error:'Stored Product price could not be confirmed. Check the Product record before another write.',code:'product_price_readback_unconfirmed',retry_automatically:false},409);
+    const fieldsConfirmed=Boolean(saved&&['name','short_description','description','product_category','inventory_quantity']
+      .every(key=>String(saved[key]??'')===String(payload[key]??'')));
+    if(!fieldsConfirmed)return json({ok:false,error:'Product fields did not match the saved record. Press Retry load and compare the server copy before any additional write. Nothing was sent to Etsy.',code:'product_fields_readback_unconfirmed',retry_automatically:false},409);
     if(typeof context.waitUntil==='function')context.waitUntil(auditAdminAction(context.env,context.request,admin,{action_type:'update_product_low_read',target_type:'product',target_id:productId,target_key:payload.name,details:{build:175,fields:PRODUCT_FIELDS.length,seo_saved:true,schema_introspection_reads:0}}).catch(()=>null));
-    return json({ok:true,product_id:productId,message:'Product saved through the zero-introspection low-read editor path.',delivery:'single-product-save-v175',saved_fields:PRODUCT_FIELDS.length,seo_saved:true,price_cents_confirmed:true,price_cents:submitted,compare_at_price_cents:compare,currency:payload.currency,schema_introspection_reads:0,d1_rows_read:measured,background_work_started:false,media_sync_started:false,readiness_scan_started:false},200,{'X-DD-D1-Rows-Read':String(measured)});
+    return json({ok:true,product_id:productId,message:'Product saved and important Product fields read back from D1.',delivery:'single-product-save-v175',saved_fields:PRODUCT_FIELDS.length,seo_saved:true,price_cents_confirmed:true,product_fields_confirmed:true,price_cents:submitted,compare_at_price_cents:compare,currency:payload.currency,schema_introspection_reads:0,d1_rows_read:measured,background_work_started:false,media_sync_started:false,readiness_scan_started:false},200,{'X-DD-D1-Rows-Read':String(measured)});
   }catch(error){
     const message=String(error?.message||'Product save failed.');const quota=/rows read|daily|limit|quota|7500/i.test(message);
     return json({ok:false,error:quota?'D1 read capacity is temporarily unavailable. The Product save was not retried automatically.':message,code:quota?'d1_read_capacity_unavailable':'product_editor_save_failed',retry_automatically:false},quota?503:500);
