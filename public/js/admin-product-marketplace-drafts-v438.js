@@ -121,6 +121,9 @@
   }
   async function test(){
     if(!productId){status(etsyStatus,'Save the Product first, then return to the Etsy tab.','warn');return;}
+    if(document.querySelector('#productEditorForm')?.dataset.productAuthority!=='ready'){
+      status(etsyStatus,'Waiting for the saved Product to load before checking Etsy. If this persists, use Retry Product load.','warn');return;
+    }
     if(document.querySelector('#productEditorForm')?.dataset.productDirty==='1'){
       status(etsyStatus,'Unsaved Product changes detected. Press Save Product before testing Etsy.','warn');return;
     }
@@ -238,12 +241,18 @@
     finally{state.ready=false;setBusy(false);}
   }
   $('dd438EtsyTest')?.addEventListener('click',test);
-  document.addEventListener('dd:editor-tab-opened',event=>{
-    if(event.detail?.tab!=='etsy'||openedEtsyOnce||!productId)return;
+  function autoTestOnEtsyTab(){
+    if(openedEtsyOnce||!productId||document.querySelector('[data-editor-panel="etsy"]')?.hidden!==false)return;
+    if(document.querySelector('#productEditorForm')?.dataset.productAuthority!=='ready')return;
     openedEtsyOnce=true;
-    status(etsyStatus,'Etsy tab opened: checking our connected shop and loading available category, shipping and processing choices…');
+    status(etsyStatus,'Etsy tab opened: checking the connected shop and loading categories, shipping and processing profiles…');
     void test();
+  }
+  document.addEventListener('dd:editor-tab-opened',event=>{
+    if(event.detail?.tab==='etsy')autoTestOnEtsyTab();
   });
+  document.addEventListener('dd:product-loaded',autoTestOnEtsyTab);
+  autoTestOnEtsyTab();
   $('dd442EtsyReconcile')?.addEventListener('click',async()=>{
     if(state.working||!state.recoveryEligible||!$('dd442EtsyNoDraftConfirm')?.checked)return;
     setBusy(true);

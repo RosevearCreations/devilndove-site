@@ -3,9 +3,11 @@
  const $=id=>document.getElementById(id),id=Number(new URLSearchParams(location.search).get('product_id')||0);
  if(!$('dd488EtsyGuide')||!window.DDAuth?.apiFetch)return;
  const form=$('productEditorForm');let busy=false,mode='';
+ const intentKey=id?`dnd:etsy:mode:494:${id}`:null;
  const say=value=>$('dd488ReadinessStatus').textContent=value;
  function choose(next){
   mode=next;
+  if(intentKey)try{sessionStorage.setItem(intentKey,mode);}catch{}
   document.dispatchEvent(new CustomEvent('dd:etsy-draft-mode-changed',{detail:{mode}}));
   $('dd488NewWorkflow').hidden=mode!=='new';$('dd486EtsyExisting').hidden=mode!=='existing';
   $('dd488ChooseNew').setAttribute('aria-pressed',String(mode==='new'));
@@ -45,4 +47,5 @@
  $('dd488CheckReadiness').addEventListener('click',()=>void check());
  if(id)$('dd488MediaLink').href=`/admin/catalog-media/?product_id=${encodeURIComponent(id)}`;
  $('dd488NewWorkflow').hidden=true;$('dd486EtsyExisting').hidden=true;
+ if(intentKey)try{const previous=sessionStorage.getItem(intentKey);if(['new','existing'].includes(previous))choose(previous);}catch{}
 })();

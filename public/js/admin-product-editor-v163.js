@@ -157,7 +157,7 @@
   }
   function browserSeed(){if(!state.productId)return null;try{const raw=sessionStorage.getItem(`dnd:product-editor-seed:${state.productId}`);if(!raw)return null;const seed=JSON.parse(raw);if(Number(seed?.product_id)!==state.productId)return null;if(Date.now()-Number(seed?.captured_at||0)>30*60*1000)return null;return seed;}catch{return null;}}
   function primeFromBrowser(){const seed=browserSeed();if(!seed)return false;title.textContent=seed.name?`Edit ${seed.name}`:'Edit Product';identity.textContent=`Product #${state.productId}${seed.product_number?` • No. ${seed.product_number}`:''}${seed.sku?` • ${seed.sku}`:''}`;const preview=document.getElementById('productEditorFeaturedPreview');if(preview&&seed.featured_image_url){armMediaImage(preview,seed.featured_image_url);preview.alt=seed.name?`Featured image for ${seed.name}`:'Featured image';}setStatus('Product Browser handoff shown while one authoritative Product read loads. Save remains disabled until authority is confirmed.','warn');return true;}
-  function setSaveReady(ready){state.authorityLoaded=Boolean(ready);if(saveButton)saveButton.disabled=state.productId?(!state.authorityLoaded||state.quotaStop||state.saveNeedsReview):state.inFlight;if(qaRun)qaRun.disabled=!state.productId||!state.authorityLoaded||state.qaRunning;}
+  function setSaveReady(ready){state.authorityLoaded=Boolean(ready);if(ready)form.dataset.productAuthority='ready';if(saveButton)saveButton.disabled=state.productId?(!state.authorityLoaded||state.quotaStop||state.saveNeedsReview):state.inFlight;if(qaRun)qaRun.disabled=!state.productId||!state.authorityLoaded||state.qaRunning;}
   function setFeaturedDraft(raw){const value=String(raw||'').trim();set('featured_image_url',value);if(state.product)state.product.featured_image_url=value;const preview=document.getElementById('productEditorFeaturedPreview');if(preview){armMediaImage(preview,value);preview.alt=get('name')?`Featured image for ${get('name')}`:'Featured image';}refreshDirty();snapshotEdits();renderMedia();state.qaData=null;renderQa();setStatus('Featured image changed in this Product draft. Press Save Product to commit it.','warn');}
   function fill(product){
     state.product=product||{};for(const key of ['name','slug','sku','product_category','color_name','color_names_text','shipping_code','review_status','short_description','description','product_type','status','currency','tax_class_id','weight_grams','inventory_quantity','digital_file_url','featured_image_url','sort_order','meta_title','meta_description','keywords','h1_override','canonical_url','og_title','og_description','og_image_url','merchandise_origin','sale_channel','external_listing_url','external_listing_label','condition_summary','era_label','sourcing_notes'])set(key,product?.[key]);set('price',(Number(product?.price_cents||0)/100).toFixed(2));set('compare_at_price',product?.compare_at_price_cents==null?'':(Number(product.compare_at_price_cents||0)/100).toFixed(2));set('taxable',Number(product?.taxable??1)===0?'0':'1');set('requires_shipping',Number(product?.requires_shipping??1)===1?'1':'0');set('inventory_tracking',Number(product?.inventory_tracking??0)===1?'1':'0');
@@ -179,7 +179,7 @@
     if(!state.productId){set('inventory_quantity',1);title.textContent='Create Product';identity.textContent='New Product';setSaveReady(true);setStatus('New Product mode. No Product list was loaded.','ok');syncSeo(true);markClean();renderQa();return;}
     if(state.inFlight||state.quotaStop)return;
     if(form.dataset.productDirty==='1'&&!window.confirm('Unsaved Product edits are in this browser. Reload the server copy and offer Restore?'))return;
-    snapshotEdits();state.inFlight=true;setSaveReady(false);
+    snapshotEdits();state.inFlight=true;form.dataset.productAuthority='loading';setSaveReady(false);
     if(!browserSeed())setStatus('Loading one authoritative Product only…');
     try{
       const response=await window.DDAuth.apiFetch(`/api/admin/product-editor-detail?product_id=${encodeURIComponent(state.productId)}`,{method:'GET',cache:'no-store'});
@@ -190,7 +190,7 @@
       setStatus(`Product authority loaded. Compare any recovered browser edits before another Save. Optional gallery, scoring, pricing and QA remain unloaded until requested.${rowsText(data)}`,'ok');
       if(currentTab()==='media')loadMedia();
     }catch(error){
-      setSaveReady(false);if(quota(error))state.quotaStop=true;
+      setSaveReady(false);form.dataset.productAuthority='failed';if(quota(error))state.quotaStop=true;
       setStatus(incidentMessage(error,'load')+' No Etsy control may operate from this failed load. Your existing saved Product has not been erased. Use Retry load after the service recovers.','error');
       document.dispatchEvent(new CustomEvent('dd:product-load-failed',{detail:{product_id:state.productId,reason:incident(error,'load').category}}));
     }finally{state.inFlight=false;}

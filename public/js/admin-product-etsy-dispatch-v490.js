@@ -36,5 +36,6 @@
   }catch(error){dispatched=true;authorize.checked=false;status('HOLD — '+error.message+' No unified Etsy action dispatched. Do not assume an approval receipt or retry without reviewing the state.');}
   finally{busy=false;refresh();}
  });
+ mode=$('dd488ChooseNew')?.getAttribute('aria-pressed')==='true'?'new':$('dd488ChooseExisting')?.getAttribute('aria-pressed')==='true'?'existing':'';
  refresh();
 })();
