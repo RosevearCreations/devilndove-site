@@ -37,5 +37,5 @@ test('Build 482 endpoint requires different authenticated reviewer, source proof
  assert.match(server,/Number\(priority.actor_user_id\)===actor/);assert.match(server,/WHERE NOT EXISTS/);assert.match(server,/payload_sha256/);
  assert.match(server,/Build 479 outstanding review/);assert.match(server,/Build 481 priority review/);assert.match(server,/case_closed:false/);
  for(const id of ['fpHandoffForm','fpHandoffOrder','fpHandoffSource','fpHandoffPriorityReceipt','fpHandoffDisposition','fpHandoffEvidence','fpHandoffObserved','fpHandoffSubmit','fpHandoffStatus'])assert.match(page,new RegExp(`id="${id}"`));
- assert.match(page,/467b48[23]/);assert.match(ui,/assessHandoff482/);assert.match(ui,/handoffPayload482/);
+ assert.match(page,/467b48[234]/);assert.match(ui,/assessHandoff482/);assert.match(ui,/handoffPayload482/);
 });
