@@ -1,3 +1,7 @@
+# Build 480 candidate — Outstanding Aftercare Portfolio Review & Exception Trend Evidence VIII
+
+Adds an explicit Admin-only GET endpoint for a sampled latest-250 aftercare receipt review, source-derived monthly UTC follow-up trends, latest per-order finding and original order links. No raw private notes or customer PII leave the new API. Bounded sample is never reported as all-time case totals or real case closure. No new D1 databases, schema changes, paid services, automatic notifications, refunds or customer actions. Promotion requires the exact tested tree and Production live proof. **Next expected: Build 481 — Aftercare Portfolio Review Annotations & Owner Follow-Up Priorities IX.**
+
 # Build 479 candidate — Aftercare Owner Reconciliation Follow-Up & Outstanding Case Review VII
 
 Build 479 extends the Admin fulfillment pilot with a manually reviewed original HOLD → aftercare follow-up → independent Build 477 audit → Build 478 owner reconciliation chain. A different authenticated Admin can record one append-only follow-up finding per owner reconciliation against the existing Build 454 D1 ledger, with duplicate prevention and server-side source/actor validation. No D1 migration, customer message, refund, carrier booking or case closure. All provider and real-world outcomes remain separately held. Promotion requires protected checks and live production integrity. **Next expected: Build 480 — Outstanding Aftercare Portfolio Review & Exception Trend Evidence VIII.**
