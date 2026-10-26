@@ -389,6 +389,10 @@ Build 171 — Release & Restart Authority Convergence — remains immutable hist
 
 ## Retained historical provenance — Release 467 Builds 192–193
 Builds 192–193 remain immutable historical release/restart provenance and do not supersede the current Release 467 authority.
+# Release 467 Build 477 — Aftercare Follow-Up Reassessment & Independent Closure Audit V
+
+Candidate: authenticated independent reviewer must differ from both original evidence actors; server cross-checks same order, private case reference, original HOLD and follow-up receipts and rejects duplicate audit pairs. Audit records remain append-only and do not close the case, contact a customer, issue refunds or mutate Orders/Inventory. No D1 schema change. Next queued: **Build 478 — Aftercare Audit Exceptions & Owner Evidence Reconciliation VI**.
+
 # Release 467 Build 476 — Aftercare Exception Aging, Escalation & Evidence Review IV
 
 Candidate: original D1 UTC receipt-aging guidance and owner-selected manual aftercare exception escalation; all age bands are advisory review prompts, never SLA breach declarations. Real source evidence, owner-attested case linkage, no automatic contact or closure. No D1 migration. Next queued: **Build 477 — Aftercare Follow-Up Reassessment & Independent Closure Audit V**.
