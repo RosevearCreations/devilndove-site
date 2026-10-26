@@ -21,16 +21,25 @@ export async function onRequestGet(context){
   const productId=Number(new URL(request.url).searchParams.get('product_id'));
   if(!Number.isInteger(productId)||productId<=0)return json({ok:false,error:'A valid product_id is required.'},400);
   try{
+    // Build 493: project only fields the editor uses; avoid loading legacy/large
+    // Product columns on every tab entry. This is one authoritative indexed row.
     const result=await db.prepare(`
-      SELECT p.*,
+      SELECT p.product_id,p.product_number,p.name,p.slug,p.sku,p.product_category,
+             p.color_name,p.color_names_json,p.shipping_code,p.review_status,
+             p.short_description,p.description,p.product_type,p.status,p.price_cents,
+             p.compare_at_price_cents,p.currency,p.taxable,p.tax_class_id,
+             p.requires_shipping,p.weight_grams,p.inventory_tracking,p.inventory_quantity,
+             p.digital_file_url,p.featured_image_url,p.sort_order,p.merchandise_origin,
+             p.sale_channel,p.external_listing_url,p.external_listing_label,
+             p.condition_summary,p.era_label,p.sourcing_notes,
              ps.meta_title, ps.meta_description, ps.keywords, ps.h1_override,
              ps.canonical_url, ps.schema_type, ps.og_title, ps.og_description, ps.og_image_url
       FROM products p
       LEFT JOIN product_seo ps ON ps.product_id=p.product_id
       WHERE p.product_id=?
       LIMIT 1
-    `).bind(productId).all();
-    const product=(Array.isArray(result?.results)?result.results:[])[0]||null;
+    `).bind(productId).first();
+    const product=result||null;
     if(!product)return json({ok:false,error:'Product not found.'},404);
     const rate=normalizeTaxRateFraction(product.tax_rate,product.rate_percent);
     product.tax_rate=rate;product.rate_percent=taxRatePercent(rate);

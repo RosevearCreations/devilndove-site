@@ -34,6 +34,6 @@
  $('dd486EtsyUpdate').addEventListener('click',()=>void action('update_saved_fields'));
  for(const x of ['dd486EtsyListingId','dd486EtsyLinkConfirm','dd486EtsyOlderTitle','dd486EtsyUpdateConfirm'])for(const kind of ['input','change'])$(x).addEventListener(kind,()=>{if(x==='dd486EtsyListingId'||x==='dd486EtsyLinkConfirm'){state.inspected=null;state.titleMatches=false;say('dd486EtsyPreview','Listing choice changed. Verify again before linking.');}buttons();});
  form?.addEventListener('input',buttons);form?.addEventListener('change',buttons);
- document.addEventListener('dd:save-succeeded',()=>{state.linked=null;state.inspected=null;$('dd486EtsyUpdateConfirm').checked=false;say('dd486EtsyExistingStatus','Product saved. Recheck its existing Etsy link and review its fields before updating.');buttons();});
+ document.addEventListener('dd:save-succeeded',()=>{state.linked=null;state.inspected=null;$('dd486EtsyUpdateConfirm').checked=false;say('dd486EtsyExistingStatus','Product saved. Reloading the existing link (read only); reapprove the update afterward.');buttons();if(id)void load();});
  if(id)void load();else say('dd486EtsyExistingStatus','Save Product first to link an existing Etsy draft.');buttons();
 })();
