@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="/admin/product-editor/channel-assist-440.css?v=440"/>
   <link rel="stylesheet" href="/admin/product-editor/unified-publishing-443.css?v=443"/>
   <link rel="stylesheet" href="/admin/product-editor/creation-flow-471.css?v=471"/>
+  <link rel="stylesheet" href="/admin/product-editor/entry-readiness-489.css?v=489"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -42,6 +43,10 @@
         <button class="btn dd-editor-tab dd-meta-tab" type="button" data-editor-tab="facebook" aria-selected="false">Facebook Marketplace <span class="dd-tab-channel-dot" aria-hidden="true"></span></button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="advanced" aria-selected="false">Advanced</button>
       </div>
+      <section class="dd489-readiness" aria-label="Cross-channel field legend and Product entry score">
+        <div><strong>Required-field colours</strong><div class="dd489-legend"><span class="dd489-etsy">Etsy only</span><span class="dd489-marketplace">Marketplace only</span><span class="dd489-both">Both channels</span><span class="dd489-export">CSV/export preparation</span></div><p class="small">Required badges are for a prepared listing. Actual Etsy/shop policy is checked at submission. Any image still needs its own original-photo and public-use approval.</p></div>
+        <div><strong>Product entry completeness <span id="dd489EntryScore">Not measured</span></strong><meter id="dd489EntryMeter" min="0" max="100" value="0"></meter><p class="small" id="dd489EntryStatus" role="status">Save one Product. This score measures filled local entry fields; use Product QA and Media scoring for authoritative checks.</p><div class="dd-product-actions"><button class="btn" type="button" data-dd489-open="qa">Open Product QA</button><button class="btn" type="button" data-dd489-open="media">Open image scoring</button></div></div>
+      </section>
 
       <section class="dd471-creation-flow" aria-labelledby="dd471FlowTitle">
         <div class="dd471-flow-head"><div><p class="eyebrow">Build 471 • Create once, review each channel</p><h2 id="dd471FlowTitle">One Product, optional destinations</h2></div><span class="dd471-hold">No automatic external publication</span></div>
@@ -173,6 +178,7 @@
           <div class="dd-editor-grid cols-2">
             <label><span class="small">Find Etsy category</span><input class="input" id="dd438EtsySearch" placeholder="Search category, e.g. soap"></label>
             <label class="dd-etsy-required-field"><span class="small">Verified Etsy seller category <span class="dd-channel-required dd-channel-required--etsy">Required</span></span><select class="input" id="dd438EtsyCategory"><option value="">Test connection to load choices…</option></select></label>
+            <p class="small" id="dd489EtsyCategorySaveStatus" role="status" aria-live="polite">Choose a category after Etsy connection loads; selections are saved to this Product, not just this browser session.</p>
             <label><span class="small">Who made it?</span><select class="input" id="dd438EtsyWhoMade">
               <option value="i_did">We made it</option><option value="collective">Member of our team</option><option value="someone_else">Someone else</option></select></label>
             <label><span class="small">When was it made?</span><select class="input" id="dd438EtsyWhenMade">
@@ -318,6 +324,7 @@
   <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=442"></script>
   <script src="/public/js/admin-product-unified-publishing-v443.js?v=487"></script>
   <script src="/public/js/admin-product-etsy-guide-v488.js?v=488"></script>
+  <script src="/public/js/admin-product-entry-readiness-v489.js?v=489"></script>
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=486"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
