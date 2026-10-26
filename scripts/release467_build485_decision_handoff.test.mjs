@@ -43,5 +43,5 @@ test('Build 485 server and admin UI enforce independence, idempotence, chain and
  for(const pattern of [/getAdminUserFromRequest/,/Same-origin request required/,/Number\(decision.actor_user_id\)===actor/,/WHERE NOT EXISTS/,/payload_sha256/,/case_closed:false/,/external_actions:false/])assert.match(server,pattern);
  for(const build of ['479','481','482','483','484','485'])assert.match(server,new RegExp(`Build ${build}`));
  for(const id of ['fpDecisionHandoffForm','fpDecisionHandoffOrder','fpDecisionHandoffSource','fpDecisionHandoffPriority','fpDecisionHandoffOriginal','fpDecisionHandoffReassessment','fpDecisionHandoffDecision','fpDecisionHandoffDisposition','fpDecisionHandoffEvidence','fpDecisionHandoffObserved','fpDecisionHandoffSubmit','fpDecisionHandoffStatus'])assert.match(page,new RegExp(`id="${id}"`));
- assert.match(page,/467b485/);assert.match(ui,/decisionAge485/);assert.match(ui,/decisionHandoffPayload485/);
+ assert.match(page,/467b486/);assert.match(ui,/decisionAge485/);assert.match(ui,/decisionHandoffPayload485/);
 });

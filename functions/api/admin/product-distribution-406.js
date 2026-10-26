@@ -12,6 +12,13 @@ const reviewSQL="SELECT admin_action_audit_id,details_json FROM admin_action_aud
 const selectedSQL="SELECT selected_product_image_ids_json FROM marketplace_export_image_selections WHERE channel=? AND product_id=? LIMIT 1";
 function gate(c){const admin=verifiedAdminFromModule(c),db=getDb(c.env);
  return !admin?{error:reply({error:'Active Admin authorization required.'},401)}:!db?{error:reply({error:'D1 Production binding unavailable.'},503)}:{admin,db};}
+function imageHolds(im){const out=[];
+ if(!/^https:\/\//i.test(String(im.image_url||''))||/\/placeholders?\/|placeholder\.(?:svg|png|webp)|\/fallbacks?\//i.test(String(im.image_url||'')))out.push('real original image URL required');
+ if(!['product_page_ok','social_ok','all_public_ok'].includes(String(im.public_use_status||'').toLowerCase()))out.push('public-use approval missing');
+ if(String(im.alt_text||'').trim().length<5)out.push('descriptive alt text missing');
+ if(Number(im.width_px||0)<800||Number(im.height_px||0)<800)out.push('verified dimensions below 800×800 or missing');
+ return out;
+}
 async function source(db,productId,channel){
  const [product,gallery,preference,review,selection]=await Promise.all([
   db.prepare(productSQL).bind(productId).first(),readCanonicalDistributionGallery(db,productId),
@@ -33,7 +40,7 @@ export async function onRequestGet(c){
    product:{name:data.product.name,price_cents:data.product.price_cents,quantity:data.product.inventory_quantity,status:data.product.status},
    gallery:data.images.map(im=>({product_image_id:im.product_image_id,image_url:im.image_url,
      alt_text:im.alt_text,width_px:im.width_px,height_px:im.height_px,image_role:im.image_role,
-     approved_for_distribution:allowedImage(im)})),
+     approved_for_distribution:allowedImage(im),hold_reasons:imageHolds(im)})),
    selected_image_ids:data.selectedIds,review_receipt:data.review?.admin_action_audit_id||null,
    current_evidence:data.status,annotation_authority:data.annotationAuthority,source:'CANONICAL_PRODUCTS_AND_PRODUCT_IMAGES_WITH_ANNOTATIONS'}):
   reply({error:'Original Product not found.'},404);

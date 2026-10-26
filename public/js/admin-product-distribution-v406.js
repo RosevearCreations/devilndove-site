@@ -23,12 +23,12 @@ try{const x=await call('/api/admin/product-distribution-406?product_id='+encodeU
   photo.loading='lazy';photo.style.cssText='width:90px;height:90px;object-fit:contain;background:#151924;border-radius:6px;';
   const desc=document.createElement('span');
   desc.textContent='Image #'+img.product_image_id+' · '+img.width_px+'×'+img.height_px+' · '+(img.image_role||'gallery')+
-   (img.approved_for_distribution?' · approved':' · BLOCKED: quality/public-use/placeholder/alt');
+   (img.approved_for_distribution?' · approved':' · BLOCKED: '+(Array.isArray(img.hold_reasons)&&img.hold_reasons.length?img.hold_reasons.join('; '):'approval unavailable'));
   lab.append(chk,photo,desc);e.gallery.append(lab);
  }
  say('Channel source: '+x.channel+'. Saved selection: '+chosen.size+
   '. Readiness: '+(x.current_evidence?.ready_for_local_export?'LOCAL EXPORT READY':'HOLD — '+(x.current_evidence?.blockers||[]).join(', '))+
-  '. Check US shipping exclusion and save explicit owner review after changing images.');
+  '. Blocked checkboxes need correction in Product Media: original photograph, public-use approval, valid dimensions and descriptive alt text. Then reload this gallery. Check US shipping exclusion and save explicit owner review after changing images.');
 }catch(err){loaded=false;say('Cannot verify image source: '+err.message+'. No changes made.');}
 finally{busy=false;update();}}
 async function save(){if(busy||!loaded||!id||!e.shipping.checked||!e.local.checked)return;
