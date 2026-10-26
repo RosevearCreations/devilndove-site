@@ -1,3 +1,7 @@
+# Current Build 482 candidate — sampled recurrence and independent owner handoff
+
+The Admin aftercare portfolio counts repeated Build 479 receipts *within the bounded sample* without inferring repeated complaints. A different authenticated Admin can attest to one handoff per original Build 481 priority annotation; exact order/source/priority linkage, same-origin security and atomic duplicate prevention are enforced. Append-only Build 454 ledger; no D1 proliferation, automatic contact, external decisions or case closure. **Next expected Build 483 — Aftercare Handoff Follow-Up Aging & Independent Reassessment XI.**
+
 # Current Build 481 candidate — manual aftercare priority annotations
 
 The latest sampled Build 479 follow-up cases can receive one explicit owner-attested, source-linked priority and next review action, recorded in the existing append-only D1 ledger. Server-side original source verification, same-origin Admin authentication, immutable idempotency and an atomic duplicate guard prohibit phantom case ratings or repeat priority receipts. Priority is advisory and cannot close an order, pay/refund, ship or contact a customer. **Next expected Build 482 — Aftercare Priority Review Recurrence & Owner Handoff Evidence X.**

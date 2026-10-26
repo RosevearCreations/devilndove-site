@@ -33,7 +33,7 @@ test('Build 481 protected endpoint and Admin form enforce unique, private, appen
  const page=readFileSync(new URL('../admin/maker-fulfillment-pilot/index.html',import.meta.url),'utf8');
  const ui=readFileSync(new URL('../public/js/admin-maker-fulfillment-pilot-464.js',import.meta.url),'utf8');
  for(const id of ['fpPriorityForm','fpPriorityOrder','fpPrioritySource','fpPriorityLevel','fpPriorityAction','fpPriorityEvidence','fpPriorityObserved','fpPrioritySubmit','fpPriorityStatus'])assert.match(page,new RegExp(`id="${id}"`));
- assert.match(page,/467b481/);assert.match(ui,/assessPriority481/);assert.match(ui,/priorityPayload481/);
+ assert.match(page,/467b48[12]/);assert.match(ui,/assessPriority481/);assert.match(ui,/priorityPayload481/);
  assert.match(api,/getAdminUserFromRequest/);assert.match(api,/Same-origin request required/);
  assert.match(api,/PRIORITY_SOURCE_HOLD/);assert.match(api,/PRIORITY_ALREADY_RECORDED/);
  assert.match(api,/WHERE NOT EXISTS/);assert.match(api,/request_key/);
