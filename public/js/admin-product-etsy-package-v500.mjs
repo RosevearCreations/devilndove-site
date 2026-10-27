@@ -1,4 +1,4 @@
-/* Build 500: one owner-approved Etsy package action, using existing server-side
+/* Builds 500–501: one owner-approved Etsy package action, using existing server-side
  * at-most-once claims and provider readback. The browser never chooses a subset
  * of photos or silently creates a second listing for an existing Product. */
 import {assessEtsyPackage500,verifiedEtsyPackage500} from './etsy-package-500.mjs';
@@ -7,12 +7,31 @@ const $=id=>document.getElementById(id);
 const form=$('productEditorForm'),id=Number(new URLSearchParams(location.search).get('product_id')||0);
 if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   const state={busy:false,linked:'',loaded:false,assessment:null,settings:null,attempted:false,
-    previewId:'',previewTitleMatches:false,images:null,lastRemoteId:''};
+    previewId:'',previewTitleMatches:false,images:null,lastRemoteId:'',holdAfterWrite:false,
+    refreshPromise:null,syncing:false};
   if(id===53){$('dd500ListingId').value='4603838854';$('dd500CandidateNote').hidden=false;}
   const ready=()=>id>0&&form.dataset.productAuthority==='ready'&&form.dataset.productDirty!=='1';
   const key=()=>crypto.randomUUID();
   const status=(message,hold=false)=>{const el=$('dd500Status');el.textContent=message;el.dataset.tone=hold?'hold':'ok';};
   const optionStatus=(message,hold=false)=>{const el=$('dd500OptionsStatus');el.textContent=message;el.dataset.tone=hold?'hold':'ok';};
+  const saveState=(message,tone='')=>{
+    const el=$('dd501SaveState');if(el){el.textContent=message;el.dataset.tone=tone;}
+    const resume=$('dd501Resume');if(resume)resume.textContent=message;
+  };
+  function openEtsyReview(){
+    const tab=document.querySelector('[data-editor-tab="etsy"]');
+    if(tab?.getAttribute('aria-selected')!=='true')tab?.click();
+  }
+  function consumeCreateRequest(){
+    if(!id)return false;
+    const marker=`dnd:etsy:sync-after-create:501:${id}`;
+    try{
+      const value=JSON.parse(sessionStorage.getItem(marker)||'null');
+      sessionStorage.removeItem(marker); // One Save authorizes at most one dispatch.
+      return value?.authorized===true&&Number(value.product_id)===id&&
+        Number.isFinite(value.at)&&Date.now()-value.at>=0&&Date.now()-value.at<300000;
+    }catch{return false;}
+  }
   async function api(path,body){
     const response=await window.DDAuth.apiFetch(path,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),cache:'no-store'}:{method:'GET',cache:'no-store'});
     const value=await response.json().catch(()=>null);
@@ -32,7 +51,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     $('dd500Link').hidden=linked;
     $('dd500NewSettings').hidden=linked;
     const send=$('dd500Send');send.textContent=linked?'Update this Etsy listing + all photos':'Create complete Etsy draft + all photos';
-    send.disabled=state.busy||state.attempted||!ready()||!state.loaded||!state.assessment?.ready||!$('dd500Consent').checked||
+    send.disabled=state.busy||state.attempted||state.holdAfterWrite||!ready()||!state.loaded||!state.assessment?.ready||!$('dd500Consent').checked||
       (!linked&&(!state.settings||!newSettingsReady()||Boolean($('dd500ListingId').value.trim())));
     $('dd500Refresh').disabled=state.busy;
     $('dd500OptionsLoad').disabled=state.busy;
@@ -44,8 +63,8 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       check('Etsy will receive all eligible Product originals, not an image selection made here.');
       for(const issue of state.assessment.issues)check('HOLD — '+issue);
     }else check('Read the saved gallery and Etsy receipts to confirm the complete package.');
-    if(id===53&&state.assessment&&JSON.stringify([...state.assessment.image_ids].sort((a,b)=>a-b))!==JSON.stringify([344,345,346]))
-      check('Product #53 must be reviewed: expected original photo IDs #344–346 before the authorized three-photo transfer.');
+    if(id===53&&state.assessment&&![344,345,346].every(photo=>state.assessment.image_ids.includes(photo)))
+      check('Product #53 must retain its three original photo IDs #344–346. New approved gallery photos may be added as normal.');
     check(linked?`Future updates target only Etsy listing #${state.linked}; no duplicate listing will be created.`:
       'For a new listing, complete the one-time category, Canadian shipping and parcel details, then use one Create button.');
     check('Store: same saved Product • Etsy: verified draft transfer • Facebook Marketplace: manual preparation only.');
@@ -97,21 +116,72 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     if(link.linked_listing_id&&String(images.listing_id||'')!==String(link.linked_listing_id))
       throw Error('Etsy listing ID and saved photo receipt disagree.');
     const assessment=assessEtsyPackage500(distribution,images,tags);
-    if(id===53&&JSON.stringify([...assessment.image_ids].sort((a,b)=>a-b))!==JSON.stringify([344,345,346]))
-      assessment.issues.push('Product #53 photo IDs differ from the three originals #344–346; inspect before transfer.');
+    if(id===53&&![344,345,346].every(photo=>assessment.image_ids.includes(photo)))
+      assessment.issues.push('Product #53 is missing one of its three original photos #344–346; inspect before transfer.');
     assessment.ready=assessment.issues.length===0;
     return {link,images,tags,assessment};
   }
-  async function refresh(){if(state.busy||!ready())return;
-    state.busy=true;show();status('Reading the saved Product ↔ Etsy ID and every gallery image (no provider write)…');
-    try{const snapshot=await packageSnapshot();state.linked=String(snapshot.link.linked_listing_id||'');
-      if(state.linked)state.lastRemoteId='';
-      state.assessment=snapshot.assessment;state.images=snapshot.images;state.loaded=true;
-      status(snapshot.assessment.ready?`Ready to review: all ${snapshot.assessment.count} gallery photos are included. ${state.linked?'Update Etsy #'+state.linked:'No existing Etsy link detected.'}`:
-        `HOLD — ${snapshot.assessment.issues.length} package requirement(s) need attention. See the list above.`,!snapshot.assessment.ready);
-      if(!state.linked&&!state.settings)$('dd500NewSettings').open=true;
-    }catch(error){state.loaded=false;state.assessment=null;status('HOLD — '+error.message,true);}
-    finally{state.busy=false;show();}
+  async function refresh(){
+    if(state.refreshPromise)return state.refreshPromise;
+    if(state.busy||!ready())return false;
+    const work=(async()=>{
+      state.busy=true;show();status('Reading the saved Product ↔ Etsy ID and every gallery image (no provider write)…');
+      try{const snapshot=await packageSnapshot();state.linked=String(snapshot.link.linked_listing_id||'');
+        if(state.linked)state.lastRemoteId='';
+        state.assessment=snapshot.assessment;state.images=snapshot.images;state.loaded=true;
+        status(snapshot.assessment.ready?`Ready to review: all ${snapshot.assessment.count} gallery photos are included. ${state.linked?'Update Etsy #'+state.linked:'No existing Etsy link detected.'}`:
+          `HOLD — ${snapshot.assessment.issues.length} package requirement(s) need attention. See the list above.`,!snapshot.assessment.ready);
+        if(!state.linked&&!state.settings&&!$('dd500ListingId').value.trim())$('dd500NewSettings').open=true;
+        return true;
+      }catch(error){state.loaded=false;state.assessment=null;status('HOLD — '+error.message,true);return false;}
+      finally{state.busy=false;show();}
+    })();
+    state.refreshPromise=work;
+    try{return await work;}finally{if(state.refreshPromise===work)state.refreshPromise=null;}
+  }
+  // Build 501: the owner opts in once with the Etsy checkbox. A confirmed
+  // local Save (or approved gallery save) can now drive the complete package.
+  // The *server* must still confirm the saved channel preference. Never send
+  // when the Product, shipping, images or a prior remote result is uncertain.
+  async function syncAfterSave(source){
+    if(state.syncing){saveState('Etsy is already synchronizing this Product. Wait for that result; no duplicate transfer will start.','working');return;}
+    if(state.busy&&!state.refreshPromise){saveState('Etsy is already checking this Product. Wait for that result; no duplicate transfer will start.','working');return;}
+    if(state.holdAfterWrite){
+      saveState('HOLD — an earlier Etsy attempt needs independent review before another write. Open Etsy Drafts and reconcile its listing ID.','hold');return;
+    }
+    state.syncing=true;
+    try{
+      const intent=await api(`/api/admin/product-channel-intent?product_id=${id}`);
+      if(Number(intent.product_id||id)!==id||intent.preferences?.etsy!==true){
+        saveState('Etsy sync is OFF or the saved Etsy checkbox could not be verified. Our local Product was saved; nothing was sent to Etsy.','hold');return;
+      }
+      if(!ready()){
+        saveState('HOLD — save the remaining Product edits before updating Etsy. The saved Product is safe.','hold');return;
+      }
+      if(state.refreshPromise)await state.refreshPromise;
+      if(!state.loaded)await refresh();
+      if(!state.loaded||!state.assessment?.ready){
+        saveState(`HOLD — Product saved, but Etsy needs ${state.assessment?.issues?.length||'a'} gallery, search-tag or verification fix(es). Review the Etsy checklist; no partial package sent.`,'hold');
+        openEtsyReview();return;
+      }
+      if(state.linked===''){
+        const candidate=$('dd500ListingId').value.trim();
+        if(candidate){
+          saveState(`HOLD — Product saved. Verify and link existing Etsy draft #${candidate} once. We will update it, never create a duplicate.`,'hold');
+          openEtsyReview();return;
+        }
+        if(!state.settings)await loadOptions();
+        if(!state.settings||!newSettingsReady()){
+          saveState('HOLD — Product saved. Complete the one-time Etsy category, Canada-only shipping/processing and packed measurements under Etsy. Then press Create complete Etsy draft + photos.','hold');
+          $('dd500NewSettings').open=true;openEtsyReview();return;
+        }
+      }
+      saveState(`Saving ${source==='media'?'new gallery photographs':'the Product changes'} to the same unpublished Etsy draft, including all eligible photos…`,'working');
+      const succeeded=await send({fromSave:true});
+      saveState($('dd500Status').textContent,succeeded?'ok':'hold');
+      if(!succeeded)openEtsyReview();
+    }catch(error){saveState(`HOLD — local Product saved; Etsy sync could not be verified: ${error.message}. Review the Etsy tab before attempting again.`,'hold');openEtsyReview();}
+    finally{state.syncing=false;}
   }
   async function linkExisting(){if(!ready()||state.busy||state.linked)return;
     const listingId=$('dd500ListingId').value.trim();if(!/^[1-9]\d{0,14}$/.test(listingId)||!$('dd500LinkConsent').checked)return;
@@ -193,12 +263,14 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       throw Error('Live acceptance is incomplete: check Etsy image receipts, tags, linking and the shared Marketplace gallery. No publication occurred.');
     return gallery.length;
   }
-  async function send(){
-    if(state.busy||state.attempted||!ready()||!state.assessment?.ready||!$('dd500Consent').checked||!globalThis.crypto?.randomUUID)return;
+  async function send({fromSave=false}={}){
+    if(state.busy||state.attempted||state.holdAfterWrite||!ready()||!state.assessment?.ready||
+      !(fromSave||$('dd500Consent').checked)||!globalThis.crypto?.randomUUID)return false;
     const existing=Boolean(state.linked),mode=existing?'existing':'new';
-    if(!existing&&(!state.settings||!newSettingsReady()||$('dd500ListingId').value.trim()))return;
+    if(!existing&&(!state.settings||!newSettingsReady()||$('dd500ListingId').value.trim()))return false;
     state.busy=true;show();status(`Rechecking all Product photos and Etsy listing ID before one ${mode} package action…`);
     let writeStarted=false;
+    let succeeded=false;
     try{
       const snapshot=await packageSnapshot();
       if(!snapshot.assessment.ready||String(snapshot.link.linked_listing_id||'')!==state.linked)
@@ -247,11 +319,15 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       const count=await acceptance(listingId);
       $('dd500Consent').checked=false;
       status(`Verified ✓ Etsy draft #${listingId} is linked to Product #${id}; ${count}/${count} original photos and native tags match live readback. Our store uses the same gallery; Facebook Marketplace remains manual. Nothing published.`);
+      succeeded=true;
       $('dd497ChannelRemote')?.click();
     }catch(error){if(error.listing_id)state.lastRemoteId=String(error.listing_id);
+      if(writeStarted)state.holdAfterWrite=true;
       status(`HOLD — ${error.message}${state.lastRemoteId?' Etsy listing ID: #'+state.lastRemoteId+'.':''}${writeStarted?' A provider action may have been attempted; inspect Etsy and audit receipts before trying again.':' No Etsy provider write was sent.'}`,true);
-      $('dd500Legacy').open=true;
-    }finally{state.busy=false;show();}
+      // Keep the six historical sections closed. The single HOLD summary is
+      // always visible; advanced repair is an optional owner decision.
+    }finally{state.busy=false;state.attempted=!succeeded&&writeStarted;show();}
+    return succeeded;
   }
   $('dd500Refresh').addEventListener('click',()=>void refresh());
   $('dd500OptionsLoad').addEventListener('click',()=>void loadOptions());
@@ -264,12 +340,37 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   for(const name of ['Consent','LinkConsent','ListingId'])for(const event of ['input','change'])$('dd500'+name).addEventListener(event,()=>{
     if(name==='ListingId'){$('dd500OlderTitleRow').hidden=true;$('dd500OlderTitle').checked=false;}show();});
   form.addEventListener('input',event=>{if(event.target.closest('#dd500Package'))return;state.loaded=false;show();});
-  document.addEventListener('dd:save-succeeded',()=>{state.attempted=false;state.loaded=false;$('dd500Consent').checked=false;void refresh();});
-  document.addEventListener('dd:product-loaded',()=>void refresh());
-  document.addEventListener('dd:media-inline-updated',()=>{state.loaded=false;$('dd500Consent').checked=false;void refresh();});
+  document.addEventListener('dd:save-succeeded',event=>{
+    state.loaded=false;$('dd500Consent').checked=false;
+    if(!state.holdAfterWrite)state.attempted=false;
+    if(event.detail?.etsy_sync_requested===true&&event.detail?.destinations_confirmed===true&&!event.detail?.newer_edits){
+      void (async()=>{await refresh();await syncAfterSave('product');})();
+    }else{
+      saveState(event.detail?.destinations_confirmed===false?'HOLD — Product saved but Etsy checkbox persistence was not confirmed. No Etsy write attempted.':
+        'Product saved locally. Etsy sync is OFF or this Save was not authorized for Etsy.','');
+      void refresh();
+    }
+  });
+  document.addEventListener('dd:product-loaded',()=>void (async()=>{
+    const resumed=consumeCreateRequest();
+    await refresh();
+    if(resumed)await syncAfterSave('product');
+  })());
+  document.addEventListener('dd:media-inline-updated',event=>{
+    if(Number(event.detail?.product_id)!==id)return;
+    state.loaded=false;$('dd500Consent').checked=false;
+    void (async()=>{await refresh();if(ready())await syncAfterSave('media');})();
+  });
   document.addEventListener('dd:product-channel-tags-changed',()=>{state.loaded=false;void refresh();});
   document.addEventListener('dd:editor-tab-opened',event=>{
-    if(event.detail?.tab==='etsy'&&ready())void (async()=>{await refresh();if(!state.linked&&!state.settings)await loadOptions();})();
+    if(event.detail?.tab==='etsy'&&ready())void (async()=>{
+      await refresh();
+      if(!state.linked&&!state.settings&&!$('dd500ListingId').value.trim())await loadOptions();
+    })();
   });
-  show();if(ready())void refresh();
+  show();if(ready())void (async()=>{
+    const resumed=consumeCreateRequest();
+    await refresh();
+    if(resumed)await syncAfterSave('product');
+  })();
 }

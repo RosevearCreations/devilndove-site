@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="/admin/product-editor/creation-flow-471.css?v=471"/>
   <link rel="stylesheet" href="/admin/product-editor/entry-readiness-489.css?v=496"/>
   <link rel="stylesheet" href="/admin/product-editor/advanced-channels-498.css?v=498"/>
+  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=501"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -57,9 +58,10 @@
       </section>
 
       <section class="dd471-creation-flow" aria-labelledby="dd471FlowTitle">
-        <div class="dd471-flow-head"><div><p class="eyebrow">Build 471 • Create once, review each channel</p><h2 id="dd471FlowTitle">One Product, optional destinations</h2></div><span class="dd471-hold">No automatic external publication</span></div>
-        <p class="small">Save one canonical Product below. We can choose Etsy and/or Facebook Marketplace preparation in the same Save. Those switches never publish, create a remote draft, transfer images, change shipping settings or notify a buyer.</p>
+        <div class="dd471-flow-head"><div><p class="eyebrow">Build 501 • Save once, sync the Etsy draft</p><h2 id="dd471FlowTitle">One Product, optional destinations</h2></div><span class="dd471-hold">Etsy draft only — never publish automatically</span></div>
+        <p class="small">Check Etsy and press <strong>Save Product</strong>. We first save the Devil n Dove Product, then create or update its <strong>same unpublished Etsy listing with every approved gallery photo</strong>. If first-time Etsy setup, photo permission or a previous draft needs attention, we show one clear HOLD instead of making a duplicate. Facebook Marketplace stays manual.</p>
         <div id="productChannel471Mount"></div>
+        <div id="dd501SaveState" class="dd501-save-state" role="status" aria-live="polite">Etsy is optional. When checked, the next successful Product save also requests an Etsy draft synchronization.</div>
         <div class="dd471-flow-actions"><button type="button" class="btn" id="dd471MediaReview" disabled>Review canonical gallery and media mapping</button><span class="small" id="dd471FlowStatus" role="status" aria-live="polite">New Product: enter its facts, choose destinations if desired, and save once.</span></div>
       </section>
 
@@ -171,8 +173,8 @@
             <p class="small">Enter the Etsy listing number once. We verify the actual shop, unpublished draft and Canada-only shipping, then store the ID against this Product. We will never create a second listing just to update it.</p>
             <label>Existing Etsy listing ID <input class="input" id="dd500ListingId" inputmode="numeric" pattern="[0-9]*" placeholder="Number shown in Etsy Drafts"></label>
             <p class="small" id="dd500CandidateNote" hidden>Product #53: our earlier owner screenshot showed Etsy draft <strong>#4603838854</strong>. This is a suggested number only; it is not accepted until Etsy verifies it and we approve the link.</p>
-            <label><input type="checkbox" id="dd500LinkConsent"> I checked this exact Etsy draft and authorize linking it to this Product.</label>
-            <label id="dd500OlderTitleRow" hidden><input type="checkbox" id="dd500OlderTitle"> The Etsy title differs, but I verified it is the very same item.</label>
+            <label><input type="checkbox" id="dd500LinkConsent"><span>I checked this exact Etsy draft and authorize linking it to this Product.</span></label>
+            <label id="dd500OlderTitleRow" hidden><input type="checkbox" id="dd500OlderTitle"><span>The Etsy title differs, but I verified it is the very same item.</span></label>
             <button type="button" class="btn" id="dd500LinkButton">Verify and save Etsy listing ID</button>
           </div>
           <details id="dd500NewSettings" class="dd500-setup">
@@ -197,9 +199,10 @@
             <p class="small" id="dd500OptionsStatus" role="status">Live options not loaded yet.</p>
           </details>
           <div class="dd500-readiness"><h3>What will be sent</h3><ul id="dd500Checklist" class="small" role="status" aria-live="polite"><li>Checking Product and photos…</li></ul></div>
-          <label class="dd500-consent"><input type="checkbox" id="dd500Consent"> I own/approve <strong>all</strong> gallery images for public use and authorize one unpublished, Canada-only Etsy package transfer: Product details, search tags, advanced fields and every eligible photo. Any uncertain result must be checked in Etsy before another attempt.</label>
+          <label class="dd500-consent"><input type="checkbox" id="dd500Consent"><span>I own/approve <strong>all</strong> gallery images for public use and authorize one unpublished, Canada-only Etsy package transfer: Product details, search tags, advanced fields and every eligible photo. Any uncertain result must be checked in Etsy before another attempt.</span></label>
           <div class="dd-product-actions"><button class="btn primary" type="button" id="dd500Send" disabled>Create complete Etsy draft + photos</button><button class="btn" type="button" id="dd500Refresh">Refresh Product, listing ID and gallery status</button><a class="btn" href="#productDistribution406">Fix Product photographs</a></div>
           <p class="small" id="dd500Status" role="status" aria-live="polite">No Etsy write attempted.</p>
+          <p class="small" id="dd501Resume" role="status" aria-live="polite">An Etsy checkbox plus Save Product authorizes the same draft workflow. This separate button is for finishing first-time setup or resolving a held package.</p>
           <p class="small">Our store retains the saved Product. Facebook Marketplace uses the same source photos but remains a manual handoff until Meta grants supported listing access. This button never publishes on either marketplace.</p>
         </div>
         <details id="dd500Legacy" class="dd500-troubleshooting"><summary>Advanced Etsy troubleshooting and individual controls (only if a package is on HOLD)</summary>
@@ -418,16 +421,19 @@
 
       <section class="card" id="productChannel405" style="margin:14px 0;padding:18px">
 <h2>Where should this Product be offered?</h2>
-<p class="small">One source Product and one canonical media library for all channels. These local destination switches record your intent when saving this Product; they do not create, upload, activate or publish a marketplace listing. A new Product must be saved before its destination choices can be stored.</p>
+<p class="small">One source Product and one gallery. Etsy checked means Save Product also creates or updates its unpublished Etsy draft and every approved photo, once requirements are ready. Unchecked means no Etsy write. Facebook remains manual.</p>
 <div class="dd-editor-grid cols-2">
-<label><input type="checkbox" id="productChannel405Etsy"> Prepare this Product for Etsy</label>
+<label><input type="checkbox" id="productChannel405Etsy"> Sync this Product with Etsy when we Save</label>
 <label><input type="checkbox" id="productChannel405Facebook"> Prepare this Product for Facebook Marketplace</label>
 </div>
-<label class="dd471-consent"><input type="checkbox" id="productChannel471Consent"> I am the owner or authorized operator. I choose these destinations for <strong>local preparation only</strong>; I understand an Etsy draft, media transfer, or Facebook listing requires its own separate explicit review and authorization. U.S. shipping stays disabled.</label>
-<div class="dd-product-actions"><button type="button" class="btn" id="productChannel405Reload">Load saved destination choices</button>
-<button type="button" class="btn" id="productChannel405Save">Save destination choices for existing Product</button></div>
-<div id="productChannel471Recovery" class="dd471-recovery" hidden><p class="small">The Product was created, but the destination write could not be confirmed. First we loaded the saved preference receipt; the unchecked options below are the confirmed state. We can restore the browser's intended switches for review, then explicitly consent and save only the destination choices. Do not create the Product again.</p><button class="btn" type="button" id="productChannel471Restore">Review unsaved destination choices</button></div>
-<p class="small" id="productChannel405Status" role="status">OFF by default when no preference is configured. Save Product to create a source Product first.</p>
+<label class="dd471-consent"><input type="checkbox" id="productChannel471Consent"> I authorize Etsy, if checked, to create or update <strong>one unpublished, Canada-only draft and all approved gallery photographs</strong> whenever we Save Product. No automatic publication. Facebook Marketplace remains manual.</label>
+<details id="dd501ChannelRecovery"><summary>Destination recovery (only if a Save is on HOLD)</summary>
+<p class="small">Normal changes are saved with Save Product above. Use these recovery tools only after a destination confirmation problem, without repeating the Product creation.</p>
+<div class="dd-product-actions"><button type="button" class="btn" id="productChannel405Reload">Reload saved destination choices</button>
+<button type="button" class="btn" id="productChannel405Save">Save recovered destination choices only</button></div>
+<div id="productChannel471Recovery" class="dd471-recovery" hidden><p class="small">The Product was created, but destination saving was not confirmed. Review the verified saved choices and restore the pending choice before explicitly saving those preferences. Do not create the Product again.</p><button class="btn" type="button" id="productChannel471Restore">Review unsaved destination choices</button></div>
+</details>
+<p class="small" id="productChannel405Status" role="status">OFF by default. Save Product to save both its destination choice and its Etsy draft synchronization request.</p>
 <p class="small">Product gallery is edited in the Media tab and reused as the source for channel-specific draft/export reviews. Distribution remains subject to per-channel policy and explicit operator approval.</p>
 </section>
 <section class="card" id="productDistribution406" style="margin:14px 0;padding:18px">
@@ -455,7 +461,7 @@
 <section class="dd-editor-panel" data-editor-panel="advanced" hidden><h2>Advanced workspaces</h2><p class="small">These systems remain separate so they cannot wake up merely because we edit a Product.</p><div class="dd-product-actions"><a class="btn" href="/admin/inventory-operations/">Inventory Operations</a><a class="btn" id="productEditorMediaAdvancedLink" href="/admin/catalog-media/">Image Editor</a><a class="btn" href="/admin/release-preflight/">Release Preflight</a><a class="btn" href="/admin/packaging-studio/">Packaging</a></div></section>
 
       <div class="dd443-recovery" id="dd443Recovery" hidden role="region" aria-label="Unsaved Product recovery"><strong>Unsaved edits recovered from this browser session</strong><p class="small" id="dd443RecoveryStatus">Choose Restore to review them, or Discard to keep the saved Product.</p><div class="dd-product-actions"><button class="btn" id="dd443RecoveryRestore" type="button">Restore unsaved edits</button><button class="btn" id="dd443RecoveryDiscard" type="button">Discard recovered edits</button></div></div>
-      <div class="dd-editor-footer"><div class="small" aria-live="polite" id="dd440SaveHint">Local draft recovery is browser-session only. No background Product writes or retries. After an uncertain save, press <strong>Retry load</strong> to compare the saved Product, then choose whether another Save is needed. Nothing posts automatically to Etsy or Facebook.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
+      <div class="dd-editor-footer"><div class="small" aria-live="polite" id="dd440SaveHint">Save Product updates our store. When Etsy is checked, a verified unpublished draft sync follows that same Save; a HOLD requires owner review, never automatic retry. No live publication or Facebook posting.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
@@ -477,8 +483,7 @@
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=496"></script>
   <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
   <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
-  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=500"></script>
-  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=500">
+  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=501"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">
