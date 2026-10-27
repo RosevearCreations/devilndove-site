@@ -54,7 +54,8 @@ export function reconcileEtsyPhotoInventory487(remote,receipts){
 }
 async function authorized(c,db){
   const [conn,shop]=await Promise.all([
-    db.prepare("SELECT connection_status,scopes_json,access_expires_at,access_token_ciphertext FROM oauth_provider_connections WHERE provider_key='etsy' LIMIT 1").first(),
+    // connectionBlockers must see the OAuth account ID to compare it with Etsy's shop owner.
+    db.prepare("SELECT remote_subject_id,connection_status,scopes_json,access_expires_at,access_token_ciphertext FROM oauth_provider_connections WHERE provider_key='etsy' LIMIT 1").first(),
     db.prepare("SELECT shop_id,owner_user_id,shop_name,currency_code,acceptance_status FROM etsy_oauth_shop_connections WHERE provider_key='etsy' LIMIT 1").first()
   ]);
   const blockers=connectionBlockers(conn,shop,c.env);let scopes=[];

@@ -13,7 +13,9 @@ function gate(c){const admin=verifiedAdminFromModule(c),db=getDb(c.env);return !
 async function local(db,id){const [product,draft,conn,shop]=await Promise.all([
  db.prepare('SELECT product_id,name,sku,slug,description,short_description,price_cents,currency,inventory_quantity,product_type FROM products WHERE product_id=?').bind(id).first(),
  db.prepare("SELECT id,external_reference,payload_json,status FROM marketplace_syndication_drafts WHERE channel_key='etsy' AND product_id=? AND external_reference IS NOT NULL ORDER BY updated_at DESC LIMIT 1").bind(id).first(),
- db.prepare("SELECT connection_status,scopes_json,access_expires_at,access_token_ciphertext FROM oauth_provider_connections WHERE provider_key='etsy' LIMIT 1").first(),
+ // The authorization guard compares the OAuth account with the verified Etsy shop owner.
+ // Always select remote_subject_id; omitting it falsely reports shop_owner_mismatch.
+ db.prepare("SELECT remote_subject_id,connection_status,scopes_json,access_expires_at,access_token_ciphertext FROM oauth_provider_connections WHERE provider_key='etsy' LIMIT 1").first(),
  db.prepare("SELECT shop_id,owner_user_id,shop_name,currency_code,acceptance_status FROM etsy_oauth_shop_connections WHERE provider_key='etsy' LIMIT 1").first()]);return {product,draft,conn,shop};}
 async function credentials(env,s){const blockers=connectionBlockers(s.conn,s.shop,env);let scopes=[];try{scopes=JSON.parse(s.conn?.scopes_json||'[]')}catch{}
  if(!scopes.includes('listings_r')||!scopes.includes('listings_w'))blockers.push('etsy_listing_scopes_missing');

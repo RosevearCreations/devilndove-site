@@ -339,6 +339,7 @@ jobs:
           node --check functions/api/admin/product-etsy-images.js
           node scripts/release467_build500_etsy_complete_package.test.mjs
           node scripts/release467_build501_etsy_save_sync_mobile.test.mjs
+          node scripts/release467_build502_etsy_existing_link_media_owner.test.mjs
           node scripts/release467_build499_owner_advanced_tags_media.test.mjs
           node scripts/release467_build497_product53_three_channel_acceptance.test.mjs
 
