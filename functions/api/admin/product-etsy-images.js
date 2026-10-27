@@ -18,7 +18,7 @@ function gate(c){const admin=verifiedAdminFromModule(c),db=getDb(c.env);
   return !admin?{error:respond({error:'Active administrator access required.'},401)}:
     !db?{error:respond({error:'D1 unavailable.'},503)}:{admin,db};}
 function details(row){try{return JSON.parse(row?.payload_json||'{}');}catch{return {};}}
-async function source(db,id){
+async function source(db,id,env={}){
   const [product,draft,gallery,accepted]=await Promise.all([
     db.prepare('SELECT product_id,name,status FROM products WHERE product_id=? LIMIT 1').bind(id).first(),
     db.prepare("SELECT id,product_id,external_reference,payload_json,status FROM marketplace_syndication_drafts WHERE channel_key='etsy' AND product_id=? AND external_reference IS NOT NULL ORDER BY updated_at DESC LIMIT 1").bind(id).first(),
@@ -29,7 +29,7 @@ async function source(db,id){
   const images=(gallery?.images||[]).filter(imageReady).slice(0,10).map(row=>({
     product_image_id:Number(row.product_image_id),alt_text:String(row.alt_text||'').trim(),
     image_url:row.image_url,transferred:done.has(Number(row.product_image_id)),
-    transferable:!!approvedR2Key(row.image_url,id)
+    transferable:!!approvedR2Key(row.image_url,id,env)
   }));
   const claimResult=await db.prepare("SELECT target_key FROM admin_action_audit WHERE action_type='etsy_product_editor_image_443_claimed' AND target_type='product' AND target_key LIKE ? ORDER BY admin_action_audit_id ASC LIMIT 11").bind(`${id}:%`).all();
   const claimed=new Set((claimResult?.results||[]).map(row=>String(row.target_key)));
@@ -73,7 +73,7 @@ async function getEtsy(path,headers){const r=await fetch('https://api.etsy.com/v
 export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
   const id=new URL(c.request.url).searchParams.get('product_id');
   if(!validId(id))return respond({error:'Choose a saved Product.'},400);
-  try{const s=await source(g.db,Number(id));
+  try{const s=await source(g.db,Number(id),c.env);
     if(!s.product)return respond({error:'Product not found.'},404);
     const local=localView(s);
     if(new URL(c.request.url).searchParams.get('reconcile')!=='1')return respond(local);
@@ -98,7 +98,7 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
     b?.confirm_canada_only!==true)return respond({error:'Explicit media, Canada-only and unpublished-only approval required.'},400);
   const id=Number(b.product_id),imageId=Number(b.product_image_id),key=recordKey(id,imageId);
   try{
-    const s=await source(g.db,id);
+    const s=await source(g.db,id,c.env);
     if(!s.product||!validId(s.draft?.external_reference)||s.payload?.canada_only_shipping_verified!==true||
       s.payload?.publication_performed!==false)return respond({error:'Only a verified, unpublished Canada-only Product Editor draft may receive images.'},409);
     const selected=s.images.find(im=>im.product_image_id===imageId);

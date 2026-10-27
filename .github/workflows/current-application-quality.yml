@@ -332,6 +332,15 @@ jobs:
           node --check public/js/admin-maker-product-safety-462.js
           node --test scripts/release467_build473_canadian_sample_safety.test.mjs scripts/release467_build462_maker_product_safety.test.mjs
 
+      - name: Build 500 verified Etsy listing ID and full gallery package
+        run: |
+          node --check public/js/etsy-package-500.mjs
+          node --check public/js/admin-product-etsy-package-v500.mjs
+          node --check functions/api/admin/product-etsy-images.js
+          node scripts/release467_build500_etsy_complete_package.test.mjs
+          node scripts/release467_build499_owner_advanced_tags_media.test.mjs
+          node scripts/release467_build497_product53_three_channel_acceptance.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
