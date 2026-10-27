@@ -7,7 +7,7 @@
   const mediaStatus=document.getElementById('productEditorMediaStatus'),mediaStrip=document.getElementById('productEditorMediaStrip'),saveButton=document.getElementById('productEditorSave');
   const qaStatus=document.getElementById('productEditorQaStatus'),qaResults=document.getElementById('productEditorQaResults'),qaRun=document.getElementById('productEditorQaRun');
   if(!form||!status||!window.DDAuth)return;
-  const params=new URLSearchParams(location.search);const rawId=Number(params.get('product_id')||0);const state={productId:Number.isInteger(rawId)&&rawId>0?rawId:0,product:null,inFlight:false,quotaStop:false,saveNeedsReview:false,mediaLoaded:false,mediaLoading:false,images:[],authorityLoaded:false,qaRunning:false,qaData:null};
+  const params=new URLSearchParams(location.search);const rawId=Number(params.get('product_id')||0);const state={productId:Number.isInteger(rawId)&&rawId>0?rawId:0,product:null,inFlight:false,quotaStop:false,saveNeedsReview:false,pendingSaveCheck:null,mediaLoaded:false,mediaLoading:false,images:[],authorityLoaded:false,qaRunning:false,qaData:null};
   const field=(name)=>form.elements.namedItem(name);const set=(name,value)=>{const el=field(name);if(el){
     const desired=value==null?'':String(value);
     if(el.tagName==='SELECT'&&desired&&![...el.options].some(option=>option.value===desired))el.add(new Option(desired+' (current)',desired));
@@ -188,7 +188,14 @@
       fill(data.product);state.saveNeedsReview=false;state.quotaStop=false;setSaveReady(true);
       document.dispatchEvent(new CustomEvent('dd:product-loaded',{detail:{product_id:state.productId}}));
       try{sessionStorage.removeItem(`dnd:product-editor-seed:${state.productId}`);}catch{}
-      setStatus(`Product authority loaded. Compare any recovered browser edits before another Save. Optional gallery, scoring, pricing and QA remain unloaded until requested.${rowsText(data)}`,'ok');
+      if(state.pendingSaveCheck){
+        const submitted=state.pendingSaveCheck;state.pendingSaveCheck=null;
+        const fields=['name','slug','sku','description','short_description','product_category','price_cents','inventory_quantity','currency','keywords'];
+        const different=fields.filter(name=>String(data.product?.[name]??'').trim()!==String(submitted[name]??'').trim());
+        setStatus(different.length?
+          `STEP 1 — The server responded to the read, but ${different.join(', ')} do not match our last attempted Product Save. Compare those named fields with the browser recovery copy before saving again. Etsy has NOT been retried.`:
+          `STEP 1 VERIFIED — Product #${state.productId}'s saved name, details, price, stock and search tags match our last attempted Save. Do not repeat that Product write. STEP 2 — return to Etsy to verify/link its existing listing; the Etsy upload is not yet confirmed.`,different.length?'warn':'ok');
+      }else setStatus(`Product authority loaded. Compare any recovered browser edits before another Save. Optional gallery, scoring, pricing and QA remain unloaded until requested.${rowsText(data)}`,'ok');
       if(currentTab()==='media')loadMedia();
     }catch(error){
       setSaveReady(false);form.dataset.productAuthority='failed';if(quota(error))state.quotaStop=true;
@@ -319,9 +326,12 @@
       const failure=incident(error,'save');
       // Write outcome may be unknown after 5xx/1102/timeout/readback mismatch.
       // Keep browser recovery and require an explicit authoritative reload.
-      if(failure.uncertainWrite||/product_fields_readback_unconfirmed|product_price_readback_unconfirmed/.test(String(error?.code||''))){state.saveNeedsReview=true;state.quotaStop=quota(error);}
+      if(failure.uncertainWrite||/product_fields_readback_unconfirmed|product_price_readback_unconfirmed/.test(String(error?.code||''))){
+        state.saveNeedsReview=true;state.quotaStop=quota(error);
+        state.pendingSaveCheck={...body,keywords:get('keywords')};
+      }
       refreshDirty();snapshotEdits();
-      setStatus(`${incidentMessage(error,'save')}${!state.productId&&failure.uncertainWrite?' Check Products for an existing new Product before creating another.':''}`,'error');
+      setStatus(`STEP 1 — Save Product #${state.productId||'new'}: ${incidentMessage(error,'save')} The error is from the local Product server, not from Etsy photos or tags. ${state.productId?'Click Review server copy first; we will identify any saved fields that differ.':'Check Products for an existing new Product before creating another.'}`,'error');
       if(saveButton)saveButton.textContent=failure.uncertainWrite?'Review server copy first':'Save Product';
     }finally{
       unlockFields();state.inFlight=false;
