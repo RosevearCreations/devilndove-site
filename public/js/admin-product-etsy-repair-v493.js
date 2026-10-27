@@ -3,12 +3,12 @@
  const $=id=>document.getElementById(id),box=$('dd493EtsyBlockers'),form=$('productEditorForm');
  if(!box||!form)return;
  const productId=Number(new URLSearchParams(location.search).get('product_id')||0);
- let loaded=form.dataset.productAuthority==='ready',failed=form.dataset.productAuthority==='failed',mode='';
+ let mode='';
  const val=id=>String($(id)?.value||'').trim(),field=name=>String(form.elements.namedItem(name)?.value||'').trim();
  const checked=id=>Boolean($(id)?.checked);
  function issues(){const errors=[];
   if(!productId)errors.push('Save the new Product once before creating or updating an Etsy draft.');
-  else if(!loaded)errors.push(failed?'Product details did not load from Cloudflare. Press Retry load at the bottom; do not re-create this Product.':'Wait for the saved Product to finish loading.');
+  else if(form.dataset.productAuthority!=='ready')errors.push(form.dataset.productAuthority==='failed'?'Product details did not load from Cloudflare. Press Retry load at the bottom; do not re-create this Product.':'Wait for the saved Product to finish loading.');
   if(form.dataset.productDirty==='1')errors.push('Save Product edits first. Etsy only reads saved Product fields.');
   if(!field('name'))errors.push('Enter the Product name in Basics.');
   if(!field('description')&&!field('short_description'))errors.push('Enter a short OR long Product description, then Save Product.');
@@ -35,10 +35,10 @@
   $('dd493EtsyRepairStatus').textContent=problems.length?`${problems.length} item(s) to check. These are live browser checks; the server still verifies Etsy authorization and draft state.`:
    'Local checklist complete. Press Send only if the button is enabled after the server/provider preflight. No Etsy operation ran during this check.';
  }
- document.addEventListener('dd:product-loaded',()=>{loaded=true;failed=false;render();});
- document.addEventListener('dd:product-load-failed',()=>{loaded=false;failed=true;render();});
+ document.addEventListener('dd:product-loaded',render);
+ document.addEventListener('dd:product-load-failed',render);
  document.addEventListener('dd:etsy-draft-mode-changed',event=>{mode=event.detail?.mode||'';render();});
- document.addEventListener('dd:save-succeeded',()=>{loaded=form.dataset.productAuthority==='ready';render();});
+ document.addEventListener('dd:save-succeeded',render);
  for(const type of ['input','change'])form.addEventListener(type,render);
  for(const id of ['dd438EtsyCreate','dd486EtsyUpdate','dd490Dispatch']){const button=$(id);if(button)new MutationObserver(render).observe(button,{attributes:true,attributeFilter:['disabled']});}
  if($('dd488ChooseNew')?.getAttribute('aria-pressed')==='true')mode='new';

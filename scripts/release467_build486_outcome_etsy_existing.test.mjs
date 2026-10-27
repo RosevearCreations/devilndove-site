@@ -33,7 +33,7 @@ test('Build 486 Etsy controls reconcile an actual existing draft without duplica
  for(const pattern of [/verifiedAdminFromModule/,/Same-origin required/,/canadaOnlyShippingProfile/,/String\(listing.state\|\|''\)/,/===?'draft'/,/link_existing/,/inspect_listing/,/update_saved_fields/,/state:\s*'draft'|state\|\|''/,/method:'PATCH'/,/publication_performed:false/,/automatic_retry:false/,/update_claimed/,/update_confirmed/])assert.match(server,pattern);
  assert.doesNotMatch(server,/method:'POST'.*shops\/.*listings/);
  for(const id of ['dd486EtsyExistingLoad','dd486EtsyListingId','dd486EtsyLinkConfirm','dd486EtsyInspect','dd486EtsyPreview','dd486EtsyOlderTitle','dd486EtsyLink','dd486EtsyUpdateConfirm','dd486EtsyUpdate','dd486EtsyUpdateStatus'])assert.match(page,new RegExp(`id="${id}"`));
- assert.match(client,/state\.inspected/);assert.match(client,/state\.uncertain/);assert.match(page,/admin-product-existing-etsy-draft-v486\.js\?v=486/);
+ assert.match(client,/state\.inspected/);assert.match(client,/state\.uncertain/);assert.match(page,/admin-product-existing-etsy-draft-v486\.js\?v=\d+/);
 });
 test('Blocked gallery checkbox reasons are explicitly distinguishable and protections are retained',()=>{
  const endpoint=read('../functions/api/admin/product-distribution-406.js'),gallery=read('../public/js/admin-product-distribution-v406.js'),photos=read('../functions/api/admin/product-etsy-images.js');

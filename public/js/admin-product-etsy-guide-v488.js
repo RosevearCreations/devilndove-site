@@ -45,7 +45,7 @@
  $('dd488ChooseNew').addEventListener('click',()=>choose('new'));
  $('dd488ChooseExisting').addEventListener('click',()=>choose('existing'));
  $('dd488CheckReadiness').addEventListener('click',()=>void check());
- if(id)$('dd488MediaLink').href=`/admin/catalog-media/?product_id=${encodeURIComponent(id)}`;
+ // Product photos are edited in-place; the advanced file editor is optional.
  $('dd488NewWorkflow').hidden=true;$('dd486EtsyExisting').hidden=true;
  if(intentKey)try{const previous=sessionStorage.getItem(intentKey);if(['new','existing'].includes(previous))choose(previous);}catch{}
 })();

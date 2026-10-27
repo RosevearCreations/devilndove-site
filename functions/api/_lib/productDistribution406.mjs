@@ -9,7 +9,9 @@ export const auditJSON=row=>{try{return JSON.parse(row?.details_json||'{}')}catc
 export const allowedImage=image=>Boolean(image&&imageIdValid(image.product_image_id)&&
  typeof image.image_url==='string'&&/^https:\/\//i.test(image.image_url)&&
  !/\/placeholders?\/|placeholder\.(?:svg|png|webp)|\/fallbacks?\//i.test(image.image_url)&&
- ['product_page_ok','social_ok','all_public_ok'].includes(String(image.public_use_status||'').toLowerCase())&&
+ // An on-site-only or social-only approval is not consent for an Etsy / Meta
+ // listing. Cross-channel export requires a separate explicit owner grant.
+ String(image.public_use_status||'').toLowerCase()==='all_public_ok'&&
  String(image.alt_text||'').trim().length>=5&&Number(image.width_px||0)>=800&&Number(image.height_px||0)>=800);
 export const reviewedSourceSignature=(product,imageIds)=>{
  const value=JSON.stringify([String(product?.product_id||''),String(product?.name||''),String(product?.description||''),
