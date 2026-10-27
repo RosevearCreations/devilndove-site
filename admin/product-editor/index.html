@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="/admin/product-editor/unified-publishing-443.css?v=443"/>
   <link rel="stylesheet" href="/admin/product-editor/creation-flow-471.css?v=471"/>
   <link rel="stylesheet" href="/admin/product-editor/entry-readiness-489.css?v=496"/>
+  <link rel="stylesheet" href="/admin/product-editor/advanced-channels-498.css?v=498"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -26,6 +27,13 @@
       <div><p class="eyebrow">Release 467 • Build 468</p><h1 id="productEditorTitle">Product Editor</h1><p>Edit one Product at a time. <strong>No autosave to the server:</strong> edits are temporarily saved only in this browser session for recovery. Save Product is the sole Product write. If a 503/1102 interrupts a save, reload and compare the authoritative Product before saving again. QA still requires an explicit Run QA.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
+
+    <section class="dd498-identity" aria-label="Saved Product and Etsy listing identity">
+      <strong>Saved Product ↔ Etsy draft</strong>
+      <div id="dd498Identity" role="status" aria-live="polite">Load a saved Product to see its SKU, slug and linked Etsy listing number.</div>
+      <button class="btn" type="button" id="dd498IdentityRefresh">Refresh saved Etsy ID</button>
+      <p class="small" id="dd498IdentityNote">Etsy gives each draft a listing ID. Our Product ID remains the permanent link even if the SKU or slug changes. A remote listing is never created by this check.</p>
+    </section>
 
     <div id="productEditorStatus" class="dd-product-status small" aria-live="polite"></div>
     <details class="dd-low-read-details"><summary>Low-read editor contract</summary><div class="dd-low-read-note small"><strong>Build 178:</strong> startup authority remains one selected-Product detail read. Product/admin fix links now return here instead of waking the retired all-in-one catalog editor. The browser handoff remains display-only. Media loads only when Media is opened. QA loads only when Run QA is pressed, reads the selected Product/SEO record plus at most two Product image rows, performs no request-time schema mutation, and does not automatically write QA history. Save updates only this Product and its SEO row through the proven schema contract, with no request-time PRAGMA/table introspection.</div></details>
@@ -127,6 +135,12 @@
           <label><span class="small">Canonical URL</span><input class="input" name="canonical_url"/></label><label><span class="small">OpenGraph title</span><input class="input" name="og_title" maxlength="160"/></label>
           <label><span class="small">OpenGraph image URL</span><input class="input" name="og_image_url"/></label><label class="wide"><span class="small">OpenGraph description</span><textarea class="input" name="og_description" rows="3"></textarea></label>
         </div>
+        <div class="dd498-tag-library" id="dd498TagLibrary">
+          <h3>One tag library — channel-specific previews</h3>
+          <p class="small">Add phrases above, for example <strong>Silver Rings</strong>. Save Product once to keep them on its SEO record. We prepare native Etsy words, Marketplace search terms, Google content guidance, and social hashtags from the same phrases. Previews never post to any channel.</p>
+          <div id="dd498TagsByChannel" class="dd498-tag-grid" role="status" aria-live="polite">Enter a search phrase to see the channel mappings.</div>
+          <p class="small" id="dd498TagWarnings" role="status"></p>
+        </div>
       </section>
 
       <section class="dd-editor-panel" data-editor-panel="qa" hidden>
@@ -136,6 +150,13 @@
       </section>
 
       <section class="dd-editor-panel dd-etsy-panel" data-editor-panel="etsy" hidden>
+        <details class="dd498-advanced" data-dd498-channel="etsy" id="dd498EtsyAdvanced">
+          <summary>Advanced Etsy fields — fill optional gaps from our saved Product</summary>
+          <p class="small">These settings save a <strong>local Etsy preparation profile only</strong>. Etsy still requires a separate owner-approved draft update, image transfer and native tag transfer. Suggested text is editable. Maker, era, category and shipping choices must be verified, never guessed.</p>
+          <div class="dd498-advanced-fields"></div>
+          <div class="dd-product-actions"><button class="btn" type="button" data-dd498-load>Load saved advanced</button><button class="btn" type="button" data-dd498-suggest>Fill missing from Product</button><button class="btn primary" type="button" data-dd498-save>Save Etsy advanced locally</button></div>
+          <p class="small" data-dd498-status role="status" aria-live="polite">No advanced settings loaded.</p>
+        </details>
         <div class="dd-products-browser-heading"><div><h2>Etsy — live connection &amp; unpublished draft</h2>
           <p class="small">Choose whether you are creating a draft or updating one already in Etsy. Both use the saved Devil n Dove Product; neither publishes a listing automatically.</p></div></div>
         <div class="dd495-simple-state" id="dd495SimpleState" role="status" aria-live="polite">Checking the saved Product and its Etsy draft link. No Etsy action runs automatically.</div>
@@ -151,6 +172,12 @@
           <div class="dd497-channel-cards" id="dd497ChannelCards" role="status" aria-live="polite"><p class="small">Load saved Product first, then review the three channels.</p></div>
           <div class="dd-product-actions"><button type="button" class="btn" id="dd497ChannelLocal">Compare the three Product cards locally</button><button type="button" class="btn" id="dd497ChannelRemote">Verify Etsy draft photos and tags (read only)</button></div>
           <p class="small" id="dd497ChannelStatus" role="status">Neither button posts a Product, changes photos, or publishes a listing.</p>
+        </div>
+        <div class="card dd443-channel-card" id="dd498OwnerAcceptance" style="padding:16px;margin:12px 0">
+          <h3>Product #53 — verified Etsy draft, original photos &amp; native tags</h3>
+          <p class="small">Only for saved Product #53. Check the linked draft #4603838854, its photo receipts and search tags against Etsy <strong>read-only</strong>. A mismatch is a HOLD, not a reason to upload duplicates. This check never publishes, retries or changes Etsy.</p>
+          <button type="button" class="btn" id="dd498OwnerAcceptanceRun">Check real Etsy media &amp; tags (read only)</button>
+          <ul id="dd498OwnerAcceptanceResult" class="small" role="status" aria-live="polite"><li>No owner verification performed in this session.</li></ul>
         </div>
         <div class="card" id="dd488EtsyGuide" style="padding:18px;margin:12px 0;border:1px solid #ae8245">
           <h3>What do you want to do on Etsy?</h3>
@@ -290,6 +317,13 @@
       </section>
 
       <section class="dd-editor-panel dd-meta-panel" data-editor-panel="facebook" hidden>
+        <details class="dd498-advanced" data-dd498-channel="facebook" id="dd498MarketplaceAdvanced">
+          <summary>Advanced Marketplace fields — fill optional gaps from our saved Product</summary>
+          <p class="small">This is local Marketplace listing preparation, not an authorized Facebook posting API. Edit text, metadata and channel keywords here without leaving the Product Editor.</p>
+          <div class="dd498-advanced-fields"></div>
+          <div class="dd-product-actions"><button class="btn" type="button" data-dd498-load>Load saved advanced</button><button class="btn" type="button" data-dd498-suggest>Fill missing from Product</button><button class="btn primary" type="button" data-dd498-save>Save Marketplace advanced locally</button></div>
+          <p class="small" data-dd498-status role="status" aria-live="polite">No advanced settings loaded.</p>
+        </details>
         <h2>Facebook Marketplace — setup &amp; authorization</h2>
         <p class="small">This channel has its own connection status. Etsy credentials cannot authorize Facebook Marketplace. We will not simulate success or send an unauthorized Marketplace listing.</p>
         <div class="dd-channel-steps dd-meta-steps"><h3>Meta setup checklist</h3><ol><li><span class="dd-step-state">Pending</span><span>Connect an approved Meta account and verify permissions</span></li><li><span class="dd-step-state">Pending</span><span>Confirm a supported Marketplace publishing method for this product type</span></li><li><span class="dd-step-state">On hold</span><span>Enable draft creation only after both checks pass</span></li></ol></div>
@@ -376,6 +410,7 @@
   <script src="/public/js/admin-product-etsy-repair-v493.js?v=496"></script>
   <script src="/public/js/admin-product-etsy-outcomes-v491.js?v=496"></script>
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=496"></script>
+  <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">

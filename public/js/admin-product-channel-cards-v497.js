@@ -84,7 +84,7 @@
  function invalidate(){loaded=false;say('Product, photo or Etsy state changed. Refresh acceptance evidence; old cards are no longer proof.');
   $('dd497ChannelCards').replaceChildren();controls();}
  for(const event of ['dd:save-succeeded','dd:media-inline-updated','dd:etsy-draft-created',
-  'dd:etsy-existing-draft-updated','dd:etsy-photo-verified','dd:etsy-native-tags-verified'])
+  'dd:etsy-existing-draft-updated','dd:etsy-existing-draft-linked','dd:etsy-photo-verified','dd:etsy-native-tags-verified'])
   document.addEventListener(event,invalidate);
  form.addEventListener('input',controls);document.addEventListener('dd:product-loaded',controls);
  controls();

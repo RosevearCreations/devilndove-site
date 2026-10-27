@@ -70,6 +70,7 @@
   say('Saved Product or draft linkage changed. Review saved tags and compare Etsy again before updating.');controls();}
  form.addEventListener('input',controls);document.addEventListener('dd:save-succeeded',reset);
  document.addEventListener('dd:etsy-existing-draft-updated',reset);
+ document.addEventListener('dd:etsy-existing-draft-linked',reset);
  document.addEventListener('dd:product-loaded',controls);
  controls();
 })();
