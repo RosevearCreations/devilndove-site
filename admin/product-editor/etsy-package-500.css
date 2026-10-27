@@ -24,6 +24,9 @@ body[data-admin-page="product-editor-v165"] input[type="checkbox"]{width:18px!im
 .dd500-readiness li{margin:5px 0}
 #dd500Status[data-tone="hold"],#dd500OptionsStatus[data-tone="hold"]{color:#b34825;font-weight:650}
 #dd500Status[data-tone="ok"]{color:inherit}
+.dd503-owner-note{padding:12px;border:1px solid #ad8244;border-radius:9px;background:rgba(170,125,51,.1);line-height:1.55}
+.dd503-owner-note[hidden],#dd503Fix[hidden],#dd500LinkButton[hidden]{display:none!important}
+.dd500-readiness li{overflow-wrap:anywhere;line-height:1.5}
 .dd500-troubleshooting{margin:18px 0;border:1px solid rgba(153,105,44,.4);border-radius:12px;padding:12px}
 .dd500-troubleshooting>summary{font-weight:700;cursor:pointer;padding:6px}
 .dd500-troubleshooting[open]>summary{margin-bottom:18px}

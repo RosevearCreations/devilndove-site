@@ -73,7 +73,15 @@ export async function onRequestPost(context){
     return json({ok:false,error:'Price must be submitted as valid non-negative CAD cents; no Product fields were changed.',code:'invalid_price_cents'},400);
   if(submitted===0&&body.confirm_zero_price!==true)
     return json({ok:false,error:'A zero-dollar Product requires explicit confirmation. No Product fields were changed.',code:'zero_price_not_confirmed'},400);
-  const payload=productPayload(body);const choiceError=await validate389(db,payload.product_category,payload.shipping_code);if(choiceError)return json({ok:false,error:choiceError,code:'product_choice_invalid'},400);if(!payload.name)return json({ok:false,error:'Product name is required.'},400);if(!payload.slug)return json({ok:false,error:'A valid slug is required.'},400);
+  const payload=productPayload(body);
+  // Resolve configured categories before the Product write. An unavailable D1
+  // preflight must return structured guidance and must never fall through as
+  // an opaque Cloudflare HTML error or start an unverified Product mutation.
+  let choiceError;
+  try{choiceError=await validate389(db,payload.product_category,payload.shipping_code);}
+  catch{return json({ok:false,error:'Product category/shipping choices could not be checked because the local database is unavailable. No Product write began. Wait and use a fresh read before saving.',code:'product_preflight_unavailable',no_product_write_started:true,retry_automatically:false},503);}
+  if(choiceError)return json({ok:false,error:choiceError,code:'product_choice_invalid'},400);
+  if(!payload.name)return json({ok:false,error:'Product name is required.'},400);if(!payload.slug)return json({ok:false,error:'A valid slug is required.'},400);
   try{
     let measured=0;
     const productValues=PRODUCT_FIELDS.map((key)=>payload[key]);
