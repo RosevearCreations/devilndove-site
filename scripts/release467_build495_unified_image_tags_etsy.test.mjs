@@ -66,7 +66,8 @@ test('Build 495 keeps search keywords in saved Product SEO and accurately previe
  assert.match(html,/dd495TagsPreview/);
  const js=read('public/js/admin-product-tags-v495.js');
  assert.match(js,/tags\.length>13/);assert.match(js,/x\.length>20/);
- assert.match(js,/not yet sent to Etsy/);
+ assert.match(js,/optional, explicitly approved action in the Etsy tab/);
+ assert.match(html,/id="dd497TagsConsent"/);
  const endpoint=read('functions/api/admin/product-editor-save.js');
  assert.match(endpoint,/meta_title','meta_description','keywords'/);
 });
