@@ -161,6 +161,8 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     const [link,distribution,images,tags]=results.map(result=>result.value);
     if([link.product_id,distribution.product_id,images.product_id,tags.product_id].some(value=>Number(value)!==id))
       throw Error('Saved Product, images and tags do not agree on Product identity.');
+    if(link.linked_listing_id&&link.saved_link_readback_confirmed!==true)
+      throw Error('The saved Etsy listing ID lacks an independent D1 primary receipt. Recheck the Product ID before any Etsy update; never create a duplicate.');
     if(link.linked_listing_id&&String(images.listing_id||'')!==String(link.linked_listing_id))
       throw Error('Etsy listing ID and saved photo receipt disagree.');
     const assessment=assessEtsyPackage500(distribution,images,tags);

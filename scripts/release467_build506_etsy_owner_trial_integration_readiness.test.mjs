@@ -72,6 +72,7 @@ test('Etsy readback and UI remain owner-gated; no automatic duplicate, tag guess
  assert.match(link,/linkedReceipt506\(g\.db,id,listingId\)/);
  assert.match(link,/saved_link_readback_confirmed:true/);
  assert.match(ui,/state\.linkReadbackHold=true/);
+ assert.match(ui,/link\.linked_listing_id&&link\.saved_link_readback_confirmed!==true/);
  assert.match(ui,/reviewTrial506/);
  assert.match(html,/dd506TrialCheck/);
  assert.match(html,/etsy-package-500\.css\?v=506/);
