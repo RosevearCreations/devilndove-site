@@ -141,6 +141,17 @@
           <div id="dd498TagsByChannel" class="dd498-tag-grid" role="status" aria-live="polite">Enter a search phrase to see the channel mappings.</div>
           <p class="small" id="dd498TagWarnings" role="status"></p>
         </div>
+        <details class="dd498-tag-library" id="dd499TagOverrides">
+          <summary><strong>Advanced channel-specific tag overrides</strong> — use different phrases only when needed</summary>
+          <p class="small">The shared Product keywords above remain our default. A channel override changes only that channel's saved search phrases; it does not edit the Product or send anything to Etsy, Facebook, Google or social media. Etsy overrides are limited to 13 native tags of 20 characters each.</p>
+          <div class="dd-editor-grid cols-2">
+            <label><span class="small">Destination</span><select class="input" id="dd499TagsChannel"><option value="etsy">Etsy</option><option value="facebook">Facebook Marketplace</option><option value="google">Google product content</option><option value="instagram">Instagram</option><option value="tiktok">TikTok</option><option value="pinterest">Pinterest</option><option value="youtube">YouTube</option></select></label>
+            <label><span class="small">Term source</span><select class="input" id="dd499TagsMode"><option value="shared">Use shared Product tags</option><option value="override">Use channel-specific phrases</option></select></label>
+            <label class="wide"><span class="small">Channel-specific search phrases (comma-separated)</span><textarea class="input" id="dd499TagsValue" rows="3" placeholder="Silver Rings, Artisan jewelry" disabled></textarea></label>
+          </div>
+          <div class="dd-product-actions"><button type="button" class="btn" id="dd499TagsLoad">Load saved channel overrides</button><button type="button" class="btn primary" id="dd499TagsSave">Save channel tag selection locally</button></div>
+          <p class="small" id="dd499TagsStatus" role="status" aria-live="polite">Load a saved Product before changing per-channel tags.</p>
+        </details>
       </section>
 
       <section class="dd-editor-panel" data-editor-panel="qa" hidden>
@@ -283,6 +294,8 @@
           <button class="btn" type="button" id="dd486EtsyExistingLoad">Check linked Etsy draft</button>
           <p class="small" id="dd486EtsyExistingStatus" role="status" aria-live="polite">No existing draft inspection performed yet.</p>
           <div class="dd-product-actions"><label for="dd486EtsyListingId">Existing Etsy draft listing number<input class="input" id="dd486EtsyListingId" inputmode="numeric" pattern="[0-9]*" placeholder="Exact listing ID from Etsy Drafts"></label><a class="btn" href="https://www.etsy.com/your/shops/me/listings/drafts" target="_blank" rel="noopener noreferrer">Find my existing Etsy draft</a></div>
+          <p class="small" id="dd499ExistingDraftHint">Product #53: We have an owner screenshot of Etsy draft <strong>#4603838854</strong>. Use the number below to inspect it, then explicitly link it after verifying the correct shop, draft status and Canada-only shipping. The number is not linked merely by appearing here.</p>
+          <div class="dd-product-actions"><button class="btn" type="button" id="dd499UsePhotoDraftId">Use Product #53's photographed draft ID (no Etsy write)</button><a class="btn" href="https://www.etsy.com/your/shops/me/listing-editor/edit/4603838854#media" target="_blank" rel="noopener noreferrer" id="dd499DirectEtsyDraft">Open that exact Etsy draft</a></div>
           <label><input type="checkbox" id="dd486EtsyLinkConfirm"> I checked this exact listing in our Etsy Drafts and authorize only a verified local Product link. Do not create or publish a listing.</label>
           <p><button type="button" class="btn" id="dd486EtsyInspect" disabled>Verify listing ownership, state &amp; Canadian shipping</button></p>
           <p class="small" id="dd486EtsyPreview" role="status" aria-live="polite">Verification required before linking.</p>
@@ -313,6 +326,15 @@
           <div class="dd-product-actions"><button type="button" class="btn" id="dd497TagsLoad">Review saved Product tags</button><button type="button" class="btn" id="dd497TagsCompare">Compare native tags on existing Etsy draft (read only)</button></div>
           <label class="dd443-consent"><input type="checkbox" id="dd497TagsConsent"> We saved and reviewed these Product tags, inspected the exact unpublished Canada-only Etsy draft, and authorize replacing <strong>only its native search tags</strong> once. No publication or automatic retry.</label>
           <button type="button" class="btn primary" id="dd497TagsSend" disabled>Update native tags on this existing Etsy draft</button>
+        </div>
+        <div class="card dd443-channel-card" id="dd499AdvancedSync" style="padding:16px;margin:12px 0">
+          <h3>6. Compare and sync approved advanced Etsy metadata</h3>
+          <p class="small">Read the same linked unpublished Canada-only draft, compare our saved Product title/description, Etsy advanced profile, and effective Etsy tags (shared or explicitly overridden). Only changed fields are eligible. This never transfers photos, changes shipping, changes quantity or publishes the listing.</p>
+          <div class="dd-product-actions"><button class="btn" type="button" id="dd499AdvancedCompare">Compare actual Etsy draft fields (read only)</button><a class="btn" href="#dd498EtsyAdvanced">Review local Etsy advanced fields</a></div>
+          <ul class="small" id="dd499AdvancedChanges" role="status" aria-live="polite"><li>No live metadata comparison performed yet.</li></ul>
+          <label class="dd443-consent"><input type="checkbox" id="dd499AdvancedConsent"> We reviewed the exact existing draft and proposed changed fields, verified Canada-only shipping and unpublished status, and authorize one metadata-only sync. We understand an uncertain result must be reconciled in Etsy before any further attempt.</label>
+          <button class="btn primary" type="button" id="dd499AdvancedSend" disabled>Sync approved advanced fields to the existing Etsy draft</button>
+          <p class="small" id="dd499AdvancedStatus" role="status" aria-live="polite">Owner approval and a fresh comparison are required.</p>
         </div>
       </section>
 
@@ -411,6 +433,7 @@
   <script src="/public/js/admin-product-etsy-outcomes-v491.js?v=496"></script>
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=496"></script>
   <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
+  <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">

@@ -22,6 +22,15 @@ if (form && identity && window.DDAuth?.apiFetch) {
     return data;
   }
 
+  let savedOverrides = null;
+  async function refreshTagOverrides() {
+    if (!saved()) { savedOverrides = null; renderTagLibrary(); return; }
+    try { const result=await api(`/api/admin/product-channel-tags-499?product_id=${productId}`);
+      if(Number(result.product_id)!==productId)throw Error('Product identity mismatch.');
+      savedOverrides=result.overrides;
+    } catch { savedOverrides=null; }
+    renderTagLibrary();
+  }
   function renderTagLibrary() {
     const data = canonical(), root = document.getElementById('dd498TagsByChannel');
     if (!root) return;
@@ -39,9 +48,12 @@ if (form && identity && window.DDAuth?.apiFetch) {
     for (const [label, key, hint] of variants) {
       const card = document.createElement('section'); card.className = 'dd498-tag-channel';
       const h = document.createElement('h4'); h.textContent = label;
-      const terms = document.createElement('p'); terms.textContent = data[key].join(key === 'instagram' || key === 'tiktok' || key === 'youtube' ? ' ' : ', ') || 'No phrases yet';
-      const explain = document.createElement('p'); explain.className = 'small'; explain.textContent = hint;
-      const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'btn'; copy.textContent = `Copy ${label} terms`; copy.disabled = data[key].length === 0;
+      const override=savedOverrides?.[key];
+      const usingOverride=override?.mode==='override';
+      const chosen=usingOverride?channelTags498(override.tags.join(','))[key]:data[key];
+      const terms = document.createElement('p'); terms.textContent = chosen.join(key === 'instagram' || key === 'tiktok' || key === 'youtube' ? ' ' : ', ') || 'No phrases yet';
+      const explain = document.createElement('p'); explain.className = 'small'; explain.textContent = `${usingOverride?'Saved channel override. ':'Shared Product SEO. '}${hint}`;
+      const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'btn'; copy.textContent = `Copy ${label} terms`; copy.disabled = chosen.length === 0;
       copy.addEventListener('click', async () => {
         try {
           await navigator.clipboard.writeText(terms.textContent);
@@ -105,8 +117,13 @@ if (form && identity && window.DDAuth?.apiFetch) {
     acceptanceButton.disabled=true;
     acceptanceResult.replaceChildren();acceptanceNote('Checking Etsy draft identity, approved originals, live photo receipts and native tags. Read only…');
     try {
-      const [link,gallery,images,tags] = await Promise.all([
-        api('/api/admin/product-etsy-existing-draft?product_id=53'),
+      const link=await api('/api/admin/product-etsy-existing-draft?product_id=53');
+      if(!normal(link.linked_listing_id)){
+        acceptanceResult.replaceChildren();
+        acceptanceNote('HOLD — the existing Etsy draft #4603838854 shown by the owner is not linked to saved Product #53. Use the existing-draft section to inspect, verify Canada-only shipping and explicitly link this exact ID. Do not create another draft.');
+        return;
+      }
+      const [gallery,images,tags] = await Promise.all([
         api('/api/admin/product-distribution-406?product_id=53&channel=etsy'),
         api('/api/admin/product-etsy-images?product_id=53&reconcile=1'),
         api('/api/admin/product-etsy-tags?product_id=53&reconcile=1'),
@@ -201,14 +218,24 @@ if (form && identity && window.DDAuth?.apiFetch) {
     }
     async function saveProfile(){
       if(record.loading||!record.ready||!saved()||record.uncertain)return;
-      const tags=canonical();if(channel==='etsy'&&tags.canonical.length&&!tags.etsyReady){say(`HOLD — fix Product SEO tags and Save Product before preparing Etsy: ${tags.warnings.join(' ')}`,'hold');return;}
+      const tags=canonical();let selectedTags=channel==='etsy'?tags.etsy:tags.facebook,tagOrigin='shared Product SEO';
+      try{
+        const overrideData=await api(`/api/admin/product-channel-tags-499?product_id=${productId}`);
+        if(Number(overrideData.product_id)!==productId)throw Error('Product ID changed.');
+        const override=overrideData.overrides?.[channel];
+        if(override?.mode==='override'){
+          selectedTags=channel==='etsy'?overrideData.etsy_effective?.tags||[]:override.tags;
+          tagOrigin=`${channel} channel override`;
+          if(channel==='etsy'&&!overrideData.etsy_effective?.ready)throw Error('Etsy override does not pass native tag validation.');
+        }else if(channel==='etsy'&&tags.canonical.length&&!tags.etsyReady)throw Error('Fix Product SEO tags and Save Product: '+tags.warnings.join(' '));
+      }catch(error){say('HOLD — cannot verify saved channel tags: '+error.message,'hold');return;}
       const value=key=>normal(fields.get(key)?.value);
       if(value('styles')&&split(value('styles')).length>2){say('HOLD — Etsy/local profile supports up to two style terms.','hold');return;}
       const quantity=value('quantity_override');
       if(quantity&&(!/^[1-9]\d{0,5}$/.test(quantity))){say('HOLD — optional quantity must be a whole number from 1 to 999999.','hold');return;}
       const original=record.profile;
       const body={channel,product_id:productId,title_override:value('title_override'),description_override:value('description_override'),
-        tags:channel==='etsy'?tags.etsy:tags.facebook,materials:split(value('materials')),styles:split(value('styles')),
+        tags:selectedTags,materials:split(value('materials')),styles:split(value('styles')),
         quantity_override:quantity?Number(quantity):null,review_notes:value('review_notes'),
         taxonomy_id:channel==='etsy'?value('taxonomy_id'):normal(original.taxonomy_id),
         shipping_profile_reference:channel==='etsy'?value('shipping_profile_reference'):normal(original.shipping_profile_reference),
@@ -232,7 +259,8 @@ if (form && identity && window.DDAuth?.apiFetch) {
           JSON.stringify(parseList(profile.style_terms_json))===JSON.stringify(body.styles);
         if(!matches)throw Error('Saved advanced profile readback did not match the requested Product/channel metadata.');
         fillProfile(profile);
-        say(`Saved ✓ ${channel==='etsy'?'Etsy':'Marketplace'} advanced fields and ${body.tags.length} shared search phrase(s) in our local profile. ${response.validation?.blocker_count||0} listing-readiness blocker(s) remain. Nothing sent to Etsy, Meta, or another provider.`);
+        say(`Saved ✓ ${channel==='etsy'?'Etsy':'Marketplace'} advanced fields and ${body.tags.length} search phrase(s) from ${tagOrigin} in our local profile. ${response.validation?.blocker_count||0} listing-readiness blocker(s) remain. Nothing sent to Etsy, Meta, or another provider.`);
+        document.dispatchEvent(new CustomEvent('dd:etsy-advanced-profile-saved',{detail:{product_id:productId,channel}}));
       }catch(error){record.uncertain=true;say(`HOLD — ${error.message} Outcome may be uncertain; use Load saved advanced to reconcile before another write.`,'hold');}
       finally{record.loading=false;controls();}
     }
@@ -251,12 +279,13 @@ if (form && identity && window.DDAuth?.apiFetch) {
   field('keywords')?.addEventListener('input',renderTagLibrary);
   for(const event of ['dd:etsy-draft-created','dd:etsy-existing-draft-linked','dd:etsy-existing-draft-updated'])
     document.addEventListener(event,()=>void refreshIdentity());
-  document.addEventListener('dd:product-loaded',()=>{renderTagLibrary();void refreshIdentity();});
-  document.addEventListener('dd:save-succeeded',()=>{renderTagLibrary();void refreshIdentity();});
+  document.addEventListener('dd:product-loaded',()=>{void refreshTagOverrides();void refreshIdentity();});
+  document.addEventListener('dd:save-succeeded',()=>{void refreshTagOverrides();void refreshIdentity();});
+  document.addEventListener('dd:product-channel-tags-changed',()=>void refreshTagOverrides());
   form.addEventListener('input',renderTagLibrary);
   for(const event of ['dd:save-succeeded','dd:media-inline-updated','dd:etsy-draft-created','dd:etsy-existing-draft-linked','dd:etsy-native-tags-verified','dd:etsy-photo-verified'])
     document.addEventListener(event,()=>{if(acceptanceResult&&productId===53){acceptanceResult.replaceChildren();acceptanceNote('Source evidence changed. Run the read-only owner acceptance check again before relying on old results.');}});
   form.addEventListener('input',()=>{if(acceptanceButton)acceptanceButton.disabled=!saved()||productId!==53;});
   document.addEventListener('dd:product-loaded',()=>{if(acceptanceButton)acceptanceButton.disabled=!saved()||productId!==53;});
-  renderTagLibrary();if(form.dataset.productAuthority==='ready')void refreshIdentity();
+  renderTagLibrary();if(form.dataset.productAuthority==='ready'){void refreshIdentity();void refreshTagOverrides();}
 }

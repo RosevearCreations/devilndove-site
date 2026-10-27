@@ -54,7 +54,10 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
    const collision=await g.db.prepare("SELECT id,product_id FROM marketplace_syndication_drafts WHERE channel_key='etsy' AND external_reference=? LIMIT 1").bind(listingId).first();
    if(collision)return respond({error:'This Etsy listing is already linked to another local draft or Product.',linked_product_id:collision.product_id},409);
    const payload={verified_remote_existing_draft:true,remote_etsy_draft_created:false,publication_performed:false,canada_only_shipping_verified:true,shipping_profile_id:remote.shipping_profile_id,request_key:b.request_key,verified_listing_id:listingId};
-   const result=await g.db.prepare("INSERT INTO marketplace_syndication_drafts(id,channel_key,product_id,draft_title,payload_json,status,external_reference,publication_requested,created_by,created_at,updated_at) SELECT ?,'etsy',?,?,?,?,?,0,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP WHERE NOT EXISTS (SELECT 1 FROM marketplace_syndication_drafts WHERE channel_key='etsy' AND (product_id=? OR external_reference=?))")
+   // Build 499: a local Etsy PREPARATION row (id='etsy:<product>',
+   // external_reference NULL) must never block the verified real-draft link.
+   // Only a different actual Etsy listing receipt is a collision.
+   const result=await g.db.prepare("INSERT INTO marketplace_syndication_drafts(id,channel_key,product_id,draft_title,payload_json,status,external_reference,publication_requested,created_by,created_at,updated_at) SELECT ?,'etsy',?,?,?,?,?,0,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP WHERE NOT EXISTS (SELECT 1 FROM marketplace_syndication_drafts WHERE channel_key='etsy' AND external_reference IS NOT NULL AND (product_id=? OR external_reference=?))")
     .bind(crypto.randomUUID(),id,String(s.product.name),JSON.stringify(payload),'needs_review',listingId,String(g.admin.email||'admin'),id,listingId).run();
    if(Number(result.meta?.changes)!==1)return respond({error:'Existing draft link already claimed. Reload before continuing.'},409);
    await auditAdminAction(c.env,c.request,g.admin,{action_type:'etsy_existing_draft_486_link_verified',target_type:'product',target_key:String(id),details:{build:486,listing_id:listingId,shop_id:s.shop.shop_id,publication_performed:false}});
