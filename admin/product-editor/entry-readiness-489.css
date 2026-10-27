@@ -22,3 +22,25 @@
 .dd-etsy-panel .dd494-authorization{display:flex;align-items:flex-start;gap:10px;margin:10px 0 14px;min-height:0;height:auto;max-height:none}
 .dd-etsy-panel .dd494-authorization>input[type="checkbox"]{flex:0 0 auto;width:18px;height:18px;min-height:0;margin:3px 0 0;accent-color:#d8a456}
 .dd-etsy-panel .dd494-authorization>label{display:block;flex:1 1 auto;width:auto;height:auto;min-height:0;max-height:none;margin:0;padding:0;line-height:1.45;overflow-wrap:anywhere}
+.dd495-image-card{display:flex;align-items:flex-start;gap:12px;margin:10px 0;padding:12px;border:1px solid rgba(195,158,88,.45);border-radius:12px;background:rgba(20,27,44,.4)}
+.dd495-image-card>input[type="checkbox"]{flex:0 0 auto;width:18px;height:18px;min-height:0;margin:36px 0 0}
+.dd495-image-thumb{width:112px;height:112px;object-fit:cover;border-radius:8px;background:#151924;flex:0 0 auto}
+.dd495-image-content{flex:1;min-width:0}.dd495-image-content>strong{display:block;margin-bottom:5px}
+.dd495-requirements{padding-left:18px;line-height:1.5;margin:8px 0}.dd495-requirements li{margin:4px 0}
+.dd495-requirements .dd489-both{font-size:.85em;margin-right:5px}
+.dd495-ready{color:#9de3bf}.dd495-hold{color:#ffb878}
+.dd495-image-inline{display:grid;gap:10px;margin-top:12px;padding:14px;border-radius:10px;border:1px solid #a47e46;background:rgba(0,0,0,.22)}
+.dd495-image-field{display:grid!important;gap:4px!important;margin:0!important;width:100%;max-height:none!important;height:auto!important;min-height:0!important}
+.dd495-image-field .input{width:100%;max-width:100%}
+@media(max-width:560px){.dd495-image-card{flex-wrap:wrap}.dd495-image-thumb{width:84px;height:84px}.dd495-image-content{flex-basis:100%}}
+.dd495-simple-state{padding:14px;margin:12px 0;border:1px solid rgba(191,154,75,.6);border-radius:10px;background:rgba(27,45,47,.5);font-weight:650;line-height:1.5}
+.dd495-simple-state[data-tone="ok"]{border-color:#69b08e;color:#b8efd0}
+.dd495-simple-state[data-tone="hold"]{border-color:#cf8959;color:#ffd1a4}
+.dd496-readiness{border:1px solid rgba(102,178,199,.55);border-radius:12px;padding:14px;margin:12px 0;background:rgba(24,39,52,.5)}
+.dd496-readiness>strong{display:block;margin-bottom:10px}
+#dd496ReadinessList{padding-left:22px;margin:8px 0 12px;line-height:1.5;overflow-wrap:anywhere}
+#dd496ReadinessList li{margin:7px 0}
+#dd496ReadinessList li[data-state="hold"]{color:#ffbd83}
+#dd496ReadinessList li[data-state="ready"]{color:#a8e5c2}
+.dd496-readiness .dd-product-actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:520px){.dd496-readiness .dd-product-actions>.btn{width:100%;white-space:normal}}

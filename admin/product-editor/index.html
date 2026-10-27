@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/admin/product-editor/channel-assist-440.css?v=440"/>
   <link rel="stylesheet" href="/admin/product-editor/unified-publishing-443.css?v=443"/>
   <link rel="stylesheet" href="/admin/product-editor/creation-flow-471.css?v=471"/>
-  <link rel="stylesheet" href="/admin/product-editor/entry-readiness-489.css?v=489"/>
+  <link rel="stylesheet" href="/admin/product-editor/entry-readiness-489.css?v=496"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -45,7 +45,7 @@
       </div>
       <section class="dd489-readiness" aria-label="Cross-channel field legend and Product entry score">
         <div><strong>Required-field colours</strong><div class="dd489-legend"><span class="dd489-etsy">Etsy only</span><span class="dd489-marketplace">Marketplace only</span><span class="dd489-both">Both channels</span><span class="dd489-export">CSV/export preparation</span></div><p class="small">Required badges are for a prepared listing. Actual Etsy/shop policy is checked at submission. Any image still needs its own original-photo and public-use approval.</p></div>
-        <div><strong>Product entry completeness <span id="dd489EntryScore">Not measured</span></strong><meter id="dd489EntryMeter" min="0" max="100" value="0"></meter><p class="small" id="dd489EntryStatus" role="status">Save one Product. This score measures filled local entry fields; use Product QA and Media scoring for authoritative checks.</p><div class="dd-product-actions"><button class="btn" type="button" data-dd489-open="qa">Open Product QA</button><button class="btn" type="button" data-dd489-open="media">Open image scoring</button></div></div>
+        <div><strong>Basic field fill — not Etsy readiness <span id="dd489EntryScore">Not measured</span></strong><meter id="dd489EntryMeter" min="0" max="100" value="0"></meter><p class="small" id="dd489EntryStatus" role="status">Save one Product. This counts seven basic fields only. Channel image permissions, live Etsy delivery, image scoring and the remote listing are checked separately.</p><div class="dd-product-actions"><button class="btn" type="button" data-dd489-open="qa">Open Product QA</button><button class="btn" type="button" data-dd489-open="media">Open image scoring</button></div></div>
       </section>
 
       <section class="dd471-creation-flow" aria-labelledby="dd471FlowTitle">
@@ -113,7 +113,7 @@
       </section>
 
       <section class="dd-editor-panel" data-editor-panel="media" hidden>
-        <div class="dd-products-browser-heading"><div><h2>Media</h2><p class="small">Opening this tab reads only this Product's canonical gallery rows. The featured URL is reused from the Product authority already loaded by the editor, so the Media tab does not re-read the Product table or check media-role/media-asset recovery sources. Open the full Image Editor only when you need recovery, add/replace/crop/reorder/remove/score work.</p></div><a class="btn" id="productEditorMediaLink" href="/admin/catalog-media/">Open Image Editor</a></div>
+        <div class="dd-products-browser-heading"><div><h2>Media — one shared Product gallery</h2><p class="small">Photos already uploaded to this Product are reused for the store, Etsy and Marketplace. Edit their alt text, image titles, public-use permission and scoring below without leaving the Product Editor. Advanced file replacement/cropping is optional.</p></div><a class="btn" id="productEditorMediaLink" href="/admin/catalog-media/">Open Image Editor (optional advanced file/crop)</a></div>
         <div id="productEditorMediaStatus" class="small" aria-live="polite">Images not loaded yet.</div>
         <div id="productEditorMediaStrip" class="dd-editor-media-strip"></div>
         <div class="dd-editor-grid cols-2" style="margin-top:14px"><label><span class="small">Featured image URL</span><input class="input" name="featured_image_url" type="url"/></label><div><span class="small">Featured preview</span><div><img id="productEditorFeaturedPreview" class="dd-product-thumb" alt=""/></div></div></div>
@@ -123,7 +123,7 @@
         <h2>SEO / Publishing</h2><p class="small" id="productEditorSeoGuidance">SEO title, H1, OpenGraph title and descriptions are suggested from Basics and Description. You can edit any SEO field manually; custom text will be preserved.</p>
         <div class="dd-editor-grid cols-2">
           <label><span class="small">SEO title</span><input class="input" name="meta_title" maxlength="160"/></label><label><span class="small">H1 override</span><input class="input" name="h1_override" maxlength="160"/></label>
-          <label class="wide"><span class="small">Meta description</span><textarea class="input" name="meta_description" maxlength="500" rows="3"></textarea></label><label><span class="small">Keywords</span><input class="input" name="keywords" maxlength="1000"/></label>
+          <label class="wide"><span class="small">Meta description</span><textarea class="input" name="meta_description" maxlength="500" rows="3"></textarea></label><label><span class="small">Product search tags / keywords (store &amp; CSV)</span><input class="input" name="keywords" maxlength="1000" placeholder="handmade soap, green soap, gift"/><span class="small">Use comma-separated phrases. Saved in Product SEO for store/export preparation; these are not yet sent to Etsy's own tag field.</span><span class="small" id="dd495TagsPreview" role="status" aria-live="polite">Add relevant search phrases, then Save Product. An Etsy tag preview will appear here.</span></label>
           <label><span class="small">Canonical URL</span><input class="input" name="canonical_url"/></label><label><span class="small">OpenGraph title</span><input class="input" name="og_title" maxlength="160"/></label>
           <label><span class="small">OpenGraph image URL</span><input class="input" name="og_image_url"/></label><label class="wide"><span class="small">OpenGraph description</span><textarea class="input" name="og_description" rows="3"></textarea></label>
         </div>
@@ -138,6 +138,13 @@
       <section class="dd-editor-panel dd-etsy-panel" data-editor-panel="etsy" hidden>
         <div class="dd-products-browser-heading"><div><h2>Etsy — live connection &amp; unpublished draft</h2>
           <p class="small">Choose whether you are creating a draft or updating one already in Etsy. Both use the saved Devil n Dove Product; neither publishes a listing automatically.</p></div></div>
+        <div class="dd495-simple-state" id="dd495SimpleState" role="status" aria-live="polite">Checking the saved Product and its Etsy draft link. No Etsy action runs automatically.</div>
+        <div class="dd496-readiness" aria-label="Saved Product and shared image readiness">
+          <strong>One Product • existing photographs • Etsy draft status</strong>
+          <ul class="small" id="dd496ReadinessList" aria-live="polite"><li>Open the Etsy tab to check saved Product photographs and their local draft receipts.</li></ul>
+          <div class="dd-product-actions"><button class="btn" id="dd496Refresh" type="button">Refresh saved Product and photo status</button><button class="btn" id="dd496FixImages" type="button">Fix photo requirements here</button></div>
+          <p class="small" id="dd496ReadinessNote" role="status">This summary does not create or publish listings, grant photo permission, transfer files or repeat a previous Etsy upload.</p>
+        </div>
         <div class="card" id="dd488EtsyGuide" style="padding:18px;margin:12px 0;border:1px solid #ae8245">
           <h3>What do you want to do on Etsy?</h3>
           <div class="dd-product-actions" role="group" aria-label="Choose Etsy draft workflow">
@@ -145,7 +152,7 @@
             <button class="btn" type="button" id="dd488ChooseExisting" aria-pressed="false">UPDATE my existing Etsy draft</button>
           </div>
           <p class="small" id="dd488ChoiceStatus" role="status">Choose either option to show only its relevant draft controls. Existing listings are never replaced with a new draft.</p>
-          <div class="dd-product-actions"><button class="btn" type="button" id="dd488CheckReadiness">Check what is missing — read only</button><a class="btn" id="dd488MediaLink" href="/admin/catalog-media/">Approve Product images</a></div>
+          <div class="dd-product-actions"><button class="btn" type="button" id="dd488CheckReadiness">Check what is missing — read only</button><a class="btn" id="dd488MediaLink" href="#productDistribution406">Complete image requirements here</a></div>
           <p class="small" id="dd488ReadinessStatus" role="status" aria-live="polite">This check reads the saved Product, local draft link and photo approvals only; it does not contact Etsy or change anything.</p>
           <ul class="small" id="dd488ReadinessList" aria-label="Etsy draft readiness findings"></ul>
           <div class="dd490-dispatch" aria-label="One deliberate Etsy draft field dispatch">
@@ -159,7 +166,7 @@
           <div class="dd491-outcomes" aria-label="Etsy draft fields and photos outcome reconciliation">
             <h3>Etsy draft package: field and photo outcomes</h3>
             <p class="small">After a send, review what was <strong>actually confirmed</strong> against local audit receipts. Uncertain field or image attempts stay on HOLD. Nothing here sends or retries a Product or photograph.</p>
-            <div class="dd-product-actions"><button class="btn" id="dd491LocalRetest" type="button">Review field &amp; photo receipts (local only)</button><button class="btn" id="dd491RemoteRetest" type="button">Compare real Etsy draft photos (read only)</button><button class="btn" data-dd489-open="qa" type="button">Open Product QA score</button><a class="btn" id="dd491MediaScoreLink" href="/admin/catalog-media/">Review image scoring</a></div>
+            <div class="dd-product-actions"><button class="btn" id="dd491LocalRetest" type="button">Review field &amp; photo receipts (local only)</button><button class="btn" id="dd491RemoteRetest" type="button">Compare real Etsy draft photos (read only)</button><button class="btn" data-dd489-open="qa" type="button">Open Product QA score</button><a class="btn" id="dd491MediaScoreLink" href="#productDistribution406">Review image scoring here</a></div>
             <p id="dd491OutcomeStatus" class="small" role="status" aria-live="polite">No package outcome retest has run. Select a saved Product and review deliberately.</p>
             <ul id="dd491OutcomeList" class="small" aria-label="Confirmed and held Etsy package outcomes"></ul>
             <div class="dd492-gap" aria-label="Existing Etsy draft photo gap diagnosis"><h4>Existing draft: verified photo gaps</h4><p class="small">Use the read-only Etsy comparison above to identify missing, unexpected and uncertain photos. An unconfirmed upload is never treated as successful. No retry, replacement, publication or transfer happens here.</p><ul class="small" id="dd492PhotoGaps" aria-live="polite"></ul></div>
@@ -255,7 +262,7 @@
         <div class="card dd443-channel-card" id="dd443EtsyImages" style="padding:16px;margin:12px 0">
           <h3>4. Add our approved Product photographs to the Etsy draft</h3>
           <p class="small">One saved Product supplies Etsy and our storefront. After a draft exists, we can send approved original JPEG/PNG gallery photos without manually uploading them again in Etsy. Only images approved for public use, with alt text and at least 800×800 pixels, qualify. No listing is published.</p>
-          <div class="dd-product-actions"><button class="btn" type="button" id="dd443EtsyImagesLoad">Load approved photos &amp; Etsy draft status</button><button class="btn" type="button" id="dd487EtsyReconcile">Compare photos with original Etsy draft (read only)</button><a class="btn" id="dd443EtsyImagesEdit" href="/admin/catalog-media/">Review our Product gallery</a><a class="btn" href="https://www.etsy.com/your/shops/me/listings/drafts" target="_blank" rel="noopener noreferrer">Check Etsy Drafts</a></div>
+          <div class="dd-product-actions"><button class="btn" type="button" id="dd443EtsyImagesLoad">Refresh approved photos &amp; draft status</button><button class="btn" type="button" id="dd487EtsyReconcile">Compare photos with original Etsy draft (read only)</button><a class="btn" id="dd443EtsyImagesEdit" href="#productDistribution406">Review shared Product gallery here</a><a class="btn" href="https://www.etsy.com/your/shops/me/listings/drafts" target="_blank" rel="noopener noreferrer">Check Etsy Drafts</a></div>
           <p class="small">Build 487: For photos #341–343, open Product Media, select each original photograph, review and save an appropriate public-use status and meaningful alt text. Return here and reload; do not assume a visible photo is approved. Compare the original Etsy draft before transferring: photos already present on Etsy must be reviewed there, not overwritten or silently duplicated.</p>
           <p class="small" role="status" aria-live="polite" id="dd443EtsyImagesStatus">No Etsy image check runs automatically. First create an unpublished Etsy draft.</p>
           <p class="small" role="status" aria-live="polite" id="dd487EtsyReconcileStatus">Read-only Etsy photo comparison has not run. It will never delete, replace or publish images.</p>
@@ -309,13 +316,14 @@
 <p class="small">Product gallery is edited in the Media tab and reused as the source for channel-specific draft/export reviews. Distribution remains subject to per-channel policy and explicit operator approval.</p>
 </section>
 <section class="card" id="productDistribution406" style="margin:14px 0;padding:18px">
-<h2>Build 406 — Canonical images &amp; destination distribution policy</h2>
-<p class="small">Select one original Product gallery for Etsy or Facebook Marketplace. Use the destination switches above first, then save this Product. Only public-use-approved images at least 800×800 pixels, with alt text, can be selected. No listing will be published.</p>
+<h2>Shared Product photographs — Store, Etsy &amp; Marketplace</h2>
+<p class="small">These are your already-uploaded photographs. Expand each image to complete its title, alt description, original/public-use permission and quality score here. No second photo upload or separate editor is required for those fields. Third-party sending still needs your explicit authorization.</p>
 <div class="dd-product-actions">
 <label>Destination <select class="input" id="productDistribution406Channel"><option value="etsy">Etsy</option><option value="facebook">Facebook Marketplace</option></select></label>
-<button type="button" class="btn" id="productDistribution406Load">Load approved Product gallery</button>
+<button type="button" class="btn" id="productDistribution406Load">Refresh existing Product photos</button>
 </div>
 <div id="productDistribution406Gallery" aria-label="Canonical images available for channel mapping"></div>
+<p class="small" id="dd495InlineImageStatus" role="status" aria-live="polite">Saved Product photographs and their requirements appear here when the Product finishes loading.</p>
 <label><input type="checkbox" id="productDistribution406UsOff"> I reviewed the destination profile: U.S. sales/shipping remain DISABLED, and only approved destination countries may be used.</label>
 <label><input type="checkbox" id="productDistribution406Local"> I approve local mapping and review only. No provider listing, price, inventory or images will be posted automatically.</label>
 <div class="dd-product-actions"><button type="button" class="btn" id="productDistribution406Save" disabled>Save selected Product images and owner shipping review</button></div>
@@ -336,15 +344,20 @@
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
-  <script src="/public/js/admin-product-channel-intent-v405.js?v=471"></script><script src="/public/js/admin-product-creation-flow-471.js?v=471"></script><script src="/public/js/admin-product-distribution-v406.js?v=436"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-recovery-policy-468.js?v=467b468"></script><script src="/public/js/admin-product-editor-v163.js?v=471&b390=1"></script>
-  <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=442"></script>
-  <script src="/public/js/admin-product-unified-publishing-v443.js?v=487"></script>
-  <script src="/public/js/admin-product-etsy-guide-v488.js?v=488"></script>
-  <script src="/public/js/admin-product-entry-readiness-v489.js?v=489"></script>
+  <script src="/public/js/admin-product-channel-intent-v405.js?v=471"></script><script src="/public/js/admin-product-creation-flow-471.js?v=471"></script><script src="/public/js/admin-product-distribution-v406.js?v=496"></script><script src="/public/js/admin-listing-sync-v408.js?v=436"></script><script src="/public/js/admin-recovery-policy-468.js?v=467b468"></script><script src="/public/js/admin-product-editor-v163.js?v=496&b390=1"></script>
+  <script src="/public/js/admin-product-marketplace-drafts-v438.js?v=496"></script>
+  <script src="/public/js/admin-product-image-inline-v495.js?v=495"></script>
+  <script src="/public/js/admin-product-unified-publishing-v443.js?v=496"></script>
+  <script src="/public/js/admin-product-etsy-guide-v488.js?v=496"></script>
+  <script src="/public/js/admin-product-syndication-state-v495.js?v=495"></script>
+  <script src="/public/js/admin-product-media-navigation-v495.js?v=495"></script>
+  <script src="/public/js/admin-product-tags-v495.js?v=495"></script>
+  <script src="/public/js/admin-product-unified-readiness-v496.js?v=496"></script>
+  <script src="/public/js/admin-product-entry-readiness-v489.js?v=496"></script>
   <script src="/public/js/admin-product-etsy-dispatch-v490.js?v=490"></script>
-  <script src="/public/js/admin-product-etsy-repair-v493.js?v=493"></script>
-  <script src="/public/js/admin-product-etsy-outcomes-v491.js?v=491"></script>
-  <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=486"></script>
+  <script src="/public/js/admin-product-etsy-repair-v493.js?v=496"></script>
+  <script src="/public/js/admin-product-etsy-outcomes-v491.js?v=496"></script>
+  <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=496"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">

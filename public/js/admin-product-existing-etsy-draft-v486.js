@@ -27,6 +27,7 @@
    state.linked=String(x.listing_id);$('dd486EtsyListingId').value=state.linked;
    say(target,link?`Verified and linked existing Etsy draft #${state.linked} without creating or changing it. Load approved photos below.`:
     `Etsy confirmed title, description, price and quantity updated on existing unpublished draft #${state.linked}. Photos require separate approval and transfer below.`);
+   if(!link)document.dispatchEvent(new CustomEvent('dd:etsy-existing-draft-updated',{detail:{product_id:id,listing_id:state.linked}}));
    if(!link)$('dd486EtsyUpdateConfirm').checked=false;
   }catch(e){if(!link&&!inspect)state.uncertain=true;say(target,'HOLD — '+e.message+(link||inspect?' No link created.':' Inspect the real Etsy draft manually before any retry.'));}
   finally{state.busy=false;buttons();}}

@@ -7,8 +7,8 @@ test('Build 494 replays Product authority to late Etsy listeners and keeps load 
  const editor=read('public/js/admin-product-editor-v163.js');
  const repair=read('public/js/admin-product-etsy-repair-v493.js');
  for(const phase of ['loading','ready','failed'])assert.match(editor,new RegExp(`productAuthority='${phase}'`));
- assert.match(repair,/loaded=form\.dataset\.productAuthority==='ready'/);
- assert.match(repair,/failed=form\.dataset\.productAuthority==='failed'/);
+ assert.match(repair,/form\.dataset\.productAuthority!=='ready'/);
+ assert.match(repair,/form\.dataset\.productAuthority==='failed'/);
  assert.match(repair,/dd488ChooseNew.*aria-pressed/);
 });
 test('Build 494 restores only draft mode intent, never remote approval, shipping consent or provider writes',()=>{

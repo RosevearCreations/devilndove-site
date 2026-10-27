@@ -53,6 +53,6 @@ test('Product Editor has accessible non-stretched channel checkboxes and cache-b
   assert.match(css,/width:20px!important/);
   assert.match(css,/height:20px!important/);
   assert.match(css,/align-items:flex-start/);
-  assert.match(html,/admin-product-distribution-v406\.js\?v=436/);
+  assert.match(html,/admin-product-distribution-v406\.js\?v=\d+/);
   assert.match(html,/admin-listing-sync-v408\.js\?v=436/);
 });

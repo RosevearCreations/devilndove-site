@@ -7,10 +7,13 @@ export const CANONICAL_DISTRIBUTION_GALLERY_SQL = `
          COALESCE(NULLIF(TRIM(pi.alt_text), ''), pia.alt_text, '') AS alt_text,
          COALESCE(pia.image_role, '') AS image_role,
          COALESCE(pia.public_use_status, 'internal_review') AS public_use_status,
-         pia.width_px AS width_px, pia.height_px AS height_px,
+         qr.quality_score AS quality_score, qr.acceptance_status AS acceptance_status,
+         COALESCE(NULLIF(pia.width_px,0),CASE WHEN qr.load_status='loaded' THEN NULLIF(qr.width_px,0) END) AS width_px,
+         COALESCE(NULLIF(pia.height_px,0),CASE WHEN qr.load_status='loaded' THEN NULLIF(qr.height_px,0) END) AS height_px,
          pi.sort_order AS sort_order
   FROM product_images pi
   LEFT JOIN product_image_annotations pia ON pia.product_image_id = pi.product_image_id
+  LEFT JOIN product_image_quality_reviews qr ON qr.product_image_id = pi.product_image_id AND qr.product_id = pi.product_id
   WHERE pi.product_id = ?
   ORDER BY pi.sort_order ASC, pi.product_image_id ASC LIMIT 60`;
 

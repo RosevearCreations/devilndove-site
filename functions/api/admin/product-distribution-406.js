@@ -14,7 +14,7 @@ function gate(c){const admin=verifiedAdminFromModule(c),db=getDb(c.env);
  return !admin?{error:reply({error:'Active Admin authorization required.'},401)}:!db?{error:reply({error:'D1 Production binding unavailable.'},503)}:{admin,db};}
 function imageHolds(im){const out=[];
  if(!/^https:\/\//i.test(String(im.image_url||''))||/\/placeholders?\/|placeholder\.(?:svg|png|webp)|\/fallbacks?\//i.test(String(im.image_url||'')))out.push('real original image URL required');
- if(!['product_page_ok','social_ok','all_public_ok'].includes(String(im.public_use_status||'').toLowerCase()))out.push('public-use approval missing');
+ if(String(im.public_use_status||'').toLowerCase()!=='all_public_ok')out.push('store + Etsy + Marketplace original-photo public-use approval missing');
  if(String(im.alt_text||'').trim().length<5)out.push('descriptive alt text missing');
  if(Number(im.width_px||0)<800||Number(im.height_px||0)<800)out.push('verified dimensions below 800×800 or missing');
  return out;
@@ -40,6 +40,7 @@ export async function onRequestGet(c){
    product:{name:data.product.name,price_cents:data.product.price_cents,quantity:data.product.inventory_quantity,status:data.product.status},
    gallery:data.images.map(im=>({product_image_id:im.product_image_id,image_url:im.image_url,
      alt_text:im.alt_text,width_px:im.width_px,height_px:im.height_px,image_role:im.image_role,
+     public_use_status:im.public_use_status,quality_score:im.quality_score,acceptance_status:im.acceptance_status,
      approved_for_distribution:allowedImage(im),hold_reasons:imageHolds(im)})),
    selected_image_ids:data.selectedIds,review_receipt:data.review?.admin_action_audit_id||null,
    current_evidence:data.status,annotation_authority:data.annotationAuthority,source:'CANONICAL_PRODUCTS_AND_PRODUCT_IMAGES_WITH_ANNOTATIONS'}):
@@ -57,7 +58,7 @@ export async function onRequestPost(c){
   const src=await source(g.db,Number(id),channel);
   if(!src)return reply({error:'Canonical Product unavailable.'},404);
   const chosen=ids.map(imageId=>src.images.find(im=>Number(im.product_image_id)===Number(imageId)));
-  if(chosen.some(im=>!im||!allowedImage(im)))return reply({error:'Each image must belong to this Product, have approved public use, alt text and at least 800×800 pixels. Choose a canonical gallery image.'},409);
+  if(chosen.some(im=>!im||!allowedImage(im)))return reply({error:'Each image must belong to this Product, be explicitly approved for store + Etsy + Marketplace, have alt text and verified dimensions of at least 800×800 pixels.'},409);
   const check=reviewEvidence({channel,product:src.product,images:src.images,selectedIds:ids,
    preference:src.preference,policyReceipt:{details_json:JSON.stringify({channel,product_id:Number(id),
    image_ids:ids.map(Number),source_signature:reviewedSourceSignature(src.product,ids.map(Number)),
