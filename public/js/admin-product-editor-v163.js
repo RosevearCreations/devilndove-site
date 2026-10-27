@@ -285,6 +285,11 @@
       try{destinationsSaved=(await window.DDProductChannels405?.afterProductSave(savedId,channelSnapshot))!==false;}
       catch{destinationsSaved=false;}
       const newerEdits=fingerprint()!==submittedFingerprint;
+      // Build 501: an opted-in Etsy Product save is one explicit authorization
+      // for an unpublished draft sync. Save the canonical Product first. Never
+      // dispatch a provider write when destination persistence is uncertain.
+      const etsySyncRequested=Boolean(destinationsSaved&&!newerEdits&&
+        document.getElementById('productChannel405Etsy')?.checked);
       if(!newerEdits){markClean();clearRecovery();}
       else {baseline=submittedFingerprint;refreshDirty();snapshotEdits();}
       if(!state.productId&&savedId){
@@ -292,13 +297,20 @@
           try{sessionStorage.setItem(`dnd:product-editor:recovery:443:${savedId}`,JSON.stringify({version:443,product_id:savedId,saved_at:Date.now(),baseline:submittedFingerprint,values:Object.fromEntries([...form.elements].filter(el=>el.name&&el.type!=='file').map(el=>[el.name,el.value]))}));}
           catch{state.saveNeedsReview=true;setStatus(`Product #${savedId} was created, but newer unsaved edits could not be transferred into browser recovery. Keep this tab open and manually compare with the saved Product. Do not create it again.`,'warn');return;}
         }
+        if(etsySyncRequested){
+          try{sessionStorage.setItem(`dnd:etsy:sync-after-create:501:${savedId}`,
+            JSON.stringify({product_id:savedId,at:Date.now(),authorized:true}));}
+          catch{/* The saved Product is intact; Etsy can be resumed manually. */}
+        }
         leavingAfterSave=true;
         location.replace(`/admin/product-editor/?product_id=${encodeURIComponent(savedId)}&created=1${destinationsSaved?'':'&destination_save=unconfirmed'}`);
         return;
       }
       if(state.product){state.product.featured_image_url=body.featured_image_url;state.product.price_cents=body.price_cents;state.product.compare_at_price_cents=body.compare_at_price_cents;}
       state.qaData=null;renderMedia();renderQa();
-      document.dispatchEvent(new CustomEvent('dd:save-succeeded',{detail:{form,message:'Product saved'}}));
+      document.dispatchEvent(new CustomEvent('dd:save-succeeded',{detail:{form,message:'Product saved',
+        product_id:savedId,etsy_sync_requested:etsySyncRequested,destinations_confirmed:destinationsSaved,
+        newer_edits:newerEdits}}));
       if(saveButton)saveButton.textContent=newerEdits?'Newer edits unsaved':destinationsSaved?'Saved ✓':'Product saved; destinations pending';
       setStatus(newerEdits?'Product saved, but newer browser edits remain unsaved. Review before another Save.':
         !destinationsSaved?'Product saved and CAD price verified, but destination choices were NOT confirmed. Reconcile destinations separately; do not repeat Product Save.':

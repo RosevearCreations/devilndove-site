@@ -33,7 +33,7 @@ async function load(){if(busy||!productId)return;if(dirty&&!window.confirm('Disc
  const pending=readPending(productId);
  if(pending&&pending.etsy===etsy.checked&&pending.facebook===facebook.checked)clearPending(productId);
  if(recovery)recovery.hidden=!pending||(pending.etsy===etsy.checked&&pending.facebook===facebook.checked);
- say(params.get('destination_save')==='unconfirmed'?'Product was created, but destination saving was NOT confirmed. The displayed choices are the current saved state; review them before proceeding.':x.preferences.configured?'Saved destination preferences loaded; these switches do not publish.':'No channel preference saved; channels remain OFF until you enable and save them.');}
+ say(params.get('destination_save')==='unconfirmed'?'Product was created, but destination saving was NOT confirmed. The displayed choices are the current saved state; review them before proceeding.':x.preferences.configured?'Saved destination preferences loaded. Etsy ON means the next successful Save Product requests an unpublished Etsy draft sync.':'No channel preference saved; channels remain OFF until you enable and save them.');}
  catch(e){say('Cannot verify saved channel choices: '+e.message+'. Change nothing until reloaded.');loaded=false;}
  finally{busy=false;apply();}}
 async function saveFor(id,frozen){let choice;
@@ -50,7 +50,7 @@ async function saveFor(id,frozen){let choice;
  const x=await r.json().catch(()=>null);if(!r.ok||!x?.ok)throw Error(x?.error||'Intent not confirmed');
  productId=Number(id);receipt=Number(x.preferences.receipt||0);loaded=true;dirty=false;
  clearPending(productId);if(recovery)recovery.hidden=true;
- say('Owner-confirmed local intent for Product #'+productId+'. Etsy: '+(choice.etsy?'ON':'OFF')+', Facebook Marketplace: '+(choice.facebook?'ON':'OFF')+'. No listings or media published.');
+ say('Saved destinations for Product #'+productId+'. Etsy: '+(choice.etsy?'ON — unpublished draft sync follows Save Product':'OFF')+', Facebook Marketplace: '+(choice.facebook?'manual preparation':'OFF')+'. No live listings published.');
  return true;
  }catch(e){writePending(Number(id),choice);say('Product may have saved, but destinations were NOT confirmed: '+e.message+'. Reload the exact preferences and use Review unsaved choices; do not repeat Product creation.');return false;}
  finally{busy=false;apply();}}

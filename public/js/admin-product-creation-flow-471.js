@@ -9,8 +9,8 @@
   const destination=chosen.length?chosen.join(' + '):'No external channels';
   const waiting=chosen.length&&!consent?.checked;
   status.textContent=(savedId?'Saved Product #'+savedId:'New Product — not yet saved')+' • '+destination+
-    (waiting?' • HOLD: owner preparation consent required':chosen.length?' • Local preparation consent checked':' • Devil n Dove source only')+
-    ' • External publication requires separate human approvals.';
+    (waiting?' • HOLD: confirm the destination change':chosen.length?' • Etsy sync occurs on Save when selected':' • Devil n Dove source only')+
+    ' • Nothing publishes automatically.';
   media.disabled=!savedId;
  }
  for(const el of [etsy,facebook,consent])el?.addEventListener('change',update);
