@@ -343,6 +343,7 @@ jobs:
           node scripts/release467_build503_etsy_owner_diagnostics.test.mjs
           node scripts/release467_build504_etsy_link_photo_signoff_cards.test.mjs
           node scripts/release467_build505_etsy_owner_reconciliation.test.mjs
+          node scripts/release467_build506_etsy_owner_trial_integration_readiness.test.mjs
           node scripts/release467_build499_owner_advanced_tags_media.test.mjs
           node scripts/release467_build497_product53_three_channel_acceptance.test.mjs
 

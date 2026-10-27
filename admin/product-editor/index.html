@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="/admin/product-editor/creation-flow-471.css?v=471"/>
   <link rel="stylesheet" href="/admin/product-editor/entry-readiness-489.css?v=496"/>
   <link rel="stylesheet" href="/admin/product-editor/advanced-channels-498.css?v=498"/>
-  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=505"/>
+  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=506"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -164,7 +164,7 @@
 
       <section class="dd-editor-panel dd-etsy-panel" data-editor-panel="etsy" hidden>
         <div class="card dd500-package" id="dd500Package" aria-labelledby="dd500Title">
-          <div class="dd500-head"><div><p class="eyebrow">Build 505 • Resolve the local ID, match original photos, approve content</p><h2 id="dd500Title">Save and update our existing Etsy draft</h2>
+          <div class="dd500-head"><div><p class="eyebrow">Build 506 • Review the trial receipt, correct metadata, test gateway readiness</p><h2 id="dd500Title">Save and update our existing Etsy draft</h2>
             <p class="small">No extra image selection. We use <strong>every approved photograph in this Product's gallery</strong>, its saved description, CAD price, quantity and search tags. Etsy creation returns a listing number we keep on this Product for all future updates. The listing stays <strong>unpublished</strong>.</p></div></div>
           <div class="dd503-owner-note" id="dd503OwnerNote" role="note" hidden><strong>Keep our existing Etsy draft #4603838854.</strong> Do not delete it or create another. First verify and link that ID, then update the same unpublished draft. Our last Etsy screenshot also showed the category “Bar Soaps”; confirm the correct category in Etsy before publishing.</div>
           <div class="dd500-id" id="dd500Identity" role="status" aria-live="polite">Reading this Product's saved Etsy listing ID…</div>
@@ -213,6 +213,14 @@
           <label class="dd500-consent"><input type="checkbox" id="dd500Consent"><span>I own/approve <strong>all</strong> gallery images for public use and authorize one unpublished, Canada-only Etsy package transfer: Product details, search tags, advanced fields and every eligible photo. Any uncertain result must be checked in Etsy before another attempt.</span></label>
           <div class="dd-product-actions"><button class="btn primary" type="button" id="dd500Send" disabled>Checking Etsy draft…</button><button class="btn" type="button" id="dd500Refresh">Recheck saved details (no Etsy changes)</button><button class="btn" type="button" id="dd503Fix" hidden>Fix missing item</button></div>
           <p class="small" id="dd500Status" role="status" aria-live="polite">No Etsy write attempted.</p>
+          <section class="dd505-review" aria-labelledby="dd506TrialTitle">
+            <h3 id="dd506TrialTitle">Product #53 — owner trial receipt and metadata review</h3>
+            <p class="small">Our existing Etsy draft is <strong>#4603838854</strong>. This check reads our saved Product, Etsy ID, search-tag source and original-photo receipts. It does not change Etsy or approve a listing.</p>
+            <button class="btn" type="button" id="dd506TrialCheck">Review saved trial receipt (read only)</button>
+            <p id="dd506TrialStatus" role="status" aria-live="polite">Awaiting a fresh saved receipt check. Unverified details remain on HOLD.</p>
+            <p class="small">If the saved Etsy tag is <strong>“Soap bars”</strong>, confirm it accurately describes the piece or correct the Etsy override under <strong>Storefront / SEO</strong>. Add actual materials, size and making details under <strong>Description</strong>; do not invent them. Save Product, then recheck. Compare the three approved original photos (#344–346) to the actual Etsy images before final sign-off.</p>
+            <p class="small"><strong>Cross-application integration v1:</strong> authenticated gateway health/capabilities checks only. Connection remains TESTING or DISCONNECTED until keys, independent review and owner approval; no product data sharing, Etsy writes, events or commands are enabled.</p>
+          </section>
           <section class="dd505-review" id="dd505PhotoReview" hidden aria-labelledby="dd505PhotoTitle">
             <h3 id="dd505PhotoTitle">Step 2 — Match photographs already on Etsy</h3>
             <p class="small">If our three original photographs are already on this draft, compare each picture side by side and record the exact match. No photograph is uploaded by this step. If an Etsy picture differs, do not confirm it.</p>
@@ -514,7 +522,7 @@
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=496"></script>
   <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
   <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
-  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=505"></script>
+  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=506"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">
