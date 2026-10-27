@@ -29,6 +29,10 @@ async function verify(env,s,id,headers){const listing=await etsy('listings/'+enc
  const review=canadaOnlyShippingProfile(profile,destinations,Number(listing.shipping_profile_id));
  if(!review.allowed)throw Error('Etsy draft shipping profile is not proven Canada-only. '+String(review.reason||''));
  return listing;}
+// Build 497 shares the same verified unpublished/Canada-only guard with native
+// tag updates, rather than introducing a weaker second Etsy identity check.
+export {local as readExistingDraftLocal486,credentials as existingDraftCredentials486,
+  verify as verifyExistingDraft486,etsy as readEtsy486};
 export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;const id=new URL(c.request.url).searchParams.get('product_id');if(!valid(id))return respond({error:'Saved Product required.'},400);
  try{const s=await local(g.db,Number(id));if(!s.product)return respond({error:'Product not found.'},404);
  return respond({product_id:Number(id),linked_listing_id:valid(s.draft?.external_reference)?String(s.draft.external_reference):null,linked_source:parse(s.draft).verified_remote_existing_draft?'verified_existing_etsy_draft':s.draft?'product_editor_or_legacy_receipt':'unlinked',requires_explicit_review:true});

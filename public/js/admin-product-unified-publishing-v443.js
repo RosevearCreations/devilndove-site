@@ -19,7 +19,7 @@
   function update(){
     const send=$('dd443EtsyImagesSend'),consent=$('dd443EtsyImagesConsent');
     if($('dd443EtsyImagesLoad'))$('dd443EtsyImagesLoad').disabled=state.busy;
-    if(send)send.disabled=state.busy||state.uncertain||!state.listingId||dirty()||
+    if(send)send.disabled=state.busy||!state.loaded||state.uncertain||!state.listingId||dirty()||form.dataset.productAuthority!=='ready'||
       !consent?.checked||!state.images.some(item=>!item.transferred&&!item.hold&&item.transferable);
   }
   function showGallery(){
@@ -82,15 +82,17 @@
         const result=await api('/api/admin/product-etsy-images',{action:'transfer_one',product_id:id,
           product_image_id:image.product_image_id,request_key:crypto.randomUUID(),
           confirm_approved_media:true,confirm_unpublished_only:true,confirm_canada_only:true});
-        if(!result.uploaded||!result.etsy_image_id)throw Error('Etsy image ID was not confirmed.');
+        if(!result.uploaded||!result.etsy_image_id||result.verified_remote_readback!==true)
+          throw Error('Etsy image was not independently verified on the original draft.');
         image.transferred=true;confirmed++;showGallery();
+        document.dispatchEvent(new CustomEvent('dd:etsy-photo-verified',{detail:{product_id:id,listing_id:state.listingId,product_image_id:image.product_image_id}}));
       }catch(e){
         image.hold=true;state.uncertain=true;showGallery();
         status('dd443EtsyImagesStatus',`STOP after ${confirmed} confirmed image(s): ${e.message} Check actual Etsy Drafts. We will not automatically retry the held photo.`);
         break;
       }
     }
-    if(!state.uncertain)status('dd443EtsyImagesStatus',`Etsy confirmed ${confirmed} newly uploaded image(s) for draft #${state.listingId}. The listing remains unpublished. Check Etsy Drafts to review photo order.`);
+    if(!state.uncertain)status('dd443EtsyImagesStatus',`Etsy confirmed ${confirmed} newly uploaded image(s) by live photo-ID readback on draft #${state.listingId}. The listing remains unpublished. Check Etsy Drafts to review photo order.`);
     state.busy=false;update();
   }
   $('dd443EtsyImagesLoad')?.addEventListener('click',()=>void load());
