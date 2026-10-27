@@ -131,7 +131,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
         state.assessment=snapshot.assessment;state.images=snapshot.images;state.loaded=true;
         status(snapshot.assessment.ready?`Ready to review: all ${snapshot.assessment.count} gallery photos are included. ${state.linked?'Update Etsy #'+state.linked:'No existing Etsy link detected.'}`:
           `HOLD — ${snapshot.assessment.issues.length} package requirement(s) need attention. See the list above.`,!snapshot.assessment.ready);
-        if(!state.linked&&!state.settings)$('dd500NewSettings').open=true;
+        if(!state.linked&&!state.settings&&!$('dd500ListingId').value.trim())$('dd500NewSettings').open=true;
         return true;
       }catch(error){state.loaded=false;state.assessment=null;status('HOLD — '+error.message,true);return false;}
       finally{state.busy=false;show();}
@@ -363,7 +363,10 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   });
   document.addEventListener('dd:product-channel-tags-changed',()=>{state.loaded=false;void refresh();});
   document.addEventListener('dd:editor-tab-opened',event=>{
-    if(event.detail?.tab==='etsy'&&ready())void (async()=>{await refresh();if(!state.linked&&!state.settings)await loadOptions();})();
+    if(event.detail?.tab==='etsy'&&ready())void (async()=>{
+      await refresh();
+      if(!state.linked&&!state.settings&&!$('dd500ListingId').value.trim())await loadOptions();
+    })();
   });
   show();if(ready())void (async()=>{
     const resumed=consumeCreateRequest();

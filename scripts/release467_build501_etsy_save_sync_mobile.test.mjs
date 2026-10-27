@@ -21,6 +21,7 @@ test('Etsy checkbox has a fixed intrinsic width, no forced 100%-wide consent box
 });
 test('one checkbox, one Product save, and one verified Etsy create/update authorization',()=>{
   assert.match(html,/id="productChannel405Etsy"> Sync this Product with Etsy when we Save/);
+  assert.match(html,/<details id="dd501ChannelRecovery"><summary>Destination recovery/);
   assert.match(html,/id="dd501SaveState"/);
   assert.match(html,/one unpublished, Canada-only draft and all approved gallery photographs/);
   assert.match(editor,/etsySyncRequested=Boolean\(destinationsSaved&&!newerEdits/);
@@ -37,6 +38,7 @@ test('existing Etsy ID is updated; uncertain result and Product #53 prevent dupl
   assert.match(packageScript,/action:'update_saved_fields'/);
   assert.match(packageScript,/action:'create_draft'/);
   assert.match(packageScript,/if\(candidate\)\{/);
+  assert.match(packageScript,/!\$\('dd500ListingId'\)\.value\.trim\(\)\)\$\('dd500NewSettings'\)\.open=true/);
   assert.match(packageScript,/Verify and link existing Etsy draft/);
   assert.match(packageScript,/state\.holdAfterWrite=true/);
   assert.match(packageScript,/if\(state\.syncing\)/);

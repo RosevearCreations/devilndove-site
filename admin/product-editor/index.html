@@ -427,9 +427,12 @@
 <label><input type="checkbox" id="productChannel405Facebook"> Prepare this Product for Facebook Marketplace</label>
 </div>
 <label class="dd471-consent"><input type="checkbox" id="productChannel471Consent"> I authorize Etsy, if checked, to create or update <strong>one unpublished, Canada-only draft and all approved gallery photographs</strong> whenever we Save Product. No automatic publication. Facebook Marketplace remains manual.</label>
-<div class="dd-product-actions"><button type="button" class="btn" id="productChannel405Reload">Load saved destination choices</button>
-<button type="button" class="btn" id="productChannel405Save">Save destination choices for existing Product</button></div>
-<div id="productChannel471Recovery" class="dd471-recovery" hidden><p class="small">The Product was created, but the destination write could not be confirmed. First we loaded the saved preference receipt; the unchecked options below are the confirmed state. We can restore the browser's intended switches for review, then explicitly consent and save only the destination choices. Do not create the Product again.</p><button class="btn" type="button" id="productChannel471Restore">Review unsaved destination choices</button></div>
+<details id="dd501ChannelRecovery"><summary>Destination recovery (only if a Save is on HOLD)</summary>
+<p class="small">Normal changes are saved with Save Product above. Use these recovery tools only after a destination confirmation problem, without repeating the Product creation.</p>
+<div class="dd-product-actions"><button type="button" class="btn" id="productChannel405Reload">Reload saved destination choices</button>
+<button type="button" class="btn" id="productChannel405Save">Save recovered destination choices only</button></div>
+<div id="productChannel471Recovery" class="dd471-recovery" hidden><p class="small">The Product was created, but destination saving was not confirmed. Review the verified saved choices and restore the pending choice before explicitly saving those preferences. Do not create the Product again.</p><button class="btn" type="button" id="productChannel471Restore">Review unsaved destination choices</button></div>
+</details>
 <p class="small" id="productChannel405Status" role="status">OFF by default. Save Product to save both its destination choice and its Etsy draft synchronization request.</p>
 <p class="small">Product gallery is edited in the Media tab and reused as the source for channel-specific draft/export reviews. Distribution remains subject to per-channel policy and explicit operator approval.</p>
 </section>

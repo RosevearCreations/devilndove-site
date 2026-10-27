@@ -33,6 +33,7 @@ async function load(){if(busy||!productId)return;if(dirty&&!window.confirm('Disc
  const pending=readPending(productId);
  if(pending&&pending.etsy===etsy.checked&&pending.facebook===facebook.checked)clearPending(productId);
  if(recovery)recovery.hidden=!pending||(pending.etsy===etsy.checked&&pending.facebook===facebook.checked);
+ if(recovery&&!recovery.hidden)el('dd501ChannelRecovery').open=true;
  say(params.get('destination_save')==='unconfirmed'?'Product was created, but destination saving was NOT confirmed. The displayed choices are the current saved state; review them before proceeding.':x.preferences.configured?'Saved destination preferences loaded. Etsy ON means the next successful Save Product requests an unpublished Etsy draft sync.':'No channel preference saved; channels remain OFF until you enable and save them.');}
  catch(e){say('Cannot verify saved channel choices: '+e.message+'. Change nothing until reloaded.');loaded=false;}
  finally{busy=false;apply();}}
@@ -52,7 +53,7 @@ async function saveFor(id,frozen){let choice;
  clearPending(productId);if(recovery)recovery.hidden=true;
  say('Saved destinations for Product #'+productId+'. Etsy: '+(choice.etsy?'ON — unpublished draft sync follows Save Product':'OFF')+', Facebook Marketplace: '+(choice.facebook?'manual preparation':'OFF')+'. No live listings published.');
  return true;
- }catch(e){writePending(Number(id),choice);say('Product may have saved, but destinations were NOT confirmed: '+e.message+'. Reload the exact preferences and use Review unsaved choices; do not repeat Product creation.');return false;}
+ }catch(e){writePending(Number(id),choice);el('dd501ChannelRecovery').open=true;say('Product may have saved, but destinations were NOT confirmed: '+e.message+'. Reload the exact preferences and use Review unsaved choices; do not repeat Product creation.');return false;}
  finally{busy=false;apply();}}
 reload.addEventListener('click',()=>void load());
 save.addEventListener('click',()=>void saveFor(productId));
