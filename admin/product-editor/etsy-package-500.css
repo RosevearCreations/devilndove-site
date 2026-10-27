@@ -35,3 +35,14 @@ body[data-admin-page="product-editor-v165"] input[type="checkbox"]{width:18px!im
 .dd501-save-state[data-tone="ok"]{border-color:#5baf82}
 .dd501-save-state[data-tone="working"]{border-color:#bf8c4a}
 @media(max-width:680px){.dd500-package{padding:13px}.dd500-package .dd-product-actions{display:grid;grid-template-columns:1fr}.dd500-package .dd-product-actions>*{max-width:100%;white-space:normal}.dd500-package .dd-editor-grid{grid-template-columns:1fr}}
+.dd504-claim{display:grid;gap:10px;grid-template-columns:minmax(0,1fr);padding:13px;border:1px solid #dc9444;background:rgba(176,94,45,.11);border-radius:10px;line-height:1.55;overflow-wrap:anywhere}
+.dd504-claim[hidden],.dd504-claim a[hidden]{display:none!important}
+.dd504-claim .btn{justify-self:start}
+.dd504-signoff{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:15px;margin-top:15px;border:1px solid rgba(167,119,59,.45);border-radius:12px;background:rgba(15,16,31,.25)}
+.dd504-signoff h3,.dd504-signoff p{margin:0}
+.dd504-signoff label{display:flex;align-items:flex-start;gap:10px;padding:10px;border-radius:9px;background:rgba(153,105,44,.1);line-height:1.45}
+.dd504-signoff label span{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+.dd504-signoff input[type="checkbox"]{display:block!important;appearance:auto!important;width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;max-width:18px!important;margin:2px 0 0;flex:0 0 18px!important}
+.dd504-signoff #dd504Readback{white-space:normal;overflow-wrap:anywhere;line-height:1.55;padding:10px;border-left:4px solid #bf8c4a;background:rgba(177,129,55,.08);border-radius:7px}
+.dd504-signoff button{justify-self:start;max-width:100%;min-height:42px;white-space:normal;text-align:center}
+@media(max-width:680px){.dd504-signoff{padding:11px}.dd504-signoff button{width:100%;justify-self:stretch}}

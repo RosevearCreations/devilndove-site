@@ -5,6 +5,9 @@ export function etsyStep503(path,body){
   const action=text(body?.action),url=text(path);
   if(url.includes('product-channel-intent'))return {label:'Etsy checkbox and saved destination',kind:'read'};
   if(url.includes('product-etsy-unified-approval'))return {label:'Complete-package owner approval',kind:'local-write'};
+  if(url.includes('product-etsy-owner-signoff-504'))return action==='approve_verified_draft'?
+    {label:'Record final owner content approval against this Etsy draft',kind:'local-write'}:
+    {label:'Read back the actual Etsy listing and three original photo receipts',kind:'read'};
   if(url.includes('product-etsy-existing-draft')){
     if(action==='inspect_listing')return {label:'Verify the existing Etsy draft and Canada-only shipping',kind:'read'};
     if(action==='link_existing')return {label:'Save Etsy listing ID against Product #53',kind:'local-write'};

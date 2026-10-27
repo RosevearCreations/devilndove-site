@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="/admin/product-editor/creation-flow-471.css?v=471"/>
   <link rel="stylesheet" href="/admin/product-editor/entry-readiness-489.css?v=496"/>
   <link rel="stylesheet" href="/admin/product-editor/advanced-channels-498.css?v=498"/>
-  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=503"/>
+  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=504"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -164,10 +164,11 @@
 
       <section class="dd-editor-panel dd-etsy-panel" data-editor-panel="etsy" hidden>
         <div class="card dd500-package" id="dd500Package" aria-labelledby="dd500Title">
-          <div class="dd500-head"><div><p class="eyebrow">Build 503 • One saved Product, one Etsy listing</p><h2 id="dd500Title">Save and update our existing Etsy draft</h2>
+          <div class="dd500-head"><div><p class="eyebrow">Build 504 • Verify the existing draft, three photos, and owner approval</p><h2 id="dd500Title">Save and update our existing Etsy draft</h2>
             <p class="small">No extra image selection. We use <strong>every approved photograph in this Product's gallery</strong>, its saved description, CAD price, quantity and search tags. Etsy creation returns a listing number we keep on this Product for all future updates. The listing stays <strong>unpublished</strong>.</p></div></div>
           <div class="dd503-owner-note" id="dd503OwnerNote" role="note" hidden><strong>Keep our existing Etsy draft #4603838854.</strong> Do not delete it or create another. First verify and link that ID, then update the same unpublished draft. Our last Etsy screenshot also showed the category “Bar Soaps”; confirm the correct category in Etsy before publishing.</div>
           <div class="dd500-id" id="dd500Identity" role="status" aria-live="polite">Reading this Product's saved Etsy listing ID…</div>
+          <div class="dd504-claim" id="dd504Claim" role="status" aria-live="polite" hidden><span id="dd504ClaimMessage"></span> <a class="btn secondary" id="dd504ClaimProduct" href="/admin/products/" hidden>Review the other Product</a></div>
           <a id="dd500Open" class="btn" href="https://www.etsy.com/your/shops/me/listings/drafts" target="_blank" rel="noopener noreferrer">Open Etsy Drafts</a>
           <div class="dd500-link" id="dd500Link">
             <h3>Already created this Etsy listing?</h3>
@@ -203,6 +204,14 @@
           <label class="dd500-consent"><input type="checkbox" id="dd500Consent"><span>I own/approve <strong>all</strong> gallery images for public use and authorize one unpublished, Canada-only Etsy package transfer: Product details, search tags, advanced fields and every eligible photo. Any uncertain result must be checked in Etsy before another attempt.</span></label>
           <div class="dd-product-actions"><button class="btn primary" type="button" id="dd500Send" disabled>Checking Etsy draft…</button><button class="btn" type="button" id="dd500Refresh">Recheck saved details (no Etsy changes)</button><button class="btn" type="button" id="dd503Fix" hidden>Fix missing item</button></div>
           <p class="small" id="dd500Status" role="status" aria-live="polite">No Etsy write attempted.</p>
+          <div class="dd504-signoff" aria-labelledby="dd504SignoffTitle"><h3 id="dd504SignoffTitle">Final owner check — Product #53</h3>
+            <p class="small">After linking and updating the same Etsy draft, check the actual listing and every approved photo. This check never uploads, creates or publishes anything.</p>
+            <button class="btn" id="dd504CheckPhotos" type="button">Read Etsy's three-photo receipts (no changes)</button>
+            <p id="dd504Readback" role="status" aria-live="polite">Not verified yet. The expected original photo IDs are #344, #345 and #346.</p>
+            <label><input type="checkbox" id="dd504ApproveContent"><span>I inspected the actual Etsy draft, including its category, description, CAD price, quantity, Canada-only delivery and all three photographs. I approve these details for this unpublished draft.</span></label>
+            <button class="btn primary" id="dd504Signoff" type="button" disabled>Record final owner sign-off</button>
+            <p class="small" id="dd504SignoffStatus" role="status" aria-live="polite">No owner approval recorded. Etsy remains unpublished.</p>
+          </div>
           <p class="small" id="dd501Resume" role="status" aria-live="polite">An Etsy checkbox plus Save Product authorizes the same draft workflow. This separate button is for finishing first-time setup or resolving a held package.</p>
           <p class="small">Our store retains the saved Product. Facebook Marketplace uses the same source photos but remains a manual handoff until Meta grants supported listing access. This button never publishes on either marketplace.</p>
         </div>
@@ -484,7 +493,7 @@
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=496"></script>
   <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
   <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
-  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=503"></script>
+  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=504"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">

@@ -341,6 +341,7 @@ jobs:
           node scripts/release467_build501_etsy_save_sync_mobile.test.mjs
           node scripts/release467_build502_etsy_existing_link_media_owner.test.mjs
           node scripts/release467_build503_etsy_owner_diagnostics.test.mjs
+          node scripts/release467_build504_etsy_link_photo_signoff_cards.test.mjs
           node scripts/release467_build499_owner_advanced_tags_media.test.mjs
           node scripts/release467_build497_product53_three_channel_acceptance.test.mjs
 
