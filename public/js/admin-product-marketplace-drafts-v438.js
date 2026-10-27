@@ -236,6 +236,7 @@
       const link=$('dd438EtsyExisting');if(link){link.hidden=false;link.href='https://www.etsy.com/your/shops/me/listings/drafts';
         link.textContent=`Open Etsy drafts — listing #${result.listing_id}`;}
       state.createdListingId=result.listing_id;
+      document.dispatchEvent(new CustomEvent('dd:etsy-draft-created',{detail:{product_id:productId,listing_id:String(result.listing_id)}}));
       status(etsyStatus,`Success — Etsy confirmed unpublished draft #${result.listing_id}. Local receipt recorded. No publication, automatic retry, image upload or U.S. shipping change occurred.`,'ok');
     }catch(error){state.attemptFailed=true;status(etsyStatus,`Etsy draft was NOT confirmed: ${errorText(error)}. Do not retry until we reconcile the attempt; we keep a one-attempt safety record.`,'error');}
     finally{state.ready=false;setBusy(false);}

@@ -94,13 +94,22 @@
     state.busy=false;update();
   }
   $('dd443EtsyImagesLoad')?.addEventListener('click',()=>void load());
+  function loadOnEtsyOpen(){
+    if(id&&!state.loaded&&!state.busy&&form.dataset.productAuthority==='ready'&&
+      document.querySelector('[data-editor-panel="etsy"]')?.hidden===false)void load();
+  }
+  document.addEventListener('dd:editor-tab-opened',event=>{if(event.detail?.tab==='etsy')loadOnEtsyOpen();});
+  document.addEventListener('dd:product-loaded',loadOnEtsyOpen);
+  document.addEventListener('dd:media-inline-updated',()=>{state.loaded=false;loadOnEtsyOpen();});
+  document.addEventListener('dd:etsy-draft-created',()=>{state.loaded=false;loadOnEtsyOpen();});
+  document.addEventListener('dd:etsy-existing-draft-updated',()=>{state.loaded=false;loadOnEtsyOpen();});
   $('dd487EtsyReconcile')?.addEventListener('click',()=>void reconcile487());
   $('dd443EtsyImagesSend')?.addEventListener('click',()=>void send());
   $('dd443EtsyImagesConsent')?.addEventListener('change',update);
-  if(id)$('dd443EtsyImagesEdit')?.setAttribute('href',`/admin/catalog-media/?product_id=${encodeURIComponent(id)}`);
+  // All shared-image corrections are available on this Product's Media tab.
   form.addEventListener('input',update);form.addEventListener('change',update);
   document.addEventListener('dd:save-succeeded',()=>{state.loaded=false;state.listingId=null;state.images=[];
-    status('dd443EtsyImagesStatus','Product changed. Load fresh approved gallery before transferring photos.');update();});
+    status('dd443EtsyImagesStatus','Product changed. Refreshing saved gallery before any photo transfer.');update();loadOnEtsyOpen();});
 
   $('dd443MetaPrepare')?.addEventListener('click',()=>{
     if(!id||dirty()){
@@ -119,5 +128,5 @@
     catch{const target=$(button.dataset.dd443Copy);target?.focus();target?.select();
       status('dd443MetaManualStatus','Clipboard permission unavailable. Text selected; use Ctrl+C to copy.');}
   }));
-  update();
+  update();loadOnEtsyOpen();
 })();

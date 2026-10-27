@@ -41,6 +41,6 @@
  }
  local.addEventListener('click',()=>void review());remote.addEventListener('click',()=>void live());
  document.addEventListener('dd:save-succeeded',()=>{latest=null;$('dd491OutcomeList').replaceChildren();$('dd492PhotoGaps')?.replaceChildren();say('Product changed. Run a fresh local outcome review before trusting previous results.');controls();});
- if(id)$('dd491MediaScoreLink').href=`/admin/catalog-media/?product_id=${encodeURIComponent(id)}`;
+ // The shared Product media review is accessible in this editor.
  controls();
 })();

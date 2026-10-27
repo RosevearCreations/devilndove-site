@@ -184,7 +184,8 @@
     try{
       const response=await window.DDAuth.apiFetch(`/api/admin/product-editor-detail?product_id=${encodeURIComponent(state.productId)}`,{method:'GET',cache:'no-store'});
       const data=await readJson(response,'Could not load Product.');
-      fill(data.product||{});state.saveNeedsReview=false;state.quotaStop=false;setSaveReady(true);
+      if(Number(data.product?.product_id)!==state.productId||!String(data.product?.name||'').trim())throw new Error('Saved Product identity or name was not returned. The editor will not enable Save from incomplete authority data.');
+      fill(data.product);state.saveNeedsReview=false;state.quotaStop=false;setSaveReady(true);
       document.dispatchEvent(new CustomEvent('dd:product-loaded',{detail:{product_id:state.productId}}));
       try{sessionStorage.removeItem(`dnd:product-editor-seed:${state.productId}`);}catch{}
       setStatus(`Product authority loaded. Compare any recovered browser edits before another Save. Optional gallery, scoring, pricing and QA remain unloaded until requested.${rowsText(data)}`,'ok');
@@ -200,9 +201,14 @@
     if(!state.mediaLoaded){mediaStrip.innerHTML='';return;}
     const rows=editorMediaRows();
     if(!rows.length){mediaStrip.innerHTML='<p class="small">No canonical gallery image or featured Product reference was found. Open Media &amp; Image Editor to add one.</p>';return;}
-    const featured=String(get('featured_image_url')||'').trim();mediaStrip.innerHTML=rows.map((row,index)=>{const isFeatured=featured&&featured===String(row.image_url||'').trim();const canonical=Number(row.product_image_id||0)>0;const source=String(row.source|| (canonical?'gallery':'recovered reference'));return `<article class="dd-editor-media-card${isFeatured?' is-featured':''}"><img loading="lazy" data-media-raw="${esc(row.image_url||'')}" alt="${esc(row.alt_text||get('name')||'Product image')}"><div><strong>${isFeatured?'Featured':'Image '+(index+1)}</strong><div class="small">${esc(row.alt_text||'No alt text yet')}</div><div class="small">Source: ${esc(source)}${canonical?'':' • recovered existing reference'}</div></div><div class="dd-product-actions"><button class="btn" type="button" data-use-featured-url="${esc(row.image_url||'')}" ${isFeatured?'disabled':''}>Use as featured</button><a class="btn" href="/admin/catalog-media/?product_id=${encodeURIComponent(state.productId)}">${canonical?'Edit image':'Open image editor'}</a></div></article>`;}).join('');
+    const featured=String(get('featured_image_url')||'').trim();mediaStrip.innerHTML=rows.map((row,index)=>{const isFeatured=featured&&featured===String(row.image_url||'').trim();const canonical=Number(row.product_image_id||0)>0;const source=String(row.source|| (canonical?'gallery':'recovered reference'));return `<article class="dd-editor-media-card${isFeatured?' is-featured':''}"><img loading="lazy" data-media-raw="${esc(row.image_url||'')}" alt="${esc(row.alt_text||get('name')||'Product image')}"><div><strong>${isFeatured?'Featured':'Image '+(index+1)}</strong><div class="small">${esc(row.alt_text||'No alt text yet')}</div><div class="small">Source: ${esc(source)}${canonical?'':' • recovered existing reference'}</div></div><div class="dd-product-actions"><button class="btn" type="button" data-use-featured-url="${esc(row.image_url||'')}" ${isFeatured?'disabled':''}>Use as featured</button><button class="btn" type="button" data-dd495-jump-media="${Number(row.product_image_id||0)}">${canonical?'Complete image requirements here':'Review shared Product images'}</button></div></article>`;}).join('');
     mediaStrip.querySelectorAll('img[data-media-raw]').forEach((img)=>armMediaImage(img,img.dataset.mediaRaw||''));
     mediaStrip.querySelectorAll('[data-use-featured-url]').forEach((button)=>button.addEventListener('click',()=>setFeaturedDraft(button.dataset.useFeaturedUrl||'')));
+    mediaStrip.querySelectorAll('[data-dd495-jump-media]').forEach(button=>button.addEventListener('click',()=>{
+      const id=Number(button.dataset.dd495JumpMedia||0),section=document.getElementById('productDistribution406');
+      section?.scrollIntoView({block:'start',behavior:'smooth'});
+      if(id)document.querySelector(`[data-dd495-edit="${id}"]`)?.click();
+    }));
   }
   async function loadMedia(){
     if(!state.productId||!state.authorityLoaded||state.mediaLoaded||state.mediaLoading||state.quotaStop)return;state.mediaLoading=true;if(mediaStatus)mediaStatus.textContent='Loading canonical gallery rows for this Product only…';
