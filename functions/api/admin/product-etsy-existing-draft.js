@@ -11,7 +11,7 @@ const parse=row=>{try{return JSON.parse(row?.payload_json||'{}')}catch{return {}
 const base='https://api.etsy.com/v3/application/';
 function gate(c){const admin=verifiedAdminFromModule(c),db=getDb(c.env);return !admin?{error:respond({error:'Verified Admin required.'},401)}:!db?{error:respond({error:'D1 unavailable.'},503)}:{admin,db};}
 async function local(db,id){const [product,draft,conn,shop]=await Promise.all([
- db.prepare('SELECT product_id,name,description,short_description,price_cents,currency,inventory_quantity,product_type FROM products WHERE product_id=?').bind(id).first(),
+ db.prepare('SELECT product_id,name,sku,slug,description,short_description,price_cents,currency,inventory_quantity,product_type FROM products WHERE product_id=?').bind(id).first(),
  db.prepare("SELECT id,external_reference,payload_json,status FROM marketplace_syndication_drafts WHERE channel_key='etsy' AND product_id=? AND external_reference IS NOT NULL ORDER BY updated_at DESC LIMIT 1").bind(id).first(),
  db.prepare("SELECT connection_status,scopes_json,access_expires_at,access_token_ciphertext FROM oauth_provider_connections WHERE provider_key='etsy' LIMIT 1").first(),
  db.prepare("SELECT shop_id,owner_user_id,shop_name,currency_code,acceptance_status FROM etsy_oauth_shop_connections WHERE provider_key='etsy' LIMIT 1").first()]);return {product,draft,conn,shop};}
@@ -35,7 +35,7 @@ export {local as readExistingDraftLocal486,credentials as existingDraftCredentia
   verify as verifyExistingDraft486,etsy as readEtsy486};
 export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;const id=new URL(c.request.url).searchParams.get('product_id');if(!valid(id))return respond({error:'Saved Product required.'},400);
  try{const s=await local(g.db,Number(id));if(!s.product)return respond({error:'Product not found.'},404);
- return respond({product_id:Number(id),linked_listing_id:valid(s.draft?.external_reference)?String(s.draft.external_reference):null,linked_source:parse(s.draft).verified_remote_existing_draft?'verified_existing_etsy_draft':s.draft?'product_editor_or_legacy_receipt':'unlinked',requires_explicit_review:true});
+ return respond({product_id:Number(id),product_name:String(s.product.name||''),product_sku:String(s.product.sku||''),product_slug:String(s.product.slug||''),linked_listing_id:valid(s.draft?.external_reference)?String(s.draft.external_reference):null,linked_source:parse(s.draft).verified_remote_existing_draft?'verified_existing_etsy_draft':s.draft?'product_editor_or_legacy_receipt':'unlinked',requires_explicit_review:true});
  }catch{return respond({error:'Existing draft status unavailable.'},503)}}
 export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error;if(c.request.headers.get('Origin')!==new URL(c.request.url).origin)return respond({error:'Same-origin required.'},403);
  let b;try{b=await c.request.json()}catch{return respond({error:'JSON required.'},400)}
