@@ -42,6 +42,7 @@
  document.addEventListener('dd:etsy-draft-mode-changed',render);
  document.addEventListener('dd:etsy-draft-created',event=>{linked=String(event.detail?.listing_id||'');if($('dd488ChooseNew'))$('dd488ChooseNew').disabled=true;confirmed=linked?`Original Product uploaded as unpublished Etsy draft #${linked}. Images are not yet transferred and the listing is not published.`:'';render();});
  document.addEventListener('dd:etsy-existing-draft-updated',event=>{linked=String(event.detail?.listing_id||linked||'');confirmed=`This Product is UPDATED ✓ Existing Etsy draft #${linked} confirmed the saved title, description, price and quantity. Images remain separately approved.`;render();});
+ document.addEventListener('dd:etsy-existing-draft-linked',event=>{linked=String(event.detail?.listing_id||linked||'');confirmed=`Existing unpublished Etsy draft #${linked} linked to this Product. No remote edits or image transfer occurred.`;render();});
  for(const target of ['dd438EtsyCreate','dd486EtsyUpdate']){const node=$(target);if(node)new MutationObserver(render).observe(node,{attributes:true,attributeFilter:['disabled']});}
  if(form.dataset.productAuthority==='ready')void lookup();else render();
 })();

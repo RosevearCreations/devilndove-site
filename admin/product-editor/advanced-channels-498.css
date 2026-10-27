@@ -1,0 +1,17 @@
+.dd498-identity,.dd498-tag-library,.dd498-advanced{border:1px solid #a88853;border-radius:12px;background:rgba(28,26,24,.57);padding:16px;margin:14px 0;color:inherit}
+.dd498-identity{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.dd498-identity>div{flex:1 1 320px}
+.dd498-identity>p{flex-basis:100%;margin:0}
+.dd498-identity a{color:#f2cc80;text-decoration:underline;text-underline-offset:2px}
+.dd498-tag-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;margin-top:12px}
+.dd498-tag-channel{border:1px solid #6f5938;border-radius:9px;padding:11px;min-width:0;background:rgba(15,15,15,.35)}
+.dd498-tag-channel h4{margin:0 0 6px;font-size:1rem}
+.dd498-tag-channel p{overflow-wrap:anywhere;margin:0 0 8px;line-height:1.5}
+.dd498-tag-channel button{width:100%;white-space:normal}
+.dd498-advanced summary{cursor:pointer;font-size:1.12rem;font-weight:700;color:#f0ca84}
+.dd498-advanced-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}
+.dd498-advanced-fields label{display:grid;gap:5px;min-width:0}
+.dd498-advanced-fields label.dd498-wide{grid-column:1/-1}
+.dd498-advanced-fields select,.dd498-advanced-fields input,.dd498-advanced-fields textarea{width:100%;box-sizing:border-box}
+.dd498-advanced [data-dd498-status][data-tone='hold'],#dd498TagWarnings:not(:empty){color:#ffca85}
+@media(max-width:600px){.dd498-identity{align-items:stretch}.dd498-identity>button{width:100%}.dd498-tag-grid{grid-template-columns:1fr}}
