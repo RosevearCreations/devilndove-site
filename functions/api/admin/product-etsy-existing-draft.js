@@ -24,6 +24,16 @@ async function localLinkOnly(db,id){const [product,draft]=await Promise.all([
  db.prepare('SELECT product_id,name,sku,slug FROM products WHERE product_id=? LIMIT 1').bind(id).first(),
  db.prepare("SELECT id,external_reference,payload_json,status FROM marketplace_syndication_drafts WHERE channel_key='etsy' AND product_id=? AND external_reference IS NOT NULL ORDER BY updated_at DESC LIMIT 1").bind(id).first()
  ]);return {product,draft};}
+// Build 504: differentiate a replay of THIS Product's verified receipt from
+// another Product that already owns the Etsy ID. Never silently move claims.
+async function claimedListing(db,listingId){
+ return db.prepare("SELECT d.id,d.product_id,d.payload_json,p.name AS product_name,p.sku AS product_sku,p.slug AS product_slug FROM marketplace_syndication_drafts d LEFT JOIN products p ON CAST(p.product_id AS TEXT)=CAST(d.product_id AS TEXT) WHERE d.channel_key='etsy' AND d.external_reference=? ORDER BY d.updated_at DESC LIMIT 1").bind(listingId).first();
+}
+export function ownerClaim504(claim,productId){
+ if(!claim)return {state:'unclaimed',product:null};
+ const product={product_id:Number(claim.product_id),name:String(claim.product_name||''),sku:String(claim.product_sku||''),slug:String(claim.product_slug||'')};
+ return {state:String(claim.product_id)===String(productId)?'same_product':'another_product',product};
+}
 async function credentials(env,s){const blockers=connectionBlockers(s.conn,s.shop,env);let scopes=[];try{scopes=JSON.parse(s.conn?.scopes_json||'[]')}catch{}
  if(!scopes.includes('listings_r')||!scopes.includes('listings_w'))blockers.push('etsy_listing_scopes_missing');
  if(blockers.length)throw Error('Etsy shop authorization or scopes unavailable: '+blockers.join(', '));
@@ -42,9 +52,11 @@ async function verify(env,s,id,headers){const listing=await etsy('listings/'+enc
 // tag updates, rather than introducing a weaker second Etsy identity check.
 export {local as readExistingDraftLocal486,credentials as existingDraftCredentials486,
   verify as verifyExistingDraft486,etsy as readEtsy486};
-export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;const id=new URL(c.request.url).searchParams.get('product_id');if(!valid(id))return respond({error:'Saved Product required.'},400);
+export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;const url=new URL(c.request.url),id=url.searchParams.get('product_id');if(!valid(id))return respond({error:'Saved Product required.'},400);
  try{const s=await localLinkOnly(g.db,Number(id));if(!s.product)return respond({error:'Product not found.'},404);
- return respond({product_id:Number(id),product_name:String(s.product.name||''),product_sku:String(s.product.sku||''),product_slug:String(s.product.slug||''),linked_listing_id:valid(s.draft?.external_reference)?String(s.draft.external_reference):null,linked_source:parse(s.draft).verified_remote_existing_draft?'verified_existing_etsy_draft':s.draft?'product_editor_or_legacy_receipt':'unlinked',requires_explicit_review:true});
+ const candidate=url.searchParams.get('candidate_listing_id');
+ const claim=valid(candidate)?ownerClaim504(await claimedListing(g.db,String(candidate)),id):null;
+ return respond({product_id:Number(id),product_name:String(s.product.name||''),product_sku:String(s.product.sku||''),product_slug:String(s.product.slug||''),linked_listing_id:valid(s.draft?.external_reference)?String(s.draft.external_reference):null,linked_source:parse(s.draft).verified_remote_existing_draft?'verified_existing_etsy_draft':s.draft?'product_editor_or_legacy_receipt':'unlinked',candidate_claim:claim,requires_explicit_review:true});
  }catch{return respond({error:'Existing draft status unavailable.'},503)}}
 export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error;if(c.request.headers.get('Origin')!==new URL(c.request.url).origin)return respond({error:'Same-origin required.'},403);
  let b;try{b=await c.request.json()}catch{return respond({error:'JSON required.'},400)}
@@ -55,14 +67,21 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
   const headers=await credentials(c.env,s);
   if(action==='inspect_listing'||action==='link_existing'){
    const listingId=String(b.listing_id||'');if(!valid(listingId)||b?.confirm_exact_etsy_listing!==true)return respond({error:'Enter the exact Etsy listing ID and confirm you checked it in Etsy Drafts.'},400);
-   if(action==='link_existing'&&s.draft?.external_reference)return respond({error:`This Product is already linked to Etsy draft #${s.draft.external_reference}; inspect the existing link. No duplicate created.`,linked_listing_id:String(s.draft.external_reference)},409);
+   if(action==='link_existing'&&s.draft?.external_reference&&String(s.draft.external_reference)!==listingId)return respond({error:`Product #${id} is linked to a DIFFERENT Etsy draft #${s.draft.external_reference}. Stop and review its original receipt; no duplicate was created.`,linked_listing_id:String(s.draft.external_reference)},409);
    const remote=await verify(c.env,s,listingId,headers);
    const titleMatches=String(remote.title||'').trim().toLocaleLowerCase()===String(s.product.name||'').trim().toLocaleLowerCase();
    if(action==='inspect_listing')return respond({listing_id:listingId,etsy_title:String(remote.title||'').slice(0,140),product_title:String(s.product.name||'').slice(0,140),title_matches:titleMatches,verified_unpublished:true,verified_canada_only:true,provider_modified:false});
    if(!titleMatches&&b?.confirm_prior_title_difference!==true)return respond({error:'Etsy title differs from saved Product. Inspect the draft preview and explicitly confirm the older title is the same item before linking.'},409);
-   const collision=await g.db.prepare("SELECT id,product_id FROM marketplace_syndication_drafts WHERE channel_key='etsy' AND external_reference=? LIMIT 1").bind(listingId).first();
-   if(collision)return respond({error:'This Etsy listing is already linked to another local draft or Product.',linked_product_id:collision.product_id},409);
-   const payload={verified_remote_existing_draft:true,remote_etsy_draft_created:false,publication_performed:false,canada_only_shipping_verified:true,shipping_profile_id:remote.shipping_profile_id,request_key:b.request_key,verified_listing_id:listingId};
+   const collision=await claimedListing(g.db,listingId),claim=ownerClaim504(collision,id);
+   if(claim.state==='another_product')return respond({error:`Etsy draft #${listingId} is already recorded against LOCAL Product #${claim.product.product_id} (${claim.product.name||claim.product.sku||'unnamed Product'}). Open that Product and confirm which record is the real owner. Product #${id} was not linked or changed.`,code:'etsy_listing_claimed_by_another_product',linked_product_id:claim.product.product_id,conflicting_product:claim.product},409);
+   const payload={...parse(collision),verified_remote_existing_draft:true,remote_etsy_draft_created:false,publication_performed:false,canada_only_shipping_verified:true,shipping_profile_id:remote.shipping_profile_id,request_key:b.request_key,verified_listing_id:listingId};
+   if(claim.state==='same_product'){
+    const updated=await g.db.prepare("UPDATE marketplace_syndication_drafts SET payload_json=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND channel_key='etsy' AND product_id=? AND external_reference=?")
+      .bind(JSON.stringify(payload),collision.id,String(id),listingId).run();
+    if(Number(updated.meta?.changes)!==1)return respond({error:'Saved Etsy receipt could not be reverified. Refresh the same Product before trying again.',code:'etsy_receipt_recheck_unconfirmed'},409);
+    await auditAdminAction(c.env,c.request,g.admin,{action_type:'etsy_existing_draft_504_same_product_receipt_verified',target_type:'product',target_key:String(id),details:{listing_id:listingId,shop_id:s.shop.shop_id,publication_performed:false}});
+    return respond({linked:true,listing_id:listingId,reused_existing_receipt:true,message:'Etsy draft already belonged to this exact Product. Its unpublished Canada-only receipt was verified; no duplicate was created.'});
+   }
    // Build 499: a local Etsy PREPARATION row (id='etsy:<product>',
    // external_reference NULL) must never block the verified real-draft link.
    // Only a different actual Etsy listing receipt is a collision.

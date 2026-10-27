@@ -7,7 +7,7 @@ import {etsyFailure503,etsyFixLocation503} from './etsy-owner-diagnostics-503.mj
 const $=id=>document.getElementById(id);
 const form=$('productEditorForm'),id=Number(new URLSearchParams(location.search).get('product_id')||0);
 if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
-  const state={busy:false,linked:'',loaded:false,assessment:null,readIssues:[],settings:null,attempted:false,
+  const state={busy:false,linked:'',loaded:false,assessment:null,readIssues:[],settings:null,attempted:false,claim:null,ownerReadbackReady:false,
     previewId:'',previewTitleMatches:false,images:null,lastRemoteId:'',holdAfterWrite:false,
     refreshPromise:null,syncing:false};
   if(id===53){$('dd500ListingId').value='4603838854';$('dd500CandidateNote').hidden=false;
@@ -20,6 +20,11 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     const el=$('dd501SaveState');if(el){el.textContent=message;el.dataset.tone=tone;}
     const resume=$('dd501Resume');if(resume)resume.textContent=message;
   };
+  function resetOwnerApproval(){state.ownerReadbackReady=false;
+    $('dd504ApproveContent').checked=false;$('dd504Signoff').disabled=true;
+    $('dd504Readback').textContent='Not yet verified after these changes. Check Etsy readback once the same draft is linked and updated.';
+    $('dd504SignoffStatus').textContent='No new owner approval recorded. Etsy remains unpublished.';
+  }
   function openEtsyReview(){
     const tab=document.querySelector('[data-editor-tab="etsy"]');
     if(tab?.getAttribute('aria-selected')!=='true')tab?.click();
@@ -46,6 +51,8 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       const failure=Error(etsyFailure503(path,body,error));
       failure.step=path;failure.httpStatus=error?.httpStatus||response.status;
       failure.listing_id=error?.payload?.listing_id||error?.listing_id;
+      failure.code=error?.payload?.code||error?.code;
+      failure.conflicting_product=error?.payload?.conflicting_product||null;
       throw failure;
     }
   }
@@ -54,28 +61,38 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     const linked=Boolean(state.linked);
     const candidate=String($('dd500ListingId').value||'').trim();
     const hasCandidate=!linked&&/^[1-9]\d{0,14}$/.test(candidate);
+    const conflict=hasCandidate&&state.claim?.state==='another_product';
+    const claimMessage=$('dd504ClaimMessage'),claimBox=$('dd504Claim'),claimProduct=$('dd504ClaimProduct');
+    if(claimBox){claimBox.hidden=!conflict;
+      if(conflict){const other=state.claim.product||{};
+        claimMessage.textContent=`STOP — Etsy draft #${candidate} is already assigned locally to Product #${other.product_id}${other.name?' (“'+other.name+'”)':''}${other.sku?' · SKU '+other.sku:''}. Compare both Products before deciding which is correct. We will not take this listing away or create another.`;
+        claimProduct.hidden=!Number.isSafeInteger(Number(other.product_id))||Number(other.product_id)<1;
+        if(!claimProduct.hidden)claimProduct.href=`/admin/product-editor/?product_id=${encodeURIComponent(String(other.product_id))}`;
+      }
+    }
     $('dd500Identity').textContent=linked?`Product #${id} is linked to Etsy draft #${state.linked}. Changes use this same listing ID.`:
       state.lastRemoteId?`HOLD: Etsy returned listing #${state.lastRemoteId}, but Product #${id}'s saved link is unconfirmed. Inspect Etsy before any new attempt.`:
       hasCandidate?`Step 1 — Link existing Etsy draft #${candidate} to Product #${id}. Do not delete it or create a second draft.`:
       `Product #${id}: no Etsy listing ID is linked yet. Check Etsy Drafts before making a new one.`;
-    $('dd500Open').href=linked?`https://www.etsy.com/your/shops/me/listing-editor/edit/${state.linked}`:
-      'https://www.etsy.com/your/shops/me/listings/drafts';
-    $('dd500Open').textContent=linked?`Open Etsy listing #${state.linked}`:'Open Etsy Drafts';
+    $('dd500Open').href=linked||hasCandidate?`https://www.etsy.com/your/shops/me/listing-editor/edit/${encodeURIComponent(linked?state.linked:candidate)}`:
+      'https://www.etsy.com/your/shops/me';
+    $('dd500Open').textContent=linked||hasCandidate?`Open Etsy draft #${linked||candidate}`:'Open Etsy Shop Manager';
     $('dd500Link').hidden=linked;
     $('dd500NewSettings').hidden=linked;
     const send=$('dd500Send');send.textContent=hasCandidate?`Step 1: Verify and link existing Etsy draft #${candidate}`:
       linked?`Step 2: Update Etsy draft #${state.linked} + all approved photos`:'Create ONE new unpublished Etsy draft + all approved photos';
-    send.disabled=state.busy||state.attempted||state.holdAfterWrite||!ready()||
+    send.disabled=state.busy||state.attempted||state.holdAfterWrite||!ready()||conflict||
       (hasCandidate?!$('dd500LinkConsent').checked:
         !state.loaded||!state.assessment?.ready||!$('dd500Consent').checked||
         (!linked&&(!state.settings||!newSettingsReady()||Boolean(candidate))));
     $('dd500Refresh').disabled=state.busy;
     $('dd500OptionsLoad').disabled=state.busy;
     $('dd500LinkButton').hidden=hasCandidate;
-    $('dd500LinkButton').disabled=state.busy||!ready()||!/^[1-9]\d{0,14}$/.test(candidate)||!$('dd500LinkConsent').checked;
+    $('dd500LinkButton').disabled=state.busy||conflict||!ready()||!/^[1-9]\d{0,14}$/.test(candidate)||!$('dd500LinkConsent').checked;
     $('dd500Checklist').replaceChildren();
     if(!ready())check('Save the Product and wait for its saved fields to load.');
     if(hasCandidate)check(`NEXT: Verify/link existing Etsy draft #${candidate} using the main button above. This is a read-only Etsy check and local ID link, not a new listing.`);
+    if(conflict)check(`LOCAL LINK CONFLICT — This draft belongs to Product #${state.claim.product?.product_id}. Review that record using the button above; do not retry, delete or create another.`);
     for(const issue of state.readIssues)check('COULD NOT CHECK — '+issue);
     if(state.assessment){
       check(`${state.assessment.count} gallery photo(s): ${state.assessment.transferred} confirmed on Etsy; ${state.assessment.pending.length} to transfer.`);
@@ -128,7 +145,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     !state.settings?.blockers?.length;}
   async function packageSnapshot(){
     const results=await Promise.allSettled([
-      api(`/api/admin/product-etsy-existing-draft?product_id=${id}`),
+      api(`/api/admin/product-etsy-existing-draft?product_id=${id}${/^[1-9]\d{0,14}$/.test(String($('dd500ListingId').value||'').trim())?`&candidate_listing_id=${encodeURIComponent($('dd500ListingId').value.trim())}`:''}`),
       api(`/api/admin/product-distribution-406?product_id=${id}&channel=etsy`),
       api(`/api/admin/product-etsy-images?product_id=${id}`),
       api(`/api/admin/product-etsy-tags?product_id=${id}`)]);
@@ -163,13 +180,14 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     const work=(async()=>{
       state.busy=true;show();status('Reading the saved Product ↔ Etsy ID and every gallery image (no provider write)…');
       try{const snapshot=await packageSnapshot();state.linked=String(snapshot.link.linked_listing_id||'');
+        state.claim=snapshot.link.candidate_claim||null;
         if(state.linked)state.lastRemoteId='';
         state.readIssues=[];state.assessment=snapshot.assessment;state.images=snapshot.images;state.loaded=true;
         status(snapshot.assessment.ready?`Ready to review: all ${snapshot.assessment.count} gallery photos are included. ${state.linked?'Update Etsy #'+state.linked:'No existing Etsy link detected.'}`:
           `HOLD — ${snapshot.assessment.issues[0]||'Saved Product needs a correction.'} See each exact missing item above.`,!snapshot.assessment.ready);
         if(!state.linked&&!state.settings&&!$('dd500ListingId').value.trim())$('dd500NewSettings').open=true;
         return true;
-      }catch(error){state.loaded=false;state.assessment=null;
+      }catch(error){state.loaded=false;state.assessment=null;state.claim=null;
         state.readIssues=Array.isArray(error.issues)?error.issues:[error.message];
         if(error.partialLink)state.linked=String(error.partialLink);
         status(`HOLD — ${state.readIssues.length} specific CHECK${state.readIssues.length===1?'':'S'} could not finish. See “What will be sent” for the failed step and safe next action. No Etsy transfer was attempted.`,true);
@@ -244,6 +262,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   }
   async function linkExisting(){if(!ready()||state.busy||state.linked)return;
     const listingId=$('dd500ListingId').value.trim();if(!/^[1-9]\d{0,14}$/.test(listingId)||!$('dd500LinkConsent').checked)return;
+    if(state.claim?.state==='another_product'){status(`STOP — draft #${listingId} belongs to local Product #${state.claim.product?.product_id}. Use “Review the other Product”; no Etsy action was attempted.`,true);return;}
     state.busy=true;show();status(`Checking Etsy listing #${listingId} without changing it…`);
     try{const common={product_id:id,listing_id:listingId,confirm_unpublished_only:true,
       confirm_canada_only:true,confirm_exact_etsy_listing:true};
@@ -263,7 +282,8 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       state.linked=listingId;state.settings=null;$('dd500Consent').checked=false;
       document.dispatchEvent(new CustomEvent('dd:etsy-existing-draft-linked',{detail:{product_id:id,listing_id:listingId}}));
       status(`Verified and saved Etsy listing #${listingId} against Product #${id}. No new listing created. Review the package, then click Update.`);
-    }catch(error){status('HOLD — '+error.message,true);}
+    }catch(error){if(error.conflicting_product){state.claim={state:'another_product',product:error.conflicting_product};}
+      status('HOLD — '+error.message,true);}
     finally{state.busy=false;show();if(state.linked)void refresh();}
   }
   async function sendImages(listingId){
@@ -321,6 +341,32 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     if(String(linked.linked_listing_id)!==String(listingId)||!verifiedEtsyPackage500(id,linked,photos,tags,gallery.length)||!same)
       throw Error('Live acceptance is incomplete: check Etsy image receipts, tags, linking and the shared Marketplace gallery. No publication occurred.');
     return gallery.length;
+  }
+  async function ownerPhotoReadback(){
+    state.ownerReadbackReady=false;$('dd504Signoff').disabled=true;
+    $('dd504Readback').textContent='Reading the saved Product, actual Etsy listing, search tags and all original photo receipts…';
+    if(!ready()){$('dd504Readback').textContent='HOLD — Save or review the latest Product changes first.';return;}
+    try{const result=await api(`/api/admin/product-etsy-owner-signoff-504?product_id=${id}`);
+      const total=result.expected_photo_ids?.length||0,confirmed=result.confirmed_photo_ids?.length||0;
+      const tally=`${confirmed}/${total} expected original photos verified; Etsy currently reports ${result.etsy_remote_photo_count??'?'} photos.`;
+      state.ownerReadbackReady=result.ready===true&&String(result.listing_id||'')===String(state.linked||'')&&total>0;
+      $('dd504Readback').textContent=state.ownerReadbackReady?
+        `VERIFIED — ${tally} Draft #${result.listing_id}, details, price, quantity and native tags match. Review the actual Etsy category and shipping before approving.`:
+        `HOLD — ${tally} ${result.issues?.join(' ')||'The saved Product is not yet fully matched to the Etsy draft.'} No Etsy change was made.`;
+      $('dd504Signoff').disabled=!state.ownerReadbackReady||!$('dd504ApproveContent').checked;
+    }catch(error){$('dd504Readback').textContent=`HOLD — ${error.message} No Etsy photo was sent and no approval was recorded.`;}
+  }
+  async function ownerSignoff(){
+    if(!state.ownerReadbackReady||!$('dd504ApproveContent').checked||!ready()||!state.linked)return;
+    $('dd504Signoff').disabled=true;
+    $('dd504SignoffStatus').textContent='Rechecking the actual Etsy draft once more before recording owner approval…';
+    try{const result=await api('/api/admin/product-etsy-owner-signoff-504',{action:'approve_verified_draft',product_id:id,
+      listing_id:state.linked,request_key:key(),confirm_actual_etsy_content:true,confirm_canada_only:true,confirm_unpublished_only:true});
+      if(!result.owner_approval_recorded)throw Error('The server did not return an approval receipt.');
+      $('dd504SignoffStatus').textContent=`APPROVED locally — Product #${id}, Etsy draft #${state.linked}, ${result.confirmed_photo_ids?.length||0} verified original photographs. No publication occurred.`;
+      state.ownerReadbackReady=false;$('dd504ApproveContent').checked=false;
+    }catch(error){$('dd504SignoffStatus').textContent=`HOLD — ${error.message} Refresh readback before any new approval attempt.`;
+      state.ownerReadbackReady=false;}
   }
   async function send({fromSave=false}={}){
     if(state.busy||state.attempted||state.holdAfterWrite||!ready()||!state.assessment?.ready||
@@ -389,6 +435,9 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     return succeeded;
   }
   $('dd500Refresh').addEventListener('click',()=>void refresh());
+  $('dd504CheckPhotos').addEventListener('click',()=>void ownerPhotoReadback());
+  $('dd504ApproveContent').addEventListener('change',()=>{$('dd504Signoff').disabled=!state.ownerReadbackReady||!$('dd504ApproveContent').checked;});
+  $('dd504Signoff').addEventListener('click',()=>void ownerSignoff());
   $('dd500OptionsLoad').addEventListener('click',()=>void loadOptions());
   $('dd500CategorySearch').addEventListener('input',categoryFilter);
   $('dd500LinkButton').addEventListener('click',()=>void linkExisting());
@@ -407,10 +456,10 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     for(const event of ['input','change'])$('dd500'+name).addEventListener(event,()=>{saveSettings();show();});
   $('dd500Supply').addEventListener('change',saveSettings);
   for(const name of ['Consent','LinkConsent','ListingId'])for(const event of ['input','change'])$('dd500'+name).addEventListener(event,()=>{
-    if(name==='ListingId'){$('dd500OlderTitleRow').hidden=true;$('dd500OlderTitle').checked=false;}show();});
-  form.addEventListener('input',event=>{if(event.target.closest('#dd500Package'))return;state.loaded=false;show();});
+    if(name==='ListingId'){$('dd500OlderTitleRow').hidden=true;$('dd500OlderTitle').checked=false;state.claim=null;resetOwnerApproval();}show();});
+  form.addEventListener('input',event=>{if(event.target.closest('#dd500Package'))return;state.loaded=false;resetOwnerApproval();show();});
   document.addEventListener('dd:save-succeeded',event=>{
-    state.loaded=false;$('dd500Consent').checked=false;
+    state.loaded=false;resetOwnerApproval();$('dd500Consent').checked=false;
     if(!state.holdAfterWrite)state.attempted=false;
     if(event.detail?.etsy_sync_requested===true&&event.detail?.destinations_confirmed===true&&!event.detail?.newer_edits){
       void (async()=>{await refresh();await syncAfterSave('product');})();
@@ -427,10 +476,10 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   })());
   document.addEventListener('dd:media-inline-updated',event=>{
     if(Number(event.detail?.product_id)!==id)return;
-    state.loaded=false;$('dd500Consent').checked=false;
+    state.loaded=false;resetOwnerApproval();$('dd500Consent').checked=false;
     void (async()=>{await refresh();if(ready())await syncAfterSave('media');})();
   });
-  document.addEventListener('dd:product-channel-tags-changed',()=>{state.loaded=false;void refresh();});
+  document.addEventListener('dd:product-channel-tags-changed',()=>{state.loaded=false;resetOwnerApproval();void refresh();});
   document.addEventListener('dd:editor-tab-opened',event=>{
     if(event.detail?.tab==='etsy'&&ready())void (async()=>{
       await refresh();
