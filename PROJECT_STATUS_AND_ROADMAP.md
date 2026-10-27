@@ -468,3 +468,9 @@ Shipped local-only owner review to conditionally reassign an incorrectly claimed
 
 **Next expected Build 506 — Etsy Owner Trial Receipt Review, Product #53 Metadata Correction Closure & Channel Integration Contract v1 Readiness.**
 
+# Build 506 — Etsy owner trial receipt and Rosevear Integration Contract v1 readiness
+
+Exact D1-primary Product #53/Etsy draft #4603838854 link readback and receipt confirmation; fail-closed browser HOLD if the saved ID cannot be independently confirmed after a local write; read-only owner trial review shows SKU/slug, gallery transfer and metadata blockers without guessing content. Authenticated server-only Integration v1 health/capabilities require AI Data Platform-scoped HMAC, configured per-environment credentials and a durable nonce audit; commands/events/product references disabled. This release cannot claim a live Etsy owner sign-off or live gateway connection before separate owner acceptance. See `docs/BUILD506_ETSY_OWNER_TRIAL_AND_GATEWAY_READINESS.md`.
+
+**Next expected Build 507 — Verified Etsy Draft Owner Metadata/Three-Photo Acceptance & Read-Only Gateway Handshake Trial.**
+

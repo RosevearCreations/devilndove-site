@@ -40,7 +40,7 @@ test('Product #53 cannot accidentally create another Etsy draft while its candid
  const ui=source('public/js/admin-product-etsy-package-v500.mjs');
  assert.match(editor,/id="dd503OwnerNote"/);
  assert.match(editor,/id="dd503Fix"/);
- assert.match(editor,/admin-product-etsy-package-v500\.mjs\?v=50[345]/);
+ assert.match(editor,/admin-product-etsy-package-v500\.mjs\?v=50[3456]/);
  assert.match(ui,/hasCandidate\?`Step 1: Verify and link existing Etsy draft/);
  assert.match(ui,/if\(!state\.linked&&\/\^\[1-9\]\\d\{0,14\}\$\/.test\(candidate\)\)void linkExisting\(\)/);
  assert.match(ui,/Promise\.allSettled/);
@@ -62,6 +62,7 @@ test('uncertain local Product save checks the server copy without repeating POST
  assert.match(ui,/different\.join\(', '\)/);
  assert.match(api,/no_product_write_started:true/);
  assert.match(link,/async function localLinkOnly/);
- assert.match(link,/try\{const s=await localLinkOnly\(g\.db,Number\(id\)\)/);
+ assert.match(link,/localLinkOnly\(db,Number\(id\)\)/);
+ assert.match(link,/g\.db\.withSession\('first-primary'\)/);
  assert.match(link,/connectionBlockers\(s\.conn,s\.shop,env\)/);
 });

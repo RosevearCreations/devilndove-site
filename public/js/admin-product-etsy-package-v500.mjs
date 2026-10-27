@@ -9,7 +9,7 @@ const form=$('productEditorForm'),id=Number(new URLSearchParams(location.search)
 if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   const state={busy:false,linked:'',loaded:false,assessment:null,readIssues:[],settings:null,attempted:false,claim:null,claimReview:null,photoReview:null,ownerReadbackReady:false,
     previewId:'',previewTitleMatches:false,images:null,lastRemoteId:'',holdAfterWrite:false,
-    refreshPromise:null,syncing:false};
+    refreshPromise:null,syncing:false,linkReadbackHold:false};
   if(id===53){$('dd500ListingId').value='4603838854';$('dd500CandidateNote').hidden=false;
     if($('dd503OwnerNote'))$('dd503OwnerNote').hidden=false;}
   const ready=()=>id>0&&form.dataset.productAuthority==='ready'&&form.dataset.productDirty!=='1';
@@ -85,14 +85,14 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     $('dd500NewSettings').hidden=linked;
     const send=$('dd500Send');send.textContent=hasCandidate?`Step 1: Verify and link existing Etsy draft #${candidate}`:
       linked?`Step 2: Update Etsy draft #${state.linked} + all approved photos`:'Create ONE new unpublished Etsy draft + all approved photos';
-    send.disabled=state.busy||state.attempted||state.holdAfterWrite||!ready()||conflict||
+    send.disabled=state.busy||state.attempted||state.holdAfterWrite||state.linkReadbackHold||!ready()||conflict||
       (hasCandidate?!$('dd500LinkConsent').checked:
         !state.loaded||!state.assessment?.ready||!$('dd500Consent').checked||
         (!linked&&(!state.settings||!newSettingsReady()||Boolean(candidate))));
     $('dd500Refresh').disabled=state.busy;
     $('dd500OptionsLoad').disabled=state.busy;
     $('dd500LinkButton').hidden=hasCandidate;
-    $('dd500LinkButton').disabled=state.busy||conflict||!ready()||!/^[1-9]\d{0,14}$/.test(candidate)||!$('dd500LinkConsent').checked;
+    $('dd500LinkButton').disabled=state.busy||conflict||state.linkReadbackHold||!ready()||!/^[1-9]\d{0,14}$/.test(candidate)||!$('dd500LinkConsent').checked;
     $('dd500Checklist').replaceChildren();
     if(!ready())check('Save the Product and wait for its saved fields to load.');
     if(hasCandidate)check(`NEXT: Verify/link existing Etsy draft #${candidate} using the main button above. This is a read-only Etsy check and local ID link, not a new listing.`);
@@ -161,6 +161,8 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     const [link,distribution,images,tags]=results.map(result=>result.value);
     if([link.product_id,distribution.product_id,images.product_id,tags.product_id].some(value=>Number(value)!==id))
       throw Error('Saved Product, images and tags do not agree on Product identity.');
+    if(link.linked_listing_id&&link.saved_link_readback_confirmed!==true)
+      throw Error('The saved Etsy listing ID lacks an independent D1 primary receipt. Recheck the Product ID before any Etsy update; never create a duplicate.');
     if(link.linked_listing_id&&String(images.listing_id||'')!==String(link.linked_listing_id))
       throw Error('Etsy listing ID and saved photo receipt disagree.');
     const assessment=assessEtsyPackage500(distribution,images,tags);
@@ -185,7 +187,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       state.busy=true;show();status('Reading the saved Product ↔ Etsy ID and every gallery image (no provider write)…');
       try{const snapshot=await packageSnapshot();state.linked=String(snapshot.link.linked_listing_id||'');
         state.claim=snapshot.link.candidate_claim||null;
-        if(state.linked)state.lastRemoteId='';
+        if(state.linked){state.lastRemoteId='';state.linkReadbackHold=false;}
         state.readIssues=[];state.assessment=snapshot.assessment;state.images=snapshot.images;state.loaded=true;
         status(snapshot.assessment.ready?`Ready to review: all ${snapshot.assessment.count} gallery photos are included. ${state.linked?'Update Etsy #'+state.linked:'No existing Etsy link detected.'}`:
           `HOLD — ${snapshot.assessment.issues[0]||'Saved Product needs a correction.'} See each exact missing item above.`,!snapshot.assessment.ready);
@@ -200,6 +202,20 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     })();
     state.refreshPromise=work;
     try{return await work;}finally{if(state.refreshPromise===work)state.refreshPromise=null;}
+  }
+  async function reviewTrial506(){
+    const el=$('dd506TrialStatus');if(!ready()){
+      el.textContent='HOLD — Save the Product and wait for the saved record to load before comparing its Etsy receipt.';return;}
+    el.textContent='Comparing saved Product ID, SKU, slug, Etsy listing ID, three originals and metadata (no Etsy changes)…';
+    try{
+      const snapshot=await packageSnapshot(),readback=await api(`/api/admin/product-etsy-existing-draft?product_id=${id}`);
+      const confirmed=String(readback.linked_listing_id||'')===String(id===53?'4603838854':snapshot.link.linked_listing_id||'')&&
+        readback.saved_link_readback_confirmed===true;
+      const problems=[...snapshot.assessment.issues];
+      if(!confirmed)problems.unshift(`Saved Etsy listing ID is not yet independently confirmed for Product #${id}. Use Step 1 once, or recheck if a local write was already attempted. Never create another draft.`);
+      el.textContent=`Product #${id} • SKU ${readback.product_sku||'not set'} • slug ${readback.product_slug||'not set'} • Etsy ${readback.linked_listing_id||'not linked'} • local receipt ${readback.receipt_id||'not confirmed'} • ${snapshot.assessment.transferred}/${snapshot.assessment.count} photos confirmed. `+
+        (problems.length?'HOLD — '+problems.join(' | '):'Local Product and metadata ready for a separate Etsy owner verification. The actual Etsy content is not approved by this check.');
+    }catch(error){el.textContent=`HOLD — ${error.message} No Etsy changes attempted.`;}
   }
   // Build 501: the owner opts in once with the Etsy checkbox. A confirmed
   // local Save (or approved gallery save) can now drive the complete package.
@@ -280,13 +296,18 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       }
       const result=await api('/api/admin/product-etsy-existing-draft',{...common,action:'link_existing',
         request_key:key(),confirm_prior_title_difference:!state.previewTitleMatches&&$('dd500OlderTitle').checked});
-      if(!result.linked||String(result.listing_id)!==listingId)throw Error('Confirmed Etsy listing ID was not saved.');
+      if(!result.linked||String(result.listing_id)!==listingId||result.saved_link_readback_confirmed!==true||!result.receipt_id)
+        throw Error('The server did not independently confirm the saved Product and Etsy receipt. Recheck saved details before any other action.');
       const saved=await api(`/api/admin/product-etsy-existing-draft?product_id=${id}`);
-      if(String(saved.linked_listing_id)!==listingId)throw Error('Etsy listing ID was not confirmed by the saved Product readback.');
+      if(String(saved.linked_listing_id)!==listingId||saved.saved_link_readback_confirmed!==true){
+        state.lastRemoteId=listingId;state.linkReadbackHold=true;
+        throw Error(`Local receipt #${result.receipt_id} was confirmed during linking, but a subsequent read could not confirm Product #${id}. Recheck saved details; never create a second Etsy draft.`);
+      }
       state.linked=listingId;state.settings=null;$('dd500Consent').checked=false;
       document.dispatchEvent(new CustomEvent('dd:etsy-existing-draft-linked',{detail:{product_id:id,listing_id:listingId}}));
       status(`Verified and saved Etsy listing #${listingId} against Product #${id}. No new listing created. Review the package, then click Update.`);
     }catch(error){if(error.conflicting_product){state.claim={state:'another_product',product:error.conflicting_product};}
+      if(error.code==='etsy_506_persistence_readback_hold'){state.lastRemoteId=listingId;state.linkReadbackHold=true;}
       status('HOLD — '+error.message,true);}
     finally{state.busy=false;show();if(state.linked)void refresh();}
   }
@@ -527,6 +548,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   }
   $('dd500Refresh').addEventListener('click',()=>void refresh());
   $('dd504CheckPhotos').addEventListener('click',()=>void ownerPhotoReadback());
+  $('dd506TrialCheck').addEventListener('click',()=>void reviewTrial506());
   $('dd504ApproveContent').addEventListener('change',()=>{$('dd504Signoff').disabled=!state.ownerReadbackReady||!$('dd504ApproveContent').checked;});
   $('dd504Signoff').addEventListener('click',()=>void ownerSignoff());
   $('dd505InspectClaim').addEventListener('click',()=>void inspectLocalClaim505());
