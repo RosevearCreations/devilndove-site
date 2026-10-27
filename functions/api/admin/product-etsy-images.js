@@ -5,7 +5,7 @@ import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 import {decryptOAuthSecret} from '../_lib/oauthSecurity.js';
 import {connectionBlockers} from '../_lib/etsyDraftTrial399.mjs';
 import {readCanonicalDistributionGallery} from '../_lib/canonicalDistributionGallery436.mjs';
-import {approvedR2Key,checkedEtsyBytes,completedImageIds,imageReady,MAX_ETSY_IMAGE_BYTES} from '../_lib/productEtsyImages443.mjs';
+import {approvedR2Key,checkedEtsyBytes,completedImageIds,confirmedEtsyImageReadback497,imageReady,MAX_ETSY_IMAGE_BYTES} from '../_lib/productEtsyImages443.mjs';
 import {assessExistingDraftPhotoGap492} from '../_lib/etsyPhotoGap492.mjs';
 
 const respond=(value,status=200)=>jsonResponse({ok:status<400,build:443,publication_performed:false,
@@ -83,8 +83,12 @@ export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
     if(String(listing?.listing_id)!==local.listing_id||String(listing?.shop_id)!==String(a.shop.shop_id)||String(listing?.state).toLowerCase()!=='draft')
       return respond({...local,remote_reconciliation:{ready:false,reason:'original_etsy_draft_identity_or_state_changed'},provider_contacted:true});
     let receipts=[];try{receipts=s.receiptRows.map(row=>JSON.parse(row.details_json))}catch{}
-    return respond({...local,remote_reconciliation:reconcileEtsyPhotoInventory487(remoteImages?.results,receipts),
-      photo_gap_492:assessExistingDraftPhotoGap492(remoteImages?.results,receipts,s.images,s.claimed,id),provider_contacted:true});
+    const foreign=receipts.some(row=>String(row.listing_id||'')!==local.listing_id);
+    const comparison=foreign?{ready:false,reason:'receipt_listing_identity_changed'}:
+      reconcileEtsyPhotoInventory487(remoteImages?.results,receipts);
+    return respond({...local,remote_reconciliation:comparison,
+      photo_gap_492:foreign?{state:'hold',reason:'receipt_listing_identity_changed',provider_write_allowed:false}:
+        assessExistingDraftPhotoGap492(remoteImages?.results,receipts,s.images,s.claimed,id),provider_contacted:true});
   }catch{return respond({error:'Canonical Etsy media readiness is temporarily unavailable.'},503);}}
 export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error;
   if(c.request.headers.get('Origin')!==new URL(c.request.url).origin)return respond({error:'Same-origin required for Etsy photo transfer.'},403);
@@ -112,7 +116,8 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
       String(listing?.state||'').toLowerCase()!=='draft')return respond({error:'Etsy listing is not our live unpublished draft. Nothing transferred.'},409);
     const remote=remoteImages?.results;
     let receipts=[];try{receipts=s.receiptRows.map(row=>JSON.parse(row.details_json));}catch{}
-    const comparison=reconcileEtsyPhotoInventory487(remote,receipts);
+    const comparison=receipts.some(row=>String(row.listing_id||'')!==listingId)?
+      {ready:false,reason:'receipt_listing_identity_changed'}:reconcileEtsyPhotoInventory487(remote,receipts);
     if(!comparison.ready)return respond({error:'Etsy photo inventory is not fully reconciled. Review the original draft manually; never overwrite or duplicate existing photos.',remote_reconciliation:comparison},409);
     const r2=bucket(c.env),objectKey=approvedR2Key(selected.image_url,id,c.env);
     if(!r2?.get||!objectKey)return respond({error:'Approved image R2 source unavailable.'},503);
@@ -135,10 +140,17 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
     }catch{return respond({error:'Etsy upload outcome unknown. Check Etsy Drafts; never retry this photo automatically.'},502);}
     if(provider.status!==201||String(result?.listing_id)!==listingId||!validId(result?.listing_image_id))
       return respond({error:'Etsy did not confirm the image. Manual reconciliation required; no retry.',provider_http_status:provider.status},409);
+    let verifiedPhotos;
+    try{verifiedPhotos=await getEtsy('listings/'+encodeURIComponent(listingId)+'/images',a.headers);}catch{
+      return respond({error:'Etsy accepted a photo but the live readback was unavailable. Outcome held; never resend automatically.'},502);
+    }
+    if(!confirmedEtsyImageReadback497(verifiedPhotos,listingId,result.listing_image_id))
+      return respond({error:'Etsy photo ID was not present on the verified draft readback. Outcome held for manual review.'},409);
     await g.db.prepare("INSERT INTO admin_action_audit (actor_user_id,action_type,target_type,target_key,request_method,request_path,details_json,created_at) VALUES (?,'etsy_product_editor_image_443_accepted','product',?,'POST',?,?,CURRENT_TIMESTAMP)")
       .bind(g.admin.user_id,String(id),new URL(c.request.url).pathname,JSON.stringify({build:443,product_id:id,product_image_id:imageId,
-        listing_id:listingId,etsy_image_id:String(result.listing_image_id),publication_performed:false,automatic_retry:false})).run();
+        listing_id:listingId,etsy_image_id:String(result.listing_image_id),verified_remote_readback:true,
+        publication_performed:false,automatic_retry:false})).run();
     return respond({product_id:id,listing_id:listingId,product_image_id:imageId,etsy_image_id:String(result.listing_image_id),
-      uploaded:true,message:'Etsy confirmed this approved image on the unpublished draft. No publication.'});
+      uploaded:true,verified_remote_readback:true,message:'Etsy confirmed this approved image, and its ID was verified on the unpublished draft. No publication.'});
   }catch{return respond({error:'Image result not fully confirmed. Inspect the Etsy draft and audit receipt before another action.'},503);}
 }

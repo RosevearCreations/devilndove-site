@@ -42,3 +42,11 @@ export function completedImageIds(rows) {
   }
   return ids;
 }
+
+// Build 497: a provider's 201 response is not yet acceptance. Require a
+// subsequent read of the same draft's image inventory before writing receipt.
+export function confirmedEtsyImageReadback497(remote,listingId,imageId) {
+  if(!/^\d+$/.test(String(listingId||''))||!/^\d+$/.test(String(imageId||''))||!Array.isArray(remote?.results))return false;
+  return remote.results.some(row=>String(row?.listing_image_id||'')===String(imageId)&&
+    (!row.listing_id||String(row.listing_id)===String(listingId)));
+}

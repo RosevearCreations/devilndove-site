@@ -123,7 +123,7 @@
         <h2>SEO / Publishing</h2><p class="small" id="productEditorSeoGuidance">SEO title, H1, OpenGraph title and descriptions are suggested from Basics and Description. You can edit any SEO field manually; custom text will be preserved.</p>
         <div class="dd-editor-grid cols-2">
           <label><span class="small">SEO title</span><input class="input" name="meta_title" maxlength="160"/></label><label><span class="small">H1 override</span><input class="input" name="h1_override" maxlength="160"/></label>
-          <label class="wide"><span class="small">Meta description</span><textarea class="input" name="meta_description" maxlength="500" rows="3"></textarea></label><label><span class="small">Product search tags / keywords (store &amp; CSV)</span><input class="input" name="keywords" maxlength="1000" placeholder="handmade soap, green soap, gift"/><span class="small">Use comma-separated phrases. Saved in Product SEO for store/export preparation; these are not yet sent to Etsy's own tag field.</span><span class="small" id="dd495TagsPreview" role="status" aria-live="polite">Add relevant search phrases, then Save Product. An Etsy tag preview will appear here.</span></label>
+          <label class="wide"><span class="small">Product search tags / keywords (store, CSV &amp; optional Etsy update)</span><input class="input" name="keywords" maxlength="1000" placeholder="handmade jewelry, green gemstone, Canadian artisan"/><span class="small">Save comma-separated phrases in Product SEO. Etsy tags use at most 13 phrases of 20 characters each; transferring them to the existing Etsy draft requires a separate, explicit approval in the Etsy tab.</span><span class="small" id="dd495TagsPreview" role="status" aria-live="polite">Add relevant search phrases, then Save Product. An Etsy tag preview will appear here.</span></label>
           <label><span class="small">Canonical URL</span><input class="input" name="canonical_url"/></label><label><span class="small">OpenGraph title</span><input class="input" name="og_title" maxlength="160"/></label>
           <label><span class="small">OpenGraph image URL</span><input class="input" name="og_image_url"/></label><label class="wide"><span class="small">OpenGraph description</span><textarea class="input" name="og_description" rows="3"></textarea></label>
         </div>
@@ -144,6 +144,13 @@
           <ul class="small" id="dd496ReadinessList" aria-live="polite"><li>Open the Etsy tab to check saved Product photographs and their local draft receipts.</li></ul>
           <div class="dd-product-actions"><button class="btn" id="dd496Refresh" type="button">Refresh saved Product and photo status</button><button class="btn" id="dd496FixImages" type="button">Fix photo requirements here</button></div>
           <p class="small" id="dd496ReadinessNote" role="status">This summary does not create or publish listings, grant photo permission, transfer files or repeat a previous Etsy upload.</p>
+        </div>
+        <div class="dd496-readiness" id="dd497ChannelAcceptance" aria-label="Three-channel Product card acceptance">
+          <strong>Three-channel Product card acceptance — same saved Product and original photos</strong>
+          <p class="small">Our store uses the original Product catalog. Etsy uses the same approved photos on an unpublished draft. Facebook Marketplace remains an owner-reviewed manual handoff until approved provider access exists.</p>
+          <div class="dd497-channel-cards" id="dd497ChannelCards" role="status" aria-live="polite"><p class="small">Load saved Product first, then review the three channels.</p></div>
+          <div class="dd-product-actions"><button type="button" class="btn" id="dd497ChannelLocal">Compare the three Product cards locally</button><button type="button" class="btn" id="dd497ChannelRemote">Verify Etsy draft photos and tags (read only)</button></div>
+          <p class="small" id="dd497ChannelStatus" role="status">Neither button posts a Product, changes photos, or publishes a listing.</p>
         </div>
         <div class="card" id="dd488EtsyGuide" style="padding:18px;margin:12px 0;border:1px solid #ae8245">
           <h3>What do you want to do on Etsy?</h3>
@@ -263,13 +270,22 @@
           <h3>4. Add our approved Product photographs to the Etsy draft</h3>
           <p class="small">One saved Product supplies Etsy and our storefront. After a draft exists, we can send approved original JPEG/PNG gallery photos without manually uploading them again in Etsy. Only images approved for public use, with alt text and at least 800×800 pixels, qualify. No listing is published.</p>
           <div class="dd-product-actions"><button class="btn" type="button" id="dd443EtsyImagesLoad">Refresh approved photos &amp; draft status</button><button class="btn" type="button" id="dd487EtsyReconcile">Compare photos with original Etsy draft (read only)</button><a class="btn" id="dd443EtsyImagesEdit" href="#productDistribution406">Review shared Product gallery here</a><a class="btn" href="https://www.etsy.com/your/shops/me/listings/drafts" target="_blank" rel="noopener noreferrer">Check Etsy Drafts</a></div>
-          <p class="small">Build 487: For photos #341–343, open Product Media, select each original photograph, review and save an appropriate public-use status and meaningful alt text. Return here and reload; do not assume a visible photo is approved. Compare the original Etsy draft before transferring: photos already present on Etsy must be reviewed there, not overwritten or silently duplicated.</p>
+          <p class="small">For Product #53 (Adventurine Argon), review the attached originals #344–346 directly under Media. Save any necessary permission, dimensions and alt-text corrections without re-uploading. Compare the existing Etsy draft before transferring; photos already in Etsy must not be overwritten or silently duplicated.</p>
           <p class="small" role="status" aria-live="polite" id="dd443EtsyImagesStatus">No Etsy image check runs automatically. First create an unpublished Etsy draft.</p>
           <p class="small" role="status" aria-live="polite" id="dd487EtsyReconcileStatus">Read-only Etsy photo comparison has not run. It will never delete, replace or publish images.</p>
           <div id="dd443EtsyImagesList" class="dd443-image-list" aria-label="Approved product images awaiting Etsy transfer"></div>
           <label class="dd443-consent"><input type="checkbox" id="dd443EtsyImagesConsent"> I checked these approved Product photographs and authorize transfer to our existing <strong>unpublished Canada-only Etsy draft</strong> only. Do not publish or retry an uncertain image upload.</label>
           <button class="btn primary" type="button" id="dd443EtsyImagesSend" disabled>Transfer approved photos to Etsy Draft</button>
-          <p class="small">Each photo gets a separate one-attempt receipt. If any transfer is uncertain, the batch stops for manual Etsy review. We never overwrite existing Etsy photos. If this button is disabled, first verify/link the draft above and approve eligible original JPEG/PNG photographs in Product Media (public use, accurate dimensions and alt text).</p>
+          <p class="small">Each photo gets one attempt; success also requires Etsy's live photo inventory to return that same image ID. If any outcome is uncertain, the batch stops for manual Etsy review. We never overwrite existing Etsy photos. If disabled, verify/link the draft and approve an eligible original JPEG/PNG photograph with verified dimensions and alt text.</p>
+        </div>
+        <div class="card dd443-channel-card" id="dd497NativeTags" style="padding:16px;margin:12px 0">
+          <h3>5. Use our saved search phrases as native Etsy tags</h3>
+          <p class="small">The Product SEO keywords above are the shared source. Review the same phrases here, compare them against Etsy's real draft and explicitly authorize one tag-only update. This replaces the Etsy draft's existing tag list; it never publishes, creates a listing or changes photos/shipping.</p>
+          <p class="small" id="dd497TagsStatus" role="status">No native Etsy tag read or update attempted.</p>
+          <ul class="small" id="dd497TagsList" aria-live="polite"></ul>
+          <div class="dd-product-actions"><button type="button" class="btn" id="dd497TagsLoad">Review saved Product tags</button><button type="button" class="btn" id="dd497TagsCompare">Compare native tags on existing Etsy draft (read only)</button></div>
+          <label class="dd443-consent"><input type="checkbox" id="dd497TagsConsent"> We saved and reviewed these Product tags, inspected the exact unpublished Canada-only Etsy draft, and authorize replacing <strong>only its native search tags</strong> once. No publication or automatic retry.</label>
+          <button type="button" class="btn primary" id="dd497TagsSend" disabled>Update native tags on this existing Etsy draft</button>
         </div>
       </section>
 
@@ -353,6 +369,8 @@
   <script src="/public/js/admin-product-media-navigation-v495.js?v=495"></script>
   <script src="/public/js/admin-product-tags-v495.js?v=495"></script>
   <script src="/public/js/admin-product-unified-readiness-v496.js?v=496"></script>
+  <script src="/public/js/admin-product-etsy-tags-v497.js?v=497"></script>
+  <script src="/public/js/admin-product-channel-cards-v497.js?v=497"></script>
   <script src="/public/js/admin-product-entry-readiness-v489.js?v=496"></script>
   <script src="/public/js/admin-product-etsy-dispatch-v490.js?v=490"></script>
   <script src="/public/js/admin-product-etsy-repair-v493.js?v=496"></script>

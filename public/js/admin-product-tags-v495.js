@@ -11,7 +11,7 @@
   if(tags.length>13)issues.push(`${tags.length} phrases exceed Etsy's 13-tag listing limit`);
   if(long.length)issues.push(`${long.length} phrase(s) exceed 20 characters`);
   if(unique.size!==tags.length)issues.push('duplicate phrases');
-  preview.textContent=`${tags.length} search phrase(s) saved locally when you Save Product • Etsy preparation: ${issues.length?issues.join('; '):tags.length?'within the 13 tags / 20 characters format':'no tags entered'}. These phrases are not yet sent to Etsy; review them in the draft.`;
+  preview.textContent=`${tags.length} search phrase(s) saved locally when you Save Product • Etsy preparation: ${issues.length?issues.join('; '):tags.length?'within the 13 tags / 20 characters format':'no tags entered'}. Transfer is an optional, explicitly approved action in the Etsy tab, never part of saving the Product.`;
   preview.dataset.tone=issues.length?'warn':'ok';
  }
  input.addEventListener('input',render);document.addEventListener('dd:product-loaded',render);

@@ -44,3 +44,8 @@
 #dd496ReadinessList li[data-state="ready"]{color:#a8e5c2}
 .dd496-readiness .dd-product-actions{display:flex;gap:8px;flex-wrap:wrap}
 @media(max-width:520px){.dd496-readiness .dd-product-actions>.btn{width:100%;white-space:normal}}
+.dd497-channel-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px;margin:12px 0}
+.dd497-channel-card{border:1px solid rgba(157,170,183,.55);border-radius:10px;padding:13px;background:rgba(9,18,29,.5);min-width:0;overflow-wrap:anywhere}
+.dd497-channel-card h4{margin:0 0 6px}.dd497-channel-card p{margin:5px 0}
+.dd497-channel-card[data-state="ready"]{border-color:#6ba68a}.dd497-channel-card[data-state="hold"]{border-color:#ca8a55}
+#dd497TagsList{padding-left:22px;line-height:1.5;overflow-wrap:anywhere}
