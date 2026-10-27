@@ -25,7 +25,7 @@ export function assessOwnerApproval504({product,listing,gallery=[],accepted=[],r
   const confirmed=new Set(receipts.filter(x=>remote.has(String(x.etsy_image_id||''))).map(x=>Number(x.product_image_id)));
   for(const imageId of expected){
     if(!eligible.has(imageId))issues.push(`Approved Product photo #${imageId} is missing from our gallery.`);
-    else if(!confirmed.has(imageId))issues.push(`Product photo #${imageId} has no confirmed Etsy upload and live-image receipt.`);
+    else if(!confirmed.has(imageId))issues.push(`Product photo #${imageId} needs an Etsy live-image receipt: verify an existing photo with owner review, or upload the original once if Etsy does not have it.`);
   }
   if(gallery.some(x=>!confirmed.has(Number(x.product_image_id))))issues.push('One or more additional approved Product photographs have no confirmed Etsy receipt.');
   if(remote.size!==new Set(receipts.map(x=>String(x.etsy_image_id||''))).size||

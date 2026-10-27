@@ -462,3 +462,9 @@ Owner-visible Product photos #341–343 remain gated by actual Product Media pub
 
 The owner requested a fix after Product #53's local Save returned HTTP 503, while Etsy already contained unpublished draft **#4603838854** but local receipt linking was unconfirmed. Build 503 keeps that draft, avoids duplicate creation, and makes **Verify/link existing draft** the primary Etsy action. The editor now identifies the *exact* gallery, image, tag, description or HTTP check at fault; the latter is not called a missing field. An uncertain local Save only allows an explicit server-copy read to identify any differences before a subsequent manual decision. Cached OAuth metadata is not queried for a simple linked-ID GET. The live Etsy category/description shown by the owner and photo #344–346 receipts must be reviewed before publication; code deployment GREEN is distinct from live Etsy owner acceptance. See [Build 503 runbook](docs/BUILD503_ETSY_OWNER_DIAGNOSTICS_SIGNOFF.md). **Next expected Build 504 — Owner Witnessed Etsy Draft Link, Safe Three-Photo Readback and Final Content Approval.**
 
+# Build 505 — Etsy owner-reconciled local listing ID and three-photo sign-off readiness
+
+Shipped local-only owner review to conditionally reassign an incorrectly claimed Etsy draft after independent shop/title/shipping and prior-activity verification. Added side-by-side original/Etsy photo matching with unique owner audit receipts, extended the existing photo inventory and final approval readback, and kept the draft unpublished. No live owner sign-off is claimed from tests. See `docs/BUILD505_ETSY_LOCAL_CLAIM_ORIGINAL_PHOTOS_AND_SIGNOFF.md`.
+
+**Next expected Build 506 — Etsy Owner Trial Receipt Review, Product #53 Metadata Correction Closure & Channel Integration Contract v1 Readiness.**
+

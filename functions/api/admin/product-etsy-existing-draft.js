@@ -26,7 +26,7 @@ async function localLinkOnly(db,id){const [product,draft]=await Promise.all([
  ]);return {product,draft};}
 // Build 504: differentiate a replay of THIS Product's verified receipt from
 // another Product that already owns the Etsy ID. Never silently move claims.
-async function claimedListing(db,listingId){
+export async function claimedListing505(db,listingId){
  return db.prepare("SELECT d.id,d.product_id,d.payload_json,p.name AS product_name,p.sku AS product_sku,p.slug AS product_slug FROM marketplace_syndication_drafts d LEFT JOIN products p ON CAST(p.product_id AS TEXT)=CAST(d.product_id AS TEXT) WHERE d.channel_key='etsy' AND d.external_reference=? ORDER BY d.updated_at DESC LIMIT 1").bind(listingId).first();
 }
 export function ownerClaim504(claim,productId){
@@ -55,7 +55,7 @@ export {local as readExistingDraftLocal486,credentials as existingDraftCredentia
 export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;const url=new URL(c.request.url),id=url.searchParams.get('product_id');if(!valid(id))return respond({error:'Saved Product required.'},400);
  try{const s=await localLinkOnly(g.db,Number(id));if(!s.product)return respond({error:'Product not found.'},404);
  const candidate=url.searchParams.get('candidate_listing_id');
- const claim=valid(candidate)?ownerClaim504(await claimedListing(g.db,String(candidate)),id):null;
+ const claim=valid(candidate)?ownerClaim504(await claimedListing505(g.db,String(candidate)),id):null;
  return respond({product_id:Number(id),product_name:String(s.product.name||''),product_sku:String(s.product.sku||''),product_slug:String(s.product.slug||''),linked_listing_id:valid(s.draft?.external_reference)?String(s.draft.external_reference):null,linked_source:parse(s.draft).verified_remote_existing_draft?'verified_existing_etsy_draft':s.draft?'product_editor_or_legacy_receipt':'unlinked',candidate_claim:claim,requires_explicit_review:true});
  }catch{return respond({error:'Existing draft status unavailable.'},503)}}
 export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error;if(c.request.headers.get('Origin')!==new URL(c.request.url).origin)return respond({error:'Same-origin required.'},403);
@@ -72,7 +72,7 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
    const titleMatches=String(remote.title||'').trim().toLocaleLowerCase()===String(s.product.name||'').trim().toLocaleLowerCase();
    if(action==='inspect_listing')return respond({listing_id:listingId,etsy_title:String(remote.title||'').slice(0,140),product_title:String(s.product.name||'').slice(0,140),title_matches:titleMatches,verified_unpublished:true,verified_canada_only:true,provider_modified:false});
    if(!titleMatches&&b?.confirm_prior_title_difference!==true)return respond({error:'Etsy title differs from saved Product. Inspect the draft preview and explicitly confirm the older title is the same item before linking.'},409);
-   const collision=await claimedListing(g.db,listingId),claim=ownerClaim504(collision,id);
+   const collision=await claimedListing505(g.db,listingId),claim=ownerClaim504(collision,id);
    if(claim.state==='another_product')return respond({error:`Etsy draft #${listingId} is already recorded against LOCAL Product #${claim.product.product_id} (${claim.product.name||claim.product.sku||'unnamed Product'}). Open that Product and confirm which record is the real owner. Product #${id} was not linked or changed.`,code:'etsy_listing_claimed_by_another_product',linked_product_id:claim.product.product_id,conflicting_product:claim.product},409);
    const payload={...parse(collision),verified_remote_existing_draft:true,remote_etsy_draft_created:false,publication_performed:false,canada_only_shipping_verified:true,shipping_profile_id:remote.shipping_profile_id,request_key:b.request_key,verified_listing_id:listingId};
    if(claim.state==='same_product'){
