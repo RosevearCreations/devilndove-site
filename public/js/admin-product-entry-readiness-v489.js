@@ -13,6 +13,11 @@
  function value(name){const el=form.elements.namedItem(name);return String(el?.value||'').trim();}
  let timer=null;
  function calculate(){
+  if(new URLSearchParams(location.search).has('product_id')&&form.dataset.productAuthority!=='ready'){
+   meter.value=0;score.textContent='Checking saved Product…';
+   document.getElementById('dd489EntryStatus').textContent='Waiting for saved Product fields. No completion percentage is reliable until the authoritative Product has loaded.';
+   return;
+  }
   const fields=['name','price','inventory_quantity','description','product_category','sku','short_description'];
   const passed=fields.filter(name=>name==='price'?Number(value(name))>0:name==='inventory_quantity'?Number(value(name))>0:
     name==='description'?Boolean(value('description')||value('short_description')):value(name).length>0);
@@ -23,6 +28,8 @@
  form.addEventListener('input',schedule);form.addEventListener('change',schedule);
  document.addEventListener('dd:save-succeeded',calculate);
   document.addEventListener('dd:product-loaded',calculate);
+ new MutationObserver(()=>{if(form.dataset.productAuthority==='ready')calculate();}).observe(form,{attributes:true,attributeFilter:['data-product-authority']});
+ document.addEventListener('dd:product-load-failed',calculate);
  for(const button of form.querySelectorAll('[data-dd489-open]'))button.addEventListener('click',()=>form.querySelector(`[data-editor-tab="${button.dataset.dd489Open}"]`)?.click());
  calculate();
 })();
