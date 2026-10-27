@@ -46,3 +46,15 @@ body[data-admin-page="product-editor-v165"] input[type="checkbox"]{width:18px!im
 .dd504-signoff #dd504Readback{white-space:normal;overflow-wrap:anywhere;line-height:1.55;padding:10px;border-left:4px solid #bf8c4a;background:rgba(177,129,55,.08);border-radius:7px}
 .dd504-signoff button{justify-self:start;max-width:100%;min-height:42px;white-space:normal;text-align:center}
 @media(max-width:680px){.dd504-signoff{padding:11px}.dd504-signoff button{width:100%;justify-self:stretch}}
+.dd505-review{display:grid;grid-template-columns:minmax(0,1fr);gap:11px;padding:15px;border:1px solid #ad8c61;border-radius:12px;background:rgba(177,129,55,.07);min-width:0}
+.dd505-review[hidden]{display:none!important}
+.dd505-review h3,.dd505-review p{margin:0;overflow-wrap:anywhere}
+.dd505-review label{display:flex;align-items:start;gap:10px;line-height:1.5}
+.dd505-review label span{min-width:0;overflow-wrap:anywhere}
+.dd505-review input[type="checkbox"]{appearance:auto!important;width:18px!important;height:18px!important;min-width:18px!important;flex:0 0 18px;margin:2px 0 0}
+.dd505-review button{justify-self:start;white-space:normal;min-height:42px;max-width:100%;text-align:center}
+.dd505-photo-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.dd505-photo-pair>div{min-width:0;display:grid;gap:8px;align-content:start}
+.dd505-photo-pair img{max-width:100%;width:100%;aspect-ratio:4/5;object-fit:contain;background:rgba(255,255,255,.08);border-radius:9px}
+.dd505-photo-pair select{width:100%;min-width:0}
+@media(max-width:680px){.dd505-review{padding:11px}.dd505-review button{justify-self:stretch;width:100%}.dd505-photo-pair{grid-template-columns:minmax(0,1fr)}}

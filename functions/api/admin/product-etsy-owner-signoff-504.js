@@ -20,7 +20,7 @@ async function review(c,db,id){
   const listing=await verifyExistingDraft486(c.env,s,listingId,headers);
   const [galleryResult,receiptResult,seo,remoteResult]=await Promise.all([
     readCanonicalDistributionGallery(db,id),
-    db.prepare("SELECT details_json FROM admin_action_audit WHERE action_type='etsy_product_editor_image_443_accepted' AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id ASC LIMIT 20").bind(String(id)).all(),
+    db.prepare("SELECT details_json FROM admin_action_audit WHERE action_type IN ('etsy_product_editor_image_443_accepted','etsy_505_owner_existing_image_matched') AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id ASC LIMIT 30").bind(String(id)).all(),
     db.prepare('SELECT keywords FROM product_seo WHERE product_id=? LIMIT 1').bind(id).first(),
     readEtsy486('listings/'+encodeURIComponent(listingId)+'/images',headers)
   ]);

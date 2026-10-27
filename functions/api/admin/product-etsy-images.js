@@ -23,7 +23,7 @@ async function source(db,id,env={}){
     db.prepare('SELECT product_id,name,status FROM products WHERE product_id=? LIMIT 1').bind(id).first(),
     db.prepare("SELECT id,product_id,external_reference,payload_json,status FROM marketplace_syndication_drafts WHERE channel_key='etsy' AND product_id=? AND external_reference IS NOT NULL ORDER BY updated_at DESC LIMIT 1").bind(id).first(),
     readCanonicalDistributionGallery(db,id),
-    db.prepare("SELECT details_json FROM admin_action_audit WHERE action_type='etsy_product_editor_image_443_accepted' AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id ASC LIMIT 10").bind(String(id)).all()
+    db.prepare("SELECT details_json FROM admin_action_audit WHERE action_type IN ('etsy_product_editor_image_443_accepted','etsy_505_owner_existing_image_matched') AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id ASC LIMIT 30").bind(String(id)).all()
   ]);
   const receiptRows=accepted?.results||[],done=completedImageIds(receiptRows);
   const images=(gallery?.images||[]).filter(imageReady).slice(0,10).map(row=>({

@@ -39,7 +39,7 @@ test('Build 500 UI is one Create/Update action with separate existing ID verific
  for(const name of ['dd500Package','dd500Identity','dd500ListingId','dd500LinkButton','dd500NewSettings',
   'dd500Consent','dd500Send','dd500Checklist','dd500Legacy'])assert.ok(editor.includes(name),name);
  assert.match(editor,/<details id="dd500Legacy"/);
- assert.match(editor,/admin-product-etsy-package-v500\.mjs\?v=50[0134]/);
+ assert.match(editor,/admin-product-etsy-package-v500\.mjs\?v=50[01345]/);
  assert.match(ui,/send\.textContent=hasCandidate\?`Step 1: Verify and link existing Etsy draft/);
  assert.match(ui,/linked\?`Step 2: Update Etsy draft/);
  assert.match(ui,/created\.listing_id/);assert.match(ui,/linked\.linked_listing_id/);
