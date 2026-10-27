@@ -28,10 +28,10 @@
   for(const issue of local.blockers||[]){const li=document.createElement('li');li.textContent='HOLD — '+issue;root.append(li);}
  }
  async function load(){if(busy||!saved())return;busy=true;controls();remote=null;needsReview=false;
-  say('Reading Product SEO tags saved in D1; nothing sent to Etsy.');
+  say('Reading saved Product SEO or explicit Etsy channel override tags from D1; nothing sent to Etsy.');
   try{local=await api(`/api/admin/product-etsy-tags?product_id=${id}`);list();
    say(local.unresolved_attempt?'HOLD — a previous Etsy tag update has no confirmed receipt. Inspect Etsy before another attempt.':
-    local.ready?`${local.local_tags.length} valid saved search tags. Compare against the actual Etsy draft before authorizing any replacement.`:
+    local.ready?`${local.local_tags.length} valid saved search tags (${local.tag_source||'shared Product'}). Compare against the actual Etsy draft before authorizing any replacement.`:
      'HOLD — save valid tags under the Product SEO fields first. No Etsy action.');
   }catch(error){local=null;say('HOLD — '+error.message);}
   finally{busy=false;controls();}
@@ -56,7 +56,7 @@
    if(data.native_tags_verified!==true)throw Error('Etsy readback was not verified.');
    remote={...remote,matching_tags:true,remote_tags:data.remote_tags};
    $('dd497TagsConsent').checked=false;
-   say(`Verified ✓ Etsy draft #${data.listing_id} now has ${data.remote_tags.length} Product SEO tags, confirmed by a fresh Etsy read. The listing remains unpublished.`);
+   say(`Verified ✓ Etsy draft #${data.listing_id} now has ${data.remote_tags.length} approved search tags, confirmed by a fresh Etsy read. The listing remains unpublished.`);
    document.dispatchEvent(new CustomEvent('dd:etsy-native-tags-verified',{detail:{product_id:id,listing_id:data.listing_id}}));
   }catch(error){needsReview=true;remote=null;
    say('HOLD — '+error.message+' Inspect the actual Etsy draft before attempting any further write. No automatic retry.');}
@@ -71,6 +71,7 @@
  form.addEventListener('input',controls);document.addEventListener('dd:save-succeeded',reset);
  document.addEventListener('dd:etsy-existing-draft-updated',reset);
  document.addEventListener('dd:etsy-existing-draft-linked',reset);
+ document.addEventListener('dd:product-channel-tags-changed',reset);
  document.addEventListener('dd:product-loaded',controls);
  controls();
 })();

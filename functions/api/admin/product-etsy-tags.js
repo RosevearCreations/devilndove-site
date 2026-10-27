@@ -3,6 +3,7 @@
 import {getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 import {preparedEtsyTags497,tagsMatch497} from '../_lib/etsyNativeTags497.mjs';
+import {readOverride499,effectiveEtsyTags499} from '../_lib/channelTagOverrides499.mjs';
 import {readExistingDraftLocal486,existingDraftCredentials486,verifyExistingDraft486,readEtsy486} from './product-etsy-existing-draft.js';
 
 const respond=(data,status=200)=>jsonResponse({ok:status<400,build:497,publication_performed:false,
@@ -18,7 +19,8 @@ async function source(db,id){
   db.prepare('SELECT p.product_id,ps.keywords FROM products p LEFT JOIN product_seo ps ON ps.product_id=p.product_id WHERE p.product_id=? LIMIT 1').bind(id).first(),
   db.prepare("SELECT (SELECT COUNT(*) FROM admin_action_audit WHERE action_type='etsy_native_tags_497_claimed' AND target_type='product' AND target_key=?) claimed,(SELECT COUNT(*) FROM admin_action_audit WHERE action_type='etsy_native_tags_497_confirmed' AND target_type='product' AND target_key=?) confirmed").bind(String(id),String(id)).first()
  ]);
- return {record,claims,prepared:preparedEtsyTags497(record?.keywords)};
+ const override=record?await readOverride499(db,id,'etsy'):null;
+ return {record,claims,prepared:override?effectiveEtsyTags499(record?.keywords,override):preparedEtsyTags497(record?.keywords)};
 }
 async function linked(db,id){const s=await readExistingDraftLocal486(db,id);
  const listingId=String(s.draft?.external_reference||'');
@@ -31,7 +33,7 @@ export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
  if(!valid(id))return respond({error:'A saved Product is required.'},400);
  try{
   const x=await source(g.db,Number(id));if(!x.record)return respond({error:'Product unavailable.'},404);
-  const reply={product_id:Number(id),local_tags:x.prepared.tags,blockers:x.prepared.blockers,ready:x.prepared.ready,
+  const reply={product_id:Number(id),local_tags:x.prepared.tags,tag_source:x.prepared.source||'shared_product_seo',blockers:x.prepared.blockers,ready:x.prepared.ready,
    unresolved_attempt:Number(x.claims?.claimed||0)!==Number(x.claims?.confirmed||0),provider_contacted:false};
   if(url.searchParams.get('reconcile')!=='1')return respond(reply);
   const {s,listingId}=await linked(g.db,Number(id)),headers=await existingDraftCredentials486(c.env,s);
