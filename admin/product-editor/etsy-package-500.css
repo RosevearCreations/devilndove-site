@@ -1,0 +1,23 @@
+/* Build 500: one clear Etsy action; older separate workflows stay available
+   only when a verified package needs troubleshooting. */
+.dd500-package{display:grid;gap:15px;margin:14px 0;padding:20px;border:1px solid #b98849;border-radius:15px;background:linear-gradient(150deg,rgba(183,129,53,.09),transparent 55%)}
+.dd500-package h2,.dd500-package h3,.dd500-package p{margin:0}
+.dd500-head{display:flex;justify-content:space-between;gap:16px}
+.dd500-head h2{margin:3px 0 9px}
+.dd500-id{padding:14px;border-left:4px solid #bf8c4a;background:rgba(177,129,55,.12);border-radius:8px;font-weight:650;overflow-wrap:anywhere}
+.dd500-link,.dd500-readiness,.dd500-setup{display:grid;gap:12px;padding:14px;border:1px solid rgba(167,119,59,.45);border-radius:10px}
+.dd500-link[hidden],.dd500-setup[hidden],#dd500OlderTitleRow[hidden]{display:none!important}
+.dd500-link label,.dd500-setup label{display:grid;gap:7px}
+.dd500-link label:has(input[type="checkbox"]),.dd500-setup label:has(input[type="checkbox"]){display:flex;align-items:flex-start;gap:8px}
+.dd500-setup summary{font-weight:700;cursor:pointer}
+.dd500-setup[open] summary{margin-bottom:10px}
+.dd500-consent{display:flex;align-items:flex-start;gap:10px;padding:13px;background:rgba(153,105,44,.10);border-radius:9px}
+.dd500-consent input,.dd500-link input[type="checkbox"]{margin-top:4px;flex:0 0 auto}
+.dd500-readiness ul{margin:0;padding-left:20px}
+.dd500-readiness li{margin:5px 0}
+#dd500Status[data-tone="hold"],#dd500OptionsStatus[data-tone="hold"]{color:#b34825;font-weight:650}
+#dd500Status[data-tone="ok"]{color:inherit}
+.dd500-troubleshooting{margin:18px 0;border:1px solid rgba(153,105,44,.4);border-radius:12px;padding:12px}
+.dd500-troubleshooting>summary{font-weight:700;cursor:pointer;padding:6px}
+.dd500-troubleshooting[open]>summary{margin-bottom:18px}
+@media(max-width:680px){.dd500-package{padding:13px}.dd500-package .dd-product-actions{display:grid;grid-template-columns:1fr}.dd500-package .dd-product-actions>*{max-width:100%;white-space:normal}.dd500-package .dd-editor-grid{grid-template-columns:1fr}}

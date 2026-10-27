@@ -161,6 +161,48 @@
       </section>
 
       <section class="dd-editor-panel dd-etsy-panel" data-editor-panel="etsy" hidden>
+        <div class="card dd500-package" id="dd500Package" aria-labelledby="dd500Title">
+          <div class="dd500-head"><div><p class="eyebrow">Build 500 • One saved Product, one Etsy listing</p><h2 id="dd500Title">Send the complete Product to Etsy</h2>
+            <p class="small">No extra image selection. We use <strong>every approved photograph in this Product's gallery</strong>, its saved description, CAD price, quantity and search tags. Etsy creation returns a listing number we keep on this Product for all future updates. The listing stays <strong>unpublished</strong>.</p></div></div>
+          <div class="dd500-id" id="dd500Identity" role="status" aria-live="polite">Reading this Product's saved Etsy listing ID…</div>
+          <a id="dd500Open" class="btn" href="https://www.etsy.com/your/shops/me/listings/drafts" target="_blank" rel="noopener noreferrer">Open Etsy Drafts</a>
+          <div class="dd500-link" id="dd500Link">
+            <h3>Already created this Etsy listing?</h3>
+            <p class="small">Enter the Etsy listing number once. We verify the actual shop, unpublished draft and Canada-only shipping, then store the ID against this Product. We will never create a second listing just to update it.</p>
+            <label>Existing Etsy listing ID <input class="input" id="dd500ListingId" inputmode="numeric" pattern="[0-9]*" placeholder="Number shown in Etsy Drafts"></label>
+            <p class="small" id="dd500CandidateNote" hidden>Product #53: our earlier owner screenshot showed Etsy draft <strong>#4603838854</strong>. This is a suggested number only; it is not accepted until Etsy verifies it and we approve the link.</p>
+            <label><input type="checkbox" id="dd500LinkConsent"> I checked this exact Etsy draft and authorize linking it to this Product.</label>
+            <label id="dd500OlderTitleRow" hidden><input type="checkbox" id="dd500OlderTitle"> The Etsy title differs, but I verified it is the very same item.</label>
+            <button type="button" class="btn" id="dd500LinkButton">Verify and save Etsy listing ID</button>
+          </div>
+          <details id="dd500NewSettings" class="dd500-setup">
+            <summary>First-time Etsy setup — category, Canadian shipping and parcel measurements</summary>
+            <p class="small">Needed only for a new Etsy listing. Previously entered choices are restored when possible, but Etsy verifies the actual profiles again before creating a draft. Never guess packed measurements.</p>
+            <button type="button" class="btn" id="dd500OptionsLoad">Load live Etsy categories and shipping profiles</button>
+            <div class="dd-editor-grid cols-2">
+              <label>Find an Etsy category <input class="input" id="dd500CategorySearch" placeholder="Search verified categories"></label>
+              <label>Etsy category <select class="input" id="dd500Category"><option value="">Load choices…</option></select></label>
+              <label>Canada-only Etsy shipping profile <select class="input" id="dd500Shipping"><option value="">Load choices…</option></select></label>
+              <label>Etsy processing profile <select class="input" id="dd500Processing"><option value="">Load choices…</option></select></label>
+              <label>Who made it? <select class="input" id="dd500Who"><option value="i_did">We made it</option><option value="collective">Our team</option><option value="someone_else">Someone else</option></select></label>
+              <label>When made? <select class="input" id="dd500When"><option value="2020_2026">2020–2026</option><option value="made_to_order">Made to order</option><option value="2010_2019">2010–2019</option><option value="2007_2009">2007–2009</option><option value="before_2007">Before 2007</option></select></label>
+              <label>Packed weight <input class="input" id="dd500Weight" type="number" min="0.001" step="any"></label>
+              <label>Weight unit <select class="input" id="dd500WeightUnit"><option value="g">g</option><option value="kg">kg</option><option value="oz">oz</option><option value="lb">lb</option></select></label>
+              <label>Packed length <input class="input" id="dd500Length" type="number" min="0.001" step="any"></label>
+              <label>Packed width <input class="input" id="dd500Width" type="number" min="0.001" step="any"></label>
+              <label>Packed height <input class="input" id="dd500Height" type="number" min="0.001" step="any"></label>
+              <label>Dimension unit <select class="input" id="dd500DimensionUnit"><option value="cm">cm</option><option value="mm">mm</option><option value="in">in</option></select></label>
+            </div>
+            <label><input type="checkbox" id="dd500Supply"> This item is a craft supply, not a finished handmade item</label>
+            <p class="small" id="dd500OptionsStatus" role="status">Live options not loaded yet.</p>
+          </details>
+          <div class="dd500-readiness"><h3>What will be sent</h3><ul id="dd500Checklist" class="small" role="status" aria-live="polite"><li>Checking Product and photos…</li></ul></div>
+          <label class="dd500-consent"><input type="checkbox" id="dd500Consent"> I own/approve <strong>all</strong> gallery images for public use and authorize one unpublished, Canada-only Etsy package transfer: Product details, search tags, advanced fields and every eligible photo. Any uncertain result must be checked in Etsy before another attempt.</label>
+          <div class="dd-product-actions"><button class="btn primary" type="button" id="dd500Send" disabled>Create complete Etsy draft + photos</button><button class="btn" type="button" id="dd500Refresh">Refresh Product, listing ID and gallery status</button><a class="btn" href="#productDistribution406">Fix Product photographs</a></div>
+          <p class="small" id="dd500Status" role="status" aria-live="polite">No Etsy write attempted.</p>
+          <p class="small">Our store retains the saved Product. Facebook Marketplace uses the same source photos but remains a manual handoff until Meta grants supported listing access. This button never publishes on either marketplace.</p>
+        </div>
+        <details id="dd500Legacy" class="dd500-troubleshooting"><summary>Advanced Etsy troubleshooting and individual controls (only if a package is on HOLD)</summary>
         <details class="dd498-advanced" data-dd498-channel="etsy" id="dd498EtsyAdvanced">
           <summary>Advanced Etsy fields — fill optional gaps from our saved Product</summary>
           <p class="small">These settings save a <strong>local Etsy preparation profile only</strong>. Etsy still requires a separate owner-approved draft update, image transfer and native tag transfer. Suggested text is editable. Maker, era, category and shipping choices must be verified, never guessed.</p>
@@ -336,6 +378,7 @@
           <button class="btn primary" type="button" id="dd499AdvancedSend" disabled>Sync approved advanced fields to the existing Etsy draft</button>
           <p class="small" id="dd499AdvancedStatus" role="status" aria-live="polite">Owner approval and a fresh comparison are required.</p>
         </div>
+        </details>
       </section>
 
       <section class="dd-editor-panel dd-meta-panel" data-editor-panel="facebook" hidden>
@@ -434,6 +477,8 @@
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=496"></script>
   <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
   <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
+  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=500"></script>
+  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=500">
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">
