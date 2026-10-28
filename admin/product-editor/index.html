@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="/admin/product-editor/entry-readiness-489.css?v=496"/>
   <link rel="stylesheet" href="/admin/product-editor/advanced-channels-498.css?v=498"/>
   <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=515"/>
-  <link rel="stylesheet" href="/admin/product-editor/etsy-simple-515.css?v=515"/>
+  <link rel="stylesheet" href="/admin/product-editor/etsy-simple-515.css?v=516"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -213,6 +213,11 @@
           <details class="dd500-readiness" id="dd515TechnicalChecks"><summary>See exactly what's missing (if Etsy cannot update)</summary><ul id="dd500Checklist" class="small" role="status" aria-live="polite"><li>Checking Product and photos…</li></ul></details>
           <label class="dd500-consent"><input type="checkbox" id="dd500Consent"><span>I own/approve <strong>all</strong> gallery images for public use and authorize one unpublished, Canada-only Etsy package transfer: Product details, search tags, advanced fields and every eligible photo. Any uncertain result must be checked in Etsy before another attempt.</span></label>
           <div class="dd-product-actions"><button class="btn primary" type="button" id="dd500Send" disabled>Checking Etsy draft…</button><button class="btn" type="button" id="dd500Refresh">Refresh draft status</button><button class="btn" type="button" id="dd503Fix" hidden>Fix missing item</button></div>
+          <div class="dd516-photo-action" id="dd516PhotoAction" hidden>
+            <p class="small">Our store already has the approved originals. To send only missing photos to this <strong>same Etsy draft</strong>, use this separate action even if its text or search tags still need editing.</p>
+            <button class="btn primary" type="button" id="dd516SyncPhotos" disabled>Sync missing original photos to Etsy</button>
+            <p class="small" role="status" aria-live="polite" id="dd516PhotoStatus">Checking the actual Etsy photo inventory…</p>
+          </div>
           <p class="small" id="dd500Status" role="status" aria-live="polite">No Etsy write attempted.</p>
           <details id="dd515PhotoRepair" class="dd515-photo-repair" hidden>
             <summary>Photos are already on Etsy? Match them without uploading duplicates</summary>
@@ -801,7 +806,7 @@
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=496"></script>
   <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
   <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
-  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=515"></script>
+  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=516"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">

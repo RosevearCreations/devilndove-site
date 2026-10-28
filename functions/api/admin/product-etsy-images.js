@@ -7,6 +7,7 @@ import {connectionBlockers} from '../_lib/etsyDraftTrial399.mjs';
 import {readCanonicalDistributionGallery} from '../_lib/canonicalDistributionGallery436.mjs';
 import {approvedR2Key,checkedEtsyBytes,completedImageIds,confirmedEtsyImageReadback497,imageReady,MAX_ETSY_IMAGE_BYTES} from '../_lib/productEtsyImages443.mjs';
 import {assessExistingDraftPhotoGap492} from '../_lib/etsyPhotoGap492.mjs';
+import {verifyExistingDraft486,linkedReceipt506} from './product-etsy-existing-draft.js';
 
 const respond=(value,status=200)=>jsonResponse({ok:status<400,build:443,publication_performed:false,
   automatic_retry:false,shipping_modified:false,...value},status,{'Cache-Control':'no-store'});
@@ -40,10 +41,15 @@ async function source(db,id,env={}){
   const claimed=new Set((claimResult?.results||[]).map(row=>String(row.target_key)));
   return {product,draft,payload:details(draft),images,done,receiptRows,claimed};
 }
-function localView(s){const linked=validId(s.draft?.external_reference)&&s.payload?.canada_only_shipping_verified===true;
+// Build 516: a Product's uniquely saved numeric Etsy ID must not disappear
+// because an older *media* or shipping snapshot lacks a verification flag.
+// These flags are not authorization: every provider write checks the live
+// unpublished listing and its Canada-only shipping profile below.
+function localView(s){const linked=validId(s.draft?.external_reference);
   const outstanding=[...s.claimed].filter(key=>!s.done.has(Number(key.split(':')[1])));
   return {product_id:Number(s.product?.product_id||0),listing_id:linked?String(s.draft.external_reference):null,
     listing_status:linked?'UNPUBLISHED_DRAFT_RECORDED':'NO_VERIFIED_ETSY_DRAFT',
+    local_canada_only_receipt:s.payload?.canada_only_shipping_verified===true,
     images:s.images.map(im=>({...im,hold:outstanding.length>0})),
     hold_unconfirmed_claims:outstanding.length,
     transferred:s.images.filter(im=>im.transferred).length,
@@ -82,10 +88,15 @@ export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
   try{const s=await source(currentDb(g.db),Number(id),c.env);
     if(!s.product)return respond({error:'Product not found.'},404);
     const local=localView(s);
+    if(local.listing_id){const claim=await linkedReceipt506(g.db,Number(id),local.listing_id);
+      if(!claim.confirmed)return respond({...local,listing_id:null,listing_status:'AMBIGUOUS_PRIMARY_LISTING_CLAIM',
+        remote_reconciliation:{ready:false,reason:claim.claim_state},provider_contacted:false});}
     if(new URL(c.request.url).searchParams.get('reconcile')!=='1')return respond(local);
     if(!local.listing_id)return respond({...local,remote_reconciliation:{ready:false,reason:'link_existing_draft_first'},provider_contacted:false});
     const a=await authorized(c,g.db);if(a.error)return a.error;
-    const [listing,remoteImages]=await Promise.all([getEtsy('listings/'+encodeURIComponent(local.listing_id),a.headers),getEtsy('listings/'+encodeURIComponent(local.listing_id)+'/images',a.headers)]);
+    const [listing,remoteImages]=await Promise.all([
+      verifyExistingDraft486(c.env,{shop:a.shop},local.listing_id,a.headers),
+      getEtsy('listings/'+encodeURIComponent(local.listing_id)+'/images',a.headers)]);
     if(String(listing?.listing_id)!==local.listing_id||String(listing?.shop_id)!==String(a.shop.shop_id)||String(listing?.state).toLowerCase()!=='draft')
       return respond({...local,remote_reconciliation:{ready:false,reason:'original_etsy_draft_identity_or_state_changed'},provider_contacted:true});
     let receipts=[];try{receipts=s.receiptRows.map(row=>JSON.parse(row.details_json))}catch{}
@@ -105,8 +116,10 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
   const id=Number(b.product_id),imageId=Number(b.product_image_id),key=recordKey(id,imageId);
   try{
     const s=await source(currentDb(g.db),id,c.env);
-    if(!s.product||!validId(s.draft?.external_reference)||s.payload?.canada_only_shipping_verified!==true||
-      s.payload?.publication_performed!==false)return respond({error:'Only a verified, unpublished Canada-only Product Editor draft may receive images.'},409);
+    if(!s.product||!validId(s.draft?.external_reference)||s.payload?.publication_performed===true)
+      return respond({error:'A saved, unpublished Etsy Product listing is required before transferring images.'},409);
+    const claimProof=await linkedReceipt506(g.db,id,String(s.draft.external_reference));
+    if(!claimProof.confirmed)return respond({error:'The Etsy draft ID does not have one unique Product claim on the D1 primary. No upload attempted.',claim_state:claimProof.claim_state},409);
     const selected=s.images.find(im=>im.product_image_id===imageId);
     if(!selected||!selected.transferable)return respond({error:'Select an approved, >=800px JPEG/PNG image from our Product gallery in R2.'},409);
     if(s.claimed.has(key)||selected.transferred)return respond({error:'This photo was previously attempted or uploaded. Inspect Etsy; never retry blindly.'},409);
@@ -115,7 +128,7 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
     const a=await authorized(c,g.db);if(a.error)return a.error;
     const listingId=String(s.draft.external_reference);
     const [listing,remoteImages]=await Promise.all([
-      getEtsy('listings/'+encodeURIComponent(listingId),a.headers),
+      verifyExistingDraft486(c.env,{shop:a.shop},listingId,a.headers),
       getEtsy('listings/'+encodeURIComponent(listingId)+'/images',a.headers)
     ]);
     if(String(listing?.listing_id||'')!==listingId||String(listing?.shop_id||'')!==String(a.shop.shop_id)||

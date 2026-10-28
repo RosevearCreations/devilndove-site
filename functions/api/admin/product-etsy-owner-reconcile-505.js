@@ -4,7 +4,7 @@ import {getDb,jsonResponse,auditAdminAction} from '../_lib/adminAudit.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 import {readCanonicalDistributionGallery} from '../_lib/canonicalDistributionGallery436.mjs';
 import {imageReady} from '../_lib/productEtsyImages443.mjs';
-import {readExistingDraftLocal486,existingDraftCredentials486,verifyExistingDraft486,readEtsy486,claimedListing505} from './product-etsy-existing-draft.js';
+import {readExistingDraftLocal486,existingDraftCredentials486,verifyExistingDraft486,readEtsy486,claimedListing505,linkedReceipt506} from './product-etsy-existing-draft.js';
 import {validEtsyId505,validOwnerKey505,reassignmentReview505,ownerPhotoMatches505} from '../_lib/etsyOwnerReconciliation505.mjs';
 
 const respond=(value,status=200)=>jsonResponse({ok:status<400,build:505,provider_modified:false,publication_performed:false,automatic_retry:false,...value},status,{'Cache-Control':'no-store'});
@@ -14,6 +14,7 @@ const safeImages=rows=>(rows||[]).filter(imageReady).slice(0,10);
 function gate(c){const admin=verifiedAdminFromModule(c),db=getDb(c.env);
   return !admin?{error:respond({error:'Verified administrator required.'},401)}:
     !db?{error:respond({error:'Product database unavailable.'},503)}:{admin,db};}
+const currentDb=db=>typeof db.withSession==='function'?db.withSession('first-primary'):db;
 async function allReceipts(db,id){
   const r=await db.prepare("SELECT details_json FROM admin_action_audit WHERE target_type='product' AND target_key=? AND action_type IN ('etsy_product_editor_image_443_accepted','etsy_505_owner_existing_image_matched') ORDER BY admin_action_audit_id ASC LIMIT 30").bind(String(id)).all();
   return (r?.results||[]).map(parse).filter(row=>row.verified_remote_readback===true);
@@ -27,7 +28,9 @@ async function live(c,db,id,listingId){
 }
 async function linkedGallery(c,db,id,listingId){
   const proof=await live(c,db,id,listingId);
-  if(String(proof.s.draft?.external_reference||'')!==listingId)throw Error('This Product does not own that verified Etsy listing ID. Resolve its local claim first.');
+  const link=await linkedReceipt506(db,id,listingId);
+  if(!link.confirmed||String(proof.s.draft?.external_reference||'')!==listingId)
+    throw Error('This Product does not have a unique, primary-confirmed claim to that Etsy draft. Refresh its saved Etsy ID first.');
   const [gallery,remote,receipts,claims]=await Promise.all([
     readCanonicalDistributionGallery(db,id),
     readEtsy486('listings/'+encodeURIComponent(listingId)+'/images',proof.credentials),
@@ -58,13 +61,16 @@ export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
   const q=new URL(c.request.url).searchParams,id=Number(q.get('product_id')),listingId=String(q.get('listing_id')||''),mode=q.get('mode');
   if(!validEtsyId505(id)||!validEtsyId505(listingId)||!['claim','photos'].includes(mode))return respond({error:'Select an exact saved Product, Etsy draft and review type.'},400);
   try{
-    if(mode==='claim')return respond({review:await conflictReview(c,g.db,id,listingId)});
-    const proof=await linkedGallery(c,g.db,id,listingId);
+    if(mode==='claim')return respond({review:await conflictReview(c,currentDb(g.db),id,listingId)});
+    const proof=await linkedGallery(c,currentDb(g.db),id,listingId);
     return respond({product_id:id,listing_id:listingId,
       originals:proof.images.map(row=>({product_image_id:Number(row.product_image_id),image_url:String(row.image_url||''),alt_text:String(row.alt_text||'')})),
       etsy_photos:proof.remoteImages.map(row=>({etsy_image_id:String(row.listing_image_id),image_url:String(row.url_570xN||row.url_fullxfull||row.url_75x75||'')})),
       matched:proof.receipts.filter(row=>String(row.listing_id)===listingId).map(row=>({product_image_id:Number(row.product_image_id),etsy_image_id:String(row.etsy_image_id)})),
-      unresolved_upload_attempts:proof.outstanding.length,read_only:true});
+      unresolved_upload_attempts:proof.outstanding.length,
+      // A pending claim is not a green light to upload again. It may, however,
+      // be resolved by witnessing the *existing* image on the same Etsy draft.
+      matching_existing_photos_allowed:true,read_only:true});
   }catch(error){return respond({error:'Owner reconciliation cannot be verified: '+String(error?.message||'live read unavailable').slice(0,190)},409);}
 }
 export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error;
@@ -93,12 +99,13 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
     }
     if(!validEtsyId505(b?.product_image_id)||!validEtsyId505(b?.etsy_image_id)||b?.confirm_exact_photo_match!==true)
       return respond({error:'Select one approved original and one existing Etsy photo, then confirm they show the exact same image.'},400);
-    const proof=await linkedGallery(c,g.db,id,listingId);
-    if(proof.outstanding.length)return respond({error:'An earlier Etsy upload is unresolved. We cannot assign photo receipts until that attempt is independently reconciled.'},409);
+    const proof=await linkedGallery(c,currentDb(g.db),id,listingId);
     const check=ownerPhotoMatches505({gallery:proof.images,remoteImages:proof.remoteImages,receipts:proof.receipts,listingId,productImageId:b.product_image_id,etsyImageId:b.etsy_image_id});
     if(!check.ready)return respond({error:'Photo owner review on HOLD. '+check.issues.join(' '),issues:check.issues},409);
     const details={build:505,product_id:id,listing_id:listingId,product_image_id:Number(b.product_image_id),etsy_image_id:String(b.etsy_image_id),
-      request_key:b.request_key,verified_remote_readback:true,owner_witnessed_existing_photo:true,provider_modified:false,publication_performed:false};
+      request_key:b.request_key,verified_remote_readback:true,owner_witnessed_existing_photo:true,
+      reconciled_prior_upload_claim:proof.outstanding.some(row=>String(row.target_key)===`${id}:${Number(b.product_image_id)}`),
+      provider_modified:false,publication_performed:false};
     const recorded=await g.db.prepare("INSERT INTO admin_action_audit(actor_user_id,action_type,target_type,target_key,request_method,request_path,details_json,created_at) SELECT ?,'etsy_505_owner_existing_image_matched','product',?,'POST',?,?,CURRENT_TIMESTAMP WHERE EXISTS (SELECT 1 FROM marketplace_syndication_drafts WHERE channel_key='etsy' AND product_id=? AND external_reference=?) AND NOT EXISTS (SELECT 1 FROM admin_action_audit WHERE action_type IN ('etsy_product_editor_image_443_accepted','etsy_505_owner_existing_image_matched') AND target_type='product' AND target_key=? AND (CAST(json_extract(details_json,'$.product_image_id') AS TEXT)=? OR CAST(json_extract(details_json,'$.etsy_image_id') AS TEXT)=? OR json_extract(details_json,'$.request_key')=?))")
       .bind(g.admin.user_id,String(id),new URL(c.request.url).pathname,JSON.stringify(details),id,listingId,String(id),String(b.product_image_id),String(b.etsy_image_id),b.request_key).run();
     if(Number(recorded.meta?.changes||0)!==1)return respond({error:'Another photo mapping was already recorded. Refresh the live Etsy image list; no duplicate match was accepted.'},409);

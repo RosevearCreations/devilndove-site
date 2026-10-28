@@ -29,6 +29,14 @@ export function assessEtsyPackage500(distribution, media, tags) {
     count:gallery.length};
 }
 
+// Build 516: media has its own complete-gallery preflight. An unrelated
+// description/tag HOLD must not prevent an explicitly approved, separately
+// verified transfer of original photos to an already linked draft. This does
+// not permit sending a partial gallery or skipping original-image approval.
+export function assessEtsyPhotos516(distribution,media){
+  return assessEtsyPackage500(distribution,media,{ready:true,unresolved_attempt:false,blockers:[]});
+}
+
 export function verifiedEtsyPackage500(productId,link,photos,tags,expectedCount) {
   const id=String(link?.linked_listing_id||'');
   return /^[1-9]\d+$/.test(id)&&String(photos?.listing_id)===id&&String(tags?.listing_id)===id&&

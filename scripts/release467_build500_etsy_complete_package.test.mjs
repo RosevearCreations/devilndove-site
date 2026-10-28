@@ -44,7 +44,8 @@ test('Build 500 UI is one Create/Update action with separate existing ID verific
  assert.match(ui,/linked\?`Step 2: Update Etsy draft/);
  assert.match(ui,/created\.listing_id/);assert.match(ui,/linked\.linked_listing_id/);
  assert.match(ui,/product-etsy-unified-approval/);
- assert.match(ui,/for\(const imageId of state\.assessment\.pending\)/);
+ assert.match(ui,/for\(const imageId of photos\.pending\)/);
+ assert.match(ui,/assessEtsyPhotos516/);
  assert.match(ui,/confirm_approved_media:true/);assert.match(ui,/confirm_canada_only:true/);
  assert.match(ui,/remote_reconciliation\?\.ready!==true/);
  assert.match(ui,/ready_for_separate_owner_approval/);
