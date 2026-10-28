@@ -11,8 +11,10 @@ export function evidencePacket508({product,listing,gallery=[],remoteImages=[],ac
    shipping_profile_id:Number(listing?.shipping_profile_id),price_amount:Number(listing?.price?.amount),
    price_divisor:Number(listing?.price?.divisor),price_currency:str(listing?.price?.currency_code),quantity:Number(listing?.quantity),
    tags:[...(listing?.tags||[])].map(str).sort()},
-  approved_originals:[...gallery].map(row=>Number(row.product_image_id)).sort((a,b)=>a-b),
-  remote_etsy_image_ids:[...remoteImages].map(row=>str(row.listing_image_id)).sort(),
+  approved_originals:sorted([...gallery].map(row=>({id:Number(row.product_image_id),image_url:str(row.image_url),
+   public_use_status:str(row.public_use_status),image_role:str(row.image_role),alt_text:str(row.alt_text)}))),
+  remote_etsy_images:sorted([...remoteImages].map(row=>({id:str(row.listing_image_id),
+   full_image_url:str(row.url_fullxfull),preview_image_url:str(row.url_570xN||row.url_75x75)}))),
   matching_receipts:sorted(accepted.filter(row=>row.verified_remote_readback===true).map(row=>({
    original:Number(row.product_image_id),etsy_image_id:str(row.etsy_image_id),listing_id:str(row.listing_id)}))),
   saved_etsy_tags:[...tags].map(str).sort()};

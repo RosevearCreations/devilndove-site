@@ -66,7 +66,7 @@ test('owner sign-off endpoint is readback first, local-only and never publishes 
  assert.match(api,/assessOwnerApproval504/);
  assert.match(api,/readEtsy486\('listings\/'.*'\/images'/s);
  assert.match(api,/action_type='etsy_504_owner_final_content_approved'|,'etsy_504_owner_final_content_approved'/);
- assert.match(api,/if\(!result\.ready\|\|result\.listing_id!==String\(b\.listing_id\)\)/);
+ assert.match(api,/if\(!result\.ready\|\|\(Number\(b\.product_id\)===53&&!result\.photo_freshness_509\?\.ready\)\|\|result\.listing_id!==String\(b\.listing_id\)\)/);
  assert.match(api,/publication_performed:false,provider_modified:false,automatic_retry:false/);
  assert.doesNotMatch(api,/method:\s*'PATCH'|method:\s*'POST'.*etsy\.com/);
 });

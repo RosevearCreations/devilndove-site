@@ -486,3 +486,9 @@ Product #53 now has a distinct read-only live Etsy draft/three-original-photo pr
 
 **Next expected Build 509 — Product #53 Independent Final Owner Trial Exception Resolution, Original-Photo Evidence Freshness & Gateway Security Approval Handoff.**
 
+# Build 509 — Independent Product #53 exception evidence, exact original-photo freshness and gateway handoff
+
+The source/Etsy SHA-256 digest now binds original and Etsy photo URLs and rights metadata, not just numerical image IDs. A read-only editor review shows the three source photos side by side with current Etsy images and differentiates unresolved exception follow-up from a different-actor independent acceptance of a genuine Build 508 closeout. Missing local link permits a truthful audit-only exception note while keeping HOLD; no Etsy duplicate or provider write. The gateway security handoff reads signed v1 health/capabilities receipts and can record an explicitly approved read-only scope only at TESTING, without exposing credentials, sharing Product/customer data, enabling events/commands or becoming CONNECTED. See `docs/BUILD509_INDEPENDENT_ETSY_PHOTO_FRESHNESS_AND_GATEWAY_SECURITY_HANDOFF.md`. Real owner acceptance and gateway provisioning remain pending.
+
+**Next expected Build 510 — Product #53 Unlinked Draft Recovery Witness Trail, Verified Source-Photo Pairing Retest & Gateway Approval Separation Audit.**
+

@@ -19,7 +19,7 @@ async function ownerProof508(c,db,productId){
    .bind(String(productId)).first();
  let prior=false;try{prior=priorOwnerApproval508(latest?.details_json||null,review);}catch{}
  return {review,prior,prior_receipt_id:prior?Number(latest.admin_action_audit_id):null,
-   ready:review.ready===true&&prior&&fingerprint(review.evidence_fingerprint_508)};
+   ready:review.ready===true&&review.photo_freshness_509?.ready===true&&prior&&fingerprint(review.evidence_fingerprint_508)};
 }
 export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
  const productId=new URL(c.request.url).searchParams.get('product_id');

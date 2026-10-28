@@ -9,10 +9,11 @@ const form=$('productEditorForm'),id=Number(new URLSearchParams(location.search)
 if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   const state={busy:false,linked:'',loaded:false,assessment:null,readIssues:[],settings:null,attempted:false,claim:null,claimReview:null,photoReview:null,ownerReadbackReady:false,
     previewId:'',previewTitleMatches:false,images:null,lastRemoteId:'',holdAfterWrite:false,
-    refreshPromise:null,syncing:false,linkReadbackHold:false,closeout508:null};
+    refreshPromise:null,syncing:false,linkReadbackHold:false,closeout508:null,independent509:null,gateway509:null};
   if(id===53){$('dd500ListingId').value='4603838854';$('dd500CandidateNote').hidden=false;
     if($('dd503OwnerNote'))$('dd503OwnerNote').hidden=false;}
   if(id!==53)$('dd508CloseoutPanel').hidden=true;
+  if(id!==53)$('dd509IndependentPanel').hidden=true;
   const ready=()=>id>0&&form.dataset.productAuthority==='ready'&&form.dataset.productDirty!=='1';
   const key=()=>crypto.randomUUID();
   const status=(message,hold=false)=>{const el=$('dd500Status');el.textContent=message;el.dataset.tone=hold?'hold':'ok';};
@@ -23,6 +24,11 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   };
   function resetOwnerApproval(){state.ownerReadbackReady=false;
     state.closeout508=null;
+    state.independent509=null;
+    for(const field of ['dd509NoEtsyChange','dd509ConfirmPhotos','dd509ConfirmMetadata','dd509ConfirmDelivery','dd509ConfirmSeparate'])$(field).checked=false;
+    $('dd509RecordException').disabled=true;$('dd509IndependentAccept').disabled=true;
+    $('dd509Status').textContent='HOLD — Saved Product details changed; refresh the actual original/Etsy photo pairs and owner approval evidence.';
+    $('dd509Photos').replaceChildren();
     for(const field of ['dd508SameDraft','dd508EachPhoto','dd508Metadata','dd508Unpublished'])$(field).checked=false;
     $('dd508Record').disabled=true;
     $('dd508ReviewStatus').textContent='HOLD — Saved Product details changed. Review the actual Etsy draft and all three original photo receipts again.';
@@ -301,6 +307,101 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
         `${(r.missing_or_next_steps||[]).join(' | ')||'Handshake is still in read-only TESTING; independent owner authorization required.'} `+
         'No secret disclosed; no data access, product transfers, events or commands enabled.';
     }catch(error){output.textContent=`DISCONNECTED — ${error.message}. No credential was exposed or provisioned.`;}
+  }
+  const independentFields509=['dd509ConfirmPhotos','dd509ConfirmMetadata','dd509ConfirmDelivery','dd509ConfirmSeparate'];
+  const gatewayFields509=['dd509GatewayRotation','dd509GatewayTenant','dd509GatewaySecrets','dd509GatewayNoDispatch'];
+  function update509Buttons(){
+    const source=state.independent509;
+    $('dd509RecordException').disabled=!(id===53&&ready()&&source?.exception_followup_allowed===true&&
+      (String(source.listing_id)==='4603838854'||source.listing_id===null)&&$('dd509NoEtsyChange').checked&&
+      $('dd509ExceptionCategory').value&&$('dd509NextAction').value.trim().length>=15);
+    $('dd509IndependentAccept').disabled=!(id===53&&ready()&&source?.ready_for_independent_review===true&&
+      $('dd509NoEtsyChange').checked&&independentFields509.every(field=>$(field).checked));
+    $('dd509GatewayHandoff').disabled=!(state.gateway509?.ready_to_prepare_security_handoff===true&&
+      gatewayFields509.every(field=>$(field).checked));
+  }
+  function photoURL509(value){try{const url=new URL(String(value||''),location.origin);
+    return url.protocol==='https:'||url.origin===location.origin&&url.protocol==='http:'?url.href:null;
+  }catch{return null;}}
+  function renderPhotoPairs509(rows){
+    const host=$('dd509Photos');host.replaceChildren();
+    for(const row of rows){
+      const card=document.createElement('div');card.className='dd509-photo-card';
+      const title=document.createElement('strong');title.textContent=`Original #${row.product_image_id} ↔ Etsy photo #${row.etsy_image_id||'not confirmed'}`;
+      card.append(title);const pair=document.createElement('div');pair.className='dd509-pair';
+      for(const [label,value] of [['Our source original',row.original_image_url],['Actual Etsy draft photo',row.etsy_image_url]]){
+        const figure=document.createElement('figure'),src=photoURL509(value);
+        if(src){const img=document.createElement('img');img.src=src;img.loading='lazy';img.alt=`${label} for Product #53 original #${row.product_image_id}`;figure.append(img);}
+        else{const missing=document.createElement('p');missing.textContent='Image not available — HOLD';figure.append(missing);}
+        const caption=document.createElement('figcaption');caption.textContent=label;figure.append(caption);pair.append(figure);
+      }
+      card.append(pair);const result=document.createElement('p');
+      result.textContent=row.ready?'Current IDs and image URLs match a saved receipt; visually compare both photographs.':
+        'HOLD — one or more current source/Etsy images or receipts are missing or conflicting.';
+      card.append(result);host.append(card);
+    }
+  }
+  async function independentReview509(){
+    state.independent509=null;
+    for(const field of ['dd509NoEtsyChange',...independentFields509])$(field).checked=false;
+    update509Buttons();$('dd509Photos').replaceChildren();
+    const output=$('dd509Status');if(id!==53||!ready()){
+      output.textContent='HOLD — Save Product #53 and wait for the latest saved record before the independent review.';return;}
+    output.textContent='Independently reading the exact same Etsy draft, three source photo URLs, remote images and the last owner closeout…';
+    try{
+      const r=await api(`/api/admin/product-etsy-independent-review-509?product_id=${id}`);
+      state.independent509=(String(r.listing_id)==='4603838854'||r.listing_id===null)?r:null;
+      renderPhotoPairs509(r.original_photo_receipts||[]);
+      output.textContent=`Product #53 • Etsy #${r.listing_id||'not linked'} • photo freshness ${r.photo_freshness_ready?'verified IDs/URLs; visual review required':'HOLD'} `+
+        `• owner closeout #${r.owner_closeout_receipt_id||'missing'} • separate reviewer ${r.separate_reviewer?'confirmed':'required'} `+
+        `• current evidence ${String(r.evidence_fingerprint||'not available').slice(0,16)}. `+
+        (r.ready_for_independent_review?'READY FOR A DIFFERENT VERIFIED ADMIN — inspect the actual photos and confirm each independent condition.':
+          `HOLD — ${(r.issues||[]).join(' | ')||'Current owner/media evidence is not fully accepted.'}`);
+    }catch(error){output.textContent=`HOLD — ${error.message}. No Etsy changes, sign-off or exception override occurred.`;}
+    update509Buttons();
+  }
+  async function submitIndependent509(action){
+    update509Buttons();if(!state.independent509)return;
+    const followup=action==='record_exception_followup',button=$(followup?'dd509RecordException':'dd509IndependentAccept');
+    if(button.disabled)return;button.disabled=true;
+    const receipt=$('dd509Receipt');receipt.textContent='Rechecking the actual Etsy/photo fingerprint and saving one local reviewer decision…';
+    try{
+      const r=await api('/api/admin/product-etsy-independent-review-509',{
+        action,product_id:53,listing_id:'4603838854',evidence_fingerprint:state.independent509.evidence_fingerprint||null,
+        request_key:key(),confirm_no_etsy_changes:true,
+        ...(followup?{category:$('dd509ExceptionCategory').value,next_action:$('dd509NextAction').value.trim()}:{
+          confirm_all_originals:true,confirm_description_tags:true,confirm_canada_only_unpublished:true,confirm_independent_review:true})});
+      receipt.textContent=followup?`EXCEPTION FOLLOW-UP #${r.receipt_id||'recorded'} saved locally. HOLD remains; nothing changed at Etsy.`:
+        `INDEPENDENT RECEIPT #${r.receipt_id||'recorded'} recorded for current evidence. Etsy remains unpublished.`;
+      state.independent509=null;
+      for(const field of ['dd509NoEtsyChange',...independentFields509])$(field).checked=false;
+    }catch(error){receipt.textContent=`HOLD — ${error.message}. Refresh the actual Etsy/photo evidence before another decision.`;
+      state.independent509=null;}
+    update509Buttons();
+  }
+  async function gatewayReview509(){
+    state.gateway509=null;gatewayFields509.forEach(field=>$(field).checked=false);update509Buttons();
+    const output=$('dd509GatewayStatus');output.textContent='Reading current server-only credential readiness and signed gateway GET receipts…';
+    try{const r=await api('/api/admin/integration-gateway-security-handoff-509');
+      state.gateway509=r.ready_to_prepare_security_handoff?r:null;
+      output.textContent=`${r.state||'DISCONNECTED'} • health GET ${r.accepted_health_receipt?'accepted':'missing'} • capabilities GET ${r.accepted_capabilities_receipt?'accepted':'missing'} `+
+        `• environment ${r.environment||'not configured'}. `+
+        (r.ready_to_prepare_security_handoff?'READY FOR OWNER SECURITY HANDOFF REVIEW ONLY. No business connection activated.':
+          `HOLD — ${(r.missing_or_next_steps||[]).join(' | ')||'Signed gateway receipts and independently provisioned server-only credentials are required.'}`);
+    }catch(error){output.textContent=`DISCONNECTED — ${error.message}. No credentials or business data were accessed.`;}
+    update509Buttons();
+  }
+  async function gatewayHandoff509(){
+    update509Buttons();if($('dd509GatewayHandoff').disabled||!state.gateway509)return;
+    const stateBefore=state.gateway509;state.gateway509=null;update509Buttons();
+    const output=$('dd509GatewayReceipt');output.textContent='Rechecking signed health/capabilities proof and recording a read-only owner security handoff…';
+    try{const r=await api('/api/admin/integration-gateway-security-handoff-509',{
+      action:'record_read_only_security_handoff',request_key:key(),environment:stateBefore.environment,
+      confirm_rotation_plan:true,confirm_tenant_isolation:true,confirm_secrets_server_only:true,
+      confirm_no_dispatch_or_data_access:true});
+      output.textContent=`SECURITY HANDOFF #${r.receipt_id||'recorded'} saved for independent review. Still TESTING; no credentials provisioned or live connection approved.`;
+    }catch(error){output.textContent=`HOLD — ${error.message}. Gateway permissions remain disabled.`;}
+    gatewayFields509.forEach(field=>$(field).checked=false);update509Buttons();
   }
   // Build 501: the owner opts in once with the Etsy checkbox. A confirmed
   // local Save (or approved gallery save) can now drive the complete package.
@@ -639,6 +740,14 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   closeoutFields508.forEach(field=>$(field).addEventListener('change',updateCloseout508Button));
   $('dd508Record').addEventListener('click',()=>void recordCloseout508());
   $('dd508GatewayCheck').addEventListener('click',()=>void reviewGateway508());
+  $('dd509Review').addEventListener('click',()=>void independentReview509());
+  for(const field of ['dd509ExceptionCategory','dd509NextAction','dd509NoEtsyChange',...independentFields509])
+    $(field).addEventListener(field==='dd509NextAction'?'input':'change',update509Buttons);
+  $('dd509RecordException').addEventListener('click',()=>void submitIndependent509('record_exception_followup'));
+  $('dd509IndependentAccept').addEventListener('click',()=>void submitIndependent509('record_independent_acceptance'));
+  $('dd509GatewayReview').addEventListener('click',()=>void gatewayReview509());
+  gatewayFields509.forEach(field=>$(field).addEventListener('change',update509Buttons));
+  $('dd509GatewayHandoff').addEventListener('click',()=>void gatewayHandoff509());
   $('dd504ApproveContent').addEventListener('change',()=>{$('dd504Signoff').disabled=!state.ownerReadbackReady||!$('dd504ApproveContent').checked;});
   $('dd504Signoff').addEventListener('click',()=>void ownerSignoff());
   $('dd505InspectClaim').addEventListener('click',()=>void inspectLocalClaim505());
