@@ -40,6 +40,17 @@ body:has([data-editor-tab="etsy"][aria-selected="true"]) .dd471-creation-flow {
 }
 .dd-etsy-panel .dd515-photo-repair summary {cursor:pointer;font-weight:600;line-height:1.4}
 .dd-etsy-panel .dd515-photo-repair #dd505PhotoReview {margin-top:14px}
+.dd-etsy-panel .dd516-photo-action {
+  border:1px solid rgba(118,164,200,.5);
+  border-radius:10px;
+  background:rgba(45,85,126,.13);
+  padding:14px;
+  display:grid;
+  gap:10px;
+}
+.dd-etsy-panel .dd516-photo-action[hidden] {display:none}
+.dd-etsy-panel #dd516PhotoStatus {margin:0;line-height:1.5;overflow-wrap:anywhere}
+.dd-etsy-panel .dd516-photo-action .btn {max-width:max-content}
 .dd-etsy-panel .dd515-support[open] {display:grid;gap:12px}
 /* The prior alternative draft editor duplicated the same create/update actions.
    Keep historical wiring available in source, but don't show two competing UIs. */
