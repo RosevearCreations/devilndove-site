@@ -353,6 +353,7 @@ jobs:
           node scripts/release467_build513_etsy_disposition_ql246_proof.test.mjs
           node scripts/release467_build514_owner_witness_ql247_source_readiness.test.mjs
           node scripts/release467_build515_owner_conflict_ql248_test_prerequisites.test.mjs
+          node scripts/release467_build515_etsy_simple_ui.test.mjs
           node scripts/release467_build499_owner_advanced_tags_media.test.mjs
           node scripts/release467_build497_product53_three_channel_acceptance.test.mjs
 

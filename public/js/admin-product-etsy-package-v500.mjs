@@ -13,6 +13,9 @@ export const numericEtsyListing511=value=>{
   return /^[1-9]\d{0,14}$/.test(text)&&Number.isSafeInteger(Number(text))?text:'';
 };
 if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
+  // Reuse the proven Build 505 image-matching controls, but disclose them only
+  // when an existing draft already contains photos. The normal tab stays small.
+  $('dd515PhotoRepairMount')?.append($('dd505PhotoReview'));
   const state={busy:false,linked:'',loaded:false,assessment:null,readIssues:[],settings:null,attempted:false,claim:null,claimReview:null,photoReview:null,ownerReadbackReady:false,
     previewId:'',previewTitleMatches:false,images:null,lastRemoteId:'',holdAfterWrite:false,
     refreshPromise:null,syncing:false,linkReadbackHold:false,closeout508:null,independent509:null,gateway509:null,
@@ -125,6 +128,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     }
     $('dd505OwnerResolution').hidden=!conflict;
     $('dd505PhotoReview').hidden=!linked;
+    $('dd515PhotoRepair').hidden=!linked;
     $('dd505ResolveClaim').disabled=state.busy||!ready()||!state.claimReview?.safe_to_offer||
       !$('dd505ReviewedOther').checked||!$('dd505CorrectTarget').checked;
     $('dd500Identity').textContent=linked?`Product #${id} is linked to Etsy draft #${state.linked}. Changes use this same listing ID.`:
@@ -219,9 +223,17 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       error.linkReadbackHold=true;throw error;}
     if(savedId&&link.saved_link_readback_confirmed!==true){const error=Error('The saved Etsy listing ID lacks an independent D1 primary receipt. Recheck this Product before any Etsy update; never create a duplicate.');
       error.partialLink=savedId;error.linkReadbackHold=true;throw error;}
-    if(savedId&&numericEtsyListing511(images.listing_id)!==savedId){const error=Error(`Saved Etsy draft #${savedId} and the photo receipt listing ID do not agree. Review the existing draft and repair the photo receipt with source evidence before any Etsy update.`);
-      error.partialLink=savedId;error.linkReadbackHold=true;throw error;}
     const assessment=assessEtsyPackage500(distribution,images,tags);
+    // The saved Etsy listing is a separate D1 identity from the photo receipts.
+    // A missing/stale media receipt must HOLD uploads, but cannot erase the
+    // uniquely confirmed Product → listing ID or suppress the Product identity.
+    if(savedId&&numericEtsyListing511(images.listing_id)!==savedId){
+      const another=numericEtsyListing511(images.listing_id);
+      assessment.issues.push(another?
+        `Photo records point to Etsy #${another}, but this Product is linked to #${savedId}. The images cannot be transferred until the incorrect receipt is independently reconciled.`:
+        `Etsy draft #${savedId} is saved, but its photo-record verification is missing. Check this exact draft and reconcile its images before uploading any more.`);
+      assessment.media_identity_hold=true;
+    }
     if(id===53&&![344,345,346].every(photo=>assessment.image_ids.includes(photo)))
       assessment.issues.push('Product #53 is missing one of its three original photos #344–346; inspect before transfer.');
     if(id===53&&tags.tag_source==='etsy_override'&&(tags.local_tags||[]).some(tag=>/\bsoap\s*bars?\b/i.test(String(tag))))
@@ -1291,26 +1303,21 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   for(const name of ['Consent','LinkConsent','ListingId'])for(const event of ['input','change'])$('dd500'+name).addEventListener(event,()=>{
     if(name==='ListingId'){$('dd500OlderTitleRow').hidden=true;$('dd500OlderTitle').checked=false;state.claim=null;state.claimReview=null;state.photoReview=null;resetOwnerApproval();}show();});
   form.addEventListener('input',event=>{if(event.target.closest('#dd500Package'))return;state.loaded=false;resetOwnerApproval();show();});
+  // Build 515: saving the local Product no longer silently runs a hidden Etsy
+  // upload. The Etsy tab is the explicit place for Create or Update.
   document.addEventListener('dd:save-succeeded',event=>{
     state.loaded=false;resetOwnerApproval();$('dd500Consent').checked=false;
     if(!state.holdAfterWrite)state.attempted=false;
-    if(event.detail?.etsy_sync_requested===true&&event.detail?.destinations_confirmed===true&&!event.detail?.newer_edits){
-      void (async()=>{await refresh();await syncAfterSave('product');})();
-    }else{
-      saveState(event.detail?.destinations_confirmed===false?'HOLD — Product saved but Etsy checkbox persistence was not confirmed. No Etsy write attempted.':
-        'Product saved locally. Etsy sync is OFF or this Save was not authorized for Etsy.','');
-      void refresh();
-    }
+    saveState(event.detail?.destinations_confirmed===false?
+      'Product saved; destination settings need review. No Etsy write attempted.':
+      'Product saved. Open the Etsy tab and choose Create or Update when ready. No automatic Etsy write.','');
+    void refresh();
   });
-  document.addEventListener('dd:product-loaded',()=>void (async()=>{
-    const resumed=consumeCreateRequest();
-    await refresh();
-    if(resumed)await syncAfterSave('product');
-  })());
+  document.addEventListener('dd:product-loaded',()=>void refresh());
   document.addEventListener('dd:media-inline-updated',event=>{
     if(Number(event.detail?.product_id)!==id)return;
     state.loaded=false;resetOwnerApproval();$('dd500Consent').checked=false;
-    void (async()=>{await refresh();if(ready())await syncAfterSave('media');})();
+    void refresh();
   });
   document.addEventListener('dd:product-channel-tags-changed',()=>{state.loaded=false;resetOwnerApproval();void refresh();});
   document.addEventListener('dd:editor-tab-opened',event=>{
@@ -1319,9 +1326,5 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       if(!state.linked&&!state.settings&&!$('dd500ListingId').value.trim())await loadOptions();
     })();
   });
-  show();if(ready())void (async()=>{
-    const resumed=consumeCreateRequest();
-    await refresh();
-    if(resumed)await syncAfterSave('product');
-  })();
+  show();if(ready())void refresh();
 }

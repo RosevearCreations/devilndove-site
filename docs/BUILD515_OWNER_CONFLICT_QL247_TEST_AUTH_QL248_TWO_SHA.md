@@ -1,5 +1,13 @@
 # Devil n Dove Build 515 — Product #53 source conflict reassessment and QL-247/248 prerequisites
 
+## Owner-requested Etsy tab simplification
+
+The Product Editor **Etsy** tab now leads with one Create/Update draft panel. It shows the **saved D1 Product name, SKU, slug, and listing ID** together; an existing listing ID is never inferred from `linked: true`. New drafts require one-time Etsy category, Canada-only shipping and packed dimensions. Linked drafts use the exact saved numeric ID. One explicit button requests a draft-only package: saved Product details, approved gallery originals, native tags and advanced metadata, followed by Etsy readback. The normal **Save Product** action saves the local store record only and cannot secretly start an Etsy provider write; gallery edits also only refresh readiness.
+
+All previous Build 506–515 witness forms and QL-247/248 gateway controls are retained behind **closed Technical history and gateway diagnostics**. Older competing Etsy controls are hidden. The exact missing conditions are under one optional checklist. If photos already exist on the linked draft, a separate collapsed **Match existing photos** option reuses the verified Build 505 side-by-side original/Etsy image pairing; this records a verified existing match without uploading a duplicate.
+
+The former client guard hid the saved Etsy ID when the photo endpoint's listing field was missing or stale. Build 515 now preserves the **uniquely verified numeric D1 listing identity** in the UI while placing the **photo transfer itself on HOLD** until its conflicting or missing receipt is reconciled. This is not an invented photo match, not bypass permission, and not proof of a successful Product #53 image update. Real owner-signed Etsy media readback remains necessary before we can say those images have transferred.
+
 ## Same existing Etsy draft, no silent repair
 
 Product #53 must retain the existing unpublished, Canada-only **Etsy draft #4603838854**. Prior Build 513 content-photo checks and Build 514 factual owner observations are distinct from a verified Etsy provider receipt. A local owner note may truthfully report that the D1 claim or historical photo receipts remain uncertain. Build 515 must not reassign a listing ID, invent Etsy photo receipts, wipe a discrepancy, create a second draft, transfer media, retry a provider write or record final owner acceptance.
@@ -45,6 +53,7 @@ The separate operator must (1) agree to noncircular proof transport with both so
 
 ```sh
 node scripts/release467_build515_owner_conflict_ql248_test_prerequisites.test.mjs
+node scripts/release467_build515_etsy_simple_ui.test.mjs
 node --test scripts/release467_build50*.test.mjs scripts/release467_build51*.test.mjs
 python scripts/current_application_quality_gate.py
 ```
