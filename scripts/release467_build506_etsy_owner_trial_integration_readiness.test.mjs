@@ -13,12 +13,11 @@ const root='https://devilndove.com';
 const env={ROSEVEAR_INTEGRATION_HMAC_SECRET_V1:'synthetic-unpublished-local-test-secret-506',ROSEVEAR_INTEGRATION_KEY_ID_V1:'gateway-v1-test',ROSEVEAR_INTEGRATION_ENVIRONMENT_V1:'preview'};
 
 function receiptDb(rows){return {withSession(mode){assert.equal(mode,'first-primary');return this;},prepare(sql){return {bind(...params){return {
-  async first(){if(sql.includes('LEFT JOIN products'))return rows.find(row=>String(row.external_reference)===String(params[0]))||null;
-    return rows.find(row=>String(row.product_id)===String(params[0])&&String(row.external_reference)===String(params[1]))||null;}
+  async all(){return {results:rows.filter(row=>String(row.external_reference)===String(params[0])).slice(0,3)};}
 };}};}};}
 test('Build506 Product #53 Etsy saved ID uses independent primary receipt and rejects claimant mismatch',async()=>{
   const original={id:'receipt-53',product_id:53,external_reference:'4603838854'};
-  assert.deepEqual(await linkedReceipt506(receiptDb([original]),53,'4603838854'),{confirmed:true,receipt_id:'receipt-53',listing_id:'4603838854'});
+  assert.deepEqual(await linkedReceipt506(receiptDb([original]),53,'4603838854'),{confirmed:true,receipt_id:'receipt-53',listing_id:'4603838854',claim_state:'same_product',claim_count_capped:1});
   assert.equal((await linkedReceipt506(receiptDb([]),53,'4603838854')).confirmed,false);
   const multi=[original,{id:'receipt-99',product_id:99,external_reference:'4603838854'}];
   assert.equal((await linkedReceipt506(receiptDb(multi.slice().reverse()),53,'4603838854')).confirmed,false);
@@ -75,8 +74,8 @@ test('Etsy readback and UI remain owner-gated; no automatic duplicate, tag guess
  assert.match(ui,/link\.linked_listing_id&&link\.saved_link_readback_confirmed!==true/);
  assert.match(ui,/reviewTrial506/);
  assert.match(html,/dd506TrialCheck/);
- assert.match(html,/etsy-package-500\.css\?v=506/);
- assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=506/);
+ assert.match(html,/etsy-package-500\.css\?v=50[67]/);
+ assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=50[67]/);
  assert.equal(read('functions/api/integration/v1/health.js').includes('product_id'),false);
  assert.equal(read('functions/api/integration/v1/capabilities.js').includes('enabled:true,method:\'POST\''),false);
 });

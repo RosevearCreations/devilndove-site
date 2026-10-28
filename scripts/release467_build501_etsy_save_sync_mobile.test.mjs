@@ -15,8 +15,8 @@ test('Etsy checkbox has a fixed intrinsic width, no forced 100%-wide consent box
   assert.match(css,/\.dd500-consent>span/);
   assert.match(html,/<label class="dd500-consent"><input type="checkbox" id="dd500Consent"><span>/);
   assert.match(html,/<label><input type="checkbox" id="dd500LinkConsent"><span>/);
-  assert.match(html,/<link rel="stylesheet" href="\/admin\/product-editor\/etsy-package-500\.css\?v=50(?:1|3|4|5|6)"\/>/);
-  assert.ok(/etsy-package-500\.css\?v=50[3456]/.test(html.slice(0,html.indexOf('</head>'))),'CSS must load in head before layout');
+  assert.match(html,/<link rel="stylesheet" href="\/admin\/product-editor\/etsy-package-500\.css\?v=50(?:1|3|4|5|6|7)"\/>/);
+  assert.ok(/etsy-package-500\.css\?v=50[34567]/.test(html.slice(0,html.indexOf('</head>'))),'CSS must load in head before layout');
   assert.doesNotMatch(html.slice(html.indexOf('<body')),/etsy-package-500\.css/);
 });
 test('one checkbox, one Product save, and one verified Etsy create/update authorization',()=>{

@@ -28,11 +28,17 @@ async function localLinkOnly(db,id){const [product,draft]=await Promise.all([
 // Read the D1 primary after linking and return proof or an actionable HOLD.
 export async function linkedReceipt506(db,id,listingId){
  const primary=typeof db.withSession==='function'?db.withSession('first-primary'):db;
- const receipt=await primary.prepare("SELECT id,product_id,external_reference,payload_json FROM marketplace_syndication_drafts WHERE channel_key='etsy' AND product_id=? AND external_reference=? ORDER BY updated_at DESC LIMIT 1")
-   .bind(id,String(listingId)).first();
- const claim=receipt?await claimedListing505(primary,String(listingId)):null;
- return {confirmed:Boolean(receipt&&claim&&String(claim.product_id)===String(id)&&String(claim.id)===String(receipt.id)),
-   receipt_id:receipt?String(receipt.id):null,listing_id:receipt?String(receipt.external_reference):null};
+ // Build 507: query the listing claim exactly ONCE on the primary. The older
+ // two independent "latest" SELECTs could disagree if multiple legacy rows
+ // shared an updated_at second; never accept an ambiguous cross-Product claim.
+ const result=await primary.prepare("SELECT id,product_id,external_reference FROM marketplace_syndication_drafts WHERE channel_key='etsy' AND external_reference=? ORDER BY id ASC LIMIT 3")
+   .bind(String(listingId)).all();
+ const rows=Array.isArray(result?.results)?result.results:[];
+ const receipt=rows.length===1&&String(rows[0].product_id)===String(id)?rows[0]:null;
+ return {confirmed:Boolean(receipt),receipt_id:receipt?String(receipt.id):null,
+   listing_id:receipt?String(receipt.external_reference):null,
+   claim_state:rows.length===0?'unclaimed':rows.length>1?'multiple_local_claims':receipt?'same_product':'another_product',
+   claim_count_capped:rows.length};
 }
 // Build 504: differentiate a replay of THIS Product's verified receipt from
 // another Product that already owns the Etsy ID. Never silently move claims.
@@ -67,7 +73,17 @@ export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
  const candidate=url.searchParams.get('candidate_listing_id');
  const claim=valid(candidate)?ownerClaim504(await claimedListing505(db,String(candidate)),id):null;
  const verified=valid(s.draft?.external_reference)?await linkedReceipt506(db,Number(id),String(s.draft.external_reference)):null;
- return respond({product_id:Number(id),product_name:String(s.product.name||''),product_sku:String(s.product.sku||''),product_slug:String(s.product.slug||''),linked_listing_id:valid(s.draft?.external_reference)?String(s.draft.external_reference):null,linked_source:parse(s.draft).verified_remote_existing_draft?'verified_existing_etsy_draft':s.draft?'product_editor_or_legacy_receipt':'unlinked',saved_link_readback_confirmed:verified?.confirmed===true,receipt_id:verified?.receipt_id||null,candidate_claim:claim,requires_explicit_review:true});
+ const candidateProof=valid(candidate)?await linkedReceipt506(db,Number(id),String(candidate)):null;
+ // A unique primary-backed candidate is stronger evidence than a possibly
+ // stale product-key lookup; never fall back to a candidate claimed elsewhere.
+ const recovered=!s.draft&&candidateProof?.confirmed===true?candidateProof:null;
+ const effective=verified?.confirmed?verified:recovered;
+ return respond({product_id:Number(id),product_name:String(s.product.name||''),product_sku:String(s.product.sku||''),product_slug:String(s.product.slug||''),
+  linked_listing_id:effective?.listing_id||(valid(s.draft?.external_reference)?String(s.draft.external_reference):null),
+  linked_source:recovered?'unique_primary_listing_claim_507':parse(s.draft).verified_remote_existing_draft?'verified_existing_etsy_draft':s.draft?'product_editor_or_legacy_receipt':'unlinked',
+  saved_link_readback_confirmed:effective?.confirmed===true,receipt_id:effective?.receipt_id||null,
+  candidate_receipt_state:candidateProof?.claim_state||null,candidate_claim_count_capped:candidateProof?.claim_count_capped??null,
+  candidate_claim:claim,requires_explicit_review:true});
  }catch{return respond({error:'Existing draft status unavailable.'},503)}}
 export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error;if(c.request.headers.get('Origin')!==new URL(c.request.url).origin)return respond({error:'Same-origin required.'},403);
  let b;try{b=await c.request.json()}catch{return respond({error:'JSON required.'},400)}
@@ -83,6 +99,8 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
    const titleMatches=String(remote.title||'').trim().toLocaleLowerCase()===String(s.product.name||'').trim().toLocaleLowerCase();
    if(action==='inspect_listing')return respond({listing_id:listingId,etsy_title:String(remote.title||'').slice(0,140),product_title:String(s.product.name||'').slice(0,140),title_matches:titleMatches,verified_unpublished:true,verified_canada_only:true,provider_modified:false});
    if(!titleMatches&&b?.confirm_prior_title_difference!==true)return respond({error:'Etsy title differs from saved Product. Inspect the draft preview and explicitly confirm the older title is the same item before linking.'},409);
+   const currentProof=await linkedReceipt506(g.db,id,listingId);
+   if(currentProof.claim_state==='multiple_local_claims')return respond({error:'More than one local receipt claims this exact Etsy draft. Independent owner reconciliation is required before changing anything; no duplicate Etsy draft was created.',code:'etsy_507_duplicate_local_claim_hold',listing_id:listingId,claim_count_capped:currentProof.claim_count_capped},409);
    const collision=await claimedListing505(g.db,listingId),claim=ownerClaim504(collision,id);
    if(claim.state==='another_product')return respond({error:`Etsy draft #${listingId} is already recorded against LOCAL Product #${claim.product.product_id} (${claim.product.name||claim.product.sku||'unnamed Product'}). Open that Product and confirm which record is the real owner. Product #${id} was not linked or changed.`,code:'etsy_listing_claimed_by_another_product',linked_product_id:claim.product.product_id,conflicting_product:claim.product},409);
    const payload={...parse(collision),verified_remote_existing_draft:true,remote_etsy_draft_created:false,publication_performed:false,canada_only_shipping_verified:true,shipping_profile_id:remote.shipping_profile_id,request_key:b.request_key,verified_listing_id:listingId};
@@ -91,7 +109,7 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
       .bind(JSON.stringify(payload),collision.id,String(id),listingId).run();
     if(Number(updated.meta?.changes)!==1)return respond({error:'Saved Etsy receipt could not be reverified. Refresh the same Product before trying again.',code:'etsy_receipt_recheck_unconfirmed'},409);
     const readback=await linkedReceipt506(g.db,id,listingId);
-    if(!readback.confirmed)return respond({error:'Etsy identity was checked, but its local Product ID receipt could not be confirmed after the update. Recheck saved details; do not create another draft.',code:'etsy_506_persistence_readback_hold',listing_id:listingId,local_link_write_attempted:true},409);
+    if(!readback.confirmed)return respond({error:`Etsy identity was checked, but its exact local ID receipt remains ${readback.claim_state}. Recheck the one existing draft; do not create another.`,code:'etsy_506_persistence_readback_hold',claim_state:readback.claim_state,listing_id:listingId,local_link_write_attempted:true},409);
     await auditAdminAction(c.env,c.request,g.admin,{action_type:'etsy_existing_draft_504_same_product_receipt_verified',target_type:'product',target_key:String(id),details:{listing_id:listingId,shop_id:s.shop.shop_id,receipt_id:readback.receipt_id,publication_performed:false}});
     return respond({linked:true,listing_id:listingId,reused_existing_receipt:true,saved_link_readback_confirmed:true,receipt_id:readback.receipt_id,message:'Existing same-Product Etsy draft independently confirmed in saved D1 receipt. No duplicate was created.'});
    }
@@ -102,7 +120,7 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
     .bind(crypto.randomUUID(),id,String(s.product.name),JSON.stringify(payload),'needs_review',listingId,String(g.admin.email||'admin'),id,listingId).run();
    if(Number(result.meta?.changes)!==1)return respond({error:'Existing draft link already claimed. Reload before continuing.'},409);
    const readback=await linkedReceipt506(g.db,id,listingId);
-   if(!readback.confirmed)return respond({error:'Etsy identity was checked and a local save was attempted, but the exact Product-to-listing receipt was not confirmed. Recheck saved details only; do not create another draft.',code:'etsy_506_persistence_readback_hold',listing_id:listingId,local_link_write_attempted:true},409);
+   if(!readback.confirmed)return respond({error:`Etsy identity was checked and a local save was attempted, but its receipt remains ${readback.claim_state}. Recheck saved details only; do not create another draft.`,code:'etsy_506_persistence_readback_hold',claim_state:readback.claim_state,listing_id:listingId,local_link_write_attempted:true},409);
    await auditAdminAction(c.env,c.request,g.admin,{action_type:'etsy_existing_draft_486_link_verified',target_type:'product',target_key:String(id),details:{build:506,listing_id:listingId,receipt_id:readback.receipt_id,shop_id:s.shop.shop_id,publication_performed:false}});
    return respond({linked:true,listing_id:listingId,saved_link_readback_confirmed:true,receipt_id:readback.receipt_id,message:'Existing unpublished Canada-only Etsy draft and its saved Product link confirmed. No listing created or changed.'});
   }
