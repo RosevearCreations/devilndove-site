@@ -106,7 +106,8 @@ test('Build511 Etsy numeric listing guard prevents the observed #true button and
  assert.match(js,/numericEtsyListing511\(partial\.value\?\.linked_listing_id\)/);
  assert.match(js,/state\.linked=numericEtsyListing511\(error\.partialLink\)/);
  assert.match(js,/state\.linkReadbackHold=error\.linkReadbackHold===true/);
- assert.match(js,/photo receipt listing ID do not agree/);
+ assert.match(js,/assessment\.media_identity_hold=true/);
+ assert.match(js,/photo-record verification is missing/);
  // Import in an inert page shell to exercise the actual browser helper.
  globalThis.document={getElementById:()=>null};globalThis.location={search:''};
  const {numericEtsyListing511}=await import('../public/js/admin-product-etsy-package-v500.mjs');

@@ -15,7 +15,8 @@
   <link rel="stylesheet" href="/admin/product-editor/creation-flow-471.css?v=471"/>
   <link rel="stylesheet" href="/admin/product-editor/entry-readiness-489.css?v=496"/>
   <link rel="stylesheet" href="/admin/product-editor/advanced-channels-498.css?v=498"/>
-  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=514"/>
+  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=515"/>
+  <link rel="stylesheet" href="/admin/product-editor/etsy-simple-515.css?v=515"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -58,8 +59,8 @@
       </section>
 
       <section class="dd471-creation-flow" aria-labelledby="dd471FlowTitle">
-        <div class="dd471-flow-head"><div><p class="eyebrow">Build 501 • Save once, sync the Etsy draft</p><h2 id="dd471FlowTitle">One Product, optional destinations</h2></div><span class="dd471-hold">Etsy draft only — never publish automatically</span></div>
-        <p class="small">Check Etsy and press <strong>Save Product</strong>. We first save the Devil n Dove Product, then create or update its <strong>same unpublished Etsy listing with every approved gallery photo</strong>. If first-time Etsy setup, photo permission or a previous draft needs attention, we show one clear HOLD instead of making a duplicate. Facebook Marketplace stays manual.</p>
+        <div class="dd471-flow-head"><div><h2 id="dd471FlowTitle">One Product, optional destinations</h2></div><span class="dd471-hold">Etsy draft only — never publish automatically</span></div>
+        <p class="small"><strong>Save Product</strong> saves our store record. To send it to Etsy, open the <strong>Etsy</strong> tab and explicitly choose Create or Update, including approved gallery photos. Facebook Marketplace stays manual.</p>
         <div id="productChannel471Mount"></div>
         <div id="dd501SaveState" class="dd501-save-state" role="status" aria-live="polite">Etsy is optional. When checked, the next successful Product save also requests an Etsy draft synchronization.</div>
         <div class="dd471-flow-actions"><button type="button" class="btn" id="dd471MediaReview" disabled>Review canonical gallery and media mapping</button><span class="small" id="dd471FlowStatus" role="status" aria-live="polite">New Product: enter its facts, choose destinations if desired, and save once.</span></div>
@@ -164,8 +165,8 @@
 
       <section class="dd-editor-panel dd-etsy-panel" data-editor-panel="etsy" hidden>
         <div class="card dd500-package" id="dd500Package" aria-labelledby="dd500Title">
-          <div class="dd500-head"><div><p class="eyebrow">Build 514 • Product #53 owner-witnessed evidence and QL-247 nonproduction source readiness</p><h2 id="dd500Title">Save and update our existing Etsy draft</h2>
-            <p class="small">No extra image selection. We use <strong>every approved photograph in this Product's gallery</strong>, its saved description, CAD price, quantity and search tags. Etsy creation returns a listing number we keep on this Product for all future updates. The listing stays <strong>unpublished</strong>.</p></div></div>
+          <div class="dd500-head"><div><h2 id="dd500Title">Etsy Drafts — Create or Update</h2>
+            <p>Save our Product, then create <strong>one new Etsy draft</strong> or update its <strong>existing draft</strong>. The approved original gallery photos go with it. Nothing publishes automatically.</p></div></div>
           <div class="dd503-owner-note" id="dd503OwnerNote" role="note" hidden><strong>Keep our existing Etsy draft #4603838854.</strong> Do not delete it or create another. First verify and link that ID, then update the same unpublished draft. Our last Etsy screenshot also showed the category “Bar Soaps”; confirm the correct category in Etsy before publishing.</div>
           <div class="dd500-id" id="dd500Identity" role="status" aria-live="polite">Reading this Product's saved Etsy listing ID…</div>
           <div class="dd504-claim" id="dd504Claim" role="status" aria-live="polite" hidden><span id="dd504ClaimMessage"></span> <a class="btn secondary" id="dd504ClaimProduct" href="/admin/products/" hidden>Review the other Product</a></div>
@@ -209,10 +210,17 @@
             <label><input type="checkbox" id="dd500Supply"> This item is a craft supply, not a finished handmade item</label>
             <p class="small" id="dd500OptionsStatus" role="status">Live options not loaded yet.</p>
           </details>
-          <div class="dd500-readiness"><h3>What will be sent</h3><ul id="dd500Checklist" class="small" role="status" aria-live="polite"><li>Checking Product and photos…</li></ul></div>
+          <details class="dd500-readiness" id="dd515TechnicalChecks"><summary>See exactly what's missing (if Etsy cannot update)</summary><ul id="dd500Checklist" class="small" role="status" aria-live="polite"><li>Checking Product and photos…</li></ul></details>
           <label class="dd500-consent"><input type="checkbox" id="dd500Consent"><span>I own/approve <strong>all</strong> gallery images for public use and authorize one unpublished, Canada-only Etsy package transfer: Product details, search tags, advanced fields and every eligible photo. Any uncertain result must be checked in Etsy before another attempt.</span></label>
-          <div class="dd-product-actions"><button class="btn primary" type="button" id="dd500Send" disabled>Checking Etsy draft…</button><button class="btn" type="button" id="dd500Refresh">Recheck saved details (no Etsy changes)</button><button class="btn" type="button" id="dd503Fix" hidden>Fix missing item</button></div>
+          <div class="dd-product-actions"><button class="btn primary" type="button" id="dd500Send" disabled>Checking Etsy draft…</button><button class="btn" type="button" id="dd500Refresh">Refresh draft status</button><button class="btn" type="button" id="dd503Fix" hidden>Fix missing item</button></div>
           <p class="small" id="dd500Status" role="status" aria-live="polite">No Etsy write attempted.</p>
+          <details id="dd515PhotoRepair" class="dd515-photo-repair" hidden>
+            <summary>Photos are already on Etsy? Match them without uploading duplicates</summary>
+            <div id="dd515PhotoRepairMount"></div>
+          </details>
+          <details class="dd515-support" id="dd515SupportDetails">
+            <summary>Technical history and gateway diagnostics (support only)</summary>
+            <p class="small">Older audit records and cross-application gateway checks are retained for technical review. They are not required just to create or update an Etsy draft.</p>
           <section class="dd505-review" aria-labelledby="dd506TrialTitle">
             <h3 id="dd506TrialTitle">Product #53 — owner trial receipt and metadata review</h3>
             <p class="small">Our existing Etsy draft is <strong>#4603838854</strong>. This check reads our saved Product, Etsy ID, search-tag source and original-photo receipts. It does not change Etsy or approve a listing.</p>
@@ -475,8 +483,45 @@
             <button type="button" class="btn" id="dd514ReviewGateway">Read our exact QL-247 missing-evidence and rollback checklist</button>
             <p class="small" id="dd514GatewayStatus" role="status" aria-live="polite">PENDING — GitHub identity is not a gateway credential. No real nonproduction connection or product/listing data sharing.</p>
           </section>
+          <section class="dd505-review" id="dd515OwnerPanel" aria-labelledby="dd515OwnerTitle">
+            <h3 id="dd515OwnerTitle">Build 515 — Independent Product #53 owner-observation conflict reassessment</h3>
+            <p class="small">The same unpublished Etsy draft <strong>#4603838854</strong> and real Product originals <strong>#344–346</strong> remain unchanged. A verified Admin who did <strong>not</strong> record the prior Build 514 owner observation may log a factual unresolved next step. This never repairs a listing/photo receipt, finalizes content or publishes anything.</p>
+            <button class="btn" type="button" id="dd515ReviewOwner">Read current Build 514 owner witness and primary claim conflict</button>
+            <p class="small" id="dd515OwnerStatus" role="status" aria-live="polite">HOLD — No independently reassessed owner source conflict.</p>
+            <label for="dd515Disposition">Specific still-unresolved evidence category</label>
+            <select class="input" id="dd515Disposition">
+              <option value="needs_listing_identity_verification">Verify the exact saved Etsy listing identity</option>
+              <option value="needs_source_photo_repair">Investigate original-photo/receipt mismatch</option>
+              <option value="needs_owner_content_correction">Owner correction of saved content/tags</option>
+              <option value="needs_external_etsy_evidence">Obtain current unpublished Etsy source evidence</option>
+              <option value="no_new_evidence_still_held">No new evidence — keep on HOLD</option>
+            </select>
+            <label for="dd515Observation">What did the separate reviewer actually find?</label>
+            <textarea class="input" id="dd515Observation" maxlength="800" rows="3" placeholder="Describe the current unresolved exact listing/photo/metadata discrepancy and manual next check. Never paste credentials."></textarea>
+            <label><input type="checkbox" id="dd515Exact"><span>We reviewed Product #53 and exactly the existing unpublished Etsy draft #4603838854.</span></label>
+            <label><input type="checkbox" id="dd515Separate"><span>We are a different verified Admin from the prior Build 514 owner observer.</span></label>
+            <label><input type="checkbox" id="dd515Hold"><span>Every historical receipt discrepancy stays unresolved until independently verified; no final approval.</span></label>
+            <label><input type="checkbox" id="dd515NoWrite"><span>No Etsy/Marketplace upload, listing claim change, new draft, publication or automatic retry.</span></label>
+            <button type="button" class="btn" id="dd515RecordOwner" disabled>Record separate unresolved conflict reassessment (local only)</button>
+            <p class="small" id="dd515OwnerResult" role="status" aria-live="polite">No independent Build 515 reassessment receipt recorded.</p>
+          </section>
+          <section class="dd505-review" id="dd515GatewayPanel" aria-labelledby="dd515GatewayTitle">
+            <h3 id="dd515GatewayTitle">QL-247 test prerequisites + QL-248 signed source/proof two-SHA amendment</h3>
+            <p class="small">QL-248 proposes signing the <strong>earlier tested source SHA</strong> and recording the later <strong>proof-bearing commit SHA separately</strong> in the operator manifest. The AI Data Platform and Comms Hub consumers must explicitly agree before use. No signed file, trusted public pin, real seven-denial witness, gateway test or owner pilot may be assumed.</p>
+            <button type="button" class="btn" id="dd515ReviewGateway">Read exact missing operator scope, test approval, pin and rollback requirements</button>
+            <p class="small" id="dd515GatewayStatus" role="status" aria-live="polite">DISCONNECTED / HOLD — No nonproduction test is authorized by this screen.</p>
+            <label for="dd515TestNote">Factual missing prerequisite note (public metadata only)</label>
+            <textarea class="input" id="dd515TestNote" rows="3" maxlength="800" placeholder="List which source commit, approved test scope, independent reviewer, trusted pin, real denial receipts or rollback evidence are missing. Never paste private keys or secrets."></textarea>
+            <label><input type="checkbox" id="dd515NotAuthorized"><span>This is not authorization to run an authenticated nonproduction test.</span></label>
+            <label><input type="checkbox" id="dd515NoSecrets"><span>No keys, credentials or private network details are entered or provisioned.</span></label>
+            <label><input type="checkbox" id="dd515TwoSha"><span>The two-SHA transport distinction remains proposed until consumers independently agree.</span></label>
+            <label><input type="checkbox" id="dd515NoGateway"><span>No gateway GET, live connection, marketplace write, call, SMS or dispatch will occur.</span></label>
+            <button type="button" class="btn" id="dd515RecordGateway" disabled>Record missing prerequisites (no test approval)</button>
+            <p class="small" id="dd515GatewayResult" role="status" aria-live="polite">No Build 515 operator-prerequisite note recorded.</p>
+          </section>
           <p class="small" id="dd501Resume" role="status" aria-live="polite">An Etsy checkbox plus Save Product authorizes the same draft workflow. This separate button is for finishing first-time setup or resolving a held package.</p>
           <p class="small">Our store retains the saved Product. Facebook Marketplace uses the same source photos but remains a manual handoff until Meta grants supported listing access. This button never publishes on either marketplace.</p>
+          </details>
         </div>
         <details id="dd500Legacy" class="dd500-troubleshooting"><summary>Advanced Etsy troubleshooting and individual controls (only if a package is on HOLD)</summary>
         <details class="dd498-advanced" data-dd498-channel="etsy" id="dd498EtsyAdvanced">
@@ -696,17 +741,17 @@
 <h2>Where should this Product be offered?</h2>
 <p class="small">One source Product and one gallery. Etsy checked means Save Product also creates or updates its unpublished Etsy draft and every approved photo, once requirements are ready. Unchecked means no Etsy write. Facebook remains manual.</p>
 <div class="dd-editor-grid cols-2">
-<label><input type="checkbox" id="productChannel405Etsy"> Sync this Product with Etsy when we Save</label>
+<label><input type="checkbox" id="productChannel405Etsy"> Prepare this Product for manual Etsy draft updates</label>
 <label><input type="checkbox" id="productChannel405Facebook"> Prepare this Product for Facebook Marketplace</label>
 </div>
-<label class="dd471-consent"><input type="checkbox" id="productChannel471Consent"> I authorize Etsy, if checked, to create or update <strong>one unpublished, Canada-only draft and all approved gallery photographs</strong> whenever we Save Product. No automatic publication. Facebook Marketplace remains manual.</label>
+<label class="dd471-consent"><input type="checkbox" id="productChannel471Consent"> I understand that Etsy draft creation or update requires a separate, explicit action on the Etsy tab. Nothing publishes automatically.</label>
 <details id="dd501ChannelRecovery"><summary>Destination recovery (only if a Save is on HOLD)</summary>
 <p class="small">Normal changes are saved with Save Product above. Use these recovery tools only after a destination confirmation problem, without repeating the Product creation.</p>
 <div class="dd-product-actions"><button type="button" class="btn" id="productChannel405Reload">Reload saved destination choices</button>
 <button type="button" class="btn" id="productChannel405Save">Save recovered destination choices only</button></div>
 <div id="productChannel471Recovery" class="dd471-recovery" hidden><p class="small">The Product was created, but destination saving was not confirmed. Review the verified saved choices and restore the pending choice before explicitly saving those preferences. Do not create the Product again.</p><button class="btn" type="button" id="productChannel471Restore">Review unsaved destination choices</button></div>
 </details>
-<p class="small" id="productChannel405Status" role="status">OFF by default. Save Product to save both its destination choice and its Etsy draft synchronization request.</p>
+<p class="small" id="productChannel405Status" role="status">Save Product stores destination preferences only; Etsy changes require the Etsy tab's Create or Update button.</p>
 <p class="small">Product gallery is edited in the Media tab and reused as the source for channel-specific draft/export reviews. Distribution remains subject to per-channel policy and explicit operator approval.</p>
 </section>
 <section class="card" id="productDistribution406" style="margin:14px 0;padding:18px">
@@ -734,7 +779,7 @@
 <section class="dd-editor-panel" data-editor-panel="advanced" hidden><h2>Advanced workspaces</h2><p class="small">These systems remain separate so they cannot wake up merely because we edit a Product.</p><div class="dd-product-actions"><a class="btn" href="/admin/inventory-operations/">Inventory Operations</a><a class="btn" id="productEditorMediaAdvancedLink" href="/admin/catalog-media/">Image Editor</a><a class="btn" href="/admin/release-preflight/">Release Preflight</a><a class="btn" href="/admin/packaging-studio/">Packaging</a></div></section>
 
       <div class="dd443-recovery" id="dd443Recovery" hidden role="region" aria-label="Unsaved Product recovery"><strong>Unsaved edits recovered from this browser session</strong><p class="small" id="dd443RecoveryStatus">Choose Restore to review them, or Discard to keep the saved Product.</p><div class="dd-product-actions"><button class="btn" id="dd443RecoveryRestore" type="button">Restore unsaved edits</button><button class="btn" id="dd443RecoveryDiscard" type="button">Discard recovered edits</button></div></div>
-      <div class="dd-editor-footer"><div class="small" aria-live="polite" id="dd440SaveHint">Save Product updates our store. When Etsy is checked, a verified unpublished draft sync follows that same Save; a HOLD requires owner review, never automatic retry. No live publication or Facebook posting.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
+      <div class="dd-editor-footer"><div class="small" aria-live="polite" id="dd440SaveHint">Save Product saves our store only. Etsy Create/Update is a separate, deliberate button on the Etsy tab. No live publication or Facebook posting.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Retry load</button><a class="btn" href="/admin/products/">Cancel / Back</a><button class="btn" id="productEditorSave" type="submit">Save Product</button></div></div>
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
@@ -756,7 +801,7 @@
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=496"></script>
   <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
   <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
-  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=514"></script>
+  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=515"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">

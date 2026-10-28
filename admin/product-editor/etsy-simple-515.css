@@ -1,0 +1,50 @@
+/* Build 515 owner-requested Etsy clean-up: one draft workflow on the Etsy tab.
+   All historical audit controls remain in the DOM for existing event handlers,
+   but are behind a closed support-only disclosure. */
+body:has([data-editor-tab="etsy"][aria-selected="true"]) .dd489-readiness,
+body:has([data-editor-tab="etsy"][aria-selected="true"]) .dd471-creation-flow {
+  display:none;
+}
+.dd-etsy-panel #dd500Package {
+  max-width:900px;
+  margin-inline:auto;
+  gap:16px;
+}
+.dd-etsy-panel #dd500Title {font-size:clamp(1.45rem,2.3vw,2rem)}
+.dd-etsy-panel .dd500-head p {line-height:1.55}
+.dd-etsy-panel #dd500Open {max-width:max-content}
+.dd-etsy-panel #dd500Status {
+  padding:12px 14px;
+  border:1px solid rgba(173,143,77,.4);
+  border-radius:9px;
+  line-height:1.5;
+  overflow-wrap:anywhere;
+}
+.dd-etsy-panel #dd500Status[data-tone="hold"] {
+  border-color:#d38b56;
+  background:rgba(146,67,34,.13);
+}
+.dd-etsy-panel .dd500-readiness {display:block}
+.dd-etsy-panel .dd500-readiness summary,
+.dd-etsy-panel .dd515-support summary {cursor:pointer;font-weight:600;line-height:1.4}
+.dd-etsy-panel .dd500-readiness ul {margin-top:12px}
+.dd-etsy-panel .dd515-support {
+  padding:12px 14px;
+  border:1px solid rgba(167,119,59,.35);
+  border-radius:10px;
+}
+.dd-etsy-panel .dd515-photo-repair {
+  border:1px solid rgba(167,119,59,.42);
+  border-radius:10px;
+  padding:12px 14px;
+}
+.dd-etsy-panel .dd515-photo-repair summary {cursor:pointer;font-weight:600;line-height:1.4}
+.dd-etsy-panel .dd515-photo-repair #dd505PhotoReview {margin-top:14px}
+.dd-etsy-panel .dd515-support[open] {display:grid;gap:12px}
+/* The prior alternative draft editor duplicated the same create/update actions.
+   Keep historical wiring available in source, but don't show two competing UIs. */
+.dd-etsy-panel #dd500Legacy {display:none!important}
+@media(max-width:700px) {
+  .dd-etsy-panel #dd500Package {margin:8px 0;padding:14px}
+  .dd-etsy-panel .dd500-head {display:block}
+}

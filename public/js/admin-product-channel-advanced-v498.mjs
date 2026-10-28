@@ -83,7 +83,7 @@ if (form && identity && window.DDAuth?.apiFetch) {
       if (Number(data.product_id) !== productId) throw Error('Saved Product identity mismatch.');
       identity.replaceChildren();
       const values = document.createElement('span');
-      values.textContent = `Product #${productId} · SKU: ${data.product_sku || 'not set'} · Slug: ${data.product_slug || 'not set'} · `;
+      values.textContent = `Product #${productId} · ${data.product_name || 'Unnamed Product'} · SKU: ${data.product_sku || 'not set'} · Slug: ${data.product_slug || 'not set'} · `;
       identity.append(values);
       const listing = normal(data.linked_listing_id);
       const result = document.createElement('strong');

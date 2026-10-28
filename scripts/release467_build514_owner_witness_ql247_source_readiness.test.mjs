@@ -105,8 +105,8 @@ test('Build 514 Editor surfaces actual hold actions and QL-247 phases without au
   'dd514GatewayPanel','dd514ReviewGateway']){
   assert.ok(html.includes(id),id);assert.ok(js.includes(id),id);
  }
- assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=514/);
- assert.match(html,/etsy-package-500\.css\?v=514/);
+ assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=5\d\d/);
+ assert.match(html,/etsy-package-500\.css\?v=5\d\d/);
  assert.match(read('functions/api/admin/integration-ql247-readiness-514.js'),/read.only/i);
  for(const name of ['functions/api/admin/product-etsy-owner-witness-514.js',
   'functions/api/admin/integration-ql247-readiness-514.js'])
