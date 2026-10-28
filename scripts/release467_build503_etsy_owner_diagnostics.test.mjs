@@ -40,7 +40,7 @@ test('Product #53 cannot accidentally create another Etsy draft while its candid
  const ui=source('public/js/admin-product-etsy-package-v500.mjs');
  assert.match(editor,/id="dd503OwnerNote"/);
  assert.match(editor,/id="dd503Fix"/);
- assert.match(editor,/admin-product-etsy-package-v500\.mjs\?v=50[3456789]/);
+ assert.match(editor,/admin-product-etsy-package-v500\.mjs\?v=(?:50[3456789]|510)/);
  assert.match(ui,/hasCandidate\?`Step 1: Verify and link existing Etsy draft/);
  assert.match(ui,/if\(!state\.linked&&\/\^\[1-9\]\\d\{0,14\}\$\/.test\(candidate\)\)void linkExisting\(\)/);
  assert.match(ui,/Promise\.allSettled/);

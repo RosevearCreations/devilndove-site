@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="/admin/product-editor/creation-flow-471.css?v=471"/>
   <link rel="stylesheet" href="/admin/product-editor/entry-readiness-489.css?v=496"/>
   <link rel="stylesheet" href="/admin/product-editor/advanced-channels-498.css?v=498"/>
-  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=509"/>
+  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=510"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -164,7 +164,7 @@
 
       <section class="dd-editor-panel dd-etsy-panel" data-editor-panel="etsy" hidden>
         <div class="card dd500-package" id="dd500Package" aria-labelledby="dd500Title">
-          <div class="dd500-head"><div><p class="eyebrow">Build 509 • Independent exception review, original-photo freshness and gateway security handoff</p><h2 id="dd500Title">Save and update our existing Etsy draft</h2>
+          <div class="dd500-head"><div><p class="eyebrow">Build 510 • Owner-witnessed recovery, three original photographs and nonproduction gateway separation</p><h2 id="dd500Title">Save and update our existing Etsy draft</h2>
             <p class="small">No extra image selection. We use <strong>every approved photograph in this Product's gallery</strong>, its saved description, CAD price, quantity and search tags. Etsy creation returns a listing number we keep on this Product for all future updates. The listing stays <strong>unpublished</strong>.</p></div></div>
           <div class="dd503-owner-note" id="dd503OwnerNote" role="note" hidden><strong>Keep our existing Etsy draft #4603838854.</strong> Do not delete it or create another. First verify and link that ID, then update the same unpublished draft. Our last Etsy screenshot also showed the category “Bar Soaps”; confirm the correct category in Etsy before publishing.</div>
           <div class="dd500-id" id="dd500Identity" role="status" aria-live="polite">Reading this Product's saved Etsy listing ID…</div>
@@ -295,7 +295,7 @@
           </section>
           <section class="dd505-review" aria-labelledby="dd509GatewayTitle">
             <h3 id="dd509GatewayTitle">Build 509 — gateway security approval handoff (no activation)</h3>
-            <p class="small">Review our signed, read-only AI Data Platform health/capabilities handshake. A handoff is permitted only when server credentials and both genuine signed receipts are in TESTING. The handoff <strong>does not</strong> connect businesses or authorize customer/product data, events, commands, real messages or dispatch.</p>
+            <p class="small">Review signed, read-only health/capabilities handshake evidence. In the new QL-243 nonproduction profile these are <strong>Devil n Dove source-side nonce receipts only</strong>, not gateway-signed Ed25519 proof. A handoff requires configured server credentials and both source GET receipts in TESTING; it <strong>never</strong> connects businesses or authorizes customer/product data, events, commands, real messages or dispatch.</p>
             <button class="btn" type="button" id="dd509GatewayReview">Review current signed gateway handshakes (read only)</button>
             <p class="small" id="dd509GatewayStatus" role="status" aria-live="polite">DISCONNECTED — No gateway security handoff is approved.</p>
             <div class="dd508-confirmations">
@@ -306,6 +306,41 @@
             </div>
             <button class="btn primary" type="button" id="dd509GatewayHandoff" disabled>Record read-only security handoff for independent review</button>
             <p class="small" id="dd509GatewayReceipt" role="status" aria-live="polite">No Build 509 security handoff receipt recorded. The gateway is not connected.</p>
+          </section>
+          <section class="dd505-review" id="dd510WitnessPanel" aria-labelledby="dd510WitnessTitle">
+            <h3 id="dd510WitnessTitle">Build 510 — unlinked draft witness trail and original-photo pairing</h3>
+            <p class="small">Our existing unpublished Etsy draft is <strong>#4603838854</strong>. Read its exact saved D1 claim before deciding anything. A witness note records what we observed in Etsy, <strong>not</strong> a verified local link or Etsy acceptance. Never create a second listing.</p>
+            <button class="btn" type="button" id="dd510ReadClaim">Read primary listing claim and current three-photo evidence (no changes)</button>
+            <p class="small" id="dd510ClaimStatus" role="status" aria-live="polite">HOLD — Read the exact saved listing claim before proceeding.</p>
+            <label for="dd510WitnessNote">What did we personally observe in our existing Etsy draft? (local witness record only)</label>
+            <textarea class="input" id="dd510WitnessNote" maxlength="500" rows="3" placeholder="Describe the existing Etsy listing ID and the unresolved local link or photo discrepancy."></textarea>
+            <label><input type="checkbox" id="dd510ConfirmWitness"><span>We personally checked the exact existing Etsy draft #4603838854; this note does not confirm the saved link or change Etsy.</span></label>
+            <label><input type="checkbox" id="dd510ConfirmNoChanges"><span>Do not create, publish, upload, move claims, retry provider writes or approve the draft from this review.</span></label>
+            <button class="btn" type="button" id="dd510RecordWitness" disabled>Record local unlinked-draft witness (HOLD remains)</button>
+            <p class="small" id="dd510WitnessReceipt" role="status" aria-live="polite">No Build 510 observation recorded.</p>
+            <div class="dd509-photo-grid" id="dd510PhotoPairs" aria-live="polite"></div>
+            <div class="dd508-confirmations">
+              <label><input type="checkbox" id="dd510Original344"><span>Original #344 matches its current live Etsy photo when viewed side by side.</span></label>
+              <label><input type="checkbox" id="dd510Original345"><span>Original #345 matches its current live Etsy photo when viewed side by side.</span></label>
+              <label><input type="checkbox" id="dd510Original346"><span>Original #346 matches its current live Etsy photo when viewed side by side.</span></label>
+              <label><input type="checkbox" id="dd510VisualEquality"><span>We directly compared the actual pictures, not just their image IDs and URLs.</span></label>
+            </div>
+            <button class="btn primary" type="button" id="dd510RecordRetest" disabled>Record fresh three-original visual retest (local only)</button>
+            <p class="small" id="dd510RetestReceipt" role="status" aria-live="polite">HOLD — Requires a uniquely saved Product link, current unpublished Etsy readback and all three verified photo pairs.</p>
+          </section>
+          <section class="dd505-review" id="dd510GatewayPanel" aria-labelledby="dd510GatewayTitle">
+            <h3 id="dd510GatewayTitle">Build 510 — QL-243 nonproduction gateway approval separation</h3>
+            <p class="small">The AI Data Platform is our sole gateway. Our source can accept <strong>authenticated nonproduction GET health/capabilities only</strong>; source nonce receipts are <strong>not</strong> gateway-signed Ed25519 evidence. Owner identity witnesses, three independent public-key pins, gateway audit durability and an owner pilot decision remain unverified. No live connection or cross-company data is enabled.</p>
+            <button class="btn" type="button" id="dd510GatewayReview">Review source handshake receipts and separation blockers (read only)</button>
+            <p class="small" id="dd510GatewayStatus" role="status" aria-live="polite">HOLD — QL-243 gateway, witness and pilot approvals have not been granted.</p>
+            <div class="dd508-confirmations">
+              <label><input type="checkbox" id="dd510GatewayDifferent"><span>We are a different verified Admin from the owner who recorded the nonproduction security handoff.</span></label>
+              <label><input type="checkbox" id="dd510GatewayNonprod"><span>We reviewed only Devil n Dove nonproduction signed health and capabilities GETs, without Product/customer details.</span></label>
+              <label><input type="checkbox" id="dd510GatewayExternal"><span>Gateway Ed25519 signatures, public-key fingerprints, durable audit and independent identity witness still need external verification.</span></label>
+              <label><input type="checkbox" id="dd510GatewayNoPilot"><span>We are not granting an owner pilot, messages, dispatch, writes or product-reference access.</span></label>
+            </div>
+            <button class="btn primary" type="button" id="dd510GatewayRecord" disabled>Record separate local security review (still HOLD)</button>
+            <p class="small" id="dd510GatewayReceipt" role="status" aria-live="polite">No independent QL-243 source-side separation review receipt recorded.</p>
           </section>
           <p class="small" id="dd501Resume" role="status" aria-live="polite">An Etsy checkbox plus Save Product authorizes the same draft workflow. This separate button is for finishing first-time setup or resolving a held package.</p>
           <p class="small">Our store retains the saved Product. Facebook Marketplace uses the same source photos but remains a manual handoff until Meta grants supported listing access. This button never publishes on either marketplace.</p>
@@ -588,7 +623,7 @@
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=496"></script>
   <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
   <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
-  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=509"></script>
+  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=510"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">

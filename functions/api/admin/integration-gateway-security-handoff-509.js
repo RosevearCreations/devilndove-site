@@ -3,6 +3,7 @@
 import {getDb,jsonResponse} from '../_lib/adminAudit.js';
 import {verifiedAdminFromModule} from '../_lib/verifiedAdmin398.mjs';
 import {gatewayReadiness508} from './integration-gateway-readiness-508.js';
+import {nonproductionSettings510} from '../_lib/integrationContract510.mjs';
 
 const respond=(data,status=200)=>jsonResponse({ok:status<400,build:509,read_only_scope:true,
   credentials_returned:false,credentials_provisioned:false,connected:false,approved_for_live_data:false,
@@ -12,6 +13,24 @@ function gate(c){const actor=verifiedAdminFromModule(c),db=getDb(c.env);
  return !actor?{error:respond({error:'Verified Admin required for security handoff.'},401)}:
   !db?{error:respond({error:'Gateway audit database unavailable.'},503)}:{actor,db};}
 async function proof(c,db){
+ if(c.env?.ROSEVEAR_QL243_DEPLOYMENT_CLASS==='nonproduction'){
+  const conf=nonproductionSettings510(c.env);
+  const evidence=await db.prepare("SELECT request_path,details_json,created_at FROM admin_action_audit WHERE action_type='rosevear_integration_v1_nonce_510' AND target_type='integration_nonce' ORDER BY admin_action_audit_id DESC LIMIT 60").all();
+  const accepted=(evidence?.results||[]).filter(row=>{let detail;try{detail=JSON.parse(row.details_json||'{}');}catch{return false;}
+   return detail.source==='ai-data-platform'&&detail.destination==='devilndove'&&detail.business==='devilndove'&&
+    detail.tenant===null&&detail.environment==='nonproduction'&&detail.key_id===conf.keyId&&
+    detail.scope==='health_capabilities_get_only'&&detail.decision==='read_only_accepted';});
+  const health=accepted.find(row=>row.request_path==='/api/integration/v1/health');
+  const capabilities=accepted.find(row=>row.request_path==='/api/integration/v1/capabilities');
+  return {state:conf.configured&&health&&capabilities?'TESTING':conf.configured?'CONFIGURED':'DISCONNECTED',
+   contract_version:'rosevear.integration.v1',application_id:'devilndove',gateway:'ai-data-platform',
+   environment:'nonproduction',key_id_configured:Boolean(conf.keyId),secret_configured:Boolean(conf.secret),
+   revoked:conf.revoked,accepted_health_receipt:Boolean(health),accepted_capabilities_receipt:Boolean(capabilities),
+   last_health_at:health?.created_at||null,last_capabilities_at:capabilities?.created_at||null,
+   source_side_receipts_only:true,nonproduction_key_id:conf.keyId,
+   missing_or_next_steps:['Source-side accepted signed GETs are not gateway Ed25519 receipts or independently witnessed owner approval.',
+    'Gateway audit durability, public SPKI pins and nonproduction pilot permission remain unverified.']};
+ }
  const rows=await db.prepare("SELECT request_path,details_json,created_at FROM admin_action_audit WHERE action_type='rosevear_integration_v1_nonce_506' AND target_type='integration_nonce' ORDER BY admin_action_audit_id DESC LIMIT 40").all();
  return gatewayReadiness508(c.env,rows?.results||[]);
 }
@@ -21,6 +40,7 @@ export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
    gateway:snapshot.gateway,environment:snapshot.environment,key_id_configured:snapshot.key_id_configured,
    secret_configured:snapshot.secret_configured,revoked:snapshot.revoked,
    accepted_health_receipt:snapshot.accepted_health_receipt,accepted_capabilities_receipt:snapshot.accepted_capabilities_receipt,
+   source_side_receipts_only:snapshot.source_side_receipts_only===true,nonproduction_key_id:snapshot.nonproduction_key_id||null,
    last_health_at:snapshot.last_health_at,last_capabilities_at:snapshot.last_capabilities_at,
    ready_to_prepare_security_handoff:snapshot.state==='TESTING'&&snapshot.accepted_health_receipt&&snapshot.accepted_capabilities_receipt,
    missing_or_next_steps:snapshot.missing_or_next_steps,
@@ -42,6 +62,7 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
   const details={build:509,contract_version:snapshot.contract_version,application_id:'devilndove',
    gateway:'ai-data-platform',environment:snapshot.environment,request_key:b.request_key,
    accepted_health_receipt:true,accepted_capabilities_receipt:true,
+   source_side_receipts_only:snapshot.source_side_receipts_only===true,nonproduction_key_id:snapshot.nonproduction_key_id||null,
    owner_reviewed_rotation_plan:true,owner_reviewed_tenant_isolation:true,
    server_only_secret:true,no_dispatch_or_product_access:true,
    scope:'read_only_health_and_capabilities_handoff',connected:false,credentials_provisioned:false,
