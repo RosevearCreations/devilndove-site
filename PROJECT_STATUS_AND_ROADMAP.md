@@ -480,3 +480,9 @@ Product #53's screenshot still shows a HOLD for existing Etsy draft #4603838854.
 
 **Next expected Build 508 — Product #53 Owner-Witnessed Etsy Final Acceptance, Verified Media Receipt Closeout & Gateway Credential Provisioning Review.**
 
+# Build 508 — Final owner evidence closeout and gateway credential readiness
+
+Product #53 now has a distinct read-only live Etsy draft/three-original-photo preflight and an explicit four-assertion local closeout action. The action requires pre-existing same-draft Build 504 sign-off, independent remote photo receipt matches (#344, #345, #346), an unchanged exact evidence fingerprint and a fresh owner request ID. On uncertainty, the server keeps HOLD; it does not retry an Etsy upload, create a duplicate or publish. Server-only v1 gateway readiness reports no secret values, independent signed health/capabilities evidence and at most TESTING — with product/customer data, events and commands still disabled. This code build does not mean a real owner has accepted Product #53 or provisioned live gateway keys. See `docs/BUILD508_ETSY_CLOSEOUT_AND_GATEWAY_CREDENTIAL_REVIEW.md`.
+
+**Next expected Build 509 — Product #53 Independent Final Owner Trial Exception Resolution, Original-Photo Evidence Freshness & Gateway Security Approval Handoff.**
+

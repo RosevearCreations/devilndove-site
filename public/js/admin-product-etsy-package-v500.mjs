@@ -9,9 +9,10 @@ const form=$('productEditorForm'),id=Number(new URLSearchParams(location.search)
 if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   const state={busy:false,linked:'',loaded:false,assessment:null,readIssues:[],settings:null,attempted:false,claim:null,claimReview:null,photoReview:null,ownerReadbackReady:false,
     previewId:'',previewTitleMatches:false,images:null,lastRemoteId:'',holdAfterWrite:false,
-    refreshPromise:null,syncing:false,linkReadbackHold:false};
+    refreshPromise:null,syncing:false,linkReadbackHold:false,closeout508:null};
   if(id===53){$('dd500ListingId').value='4603838854';$('dd500CandidateNote').hidden=false;
     if($('dd503OwnerNote'))$('dd503OwnerNote').hidden=false;}
+  if(id!==53)$('dd508CloseoutPanel').hidden=true;
   const ready=()=>id>0&&form.dataset.productAuthority==='ready'&&form.dataset.productDirty!=='1';
   const key=()=>crypto.randomUUID();
   const status=(message,hold=false)=>{const el=$('dd500Status');el.textContent=message;el.dataset.tone=hold?'hold':'ok';};
@@ -21,6 +22,10 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     const resume=$('dd501Resume');if(resume)resume.textContent=message;
   };
   function resetOwnerApproval(){state.ownerReadbackReady=false;
+    state.closeout508=null;
+    for(const field of ['dd508SameDraft','dd508EachPhoto','dd508Metadata','dd508Unpublished'])$(field).checked=false;
+    $('dd508Record').disabled=true;
+    $('dd508ReviewStatus').textContent='HOLD — Saved Product details changed. Review the actual Etsy draft and all three original photo receipts again.';
     $('dd504ApproveContent').checked=false;$('dd504Signoff').disabled=true;
     $('dd504Readback').textContent='Not yet verified after these changes. Check Etsy readback once the same draft is linked and updated.';
     $('dd504SignoffStatus').textContent='No new owner approval recorded. Etsy remains unpublished.';
@@ -243,6 +248,59 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
         await refresh();
       }
     }catch(error){output.textContent=`HOLD — ${error.message}. No listing, Product or photograph was changed.`;}
+  }
+  const closeoutFields508=['dd508SameDraft','dd508EachPhoto','dd508Metadata','dd508Unpublished'];
+  function updateCloseout508Button(){
+    $('dd508Record').disabled=!(id===53&&ready()&&state.closeout508?.ready_for_owner_closeout===true&&
+      String(state.closeout508.listing_id)==='4603838854'&&closeoutFields508.every(field=>$(field).checked));
+  }
+  async function reviewCloseout508(){
+    state.closeout508=null;closeoutFields508.forEach(field=>$(field).checked=false);updateCloseout508Button();
+    const output=$('dd508ReviewStatus');
+    if(id!==53||!ready()){output.textContent='HOLD — Save Product #53 and wait for its saved record before owner closeout.';return;}
+    output.textContent='Independently rechecking the actual unpublished Etsy draft, prior owner sign-off and original-photo receipts…';
+    try{
+      const receipt=await api(`/api/admin/product-etsy-owner-closeout-508?product_id=${id}`);
+      const verified=Array.isArray(receipt.verified_media_pairs)?receipt.verified_media_pairs:[];
+      const expected=[344,345,346];
+      const matched=expected.every(photo=>verified.some(pair=>Number(pair.product_image_id)===photo&&
+        String(pair.etsy_image_id||'').trim()!==''));
+      state.closeout508=receipt.ready_for_owner_closeout&&receipt.prior_owner_signoff_confirmed&&matched&&
+        String(receipt.listing_id)==='4603838854'?receipt:null;
+      const count=expected.filter(photo=>verified.some(pair=>Number(pair.product_image_id)===photo&&String(pair.etsy_image_id||'').trim())).length;
+      output.textContent=`Product #53 • existing Etsy draft #${receipt.listing_id||'NOT LINKED'} • prior witnessed sign-off ${receipt.prior_owner_signoff_confirmed?'confirmed':'missing'} `+
+        `• original-photo remote receipts ${count}/3 • ${receipt.etsy_remote_photo_count??'?'} Etsy images • evidence digest ${String(receipt.evidence_fingerprint||'not yet available').slice(0,16)}. `+
+        (state.closeout508?'READY FOR OWNER REVIEW — Inspect the real draft and confirm all four statements separately. No publication occurred.':
+          `HOLD — ${[...(receipt.issues||[]),receipt.next_action||''].filter(Boolean).join(' | ')||'Verified owner and media receipts are still required.'}`);
+    }catch(error){output.textContent=`HOLD — ${error.message} No owner approval or Etsy changes occurred.`;}
+    updateCloseout508Button();
+  }
+  async function recordCloseout508(){
+    updateCloseout508Button();if($('dd508Record').disabled||!state.closeout508)return;
+    $('dd508Record').disabled=true;
+    const receipt=state.closeout508;state.closeout508=null;
+    $('dd508ReceiptStatus').textContent='Checking that the existing Etsy draft, prior sign-off, original photos and metadata have not changed…';
+    try{
+      const result=await api('/api/admin/product-etsy-owner-closeout-508',{
+        action:'record_owner_closeout_508',product_id:53,listing_id:receipt.listing_id,
+        evidence_fingerprint:receipt.evidence_fingerprint,request_key:key(),
+        confirm_same_draft:true,confirm_each_original_photo:true,confirm_actual_metadata:true,
+        confirm_unpublished_canada_only:true});
+      if(!result.owner_closeout_recorded)throw Error('No independent closeout receipt was returned.');
+      $('dd508ReceiptStatus').textContent=`LOCALLY RECORDED — receipt #${result.receipt_id||'recorded'} for existing Etsy draft #${result.listing_id}; three verified originals. Etsy is still unpublished. No provider write or duplicate draft.`;
+      closeoutFields508.forEach(field=>$(field).checked=false);
+    }catch(error){$('dd508ReceiptStatus').textContent=`HOLD — ${error.message} Refresh the actual Etsy evidence before another owner decision.`;}
+    updateCloseout508Button();
+  }
+  async function reviewGateway508(){
+    const output=$('dd508GatewayStatus');output.textContent='Checking server-side gateway credential presence and independently saved signed handshake receipts…';
+    try{
+      const r=await api('/api/admin/integration-gateway-readiness-508');
+      output.textContent=`${r.state||'DISCONNECTED'} — key ID ${r.key_id_configured?'configured':'missing'}, server-only HMAC secret ${r.secret_configured?'configured':'missing'}, `+
+        `signed health receipt ${r.accepted_health_receipt?'found':'missing'}, signed capabilities receipt ${r.accepted_capabilities_receipt?'found':'missing'}. `+
+        `${(r.missing_or_next_steps||[]).join(' | ')||'Handshake is still in read-only TESTING; independent owner authorization required.'} `+
+        'No secret disclosed; no data access, product transfers, events or commands enabled.';
+    }catch(error){output.textContent=`DISCONNECTED — ${error.message}. No credential was exposed or provisioned.`;}
   }
   // Build 501: the owner opts in once with the Etsy checkbox. A confirmed
   // local Save (or approved gallery save) can now drive the complete package.
@@ -577,6 +635,10 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   $('dd504CheckPhotos').addEventListener('click',()=>void ownerPhotoReadback());
   $('dd506TrialCheck').addEventListener('click',()=>void reviewTrial506());
   $('dd507TrialCheck').addEventListener('click',()=>void reviewTrial507());
+  $('dd508Preflight').addEventListener('click',()=>void reviewCloseout508());
+  closeoutFields508.forEach(field=>$(field).addEventListener('change',updateCloseout508Button));
+  $('dd508Record').addEventListener('click',()=>void recordCloseout508());
+  $('dd508GatewayCheck').addEventListener('click',()=>void reviewGateway508());
   $('dd504ApproveContent').addEventListener('change',()=>{$('dd504Signoff').disabled=!state.ownerReadbackReady||!$('dd504ApproveContent').checked;});
   $('dd504Signoff').addEventListener('click',()=>void ownerSignoff());
   $('dd505InspectClaim').addEventListener('click',()=>void inspectLocalClaim505());
