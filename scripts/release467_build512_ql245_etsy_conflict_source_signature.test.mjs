@@ -117,8 +117,8 @@ test('Build512 editor has an actionable but non-automated Etsy conflict and QL-2
    'dd512PublicSignature','dd512InspectSignature']){
   assert.ok(html.includes(id),id);assert.ok(js.includes(id),id);
  }
- assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=512/);
- assert.match(html,/etsy-package-500\.css\?v=512/);
+ assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=5\d\d/);
+ assert.match(html,/etsy-package-500\.css\?v=5\d\d/);
  for(const file of ['functions/api/admin/product-etsy-review-512.js',
    'functions/api/admin/integration-ql245-source-evidence-512.js']){
   const s=read(file);

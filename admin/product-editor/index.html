@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="/admin/product-editor/creation-flow-471.css?v=471"/>
   <link rel="stylesheet" href="/admin/product-editor/entry-readiness-489.css?v=496"/>
   <link rel="stylesheet" href="/admin/product-editor/advanced-channels-498.css?v=498"/>
-  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=512"/>
+  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=513"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -164,7 +164,7 @@
 
       <section class="dd-editor-panel dd-etsy-panel" data-editor-panel="etsy" hidden>
         <div class="card dd500-package" id="dd500Package" aria-labelledby="dd500Title">
-          <div class="dd500-head"><div><p class="eyebrow">Build 512 • Listing/photo conflict review, independent evidence recheck and QL-245 public-signature intake</p><h2 id="dd500Title">Save and update our existing Etsy draft</h2>
+          <div class="dd500-head"><div><p class="eyebrow">Build 513 • Listing/media exception disposition, owner content recheck and QL-246 source-proof readiness</p><h2 id="dd500Title">Save and update our existing Etsy draft</h2>
             <p class="small">No extra image selection. We use <strong>every approved photograph in this Product's gallery</strong>, its saved description, CAD price, quantity and search tags. Etsy creation returns a listing number we keep on this Product for all future updates. The listing stays <strong>unpublished</strong>.</p></div></div>
           <div class="dd503-owner-note" id="dd503OwnerNote" role="note" hidden><strong>Keep our existing Etsy draft #4603838854.</strong> Do not delete it or create another. First verify and link that ID, then update the same unpublished draft. Our last Etsy screenshot also showed the category “Bar Soaps”; confirm the correct category in Etsy before publishing.</div>
           <div class="dd500-id" id="dd500Identity" role="status" aria-live="polite">Reading this Product's saved Etsy listing ID…</div>
@@ -408,6 +408,44 @@
               <label><input type="checkbox" id="dd512PublicNonprod"><span>This is nonproduction and does not authorize the gateway or owner pilot.</span></label>
               <button type="button" class="btn" id="dd512InspectSignature" disabled>Verify pinned source signature and record local metadata receipt</button>
               <p class="small" id="dd512SignatureStatus" role="status" aria-live="polite">HOLD — External QL-245 source public signature not verified. Six-app and assessor proofs remain external.</p>
+            </details>
+          </section>
+          <section class="dd505-review" id="dd513EtsyPanel" aria-labelledby="dd513EtsyTitle">
+            <h3 id="dd513EtsyTitle">Build 513 — Product #53 exception disposition and saved-content correction recheck</h3>
+            <p class="small">Inspect our existing Etsy draft <strong>#4603838854</strong> alongside the exact saved Product, description, CAD price, quantity, correct Etsy category and non-soap product tags. The three original photos <strong>#344–346</strong> and all historical listing/media conflicts stay visible. A note about a problem is never an automatic fix or final owner approval.</p>
+            <button type="button" class="btn" id="dd513ReviewContent">Read saved content, unresolved exceptions and live Etsy evidence</button>
+            <p class="small" id="dd513ContentStatus" role="status" aria-live="polite">HOLD — Current Etsy content and media correction evidence is not yet verified.</p>
+            <label for="dd513DispositionNote">Which exact unresolved listing/photo/content issue must we resolve next?</label>
+            <textarea class="input" id="dd513DispositionNote" maxlength="600" rows="3" placeholder="Describe factual observations and our next manual review, not a claimed repair."></textarea>
+            <label><input type="checkbox" id="dd513Unresolved"><span>We reviewed the actual existing draft. This records an unresolved exception follow-up only.</span></label>
+            <label><input type="checkbox" id="dd513NoEtsyWrite"><span>No new Etsy draft, upload, relink, retry, publication or final content approval.</span></label>
+            <button class="btn" type="button" id="dd513RecordFollowup" disabled>Record factual exception disposition follow-up (HOLD)</button>
+            <p class="small" id="dd513FollowupStatus" role="status" aria-live="polite">No Build 513 exception follow-up recorded.</p>
+            <div class="dd508-confirmations">
+              <label><input type="checkbox" id="dd513Description"><span>Our saved description has verified item materials, size and making details, not just the title.</span></label>
+              <label><input type="checkbox" id="dd513Tags"><span>Our saved Etsy channel tags accurately describe the item; no inappropriate “Soap bars” tag remains.</span></label>
+              <label><input type="checkbox" id="dd513Category"><span>We independently checked the correct category in the actual Etsy draft.</span></label>
+              <label><input type="checkbox" id="dd513Details"><span>We checked CAD price, quantity, unpublished status and Canada-only delivery in Etsy.</span></label>
+              <label><input type="checkbox" id="dd513Photo344"><span>We visually compared original photograph #344 to its current Etsy image.</span></label>
+              <label><input type="checkbox" id="dd513Photo345"><span>We visually compared original photograph #345 to its current Etsy image.</span></label>
+              <label><input type="checkbox" id="dd513Photo346"><span>We visually compared original photograph #346 to its current Etsy image.</span></label>
+              <label><input type="checkbox" id="dd513Independent"><span>We are a different verified Admin from the Build 512 photo recheck reviewer.</span></label>
+            </div>
+            <button type="button" class="btn primary" id="dd513RecordContent" disabled>Record independent corrected-content evidence recheck (local only)</button>
+            <p class="small" id="dd513RecheckStatus" role="status" aria-live="polite">HOLD — Requires current correct Product/Etsy metadata and three photos with a distinct prior reviewer.</p>
+          </section>
+          <section class="dd505-review" id="dd513GatewayPanel" aria-labelledby="dd513GatewayTitle">
+            <h3 id="dd513GatewayTitle">Build 513 — QL-246 six-app source-proof handoff and independent receipt comparison</h3>
+            <p class="small">The new handoff describes <strong>the final evidence steps, not permission to connect</strong>. Each of six applications needs an immutable public source record signed by its own Ed25519 key over QL-246 line-pair bytes, an operator challenge, an independently trusted key fingerprint, real nonproduction signed GETs and seven observed denials. Our source is still <strong>DISCONNECTED</strong>; no customer/product reads or live actions are enabled.</p>
+            <button class="btn" type="button" id="dd513ReviewGateway">Compare actual local receipts against QL-246 requirements (read only)</button>
+            <p class="small" id="dd513GatewayStatus" role="status" aria-live="polite">PENDING — No private signing key, challenge, independently witnessed source tests or owner pilot is presumed.</p>
+            <details class="dd500-troubleshooting"><summary>Advanced: inspect one public QL-246 signed source record (local check only)</summary>
+              <label for="dd513RawProof">Raw, nonsecret JSON containing exactly publicKeyPem, payload and signature</label>
+              <textarea class="input" id="dd513RawProof" rows="5" placeholder="Paste only a genuine separately approved public proof. Never paste a private key or credential."></textarea>
+              <label><input type="checkbox" id="dd513NoSecrets"><span>This contains public metadata only; our private keys and HMAC secrets remain in the secret manager.</span></label>
+              <label><input type="checkbox" id="dd513NoPilot"><span>This checks a nonproduction public signature only — no gateway connection, owner authorization or communications pilot.</span></label>
+              <button type="button" class="btn" id="dd513InspectPublic" disabled>Check exact QL-246 signature and independently pinned challenge</button>
+              <p class="small" id="dd513SignatureStatus" role="status" aria-live="polite">PENDING — Without a genuine challenged, independently pinned signature, do not publish an acceptance proof.</p>
             </details>
           </section>
           <p class="small" id="dd501Resume" role="status" aria-live="polite">An Etsy checkbox plus Save Product authorizes the same draft workflow. This separate button is for finishing first-time setup or resolving a held package.</p>
@@ -691,7 +729,7 @@
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=496"></script>
   <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
   <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
-  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=512"></script>
+  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=513"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">
