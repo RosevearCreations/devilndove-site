@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {assessEtsyPackage500,assessEtsyPhotos516} from '../public/js/etsy-package-500.mjs';
 import {onRequestGet as readImages} from '../functions/api/admin/product-etsy-images.js';
+import {onRequestGet as readExistingPhotos} from '../functions/api/admin/product-etsy-owner-reconcile-505.js';
+import {encryptOAuthSecret} from '../functions/api/_lib/oauthSecurity.js';
 
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const gallery=[344,345,346].map(product_image_id=>({product_image_id,approved_for_distribution:true,image_url:`https://assets.devilndove.com/products/53/${product_image_id}.jpg`}));
@@ -50,6 +52,49 @@ test('media read preserves exact primary-confirmed Etsy ID even when an old ship
   assert.equal(body.pending,3);
   assert.equal(body.provider_contacted,false);
   assert.ok(recorded.some(row=>row.sql.includes('external_reference=?')));
+});
+
+test('existing-photo matching can read real Etsy images using the same primary Product claim',async()=>{
+  const env={ETSY_API_KEYSTRING:'test-key',ETSY_SHARED_SECRET:'test-secret'};
+  const conn={remote_subject_id:'999',connection_status:'connected',scopes_json:'["shops_r","listings_r","listings_w"]',
+    access_expires_at:new Date(Date.now()+3_600_000).toISOString(),
+    access_token_ciphertext:await encryptOAuthSecret(env,'test-token','oauth-token|etsy|access')};
+  const shop={shop_id:'555',owner_user_id:'999',shop_name:'Devil n Dove',currency_code:'CAD',acceptance_status:'connected_verified'};
+  const draft={id:'one-claim',product_id:53,external_reference:'4603838854',payload_json:'{}'};
+  const db={withSession(){return this;},prepare(sql){let values=[];return {bind(...args){values=args;return this;},async first(){
+    if(sql.includes('FROM products WHERE product_id'))return {product_id:53,name:'Adventurine Argon',sku:'DND-01130',slug:'adventurine-argon'};
+    if(sql.includes('FROM marketplace_syndication_drafts'))return draft;
+    if(sql.includes('FROM oauth_provider_connections'))return conn;
+    if(sql.includes('FROM etsy_oauth_shop_connections'))return shop;
+    throw Error('Unexpected first query: '+sql);
+  },async all(){
+    if(sql.includes('FROM product_images pi'))return {results:gallery.map((row,i)=>({...row,product_id:53,
+      alt_text:'Owner approved original',public_use_status:'all_public_ok',width_px:1200,height_px:900,sort_order:i}))};
+    if(sql.includes('FROM admin_action_audit'))return {results:[]};
+    if(sql.includes('FROM marketplace_syndication_drafts')&&sql.includes('external_reference=?'))return {results:[draft]};
+    throw Error('Unexpected all query: '+sql+' '+values);
+  }};}};
+  env.DB=db;
+  const oldFetch=globalThis.fetch;
+  const calls=[];
+  globalThis.fetch=async (url,options)=>{calls.push([String(url),options?.method||'GET']);const path=String(url);
+    if(path.endsWith('/listings/4603838854'))return Response.json({listing_id:4603838854,shop_id:555,state:'draft',shipping_profile_id:17});
+    if(path.endsWith('/shops/555/shipping-profiles/17'))return Response.json({shipping_profile_id:17,origin_country_iso:'CA'});
+    if(path.includes('/shipping-profiles/17/destinations'))return Response.json({count:1,results:[{shipping_profile_id:17,destination_country_iso:'CA',destination_region:'none'}]});
+    if(path.endsWith('/listings/4603838854/images'))return Response.json({count:1,results:[{listing_id:4603838854,listing_image_id:901,url_570xN:'https://i.etsystatic.com/example/901.jpg'}]});
+    throw Error('Unexpected Etsy URL '+path);
+  };
+  try{
+    const response=await readExistingPhotos({request:new Request('https://devilndove.com/api/admin/product-etsy-owner-reconcile-505?mode=photos&product_id=53&listing_id=4603838854'),env,
+      data:{ddModuleAccess:{allowed:true,user:{role:'admin',is_active:1,user_id:8,email:'owner@example.invalid'}}}});
+    assert.equal(response.status,200);
+    const receipt=await response.json();
+    assert.equal(receipt.listing_id,'4603838854');
+    assert.equal(receipt.originals.length,3);
+    assert.equal(receipt.etsy_photos[0].etsy_image_id,'901');
+    assert.equal(receipt.unresolved_upload_attempts,0);
+    assert.ok(calls.every(([,method])=>method==='GET'));
+  }finally{globalThis.fetch=oldFetch;}
 });
 
 test('one explicit Etsy photo-sync action uses live inventory and per-image provider readback; duplicates remain held',()=>{
