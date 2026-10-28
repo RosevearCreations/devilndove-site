@@ -9,11 +9,13 @@ const form=$('productEditorForm'),id=Number(new URLSearchParams(location.search)
 if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   const state={busy:false,linked:'',loaded:false,assessment:null,readIssues:[],settings:null,attempted:false,claim:null,claimReview:null,photoReview:null,ownerReadbackReady:false,
     previewId:'',previewTitleMatches:false,images:null,lastRemoteId:'',holdAfterWrite:false,
-    refreshPromise:null,syncing:false,linkReadbackHold:false,closeout508:null,independent509:null,gateway509:null};
+    refreshPromise:null,syncing:false,linkReadbackHold:false,closeout508:null,independent509:null,gateway509:null,
+    witness510:null,separation510:null};
   if(id===53){$('dd500ListingId').value='4603838854';$('dd500CandidateNote').hidden=false;
     if($('dd503OwnerNote'))$('dd503OwnerNote').hidden=false;}
   if(id!==53)$('dd508CloseoutPanel').hidden=true;
   if(id!==53)$('dd509IndependentPanel').hidden=true;
+  if(id!==53){$('dd510WitnessPanel').hidden=true;$('dd510GatewayPanel').hidden=true;}
   const ready=()=>id>0&&form.dataset.productAuthority==='ready'&&form.dataset.productDirty!=='1';
   const key=()=>crypto.randomUUID();
   const status=(message,hold=false)=>{const el=$('dd500Status');el.textContent=message;el.dataset.tone=hold?'hold':'ok';};
@@ -25,6 +27,11 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   function resetOwnerApproval(){state.ownerReadbackReady=false;
     state.closeout508=null;
     state.independent509=null;
+    state.witness510=null;
+    for(const field of ['dd510ConfirmWitness','dd510ConfirmNoChanges','dd510Original344','dd510Original345','dd510Original346','dd510VisualEquality'])$(field).checked=false;
+    $('dd510RecordWitness').disabled=true;$('dd510RecordRetest').disabled=true;
+    $('dd510PhotoPairs').replaceChildren();
+    $('dd510ClaimStatus').textContent='HOLD — Saved Product changed. Refresh the primary listing claim and source/Etsy photo pairing before recording any observation.';
     for(const field of ['dd509NoEtsyChange','dd509ConfirmPhotos','dd509ConfirmMetadata','dd509ConfirmDelivery','dd509ConfirmSeparate'])$(field).checked=false;
     $('dd509RecordException').disabled=true;$('dd509IndependentAccept').disabled=true;
     $('dd509Status').textContent='HOLD — Saved Product details changed; refresh the actual original/Etsy photo pairs and owner approval evidence.';
@@ -323,8 +330,8 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   function photoURL509(value){try{const url=new URL(String(value||''),location.origin);
     return url.protocol==='https:'||url.origin===location.origin&&url.protocol==='http:'?url.href:null;
   }catch{return null;}}
-  function renderPhotoPairs509(rows){
-    const host=$('dd509Photos');host.replaceChildren();
+  function renderPhotoPairs509(rows,hostId='dd509Photos'){
+    const host=$(hostId);host.replaceChildren();
     for(const row of rows){
       const card=document.createElement('div');card.className='dd509-photo-card';
       const title=document.createElement('strong');title.textContent=`Original #${row.product_image_id} ↔ Etsy photo #${row.etsy_image_id||'not confirmed'}`;
@@ -381,12 +388,12 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   }
   async function gatewayReview509(){
     state.gateway509=null;gatewayFields509.forEach(field=>$(field).checked=false);update509Buttons();
-    const output=$('dd509GatewayStatus');output.textContent='Reading current server-only credential readiness and signed gateway GET receipts…';
+    const output=$('dd509GatewayStatus');output.textContent='Reading server-side credential readiness and signed source-side GET receipts…';
     try{const r=await api('/api/admin/integration-gateway-security-handoff-509');
       state.gateway509=r.ready_to_prepare_security_handoff?r:null;
       output.textContent=`${r.state||'DISCONNECTED'} • health GET ${r.accepted_health_receipt?'accepted':'missing'} • capabilities GET ${r.accepted_capabilities_receipt?'accepted':'missing'} `+
         `• environment ${r.environment||'not configured'}. `+
-        (r.ready_to_prepare_security_handoff?'READY FOR OWNER SECURITY HANDOFF REVIEW ONLY. No business connection activated.':
+        (r.ready_to_prepare_security_handoff?'READY FOR OWNER SOURCE-SIDE SECURITY HANDOFF REVIEW ONLY. No business connection activated.':
           `HOLD — ${(r.missing_or_next_steps||[]).join(' | ')||'Signed gateway receipts and independently provisioned server-only credentials are required.'}`);
     }catch(error){output.textContent=`DISCONNECTED — ${error.message}. No credentials or business data were accessed.`;}
     update509Buttons();
@@ -402,6 +409,82 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       output.textContent=`SECURITY HANDOFF #${r.receipt_id||'recorded'} saved for independent review. Still TESTING; no credentials provisioned or live connection approved.`;
     }catch(error){output.textContent=`HOLD — ${error.message}. Gateway permissions remain disabled.`;}
     gatewayFields509.forEach(field=>$(field).checked=false);update509Buttons();
+  }
+  const photoChecks510=['dd510Original344','dd510Original345','dd510Original346','dd510VisualEquality'];
+  const separationChecks510=['dd510GatewayDifferent','dd510GatewayNonprod','dd510GatewayExternal','dd510GatewayNoPilot'];
+  function update510Buttons(){
+    const witness=state.witness510,source=state.separation510;
+    $('dd510RecordWitness').disabled=!(id===53&&ready()&&witness&&
+      $('dd510ConfirmWitness').checked&&$('dd510ConfirmNoChanges').checked&&
+      $('dd510WitnessNote').value.trim().length>=15&&$('dd510WitnessNote').value.length<=500);
+    $('dd510RecordRetest').disabled=!(id===53&&ready()&&witness?.local_link_confirmed===true&&
+      witness.live_etsy_readback_confirmed===true&&witness.photo_freshness_ready===true&&
+      /^[a-f0-9]{64}$/.test(String(witness.current_evidence_fingerprint||''))&&
+      Array.isArray(witness.photo_pairs)&&witness.photo_pairs.length===3&&
+      witness.photo_pairs.every(photo=>photo.ready===true)&&$('dd510ConfirmNoChanges').checked&&
+      photoChecks510.every(field=>$(field).checked));
+    $('dd510GatewayRecord').disabled=!(source?.review_ready===true&&
+      Number(source.owner_security_handoff_receipt_id)>0&&separationChecks510.every(field=>$(field).checked));
+  }
+  async function witnessRead510(){
+    state.witness510=null;
+    for(const field of ['dd510ConfirmWitness','dd510ConfirmNoChanges',...photoChecks510])$(field).checked=false;
+    $('dd510PhotoPairs').replaceChildren();update510Buttons();
+    const out=$('dd510ClaimStatus');
+    if(id!==53||!ready()){out.textContent='HOLD — Save Product #53 first and review its latest saved state.';return;}
+    out.textContent='Reading the exact existing Etsy draft claim from the saved D1 primary; no Etsy changes…';
+    try{
+      const value=await api('/api/admin/product-etsy-witness-trail-510?product_id=53');
+      state.witness510=value;renderPhotoPairs509(value.photo_pairs||[],'dd510PhotoPairs');
+      out.textContent=`LOCAL CLAIM: ${value.local_claim_state||'unknown'} • receipt #${value.local_claim_receipt_id||'not confirmed'} `+
+        `• existing listing #4603838854 • live Etsy draft ${value.live_etsy_readback_confirmed?'confirmed':'not verified'} `+
+        `• three photo pairs ${value.photo_freshness_ready?'current receipts available (visual review required)':'HOLD'}. `+
+        (value.issues||[]).join(' | ')+
+        ' This is a local readback only; the existing listing is not duplicated or published.';
+    }catch(error){out.textContent=`HOLD — ${error.message}. No listing ownership or remote photos were changed.`;}
+    update510Buttons();
+  }
+  async function witnessRecord510(action){
+    update510Buttons();const retest=action==='record_photo_retest';
+    if($(retest?'dd510RecordRetest':'dd510RecordWitness').disabled||!state.witness510)return;
+    const field=$(retest?'dd510RetestReceipt':'dd510WitnessReceipt'),source=state.witness510;
+    field.textContent='Rechecking the same local draft claim and storing one audit observation…';
+    state.witness510=null;update510Buttons();
+    try{
+      const result=await api('/api/admin/product-etsy-witness-trail-510',{
+        action,product_id:53,listing_id:'4603838854',request_key:key(),confirm_no_etsy_changes:true,
+        ...(retest?{evidence_fingerprint:source.current_evidence_fingerprint,
+          confirm_original_344:true,confirm_original_345:true,confirm_original_346:true,confirm_visual_equality:true}:
+          {expected_claim_state:source.local_claim_state,witness_note:$('dd510WitnessNote').value.trim(),confirm_checked_actual_etsy:true})});
+      field.textContent=`LOCAL AUDIT #${result.witness_receipt_id||'recorded'} — ${result.message} No Etsy listing or Product link was changed.`;
+      await witnessRead510();
+    }catch(error){field.textContent=`HOLD — ${error.message}. Refresh current evidence before another witnessed action.`;}
+  }
+  async function separationRead510(){
+    state.separation510=null;separationChecks510.forEach(field=>$(field).checked=false);update510Buttons();
+    const out=$('dd510GatewayStatus');out.textContent='Reading QL-243 signed nonproduction source nonce receipts, owner handoff and independent-review separation…';
+    try{const result=await api('/api/admin/integration-gateway-separation-510');state.separation510=result;
+      out.textContent=`HOLD • QL-243 Devil n Dove source • health signed GET ${result.source_health_accepted?'local nonce accepted':'not evidenced'} `+
+        `• capabilities signed GET ${result.source_capabilities_accepted?'local nonce accepted':'not evidenced'} `+
+        `• owner source-side security handoff #${result.owner_security_handoff_receipt_id||'missing'} `+
+        `• separate reviewer ${result.different_reviewer?'confirmed':'required'}. `+
+        (result.blockers||[]).join(' | ')+
+        ' Gateway Ed25519 receipts and owner pilot remain unverified.';
+    }catch(error){out.textContent=`HOLD — ${error.message}. No gateway approval or live credentials were activated.`;}
+    update510Buttons();
+  }
+  async function separationRecord510(){
+    update510Buttons();if($('dd510GatewayRecord').disabled||!state.separation510)return;
+    const prior=state.separation510;state.separation510=null;update510Buttons();
+    const output=$('dd510GatewayReceipt');output.textContent='Recording a separate local reviewer decision, without connecting to the gateway…';
+    try{const result=await api('/api/admin/integration-gateway-separation-510',{
+      action:'record_nonproduction_separation_review',request_key:key(),
+      owner_handoff_receipt_id:prior.owner_security_handoff_receipt_id,
+      confirm_different_reviewer:true,confirm_nonproduction_only:true,
+      confirm_gateway_external_proof_pending:true,confirm_owner_pilot_not_authorized:true});
+      output.textContent=`LOCAL SEPARATION RECEIPT #${result.receipt_id||'recorded'} — ${result.message}`;
+    }catch(error){output.textContent=`HOLD — ${error.message}. Gateway proof and owner pilot remain pending.`;}
+    separationChecks510.forEach(field=>$(field).checked=false);
   }
   // Build 501: the owner opts in once with the Etsy checkbox. A confirmed
   // local Save (or approved gallery save) can now drive the complete package.
@@ -748,6 +831,14 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   $('dd509GatewayReview').addEventListener('click',()=>void gatewayReview509());
   gatewayFields509.forEach(field=>$(field).addEventListener('change',update509Buttons));
   $('dd509GatewayHandoff').addEventListener('click',()=>void gatewayHandoff509());
+  $('dd510ReadClaim').addEventListener('click',()=>void witnessRead510());
+  $('dd510WitnessNote').addEventListener('input',update510Buttons);
+  for(const field of ['dd510ConfirmWitness','dd510ConfirmNoChanges',...photoChecks510])$(field).addEventListener('change',update510Buttons);
+  $('dd510RecordWitness').addEventListener('click',()=>void witnessRecord510('record_candidate_witness'));
+  $('dd510RecordRetest').addEventListener('click',()=>void witnessRecord510('record_photo_retest'));
+  $('dd510GatewayReview').addEventListener('click',()=>void separationRead510());
+  separationChecks510.forEach(field=>$(field).addEventListener('change',update510Buttons));
+  $('dd510GatewayRecord').addEventListener('click',()=>void separationRecord510());
   $('dd504ApproveContent').addEventListener('change',()=>{$('dd504Signoff').disabled=!state.ownerReadbackReady||!$('dd504ApproveContent').checked;});
   $('dd504Signoff').addEventListener('click',()=>void ownerSignoff());
   $('dd505InspectClaim').addEventListener('click',()=>void inspectLocalClaim505());
