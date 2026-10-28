@@ -6,16 +6,23 @@ import {etsyFailure503,etsyFixLocation503} from './etsy-owner-diagnostics-503.mj
 
 const $=id=>document.getElementById(id);
 const form=$('productEditorForm'),id=Number(new URLSearchParams(location.search).get('product_id')||0);
+// Build 511: "linked:true" is an acknowledgement, never a listing ID.
+export const numericEtsyListing511=value=>{
+  if(typeof value!=='string'&&typeof value!=='number')return '';
+  const text=String(value).trim();
+  return /^[1-9]\d{0,14}$/.test(text)&&Number.isSafeInteger(Number(text))?text:'';
+};
 if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   const state={busy:false,linked:'',loaded:false,assessment:null,readIssues:[],settings:null,attempted:false,claim:null,claimReview:null,photoReview:null,ownerReadbackReady:false,
     previewId:'',previewTitleMatches:false,images:null,lastRemoteId:'',holdAfterWrite:false,
     refreshPromise:null,syncing:false,linkReadbackHold:false,closeout508:null,independent509:null,gateway509:null,
-    witness510:null,separation510:null};
+    witness510:null,separation510:null,evidence511:null,gateway511:null};
   if(id===53){$('dd500ListingId').value='4603838854';$('dd500CandidateNote').hidden=false;
     if($('dd503OwnerNote'))$('dd503OwnerNote').hidden=false;}
   if(id!==53)$('dd508CloseoutPanel').hidden=true;
   if(id!==53)$('dd509IndependentPanel').hidden=true;
-  if(id!==53){$('dd510WitnessPanel').hidden=true;$('dd510GatewayPanel').hidden=true;}
+  if(id!==53){$('dd510WitnessPanel').hidden=true;$('dd510GatewayPanel').hidden=true;
+    $('dd511EvidencePanel').hidden=true;$('dd511GatewayPanel').hidden=true;}
   const ready=()=>id>0&&form.dataset.productAuthority==='ready'&&form.dataset.productDirty!=='1';
   const key=()=>crypto.randomUUID();
   const status=(message,hold=false)=>{const el=$('dd500Status');el.textContent=message;el.dataset.tone=hold?'hold':'ok';};
@@ -28,6 +35,11 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     state.closeout508=null;
     state.independent509=null;
     state.witness510=null;
+    state.evidence511=null;
+    for(const field of ['dd511ManualClaim','dd511NoProvider','dd511Photo344','dd511Photo345','dd511Photo346','dd511Visual','dd511Independent'])$(field).checked=false;
+    $('dd511RecordWitnessFollowup').disabled=true;$('dd511RecordPhotoRenewal').disabled=true;
+    $('dd511PhotoPairs').replaceChildren();
+    $('dd511EvidenceStatus').textContent='HOLD — Saved Product changed. Recheck its primary Etsy listing claim and photo evidence.';
     for(const field of ['dd510ConfirmWitness','dd510ConfirmNoChanges','dd510Original344','dd510Original345','dd510Original346','dd510VisualEquality'])$(field).checked=false;
     $('dd510RecordWitness').disabled=true;$('dd510RecordRetest').disabled=true;
     $('dd510PhotoPairs').replaceChildren();
@@ -174,15 +186,18 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     const failures=results.filter(result=>result.status==='rejected').map(result=>result.reason?.message||'An unknown read failed.');
     if(failures.length){const failure=Error('Not all saved Etsy Product checks could load.');
       failure.issues=failures;
-      const partial=results[0];failure.partialLink=partial.status==='fulfilled'?partial.value?.linked_listing_id:null;
+      const partial=results[0];failure.partialLink=partial.status==='fulfilled'?numericEtsyListing511(partial.value?.linked_listing_id):'';
       throw failure;}
     const [link,distribution,images,tags]=results.map(result=>result.value);
     if([link.product_id,distribution.product_id,images.product_id,tags.product_id].some(value=>Number(value)!==id))
       throw Error('Saved Product, images and tags do not agree on Product identity.');
-    if(link.linked_listing_id&&link.saved_link_readback_confirmed!==true)
-      throw Error('The saved Etsy listing ID lacks an independent D1 primary receipt. Recheck the Product ID before any Etsy update; never create a duplicate.');
-    if(link.linked_listing_id&&String(images.listing_id||'')!==String(link.linked_listing_id))
-      throw Error('Etsy listing ID and saved photo receipt disagree.');
+    const savedId=numericEtsyListing511(link.linked_listing_id);
+    if(link.linked_listing_id&&!savedId){const error=Error('The saved Etsy ID was returned as a nonnumeric value, not a verified listing number. Recheck this exact Product receipt; never use #true or create a duplicate.');
+      error.linkReadbackHold=true;throw error;}
+    if(savedId&&link.saved_link_readback_confirmed!==true){const error=Error('The saved Etsy listing ID lacks an independent D1 primary receipt. Recheck this Product before any Etsy update; never create a duplicate.');
+      error.partialLink=savedId;error.linkReadbackHold=true;throw error;}
+    if(savedId&&numericEtsyListing511(images.listing_id)!==savedId){const error=Error(`Saved Etsy draft #${savedId} and the photo receipt listing ID do not agree. Review the existing draft and repair the photo receipt with source evidence before any Etsy update.`);
+      error.partialLink=savedId;error.linkReadbackHold=true;throw error;}
     const assessment=assessEtsyPackage500(distribution,images,tags);
     if(id===53&&![344,345,346].every(photo=>assessment.image_ids.includes(photo)))
       assessment.issues.push('Product #53 is missing one of its three original photos #344–346; inspect before transfer.');
@@ -203,7 +218,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     if(state.busy||!ready())return false;
     const work=(async()=>{
       state.busy=true;show();status('Reading the saved Product ↔ Etsy ID and every gallery image (no provider write)…');
-      try{const snapshot=await packageSnapshot();state.linked=String(snapshot.link.linked_listing_id||'');
+      try{const snapshot=await packageSnapshot();state.linked=numericEtsyListing511(snapshot.link.linked_listing_id);
         state.claim=snapshot.link.candidate_claim||null;
         if(state.linked){state.lastRemoteId='';state.linkReadbackHold=false;}
         state.readIssues=[];state.assessment=snapshot.assessment;state.images=snapshot.images;state.loaded=true;
@@ -213,7 +228,8 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
         return true;
       }catch(error){state.loaded=false;state.assessment=null;state.claim=null;
         state.readIssues=Array.isArray(error.issues)?error.issues:[error.message];
-        if(error.partialLink)state.linked=String(error.partialLink);
+        state.linked=numericEtsyListing511(error.partialLink);
+        state.linkReadbackHold=error.linkReadbackHold===true;
         status(`HOLD — ${state.readIssues.length} specific CHECK${state.readIssues.length===1?'':'S'} could not finish. See “What will be sent” for the failed step and safe next action. No Etsy transfer was attempted.`,true);
         return false;}
       finally{state.busy=false;show();}
@@ -485,6 +501,62 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       output.textContent=`LOCAL SEPARATION RECEIPT #${result.receipt_id||'recorded'} — ${result.message}`;
     }catch(error){output.textContent=`HOLD — ${error.message}. Gateway proof and owner pilot remain pending.`;}
     separationChecks510.forEach(field=>$(field).checked=false);
+  }
+  const photoFields511=['dd511Photo344','dd511Photo345','dd511Photo346','dd511Visual','dd511Independent'];
+  function update511Buttons(){const source=state.evidence511;
+    $('dd511RecordWitnessFollowup').disabled=!(id===53&&ready()&&source?.can_record_witness_followup===true&&
+      $('dd511ManualClaim').checked&&$('dd511NoProvider').checked&&
+      $('dd511NextAction').value.trim().length>=15&&$('dd511NextAction').value.length<=500);
+    $('dd511RecordPhotoRenewal').disabled=!(id===53&&ready()&&source?.can_record_photo_renewal===true&&
+      Number(source.previous_retest_id)>0&&/^[a-f0-9]{64}$/.test(String(source.current_evidence_fingerprint||''))&&
+      $('dd511NoProvider').checked&&photoFields511.every(field=>$(field).checked));
+  }
+  async function reviewEvidence511(){state.evidence511=null;
+    for(const field of ['dd511ManualClaim','dd511NoProvider',...photoFields511])$(field).checked=false;
+    $('dd511PhotoPairs').replaceChildren();update511Buttons();
+    const out=$('dd511EvidenceStatus');
+    if(id!==53||!ready()){out.textContent='HOLD — Save Product #53 before independently reviewing its exact Etsy receipt.';return;}
+    out.textContent='Reading saved D1 primary ownership, prior Build 510 owner witness/retest and current live Etsy image URLs…';
+    try{const result=await api('/api/admin/product-etsy-evidence-renewal-511?product_id=53');
+      state.evidence511=result;renderPhotoPairs509(result.original_photo_pairs||[],'dd511PhotoPairs');
+      out.textContent=`Product #53 • actual Etsy #4603838854 • saved D1 claim ${result.claim_state||'unknown'} `+
+        `• previous owner witness #${result.previous_witness_id||'not recorded'} `+
+        `• prior three-original retest #${result.previous_retest_id||'not recorded'} `+
+        `• current photos ${result.fresh_three_original_pairs?'three verified source/Etsy URL receipts':'HOLD'} `+
+        `• prior fingerprint ${result.evidence_unchanged?'unchanged':'missing or renewed'} `+
+        `• independent reviewer ${result.independent_reviewer?'different Admin verified':'required'}. `+
+        (result.can_record_photo_renewal?'READY FOR SEPARATE HUMAN PHOTO COMPARISON ONLY.':'HOLD — '+(result.issues||[]).join(' | '))+
+        ' No listing update, photo upload or acceptance was performed.';
+    }catch(error){out.textContent=`HOLD — ${error.message}. The existing draft remains unchanged.`;}
+    update511Buttons();
+  }
+  async function recordEvidence511(action){update511Buttons();
+    const renew=action==='record_three_photo_renewal';
+    const button=$(renew?'dd511RecordPhotoRenewal':'dd511RecordWitnessFollowup');
+    if(button.disabled||!state.evidence511)return;
+    const prior=state.evidence511,receipt=$(renew?'dd511PhotoReceipt':'dd511WitnessReceipt');
+    state.evidence511=null;update511Buttons();receipt.textContent='Rechecking exact source evidence before recording a local decision…';
+    try{const saved=await api('/api/admin/product-etsy-evidence-renewal-511',{
+      action,request_key:key(),product_id:53,listing_id:'4603838854',confirm_no_provider_write:true,
+      ...(renew?{prior_retest_id:prior.previous_retest_id,evidence_fingerprint:prior.current_evidence_fingerprint,
+        confirm_original_344:true,confirm_original_345:true,confirm_original_346:true,
+        confirm_actual_visual_match:true,confirm_independent_actor:true}:
+        {expected_claim_state:prior.claim_state,next_action:$('dd511NextAction').value.trim(),confirm_manual_claim_review:true})});
+      receipt.textContent=`LOCAL AUDIT #${saved.receipt_id||'recorded'} • ${saved.message} Final Etsy acceptance and gateway pilot remain HOLD.`;
+      await reviewEvidence511();
+    }catch(error){receipt.textContent=`HOLD — ${error.message}. Refresh before another local review; no provider action was retried.`;}
+  }
+  async function gatewayReceiptReview511(){const out=$('dd511GatewayStatus');
+    out.textContent='Rechecking current nonproduction HMAC source receipts and independent owner-review chain without contacting a gateway…';
+    try{const result=await api('/api/admin/integration-gateway-receipt-verification-511');
+      out.textContent=`CONNECTION HOLD • nonproduction source key ${result.nonproduction_profile_configured?'configured':'not provisioned'} `+
+        `• source health #${result.health_source_nonce_receipt_id||'missing'} `+
+        `• source capabilities #${result.capabilities_source_nonce_receipt_id||'missing'} `+
+        `• source evidence ${result.source_receipts_verified?'verified local D1 readback':'HOLD'} `+
+        `• separate reviewer ${result.owner_separation_verified?'source-side local audit matched':'not evidenced'} `+
+        `• gateway Ed25519/pins ${result.gateway_signed_receipts_verified?'independently verified':'NOT VERIFIED'} `+
+        `• owner identity/pilot NOT AUTHORIZED. ${(result.blockers||[]).join(' | ')}`;
+    }catch(error){out.textContent=`HOLD — ${error.message}. Gateway authentication and owner permissions are not approved.`;}
   }
   // Build 501: the owner opts in once with the Etsy checkbox. A confirmed
   // local Save (or approved gallery save) can now drive the complete package.
@@ -839,6 +911,12 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   $('dd510GatewayReview').addEventListener('click',()=>void separationRead510());
   separationChecks510.forEach(field=>$(field).addEventListener('change',update510Buttons));
   $('dd510GatewayRecord').addEventListener('click',()=>void separationRecord510());
+  $('dd511ReviewEvidence').addEventListener('click',()=>void reviewEvidence511());
+  $('dd511NextAction').addEventListener('input',update511Buttons);
+  for(const field of ['dd511ManualClaim','dd511NoProvider',...photoFields511])$(field).addEventListener('change',update511Buttons);
+  $('dd511RecordWitnessFollowup').addEventListener('click',()=>void recordEvidence511('record_claim_witness_followup'));
+  $('dd511RecordPhotoRenewal').addEventListener('click',()=>void recordEvidence511('record_three_photo_renewal'));
+  $('dd511ReviewGateway').addEventListener('click',()=>void gatewayReceiptReview511());
   $('dd504ApproveContent').addEventListener('change',()=>{$('dd504Signoff').disabled=!state.ownerReadbackReady||!$('dd504ApproveContent').checked;});
   $('dd504Signoff').addEventListener('click',()=>void ownerSignoff());
   $('dd505InspectClaim').addEventListener('click',()=>void inspectLocalClaim505());
