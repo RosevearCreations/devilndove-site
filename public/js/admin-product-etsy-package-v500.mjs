@@ -217,6 +217,33 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
         (problems.length?'HOLD — '+problems.join(' | '):'Local Product and metadata ready for a separate Etsy owner verification. The actual Etsy content is not approved by this check.');
     }catch(error){el.textContent=`HOLD — ${error.message} No Etsy changes attempted.`;}
   }
+  async function reviewTrial507(){
+    const output=$('dd507TrialStatus');
+    if(!ready()){
+      output.textContent='HOLD — First save this Product, then run the read-only Etsy comparison.';return;
+    }
+    const listingId=String(state.linked||$('dd500ListingId').value||'').trim();
+    if(!/^[1-9]\d{0,14}$/.test(listingId)){
+      output.textContent='HOLD — Enter the exact existing Etsy draft number before comparison. Never create another draft.';return;
+    }
+    output.textContent='Reading the exact Etsy draft and the three original Product photo receipts. No Etsy changes…';
+    try{
+      const data=await api(`/api/admin/product-etsy-owner-trial-507?product_id=${id}&listing_id=${encodeURIComponent(listingId)}`);
+      const issues=Array.isArray(data.issues)?data.issues:[];
+      output.textContent=`Product #${id} • SKU ${data.product_sku||'not set'} • slug ${data.product_slug||'not set'} • Etsy #${listingId} `+
+        `• local claim ${data.local_claim_state||'unverified'} • D1 receipt ${data.local_receipt_id||'not confirmed'} `+
+        `• actual Etsy ${data.remote_readback_confirmed?'verified read-only':'NOT verified'} `+
+        `• original photo receipts ${data.photo_receipts_confirmed||0}/${data.expected_originals?.length||data.approved_photo_count||0} `+
+        `• tag source ${data.tag_source||'unconfirmed'}. `+
+        (data.ready_for_owner_signoff?
+          'All technical readbacks match. Inspect the actual Etsy draft and use the separate owner sign-off button; nothing has been published.':
+          `HOLD — ${[...issues,...(data.remote_hold?[data.remote_hold]:[])].join(' | ')||'An independent owner check is still required.'}`);
+      if(data.local_link_confirmed&&!state.linked){
+        // Only refresh display from a separately verified, unique D1 claim.
+        await refresh();
+      }
+    }catch(error){output.textContent=`HOLD — ${error.message}. No listing, Product or photograph was changed.`;}
+  }
   // Build 501: the owner opts in once with the Etsy checkbox. A confirmed
   // local Save (or approved gallery save) can now drive the complete package.
   // The *server* must still confirm the saved channel preference. Never send
@@ -298,7 +325,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
         request_key:key(),confirm_prior_title_difference:!state.previewTitleMatches&&$('dd500OlderTitle').checked});
       if(!result.linked||String(result.listing_id)!==listingId||result.saved_link_readback_confirmed!==true||!result.receipt_id)
         throw Error('The server did not independently confirm the saved Product and Etsy receipt. Recheck saved details before any other action.');
-      const saved=await api(`/api/admin/product-etsy-existing-draft?product_id=${id}`);
+      const saved=await api(`/api/admin/product-etsy-existing-draft?product_id=${id}&candidate_listing_id=${encodeURIComponent(listingId)}`);
       if(String(saved.linked_listing_id)!==listingId||saved.saved_link_readback_confirmed!==true){
         state.lastRemoteId=listingId;state.linkReadbackHold=true;
         throw Error(`Local receipt #${result.receipt_id} was confirmed during linking, but a subsequent read could not confirm Product #${id}. Recheck saved details; never create a second Etsy draft.`);
@@ -309,7 +336,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     }catch(error){if(error.conflicting_product){state.claim={state:'another_product',product:error.conflicting_product};}
       if(error.code==='etsy_506_persistence_readback_hold'){state.lastRemoteId=listingId;state.linkReadbackHold=true;}
       status('HOLD — '+error.message,true);}
-    finally{state.busy=false;show();if(state.linked)void refresh();}
+    finally{state.busy=false;show();if(state.linked||state.linkReadbackHold)void refresh();}
   }
   async function inspectLocalClaim505(){
     const listingId=$('dd500ListingId').value.trim();
@@ -549,6 +576,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   $('dd500Refresh').addEventListener('click',()=>void refresh());
   $('dd504CheckPhotos').addEventListener('click',()=>void ownerPhotoReadback());
   $('dd506TrialCheck').addEventListener('click',()=>void reviewTrial506());
+  $('dd507TrialCheck').addEventListener('click',()=>void reviewTrial507());
   $('dd504ApproveContent').addEventListener('change',()=>{$('dd504Signoff').disabled=!state.ownerReadbackReady||!$('dd504ApproveContent').checked;});
   $('dd504Signoff').addEventListener('click',()=>void ownerSignoff());
   $('dd505InspectClaim').addEventListener('click',()=>void inspectLocalClaim505());

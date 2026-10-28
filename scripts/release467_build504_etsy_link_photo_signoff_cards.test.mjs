@@ -34,7 +34,7 @@ test('a verified admin can read the exact conflicting local Product without a D1
    if(sql.includes('FROM products WHERE product_id=?'))return {product_id:53,name:'Adventurine Argon',sku:'DND-01130',slug:'adventurine-argon'};
    if(sql.includes('SELECT id,external_reference'))return null;
    if(sql.includes('FROM marketplace_syndication_drafts d LEFT JOIN products p'))return {id:'oldreceipt',product_id:'71',product_name:'Other Product',product_sku:'DND-OTHER',product_slug:'other-product'};
-   return null;}};}};}};
+   return null;},async all(){operations.push({sql,args});return {results:[{id:'oldreceipt',product_id:'71',external_reference:'4603838854'}]};}};}};}};
  const request=new Request('https://devilndove.com/api/admin/product-etsy-existing-draft?product_id=53&candidate_listing_id=4603838854');
  const response=await getEtsyClaim({request,env:{DB:db},data:{ddModuleAccess:{allowed:true,user:{role:'admin',is_active:1,user_id:1,email:'owner@example.test'}}}});
  const data=await response.json();
@@ -42,7 +42,7 @@ test('a verified admin can read the exact conflicting local Product without a D1
  assert.equal(data.linked_listing_id,null);
  assert.equal(data.candidate_claim.state,'another_product');
  assert.equal(data.candidate_claim.product.product_id,71);
- assert.equal(operations.length,3);
+ assert.equal(operations.length,4);
  assert.ok(operations.every(x=>/^SELECT /.test(x.sql.trim())));
 });
 

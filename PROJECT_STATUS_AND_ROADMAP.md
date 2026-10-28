@@ -474,3 +474,9 @@ Exact D1-primary Product #53/Etsy draft #4603838854 link readback and receipt co
 
 **Next expected Build 507 — Verified Etsy Draft Owner Metadata/Three-Photo Acceptance & Read-Only Gateway Handshake Trial.**
 
+# Build 507 — Exact Etsy receipt recovery, original-photo owner trial & signed gateway proof
+
+Product #53's screenshot still shows a HOLD for existing Etsy draft #4603838854. Build 507 removes a false-negative two-query receipt comparison, uses one unique primary listing claim to recover a stale Product-key read without moving or creating anything, and exposes a read-only owner trial with actual saved SKU/slug, provider draft, metadata/tag/source and three-photo receipts. Duplicate or foreign claims, tag/description uncertainty and missing owner-witnessed photos stay HOLD. Independent synthetic HMAC health/capabilities GETs prove replay rejection without claiming a live gateway connection or enabling Product data transfer. See `docs/BUILD507_ETSY_OWNER_METADATA_PHOTO_GATEWAY_TRIAL.md`.
+
+**Next expected Build 508 — Product #53 Owner-Witnessed Etsy Final Acceptance, Verified Media Receipt Closeout & Gateway Credential Provisioning Review.**
+
