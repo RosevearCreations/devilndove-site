@@ -92,7 +92,7 @@ test('Product #53 UI requires four separate confirmations, fresh preflight and r
  }
  assert.match(js,/ready_for_owner_closeout/);assert.match(js,/evidence_fingerprint/);
  assert.match(js,/record_owner_closeout_508/);
- assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=508/);
- assert.match(html,/etsy-package-500\.css\?v=508/);
+ assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=509/);
+ assert.match(html,/etsy-package-500\.css\?v=509/);
  assert.match(html,/does not publish, upload photographs, create a draft or change Etsy/);
 });

@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="/admin/product-editor/creation-flow-471.css?v=471"/>
   <link rel="stylesheet" href="/admin/product-editor/entry-readiness-489.css?v=496"/>
   <link rel="stylesheet" href="/admin/product-editor/advanced-channels-498.css?v=498"/>
-  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=508"/>
+  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=509"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -164,7 +164,7 @@
 
       <section class="dd-editor-panel dd-etsy-panel" data-editor-panel="etsy" hidden>
         <div class="card dd500-package" id="dd500Package" aria-labelledby="dd500Title">
-          <div class="dd500-head"><div><p class="eyebrow">Build 508 • Owner-witnessed Etsy final acceptance, verified media receipts and gateway readiness</p><h2 id="dd500Title">Save and update our existing Etsy draft</h2>
+          <div class="dd500-head"><div><p class="eyebrow">Build 509 • Independent exception review, original-photo freshness and gateway security handoff</p><h2 id="dd500Title">Save and update our existing Etsy draft</h2>
             <p class="small">No extra image selection. We use <strong>every approved photograph in this Product's gallery</strong>, its saved description, CAD price, quantity and search tags. Etsy creation returns a listing number we keep on this Product for all future updates. The listing stays <strong>unpublished</strong>.</p></div></div>
           <div class="dd503-owner-note" id="dd503OwnerNote" role="note" hidden><strong>Keep our existing Etsy draft #4603838854.</strong> Do not delete it or create another. First verify and link that ID, then update the same unpublished draft. Our last Etsy screenshot also showed the category “Bar Soaps”; confirm the correct category in Etsy before publishing.</div>
           <div class="dd500-id" id="dd500Identity" role="status" aria-live="polite">Reading this Product's saved Etsy listing ID…</div>
@@ -267,6 +267,45 @@
             <p class="small">Review whether our server-only integration key, secret, environment and signed health/capabilities handshake receipts are provisioned. Secrets are never displayed. Read-only checks do not connect businesses, approve customer-data access or enable product transfer, events or commands.</p>
             <button class="btn" type="button" id="dd508GatewayCheck">Check server-only gateway readiness (read only)</button>
             <p id="dd508GatewayStatus" role="status" aria-live="polite">DISCONNECTED until independent gateway credential and signed receipt checks succeed. No connection approval granted.</p>
+          </section>
+          <section class="dd505-review" id="dd509IndependentPanel" aria-labelledby="dd509IndependentTitle">
+            <h3 id="dd509IndependentTitle">Build 509 — independent Etsy owner-trial exception and photo-freshness review</h3>
+            <p class="small">Check the real draft #4603838854 and each current Product original against Etsy. We must witness the three photo pairs visually; matching ID numbers alone cannot establish identical pictures. An exception report does not release a HOLD. Independent acceptance requires a <strong>different verified Admin</strong> from the original Build 508 owner sign-off.</p>
+            <button class="btn" id="dd509Review" type="button">Review current Etsy/photo evidence and outstanding exceptions (read only)</button>
+            <p class="small" id="dd509Status" role="status" aria-live="polite">HOLD — Awaiting independent live media and owner closeout evidence.</p>
+            <div class="dd509-photo-grid" id="dd509Photos" aria-live="polite"></div>
+            <label for="dd509ExceptionCategory">If an exception remains, choose its type</label>
+            <select class="input" id="dd509ExceptionCategory">
+              <option value="">Choose the actual exception…</option><option value="listing_claim">Existing Etsy listing ID claim</option>
+              <option value="photo_receipt">Original photograph or Etsy photo receipt</option><option value="metadata">Description, category, price or tags</option>
+              <option value="owner_signoff">Owner sign-off or independent reviewer</option><option value="provider_readback">Remote Etsy/provider readback</option><option value="other">Other verified exception</option>
+            </select>
+            <label for="dd509NextAction">Manual follow-up to resolve the source exception (no automatic retry)</label>
+            <textarea class="input" id="dd509NextAction" rows="3" maxlength="500" placeholder="Which exact source evidence will we correct or independently verify?"></textarea>
+            <label><input type="checkbox" id="dd509NoEtsyChange"><span>We confirm this review is local only. Do not recreate a draft, re-upload images, publish or bypass a HOLD.</span></label>
+            <button class="btn" type="button" id="dd509RecordException" disabled>Record owner exception follow-up (HOLD remains)</button>
+            <div class="dd508-confirmations">
+              <label><input type="checkbox" id="dd509ConfirmPhotos"><span>As a separate reviewer, we inspected all three actual source/Etsy photos and their fresh receipts.</span></label>
+              <label><input type="checkbox" id="dd509ConfirmMetadata"><span>We independently checked the current description, category, correct tags, CAD price and quantity.</span></label>
+              <label><input type="checkbox" id="dd509ConfirmDelivery"><span>We independently confirmed Canada-only delivery and unpublished draft status.</span></label>
+              <label><input type="checkbox" id="dd509ConfirmSeparate"><span>We are a different verified Admin from the owner who recorded Build 508 closeout.</span></label>
+            </div>
+            <button class="btn primary" type="button" id="dd509IndependentAccept" disabled>Record independent current-evidence acceptance</button>
+            <p class="small" id="dd509Receipt" role="status" aria-live="polite">No Build 509 exception or independent acceptance receipt recorded.</p>
+          </section>
+          <section class="dd505-review" aria-labelledby="dd509GatewayTitle">
+            <h3 id="dd509GatewayTitle">Build 509 — gateway security approval handoff (no activation)</h3>
+            <p class="small">Review our signed, read-only AI Data Platform health/capabilities handshake. A handoff is permitted only when server credentials and both genuine signed receipts are in TESTING. The handoff <strong>does not</strong> connect businesses or authorize customer/product data, events, commands, real messages or dispatch.</p>
+            <button class="btn" type="button" id="dd509GatewayReview">Review current signed gateway handshakes (read only)</button>
+            <p class="small" id="dd509GatewayStatus" role="status" aria-live="polite">DISCONNECTED — No gateway security handoff is approved.</p>
+            <div class="dd508-confirmations">
+              <label><input type="checkbox" id="dd509GatewayRotation"><span>We reviewed who controls credential issuance, rotation and revocation.</span></label>
+              <label><input type="checkbox" id="dd509GatewayTenant"><span>We reviewed isolation between Devil n Dove and our other companies.</span></label>
+              <label><input type="checkbox" id="dd509GatewaySecrets"><span>We confirmed gateway secrets stay on the server, never in this page or a handoff file.</span></label>
+              <label><input type="checkbox" id="dd509GatewayNoDispatch"><span>We approve a read-only review handoff only — no cross-application customer data or live dispatch.</span></label>
+            </div>
+            <button class="btn primary" type="button" id="dd509GatewayHandoff" disabled>Record read-only security handoff for independent review</button>
+            <p class="small" id="dd509GatewayReceipt" role="status" aria-live="polite">No Build 509 security handoff receipt recorded. The gateway is not connected.</p>
           </section>
           <p class="small" id="dd501Resume" role="status" aria-live="polite">An Etsy checkbox plus Save Product authorizes the same draft workflow. This separate button is for finishing first-time setup or resolving a held package.</p>
           <p class="small">Our store retains the saved Product. Facebook Marketplace uses the same source photos but remains a manual handoff until Meta grants supported listing access. This button never publishes on either marketplace.</p>
@@ -549,7 +588,7 @@
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=496"></script>
   <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
   <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
-  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=508"></script>
+  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=509"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">

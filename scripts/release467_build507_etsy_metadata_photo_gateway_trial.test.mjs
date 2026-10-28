@@ -62,7 +62,7 @@ test('only authenticated admin can run Etsy owner trial; no real Etsy or sign-of
  assert.match(api,/verifyExistingDraft486/);assert.ok(api.includes("readEtsy486('listings/"));
  assert.doesNotMatch(api,/method:\s*['"](?:POST|PATCH|PUT|DELETE)['"]|\.run\(\)/);
  assert.match(client,/reviewTrial507/);assert.match(html,/dd507TrialCheck/);
- assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=508/);
+ assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=509/);
 });
 test('integration v1 handshake trial accepts independent signed GETs and rejects replay, no product read/command grants',async()=>{
  const config={ROSEVEAR_INTEGRATION_HMAC_SECRET_V1:'synthetic-507-server-only-credential-sample',ROSEVEAR_INTEGRATION_KEY_ID_V1:'gateway-test-507',ROSEVEAR_INTEGRATION_ENVIRONMENT_V1:'test'};
