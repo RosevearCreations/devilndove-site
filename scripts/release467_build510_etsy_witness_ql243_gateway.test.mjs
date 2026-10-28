@@ -145,8 +145,8 @@ test('Build510 UI exposes factual witness notes, separate photo confirmations, n
   'dd510GatewayNoPilot','dd510GatewayRecord']){
    assert.match(page,new RegExp(el));assert.match(script,new RegExp(el));
  }
- assert.match(page,/admin-product-etsy-package-v500\.mjs\?v=510/);
- assert.match(page,/etsy-package-500\.css\?v=510/);
+ assert.match(page,/admin-product-etsy-package-v500\.mjs\?v=51[01]/);
+ assert.match(page,/etsy-package-500\.css\?v=51[01]/);
  assert.match(script,/renderPhotoPairs509\(value\.photo_pairs\|\|\[\],'dd510PhotoPairs'\)/);
  assert.match(source('admin/product-editor/etsy-package-500.css'),/object-fit:contain/);
  const route=source('functions/api/admin/product-etsy-witness-trail-510.js');

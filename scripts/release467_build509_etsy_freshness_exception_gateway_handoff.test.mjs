@@ -104,8 +104,8 @@ test('Build509 UI provides three side-by-side original/Etsy photos and independe
  const css=source('admin/product-editor/etsy-package-500.css');
  assert.match(css,/\.dd509-photo-grid/);assert.match(css,/object-fit:contain/);
  assert.match(client,/record_exception_followup/);assert.match(client,/record_independent_acceptance/);
- assert.match(page,/admin-product-etsy-package-v500\.mjs\?v=(?:509|510)/);
- assert.match(page,/etsy-package-500\.css\?v=(?:509|510)/);
+ assert.match(page,/admin-product-etsy-package-v500\.mjs\?v=(?:509|51[01])/);
+ assert.match(page,/etsy-package-500\.css\?v=(?:509|51[01])/);
  const exception=source('functions/api/admin/product-etsy-independent-review-509.js');
  assert.match(exception,/separate_reviewer/);assert.match(exception,/etsy_509_exception_followup_recorded/);
  assert.doesNotMatch(exception,/publishEtsy|createEtsy|uploadEtsy|fetch\s*\(/);
