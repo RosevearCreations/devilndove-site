@@ -123,7 +123,7 @@ test('Build511 UI has separately actionable witness follow-up, independent three
   'dd511Visual','dd511Independent','dd511RecordPhotoRenewal','dd511GatewayPanel','dd511ReviewGateway']){
    assert.ok(html.includes(id),id);assert.ok(js.includes(id),id);
  }
- assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=511/);
- assert.match(html,/etsy-package-500\.css\?v=511/);
+ assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=5\d\d/);
+ assert.match(html,/etsy-package-500\.css\?v=5\d\d/);
  assert.doesNotMatch(read('functions/api/admin/product-etsy-evidence-renewal-511.js'),/fetch\s*\(|publishEtsy|uploadEtsy|createEtsy/);
 });

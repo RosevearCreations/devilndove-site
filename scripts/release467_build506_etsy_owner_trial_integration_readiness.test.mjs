@@ -74,8 +74,8 @@ test('Etsy readback and UI remain owner-gated; no automatic duplicate, tag guess
  assert.match(ui,/(?:link\.linked_listing_id|savedId)&&link\.saved_link_readback_confirmed!==true/);
  assert.match(ui,/reviewTrial506/);
  assert.match(html,/dd506TrialCheck/);
- assert.match(html,/etsy-package-500\.css\?v=(?:50[6789]|51[01])/);
- assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=(?:50[6789]|51[01])/);
+ assert.match(html,/etsy-package-500\.css\?v=5\d\d/);
+ assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=5\d\d/);
  assert.equal(read('functions/api/integration/v1/health.js').includes('product_id'),false);
  assert.equal(read('functions/api/integration/v1/capabilities.js').includes('enabled:true,method:\'POST\''),false);
 });

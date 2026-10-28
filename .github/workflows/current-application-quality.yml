@@ -349,6 +349,7 @@ jobs:
           node scripts/release467_build509_etsy_freshness_exception_gateway_handoff.test.mjs
           node scripts/release467_build510_etsy_witness_ql243_gateway.test.mjs
           node scripts/release467_build511_etsy_evidence_gateway_receipts.test.mjs
+          node scripts/release467_build512_ql245_etsy_conflict_source_signature.test.mjs
           node scripts/release467_build499_owner_advanced_tags_media.test.mjs
           node scripts/release467_build497_product53_three_channel_acceptance.test.mjs
 
