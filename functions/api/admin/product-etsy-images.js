@@ -17,6 +17,11 @@ const bucket=env=>env.PRODUCT_MEDIA_BUCKET||env.MEDIA_BUCKET||env.R2_PRODUCT_MED
 function gate(c){const admin=verifiedAdminFromModule(c),db=getDb(c.env);
   return !admin?{error:respond({error:'Active administrator access required.'},401)}:
     !db?{error:respond({error:'D1 unavailable.'},503)}:{admin,db};}
+// Build 515: the listing-ID receipt UI already uses D1 first-primary. The
+// gallery-read endpoint must read the same primary authority, or a recent
+// legitimate link can appear missing here even while it is confirmed in the
+// Product identity view. This does not turn stale/foreign media into proof.
+const currentDb=db=>typeof db.withSession==='function'?db.withSession('first-primary'):db;
 function details(row){try{return JSON.parse(row?.payload_json||'{}');}catch{return {};}}
 async function source(db,id,env={}){
   const [product,draft,gallery,accepted]=await Promise.all([
@@ -74,7 +79,7 @@ async function getEtsy(path,headers){const r=await fetch('https://api.etsy.com/v
 export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
   const id=new URL(c.request.url).searchParams.get('product_id');
   if(!validId(id))return respond({error:'Choose a saved Product.'},400);
-  try{const s=await source(g.db,Number(id),c.env);
+  try{const s=await source(currentDb(g.db),Number(id),c.env);
     if(!s.product)return respond({error:'Product not found.'},404);
     const local=localView(s);
     if(new URL(c.request.url).searchParams.get('reconcile')!=='1')return respond(local);
@@ -99,7 +104,7 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
     b?.confirm_canada_only!==true)return respond({error:'Explicit media, Canada-only and unpublished-only approval required.'},400);
   const id=Number(b.product_id),imageId=Number(b.product_image_id),key=recordKey(id,imageId);
   try{
-    const s=await source(g.db,id,c.env);
+    const s=await source(currentDb(g.db),id,c.env);
     if(!s.product||!validId(s.draft?.external_reference)||s.payload?.canada_only_shipping_verified!==true||
       s.payload?.publication_performed!==false)return respond({error:'Only a verified, unpublished Canada-only Product Editor draft may receive images.'},409);
     const selected=s.images.find(im=>im.product_image_id===imageId);
