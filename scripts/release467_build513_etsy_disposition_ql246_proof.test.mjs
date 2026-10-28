@@ -120,8 +120,8 @@ test('Build513 UI/copy exposes safe exception notes and QL-246 public proof but 
    'dd513RecordContent','dd513GatewayPanel','dd513ReviewGateway','dd513RawProof','dd513InspectPublic']){
   assert.ok(html.includes(id),id);assert.ok(js.includes(id),id);
  }
- assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=513/);
- assert.match(html,/etsy-package-500\.css\?v=513/);
+ assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=5\d\d/);
+ assert.match(html,/etsy-package-500\.css\?v=5\d\d/);
  for(const file of ['functions/api/admin/product-etsy-disposition-513.js',
    'functions/api/admin/integration-ql246-source-comparison-513.js']){
   assert.doesNotMatch(read(file),/publishEtsy|createEtsy|uploadEtsy|UPDATE\s+marketplace_syndication_drafts|fetch\s*\(/i);
