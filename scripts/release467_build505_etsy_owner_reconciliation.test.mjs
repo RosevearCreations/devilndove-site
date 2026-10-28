@@ -77,6 +77,6 @@ test('editor offers owner-witnessed correction and side-by-side original-photo c
   assert.match(ui,/matchExistingPhoto505/);
   assert.match(ui,/unresolved_upload_attempts/);
   assert.match(css,/dd505-photo-pair/);
-  assert.match(html,/etsy-package-500\.css\?v=50[567]/);
-  assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=50[567]/);
+  assert.match(html,/etsy-package-500\.css\?v=50[5678]/);
+  assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=50[5678]/);
 });

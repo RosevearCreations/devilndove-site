@@ -58,3 +58,6 @@ body[data-admin-page="product-editor-v165"] input[type="checkbox"]{width:18px!im
 .dd505-photo-pair img{max-width:100%;width:100%;aspect-ratio:4/5;object-fit:contain;background:rgba(255,255,255,.08);border-radius:9px}
 .dd505-photo-pair select{width:100%;min-width:0}
 @media(max-width:680px){.dd505-review{padding:11px}.dd505-review button{justify-self:stretch;width:100%}.dd505-photo-pair{grid-template-columns:minmax(0,1fr)}}
+.dd508-confirmations{display:grid;gap:8px}
+.dd508-confirmations label{padding:10px;border:1px solid rgba(173,140,97,.4);border-radius:8px;background:rgba(177,129,55,.07)}
+#dd508ReviewStatus,#dd508GatewayStatus,#dd508ReceiptStatus{line-height:1.6;overflow-wrap:anywhere}
