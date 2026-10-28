@@ -16,7 +16,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   const state={busy:false,linked:'',loaded:false,assessment:null,readIssues:[],settings:null,attempted:false,claim:null,claimReview:null,photoReview:null,ownerReadbackReady:false,
     previewId:'',previewTitleMatches:false,images:null,lastRemoteId:'',holdAfterWrite:false,
     refreshPromise:null,syncing:false,linkReadbackHold:false,closeout508:null,independent509:null,gateway509:null,
-    witness510:null,separation510:null,evidence511:null,gateway511:null,evidence512:null,gateway512:null,evidence513:null};
+    witness510:null,separation510:null,evidence511:null,gateway511:null,evidence512:null,gateway512:null,evidence513:null,owner514:null};
   if(id===53){$('dd500ListingId').value='4603838854';$('dd500CandidateNote').hidden=false;
     if($('dd503OwnerNote'))$('dd503OwnerNote').hidden=false;}
   if(id!==53)$('dd508CloseoutPanel').hidden=true;
@@ -24,7 +24,8 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   if(id!==53){$('dd510WitnessPanel').hidden=true;$('dd510GatewayPanel').hidden=true;
     $('dd511EvidencePanel').hidden=true;$('dd511GatewayPanel').hidden=true;
     $('dd512EtsyPanel').hidden=true;$('dd512GatewayPanel').hidden=true;
-    $('dd513EtsyPanel').hidden=true;$('dd513GatewayPanel').hidden=true;}
+    $('dd513EtsyPanel').hidden=true;$('dd513GatewayPanel').hidden=true;
+    $('dd514OwnerPanel').hidden=true;$('dd514GatewayPanel').hidden=true;}
   const ready=()=>id>0&&form.dataset.productAuthority==='ready'&&form.dataset.productDirty!=='1';
   const key=()=>crypto.randomUUID();
   const status=(message,hold=false)=>{const el=$('dd500Status');el.textContent=message;el.dataset.tone=hold?'hold':'ok';};
@@ -40,6 +41,10 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     state.evidence511=null;
     state.evidence512=null;
     state.evidence513=null;
+    state.owner514=null;
+    for(const field of ['dd514Inspected','dd514Unresolved','dd514NoChanges','dd514Description','dd514Category','dd514Photos','dd514Reviewer'])$(field).checked=false;
+    $('dd514RecordOwner').disabled=true;$('dd514RecordRecheck').disabled=true;
+    $('dd514Status').textContent='HOLD — Product data changed. Refresh the exact listing, source photos and owner observation.';
     for(const field of ['dd513Unresolved','dd513NoEtsyWrite','dd513Description','dd513Tags','dd513Category','dd513Details','dd513Photo344','dd513Photo345','dd513Photo346','dd513Independent'])$(field).checked=false;
     $('dd513RecordFollowup').disabled=true;$('dd513RecordContent').disabled=true;
     $('dd513ContentStatus').textContent='HOLD — Product data changed. Recheck current Etsy content and original-photo evidence.';
@@ -725,6 +730,65 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     }catch(error){out.textContent=`PENDING — ${error.message}. No proof was fabricated or connection enabled.`;}
     publicButton513();
   }
+  const checks514=['dd514Description','dd514Category','dd514Photos','dd514Reviewer'];
+  function buttons514(){const e=state.owner514;
+    $('dd514RecordOwner').disabled=!(id===53&&ready()&&e?.can_record_factual_owner_observation===true&&
+      $('dd514Inspected').checked&&$('dd514Unresolved').checked&&$('dd514NoChanges').checked&&
+      $('dd514Note').value.trim().length>=30&&$('dd514Note').value.length<=800);
+    $('dd514RecordRecheck').disabled=!(id===53&&ready()&&e?.can_record_independent_disposition_recheck===true&&
+      $('dd514NoChanges').checked&&checks514.every(field=>$(field).checked)&&
+      Number(e.prior_content_recheck_id)>0&&/^[a-f0-9]{64}$/.test(String(e.current_evidence_fingerprint||'')));
+  }
+  async function reviewOwner514(){state.owner514=null;
+    for(const field of ['dd514Inspected','dd514Unresolved','dd514NoChanges',...checks514])$(field).checked=false;
+    buttons514();const out=$('dd514Status');
+    if(id!==53||!ready()){out.textContent='HOLD — Save Product #53 before rechecking its existing Etsy draft.';return;}
+    out.textContent='Reading the exact primary Etsy ID, Build 513 local content receipt and current three-original evidence…';
+    try{const r=await api('/api/admin/product-etsy-owner-witness-514?product_id=53');state.owner514=r;
+      out.textContent=`Draft #4603838854 • claim ${r.claim_state||'unverified'} `+
+        `• prior owner observation #${r.prior_owner_witness_id||'none'} `+
+        `• independent corrected-content receipt #${r.prior_content_recheck_id||'none'} `+
+        `• conflicting photo receipts ${(r.conflicting_photo_receipt_ids||[]).join(', ')||'none'} `+
+        `• status ${r.disposition_status||'HOLD'}. `+
+        (r.issues||[]).join(' | ')+
+        ' No Etsy change, final content approval or source-claim correction was attempted.';
+    }catch(error){out.textContent=`HOLD — ${error.message}. No Etsy changes were made.`;}
+    buttons514();
+  }
+  async function recordOwner514(independent){buttons514();
+    const button=$(independent?'dd514RecordRecheck':'dd514RecordOwner');
+    if(button.disabled||!state.owner514)return;
+    const before=state.owner514,out=$(independent?'dd514RecheckResult':'dd514OwnerResult');
+    state.owner514=null;buttons514();out.textContent='Rechecking the saved primary claim and receipt references before recording a local observation…';
+    try{const r=await api('/api/admin/product-etsy-owner-witness-514',{
+      action:independent?'record_independent_disposition_recheck':'record_factual_owner_witness',
+      request_key:key(),product_id:53,listing_id:'4603838854',
+      expected_claim_state:before.claim_state,expected_claim_receipt_id:before.claim_receipt_id,
+      expected_conflicting_photo_receipt_ids:before.conflicting_photo_receipt_ids,
+      confirm_existing_draft_only:true,confirm_no_etsy_changes:true,confirm_not_final_approval:true,
+      ...(independent?{prior_content_recheck_id:before.prior_content_recheck_id,
+        evidence_fingerprint:before.current_evidence_fingerprint,
+        confirm_corrected_description:true,confirm_corrected_tags:true,
+        confirm_current_category_delivery:true,confirm_all_three_originals:true,
+        confirm_independent_reviewer:true}:
+        {observation_note:$('dd514Note').value.trim(),
+         confirm_direct_owner_draft_inspection:true,confirm_unresolved_media_conflicts:true})});
+      out.textContent=`LOCAL RECEIPT #${r.receipt_id||'recorded'} — ${r.message}`;
+      await reviewOwner514();
+    }catch(error){out.textContent=`HOLD — ${error.message}. No source evidence was rewritten.`;}
+  }
+  async function reviewGateway514(){const out=$('dd514GatewayStatus');
+    out.textContent='Checking QL-247 public-source and credential/negative-denial witness readiness…';
+    try{const r=await api('/api/admin/integration-ql247-readiness-514');
+      out.textContent=`${r.connection_state||'DISCONNECTED'} • Phase A ${r.phase_a?.public_ql246_source_proof_published?'signed proof':'missing signed proof'} `+
+        `• independent pin ${r.phase_a?.trusted_ql246_public_pin_configured?'configured':'NOT PROVISIONED'} `+
+        `• operator challenge ${r.phase_a?.independent_operator_challenge_configured?'configured':'NOT PROVISIONED'} `+
+        `• Phase B ${r.phase_b?.status||'NOT AUTHORIZED'} `+
+        `• owner pilot ${r.owner_pilot_authorization||'NOT GIVEN'}. `+
+        (r.next_evidence||[]).join(' | ')+
+        ' Never paste credentials into this screen; no gateway request was sent.';
+    }catch(error){out.textContent=`HOLD — ${error.message}. No gateway connection was attempted.`;}
+  }
   // Build 501: the owner opts in once with the Etsy checkbox. A confirmed
   // local Save (or approved gallery save) can now drive the complete package.
   // The *server* must still confirm the saved channel preference. Never send
@@ -1102,6 +1166,12 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   $('dd513RawProof').addEventListener('input',publicButton513);
   for(const field of ['dd513NoSecrets','dd513NoPilot'])$(field).addEventListener('change',publicButton513);
   $('dd513InspectPublic').addEventListener('click',()=>void inspectPublic513());
+  $('dd514Review').addEventListener('click',()=>void reviewOwner514());
+  $('dd514Note').addEventListener('input',buttons514);
+  for(const field of ['dd514Inspected','dd514Unresolved','dd514NoChanges',...checks514])$(field).addEventListener('change',buttons514);
+  $('dd514RecordOwner').addEventListener('click',()=>void recordOwner514(false));
+  $('dd514RecordRecheck').addEventListener('click',()=>void recordOwner514(true));
+  $('dd514ReviewGateway').addEventListener('click',()=>void reviewGateway514());
   $('dd504ApproveContent').addEventListener('change',()=>{$('dd504Signoff').disabled=!state.ownerReadbackReady||!$('dd504ApproveContent').checked;});
   $('dd504Signoff').addEventListener('click',()=>void ownerSignoff());
   $('dd505InspectClaim').addEventListener('click',()=>void inspectLocalClaim505());

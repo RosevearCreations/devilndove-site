@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="/admin/product-editor/creation-flow-471.css?v=471"/>
   <link rel="stylesheet" href="/admin/product-editor/entry-readiness-489.css?v=496"/>
   <link rel="stylesheet" href="/admin/product-editor/advanced-channels-498.css?v=498"/>
-  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=513"/>
+  <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=514"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -164,7 +164,7 @@
 
       <section class="dd-editor-panel dd-etsy-panel" data-editor-panel="etsy" hidden>
         <div class="card dd500-package" id="dd500Package" aria-labelledby="dd500Title">
-          <div class="dd500-head"><div><p class="eyebrow">Build 513 • Listing/media exception disposition, owner content recheck and QL-246 source-proof readiness</p><h2 id="dd500Title">Save and update our existing Etsy draft</h2>
+          <div class="dd500-head"><div><p class="eyebrow">Build 514 • Product #53 owner-witnessed evidence and QL-247 nonproduction source readiness</p><h2 id="dd500Title">Save and update our existing Etsy draft</h2>
             <p class="small">No extra image selection. We use <strong>every approved photograph in this Product's gallery</strong>, its saved description, CAD price, quantity and search tags. Etsy creation returns a listing number we keep on this Product for all future updates. The listing stays <strong>unpublished</strong>.</p></div></div>
           <div class="dd503-owner-note" id="dd503OwnerNote" role="note" hidden><strong>Keep our existing Etsy draft #4603838854.</strong> Do not delete it or create another. First verify and link that ID, then update the same unpublished draft. Our last Etsy screenshot also showed the category “Bar Soaps”; confirm the correct category in Etsy before publishing.</div>
           <div class="dd500-id" id="dd500Identity" role="status" aria-live="polite">Reading this Product's saved Etsy listing ID…</div>
@@ -448,6 +448,33 @@
               <p class="small" id="dd513SignatureStatus" role="status" aria-live="polite">PENDING — Without a genuine challenged, independently pinned signature, do not publish an acceptance proof.</p>
             </details>
           </section>
+          <section class="dd505-review" id="dd514OwnerPanel" aria-labelledby="dd514OwnerTitle">
+            <h3 id="dd514OwnerTitle">Build 514 — Owner-witnessed Etsy content/media disposition</h3>
+            <p class="small">Review the real <strong>unpublished Etsy draft #4603838854</strong> and Product #53 saved description, category, search tags, CAD price, quantity, Canada-only delivery and each original photograph <strong>#344–346</strong>. A local owner observation never corrects a saved conflict or constitutes final Etsy approval.</p>
+            <button type="button" class="btn" id="dd514Review">Review current Product claim, Build 513 owner evidence and independent reviewer</button>
+            <p class="small" id="dd514Status" role="status" aria-live="polite">HOLD — Fresh source-backed owner observation and independent correction review not yet recorded.</p>
+            <label for="dd514Note">Our factual observations from the exact existing Etsy draft</label>
+            <textarea class="input" id="dd514Note" rows="3" maxlength="800" placeholder="Describe what we actually saw, any mismatch and what still needs checking. Do not claim a repaired link or approved photo."></textarea>
+            <label><input type="checkbox" id="dd514Inspected"><span>We directly inspected the same Etsy draft and the saved Product.</span></label>
+            <label><input type="checkbox" id="dd514Unresolved"><span>Any unmatched listing/photo receipts remain unresolved until separately verified.</span></label>
+            <label><input type="checkbox" id="dd514NoChanges"><span>This is only local evidence: no Etsy update, new draft, automatic retry, publication or final approval.</span></label>
+            <button type="button" class="btn" id="dd514RecordOwner" disabled>Record factual owner observation (unresolved HOLD)</button>
+            <p class="small" id="dd514OwnerResult" role="status" aria-live="polite">No Build 514 owner observation recorded.</p>
+            <div class="dd508-confirmations">
+              <label><input type="checkbox" id="dd514Description"><span>Saved product description and accurate Etsy search tags have been independently checked.</span></label>
+              <label><input type="checkbox" id="dd514Category"><span>Current Etsy category, CAD price, quantity, unpublished status and Canada-only delivery match.</span></label>
+              <label><input type="checkbox" id="dd514Photos"><span>All three original photographs #344, #345 and #346 match current Etsy images.</span></label>
+              <label><input type="checkbox" id="dd514Reviewer"><span>We are a different verified Admin from the last Build 513 corrected-content reviewer.</span></label>
+            </div>
+            <button type="button" class="btn primary" id="dd514RecordRecheck" disabled>Record independent source-backed disposition recheck (no closure)</button>
+            <p class="small" id="dd514RecheckResult" role="status" aria-live="polite">HOLD — No independent content/media disposition recheck recorded.</p>
+          </section>
+          <section class="dd505-review" id="dd514GatewayPanel" aria-labelledby="dd514GatewayTitle">
+            <h3 id="dd514GatewayTitle">QL-247 — Six-application source readiness and connection test handoff</h3>
+            <p class="small">The revised handoff describes Phase A <strong>public source/CI/trusted-pin preparation</strong>, then separately authorized Phase B <strong>real nonproduction health/capabilities GETs and seven independent denial witnesses</strong>. Do not create a signed proof until real evidence exists. Phase C owner pilot is <strong>NOT AUTHORIZED</strong>; all businesses remain <strong>DISCONNECTED</strong>.</p>
+            <button type="button" class="btn" id="dd514ReviewGateway">Read our exact QL-247 missing-evidence and rollback checklist</button>
+            <p class="small" id="dd514GatewayStatus" role="status" aria-live="polite">PENDING — GitHub identity is not a gateway credential. No real nonproduction connection or product/listing data sharing.</p>
+          </section>
           <p class="small" id="dd501Resume" role="status" aria-live="polite">An Etsy checkbox plus Save Product authorizes the same draft workflow. This separate button is for finishing first-time setup or resolving a held package.</p>
           <p class="small">Our store retains the saved Product. Facebook Marketplace uses the same source photos but remains a manual handoff until Meta grants supported listing access. This button never publishes on either marketplace.</p>
         </div>
@@ -729,7 +756,7 @@
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=496"></script>
   <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
   <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
-  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=513"></script>
+  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=514"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">
