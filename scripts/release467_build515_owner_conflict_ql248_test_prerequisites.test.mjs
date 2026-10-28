@@ -107,7 +107,7 @@ test('Build 515 interface exposes only unresolved owner reassessment and QL-248 
   'dd515GatewayPanel','dd515ReviewGateway','dd515TestNote','dd515RecordGateway']){
   assert.ok(html.includes(id),id);assert.ok(js.includes(id),id);
  }
- assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=515/);
+ assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=51[56]/);
  assert.match(html,/etsy-package-500\.css\?v=515/);
  for(const file of ['functions/api/admin/product-etsy-conflict-reassessment-515.js',
   'functions/api/admin/integration-ql247-prerequisites-515.js'])

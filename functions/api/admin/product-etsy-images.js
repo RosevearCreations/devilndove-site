@@ -117,7 +117,7 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
   try{
     const s=await source(currentDb(g.db),id,c.env);
     if(!s.product||!validId(s.draft?.external_reference)||s.payload?.publication_performed===true)
-      return respond({error:'A saved, unpublished Canada-only Etsy Product listing is required before transferring images.'},409);
+      return respond({error:'Only a verified, unpublished Canada-only Etsy Product draft may receive images. Link the exact saved listing ID first.'},409);
     const claimProof=await linkedReceipt506(g.db,id,String(s.draft.external_reference));
     if(!claimProof.confirmed)return respond({error:'The Etsy draft ID does not have one unique Product claim on the D1 primary. No upload attempted.',claim_state:claimProof.claim_state},409);
     const selected=s.images.find(im=>im.product_image_id===imageId);
