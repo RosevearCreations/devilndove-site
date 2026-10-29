@@ -85,15 +85,18 @@ async function getEtsy(path,headers){const r=await fetch('https://api.etsy.com/v
 export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
   const id=new URL(c.request.url).searchParams.get('product_id');
   if(!validId(id))return respond({error:'Choose a saved Product.'},400);
+  let readPhase='primary_product_gallery';
   try{const s=await source(currentDb(g.db),Number(id),c.env);
     if(!s.product)return respond({error:'Product not found.'},404);
     const local=localView(s);
-    if(local.listing_id){const claim=await linkedReceipt506(g.db,Number(id),local.listing_id);
+    if(local.listing_id){readPhase='primary_listing_receipt';const claim=await linkedReceipt506(g.db,Number(id),local.listing_id);
       if(!claim.confirmed)return respond({...local,listing_id:null,listing_status:'AMBIGUOUS_PRIMARY_LISTING_CLAIM',
         remote_reconciliation:{ready:false,reason:claim.claim_state},provider_contacted:false});}
     if(new URL(c.request.url).searchParams.get('reconcile')!=='1')return respond(local);
     if(!local.listing_id)return respond({...local,remote_reconciliation:{ready:false,reason:'link_existing_draft_first'},provider_contacted:false});
+    readPhase='etsy_credentials_read';
     const a=await authorized(c,g.db);if(a.error)return a.error;
+    readPhase='etsy_live_draft_and_photo_read';
     const [listing,remoteImages]=await Promise.all([
       verifyExistingDraft486(c.env,{shop:a.shop},local.listing_id,a.headers),
       getEtsy('listings/'+encodeURIComponent(local.listing_id)+'/images',a.headers)]);
@@ -106,7 +109,8 @@ export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
     return respond({...local,remote_reconciliation:comparison,
       photo_gap_492:foreign?{state:'hold',reason:'receipt_listing_identity_changed',provider_write_allowed:false}:
         assessExistingDraftPhotoGap492(remoteImages?.results,receipts,s.images,s.claimed,id),provider_contacted:true});
-  }catch{return respond({error:'Canonical Etsy media readiness is temporarily unavailable.'},503);}}
+  }catch{return respond({error:'Etsy photo verification read unavailable. Product photos have not been changed.',
+    diagnostic_phase:readPhase,retry_safe_get:true,provider_modified:false},503);}}
 export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error;
   if(c.request.headers.get('Origin')!==new URL(c.request.url).origin)return respond({error:'Same-origin required for Etsy photo transfer.'},403);
   let b;try{b=await c.request.json();}catch{return respond({error:'JSON required.'},400);}
