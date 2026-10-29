@@ -10,6 +10,10 @@ body:has([data-editor-tab="etsy"][aria-selected="true"]) .dd471-creation-flow {
   margin-inline:auto;
   gap:16px;
 }
+.dd521-save-review {border:1px solid #ce8854;border-radius:10px;padding:14px;background:rgba(169,96,52,.12);margin:12px 0;display:grid;gap:10px}
+.dd521-save-review[hidden] {display:none}
+.dd521-save-review h3,.dd521-save-review p {margin:0;line-height:1.5;overflow-wrap:anywhere}
+.dd521-save-review ul {margin:0;padding-left:24px;line-height:1.5;overflow-wrap:anywhere}
 .dd-etsy-panel #dd500Title {font-size:clamp(1.45rem,2.3vw,2rem)}
 .dd-etsy-panel .dd500-head p {line-height:1.55}
 .dd-etsy-panel #dd500Open {max-width:max-content}
@@ -66,6 +70,14 @@ body:has([data-editor-tab="etsy"][aria-selected="true"]) .dd471-creation-flow {
 .dd-etsy-panel .dd519-photo-evidence .btn {width:fit-content;max-width:100%}
 .dd-etsy-panel .dd520-evidence-list {margin:0;padding:10px 12px 10px 34px;line-height:1.55;border:1px solid rgba(167,119,59,.28);border-radius:8px;overflow-wrap:anywhere}
 .dd-etsy-panel .dd520-evidence-list li+li {margin-top:6px}
+.dd-etsy-panel .dd521-pair-gallery {display:grid;gap:12px}
+.dd-etsy-panel .dd521-identity-pair {padding:12px;border:1px solid rgba(164,143,209,.55);border-radius:9px;display:grid;gap:8px;min-width:0}
+.dd-etsy-panel .dd521-identity-pair strong {overflow-wrap:anywhere}
+.dd-etsy-panel .dd521-pair-images {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.dd-etsy-panel .dd521-pair-images figure {margin:0;min-width:0;display:grid;gap:6px}
+.dd-etsy-panel .dd521-pair-images img {display:block;width:100%;height:150px;object-fit:contain;background:#141522;border:1px solid rgba(255,255,255,.15);border-radius:6px}
+.dd-etsy-panel .dd521-pair-images figcaption {font-size:.86rem;line-height:1.35;overflow-wrap:anywhere}
+@media(max-width:500px) {.dd-etsy-panel .dd521-pair-images {grid-template-columns:minmax(0,1fr)} .dd-etsy-panel .dd521-pair-images img {height:210px}}
 .dd-etsy-panel .dd517-owner-check h3,
 .dd-etsy-panel .dd517-owner-check p {margin:0;line-height:1.5;overflow-wrap:anywhere}
 .dd-etsy-panel .dd517-owner-check .btn {width:fit-content;max-width:100%}

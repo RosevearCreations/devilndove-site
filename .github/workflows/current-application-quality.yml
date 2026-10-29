@@ -359,6 +359,7 @@ jobs:
           node scripts/release467_build518_etsy_readback_ql252.test.mjs
           node scripts/release467_build519_etsy_matching_ql253.test.mjs
           node scripts/release467_build520_etsy_readback_ql254.test.mjs
+          node scripts/release467_build521_etsy_identity_save_ql255.test.mjs
           node scripts/release467_build499_owner_advanced_tags_media.test.mjs
           node scripts/release467_build497_product53_three_channel_acceptance.test.mjs
 
