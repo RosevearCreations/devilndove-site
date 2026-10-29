@@ -32,7 +32,7 @@ test('Product identity displays actual saved D1 Product name, SKU, slug and exac
 });
 
 test('Saved local Product does not auto-dispatch Etsy, while manual send keeps photo and draft guards',()=>{
-  assert.match(html,/Save Product saves our store only/);
+  assert.match(html,/Save Product saves our store and selected destinations/);
   assert.match(js,/document\.addEventListener\('dd:save-succeeded'/);
   const localBlock=js.slice(js.indexOf("document.addEventListener('dd:save-succeeded'"),
     js.indexOf("document.addEventListener('dd:product-channel-tags-changed'"));

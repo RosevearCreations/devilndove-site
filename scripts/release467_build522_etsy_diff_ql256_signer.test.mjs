@@ -22,7 +22,7 @@ test('Product #48 exact meta description difference presents both prior browser 
  assert.match(editor,/Saved server value/);
  assert.match(editor,/span\.textContent/);assert.doesNotMatch(editor,/innerHTML=.*fieldSnapshots/);
  assert.match(html,/id="dd521KeepServer"/);assert.match(html,/id="dd521RestoreBrowser"/);
- assert.match(html,/Checking Etsy records a local preparation preference only/);
+ assert.match(html,/Save Product stores destination preferences only/);
  assert.doesNotMatch(html,/Etsy checked means Save Product also creates/);
  assert.match(html,/etsy-simple-515\.css\?v=522/);
 });

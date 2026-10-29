@@ -118,16 +118,6 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     const tab=document.querySelector('[data-editor-tab="etsy"]');
     if(tab?.getAttribute('aria-selected')!=='true')tab?.click();
   }
-  function consumeCreateRequest(){
-    if(!id)return false;
-    const marker=`dnd:etsy:sync-after-create:501:${id}`;
-    try{
-      const value=JSON.parse(sessionStorage.getItem(marker)||'null');
-      sessionStorage.removeItem(marker); // One Save authorizes at most one dispatch.
-      return value?.authorized===true&&Number(value.product_id)===id&&
-        Number.isFinite(value.at)&&Date.now()-value.at>=0&&Date.now()-value.at<300000;
-    }catch{return false;}
-  }
   async function api(path,body){
     const response=await window.DDAuth.apiFetch(path,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),cache:'no-store'}:{method:'GET',cache:'no-store'});
     try{
@@ -1551,7 +1541,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   $('dd500Supply').addEventListener('change',saveSettings);
   for(const name of ['Consent','LinkConsent','ListingId'])for(const event of ['input','change'])$('dd500'+name).addEventListener(event,()=>{
     if(name==='ListingId'){$('dd500OlderTitleRow').hidden=true;$('dd500OlderTitle').checked=false;state.claim=null;state.claimReview=null;state.photoReview=null;resetOwnerApproval();}show();});
-  form.addEventListener('input',event=>{if(event.target.closest('#dd500Package'))return;state.loaded=false;resetOwnerApproval();show();});
+  form.addEventListener('input',event=>{if(event.target.closest('#dd500Package')||event.target.closest('#dd500NewSettings'))return;state.loaded=false;resetOwnerApproval();show();});
   // Build 515: saving the local Product no longer silently runs a hidden Etsy
   // upload. The Etsy tab is the explicit place for Create or Update.
   document.addEventListener('dd:save-succeeded',event=>{
@@ -1575,5 +1565,38 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       if(!state.linked&&!state.settings&&!$('dd500ListingId').value.trim())await loadOptions();
     })();
   });
+  // Build 523: reuse the original at-most-once, owner-gated provider package
+  // from the simple Product intake, without duplicating OAuth or image writes.
+  // This facade exposes only readiness and one deliberate draft-only action.
+  window.DDEtsyDraftFlow523={
+    inspect:async()=>{
+      if(!ready())return {ready:false,issues:['Save all Product edits and load the authoritative record first.']};
+      if(!state.loaded)await refresh();
+      if(state.loaded&&!state.linked&&!state.settings&&!$('dd500ListingId').value.trim())await loadOptions();
+      const issues=[...state.readIssues,...(state.assessment?.issues||[])];
+      if(state.holdAfterWrite||state.attempted)issues.push('An earlier Etsy attempt needs its real remote receipt checked before another request.');
+      if(state.linkReadbackHold)issues.push('Saved Etsy listing ID readback is not independently verified.');
+      if(!state.linked&&!state.settings)issues.push('Live Etsy shop/categories/shipping setup is not verified.');
+      if(!state.linked&&!newSettingsReady())issues.push('Complete verified Etsy category, Canada-only shipping/processing and packed weight/dimensions.');
+      return {ready:ready()&&state.loaded&&state.assessment?.ready===true&&!state.holdAfterWrite&&!state.attempted&&!state.linkReadbackHold&&
+        (Boolean(state.linked)||Boolean(state.settings&&newSettingsReady())),issues,
+        linked_listing_id:state.linked||null,images:state.assessment?.count||0,product_id:id,
+        mode:state.linked?'update':'create',status:$('dd500Status').textContent};
+    },
+    post:async()=>{
+      const inspected=await window.DDEtsyDraftFlow523.inspect();
+      if(!inspected.ready)return {...inspected,posted:false};
+      // One click is the only authority to set the underlying package consent.
+      $('dd500Consent').checked=true;show();
+      try{
+        const posted=await send();
+        if(posted){document.dispatchEvent(new CustomEvent('dd:etsy-draft-flow-523-complete',{
+          detail:{product_id:id,listing_id:state.linked,unpublished:true}}));}
+        return {posted,linked_listing_id:state.linked||null,status:$('dd500Status').textContent,
+          issues:posted?[]:[String($('dd500Status').textContent||'Provider outcome needs review.')],
+          hold_after_write:state.holdAfterWrite};
+      }finally{$('dd500Consent').checked=false;show();}
+    }
+  };
   show();if(ready())void refresh();
 }

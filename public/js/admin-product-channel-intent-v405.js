@@ -34,7 +34,7 @@ async function load(){if(busy||!productId)return;if(dirty&&!window.confirm('Disc
  if(pending&&pending.etsy===etsy.checked&&pending.facebook===facebook.checked)clearPending(productId);
  if(recovery)recovery.hidden=!pending||(pending.etsy===etsy.checked&&pending.facebook===facebook.checked);
  if(recovery&&!recovery.hidden&&el('dd501ChannelRecovery'))el('dd501ChannelRecovery').open=true;
- say(params.get('destination_save')==='unconfirmed'?'Product was created, but destination saving was NOT confirmed. The displayed choices are the current saved state; review them before proceeding.':x.preferences.configured?'Saved destination preferences loaded. Etsy ON prepares the Product only; choose Create or Update manually on the Etsy tab.':'No channel preference saved; channels remain OFF until you enable and save them.');}
+ say(params.get('destination_save')==='unconfirmed'?'Product was created, but destination saving was NOT confirmed. The displayed choices are the current saved state; review them before proceeding.':x.preferences.configured?'Saved destination preferences loaded. Use Review and send at the top for an owner-confirmed Etsy draft POST.':'No channel preference saved; channels remain OFF until you enable and save them.');}
  catch(e){say('Cannot verify saved channel choices: '+e.message+'. Change nothing until reloaded.');loaded=false;}
  finally{busy=false;apply();}}
 async function saveFor(id,frozen){let choice;
@@ -51,7 +51,7 @@ async function saveFor(id,frozen){let choice;
  const x=await r.json().catch(()=>null);if(!r.ok||!x?.ok)throw Error(x?.error||'Intent not confirmed');
  productId=Number(id);receipt=Number(x.preferences.receipt||0);loaded=true;dirty=false;
  clearPending(productId);if(recovery)recovery.hidden=true;
- say('Saved destinations for Product #'+productId+'. Etsy: '+(choice.etsy?'ON — manual Create/Update remains on the Etsy tab':'OFF')+', Facebook Marketplace: '+(choice.facebook?'manual preparation':'OFF')+'. No remote draft was created or updated by destination preference Save.');
+ say('Saved destinations for Product #'+productId+'. Etsy: '+(choice.etsy?'ON — use Review and send for a separate acknowledged draft POST':'OFF')+', Facebook Marketplace: '+(choice.facebook?'manual preparation':'OFF')+'. No remote draft was created or updated by destination preference Save.');
  return true;
  }catch(e){writePending(Number(id),choice);if(el('dd501ChannelRecovery'))el('dd501ChannelRecovery').open=true;say('Product may have saved, but destinations were NOT confirmed: '+e.message+'. Reload the exact preferences and use Review unsaved choices; do not repeat Product creation.');return false;}
  finally{busy=false;apply();}}
@@ -61,7 +61,7 @@ restore?.addEventListener('click',()=>{if(!loaded||!productId)return;const p=rea
  etsy.checked=p.etsy;facebook.checked=p.facebook;dirty=true;if(consent)consent.checked=false;if(recovery)recovery.hidden=true;
  say('Unsaved destination choices restored for review only. Read the owner consent and choose Save destination choices; Product itself is already saved.');apply();});
 window.DDProductChannels405={afterProductSave:async(id,choice)=>saveFor(Number(id),choice),
- captureForProductSave,isDirty:()=>dirty,load};
+ captureForProductSave,isDirty:()=>dirty,isLoaded:()=>loaded&&!busy,load};
 apply();
 // Existing products read one bounded destination receipt on startup to prevent blind overwrites.
 if(productId)void load();

@@ -74,7 +74,7 @@ test('owner-facing retest uses three GET-only reads and explicit local owner dec
   const css=read('admin/product-editor/etsy-simple-515.css');
   for(const name of ['dd517OwnerCheck','dd517Verify','dd517PhotoResult','dd517ContentResult','dd517Status',
     'dd517OwnerConfirm','dd517Approve','dd517ApprovalStatus'])assert.match(html,new RegExp(`id="${name}"`));
-  assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=5(?:1[7-9]|2[01])/);
+  assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=5(?:1[7-9]|2[0-3])/);
   assert.match(html,/etsy-simple-515\.css\?v=5(?:1[7-9]|2[0-2])/);
   assert.match(css,/\.dd517-owner-check\[hidden\]/);
   const check=ui.match(/async function verifyOwner517\(\)\{([\s\S]*?)\n  \}\n  async function approveOwner517/);
