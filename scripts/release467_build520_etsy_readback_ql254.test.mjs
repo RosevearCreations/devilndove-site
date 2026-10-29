@@ -63,8 +63,8 @@ test('owner-facing Build 520 signoff has a separate read-only primary audit GET,
  assert.match(ui,/photoReadback520/);
  assert.match(ui,/evidenceReadRows520/);
  assert.match(ui,/dd520ReadAcceptance'\)\.addEventListener\('click'/);
- assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=520/);
- assert.match(html,/etsy-simple-515\.css\?v=520/);
+ assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=52[01]/);
+ assert.match(html,/etsy-simple-515\.css\?v=52[01]/);
  assert.match(endpoint,/withSession\('first-primary'\)/);
  assert.match(endpoint,/action_type='etsy_504_owner_final_content_approved'/);
  assert.doesNotMatch(endpoint,/onRequestPost|INSERT INTO|UPDATE |publishListing|transfer_one/);

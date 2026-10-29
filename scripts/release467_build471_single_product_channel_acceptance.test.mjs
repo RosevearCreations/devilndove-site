@@ -90,8 +90,9 @@ test('Human-gated source readiness never implies a live listing or unreviewed me
 });
 
 test('The live Product Add page uses the single-flow mount, media handoff and explicit owner gate',()=>{
- for(const token of ['productChannel471Mount','productChannel471Consent','productChannel471Recovery',
-   'admin-product-creation-flow-471.js?v=471','admin-product-channel-intent-v405.js?v=471'])assert.ok(page.includes(token),token);
+ for(const token of ['productChannel471Mount','productChannel471Consent','productChannel471Recovery'])assert.ok(page.includes(token),token);
+ assert.match(page,/admin-product-creation-flow-471\.js\?v=(?:471|521)/);
+ assert.match(page,/admin-product-channel-intent-v405\.js\?v=(?:471|521)/);
  assert.match(page,/admin-product-editor-v163\.js\?v=\d+/);
  assert.ok(save.includes('captureForProductSave'));
  assert.ok(save.includes('afterProductSave(savedId,channelSnapshot)'));
