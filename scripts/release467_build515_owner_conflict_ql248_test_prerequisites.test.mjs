@@ -109,7 +109,7 @@ test('Build 515 interface exposes only unresolved owner reassessment and QL-248 
  }
  // Build 517 refreshes the same module cache after adding an independent
  // owner-facing GET-only receipt check; it does not activate QL-248 testing.
- assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=51[5-7]/);
+ assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=51[5-8]/);
  assert.match(html,/etsy-package-500\.css\?v=515/);
  for(const file of ['functions/api/admin/product-etsy-conflict-reassessment-515.js',
   'functions/api/admin/integration-ql247-prerequisites-515.js'])
