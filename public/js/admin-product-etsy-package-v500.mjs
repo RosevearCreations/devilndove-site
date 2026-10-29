@@ -7,6 +7,7 @@ import {assessEtsyOwnerVerification517,PRODUCT_53_ETSY_DRAFT_517} from './etsy-o
 import {summarizeOwnerReads518} from './etsy-owner-evidence-518.mjs';
 import {assessExistingPhotoMatches519} from './etsy-photo-matching-519.mjs';
 import {photoReadback520,evidenceReadRows520} from './etsy-photo-readback-520.mjs';
+import {assessVisualPhotoPairs521} from './etsy-identity-witness-521.mjs';
 
 const $=id=>document.getElementById(id);
 const form=$('productEditorForm'),id=Number(new URLSearchParams(location.search).get('product_id')||0);
@@ -25,7 +26,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     previewId:'',previewTitleMatches:false,images:null,lastRemoteId:'',holdAfterWrite:false,
     refreshPromise:null,syncing:false,linkReadbackHold:false,closeout508:null,independent509:null,gateway509:null,
     witness510:null,separation510:null,evidence511:null,gateway511:null,evidence512:null,gateway512:null,evidence513:null,owner514:null,reassessment515:null,prerequisites515:null,
-    live517:null,photoReviewVerdict519:null};
+    live517:null,photoReviewVerdict519:null,identityWitness521:null};
   if(id===53){$('dd500ListingId').value='4603838854';$('dd500CandidateNote').hidden=false;
     if($('dd503OwnerNote'))$('dd503OwnerNote').hidden=false;}
   if(id!==53)$('dd508CloseoutPanel').hidden=true;
@@ -62,6 +63,10 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   function resetOwnerApproval(){state.ownerReadbackReady=false;
     clearOwnerVerification517();
     state.photoReviewVerdict519=null;
+    state.identityWitness521=null;
+    $('dd521VisualConfirmed').checked=false;$('dd521VisualConfirmed').disabled=true;
+    $('dd521WitnessStatus').textContent='HOLD — saved Product or image receipts changed. Re-read all six image previews before visual witness.';
+    $('dd521IdentityGallery').replaceChildren();
     $('dd519PhotoProgress').textContent='HOLD — A Product or photo receipt changed. Compare the three existing Etsy photographs again.';
     $('dd520PhotoSummary').textContent='HOLD — Earlier photo observations are stale. Recheck the actual Etsy draft.';
     showReadRows520($('dd520PhotoRows'),['Previous original-to-Etsy photo observations need fresh verification.']);
@@ -146,8 +151,9 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     $('dd519PhotoEvidence').hidden=id!==53||!linked;
     $('dd519Compare').disabled=id!==53||!linked||!ready()||state.busy;
     $('dd517Verify').disabled=id!==53||state.busy||!ready()||state.linked!==PRODUCT_53_ETSY_DRAFT_517;
-    $('dd517OwnerConfirm').disabled=!state.live517?.ready||state.busy||!ready();
-    $('dd517Approve').disabled=!state.live517?.ready||state.busy||!ready()||!$('dd517OwnerConfirm').checked;
+    const witnessed=state.identityWitness521?.readyForHumanVisualReview===true&&$('dd521VisualConfirmed').checked;
+    $('dd517OwnerConfirm').disabled=!state.live517?.ready||state.busy||!ready()||!witnessed;
+    $('dd517Approve').disabled=!state.live517?.ready||state.busy||!ready()||!witnessed||!$('dd517OwnerConfirm').checked;
     $('dd520ReadAcceptance').disabled=id!==53||state.busy||!ready()||state.linked!==PRODUCT_53_ETSY_DRAFT_517;
     const candidate=String($('dd500ListingId').value||'').trim();
     const hasCandidate=!linked&&/^[1-9]\d{0,14}$/.test(candidate);
@@ -1079,8 +1085,42 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     $('dd505MatchPhoto').disabled=!ready()||!state.photoReviewVerdict519?.safeToMatch||!original||!remote||!$('dd505WitnessPhoto').checked||
       state.busy;
   }
+  function displayPhotoPairs521(receipt){
+    const gallery=$('dd521IdentityGallery'),confirmed=$('dd521VisualConfirmed'),out=$('dd521WitnessStatus');
+    const view=assessVisualPhotoPairs521(receipt);
+    gallery.replaceChildren();confirmed.checked=false;confirmed.disabled=true;state.identityWitness521=null;
+    let loaded=0,failed=false;
+    const complete=()=>{loaded++;
+      if(!failed&&loaded===6&&view.readyForHumanVisualReview){state.identityWitness521=view;
+        confirmed.disabled=false;
+        out.textContent='All six current image previews loaded. Compare each original with its exact Etsy image by eye, then tick the separate visual-witness checkbox. This check saves nothing.';
+        show();}
+    };
+    for(const pair of view.pairs){
+      const card=document.createElement('article');card.className='dd521-identity-pair';
+      const heading=document.createElement('strong');heading.textContent=`Product original #${pair.original} ↔ ${pair.etsyImageId?'Etsy image #'+pair.etsyImageId:'NO VERIFIED ETSY PAIR'}`;
+      card.append(heading);
+      if(pair.localUrl&&pair.remoteUrl&&pair.receiptPresent){
+        const images=document.createElement('div');images.className='dd521-pair-images';
+        for(const [label,url] of [[`Original #${pair.original}`,pair.localUrl],[`Existing Etsy image #${pair.etsyImageId}`,pair.remoteUrl]]){
+          const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');
+          img.loading='eager';img.alt=label;caption.textContent=label;
+          img.addEventListener('load',complete,{once:true});
+          img.addEventListener('error',()=>{failed=true;state.identityWitness521=null;confirmed.checked=false;confirmed.disabled=true;
+            out.textContent=`HOLD — ${label} image did not load. A URL alone cannot establish visual identity. No Etsy upload was performed.`;show();},{once:true});
+          img.src=url;figure.append(img,caption);images.append(figure);
+        }
+        card.append(images);
+      }else{const problem=document.createElement('p');problem.textContent=`HOLD — No complete current local receipt and image previews for original #${pair.original}.`;card.append(problem);}
+      gallery.append(card);
+    }
+    if(!view.readyForHumanVisualReview){out.textContent=`HOLD — ${view.issues.join(' | ')} No photo is automatically treated as missing or identical.`;}
+    else{out.textContent='Loading three original/Etsy image pairs for manual comparison…';}
+  }
   async function inspectExistingPhotos505(){
     state.photoReview=null;state.photoReviewVerdict519=null;$('dd505MatchPhoto').disabled=true;
+    clearOwnerVerification517('HOLD — image comparison is being refreshed. Run the separate final live draft check again afterward.');
+    state.identityWitness521=null;$('dd521VisualConfirmed').checked=false;$('dd521VisualConfirmed').disabled=true;
     $('dd505PhotoStatus').textContent='Reading Etsy’s actual unpublished listing images and the saved original gallery (no changes)…';
     $('dd519PhotoProgress').textContent='Reading the saved gallery and live Etsy photo inventory. Nothing is being uploaded.';
     if(!ready()||!state.linked){$('dd505PhotoStatus').textContent='HOLD — first save and link the existing draft.';return;}
@@ -1091,6 +1131,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       const diagnostic=photoReadback520({receipt,verdict});
       state.photoReview=receipt;
       state.photoReviewVerdict519=verdict;
+      displayPhotoPairs521(receipt);
       $('dd520PhotoSummary').textContent=`Etsy returned ${diagnostic.remoteCount} photograph(s). ${diagnostic.recordedPairs}/3 saved original-to-Etsy pairings appear in the current remote inventory. `+
         `${diagnostic.unresolvedAttempts} historical upload claim(s) unresolved. ${diagnostic.next} This check cannot supply our personal owner acceptance.`;
       showReadRows520($('dd520PhotoRows'),diagnostic.rows.map(row=>`Original #${row.original} → ${row.etsyImageId?'Etsy image #'+row.etsyImageId:'not independently paired'}: ${row.note}.`));
@@ -1108,6 +1149,8 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       $('dd505PhotoStatus').textContent=`${receipt.matched.length} original photograph(s) matched. ${receipt.originals.length-receipt.matched.length} local original(s) and ${receipt.etsy_photos.length-receipt.matched.length} Etsy photo(s) remain unmatched. ${receipt.unresolved_upload_attempts?'One or more earlier upload attempts are unconfirmed; match their exact existing Etsy photograph here to resolve the receipt. Never upload them again blindly. ':''}Choose the exact same photograph in both columns and confirm.`;
     }catch(error){
       state.photoReview=null;state.photoReviewVerdict519=null;
+      state.identityWitness521=null;$('dd521VisualConfirmed').checked=false;$('dd521VisualConfirmed').disabled=true;
+      $('dd521IdentityGallery').replaceChildren();$('dd521WitnessStatus').textContent='HOLD — current Etsy photo identity could not be read. No visual witness can be accepted.';
       $('dd520PhotoSummary').textContent=`HOLD — Etsy photo inventory read did not finish: ${error.message}. An HTTP 503 is not a missing photograph.`;
       showReadRows520($('dd520PhotoRows'),[344,345,346].map(n=>`Original #${n}: live Etsy pairing UNKNOWN, not missing.`));
       $('dd519PhotoProgress').textContent=`HOLD — Existing Etsy photos could not be read: ${error.message}. A 503 does not prove a photo is missing. Retry this read only when the server is available.`;
@@ -1314,7 +1357,8 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   }
   async function approveOwner517(){
     if(id!==53||!ready()||state.busy||!state.live517?.ready||
-      state.linked!==PRODUCT_53_ETSY_DRAFT_517||!$('dd517OwnerConfirm').checked)return;
+      state.linked!==PRODUCT_53_ETSY_DRAFT_517||!$('dd517OwnerConfirm').checked||
+      !state.identityWitness521?.readyForHumanVisualReview||!$('dd521VisualConfirmed').checked)return;
     state.busy=true;show();
     $('dd517ApprovalStatus').textContent='Re-reading the same Etsy draft and all three photos before saving one local owner decision…';
     const ownerApprovalKey=key();
@@ -1409,6 +1453,13 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   $('dd517Verify').addEventListener('click',()=>void verifyOwner517());
   $('dd517OwnerConfirm').addEventListener('change',show);
   $('dd517Approve').addEventListener('click',()=>void approveOwner517());
+  $('dd521VisualConfirmed').addEventListener('change',()=>{
+    if($('dd521VisualConfirmed').checked&&!state.identityWitness521?.readyForHumanVisualReview){$('dd521VisualConfirmed').checked=false;}
+    $('dd521WitnessStatus').textContent=$('dd521VisualConfirmed').checked?
+      'This session has our explicit visual witness for all three current pairs. Complete the independent live draft read and owner approval separately. Nothing was posted.':
+      'Visual witness is not confirmed. Inspect all three original/Etsy pairs before final owner sign-off.';
+    show();
+  });
   $('dd520ReadAcceptance').addEventListener('click',()=>void checkOwnerAcceptance520());
   $('dd504CheckPhotos').addEventListener('click',()=>void ownerPhotoReadback());
   $('dd506TrialCheck').addEventListener('click',()=>void reviewTrial506());

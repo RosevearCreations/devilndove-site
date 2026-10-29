@@ -5,9 +5,21 @@
   'use strict';
   const form=document.getElementById('productEditorForm'),status=document.getElementById('productEditorStatus'),title=document.getElementById('productEditorTitle'),identity=document.getElementById('productEditorIdentity');
   const mediaStatus=document.getElementById('productEditorMediaStatus'),mediaStrip=document.getElementById('productEditorMediaStrip'),saveButton=document.getElementById('productEditorSave');
+  const saveReview521=document.getElementById('dd521SaveReview'),reviewStatus521=document.getElementById('dd521SaveReviewStatus'),
+    reviewDifferences521=document.getElementById('dd521SaveDifferences'),keepServer521=document.getElementById('dd521KeepServer'),restoreBrowser521=document.getElementById('dd521RestoreBrowser');
   const qaStatus=document.getElementById('productEditorQaStatus'),qaResults=document.getElementById('productEditorQaResults'),qaRun=document.getElementById('productEditorQaRun');
   if(!form||!status||!window.DDAuth)return;
-  const params=new URLSearchParams(location.search);const rawId=Number(params.get('product_id')||0);const state={productId:Number.isInteger(rawId)&&rawId>0?rawId:0,product:null,inFlight:false,quotaStop:false,saveNeedsReview:false,pendingSaveCheck:null,mediaLoaded:false,mediaLoading:false,images:[],authorityLoaded:false,qaRunning:false,qaData:null};
+  const params=new URLSearchParams(location.search);const rawId=Number(params.get('product_id')||0);const state={productId:Number.isInteger(rawId)&&rawId>0?rawId:0,product:null,inFlight:false,quotaStop:false,saveNeedsReview:false,pendingSaveCheck:null,review521:null,mediaLoaded:false,mediaLoading:false,images:[],authorityLoaded:false,qaRunning:false,qaData:null};
+  const uncertainSaveKey521=state.productId?`dnd:product:uncertain-save:521:${state.productId}`:null;
+  const clearUncertainSave521=()=>{if(uncertainSaveKey521)try{sessionStorage.removeItem(uncertainSaveKey521);}catch{}};
+  if(uncertainSaveKey521){try{
+    const prior=JSON.parse(sessionStorage.getItem(uncertainSaveKey521)||'null');
+    if(Number(prior?.product_id)===state.productId&&prior?.submitted&&typeof prior.submitted==='object'){
+      state.pendingSaveCheck=prior.submitted;state.saveNeedsReview=true;
+      if(saveReview521)saveReview521.hidden=false;
+      if(reviewStatus521)reviewStatus521.textContent='An earlier Product Save was unconfirmed. One authoritative server GET will compare all submitted fields before any further write is available.';
+    }
+  }catch{/* A blocked session store must never authorize a repeat write. */}}
   const field=(name)=>form.elements.namedItem(name);const set=(name,value)=>{const el=field(name);if(el){
     const desired=value==null?'':String(value);
     if(el.tagName==='SELECT'&&desired&&![...el.options].some(option=>option.value===desired))el.add(new Option(desired+' (current)',desired));
@@ -69,7 +81,7 @@
     if(notice)notice.textContent=same?'This browser has edits we did not save. Restore and review them, or discard the temporary copy.':
       'The saved Product changed since this browser copy. Restoring could overwrite newer work; compare every field before saving.';
   }
-  document.getElementById('dd443RecoveryRestore')?.addEventListener('click',()=>{
+  function restoreRecoveryEdits(){
     if(!pendingRecovery||!state.authorityLoaded)return;
     if(pendingRecovery.baseline!==baseline&&!window.confirm('Saved Product data has changed since these edits. Restore the old browser copy for careful review?'))return;
     for(const [name,value] of Object.entries(pendingRecovery.values)){
@@ -78,9 +90,14 @@
       el.value=String(value??'');
     }
     refreshDirty();if(recoveryBox)recoveryBox.hidden=true;
+    if(state.review521?.reviewed){state.saveNeedsReview=false;state.review521=null;clearUncertainSave521();setSaveReady(true);
+      if(saveReview521)saveReview521.hidden=false;if(reviewStatus521)reviewStatus521.textContent='Browser edits restored after comparing with the saved server copy. Review every changed field before deliberately pressing Save Product. Nothing was resent.';
+      if(keepServer521)keepServer521.hidden=true;if(restoreBrowser521)restoreBrowser521.hidden=true;}
     setStatus('Unsaved browser edits restored for review. Press Save Product only when the fields are correct. No server or marketplace write occurred.','warn');
-  });
+  }
+  document.getElementById('dd443RecoveryRestore')?.addEventListener('click',restoreRecoveryEdits);
   document.getElementById('dd443RecoveryDiscard')?.addEventListener('click',()=>{
+    if(state.saveNeedsReview){setStatus('HOLD — The previous Product Save outcome is uncertain. Keep the browser recovery until we compare the saved server record and explicitly choose Keep server or Restore browser.','error');return;}
     clearRecovery();setStatus('Temporary browser copy discarded. Our saved Product is unchanged.','ok');
   });
   form.addEventListener('input',event=>{
@@ -185,16 +202,39 @@
       const response=await window.DDAuth.apiFetch(`/api/admin/product-editor-detail?product_id=${encodeURIComponent(state.productId)}`,{method:'GET',cache:'no-store'});
       const data=await readJson(response,'Could not load Product.');
       if(Number(data.product?.product_id)!==state.productId||!String(data.product?.name||'').trim())throw new Error('Saved Product identity or name was not returned. The editor will not enable Save from incomplete authority data.');
-      fill(data.product);state.saveNeedsReview=false;state.quotaStop=false;setSaveReady(true);
+      fill(data.product);state.quotaStop=false;
+      if(state.pendingSaveCheck||state.review521?.reviewed){state.authorityLoaded=true;form.dataset.productAuthority='review';if(saveButton)saveButton.disabled=true;}
+      else{state.saveNeedsReview=false;setSaveReady(true);}
       document.dispatchEvent(new CustomEvent('dd:product-loaded',{detail:{product_id:state.productId}}));
       try{sessionStorage.removeItem(`dnd:product-editor-seed:${state.productId}`);}catch{}
       if(state.pendingSaveCheck){
-        const submitted=state.pendingSaveCheck;state.pendingSaveCheck=null;
-        const fields=['name','slug','sku','description','short_description','product_category','price_cents','inventory_quantity','currency','keywords'];
-        const different=fields.filter(name=>String(data.product?.[name]??'').trim()!==String(submitted[name]??'').trim());
-        setStatus(different.length?
-          `STEP 1 — The server responded to the read, but ${different.join(', ')} do not match our last attempted Product Save. Compare those named fields with the browser recovery copy before saving again. Etsy has NOT been retried.`:
-          `STEP 1 VERIFIED — Product #${state.productId}'s saved name, details, price, stock and search tags match our last attempted Save. Do not repeat that Product write. STEP 2 — return to Etsy to verify/link its existing listing; the Etsy upload is not yet confirmed.`,different.length?'warn':'ok');
+        // Compare the full Product payload and all returned server fields. A
+        // successful GET is not itself proof that every requested field saved.
+        try{
+          const {compareUncertainProductSave521}=await import('/public/js/product-save-outcome-521.mjs');
+          const verdict=compareUncertainProductSave521({productId:state.productId,submitted:state.pendingSaveCheck,saved:data.product});
+          state.review521=verdict;state.pendingSaveCheck=null;
+          if(saveReview521)saveReview521.hidden=false;
+          if(reviewDifferences521)reviewDifferences521.replaceChildren(...(verdict.savedMatch?['All submitted Product fields match the read-only server copy.']:
+            [...verdict.different.map(name=>'Different: '+name),...verdict.unavailable.map(name=>'Not returned: '+name)]).map(label=>{
+              const li=document.createElement('li');li.textContent=label;return li;}));
+          if(reviewStatus521)reviewStatus521.textContent=verdict.next;
+          if(keepServer521)keepServer521.hidden=verdict.savedMatch||!verdict.reviewed;
+          if(restoreBrowser521)restoreBrowser521.hidden=verdict.savedMatch||!verdict.reviewed||!pendingRecovery;
+          state.saveNeedsReview=!verdict.savedMatch;
+          if(verdict.savedMatch){clearRecovery();clearUncertainSave521();state.review521=null;setSaveReady(true);
+            setStatus(`STEP 1 VERIFIED — Product #${state.productId}'s complete submitted record matches the saved server copy. No repeat Save needed. Etsy remains a separate, deliberate step.`,'ok');
+          }else{state.authorityLoaded=true;form.dataset.productAuthority='review';if(saveButton)saveButton.disabled=true;
+            setStatus(`HOLD — Product #${state.productId}'s saved record differs in ${verdict.different.length} fields; ${verdict.unavailable.length} values were unavailable. Choose which copy to keep after review. Nothing was re-sent to Etsy.`,'warn');}
+        }catch(error){state.saveNeedsReview=true;state.authorityLoaded=true;form.dataset.productAuthority='review';if(saveButton)saveButton.disabled=true;
+          if(saveReview521)saveReview521.hidden=false;
+          if(reviewStatus521)reviewStatus521.textContent='HOLD — Could not compare the server copy safely: '+String(error?.message||'comparison unavailable').slice(0,170)+'. Preserve the browser edits; no Save was repeated.';
+          setStatus('HOLD — Server detail loaded, but the previous uncertain Save could not be reconciled. Do not resend it.','error');}
+      }else if(state.review521?.reviewed){
+        state.saveNeedsReview=true;state.authorityLoaded=true;form.dataset.productAuthority='review';if(saveButton)saveButton.disabled=true;
+        if(saveReview521)saveReview521.hidden=false;
+        if(reviewStatus521)reviewStatus521.textContent='The saved server copy was refreshed, but our prior uncertain Save still needs a deliberate Keep server or Restore browser choice. Nothing was submitted.';
+        setStatus('HOLD — We have not chosen which Product copy to keep after the uncertain Save. Use the review controls below; another reload does not approve a retry.','warn');
       }else setStatus(`Product authority loaded. Compare any recovered browser edits before another Save. Optional gallery, scoring, pricing and QA remain unloaded until requested.${rowsText(data)}`,'ok');
       if(currentTab()==='media')loadMedia();
     }catch(error){
@@ -292,9 +332,9 @@
       try{destinationsSaved=(await window.DDProductChannels405?.afterProductSave(savedId,channelSnapshot))!==false;}
       catch{destinationsSaved=false;}
       const newerEdits=fingerprint()!==submittedFingerprint;
-      // Build 501: an opted-in Etsy Product save is one explicit authorization
-      // for an unpublished draft sync. Save the canonical Product first. Never
-      // dispatch a provider write when destination persistence is uncertain.
+      clearUncertainSave521();
+      // A Product Save only records the Product and optional destination preference.
+      // Etsy Create/Update always requires an independent button on the Etsy tab.
       const etsySyncRequested=Boolean(destinationsSaved&&!newerEdits&&
         document.getElementById('productChannel405Etsy')?.checked);
       if(!newerEdits){markClean();clearRecovery();}
@@ -329,10 +369,15 @@
       if(failure.uncertainWrite||/product_fields_readback_unconfirmed|product_price_readback_unconfirmed/.test(String(error?.code||''))){
         state.saveNeedsReview=true;state.quotaStop=quota(error);
         state.pendingSaveCheck={...body,keywords:get('keywords')};
+        if(uncertainSaveKey521)try{sessionStorage.setItem(uncertainSaveKey521,JSON.stringify({product_id:state.productId,submitted:state.pendingSaveCheck,at:Date.now()}));}catch{}
+        state.review521=null;if(saveReview521)saveReview521.hidden=false;
+        if(reviewStatus521)reviewStatus521.textContent='Outcome unknown. Review the authoritative server copy with one GET when available; do not submit another Product Save.';
+        if(reviewDifferences521)reviewDifferences521.replaceChildren();
+        if(keepServer521)keepServer521.hidden=true;if(restoreBrowser521)restoreBrowser521.hidden=true;
       }
       refreshDirty();snapshotEdits();
       setStatus(`STEP 1 — Save Product #${state.productId||'new'}: ${incidentMessage(error,'save')} The error is from the local Product server, not from Etsy photos or tags. ${state.productId?'Click Review server copy first; we will identify any saved fields that differ.':'Check Products for an existing new Product before creating another.'}`,'error');
-      if(saveButton)saveButton.textContent=failure.uncertainWrite?'Review server copy first':'Save Product';
+      if(saveButton)saveButton.textContent='Save Product';
     }finally{
       unlockFields();state.inFlight=false;
       if(saveButton)saveButton.disabled=Boolean(state.inFlight||state.quotaStop||state.saveNeedsReview||(state.productId&&!state.authorityLoaded));
@@ -343,6 +388,18 @@
     if(!state.productId&&state.saveNeedsReview){setStatus('A new Product may already exist. Check Product Browser for a duplicate before any new Save. Reloading this blank form cannot verify the create outcome.','error');return;}
     state.quotaStop=false;load();
   });
+  document.getElementById('dd521ReviewServer')?.addEventListener('click',()=>{
+    if(state.inFlight||!state.productId)return;
+    state.quotaStop=false;void load(); // One explicit GET; never repeats the write.
+  });
+  keepServer521?.addEventListener('click',()=>{
+    if(!state.review521?.reviewed||!state.authorityLoaded||!window.confirm('Keep the current saved server Product and discard the older browser draft? No Save or Etsy request will be sent.'))return;
+    clearRecovery();clearUncertainSave521();state.pendingSaveCheck=null;state.review521=null;state.saveNeedsReview=false;setSaveReady(true);
+    keepServer521.hidden=true;if(restoreBrowser521)restoreBrowser521.hidden=true;
+    if(reviewStatus521)reviewStatus521.textContent='We kept the current authoritative server Product. The earlier uncertain Save was not repeated; browser recovery was deliberately discarded.';
+    setStatus('Current saved Product kept after a read-only comparison. No Product or Etsy write was performed.','ok');
+  });
+  restoreBrowser521?.addEventListener('click',restoreRecoveryEdits);
   document.querySelectorAll('[data-editor-tab]').forEach((button)=>button.addEventListener('click',()=>openTab(button.dataset.editorTab||'basics')));
   qaRun?.addEventListener('click',runQa);
   field('featured_image_url')?.addEventListener('change',()=>setFeaturedDraft(get('featured_image_url')));
