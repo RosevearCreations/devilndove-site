@@ -51,6 +51,20 @@ body:has([data-editor-tab="etsy"][aria-selected="true"]) .dd471-creation-flow {
 .dd-etsy-panel .dd516-photo-action[hidden] {display:none}
 .dd-etsy-panel #dd516PhotoStatus {margin:0;line-height:1.5;overflow-wrap:anywhere}
 .dd-etsy-panel .dd516-photo-action .btn {max-width:max-content}
+.dd-etsy-panel .dd517-owner-check {
+  display:grid;
+  gap:10px;
+  padding:14px;
+  border:1px solid rgba(167,119,59,.55);
+  border-radius:10px;
+  background:rgba(167,119,59,.09);
+}
+.dd-etsy-panel .dd517-owner-check[hidden] {display:none}
+.dd-etsy-panel .dd517-owner-check h3,
+.dd-etsy-panel .dd517-owner-check p {margin:0;line-height:1.5;overflow-wrap:anywhere}
+.dd-etsy-panel .dd517-owner-check .btn {width:fit-content;max-width:100%}
+.dd-etsy-panel .dd517-owner-consent {display:flex;align-items:flex-start;gap:9px;line-height:1.5}
+.dd-etsy-panel .dd517-owner-consent input {width:19px;height:19px;flex:none;margin-top:2px}
 .dd-etsy-panel .dd515-support[open] {display:grid;gap:12px}
 /* The prior alternative draft editor duplicated the same create/update actions.
    Keep historical wiring available in source, but don't show two competing UIs. */

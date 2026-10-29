@@ -3,6 +3,7 @@
  * of photos or silently creates a second listing for an existing Product. */
 import {assessEtsyPackage500,assessEtsyPhotos516,verifiedEtsyPackage500} from './etsy-package-500.mjs';
 import {etsyFailure503,etsyFixLocation503} from './etsy-owner-diagnostics-503.mjs';
+import {assessEtsyOwnerVerification517,PRODUCT_53_ETSY_DRAFT_517} from './etsy-owner-verification-517.mjs';
 
 const $=id=>document.getElementById(id);
 const form=$('productEditorForm'),id=Number(new URLSearchParams(location.search).get('product_id')||0);
@@ -19,10 +20,12 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   const state={busy:false,linked:'',loaded:false,assessment:null,photoAssessment:null,readIssues:[],settings:null,attempted:false,claim:null,claimReview:null,photoReview:null,ownerReadbackReady:false,
     previewId:'',previewTitleMatches:false,images:null,lastRemoteId:'',holdAfterWrite:false,
     refreshPromise:null,syncing:false,linkReadbackHold:false,closeout508:null,independent509:null,gateway509:null,
-    witness510:null,separation510:null,evidence511:null,gateway511:null,evidence512:null,gateway512:null,evidence513:null,owner514:null,reassessment515:null,prerequisites515:null};
+    witness510:null,separation510:null,evidence511:null,gateway511:null,evidence512:null,gateway512:null,evidence513:null,owner514:null,reassessment515:null,prerequisites515:null,
+    live517:null};
   if(id===53){$('dd500ListingId').value='4603838854';$('dd500CandidateNote').hidden=false;
     if($('dd503OwnerNote'))$('dd503OwnerNote').hidden=false;}
   if(id!==53)$('dd508CloseoutPanel').hidden=true;
+  $('dd517OwnerCheck').hidden=id!==53;
   if(id!==53)$('dd509IndependentPanel').hidden=true;
   if(id!==53){$('dd510WitnessPanel').hidden=true;$('dd510GatewayPanel').hidden=true;
     $('dd511EvidencePanel').hidden=true;$('dd511GatewayPanel').hidden=true;
@@ -38,7 +41,18 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     const el=$('dd501SaveState');if(el){el.textContent=message;el.dataset.tone=tone;}
     const resume=$('dd501Resume');if(resume)resume.textContent=message;
   };
+  function clearOwnerVerification517(reason='HOLD — Run the live Etsy draft check again after saving or changing photos, listing details or tags.'){
+    state.live517=null;
+    $('dd517OwnerConfirm').checked=false;
+    $('dd517OwnerConfirm').disabled=true;
+    $('dd517Approve').disabled=true;
+    $('dd517PhotoResult').textContent='Photos: not independently checked in this session.';
+    $('dd517ContentResult').textContent='Description and tags: not independently checked in this session.';
+    $('dd517Status').textContent=reason;
+  }
   function resetOwnerApproval(){state.ownerReadbackReady=false;
+    clearOwnerVerification517();
+    $('dd517ApprovalStatus').textContent='HOLD — Saved Product or media changed. Any earlier approval must be independently rechecked against the current Etsy draft.';
     state.closeout508=null;
     state.independent509=null;
     state.witness510=null;
@@ -115,6 +129,9 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   function check(message){const li=document.createElement('li');li.textContent=message;$('dd500Checklist').append(li);}
   function show(){
     const linked=Boolean(state.linked);
+    $('dd517Verify').disabled=id!==53||state.busy||!ready()||state.linked!==PRODUCT_53_ETSY_DRAFT_517;
+    $('dd517OwnerConfirm').disabled=!state.live517?.ready||state.busy||!ready();
+    $('dd517Approve').disabled=!state.live517?.ready||state.busy||!ready()||!$('dd517OwnerConfirm').checked;
     const candidate=String($('dd500ListingId').value||'').trim();
     const hasCandidate=!linked&&/^[1-9]\d{0,14}$/.test(candidate);
     const conflict=hasCandidate&&state.claim?.state==='another_product';
@@ -266,6 +283,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   async function refresh(){
     if(state.refreshPromise)return state.refreshPromise;
     if(state.busy||!ready())return false;
+    clearOwnerVerification517();
     const work=(async()=>{
       state.busy=true;show();status('Reading the saved Product ↔ Etsy ID and every gallery image (no provider write)…');
       try{const snapshot=await packageSnapshot();state.linked=numericEtsyListing511(snapshot.link.linked_listing_id);
@@ -1103,6 +1121,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       !state.loaded||!state.photoAssessment?.ready||!state.photoAssessment.pending.length||
       !$('dd500Consent').checked)return;
     const listingId=state.linked;
+    clearOwnerVerification517('HOLD — A photo-sync attempt started. Recheck the actual Etsy draft before owner approval.');
     state.busy=true;show();
     const out=$('dd516PhotoStatus');out.textContent=`Checking draft #${listingId} and all original photos with Etsy (read only)…`;
     let writeStarted=false;
@@ -1204,11 +1223,56 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     }catch(error){$('dd504SignoffStatus').textContent=`HOLD — ${error.message} Refresh readback before any new approval attempt.`;
       state.ownerReadbackReady=false;}
   }
+  async function verifyOwner517(){
+    const output=$('dd517Status');
+    if(id!==53||!ready()||state.busy||state.linked!==PRODUCT_53_ETSY_DRAFT_517){
+      output.textContent='HOLD — Save Product #53 and verify its unique Etsy draft #4603838854 before checking.';return;
+    }
+    clearOwnerVerification517('Reading three independent live Etsy/primary-D1 views. This is GET-only; nothing is uploaded.');
+    state.busy=true;show();
+    try{
+      const [inventory,owner,trial]=await Promise.all([
+        api(`/api/admin/product-etsy-images?product_id=${id}&reconcile=1`),
+        api(`/api/admin/product-etsy-owner-signoff-504?product_id=${id}`),
+        api(`/api/admin/product-etsy-owner-trial-507?product_id=${id}&listing_id=${PRODUCT_53_ETSY_DRAFT_517}`)
+      ]);
+      const verdict=assessEtsyOwnerVerification517({productId:id,listingId:state.linked,inventory,owner,trial});
+      state.live517=verdict.ready?verdict:null;
+      $('dd517PhotoResult').textContent=`Photos: ${verdict.verifiedOriginals}/3 distinct original receipts • ${verdict.photosReady?'VERIFIED against live Etsy':'HOLD — incomplete or mismatched'}.`;
+      $('dd517ContentResult').textContent=`Description, category, saved ID and tags: ${verdict.contentReady?'VERIFIED against the unpublished Canada-only draft':'HOLD — correction or independent check needed'}.`;
+      output.textContent=(verdict.ready?'READY FOR OWNER REVIEW — ':'HOLD — ')+verdict.next+
+        (verdict.ready?'':` ${verdict.problems.slice(0,4).join(' | ')}`)+
+        ' Verification is read-only and never proves that an owner personally approved the listing.';
+    }catch(error){
+      clearOwnerVerification517(`HOLD — Live Etsy receipt verification did not complete: ${error.message}. No new upload, update or owner approval was sent.`);
+    }finally{state.busy=false;show();}
+  }
+  async function approveOwner517(){
+    if(id!==53||!ready()||state.busy||!state.live517?.ready||
+      state.linked!==PRODUCT_53_ETSY_DRAFT_517||!$('dd517OwnerConfirm').checked)return;
+    state.busy=true;show();
+    $('dd517ApprovalStatus').textContent='Re-reading the same Etsy draft and all three photos before saving one local owner decision…';
+    try{
+      const result=await api('/api/admin/product-etsy-owner-signoff-504',{
+        action:'approve_verified_draft',product_id:id,listing_id:state.linked,request_key:key(),
+        confirm_actual_etsy_content:true,confirm_canada_only:true,confirm_unpublished_only:true
+      });
+      if(result.owner_approval_recorded!==true||String(result.listing_id)!==PRODUCT_53_ETSY_DRAFT_517||
+        ![344,345,346].every(imageId=>(result.confirmed_photo_ids||[]).includes(imageId)))
+        throw Error('The server did not confirm a complete three-photo owner approval receipt.');
+      $('dd517ApprovalStatus').textContent=`Owner approval RECORDED locally for original photos #344–346 on unpublished Etsy draft #${state.linked}. Nothing published or newly uploaded.`;
+      clearOwnerVerification517('Owner decision saved. Recheck live Etsy again before any subsequent owner approval.');
+    }catch(error){
+      clearOwnerVerification517('HOLD — Approval outcome could not be confirmed. Inspect the audit receipt; never retry an uncertain owner decision blindly.');
+      $('dd517ApprovalStatus').textContent=`HOLD — ${error.message}`;
+    }finally{state.busy=false;show();}
+  }
   async function send({fromSave=false}={}){
     if(state.busy||state.attempted||state.holdAfterWrite||!ready()||!state.assessment?.ready||
       !(fromSave||$('dd500Consent').checked)||!globalThis.crypto?.randomUUID)return false;
     const existing=Boolean(state.linked),mode=existing?'existing':'new';
     if(!existing&&(!state.settings||!newSettingsReady()||$('dd500ListingId').value.trim()))return false;
+    clearOwnerVerification517('HOLD — A draft update has started. Recheck the actual live Etsy content after it finishes.');
     state.busy=true;show();status(`Rechecking all Product photos and Etsy listing ID before one ${mode} package action…`);
     let writeStarted=false;
     let succeeded=false;
@@ -1272,6 +1336,9 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   }
   $('dd500Refresh').addEventListener('click',()=>void refresh());
   $('dd516SyncPhotos').addEventListener('click',()=>void syncPhotos516());
+  $('dd517Verify').addEventListener('click',()=>void verifyOwner517());
+  $('dd517OwnerConfirm').addEventListener('change',show);
+  $('dd517Approve').addEventListener('click',()=>void approveOwner517());
   $('dd504CheckPhotos').addEventListener('click',()=>void ownerPhotoReadback());
   $('dd506TrialCheck').addEventListener('click',()=>void reviewTrial506());
   $('dd507TrialCheck').addEventListener('click',()=>void reviewTrial507());
