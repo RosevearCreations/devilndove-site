@@ -10,6 +10,11 @@
 .dd523-flow .dd523-setup-mount .dd-editor-grid{grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr))}
 .dd523-flow .dd523-marketplace{display:grid;gap:.7rem;padding:1rem;border:1px solid #52699f;border-radius:10px}
 .dd523-flow .dd523-marketplace a{width:max-content;max-width:100%}
+.dd523-flow .dd524-receipt{display:grid;gap:.35rem;padding:.7rem;border:1px solid #66557a;border-radius:9px;min-width:0}
+.dd523-flow .dd524-receipt button{width:max-content;max-width:100%;white-space:normal}
+.dd523-flow .dd524-media-list{margin:.15rem 0;padding-left:1.5rem;overflow-wrap:anywhere}
+.dd523-flow .dd524-media-list li{padding:.15rem 0}
+.dd523-flow .dd524-media-list a{width:auto;display:inline;overflow-wrap:anywhere}
 .dd523-flow #dd523MarketplaceCopy:not([hidden]){display:grid;gap:.5rem}
 .dd523-flow #dd523Issues{margin:0;padding-left:1.5rem;line-height:1.55}
 .dd523-flow #dd523EtsyPost{width:max-content;max-width:100%;white-space:normal}
