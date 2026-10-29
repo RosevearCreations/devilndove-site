@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/admin/product-editor/advanced-channels-498.css?v=498"/>
   <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=515"/>
   <link rel="stylesheet" href="/admin/product-editor/etsy-simple-515.css?v=522"/>
-  <link rel="stylesheet" href="/admin/product-editor/destination-flow-523.css?v=523"/>
+  <link rel="stylesheet" href="/admin/product-editor/destination-flow-523.css?v=525"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -27,7 +27,7 @@
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
-      <div><p class="eyebrow">Release 467 • Build 523</p><h1 id="productEditorTitle">Product Editor</h1><p>Enter your item once, including its description, price, size, weight and original photographs. Save it to Devil n Dove first. Then choose an optional Etsy draft or Facebook Marketplace handoff. Nothing publishes automatically. If a Save times out, compare the server copy before retrying.</p></div>
+      <div><p class="eyebrow">Release 467 • Build 525</p><h1 id="productEditorTitle">Product Editor</h1><p>Enter your item once, including its description, price, size, weight and original photographs. Save it to Devil n Dove first. Then choose an optional Etsy draft or Facebook Marketplace handoff. Nothing publishes automatically. If a Save times out, compare the server copy before retrying.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
 
@@ -87,6 +87,15 @@
           <button type="button" class="btn primary" id="dd523EtsyPost" disabled>POST one unpublished Etsy draft</button>
           <div class="dd523-marketplace"><h4>Facebook Marketplace</h4><p class="small">The same Product and approved photos are prepared here. Automated Marketplace POST is unavailable until Meta grants a supported listing API; we cannot claim a listing was created.</p><button type="button" class="btn" id="dd523MarketplacePrepare" disabled>Prepare manual Marketplace handoff</button><a class="btn" href="https://www.facebook.com/marketplace/create/item" rel="noopener noreferrer" target="_blank">Open Marketplace</a><div id="dd523MarketplaceCopy" hidden><label>Title <textarea class="input" id="dd523MarketplaceTitle" rows="2" readonly></textarea></label><label>CAD price <input class="input" id="dd523MarketplacePrice" readonly></label><label>Description <textarea class="input" id="dd523MarketplaceDescription" rows="4" readonly></textarea></label><p class="small">All original image references, in saved gallery order:</p><ol class="dd524-media-list" id="dd524MarketplacePhotos"></ol><p class="small">Copy the fields and use each original image in Facebook; this is a manual upload because no authorized Marketplace POST API is connected. Review Facebook's rules and Canada-only delivery before publishing there.</p></div></div>
           <p class="small" id="dd523PostStatus" role="status" aria-live="polite">Nothing has been posted.</p>
+          <section class="dd525-review" id="dd525OwnerTrial" aria-labelledby="dd525Title">
+            <h4 id="dd525Title">Fresh Product — verify the actual Etsy draft and every image</h4>
+            <p class="small">After a new draft is created, verify its saved Etsy ID and read the <strong>real Etsy images</strong> alongside our exact originals. This is a read-only source check. Products #48 and #53 stay owner-managed.</p>
+            <button type="button" class="btn" id="dd525Read">Read actual Etsy draft and original image pairs (GET only)</button>
+            <p class="small" role="status" aria-live="polite" id="dd525Status">No live comparison has been run.</p>
+            <ol class="dd525-pairs" id="dd525PhotoPairs" aria-label="Original and actual Etsy photo comparisons"></ol>
+            <label class="dd523-confirm"><input type="checkbox" id="dd525OwnerStatement"/><span>I personally compared every original photo with its actual Etsy photo above, confirmed the real saved Product and unpublished draft, and approve recording <strong>my local owner evidence only</strong>. This is not independent pixel or signer-custody proof.</span></label>
+            <button type="button" class="btn primary" id="dd525Accept" disabled>Record my visual photo acceptance (local audit only)</button>
+          </section>
         </div>
         <div id="dd501SaveState" class="dd501-save-state" role="status" aria-live="polite">Destination checkboxes store preferences. Any Etsy POST requires a separate owner acknowledgement and click above.</div>
         <div class="dd471-flow-actions"><button type="button" class="btn" id="dd471MediaReview" disabled>Review canonical gallery and media mapping</button><span class="small" id="dd471FlowStatus" role="status" aria-live="polite">New Product: enter its facts, choose destinations if desired, and save once.</span></div>
@@ -862,6 +871,7 @@
   <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
   <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=523"></script>
   <script type="module" src="/public/js/admin-product-destination-flow-523.mjs?v=524"></script>
+  <script type="module" src="/public/js/admin-product-etsy-owner-trial-525.mjs?v=525"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">
