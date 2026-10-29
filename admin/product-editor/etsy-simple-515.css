@@ -60,6 +60,10 @@ body:has([data-editor-tab="etsy"][aria-selected="true"]) .dd471-creation-flow {
   background:rgba(167,119,59,.09);
 }
 .dd-etsy-panel .dd517-owner-check[hidden] {display:none}
+.dd-etsy-panel .dd519-photo-evidence {display:grid;gap:10px;padding:14px;border:1px solid rgba(147,103,192,.6);border-radius:10px;background:rgba(147,103,192,.08)}
+.dd-etsy-panel .dd519-photo-evidence[hidden] {display:none}
+.dd-etsy-panel .dd519-photo-evidence h3,.dd-etsy-panel .dd519-photo-evidence p {margin:0;line-height:1.5;overflow-wrap:anywhere}
+.dd-etsy-panel .dd519-photo-evidence .btn {width:fit-content;max-width:100%}
 .dd-etsy-panel .dd517-owner-check h3,
 .dd-etsy-panel .dd517-owner-check p {margin:0;line-height:1.5;overflow-wrap:anywhere}
 .dd-etsy-panel .dd517-owner-check .btn {width:fit-content;max-width:100%}
