@@ -20,15 +20,15 @@ test('Etsy checkbox has a fixed intrinsic width, no forced 100%-wide consent box
   assert.doesNotMatch(html.slice(html.indexOf('<body')),/etsy-package-500\.css/);
 });
 test('Product save stays local and Etsy needs a deliberate Create/Update authorization',()=>{
-  assert.match(html,/id="productChannel405Etsy"> Prepare this Product for manual Etsy draft updates/);
+  assert.match(html,/id="productChannel405Etsy"> Create \/ update an Etsy draft/);
   assert.match(html,/<details id="dd501ChannelRecovery"><summary>Destination recovery/);
   assert.match(html,/id="dd501SaveState"/);
-  assert.match(html,/Etsy Create\/Update is a separate, deliberate button/);
-  assert.match(editor,/etsySyncRequested=Boolean\(destinationsSaved&&!newerEdits/);
-  assert.match(editor,/etsy_sync_requested:etsySyncRequested,destinations_confirmed:destinationsSaved/);
-  assert.match(editor,/sync-after-create:501:\$\{savedId\}/);
-  assert.match(packageScript,/sync-after-create:501:\$\{id\}/);
-  assert.match(packageScript,/sessionStorage\.removeItem\(marker\)/);
+  assert.match(html,/POST one unpublished Etsy draft/);
+  assert.match(editor,/etsyPreferenceSaved=Boolean\(destinationsSaved&&!newerEdits/);
+  assert.match(editor,/etsy_preference_saved:etsyPreferenceSaved,destinations_confirmed:destinationsSaved/);
+  assert.doesNotMatch(editor,/sync-after-create:501/);
+  assert.doesNotMatch(packageScript,/sync-after-create:501/);
+  assert.match(packageScript,/window\.DDEtsyDraftFlow523=\{/);
   assert.match(packageScript,/void refresh\(\);\n  \}\);\n  document\.addEventListener\('dd:product-loaded'/);
   assert.doesNotMatch(packageScript,/await refresh\(\);await syncAfterSave\('product'\)/);
   assert.match(intent,/afterProductSave:async\(id,choice\)=>saveFor\(Number\(id\),choice\)/);
