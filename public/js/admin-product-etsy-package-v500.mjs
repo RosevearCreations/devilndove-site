@@ -4,6 +4,7 @@
 import {assessEtsyPackage500,assessEtsyPhotos516,verifiedEtsyPackage500} from './etsy-package-500.mjs';
 import {etsyFailure503,etsyFixLocation503} from './etsy-owner-diagnostics-503.mjs';
 import {assessEtsyOwnerVerification517,PRODUCT_53_ETSY_DRAFT_517} from './etsy-owner-verification-517.mjs';
+import {summarizeOwnerReads518} from './etsy-owner-evidence-518.mjs';
 
 const $=id=>document.getElementById(id);
 const form=$('productEditorForm'),id=Number(new URLSearchParams(location.search).get('product_id')||0);
@@ -1231,11 +1232,25 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     clearOwnerVerification517('Reading three independent live Etsy/primary-D1 views. This is GET-only; nothing is uploaded.');
     state.busy=true;show();
     try{
-      const [inventory,owner,trial]=await Promise.all([
+      const checks=await Promise.allSettled([
         api(`/api/admin/product-etsy-images?product_id=${id}&reconcile=1`),
         api(`/api/admin/product-etsy-owner-signoff-504?product_id=${id}`),
         api(`/api/admin/product-etsy-owner-trial-507?product_id=${id}&listing_id=${PRODUCT_53_ETSY_DRAFT_517}`)
       ]);
+      const reads=summarizeOwnerReads518(checks);
+      if(!reads.complete){
+        const [photos,owner,trial]=reads.entries;
+        $('dd517PhotoResult').textContent=photos.ok&&owner.ok?
+          'Photos: two photo-read endpoints responded; full receipt verification is still on HOLD until all three checks finish.':
+          `Photos: HOLD — ${!photos.ok?'Live Etsy inventory could not be read. ':'Independent photo receipts could not all be read.'}`;
+        $('dd517ContentResult').textContent=owner.ok&&trial.ok?
+          'Description and tags: both content endpoints responded; full acceptance remains on HOLD.':
+          'Description and tags: HOLD — at least one independent item-content read could not finish.';
+        output.textContent=`HOLD — ${reads.unavailable.map(item=>`${item.name}: ${item.error||'read unavailable'}`).join(' | ')} `+
+          'A server 503 is not proof that photos are missing. You may press Verify again when the server is available; this does not upload, update, publish or approve anything.';
+        return;
+      }
+      const [inventory,owner,trial]=reads.entries.map(entry=>entry.value);
       const verdict=assessEtsyOwnerVerification517({productId:id,listingId:state.linked,inventory,owner,trial});
       state.live517=verdict.ready?verdict:null;
       $('dd517PhotoResult').textContent=`Photos: ${verdict.verifiedOriginals}/3 distinct original receipts • ${verdict.photosReady?'VERIFIED against live Etsy':'HOLD — incomplete or mismatched'}.`;
@@ -1244,7 +1259,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
         (verdict.ready?'':` ${verdict.problems.slice(0,4).join(' | ')}`)+
         ' Verification is read-only and never proves that an owner personally approved the listing.';
     }catch(error){
-      clearOwnerVerification517(`HOLD — Live Etsy receipt verification did not complete: ${error.message}. No new upload, update or owner approval was sent.`);
+      clearOwnerVerification517(`HOLD — Live Etsy receipt verification could not finish: ${error.message}. No new upload, update or owner approval was sent.`);
     }finally{state.busy=false;show();}
   }
   async function approveOwner517(){
