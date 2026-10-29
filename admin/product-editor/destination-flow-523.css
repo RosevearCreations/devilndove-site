@@ -1,0 +1,22 @@
+/* Build 523: straightforward Product → two optional destinations. */
+.dd523-flow{margin:1.1rem 0 0;padding:clamp(14px,2vw,24px);border:1px solid #ad844c;border-radius:14px;background:linear-gradient(140deg,#191a32,#201c30);display:grid;gap:.75rem;min-width:0}
+.dd523-flow h3,.dd523-flow h4,.dd523-flow p{margin:0;overflow-wrap:anywhere}
+.dd523-flow h3{font-size:clamp(1.15rem,2vw,1.55rem);color:#f7e0bf}
+.dd523-flow h4{color:#ddc7f6;font-size:1.05rem}
+.dd523-flow .dd523-confirm{display:flex;gap:.7rem;align-items:flex-start;background:#272036;padding:1rem;border-radius:10px;line-height:1.5}
+.dd523-flow .dd523-confirm input{margin-top:.25rem;flex:0 0 auto}
+.dd523-flow .dd523-setup-mount:not([hidden]){display:block;max-width:100%;min-width:0}
+.dd523-flow .dd523-setup-mount details{margin:.6rem 0;padding:.75rem;border:1px solid #715d84;border-radius:10px}
+.dd523-flow .dd523-setup-mount .dd-editor-grid{grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr))}
+.dd523-flow .dd523-marketplace{display:grid;gap:.7rem;padding:1rem;border:1px solid #52699f;border-radius:10px}
+.dd523-flow .dd523-marketplace a{width:max-content;max-width:100%}
+.dd523-flow #dd523MarketplaceCopy:not([hidden]){display:grid;gap:.5rem}
+.dd523-flow #dd523Issues{margin:0;padding-left:1.5rem;line-height:1.55}
+.dd523-flow #dd523EtsyPost{width:max-content;max-width:100%;white-space:normal}
+.dd523-flow [data-tone="warn"]{color:#ffca80}
+.dd523-flow [data-tone="error"]{color:#ffa5a2}
+.dd523-flow [data-tone="ok"]{color:#a3efbf}
+.dd523-technical-etsy{border:1px solid #66557a;border-radius:12px;padding:.8rem;margin:1rem 0;background:#16172a}
+.dd523-technical-etsy>summary{cursor:pointer;font-weight:600;color:#cbb3e6}
+.dd523-technical-etsy>.dd500-package{margin-top:1rem;max-width:100%}
+@media(max-width:650px){.dd523-flow .dd-product-actions{display:flex;flex-direction:column;align-items:stretch}.dd523-flow .dd-product-actions button{width:100%}}

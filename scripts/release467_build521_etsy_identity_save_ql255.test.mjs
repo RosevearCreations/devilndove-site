@@ -52,10 +52,10 @@ test('Product save uncertainty and Etsy witness controls do not auto-repeat writ
   assert.match(etsy,/assessVisualPhotoPairs521/);assert.match(etsy,/All six current image previews loaded/);
   assert.match(etsy,/!state\.identityWitness521\?\.readyForHumanVisualReview\|\|!\$\('dd521VisualConfirmed'\)\.checked/);
   assert.match(etsy,/checkOwnerAcceptance520\(\{requestKey:ownerApprovalKey\}\)/);
-  assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=521/);
+  assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=523/);
   assert.match(html,/etsy-simple-515\.css\?v=52[12]/);
-  assert.match(read('public/js/admin-product-channel-intent-v405.js'),/manually on the Etsy tab/);
-  assert.match(read('public/js/admin-product-creation-flow-471.js'),/manually/);
+  assert.match(read('public/js/admin-product-channel-intent-v405.js'),/Review and send/);
+  assert.match(read('public/js/admin-product-creation-flow-471.js'),/Marketplace preparation only/);
 });
 test('QL-255 public proof exception cannot be mislabeled private custody, owner authorization or connection',()=>{
   assert.equal(QL254_OBSERVATION_521.proof_http_status,404);
