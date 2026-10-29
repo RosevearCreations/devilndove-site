@@ -53,7 +53,7 @@ test('Product save uncertainty and Etsy witness controls do not auto-repeat writ
   assert.match(etsy,/!state\.identityWitness521\?\.readyForHumanVisualReview\|\|!\$\('dd521VisualConfirmed'\)\.checked/);
   assert.match(etsy,/checkOwnerAcceptance520\(\{requestKey:ownerApprovalKey\}\)/);
   assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=521/);
-  assert.match(html,/etsy-simple-515\.css\?v=521/);
+  assert.match(html,/etsy-simple-515\.css\?v=52[12]/);
   assert.match(read('public/js/admin-product-channel-intent-v405.js'),/manually on the Etsy tab/);
   assert.match(read('public/js/admin-product-creation-flow-471.js'),/manually/);
 });

@@ -18,17 +18,19 @@ const canonical=(name,value)=>value==null||value===''?'':numberFields.has(name)?
 export function compareUncertainProductSave521({productId,submitted,saved}={}){
   if(!Number.isSafeInteger(Number(productId))||Number(productId)<1||
     Number(saved?.product_id)!==Number(productId)||!submitted||typeof submitted!=='object')
-    return {reviewed:false,savedMatch:false,different:[],unavailable:[],matching:[],
+    return {reviewed:false,savedMatch:false,different:[],unavailable:[],matching:[],fieldSnapshots:[],
       next:'Product identity or authoritative server data is unavailable. Keep the browser draft and do not retry the write.'};
-  const different=[],unavailable=[],matching=[];
+  const different=[],unavailable=[],matching=[],fieldSnapshots=[];
   for(const field of PRODUCT_SAVE_FIELDS_521){
     if(!Object.hasOwn(submitted,field)||!Object.hasOwn(saved,field)){
-      unavailable.push(field);continue;
+      unavailable.push(field);fieldSnapshots.push({field,status:'unavailable',browser:submitted[field]??null,server:null});continue;
     }
-    (canonical(field,submitted[field])===canonical(field,saved[field])?matching:different).push(field);
+    const same=canonical(field,submitted[field])===canonical(field,saved[field]);
+    (same?matching:different).push(field);
+    if(!same)fieldSnapshots.push({field,status:'different',browser:submitted[field],server:saved[field]});
   }
   return {reviewed:true,savedMatch:different.length===0&&unavailable.length===0,
-    different,unavailable,matching,
+    different,unavailable,matching,fieldSnapshots,
     next:different.length||unavailable.length?
       'Some saved fields differ or could not be independently returned. Choose to keep the current server record, or restore the preserved browser draft for careful review. Nothing will be re-sent automatically.':
       'Every submitted Product field matches the authoritative server record. Do not repeat the earlier Save; Etsy is a separate manual step.'};
