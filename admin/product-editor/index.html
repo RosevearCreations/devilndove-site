@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="/admin/product-editor/entry-readiness-489.css?v=496"/>
   <link rel="stylesheet" href="/admin/product-editor/advanced-channels-498.css?v=498"/>
   <link rel="stylesheet" href="/admin/product-editor/etsy-package-500.css?v=515"/>
-  <link rel="stylesheet" href="/admin/product-editor/etsy-simple-515.css?v=519"/>
+  <link rel="stylesheet" href="/admin/product-editor/etsy-simple-515.css?v=520"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -223,6 +223,8 @@
             <p class="small">Product #53 · Original photos #344, #345 and #346 · Etsy draft #4603838854. Read the actual images first. Matching an existing photo saves only the local evidence; it never uploads, updates or publishes on Etsy.</p>
             <button class="btn" type="button" id="dd519Compare">Compare existing Etsy photographs (read only)</button>
             <p class="small" role="status" aria-live="polite" id="dd519PhotoProgress">Not checked in this session. No Etsy photo is assumed missing.</p>
+            <p class="small" id="dd520PhotoSummary">Build 520 readback: the Etsy photo count, three original IDs and recorded pairings have not yet been checked.</p>
+            <ol class="small dd520-evidence-list" id="dd520PhotoRows" aria-label="Each original photo and its confirmed Etsy image ID"><li>Press Compare to see all three original-photo receipt states.</li></ol>
             <p class="small">If we can visually confirm a match, choose both images below, tick the exact-match confirmation and record that one pairing. Then run the separate final draft check.</p>
             <div id="dd519PhotoMatchMount"></div>
           </section>
@@ -232,10 +234,13 @@
             <button class="btn" type="button" id="dd517Verify">Verify / retry live draft &amp; all 3 photos (read only)</button>
             <p class="small" id="dd517PhotoResult">Photos: not independently checked in this session.</p>
             <p class="small" id="dd517ContentResult">Description and tags: not independently checked in this session.</p>
+            <ol class="small dd520-evidence-list" id="dd520ReadSources" aria-label="Independent live Etsy and database read statuses"><li>Independent read status not checked yet.</li></ol>
             <p id="dd517Status" role="status" aria-live="polite">HOLD — Run the live check after saving and, if needed, updating this same draft.</p>
             <label class="dd517-owner-consent"><input type="checkbox" id="dd517OwnerConfirm" disabled><span>We personally inspected the actual Etsy draft, category, description, CAD price, Canada-only shipping, search tags and all three original photographs. Record our approval of this <strong>unpublished draft only</strong>.</span></label>
             <button class="btn primary" type="button" id="dd517Approve" disabled>Record owner approval (never publish)</button>
             <p class="small" id="dd517ApprovalStatus" role="status" aria-live="polite">No Build 518 owner approval recorded. A green software release cannot substitute for our real Etsy check.</p>
+            <button class="btn" type="button" id="dd520ReadAcceptance">Check saved owner approval receipt (read only)</button>
+            <p class="small" id="dd520AcceptanceStatus" role="status" aria-live="polite">No stored approval receipt has been checked in this session. Only our real confirmation can create one.</p>
           </section>
           <p class="small" id="dd500Status" role="status" aria-live="polite">No Etsy write attempted.</p>
           <details id="dd515PhotoRepair" class="dd515-photo-repair" hidden>
@@ -826,7 +831,7 @@
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=496"></script>
   <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
   <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
-  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=519"></script>
+  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=520"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">
