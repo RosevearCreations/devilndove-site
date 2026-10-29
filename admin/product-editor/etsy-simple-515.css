@@ -14,6 +14,8 @@ body:has([data-editor-tab="etsy"][aria-selected="true"]) .dd471-creation-flow {
 .dd521-save-review[hidden] {display:none}
 .dd521-save-review h3,.dd521-save-review p {margin:0;line-height:1.5;overflow-wrap:anywhere}
 .dd521-save-review ul {margin:0;padding-left:24px;line-height:1.5;overflow-wrap:anywhere}
+.dd521-save-review details {margin:.45rem 0;max-width:100%}
+.dd521-save-review .dd522-diff-value {overflow-wrap:anywhere;white-space:pre-wrap;margin:.35rem 0;padding:.45rem .65rem;background:rgba(14,15,31,.65);border-radius:.4rem}
 .dd-etsy-panel #dd500Title {font-size:clamp(1.45rem,2.3vw,2rem)}
 .dd-etsy-panel .dd500-head p {line-height:1.55}
 .dd-etsy-panel #dd500Open {max-width:max-content}

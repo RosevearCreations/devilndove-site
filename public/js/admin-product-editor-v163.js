@@ -211,13 +211,26 @@
         // Compare the full Product payload and all returned server fields. A
         // successful GET is not itself proof that every requested field saved.
         try{
-          const {compareUncertainProductSave521}=await import('/public/js/product-save-outcome-521.mjs');
+          const {compareUncertainProductSave521}=await import('/public/js/product-save-outcome-521.mjs?v=522');
           const verdict=compareUncertainProductSave521({productId:state.productId,submitted:state.pendingSaveCheck,saved:data.product});
           state.review521=verdict;state.pendingSaveCheck=null;
           if(saveReview521)saveReview521.hidden=false;
-          if(reviewDifferences521)reviewDifferences521.replaceChildren(...(verdict.savedMatch?['All submitted Product fields match the read-only server copy.']:
-            [...verdict.different.map(name=>'Different: '+name),...verdict.unavailable.map(name=>'Not returned: '+name)]).map(label=>{
-              const li=document.createElement('li');li.textContent=label;return li;}));
+          if(reviewDifferences521)reviewDifferences521.replaceChildren(...(verdict.savedMatch?
+            [{field:'verified',status:'matched',browser:null,server:null}]:verdict.fieldSnapshots).map(item=>{
+              const li=document.createElement('li');
+              if(item.status==='matched'){li.textContent='Every submitted Product field matches the saved server copy.';return li;}
+              const details=document.createElement('details'),summary=document.createElement('summary');
+              const label=item.field==='meta_description'?'Search description (meta_description)':item.field.replace(/_/g,' ');
+              summary.textContent=`${label}: ${item.status==='different'?'saved server differs':'not returned by server'} — compare both values`;
+              details.append(summary);
+              for(const [prefix,value] of [['Saved server value',item.server],['Previous browser Save request',item.browser]]){
+                const p=document.createElement('p');p.className='dd522-diff-value';
+                const strong=document.createElement('strong');strong.textContent=prefix+': ';
+                const span=document.createElement('span');span.textContent=item.status==='unavailable'&&prefix==='Saved server value'?
+                  '[not returned]':value==null||value===''?'[blank]':String(value);
+                p.append(strong,span);details.append(p);
+              }
+              li.append(details);return li;}));
           if(reviewStatus521)reviewStatus521.textContent=verdict.next;
           if(keepServer521)keepServer521.hidden=verdict.savedMatch||!verdict.reviewed;
           if(restoreBrowser521)restoreBrowser521.hidden=verdict.savedMatch||!verdict.reviewed||!pendingRecovery;
