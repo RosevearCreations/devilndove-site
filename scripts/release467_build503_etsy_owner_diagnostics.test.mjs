@@ -59,7 +59,7 @@ test('uncertain local Product save checks the server copy without repeating POST
  const link=source('functions/api/admin/product-etsy-existing-draft.js');
  assert.match(ui,/pendingSaveCheck/);
  assert.match(ui,/STEP 1 VERIFIED — Product/);
- assert.match(ui,/different\.join\(', '\)/);
+ assert.match(ui,/verdict\.different\.map\(name=>'Different: '\+name\)/);
  assert.match(api,/no_product_write_started:true/);
  assert.match(link,/async function localLinkOnly/);
  assert.match(link,/localLinkOnly\(db,Number\(id\)\)/);

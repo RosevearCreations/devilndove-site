@@ -9,7 +9,7 @@
   const destination=chosen.length?chosen.join(' + '):'No external channels';
   const waiting=chosen.length&&!consent?.checked;
   status.textContent=(savedId?'Saved Product #'+savedId:'New Product — not yet saved')+' • '+destination+
-    (waiting?' • HOLD: confirm the destination change':chosen.length?' • Etsy sync occurs on Save when selected':' • Devil n Dove source only')+
+    (waiting?' • HOLD: confirm the destination change':etsy?.checked?' • Etsy preference only: open Etsy tab to Create/Update manually':facebook?.checked?' • Marketplace preparation only; posting remains manual':' • Devil n Dove source only')+
     ' • Nothing publishes automatically.';
   media.disabled=!savedId;
  }
