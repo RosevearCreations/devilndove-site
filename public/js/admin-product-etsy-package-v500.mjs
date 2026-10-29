@@ -6,6 +6,7 @@ import {etsyFailure503,etsyFixLocation503} from './etsy-owner-diagnostics-503.mj
 import {assessEtsyOwnerVerification517,PRODUCT_53_ETSY_DRAFT_517} from './etsy-owner-verification-517.mjs';
 import {summarizeOwnerReads518} from './etsy-owner-evidence-518.mjs';
 import {assessExistingPhotoMatches519} from './etsy-photo-matching-519.mjs';
+import {photoReadback520,evidenceReadRows520} from './etsy-photo-readback-520.mjs';
 
 const $=id=>document.getElementById(id);
 const form=$('productEditorForm'),id=Number(new URLSearchParams(location.search).get('product_id')||0);
@@ -40,6 +41,9 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   const ready=()=>id>0&&form.dataset.productAuthority==='ready'&&form.dataset.productDirty!=='1';
   const key=()=>crypto.randomUUID();
   const status=(message,hold=false)=>{const el=$('dd500Status');el.textContent=message;el.dataset.tone=hold?'hold':'ok';};
+  const showReadRows520=(element,lines)=>{
+    element.replaceChildren(...lines.map(value=>{const li=document.createElement('li');li.textContent=value;return li;}));
+  };
   const optionStatus=(message,hold=false)=>{const el=$('dd500OptionsStatus');el.textContent=message;el.dataset.tone=hold?'hold':'ok';};
   const saveState=(message,tone='')=>{
     const el=$('dd501SaveState');if(el){el.textContent=message;el.dataset.tone=tone;}
@@ -53,11 +57,15 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     $('dd517PhotoResult').textContent='Photos: not independently checked in this session.';
     $('dd517ContentResult').textContent='Description and tags: not independently checked in this session.';
     $('dd517Status').textContent=reason;
+    showReadRows520($('dd520ReadSources'),['Independent live readback must be repeated before approval.']);
   }
   function resetOwnerApproval(){state.ownerReadbackReady=false;
     clearOwnerVerification517();
     state.photoReviewVerdict519=null;
     $('dd519PhotoProgress').textContent='HOLD — A Product or photo receipt changed. Compare the three existing Etsy photographs again.';
+    $('dd520PhotoSummary').textContent='HOLD — Earlier photo observations are stale. Recheck the actual Etsy draft.';
+    showReadRows520($('dd520PhotoRows'),['Previous original-to-Etsy photo observations need fresh verification.']);
+    $('dd520AcceptanceStatus').textContent='HOLD — Any earlier owner approval requires a fresh evidence fingerprint check.';
     $('dd517ApprovalStatus').textContent='HOLD — Saved Product or media changed. Any earlier approval must be independently rechecked against the current Etsy draft.';
     state.closeout508=null;
     state.independent509=null;
@@ -140,6 +148,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     $('dd517Verify').disabled=id!==53||state.busy||!ready()||state.linked!==PRODUCT_53_ETSY_DRAFT_517;
     $('dd517OwnerConfirm').disabled=!state.live517?.ready||state.busy||!ready();
     $('dd517Approve').disabled=!state.live517?.ready||state.busy||!ready()||!$('dd517OwnerConfirm').checked;
+    $('dd520ReadAcceptance').disabled=id!==53||state.busy||!ready()||state.linked!==PRODUCT_53_ETSY_DRAFT_517;
     const candidate=String($('dd500ListingId').value||'').trim();
     const hasCandidate=!linked&&/^[1-9]\d{0,14}$/.test(candidate);
     const conflict=hasCandidate&&state.claim?.state==='another_product';
@@ -1079,8 +1088,12 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       const receipt=await api(`/api/admin/product-etsy-owner-reconcile-505?mode=photos&product_id=${id}&listing_id=${encodeURIComponent(state.linked)}`);
       if(String(receipt.listing_id)!==state.linked)throw Error('Etsy listing ID differs from this Product.');
       const verdict=assessExistingPhotoMatches519({productId:id,listingId:state.linked,receipt});
+      const diagnostic=photoReadback520({receipt,verdict});
       state.photoReview=receipt;
       state.photoReviewVerdict519=verdict;
+      $('dd520PhotoSummary').textContent=`Etsy returned ${diagnostic.remoteCount} photograph(s). ${diagnostic.recordedPairs}/3 saved original-to-Etsy pairings appear in the current remote inventory. `+
+        `${diagnostic.unresolvedAttempts} historical upload claim(s) unresolved. ${diagnostic.next} This check cannot supply our personal owner acceptance.`;
+      showReadRows520($('dd520PhotoRows'),diagnostic.rows.map(row=>`Original #${row.original} → ${row.etsyImageId?'Etsy image #'+row.etsyImageId:'not independently paired'}: ${row.note}.`));
       const matchedLocal=new Set(receipt.matched.map(row=>String(row.product_image_id)));
       const matchedRemote=new Set(receipt.matched.map(row=>String(row.etsy_image_id)));
       for(const [select,list,keyField,matched] of [[$('dd505Original'),receipt.originals,'product_image_id',matchedLocal],[$('dd505Remote'),receipt.etsy_photos,'etsy_image_id',matchedRemote]]){
@@ -1095,6 +1108,8 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       $('dd505PhotoStatus').textContent=`${receipt.matched.length} original photograph(s) matched. ${receipt.originals.length-receipt.matched.length} local original(s) and ${receipt.etsy_photos.length-receipt.matched.length} Etsy photo(s) remain unmatched. ${receipt.unresolved_upload_attempts?'One or more earlier upload attempts are unconfirmed; match their exact existing Etsy photograph here to resolve the receipt. Never upload them again blindly. ':''}Choose the exact same photograph in both columns and confirm.`;
     }catch(error){
       state.photoReview=null;state.photoReviewVerdict519=null;
+      $('dd520PhotoSummary').textContent=`HOLD — Etsy photo inventory read did not finish: ${error.message}. An HTTP 503 is not a missing photograph.`;
+      showReadRows520($('dd520PhotoRows'),[344,345,346].map(n=>`Original #${n}: live Etsy pairing UNKNOWN, not missing.`));
       $('dd519PhotoProgress').textContent=`HOLD — Existing Etsy photos could not be read: ${error.message}. A 503 does not prove a photo is missing. Retry this read only when the server is available.`;
       $('dd505PhotoStatus').textContent=`HOLD — ${error.message} Nothing was uploaded or mapped.`;
     }
@@ -1256,6 +1271,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
         api(`/api/admin/product-etsy-owner-trial-507?product_id=${id}&listing_id=${PRODUCT_53_ETSY_DRAFT_517}`)
       ]);
       const reads=summarizeOwnerReads518(checks);
+      showReadRows520($('dd520ReadSources'),evidenceReadRows520(reads).map(row=>`${row.name}: ${row.ok?'READ OK':'HOLD'} — ${row.message}`));
       if(!reads.complete){
         const [photos,owner,trial]=reads.entries;
         $('dd517PhotoResult').textContent=photos.ok&&owner.ok?
@@ -1280,24 +1296,44 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       clearOwnerVerification517(`HOLD — Live Etsy receipt verification could not finish: ${error.message}. No new upload, update or owner approval was sent.`);
     }finally{state.busy=false;show();}
   }
+  async function checkOwnerAcceptance520({requestKey=null}={}){
+    if(id!==53||!ready()||state.linked!==PRODUCT_53_ETSY_DRAFT_517)return;
+    const output=$('dd520AcceptanceStatus');
+    output.textContent='Reading the saved owner receipt from the primary database and comparing it with the current live Etsy draft. Nothing is changed.';
+    try{
+      const filter=requestKey?'&request_key='+encodeURIComponent(requestKey):'';
+      const result=await api(`/api/admin/product-etsy-owner-acceptance-520?product_id=53&listing_id=${PRODUCT_53_ETSY_DRAFT_517}${filter}`);
+      if(result.current_acceptance_verified===true&&result.receipt_recorded===true&&result.approval_created===false){
+        output.textContent=`VERIFIED LOCAL OWNER RECEIPT — Saved owner approval for unpublished Etsy draft #${PRODUCT_53_ETSY_DRAFT_517} matches the current three original photos and live Etsy evidence. No Etsy listing was published or updated by this check.`;
+        return true;
+      }
+      output.textContent=`HOLD — ${result.receipt_recorded?'A previously saved owner action exists, but the live evidence no longer matches.':'No actual owner approval receipt is saved for this draft.'} `+
+        `${(result.issues||[]).join(' ')} Never create or repeat an owner decision just to clear this warning.`;
+    }catch(error){output.textContent=`HOLD — Saved approval outcome or current Etsy readback could not be confirmed: ${error.message}. A 503 is not a missing approval or photo. Do not blindly repeat an owner action.`;}
+    return false;
+  }
   async function approveOwner517(){
     if(id!==53||!ready()||state.busy||!state.live517?.ready||
       state.linked!==PRODUCT_53_ETSY_DRAFT_517||!$('dd517OwnerConfirm').checked)return;
     state.busy=true;show();
     $('dd517ApprovalStatus').textContent='Re-reading the same Etsy draft and all three photos before saving one local owner decision…';
+    const ownerApprovalKey=key();
     try{
       const result=await api('/api/admin/product-etsy-owner-signoff-504',{
-        action:'approve_verified_draft',product_id:id,listing_id:state.linked,request_key:key(),
+        action:'approve_verified_draft',product_id:id,listing_id:state.linked,request_key:ownerApprovalKey,
         confirm_actual_etsy_content:true,confirm_canada_only:true,confirm_unpublished_only:true
       });
       if(result.owner_approval_recorded!==true||String(result.listing_id)!==PRODUCT_53_ETSY_DRAFT_517||
         ![344,345,346].every(imageId=>(result.confirmed_photo_ids||[]).includes(imageId)))
         throw Error('The server did not confirm a complete three-photo owner approval receipt.');
-      $('dd517ApprovalStatus').textContent=`Owner approval RECORDED locally for original photos #344–346 on unpublished Etsy draft #${state.linked}. Nothing published or newly uploaded.`;
+      const verified=await checkOwnerAcceptance520({requestKey:ownerApprovalKey});
+      $('dd517ApprovalStatus').textContent=verified?
+        `Owner approval independently READ BACK from the local audit for original photos #344–346 on unpublished Etsy draft #${state.linked}. Nothing published or newly uploaded.`:
+        'HOLD — The owner action returned success, but its primary audit and live Etsy readback are not independently confirmed. Do not repeat approval blindly.';
       clearOwnerVerification517('Owner decision saved. Recheck live Etsy again before any subsequent owner approval.');
     }catch(error){
       clearOwnerVerification517('HOLD — Approval outcome could not be confirmed. Inspect the audit receipt; never retry an uncertain owner decision blindly.');
-      $('dd517ApprovalStatus').textContent=`HOLD — ${error.message}`;
+      $('dd517ApprovalStatus').textContent=`HOLD — ${error.message} Use “Check saved owner approval receipt” (read only), never repeat an uncertain owner write.`;
     }finally{state.busy=false;show();}
   }
   async function send({fromSave=false}={}){
@@ -1373,6 +1409,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   $('dd517Verify').addEventListener('click',()=>void verifyOwner517());
   $('dd517OwnerConfirm').addEventListener('change',show);
   $('dd517Approve').addEventListener('click',()=>void approveOwner517());
+  $('dd520ReadAcceptance').addEventListener('click',()=>void checkOwnerAcceptance520());
   $('dd504CheckPhotos').addEventListener('click',()=>void ownerPhotoReadback());
   $('dd506TrialCheck').addEventListener('click',()=>void reviewTrial506());
   $('dd507TrialCheck').addEventListener('click',()=>void reviewTrial507());

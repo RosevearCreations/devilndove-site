@@ -64,6 +64,8 @@ body:has([data-editor-tab="etsy"][aria-selected="true"]) .dd471-creation-flow {
 .dd-etsy-panel .dd519-photo-evidence[hidden] {display:none}
 .dd-etsy-panel .dd519-photo-evidence h3,.dd-etsy-panel .dd519-photo-evidence p {margin:0;line-height:1.5;overflow-wrap:anywhere}
 .dd-etsy-panel .dd519-photo-evidence .btn {width:fit-content;max-width:100%}
+.dd-etsy-panel .dd520-evidence-list {margin:0;padding:10px 12px 10px 34px;line-height:1.55;border:1px solid rgba(167,119,59,.28);border-radius:8px;overflow-wrap:anywhere}
+.dd-etsy-panel .dd520-evidence-list li+li {margin-top:6px}
 .dd-etsy-panel .dd517-owner-check h3,
 .dd-etsy-panel .dd517-owner-check p {margin:0;line-height:1.5;overflow-wrap:anywhere}
 .dd-etsy-panel .dd517-owner-check .btn {width:fit-content;max-width:100%}

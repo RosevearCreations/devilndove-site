@@ -41,8 +41,8 @@ test('visible Etsy workflow requires deliberate photo comparison then a separate
  assert.match(ui,/dd519Compare'\)\.addEventListener\('click'/);
  assert.match(ui,/dd519PhotoProgress'\)\.textContent/);
  assert.match(ui,/!state\.photoReviewVerdict519\?\.safeToMatch/);
- assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=519/);
- assert.match(html,/etsy-simple-515\.css\?v=519/);
+ assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=520/);
+ assert.match(html,/etsy-simple-515\.css\?v=520/);
  assert.match(ui,/async function verifyOwner517/);
  assert.match(ui,/action:'match_existing_photo'/);
  assert.doesNotMatch(ui,/publishListing\(|activateListing\(/);
