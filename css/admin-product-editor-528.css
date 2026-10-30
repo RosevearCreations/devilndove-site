@@ -1,0 +1,39 @@
+/* Build 528: readable, non-overlapping Etsy setup and one-click connection check. */
+#dd500NewSettings .dd-editor-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:15px;
+  width:100%;
+  min-width:0;
+  margin-top:13px;
+}
+#dd500NewSettings .dd-editor-grid > label {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:7px;
+  min-width:0;
+  max-width:100%;
+  overflow-wrap:break-word;
+}
+#dd500NewSettings .dd-editor-grid > label > .input {
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+#dd500NewSettings .dd-editor-grid select:disabled {opacity:.72;cursor:not-allowed}
+#dd500NewSettings #dd500OptionsStatus {line-height:1.55;overflow-wrap:anywhere;margin-top:12px}
+#dd500NewSettings #dd500OptionsStatus[data-tone="hold"] {color:#ffb080}
+#dd500NewSettings #dd500OptionsStatus[data-tone="ok"] {color:#a3efbf}
+#dd500NewSettings #dd528Reconnect {display:inline-flex;vertical-align:middle;margin:8px 0 0 10px;white-space:normal}
+#dd500NewSettings #dd528Reconnect[hidden] {display:none!important}
+@media (max-width:1020px) {
+  #dd500NewSettings .dd-editor-grid {grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:650px) {
+  #dd500NewSettings .dd-editor-grid {grid-template-columns:minmax(0,1fr)}
+  #dd500NewSettings #dd528Reconnect {display:flex;margin:9px 0 0}
+  #dd500NewSettings #dd500OptionsLoad {width:100%;white-space:normal}
+}

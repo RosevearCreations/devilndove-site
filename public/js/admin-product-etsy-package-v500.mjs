@@ -2,7 +2,7 @@
  * at-most-once claims and provider readback. The browser never chooses a subset
  * of photos or silently creates a second listing for an existing Product. */
 import {assessEtsyPackage500,assessEtsyPhotos516,verifiedEtsyPackage500} from './etsy-package-500.mjs';
-import {etsyFailure503,etsyFixLocation503} from './etsy-owner-diagnostics-503.mjs';
+import {etsyFailure503,etsyFixLocation503,etsyConnectionRecovery528,verifyEtsyOptionsAfterExplicitClick528} from './etsy-owner-diagnostics-503.mjs';
 import {assessEtsyOwnerVerification517,PRODUCT_53_ETSY_DRAFT_517} from './etsy-owner-verification-517.mjs';
 import {summarizeOwnerReads518} from './etsy-owner-evidence-518.mjs';
 import {assessExistingPhotoMatches519} from './etsy-photo-matching-519.mjs';
@@ -131,6 +131,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       failure.step=path;failure.httpStatus=error?.httpStatus||response.status;
       failure.listing_id=error?.payload?.listing_id||error?.listing_id;
       failure.code=error?.payload?.code||error?.code;
+      failure.blockers=Array.isArray(error?.payload?.blockers)?error.payload.blockers:[];
       failure.conflicting_product=error?.payload?.conflicting_product||null;
       throw failure;
     }
@@ -187,6 +188,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
         (!linked&&(!state.settings||!newSettingsReady()||Boolean(candidate))));
     $('dd500Refresh').disabled=state.busy;
     $('dd500OptionsLoad').disabled=state.busy;
+    for(const field of ['Category','Shipping','Processing'])$('dd500'+field).disabled=state.busy||!state.settings;
     $('dd500LinkButton').hidden=hasCandidate;
     $('dd500LinkButton').disabled=state.busy||conflict||state.linkReadbackHold||!ready()||!/^[1-9]\d{0,14}$/.test(candidate)||!$('dd500LinkConsent').checked;
     $('dd500Checklist').replaceChildren();
@@ -224,16 +226,36 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   function categoryFilter(){const term=$('dd500CategorySearch').value.toLowerCase().trim(),value=$('dd500Category').value||savedSetup.Category;
     putOptions('Category',taxonomy.filter(row=>!term||row.name.toLowerCase().includes(term)).slice(0,150),value);
   }
-  async function loadOptions(){if(!ready()||state.busy||state.linked)return;
-    state.busy=true;show();optionStatus('Verifying the connected Etsy shop, seller categories, shipping and processing profiles (read only)…');
-    try{const data=await api('/api/admin/product-etsy-draft',{action:'test_connection',product_id:id});
+  async function loadOptions(){if(!ready()||state.busy||state.linked)return false;
+    state.busy=true;show();optionStatus('Checking the Etsy connection and loading category, shipping and processing choices…');
+    const reconnect=$('dd528Reconnect');if(reconnect)reconnect.hidden=true;
+    try{
+      const data=await verifyEtsyOptionsAfterExplicitClick528(api,id,()=>
+        optionStatus('Etsy access has expired. Refreshing the verified connection once, then reloading choices…'));
       if(!data.live_connection_verified||!data.fingerprint)throw Error('Live Etsy connection was not verified.');
       state.settings=data;taxonomy=data.options?.taxonomy||[];
       putOptions('Shipping',data.options?.shipping||[],savedSetup.Shipping);
       putOptions('Processing',data.options?.readiness||[],savedSetup.Processing);
       categoryFilter();
-      optionStatus(`Etsy shop ${data.shop?.shop_name||data.shop?.name||data.shop?.shop_id} verified. Choose a category and your existing Canada-only shipping/processing profiles. ${data.blockers?.length?'HOLD: '+data.blockers.join(', '):'Saved Product fields passed preflight.'}`,!!data.blockers?.length);
-    }catch(error){state.settings=null;optionStatus('HOLD — '+error.message,true);}
+      const missing=['seller categories','shipping profiles','processing profiles'].filter((_,i)=>
+        ![taxonomy,data.options?.shipping,data.options?.readiness][i]?.length);
+      optionStatus(missing.length?`Etsy shop verified, but ${missing.join(', ')} could not be loaded. Check the shop settings in Etsy, then use this button again. No draft created.`:
+        `Etsy shop ${data.shop?.shop_name||data.shop?.name||data.shop?.shop_id} verified. Category, shipping and processing choices loaded. Select the Canada-only profile; no draft created.`,!!missing.length);
+      if(missing.length){if(reconnect)reconnect.hidden=false;}
+      return !missing.length;
+    }catch(error){
+      state.settings=null;taxonomy=[];
+      for(const name of ['Category','Shipping','Processing'])putOptions(name,[],null);
+      const repair=etsyConnectionRecovery528(error);
+      const explanation=error.code==='etsy_connection_not_ready'?repair.reason:
+        error.code==='oauth_refresh_token_unavailable'?'No usable Etsy refresh token remains.':
+        error.code==='oauth_live_authorization_closed'?'Etsy credential refresh is closed for this environment.':
+        error.code==='oauth_refresh_failed'?'Etsy rejected the credential refresh.':
+        'The Etsy setup request failed: '+String(error.message||'unknown error').slice(0,190);
+      optionStatus(`HOLD — ${explanation} Open I.T. Integrations to reconnect or verify Etsy, then try Load choices again. No draft was created.`,true);
+      if(reconnect)reconnect.hidden=false;
+      return false;
+    }
     finally{state.busy=false;show();}
   }
   function parcel(){return {item_weight:$('dd500Weight').value,item_weight_unit:$('dd500WeightUnit').value,
@@ -1563,7 +1585,8 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   document.addEventListener('dd:editor-tab-opened',event=>{
     if(event.detail?.tab==='etsy'&&ready())void (async()=>{
       await refresh();
-      if(!state.linked&&!state.settings&&!$('dd500ListingId').value.trim())await loadOptions();
+      // Build 528: opening the editor is a LOCAL read only. No hidden OAuth
+      // or Etsy connection POSTs on first load; the owner explicitly checks.
     })();
   });
   // Build 523: reuse the original at-most-once, owner-gated provider package

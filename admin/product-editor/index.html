@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="/admin/product-editor/destination-flow-523.css?v=525"/>
   <link rel="stylesheet" href="/css/admin-product-editor-526.css?v=526"/>
   <link rel="stylesheet" href="/css/admin-product-editor-527.css?v=527"/>
+  <link rel="stylesheet" href="/css/admin-product-editor-528.css?v=528"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -29,7 +30,7 @@
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
-      <div><p class="eyebrow">Devil n Dove • Build 527</p><h1 id="productEditorTitle">Product Editor</h1><p>One product, one shared photo gallery. Choose Etsy and/or Marketplace, then Save Product. When Etsy is checked we will verify the saved ID, photos and shop settings, then ask before creating or updating an unpublished draft.</p></div>
+      <div><p class="eyebrow">Devil n Dove • Build 528</p><h1 id="productEditorTitle">Product Editor</h1><p>One product, one shared photo gallery. Choose Etsy and/or Marketplace, then Save Product. An Etsy draft is checked and confirmed separately; the same saved Etsy ID is used for updates.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
 
@@ -238,12 +239,13 @@
           <details id="dd500NewSettings" class="dd500-setup">
             <summary>First-time Etsy setup — category, Canadian shipping and parcel measurements</summary>
             <p class="small">Needed only for a new Etsy listing. Previously entered choices are restored when possible, but Etsy verifies the actual profiles again before creating a draft. Never guess packed measurements.</p>
-            <button type="button" class="btn" id="dd500OptionsLoad">Load live Etsy categories and shipping profiles</button>
+            <button type="button" class="btn" id="dd500OptionsLoad">Check Etsy connection &amp; load choices</button>
+            <a class="btn dd528-reconnect" id="dd528Reconnect" href="/admin/it-integrations/#etsy-oauth-acceptance" hidden>Reconnect Etsy in I.T. Integrations</a>
             <div class="dd-editor-grid cols-2">
               <label>Find an Etsy category <input class="input" id="dd500CategorySearch" placeholder="Search verified categories"></label>
-              <label>Etsy category <select class="input" id="dd500Category"><option value="">Load choices…</option></select></label>
-              <label>Canada-only Etsy shipping profile <select class="input" id="dd500Shipping"><option value="">Load choices…</option></select></label>
-              <label>Etsy processing profile <select class="input" id="dd500Processing"><option value="">Load choices…</option></select></label>
+              <label>Etsy category <select class="input" id="dd500Category" disabled><option value="">Check Etsy connection first…</option></select></label>
+              <label>Canada-only Etsy shipping profile <select class="input" id="dd500Shipping" disabled><option value="">Check Etsy connection first…</option></select></label>
+              <label>Etsy processing profile <select class="input" id="dd500Processing" disabled><option value="">Check Etsy connection first…</option></select></label>
               <label>Who made it? <select class="input" id="dd500Who"><option value="i_did">We made it</option><option value="collective">Our team</option><option value="someone_else">Someone else</option></select></label>
               <label>When made? <select class="input" id="dd500When"><option value="2020_2026">2020–2026</option><option value="made_to_order">Made to order</option><option value="2010_2019">2010–2019</option><option value="2007_2009">2007–2009</option><option value="before_2007">Before 2007</option></select></label>
               <label>Packed weight <input class="input" id="dd500Weight" type="number" min="0.001" step="any"></label>
@@ -254,7 +256,7 @@
               <label>Dimension unit <select class="input" id="dd500DimensionUnit"><option value="cm">cm</option><option value="mm">mm</option><option value="in">in</option></select></label>
             </div>
             <label><input type="checkbox" id="dd500Supply"> This item is a craft supply, not a finished handmade item</label>
-            <p class="small" id="dd500OptionsStatus" role="status">Live options not loaded yet.</p>
+            <p class="small" id="dd500OptionsStatus" role="status" aria-live="polite">Select “Check Etsy connection &amp; load choices.” No draft will be created by this check.</p>
           </details>
           <details class="dd500-readiness" id="dd515TechnicalChecks"><summary>See exactly what's missing (if Etsy cannot update)</summary><ul id="dd500Checklist" class="small" role="status" aria-live="polite"><li>Checking Product and photos…</li></ul></details>
           <label class="dd500-consent"><input type="checkbox" id="dd500Consent"><span>I own/approve <strong>all</strong> gallery images for public use and authorize one unpublished, Canada-only Etsy package transfer: Product details, search tags, advanced fields and every eligible photo. Any uncertain result must be checked in Etsy before another attempt.</span></label>
@@ -880,7 +882,7 @@
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=496"></script>
   <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
   <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
-  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=527"></script>
+  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=528"></script>
   <script type="module" src="/public/js/admin-product-destination-flow-523.mjs?v=527"></script>
   <script type="module" src="/public/js/admin-product-etsy-owner-trial-525.mjs?v=525"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>

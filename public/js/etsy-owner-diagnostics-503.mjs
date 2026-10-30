@@ -52,3 +52,40 @@ export function etsyFixLocation503(issues){
   if(/description|product details|materials/i.test(first))return {tab:'description',label:'Fix Product description'};
   return null;
 }
+
+// Build 528: decide from *structured local preflight blockers* whether one
+// explicit, administrator-initiated OAuth refresh is useful. A category/profile
+// GET cannot repair expired credentials, and a failed draft POST must never be
+// replayed by this helper.
+export function etsyConnectionRecovery528({code,blockers}={}){
+  const list=Array.isArray(blockers)?blockers.filter(x=>typeof x==='string'):[];
+  if(code!=='etsy_connection_not_ready')return {refresh_allowed:false,reconnect_required:false,
+    reason:'The Etsy setup check needs review. No draft action was retried.'};
+  const expiring=list.includes('oauth_access_expired_or_near_expiry');
+  const missingCredentials=list.includes('etsy_api_credentials_missing');
+  const missingScopes=list.some(x=>x==='shops_r_missing'||x==='listings_w_missing');
+  const wrongShop=list.some(x=>x==='shop_owner_mismatch'||x==='etsy_shop_currency_not_confirmed_CAD');
+  const refreshAllowed=expiring&&!missingCredentials&&!missingScopes&&!wrongShop;
+  const reason=missingCredentials?'Etsy API credentials are missing from this environment.':
+    missingScopes?'The Etsy connection is missing required shop/listing permissions.':
+    wrongShop?'The connected Etsy shop identity or Canadian currency did not match.':
+    expiring?'The Etsy access token has expired or will expire shortly.':
+    list.includes('verified_shop_missing')?'The verified Etsy shop connection is missing.':
+    list.includes('etsy_not_connected')?'The Etsy account is not connected.':
+    'The Etsy connection could not be verified.';
+  return {refresh_allowed:refreshAllowed,reconnect_required:!refreshAllowed,reason};
+}
+
+export async function verifyEtsyOptionsAfterExplicitClick528(request,productId,onRefresh=()=>{}){
+  const test=()=>request('/api/admin/product-etsy-draft',{action:'test_connection',product_id:productId});
+  try{return await test();}
+  catch(error){
+    if(!etsyConnectionRecovery528(error).refresh_allowed)throw error;
+    onRefresh();
+    const result=await request('/api/admin/oauth-connections',{action:'refresh',provider:'etsy'});
+    if(result?.refreshed!==true)throw Error('The Etsy credential refresh was not confirmed.');
+    // Only this original GET-only connection inspection is repeated once.
+    // Never invoke a listing, image, tag or publication mutation here.
+    return test();
+  }
+}
