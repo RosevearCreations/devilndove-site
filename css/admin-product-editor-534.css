@@ -1,0 +1,11 @@
+/* Build 534: put the observed older draft and the two actual owner choices
+ * where they are visible, without reintroducing the advanced Etsy dashboard. */
+.dd534-owner-path{border:1px solid #c99755;border-radius:14px;padding:1rem 1.15rem;margin:.8rem 0;background:linear-gradient(125deg,rgba(198,143,65,.14),rgba(77,45,130,.12))}
+.dd534-owner-path[hidden]{display:none!important}
+.dd534-owner-path h4{margin:0 0 .4rem;color:#f2d6aa}
+.dd534-quick-fixes{margin:.9rem 0;padding:.8rem 1rem;border-radius:12px;border:1px solid rgba(170,145,207,.32);background:rgba(22,18,43,.22)}
+.dd534-quick-fixes strong{display:block;margin-bottom:.55rem;color:#eee4fa}
+.dd534-quick-fixes .dd-product-actions{display:flex;flex-wrap:wrap;gap:.55rem}
+.dd534-quick-fixes p,.dd534-owner-path p{line-height:1.5}
+.dd534-readback{margin:.55rem 0 .75rem;word-break:break-word}
+@media(max-width:680px){.dd534-owner-path,.dd534-quick-fixes{padding:.75rem}.dd534-quick-fixes .dd-product-actions>.btn{width:100%}}
