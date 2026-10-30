@@ -16,6 +16,10 @@ const uuid=x=>/^[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}$/i.test(
 const parse=row=>{try{return JSON.parse(row?.details_json||'{}');}catch{return {};}};
 function gate(c){const admin=verifiedAdminFromModule(c),db=getDb(c.env);return !admin?{error:respond({error:'Verified administrator required.'},401)}:!db?{error:respond({error:'Product database unavailable.'},503)}:{admin,db};}
 export async function reviewOwnerEtsy504(c,db,id){
+  // Build 536: the independently signed owner receipt must read the same D1
+  // first-primary source as the unique Etsy link and image reconciliation.
+  // Replica lag must never create a false Product-not-linked result.
+  if(typeof db.withSession==='function')db=db.withSession('first-primary');
   const s=await readExistingDraftLocal486(db,id),listingId=String(s.draft?.external_reference||'');
   if(!s.product||!valid(listingId))return {ready:false,issues:['Step 1: link Product #'+id+' to its existing Etsy draft before checking photos.'],listing_id:null};
   const headers=await existingDraftCredentials486(c.env,s);
