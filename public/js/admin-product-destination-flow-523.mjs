@@ -4,7 +4,8 @@
 import {assessProductDraft523,LEGACY_OWNER_TRIAL_IDS_523} from './product-destination-gates-523.mjs';
 import {verifySavedEtsyReceipt524,prepareMarketplaceHandoff524} from './product-destination-receipts-524.mjs';
 import {selectedMarketplacePhotos532} from './marketplace-photo-handoff-532.mjs';
-import {ownerDraftDecision534} from './etsy-owner-draft-history-534.mjs';
+import {ownerDraftDecision534,ownerDraftHistory534} from './etsy-owner-draft-history-534.mjs';
+import {evaluateEtsyLiveOwnerReview535} from './etsy-live-owner-review-535.mjs';
 // Build 533: the draft controller MUST finish initializing before this flow
 // evaluates its readiness. Module-script tag order alone does not enforce
 // dependency completion for separate module graphs.
@@ -20,6 +21,7 @@ if(form&&root&&window.DDAuth?.apiFetch){
  const setup=$('dd523EtsySetupMount');
  const history=$('dd534HistoricalDraft'),historyMessage=$('dd534HistoricalDraftMessage');
  const setupReadback=$('dd534SetupReadback');
+ const liveRead=$('dd535ReadLive'),liveStatus=$('dd535LiveStatus'),liveEvidence=$('dd535LiveEvidence');
  const receiptStatus=$('dd524ReceiptStatus'),receiptButton=$('dd524ReadReceipt');
  const originalSettings=$('dd500NewSettings');
  if(originalSettings)setup.append(originalSettings); // One real set of Etsy fields, inside Product input.
@@ -30,8 +32,10 @@ if(form&&root&&window.DDAuth?.apiFetch){
  if(originalEtsyPanel){const technical=document.createElement('details');technical.className='dd523-technical-etsy';
   const caption=document.createElement('summary');caption.textContent='Older Etsy draft diagnostics and recovery (advanced only)';
   originalEtsyPanel.before(technical);technical.append(caption,originalEtsyPanel);}
- const state={busy:false,etsyReady:false,facebookReady:false,read:null,provider:null,unsafe:false,unsafeReason:'',
+ const state={busy:false,liveBusy:false,etsyReady:false,facebookReady:false,read:null,provider:null,unsafe:false,unsafeReason:'',
   lastVerifiedFingerprint:'',lastListingId:'',savedReceipt:null};
+ const confirmedListing=()=>state.savedReceipt?.verified===true&&state.savedReceipt.listing_id===state.lastListingId?
+  state.lastListingId:'';
  const selected=()=>({etsy:etsy.checked,facebook:facebook.checked});
  const value=name=>String(form.elements.namedItem(name)?.value||'').trim();
  const product=()=>({name:value('name'),description:value('description')||value('short_description'),price:value('price'),
@@ -44,15 +48,16 @@ if(form&&root&&window.DDAuth?.apiFetch){
  const list=(rows)=>issues.replaceChildren(...rows.map(s=>{const li=document.createElement('li');li.textContent=s;return li;}));
  function render(){
   const choices=selected(),legacy=LEGACY_OWNER_TRIAL_IDS_523.includes(id);
-  const prior=ownerDraftDecision534(id,state.lastListingId);
+  const verifiedId=confirmedListing(),prior=ownerDraftDecision534(id,verifiedId);
   setup.hidden=!choices.etsy||legacy||id<1;
   reviewButton.disabled=state.busy||!id;
   ack.disabled=true; // Retired duplicate checkbox; confirmation stays at draft POST.
-  post.disabled=state.busy||!choices.etsy||state.unsafe||legacy||id<1||prior.requiresExistingDraftCheck;
+  post.disabled=state.busy||!choices.etsy||state.unsafe||legacy||id<1||prior.requiresExistingDraftCheck||
+   Boolean(state.lastListingId&&!verifiedId);
   post.hidden=!choices.etsy;
   manual.disabled=state.busy||!choices.facebook||legacy||id<1;
   if(marketplacePanel)marketplacePanel.hidden=!choices.facebook;
-  post.textContent=state.lastListingId?`Update Etsy draft #${state.lastListingId}`:
+  post.textContent=verifiedId?`Update Etsy draft #${verifiedId}`:
    prior.requiresExistingDraftCheck?'Verify existing Etsy draft before updating':'Create Etsy draft';
   if(history){history.hidden=!prior.requiresExistingDraftCheck;
    historyMessage.textContent=prior.report?
@@ -60,13 +65,14 @@ if(form&&root&&window.DDAuth?.apiFetch){
   if(setupReadback){
    const label=name=>{const element=$('dd500'+name);
     return element?.value?element.selectedOptions?.[0]?.textContent?.trim()||'selected':'not selected';};
-   setupReadback.textContent=state.lastListingId?
-    `Saved Etsy ID #${state.lastListingId}: use the actual draft readback to confirm its category, Canada-only shipping, photographs and tags. First-time setup is not required for this update.`:
+   setupReadback.textContent=verifiedId?
+    `Saved primary Etsy ID #${verifiedId}: use the actual draft readback to confirm its category, Canada-only shipping, photographs and tags. First-time setup is not required for this update.`:
     `New-draft setup shown in editor (not remote acceptance): category ${label('Category')} · shipping ${label('Shipping')} · processing ${label('Processing')} · packed ${$('dd500Weight')?.value||'?'} ${$('dd500WeightUnit')?.value||''}, ${[$('dd500Length')?.value,$('dd500Width')?.value,$('dd500Height')?.value].join(' × ')} ${$('dd500DimensionUnit')?.value||''}.`;
   }
   const p=product();
-  identity.textContent=`Product ${id?'#'+id:'not yet saved'} · ${p.name||'Untitled'} · SKU ${p.sku||'not set'} · Slug ${p.slug||'not set'} · Etsy listing ID: ${state.lastListingId||'not linked'}`;
+  identity.textContent=`Product ${id?'#'+id:'not yet saved'} · ${p.name||'Untitled'} · SKU ${p.sku||'not set'} · Slug ${p.slug||'not set'} · Etsy listing ID: ${verifiedId||'not confirmed'}${!verifiedId&&state.lastListingId?' (candidate #'+state.lastListingId+')':''}`;
   receiptButton.disabled=state.busy||id<1;
+  if(liveRead)liveRead.disabled=state.busy||state.liveBusy||id<1;
   if(legacy)postStatus(`Existing Product #${id} belongs to the two earlier Etsy trial records. We will leave those drafts and their IDs untouched; use a new Product for this new workflow.`,'warn');
  }
  async function get(path){const r=await window.DDAuth.apiFetch(path,{method:'GET',cache:'no-store'});
@@ -75,7 +81,14 @@ if(form&&root&&window.DDAuth?.apiFetch){
  async function readReceipt524({expectedListingId=''}={}){
   if(id<1||LEGACY_OWNER_TRIAL_IDS_523.includes(id))return {verified:false,unlinked:true,issues:[]};
   try{
-   const readback=await get(`/api/admin/product-etsy-existing-draft?product_id=${id}`);
+   // Build 535: the primary D1 Product-key lookup can miss a saved unique
+   // listing claim recovered by exact listing ID. Query the candidate on
+   // the SAME read-only primary endpoint; it only returns a link when the
+   // unique claim is genuinely owned by this Product.
+   const candidate=/^[1-9]\d{0,14}$/.test(String(expectedListingId||''))?
+    String(expectedListingId):ownerDraftHistory534(id)?.listingId||'';
+   const query=`/api/admin/product-etsy-existing-draft?product_id=${id}${candidate?`&candidate_listing_id=${encodeURIComponent(candidate)}`:''}`;
+   const readback=await get(query);
    const proof=verifySavedEtsyReceipt524({productId:id,expectedListingId,readback});
    state.savedReceipt=proof;
    if((proof.verified||proof.unlinked)&&state.unsafeReason==='readback'){state.unsafe=false;state.unsafeReason='';}
@@ -83,12 +96,40 @@ if(form&&root&&window.DDAuth?.apiFetch){
     receiptStatus.textContent=`Saved primary D1 receipt #${proof.receipt_id}: Product #${id} · SKU ${proof.sku||'not set'} · Slug ${proof.slug||'not set'} → unpublished Etsy draft #${proof.listing_id}.`;
     receiptStatus.dataset.tone='ok';
    }else if(proof.unlinked){state.lastListingId='';receiptStatus.textContent=`Product #${id} has no saved Etsy draft ID. No draft was created by this read.`;receiptStatus.dataset.tone='';}
-   else{state.unsafe=true;state.unsafeReason='readback';receiptStatus.textContent=`The saved Etsy ID cannot be confirmed: ${proof.issues.join(' ')} Verify the existing draft before another submission.`;receiptStatus.dataset.tone='error';}
+   else{state.unsafe=true;state.unsafeReason='readback';receiptStatus.textContent=`The saved Etsy ID cannot be confirmed: ${proof.issues.join(' ')} Candidate claim: ${readback.candidate_receipt_state||'unknown'}. Inspect and link this existing draft; do not create another.`;receiptStatus.dataset.tone='error';}
    if(proof.verified||proof.unlinked)document.dispatchEvent(new CustomEvent('dd:etsy-saved-receipt-532',
     {detail:{product_id:id,listing_id:proof.verified?proof.listing_id:null,verified:proof.verified}}));
    render();return proof;
-   }catch(error){state.unsafe=true;state.unsafeReason='readback';receiptStatus.textContent=`Could not check the saved Etsy ID: ${error.message}. Review Etsy Drafts before another write.`;
+   }catch(error){state.savedReceipt=null;state.unsafe=true;state.unsafeReason='readback';receiptStatus.textContent=`Could not check the saved Etsy ID: ${error.message}. Review Etsy Drafts before another write.`;
    receiptStatus.dataset.tone='error';render();return {verified:false,unlinked:false,issues:[error.message]};}
+ }
+ async function reviewLive535(){
+  if(!liveRead||liveRead.disabled)return;
+  state.liveBusy=true;liveRead.disabled=true;
+  liveStatus.textContent='Checking the exact saved primary claim, live Etsy gallery and native tags (read only). Nothing is uploaded.';
+  liveEvidence.replaceChildren();
+  try{
+   const candidate=confirmedListing()||state.lastListingId||ownerDraftHistory534(id)?.listingId||'';
+   const receipt=await readReceipt524({expectedListingId:candidate});
+   if(!receipt.verified){liveStatus.textContent='The Product and Etsy ID are not yet linked by a verified primary receipt. Use “Inspect earlier Etsy draft” to verify and link the same unpublished draft. No new listing was made.';return;}
+   const [photoResult,tagResult]=await Promise.allSettled([
+    get(`/api/admin/product-etsy-images?product_id=${id}&reconcile=1`),
+    get(`/api/admin/product-etsy-tags?product_id=${id}&reconcile=1`)]);
+   const photos=photoResult.status==='fulfilled'?photoResult.value:null;
+   const tags=tagResult.status==='fulfilled'?tagResult.value:null;
+   const verdict=evaluateEtsyLiveOwnerReview535({productId:id,listingId:receipt.listing_id,receipt,photos,tags});
+   const details=[`Exact primary D1 receipt: ${verdict.identityReady?'verified #'+receipt.receipt_id:'not verified'}.`,
+    `Real Etsy photos: ${verdict.remotePhotoCount===null?'not verified':verdict.remotePhotoCount} / ${verdict.expectedPhotoCount===null?'unknown':verdict.expectedPhotoCount} saved gallery originals; exact photo pairs: ${verdict.photosReady?'verified':'need review'}.`,
+    `Actual native Etsy tags: ${verdict.tagsReady?'match saved Product tags':'not yet accepted'}.`,
+    ...verdict.issues];
+   if(photoResult.status==='rejected')details.push('Photo readback error: '+String(photoResult.reason?.message||'unavailable'));
+   if(tagResult.status==='rejected')details.push('Tag readback error: '+String(tagResult.reason?.message||'unavailable'));
+   liveEvidence.replaceChildren(...details.map(s=>{const li=document.createElement('li');li.textContent=s;return li;}));
+   liveStatus.textContent=verdict.ready?`Verified live Etsy draft #${receipt.listing_id}: all saved photos and tags match. Owner visual acceptance is still a separate choice.`:
+    `Live Etsy draft #${receipt.listing_id} still needs the specific photo/tag work shown below. No provider write occurred.`;
+   liveStatus.dataset.tone=verdict.ready?'ok':'warn';
+  }catch(error){liveStatus.textContent=`Live Etsy review could not finish: ${error.message}. The saved Product and actual Etsy draft were not changed.`;liveStatus.dataset.tone='error';}
+  finally{state.liveBusy=false;render();}
  }
  function invalidate(){state.etsyReady=false;state.facebookReady=false;state.read=null;state.provider=null;state.lastVerifiedFingerprint='';ack.checked=false;
   say('Product or channel selection changed. Save the Product, then recheck every original photo before POST.');list(['Review the changed fields and original-image approvals.']);render();}
@@ -130,7 +171,7 @@ if(form&&root&&window.DDAuth?.apiFetch){
       blockers.push('The actual Etsy shop and package readback are not ready for a draft POST.');
      if(Number(state.provider.images)!==common.gallery.count)
       blockers.push('Etsy package image count does not match every saved original photo. Resolve the source/gallery mismatch before POST.');
-     const prior=ownerDraftDecision534(id,state.lastListingId);
+     const prior=ownerDraftDecision534(id,confirmedListing());
      if(prior.requiresExistingDraftCheck)blockers.unshift(`An earlier owner trial reported Etsy draft #${prior.report.listingId} for this Product. Verify and link the existing draft first; a second draft must not be created.`);
      state.etsyReady=common.ready&&state.provider.ready===true&&!state.unsafe;
     }
@@ -150,11 +191,11 @@ if(form&&root&&window.DDAuth?.apiFetch){
  }
  async function postEtsy(){
   if(!etsy.checked||state.unsafe||LEGACY_OWNER_TRIAL_IDS_523.includes(id)||state.busy)return;
-  if(ownerDraftDecision534(id,state.lastListingId).requiresExistingDraftCheck){
+  if(ownerDraftDecision534(id,confirmedListing()).requiresExistingDraftCheck){
    postStatus('This Product already has an owner-reported Etsy draft. Use “Inspect earlier Etsy draft” and verify its ID before an update. No Etsy write was made.','warn');return;}
   const confirmed=await check();
-  if(!confirmed||!state.etsyReady||state.lastVerifiedFingerprint!==fingerprint())return;
-  if(ownerDraftDecision534(id,state.lastListingId).requiresExistingDraftCheck)return;
+  if(!confirmed||!state.etsyReady||state.lastVerifiedFingerprint!==fingerprint()||!confirmedListing()&&Boolean(state.lastListingId))return;
+  if(ownerDraftDecision534(id,confirmedListing()).requiresExistingDraftCheck)return;
   const target=state.lastListingId?`update unpublished Etsy draft #${state.lastListingId}`:'create one NEW unpublished Etsy draft';
   if(!state.lastListingId&&!window.confirm(`Before creating a new Etsy listing, did we check Etsy Shop Manager → Listings → Drafts for this SAME product and confirm an older draft does NOT already exist? Choose Cancel to verify and link the existing Etsy ID.`))return;
   if(!window.confirm(`POST now to ${target} for Product #${id}, using every approved original photo? Nothing will be published. Cancel to review.`))return;
@@ -234,7 +275,7 @@ if(form&&root&&window.DDAuth?.apiFetch){
   postStatus('If Etsy already has this product as an unpublished draft, enter its exact Etsy listing ID here. Inspect and link the SAME draft after Etsy confirms it. Do not create a second draft.','warn');
  });
  $('dd534InspectHistorical')?.addEventListener('click',()=>{
-  const prior=ownerDraftDecision534(id,state.lastListingId);
+  const prior=ownerDraftDecision534(id,confirmedListing());
   if(!prior.requiresExistingDraftCheck)return;
   const field=$('dd500ListingId');if(field){field.value=prior.report.listingId;field.dispatchEvent(new Event('input',{bubbles:true}));}
   $('dd533ExistingDraft')?.click();
@@ -250,6 +291,25 @@ if(form&&root&&window.DDAuth?.apiFetch){
   const fields=$('dd500NewSettings');if(fields)fields.open=true;
   $('dd500Processing')?.scrollIntoView({block:'center',behavior:'smooth'});
   $('dd500Processing')?.focus({preventScroll:true});
+ });
+ liveRead?.addEventListener('click',()=>void reviewLive535());
+ $('dd535GoPhotoSync')?.addEventListener('click',()=>{
+  const technical=$('dd500Package')?.closest('details');if(technical)technical.open=true;
+  $('dd500Refresh')?.click();
+  $('dd516PhotoAction')?.scrollIntoView({block:'center',behavior:'smooth'});
+  liveStatus.textContent='Photo transfer uses the existing “Sync missing original photos to Etsy” control, only for this linked unpublished draft, with fresh image checks and explicit consent. Do not upload twice.';
+ });
+ $('dd535GoTagSync')?.addEventListener('click',()=>{
+  const target=$('dd497NativeTags');
+  for(let parent=target?.parentElement;parent;parent=parent.parentElement)if(parent.tagName==='DETAILS')parent.open=true;
+  target?.scrollIntoView({block:'center',behavior:'smooth'});
+  $('dd497TagsLoad')?.click();
+  liveStatus.textContent='Review saved tags and compare actual Etsy tags. The native-tag update is a separate, explicitly approved action on the same draft.';
+ });
+ $('dd535GoOwnerPhotos')?.addEventListener('click',()=>{
+  const details=$('dd525OwnerTrial')?.closest('details');if(details)details.open=true;
+  $('dd525OwnerTrial')?.scrollIntoView({block:'center',behavior:'smooth'});
+  liveStatus.textContent='First read actual original/Etsy photo pairs. Owner acceptance stays disabled until EVERY real matching photo has been inspected.';
  });
  for(const name of ['Category','Shipping','Processing','Weight','WeightUnit','Length','Width','Height','DimensionUnit'])
   $('dd500'+name)?.addEventListener('change',render);

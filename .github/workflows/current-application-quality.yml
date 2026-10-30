@@ -393,6 +393,8 @@ jobs:
           node --test scripts/release467_build533_photo_framing_etsy_owner_walkthrough.test.mjs
           node --check public/js/etsy-owner-draft-history-534.mjs
           node --test scripts/release467_build534_etsy_owner_receipt_readback.test.mjs
+          node --check public/js/etsy-live-owner-review-535.mjs
+          node --test scripts/release467_build535_live_etsy_owner_acceptance.test.mjs
           node scripts/release467_build499_owner_advanced_tags_media.test.mjs
           node scripts/release467_build497_product53_three_channel_acceptance.test.mjs
 

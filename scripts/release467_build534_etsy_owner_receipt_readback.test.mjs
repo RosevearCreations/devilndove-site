@@ -15,22 +15,22 @@ test('Build 534 recognizes the owner-reported historical Sweet Orange draft but 
 });
 test('Build 534 UI cannot create a second soap draft without linking a verified earlier draft',()=>{
  const html=read('admin/product-editor/index.html'),flow=read('public/js/admin-product-destination-flow-523.mjs');
- assert.match(html,/Devil n Dove • Build 534/);
+ assert.match(html,/Devil n Dove • Build 53[45]/);
  assert.match(html,/id="dd534HistoricalDraft"/);
  assert.match(html,/id="dd534InspectHistorical"/);
  assert.match(html,/id="dd534GoTags"/);
  assert.match(html,/id="dd534GoProcessing"/);
  assert.match(html,/admin-product-editor-534\.css\?v=534/);
- assert.match(html,/admin-product-destination-flow-523\.mjs\?v=534/);
+ assert.match(html,/admin-product-destination-flow-523\.mjs\?v=53[45]/);
  assert.match(flow,/post\.disabled=.*prior\.requiresExistingDraftCheck/);
- assert.match(flow,/if\(ownerDraftDecision534\(id,state\.lastListingId\)\.requiresExistingDraftCheck\)/);
+ assert.match(flow,/if\(ownerDraftDecision534\(id,(?:state\.lastListingId|confirmedListing\(\))\)\.requiresExistingDraftCheck\)/);
  assert.match(flow,/const proof=verifySavedEtsyReceipt524/);
  assert.match(flow,/dd:etsy-existing-draft-linked/);
  assert.match(flow,/dd500ListingId/);
  assert.match(flow,/dd500Processing/);
  assert.match(flow,/label\('Category'\)/);
  assert.match(flow,/label\('Shipping'\)/);
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":534/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":53[45]/);
 });
 test('Build 534 keeps the source images shared and makes the owner accept verified draft-only writes',()=>{
  const flow=read('public/js/admin-product-destination-flow-523.mjs');
