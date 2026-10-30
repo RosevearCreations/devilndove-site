@@ -1,0 +1,35 @@
+/* Build 526: one owner-facing Product -> optional draft workflow.
+   Retained technical controls remain in the DOM for explicit recovery, but
+   diagnostics do not interrupt ordinary product creation and editing. */
+#productEditorForm .dd526-retired-check,
+#productEditorForm .dd489-readiness,
+#productEditorForm #listingSync408,
+#productEditorForm #dd471FlowStatus,
+#productEditorForm #dd501SaveState,
+.dd-low-read-details { display:none !important; }
+
+#productEditorForm .dd471-creation-flow { border:1px solid #a67c52; border-radius:16px; padding:clamp(14px,2vw,24px); margin:14px 0 22px; background:linear-gradient(140deg,rgba(180,131,69,.13),rgba(255,255,255,.025)); }
+#productEditorForm #productChannel405 { padding:12px !important; margin:8px 0 !important; border:0; background:transparent; box-shadow:none; }
+#productEditorForm #productChannel405 h2 { font-size:1.15rem; margin:0 0 8px; }
+#productEditorForm #productChannel405 .dd-editor-grid label { display:flex; gap:9px; align-items:center; padding:12px; border:1px solid rgba(192,151,88,.6); border-radius:10px; cursor:pointer; font-weight:600; }
+#productEditorForm #productChannel405 .dd-editor-grid input { width:20px; height:20px; flex:none; accent-color:#bd8e46; }
+#productEditorForm #productChannel405 > p:last-child { display:none; }
+#productEditorForm .dd526-primary-save { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:10px 0 20px; }
+#productEditorForm .dd526-primary-save button { min-height:44px; padding:11px 28px; font-size:1.05rem; }
+#productEditorForm #dd523Flow { border-top:1px solid rgba(182,144,86,.4); padding-top:15px; }
+#productEditorForm[data-product-id="0"] #dd523Flow { display:none; }
+#productEditorForm #dd523Flow h3 { margin:0 0 8px; font-size:1.2rem; }
+#productEditorForm #dd523Flow .dd523-marketplace { margin-top:18px; }
+#productEditorForm #dd523Flow #dd523EtsyPost { min-height:43px; }
+#productEditorForm #dd521SaveReview:not([hidden]) { border:2px solid #b38b57; border-radius:14px; padding:15px; margin:12px 0; }
+#productEditorForm #dd521ReviewServer { font-weight:700; }
+#productEditorForm .dd523-technical-etsy:not([open]) { margin-top:12px; }
+#productEditorForm .dd526-optional-owner-review { margin-top:14px; }
+#productEditorForm .dd526-optional-owner-review > summary { cursor:pointer; padding:10px 0; font-weight:600; }
+#productEditorForm .dd-editor-footer { justify-content:flex-end; }
+@media (max-width:640px) {
+  #productEditorForm #productChannel405 .dd-editor-grid.cols-2 { display:grid; grid-template-columns:1fr; }
+  #productEditorForm .dd526-primary-save button,
+  #productEditorForm #dd523EtsyPost,
+  #productEditorForm #dd523MarketplacePrepare { width:100%; }
+}

@@ -22,8 +22,13 @@ async function validate389(db,category,shipping){
  return '';
 }
 const SEO_FIELDS = Object.freeze(['meta_title','meta_description','keywords','h1_override','canonical_url','og_title','og_description','og_image_url']);
-const PRODUCT_UPDATE_SQL=`UPDATE products SET ${PRODUCT_FIELDS.map((key)=>`${key}=?`).join(',')},updated_at=CURRENT_TIMESTAMP WHERE product_id=?`;
+const PRODUCT_UPDATE_SQL=(fields)=>`UPDATE products SET ${fields.map((key)=>`${key}=?`).join(',')},updated_at=CURRENT_TIMESTAMP WHERE product_id=?`;
 const SEO_UPSERT_SQL=`INSERT INTO product_seo (product_id,${SEO_FIELDS.join(',')},created_at,updated_at) VALUES (?,${SEO_FIELDS.map(()=>'?').join(',')},CURRENT_TIMESTAMP,CURRENT_TIMESTAMP) ON CONFLICT(product_id) DO UPDATE SET ${SEO_FIELDS.map((key)=>`${key}=excluded.${key}`).join(',')},updated_at=CURRENT_TIMESTAMP`;
+// Build 526: changing *every* column on each Save needlessly fires publication,
+// quality and finished-piece quantity triggers, even when an owner only edits a
+// soap's description. Compare the saved row and write only actual differences.
+const comparable=(value)=>value==null||value===''?'':String(value);
+export const changedFields526=(fields,desired,saved)=>fields.filter(key=>comparable(desired[key])!==comparable(saved?.[key]));
 
 function json(data,status=200,headers={}){return jsonResponse(data,status,{'Cache-Control':'no-store','X-DD-D1-Write-Contract':'single-product-save-v175',...headers});}
 function adminFromContext(context){const user=context?.data?.ddModuleAccess?.user||null;return user&&String(user.role||'').toLowerCase()==='admin'?user:null;}
@@ -84,12 +89,23 @@ export async function onRequestPost(context){
   if(!payload.name)return json({ok:false,error:'Product name is required.'},400);if(!payload.slug)return json({ok:false,error:'A valid slug is required.'},400);
   try{
     let measured=0;
-    const productValues=PRODUCT_FIELDS.map((key)=>payload[key]);
-    const update=await db.prepare(PRODUCT_UPDATE_SQL).bind(...productValues,productId).run();measured+=rowsRead(update);
-    if(Number(update?.meta?.changes||0)<1)return json({ok:false,error:'Product was not found or could not be updated.'},404);
-
-    const seo=seoPayload(body);const seoValues=SEO_FIELDS.map((key)=>seo[key]);
-    const seoResult=await db.prepare(SEO_UPSERT_SQL).bind(productId,...seoValues).run();measured+=rowsRead(seoResult);
+    const prior=await db.prepare(`SELECT ${PRODUCT_FIELDS.map(k=>`p.${k} AS ${k}`).join(',')},${SEO_FIELDS.map(k=>`ps.${k} AS seo_${k}`).join(',')},ps.product_id AS seo_product_id FROM products p LEFT JOIN product_seo ps ON ps.product_id=p.product_id WHERE p.product_id=? LIMIT 1`).bind(productId).first();
+    if(!prior)return json({ok:false,error:'Product was not found. No write began.',code:'product_missing',no_product_write_started:true},404);
+    measured+=1;
+    const productChanges=changedFields526(PRODUCT_FIELDS,payload,prior);
+    const seo=seoPayload(body);
+    const seoChanges=!prior.seo_product_id||SEO_FIELDS.some(k=>comparable(seo[k])!==comparable(prior[`seo_${k}`]));
+    const statements=[];
+    if(productChanges.length)statements.push(db.prepare(PRODUCT_UPDATE_SQL(productChanges)).bind(...productChanges.map(k=>payload[k]),productId));
+    if(seoChanges)statements.push(db.prepare(SEO_UPSERT_SQL).bind(productId,...SEO_FIELDS.map(k=>seo[k])));
+    // D1 batch runs as one transaction. A rejected SEO write must not leave
+    // half of the submitted Product changes committed.
+    if(statements.length){
+      const results=await db.batch(statements);
+      if(!Array.isArray(results)||results.length!==statements.length||results.some(r=>r?.success===false))
+        throw new Error('product_save_transaction_unconfirmed');
+      for(const result of results)measured+=rowsRead(result);
+    }
 
     const check=await db.prepare('SELECT name,short_description,description,product_category,inventory_quantity,price_cents,compare_at_price_cents,currency FROM products WHERE product_id=? LIMIT 1').bind(productId).all();
     measured+=rowsRead(check);
@@ -100,10 +116,12 @@ export async function onRequestPost(context){
     const fieldsConfirmed=Boolean(saved&&['name','short_description','description','product_category','inventory_quantity']
       .every(key=>String(saved[key]??'')===String(payload[key]??'')));
     if(!fieldsConfirmed)return json({ok:false,error:'Product fields did not match the saved record. Press Retry load and compare the server copy before any additional write. Nothing was sent to Etsy.',code:'product_fields_readback_unconfirmed',retry_automatically:false},409);
-    if(typeof context.waitUntil==='function')context.waitUntil(auditAdminAction(context.env,context.request,admin,{action_type:'update_product_low_read',target_type:'product',target_id:productId,target_key:payload.name,details:{build:175,fields:PRODUCT_FIELDS.length,seo_saved:true,schema_introspection_reads:0}}).catch(()=>null));
-    return json({ok:true,product_id:productId,message:'Product saved and important Product fields read back from D1.',delivery:'single-product-save-v175',saved_fields:PRODUCT_FIELDS.length,seo_saved:true,price_cents_confirmed:true,product_fields_confirmed:true,price_cents:submitted,compare_at_price_cents:compare,currency:payload.currency,schema_introspection_reads:0,d1_rows_read:measured,background_work_started:false,media_sync_started:false,readiness_scan_started:false},200,{'X-DD-D1-Rows-Read':String(measured)});
+    if(typeof context.waitUntil==='function')context.waitUntil(auditAdminAction(context.env,context.request,admin,{action_type:'update_product_low_read',target_type:'product',target_id:productId,target_key:payload.name,details:{build:526,fields_changed:productChanges,seo_saved:seoChanges,schema_introspection_reads:0}}).catch(()=>null));
+    return json({ok:true,product_id:productId,message:'Product saved and important Product fields read back from D1.',delivery:'single-product-save-v526',saved_fields:PRODUCT_FIELDS.length,changed_fields:productChanges,seo_saved:seoChanges,price_cents_confirmed:true,product_fields_confirmed:true,price_cents:submitted,compare_at_price_cents:compare,currency:payload.currency,schema_introspection_reads:0,d1_rows_read:measured,background_work_started:false,media_sync_started:false,readiness_scan_started:false},200,{'X-DD-D1-Rows-Read':String(measured)});
   }catch(error){
     const message=String(error?.message||'Product save failed.');const quota=/rows read|daily|limit|quota|7500/i.test(message);
-    return json({ok:false,error:quota?'D1 read capacity is temporarily unavailable. The Product save was not retried automatically.':message,code:quota?'d1_read_capacity_unavailable':'product_editor_save_failed',retry_automatically:false},quota?503:500);
+    const blocked=/release465_|release467_|quality_release_review_required|piece_registered_quantity_exceeds_stock|constraint failed|FOREIGN KEY constraint/i.test(message);
+    return json({ok:false,error:quota?'D1 read capacity is temporarily unavailable. The Product save was not retried automatically.':blocked?'A saved Product protection rule rejected this change. Review the Product status, stock and required fields before saving again.':message,
+      code:quota?'d1_read_capacity_unavailable':blocked?'product_protection_rule_blocked':'product_editor_save_failed',reason:blocked?message.slice(0,110):null,retry_automatically:false},quota?503:blocked?409:500);
   }
 }

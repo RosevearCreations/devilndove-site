@@ -414,7 +414,8 @@ function cspReportOnlyForNonce(nonce) {
     "base-uri 'self'",
     "frame-ancestors 'none'",
     "form-action 'self'",
-    "upgrade-insecure-requests"
+    "upgrade-insecure-requests",
+    "report-uri /api/csp-report"
   ].join('; ');
 }
 function styleNonceBootstrapMarkup() {
@@ -464,7 +465,7 @@ function shouldBypass(pathname) {
   const path = String(pathname || '');
   if (!path) return true;
   if (path.startsWith('/assets/') || path.startsWith('/css/') || path.startsWith('/js/') || path.startsWith('/public/')) return true;
-  if (path.startsWith('/api/auth/') || path === '/api/modules' || path.startsWith('/api/modules/')) return true;
+  if (path.startsWith('/api/auth/') || path === '/api/csp-report' || path === '/api/modules' || path.startsWith('/api/modules/')) return true;
   if (path === '/api/admin/app-modules' || path.startsWith('/api/admin/app-modules/')) return true;
   if (path === '/admin/application-modules' || path.startsWith('/admin/application-modules/')) return true;
   return false;

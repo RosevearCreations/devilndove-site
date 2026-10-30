@@ -22,7 +22,8 @@ for(const x of [etsy,facebook])x.addEventListener('change',changes);
 consent?.addEventListener('change',apply);
 function captureForProductSave(){if(!dirty)return {changed:false};
  if(productId&&!loaded)throw Error('Load saved destination preferences before changing channels.');
- if(!consent?.checked)throw Error('Confirm the owner-only local destination preparation consent before saving the Product. Nothing has been saved.');
+ // Build 526: the selection itself explicitly authorizes a LOCAL preference.
+ // Actual Etsy submission still requires its own confirmed draft-only action.
  return {changed:true,etsy:etsy.checked,facebook:facebook.checked,confirmed:true};
 }
 async function load(){if(busy||!productId)return;if(dirty&&!window.confirm('Discard unsaved destination changes and reload the saved choices?'))return;busy=true;apply();

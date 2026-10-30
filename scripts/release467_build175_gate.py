@@ -37,8 +37,8 @@ req("context.waitUntil" in save and "auditAdminAction" in save,'Build 175 Produc
 for forbidden in ('product_images','product_resource_links','content_projects','creative_projects','maybeQueueApprovedProductSocialPost','createOrRefreshContentProjectForProduct'):
     req(forbidden not in save,f'Build 175 Product save touches unrelated authority: {forbidden}')
 
-req(any(token in page for token in ('Release 467 • Build 175','Release 467 • Build 178')),'Build 175+ Product Editor page identity missing')
-req(any(token in page for token in ('admin-product-editor-v163.js?v=175','admin-product-editor-v163.js?v=178')),'Build 175+ Product Editor cache identity missing')
+req(any(token in page for token in ('Release 467 • Build 175','Release 467 • Build 178','Devil n Dove • Build 526')),'Build 175+ Product Editor page identity missing')
+req(any(token in page for token in ('admin-product-editor-v163.js?v=175','admin-product-editor-v163.js?v=178','admin-product-editor-v163.js?v=526')),'Build 175+ Product Editor cache identity missing')
 req('no request-time PRAGMA/table introspection' in page,'Build 175 Product Editor page lost zero-introspection contract')
 for token in ('Build 175','Schema introspection reads:','/api/admin/product-editor-save'):
     req(token in client,f'Build 175 Product Editor client missing: {token}')
