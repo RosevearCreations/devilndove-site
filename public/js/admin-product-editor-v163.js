@@ -389,9 +389,13 @@
         `Saved ✓ CAD price verified as ${(Number(body.price_cents)/100).toFixed(2)}. Schema introspection reads: ${Number(data?.schema_introspection_reads||0)}. QA remains manual.${rowsText(data)}`,newerEdits||!destinationsSaved?'warn':'ok');
     }catch(error){
       const failure=incident(error,'save');
+      // Build 532: the server explicitly distinguishes a failed read-only
+      // preflight from a write that might have committed. An affirmative
+      // no-write receipt does not require the uncertain-write recovery lock.
+      const noWriteStarted=error?.payload?.no_product_write_started===true;
       // Write outcome may be unknown after 5xx/1102/timeout/readback mismatch.
       // Keep browser recovery and require an explicit authoritative reload.
-      if(failure.uncertainWrite||/product_fields_readback_unconfirmed|product_price_readback_unconfirmed/.test(String(error?.code||''))){
+      if(!noWriteStarted&&(failure.uncertainWrite||/product_fields_readback_unconfirmed|product_price_readback_unconfirmed/.test(String(error?.code||'')))){
         state.saveNeedsReview=true;state.quotaStop=quota(error);
         state.pendingSaveCheck={...body,keywords:get('keywords')};state.lastSubmitted521=state.pendingSaveCheck;
         if(uncertainSaveKey521)try{sessionStorage.setItem(uncertainSaveKey521,JSON.stringify({product_id:state.productId,submitted:state.pendingSaveCheck,at:Date.now()}));}catch{}
@@ -401,7 +405,10 @@
         if(keepServer521)keepServer521.hidden=true;if(restoreBrowser521)restoreBrowser521.hidden=true;
       }
       refreshDirty();snapshotEdits();
-      setStatus(`STEP 1 — Save Product #${state.productId||'new'}: ${incidentMessage(error,'save')} The error is from the local Product server, not from Etsy photos or tags. ${state.productId?'Click Review server copy first; we will identify any saved fields that differ.':'Check Products for an existing new Product before creating another.'}`,'error');
+      setStatus(noWriteStarted?
+        `Product Save did not begin: ${String(error.message||'check the saved Product options').slice(0,240)}. Our browser edits are preserved. Correct the issue, then deliberately press Save Product once; nothing was sent to Etsy.`:
+        `STEP 1 — Save Product #${state.productId||'new'}: ${incidentMessage(error,'save')} The error is from the local Product server, not from Etsy photos or tags. ${state.productId?'Click Review server copy first; we will identify any saved fields that differ.':'Check Products for an existing new Product before creating another.'}`,
+        noWriteStarted?'warn':'error');
       if(saveButton)saveButton.textContent='Save Product';
     }finally{
       unlockFields();state.inFlight=false;

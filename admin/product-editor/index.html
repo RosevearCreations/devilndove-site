@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="/css/admin-product-editor-529.css?v=529"/>
   <link rel="stylesheet" href="/css/admin-product-editor-530.css?v=530"/>
   <link rel="stylesheet" href="/css/admin-product-editor-531.css?v=531"/>
+  <link rel="stylesheet" href="/css/admin-product-editor-532.css?v=532"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -33,7 +34,7 @@
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
-      <div><p class="eyebrow">Devil n Dove • Build 531</p><h1 id="productEditorTitle">Product Editor</h1><p>One product, one shared photo gallery. Choose Etsy and/or Marketplace, then Save Product. An Etsy draft is checked and confirmed separately; the same saved Etsy ID is used for updates.</p></div>
+      <div><p class="eyebrow">Devil n Dove • Build 532</p><h1 id="productEditorTitle">Product Editor</h1><p>One saved item, one photo gallery, one Etsy draft ID. Edit and Save Product, then confirm its Etsy draft in the same screen.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
 
@@ -42,6 +43,23 @@
       <div id="dd498Identity" role="status" aria-live="polite">Load a saved Product to see its SKU, slug and linked Etsy listing number.</div>
       <button class="btn" type="button" id="dd498IdentityRefresh">Refresh saved Etsy ID</button>
       <p class="small" id="dd498IdentityNote">Etsy gives each draft a listing ID. Our Product ID remains the permanent link even if the SKU or slug changes. A remote listing is never created by this check.</p>
+    </section>
+
+    <section class="dd532-journey" id="dd532Journey" aria-labelledby="dd532JourneyTitle">
+      <h2 id="dd532JourneyTitle">Edit an existing item → Etsy draft</h2>
+      <p class="small">Our everyday path has six steps. The older technical recovery panels are optional; we only need them if a real check finds a problem.</p>
+      <ol class="dd532-steps">
+        <li><button type="button" class="dd532-link" data-dd532-jump="products">Open Products</button> and select <strong>Edit</strong> on the existing item (do not create a duplicate).</li>
+        <li>Review <button type="button" class="dd532-link" data-dd532-jump="basics">Basics</button>, <button type="button" class="dd532-link" data-dd532-jump="pricing">CAD price and stock</button>, <button type="button" class="dd532-link" data-dd532-jump="description">description</button> and <button type="button" class="dd532-link" data-dd532-jump="seo">search tags</button>.</li>
+        <li>Check the <button type="button" class="dd532-link" data-dd532-jump="media">original photos</button>. Give them descriptive alt text and public-use approval; Etsy needs the actual approved source photos.</li>
+        <li><button type="button" class="dd532-link" data-dd532-jump="channels">Tick Etsy</button> and <button type="button" class="dd532-link" data-dd532-jump="save">Save Product</button> once. Wait for the saved confirmation.</li>
+        <li><button type="button" class="dd532-link" data-dd532-jump="review">Check images &amp; Etsy settings</button>; for a new draft, load Etsy category, Canada-only shipping and processing choices, and enter the real packed parcel measurements.</li>
+        <li>Confirm <strong>Create Etsy draft</strong> if no draft exists, or <strong>Update Etsy draft #…</strong> if we already have its saved ID. Open <a href="https://www.etsy.com/your/shops/me/listings/drafts" target="_blank" rel="noopener noreferrer">Etsy Drafts</a> to confirm the result, photos and tags. The listing remains unpublished.</li>
+      </ol>
+      <div class="dd532-next"><strong>Our next step:</strong> <p id="dd532Next" role="status" aria-live="polite">Loading the existing Product…</p>
+        <button class="btn" type="button" id="dd532NextButton">Show next field</button>
+      </div>
+      <p class="small">If Etsy reports a connection problem, open <a href="/admin/it-integrations/">I.T. → Integrations</a>, reconnect our Etsy shop and return to this same Product. If a save or Etsy attempt has an unknown result, compare the saved Product and Etsy Drafts before trying again.</p>
     </section>
 
     <details class="dd529-owner-panel" id="dd529Panel">
@@ -115,7 +133,7 @@
           <div id="dd523EtsySetupMount" class="dd523-setup-mount" hidden></div>
           <label class="dd523-confirm dd526-retired-check"><input type="checkbox" id="dd523EtsyAcknowledge"><span>Draft acknowledgement now occurs in the final confirmation.</span></label>
           <button type="button" class="btn primary" id="dd523EtsyPost" disabled>Create Etsy draft</button>
-          <div class="dd523-marketplace"><h4>Facebook Marketplace</h4><p class="small">The same Product and approved photos are prepared here. Automated Marketplace POST is unavailable until Meta grants a supported listing API; we cannot claim a listing was created.</p><button type="button" class="btn" id="dd523MarketplacePrepare" disabled>Prepare manual Marketplace handoff</button><a class="btn" href="https://www.facebook.com/marketplace/create/item" rel="noopener noreferrer" target="_blank">Open Marketplace</a><div id="dd523MarketplaceCopy" hidden><label>Title <textarea class="input" id="dd523MarketplaceTitle" rows="2" readonly></textarea></label><label>CAD price <input class="input" id="dd523MarketplacePrice" readonly></label><label>Description <textarea class="input" id="dd523MarketplaceDescription" rows="4" readonly></textarea></label><p class="small">All original image references, in saved gallery order:</p><ol class="dd524-media-list" id="dd524MarketplacePhotos"></ol><p class="small">Copy the fields and use each original image in Facebook; this is a manual upload because no authorized Marketplace POST API is connected. Review Facebook's rules and Canada-only delivery before publishing there.</p></div></div>
+          <div class="dd523-marketplace"><h4>Facebook Marketplace — manual copy only</h4><p class="small"><strong>Authorization decision:</strong> No Facebook listing API is connected or authorized. We can copy the saved fields and selected approved source photos manually; no automated draft creation or publishing.</p><button type="button" class="btn" id="dd523MarketplacePrepare" disabled>Prepare manual Marketplace handoff</button><a class="btn" href="https://www.facebook.com/marketplace/create/item" rel="noopener noreferrer" target="_blank">Open Marketplace</a><div id="dd523MarketplaceCopy" hidden><label>Title <textarea class="input" id="dd523MarketplaceTitle" rows="2" readonly></textarea></label><label>CAD price <input class="input" id="dd523MarketplacePrice" readonly></label><label>Description <textarea class="input" id="dd523MarketplaceDescription" rows="4" readonly></textarea></label><button class="btn" type="button" id="dd532CopyMarketplace">Copy approved listing text</button><p id="dd532CopyMarketplaceStatus" class="small" role="status" aria-live="polite">Use the selected source photos below; they are not automatically uploaded to Facebook.</p><p class="small">Selected approved originals, in saved destination order:</p><ol class="dd524-media-list" id="dd524MarketplacePhotos"></ol><p class="small">Open each original image and save it on the computer for manual upload in Facebook. Choose the proper category and Canada-only delivery there. Review before Facebook's own Publish action.</p></div></div>
           <p class="small" id="dd523PostStatus" role="status" aria-live="polite">Nothing has been posted.</p>
           <details class="dd526-optional-owner-review"><summary>Optional: verify Etsy draft photos after sending</summary>
           <section class="dd525-review" id="dd525OwnerTrial" aria-labelledby="dd525Title">
@@ -912,6 +930,8 @@
   <script type="module" src="/public/js/admin-product-etsy-owner-trial-525.mjs?v=525"></script>
   <script type="module" src="/public/js/admin-product-etsy-closure-530.mjs?v=530"></script>
   <script type="module" src="/public/js/admin-product-owner-trial-531.mjs?v=531"></script>
+  <script type="module" src="/public/js/product-editor-journey-532.mjs?v=532"></script>
+  <script type="module" src="/public/js/marketplace-copy-handoff-532.mjs?v=532"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
   <script src="/public/js/admin-product-editor-layout-526.js?v=526"></script>

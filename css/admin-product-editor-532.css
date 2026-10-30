@@ -1,0 +1,14 @@
+/* Build 532: a readable operator path without exposing technical recovery by default. */
+.dd532-journey{margin:14px 0 18px;padding:18px 20px;background:linear-gradient(135deg,#251d37,#1a1728);border:1px solid #9476ae;border-radius:14px;color:#f4eaf9}
+.dd532-journey h2{font-size:1.24rem;margin:0 0 7px;color:#f4d3ab}
+.dd532-steps{margin:10px 0 13px;padding-left:25px;display:grid;gap:7px;line-height:1.55}
+.dd532-steps li{padding-left:2px}
+.dd532-link{border:0;background:transparent;color:#edc9ff;text-decoration:underline;text-underline-offset:3px;cursor:pointer;display:inline;font:inherit;padding:0}
+.dd532-link:hover,.dd532-link:focus-visible{color:#fff;text-decoration-thickness:2px}
+.dd532-next{border:1px solid #866e99;border-radius:10px;padding:12px 14px;background:#131125}
+.dd532-next p{margin:6px 0 12px;line-height:1.5;color:#f1e7f5}
+.dd532-next .btn{white-space:normal}
+#dd523MarketplaceCopy label{display:block;min-width:0;margin:10px 0}
+#dd524MarketplacePhotos li{margin:8px 0;overflow-wrap:anywhere}
+#dd523MarketplaceCopy .btn{white-space:normal}
+@media(max-width:650px){.dd532-journey{padding:12px}.dd532-steps{padding-left:20px}.dd532-next .btn{width:100%}}

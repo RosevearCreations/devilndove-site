@@ -3,6 +3,7 @@
  * Existing Etsy drafts are untouched. No automatic provider request on Save. */
 import {assessProductDraft523,LEGACY_OWNER_TRIAL_IDS_523} from './product-destination-gates-523.mjs';
 import {verifySavedEtsyReceipt524,prepareMarketplaceHandoff524} from './product-destination-receipts-524.mjs';
+import {selectedMarketplacePhotos532} from './marketplace-photo-handoff-532.mjs';
 
 const $=id=>document.getElementById(id),form=$('productEditorForm'),root=$('dd523Flow');
 if(form&&root&&window.DDAuth?.apiFetch){
@@ -63,9 +64,11 @@ if(form&&root&&window.DDAuth?.apiFetch){
     receiptStatus.textContent=`Saved primary D1 receipt #${proof.receipt_id}: Product #${id} · SKU ${proof.sku||'not set'} · Slug ${proof.slug||'not set'} → unpublished Etsy draft #${proof.listing_id}.`;
     receiptStatus.dataset.tone='ok';
    }else if(proof.unlinked){state.lastListingId='';receiptStatus.textContent=`Product #${id} has no saved Etsy draft ID. No draft was created by this read.`;receiptStatus.dataset.tone='';}
-   else{state.unsafe=true;state.unsafeReason='readback';receiptStatus.textContent=`HOLD — ${proof.issues.join(' ')} Verify the existing Etsy draft before any new POST.`;receiptStatus.dataset.tone='error';}
+   else{state.unsafe=true;state.unsafeReason='readback';receiptStatus.textContent=`The saved Etsy ID cannot be confirmed: ${proof.issues.join(' ')} Verify the existing draft before another submission.`;receiptStatus.dataset.tone='error';}
+   if(proof.verified||proof.unlinked)document.dispatchEvent(new CustomEvent('dd:etsy-saved-receipt-532',
+    {detail:{product_id:id,listing_id:proof.verified?proof.listing_id:null,verified:proof.verified}}));
    render();return proof;
-  }catch(error){state.unsafe=true;state.unsafeReason='readback';receiptStatus.textContent=`HOLD — Saved Etsy claim unavailable: ${error.message}. Never retry an uncertain Etsy write.`;
+   }catch(error){state.unsafe=true;state.unsafeReason='readback';receiptStatus.textContent=`Could not check the saved Etsy ID: ${error.message}. Review Etsy Drafts before another write.`;
    receiptStatus.dataset.tone='error';render();return {verified:false,unlinked:false,issues:[error.message]};}
  }
  function invalidate(){state.etsyReady=false;state.facebookReady=false;state.read=null;state.provider=null;state.lastVerifiedFingerprint='';ack.checked=false;
@@ -77,16 +80,24 @@ if(form&&root&&window.DDAuth?.apiFetch){
   try{
    if(!saved())throw Error(id?'Product edits, saved channel preferences or the authoritative record have not finished saving.':'Save this Product first, then upload/approve its images.');
    const choice=selected();if(!choice.etsy&&!choice.facebook)throw Error('Select Etsy, Facebook Marketplace or both, then Save Product.');
-   say('Reading the saved Product and every original image (no provider write)…');
-   const responses=await Promise.all([get(`/api/admin/product-distribution-406?product_id=${id}&channel=etsy`),
-    ...(choice.facebook?[get(`/api/admin/product-distribution-406?product_id=${id}&channel=facebook`)]:[])]);
-   const gallery=responses[0].gallery||[];
-   if(responses.some(r=>Number(r.product_id)!==id))throw Error('Saved Product/gallery identity mismatched.');
-   if(responses.length===2){const ids=x=>(x.gallery||[]).map(im=>Number(im.product_image_id)).sort((a,b)=>a-b).join(',');
-    if(ids(responses[0])!==ids(responses[1]))throw Error('Etsy and Marketplace did not return the same canonical original gallery.');}
-   const base={productId:id,product:product(),images:gallery,authorityReady:saved(),dirty:false,channelSelected:true};
-   const common=assessProductDraft523({...base,channel:choice.etsy?'etsy':'facebook'});
-   const blockers=[...common.issues];
+   say('Checking saved Product details and original photos for the selected destinations (read only)…');
+   // Facebook-only must never depend on Etsy's distribution record or OAuth.
+   const [etsySource,facebookSource]=await Promise.all([
+    choice.etsy?get(`/api/admin/product-distribution-406?product_id=${id}&channel=etsy`):Promise.resolve(null),
+    choice.facebook?get(`/api/admin/product-distribution-406?product_id=${id}&channel=facebook`):Promise.resolve(null)]);
+   const responses=[etsySource,facebookSource].filter(Boolean);
+   if(responses.some(r=>Number(r.product_id)!==id))throw Error('Saved Product/photo identity did not match.');
+   if(etsySource&&facebookSource){const ids=x=>(x.gallery||[]).map(im=>Number(im.product_image_id)).sort((a,b)=>a-b).join(',');
+    if(ids(etsySource)!==ids(facebookSource))throw Error('Etsy and Marketplace returned different original Product galleries.');}
+   const gallery=etsySource?.gallery||facebookSource?.gallery||[];
+   const base={productId:id,product:product(),authorityReady:saved(),dirty:false,channelSelected:true};
+   const common=choice.etsy?assessProductDraft523({...base,images:gallery,channel:'etsy'}):null;
+   const blockers=[...(common?.issues||[])];
+   const facebookReview=choice.facebook?selectedMarketplacePhotos532(facebookSource,id):null;
+   const facebookSourceCheck=choice.facebook&&facebookReview?.ready?
+    assessProductDraft523({...base,images:facebookReview.photos,channel:'facebook'}):null;
+   state.facebookReady=Boolean(choice.facebook&&facebookReview?.ready&&facebookSourceCheck?.ready);
+   const facebookIssues=[...(facebookReview?.issues||[]),...(facebookSourceCheck?.issues||[])];
    if(choice.etsy){
     const controller=window.DDEtsyDraftFlow523;
     if(!controller)blockers.push('Etsy provider workflow has not loaded; refresh this Product before any POST.');
@@ -103,16 +114,17 @@ if(form&&root&&window.DDAuth?.apiFetch){
      state.etsyReady=common.ready&&state.provider.ready===true&&!state.unsafe;
     }
    }
-   state.facebookReady=choice.facebook&&common.ready;
-   state.read={gallery:common.gallery,originals:gallery,issues:blockers};state.lastVerifiedFingerprint=fingerprint();
-   if(blockers.length){list([...new Set(blockers)]);say(`Needs attention: ${blockers.length} Product, image or Etsy setup requirement(s). Nothing was POSTed.`,'warn');}
-   else {list([`${common.gallery.count} actual original photo(s) checked: verified ≥800 × 800 px, alt text, HTTPS and full public-use permission.`,
-      choice.etsy?'Etsy native category, Canada-only shipping, processing and parcel fields are verified for this draft action.':'Facebook handoff uses the same saved Product.']);
+   state.read={gallery:common?.gallery,originals:gallery,facebookOriginals:facebookReview?.photos||[],issues:blockers};
+   state.lastVerifiedFingerprint=fingerprint();
+   const messages=[...new Set([...blockers,...facebookIssues.map(s=>'Marketplace: '+s)])];
+   if(messages.length){list(messages);say(`Please review ${messages.length} item${messages.length===1?'':'s'} shown below. No Etsy or Facebook write was made.`,'warn');}
+   else {list([`${gallery.length} saved original Product photo(s) checked.`,
+      choice.etsy?'Etsy draft setup and current Product identity are ready for your explicit confirmation.':'Marketplace photos are ready for a manual listing copy.']);
     say(`Ready for owner review. ${choice.etsy?(state.lastListingId?'Update Etsy #'+state.lastListingId:'Create one unpublished Etsy draft'):'No Etsy POST selected'}. ${choice.facebook?'Marketplace remains manual.':''}`,'ok');}
    if(blockers.length)state.etsyReady=false;
    ack.checked=wasAck&&state.etsyReady;
    return choice.etsy?state.etsyReady:state.facebookReady;
-  }catch(error){list([error.message]);say('HOLD — '+error.message+' No provider POST was attempted.','error');return false;}
+  }catch(error){list([error.message]);say('Could not complete the review: '+error.message+' No marketplace request was sent.','error');return false;}
   finally{state.busy=false;render();}
  }
  async function postEtsy(){
@@ -153,16 +165,18 @@ if(form&&root&&window.DDAuth?.apiFetch){
  }
  function prepareMarketplace(){
   if(!state.facebookReady||state.busy||!facebook.checked||state.lastVerifiedFingerprint!==fingerprint())return;
-  const handoff=prepareMarketplaceHandoff524({productId:id,product:product(),images:state.read?.originals||[],
+  const handoff=prepareMarketplaceHandoff524({productId:id,product:product(),images:state.read?.facebookOriginals||[],
    authorityReady:saved(),dirty:false,channelSelected:true});
   if(!handoff.ready){postStatus(`HOLD — ${handoff.issues.join(' ')} No Marketplace handoff prepared.`,'error');return;}
   $('dd523MarketplaceTitle').value=handoff.title;$('dd523MarketplacePrice').value=handoff.price_cad;
   $('dd523MarketplaceDescription').value=handoff.description;
   $('dd524MarketplacePhotos').replaceChildren(...handoff.photos.map(photo=>{const item=document.createElement('li');
    const link=document.createElement('a');link.href=photo.url;link.rel='noopener noreferrer';link.target='_blank';
-   link.textContent=`Original #${photo.id}: ${photo.alt} (${photo.width} × ${photo.height})`;item.append(link);return item;}));
+   link.textContent=`Open approved original photo #${photo.id} (${photo.width} × ${photo.height})`;item.append(link);
+   const note=document.createElement('span');note.textContent=` — ${photo.alt}. Save this original image to the computer before uploading it manually in Facebook.`;
+   item.append(note);return item;}));
   $('dd523MarketplaceCopy').hidden=false;
-  postStatus(`Prepared manual Marketplace handoff: ${handoff.photos.length} exact approved original(s) for Product #${id}. No Facebook POST or automatic publication performed.`,'ok');
+  postStatus(`Prepared MANUAL Marketplace handoff: ${handoff.photos.length} specifically selected and approved original photo(s) for Product #${id}. No Facebook authorization or API posting was used.`,'ok');
  }
  // Build 527: after one verified local Save, a checked destination initiates
  // its review in the same screen. Every Etsy write still requires the owner's
