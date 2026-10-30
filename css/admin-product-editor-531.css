@@ -1,0 +1,11 @@
+#dd531TrialSummary{margin-top:1.1rem;padding-top:1rem;border-top:1px solid #796c8d}
+#dd531TrialSummary h3{margin:.3rem 0 .6rem;color:#e9d1f6}
+#dd531TrialRows{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:.6rem;margin:.8rem 0}
+.dd531-trial-row{padding:.7rem;border-radius:10px;border:1px solid #706783;background:#171426;overflow-wrap:anywhere}
+.dd531-trial-row h4{margin:0;color:#f4dcb7}
+.dd531-trial-row p{font-size:.88rem;margin:.55rem 0}
+.dd531-fix-links{display:flex;flex-wrap:wrap;gap:.35rem}.dd531-fix-links a{font-size:.78rem;white-space:normal}
+.dd531-hold{color:#ffb18c}.dd531-ok{color:#b4e2c2}
+.dd531-marketplace-check{margin:.7rem 0;border:1px solid #75658b;border-radius:10px;padding:.8rem;background:rgba(40,30,60,.5)}
+.dd531-marketplace-check summary{cursor:pointer;color:#f0def8;font-weight:650}
+.dd531-marketplace-check button{white-space:normal}

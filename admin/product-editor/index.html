@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="/css/admin-product-editor-528.css?v=528"/>
   <link rel="stylesheet" href="/css/admin-product-editor-529.css?v=529"/>
   <link rel="stylesheet" href="/css/admin-product-editor-530.css?v=530"/>
+  <link rel="stylesheet" href="/css/admin-product-editor-531.css?v=531"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -32,7 +33,7 @@
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
-      <div><p class="eyebrow">Devil n Dove • Build 530</p><h1 id="productEditorTitle">Product Editor</h1><p>One product, one shared photo gallery. Choose Etsy and/or Marketplace, then Save Product. An Etsy draft is checked and confirmed separately; the same saved Etsy ID is used for updates.</p></div>
+      <div><p class="eyebrow">Devil n Dove • Build 531</p><h1 id="productEditorTitle">Product Editor</h1><p>One product, one shared photo gallery. Choose Etsy and/or Marketplace, then Save Product. An Etsy draft is checked and confirmed separately; the same saved Etsy ID is used for updates.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
 
@@ -51,6 +52,13 @@
       </label><button id="dd529Check" class="btn" type="button">Check current saved Product and Etsy evidence</button></div>
       <p id="dd529Status" role="status" aria-live="polite">No readback requested yet.</p>
       <div id="dd529Results" aria-label="Verified Etsy receipt results"></div>
+      <section id="dd531TrialSummary" hidden aria-labelledby="dd531TrialTitle">
+        <h3 id="dd531TrialTitle">Owner trial outcomes — one Product at a time</h3>
+        <p class="small">Current local receipts and read-only Marketplace image readiness; no simulated three-soap success or Facebook API posting.</p>
+        <div id="dd531TrialRows" aria-label="Owner trial Product dispositions"></div>
+        <div class="dd-product-actions"><button class="btn" id="dd531CopyTrial" type="button" disabled>Copy sanitized trial summary</button></div>
+        <p class="small" id="dd531TrialStatus" role="status" aria-live="polite">No trial readback yet.</p>
+      </section>
     </details>
 
     <div id="productEditorStatus" class="dd-product-status small" aria-live="polite"></div>
@@ -821,6 +829,11 @@
           <p class="small">Marketplace Partner API access is restricted and must be approved by Meta. Until it is, we can reuse our saved Product information, copy it into Facebook's own listing screen, and upload images there ourselves. This does not authorize automated posting, and a Commerce catalog is not the same as a Marketplace listing.</p>
           <div class="dd-product-actions"><button class="btn" type="button" id="dd443MetaPrepare">Prepare saved Product listing text</button><a class="btn" href="https://www.facebook.com/marketplace/create/item" target="_blank" rel="noopener noreferrer">Open Facebook Marketplace</a><a class="btn" href="https://www.facebook.com/business/help/646509171194744" target="_blank" rel="noopener noreferrer">Partner eligibility</a></div>
           <p class="small" role="status" aria-live="polite" id="dd443MetaManualStatus">Manual copy-and-review is available after our Product is saved; no Facebook account or app key is accessed here.</p>
+          <details class="dd531-marketplace-check"><summary>Check original photos and manual Marketplace draft readiness</summary>
+            <p class="small">Uses this Product's approved image gallery and saved local destination review. It does not check, grant or claim a Facebook Marketplace posting API.</p>
+            <button type="button" class="btn" id="dd531MarketplaceCheck">Check saved Marketplace preparation (GET only)</button>
+            <p class="small" id="dd531MarketplaceResult" role="status">No Marketplace readiness check requested.</p>
+          </details>
           <div id="dd443MetaCopyFields" hidden>
             <label class="dd443-copy-field">Title <textarea id="dd443MetaTitle" class="input" rows="2" readonly></textarea><button class="btn" type="button" data-dd443-copy="dd443MetaTitle">Copy title</button></label>
             <label class="dd443-copy-field">Price (CAD) <input id="dd443MetaPrice" class="input" readonly><button class="btn" type="button" data-dd443-copy="dd443MetaPrice">Copy price</button></label>
@@ -898,6 +911,7 @@
   <script type="module" src="/public/js/admin-product-destination-flow-523.mjs?v=527"></script>
   <script type="module" src="/public/js/admin-product-etsy-owner-trial-525.mjs?v=525"></script>
   <script type="module" src="/public/js/admin-product-etsy-closure-530.mjs?v=530"></script>
+  <script type="module" src="/public/js/admin-product-owner-trial-531.mjs?v=531"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
   <script src="/public/js/admin-product-editor-layout-526.js?v=526"></script>
