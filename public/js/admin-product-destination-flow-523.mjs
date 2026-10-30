@@ -37,10 +37,10 @@ if(form&&root&&window.DDAuth?.apiFetch){
   const choices=selected(),legacy=LEGACY_OWNER_TRIAL_IDS_523.includes(id);
   setup.hidden=!choices.etsy||legacy||id<1;
   reviewButton.disabled=state.busy||!id;
-  ack.disabled=state.busy||!choices.etsy||!state.etsyReady||state.unsafe||legacy;
-  post.disabled=state.busy||!choices.etsy||!ack.checked||!state.etsyReady||state.unsafe||legacy;
-  manual.disabled=state.busy||!choices.facebook||!state.facebookReady||legacy;
-  post.textContent=state.lastListingId?`POST update to unpublished Etsy #${state.lastListingId}`:'POST one unpublished Etsy draft';
+  ack.disabled=true; // Retired duplicate checkbox; confirmation stays at draft POST.
+  post.disabled=state.busy||!choices.etsy||state.unsafe||legacy||id<1;
+  manual.disabled=state.busy||!choices.facebook||legacy||id<1;
+  post.textContent=state.lastListingId?`Update Etsy draft #${state.lastListingId}`:'Create Etsy draft';
   const p=product();
   identity.textContent=`Product ${id?'#'+id:'not yet saved'} · ${p.name||'Untitled'} · SKU ${p.sku||'not set'} · Slug ${p.slug||'not set'} · Etsy listing ID: ${state.lastListingId||'not linked'}`;
   receiptButton.disabled=state.busy||id<1;
@@ -113,9 +113,9 @@ if(form&&root&&window.DDAuth?.apiFetch){
   finally{state.busy=false;render();}
  }
  async function postEtsy(){
-  if(!ack.checked||!etsy.checked||state.unsafe||LEGACY_OWNER_TRIAL_IDS_523.includes(id)||state.busy)return;
-  const confirmed=await check({preserveAck:true});
-  if(!confirmed||!ack.checked||!state.etsyReady||state.lastVerifiedFingerprint!==fingerprint())return;
+  if(!etsy.checked||state.unsafe||LEGACY_OWNER_TRIAL_IDS_523.includes(id)||state.busy)return;
+  const confirmed=await check();
+  if(!confirmed||!state.etsyReady||state.lastVerifiedFingerprint!==fingerprint())return;
   const target=state.lastListingId?`update unpublished Etsy draft #${state.lastListingId}`:'create one NEW unpublished Etsy draft';
   if(!window.confirm(`POST now to ${target} for Product #${id}, using every approved original photo? Nothing will be published. Cancel to review.`))return;
   state.busy=true;state.etsyReady=false;state.unsafe=true;state.unsafeReason='provider-attempt';render();
@@ -130,7 +130,21 @@ if(form&&root&&window.DDAuth?.apiFetch){
     $('dd498IdentityRefresh')?.click();
     document.dispatchEvent(new CustomEvent('dd:etsy-draft-flow-523-complete',{
      detail:{product_id:id,listing_id:state.lastListingId,unpublished:true}}));
-   }else postStatus(`HOLD — ${response.status||response.issues?.[0]||'Etsy write result unconfirmed.'} Inspect Etsy and the saved ID before another attempt.`,'error');
+   }else {
+    // Etsy may have created the draft successfully before an image/tag step
+    // failed. Show its genuine saved ID on the front tab even on partial HOLD.
+    const partialId=String(response.linked_listing_id||'');
+    let partialVerified=false;
+    if(/^[1-9]\d{0,14}$/.test(partialId)){
+      const receipt=await readReceipt524({expectedListingId:partialId});
+      partialVerified=receipt.verified===true;
+      if(partialVerified){state.lastListingId=receipt.listing_id;$('dd498IdentityRefresh')?.click();}
+    }
+    // A purely local/live-read preflight failure is fixable on this page.
+    // Keep the hard lock only when the package reports an attempted write.
+    if(response.hold_after_write===false){state.unsafe=false;state.unsafeReason='';}
+    postStatus(`HOLD — ${partialVerified?'Etsy draft #'+state.lastListingId+' is saved and linked; remaining image/tag work is unconfirmed. ':' '}${response.status||response.issues?.[0]||'Etsy write result unconfirmed.'} ${response.hold_after_write===false?'No provider write began; correct the indicated photo or setup issue and check again.':'A provider action may have occurred. Inspect the original Etsy draft and saved ID before retrying.'}`,'error');
+   }
   }catch(error){postStatus(`HOLD — ${error.message}. An Etsy attempt may have occurred. Verify the real remote draft and saved ID before retrying.`,'error');}
   finally{state.busy=false;ack.checked=false;render();}
  }
@@ -151,7 +165,7 @@ if(form&&root&&window.DDAuth?.apiFetch){
   $('productDistribution406')?.scrollIntoView({block:'start',behavior:'smooth'});});
  reviewButton.addEventListener('click',()=>void check());
  ack.addEventListener('change',render);post.addEventListener('click',()=>void postEtsy());
- manual.addEventListener('click',prepareMarketplace);
+ manual.addEventListener('click',async()=>{await check();if(state.facebookReady)prepareMarketplace();});
  receiptButton.addEventListener('click',()=>void readReceipt524());
  for(const checkbox of [etsy,facebook])checkbox.addEventListener('change',invalidate);
  form.addEventListener('input',event=>{if(event.target.closest('#dd523Flow')||event.target.closest('#dd500NewSettings')){if(event.target.closest('#dd500NewSettings'))invalidate();return;}

@@ -25,8 +25,8 @@ test('Build 523 front screen enforces saved Product, two checkboxes, image revie
  const html=read('admin/product-editor/index.html'),flow=read('public/js/admin-product-destination-flow-523.mjs');
  const pkg=read('public/js/admin-product-etsy-package-v500.mjs'),editor=read('public/js/admin-product-editor-v163.js');
  for(const token of ['dd523Flow','dd523EtsyAcknowledge','dd523EtsyPost','dd523MarketplacePrepare','dd523Identity','dd523EtsySetupMount','dd523MarketplaceCopy'])assert.ok(html.includes(token),token);
- assert.match(html,/Create \/ update an Etsy draft/);
- assert.match(html,/no Etsy publication or Facebook posting/i);
+ assert.match(html,/Etsy — create or update draft/);
+ assert.match(html,/Marketplace.*manual handoff/i);
  assert.match(flow,/window\.DDEtsyDraftFlow523\.post\(\)/);
  assert.match(flow,/window\.confirm\(`/);
  assert.match(flow,/LEGACY_OWNER_TRIAL_IDS_523\.includes\(id\)/);

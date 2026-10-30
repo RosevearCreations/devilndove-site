@@ -15,14 +15,15 @@ function readPending(id){try{const p=JSON.parse(sessionStorage.getItem(recoveryK
 function clearPending(id){try{sessionStorage.removeItem(recoveryKey(id));}catch{}}
 function writePending(id,choice){try{sessionStorage.setItem(recoveryKey(id),JSON.stringify({id,at:Date.now(),etsy:choice.etsy,facebook:choice.facebook}));}catch{}}
 function say(s){status.textContent=s;}
-function apply(){reload.disabled=busy||!productId;save.disabled=busy||!productId||!loaded||!dirty||!consent?.checked;etsy.disabled=busy||(!!productId&&!loaded);facebook.disabled=busy||(!!productId&&!loaded);
+function apply(){reload.disabled=busy||!productId;save.disabled=busy||!productId||!loaded||!dirty;etsy.disabled=busy||(!!productId&&!loaded);facebook.disabled=busy||(!!productId&&!loaded);
  area.dataset.dirty=dirty?'1':'0';}
 const changes=()=>{if(productId&&!loaded)return;dirty=true;if(consent)consent.checked=false;apply();};
 for(const x of [etsy,facebook])x.addEventListener('change',changes);
 consent?.addEventListener('change',apply);
 function captureForProductSave(){if(!dirty)return {changed:false};
  if(productId&&!loaded)throw Error('Load saved destination preferences before changing channels.');
- if(!consent?.checked)throw Error('Confirm the owner-only local destination preparation consent before saving the Product. Nothing has been saved.');
+ // Build 526: the selection itself explicitly authorizes a LOCAL preference.
+ // Actual Etsy submission still requires its own confirmed draft-only action.
  return {changed:true,etsy:etsy.checked,facebook:facebook.checked,confirmed:true};
 }
 async function load(){if(busy||!productId)return;if(dirty&&!window.confirm('Discard unsaved destination changes and reload the saved choices?'))return;busy=true;apply();
@@ -59,7 +60,7 @@ reload.addEventListener('click',()=>void load());
 save.addEventListener('click',()=>void saveFor(productId));
 restore?.addEventListener('click',()=>{if(!loaded||!productId)return;const p=readPending(productId);if(!p)return;
  etsy.checked=p.etsy;facebook.checked=p.facebook;dirty=true;if(consent)consent.checked=false;if(recovery)recovery.hidden=true;
- say('Unsaved destination choices restored for review only. Read the owner consent and choose Save destination choices; Product itself is already saved.');apply();});
+ say('Unsaved destination choices restored for review only. Choose Save recovered destination choices; Product itself is already saved.');apply();});
 window.DDProductChannels405={afterProductSave:async(id,choice)=>saveFor(Number(id),choice),
  captureForProductSave,isDirty:()=>dirty,isLoaded:()=>loaded&&!busy,load};
 apply();
