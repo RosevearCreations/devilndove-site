@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="/css/admin-product-editor-527.css?v=527"/>
   <link rel="stylesheet" href="/css/admin-product-editor-528.css?v=528"/>
   <link rel="stylesheet" href="/css/admin-product-editor-529.css?v=529"/>
+  <link rel="stylesheet" href="/css/admin-product-editor-530.css?v=530"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -31,7 +32,7 @@
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
-      <div><p class="eyebrow">Devil n Dove • Build 529</p><h1 id="productEditorTitle">Product Editor</h1><p>One product, one shared photo gallery. Choose Etsy and/or Marketplace, then Save Product. An Etsy draft is checked and confirmed separately; the same saved Etsy ID is used for updates.</p></div>
+      <div><p class="eyebrow">Devil n Dove • Build 530</p><h1 id="productEditorTitle">Product Editor</h1><p>One product, one shared photo gallery. Choose Etsy and/or Marketplace, then Save Product. An Etsy draft is checked and confirmed separately; the same saved Etsy ID is used for updates.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
 
@@ -43,11 +44,11 @@
     </section>
 
     <details class="dd529-owner-panel" id="dd529Panel">
-      <summary>Verify saved Etsy drafts and photos (read-only)</summary>
-      <p class="small">If one of our three soap saves failed, enter its saved Product ID below. Check up to three IDs at once. This reads the real stored Etsy connection, saved Product, listing identity and live unpublished Etsy photos. It never resaves the Product or creates another Etsy draft.</p>
+      <summary>Verify saved Etsy drafts, photos and tags</summary>
+      <p class="small">Enter up to three exact saved soap Product IDs to read current Product, Etsy connection, draft, photos, tags and any earlier browser Save comparison. A separate checkbox allows a local owner acceptance only after every current Etsy check passes. This never resaves a Product, creates a duplicate Etsy draft or publishes anything.</p>
       <div class="dd529-input-row"><label for="dd529ProductIds">Saved Product IDs (up to three, comma-separated)
         <input id="dd529ProductIds" class="input" type="text" inputmode="numeric" autocomplete="off" placeholder="e.g. 12, 13, 14"/>
-      </label><button id="dd529Check" class="btn" type="button">Verify saved receipts (GET only)</button></div>
+      </label><button id="dd529Check" class="btn" type="button">Check current saved Product and Etsy evidence</button></div>
       <p id="dd529Status" role="status" aria-live="polite">No readback requested yet.</p>
       <div id="dd529Results" aria-label="Verified Etsy receipt results"></div>
     </details>
@@ -896,7 +897,7 @@
   <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=528"></script>
   <script type="module" src="/public/js/admin-product-destination-flow-523.mjs?v=527"></script>
   <script type="module" src="/public/js/admin-product-etsy-owner-trial-525.mjs?v=525"></script>
-  <script type="module" src="/public/js/admin-product-etsy-readback-529.mjs?v=529"></script>
+  <script type="module" src="/public/js/admin-product-etsy-closure-530.mjs?v=530"></script>
   <script src="/public/js/admin-product-channel-assist-v440.js?v=440"></script>
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
   <script src="/public/js/admin-product-editor-layout-526.js?v=526"></script>

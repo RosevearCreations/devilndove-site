@@ -31,7 +31,7 @@ preflight_ui=read('public/js/admin-product-release-preflight.js')
 preflight_api=read('functions/api/admin/product-release-preflight.js')
 marketplace=read('public/js/admin-products-marketplace-readiness.js')
 
-req(any(token in editor_page for token in ('Release 467 • Build 178','Devil n Dove • Build 527','Devil n Dove • Build 528','Devil n Dove • Build 529')),'Product Editor Build 178/successor identity missing')
+req(any(token in editor_page for token in ('Release 467 • Build 178','Devil n Dove • Build 527','Devil n Dove • Build 528','Devil n Dove • Build 529','Devil n Dove • Build 530')),'Product Editor Build 178/successor identity missing')
 req(any(token in editor_page for token in ('admin-product-editor-v163.js?v=178','admin-product-editor-v163.js?v=527')),'Product Editor Build 178/successor cache identity missing')
 req(('Release 467 • Build 178' in media_page) or ('Product media workspace' in media_page),'Product Image Editor Build 178/successor identity missing')
 req(any(token in media_page for token in ('admin-product-media-editor-v172.js?v=178','admin-product-media-editor-v172.js?v=467b198')),'Product Image Editor Build 178/successor cache identity missing')

@@ -67,14 +67,14 @@ test('Build 529 exposes an owner-triggered three-Product GET-only review without
   const frontend=read('public/js/admin-product-etsy-readback-529.mjs');
   const api=read('functions/api/admin/product-etsy-images.js');
   const deploy=read('.github/workflows/production-pages-deploy-current.yml');
-  assert.match(html,/Devil n Dove • Build 529/);
+  assert.match(html,/Devil n Dove • Build (?:529|530)/);
   for(const id of ['dd529Panel','dd529ProductIds','dd529Check','dd529Status','dd529Results'])assert.match(html,new RegExp(`id="${id}"`));
-  assert.match(html,/admin-product-etsy-readback-529\.mjs\?v=529/);
+  assert.match(html,/admin-product-etsy-(?:readback-529|closure-530)\.mjs\?v=(?:529|530)/);
   assert.match(frontend,/button\.addEventListener\('click',async/);
   assert.match(frontend,/method:'GET',cache:'no-store'/);
   assert.doesNotMatch(frontend,/method:\s*['"]POST|setInterval\(|setTimeout\(/);
   assert.match(frontend,/product-etsy-images\?product_id=\$\{id\}/);
   assert.match(api,/verifiedOwnerPhotoPairs529/);
   assert.match(api,/photo_pair_readback_529/);
-  assert.match(deploy,/"build":529/);
+  assert.match(deploy,/"build":5(?:29|30)/);
 });

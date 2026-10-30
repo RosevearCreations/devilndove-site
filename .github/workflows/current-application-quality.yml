@@ -377,6 +377,9 @@ jobs:
           node scripts/release467_build527_product_recovery_etsy_policy.test.mjs
           node scripts/release467_build528_etsy_connection_options.test.mjs
           node scripts/release467_build529_owner_readback.test.mjs
+          node --check functions/api/admin/product-etsy-owner-signoff-504.js
+          node --check public/js/admin-product-etsy-closure-530.mjs
+          node scripts/release467_build530_three_soap_closure.test.mjs
           node scripts/release467_build499_owner_advanced_tags_media.test.mjs
           node scripts/release467_build497_product53_three_channel_acceptance.test.mjs
 

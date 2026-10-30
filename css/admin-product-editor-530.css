@@ -1,0 +1,7 @@
+.dd530-result{min-width:0}
+.dd530-result .dd530-save{border-left:3px solid #bca9db;padding-left:.65rem}
+.dd530-result .dd530-held{color:#f8ae86;border-left:3px solid #f58c63;padding-left:.65rem;font-weight:600}
+.dd530-result .dd530-ready{color:#b1e0bf;border-left:3px solid #62ab81;padding-left:.65rem;font-weight:600}
+.dd530-result .dd530-consent{display:flex;align-items:flex-start;gap:.55rem;padding:.6rem .2rem;line-height:1.5;color:#f2e9f8}
+.dd530-result .dd530-consent input{flex:none;min-width:1.2rem;min-height:1.2rem;margin-top:.2rem}
+.dd530-result button{width:100%;white-space:normal}
