@@ -61,7 +61,7 @@ test('Simple draft UI keeps one of each checkbox and a safe Create-or-Update-by-
  const recovery=read('public/js/admin-product-editor-v163.js'),headers=read('_headers');
  for(const id of ['productEditorSave','productChannel405Etsy','productChannel405Facebook'])
   assert.equal((page.match(new RegExp(`id="${id}"`,'g'))||[]).length,1,id);
- assert.match(flow,/state\.lastListingId\?`Update Etsy draft/);
+ assert.match(flow,/(?:state\.lastListingId|verifiedId)\?`Update Etsy draft/);
  assert.match(flow,/window\.confirm\(`/);assert.match(flow,/readReceipt524/);
  assert.match(flow,/partialVerified=receipt\.verified===true/);
  assert.match(flow,/prepareMarketplaceHandoff524/);

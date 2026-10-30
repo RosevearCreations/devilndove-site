@@ -1,0 +1,11 @@
+/* Build 535: a compact actual Etsy evidence panel, integrated with the
+ * established single-Product editor rather than a second diagnostics page. */
+.dd535-live-review{margin:.85rem 0;padding:1rem 1.15rem;border:1px solid rgba(162,136,210,.45);border-radius:13px;background:linear-gradient(125deg,rgba(38,28,65,.35),rgba(21,51,64,.2))}
+.dd535-live-review h4{margin:0 0 .55rem;color:#f1e4fa}
+.dd535-live-review p{line-height:1.5}
+.dd535-live-review .dd-product-actions{display:flex;flex-wrap:wrap;gap:.55rem;margin:.7rem 0}
+#dd535LiveEvidence{margin:.6rem 0;padding-left:1.35rem;line-height:1.65}
+#dd535LiveStatus[data-tone="ok"]{color:#97e8ad}
+#dd535LiveStatus[data-tone="warn"]{color:#f6d68c}
+#dd535LiveStatus[data-tone="error"]{color:#ffb8b8}
+@media(max-width:680px){.dd535-live-review{padding:.7rem}.dd535-live-review .dd-product-actions>.btn{width:100%}}
