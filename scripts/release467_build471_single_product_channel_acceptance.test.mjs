@@ -40,12 +40,10 @@ test('Build 471 rejects external intent without explicit owner consent and Canad
  assert.equal(verifyProductChannelConsent471({intent_source_build:405}).legacy,true);
 });
 
-test('Create once: channel intent is frozen, owner-authorized and separately recorded after Product save',async()=>{
- const b=mockBrowser(),etsy=b.elements.get('productChannel405Etsy'),consent=b.elements.get('productChannel471Consent');
+test('Create once: a destination checkbox captures local intent without a second hidden consent gate',async()=>{
+ const b=mockBrowser(),etsy=b.elements.get('productChannel405Etsy');
  assert.equal(b.window.DDProductChannels405.captureForProductSave().changed,false);
  etsy.checked=true;etsy.fire();
- assert.throws(()=>b.window.DDProductChannels405.captureForProductSave(),/owner.*consent/i);
- consent.checked=true;consent.fire();
  const frozen=b.window.DDProductChannels405.captureForProductSave();
  assert.equal(frozen.etsy,true);assert.equal(frozen.confirmed,true);
  // Mutating a browser checkbox after the snapshot must not change the submitted owner decision.
@@ -64,7 +62,6 @@ test('Create once: channel intent is frozen, owner-authorized and separately rec
 test('Uncertain channel write preserves reviewable choices without duplicate Product creation',async()=>{
  const stored=new Map(),b=mockBrowser({stored,postFails:true});
  b.elements.get('productChannel405Facebook').checked=true;b.elements.get('productChannel405Facebook').fire();
- b.elements.get('productChannel471Consent').checked=true;
  const frozen=b.window.DDProductChannels405.captureForProductSave();
  assert.equal(await b.window.DDProductChannels405.afterProductSave(88,frozen),false);
  assert.equal(stored.has('dnd:channel-intent:471:88'),true);
@@ -74,8 +71,10 @@ test('Uncertain channel write preserves reviewable choices without duplicate Pro
  assert.equal(next.elements.get('productChannel405Facebook').checked,false);
  next.elements.get('productChannel471Restore').fire('click');
  assert.equal(next.elements.get('productChannel405Facebook').checked,true);
- assert.equal(next.elements.get('productChannel471Consent').checked,false);
- assert.throws(()=>next.window.DDProductChannels405.captureForProductSave(),/consent/i);
+ const recovered=next.window.DDProductChannels405.captureForProductSave();
+ assert.equal(recovered.facebook,true);
+ assert.equal(recovered.confirmed,true);
+ assert.equal(next.elements.get('productChannel405Save').disabled,false);
  assert.equal(next.calls.filter(x=>x.method==='POST').length,0);
 });
 
@@ -92,7 +91,7 @@ test('Human-gated source readiness never implies a live listing or unreviewed me
 test('The live Product Add page uses the single-flow mount, media handoff and explicit owner gate',()=>{
  for(const token of ['productChannel471Mount','productChannel471Consent','productChannel471Recovery'])assert.ok(page.includes(token),token);
  assert.match(page,/admin-product-creation-flow-471\.js\?v=(?:471|521|523)/);
- assert.match(page,/admin-product-channel-intent-v405\.js\?v=(?:471|521|523)/);
+ assert.match(page,/admin-product-channel-intent-v405\.js\?v=(?:471|521|523|526)/);
  assert.match(page,/admin-product-editor-v163\.js\?v=\d+/);
  assert.ok(save.includes('captureForProductSave'));
  assert.ok(save.includes('afterProductSave(savedId,channelSnapshot)'));
