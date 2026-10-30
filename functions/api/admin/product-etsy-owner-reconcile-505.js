@@ -10,13 +10,13 @@ import {validEtsyId505,validOwnerKey505,reassignmentReview505,ownerPhotoMatches5
 const respond=(value,status=200)=>jsonResponse({ok:status<400,build:505,provider_modified:false,publication_performed:false,automatic_retry:false,...value},status,{'Cache-Control':'no-store'});
 const parse=row=>{try{return JSON.parse(row?.details_json||'{}');}catch{return {}}};
 const payload=row=>{try{return JSON.parse(row?.payload_json||'{}');}catch{return {}}};
-const safeImages=rows=>(rows||[]).filter(imageReady).slice(0,10);
+const safeImages=rows=>(rows||[]).filter(imageReady).slice(0,20);
 function gate(c){const admin=verifiedAdminFromModule(c),db=getDb(c.env);
   return !admin?{error:respond({error:'Verified administrator required.'},401)}:
     !db?{error:respond({error:'Product database unavailable.'},503)}:{admin,db};}
 const currentDb=db=>typeof db.withSession==='function'?db.withSession('first-primary'):db;
 async function allReceipts(db,id){
-  const r=await db.prepare("SELECT details_json FROM admin_action_audit WHERE target_type='product' AND target_key=? AND action_type IN ('etsy_product_editor_image_443_accepted','etsy_505_owner_existing_image_matched') ORDER BY admin_action_audit_id ASC LIMIT 30").bind(String(id)).all();
+  const r=await db.prepare("SELECT details_json FROM admin_action_audit WHERE target_type='product' AND target_key=? AND action_type IN ('etsy_product_editor_image_443_accepted','etsy_505_owner_existing_image_matched') ORDER BY admin_action_audit_id ASC LIMIT 60").bind(String(id)).all();
   return (r?.results||[]).map(parse).filter(row=>row.verified_remote_readback===true);
 }
 async function live(c,db,id,listingId){
@@ -35,7 +35,7 @@ async function linkedGallery(c,db,id,listingId){
     readCanonicalDistributionGallery(db,id),
     readEtsy486('listings/'+encodeURIComponent(listingId)+'/images',proof.credentials),
     allReceipts(db,id),
-    db.prepare("SELECT details_json,target_key FROM admin_action_audit WHERE action_type='etsy_product_editor_image_443_claimed' AND target_type='product' AND target_key LIKE ? ORDER BY admin_action_audit_id ASC LIMIT 12").bind(`${id}:%`).all()
+    db.prepare("SELECT details_json,target_key FROM admin_action_audit WHERE action_type='etsy_product_editor_image_443_claimed' AND target_type='product' AND target_key LIKE ? ORDER BY admin_action_audit_id ASC LIMIT 41").bind(`${id}:%`).all()
   ]);
   const images=safeImages(gallery.images),remoteImages=Array.isArray(remote?.results)?remote.results:[];
   if(remoteImages.some(row=>!validEtsyId505(row.listing_image_id)))throw Error('Etsy returned an invalid photo ID. No mapping can be accepted.');

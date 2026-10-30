@@ -16,8 +16,8 @@ export function assessExistingDraftPhotoGap492(remote, receipts, images, claims,
   const hold=unexpected.length>0||absent.length>0||uncertain.length>0;
   return {state:hold?'hold':pending.length?'ready_for_separate_owner_approval':'matched',
     reason:unexpected.length?'untracked_remote_photos':absent.length?'confirmed_photos_absent_from_etsy':uncertain.length?'unconfirmed_upload_claim':'verified_inventory',
-    unexpected_etsy_image_ids:unexpected.slice(0,10),missing_etsy_image_ids:absent.slice(0,10),
-    uncertain_product_image_ids:uncertain.slice(0,10),pending_local_images:pending.slice(0,10),
+    unexpected_etsy_image_ids:unexpected.slice(0,20),missing_etsy_image_ids:absent.slice(0,20),
+    uncertain_product_image_ids:uncertain.slice(0,20),pending_local_images:pending.slice(0,20),
     tracked_remote_count:known.size,verified_remote_count:actual.size,provider_write_allowed:false,
     next_step:hold?'Inspect the original Etsy draft and audit receipts. Do not retry or overwrite; resolve identity/evidence with the owner.':
       pending.length?'Use the existing one-photo approval control for each eligible original; this diagnostic never uploads.':

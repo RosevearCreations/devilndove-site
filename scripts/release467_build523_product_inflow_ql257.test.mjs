@@ -18,7 +18,8 @@ test('one full Product and all real originals pass conservative shared preparati
  assert.match(assessProductDraft523({...src,images:[{...validImg(101),image_url:'https:\/\/cdn.invalid\/placeholder.svg'}]}).issues.join(' '),/real secure/);
  assert.match(assessProductDraft523({...src,authorityReady:false}).issues.join(' '),/authoritative/);
  assert.match(assessProductDraft523({...src,product:{...src.product,weight_grams:''}}).issues.join(' '),/weight/);
- assert.match(assessCanonicalGallery523(Array.from({length:11},(_,i)=>validImg(i+10))).issues.join(' '),/at most ten/);
+ assert.equal(assessCanonicalGallery523(Array.from({length:20},(_,i)=>validImg(i+10))).ready,true);
+ assert.match(assessCanonicalGallery523(Array.from({length:21},(_,i)=>validImg(i+10))).issues.join(' '),/at most 20/);
  assert.deepEqual(LEGACY_OWNER_TRIAL_IDS_523,[48,53]);
 });
 test('Build 523 front screen enforces saved Product, two checkboxes, image review and separate Etsy POST; no Meta API claim',()=>{

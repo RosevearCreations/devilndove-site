@@ -33,7 +33,7 @@
    const eligible=gallery.filter(row=>row.approved_for_distribution);
    const blocked=gallery.filter(row=>!row.approved_for_distribution);
    issue(`${eligible.length} approved canonical Product image(s); ${blocked.length} held. Image approval does not itself transfer a file.`,eligible.length>0);
-   for(const row of blocked.slice(0,10))issue(`Image #${row.product_image_id}: ${(row.hold_reasons||['approval unavailable']).join('; ')}. Review in Product Media.`);
+   for(const row of blocked.slice(0,20))issue(`Image #${row.product_image_id}: ${(row.hold_reasons||['approval unavailable']).join('; ')}. Review in Product Media.`);
    const transferable=Array.isArray(images.images)?images.images.filter(row=>row.transferable&&!row.transferred&&!row.hold):[];
    issue(`${transferable.length} approved original R2 JPEG/PNG photo(s) eligible for transfer after draft verification.`,transferable.length>0);
    if(Number(images.hold_unconfirmed_claims||0)>0)issue('Previous image upload outcome unresolved: manually reconcile actual Etsy images; no retry.');

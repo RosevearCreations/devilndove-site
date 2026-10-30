@@ -1,0 +1,15 @@
+/* Build 527: keep routine Product creation to five sections and two channel choices.
+   Every historical audit/recovery control remains reachable on demand. */
+.dd527-more-tools { margin:4px 0 14px; border:1px solid rgba(173,132,87,.45); border-radius:12px; padding:10px 14px; }
+.dd527-more-tools > summary, .dd527-draft-checks > summary { cursor:pointer; font-weight:650; }
+.dd527-more-tools .dd-editor-tabs { margin-top:14px; }
+.dd527-draft-checks { margin:10px 0; padding:10px 12px; border:1px solid rgba(173,132,87,.35); border-radius:10px; }
+.dd527-draft-checks > .dd-product-actions, .dd527-draft-checks .dd-product-actions { margin-top:10px; }
+#dd523Flow #dd523EtsyPost:not([hidden]), #dd523Flow #dd523MarketplacePrepare:not([hidden]) { min-height:46px; font-weight:700; }
+#dd523Flow #dd523Issues:empty { display:none; }
+#productEditorForm .dd523-marketplace[hidden], #productEditorForm #dd523EtsyPost[hidden] { display:none !important; }
+#productEditorForm .dd527-more-tools .dd-editor-tab { font-size:.94rem; }
+@media (max-width:640px) {
+  .dd527-more-tools .dd-editor-tabs { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .dd527-more-tools .dd-editor-tabs button { white-space:normal; }
+}

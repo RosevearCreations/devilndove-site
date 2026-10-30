@@ -33,5 +33,5 @@ export function compareUncertainProductSave521({productId,submitted,saved}={}){
     different,unavailable,matching,fieldSnapshots,
     next:different.length||unavailable.length?
       'Some saved fields differ or could not be independently returned. Choose to keep the current server record, or restore the preserved browser draft for careful review. Nothing will be re-sent automatically.':
-      'Every submitted Product field matches the authoritative server record. Do not repeat the earlier Save; Etsy is a separate manual step.'};
+      'Every submitted Product field matches the authoritative server record. Do not repeat the earlier Save. The saved Etsy ID and gallery can now be reviewed without redoing Product creation.'};
 }
