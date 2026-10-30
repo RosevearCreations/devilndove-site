@@ -4,6 +4,10 @@
 import {assessProductDraft523,LEGACY_OWNER_TRIAL_IDS_523} from './product-destination-gates-523.mjs';
 import {verifySavedEtsyReceipt524,prepareMarketplaceHandoff524} from './product-destination-receipts-524.mjs';
 import {selectedMarketplacePhotos532} from './marketplace-photo-handoff-532.mjs';
+// Build 533: the draft controller MUST finish initializing before this flow
+// evaluates its readiness. Module-script tag order alone does not enforce
+// dependency completion for separate module graphs.
+import './admin-product-etsy-package-v500.mjs?v=533';
 
 const $=id=>document.getElementById(id),form=$('productEditorForm'),root=$('dd523Flow');
 if(form&&root&&window.DDAuth?.apiFetch){
@@ -100,7 +104,7 @@ if(form&&root&&window.DDAuth?.apiFetch){
    const facebookIssues=[...(facebookReview?.issues||[]),...(facebookSourceCheck?.issues||[])];
    if(choice.etsy){
     const controller=window.DDEtsyDraftFlow523;
-    if(!controller)blockers.push('Etsy provider workflow has not loaded; refresh this Product before any POST.');
+    if(!controller)blockers.push('The Etsy controls did not initialize. Open “Already have an Etsy draft?” to inspect the saved ID. If the controls remain unavailable, reload this page once; no Etsy request was sent.');
     else {
      state.provider=await controller.inspect();state.lastListingId=String(state.provider.linked_listing_id||'');
      blockers.push(...(state.provider.issues||[]));
@@ -132,6 +136,7 @@ if(form&&root&&window.DDAuth?.apiFetch){
   const confirmed=await check();
   if(!confirmed||!state.etsyReady||state.lastVerifiedFingerprint!==fingerprint())return;
   const target=state.lastListingId?`update unpublished Etsy draft #${state.lastListingId}`:'create one NEW unpublished Etsy draft';
+  if(!state.lastListingId&&!window.confirm(`Before creating a new Etsy listing, did we check Etsy Shop Manager → Listings → Drafts for this SAME product and confirm an older draft does NOT already exist? Choose Cancel to verify and link the existing Etsy ID.`))return;
   if(!window.confirm(`POST now to ${target} for Product #${id}, using every approved original photo? Nothing will be published. Cancel to review.`))return;
   state.busy=true;state.etsyReady=false;state.unsafe=true;state.unsafeReason='provider-attempt';render();
   postStatus(`Submitting one owner-approved Etsy ${state.lastListingId?'update':'draft creation'} attempt. Do not refresh or retry until its real result is confirmed.`,'warn');
@@ -202,6 +207,12 @@ if(form&&root&&window.DDAuth?.apiFetch){
  }
  $('dd523OpenMedia')?.addEventListener('click',()=>{document.querySelector('[data-editor-tab="media"]')?.click();
   $('productDistribution406')?.scrollIntoView({block:'start',behavior:'smooth'});});
+ $('dd533ExistingDraft')?.addEventListener('click',()=>{
+  const advanced=$('dd500Package')?.closest('details');if(advanced)advanced.open=true;
+  const field=$('dd500ListingId');if(!field)return;
+  field.scrollIntoView({block:'center',behavior:'smooth'});field.focus({preventScroll:true});
+  postStatus('If Etsy already has this product as an unpublished draft, enter its exact Etsy listing ID here. Inspect and link the SAME draft after Etsy confirms it. Do not create a second draft.','warn');
+ });
  reviewButton.addEventListener('click',()=>void check());
  ack.addEventListener('change',render);post.addEventListener('click',()=>void postEtsy());
  manual.addEventListener('click',async()=>{await check();if(state.facebookReady)prepareMarketplace();});

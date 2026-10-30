@@ -387,6 +387,10 @@ jobs:
           node --check public/js/marketplace-photo-handoff-532.mjs
           node --check public/js/marketplace-copy-handoff-532.mjs
           node scripts/release467_build532_existing_product_etsy_manual_handoff.test.mjs
+          node --check public/js/product-photo-framing-policy-533.mjs
+          node --check public/js/admin-product-photo-framing-533.mjs
+          node --check public/js/admin-product-destination-flow-523.mjs
+          node --test scripts/release467_build533_photo_framing_etsy_owner_walkthrough.test.mjs
           node scripts/release467_build499_owner_advanced_tags_media.test.mjs
           node scripts/release467_build497_product53_three_channel_acceptance.test.mjs
 

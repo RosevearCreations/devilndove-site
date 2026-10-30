@@ -32,15 +32,18 @@ try{const x=await call('/api/admin/product-distribution-406?product_id='+encodeU
   const holds=Array.isArray(img.hold_reasons)?img.hold_reasons:[];
   for(const [label,ready] of [['Original photograph and public-use permission',!holds.some(h=>/original|public-use/i.test(h))],
     ['Alt description (Etsy / Marketplace / accessible store)',!holds.some(h=>/alt text/i.test(h))],
-    ['Verified image dimensions ≥800×800',!holds.some(h=>/dimensions/i.test(h))]]){
+    ['Verified image dimensions ≥800×800 (minimum, not crop size)',!holds.some(h=>/dimensions/i.test(h))]]){
    const row=document.createElement('li');row.className=ready?'dd495-ready':'dd495-hold';
    const chip=document.createElement('span');chip.className='dd489-both';chip.textContent='Both channels';
    row.append(chip,document.createTextNode(` ${ready?'✓':'Required —'} ${label}`));requirements.append(row);
   }
   if(holds.length){const warning=document.createElement('p');warning.className='dd495-hold';warning.textContent='Needs attention: '+holds.join('; ');desc.append(warning);}
   const edit=document.createElement('button');edit.type='button';edit.className='btn';edit.dataset.dd495Edit=String(img.product_image_id);edit.textContent='Edit image requirements here';
+  const frame=document.createElement('button');frame.type='button';frame.className='btn';frame.dataset.dd533Frame=String(img.product_image_id);frame.textContent='Choose square framing (optional)';
   const mount=document.createElement('div');mount.dataset.dd495Inline=String(img.product_image_id);
-  desc.append(heading,status,requirements,edit,mount);lab.append(chk,photo,desc);e.gallery.append(lab);
+  const frameMount=document.createElement('div');frameMount.dataset.dd533FrameMount=String(img.product_image_id);
+  const sizeNote=document.createElement('p');sizeNote.className='small';sizeNote.textContent='800 × 800 is our minimum original dimension, not a required square crop. Etsy recommends at least 2000 px on the shortest side. Leave originals as-is unless composition needs editing.';
+  desc.append(heading,status,requirements,sizeNote,edit,frame,mount,frameMount);lab.append(chk,photo,desc);e.gallery.append(lab);
  }
  say('Same canonical Product gallery for Store / Etsy / Marketplace. Channel: '+x.channel+'. Saved mapping: '+chosen.size+
   '. Readiness: '+(x.current_evidence?.ready_for_local_export?'LOCAL EXPORT READY':'HOLD — '+(x.current_evidence?.blockers||[]).join(', '))+
