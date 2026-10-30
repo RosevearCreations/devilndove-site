@@ -20,10 +20,10 @@ test('Etsy checkbox has a fixed intrinsic width, no forced 100%-wide consent box
   assert.doesNotMatch(html.slice(html.indexOf('<body')),/etsy-package-500\.css/);
 });
 test('Product save stays local and Etsy needs a deliberate Create/Update authorization',()=>{
-  assert.match(html,/id="productChannel405Etsy"> Create \/ update an Etsy draft/);
+  assert.match(html,/id="productChannel405Etsy"> Etsy — create or update draft/);
   assert.match(html,/<details id="dd501ChannelRecovery"><summary>Destination recovery/);
   assert.match(html,/id="dd501SaveState"/);
-  assert.match(html,/POST one unpublished Etsy draft/);
+  assert.match(html,/id="dd523EtsyPost" disabled>Create Etsy draft/);
   assert.match(editor,/etsyPreferenceSaved=Boolean\(destinationsSaved&&!newerEdits/);
   assert.match(editor,/etsy_preference_saved:etsyPreferenceSaved,destinations_confirmed:destinationsSaved/);
   assert.doesNotMatch(editor,/sync-after-create:501/);

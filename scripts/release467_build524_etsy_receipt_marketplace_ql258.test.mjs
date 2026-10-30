@@ -26,7 +26,8 @@ test('Marketplace handoff uses all approved canonical originals without posting 
  assert.deepEqual(ready.photos.map(x=>x.id),[401,402,403]);
  assert.equal(prepareMarketplaceHandoff524({...args,images:[photo(401),{...photo(402),alt_text:''}]}).ready,false);
  const page=read('admin/product-editor/index.html'),flow=read('public/js/admin-product-destination-flow-523.mjs');
- for(const token of ['dd524ReadReceipt','dd524ReceiptStatus','dd524MarketplacePhotos','v=524'])assert.ok(page.includes(token),token);
+ for(const token of ['dd524ReadReceipt','dd524ReceiptStatus','dd524MarketplacePhotos'])assert.ok(page.includes(token),token);
+ assert.ok(page.includes('admin-product-destination-flow-523.mjs?v=524')||page.includes('admin-product-destination-flow-523.mjs?v=526'));
  assert.match(flow,/verifySavedEtsyReceipt524/);assert.match(flow,/await readReceipt524\(\{expectedListingId:String\(response\.linked_listing_id\)\}\)/);
  assert.match(flow,/prepareMarketplaceHandoff524/);assert.match(flow,/LEGACY_OWNER_TRIAL_IDS_523\.includes\(id\)/);
  assert.doesNotMatch(flow,/fetch\([^\n]*facebook\.com\/graph/);
