@@ -50,7 +50,7 @@
    permission.value=original.public_use_status||'internal_review';
    approval.append(approvalTitle,permission);
    const metrics=document.createElement('p');metrics.className='small';
-   metrics.textContent=`Current quality score: ${original.quality_score==null?'Not measured':original.quality_score+'/100'} • ${original.acceptance_status||'Not reviewed'} • saved dimensions: ${original.width_px||'?'}×${original.height_px||'?'}. Storefront primary-photo quality has a separate 1200×1200 target; outbound channels require verified dimensions at least 800×800.`;
+   metrics.textContent=`Current quality score: ${original.quality_score==null?'Not measured':original.quality_score+'/100'} • ${original.acceptance_status||'Not reviewed'} • saved dimensions: ${original.width_px||'?'}×${original.height_px||'?'}. 800×800 is a local MINIMUM, not a crop size. Etsy recommends a 2000 px shortest side; these existing photos can remain rectangular.`;
    const save=document.createElement('button');save.className='btn primary';save.type='button';save.textContent='Save this photo & refresh its score';
    const result=document.createElement('p');result.className='small';result.setAttribute('role','status');
    const chosen=[alt,title,caption].map(x=>x.wrap);
