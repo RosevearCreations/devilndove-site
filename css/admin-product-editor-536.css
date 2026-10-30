@@ -1,0 +1,12 @@
+/* Build 536: compact, readable four-stage real owner receipt results. */
+.dd536-evidence{border:1px solid rgba(189,147,249,.36);border-radius:13px;padding:16px;margin:14px 0;background:rgba(34,26,53,.42)}
+.dd536-evidence h5{margin:0 0 12px;color:#eacda5;font-size:1rem}
+.dd536-stages{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:10px}
+.dd536-stages li{padding:12px;border-radius:9px;border:1px solid rgba(212,189,234,.18);min-width:0;overflow-wrap:anywhere}
+.dd536-stages li strong{display:block;margin-bottom:6px}
+.dd536-stages li p{margin:5px 0;line-height:1.48}
+.dd536-stage-ready{background:rgba(11,99,74,.20);border-color:rgba(81,202,156,.38)!important;color:#ddfced}
+.dd536-stage-action{background:rgba(114,71,22,.16);border-color:rgba(225,170,89,.37)!important;color:#ffe9ca}
+.dd536-actions{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}
+.dd536-actions .btn{white-space:normal;text-align:center;min-height:42px}
+@media(max-width:680px){.dd536-stages{grid-template-columns:1fr}.dd536-evidence{padding:11px}}

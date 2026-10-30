@@ -14,6 +14,7 @@ const parse=row=>{try{return JSON.parse(row?.payload_json||'{}');}catch{return {
 function gate(c){const admin=verifiedAdminFromModule(c),db=getDb(c.env);
  return !admin?{error:respond({error:'Verified administrator required.'},401)}:
   !db?{error:respond({error:'D1 unavailable.'},503)}:{admin,db};}
+const currentDb=db=>typeof db.withSession==='function'?db.withSession('first-primary'):db;
 async function source(db,id){
  const [record,claims]=await Promise.all([
   db.prepare('SELECT p.product_id,ps.keywords FROM products p LEFT JOIN product_seo ps ON ps.product_id=p.product_id WHERE p.product_id=? LIMIT 1').bind(id).first(),
@@ -32,11 +33,11 @@ export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
  const url=new URL(c.request.url),id=url.searchParams.get('product_id');
  if(!valid(id))return respond({error:'A saved Product is required.'},400);
  try{
-  const x=await source(g.db,Number(id));if(!x.record)return respond({error:'Product unavailable.'},404);
+  const db=currentDb(g.db),x=await source(db,Number(id));if(!x.record)return respond({error:'Product unavailable.'},404);
   const reply={product_id:Number(id),local_tags:x.prepared.tags,tag_source:x.prepared.source||'shared_product_seo',blockers:x.prepared.blockers,ready:x.prepared.ready,
    unresolved_attempt:Number(x.claims?.claimed||0)!==Number(x.claims?.confirmed||0),provider_contacted:false};
   if(url.searchParams.get('reconcile')!=='1')return respond(reply);
-  const {s,listingId}=await linked(g.db,Number(id)),headers=await existingDraftCredentials486(c.env,s);
+  const {s,listingId}=await linked(db,Number(id)),headers=await existingDraftCredentials486(c.env,s);
   const listing=await verifyExistingDraft486(c.env,s,listingId,headers);
   const remoteTags=Array.isArray(listing.tags)?listing.tags:null;
   return respond({...reply,listing_id:listingId,provider_contacted:true,remote_tags:remoteTags,
@@ -55,12 +56,12 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
    body?.confirm_unpublished_only!==true||body?.confirm_canada_only!==true)
   return respond({error:'Explicit tags, linked draft ID, unique key and Canada-only draft approval required.'},400);
  try{
-  const local=await source(g.db,id);
+  const local=await source(currentDb(g.db),id);
   if(!local.record||!local.prepared.ready||!tagsMatch497(local.prepared.tags,body.reviewed_tags))
    return respond({error:'Saved Product tags have changed or are invalid. Save/review again.',blockers:local.prepared.blockers},409);
   if(Number(local.claims?.claimed)!==Number(local.claims?.confirmed))
    return respond({error:'Previous Etsy tags attempt is unresolved. Compare live Etsy tags; do not retry blindly.'},409);
-  const {s,listingId}=await linked(g.db,id);
+  const {s,listingId}=await linked(currentDb(g.db),id);
   if(listingId!==String(body.listing_id))return respond({error:'The linked draft changed. Nothing sent.'},409);
   const headers=await existingDraftCredentials486(c.env,s);
   const remote=await verifyExistingDraft486(c.env,s,listingId,headers);
