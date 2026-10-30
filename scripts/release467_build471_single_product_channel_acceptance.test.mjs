@@ -23,8 +23,9 @@ function mockBrowser({query='',stored=new Map(),response=null,postFails=false}={
  }};
  const sessionStorage={getItem:k=>stored.get(k)||null,setItem:(k,v)=>stored.set(k,v),removeItem:k=>stored.delete(k)};
  const window={DDAuth,confirm:()=>true};
- const document={getElementById:id=>elements.get(id)||null};
- vm.runInNewContext(source,{document,window,location:{search:query},URLSearchParams,sessionStorage,crypto:{randomUUID:()=>
+ const document={getElementById:id=>elements.get(id)||null,dispatchEvent:()=>true};
+ class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail;}}
+ vm.runInNewContext(source,{document,window,CustomEvent,location:{search:query},URLSearchParams,sessionStorage,crypto:{randomUUID:()=>
    '98765432-1234-4321-9876-123456789abc'},console});
  return {elements,calls,window,stored};
 }
@@ -90,8 +91,8 @@ test('Human-gated source readiness never implies a live listing or unreviewed me
 
 test('The live Product Add page uses the single-flow mount, media handoff and explicit owner gate',()=>{
  for(const token of ['productChannel471Mount','productChannel471Consent','productChannel471Recovery'])assert.ok(page.includes(token),token);
- assert.match(page,/admin-product-creation-flow-471\.js\?v=(?:471|521|523)/);
- assert.match(page,/admin-product-channel-intent-v405\.js\?v=(?:471|521|523|526)/);
+ assert.match(page,/admin-product-creation-flow-471\.js\?v=(?:471|521|523|527)/);
+ assert.match(page,/admin-product-channel-intent-v405\.js\?v=(?:471|521|523|526|527)/);
  assert.match(page,/admin-product-editor-v163\.js\?v=\d+/);
  assert.ok(save.includes('captureForProductSave'));
  assert.ok(save.includes('afterProductSave(savedId,channelSnapshot)'));
