@@ -8,6 +8,7 @@ import {readCanonicalDistributionGallery} from '../_lib/canonicalDistributionGal
 import {approvedR2Key,checkedEtsyBytes,completedImageIds,confirmedEtsyImageReadback497,imageReady,MAX_ETSY_IMAGE_BYTES} from '../_lib/productEtsyImages443.mjs';
 import {assessExistingDraftPhotoGap492} from '../_lib/etsyPhotoGap492.mjs';
 import {verifyExistingDraft486,linkedReceipt506} from './product-etsy-existing-draft.js';
+import {verifiedOwnerPhotoPairs529} from '../_lib/etsyOwnerReadback529.mjs';
 
 const respond=(value,status=200)=>jsonResponse({ok:status<400,build:443,publication_performed:false,
   automatic_retry:false,shipping_modified:false,...value},status,{'Cache-Control':'no-store'});
@@ -107,7 +108,11 @@ export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
     const foreign=receipts.some(row=>String(row.listing_id||'')!==local.listing_id);
     const comparison=foreign?{ready:false,reason:'receipt_listing_identity_changed'}:
       reconcileEtsyPhotoInventory487(remoteImages?.results,receipts);
+    const ownerPairs=verifiedOwnerPhotoPairs529({listingId:local.listing_id,galleryCount:s.galleryCount,images:s.images,
+      remote:remoteImages?.results,receipts});
     return respond({...local,remote_reconciliation:comparison,
+      verified_photo_pairs_529:ownerPairs.pairs,photo_pair_readback_529:{ready:ownerPairs.ready,
+        issues:ownerPairs.issues,confirmed_pairs:ownerPairs.pairs.length},
       photo_gap_492:foreign?{state:'hold',reason:'receipt_listing_identity_changed',provider_write_allowed:false}:
         assessExistingDraftPhotoGap492(remoteImages?.results,receipts,s.images,s.claimed,id),provider_contacted:true});
   }catch{return respond({error:'Etsy photo verification read unavailable. Product photos have not been changed.',
