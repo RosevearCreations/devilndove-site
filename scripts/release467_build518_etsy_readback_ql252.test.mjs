@@ -27,7 +27,7 @@ test('owner verifier does three independent GETs, no automatic photo/metadata re
   for(const path of ['product-etsy-images?product_id=','product-etsy-owner-signoff-504?product_id=',
     'product-etsy-owner-trial-507?product_id='])assert.ok(check[1].includes(path));
   assert.doesNotMatch(check[1],/action:\s*'transfer_one'|action:\s*'update_saved_fields'|action:\s*'create_draft'/);
-  assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=5(?:1[89]|2[0-3])/);
+  assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=5(?:1[89]|2[0-7])/);
   assert.match(html,/etsy-simple-515\.css\?v=5(?:1[89]|2[0-2])/);
   assert.match(html,/Verify \/ retry live draft/);
   const endpoint=read('functions/api/admin/product-etsy-images.js');

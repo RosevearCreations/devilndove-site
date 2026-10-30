@@ -16,7 +16,8 @@ test('Build 497 maps Product SEO comma-separated phrases to valid native Etsy ta
  assert.equal(preparedEtsyTags497('very very very very long').ready,false);
  assert.equal(preparedEtsyTags497('green/gemstone').ready,false);
  assert.equal(preparedEtsyTags497(Array.from({length:14},(_,i)=>'Tag'+i).join(',')).ready,false);
- assert.equal(preparedEtsyTags497('Création, gold™').ready,true);
+ assert.equal(preparedEtsyTags497('Création, gold charm').ready,true);
+ assert.equal(preparedEtsyTags497('Création, gold™').ready,false);
 });
 
 test('Build 497 rejects absent, wrong-draft and malformed provider photo readbacks',()=>{
