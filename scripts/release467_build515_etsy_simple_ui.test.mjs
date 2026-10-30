@@ -31,12 +31,16 @@ test('Product identity displays actual saved D1 Product name, SKU, slug and exac
   assert.match(read('functions/api/admin/product-etsy-existing-draft.js'),/saved_link_readback_confirmed:effective\?\.confirmed===true/);
 });
 
-test('Saved local Product does not auto-dispatch Etsy, while manual send keeps photo and draft guards',()=>{
-  assert.match(html,/Fill in your product, choose the destinations, and press Save Product/);
+test('Verified local Save initiates one owner-confirmed Etsy review; underlying provider send keeps photo and draft guards',()=>{
+  assert.match(html,/Fill in the product, choose the destinations and press Save Product/);
   assert.match(js,/document\.addEventListener\('dd:save-succeeded'/);
   const localBlock=js.slice(js.indexOf("document.addEventListener('dd:save-succeeded'"),
     js.indexOf("document.addEventListener('dd:product-channel-tags-changed'"));
   assert.doesNotMatch(localBlock,/syncAfterSave\(/);
+  const flow=read('public/js/admin-product-destination-flow-523.mjs');
+  assert.match(flow,/dd:save-succeeded/);
+  assert.match(flow,/await postEtsy\(\)/);
+  assert.match(flow,/window\.confirm\(`/);
   assert.match(js,/\$\('dd500Send'\)\.addEventListener\('click'/);
   assert.match(js,/await sendImages\(listingId\)/);
   assert.match(js,/await acceptance\(listingId\)/);

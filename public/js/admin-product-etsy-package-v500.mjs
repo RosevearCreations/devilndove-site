@@ -1542,14 +1542,15 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
   for(const name of ['Consent','LinkConsent','ListingId'])for(const event of ['input','change'])$('dd500'+name).addEventListener(event,()=>{
     if(name==='ListingId'){$('dd500OlderTitleRow').hidden=true;$('dd500OlderTitle').checked=false;state.claim=null;state.claimReview=null;state.photoReview=null;resetOwnerApproval();}show();});
   form.addEventListener('input',event=>{if(event.target.closest('#dd500Package')||event.target.closest('#dd500NewSettings'))return;state.loaded=false;resetOwnerApproval();show();});
-  // Build 515: saving the local Product no longer silently runs a hidden Etsy
-  // upload. The Etsy tab is the explicit place for Create or Update.
+  // Build 527: local Product Save never silently uploads to Etsy. The main
+  // editor can request a draft review afterward, but only a fresh owner
+  // confirmation authorizes the guarded provider Create/Update.
   document.addEventListener('dd:save-succeeded',event=>{
     state.loaded=false;resetOwnerApproval();$('dd500Consent').checked=false;
     if(!state.holdAfterWrite)state.attempted=false;
     saveState(event.detail?.destinations_confirmed===false?
       'Product saved; destination settings need review. No Etsy write attempted.':
-      'Product saved. Open the Etsy tab and choose Create or Update when ready. No automatic Etsy write.','');
+      'Product saved. Checked Etsy drafts now receive a readiness review and final confirmation before one provider action. No unattended Etsy write.','');
     void refresh();
   });
   document.addEventListener('dd:product-loaded',()=>void refresh());
