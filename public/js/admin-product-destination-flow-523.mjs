@@ -9,6 +9,7 @@ if(form&&root&&window.DDAuth?.apiFetch){
  const id=Number(new URLSearchParams(location.search).get('product_id')||0);
  const etsy=$('productChannel405Etsy'),facebook=$('productChannel405Facebook'),ack=$('dd523EtsyAcknowledge');
  const post=$('dd523EtsyPost'),reviewButton=$('dd523Review'),manual=$('dd523MarketplacePrepare');
+ const marketplacePanel=root.querySelector('.dd523-marketplace');
  const message=$('dd523Readiness'),issues=$('dd523Issues'),result=$('dd523PostStatus'),identity=$('dd523Identity');
  const setup=$('dd523EtsySetupMount');
  const receiptStatus=$('dd524ReceiptStatus'),receiptButton=$('dd524ReadReceipt');
@@ -39,7 +40,9 @@ if(form&&root&&window.DDAuth?.apiFetch){
   reviewButton.disabled=state.busy||!id;
   ack.disabled=true; // Retired duplicate checkbox; confirmation stays at draft POST.
   post.disabled=state.busy||!choices.etsy||state.unsafe||legacy||id<1;
+  post.hidden=!choices.etsy;
   manual.disabled=state.busy||!choices.facebook||legacy||id<1;
+  if(marketplacePanel)marketplacePanel.hidden=!choices.facebook;
   post.textContent=state.lastListingId?`Update Etsy draft #${state.lastListingId}`:'Create Etsy draft';
   const p=product();
   identity.textContent=`Product ${id?'#'+id:'not yet saved'} · ${p.name||'Untitled'} · SKU ${p.sku||'not set'} · Slug ${p.slug||'not set'} · Etsy listing ID: ${state.lastListingId||'not linked'}`;
@@ -161,6 +164,28 @@ if(form&&root&&window.DDAuth?.apiFetch){
   $('dd523MarketplaceCopy').hidden=false;
   postStatus(`Prepared manual Marketplace handoff: ${handoff.photos.length} exact approved original(s) for Product #${id}. No Facebook POST or automatic publication performed.`,'ok');
  }
+ // Build 527: after one verified local Save, a checked destination initiates
+ // its review in the same screen. Every Etsy write still requires the owner's
+ // *new* confirm dialog and exact saved listing-ID/remote state checks. There
+ // are no unattended POSTs, browser retries or third-party Facebook writes.
+ async function reviewAfterVerifiedSave527(){
+  if(state.busy||!saved())return;
+  if(etsy.checked){postStatus('Saved Product verified. Checking the linked Etsy draft and originals before asking permission…');
+   await postEtsy();
+   if(facebook.checked&&state.facebookReady)prepareMarketplace();
+  }else if(facebook.checked){await check();if(state.facebookReady)prepareMarketplace();}
+ }
+ let consumedRedirectPrompt527=false;
+ function resumeNewProductReview527(){
+  if(consumedRedirectPrompt527||id<1||!saved())return;
+  const key=`dnd:etsy:after-save-527:${id}`;let receipt=null;
+  try{receipt=JSON.parse(sessionStorage.getItem(key)||'null');}catch{}
+  if(!receipt)return;
+  consumedRedirectPrompt527=true;
+  try{sessionStorage.removeItem(key);}catch{}
+  if(Number(receipt.product_id)!==id||receipt.review_only!==true||Date.now()-Number(receipt.at||0)>10*60*1000||!etsy.checked)return;
+  void reviewAfterVerifiedSave527();
+ }
  $('dd523OpenMedia')?.addEventListener('click',()=>{document.querySelector('[data-editor-tab="media"]')?.click();
   $('productDistribution406')?.scrollIntoView({block:'start',behavior:'smooth'});});
  reviewButton.addEventListener('click',()=>void check());
@@ -171,8 +196,13 @@ if(form&&root&&window.DDAuth?.apiFetch){
  form.addEventListener('input',event=>{if(event.target.closest('#dd523Flow')||event.target.closest('#dd500NewSettings')){if(event.target.closest('#dd500NewSettings'))invalidate();return;}
   if(event.target.matches('input,textarea,select'))invalidate();});
  form.addEventListener('change',event=>{if(event.target.closest('#dd500NewSettings'))invalidate();});
- document.addEventListener('dd:product-loaded',()=>invalidate());
- document.addEventListener('dd:save-succeeded',()=>invalidate());
+ document.addEventListener('dd:product-loaded',()=>{invalidate();queueMicrotask(resumeNewProductReview527);});
+ document.addEventListener('dd:product-channel-loaded',event=>{if(Number(event.detail?.product_id)===id)queueMicrotask(resumeNewProductReview527);});
+ document.addEventListener('dd:save-succeeded',event=>{
+  invalidate();
+  if(Number(event.detail?.product_id)===id&&event.detail?.destinations_confirmed===true&&event.detail?.newer_edits!==true&&
+    (event.detail?.etsy_preference_saved===true||facebook.checked))void reviewAfterVerifiedSave527();
+ });
  document.addEventListener('dd:media-inline-updated',()=>invalidate());
  document.addEventListener('dd:product-channel-tags-changed',()=>invalidate());
  document.addEventListener('dd:etsy-draft-created',event=>{if(Number(event.detail?.product_id)===id){state.lastListingId=String(event.detail.listing_id||'');render();}});

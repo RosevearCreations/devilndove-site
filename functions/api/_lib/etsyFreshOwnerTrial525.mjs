@@ -13,7 +13,7 @@ export function evaluateFreshOwnerTrial525({productId,listingId,claim,product,ga
  if(str(product?.product_id)!==str(id))issues.push('Saved source Product identity does not match.');
  if(str(remoteListing?.listing_id)!==listing||str(remoteListing?.state).toLowerCase()!=='draft')
   issues.push('The actual remote Etsy ID or unpublished draft state differs.');
- if(!Array.isArray(gallery)||gallery.length<1||gallery.length>10)issues.push('A complete source gallery must contain 1–10 originals.');
+ if(!Array.isArray(gallery)||gallery.length<1||gallery.length>20)issues.push('A complete source gallery must contain 1–20 originals.');
  if(!Array.isArray(remoteImages)||remoteImages.length!==gallery.length)issues.push('Etsy image count differs from the full original gallery.');
  if(!Array.isArray(receipts))issues.push('Actual saved Etsy image-transfer receipts were not returned.');
  const sourcePhotos=Array.isArray(gallery)?gallery:[],etsyPhotos=Array.isArray(remoteImages)?remoteImages:[],savedReceipts=Array.isArray(receipts)?receipts:[];

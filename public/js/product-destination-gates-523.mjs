@@ -20,7 +20,7 @@ export function assessCanonicalGallery523(galleries){
     if(image.approved_for_distribution!==true)faults.push('server approval');
     if(faults.length)issues.push(`Photo #${id}: needs ${[...new Set(faults)].join(', ')}.`);
   }
-  if(byId.size>10)issues.push('More than ten original photos; Etsy permits at most ten listing images in this workflow.');
+  if(byId.size>20)issues.push('Etsy permits at most 20 listing photos. Choose which originals to include before sending.');
   return {ready:issues.length===0,count:byId.size,ids:[...byId.keys()],issues};
 }
 

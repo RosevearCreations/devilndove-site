@@ -29,17 +29,17 @@ async function source(db,id,env={}){
     db.prepare('SELECT product_id,name,status FROM products WHERE product_id=? LIMIT 1').bind(id).first(),
     db.prepare("SELECT id,product_id,external_reference,payload_json,status FROM marketplace_syndication_drafts WHERE channel_key='etsy' AND product_id=? AND external_reference IS NOT NULL ORDER BY updated_at DESC LIMIT 1").bind(id).first(),
     readCanonicalDistributionGallery(db,id),
-    db.prepare("SELECT details_json FROM admin_action_audit WHERE action_type IN ('etsy_product_editor_image_443_accepted','etsy_505_owner_existing_image_matched') AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id ASC LIMIT 30").bind(String(id)).all()
+    db.prepare("SELECT details_json FROM admin_action_audit WHERE action_type IN ('etsy_product_editor_image_443_accepted','etsy_505_owner_existing_image_matched') AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id ASC LIMIT 60").bind(String(id)).all()
   ]);
   const receiptRows=accepted?.results||[],done=completedImageIds(receiptRows);
-  const images=(gallery?.images||[]).filter(imageReady).slice(0,10).map(row=>({
+  const images=(gallery?.images||[]).filter(imageReady).map(row=>({
     product_image_id:Number(row.product_image_id),alt_text:String(row.alt_text||'').trim(),
     image_url:row.image_url,transferred:done.has(Number(row.product_image_id)),
     transferable:!!approvedR2Key(row.image_url,id,env)
   }));
-  const claimResult=await db.prepare("SELECT target_key FROM admin_action_audit WHERE action_type='etsy_product_editor_image_443_claimed' AND target_type='product' AND target_key LIKE ? ORDER BY admin_action_audit_id ASC LIMIT 11").bind(`${id}:%`).all();
+  const claimResult=await db.prepare("SELECT target_key FROM admin_action_audit WHERE action_type='etsy_product_editor_image_443_claimed' AND target_type='product' AND target_key LIKE ? ORDER BY admin_action_audit_id ASC LIMIT 41").bind(`${id}:%`).all();
   const claimed=new Set((claimResult?.results||[]).map(row=>String(row.target_key)));
-  return {product,draft,payload:details(draft),images,done,receiptRows,claimed};
+  return {product,draft,payload:details(draft),galleryCount:(gallery?.images||[]).length,images,done,receiptRows,claimed};
 }
 // Build 516: a Product's uniquely saved numeric Etsy ID must not disappear
 // because an older *media* or shipping snapshot lacks a verification flag.
@@ -48,6 +48,7 @@ async function source(db,id,env={}){
 function localView(s){const linked=validId(s.draft?.external_reference);
   const outstanding=[...s.claimed].filter(key=>!s.done.has(Number(key.split(':')[1])));
   return {product_id:Number(s.product?.product_id||0),listing_id:linked?String(s.draft.external_reference):null,
+    gallery_photo_count:s.galleryCount,gallery_limit_exceeded:s.galleryCount>20,
     listing_status:linked?'UNPUBLISHED_DRAFT_RECORDED':'NO_VERIFIED_ETSY_DRAFT',
     local_canada_only_receipt:s.payload?.canada_only_shipping_verified===true,
     images:s.images.map(im=>({...im,hold:outstanding.length>0})),
@@ -120,6 +121,7 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
   const id=Number(b.product_id),imageId=Number(b.product_image_id),key=recordKey(id,imageId);
   try{
     const s=await source(currentDb(g.db),id,c.env);
+    if(s.galleryCount>20)return respond({error:'The complete original Product gallery exceeds Etsy\'s 20-photo limit. Review the gallery; no subset was silently sent.'},409);
     if(!s.product||!validId(s.draft?.external_reference)||s.payload?.publication_performed===true)
       return respond({error:'Only a verified, unpublished Canada-only Etsy Product draft may receive images. Link the exact saved listing ID first.'},409);
     const claimProof=await linkedReceipt506(g.db,id,String(s.draft.external_reference));
@@ -138,6 +140,7 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
     if(String(listing?.listing_id||'')!==listingId||String(listing?.shop_id||'')!==String(a.shop.shop_id)||
       String(listing?.state||'').toLowerCase()!=='draft')return respond({error:'Etsy listing is not our live unpublished draft. Nothing transferred.'},409);
     const remote=remoteImages?.results;
+    if(!Array.isArray(remote)||remote.length>=20)return respond({error:'Etsy already has 20 photos or the full image inventory is unavailable. No additional photo was sent.'},409);
     let receipts=[];try{receipts=s.receiptRows.map(row=>JSON.parse(row.details_json));}catch{}
     const comparison=receipts.some(row=>String(row.listing_id||'')!==listingId)?
       {ready:false,reason:'receipt_listing_identity_changed'}:reconcileEtsyPhotoInventory487(remote,receipts);

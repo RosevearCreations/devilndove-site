@@ -7,9 +7,8 @@
  function update(){
   const chosen=[...(etsy?.checked?['Etsy']:[]),...(facebook?.checked?['Facebook Marketplace']:[])];
   const destination=chosen.length?chosen.join(' + '):'No external channels';
-  const waiting=chosen.length&&!consent?.checked;
   status.textContent=(savedId?'Saved Product #'+savedId:'New Product — not yet saved')+' • '+destination+
-    (waiting?' • Confirm destination preferences before Save':etsy?.checked?' • Etsy draft requires the separate Review and send acknowledgement':facebook?.checked?' • Marketplace preparation only; posting remains manual':' • Devil n Dove source only')+
+    (etsy?.checked?' • Etsy requests confirmation after a verified Product Save':facebook?.checked?' • Marketplace preparation only; posting remains manual':' • Devil n Dove source only')+
     ' • Nothing publishes automatically.';
   media.disabled=!savedId;
  }

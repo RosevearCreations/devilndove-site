@@ -37,11 +37,11 @@ export async function onRequestGet(c){
   const [link,gallery,seo,receipts]=await Promise.all([
    linkedReceipt506(db,productId,String(listingId)),readCanonicalDistributionGallery(db,productId),
    db.prepare('SELECT keywords FROM product_seo WHERE product_id=? LIMIT 1').bind(productId).first(),
-   db.prepare("SELECT details_json FROM admin_action_audit WHERE action_type IN ('etsy_product_editor_image_443_accepted','etsy_505_owner_existing_image_matched') AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id ASC LIMIT 30").bind(String(id)).all()
+   db.prepare("SELECT details_json FROM admin_action_audit WHERE action_type IN ('etsy_product_editor_image_443_accepted','etsy_505_owner_existing_image_matched') AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id ASC LIMIT 60").bind(String(id)).all()
   ]);
   const override=await readOverride499(db,productId,'etsy');
   const tags=override?effectiveEtsyTags499(seo?.keywords,override):preparedEtsyTags497(seo?.keywords);
-  const originals=(gallery.images||[]).filter(imageReady).slice(0,10);
+  const originals=(gallery.images||[]).filter(imageReady).slice(0,20);
   const result={product_id:productId,product_sku:String(s.product.sku||''),product_slug:String(s.product.slug||''),
    listing_id:String(listingId),local_link_confirmed:link.confirmed,local_claim_state:link.claim_state,
    local_receipt_id:link.receipt_id||null,local_claim_count_capped:link.claim_count_capped,

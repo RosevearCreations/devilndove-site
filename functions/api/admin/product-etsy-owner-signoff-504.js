@@ -22,13 +22,13 @@ export async function reviewOwnerEtsy504(c,db,id){
   const listing=await verifyExistingDraft486(c.env,s,listingId,headers);
   const [galleryResult,receiptResult,seo,remoteResult]=await Promise.all([
     readCanonicalDistributionGallery(db,id),
-    db.prepare("SELECT details_json FROM admin_action_audit WHERE action_type IN ('etsy_product_editor_image_443_accepted','etsy_505_owner_existing_image_matched') AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id ASC LIMIT 30").bind(String(id)).all(),
+    db.prepare("SELECT details_json FROM admin_action_audit WHERE action_type IN ('etsy_product_editor_image_443_accepted','etsy_505_owner_existing_image_matched') AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id ASC LIMIT 60").bind(String(id)).all(),
     db.prepare('SELECT keywords FROM product_seo WHERE product_id=? LIMIT 1').bind(id).first(),
     readEtsy486('listings/'+encodeURIComponent(listingId)+'/images',headers)
   ]);
   const override=await readOverride499(db,id,'etsy');
   const tags=override?effectiveEtsyTags499(seo?.keywords,override):preparedEtsyTags497(seo?.keywords);
-  const gallery=(galleryResult.images||[]).filter(imageReady).slice(0,10);
+  const gallery=(galleryResult.images||[]).filter(imageReady).slice(0,20);
   const accepted=(receiptResult.results||[]).map(parse);
   const remoteImages=Array.isArray(remoteResult?.results)?remoteResult.results:[];
   const summary=assessOwnerApproval504({product:s.product,listing,gallery,accepted,

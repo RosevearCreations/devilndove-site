@@ -6,7 +6,7 @@ export function assessEtsyPackage500(distribution, media, tags) {
   const eligible=Array.isArray(media?.images)?media.images:[];
   const issues=[];
   if(!gallery.length)issues.push('Add Product photographs under Media first.');
-  if(gallery.length>10)issues.push('Etsy allows up to ten listing photographs; review the Product gallery.');
+  if(gallery.length>20)issues.push('Etsy allows up to 20 listing photographs; review the Product gallery.');
   if(!gallery.every(x=>Number.isSafeInteger(Number(x.product_image_id))&&Number(x.product_image_id)>0))
     issues.push('Some gallery photographs do not have a saved Product image ID.');
   const ids=gallery.map(x=>Number(x.product_image_id));

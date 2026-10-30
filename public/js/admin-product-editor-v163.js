@@ -191,6 +191,11 @@
   function currentTab(){return document.querySelector('[data-editor-panel]:not([hidden])')?.dataset.editorPanel||'basics';}
   function openTab(id,focusName=''){
     const available=[...document.querySelectorAll('[data-editor-panel]')].some((panel)=>panel.dataset.editorPanel===id);const target=available?id:'basics';
+    // Build 527: deep links and contextual Help can still reach optional tabs
+    // even though the ordinary Product screen keeps them collapsed.
+    if(['buyer','qa','etsy','facebook','advanced'].includes(target)){
+      const more=document.getElementById('dd527MoreTools');if(more)more.open=true;
+    }
     document.querySelectorAll('[data-editor-panel]').forEach((panel)=>panel.hidden=panel.dataset.editorPanel!==target);document.querySelectorAll('[data-editor-tab]').forEach((tab)=>tab.setAttribute('aria-selected',tab.dataset.editorTab===target?'true':'false'));
     document.dispatchEvent(new CustomEvent('dd:editor-tab-opened',{detail:{tab:target,product_id:state.productId}}));
     if(target==='media')loadMedia();
@@ -215,7 +220,7 @@
         // Compare the full Product payload and all returned server fields. A
         // successful GET is not itself proof that every requested field saved.
         try{
-          const {compareUncertainProductSave521}=await import('/public/js/product-save-outcome-521.mjs?v=522');
+          const {compareUncertainProductSave521}=await import('/public/js/product-save-outcome-521.mjs?v=527');
           const verdict=compareUncertainProductSave521({productId:state.productId,submitted:state.pendingSaveCheck,saved:data.product});
           state.review521=verdict;state.pendingSaveCheck=null;
           if(saveReview521)saveReview521.hidden=false;
@@ -357,6 +362,12 @@
       if(!newerEdits){markClean();clearRecovery();}
       else {baseline=submittedFingerprint;refreshDirty();snapshotEdits();}
       if(!state.productId&&savedId){
+        // A just-created Product needs a new page for its canonical gallery.
+        // Carry a one-use *review prompt*, never provider authorization or an
+        // automatic POST, across the redirect to the saved Product identity.
+        if(etsyPreferenceSaved&&!newerEdits)try{
+          sessionStorage.setItem(`dnd:etsy:after-save-527:${savedId}`,JSON.stringify({product_id:savedId,at:Date.now(),review_only:true}));
+        }catch{/* The visible Create Etsy draft button remains available. */}
         if(newerEdits){
           try{sessionStorage.setItem(`dnd:product-editor:recovery:443:${savedId}`,JSON.stringify({version:443,product_id:savedId,saved_at:Date.now(),baseline:submittedFingerprint,values:Object.fromEntries([...form.elements].filter(el=>el.name&&el.type!=='file').map(el=>[el.name,el.value]))}));}
           catch{state.saveNeedsReview=true;setStatus(`Product #${savedId} was created, but newer unsaved edits could not be transferred into browser recovery. Keep this tab open and manually compare with the saved Product. Do not create it again.`,'warn');return;}

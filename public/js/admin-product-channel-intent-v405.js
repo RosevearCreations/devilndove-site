@@ -35,7 +35,8 @@ async function load(){if(busy||!productId)return;if(dirty&&!window.confirm('Disc
  if(pending&&pending.etsy===etsy.checked&&pending.facebook===facebook.checked)clearPending(productId);
  if(recovery)recovery.hidden=!pending||(pending.etsy===etsy.checked&&pending.facebook===facebook.checked);
  if(recovery&&!recovery.hidden&&el('dd501ChannelRecovery'))el('dd501ChannelRecovery').open=true;
- say(params.get('destination_save')==='unconfirmed'?'Product was created, but destination saving was NOT confirmed. The displayed choices are the current saved state; review them before proceeding.':x.preferences.configured?'Saved destination preferences loaded. Use Review and send at the top for an owner-confirmed Etsy draft POST.':'No channel preference saved; channels remain OFF until you enable and save them.');}
+ say(params.get('destination_save')==='unconfirmed'?'Product was created, but destination saving was NOT confirmed. The displayed choices are the current saved state; review them before proceeding.':x.preferences.configured?'Saved destination preferences loaded. Etsy will ask before sending an unpublished draft.':'No channel preference saved; channels remain OFF until you enable and save them.');
+ document.dispatchEvent(new CustomEvent('dd:product-channel-loaded',{detail:{product_id:productId,etsy:etsy.checked,facebook:facebook.checked}}));}
  catch(e){say('Cannot verify saved channel choices: '+e.message+'. Change nothing until reloaded.');loaded=false;}
  finally{busy=false;apply();}}
 async function saveFor(id,frozen){let choice;
