@@ -7,7 +7,7 @@ import {selectedMarketplacePhotos532} from './marketplace-photo-handoff-532.mjs'
 // Build 533: the draft controller MUST finish initializing before this flow
 // evaluates its readiness. Module-script tag order alone does not enforce
 // dependency completion for separate module graphs.
-import './admin-product-etsy-package-v500.mjs?v=533';
+import './admin-product-etsy-package-v500.mjs?v=528';
 
 const $=id=>document.getElementById(id),form=$('productEditorForm'),root=$('dd523Flow');
 if(form&&root&&window.DDAuth?.apiFetch){

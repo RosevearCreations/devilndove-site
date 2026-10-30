@@ -43,8 +43,8 @@ test('Build 533 retains one canonical gallery, displays visual editor and explic
 });
 test('Build 533 requires completed Etsy provider module initialization and existing draft check',()=>{
  const html=read('admin/product-editor/index.html'),flow=read('public/js/admin-product-destination-flow-523.mjs');
- assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=533/);
- assert.match(flow,/import '\.\/admin-product-etsy-package-v500\.mjs\?v=533';/);
+ assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=528/);
+ assert.match(flow,/import '\.\/admin-product-etsy-package-v500\.mjs\?v=528';/);
  assert.match(flow,/Already have an Etsy draft/);
  assert.match(flow,/state\.lastListingId&&?\!?window\.confirm|!state\.lastListingId&&!window\.confirm/);
  assert.match(flow,/dd533ExistingDraft/);
