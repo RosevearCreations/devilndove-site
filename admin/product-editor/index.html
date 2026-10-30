@@ -26,6 +26,7 @@
   <link rel="stylesheet" href="/css/admin-product-editor-531.css?v=531"/>
   <link rel="stylesheet" href="/css/admin-product-editor-532.css?v=532"/>
   <link rel="stylesheet" href="/css/admin-product-editor-533.css?v=533"/>
+  <link rel="stylesheet" href="/css/admin-product-editor-534.css?v=534"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -35,7 +36,7 @@
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
-      <div><p class="eyebrow">Devil n Dove • Build 533</p><h1 id="productEditorTitle">Product Editor</h1><p>One saved item, one photo gallery, one Etsy draft ID. Edit and Save Product, then confirm its Etsy draft in the same screen.</p></div>
+      <div><p class="eyebrow">Devil n Dove • Build 534</p><h1 id="productEditorTitle">Product Editor</h1><p>One saved item, one photo gallery, one Etsy draft ID. Edit and Save Product, then confirm its Etsy draft in the same screen.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
 
@@ -125,6 +126,15 @@
         <div class="dd523-flow" id="dd523Flow" aria-labelledby="dd523Title">
           <h3 id="dd523Title">Create or update selected draft</h3>
           <p class="small" id="dd523Identity" role="status" aria-live="polite">Save the Product to see its ID, SKU, slug and returned Etsy listing ID here.</p>
+          <section id="dd534HistoricalDraft" class="dd534-owner-path" hidden aria-labelledby="dd534HistoricalTitle">
+            <h4 id="dd534HistoricalTitle">This soap was previously sent to Etsy</h4>
+            <p id="dd534HistoricalDraftMessage" class="small" role="status" aria-live="polite"></p>
+            <div class="dd-product-actions"><button class="btn primary" type="button" id="dd534InspectHistorical">Inspect earlier Etsy draft and link it</button><a class="btn" href="https://www.etsy.com/your/shops/me/listings/drafts" target="_blank" rel="noopener noreferrer">Check my Etsy Drafts</a></div>
+            <p class="small">The historical ID is a lead, not a confirmed current record. The existing-draft action verifies Etsy ownership, unpublished status, Canada-only shipping and the actual Product before linking. It does not create a second listing.</p>
+          </section>
+          <div class="dd534-quick-fixes"><strong>Complete the visible owner checks:</strong><div class="dd-product-actions"><button type="button" class="btn" id="dd534GoTags">1. Add and save search tags</button><button type="button" class="btn" id="dd534GoProcessing">2. Select verified processing profile (new drafts)</button></div><p class="small">For an already-linked draft, Etsy does not require first-time category, shipping or processing setup again. To create a new one, load live Etsy choices and select category, <strong>Canada-only</strong> shipping and a verified processing profile. Keep actual measured parcel weight and dimensions.</p></div>
+          <p class="dd534-readback small" id="dd534SetupReadback" role="status" aria-live="polite">Current category, shipping and processing choices appear here after the Etsy controls load.</p>
+          <p class="small">All approved Product gallery originals are shared across our website, Etsy and Marketplace. <strong>800 × 800 is our minimum, not a required crop.</strong> Use Edit original photos to frame the composition. Your chosen originals must be saved and approved before Etsy transfer; photos are never silently replaced.</p>
           <details class="dd527-draft-checks"><summary>Optional: check the saved Etsy ID, original photos or settings</summary>
             <div class="dd524-receipt"><button type="button" class="btn" id="dd524ReadReceipt">Verify saved Etsy ID (read only)</button><p class="small" id="dd524ReceiptStatus" role="status" aria-live="polite">Primary saved Product → Etsy receipt has not been rechecked.</p></div>
             <div class="dd-product-actions"><button type="button" class="btn" id="dd523Review" disabled>Check images &amp; Etsy settings</button><button type="button" class="btn" id="dd523OpenMedia">Edit original photos</button><button type="button" class="btn" id="dd533ExistingDraft">Already have an Etsy draft? Verify its ID</button></div>
@@ -927,7 +937,7 @@
   <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
   <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
   <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=528"></script>
-  <script type="module" src="/public/js/admin-product-destination-flow-523.mjs?v=533"></script>
+  <script type="module" src="/public/js/admin-product-destination-flow-523.mjs?v=534"></script>
   <script type="module" src="/public/js/admin-product-photo-framing-533.mjs?v=533"></script>
   <script type="module" src="/public/js/admin-product-etsy-owner-trial-525.mjs?v=525"></script>
   <script type="module" src="/public/js/admin-product-etsy-closure-530.mjs?v=530"></script>
