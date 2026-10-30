@@ -55,6 +55,7 @@ if(check&&input&&status&&results&&window.DDAuth?.apiFetch){
      throw Error('The exact owner receipt was not confirmed.');
     feedback.textContent=response.already_recorded?'This exact evidence already had an owner receipt. No new write.':
      'Owner receipt recorded for the exact Etsy draft. Product and Etsy listing were not modified or published.';
+    document.dispatchEvent(new CustomEvent('dd:owner-trial-accepted-531',{detail:{product_id:id,listing_id:readback.listing_id,confirmed:true}}));
     label.remove();confirm.remove();
    }catch(error){feedback.textContent=`HOLD — ${String(error.message||'Receipt outcome unknown').slice(0,250)}. Run a fresh read-only check before considering another owner action. No automatic retry.`;}
   });
@@ -82,9 +83,13 @@ if(check&&input&&status&&results&&window.DDAuth?.apiFetch){
      const closure=assessSoapClosure530({productId:id,readback,content,save});
      if(closure.state!=='HOLD')cleared++;
      render(id,card,readback,content,save,closure);
-    }catch(error){line(card,`HOLD — ${String(error.message||'Unverified Product/Etsy readback').slice(0,230)}. No Etsy or Product write attempted.`);}
+     document.dispatchEvent(new CustomEvent('dd:owner-trial-product-531',{detail:{product_id:id,readback,content,save,closure}}));
+    }catch(error){const reason=String(error.message||'Unverified Product/Etsy readback').slice(0,230);
+     line(card,`HOLD — ${reason}. No Etsy or Product write attempted.`);
+     document.dispatchEvent(new CustomEvent('dd:owner-trial-product-531',{detail:{product_id:id,failed_reason:reason}}));}
    }
    status.textContent=`Review complete: ${cleared}/${chosen.ids.length} Products have matching current Etsy draft, image and tag evidence. Owner acceptance is separate and explicit. Missing browser Save history never proves a failed POST succeeded.`;
+   document.dispatchEvent(new CustomEvent('dd:owner-trial-complete-531',{detail:{ids:chosen.ids}}));
   }catch(error){status.textContent=`HOLD — Etsy OAuth/shop receipt unavailable: ${String(error.message||'connection unavailable').slice(0,250)}. No Product or listing write.`;}
   finally{busy=false;check.disabled=false;}
  });

@@ -380,6 +380,9 @@ jobs:
           node --check functions/api/admin/product-etsy-owner-signoff-504.js
           node --check public/js/admin-product-etsy-closure-530.mjs
           node scripts/release467_build530_three_soap_closure.test.mjs
+          node --check public/js/admin-product-owner-trial-531.mjs
+          node --check public/js/admin-product-etsy-closure-530.mjs
+          node scripts/release467_build531_owner_trial_marketplace_readiness.test.mjs
           node scripts/release467_build499_owner_advanced_tags_media.test.mjs
           node scripts/release467_build497_product53_three_channel_acceptance.test.mjs
 

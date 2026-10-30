@@ -58,7 +58,7 @@ test('Build 530 owner acceptance is a separate human action with server-side fre
  const frontend=read('public/js/admin-product-etsy-closure-530.mjs');
  const api=read('functions/api/admin/product-etsy-owner-signoff-504.js');
  const deploy=read('.github/workflows/production-pages-deploy-current.yml');
- assert.match(html,/Devil n Dove • Build 530/);
+ assert.match(html,/Devil n Dove • Build 53[01]/);
  assert.match(html,/id="dd529Panel"/);
  assert.match(html,/admin-product-etsy-closure-530\.mjs\?v=530/);
  assert.doesNotMatch(html,/src="\/public\/js\/admin-product-etsy-readback-529\.mjs/);
@@ -75,5 +75,5 @@ test('Build 530 owner acceptance is a separate human action with server-side fre
  assert.match(api,/tag_readback_530:tagReadback/);
  assert.match(api,/code:'owner_evidence_changed_530'/);
  assert.match(api,/verified_canada_only:true/);
- assert.match(deploy,/"build":530/);
+ assert.match(deploy,/"build":53[01]/);
 });
