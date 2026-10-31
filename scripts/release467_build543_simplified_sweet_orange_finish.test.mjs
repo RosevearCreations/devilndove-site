@@ -12,16 +12,18 @@ test('Build 543 saves Product edits even when the legacy scent is mismatched, wi
   assert.match(ui,/renderRecipe\(\{changed:true\}\)/);
 });
 
-test('Build 543 shows two steps to reuse the existing unpublished draft and its original Product photos',()=>{
-  const page=file('admin/product-editor/index.html'),ui=file('public/js/admin-product-simple-540.mjs'),css=file('css/admin-product-editor-543.css');
+test('Build 544 displays independent connection and photograph steps unaffected by legacy hidden controls',()=>{
+  const page=file('admin/product-editor/index.html'),ui=file('public/js/admin-product-simple-540.mjs'),flow=file('public/js/product-editor-etsy-544.mjs');
   assert.match(page,/Finish our Etsy draft/);
-  assert.match(page,/id="dd543ExistingDraftMount"/);
-  assert.match(page,/id="dd541PhotosMount"/);
+  assert.match(page,/id="dd544ConnectHeading"/);
+  assert.match(page,/id="dd544PhotosHeading"/);
   assert.match(page,/id="dd543OrangeSuggestion"/);
-  assert.match(ui,/linkMount\.append\(linkPanel\)/);
-  assert.match(ui,/photoMount\.append\(photoPanel\)/);
-  assert.match(ui,/dd:etsy-existing-draft-linked/);
-  assert.match(css,/\.dd543-simple-step/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":543/);
+  assert.doesNotMatch(ui,/linkMount\.append\(linkPanel\)/);
+  assert.doesNotMatch(ui,/photoMount\.append\(photoPanel\)/);
+  assert.match(flow,/action:'inspect_listing'/);
+  assert.match(flow,/action:'link_existing'/);
+  assert.match(flow,/verified_remote_readback!==true/);
+  assert.match(flow,/state\.hold=true/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":544/);
   assert.doesNotMatch(ui,/action:'transfer_one'/);
 });

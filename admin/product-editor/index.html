@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Product Editor — Devil n Dove Admin</title>
   <meta name="description" content="Dedicated low-read single-Product editor for Devil n Dove."/>
-  <meta name="dnd-build-identity" content="Devil n Dove • Build 543"/>
+  <meta name="dnd-build-identity" content="Devil n Dove • Build 544"/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
   <link rel="stylesheet" href="/css/admin-product-v162.css?v=178"/>
@@ -281,7 +281,11 @@
         <div id="productResourcesAdminMount" data-manual-load="true"></div>
       </section>
 
-      <section class="dd-editor-panel dd540-publish-panel" data-editor-panel="publishing" hidden><div class="dd540-section-head"><div><h2>Finish our Etsy draft</h2><p class="small">Two steps: connect our existing Sweet Orange draft, then send the three approved Product photos. Nothing is published automatically.</p></div><span class="dd540-simple-badge">Draft only</span></div><div id="dd540DestinationMount"></div><div id="dd543ExistingDraftMount" class="dd543-simple-step" aria-label="Connect existing Sweet Orange Etsy draft"></div><div id="dd541PhotosMount" class="dd541-photo-step dd543-simple-step" aria-label="Transfer the three Product photos"></div><details class="dd543-more-checks"><summary>More checks and listing text updates</summary><p class="small" id="dd540PublishingStatus" role="status" aria-live="polite">Our existing draft is preserved.</p><div class="dd540-publishing-actions"><button class="btn" type="button" id="dd540CheckDraft">Check Etsy draft</button><button class="btn" type="button" id="dd542OwnerVerify">Verify saved recipe &amp; Etsy photos</button><button class="btn primary" type="button" id="dd540UpdateDraft">Update existing Etsy draft</button></div><p class="small" id="dd542OwnerStatus" role="status" aria-live="polite">Owner verification is read-only.</p></details><p class="small">We keep draft #4601705477 unpublished until we approve it on Etsy.</p></section>
+      <section class="dd-editor-panel dd540-publish-panel" data-editor-panel="publishing" hidden><div class="dd540-section-head"><div><h2>Finish our Etsy draft</h2><p class="small">Connect the draft we already made, then send approved photographs. We never create or publish a second listing here.</p></div><span class="dd540-simple-badge">Draft only</span></div><div id="dd540DestinationMount"></div>
+      <div id="dd544EtsyFlow" class="dd544-flow">
+        <section class="dd544-step" aria-labelledby="dd544ConnectHeading"><h3 id="dd544ConnectHeading">1. Connect our existing Etsy draft</h3><p class="small">This checks the actual Etsy listing and saves its connection to this Product. It does not publish or change Etsy.</p><label for="dd544Listing">Existing Etsy listing number</label><input id="dd544Listing" class="input" inputmode="numeric" autocomplete="off" placeholder="Etsy draft listing ID"/><label class="dd544-check"><input type="checkbox" id="dd544Exact"/> I checked that this number is our existing, unpublished Canada-only Etsy draft.</label><p id="dd544ConnectStatus" role="status" aria-live="polite">Checking saved draft connection…</p><p id="dd544Preview" class="small"></p><label class="dd544-check" id="dd544OlderWrap" hidden><input type="checkbox" id="dd544Older"/> The older Etsy title is different, but I checked that it is this exact Product.</label><div class="dd544-actions"><button type="button" class="btn" id="dd544Inspect">Verify existing draft</button><button type="button" class="btn primary" id="dd544Link" disabled>Connect verified draft</button></div></section>
+        <section class="dd544-step" aria-labelledby="dd544PhotosHeading"><h3 id="dd544PhotosHeading">2. Send our approved Product photographs</h3><p class="small">Only approved original photographs are offered. Every upload is independently checked against the existing unpublished Etsy draft; uncertain uploads are never retried automatically.</p><div id="dd544PhotosList" aria-live="polite"><p>Loading saved Product photographs…</p></div><p id="dd544PhotosStatus" role="status" aria-live="polite">Waiting for the confirmed draft connection.</p><label class="dd544-check"><input type="checkbox" id="dd544Consent"/> I reviewed these photographs and authorize sending them to this existing unpublished Canada-only Etsy draft.</label><div class="dd544-actions"><button type="button" class="btn" id="dd544Refresh">Refresh draft and photos</button><button type="button" class="btn primary" id="dd544Send" disabled>Send approved photos to Etsy draft</button></div></section>
+      </div><details class="dd543-more-checks"><summary>Advanced listing checks</summary><p class="small" id="dd540PublishingStatus" role="status" aria-live="polite">Our existing draft is preserved.</p><div class="dd540-publishing-actions"><button class="btn" type="button" id="dd540CheckDraft">Check Etsy draft</button><button class="btn" type="button" id="dd542OwnerVerify">Verify saved recipe &amp; Etsy photos</button><button class="btn primary" type="button" id="dd540UpdateDraft">Update existing Etsy draft</button></div><p class="small" id="dd542OwnerStatus" role="status" aria-live="polite">Owner verification is read-only.</p></details><p class="small">Publishing happens only after we approve the draft in Etsy.</p></section>
 
       <section class="dd-editor-panel" data-editor-panel="buyer" hidden>
         <div class="dd-products-browser-heading">
@@ -1023,6 +1027,8 @@
   <script src="/public/js/admin-product-editor-layout-526.js?v=526"></script>
   <script type="module" src="/public/js/admin-product-ingredients-539.mjs?v=539"></script>
   <script type="module" src="/public/js/admin-product-simple-540.mjs?v=543"></script>
+  <script type="module" src="/public/js/product-editor-etsy-544.mjs?v=544"></script>
+  <link rel="stylesheet" href="/css/product-editor-etsy-544.css?v=544"/>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">
 <script defer src="/public/js/admin-brand-v3-set17.js?v=17"></script>
 </body>
