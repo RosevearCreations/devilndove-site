@@ -81,6 +81,6 @@ test('Build 554 preserves read-only dashboard and exact release marker',()=>{
   assert.match(page,/This guide never detects a second device/);
   assert.match(client,/dd:owner-review-recorded-554/);
   assert.doesNotMatch(client,/fetch\(|localStorage|sessionStorage|DELETE FROM|UPDATE runtime_incidents/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:554|555)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:554|555|556)/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build554_owner_walkthrough_followup\.test\.mjs/);
 });

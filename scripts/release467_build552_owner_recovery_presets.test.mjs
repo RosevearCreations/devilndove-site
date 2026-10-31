@@ -17,7 +17,7 @@ test('Build 552 retains older controls in Advanced and offers explicit owner evi
   assert.match(ui,/application\/json/);
   assert.match(ui,/owner_reported_not_independent_device_proof/);
   assert.doesNotMatch(ui,/DELETE|localStorage/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:552|553|554|555)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:552|553|554|555|556)/);
 });
 
 test('Build 552 follow-up presets filter the bounded read-only incident list',()=>{
