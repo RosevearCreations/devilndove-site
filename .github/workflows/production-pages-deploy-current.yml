@@ -293,7 +293,7 @@ jobs:
           ! grep -q 'devilndove-toolshed-images-dev' wrangler.toml
           ! grep -q 'devilndove-caip-media-dev' wrangler.toml
           # Build 453: immutable public marker, generated from this exact approved main run.
-          printf '{"source_sha":"%s","branch":"main","workflow_run_id":"%s","build":544}' "${GITHUB_SHA}" "${GITHUB_RUN_ID}" > release-version.json
+          printf '{"source_sha":"%s","branch":"main","workflow_run_id":"%s","build":545}' "${GITHUB_SHA}" "${GITHUB_RUN_ID}" > release-version.json
           python -m json.tool release-version.json > /dev/null
           npx --yes wrangler@4.128.0 pages deploy . \
             --project-name=devilndove-site \
@@ -435,6 +435,21 @@ jobs:
           print(json.dumps(proof,indent=2,sort_keys=True))
           PY
 
+      - name: Build 545 verify critical admin pages and report intermittent origin timeouts
+        run: |
+          python scripts/release467_build545_admin_route_probe.test.py
+          python scripts/production_admin_route_probe_545.py --base-url "${PROD_LIVE_BASE}" --output /tmp/production-admin-route-545.json
+          python - <<'PY'
+          import json,os
+          report=json.load(open('/tmp/production-admin-route-545.json'))
+          lines=['### Build 545 Admin Route Availability','',f"Critical route gate: {report['status']}"]
+          for name,row in report['routes'].items():
+              lines.append(f"- {name}: {row['status']} ({row['attempts']} attempt(s)) {row['last_error']}")
+          if report['degraded_routes']:
+              lines.append('Known degraded routes remain unresolved and are **not** represented as healthy.')
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as summary:summary.write('\n'.join(lines)+'\n')
+          PY
+
       - name: Build 431 prove live exact source version on custom domain
         shell: bash
         run: |
@@ -485,6 +500,7 @@ jobs:
             /tmp/production-smoke.json
             /tmp/production-release-receipt.json
             /tmp/production-live-version.json
+            /tmp/production-admin-route-545.json
           retention-days: 90
           if-no-files-found: error
 
