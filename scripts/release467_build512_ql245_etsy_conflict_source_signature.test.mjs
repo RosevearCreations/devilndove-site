@@ -64,7 +64,9 @@ test('Build512 checks the actual Ed25519 canonical source signature against an i
  assert.equal(good.connection_state,'DISCONNECTED');
  assert.equal((await inspectQL245Source512({...input,env:{}})).accepted,false);
  assert.equal((await inspectQL245Source512({...input,env:{ROSEVEAR_QL245_TRUSTED_DEVILNDOVE_SPKI_SHA256:'0'.repeat(64)}})).accepted,false);
- assert.equal((await inspectQL245Source512({...input,signature:'A'+signature.slice(1)})).accepted,false);
+ const tamperedSignature=(signature[0]==='A'?'B':'A')+signature.slice(1);
+ assert.notEqual(tamperedSignature,signature,'negative signature fixture must always alter the signed bytes');
+ assert.equal((await inspectQL245Source512({...input,signature:tamperedSignature})).accepted,false);
  assert.equal((await inspectQL245Source512({...input,payload:{...payload,business_id:'yw'}})).accepted,false);
  assert.equal((await inspectQL245Source512({...input,payload:{...payload,connection_state:'CONNECTED'}})).accepted,false);
  assert.equal((await inspectQL245Source512({...input,payload:{...payload,source_revision:'fake'}})).accepted,false);
