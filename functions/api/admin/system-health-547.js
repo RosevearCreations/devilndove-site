@@ -37,19 +37,26 @@ export async function onRequestPost(context){const {user,db,id}=await auth(conte
       const older=cleanSamples(json(existing?.filter_json,{}).samples,{fresh:false})||[];
       const merged=compact([...older,...incoming]);
       await db.prepare(`INSERT INTO admin_command_center_saved_views (view_key,view_label,view_area,filter_json,view_status,created_by_user_id) VALUES (?,? ,?,?,'active',?) ON CONFLICT(view_key) DO UPDATE SET filter_json=excluded.filter_json,updated_at=CURRENT_TIMESTAMP WHERE created_by_user_id=excluded.created_by_user_id AND view_area=excluded.view_area`).bind(keyFor(id),'System health samples',AREA,JSON.stringify({samples:merged}),id).run();
+      const saved=await db.prepare(`SELECT filter_json FROM admin_command_center_saved_views WHERE view_key=? AND view_area=? AND created_by_user_id=? LIMIT 1`).bind(keyFor(id),AREA,id).first();
+      const verified=cleanSamples(json(saved?.filter_json,{}).samples,{fresh:false})||[];
+      const allConfirmed=incoming.every(sample=>verified.some(row=>row.path===sample.path&&row.at===sample.at&&row.status===sample.status&&row.ms===sample.ms));
+      if(!allConfirmed)return jsonResponse({ok:false,error:'Saved history receipt not confirmed. Reload before any retry.',readback_confirmed:false},409);
       await auditAdminAction(context.env,context.request,user,{action_type:'system_health_samples_saved_547',target_type:'admin_command_center_saved_views',target_key:keyFor(id),details:{sample_count:incoming.length,history_count:merged.length}});
-      return jsonResponse({ok:true,saved_count:incoming.length,history_count:merged.length});
+      return jsonResponse({ok:true,saved_count:incoming.length,history_count:verified.length,readback_confirmed:true,verified_last_at:verified.at(-1)?.at||null});
     }
     if(action==='save_view'){
-      const label=String(body.label||'').trim().slice(0,55),routes=Array.isArray(body.routes)?body.routes.filter(x=>PATHS.has(x)).slice(0,5):[],severity=String(body.severity||'all');
-      if(!label||!routes.length||!['all','critical','error','warning','info'].includes(severity))return jsonResponse({ok:false,error:'Choose a name, valid routes, and a severity filter.'},400);
+      const label=String(body.label||'').trim().slice(0,55),routes=Array.isArray(body.routes)?body.routes.filter(x=>PATHS.has(x)).slice(0,5):[],severity=String(body.severity||'all'),review=String(body.review||'all');
+      if(!label||!routes.length||!['all','critical','error','warning','info'].includes(severity)||!['all','open','closed'].includes(review))return jsonResponse({ok:false,error:'Choose a name, valid routes, severity and review status.'},400);
       const slug=label.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,45);if(!slug)return jsonResponse({ok:false,error:'View name must contain a letter or number.'},400);
       const key=`system-health-preset-${id}-${slug}`;
       const count=await db.prepare(`SELECT COUNT(*) AS total FROM admin_command_center_saved_views WHERE view_area=? AND created_by_user_id=? AND view_status='active'`).bind(PRESET,id).first();
       if(Number(count?.total||0)>=8){const found=await db.prepare(`SELECT view_key FROM admin_command_center_saved_views WHERE view_key=? AND created_by_user_id=?`).bind(key,id).first();if(!found)return jsonResponse({ok:false,error:'Maximum 8 saved views. Reuse an existing name.'},409);}
-      await db.prepare(`INSERT INTO admin_command_center_saved_views (view_key,view_label,view_area,filter_json,view_status,created_by_user_id) VALUES (?,?,?,?,'active',?) ON CONFLICT(view_key) DO UPDATE SET view_label=excluded.view_label,filter_json=excluded.filter_json,updated_at=CURRENT_TIMESTAMP WHERE created_by_user_id=excluded.created_by_user_id AND view_area=excluded.view_area`).bind(key,label,PRESET,JSON.stringify({routes,severity}),id).run();
-      await auditAdminAction(context.env,context.request,user,{action_type:'system_health_view_saved_547',target_type:'admin_command_center_saved_views',target_key:key,details:{label,route_count:routes.length,severity}});
-      return jsonResponse({ok:true,key,label});
+      await db.prepare(`INSERT INTO admin_command_center_saved_views (view_key,view_label,view_area,filter_json,view_status,created_by_user_id) VALUES (?,?,?,?,'active',?) ON CONFLICT(view_key) DO UPDATE SET view_label=excluded.view_label,filter_json=excluded.filter_json,updated_at=CURRENT_TIMESTAMP WHERE created_by_user_id=excluded.created_by_user_id AND view_area=excluded.view_area`).bind(key,label,PRESET,JSON.stringify({routes,severity,review}),id).run();
+      const saved=await db.prepare(`SELECT view_label,filter_json FROM admin_command_center_saved_views WHERE view_key=? AND view_area=? AND created_by_user_id=? LIMIT 1`).bind(key,PRESET,id).first();
+      const filters=json(saved?.filter_json,{}),confirmed=saved?.view_label===label&&filters.severity===severity&&filters.review===review&&JSON.stringify(filters.routes)===JSON.stringify(routes);
+      if(!confirmed)return jsonResponse({ok:false,error:'Saved view receipt not confirmed. Reload before retrying.',readback_confirmed:false},409);
+      await auditAdminAction(context.env,context.request,user,{action_type:'system_health_view_saved_547',target_type:'admin_command_center_saved_views',target_key:key,details:{label,route_count:routes.length,severity,review}});
+      return jsonResponse({ok:true,key,label,readback_confirmed:true,filters});
     }
     return jsonResponse({ok:false,error:'Unknown action.'},400);
   }catch(error){return jsonResponse({ok:false,error:'Could not save shared monitoring data.',detail:String(error?.message||'').slice(0,180)},503);}

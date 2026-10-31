@@ -427,6 +427,12 @@ jobs:
           node --check functions/api/admin/system-health-547.js
           node --test scripts/release467_build547_shared_health.test.mjs
 
+      - name: Build 548 history readback and incident filter owner checkpoint
+        run: |
+          node --check public/js/admin-system-health-547.js
+          node --check functions/api/admin/system-health-547.js
+          node --test scripts/release467_build548_owner_acceptance.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
