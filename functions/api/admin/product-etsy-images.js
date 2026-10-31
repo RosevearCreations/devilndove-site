@@ -9,6 +9,7 @@ import {approvedR2Key,checkedEtsyBytes,completedImageIds,confirmedEtsyImageReadb
 import {assessExistingDraftPhotoGap492} from '../_lib/etsyPhotoGap492.mjs';
 import {verifyExistingDraft486,linkedReceipt506} from './product-etsy-existing-draft.js';
 import {verifiedOwnerPhotoPairs529} from '../_lib/etsyOwnerReadback529.mjs';
+import {SWEET_ORANGE_558} from '../../../public/js/sweet-orange-558.mjs';
 
 const respond=(value,status=200)=>jsonResponse({ok:status<400,build:443,publication_performed:false,
   automatic_retry:false,shipping_modified:false,...value},status,{'Cache-Control':'no-store'});
@@ -154,6 +155,15 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
     if(s.galleryCount>20)return respond({error:'The complete original Product gallery exceeds Etsy\'s 20-photo limit. Review the gallery; no subset was silently sent.'},409);
     if(!s.product||!validId(s.draft?.external_reference)||s.payload?.publication_performed===true)
       return respond({error:'Only a verified, unpublished Canada-only Etsy Product draft may receive images. Link the exact saved listing ID first.'},409);
+    // Build 558: Sweet Orange's owner-approved three originals and the exact
+    // existing listing are the only valid targets. An extra gallery photo or
+    // a different saved listing is a HOLD, not an implicit publishing choice.
+    if(id===SWEET_ORANGE_558.productId&&(
+      String(s.draft.external_reference)!==SWEET_ORANGE_558.listingId||
+      !SWEET_ORANGE_558.photoIds.includes(imageId)||s.galleryCount!==SWEET_ORANGE_558.photoIds.length||
+      s.images.length!==SWEET_ORANGE_558.photoIds.length||
+      !SWEET_ORANGE_558.photoIds.every(expected=>s.images.some(im=>im.product_image_id===expected&&im.transferable))))
+      return respond({error:'Sweet Orange must use its exact existing Etsy draft and approved original photos #342, #341 and #343. Review the Product gallery; nothing was uploaded.'},409);
     const claimProof=await linkedReceipt506(g.db,id,String(s.draft.external_reference));
     if(!claimProof.confirmed)return respond({error:'The Etsy draft ID does not have one unique Product claim on the D1 primary. No upload attempted.',claim_state:claimProof.claim_state},409);
     const selected=s.images.find(im=>im.product_image_id===imageId);

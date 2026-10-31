@@ -487,6 +487,15 @@ jobs:
           node --check public/js/product-entry-557.mjs
           node --test scripts/release467_build557_product_entry_rewrite.test.mjs
 
+      - name: Build 558 Sweet Orange actual-owner recipe acceptance and exact three-image Etsy proof
+        run: |
+          node --check functions/api/admin/product-soap-formula-540.js
+          node --check functions/api/admin/product-etsy-images.js
+          node --check public/js/admin-product-simple-540.mjs
+          node --check public/js/product-editor-etsy-544.mjs
+          node --check public/js/sweet-orange-558.mjs
+          node --test scripts/release467_build558_sweet_orange_completion.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

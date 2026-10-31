@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Product Editor — Devil n Dove Admin</title>
   <meta name="description" content="Dedicated low-read single-Product editor for Devil n Dove."/>
-  <meta name="dnd-build-identity" content="Devil n Dove • Build 557"/>
+  <meta name="dnd-build-identity" content="Devil n Dove • Build 558"/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
   <link rel="stylesheet" href="/css/admin-product-v162.css?v=178"/>
@@ -37,7 +37,7 @@
   <link rel="stylesheet" href="/css/admin-product-editor-543.css?v=543"/>
   <link rel="stylesheet" href="/css/admin-interface-foundation-556.css?v=556"/>
 </head>
-<body data-admin-page="product-editor-v557" class="dd540-finished-product dd557-entry dd556-admin-root">
+<body data-admin-page="product-editor-v558" class="dd540-finished-product dd557-entry dd556-admin-root">
   <a class="dd556-skip" href="#productEditorForm">Skip to Product entry</a>
   <div class="container admin-shell dd-product-shell">
     <nav class="nav" aria-label="Admin navigation">
@@ -274,6 +274,7 @@
             <label class="dd540-confirm"><input type="checkbox" id="dd540Verified"/><span>I checked the real batch formula, source ingredient order and measured bar weight. These details are correct for the soap we sell.</span></label>
           </div>
           <p class="small" id="dd540RecipeStatus" role="status" aria-live="polite">Source records load when we open this tab. Our existing saved labels stay intact until we explicitly Save.</p>
+          <p class="small dd558-owner-receipt" id="dd558OwnerReceipt" role="status" aria-live="polite">Owner acceptance is pending until we check the physical batch and save its exact source ingredients and net weight.</p>
           <details class="dd540-library-help"><summary>Edit a source ingredient?</summary><p class="small">Our source materials are shared across Products. <a href="/admin/packaging/">Open the Source Material Library</a> to correct supplier INCI details. We never guess them.</p></details>
         </section>
         <div class="dd539-panel-head"><div><p class="eyebrow">Restored product settings · Build 539</p><h2 id="dd539IngredientsTitle">Ingredients, labels &amp; maker materials</h2><p class="small">Our original ingredient records were not removed. Open the saved Product links below to see each ingredient's INCI name, English/French label names, making quantity, materials and costs. These are separate from Etsy search tags.</p></div><span class="dd539-local-badge">Local Product data</span></div>
@@ -285,7 +286,7 @@
       <section class="dd-editor-panel dd540-publish-panel" data-editor-panel="publishing" hidden><div class="dd540-section-head"><div><h2>Finish our Etsy draft</h2><p class="small">Connect the draft we already made, then send approved photographs. We never create or publish a second listing here.</p></div><span class="dd540-simple-badge">Draft only</span></div><div id="dd540DestinationMount"></div>
       <div id="dd544EtsyFlow" class="dd544-flow">
         <section class="dd544-step" aria-labelledby="dd544ConnectHeading"><h3 id="dd544ConnectHeading">1. Connect our existing Etsy draft</h3><p class="small">This checks the actual Etsy listing and saves its connection to this Product. It does not publish or change Etsy.</p><label for="dd544Listing">Existing Etsy listing number</label><input id="dd544Listing" class="input" inputmode="numeric" autocomplete="off" placeholder="Etsy draft listing ID"/><label class="dd544-check"><input type="checkbox" id="dd544Exact"/> I checked that this number is our existing, unpublished Canada-only Etsy draft.</label><p id="dd544ConnectStatus" role="status" aria-live="polite">Checking saved draft connection…</p><p id="dd544Preview" class="small"></p><label class="dd544-check" id="dd544OlderWrap" hidden><input type="checkbox" id="dd544Older"/> The older Etsy title is different, but I checked that it is this exact Product.</label><div class="dd544-actions"><button type="button" class="btn" id="dd544Inspect">Verify existing draft</button><button type="button" class="btn primary" id="dd544Link" disabled>Connect verified draft</button></div></section>
-        <section class="dd544-step" aria-labelledby="dd544PhotosHeading"><h3 id="dd544PhotosHeading">2. Send our approved Product photographs</h3><p class="small">Only approved original photographs are offered. Every upload is independently checked against the existing unpublished Etsy draft; uncertain uploads are never retried automatically.</p><div id="dd544PhotosList" aria-live="polite"><p>Loading saved Product photographs…</p></div><p id="dd544PhotosStatus" role="status" aria-live="polite">Waiting for the confirmed draft connection.</p><label class="dd544-check"><input type="checkbox" id="dd544Consent"/> I reviewed these photographs and authorize sending them to this existing unpublished Canada-only Etsy draft.</label><div class="dd544-actions"><button type="button" class="btn" id="dd544Refresh">Refresh draft and photos</button><button type="button" class="btn primary" id="dd544Send" disabled>Send approved photos to Etsy draft</button></div></section>
+        <section class="dd544-step" aria-labelledby="dd544PhotosHeading"><h3 id="dd544PhotosHeading">2. Confirm three photos on the actual Etsy draft</h3><p class="small">The three Sweet Orange originals are #342, #341 and #343. Only live Etsy image IDs count as complete; uncertain uploads are never retried automatically.</p><strong class="dd558-photo-count" id="dd558PhotoCount" data-ready="false">Not checked on Etsy</strong><div id="dd544PhotosList" aria-live="polite"><p>Loading saved Product photographs…</p></div><p id="dd544PhotosStatus" role="status" aria-live="polite">Waiting for the confirmed draft connection.</p><a class="btn" href="https://www.etsy.com/your/shops/me/listing-editor/edit/4601705477#media" target="_blank" rel="noopener noreferrer">Open reported Sweet Orange draft in Etsy to inspect photos</a><label class="dd544-check"><input type="checkbox" id="dd544Consent"/> I reviewed these photographs and authorize sending them to this existing unpublished Canada-only Etsy draft.</label><div class="dd544-actions"><button type="button" class="btn" id="dd544Refresh">Refresh draft and photos</button><button type="button" class="btn primary" id="dd544Send" disabled>Send missing verified originals to Etsy draft</button></div></section>
       </div><details class="dd543-more-checks"><summary>Advanced listing checks</summary><p class="small" id="dd540PublishingStatus" role="status" aria-live="polite">Our existing draft is preserved.</p><div class="dd540-publishing-actions"><button class="btn" type="button" id="dd540CheckDraft">Check Etsy draft</button><button class="btn" type="button" id="dd542OwnerVerify">Verify saved recipe &amp; Etsy photos</button><button class="btn primary" type="button" id="dd540UpdateDraft">Update existing Etsy draft</button></div><p class="small" id="dd542OwnerStatus" role="status" aria-live="polite">Owner verification is read-only.</p></details><p class="small">Publishing happens only after we approve the draft in Etsy.</p></section>
 
       <section class="dd-editor-panel" data-editor-panel="buyer" hidden>
@@ -340,7 +341,7 @@
         <div class="card dd500-package" id="dd500Package" aria-labelledby="dd500Title">
           <div class="dd500-head"><div><h2 id="dd500Title">Etsy Drafts — Create or Update</h2>
             <p>Save our Product, then create <strong>one new Etsy draft</strong> or update its <strong>existing draft</strong>. The approved original gallery photos go with it. Nothing publishes automatically.</p></div></div>
-          <div class="dd503-owner-note" id="dd503OwnerNote" role="note" hidden><strong>Keep our existing Etsy draft #4603838854.</strong> Do not delete it or create another. First verify and link that ID, then update the same unpublished draft. Our last Etsy screenshot also showed the category “Bar Soaps”; confirm the correct category in Etsy before publishing.</div>
+          <div class="dd503-owner-note" id="dd503OwnerNote" role="note" hidden><strong>Verify the exact existing Sweet Orange draft #4601705477 before any write.</strong> Do not delete it or create another. The reported listing ID needs independent live Etsy confirmation, and the category “Bar Soaps” must be checked on the actual listing.</div>
           <div class="dd500-id" id="dd500Identity" role="status" aria-live="polite">Reading this Product's saved Etsy listing ID…</div>
           <div class="dd504-claim" id="dd504Claim" role="status" aria-live="polite" hidden><span id="dd504ClaimMessage"></span> <a class="btn secondary" id="dd504ClaimProduct" href="/admin/products/" hidden>Review the other Product</a></div>
           <section class="dd505-review" id="dd505OwnerResolution" hidden aria-labelledby="dd505OwnerResolutionTitle">
@@ -1027,8 +1028,8 @@
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
   <script src="/public/js/admin-product-editor-layout-526.js?v=526"></script>
   <script type="module" src="/public/js/admin-product-ingredients-539.mjs?v=539"></script>
-  <script type="module" src="/public/js/admin-product-simple-540.mjs?v=543"></script>
-  <script type="module" src="/public/js/product-editor-etsy-544.mjs?v=544"></script>
+  <script type="module" src="/public/js/admin-product-simple-540.mjs?v=558"></script>
+  <script type="module" src="/public/js/product-editor-etsy-544.mjs?v=558"></script>
   <script type="module" src="/public/js/product-entry-557.mjs?v=557"></script>
   <link rel="stylesheet" href="/css/product-editor-etsy-544.css?v=544"/>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">

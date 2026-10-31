@@ -6,6 +6,7 @@ const productId=Number(new URLSearchParams(location.search).get('product_id')||0
 const form=byId('productEditorForm'),save=byId('dd540SaveProduct'),toolbar=byId('dd540ToolbarStatus');
 let isSoap=productId===54||/\bsoap\b/i.test(String(form?.elements.namedItem('name')?.value||''));
 const recipeStatus=byId('dd540RecipeStatus');
+const ownerReceipt=byId('dd558OwnerReceipt');
 const recipeRoot=byId('dd540SoapComposer');
 const preview=byId('dd540InciPreview'),weightInput=byId('dd540NetWeight'),verified=byId('dd540Verified');
 const pickers={base:byId('dd540Base'),scent:byId('dd540Scent'),oil:byId('dd540Oil')};
@@ -31,6 +32,10 @@ function renderRecipe({changed=false}={}){
   const selectedScent=library.find(row=>String(row.packaging_source_material_template_id)===String(pickers.scent?.value||''));
   const conflict=scentNameConflict541(form?.elements.namedItem('name')?.value,selectedScent?.material_name);
   if(conflict&&verified)verified.checked=false;
+  if((changed||conflict)&&ownerReceipt){ownerReceipt.textContent=conflict?
+    'Owner acceptance HOLD — saved fragrance conflicts with Sweet Orange. Check the actual batch before saving a corrected official formula.':
+    'Recipe edited locally. Owner acceptance will be recorded only after we verify the physical batch, check the box and Save Product.';
+    ownerReceipt.dataset.ready='false';}
   const orange=library.filter(row=>SOAP_ROLES_540.scent.includes(String(row.material_subtype||row.material_type))&&/\borange\b/i.test(String(row.material_name||'')));
   if(orangeSuggestion){orangeSuggestion.hidden=!conflict||orange.length!==1;orangeSuggestion.dataset.sourceId=orange.length===1?String(orange[0].packaging_source_material_template_id):'';}
   say(conflict?'The saved Sea Breeze scent does not match Sweet Orange. We can still Save Product. Choose the real Orange fragrance if that is what we used; the official recipe stays unchanged until confirmed.':summary+warnings,!formula.ready||conflict);
@@ -59,6 +64,12 @@ async function loadSoap(){
       }
     }
     loaded=true;renderRecipe();
+    if(ownerReceipt){
+      const accepted=record.owner_acceptance_558?.current===true;
+      ownerReceipt.textContent=accepted?`✓ Owner recipe acceptance is saved and matches this official formula (${record.owner_acceptance_558.accepted_at}). Check the physical label before external publishing.`:
+        'Owner recipe acceptance is not verified. Check the actual Sweet Orange fragrance, complete supplier ingredients and unwrapped bar weight, then check the confirmation box and Save Product.';
+      ownerReceipt.dataset.ready=accepted?'true':'false';
+    }
     if(record.saved_weight_g>0&&weightInput&&!weightInput.value)weightInput.value=String(record.saved_weight_g);
     if(record.saved_ingredients?.length&&!choices().base){
       if(preview)preview.value=record.saved_ingredients.map(row=>String(row.inci_name||'').trim()).filter(Boolean).join(', ');
@@ -127,6 +138,10 @@ if(form&&save){
             });
             toolbar.textContent=`Saved Product and ${result.saved_ingredient_count} official ingredient rows. Etsy remains unchanged until we choose Update Draft.`;
             say('Saved our real source-selected formula and label ingredient record. Final label/packaging approval remains separate.');
+            if(ownerReceipt){ownerReceipt.textContent=result.owner_acceptance_saved===true?
+              '✓ Physical batch owner confirmation saved with this exact source formula and net weight. Final packaging and Etsy approval are still separate.':
+              'Owner acceptance receipt was not confirmed. Review the saved official formula before external publishing.';
+              ownerReceipt.dataset.ready=result.owner_acceptance_saved===true?'true':'false';}
           }catch(error){toolbar.textContent='Product saved, but official soap formula needs review: '+String(error?.message||error)+' Do not submit an Etsy update yet.';}
           finally{saveBusy=false;save.disabled=false;}
         };

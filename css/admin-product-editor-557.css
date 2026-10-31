@@ -48,6 +48,10 @@ body.dd557-entry{background:#0b1020;color:#f3f0fa}
 .dd557-entry .dd544-step h3{margin:0 0 9px;color:#efcf94}
 .dd557-entry .dd544-step .dd544-actions{display:flex;flex-wrap:wrap;gap:10px}
 .dd557-entry .dd544-step .dd544-photo{border-radius:12px}
+.dd557-entry .dd558-photo-count{display:inline-flex;width:max-content;max-width:100%;padding:9px 14px;border-radius:999px;background:#543c32;color:#ffdbab;font-variant-numeric:tabular-nums}
+.dd557-entry .dd558-photo-count[data-ready="true"]{background:#1b493b;color:#c3fbe0}
+.dd557-entry .dd558-owner-receipt{padding:12px 15px;border:1px solid #8c633e;border-radius:12px;background:#302737;color:#f7dcb2}
+.dd557-entry .dd558-owner-receipt[data-ready="true"]{border-color:#39745e;background:#1d3a32;color:#bcead3}
 .dd557-entry .dd557-destinations{margin:18px 0}
 .dd557-entry .dd557-destinations h3{color:#efcf94;margin:0 0 12px}
 .dd557-entry .dd557-destination{border:1px solid #4a4e6e;border-radius:14px;background:#1b2238;padding:16px;margin:12px 0}
