@@ -23,7 +23,7 @@ test('Build 542 keeps owner readback GET-only and requires confirmed media pairi
   assert.match(ui,/dd542OwnerVerify/);
   assert.match(ui,/product-etsy-images\?product_id=.*&reconcile=1/);
   assert.match(ui,/No Etsy upload, publication or ingredient write occurred/);
-  assert.match(workflow,/"build":(?:54[23456789]|550)/);
+  assert.match(workflow,/"build":(?:54[23456789]|550|551)/);
   assert.match(workflow,/PRODUCTION ROUTE RETRY/);
   assert.match(file('admin/product-editor/index.html'),/Devil n Dove • Build 54[234]/);
 });

@@ -10,10 +10,11 @@ function receiptQuery(raw){if(typeof raw!=='string'||raw.length>512)throw Error(
   if(item?.kind==='view'&&/^system-health-preset-\d+-[a-z0-9-]{1,45}$/.test(String(item.key||''))){const params=new URLSearchParams({receipt_view:item.key});if(item.label!==undefined){if(typeof item.label!=='string'||item.label.length>55)throw Error('Invalid saved view label.');params.set('receipt_label',item.label);}if(item.updated_at!==undefined){if(typeof item.updated_at!=='string'||item.updated_at.length>40)throw Error('Invalid saved view date.');params.set('receipt_updated',item.updated_at);}return params;}
   throw Error('Receipt must contain a recognized saved route/time or saved-view key.');
 }
-async function verify(){if(busy)return;let query;try{query=receiptQuery($('dd549ReceiptCode').value.trim());}catch(error){status(error.message);return;}
+async function verify(){if(busy)return;const raw=$('dd549ReceiptCode').value.trim();let query;try{query=receiptQuery(raw);}catch(error){status(error.message);return;}
   if(!window.DDAuth?.apiFetch){status('Please sign in as an administrator to verify this receipt.');return;}
   busy=true;$('dd549Verify').disabled=true;status('Reading the exact receipt in the signed-in administrator account…');
   try{const response=await window.DDAuth.apiFetch('/api/admin/system-health-547?'+query.toString(),{cache:'no-store'}),data=await response.json();if(!response.ok||!data.ok)throw Error(data.error||`HTTP ${response.status}`);
+    document.dispatchEvent(new CustomEvent('dd:health-receipt-verified-551',{detail:{receipt:JSON.parse(raw),raw,comparison:data.receipt_check}}));
     if(!data.receipt_check?.found){status(data.receipt_check?.changed?'CHANGED — this record exists but its saved details no longer match the receipt. Review the current record before using it.':'NOT FOUND in this administrator account. The original save or account identity is not confirmed; do not assume the data transferred.');return;}
     status(`FOUND — ${data.receipt_check.kind==='view'?'saved view':'history sample'} verified in this signed-in account. Compare the same receipt on the other device. No incident or Product record was changed.`);
   }catch(error){status('Receipt verification unavailable: '+error.message+'. Do not assume the saved record is missing.');}

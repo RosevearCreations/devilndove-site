@@ -41,6 +41,6 @@ document.addEventListener('dd:system-health-unavailable-550',()=>{
   $('dd550Count').textContent='Incident timeline unavailable — no current database readback.';
   $('dd549Timeline').replaceChildren(node('p','Current incident records could not be loaded. Try Reload shared monitoring.'));
 });
-$('dd550ReceiptPicker').addEventListener('change',()=>{if(!$('dd550ReceiptPicker').value)return;$('dd549ReceiptCode').value=$('dd550ReceiptPicker').value;$('dd549ReceiptStatus').textContent='Saved receipt recovered from shared history. Copy it to the other signed-in device and verify there. This has not confirmed cross-device owner acceptance.';});
+$('dd550ReceiptPicker').addEventListener('change',()=>{if(!$('dd550ReceiptPicker').value)return;$('dd549ReceiptCode').value=$('dd550ReceiptPicker').value;document.dispatchEvent(new CustomEvent('dd:health-receipt-changed-551'));$('dd549ReceiptStatus').textContent='Saved receipt recovered from shared history. Copy it to the other signed-in device and verify there. This has not confirmed cross-device owner acceptance.';});
 $('dd550Priority').addEventListener('change',review);$('dd550Review').addEventListener('change',review);
 })();
