@@ -1,6 +1,16 @@
 /* Build 551: explicit, auditable owner comparison acknowledgement and read-only incident aging. */
 (()=>{'use strict';const $=id=>document.getElementById(id);if(!$('dd551SaveReview'))return;
-let matched=null,busy=false,savedEvidence=[];const attempts={exact:0,changed:0,missing:0};
+let matched=null,busy=false,savedEvidence=[],evidenceReadbackAt=null;const attempts={exact:0,changed:0,missing:0};
+const evidenceType='owner_reported_not_independent_device_proof',evidenceFormat='devilndove_owner_monitoring_evidence_553';
+const evidenceStatus=message=>{if($('dd553ExportStatus'))$('dd553ExportStatus').textContent=message;};
+function currentExport(){return{format:evidenceFormat,version:1,exported_at:new Date().toISOString(),source_readback_at:evidenceReadbackAt,source:'Devil n Dove owner-scoped monitoring review history',evidence_type:evidenceType,review_count:savedEvidence.length,reviews:savedEvidence};}
+function compareExport(payload){if(!evidenceReadbackAt)throw Error('Shared owner evidence must be freshly loaded before comparison.');
+  if(!payload||typeof payload!=='object'||Array.isArray(payload)||payload.format!==evidenceFormat||payload.version!==1||payload.evidence_type!==evidenceType||payload.source!=='Devil n Dove owner-scoped monitoring review history')throw Error('This is not a recognized Build 553 owner evidence export.');
+  if(typeof payload.exported_at!=='string'||!Number.isFinite(Date.parse(payload.exported_at))||typeof payload.source_readback_at!=='string'||!Number.isFinite(Date.parse(payload.source_readback_at)))throw Error('Export or source readback time is missing or invalid.');
+  if(!Array.isArray(payload.reviews)||payload.reviews.length>12||payload.review_count!==payload.reviews.length||payload.review_count!==savedEvidence.length)throw Error('Export record count does not match the currently loaded owner evidence.');
+  if(JSON.stringify(payload.reviews)!==JSON.stringify(savedEvidence))throw Error('Export records differ from the current loaded owner evidence. Reload shared monitoring and review the differences.');
+  return payload.review_count;
+}
 const el=(tag,text,klass)=>{const n=document.createElement(tag);if(text!==undefined&&text!==null)n.textContent=String(text);if(klass)n.className=klass;return n;};
 const nice=at=>{const time=Date.parse(at);return Number.isFinite(time)?new Date(time).toLocaleString():String(at||'Unknown date');};
 const status=message=>{$('dd551ReviewStatus').textContent=message;};
@@ -8,6 +18,8 @@ function invalidate(){matched=null;$('dd551OwnerCheck').checked=false;$('dd551Ow
 function summary(){const total=attempts.exact+attempts.changed+attempts.missing;$('dd551ComparisonSummary').textContent=`This browser session: ${attempts.exact} exact match(es), ${attempts.changed} changed record(s), ${attempts.missing} missing record(s) across ${total} successful lookups. An API failure is not counted as a missing receipt.`;}
 function reviews(rows){const root=$('dd551ReviewList');root.replaceChildren();const list=Array.isArray(rows)?rows.slice(0,12):[];savedEvidence=list;
   if($('dd552DownloadEvidence'))$('dd552DownloadEvidence').disabled=!list.length;
+  if($('dd553VerifyEvidenceFile'))$('dd553VerifyEvidenceFile').disabled=!list.length;
+  evidenceReadbackAt=new Date().toISOString();evidenceStatus(list.length?`${list.length} owner-reported record(s) loaded from the signed-in monitoring response at ${nice(evidenceReadbackAt)}. Export or verify a local JSON file against this snapshot.`:'No saved owner evidence was returned. There is nothing to export or compare.');
   $('dd551ReviewCount').textContent=`${list.length} owner-reported comparison acknowledgement(s) retained (maximum 12 per administrator).`;
   if(!list.length){root.append(el('p','No owner comparison acknowledgement saved.'));return;}
   for(const record of list){const receipt=record.receipt||{},item=el('li'),title=el('strong',receipt.kind==='view'?`View: ${receipt.label||'Unnamed view'}`:`Route: ${receipt.path||'Unknown route'}`),date=el('span',` · Owner-reported on ${nice(record.reviewed_at)}. Not independent device proof.`),button=el('button','Load receipt for recheck','btn secondary');
@@ -34,13 +46,22 @@ document.addEventListener('dd:health-receipt-verified-551',event=>{
 document.addEventListener('dd:health-receipt-changed-551',()=>{invalidate();status('Receipt changed. Run Verify receipt before recording owner evidence.');});
 document.addEventListener('dd:health-receipt-549',()=>{invalidate();status('A new receipt was saved. Verify it before recording owner evidence.');});
 document.addEventListener('dd:system-health-reconciled-549',event=>{reviews(event.detail?.ownerReviews);aging(event.detail?.followUp);});
-document.addEventListener('dd:system-health-unavailable-550',()=>{invalidate();savedEvidence=[];if($('dd552DownloadEvidence'))$('dd552DownloadEvidence').disabled=true;$('dd551ReviewCount').textContent='Saved owner review evidence is unavailable. Reload after signing in.';aging(null);});
+document.addEventListener('dd:system-health-unavailable-550',()=>{invalidate();savedEvidence=[];evidenceReadbackAt=null;if($('dd552DownloadEvidence'))$('dd552DownloadEvidence').disabled=true;if($('dd553VerifyEvidenceFile'))$('dd553VerifyEvidenceFile').disabled=true;evidenceStatus('Shared owner evidence unavailable. Previously loaded records cannot be exported or verified until a fresh signed-in reload.');$('dd551ReviewCount').textContent='Saved owner review evidence is unavailable. Reload after signing in.';aging(null);});
 $('dd552DownloadEvidence')?.addEventListener('click',()=>{
-  if(!savedEvidence.length)return;
-  const payload={exported_at:new Date().toISOString(),source:'Devil n Dove owner-scoped monitoring review history',evidence_type:'owner_reported_not_independent_device_proof',reviews:savedEvidence};
-  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
-  link.href=url;link.download=`devilndove-owner-monitoring-evidence-${new Date().toISOString().slice(0,10)}.json`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
-  status('Evidence download requested. The saved source records were not changed or deleted.');
+  if(!savedEvidence.length||!evidenceReadbackAt)return;
+  let url;try{const payload=currentExport(),count=compareExport(payload),blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),link=document.createElement('a');url=URL.createObjectURL(blob);
+    link.href=url;link.download=`devilndove-owner-monitoring-evidence-${new Date().toISOString().slice(0,10)}.json`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    evidenceStatus(`Prepared download with ${count} of ${count} currently loaded owner-reported records. Check the saved file using the file picker below to confirm it was downloaded intact. No server record changed.`);
+  }catch(error){if(url)URL.revokeObjectURL(url);evidenceStatus(`Evidence export could not be prepared: ${error.message}. No saved record was changed.`);}
+});
+$('dd553VerifyEvidenceFile')?.addEventListener('change',async()=>{
+  const picker=$('dd553VerifyEvidenceFile'),file=picker.files?.[0];if(!file)return;
+  try{if(file.size>131072)throw Error('The JSON file is larger than the 128 KB verification limit.');
+    const raw=await file.text();if(raw.length>131072)throw Error('The JSON file is larger than the 128 KB verification limit.');
+    let payload;try{payload=JSON.parse(raw);}catch{throw Error('The selected file does not contain valid JSON.');}
+    const count=compareExport(payload);evidenceStatus(`LOCAL FILE MATCH — ${count} owner-reported record(s) exactly match the currently loaded saved evidence. The file itself was read successfully. This does not prove another device was used or verify records after the last reload.`);
+  }catch(error){evidenceStatus(`FILE NOT VERIFIED — ${error.message} No saved source record was changed.`);}
+  finally{picker.value='';}
 });
 $('dd549ReceiptCode').addEventListener('input',()=>{invalidate();status('Receipt edited. Verify the current value again.');});
 $('dd551OwnerCheck').addEventListener('change',()=>{$('dd551SaveReview').disabled=!matched||!$('dd551OwnerCheck').checked||busy;});

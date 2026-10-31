@@ -1,6 +1,16 @@
 /* Build 550: recover owner-scoped receipts from persisted records and inspect bounded incident milestones. */
 (()=>{'use strict';const $=id=>document.getElementById(id);if(!$('dd550ReceiptPicker'))return;
-let incidents=[];
+let incidents=[],incidentReadback=false;
+const validPresets=new Set(['all','open','open_24h','open_7d','open_unreviewed']);
+const initialPreset=(()=>{try{const raw=new URLSearchParams(window.location?.search||'').get('incident_preset');return validPresets.has(raw)?raw:'all';}catch{return 'all';}})();
+if($('dd552FollowUpPreset'))$('dd552FollowUpPreset').value=initialPreset;
+if(initialPreset!=='all'&&$('dd552IncidentTimelineDetails'))$('dd552IncidentTimelineDetails').open=true;
+const presetStatus=message=>{if($('dd553PresetStatus'))$('dd553PresetStatus').textContent=message;};
+presetStatus(initialPreset==='all'?'All recent incidents selected. Choose a preset to keep it in this page link.':`Restored “${$('dd552FollowUpPreset').selectedOptions?.[0]?.textContent||initialPreset}” from this page link. Priority and review-status refinements are session-only.`);
+function savePreset(){const selected=$('dd552FollowUpPreset')?.value||'all';if(!validPresets.has(selected))return;
+  try{if(!window.location?.href||!window.history?.replaceState)throw Error('Link updates unavailable');const next=new URL(window.location.href);if(selected==='all')next.searchParams.delete('incident_preset');else next.searchParams.set('incident_preset',selected);window.history.replaceState(null,'',next.pathname+next.search+next.hash);presetStatus(selected==='all'?'Incident filters reset; the saved preset was removed from this page link.':'Preset saved in this page link. Bookmark this URL to restore it after a reload. Detailed priority/status filters are not saved.');}
+  catch{presetStatus('Preset applied here, but this browser could not save it in the page link.');}
+}
 const node=(tag,value,klass)=>{const el=document.createElement(tag);if(value!==undefined&&value!==null)el.textContent=String(value);if(klass)el.className=klass;return el;};
 const nice=date=>{const time=Date.parse(date);return Number.isFinite(time)?new Date(time).toLocaleString():String(date||'Unknown time');};
 function receipts(history,presets){const picker=$('dd550ReceiptPicker'),prior=picker.value;picker.disabled=false;picker.replaceChildren();
@@ -31,6 +41,7 @@ function followsPreset(item,preset){if(preset==='all')return true;if(closed(item
   return false;
 }
 function review(){const root=$('dd549Timeline'),severity=$('dd550Priority').value,reviewStatus=$('dd550Review').value,preset=$('dd552FollowUpPreset')?.value||'all';
+  if(!incidentReadback){root.replaceChildren(node('p','Incident records unavailable. Reload shared monitoring after signing in. The chosen preset remains selected.'));$('dd550Count').textContent='Incident timeline unavailable — no current database readback.';return;}
   const filtered=incidents.filter(item=>followsPreset(item,preset)&&(severity==='all'||String(item.severity||'warning').toLowerCase()===severity)&&(reviewStatus==='all'||(reviewStatus==='closed'?closed(item.review_status):!closed(item.review_status))));
   root.replaceChildren();$('dd550Count').textContent=`Showing ${filtered.length} of ${incidents.length} latest incident records (maximum 25 shown). Follow-up presets filter this bounded list; the 30-day totals below are broader.`;
   if(!filtered.length){root.append(node('p',incidents.length?'No incidents match the selected filters.':'No recent incident records returned. This does not prove there were no outages.'));return;}
@@ -42,15 +53,17 @@ function review(){const root=$('dd549Timeline'),severity=$('dd550Priority').valu
   }
 }
 document.addEventListener('dd:system-health-reconciled-549',event=>{
-  receipts(event.detail?.history,event.detail?.presets);incidents=Array.isArray(event.detail?.timeline)?event.detail.timeline.slice(0,25):[];review();
+  receipts(event.detail?.history,event.detail?.presets);incidents=Array.isArray(event.detail?.timeline)?event.detail.timeline.slice(0,25):[];incidentReadback=true;review();
 });
 document.addEventListener('dd:system-health-unavailable-550',()=>{
+  incidents=[];incidentReadback=false;
   const picker=$('dd550ReceiptPicker');picker.replaceChildren(new Option('Shared records unavailable — sign in or reload',''));picker.disabled=true;
   $('dd550Retention').textContent='No fresh shared record inventory is available. Reload shared monitoring after signing in; do not treat an earlier receipt as verified.';
   $('dd550Count').textContent='Incident timeline unavailable — no current database readback.';
-  $('dd549Timeline').replaceChildren(node('p','Current incident records could not be loaded. Try Reload shared monitoring.'));
+  $('dd549Timeline').replaceChildren(node('p','Current incident records could not be loaded. Try Reload shared monitoring.'));presetStatus('Shared incident records are unavailable. Your selected incident preset is still shown; no saved-source result is claimed.');
 });
 $('dd550ReceiptPicker').addEventListener('change',()=>{if(!$('dd550ReceiptPicker').value)return;$('dd549ReceiptCode').value=$('dd550ReceiptPicker').value;document.dispatchEvent(new CustomEvent('dd:health-receipt-changed-551'));$('dd549ReceiptStatus').textContent='Saved receipt recovered from shared history. Copy it to the other signed-in device and verify there. This has not confirmed cross-device owner acceptance.';});
 $('dd550Priority').addEventListener('change',review);$('dd550Review').addEventListener('change',review);
-$('dd552FollowUpPreset')?.addEventListener('change',()=>{$('dd550Priority').value='all';$('dd550Review').value='all';if($('dd552IncidentTimelineDetails'))$('dd552IncidentTimelineDetails').open=true;review();});
+$('dd552FollowUpPreset')?.addEventListener('change',()=>{$('dd550Priority').value='all';$('dd550Review').value='all';if($('dd552IncidentTimelineDetails'))$('dd552IncidentTimelineDetails').open=true;savePreset();review();});
+$('dd553ResetPreset')?.addEventListener('click',()=>{$('dd552FollowUpPreset').value='all';$('dd550Priority').value='all';$('dd550Review').value='all';savePreset();review();});
 })();

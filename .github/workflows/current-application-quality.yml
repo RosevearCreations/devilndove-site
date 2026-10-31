@@ -459,6 +459,12 @@ jobs:
           node --check public/js/admin-system-health-551.js
           node --test scripts/release467_build552_owner_recovery_presets.test.mjs
 
+      - name: Build 553 owner evidence local file verification and incident preset link recovery
+        run: |
+          node --check public/js/admin-system-health-550.js
+          node --check public/js/admin-system-health-551.js
+          node --test scripts/release467_build553_export_preset_usability.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

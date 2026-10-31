@@ -19,9 +19,9 @@ test('Build 550 checks retained receipt contents without confusing a changed rec
 test('Build 550 offers recoverable owner-scoped receipt selection and read-only incident filtering',()=>{
   const api=read('functions/api/admin/system-health-547.js'),page=read('admin/system-operations/index.html'),ui=read('public/js/admin-system-health-550.js'),verify=read('public/js/admin-system-health-549.js');
   for(const name of ['dd550ReceiptPicker','dd550Retention','dd550Priority','dd550Review','dd550Count'])assert.match(page,new RegExp(`id="${name}"`));
-  assert.match(page,/Build (?:550|551|552)/);assert.match(page,/Not independently confirmed/);
+  assert.match(page,/Build (?:550|551|552|553)/);assert.match(page,/Not independently confirmed/);
   assert.match(page,/maximum 25|latest review milestones/i);
-  assert.match(page,/admin-system-health-550\.js\?v=(?:550|551|552)/);
+  assert.match(page,/admin-system-health-550\.js\?v=(?:550|551|552|553)/);
   assert.match(ui,/dd:system-health-reconciled-549/);
   assert.match(ui,/receipt=\{kind:'history',path:row\.path,at:row\.at,status:row\.status,ms:row\.ms\}/);
   assert.match(ui,/receipt=\{kind:'view',key:view\.key,label:view\.label/);
@@ -35,6 +35,6 @@ test('Build 550 offers recoverable owner-scoped receipt selection and read-only 
   assert.match(api,/receipt_ms/);
   assert.match(api,/incident_timeline/);
   assert.doesNotMatch(api,/DELETE FROM|CREATE TABLE/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:550|551|552)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:550|551|552|553)/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build550_receipt_retention\.test\.mjs/);
 });
