@@ -266,10 +266,12 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     ['g','kg','oz','lb'].includes(data.item_weight_unit)&&['cm','mm','in'].includes(data.item_dimensions_unit)&&
     !state.settings?.blockers?.length;}
   async function packageSnapshot(){
+    const photoCandidate=numericEtsyListing511(String($('dd500ListingId').value||'').trim())||state.linked||
+      (id===54?'4601705477':'');
     const results=await Promise.allSettled([
-      api(`/api/admin/product-etsy-existing-draft?product_id=${id}${/^[1-9]\d{0,14}$/.test(String($('dd500ListingId').value||'').trim())?`&candidate_listing_id=${encodeURIComponent($('dd500ListingId').value.trim())}`:''}`),
+      api(`/api/admin/product-etsy-existing-draft?product_id=${id}${photoCandidate?`&candidate_listing_id=${encodeURIComponent(photoCandidate)}`:''}`),
       api(`/api/admin/product-distribution-406?product_id=${id}&channel=etsy`),
-      api(`/api/admin/product-etsy-images?product_id=${id}`),
+      api(`/api/admin/product-etsy-images?product_id=${id}${photoCandidate?`&candidate_listing_id=${encodeURIComponent(photoCandidate)}`:''}`),
       api(`/api/admin/product-etsy-tags?product_id=${id}`)]);
     const failures=results.filter(result=>result.status==='rejected').map(result=>result.reason?.message||'An unknown read failed.');
     if(failures.length){const failure=Error('Not all saved Etsy Product checks could load.');
@@ -1187,7 +1189,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       state.photoReview=null;state.photoReviewVerdict519=null;photoSelection505();}
   }
   async function sendImages(listingId,photos=state.photoAssessment){
-    const inventory=await api(`/api/admin/product-etsy-images?product_id=${id}&reconcile=1`);
+    const inventory=await api(`/api/admin/product-etsy-images?product_id=${id}&reconcile=1&candidate_listing_id=${encodeURIComponent(listingId)}`);
     if(String(inventory.listing_id)!==String(listingId)||inventory.remote_reconciliation?.ready!==true||
       !['matched','ready_for_separate_owner_approval'].includes(inventory.photo_gap_492?.state))
       throw Error(inventory.remote_reconciliation?.reason==='existing_etsy_photos_need_manual_reconciliation'?
@@ -1197,7 +1199,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     for(const imageId of photos.pending){
       const message=`Uploading original photo #${imageId} to Etsy draft #${listingId} (${transferred+1}/${photos.pending.length}). Do not leave this page…`;
       status(message);if($('dd516PhotoStatus'))$('dd516PhotoStatus').textContent=message;
-      const result=await api('/api/admin/product-etsy-images',{action:'transfer_one',product_id:id,product_image_id:imageId,
+      const result=await api('/api/admin/product-etsy-images',{action:'transfer_one',product_id:id,listing_id:listingId,product_image_id:imageId,
         request_key:key(),confirm_approved_media:true,confirm_unpublished_only:true,confirm_canada_only:true});
       if(result.verified_remote_readback!==true||!result.etsy_image_id||String(result.listing_id)!==String(listingId))
         throw Error(`Photo #${imageId} did not return a verified Etsy image ID. Check Etsy before attempting any more uploads.`);
@@ -1218,7 +1220,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       const snapshot=await packageSnapshot();
       if(!snapshot.photoAssessment.ready||String(snapshot.link.linked_listing_id||'')!==listingId)
         throw Error('The saved Product gallery or its exact Etsy draft ID changed. Refresh the draft before approving a transfer.');
-      const inventory=await api(`/api/admin/product-etsy-images?product_id=${id}&reconcile=1`);
+      const inventory=await api(`/api/admin/product-etsy-images?product_id=${id}&reconcile=1&candidate_listing_id=${encodeURIComponent(listingId)}`);
       if(String(inventory.listing_id)!==listingId||inventory.remote_reconciliation?.ready!==true||
         !['matched','ready_for_separate_owner_approval'].includes(inventory.photo_gap_492?.state)){
         if(inventory.remote_reconciliation?.reason==='existing_etsy_photos_need_manual_reconciliation'){
@@ -1233,7 +1235,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
         writeStarted=true;state.attempted=true;
         await sendImages(listingId,snapshot.photoAssessment);
       }
-      const checked=await api(`/api/admin/product-etsy-images?product_id=${id}&reconcile=1`);
+      const checked=await api(`/api/admin/product-etsy-images?product_id=${id}&reconcile=1&candidate_listing_id=${encodeURIComponent(listingId)}`);
       if(String(checked.listing_id)!==listingId||checked.remote_reconciliation?.ready!==true||
         checked.photo_gap_492?.state!=='matched'||Number(checked.transferred)!==snapshot.photoAssessment.count||checked.pending!==0)
         throw Error('Etsy did not yet confirm every original photo on the same draft. Inspect its actual images before another upload.');

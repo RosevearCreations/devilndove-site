@@ -25,6 +25,27 @@ function gate(c){const admin=verifiedAdminFromModule(c),db=getDb(c.env);
 // Product identity view. This does not turn stale/foreign media into proof.
 const currentDb=db=>typeof db.withSession==='function'?db.withSession('first-primary'):db;
 function details(row){try{return JSON.parse(row?.payload_json||'{}');}catch{return {};}}
+// Build 538: an exact Product→listing claim can be on the D1 primary while
+// the generic Product-key gallery snapshot returns no draft. Recover only the
+// immutable, unique, same-Product claim; a guessed ID cannot authorize photos.
+export async function resolvePhotoDraft538(db,productId,candidate,previous=null){
+  if(!validId(candidate))return previous;
+  const proof=await linkedReceipt506(db,productId,String(candidate));
+  if(proof.confirmed!==true||String(proof.listing_id)!==String(candidate))return previous;
+  const row=await currentDb(db).prepare("SELECT id,product_id,external_reference,payload_json,status FROM marketplace_syndication_drafts WHERE channel_key='etsy' AND product_id=? AND external_reference=? LIMIT 1")
+    .bind(productId,String(candidate)).first();
+  return row&&String(row.product_id)===String(productId)&&String(row.external_reference)===String(candidate)?row:previous;
+}
+async function exactSource538(db,id,env,candidate){
+  const snapshot=await source(currentDb(db),id,env);
+  if(validId(candidate)){
+    const recovered=await resolvePhotoDraft538(db,id,String(candidate),snapshot.draft);
+    if(recovered&&String(recovered.external_reference)===String(candidate)){
+      snapshot.draft=recovered;snapshot.payload=details(recovered);
+    }
+  }
+  return snapshot;
+}
 async function source(db,id,env={}){
   const [product,draft,gallery,accepted]=await Promise.all([
     db.prepare('SELECT product_id,name,status FROM products WHERE product_id=? LIMIT 1').bind(id).first(),
@@ -85,16 +106,17 @@ async function getEtsy(path,headers){const r=await fetch('https://api.etsy.com/v
   if(!r.ok||r.status>=300)throw Error('etsy_read_http_'+r.status);
   return r.json();}
 export async function onRequestGet(c){const g=gate(c);if(g.error)return g.error;
-  const id=new URL(c.request.url).searchParams.get('product_id');
+  const url=new URL(c.request.url),id=url.searchParams.get('product_id');
   if(!validId(id))return respond({error:'Choose a saved Product.'},400);
   let readPhase='primary_product_gallery';
-  try{const s=await source(currentDb(g.db),Number(id),c.env);
+  try{const candidate=url.searchParams.get('candidate_listing_id');
+    const s=await exactSource538(g.db,Number(id),c.env,candidate);
     if(!s.product)return respond({error:'Product not found.'},404);
     const local=localView(s);
     if(local.listing_id){readPhase='primary_listing_receipt';const claim=await linkedReceipt506(g.db,Number(id),local.listing_id);
       if(!claim.confirmed)return respond({...local,listing_id:null,listing_status:'AMBIGUOUS_PRIMARY_LISTING_CLAIM',
         remote_reconciliation:{ready:false,reason:claim.claim_state},provider_contacted:false});}
-    if(new URL(c.request.url).searchParams.get('reconcile')!=='1')return respond(local);
+    if(url.searchParams.get('reconcile')!=='1')return respond(local);
     if(!local.listing_id)return respond({...local,remote_reconciliation:{ready:false,reason:'link_existing_draft_first'},provider_contacted:false});
     readPhase='etsy_credentials_read';
     const a=await authorized(c,g.db);if(a.error)return a.error;
@@ -122,10 +144,13 @@ export async function onRequestPost(c){const g=gate(c);if(g.error)return g.error
   let b;try{b=await c.request.json();}catch{return respond({error:'JSON required.'},400);}
   if(b?.action!=='transfer_one'||!validId(b?.product_id)||!validId(b?.product_image_id)||
     !requestKey(b?.request_key)||b?.confirm_approved_media!==true||b?.confirm_unpublished_only!==true||
-    b?.confirm_canada_only!==true)return respond({error:'Explicit media, Canada-only and unpublished-only approval required.'},400);
+    b?.confirm_canada_only!==true||(b.listing_id!==undefined&&!validId(b.listing_id)))
+    return respond({error:'Explicit media, valid exact listing ID, Canada-only and unpublished-only approval required.'},400);
   const id=Number(b.product_id),imageId=Number(b.product_image_id),key=recordKey(id,imageId);
   try{
-    const s=await source(currentDb(g.db),id,c.env);
+    const s=await exactSource538(g.db,id,c.env,b.listing_id);
+    if(b.listing_id!==undefined&&String(s.draft?.external_reference||'')!==String(b.listing_id))
+      return respond({error:'Requested Etsy photo target does not match a uniquely verified primary D1 Product claim. No upload attempted.'},409);
     if(s.galleryCount>20)return respond({error:'The complete original Product gallery exceeds Etsy\'s 20-photo limit. Review the gallery; no subset was silently sent.'},409);
     if(!s.product||!validId(s.draft?.external_reference)||s.payload?.publication_performed===true)
       return respond({error:'Only a verified, unpublished Canada-only Etsy Product draft may receive images. Link the exact saved listing ID first.'},409);

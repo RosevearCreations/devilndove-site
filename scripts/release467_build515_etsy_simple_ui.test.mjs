@@ -57,6 +57,6 @@ test('A missing photo receipt cannot hide or replace the independently saved num
   assert.match(html,/Photos are already on Etsy\? Match them without uploading duplicates/);
   const imageApi=read('functions/api/admin/product-etsy-images.js');
   assert.match(imageApi,/const currentDb=db=>typeof db\.withSession==='function'\?db\.withSession\('first-primary'\):db/);
-  assert.match(imageApi,/source\(currentDb\(g\.db\),Number\(id\),c\.env\)/);
-  assert.match(imageApi,/source\(currentDb\(g\.db\),id,c\.env\)/);
+  assert.match(imageApi,/exactSource538\(g\.db,Number\(id\),c\.env,candidate\)/);
+  assert.match(imageApi,/exactSource538\(g\.db,id,c\.env,b\.listing_id\)/);
 });

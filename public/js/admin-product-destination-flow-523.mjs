@@ -9,7 +9,7 @@ import {evaluateEtsyLiveOwnerReview535} from './etsy-live-owner-review-535.mjs';
 // Build 533: the draft controller MUST finish initializing before this flow
 // evaluates its readiness. Module-script tag order alone does not enforce
 // dependency completion for separate module graphs.
-import './admin-product-etsy-package-v500.mjs?v=528';
+import './admin-product-etsy-package-v500.mjs?v=538';
 
 const $=id=>document.getElementById(id),form=$('productEditorForm'),root=$('dd523Flow');
 if(form&&root&&window.DDAuth?.apiFetch){
