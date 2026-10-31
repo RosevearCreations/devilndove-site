@@ -15,7 +15,7 @@ test('Build 539 restores the actual saved INCI/material editor alongside Product
   assert.match(page, /admin-product-ingredients-539\.mjs\?v=539/);
   assert.match(page, /admin-product-editor-539\.css\?v=539/);
   assert.match(page, /id="dd527MoreTools"/);
-  assert.match(page, /Devil n Dove • Build 539/);
+  assert.match(page, /Devil n Dove • Build 540/);
   for (const id of ['dd538Pilot','dd538Ingredients','dd538NetWeight','dd538FactsConfirm','dd538Fill'])
     assert.equal((page.match(new RegExp(`id="${id}"`,'g'))||[]).length,1,`one ${id} only`);
 });
@@ -65,6 +65,6 @@ test('Build 539 release and CI preserve explicit live Etsy one-draft photo/tag g
   assert.match(page,/dd537OwnerRecovery/);
   assert.match(page,/dd538Photos/);
   assert.match(flow,/action:'transfer_one',product_id:id,listing_id:listingId/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":539/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":540/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build539_ingredient_editor_etsy_acceptance\.test\.mjs/);
 });

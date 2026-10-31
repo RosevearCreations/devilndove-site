@@ -58,7 +58,7 @@ test('Etsy 20-photo maximum retains the entire approved gallery, never silently 
 test('Product Editor restores a sixth normal Ingredients tab, keeps optional tools collapsed and one-save Etsy handoff',()=>{
  const html=read('admin/product-editor/index.html'),flow=read('public/js/admin-product-destination-flow-523.mjs');
  const mainNav=html.match(/<div class="dd-editor-tabs" role="tablist" aria-label="Product Editor sections">([\s\S]*?)<\/div>/)?.[1]||'';
- assert.deepEqual([...mainNav.matchAll(/data-editor-tab="([^"]+)"/g)].map(m=>m[1]),['basics','pricing','description','ingredients','media','seo']);
+ assert.deepEqual([...mainNav.matchAll(/data-editor-tab="([^"]+)"/g)].map(m=>m[1]),['basics','pricing','description','ingredients','media','seo','publishing']);
  assert.match(html,/id="dd527MoreTools"/);assert.match(html,/Build (?:52[789]|53[0123456789])/);
  assert.match(html,/admin-product-editor-527\.css\?v=527/);
  assert.match(flow,/dd:save-succeeded/);assert.match(flow,/reviewAfterVerifiedSave527/);
