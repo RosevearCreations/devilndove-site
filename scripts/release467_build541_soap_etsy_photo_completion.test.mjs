@@ -17,8 +17,8 @@ test('Build 541 reuses existing guarded, owner-authorized photo transfer on the 
   const page=file('admin/product-editor/index.html');
   const ui=file('public/js/admin-product-simple-540.mjs');
   const transfer=file('functions/api/admin/product-etsy-images.js');
-  assert.match(page,/id="dd541PhotosMount"/);
-  assert.match(ui,/photoMount\.append\(photoPanel\)/);
+  assert.match(page,/id="dd544PhotosHeading"/);
+  assert.match(file('public/js/product-editor-etsy-544.mjs'),/action:'transfer_one'/);
   assert.match(ui,/dd443EtsyImagesLoad/);
   assert.match(transfer,/confirm_unpublished_only!==true/);
   assert.match(transfer,/confirm_canada_only!==true/);

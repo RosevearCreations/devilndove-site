@@ -150,21 +150,8 @@ if(form&&save){
     renderRecipe({changed:true});
     say('Orange fragrance selected from our saved library. Check that it is the real fragrance used, then confirm the formula and Save Product.');
   });
-  const linkMount=byId('dd543ExistingDraftMount'),linkPanel=byId('dd486EtsyExisting');
-  if(productId===54&&linkMount&&linkPanel){
-    linkMount.append(linkPanel);
-    const heading=linkPanel.querySelector('h3');if(heading)heading.textContent='1. Connect our existing Etsy draft #4601705477';
-    for(const el of linkPanel.querySelectorAll('#dd499ExistingDraftHint,#dd499UsePhotoDraftId,#dd499DirectEtsyDraft'))el.hidden=true;
-    const field=byId('dd486EtsyListingId');if(field&&!field.value)field.value='4601705477';
-  }
-  // Reuse the vetted at-most-once photo controls; never implement a second upload path.
-  const photoMount=byId('dd541PhotosMount'),photoPanel=byId('dd443EtsyImages');
-  if(photoMount&&photoPanel){
-    photoMount.append(photoPanel);
-    const heading=photoPanel.querySelector('h3');if(heading)heading.textContent='2. Send our three approved photographs';
-    const legacyHint=photoPanel.querySelector('p:nth-of-type(2)');
-    if(legacyHint&&/Product #53/.test(legacyHint.textContent||''))legacyHint.hidden=true;
-  }
+  // The Build 544 Etsy workflow owns its own stable controls. Legacy scripts may
+  // hide their own panels, but cannot hide the new draft connection step.
   const sources=['dd535LiveStatus','dd523PostStatus','dd523Readiness'].map(byId).filter(Boolean);
   for(const source of sources)new MutationObserver(()=>{
     const current=sources.map(x=>String(x.textContent||'').trim()).filter(Boolean);
