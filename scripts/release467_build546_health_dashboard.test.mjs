@@ -9,7 +9,7 @@ test('Build 546 adds a real interactive System Operations health dashboard with 
   assert.match(html,/System Operations &amp; Health/);
   for(const id of ['dd546Health','dd546Refresh','dd546Routes','dd546History','dd546Incidents','dd546IncidentStatus'])assert.match(html,new RegExp(`id="${id}"`));
   assert.match(html,/stored in this browser only/);
-  assert.match(html,/admin-system-health-546\.js\?v=54[678]/);
+  assert.match(html,/admin-system-health-546\.js\?v=54[6789]/);
   assert.match(js,/HISTORY_KEY='dnd-system-route-history-546'/);
   assert.match(js,/\.slice\(-60\)/);
   assert.match(js,/AbortController/);
@@ -23,6 +23,6 @@ test('Build 546 is read-only, reports route timeouts and uses authenticated inci
   assert.match(js,/\/api\/admin\/runtime-incidents\?days=30&limit=15&review_status=all/);
   assert.match(js,/window\.DDAuth\?\.apiFetch/);
   assert.doesNotMatch(js,/method:\s*'POST'|method:\s*'DELETE'|setInterval\(/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":54[678]/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":54[6789]/);
   assert.match(file('css/admin-system-health-546.css'),/\.dd546-route-grid/);
 });
