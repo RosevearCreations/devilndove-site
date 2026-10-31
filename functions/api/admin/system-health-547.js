@@ -1,12 +1,14 @@
 /* Build 547: authenticated owner-scoped monitoring history and saved views.
    Reuses the established command-center saved-view table; no schema mutation. */
 import {auditAdminAction,getAdminUserFromRequest,getDb,jsonResponse} from '../_lib/adminAudit.js';
+import {compactOwnerReviews,ownerReviewReceipt} from '../_lib/systemHealthOwnerReview551.mjs';
 
 const PATHS=new Set(['/','/shop/','/admin/','/admin/product-editor/?product_id=54','/admin/system-operations/']);
 const STATUS=new Set(['200','301','302','400','401','403','404','429','500','502','503','504','524','TIMEOUT','NETWORK ERROR']);
-const AREA='system_health_history',PRESET='system_health_preset';
+const AREA='system_health_history',PRESET='system_health_preset',OWNER_REVIEW='system_health_owner_reviews';
 const idOf=user=>Number(user?.user_id||0);
 const keyFor=id=>`system-health-history-owner-${id}`;
+const reviewKey=id=>`system-health-reviews-owner-${id}`;
 export function cleanSamples(input,{fresh=true}={}){if(!Array.isArray(input))return [];
   const samples=[];for(const row of input.slice(0,fresh?20:60)){
     const path=String(row?.path||''),status=String(row?.status||''),ms=Number(row?.ms),at=String(row?.at||'');
@@ -45,7 +47,10 @@ export async function onRequestGet(context){const {user,db,id}=await auth(contex
       return jsonResponse({ok:true,receipt_check:{kind:'history',...comparison,owner_scoped:true,path:receiptPath,at:new Date(receiptAt).toISOString()}},200,{'Cache-Control':'no-store'});
     }
     const timeline=(await db.prepare(`SELECT runtime_incident_id,incident_code,incident_scope,severity,endpoint_path,COALESCE(review_status,'open') AS review_status,created_at,reviewed_at FROM runtime_incidents WHERE datetime(created_at)>=datetime('now','-30 days') ORDER BY datetime(created_at) DESC,runtime_incident_id DESC LIMIT 25`).all()).results||[];
-    return jsonResponse({ok:true,history:history.slice(-60),presets:presets.map(row=>({key:row.view_key,label:row.view_label,filters:json(row.filter_json,{}),updated_at:row.updated_at})),incident_summary:incident.map(row=>({severity:row.severity,review_status:row.review_status,count:Number(row.total||0)})),incident_timeline:timeline.map(row=>({id:Number(row.runtime_incident_id||0),code:row.incident_code,scope:row.incident_scope,severity:row.severity,path:row.endpoint_path,review_status:row.review_status,created_at:row.created_at,reviewed_at:row.reviewed_at})),scope:'signed_in_admin',sample_limit:60},200,{'Cache-Control':'no-store'});
+    const aging=await db.prepare(`SELECT COUNT(*) AS total, SUM(CASE WHEN LOWER(COALESCE(review_status,'open')) NOT IN ('resolved','ignored') THEN 1 ELSE 0 END) AS open_total, SUM(CASE WHEN LOWER(COALESCE(review_status,'open')) NOT IN ('resolved','ignored') AND datetime(created_at)<=datetime('now','-1 day') THEN 1 ELSE 0 END) AS open_24h, SUM(CASE WHEN LOWER(COALESCE(review_status,'open')) NOT IN ('resolved','ignored') AND datetime(created_at)<=datetime('now','-7 days') THEN 1 ELSE 0 END) AS open_7d, SUM(CASE WHEN LOWER(COALESCE(review_status,'open')) NOT IN ('resolved','ignored') AND reviewed_at IS NULL THEN 1 ELSE 0 END) AS open_without_review FROM runtime_incidents WHERE datetime(created_at)>=datetime('now','-30 days')`).first();
+    const ownerRecord=await db.prepare(`SELECT filter_json FROM admin_command_center_saved_views WHERE view_key=? AND view_area=? AND created_by_user_id=? LIMIT 1`).bind(reviewKey(id),OWNER_REVIEW,id).first();
+    const ownerReviews=json(ownerRecord?.filter_json,{}).reviews;
+    return jsonResponse({ok:true,history:history.slice(-60),presets:presets.map(row=>({key:row.view_key,label:row.view_label,filters:json(row.filter_json,{}),updated_at:row.updated_at})),incident_summary:incident.map(row=>({severity:row.severity,review_status:row.review_status,count:Number(row.total||0)})),incident_timeline:timeline.map(row=>({id:Number(row.runtime_incident_id||0),code:row.incident_code,scope:row.incident_scope,severity:row.severity,path:row.endpoint_path,review_status:row.review_status,created_at:row.created_at,reviewed_at:row.reviewed_at})),incident_follow_up:{window_days:30,total:Number(aging?.total||0),open:Number(aging?.open_total||0),open_24h:Number(aging?.open_24h||0),open_7d:Number(aging?.open_7d||0),open_without_review:Number(aging?.open_without_review||0)},owner_reviews:Array.isArray(ownerReviews)?ownerReviews.slice(0,12):[],scope:'signed_in_admin',sample_limit:60},200,{'Cache-Control':'no-store'});
   }catch(error){return jsonResponse({ok:false,error:'Shared health history unavailable. Local checks remain usable.',detail:String(error?.message||'').slice(0,180)},503);}
 }
 export async function onRequestPost(context){const {user,db,id}=await auth(context);if(!user||!id)return jsonResponse({ok:false,error:'Administrator sign-in required.'},401);if(!db)return jsonResponse({ok:false,error:'Database unavailable.'},503);
@@ -78,6 +83,30 @@ export async function onRequestPost(context){const {user,db,id}=await auth(conte
       if(!confirmed)return jsonResponse({ok:false,error:'Saved view receipt not confirmed. Reload before retrying.',readback_confirmed:false},409);
       await auditAdminAction(context.env,context.request,user,{action_type:'system_health_view_saved_547',target_type:'admin_command_center_saved_views',target_key:key,details:{label,route_count:routes.length,severity,review}});
       return jsonResponse({ok:true,key,label,readback_confirmed:true,filters});
+    }
+    if(action==='owner_review_551'){
+      if(body.second_device_compared!==true||!body.receipt||JSON.stringify(body.receipt).length>512)return jsonResponse({ok:false,error:'Explicit owner comparison and a short saved receipt are required.'},400);
+      const source=await db.prepare(`SELECT filter_json FROM admin_command_center_saved_views WHERE view_key=? AND view_area=? AND created_by_user_id=? LIMIT 1`).bind(keyFor(id),AREA,id).first();
+      const history=cleanSamples(json(source?.filter_json,{}).samples,{fresh:false})||[];
+      const presets=(await db.prepare(`SELECT view_key,view_label,updated_at FROM admin_command_center_saved_views WHERE view_area=? AND created_by_user_id=? AND view_status='active' ORDER BY updated_at DESC LIMIT 8`).bind(PRESET,id).all()).results||[];
+      const receipt=ownerReviewReceipt(body.receipt,history,presets);
+      if(!receipt)return jsonResponse({ok:false,error:'The saved receipt is no longer an exact match in this owner account. Reload and verify again; no acknowledgement was saved.'},409);
+      const existing=await db.prepare(`SELECT filter_json FROM admin_command_center_saved_views WHERE view_key=? AND view_area=? AND created_by_user_id=? LIMIT 1`).bind(reviewKey(id),OWNER_REVIEW,id).first();
+      const review={receipt,reviewed_at:new Date().toISOString(),claim:'owner_reported_second_device_comparison'};
+      const result=compactOwnerReviews(json(existing?.filter_json,{}).reviews,review);
+      if(result.full)return jsonResponse({ok:false,error:'Owner review evidence has reached the 12-record safety limit. Existing evidence was preserved; no new acknowledgement was saved.'},409);
+      if(!result.already_recorded){
+        const payload=JSON.stringify({reviews:result.rows});
+        const changed=existing
+          ?await db.prepare(`UPDATE admin_command_center_saved_views SET filter_json=?,updated_at=CURRENT_TIMESTAMP WHERE view_key=? AND view_area=? AND created_by_user_id=? AND filter_json=?`).bind(payload,reviewKey(id),OWNER_REVIEW,id,existing.filter_json).run()
+          :await db.prepare(`INSERT OR IGNORE INTO admin_command_center_saved_views (view_key,view_label,view_area,filter_json,view_status,created_by_user_id) VALUES (?,?,?,?,'active',?)`).bind(reviewKey(id),'System health owner comparison evidence',OWNER_REVIEW,payload,id).run();
+        if(Number(changed?.meta?.changes)!==1)return jsonResponse({ok:false,error:'Another device changed owner review evidence during this save. No existing evidence was overwritten; reload before reviewing again.'},409);
+      }
+      const saved=await db.prepare(`SELECT filter_json FROM admin_command_center_saved_views WHERE view_key=? AND view_area=? AND created_by_user_id=? LIMIT 1`).bind(reviewKey(id),OWNER_REVIEW,id).first();
+      const readback=json(saved?.filter_json,{}).reviews;
+      if(!Array.isArray(readback)||!readback.some(item=>JSON.stringify(item.receipt)===JSON.stringify(receipt)&&item.reviewed_at===result.review.reviewed_at))return jsonResponse({ok:false,error:'Owner review evidence write not independently read back. Reload before any retry.',readback_confirmed:false},409);
+      if(!result.already_recorded)await auditAdminAction(context.env,context.request,user,{action_type:'system_health_owner_comparison_attested_551',target_type:'admin_command_center_saved_views',target_key:reviewKey(id),details:{kind:receipt.kind,reviewed_at:result.review.reviewed_at,owner_reported:true}});
+      return jsonResponse({ok:true,review:result.review,already_recorded:result.already_recorded,readback_confirmed:true,review_count:readback.length});
     }
     return jsonResponse({ok:false,error:'Unknown action.'},400);
   }catch(error){return jsonResponse({ok:false,error:'Could not save shared monitoring data.',detail:String(error?.message||'').slice(0,180)},503);}

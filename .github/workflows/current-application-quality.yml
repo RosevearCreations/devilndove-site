@@ -446,6 +446,13 @@ jobs:
           node --check functions/api/admin/system-health-547.js
           node --test scripts/release467_build550_receipt_retention.test.mjs
 
+      - name: Build 551 owner comparison acknowledgement and incident aging
+        run: |
+          node --check functions/api/_lib/systemHealthOwnerReview551.mjs
+          node --check functions/api/admin/system-health-547.js
+          node --check public/js/admin-system-health-551.js
+          node --test scripts/release467_build551_owner_review_aging.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
