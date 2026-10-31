@@ -110,5 +110,9 @@ if(root){
   form?.addEventListener('input',controls);form?.addEventListener('change',controls);
   document.addEventListener('dd:save-succeeded',()=>{state.loaded=false;void load();});
   document.addEventListener('dd:editor-tab-opened',event=>{if(event.detail?.tab==='publishing'&&!state.loaded)void load();});
-  controls();if(productId)void load();
+  // Build 557: do not wake Etsy's two live receipt reads merely because the
+  // owner opened Details. Destinations loads on explicit tab access; deep-links
+  // to that tab still load immediately. This also reduces 524 timeout pressure.
+  controls();
+  if(productId&&new URLSearchParams(location.search).get('tab')==='publishing')void load();
 }

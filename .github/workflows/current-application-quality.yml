@@ -481,6 +481,12 @@ jobs:
           node scripts/release467_build556_admin_interface_inventory.mjs --check
           node --test scripts/release467_build556_product_admin_design_blueprint.test.mjs
 
+      - name: Build 557 four-area Product Entry, local Save and safe external handoff
+        run: |
+          node --check public/js/admin-product-editor-v163.js
+          node --check public/js/product-entry-557.mjs
+          node --test scripts/release467_build557_product_entry_rewrite.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

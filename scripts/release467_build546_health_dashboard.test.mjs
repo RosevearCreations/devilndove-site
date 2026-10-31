@@ -23,6 +23,6 @@ test('Build 546 is read-only, reports route timeouts and uses authenticated inci
   assert.match(js,/\/api\/admin\/runtime-incidents\?days=30&limit=15&review_status=all/);
   assert.match(js,/window\.DDAuth\?\.apiFetch/);
   assert.doesNotMatch(js,/method:\s*'POST'|method:\s*'DELETE'|setInterval\(/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:54[6789]|550|551|552|553|554|555|556)/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:54[6789]|550|551|552|553|554|555|556|557)/);
   assert.match(file('css/admin-system-health-546.css'),/\.dd546-route-grid/);
 });

@@ -17,9 +17,9 @@
   ],
   "totals": {
     "total": 150,
-    "keep": 4,
+    "keep": 5,
     "improve": 4,
-    "rebuild": 1,
+    "rebuild": 0,
     "review": 141
   },
   "routes": [
@@ -1511,13 +1511,13 @@
     {
       "route": "/admin/product-editor/",
       "source": "admin/product-editor/index.html",
-      "decision": "REBUILD",
+      "decision": "KEEP",
       "reference_screen": "Product Management",
-      "reason": "Owner explicitly requested replacing the confusing multi-panel Product Editor with a four-area workflow in Build 557.",
+      "reason": "Build 557 now provides the four-area Product Entry 2.0 shell. Preserve until real owner visual acceptance or an observed functional correction is requested.",
       "evidence": {
-        "byte_length": 153301,
-        "stylesheets": 30,
-        "scripts": 41,
+        "byte_length": 153976,
+        "stylesheets": 32,
+        "scripts": 42,
         "forms": 1,
         "has_viewport": true
       },

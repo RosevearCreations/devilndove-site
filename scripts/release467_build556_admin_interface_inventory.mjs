@@ -15,7 +15,7 @@ const reviewed={
   '/admin/':{decision:'KEEP',screen:'Admin Dashboard',reason:'Existing Admin dashboard already received a dedicated shell/hero modernization. Preserve until owner review.'},
   '/admin/products/':{decision:'KEEP',screen:'Product Management',reason:'Existing compact Product browser and low-read recovery were previously revamped; preserve behavior and styling.'},
   '/admin/system-operations/':{decision:'KEEP',screen:'Settings & Configuration',reason:'Builds 546-555 already modernized monitoring and owner evidence; preserve current controls.'},
-  '/admin/product-editor/':{decision:'REBUILD',screen:'Product Management',reason:'Owner explicitly requested replacing the confusing multi-panel Product Editor with a four-area workflow in Build 557.'},
+  '/admin/product-editor/':{decision:'KEEP',screen:'Product Management',reason:'Build 557 now provides the four-area Product Entry 2.0 shell. Preserve until real owner visual acceptance or an observed functional correction is requested.'},
   '/admin/inventory-operations/':{decision:'REVIEW',screen:'Inventory & Stock',reason:'Inventory Ops has its own prior workflow work; inspect its live layout before authorizing any visual change.'},
   '/admin/orders/':{decision:'IMPROVE',screen:'Orders & Fulfillment',reason:'Candidate for reference-style cards, filters and exception inspectors; preserve the existing order APIs and controls.'},
   '/admin/custom-request/':{decision:'IMPROVE',screen:'Customer Requests',reason:'Candidate for clearer intake and triage layout only after checking current owner-approved controls.'},

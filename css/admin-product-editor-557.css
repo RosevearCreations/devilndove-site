@@ -1,0 +1,71 @@
+/* Build 557 — one Product, four clearly separated owner work areas.
+   Legacy handlers keep their original DOM hooks, not a second visible UI. */
+body.dd557-entry{background:#0b1020;color:#f3f0fa}
+.dd557-entry .dd-product-shell{max-width:1480px;padding:16px clamp(12px,2.5vw,34px);background:transparent}
+.dd557-entry .dd-product-shell>.nav{border:1px solid #363951;border-radius:16px;background:#121a2c;padding:12px 18px;box-shadow:0 12px 26px #05081455}
+.dd557-entry .dd-product-shell>.nav .links{gap:8px;flex-wrap:wrap}
+.dd557-entry .dd-product-shell>.nav .links a{border-radius:10px;padding:8px 12px;text-decoration:none}
+.dd557-entry .dd-editor-head{border:1px solid #4b3d68;border-radius:20px;background:radial-gradient(circle at 100% 0%,#623c8240,transparent 48%),linear-gradient(130deg,#251a38,#131e33);margin:18px 0;padding:clamp(20px,3vw,34px)}
+.dd557-entry .dd-editor-head h1{font-size:clamp(1.7rem,2.5vw,2.5rem);color:#fff}
+.dd557-entry .dd-editor-head .eyebrow{color:#e9bc70;letter-spacing:.11em;text-transform:uppercase;font-size:.8rem}
+.dd557-entry .dd-editor-head p{color:#e0dce9;max-width:65ch}
+.dd557-entry #productEditorForm{background:#11182b;border:1px solid #414567;border-radius:20px;padding:clamp(12px,2.3vw,28px);box-shadow:0 16px 36px #07091655}
+.dd557-entry .dd557-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 18px}
+.dd557-entry .dd557-steps .btn{min-height:56px;min-width:0;border:1px solid #51486e;color:#f2eafa;background:#20253d;border-radius:14px;font-weight:700;font-size:1rem;white-space:normal;overflow-wrap:anywhere;text-align:center}
+.dd557-entry .dd557-steps .btn[aria-selected="true"]{background:#51318b;border:2px solid #e2bc7f;color:#fff;box-shadow:inset 0 -3px #e2bc7f}
+.dd557-entry .dd557-steps .btn:focus-visible,.dd557-entry .btn:focus-visible,.dd557-entry input:focus-visible,.dd557-entry textarea:focus-visible,.dd557-entry select:focus-visible{outline:3px solid #e2bc7f;outline-offset:2px}
+.dd557-entry .dd557-save-bar{position:relative;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 18px;border:1px solid #675782;background:#22213a;border-radius:14px;margin:0 0 14px}
+.dd557-entry .dd557-save-bar>div{flex:1;min-width:0}
+.dd557-entry .dd557-save-bar strong{color:#fff}
+.dd557-entry .dd557-save-bar p{font-size:.88rem;color:#e7dff2;margin-top:5px;overflow-wrap:anywhere}
+.dd557-entry .dd557-save-bar .btn{font-size:1rem;font-weight:750;min-height:46px;padding:10px 22px;background:#7137c3;color:#fff}
+.dd557-entry .dd557-panel-guide{border-left:4px solid #d2aa70;padding:10px 14px;margin:0 0 16px;background:#25243b;border-radius:8px;color:#e8e0f1;font-size:.94rem}
+.dd557-entry .dd-editor-panel:not([hidden]){min-width:0;display:block;margin:0 0 15px;padding:clamp(16px,2vw,24px);background:#171e32;border:1px solid #414865;border-radius:16px}
+.dd557-entry [data-editor-panel][hidden]{display:none!important}
+.dd557-entry .dd-editor-panel h2{color:#f3d5a5;margin:0 0 12px;font-size:1.4rem}
+.dd557-entry .dd-editor-grid{gap:14px}
+.dd557-entry .dd-editor-grid label{min-width:0}
+.dd557-entry .dd-editor-panel .input{width:100%;max-width:100%;min-width:0;color:#fff;background:#111427;border:1px solid #5b5078;border-radius:10px;min-height:44px;padding:10px 12px}
+.dd557-entry .dd-editor-panel textarea.input{min-height:90px;resize:vertical}
+.dd557-entry .dd-editor-panel .input:focus-visible{border-color:#ecc58a}
+.dd557-entry .dd-editor-panel .small{color:#d5cfe0}
+.dd557-entry .dd540-soap-composer{background:transparent;border:0;padding:0}
+.dd557-entry .dd540-section-head h2{color:#f3d5a5}
+.dd557-entry #dd527MoreTools{display:block!important;padding:12px 16px;margin-top:18px;background:#15172a;border:1px solid #3e415b;border-radius:14px}
+.dd557-entry #dd527MoreTools>summary{cursor:pointer;font-weight:650;color:#d7befc}
+.dd557-entry #dd527MoreTools .dd-editor-tabs{display:flex;flex-wrap:wrap;margin:14px 0 0}
+.dd557-entry #dd527MoreTools .btn{white-space:normal}
+.dd557-entry #dd527MoreTools:not([open]) .dd-editor-tabs{display:none}
+.dd557-entry .dd557-extra-fields{margin-top:16px;padding:14px;border:1px solid #4c4c6d;border-radius:12px;background:#1c2036}
+.dd557-entry .dd557-extra-fields>summary{cursor:pointer;font-weight:700;color:#e1c8ff}
+.dd557-entry .dd557-extra-fields .dd-editor-grid{margin-top:14px}
+.dd557-entry #dd498TagLibrary,.dd557-entry #dd499TagOverrides{margin-top:14px}
+.dd557-entry #dd557NotSoap{margin:0;padding:14px 16px;border-radius:12px;background:#222439;border:1px solid #525875}
+.dd557-entry .dd540-publish-panel{background:transparent;border:0;padding:0}
+.dd557-entry #dd540DestinationMount{margin:14px 0}
+.dd557-entry #dd544EtsyFlow{display:grid;gap:14px}
+.dd557-entry .dd544-step{margin:0;padding:18px;border:1px solid #514d6f;background:#1e223a;border-radius:14px}
+.dd557-entry .dd544-step h3{margin:0 0 9px;color:#efcf94}
+.dd557-entry .dd544-step .dd544-actions{display:flex;flex-wrap:wrap;gap:10px}
+.dd557-entry .dd544-step .dd544-photo{border-radius:12px}
+.dd557-entry .dd557-destinations{margin:18px 0}
+.dd557-entry .dd557-destinations h3{color:#efcf94;margin:0 0 12px}
+.dd557-entry .dd557-destination{border:1px solid #4a4e6e;border-radius:14px;background:#1b2238;padding:16px;margin:12px 0}
+.dd557-entry .dd557-destination>div:first-child{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.dd557-entry .dd557-destination strong{color:#fff;font-size:1.08rem}
+.dd557-entry .dd557-state{display:inline-block;padding:4px 9px;border:1px solid #997a4a;border-radius:999px;color:#f1d3a0;font-size:.79rem}
+.dd557-entry .dd557-destination p{margin:8px 0 12px;color:#d9d2e6;max-width:80ch}
+.dd557-entry .dd557-destination .dd-product-actions{display:flex;gap:9px;flex-wrap:wrap}
+.dd557-entry .dd557-destination .btn{white-space:normal;text-align:center}
+.dd557-entry .dd557-destination details{padding:8px 0}
+.dd557-entry .dd557-destination summary{cursor:pointer;color:#dbc7ff}
+.dd557-entry .dd557-destinations textarea{width:100%;min-height:110px;margin-top:10px}
+.dd557-entry #dd557HandoffStatus{padding:9px;border-left:3px solid #c9a872;background:#29283f;border-radius:6px}
+.dd557-entry .dd557-photos-note{padding:10px 12px;border-left:3px solid #c7a777;background:#242439;border-radius:8px;margin-bottom:14px}
+.dd557-entry .dd557-photos-settings{margin-top:12px;border:1px solid #454969;border-radius:12px;padding:12px}
+.dd557-entry .dd557-photos-settings>summary{cursor:pointer;font-weight:600;color:#dbc7ff}
+.dd557-entry .dd557-photos-settings label{display:block;margin:10px 0}
+.dd557-entry #dd540SaveProduct:disabled,.dd557-entry button:disabled{opacity:.52;cursor:not-allowed}
+.dd557-entry .dd-editor-footer{border-top:1px solid #404765;margin-top:22px}
+@media(max-width:820px){.dd557-entry .dd557-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.dd557-entry .dd-editor-grid.cols-4,.dd557-entry .dd-editor-grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.dd557-entry .dd-editor-head{display:block}}
+@media(max-width:580px){.dd557-entry .dd557-steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.dd557-entry .dd557-steps .btn{font-size:.9rem;padding:9px 6px;min-height:48px}.dd557-entry .dd557-save-bar{display:block}.dd557-entry .dd557-save-bar .btn{width:100%;margin-top:12px}.dd557-entry .dd-editor-grid,.dd557-entry .dd-editor-grid.cols-4,.dd557-entry .dd-editor-grid.cols-2{grid-template-columns:minmax(0,1fr)}.dd557-entry .dd557-destination .btn{width:100%}}
