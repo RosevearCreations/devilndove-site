@@ -1,0 +1,13 @@
+/* Build 555: readback and acceptance status at a glance, without altering prior modernized Admin pages. */
+.dd555-evidence{margin-top:1.2rem;padding:1.15rem;border:1px solid #755f95;border-radius:14px;background:linear-gradient(145deg,#171a30,#211a38)}
+.dd555-evidence h3{color:#e9c477;margin:0 0 .5rem}
+.dd555-evidence>p{max-width:92ch}
+.dd555-readback-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;margin:1rem 0}
+.dd555-readback-grid>div{border:1px solid #54486b;border-radius:12px;padding:1rem;background:#121629;min-width:0}
+.dd555-readback-grid strong{display:block;color:#e8dbff;margin-bottom:.35rem}
+.dd555-readback-grid p{margin:0;overflow-wrap:anywhere;line-height:1.45}
+.dd555-evidence [data-state="ready"]{color:#b8f0cb}
+.dd555-evidence [data-state="warning"]{color:#ffcfbd}
+.dd555-evidence [data-state="review"]{color:#f4d9a3}
+.dd555-evidence .small{color:#c8c6da}
+@media(max-width:900px){.dd555-readback-grid{grid-template-columns:1fr}}
