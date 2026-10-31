@@ -34,6 +34,7 @@ async function incidents(){const status=$('dd546IncidentStatus'),list=$('dd546In
 async function refresh(){if(busy)return;busy=true;const button=$('dd546Refresh');button.disabled=true;button.textContent='Checking routes…';$('dd546Status').textContent='Checking public and admin pages; allow up to 10 seconds per route…';
   try{const rows=await Promise.all(ROUTES.map(([name,path])=>checkRoute(name,path)));renderRoutes(rows);const saved=[...history(),...rows].slice(-60);saveHistory(saved);renderHistory(saved);
     const failed=rows.filter(row=>row.status!=='200');$('dd546Status').textContent=failed.length?`${failed.length} route(s) unavailable or timed out: ${failed.map(row=>row.name).join(', ')}. Green deployment does not override these failures.`:`All ${rows.length} tested routes responded HTTP 200 at this check. This is a point-in-time result, not an uptime guarantee.`;
+    document.dispatchEvent(new CustomEvent('dd:system-health-sampled',{detail:{rows}}));
     await incidents();
   }finally{busy=false;button.disabled=false;button.textContent='Refresh health now';}
 }
