@@ -40,6 +40,10 @@
 .dd540-library-help{margin-top:16px;font-size:.85rem;color:#d6cce2}
 .dd540-library-help summary{cursor:pointer}
 .dd540-publishing-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.dd541-photo-step{margin-top:20px}
+.dd541-photo-step #dd443EtsyImages{margin:0!important;padding:16px!important;border:1px solid #655081;border-radius:12px;background:#1a1a2e}
+.dd541-photo-step .dd443-image-row{min-width:0}
+.dd540-soap-composer[data-scent-conflict="1"] #dd540RecipeStatus{border-left-color:#f59d65;background:#442b34}
 .dd540-finished-product #productChannel405{padding:12px!important;margin:12px 0!important;background:#272038;border:1px solid #655081;border-radius:10px}
 .dd540-finished-product #productChannel405 h2,.dd540-finished-product #productChannel405>p.small,.dd540-finished-product #productChannel405 .dd471-consent{display:none!important}
 .dd540-finished-product #productChannel405 .dd-editor-grid{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
