@@ -79,6 +79,6 @@ test('Build 557 modern design is scoped to the rebuilt Admin screen and release 
   assert.match(css,/:focus-visible/);
   assert.doesNotMatch(css,/(^|\n)(?:body|:root|\.container)\s*\{/);
   for(const path of ['admin/index.html','admin/products/index.html','admin/system-operations/index.html','css/styles.css'])assert.doesNotMatch(source(path),/admin-product-editor-557/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":557/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":558/);
   assert.match(source('.github/workflows/current-application-quality.yml'),/release467_build557_product_entry_rewrite\.test\.mjs/);
 });

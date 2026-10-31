@@ -1,7 +1,8 @@
 /* Build 540 — bounded, authenticated soap source read and explicit official
  * formula save. Uses existing Packaging/soap tables, never makes Etsy calls. */
 import {getAdminUserFromRequest,getDb,jsonResponse} from '../_lib/adminAudit.js';
-import {composeSoapFormula540} from '../../../public/js/soap-formula-540.mjs';
+import {composeSoapFormula540,scentNameConflict541} from '../../../public/js/soap-formula-540.mjs';
+import {ownerRecipeSnapshot558,ownerRecipeReadback558} from '../../../public/js/sweet-orange-558.mjs';
 
 const json=(body,status=200)=>jsonResponse(body,status,{'Cache-Control':'no-store'});
 const rows=result=>Array.isArray(result?.results)?result.results:[];
@@ -47,16 +48,25 @@ export async function onRequestGet(context){
     if(!product)return json({ok:false,error:'Product not found.'},404);
     const projects=await projectRecords(a.db,productId);
     const project=projects.length===1?projects[0]:null;
-    const [sources,selections,ingredients,spec,soapWeight]=await Promise.all([
+    const [sources,selections,ingredients,spec,soapWeight,acceptance]=await Promise.all([
       sourceLibrary(a.db),readSelections(a.db,project?.packaging_project_id),
       readIngredients(a.db,project?.packaging_project_id),
       a.db.prepare('SELECT scent_profile,wax_or_base,ingredient_notes FROM custom_candle_soap_product_specs WHERE product_id=? ORDER BY updated_at DESC LIMIT 1').bind(productId).first().catch(()=>null),
-      project?.packaging_project_id?a.db.prepare('SELECT net_weight_g FROM soap_products WHERE packaging_project_id=? LIMIT 1').bind(project.packaging_project_id).first():Promise.resolve(null)
+      project?.packaging_project_id?a.db.prepare('SELECT net_weight_g FROM soap_products WHERE packaging_project_id=? LIMIT 1').bind(project.packaging_project_id).first():Promise.resolve(null),
+      a.db.prepare("SELECT actor_user_id,details_json,created_at FROM admin_action_audit WHERE action_type='soap_formula_558_owner_accepted' AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id DESC LIMIT 1").bind(String(productId)).first()
     ]);
+    let ownerReceipt=null;try{ownerReceipt=JSON.parse(acceptance?.details_json||'null');}catch{}
+    const linkedScent=selections.find(row=>row.material_role==='fragrance');
+    const linkedSource=sources.find(row=>String(row.packaging_source_material_template_id)===String(linkedScent?.packaging_source_material_template_id));
+    const scentConflict=scentNameConflict541(product.name,linkedSource?.material_name);
+    const receiptCurrent=!scentConflict&&ownerRecipeReadback558({projectId:project?.packaging_project_id,materials:selections,
+      ingredients,netWeightG:soapWeight?.net_weight_g},{...ownerReceipt,owner_user_id:acceptance?.actor_user_id});
     return json({ok:true,product_id:productId,product_name:product.name,
       source_materials:sources,official_project:project,ambiguous_projects:projects.length>1,
       saved_materials:selections,saved_ingredients:ingredients,
       saved_weight_g:Number(soapWeight?.net_weight_g||0),
+      owner_acceptance_558:{current:receiptCurrent,scent_conflict:scentConflict,accepted_at:receiptCurrent?acceptance.created_at:null,
+        note:receiptCurrent?'The recorded owner confirmation matches the current saved ingredients, sources and net weight.':'Owner recipe acceptance is pending or the saved formula changed.'},
       previous_spec:spec?{scent_profile:spec.scent_profile,wax_or_base:spec.wax_or_base,ingredient_notes:spec.ingredient_notes}:null,
       facts:'Only real saved source records; Product shipping weight is NOT finished soap net weight.',
       mode:'owner-selected-source-materials-no-automatic-write'});
@@ -78,6 +88,9 @@ export async function onRequestPost(context){
     const library=await sourceLibrary(a.db);
     const recipe=composeSoapFormula540(library,body?.choices);
     if(!recipe.ready)return json({ok:false,error:recipe.blockers.join(' '),blockers:recipe.blockers},422);
+    const selectedScent=recipe.selected.find(row=>row.role==='scent');
+    if(scentNameConflict541(product.name,selectedScent?.material_name))
+      return json({ok:false,error:'Sweet Orange has a conflicting saved fragrance. Choose the actual Orange source used in this physical batch before accepting the official formula. No recipe was changed.'},409);
     if(recipe.inci_text!==String(body?.expected_inci_text||''))return json({ok:false,error:'The reviewed ingredient text differs from current saved source records. Refresh before saving.'},409);
     // Existing official ingredient rows may only be replaced after the owner
     // explicitly reviewed the complete physical recipe and actual net weight.
@@ -112,10 +125,18 @@ export async function onRequestPost(context){
     }
     statements.push(a.db.prepare("UPDATE packaging_projects SET ingredients_inci=?,ingredients_en=?,ingredients_fr=?,net_quantity_text=?,compliance_status='needs_review',updated_by_user_id=?,updated_at=CURRENT_TIMESTAMP WHERE packaging_project_id=?").bind(recipe.inci_text,recipe.ingredients.map(x=>x.display_name_en).join(', '),recipe.ingredients.map(x=>x.display_name_fr).join(', '),`${weight} g`,userId,projectId));
     statements.push(a.db.prepare("UPDATE soap_products SET product_id=?,product_name=?,net_weight_g=?,print_status='draft',compliance_status='needs_review',updated_at=CURRENT_TIMESTAMP WHERE soap_product_id=?").bind(productId,product.name,weight,soap.soap_product_id));
+    // Build 558: same D1 batch as the official formula, so an owner acceptance
+    // receipt cannot survive a failed save or represent a different recipe.
+    const snapshot=ownerRecipeSnapshot558({projectId,
+      materials:recipe.selected.map(row=>({material_role:row.role==='scent'?'fragrance':row.role==='oil'?'additive':'base',packaging_source_material_template_id:row.id})),
+      ingredients:recipe.ingredients,netWeightG:weight});
+    statements.push(a.db.prepare("INSERT INTO admin_action_audit (actor_user_id,action_type,target_type,target_key,request_method,request_path,details_json,created_at) VALUES (?,'soap_formula_558_owner_accepted','product',?,'POST',?,?,CURRENT_TIMESTAMP)")
+      .bind(a.owner.user_id,String(productId),new URL(context.request.url).pathname,JSON.stringify({project_id:projectId,
+        confirm_actual_formula:true,snapshot,source:'physical_batch_owner_confirmation',etsy_modified:false})));
     await a.db.batch(statements);
     return json({ok:true,product_id:productId,packaging_project_id:projectId,soap_product_id:soap.soap_product_id,
       selected_materials:recipe.selected.map(x=>({role:x.role,id:x.id,material_name:x.material_name})),
       saved_ingredient_count:recipe.ingredients.length,net_weight_g:weight,
-      listing_published:false,compliance_status:'needs_review',message:'Saved genuine source-selected soap formula and bilingual INCI drafts. Label approval and Etsy update remain separate.'});
+      owner_acceptance_saved:true,listing_published:false,compliance_status:'needs_review',message:'Saved genuine source-selected soap formula and the owner acceptance receipt. Label approval and Etsy update remain separate.'});
   }catch(error){return json({ok:false,error:'Soap formula was not confirmed. '+String(error?.message||'')},500);}
 }
