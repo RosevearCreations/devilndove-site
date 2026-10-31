@@ -1,0 +1,7 @@
+.dd549-review{background:linear-gradient(140deg,#201b38,#2e2345);color:#f8f1ff;border:1px solid #946fb1;border-radius:18px;padding:22px;margin:20px 0}
+.dd549-review h2,.dd549-review h3{color:#f4d68d}.dd549-review p{line-height:1.5}
+.dd549-actions{display:flex;align-items:flex-start;flex-wrap:wrap;gap:10px;margin:12px 0}.dd549-actions textarea{flex:1 1 280px;min-width:200px;max-width:100%;padding:12px;border-radius:10px;box-sizing:border-box}
+#dd549ReceiptStatus{padding:12px;border-radius:10px;background:#342b4b}#dd549OwnerReview{color:#e8c27c}
+.dd549-timeline{display:grid;gap:10px}.dd549-event{border-left:4px solid #b995d4;background:#241d39;border-radius:10px;padding:13px;overflow-wrap:anywhere}.dd549-event p{margin:5px 0}
+.dd549-event[data-review=resolved],.dd549-event[data-review=ignored]{border-left-color:#66be93}
+@media(max-width:600px){.dd549-review{padding:14px}}

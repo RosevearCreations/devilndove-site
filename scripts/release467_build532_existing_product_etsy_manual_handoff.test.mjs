@@ -55,7 +55,7 @@ test('Build 532 offers a six-step same-page guide and unambiguous manual Faceboo
  const editor=read('public/js/admin-product-editor-v163.js');
  for(const id of ['dd532Journey','dd532Next','dd532NextButton','dd532CopyMarketplace','dd532CopyMarketplaceStatus'])
   assert.match(html,new RegExp(`id="${id}"`));
- assert.match(html,/Devil n Dove • Build (?:53[23456789]|540|541|542|543|544|545|546|547|548)/);
+ assert.match(html,/Devil n Dove • Build (?:53[23456789]|540|541|542|543|544|545|546|547|548|549)/);
  assert.match(html,/admin-product-editor-532\.css\?v=532/);
  assert.match(html,/product-editor-journey-532\.mjs\?v=532/);
  assert.match(html,/marketplace-copy-handoff-532\.mjs\?v=532/);
@@ -70,5 +70,5 @@ test('Build 532 offers a six-step same-page guide and unambiguous manual Faceboo
  assert.match(editor,/const noWriteStarted=error\?\.payload\?\.no_product_write_started===true/);
  assert.match(editor,/if\(!noWriteStarted&&\(failure\.uncertainWrite/);
  assert.match(read('functions/api/admin/product-editor-save.js'),/no_product_write_started:true/);
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":5(?:3[23456789]|40|41|42|43|44|45|46|47|48)/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":5(?:3[23456789]|40|41|42|43|44|45|46|47|48|49)/);
 });

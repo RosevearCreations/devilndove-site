@@ -17,6 +17,7 @@ export function cleanSamples(input,{fresh=true}={}){if(!Array.isArray(input))ret
 }
 function json(value,fallback){try{const x=JSON.parse(value||'');return x&&typeof x==='object'?x:fallback;}catch{return fallback;}}
 export function compact(samples){const seen=new Set();return [...samples].sort((a,b)=>Date.parse(a.at)-Date.parse(b.at)).filter(s=>{const key=s.path+'|'+s.at;if(seen.has(key))return false;seen.add(key);return true;}).slice(-60);}
+export function matchingReceipt(samples,{path,at}){return PATHS.has(path)&&Number.isFinite(Date.parse(at))&&samples.some(row=>row.path===path&&row.at===new Date(at).toISOString());}
 async function auth(context){const user=await getAdminUserFromRequest(context.request,context.env),db=getDb(context.env);return {user,db,id:idOf(user)};}
 export async function onRequestGet(context){const {user,db,id}=await auth(context);if(!user||!id)return jsonResponse({ok:false,error:'Administrator sign-in required.'},401);if(!db)return jsonResponse({ok:false,error:'Database unavailable.'},503);
   try{
@@ -24,7 +25,16 @@ export async function onRequestGet(context){const {user,db,id}=await auth(contex
     const history=cleanSamples(json(saved?.filter_json,{}).samples,{fresh:false})||[];
     const presets=(await db.prepare(`SELECT view_key,view_label,filter_json,updated_at FROM admin_command_center_saved_views WHERE view_area=? AND created_by_user_id=? AND view_status='active' ORDER BY updated_at DESC LIMIT 8`).bind(PRESET,id).all()).results||[];
     const incident=(await db.prepare(`SELECT LOWER(COALESCE(severity,'warning')) AS severity,LOWER(COALESCE(review_status,'open')) AS review_status,COUNT(*) AS total FROM runtime_incidents WHERE datetime(created_at)>=datetime('now','-30 days') GROUP BY LOWER(COALESCE(severity,'warning')),LOWER(COALESCE(review_status,'open')) ORDER BY total DESC LIMIT 30`).all()).results||[];
-    return jsonResponse({ok:true,history:history.slice(-60),presets:presets.map(row=>({key:row.view_key,label:row.view_label,filters:json(row.filter_json,{}),updated_at:row.updated_at})),incident_summary:incident.map(row=>({severity:row.severity,review_status:row.review_status,count:Number(row.total||0)})),scope:'signed_in_admin',sample_limit:60},200,{'Cache-Control':'no-store'});
+    const url=new URL(context.request.url),receiptPath=String(url.searchParams.get('receipt_path')||''),receiptAt=String(url.searchParams.get('receipt_at')||''),receiptView=String(url.searchParams.get('receipt_view')||'');
+    if(receiptPath||receiptAt||receiptView){
+      if(receiptView){if(!/^system-health-preset-\d+-[a-z0-9-]{1,45}$/.test(receiptView))return jsonResponse({ok:false,error:'Invalid view receipt.'},400);
+        const matched=presets.find(row=>row.view_key===receiptView);
+        return jsonResponse({ok:true,receipt_check:{kind:'view',found:!!matched,owner_scoped:true,label:matched?.view_label||null,updated_at:matched?.updated_at||null}},200,{'Cache-Control':'no-store'});}
+      if(!PATHS.has(receiptPath)||!Number.isFinite(Date.parse(receiptAt)))return jsonResponse({ok:false,error:'Invalid route receipt.'},400);
+      return jsonResponse({ok:true,receipt_check:{kind:'history',found:matchingReceipt(history,{path:receiptPath,at:receiptAt}),owner_scoped:true,path:receiptPath,at:new Date(receiptAt).toISOString()}},200,{'Cache-Control':'no-store'});
+    }
+    const timeline=(await db.prepare(`SELECT runtime_incident_id,incident_code,incident_scope,severity,endpoint_path,COALESCE(review_status,'open') AS review_status,created_at,reviewed_at FROM runtime_incidents WHERE datetime(created_at)>=datetime('now','-30 days') ORDER BY datetime(created_at) DESC,runtime_incident_id DESC LIMIT 25`).all()).results||[];
+    return jsonResponse({ok:true,history:history.slice(-60),presets:presets.map(row=>({key:row.view_key,label:row.view_label,filters:json(row.filter_json,{}),updated_at:row.updated_at})),incident_summary:incident.map(row=>({severity:row.severity,review_status:row.review_status,count:Number(row.total||0)})),incident_timeline:timeline.map(row=>({id:Number(row.runtime_incident_id||0),code:row.incident_code,scope:row.incident_scope,severity:row.severity,path:row.endpoint_path,review_status:row.review_status,created_at:row.created_at,reviewed_at:row.reviewed_at})),scope:'signed_in_admin',sample_limit:60},200,{'Cache-Control':'no-store'});
   }catch(error){return jsonResponse({ok:false,error:'Shared health history unavailable. Local checks remain usable.',detail:String(error?.message||'').slice(0,180)},503);}
 }
 export async function onRequestPost(context){const {user,db,id}=await auth(context);if(!user||!id)return jsonResponse({ok:false,error:'Administrator sign-in required.'},401);if(!db)return jsonResponse({ok:false,error:'Database unavailable.'},503);
