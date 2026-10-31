@@ -15,7 +15,7 @@ test('Build 534 recognizes the owner-reported historical Sweet Orange draft but 
 });
 test('Build 534 UI cannot create a second soap draft without linking a verified earlier draft',()=>{
  const html=read('admin/product-editor/index.html'),flow=read('public/js/admin-product-destination-flow-523.mjs');
- assert.match(html,/Devil n Dove • Build 53[456789]/);
+ assert.match(html,/Devil n Dove • Build (?:53[456789]|540)/);
  assert.match(html,/id="dd534HistoricalDraft"/);
  assert.match(html,/id="dd534InspectHistorical"/);
  assert.match(html,/id="dd534GoTags"/);
@@ -30,7 +30,7 @@ test('Build 534 UI cannot create a second soap draft without linking a verified 
  assert.match(flow,/dd500Processing/);
  assert.match(flow,/label\('Category'\)/);
  assert.match(flow,/label\('Shipping'\)/);
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":53[456789]/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":5(?:3[456789]|40)/);
 });
 test('Build 534 keeps the source images shared and makes the owner accept verified draft-only writes',()=>{
  const flow=read('public/js/admin-product-destination-flow-523.mjs');

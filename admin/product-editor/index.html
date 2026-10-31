@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Product Editor — Devil n Dove Admin</title>
   <meta name="description" content="Dedicated low-read single-Product editor for Devil n Dove."/>
+  <meta name="dnd-build-identity" content="Devil n Dove • Build 540"/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
   <link rel="stylesheet" href="/css/admin-product-v162.css?v=178"/>
@@ -32,8 +33,9 @@
   <link rel="stylesheet" href="/css/admin-product-editor-537.css?v=537"/>
   <link rel="stylesheet" href="/css/admin-product-editor-538.css?v=538"/>
   <link rel="stylesheet" href="/css/admin-product-editor-539.css?v=539"/>
+  <link rel="stylesheet" href="/css/admin-product-editor-540.css?v=540"/>
 </head>
-<body data-admin-page="product-editor-v165">
+<body data-admin-page="product-editor-v165" class="dd540-finished-product">
   <div class="container admin-shell dd-product-shell">
     <nav class="nav" aria-label="Admin navigation">
       <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><strong>Devil n Dove</strong><div class="small">Admin / Product Editor</div></div></div>
@@ -41,7 +43,7 @@
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
-      <div><p class="eyebrow">Devil n Dove • Build 539</p><h1 id="productEditorTitle">Product Editor</h1><p>One saved item, one photo gallery, one Etsy draft ID. Ingredients, maker settings and Etsy draft checks stay together.</p></div>
+      <div><p class="eyebrow">Devil n Dove</p><h1 id="productEditorTitle">Product Editor</h1><p>Enter the product, choose our ingredients and photos, then save. Etsy draft updates are a separate final step.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
 
@@ -108,7 +110,9 @@
         <button class="btn dd-editor-tab dd539-ingredients-tab" type="button" data-editor-tab="ingredients" aria-selected="false">Ingredients &amp; Materials</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="media" aria-selected="false">Media</button>
         <button class="btn dd-editor-tab" type="button" data-editor-tab="seo" aria-selected="false">Tags &amp; SEO</button>
+        <button class="btn dd-editor-tab" type="button" data-editor-tab="publishing" aria-selected="false">Etsy Draft</button>
       </div>
+      <div class="dd540-primary-toolbar"><p class="small" id="dd540ToolbarStatus" role="status" aria-live="polite">Edit our product. Nothing is sent to Etsy until we explicitly choose Update Draft.</p><button class="btn primary" id="dd540SaveProduct" type="button">Save Product</button></div>
       <details class="dd527-more-tools" id="dd527MoreTools">
         <summary>Optional settings, quality checks &amp; troubleshooting</summary>
         <div class="dd-editor-tabs" role="tablist" aria-label="Optional Product Editor sections">
@@ -255,11 +259,28 @@
       </section>
 
       <section class="dd-editor-panel dd539-ingredients-panel" data-editor-panel="ingredients" hidden aria-labelledby="dd539IngredientsTitle">
+        <section id="dd540SoapComposer" class="dd540-soap-composer" aria-labelledby="dd540SoapTitle">
+          <div class="dd540-section-head"><div><h2 id="dd540SoapTitle">Soap ingredients</h2><p class="small">Choose the saved soap base, scent and oil. We fill the label list from actual source records; review what went into this batch before saving.</p></div><span class="dd540-simple-badge">Soap recipe</span></div>
+          <div class="dd540-recipe-grid">
+            <label><span>Soap base</span><select class="input" id="dd540Base"><option value="">Choose soap base</option></select></label>
+            <label><span>Scent</span><select class="input" id="dd540Scent"><option value="">Unscented / choose scent</option></select></label>
+            <label><span>Additional oil</span><select class="input" id="dd540Oil"><option value="">None / choose oil</option></select></label>
+          </div>
+          <div class="dd540-facts">
+            <label><span>Ingredients for the official soap label</span><textarea class="input" id="dd540InciPreview" readonly placeholder="The chosen saved supplier ingredients will appear here."></textarea></label>
+            <label><span>Finished bar net weight in grams (without packaging)</span><input class="input" id="dd540NetWeight" type="number" min="0.1" max="10000" step="0.1" inputmode="decimal" placeholder="Enter the measured weight"/></label>
+            <label class="dd540-confirm"><input type="checkbox" id="dd540Verified"/><span>I checked the real batch formula, source ingredient order and measured bar weight. These details are correct for the soap we sell.</span></label>
+          </div>
+          <p class="small" id="dd540RecipeStatus" role="status" aria-live="polite">Source records load when we open this tab. Our existing saved labels stay intact until we explicitly Save.</p>
+          <details class="dd540-library-help"><summary>Edit a source ingredient?</summary><p class="small">Our source materials are shared across Products. <a href="/admin/packaging/">Open the Source Material Library</a> to correct supplier INCI details. We never guess them.</p></details>
+        </section>
         <div class="dd539-panel-head"><div><p class="eyebrow">Restored product settings · Build 539</p><h2 id="dd539IngredientsTitle">Ingredients, labels &amp; maker materials</h2><p class="small">Our original ingredient records were not removed. Open the saved Product links below to see each ingredient's INCI name, English/French label names, making quantity, materials and costs. These are separate from Etsy search tags.</p></div><span class="dd539-local-badge">Local Product data</span></div>
         <section class="dd539-etsy-facts" aria-labelledby="dd539EtsyFactsTitle"><h3 id="dd539EtsyFactsTitle">Sweet Orange — exact label facts and live Etsy checks</h3><p class="small">The existing draft is <strong>#4601705477</strong>. We must verify actual ingredients, the soap's net weight and the remote photos. Nothing here creates another draft or publishes it.</p><div id="dd539PilotMount"></div><div class="dd-product-actions"><button class="btn" type="button" id="dd539UseSavedInci">Bring verified INCI labels into Sweet Orange facts</button><button class="btn" type="button" id="dd539VerifyLive">Read actual Etsy draft + photos + tags</button></div><p class="small" id="dd539InciStatus" role="status" aria-live="polite">Saved ingredient labels are read only when requested, and must be checked against the real soap label before using them.</p><p class="small" id="dd539LiveStatus" role="status" aria-live="polite">No current Etsy live readback. Photos and tags are not assumed uploaded.</p><ul class="small" id="dd539LiveEvidence" aria-label="Actual Etsy draft readback"></ul></section>
         <div class="dd539-material-controls"><h3>Saved ingredient profiles &amp; tool/supply links</h3><p class="small">Choose <strong>Load Product resources</strong> below to edit an existing INCI/English/French label profile or link an ingredient. Then click <strong>Save Product Links</strong> in this panel. This does not send anything to Etsy.</p><button class="btn primary" type="button" id="dd539LoadIngredients">Load our Product's ingredients &amp; materials</button></div>
         <div id="productResourcesAdminMount" data-manual-load="true"></div>
       </section>
+
+      <section class="dd-editor-panel dd540-publish-panel" data-editor-panel="publishing" hidden><div class="dd540-section-head"><div><h2>Our Etsy draft</h2><p class="small">Choose Etsy, Save Product, then check the existing draft before updating it. Publishing still happens on Etsy.</p></div><span class="dd540-simple-badge">Draft only</span></div><div id="dd540DestinationMount"></div><p class="small" id="dd540PublishingStatus" role="status" aria-live="polite">Check Etsy to see which photos, tags and details reached this same saved draft.</p><div class="dd540-publishing-actions"><button class="btn" type="button" id="dd540CheckDraft">Check Etsy draft</button><button class="btn primary" type="button" id="dd540UpdateDraft">Update existing Etsy draft</button></div><p class="small">We do not create a second Sweet Orange draft or publish automatically.</p></section>
 
       <section class="dd-editor-panel" data-editor-panel="buyer" hidden>
         <div class="dd-products-browser-heading">
@@ -964,7 +985,7 @@
 <section class="dd-editor-panel" data-editor-panel="advanced" hidden><h2>Advanced workspaces</h2><p class="small">These systems remain separate so they cannot wake up merely because we edit a Product.</p><div class="dd-product-actions"><a class="btn" href="/admin/inventory-operations/">Inventory Operations</a><a class="btn" id="productEditorMediaAdvancedLink" href="/admin/catalog-media/">Image Editor</a><a class="btn" href="/admin/release-preflight/">Release Preflight</a><a class="btn" href="/admin/packaging-studio/">Packaging</a></div></section>
 
       <div class="dd443-recovery" id="dd443Recovery" hidden role="region" aria-label="Unsaved Product recovery"><strong>Unsaved edits recovered from this browser session</strong><p class="small" id="dd443RecoveryStatus">Choose Restore to review them, or Discard to keep the saved Product.</p><div class="dd-product-actions"><button class="btn" id="dd443RecoveryRestore" type="button">Restore unsaved edits</button><button class="btn" id="dd443RecoveryDiscard" type="button">Discard recovered edits</button></div></div>
-      <div class="dd-editor-footer"><div class="small" aria-live="polite" id="dd440SaveHint">Only drafts are supported; publishing remains in Etsy or Facebook. If a Save fails, review the server copy first to protect earlier work.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Reload saved Product</button><a class="btn" href="/admin/products/">Back to Products</a></div></div>
+      <div class="dd-editor-footer"><div class="small" aria-live="polite" id="dd440SaveHint">Our Product saves here. Etsy publishing happens in Etsy.</div><div class="dd-product-actions"><button class="btn" id="productEditorRetry" type="button">Reload saved Product</button><a class="btn" href="/admin/products/">Back to Products</a></div></div>
     </form>
   </div>
   <script src="/public/js/auth.js?v=440"></script>
@@ -1000,6 +1021,7 @@
   <script src="/public/js/admin-product-buyer-readiness-v182.js?v=199"></script>
   <script src="/public/js/admin-product-editor-layout-526.js?v=526"></script>
   <script type="module" src="/public/js/admin-product-ingredients-539.mjs?v=539"></script>
+  <script type="module" src="/public/js/admin-product-simple-540.mjs?v=540"></script>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">
 <script defer src="/public/js/admin-brand-v3-set17.js?v=17"></script>
 </body>

@@ -1,0 +1,50 @@
+/* Finished Product Editor: former build and diagnostic workbenches remain
+   recoverable in code, but are no longer part of everyday product entry. */
+.dd540-finished-product .dd-low-read-details,
+.dd540-finished-product .dd498-identity,
+.dd540-finished-product .dd532-journey,
+.dd540-finished-product .dd529-owner-panel,
+.dd540-finished-product #productEditorStatus,
+.dd540-finished-product .dd489-readiness,
+.dd540-finished-product .dd471-creation-flow,
+.dd540-finished-product .dd539-quick-actions,
+.dd540-finished-product #dd527MoreTools,
+.dd540-finished-product .dd539-panel-head,
+.dd540-finished-product .dd539-etsy-facts,
+.dd540-finished-product .dd539-material-controls,
+.dd540-finished-product .dd539-library-help,
+.dd540-finished-product #productResourcesAdminMount {display:none!important}
+.dd540-finished-product .dd539-ingredients-panel{margin:0;padding:0;min-height:0}
+.dd540-finished-product .dd-editor-tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.dd540-finished-product .dd-editor-tabs .btn{border-radius:10px;padding:10px 14px}
+.dd540-primary-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:10px 14px;margin:8px 0 18px;border-radius:12px;background:#201b34;border:1px solid #634d85}
+.dd540-primary-toolbar p{margin:0;flex:1;min-width:200px}
+.dd540-primary-toolbar .btn{min-width:160px}
+.dd540-section-head{display:flex;justify-content:space-between;align-items:start;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.dd540-section-head h2{color:#f6dca9;margin:0 0 7px;font-size:1.42rem}
+.dd540-section-head p{margin:0;max-width:65ch}
+.dd540-simple-badge{padding:6px 10px;border-radius:999px;border:1px solid #cfa966;color:#f8dc9a;white-space:nowrap;font-size:.8rem}
+.dd540-soap-composer,.dd540-publish-panel{padding:clamp(14px,2vw,26px);border:1px solid #8267a1;border-radius:14px;background:linear-gradient(135deg,#211c35,#151625);width:100%;min-width:0}
+.dd540-recipe-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.dd540-recipe-grid label{min-width:0;display:grid;gap:6px;color:#f0e4ff}
+.dd540-recipe-grid .input{min-width:0;width:100%;max-width:100%;overflow-wrap:anywhere}
+.dd540-facts{display:grid;gap:12px;margin-top:16px}
+.dd540-facts .dd538-input-grid{margin:0}
+.dd540-facts .dd538-attest{margin-top:6px}
+.dd540-facts .dd-product-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dd540-facts textarea{width:100%;min-height:105px;resize:vertical}
+.dd540-facts label{display:grid;gap:7px}
+.dd540-facts .dd540-confirm{display:flex;align-items:start;gap:10px}
+.dd540-facts .dd540-confirm input{margin-top:5px}
+.dd540-finished-product #dd540RecipeStatus{margin:12px 0;padding:12px 14px;border-radius:10px;border-left:3px solid #c4a46b;background:#292239}
+.dd540-library-help{margin-top:16px;font-size:.85rem;color:#d6cce2}
+.dd540-library-help summary{cursor:pointer}
+.dd540-publishing-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.dd540-finished-product #productChannel405{padding:12px!important;margin:12px 0!important;background:#272038;border:1px solid #655081;border-radius:10px}
+.dd540-finished-product #productChannel405 h2,.dd540-finished-product #productChannel405>p.small,.dd540-finished-product #productChannel405 .dd471-consent{display:none!important}
+.dd540-finished-product #productChannel405 .dd-editor-grid{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.dd540-finished-product #productChannel405 label{color:#fff;padding:8px 4px}
+.dd540-finished-product #productChannel405 #dd501ChannelRecovery:not([open]){display:none}
+.dd540-finished-product .dd-editor-footer{padding:10px 14px}
+.dd540-finished-product [data-editor-panel="ingredients"][hidden],.dd540-finished-product [data-editor-panel="publishing"][hidden]{display:none!important}
+@media(max-width:780px){.dd540-recipe-grid{grid-template-columns:minmax(0,1fr)}.dd540-primary-toolbar .btn{width:100%}.dd540-section-head{display:block}.dd540-simple-badge{display:inline-block;margin-top:10px}}
