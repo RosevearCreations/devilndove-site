@@ -1,0 +1,24 @@
+/* Build 543: two purposeful steps, with the proven provider guards retained. */
+.dd543-orange-suggestion{font-size:.86rem;padding:7px 10px;text-align:left;white-space:normal}
+.dd543-orange-suggestion[hidden]{display:none!important}
+.dd543-simple-step{margin-top:16px}
+.dd543-simple-step>.dd443-channel-card{margin:0!important;border-radius:12px;padding:16px!important}
+.dd543-simple-step h3{margin:0 0 12px;color:#f6dca9;font-size:1.17rem}
+.dd543-simple-step .dd-product-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.dd543-simple-step .dd-product-actions .btn{white-space:normal}
+.dd543-simple-step #dd486EtsyExisting>p.small:not([id]),
+.dd543-simple-step #dd443EtsyImages>p.small:not([id]),
+.dd543-simple-step #dd486EtsyUpdateConfirm,
+.dd543-simple-step #dd486EtsyUpdate,
+.dd543-simple-step #dd486EtsyUpdateStatus,
+.dd543-simple-step #dd499ExistingDraftHint,
+.dd543-simple-step #dd499UsePhotoDraftId,
+.dd543-simple-step #dd499DirectEtsyDraft{display:none!important}
+.dd543-simple-step #dd486EtsyListingId{max-width:220px}
+.dd543-simple-step #dd486EtsyPreview,.dd543-simple-step #dd486EtsyExistingStatus,
+.dd543-simple-step #dd443EtsyImagesStatus,.dd543-simple-step #dd487EtsyReconcileStatus{line-height:1.45}
+.dd543-simple-step #dd443EtsyImagesSend{margin-top:12px}
+.dd543-more-checks{margin-top:14px;border:1px solid #625079;border-radius:10px;padding:11px 14px}
+.dd543-more-checks summary{cursor:pointer;font-weight:600;color:#e8d7ff}
+.dd543-more-checks:not([open]){background:#201d31}
+@media(max-width:700px){.dd543-simple-step .dd-product-actions .btn,.dd543-simple-step #dd486EtsyListingId{width:100%;max-width:100%}}
