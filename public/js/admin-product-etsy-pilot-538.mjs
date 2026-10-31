@@ -28,9 +28,16 @@ if(root&&id===54&&form&&window.DDAuth?.apiFetch){
  }
  function recoverFacts(){
   const existing=String(field('description')?.value||'');
-  if(ingredient.value.trim())return;
-  const match=existing.match(/(?:^|\n)\s*ingredients?\s*:\s*([^\n\[\]]{12,1500})/i);
-  if(match){ingredient.value=match[1].trim();copyReady();}
+  if(!ingredient.value.trim()){
+   const match=existing.match(/(?:^|\n)\s*ingredients?\s*:\s*([^\n\[\]]{12,1500})/i);
+   if(match)ingredient.value=match[1].trim();
+  }
+  if(!net.value.trim()){
+   // Only use an explicit saved soap NET weight, never parcel/shipping weight.
+   const weight=existing.match(/Net weight of soap \(without packaging\)\s*:\s*(\d+(?:\.\d+)?)\s*g\b/i);
+   if(weight)net.value=weight[1];
+  }
+  copyReady();
  }
  fill.addEventListener('click',()=>{
   const proposed=sweetOrangeListing538({ingredients:ingredient.value,netWeightGrams:net.value});
