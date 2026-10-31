@@ -35,7 +35,7 @@ test('Build 535 keeps native tags separate and honest when empty, different, or 
 });
 test('Build 535 reads primary candidate, live Etsy photo inventory and tags without any invisible POST',()=>{
  const html=read('admin/product-editor/index.html'),flow=read('public/js/admin-product-destination-flow-523.mjs');
- assert.match(html,/Devil n Dove • Build (?:53[56789]|540|541|542|543|544|545|546|547|548|549|550|551)/);
+ assert.match(html,/Devil n Dove • Build (?:53[56789]|540|541|542|543|544|545|546|547|548|549|550|551|552)/);
  for(const id of ['dd535ReadLive','dd535LiveStatus','dd535LiveEvidence','dd535GoPhotoSync','dd535GoTagSync','dd535GoOwnerPhotos'])
   assert.match(html,new RegExp(`id="${id}"`));
  assert.match(html,/admin-product-destination-flow-523\.mjs\?v=53[57]/);
@@ -50,5 +50,5 @@ test('Build 535 reads primary candidate, live Etsy photo inventory and tags with
  assert.match(flow,/dd497NativeTags/);
  assert.match(flow,/dd525OwnerTrial/);
  assert.doesNotMatch(read('public/js/etsy-live-owner-review-535.mjs'),/fetch\(|POST|graph\.facebook\.com/);
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:5(?:3[56789]|40|41|42|43|44|45|46|47|48|49)|550|551)/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:5(?:3[56789]|40|41|42|43|44|45|46|47|48|49)|550|551|552)/);
 });

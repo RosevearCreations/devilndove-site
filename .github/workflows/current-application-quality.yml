@@ -453,6 +453,12 @@ jobs:
           node --check public/js/admin-system-health-551.js
           node --test scripts/release467_build551_owner_review_aging.test.mjs
 
+      - name: Build 552 owner evidence recovery and incident follow-up presets
+        run: |
+          node --check public/js/admin-system-health-550.js
+          node --check public/js/admin-system-health-551.js
+          node --test scripts/release467_build552_owner_recovery_presets.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
