@@ -76,5 +76,5 @@ test('Build 529 exposes an owner-triggered three-Product GET-only review without
   assert.match(frontend,/product-etsy-images\?product_id=\$\{id\}/);
   assert.match(api,/verifiedOwnerPhotoPairs529/);
   assert.match(api,/photo_pair_readback_529/);
-  assert.match(deploy,/"build":(?:5(?:29|3[0123456789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555)/);
+  assert.match(deploy,/"build":(?:5(?:29|3[0123456789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556)/);
 });

@@ -476,6 +476,11 @@ jobs:
           node --check public/js/admin-system-health-555.js
           node --test scripts/release467_build555_owner_acceptance_evidence.test.mjs
 
+      - name: Build 556 Admin route inventory, opt-in design foundation and Product Entry blueprint
+        run: |
+          node scripts/release467_build556_admin_interface_inventory.mjs --check
+          node --test scripts/release467_build556_product_admin_design_blueprint.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

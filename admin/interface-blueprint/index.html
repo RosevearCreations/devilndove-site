@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>Admin Interface Blueprint — Devil n Dove</title>
+  <link rel="stylesheet" href="/css/admin-interface-foundation-556.css?v=556"/>
+</head>
+<body class="dd556-admin-root" data-admin-page="interface-blueprint">
+  <a class="dd556-skip" href="#dd556Main">Skip to Admin blueprint</a>
+  <header class="dd556-top">
+    <a class="dd556-brand" href="/admin/"><img src="/assets/logo-clear-nav.webp" alt=""/>Devil n Dove · Admin</a>
+    <nav aria-label="Admin navigation"><a href="/admin/">Dashboard</a><a href="/admin/products/">Products</a><a href="/admin/inventory-operations/">Inventory</a><a href="/admin/system-operations/">System Operations</a><a href="/admin/interface-blueprint/" aria-current="page">UI Blueprint</a></nav>
+  </header>
+  <div class="dd556-layout">
+    <aside class="dd556-rail" aria-label="Blueprint sections">
+      <strong>Build 556 · Preview</strong>
+      <a href="#dd556Overview" aria-current="page">Product entry overview</a>
+      <a href="#dd556Flow">Four work areas</a>
+      <a href="#dd556Channels">Destinations</a>
+      <a href="#dd556Rules">Safety and design rules</a>
+    </aside>
+    <main id="dd556Main" class="dd556-content">
+      <section class="dd556-hero" id="dd556Overview" aria-labelledby="dd556Title">
+        <span class="dd556-eyebrow">Release 467 · Build 556 · Read-only Admin preview</span>
+        <h1 id="dd556Title">One Product. One Save. Clear destinations.</h1>
+        <p>This shows the simpler direction for the next Product Entry rewrite. It is a visual blueprint, <strong>not</strong> a live Product editor. No Product, Etsy draft, social account or incident record can be changed here.</p>
+        <span class="dd556-tag">Future Admin interface · public storefront unchanged</span>
+      </section>
+      <div class="dd556-stats" aria-label="Proposed interface principles">
+        <article class="dd556-stat"><span>Product work areas</span><strong>4</strong><span>Details · Recipe · Photos · Destinations</span></article>
+        <article class="dd556-stat"><span>Local Product save</span><strong>1</strong><span>One clear Save Product operation</span></article>
+        <article class="dd556-stat"><span>External writes here</span><strong>0</strong><span>This page is a design reference only</span></article>
+        <article class="dd556-stat"><span>Next delivery</span><strong>557</strong><span>Actual Product Entry 2.0 rewrite</span></article>
+      </div>
+      <div class="dd556-panels">
+        <section class="dd556-panel" id="dd556Flow" aria-labelledby="dd556FlowTitle">
+          <h2 id="dd556FlowTitle">The future Product Entry flow</h2>
+          <p>All Product facts stay in one saved record. Choosing a destination never silently publishes anything.</p>
+          <div class="dd556-area-list">
+            <article class="dd556-area"><span aria-hidden="true">1</span><div><h3>Details</h3><p>Name, SKU, category, CAD price, stock and description; show required fields beside the field itself.</p></div></article>
+            <article class="dd556-area"><span aria-hidden="true">2</span><div><h3>Recipe</h3><p>Choose saved soap base, scent and added oil. Generate label ingredients only from authentic verified source records; owner confirms the actual batch.</p></div></article>
+            <article class="dd556-area"><span aria-hidden="true">3</span><div><h3>Photos</h3><p>One shared gallery of real Product images. Each photo carries rights approval, descriptive alt text, file provenance and optional destination eligibility.</p></div></article>
+            <article class="dd556-area"><span aria-hidden="true">4</span><div><h3>Destinations</h3><p>Clearly separate <strong>Save Product</strong>, <strong>Create draft</strong>, <strong>Update existing draft</strong>, <strong>Prepare manual handoff</strong> and <strong>Publish</strong>.</p></div></article>
+          </div>
+          <p class="dd556-guard"><strong>Product #54:</strong> The reported existing Sweet Orange Etsy draft must be recovered and checked before any image transfer. Build 556 does not retry uploads or change its recipe.</p>
+          <a class="dd556-link" href="/admin/product-editor/?product_id=54">Open current Product #54 editor (separate live tool)</a>
+        </section>
+        <section class="dd556-panel" id="dd556Channels" aria-labelledby="dd556ChannelsTitle">
+          <h2 id="dd556ChannelsTitle">Where the saved Product can go</h2>
+          <p>These are proposed capabilities, not confirmed live connections. Every provider must pass its own account, permission and readback check.</p>
+          <div class="dd556-channel-list">
+            <article class="dd556-channel"><div><strong>Etsy</strong><small>Create draft or update its stored existing listing ID; verify images and tags before approval.</small></div><span class="dd556-state">Verify draft</span></article>
+            <article class="dd556-channel"><div><strong>Facebook Marketplace</strong><small>Prepare a manual listing handoff unless partner posting authorization is proven.</small></div><span class="dd556-state">Manual default</span></article>
+            <article class="dd556-channel"><div><strong>Facebook Pages / Instagram</strong><small>Professional account and Meta permission review before any API publishing.</small></div><span class="dd556-state">Permission check</span></article>
+            <article class="dd556-channel"><div><strong>TikTok</strong><small>Photo/video export, inbox draft or direct post only after approved scopes and creator confirmation.</small></div><span class="dd556-state">App review</span></article>
+            <article class="dd556-channel"><div><strong>X</strong><small>Post copy and media preparation; API posting only when user authorization and exact readback work.</small></div><span class="dd556-state">Verify access</span></article>
+            <article class="dd556-channel"><div><strong>Pinterest</strong><small>Pin preparation and approved API create flow where the account is connected.</small></div><span class="dd556-state">Verify access</span></article>
+            <article class="dd556-channel"><div><strong>Other channels</strong><small>Use an adapter or manual export only when that destination has a documented capability.</small></div><span class="dd556-state">Future adapter</span></article>
+          </div>
+        </section>
+      </div>
+      <section class="dd556-panel" id="dd556Rules" aria-labelledby="dd556RulesTitle" style="margin-top:1rem">
+        <h2 id="dd556RulesTitle">Rules for future Admin screens</h2>
+        <p>The reference uses a compact top bar, contextual side rail, dark navy surfaces, rounded cards, purple primary actions, gold/copper accents, semantic status colours and source-backed numbers. These styles are opt-in and will be introduced <strong>only</strong> on Admin surfaces that actually need a revamp.</p>
+        <details><summary>Publishing safety and recovery rules</summary><ul><li>Local Save Product never creates or publishes remote content.</li><li>Every destination shows account, readiness, required fields, operation status and remote ID when confirmed.</li><li>Never create a duplicate Etsy draft while an existing listing ID is unknown or unverified.</li><li>Each uncertain remote write must be reconciled by readback before offering a retry.</li><li>Photo permission, source, alt text and exact uploaded-image receipts are independently checked.</li><li>No direct posting is claimed for a provider without tested and authorized capability.</li></ul></details>
+        <details><summary>Responsive and accessibility rules</summary><ul><li>Desktop: top navigation, contextual rail and readable multi-column cards.</li><li>Tablet: stack secondary panels; allow navigation wrapping without clipped labels.</li><li>Mobile: single-column work areas and cards; local scrolling for larger tables.</li><li>Visible focus, meaningful labels, source timestamps, loading/error/empty states and keyboard-operable actions.</li></ul></details>
+      </section>
+    </main>
+  </div>
+  <footer class="dd556-foot">Admin-only design foundation · Build 556 · This preview performs no writes.</footer>
+</body>
+</html>

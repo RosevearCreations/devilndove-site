@@ -1,0 +1,2277 @@
+{
+  "format": "devilndove-admin-route-inventory-556",
+  "build": 556,
+  "scope": "Admin routes only — does not classify or alter public storefront",
+  "classification": "PROVISIONAL_STATIC_AUDIT_NOT_OWNER_APPROVAL",
+  "reference_screens": [
+    "Admin Dashboard",
+    "Product Management",
+    "Inventory & Stock",
+    "Orders & Fulfillment",
+    "Customer Requests",
+    "Production Calendar",
+    "Workstations & Capacity",
+    "Analytics & Reports",
+    "Shop Preview",
+    "Settings & Configuration"
+  ],
+  "totals": {
+    "total": 150,
+    "keep": 4,
+    "improve": 4,
+    "rebuild": 1,
+    "review": 141
+  },
+  "routes": [
+    {
+      "route": "/admin/",
+      "source": "admin/index.html",
+      "decision": "KEEP",
+      "reference_screen": "Admin Dashboard",
+      "reason": "Existing Admin dashboard already received a dedicated shell/hero modernization. Preserve until owner review.",
+      "evidence": {
+        "byte_length": 18206,
+        "stylesheets": 5,
+        "scripts": 12,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/accounting/",
+      "source": "admin/accounting/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 6782,
+        "stylesheets": 6,
+        "scripts": 20,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/analytics/",
+      "source": "admin/analytics/index.html",
+      "decision": "IMPROVE",
+      "reference_screen": "Analytics & Reports",
+      "reason": "Candidate for source-backed KPI and trend presentation, subject to a live visual check.",
+      "evidence": {
+        "byte_length": 4011,
+        "stylesheets": 2,
+        "scripts": 10,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/application-modules/",
+      "source": "admin/application-modules/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4672,
+        "stylesheets": 2,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/application-sanity/",
+      "source": "admin/application-sanity/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 1964,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/business-health/",
+      "source": "admin/business-health/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 6667,
+        "stylesheets": 3,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/business-pipeline/",
+      "source": "admin/business-pipeline/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3546,
+        "stylesheets": 3,
+        "scripts": 8,
+        "forms": 1,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/caip-content-handoff/",
+      "source": "admin/caip-content-handoff/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3669,
+        "stylesheets": 2,
+        "scripts": 6,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/catalog-health/",
+      "source": "admin/catalog-health/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 8775,
+        "stylesheets": 9,
+        "scripts": 12,
+        "forms": 2,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/catalog-media/",
+      "source": "admin/catalog-media/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 13858,
+        "stylesheets": 4,
+        "scripts": 4,
+        "forms": 2,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/catalog/",
+      "source": "admin/catalog/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 6271,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/command-center/",
+      "source": "admin/command-center/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3239,
+        "stylesheets": 2,
+        "scripts": 12,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/commission-workbench/",
+      "source": "admin/commission-workbench/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 5844,
+        "stylesheets": 1,
+        "scripts": 4,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/content-publications/",
+      "source": "admin/content-publications/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2868,
+        "stylesheets": 2,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/content-studio/",
+      "source": "admin/content-studio/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3673,
+        "stylesheets": 2,
+        "scripts": 10,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/creation-media/",
+      "source": "admin/creation-media/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4277,
+        "stylesheets": 1,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/creative-assets/",
+      "source": "admin/creative-assets/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 5030,
+        "stylesheets": 6,
+        "scripts": 16,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/creative-automation/",
+      "source": "admin/creative-automation/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4302,
+        "stylesheets": 4,
+        "scripts": 11,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/creative-process/",
+      "source": "admin/creative-process/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 11737,
+        "stylesheets": 2,
+        "scripts": 12,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/creative-project-pilot/",
+      "source": "admin/creative-project-pilot/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2602,
+        "stylesheets": 1,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/creator-content-completeness/",
+      "source": "admin/creator-content-completeness/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 5523,
+        "stylesheets": 2,
+        "scripts": 4,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/creator/",
+      "source": "admin/creator/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3232,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/cross-project-accounting/",
+      "source": "admin/cross-project-accounting/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4645,
+        "stylesheets": 1,
+        "scripts": 3,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/custom-request/",
+      "source": "admin/custom-request/index.html",
+      "decision": "IMPROVE",
+      "reference_screen": "Customer Requests",
+      "reason": "Candidate for clearer intake and triage layout only after checking current owner-approved controls.",
+      "evidence": {
+        "byte_length": 6200,
+        "stylesheets": 3,
+        "scripts": 18,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/custom-request/made-today/",
+      "source": "admin/custom-request/made-today/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 5197,
+        "stylesheets": 2,
+        "scripts": 6,
+        "forms": 1,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/custom-work-pilot/",
+      "source": "admin/custom-work-pilot/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2445,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/customer-documents/",
+      "source": "admin/customer-documents/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3136,
+        "stylesheets": 1,
+        "scripts": 10,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/dark-theme-evidence/",
+      "source": "admin/dark-theme-evidence/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 1046,
+        "stylesheets": 1,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/deploy-readiness/",
+      "source": "admin/deploy-readiness/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2082,
+        "stylesheets": 1,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/deployment-preflight/",
+      "source": "admin/deployment-preflight/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 17387,
+        "stylesheets": 3,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/etsy-owner-acceptance/",
+      "source": "admin/etsy-owner-acceptance/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 7903,
+        "stylesheets": 1,
+        "scripts": 2,
+        "forms": 1,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/evidence-adoption/",
+      "source": "admin/evidence-adoption/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2401,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/evidence-gap-execution-workbench/",
+      "source": "admin/evidence-gap-execution-workbench/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3113,
+        "stylesheets": 1,
+        "scripts": 2,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/evidence-gap-owner-queue/",
+      "source": "admin/evidence-gap-owner-queue/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 1817,
+        "stylesheets": 2,
+        "scripts": 3,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/finance-product-inventory-unit-economics/",
+      "source": "admin/finance-product-inventory-unit-economics/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4257,
+        "stylesheets": 3,
+        "scripts": 9,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/finance/",
+      "source": "admin/finance/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3997,
+        "stylesheets": 3,
+        "scripts": 12,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/finished-pieces/",
+      "source": "admin/finished-pieces/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3305,
+        "stylesheets": 1,
+        "scripts": 2,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/finished-quality/",
+      "source": "admin/finished-quality/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3406,
+        "stylesheets": 1,
+        "scripts": 2,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/gift-cards/",
+      "source": "admin/gift-cards/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2422,
+        "stylesheets": 2,
+        "scripts": 9,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/go-live-execution/",
+      "source": "admin/go-live-execution/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 1945,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/grey-hair-content-studio-handoff/",
+      "source": "admin/grey-hair-content-studio-handoff/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3888,
+        "stylesheets": 1,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/grey-hair-media-intelligence/",
+      "source": "admin/grey-hair-media-intelligence/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3146,
+        "stylesheets": 1,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/grey-hair-production-acceptance/",
+      "source": "admin/grey-hair-production-acceptance/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4412,
+        "stylesheets": 1,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/grey-hair-story-edit-planning/",
+      "source": "admin/grey-hair-story-edit-planning/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 6244,
+        "stylesheets": 1,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/grey-hair-story-readiness/",
+      "source": "admin/grey-hair-story-readiness/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2910,
+        "stylesheets": 1,
+        "scripts": 2,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/grey-hair-sync-alignment/",
+      "source": "admin/grey-hair-sync-alignment/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4101,
+        "stylesheets": 1,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/guided-manufacturing/",
+      "source": "admin/guided-manufacturing/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3859,
+        "stylesheets": 1,
+        "scripts": 2,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/help/",
+      "source": "admin/help/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 12929,
+        "stylesheets": 3,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/home-carousel/",
+      "source": "admin/home-carousel/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 6872,
+        "stylesheets": 3,
+        "scripts": 5,
+        "forms": 1,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/image-manifest/",
+      "source": "admin/image-manifest/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2914,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/interface-blueprint/",
+      "source": "admin/interface-blueprint/index.html",
+      "decision": "KEEP",
+      "reference_screen": "Product Management",
+      "reason": "Build 556 opt-in Admin-only visual reference; read-only blueprint, not a product or provider editor.",
+      "evidence": {
+        "byte_length": 8338,
+        "stylesheets": 1,
+        "scripts": 0,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/inventory-creator-intelligence/",
+      "source": "admin/inventory-creator-intelligence/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4435,
+        "stylesheets": 2,
+        "scripts": 4,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/inventory-finance-valuation-readiness/",
+      "source": "admin/inventory-finance-valuation-readiness/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2535,
+        "stylesheets": 4,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/inventory-intelligence/",
+      "source": "admin/inventory-intelligence/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 5535,
+        "stylesheets": 3,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/inventory-operations/",
+      "source": "admin/inventory-operations/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Inventory & Stock",
+      "reason": "Inventory Ops has its own prior workflow work; inspect its live layout before authorizing any visual change.",
+      "evidence": {
+        "byte_length": 11582,
+        "stylesheets": 13,
+        "scripts": 36,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/inventory-replenishment/",
+      "source": "admin/inventory-replenishment/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2560,
+        "stylesheets": 3,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/it-integrations/",
+      "source": "admin/it-integrations/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 56172,
+        "stylesheets": 5,
+        "scripts": 42,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/it-platform/",
+      "source": "admin/it-platform/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 1982,
+        "stylesheets": 1,
+        "scripts": 6,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/it/",
+      "source": "admin/it/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Settings & Configuration",
+      "reason": "Recent I.T. work must be preserved; determine visually whether only small refinements are needed.",
+      "evidence": {
+        "byte_length": 16749,
+        "stylesheets": 3,
+        "scripts": 17,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/listings/",
+      "source": "admin/listings/index.html",
+      "decision": "IMPROVE",
+      "reference_screen": "Product Management",
+      "reason": "Listing overview may need a consolidated destination handoff after the Product Editor rewrite.",
+      "evidence": {
+        "byte_length": 2413,
+        "stylesheets": 1,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/live-ops-followthrough/",
+      "source": "admin/live-ops-followthrough/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 1965,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/local-seo-review/",
+      "source": "admin/local-seo-review/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2243,
+        "stylesheets": 2,
+        "scripts": 11,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/maker-evidence-search/",
+      "source": "admin/maker-evidence-search/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 6501,
+        "stylesheets": 1,
+        "scripts": 2,
+        "forms": 1,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/maker-fulfillment-pilot/",
+      "source": "admin/maker-fulfillment-pilot/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 32223,
+        "stylesheets": 1,
+        "scripts": 2,
+        "forms": 8,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/maker-media-acceptance/",
+      "source": "admin/maker-media-acceptance/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 9989,
+        "stylesheets": 1,
+        "scripts": 3,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/maker-media-stories/",
+      "source": "admin/maker-media-stories/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4087,
+        "stylesheets": 1,
+        "scripts": 2,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/maker-owner-trials/",
+      "source": "admin/maker-owner-trials/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 7847,
+        "stylesheets": 2,
+        "scripts": 3,
+        "forms": 1,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/maker-pilot-closure/",
+      "source": "admin/maker-pilot-closure/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 6641,
+        "stylesheets": 2,
+        "scripts": 3,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/maker-product-safety/",
+      "source": "admin/maker-product-safety/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 11655,
+        "stylesheets": 2,
+        "scripts": 4,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/maker-resource-budget/",
+      "source": "admin/maker-resource-budget/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 15608,
+        "stylesheets": 1,
+        "scripts": 3,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/maker-story-coverage/",
+      "source": "admin/maker-story-coverage/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2318,
+        "stylesheets": 2,
+        "scripts": 3,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/maker-trial-debrief/",
+      "source": "admin/maker-trial-debrief/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 9375,
+        "stylesheets": 2,
+        "scripts": 3,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/maker-workbench/",
+      "source": "admin/maker-workbench/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 8223,
+        "stylesheets": 2,
+        "scripts": 3,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/manufacturing-adoption/",
+      "source": "admin/manufacturing-adoption/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3055,
+        "stylesheets": 2,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/markdown-sanity/",
+      "source": "admin/markdown-sanity/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2347,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/marketplace-calibration/",
+      "source": "admin/marketplace-calibration/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2385,
+        "stylesheets": 2,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/marketplace-exports/",
+      "source": "admin/marketplace-exports/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 1912,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/marketplace-mapping/",
+      "source": "admin/marketplace-mapping/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 1915,
+        "stylesheets": 2,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/marketplace-readiness/",
+      "source": "admin/marketplace-readiness/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2222,
+        "stylesheets": 3,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/media-content-studio/",
+      "source": "admin/media-content-studio/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 15105,
+        "stylesheets": 1,
+        "scripts": 12,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/members/",
+      "source": "admin/members/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3929,
+        "stylesheets": 2,
+        "scripts": 19,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/membership/",
+      "source": "admin/membership/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2013,
+        "stylesheets": 1,
+        "scripts": 10,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/mobile-inventory/",
+      "source": "admin/mobile-inventory/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3927,
+        "stylesheets": 2,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/mobile-product/",
+      "source": "admin/mobile-product/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 17008,
+        "stylesheets": 1,
+        "scripts": 9,
+        "forms": 1,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/mobile-workshop-assistant/",
+      "source": "admin/mobile-workshop-assistant/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 8700,
+        "stylesheets": 3,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/mobile/",
+      "source": "admin/mobile/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 8907,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/month-end/",
+      "source": "admin/month-end/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2793,
+        "stylesheets": 3,
+        "scripts": 9,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/movies/",
+      "source": "admin/movies/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 16212,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 1,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/operational-continuity/",
+      "source": "admin/operational-continuity/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 5331,
+        "stylesheets": 1,
+        "scripts": 9,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/operations/",
+      "source": "admin/operations/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 6690,
+        "stylesheets": 2,
+        "scripts": 32,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/order-finance-settlement-readiness/",
+      "source": "admin/order-finance-settlement-readiness/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2464,
+        "stylesheets": 4,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/order-fulfillment-care/",
+      "source": "admin/order-fulfillment-care/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 5328,
+        "stylesheets": 3,
+        "scripts": 12,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/order-inventory-fulfillment-readiness/",
+      "source": "admin/order-inventory-fulfillment-readiness/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4023,
+        "stylesheets": 4,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/order-production-release-readiness/",
+      "source": "admin/order-production-release-readiness/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2575,
+        "stylesheets": 4,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/orders/",
+      "source": "admin/orders/index.html",
+      "decision": "IMPROVE",
+      "reference_screen": "Orders & Fulfillment",
+      "reason": "Candidate for reference-style cards, filters and exception inspectors; preserve the existing order APIs and controls.",
+      "evidence": {
+        "byte_length": 4701,
+        "stylesheets": 2,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/packaging-studio/",
+      "source": "admin/packaging-studio/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 10205,
+        "stylesheets": 2,
+        "scripts": 13,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/packaging/soap-labels/",
+      "source": "admin/packaging/soap-labels/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2498,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/post-deploy-smoke-tests/",
+      "source": "admin/post-deploy-smoke-tests/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 1864,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/prelaunch/",
+      "source": "admin/prelaunch/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 7855,
+        "stylesheets": 1,
+        "scripts": 6,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/product-editor/",
+      "source": "admin/product-editor/index.html",
+      "decision": "REBUILD",
+      "reference_screen": "Product Management",
+      "reason": "Owner explicitly requested replacing the confusing multi-panel Product Editor with a four-area workflow in Build 557.",
+      "evidence": {
+        "byte_length": 153301,
+        "stylesheets": 30,
+        "scripts": 41,
+        "forms": 1,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/product-image-quality/",
+      "source": "admin/product-image-quality/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 7301,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/product-lineage/",
+      "source": "admin/product-lineage/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 6562,
+        "stylesheets": 1,
+        "scripts": 6,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/products/",
+      "source": "admin/products/index.html",
+      "decision": "KEEP",
+      "reference_screen": "Product Management",
+      "reason": "Existing compact Product browser and low-read recovery were previously revamped; preserve behavior and styling.",
+      "evidence": {
+        "byte_length": 6939,
+        "stylesheets": 2,
+        "scripts": 5,
+        "forms": 1,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/project-bom/",
+      "source": "admin/project-bom/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 6562,
+        "stylesheets": 1,
+        "scripts": 2,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/project-capacity-planner/",
+      "source": "admin/project-capacity-planner/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Workstations & Capacity",
+      "reason": "Capacity planner has existing scoped UI; verify whether it already matches the reference.",
+      "evidence": {
+        "byte_length": 4781,
+        "stylesheets": 1,
+        "scripts": 2,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/project-costs/",
+      "source": "admin/project-costs/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 9344,
+        "stylesheets": 1,
+        "scripts": 2,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/project-design-files/",
+      "source": "admin/project-design-files/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 6703,
+        "stylesheets": 1,
+        "scripts": 2,
+        "forms": 2,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/project-discovery-overview/",
+      "source": "admin/project-discovery-overview/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4689,
+        "stylesheets": 1,
+        "scripts": 3,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/project-material-planner/",
+      "source": "admin/project-material-planner/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4222,
+        "stylesheets": 1,
+        "scripts": 4,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/project-profitability-reconciliation/",
+      "source": "admin/project-profitability-reconciliation/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3596,
+        "stylesheets": 3,
+        "scripts": 6,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/project-resource-calendar/",
+      "source": "admin/project-resource-calendar/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Production Calendar",
+      "reason": "Calendar and resource workspaces have existing maker revamps; compare visually before changing.",
+      "evidence": {
+        "byte_length": 6956,
+        "stylesheets": 1,
+        "scripts": 3,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/project-work-orders/",
+      "source": "admin/project-work-orders/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Workstations & Capacity",
+      "reason": "Work-order flow has prior production enhancements and must not be visually overwritten without review.",
+      "evidence": {
+        "byte_length": 3851,
+        "stylesheets": 2,
+        "scripts": 4,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/project-workflow-routing/",
+      "source": "admin/project-workflow-routing/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4474,
+        "stylesheets": 1,
+        "scripts": 3,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/promotion-control/",
+      "source": "admin/promotion-control/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2128,
+        "stylesheets": 1,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/public-display-order/",
+      "source": "admin/public-display-order/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2099,
+        "stylesheets": 1,
+        "scripts": 4,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/public-proof-candidates/",
+      "source": "admin/public-proof-candidates/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 1739,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/public-story-activation/",
+      "source": "admin/public-story-activation/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2376,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/readiness/",
+      "source": "admin/readiness/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2475,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/release-control/",
+      "source": "admin/release-control/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2240,
+        "stylesheets": 2,
+        "scripts": 6,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/release-control/external-acceptance/",
+      "source": "admin/release-control/external-acceptance/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3775,
+        "stylesheets": 2,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/release-control/external-commercial-readiness/",
+      "source": "admin/release-control/external-commercial-readiness/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 6170,
+        "stylesheets": 2,
+        "scripts": 3,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/release-control/revenue-business-intelligence/",
+      "source": "admin/release-control/revenue-business-intelligence/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2634,
+        "stylesheets": 1,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/release-control/runtime-storefront-intelligence/",
+      "source": "admin/release-control/runtime-storefront-intelligence/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2700,
+        "stylesheets": 1,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/release-gate-status/",
+      "source": "admin/release-gate-status/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4036,
+        "stylesheets": 1,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/release-notes/",
+      "source": "admin/release-notes/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 876,
+        "stylesheets": 1,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/release-preflight/",
+      "source": "admin/release-preflight/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2188,
+        "stylesheets": 1,
+        "scripts": 6,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/reliability/",
+      "source": "admin/reliability/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 16524,
+        "stylesheets": 4,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/rollback-readiness/",
+      "source": "admin/rollback-readiness/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4680,
+        "stylesheets": 1,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/runtime-acceptance/",
+      "source": "admin/runtime-acceptance/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4072,
+        "stylesheets": 3,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/safe-deploy-package/",
+      "source": "admin/safe-deploy-package/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 927,
+        "stylesheets": 1,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/shared-tools/",
+      "source": "admin/shared-tools/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 7250,
+        "stylesheets": 1,
+        "scripts": 2,
+        "forms": 1,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/social-publishing/",
+      "source": "admin/social-publishing/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Settings & Configuration",
+      "reason": "Existing social authorization and draft boundaries must remain intact; integration redesign is queued separately.",
+      "evidence": {
+        "byte_length": 13647,
+        "stylesheets": 3,
+        "scripts": 11,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/stage-photo-moderation/",
+      "source": "admin/stage-photo-moderation/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 1734,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/startup-readiness/",
+      "source": "admin/startup-readiness/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2392,
+        "stylesheets": 2,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/storefront-inventory-sellability/",
+      "source": "admin/storefront-inventory-sellability/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4520,
+        "stylesheets": 3,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/storefront-merchandising/",
+      "source": "admin/storefront-merchandising/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 10043,
+        "stylesheets": 3,
+        "scripts": 8,
+        "forms": 4,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/storefront-quality/",
+      "source": "admin/storefront-quality/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 4664,
+        "stylesheets": 2,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/storefront/",
+      "source": "admin/storefront/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Shop Preview",
+      "reason": "Admin storefront preview is distinct from public storefront; verify its present appearance first.",
+      "evidence": {
+        "byte_length": 2291,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/supply-sourcing/",
+      "source": "admin/supply-sourcing/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 3812,
+        "stylesheets": 2,
+        "scripts": 5,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/system-operations/",
+      "source": "admin/system-operations/index.html",
+      "decision": "KEEP",
+      "reference_screen": "Settings & Configuration",
+      "reason": "Builds 546-555 already modernized monitoring and owner evidence; preserve current controls.",
+      "evidence": {
+        "byte_length": 20230,
+        "stylesheets": 11,
+        "scripts": 10,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/today-tasks/",
+      "source": "admin/today-tasks/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2262,
+        "stylesheets": 1,
+        "scripts": 9,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/tool-lifecycle/",
+      "source": "admin/tool-lifecycle/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 9348,
+        "stylesheets": 3,
+        "scripts": 7,
+        "forms": 2,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/trust-blocks/",
+      "source": "admin/trust-blocks/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2345,
+        "stylesheets": 2,
+        "scripts": 9,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/users/",
+      "source": "admin/users/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2786,
+        "stylesheets": 1,
+        "scripts": 16,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/vendor-reviews/",
+      "source": "admin/vendor-reviews/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 7896,
+        "stylesheets": 2,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/visual-enrichment-studio/",
+      "source": "admin/visual-enrichment-studio/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2082,
+        "stylesheets": 2,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/visual-polish/",
+      "source": "admin/visual-polish/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 1972,
+        "stylesheets": 1,
+        "scripts": 7,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/workshop-capabilities/",
+      "source": "admin/workshop-capabilities/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 1728,
+        "stylesheets": 3,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/workshop-knowledge/",
+      "source": "admin/workshop-knowledge/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2780,
+        "stylesheets": 2,
+        "scripts": 9,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/workshop-readiness/",
+      "source": "admin/workshop-readiness/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 2569,
+        "stylesheets": 3,
+        "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    }
+  ]
+}
