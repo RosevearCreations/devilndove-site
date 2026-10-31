@@ -56,7 +56,7 @@ test('Final owner sign-off requires independent provider content and proper evid
 });
 test('Build 536 owner trial uses the same candidate as the editor and actual image/tag/final-content GET receipts, with explicit consent only',()=>{
  const html=read('admin/product-editor/index.html'),closure=read('public/js/admin-product-etsy-closure-530.mjs');
- assert.match(html,/Devil n Dove • Build (?:53[6789]|540|541|542|543|544|545|546|547|548|549)/);
+ assert.match(html,/Devil n Dove • Build (?:53[6789]|540|541|542|543|544|545|546|547|548|549|550)/);
  assert.match(html,/admin-product-editor-536\.css\?v=536/);
  assert.match(html,/admin-product-etsy-closure-530\.mjs\?v=536/);
  assert.match(closure,/ownerDraftHistory534\(id\)\?\.listingId/);
@@ -70,6 +70,6 @@ test('Build 536 owner trial uses the same candidate as the editor and actual ima
  const signoff=read('functions/api/admin/product-etsy-owner-signoff-504.js');
  assert.match(signoff,/db=db\.withSession\('first-primary'\)/);
  assert.match(read('functions/api/admin/product-etsy-tags.js'),/const currentDb=db=>/);
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":5(?:3[6789]|40|41|42|43|44|45|46|47|48|49)/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:5(?:3[6789]|40|41|42|43|44|45|46|47|48|49)|550)/);
  assert.doesNotMatch(read('public/js/etsy-owner-final-readback-536.mjs'),/fetch\(|method:'POST'|graph\.facebook\.com/);
 });

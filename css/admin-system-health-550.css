@@ -1,0 +1,9 @@
+.dd550-recover{border:1px solid #8e75b7;border-radius:12px;background:#29223f;padding:15px;margin:16px 0;color:#f3eaff}
+.dd550-recover h3{margin:0 0 9px;color:#f4d68d}.dd550-recover label{display:block;font-weight:600;margin-bottom:8px}
+.dd550-recover select,.dd550-filter select{width:100%;min-height:42px;border:1px solid #a88ac5;border-radius:9px;background:#17132b;color:#fff;padding:9px;box-sizing:border-box}
+.dd550-recover p{font-size:.91rem;margin:10px 0 0;color:#dbcdea}
+.dd550-filter{display:flex;flex-wrap:wrap;gap:12px;margin:15px 0 8px}.dd550-filter label{flex:1 1 185px;display:block;max-width:290px;color:#f5d995;font-weight:600}
+.dd550-filter select{display:block;margin-top:7px}.dd550-incident details{margin-top:10px;border-top:1px solid #57496c;padding-top:9px}
+.dd550-incident summary{cursor:pointer;font-weight:600;color:#edcd8e}.dd550-incident dl{display:grid;grid-template-columns:minmax(120px,35%) 1fr;gap:5px 12px;margin:10px 0 0;font-size:.9rem}
+.dd550-incident dt{color:#d9c2f0}.dd550-incident dd{margin:0;overflow-wrap:anywhere}#dd550Count{color:#dcc9ed;font-size:.9rem}
+@media(max-width:600px){.dd550-recover{padding:11px}.dd550-filter label{max-width:none}}
