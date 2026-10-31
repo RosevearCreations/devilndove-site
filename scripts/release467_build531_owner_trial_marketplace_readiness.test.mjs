@@ -41,7 +41,7 @@ test('Build 531 attaches an explicit owner trial report and manual Marketplace G
  const etsy=read('public/js/admin-product-etsy-closure-530.mjs');
  const localApi=read('functions/api/admin/product-distribution-406.js');
  const deploy=read('.github/workflows/production-pages-deploy-current.yml');
- assert.match(html,/Devil n Dove • Build 53[1234567]/);
+ assert.match(html,/Devil n Dove • Build 53[12345678]/);
  for(const id of ['dd531TrialSummary','dd531TrialRows','dd531TrialStatus','dd531CopyTrial','dd531MarketplaceCheck','dd531MarketplaceResult'])
    assert.match(html,new RegExp(`id="${id}"`));
  assert.match(html,/admin-product-owner-trial-531\.mjs\?v=531/);
@@ -52,5 +52,5 @@ test('Build 531 attaches an explicit owner trial report and manual Marketplace G
  assert.doesNotMatch(script,/method:'POST'|action:'create_|fetch\('https:\/\/graph\.facebook/);
  assert.match(localApi,/provider_called:false/);
  assert.match(localApi,/provider_publication_allowed:false/);
- assert.match(deploy,/"build":53[1234567]/);
+ assert.match(deploy,/"build":53[12345678]/);
 });

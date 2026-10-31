@@ -65,9 +65,9 @@ test('Build 528 loads options by explicit owner action and never performs a hidd
 
 test('Build 528 shows an actionable reconnection link and responsive fields without making up shop choices',()=>{
   const html=read('admin/product-editor/index.html'),css=read('css/admin-product-editor-528.css');
-  assert.match(html,/Devil n Dove • Build (?:52[89]|53[01234567])/);
+  assert.match(html,/Devil n Dove • Build (?:52[89]|53[012345678])/);
   assert.match(html,/admin-product-editor-528\.css\?v=528/);
-  assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=(?:528|533)/);
+  assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=(?:528|533|538)/);
   assert.match(html,/id="dd528Reconnect"[^>]*href="\/admin\/it-integrations\/#etsy-oauth-acceptance"[^>]*hidden/);
   for(const id of ['dd500Category','dd500Shipping','dd500Processing'])assert.match(html,new RegExp(`id="${id}" disabled`));
   assert.match(css,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);

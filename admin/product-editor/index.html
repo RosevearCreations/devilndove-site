@@ -30,6 +30,7 @@
   <link rel="stylesheet" href="/css/admin-product-editor-535.css?v=535"/>
   <link rel="stylesheet" href="/css/admin-product-editor-536.css?v=536"/>
   <link rel="stylesheet" href="/css/admin-product-editor-537.css?v=537"/>
+  <link rel="stylesheet" href="/css/admin-product-editor-538.css?v=538"/>
 </head>
 <body data-admin-page="product-editor-v165">
   <div class="container admin-shell dd-product-shell">
@@ -39,7 +40,7 @@
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
-      <div><p class="eyebrow">Devil n Dove • Build 537</p><h1 id="productEditorTitle">Product Editor</h1><p>One saved item, one photo gallery, one Etsy draft ID. Edit and Save Product, then confirm its Etsy draft in the same screen.</p></div>
+      <div><p class="eyebrow">Devil n Dove • Build 538</p><h1 id="productEditorTitle">Product Editor</h1><p>One saved item, one photo gallery, one Etsy draft ID. Edit and Save Product, then confirm its Etsy draft in the same screen.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
 
@@ -159,6 +160,19 @@
               <button type="button" class="btn" id="dd537Final">4. Final owner readback</button>
             </div>
             <p class="small">Photos missing from Etsy require a separate, explicitly approved one-time transfer. Photos already on Etsy require a visual original-to-Etsy pairing. Final owner acceptance is offered only after the live identity, photos, native tags and content all match. <strong>This application cannot publish on Etsy or Facebook.</strong></p>
+          </section>
+          <section class="dd538-pilot" id="dd538Pilot" hidden aria-labelledby="dd538PilotTitle">
+            <div class="dd538-heading"><div><p class="eyebrow">Product #54 · DND-01131 · existing draft #4601705477</p><h4 id="dd538PilotTitle">Finish our Sweet Orange soap — one Product</h4></div><span class="dd538-badge">Keep unpublished until reviewed in Etsy</span></div>
+            <p class="small">Our current Etsy screenshot shows this saved draft with no photos. We will correct the Product description, use one list of search tags and inspect the same three approved gallery originals. <strong>Nothing here creates a second draft or silently posts it.</strong></p>
+            <div class="dd538-input-grid">
+              <label><strong>Ingredients, exactly as listed on our soap label</strong><textarea class="input" id="dd538Ingredients" rows="3" placeholder="Enter the actual full ingredient list (INCI names); no guessed ingredients"></textarea><span class="small">Copy from the real label. The application cannot infer our soap formula.</span></label>
+              <label><strong>Actual net soap weight (grams)</strong><input class="input" id="dd538NetWeight" inputmode="decimal" placeholder="Measured weight of one soap bar, without packaging"/><span class="small">The earlier 180 g value is parcel shipping weight, not verified soap net weight.</span></label>
+            </div>
+            <label class="dd538-attest"><input id="dd538FactsConfirm" type="checkbox"/> I checked the actual soap ingredients and net weight. These facts are accurate for the item we will sell.</label>
+            <p class="small" id="dd538FactsStatus" role="status">Enter the actual soap facts to prepare a truthful description.</p>
+            <div class="dd-product-actions"><button class="btn primary" id="dd538Fill" type="button" disabled>1. Fill accurate Sweet Orange details + 13 tags</button><span class="small">Then click <strong>Save Product</strong> above. This fills local fields only.</span></div>
+            <div class="dd538-steps dd-product-actions"><button class="btn" id="dd538SharedTags" type="button">2. Use saved tags for Etsy</button><button class="btn" id="dd538Photos" type="button">3. Review 3 original-photo transfers</button><button class="btn" id="dd538NativeTags" type="button">4. Confirm native Etsy tags</button><button class="btn" id="dd538Final" type="button">5. Check actual Etsy draft</button></div>
+            <p class="small dd538-result" id="dd538PilotStatus" role="status" aria-live="polite">No changes yet. Real photo transfers and Etsy tag updates each require the separate existing owner approval.</p>
           </section>
           <p class="small">All approved Product gallery originals are shared across our website, Etsy and Marketplace. <strong>800 × 800 is our minimum, not a required crop.</strong> Use Edit original photos to frame the composition. Your chosen originals must be saved and approved before Etsy transfer; photos are never silently replaced.</p>
           <details class="dd527-draft-checks"><summary>Optional: check the saved Etsy ID, original photos or settings</summary>
@@ -962,9 +976,10 @@
   <script src="/public/js/admin-product-existing-etsy-draft-v486.js?v=537"></script>
   <script type="module" src="/public/js/admin-product-channel-advanced-v498.mjs?v=498"></script>
   <script type="module" src="/public/js/admin-product-owner-sync-v499.mjs?v=499"></script>
-  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=528"></script>
+  <script type="module" src="/public/js/admin-product-etsy-package-v500.mjs?v=538"></script>
   <script type="module" src="/public/js/admin-product-destination-flow-523.mjs?v=537"></script>
-  <script type="module" src="/public/js/admin-product-etsy-recovery-537.mjs?v=537"></script>
+  <script type="module" src="/public/js/admin-product-etsy-recovery-537.mjs?v=538"></script>
+  <script type="module" src="/public/js/admin-product-etsy-pilot-538.mjs?v=538"></script>
   <script type="module" src="/public/js/admin-product-photo-framing-533.mjs?v=533"></script>
   <script type="module" src="/public/js/admin-product-etsy-owner-trial-525.mjs?v=525"></script>
   <script type="module" src="/public/js/admin-product-etsy-closure-530.mjs?v=536"></script>

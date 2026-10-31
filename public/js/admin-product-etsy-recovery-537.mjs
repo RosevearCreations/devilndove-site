@@ -63,7 +63,7 @@ if(root&&productId===54&&window.DDAuth?.apiFetch){
    const identity=await get(`/api/admin/product-etsy-existing-draft?product_id=${productId}&candidate_listing_id=${encodeURIComponent(candidate)}`);
    const exact=identity.saved_link_readback_confirmed===true&&Number(identity.product_id)===productId&&
     String(identity.linked_listing_id||'')===candidate&&Boolean(String(identity.receipt_id||'').trim());
-   const paths=[`/api/admin/product-etsy-images?product_id=${productId}${exact?'&reconcile=1':''}`];
+   const paths=[`/api/admin/product-etsy-images?product_id=${productId}&candidate_listing_id=${encodeURIComponent(candidate)}${exact?'&reconcile=1':''}`];
    if(exact)paths.push(`/api/admin/product-etsy-tags?product_id=${productId}&reconcile=1`,
     `/api/admin/product-etsy-owner-signoff-504?product_id=${productId}`);
    const replies=await Promise.allSettled(paths.map(get));

@@ -1,0 +1,18 @@
+/* Build 538 — owner-facing single-product Etsy repair, same brand palette. */
+.dd538-pilot{margin:1.1rem 0;padding:clamp(1rem,2.3vw,1.45rem);border:1px solid #b28b50;border-radius:16px;background:linear-gradient(135deg,#26203b,#181a2b 75%);box-shadow:0 8px 28px #06071030;color:#f4edf7}
+.dd538-pilot[hidden]{display:none!important}
+.dd538-pilot h4{font-size:1.35rem;margin:.25rem 0 .6rem;color:#fff1da}
+.dd538-pilot .eyebrow{color:#dfbd85}
+.dd538-heading{display:flex;justify-content:space-between;gap:1rem;align-items:start;flex-wrap:wrap}
+.dd538-badge{padding:.4rem .7rem;border:1px solid #cb9966;border-radius:999px;color:#f7c995;font-size:.8rem}
+.dd538-input-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:1rem;margin:1rem 0}
+.dd538-input-grid label{min-width:0;display:flex;flex-direction:column;gap:.45rem}
+.dd538-input-grid .input{background:#0f1021;color:#fff;border:1px solid #775e90;border-radius:10px;max-width:100%;box-sizing:border-box}
+.dd538-attest{display:flex;align-items:flex-start;gap:.65rem;margin:.65rem 0;line-height:1.5}
+.dd538-attest input{flex:0 0 auto;margin-top:.3rem;accent-color:#bf80ff}
+.dd538-steps{margin-top:1rem;border-top:1px solid #655079;padding-top:1rem}
+.dd538-pilot .btn{max-width:100%;white-space:normal;line-height:1.4;text-align:center}
+.dd538-pilot .btn:focus-visible,.dd538-input-grid .input:focus-visible{outline:3px solid #e8bb75;outline-offset:3px}
+.dd538-result{margin:.85rem 0 0;padding:.85rem;border-radius:10px;background:#162a30;border-left:4px solid #83d7b8}
+.dd538-result[data-tone="hold"]{background:#3b2425;border-left-color:#f39b5f}
+@media(max-width:750px){.dd538-input-grid{grid-template-columns:1fr}.dd538-steps .btn{width:100%}}
