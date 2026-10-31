@@ -1,0 +1,12 @@
+.dd553-boundary{margin:16px 0 0!important;padding:12px 14px;border-left:4px solid #f1d28e;background:#271f3c;border-radius:6px;color:#f7ead1;line-height:1.55}
+.dd553-preset-tools{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:5px 0 15px}
+.dd553-preset-tools .btn{flex-shrink:0}
+#dd553PresetStatus{flex:1;min-width:240px;padding:10px 12px;border-radius:9px;background:#332746;color:#f4e5fa;line-height:1.5}
+#dd553EvidenceDetails{padding:14px;border:1px solid #8870a1;border-radius:12px;background:#1c1830;margin:15px 0}
+#dd553EvidenceDetails>summary{color:#f4d99c;font-weight:700;cursor:pointer;padding:3px 0}
+.dd553-evidence-tools{display:flex;flex-wrap:wrap;align-items:center;gap:18px;margin:14px 0}
+.dd553-evidence-tools label{display:grid;gap:8px;flex:1;min-width:min(100%,250px);font-weight:600}
+.dd553-evidence-tools input[type=file]{display:block;width:100%;max-width:440px;color:#f6eaf9;background:#302642;padding:10px;border:1px solid #9b84b3;border-radius:9px}
+.dd553-evidence-tools input[type=file]:focus-visible,.dd553-preset-tools button:focus-visible{outline:3px solid #f4d18e;outline-offset:3px}
+#dd553ExportStatus{padding:12px 14px;border-radius:9px;background:#352945;color:#fff2da;line-height:1.5;overflow-wrap:anywhere}
+@media(max-width:700px){.dd553-preset-tools{display:grid}.dd553-evidence-tools{display:grid}.dd553-evidence-tools label{min-width:0}}
