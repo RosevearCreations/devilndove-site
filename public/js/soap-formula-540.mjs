@@ -13,6 +13,26 @@ export function scentNameConflict541(productName,selectedName){
   return /sweet\s+orange/.test(product)&&!!scent&&!/\borange\b/.test(scent);
 }
 
+// Read-only owner evidence. It reports what is still unknown; it never accepts
+// a Product title or an Etsy screenshot as proof of a physical formula/upload.
+export function assessOwnerRecipePhotos542(recipe,photos,{productId=54,expectedListingId='4601705477'}={}){
+  const issues=[];
+  if(Number(recipe?.product_id)!==Number(productId))issues.push('Saved Product identity was not verified.');
+  if(recipe?.ambiguous_projects||!recipe?.official_project)issues.push('One authoritative official soap label record was not found.');
+  if(!Array.isArray(recipe?.saved_ingredients)||!recipe.saved_ingredients.length)issues.push('Saved official INCI ingredients are missing.');
+  if(!Array.isArray(recipe?.saved_materials)||!recipe.saved_materials.some(x=>x.material_role==='base'))issues.push('The actual soap base source is not linked to the official recipe.');
+  const scent=recipe?.saved_materials?.find(x=>x.material_role==='fragrance');
+  const source=recipe?.source_materials?.find(x=>String(x.packaging_source_material_template_id)===String(scent?.packaging_source_material_template_id));
+  if(scentNameConflict541(recipe?.product_name,source?.material_name))issues.push('Saved scent conflicts with Sweet Orange; owner must review the actual batch.');
+  if(!(Number(recipe?.saved_weight_g)>0))issues.push('Finished unwrapped bar weight is not recorded.');
+  if(String(photos?.listing_id||'')!==String(expectedListingId))issues.push('The linked Etsy draft is not the expected existing draft.');
+  if(photos?.provider_contacted!==true)issues.push('Live Etsy photo inventory has not been verified.');
+  if(photos?.remote_reconciliation?.ready!==true||photos?.photo_pair_readback_529?.ready!==true)issues.push('Original Product photographs do not all have verified Etsy photo pairs.');
+  if(Number(photos?.gallery_photo_count||0)<1)issues.push('No approved original Product gallery photographs were found.');
+  return {ready:issues.length===0,issues,ingredient_count:recipe?.saved_ingredients?.length||0,
+    original_count:photos?.gallery_photo_count??null,remote_count:photos?.remote_reconciliation?.remote_count??null};
+}
+
 export function composeSoapFormula540(sources, choices) {
   const selected = [];
   const blockers = [];

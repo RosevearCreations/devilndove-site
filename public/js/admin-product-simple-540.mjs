@@ -1,6 +1,6 @@
 /* Finished-product entry. Historical diagnostic DOM stays mounted for existing
  * handlers but only this simple surface is shown to the owner. */
-import {composeSoapFormula540,SOAP_ROLES_540,scentNameConflict541} from './soap-formula-540.mjs';
+import {composeSoapFormula540,SOAP_ROLES_540,scentNameConflict541,assessOwnerRecipePhotos542} from './soap-formula-540.mjs';
 const byId=id=>document.getElementById(id);
 const productId=Number(new URLSearchParams(location.search).get('product_id')||0);
 const form=byId('productEditorForm'),save=byId('dd540SaveProduct'),toolbar=byId('dd540ToolbarStatus');
@@ -149,6 +149,26 @@ if(form&&save){
     const read=byId('dd535ReadLive');if(read)read.click();
     else publishingStatus.textContent='Live Etsy readback is unavailable; no Etsy write occurred.';
     byId('dd443EtsyImagesLoad')?.click();
+  });
+  if(byId('dd542OwnerVerify'))byId('dd542OwnerVerify').hidden=productId!==54;
+  byId('dd542OwnerVerify')?.addEventListener('click',async()=>{
+    const button=byId('dd542OwnerVerify'),status=byId('dd542OwnerStatus');
+    if(!productId||form.dataset.productDirty==='1'){
+      status.textContent='Save the Product first. No recipe or Etsy photo verification was attempted.';return;
+    }
+    button.disabled=true;status.textContent='Reading the saved official soap record and actual existing Etsy draft photos…';
+    try{
+      const [recipe,photos]=await Promise.all([
+        api(`/api/admin/product-soap-formula-540?product_id=${productId}`),
+        api(`/api/admin/product-etsy-images?product_id=${productId}&reconcile=1&candidate_listing_id=4601705477`)
+      ]);
+      const report=assessOwnerRecipePhotos542(recipe,photos,{productId});
+      status.textContent=report.ready?
+        `Readback complete: ${report.ingredient_count} saved INCI rows and ${report.remote_count}/${report.original_count} matched Etsy photos. The owner still needs to approve the physical recipe and photos.`:
+        `HOLD — ${report.issues.join(' ')} No Etsy upload, publication or ingredient write occurred.`;
+      status.dataset.tone=report.ready?'ok':'hold';
+    }catch(error){status.textContent='HOLD — readback unavailable: '+String(error?.message||error)+'. No Etsy or ingredient write occurred.';status.dataset.tone='hold';}
+    finally{button.disabled=false;}
   });
   byId('dd540UpdateDraft')?.addEventListener('click',()=>{
     const dispatch=byId('dd523EtsyPost');
