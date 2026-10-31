@@ -396,6 +396,10 @@ jobs:
           node --check public/js/etsy-live-owner-review-535.mjs
           node --test scripts/release467_build535_live_etsy_owner_acceptance.test.mjs
           node --test scripts/release467_build536_etsy_photo_tag_owner_final_signoff.test.mjs
+          node --check public/js/admin-product-etsy-recovery-537.mjs
+          node --check public/js/admin-product-existing-etsy-draft-v486.js
+          node --check public/js/admin-product-etsy-guide-v488.js
+          node --test scripts/release467_build537_existing_draft_photo_recovery.test.mjs
           node scripts/release467_build499_owner_advanced_tags_media.test.mjs
           node scripts/release467_build497_product53_three_channel_acceptance.test.mjs
 
