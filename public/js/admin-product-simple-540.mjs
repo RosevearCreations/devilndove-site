@@ -147,8 +147,8 @@ if(form&&save){
   }).observe(source,{subtree:true,childList:true,characterData:true});
   byId('dd540CheckDraft')?.addEventListener('click',()=>{
     const read=byId('dd535ReadLive');if(read)read.click();
-    byId('dd443EtsyImagesLoad')?.click();
     else publishingStatus.textContent='Live Etsy readback is unavailable; no Etsy write occurred.';
+    byId('dd443EtsyImagesLoad')?.click();
   });
   byId('dd540UpdateDraft')?.addEventListener('click',()=>{
     const dispatch=byId('dd523EtsyPost');
