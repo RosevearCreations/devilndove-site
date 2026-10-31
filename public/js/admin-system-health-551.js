@@ -1,16 +1,19 @@
 /* Build 551: explicit, auditable owner comparison acknowledgement and read-only incident aging. */
 (()=>{'use strict';const $=id=>document.getElementById(id);if(!$('dd551SaveReview'))return;
-let matched=null,busy=false;const attempts={exact:0,changed:0,missing:0};
+let matched=null,busy=false,savedEvidence=[];const attempts={exact:0,changed:0,missing:0};
 const el=(tag,text,klass)=>{const n=document.createElement(tag);if(text!==undefined&&text!==null)n.textContent=String(text);if(klass)n.className=klass;return n;};
 const nice=at=>{const time=Date.parse(at);return Number.isFinite(time)?new Date(time).toLocaleString():String(at||'Unknown date');};
 const status=message=>{$('dd551ReviewStatus').textContent=message;};
 function invalidate(){matched=null;$('dd551OwnerCheck').checked=false;$('dd551OwnerCheck').disabled=true;$('dd551SaveReview').disabled=true;}
 function summary(){const total=attempts.exact+attempts.changed+attempts.missing;$('dd551ComparisonSummary').textContent=`This browser session: ${attempts.exact} exact match(es), ${attempts.changed} changed record(s), ${attempts.missing} missing record(s) across ${total} successful lookups. An API failure is not counted as a missing receipt.`;}
-function reviews(rows){const root=$('dd551ReviewList');root.replaceChildren();const list=Array.isArray(rows)?rows.slice(0,12):[];
+function reviews(rows){const root=$('dd551ReviewList');root.replaceChildren();const list=Array.isArray(rows)?rows.slice(0,12):[];savedEvidence=list;
+  if($('dd552DownloadEvidence'))$('dd552DownloadEvidence').disabled=!list.length;
   $('dd551ReviewCount').textContent=`${list.length} owner-reported comparison acknowledgement(s) retained (maximum 12 per administrator).`;
   if(!list.length){root.append(el('p','No owner comparison acknowledgement saved.'));return;}
-  for(const record of list){const receipt=record.receipt||{},item=el('li'),title=el('strong',receipt.kind==='view'?`View: ${receipt.label||'Unnamed view'}`:`Route: ${receipt.path||'Unknown route'}`),date=el('span',` · Owner-reported on ${nice(record.reviewed_at)}. Not independent device proof.`);
-    item.append(title,date);root.append(item);
+  for(const record of list){const receipt=record.receipt||{},item=el('li'),title=el('strong',receipt.kind==='view'?`View: ${receipt.label||'Unnamed view'}`:`Route: ${receipt.path||'Unknown route'}`),date=el('span',` · Owner-reported on ${nice(record.reviewed_at)}. Not independent device proof.`),button=el('button','Load receipt for recheck','btn secondary');
+    button.type='button';button.addEventListener('click',()=>{const raw=JSON.stringify(receipt);if(raw.length>512||!['view','history'].includes(receipt.kind)){status('This saved evidence cannot be loaded as a valid short receipt. No record was changed.');return;}
+      $('dd549ReceiptCode').value=raw;document.dispatchEvent(new CustomEvent('dd:health-receipt-changed-551'));$('dd549ReceiptStatus').textContent='Recovered an earlier owner-reported receipt. Verify the current saved source again; the original source may have changed or been evicted.';$('dd549Heading')?.scrollIntoView({behavior:'smooth',block:'start'});
+    });item.append(title,date,button);root.append(item);
   }
   $('dd549OwnerReview').textContent=`${list.length} owner-reported comparison(s) saved. These are administrator attestations, not independent second-device telemetry.`;
 }
@@ -31,7 +34,14 @@ document.addEventListener('dd:health-receipt-verified-551',event=>{
 document.addEventListener('dd:health-receipt-changed-551',()=>{invalidate();status('Receipt changed. Run Verify receipt before recording owner evidence.');});
 document.addEventListener('dd:health-receipt-549',()=>{invalidate();status('A new receipt was saved. Verify it before recording owner evidence.');});
 document.addEventListener('dd:system-health-reconciled-549',event=>{reviews(event.detail?.ownerReviews);aging(event.detail?.followUp);});
-document.addEventListener('dd:system-health-unavailable-550',()=>{invalidate();$('dd551ReviewCount').textContent='Saved owner review evidence is unavailable. Reload after signing in.';aging(null);});
+document.addEventListener('dd:system-health-unavailable-550',()=>{invalidate();savedEvidence=[];if($('dd552DownloadEvidence'))$('dd552DownloadEvidence').disabled=true;$('dd551ReviewCount').textContent='Saved owner review evidence is unavailable. Reload after signing in.';aging(null);});
+$('dd552DownloadEvidence')?.addEventListener('click',()=>{
+  if(!savedEvidence.length)return;
+  const payload={exported_at:new Date().toISOString(),source:'Devil n Dove owner-scoped monitoring review history',evidence_type:'owner_reported_not_independent_device_proof',reviews:savedEvidence};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
+  link.href=url;link.download=`devilndove-owner-monitoring-evidence-${new Date().toISOString().slice(0,10)}.json`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  status('Evidence download requested. The saved source records were not changed or deleted.');
+});
 $('dd549ReceiptCode').addEventListener('input',()=>{invalidate();status('Receipt edited. Verify the current value again.');});
 $('dd551OwnerCheck').addEventListener('change',()=>{$('dd551SaveReview').disabled=!matched||!$('dd551OwnerCheck').checked||busy;});
 $('dd551SaveReview').addEventListener('click',async()=>{

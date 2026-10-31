@@ -21,9 +21,18 @@ function receipts(history,presets){const picker=$('dd550ReceiptPicker'),prior=pi
   $('dd550Retention').textContent=`Available to recover: ${rows.length} of 60 shared route checks; ${views.length} of 8 saved views. When the history reaches 60, older checks are removed from this saved history. These receipts exist only while their source records are retained.`;
 }
 const closed=status=>['resolved','ignored'].includes(String(status||'open').toLowerCase());
-function review(){const root=$('dd549Timeline'),severity=$('dd550Priority').value,reviewStatus=$('dd550Review').value;
-  const filtered=incidents.filter(item=>(severity==='all'||String(item.severity||'warning').toLowerCase()===severity)&&(reviewStatus==='all'||(reviewStatus==='closed'?closed(item.review_status):!closed(item.review_status))));
-  root.replaceChildren();$('dd550Count').textContent=`Showing ${filtered.length} of ${incidents.length} recent incident records (maximum 25 returned).`;
+function ageHours(value){const raw=String(value||'');const utc=/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(raw)?raw.replace(' ','T')+'Z':raw;const at=Date.parse(utc);return Number.isFinite(at)?Math.max(0,(Date.now()-at)/3600000):null;}
+function followsPreset(item,preset){if(preset==='all')return true;if(closed(item.review_status))return false;
+  const hours=ageHours(item.created_at);
+  if(preset==='open')return true;
+  if(preset==='open_24h')return hours!==null&&hours>=24;
+  if(preset==='open_7d')return hours!==null&&hours>=168;
+  if(preset==='open_unreviewed')return !item.reviewed_at;
+  return false;
+}
+function review(){const root=$('dd549Timeline'),severity=$('dd550Priority').value,reviewStatus=$('dd550Review').value,preset=$('dd552FollowUpPreset')?.value||'all';
+  const filtered=incidents.filter(item=>followsPreset(item,preset)&&(severity==='all'||String(item.severity||'warning').toLowerCase()===severity)&&(reviewStatus==='all'||(reviewStatus==='closed'?closed(item.review_status):!closed(item.review_status))));
+  root.replaceChildren();$('dd550Count').textContent=`Showing ${filtered.length} of ${incidents.length} latest incident records (maximum 25 shown). Follow-up presets filter this bounded list; the 30-day totals below are broader.`;
   if(!filtered.length){root.append(node('p',incidents.length?'No incidents match the selected filters.':'No recent incident records returned. This does not prove there were no outages.'));return;}
   for(const incident of filtered){
     const card=node('article',undefined,'dd549-event dd550-incident'),title=node('strong',`${String(incident.severity||'warning').toUpperCase()} · ${incident.code||incident.scope||'Runtime incident'} · #${incident.id||'?'}`),summary=node('p',`${incident.path||'Route not recorded'} · ${closed(incident.review_status)?'Closed':'Open / under review'}`),detail=node('details'),toggle=node('summary','Review recorded milestones');
@@ -43,4 +52,5 @@ document.addEventListener('dd:system-health-unavailable-550',()=>{
 });
 $('dd550ReceiptPicker').addEventListener('change',()=>{if(!$('dd550ReceiptPicker').value)return;$('dd549ReceiptCode').value=$('dd550ReceiptPicker').value;document.dispatchEvent(new CustomEvent('dd:health-receipt-changed-551'));$('dd549ReceiptStatus').textContent='Saved receipt recovered from shared history. Copy it to the other signed-in device and verify there. This has not confirmed cross-device owner acceptance.';});
 $('dd550Priority').addEventListener('change',review);$('dd550Review').addEventListener('change',review);
+$('dd552FollowUpPreset')?.addEventListener('change',()=>{$('dd550Priority').value='all';$('dd550Review').value='all';if($('dd552IncidentTimelineDetails'))$('dd552IncidentTimelineDetails').open=true;review();});
 })();
