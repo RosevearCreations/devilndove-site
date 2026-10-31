@@ -45,7 +45,7 @@ document.addEventListener('dd:health-receipt-verified-551',event=>{
 });
 document.addEventListener('dd:health-receipt-changed-551',()=>{invalidate();status('Receipt changed. Run Verify receipt before recording owner evidence.');});
 document.addEventListener('dd:health-receipt-549',()=>{invalidate();status('A new receipt was saved. Verify it before recording owner evidence.');});
-document.addEventListener('dd:system-health-reconciled-549',event=>{reviews(event.detail?.ownerReviews);aging(event.detail?.followUp);});
+document.addEventListener('dd:system-health-reconciled-549',event=>{if(matched){invalidate();status('Shared source refreshed. Verify the exact receipt again before recording owner evidence.');}reviews(event.detail?.ownerReviews);aging(event.detail?.followUp);});
 document.addEventListener('dd:system-health-unavailable-550',()=>{invalidate();savedEvidence=[];evidenceReadbackAt=null;if($('dd552DownloadEvidence'))$('dd552DownloadEvidence').disabled=true;if($('dd553VerifyEvidenceFile'))$('dd553VerifyEvidenceFile').disabled=true;evidenceStatus('Shared owner evidence unavailable. Previously loaded records cannot be exported or verified until a fresh signed-in reload.');$('dd551ReviewCount').textContent='Saved owner review evidence is unavailable. Reload after signing in.';aging(null);});
 $('dd552DownloadEvidence')?.addEventListener('click',()=>{
   if(!savedEvidence.length||!evidenceReadbackAt)return;
@@ -72,8 +72,9 @@ $('dd551SaveReview').addEventListener('click',async()=>{
   try{const response=await window.DDAuth.apiFetch('/api/admin/system-health-547',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'owner_review_551',receipt:matched.receipt,second_device_compared:true})}),data=await response.json();
     if(!response.ok||!data.ok||data.readback_confirmed!==true)throw Error(data.error||`HTTP ${response.status}`);
     status(`${data.already_recorded?'Already recorded':'Saved and independently read back'}: owner-reported comparison at ${nice(data.review?.reviewed_at)}. This is not independent device proof.`);
+    document.dispatchEvent(new CustomEvent('dd:owner-review-recorded-554',{detail:{reviewedAt:data.review?.reviewed_at||null,alreadyRecorded:data.already_recorded===true,readbackConfirmed:true}}));
     invalidate();$('dd547Reload')?.click();
-  }catch(error){status('Owner review save was not confirmed: '+error.message+'. Reload shared monitoring before attempting another save.');invalidate();}
+  }catch(error){status('Owner review save was not confirmed: '+error.message+'. Reload shared monitoring before attempting another save.');document.dispatchEvent(new CustomEvent('dd:owner-review-save-unconfirmed-554'));invalidate();}
   finally{busy=false;}
 });
 })();

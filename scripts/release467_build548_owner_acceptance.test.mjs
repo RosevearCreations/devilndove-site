@@ -28,5 +28,5 @@ test('Build 548 presents a truthful second-device owner acceptance checkpoint an
   assert.match(ui,/\['resolved','ignored'\]\.includes\(row\.review_status\)/);
   assert.match(ui,/review:\$\('dd548Review'\)/);
   assert.match(ui,/Saved and independently read back/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:54[89]|550|551|552|553)/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:54[89]|550|551|552|553|554)/);
 });
