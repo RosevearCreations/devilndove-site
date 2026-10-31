@@ -10,6 +10,7 @@ const recipeRoot=byId('dd540SoapComposer');
 const preview=byId('dd540InciPreview'),weightInput=byId('dd540NetWeight'),verified=byId('dd540Verified');
 const pickers={base:byId('dd540Base'),scent:byId('dd540Scent'),oil:byId('dd540Oil')};
 let library=[],loaded=false,loading=false,formula=null,saveBusy=false;
+const orangeSuggestion=byId('dd543OrangeSuggestion');
 const say=(message,issue=false)=>{if(recipeStatus){recipeStatus.textContent=message;recipeStatus.dataset.tone=issue?'hold':'ok';}};
 const api=async(path,method='GET',payload)=>{
   if(!window.DDAuth?.apiFetch)throw Error('Sign in as an authorized administrator first.');
@@ -30,7 +31,9 @@ function renderRecipe({changed=false}={}){
   const selectedScent=library.find(row=>String(row.packaging_source_material_template_id)===String(pickers.scent?.value||''));
   const conflict=scentNameConflict541(form?.elements.namedItem('name')?.value,selectedScent?.material_name);
   if(conflict&&verified)verified.checked=false;
-  say(summary+warnings+(conflict?' HOLD: this Sweet Orange Product has a different saved scent selected. Confirm the actual batch and correct the source choice before signing off. No recipe was changed.':''),!formula.ready||conflict);
+  const orange=library.filter(row=>SOAP_ROLES_540.scent.includes(String(row.material_subtype||row.material_type))&&/\borange\b/i.test(String(row.material_name||'')));
+  if(orangeSuggestion){orangeSuggestion.hidden=!conflict||orange.length!==1;orangeSuggestion.dataset.sourceId=orange.length===1?String(orange[0].packaging_source_material_template_id):'';}
+  say(conflict?'The saved Sea Breeze scent does not match Sweet Orange. We can still Save Product. Choose the real Orange fragrance if that is what we used; the official recipe stays unchanged until confirmed.':summary+warnings,!formula.ready||conflict);
   if(recipeRoot)recipeRoot.dataset.scentConflict=conflict?'1':'0';
 }
 async function loadSoap(){
@@ -94,6 +97,13 @@ if(form&&save){
   });
   if(new URLSearchParams(location.search).get('tab')==='ingredients')loadSoap();
 
+  document.addEventListener('dd:save-succeeded',event=>{
+    if(Number(event.detail?.product_id)!==productId||saveBusy)return;
+    if(isSoap&&recipeRoot?.dataset.scentConflict==='1'){
+      toolbar.textContent='Product saved. Our existing official ingredient record was NOT changed. Choose the actual fragrance when ready; Etsy draft photos can be handled separately.';
+    }else if(!event.detail?.newer_edits){toolbar.textContent='Product saved. The Etsy draft is unchanged until we explicitly update it.';}
+  });
+
   save.addEventListener('click',async()=>{
     if(saveBusy)return;
     saveBusy=true;save.disabled=true;
@@ -101,10 +111,10 @@ if(form&&save){
       const actualSave=byId('productEditorSave');
       if(!actualSave||actualSave.disabled)throw Error('Wait until the saved Product finishes loading before saving. No change was sent.');
       const validRecipe=isSoap&&loaded&&formula?.ready&&Number(pickers.base?.value||0)>0;
-      if(isSoap&&recipeRoot?.dataset.scentConflict==='1')throw Error('Sweet Orange has a conflicting saved scent. Review the physical recipe and choose the correct saved fragrance before saving its official label. No changes sent.');
+      const scentConflict=recipeRoot?.dataset.scentConflict==='1';
       const net=Number(weightInput?.value||0);
       const confirmed=verified?.checked===true;
-      if(validRecipe&&confirmed&&Number.isFinite(net)&&net>0){
+      if(validRecipe&&!scentConflict&&confirmed&&Number.isFinite(net)&&net>0){
         toolbar.textContent='Saving our Product, then its official source-selected soap formula…';
         const afterSave=async event=>{
           if(Number(event.detail?.product_id)!==productId)return;
@@ -126,17 +136,32 @@ if(form&&save){
         setTimeout(()=>{if(saveBusy){document.removeEventListener('dd:save-succeeded',afterSave);saveBusy=false;save.disabled=false;toolbar.textContent='Product Save is not confirmed. Review the saved Product before trying again; no soap formula was automatically posted.';}},20000);
       }else{
         actualSave.click();
-        toolbar.textContent=isSoap?'Saving Product draft. The official soap formula is unchanged until we confirm real ingredients and net weight.':'Saving Product…';
+        toolbar.textContent=isSoap&&scentConflict?'Saving Product only. The conflicting soap formula is preserved for correction; it will not overwrite the official label.':isSoap?'Saving Product draft. The official soap formula is unchanged until we confirm real ingredients and net weight.':'Saving Product…';
         saveBusy=false;save.disabled=false;
       }
     }catch(error){toolbar.textContent=String(error?.message||error);saveBusy=false;save.disabled=false;}
   });
 
   const publishingStatus=byId('dd540PublishingStatus');
+  orangeSuggestion?.addEventListener('click',()=>{
+    const source=orangeSuggestion.dataset.sourceId;
+    if(!source||!pickers.scent)return;
+    pickers.scent.value=source;
+    renderRecipe({changed:true});
+    say('Orange fragrance selected from our saved library. Check that it is the real fragrance used, then confirm the formula and Save Product.');
+  });
+  const linkMount=byId('dd543ExistingDraftMount'),linkPanel=byId('dd486EtsyExisting');
+  if(productId===54&&linkMount&&linkPanel){
+    linkMount.append(linkPanel);
+    const heading=linkPanel.querySelector('h3');if(heading)heading.textContent='1. Connect our existing Etsy draft #4601705477';
+    for(const el of linkPanel.querySelectorAll('#dd499ExistingDraftHint,#dd499UsePhotoDraftId,#dd499DirectEtsyDraft'))el.hidden=true;
+    const field=byId('dd486EtsyListingId');if(field&&!field.value)field.value='4601705477';
+  }
   // Reuse the vetted at-most-once photo controls; never implement a second upload path.
   const photoMount=byId('dd541PhotosMount'),photoPanel=byId('dd443EtsyImages');
   if(photoMount&&photoPanel){
     photoMount.append(photoPanel);
+    const heading=photoPanel.querySelector('h3');if(heading)heading.textContent='2. Send our three approved photographs';
     const legacyHint=photoPanel.querySelector('p:nth-of-type(2)');
     if(legacyHint&&/Product #53/.test(legacyHint.textContent||''))legacyHint.hidden=true;
   }
@@ -149,6 +174,14 @@ if(form&&save){
     const read=byId('dd535ReadLive');if(read)read.click();
     else publishingStatus.textContent='Live Etsy readback is unavailable; no Etsy write occurred.';
     byId('dd443EtsyImagesLoad')?.click();
+  });
+  document.addEventListener('dd:etsy-existing-draft-linked',event=>{
+    if(Number(event.detail?.product_id)!==productId)return;
+    publishingStatus.textContent='Existing draft connected. Loading our three Product photos now…';
+    byId('dd443EtsyImagesLoad')?.click();
+  });
+  document.addEventListener('dd:editor-tab-opened',event=>{
+    if(event.detail?.tab==='publishing'&&productId===54)byId('dd443EtsyImagesLoad')?.click();
   });
   if(byId('dd542OwnerVerify'))byId('dd542OwnerVerify').hidden=productId!==54;
   byId('dd542OwnerVerify')?.addEventListener('click',async()=>{
