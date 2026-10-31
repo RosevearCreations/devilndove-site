@@ -18,6 +18,11 @@ export function cleanSamples(input,{fresh=true}={}){if(!Array.isArray(input))ret
 function json(value,fallback){try{const x=JSON.parse(value||'');return x&&typeof x==='object'?x:fallback;}catch{return fallback;}}
 export function compact(samples){const seen=new Set();return [...samples].sort((a,b)=>Date.parse(a.at)-Date.parse(b.at)).filter(s=>{const key=s.path+'|'+s.at;if(seen.has(key))return false;seen.add(key);return true;}).slice(-60);}
 export function matchingReceipt(samples,{path,at}){return PATHS.has(path)&&Number.isFinite(Date.parse(at))&&samples.some(row=>row.path===path&&row.at===new Date(at).toISOString());}
+export function compareHistoryReceipt(samples,{path,at,status,ms}){
+  const found=PATHS.has(path)&&Number.isFinite(Date.parse(at))?samples.find(row=>row.path===path&&row.at===new Date(at).toISOString()):null;
+  const exact=!!found&&(status===undefined||found.status===status)&&(ms===undefined||found.ms===ms);
+  return {found:exact,record_exists:!!found,changed:!!found&&!exact};
+}
 async function auth(context){const user=await getAdminUserFromRequest(context.request,context.env),db=getDb(context.env);return {user,db,id:idOf(user)};}
 export async function onRequestGet(context){const {user,db,id}=await auth(context);if(!user||!id)return jsonResponse({ok:false,error:'Administrator sign-in required.'},401);if(!db)return jsonResponse({ok:false,error:'Database unavailable.'},503);
   try{
@@ -29,9 +34,15 @@ export async function onRequestGet(context){const {user,db,id}=await auth(contex
     if(receiptPath||receiptAt||receiptView){
       if(receiptView){if(!/^system-health-preset-\d+-[a-z0-9-]{1,45}$/.test(receiptView))return jsonResponse({ok:false,error:'Invalid view receipt.'},400);
         const matched=presets.find(row=>row.view_key===receiptView);
-        return jsonResponse({ok:true,receipt_check:{kind:'view',found:!!matched,owner_scoped:true,label:matched?.view_label||null,updated_at:matched?.updated_at||null}},200,{'Cache-Control':'no-store'});}
+        const label=url.searchParams.get('receipt_label'),updated=url.searchParams.get('receipt_updated');
+        if((label!==null&&label.length>55)||(updated!==null&&updated.length>40))return jsonResponse({ok:false,error:'Invalid view receipt details.'},400);
+        const exact=!!matched&&(label===null||matched.view_label===label)&&(updated===null||matched.updated_at===updated);
+        return jsonResponse({ok:true,receipt_check:{kind:'view',found:exact,record_exists:!!matched,changed:!!matched&&!exact,owner_scoped:true,label:matched?.view_label||null,updated_at:matched?.updated_at||null}},200,{'Cache-Control':'no-store'});}
       if(!PATHS.has(receiptPath)||!Number.isFinite(Date.parse(receiptAt)))return jsonResponse({ok:false,error:'Invalid route receipt.'},400);
-      return jsonResponse({ok:true,receipt_check:{kind:'history',found:matchingReceipt(history,{path:receiptPath,at:receiptAt}),owner_scoped:true,path:receiptPath,at:new Date(receiptAt).toISOString()}},200,{'Cache-Control':'no-store'});
+      const hasStatus=url.searchParams.has('receipt_status'),hasMs=url.searchParams.has('receipt_ms'),status=url.searchParams.get('receipt_status'),msText=url.searchParams.get('receipt_ms'),ms=Number(msText);
+      if(hasStatus!==hasMs||(hasStatus&&(!STATUS.has(status)||!/^(?:0|[1-9]\d{0,4})$/.test(msText)||ms>60000)))return jsonResponse({ok:false,error:'Invalid history receipt details.'},400);
+      const comparison=compareHistoryReceipt(history,{path:receiptPath,at:receiptAt,...(hasStatus?{status,ms}:{})});
+      return jsonResponse({ok:true,receipt_check:{kind:'history',...comparison,owner_scoped:true,path:receiptPath,at:new Date(receiptAt).toISOString()}},200,{'Cache-Control':'no-store'});
     }
     const timeline=(await db.prepare(`SELECT runtime_incident_id,incident_code,incident_scope,severity,endpoint_path,COALESCE(review_status,'open') AS review_status,created_at,reviewed_at FROM runtime_incidents WHERE datetime(created_at)>=datetime('now','-30 days') ORDER BY datetime(created_at) DESC,runtime_incident_id DESC LIMIT 25`).all()).results||[];
     return jsonResponse({ok:true,history:history.slice(-60),presets:presets.map(row=>({key:row.view_key,label:row.view_label,filters:json(row.filter_json,{}),updated_at:row.updated_at})),incident_summary:incident.map(row=>({severity:row.severity,review_status:row.review_status,count:Number(row.total||0)})),incident_timeline:timeline.map(row=>({id:Number(row.runtime_incident_id||0),code:row.incident_code,scope:row.incident_scope,severity:row.severity,path:row.endpoint_path,review_status:row.review_status,created_at:row.created_at,reviewed_at:row.reviewed_at})),scope:'signed_in_admin',sample_limit:60},200,{'Cache-Control':'no-store'});
