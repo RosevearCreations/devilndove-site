@@ -465,6 +465,12 @@ jobs:
           node --check public/js/admin-system-health-551.js
           node --test scripts/release467_build553_export_preset_usability.test.mjs
 
+      - name: Build 554 monitoring owner review walkthrough and dashboard follow-up
+        run: |
+          node --check public/js/admin-system-health-551.js
+          node --check public/js/admin-system-health-554.js
+          node --test scripts/release467_build554_owner_walkthrough_followup.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
