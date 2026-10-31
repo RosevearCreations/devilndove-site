@@ -65,6 +65,6 @@ test('Build 539 release and CI preserve explicit live Etsy one-draft photo/tag g
   assert.match(page,/dd537OwnerRecovery/);
   assert.match(page,/dd538Photos/);
   assert.match(flow,/action:'transfer_one',product_id:id,listing_id:listingId/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":54[01234]/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":54[012345]/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build539_ingredient_editor_etsy_acceptance\.test\.mjs/);
 });
