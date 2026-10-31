@@ -405,6 +405,10 @@ jobs:
           node --check public/js/admin-product-etsy-pilot-538.mjs
           node --check public/js/etsy-sweet-orange-copy-538.mjs
           node --test scripts/release467_build538_one_soap_etsy_completion.test.mjs
+          node --check public/js/admin-product-resources.js
+          node --check public/js/admin-product-ingredients-539.mjs
+          node --check public/js/product-ingredient-review-539.mjs
+          node --test scripts/release467_build539_ingredient_editor_etsy_acceptance.test.mjs
           node scripts/release467_build499_owner_advanced_tags_media.test.mjs
           node scripts/release467_build497_product53_three_channel_acceptance.test.mjs
 

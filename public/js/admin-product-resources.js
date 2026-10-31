@@ -3,7 +3,7 @@
 // Brief description: Admin editor for linking tools and supplies to a product as
 // a reusable making-story with quantity, cost, and inventory handling notes.
 
-document.addEventListener('DOMContentLoaded', () => {
+function initializeProductResources() {
   const mountEl = document.getElementById('productResourcesAdminMount');
   if (!mountEl) return;
 
@@ -248,7 +248,9 @@ document.addEventListener('DOMContentLoaded', () => {
     state.selectedProductId = safeProductId;
     const select = document.getElementById('productResourcesProduct');
     if (select) select.value = String(safeProductId);
-    if (autoLoad && window.DDAuth?.isLoggedIn()) loadData();
+    // Embedded Product Editor uses an explicit manual-load budget. A Product
+    // Save must not silently wake an additional D1 resource scan there.
+    if (autoLoad && (mountEl.dataset.manualLoad !== 'true' || initialLoadStarted) && window.DDAuth?.isLoggedIn()) loadData();
   }
 
   function renderProducts() {
@@ -823,4 +825,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   ensureRendered();
   setMessage('Product resource reads are paused to protect the D1 daily budget. Choose Load Product resources when actively editing Product links.');
-});
+}
+// Inventory Operations initializes on normal DOM readiness. The Product Editor
+// imports this module only on explicit owner action, after DOMContentLoaded.
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initializeProductResources, { once: true });
+else initializeProductResources();
