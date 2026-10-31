@@ -188,18 +188,23 @@
     const preview=document.getElementById('productEditorFeaturedPreview');if(preview){armMediaImage(preview,product?.featured_image_url);preview.alt=product?.name?`Featured image for ${product.name}`:'Featured image';}
     for(const id of ['productEditorMediaLink','productEditorMediaAdvancedLink']){const link=document.getElementById(id);if(link)link.href=`/admin/catalog-media/?product_id=${encodeURIComponent(state.productId)}`;}
   }
+  const detailArea557=new Set(['details','basics','pricing','description','seo']);
   function currentTab(){return document.querySelector('[data-editor-panel]:not([hidden])')?.dataset.editorPanel||'basics';}
   function openTab(id,focusName=''){
-    const available=[...document.querySelectorAll('[data-editor-panel]')].some((panel)=>panel.dataset.editorPanel===id);const target=available?id:'basics';
+    const isDetails=detailArea557.has(id);
+    const available=isDetails||[...document.querySelectorAll('[data-editor-panel]')].some((panel)=>panel.dataset.editorPanel===id);
+    const target=available?(isDetails?'details':id):'details';
     // Build 527: deep links and contextual Help can still reach optional tabs
     // even though the ordinary Product screen keeps them collapsed.
     if(['buyer','qa','etsy','facebook','advanced'].includes(target)){
       const more=document.getElementById('dd527MoreTools');if(more)more.open=true;
     }
-    document.querySelectorAll('[data-editor-panel]').forEach((panel)=>panel.hidden=panel.dataset.editorPanel!==target);document.querySelectorAll('[data-editor-tab]').forEach((tab)=>tab.setAttribute('aria-selected',tab.dataset.editorTab===target?'true':'false'));
+    document.querySelectorAll('[data-editor-panel]').forEach((panel)=>panel.hidden=target==='details'? !detailArea557.has(panel.dataset.editorPanel):panel.dataset.editorPanel!==target);
+    document.querySelectorAll('[data-editor-tab]').forEach((tab)=>tab.setAttribute('aria-selected',tab.dataset.editorTab===target?'true':'false'));
     document.dispatchEvent(new CustomEvent('dd:editor-tab-opened',{detail:{tab:target,product_id:state.productId}}));
     if(target==='media')loadMedia();
-    if(focusName){const el=field(focusName);if(el){el.focus();el.scrollIntoView({block:'center'});}}
+    if(focusName){const el=field(focusName);if(el){const disclosure=el.closest('details');if(disclosure)disclosure.open=true;el.focus();el.scrollIntoView({block:'center'});}}
+    else if(isDetails&&id!=='details'&&id!=='basics')document.querySelector(`[data-editor-panel="${id}"]`)?.scrollIntoView({block:'start'});
   }
   async function load(){
     if(!state.productId){set('inventory_quantity',1);title.textContent='Create Product';identity.textContent='New Product';setSaveReady(true);setStatus('New Product mode. No Product list was loaded.','ok');syncSeo(true);markClean();renderQa();return;}

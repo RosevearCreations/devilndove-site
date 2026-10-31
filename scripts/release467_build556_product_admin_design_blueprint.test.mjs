@@ -12,7 +12,7 @@ test('Build 556 captures every Admin route and keeps previously modernized pages
   assert.equal(audit.routes.length,audit.totals.total);
   assert.equal(new Set(audit.routes.map(item=>item.route)).size,audit.routes.length);
   const byRoute=route=>audit.routes.find(item=>item.route===route);
-  assert.equal(byRoute('/admin/product-editor/').decision,'REBUILD');
+  assert.equal(byRoute('/admin/product-editor/').decision,'KEEP');
   for(const route of ['/admin/','/admin/products/','/admin/system-operations/','/admin/interface-blueprint/'])assert.equal(byRoute(route).decision,'KEEP');
   for(const route of ['/admin/inventory-operations/','/admin/project-capacity-planner/','/admin/it/'])assert.equal(byRoute(route).decision,'REVIEW');
   assert.equal(audit.routes.every(row=>row.source.startsWith('admin/')&&row.source.endsWith('/index.html')),true);
@@ -39,7 +39,9 @@ test('Build 556 new Admin preview is intentionally read-only, accessible and no 
   assert.match(css,/@media\(max-width:420px\)/);
   assert.match(css,/:focus-visible/);
   assert.doesNotMatch(css,/^body\s*\{|^:root\s*\{|!important/m);
-  for(const path of ['css/styles.css','admin/index.html','admin/products/index.html','admin/system-operations/index.html','admin/product-editor/index.html'])assert.doesNotMatch(read(path),/admin-interface-foundation-556/,`Build 556 must not restyle ${path}`);
+  for(const path of ['css/styles.css','admin/index.html','admin/products/index.html','admin/system-operations/index.html'])assert.doesNotMatch(read(path),/admin-interface-foundation-556/,`Build 556 must not restyle ${path}`);
+  // Build 557 deliberately opted the newly rebuilt Product Editor into the foundation.
+  assert.match(read('admin/product-editor/index.html'),/class="dd540-finished-product dd557-entry dd556-admin-root"/);
 });
 
 test('Build 556 Product entry and external channel blueprint preserves explicit draft safety and owner consent',()=>{
@@ -57,7 +59,7 @@ test('Build 556 Product entry and external channel blueprint preserves explicit 
 });
 
 test('Build 556 exact release marker and quality gate are configured',()=>{
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":556/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:556|557)/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build556_product_admin_design_blueprint\.test\.mjs/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build556_admin_interface_inventory\.mjs --check/);
 });

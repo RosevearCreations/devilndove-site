@@ -244,10 +244,9 @@ if(form&&root&&window.DDAuth?.apiFetch){
   $('dd523MarketplaceCopy').hidden=false;
   postStatus(`Prepared MANUAL Marketplace handoff: ${handoff.photos.length} specifically selected and approved original photo(s) for Product #${id}. No Facebook authorization or API posting was used.`,'ok');
  }
- // Build 527: after one verified local Save, a checked destination initiates
- // its review in the same screen. Every Etsy write still requires the owner's
- // *new* confirm dialog and exact saved listing-ID/remote state checks. There
- // are no unattended POSTs, browser retries or third-party Facebook writes.
+ // Historical explicit review helper retained for advanced support. Build 557
+ // no longer calls this from the local Product Save or redirect: entering a
+ // Product must never wake a separate Etsy consent prompt unexpectedly.
  async function reviewAfterVerifiedSave527(){
   if(state.busy||!saved())return;
   if(etsy.checked){postStatus('Saved Product verified. Checking the linked Etsy draft and originals before asking permission…');
@@ -264,7 +263,7 @@ if(form&&root&&window.DDAuth?.apiFetch){
   consumedRedirectPrompt527=true;
   try{sessionStorage.removeItem(key);}catch{}
   if(Number(receipt.product_id)!==id||receipt.review_only!==true||Date.now()-Number(receipt.at||0)>10*60*1000||!etsy.checked)return;
-  void reviewAfterVerifiedSave527();
+  postStatus('Product saved locally. Open Destinations and explicitly check the existing draft when ready. No Etsy or Facebook request was sent.','ok');
  }
  $('dd523OpenMedia')?.addEventListener('click',()=>{document.querySelector('[data-editor-tab="media"]')?.click();
   $('productDistribution406')?.scrollIntoView({block:'start',behavior:'smooth'});});
@@ -330,7 +329,8 @@ if(form&&root&&window.DDAuth?.apiFetch){
  document.addEventListener('dd:save-succeeded',event=>{
   invalidate();
   if(Number(event.detail?.product_id)===id&&event.detail?.destinations_confirmed===true&&event.detail?.newer_edits!==true&&
-    (event.detail?.etsy_preference_saved===true||facebook.checked))void reviewAfterVerifiedSave527();
+    (event.detail?.etsy_preference_saved===true||facebook.checked))
+    postStatus('Product saved locally. Destinations are preferences only. Open Destinations to verify and explicitly send a draft; no provider action started.','ok');
  });
  document.addEventListener('dd:media-inline-updated',()=>invalidate());
  document.addEventListener('dd:product-channel-tags-changed',()=>invalidate());
@@ -338,6 +338,12 @@ if(form&&root&&window.DDAuth?.apiFetch){
  document.addEventListener('dd:etsy-existing-draft-linked',event=>{
   if(Number(event.detail?.product_id)===id)void readReceipt524({expectedListingId:String(event.detail?.listing_id||'')});
  });
+ document.addEventListener('dd:editor-tab-opened',event=>{
+  if(['publishing','etsy'].includes(event.detail?.tab)&&id>0&&!LEGACY_OWNER_TRIAL_IDS_523.includes(id))void readReceipt524();
+ });
  if(!id)reviewButton.disabled=true;
- render();if(id>0&&!LEGACY_OWNER_TRIAL_IDS_523.includes(id))void readReceipt524();
+ // Build 557: editing local Details is not a request to interrogate Etsy.
+ // Read the primary draft claim when Destinations/Advanced Etsy is opened.
+ render();
+ if(id>0&&!LEGACY_OWNER_TRIAL_IDS_523.includes(id)&&new URLSearchParams(location.search).get('tab')==='publishing')void readReceipt524();
 }

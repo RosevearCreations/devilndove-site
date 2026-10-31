@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Product Editor — Devil n Dove Admin</title>
   <meta name="description" content="Dedicated low-read single-Product editor for Devil n Dove."/>
-  <meta name="dnd-build-identity" content="Devil n Dove • Build 544"/>
+  <meta name="dnd-build-identity" content="Devil n Dove • Build 557"/>
   <link rel="icon" href="/assets/mark.png" type="image/png"/>
   <link rel="stylesheet" href="/css/styles.css?v=440"/>
   <link rel="stylesheet" href="/css/admin-product-v162.css?v=178"/>
@@ -35,8 +35,10 @@
   <link rel="stylesheet" href="/css/admin-product-editor-539.css?v=539"/>
   <link rel="stylesheet" href="/css/admin-product-editor-540.css?v=540"/>
   <link rel="stylesheet" href="/css/admin-product-editor-543.css?v=543"/>
+  <link rel="stylesheet" href="/css/admin-interface-foundation-556.css?v=556"/>
 </head>
-<body data-admin-page="product-editor-v165" class="dd540-finished-product">
+<body data-admin-page="product-editor-v557" class="dd540-finished-product dd557-entry dd556-admin-root">
+  <a class="dd556-skip" href="#productEditorForm">Skip to Product entry</a>
   <div class="container admin-shell dd-product-shell">
     <nav class="nav" aria-label="Admin navigation">
       <div class="brand"><img alt="Devil n Dove logo" src="/assets/logo-clear-nav.webp"/><div><strong>Devil n Dove</strong><div class="small">Admin / Product Editor</div></div></div>
@@ -44,7 +46,7 @@
     </nav>
 
     <header class="hero compact-hero dd-editor-head">
-      <div><p class="eyebrow">Devil n Dove</p><h1 id="productEditorTitle">Product Editor</h1><p>Enter the product, choose our ingredients and photos, then save. Etsy draft updates are a separate final step.</p></div>
+      <div><p class="eyebrow">Devil n Dove · Product Entry 2.0</p><h1 id="productEditorTitle">Product Editor</h1><p>Four areas. One saved Product. We choose when to prepare an external draft—nothing is published here.</p></div>
       <div class="dd-editor-id" id="productEditorIdentity">Loading Product identity…</div>
     </header>
 
@@ -104,16 +106,15 @@
     <details class="dd-low-read-details"><summary>Low-read editor contract</summary><div class="dd-low-read-note small"><strong>Build 178:</strong> startup authority remains one selected-Product detail read. Product/admin fix links now return here instead of waking the retired all-in-one catalog editor. The browser handoff remains display-only. Media loads only when Media is opened. QA loads only when Run QA is pressed, reads the selected Product/SEO record plus at most two Product image rows, performs no request-time schema mutation, and does not automatically write QA history. Save updates only this Product and its SEO row through the proven schema contract, with no request-time PRAGMA/table introspection.</div></details>
 
     <form id="productEditorForm" class="card" data-dd-unsaved-ignore="1" data-dd-save-label="Product Editor">
-      <div class="dd-editor-tabs" role="tablist" aria-label="Product Editor sections">
-        <button class="btn dd-editor-tab" type="button" data-editor-tab="basics" aria-selected="true">Basics</button>
-        <button class="btn dd-editor-tab" type="button" data-editor-tab="pricing" aria-selected="false">Pricing &amp; Stock</button>
-        <button class="btn dd-editor-tab" type="button" data-editor-tab="description" aria-selected="false">Description</button>
-        <button class="btn dd-editor-tab dd539-ingredients-tab" type="button" data-editor-tab="ingredients" aria-selected="false">Ingredients &amp; Materials</button>
-        <button class="btn dd-editor-tab" type="button" data-editor-tab="media" aria-selected="false">Media</button>
-        <button class="btn dd-editor-tab" type="button" data-editor-tab="seo" aria-selected="false">Tags &amp; SEO</button>
-        <button class="btn dd-editor-tab" type="button" data-editor-tab="publishing" aria-selected="false">Etsy Draft</button>
+      <div class="dd-editor-tabs dd557-steps" role="tablist" aria-label="Four Product entry areas">
+        <button class="btn dd-editor-tab" type="button" role="tab" aria-controls="dd557DetailsArea" data-editor-tab="details" aria-selected="true">1 · Details</button>
+        <button class="btn dd-editor-tab dd539-ingredients-tab" type="button" role="tab" aria-controls="dd557RecipeArea" data-editor-tab="ingredients" aria-selected="false">2 · Recipe</button>
+        <button class="btn dd-editor-tab" type="button" role="tab" aria-controls="dd557PhotosArea" data-editor-tab="media" aria-selected="false">3 · Photos</button>
+        <button class="btn dd-editor-tab" type="button" role="tab" aria-controls="dd557DestinationArea" data-editor-tab="publishing" aria-selected="false">4 · Destinations</button>
       </div>
-      <div class="dd540-primary-toolbar"><p class="small" id="dd540ToolbarStatus" role="status" aria-live="polite">Edit our product. Nothing is sent to Etsy until we explicitly choose Update Draft.</p><button class="btn primary" id="dd540SaveProduct" type="button">Save Product</button></div>
+      <div class="dd557-legacy-tab-hooks" hidden aria-hidden="true"><button type="button" data-editor-tab="basics">Basics</button><button type="button" data-editor-tab="pricing">Pricing</button><button type="button" data-editor-tab="description">Description</button><button type="button" data-editor-tab="seo">Tags</button></div>
+      <div class="dd540-primary-toolbar dd557-save-bar"><div><strong>Save our Product</strong><p class="small" id="dd540ToolbarStatus" role="status" aria-live="polite">Local save only. Etsy and all other destinations remain unchanged.</p></div><button class="btn primary" id="dd540SaveProduct" type="button">Save Product</button></div>
+      <p class="dd557-panel-guide" id="dd557PanelGuide" role="status" aria-live="polite">Start with the name, price, description and tags. Additional fields are available under More Product fields.</p>
       <details class="dd527-more-tools" id="dd527MoreTools">
         <summary>Optional settings, quality checks &amp; troubleshooting</summary>
         <div class="dd-editor-tabs" role="tablist" aria-label="Optional Product Editor sections">
@@ -211,7 +212,7 @@
       </section>
 
       <section class="dd-editor-panel" data-editor-panel="basics">
-        <h2>Basics</h2>
+        <h2>Product details</h2>
         <div class="dd-editor-grid">
           <label><span class="small">Product name <span class="dd-channel-required dd-channel-required--etsy">Etsy required</span></span><input class="input" name="name" maxlength="160" required/></label>
           <label><span class="small">Slug</span><input class="input" name="slug" maxlength="180"/></label>
@@ -226,7 +227,7 @@
       </section>
 
       <section class="dd-editor-panel" data-editor-panel="pricing" hidden>
-        <h2>Pricing &amp; Stock</h2>
+        <h2>Price and stock</h2>
         <p class="small">Prices are CAD dollars and cents (e.g. 8.00). Tax classes and shipping codes are selected from configured options; shipping codes do not calculate a delivery rate.</p><div class="dd-editor-grid cols-4">
           <label><span class="small">Price (CAD, dollars.cents) <span class="dd-channel-required dd-channel-required--etsy">Etsy required</span></span><input class="input" type="text" inputmode="decimal" name="price" pattern="[0-9]+(\.[0-9]{1,2})?" placeholder="0.00" data-money-cad="1"/></label>
           <label><span class="small">Compare-at price (CAD)</span><input class="input" type="text" inputmode="decimal" name="compare_at_price" pattern="[0-9]+(\.[0-9]{1,2})?" placeholder="0.00" data-money-cad="1"/></label>
@@ -244,7 +245,7 @@
       </section>
 
       <section class="dd-editor-panel" data-editor-panel="description" hidden>
-        <h2>Description &amp; Item Facts</h2>
+        <h2>Description</h2>
         <p class="dd-etsy-description-help"><span class="dd-channel-required dd-channel-required--etsy">Etsy required</span> Add a real description in either the short or long description box, then press Save Product. Our Etsy draft uses the saved description.</p>
         <div class="dd-editor-grid cols-2">
           <label class="wide"><span class="small">Short description</span><textarea class="input" name="short_description" rows="3"></textarea></label>
@@ -303,7 +304,7 @@
       </section>
 
       <section class="dd-editor-panel" data-editor-panel="seo" hidden>
-        <h2>SEO / Publishing</h2><p class="small" id="productEditorSeoGuidance">SEO title, H1, OpenGraph title and descriptions are suggested from Basics and Description. You can edit any SEO field manually; custom text will be preserved.</p>
+        <h2>Search tags</h2><p class="small" id="productEditorSeoGuidance">These tags belong to our saved Product. External destinations use their own rules and require a separate send action.</p>
         <div class="dd-editor-grid cols-2">
           <label><span class="small">SEO title</span><input class="input" name="meta_title" maxlength="160"/></label><label><span class="small">H1 override</span><input class="input" name="h1_override" maxlength="160"/></label>
           <label class="wide"><span class="small">Product search tags / keywords (store, CSV &amp; optional Etsy update)</span><input class="input" name="keywords" maxlength="1000" placeholder="handmade jewelry, green gemstone, Canadian artisan"/><span class="small">Save comma-separated phrases in Product SEO. Etsy tags use at most 13 phrases of 20 characters each; transferring them to the existing Etsy draft requires a separate, explicit approval in the Etsy tab.</span><span class="small" id="dd495TagsPreview" role="status" aria-live="polite">Add relevant search phrases, then Save Product. An Etsy tag preview will appear here.</span></label>
@@ -1028,8 +1029,10 @@
   <script type="module" src="/public/js/admin-product-ingredients-539.mjs?v=539"></script>
   <script type="module" src="/public/js/admin-product-simple-540.mjs?v=543"></script>
   <script type="module" src="/public/js/product-editor-etsy-544.mjs?v=544"></script>
+  <script type="module" src="/public/js/product-entry-557.mjs?v=557"></script>
   <link rel="stylesheet" href="/css/product-editor-etsy-544.css?v=544"/>
 <link rel="stylesheet" href="/css/admin-brand-v3-set17.css?v=17">
+<link rel="stylesheet" href="/css/admin-product-editor-557.css?v=557">
 <script defer src="/public/js/admin-brand-v3-set17.js?v=17"></script>
 </body>
 </html>

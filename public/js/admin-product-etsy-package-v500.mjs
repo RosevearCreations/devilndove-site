@@ -40,6 +40,7 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     $('dd514OwnerPanel').hidden=true;$('dd514GatewayPanel').hidden=true;
     $('dd515OwnerPanel').hidden=true;$('dd515GatewayPanel').hidden=true;}
   const ready=()=>id>0&&form.dataset.productAuthority==='ready'&&form.dataset.productDirty!=='1';
+  const etsyAreaVisible557=()=>['publishing','etsy'].some(name=>document.querySelector(`[data-editor-panel="${name}"]`)?.hidden===false);
   const key=()=>crypto.randomUUID();
   const status=(message,hold=false)=>{const el=$('dd500Status');el.textContent=message;el.dataset.tone=hold?'hold':'ok';};
   const showReadRows520=(element,lines)=>{
@@ -1575,15 +1576,15 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     saveState(event.detail?.destinations_confirmed===false?
       'Product saved; destination settings need review. No Etsy write attempted.':
       'Product saved. Checked Etsy drafts now receive a readiness review and final confirmation before one provider action. No unattended Etsy write.','');
-    void refresh();
+    if(etsyAreaVisible557())void refresh();
   });
-  document.addEventListener('dd:product-loaded',()=>void refresh());
+  document.addEventListener('dd:product-loaded',()=>{if(etsyAreaVisible557())void refresh();});
   document.addEventListener('dd:media-inline-updated',event=>{
     if(Number(event.detail?.product_id)!==id)return;
     state.loaded=false;resetOwnerApproval();$('dd500Consent').checked=false;
-    void refresh();
+    if(etsyAreaVisible557())void refresh();
   });
-  document.addEventListener('dd:product-channel-tags-changed',()=>{state.loaded=false;resetOwnerApproval();void refresh();});
+  document.addEventListener('dd:product-channel-tags-changed',()=>{state.loaded=false;resetOwnerApproval();if(etsyAreaVisible557())void refresh();});
   document.addEventListener('dd:editor-tab-opened',event=>{
     if(event.detail?.tab==='etsy'&&ready())void (async()=>{
       await refresh();
@@ -1624,5 +1625,5 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
       }finally{$('dd500Consent').checked=false;show();}
     }
   };
-  show();if(ready())void refresh();
+  show();if(ready()&&etsyAreaVisible557())void refresh();
 }
