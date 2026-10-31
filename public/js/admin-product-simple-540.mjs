@@ -1,6 +1,6 @@
 /* Finished-product entry. Historical diagnostic DOM stays mounted for existing
  * handlers but only this simple surface is shown to the owner. */
-import {composeSoapFormula540,SOAP_ROLES_540} from './soap-formula-540.mjs';
+import {composeSoapFormula540,SOAP_ROLES_540,scentNameConflict541} from './soap-formula-540.mjs';
 const byId=id=>document.getElementById(id);
 const productId=Number(new URLSearchParams(location.search).get('product_id')||0);
 const form=byId('productEditorForm'),save=byId('dd540SaveProduct'),toolbar=byId('dd540ToolbarStatus');
@@ -27,7 +27,11 @@ function renderRecipe({changed=false}={}){
   const summary=formula.ready?`${formula.selected.length} selected materials · ${formula.ingredients.length} genuine INCI ingredients. Review their actual order and the measured net weight below before saving.`:
     formula.blockers.join(' ');
   const warnings=formula.warnings.length?` ${formula.warnings.join(' ')}`:'';
-  say(summary+warnings,!formula.ready);
+  const selectedScent=library.find(row=>String(row.packaging_source_material_template_id)===String(pickers.scent?.value||''));
+  const conflict=scentNameConflict541(form?.elements.namedItem('name')?.value,selectedScent?.material_name);
+  if(conflict&&verified)verified.checked=false;
+  say(summary+warnings+(conflict?' HOLD: this Sweet Orange Product has a different saved scent selected. Confirm the actual batch and correct the source choice before signing off. No recipe was changed.':''),!formula.ready||conflict);
+  if(recipeRoot)recipeRoot.dataset.scentConflict=conflict?'1':'0';
 }
 async function loadSoap(){
   if(loaded||loading||!isSoap)return;
@@ -97,6 +101,7 @@ if(form&&save){
       const actualSave=byId('productEditorSave');
       if(!actualSave||actualSave.disabled)throw Error('Wait until the saved Product finishes loading before saving. No change was sent.');
       const validRecipe=isSoap&&loaded&&formula?.ready&&Number(pickers.base?.value||0)>0;
+      if(isSoap&&recipeRoot?.dataset.scentConflict==='1')throw Error('Sweet Orange has a conflicting saved scent. Review the physical recipe and choose the correct saved fragrance before saving its official label. No changes sent.');
       const net=Number(weightInput?.value||0);
       const confirmed=verified?.checked===true;
       if(validRecipe&&confirmed&&Number.isFinite(net)&&net>0){
@@ -128,6 +133,13 @@ if(form&&save){
   });
 
   const publishingStatus=byId('dd540PublishingStatus');
+  // Reuse the vetted at-most-once photo controls; never implement a second upload path.
+  const photoMount=byId('dd541PhotosMount'),photoPanel=byId('dd443EtsyImages');
+  if(photoMount&&photoPanel){
+    photoMount.append(photoPanel);
+    const legacyHint=photoPanel.querySelector('p:nth-of-type(2)');
+    if(legacyHint&&/Product #53/.test(legacyHint.textContent||''))legacyHint.hidden=true;
+  }
   const sources=['dd535LiveStatus','dd523PostStatus','dd523Readiness'].map(byId).filter(Boolean);
   for(const source of sources)new MutationObserver(()=>{
     const current=sources.map(x=>String(x.textContent||'').trim()).filter(Boolean);
@@ -135,6 +147,7 @@ if(form&&save){
   }).observe(source,{subtree:true,childList:true,characterData:true});
   byId('dd540CheckDraft')?.addEventListener('click',()=>{
     const read=byId('dd535ReadLive');if(read)read.click();
+    byId('dd443EtsyImagesLoad')?.click();
     else publishingStatus.textContent='Live Etsy readback is unavailable; no Etsy write occurred.';
   });
   byId('dd540UpdateDraft')?.addEventListener('click',()=>{

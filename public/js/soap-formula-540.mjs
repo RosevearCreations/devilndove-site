@@ -7,6 +7,12 @@ export const SOAP_ROLES_540 = Object.freeze({
 const id = value => Number.isSafeInteger(Number(value)) && Number(value)>0 ? Number(value) : 0;
 const clean = value => String(value ?? '').trim();
 
+// Advisory only: never infer or overwrite a physical batch formula from the title.
+export function scentNameConflict541(productName,selectedName){
+  const product=clean(productName).toLowerCase(),scent=clean(selectedName).toLowerCase();
+  return /sweet\s+orange/.test(product)&&!!scent&&!/\borange\b/.test(scent);
+}
+
 export function composeSoapFormula540(sources, choices) {
   const selected = [];
   const blockers = [];
