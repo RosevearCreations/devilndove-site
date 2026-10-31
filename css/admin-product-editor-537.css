@@ -1,0 +1,14 @@
+/* Build 537: a short, single-product evidence path; advanced recovery stays optional. */
+.dd537-owner-recovery{margin:18px 0;padding:18px;border:1px solid #bd9259;border-radius:14px;background:linear-gradient(145deg,rgba(42,31,60,.94),rgba(22,24,44,.95));color:#f8f0ff}
+.dd537-owner-recovery h4{margin:0 0 10px;font-size:1.2rem;color:#f5dbba}
+.dd537-owner-recovery p{line-height:1.55;overflow-wrap:anywhere}
+.dd537-stage-list{padding:0;margin:14px 0;list-style:none;display:grid;gap:9px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+.dd537-stage-list li{display:flex;flex-direction:column;gap:7px;padding:12px;border-radius:9px;overflow-wrap:anywhere;font-size:.9rem;line-height:1.42}
+.dd537-stage-list strong{font-size:.95rem}
+.dd537-ready{background:#113b35;border:1px solid #4caa91;color:#dbfff1}
+.dd537-held{background:#46301e;border:1px solid #c5965d;color:#ffecd1}
+.dd537-actions{gap:10px;align-items:stretch}
+.dd537-actions .btn{flex:1 1 190px;min-height:48px;white-space:normal;text-align:center}
+#dd537Status[data-tone="hold"]{color:#ffd4a0}
+#dd537Status[data-tone="ok"]{color:#b1f5d8}
+@media(max-width:680px){.dd537-owner-recovery{padding:12px}.dd537-stage-list{grid-template-columns:1fr}.dd537-actions .btn{flex-basis:100%}}

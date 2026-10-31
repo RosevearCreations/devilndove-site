@@ -22,13 +22,16 @@
   if(form?.dataset.productDirty==='1'){say('Unsaved edits: save the Product first. Etsy uses the saved version, never unsaved browser fields.');return;}
   busy=true;$('dd488CheckReadiness').disabled=true;say('Reading Product media approvals and existing local Etsy draft link (no Etsy API call)…');
   try{
+   const candidate=id===54?'4601705477':'';
    const [link,dist,images]=await Promise.all([
-    read(`/api/admin/product-etsy-existing-draft?product_id=${id}`),
+    read(`/api/admin/product-etsy-existing-draft?product_id=${id}${candidate?'&candidate_listing_id='+candidate:''}`),
     read(`/api/admin/product-distribution-406?product_id=${id}&channel=etsy`),
     read(`/api/admin/product-etsy-images?product_id=${id}`)]);
-   const linked=link.linked_listing_id||images.listing_id;
+   const linked=link.saved_link_readback_confirmed===true&&String(link.product_id)===String(id)&&
+    String(link.receipt_id||'').trim()&&(!candidate||String(link.linked_listing_id)===candidate)?link.linked_listing_id:null;
    issue(linked?`Existing Etsy draft #${linked} is linked locally. Choose UPDATE; verify its live draft state before the actual update.`:
-    'No Etsy draft is linked to this Product. If one already exists in Etsy, choose UPDATE and link its exact listing ID; otherwise choose NEW.',!!linked);
+    candidate?`Previously reported Etsy draft #${candidate} is NOT yet primary-linked. Choose UPDATE and verify/link that same listing; do not create a duplicate.`:
+    'No verified primary Etsy draft link. If one already exists in Etsy, choose UPDATE and link its exact listing ID; otherwise choose NEW.',!!linked);
    const gallery=Array.isArray(dist.gallery)?dist.gallery:[];
    const eligible=gallery.filter(row=>row.approved_for_distribution);
    const blocked=gallery.filter(row=>!row.approved_for_distribution);

@@ -11,10 +11,22 @@
   $('dd486EtsyLink').disabled=state.busy||!id||Boolean(state.linked)||!valid||state.inspected!==String($('dd486EtsyListingId').value)||!$('dd486EtsyLinkConfirm').checked||(!state.titleMatches&&!$('dd486EtsyOlderTitle').checked);
   $('dd486EtsyUpdate').disabled=state.busy||!id||!state.linked||state.uncertain||dirty()||!$('dd486EtsyUpdateConfirm').checked;
  }
- async function load(){if(state.busy||!id)return;state.busy=true;buttons();say('dd486EtsyExistingStatus','Reading only our saved Product-to-Etsy draft receipt…');
-  try{const x=await api(`/api/admin/product-etsy-existing-draft?product_id=${id}`);state.linked=x.linked_listing_id||null;
-   if(state.linked){$('dd486EtsyListingId').value=String(state.linked);say('dd486EtsyExistingStatus',`Existing Etsy draft #${state.linked} linked (${x.linked_source}). No new draft needed. Confirm current Etsy state before updating.`);}
-   else say('dd486EtsyExistingStatus','No Product Editor link found. If you already have this draft in Etsy, enter its exact listing ID here; do not press Create draft again.');
+ // An owner's earlier screenshot is a search lead, never a saved D1 link.
+ const ownerLead=id===54?'4601705477':'';
+ async function load(){if(state.busy||!id)return;state.busy=true;buttons();say('dd486EtsyExistingStatus','Reading the exact primary Product-to-Etsy draft receipt (no Etsy write)…');
+  try{const query=`/api/admin/product-etsy-existing-draft?product_id=${id}${ownerLead?'&candidate_listing_id='+encodeURIComponent(ownerLead):''}`;
+   const x=await api(query),confirmed=x.saved_link_readback_confirmed===true&&String(x.product_id)===String(id)&&
+    /^[1-9]\d{0,14}$/.test(String(x.linked_listing_id||''))&&Boolean(String(x.receipt_id||'').trim());
+   const expected=ownerLead&&String(x.linked_listing_id||'')!==ownerLead;
+   state.linked=confirmed&&!expected?String(x.linked_listing_id):null;state.inspected=null;
+   if(state.linked){$('dd486EtsyListingId').value=state.linked;say('dd486EtsyExistingStatus',`Verified PRIMARY Product #${id} → existing Etsy draft #${state.linked}; receipt ${x.receipt_id}. Draft and shipping will still be checked live before any change.`);}
+   else {if(ownerLead&&!String($('dd486EtsyListingId').value||'').trim())$('dd486EtsyListingId').value=ownerLead;
+    const reason=expected?'A different listing ID is saved on this Product. Resolve this conflict before an update.':
+     x.candidate_receipt_state==='multiple_local_claims'?'More than one local Product claims this draft. Independent reconciliation is required.':
+     x.candidate_receipt_state==='another_product'?'A different Product claims this draft. Check the correct Product before linking.':
+     `No unique primary D1 link was confirmed${ownerLead?' for previously reported #'+ownerLead:''}. Inspect this SAME draft in Etsy, then explicitly verify and link it. Do not create another.`;
+    say('dd486EtsyExistingStatus',`HOLD — ${reason} The number in the box is only a candidate.`);}
+   document.dispatchEvent(new CustomEvent('dd:etsy-existing-draft-read-537',{detail:{product_id:id,confirmed:Boolean(state.linked),listing_id:state.linked||null,claim_state:x.candidate_receipt_state||null}}));
   }catch(e){state.linked=null;say('dd486EtsyExistingStatus','HOLD — '+e.message);}finally{state.busy=false;buttons();}}
  async function action(name){if(state.busy||!id||dirty()){say('dd486EtsyUpdateStatus','Save the Product first, then load its existing Etsy draft. No provider write.');return;}
   state.busy=true;buttons();const link=name==='link_existing',inspect=name==='inspect_listing';const target=link||inspect?'dd486EtsyExistingStatus':'dd486EtsyUpdateStatus';
@@ -24,6 +36,8 @@
    if(inspect){state.inspected=String(x.listing_id);state.titleMatches=x.title_matches===true;
     say('dd486EtsyPreview',`Verified draft #${x.listing_id}; Etsy title: “${x.etsy_title}”; saved Product title: “${x.product_title}”. ${state.titleMatches?'Titles match.':'Titles differ: independently confirm the older title represents this same Product before linking.'} Canada-only shipping confirmed. No Etsy change.`);
     say(target,'Original Etsy draft verified; linking now requires the exact reviewed listing ID.');return;}
+   if(link&&!(x.saved_link_readback_confirmed===true&&String(x.receipt_id||'').trim()&&String(x.listing_id)===String($('dd486EtsyListingId').value)))
+    throw Error('The primary saved link receipt was not confirmed. No update is authorized.');
    state.linked=String(x.listing_id);$('dd486EtsyListingId').value=state.linked;
    say(target,link?`Verified and linked existing Etsy draft #${state.linked} without creating or changing it. Load approved photos below.`:
     `Etsy confirmed title, description, price and quantity updated on existing unpublished draft #${state.linked}. Photos require separate approval and transfer below.`);

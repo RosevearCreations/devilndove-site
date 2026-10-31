@@ -268,18 +268,22 @@ if(form&&root&&window.DDAuth?.apiFetch){
  }
  $('dd523OpenMedia')?.addEventListener('click',()=>{document.querySelector('[data-editor-tab="media"]')?.click();
   $('productDistribution406')?.scrollIntoView({block:'start',behavior:'smooth'});});
- $('dd533ExistingDraft')?.addEventListener('click',()=>{
-  const advanced=$('dd500Package')?.closest('details');if(advanced)advanced.open=true;
-  const field=$('dd500ListingId');if(!field)return;
+ // Build 537: the older dd500 package field was not the actual existing-draft
+ // verification/link action. Route both owner shortcuts to the SAME dd486
+ // inspect-and-link controls; selecting the mode does not consent or POST.
+ function revealExistingDraft537(candidate=''){
+  document.querySelector('[data-editor-tab="etsy"]')?.click();
+  $('dd488ChooseExisting')?.click();
+  const field=$('dd486EtsyListingId');if(!field)return;
+  if(candidate){field.value=candidate;field.dispatchEvent(new Event('input',{bubbles:true}));}
   field.scrollIntoView({block:'center',behavior:'smooth'});field.focus({preventScroll:true});
-  postStatus('If Etsy already has this product as an unpublished draft, enter its exact Etsy listing ID here. Inspect and link the SAME draft after Etsy confirms it. Do not create a second draft.','warn');
- });
+  postStatus(`Inspect the SAME unpublished Etsy draft${candidate?' #'+candidate:''}, tick the existing-link consent, verify its shop and Canada-only delivery, then explicitly link it. The listing number alone is not proof. No Etsy write was made.`,'warn');
+ }
+ $('dd533ExistingDraft')?.addEventListener('click',()=>revealExistingDraft537(ownerDraftHistory534(id)?.listingId||''));
  $('dd534InspectHistorical')?.addEventListener('click',()=>{
   const prior=ownerDraftDecision534(id,confirmedListing());
   if(!prior.requiresExistingDraftCheck)return;
-  const field=$('dd500ListingId');if(field){field.value=prior.report.listingId;field.dispatchEvent(new Event('input',{bubbles:true}));}
-  $('dd533ExistingDraft')?.click();
-  postStatus(`Entered previously reported draft #${prior.report.listingId} for inspection only. Open that exact Etsy draft, confirm it is ours and unpublished, tick the link consent, then choose Verify and save Etsy listing ID. Nothing was uploaded.`,'warn');
+  revealExistingDraft537(prior.report.listingId);
  });
  $('dd534GoTags')?.addEventListener('click',()=>{
   document.querySelector('[data-dd532-jump="seo"]')?.click();
