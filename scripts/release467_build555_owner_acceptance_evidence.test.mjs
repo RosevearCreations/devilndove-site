@@ -75,7 +75,7 @@ test('Build 555 release wiring, owner queue and read-only safe UX remain explici
   assert.match(page,/admin-system-health-555\.css\?v=555/);
   assert.match(source('functions/api/admin/system-health-547.js'),/readback_at:new Date\(\)\.toISOString\(\)/);
   assert.match(source('public/js/admin-system-health-547.js'),/incidentSummary:lastPriorities,readbackAt:data\.readback_at/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:555|556|557|558)/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:555|556|557|558|559)/);
   assert.match(source('.github/workflows/current-application-quality.yml'),/release467_build555_owner_acceptance_evidence\.test\.mjs/);
   const plan=source('docs/operations/RELEASE_467_BUILD_555_OWNER_ACCEPTANCE_AND_NEXT_QUEUED_BUILDS_556_567.md');
   for(let build=556;build<=567;build++)assert.match(plan,new RegExp(`\\*\\*${build} —`));

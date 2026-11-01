@@ -84,12 +84,12 @@ test('Build 553 restores only known incident presets from URL and clears stale r
 test('Build 553 clarifies owner evidence file verification and preserves production provenance',()=>{
   const html=read('admin/system-operations/index.html'),deploy=read('.github/workflows/production-pages-deploy-current.yml');
   for(const id of ['dd553EvidenceDetails','dd553VerifyEvidenceFile','dd553ExportStatus','dd553PresetStatus','dd553ResetPreset'])assert.match(html,new RegExp(`id="${id}"`));
-  assert.match(html,/Build (?:553|554|555|557|558)/);
+  assert.match(html,/Build (?:553|554|555|557|558|559)/);
   assert.match(html,/admin-system-health-553\.css\?v=553/);
   assert.match(html,/admin-system-health-550\.js\?v=553/);
   assert.match(html,/admin-system-health-551\.js\?v=(?:553|554)/);
   assert.match(html,/not independently verified second-device activity/);
-  assert.match(deploy,/"build":(?:553|554|555|556|557|558)/);
+  assert.match(deploy,/"build":(?:553|554|555|556|557|558|559)/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build553_export_preset_usability\.test\.mjs/);
   for(const file of ['public/js/admin-system-health-550.js','public/js/admin-system-health-551.js']){
     assert.doesNotMatch(read(file),/localStorage|sessionStorage|DELETE FROM|UPDATE runtime_incidents/);
