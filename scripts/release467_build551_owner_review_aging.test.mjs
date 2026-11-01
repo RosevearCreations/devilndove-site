@@ -33,7 +33,7 @@ test('Build 551 never silently discards bounded owner evidence and avoids duplic
 test('Build 551 presents honest owner evidence and bounded read-only incident age groups',()=>{
   const page=read('admin/system-operations/index.html'),api=read('functions/api/admin/system-health-547.js'),ui=read('public/js/admin-system-health-551.js');
   for(const id of ['dd551ComparisonSummary','dd551OwnerCheck','dd551SaveReview','dd551ReviewStatus','dd551ReviewList','dd551Aging','dd551AgingContext'])assert.match(page,new RegExp(`id="${id}"`));
-  assert.match(page,/Build (?:551|552|553|554|555|557|558|559|560|561|562)/);assert.match(page,/personally compared/);assert.match(page,/not independent device proof/i);
+  assert.match(page,/Build (?:551|552|553|554|555|557|558|559|560|561|562|563)/);assert.match(page,/personally compared/);assert.match(page,/not independent device proof/i);
   assert.match(page,/admin-system-health-551\.js\?v=(?:551|552|553|554)/);
   assert.match(ui,/dd:health-receipt-verified-551/);assert.match(ui,/comparison\.found/);
   assert.match(ui,/second_device_compared:true/);assert.match(ui,/action:'owner_review_551'/);
@@ -46,6 +46,6 @@ test('Build 551 presents honest owner evidence and bounded read-only incident ag
   assert.match(api,/open_24h/);assert.match(api,/open_7d/);assert.match(api,/open_without_review/);
   assert.match(api,/datetime\(created_at\)>=datetime\('now','-30 days'\)/);
   assert.doesNotMatch(api,/UPDATE runtime_incidents|DELETE FROM runtime_incidents|CREATE TABLE/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:551|552|553|554|555|556|557|558|559|560|561|562)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:551|552|553|554|555|556|557|558|559|560|561|562|563)/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build551_owner_review_aging\.test\.mjs/);
 });

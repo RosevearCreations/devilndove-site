@@ -17,7 +17,7 @@ test('Build 557 replaces the seven-tab everyday editor with four explicit work a
   assert.match(page,/id="dd544PhotosList"/);
   assert.match(page,/id="dd527MoreTools"/);
   assert.match(page,/admin-product-editor-557\.css\?v=557/);
-  assert.match(page,/product-entry-557\.mjs\?v=56[12]/);
+  assert.match(page,/product-entry-557\.mjs\?v=56[123]/);
   assert.equal((page.match(/id="dd540SaveProduct"/g)||[]).length,1);
   assert.equal((page.match(/id="productEditorSave"/g)||[]).length,1);
   assert.doesNotMatch(page,/<script[^>]+src="https?:\/\//);
@@ -80,6 +80,6 @@ test('Build 557 modern design is scoped to the rebuilt Admin screen and release 
   assert.match(css,/:focus-visible/);
   assert.doesNotMatch(css,/(^|\n)(?:body|:root|\.container)\s*\{/);
   for(const path of ['admin/index.html','admin/products/index.html','admin/system-operations/index.html','css/styles.css'])assert.doesNotMatch(source(path),/admin-product-editor-557/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":56[12]/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":56[123]/);
   assert.match(source('.github/workflows/current-application-quality.yml'),/release467_build557_product_entry_rewrite\.test\.mjs/);
 });

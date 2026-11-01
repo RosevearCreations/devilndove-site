@@ -1,0 +1,9 @@
+/* Build 563 — compact receipt inspector, never a remote publish control. */
+.dd559-board .dd563-card{border:1px solid rgba(186,151,208,.32);border-radius:12px;padding:.9rem 1rem;margin:.8rem 0;background:rgba(17,21,40,.38)}
+.dd559-board .dd563-card h3{font-size:1rem;margin:.1rem 0 .4rem;color:#ead6ae}
+.dd559-board .dd563-card p{margin:.45rem 0;overflow-wrap:anywhere}
+.dd559-board .dd563-card ul{padding-left:1.4rem}
+.dd559-board .dd563-card summary{cursor:pointer}
+.dd559-board .dd563-remote{font-weight:650}
+.dd559-board .dd563-links{display:flex;flex-wrap:wrap;gap:.7rem;margin:.9rem 0}
+.dd559-board .dd563-links a{text-decoration:underline;text-underline-offset:3px}
