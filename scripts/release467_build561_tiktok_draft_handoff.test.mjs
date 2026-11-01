@@ -93,7 +93,7 @@ test('Build 561 TikTok editor keeps a one-click, nonpublishing draft preparation
   const page=file('admin/product-editor/index.html'),ui=file('public/js/product-destinations-559.mjs');
   const api=file('functions/api/admin/product-tiktok-handoff-561.js');
   const pure=file('functions/api/_lib/productTikTokHandoff561.mjs');
-  assert.match(page,/Devil n Dove • Build 561/);
+  assert.match(page,/Devil n Dove • Build 56[12]/);
   assert.match(page,/admin-product-tiktok-561\.css\?v=561/);
   assert.match(ui,/id="dd561TikTok"/);
   assert.match(ui,/Prepare TikTok draft handoff/);
@@ -106,6 +106,6 @@ test('Build 561 TikTok editor keeps a one-click, nonpublishing draft preparation
   assert.match(api,/readCanonicalDistributionGallery/);
   assert.match(pure,/allowedImage/);
   assert.doesNotMatch(api,/\bfetch\(|method:\s*['"]POST|access_token_ciphertext|decryptOAuthSecret|\.run\(/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":561/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":56[12]/);
   assert.match(file('.github/workflows/current-application-quality.yml'),/release467_build561_tiktok_draft_handoff\.test\.mjs/);
 });
