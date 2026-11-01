@@ -59,6 +59,7 @@ export function renderUnifiedDestinations559({form,productId,caption}={}){
     <div class="dd559-grid" id="dd559Grid" aria-label="Individual destination statuses"></div>
     <details class="dd560-meta" id="dd560Meta"><summary>Meta account &amp; approved photo checks <small>(Facebook Marketplace, Pages, Instagram)</small></summary><div class="dd560-meta-inner"><p class="small">Read saved connections and approved Product originals. This never contacts Meta or publishes a post.</p><button class="btn" id="dd560Refresh" type="button">Check Meta handoff readiness</button><p id="dd560Status" role="status" aria-live="polite">Choose Check to review current saved evidence.</p><div id="dd560Results"></div></div></details>
     <details class="dd561-tiktok" id="dd561TikTok"><summary>TikTok draft handoff <small>(caption, approved original photos and account checks)</small></summary><div class="dd561-inner"><p class="small">Prepare a copy for TikTok. No draft or upload is created on TikTok from this screen.</p><button class="btn" id="dd561Refresh" type="button">Review TikTok draft content</button><p id="dd561Status" role="status" aria-live="polite">Choose Review to read the saved Product and its approved photographs.</p><div id="dd561Review" hidden><p id="dd561PhotoSummary" class="dd561-summary"></p><div id="dd561Warnings"></div><label for="dd561Caption">TikTok caption — editable local copy, not saved to TikTok or Product</label><textarea class="input" id="dd561Caption" rows="6" spellcheck="true"></textarea><div class="dd561-caption-actions"><span id="dd561CaptionCount"></span><button class="btn" id="dd561Copy" type="button">Copy TikTok caption</button></div><h3>Approved original photographs</h3><div id="dd561Photos"></div><h3>Account and API publishing checks</h3><ul id="dd561AccountChecks"></ul><p class="small">Finish a new post or save its draft in TikTok itself. App permissions are not proof of a completed upload or publication.</p><a class="btn" href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer">Open TikTok</a></div></div></details>
+    <details class="dd561-tiktok" id="dd562Social"><summary>X &amp; Pinterest manual handoff <small>(saved text, approved originals, permission checks)</small></summary><div class="dd561-inner"><p class="small">Review local copies of our saved Product content. Nothing is uploaded, drafted or published externally.</p><button class="btn" id="dd562Refresh" type="button">Review X &amp; Pinterest content</button><p id="dd562Status" role="status" aria-live="polite">Choose Review to prepare local handoff content.</p><div id="dd562Review" hidden><div id="dd562Warnings"></div><div id="dd562Channels"></div><h3>Approved original photographs</h3><div id="dd562Photos"></div></div></div></details>
     <details class="dd559-more" id="dd559More"><summary>More destinations: Pinterest, YouTube</summary><div class="dd559-grid" id="dd559MoreGrid"></div></details>
     <div class="dd559-handoff" id="dd559Handoff" hidden><label for="dd559Caption">Prepared text — review before posting</label><textarea class="input" id="dd559Caption" rows="7" readonly></textarea><p class="small" id="dd559HandoffStatus" role="status" aria-live="polite"></p><button class="btn" id="dd559CopyAgain" type="button">Copy text</button></div>`;
   const heading=panel.querySelector('.dd540-section-head');if(heading)heading.after(mount);else panel.prepend(mount);
@@ -89,6 +90,7 @@ export function renderUnifiedDestinations559({form,productId,caption}={}){
       actions.append(makeButton('Review draft update','etsy-update',{disabled:!saved()||!row.draft_update_allowed,primary:true}));
     }else{
       actions.append(row.key==='tiktok'?makeButton('Prepare TikTok draft handoff','tiktok-review',{disabled:!saved()}):
+        ['x','pinterest'].includes(row.key)?makeButton('Review manual draft handoff','social-review',{disabled:!saved()}):
         makeButton('Prepare manual handoff','copy:'+row.key,{disabled:!saved()}));
       if(['facebook_marketplace','facebook','instagram'].includes(row.key))actions.append(makeButton('Check Meta readiness','meta-review'));
       actions.append(makeButton('View Product photos','view-photos'));
@@ -211,6 +213,52 @@ export function renderUnifiedDestinations559({form,productId,caption}={}){
     }catch(error){invalidateTikTok(`TikTok handoff unavailable: ${error.message}. Nothing was uploaded or published.`);}
     finally{tiktokLoading=false;byId('dd561Refresh').disabled=false;}
   }
+  let socialLoaded=false,socialLoading=false;
+  const socialStatus=message=>{byId('dd562Status').textContent=message;};
+  function invalidateSocial(message){socialLoaded=false;byId('dd562Review').hidden=true;socialStatus(message);}
+  function drawSocial(data){
+    const wrap=byId('dd562Channels'),warnings=byId('dd562Warnings'),photos=byId('dd562Photos');
+    wrap.replaceChildren();warnings.replaceChildren();photos.replaceChildren();byId('dd562Review').hidden=false;
+    if(data.manual_handoff_warnings?.length){const list=document.createElement('ul');list.className='dd561-warnings';
+      for(const issue of data.manual_handoff_warnings){const li=document.createElement('li');li.textContent=issue;list.append(li);}warnings.append(list);}
+    for(const [key,name,url] of [['x','X','https://x.com/compose/post'],['pinterest','Pinterest','https://www.pinterest.com/pin-creation-tool/']]){
+      const entry=data.destinations?.[key];if(!entry)continue;
+      const section=document.createElement('section');section.className='dd562-channel';
+      const heading=document.createElement('h3');heading.textContent=`${name} — manual handoff`;
+      section.append(heading);
+      const addField=(label,value,limit)=>{
+        const caption=document.createElement('label');caption.textContent=label;
+        const area=document.createElement('textarea');area.className='input';area.rows=key==='x'?4:3;area.value=value||'';
+        area.addEventListener('input',e=>{e.stopPropagation();update();});area.addEventListener('change',e=>e.stopPropagation());
+        const count=document.createElement('p');count.className='small';count.setAttribute('aria-live','polite');
+        const copy=document.createElement('button');copy.type='button';copy.className='btn';copy.textContent=`Copy ${label.toLowerCase()}`;
+        const update=()=>{count.textContent=`${area.value.length} / ${limit} characters`;copy.disabled=!area.value.trim()||area.value.length>limit;};
+        copy.addEventListener('click',()=>{if(copy.disabled||!socialLoaded)return;
+          if(navigator.clipboard?.writeText)void navigator.clipboard.writeText(area.value).then(()=>socialStatus(`${name} text copied. Nothing posted.`)).catch(()=>{area.focus();area.select();socialStatus('Select and copy text manually.');});
+          else{area.focus();area.select();socialStatus('Text selected; copy manually.');}});
+        section.append(caption,area,count,copy);update();
+      };
+      if(key==='x')addField('Post text',entry.text,entry.limit);
+      else{addField('Pin title',entry.title,entry.title_limit);addField('Pin description',entry.description,entry.description_limit);}
+      const notes=document.createElement('ul');for(const issue of [entry.note,...entry.account_checks]){const li=document.createElement('li');li.textContent=issue;notes.append(li);}section.append(notes);
+      const link=document.createElement('a');link.className='btn';link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=`Open ${name} to prepare and publish manually`;section.append(link);wrap.append(section);
+    }
+    for(const photo of data.photos||[]){const item=document.createElement('div');item.className='dd561-photo';
+      const link=document.createElement('a');link.href=photo.image_url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=`Open original #${photo.product_image_id} (${photo.width_px} × ${photo.height_px})`;
+      const alt=document.createElement('small');alt.textContent=photo.alt_text;item.append(link,alt);photos.append(item);}
+    if(!data.photos?.length){const p=document.createElement('p');p.textContent='No approved originals available. Review Media approvals.';photos.append(p);}
+  }
+  async function refreshSocial(){
+    if(socialLoading)return;if(!saved()){invalidateSocial('Save the Product first. No provider contacted.');return;}
+    socialLoading=true;byId('dd562Refresh').disabled=true;socialStatus('Reading saved Product and local approval evidence…');
+    try{
+      if(!window.DDAuth?.apiFetch)throw Error('Admin session unavailable.');
+      const response=await window.DDAuth.apiFetch(`/api/admin/product-social-handoff-562?product_id=${productId}`,{method:'GET',cache:'no-store'});
+      const data=await response.json();if(!response.ok||data?.ok!==true||Number(data.product_id)!==productId)throw Error(data?.error||'Handoff unavailable.');
+      drawSocial(data);socialLoaded=true;socialStatus('Local X and Pinterest content prepared. Review, copy and finish on each destination; nothing posted.');
+    }catch(error){invalidateSocial(`Handoff unavailable: ${error.message}. Nothing posted.`);}
+    finally{socialLoading=false;byId('dd562Refresh').disabled=false;}
+  }
   async function copyText(key){
     if(!saved()){setStatus('Save Product first. No manual handoff prepared.');return;}
     try{
@@ -242,10 +290,15 @@ export function renderUnifiedDestinations559({form,productId,caption}={}){
       const details=byId('dd561TikTok');details.open=true;details.scrollIntoView({behavior:'smooth',block:'nearest'});
       if(!tiktokLoaded)void refreshTikTok();return;
     }
+    if(action==='social-review'){
+      const details=byId('dd562Social');details.open=true;details.scrollIntoView({behavior:'smooth',block:'nearest'});
+      if(!socialLoaded)void refreshSocial();return;
+    }
     if(action.startsWith('copy:'))void copyText(action.slice(5));
   });
   byId('dd560Refresh').addEventListener('click',()=>void refreshMeta());
   byId('dd561Refresh').addEventListener('click',()=>void refreshTikTok());
+  byId('dd562Refresh').addEventListener('click',()=>void refreshSocial());
   copyTikTok.addEventListener('click',()=>{
     updateCaptionCount();if(copyTikTok.disabled||!tiktokLoaded)return;
     if(navigator.clipboard?.writeText){void navigator.clipboard.writeText(captionArea.value)
@@ -265,11 +318,13 @@ export function renderUnifiedDestinations559({form,productId,caption}={}){
   document.addEventListener('dd:save-succeeded',event=>{if(Number(event.detail?.product_id)===productId){
     loaded=false;metaLoaded=false;byId('dd560Results').replaceChildren();metaStatus('Product changed. Check current Meta and photo evidence again.');
     invalidateTikTok('Product saved. Review the new TikTok draft evidence before copying.');void refresh();
+    invalidateSocial('Product saved. Review the new X and Pinterest evidence before copying.');
   }});
   document.addEventListener('dd:etsy-existing-draft-linked',()=>{loaded=false;void refresh();});
   const changed=()=>{
     if(metaLoaded){metaLoaded=false;byId('dd560Results').replaceChildren();metaStatus('Product fields changed. Save first, then check Meta and photo evidence again.');}
     if(tiktokLoaded)invalidateTikTok('Product fields changed. Save first, then review the TikTok draft again.');
+    if(socialLoaded)invalidateSocial('Product fields changed. Save first, then review X and Pinterest again.');
     render();
   };
   form.addEventListener('input',changed);form.addEventListener('change',changed);
