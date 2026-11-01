@@ -511,6 +511,13 @@ jobs:
           node --check public/js/product-destinations-559.mjs
           node --test scripts/release467_build560_meta_destinations.test.mjs
 
+      - name: Build 561 TikTok saved Product caption and approved photo manual draft handoff
+        run: |
+          node --check functions/api/_lib/productTikTokHandoff561.mjs
+          node --check functions/api/admin/product-tiktok-handoff-561.js
+          node --check public/js/product-destinations-559.mjs
+          node --test scripts/release467_build561_tiktok_draft_handoff.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
