@@ -1,0 +1,92 @@
+/* Release 467 / Build 567: final Product entry accessibility and owner acceptance.
+   Only the opted-in Product Editor receives these small cleanup rules. */
+body[data-dd-acceptance-v567] .dd567-owner-walkthrough {
+  margin: 0 0 18px;
+  padding: 14px 18px;
+  border: 1px solid #786080;
+  border-radius: 14px;
+  background: linear-gradient(120deg, #211d34, #182238);
+  color: #f4edf6;
+}
+body[data-dd-acceptance-v567] .dd567-owner-walkthrough > summary {
+  color: #f5d7a9;
+  cursor: pointer;
+  font-weight: 750;
+  line-height: 1.55;
+}
+body[data-dd-acceptance-v567] .dd567-owner-walkthrough ol {
+  margin: 16px 0 12px;
+  padding-left: 24px;
+  display: grid;
+  gap: 9px;
+  line-height: 1.55;
+}
+body[data-dd-acceptance-v567] .dd567-owner-walkthrough .small {
+  margin: 12px 0 2px;
+  color: #d4cce0;
+  max-width: 85ch;
+}
+body[data-dd-acceptance-v567] .dd567-handoff-guide {
+  margin: 14px 0;
+  padding: 12px 14px;
+  border: 1px solid #5d5878;
+  border-radius: 12px;
+  background: #171d30;
+}
+body[data-dd-acceptance-v567] .dd567-handoff-guide > summary {
+  color: #f1d8ad;
+  cursor: pointer;
+  font-size: .92rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+body[data-dd-acceptance-v567] .dd567-handoff-guide .dd559-steps {
+  margin: 14px 0 3px;
+}
+body[data-dd-acceptance-v567] :is(.dd567-owner-walkthrough, .dd567-handoff-guide) > summary:focus-visible,
+body[data-dd-acceptance-v567] [role="tabpanel"]:focus-visible {
+  outline: 3px solid #f0cc91;
+  outline-offset: 3px;
+}
+body[data-dd-acceptance-v567] [role="tabpanel"],
+body[data-dd-acceptance-v567] .dd559-board,
+body[data-dd-acceptance-v567] .dd559-card,
+body[data-dd-acceptance-v567] .dd559-handoff {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+body[data-dd-acceptance-v567] .dd559-actions .btn {
+  white-space: normal;
+}
+body[data-dd-acceptance-v567] [role="tabpanel"] {
+  scroll-margin-top: 18px;
+}
+@media (max-width: 520px) {
+  body[data-dd-acceptance-v567] .dd567-owner-walkthrough {
+    padding: 12px 13px;
+  }
+  body[data-dd-acceptance-v567] .dd567-handoff-guide {
+    padding: 10px 12px;
+  }
+  body[data-dd-acceptance-v567] .dd557-steps .btn {
+    font-size: .89rem;
+    line-height: 1.35;
+    min-height: 54px;
+    padding: 10px 6px;
+  }
+  body[data-dd-acceptance-v567] .dd559-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body[data-dd-acceptance-v567] .dd559-actions > :is(button, a) {
+    width: 100%;
+    justify-content: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-dd-acceptance-v567] .dd557-steps .btn,
+  body[data-dd-acceptance-v567] .dd559-actions .btn {
+    transition: none;
+  }
+}
