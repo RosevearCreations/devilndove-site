@@ -77,5 +77,5 @@ test('Build 537 owner buttons reveal exact real verification, photo comparison, 
  assert.match(recovery,/\$\('dd529Check'\)\?\.click\(\)/);
  assert.doesNotMatch(recovery,/method:\s*['"]POST|graph\.facebook\.com|action:'approve_verified_draft_530'/);
  assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build537_existing_draft_photo_recovery\.test\.mjs/);
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:537|538|539|540|541|542|543|544|545|546|547|548|549|550|551|552|553|554|555|556|557|558|559|560|561|562|563)/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:537|538|539|540|541|542|543|544|545|546|547|548|549|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564)/);
 });

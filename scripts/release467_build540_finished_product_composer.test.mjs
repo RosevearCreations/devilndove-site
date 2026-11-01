@@ -47,5 +47,5 @@ test('Build 540 only writes reviewed local Product/soap records and keeps Etsy u
   assert.match(ui,/if\(form\.dataset\.productDirty==='1'\)/);
   assert.match(ui,/dd:save-succeeded/);
   assert.match(ui,/dd540UpdateDraft/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:54[0123456789]|550|551|552|553|554|555|556|557|558|559|560|561|562|563)/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:54[0123456789]|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564)/);
 });

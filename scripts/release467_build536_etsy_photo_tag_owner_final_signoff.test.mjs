@@ -70,6 +70,6 @@ test('Build 536 owner trial uses the same candidate as the editor and actual ima
  const signoff=read('functions/api/admin/product-etsy-owner-signoff-504.js');
  assert.match(signoff,/db=db\.withSession\('first-primary'\)/);
  assert.match(read('functions/api/admin/product-etsy-tags.js'),/const currentDb=db=>/);
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:5(?:3[6789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560|561|562|563)/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:5(?:3[6789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564)/);
  assert.doesNotMatch(read('public/js/etsy-owner-final-readback-536.mjs'),/fetch\(|method:'POST'|graph\.facebook\.com/);
 });
