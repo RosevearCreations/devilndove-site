@@ -50,5 +50,5 @@ test('Build 535 reads primary candidate, live Etsy photo inventory and tags with
  assert.match(flow,/dd497NativeTags/);
  assert.match(flow,/dd525OwnerTrial/);
  assert.doesNotMatch(read('public/js/etsy-live-owner-review-535.mjs'),/fetch\(|POST|graph\.facebook\.com/);
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:5(?:3[56789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564)/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:5(?:3[56789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565)/);
 });

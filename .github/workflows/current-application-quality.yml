@@ -537,6 +537,11 @@ jobs:
           node --check scripts/release467_build564_commerce_modernization.test.mjs
           node --test scripts/release467_build564_commerce_modernization.test.mjs
 
+      - name: Build 565 Workshop Operations Admin modernization and authority retention
+        run: |
+          node --check scripts/release467_build565_workshop_admin_modernization.test.mjs
+          node --test scripts/release467_build565_workshop_admin_modernization.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

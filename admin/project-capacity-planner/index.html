@@ -15,15 +15,16 @@ main.wrap.page-space :where(section,.card){min-width:0}
 main.wrap.page-space :where(select,input,textarea){max-width:100%;box-sizing:border-box}
 @media(max-width:650px){.site-header .header-inner{padding:12px 16px}.site-header .main-nav>a{padding:8px 9px}main.wrap.page-space{padding:16px 14px 36px}}
 
-</style></head>
-<body data-admin-page="project-capacity-planner" data-admin-module="creator">
+</style><link rel="stylesheet" href="/css/admin-workshop-565.css?v=565"></head>
+<body data-admin-page="project-capacity-planner" data-admin-module="creator" data-dd-workshop-v565="capacity">
 <header class="site-header"><div class="wrap header-inner"><a class="brand" href="/admin/">Devil n Dove Admin</a><nav class="main-nav"><a href="/admin/">Dashboard</a><a href="/admin/project-discovery-overview/">All Projects</a><a href="/admin/project-workflow-routing/">Workflow</a><a href="/admin/inventory-operations/">Equipment Inventory</a><a href="/admin/project-work-orders/">Work Orders &amp; Time</a><a href="/admin/project-material-planner/">Materials &amp; Costing</a><a href="/admin/project-resource-calendar/">Production Calendar</a></nav></div></header>
 <main class="wrap page-space">
-<section class="page-hero compact"><p class="eyebrow">Release 467 • Build 378</p><h1>Shared Workstations, Equipment &amp; Capacity</h1>
-<p>See which actual project records reference each station or tool. Shared demand is a planning warning—not proof of an overlapping booking.</p>
+<section class="page-hero compact dd565-workshop-hero"><p class="eyebrow dd565-eyebrow">Workshop Command • Capacity</p><h1>Workstations &amp; capacity</h1>
+<p>Review source-backed workstation demand across projects. Shared demand is a planning warning, never proof of a time reservation.</p>
 <div class="button-row"><button id="capacityRefresh" class="btn" type="button">Refresh capacity picture</button></div>
 <details><summary>ⓘ Help — capacity and availability</summary><p>Inventory Operations owns which Tools are workstations and which equipment can be used at multiple stations. Creative Process owns project operation requirements and Maker Story station references. The same associated tool may fit multiple stations; it is not allocated to every station simultaneously. Project demand here is not a time reservation. Build 381 adds dated, operator-confirmed calendar entries at <a href='/admin/project-resource-calendar/'>Production Calendar</a> to detect overlaps and maintenance blocks. This demand-only view still does not consult those bookings. An empty calendar cannot prove physical availability. Continue documenting real project operations in Creative Process.</p></details></section>
-<section class="card"><div class="button-row"><label>Search loaded projects <input id="capacitySearch" type="search" placeholder="Project or workstation"></label><label>Station filter <select id="capacityFilter"><option value="all">All stations</option><option value="shared">Shared demand</option><option value="used">Referenced by projects</option></select></label></div>
+<nav class="dd565-workshop-nav" aria-label="Workshop operations workspaces"><a href="/admin/custom-request/">Requests</a><a href="/admin/commission-workbench/">Commissions</a><a href="/admin/project-resource-calendar/">Calendar</a><a aria-current="page" href="/admin/project-capacity-planner/">Capacity</a><a href="/admin/project-work-orders/">Work Orders</a></nav>
+<section class="card dd565-primary-card"><div class="button-row"><label>Search loaded projects <input id="capacitySearch" type="search" placeholder="Project or workstation"></label><label>Station filter <select id="capacityFilter"><option value="all">All stations</option><option value="shared">Shared demand</option><option value="used">Referenced by projects</option></select></label></div>
 <div id="capacityMount" role="status" aria-live="polite">Loading capacity planning sources…</div>
 <div class="button-row"><button id="capacityPrevious" class="btn secondary" type="button" disabled>Previous projects</button><button id="capacityNext" class="btn secondary" type="button" disabled>Next projects</button></div></section>
 </main><script src="/public/js/admin-auth.js?v=467" defer></script><script src="/public/js/admin-project-capacity-planner.js?v=467b378" defer></script></body></html>

@@ -15,22 +15,23 @@ main.wrap.page-space :where(section,.card){min-width:0}
 main.wrap.page-space :where(select,input,textarea){max-width:100%;box-sizing:border-box}
 @media(max-width:650px){.site-header .header-inner{padding:12px 16px}.site-header .main-nav>a{padding:8px 9px}main.wrap.page-space{padding:16px 14px 36px}}
 
-</style></head>
-<body data-admin-page="project-resource-calendar" data-admin-module="creator"><header class="site-header"><div class="wrap header-inner"><a class="brand" href="/admin/">Devil n Dove Admin</a><nav class="main-nav"><a href="/admin/">Dashboard</a><a href="/admin/project-capacity-planner/">Capacity</a><a href="/admin/shared-tools/">Shared Tool Reviews</a><a href="/admin/project-work-orders/">Work Orders</a><a href="/admin/project-material-planner/">Materials</a><a href="/admin/inventory-operations/">Inventory</a><a href="/admin/commission-workbench/">Commissions &amp; Quotes</a></nav></div></header>
+</style><link rel="stylesheet" href="/css/admin-workshop-565.css?v=565"></head>
+<body data-admin-page="project-resource-calendar" data-admin-module="creator" data-dd-workshop-v565="calendar"><header class="site-header"><div class="wrap header-inner"><a class="brand" href="/admin/">Devil n Dove Admin</a><nav class="main-nav"><a href="/admin/">Dashboard</a><a href="/admin/project-capacity-planner/">Capacity</a><a href="/admin/shared-tools/">Shared Tool Reviews</a><a href="/admin/project-work-orders/">Work Orders</a><a href="/admin/project-material-planner/">Materials</a><a href="/admin/inventory-operations/">Inventory</a><a href="/admin/commission-workbench/">Commissions &amp; Quotes</a></nav></div></header>
 <main class="wrap page-space">
-<section class="page-hero compact"><p class="eyebrow">Release 467 • Build 381</p><h1>Production Calendar, Resource Conflicts &amp; Availability</h1>
+<section class="page-hero compact dd565-workshop-hero"><p class="eyebrow dd565-eyebrow">Workshop Command • Calendar</p><h1>Production calendar &amp; resource availability</h1>
 <p>Schedule project work, mark maintenance, reserve shared tools and record deadlines using actual UTC time windows. Conflicts are checked against canonical saved bookings, including across projects.</p>
 <details><summary>ⓘ Help — recorded conflicts and physical availability</summary>
 <p>Only human-confirmed calendar entries constitute booking evidence. No recorded overlap means no conflicting entry in this application; it does <strong>not</strong> prove a machine is powered on, maintained, physically available or that someone else isn't using it. Resource capacity is one booking per active Inventory tool or workstation at a time. A project deadline records a delivery target, not a resource reservation.</p>
 <p>Build 448: a real maintenance or resource hold is a <strong>hard block</strong> on project bookings, even when the old acknowledgement box is selected. For two overlapping project bookings, record a separate exact human decision in <a href="/admin/shared-tools/">Shared Tool Reviews</a> first; a generic override reason is no longer enough. Calendar and Tool lifecycle remain the authority. Existing calendar history is preserved by cancelling and creating a new entry. No automatic maintenance sign-off, work order completion, Inventory consumption or customer notification occurs.</p>
 </details></section>
-<section class="card"><h2>Calendar window</h2><div class="button-row">
+<nav class="dd565-workshop-nav" aria-label="Workshop operations workspaces"><a href="/admin/custom-request/">Requests</a><a href="/admin/commission-workbench/">Commissions</a><a aria-current="page" href="/admin/project-resource-calendar/">Calendar</a><a href="/admin/project-capacity-planner/">Capacity</a><a href="/admin/project-work-orders/">Work Orders</a></nav>
+<section class="card dd565-primary-card"><h2>Calendar window</h2><div class="button-row">
 <label>From <input type="datetime-local" id="calendarFrom"></label><label>To <input type="datetime-local" id="calendarTo"></label>
 <label>Resource <select id="calendarResourceFilter"><option value="">All tools and workstations</option></select></label>
 <label>Project <select id="calendarProjectFilter"><option value="">All projects</option></select></label>
 <button type="button" class="btn secondary" id="calendarRefresh">Refresh calendar</button></div>
 <div id="calendarRecords" role="status" aria-live="polite">Loading source calendar…</div></section>
-<section class="card"><h2>Add a verified calendar entry</h2>
+<section class="card dd565-compose-card"><h2>Add a verified calendar entry</h2>
 <div class="button-row"><label>Type <select id="calendarKind"><option value="project_booking">Project resource booking</option><option value="maintenance">Maintenance block</option><option value="resource_hold">Shared-resource hold</option><option value="project_deadline">Project deadline</option></select></label>
 <label>Resource <select id="calendarResource"><option value="">Choose active tool</option></select></label>
 <label>Project <select id="calendarProject"><option value="">Choose project</option></select></label>

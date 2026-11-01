@@ -52,5 +52,5 @@ test('Build 531 attaches an explicit owner trial report and manual Marketplace G
  assert.doesNotMatch(script,/method:'POST'|action:'create_|fetch\('https:\/\/graph\.facebook/);
  assert.match(localApi,/provider_called:false/);
  assert.match(localApi,/provider_publication_allowed:false/);
- assert.match(deploy,/"build":(?:5(?:3[123456789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564)/);
+ assert.match(deploy,/"build":(?:5(?:3[123456789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565)/);
 });
