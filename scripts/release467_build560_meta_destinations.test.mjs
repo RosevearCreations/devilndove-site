@@ -103,6 +103,6 @@ test('Build 560 keeps Meta evidence behind one owner click and does not ship Gra
   assert.match(api,/readCanonicalDistributionGallery/);
   assert.match(pure,/allowedImage/);
   assert.doesNotMatch(api,/\bfetch\(|method:\s*['"]POST|access_token_ciphertext|decryptOAuthSecret|\.run\(/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":56[123]/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":56[1234]/);
   assert.match(file('.github/workflows/current-application-quality.yml'),/release467_build560_meta_destinations\.test\.mjs/);
 });
