@@ -28,7 +28,7 @@ test('Build 540 shows one finished-product toolbar, real soap selectors and a cl
   const page=file('admin/product-editor/index.html'),css=file('css/admin-product-editor-540.css');
   for(const id of ['dd540SaveProduct','dd540Base','dd540Scent','dd540Oil','dd540InciPreview','dd540NetWeight','dd540Verified','dd540CheckDraft','dd540UpdateDraft'])assert.equal((page.match(new RegExp(`id="${id}"`,'g'))||[]).length,1);
   assert.match(page,/data-editor-tab="publishing"/);
-  assert.match(page,/Devil n Dove • Build (?:54[01234]|557|558|559|560|561)/);
+  assert.match(page,/Devil n Dove • Build (?:54[01234]|557|558|559|560|561|562)/);
   assert.match(css,/\.dd540-finished-product \.dd532-journey/);
   assert.match(css,/\.dd540-finished-product \.dd471-creation-flow/);
   assert.match(css,/\.dd540-finished-product #productResourcesAdminMount/);
@@ -47,5 +47,5 @@ test('Build 540 only writes reviewed local Product/soap records and keeps Etsy u
   assert.match(ui,/if\(form\.dataset\.productDirty==='1'\)/);
   assert.match(ui,/dd:save-succeeded/);
   assert.match(ui,/dd540UpdateDraft/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:54[0123456789]|550|551|552|553|554|555|556|557|558|559|560|561)/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:54[0123456789]|550|551|552|553|554|555|556|557|558|559|560|561|562)/);
 });

@@ -65,7 +65,7 @@ test('Build 558 server guards and owner UI never infer actual acceptance or repe
   assert.match(workflow,/listing_id:state.linked/);
   assert.match(page,/dd558OwnerReceipt/);
   assert.match(page,/dd558PhotoCount/);
-  assert.match(page,/Build 561/);
+  assert.match(page,/Build (?:561|562)/);
   assert.doesNotMatch(page,/Keep our existing Etsy draft #4603838854/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":561/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":56[12]/);
 });
