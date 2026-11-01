@@ -46,6 +46,6 @@ test('Build 551 presents honest owner evidence and bounded read-only incident ag
   assert.match(api,/open_24h/);assert.match(api,/open_7d/);assert.match(api,/open_without_review/);
   assert.match(api,/datetime\(created_at\)>=datetime\('now','-30 days'\)/);
   assert.doesNotMatch(api,/UPDATE runtime_incidents|DELETE FROM runtime_incidents|CREATE TABLE/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:551|552|553|554|555|556|557|558|559|560|561|562|563|564)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:551|552|553|554|555|556|557|558|559|560|561|562|563|564|565)/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build551_owner_review_aging\.test\.mjs/);
 });

@@ -210,8 +210,8 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 5844,
-        "stylesheets": 1,
+        "byte_length": 6364,
+        "stylesheets": 2,
         "scripts": 4,
         "forms": 0,
         "has_viewport": true
@@ -375,8 +375,8 @@
       "reference_screen": "Customer Requests",
       "reason": "Candidate for clearer intake and triage layout only after checking current owner-approved controls.",
       "evidence": {
-        "byte_length": 6200,
-        "stylesheets": 3,
+        "byte_length": 6907,
+        "stylesheets": 4,
         "scripts": 18,
         "forms": 0,
         "has_viewport": true
@@ -1590,8 +1590,8 @@
       "reference_screen": "Workstations & Capacity",
       "reason": "Capacity planner has existing scoped UI; verify whether it already matches the reference.",
       "evidence": {
-        "byte_length": 4781,
-        "stylesheets": 1,
+        "byte_length": 5272,
+        "stylesheets": 2,
         "scripts": 2,
         "forms": 0,
         "has_viewport": true
@@ -1680,8 +1680,8 @@
       "reference_screen": "Production Calendar",
       "reason": "Calendar and resource workspaces have existing maker revamps; compare visually before changing.",
       "evidence": {
-        "byte_length": 6956,
-        "stylesheets": 1,
+        "byte_length": 7484,
+        "stylesheets": 2,
         "scripts": 3,
         "forms": 0,
         "has_viewport": true
@@ -1695,8 +1695,8 @@
       "reference_screen": "Workstations & Capacity",
       "reason": "Work-order flow has prior production enhancements and must not be visually overwritten without review.",
       "evidence": {
-        "byte_length": 3851,
-        "stylesheets": 2,
+        "byte_length": 4393,
+        "stylesheets": 3,
         "scripts": 4,
         "forms": 0,
         "has_viewport": true

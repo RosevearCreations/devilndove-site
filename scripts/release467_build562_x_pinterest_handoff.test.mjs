@@ -44,7 +44,7 @@ test('Build 562 editor has lazy manual handoff, invalidation and production mark
   assert.match(ui,/if\(!socialLoaded\)void refreshSocial\(\)/);
   assert.match(ui,/invalidateSocial\('Product saved/);
   assert.match(read('admin/product-editor/index.html'),/Devil n Dove • Build 56[23]/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":56[234]/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":56[2345]/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build562_x_pinterest_handoff\.test\.mjs/);
   assert.doesNotMatch(api,/\bfetch\(|method:\s*['"]POST|decryptOAuthSecret|\.run\(/);
 });
