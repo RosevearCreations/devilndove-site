@@ -129,10 +129,13 @@ if(root){
   $('dd544Send').addEventListener('click',()=>void send());
   form?.addEventListener('input',controls);form?.addEventListener('change',controls);
   document.addEventListener('dd:save-succeeded',()=>{state.loaded=false;void load();});
-  document.addEventListener('dd:editor-tab-opened',event=>{if(event.detail?.tab==='publishing'&&!state.loaded)void load();});
-  // Build 557: do not wake Etsy's two live receipt reads merely because the
-  // owner opened Details. Destinations loads on explicit tab access; deep-links
-  // to that tab still load immediately. This also reduces 524 timeout pressure.
+  const ownerEtsyTools=$('dd559EtsyTools');
+  document.addEventListener('dd:editor-tab-opened',event=>{if(event.detail?.tab==='publishing'&&ownerEtsyTools?.open&&!state.loaded)void load();});
+  ownerEtsyTools?.addEventListener('toggle',()=>{if(ownerEtsyTools.open&&!state.loaded)void load();});
+  // Build 559: destination cards read only local status on tab open. The
+  // slower live Etsy receipts, photos and OAuth calls require opening the
+  // specific Etsy tools, avoiding simultaneous origin reads and 524s.
   controls();
-  if(productId&&new URLSearchParams(location.search).get('tab')==='publishing')void load();
+  const deep=new URLSearchParams(location.search);
+  if(productId&&deep.get('tab')==='publishing'&&deep.get('etsy')==='1'&&ownerEtsyTools){ownerEtsyTools.open=true;void load();}
 }

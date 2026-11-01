@@ -17,7 +17,7 @@ test('Build 557 replaces the seven-tab everyday editor with four explicit work a
   assert.match(page,/id="dd544PhotosList"/);
   assert.match(page,/id="dd527MoreTools"/);
   assert.match(page,/admin-product-editor-557\.css\?v=557/);
-  assert.match(page,/product-entry-557\.mjs\?v=557/);
+  assert.match(page,/product-entry-557\.mjs\?v=559/);
   assert.equal((page.match(/id="dd540SaveProduct"/g)||[]).length,1);
   assert.equal((page.match(/id="productEditorSave"/g)||[]).length,1);
   assert.doesNotMatch(page,/<script[^>]+src="https?:\/\//);
@@ -41,21 +41,22 @@ test('Build 557 groups Details fields without deleting legacy saved fields or ch
 
 test('Build 557 protects the existing Etsy draft and presents honest external destinations',()=>{
   const shell=source('public/js/product-entry-557.mjs');
+  const unified=source('public/js/product-destinations-559.mjs');
   const existing=source('public/js/product-editor-etsy-544.mjs');
-  assert.match(shell,/Update verified existing Etsy draft/);
-  assert.match(shell,/Verify existing draft first/);
-  assert.match(shell,/if\(id===54\)/);
-  assert.match(shell,/dd544ConnectStatus/);
-  assert.match(shell,/dd540UpdateDraft/);
-  assert.match(shell,/Facebook Marketplace/);
-  for(const provider of ['Instagram','TikTok','X','Pinterest'])assert.match(shell,new RegExp(provider));
-  assert.match(shell,/Automatic Marketplace posting is not connected/);
-  assert.match(shell,/Save Product first and wait for the confirmed saved version/);
+  assert.match(shell,/renderUnifiedDestinations559/);
+  assert.match(unified,/Review draft update/);
+  assert.match(unified,/No verified draft link/);
+  assert.match(unified,/dd559EtsyTools/);
+  assert.match(unified,/dd540UpdateDraft/);
+  assert.match(unified,/Facebook Marketplace/);
+  for(const provider of ['Instagram','TikTok','X','Pinterest'])assert.match(unified,new RegExp(provider));
+  assert.match(unified,/Marketplace API posting is not authorized/);
+  assert.match(unified,/Save Product first/);
   assert.match(existing,/confirm_unpublished_only:true/);
   assert.match(existing,/confirm_canada_only:true/);
   assert.match(existing,/saved_link_readback_confirmed/);
   assert.match(existing,/verified_remote_readback!==true/);
-  assert.match(existing,/get\('tab'\)==='publishing'\)void load\(\)/);
+  assert.match(existing,/ownerEtsyTools\?\.addEventListener\('toggle'/);
   assert.doesNotMatch(existing,/controls\(\);if\(productId\)void load\(\)/);
   assert.match(source('public/js/admin-product-etsy-package-v500.mjs'),/etsyAreaVisible557/);
   assert.doesNotMatch(shell,/\bapiFetch\b|fetch\(|\/api\/admin\/product-etsy/);
@@ -79,6 +80,6 @@ test('Build 557 modern design is scoped to the rebuilt Admin screen and release 
   assert.match(css,/:focus-visible/);
   assert.doesNotMatch(css,/(^|\n)(?:body|:root|\.container)\s*\{/);
   for(const path of ['admin/index.html','admin/products/index.html','admin/system-operations/index.html','css/styles.css'])assert.doesNotMatch(source(path),/admin-product-editor-557/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":558/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":559/);
   assert.match(source('.github/workflows/current-application-quality.yml'),/release467_build557_product_entry_rewrite\.test\.mjs/);
 });

@@ -40,7 +40,10 @@ if(form&&$('dd500Package')&&window.DDAuth?.apiFetch){
     $('dd514OwnerPanel').hidden=true;$('dd514GatewayPanel').hidden=true;
     $('dd515OwnerPanel').hidden=true;$('dd515GatewayPanel').hidden=true;}
   const ready=()=>id>0&&form.dataset.productAuthority==='ready'&&form.dataset.productDirty!=='1';
-  const etsyAreaVisible557=()=>['publishing','etsy'].some(name=>document.querySelector(`[data-editor-panel="${name}"]`)?.hidden===false);
+  // Build 559: summary cards are lightweight. Open the actual Etsy disclosure
+  // or advanced Etsy tab before hydrating the older provider package.
+  const etsyAreaVisible557=()=>document.querySelector('[data-editor-panel="etsy"]')?.hidden===false||
+    (document.querySelector('[data-editor-panel="publishing"]')?.hidden===false&&document.getElementById('dd559EtsyTools')?.open===true);
   const key=()=>crypto.randomUUID();
   const status=(message,hold=false)=>{const el=$('dd500Status');el.textContent=message;el.dataset.tone=hold?'hold':'ok';};
   const showReadRows520=(element,lines)=>{

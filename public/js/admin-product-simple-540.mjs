@@ -179,11 +179,13 @@ if(form&&save){
   });
   document.addEventListener('dd:etsy-existing-draft-linked',event=>{
     if(Number(event.detail?.product_id)!==productId)return;
-    publishingStatus.textContent='Existing draft connected. Loading our three Product photos now…';
-    byId('dd443EtsyImagesLoad')?.click();
+    publishingStatus.textContent='Existing draft connected. Use Refresh draft and photos in the Etsy tools for live verification.';
   });
   document.addEventListener('dd:editor-tab-opened',event=>{
-    if(event.detail?.tab==='publishing'&&productId===54)byId('dd443EtsyImagesLoad')?.click();
+    // Build 559: do not start the older, duplicate provider photo read merely
+    // by opening the summary dashboard. The owner opens Etsy tools explicitly.
+    if(event.detail?.tab==='publishing'&&productId===54)
+      publishingStatus.textContent='Open Existing Etsy draft tools only when we want the live photo and listing checks.';
   });
   if(byId('dd542OwnerVerify'))byId('dd542OwnerVerify').hidden=productId!==54;
   byId('dd542OwnerVerify')?.addEventListener('click',async()=>{
