@@ -82,7 +82,7 @@ test('Build 559 primary-D1 endpoint returns exactly claimed Etsy ID without a pr
 test('Build 559 editor is one admin-only destination dashboard and local evidence GET with manual handoff',()=>{
   const page=file('admin/product-editor/index.html'),ui=file('public/js/product-destinations-559.mjs');
   const api=file('functions/api/admin/product-destinations-559.js'),etsycli=file('public/js/product-editor-etsy-544.mjs');
-  assert.match(page,/Devil n Dove • Build (?:561|562)/);
+  assert.match(page,/Devil n Dove • Build (?:561|562|563)/);
   assert.match(page,/dd559EtsyTools/);
   assert.match(page,/admin-product-destinations-559\.css\?v=559/);
   assert.match(ui,/Where do we want to share this Product/);
@@ -99,6 +99,6 @@ test('Build 559 editor is one admin-only destination dashboard and local evidenc
   assert.doesNotMatch(api,/fetch\(|method:'POST'|access_token_ciphertext|decryptOAuthSecret/);
   assert.match(etsycli,/ownerEtsyTools\?\.addEventListener\('toggle'/);
   assert.doesNotMatch(etsycli,/get\('tab'\)==='publishing'\)void load\(\)/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":56[12]/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":56[123]/);
   assert.match(file('.github/workflows/current-application-quality.yml'),/release467_build559_unified_destinations\.test\.mjs/);
 });
