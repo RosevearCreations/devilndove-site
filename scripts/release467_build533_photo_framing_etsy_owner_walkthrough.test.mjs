@@ -25,7 +25,7 @@ test('Build 533 square selection respects entire source, edges and portrait/land
 test('Build 533 retains one canonical gallery, displays visual editor and explicit replacement authority',()=>{
  const html=read('admin/product-editor/index.html'),gallery=read('public/js/admin-product-distribution-v406.js');
  const editor=read('public/js/admin-product-photo-framing-533.mjs');
- assert.match(html,/Devil n Dove • Build (?:53[3456789]|540|541|542|543|544|545|546|547|548|549|550|551|552|553|554|555|557|558|559|560)/);
+ assert.match(html,/Devil n Dove • Build (?:53[3456789]|540|541|542|543|544|545|546|547|548|549|550|551|552|553|554|555|557|558|559|560|561)/);
  assert.match(html,/admin-product-photo-framing-533\.mjs\?v=533/);
  assert.match(html,/admin-product-editor-533\.css\?v=533/);
  assert.match(html,/id="dd533ExistingDraft"/);
@@ -49,5 +49,5 @@ test('Build 533 requires completed Etsy provider module initialization and exist
  assert.match(flow,/state\.lastListingId&&?\!?window\.confirm|!state\.lastListingId&&!window\.confirm/);
  assert.match(flow,/dd533ExistingDraft/);
  assert.match(flow,/dd486EtsyListingId/); // Build 537 uses the actual inspect/link workflow.
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:5(?:3[3456789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560)/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:5(?:3[3456789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560|561)/);
 });

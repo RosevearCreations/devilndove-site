@@ -58,6 +58,7 @@ export function renderUnifiedDestinations559({form,productId,caption}={}){
     <p id="dd559Summary" class="dd559-summary" role="status" aria-live="polite">Open Destinations to read the saved Product status. No channel has been contacted.</p>
     <div class="dd559-grid" id="dd559Grid" aria-label="Individual destination statuses"></div>
     <details class="dd560-meta" id="dd560Meta"><summary>Meta account &amp; approved photo checks <small>(Facebook Marketplace, Pages, Instagram)</small></summary><div class="dd560-meta-inner"><p class="small">Read saved connections and approved Product originals. This never contacts Meta or publishes a post.</p><button class="btn" id="dd560Refresh" type="button">Check Meta handoff readiness</button><p id="dd560Status" role="status" aria-live="polite">Choose Check to review current saved evidence.</p><div id="dd560Results"></div></div></details>
+    <details class="dd561-tiktok" id="dd561TikTok"><summary>TikTok draft handoff <small>(caption, approved original photos and account checks)</small></summary><div class="dd561-inner"><p class="small">Prepare a copy for TikTok. No draft or upload is created on TikTok from this screen.</p><button class="btn" id="dd561Refresh" type="button">Review TikTok draft content</button><p id="dd561Status" role="status" aria-live="polite">Choose Review to read the saved Product and its approved photographs.</p><div id="dd561Review" hidden><p id="dd561PhotoSummary" class="dd561-summary"></p><div id="dd561Warnings"></div><label for="dd561Caption">TikTok caption — editable local copy, not saved to TikTok or Product</label><textarea class="input" id="dd561Caption" rows="6" spellcheck="true"></textarea><div class="dd561-caption-actions"><span id="dd561CaptionCount"></span><button class="btn" id="dd561Copy" type="button">Copy TikTok caption</button></div><h3>Approved original photographs</h3><div id="dd561Photos"></div><h3>Account and API publishing checks</h3><ul id="dd561AccountChecks"></ul><p class="small">Finish a new post or save its draft in TikTok itself. App permissions are not proof of a completed upload or publication.</p><a class="btn" href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer">Open TikTok</a></div></div></details>
     <details class="dd559-more" id="dd559More"><summary>More destinations: Pinterest, YouTube</summary><div class="dd559-grid" id="dd559MoreGrid"></div></details>
     <div class="dd559-handoff" id="dd559Handoff" hidden><label for="dd559Caption">Prepared text — review before posting</label><textarea class="input" id="dd559Caption" rows="7" readonly></textarea><p class="small" id="dd559HandoffStatus" role="status" aria-live="polite"></p><button class="btn" id="dd559CopyAgain" type="button">Copy text</button></div>`;
   const heading=panel.querySelector('.dd540-section-head');if(heading)heading.after(mount);else panel.prepend(mount);
@@ -87,7 +88,8 @@ export function renderUnifiedDestinations559({form,productId,caption}={}){
       actions.append(makeButton('Review existing Etsy draft','etsy-review'));
       actions.append(makeButton('Review draft update','etsy-update',{disabled:!saved()||!row.draft_update_allowed,primary:true}));
     }else{
-      actions.append(makeButton('Prepare manual handoff','copy:'+row.key,{disabled:!saved()}));
+      actions.append(row.key==='tiktok'?makeButton('Prepare TikTok draft handoff','tiktok-review',{disabled:!saved()}):
+        makeButton('Prepare manual handoff','copy:'+row.key,{disabled:!saved()}));
       if(['facebook_marketplace','facebook','instagram'].includes(row.key))actions.append(makeButton('Check Meta readiness','meta-review'));
       actions.append(makeButton('View Product photos','view-photos'));
       const link=document.createElement('a');link.className='btn';link.href=row.url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=`Open ${row.name}`;
@@ -161,6 +163,54 @@ export function renderUnifiedDestinations559({form,productId,caption}={}){
     }catch(error){metaLoaded=false;byId('dd560Results').replaceChildren();metaStatus(`Meta readiness unavailable: ${error.message}. No provider contacted or updated.`);}
     finally{metaLoading=false;byId('dd560Refresh').disabled=false;}
   }
+  let tiktokLoading=false,tiktokLoaded=false;
+  const tiktokStatus=message=>{byId('dd561Status').textContent=message;};
+  const captionArea=byId('dd561Caption'),copyTikTok=byId('dd561Copy');
+  const updateCaptionCount=()=>{
+    const count=captionArea.value.length;
+    const valid=count>0&&count<=4000;
+    byId('dd561CaptionCount').textContent=`${count} / 4,000 UTF-16 characters${valid?'':' · shorten or enter a caption before copying'}`;
+    copyTikTok.disabled=!valid;
+  };
+  captionArea.addEventListener('input',event=>{event.stopPropagation();updateCaptionCount();});
+  captionArea.addEventListener('change',event=>event.stopPropagation());
+  function invalidateTikTok(message){
+    tiktokLoaded=false;byId('dd561Review').hidden=true;captionArea.value='';
+    tiktokStatus(message);
+  }
+  function drawTikTok(data){
+    byId('dd561Review').hidden=false;
+    byId('dd561PhotoSummary').textContent=`${data.approved_photo_count} of ${data.reviewed_photo_count} original Product photos cleared. ${data.manual_handoff_ready?'Manual draft handoff ready.':'Review the items below before preparing a draft.'} No TikTok draft exists yet.`;
+    const warnings=byId('dd561Warnings');warnings.replaceChildren();
+    if(data.manual_handoff_warnings?.length){const list=document.createElement('ul');list.className='dd561-warnings';
+      for(const issue of data.manual_handoff_warnings){const li=document.createElement('li');li.textContent=issue;list.append(li);}warnings.append(list);}
+    captionArea.value=data.caption||'';updateCaptionCount();
+    const originals=byId('dd561Photos');originals.replaceChildren();
+    for(const photo of data.photos||[]){
+      const item=document.createElement('div');item.className='dd561-photo';
+      const link=document.createElement('a');link.href=photo.image_url;link.target='_blank';link.rel='noopener noreferrer';
+      link.textContent=`Open original #${photo.product_image_id} (${photo.width_px} × ${photo.height_px})`;
+      const alt=document.createElement('small');alt.textContent=photo.alt_text;
+      item.append(link,alt);originals.append(item);
+    }
+    if(!data.photos?.length){const note=document.createElement('p');note.textContent='No approved originals available. Review the shared Media tab; no unapproved photo is offered.';originals.append(note);}
+    const checks=byId('dd561AccountChecks');checks.replaceChildren();
+    for(const issue of data.account_checks||[]){const li=document.createElement('li');li.textContent=issue;checks.append(li);}
+  }
+  async function refreshTikTok(){
+    if(tiktokLoading)return;
+    if(!saved()){invalidateTikTok('Save the latest Product first. Nothing has been sent to TikTok.');return;}
+    tiktokLoading=true;byId('dd561Refresh').disabled=true;tiktokStatus('Reading saved Product, approved originals and local TikTok permissions…');
+    try{
+      if(!window.DDAuth?.apiFetch)throw Error('Admin session unavailable.');
+      const response=await window.DDAuth.apiFetch(`/api/admin/product-tiktok-handoff-561?product_id=${productId}`,{method:'GET',cache:'no-store'});
+      const data=await response.json();
+      if(!response.ok||data?.ok!==true||Number(data.product_id)!==productId)throw Error(data?.error||'TikTok draft evidence unavailable.');
+      drawTikTok(data);tiktokLoaded=true;
+      tiktokStatus('Local TikTok handoff prepared for review. Use Copy caption and the original photo links, then finish the draft on TikTok. Nothing uploaded.');
+    }catch(error){invalidateTikTok(`TikTok handoff unavailable: ${error.message}. Nothing was uploaded or published.`);}
+    finally{tiktokLoading=false;byId('dd561Refresh').disabled=false;}
+  }
   async function copyText(key){
     if(!saved()){setStatus('Save Product first. No manual handoff prepared.');return;}
     try{
@@ -188,9 +238,21 @@ export function renderUnifiedDestinations559({form,productId,caption}={}){
       const details=byId('dd560Meta');details.open=true;details.scrollIntoView({behavior:'smooth',block:'nearest'});
       if(!metaLoaded)void refreshMeta();return;
     }
+    if(action==='tiktok-review'){
+      const details=byId('dd561TikTok');details.open=true;details.scrollIntoView({behavior:'smooth',block:'nearest'});
+      if(!tiktokLoaded)void refreshTikTok();return;
+    }
     if(action.startsWith('copy:'))void copyText(action.slice(5));
   });
   byId('dd560Refresh').addEventListener('click',()=>void refreshMeta());
+  byId('dd561Refresh').addEventListener('click',()=>void refreshTikTok());
+  copyTikTok.addEventListener('click',()=>{
+    updateCaptionCount();if(copyTikTok.disabled||!tiktokLoaded)return;
+    if(navigator.clipboard?.writeText){void navigator.clipboard.writeText(captionArea.value)
+      .then(()=>tiktokStatus('TikTok caption copied. Open TikTok to add approved originals and save the draft there; nothing was published.'))
+      .catch(()=>{captionArea.focus();captionArea.select();tiktokStatus('Select and copy the caption manually. Nothing was published.');});}
+    else{captionArea.focus();captionArea.select();tiktokStatus('Caption selected; copy it manually. Nothing was published.');}
+  });
   byId('dd559CopyAgain').addEventListener('click',()=>{
     const text=byId('dd559Caption').value;if(!text)return;
     if(navigator.clipboard?.writeText)void navigator.clipboard.writeText(text).then(()=>{byId('dd559HandoffStatus').textContent='Text copied. Nothing was posted.';}).catch(()=>{byId('dd559HandoffStatus').textContent='Select and copy the prepared text manually.';});
@@ -201,11 +263,13 @@ export function renderUnifiedDestinations559({form,productId,caption}={}){
   document.addEventListener('dd:editor-tab-opened',maybeLoad);
   document.addEventListener('dd:product-loaded',()=>{render();if(!panel.hidden&&!loaded)void refresh();});
   document.addEventListener('dd:save-succeeded',event=>{if(Number(event.detail?.product_id)===productId){
-    loaded=false;metaLoaded=false;byId('dd560Results').replaceChildren();metaStatus('Product changed. Check current Meta and photo evidence again.');void refresh();
+    loaded=false;metaLoaded=false;byId('dd560Results').replaceChildren();metaStatus('Product changed. Check current Meta and photo evidence again.');
+    invalidateTikTok('Product saved. Review the new TikTok draft evidence before copying.');void refresh();
   }});
   document.addEventListener('dd:etsy-existing-draft-linked',()=>{loaded=false;void refresh();});
   const changed=()=>{
     if(metaLoaded){metaLoaded=false;byId('dd560Results').replaceChildren();metaStatus('Product fields changed. Save first, then check Meta and photo evidence again.');}
+    if(tiktokLoaded)invalidateTikTok('Product fields changed. Save first, then review the TikTok draft again.');
     render();
   };
   form.addEventListener('input',changed);form.addEventListener('change',changed);

@@ -33,5 +33,5 @@ test('Build 547 uses authenticated owner-scoped existing D1 saved views and read
   for(const id of ['dd547SaveChecks','dd547Reload','dd547History','dd547Priorities','dd547SaveView','dd547Views'])assert.match(html,new RegExp(`id="${id}"`));
   assert.match(file('public/js/admin-system-health-546.js'),/dd:system-health-sampled/);
   assert.match(file('public/js/admin-system-health-547.js'),/document\.addEventListener\('dd:system-health-sampled'/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:54[789]|550|551|552|553|554|555|556|557|558|559|560)/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:54[789]|550|551|552|553|554|555|556|557|558|559|560|561)/);
 });
