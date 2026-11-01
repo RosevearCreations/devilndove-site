@@ -91,7 +91,7 @@ test('Build 560 keeps Meta evidence behind one owner click and does not ship Gra
   const page=file('admin/product-editor/index.html'),ui=file('public/js/product-destinations-559.mjs');
   const api=file('functions/api/admin/product-meta-readiness-560.js');
   const pure=file('functions/api/_lib/productMetaReadiness560.mjs');
-  assert.match(page,/Devil n Dove • Build 561/);
+  assert.match(page,/Devil n Dove • Build (?:561|562)/);
   assert.match(page,/admin-product-meta-560\.css\?v=560/);
   assert.match(ui,/id="dd560Meta"/);
   assert.match(ui,/meta-review/);
@@ -103,6 +103,6 @@ test('Build 560 keeps Meta evidence behind one owner click and does not ship Gra
   assert.match(api,/readCanonicalDistributionGallery/);
   assert.match(pure,/allowedImage/);
   assert.doesNotMatch(api,/\bfetch\(|method:\s*['"]POST|access_token_ciphertext|decryptOAuthSecret|\.run\(/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":561/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":56[12]/);
   assert.match(file('.github/workflows/current-application-quality.yml'),/release467_build560_meta_destinations\.test\.mjs/);
 });
