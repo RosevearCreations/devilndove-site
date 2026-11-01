@@ -35,6 +35,6 @@ test('Build 550 offers recoverable owner-scoped receipt selection and read-only 
   assert.match(api,/receipt_ms/);
   assert.match(api,/incident_timeline/);
   assert.doesNotMatch(api,/DELETE FROM|CREATE TABLE/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565|566)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565|566|567)/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build550_receipt_retention\.test\.mjs/);
 });

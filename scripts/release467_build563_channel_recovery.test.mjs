@@ -60,10 +60,10 @@ test('Build 563 admin GET is auth gated, bounded, and SELECT-only without provid
 test('Build 563 UI has lazy readback, save invalidation, no provider update, and exact release marker',()=>{
   const page=read('admin/product-editor/index.html'),ui=read('public/js/product-destinations-559.mjs');
   const api=read('functions/api/admin/product-channel-recovery-563.js');
-  assert.match(page,/Devil n Dove • Build 563/);assert.match(page,/admin-product-recovery-563\.css\?v=563/);
+  assert.match(page,/Devil n Dove • Build (?:563|567)/);assert.match(page,/admin-product-recovery-563\.css\?v=563/);
   assert.match(ui,/id="dd563Recovery"/);assert.match(ui,/product-channel-recovery-563\?product_id=/);
   assert.match(ui,/invalidateRecovery\('Product saved/);assert.match(ui,/if\(!recoveryLoaded\)void refreshRecovery\(\)/);
   assert.doesNotMatch(api,/\bfetch\(|method:\s*['"]POST|\.run\(|decryptOAuthSecret/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:563|564|565|566)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:563|564|565|566|567)/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build563_channel_recovery\.test\.mjs/);
 });

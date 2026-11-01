@@ -89,7 +89,7 @@ test('Build 553 clarifies owner evidence file verification and preserves product
   assert.match(html,/admin-system-health-550\.js\?v=553/);
   assert.match(html,/admin-system-health-551\.js\?v=(?:553|554)/);
   assert.match(html,/not independently verified second-device activity/);
-  assert.match(deploy,/"build":(?:553|554|555|556|557|558|559|560|561|562|563|564|565|566)/);
+  assert.match(deploy,/"build":(?:553|554|555|556|557|558|559|560|561|562|563|564|565|566|567)/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build553_export_preset_usability\.test\.mjs/);
   for(const file of ['public/js/admin-system-health-550.js','public/js/admin-system-health-551.js']){
     assert.doesNotMatch(read(file),/localStorage|sessionStorage|DELETE FROM|UPDATE runtime_incidents/);

@@ -80,6 +80,7 @@ if(typeof document!=='undefined'){
     const deepFocus=new URLSearchParams(location.search).get('focus');
     if(deepFocus){const target=form.elements.namedItem(deepFocus);if(target?.closest('details'))target.closest('details').open=true;}
     const tabs=[...document.querySelectorAll('.dd557-steps [data-editor-tab]')];
+    for(const tab of tabs)tab.tabIndex=tab.getAttribute('aria-selected')==='true'?0:-1;
     for(const tab of tabs)tab.addEventListener('keydown',event=>{
       const current=tabs.indexOf(tab);
       const destination=event.key==='ArrowRight'?(current+1)%tabs.length:
@@ -95,6 +96,7 @@ if(typeof document!=='undefined'){
       for(const button of document.querySelectorAll('.dd557-steps [data-editor-tab]')){
         const selected=button.dataset.editorTab===current;
         button.setAttribute('aria-selected',selected?'true':'false');
+        button.tabIndex=selected?0:-1;
       }
     });
     const note=byId('dd557NotSoap')||document.createElement('p');
