@@ -99,6 +99,6 @@ test('Build 559 editor is one admin-only destination dashboard and local evidenc
   assert.doesNotMatch(api,/fetch\(|method:'POST'|access_token_ciphertext|decryptOAuthSecret/);
   assert.match(etsycli,/ownerEtsyTools\?\.addEventListener\('toggle'/);
   assert.doesNotMatch(etsycli,/get\('tab'\)==='publishing'\)void load\(\)/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":56[12345]/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":56[123456]/);
   assert.match(file('.github/workflows/current-application-quality.yml'),/release467_build559_unified_destinations\.test\.mjs/);
 });

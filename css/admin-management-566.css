@@ -1,0 +1,264 @@
+/* Release 467 • Build 566 — scoped Management & Systems presentation.
+   This stylesheet contains no workflow, authorization or data-state logic. */
+body[data-dd-management-v566] {
+  --dd566-copper: #ffb87a;
+  --dd566-ice: #d6eafa;
+  --dd566-line: rgba(169, 188, 221, .22);
+  --dd566-panel: linear-gradient(145deg, rgba(31, 39, 63, .95), rgba(16, 22, 36, .97));
+  background:
+    radial-gradient(ellipse at 80% 0%, rgba(100, 70, 141, .17), transparent 45%),
+    radial-gradient(ellipse at 12% 34%, rgba(32, 101, 128, .12), transparent 52%),
+    #0b0d10;
+}
+
+body[data-dd-management-v566] .admin-shell {
+  max-width: 1260px;
+}
+
+body[data-dd-management-v566] .dd566-management-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(210px, .75fr);
+  align-items: center;
+  gap: clamp(14px, 3vw, 36px);
+  margin: 14px 0 18px;
+  padding: clamp(22px, 4.5vw, 44px);
+  border: 1px solid rgba(255, 184, 122, .30);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 97% 0%, rgba(245, 145, 90, .16), transparent 47%),
+    linear-gradient(120deg, #1b2438, #121824 68%, #191625);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, .18);
+}
+
+body[data-dd-management-v566] .dd566-eyebrow {
+  color: var(--dd566-copper);
+  font-size: .75rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  line-height: 1.45;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+
+body[data-dd-management-v566] .dd566-management-hero h1,
+body[data-dd-management-v566] .dd566-continuity-hero h1 {
+  font-size: clamp(2rem, 4.5vw, 3.45rem);
+  line-height: 1.06;
+  letter-spacing: -.035em;
+  max-width: 22ch;
+  margin: 0 0 16px;
+}
+
+body[data-dd-management-v566] .dd566-management-hero p:not(.dd566-eyebrow) {
+  color: var(--dd566-ice);
+  line-height: 1.65;
+}
+
+body[data-dd-management-v566] .dd566-hero-aside {
+  display: grid;
+  gap: 10px;
+  padding: 18px 20px;
+  background: rgba(10, 18, 32, .66);
+  border: 1px solid var(--dd566-line);
+  border-left: 3px solid var(--dd566-copper);
+  border-radius: 15px;
+  line-height: 1.55;
+}
+
+body[data-dd-management-v566] .dd566-hero-aside strong {
+  color: #fff4e7;
+  font-size: .95rem;
+}
+
+body[data-dd-management-v566] .dd566-hero-aside span {
+  color: #c9d5e4;
+  font-size: .86rem;
+}
+
+body[data-dd-management-v566] .dd566-management-nav {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 18px;
+}
+
+body[data-dd-management-v566] .dd566-management-nav a {
+  display: flex;
+  min-height: 48px;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 14px;
+  border: 1px solid var(--dd566-line);
+  border-radius: 13px;
+  background: rgba(25, 32, 47, .92);
+  color: #dce5f2;
+  text-align: center;
+  font-size: .9rem;
+  font-weight: 700;
+  transition: background .14s ease, border-color .14s ease, transform .14s ease;
+}
+
+body[data-dd-management-v566] .dd566-management-nav a:hover {
+  background: #25354a;
+  border-color: rgba(255, 184, 122, .55);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+body[data-dd-management-v566] .dd566-management-nav a[aria-current="page"] {
+  color: #23160e;
+  background: linear-gradient(110deg, #ffc798, #e8a16d);
+  border-color: #ffcfab;
+}
+
+body[data-dd-management-v566] .dd566-focus-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 20px;
+}
+
+body[data-dd-management-v566] .dd566-focus-links a {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid rgba(133, 197, 231, .33);
+  border-radius: 999px;
+  background: rgba(20, 56, 78, .38);
+  color: #cfeeff;
+  font-size: .84rem;
+  font-weight: 650;
+}
+
+body[data-dd-management-v566] .dd566-focus-links a:hover {
+  text-decoration: none;
+  background: rgba(38, 99, 125, .55);
+}
+
+body[data-dd-management-v566] :is(.card, .admin-panel) {
+  border-color: var(--dd566-line);
+}
+
+body[data-dd-management-v566] .dd566-summary {
+  padding: clamp(18px, 3vw, 28px);
+  background: var(--dd566-panel);
+  border: 1px solid rgba(255, 184, 122, .25);
+  border-radius: 22px;
+}
+
+body[data-dd-management-v566] .dd566-summary .admin-summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(165px, 100%), 1fr));
+  gap: 12px;
+}
+
+body[data-dd-management-v566] .dd566-summary .admin-stat {
+  padding: 18px;
+  min-height: 112px;
+  border: 1px solid rgba(177, 195, 225, .22);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(44, 61, 84, .7), rgba(20, 30, 46, .7));
+}
+
+body[data-dd-management-v566] .dd566-summary .admin-stat-label {
+  color: #c0ccdb;
+  letter-spacing: .095em;
+  line-height: 1.45;
+}
+
+body[data-dd-management-v566] .dd566-summary .admin-stat-value {
+  color: #fff0de;
+  font-size: clamp(1.6rem, 2.5vw, 2.1rem);
+  font-variant-numeric: tabular-nums;
+}
+
+body[data-dd-management-v566] .dd566-related {
+  margin: 8px 0 18px;
+  background: rgba(18, 24, 36, .92);
+}
+
+body[data-dd-management-v566] .dd566-related summary {
+  padding: 4px 0;
+  cursor: pointer;
+  font-weight: 700;
+  color: #f4dfc6;
+}
+
+body[data-dd-management-v566] .dd566-related .admin-department-links {
+  margin: 14px 0 0;
+  max-height: none;
+  overflow: visible;
+}
+
+body[data-dd-management-v566] .dd566-related .admin-department-links a {
+  min-height: 40px;
+  white-space: normal;
+}
+
+body[data-dd-management-v566] .dd566-continuity-hero {
+  border: 1px solid rgba(255, 184, 122, .25);
+  border-radius: 22px;
+  background: linear-gradient(115deg, rgba(36, 46, 70, .55), rgba(23, 24, 38, .75));
+  padding: clamp(18px, 3vw, 30px);
+  margin-bottom: 18px;
+}
+
+body[data-dd-management-v566] .dd566-continuity-hero .visual-placeholder-card {
+  min-width: 0;
+}
+
+body[data-dd-management-v566] :is(.dd566-management-nav, .dd566-focus-links) a:focus-visible,
+body[data-dd-management-v566] .dd566-related summary:focus-visible {
+  outline: 3px solid #fbd4a3;
+  outline-offset: 3px;
+}
+
+body[data-dd-management-v566] :is(.card, .admin-panel) table {
+  max-width: 100%;
+}
+
+body[data-dd-management-v566] [id$="Mount"],
+body[data-dd-management-v566] [id$="Mount"] .card {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+body[data-dd-management-v566] :is(.dd566-management-nav, .dd566-focus-links) + [id] {
+  scroll-margin-top: 16px;
+}
+
+@media (max-width: 960px) {
+  body[data-dd-management-v566] .dd566-management-nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  body[data-dd-management-v566] .dd566-management-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  body[data-dd-management-v566] .dd566-management-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  body[data-dd-management-v566] .dd566-management-nav a {
+    font-size: .82rem;
+    padding: 9px 6px;
+  }
+  body[data-dd-management-v566] .dd566-management-hero {
+    border-radius: 18px;
+    padding: 22px 18px;
+  }
+  body[data-dd-management-v566] .dd566-focus-links a {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-dd-management-v566] .dd566-management-nav a {
+    transition: none;
+  }
+  body[data-dd-management-v566] .dd566-management-nav a:hover {
+    transform: none;
+  }
+}
