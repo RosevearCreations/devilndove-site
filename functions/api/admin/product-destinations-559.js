@@ -22,7 +22,7 @@ export async function onRequestGet(c){
       db.prepare('SELECT product_id,name,sku,status FROM products WHERE product_id=? LIMIT 1').bind(Number(id)).first(),
       db.prepare("SELECT id,product_id,external_reference,status FROM marketplace_syndication_drafts WHERE channel_key='etsy' AND product_id=? AND external_reference IS NOT NULL ORDER BY id DESC LIMIT 3")
         .bind(Number(id)).all(),
-      db.prepare("SELECT provider_key,connection_status,access_expires_at FROM oauth_provider_connections WHERE provider_key IN ('etsy','facebook','instagram','tiktok','x','pinterest','youtube') ORDER BY provider_key LIMIT 10").all(),
+      db.prepare("SELECT provider_key,connection_status,access_expires_at FROM oauth_provider_connections WHERE provider_key IN ('etsy','meta','facebook','instagram','tiktok','x','pinterest','youtube') ORDER BY provider_key LIMIT 10").all(),
       db.prepare("SELECT details_json FROM admin_action_audit WHERE action_type='product_channel_intent_405' AND target_type='product' AND target_key=? ORDER BY admin_action_audit_id DESC LIMIT 1")
         .bind(String(id)).first()
     ]);

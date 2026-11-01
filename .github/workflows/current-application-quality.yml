@@ -504,6 +504,13 @@ jobs:
           node --check public/js/product-editor-etsy-544.mjs
           node --test scripts/release467_build559_unified_destinations.test.mjs
 
+      - name: Build 560 Meta Marketplace, Page and Instagram local readiness with verified manual originals
+        run: |
+          node --check functions/api/_lib/productMetaReadiness560.mjs
+          node --check functions/api/admin/product-meta-readiness-560.js
+          node --check public/js/product-destinations-559.mjs
+          node --test scripts/release467_build560_meta_destinations.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
