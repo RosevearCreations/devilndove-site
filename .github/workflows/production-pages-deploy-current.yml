@@ -293,7 +293,7 @@ jobs:
           ! grep -q 'devilndove-toolshed-images-dev' wrangler.toml
           ! grep -q 'devilndove-caip-media-dev' wrangler.toml
           # Build 453: immutable public marker, generated from this exact approved main run.
-          printf '{"source_sha":"%s","branch":"main","workflow_run_id":"%s","build":563}' "${GITHUB_SHA}" "${GITHUB_RUN_ID}" > release-version.json
+          printf '{"source_sha":"%s","branch":"main","workflow_run_id":"%s","build":564}' "${GITHUB_SHA}" "${GITHUB_RUN_ID}" > release-version.json
           python -m json.tool release-version.json > /dev/null
           npx --yes wrangler@4.128.0 pages deploy . \
             --project-name=devilndove-site \

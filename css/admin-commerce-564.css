@@ -1,0 +1,314 @@
+/* Build 564 — opt-in Commerce Admin presentation only.
+   Existing Orders, Fulfilment, Inventory and Products authorities are unchanged. */
+body[data-dd-commerce-v564] {
+  --bg: #090d1a;
+  --card: #141b2f;
+  --text: #f6f2eb;
+  --muted: #c4cad7;
+  --border: #35415c;
+  --ice: #d9e6ff;
+  --gold: #f4c57b;
+  --dd564-surface: #19233b;
+  --dd564-raised: #202d49;
+  --dd564-line: #42516d;
+  --dd564-copper: #f4b57b;
+  background:
+    radial-gradient(ellipse 75% 380px at 88% 0, rgba(91, 57, 136, .24), transparent 70%),
+    radial-gradient(ellipse 80% 500px at 10% 16%, rgba(31, 69, 113, .2), transparent 75%),
+    #090d1a;
+  color: var(--text);
+}
+body[data-dd-commerce-v564] .container.admin-shell {
+  max-width: 1440px;
+  padding-inline: clamp(16px, 3vw, 42px);
+  padding-bottom: 60px;
+}
+body[data-dd-commerce-v564] .nav {
+  border-bottom: 1px solid var(--dd564-line);
+  padding-block: 14px 18px;
+  margin-bottom: 20px;
+}
+body[data-dd-commerce-v564] .nav .links {gap: 8px 17px;}
+body[data-dd-commerce-v564] .nav .links a {font-weight: 650;}
+body[data-dd-commerce-v564] .nav a:focus-visible,
+body[data-dd-commerce-v564] .btn:focus-visible,
+body[data-dd-commerce-v564] .dd564-commerce-nav a:focus-visible,
+body[data-dd-commerce-v564] summary:focus-visible,
+body[data-dd-commerce-v564] button:focus-visible,
+body[data-dd-commerce-v564] input:focus-visible,
+body[data-dd-commerce-v564] select:focus-visible,
+body[data-dd-commerce-v564] textarea:focus-visible {
+  outline: 3px solid #f4c57b;
+  outline-offset: 3px;
+}
+body[data-dd-commerce-v564] .card {
+  background: linear-gradient(155deg, #19243b, #131a2d);
+  border-color: var(--dd564-line);
+  box-shadow: 0 12px 36px rgba(1, 4, 12, .24);
+}
+body[data-dd-commerce-v564] .btn {
+  border-radius: 11px;
+  border-color: #61718d;
+  background: #25334e;
+  color: #f6f2eb;
+  font-weight: 650;
+}
+body[data-dd-commerce-v564] .btn:hover {background: #334463;}
+body[data-dd-commerce-v564] .btn.primary {
+  background: #63402d;
+  border-color: #cb9161;
+  color: #fff1db;
+}
+body[data-dd-commerce-v564] .btn.primary:hover {background: #754b32;}
+body[data-dd-commerce-v564] input,
+body[data-dd-commerce-v564] select,
+body[data-dd-commerce-v564] textarea {
+  max-width: 100%;
+  background: #0e1728;
+  color: #f6f2eb;
+  border-color: #697894;
+  border-radius: 10px;
+}
+body[data-dd-commerce-v564] input::placeholder,
+body[data-dd-commerce-v564] textarea::placeholder {color: #aeb9ce;}
+body[data-dd-commerce-v564] table {max-width: 100%;}
+body[data-dd-commerce-v564] th {color: #f6d5a6;}
+body[data-dd-commerce-v564] .hero.dd564-commerce-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(230px, .8fr);
+  align-items: center;
+  gap: clamp(20px, 3vw, 42px);
+  margin: 14px 0 18px;
+  padding: clamp(24px, 3.4vw, 44px);
+  background: linear-gradient(116deg, #1b2343 0%, #24203d 56%, #322438 100%);
+  border: 1px solid #65516b;
+  border-top: 3px solid #e0a86d;
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(4, 4, 16, .28);
+}
+body[data-dd-commerce-v564] .dd564-commerce-hero .eyebrow,
+body[data-dd-commerce-v564] .dd564-commerce-hero .inventory-operations-eyebrow {
+  color: #f6cc92;
+  font-size: .78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .13em;
+  margin: 0 0 13px;
+}
+body[data-dd-commerce-v564] .dd564-commerce-hero h1 {
+  font-size: clamp(2rem, 3.2vw, 3.2rem);
+  line-height: 1.12;
+  letter-spacing: -.035em;
+  margin-bottom: 14px;
+  max-width: 17ch;
+}
+body[data-dd-commerce-v564] .dd564-commerce-hero p:not(.eyebrow):not(.inventory-operations-eyebrow) {
+  color: #e0ddeb;
+  line-height: 1.65;
+  max-width: 68ch;
+}
+body[data-dd-commerce-v564] .dd564-hero-aside {
+  border: 1px solid rgba(244, 197, 123, .4);
+  border-radius: 17px;
+  background: rgba(8, 12, 27, .42);
+  padding: 20px;
+  display: grid;
+  gap: 11px;
+  min-width: 0;
+}
+body[data-dd-commerce-v564] .dd564-hero-aside strong {color: #f5c993;letter-spacing: .01em;}
+body[data-dd-commerce-v564] .dd564-hero-aside span {color: #e5deea;line-height: 1.55;font-size: .89rem;}
+body[data-dd-commerce-v564] .dd564-commerce-nav {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  background: #101829;
+  border: 1px solid var(--dd564-line);
+  border-radius: 17px;
+  padding: 8px;
+  margin-bottom: 18px;
+}
+body[data-dd-commerce-v564] .dd564-commerce-nav a {
+  border-radius: 11px;
+  padding: 13px 14px;
+  color: #d9e0f0;
+  text-align: center;
+  font-weight: 750;
+  border: 1px solid transparent;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+body[data-dd-commerce-v564] .dd564-commerce-nav a:hover {text-decoration: none;background: #26344c;}
+body[data-dd-commerce-v564] .dd564-commerce-nav a[aria-current="page"] {
+  background: linear-gradient(110deg, #6c4233, #49384c);
+  border-color: #d2a076;
+  color: #fff0d8;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .09);
+}
+body[data-dd-commerce-v564] .dd564-help {
+  margin: 14px 0 20px;
+  padding: 0;
+  background: #121d32;
+  box-shadow: none;
+}
+body[data-dd-commerce-v564] .dd564-help summary {
+  list-style-position: inside;
+  padding: 14px 18px;
+  cursor: pointer;
+  color: #f2d2a0;
+  font-weight: 700;
+}
+body[data-dd-commerce-v564] .dd564-help summary span {margin-right: 7px;font-size: 1.1rem;}
+body[data-dd-commerce-v564] .dd564-help p {
+  padding: 0 18px 17px;
+  margin: 0;
+  color: #cbd4e4;
+  line-height: 1.65;
+}
+body[data-dd-commerce-v564] .dd564-related {margin-top: 23px;}
+body[data-dd-commerce-v564] .dd564-related h2 {margin-top: 0;}
+body[data-dd-commerce-v564] .admin-department-links {display: flex;flex-wrap: wrap;gap: 8px;}
+body[data-dd-commerce-v564] .admin-department-links .btn {font-size: .82rem;padding: 7px 10px;}
+
+/* Existing Orders Build 150 renderer: layout and interaction states only. */
+body[data-dd-commerce-v564="orders"] .b150-orders {margin-top: 22px;}
+body[data-dd-commerce-v564="orders"] .b150-toolbar,
+body[data-dd-commerce-v564="orders"] .b150-detail {min-width: 0;}
+body[data-dd-commerce-v564="orders"] .b150-toolbar label {color: #d2d9e7;font-weight: 700;font-size: .84rem;}
+body[data-dd-commerce-v564="orders"] .b150-toolbar input,
+body[data-dd-commerce-v564="orders"] .b150-toolbar select {min-height: 44px;}
+body[data-dd-commerce-v564="orders"] .b150-summary {gap: 12px;margin: 20px 0;}
+body[data-dd-commerce-v564="orders"] .b150-kpi {
+  background: linear-gradient(145deg, #253151, #18243b);
+  border-color: #4a5a78;
+  border-radius: 16px;
+  padding: 17px;
+  min-width: 0;
+}
+body[data-dd-commerce-v564="orders"] .b150-kpi strong {font-size: clamp(1.35rem, 2vw, 1.9rem);color: #f6c98a;line-height: 1.4;}
+body[data-dd-commerce-v564="orders"] .b150-layout {gap: 18px;}
+body[data-dd-commerce-v564="orders"] .b150-list {
+  border-color: #4b5a74;
+  background: #111b2e;
+  border-radius: 17px;
+}
+body[data-dd-commerce-v564="orders"] .b150-order {
+  padding: 17px;
+  border-color: #34415b;
+  transition: background-color .15s ease;
+}
+body[data-dd-commerce-v564="orders"] .b150-order:hover,
+body[data-dd-commerce-v564="orders"] .b150-order:focus-visible {background: #273651;}
+body[data-dd-commerce-v564="orders"] .b150-order[aria-current="true"] {
+  background: #333652;
+  box-shadow: inset 4px 0 #f4c57b;
+}
+body[data-dd-commerce-v564="orders"] .b150-detail .card,
+body[data-dd-commerce-v564="orders"] .b150-panel {border-radius: 16px;border-color: #475671;}
+body[data-dd-commerce-v564="orders"] .b150-panel {background: #17243a;padding: 17px;min-width: 0;}
+body[data-dd-commerce-v564="orders"] .b150-pill {border-color: #8d9bb6;color: #f0dfc8;}
+body[data-dd-commerce-v564="orders"] .b150-item,
+body[data-dd-commerce-v564="orders"] .b150-event {border-color: #3c4a64;}
+body[data-dd-commerce-v564="orders"] .b150-muted {opacity: 1;color: #bcc8da;}
+body[data-dd-commerce-v564="orders"] .b150-offline {border-color: #f4c57b;background: rgba(169, 107, 42, .11);}
+
+/* Existing Fulfilment Build 82 and read-only Build 18 queues. */
+body[data-dd-commerce-v564="fulfillment"] .fc-stats,
+body[data-dd-commerce-v564="fulfillment"] .ofw-summary {gap: 12px;}
+body[data-dd-commerce-v564="fulfillment"] .fc-stat,
+body[data-dd-commerce-v564="fulfillment"] .ofw-stat {
+  background: linear-gradient(145deg, #243253, #18243b);
+  border-color: #4a5a78;
+  padding: 17px;
+  border-radius: 16px;
+}
+body[data-dd-commerce-v564="fulfillment"] .fc-stat strong,
+body[data-dd-commerce-v564="fulfillment"] .ofw-stat strong {color: #f6c98a;font-size: 1.7rem;}
+body[data-dd-commerce-v564="fulfillment"] .fc-stat span,
+body[data-dd-commerce-v564="fulfillment"] .fc-stat small,
+body[data-dd-commerce-v564="fulfillment"] .ofw-stat span,
+body[data-dd-commerce-v564="fulfillment"] .ofw-stat small {opacity: 1;color: #d4d9e5;}
+body[data-dd-commerce-v564="fulfillment"] .ofw-order,
+body[data-dd-commerce-v564="fulfillment"] .fc-attention {border-left-color: #d9a473;border-radius: 17px;}
+body[data-dd-commerce-v564="fulfillment"] .ofw-grid > div {background: #22314d;border: 1px solid #40506b;border-radius: 11px;}
+body[data-dd-commerce-v564="fulfillment"] .ofw-progress span {background: #18263d;border-color: #596984;}
+body[data-dd-commerce-v564="fulfillment"] .ofw-progress span.done {opacity: .78;}
+body[data-dd-commerce-v564="fulfillment"] .ofw-progress span.active {color: #ffe3af;background: #614234;border-color: #e7ad70;}
+body[data-dd-commerce-v564="fulfillment"] .ofw-blockers {background: #32283a;border-left-color: #efbd80;}
+body[data-dd-commerce-v564="fulfillment"] .fc-badge {border: 1px solid #68728b;}
+body[data-dd-commerce-v564="fulfillment"] .severity-critical {color: #ffc0b5;}
+body[data-dd-commerce-v564="fulfillment"] .severity-high {color: #ffd1a0;}
+body[data-dd-commerce-v564="fulfillment"] .severity-medium {color: #ffdf9a;}
+body[data-dd-commerce-v564="fulfillment"] .fc-table th,
+body[data-dd-commerce-v564="fulfillment"] .fc-table td {border-color: #42516b;}
+body[data-dd-commerce-v564="fulfillment"] .fc-table-wrap {border: 1px solid #42516b;border-radius: 12px;}
+
+/* Inventory: preserve every specialized workflow mount and existing controls. */
+body[data-dd-commerce-v564="inventory"] .inventory-operations-hero {
+  grid-template-columns: minmax(0, 1.6fr) minmax(240px, .75fr);
+}
+body[data-dd-commerce-v564="inventory"] .inventory-operations-hero .inventory-operations-hero-note {
+  margin-top: 13px;
+  font-size: .87rem;
+}
+body[data-dd-commerce-v564="inventory"] .inventory-operations-hero-art {
+  padding: 12px;
+  background: rgba(6, 12, 25, .4);
+  border: 1px solid rgba(244, 197, 123, .33);
+  border-radius: 17px;
+  min-width: 0;
+}
+body[data-dd-commerce-v564="inventory"] .inventory-operations-hero-art img {
+  display: block;
+  max-width: 100%;
+  max-height: 210px;
+  object-fit: contain;
+  margin-inline: auto;
+}
+body[data-dd-commerce-v564="inventory"] .inventory-operations-hero-art .small {text-align: center;margin-top: 9px;}
+body[data-dd-commerce-v564="inventory"] .release462-status-strip {
+  border: 1px solid var(--dd564-line);
+  border-radius: 17px;
+  background: #141f34;
+  gap: 10px;
+  padding: 13px;
+  margin-bottom: 17px;
+}
+body[data-dd-commerce-v564="inventory"] .release462-status-strip > div {
+  background: #202d47;
+  border: 1px solid #3b4c69;
+  border-radius: 12px;
+  padding: 13px;
+  min-width: 0;
+}
+body[data-dd-commerce-v564="inventory"] .release462-status-strip strong {color: #f6cf9a;}
+body[data-dd-commerce-v564="inventory"] .inventory-operations-workspace {border-top: 3px solid #cf9871;}
+body[data-dd-commerce-v564="inventory"] .inventory-operations-workspace-heading {
+  border-bottom: 1px solid #41516b;
+  margin-bottom: 16px;
+  padding-bottom: 18px;
+  gap: 16px;
+}
+body[data-dd-commerce-v564="inventory"] .inventory-operations-workspace-heading h2 {font-size: clamp(1.4rem, 2.3vw, 2rem);}
+body[data-dd-commerce-v564="inventory"] .inventory-operations-eyebrow {color: #f3c68d;}
+
+@media (max-width: 960px) {
+  body[data-dd-commerce-v564] .hero.dd564-commerce-hero,
+  body[data-dd-commerce-v564="inventory"] .inventory-operations-hero {grid-template-columns: 1fr;}
+  body[data-dd-commerce-v564] .dd564-hero-aside {max-width: none;}
+  body[data-dd-commerce-v564="inventory"] .inventory-operations-hero-art {max-width: 500px;}
+}
+@media (max-width: 620px) {
+  body[data-dd-commerce-v564] .hero.dd564-commerce-hero {padding: 21px;border-radius: 18px;}
+  body[data-dd-commerce-v564] .dd564-commerce-nav {grid-template-columns: repeat(2, minmax(0, 1fr));}
+  body[data-dd-commerce-v564] .dd564-commerce-nav a {padding: 12px 7px;}
+  body[data-dd-commerce-v564] .dd564-hero-aside {padding: 15px;}
+  body[data-dd-commerce-v564="orders"] .b150-kpi {padding: 12px;}
+  body[data-dd-commerce-v564="orders"] .b150-order {padding: 13px;}
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-dd-commerce-v564] .dd564-commerce-nav a,
+  body[data-dd-commerce-v564="orders"] .b150-order {transition: none;}
+}
+@media print {
+  body[data-dd-commerce-v564] {background: #fff;color: #000;}
+}

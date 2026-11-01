@@ -67,5 +67,5 @@ test('Build 558 server guards and owner UI never infer actual acceptance or repe
   assert.match(page,/dd558PhotoCount/);
   assert.match(page,/Build (?:561|562|563)/);
   assert.doesNotMatch(page,/Keep our existing Etsy draft #4603838854/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":56[123]/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":56[1234]/);
 });

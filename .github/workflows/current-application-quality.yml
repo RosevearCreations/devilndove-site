@@ -532,6 +532,11 @@ jobs:
           node --check public/js/product-destinations-559.mjs
           node --test scripts/release467_build563_channel_recovery.test.mjs
 
+      - name: Build 564 Commerce Admin modernization and authority retention
+        run: |
+          node --check scripts/release467_build564_commerce_modernization.test.mjs
+          node --test scripts/release467_build564_commerce_modernization.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

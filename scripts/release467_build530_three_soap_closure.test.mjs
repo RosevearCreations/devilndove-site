@@ -75,5 +75,5 @@ test('Build 530 owner acceptance is a separate human action with server-side fre
  assert.match(api,/tag_readback_530:tagReadback/);
  assert.match(api,/code:'owner_evidence_changed_530'/);
  assert.match(api,/verified_canada_only:true/);
- assert.match(deploy,/"build":(?:5(?:3[0123456789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560|561|562|563)/);
+ assert.match(deploy,/"build":(?:5(?:3[0123456789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564)/);
 });

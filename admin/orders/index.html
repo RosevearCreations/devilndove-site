@@ -6,11 +6,12 @@
   <meta content="width=device-width,initial-scale=1" name="viewport"/>
   <link href="/css/styles.css" rel="stylesheet"/>
   <link href="/css/admin-orders-workspace-build150.css?v=467b150" rel="stylesheet"/>
+  <link href="/css/admin-commerce-564.css?v=564" rel="stylesheet"/>
   <link href="/assets/mark.png" rel="icon" type="image/png"/>
   <title>Orders Department — Devil n Dove</title>
   <meta content="Manage orders, fulfilment, buyer communication drafts, payment status, tracking audit, packing slips and accounting handoffs." name="description"/>
 </head>
-<body data-dd-brand-v3-section="orders">
+<body data-dd-brand-v3-section="orders" data-dd-commerce-v564="orders">
   <div class="container admin-shell">
     <div class="nav">
       <div class="brand">
@@ -25,9 +26,13 @@
         <button class="btn" data-nav-logout="" type="button">Logout</button>
       </div>
     </div>
-    <div class="hero">
-      <div><p class="eyebrow">Release 467 Build 150</p><h1>Orders &amp; Fulfillment</h1><p>One seller workspace for orders, buyer context, fulfilment progress, packing, copy-only communication drafts, tracking audit and downstream payment/accounting handoffs.</p></div>
-    </div>
+    <header class="hero dd564-commerce-hero">
+      <div><p class="eyebrow">Commerce Command • Orders</p><h1>Orders &amp; Fulfillment</h1><p>Find an order, review its payment and fulfilment status, then continue the existing confirmed workflow.</p></div>
+      <div class="dd564-hero-aside"><strong>Source-backed activity</strong><span>Live order counts and buyer details load in the workspace below. Cached information is marked by the existing order controls.</span></div>
+    </header>
+    <nav class="dd564-commerce-nav" aria-label="Commerce workspaces">
+      <a aria-current="page" href="/admin/orders/">Orders</a><a href="/admin/order-fulfillment-care/">Fulfilment</a><a href="/admin/inventory-operations/">Inventory</a><a href="/admin/products/">Products</a>
+    </nav>
     <div class="admin-department-links card">
       <a class="btn" href="/admin/">Dashboard</a>
       <a class="btn" href="/admin/members/">Members</a>
@@ -41,7 +46,7 @@
       <a class="btn" href="/admin/movies/">Movies</a>
     </div>
 
-    <div class="card" style="margin-top:18px"><strong>Build 150 workspace:</strong> the unified seller view consumes the existing Orders, order-detail and Build 82 fulfilment workflow authorities. Packaging/internal notes and buyer-message drafts save locally only. Live fulfilment and tracking-audit changes require confirmation and use stable <code>client_action_id</code> replay protection. Buyer sending, payment/refund execution, carrier calls, accounting posting, R2 and schema mutation remain outside this workspace.</div>
+    <details class="card dd564-help"><summary><span aria-hidden="true">ⓘ</span> What can we safely do here?</summary><p>The unified seller workspace uses existing Orders, order-detail and fulfilment authorities. Packaging/internal notes and buyer-message drafts save locally only. Live fulfilment and tracking-audit changes require confirmation and stable <code>client_action_id</code> replay protection. Buyer sending, payment/refund execution, carrier calls and accounting posting remain outside this workspace.</p></details>
 
     <div id="orderWorkspaceMount" data-release="467" data-build="150"></div>
     <template id="ordersBuild82WorkflowContract" data-build176-inert-contract="true">
@@ -55,15 +60,15 @@
       <option value="returned">Returned</option>
     </template>
 
-    <div class="card" id="ordersSection" style="margin-top:18px">
-      <h2 style="margin-top:0">Detailed Orders &amp; Payments Table</h2>
-      <p class="small">Build 176 no longer starts a second legacy Orders renderer underneath the unified seller workspace. Open the owning focused workspace only when deeper fulfilment, payment, refund, customer-document or accounting work is required.</p>
+    <section class="card dd564-related" id="ordersSection">
+      <h2>Related order workspaces</h2>
+      <p class="small">For deeper fulfilment, payment, refund, customer-document or accounting work, open the existing specialized workspace. The detailed order list above is the single active Orders renderer.</p>
       <div class="dd-admin-responsive-actions">
         <a class="btn" href="/admin/order-fulfillment-care/">Fulfilment &amp; Customer Care</a>
         <a class="btn" href="/admin/accounting/">Payments &amp; Accounting</a>
         <a class="btn" href="/admin/customer-documents/">Customer Documents</a>
       </div>
-    </div>
+    </section>
     <div class="footer card" style="margin-top:18px"></div>
   </div>
   <script src="/js/main.js?v=440"></script>
