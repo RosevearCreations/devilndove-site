@@ -114,6 +114,6 @@ test('Inventory retains all stock, receiving, reconciliation and classified-tool
 });
 
 test('Release marker, deployment workflow and CI proof identify Build 564', () => {
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'), /"build":(?:564|565)/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'), /"build":(?:564|565|566)/);
   assert.match(source('.github/workflows/current-application-quality.yml'), /release467_build564_commerce_modernization\.test\.mjs/);
 });

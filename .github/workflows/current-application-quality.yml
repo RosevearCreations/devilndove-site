@@ -542,6 +542,11 @@ jobs:
           node --check scripts/release467_build565_workshop_admin_modernization.test.mjs
           node --test scripts/release467_build565_workshop_admin_modernization.test.mjs
 
+      - name: Build 566 Management and Systems Admin modernization and authority retention
+        run: |
+          node --check scripts/release467_build566_management_admin_modernization.test.mjs
+          node --test scripts/release467_build566_management_admin_modernization.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

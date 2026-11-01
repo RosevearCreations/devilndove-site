@@ -60,8 +60,8 @@
       "reference_screen": "Analytics & Reports",
       "reason": "Candidate for source-backed KPI and trend presentation, subject to a live visual check.",
       "evidence": {
-        "byte_length": 4011,
-        "stylesheets": 2,
+        "byte_length": 4778,
+        "stylesheets": 3,
         "scripts": 10,
         "forms": 0,
         "has_viewport": true
@@ -900,8 +900,8 @@
       "reference_screen": "Settings & Configuration",
       "reason": "Recent I.T. work must be preserved; determine visually whether only small refinements are needed.",
       "evidence": {
-        "byte_length": 16749,
-        "stylesheets": 3,
+        "byte_length": 17680,
+        "stylesheets": 4,
         "scripts": 17,
         "forms": 0,
         "has_viewport": true
@@ -1350,8 +1350,8 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 5331,
-        "stylesheets": 1,
+        "byte_length": 5700,
+        "stylesheets": 2,
         "scripts": 9,
         "forms": 0,
         "has_viewport": true
@@ -1365,8 +1365,8 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 6690,
-        "stylesheets": 2,
+        "byte_length": 7908,
+        "stylesheets": 3,
         "scripts": 32,
         "forms": 0,
         "has_viewport": true

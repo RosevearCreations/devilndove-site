@@ -49,5 +49,5 @@ test('Build 533 requires completed Etsy provider module initialization and exist
  assert.match(flow,/state\.lastListingId&&?\!?window\.confirm|!state\.lastListingId&&!window\.confirm/);
  assert.match(flow,/dd533ExistingDraft/);
  assert.match(flow,/dd486EtsyListingId/); // Build 537 uses the actual inspect/link workflow.
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:5(?:3[3456789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565)/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:5(?:3[3456789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565|566)/);
 });
