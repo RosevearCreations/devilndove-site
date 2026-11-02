@@ -4,15 +4,16 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta name="robots" content="noindex,nofollow"/>
-  <meta name="dnd-build-identity" content="Devil n Dove • Build 572"/>
+  <meta name="dnd-build-identity" content="Devil n Dove • Build 573"/>
   <meta name="description" content="Browser-local owner device feedback worksheet for Devil n Dove Admin. No provider actions or remote acceptance."/>
   <title>Owner Device Feedback — Devil n Dove Admin</title>
   <link rel="icon" type="image/png" href="/assets/mark.png"/>
-  <link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=572"/>
-  <script type="module" src="/public/js/admin-device-acceptance-569.mjs?v=572"></script>
-  <script type="module" src="/public/js/admin-device-followup-570.mjs?v=572"></script>
-  <script type="module" src="/public/js/admin-device-retest-571.mjs?v=572"></script>
-  <script type="module" src="/public/js/admin-device-evidence-572.mjs?v=572"></script>
+  <link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=573"/>
+  <script type="module" src="/public/js/admin-device-acceptance-569.mjs?v=573"></script>
+  <script type="module" src="/public/js/admin-device-followup-570.mjs?v=573"></script>
+  <script type="module" src="/public/js/admin-device-retest-571.mjs?v=573"></script>
+  <script type="module" src="/public/js/admin-device-evidence-572.mjs?v=573"></script>
+  <script type="module" src="/public/js/admin-device-intake-573.mjs?v=573"></script>
 </head>
 <body data-admin-page="device-acceptance-569">
   <a class="dd569-skip" href="#dd569Review">Skip to device review</a>
@@ -22,11 +23,11 @@
       <nav aria-label="Admin navigation"><a href="/admin/">Dashboard</a><a href="/admin/product-editor/">Product Editor</a><a href="/admin/analytics/">Analytics</a><a href="/admin/system-operations/">System Operations</a></nav>
     </header>
     <section class="dd569-hero" aria-labelledby="dd569Title">
-      <div class="dd569-eyebrow">Release 467 · Builds 569–572 · Owner review</div>
+      <div class="dd569-eyebrow">Release 467 · Builds 569–573 · Owner review</div>
       <h1 id="dd569Title">Device feedback & safe acceptance readback</h1>
       <p>Check the actual Admin experience on each device and record what you personally observed. These notes stay in <strong>this browser only</strong> until you deliberately copy and share them. Another phone or computer does not automatically receive them.</p>
       <span class="dd569-gate">Owner sign-off PENDING · No remote readback claimed</span>
-      <div class="dd569-actions"><a class="dd569-button" href="#dd571Retests">Device retest receipts</a><a class="dd569-button primary" href="#dd572Evidence">Owner acceptance evidence packet</a></div>
+      <div class="dd569-actions"><a class="dd569-button" href="#dd571Retests">Device retest receipts</a><a class="dd569-button" href="#dd572Evidence">Evidence packet</a><a class="dd569-button primary" href="#dd573Intake">Review imported evidence</a></div>
     </section>
     <main id="dd569Review">
       <section class="dd569-panel" aria-labelledby="dd569StartTitle">
@@ -90,6 +91,22 @@
         <label for="dd572Packet">Portable source-matched JSON packet, including original observations and retest notes (review before sharing)</label>
         <textarea id="dd572Packet" rows="8" readonly></textarea>
         <p class="dd569-boundary">Source links and review notes are manually supplied, not authenticated or independently checked by this page. Old notes are flagged stale when either the original report or retest changes. No automatic closure, final acceptance, Product save, Etsy posting, provider action, Inventory, Finance or D1 write is performed. Never include private customer details or credentials.</p>
+      </section>
+      <section class="dd569-panel" id="dd573Intake" aria-labelledby="dd573Title">
+        <h2 id="dd573Title">7. Owner evidence intake, exception disposition &amp; acceptance safeguards — Build 573</h2>
+        <p>Paste a <strong>Build 572 JSON evidence packet</strong> copied from another browser or prepare one from this browser's saved observations. Validate its source structure before reviewing. Imported evidence is <strong>not authenticated</strong>, and no report is silently merged into the original review worksheet.</p>
+        <label for="dd573ImportText">Untrusted Build 572 JSON packet (check contents for customer information and secrets before pasting)</label>
+        <textarea id="dd573ImportText" rows="5" maxlength="180000" placeholder="Paste the full Build 572 source-matched JSON packet here"></textarea>
+        <label class="dd569-checkbox" for="dd573Confirm"><input type="checkbox" id="dd573Confirm"/> I reviewed this packet's contents and understand that importing it does not authenticate the owner, a device, or independent proof.</label>
+        <div class="dd569-actions"><button class="dd569-button primary" id="dd573Import" type="button">Validate and stage copied packet</button><button class="dd569-button" id="dd573Local" type="button">Prepare from this browser</button><button class="dd569-button" id="dd573Review" type="button">Review staged packet</button></div>
+        <p id="dd573State" class="dd569-status" role="status" aria-live="polite">No evidence staged. All exceptions remain OPEN; owner decision NOT RECORDED; sign-off PENDING.</p>
+        <div id="dd573List" class="dd569-grid" aria-label="Open device exception disposition drafts and stale intake evidence"></div>
+        <div class="dd569-actions"><button class="dd569-button" id="dd573CopySummary" type="button">Copy open-case decision readback</button><button class="dd569-button" id="dd573CopyPacket" type="button">Copy intake draft JSON</button></div>
+        <label for="dd573Summary">Open-case owner decision readback (not an approval)</label>
+        <textarea id="dd573Summary" rows="7" readonly></textarea>
+        <label for="dd573Packet">Portable disposition draft including the staged source packet (review before sharing)</label>
+        <textarea id="dd573Packet" rows="7" readonly></textarea>
+        <p class="dd569-boundary">Only OPEN-case actions are available: keep open, request actual-device retest, request independent source verification, or escalate a source fix. No ACCEPT, RESOLVE, APPROVE or CLOSE action exists. Edited original reports, retests or source references make prior disposition drafts stale. Zero independently verified closures, no owner sign-off, no remote Product, Etsy, provider, Inventory, Finance or D1 write.</p>
       </section>
     </main>
   </div>
