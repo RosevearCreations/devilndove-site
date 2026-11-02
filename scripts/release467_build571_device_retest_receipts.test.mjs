@@ -63,7 +63,7 @@ test('Visible retest UI requires explicit source-bound decision, 12-character ex
   const html=source('admin/device-acceptance/index.html');
   const js=source('public/js/admin-device-retest-571.mjs');
   for(const id of ['dd571Retests','dd571Title','dd571Load','dd571Copy','dd571State','dd571List','dd571Export'])assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build (?:571|572)/);
+  assert.match(html,/Devil n Dove • Build (?:571|572|573)/);
   assert.match(html,/An “appears fixed” retest is only a personal observation/);
   assert.match(js,/Choose retest outcome/);
   assert.match(js,/!confirm\.checked\|\|!states\.has\(select\.value\)\|\|note\.value\.trim\(\)\.length<12/);
@@ -78,12 +78,12 @@ test('All earlier modules share current cache revision, accessibility is retaine
   const html=source('admin/device-acceptance/index.html');
   const triage=source('public/js/admin-device-followup-570.mjs');
   const retest=source('public/js/admin-device-retest-571.mjs');
-  for(const module of ['admin-device-acceptance-569','admin-device-followup-570','admin-device-retest-571'])assert.ok(html.includes(`${module}.mjs?v=572`),module);
-  assert.match(triage,/admin-device-acceptance-569\.mjs\?v=572/);
-  assert.match(retest,/admin-device-acceptance-569\.mjs\?v=572/);
-  assert.match(retest,/admin-device-followup-570\.mjs\?v=572/);
+  for(const module of ['admin-device-acceptance-569','admin-device-followup-570','admin-device-retest-571'])assert.ok(html.includes(`${module}.mjs?v=573`),module);
+  assert.match(triage,/admin-device-acceptance-569\.mjs\?v=573/);
+  assert.match(retest,/admin-device-acceptance-569\.mjs\?v=573/);
+  assert.match(retest,/admin-device-followup-570\.mjs\?v=573/);
   assert.match(source('css/admin-device-acceptance-569.css'),/\.dd571-retest/);
   assert.match(source('css/admin-device-acceptance-569.css'),/:focus-visible/);
   assert.match(source('.github/workflows/current-application-quality.yml'),/release467_build571_device_retest_receipts\.test\.mjs/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":572/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":573/);
 });

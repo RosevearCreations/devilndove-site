@@ -584,6 +584,12 @@ jobs:
           node --check scripts/release467_build572_owner_acceptance_packet.test.mjs
           node --test scripts/release467_build572_owner_acceptance_packet.test.mjs
 
+      - name: Build 573 guarded imported evidence intake and open-case disposition drafts
+        run: |
+          node --check public/js/admin-device-intake-573.mjs
+          node --check scripts/release467_build573_evidence_intake_disposition.test.mjs
+          node --test scripts/release467_build573_evidence_intake_disposition.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
