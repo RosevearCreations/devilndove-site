@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {makePacket569,CHECKS_569,DEVICES_569} from '../public/js/admin-device-acceptance-569.mjs?v=576';
-import {retestPacket571} from '../public/js/admin-device-retest-571.mjs?v=576';
-import {reviewNotesPacket572,acceptancePacket572} from '../public/js/admin-device-evidence-572.mjs?v=576';
-import {dispositionPacket573,intakePacket573} from '../public/js/admin-device-intake-573.mjs?v=576';
-import {readinessPacket574} from '../public/js/admin-device-readiness-574.mjs?v=576';
+import {makePacket569,CHECKS_569,DEVICES_569} from '../public/js/admin-device-acceptance-569.mjs?v=577';
+import {retestPacket571} from '../public/js/admin-device-retest-571.mjs?v=577';
+import {reviewNotesPacket572,acceptancePacket572} from '../public/js/admin-device-evidence-572.mjs?v=577';
+import {dispositionPacket573,intakePacket573} from '../public/js/admin-device-intake-573.mjs?v=577';
+import {readinessPacket574} from '../public/js/admin-device-readiness-574.mjs?v=577';
 import {reconcileWitnesses575,witnessDraftPacket575,witnessPacket575,validateWitnessPacket575,
   witnessReadback575,WITNESS_FORMAT_575,WITNESS_KEY_575,WITNESS_SOURCE_KEY_575} from '../public/js/admin-device-witness-575.mjs';
 
@@ -143,7 +143,7 @@ test('Live UI gives manual, bounded and browser-local witness review with no clo
   for(const id of ['dd575Witness','dd575Title','dd575ImportText','dd575Confirm','dd575Import',
     'dd575Local','dd575Review','dd575State','dd575List','dd575CopySummary','dd575CopyPacket',
     'dd575Summary','dd575Packet'])assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build (?:575|576)/);
+  assert.match(html,/Devil n Dove • Build (?:575|576|577)/);
   assert.match(html,/No independent witness identity or external source evidence is verified/);
   assert.match(js,/win\.localStorage\.setItem\(WITNESS_SOURCE_KEY_575/);
   assert.match(js,/win\.localStorage\.setItem\(WITNESS_KEY_575/);
@@ -159,10 +159,10 @@ test('Versioned Admin modules, CI and immutable Production build marker track Bu
   const html=read('admin/device-acceptance/index.html');
   for(const module of ['admin-device-acceptance-569','admin-device-followup-570','admin-device-retest-571',
     'admin-device-evidence-572','admin-device-intake-573','admin-device-readiness-574','admin-device-witness-575'])
-    assert.ok(html.includes(`${module}.mjs?v=576`),module);
-  assert.match(read('public/js/admin-device-readiness-574.mjs'),/admin-device-intake-573\.mjs\?v=576/);
-  assert.match(read('public/js/admin-device-witness-575.mjs'),/admin-device-readiness-574\.mjs\?v=576/);
+    assert.ok(html.includes(`${module}.mjs?v=577`),module);
+  assert.match(read('public/js/admin-device-readiness-574.mjs'),/admin-device-intake-573\.mjs\?v=577/);
+  assert.match(read('public/js/admin-device-witness-575.mjs'),/admin-device-readiness-574\.mjs\?v=577/);
   assert.match(read('css/admin-device-acceptance-569.css'),/\.dd575-witness/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build575_device_witness\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":576/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":577/);
 });

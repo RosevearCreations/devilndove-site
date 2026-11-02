@@ -607,6 +607,11 @@ jobs:
           node --check public/js/admin-device-provenance-576.mjs
           node --check scripts/release467_build576_provenance_followup.test.mjs
           node --test scripts/release467_build576_provenance_followup.test.mjs
+      - name: Build 577 independent attestation exception review and owner evidence handoff safeguards
+        run: |
+          node --check public/js/admin-device-attestation-577.mjs
+          node --check scripts/release467_build577_attestation_handoff.test.mjs
+          node --test scripts/release467_build577_attestation_handoff.test.mjs
 
       - name: JavaScript syntax
         run: |

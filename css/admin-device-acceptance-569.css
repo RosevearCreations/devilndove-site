@@ -66,6 +66,11 @@ body[data-admin-page="device-acceptance-569"] *{box-sizing:border-box}
 .dd576-provenance label{display:block;margin:.7rem 0}
 .dd576-provenance textarea,.dd576-provenance select{width:100%;max-width:100%;box-sizing:border-box}
 .dd576-provenance [hidden]{display:none!important}
+.dd577-attestation{border-color:#ae89ba;background:linear-gradient(150deg,#2e2543,#231f3c)}
+.dd577-attestation h3{color:#ffe2b4}
+.dd577-attestation label{display:block;margin:.7rem 0}
+.dd577-attestation textarea,.dd577-attestation select{width:100%;max-width:100%;box-sizing:border-box}
+.dd577-attestation .dd569-checkbox{display:flex!important}
 body[data-admin-page="device-acceptance-569"] :is(a,button,select,textarea,input):focus-visible{outline:3px solid #f2d49b;outline-offset:3px}
 @media(max-width:750px){.dd569-grid{grid-template-columns:minmax(0,1fr)}.dd569-wrap{width:min(100% - 20px,1150px)}.dd569-top nav a{padding:8px 4px}.dd569-check p{min-height:0}}
 @media(prefers-reduced-motion:reduce){.dd569-button{transition:none}}

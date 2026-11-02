@@ -480,9 +480,9 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 23282,
+        "byte_length": 26385,
         "stylesheets": 1,
-        "scripts": 8,
+        "scripts": 9,
         "forms": 0,
         "has_viewport": true
       },
@@ -1530,7 +1530,7 @@
       "reference_screen": "Product Management",
       "reason": "Build 557 now provides the four-area Product Entry 2.0 shell. Preserve until real owner visual acceptance or an observed functional correction is requested.",
       "evidence": {
-        "byte_length": 156917,
+        "byte_length": 161419,
         "stylesheets": 38,
         "scripts": 42,
         "forms": 1,

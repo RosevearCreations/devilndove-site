@@ -83,6 +83,16 @@
         <button class="btn" type="button" id="dd532NextButton">Show next field</button>
       </div>
       <p class="small">If Etsy reports a connection problem, open <a href="/admin/it-integrations/">I.T. → Integrations</a>, reconnect our Etsy shop and return to this same Product. If a save or Etsy attempt has an unknown result, compare the saved Product and Etsy Drafts before trying again.</p>
+      <details id="dd577EtsyConnectionGuide"><summary>New Etsy draft and approved-photo checklist (connection test)</summary>
+        <ol class="small">
+          <li>In Etsy Developer, register our application and keep its keystring and shared secret in Cloudflare's server-side secrets. Register the exact HTTPS callback <code>https://devilndove.com/api/social/oauth/etsy/callback</code>. Never paste a secret into this editor.</li>
+          <li>In I.T. → Integrations, explicitly connect the real Etsy shop with <code>shops_r</code>, <code>listings_r</code>, <code>listings_w</code>. Read back the shop identity before a draft write.</li>
+          <li>For a new Product enter title, description, CAD price, quantity, category, who made it, when made, physical/craft supply status, Canada-only shipping profile, processing profile, packed weight and dimensions; fill SEO tags and any category-specific attributes.</li>
+          <li>Save every real original gallery image with alt text and explicit public-use approval. Use a sharp product photograph; Etsy recommends about 2000 pixels across. Confirm the image checks without changing originals automatically.</li>
+          <li>First verify the same product has no existing Etsy draft. Then confirm <strong>Create Etsy draft</strong> ONCE, or update the uniquely linked existing draft ID. The existing workflow uploads approved originals one at a time and reads back each Etsy image ID; unknown outcomes stop further transfers.</li>
+          <li>Read back the actual unpublished Etsy draft, real images and native tags. Keep publication separate and manual; a green website deployment never proves a successful Etsy transfer.</li>
+        </ol>
+      </details>
     </section>
 
     <details class="dd529-owner-panel" id="dd529Panel">
@@ -933,6 +943,18 @@
         </details>
         <h2>Facebook Marketplace — setup &amp; authorization</h2>
         <p class="small">This channel has its own connection status. Etsy credentials cannot authorize Facebook Marketplace. We will not simulate success or send an unauthorized Marketplace listing.</p>
+        <details id="dd577MetaConnectionGuide"><summary>Step-by-step Meta setup: Facebook Page, Instagram and Marketplace</summary>
+          <ol class="small">
+            <li>Confirm we manage the Devil n Dove Facebook Page and a professional (Business or Creator) Instagram account. For the Facebook Login route, link that Instagram account to our Page in Meta Business Suite.</li>
+            <li>Go to <a href="https://developers.facebook.com/" target="_blank" rel="noopener noreferrer">Meta for Developers</a> → My Apps → Create App, choose our business use cases and register the relevant OAuth callback(s) shown in <a href="/admin/it-integrations/">I.T. → Integrations</a>.</li>
+            <li>Keep <code>META_APP_ID</code>, <code>META_APP_SECRET</code> and <code>META_REDIRECT_URI</code> in the approved server configuration. A Page test also needs the verified <code>FACEBOOK_PAGE_ID</code> and Page access token; an Instagram test needs the correct Instagram professional account ID and authorized token.</li>
+            <li>For Facebook Page publishing, request the approved Page posting permissions; for Instagram choose one documented login route, request its <code>instagram_content_publish</code> (Facebook Login) or <code>instagram_business_content_publish</code> (Instagram Login) scope, then complete any required App Review.</li>
+            <li>Run a read-only identity, token and permissions check before approving one Page/Instagram test post. A Page post is not a Marketplace listing, and Instagram's media-container request is not the same as publishing it.</li>
+            <li>For ordinary Facebook Marketplace listings, use <strong>Prepare manual Marketplace handoff</strong> on this page, then paste title, CAD price, description and category and upload approved original photos in Facebook. Marketplace API write access is restricted to approved partner capabilities; do not assume our Meta App ID grants that permission.</li>
+          </ol>
+          <p class="small"><strong>Product content to prepare:</strong> name/title, description, CAD price, category, real product page URL (Page/Instagram), condition and stock where supported, approved original photos, alt/caption and channel tags, pickup or Canada-only delivery arrangements. Verify provider policies for each product type before publishing.</p>
+          <p class="small">Reference: <a href="https://www.postman.com/meta/instagram/documentation/6yqw8pt/instagram-api" target="_blank" rel="noopener noreferrer">Meta's Instagram API collection</a> and <a href="https://www.postman.com/meta/facebook/overview" target="_blank" rel="noopener noreferrer">Meta's Facebook API collection</a>. No API call or permission request happens when opening this checklist.</p>
+        </details>
         <div class="dd-channel-steps dd-meta-steps"><h3>Meta setup checklist</h3><ol><li><span class="dd-step-state">Pending</span><span>Connect an approved Meta account and verify permissions</span></li><li><span class="dd-step-state">Pending</span><span>Confirm a supported Marketplace publishing method for this product type</span></li><li><span class="dd-step-state">On hold</span><span>Enable draft creation only after both checks pass</span></li></ol></div>
         <div class="card" style="padding:16px;margin:12px 0">
           <h3>1. Check Meta/Facebook connection</h3>
