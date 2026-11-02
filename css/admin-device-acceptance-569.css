@@ -62,6 +62,10 @@ body[data-admin-page="device-acceptance-569"] *{box-sizing:border-box}
 .dd575-witness{border-color:#a1906f}
 .dd575-witness textarea,.dd575-witness select{width:100%;max-width:100%;box-sizing:border-box}
 .dd575-witness label{display:block;margin:.7rem 0}
+.dd576-provenance{border-color:#a1906f}
+.dd576-provenance label{display:block;margin:.7rem 0}
+.dd576-provenance textarea,.dd576-provenance select{width:100%;max-width:100%;box-sizing:border-box}
+.dd576-provenance [hidden]{display:none!important}
 body[data-admin-page="device-acceptance-569"] :is(a,button,select,textarea,input):focus-visible{outline:3px solid #f2d49b;outline-offset:3px}
 @media(max-width:750px){.dd569-grid{grid-template-columns:minmax(0,1fr)}.dd569-wrap{width:min(100% - 20px,1150px)}.dd569-top nav a{padding:8px 4px}.dd569-check p{min-height:0}}
 @media(prefers-reduced-motion:reduce){.dd569-button{transition:none}}

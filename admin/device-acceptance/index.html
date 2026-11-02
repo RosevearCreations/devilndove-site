@@ -4,18 +4,19 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta name="robots" content="noindex,nofollow"/>
-  <meta name="dnd-build-identity" content="Devil n Dove • Build 575"/>
+  <meta name="dnd-build-identity" content="Devil n Dove • Build 576"/>
   <meta name="description" content="Browser-local owner device feedback worksheet for Devil n Dove Admin. No provider actions or remote acceptance."/>
   <title>Owner Device Feedback — Devil n Dove Admin</title>
   <link rel="icon" type="image/png" href="/assets/mark.png"/>
-  <link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=575"/>
-  <script type="module" src="/public/js/admin-device-acceptance-569.mjs?v=575"></script>
-  <script type="module" src="/public/js/admin-device-followup-570.mjs?v=575"></script>
-  <script type="module" src="/public/js/admin-device-retest-571.mjs?v=575"></script>
-  <script type="module" src="/public/js/admin-device-evidence-572.mjs?v=575"></script>
-  <script type="module" src="/public/js/admin-device-intake-573.mjs?v=575"></script>
-  <script type="module" src="/public/js/admin-device-readiness-574.mjs?v=575"></script>
-  <script type="module" src="/public/js/admin-device-witness-575.mjs?v=575"></script>
+  <link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=576"/>
+  <script type="module" src="/public/js/admin-device-acceptance-569.mjs?v=576"></script>
+  <script type="module" src="/public/js/admin-device-followup-570.mjs?v=576"></script>
+  <script type="module" src="/public/js/admin-device-retest-571.mjs?v=576"></script>
+  <script type="module" src="/public/js/admin-device-evidence-572.mjs?v=576"></script>
+  <script type="module" src="/public/js/admin-device-intake-573.mjs?v=576"></script>
+  <script type="module" src="/public/js/admin-device-readiness-574.mjs?v=576"></script>
+  <script type="module" src="/public/js/admin-device-witness-575.mjs?v=576"></script>
+  <script type="module" src="/public/js/admin-device-provenance-576.mjs?v=576"></script>
 </head>
 <body data-admin-page="device-acceptance-569">
   <a class="dd569-skip" href="#dd569Review">Skip to device review</a>
@@ -25,11 +26,11 @@
       <nav aria-label="Admin navigation"><a href="/admin/">Dashboard</a><a href="/admin/product-editor/">Product Editor</a><a href="/admin/analytics/">Analytics</a><a href="/admin/system-operations/">System Operations</a></nav>
     </header>
     <section class="dd569-hero" aria-labelledby="dd569Title">
-      <div class="dd569-eyebrow">Release 467 · Builds 569–575 · Owner review</div>
+      <div class="dd569-eyebrow">Release 467 · Builds 569–576 · Owner review</div>
       <h1 id="dd569Title">Device feedback & safe acceptance readback</h1>
       <p>Check the actual Admin experience on each device and record what you personally observed. These notes stay in <strong>this browser only</strong> until you deliberately copy and share them. Another phone or computer does not automatically receive them.</p>
       <span class="dd569-gate">Owner sign-off PENDING · No remote readback claimed</span>
-      <div class="dd569-actions"><a class="dd569-button" href="#dd571Retests">Device retest receipts</a><a class="dd569-button" href="#dd572Evidence">Evidence packet</a><a class="dd569-button" href="#dd574Readiness">Decision readiness</a><a class="dd569-button primary" href="#dd575Witness">Independent witness review</a></div>
+      <div class="dd569-actions"><a class="dd569-button" href="#dd571Retests">Device retest receipts</a><a class="dd569-button" href="#dd574Readiness">Decision readiness</a><a class="dd569-button" href="#dd575Witness">Independent witness review</a><a class="dd569-button primary" href="#dd576Provenance">Authentication follow-up</a></div>
     </section>
     <main id="dd569Review">
       <section class="dd569-panel" aria-labelledby="dd569StartTitle">
@@ -141,6 +142,22 @@
         <label for="dd575Packet">Portable witness review draft and exact Build 574 source (review before sharing)</label>
         <textarea id="dd575Packet" rows="7" readonly></textarea>
         <p class="dd569-boundary">No independent witness identity or external source evidence is verified by this browser. Source match claims, absent device observations, still-failing retests, conflicts and stale witness drafts remain OPEN; independently verified closures 0, owner decision NOT RECORDED and sign-off PENDING. No ACCEPT, RESOLVE, APPROVE, CLOSE, provider action, Product, Etsy, Inventory, Finance or D1 write.</p>
+      </section>
+      <section class="dd569-panel" id="dd576Provenance" aria-labelledby="dd576Title">
+        <h2 id="dd576Title">10. Authenticated witness provenance readiness &amp; owner-device acceptance follow-up — Build 576</h2>
+        <p>Prepare a traceable <strong>external authentication plan</strong> for each source-matched witness claim. Specify how reviewer independence, an external source proof, and the exact original owner-device retest can be verified by an independent person. A completed plan is <strong>not</strong> an authenticated witness or an owner acceptance decision. Contradictions, absent physical-device evidence and stale source/witness records remain open.</p>
+        <label for="dd576ImportText">Optional complete Build 575 witness JSON from another device (review before pasting; no private details or secrets)</label>
+        <textarea id="dd576ImportText" rows="5" maxlength="550000" placeholder="Paste full Build 575 witness reconciliation JSON including the original source records"></textarea>
+        <label class="dd569-checkbox" for="dd576Confirm"><input type="checkbox" id="dd576Confirm"/> I understand copied witness and owner-device records are unauthenticated, and staging them does not verify a signature, close an issue or record owner approval.</label>
+        <div class="dd569-actions"><button class="dd569-button primary" id="dd576Import" type="button">Validate copied Build 575 source</button><button class="dd569-button" id="dd576Local" type="button">Use saved witness evidence</button><button class="dd569-button" id="dd576Review" type="button">Refresh provenance follow-up</button></div>
+        <p id="dd576State" class="dd569-status" role="status" aria-live="polite">No provenance review staged. Authenticated witnesses 0; owner acceptance BLOCKED / PENDING.</p>
+        <div id="dd576List" class="dd569-grid" aria-label="Authentication prerequisites, owner-device follow-up drafts and stale source pins"></div>
+        <div class="dd569-actions"><button class="dd569-button" id="dd576CopySummary" type="button">Copy targeted owner-device follow-up</button><button class="dd569-button" id="dd576CopyPacket" type="button">Copy provenance readiness JSON</button></div>
+        <label for="dd576Summary">Source-linked witness authentication gaps and pending owner decision</label>
+        <textarea id="dd576Summary" rows="7" readonly></textarea>
+        <label for="dd576Packet">Portable provenance preflight draft including Build 575 witness source (review before sharing)</label>
+        <textarea id="dd576Packet" rows="7" readonly></textarea>
+        <p class="dd569-boundary">External reviewer credentials, signed reports, source-control attestations and actual-device receipts are NOT checked or authenticated by this browser. All owner device exceptions remain OPEN, authenticated witnesses 0, independently verified closures 0, owner decision NOT RECORDED and sign-off PENDING. No ACCEPT, RESOLVE, APPROVE, CLOSE, Product, Etsy, provider, Inventory, Finance or D1 write.</p>
       </section>
     </main>
   </div>

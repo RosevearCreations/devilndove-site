@@ -602,6 +602,12 @@ jobs:
           node --check scripts/release467_build575_device_witness.test.mjs
           node --test scripts/release467_build575_device_witness.test.mjs
 
+      - name: Build 576 witness provenance authentication preflight and owner-device follow-up safeguards
+        run: |
+          node --check public/js/admin-device-provenance-576.mjs
+          node --check scripts/release467_build576_provenance_followup.test.mjs
+          node --test scripts/release467_build576_provenance_followup.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
