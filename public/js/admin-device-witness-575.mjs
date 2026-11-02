@@ -1,7 +1,7 @@
 /* Build 575 — exact-source independent witness review drafts and acceptance gates.
  * A browser-local witness claim is not authenticated independent proof or owner sign-off. */
-import {STAGED_KEY_574,readinessPacket574,validateReadinessPacket574} from './admin-device-readiness-574.mjs?v=575';
-import {STAGED_KEY_573,DISPOSITION_KEY_573,dispositionPacket573,intakePacket573,validateIntakePacket573} from './admin-device-intake-573.mjs?v=575';
+import {STAGED_KEY_574,readinessPacket574,validateReadinessPacket574} from './admin-device-readiness-574.mjs?v=576';
+import {STAGED_KEY_573,DISPOSITION_KEY_573,dispositionPacket573,intakePacket573,validateIntakePacket573} from './admin-device-intake-573.mjs?v=576';
 
 export const WITNESS_FORMAT_575='devilndove-admin-device-witness-review-575-v1';
 export const WITNESS_DRAFT_FORMAT_575='devilndove-admin-device-witness-drafts-575-v1';

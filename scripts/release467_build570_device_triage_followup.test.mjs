@@ -64,10 +64,10 @@ test('Build 569 navigation correction opens the source workspace in another tab 
 test('Follow-up panel loads the exact same versioned worksheet module once and copies only a local summary',()=>{
   const html=source('admin/device-acceptance/index.html');
   const js=source('public/js/admin-device-followup-570.mjs');
-  assert.match(html,/Devil n Dove • Build (?:570|571|572|573|574|575)/);
-  assert.match(html,/admin-device-acceptance-569\.mjs\?v=(?:570|571|572|573|574|575)/);
-  assert.match(html,/admin-device-followup-570\.mjs\?v=(?:570|571|572|573|574|575)/);
-  assert.match(js,/from '\.\/admin-device-acceptance-569\.mjs\?v=(?:570|571|572|573|574|575)'/);
+  assert.match(html,/Devil n Dove • Build (?:570|571|572|573|574|575|576)/);
+  assert.match(html,/admin-device-acceptance-569\.mjs\?v=(?:570|571|572|573|574|575|576)/);
+  assert.match(html,/admin-device-followup-570\.mjs\?v=(?:570|571|572|573|574|575|576)/);
+  assert.match(js,/from '\.\/admin-device-acceptance-569\.mjs\?v=(?:570|571|572|573|574|575|576)'/);
   for(const id of ['dd570Followup','dd570Title','dd570Build','dd570Copy','dd570State','dd570List','dd570Export'])assert.ok(html.includes(`id="${id}"`),id);
   assert.match(html,/source correction or a Production GREEN build does not prove/);
   assert.match(html,/No Product save, Etsy update, remote write, automatic issue closure/);
@@ -83,5 +83,5 @@ test('Scoped responsive styling and production gate are required in CI',()=>{
   assert.match(css,/:focus-visible/);
   assert.match(css,/@media\(max-width:750px\)/);
   assert.match(source('.github/workflows/current-application-quality.yml'),/release467_build570_device_triage_followup\.test\.mjs/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:570|571|572|573|574|575)/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:570|571|572|573|574|575|576)/);
 });
