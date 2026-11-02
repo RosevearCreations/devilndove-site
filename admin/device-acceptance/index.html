@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <meta name="dnd-build-identity" content="Devil n Dove • Build 569"/>
+  <meta name="description" content="Browser-local owner device feedback worksheet for Devil n Dove Admin. No provider actions or remote acceptance."/>
+  <title>Owner Device Feedback — Devil n Dove Admin</title>
+  <link rel="icon" type="image/png" href="/assets/mark.png"/>
+  <link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=569"/>
+  <script type="module" src="/public/js/admin-device-acceptance-569.mjs?v=569"></script>
+</head>
+<body data-admin-page="device-acceptance-569">
+  <a class="dd569-skip" href="#dd569Review">Skip to device review</a>
+  <div class="dd569-wrap">
+    <header class="dd569-top">
+      <a class="dd569-brand" href="/admin/"><img src="/assets/logo-clear-nav.webp" alt=""/>Devil n Dove · Admin</a>
+      <nav aria-label="Admin navigation"><a href="/admin/">Dashboard</a><a href="/admin/product-editor/">Product Editor</a><a href="/admin/analytics/">Analytics</a><a href="/admin/system-operations/">System Operations</a></nav>
+    </header>
+    <section class="dd569-hero" aria-labelledby="dd569Title">
+      <div class="dd569-eyebrow">Release 467 · Build 569 · Owner review</div>
+      <h1 id="dd569Title">Device feedback & safe acceptance readback</h1>
+      <p>Check the actual Admin experience on each device and record what you personally observed. These notes stay in <strong>this browser only</strong> until you deliberately copy and share them. Another phone or computer does not automatically receive them.</p>
+      <span class="dd569-gate">Owner sign-off PENDING · No remote readback claimed</span>
+    </section>
+    <main id="dd569Review">
+      <section class="dd569-panel" aria-labelledby="dd569StartTitle">
+        <h2 id="dd569StartTitle">1. Choose the device you are reviewing</h2>
+        <label for="dd569Device">Device type</label>
+        <select id="dd569Device"><option value="desktop">Desktop / keyboard</option><option value="phone">Phone / touch</option><option value="tablet">Tablet / touch</option></select>
+        <p>Use the links in each check to inspect the real Admin screen. Return here to record the observation. Do not mark a check as personally observed until you actually open it on this device.</p>
+        <p class="dd569-boundary">No passwords, customer information, private photos or access tokens in notes. This worksheet is a review aid, not authentication, a provider test or approval to send data.</p>
+      </section>
+      <section class="dd569-panel" aria-labelledby="dd569ChecksTitle">
+        <h2 id="dd569ChecksTitle">2. Review the actual workspaces</h2>
+        <p>All checks start as <strong>Not yet reviewed</strong>. “Looks right” means a person entered that observation; the site never verifies it automatically.</p>
+        <div id="dd569Checks" class="dd569-grid" aria-label="Device checks"></div>
+        <div class="dd569-actions"><button id="dd569Save" class="dd569-button primary" type="button">Save review on this browser</button><button id="dd569CopySummary" class="dd569-button" type="button">Copy readable readback</button><button id="dd569CopyJson" class="dd569-button" type="button">Copy transfer JSON</button></div>
+        <p id="dd569State" class="dd569-status" role="status" aria-live="polite">Owner sign-off PENDING · No device review recorded.</p>
+        <p id="dd569Notice" class="dd569-notice" role="status" aria-live="polite"></p>
+        <label for="dd569Export">Readback ready to copy manually if clipboard access is unavailable</label>
+        <textarea id="dd569Export" rows="5" readonly></textarea>
+      </section>
+      <section class="dd569-panel" aria-labelledby="dd569ImportTitle">
+        <h2 id="dd569ImportTitle">3. Bring observations from another device</h2>
+        <p>Use <strong>Copy transfer JSON</strong> on your other device and paste its content below. Import merges different device checks with this browser's notes. If the same check has conflicting observations, import stops for manual comparison; nothing is silently overwritten. There is no server-side synchronization.</p>
+        <label for="dd569ImportText">Review packet JSON from another device</label>
+        <textarea id="dd569ImportText" rows="4" placeholder="Paste a Build 569 device review JSON packet here"></textarea>
+        <label class="dd569-checkbox" for="dd569ImportConfirm"><input type="checkbox" id="dd569ImportConfirm"/> I have reviewed the incoming packet and want to merge it on this browser.</label>
+        <div class="dd569-actions"><button id="dd569Import" class="dd569-button" type="button">Merge local review packet</button></div>
+        <div class="dd569-import">
+          <label class="dd569-checkbox" for="dd569ClearConfirm"><input type="checkbox" id="dd569ClearConfirm"/> I want to clear all Build 569 review notes on this browser.</label>
+          <div class="dd569-actions"><button id="dd569Clear" class="dd569-button" type="button">Clear this browser's review</button></div>
+        </div>
+        <p class="dd569-boundary">Final approval remains PENDING even when all entries say “looks right.” To close a real issue or owner sign-off, share the observations for independent follow-up and separately verify the saved Product, exact Etsy draft identity and any provider action.</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

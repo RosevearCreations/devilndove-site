@@ -16,11 +16,11 @@
     "Settings & Configuration"
   ],
   "totals": {
-    "total": 150,
+    "total": 151,
     "keep": 5,
     "improve": 4,
     "rebuild": 0,
-    "review": 141
+    "review": 142
   },
   "routes": [
     {
@@ -30,7 +30,7 @@
       "reference_screen": "Admin Dashboard",
       "reason": "Existing Admin dashboard already received a dedicated shell/hero modernization. Preserve until owner review.",
       "evidence": {
-        "byte_length": 18206,
+        "byte_length": 18614,
         "stylesheets": 5,
         "scripts": 12,
         "forms": 0,
@@ -468,6 +468,21 @@
         "byte_length": 17387,
         "stylesheets": 3,
         "scripts": 8,
+        "forms": 0,
+        "has_viewport": true
+      },
+      "owner_visual_acceptance": "PENDING"
+    },
+    {
+      "route": "/admin/device-acceptance/",
+      "source": "admin/device-acceptance/index.html",
+      "decision": "REVIEW",
+      "reference_screen": "Unassigned / contextual module",
+      "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
+      "evidence": {
+        "byte_length": 5548,
+        "stylesheets": 1,
+        "scripts": 1,
         "forms": 0,
         "has_viewport": true
       },
@@ -1515,7 +1530,7 @@
       "reference_screen": "Product Management",
       "reason": "Build 557 now provides the four-area Product Entry 2.0 shell. Preserve until real owner visual acceptance or an observed functional correction is requested.",
       "evidence": {
-        "byte_length": 156779,
+        "byte_length": 156917,
         "stylesheets": 38,
         "scripts": 42,
         "forms": 1,
