@@ -4,16 +4,17 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta name="robots" content="noindex,nofollow"/>
-  <meta name="dnd-build-identity" content="Devil n Dove • Build 573"/>
+  <meta name="dnd-build-identity" content="Devil n Dove • Build 574"/>
   <meta name="description" content="Browser-local owner device feedback worksheet for Devil n Dove Admin. No provider actions or remote acceptance."/>
   <title>Owner Device Feedback — Devil n Dove Admin</title>
   <link rel="icon" type="image/png" href="/assets/mark.png"/>
-  <link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=573"/>
-  <script type="module" src="/public/js/admin-device-acceptance-569.mjs?v=573"></script>
-  <script type="module" src="/public/js/admin-device-followup-570.mjs?v=573"></script>
-  <script type="module" src="/public/js/admin-device-retest-571.mjs?v=573"></script>
-  <script type="module" src="/public/js/admin-device-evidence-572.mjs?v=573"></script>
-  <script type="module" src="/public/js/admin-device-intake-573.mjs?v=573"></script>
+  <link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=574"/>
+  <script type="module" src="/public/js/admin-device-acceptance-569.mjs?v=574"></script>
+  <script type="module" src="/public/js/admin-device-followup-570.mjs?v=574"></script>
+  <script type="module" src="/public/js/admin-device-retest-571.mjs?v=574"></script>
+  <script type="module" src="/public/js/admin-device-evidence-572.mjs?v=574"></script>
+  <script type="module" src="/public/js/admin-device-intake-573.mjs?v=574"></script>
+  <script type="module" src="/public/js/admin-device-readiness-574.mjs?v=574"></script>
 </head>
 <body data-admin-page="device-acceptance-569">
   <a class="dd569-skip" href="#dd569Review">Skip to device review</a>
@@ -23,11 +24,11 @@
       <nav aria-label="Admin navigation"><a href="/admin/">Dashboard</a><a href="/admin/product-editor/">Product Editor</a><a href="/admin/analytics/">Analytics</a><a href="/admin/system-operations/">System Operations</a></nav>
     </header>
     <section class="dd569-hero" aria-labelledby="dd569Title">
-      <div class="dd569-eyebrow">Release 467 · Builds 569–573 · Owner review</div>
+      <div class="dd569-eyebrow">Release 467 · Builds 569–574 · Owner review</div>
       <h1 id="dd569Title">Device feedback & safe acceptance readback</h1>
       <p>Check the actual Admin experience on each device and record what you personally observed. These notes stay in <strong>this browser only</strong> until you deliberately copy and share them. Another phone or computer does not automatically receive them.</p>
       <span class="dd569-gate">Owner sign-off PENDING · No remote readback claimed</span>
-      <div class="dd569-actions"><a class="dd569-button" href="#dd571Retests">Device retest receipts</a><a class="dd569-button" href="#dd572Evidence">Evidence packet</a><a class="dd569-button primary" href="#dd573Intake">Review imported evidence</a></div>
+      <div class="dd569-actions"><a class="dd569-button" href="#dd571Retests">Device retest receipts</a><a class="dd569-button" href="#dd572Evidence">Evidence packet</a><a class="dd569-button" href="#dd573Intake">Review imported evidence</a><a class="dd569-button primary" href="#dd574Readiness">Decision readiness</a></div>
     </section>
     <main id="dd569Review">
       <section class="dd569-panel" aria-labelledby="dd569StartTitle">
@@ -107,6 +108,22 @@
         <label for="dd573Packet">Portable disposition draft including the staged source packet (review before sharing)</label>
         <textarea id="dd573Packet" rows="7" readonly></textarea>
         <p class="dd569-boundary">Only OPEN-case actions are available: keep open, request actual-device retest, request independent source verification, or escalate a source fix. No ACCEPT, RESOLVE, APPROVE or CLOSE action exists. Edited original reports, retests or source references make prior disposition drafts stale. Zero independently verified closures, no owner sign-off, no remote Product, Etsy, provider, Inventory, Finance or D1 write.</p>
+      </section>
+      <section class="dd569-panel" id="dd574Readiness" aria-labelledby="dd574Title">
+        <h2 id="dd574Title">8. Owner device evidence gap closure review &amp; Admin acceptance decision readiness — Build 574</h2>
+        <p>Audit a structurally valid Build 573 intake packet, including actual-device retest gaps, still-failing exceptions, source references, stale records and outstanding owner checks. A source reference may complete a <strong>documentary field</strong>, but it does <strong>not</strong> verify the fix or close a device exception. Final owner acceptance is separately blocked until authentic evidence is independently reviewed.</p>
+        <label for="dd574ImportText">Optional copied Build 573 intake JSON (review for private data before pasting)</label>
+        <textarea id="dd574ImportText" rows="5" maxlength="250000" placeholder="Paste a complete Build 573 intake JSON packet"></textarea>
+        <label class="dd569-checkbox" for="dd574Confirm"><input type="checkbox" id="dd574Confirm"/> I understand this copied packet is untrusted and may contain unverified claims, not owner authentication or approval.</label>
+        <div class="dd569-actions"><button class="dd569-button primary" id="dd574Import" type="button">Validate copied readiness input</button><button class="dd569-button" id="dd574Local" type="button">Review saved browser evidence</button><button class="dd569-button" id="dd574Review" type="button">Refresh staged readiness review</button></div>
+        <p id="dd574State" class="dd569-status" role="status" aria-live="polite">No readiness audit staged. No verified evidence gap closures; owner decision BLOCKED / PENDING.</p>
+        <div id="dd574List" class="dd569-grid" aria-label="Source-linked owner device evidence gaps and required follow-up"></div>
+        <div class="dd569-actions"><button class="dd569-button" id="dd574CopySummary" type="button">Copy targeted evidence gap requests</button><button class="dd569-button" id="dd574CopyPacket" type="button">Copy readiness JSON draft</button></div>
+        <label for="dd574Summary">Owner-safe evidence gap readback and explicit decision blockers</label>
+        <textarea id="dd574Summary" rows="7" readonly></textarea>
+        <label for="dd574Packet">Portable structural-readiness packet with its source intake (review before sharing)</label>
+        <textarea id="dd574Packet" rows="7" readonly></textarea>
+        <p class="dd569-boundary">No automatic evidence gap closure, issue resolution or owner sign-off occurs. A structurally complete packet can be ready for independent review but is never an authenticated owner decision. Independent source verification NOT PERFORMED; verified exception closures 0; owner decision NOT RECORDED. No Product, Etsy, provider, Inventory, Finance or D1 write.</p>
       </section>
     </main>
   </div>
