@@ -59,7 +59,7 @@ test('Build 556 Product entry and external channel blueprint preserves explicit 
 });
 
 test('Build 556 exact release marker and quality gate are configured',()=>{
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:556|557|558|559|560|561|562|563|564|565|566|567|568|569)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:556|557|558|559|560|561|562|563|564|565|566|567|568|569|570)/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build556_product_admin_design_blueprint\.test\.mjs/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build556_admin_interface_inventory\.mjs --check/);
 });

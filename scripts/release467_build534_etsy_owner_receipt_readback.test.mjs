@@ -30,7 +30,7 @@ test('Build 534 UI cannot create a second soap draft without linking a verified 
  assert.match(flow,/dd500Processing/);
  assert.match(flow,/label\('Category'\)/);
  assert.match(flow,/label\('Shipping'\)/);
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:5(?:3[456789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565|566|567|568|569)/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:5(?:3[456789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565|566|567|568|569|570)/);
 });
 test('Build 534 keeps the source images shared and makes the owner accept verified draft-only writes',()=>{
  const flow=read('public/js/admin-product-destination-flow-523.mjs');

@@ -81,5 +81,5 @@ test('No external provider publication, duplicate draft, or owner decision is in
 
 test('Build 568 is quality-gated and emits the exact Production marker',()=>{
   assert.match(source('.github/workflows/current-application-quality.yml'),/release467_build568_owner_device_review\.test\.mjs/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:568|569)/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:568|569|570)/);
 });

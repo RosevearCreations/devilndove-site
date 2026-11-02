@@ -116,5 +116,5 @@ test('Work Orders retain append-only status, real time and milestone evidence', 
 
 test('Build 565 CI proof and exact Production release marker are wired', () => {
   assert.match(source('.github/workflows/current-application-quality.yml'), /release467_build565_workshop_admin_modernization\.test\.mjs/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'), /"build":(?:565|566|567|568|569)/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'), /"build":(?:565|566|567|568|569|570)/);
 });

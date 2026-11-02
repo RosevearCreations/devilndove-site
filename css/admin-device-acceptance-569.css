@@ -36,6 +36,11 @@ body[data-admin-page="device-acceptance-569"] *{box-sizing:border-box}
 .dd569-checkbox input{width:20px;height:20px;flex:none;margin:3px 0 0;accent-color:#a66ddd}
 .dd569-import{margin-top:18px;border-top:1px solid #655277;padding-top:14px}
 .dd569-notice{color:#eac89f;min-height:1.5em}
+.dd570-candidate{min-width:0;border:1px solid #9b6a70;border-radius:13px;padding:15px;background:#2b233e;overflow-wrap:anywhere}
+.dd570-candidate h3{margin:0 0 8px;font-size:1rem;color:#ffe0ae}
+.dd570-candidate p{font-size:.9rem;min-height:0}
+.dd570-candidate a{display:inline-block;min-height:44px;padding:9px 0;color:#f5d099;text-underline-offset:3px}
+.dd570-candidate small{display:block;margin-top:8px;color:#e5ccdb}
 body[data-admin-page="device-acceptance-569"] :is(a,button,select,textarea,input):focus-visible{outline:3px solid #f2d49b;outline-offset:3px}
 @media(max-width:750px){.dd569-grid{grid-template-columns:minmax(0,1fr)}.dd569-wrap{width:min(100% - 20px,1150px)}.dd569-top nav a{padding:8px 4px}.dd569-check p{min-height:0}}
 @media(prefers-reduced-motion:reduce){.dd569-button{transition:none}}

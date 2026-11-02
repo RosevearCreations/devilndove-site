@@ -64,6 +64,6 @@ test('Build 563 UI has lazy readback, save invalidation, no provider update, and
   assert.match(ui,/id="dd563Recovery"/);assert.match(ui,/product-channel-recovery-563\?product_id=/);
   assert.match(ui,/invalidateRecovery\('Product saved/);assert.match(ui,/if\(!recoveryLoaded\)void refreshRecovery\(\)/);
   assert.doesNotMatch(api,/\bfetch\(|method:\s*['"]POST|\.run\(|decryptOAuthSecret/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:563|564|565|566|567|568|569)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:563|564|565|566|567|568|569|570)/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build563_channel_recovery\.test\.mjs/);
 });
