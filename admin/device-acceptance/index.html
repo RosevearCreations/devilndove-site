@@ -4,13 +4,14 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta name="robots" content="noindex,nofollow"/>
-  <meta name="dnd-build-identity" content="Devil n Dove • Build 570"/>
+  <meta name="dnd-build-identity" content="Devil n Dove • Build 571"/>
   <meta name="description" content="Browser-local owner device feedback worksheet for Devil n Dove Admin. No provider actions or remote acceptance."/>
   <title>Owner Device Feedback — Devil n Dove Admin</title>
   <link rel="icon" type="image/png" href="/assets/mark.png"/>
-  <link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=570"/>
-  <script type="module" src="/public/js/admin-device-acceptance-569.mjs?v=570"></script>
-  <script type="module" src="/public/js/admin-device-followup-570.mjs?v=570"></script>
+  <link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=571"/>
+  <script type="module" src="/public/js/admin-device-acceptance-569.mjs?v=571"></script>
+  <script type="module" src="/public/js/admin-device-followup-570.mjs?v=571"></script>
+  <script type="module" src="/public/js/admin-device-retest-571.mjs?v=571"></script>
 </head>
 <body data-admin-page="device-acceptance-569">
   <a class="dd569-skip" href="#dd569Review">Skip to device review</a>
@@ -20,10 +21,11 @@
       <nav aria-label="Admin navigation"><a href="/admin/">Dashboard</a><a href="/admin/product-editor/">Product Editor</a><a href="/admin/analytics/">Analytics</a><a href="/admin/system-operations/">System Operations</a></nav>
     </header>
     <section class="dd569-hero" aria-labelledby="dd569Title">
-      <div class="dd569-eyebrow">Release 467 · Build 569 · Owner review</div>
+      <div class="dd569-eyebrow">Release 467 · Builds 569–571 · Owner review</div>
       <h1 id="dd569Title">Device feedback & safe acceptance readback</h1>
       <p>Check the actual Admin experience on each device and record what you personally observed. These notes stay in <strong>this browser only</strong> until you deliberately copy and share them. Another phone or computer does not automatically receive them.</p>
       <span class="dd569-gate">Owner sign-off PENDING · No remote readback claimed</span>
+      <p><a class="dd569-button" href="#dd571Retests">Jump to device retest receipts</a></p>
     </section>
     <main id="dd569Review">
       <section class="dd569-panel" aria-labelledby="dd569StartTitle">
@@ -65,6 +67,16 @@
         <label for="dd570Export">Follow-up readback, available for manual copy</label>
         <textarea id="dd570Export" rows="6" readonly></textarea>
         <p class="dd569-boundary">A source correction or a Production GREEN build does not prove the owner's device issue is resolved. No Product save, Etsy update, remote write, automatic issue closure or final owner sign-off is performed here.</p>
+      </section>
+      <section class="dd569-panel" id="dd571Retests" aria-labelledby="dd571Title">
+        <h2 id="dd571Title">5. Owner device retest receipts &amp; exception review — Build 571</h2>
+        <p>Return to the <strong>same device</strong> after a targeted correction. Load only saved correction candidates, inspect the linked workspace in a new tab, choose an explicit result, describe the actual steps and confirm that you personally retested it. These receipts stay on this browser and <strong>never close an issue automatically</strong>.</p>
+        <div class="dd569-actions"><button class="dd569-button primary" id="dd571Load" type="button">Load saved candidates for retest</button><button class="dd569-button" id="dd571Copy" type="button">Copy retest readback</button></div>
+        <p id="dd571State" class="dd569-status" role="status" aria-live="polite">No retest receipts checked. Owner sign-off PENDING; no independently verified fixes.</p>
+        <div id="dd571List" class="dd569-grid" aria-label="Source-linked owner device retest receipts"></div>
+        <label for="dd571Export">Readback of source-matched retest receipts, with stale records identified</label>
+        <textarea id="dd571Export" rows="6" readonly></textarea>
+        <p class="dd569-boundary">An “appears fixed” retest is only a personal observation. If the original device report changes, its old receipt becomes stale. Independent source verification, matching actual device evidence, and explicit owner acceptance are still required before any exception can be closed. No Product, Etsy, provider, Inventory, Finance or database writes occur here.</p>
       </section>
     </main>
   </div>
