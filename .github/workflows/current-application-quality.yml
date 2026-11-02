@@ -554,6 +554,12 @@ jobs:
           node --check scripts/release467_build567_final_admin_acceptance.test.mjs
           node --test scripts/release467_build567_final_admin_acceptance.test.mjs
 
+      - name: Build 568 owner device-readiness corrections and safe Admin overlay acceptance
+        run: |
+          node --check functions/_middleware.js
+          node --check scripts/release467_build568_owner_device_review.test.mjs
+          node --test scripts/release467_build568_owner_device_review.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

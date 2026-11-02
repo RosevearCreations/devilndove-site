@@ -152,7 +152,7 @@ function productsPlatformMarkup() {
   return [
     `<link data-dd-design-system-v293="1" rel="stylesheet" href="/css/design-system-v293.css?v=${DESIGN_SYSTEM_REVISION}">`,
     '<link data-dd-products-static-platform="1" rel="stylesheet" href="/css/current-responsive.css?v=current">',
-    `<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`,
+    `<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b568">`,
     `<link data-dd-brand-v3-theme="1" rel="stylesheet" href="/css/brand-v3-theme.css?v=435-standard-accessibility-b435">`,
     `<link rel="stylesheet" href="/css/admin-products-table-layout.css?v=${PRODUCTS_ASSET_REVISION}">`,
     adminQolMarkup(),
@@ -195,7 +195,7 @@ function storefrontFastPlatformMarkup() {
     styleNonceBootstrapMarkup(),
     `<link data-dd-design-system-v293="1" rel="stylesheet" href="/css/design-system-v293.css?v=${DESIGN_SYSTEM_REVISION}">`,
     '<link rel="stylesheet" href="/css/current-responsive.css?v=current">',
-    `<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`,
+    `<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b568">`,
     `<link data-dd-brand-v3-theme="1" rel="stylesheet" href="/css/brand-v3-theme.css?v=435-standard-accessibility-b435">`,
     '<link data-dd-brand-v3-frontsite="1" rel="stylesheet" href="/css/brand-v3-frontsite-recovery.css?v=433">',
     '<script defer src="/public/js/brand-v3-frontsite-recovery.js?v=295"></script>',
@@ -276,7 +276,7 @@ async function withPlatformClient(response, request, env = {}) {
           element.prepend(styleNonceBootstrapMarkup(), { html: true });
           element.append(`<link data-dd-design-system-v293="1" rel="stylesheet" href="/css/design-system-v293.css?v=${DESIGN_SYSTEM_REVISION}">`, { html: true });
           element.append('<link rel="stylesheet" href="/css/current-responsive.css?v=current">', { html: true });
-          element.append(`<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b143">`, { html: true });
+          element.append(`<link rel="stylesheet" href="/css/adaptive-shell.css?v=${CURRENT_RELEASE}b568">`, { html: true });
           element.append('<link data-dd-brand-v3-theme="1" rel="stylesheet" href="/css/brand-v3-theme.css?v=435-standard-accessibility-b435">', { html: true });
           if (isPublicRuntimeIntelligencePath(pathname)) {
             element.append('<link data-dd-brand-v3-frontsite="1" rel="stylesheet" href="/css/brand-v3-frontsite-recovery.css?v=433"><script defer src="/public/js/brand-v3-frontsite-recovery.js?v=295"></script>', { html: true });

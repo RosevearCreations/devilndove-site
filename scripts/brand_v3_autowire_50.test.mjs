@@ -293,7 +293,7 @@ test('Set 17 Admin banners 161-170 have exact separate filenames and working pag
   assert.equal(filenames.get(161+i),name,name);
   assert.ok(loader.includes('"'+route+'": "'+name+'"'),route);
   assert.ok(page.includes('/public/js/admin-brand-v3-set17.js?v=17'),route);
-  assert.ok(page.includes('/css/admin-brand-v3-set17.css?v=17'),route);
+  assert.ok(page.includes('/css/admin-brand-v3-set17.css?v=568'),route);
  }
  assert.match(loader,/image.onload/);
  assert.match(loader,/image.onerror/);

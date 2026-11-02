@@ -6,7 +6,7 @@ const read=path=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
 test('Build 552 retains older controls in Advanced and offers explicit owner evidence recovery',()=>{
   const html=read('admin/system-operations/index.html'),ui=read('public/js/admin-system-health-551.js');
-  assert.match(html,/Build (?:552|553|554|555|557|558|559|560|561|562|563)/);
+  assert.match(html,/Build (?:552|553|554|555|557|558|559|560|561|562|563|568)/);
   for(const id of ['dd552Heading','dd552Advanced','dd552FollowUpPreset','dd552IncidentTimelineDetails','dd552DownloadEvidence','dd546Refresh','dd547SaveChecks','dd549Verify','dd551OwnerCheck'])assert.match(html,new RegExp(`id="${id}"`));
   assert.match(html,/<details class="dd552-advanced" id="dd552Advanced">/);
   assert.match(html,/<details id="dd552IncidentTimelineDetails"/);
@@ -17,7 +17,7 @@ test('Build 552 retains older controls in Advanced and offers explicit owner evi
   assert.match(ui,/application\/json/);
   assert.match(ui,/owner_reported_not_independent_device_proof/);
   assert.doesNotMatch(ui,/DELETE|localStorage/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:552|553|554|555|556|557|558|559|560|561|562|563|564|565|566|567)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:552|553|554|555|556|557|558|559|560|561|562|563|564|565|566|567|568)/);
 });
 
 test('Build 552 follow-up presets filter the bounded read-only incident list',()=>{

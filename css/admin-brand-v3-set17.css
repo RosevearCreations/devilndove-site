@@ -13,6 +13,11 @@ body .dd-brand-v3-set17-banner img{
  object-fit:contain;object-position:center;
  background-color:#131020;
 }
+/* Build 568: Product Entry already has its own live title/identity hero.
+   Retire the redundant image-only header there so controls start above the fold. */
+body[data-dd-acceptance-v567="product-entry"] .dd-brand-v3-set17-banner{
+ display:none;
+}
 body.dd-brand-v3-set17-active :where(.hero,.page-hero){
  padding:clamp(18px,2.5vw,32px);
  border:1px solid rgba(139,106,169,.58);border-radius:16px;
@@ -40,7 +45,7 @@ body.dd-brand-v3-set17-active :where(a,button,input,select,textarea):focus-visib
 }
 @media(max-width:740px){
  body .dd-brand-v3-set17-banner img{
-  min-width:820px;width:820px;height:auto;max-height:none;
+  min-width:0;width:100%;height:auto;max-height:none;
  }
  body.dd-brand-v3-set17-active :where(.hero,.page-hero){padding:16px}
 }

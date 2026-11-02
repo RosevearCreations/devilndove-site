@@ -34,6 +34,19 @@ body.dd-shell-active{min-width:0}
   .dd-shell-connectivity{position:fixed;left:10px;bottom:calc(var(--dd-shell-size) + env(safe-area-inset-bottom,0px) + 10px);max-width:calc(100vw - 20px);overflow:hidden;text-overflow:ellipsis}
   .dd-auth-widget{bottom:calc(var(--dd-shell-size) + env(safe-area-inset-bottom,0px) + 52px)!important}
   .dd-shell-drawer-grid{grid-template-columns:1fr}
+  /* Build 568: the optional Search and Resume launchers must clear the
+     seller dock, while the page retains enough bottom scroll clearance. */
+  body.dd-shell-active:has(#ddAdaptiveShell.dd-seller-shell){
+    padding-bottom:calc(var(--dd-shell-size) + env(safe-area-inset-bottom,0px) + 140px);
+  }
+  body.dd-shell-active:has(#ddAdaptiveShell.dd-seller-shell) .dd-v161-launcher{
+    right:10px;
+    bottom:calc(var(--dd-shell-size) + env(safe-area-inset-bottom,0px) + 14px);
+  }
+  body.dd-shell-active:has(#ddAdaptiveShell.dd-seller-shell) .dd-b235-launch{
+    right:10px;
+    bottom:calc(var(--dd-shell-size) + env(safe-area-inset-bottom,0px) + 64px);
+  }
 }
 
 @media (min-width:761px) and (max-width:1099px){
