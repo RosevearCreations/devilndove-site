@@ -1,9 +1,9 @@
 /* Build 574 — source-linked owner device evidence gaps and decision readiness.
  * Documentary coverage is not independent proof or owner approval. */
-import {STORAGE_KEY_569,makePacket569} from './admin-device-acceptance-569.mjs?v=576';
-import {RETEST_STORAGE_571,retestPacket571} from './admin-device-retest-571.mjs?v=576';
-import {NOTES_KEY_572,reviewNotesPacket572,acceptancePacket572} from './admin-device-evidence-572.mjs?v=576';
-import {STAGED_KEY_573,DISPOSITION_KEY_573,dispositionPacket573,intakePacket573,validateIntakePacket573} from './admin-device-intake-573.mjs?v=576';
+import {STORAGE_KEY_569,makePacket569} from './admin-device-acceptance-569.mjs?v=577';
+import {RETEST_STORAGE_571,retestPacket571} from './admin-device-retest-571.mjs?v=577';
+import {NOTES_KEY_572,reviewNotesPacket572,acceptancePacket572} from './admin-device-evidence-572.mjs?v=577';
+import {STAGED_KEY_573,DISPOSITION_KEY_573,dispositionPacket573,intakePacket573,validateIntakePacket573} from './admin-device-intake-573.mjs?v=577';
 
 export const READINESS_FORMAT_574='devilndove-admin-device-readiness-574-v1';
 export const STAGED_KEY_574='dd:admin-device-readiness-input:574:v1';

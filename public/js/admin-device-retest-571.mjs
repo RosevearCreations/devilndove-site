@@ -1,7 +1,7 @@
 /* Build 571 — device retest receipts, browser-local only.
  * Owner-entered observations cannot close verified Admin exceptions. */
-import {STORAGE_KEY_569,makePacket569} from './admin-device-acceptance-569.mjs?v=576';
-import {triagePacket570} from './admin-device-followup-570.mjs?v=576';
+import {STORAGE_KEY_569,makePacket569} from './admin-device-acceptance-569.mjs?v=577';
+import {triagePacket570} from './admin-device-followup-570.mjs?v=577';
 
 export const RETEST_FORMAT_571='devilndove-admin-device-retest-571-v1';
 export const RETEST_STORAGE_571='dd:admin-device-retests:571:v1';

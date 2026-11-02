@@ -1,7 +1,7 @@
 /* Build 576 — witness provenance authentication preflight and owner-device follow-up.
  * Prepared links/methods are not authenticated signatures, verified fixes or owner consent. */
 import {WITNESS_SOURCE_KEY_575,WITNESS_KEY_575,witnessDraftPacket575,witnessPacket575,
-  validateWitnessPacket575} from './admin-device-witness-575.mjs?v=576';
+  validateWitnessPacket575} from './admin-device-witness-575.mjs?v=577';
 
 export const PROVENANCE_FORMAT_576='devilndove-admin-device-provenance-followup-576-v1';
 export const FOLLOWUP_FORMAT_576='devilndove-admin-device-provenance-followup-drafts-576-v1';
