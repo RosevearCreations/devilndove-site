@@ -63,7 +63,7 @@ test('Visible retest UI requires explicit source-bound decision, 12-character ex
   const html=source('admin/device-acceptance/index.html');
   const js=source('public/js/admin-device-retest-571.mjs');
   for(const id of ['dd571Retests','dd571Title','dd571Load','dd571Copy','dd571State','dd571List','dd571Export'])assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build 571/);
+  assert.match(html,/Devil n Dove • Build (?:571|572)/);
   assert.match(html,/An “appears fixed” retest is only a personal observation/);
   assert.match(js,/Choose retest outcome/);
   assert.match(js,/!confirm\.checked\|\|!states\.has\(select\.value\)\|\|note\.value\.trim\(\)\.length<12/);
@@ -74,16 +74,16 @@ test('Visible retest UI requires explicit source-bound decision, 12-character ex
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|method\s*:\s*['"](?:POST|PATCH|PUT|DELETE)['"]/);
 });
 
-test('All modules share cache revision 571, accessibility is retained and CI/Production marker required',()=>{
+test('All earlier modules share current cache revision, accessibility is retained and CI/Production marker required',()=>{
   const html=source('admin/device-acceptance/index.html');
   const triage=source('public/js/admin-device-followup-570.mjs');
   const retest=source('public/js/admin-device-retest-571.mjs');
-  for(const module of ['admin-device-acceptance-569','admin-device-followup-570','admin-device-retest-571'])assert.ok(html.includes(`${module}.mjs?v=571`),module);
-  assert.match(triage,/admin-device-acceptance-569\.mjs\?v=571/);
-  assert.match(retest,/admin-device-acceptance-569\.mjs\?v=571/);
-  assert.match(retest,/admin-device-followup-570\.mjs\?v=571/);
+  for(const module of ['admin-device-acceptance-569','admin-device-followup-570','admin-device-retest-571'])assert.ok(html.includes(`${module}.mjs?v=572`),module);
+  assert.match(triage,/admin-device-acceptance-569\.mjs\?v=572/);
+  assert.match(retest,/admin-device-acceptance-569\.mjs\?v=572/);
+  assert.match(retest,/admin-device-followup-570\.mjs\?v=572/);
   assert.match(source('css/admin-device-acceptance-569.css'),/\.dd571-retest/);
   assert.match(source('css/admin-device-acceptance-569.css'),/:focus-visible/);
   assert.match(source('.github/workflows/current-application-quality.yml'),/release467_build571_device_retest_receipts\.test\.mjs/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":571/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":572/);
 });

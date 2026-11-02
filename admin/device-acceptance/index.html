@@ -4,14 +4,15 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta name="robots" content="noindex,nofollow"/>
-  <meta name="dnd-build-identity" content="Devil n Dove • Build 571"/>
+  <meta name="dnd-build-identity" content="Devil n Dove • Build 572"/>
   <meta name="description" content="Browser-local owner device feedback worksheet for Devil n Dove Admin. No provider actions or remote acceptance."/>
   <title>Owner Device Feedback — Devil n Dove Admin</title>
   <link rel="icon" type="image/png" href="/assets/mark.png"/>
-  <link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=571"/>
-  <script type="module" src="/public/js/admin-device-acceptance-569.mjs?v=571"></script>
-  <script type="module" src="/public/js/admin-device-followup-570.mjs?v=571"></script>
-  <script type="module" src="/public/js/admin-device-retest-571.mjs?v=571"></script>
+  <link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=572"/>
+  <script type="module" src="/public/js/admin-device-acceptance-569.mjs?v=572"></script>
+  <script type="module" src="/public/js/admin-device-followup-570.mjs?v=572"></script>
+  <script type="module" src="/public/js/admin-device-retest-571.mjs?v=572"></script>
+  <script type="module" src="/public/js/admin-device-evidence-572.mjs?v=572"></script>
 </head>
 <body data-admin-page="device-acceptance-569">
   <a class="dd569-skip" href="#dd569Review">Skip to device review</a>
@@ -21,11 +22,11 @@
       <nav aria-label="Admin navigation"><a href="/admin/">Dashboard</a><a href="/admin/product-editor/">Product Editor</a><a href="/admin/analytics/">Analytics</a><a href="/admin/system-operations/">System Operations</a></nav>
     </header>
     <section class="dd569-hero" aria-labelledby="dd569Title">
-      <div class="dd569-eyebrow">Release 467 · Builds 569–571 · Owner review</div>
+      <div class="dd569-eyebrow">Release 467 · Builds 569–572 · Owner review</div>
       <h1 id="dd569Title">Device feedback & safe acceptance readback</h1>
       <p>Check the actual Admin experience on each device and record what you personally observed. These notes stay in <strong>this browser only</strong> until you deliberately copy and share them. Another phone or computer does not automatically receive them.</p>
       <span class="dd569-gate">Owner sign-off PENDING · No remote readback claimed</span>
-      <p><a class="dd569-button" href="#dd571Retests">Jump to device retest receipts</a></p>
+      <div class="dd569-actions"><a class="dd569-button" href="#dd571Retests">Device retest receipts</a><a class="dd569-button primary" href="#dd572Evidence">Owner acceptance evidence packet</a></div>
     </section>
     <main id="dd569Review">
       <section class="dd569-panel" aria-labelledby="dd569StartTitle">
@@ -77,6 +78,18 @@
         <label for="dd571Export">Readback of source-matched retest receipts, with stale records identified</label>
         <textarea id="dd571Export" rows="6" readonly></textarea>
         <p class="dd569-boundary">An “appears fixed” retest is only a personal observation. If the original device report changes, its old receipt becomes stale. Independent source verification, matching actual device evidence, and explicit owner acceptance are still required before any exception can be closed. No Product, Etsy, provider, Inventory, Finance or database writes occur here.</p>
+      </section>
+      <section class="dd569-panel" id="dd572Evidence" aria-labelledby="dd572Title">
+        <h2 id="dd572Title">6. Source-matched exception reconciliation &amp; owner acceptance packet — Build 572</h2>
+        <p>Reconcile saved original reports, exact device retests and optional source-review references. All evidence is <strong>browser-local and unverified</strong>. A matching “appears fixed” retest plus a manually entered source reference is <strong>not</strong> proof of repair or owner sign-off.</p>
+        <div class="dd569-actions"><button class="dd569-button primary" id="dd572Load" type="button">Reconcile saved evidence</button><button class="dd569-button" id="dd572CopySummary" type="button">Copy owner-safe readback</button><button class="dd569-button" id="dd572CopyPacket" type="button">Copy full evidence JSON</button></div>
+        <p id="dd572State" class="dd569-status" role="status" aria-live="polite">No source reconciliation performed. Verified closures 0; independent verification NOT PERFORMED; owner sign-off PENDING.</p>
+        <div id="dd572List" class="dd569-grid" aria-label="Reconciled Admin exception cases and stale evidence"></div>
+        <label for="dd572Summary">Owner-safe decision readback (unverified source references and all open exceptions)</label>
+        <textarea id="dd572Summary" rows="7" readonly></textarea>
+        <label for="dd572Packet">Portable source-matched JSON packet, including original observations and retest notes (review before sharing)</label>
+        <textarea id="dd572Packet" rows="8" readonly></textarea>
+        <p class="dd569-boundary">Source links and review notes are manually supplied, not authenticated or independently checked by this page. Old notes are flagged stale when either the original report or retest changes. No automatic closure, final acceptance, Product save, Etsy posting, provider action, Inventory, Finance or D1 write is performed. Never include private customer details or credentials.</p>
       </section>
     </main>
   </div>
