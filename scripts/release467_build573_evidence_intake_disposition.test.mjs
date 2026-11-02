@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {makePacket569} from '../public/js/admin-device-acceptance-569.mjs?v=574';
-import {retestPacket571} from '../public/js/admin-device-retest-571.mjs?v=574';
-import {reviewNotesPacket572,acceptancePacket572} from '../public/js/admin-device-evidence-572.mjs?v=574';
+import {makePacket569} from '../public/js/admin-device-acceptance-569.mjs?v=575';
+import {retestPacket571} from '../public/js/admin-device-retest-571.mjs?v=575';
+import {reviewNotesPacket572,acceptancePacket572} from '../public/js/admin-device-evidence-572.mjs?v=575';
 import {DISPOSITIONS_573,dispositionPacket573,validateDispositions573,reconcileIntake573,
   intakePacket573,validateIntakePacket573,intakeReadback573,INTAKE_FORMAT_573} from '../public/js/admin-device-intake-573.mjs';
 
@@ -106,7 +106,7 @@ test('UI stages imported copy separately, requires explicit confirmation, compar
   for(const id of ['dd573Intake','dd573Title','dd573ImportText','dd573Confirm','dd573Import','dd573Local',
     'dd573Review','dd573State','dd573List','dd573CopySummary','dd573CopyPacket','dd573Summary','dd573Packet'])
     assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build (?:573|574)/);
+  assert.match(html,/Devil n Dove • Build (?:573|574|575)/);
   assert.match(html,/No ACCEPT, RESOLVE, APPROVE or CLOSE action exists/);
   assert.match(js,/if\(!get\('dd573Confirm'\)\.checked\)/);
   assert.match(js,/validateAcceptancePacket572\(JSON\.parse\(raw\)\)/);
@@ -120,12 +120,12 @@ test('UI stages imported copy separately, requires explicit confirmation, compar
 test('Build 573 cache, CI and immutable Production version marker are current',()=>{
   const html=file('admin/device-acceptance/index.html');
   for(const module of ['admin-device-acceptance-569','admin-device-followup-570','admin-device-retest-571','admin-device-evidence-572','admin-device-intake-573'])
-    assert.ok(html.includes(`${module}.mjs?v=574`),module);
-  assert.match(file('public/js/admin-device-followup-570.mjs'),/admin-device-acceptance-569\.mjs\?v=574/);
-  assert.match(file('public/js/admin-device-retest-571.mjs'),/admin-device-followup-570\.mjs\?v=574/);
-  assert.match(file('public/js/admin-device-evidence-572.mjs'),/admin-device-retest-571\.mjs\?v=574/);
-  assert.match(file('public/js/admin-device-intake-573.mjs'),/admin-device-evidence-572\.mjs\?v=574/);
+    assert.ok(html.includes(`${module}.mjs?v=575`),module);
+  assert.match(file('public/js/admin-device-followup-570.mjs'),/admin-device-acceptance-569\.mjs\?v=575/);
+  assert.match(file('public/js/admin-device-retest-571.mjs'),/admin-device-followup-570\.mjs\?v=575/);
+  assert.match(file('public/js/admin-device-evidence-572.mjs'),/admin-device-retest-571\.mjs\?v=575/);
+  assert.match(file('public/js/admin-device-intake-573.mjs'),/admin-device-evidence-572\.mjs\?v=575/);
   assert.match(file('css/admin-device-acceptance-569.css'),/\.dd573-case/);
   assert.match(file('.github/workflows/current-application-quality.yml'),/release467_build573_evidence_intake_disposition\.test\.mjs/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":574/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":575/);
 });

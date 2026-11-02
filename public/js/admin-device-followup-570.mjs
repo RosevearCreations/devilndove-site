@@ -1,6 +1,6 @@
 /* Release 467 Build 570 — local-only triage of explicit Build 569 observations.
  * Suggested priorities are not independently verified defects or approvals. */
-import {CHECKS_569,DEVICES_569,STORAGE_KEY_569,makePacket569,validatePacket569} from './admin-device-acceptance-569.mjs?v=574';
+import {CHECKS_569,DEVICES_569,STORAGE_KEY_569,makePacket569,validatePacket569} from './admin-device-acceptance-569.mjs?v=575';
 
 export const TRIAGE_FORMAT_570='devilndove-admin-device-followup-570-v1';
 const deviceName=new Map(DEVICES_569.map(x=>[x.id,x.label]));
