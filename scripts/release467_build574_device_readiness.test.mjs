@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {makePacket569,CHECKS_569,DEVICES_569} from '../public/js/admin-device-acceptance-569.mjs?v=574';
-import {retestPacket571} from '../public/js/admin-device-retest-571.mjs?v=574';
-import {reviewNotesPacket572,acceptancePacket572} from '../public/js/admin-device-evidence-572.mjs?v=574';
-import {dispositionPacket573,intakePacket573} from '../public/js/admin-device-intake-573.mjs?v=574';
+import {makePacket569,CHECKS_569,DEVICES_569} from '../public/js/admin-device-acceptance-569.mjs?v=575';
+import {retestPacket571} from '../public/js/admin-device-retest-571.mjs?v=575';
+import {reviewNotesPacket572,acceptancePacket572} from '../public/js/admin-device-evidence-572.mjs?v=575';
+import {dispositionPacket573,intakePacket573} from '../public/js/admin-device-intake-573.mjs?v=575';
 import {reviewReadiness574,readinessPacket574,validateReadinessPacket574,readinessReadback574,
   READINESS_FORMAT_574} from '../public/js/admin-device-readiness-574.mjs';
 
@@ -123,7 +123,7 @@ test('Live UI handles copied Build 573 packets, exposes blockers and no posting 
   for(const id of ['dd574Readiness','dd574Title','dd574ImportText','dd574Confirm','dd574Import','dd574Local',
     'dd574Review','dd574State','dd574List','dd574CopySummary','dd574CopyPacket','dd574Summary','dd574Packet'])
     assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build 574/);
+  assert.match(html,/Devil n Dove • Build (?:574|575)/);
   assert.match(html,/No automatic evidence gap closure, issue resolution or owner sign-off occurs/);
   assert.match(js,/if\(!get\('dd574Confirm'\)\.checked\)/);
   assert.match(js,/validateIntakePacket573\(JSON\.parse\(raw\)\)/);
@@ -136,13 +136,13 @@ test('Build 574 revalidates six shared module revisions and Production CI releas
   const html=read('admin/device-acceptance/index.html');
   for(const module of ['admin-device-acceptance-569','admin-device-followup-570','admin-device-retest-571',
     'admin-device-evidence-572','admin-device-intake-573','admin-device-readiness-574'])
-    assert.ok(html.includes(`${module}.mjs?v=574`),module);
-  assert.match(read('public/js/admin-device-followup-570.mjs'),/admin-device-acceptance-569\.mjs\?v=574/);
-  assert.match(read('public/js/admin-device-retest-571.mjs'),/admin-device-followup-570\.mjs\?v=574/);
-  assert.match(read('public/js/admin-device-evidence-572.mjs'),/admin-device-retest-571\.mjs\?v=574/);
-  assert.match(read('public/js/admin-device-intake-573.mjs'),/admin-device-evidence-572\.mjs\?v=574/);
-  assert.match(read('public/js/admin-device-readiness-574.mjs'),/admin-device-intake-573\.mjs\?v=574/);
+    assert.ok(html.includes(`${module}.mjs?v=575`),module);
+  assert.match(read('public/js/admin-device-followup-570.mjs'),/admin-device-acceptance-569\.mjs\?v=575/);
+  assert.match(read('public/js/admin-device-retest-571.mjs'),/admin-device-followup-570\.mjs\?v=575/);
+  assert.match(read('public/js/admin-device-evidence-572.mjs'),/admin-device-retest-571\.mjs\?v=575/);
+  assert.match(read('public/js/admin-device-intake-573.mjs'),/admin-device-evidence-572\.mjs\?v=575/);
+  assert.match(read('public/js/admin-device-readiness-574.mjs'),/admin-device-intake-573\.mjs\?v=575/);
   assert.match(read('css/admin-device-acceptance-569.css'),/\.dd574-gap/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build574_device_readiness\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":574/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":575/);
 });
