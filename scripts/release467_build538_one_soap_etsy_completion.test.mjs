@@ -66,7 +66,7 @@ test('Build 538 front-end offers one-screen explicit owner workflow, no automati
  const flow=read('public/js/admin-product-etsy-package-v500.mjs');
  for(const element of ['dd538Pilot','dd538Ingredients','dd538NetWeight','dd538FactsConfirm','dd538Fill','dd538SharedTags','dd538Photos','dd538NativeTags','dd538Final','dd538PilotStatus'])
   assert.match(html,new RegExp(`id="${element}"`));
- assert.match(html,/Devil n Dove • Build (?:538|539|540|541|542|543|544|545|546|547|548|549|550|551|552|553|554|555|557|558|559|560|561|562|563|567|568)/);
+ assert.match(html,/Devil n Dove • Build (?:538|539|540|541|542|543|544|545|546|547|548|549|550|551|552|553|554|555|557|558|559|560|561|562|563|567|568|569)/);
  assert.match(html,/admin-product-etsy-pilot-538\.mjs\?v=538/);
  assert.match(html,/admin-product-etsy-package-v500\.mjs\?v=538/);
  assert.match(read('public/js/admin-product-destination-flow-523.mjs'),/admin-product-etsy-package-v500\.mjs\?v=538/);
@@ -80,6 +80,6 @@ test('Build 538 front-end offers one-screen explicit owner workflow, no automati
  assert.match(api,/if\(b\.listing_id!==undefined&&String\(s\.draft\?\.external_reference\|\|''\)!==String\(b\.listing_id\)\)/);
  assert.match(flow,/product-etsy-images\?product_id=\$\{id\}&reconcile=1&candidate_listing_id=\$\{encodeURIComponent\(listingId\)\}/);
  assert.match(flow,/action:'transfer_one',product_id:id,listing_id:listingId/);
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:538|539|540|541|542|543|544|545|546|547|548|549|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565|566|567|568)/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:538|539|540|541|542|543|544|545|546|547|548|549|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565|566|567|568|569)/);
  assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build538_one_soap_etsy_completion\.test\.mjs/);
 });

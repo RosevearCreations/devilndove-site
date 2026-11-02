@@ -560,6 +560,12 @@ jobs:
           node --check scripts/release467_build568_owner_device_review.test.mjs
           node --test scripts/release467_build568_owner_device_review.test.mjs
 
+      - name: Build 569 owner device-feedback readback, conflict-safe transfer and no-write acceptance
+        run: |
+          node --check public/js/admin-device-acceptance-569.mjs
+          node --check scripts/release467_build569_device_feedback_readback.test.mjs
+          node --test scripts/release467_build569_device_feedback_readback.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

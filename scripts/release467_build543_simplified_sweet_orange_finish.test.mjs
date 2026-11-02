@@ -25,6 +25,6 @@ test('Build 544 displays independent connection and photograph steps unaffected 
   assert.match(flow,/action:'link_existing'/);
   assert.match(flow,/verified_remote_readback!==true/);
   assert.match(flow,/state\.hold=true/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:54[456789]|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565|566|567|568)/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:54[456789]|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565|566|567|568|569)/);
   assert.doesNotMatch(ui,/action:'transfer_one'/);
 });

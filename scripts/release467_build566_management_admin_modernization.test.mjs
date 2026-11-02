@@ -126,5 +126,5 @@ test('Continuity preserves safe evidence semantics, read refresh, retry and plan
 
 test('Build 566 gates are connected to CI and the exact Production release marker', () => {
   assert.match(source('.github/workflows/current-application-quality.yml'), /release467_build566_management_admin_modernization\.test\.mjs/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'), /"build":(?:566|567|568)/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'), /"build":(?:566|567|568|569)/);
 });

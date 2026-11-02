@@ -1,0 +1,41 @@
+/* Build 569 — standalone, opt-in owner device feedback worksheet. */
+body[data-admin-page="device-acceptance-569"]{margin:0;background:#0b1326;color:#f5eff8;font-family:system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.5}
+body[data-admin-page="device-acceptance-569"] *{box-sizing:border-box}
+.dd569-skip{position:absolute;left:-10000px;top:5px;background:#fff;color:#131927;padding:8px 12px;z-index:10}
+.dd569-skip:focus{left:12px}
+.dd569-wrap{width:min(1150px,calc(100% - 32px));margin:auto;padding:20px 0 85px}
+.dd569-top{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.dd569-brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+.dd569-brand img{width:40px;height:40px;object-fit:contain}
+.dd569-top nav{display:flex;gap:8px;flex-wrap:wrap}
+.dd569-top nav a,.dd569-link{color:#f0d6ad;text-decoration:underline;text-underline-offset:3px}
+.dd569-top nav a{padding:9px}
+.dd569-hero{margin:24px 0 20px;padding:clamp(20px,4vw,34px);border:1px solid #7f608e;border-radius:18px;background:linear-gradient(135deg,#28203e,#151f38 65%,#20223e)}
+.dd569-eyebrow{color:#f0c68c;text-transform:uppercase;letter-spacing:.09em;font-weight:800;font-size:.76rem}
+.dd569-hero h1{font-size:clamp(1.6rem,4vw,2.6rem);line-height:1.12;margin:12px 0}
+.dd569-hero p{max-width:80ch;color:#e1d7ec}
+.dd569-gate{display:inline-block;border:1px solid #d8a56c;border-radius:99px;padding:6px 12px;color:#ffdfaa;font-size:.85rem;font-weight:800}
+.dd569-panel{background:#161e34;border:1px solid #665776;border-radius:16px;margin:18px 0;padding:clamp(16px,3vw,24px)}
+.dd569-panel h2{margin:0 0 9px;font-size:1.3rem}
+.dd569-panel p{color:#ddd4e4;margin:6px 0 14px}
+.dd569-panel label{display:block;font-weight:700;margin:12px 0 6px}
+.dd569-panel select,.dd569-panel textarea{display:block;width:100%;max-width:100%;min-height:44px;border:1px solid #9587aa;border-radius:9px;background:#0c1529;color:#fff;font:inherit;padding:10px}
+.dd569-panel textarea{resize:vertical;min-height:70px}
+.dd569-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.dd569-check{min-width:0;border:1px solid #554a74;border-radius:13px;padding:16px;background:#22223e}
+.dd569-check h3{font-size:1rem;margin:0 0 7px;color:#fff}
+.dd569-check p{font-size:.9rem;min-height:3.8em}
+.dd569-check a{color:#f5d099;text-underline-offset:3px}
+.dd569-check label{font-size:.85rem;margin-top:12px}
+.dd569-actions{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin:16px 0}
+.dd569-button{display:inline-flex;justify-content:center;align-items:center;min-height:44px;padding:9px 14px;border:1px solid #b2a1ce;border-radius:9px;font:inherit;font-weight:750;cursor:pointer;background:#392b56;color:#fff}
+.dd569-button.primary{background:#7851a6;border-color:#ccafef}
+.dd569-status{padding:12px 14px;border-left:4px solid #d3ad75;background:#212842;color:#ffdfaf;font-weight:700;border-radius:8px;overflow-wrap:anywhere}
+.dd569-boundary{font-size:.9rem;border-left:4px solid #9b7bb6;padding:7px 12px;background:#20283f}
+.dd569-checkbox{display:flex!important;gap:10px;align-items:flex-start;font-weight:500!important}
+.dd569-checkbox input{width:20px;height:20px;flex:none;margin:3px 0 0;accent-color:#a66ddd}
+.dd569-import{margin-top:18px;border-top:1px solid #655277;padding-top:14px}
+.dd569-notice{color:#eac89f;min-height:1.5em}
+body[data-admin-page="device-acceptance-569"] :is(a,button,select,textarea,input):focus-visible{outline:3px solid #f2d49b;outline-offset:3px}
+@media(max-width:750px){.dd569-grid{grid-template-columns:minmax(0,1fr)}.dd569-wrap{width:min(100% - 20px,1150px)}.dd569-top nav a{padding:8px 4px}.dd569-check p{min-height:0}}
+@media(prefers-reduced-motion:reduce){.dd569-button{transition:none}}

@@ -8,7 +8,7 @@ const source = path => readFileSync(new URL(`../${path}`, import.meta.url), 'utf
 
 test('Product entry remains the same one-Product, four-area owner flow with accessible linked panels', () => {
   const page=source('admin/product-editor/index.html');
-  assert.match(page, /Devil n Dove • Build (?:567|568)/);
+  assert.match(page, /Devil n Dove • Build (?:567|568|569)/);
   assert.match(page, /class="dd540-finished-product dd557-entry dd556-admin-root" data-dd-acceptance-v567="product-entry"/);
   const tabs=[
     ['Details','details','dd557DetailsArea','basics'],
@@ -119,5 +119,5 @@ test('Commerce, Workshop and Management responsive authority remains independent
 
 test('Build 567 is required in quality CI and has the exact live Production marker', () => {
   assert.match(source('.github/workflows/current-application-quality.yml'), /release467_build567_final_admin_acceptance\.test\.mjs/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'), /"build":(?:567|568)/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'), /"build":(?:567|568|569)/);
 });
