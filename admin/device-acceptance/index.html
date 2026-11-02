@@ -4,12 +4,13 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta name="robots" content="noindex,nofollow"/>
-  <meta name="dnd-build-identity" content="Devil n Dove • Build 569"/>
+  <meta name="dnd-build-identity" content="Devil n Dove • Build 570"/>
   <meta name="description" content="Browser-local owner device feedback worksheet for Devil n Dove Admin. No provider actions or remote acceptance."/>
   <title>Owner Device Feedback — Devil n Dove Admin</title>
   <link rel="icon" type="image/png" href="/assets/mark.png"/>
-  <link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=569"/>
-  <script type="module" src="/public/js/admin-device-acceptance-569.mjs?v=569"></script>
+  <link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=570"/>
+  <script type="module" src="/public/js/admin-device-acceptance-569.mjs?v=570"></script>
+  <script type="module" src="/public/js/admin-device-followup-570.mjs?v=570"></script>
 </head>
 <body data-admin-page="device-acceptance-569">
   <a class="dd569-skip" href="#dd569Review">Skip to device review</a>
@@ -29,7 +30,7 @@
         <h2 id="dd569StartTitle">1. Choose the device you are reviewing</h2>
         <label for="dd569Device">Device type</label>
         <select id="dd569Device"><option value="desktop">Desktop / keyboard</option><option value="phone">Phone / touch</option><option value="tablet">Tablet / touch</option></select>
-        <p>Use the links in each check to inspect the real Admin screen. Return here to record the observation. Do not mark a check as personally observed until you actually open it on this device.</p>
+        <p>Use the links in each check to inspect the real Admin screen in a separate tab, keeping your unsaved notes here. Return to this tab to record the observation. Do not mark a check as personally observed until you actually open it on this device.</p>
         <p class="dd569-boundary">No passwords, customer information, private photos or access tokens in notes. This worksheet is a review aid, not authentication, a provider test or approval to send data.</p>
       </section>
       <section class="dd569-panel" aria-labelledby="dd569ChecksTitle">
@@ -54,6 +55,16 @@
           <div class="dd569-actions"><button id="dd569Clear" class="dd569-button" type="button">Clear this browser's review</button></div>
         </div>
         <p class="dd569-boundary">Final approval remains PENDING even when all entries say “looks right.” To close a real issue or owner sign-off, share the observations for independent follow-up and separately verify the saved Product, exact Etsy draft identity and any provider action.</p>
+      </section>
+      <section class="dd569-panel" id="dd570Followup" aria-labelledby="dd570Title">
+        <h2 id="dd570Title">4. Triage saved device observations — Build 570</h2>
+        <p>After <strong>Save review on this browser</strong>, build a prioritized follow-up list from the entries you marked <strong>Needs a targeted correction</strong>. The priorities are suggested only; a developer must verify the actual source and you must retest on the original device. Unreviewed checks are not silently closed.</p>
+        <div class="dd569-actions"><button class="dd569-button primary" id="dd570Build" type="button">Build follow-up queue from saved notes</button><button class="dd569-button" id="dd570Copy" type="button" disabled>Copy follow-up queue</button></div>
+        <p id="dd570State" class="dd569-status" role="status" aria-live="polite">No triage run yet. Owner sign-off PENDING; all unreported findings await actual device review.</p>
+        <div id="dd570List" class="dd569-grid" aria-label="Owner-reported correction candidates"></div>
+        <label for="dd570Export">Follow-up readback, available for manual copy</label>
+        <textarea id="dd570Export" rows="6" readonly></textarea>
+        <p class="dd569-boundary">A source correction or a Production GREEN build does not prove the owner's device issue is resolved. No Product save, Etsy update, remote write, automatic issue closure or final owner sign-off is performed here.</p>
       </section>
     </main>
   </div>

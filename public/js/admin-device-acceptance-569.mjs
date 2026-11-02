@@ -124,7 +124,8 @@ function startWorksheet569(doc=globalThis.document,win=globalThis.window){
       const card=doc.createElement('article');card.className='dd569-check';
       const heading=doc.createElement('h3');heading.textContent=check.name;card.append(heading);
       const help=doc.createElement('p');help.textContent=check.hint;card.append(help);
-      const link=doc.createElement('a');link.href=check.href;link.textContent='Open this Admin workspace';card.append(link);
+      const link=doc.createElement('a');link.href=check.href;link.target='_blank';link.rel='noopener noreferrer';
+      link.textContent='Open Admin workspace in a new tab';card.append(link);
       const statusLabel=doc.createElement('label');statusLabel.textContent='My device observation';
       const select=doc.createElement('select');select.id=`dd569-${picker.value}-${check.id}`;
       for(const option of STATUSES_569){const opt=doc.createElement('option');opt.value=option.id;opt.textContent=option.label;select.append(opt);}

@@ -51,14 +51,14 @@ test('Imported JSON rejects forged acceptance, unknown devices, statuses and ove
 test('Review page offers keyboard, phone, local save, copy and explicit merge/clear controls',()=>{
   const html=source('admin/device-acceptance/index.html');
   for(const id of ['dd569Review','dd569Device','dd569Checks','dd569Save','dd569CopySummary','dd569CopyJson','dd569State','dd569Notice','dd569Export','dd569ImportText','dd569ImportConfirm','dd569Import','dd569ClearConfirm','dd569Clear'])assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build 569/);
+  assert.match(html,/Devil n Dove • Build (?:569|570)/);
   assert.match(html,/<meta name="viewport" content="width=device-width,initial-scale=1"/);
   assert.match(html,/<meta name="robots" content="noindex,nofollow"/);
   assert.match(html,/Owner sign-off PENDING/);
   assert.match(html,/no server-side synchronization/i);
   assert.match(html,/no passwords, customer information, private photos or access tokens/i);
-  assert.match(html,/admin-device-acceptance-569\.css\?v=569/);
-  assert.match(html,/admin-device-acceptance-569\.mjs\?v=569/);
+  assert.match(html,/admin-device-acceptance-569\.css\?v=(?:569|570)/);
+  assert.match(html,/admin-device-acceptance-569\.mjs\?v=(?:569|570)/);
   assert.doesNotMatch(html,/<form[^>]+action=|type="submit"/,'no remote form submission');
 });
 
@@ -100,5 +100,5 @@ test('Owner worksheet styling is scoped, mobile-readable and keyboard-accessible
 
 test('New Build 569 regression is CI-required and Production marker matches',()=>{
   assert.match(source('.github/workflows/current-application-quality.yml'),/release467_build569_device_feedback_readback\.test\.mjs/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":569/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:569|570)/);
 });

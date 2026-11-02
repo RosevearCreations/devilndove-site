@@ -119,5 +119,5 @@ test('Commerce, Workshop and Management responsive authority remains independent
 
 test('Build 567 is required in quality CI and has the exact live Production marker', () => {
   assert.match(source('.github/workflows/current-application-quality.yml'), /release467_build567_final_admin_acceptance\.test\.mjs/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'), /"build":(?:567|568|569)/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'), /"build":(?:567|568|569|570)/);
 });
