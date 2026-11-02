@@ -578,6 +578,12 @@ jobs:
           node --check scripts/release467_build571_device_retest_receipts.test.mjs
           node --test scripts/release467_build571_device_retest_receipts.test.mjs
 
+      - name: Build 572 source-matched exception reconciliation and owner-safe acceptance evidence
+        run: |
+          node --check public/js/admin-device-evidence-572.mjs
+          node --check scripts/release467_build572_owner_acceptance_packet.test.mjs
+          node --test scripts/release467_build572_owner_acceptance_packet.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
