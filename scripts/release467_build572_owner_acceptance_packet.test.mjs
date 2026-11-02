@@ -115,7 +115,7 @@ test('Live review surface has all controls, safe DOM text, no external mutation 
   const js=read('public/js/admin-device-evidence-572.mjs');
   for(const id of ['dd572Evidence','dd572Title','dd572Load','dd572CopySummary','dd572CopyPacket','dd572State','dd572List','dd572Summary','dd572Packet'])
     assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build (?:572|573)/);
+  assert.match(html,/Devil n Dove • Build (?:572|573|574)/);
   assert.match(html,/owner acceptance packet — Build 572/);
   assert.match(html,/No automatic closure, final acceptance/);
   assert.match(js,/win\.localStorage\.setItem\(NOTES_KEY_572/);
@@ -129,11 +129,11 @@ test('Live review surface has all controls, safe DOM text, no external mutation 
 test('All four modules share Build 572 cache revision; CI and immutable Production marker are current',()=>{
   const html=read('admin/device-acceptance/index.html');
   for(const module of ['admin-device-acceptance-569','admin-device-followup-570','admin-device-retest-571','admin-device-evidence-572'])
-    assert.ok(html.includes(`${module}.mjs?v=573`),module);
-  assert.match(read('public/js/admin-device-followup-570.mjs'),/admin-device-acceptance-569\.mjs\?v=573/);
-  assert.match(read('public/js/admin-device-retest-571.mjs'),/admin-device-followup-570\.mjs\?v=573/);
-  assert.match(read('public/js/admin-device-evidence-572.mjs'),/admin-device-retest-571\.mjs\?v=573/);
+    assert.ok(html.includes(`${module}.mjs?v=574`),module);
+  assert.match(read('public/js/admin-device-followup-570.mjs'),/admin-device-acceptance-569\.mjs\?v=574/);
+  assert.match(read('public/js/admin-device-retest-571.mjs'),/admin-device-followup-570\.mjs\?v=574/);
+  assert.match(read('public/js/admin-device-evidence-572.mjs'),/admin-device-retest-571\.mjs\?v=574/);
   assert.match(read('css/admin-device-acceptance-569.css'),/\.dd572-case/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build572_owner_acceptance_packet\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":573/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":574/);
 });
