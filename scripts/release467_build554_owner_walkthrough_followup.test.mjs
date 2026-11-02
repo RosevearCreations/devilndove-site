@@ -75,12 +75,12 @@ test('Build 554 emits owner acknowledgement only after confirmed server readback
 test('Build 554 preserves read-only dashboard and exact release marker',()=>{
   const page=read('admin/system-operations/index.html'),client=read('public/js/admin-system-health-554.js');
   for(const id of ['dd554Guide','dd554ReloadShared','dd554Step1','dd554Step2','dd554Step3','dd554Step4','dd554RoutesStatus','dd554SharedStatus','dd554IncidentStatus'])assert.match(page,new RegExp(`id="${id}"`));
-  assert.match(page,/Build (?:554|555|557|558|559|560|561|562|563)/);
+  assert.match(page,/Build (?:554|555|557|558|559|560|561|562|563|568)/);
   assert.match(page,/admin-system-health-554\.css\?v=554/);
   assert.match(page,/admin-system-health-554\.js\?v=554/);
   assert.match(page,/This guide never detects a second device/);
   assert.match(client,/dd:owner-review-recorded-554/);
   assert.doesNotMatch(client,/fetch\(|localStorage|sessionStorage|DELETE FROM|UPDATE runtime_incidents/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:554|555|556|557|558|559|560|561|562|563|564|565|566|567)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:554|555|556|557|558|559|560|561|562|563|564|565|566|567|568)/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build554_owner_walkthrough_followup\.test\.mjs/);
 });

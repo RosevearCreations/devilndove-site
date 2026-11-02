@@ -60,7 +60,7 @@
       "reference_screen": "Analytics & Reports",
       "reason": "Candidate for source-backed KPI and trend presentation, subject to a live visual check.",
       "evidence": {
-        "byte_length": 4778,
+        "byte_length": 4779,
         "stylesheets": 3,
         "scripts": 10,
         "forms": 0,
@@ -120,7 +120,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 3546,
+        "byte_length": 3547,
         "stylesheets": 3,
         "scripts": 8,
         "forms": 1,
@@ -285,7 +285,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 4302,
+        "byte_length": 4303,
         "stylesheets": 4,
         "scripts": 11,
         "forms": 0,
@@ -375,7 +375,7 @@
       "reference_screen": "Customer Requests",
       "reason": "Candidate for clearer intake and triage layout only after checking current owner-approved controls.",
       "evidence": {
-        "byte_length": 6907,
+        "byte_length": 6908,
         "stylesheets": 4,
         "scripts": 18,
         "forms": 0,
@@ -735,7 +735,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 12929,
+        "byte_length": 12930,
         "stylesheets": 3,
         "scripts": 7,
         "forms": 0,
@@ -1200,7 +1200,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 2222,
+        "byte_length": 2223,
         "stylesheets": 3,
         "scripts": 8,
         "forms": 0,
@@ -1230,7 +1230,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 3929,
+        "byte_length": 3931,
         "stylesheets": 2,
         "scripts": 19,
         "forms": 0,
@@ -1515,7 +1515,7 @@
       "reference_screen": "Product Management",
       "reason": "Build 557 now provides the four-area Product Entry 2.0 shell. Preserve until real owner visual acceptance or an observed functional correction is requested.",
       "evidence": {
-        "byte_length": 156778,
+        "byte_length": 156779,
         "stylesheets": 38,
         "scripts": 42,
         "forms": 1,
@@ -1800,7 +1800,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 2240,
+        "byte_length": 2241,
         "stylesheets": 2,
         "scripts": 6,
         "forms": 0,
@@ -2160,7 +2160,7 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 2345,
+        "byte_length": 2346,
         "stylesheets": 2,
         "scripts": 9,
         "forms": 0,
