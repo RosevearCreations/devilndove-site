@@ -106,6 +106,6 @@ test('Build 561 TikTok editor keeps a one-click, nonpublishing draft preparation
   assert.match(api,/readCanonicalDistributionGallery/);
   assert.match(pure,/allowedImage/);
   assert.doesNotMatch(api,/\bfetch\(|method:\s*['"]POST|access_token_ciphertext|decryptOAuthSecret|\.run\(/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:56[123456789]|570|571|572|573|574|575|576|577|578|579|580|581|582|583)/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:56[123456789]|570|571|572|573|574|575|576|577|578|579|580|581|582|583|584)/);
   assert.match(file('.github/workflows/current-application-quality.yml'),/release467_build561_tiktok_draft_handoff\.test\.mjs/);
 });

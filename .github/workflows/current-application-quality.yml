@@ -642,6 +642,11 @@ jobs:
           node --check public/js/admin-channel-intake-583.mjs
           node --check scripts/release467_build583_provider_intake.test.mjs
           node --test scripts/release467_build583_provider_intake.test.mjs
+      - name: Build 584 independent witness request and exact owner trial decision HOLD
+        run: |
+          node --check public/js/admin-channel-witness-584.mjs
+          node --check scripts/release467_build584_witness_trial_gate.test.mjs
+          node --test scripts/release467_build584_witness_trial_gate.test.mjs
 
       - name: JavaScript syntax
         run: |
