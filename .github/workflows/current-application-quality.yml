@@ -632,6 +632,11 @@ jobs:
           node --check public/js/admin-channel-trial-gate-581.mjs
           node --check scripts/release467_build581_trial_gate.test.mjs
           node --test scripts/release467_build581_trial_gate.test.mjs
+      - name: Build 582 provider identity and permission exception handoff safeguards
+        run: |
+          node --check public/js/admin-channel-handoff-582.mjs
+          node --check scripts/release467_build582_provider_handoff.test.mjs
+          node --test scripts/release467_build582_provider_handoff.test.mjs
 
       - name: JavaScript syntax
         run: |
