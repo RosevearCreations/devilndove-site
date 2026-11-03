@@ -702,6 +702,11 @@ jobs:
           node --check public/js/admin-channel-source-verification-595.mjs
           node --check scripts/release467_build595_source_verification.test.mjs
           node --test scripts/release467_build595_source_verification.test.mjs
+      - name: Build 596 independent evidence workboard, digest review and unsigned owner packet HOLD
+        run: |
+          node --check public/js/admin-channel-review-workboard-596.mjs
+          node --check scripts/release467_build596_review_workboard.test.mjs
+          node --test scripts/release467_build596_review_workboard.test.mjs
 
       - name: JavaScript syntax
         run: |

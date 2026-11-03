@@ -73,7 +73,7 @@ test('Build513 QL-246 uses exact signed field-name/value newline pairs and indep
  assert.equal((await inspectQl246513({rawJson:JSON.stringify({...record,payload:{...payload,negative_tests:{...payload.negative_tests,write_denied:false}}}),env,now})).matched,false);
  assert.equal((await inspectQl246513({rawJson:JSON.stringify({...record,payload:{...payload,connection_state:'CONNECTED'}}),env,now})).matched,false);
  assert.equal((await inspectQl246513({rawJson:JSON.stringify({...record,payload:{...payload,source_revision:'c'.repeat(40)}}),env,now})).matched,false);
- assert.equal((await inspectQl246513({rawJson:JSON.stringify({...record,signature:'A'+signature.slice(1)}),env,now})).matched,false);
+ assert.equal((await inspectQl246513({rawJson:JSON.stringify({...record,signature:(signature.startsWith('A')?'B':'A')+signature.slice(1)}),env,now})).matched,false);
  assert.equal((await inspectQl246513({rawJson,env,now:now+3600000})).matched,false);
 });
 
