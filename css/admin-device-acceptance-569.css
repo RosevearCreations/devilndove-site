@@ -74,3 +74,10 @@ body[data-admin-page="device-acceptance-569"] *{box-sizing:border-box}
 body[data-admin-page="device-acceptance-569"] :is(a,button,select,textarea,input):focus-visible{outline:3px solid #f2d49b;outline-offset:3px}
 @media(max-width:750px){.dd569-grid{grid-template-columns:minmax(0,1fr)}.dd569-wrap{width:min(100% - 20px,1150px)}.dd569-top nav a{padding:8px 4px}.dd569-check p{min-height:0}}
 @media(prefers-reduced-motion:reduce){.dd569-button{transition:none}}
+/* Build 578 owner-safe trial ledger */
+body:has(#dd578Form){margin:0;background:#0b1326;color:#f5eff8;font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+body:has(#dd578Form) *{box-sizing:border-box}
+.dd578-form input:not([type="checkbox"]){display:block;width:100%;min-height:44px;border:1px solid #9587aa;border-radius:9px;background:#0c1529;color:#fff;font:inherit;padding:10px}
+.dd578-form label{max-width:780px}
+body:has(#dd578Form) :is(a,button,select,textarea,input):focus-visible{outline:3px solid #f2d49b;outline-offset:3px}
+body:has(#dd578Form) a{color:#f0d6ad}
