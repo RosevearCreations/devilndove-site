@@ -627,6 +627,11 @@ jobs:
           node --check public/js/admin-channel-owner-review-580.mjs
           node --check scripts/release467_build580_owner_review.test.mjs
           node --test scripts/release467_build580_owner_review.test.mjs
+      - name: Build 581 independent provider receipt and owner-specific scoped trial gate
+        run: |
+          node --check public/js/admin-channel-trial-gate-581.mjs
+          node --check scripts/release467_build581_trial_gate.test.mjs
+          node --test scripts/release467_build581_trial_gate.test.mjs
 
       - name: JavaScript syntax
         run: |

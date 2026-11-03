@@ -135,5 +135,5 @@ test('All four modules share Build 572 cache revision; CI and immutable Producti
   assert.match(read('public/js/admin-device-evidence-572.mjs'),/admin-device-retest-571\.mjs\?v=577/);
   assert.match(read('css/admin-device-acceptance-569.css'),/\.dd572-case/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build572_owner_acceptance_packet\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:577|578|579|580)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:577|578|579|580|581)/);
 });
