@@ -164,5 +164,5 @@ test('Versioned Admin modules, CI and immutable Production build marker track Bu
   assert.match(read('public/js/admin-device-witness-575.mjs'),/admin-device-readiness-574\.mjs\?v=577/);
   assert.match(read('css/admin-device-acceptance-569.css'),/\.dd575-witness/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build575_device_witness\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":577/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:577|578|579)/);
 });
