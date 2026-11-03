@@ -31,5 +31,5 @@ test('Build 549 offers truthful cross-device owner receipt review and read-only 
   assert.match(ui,/No incident or Product record was changed/);
   assert.doesNotMatch(ui,/method:'POST'|method:'DELETE'/);
   assert.match(shared,/dd:system-health-reconciled-549/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:549|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565|566|567|568|569|570|571|572|573|574|575|576|577|578|579|580|581|582|583|584|585|586|587)/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:549|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565|566|567|568|569|570|571|572|573|574|575|576|577|578|579|580|581|582|583|584|585|586|587|588)/);
 });
