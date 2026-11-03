@@ -73,8 +73,8 @@ test('admin integration and build marker are no-provider-write and no-approval b
     'dd584Scope','dd584Outcome','dd584Reason','dd584Ack','dd584SaveWitness',
     'dd584OwnerRequest','dd584OwnerReason','dd584OwnerAck','dd584SaveOwner','dd584Copy',
     'dd584State','dd584Output'])assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build 584/);
+  assert.match(html,/Devil n Dove • Build (?:584|585)/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build584_witness_trial_gate\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":584/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:584|585)/);
 });

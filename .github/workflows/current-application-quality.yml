@@ -647,6 +647,11 @@ jobs:
           node --check public/js/admin-channel-witness-584.mjs
           node --check scripts/release467_build584_witness_trial_gate.test.mjs
           node --test scripts/release467_build584_witness_trial_gate.test.mjs
+      - name: Build 585 provider receipt reconciliation and owner decision exception HOLD
+        run: |
+          node --check public/js/admin-channel-receipt-followup-585.mjs
+          node --check scripts/release467_build585_receipt_followup.test.mjs
+          node --test scripts/release467_build585_receipt_followup.test.mjs
 
       - name: JavaScript syntax
         run: |

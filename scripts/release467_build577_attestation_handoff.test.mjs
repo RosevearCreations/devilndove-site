@@ -151,5 +151,5 @@ test('Immutable workflow marker, CI regression and all cache-busted source modul
   assert.match(read('css/admin-device-acceptance-569.css'),/\.dd577-attestation/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build577_attestation_handoff\.test\.mjs/);
   // The deployment marker advances with the current build; historical Build 577 behavior stays pinned.
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:579|580|581|582|583|584)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:579|580|581|582|583|584|585)/);
 });
