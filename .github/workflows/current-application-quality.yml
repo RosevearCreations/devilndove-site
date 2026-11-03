@@ -692,6 +692,11 @@ jobs:
           node --check public/js/admin-channel-authenticity-matrix-593.mjs
           node --check scripts/release467_build593_authenticity_matrix.test.mjs
           node --test scripts/release467_build593_authenticity_matrix.test.mjs
+      - name: Build 594 provider original-source intake and owner decision exception aging HOLD
+        run: |
+          node --check public/js/admin-channel-intake-aging-594.mjs
+          node --check scripts/release467_build594_intake_aging.test.mjs
+          node --test scripts/release467_build594_intake_aging.test.mjs
 
       - name: JavaScript syntax
         run: |

@@ -27,6 +27,13 @@ const pending={response_pin:responsePin593(provider,provider.latest_reconciliati
   provider_account_id:'shop1',product_ref:'54',action_scope:'UPLOAD_IMAGE',
   reason:'Provider original response and independent witness authentication remain unverified.',
   recorded_at:'2026-11-03T14:02:00Z',next_review_at:'2026-11-04T14:00:00Z'};
+const ownerPending={...pending,response_pin:responsePin593(owner,owner.latest_reconciliation),
+  next_action:'REQUEST_SEPARATELY_SIGNED_OWNER_SCOPE_DECISION',
+  owner_decision_outcome:'APPROVAL_REQUESTED',external_case_ref:'Owner external case 591',
+  owner_decision_ref:'Candidate owner paper decision not independently verified',
+  owner_signer_ref:'Candidate signer not authenticated',
+  recorded_at:'2026-11-03T14:03:00Z'};
+export const fixture593={source,args,pending,ownerPending,asOf};
 test('exact source authenticity matrix cannot authenticate provider or authorize trial',()=>{
   const r=authenticityMatrix593(source,args,[pending],asOf);
   assert.equal(r.format,FORMAT_593);assert.equal(r.open_authenticity_cases,2);
@@ -77,10 +84,10 @@ test('Build 593 Admin, CI and production marker preserve no-provider-write gate'
     'dd593Receipt','dd593Origin','dd593Owner','dd593Signer','dd593Account',
     'dd593Product','dd593Scope','dd593Due','dd593Ack','dd593Save','dd593Copy','dd593Output'])
     assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build 593/);
+  assert.match(html,/Devil n Dove • Build (?:593|594)/);
   const js=read('public/js/admin-channel-authenticity-matrix-593.mjs');
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build593_authenticity_matrix\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":593/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:593|594)/);
 });
