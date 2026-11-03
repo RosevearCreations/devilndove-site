@@ -662,6 +662,11 @@ jobs:
           node --check public/js/admin-channel-provenance-triage-587.mjs
           node --check scripts/release467_build587_provenance_triage.test.mjs
           node --test scripts/release467_build587_provenance_triage.test.mjs
+      - name: Build 588 independent provider provenance disposition and owner decision evidence recheck HOLD
+        run: |
+          node --check public/js/admin-channel-disposition-588.mjs
+          node --check scripts/release467_build588_disposition_recheck.test.mjs
+          node --test scripts/release467_build588_disposition_recheck.test.mjs
 
       - name: JavaScript syntax
         run: |

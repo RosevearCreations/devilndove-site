@@ -70,5 +70,5 @@ test('Build 532 offers a six-step same-page guide and unambiguous manual Faceboo
  assert.match(editor,/const noWriteStarted=error\?\.payload\?\.no_product_write_started===true/);
  assert.match(editor,/if\(!noWriteStarted&&\(failure\.uncertainWrite/);
  assert.match(read('functions/api/admin/product-editor-save.js'),/no_product_write_started:true/);
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:5(?:3[23456789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565|566|567|568|569|570|571|572|573|574|575|576|577|578|579|580|581|582|583|584|585|586|587)/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:5(?:3[23456789]|40|41|42|43|44|45|46|47|48|49)|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565|566|567|568|569|570|571|572|573|574|575|576|577|578|579|580|581|582|583|584|585|586|587|588)/);
 });

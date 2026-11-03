@@ -43,8 +43,8 @@ test('Build 580 UI, CI and live marker are wired without provider requests or D1
   const html=read('admin/channel-trials/index.html'),js=read('public/js/admin-channel-owner-review-580.mjs');
   for(const id of ['dd580Review','dd580Action','dd580Reason','dd580Locator','dd580Ack',
     'dd580Save','dd580Copy','dd580State','dd580Output'])assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build (?:580|581|582|583|584|585|586|587)/);
+  assert.match(html,/Devil n Dove • Build (?:580|581|582|583|584|585|586|587|588)/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build580_owner_review\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:580|581|582|583|584|585|586|587)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:580|581|582|583|584|585|586|587|588)/);
 });

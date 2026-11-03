@@ -195,9 +195,9 @@
       "reference_screen": "Unassigned / contextual module",
       "reason": "Not individually approved for a revamp; inspect actual signed-in UI and owner acceptance before changing.",
       "evidence": {
-        "byte_length": 34721,
+        "byte_length": 38661,
         "stylesheets": 1,
-        "scripts": 10,
+        "scripts": 11,
         "forms": 1,
         "has_viewport": true
       },
