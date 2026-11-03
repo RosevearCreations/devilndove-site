@@ -36,6 +36,7 @@ const pendingEscalation={witness_pin:witnessPin591(providerCase,providerCase.wit
   provider_account_id:'different-shop',product_ref:'54',action_scope:'UPLOAD_IMAGE',
   reason:'Provider custody identity and independent chain confirmation needed.',
   recorded_at:'2026-11-03T13:40:00Z',next_review_at:'2026-11-04T12:00:00Z'};
+export const fixture591={sourceArgs,exactWitness,pendingEscalation,providerCase,ownerCase590,asOf};
 test('source-pinned witness escalation prioritizes open evidence and mismatched provider account',()=>{
   const r=escalation591(exactWitness,sourceArgs,[pendingEscalation],asOf);
   assert.equal(r.format,FORMAT_591);assert.equal(r.open_escalation_cases,2);
@@ -75,8 +76,8 @@ test('Admin, CI and immutable deployment marker include Build 591 with no provid
     'dd591Receipt','dd591Owner','dd591Account','dd591Product','dd591Scope','dd591Due',
     'dd591Reason','dd591Ack','dd591Save','dd591Copy','dd591State','dd591Output'])
     assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build 591/);
+  assert.match(html,/Devil n Dove • Build (?:591|592)/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build591_witness_escalation\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":591/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:591|592)/);
 });

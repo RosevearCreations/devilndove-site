@@ -68,8 +68,8 @@ test('Build 590 Admin controls, CI and production marker are wired without provi
     'dd590Reviewer','dd590Custody','dd590Owner','dd590Account','dd590Product','dd590Scope',
     'dd590Due','dd590Reason','dd590Ack','dd590Save','dd590Copy','dd590State','dd590Output'])
     assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build (?:590|591)/);
+  assert.match(html,/Devil n Dove • Build (?:590|591|592)/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build590_witness_continuity\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:590|591)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:590|591|592)/);
 });
