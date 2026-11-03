@@ -725,6 +725,12 @@ jobs:
           node --check scripts/release467_build599_issuer_receipt_consent_preflight.test.mjs
           node --test scripts/release467_build599_issuer_receipt_consent_preflight.test.mjs
 
+      - name: Build 600 independent issuer authenticity decision register and owner readiness HOLD
+        run: |
+          node --check public/js/admin-channel-issuer-response-598.mjs
+          node --check scripts/release467_build600_decision_register_aging.test.mjs
+          node --test scripts/release467_build600_decision_register_aging.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

@@ -484,3 +484,267 @@ function init599(doc=globalThis.document,win=globalThis.window){
   get('dd599CopyOwner').addEventListener('click',()=>copy('owner'));
 }
 if(typeof document!=='undefined')init599();
+
+
+/* Build 600 — independent issuer decision register, open exception aging and owner readiness.
+   Local dispositions are NOT source authentication, closure or trial authority. */
+export const FORMAT_600='devilndove-issuer-authenticity-decision-owner-readiness-600-v1';
+export const KEY_600='dd:issuer-authenticity-decision-owner-readiness:600:v1';
+export const STATES_600=['ISSUER_AUTHENTICITY_PENDING','ISSUER_SOURCE_DISPUTED',
+  'DIGEST_CUSTODY_RECHECK','INDEPENDENT_CONFLICT_WITNESS_PENDING',
+  'CONFLICT_CLOSURE_PROOF_PENDING','EXACT_OWNER_SIGNED_SCOPE_PENDING',
+  'EXACT_OWNER_SCOPE_DISPUTED','OWNER_AUTHORIZATION_ESCALATED'];
+export const ACTIONS_600=['REQUEST_ORIGINAL_ISSUER_AUTHORITY',
+  'RECONCILE_SOURCE_DIGEST_AND_CUSTODY','ESCALATE_DISTINCT_CONFLICT_WITNESS',
+  'REQUEST_INDEPENDENT_CONFLICT_CLOSURE_PROOF',
+  'REQUEST_EXACT_OWNER_SIGNED_AUTHORIZATION','RECONCILE_OWNER_SIGNER_WITNESS',
+  'ESCALATE_EXACT_OWNER_AUTHORIZATION'];
+export const FILTERS_600=['ALL','ISSUER','OWNER','CONFLICT','OVERDUE','NO_RECEIPT','WITNESS'];
+const ownerAction600=a=>ACTIONS_600.slice(4).includes(a);
+const safe600=(s,n=220)=>typeof s==='string'&&s.length<=n&&
+  !/(?:access[_ -]?token|bearer\s+\S+|client[_ -]?secret|password\s*[:=]|api[_ -]?key\s*[:=]|private[_ -]?key)/i.test(s);
+const iso600=s=>typeof s==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:\d\d)$/.test(s)&&Number.isFinite(Date.parse(s));
+const sha600=s=>s===''||/^[a-f0-9]{64}$/.test(s);
+const uniq600=a=>[...new Set(a.filter(Boolean))];
+const fields600=['case_pin','exception_code','decision_ref','issuer_authority_ref',
+  'original_issuer_ref','issuer_receipt_ref','receipt_sha256','custody_receipt_ref',
+  'reviewer_ref','witness_ref','owner_signer_ref','owner_signed_receipt_ref',
+  'owner_account','owner_product','owner_action','reason'];
+
+export function decisionCandidate600(d){
+  const allowed=new Set([...fields600,'state','next_action','recorded_at','next_review_at']);
+  if(!d||Array.isArray(d)||Object.keys(d).some(k=>!allowed.has(k))||
+    fields600.some(k=>!safe600(d[k],k==='reason'?900:220))||
+    !d.case_pin.startsWith('dd596-case:')||d.exception_code.length<4||
+    !STATES_600.includes(d.state)||!ACTIONS_600.includes(d.next_action)||
+    !sha600(d.receipt_sha256)||d.reason.trim().length<15||
+    !iso600(d.recorded_at)||!iso600(d.next_review_at)||
+    Date.parse(d.next_review_at)<Date.parse(d.recorded_at))
+    throw Error('Unverified issuer or owner decision cannot assert approval.');
+  return Object.fromEntries([...fields600.map(k=>[k,d[k].trim()]),
+    ['state',d.state],['next_action',d.next_action],
+    ['recorded_at',d.recorded_at],['next_review_at',d.next_review_at],
+    ['issuer_authenticated',false],['conflict_closed',false],
+    ['owner_consent_authenticated',false],['trial_authorized',false]]);
+}
+export function aging600(due,asOf){
+  if(due!==''&&!iso600(due)||!iso600(asOf))throw Error('Invalid review clock.');
+  if(!due)return {bucket:'NO_REVIEW_DEADLINE',overdue_days:0};
+  const delta=Date.parse(asOf)-Date.parse(due);
+  return {bucket:delta<=-86400000?'ON_TRACK':delta<0?'DUE_WITHIN_24H':
+    delta<86400000?'OVERDUE_LT_1D':delta<4*86400000?'OVERDUE_1_3D':
+    delta<8*86400000?'OVERDUE_4_7D':'OVERDUE_8D_PLUS',
+    overdue_days:Math.max(0,Math.ceil(delta/86400000)),due_at:due};
+}
+export function decisionRegister600(exact599,source599,local599=[],rows=[],asOf=new Date().toISOString()){
+  if(exact599?.format!==FORMAT_599||!Array.isArray(source599)||source599.length!==3||
+    !Array.isArray(local599)||!Array.isArray(rows)||rows.length>100||!iso600(asOf))
+    throw Error('Exact Build 599 receipt chain required.');
+  if(JSON.stringify(receiptIntake599(...source599,local599,exact599.as_of))!==JSON.stringify(exact599))
+    throw Error('Stale or modified Build 599 original-source packet.');
+  const current=receiptIntake599(...source599,local599,asOf);
+  const requested=rows.map(decisionCandidate600);
+  const cases=current.cases.map(c=>{
+    const owner=c.owner_trial_decision_pending,prior=c.latest_receipt||{};
+    const decisions=requested.filter(r=>r.case_pin===c.case_pin).map(r=>{
+      if(ownerAction600(r.next_action)!==owner||!c.open_exceptions.includes(r.exception_code)||
+        (owner&&(r.owner_account!==c.account_id||r.owner_product!==c.product_ref||
+          r.owner_action!==c.exact_action))||
+        (!owner&&[r.owner_signer_ref,r.owner_signed_receipt_ref,r.owner_account,
+          r.owner_product,r.owner_action].some(Boolean)))
+        throw Error('Wrong original issuer exception or exact owner trial scope.');
+      const conflicts=uniq600([
+        r.issuer_authority_ref&&r.decision_ref&&r.issuer_authority_ref===r.decision_ref?
+          'SELF_REFERENTIAL_ISSUER_DECISION':null,
+        r.issuer_authority_ref&&r.issuer_receipt_ref&&r.issuer_authority_ref===r.issuer_receipt_ref?
+          'ISSUER_AUTHORITY_NOT_INDEPENDENT_OF_RECEIPT':null,
+        r.original_issuer_ref&&c.expected_issuer_ref&&r.original_issuer_ref!==c.expected_issuer_ref?
+          'ISSUER_IDENTITY_SUBSTITUTION_CONFLICT':null,
+        r.issuer_receipt_ref&&prior.issuer_receipt_ref&&r.issuer_receipt_ref!==prior.issuer_receipt_ref?
+          'ORIGINAL_RECEIPT_SUBSTITUTION':null,
+        r.receipt_sha256&&c.source_digest&&r.receipt_sha256!==c.source_digest?
+          'SOURCE_DIGEST_DISPUTE_OPEN':null,
+        r.custody_receipt_ref&&c.expected_custody_ref&&r.custody_receipt_ref!==c.expected_custody_ref?
+          'CUSTODY_RECEIPT_CONFLICT':null,
+        r.reviewer_ref&&r.witness_ref&&r.reviewer_ref===r.witness_ref?
+          'REVIEWER_EQUALS_WITNESS':null,
+        r.original_issuer_ref&&r.reviewer_ref&&r.original_issuer_ref===r.reviewer_ref?
+          'ISSUER_EQUALS_REVIEWER':null,
+        r.original_issuer_ref&&r.witness_ref&&r.original_issuer_ref===r.witness_ref?
+          'ISSUER_EQUALS_WITNESS':null,
+        owner&&r.owner_signer_ref&&r.owner_signer_ref===r.reviewer_ref?
+          'OWNER_SIGNER_EQUALS_REVIEWER':null,
+        owner&&r.owner_signer_ref&&r.owner_signer_ref===r.witness_ref?
+          'OWNER_SIGNER_EQUALS_WITNESS':null,
+        owner&&r.owner_signer_ref&&c.expected_owner_signer_ref&&
+          r.owner_signer_ref!==c.expected_owner_signer_ref?'OWNER_SIGNER_CONFLICT':null,
+        owner&&r.owner_signed_receipt_ref&&c.expected_owner_receipt_ref&&
+          r.owner_signed_receipt_ref!==c.expected_owner_receipt_ref?
+          'OWNER_SIGNED_RECEIPT_CONFLICT':null,
+        !r.issuer_authority_ref?'EXTERNAL_ISSUER_AUTHORITY_UNVERIFIED':null,
+        !r.reviewer_ref?'INDEPENDENT_REVIEWER_MISSING':null,
+        !r.witness_ref?'SEPARATE_WITNESS_MISSING':null,
+        owner&&(!r.owner_signer_ref||!r.owner_signed_receipt_ref)?
+          'EXACT_OWNER_SIGNED_SCOPE_UNVERIFIED':null
+      ]);
+      return {...r,conflicts,unresolved_exceptions:uniq600([...c.open_exceptions,...conflicts]),
+        issuer_authenticated:false,independent_conflict_closed:false,
+        owner_consent_authenticated:false,provider_reads:0,provider_writes:0,
+        d1_operations:0,trial_authorized:false};
+    });
+    const latest=decisions.at(-1)||null;
+    const aging=aging600(latest?.next_review_at||prior.next_review_at||'',asOf);
+    const unresolved=uniq600([...c.open_exceptions,...(latest?.conflicts||[])]);
+    const blockers=uniq600([
+      !prior.issuer_receipt_ref?'ORIGINAL_ISSUER_RECEIPT_MISSING':null,
+      !latest?.issuer_authority_ref?'EXTERNAL_ISSUER_AUTHORITY_UNVERIFIED':null,
+      !latest?.reviewer_ref?'INDEPENDENT_REVIEWER_MISSING':null,
+      !latest?.witness_ref?'SEPARATE_WITNESS_MISSING':null,
+      owner&&!latest?.owner_signed_receipt_ref?'EXACT_OWNER_SIGNED_RECEIPT_UNVERIFIED':null,
+      ...unresolved
+    ]);
+    return {case_pin:c.case_pin,channel:c.channel,account_id:c.account_id,
+      product_ref:c.product_ref,exact_action:c.exact_action,priority:c.priority,
+      owner_trial_decision_pending:owner,expected_issuer_ref:c.expected_issuer_ref,
+      expected_custody_ref:c.expected_custody_ref,expected_owner_signer_ref:c.expected_owner_signer_ref,
+      expected_owner_receipt_ref:c.expected_owner_receipt_ref,source_digest:c.source_digest,
+      prior_receipt:prior,decisions,latest_decision:latest,aging,
+      open_exceptions:unresolved,readiness_blockers:blockers,
+      original_issuer_authenticated:false,conflict_closed:false,
+      exact_owner_consent_verified:false,trial_authorized:false,
+      readiness_status:'HOLD_ORIGINAL_AUTHORITY_CONFLICT_CLOSURE_AND_SIGNED_OWNER_SCOPE'};
+  });
+  const pins=new Set(cases.map(c=>c.case_pin));
+  return {format:FORMAT_600,build:600,source_build:599,as_of:asOf,cases,
+    open_cases:cases.length,issuer_cases:cases.filter(c=>!c.owner_trial_decision_pending).length,
+    owner_cases:cases.filter(c=>c.owner_trial_decision_pending).length,
+    overdue_cases:cases.filter(c=>c.aging.bucket.startsWith('OVERDUE')).length,
+    overdue_owner_cases:cases.filter(c=>c.owner_trial_decision_pending&&c.aging.bucket.startsWith('OVERDUE')).length,
+    conflict_cases:cases.filter(c=>c.open_exceptions.some(x=>/CONFLICT|DIGEST|CUSTODY|DISPUTE|REUSED/.test(x))).length,
+    witness_gaps:cases.filter(c=>c.readiness_blockers.some(x=>/WITNESS|REVIEWER/.test(x))).length,
+    missing_issuer_receipts:cases.filter(c=>!c.prior_receipt.issuer_receipt_ref).length,
+    stale_unmatched_decisions:requested.filter(r=>!pins.has(r.case_pin)),
+    issuer_decisions_authenticated:0,independent_conflicts_closed:0,
+    exact_owner_signatures_verified:0,authorized_trials:0,
+    provider_reads:0,provider_writes:0,d1_operations:0,
+    release_gate:'HOLD_INDEPENDENT_ISSUER_DECISION_CONFLICT_CLOSURE_AND_EXACT_OWNER_AUTHORIZATION'};
+}
+export function filterDecision600(packet,kind='ALL',term=''){
+  if(packet?.format!==FORMAT_600||!FILTERS_600.includes(kind)||!safe600(term,120))
+    throw Error('Invalid decision dashboard filter.');
+  const q=term.trim().toLowerCase();
+  return packet.cases.filter(c=>(kind==='ALL'||
+    (kind==='ISSUER'&&!c.owner_trial_decision_pending)||
+    (kind==='OWNER'&&c.owner_trial_decision_pending)||
+    (kind==='CONFLICT'&&c.open_exceptions.some(x=>/CONFLICT|DIGEST|CUSTODY|DISPUTE|REUSED/.test(x)))||
+    (kind==='OVERDUE'&&c.aging.bucket.startsWith('OVERDUE'))||
+    (kind==='NO_RECEIPT'&&!c.prior_receipt.issuer_receipt_ref)||
+    (kind==='WITNESS'&&c.readiness_blockers.some(x=>/WITNESS|REVIEWER/.test(x)))) &&
+    (!q||[c.channel,c.account_id,c.product_ref,c.exact_action,c.priority]
+      .some(x=>String(x).toLowerCase().includes(q))));
+}
+export function unsignedOwnerReadiness600(packet,pin){
+  if(packet?.format!==FORMAT_600)throw Error('Exact Build 600 decision register required.');
+  const c=packet.cases.find(c=>c.case_pin===pin&&c.owner_trial_decision_pending);
+  if(!c)throw Error('Exact pending owner case required.');
+  const d=c.latest_decision||{};
+  return {format:'devilndove-unsigned-owner-authorization-readiness-600-v1',
+    build:600,source_build:599,case_pin:c.case_pin,prepared_at:packet.as_of,
+    exact_channel:c.channel,exact_shop_account:c.account_id,
+    exact_product_sku:c.product_ref,exact_action:c.exact_action,
+    expected_signer:c.expected_owner_signer_ref,
+    expected_signed_receipt:c.expected_owner_receipt_ref,
+    proposed_signer:d.owner_signer_ref||null,proposed_signed_receipt:d.owner_signed_receipt_ref||null,
+    reviewer:d.reviewer_ref||null,separate_witness:d.witness_ref||null,
+    aging_bucket:c.aging.bucket,unresolved_exceptions:c.open_exceptions,
+    readiness_blockers:c.readiness_blockers,issuer_authenticated:false,
+    conflict_closed:false,owner_signature_authenticated:false,
+    trial_authorized:false,provider_read_or_write_authorized:false,
+    status:'UNSIGNED_UNVERIFIED_EXACT_OWNER_CONSENT_TRIAL_HOLD'};
+}
+function init600(doc=globalThis.document,win=globalThis.window){
+  if(!doc?.getElementById('dd600Refresh'))return;
+  const get=id=>doc.getElementById(id),status=get('dd600Status'),output=get('dd600Output');
+  const read=(key,fallback)=>{const x=win.localStorage.getItem(key);return x?JSON.parse(x):fallback;};
+  const stored=()=>read(KEY_600,[]);
+  let previousPin=null;
+  const source=()=>{
+    const a=get('dd599Output')?.value,b=get('dd598Output')?.value,c=get('dd597Output')?.value;
+    if(!a||!b||!c||[a,b,c].some(x=>x.length>900000))
+      throw Error('Recompute original source sections 5–24.');
+    return [JSON.parse(a),[JSON.parse(b),[JSON.parse(c),sourceContext597(doc,win),
+      read(KEY_597,[])],read(KEY_598,[])],read(KEY_599,[])];
+  };
+  const refresh=()=>{
+    const p=decisionRegister600(...source(),stored());
+    output.value=JSON.stringify(p,null,2);
+    get('dd600Metrics').textContent=p.open_cases+' open · '+p.overdue_cases+
+      ' overdue · '+p.conflict_cases+' disputes · '+p.owner_cases+' owner decisions · trial HOLD';
+    const choices=get('dd600Case'),prior=choices.value;choices.replaceChildren();
+    for(const c of p.cases){const o=doc.createElement('option');o.value=c.case_pin;
+      o.textContent=c.priority+' · '+c.channel+' · '+c.product_ref;choices.append(o);}
+    if([...choices.options].some(x=>x.value===prior))choices.value=prior;
+    const c=p.cases.find(x=>x.case_pin===choices.value),ex=get('dd600Exception'),priorEx=ex.value;
+    ex.replaceChildren();
+    for(const x of c?.open_exceptions||[]){const o=doc.createElement('option');o.value=x;
+      o.textContent=x.replaceAll('_',' ');ex.append(o);}
+    if([...ex.options].some(x=>x.value===priorEx))ex.value=priorEx;
+    if(previousPin!==c?.case_pin){
+      previousPin=c?.case_pin||null;
+      get('dd600Action').value=c?.owner_trial_decision_pending?
+        'REQUEST_EXACT_OWNER_SIGNED_AUTHORIZATION':'REQUEST_ORIGINAL_ISSUER_AUTHORITY';
+      get('dd600State').value=c?.owner_trial_decision_pending?
+        'EXACT_OWNER_SIGNED_SCOPE_PENDING':'ISSUER_AUTHENTICITY_PENDING';
+      for(const [id,v] of [['dd600Account',c?.owner_trial_decision_pending?c.account_id:''],
+        ['dd600Product',c?.owner_trial_decision_pending?c.product_ref:''],
+        ['dd600Scope',c?.owner_trial_decision_pending?c.exact_action:'']])get(id).value=v;
+    }
+    const rows=get('dd600Rows');rows.replaceChildren();
+    for(const c of filterDecision600(p,get('dd600Filter').value,get('dd600Search').value)){
+      const li=doc.createElement('li');
+      li.textContent=c.priority+' · '+c.channel+' · '+c.product_ref+' · '+c.aging.bucket+
+        ' · '+c.readiness_blockers.length+' unresolved readiness blockers';rows.append(li);
+    }
+    status.textContent='Independent decision register updated. No issuer authentication or trial consent.';
+    return p;
+  };
+  const guard=()=>{try{return refresh();}catch{
+    status.textContent='Refresh original source sections 5–24 first; authorization HOLD.';return null;}};
+  for(const [id,event] of [['dd600Refresh','click'],['dd600Filter','change'],
+    ['dd600Search','input'],['dd600Case','change']])get(id).addEventListener(event,guard);
+  get('dd600Save').addEventListener('click',()=>{try{
+    if(!get('dd600Ack').checked)throw Error('Acknowledge HOLD.');
+    const p=refresh(),c=p.cases.find(x=>x.case_pin===get('dd600Case').value);
+    if(!c)throw Error('No source case.');
+    const v=id=>get(id).value.trim();
+    const row=decisionCandidate600({case_pin:c.case_pin,exception_code:v('dd600Exception'),
+      state:v('dd600State'),next_action:v('dd600Action'),decision_ref:v('dd600DecisionRef'),
+      issuer_authority_ref:v('dd600Authority'),original_issuer_ref:v('dd600Issuer'),
+      issuer_receipt_ref:v('dd600Receipt'),receipt_sha256:v('dd600Digest'),
+      custody_receipt_ref:v('dd600Custody'),reviewer_ref:v('dd600Reviewer'),
+      witness_ref:v('dd600Witness'),owner_signer_ref:v('dd600Signer'),
+      owner_signed_receipt_ref:v('dd600OwnerReceipt'),
+      owner_account:v('dd600Account'),owner_product:v('dd600Product'),
+      owner_action:v('dd600Scope'),reason:v('dd600Reason'),
+      recorded_at:new Date().toISOString(),
+      next_review_at:new Date(v('dd600Due')).toISOString()});
+    const next=[...stored(),row];decisionRegister600(...source(),next);
+    win.localStorage.setItem(KEY_600,JSON.stringify(next));
+    get('dd600Ack').checked=false;refresh();
+  }catch{status.textContent='Rejected: stale source, wrong scope or unsafe decision. Trial HOLD.';}});
+  const make=()=>{const p=refresh();
+    get('dd600OwnerPacket').value=JSON.stringify(unsignedOwnerReadiness600(p,get('dd600Case').value),null,2);
+    status.textContent='Unsigned exact owner readiness prepared; HOLD.';};
+  get('dd600Prepare').addEventListener('click',()=>{try{make();}catch{
+    status.textContent='Select a current owner case. Trial HOLD.';}});
+  const copy=async(kind)=>{try{
+    if(kind==='owner')make();else refresh();
+    const el=get(kind==='owner'?'dd600OwnerPacket':'dd600Output');
+    try{await win.navigator.clipboard.writeText(el.value);
+      status.textContent='Unverified documentary evidence copied; HOLD.';
+    }catch{el.focus();el.select();status.textContent='Select and copy the document manually.';}
+  }catch{status.textContent='Refresh exact current source before copying. HOLD.';}};
+  get('dd600Copy').addEventListener('click',()=>copy('queue'));
+  get('dd600CopyOwner').addEventListener('click',()=>copy('owner'));
+}
+if(typeof document!=='undefined')init600();
