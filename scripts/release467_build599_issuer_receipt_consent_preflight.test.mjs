@@ -8,7 +8,7 @@ import {reconcileSource597} from '../public/js/admin-channel-source-disposition-
 import {issuerResponseReview598} from '../public/js/admin-channel-issuer-response-598.mjs';
 import {FORMAT_599,receiptCandidate599,receiptIntake599,filterReceipt599,
   unresolvedWitnessPacket599,exactConsentPreflight599} from
-  '../public/js/admin-channel-issuer-receipt-599.mjs';
+  '../public/js/admin-channel-issuer-response-598.mjs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const {exact594,upstream594,providerRow,ownerRow,asOf}=fixture595;
 const source595=[exact594,upstream594,[providerRow,ownerRow]];
@@ -36,6 +36,13 @@ const row=c=>({case_pin:c.case_pin,exception_code:c.open_exceptions[0],
   received_at:'2026-11-03T18:00:00Z',recorded_at:'2026-11-03T19:00:00Z',
   next_review_at:'2026-11-04T19:30:00Z'});
 const providerReceipt=row(provider),ownerReceipt=row(owner);
+test('runtime budget preserves existing issuer-review asset rather than adding another runtime file',()=>{
+  const html=read('admin/channel-trials/index.html');
+  assert.doesNotMatch(html,/admin-channel-issuer-receipt-599\.mjs/);
+  const js=read('public/js/admin-channel-issuer-response-598.mjs');
+  assert.match(js,/export const FORMAT_599=/);
+  assert.match(js,/function init599/);
+});
 test('normalized local receipt survives save and reload without inventing approval flags',()=>{
   const persisted=receiptCandidate599(providerReceipt);
   const p=receiptIntake599(exact598,source598,[],[persisted],asOf);
@@ -131,10 +138,10 @@ test('Build 599 Admin controls, CI gate, exact source identity and no-network bo
     'dd599PrepareOwner','dd599CopyOwner','dd599OwnerPacket'])
     assert.ok(html.includes('id="'+id+'"'),id);
   assert.match(html,/Devil n Dove • Build 599/);
-  assert.match(html,/admin-channel-issuer-receipt-599\.mjs\?v=599/);
-  const js=read('public/js/admin-channel-issuer-receipt-599.mjs');
+  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=599/);
+  const js=read('public/js/admin-channel-issuer-response-598.mjs');
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
-  assert.match(js,/admin-channel-issuer-response-598\.mjs\?v=598/);
+  assert.match(js,/admin-channel-source-disposition-597\.mjs\?v=597/);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build599_issuer_receipt_consent_preflight\.test\.mjs/);
   assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":599/);

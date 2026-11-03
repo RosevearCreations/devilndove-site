@@ -19,3 +19,5 @@ Build 599 adds section 24 of the Admin Channel Trials worksheet. It indexes clai
 ## Verification
 
 Run the Build 599 Node test suite and the Admin route inventory. On exact development SHA, System Gate, Current Application Quality Proof, I.T. Admin Runtime Proof and Branch Hygiene must pass. After merging through dev to main, production Cloudflare Pages deployment, zero-D1 code-only proof, custom-domain smoke/version and independent live-resource integrity must pass. Live Etsy/Meta and owner consent remain HOLD regardless of deployment state.
+
+Runtime performance note: Build 599 is consolidated in the existing public/js/admin-channel-issuer-response-598.mjs asset, cache version 599, to retain the enforced 1,800 runtime source-file ceiling. Build 598 APIs and the independent safety checks are preserved.

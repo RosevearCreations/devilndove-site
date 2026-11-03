@@ -105,7 +105,7 @@ test('Build 598 Admin section, CI gate and production release marker are review-
     'dd598Prepare','dd598CopyPacket','dd598Packet'])
     assert.ok(html.includes('id="'+id+'"'),id);
   assert.match(html,/Devil n Dove • Build (?:598|599)/);
-  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=598/);
+  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=(?:598|599)/);
   const js=read('public/js/admin-channel-issuer-response-598.mjs');
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(js,/admin-channel-source-disposition-597\.mjs\?v=597/);
