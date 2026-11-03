@@ -657,6 +657,11 @@ jobs:
           node --check public/js/admin-channel-aging-586.mjs
           node --check scripts/release467_build586_witness_aging.test.mjs
           node --test scripts/release467_build586_witness_aging.test.mjs
+      - name: Build 587 receipt provenance aging and exact owner trial exception triage HOLD
+        run: |
+          node --check public/js/admin-channel-provenance-triage-587.mjs
+          node --check scripts/release467_build587_provenance_triage.test.mjs
+          node --test scripts/release467_build587_provenance_triage.test.mjs
 
       - name: JavaScript syntax
         run: |

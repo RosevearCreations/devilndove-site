@@ -144,5 +144,5 @@ test('Build 574 revalidates six shared module revisions and Production CI releas
   assert.match(read('public/js/admin-device-readiness-574.mjs'),/admin-device-intake-573\.mjs\?v=577/);
   assert.match(read('css/admin-device-acceptance-569.css'),/\.dd574-gap/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build574_device_readiness\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:577|578|579|580|581|582|583|584|585|586)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:577|578|579|580|581|582|583|584|585|586|587)/);
 });

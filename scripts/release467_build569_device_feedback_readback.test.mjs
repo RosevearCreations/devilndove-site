@@ -100,5 +100,5 @@ test('Owner worksheet styling is scoped, mobile-readable and keyboard-accessible
 
 test('New Build 569 regression is CI-required and Production marker matches',()=>{
   assert.match(source('.github/workflows/current-application-quality.yml'),/release467_build569_device_feedback_readback\.test\.mjs/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:569|570|571|572|573|574|575|576|577|578|579|580|581|582|583|584|585|586)/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:569|570|571|572|573|574|575|576|577|578|579|580|581|582|583|584|585|586|587)/);
 });
