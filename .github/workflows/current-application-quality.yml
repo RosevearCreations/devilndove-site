@@ -677,6 +677,11 @@ jobs:
           node --check public/js/admin-channel-witness-continuity-590.mjs
           node --check scripts/release467_build590_witness_continuity.test.mjs
           node --test scripts/release467_build590_witness_continuity.test.mjs
+      - name: Build 591 independent witness escalation and exact owner trial gate decision handoff HOLD
+        run: |
+          node --check public/js/admin-channel-escalation-591.mjs
+          node --check scripts/release467_build591_witness_escalation.test.mjs
+          node --test scripts/release467_build591_witness_escalation.test.mjs
 
       - name: JavaScript syntax
         run: |
