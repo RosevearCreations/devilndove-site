@@ -667,6 +667,11 @@ jobs:
           node --check public/js/admin-channel-disposition-588.mjs
           node --check scripts/release467_build588_disposition_recheck.test.mjs
           node --test scripts/release467_build588_disposition_recheck.test.mjs
+      - name: Build 589 exact provider source custody and owner trial decision scope revalidation HOLD
+        run: |
+          node --check public/js/admin-channel-custody-589.mjs
+          node --check scripts/release467_build589_custody_recheck.test.mjs
+          node --test scripts/release467_build589_custody_recheck.test.mjs
 
       - name: JavaScript syntax
         run: |
