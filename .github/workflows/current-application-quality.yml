@@ -707,6 +707,11 @@ jobs:
           node --check public/js/admin-channel-review-workboard-596.mjs
           node --check scripts/release467_build596_review_workboard.test.mjs
           node --test scripts/release467_build596_review_workboard.test.mjs
+      - name: Build 597 original issuer conflict and exact owner witness review HOLD
+        run: |
+          node --check public/js/admin-channel-source-disposition-597.mjs
+          node --check scripts/release467_build597_source_disposition_witness.test.mjs
+          node --test scripts/release467_build597_source_disposition_witness.test.mjs
 
       - name: JavaScript syntax
         run: |
