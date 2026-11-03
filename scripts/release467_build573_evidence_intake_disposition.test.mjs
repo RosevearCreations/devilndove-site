@@ -127,5 +127,5 @@ test('Build 573 cache, CI and immutable Production version marker are current',(
   assert.match(file('public/js/admin-device-intake-573.mjs'),/admin-device-evidence-572\.mjs\?v=577/);
   assert.match(file('css/admin-device-acceptance-569.css'),/\.dd573-case/);
   assert.match(file('.github/workflows/current-application-quality.yml'),/release467_build573_evidence_intake_disposition\.test\.mjs/);
-  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:577|578|579|580|581|582|583|584)/);
+  assert.match(file('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:577|578|579|580|581|582|583|584|585)/);
 });

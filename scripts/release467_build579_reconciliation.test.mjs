@@ -36,5 +36,5 @@ test('Admin integration and release checks expose no unapproved provider or D1 w
   assert.match(html,/Build 579/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build579_reconciliation\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:579|580|581|582|583|584)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:579|580|581|582|583|584|585)/);
 });
