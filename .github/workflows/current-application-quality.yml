@@ -687,6 +687,11 @@ jobs:
           node --check public/js/admin-channel-receipt-reconciliation-592.mjs
           node --check scripts/release467_build592_receipt_reconciliation.test.mjs
           node --test scripts/release467_build592_receipt_reconciliation.test.mjs
+      - name: Build 593 independent provider authenticity matrix and exact owner scope decision HOLD
+        run: |
+          node --check public/js/admin-channel-authenticity-matrix-593.mjs
+          node --check scripts/release467_build593_authenticity_matrix.test.mjs
+          node --test scripts/release467_build593_authenticity_matrix.test.mjs
 
       - name: JavaScript syntax
         run: |
