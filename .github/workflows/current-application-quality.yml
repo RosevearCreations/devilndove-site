@@ -612,6 +612,11 @@ jobs:
           node --check public/js/admin-device-attestation-577.mjs
           node --check scripts/release467_build577_attestation_handoff.test.mjs
           node --test scripts/release467_build577_attestation_handoff.test.mjs
+      - name: Build 578 Etsy and Meta trial receipts and owner-safe decision safeguards
+        run: |
+          node --check public/js/admin-channel-trials-578.mjs
+          node --check scripts/release467_build578_channel_trials.test.mjs
+          node --test scripts/release467_build578_channel_trials.test.mjs
 
       - name: JavaScript syntax
         run: |
