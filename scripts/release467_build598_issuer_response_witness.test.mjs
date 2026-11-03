@@ -104,12 +104,12 @@ test('Build 598 Admin section, CI gate and production release marker are review-
     'dd598Ack','dd598Save','dd598Copy','dd598State','dd598Output',
     'dd598Prepare','dd598CopyPacket','dd598Packet'])
     assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build 598/);
+  assert.match(html,/Devil n Dove • Build (?:598|599)/);
   assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=598/);
   const js=read('public/js/admin-channel-issuer-response-598.mjs');
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(js,/admin-channel-source-disposition-597\.mjs\?v=597/);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build598_issuer_response_witness.test.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":598/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:598|599)/);
 });

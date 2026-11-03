@@ -83,11 +83,11 @@ test('Build 594 Admin route, CI and marker include safe review-only source intak
     'dd594Owner','dd594Signer','dd594Account','dd594Product','dd594Scope',
     'dd594Due','dd594Reason','dd594Ack','dd594Save','dd594Copy','dd594Output'])
     assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build (?:594|595|596|597|598)/);
+  assert.match(html,/Devil n Dove • Build (?:594|595|596|597|598|599)/);
   assert.match(html,/admin-channel-intake-aging-594\.mjs\?v=594/);
   const js=read('public/js/admin-channel-intake-aging-594.mjs');
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build594_intake_aging\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":59[45678]/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":59[456789]/);
 });

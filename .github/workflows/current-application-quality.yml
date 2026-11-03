@@ -719,6 +719,12 @@ jobs:
           node --check scripts/release467_build598_issuer_response_witness.test.mjs
           node --test scripts/release467_build598_issuer_response_witness.test.mjs
 
+      - name: Build 599 original issuer receipt and exact owner consent preflight HOLD
+        run: |
+          node --check public/js/admin-channel-issuer-receipt-599.mjs
+          node --check scripts/release467_build599_issuer_receipt_consent_preflight.test.mjs
+          node --test scripts/release467_build599_issuer_receipt_consent_preflight.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
