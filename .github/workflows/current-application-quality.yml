@@ -682,6 +682,11 @@ jobs:
           node --check public/js/admin-channel-escalation-591.mjs
           node --check scripts/release467_build591_witness_escalation.test.mjs
           node --test scripts/release467_build591_witness_escalation.test.mjs
+      - name: Build 592 external witness receipt reconciliation and exact owner action decision HOLD
+        run: |
+          node --check public/js/admin-channel-receipt-reconciliation-592.mjs
+          node --check scripts/release467_build592_receipt_reconciliation.test.mjs
+          node --test scripts/release467_build592_receipt_reconciliation.test.mjs
 
       - name: JavaScript syntax
         run: |
