@@ -18,7 +18,7 @@ const source597=[exact596,source596,[]],exact597=reconcileSource597(...source597
 const source598=[exact597,source597,[]],exact598=issuerResponseReview598(...source598,[],asOf);
 const provider=exact598.cases.find(c=>!c.owner_trial_decision_pending);
 const owner=exact598.cases.find(c=>c.owner_trial_decision_pending);
-const row=c=>({case_pin:c.case_pin,exception_code:c.open_exceptions[0],
+const row=c=>({case_pin:c.case_pin,exception_code:c.unresolved_exceptions[0],
   issuer_receipt_ref:'original-issued-receipt-'+(c.owner_trial_decision_pending?'owner':'provider'),
   issuer_identity_ref:c.expected_issuer_ref||'',authority_source_ref:'',
   receipt_sha256:c.source_digest||'',custody_receipt_ref:c.expected_custody_ref||'',
