@@ -181,5 +181,5 @@ test('Seven prior Admin modules, CI and immutable Production marker use Build 57
   assert.match(read('public/js/admin-device-provenance-576.mjs'),/admin-device-witness-575\.mjs\?v=577/);
   assert.match(read('css/admin-device-acceptance-569.css'),/\.dd576-provenance/);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build576_provenance_followup\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:577|578|579|580|581|582|583|584|585)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:577|578|579|580|581|582|583|584|585|586)/);
 });

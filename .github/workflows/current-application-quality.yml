@@ -652,6 +652,11 @@ jobs:
           node --check public/js/admin-channel-receipt-followup-585.mjs
           node --check scripts/release467_build585_receipt_followup.test.mjs
           node --test scripts/release467_build585_receipt_followup.test.mjs
+      - name: Build 586 provider receipt witness exception aging and owner decision HOLD
+        run: |
+          node --check public/js/admin-channel-aging-586.mjs
+          node --check scripts/release467_build586_witness_aging.test.mjs
+          node --test scripts/release467_build586_witness_aging.test.mjs
 
       - name: JavaScript syntax
         run: |
