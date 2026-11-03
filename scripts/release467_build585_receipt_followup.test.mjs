@@ -80,8 +80,8 @@ test('admin UI, CI and source marker preserve no-provider-write boundary',()=>{
     'dd585Listing','dd585Images','dd585Scope','dd585Reviewer','dd585Action','dd585Reason',
     'dd585Ack','dd585Save','dd585Copy','dd585State','dd585Output'])
     assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build (?:585|586|587|588|589)/);
+  assert.match(html,/Devil n Dove • Build (?:585|586|587|588|589|590)/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build585_receipt_followup\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:585|586|587|588|589)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:585|586|587|588|589|590)/);
 });

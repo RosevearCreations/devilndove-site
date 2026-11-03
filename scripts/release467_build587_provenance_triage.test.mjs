@@ -87,8 +87,8 @@ test('Admin, CI and marker reflect Build 587 without provider API writes',()=>{
   for(const id of ['dd587Review','dd587Case','dd587Action','dd587Locator','dd587Reviewer',
     'dd587Reason','dd587Ack','dd587Save','dd587Copy','dd587State','dd587Output'])
     assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build (?:587|588|589)/);
+  assert.match(html,/Devil n Dove • Build (?:587|588|589|590)/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build587_provenance_triage\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:587|588|589)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:587|588|589|590)/);
 });

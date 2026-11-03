@@ -61,8 +61,8 @@ test('admin UI and deployment marker expose source-pinned no-write handoff',()=>
     'dd583Account','dd583Scope','dd583Reviewer','dd583OwnerScope','dd583Reason',
     'dd583Ack','dd583Save','dd583Copy','dd583State','dd583Output'])
     assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build (?:583|584|585|586|587|588|589)/);
+  assert.match(html,/Devil n Dove • Build (?:583|584|585|586|587|588|589|590)/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build583_provider_intake\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:583|584|585|586|587|588|589)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:583|584|585|586|587|588|589|590)/);
 });

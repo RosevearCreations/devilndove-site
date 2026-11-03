@@ -88,8 +88,8 @@ test('admin, CI and marker wire no provider writes into the owner follow-up queu
   for(const id of ['dd586Review','dd586Case','dd586Correlation','dd586Type','dd586Step','dd586Due',
     'dd586Reason','dd586Ack','dd586Save','dd586Copy','dd586State','dd586Output'])
     assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build (?:586|587|588|589)/);
+  assert.match(html,/Devil n Dove • Build (?:586|587|588|589|590)/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build586_witness_aging\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:586|587|588|589)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:586|587|588|589|590)/);
 });

@@ -51,8 +51,8 @@ test('Admin handoff and production marker have strict no-write boundaries',()=>{
   const html=read('admin/channel-trials/index.html'),js=read('public/js/admin-channel-handoff-582.mjs');
   for(const id of ['dd582Review','dd582Case','dd582Disposition','dd582Reason','dd582Locator',
     'dd582Ack','dd582Save','dd582Copy','dd582State','dd582Output'])assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build (?:582|583|584|585|586|587|588|589)/);
+  assert.match(html,/Devil n Dove • Build (?:582|583|584|585|586|587|588|589|590)/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build582_provider_handoff\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:582|583|584|585|586|587|588|589)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:582|583|584|585|586|587|588|589|590)/);
 });
