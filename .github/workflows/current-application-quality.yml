@@ -697,6 +697,11 @@ jobs:
           node --check public/js/admin-channel-intake-aging-594.mjs
           node --check scripts/release467_build594_intake_aging.test.mjs
           node --test scripts/release467_build594_intake_aging.test.mjs
+      - name: Build 595 independent original source document integrity, custody and owner trial review HOLD
+        run: |
+          node --check public/js/admin-channel-source-verification-595.mjs
+          node --check scripts/release467_build595_source_verification.test.mjs
+          node --test scripts/release467_build595_source_verification.test.mjs
 
       - name: JavaScript syntax
         run: |
