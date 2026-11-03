@@ -33,5 +33,5 @@ test('screen is integrated, explicit gates and no provider API or database reque
   assert.match(html,/provider POST/);assert.match(html,/Marketplace/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|indexedDB|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build578_channel_trials\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:579|580|581|582|583|584|585|586)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:579|580|581|582|583|584|585|586|587)/);
 });
