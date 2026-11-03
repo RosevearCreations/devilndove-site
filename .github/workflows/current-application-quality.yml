@@ -637,6 +637,11 @@ jobs:
           node --check public/js/admin-channel-handoff-582.mjs
           node --check scripts/release467_build582_provider_handoff.test.mjs
           node --test scripts/release467_build582_provider_handoff.test.mjs
+      - name: Build 583 independent provider exception evidence intake and owner decision HOLD
+        run: |
+          node --check public/js/admin-channel-intake-583.mjs
+          node --check scripts/release467_build583_provider_intake.test.mjs
+          node --test scripts/release467_build583_provider_intake.test.mjs
 
       - name: JavaScript syntax
         run: |

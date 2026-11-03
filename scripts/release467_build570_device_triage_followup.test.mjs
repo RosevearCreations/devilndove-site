@@ -83,5 +83,5 @@ test('Scoped responsive styling and production gate are required in CI',()=>{
   assert.match(css,/:focus-visible/);
   assert.match(css,/@media\(max-width:750px\)/);
   assert.match(source('.github/workflows/current-application-quality.yml'),/release467_build570_device_triage_followup\.test\.mjs/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:570|571|572|573|574|575|576|577|578|579|580|581|582)/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:570|571|572|573|574|575|576|577|578|579|580|581|582|583)/);
 });
