@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="robots" content="noindex,nofollow"/><meta name="dnd-build-identity" content="Devil n Dove • Build 580"/>
-<title>Channel Trial Receipts — Devil n Dove</title><link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=580"/>
-<script type="module" src="/public/js/admin-channel-trials-578.mjs?v=580"></script><script type="module" src="/public/js/admin-channel-reconciliation-579.mjs?v=580"></script><script type="module" src="/public/js/admin-channel-owner-review-580.mjs?v=580"></script></head>
+<meta name="robots" content="noindex,nofollow"/><meta name="dnd-build-identity" content="Devil n Dove • Build 581"/>
+<title>Channel Trial Receipts — Devil n Dove</title><link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=581"/>
+<script type="module" src="/public/js/admin-channel-trials-578.mjs?v=581"></script><script type="module" src="/public/js/admin-channel-reconciliation-579.mjs?v=581"></script><script type="module" src="/public/js/admin-channel-owner-review-580.mjs?v=581"></script><script type="module" src="/public/js/admin-channel-trial-gate-581.mjs?v=581"></script></head>
 <body><div class="dd569-wrap"><header class="dd569-top"><a class="dd569-brand" href="/admin/">Devil n Dove · Admin</a><nav aria-label="Admin navigation"><a href="/admin/">Dashboard</a><a href="/admin/product-editor/">Product Editor</a><a href="/admin/device-acceptance/">Device acceptance</a></nav></header>
 <section class="dd569-hero"><div class="dd569-eyebrow">Release 467 · Build 578 · Owner-safe trial worksheet</div><h1>Etsy &amp; Meta connection trial receipts</h1>
 <p>Record an observed connection, Etsy draft or remote image readback after checking the actual provider account. This page does not sign in, call providers, upload photos or publish anything. Manually entered references are <strong>unverified</strong>.</p>
@@ -41,4 +41,19 @@
 <div class="dd569-actions"><button type="button" class="dd569-button primary" id="dd580Save">Save local recovery follow-up request</button><button type="button" class="dd569-button" id="dd580Copy">Copy owner-safe review packet</button></div>
 <p id="dd580State" class="dd569-status" role="status" aria-live="polite">Owner decision PENDING. No signed provider evidence or closure.</p>
 <label for="dd580Output">Source-pinned owner review and open/stale follow-up requests</label><textarea id="dd580Output" rows="14" readonly></textarea></div>
-<p class="dd569-boundary">Owner sign-off PENDING · authenticated provider receipts 0 · verified exception closures 0. No external provider POST, database write or publication is triggered from this screen.</p></section></main></div></body></html>
+<p class="dd569-boundary">Owner sign-off PENDING · authenticated provider receipts 0 · verified exception closures 0. No external provider POST, database write or publication is triggered from this screen.</p></section>
+<section class="dd569-panel" aria-labelledby="dd581Title"><h2 id="dd581Title">6. Independent provider authentication &amp; owner-specific trial gate — Build 581</h2>
+<p>Review the exact owner source from section 5. Enter <strong>external verification requests</strong> for real Etsy/Meta account identity, provider receipt, permissions and exact owner authorization. No field here proves authentication: a person must independently verify the signed-in provider account, returned receipt and specific allowed action outside this browser.</p>
+<div class="dd569-actions"><button type="button" class="dd569-button" id="dd581Review">Check exact-source trial gate</button></div>
+<div class="dd578-form"><label>Requested trial action (only the relevant provider's action is permitted)<select id="dd581Action"><option value="READ_CONNECTION">Read connection / identity</option><option value="READ_LISTING">Read Etsy listing / draft</option><option value="READ_IMAGES">Read Etsy image IDs</option><option value="CREATE_DRAFT">Create one Etsy unpublished draft</option><option value="UPDATE_DRAFT">Update known Etsy draft ID</option><option value="UPLOAD_IMAGE">Upload one authorized Etsy image</option><option value="PUBLISH_PAGE_POST">Publish Facebook Page post</option><option value="PUBLISH_INSTAGRAM_POST">Publish Instagram Professional post</option></select></label>
+<label>Provider-issued receipt locator (optional; redact sensitive values)<input id="dd581Receipt" maxlength="350"/></label>
+<label>Authenticated account/shop identity evidence locator<input id="dd581Identity" maxlength="350"/></label>
+<label>Verified OAuth/permission scope reference<input id="dd581Scope" maxlength="350"/></label>
+<label>Independent reviewer identity reference<input id="dd581Reviewer" maxlength="250"/></label>
+<label>Exact owner authorization reference (required for eventual provider writes)<input id="dd581Owner" maxlength="350"/></label>
+<label>Missing evidence and specific follow-up<textarea id="dd581Reason" rows="3" maxlength="800" required placeholder="Describe what a separate authenticated reviewer must verify before any trial"></textarea></label>
+<label class="dd569-checkbox"><input type="checkbox" id="dd581Ack"/> I understand these are typed, unauthenticated references; saving them cannot approve a trial, verify a provider, close an exception, or send data.</label>
+<div class="dd569-actions"><button type="button" class="dd569-button primary" id="dd581Save">Save pending verification request</button><button type="button" class="dd569-button" id="dd581Copy">Copy trial gate checklist</button></div>
+<p id="dd581State" class="dd569-status" role="status" aria-live="polite">Provider authentication NOT PERFORMED · owner authorization NOT VERIFIED · trial gate HOLD.</p>
+<label for="dd581Output">Source-matched outstanding authentication and owner authorization conditions</label><textarea id="dd581Output" rows="14" readonly></textarea></div>
+<p class="dd569-boundary">Never enter credentials, customer data or private media URLs here. Read-before-retry for unknown Etsy POST outcomes. Personal Facebook Marketplace classified listings remain manual. No external provider request, D1 operation or publication is executed.</p></section></main></div></body></html>
