@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="robots" content="noindex,nofollow"/><meta name="dnd-build-identity" content="Devil n Dove • Build 579"/>
-<title>Channel Trial Receipts — Devil n Dove</title><link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=579"/>
-<script type="module" src="/public/js/admin-channel-trials-578.mjs?v=579"></script><script type="module" src="/public/js/admin-channel-reconciliation-579.mjs?v=579"></script></head>
+<meta name="robots" content="noindex,nofollow"/><meta name="dnd-build-identity" content="Devil n Dove • Build 580"/>
+<title>Channel Trial Receipts — Devil n Dove</title><link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=580"/>
+<script type="module" src="/public/js/admin-channel-trials-578.mjs?v=580"></script><script type="module" src="/public/js/admin-channel-reconciliation-579.mjs?v=580"></script><script type="module" src="/public/js/admin-channel-owner-review-580.mjs?v=580"></script></head>
 <body><div class="dd569-wrap"><header class="dd569-top"><a class="dd569-brand" href="/admin/">Devil n Dove · Admin</a><nav aria-label="Admin navigation"><a href="/admin/">Dashboard</a><a href="/admin/product-editor/">Product Editor</a><a href="/admin/device-acceptance/">Device acceptance</a></nav></header>
 <section class="dd569-hero"><div class="dd569-eyebrow">Release 467 · Build 578 · Owner-safe trial worksheet</div><h1>Etsy &amp; Meta connection trial receipts</h1>
 <p>Record an observed connection, Etsy draft or remote image readback after checking the actual provider account. This page does not sign in, call providers, upload photos or publish anything. Manually entered references are <strong>unverified</strong>.</p>
@@ -30,4 +30,15 @@
 <div class="dd569-actions"><button type="button" class="dd569-button primary" id="dd579Compare">Compare documentary references</button><button type="button" class="dd569-button" id="dd579Copy">Copy exception review</button></div>
 <p id="dd579State" class="dd569-status" role="status" aria-live="polite">No authenticated provider evidence reviewed. All closure decisions HOLD.</p>
 <label for="dd579Output">Exception comparison (documentary and unverified)</label><textarea id="dd579Output" rows="12" readonly></textarea></div>
-<p class="dd569-boundary">Unknown Etsy create/image outcomes remain HOLD until authenticated live readback; never retry blindly. Facebook Marketplace remains manual. No sign-off, publication, API requests or database writes.</p></section></main></div></body></html>
+<p class="dd569-boundary">Unknown Etsy create/image outcomes remain HOLD until authenticated live readback; never retry blindly. Facebook Marketplace remains manual. No sign-off, publication, API requests or database writes.</p></section>
+<section class="dd569-panel" aria-labelledby="dd580Title"><h2 id="dd580Title">5. Owner receipt review &amp; exact-source recovery follow-up — Build 580</h2>
+<p>After comparing the exact account, Product, listing and image IDs in section 4, review its remaining gaps. Record a <strong>request for follow-up</strong>, never a verified receipt, closure or provider-write authorization. A changed source comparison makes older requests stale.</p>
+<div class="dd569-actions"><button type="button" class="dd569-button" id="dd580Review">Recheck current source and outstanding requests</button></div>
+<div class="dd578-form"><label>Safe next action<select id="dd580Action"><option value="REQUEST_AUTHENTICATED_PROVIDER_RECEIPT">Request authenticated provider readback receipt</option><option value="RECHECK_EXACT_LISTING_AND_IMAGE_IDS">Recheck listing and each image ID</option><option value="ESCALATE_DUPLICATE_OR_UNKNOWN_OUTCOME">Escalate uncertain create/upload or duplicate</option><option value="REQUEST_SCOPED_OWNER_TEST_DECISION">Request separate scoped owner test decision</option></select></label>
+<label>Source-matched recovery reason<textarea id="dd580Reason" rows="3" maxlength="800" placeholder="State the exact missing receipt, unknown outcome, stale source or mismatch" required></textarea></label>
+<label>External proof locator to review later (optional; no tokens)<input id="dd580Locator" maxlength="350"/></label>
+<label class="dd569-checkbox"><input type="checkbox" id="dd580Ack"/> This is an unverified follow-up request only. It is not owner approval, an authenticated provider receipt, a closure or permission to publish.</label>
+<div class="dd569-actions"><button type="button" class="dd569-button primary" id="dd580Save">Save local recovery follow-up request</button><button type="button" class="dd569-button" id="dd580Copy">Copy owner-safe review packet</button></div>
+<p id="dd580State" class="dd569-status" role="status" aria-live="polite">Owner decision PENDING. No signed provider evidence or closure.</p>
+<label for="dd580Output">Source-pinned owner review and open/stale follow-up requests</label><textarea id="dd580Output" rows="14" readonly></textarea></div>
+<p class="dd569-boundary">Owner sign-off PENDING · authenticated provider receipts 0 · verified exception closures 0. No external provider POST, database write or publication is triggered from this screen.</p></section></main></div></body></html>
