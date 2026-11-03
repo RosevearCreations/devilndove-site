@@ -89,10 +89,10 @@ test('new admin section, CI and immutable production marker use Build 592 withou
     'dd592Account','dd592Product','dd592Scope','dd592Due','dd592Reason','dd592Ack',
     'dd592Save','dd592Copy','dd592State','dd592Output'])
     assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build (?:592|593)/);
-  assert.match(html,/admin-channel-receipt-reconciliation-592\.mjs\?v=(?:592|593)/);
+  assert.match(html,/Devil n Dove • Build (?:592|593|594)/);
+  assert.match(html,/admin-channel-receipt-reconciliation-592\.mjs\?v=(?:592|593|594)/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build592_receipt_reconciliation\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:592|593)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:592|593|594)/);
 });
