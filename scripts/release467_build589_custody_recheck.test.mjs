@@ -83,6 +83,7 @@ const pending={disposition_pin:dispositionPin589(providerCase,providerCase.dispo
   owner_product_ref:'54',owner_action_scope:'UPLOAD_IMAGE',owner_scope_expires_at:'',
   reason:'Independent witness and original provider chain remain unresolved.',
   recorded_at:'2026-11-03T13:00:00Z',next_review_at:'2026-11-04T12:00:00Z'};
+export const fixture589={args,providerCase,ownerCase,pending,asOf};
 test('same custodian, missing witness and source scope mismatch never become authenticated custody',()=>{
   const r=custody589(...args,[pending],asOf);
   assert.equal(r.format,FORMAT_589);assert.equal(r.open_custody_cases,2);
@@ -125,8 +126,8 @@ test('Admin controls, CI and release marker include Build 589 without provider t
     'dd589Handoff','dd589HandoffAt','dd589Witness','dd589OwnerDecision','dd589Account',
     'dd589Product','dd589Scope','dd589Expiry','dd589Due','dd589Reason','dd589Ack',
     'dd589Save','dd589Copy','dd589State','dd589Output'])assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build 589/);
+  assert.match(html,/Devil n Dove • Build (?:589|590)/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build589_custody_recheck\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":589/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:589|590)/);
 });

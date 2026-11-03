@@ -80,6 +80,6 @@ test('Build 538 front-end offers one-screen explicit owner workflow, no automati
  assert.match(api,/if\(b\.listing_id!==undefined&&String\(s\.draft\?\.external_reference\|\|''\)!==String\(b\.listing_id\)\)/);
  assert.match(flow,/product-etsy-images\?product_id=\$\{id\}&reconcile=1&candidate_listing_id=\$\{encodeURIComponent\(listingId\)\}/);
  assert.match(flow,/action:'transfer_one',product_id:id,listing_id:listingId/);
- assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:538|539|540|541|542|543|544|545|546|547|548|549|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565|566|567|568|569|570|571|572|573|574|575|576|577|578|579|580|581|582|583|584|585|586|587|588|589)/);
+ assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:538|539|540|541|542|543|544|545|546|547|548|549|550|551|552|553|554|555|556|557|558|559|560|561|562|563|564|565|566|567|568|569|570|571|572|573|574|575|576|577|578|579|580|581|582|583|584|585|586|587|588|589|590)/);
  assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build538_one_soap_etsy_completion\.test\.mjs/);
 });

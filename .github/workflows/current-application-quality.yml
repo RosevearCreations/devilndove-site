@@ -672,6 +672,11 @@ jobs:
           node --check public/js/admin-channel-custody-589.mjs
           node --check scripts/release467_build589_custody_recheck.test.mjs
           node --test scripts/release467_build589_custody_recheck.test.mjs
+      - name: Build 590 independent witness continuity and exact owner closure-readiness HOLD
+        run: |
+          node --check public/js/admin-channel-witness-continuity-590.mjs
+          node --check scripts/release467_build590_witness_continuity.test.mjs
+          node --test scripts/release467_build590_witness_continuity.test.mjs
 
       - name: JavaScript syntax
         run: |
