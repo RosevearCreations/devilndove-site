@@ -104,8 +104,8 @@ test('Admin, CI and deploy marker contain Build 588 with no provider transport',
     'dd588Scope','dd588Correlation','dd588Evidence','dd588Witness','dd588Owner',
     'dd588Due','dd588Reason','dd588Ack','dd588Save','dd588Copy','dd588State','dd588Output'])
     assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build 588/);
+  assert.match(html,/Devil n Dove • Build (?:588|589)/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build588_disposition_recheck\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":588/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:588|589)/);
 });

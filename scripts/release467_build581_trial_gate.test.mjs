@@ -49,8 +49,8 @@ test('Live Admin provides source-linked owner gate without provider POST or D1 m
   for(const id of ['dd581Review','dd581Action','dd581Receipt','dd581Identity','dd581Scope',
     'dd581Reviewer','dd581Owner','dd581Reason','dd581Ack','dd581Save','dd581Copy',
     'dd581State','dd581Output'])assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build (?:581|582|583|584|585|586|587|588)/);
+  assert.match(html,/Devil n Dove • Build (?:581|582|583|584|585|586|587|588|589)/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build581_trial_gate\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:581|582|583|584|585|586|587|588)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:581|582|583|584|585|586|587|588|589)/);
 });
