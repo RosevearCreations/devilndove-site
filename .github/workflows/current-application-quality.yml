@@ -617,6 +617,11 @@ jobs:
           node --check public/js/admin-channel-trials-578.mjs
           node --check scripts/release467_build578_channel_trials.test.mjs
           node --test scripts/release467_build578_channel_trials.test.mjs
+      - name: Build 579 exact listing and image exception reconciliation safeguards
+        run: |
+          node --check public/js/admin-channel-reconciliation-579.mjs
+          node --check scripts/release467_build579_reconciliation.test.mjs
+          node --test scripts/release467_build579_reconciliation.test.mjs
 
       - name: JavaScript syntax
         run: |

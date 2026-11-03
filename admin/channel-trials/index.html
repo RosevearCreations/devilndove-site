@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="robots" content="noindex,nofollow"/><meta name="dnd-build-identity" content="Devil n Dove • Build 578"/>
-<title>Channel Trial Receipts — Devil n Dove</title><link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=578"/>
-<script type="module" src="/public/js/admin-channel-trials-578.mjs?v=578"></script></head>
+<meta name="robots" content="noindex,nofollow"/><meta name="dnd-build-identity" content="Devil n Dove • Build 579"/>
+<title>Channel Trial Receipts — Devil n Dove</title><link rel="stylesheet" href="/css/admin-device-acceptance-569.css?v=579"/>
+<script type="module" src="/public/js/admin-channel-trials-578.mjs?v=579"></script><script type="module" src="/public/js/admin-channel-reconciliation-579.mjs?v=579"></script></head>
 <body><div class="dd569-wrap"><header class="dd569-top"><a class="dd569-brand" href="/admin/">Devil n Dove · Admin</a><nav aria-label="Admin navigation"><a href="/admin/">Dashboard</a><a href="/admin/product-editor/">Product Editor</a><a href="/admin/device-acceptance/">Device acceptance</a></nav></header>
 <section class="dd569-hero"><div class="dd569-eyebrow">Release 467 · Build 578 · Owner-safe trial worksheet</div><h1>Etsy &amp; Meta connection trial receipts</h1>
 <p>Record an observed connection, Etsy draft or remote image readback after checking the actual provider account. This page does not sign in, call providers, upload photos or publish anything. Manually entered references are <strong>unverified</strong>.</p>
@@ -18,4 +18,16 @@
 <button class="dd569-button primary" type="submit">Save unverified local note</button></form><p id="dd578Status" class="dd569-status" role="status" aria-live="polite">No provider test performed.</p></section>
 <section class="dd569-panel"><h2>3. Owner-safe reconciliation &amp; handoff</h2><p>All recorded observations remain on this browser. Copy for an external review; provider-issued receipts must be independently checked against the matching shop, listing and image IDs. Unknown or duplicate-create outcomes stay on HOLD.</p>
 <button type="button" class="dd569-button" id="dd578Copy">Copy local trial readback</button><label for="dd578Output">Readback JSON — unverified, no token or authenticated receipt</label><textarea id="dd578Output" rows="12" readonly></textarea>
-<p class="dd569-boundary">Acceptance is PENDING until actual authenticated provider evidence and owner sign-off exist. This worksheet has zero provider requests and zero D1 queries or writes.</p></section></main></div></body></html>
+<p class="dd569-boundary">Acceptance is PENDING until actual authenticated provider evidence and owner sign-off exist. This worksheet has zero provider requests and zero D1 queries or writes.</p></section>
+<section class="dd569-panel" aria-labelledby="dd579Title"><h2 id="dd579Title">4. Exact listing and image exception comparison — Build 579</h2>
+<p>Enter identifiers from two separately examined sources. The comparison detects mismatched account, Product, listing and individual image IDs. Matching typed values are <strong>not authenticated provider evidence</strong> and cannot close an exception. Check actual server-side provider receipts and owner authorization outside this worksheet.</p>
+<div class="dd578-form"><label>Channel<select id="dd579Channel"><option value="etsy">Etsy</option><option value="facebook_page">Facebook Page</option><option value="instagram">Instagram Professional</option></select></label>
+<label>Our Product ID / SKU<input id="dd579Product" maxlength="100"/></label>
+<label>Expected account / shop ID<input id="dd579ExpectedAccount" maxlength="120"/></label><label>Observed provider account / shop ID<input id="dd579ObservedAccount" maxlength="120"/></label>
+<label>Expected listing / post ID<input id="dd579ExpectedListing" maxlength="120"/></label><label>Observed listing / post ID<input id="dd579ObservedListing" maxlength="120"/></label>
+<label>Expected individual image IDs (comma separated)<textarea id="dd579ExpectedImages" rows="2" maxlength="2500"></textarea></label>
+<label>Observed individual image IDs (comma separated)<textarea id="dd579ObservedImages" rows="2" maxlength="2500"></textarea></label>
+<div class="dd569-actions"><button type="button" class="dd569-button primary" id="dd579Compare">Compare documentary references</button><button type="button" class="dd569-button" id="dd579Copy">Copy exception review</button></div>
+<p id="dd579State" class="dd569-status" role="status" aria-live="polite">No authenticated provider evidence reviewed. All closure decisions HOLD.</p>
+<label for="dd579Output">Exception comparison (documentary and unverified)</label><textarea id="dd579Output" rows="12" readonly></textarea></div>
+<p class="dd569-boundary">Unknown Etsy create/image outcomes remain HOLD until authenticated live readback; never retry blindly. Facebook Marketplace remains manual. No sign-off, publication, API requests or database writes.</p></section></main></div></body></html>
