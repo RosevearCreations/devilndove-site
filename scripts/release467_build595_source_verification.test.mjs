@@ -132,7 +132,7 @@ test('Build 595 Admin route, exact source marker and protected release gate rema
     'dd595Reviewer','dd595Witness','dd595Owner','dd595Signer','dd595Account',
     'dd595Product','dd595Scope','dd595Due','dd595Reason','dd595Ack',
     'dd595Save','dd595Copy','dd595Output'])assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build (?:595|596)/);
+  assert.match(html,/Devil n Dove • Build (?:595|596|597)/);
   assert.match(html,/admin-channel-source-verification-595\.mjs\?v=595/);
   const js=read('public/js/admin-channel-source-verification-595.mjs');
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
@@ -140,5 +140,5 @@ test('Build 595 Admin route, exact source marker and protected release gate rema
   assert.doesNotMatch(js,/import .*\.mjs\?v=595/);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build595_source_verification\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":59[56]/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":59[567]/);
 });
