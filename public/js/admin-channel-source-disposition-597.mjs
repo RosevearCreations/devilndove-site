@@ -176,6 +176,28 @@ export function unsignedWitnessPacket597(packet,pin){
     status:'UNSIGNED_UNVERIFIED_WITNESS_RECONCILIATION_TRIAL_HOLD'};
 }
 
+export function sourceContext597(doc=globalThis.document,win=globalThis.window){
+  const get=id=>doc.getElementById(id);
+  const read=(key,fallback)=>{const v=win.localStorage.getItem(key);return v?JSON.parse(v):fallback;};
+    const ids=['dd596Output','dd595Output','dd594Output','dd593Output',
+      'dd592Output','dd591Output','dd590Output','dd589Output','dd588Output',
+      'dd587Output','dd586Output','dd585Output','dd584Output','dd583Output',
+      'dd581Output','dd580Output'];
+    const parsed=ids.map(id=>{const raw=get(id)?.value;
+      if(!raw||raw.length>850000)throw Error('Recompute exact source sections 5–21.');
+      return JSON.parse(raw);});
+    const prior=parsed.slice(3),witness=read(KEY_584,{witness:[],owner:[]});
+    const custodyArgs=[...prior.slice(5),read(KEY_578,trialPacket578([])),
+      read(KEY_580,[]),read(KEY_581,[]),read(KEY_582,[]),read(KEY_583,[]),
+      witness.witness,witness.owner,read(KEY_585,[]),read(KEY_586,[]),
+      read(KEY_587,[]),read(KEY_588,[]),read(KEY_589,[])];
+    const escalationArgs=[prior[3],[prior[4],custodyArgs,read(KEY_590,[])],read(KEY_591,[])];
+    const receiptArgs=[prior[2],escalationArgs,read(KEY_592,[])];
+    const source594=[prior[0],[prior[1],receiptArgs,read(KEY_593,[])],read(KEY_594,[])];
+    const source595=[parsed[2],source594,read(KEY_595,[])];
+    return [parsed[0],[parsed[1],source595],read(KEY_596,[])];
+}
+
 function init597(doc=globalThis.document,win=globalThis.window){
   if(!doc?.getElementById('dd597Refresh'))return;
   const get=id=>doc.getElementById(id),status=get('dd597State'),output=get('dd597Output');

@@ -713,6 +713,12 @@ jobs:
           node --check scripts/release467_build597_source_disposition_witness.test.mjs
           node --test scripts/release467_build597_source_disposition_witness.test.mjs
 
+      - name: Build 598 independent original issuer response, conflict closure and exact owner witness HOLD
+        run: |
+          node --check public/js/admin-channel-issuer-response-598.mjs
+          node --check scripts/release467_build598_issuer_response_witness.test.mjs
+          node --test scripts/release467_build598_issuer_response_witness.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js

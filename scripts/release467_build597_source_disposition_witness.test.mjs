@@ -107,12 +107,12 @@ test('Build 597 Admin section, CI and production marker are review-only',()=>{
     'dd597Scope','dd597Due','dd597Reason','dd597Ack','dd597Save','dd597Copy',
     'dd597State','dd597Output','dd597Prepare','dd597CopyPacket','dd597Packet'])
     assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build 597/);
+  assert.match(html,/Devil n Dove • Build (?:597|598)/);
   assert.match(html,/admin-channel-source-disposition-597\.mjs\?v=597/);
   const js=read('public/js/admin-channel-source-disposition-597.mjs');
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(js,/admin-channel-review-workboard-596\.mjs\?v=596/);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build597_source_disposition_witness\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":597/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:597|598)/);
 });

@@ -76,8 +76,8 @@ test('Admin, CI and immutable deployment marker include Build 591 with no provid
     'dd591Receipt','dd591Owner','dd591Account','dd591Product','dd591Scope','dd591Due',
     'dd591Reason','dd591Ack','dd591Save','dd591Copy','dd591State','dd591Output'])
     assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build (?:591|592|593|594|595|596|597)/);
+  assert.match(html,/Devil n Dove • Build (?:591|592|593|594|595|596|597|598)/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),/release467_build591_witness_escalation\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:591|592|593|594|595|596|597)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:591|592|593|594|595|596|597|598)/);
 });
