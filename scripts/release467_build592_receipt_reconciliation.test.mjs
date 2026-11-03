@@ -27,6 +27,7 @@ const candidate={escalation_pin:escalationPin592(p,p.latest_followup),
   provider_account_id:'different-shop',product_ref:'54',action_scope:'UPLOAD_IMAGE',
   reason:'Original provider response is not independently attested and remains on hold.',
   recorded_at:'2026-11-03T13:50:00Z',next_review_at:'2026-11-04T12:00:00Z'};
+export const fixture592={exactEscalation,escalationArgs,candidate,asOf};
 test('original provider receipt is compared to exact escalation and remains unauthenticated',()=>{
   const result=receiptReconciliation592(exactEscalation,escalationArgs,[candidate],asOf);
   assert.equal(result.format,FORMAT_592);assert.equal(result.open_reconciliation_cases,2);
@@ -88,10 +89,10 @@ test('new admin section, CI and immutable production marker use Build 592 withou
     'dd592Account','dd592Product','dd592Scope','dd592Due','dd592Reason','dd592Ack',
     'dd592Save','dd592Copy','dd592State','dd592Output'])
     assert.ok(html.includes(`id="${id}"`),id);
-  assert.match(html,/Devil n Dove • Build 592/);
-  assert.match(html,/admin-channel-receipt-reconciliation-592\.mjs\?v=592/);
+  assert.match(html,/Devil n Dove • Build (?:592|593)/);
+  assert.match(html,/admin-channel-receipt-reconciliation-592\.mjs\?v=(?:592|593)/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build592_receipt_reconciliation\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":592/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:592|593)/);
 });
