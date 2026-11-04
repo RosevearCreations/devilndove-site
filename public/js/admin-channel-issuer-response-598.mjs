@@ -1265,3 +1265,280 @@ function init602(doc=globalThis.document,win=globalThis.window){
   get('dd602CopyHandoff').addEventListener('click',()=>copy('handoff'));
 }
 if(typeof document!=='undefined')init602();
+
+/* Build 603 — source-pinned custody continuity, independent witness identity follow-up
+ * and exact owner signed-scope expiry. All records are unauthenticated local claims. */
+export const FORMAT_603='devilndove-custody-witness-owner-expiry-603-v1';
+export const KEY_603='dd:custody-witness-owner-expiry:603:v1';
+export const KINDS_603=['CUSTODY_HANDOFF','WITNESS_IDENTITY_FOLLOWUP','OWNER_SIGNOFF_EXPIRY'];
+export const FILTERS_603=['ALL','CUSTODY','WITNESS','OWNER','EXPIRED','EXPIRING','OVERDUE','CONFLICT'];
+const FIELDS_603=['case_pin','exception_code','artifact_ref','issuer_authority_ref',
+  'original_sha256','custody_origin_receipt_ref','custody_transfer_receipt_ref',
+  'custodian_from_ref','custodian_to_ref','reviewer_ref','witness_identity_ref',
+  'witness_independent_authority_ref','witness_followup_receipt_ref',
+  'owner_signer_ref','owner_signed_receipt_ref','owner_account','owner_product',
+  'owner_action','reason'];
+const DATES_603=['custody_observed_at','custody_transferred_at','witness_contacted_at',
+  'witness_responded_at','owner_signed_at','owner_expires_at','recorded_at','next_review_at'];
+export function custodyFollowupCandidate603(d){
+  const allowed=new Set([...FIELDS_603,...DATES_603,'kind']);
+  if(!d||Array.isArray(d)||Object.keys(d).some(k=>!allowed.has(k))||
+    FIELDS_603.some(k=>!safe600(d[k],k==='reason'?900:220))||
+    DATES_603.some(k=>!safe600(d[k],40))||
+    !d.case_pin.startsWith('dd596-case:')||d.exception_code.length<4||
+    !KINDS_603.includes(d.kind)||!sha600(d.original_sha256)||
+    d.reason.trim().length<15||!iso600(d.recorded_at)||!iso600(d.next_review_at)||
+    DATES_603.slice(0,-2).some(k=>d[k]!==''&&!iso600(d[k]))||
+    Date.parse(d.next_review_at)<Date.parse(d.recorded_at)||
+    DATES_603.slice(0,-2).filter(k=>k!=='owner_expires_at')
+      .some(k=>d[k]!==''&&Date.parse(d[k])>Date.parse(d.recorded_at))||
+    [['custody_observed_at','custody_transferred_at'],
+      ['witness_contacted_at','witness_responded_at'],['owner_signed_at','owner_expires_at']]
+      .some(([a,b])=>d[a]&&d[b]&&Date.parse(d[b])<=Date.parse(d[a])))
+    throw Error('Unverified custody, witness or owner sign-off cannot grant trial authority.');
+  return {...Object.fromEntries(FIELDS_603.map(k=>[k,d[k].trim()])),
+    ...Object.fromEntries(DATES_603.map(k=>[k,d[k]])),kind:d.kind,
+    issuer_authenticated:false,custody_verified:false,witness_authenticated:false,
+    owner_signature_verified:false,trial_authorized:false};
+}
+export function signoffExpiry603(signed,expires,asOf){
+  if(!iso600(asOf)||signed&&!iso600(signed)||expires&&!iso600(expires))
+    throw Error('Invalid exact owner authorization review clock.');
+  if(!signed||!expires)return {state:'SIGNOFF_DATE_OR_EXPIRY_MISSING',hours_remaining:null};
+  if(Date.parse(expires)<=Date.parse(signed))throw Error('Owner expiry must follow signature claim.');
+  const hours=(Date.parse(expires)-Date.parse(asOf))/3600000;
+  return {state:Date.parse(asOf)<Date.parse(signed)?'SIGNOFF_NOT_YET_EFFECTIVE':
+    hours<=0?'SIGNOFF_EXPIRED':hours<=72?'SIGNOFF_EXPIRES_WITHIN_72H':
+      'SIGNOFF_UNVERIFIED_WITH_FUTURE_EXPIRY',hours_remaining:Math.round(hours*10)/10};
+}
+export function reconcileCustodyWitnessExpiry603(exact602,source602,local602=[],rows=[],
+  asOf=new Date().toISOString()){
+  if(exact602?.format!==FORMAT_602||!Array.isArray(source602)||source602.length!==3||
+    !Array.isArray(local602)||!Array.isArray(rows)||rows.length>100||!iso600(asOf))
+    throw Error('Exact Build 602 original-evidence source chain required.');
+  const replay=recheckExternalEvidence602(...source602,local602,exact602.as_of);
+  if(JSON.stringify(replay)!==JSON.stringify(exact602))
+    throw Error('Stale or substituted Build 602 original evidence packet.');
+  const current=recheckExternalEvidence602(...source602,local602,asOf);
+  return reviewCustodyWitnessExpiry603(current,rows,asOf);
+}
+/* Pure documentary audit is testable without repeating the expensive original-source
+ * replay; the browser entrypoint above always verifies that exact chain first. */
+export function reviewCustodyWitnessExpiry603(current,rows=[],asOf=new Date().toISOString()){
+  if(current?.format!==FORMAT_602||!Array.isArray(current.cases)||
+    !Array.isArray(rows)||rows.length>100||!iso600(asOf))
+    throw Error('Validated current Build 602 external evidence cases required.');
+  const entered=rows.map(custodyFollowupCandidate603);
+  const cases=current.cases.map(c=>{
+    const owner=c.owner_trial_decision_pending;
+    const followups=entered.filter(r=>r.case_pin===c.case_pin).map((r,i)=>{
+      if(!c.open_exceptions.includes(r.exception_code)||
+        (!owner&&r.kind==='OWNER_SIGNOFF_EXPIRY')||
+        (!owner&&[r.owner_signer_ref,r.owner_signed_receipt_ref,r.owner_account,
+          r.owner_product,r.owner_action,r.owner_signed_at,r.owner_expires_at].some(Boolean))||
+        (owner&&(r.owner_account!==c.account_id||r.owner_product!==c.product_ref||
+          r.owner_action!==c.exact_action)))
+        throw Error('Wrong exact original evidence exception or owner authorization scope.');
+      const previous=c.latest_external_evidence||{},prior=i?entered.filter(x=>x.case_pin===c.case_pin)[i-1]:null;
+      const expiry=owner?signoffExpiry603(r.owner_signed_at,r.owner_expires_at,asOf):null;
+      const conflicts=uniq600([
+        r.original_sha256&&c.source_digest&&r.original_sha256!==c.source_digest?
+          'ORIGINAL_DOCUMENT_DIGEST_CHANGED':null,
+        r.original_sha256&&previous.original_document_sha256&&
+          r.original_sha256!==previous.original_document_sha256?'BUILD_602_DIGEST_CONTINUITY_BROKEN':null,
+        r.custody_origin_receipt_ref&&c.expected_custody_ref&&
+          r.custody_origin_receipt_ref!==c.expected_custody_ref?'ORIGINAL_CUSTODY_RECEIPT_SUBSTITUTED':null,
+        r.custody_origin_receipt_ref&&r.custody_origin_receipt_ref===r.custody_transfer_receipt_ref?
+          'CUSTODY_ORIGIN_REUSED_AS_TRANSFER':null,
+        r.custodian_from_ref&&r.custodian_from_ref===r.custodian_to_ref?
+          'CUSTODY_TRANSFER_SELF_ATTESTED':null,
+        prior&&prior.custody_transfer_receipt_ref&&r.custody_origin_receipt_ref&&
+          prior.custody_transfer_receipt_ref!==r.custody_origin_receipt_ref?
+          'CUSTODY_HANDOFF_CHAIN_GAP':null,
+        prior&&prior.custodian_to_ref&&r.custodian_from_ref&&
+          prior.custodian_to_ref!==r.custodian_from_ref?'CUSTODIAN_IDENTITY_CHAIN_GAP':null,
+        prior&&prior.custody_transferred_at&&r.custody_observed_at&&
+          Date.parse(r.custody_observed_at)<Date.parse(prior.custody_transferred_at)?
+          'CUSTODY_EVENT_REVERSED':null,
+        r.witness_identity_ref&&[r.reviewer_ref,r.custodian_from_ref,
+          r.custodian_to_ref,r.owner_signer_ref,c.expected_issuer_ref].includes(r.witness_identity_ref)?
+          'WITNESS_NOT_INDEPENDENT_OF_REVIEW_CUSTODY_ISSUER_OWNER':null,
+        r.witness_independent_authority_ref&&[r.witness_identity_ref,r.witness_followup_receipt_ref,
+          r.artifact_ref].includes(r.witness_independent_authority_ref)?
+          'WITNESS_AUTHORITY_SELF_REFERENTIAL':null,
+        r.witness_followup_receipt_ref&&[r.artifact_ref,r.custody_origin_receipt_ref,
+          r.custody_transfer_receipt_ref].includes(r.witness_followup_receipt_ref)?
+          'WITNESS_FOLLOWUP_REUSES_DISPUTED_RECEIPT':null,
+        owner&&r.owner_signer_ref&&c.expected_owner_signer_ref&&
+          r.owner_signer_ref!==c.expected_owner_signer_ref?'OWNER_SIGNER_CHANGED':null,
+        owner&&r.owner_signed_receipt_ref&&c.expected_owner_receipt_ref&&
+          r.owner_signed_receipt_ref!==c.expected_owner_receipt_ref?'OWNER_SIGNED_RECEIPT_CHANGED':null,
+        owner&&r.owner_signed_receipt_ref&&[r.witness_followup_receipt_ref,r.artifact_ref,
+          r.custody_transfer_receipt_ref].includes(r.owner_signed_receipt_ref)?
+          'OWNER_SIGNOFF_REUSES_DISPUTED_RECEIPT':null,
+        !r.artifact_ref||!r.issuer_authority_ref?'ORIGINAL_ARTIFACT_AUTHORITY_NOT_VERIFIED':null,
+        r.kind==='CUSTODY_HANDOFF'&&(!r.custody_origin_receipt_ref||
+          !r.custody_transfer_receipt_ref||!r.custodian_from_ref||!r.custodian_to_ref||
+          !r.custody_observed_at||!r.custody_transferred_at)?'CUSTODY_EVENT_INCOMPLETE':null,
+        r.kind==='WITNESS_IDENTITY_FOLLOWUP'&&(!r.witness_identity_ref||
+          !r.witness_independent_authority_ref||!r.witness_followup_receipt_ref||
+          !r.witness_contacted_at||!r.witness_responded_at)?'INDEPENDENT_WITNESS_FOLLOWUP_INCOMPLETE':null,
+        owner&&expiry?.state==='SIGNOFF_EXPIRED'?'EXACT_OWNER_SIGNOFF_EXPIRED':null,
+        owner&&expiry?.state==='SIGNOFF_EXPIRES_WITHIN_72H'?'EXACT_OWNER_SIGNOFF_EXPIRING':null,
+        owner&&expiry?.state==='SIGNOFF_NOT_YET_EFFECTIVE'?'OWNER_SIGNOFF_NOT_YET_EFFECTIVE':null,
+        owner&&expiry?.state==='SIGNOFF_DATE_OR_EXPIRY_MISSING'?'OWNER_SIGNOFF_EXPIRY_PROOF_MISSING':null,
+        owner&&(!r.owner_signer_ref||!r.owner_signed_receipt_ref)?'EXACT_OWNER_SIGNATURE_UNVERIFIED':null
+      ]);
+      return {...r,conflicts,signoff_expiry:expiry,issuer_authenticated:false,
+        custody_verified:false,witness_authenticated:false,owner_signature_verified:false,
+        trial_authorized:false,provider_reads:0,provider_writes:0,d1_operations:0};
+    });
+    const latest=followups.at(-1)||null;
+    const lastSignoff=followups.filter(r=>r.kind==='OWNER_SIGNOFF_EXPIRY').at(-1);
+    const signoff=owner?(lastSignoff?.signoff_expiry||signoffExpiry603('','',asOf)):null;
+    const blockers=uniq600([...c.remaining_blockers,...followups.flatMap(r=>r.conflicts),
+      !followups.length?'CUSTODY_WITNESS_EXPIRY_FOLLOWUP_NOT_RECORDED':null,
+      !followups.some(r=>r.kind==='CUSTODY_HANDOFF')?'ORIGINAL_CUSTODY_HANDOFF_UNCONFIRMED':null,
+      !followups.some(r=>r.kind==='WITNESS_IDENTITY_FOLLOWUP')?'INDEPENDENT_WITNESS_IDENTITY_UNCONFIRMED':null,
+      owner&&!followups.some(r=>r.kind==='OWNER_SIGNOFF_EXPIRY')?
+        'EXACT_OWNER_SIGNOFF_EXPIRY_UNCONFIRMED':null]);
+    return {...c,custody_witness_owner_followups:followups,latest_followup:latest,
+      signoff_expiry:signoff,aging:aging600(latest?.next_review_at||c.aging.due_at||'',asOf),
+      remaining_blockers:blockers,issuer_authenticated:false,custody_verified:false,
+      witness_authenticated:false,owner_signature_verified:false,trial_authorized:false,
+      status:'ORIGINAL_CUSTODY_WITNESS_AND_EXACT_OWNER_SIGNOFF_HOLD'};
+  });
+  const pins=new Set(cases.map(c=>c.case_pin));
+  return {format:FORMAT_603,build:603,source_build:602,as_of:asOf,cases,
+    open_cases:cases.length,custody_gaps:cases.filter(c=>c.remaining_blockers.some(x=>/CUSTODY/.test(x))).length,
+    witness_gaps:cases.filter(c=>c.remaining_blockers.some(x=>/WITNESS/.test(x))).length,
+    expired_signoffs:cases.filter(c=>c.signoff_expiry?.state==='SIGNOFF_EXPIRED').length,
+    expiring_signoffs:cases.filter(c=>c.signoff_expiry?.state==='SIGNOFF_EXPIRES_WITHIN_72H').length,
+    overdue_reviews:cases.filter(c=>c.aging.bucket.startsWith('OVERDUE')).length,
+    stale_unmatched_followups:entered.filter(r=>!pins.has(r.case_pin)),
+    authenticated_issuers:0,verified_custody_chains:0,authenticated_witnesses:0,
+    verified_owner_signoffs:0,authorized_trials:0,provider_reads:0,provider_writes:0,d1_operations:0,
+    release_gate:'HOLD_INDEPENDENT_ORIGINAL_CUSTODY_WITNESS_IDENTITY_EXACT_OWNER_SIGNOFF'};
+}
+export function filterCustodyWitnessExpiry603(p,kind='ALL',term=''){
+  if(p?.format!==FORMAT_603||!FILTERS_603.includes(kind)||!safe600(term,120))
+    throw Error('Invalid source-pinned custody and owner expiry filter.');
+  const q=term.trim().toLowerCase();
+  return p.cases.filter(c=>(kind==='ALL'||
+    (kind==='CUSTODY'&&c.remaining_blockers.some(x=>/CUSTODY/.test(x)))||
+    (kind==='WITNESS'&&c.remaining_blockers.some(x=>/WITNESS/.test(x)))||
+    (kind==='OWNER'&&c.owner_trial_decision_pending)||
+    (kind==='EXPIRED'&&c.signoff_expiry?.state==='SIGNOFF_EXPIRED')||
+    (kind==='EXPIRING'&&c.signoff_expiry?.state==='SIGNOFF_EXPIRES_WITHIN_72H')||
+    (kind==='OVERDUE'&&c.aging.bucket.startsWith('OVERDUE'))||
+    (kind==='CONFLICT'&&c.custody_witness_owner_followups.some(r=>r.conflicts.length)))&&
+    (!q||[c.channel,c.account_id,c.product_ref,c.exact_action,c.priority]
+      .some(x=>String(x).toLowerCase().includes(q))));
+}
+export function unsignedCustodyWitnessExpiry603(p,pin){
+  if(p?.format!==FORMAT_603)throw Error('Exact Build 603 original-chain packet required.');
+  const c=p.cases.find(x=>x.case_pin===pin);
+  if(!c)throw Error('Select current original-source case.');
+  return {format:'devilndove-unsigned-custody-witness-expiry-followup-603-v1',
+    build:603,source_build:602,source_pin:pin,prepared_at:p.as_of,
+    channel:c.channel,exact_shop_account:c.account_id,exact_product_sku:c.product_ref,
+    exact_action:c.exact_action,original_source_digest:c.source_digest,
+    custody_chain:c.custody_witness_owner_followups.filter(r=>r.kind==='CUSTODY_HANDOFF'),
+    witness_followups:c.custody_witness_owner_followups.filter(r=>r.kind==='WITNESS_IDENTITY_FOLLOWUP'),
+    owner_signoff_claims:c.custody_witness_owner_followups.filter(r=>r.kind==='OWNER_SIGNOFF_EXPIRY'),
+    signoff_expiry:c.signoff_expiry,remaining_blockers:c.remaining_blockers,
+    independent_external_actions:['Recheck original issuer and each custody transfer with trusted sources',
+      'Authenticate the separate witness identity and original follow-up receipt',
+      ...(c.owner_trial_decision_pending?['Reconfirm signer, exact scope and unexpired signed owner receipt']:[])],
+    custody_verified:false,witness_authenticated:false,owner_signature_verified:false,
+    trial_authorized:false,provider_read_or_write_authorized:false,
+    status:'UNSIGNED_SOURCE_PINNED_FOLLOWUP_HOLD'};
+}
+function init603(doc=globalThis.document,win=globalThis.window){
+  if(!doc?.getElementById('dd603Refresh'))return;
+  const get=id=>doc.getElementById(id),status=get('dd603Status'),output=get('dd603Output');
+  const read=(key,fallback)=>{const v=win.localStorage.getItem(key);return v?JSON.parse(v):fallback;};
+  const stored=()=>read(KEY_603,[]);
+  let previousPin=null;
+  const source=()=>{
+    const v=['dd602Output','dd601Output','dd600Output','dd599Output','dd598Output',
+      'dd597Output'].map(id=>get(id)?.value);
+    if(v.some(x=>!x||x.length>900000))throw Error('Recompute original Admin sections 5–27.');
+    const original=[JSON.parse(v[3]),[JSON.parse(v[4]),
+      [JSON.parse(v[5]),sourceContext597(doc,win),read(KEY_597,[])],read(KEY_598,[])],
+      read(KEY_599,[])];
+    const source601=[JSON.parse(v[2]),original,read(KEY_600,[])];
+    return [JSON.parse(v[0]),[JSON.parse(v[1]),source601,read(KEY_601,[])],read(KEY_602,[])];
+  };
+  const refresh=()=>{
+    const p=reconcileCustodyWitnessExpiry603(...source(),stored());
+    output.value=JSON.stringify(p,null,2);
+    get('dd603Metrics').textContent=p.open_cases+' open · '+p.custody_gaps+
+      ' custody gaps · '+p.witness_gaps+' witness gaps · '+p.expired_signoffs+
+      ' expired sign-offs · '+p.expiring_signoffs+' expiring · HOLD';
+    const select=get('dd603Case'),old=select.value;select.replaceChildren();
+    for(const c of p.cases){const o=doc.createElement('option');o.value=c.case_pin;
+      o.textContent=c.priority+' · '+c.channel+' · '+c.product_ref;select.append(o);}
+    if([...select.options].some(o=>o.value===old))select.value=old;
+    const c=p.cases.find(x=>x.case_pin===select.value),exception=get('dd603Exception');
+    const selected=exception.value;exception.replaceChildren();
+    for(const x of c?.open_exceptions||[]){const o=doc.createElement('option');
+      o.value=x;o.textContent=x.replaceAll('_',' ');exception.append(o);}
+    if([...exception.options].some(o=>o.value===selected))exception.value=selected;
+    if(previousPin!==c?.case_pin){previousPin=c?.case_pin||null;
+      get('dd603Kind').value=c?.owner_trial_decision_pending?'OWNER_SIGNOFF_EXPIRY':'CUSTODY_HANDOFF';
+      for(const [id,v] of [['dd603Account',c?.owner_trial_decision_pending?c.account_id:''],
+        ['dd603Product',c?.owner_trial_decision_pending?c.product_ref:''],
+        ['dd603Scope',c?.owner_trial_decision_pending?c.exact_action:'']])get(id).value=v;
+    }
+    const list=get('dd603Rows');list.replaceChildren();
+    for(const c of filterCustodyWitnessExpiry603(p,get('dd603Filter').value,get('dd603Search').value)){
+      const li=doc.createElement('li');li.textContent=c.priority+' · '+c.channel+' · '+c.product_ref+
+        ' · '+(c.signoff_expiry?.state||'issuer/witness')+' · '+c.remaining_blockers.length+' gaps';
+      list.append(li);
+    }
+    status.textContent='Custody, independent witness and exact owner sign-off remain unverified · HOLD.';
+    return p;
+  };
+  const guard=()=>{try{return refresh();}catch{
+    status.textContent='Recompute exact source sections 5–27; no external approval · HOLD.';return null;}};
+  for(const [id,event] of [['dd603Refresh','click'],['dd603Filter','change'],
+    ['dd603Search','input'],['dd603Case','change']])get(id).addEventListener(event,guard);
+  get('dd603Save').addEventListener('click',()=>{try{
+    if(!get('dd603Ack').checked)throw Error('HOLD acknowledgement required.');
+    const p=refresh(),c=p.cases.find(x=>x.case_pin===get('dd603Case').value);
+    if(!c)throw Error('Exact current case required.');
+    const v=id=>get(id).value.trim(),date=id=>v(id)?new Date(v(id)).toISOString():'';
+    const row=custodyFollowupCandidate603({case_pin:c.case_pin,
+      exception_code:v('dd603Exception'),kind:v('dd603Kind'),
+      ...Object.fromEntries([['artifact_ref','Artifact'],['issuer_authority_ref','IssuerAuthority'],
+        ['original_sha256','Digest'],['custody_origin_receipt_ref','Origin'],
+        ['custody_transfer_receipt_ref','Transfer'],['custodian_from_ref','From'],
+        ['custodian_to_ref','To'],['reviewer_ref','Reviewer'],
+        ['witness_identity_ref','Witness'],['witness_independent_authority_ref','WitnessAuthority'],
+        ['witness_followup_receipt_ref','WitnessReceipt'],['owner_signer_ref','Signer'],
+        ['owner_signed_receipt_ref','OwnerReceipt'],['owner_account','Account'],
+        ['owner_product','Product'],['owner_action','Scope'],['reason','Reason']]
+        .map(([k,id])=>[k,v('dd603'+id)])),
+      custody_observed_at:date('dd603Observed'),custody_transferred_at:date('dd603Transferred'),
+      witness_contacted_at:date('dd603Contacted'),witness_responded_at:date('dd603Responded'),
+      owner_signed_at:date('dd603Signed'),owner_expires_at:date('dd603Expires'),
+      recorded_at:new Date().toISOString(),next_review_at:date('dd603Due')});
+    const next=[...stored(),row];reconcileCustodyWitnessExpiry603(...source(),next);
+    win.localStorage.setItem(KEY_603,JSON.stringify(next));get('dd603Ack').checked=false;refresh();
+  }catch{status.textContent='Rejected: original-source, custody, witness or owner expiry conflict · HOLD.';}});
+  const prepare=()=>{const p=refresh();get('dd603Handoff').value=JSON.stringify(
+    unsignedCustodyWitnessExpiry603(p,get('dd603Case').value),null,2);
+    status.textContent='Unsigned external verification packet prepared; provider trial HOLD.';};
+  get('dd603Prepare').addEventListener('click',()=>{try{prepare();}catch{
+    status.textContent='Recompute and select a current exact case · HOLD.';}});
+  const copy=async(kind)=>{try{if(kind==='handoff')prepare();else refresh();
+    const el=get(kind==='handoff'?'dd603Handoff':'dd603Output');
+    try{await win.navigator.clipboard.writeText(el.value);
+      status.textContent='Unverified source packet copied; trial HOLD.';
+    }catch{el.focus();el.select();status.textContent='Select and copy manually; HOLD.';}
+  }catch{status.textContent='Refresh exact-source packet first; HOLD.';}};
+  get('dd603Copy').addEventListener('click',()=>copy('queue'));
+  get('dd603CopyHandoff').addEventListener('click',()=>copy('handoff'));
+}
+if(typeof document!=='undefined')init603();

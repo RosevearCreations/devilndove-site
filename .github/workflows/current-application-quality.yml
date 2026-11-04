@@ -743,6 +743,12 @@ jobs:
           node --check scripts/release467_build602_external_issuer_witness_owner.test.mjs
           node --test scripts/release467_build602_external_issuer_witness_owner.test.mjs
 
+      - name: Build 603 original custody continuity, independent witness identity and exact owner signoff expiry HOLD
+        run: |
+          node --check public/js/admin-channel-issuer-response-598.mjs
+          node --check scripts/release467_build603_custody_witness_owner_expiry.test.mjs
+          node --test scripts/release467_build603_custody_witness_owner_expiry.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
