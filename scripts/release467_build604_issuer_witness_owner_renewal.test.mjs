@@ -127,12 +127,12 @@ test('Build 604 actual Admin controls, isolated runtime and exact production mar
     'dd604Due','dd604Reason','dd604Ack','dd604Save','dd604Copy','dd604Status',
     'dd604Output','dd604Prepare','dd604CopyHandoff','dd604Handoff'])
     assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build 604/);
-  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=604/);
+  assert.match(html,/Devil n Dove • Build (?:604|605)/);
+  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=(?:604|605)/);
   const js=read('public/js/admin-channel-issuer-response-598.mjs');
   assert.match(js,/export const FORMAT_604=/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build604_issuer_witness_owner_renewal\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":604/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":60[45]/);
 });

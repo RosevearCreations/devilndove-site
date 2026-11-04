@@ -755,6 +755,12 @@ jobs:
           node --check scripts/release467_build604_issuer_witness_owner_renewal.test.mjs
           node --test scripts/release467_build604_issuer_witness_owner_renewal.test.mjs
 
+      - name: Build 605 independent issuer authentication followup, witness reconciliation and owner evidence handoff HOLD
+        run: |
+          node --check public/js/admin-channel-issuer-response-598.mjs
+          node --check scripts/release467_build605_issuer_witness_owner_handoff.test.mjs
+          node --test scripts/release467_build605_issuer_witness_owner_handoff.test.mjs
+
       - name: JavaScript syntax
         run: |
           node --check functions/_middleware.js
