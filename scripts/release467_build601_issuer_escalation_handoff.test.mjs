@@ -110,12 +110,12 @@ test('Admin section 26, workflow, marker, consolidated zero-network runtime',()=
     'dd601Product','dd601Scope','dd601Due','dd601Reason','dd601Ack',
     'dd601Save','dd601Copy','dd601Status','dd601Output','dd601Prepare',
     'dd601CopyHandoff','dd601Handoff'])assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build 601/);
-  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=601/);
+  assert.match(html,/Devil n Dove • Build 6\d{2}/);
+  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=6\d{2}/);
   const js=read('public/js/admin-channel-issuer-response-598.mjs');
   assert.match(js,/export const FORMAT_601=/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build601_issuer_escalation_handoff\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":601/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":6\d{2}/);
 });

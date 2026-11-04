@@ -84,10 +84,10 @@ test('Build 593 Admin, CI and production marker preserve no-provider-write gate'
     'dd593Receipt','dd593Origin','dd593Owner','dd593Signer','dd593Account',
     'dd593Product','dd593Scope','dd593Due','dd593Ack','dd593Save','dd593Copy','dd593Output'])
     assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build (?:601|600|(?:593|594|595|596|597|598|599))/);
+  assert.match(html,/Devil n Dove • Build (?:6\d{2}|(?:593|594|595|596|597|598|599))/);
   const js=read('public/js/admin-channel-authenticity-matrix-593.mjs');
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build593_authenticity_matrix\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:601|600|(?:593|594|595|596|597|598|599))/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:6\d{2}|(?:593|594|595|596|597|598|599))/);
 });

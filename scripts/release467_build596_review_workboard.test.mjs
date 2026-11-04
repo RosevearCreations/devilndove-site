@@ -101,12 +101,12 @@ test('Build 596 Admin workboard, owner packet, CI and immutable source marker st
     'dd596Action','dd596Disposition','dd596Reviewer','dd596Witness','dd596Due',
     'dd596Reason','dd596Ack','dd596Save','dd596Copy','dd596State','dd596Output',
     'dd596Prepare','dd596CopyPacket','dd596Packet'])assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build (?:601|600|(?:596|597|598|599))/);
+  assert.match(html,/Devil n Dove • Build (?:6\d{2}|(?:596|597|598|599))/);
   assert.match(html,/admin-channel-review-workboard-596\.mjs\?v=596/);
   const js=read('public/js/admin-channel-review-workboard-596.mjs');
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(js,/admin-channel-source-verification-595\.mjs\?v=595/);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build596_review_workboard\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:601|600|59[6789])/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:6\d{2}|59[6789])/);
 });
