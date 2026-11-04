@@ -748,3 +748,244 @@ function init600(doc=globalThis.document,win=globalThis.window){
   get('dd600CopyOwner').addEventListener('click',()=>copy('owner'));
 }
 if(typeof document!=='undefined')init600();
+
+/* Build 601 — exact-source issuer evidence reconciliation, unresolved conflict escalation,
+ * and unsigned owner authorization handoff. This local queue cannot verify external proof. */
+export const FORMAT_601='devilndove-issuer-decision-conflict-escalation-owner-handoff-601-v1';
+export const KEY_601='dd:issuer-conflict-owner-handoff:601:v1';
+export const STATES_601=['ISSUER_DECISION_EVIDENCE_AWAITED','ISSUER_DECISION_DISPUTED',
+  'CONFLICT_INDEPENDENT_REVIEW_ESCALATED','EXTERNAL_CLOSURE_PROOF_AWAITED',
+  'OWNER_SIGNED_SCOPE_AWAITED','OWNER_SCOPE_DISPUTED','OWNER_AUTHORIZATION_HANDOFF_PENDING'];
+export const ACTIONS_601=['REQUEST_AUTHENTIC_ORIGINAL_ISSUER_DECISION',
+  'ESCALATE_DIGEST_CUSTODY_CONFLICT','REQUEST_DISTINCT_CONFLICT_CLOSURE_WITNESS',
+  'REQUEST_EXACT_OWNER_SIGNED_SCOPE','ESCALATE_OWNER_SIGNER_OR_SCOPE_CONFLICT',
+  'HANDOFF_UNSIGNED_OWNER_AUTHORIZATION_REVIEW'];
+export const FILTERS_601=['ALL','ISSUER','OWNER','CONFLICT','OVERDUE','NO_WITNESS','STALE'];
+const FIELDS_601=['case_pin','exception_code','issuer_decision_ref','issuer_identity_ref',
+  'external_authority_ref','original_digest','custody_receipt_ref','closure_evidence_ref',
+  'reviewer_ref','witness_ref','owner_signer_ref','owner_signed_receipt_ref',
+  'owner_account','owner_product','owner_action','reason'];
+const ownerAction601=a=>ACTIONS_601.slice(3).includes(a);
+export function escalationCandidate601(d){
+  const allowed=new Set([...FIELDS_601,'state','next_action','recorded_at','next_review_at']);
+  if(!d||Array.isArray(d)||Object.keys(d).some(k=>!allowed.has(k))||
+    FIELDS_601.some(k=>!safe600(d[k],k==='reason'?900:220))||
+    !d.case_pin.startsWith('dd596-case:')||d.exception_code.length<4||
+    !STATES_601.includes(d.state)||!ACTIONS_601.includes(d.next_action)||
+    !sha600(d.original_digest)||d.reason.trim().length<15||
+    !iso600(d.recorded_at)||!iso600(d.next_review_at)||
+    Date.parse(d.next_review_at)<Date.parse(d.recorded_at))
+    throw Error('Unverified escalation cannot close a conflict or authorize a trial.');
+  return Object.fromEntries([...FIELDS_601.map(k=>[k,d[k].trim()]),
+    ['state',d.state],['next_action',d.next_action],
+    ['recorded_at',d.recorded_at],['next_review_at',d.next_review_at],
+    ['issuer_authenticated',false],['independent_closure_verified',false],
+    ['owner_signature_verified',false],['trial_authorized',false]]);
+}
+export function reconcileEscalations601(exact600,source600,local600=[],rows=[],asOf=new Date().toISOString()){
+  if(exact600?.format!==FORMAT_600||!Array.isArray(source600)||source600.length!==3||
+    !Array.isArray(local600)||!Array.isArray(rows)||rows.length>100||!iso600(asOf))
+    throw Error('Exact Build 600 original-source decision packet required.');
+  if(JSON.stringify(decisionRegister600(...source600,local600,exact600.as_of))!==JSON.stringify(exact600))
+    throw Error('Stale, substituted or modified Build 600 decision register.');
+  const current=decisionRegister600(...source600,local600,asOf);
+  const submitted=rows.map(escalationCandidate601);
+  const cases=current.cases.map(c=>{
+    const owner=c.owner_trial_decision_pending;
+    const escalations=submitted.filter(r=>r.case_pin===c.case_pin).map(r=>{
+      if(ownerAction601(r.next_action)!==owner||
+        (owner? !STATES_601.slice(4).includes(r.state):STATES_601.slice(4).includes(r.state))||
+        !c.open_exceptions.includes(r.exception_code)||
+        (owner&&(r.owner_account!==c.account_id||r.owner_product!==c.product_ref||
+          r.owner_action!==c.exact_action))||
+        (!owner&&[r.owner_signer_ref,r.owner_signed_receipt_ref,r.owner_account,
+          r.owner_product,r.owner_action].some(Boolean)))
+        throw Error('Wrong unresolved issuer exception, escalation action or exact owner scope.');
+      const prior=c.latest_decision||{};
+      const conflicts=uniq600([
+        r.issuer_identity_ref&&c.expected_issuer_ref&&r.issuer_identity_ref!==c.expected_issuer_ref?
+          'ORIGINAL_ISSUER_IDENTITY_MISMATCH':null,
+        r.original_digest&&c.source_digest&&r.original_digest!==c.source_digest?
+          'ORIGINAL_DIGEST_MISMATCH':null,
+        r.custody_receipt_ref&&c.expected_custody_ref&&r.custody_receipt_ref!==c.expected_custody_ref?
+          'ORIGINAL_CUSTODY_MISMATCH':null,
+        r.issuer_decision_ref&&prior.decision_ref&&r.issuer_decision_ref!==prior.decision_ref?
+          'ISSUER_DECISION_REFERENCE_CHANGED':null,
+        r.external_authority_ref&&r.external_authority_ref===r.issuer_decision_ref?
+          'SELF_ATTESTED_ISSUER_AUTHORITY':null,
+        r.closure_evidence_ref&&r.closure_evidence_ref===r.issuer_decision_ref?
+          'CLOSURE_REUSES_DISPUTED_ISSUER_DECISION':null,
+        r.reviewer_ref&&r.reviewer_ref===r.witness_ref?'REVIEWER_EQUALS_WITNESS':null,
+        r.issuer_identity_ref&&[r.reviewer_ref,r.witness_ref].includes(r.issuer_identity_ref)?
+          'ISSUER_EQUALS_INDEPENDENT_REVIEWER_OR_WITNESS':null,
+        owner&&r.owner_signer_ref&&[r.reviewer_ref,r.witness_ref].includes(r.owner_signer_ref)?
+          'OWNER_SIGNER_NOT_INDEPENDENT':null,
+        owner&&r.owner_signer_ref&&c.expected_owner_signer_ref&&
+          r.owner_signer_ref!==c.expected_owner_signer_ref?'OWNER_SIGNER_MISMATCH':null,
+        owner&&r.owner_signed_receipt_ref&&c.expected_owner_receipt_ref&&
+          r.owner_signed_receipt_ref!==c.expected_owner_receipt_ref?'OWNER_RECEIPT_MISMATCH':null,
+        !r.external_authority_ref?'INDEPENDENT_ISSUER_AUTHORITY_NOT_DOCUMENTED':null,
+        !r.closure_evidence_ref?'EXTERNAL_CONFLICT_CLOSURE_PROOF_MISSING':null,
+        !r.reviewer_ref?'INDEPENDENT_REVIEWER_MISSING':null,
+        !r.witness_ref?'INDEPENDENT_WITNESS_MISSING':null,
+        owner&&(!r.owner_signer_ref||!r.owner_signed_receipt_ref)?
+          'EXACT_OWNER_SIGNED_SCOPE_NOT_DOCUMENTED':null
+      ]);
+      return {...r,conflicts,
+        digest_comparison:r.original_digest&&c.source_digest?
+          (r.original_digest===c.source_digest?'LOCAL_DIGEST_MATCH_NOT_AUTHENTICATED':'DIGEST_CONFLICT_OPEN'):
+          'ORIGINAL_DIGEST_NOT_DOCUMENTED',
+        issuer_authenticated:false,independent_conflict_closed:false,
+        owner_signature_authenticated:false,provider_reads:0,provider_writes:0,
+        d1_operations:0,trial_authorized:false};
+    });
+    const latest=escalations.at(-1)||null;
+    const aging=aging600(latest?.next_review_at||c.latest_decision?.next_review_at||'',asOf);
+    const blockers=uniq600([...c.readiness_blockers,...c.open_exceptions,
+      ...(latest?.conflicts||[]),
+      !latest?'NO_BUILD_601_ESCALATION_RECORDED':null,
+      !latest?.issuer_decision_ref?'ORIGINAL_ISSUER_DECISION_PROOF_AWAITED':null,
+      !latest?.closure_evidence_ref?'INDEPENDENT_CONFLICT_CLOSURE_AWAITED':null,
+      owner&&!latest?.owner_signed_receipt_ref?'EXACT_SIGNED_OWNER_AUTHORIZATION_AWAITED':null]);
+    return {...c,escalations,latest_escalation:latest,aging,readiness_blockers:blockers,
+      original_issuer_authenticated:false,independent_conflict_closed:false,
+      exact_owner_signature_verified:false,trial_authorized:false,
+      status:'HOLD_UNVERIFIED_EXTERNAL_EVIDENCE_AND_OWNER_AUTHORIZATION'};
+  });
+  const pins=new Set(cases.map(c=>c.case_pin));
+  return {format:FORMAT_601,build:601,source_build:600,as_of:asOf,cases,
+    open_cases:cases.length,issuer_escalations:cases.filter(c=>!c.owner_trial_decision_pending).length,
+    owner_handoffs:cases.filter(c=>c.owner_trial_decision_pending).length,
+    conflict_escalations:cases.filter(c=>c.readiness_blockers.some(x=>/CONFLICT|DIGEST|CUSTODY|DISPUTE|MISMATCH/.test(x))).length,
+    overdue_cases:cases.filter(c=>c.aging.bucket.startsWith('OVERDUE')).length,
+    stale_unmatched_escalations:submitted.filter(r=>!pins.has(r.case_pin)),
+    issuer_decisions_authenticated:0,independent_conflicts_closed:0,
+    owner_signatures_verified:0,authorized_trials:0,
+    provider_reads:0,provider_writes:0,d1_operations:0,
+    release_gate:'HOLD_ORIGINAL_ISSUER_AUTHENTICITY_INDEPENDENT_CLOSURE_AND_EXACT_OWNER_PERMISSION'};
+}
+export function filterEscalations601(p,kind='ALL',term=''){
+  if(p?.format!==FORMAT_601||!FILTERS_601.includes(kind)||!safe600(term,120))
+    throw Error('Invalid source-pinned escalation filter.');
+  const q=term.trim().toLowerCase();
+  return p.cases.filter(c=>(kind==='ALL'||
+    (kind==='ISSUER'&&!c.owner_trial_decision_pending)||
+    (kind==='OWNER'&&c.owner_trial_decision_pending)||
+    (kind==='CONFLICT'&&c.readiness_blockers.some(x=>/CONFLICT|DIGEST|CUSTODY|DISPUTE|MISMATCH/.test(x)))||
+    (kind==='OVERDUE'&&c.aging.bucket.startsWith('OVERDUE'))||
+    (kind==='NO_WITNESS'&&c.readiness_blockers.some(x=>/WITNESS|REVIEWER/.test(x)))||
+    (kind==='STALE'&&!c.latest_escalation))&&
+    (!q||[c.channel,c.account_id,c.product_ref,c.exact_action,c.priority]
+      .some(x=>String(x).toLowerCase().includes(q))));
+}
+export function unsignedHandoff601(p,pin){
+  if(p?.format!==FORMAT_601)throw Error('Exact source-pinned Build 601 packet required.');
+  const c=p.cases.find(x=>x.case_pin===pin);
+  if(!c)throw Error('Exact unresolved issuer or owner case required.');
+  const owner=c.owner_trial_decision_pending,r=c.latest_escalation||{};
+  return {format:owner?'devilndove-unsigned-owner-handoff-601-v1':
+      'devilndove-unverified-issuer-conflict-escalation-601-v1',
+    build:601,source_build:600,case_pin:c.case_pin,prepared_at:p.as_of,
+    kind:owner?'EXACT_OWNER_AUTHORIZATION_HANDOFF':'INDEPENDENT_ISSUER_CONFLICT_ESCALATION',
+    exact_channel:c.channel,exact_shop_account:c.account_id,
+    exact_product_sku:c.product_ref,exact_action:c.exact_action,
+    original_source_digest:c.source_digest,
+    expected_issuer:c.expected_issuer_ref,expected_custody:c.expected_custody_ref,
+    expected_owner_signer:owner?c.expected_owner_signer_ref:null,
+    proposed_owner_signer:owner?r.owner_signer_ref||null:null,
+    proposed_owner_receipt:owner?r.owner_signed_receipt_ref||null:null,
+    proposed_review_ref:r.reviewer_ref||null,proposed_witness_ref:r.witness_ref||null,
+    escalation_action:r.next_action||null,aging_bucket:c.aging.bucket,
+    independent_external_checks_required:owner?[
+      'Authenticate original issuer decision and custody',
+      'Independently resolve every conflict with a distinct witness',
+      'Verify original owner signature for this exact account, Product and action',
+      'Obtain separate, explicit owner trial authorization']:[
+      'Authenticate original issuer via an independently trusted source',
+      'Reconcile original source digest and custody',
+      'Verify conflict closure with separate reviewer and witness'],
+    unresolved_exceptions:c.open_exceptions,readiness_blockers:c.readiness_blockers,
+    issuer_authenticated:false,conflict_closed:false,owner_signature_verified:false,
+    owner_authorization_granted:false,trial_authorized:false,
+    provider_read_or_write_authorized:false,status:'UNSIGNED_UNVERIFIED_EXTERNAL_HANDOFF_HOLD'};
+}
+function init601(doc=globalThis.document,win=globalThis.window){
+  if(!doc?.getElementById('dd601Refresh'))return;
+  const get=id=>doc.getElementById(id),status=get('dd601Status'),output=get('dd601Output');
+  const read=(key,fallback)=>{const v=win.localStorage.getItem(key);return v?JSON.parse(v):fallback;};
+  const stored=()=>read(KEY_601,[]);
+  let previousPin=null;
+  const source=()=>{
+    const ids=['dd600Output','dd599Output','dd598Output','dd597Output'];
+    const v=ids.map(id=>get(id)?.value);
+    if(v.some(x=>!x||x.length>900000))throw Error('Recompute exact source sections 5–25.');
+    return [JSON.parse(v[0]),[JSON.parse(v[1]),
+      [JSON.parse(v[2]),[JSON.parse(v[3]),sourceContext597(doc,win),read(KEY_597,[])],
+        read(KEY_598,[])],read(KEY_599,[])],read(KEY_600,[])];
+  };
+  const refresh=()=>{
+    const p=reconcileEscalations601(...source(),stored());output.value=JSON.stringify(p,null,2);
+    get('dd601Metrics').textContent=p.open_cases+' open · '+p.conflict_escalations+
+      ' conflict escalations · '+p.overdue_cases+' overdue · '+p.owner_handoffs+' owner handoffs · HOLD';
+    const choices=get('dd601Case'),prior=choices.value;choices.replaceChildren();
+    for(const c of p.cases){const o=doc.createElement('option');o.value=c.case_pin;
+      o.textContent=c.priority+' · '+c.channel+' · '+c.product_ref;choices.append(o);}
+    if([...choices.options].some(o=>o.value===prior))choices.value=prior;
+    const c=p.cases.find(x=>x.case_pin===choices.value),ex=get('dd601Exception'),prevEx=ex.value;
+    ex.replaceChildren();for(const x of c?.open_exceptions||[]){const o=doc.createElement('option');
+      o.value=x;o.textContent=x.replaceAll('_',' ');ex.append(o);}
+    if([...ex.options].some(o=>o.value===prevEx))ex.value=prevEx;
+    if(previousPin!==c?.case_pin){previousPin=c?.case_pin||null;
+      get('dd601State').value=c?.owner_trial_decision_pending?'OWNER_SIGNED_SCOPE_AWAITED':'ISSUER_DECISION_EVIDENCE_AWAITED';
+      get('dd601Action').value=c?.owner_trial_decision_pending?'REQUEST_EXACT_OWNER_SIGNED_SCOPE':
+        'REQUEST_AUTHENTIC_ORIGINAL_ISSUER_DECISION';
+      for(const [id,v] of [['dd601Account',c?.owner_trial_decision_pending?c.account_id:''],
+        ['dd601Product',c?.owner_trial_decision_pending?c.product_ref:''],
+        ['dd601Scope',c?.owner_trial_decision_pending?c.exact_action:'']])get(id).value=v;
+    }
+    const list=get('dd601Rows');list.replaceChildren();
+    for(const c of filterEscalations601(p,get('dd601Filter').value,get('dd601Search').value)){
+      const li=doc.createElement('li');li.textContent=c.priority+' · '+c.channel+' · '+c.product_ref+
+        ' · '+c.aging.bucket+' · '+c.readiness_blockers.length+' blockers · '+
+        (c.latest_escalation?'follow-up recorded':'escalation pending');list.append(li);
+    }
+    status.textContent='Source-pinned unresolved escalation queue. External proof and owner authorization HOLD.';
+    return p;
+  };
+  const guard=()=>{try{return refresh();}catch{
+    status.textContent='Recompute exact original source sections 5–25; trial HOLD.';return null;}};
+  for(const [id,event] of [['dd601Refresh','click'],['dd601Filter','change'],
+    ['dd601Search','input'],['dd601Case','change']])get(id).addEventListener(event,guard);
+  get('dd601Save').addEventListener('click',()=>{try{
+    if(!get('dd601Ack').checked)throw Error('Explicit HOLD acknowledgment required.');
+    const p=refresh(),c=p.cases.find(x=>x.case_pin===get('dd601Case').value);
+    if(!c)throw Error('No current unresolved case.');
+    const v=id=>get(id).value.trim();
+    const row=escalationCandidate601({case_pin:c.case_pin,exception_code:v('dd601Exception'),
+      state:v('dd601State'),next_action:v('dd601Action'),issuer_decision_ref:v('dd601Decision'),
+      issuer_identity_ref:v('dd601Issuer'),external_authority_ref:v('dd601Authority'),
+      original_digest:v('dd601Digest'),custody_receipt_ref:v('dd601Custody'),
+      closure_evidence_ref:v('dd601Closure'),reviewer_ref:v('dd601Reviewer'),
+      witness_ref:v('dd601Witness'),owner_signer_ref:v('dd601Signer'),
+      owner_signed_receipt_ref:v('dd601OwnerReceipt'),owner_account:v('dd601Account'),
+      owner_product:v('dd601Product'),owner_action:v('dd601Scope'),reason:v('dd601Reason'),
+      recorded_at:new Date().toISOString(),next_review_at:new Date(v('dd601Due')).toISOString()});
+    const next=[...stored(),row];reconcileEscalations601(...source(),next);
+    win.localStorage.setItem(KEY_601,JSON.stringify(next));get('dd601Ack').checked=false;refresh();
+  }catch{status.textContent='Rejected: changed source, wrong scope or unverified escalation. HOLD.';}});
+  const prepare=()=>{const p=refresh();
+    get('dd601Handoff').value=JSON.stringify(unsignedHandoff601(p,get('dd601Case').value),null,2);
+    status.textContent='Unsigned issuer/owner handoff prepared; no authorization granted.';};
+  get('dd601Prepare').addEventListener('click',()=>{try{prepare();}catch{
+    status.textContent='Select a current unresolved case. HOLD.';}});
+  const copy=async(kind)=>{try{
+    if(kind==='handoff')prepare();else refresh();
+    const el=get(kind==='handoff'?'dd601Handoff':'dd601Output');
+    try{await win.navigator.clipboard.writeText(el.value);
+      status.textContent='Unverified source-pinned JSON copied; HOLD.';
+    }catch{el.focus();el.select();status.textContent='Select and copy manually; HOLD.';}
+  }catch{status.textContent='Recompute the exact source first; HOLD.';}};
+  get('dd601Copy').addEventListener('click',()=>copy('queue'));
+  get('dd601CopyHandoff').addEventListener('click',()=>copy('handoff'));
+}
+if(typeof document!=='undefined')init601();
