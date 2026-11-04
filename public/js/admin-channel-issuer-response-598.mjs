@@ -1542,3 +1542,305 @@ function init603(doc=globalThis.document,win=globalThis.window){
   get('dd603CopyHandoff').addEventListener('click',()=>copy('handoff'));
 }
 if(typeof document!=='undefined')init603();
+
+/* Build 604 — original issuer receipt confirmations, independent witness exception
+ * disposition and exact owner sign-off renewal. This queue can only record HOLD. */
+export const FORMAT_604='devilndove-original-issuer-witness-owner-renewal-604-v1';
+export const KEY_604='dd:original-issuer-witness-owner-renewal:604:v1';
+export const KINDS_604=['ISSUER_CONFIRMATION','WITNESS_EXCEPTION_DISPOSITION',
+  'EXACT_OWNER_RENEWAL'];
+export const ISSUER_STATES_604=['NOT_REQUESTED','REQUESTED','REPORTED_CONFIRMATION',
+  'DISPUTED_ORIGINAL','NO_RESPONSE'];
+export const WITNESS_STATES_604=['OPEN','ESCALATED','REPORTED_RESOLUTION','DISPUTED'];
+export const FILTERS_604=['ALL','ISSUER','WITNESS','OWNER','RENEWAL_EXPIRED',
+  'RENEWAL_DUE','OVERDUE','CONFLICT','NO_REPLY'];
+const FIELDS_604=['case_pin','exception_code','original_issuer_confirmation_ref',
+  'issuer_identity_ref','issuer_authority_locator_ref','original_digest',
+  'reviewer_ref','witness_identity_ref','witness_disposition_ref',
+  'witness_independent_source_ref','owner_signer_ref','owner_original_receipt_ref',
+  'owner_renewal_receipt_ref','owner_account','owner_product','owner_action','reason'];
+const DATES_604=['issuer_contacted_at','issuer_responded_at','witness_contacted_at',
+  'witness_disposed_at','owner_original_expires_at','owner_renewal_requested_at',
+  'owner_renewed_signed_at','owner_renewed_expires_at','recorded_at','next_review_at'];
+export function confirmationCandidate604(d){
+  const allowed=new Set([...FIELDS_604,...DATES_604,'kind','issuer_state','witness_state']);
+  if(!d||Array.isArray(d)||Object.keys(d).some(k=>!allowed.has(k))||
+    FIELDS_604.some(k=>!safe600(d[k],k==='reason'?900:220))||
+    DATES_604.some(k=>!safe600(d[k],40))||!d.case_pin.startsWith('dd596-case:')||
+    d.exception_code.length<4||!KINDS_604.includes(d.kind)||
+    !ISSUER_STATES_604.includes(d.issuer_state)||
+    !WITNESS_STATES_604.includes(d.witness_state)||!sha600(d.original_digest)||
+    d.reason.trim().length<15||!iso600(d.recorded_at)||!iso600(d.next_review_at)||
+    DATES_604.slice(0,-2).some(k=>d[k]!==''&&!iso600(d[k]))||
+    DATES_604.slice(0,-2).filter(k=>!['owner_original_expires_at',
+      'owner_renewed_expires_at'].includes(k)).some(k=>d[k]&&
+      Date.parse(d[k])>Date.parse(d.recorded_at))||
+    Date.parse(d.next_review_at)<Date.parse(d.recorded_at)||
+    [['issuer_contacted_at','issuer_responded_at'],
+      ['witness_contacted_at','witness_disposed_at'],
+      ['owner_renewal_requested_at','owner_renewed_signed_at'],
+      ['owner_renewed_signed_at','owner_renewed_expires_at']]
+      .some(([a,b])=>d[a]&&d[b]&&Date.parse(d[b])<=Date.parse(d[a])))
+    throw Error('Unverified issuer, witness or exact owner renewal cannot grant approval.');
+  return {...Object.fromEntries(FIELDS_604.map(k=>[k,d[k].trim()])),
+    ...Object.fromEntries(DATES_604.map(k=>[k,d[k]])),kind:d.kind,
+    issuer_state:d.issuer_state,witness_state:d.witness_state,
+    issuer_authenticated:false,witness_exception_closed:false,
+    owner_renewal_authenticated:false,trial_authorized:false};
+}
+export function renewalClock604(signed,expiry,asOf){
+  const e=signoffExpiry603(signed,expiry,asOf);
+  return {state:e.state.replace('SIGNOFF_','RENEWAL_'),hours_remaining:e.hours_remaining,
+    independently_authenticated:false};
+}
+export function reconcileOriginalConfirmations604(exact603,source603,rows=[],
+  asOf=new Date().toISOString()){
+  if(exact603?.format!==FORMAT_603||!Array.isArray(source603)||source603.length!==4||
+    !Array.isArray(rows)||rows.length>100||!iso600(asOf))
+    throw Error('Exact Build 603 issuer custody, witness and owner source required.');
+  const replay=reconcileCustodyWitnessExpiry603(...source603,exact603.as_of);
+  if(JSON.stringify(replay)!==JSON.stringify(exact603))
+    throw Error('Stale or substituted Build 603 source-pinned external case packet.');
+  const current=reconcileCustodyWitnessExpiry603(...source603,asOf);
+  return reviewOriginalConfirmations604(current,rows,asOf);
+}
+/* Pure review permits focused deterministic tests. The live entrypoint always
+ * replays and compares exact Build 603 source before calling this audit. */
+export function reviewOriginalConfirmations604(current,rows=[],asOf=new Date().toISOString()){
+  if(current?.format!==FORMAT_603||!Array.isArray(current.cases)||
+    !Array.isArray(rows)||rows.length>100||!iso600(asOf))
+    throw Error('Current validated Build 603 case register required.');
+  const entered=rows.map(confirmationCandidate604);
+  const cases=current.cases.map(c=>{
+    const owner=c.owner_trial_decision_pending;
+    const notes=entered.filter(r=>r.case_pin===c.case_pin).map(r=>{
+      if(!c.open_exceptions.includes(r.exception_code)||
+        (r.kind==='EXACT_OWNER_RENEWAL'&&!owner)||
+        (!owner&&[r.owner_signer_ref,r.owner_original_receipt_ref,r.owner_renewal_receipt_ref,
+          r.owner_account,r.owner_product,r.owner_action,r.owner_original_expires_at,
+          r.owner_renewal_requested_at,r.owner_renewed_signed_at,
+          r.owner_renewed_expires_at].some(Boolean))||
+        (owner&&(r.owner_account!==c.account_id||r.owner_product!==c.product_ref||
+          r.owner_action!==c.exact_action)))
+        throw Error('Wrong unresolved original evidence case or exact owner renewal scope.');
+      const priorWitness=c.custody_witness_owner_followups?.filter(
+        x=>x.kind==='WITNESS_IDENTITY_FOLLOWUP').at(-1)||{};
+      const priorOwner=c.custody_witness_owner_followups?.filter(
+        x=>x.kind==='OWNER_SIGNOFF_EXPIRY').at(-1)||{};
+      const clock=owner?renewalClock604(r.owner_renewed_signed_at,
+        r.owner_renewed_expires_at,asOf):null;
+      const duplicate=key=>r[key]&&entered.some(x=>x.case_pin!==r.case_pin&&
+        x[key]===r[key]);
+      const conflicts=uniq600([
+        r.issuer_identity_ref&&c.expected_issuer_ref&&r.issuer_identity_ref!==c.expected_issuer_ref?
+          'ISSUER_IDENTITY_SUBSTITUTED':null,
+        r.original_digest&&c.source_digest&&r.original_digest!==c.source_digest?
+          'ORIGINAL_ISSUER_DIGEST_CONFLICT':null,
+        r.original_issuer_confirmation_ref&&[
+          r.issuer_identity_ref,r.issuer_authority_locator_ref,r.witness_disposition_ref,
+          r.owner_renewal_receipt_ref].includes(r.original_issuer_confirmation_ref)?
+          'ISSUER_CONFIRMATION_SELF_REFERENTIAL':null,
+        r.issuer_authority_locator_ref&&r.issuer_authority_locator_ref===r.issuer_identity_ref?
+          'ISSUER_AUTHORITY_NOT_INDEPENDENT':null,
+        duplicate('original_issuer_confirmation_ref')?'ISSUER_RECEIPT_REUSED_ACROSS_CASES':null,
+        r.kind==='ISSUER_CONFIRMATION'&&(!r.original_issuer_confirmation_ref||
+          !r.issuer_authority_locator_ref||!r.issuer_responded_at)&&
+          r.issuer_state==='REPORTED_CONFIRMATION'?'CLAIMED_ISSUER_REPLY_INCOMPLETE':null,
+        r.witness_identity_ref&&[r.reviewer_ref,r.issuer_identity_ref,r.owner_signer_ref]
+          .includes(r.witness_identity_ref)?'WITNESS_NOT_INDEPENDENT':null,
+        r.witness_identity_ref&&priorWitness.witness_identity_ref&&
+          r.witness_identity_ref!==priorWitness.witness_identity_ref?
+          'WITNESS_IDENTITY_CHANGED_FROM_CUSTODY_CASE':null,
+        r.witness_disposition_ref&&[r.original_issuer_confirmation_ref,
+          r.witness_identity_ref,r.witness_independent_source_ref].includes(r.witness_disposition_ref)?
+          'WITNESS_DISPOSITION_SELF_REFERENTIAL':null,
+        duplicate('witness_disposition_ref')?'WITNESS_DISPOSITION_REUSED_ACROSS_CASES':null,
+        r.kind==='WITNESS_EXCEPTION_DISPOSITION'&&
+          r.witness_state==='REPORTED_RESOLUTION'&&(!r.witness_disposition_ref||
+          !r.witness_independent_source_ref||!r.witness_disposed_at)?
+          'WITNESS_REPORTED_CLOSURE_NOT_EXTERNALLY_CONFIRMED':null,
+        owner&&r.owner_signer_ref&&c.expected_owner_signer_ref&&
+          r.owner_signer_ref!==c.expected_owner_signer_ref?'OWNER_SIGNER_SUBSTITUTED':null,
+        owner&&r.owner_original_receipt_ref&&priorOwner.owner_signed_receipt_ref&&
+          r.owner_original_receipt_ref!==priorOwner.owner_signed_receipt_ref?
+          'OWNER_ORIGINAL_SIGNOFF_RECEIPT_CHANGED':null,
+        owner&&r.owner_original_expires_at&&priorOwner.owner_expires_at&&
+          r.owner_original_expires_at!==priorOwner.owner_expires_at?
+          'OWNER_ORIGINAL_EXPIRY_REWRITTEN':null,
+        owner&&r.owner_renewal_receipt_ref&&r.owner_renewal_receipt_ref===r.owner_original_receipt_ref?
+          'OWNER_OLD_SIGNOFF_REUSED_AS_RENEWAL':null,
+        duplicate('owner_renewal_receipt_ref')?'OWNER_RENEWAL_RECEIPT_REUSED_ACROSS_CASES':null,
+        owner&&clock?.state==='RENEWAL_EXPIRED'?'OWNER_RENEWAL_EXPIRED':null,
+        owner&&clock?.state==='RENEWAL_EXPIRES_WITHIN_72H'?'OWNER_RENEWAL_DUE_WITHIN_72H':null,
+        owner&&clock?.state==='RENEWAL_NOT_YET_EFFECTIVE'?'OWNER_RENEWAL_NOT_YET_EFFECTIVE':null,
+        owner&&clock?.state==='RENEWAL_DATE_OR_EXPIRY_MISSING'?'OWNER_RENEWAL_DATES_MISSING':null,
+        r.kind==='EXACT_OWNER_RENEWAL'&&(!r.owner_renewal_receipt_ref||
+          !r.owner_signer_ref||!r.owner_renewed_signed_at)?
+          'EXACT_OWNER_SIGNED_RENEWAL_UNVERIFIED':null
+      ]);
+      return {...r,conflicts,renewal_clock:clock,issuer_authenticated:false,
+        witness_exception_closed:false,owner_renewal_authenticated:false,
+        trial_authorized:false,provider_reads:0,provider_writes:0,d1_operations:0};
+    });
+    const latest=notes.at(-1)||null;
+    const lastOwner=notes.filter(r=>r.kind==='EXACT_OWNER_RENEWAL').at(-1);
+    const clock=owner?(lastOwner?.renewal_clock||renewalClock604('','',asOf)):null;
+    const blockers=uniq600([...c.remaining_blockers,...notes.flatMap(r=>r.conflicts),
+      !notes.some(r=>r.kind==='ISSUER_CONFIRMATION')?'ORIGINAL_ISSUER_CONFIRMATION_UNVERIFIED':null,
+      !notes.some(r=>r.kind==='WITNESS_EXCEPTION_DISPOSITION')?
+        'INDEPENDENT_WITNESS_DISPOSITION_UNVERIFIED':null,
+      owner&&!lastOwner?'EXACT_OWNER_RENEWAL_NOT_RECORDED':null]);
+    return {...c,issuer_witness_renewal_notes:notes,latest_confirmation:latest,
+      renewal_clock:clock,remaining_blockers:blockers,
+      aging:aging600(latest?.next_review_at||c.aging?.due_at||'',asOf),
+      original_issuer_authenticated:false,witness_exception_closed:false,
+      owner_renewal_authenticated:false,trial_authorized:false,
+      status:'ORIGINAL_ISSUER_WITNESS_AND_EXACT_OWNER_RENEWAL_HOLD'};
+  });
+  const pins=new Set(cases.map(c=>c.case_pin));
+  return {format:FORMAT_604,build:604,source_build:603,as_of:asOf,cases,
+    open_cases:cases.length,issuer_confirmation_gaps:cases.filter(c=>c.remaining_blockers.some(
+      x=>/ISSUER_CONFIRMATION|ISSUER_REPLY/.test(x))).length,
+    witness_disposition_gaps:cases.filter(c=>c.remaining_blockers.some(
+      x=>/WITNESS_DISPOSITION|WITNESS_REPORTED/.test(x))).length,
+    renewal_expired:cases.filter(c=>c.renewal_clock?.state==='RENEWAL_EXPIRED').length,
+    renewal_due_within_72h:cases.filter(c=>c.renewal_clock?.state==='RENEWAL_EXPIRES_WITHIN_72H').length,
+    overdue_reviews:cases.filter(c=>c.aging.bucket.startsWith('OVERDUE')).length,
+    stale_unmatched_notes:entered.filter(r=>!pins.has(r.case_pin)),
+    original_issuers_confirmed:0,witness_exceptions_closed:0,
+    exact_owner_renewals_authenticated:0,authorized_trials:0,
+    provider_reads:0,provider_writes:0,d1_operations:0,
+    release_gate:'HOLD_ORIGINAL_ISSUER_CONFIRMATION_WITNESS_DISPOSITION_AND_SIGNED_OWNER_RENEWAL'};
+}
+export function filterOriginalConfirmations604(p,kind='ALL',term=''){
+  if(p?.format!==FORMAT_604||!FILTERS_604.includes(kind)||!safe600(term,120))
+    throw Error('Invalid original-source receipt and exact owner renewal filter.');
+  const q=term.trim().toLowerCase();
+  return p.cases.filter(c=>(kind==='ALL'||
+    (kind==='ISSUER'&&c.remaining_blockers.some(x=>/ISSUER/.test(x)))||
+    (kind==='WITNESS'&&c.remaining_blockers.some(x=>/WITNESS/.test(x)))||
+    (kind==='OWNER'&&c.owner_trial_decision_pending)||
+    (kind==='RENEWAL_EXPIRED'&&c.renewal_clock?.state==='RENEWAL_EXPIRED')||
+    (kind==='RENEWAL_DUE'&&c.renewal_clock?.state==='RENEWAL_EXPIRES_WITHIN_72H')||
+    (kind==='OVERDUE'&&c.aging.bucket.startsWith('OVERDUE'))||
+    (kind==='CONFLICT'&&c.issuer_witness_renewal_notes.some(r=>r.conflicts.length))||
+    (kind==='NO_REPLY'&&c.issuer_witness_renewal_notes.some(r=>
+      r.kind==='ISSUER_CONFIRMATION'&&r.issuer_state==='NO_RESPONSE')))&&
+    (!q||[c.channel,c.account_id,c.product_ref,c.exact_action,c.priority]
+      .some(x=>String(x).toLowerCase().includes(q))));
+}
+export function unsignedOriginalConfirmation604(p,pin){
+  if(p?.format!==FORMAT_604)throw Error('Exact Build 604 source-pinned packet required.');
+  const c=p.cases.find(x=>x.case_pin===pin);
+  if(!c)throw Error('Current issuer, witness or owner case required.');
+  return {format:'devilndove-unsigned-issuer-witness-owner-renewal-604-v1',
+    build:604,source_build:603,source_pin:pin,prepared_at:p.as_of,
+    channel:c.channel,exact_shop_account:c.account_id,exact_product_sku:c.product_ref,
+    exact_action:c.exact_action,source_digest:c.source_digest,
+    issuer_confirmation_claims:c.issuer_witness_renewal_notes.filter(r=>
+      r.kind==='ISSUER_CONFIRMATION'),
+    witness_disposition_claims:c.issuer_witness_renewal_notes.filter(r=>
+      r.kind==='WITNESS_EXCEPTION_DISPOSITION'),
+    owner_renewal_claims:c.issuer_witness_renewal_notes.filter(r=>
+      r.kind==='EXACT_OWNER_RENEWAL'),
+    renewal_clock:c.renewal_clock,remaining_blockers:c.remaining_blockers,
+    independent_followups:['Obtain authenticated original issuer reply from its trusted authority',
+      'Obtain independent witness identity and external resolution confirmation',
+      ...(c.owner_trial_decision_pending?
+        ['Obtain current unexpired signed owner consent for this exact shop, SKU and action']:[])],
+    issuer_authenticated:false,witness_exception_closed:false,
+    owner_renewal_authenticated:false,trial_authorized:false,
+    provider_read_or_write_authorized:false,status:'UNSIGNED_ORIGINAL_CONFIRMATION_RENEWAL_HOLD'};
+}
+function init604(doc=globalThis.document,win=globalThis.window){
+  if(!doc?.getElementById('dd604Refresh'))return;
+  const get=id=>doc.getElementById(id),status=get('dd604Status'),output=get('dd604Output');
+  const read=(key,fallback)=>{const v=win.localStorage.getItem(key);return v?JSON.parse(v):fallback;};
+  const stored=()=>read(KEY_604,[]);
+  let previousPin=null;
+  const source=()=>{
+    const v=['dd603Output','dd602Output','dd601Output','dd600Output','dd599Output',
+      'dd598Output','dd597Output'].map(id=>get(id)?.value);
+    if(v.some(x=>!x||x.length>900000))throw Error('Recompute exact original sections 5–28.');
+    const original=[JSON.parse(v[4]),[JSON.parse(v[5]),
+      [JSON.parse(v[6]),sourceContext597(doc,win),read(KEY_597,[])],read(KEY_598,[])],
+      read(KEY_599,[])];
+    const s601=[JSON.parse(v[3]),original,read(KEY_600,[])];
+    const s602=[JSON.parse(v[2]),s601,read(KEY_601,[])];
+    return [JSON.parse(v[0]),[JSON.parse(v[1]),s602,read(KEY_602,[]),read(KEY_603,[])]];
+  };
+  const refresh=()=>{
+    const p=reconcileOriginalConfirmations604(...source(),stored());
+    output.value=JSON.stringify(p,null,2);
+    get('dd604Metrics').textContent=p.open_cases+' open · '+p.issuer_confirmation_gaps+
+      ' issuer gaps · '+p.witness_disposition_gaps+' witness gaps · '+p.renewal_expired+
+      ' expired renewals · '+p.renewal_due_within_72h+' due soon · HOLD';
+    const select=get('dd604Case'),old=select.value;select.replaceChildren();
+    for(const c of p.cases){const o=doc.createElement('option');o.value=c.case_pin;
+      o.textContent=c.priority+' · '+c.channel+' · '+c.product_ref;select.append(o);}
+    if([...select.options].some(o=>o.value===old))select.value=old;
+    const c=p.cases.find(x=>x.case_pin===select.value),exception=get('dd604Exception');
+    const chosen=exception.value;exception.replaceChildren();
+    for(const x of c?.open_exceptions||[]){const o=doc.createElement('option');
+      o.value=x;o.textContent=x.replaceAll('_',' ');exception.append(o);}
+    if([...exception.options].some(o=>o.value===chosen))exception.value=chosen;
+    if(previousPin!==c?.case_pin){previousPin=c?.case_pin||null;
+      get('dd604Kind').value=c?.owner_trial_decision_pending?'EXACT_OWNER_RENEWAL':'ISSUER_CONFIRMATION';
+      for(const [id,v] of [['dd604Account',c?.owner_trial_decision_pending?c.account_id:''],
+        ['dd604Product',c?.owner_trial_decision_pending?c.product_ref:''],
+        ['dd604Scope',c?.owner_trial_decision_pending?c.exact_action:'']])get(id).value=v;
+    }
+    const list=get('dd604Rows');list.replaceChildren();
+    for(const c of filterOriginalConfirmations604(p,get('dd604Filter').value,get('dd604Search').value)){
+      const li=doc.createElement('li');li.textContent=c.priority+' · '+c.channel+' · '+c.product_ref+
+        ' · '+(c.renewal_clock?.state||'issuer/witness')+' · '+c.remaining_blockers.length+' gaps';
+      list.append(li);
+    }
+    status.textContent='Original issuer replies, witness dispositions and owner renewals remain unverified · HOLD.';
+    return p;
+  };
+  const guard=()=>{try{return refresh();}catch{
+    status.textContent='Recompute exact original sections 5–28 first · HOLD.';return null;}};
+  for(const [id,event] of [['dd604Refresh','click'],['dd604Filter','change'],
+    ['dd604Search','input'],['dd604Case','change']])get(id).addEventListener(event,guard);
+  get('dd604Save').addEventListener('click',()=>{try{
+    if(!get('dd604Ack').checked)throw Error('Explicit documentary HOLD required.');
+    const p=refresh(),c=p.cases.find(x=>x.case_pin===get('dd604Case').value);
+    if(!c)throw Error('Current exact case required.');
+    const v=id=>get(id).value.trim(),date=id=>v(id)?new Date(v(id)).toISOString():'';
+    const fields=[['original_issuer_confirmation_ref','Receipt'],['issuer_identity_ref','Issuer'],
+      ['issuer_authority_locator_ref','Authority'],['original_digest','Digest'],
+      ['reviewer_ref','Reviewer'],['witness_identity_ref','Witness'],
+      ['witness_disposition_ref','Disposition'],['witness_independent_source_ref','WitnessSource'],
+      ['owner_signer_ref','Signer'],['owner_original_receipt_ref','OwnerOriginal'],
+      ['owner_renewal_receipt_ref','RenewalReceipt'],['owner_account','Account'],
+      ['owner_product','Product'],['owner_action','Scope'],['reason','Reason']];
+    const row=confirmationCandidate604({case_pin:c.case_pin,exception_code:v('dd604Exception'),
+      kind:v('dd604Kind'),issuer_state:v('dd604IssuerState'),
+      witness_state:v('dd604WitnessState'),
+      ...Object.fromEntries(fields.map(([k,id])=>[k,v('dd604'+id)])),
+      issuer_contacted_at:date('dd604IssuerContact'),issuer_responded_at:date('dd604IssuerReply'),
+      witness_contacted_at:date('dd604WitnessContact'),witness_disposed_at:date('dd604WitnessAt'),
+      owner_original_expires_at:date('dd604OriginalExpiry'),
+      owner_renewal_requested_at:date('dd604RenewalRequested'),
+      owner_renewed_signed_at:date('dd604RenewedSigned'),
+      owner_renewed_expires_at:date('dd604RenewalExpiry'),
+      recorded_at:new Date().toISOString(),next_review_at:date('dd604Due')});
+    const next=[...stored(),row];reconcileOriginalConfirmations604(...source(),next);
+    win.localStorage.setItem(KEY_604,JSON.stringify(next));get('dd604Ack').checked=false;refresh();
+  }catch{status.textContent='Rejected: wrong original issuer, witness or exact owner renewal proof · HOLD.';}});
+  const prepare=()=>{const p=refresh();get('dd604Handoff').value=JSON.stringify(
+    unsignedOriginalConfirmation604(p,get('dd604Case').value),null,2);
+    status.textContent='Unsigned original-source follow-up packet prepared; trial HOLD.';};
+  get('dd604Prepare').addEventListener('click',()=>{try{prepare();}catch{
+    status.textContent='Choose a current original source case and retry · HOLD.';}});
+  const copy=async(kind)=>{try{if(kind==='handoff')prepare();else refresh();
+    const el=get(kind==='handoff'?'dd604Handoff':'dd604Output');
+    try{await win.navigator.clipboard.writeText(el.value);
+      status.textContent='Unverified issuer/witness/renewal packet copied · HOLD.';
+    }catch{el.focus();el.select();status.textContent='Select and copy manually · HOLD.';}
+  }catch{status.textContent='Recompute exact original source before copying · HOLD.';}};
+  get('dd604Copy').addEventListener('click',()=>copy('queue'));
+  get('dd604CopyHandoff').addEventListener('click',()=>copy('handoff'));
+}
+if(typeof document!=='undefined')init604();

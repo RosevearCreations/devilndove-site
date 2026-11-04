@@ -107,13 +107,13 @@ test('Build 602 Admin, gated CI, local-only SHA-256 and immutable main marker',(
     'dd602Due','dd602Reason','dd602Ack','dd602Save','dd602Copy','dd602Status',
     'dd602Output','dd602Prepare','dd602CopyHandoff','dd602Handoff'])
     assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build (?:602|603)/);
-  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=(?:602|603)/);
+  assert.match(html,/Devil n Dove • Build (?:602|603|604)/);
+  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=(?:602|603|604)/);
   const js=read('public/js/admin-channel-issuer-response-598.mjs');
   assert.match(js,/export const FORMAT_602=/);
   assert.match(js,/cryptoApi\.subtle\.digest\('SHA-256'/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build602_external_issuer_witness_owner\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":60[23]/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":60[234]/);
 });

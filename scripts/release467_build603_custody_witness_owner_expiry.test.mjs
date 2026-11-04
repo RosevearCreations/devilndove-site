@@ -123,12 +123,12 @@ test('Build 603 actual Admin controls, CI gate, script cache key and deployed ma
     'dd603Expires','dd603Due','dd603Reason','dd603Ack','dd603Save','dd603Copy',
     'dd603Status','dd603Output','dd603Prepare','dd603CopyHandoff','dd603Handoff'])
     assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build 603/);
-  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=603/);
+  assert.match(html,/Devil n Dove • Build (?:603|604)/);
+  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=(?:603|604)/);
   const runtime=read('public/js/admin-channel-issuer-response-598.mjs');
   assert.match(runtime,/export const FORMAT_603=/);
   assert.doesNotMatch(runtime,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build603_custody_witness_owner_expiry\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":603/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":60[34]/);
 });
