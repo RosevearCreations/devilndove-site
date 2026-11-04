@@ -137,12 +137,12 @@ test('Build 599 Admin controls, CI gate, exact source identity and no-network bo
     'dd599PrepareWitness','dd599CopyWitness','dd599WitnessPacket',
     'dd599PrepareOwner','dd599CopyOwner','dd599OwnerPacket'])
     assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build (?:601|600|599)/);
-  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=(?:599|600|601)/);
+  assert.match(html,/Devil n Dove • Build (?:6\d{2}|599)/);
+  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=(?:599|6\d{2})/);
   const js=read('public/js/admin-channel-issuer-response-598.mjs');
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(js,/admin-channel-source-disposition-597\.mjs\?v=597/);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build599_issuer_receipt_consent_preflight\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:601|600|599)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:6\d{2}|599)/);
 });

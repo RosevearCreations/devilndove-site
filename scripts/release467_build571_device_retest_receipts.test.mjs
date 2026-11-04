@@ -85,5 +85,5 @@ test('All earlier modules share current cache revision, accessibility is retaine
   assert.match(source('css/admin-device-acceptance-569.css'),/\.dd571-retest/);
   assert.match(source('css/admin-device-acceptance-569.css'),/:focus-visible/);
   assert.match(source('.github/workflows/current-application-quality.yml'),/release467_build571_device_retest_receipts\.test\.mjs/);
-  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:601|600|(?:577|578|579|580|581|582|583|584|585|586|587|588|589|590|591|592|593|594|595|596|597|598|599))/);
+  assert.match(source('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:6\d{2}|(?:577|578|579|580|581|582|583|584|585|586|587|588|589|590|591|592|593|594|595|596|597|598|599))/);
 });

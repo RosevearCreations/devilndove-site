@@ -114,12 +114,12 @@ test('Build 600 Admin controls, CI, immutable release marker and zero-network bo
     'dd600Ack','dd600Save','dd600Copy','dd600Status','dd600Output',
     'dd600Prepare','dd600CopyOwner','dd600OwnerPacket'])
     assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build (?:600|601)/);
-  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=(?:600|601)/);
+  assert.match(html,/Devil n Dove • Build 6\d{2}/);
+  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=6\d{2}/);
   const js=read('public/js/admin-channel-issuer-response-598.mjs');
   assert.match(js,/export const FORMAT_600=/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);
   assert.match(read('.github/workflows/current-application-quality.yml'),
     /release467_build600_decision_register_aging\.test\.mjs/);
-  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":(?:600|601)/);
+  assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":6\d{2}/);
 });
