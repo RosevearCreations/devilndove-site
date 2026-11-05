@@ -363,6 +363,13 @@
       "release": 467,
       "description": "Private append-only manual owner trial checklist receipts for six actual Maker journeys, bound to canonical project, process, QA, media, design or commission evidence; accepts only explicitly attested source-backed checkpoints.",
       "recovery": "Stop new Build 456 attestations if defects appear, preserve the original owner trial and source history, append a later HOLD/superseding review and correct schema only with a forward migration. Never infer external acceptance or alter maker, customer, stock or publication authorities."
+    },
+    {
+      "version": 51,
+      "file": "0051_ql336_owned_child_shell_hold.sql",
+      "release": 467,
+      "description": "QL-336 additive pending maker-child registry, memberships, exclusive legacy resource claims and opaque provider references. No existing Etsy, order, media, customer, stock or checkout table is rewritten or converted. All memberships and child resources stay PENDING.",
+      "recovery": "Leave the new pending tables inactive and do not enroll future children. Preserve any inserted review data and original legacy business records; forward-only repair after source backup and owner review. Never auto-assign Etsy shops, credentials, media, customers, orders or stock."
     }
   ]
 }

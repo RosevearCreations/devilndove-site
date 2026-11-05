@@ -1,0 +1,10 @@
+# QL-336 — Maker-commerce child-shell preparation (HOLD)
+
+Devil n Dove remains the first owned maker business, not an authenticated multi-maker connector.
+
+- New shell-level GET handlers are distinct from legacy integration v1 and always return **503 HOLD**, with no Etsy, order, inventory, image, customer, payment or fulfilment access. Child overrides, writes and unrelated routes are denied.
+- Canonical D1 migration `0051_ql336_owned_child_shell_hold.sql` and manifest entry define **pending-only** children, memberships, unique legacy resource claims and opaque, non-secret provider-handle references. The migration is **not applied** by this source commit; independent Development-first migration proof and original data backup are prerequisites.
+- D1/SQLite has no native RLS. Future active tenancy demands server-side query-by-child enforcement, R2 object isolation, Etsy shop and marketplace/provider partitioning, session roles and explicit cross-child 403/no-rows tests. A registry row must never substitute for these controls.
+- First child slug for later source review: `devil-n-dove`. No second maker is enrolled, and no existing data or provider action is changed.
+
+Local acceptance: `node --test scripts/release467_build610_ql336_child_shell.test.mjs` and `python3 scripts/migration_policy_gate.py`. Live multi-tenant enrollment and signed TEST are **NO-GO** pending separately reviewed proof.

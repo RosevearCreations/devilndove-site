@@ -24,6 +24,10 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
+      - name: QL-336 pending child-shell and nonproduction endpoint isolation
+        run: |
+          node --test scripts/release467_build610_ql336_child_shell.test.mjs
+          python scripts/migration_policy_gate.py
       - name: Current help, search, H1, responsive, Packaging, Grey Hair CAIP, Content Studio review/execution boundary, authority restart integrity, I.T. truth and release provenance quality
         run: python scripts/current_application_quality_gate.py
       - name: Preserve password-hash compatibility and current-write security
