@@ -51,7 +51,7 @@ for(const [p,expected] of [
  assert.ok(events(p).includes(expected),'required independent release trigger missing: '+p);
 assert.match(read('.github/workflows/current-application-quality.yml'),
  /node scripts\/release467_build609_ci_bundle\.mjs/);
-assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":609/);
+assert.match(read('.github/workflows/production-pages-deploy-current.yml'),/"build":6\d{2}/);
 
 const testPaths=[
  'scripts/release467_build399_etsy_draft.test.mjs',

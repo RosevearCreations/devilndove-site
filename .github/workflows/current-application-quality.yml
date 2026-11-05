@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   quality:
@@ -697,92 +698,56 @@ jobs:
           node --check public/js/admin-channel-intake-aging-594.mjs
           node --check scripts/release467_build594_intake_aging.test.mjs
           node --test scripts/release467_build594_intake_aging.test.mjs
-      - name: Build 595 independent original source document integrity, custody and owner trial review HOLD
+      # All original source checks remain; only execution scheduling is optimized.
+      - name: Build 610 exact Build 595–608 issuer evidence replay, bounded concurrent test budget
         run: |
+          set -euo pipefail
           node --check public/js/admin-channel-source-verification-595.mjs
-          node --check scripts/release467_build595_source_verification.test.mjs
-          node --test scripts/release467_build595_source_verification.test.mjs
-      - name: Build 596 independent evidence workboard, digest review and unsigned owner packet HOLD
-        run: |
           node --check public/js/admin-channel-review-workboard-596.mjs
-          node --check scripts/release467_build596_review_workboard.test.mjs
-          node --test scripts/release467_build596_review_workboard.test.mjs
-      - name: Build 597 original issuer conflict and exact owner witness review HOLD
-        run: |
           node --check public/js/admin-channel-source-disposition-597.mjs
+          node --check public/js/admin-channel-issuer-response-598.mjs
+          node --check scripts/release467_build595_source_verification.test.mjs
+          node --check scripts/release467_build596_review_workboard.test.mjs
           node --check scripts/release467_build597_source_disposition_witness.test.mjs
-          node --test scripts/release467_build597_source_disposition_witness.test.mjs
-
-      - name: Build 598 independent original issuer response, conflict closure and exact owner witness HOLD
-        run: |
-          node --check public/js/admin-channel-issuer-response-598.mjs
           node --check scripts/release467_build598_issuer_response_witness.test.mjs
-          node --test scripts/release467_build598_issuer_response_witness.test.mjs
-
-      - name: Build 599 original issuer receipt and exact owner consent preflight HOLD
-        run: |
-          node --check public/js/admin-channel-issuer-response-598.mjs
           node --check scripts/release467_build599_issuer_receipt_consent_preflight.test.mjs
-          node --test scripts/release467_build599_issuer_receipt_consent_preflight.test.mjs
-
-      - name: Build 600 independent issuer authenticity decision register and owner readiness HOLD
-        run: |
-          node --check public/js/admin-channel-issuer-response-598.mjs
           node --check scripts/release467_build600_decision_register_aging.test.mjs
-          node --test scripts/release467_build600_decision_register_aging.test.mjs
-
-      - name: Build 601 independent issuer escalation reconciliation and unsigned owner handoff HOLD
-        run: |
-          node --check public/js/admin-channel-issuer-response-598.mjs
           node --check scripts/release467_build601_issuer_escalation_handoff.test.mjs
-          node --test scripts/release467_build601_issuer_escalation_handoff.test.mjs
-
-      - name: Build 602 independent external issuer intake, witness validation and exact owner exception recheck HOLD
-        run: |
-          node --check public/js/admin-channel-issuer-response-598.mjs
           node --check scripts/release467_build602_external_issuer_witness_owner.test.mjs
-          node --test scripts/release467_build602_external_issuer_witness_owner.test.mjs
-
-      - name: Build 603 original custody continuity, independent witness identity and exact owner signoff expiry HOLD
-        run: |
-          node --check public/js/admin-channel-issuer-response-598.mjs
           node --check scripts/release467_build603_custody_witness_owner_expiry.test.mjs
-          node --test scripts/release467_build603_custody_witness_owner_expiry.test.mjs
-
-      - name: Build 604 original issuer confirmations, witness exception disposition and exact owner renewal HOLD
-        run: |
-          node --check public/js/admin-channel-issuer-response-598.mjs
           node --check scripts/release467_build604_issuer_witness_owner_renewal.test.mjs
-          node --test scripts/release467_build604_issuer_witness_owner_renewal.test.mjs
-
-      - name: Build 605 independent issuer authentication followup, witness reconciliation and owner evidence handoff HOLD
-        run: |
-          node --check public/js/admin-channel-issuer-response-598.mjs
           node --check scripts/release467_build605_issuer_witness_owner_handoff.test.mjs
-          node --test scripts/release467_build605_issuer_witness_owner_handoff.test.mjs
-
-      - name: Build 606 issuer callback challenge, witness reverification and owner consent readiness HOLD
-        run: |
-          node --check public/js/admin-channel-issuer-response-598.mjs
           node --check scripts/release467_build606_issuer_challenge_witness_consent.test.mjs
-          node --test scripts/release467_build606_issuer_challenge_witness_consent.test.mjs
-
-      - name: Build 607 original callback outcome, independent witness conflict and exact consent decision audit HOLD
-        run: |
-          node --check public/js/admin-channel-issuer-response-598.mjs
           node --check scripts/release467_build607_issuer_witness_owner_decision.test.mjs
-          node --test scripts/release467_build607_issuer_witness_owner_decision.test.mjs
-
-      - name: Build 608 original issuer attestation, witness escalation aging and exact owner renewal decision HOLD
-        run: |
-          node --check public/js/admin-channel-issuer-response-598.mjs
           node --check scripts/release467_build608_issuer_witness_owner_renewal.test.mjs
-          node --test scripts/release467_build608_issuer_witness_owner_renewal.test.mjs
+          node --check scripts/release467_build610_evidence_budget.mjs
+          node scripts/release467_build610_evidence_budget.mjs --audit-only
+          node --test scripts/release467_build610_ci_runtime.test.mjs
+          node scripts/release467_build610_evidence_budget.mjs
 
       - name: Build 609 consolidated historical proof and CI fan-out guard
         run: |
           node --check scripts/release467_build609_ci_bundle.mjs
           node scripts/release467_build609_ci_bundle.mjs
+
+      - name: Build 610 read-only promotion queue SLA measurements
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          node --check scripts/release467_build610_promotion_sla.mjs
+          node scripts/release467_build610_promotion_sla.mjs
+          node scripts/release467_build610_promotion_sla.mjs --collect
+      - name: Preserve Build 610 source-replay and queue measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build610-ci-runtime-queue-sla
+          path: |
+            artifacts/build610-evidence-test-timings.json
+            artifacts/build610-promotion-queue-sla.json
+          if-no-files-found: warn
+          retention-days: 30
 
       - name: JavaScript syntax
         run: |
