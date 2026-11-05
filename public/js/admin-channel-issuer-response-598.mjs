@@ -49,7 +49,7 @@ throw Error('Exact Build 597 source disposition chain required.');
 const reproduced=reconcileSource597(...source597,local597,exact597.as_of);
 if(JSON.stringify(reproduced)!==JSON.stringify(exact597))
 throw Error('Stale or modified Build 597 source reconciliation.');
-const current=reconcileSource597(...source597,local597,asOf);
+const current=asOf===exact597.as_of?reproduced:reconcileSource597(...source597,local597,asOf);
 const submitted=candidates.map(issuerResponseCandidate598);
 const cases=current.cases.map(c=>{
 const rows=submitted.filter(r=>r.case_pin===c.case_pin).map(r=>{
@@ -280,7 +280,7 @@ throw Error('Exact Build 598 source chain required.');
 const reproduced=issuerResponseReview598(...source598,local598,exact598.as_of);
 if(JSON.stringify(reproduced)!==JSON.stringify(exact598))
 throw Error('Stale or forged Build 598 original issuer packet.');
-const current=issuerResponseReview598(...source598,local598,asOf);
+const current=asOf===exact598.as_of?reproduced:issuerResponseReview598(...source598,local598,asOf);
 const requests=submitted.map(receiptCandidate599);
 const cases=current.cases.map(c=>{
 const owner=c.owner_trial_decision_pending;
@@ -540,9 +540,10 @@ export function decisionRegister600(exact599,source599,local599=[],rows=[],asOf=
 if(exact599?.format!==FORMAT_599||!Array.isArray(source599)||source599.length!==3||
 !Array.isArray(local599)||!Array.isArray(rows)||rows.length>100||!iso600(asOf))
 throw Error('Exact Build 599 receipt chain required.');
-if(JSON.stringify(receiptIntake599(...source599,local599,exact599.as_of))!==JSON.stringify(exact599))
+const reproduced=receiptIntake599(...source599,local599,exact599.as_of);
+if(JSON.stringify(reproduced)!==JSON.stringify(exact599))
 throw Error('Stale or modified Build 599 original-source packet.');
-const current=receiptIntake599(...source599,local599,asOf);
+const current=asOf===exact599.as_of?reproduced:receiptIntake599(...source599,local599,asOf);
 const requested=rows.map(decisionCandidate600);
 const cases=current.cases.map(c=>{
 const owner=c.owner_trial_decision_pending,prior=c.latest_receipt||{};
@@ -786,9 +787,10 @@ export function reconcileEscalations601(exact600,source600,local600=[],rows=[],a
 if(exact600?.format!==FORMAT_600||!Array.isArray(source600)||source600.length!==3||
 !Array.isArray(local600)||!Array.isArray(rows)||rows.length>100||!iso600(asOf))
 throw Error('Exact Build 600 original-source decision packet required.');
-if(JSON.stringify(decisionRegister600(...source600,local600,exact600.as_of))!==JSON.stringify(exact600))
+const reproduced=decisionRegister600(...source600,local600,exact600.as_of);
+if(JSON.stringify(reproduced)!==JSON.stringify(exact600))
 throw Error('Stale, substituted or modified Build 600 decision register.');
-const current=decisionRegister600(...source600,local600,asOf);
+const current=asOf===exact600.as_of?reproduced:decisionRegister600(...source600,local600,asOf);
 const submitted=rows.map(escalationCandidate601);
 const cases=current.cases.map(c=>{
 const owner=c.owner_trial_decision_pending;
@@ -1048,9 +1050,10 @@ asOf=new Date().toISOString()){
 if(exact601?.format!==FORMAT_601||!Array.isArray(source601)||source601.length!==3||
 !Array.isArray(local601)||!Array.isArray(rows)||rows.length>100||!iso600(asOf))
 throw Error('Exact Build 601 independent escalation source required.');
-if(JSON.stringify(reconcileEscalations601(...source601,local601,exact601.as_of))!==JSON.stringify(exact601))
+const reproduced=reconcileEscalations601(...source601,local601,exact601.as_of);
+if(JSON.stringify(reproduced)!==JSON.stringify(exact601))
 throw Error('Stale or modified Build 601 original issuer and owner handoff packet.');
-const current=reconcileEscalations601(...source601,local601,asOf);
+const current=asOf===exact601.as_of?reproduced:reconcileEscalations601(...source601,local601,asOf);
 const entered=rows.map(evidenceCandidate602);
 const cases=current.cases.map(c=>{
 const owner=c.owner_trial_decision_pending;

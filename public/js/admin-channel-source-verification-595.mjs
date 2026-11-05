@@ -97,7 +97,8 @@ export function sourceVerification595(exact594,sourceArgs,requests=[],asOf=new D
   const reproduced=intakeAging594(...sourceArgs,exact594.as_of);
   if(JSON.stringify(reproduced)!==JSON.stringify(exact594))
     throw Error('Changed, forged or stale Build 594 source packet.');
-  const current=intakeAging594(...sourceArgs,asOf);
+  // Build 611: reuse this invocation's already verified identical-time source.
+  const current=asOf===exact594.as_of?reproduced:intakeAging594(...sourceArgs,asOf);
   const candidates=requests.map(sourceCandidate595);
   const cases=current.cases.map(c=>{
     const intakePin=c.latest_intake?sourcePin595(c):null;

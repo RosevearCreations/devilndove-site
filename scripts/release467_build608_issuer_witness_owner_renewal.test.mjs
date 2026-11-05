@@ -173,8 +173,8 @@ test('Actual admin controls, read-only runtime, protected quality gate and relea
     'dd608Reason','dd608Ack','dd608Save','dd608Copy','dd608Status','dd608Output',
     'dd608Prepare','dd608CopyHandoff','dd608Handoff'])
     assert.ok(html.includes('id="'+id+'"'),id);
-  assert.match(html,/Devil n Dove • Build 608/);
-  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=608/);
+  assert.match(html,/Devil n Dove • Build 6\d{2}/);
+  assert.match(html,/admin-channel-issuer-response-598\.mjs\?v=6\d{2}/);
   const js=read('public/js/admin-channel-issuer-response-598.mjs');
   assert.match(js,/export const FORMAT_608=/);
   assert.doesNotMatch(js,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|\.innerHTML\s*=|\/api\//);

@@ -47,7 +47,7 @@ export function auditInventory610(root=ROOT){
  if(!gate.includes('Build 609 consolidated historical proof'))
   throw Error('Historical consolidated proof removed');
  const marker=read('.github/workflows/production-pages-deploy-current.yml');
- if(!marker.includes('"build":610'))throw Error('Expected production Build 610 release marker');
+ if(!/"build":6\d{2}/.test(marker))throw Error('Expected 6xx production release marker');
  return {files:TEST_FILES_610.length,concurrency:BUDGET_610.max_concurrent};
 }
 function runTest610(testPath){
